@@ -179,8 +179,6 @@ struct gl_video {
     bool has_alpha;
     char color_swizzle[5];
 
-    bool user_gamma_enabled;
-
     struct video_image image;
 
     struct fbotex indirect_fbo;         // RGB target
@@ -205,6 +203,7 @@ struct gl_video {
     struct src_tex pass_tex[TEXUNIT_VIDEO_NUM];
     bool use_indirect;
     bool use_linear;
+    float user_gamma;
 
     int frames_rendered;
 
@@ -1335,8 +1334,7 @@ static void pass_convert_yuv(struct gl_video *p)
     mp_csp_set_image_params(&cparams, &p->image_params);
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
 
-    float user_gamma = cparams.gamma * p->opts.gamma;
-    p->user_gamma_enabled |= user_gamma != 1.0;
+    p->user_gamma = 1.0 / (cparams.gamma * p->opts.gamma);
 
     GLSLF("// color conversion\n");
 
@@ -1402,11 +1400,11 @@ static void pass_convert_yuv(struct gl_video *p)
                              lessThanEqual(vec3(0.0181), color.rgb));)
     }
 
-    if (p->user_gamma_enabled) {
+    if (p->user_gamma != 1) {
         p->use_indirect = true;
-        gl_sc_uniform_f(sc, "user_gamma", user_gamma);
+        gl_sc_uniform_f(sc, "user_gamma", p->user_gamma);
         GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
-        GLSL(color.rgb = pow(color.rgb, vec3(1.0 / user_gamma));)
+        GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
 
     if (!p->has_alpha || p->opts.alpha_mode == 0) { // none
@@ -1422,6 +1420,25 @@ static void get_scale_factors(struct gl_video *p, double xy[2])
             (double)(p->src_rect.x1 - p->src_rect.x0);
     xy[1] = (p->dst_rect.y1 - p->dst_rect.y0) /
             (double)(p->src_rect.y1 - p->src_rect.y0);
+}
+
+static void pass_linearize(struct gl_video *p)
+{
+    GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
+    switch (p->image_params.gamma) {
+        case MP_CSP_TRC_SRGB:
+            GLSL(color.rgb = mix(color.rgb / vec3(12.92),
+                                 pow((color.rgb + vec3(0.055))/vec3(1.055),
+                                     vec3(2.4)),
+                                 lessThanEqual(vec3(0.04045), color.rgb));)
+            break;
+        case MP_CSP_TRC_BT_1886:
+            GLSL(color.rgb = pow(color.rgb, vec3(1.961));)
+            break;
+        case MP_CSP_TRC_GAMMA22:
+            GLSL(color.rgb = pow(color.rgb, vec3(2.2));)
+            break;
+    }
 }
 
 // Takes care of the main scaling and pre/post-conversions
@@ -1453,24 +1470,10 @@ static void pass_scale_main(struct gl_video *p)
     // Pre-conversion, like linear light/sigmoidization
     GLSLF("// scaler pre-conversion\n");
     p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling
-                      || use_cms || p->image_params.gamma == MP_CSP_TRC_LINEAR;
+                    || use_cms || p->image_params.gamma == MP_CSP_TRC_LINEAR;
     if (p->use_linear) {
-        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         p->use_indirect = true;
-        switch (p->image_params.gamma) {
-            case MP_CSP_TRC_SRGB:
-                GLSL(color.rgb = mix(color.rgb / vec3(12.92),
-                                     pow((color.rgb + vec3(0.055))/vec3(1.055),
-                                         vec3(2.4)),
-                                     lessThanEqual(vec3(0.04045), color.rgb));)
-                break;
-            case MP_CSP_TRC_BT_1886:
-                GLSL(color.rgb = pow(color.rgb, vec3(1.961));)
-                break;
-            case MP_CSP_TRC_GAMMA22:
-                GLSL(color.rgb = pow(color.rgb, vec3(2.2));)
-                break;
-        }
+        pass_linearize(p);
     }
 
     bool use_sigmoid = p->use_linear && p->opts.sigmoid_upscaling && upscaling;
@@ -1534,7 +1537,8 @@ static void pass_scale_main(struct gl_video *p)
     }
 }
 
-// Adapts the colors to the display device's native gamut.
+// Adapts the colors to the display device's native gamut. Assumes the input
+// is in linear RGB.
 static void pass_colormanage(struct gl_video *p)
 {
     GLSLF("// color management\n");
@@ -1896,6 +1900,17 @@ draw_osd:
         default:
             abort();
         }
+
+        // Apply OSD color correction
+        if (p->use_linear)
+            pass_linearize(p);
+        if (p->user_gamma != 1) {
+            gl_sc_uniform_f(p->sc, "user_gamma", p->user_gamma);
+            GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
+            GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
+        }
+        pass_colormanage(p);
+
         gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
         gl_sc_gen_shader_and_reset(p->sc);
         mpgl_osd_draw_part(p->osd, p->vp_w, p->vp_h, n);
