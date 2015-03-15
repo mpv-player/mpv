@@ -485,7 +485,7 @@ Available video output drivers are:
         analogous to their ``scale`` counterparts. The default is ``oversample``.
 
         Note that the maximum supported filter radius is currently 3, and that
-        using filters with larger radius may introduce isues when pausing or
+        using filters with larger radius may introduce issues when pausing or
         framestepping, proportional to the radius used. It is recommended to
         stick to a radius of 1 or 2.
 
