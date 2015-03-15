@@ -279,6 +279,8 @@ static double lanczos(kernel *k, double x)
 
 static double ewa_ginseng(kernel *k, double x)
 {
+    // Note: This is EWA ginseng, aka sinc-windowed jinc.
+    // Not to be confused with tensor ginseng, aka jinc-windowed sinc.
     double radius = k->radius;
     if (fabs(x) >= radius)
         return 0.0;
