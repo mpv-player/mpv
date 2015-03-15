@@ -356,6 +356,12 @@ Available video output drivers are:
             Sharpening strength. Increasing this makes the image sharper but
             adds more ringing and aliasing. Defaults to 0.5.
 
+        ``oversample``
+            Minimum distance to an edge before interpolation is used. Setting
+            this to 0 will always interpolate edges, whereas setting it to 0.5
+            will never interpolate, thus behaving as if the regular nearest
+            neighbour algorithm was used. Defaults to 0.0.
+
     ``scale-radius=<r>``
         Set radius for filters listed below, must be a float number between 1.0
         and 16.0. Defaults to be 3.0 if not specified.
