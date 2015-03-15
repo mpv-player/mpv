@@ -1778,11 +1778,13 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     // Possible causes for failure of this condition include seeks, pausing,
     // end of playback or start of playback.
     bool valid = true;
-    for (int i = surface_bse; i != surface_end; i = fbosurface_wrap(i+1)) {
-        if (!p->surfaces[i].pts ||
-                p->surfaces[fbosurface_wrap(i+1)].pts < p->surfaces[i].pts) {
+    for (int i = surface_bse, ii; valid && i != surface_end; i = ii) {
+        ii = fbosurface_wrap(i+1);
+        if (!p->surfaces[i].pts || !p->surfaces[ii].pts) {
             valid = false;
-            break;
+        } else if (p->surfaces[ii].pts < p->surfaces[i].pts) {
+            valid = false;
+            MP_DBG(p, "interpolation queue underrun\n");
         }
     }
 
@@ -1802,9 +1804,10 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
             mix = (pts_nxt - t->next_vsync) / vsync_interval;
             mix = mix <= 0 + threshold ? 0 : mix;
             mix = mix >= 1 - threshold ? 1 : mix;
+            mix = 1 - mix;
             gl_sc_uniform_f(p->sc, "inter_coeff", mix);
-            GLSL(vec4 color = mix(texture(texture1, texcoord1),
-                                  texture(texture0, texcoord0),
+            GLSL(vec4 color = mix(texture(texture0, texcoord0),
+                                  texture(texture1, texcoord1),
                                   inter_coeff);)
         } else {
             mix = (t->next_vsync - pts_now) / fscale;
