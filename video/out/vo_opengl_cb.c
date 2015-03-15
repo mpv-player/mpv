@@ -306,7 +306,7 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
         struct vo_priv *p = vo ? vo->priv : NULL;
         struct vo_priv *opts = ctx->new_opts ? ctx->new_opts : p;
         if (opts) {
-            gl_video_set_options(ctx->renderer, opts->renderer_opts);
+            gl_video_set_options(ctx->renderer, opts->renderer_opts, NULL);
             ctx->gl->debug_context = opts->use_gl_debug;
             gl_video_set_debug(ctx->renderer, opts->use_gl_debug);
             frame_queue_shrink(ctx, opts->frame_queue_size);
