@@ -565,9 +565,10 @@ Available filters are:
              Scale tempo in sync with speed (default).
         pitch
              Reverses effect of filter. Scales pitch without altering tempo.
-             Add ``[ multiply speed 0.9438743126816935`` and
-             ``] multiply speed 1.059463094352953`` to your ``input.conf``
-             to step by musical semi-tones.
+             Add this to your ``input.conf`` to step by musical semi-tones::
+
+                [ multiply speed 0.9438743126816935
+                ] multiply speed 1.059463094352953
 
              .. warning::
 
