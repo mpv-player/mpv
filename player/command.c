@@ -3561,7 +3561,7 @@ static const char *const *const mp_event_property_change[] = {
       "volume-restore-data", "current-ao"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking", "core-idle"),
-    E(MPV_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata"),
+    E(MPV_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata", "media-title"),
     E(MPV_EVENT_CHAPTER_CHANGE, "chapter", "chapter-metadata"),
     E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used", "cache-idle",
       "demuxer-cache-duration", "demuxer-cache-idle", "paused-for-cache"),
