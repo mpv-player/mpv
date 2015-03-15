@@ -2442,7 +2442,7 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
         if (kernel) {
             double radius = kernel->radius;
             radius = radius > 0 ? radius : p->opts.scaler_radius[2];
-           *queue_size = 50e3 * (ceil(radius) - 1);
+           *queue_size = 50e3 * ceil(radius);
         }
     }
 
