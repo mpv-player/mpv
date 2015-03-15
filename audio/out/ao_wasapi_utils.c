@@ -433,6 +433,17 @@ static bool find_formats(struct ao *ao)
     }
 
     /* Exclusive mode, we have to guess. */
+
+    // try typical channels first, then more esoteric ones
+    char *channel_layouts[] =
+        {"7.1", "6.1", "5.1", "5.0", "4.0", "2.1", "stereo", "mono",
+         "7.1(wide)", "7.1(wide-side)", "7.1(rear)", "octagonal",
+         "6.1(back)", "6.1(front)", "7.0", "7.0(front)",
+         "5.1(side)", "6.0", "6.0(front)", "hexagonal"
+         "5.0(side)", "4.1",
+         "quad", "quad(side)", "3.1",
+         "3.0", "3.0(back)"};
+    int j=0;
     while (true) {
         int samplerate = ao->samplerate;
         // try integer multiples of requested sample rate first
@@ -451,8 +462,9 @@ static bool find_formats(struct ao *ao)
             return true;
         }
 
-        if (ao->channels.num > 1) {
-            mp_chmap_from_channels(&ao->channels, ao->channels.num - 1);
+        if (j < MP_ARRAY_SIZE(channel_layouts)) {
+            // try the next channel map
+            mp_chmap_from_str(&ao->channels, bstr0(channel_layouts[j++]));
         } else {
             MP_ERR(ao, "Couldn't find acceptable audio format\n");
             return false;
