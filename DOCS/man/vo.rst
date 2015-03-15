@@ -327,6 +327,14 @@ Available video output drivers are:
             ``scale-param1`` and ``scale-param2``. This filter is very good at
             downscaling (see ``scale-down``).
 
+        ``oversample``
+            A version of nearest neighbour that (naively) oversamples pixels,
+            so that pixels overlapping edges get linearly interpolated instead
+            of rounded. This essentially removes the small imperfections and
+            judder artifacts caused by nearest-neighbour interpolation, in
+            exchange for adding some blur. This filter is good at temporal
+            interpolation, and also known as "smoothmotion" (see ``tscale``).
+
         There are some more filters, but most are not as useful. For a complete
         list, pass ``help`` as value, e.g.::
 
@@ -474,7 +482,7 @@ Available video output drivers are:
         only used if ``interpolation`` is enabled. The only valid choices
         for ``tscale`` are separable convolution filters (use ``tscale=help``
         to get a list). The other options (``tscale-param1`` etc.) are
-        analogous to their ``scale`` counterparts. The default is ``mitchell``.
+        analogous to their ``scale`` counterparts. The default is ``oversample``.
 
         Note that the maximum supported filter radius is currently 3, and that
         using filters with larger radius may introduce isues when pausing or
