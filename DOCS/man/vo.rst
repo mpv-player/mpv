@@ -491,6 +491,10 @@ Available video output drivers are:
         As ``scale``, but for interpolating chroma information. If the image
         is not subsampled, this option is ignored entirely.
 
+        .. warning:: Some hardware decoder settings, like ``hwdec=vdpau``, will
+                     do chroma interpolation on their own, thus rendering this
+                     option useless (and reducing image quality).
+
     ``tscale=<filter>``
         The filter used for interpolating the temporal axis (frames). This is
         only used if ``interpolation`` is enabled. The only valid choices

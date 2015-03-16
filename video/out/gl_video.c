@@ -699,6 +699,17 @@ static void init_video(struct gl_video *p)
         p->gl_target = p->hwdec->gl_texture_target;
     }
 
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->image_params.imgfmt);
+    if (p->hwdec_active &&
+        strcmp(p->opts.scaler[2].kernel.name, "bilinear") != 0 &&
+        p->plane_count == 1 &&
+        desc.flags & MP_IMGFLAG_SUBSAMPLED)
+    {
+        p->opts.scaler[2].kernel.name = "bilinear";
+        MP_WARN(p, "Disabling cscale: incompatible with hardware decoding. "
+                   "Expect some quality loss.\n");
+    }
+
     mp_image_params_guess_csp(&p->image_params);
 
     p->image_w = p->image_params.w;
