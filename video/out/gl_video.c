@@ -431,6 +431,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
         OPT_REMOVED("scale-sep", "this is set automatically whenever sane"),
         OPT_REMOVED("indirect", "this is set automatically whenever sane"),
+        OPT_REMOVED("srgb", "use target-prim=bt709:target-trc=srgb instead"),
 
         OPT_REPLACED("lscale", "scale"),
         OPT_REPLACED("lscale-down", "scale-down"),
@@ -442,7 +443,6 @@ const struct m_sub_options gl_video_conf = {
         OPT_REPLACED("cparam2", "cscale-param2"),
         OPT_REPLACED("cradius", "cscale-radius"),
         OPT_REPLACED("cantiring", "cscale-antiring"),
-        OPT_REPLACED("srgb", "target-prim=srgb:target-trc=srgb"),
         OPT_REPLACED("smoothmotion", "interpolation"),
         OPT_REPLACED("smoothmotion-threshold", "tscale-param1"),
 
@@ -828,6 +828,7 @@ static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
                    sizeof(struct vertex_pt[TEXUNIT_VIDEO_NUM]));
     }
 
+    p->gl->Viewport(0, 0, vp_w, abs(vp_h));
     gl_vao_draw_data(&p->vao, GL_TRIANGLE_STRIP, va, 4);
 
     debug_check_gl(p, "after rendering");
@@ -840,7 +841,6 @@ static void finish_pass_direct(struct gl_video *p, GLint fbo, int vp_w, int vp_h
     GL *gl = p->gl;
     pass_prepare_src_tex(p);
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
-    gl->Viewport(0, 0, vp_w, vp_h < 0 ? -vp_h : vp_h);
     gl_sc_gen_shader_and_reset(p->sc);
     render_pass_quad(p, vp_w, vp_h, dst, flags);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -1405,9 +1405,10 @@ static void pass_convert_yuv(struct gl_video *p)
                              lessThanEqual(vec3(0.0181), color.rgb));)
     }
 
-    if (p->user_gamma != 1) {
+    float user_gamma = 1.0 / (cparams.gamma * p->opts.gamma);
+    if (user_gamma != 1) {
         p->use_indirect = true;
-        gl_sc_uniform_f(sc, "user_gamma", p->user_gamma);
+        gl_sc_uniform_f(sc, "user_gamma", user_gamma);
         GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
@@ -1682,15 +1683,11 @@ static void pass_dither(struct gl_video *p)
     // screen. The superfluous bits will be used for rounding according to the
     // dither matrix. The precision of the source implicitly decides how many
     // dither patterns can be visible.
-    float dither_quantization = (1 << dst_depth) - 1;
-    float dither_center = 0.5 / (p->dither_size * p->dither_size);
+    int dither_quantization = (1 << dst_depth) - 1;
 
-    gl_sc_uniform_f(p->sc, "dither_size", p->dither_size);
-    gl_sc_uniform_f(p->sc, "dither_quantization", dither_quantization);
-    gl_sc_uniform_f(p->sc, "dither_center", dither_center);
     gl_sc_uniform_sampler(p->sc, "dither", GL_TEXTURE_2D, TEXUNIT_DITHER);
 
-    GLSL(vec2 dither_pos = gl_FragCoord.xy / dither_size;)
+    GLSLF("vec2 dither_pos = gl_FragCoord.xy / %d;\n", p->dither_size);
 
     if (p->opts.temporal_dither) {
         int phase = p->frames_rendered % 8u;
@@ -1705,8 +1702,9 @@ static void pass_dither(struct gl_video *p)
     }
 
     GLSL(float dither_value = texture(dither, dither_pos).r;)
-    GLSL(color = floor(color * dither_quantization + dither_value + dither_center) /
-                       dither_quantization;)
+    GLSLF("color = floor(color * %d + dither_value + 0.5 / (%d * %d)) / %d;\n",
+          dither_quantization, p->dither_size, p->dither_size,
+          dither_quantization);
 }
 
 // The main rendering function, takes care of everything up to and including
@@ -1881,7 +1879,6 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
 draw_osd:
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
-    gl->Viewport(0, 0, p->vp_w, abs(p->vp_h));
 
     mpgl_osd_generate(p->osd, p->osd_rect, p->osd_pts, p->image_params.stereo_out);
 
@@ -1909,8 +1906,9 @@ draw_osd:
         // Apply OSD color correction
         if (p->use_linear)
             pass_linearize(p);
-        if (p->user_gamma != 1) {
-            gl_sc_uniform_f(p->sc, "user_gamma", p->user_gamma);
+        float user_gamma = 1.0 / p->opts.gamma;
+        if (user_gamma != 1) {
+            gl_sc_uniform_f(p->sc, "user_gamma", user_gamma);
             GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
             GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
         }

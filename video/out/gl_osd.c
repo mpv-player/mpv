@@ -375,6 +375,8 @@ void mpgl_osd_draw_part(struct mpgl_osd *ctx, int vp_w, int vp_h, int index)
     int div[2];
     get_3d_side_by_side(ctx->stereo_mode, div);
 
+    ctx->gl->Viewport(0, 0, vp_w, abs(vp_h));
+
     for (int x = 0; x < div[0]; x++) {
         for (int y = 0; y < div[1]; y++) {
             struct gl_transform t;
