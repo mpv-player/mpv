@@ -1,3 +1,31 @@
+Release 0.8.3
+=============
+
+Changes
+-------
+
+- Documentation fixes and updates.
+- (Client API) Clarify `mpv_opengl_cb_render`'s viewport parameter behavior.
+
+Bug fixes
+---------
+
+- (X11) Fix crash on `vo_xv:no-colorkey` with the Overlay adapter. (bug #1629)
+- Make the video equalizer work correctly on some VAAPI drivers. (bug #1647)
+- Prevent OSD from disappearing when clicking on mozplugger. (bug #1672)
+- The new DVB-S2 support code, using S2API, now builds on FreeBSD.
+- Fix decoding of seekable matroska from unseekable network stream. (bug #1656)
+- (OSX) Fix crashing when closing a VO's window (usually at exit). (bug #1657)
+- (OSX) Unhide the mouse cursor when over the Dock or Launchpad. (bug #513)
+- (OSX) Fix mouse cursor autohiding when the player is fullscreen.
+- `vf_vavpp` (VAAPI postprocessing) now deinterlaces video correctly.
+- `smb://` streams now use the stream cache (used to be inefficient).
+- (Windows) Do not hide the mouse cursor when it is hovering the window menu.
+- Fix 8-channel output on `ao_jack`. (bug #1688)
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.8.2..v0.8.3` in the git repository.
+
 Release 0.8.2
 =============
 
