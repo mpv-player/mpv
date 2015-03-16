@@ -93,6 +93,12 @@ typedef struct MPGLContext {
     void (*releaseGlContext)(struct MPGLContext *);
     void (*set_current)(struct MPGLContext *, bool current);
 
+    // Used on windows only, tries to vsync with the DWM, and modifies SwapInterval
+    // when it does so. Returns the possibly modified swapinterval value.
+    int (*DwmFlush)(struct MPGLContext *, int opt_dwmflush,
+                    int opt_swapinterval, int current_swapinterval);
+
+
     // Resize the window, or create a new window if there isn't one yet.
     // On the first call, it creates a GL context according to what's specified
     // in MPGLContext.requested_gl_version. This is just a hint, and if the

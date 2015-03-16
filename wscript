@@ -595,6 +595,10 @@ video_output_features = [
         'func': check_pkg_config('wayland-egl', '>= 9.0.0',
                                  'egl',         '>= 9.0.0')
     } , {
+	'name': 'dwm',
+	'desc': 'Windows DWM API',
+	'func': check_statement('dwmapi.h', 'DwmFlush()', lib='dwmapi')
+    }, {
         'name': '--gl-win32',
         'desc': 'OpenGL Win32 Backend',
         'deps': [ 'win32' ],

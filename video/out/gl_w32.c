@@ -21,6 +21,13 @@
 
 #include <assert.h>
 #include <windows.h>
+
+#include "config.h"
+
+#if HAVE_DWM
+#include <dwmapi.h>
+#endif
+
 #include "w32_common.h"
 #include "gl_common.h"
 
@@ -248,6 +255,33 @@ static void swapGlBuffers_w32(MPGLContext *ctx)
     SwapBuffers(w32_ctx->hdc);
 }
 
+// opt_dwmflush: 0 - never DwmFlush, 1 - only in windowed mode, 2 - always
+// return: the current (applied if modified) SwapInterval value.
+// DwmFlush waits on DWM vsync similar to SwapBuffers but a bit more noisy.
+// SwapBuffers still needs to be called, but we SwapInterval(0) when DwmFLush is
+// used (will get applied for the following SwapBuffers calls)
+static int DwmFlush_w32(MPGLContext *ctx, int opt_dwmflush,
+                        int opt_swapinterval, int current_swapinterval)
+{
+    int new_swapinterval = current_swapinterval;
+
+#if HAVE_DWM
+    if (opt_dwmflush == 2  || (opt_dwmflush == 1 && !ctx->vo->opts->fullscreen)) {
+        DwmFlush();
+        new_swapinterval = 0;
+    } else {
+        new_swapinterval = opt_swapinterval;
+    }
+
+    if ((new_swapinterval != current_swapinterval) && ctx->gl->SwapInterval) {
+        ctx->gl->SwapInterval(new_swapinterval);
+        MP_VERBOSE(ctx->vo, "DwmFlush: set SwapInterval(%d)\n", new_swapinterval);
+    }
+#endif
+
+    return new_swapinterval;
+}
+
 void mpgl_set_backend_w32(MPGLContext *ctx)
 {
     ctx->priv = talloc_zero(ctx, struct w32_context);
@@ -257,4 +291,5 @@ void mpgl_set_backend_w32(MPGLContext *ctx)
     ctx->vo_init = vo_w32_init;
     ctx->vo_uninit = vo_w32_uninit;
     ctx->vo_control = vo_w32_control;
+    ctx->DwmFlush = DwmFlush_w32;
 }
