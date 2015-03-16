@@ -402,6 +402,7 @@ int video_reconfig_filters(struct dec_video *d_video,
         if (sh->aspect > 0)
             vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, sh->aspect);
     } else {
+        MP_VERBOSE(d_video, "Using bitstream aspect ratio.\n");
         // Even if the aspect switches back, don't use container aspect again.
         d_video->initial_decoder_aspect = -1;
     }
@@ -409,14 +410,6 @@ int video_reconfig_filters(struct dec_video *d_video,
     float force_aspect = opts->movie_aspect;
     if (force_aspect >= 0.0)
         vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, force_aspect);
-
-    if (abs(p.d_w - p.w) >= 4 || abs(p.d_h - p.h) >= 4) {
-        MP_VERBOSE(d_video, "Aspect ratio is %.2f:1 - "
-                   "scaling to correct movie aspect.\n", sh->aspect);
-    } else {
-        p.d_w = p.w;
-        p.d_h = p.h;
-    }
 
     // Apply user overrides
     if (opts->requested_colorspace != MP_CSP_AUTO)
