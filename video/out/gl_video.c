@@ -823,6 +823,7 @@ static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
                    sizeof(struct vertex_pt[TEXUNIT_VIDEO_NUM]));
     }
 
+    p->gl->Viewport(0, 0, vp_w, abs(vp_h));
     gl_vao_draw_data(&p->vao, GL_TRIANGLE_STRIP, va, 4);
 
     debug_check_gl(p, "after rendering");
@@ -835,7 +836,6 @@ static void finish_pass_direct(struct gl_video *p, GLint fbo, int vp_w, int vp_h
     GL *gl = p->gl;
     pass_prepare_src_tex(p);
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
-    gl->Viewport(0, 0, vp_w, vp_h < 0 ? -vp_h : vp_h);
     gl_sc_gen_shader_and_reset(p->sc);
     render_pass_quad(p, vp_w, vp_h, dst, flags);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -1876,7 +1876,6 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
 draw_osd:
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
-    gl->Viewport(0, 0, p->vp_w, abs(p->vp_h));
 
     mpgl_osd_generate(p->osd, p->osd_rect, p->osd_pts, p->image_params.stereo_out);
 
