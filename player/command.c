@@ -3843,7 +3843,6 @@ static bool reinit_filters(MPContext *mpctx, enum stream_type mediatype)
     case STREAM_VIDEO:
         return reinit_video_filters(mpctx) >= 0;
     case STREAM_AUDIO:
-        clear_audio_output_buffers(mpctx);
         return reinit_audio_filters(mpctx) >= 0;
     }
     return false;
