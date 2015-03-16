@@ -419,7 +419,10 @@ bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
             MP_DBG(ao, "chmap_sel #%d: %s\n", i, mp_chmap_to_str(&c));
         }
     }
-    return mp_chmap_sel_adjust(s, map);
+    bool r = mp_chmap_sel_adjust(s, map);
+    if (r)
+        MP_DBG(ao, "result: %s\n", mp_chmap_to_str(map));
+    return r;
 }
 
 bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
