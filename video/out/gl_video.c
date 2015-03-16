@@ -1675,15 +1675,11 @@ static void pass_dither(struct gl_video *p)
     // screen. The superfluous bits will be used for rounding according to the
     // dither matrix. The precision of the source implicitly decides how many
     // dither patterns can be visible.
-    float dither_quantization = (1 << dst_depth) - 1;
-    float dither_center = 0.5 / (p->dither_size * p->dither_size);
+    int dither_quantization = (1 << dst_depth) - 1;
 
-    gl_sc_uniform_f(p->sc, "dither_size", p->dither_size);
-    gl_sc_uniform_f(p->sc, "dither_quantization", dither_quantization);
-    gl_sc_uniform_f(p->sc, "dither_center", dither_center);
     gl_sc_uniform_sampler(p->sc, "dither", GL_TEXTURE_2D, TEXUNIT_DITHER);
 
-    GLSL(vec2 dither_pos = gl_FragCoord.xy / dither_size;)
+    GLSLF("vec2 dither_pos = gl_FragCoord.xy / %d;\n", p->dither_size);
 
     if (p->opts.temporal_dither) {
         int phase = p->frames_rendered % 8u;
@@ -1698,8 +1694,9 @@ static void pass_dither(struct gl_video *p)
     }
 
     GLSL(float dither_value = texture(dither, dither_pos).r;)
-    GLSL(color = floor(color * dither_quantization + dither_value + dither_center) /
-                       dither_quantization;)
+    GLSLF("color = floor(color * %d + dither_value + 0.5 / (%d * %d)) / %d;\n",
+          dither_quantization, p->dither_size, p->dither_size,
+          dither_quantization);
 }
 
 // The main rendering function, takes care of everything up to and including
