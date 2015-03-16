@@ -134,6 +134,7 @@ static const struct format_hack format_hacks[] = {
     BLACKLIST("bin"),
     // Image demuxers, disabled in favor of demux_mf (for now):
     BLACKLIST("image"),
+    BLACKLIST("image2"),
     BLACKLIST("image2pipe"),
     BLACKLIST("bmp_pipe"), BLACKLIST("dpx_pipe"), BLACKLIST("exr_pipe"),
     BLACKLIST("j2k_pipe"), BLACKLIST("png_pipe"), BLACKLIST("tiff_pipe"),
