@@ -431,6 +431,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
         OPT_REMOVED("scale-sep", "this is set automatically whenever sane"),
         OPT_REMOVED("indirect", "this is set automatically whenever sane"),
+        OPT_REMOVED("srgb", "use target-prim=bt709:target-trc=srgb instead"),
 
         OPT_REPLACED("lscale", "scale"),
         OPT_REPLACED("lscale-down", "scale-down"),
@@ -442,7 +443,6 @@ const struct m_sub_options gl_video_conf = {
         OPT_REPLACED("cparam2", "cscale-param2"),
         OPT_REPLACED("cradius", "cscale-radius"),
         OPT_REPLACED("cantiring", "cscale-antiring"),
-        OPT_REPLACED("srgb", "target-prim=srgb:target-trc=srgb"),
         OPT_REPLACED("smoothmotion", "interpolation"),
         OPT_REPLACED("smoothmotion-threshold", "tscale-param1"),
 
