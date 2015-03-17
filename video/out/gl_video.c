@@ -59,6 +59,7 @@ static const char *const fixed_scale_filters[] = {
     "sharpen3",
     "sharpen5",
     "oversample",
+    "custom",
     NULL
 };
 static const char *const fixed_tscale_filters[] = {
@@ -135,6 +136,12 @@ struct fbosurface {
 
 #define FBOSURFACES_MAX 10
 
+// Represents a cached file, which is only re-read if the name changes
+struct filestr {
+    const char *path;
+    const char *str;
+};
+
 struct src_tex {
     GLuint gl_tex;
     GLenum gl_target;
@@ -145,6 +152,7 @@ struct src_tex {
 struct gl_video {
     GL *gl;
 
+    struct mpv_global *global;
     struct mp_log *log;
     struct gl_video_opts opts;
     bool gl_debug;
@@ -180,9 +188,10 @@ struct gl_video {
 
     struct video_image image;
 
-    struct fbotex indirect_fbo;         // RGB target
     struct fbotex chroma_merge_fbo;
+    struct fbotex indirect_fbo;
     struct fbotex blend_subs_fbo;
+    struct fbotex post_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
 
     int surface_idx;
@@ -210,6 +219,11 @@ struct gl_video {
     // Cached because computing it can take relatively long
     int last_dither_matrix_size;
     float *last_dither_matrix;
+
+    // Cached because it requires file I/O
+    struct filestr pre_shader;
+    struct filestr post_shader;
+    struct filestr scale_shader;
 
     struct gl_hwdec *hwdec;
     bool hwdec_active;
@@ -429,6 +443,9 @@ const struct m_sub_options gl_video_conf = {
         OPT_COLOR("background", background, 0),
         OPT_FLAG("interpolation", interpolation, 0),
         OPT_FLAG("blend-subtitles", blend_subs, 0),
+        OPT_STRING("pre-shader", pre_shader, 0),
+        OPT_STRING("post-shader", post_shader, 0),
+        OPT_STRING("scale-shader", scale_shader, 0),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
@@ -508,6 +525,28 @@ static inline int fbosurface_wrap(int id)
     return id < 0 ? id + FBOSURFACES_MAX : id;
 }
 
+static bool load_filestr(struct gl_video *p, struct filestr *f, const char *path)
+{
+    if (!f || !path || !path[0] || !p->global)
+        return false;
+
+    if (!f->path || strcmp(f->path, path) != 0) {
+        // New file available, load it
+        struct bstr s = bstr_load_file(p, path, p->global);
+        if (s.len) {
+            talloc_free((char *) f->str);
+            f->str = bstrto0(p, s);
+            f->path = path;
+            MP_VERBOSE(p, "Loaded file '%s' with length '%ld'.\n", path, s.len);
+        } else {
+            f->str = f->path = NULL;
+        }
+        talloc_free(s.start);
+    }
+
+    return f->str;
+}
+
 static void recreate_osd(struct gl_video *p)
 {
     mpgl_osd_destroy(p->osd);
@@ -539,9 +578,10 @@ static void uninit_rendering(struct gl_video *p)
     gl->DeleteTextures(1, &p->dither_texture);
     p->dither_texture = 0;
 
-    fbotex_uninit(&p->indirect_fbo);
     fbotex_uninit(&p->chroma_merge_fbo);
+    fbotex_uninit(&p->indirect_fbo);
     fbotex_uninit(&p->blend_subs_fbo);
+    fbotex_uninit(&p->post_fbo);
 
     for (int n = 0; n < FBOSURFACES_MAX; n++)
         fbotex_uninit(&p->surfaces[n].fbotex);
@@ -1262,6 +1302,14 @@ static void pass_sample(struct gl_video *p, int src_tex,
         pass_sample_sharpen5(p, scaler);
     } else if (strcmp(scaler->name, "oversample") == 0) {
         pass_sample_oversample(p, scaler, w, h);
+    } else if (strcmp(scaler->name, "custom") == 0) {
+        if (load_filestr(p, &p->scale_shader, p->opts.scale_shader)) {
+            GLSLF("vec4 color;\n// custom scale-shader\n");
+            GLSLF("%s\n", p->scale_shader.str);
+        } else {
+            // Naive fallback to signal something went wrong
+            GLSL(vec4 color = vec4(1.0, 0.0, 0.0, 1.0);)
+        }
     } else if (scaler->kernel && scaler->kernel->polar) {
         pass_sample_polar(p, scaler);
     } else if (scaler->kernel) {
@@ -1750,15 +1798,25 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
 // upscaling
 static void pass_render_frame(struct gl_video *p)
 {
+    int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
+        vp_h = p->dst_rect.y1 - p->dst_rect.y0;
+
     p->use_indirect = false; // set to true as needed by pass_*
     pass_read_video(p);
     pass_convert_yuv(p);
+
+    if (load_filestr(p, &p->pre_shader, p->opts.pre_shader)) {
+        finish_pass_fbo(p, &p->indirect_fbo, p->image_w, p->image_h, 0, 0);
+        sampler_prelude(p, 0);
+        GLSLF("vec4 color;\n// custom pre-shader\n");
+        GLSLF("%s\n", p->pre_shader.str);
+        p->use_indirect = true;
+    }
+
     pass_scale_main(p);
 
     if (p->opts.blend_subs) {
         // Recreate the real video size from the src/dst rects
-        int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
-            vp_h = p->dst_rect.y1 - p->dst_rect.y0;
         struct mp_osd_res rect = {
             .w = vp_w, .h = vp_h,
             .ml = -p->src_rect.x0, .mr = p->src_rect.x1 - p->image_w,
@@ -1774,6 +1832,13 @@ static void pass_render_frame(struct gl_video *p)
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, p->image.mpi->pts, rect, vp_w, vp_h,
                       p->blend_subs_fbo.fbo, p->use_linear);
         GLSL(vec4 color = texture(texture0, texcoord0);)
+    }
+
+    if (load_filestr(p, &p->post_shader, p->opts.post_shader)) {
+        finish_pass_fbo(p, &p->post_fbo, vp_w, vp_h, 0, 0);
+        sampler_prelude(p, 0);
+        GLSLF("vec4 color;\n// custom post-shader\n");
+        GLSLF("%s\n", p->post_shader.str);
     }
 }
 
@@ -2438,7 +2503,7 @@ void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd)
     recreate_osd(p);
 }
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log)
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
 {
     if (gl->version < 210 && gl->es < 200) {
         mp_err(log, "At least OpenGL 2.1 or OpenGL ES 2.0 required.\n");
@@ -2448,6 +2513,7 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log)
     struct gl_video *p = talloc_ptrtype(NULL, p);
     *p = (struct gl_video) {
         .gl = gl,
+        .global = g,
         .log = log,
         .opts = gl_video_opts_def,
         .gl_target = GL_TEXTURE_2D,

@@ -27,6 +27,7 @@
 
 #include "talloc.h"
 #include "osdep/compiler.h"
+#include "common/global.h"
 
 /* NOTE: 'len' is size_t, but most string-handling functions below assume
  * that input size has been sanity checked and len fits in an int.
@@ -116,6 +117,10 @@ int bstr_validate_utf8(struct bstr s);
 // byte added past its end for convenience). The string is allocated via
 // talloc, with talloc_ctx as parent.
 struct bstr bstr_sanitize_utf8_latin1(void *talloc_ctx, struct bstr s);
+
+// Load a bstr from a given file location.
+struct bstr bstr_load_file(void *talloc_ctx, const char *filename,
+                           struct mpv_global *global);
 
 // Return the text before the next line break, and return it. Change *rest to
 // point to the text following this line break. (rest can be NULL.)

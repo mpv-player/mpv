@@ -29,6 +29,8 @@
 
 #include "common/common.h"
 #include "misc/ctype.h"
+#include "options/path.h"
+#include "stream/stream.h"
 #include "bstr.h"
 
 int bstrcmp(struct bstr str1, struct bstr str2)
@@ -357,6 +359,20 @@ struct bstr bstr_sanitize_utf8_latin1(void *talloc_ctx, struct bstr s)
     if (first_ok != left.start)
         bstr_xappend(talloc_ctx, &new, (bstr){first_ok, left.start - first_ok});
     return new;
+}
+
+struct bstr bstr_load_file(void *talloc_ctx, const char *filename,
+                           struct mpv_global *global)
+{
+    struct bstr res = {0};
+    char *fname = mp_get_user_path(NULL, global, filename);
+    stream_t *s = stream_open(fname, global);
+    if (s) {
+        res = stream_read_complete(s, talloc_ctx, 1000000000);
+        free_stream(s);
+    }
+    talloc_free(fname);
+    return res;
 }
 
 static void resize_append(void *talloc_ctx, bstr *s, size_t append_min)
