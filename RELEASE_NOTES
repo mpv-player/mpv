@@ -22,6 +22,8 @@ Bug fixes
 - `smb://` streams now use the stream cache (used to be inefficient).
 - (Windows) Do not hide the mouse cursor when it is hovering the window menu.
 - Fix 8-channel output on `ao_jack`. (bug #1688)
+- Fix `--mf-fps` parameter on JPEG files. (bug #1689)
+- Fix anamorphic scaling being ignored if it was very minor.
 
 This listing is not complete. A complete changelog can be seen by running
 `git log v0.8.2..v0.8.3` in the git repository.
