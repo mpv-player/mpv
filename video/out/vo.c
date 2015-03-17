@@ -623,7 +623,7 @@ static bool render_frame(struct vo *vo)
     if (in->vsync_timed) {
         // this is a heuristic that wakes the thread up some
         // time before the next vsync
-        target = next_vsync - MPMIN(in->vsync_interval / 3, 4e3);
+        target = next_vsync - MPMIN(in->vsync_interval / 2, 8e3);
 
         // We are very late with the frame and using vsync timing: probably
         // no new frames are coming in. This must be done whether or not
