@@ -123,6 +123,7 @@ struct gl_shader_cache *gl_sc_create(GL *gl, struct mp_log *log);
 void gl_sc_destroy(struct gl_shader_cache *sc);
 void gl_sc_add(struct gl_shader_cache *sc, const char *text);
 void gl_sc_addf(struct gl_shader_cache *sc, const char *textf, ...);
+void gl_sc_hadd(struct gl_shader_cache *sc, const char *text);
 void gl_sc_uniform_sampler(struct gl_shader_cache *sc, char *name, GLenum target,
                            int unit);
 void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, GLfloat f);
