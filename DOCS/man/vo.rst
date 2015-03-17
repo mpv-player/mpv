@@ -335,6 +335,9 @@ Available video output drivers are:
             exchange for adding some blur. This filter is good at temporal
             interpolation, and also known as "smoothmotion" (see ``tscale``).
 
+        ``custom``
+            A user-defined custom shader (see ``scale-shader``).
+
         There are some more filters, but most are not as useful. For a complete
         list, pass ``help`` as value, e.g.::
 
@@ -503,6 +506,39 @@ Available video output drivers are:
         feature doesn't work correctly with different scale factors in
         different directions.
 
+    ``pre-shader=<file>``, ``post-shader=<file>``, ``scale-shader=<file>``
+        Custom GLSL fragment shaders. ``pre-shader`` gets applied before
+        upscaling (after conversion to RGB), and ``post-shader`` gets
+        applied after upscaling (and after ``blend-subtitles`` if enabled).
+        ``scale-shader`` defines the source for the ``custom`` scaler.
+
+        These files should contain the body of the GLSL fragment shader. The
+        function definition, uniforms etc. are already added by mpv. This also
+        means that it's currently impossible to define a subfunction inside the
+        shader source. The shader is expected to operate on linear RGB (with the
+        exception of ``scale-shader``, which can operate on sigmoidized RGB
+        if ``sigmoid-upscaling`` is enabled, and chroma if ``cscale=custom`` is
+        used).
+
+        The following definitions are available inside the shader:
+
+        sampler2D tex
+            The source texture for the shader.
+        vec2 size
+            The size, in pixels, of ``tex``.
+        vec2 pt
+            The size of a single pixel, in coordinate space. Equal to 1.0/size.
+        vec2 pos
+            The position this texture should be sampled at, in coordinate space.
+
+        Shaders are expected to write their output to a (pre-defined)
+        ``vec4 color``.
+
+        For example, a shader that inverts the colors could look like this::
+
+            color = texture(tex, pos);
+            color.rgb = 1.0 - color.rgb;
+
     ``sigmoid-upscaling``
         When upscaling, use a sigmoidal color transform to avoid emphasizing
         ringing artifacts. This also enables ``linear-scaling``.
@@ -656,8 +692,9 @@ Available video output drivers are:
         Blend subtitles directly onto upscaled video frames, before
         interpolation and/or color management (default: no). Enabling this
         causes subtitles to be affected by ``icc-profile``, ``target-prim``,
-        ``target-trc``, ``interpolation``, ``gamma`` and ``linear-scaling``.
-        It also increases subtitle performance when using ``interpolation``.
+        ``target-trc``, ``interpolation``, ``gamma``, ``post-shader`` and
+        ``linear-scaling``. It also increases subtitle performance when using
+        ``interpolation``.
 
         The downside of enabling this is that it restricts subtitles to the
         visible portion of the video, so you can't have subtitles exist in the
