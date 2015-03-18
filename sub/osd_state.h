@@ -36,8 +36,7 @@ struct osd_object {
     struct sub_bitmaps cached;
 
     // VO cache state
-    int vo_bitmap_id;
-    int vo_bitmap_pos_id;
+    int vo_change_id;
     struct mp_osd_res vo_res;
 
     // Internally used by osd_libass.c

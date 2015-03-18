@@ -61,6 +61,8 @@ struct priv {
 
     AVRational timebase_out;
 
+    bool eof;
+
     // options
     char *cfg_graph;
     char **cfg_avopts;
@@ -71,6 +73,8 @@ static void destroy_graph(struct af_instance *af)
     struct priv *p = af->priv;
     avfilter_graph_free(&p->graph);
     p->in = p->out = NULL;
+    p->samples_in = 0;
+    p->eof = false;
 }
 
 static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
@@ -167,6 +171,12 @@ error:
     return false;
 }
 
+static void reset(struct af_instance *af)
+{
+    if (!recreate_graph(af, &af->fmt_in))
+        MP_FATAL(af, "Can't recreate libavfilter filter after a seek reset.\n");
+}
+
 static int control(struct af_instance *af, int cmd, void *arg)
 {
     struct priv *p = af->priv;
@@ -203,6 +213,9 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
     }
+    case AF_CONTROL_RESET:
+        reset(af);
+        return AF_OK;
     }
     return AF_UNKNOWN;
 }
@@ -210,9 +223,16 @@ static int control(struct af_instance *af, int cmd, void *arg)
 static int filter_frame(struct af_instance *af, struct mp_audio *data)
 {
     struct priv *p = af->priv;
+    AVFrame *frame = NULL;
+
+    if (p->eof && data)
+        reset(af);
+
+    if (!p->graph)
+        goto error;
+
     AVFilterLink *l_in = p->in->outputs[0];
 
-    AVFrame *frame = NULL;
     if (data) {
         frame = av_frame_alloc();
         if (!frame)
@@ -255,6 +275,9 @@ static int filter_out(struct af_instance *af)
 {
     struct priv *p = af->priv;
 
+    if (!p->graph)
+        goto error;
+
     AVFrame *frame = av_frame_alloc();
     if (!frame)
         goto error;
@@ -262,7 +285,10 @@ static int filter_out(struct af_instance *af)
     int err = av_buffersink_get_frame(p->out, frame);
     if (err == AVERROR(EAGAIN) || err == AVERROR_EOF) {
         // Not an error situation - no more output buffers in queue.
+        // AVERROR_EOF means we shouldn't even give the filter more
+        // input, but we don't handle that completely correctly.
         av_frame_free(&frame);
+        p->eof |= err == AVERROR_EOF;
         return 0;
     }
 

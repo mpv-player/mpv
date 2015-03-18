@@ -581,15 +581,16 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
         mpctx->next_frame[0] = mpctx->next_frame[1];
         mpctx->next_frame[1] = NULL;
 
+        double frame_time = 0;
         double pts = mpctx->next_frame[0]->pts;
-        double last_pts = mpctx->video_pts;
-        if (last_pts == MP_NOPTS_VALUE)
-            last_pts = pts;
-        double frame_time = pts - last_pts;
-        if (frame_time < 0 || frame_time >= 60) {
-            // Assume a PTS difference >= 60 seconds is a discontinuity.
-            MP_WARN(mpctx, "Jump in video pts: %f -> %f\n", last_pts, pts);
-            frame_time = 0;
+        if (mpctx->video_pts != MP_NOPTS_VALUE) {
+            frame_time = pts - mpctx->video_pts;
+            if (frame_time <= 0 || frame_time >= 60) {
+                // Assume a PTS difference >= 60 seconds is a discontinuity.
+                MP_WARN(mpctx, "Non-monotonic video pts: %f -> %f\n",
+                        mpctx->video_pts, pts);
+                frame_time = 0;
+            }
         }
         mpctx->video_next_pts = pts;
         mpctx->delay -= frame_time;

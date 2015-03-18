@@ -134,7 +134,7 @@ struct priv {
     struct wl_subsurface *osd_subsurfaces[MAX_OSD_PARTS];
     shm_buffer_t *osd_buffers[MAX_OSD_PARTS];
     // this id tells us if the subtitle part has changed or not
-    int bitmap_pos_id[MAX_OSD_PARTS];
+    int change_id[MAX_OSD_PARTS];
 
     int64_t recent_flip_time; // last frame event
 
@@ -455,8 +455,8 @@ static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
 
     struct wl_surface *s = p->osd_surfaces[id];
 
-    if (imgs->bitmap_pos_id != p->bitmap_pos_id[id]) {
-        p->bitmap_pos_id[id] = imgs->bitmap_pos_id;
+    if (imgs->change_id != p->change_id[id]) {
+        p->change_id[id] = imgs->change_id;
 
         struct mp_rect bb;
         if (!mp_sub_bitmaps_bb(imgs, &bb))

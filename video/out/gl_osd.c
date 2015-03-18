@@ -68,7 +68,7 @@ static const struct gl_vao_entry vertex_vao[] = {
 
 struct mpgl_osd_part {
     enum sub_bitmap_format format;
-    int bitmap_id, bitmap_pos_id;
+    int change_id;
     GLuint texture;
     int w, h;
     GLuint buffer;
@@ -278,14 +278,11 @@ static void gen_osd_cb(void *pctx, struct sub_bitmaps *imgs)
 
     struct mpgl_osd_part *osd = ctx->parts[imgs->render_index];
 
-    if (imgs->bitmap_pos_id != osd->bitmap_pos_id) {
-        if (imgs->bitmap_id != osd->bitmap_id) {
-            if (!upload_osd(ctx, osd, imgs))
-                osd->packer->count = 0;
-        }
+    if (imgs->change_id != osd->change_id) {
+        if (!upload_osd(ctx, osd, imgs))
+            osd->packer->count = 0;
 
-        osd->bitmap_id = imgs->bitmap_id;
-        osd->bitmap_pos_id = imgs->bitmap_pos_id;
+        osd->change_id = imgs->change_id;
     }
     osd->num_subparts = osd->packer->count;
 

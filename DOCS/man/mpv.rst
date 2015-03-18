@@ -766,7 +766,7 @@ FILES
     mpv system-wide settings (depends on ``--prefix`` passed to configure)
 
 ``~/.config/mpv/mpv.conf``
-    mpv user settings
+    mpv user settings (see `CONFIGURATION FILES`_ section)
 
 ``~/.config/mpv/input.conf``
     key bindings (see `INPUT.CONF`_ section)

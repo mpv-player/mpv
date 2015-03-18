@@ -70,8 +70,7 @@ struct sub_bitmaps {
     struct sub_bitmap *parts;
     int num_parts;
 
-    // Incremented on each change
-    int bitmap_id, bitmap_pos_id;
+    int change_id;  // Incremented on each change
 };
 
 struct mp_osd_res {

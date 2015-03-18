@@ -103,7 +103,7 @@ struct texplane {
 
 struct osdpart {
     enum sub_bitmap_format format;
-    int bitmap_id, bitmap_pos_id;
+    int change_id;
     struct d3dtex texture;
     int num_vertices;
     vertex_osd *vertices;
@@ -453,7 +453,7 @@ static void destroy_d3d_surfaces(d3d_priv *priv)
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osdpart *osd = priv->osd[n];
         d3dtex_release(priv, &osd->texture);
-        osd->bitmap_id = osd->bitmap_pos_id = -1;
+        osd->change_id = -1;
     }
 
     if (priv->d3d_backbuf)
@@ -1618,14 +1618,11 @@ static struct osdpart *generate_osd(d3d_priv *priv, struct sub_bitmaps *imgs)
 
     struct osdpart *osd = priv->osd[imgs->render_index];
 
-    if (imgs->bitmap_pos_id != osd->bitmap_pos_id) {
-        if (imgs->bitmap_id != osd->bitmap_id) {
-            if (!upload_osd(priv, osd, imgs))
-                osd->packer->count = 0;
-        }
+    if (imgs->change_id != osd->change_id) {
+        if (!upload_osd(priv, osd, imgs))
+            osd->packer->count = 0;
 
-        osd->bitmap_id = imgs->bitmap_id;
-        osd->bitmap_pos_id = imgs->bitmap_pos_id;
+        osd->change_id = imgs->change_id;
         osd->num_vertices = 0;
     }
 

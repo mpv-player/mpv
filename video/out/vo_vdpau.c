@@ -136,8 +136,7 @@ struct vdpctx {
         } *targets;
         int targets_size;
         int render_count;
-        int bitmap_id;
-        int bitmap_pos_id;
+        int change_id;
     } osd_surfaces[MAX_OSD_PARTS];
 
     // Video equalizer
@@ -388,7 +387,7 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
     for (int i = 0; i < MAX_OSD_PARTS; i++) {
         struct osd_bitmap_surface *sfc = &vc->osd_surfaces[i];
         talloc_free(sfc->packer);
-        sfc->bitmap_id = sfc->bitmap_pos_id = 0;
+        sfc->change_id = 0;
         *sfc = (struct osd_bitmap_surface){
             .surface = VDP_INVALID_HANDLE,
         };
@@ -512,16 +511,13 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
     struct osd_bitmap_surface *sfc = &vc->osd_surfaces[imgs->render_index];
     bool need_upload = false;
 
-    if (imgs->bitmap_pos_id == sfc->bitmap_pos_id)
+    if (imgs->change_id == sfc->change_id)
         return; // Nothing changed and we still have the old data
 
     sfc->render_count = 0;
 
     if (imgs->format == SUBBITMAP_EMPTY || imgs->num_parts == 0)
         return;
-
-    if (imgs->bitmap_id == sfc->bitmap_id)
-        goto osd_skip_upload;
 
     need_upload = true;
     VdpRGBAFormat format;
@@ -574,7 +570,6 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
                                  sfc->packer->used_height});
     }
 
-osd_skip_upload:
     if (sfc->surface == VDP_INVALID_HANDLE)
         return;
     if (sfc->packer->count > sfc->targets_size) {
@@ -610,8 +605,7 @@ osd_skip_upload:
         sfc->render_count++;
     }
 
-    sfc->bitmap_id = imgs->bitmap_id;
-    sfc->bitmap_pos_id = imgs->bitmap_pos_id;
+    sfc->change_id = imgs->change_id;
 }
 
 static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
