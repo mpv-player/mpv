@@ -669,6 +669,11 @@ static void init_video(struct gl_video *p)
         p->gl_target = p->hwdec->gl_texture_target;
     }
 
+    if (p->hwdec_active && strcmp(p->opts.scalers[1], "bilinear") != 0) {
+        p->opts.scalers[1] = "bilinear";
+        MP_ERR(p, "Disabling cscale: incompatible with hardware decoding.\n");
+    }
+
     mp_image_params_guess_csp(&p->image_params);
 
     p->image_w = p->image_params.w;
@@ -1334,6 +1339,8 @@ static void pass_convert_yuv(struct gl_video *p)
     mp_csp_set_image_params(&cparams, &p->image_params);
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
 
+    p->user_gamma = 1.0 / (cparams.gamma * p->opts.gamma);
+
     GLSLF("// color conversion\n");
 
     if (p->color_swizzle[0])
@@ -1398,9 +1405,10 @@ static void pass_convert_yuv(struct gl_video *p)
                              lessThanEqual(vec3(0.0181), color.rgb));)
     }
 
-    if (p->user_gamma != 1) {
+    float user_gamma = 1.0 / (cparams.gamma * p->opts.gamma);
+    if (user_gamma != 1) {
         p->use_indirect = true;
-        gl_sc_uniform_f(sc, "user_gamma", p->user_gamma);
+        gl_sc_uniform_f(sc, "user_gamma", user_gamma);
         GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
@@ -1843,8 +1851,6 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
 
-    p->user_gamma = 1.0 / p->opts.gamma;
-
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     if (p->dst_rect.x0 > 0 || p->dst_rect.y0 > 0
@@ -1900,8 +1906,9 @@ draw_osd:
         // Apply OSD color correction
         if (p->use_linear)
             pass_linearize(p);
-        if (p->user_gamma != 1) {
-            gl_sc_uniform_f(p->sc, "user_gamma", p->user_gamma);
+        float user_gamma = 1.0 / p->opts.gamma;
+        if (user_gamma != 1) {
+            gl_sc_uniform_f(p->sc, "user_gamma", user_gamma);
             GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
             GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
         }
