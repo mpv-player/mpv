@@ -3931,7 +3931,7 @@ static void recreate_overlays(struct MPContext *mpctx)
     if (new == cmd->overlay_osd_current)
         new += 1; // pick the unused one
     new->format = SUBBITMAP_RGBA;
-    new->bitmap_id = new->bitmap_pos_id = 1;
+    new->change_id = 1;
     // overlay array can have unused entries, but parts list must be "packed"
     new->num_parts = 0;
     for (int n = 0; n < cmd->num_overlays; n++) {

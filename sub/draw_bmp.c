@@ -43,7 +43,7 @@ struct sub_cache {
 };
 
 struct part {
-    int bitmap_pos_id;
+    int change_id;
     int imgfmt;
     enum mp_csp colorspace;
     enum mp_csp_levels levels;
@@ -399,7 +399,7 @@ static struct part *get_cache(struct mp_draw_sub_cache *cache,
     if (use_cache) {
         part = cache->parts[sbs->render_index];
         if (part) {
-            if (part->bitmap_pos_id != sbs->bitmap_pos_id
+            if (part->change_id != sbs->change_id
                 || part->imgfmt != format->imgfmt
                 || part->colorspace != format->params.colorspace
                 || part->levels != format->params.colorlevels)
@@ -411,7 +411,7 @@ static struct part *get_cache(struct mp_draw_sub_cache *cache,
         if (!part) {
             part = talloc(cache, struct part);
             *part = (struct part) {
-                .bitmap_pos_id = sbs->bitmap_pos_id,
+                .change_id = sbs->change_id,
                 .num_imgs = sbs->num_parts,
                 .imgfmt = format->imgfmt,
                 .levels = format->params.colorlevels,

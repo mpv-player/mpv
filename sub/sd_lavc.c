@@ -256,7 +256,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     res->parts = priv->outbitmaps;
     res->num_parts = current->count;
     if (priv->displayed_id != current->id)
-        res->bitmap_id = ++res->bitmap_pos_id;
+        res->change_id++;
     priv->displayed_id = current->id;
     res->format = SUBBITMAP_INDEXED;
 

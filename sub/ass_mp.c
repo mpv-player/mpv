@@ -134,10 +134,8 @@ void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
 {
     int changed;
     ASS_Image *imgs = ass_render_frame(renderer, track, time, &changed);
-    if (changed == 2)
-        res->bitmap_id = ++res->bitmap_pos_id;
-    else if (changed)
-        res->bitmap_pos_id++;
+    if (changed)
+        res->change_id++;
     res->format = SUBBITMAP_LIBASS;
 
     res->parts = *parts;

@@ -263,7 +263,7 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
     } else if (obj->type == OSDTYPE_EXTERNAL2) {
         if (obj->external2 && obj->external2->format) {
             *out_imgs = *obj->external2;
-            obj->external2->bitmap_id = obj->external2->bitmap_pos_id = 0;
+            obj->external2->change_id = 0;
         }
     } else if (obj->type == OSDTYPE_NAV_HIGHLIGHT) {
         if (obj->highlight_priv)
@@ -272,29 +272,23 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
         osd_object_get_bitmaps(osd, obj, out_imgs);
     }
 
-    if (obj->force_redraw) {
-        out_imgs->bitmap_id++;
-        out_imgs->bitmap_pos_id++;
-    }
+    if (obj->force_redraw)
+        out_imgs->change_id++;
 
     obj->force_redraw = false;
-    obj->vo_bitmap_id += out_imgs->bitmap_id;
-    obj->vo_bitmap_pos_id += out_imgs->bitmap_pos_id;
+    obj->vo_change_id += out_imgs->change_id;
 
     if (out_imgs->num_parts == 0)
         return;
 
-    if (obj->cached.bitmap_id == obj->vo_bitmap_id
-        && obj->cached.bitmap_pos_id == obj->vo_bitmap_pos_id
-        && formats[obj->cached.format])
+    if (obj->cached.change_id == obj->vo_change_id && formats[obj->cached.format])
     {
         *out_imgs = obj->cached;
         return;
     }
 
     out_imgs->render_index = obj->type;
-    out_imgs->bitmap_id = obj->vo_bitmap_id;
-    out_imgs->bitmap_pos_id = obj->vo_bitmap_pos_id;
+    out_imgs->change_id = obj->vo_change_id;
 
     if (formats[out_imgs->format])
         return;

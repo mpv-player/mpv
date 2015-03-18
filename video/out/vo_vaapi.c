@@ -57,7 +57,7 @@ struct vaapi_subpic {
 
 struct vaapi_osd_part {
     bool active;
-    int bitmap_pos_id;
+    int change_id;
     struct vaapi_osd_image image;
     struct vaapi_subpic subpic;
     struct osd_conv_cache *conv_cache;
@@ -345,8 +345,8 @@ static void draw_osd_cb(void *pctx, struct sub_bitmaps *imgs)
     struct priv *p = pctx;
 
     struct vaapi_osd_part *part = &p->osd_parts[imgs->render_index];
-    if (imgs->bitmap_pos_id != part->bitmap_pos_id) {
-        part->bitmap_pos_id = imgs->bitmap_pos_id;
+    if (imgs->change_id != part->change_id) {
+        part->change_id = imgs->change_id;
 
         osd_scale_rgba(part->conv_cache, imgs);
 
