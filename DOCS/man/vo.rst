@@ -844,7 +844,7 @@ Available video output drivers are:
         clear
             Drop all frames in the frame queue.
 
-    This also supports many of the suboptions the ``opengl`` VO has. Runs
+    This also supports many of the suboptions the ``opengl`` VO has. Run
     ``mpv --vo=opengl-cb:help`` for a list.
 
     This also supports the ``vo_cmdline`` command.
