@@ -726,14 +726,14 @@ struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
 void memcpy_pic(void *dst, const void *src, int bytesPerLine, int height,
                 int dstStride, int srcStride)
 {
-    if (bytesPerLine == dstStride && dstStride == srcStride) {
+    if (bytesPerLine == dstStride && dstStride == srcStride && height) {
         if (srcStride < 0) {
             src = (uint8_t*)src + (height - 1) * srcStride;
             dst = (uint8_t*)dst + (height - 1) * dstStride;
             srcStride = -srcStride;
         }
 
-        memcpy(dst, src, srcStride * height);
+        memcpy(dst, src, srcStride * (height - 1) + bytesPerLine);
     } else {
         for (int i = 0; i < height; i++) {
             memcpy(dst, src, bytesPerLine);
@@ -745,8 +745,8 @@ void memcpy_pic(void *dst, const void *src, int bytesPerLine, int height,
 
 void memset_pic(void *dst, int fill, int bytesPerLine, int height, int stride)
 {
-    if (bytesPerLine == stride) {
-        memset(dst, fill, stride * height);
+    if (bytesPerLine == stride && height) {
+        memset(dst, fill, stride * (height - 1) + bytesPerLine);
     } else {
         for (int i = 0; i < height; i++) {
             memset(dst, fill, bytesPerLine);
