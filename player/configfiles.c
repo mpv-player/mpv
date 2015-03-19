@@ -290,7 +290,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         goto exit;
 
     struct demuxer *demux = mpctx->demuxer;
-    if (demux && demux->seekable && demux->partially_seekable) {
+    if (demux && (!demux->seekable || demux->partially_seekable)) {
         MP_INFO(mpctx, "Not seekable - not saving state.\n");
         goto exit;
     }
