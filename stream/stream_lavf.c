@@ -262,6 +262,13 @@ static int open_f(stream_t *stream)
 
     filename = normalize_url(stream, filename);
 
+    if (strncmp(filename, "rtmp", 4) == 0) {
+        stream->demuxer = "lavf";
+        stream->lavf_type = "flv";
+        // Setting timeout enables listen mode - force it to disabled.
+        av_dict_set(&dict, "timeout", "0", 0);
+    }
+
     int err = avio_open2(&avio, filename, flags, &cb, &dict);
     if (err < 0) {
         if (err == AVERROR_PROTOCOL_NOT_FOUND)
@@ -280,10 +287,6 @@ static int open_f(stream_t *stream)
         }
     }
 
-    if (strncmp(filename, "rtmp", 4) == 0) {
-        stream->demuxer = "lavf";
-        stream->lavf_type = "flv";
-    }
     stream->priv = avio;
     stream->seekable = avio->seekable;
     stream->seek = stream->seekable ? seek : NULL;
