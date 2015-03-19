@@ -37,7 +37,6 @@
 #include "config.h"
 #include "vo.h"
 #include "video/mp_image.h"
-#include "video/memcpy_pic.h"
 
 #include "input/keycodes.h"
 #include "input/input.h"

@@ -27,7 +27,6 @@
 #include "vo.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
-#include "video/memcpy_pic.h"
 #include "sub/osd.h"
 #include "sub/img_convert.h"
 #include "common/msg.h"

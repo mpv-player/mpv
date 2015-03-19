@@ -39,8 +39,6 @@
 #include "video/mp_image_pool.h"
 #include "vf.h"
 
-#include "video/memcpy_pic.h"
-
 extern const vf_info_t vf_info_crop;
 extern const vf_info_t vf_info_expand;
 extern const vf_info_t vf_info_scale;

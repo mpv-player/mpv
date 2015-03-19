@@ -51,7 +51,6 @@
 #include "video/mp_image.h"
 #include "video/img_fourcc.h"
 #include "x11_common.h"
-#include "video/memcpy_pic.h"
 #include "sub/osd.h"
 #include "sub/draw_bmp.h"
 #include "video/csputils.h"

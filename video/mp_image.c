@@ -35,7 +35,6 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "sws_utils.h"
-#include "memcpy_pic.h"
 #include "fmt-conversion.h"
 
 #include "video/filter/vf.h"
@@ -722,4 +721,51 @@ struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
     }
     talloc_free(new_ref);
     return frame;
+}
+
+void memcpy_pic(void *dst, const void *src, int bytesPerLine, int height,
+                int dstStride, int srcStride)
+{
+    if (bytesPerLine == dstStride && dstStride == srcStride) {
+        if (srcStride < 0) {
+            src = (uint8_t*)src + (height - 1) * srcStride;
+            dst = (uint8_t*)dst + (height - 1) * dstStride;
+            srcStride = -srcStride;
+        }
+
+        memcpy(dst, src, srcStride * height);
+    } else {
+        for (int i = 0; i < height; i++) {
+            memcpy(dst, src, bytesPerLine);
+            src = (uint8_t*)src + srcStride;
+            dst = (uint8_t*)dst + dstStride;
+        }
+    }
+}
+
+void memset_pic(void *dst, int fill, int bytesPerLine, int height, int stride)
+{
+    if (bytesPerLine == stride) {
+        memset(dst, fill, stride * height);
+    } else {
+        for (int i = 0; i < height; i++) {
+            memset(dst, fill, bytesPerLine);
+            dst = (uint8_t *)dst + stride;
+        }
+    }
+}
+
+void memset16_pic(void *dst, int fill, int unitsPerLine, int height, int stride)
+{
+    if (fill == 0) {
+        memset_pic(dst, 0, unitsPerLine * 2, height, stride);
+    } else {
+        for (int i = 0; i < height; i++) {
+            uint16_t *line = dst;
+            uint16_t *end = line + unitsPerLine;
+            while (line < end)
+                *line++ = fill;
+            dst = (uint8_t *)dst + stride;
+        }
+    }
 }

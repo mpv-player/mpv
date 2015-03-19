@@ -35,8 +35,6 @@
 #include "vf.h"
 #include "options/m_option.h"
 
-#include "video/memcpy_pic.h"
-
 #include "vf_lavfi.h"
 
 //==types==//

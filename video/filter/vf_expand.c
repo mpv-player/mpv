@@ -31,8 +31,6 @@
 #include "video/mp_image.h"
 #include "vf.h"
 
-#include "video/memcpy_pic.h"
-
 #include "options/m_option.h"
 
 static struct vf_priv_s {
