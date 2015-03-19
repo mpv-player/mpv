@@ -134,12 +134,6 @@ void mp_image_steal_data(struct mp_image *dst, struct mp_image *src);
 struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *arg,
                                          void (*free)(void *arg));
 
-struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
-                                           void (*ref)(void *arg),
-                                           void (*unref)(void *arg),
-                                           bool (*is_unique)(void *arg),
-                                           void (*free)(void *arg));
-
 void mp_image_params_guess_csp(struct mp_image_params *params);
 
 char *mp_image_params_to_str_buf(char *b, size_t bs,

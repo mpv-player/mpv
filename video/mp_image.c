@@ -48,12 +48,6 @@ struct m_refcount {
     void *arg;
     // free() is called if refcount reaches 0.
     void (*free)(void *arg);
-    // External refcounted object (such as libavcodec DR buffers). This assumes
-    // that the actual data is managed by the external object, not by
-    // m_refcount. The .ext_* calls use that external object's refcount
-    // primitives.
-    void (*ext_ref)(void *arg);
-    void (*ext_unref)(void *arg);
     bool (*ext_is_unique)(void *arg);
     // Native refcount (there may be additional references if .ext_* are set)
     int refcount;
@@ -80,16 +74,10 @@ static void m_refcount_ref(struct m_refcount *ref)
     refcount_lock();
     ref->refcount++;
     refcount_unlock();
-
-    if (ref->ext_ref)
-        ref->ext_ref(ref->arg);
 }
 
 static void m_refcount_unref(struct m_refcount *ref)
 {
-    if (ref->ext_unref)
-        ref->ext_unref(ref->arg);
-
     bool dead;
     refcount_lock();
     assert(ref->refcount > 0);
@@ -266,6 +254,26 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
     return new;
 }
 
+// Return a reference counted reference to img. is_unique us used to connect to
+// an external refcounting API. It is assumed that the new object
+// has an initial reference to that external API. If free is given, that is
+// called after the last unref. All function pointers are optional.
+// On allocation failure, unref the frame and return NULL.
+static struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
+                                                  bool (*is_unique)(void *arg),
+                                                  void (*free)(void *arg))
+{
+    struct mp_image *new = talloc_ptrtype(NULL, new);
+    talloc_set_destructor(new, mp_image_destructor);
+    *new = *img;
+
+    new->refcount = m_refcount_new();
+    new->refcount->ext_is_unique = is_unique;
+    new->refcount->free = free;
+    new->refcount->arg = arg;
+    return new;
+}
+
 // Return a reference counted reference to img. If the reference count reaches
 // 0, call free(free_arg). The data passed by img must not be free'd before
 // that. The new reference will be writeable.
@@ -273,31 +281,7 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
 struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *free_arg,
                                          void (*free)(void *arg))
 {
-    return mp_image_new_external_ref(img, free_arg, NULL, NULL, NULL, free);
-}
-
-// Return a reference counted reference to img. ref/unref/is_unique are used to
-// connect to an external refcounting API. It is assumed that the new object
-// has an initial reference to that external API. If free is given, that is
-// called after the last unref. All function pointers are optional.
-// On allocation failure, unref the frame and return NULL.
-struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
-                                           void (*ref)(void *arg),
-                                           void (*unref)(void *arg),
-                                           bool (*is_unique)(void *arg),
-                                           void (*free)(void *arg))
-{
-    struct mp_image *new = talloc_ptrtype(NULL, new);
-    talloc_set_destructor(new, mp_image_destructor);
-    *new = *img;
-
-    new->refcount = m_refcount_new();
-    new->refcount->ext_ref = ref;
-    new->refcount->ext_unref = unref;
-    new->refcount->ext_is_unique = is_unique;
-    new->refcount->free = free;
-    new->refcount->arg = arg;
-    return new;
+    return mp_image_new_external_ref(img, free_arg, NULL, free);
 }
 
 bool mp_image_is_writeable(struct mp_image *img)
@@ -692,8 +676,7 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame)
         return NULL;
     struct mp_image t = {0};
     mp_image_copy_fields_from_av_frame(&t, new_ref);
-    return mp_image_new_external_ref(&t, new_ref, NULL, NULL, frame_is_unique,
-                                     frame_free);
+    return mp_image_new_external_ref(&t, new_ref, frame_is_unique, frame_free);
 }
 
 static void free_img(void *opaque, uint8_t *data)
