@@ -23,9 +23,6 @@
 #include <string.h>
 #include <stddef.h>
 
-#define my_memcpy_pic memcpy_pic
-#define memcpy_pic2(d, s, b, h, ds, ss, unused) memcpy_pic(d, s, b, h, ds, ss)
-
 static inline void memcpy_pic(void *dst, const void *src,
                               int bytesPerLine, int height,
                               int dstStride, int srcStride)

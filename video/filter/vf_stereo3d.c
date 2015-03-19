@@ -322,20 +322,18 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
         case ABOVE_BELOW_2_RL:
         case INTERLEAVE_ROWS_LR:
         case INTERLEAVE_ROWS_RL:
-            memcpy_pic2(dmpi->planes[0] + out_off_left,
+            memcpy_pic(dmpi->planes[0] + out_off_left,
                        mpi->planes[0] + in_off_left,
                        3 * vf->priv->width,
                        vf->priv->height,
                        dmpi->stride[0] * vf->priv->row_step,
-                       mpi->stride[0] * vf->priv->row_step,
-                       vf->priv->row_step != 1);
-            memcpy_pic2(dmpi->planes[0] + out_off_right,
+                       mpi->stride[0] * vf->priv->row_step);
+            memcpy_pic(dmpi->planes[0] + out_off_right,
                        mpi->planes[0] + in_off_right,
                        3 * vf->priv->width,
                        vf->priv->height,
                        dmpi->stride[0] * vf->priv->row_step,
-                       mpi->stride[0] * vf->priv->row_step,
-                       vf->priv->row_step != 1);
+                       mpi->stride[0] * vf->priv->row_step);
             break;
         case MONO_L:
         case MONO_R:
