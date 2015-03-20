@@ -58,6 +58,8 @@ struct sh_stream {
     bool default_track;         // container default track flag
     int hls_bitrate;
 
+    bool missing_timestamps;
+
     // stream is a picture (such as album art)
     struct demux_packet *attached_picture;
 

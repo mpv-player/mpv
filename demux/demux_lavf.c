@@ -151,7 +151,6 @@ typedef struct lavf_priv {
     AVFormatContext *avfc;
     AVIOContext *pb;
     int64_t last_pts;
-    bool init_pts;
     struct sh_stream **streams; // NULL for unknown streams
     int num_streams;
     int cur_program;
@@ -618,6 +617,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
         sh->hls_bitrate = dict_get_decimal(st->metadata, "variant_bitrate", 0);
         if (!sh->title && sh->hls_bitrate > 0)
             sh->title = talloc_asprintf(sh, "bitrate %d", sh->hls_bitrate);
+        sh->missing_timestamps = !!(priv->avif->flags & AVFMT_NOTIMESTAMPS);
     }
 
     select_tracks(demuxer, i);
@@ -794,7 +794,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     mp_tags_copy_from_av_dictionary(demuxer->metadata, avfc->metadata);
     update_metadata(demuxer, NULL);
 
-    demuxer->ts_resets_possible = priv->avif->flags & AVFMT_TS_DISCONT;
+    demuxer->ts_resets_possible =
+        priv->avif->flags & (AVFMT_TS_DISCONT | AVFMT_NOTIMESTAMPS);
 
     demuxer->start_time = priv->avfc->start_time == AV_NOPTS_VALUE ?
                           0 : (double)priv->avfc->start_time / AV_TIME_BASE;
@@ -839,12 +840,6 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
         return 1;
     }
 
-    if (!priv->init_pts && (priv->avfc->flags & AVFMT_NOTIMESTAMPS)) {
-        if (pkt->pts == AV_NOPTS_VALUE && pkt->dts == AV_NOPTS_VALUE)
-            pkt->dts = 0;
-        priv->init_pts = true;
-    }
-
     if (pkt->pts != AV_NOPTS_VALUE)
         dp->pts = pkt->pts * av_q2d(st->time_base);
     if (pkt->dts != AV_NOPTS_VALUE)
@@ -872,8 +867,6 @@ static void demux_seek_lavf(demuxer_t *demuxer, double rel_seek_secs, int flags)
 {
     lavf_priv_t *priv = demuxer->priv;
     int avsflags = 0;
-
-    priv->init_pts = false;
 
     if (flags & SEEK_ABSOLUTE)
         priv->last_pts = 0;
