@@ -130,7 +130,7 @@ struct scaler {
 
 struct fbosurface {
     struct fbotex fbotex;
-    int64_t pts;
+    double pts;
 };
 
 #define FBOSURFACES_MAX 10
@@ -493,7 +493,7 @@ void gl_video_set_debug(struct gl_video *p, bool enable)
 static void gl_video_reset_surfaces(struct gl_video *p)
 {
     for (int i = 0; i < FBOSURFACES_MAX; i++)
-        p->surfaces[i].pts = 0;
+        p->surfaces[i].pts = -1;
     p->surface_idx = 0;
     p->surface_now = 0;
 }
@@ -1733,13 +1733,15 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
         vp_h = p->dst_rect.y1 - p->dst_rect.y0,
         fuzz = FBOTEX_FUZZY_W | FBOTEX_FUZZY_H;
 
+    double new_pts = p->image.mpi->pts;
+
     // First of all, figure out if we have a frame availble at all, and draw
     // it manually + reset the queue if not
-    if (!p->surfaces[p->surface_now].pts) {
+    if (p->surfaces[p->surface_now].pts < 0) {
         pass_render_frame(p);
         finish_pass_fbo(p, &p->surfaces[p->surface_now].fbotex,
                         vp_w, vp_h, 0, fuzz);
-        p->surfaces[p->surface_now].pts = t ? t->pts : 0;
+        p->surfaces[p->surface_now].pts = new_pts;
         p->surface_idx = p->surface_now;
     }
 
@@ -1768,13 +1770,12 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
 
     // Render a new frame if it came in and there's room in the queue
     int surface_dst = fbosurface_wrap(p->surface_idx+1);
-    if (t && surface_dst != surface_bse &&
-             p->surfaces[p->surface_idx].pts < t->pts) {
+    if (surface_dst != surface_bse && p->surfaces[p->surface_idx].pts < new_pts) {
         MP_STATS(p, "new-pts");
         pass_render_frame(p);
         finish_pass_fbo(p, &p->surfaces[surface_dst].fbotex,
                         vp_w, vp_h, 0, fuzz);
-        p->surfaces[surface_dst].pts = t->pts;
+        p->surfaces[surface_dst].pts = new_pts;
         p->surface_idx = surface_dst;
     }
 
@@ -1786,12 +1787,21 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     bool valid = true;
     for (int i = surface_bse, ii; valid && i != surface_end; i = ii) {
         ii = fbosurface_wrap(i+1);
-        if (!p->surfaces[i].pts || !p->surfaces[ii].pts) {
+        if (p->surfaces[i].pts < 0 || p->surfaces[ii].pts < 0) {
             valid = false;
         } else if (p->surfaces[ii].pts < p->surfaces[i].pts) {
             valid = false;
             MP_DBG(p, "interpolation queue underrun\n");
         }
+    }
+
+    // Calculate the correct PTS/vsync timings
+    double pts_now = 0, pts_nxt = 0, next_vsync = 0, vsync_interval = 0;
+    if (t) {
+        next_vsync = (t->next_vsync - t->pts)/1e6 + new_pts;
+        vsync_interval = (t->next_vsync - t->prev_vsync)/1e6;
+        pts_now = p->surfaces[surface_now].pts;
+        pts_nxt = p->surfaces[surface_nxt].pts;
     }
 
     // Finally, draw the right mix of frames to the screen.
@@ -1801,13 +1811,10 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
         GLSL(vec4 color = texture(texture0, texcoord0);)
         p->is_interpolated = false;
     } else {
-        int64_t pts_now = p->surfaces[surface_now].pts,
-                pts_nxt = p->surfaces[surface_nxt].pts;
         double fscale = pts_nxt - pts_now, mix;
         if (oversample) {
-            double vsync_interval = t->next_vsync - t->prev_vsync,
-                   threshold = isnan(tscale->params[0]) ? 0 : tscale->params[0];
-            mix = (pts_nxt - t->next_vsync) / vsync_interval;
+            double threshold = isnan(tscale->params[0]) ? 0 : tscale->params[0];
+            mix = (pts_nxt - next_vsync) / vsync_interval;
             mix = mix <= 0 + threshold ? 0 : mix;
             mix = mix >= 1 - threshold ? 1 : mix;
             mix = 1 - mix;
@@ -1816,7 +1823,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
                                   texture(texture1, texcoord1),
                                   inter_coeff);)
         } else {
-            mix = (t->next_vsync - pts_now) / fscale;
+            mix = (next_vsync - pts_now) / fscale;
             gl_sc_uniform_f(p->sc, "fcoord", mix);
             pass_sample_separated_gen(p, tscale, 0, 0);
         }
@@ -1825,21 +1832,18 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
                              i, vp_w, vp_h);
         }
         MP_STATS(p, "frame-mix");
-        MP_DBG(p, "inter frame ppts: %lld, pts: %lld, vsync: %lld, mix: %f\n",
-               (long long)pts_now, (long long)pts_nxt,
-               (long long)t->next_vsync, mix);
+        MP_DBG(p, "inter frame ppts: %f, pts: %f, vsync: %f, mix: %f\n",
+               pts_now, pts_nxt, next_vsync, mix);
         p->is_interpolated = true;
     }
     pass_draw_to_screen(p, fbo);
 
     // Dequeue frames if necessary
     if (t) {
-        int64_t vsync_interval = t->next_vsync - t->prev_vsync;
-        int64_t vsync_guess = t->next_vsync + vsync_interval;
-        if (p->surfaces[surface_nxt].pts > p->surfaces[p->surface_now].pts
-                && p->surfaces[surface_nxt].pts < vsync_guess) {
+        double vsync_guess = next_vsync + vsync_interval;
+        if (p->surfaces[surface_nxt].pts > p->surfaces[surface_now].pts &&
+                p->surfaces[surface_nxt].pts < vsync_guess) {
             p->surface_now = surface_nxt;
-            surface_nxt = fbosurface_wrap(p->surface_now+1);
         }
     }
 }
