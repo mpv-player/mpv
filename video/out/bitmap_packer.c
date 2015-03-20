@@ -29,7 +29,7 @@
 #include "bitmap_packer.h"
 #include "common/common.h"
 #include "sub/dec_sub.h"
-#include "video/memcpy_pic.h"
+#include "video/mp_image.h"
 
 #define IS_POWER_OF_2(x) (((x) > 0) && !(((x) - 1) & (x)))
 

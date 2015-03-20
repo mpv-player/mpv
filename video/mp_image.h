@@ -134,12 +134,6 @@ void mp_image_steal_data(struct mp_image *dst, struct mp_image *src);
 struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *arg,
                                          void (*free)(void *arg));
 
-struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
-                                           void (*ref)(void *arg),
-                                           void (*unref)(void *arg),
-                                           bool (*is_unique)(void *arg),
-                                           void (*free)(void *arg));
-
 void mp_image_params_guess_csp(struct mp_image_params *params);
 
 char *mp_image_params_to_str_buf(char *b, size_t bs,
@@ -163,5 +157,10 @@ void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
                                       struct mp_image *src);
 struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame);
 struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img);
+
+void memcpy_pic(void *dst, const void *src, int bytesPerLine, int height,
+                int dstStride, int srcStride);
+void memset_pic(void *dst, int fill, int bytesPerLine, int height, int stride);
+void memset16_pic(void *dst, int fill, int unitsPerLine, int height, int stride);
 
 #endif /* MPLAYER_MP_IMAGE_H */

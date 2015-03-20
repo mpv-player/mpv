@@ -32,7 +32,6 @@
 #include "config.h"
 #include "common/msg.h"
 #include "video/out/vo.h"
-#include "video/memcpy_pic.h"
 #include "video/mp_image_pool.h"
 #include "sub/osd.h"
 #include "sub/img_convert.h"

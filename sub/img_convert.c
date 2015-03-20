@@ -29,7 +29,6 @@
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
-#include "video/memcpy_pic.h"
 
 struct osd_conv_cache {
     struct sub_bitmap part[MP_SUB_BB_LIST_MAX];

@@ -38,7 +38,6 @@
 #include "sub/dec_sub.h"
 
 #include "video/sws_utils.h"
-#include "video/memcpy_pic.h"
 
 #include "options/m_option.h"
 

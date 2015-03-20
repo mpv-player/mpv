@@ -51,7 +51,6 @@
 #include "video/mp_image.h"
 #include "video/img_fourcc.h"
 #include "x11_common.h"
-#include "video/memcpy_pic.h"
 #include "sub/osd.h"
 #include "sub/draw_bmp.h"
 #include "video/csputils.h"
@@ -515,8 +514,7 @@ static bool allocate_xvimage(struct vo *vo, int foo)
         ctx->Shminfo[foo].shmid = shmget(IPC_PRIVATE,
                                          ctx->xvimage[foo]->data_size,
                                          IPC_CREAT | 0777);
-        ctx->Shminfo[foo].shmaddr = (char *) shmat(ctx->Shminfo[foo].shmid, 0,
-                                                   0);
+        ctx->Shminfo[foo].shmaddr = shmat(ctx->Shminfo[foo].shmid, 0, 0);
         if (ctx->Shminfo[foo].shmaddr == (void *)-1)
             return false;
         ctx->Shminfo[foo].readOnly = False;

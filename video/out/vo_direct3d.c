@@ -35,7 +35,6 @@
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "video/img_format.h"
-#include "video/memcpy_pic.h"
 #include "common/msg.h"
 #include "common/common.h"
 #include "w32_common.h"

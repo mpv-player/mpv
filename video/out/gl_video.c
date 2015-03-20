@@ -37,7 +37,6 @@
 #include "gl_osd.h"
 #include "filter_kernels.h"
 #include "aspect.h"
-#include "video/memcpy_pic.h"
 #include "bitmap_packer.h"
 #include "dither.h"
 
