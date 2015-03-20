@@ -99,6 +99,7 @@ struct format_hack {
     const char *mime_type;
     int probescore;
     float analyzeduration;
+    unsigned int if_flags;      // additional AVInputFormat.flags flags
     bool max_probe : 1;         // use probescore only if max. probe size reached
     bool ignore : 1;            // blacklisted
     bool no_stream : 1;         // do not wrap struct stream as AVIOContext
@@ -127,6 +128,10 @@ static const struct format_hack format_hacks[] = {
     {"mpeg", .use_stream_ids = true},
     {"mpegts", .use_stream_ids = true},
 
+    // In theory, such streams might contain timestamps, but virtually none do.
+    {"h264", .if_flags = AVFMT_NOTIMESTAMPS },
+    {"hevc", .if_flags = AVFMT_NOTIMESTAMPS },
+
     TEXTSUB("aqtitle"), TEXTSUB("ass"), TEXTSUB("jacosub"), TEXTSUB("microdvd"),
     TEXTSUB("mpl2"), TEXTSUB("mpsub"), TEXTSUB("pjs"), TEXTSUB("realtext"),
     TEXTSUB("sami"), TEXTSUB("srt"), TEXTSUB("stl"), TEXTSUB("subviewer"),
@@ -148,6 +153,7 @@ typedef struct lavf_priv {
     char *filename;
     struct format_hack format_hack;
     AVInputFormat *avif;
+    int avif_flags;
     AVFormatContext *avfc;
     AVIOContext *pb;
     int64_t last_pts;
@@ -384,6 +390,8 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         priv->format_hack.image_format = true;
     }
 
+    priv->avif_flags = priv->avif->flags | priv->format_hack.if_flags;
+
     demuxer->filetype = priv->avif->name;
 
     return 0;
@@ -617,7 +625,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
         sh->hls_bitrate = dict_get_decimal(st->metadata, "variant_bitrate", 0);
         if (!sh->title && sh->hls_bitrate > 0)
             sh->title = talloc_asprintf(sh, "bitrate %d", sh->hls_bitrate);
-        sh->missing_timestamps = !!(priv->avif->flags & AVFMT_NOTIMESTAMPS);
+        sh->missing_timestamps = !!(priv->avif_flags & AVFMT_NOTIMESTAMPS);
     }
 
     select_tracks(demuxer, i);
@@ -711,7 +719,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     AVDictionary *dopts = NULL;
 
-    if ((priv->avif->flags & AVFMT_NOFILE) ||
+    if ((priv->avif_flags & AVFMT_NOFILE) ||
         demuxer->stream->type == STREAMTYPE_AVDEVICE ||
         priv->format_hack.no_stream)
     {
@@ -795,7 +803,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     update_metadata(demuxer, NULL);
 
     demuxer->ts_resets_possible =
-        priv->avif->flags & (AVFMT_TS_DISCONT | AVFMT_NOTIMESTAMPS);
+        priv->avif_flags & (AVFMT_TS_DISCONT | AVFMT_NOTIMESTAMPS);
 
     demuxer->start_time = priv->avfc->start_time == AV_NOPTS_VALUE ?
                           0 : (double)priv->avfc->start_time / AV_TIME_BASE;
@@ -883,7 +891,7 @@ static void demux_seek_lavf(demuxer_t *demuxer, double rel_seek_secs, int flags)
         int64_t end = 0;
         stream_control(s, STREAM_CTRL_GET_SIZE, &end);
         if (end > 0 && demuxer->ts_resets_possible &&
-            !(priv->avif->flags & AVFMT_NO_BYTE_SEEK))
+            !(priv->avif_flags & AVFMT_NO_BYTE_SEEK))
         {
             avsflags |= AVSEEK_FLAG_BYTE;
             priv->last_pts = end * rel_seek_secs;
