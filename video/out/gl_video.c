@@ -1802,6 +1802,10 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
         vsync_interval = (t->next_vsync - t->prev_vsync)/1e6;
         pts_now = p->surfaces[surface_now].pts;
         pts_nxt = p->surfaces[surface_nxt].pts;
+
+        // Round OSD PTS to the nearest neighbour
+        p->osd_pts = (fabs(next_vsync - pts_now) < fabs(next_vsync - pts_nxt))
+                         ? pts_now : pts_nxt;
     }
 
     // Finally, draw the right mix of frames to the screen.
