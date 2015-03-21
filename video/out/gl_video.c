@@ -1125,7 +1125,7 @@ static void pass_sample_bicubic_fast(struct gl_video *p)
     GLSL(vec4 color;)
     GLSLF("{\n");
     GLSL(vec2 pt = 1.0 / sample_size;)
-    GLSL(vec2 fcoord = fract(sample_tex * sample_size + vec2(0.5, 0.5));)
+    GLSL(vec2 fcoord = fract(sample_pos * sample_size + vec2(0.5, 0.5));)
     bicubic_calcweights(p, "parmx", "fcoord.x");
     bicubic_calcweights(p, "parmy", "fcoord.y");
     GLSL(vec4 cdelta;)
