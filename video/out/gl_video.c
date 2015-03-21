@@ -1846,16 +1846,16 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    if (p->dst_rect.x0 > 0 || p->dst_rect.y0 > 0
-        || p->dst_rect.x1 < p->vp_w || p->dst_rect.y1 < abs(p->vp_h))
+    if (!vimg->mpi || p->dst_rect.x0 > 0 || p->dst_rect.y0 > 0 ||
+        p->dst_rect.x1 < p->vp_w || p->dst_rect.y1 < abs(p->vp_h))
     {
+        struct m_color c = p->opts.background;
+        gl->ClearColor(c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
         gl->Clear(GL_COLOR_BUFFER_BIT);
     }
 
-    if (!vimg->mpi) {
-        gl->Clear(GL_COLOR_BUFFER_BIT);
+    if (!vimg->mpi)
         goto draw_osd;
-    }
 
     gl_sc_set_vao(p->sc, &p->vao);
 
@@ -2193,8 +2193,6 @@ void gl_video_set_gl_state(struct gl_video *p)
 {
     GL *gl = p->gl;
 
-    struct m_color c = p->opts.background;
-    gl->ClearColor(c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
     gl->ActiveTexture(GL_TEXTURE0);
     if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH)
         gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
