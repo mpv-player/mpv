@@ -164,6 +164,9 @@ static int decode_new_frame(struct dec_audio *da)
         if (ret < 0)
             return ret;
 
+        if (da->pts == MP_NOPTS_VALUE && da->header->missing_timestamps)
+            da->pts = 0;
+
         if (da->waiting) {
             da->pts_offset += da->waiting->samples;
             da->decode_format = *da->waiting;

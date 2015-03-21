@@ -200,6 +200,12 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
                d_video->header->codec ? d_video->header->codec : "<unknown>");
     }
 
+    if (d_video->header->missing_timestamps) {
+        MP_WARN(d_video, "This stream has no timestamps!\n");
+        MP_WARN(d_video, "Making up playback time using %f FPS.\n", d_video->fps);
+        MP_WARN(d_video, "Seeking will probably fail badly.\n");
+    }
+
     talloc_free(list);
     return !!d_video->vd_driver;
 }
@@ -351,7 +357,7 @@ struct mp_image *video_decode(struct dec_video *d_video,
         pts = retrieve_sorted_pts(d_video, pts);
 
     if (!opts->correct_pts || pts == MP_NOPTS_VALUE) {
-        if (opts->correct_pts)
+        if (opts->correct_pts && !d_video->header->missing_timestamps)
             MP_WARN(d_video, "No video PTS! Making something up.\n");
 
         double frame_time = 1.0f / (d_video->fps > 0 ? d_video->fps : 25);

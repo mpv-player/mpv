@@ -296,8 +296,9 @@ static int init(struct dec_video *vd, const char *decoder)
             hwdec = probe_hwdec(vd, false, vd->opts->hwdec_api, decoder);
         }
     } else {
-        MP_VERBOSE(vd, "Not trying to use hardware decoding: "
-                   "codec %s is blacklisted by user.\n", decoder);
+        MP_VERBOSE(vd, "Not trying to use hardware decoding: codec %s is not "
+                   "on whitelist, or does not support hardware acceleration.\n",
+                   decoder);
     }
 
     if (hwdec) {
