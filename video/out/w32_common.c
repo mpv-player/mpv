@@ -589,9 +589,13 @@ static double vo_w32_get_display_fps(struct vo_w32_state *w32)
     switch (dm.dmDisplayFrequency) {
         case  23:
         case  29:
+        case  47:
         case  59:
         case  71:
+        case  89:
+        case  95:
         case 119:
+        case 143:
             rv = (rv + 1) / 1.001;
     }
 
