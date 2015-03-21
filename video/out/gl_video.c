@@ -1348,7 +1348,7 @@ static void pass_convert_yuv(struct gl_video *p)
 
         // Pre-colormatrix input gamma correction. Note that this results in
         // linear light
-        GLSL(color.rgb *= vec3(2.6);)
+        GLSL(color.rgb = pow(color.rgb, vec3(2.6));)
     }
 
     // Conversion from Y'CbCr or other linear spaces to RGB
