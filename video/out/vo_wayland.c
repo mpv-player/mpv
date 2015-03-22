@@ -41,7 +41,6 @@
 static void draw_image(struct vo *vo, mp_image_t *mpi);
 static void draw_osd(struct vo *vo);
 
-static const struct wl_callback_listener frame_listener;
 static const struct wl_buffer_listener buffer_listener;
 
 // TODO: pay attention to the reported subpixel order
@@ -118,8 +117,6 @@ struct priv {
 
     struct mp_sws_context *sws;
     struct mp_image_params in_format;
-
-    struct wl_callback *redraw_callback;
 
     struct buffer_pool video_bufpool;
 
@@ -359,34 +356,6 @@ static const struct wl_buffer_listener buffer_listener = {
     buffer_handle_release
 };
 
-static void frame_handle_redraw(void *data,
-                                struct wl_callback *callback,
-                                uint32_t time)
-{
-    struct priv *p = data;
-    struct vo_wayland_state *wl = p->wl;
-    shm_buffer_t *buf = buffer_pool_get_front(&p->video_bufpool);
-
-    wl_surface_attach(wl->window.video_surface, buf->buffer, p->x, p->y);
-    wl_surface_damage(wl->window.video_surface, 0, 0, p->dst_w, p->dst_h);
-
-    if (callback)
-        wl_callback_destroy(callback);
-
-    p->redraw_callback = wl_surface_frame(wl->window.video_surface);
-    wl_callback_add_listener(p->redraw_callback, &frame_listener, p);
-    wl_surface_commit(wl->window.video_surface);
-    buffer_finalise_front(buf);
-
-    p->x = 0;
-    p->y = 0;
-    p->recent_flip_time = mp_time_us();
-}
-
-static const struct wl_callback_listener frame_listener = {
-    frame_handle_redraw
-};
-
 static void shm_handle_format(void *data,
                               struct wl_shm *wl_shm,
                               uint32_t format)
@@ -414,12 +383,16 @@ static const struct wl_shm_listener shm_listener = {
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
-    shm_buffer_t *buf = buffer_pool_get_back(&p->video_bufpool);
 
     if (mpi) {
         talloc_free(p->original_image);
         p->original_image = mpi;
     }
+
+    if (!p->wl->frame.pending)
+        return;
+
+    shm_buffer_t *buf = buffer_pool_get_back(&p->video_bufpool);
 
     if (!buf) {
         // TODO: use similar handling of busy buffers as the osd buffers
@@ -535,12 +508,21 @@ static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
+    if (!p->wl->frame.pending)
+        return;
+
     buffer_pool_swap(&p->video_bufpool);
 
-    if (!p->redraw_callback) {
-        MP_DBG(p->wl, "restart frame callback\n");
-        frame_handle_redraw(p, NULL, 0);
-    }
+    shm_buffer_t *buf = buffer_pool_get_front(&p->video_bufpool);
+    wl_surface_attach(p->wl->window.video_surface, buf->buffer, p->x, p->y);
+    wl_surface_damage(p->wl->window.video_surface, 0, 0, p->dst_w, p->dst_h);
+    wl_surface_commit(p->wl->window.video_surface);
+    buffer_finalise_front(buf);
+
+    p->x = 0;
+    p->y = 0;
+    p->recent_flip_time = mp_time_us();
+    p->wl->frame.pending = false;
 }
 
 static int query_format(struct vo *vo, int format)
@@ -611,9 +593,6 @@ static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
     buffer_pool_destroy(&p->video_bufpool);
-
-    if (p->redraw_callback)
-        wl_callback_destroy(p->redraw_callback);
 
     talloc_free(p->original_image);
 
