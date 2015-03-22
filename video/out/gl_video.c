@@ -1842,7 +1842,10 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
 
-    p->user_gamma = 1.0 / p->opts.gamma;
+    struct mp_csp_params params;
+    mp_csp_copy_equalizer_values(&params, &p->video_eq);
+
+    p->user_gamma = 1.0 / (p->opts.gamma * params.gamma);
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
