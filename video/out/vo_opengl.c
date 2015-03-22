@@ -122,6 +122,9 @@ static void flip_page(struct vo *vo)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
+    if (p->glctx->is_active && !p->glctx->is_active(p->glctx))
+        return;
+
     mpgl_lock(p->glctx);
 
     p->glctx->swapGlBuffers(p->glctx);
@@ -159,6 +162,12 @@ static void draw_image_timed(struct vo *vo, mp_image_t *mpi,
 {
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
+
+    if (p->glctx->is_active && !p->glctx->is_active(p->glctx)) {
+        if (mpi)
+            gl_video_skip_image(p->renderer, mpi);
+        return;
+    }
 
     if (p->vo_flipped)
         mp_image_vflip(mpi);
@@ -376,6 +385,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
         request_hwdec_api(p, data);
         return true;
     case VOCTRL_REDRAW_FRAME:
+        if (p->glctx->is_active && !p->glctx->is_active(p->glctx))
+            return true;
+
         mpgl_lock(p->glctx);
         gl_video_render_frame(p->renderer, 0, NULL);
         mpgl_unlock(p->glctx);

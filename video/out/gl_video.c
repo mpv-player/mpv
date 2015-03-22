@@ -1976,6 +1976,13 @@ static bool get_image(struct gl_video *p, struct mp_image *mpi)
     return true;
 }
 
+void gl_video_skip_image(struct gl_video *p, struct mp_image *mpi)
+{
+    struct video_image *vimg = &p->image;
+    talloc_free(vimg->mpi);
+    vimg->mpi = mpi;
+}
+
 void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
 {
     GL *gl = p->gl;
