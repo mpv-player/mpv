@@ -196,7 +196,12 @@ static void releaseGlContext_wayland(MPGLContext *ctx)
 static void swapGlBuffers_wayland(MPGLContext *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wayland;
+
+    if (!wl->frame.pending)
+        return;
+
     eglSwapBuffers(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
+    wl->frame.pending = false;
 }
 
 static int control(struct vo *vo, int *events, int request, void *data)
