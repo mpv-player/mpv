@@ -164,7 +164,8 @@ const struct af_info af_info_bs2b = {
         OPT_INTRANGE("fcut", fcut, 0, BS2B_MINFCUT, BS2B_MAXFCUT),
         OPT_INTRANGE("feed", feed, 0, BS2B_MINFEED, BS2B_MAXFEED),
         OPT_CHOICE("profile", profile, 0,
-                   ({"default", BS2B_DEFAULT_CLEVEL},
+                   ({"unset", 0},
+                    {"default", BS2B_DEFAULT_CLEVEL},
                     {"cmoy", BS2B_CMOY_CLEVEL},
                     {"jmeier", BS2B_JMEIER_CLEVEL})),
         {0}
