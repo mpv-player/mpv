@@ -268,7 +268,7 @@ static bool resize(struct priv *p)
 {
     struct vo_wayland_state *wl = p->wl;
 
-    if (SHM_BUFFER_IS_BUSY(p->video_bufpool.back_buffer))
+    if (!p->video_bufpool.back_buffer || SHM_BUFFER_IS_BUSY(p->video_bufpool.back_buffer))
         return false; // skip resizing if we can't garantuee pixel perfectness!
 
     int32_t x = wl->window.sh_x;
