@@ -248,13 +248,6 @@ static int init(struct ao *ao)
     MP_DBG(ao, "Init wasapi\n");
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
-    ao->format = af_fmt_from_planar(ao->format);
-    struct mp_chmap_sel sel = {0};
-    mp_chmap_sel_add_waveext(&sel);
-    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels)) {
-        MP_ERR(ao, "Error adjusting channel map to waveext channel order\n");
-        return -1;
-    }
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     state->log = ao->log;
     if(!wasapi_fill_VistaBlob(state))
