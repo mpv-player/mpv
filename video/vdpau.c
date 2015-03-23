@@ -164,8 +164,7 @@ static int win_x11_init_vdpau_procs(struct mp_vdpau_ctx *ctx)
     ctx->vdp = vdp;
     ctx->get_proc_address = get_proc_address;
 
-    vdp_st = vdp.preemption_callback_register(ctx->vdp_device,
-                                              preemption_callback, ctx);
+    vdp.preemption_callback_register(ctx->vdp_device, preemption_callback, ctx);
     return 0;
 }
 
