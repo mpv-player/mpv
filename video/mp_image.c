@@ -473,8 +473,7 @@ bool mp_image_params_valid(const struct mp_image_params *p)
     // ints. We also should (for now) do the same as FFmpeg, to be sure large
     // images don't crash with libswscale or when wrapping with AVFrame and
     // passing the result to filters.
-    // Unlike FFmpeg, consider 0x0 valid (might be needed for OSD/screenshots).
-    if (p->w < 0 || p->h < 0 || (p->w + 128LL) * (p->h + 128LL) >= INT_MAX / 8)
+    if (p->w <= 0 || p->h <= 0 || (p->w + 128LL) * (p->h + 128LL) >= INT_MAX / 8)
         return false;
 
     if (p->d_w <= 0 || p->d_h <= 0)
