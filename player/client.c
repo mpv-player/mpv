@@ -1685,7 +1685,7 @@ static mpv_opengl_cb_context *opengl_cb_get_context(mpv_handle *ctx)
 {
     mpv_opengl_cb_context *cb = ctx->mpctx->gl_cb_ctx;
     if (!cb) {
-        cb = mp_opengl_create(ctx->mpctx->global, ctx->mpctx->osd, ctx->clients);
+        cb = mp_opengl_create(ctx->mpctx->global, ctx->clients);
         ctx->mpctx->gl_cb_ctx = cb;
     }
     return cb;

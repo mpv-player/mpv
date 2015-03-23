@@ -506,10 +506,12 @@ static inline int fbosurface_wrap(int id)
 
 static void recreate_osd(struct gl_video *p)
 {
-    if (p->osd)
-        mpgl_osd_destroy(p->osd);
-    p->osd = mpgl_osd_init(p->gl, p->log, p->osd_state);
-    mpgl_osd_set_options(p->osd, p->opts.pbo);
+    mpgl_osd_destroy(p->osd);
+    p->osd = NULL;
+    if (p->osd_state) {
+        p->osd = mpgl_osd_init(p->gl, p->log, p->osd_state);
+        mpgl_osd_set_options(p->osd, p->opts.pbo);
+    }
 }
 
 static void reinit_rendering(struct gl_video *p)
@@ -1916,7 +1918,8 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    draw_osd(p);
+    if (p->osd)
+        draw_osd(p);
 
     gl->UseProgram(0);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -2389,7 +2392,15 @@ void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b)
     p->depth_g = g;
 }
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd)
+void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd)
+{
+    mpgl_osd_destroy(p->osd);
+    p->osd = NULL;
+    p->osd_state = osd;
+    recreate_osd(p);
+}
+
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log)
 {
     if (gl->version < 210 && gl->es < 200) {
         mp_err(log, "At least OpenGL 2.1 or OpenGL ES 2.0 required.\n");
@@ -2400,7 +2411,6 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd
     *p = (struct gl_video) {
         .gl = gl,
         .log = log,
-        .osd_state = osd,
         .opts = gl_video_opts_def,
         .gl_target = GL_TEXTURE_2D,
         .texture_16bit_depth = 16,

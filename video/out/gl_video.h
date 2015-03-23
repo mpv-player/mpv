@@ -64,8 +64,9 @@ extern const struct gl_video_opts gl_video_opts_def;
 
 struct gl_video;
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct osd_state *osd);
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log);
 void gl_video_uninit(struct gl_video *p);
+void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd);
 void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
                           int *queue_size);
 bool gl_video_check_format(struct gl_video *p, int mp_format);
