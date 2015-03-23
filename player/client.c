@@ -900,7 +900,6 @@ int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
     if (format != MPV_FORMAT_NODE) {
         tmp.format = format;
         memcpy(&tmp.u, data, type->type->size);
-        format = MPV_FORMAT_NODE;
         data = &tmp;
     }
     lock_core(ctx);
