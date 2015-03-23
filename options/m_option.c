@@ -720,7 +720,7 @@ const struct m_option_type m_option_type_choice = {
 
 static int apply_flag(const struct m_option *opt, int *val, bstr flag)
 {
-    struct m_opt_choice_alternatives *alt = opt->priv;
+    struct m_opt_choice_alternatives *alt;
     for (alt = opt->priv; alt->name; alt++) {
         if (bstr_equals0(flag, alt->name)) {
             if (*val & alt->value)
@@ -734,7 +734,7 @@ static int apply_flag(const struct m_option *opt, int *val, bstr flag)
 
 static const char *find_next_flag(const struct m_option *opt, int *val)
 {
-    struct m_opt_choice_alternatives *alt = opt->priv;
+    struct m_opt_choice_alternatives *alt;
     for (alt = opt->priv; alt->name; alt++) {
         if (alt->value && (alt->value & (*val)) == alt->value) {
             *val = *val & ~(unsigned)alt->value;
@@ -754,10 +754,10 @@ static int parse_flags(struct mp_log *log, const struct m_option *opt,
         bstr_split_tok(param, "+", &flag, &param);
         int r = apply_flag(opt, &value, flag);
         if (r == M_OPT_UNKNOWN) {
-            struct m_opt_choice_alternatives *alt = opt->priv;
             mp_fatal(log, "Invalid flag for option %.*s: %.*s\n",
                      BSTR_P(name), BSTR_P(flag));
             mp_info(log, "Valid flags are:\n");
+            struct m_opt_choice_alternatives *alt;
             for (alt = opt->priv; alt->name; alt++)
                 mp_info(log, "    %s\n", alt->name);
             mp_info(log, "Flags can usually be combined with '+'.\n");
