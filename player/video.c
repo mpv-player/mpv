@@ -238,6 +238,7 @@ void uninit_video_out(struct MPContext *mpctx)
     if (mpctx->video_out)
         vo_destroy(mpctx->video_out);
     mpctx->video_out = NULL;
+    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }
 
 void uninit_video_chain(struct MPContext *mpctx)
