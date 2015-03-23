@@ -588,7 +588,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
             frame_time = pts - mpctx->video_pts;
             if (frame_time <= 0 || frame_time >= 60) {
                 // Assume a PTS difference >= 60 seconds is a discontinuity.
-                MP_WARN(mpctx, "Non-monotonic video pts: %f -> %f\n",
+                MP_WARN(mpctx, "Invalid video timestamp: %f -> %f\n",
                         mpctx->video_pts, pts);
                 frame_time = 0;
             }
