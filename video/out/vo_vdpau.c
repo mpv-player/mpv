@@ -163,19 +163,10 @@ static int render_video_to_output_surface(struct vo *vo,
     CHECK_VDP_WARNING(vo, "Error when calling "
                       "vdp_presentation_queue_block_until_surface_idle");
 
-    if (!mpi) {
-        // At least clear the screen if there is nothing to render
-        int flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_0;
-        vdp_st = vdp->output_surface_render_output_surface(output_surface,
-                                                           NULL, vc->black_pixel,
-                                                           NULL, NULL, NULL,
-                                                           flags);
-        return -1;
-    }
-
-    if (vc->rgb_mode) {
-        // Clear the borders between video and window (if there are any).
-        // For some reason, video_mixer_render doesn't need it for YUV.
+    // Clear the borders between video and window (if there are any).
+    // For some reason, video_mixer_render doesn't need it for YUV.
+    // Also, if there is nothing to render, at least clear the screen.
+    if (vc->rgb_mode || !mpi) {
         int flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_0;
         vdp_st = vdp->output_surface_render_output_surface(output_surface,
                                                            NULL, vc->black_pixel,
@@ -183,6 +174,9 @@ static int render_video_to_output_surface(struct vo *vo,
                                                            flags);
         CHECK_VDP_WARNING(vo, "Error clearing screen");
     }
+
+    if (!mpi)
+        return -1;
 
     struct mp_vdpau_mixer_frame *frame = mp_vdpau_mixed_frame_get(mpi);
     struct mp_vdpau_mixer_opts opts = {0};
