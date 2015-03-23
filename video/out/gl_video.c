@@ -1830,10 +1830,10 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     if (t) {
         int64_t vsync_interval = t->next_vsync - t->prev_vsync;
         int64_t vsync_guess = t->next_vsync + vsync_interval;
-        if (p->surfaces[surface_nxt].pts > p->surfaces[p->surface_now].pts
-                && p->surfaces[surface_nxt].pts < vsync_guess) {
+        if (p->surfaces[surface_nxt].pts > p->surfaces[p->surface_now].pts &&
+            p->surfaces[surface_nxt].pts < vsync_guess)
+        {
             p->surface_now = surface_nxt;
-            surface_nxt = fbosurface_wrap(p->surface_now+1);
         }
     }
 }
