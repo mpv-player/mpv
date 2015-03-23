@@ -183,6 +183,7 @@ struct gl_video {
 
     struct fbotex indirect_fbo;         // RGB target
     struct fbotex chroma_merge_fbo;
+    struct fbotex blend_subs_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
 
     int surface_idx;
@@ -350,6 +351,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
+    .blend_subs = 0,
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
@@ -427,6 +429,8 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("rectangle-textures", use_rectangle, 0),
         OPT_COLOR("background", background, 0),
         OPT_FLAG("interpolation", interpolation, 0),
+        OPT_FLAG("blend-subtitles", blend_subs, 0),
+
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
         OPT_REMOVED("scale-sep", "this is set automatically whenever sane"),
@@ -540,6 +544,7 @@ static void uninit_rendering(struct gl_video *p)
 
     fbotex_uninit(&p->indirect_fbo);
     fbotex_uninit(&p->chroma_merge_fbo);
+    fbotex_uninit(&p->blend_subs_fbo);
 
     for (int n = 0; n < FBOSURFACES_MAX; n++)
         fbotex_uninit(&p->surfaces[n].fbotex);
@@ -1337,6 +1342,7 @@ static void pass_convert_yuv(struct gl_video *p)
     cparams.texture_bits = (cparams.input_bits + 7) & ~7;
     mp_csp_set_image_params(&cparams, &p->image_params);
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
+    p->user_gamma = 1.0 / (cparams.gamma * p->opts.gamma);
 
     GLSLF("// color conversion\n");
 
@@ -1400,13 +1406,6 @@ static void pass_convert_yuv(struct gl_video *p)
         GLSL(color.rgb = mix(color.rgb * vec3(4.5),
                              vec3(1.0993) * pow(color.rgb, vec3(0.45)) - vec3(0.0993),
                              lessThanEqual(vec3(0.0181), color.rgb));)
-    }
-
-    if (p->user_gamma != 1) {
-        p->use_indirect = true;
-        gl_sc_uniform_f(sc, "user_gamma", p->user_gamma);
-        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
-        GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
 
     if (!p->has_alpha || p->opts.alpha_mode == 0) { // none
@@ -1547,6 +1546,13 @@ static void pass_colormanage(struct gl_video *p)
     enum mp_csp_trc trc_dst = p->opts.target_trc;
     enum mp_csp_prim prim_src = p->image_params.primaries,
                      prim_dst = p->opts.target_prim;
+
+    if (p->user_gamma != 1) {
+        p->use_indirect = true;
+        gl_sc_uniform_f(p->sc, "user_gamma", p->user_gamma);
+        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
+        GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
+    }
 
     if (p->use_lut_3d) {
         // The 3DLUT is hard-coded against BT.2020's gamut during creation, and
@@ -1703,6 +1709,44 @@ static void pass_dither(struct gl_video *p)
           dither_quantization);
 }
 
+// Draws the OSD. If linearize is true, the output will be converted to
+// linear light.
+static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
+                          struct mp_osd_res rect, int vp_w, int vp_h, int fbo,
+                          bool linearize)
+{
+    mpgl_osd_generate(p->osd, rect, pts, p->image_params.stereo_out, draw_flags);
+
+    p->gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
+    for (int n = 0; n < MAX_OSD_PARTS; n++) {
+        enum sub_bitmap_format fmt = mpgl_osd_get_part_format(p->osd, n);
+        if (!fmt)
+            continue;
+        gl_sc_uniform_sampler(p->sc, "osdtex", GL_TEXTURE_2D, 0);
+        switch (fmt) {
+        case SUBBITMAP_RGBA: {
+            GLSLF("// OSD (RGBA)\n");
+            GLSL(vec4 color = texture(osdtex, texcoord).bgra;)
+            break;
+        }
+        case SUBBITMAP_LIBASS: {
+            GLSLF("// OSD (libass)\n");
+            GLSL(vec4 color =
+                vec4(ass_color.rgb, ass_color.a * texture(osdtex, texcoord).r);)
+            break;
+        }
+        default:
+            abort();
+        }
+        if (linearize)
+            pass_linearize(p);
+        gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
+        gl_sc_gen_shader_and_reset(p->sc);
+        mpgl_osd_draw_part(p->osd, vp_w, vp_h, n);
+    }
+    gl_sc_set_vao(p->sc, &p->vao);
+}
+
 // The main rendering function, takes care of everything up to and including
 // upscaling
 static void pass_render_frame(struct gl_video *p)
@@ -1711,6 +1755,31 @@ static void pass_render_frame(struct gl_video *p)
     pass_read_video(p);
     pass_convert_yuv(p);
     pass_scale_main(p);
+
+    if (p->osd && p->opts.blend_subs) {
+        // Recreate the real video size from the src/dst rects
+        int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
+            vp_h = p->dst_rect.y1 - p->dst_rect.y0;
+        struct mp_osd_res rect = {
+            .w = vp_w, .h = vp_h,
+            .ml = -p->src_rect.x0, .mr = p->src_rect.x1 - p->image_w,
+            .mt = -p->src_rect.y0, .mb = p->src_rect.y1 - p->image_h,
+            .display_par = 1.0,
+        };
+        // Adjust margins for scale
+        double scale[2];
+        get_scale_factors(p, scale);
+        rect.ml *= scale[0]; rect.mr *= scale[0];
+        rect.mt *= scale[1]; rect.mb *= scale[1];
+        finish_pass_fbo(p, &p->blend_subs_fbo, vp_w, vp_h, 0,
+                        FBOTEX_FUZZY_W | FBOTEX_FUZZY_H);
+        double vpts = p->image.mpi->pts;
+        if (vpts == MP_NOPTS_VALUE)
+            vpts = p->osd_pts;
+        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, vp_w, vp_h,
+                      p->blend_subs_fbo.fbo, p->use_linear);
+        GLSL(vec4 color = texture(texture0, texcoord0);)
+    }
 }
 
 static void pass_draw_to_screen(struct gl_video *p, int fbo)
@@ -1859,59 +1928,11 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     }
 }
 
-static void draw_osd(struct gl_video *p)
-{
-    mpgl_osd_generate(p->osd, p->osd_rect, p->osd_pts, p->image_params.stereo_out);
-
-    for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        enum sub_bitmap_format fmt = mpgl_osd_get_part_format(p->osd, n);
-        if (!fmt)
-            continue;
-        gl_sc_uniform_sampler(p->sc, "osdtex", GL_TEXTURE_2D, 0);
-        switch (fmt) {
-        case SUBBITMAP_RGBA: {
-            GLSLF("// OSD (RGBA)\n");
-            GLSL(vec4 color = texture(osdtex, texcoord).bgra;)
-            break;
-        }
-        case SUBBITMAP_LIBASS: {
-            GLSLF("// OSD (libass)\n");
-            GLSL(vec4 color =
-                vec4(ass_color.rgb, ass_color.a * texture(osdtex, texcoord).r);)
-            break;
-        }
-        default:
-            abort();
-        }
-
-        // Apply OSD color correction
-        if (p->use_linear)
-            pass_linearize(p);
-        if (p->user_gamma != 1) {
-            gl_sc_uniform_f(p->sc, "user_gamma", p->user_gamma);
-            GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
-            GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
-        }
-        pass_colormanage(p);
-
-        gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
-        gl_sc_gen_shader_and_reset(p->sc);
-        mpgl_osd_draw_part(p->osd, p->vp_w, p->vp_h, n);
-    }
-
-    debug_check_gl(p, "after OSD rendering");
-}
-
 // (fbo==0 makes BindFramebuffer select the screen backbuffer)
 void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
 {
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
-
-    struct mp_csp_params params;
-    mp_csp_copy_equalizer_values(&params, &p->video_eq);
-
-    p->user_gamma = 1.0 / (p->opts.gamma * params.gamma);
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
@@ -1939,8 +1960,11 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    if (p->osd)
-        draw_osd(p);
+    if (p->osd) {
+        pass_draw_osd(p, p->opts.blend_subs ? OSD_DRAW_OSD_ONLY : 0,
+                      p->osd_pts, p->osd_rect, p->vp_w, p->vp_h, fbo, false);
+        debug_check_gl(p, "after OSD rendering");
+    }
 
     gl->UseProgram(0);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -2143,6 +2167,10 @@ static void check_gl_features(struct gl_video *p)
     if (p->opts.interpolation && !test_fbo(p, &have_fbo)) {
         p->opts.interpolation = false;
         disabled[n_disabled++] = "interpolation (FBO)";
+    }
+    if (p->opts.blend_subs && !test_fbo(p, &have_fbo)) {
+        p->opts.blend_subs = false;
+        disabled[n_disabled++] = "subtitle blending (FBO)";
     }
     if (gl->es && p->opts.pbo) {
         p->opts.pbo = 0;

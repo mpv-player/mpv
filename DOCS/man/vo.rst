@@ -652,6 +652,17 @@ Available video output drivers are:
         Default is 128x256x64.
         Sizes must be a power of two, and 512 at most.
 
+    ``blend-subtitles``
+        Blend subtitles directly onto upscaled video frames, before
+        interpolation and/or color management (default: no). Enabling this
+        causes subtitles to be affected by ``icc-profile``, ``target-prim``,
+        ``target-trc``, ``interpolation``, ``gamma`` and ``linear-scaling``.
+        It also increases subtitle performance when using ``interpolation``.
+
+        The downside of enabling this is that it restricts subtitles to the
+        visible portion of the video, so you can't have subtitles exist in the
+        black margins below a video (for example).
+
     ``alpha=<blend|yes|no>``
         Decides what to do if the input has an alpha component (default: blend).
 
