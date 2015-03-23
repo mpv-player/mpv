@@ -1836,46 +1836,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     }
 }
 
-// (fbo==0 makes BindFramebuffer select the screen backbuffer)
-void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
+static void draw_osd(struct gl_video *p)
 {
-    GL *gl = p->gl;
-    struct video_image *vimg = &p->image;
-
-    struct mp_csp_params params;
-    mp_csp_copy_equalizer_values(&params, &p->video_eq);
-
-    p->user_gamma = 1.0 / (p->opts.gamma * params.gamma);
-
-    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
-
-    if (!vimg->mpi || p->dst_rect.x0 > 0 || p->dst_rect.y0 > 0 ||
-        p->dst_rect.x1 < p->vp_w || p->dst_rect.y1 < abs(p->vp_h))
-    {
-        struct m_color c = p->opts.background;
-        gl->ClearColor(c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
-        gl->Clear(GL_COLOR_BUFFER_BIT);
-    }
-
-    if (!vimg->mpi)
-        goto draw_osd;
-
-    gl_sc_set_vao(p->sc, &p->vao);
-
-    if (p->opts.interpolation) {
-        gl_video_interpolate_frame(p, fbo, t);
-    } else {
-        // Skip interpolation if there's nothing to be done
-        pass_render_frame(p);
-        pass_draw_to_screen(p, fbo);
-    }
-
-    debug_check_gl(p, "after video rendering");
-
-draw_osd:
-
-    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
-
     mpgl_osd_generate(p->osd, p->osd_rect, p->osd_pts, p->image_params.stereo_out);
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
@@ -1915,6 +1877,46 @@ draw_osd:
     }
 
     debug_check_gl(p, "after OSD rendering");
+}
+
+// (fbo==0 makes BindFramebuffer select the screen backbuffer)
+void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
+{
+    GL *gl = p->gl;
+    struct video_image *vimg = &p->image;
+
+    struct mp_csp_params params;
+    mp_csp_copy_equalizer_values(&params, &p->video_eq);
+
+    p->user_gamma = 1.0 / (p->opts.gamma * params.gamma);
+
+    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    if (!vimg->mpi || p->dst_rect.x0 > 0 || p->dst_rect.y0 > 0 ||
+        p->dst_rect.x1 < p->vp_w || p->dst_rect.y1 < abs(p->vp_h))
+    {
+        struct m_color c = p->opts.background;
+        gl->ClearColor(c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
+        gl->Clear(GL_COLOR_BUFFER_BIT);
+    }
+
+    if (vimg->mpi) {
+        gl_sc_set_vao(p->sc, &p->vao);
+
+        if (p->opts.interpolation) {
+            gl_video_interpolate_frame(p, fbo, t);
+        } else {
+            // Skip interpolation if there's nothing to be done
+            pass_render_frame(p);
+            pass_draw_to_screen(p, fbo);
+        }
+
+        debug_check_gl(p, "after video rendering");
+    }
+
+    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    draw_osd(p);
 
     gl->UseProgram(0);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
