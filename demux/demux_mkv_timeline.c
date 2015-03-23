@@ -217,7 +217,7 @@ static bool check_file_seg(struct tl_ctx *ctx, char *filename, int segment)
                 params.matroska_wanted_uids = ctx->uids; // potentially reallocated, same data
                 d = demux_open_url(filename, &params, cancel, ctx->global);
                 if (!d)
-                    continue;
+                    return false;
             }
 
             ctx->sources[i] = d;
