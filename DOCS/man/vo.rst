@@ -652,6 +652,17 @@ Available video output drivers are:
         Default is 128x256x64.
         Sizes must be a power of two, and 512 at most.
 
+    ``blend-subtitles``
+        Blend subtitles directly onto upscaled video frames, before
+        interpolation and/or color management (default: no). Enabling this
+        causes subtitles to be affected by ``icc-profile``, ``target-prim``,
+        ``target-trc``, ``interpolation``, ``gamma`` and ``linear-scaling``.
+        It also increases subtitle performance when using ``interpolation``.
+
+        The downside of enabling this is that it restricts subtitles to the
+        visible portion of the video, so you can't have subtitles exist in the
+        black margins below a video (for example).
+
     ``alpha=<blend|yes|no>``
         Decides what to do if the input has an alpha component (default: blend).
 
@@ -685,7 +696,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:scale=spline36:scale-down=mitchell:dither-depth=auto:fbo-format=rgba16:fancy-downscaling:sigmoid-upscaling
+        --vo=opengl:scale=spline36:scale-down=mitchell:dither-depth=auto:fbo-format=rgba16:fancy-downscaling:sigmoid-upscaling:blend-subtitles
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.

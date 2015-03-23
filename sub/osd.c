@@ -332,6 +332,8 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
             continue;
         if ((draw_flags & OSD_DRAW_SUB_ONLY) && !obj->is_sub)
             continue;
+        if ((draw_flags & OSD_DRAW_OSD_ONLY) && obj->is_sub)
+            continue;
 
         if (obj->sub_state.dec_sub)
             sub_lock(obj->sub_state.dec_sub);
