@@ -1338,8 +1338,6 @@ static void pass_convert_yuv(struct gl_video *p)
     mp_csp_set_image_params(&cparams, &p->image_params);
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
 
-    p->user_gamma = 1.0 / (cparams.gamma * p->opts.gamma);
-
     GLSLF("// color conversion\n");
 
     if (p->color_swizzle[0])
