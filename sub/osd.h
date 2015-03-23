@@ -180,6 +180,7 @@ void osd_set_nav_highlight(struct osd_state *osd, void *priv);
 enum mp_osd_draw_flags {
     OSD_DRAW_SUB_FILTER = (1 << 0),
     OSD_DRAW_SUB_ONLY   = (1 << 1),
+    OSD_DRAW_OSD_ONLY   = (1 << 2),
 };
 
 void osd_draw(struct osd_state *osd, struct mp_osd_res res,
