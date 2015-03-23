@@ -568,6 +568,7 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
                 &(const void *){zeros}, &(uint32_t){0},
                 &(VdpRect){0, 0, sfc->packer->used_width,
                                  sfc->packer->used_height});
+        CHECK_VDP_WARNING(vo, "OSD: error uploading OSD bitmap");
     }
 
     if (sfc->surface == VDP_INVALID_HANDLE)
