@@ -2054,24 +2054,21 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
-static bool test_fbo(struct gl_video *p, bool *success)
+static bool test_fbo(struct gl_video *p)
 {
-    if (!*success)
-        return false;
-
     GL *gl = p->gl;
-    *success = false;
+    bool success = false;
     MP_VERBOSE(p, "Testing user-set FBO format (0x%x)\n",
                    (unsigned)p->opts.fbo_format);
     struct fbotex fbo = {0};
     if (fbotex_init(&fbo, p->gl, p->log, 16, 16, p->opts.fbo_format)) {
         gl->BindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
         gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-        *success = true;
+        success = true;
     }
     fbotex_uninit(&fbo);
     glCheckError(gl, p->log, "FBO test");
-    return *success;
+    return success;
 }
 
 // Disable features that are not supported with the current OpenGL version.
@@ -2079,7 +2076,7 @@ static void check_gl_features(struct gl_video *p)
 {
     GL *gl = p->gl;
     bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
-    bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
+    bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB && test_fbo(p);
     bool have_1d_tex = gl->mpgl_caps & MPGL_CAP_1D_TEX;
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
@@ -2095,7 +2092,7 @@ static void check_gl_features(struct gl_video *p)
         const struct filter_kernel *kernel = mp_find_filter_kernel(p->opts.scalers[n]);
         if (kernel) {
             char *reason = NULL;
-            if (!test_fbo(p, &have_fbo))
+            if (!have_fbo)
                 reason = "scaler (FBO)";
             if (!have_float_tex)
                 reason = "scaler (float tex.)";
@@ -2136,17 +2133,17 @@ static void check_gl_features(struct gl_video *p)
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (GLSL version)";
     }
-    if (use_cms && !test_fbo(p, &have_fbo)) {
+    if (use_cms && !have_fbo) {
         p->opts.target_prim = MP_CSP_PRIM_AUTO;
         p->opts.target_trc = MP_CSP_TRC_AUTO;
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (FBO)";
     }
-    if (p->opts.interpolation && !test_fbo(p, &have_fbo)) {
+    if (p->opts.interpolation && !have_fbo) {
         p->opts.interpolation = false;
         disabled[n_disabled++] = "interpolation (FBO)";
     }
-    if (p->opts.blend_subs && !test_fbo(p, &have_fbo)) {
+    if (p->opts.blend_subs && !have_fbo) {
         p->opts.blend_subs = false;
         disabled[n_disabled++] = "subtitle blending (FBO)";
     }
