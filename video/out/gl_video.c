@@ -1770,8 +1770,7 @@ static void pass_render_frame(struct gl_video *p)
         get_scale_factors(p, scale);
         rect.ml *= scale[0]; rect.mr *= scale[0];
         rect.mt *= scale[1]; rect.mb *= scale[1];
-        finish_pass_fbo(p, &p->blend_subs_fbo, vp_w, vp_h, 0,
-                        FBOTEX_FUZZY_W | FBOTEX_FUZZY_H);
+        finish_pass_fbo(p, &p->blend_subs_fbo, vp_w, vp_h, 0, FBOTEX_FUZZY);
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, p->image.mpi->pts, rect, vp_w, vp_h,
                       p->blend_subs_fbo.fbo, p->use_linear);
         GLSL(vec4 color = texture(texture0, texcoord0);)
@@ -1792,8 +1791,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
                                        struct frame_timing *t)
 {
     int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
-        vp_h = p->dst_rect.y1 - p->dst_rect.y0,
-        fuzz = FBOTEX_FUZZY_W | FBOTEX_FUZZY_H;
+        vp_h = p->dst_rect.y1 - p->dst_rect.y0;
 
     double new_pts = p->image.mpi->pts;
 
@@ -1802,7 +1800,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     if (p->surfaces[p->surface_now].pts < 0) {
         pass_render_frame(p);
         finish_pass_fbo(p, &p->surfaces[p->surface_now].fbotex,
-                        vp_w, vp_h, 0, fuzz);
+                        vp_w, vp_h, 0, FBOTEX_FUZZY);
         p->surfaces[p->surface_now].pts = new_pts;
         p->surface_idx = p->surface_now;
     }
@@ -1836,7 +1834,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
         MP_STATS(p, "new-pts");
         pass_render_frame(p);
         finish_pass_fbo(p, &p->surfaces[surface_dst].fbotex,
-                        vp_w, vp_h, 0, fuzz);
+                        vp_w, vp_h, 0, FBOTEX_FUZZY);
         p->surfaces[surface_dst].pts = new_pts;
         p->surface_idx = surface_dst;
     }
