@@ -1693,6 +1693,10 @@ Property list
     Return the audio device selected by the AO driver (only implemented for
     some drivers: currently only ``coreaudio``).
 
+``working-directory``
+    Return the working directory of the mpv process. Can be useful for JSON IPC
+    users, because the command line player usually works with relative paths.
+
 ``mpv-version``
     Return the mpv version/copyright string. Depending on how the binary was
     built, it might contain either a release version, or just a git hash.

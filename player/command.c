@@ -3149,6 +3149,24 @@ static int mp_property_packet_bitrate(void *ctx, struct m_property *prop,
     return m_property_int64_ro(action, arg, r[type] * 8 / 1000.0 + 0.5);
 }
 
+static int mp_property_cwd(void *ctx, struct m_property *prop,
+                           int action, void *arg)
+{
+    switch (action) {
+    case M_PROPERTY_GET: {
+        char *cwd = mp_getcwd(NULL);
+        if (!cwd)
+            return M_PROPERTY_ERROR;
+        *(char **)arg = cwd;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_version(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
@@ -3523,6 +3541,8 @@ static const struct m_property mp_properties[] = {
     {"window-minimized", mp_property_win_minimized},
     {"display-names", mp_property_display_names},
     {"display-fps", mp_property_display_fps},
+
+    {"working-directory", mp_property_cwd},
 
     {"mpv-version", mp_property_version},
     {"mpv-configuration", mp_property_configuration},
