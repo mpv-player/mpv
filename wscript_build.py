@@ -185,7 +185,6 @@ def build(ctx):
         ( "input/keycodes.c" ),
         ( "input/pipe-win32.c",                  "waio" ),
         ( "input/joystick.c",                    "joystick" ),
-        ( "input/lirc.c",                        "lirc" ),
 
         ## Misc
         ( "misc/bstr.c" ),

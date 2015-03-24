@@ -164,7 +164,6 @@ options_state_machine() {
     opt_yes_no _libguess    "libguess"
     opt_yes_no _termios     "termios database for key codes"
     opt_yes_no _iconv       "iconv for encoding conversion"
-    opt_yes_no _lirc        "LIRC (remote control) support"
     opt_yes_no _joystick    "joystick support" no
     opt_yes_no _vm          "X video mode extensions"
     opt_yes_no _dvb         "DVB input"
@@ -840,8 +839,6 @@ fi
 check_trivial "VapourSynth core" $_vapoursynth_core VAPOURSYNTH_CORE
 
 check_trivial "joystick" $_joystick JOYSTICK
-
-check_statement_libs "lirc" $_lirc LIRC lirc/lirc_client.h "" -llirc_client
 
 check_trivial "encoding" $_encoding ENCODING
 

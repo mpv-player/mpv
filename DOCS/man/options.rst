@@ -2364,13 +2364,6 @@ Input
 ``--input-js-dev``
     Specifies the joystick device to use (default: ``/dev/input/js0``).
 
-``--input-lirc``, ``--no-input-lirc``
-    Enable/disable LIRC support. Enabled by default.
-
-``--input-lirc-conf=<filename>``
-    (LIRC only)
-    Specifies a configuration file for LIRC (default: ``~/.lircrc``).
-
 ``--input-media-keys=<yes|no>``
     (OS X only)
     Enable/disable media keys support. Enabled by default (except for libmpv).
@@ -2951,7 +2944,7 @@ TV
         Use _ for spaces in names (or play with quoting ;-) ). The channel
         names will then be written using OSD, and the slave commands
         ``tv_step_channel``, ``tv_set_channel`` and ``tv_last_channel``
-        will be usable for a remote control (see LIRC). Not compatible with
+        will be usable for a remote control. Not compatible with
         the ``frequency`` parameter.
 
     .. note::

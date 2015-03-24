@@ -32,8 +32,10 @@ INTERACTIVE CONTROL
 ===================
 
 mpv has a fully configurable, command-driven control layer which allows you
-to control mpv using keyboard, mouse, joystick or remote control (with
-LIRC). See the ``--input-`` options for ways to customize it.
+to control mpv using keyboard, mouse, joystick or remote control (there is no
+LIRC support - configure remotes as input devices instead).
+
+See the ``--input-`` options for ways to customize it.
 
 Keyboard Control
 ----------------
