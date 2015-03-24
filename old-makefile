@@ -45,8 +45,6 @@ SOURCES-$(LIBBS2B)              += audio/filter/af_bs2b.c
 
 SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 
-SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
-
 SOURCES-$(PVR)                  += stream/stream_pvr.c
 
 SOURCES-$(TV)                   += stream/stream_tv.c stream/tv.c \

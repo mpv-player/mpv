@@ -187,7 +187,6 @@ options_state_machine() {
     opt_yes_no _ffmpeg      "skip FFmpeg/Libav autodetection"
     opt_yes_no _ladspa      "LADSPA plugin support"
     opt_yes_no _libbs2b     "libbs2b audio filter support"
-    opt_yes_no _mpg123      " libmpg123 MP3 decoding support"
     opt_yes_no _libavresample "libavresample (preferred over libswresample)"
     opt_yes_no _libswresample "libswresample"
     opt_yes_no _caca        "CACA  video output"
@@ -736,8 +735,6 @@ check_pkg_config "ENCA" $_enca ENCA 'enca'
 
 check_pkg_config "zlib" auto ZLIB 'zlib'
 test $(defretval) = no && die "Unable to find development files for zlib."
-
-check_pkg_config "mpg123 support" $_mpg123 MPG123 'libmpg123 >= 1.14.0'
 
 test "$_dl" = no && _ladspa=no
 check_statement_libs "LADSPA plugin support" $_ladspa LADSPA ladspa.h 'LADSPA_Descriptor ld = {0}'

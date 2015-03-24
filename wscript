@@ -339,10 +339,6 @@ iconv support use --disable-iconv.",
         'desc': 'ENCA support',
         'func': check_statement('enca.h', 'enca_get_languages(NULL)', lib='enca'),
     }, {
-        'name': '--mpg123',
-        'desc': 'mpg123 support',
-        'func': check_pkg_config('libmpg123', '>= 1.14.0'),
-    }, {
         'name': '--ladspa',
         'desc': 'LADSPA plugin support',
         'func': check_statement('ladspa.h', 'LADSPA_Descriptor ld = {0}'),
