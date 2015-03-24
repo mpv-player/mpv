@@ -542,4 +542,8 @@ function mp_utils.to_string(v, set)
     end
 end
 
+function mp_utils.getcwd()
+    return mp.get_property("working-directory")
+end
+
 return {}

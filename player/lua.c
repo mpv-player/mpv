@@ -1088,19 +1088,6 @@ static int script_get_wakeup_pipe(lua_State *L)
     return 1;
 }
 
-static int script_getcwd(lua_State *L)
-{
-    char *cwd = mp_getcwd(NULL);
-    if (!cwd) {
-        lua_pushnil(L);
-        lua_pushstring(L, "error");
-        return 2;
-    }
-    lua_pushstring(L, cwd);
-    talloc_free(cwd);
-    return 1;
-}
-
 static int script_readdir(lua_State *L)
 {
     //                    0      1        2       3
@@ -1305,7 +1292,6 @@ static const struct fn_entry main_fns[] = {
 };
 
 static const struct fn_entry utils_fns[] = {
-    FN_ENTRY(getcwd),
     FN_ENTRY(readdir),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),
