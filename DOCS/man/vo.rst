@@ -730,7 +730,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:scale=spline36:scale-down=mitchell:dither-depth=auto:fbo-format=rgba16:fancy-downscaling:sigmoid-upscaling:blend-subtitles
+        --vo=opengl:scale=spline36:cscale=spline36:scale-down=mitchell:dither-depth=auto:fbo-format=rgba16:fancy-downscaling:sigmoid-upscaling:blend-subtitles
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.
