@@ -309,15 +309,6 @@ iconv support use --disable-iconv.",
         'desc' : 'Encoding',
         'func': check_true,
     }, {
-        'name' : '--joystick',
-        'desc' : 'joystick',
-        'func': check_cc(header_name='linux/joystick.h'),
-        'default': 'disable'
-    }, {
-        'name' : '--lirc',
-        'desc' : 'lirc',
-        'func': check_cc(header_name='lirc/lirc_client.h', lib='lirc_client'),
-    }, {
         'name': '--libbluray',
         'desc': 'Bluray support',
         'func': check_pkg_config('libbluray', '>= 0.3.0'),
@@ -338,10 +329,6 @@ iconv support use --disable-iconv.",
         'name': '--enca',
         'desc': 'ENCA support',
         'func': check_statement('enca.h', 'enca_get_languages(NULL)', lib='enca'),
-    }, {
-        'name': '--mpg123',
-        'desc': 'mpg123 support',
-        'func': check_pkg_config('libmpg123', '>= 1.14.0'),
     }, {
         'name': '--ladspa',
         'desc': 'LADSPA plugin support',

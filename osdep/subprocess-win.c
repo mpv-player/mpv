@@ -30,6 +30,12 @@
 
 static void write_arg(bstr *cmdline, char *arg)
 {
+    // Empty args must be represented as an empty quoted string
+    if (!arg[0]) {
+        bstr_xappend(NULL, cmdline, bstr0("\"\""));
+        return;
+    }
+
     // If the string doesn't have characters that need to be escaped, it's best
     // to leave it alone for the sake of Windows programs that don't process
     // quoted args correctly.
@@ -48,22 +54,22 @@ static void write_arg(bstr *cmdline, char *arg)
     for (int pos = 0; arg[pos]; pos++) {
         switch (arg[pos]) {
         case '\\':
-            // Count backslashes that appear in a row
+            // Count consecutive backslashes
             num_slashes++;
             break;
         case '"':
+            // Write the argument up to the point before the quote
             bstr_xappend(NULL, cmdline, (struct bstr){arg, pos});
-
-            // Double preceding slashes
-            for (int i = 0; i < num_slashes; i++)
-                bstr_xappend(NULL, cmdline, bstr0("\\"));
-
-            // Escape the following quote
-            bstr_xappend(NULL, cmdline, bstr0("\\"));
-
             arg += pos;
             pos = 0;
+
+            // Double backslashes preceding the quote
+            for (int i = 0; i < num_slashes; i++)
+                bstr_xappend(NULL, cmdline, bstr0("\\"));
             num_slashes = 0;
+
+            // Escape the quote itself
+            bstr_xappend(NULL, cmdline, bstr0("\\"));
             break;
         default:
             num_slashes = 0;
@@ -73,7 +79,7 @@ static void write_arg(bstr *cmdline, char *arg)
     // Write the rest of the argument
     bstr_xappend(NULL, cmdline, bstr0(arg));
 
-    // Double slashes that appear at the end of the string
+    // Double backslashes at the end of the argument
     for (int i = 0; i < num_slashes; i++)
         bstr_xappend(NULL, cmdline, bstr0("\\"));
 

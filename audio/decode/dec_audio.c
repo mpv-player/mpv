@@ -25,7 +25,6 @@
 
 #include "demux/codec_tags.h"
 
-#include "config.h"
 #include "common/codecs.h"
 #include "common/msg.h"
 #include "misc/bstr.h"
@@ -43,15 +42,11 @@
 
 #include "audio/filter/af.h"
 
-extern const struct ad_functions ad_mpg123;
 extern const struct ad_functions ad_lavc;
 extern const struct ad_functions ad_spdif;
 
 static const struct ad_functions * const ad_drivers[] = {
     &ad_lavc,
-#if HAVE_MPG123
-    &ad_mpg123,
-#endif
     &ad_spdif,
     NULL
 };

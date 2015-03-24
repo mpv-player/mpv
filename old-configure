@@ -164,8 +164,6 @@ options_state_machine() {
     opt_yes_no _libguess    "libguess"
     opt_yes_no _termios     "termios database for key codes"
     opt_yes_no _iconv       "iconv for encoding conversion"
-    opt_yes_no _lirc        "LIRC (remote control) support"
-    opt_yes_no _joystick    "joystick support" no
     opt_yes_no _vm          "X video mode extensions"
     opt_yes_no _dvb         "DVB input"
     opt_yes_no _tv          "TV interface (TV/DVB grabbers)" yes
@@ -187,7 +185,6 @@ options_state_machine() {
     opt_yes_no _ffmpeg      "skip FFmpeg/Libav autodetection"
     opt_yes_no _ladspa      "LADSPA plugin support"
     opt_yes_no _libbs2b     "libbs2b audio filter support"
-    opt_yes_no _mpg123      " libmpg123 MP3 decoding support"
     opt_yes_no _libavresample "libavresample (preferred over libswresample)"
     opt_yes_no _libswresample "libswresample"
     opt_yes_no _caca        "CACA  video output"
@@ -737,8 +734,6 @@ check_pkg_config "ENCA" $_enca ENCA 'enca'
 check_pkg_config "zlib" auto ZLIB 'zlib'
 test $(defretval) = no && die "Unable to find development files for zlib."
 
-check_pkg_config "mpg123 support" $_mpg123 MPG123 'libmpg123 >= 1.14.0'
-
 test "$_dl" = no && _ladspa=no
 check_statement_libs "LADSPA plugin support" $_ladspa LADSPA ladspa.h 'LADSPA_Descriptor ld = {0}'
 
@@ -841,10 +836,6 @@ if test "$_vapoursynth" = no && test "$_vapoursynth_lazy" = no ; then
     _vapoursynth_core=no
 fi
 check_trivial "VapourSynth core" $_vapoursynth_core VAPOURSYNTH_CORE
-
-check_trivial "joystick" $_joystick JOYSTICK
-
-check_statement_libs "lirc" $_lirc LIRC lirc/lirc_client.h "" -llirc_client
 
 check_trivial "encoding" $_encoding ENCODING
 

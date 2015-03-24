@@ -90,7 +90,6 @@ def build(ctx):
         ( "audio/format.c" ),
         ( "audio/mixer.c" ),
         ( "audio/decode/ad_lavc.c" ),
-        ( "audio/decode/ad_mpg123.c",            "mpg123" ),
         ( "audio/decode/ad_spdif.c" ),
         ( "audio/decode/dec_audio.c" ),
         ( "audio/filter/af.c" ),
@@ -185,8 +184,6 @@ def build(ctx):
         ( "input/ipc.c",                         "!mingw" ),
         ( "input/keycodes.c" ),
         ( "input/pipe-win32.c",                  "waio" ),
-        ( "input/joystick.c",                    "joystick" ),
-        ( "input/lirc.c",                        "lirc" ),
 
         ## Misc
         ( "misc/bstr.c" ),

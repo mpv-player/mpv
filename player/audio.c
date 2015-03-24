@@ -431,7 +431,7 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
 
     double ptsdiff = written_pts - sync_pts;
     // Missing timestamp, or PTS reset, or just broken.
-    if (written_pts == MP_NOPTS_VALUE || fabs(ptsdiff) > 300) {
+    if (written_pts == MP_NOPTS_VALUE || fabs(ptsdiff) > 3600) {
         MP_WARN(mpctx, "Failed audio resync.\n");
         mpctx->audio_status = STATUS_FILLING;
         return true;
