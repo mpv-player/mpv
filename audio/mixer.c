@@ -38,6 +38,7 @@ struct mixer {
     // Static, dependent on ao/softvol settings
     bool softvol;                       // use AO (false) or af_volume (true)
     bool ao_softvol;                    // AO has private or per-app volume
+    bool ao_perapp;                     // AO has persistent per-app volume
     bool emulate_mute;                  // if true, emulate mute with volume=0
     // Last known values (possibly out of sync with reality)
     float vol_l, vol_r;
@@ -246,9 +247,11 @@ char *mixer_get_volume_restore_data(struct mixer *mixer)
 
 static void probe_softvol(struct mixer *mixer)
 {
-    mixer->ao_softvol =
-        ao_control(mixer->ao, AOCONTROL_HAS_SOFT_VOLUME, 0) == 1 ||
+    mixer->ao_perapp =
         ao_control(mixer->ao, AOCONTROL_HAS_PER_APP_VOLUME, 0) == 1;
+    mixer->ao_softvol = mixer->ao_perapp ||
+        ao_control(mixer->ao, AOCONTROL_HAS_SOFT_VOLUME, 0) == 1;
+
 
     if (mixer->opts->softvol == SOFTVOL_AUTO) {
         // No system-wide volume => fine with AO volume control.
@@ -285,7 +288,7 @@ static void restore_volume(struct mixer *mixer)
     const char *prev_driver = mixer->driver;
     mixer->driver = mixer->softvol ? "softvol" : ao_get_name(ao);
 
-    bool restore = mixer->softvol || mixer->ao_softvol;
+    bool restore = mixer->softvol || (mixer->ao_softvol && !mixer->ao_perapp);
 
     // Restore old parameters if volume won't survive reinitialization.
     // But not if volume scale is possibly different.
