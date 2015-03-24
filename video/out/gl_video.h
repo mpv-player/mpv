@@ -56,6 +56,10 @@ struct gl_video_opts {
     int use_rectangle;
     struct m_color background;
     int interpolation;
+    int blend_subs;
+    char *pre_shader;
+    char *post_shader;
+    char *scale_shader;
 };
 
 extern const struct m_sub_options gl_video_conf;
@@ -64,7 +68,7 @@ extern const struct gl_video_opts gl_video_opts_def;
 
 struct gl_video;
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log);
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g);
 void gl_video_uninit(struct gl_video *p);
 void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd);
 void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,

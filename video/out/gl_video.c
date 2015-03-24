@@ -59,6 +59,7 @@ static const char *const fixed_scale_filters[] = {
     "sharpen3",
     "sharpen5",
     "oversample",
+    "custom",
     NULL
 };
 static const char *const fixed_tscale_filters[] = {
@@ -130,10 +131,16 @@ struct scaler {
 
 struct fbosurface {
     struct fbotex fbotex;
-    int64_t pts;
+    double pts;
 };
 
 #define FBOSURFACES_MAX 10
+
+// Represents a cached file, which is only re-read if the name changes
+struct filestr {
+    const char *path;
+    const char *str;
+};
 
 struct src_tex {
     GLuint gl_tex;
@@ -145,6 +152,7 @@ struct src_tex {
 struct gl_video {
     GL *gl;
 
+    struct mpv_global *global;
     struct mp_log *log;
     struct gl_video_opts opts;
     bool gl_debug;
@@ -180,8 +188,10 @@ struct gl_video {
 
     struct video_image image;
 
-    struct fbotex indirect_fbo;         // RGB target
     struct fbotex chroma_merge_fbo;
+    struct fbotex indirect_fbo;
+    struct fbotex blend_subs_fbo;
+    struct fbotex post_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
 
     int surface_idx;
@@ -209,6 +219,11 @@ struct gl_video {
     // Cached because computing it can take relatively long
     int last_dither_matrix_size;
     float *last_dither_matrix;
+
+    // Cached because it requires file I/O
+    struct filestr pre_shader;
+    struct filestr post_shader;
+    struct filestr scale_shader;
 
     struct gl_hwdec *hwdec;
     bool hwdec_active;
@@ -342,13 +357,14 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .sigmoid_upscaling = 1,
-    .scalers = { "spline36", "bilinear", "oversample" },
+    .scalers = { "spline36", "spline36", "oversample" },
     .dscaler = "mitchell",
     .scaler_params = {{NAN, NAN}, {NAN, NAN}, {NAN, NAN}},
     .scaler_radius = {3, 3, 3},
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
+    .blend_subs = 1,
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
@@ -426,6 +442,11 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("rectangle-textures", use_rectangle, 0),
         OPT_COLOR("background", background, 0),
         OPT_FLAG("interpolation", interpolation, 0),
+        OPT_FLAG("blend-subtitles", blend_subs, 0),
+        OPT_STRING("pre-shader", pre_shader, 0),
+        OPT_STRING("post-shader", post_shader, 0),
+        OPT_STRING("scale-shader", scale_shader, 0),
+
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
         OPT_REMOVED("scale-sep", "this is set automatically whenever sane"),
@@ -493,7 +514,7 @@ void gl_video_set_debug(struct gl_video *p, bool enable)
 static void gl_video_reset_surfaces(struct gl_video *p)
 {
     for (int i = 0; i < FBOSURFACES_MAX; i++)
-        p->surfaces[i].pts = 0;
+        p->surfaces[i].pts = -1;
     p->surface_idx = 0;
     p->surface_now = 0;
 }
@@ -502,6 +523,28 @@ static inline int fbosurface_wrap(int id)
 {
     id = id % FBOSURFACES_MAX;
     return id < 0 ? id + FBOSURFACES_MAX : id;
+}
+
+static bool load_filestr(struct gl_video *p, struct filestr *f, const char *path)
+{
+    if (!f || !path || !path[0] || !p->global)
+        return false;
+
+    if (!f->path || strcmp(f->path, path) != 0) {
+        // New file available, load it
+        struct bstr s = bstr_load_file(p, path, p->global);
+        if (s.len) {
+            talloc_free((char *) f->str);
+            f->str = bstrto0(p, s);
+            f->path = path;
+            MP_VERBOSE(p, "Loaded file '%s' with length '%ld'.\n", path, s.len);
+        } else {
+            f->str = f->path = NULL;
+        }
+        talloc_free(s.start);
+    }
+
+    return f->str;
 }
 
 static void recreate_osd(struct gl_video *p)
@@ -535,8 +578,10 @@ static void uninit_rendering(struct gl_video *p)
     gl->DeleteTextures(1, &p->dither_texture);
     p->dither_texture = 0;
 
-    fbotex_uninit(&p->indirect_fbo);
     fbotex_uninit(&p->chroma_merge_fbo);
+    fbotex_uninit(&p->indirect_fbo);
+    fbotex_uninit(&p->blend_subs_fbo);
+    fbotex_uninit(&p->post_fbo);
 
     for (int n = 0; n < FBOSURFACES_MAX; n++)
         fbotex_uninit(&p->surfaces[n].fbotex);
@@ -668,6 +713,11 @@ static void init_video(struct gl_video *p)
             MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
         init_format(p->image_params.imgfmt, p);
         p->gl_target = p->hwdec->gl_texture_target;
+    }
+
+    if (p->hwdec_active && strcmp(p->opts.scalers[1], "bilinear") != 0) {
+        p->opts.scalers[1] = "bilinear";
+        MP_ERR(p, "Disabling cscale: incompatible with hardware decoding.\n");
     }
 
     mp_image_params_guess_csp(&p->image_params);
@@ -963,6 +1013,15 @@ static void reinit_scaler(struct gl_video *p, int scaler_unit, const char *name,
     debug_check_gl(p, "after initializing scaler");
 }
 
+// Set up shared/commonly used variables
+static void sampler_prelude(struct gl_video *p, int tex_num)
+{
+    GLSLF("#define tex texture%d\n", tex_num);
+    GLSLF("vec2 pos = texcoord%d;\n", tex_num);
+    GLSLF("vec2 size = texture_size%d;\n", tex_num);
+    GLSLF("vec2 pt = vec2(1.0) / size;\n");
+}
+
 static void pass_sample_separated_get_weights(struct gl_video *p,
                                               struct scaler *scaler)
 {
@@ -1003,9 +1062,9 @@ static void pass_sample_separated_gen(struct gl_video *p, struct scaler *scaler,
     GLSLF("{\n");
     if (!planar) {
         GLSLF("vec2 dir = vec2(%d, %d);\n", d_x, d_y);
-        GLSL(vec2 pt = (vec2(1.0) / sample_size) * dir;)
-        GLSL(float fcoord = dot(fract(sample_pos * sample_size - vec2(0.5)), dir);)
-        GLSLF("vec2 base = sample_pos - fcoord * pt - pt * vec2(%d);\n", N / 2 - 1);
+        GLSL(pt *= dir;)
+        GLSL(float fcoord = dot(fract(pos * size - vec2(0.5)), dir);)
+        GLSLF("vec2 base = pos - fcoord * pt - pt * vec2(%d);\n", N / 2 - 1);
     }
     GLSL(vec4 c;)
     if (use_ar) {
@@ -1018,7 +1077,7 @@ static void pass_sample_separated_gen(struct gl_video *p, struct scaler *scaler,
         if (planar) {
             GLSLF("c = texture(texture%d, texcoord%d);\n", n, n);
         } else {
-            GLSLF("c = texture(sample_tex, base + pt * vec2(%d));\n", n);
+            GLSLF("c = texture(tex, base + pt * vec2(%d));\n", n);
         }
         GLSLF("color += vec4(weights[%d]) * c;\n", n);
         if (use_ar && (n == N/2-1 || n == N/2)) {
@@ -1045,9 +1104,7 @@ static void pass_sample_separated(struct gl_video *p, int src_tex,
     int src_w = p->pass_tex[src_tex].src.x1 - p->pass_tex[src_tex].src.x0;
     finish_pass_fbo(p, &scaler->sep_fbo, src_w, h, src_tex, FBOTEX_FUZZY_H);
     // Restore the sample source for the second pass
-    GLSLF("#define sample_tex  texture%d\n", src_tex);
-    GLSLF("#define sample_pos  texcoord%d\n", src_tex);
-    GLSLF("#define sample_size texture_size%d\n", src_tex);
+    sampler_prelude(p, src_tex);
     GLSLF("// pass 2\n");
     p->pass_tex[src_tex].src.x0 = src_new.x0;
     p->pass_tex[src_tex].src.x1 = src_new.x1;
@@ -1061,9 +1118,8 @@ static void pass_sample_polar(struct gl_video *p, struct scaler *scaler)
     bool use_ar = scaler->antiring > 0;
     GLSL(vec4 color = vec4(0.0);)
     GLSLF("{\n");
-    GLSL(vec2 pt = vec2(1.0) / sample_size;)
-    GLSL(vec2 fcoord = fract(sample_pos * sample_size - vec2(0.5));)
-    GLSL(vec2 base = sample_pos - fcoord * pt;)
+    GLSL(vec2 fcoord = fract(pos * size - vec2(0.5));)
+    GLSL(vec2 base = pos - fcoord * pt;)
     GLSL(vec4 c;)
     GLSLF("float w, d, wsum = 0.0;\n");
     if (use_ar) {
@@ -1089,7 +1145,7 @@ static void pass_sample_polar(struct gl_video *p, struct scaler *scaler)
                 GLSLF("if (d < 1.0) {\n");
             GLSL(w = texture1D(lut, d).r;)
             GLSL(wsum += w;)
-            GLSLF("c = texture(sample_tex, base + pt * vec2(%d, %d));\n", x, y);
+            GLSLF("c = texture(tex, base + pt * vec2(%d, %d));\n", x, y);
             GLSL(color += vec4(w) * c;)
             if (use_ar && x >= 0 && y >= 0 && x <= 1 && y <= 1) {
                 GLSL(lo = min(lo, c);)
@@ -1126,20 +1182,19 @@ static void pass_sample_bicubic_fast(struct gl_video *p)
 {
     GLSL(vec4 color;)
     GLSLF("{\n");
-    GLSL(vec2 pt = 1.0 / sample_size;)
-    GLSL(vec2 fcoord = fract(sample_pos * sample_size + vec2(0.5, 0.5));)
+    GLSL(vec2 fcoord = fract(pos * size + vec2(0.5, 0.5));)
     bicubic_calcweights(p, "parmx", "fcoord.x");
     bicubic_calcweights(p, "parmy", "fcoord.y");
     GLSL(vec4 cdelta;)
     GLSL(cdelta.xz = parmx.RG * vec2(-pt.x, pt.x);)
     GLSL(cdelta.yw = parmy.RG * vec2(-pt.y, pt.y);)
     // first y-interpolation
-    GLSL(vec4 ar = texture(sample_tex, sample_pos + cdelta.xy);)
-    GLSL(vec4 ag = texture(sample_tex, sample_pos + cdelta.xw);)
+    GLSL(vec4 ar = texture(tex, pos + cdelta.xy);)
+    GLSL(vec4 ag = texture(tex, pos + cdelta.xw);)
     GLSL(vec4 ab = mix(ag, ar, parmy.b);)
     // second y-interpolation
-    GLSL(vec4 br = texture(sample_tex, sample_pos + cdelta.zy);)
-    GLSL(vec4 bg = texture(sample_tex, sample_pos + cdelta.zw);)
+    GLSL(vec4 br = texture(tex, pos + cdelta.zy);)
+    GLSL(vec4 bg = texture(tex, pos + cdelta.zw);)
     GLSL(vec4 aa = mix(bg, br, parmy.b);)
     // x-interpolation
     GLSL(color = mix(aa, ab, parmx.b);)
@@ -1150,13 +1205,12 @@ static void pass_sample_sharpen3(struct gl_video *p, struct scaler *scaler)
 {
     GLSL(vec4 color;)
     GLSLF("{\n");
-    GLSL(vec2 pt = 1.0 / sample_size;)
     GLSL(vec2 st = pt * 0.5;)
-    GLSL(vec4 p = texture(sample_tex, sample_pos);)
-    GLSL(vec4 sum = texture(sample_tex, sample_pos + st * vec2(+1, +1))
-                  + texture(sample_tex, sample_pos + st * vec2(+1, -1))
-                  + texture(sample_tex, sample_pos + st * vec2(-1, +1))
-                  + texture(sample_tex, sample_pos + st * vec2(-1, -1));)
+    GLSL(vec4 p = texture(tex, pos);)
+    GLSL(vec4 sum = texture(tex, pos + st * vec2(+1, +1))
+                  + texture(tex, pos + st * vec2(+1, -1))
+                  + texture(tex, pos + st * vec2(-1, +1))
+                  + texture(tex, pos + st * vec2(-1, -1));)
     double param = isnan(scaler->params[0]) ? 0.5 : scaler->params[0];
     GLSLF("color = p + (p - 0.25 * sum) * %f;\n", param);
     GLSLF("}\n");
@@ -1166,18 +1220,17 @@ static void pass_sample_sharpen5(struct gl_video *p, struct scaler *scaler)
 {
     GLSL(vec4 color;)
     GLSLF("{\n");
-    GLSL(vec2 pt = 1.0 / sample_size;)
     GLSL(vec2 st1 = pt * 1.2;)
-    GLSL(vec4 p = texture(sample_tex, sample_pos);)
-    GLSL(vec4 sum1 = texture(sample_tex, sample_pos + st1 * vec2(+1, +1))
-                   + texture(sample_tex, sample_pos + st1 * vec2(+1, -1))
-                   + texture(sample_tex, sample_pos + st1 * vec2(-1, +1))
-                   + texture(sample_tex, sample_pos + st1 * vec2(-1, -1));)
+    GLSL(vec4 p = texture(tex, pos);)
+    GLSL(vec4 sum1 = texture(tex, pos + st1 * vec2(+1, +1))
+                   + texture(tex, pos + st1 * vec2(+1, -1))
+                   + texture(tex, pos + st1 * vec2(-1, +1))
+                   + texture(tex, pos + st1 * vec2(-1, -1));)
     GLSL(vec2 st2 = pt * 1.5;)
-    GLSL(vec4 sum2 = texture(sample_tex, sample_pos + st2 * vec2(+1,  0))
-                   + texture(sample_tex, sample_pos + st2 * vec2( 0, +1))
-                   + texture(sample_tex, sample_pos + st2 * vec2(-1,  0))
-                   + texture(sample_tex, sample_pos + st2 * vec2( 0, -1));)
+    GLSL(vec4 sum2 = texture(tex, pos + st2 * vec2(+1,  0))
+                   + texture(tex, pos + st2 * vec2( 0, +1))
+                   + texture(tex, pos + st2 * vec2(-1,  0))
+                   + texture(tex, pos + st2 * vec2( 0, -1));)
     GLSL(vec4 t = p * 0.859375 + sum2 * -0.1171875 + sum1 * -0.09765625;)
     double param = isnan(scaler->params[0]) ? 0.5 : scaler->params[0];
     GLSLF("color = p + t * %f;\n", param);
@@ -1189,9 +1242,8 @@ static void pass_sample_oversample(struct gl_video *p, struct scaler *scaler,
 {
     GLSL(vec4 color;)
     GLSLF("{\n");
-    GLSL(vec2 pt = 1.0 / sample_size;)
-    GLSL(vec2 pos = sample_pos + vec2(0.5) * pt;) // round to nearest
-    GLSL(vec2 fcoord = fract(pos * sample_size - vec2(0.5));)
+    GLSL(vec2 pos = pos + vec2(0.5) * pt;) // round to nearest
+    GLSL(vec2 fcoord = fract(pos * size - vec2(0.5));)
     // We only need to sample from the four corner pixels since we're using
     // nearest neighbour and can compute the exact transition point
     GLSL(vec2 baseNW = pos - fcoord * pt;)
@@ -1209,11 +1261,11 @@ static void pass_sample_oversample(struct gl_video *p, struct scaler *scaler,
               "greaterThanEqual(coeff, vec2(%f)));\n", scaler->params[0]);
     }
     // Compute the right blend of colors
-    GLSL(vec4 left = mix(texture(sample_tex, baseSW),
-                         texture(sample_tex, baseNW),
+    GLSL(vec4 left = mix(texture(tex, baseSW),
+                         texture(tex, baseNW),
                          coeff.y);)
-    GLSL(vec4 right = mix(texture(sample_tex, baseSE),
-                          texture(sample_tex, baseNE),
+    GLSL(vec4 right = mix(texture(tex, baseSE),
+                          texture(tex, baseNE),
                           coeff.y);)
     GLSL(color = mix(right, left, coeff.x);)
     GLSLF("}\n");
@@ -1234,11 +1286,7 @@ static void pass_sample(struct gl_video *p, int src_tex,
 {
     struct scaler *scaler = &p->scalers[scaler_unit];
     reinit_scaler(p, scaler_unit, name, scale_factor, filter_sizes);
-
-    // Set up the sample parameters appropriately
-    GLSLF("#define sample_tex  texture%d\n", src_tex);
-    GLSLF("#define sample_pos  texcoord%d\n", src_tex);
-    GLSLF("#define sample_size texture_size%d\n", src_tex);
+    sampler_prelude(p, src_tex);
 
     // Set up the transformation for everything other than separated scaling
     if (!scaler->kernel || scaler->kernel->polar)
@@ -1246,7 +1294,7 @@ static void pass_sample(struct gl_video *p, int src_tex,
 
     // Dispatch the scaler. They're all wildly different.
     if (strcmp(scaler->name, "bilinear") == 0) {
-        GLSL(vec4 color = texture(sample_tex, sample_pos);)
+        GLSL(vec4 color = texture(tex, pos);)
     } else if (strcmp(scaler->name, "bicubic_fast") == 0) {
         pass_sample_bicubic_fast(p);
     } else if (strcmp(scaler->name, "sharpen3") == 0) {
@@ -1255,6 +1303,14 @@ static void pass_sample(struct gl_video *p, int src_tex,
         pass_sample_sharpen5(p, scaler);
     } else if (strcmp(scaler->name, "oversample") == 0) {
         pass_sample_oversample(p, scaler, w, h);
+    } else if (strcmp(scaler->name, "custom") == 0) {
+        if (load_filestr(p, &p->scale_shader, p->opts.scale_shader)) {
+            GLSLF("vec4 color;\n// custom scale-shader\n");
+            GLSLF("%s\n", p->scale_shader.str);
+        } else {
+            // Naive fallback to signal something went wrong
+            GLSL(vec4 color = vec4(1.0, 0.0, 0.0, 1.0);)
+        }
     } else if (scaler->kernel && scaler->kernel->polar) {
         pass_sample_polar(p, scaler);
     } else if (scaler->kernel) {
@@ -1334,6 +1390,7 @@ static void pass_convert_yuv(struct gl_video *p)
     cparams.texture_bits = (cparams.input_bits + 7) & ~7;
     mp_csp_set_image_params(&cparams, &p->image_params);
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
+    p->user_gamma = 1.0 / (cparams.gamma * p->opts.gamma);
 
     GLSLF("// color conversion\n");
 
@@ -1397,13 +1454,6 @@ static void pass_convert_yuv(struct gl_video *p)
         GLSL(color.rgb = mix(color.rgb * vec3(4.5),
                              vec3(1.0993) * pow(color.rgb, vec3(0.45)) - vec3(0.0993),
                              lessThanEqual(vec3(0.0181), color.rgb));)
-    }
-
-    if (p->user_gamma != 1) {
-        p->use_indirect = true;
-        gl_sc_uniform_f(sc, "user_gamma", p->user_gamma);
-        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
-        GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
 
     if (!p->has_alpha || p->opts.alpha_mode == 0) { // none
@@ -1544,6 +1594,13 @@ static void pass_colormanage(struct gl_video *p)
     enum mp_csp_trc trc_dst = p->opts.target_trc;
     enum mp_csp_prim prim_src = p->image_params.primaries,
                      prim_dst = p->opts.target_prim;
+
+    if (p->user_gamma != 1) {
+        p->use_indirect = true;
+        gl_sc_uniform_f(p->sc, "user_gamma", p->user_gamma);
+        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
+        GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
+    }
 
     if (p->use_lut_3d) {
         // The 3DLUT is hard-coded against BT.2020's gamut during creation, and
@@ -1700,14 +1757,90 @@ static void pass_dither(struct gl_video *p)
           dither_quantization);
 }
 
+// Draws the OSD. If linearize is true, the output will be converted to
+// linear light.
+static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
+                          struct mp_osd_res rect, int vp_w, int vp_h, int fbo,
+                          bool linearize)
+{
+    mpgl_osd_generate(p->osd, rect, pts, p->image_params.stereo_out, draw_flags);
+
+    p->gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
+    for (int n = 0; n < MAX_OSD_PARTS; n++) {
+        enum sub_bitmap_format fmt = mpgl_osd_get_part_format(p->osd, n);
+        if (!fmt)
+            continue;
+        gl_sc_uniform_sampler(p->sc, "osdtex", GL_TEXTURE_2D, 0);
+        switch (fmt) {
+        case SUBBITMAP_RGBA: {
+            GLSLF("// OSD (RGBA)\n");
+            GLSL(vec4 color = texture(osdtex, texcoord).bgra;)
+            break;
+        }
+        case SUBBITMAP_LIBASS: {
+            GLSLF("// OSD (libass)\n");
+            GLSL(vec4 color =
+                vec4(ass_color.rgb, ass_color.a * texture(osdtex, texcoord).r);)
+            break;
+        }
+        default:
+            abort();
+        }
+        if (linearize)
+            pass_linearize(p);
+        gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
+        gl_sc_gen_shader_and_reset(p->sc);
+        mpgl_osd_draw_part(p->osd, vp_w, vp_h, n);
+    }
+    gl_sc_set_vao(p->sc, &p->vao);
+}
+
 // The main rendering function, takes care of everything up to and including
 // upscaling
 static void pass_render_frame(struct gl_video *p)
 {
+    int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
+        vp_h = p->dst_rect.y1 - p->dst_rect.y0;
+
     p->use_indirect = false; // set to true as needed by pass_*
     pass_read_video(p);
     pass_convert_yuv(p);
+
+    if (load_filestr(p, &p->pre_shader, p->opts.pre_shader)) {
+        finish_pass_fbo(p, &p->indirect_fbo, p->image_w, p->image_h, 0, 0);
+        sampler_prelude(p, 0);
+        GLSLF("vec4 color;\n// custom pre-shader\n");
+        GLSLF("%s\n", p->pre_shader.str);
+        p->use_indirect = true;
+    }
+
     pass_scale_main(p);
+
+    if (p->opts.blend_subs) {
+        // Recreate the real video size from the src/dst rects
+        struct mp_osd_res rect = {
+            .w = vp_w, .h = vp_h,
+            .ml = -p->src_rect.x0, .mr = p->src_rect.x1 - p->image_w,
+            .mt = -p->src_rect.y0, .mb = p->src_rect.y1 - p->image_h,
+            .display_par = 1.0,
+        };
+        // Adjust margins for scale
+        double scale[2];
+        get_scale_factors(p, scale);
+        rect.ml *= scale[0]; rect.mr *= scale[0];
+        rect.mt *= scale[1]; rect.mb *= scale[1];
+        finish_pass_fbo(p, &p->blend_subs_fbo, vp_w, vp_h, 0, FBOTEX_FUZZY);
+        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, p->image.mpi->pts, rect, vp_w, vp_h,
+                      p->blend_subs_fbo.fbo, p->use_linear);
+        GLSL(vec4 color = texture(texture0, texcoord0);)
+    }
+
+    if (load_filestr(p, &p->post_shader, p->opts.post_shader)) {
+        finish_pass_fbo(p, &p->post_fbo, vp_w, vp_h, 0, 0);
+        sampler_prelude(p, 0);
+        GLSLF("vec4 color;\n// custom post-shader\n");
+        GLSLF("%s\n", p->post_shader.str);
+    }
 }
 
 static void pass_draw_to_screen(struct gl_video *p, int fbo)
@@ -1724,16 +1857,17 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
                                        struct frame_timing *t)
 {
     int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
-        vp_h = p->dst_rect.y1 - p->dst_rect.y0,
-        fuzz = FBOTEX_FUZZY_W | FBOTEX_FUZZY_H;
+        vp_h = p->dst_rect.y1 - p->dst_rect.y0;
+
+    double new_pts = p->image.mpi->pts;
 
     // First of all, figure out if we have a frame availble at all, and draw
     // it manually + reset the queue if not
-    if (!p->surfaces[p->surface_now].pts) {
+    if (p->surfaces[p->surface_now].pts < 0) {
         pass_render_frame(p);
         finish_pass_fbo(p, &p->surfaces[p->surface_now].fbotex,
-                        vp_w, vp_h, 0, fuzz);
-        p->surfaces[p->surface_now].pts = t ? t->pts : 0;
+                        vp_w, vp_h, 0, FBOTEX_FUZZY);
+        p->surfaces[p->surface_now].pts = new_pts;
         p->surface_idx = p->surface_now;
     }
 
@@ -1762,13 +1896,12 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
 
     // Render a new frame if it came in and there's room in the queue
     int surface_dst = fbosurface_wrap(p->surface_idx+1);
-    if (t && surface_dst != surface_bse &&
-             p->surfaces[p->surface_idx].pts < t->pts) {
+    if (surface_dst != surface_bse && p->surfaces[p->surface_idx].pts < new_pts) {
         MP_STATS(p, "new-pts");
         pass_render_frame(p);
         finish_pass_fbo(p, &p->surfaces[surface_dst].fbotex,
-                        vp_w, vp_h, 0, fuzz);
-        p->surfaces[surface_dst].pts = t->pts;
+                        vp_w, vp_h, 0, FBOTEX_FUZZY);
+        p->surfaces[surface_dst].pts = new_pts;
         p->surface_idx = surface_dst;
     }
 
@@ -1780,12 +1913,25 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     bool valid = true;
     for (int i = surface_bse, ii; valid && i != surface_end; i = ii) {
         ii = fbosurface_wrap(i+1);
-        if (!p->surfaces[i].pts || !p->surfaces[ii].pts) {
+        if (p->surfaces[i].pts < 0 || p->surfaces[ii].pts < 0) {
             valid = false;
         } else if (p->surfaces[ii].pts < p->surfaces[i].pts) {
             valid = false;
             MP_DBG(p, "interpolation queue underrun\n");
         }
+    }
+
+    // Calculate the correct PTS/vsync timings
+    double pts_now = 0, pts_nxt = 0, next_vsync = 0, vsync_interval = 0;
+    if (t) {
+        next_vsync = (t->next_vsync - t->pts)/1e6 + new_pts;
+        vsync_interval = (t->next_vsync - t->prev_vsync)/1e6;
+        pts_now = p->surfaces[surface_now].pts;
+        pts_nxt = p->surfaces[surface_nxt].pts;
+
+        // Round OSD PTS to the nearest neighbour
+        p->osd_pts = (fabs(next_vsync - pts_now) < fabs(next_vsync - pts_nxt))
+                         ? pts_now : pts_nxt;
     }
 
     // Finally, draw the right mix of frames to the screen.
@@ -1795,13 +1941,10 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
         GLSL(vec4 color = texture(texture0, texcoord0);)
         p->is_interpolated = false;
     } else {
-        int64_t pts_now = p->surfaces[surface_now].pts,
-                pts_nxt = p->surfaces[surface_nxt].pts;
         double fscale = pts_nxt - pts_now, mix;
         if (oversample) {
-            double vsync_interval = t->next_vsync - t->prev_vsync,
-                   threshold = isnan(tscale->params[0]) ? 0 : tscale->params[0];
-            mix = (pts_nxt - t->next_vsync) / vsync_interval;
+            double threshold = isnan(tscale->params[0]) ? 0 : tscale->params[0];
+            mix = (pts_nxt - next_vsync) / vsync_interval;
             mix = mix <= 0 + threshold ? 0 : mix;
             mix = mix >= 1 - threshold ? 1 : mix;
             mix = 1 - mix;
@@ -1810,7 +1953,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
                                   texture(texture1, texcoord1),
                                   inter_coeff);)
         } else {
-            mix = (t->next_vsync - pts_now) / fscale;
+            mix = (next_vsync - pts_now) / fscale;
             gl_sc_uniform_f(p->sc, "fcoord", mix);
             pass_sample_separated_gen(p, tscale, 0, 0);
         }
@@ -1819,18 +1962,16 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
                              i, vp_w, vp_h);
         }
         MP_STATS(p, "frame-mix");
-        MP_DBG(p, "inter frame ppts: %lld, pts: %lld, vsync: %lld, mix: %f\n",
-               (long long)pts_now, (long long)pts_nxt,
-               (long long)t->next_vsync, mix);
+        MP_DBG(p, "inter frame ppts: %f, pts: %f, vsync: %f, mix: %f\n",
+               pts_now, pts_nxt, next_vsync, mix);
         p->is_interpolated = true;
     }
     pass_draw_to_screen(p, fbo);
 
     // Dequeue frames if necessary
     if (t) {
-        int64_t vsync_interval = t->next_vsync - t->prev_vsync;
-        int64_t vsync_guess = t->next_vsync + vsync_interval;
-        if (p->surfaces[surface_nxt].pts > p->surfaces[p->surface_now].pts &&
+        double vsync_guess = next_vsync + vsync_interval;
+        if (p->surfaces[surface_nxt].pts > p->surfaces[surface_now].pts &&
             p->surfaces[surface_nxt].pts < vsync_guess)
         {
             p->surface_now = surface_nxt;
@@ -1838,59 +1979,11 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     }
 }
 
-static void draw_osd(struct gl_video *p)
-{
-    mpgl_osd_generate(p->osd, p->osd_rect, p->osd_pts, p->image_params.stereo_out);
-
-    for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        enum sub_bitmap_format fmt = mpgl_osd_get_part_format(p->osd, n);
-        if (!fmt)
-            continue;
-        gl_sc_uniform_sampler(p->sc, "osdtex", GL_TEXTURE_2D, 0);
-        switch (fmt) {
-        case SUBBITMAP_RGBA: {
-            GLSLF("// OSD (RGBA)\n");
-            GLSL(vec4 color = texture(osdtex, texcoord).bgra;)
-            break;
-        }
-        case SUBBITMAP_LIBASS: {
-            GLSLF("// OSD (libass)\n");
-            GLSL(vec4 color =
-                vec4(ass_color.rgb, ass_color.a * texture(osdtex, texcoord).r);)
-            break;
-        }
-        default:
-            abort();
-        }
-
-        // Apply OSD color correction
-        if (p->use_linear)
-            pass_linearize(p);
-        if (p->user_gamma != 1) {
-            gl_sc_uniform_f(p->sc, "user_gamma", p->user_gamma);
-            GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
-            GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
-        }
-        pass_colormanage(p);
-
-        gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
-        gl_sc_gen_shader_and_reset(p->sc);
-        mpgl_osd_draw_part(p->osd, p->vp_w, p->vp_h, n);
-    }
-
-    debug_check_gl(p, "after OSD rendering");
-}
-
 // (fbo==0 makes BindFramebuffer select the screen backbuffer)
 void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
 {
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
-
-    struct mp_csp_params params;
-    mp_csp_copy_equalizer_values(&params, &p->video_eq);
-
-    p->user_gamma = 1.0 / (p->opts.gamma * params.gamma);
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
@@ -1918,8 +2011,11 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    if (p->osd)
-        draw_osd(p);
+    if (p->osd) {
+        pass_draw_osd(p, p->opts.blend_subs ? OSD_DRAW_OSD_ONLY : 0,
+                      p->osd_pts, p->osd_rect, p->vp_w, p->vp_h, fbo, false);
+        debug_check_gl(p, "after OSD rendering");
+    }
 
     gl->UseProgram(0);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -2031,24 +2127,21 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
-static bool test_fbo(struct gl_video *p, bool *success)
+static bool test_fbo(struct gl_video *p)
 {
-    if (!*success)
-        return false;
-
     GL *gl = p->gl;
-    *success = false;
+    bool success = false;
     MP_VERBOSE(p, "Testing user-set FBO format (0x%x)\n",
                    (unsigned)p->opts.fbo_format);
     struct fbotex fbo = {0};
     if (fbotex_init(&fbo, p->gl, p->log, 16, 16, p->opts.fbo_format)) {
         gl->BindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
         gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-        *success = true;
+        success = true;
     }
     fbotex_uninit(&fbo);
     glCheckError(gl, p->log, "FBO test");
-    return *success;
+    return success;
 }
 
 // Disable features that are not supported with the current OpenGL version.
@@ -2056,7 +2149,7 @@ static void check_gl_features(struct gl_video *p)
 {
     GL *gl = p->gl;
     bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
-    bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
+    bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB && test_fbo(p);
     bool have_1d_tex = gl->mpgl_caps & MPGL_CAP_1D_TEX;
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
@@ -2072,7 +2165,7 @@ static void check_gl_features(struct gl_video *p)
         const struct filter_kernel *kernel = mp_find_filter_kernel(p->opts.scalers[n]);
         if (kernel) {
             char *reason = NULL;
-            if (!test_fbo(p, &have_fbo))
+            if (!have_fbo)
                 reason = "scaler (FBO)";
             if (!have_float_tex)
                 reason = "scaler (float tex.)";
@@ -2113,15 +2206,19 @@ static void check_gl_features(struct gl_video *p)
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (GLSL version)";
     }
-    if (use_cms && !test_fbo(p, &have_fbo)) {
+    if (use_cms && !have_fbo) {
         p->opts.target_prim = MP_CSP_PRIM_AUTO;
         p->opts.target_trc = MP_CSP_TRC_AUTO;
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (FBO)";
     }
-    if (p->opts.interpolation && !test_fbo(p, &have_fbo)) {
+    if (p->opts.interpolation && !have_fbo) {
         p->opts.interpolation = false;
         disabled[n_disabled++] = "interpolation (FBO)";
+    }
+    if (p->opts.blend_subs && !have_fbo) {
+        p->opts.blend_subs = false;
+        disabled[n_disabled++] = "subtitle blending (FBO)";
     }
     if (gl->es && p->opts.pbo) {
         p->opts.pbo = 0;
@@ -2407,7 +2504,7 @@ void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd)
     recreate_osd(p);
 }
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log)
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
 {
     if (gl->version < 210 && gl->es < 200) {
         mp_err(log, "At least OpenGL 2.1 or OpenGL ES 2.0 required.\n");
@@ -2417,6 +2514,7 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log)
     struct gl_video *p = talloc_ptrtype(NULL, p);
     *p = (struct gl_video) {
         .gl = gl,
+        .global = g,
         .log = log,
         .opts = gl_video_opts_def,
         .gl_target = GL_TEXTURE_2D,
@@ -2493,6 +2591,7 @@ struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p)
 // Call when the mp_csp_equalizer returned by gl_video_eq_ptr() was changed.
 void gl_video_eq_update(struct gl_video *p)
 {
+    gl_video_reset_surfaces(p);
 }
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,

@@ -640,8 +640,11 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
     }
 
     // On EOF, always allow the playloop to use the remaining frame.
-    if (have_new_frame(mpctx) || (r <= 0 && mpctx->next_frame[0]))
+    if (have_new_frame(mpctx) || (r <= 0 && mpctx->next_frame[0])) {
         return VD_NEW_FRAME;
+    } else if (r <= 0 && mpctx->next_frame[1]) {
+        return VD_PROGRESS;
+    }
 
     // Last-frame seek
     if (r <= 0 && hrseek && mpctx->hrseek_lastframe && mpctx->saved_frame) {

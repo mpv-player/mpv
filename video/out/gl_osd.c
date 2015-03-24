@@ -401,7 +401,7 @@ struct gl_vao *mpgl_osd_get_vao(struct mpgl_osd *ctx)
 }
 
 void mpgl_osd_generate(struct mpgl_osd *ctx, struct mp_osd_res res, double pts,
-                       int stereo_mode)
+                       int stereo_mode, int draw_flags)
 {
     for (int n = 0; n < MAX_OSD_PARTS; n++)
         ctx->parts[n]->num_subparts = 0;
@@ -413,6 +413,6 @@ void mpgl_osd_generate(struct mpgl_osd *ctx, struct mp_osd_res res, double pts,
     ctx->display_size[0] = s_res.w = s_res.w / div[0];
     ctx->display_size[1] = s_res.h = s_res.h / div[1];
 
-    osd_draw(ctx->osd, s_res, pts, 0, ctx->formats, gen_osd_cb, ctx);
+    osd_draw(ctx->osd, s_res, pts, draw_flags, ctx->formats, gen_osd_cb, ctx);
     ctx->stereo_mode = stereo_mode;
 }
