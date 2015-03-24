@@ -444,7 +444,8 @@ function render_elements(master_ass)
         end
 
         style_ass:append(string.format("{\\1a&H%X&\\2a&H%X&\\3a&H%X&\\4a&H%X&}",
-            ar[1], ar[2], ar[3], ar[4]))
+            math.floor(ar[1]), math.floor(ar[2]),
+            math.floor(ar[3]), math.floor(ar[4])))
 
         if (state.active_element == n) then
 

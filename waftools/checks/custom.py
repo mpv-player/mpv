@@ -54,9 +54,12 @@ def check_lua(ctx, dependency_identifier):
         ( '51',     'lua >= 5.1.0 lua < 5.2.0'),
         ( '51deb',  'lua5.1 >= 5.1.0'), # debian
         ( '51fbsd', 'lua-5.1 >= 5.1.0'), # FreeBSD
-        ( '52',     'lua >= 5.2.0' ),
+        ( '52',     'lua >= 5.2.0 lua < 5.3.0' ),
         ( '52deb',  'lua5.2 >= 5.2.0'), # debian
         ( '52fbsd', 'lua-5.2 >= 5.2.0'), # FreeBSD
+        ( '53',     'lua >= 5.3.0' ),
+        ( '53deb',  'lua5.2 >= 5.3.0'), # debian
+        ( '53fbsd', 'lua-5.2 >= 5.3.0'), # FreeBSD
         ( 'luajit', 'luajit >= 2.0.0' ),
     ]
 
@@ -72,6 +75,9 @@ def check_lua(ctx, dependency_identifier):
             ctx.mark_satisfied(lua_version)
             ctx.add_optional_message(dependency_identifier,
                                      'version found: ' + lua_version)
+            if lua_version.startswith('53'):
+                print 'Lua 5.3 is very unlikely to work properly...'
+                return False
             return True
     return False
 
