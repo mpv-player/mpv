@@ -1062,6 +1062,7 @@ static void pass_sample_separated_gen(struct gl_video *p, struct scaler *scaler,
     GLSLF("{\n");
     if (!planar) {
         GLSLF("vec2 dir = vec2(%d, %d);\n", d_x, d_y);
+        GLSL(pt *= dir;)
         GLSL(float fcoord = dot(fract(pos * size - vec2(0.5)), dir);)
         GLSLF("vec2 base = pos - fcoord * pt - pt * vec2(%d);\n", N / 2 - 1);
     }
