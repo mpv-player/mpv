@@ -904,28 +904,34 @@ static void demux_seek_lavf(demuxer_t *demuxer, double rel_seek_secs, int flags)
         priv->last_pts += rel_seek_secs * AV_TIME_BASE;
     }
 
+    int r;
     if (!priv->avfc->iformat->read_seek2) {
         // Normal seeking.
-        int r = av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags);
+        r = av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags);
         if (r < 0 && (avsflags & AVSEEK_FLAG_BACKWARD)) {
             // When seeking before the beginning of the file, and seeking fails,
             // try again without the backwards flag to make it seek to the
             // beginning.
             avsflags &= ~AVSEEK_FLAG_BACKWARD;
-            av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags);
+            r = av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags);
         }
     } else {
         // av_seek_frame() won't work. Use "new" seeking API. We don't use this
         // API by default, because there are some major issues.
         // Set max_ts==ts, so that demuxing starts from an earlier position in
         // the worst case.
-        int r = avformat_seek_file(priv->avfc, -1, INT64_MIN,
-                                   priv->last_pts, priv->last_pts, avsflags);
+        r = avformat_seek_file(priv->avfc, -1, INT64_MIN,
+                               priv->last_pts, priv->last_pts, avsflags);
         // Similar issue as in the normal seeking codepath.
         if (r < 0) {
-            avformat_seek_file(priv->avfc, -1, INT64_MIN,
-                               priv->last_pts, INT64_MAX, avsflags);
+            r = avformat_seek_file(priv->avfc, -1, INT64_MIN,
+                                   priv->last_pts, INT64_MAX, avsflags);
         }
+    }
+    if (r < 0) {
+        char buf[180];
+        av_strerror(r, buf, sizeof(buf));
+        MP_VERBOSE(demuxer, "Seek failed (%s)\n", buf);
     }
 }
 
