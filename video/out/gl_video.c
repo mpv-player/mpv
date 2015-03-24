@@ -971,6 +971,15 @@ static void reinit_scaler(struct gl_video *p, int scaler_unit, const char *name,
     debug_check_gl(p, "after initializing scaler");
 }
 
+// Set up shared/commonly used variables
+static void sampler_prelude(struct gl_video *p, int tex_num)
+{
+    GLSLF("#define tex texture%d\n", tex_num);
+    GLSLF("vec2 pos = texcoord%d;\n", tex_num);
+    GLSLF("vec2 size = texture_size%d;\n", tex_num);
+    GLSLF("vec2 pt = vec2(1.0) / size;\n");
+}
+
 static void pass_sample_separated_get_weights(struct gl_video *p,
                                               struct scaler *scaler)
 {
@@ -1011,9 +1020,9 @@ static void pass_sample_separated_gen(struct gl_video *p, struct scaler *scaler,
     GLSLF("{\n");
     if (!planar) {
         GLSLF("vec2 dir = vec2(%d, %d);\n", d_x, d_y);
-        GLSL(vec2 pt = (vec2(1.0) / sample_size) * dir;)
-        GLSL(float fcoord = dot(fract(sample_pos * sample_size - vec2(0.5)), dir);)
-        GLSLF("vec2 base = sample_pos - fcoord * pt - pt * vec2(%d);\n", N / 2 - 1);
+        GLSL(pt *= dir;)
+        GLSL(float fcoord = dot(fract(pos * size - vec2(0.5)), dir);)
+        GLSLF("vec2 base = pos - fcoord * pt - pt * vec2(%d);\n", N / 2 - 1);
     }
     GLSL(vec4 c;)
     if (use_ar) {
@@ -1026,7 +1035,7 @@ static void pass_sample_separated_gen(struct gl_video *p, struct scaler *scaler,
         if (planar) {
             GLSLF("c = texture(texture%d, texcoord%d);\n", n, n);
         } else {
-            GLSLF("c = texture(sample_tex, base + pt * vec2(%d));\n", n);
+            GLSLF("c = texture(tex, base + pt * vec2(%d));\n", n);
         }
         GLSLF("color += vec4(weights[%d]) * c;\n", n);
         if (use_ar && (n == N/2-1 || n == N/2)) {
@@ -1053,9 +1062,7 @@ static void pass_sample_separated(struct gl_video *p, int src_tex,
     int src_w = p->pass_tex[src_tex].src.x1 - p->pass_tex[src_tex].src.x0;
     finish_pass_fbo(p, &scaler->sep_fbo, src_w, h, src_tex, FBOTEX_FUZZY_H);
     // Restore the sample source for the second pass
-    GLSLF("#define sample_tex  texture%d\n", src_tex);
-    GLSLF("#define sample_pos  texcoord%d\n", src_tex);
-    GLSLF("#define sample_size texture_size%d\n", src_tex);
+    sampler_prelude(p, src_tex);
     GLSLF("// pass 2\n");
     p->pass_tex[src_tex].src.x0 = src_new.x0;
     p->pass_tex[src_tex].src.x1 = src_new.x1;
@@ -1069,9 +1076,8 @@ static void pass_sample_polar(struct gl_video *p, struct scaler *scaler)
     bool use_ar = scaler->antiring > 0;
     GLSL(vec4 color = vec4(0.0);)
     GLSLF("{\n");
-    GLSL(vec2 pt = vec2(1.0) / sample_size;)
-    GLSL(vec2 fcoord = fract(sample_pos * sample_size - vec2(0.5));)
-    GLSL(vec2 base = sample_pos - fcoord * pt;)
+    GLSL(vec2 fcoord = fract(pos * size - vec2(0.5));)
+    GLSL(vec2 base = pos - fcoord * pt;)
     GLSL(vec4 c;)
     GLSLF("float w, d, wsum = 0.0;\n");
     if (use_ar) {
@@ -1097,7 +1103,7 @@ static void pass_sample_polar(struct gl_video *p, struct scaler *scaler)
                 GLSLF("if (d < 1.0) {\n");
             GLSL(w = texture1D(lut, d).r;)
             GLSL(wsum += w;)
-            GLSLF("c = texture(sample_tex, base + pt * vec2(%d, %d));\n", x, y);
+            GLSLF("c = texture(tex, base + pt * vec2(%d, %d));\n", x, y);
             GLSL(color += vec4(w) * c;)
             if (use_ar && x >= 0 && y >= 0 && x <= 1 && y <= 1) {
                 GLSL(lo = min(lo, c);)
@@ -1134,20 +1140,19 @@ static void pass_sample_bicubic_fast(struct gl_video *p)
 {
     GLSL(vec4 color;)
     GLSLF("{\n");
-    GLSL(vec2 pt = 1.0 / sample_size;)
-    GLSL(vec2 fcoord = fract(sample_pos * sample_size + vec2(0.5, 0.5));)
+    GLSL(vec2 fcoord = fract(pos * size + vec2(0.5, 0.5));)
     bicubic_calcweights(p, "parmx", "fcoord.x");
     bicubic_calcweights(p, "parmy", "fcoord.y");
     GLSL(vec4 cdelta;)
     GLSL(cdelta.xz = parmx.RG * vec2(-pt.x, pt.x);)
     GLSL(cdelta.yw = parmy.RG * vec2(-pt.y, pt.y);)
     // first y-interpolation
-    GLSL(vec4 ar = texture(sample_tex, sample_pos + cdelta.xy);)
-    GLSL(vec4 ag = texture(sample_tex, sample_pos + cdelta.xw);)
+    GLSL(vec4 ar = texture(tex, pos + cdelta.xy);)
+    GLSL(vec4 ag = texture(tex, pos + cdelta.xw);)
     GLSL(vec4 ab = mix(ag, ar, parmy.b);)
     // second y-interpolation
-    GLSL(vec4 br = texture(sample_tex, sample_pos + cdelta.zy);)
-    GLSL(vec4 bg = texture(sample_tex, sample_pos + cdelta.zw);)
+    GLSL(vec4 br = texture(tex, pos + cdelta.zy);)
+    GLSL(vec4 bg = texture(tex, pos + cdelta.zw);)
     GLSL(vec4 aa = mix(bg, br, parmy.b);)
     // x-interpolation
     GLSL(color = mix(aa, ab, parmx.b);)
@@ -1158,13 +1163,12 @@ static void pass_sample_sharpen3(struct gl_video *p, struct scaler *scaler)
 {
     GLSL(vec4 color;)
     GLSLF("{\n");
-    GLSL(vec2 pt = 1.0 / sample_size;)
     GLSL(vec2 st = pt * 0.5;)
-    GLSL(vec4 p = texture(sample_tex, sample_pos);)
-    GLSL(vec4 sum = texture(sample_tex, sample_pos + st * vec2(+1, +1))
-                  + texture(sample_tex, sample_pos + st * vec2(+1, -1))
-                  + texture(sample_tex, sample_pos + st * vec2(-1, +1))
-                  + texture(sample_tex, sample_pos + st * vec2(-1, -1));)
+    GLSL(vec4 p = texture(tex, pos);)
+    GLSL(vec4 sum = texture(tex, pos + st * vec2(+1, +1))
+                  + texture(tex, pos + st * vec2(+1, -1))
+                  + texture(tex, pos + st * vec2(-1, +1))
+                  + texture(tex, pos + st * vec2(-1, -1));)
     double param = isnan(scaler->params[0]) ? 0.5 : scaler->params[0];
     GLSLF("color = p + (p - 0.25 * sum) * %f;\n", param);
     GLSLF("}\n");
@@ -1174,18 +1178,17 @@ static void pass_sample_sharpen5(struct gl_video *p, struct scaler *scaler)
 {
     GLSL(vec4 color;)
     GLSLF("{\n");
-    GLSL(vec2 pt = 1.0 / sample_size;)
     GLSL(vec2 st1 = pt * 1.2;)
-    GLSL(vec4 p = texture(sample_tex, sample_pos);)
-    GLSL(vec4 sum1 = texture(sample_tex, sample_pos + st1 * vec2(+1, +1))
-                   + texture(sample_tex, sample_pos + st1 * vec2(+1, -1))
-                   + texture(sample_tex, sample_pos + st1 * vec2(-1, +1))
-                   + texture(sample_tex, sample_pos + st1 * vec2(-1, -1));)
+    GLSL(vec4 p = texture(tex, pos);)
+    GLSL(vec4 sum1 = texture(tex, pos + st1 * vec2(+1, +1))
+                   + texture(tex, pos + st1 * vec2(+1, -1))
+                   + texture(tex, pos + st1 * vec2(-1, +1))
+                   + texture(tex, pos + st1 * vec2(-1, -1));)
     GLSL(vec2 st2 = pt * 1.5;)
-    GLSL(vec4 sum2 = texture(sample_tex, sample_pos + st2 * vec2(+1,  0))
-                   + texture(sample_tex, sample_pos + st2 * vec2( 0, +1))
-                   + texture(sample_tex, sample_pos + st2 * vec2(-1,  0))
-                   + texture(sample_tex, sample_pos + st2 * vec2( 0, -1));)
+    GLSL(vec4 sum2 = texture(tex, pos + st2 * vec2(+1,  0))
+                   + texture(tex, pos + st2 * vec2( 0, +1))
+                   + texture(tex, pos + st2 * vec2(-1,  0))
+                   + texture(tex, pos + st2 * vec2( 0, -1));)
     GLSL(vec4 t = p * 0.859375 + sum2 * -0.1171875 + sum1 * -0.09765625;)
     double param = isnan(scaler->params[0]) ? 0.5 : scaler->params[0];
     GLSLF("color = p + t * %f;\n", param);
@@ -1197,9 +1200,8 @@ static void pass_sample_oversample(struct gl_video *p, struct scaler *scaler,
 {
     GLSL(vec4 color;)
     GLSLF("{\n");
-    GLSL(vec2 pt = 1.0 / sample_size;)
-    GLSL(vec2 pos = sample_pos + vec2(0.5) * pt;) // round to nearest
-    GLSL(vec2 fcoord = fract(pos * sample_size - vec2(0.5));)
+    GLSL(vec2 pos = pos + vec2(0.5) * pt;) // round to nearest
+    GLSL(vec2 fcoord = fract(pos * size - vec2(0.5));)
     // We only need to sample from the four corner pixels since we're using
     // nearest neighbour and can compute the exact transition point
     GLSL(vec2 baseNW = pos - fcoord * pt;)
@@ -1217,11 +1219,11 @@ static void pass_sample_oversample(struct gl_video *p, struct scaler *scaler,
               "greaterThanEqual(coeff, vec2(%f)));\n", scaler->params[0]);
     }
     // Compute the right blend of colors
-    GLSL(vec4 left = mix(texture(sample_tex, baseSW),
-                         texture(sample_tex, baseNW),
+    GLSL(vec4 left = mix(texture(tex, baseSW),
+                         texture(tex, baseNW),
                          coeff.y);)
-    GLSL(vec4 right = mix(texture(sample_tex, baseSE),
-                          texture(sample_tex, baseNE),
+    GLSL(vec4 right = mix(texture(tex, baseSE),
+                          texture(tex, baseNE),
                           coeff.y);)
     GLSL(color = mix(right, left, coeff.x);)
     GLSLF("}\n");
@@ -1242,11 +1244,7 @@ static void pass_sample(struct gl_video *p, int src_tex,
 {
     struct scaler *scaler = &p->scalers[scaler_unit];
     reinit_scaler(p, scaler_unit, name, scale_factor, filter_sizes);
-
-    // Set up the sample parameters appropriately
-    GLSLF("#define sample_tex  texture%d\n", src_tex);
-    GLSLF("#define sample_pos  texcoord%d\n", src_tex);
-    GLSLF("#define sample_size texture_size%d\n", src_tex);
+    sampler_prelude(p, src_tex);
 
     // Set up the transformation for everything other than separated scaling
     if (!scaler->kernel || scaler->kernel->polar)
@@ -1254,7 +1252,7 @@ static void pass_sample(struct gl_video *p, int src_tex,
 
     // Dispatch the scaler. They're all wildly different.
     if (strcmp(scaler->name, "bilinear") == 0) {
-        GLSL(vec4 color = texture(sample_tex, sample_pos);)
+        GLSL(vec4 color = texture(tex, pos);)
     } else if (strcmp(scaler->name, "bicubic_fast") == 0) {
         pass_sample_bicubic_fast(p);
     } else if (strcmp(scaler->name, "sharpen3") == 0) {
