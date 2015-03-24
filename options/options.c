@@ -616,7 +616,6 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("noar", "no-input-appleremote"),
     OPT_REPLACED("noautosub", "no-sub-auto"),
     OPT_REPLACED("noconsolecontrols", "no-input-terminal"),
-    OPT_REPLACED("nojoystick", "no-input-joystick"),
     OPT_REPLACED("nosound", "no-audio"),
     OPT_REPLACED("osdlevel", "osd-level"),
     OPT_REMOVED("panscanrange", "use --video-zoom, --video-pan-x/y"),

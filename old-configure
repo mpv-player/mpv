@@ -164,7 +164,6 @@ options_state_machine() {
     opt_yes_no _libguess    "libguess"
     opt_yes_no _termios     "termios database for key codes"
     opt_yes_no _iconv       "iconv for encoding conversion"
-    opt_yes_no _joystick    "joystick support" no
     opt_yes_no _vm          "X video mode extensions"
     opt_yes_no _dvb         "DVB input"
     opt_yes_no _tv          "TV interface (TV/DVB grabbers)" yes
@@ -837,8 +836,6 @@ if test "$_vapoursynth" = no && test "$_vapoursynth_lazy" = no ; then
     _vapoursynth_core=no
 fi
 check_trivial "VapourSynth core" $_vapoursynth_core VAPOURSYNTH_CORE
-
-check_trivial "joystick" $_joystick JOYSTICK
 
 check_trivial "encoding" $_encoding ENCODING
 

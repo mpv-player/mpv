@@ -241,7 +241,6 @@ Command Line Switches
     ``-noar``                   ``--no-input-appleremote``
     ``-noautosub``              ``--no-sub-auto``
     ``-noconsolecontrols``      ``--no-input-terminal``
-    ``-nojoystick``             ``--no-input-joystick``
     ``-nosound``                ``--no-audio``
     ``-osdlevel``               ``--osd-level``
     ``-panscanrange``           ``--video-zoom``, ``--video-pan-x/y``

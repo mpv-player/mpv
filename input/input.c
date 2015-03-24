@@ -163,8 +163,6 @@ struct input_opts {
     // Autorepeat config (be aware of mp_input_set_repeat_info())
     int ar_delay;
     int ar_rate;
-    char *js_dev;
-    int use_joystick;
     int use_alt_gr;
     int use_appleremote;
     int use_media_keys;
@@ -182,11 +180,9 @@ const struct m_sub_options input_config = {
         OPT_INT("ar-rate", ar_rate, CONF_GLOBAL),
         OPT_PRINT("keylist", mp_print_key_list),
         OPT_PRINT("cmdlist", mp_print_cmd_list),
-        OPT_STRING("js-dev", js_dev, CONF_GLOBAL),
         OPT_FLAG("default-bindings", default_bindings, CONF_GLOBAL),
         OPT_FLAG("test", test, CONF_GLOBAL),
         OPT_INTRANGE("doubleclick-time", doubleclick_time, 0, 0, 1000),
-        OPT_FLAG("joystick", use_joystick, CONF_GLOBAL),
         OPT_FLAG("right-alt-gr", use_alt_gr, CONF_GLOBAL),
         OPT_INTRANGE("key-fifo-size", key_fifo_size, CONF_GLOBAL, 2, 65000),
         OPT_FLAG("cursor", enable_mouse_movements, CONF_GLOBAL),
@@ -1243,11 +1239,6 @@ void mp_input_load(struct input_ctx *ictx)
     if (!config_ok) {
         MP_VERBOSE(ictx, "Falling back on default (hardcoded) input config\n");
     }
-
-#if HAVE_JOYSTICK
-    if (input_conf->use_joystick)
-        mp_input_joystick_add(ictx, input_conf->js_dev);
-#endif
 
     if (input_conf->use_alt_gr) {
         ictx->using_alt_gr = true;

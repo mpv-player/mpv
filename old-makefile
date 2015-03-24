@@ -73,7 +73,6 @@ SOURCES-$(GL_WAYLAND)           += video/out/wayland_common.c \
                                    video/out/gl_wayland.c
 
 SOURCES-$(JACK)                 += audio/out/ao_jack.c
-SOURCES-$(JOYSTICK)             += input/joystick.c
 SOURCES-$(OPENAL)               += audio/out/ao_openal.c
 SOURCES-$(OSS_AUDIO)            += audio/out/ao_oss.c
 SOURCES-$(PULSE)                += audio/out/ao_pulse.c

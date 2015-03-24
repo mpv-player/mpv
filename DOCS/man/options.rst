@@ -2358,12 +2358,6 @@ Input
     driver. Necessary to use the OSC, or to select the buttons in DVD menus.
     Support depends on the VO in use.
 
-``--input-joystick``, ``--no-input-joystick``
-    Enable/disable joystick support. Disabled by default.
-
-``--input-js-dev``
-    Specifies the joystick device to use (default: ``/dev/input/js0``).
-
 ``--input-media-keys=<yes|no>``
     (OS X only)
     Enable/disable media keys support. Enabled by default (except for libmpv).

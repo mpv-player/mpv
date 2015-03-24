@@ -309,11 +309,6 @@ iconv support use --disable-iconv.",
         'desc' : 'Encoding',
         'func': check_true,
     }, {
-        'name' : '--joystick',
-        'desc' : 'joystick',
-        'func': check_cc(header_name='linux/joystick.h'),
-        'default': 'disable'
-    }, {
         'name': '--libbluray',
         'desc': 'Bluray support',
         'func': check_pkg_config('libbluray', '>= 0.3.0'),
