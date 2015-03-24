@@ -30,6 +30,12 @@
 
 static void write_arg(bstr *cmdline, char *arg)
 {
+    // Empty args must be represented as an empty quoted string
+    if (!arg[0]) {
+        bstr_xappend(NULL, cmdline, bstr0("\"\""));
+        return;
+    }
+
     // If the string doesn't have characters that need to be escaped, it's best
     // to leave it alone for the sake of Windows programs that don't process
     // quoted args correctly.
