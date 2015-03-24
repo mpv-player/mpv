@@ -900,7 +900,6 @@ int mpv_set_option(mpv_handle *ctx, const char *name, mpv_format format,
     if (format != MPV_FORMAT_NODE) {
         tmp.format = format;
         memcpy(&tmp.u, data, type->type->size);
-        format = MPV_FORMAT_NODE;
         data = &tmp;
     }
     lock_core(ctx);
@@ -1685,7 +1684,7 @@ static mpv_opengl_cb_context *opengl_cb_get_context(mpv_handle *ctx)
 {
     mpv_opengl_cb_context *cb = ctx->mpctx->gl_cb_ctx;
     if (!cb) {
-        cb = mp_opengl_create(ctx->mpctx->global, ctx->mpctx->osd, ctx->clients);
+        cb = mp_opengl_create(ctx->mpctx->global, ctx->clients);
         ctx->mpctx->gl_cb_ctx = cb;
     }
     return cb;

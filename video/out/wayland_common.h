@@ -52,6 +52,11 @@ struct vo_wayland_state {
     struct vo *vo;
     struct mp_log* log;
 
+    struct {
+        struct wl_callback *callback;
+        bool pending;
+    } frame;
+
 #if HAVE_GL_WAYLAND
     struct {
         EGLSurface egl_surface;

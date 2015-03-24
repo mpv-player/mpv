@@ -106,7 +106,9 @@ static bool strndup_append_at(char **str, size_t at, const char *append,
         *str = t;
     }
 
-    memcpy(*str + at, append, append_len);
+    if (append_len)
+        memcpy(*str + at, append, append_len);
+
     (*str)[at + append_len] = '\0';
 
     ta_dbg_mark_as_string(*str);

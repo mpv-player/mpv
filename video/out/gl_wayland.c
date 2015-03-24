@@ -196,7 +196,12 @@ static void releaseGlContext_wayland(MPGLContext *ctx)
 static void swapGlBuffers_wayland(MPGLContext *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wayland;
+
+    if (!wl->frame.pending)
+        return;
+
     eglSwapBuffers(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
+    wl->frame.pending = false;
 }
 
 static int control(struct vo *vo, int *events, int request, void *data)
@@ -210,6 +215,12 @@ static int control(struct vo *vo, int *events, int request, void *data)
     return r;
 }
 
+static bool is_active(struct MPGLContext *ctx)
+{
+    struct vo_wayland_state *wl = ctx->vo->wayland;
+    return wl->frame.pending;
+}
+
 void mpgl_set_backend_wayland(MPGLContext *ctx)
 {
     ctx->config_window = config_window_wayland;
@@ -218,4 +229,5 @@ void mpgl_set_backend_wayland(MPGLContext *ctx)
     ctx->vo_control = control;
     ctx->vo_init = vo_wayland_init;
     ctx->vo_uninit = vo_wayland_uninit;
+    ctx->is_active = is_active;
 }

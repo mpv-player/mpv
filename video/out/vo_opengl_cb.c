@@ -87,7 +87,6 @@ struct mpv_opengl_cb_context {
 
     // --- Immutable or semi-threadsafe.
 
-    struct osd_state *osd;
     const char *hwapi;
 
     struct vo *active;
@@ -162,7 +161,6 @@ static void free_ctx(void *ptr)
 }
 
 struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
-                                               struct osd_state *osd,
                                                struct mp_client_api *client_api)
 {
     mpv_opengl_cb_context *ctx = talloc_zero(NULL, mpv_opengl_cb_context);
@@ -172,7 +170,6 @@ struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
     ctx->gl = talloc_zero(ctx, GL);
 
     ctx->log = mp_log_new(ctx, g->log, "opengl-cb");
-    ctx->osd = osd;
     ctx->client_api = client_api;
 
     switch (g->opts->hwdec_api) {
@@ -220,7 +217,7 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
 
     mpgl_load_functions2(ctx->gl, get_proc_address, get_proc_address_ctx,
                          exts, ctx->log);
-    ctx->renderer = gl_video_init(ctx->gl, ctx->log, ctx->osd);
+    ctx->renderer = gl_video_init(ctx->gl, ctx->log);
     if (!ctx->renderer)
         return MPV_ERROR_UNSUPPORTED;
 
@@ -300,8 +297,10 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
         gl_video_resize(ctx->renderer, vp_w, vp_h, &src, &dst, &osd);
     }
 
-    if (ctx->reconfigured)
+    if (ctx->reconfigured) {
+        gl_video_set_osd_source(ctx->renderer, vo ? vo->osd : NULL);
         gl_video_config(ctx->renderer, &ctx->img_params);
+    }
     if (ctx->update_new_opts) {
         struct vo_priv *p = vo ? vo->priv : NULL;
         struct vo_priv *opts = ctx->new_opts ? ctx->new_opts : p;
@@ -523,7 +522,6 @@ static int preinit(struct vo *vo)
     }
     p->ctx->active = vo;
     p->ctx->reconfigured = true;
-    assert(vo->osd == p->ctx->osd);
     copy_vo_opts(vo);
     pthread_mutex_unlock(&p->ctx->lock);
 

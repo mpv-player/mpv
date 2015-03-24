@@ -109,6 +109,10 @@ typedef struct MPGLContext {
     void (*register_resize_callback)(struct vo *vo,
                                      void (*cb)(struct vo *vo, int w, int h));
 
+    // Optional activity state of context.
+    // If false, OpenGL renderers should not draw anything.
+    bool (*is_active)(struct MPGLContext *);
+
     // For free use by the backend.
     void *priv;
 } MPGLContext;
