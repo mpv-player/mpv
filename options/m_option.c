@@ -1990,6 +1990,35 @@ error:
 #undef READ_NUM
 #undef READ_SIGN
 
+#define APPEND_PER(F, F_PER) \
+    res = talloc_asprintf_append(res, "%d%s", gm->F, gm->F_PER ? "%" : "")
+
+static char *print_geometry(const m_option_t *opt, const void *val)
+{
+    const struct m_geometry *gm = val;
+    char *res = talloc_strdup(NULL, "");
+    if (gm->wh_valid || gm->xy_valid) {
+        if (gm->wh_valid) {
+            APPEND_PER(w, w_per);
+            res = talloc_asprintf_append(res, "x");
+            APPEND_PER(h, h_per);
+        }
+        if (gm->xy_valid) {
+            res = talloc_asprintf_append(res, "+");
+            if (gm->x_sign)
+                res = talloc_asprintf_append(res, "-");
+            APPEND_PER(x, x_per);
+            res = talloc_asprintf_append(res, "+");
+            if (gm->y_sign)
+                res = talloc_asprintf_append(res, "-");
+            APPEND_PER(y, y_per);
+        }
+    }
+    return res;
+}
+
+#undef APPEND_PER
+
 // xpos,ypos: position of the left upper corner
 // widw,widh: width and height of the window
 // scrw,scrh: width and height of the current screen
@@ -2053,6 +2082,7 @@ const m_option_type_t m_option_type_geometry = {
     .name  = "Window geometry",
     .size  = sizeof(struct m_geometry),
     .parse = parse_geometry,
+    .print = print_geometry,
     .copy  = copy_opt,
 };
 
@@ -2082,6 +2112,7 @@ const m_option_type_t m_option_type_size_box = {
     .name  = "Window size",
     .size  = sizeof(struct m_geometry),
     .parse = parse_size_box,
+    .print = print_geometry,
     .copy  = copy_opt,
 };
 
