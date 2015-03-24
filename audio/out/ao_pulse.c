@@ -419,7 +419,6 @@ static int init(struct ao *ao)
         MP_ERR(ao, "Failed to allocate proplist\n");
         goto unlock_and_fail;
     }
-    (void)pa_proplist_sets(proplist, PA_PROP_MEDIA_ROLE, "video");
     (void)pa_proplist_sets(proplist, PA_PROP_MEDIA_ICON_NAME, ao->client_name);
 
     pa_format_info_set_rate(format, ao->samplerate);
