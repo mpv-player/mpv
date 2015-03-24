@@ -54,6 +54,7 @@ extern const demuxer_desc_t demuxer_desc_libass;
 extern const demuxer_desc_t demuxer_desc_subreader;
 extern const demuxer_desc_t demuxer_desc_playlist;
 extern const demuxer_desc_t demuxer_desc_disc;
+extern const demuxer_desc_t demuxer_desc_rar;
 
 /* Please do not add any new demuxers here. If you want to implement a new
  * demuxer, add it to libavformat, except for wrappers around external
@@ -72,6 +73,7 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_libass,
 #endif
     &demuxer_desc_matroska,
+    &demuxer_desc_rar,
     &demuxer_desc_lavf,
     &demuxer_desc_mf,
     &demuxer_desc_playlist,
