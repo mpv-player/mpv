@@ -639,24 +639,19 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
             // Always add these; they make backstepping after seeking faster.
             add_frame_pts(mpctx, img->pts);
 
-            bool drop = false;
-            if ((endpts != MP_NOPTS_VALUE && img->pts >= endpts) ||
-                mpctx->max_frames == 0)
-            {
-                drop = true;
+            if (endpts != MP_NOPTS_VALUE && img->pts >= endpts) {
                 r = VD_EOF;
-            }
-            if (!drop && hrseek && mpctx->hrseek_lastframe) {
+            } else if (mpctx->max_frames == 0) {
+                r = VD_EOF;
+            } else if (hrseek && mpctx->hrseek_lastframe) {
                 mp_image_setrefp(&mpctx->saved_frame, img);
-                drop = true;
-            }
-            if (hrseek && img->pts < mpctx->hrseek_pts - .005)
-                drop = true;
-            if (drop) {
-                talloc_free(img);
+            } else if (hrseek && img->pts < mpctx->hrseek_pts - .005) {
+                /* just skip */
             } else {
                 add_new_frame(mpctx, img);
+                img = NULL;
             }
+            talloc_free(img);
         }
     }
 
