@@ -324,7 +324,7 @@ test -z "$_bindir"  && _bindir="$_prefix/bin"
 test -z "$_mandir"  && _mandir="$_prefix/share/man"
 test -z "$_confdir" && _confdir="$_prefix/etc/mpv"
 
-mplayer_tmpdir=$(mktemp -d --tmpdir mpv-configure-XXXX)
+mplayer_tmpdir=$(mktemp -d -p ${TMPDIR:=/tmp} mpv-configure-XXXXXX)
 test -n "$mplayer_tmpdir" || die "Unable to create tmpdir."
 trap 'rm -rf "$mplayer_tmpdir"' EXIT
 
