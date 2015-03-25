@@ -72,6 +72,8 @@ struct vf_priv_s {
     int max_requests;           // upper bound for requested[] array
     bool failed;                // frame callback returned with an error
     bool shutdown;              // ask node to return
+    bool eof;                   // drain remaining data
+    int64_t frames_sent;
     bool initializing;          // filters are being built
     bool in_node_active;        // node might still be called
 
@@ -315,6 +317,7 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 {
     struct vf_priv_s *p = vf->priv;
     int ret = 0;
+    bool eof = !mpi;
 
     if (!p->out_node) {
         talloc_free(mpi);
@@ -323,13 +326,12 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 
     MPSWAP(struct mp_image *, p->next_image, mpi);
 
-    if (!mpi)
-        return 0;
-
-    // Turn PTS into frame duration (the pts field is abused for storing it)
-    if (p->out_pts == MP_NOPTS_VALUE)
-        p->out_pts = mpi->pts;
-    mpi->pts = p->next_image ? p->next_image->pts - mpi->pts : 0;
+    if (mpi) {
+        // Turn PTS into frame duration (the pts field is abused for storing it)
+        if (p->out_pts == MP_NOPTS_VALUE)
+            p->out_pts = mpi->pts;
+        mpi->pts = p->next_image ? p->next_image->pts - mpi->pts : 0;
+    }
 
     // Try to get new frames until we get rid of the input mpi.
     pthread_mutex_lock(&p->lock);
@@ -344,6 +346,7 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 
         // Make the input frame available to infiltGetFrame().
         if (mpi && locked_need_input(vf)) {
+            p->frames_sent++;
             p->buffered[p->num_buffered++] = talloc_steal(p->buffered, mpi);
             mpi = NULL;
             pthread_cond_broadcast(&p->wakeup);
@@ -351,8 +354,14 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 
         locked_read_output(vf);
 
-        if (!mpi)
+        if (!mpi) {
+            if (eof && p->frames_sent && !p->eof) {
+                MP_VERBOSE(vf, "input EOF\n");
+                p->eof = true;
+                pthread_cond_broadcast(&p->wakeup);
+            }
             break;
+        }
         pthread_cond_wait(&p->wakeup, &p->lock);
     }
     pthread_mutex_unlock(&p->lock);
@@ -374,7 +383,7 @@ static int filter_out(struct vf_instance *vf)
             break;
         // If the VS filter wants new input, there's no guarantee that we can
         // actually finish any time soon without feeding new input.
-        if (locked_need_input(vf))
+        if (!p->eof && locked_need_input(vf))
             break;
         pthread_cond_wait(&p->wakeup, &p->lock);
     }
@@ -468,6 +477,14 @@ static const VSFrameRef *VS_CC infiltGetFrame(int frameno, int activationReason,
                 continue;
             }
         }
+        if (frameno >= p->in_frameno + p->num_buffered) {
+            // If we think EOF was reached, don't wait for new input, and assume
+            // the VS filter has reached EOF.
+            if (p->eof) {
+                p->shutdown = true;
+                continue;
+            }
+        }
         if (frameno < p->in_frameno + p->num_buffered) {
             struct mp_image *img = p->buffered[frameno - p->in_frameno];
             ret = alloc_vs_frame(p, &img->params);
@@ -539,6 +556,8 @@ static void destroy_vs(struct vf_instance *vf)
     assert(num_requested(p) == 0); // async callback didn't return?
 
     p->shutdown = false;
+    p->eof = false;
+    p->frames_sent = 0;
     // Kill filtered images that weren't returned yet
     for (int n = 0; n < p->max_requests; n++)
         mp_image_unrefp(&p->requested[n]);
