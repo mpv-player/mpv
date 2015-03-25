@@ -36,8 +36,10 @@ struct gl_video_opts {
     int target_prim;
     int target_trc;
     float scaler_params[3][2];
+    float scaler_blur[3];
     float scaler_radius[3];
     float scaler_antiring[3];
+    char *scaler_window[3];
     int linear_scaling;
     int fancy_downscaling;
     int sigmoid_upscaling;

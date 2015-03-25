@@ -308,11 +308,15 @@ Available video output drivers are:
             This filter corresponds to the old ``lanczos3`` alias if the default
             radius is used, while ``lanczos2`` corresponds to a radius of 2.
 
+            (This filter is an alias for ``sinc``-windowed ``sinc``)
+
         ``ewa_lanczos``
             Elliptic weighted average Lanczos scaling. Also known as Jinc.
             Relatively slow, but very good quality. The radius can be
             controlled with ``scale-radius``. Increasing the radius makes the
             filter sharper but adds more ringing.
+
+            (This filter is an alias for ``jinc``-windowed ``jinc``)
 
         ``ewa_lanczossharp``
             A slightly sharpened version of ewa_lanczos, preconfigured to use
@@ -344,37 +348,35 @@ Available video output drivers are:
         Set filter parameters. Ignored if the filter is not tunable.
         Currently, this affects the following filter parameters:
 
-        ``kaiser``
-            Window parameter (``alpha``). Defaults to 6.33.
+        bcspline
+            Spline parameters (``B`` and ``C``). Defaults to 0.5 for both.
 
-        ``mitchell``
-            Spline parameters (``B`` and ``C``). Defaults to 1/3 for both.
-
-        ``gaussian``
+        gaussian
             Scale parameter (``t``). Increasing this makes the result blurrier.
             Defaults to 1.
 
-        ``ewa_lanczos``, ``ewa_ginseng``, ``ewa_hanning``
-            Jinc function scaling factor (also known as a blur factor).
-            Decreasing this makes the result sharper, increasing it makes it
-            blurrier. Defaults to 1. Note that setting this too low (eg. 0.5)
-            leads to bad results. It's recommended to stay between 0.9 and 1.1.
-
-        ``sharpen3``, ``sharpen5``
+        sharpen3, sharpen5
             Sharpening strength. Increasing this makes the image sharper but
             adds more ringing and aliasing. Defaults to 0.5.
 
-        ``oversample``
+        oversample
             Minimum distance to an edge before interpolation is used. Setting
             this to 0 will always interpolate edges, whereas setting it to 0.5
             will never interpolate, thus behaving as if the regular nearest
             neighbour algorithm was used. Defaults to 0.0.
 
-    ``scale-radius=<r>``
+    ``scale-blur=<value>``
+        Kernel scaling factor (also known as a blur factor). Decreasing this
+        makes the result sharper, increasing it makes it blurrier (default 0).
+        If set to 0, the kernel's preferred blur factor is used. Note that
+        setting this too low (eg. 0.5) leads to bad results. It's generally
+        recommended to stick to values between 0.8 and 1.2.
+
+    ``scale-radius=<value>``
         Set radius for filters listed below, must be a float number between 1.0
         and 16.0. Defaults to be 3.0 if not specified.
 
-            ``sinc``, ``lanczos``, ``blackman``, ``gaussian`` and all EWA filters (eg. ``ewa_lanczos``)
+            ``sinc`` and derivatives, ``jinc`` and derivatives, ``gaussian``, ``box`` and ``triangle``
 
         Note that depending on filter implementation details and video scaling
         ratio, the radius that actually being used might be different
@@ -388,6 +390,11 @@ Available video output drivers are:
 
         Note that this doesn't affect the special filters ``bilinear``,
         ``bicubic_fast`` or ``sharpen``.
+
+    ``scale-window=<window>``
+        (Advanced users only) Choose a custom windowing function for the kernel.
+        Defaults to the filter's preferred window if unset. Use
+        ``scale-window=help`` to get a list of supported windowing functions.
 
     ``scaler-resizes-only``
         Disable the scaler if the video image is not resized. In that case,
@@ -469,25 +476,25 @@ Available video output drivers are:
 
     ``scale-down=<filter>``
         Like ``scale``, but apply these filters on downscaling instead. If this
-        option is unset, the filter implied by ``scale`` will be applied.
+        option is unset, the filter implied by ``scale`` will be applied. Note
+        that this is also affected by the other options related to ``scale``,
+        ie. there is no ``scale-down-param1`` or similar.
 
-    ``cscale-param1``, ``cscale-param2``, ``cscale-radius``, ``cscale-antiring``
-        Set filter parameters and radius for ``cscale``.
-
-        See ``scale-param1``, ``scale-param2``, ``scale-radius`` and
-        ``scale-antiring``.
-
-    ``tscale=<filter>``, ``tscale-param1``, ``tscale-param2``, ``tscale-antiring``
+    ``tscale=<filter>``
         The filter used for interpolating the temporal axis (frames). This is
         only used if ``interpolation`` is enabled. The only valid choices
         for ``tscale`` are separable convolution filters (use ``tscale=help``
-        to get a list). The other options (``tscale-param1`` etc.) are
-        analogous to their ``scale`` counterparts. The default is ``oversample``.
+        to get a list). The default is ``oversample``.
 
         Note that the maximum supported filter radius is currently 3, and that
         using filters with larger radius may introduce issues when pausing or
         framestepping, proportional to the radius used. It is recommended to
         stick to a radius of 1 or 2.
+
+    ``cscale-radius``, ``tscale-radius``, ``cscale-blur``, ``tscale-blur``, etc.
+        Set filter parameters for ``cscale`` and ``tscale``, respectively.
+
+        See the corresponding options for ``scale``.
 
     ``linear-scaling``
         Scale in linear light. This is automatically enabled if
