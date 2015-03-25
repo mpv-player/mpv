@@ -215,21 +215,6 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
-    // Framebuffers, alternative extension name.
-    {
-        .ver_removed = 300, // don't touch these fn names in 3.x
-        .ver_es_removed = 300,
-        .extension = "GL_EXT_framebuffer_object",
-        .provides = MPGL_CAP_FB,
-        .functions = (const struct gl_function[]) {
-            DEF_FN_NAMES(BindFramebuffer, "glBindFramebufferEXT"),
-            DEF_FN_NAMES(GenFramebuffers, "glGenFramebuffersEXT"),
-            DEF_FN_NAMES(DeleteFramebuffers, "glDeleteFramebuffersEXT"),
-            DEF_FN_NAMES(CheckFramebufferStatus, "glCheckFramebufferStatusEXT"),
-            DEF_FN_NAMES(FramebufferTexture2D, "glFramebufferTexture2DEXT"),
-            {0}
-        },
-    },
     // VAOs, extension in GL 2.x, core in GL 3.x core.
     {
         .ver_core = 300,
