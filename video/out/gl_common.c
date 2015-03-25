@@ -79,6 +79,14 @@ static void GLAPIENTRY dummy_glBindFramebuffer(GLenum target, GLuint framebuffer
     assert(framebuffer == 0);
 }
 
+static bool check_ext(GL *gl, const char *name)
+{
+    const char *exts = gl->extensions;
+    char *s = strstr(exts, name);
+    char *e = s ? s + strlen(name) : NULL;
+    return s && (s == exts || s[-1] == ' ') && (e[0] == ' ' || !e[0]);
+}
+
 #define FN_OFFS(name) offsetof(GL, name)
 
 #define DEF_FN(name)            {FN_OFFS(name), {"gl" # name}}
@@ -418,7 +426,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         if (ver_core)
             must_exist = version >= ver_core;
 
-        if (section->extension && strstr(gl->extensions, section->extension))
+        if (section->extension && check_ext(gl, section->extension))
             exists = true;
 
         exists |= must_exist;
