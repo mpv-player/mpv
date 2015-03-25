@@ -357,6 +357,9 @@ const struct gl_video_opts gl_video_opts_hq_def = {
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
                                struct bstr name, struct bstr param);
 
+static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
+                               struct bstr name, struct bstr param);
+
 #define OPT_BASE_STRUCT struct gl_video_opts
 const struct m_sub_options gl_video_conf = {
     .opts = (const m_option_t[]) {
@@ -387,6 +390,12 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLOAT("cscale-param2", scaler_params[1][1], 0),
         OPT_FLOAT("tscale-param1", scaler_params[2][0], 0),
         OPT_FLOAT("tscale-param2", scaler_params[2][1], 0),
+        OPT_FLOAT("scale-blur", scaler_blur[0], 0),
+        OPT_FLOAT("cscale-blur", scaler_blur[1], 0),
+        OPT_FLOAT("tscale-blur", scaler_blur[2], 0),
+        OPT_STRING_VALIDATE("scale-window", scaler_window[0], 0, validate_window_opt),
+        OPT_STRING_VALIDATE("cscale-window", scaler_window[1], 0, validate_window_opt),
+        OPT_STRING_VALIDATE("tscale-window", scaler_window[2], 0, validate_window_opt),
         OPT_FLOATRANGE("scale-radius", scaler_radius[0], 0, 1.0, 16.0),
         OPT_FLOATRANGE("cscale-radius", scaler_radius[1], 0, 1.0, 16.0),
         OPT_FLOATRANGE("tscale-radius", scaler_radius[2], 0, 1.0, 3.0),
@@ -893,6 +902,7 @@ static void reinit_scaler(struct gl_video *p, int scaler_unit, const char *name,
 
     for (int n = 0; n < 2; n++)
         scaler->params[n] = p->opts.scaler_params[scaler->index][n];
+    scaler->antiring = p->opts.scaler_antiring[scaler->index];
 
     const struct filter_kernel *t_kernel = mp_find_filter_kernel(scaler->name);
     if (!t_kernel)
@@ -901,15 +911,24 @@ static void reinit_scaler(struct gl_video *p, int scaler_unit, const char *name,
     scaler->kernel_storage = *t_kernel;
     scaler->kernel = &scaler->kernel_storage;
 
+    const char *win = p->opts.scaler_window[scaler->index];
+    if (!win || !win[0])
+        win = t_kernel->window;
+    const struct filter_window *t_window = mp_find_filter_window(win);
+    if (t_window)
+        scaler->kernel->w = *t_window;
+
     for (int n = 0; n < 2; n++) {
         if (!isnan(scaler->params[n]))
-            scaler->kernel->params[n] = scaler->params[n];
+            scaler->kernel->f.params[n] = scaler->params[n];
     }
 
-    scaler->antiring = p->opts.scaler_antiring[scaler->index];
+    float blur = p->opts.scaler_blur[scaler->index];
+    if (blur > 0.0)
+        scaler->kernel->f.blur = blur;
 
-    if (scaler->kernel->radius < 0)
-        scaler->kernel->radius = p->opts.scaler_radius[scaler->index];
+    if (scaler->kernel->f.radius < 0)
+        scaler->kernel->f.radius = p->opts.scaler_radius[scaler->index];
 
     scaler->insufficient = !mp_init_filter(scaler->kernel, sizes, scale_factor);
 
@@ -1064,7 +1083,7 @@ static void pass_sample_separated(struct gl_video *p, int src_tex,
 
 static void pass_sample_polar(struct gl_video *p, struct scaler *scaler)
 {
-    double radius = scaler->kernel->radius;
+    double radius = scaler->kernel->f.radius;
     int bound = (int)ceil(radius);
     bool use_ar = scaler->antiring > 0;
     GLSL(vec4 color = vec4(0.0);)
@@ -2491,7 +2510,7 @@ static const char *handle_scaler_opt(const char *name, bool tscale)
     if (name && name[0]) {
         const struct filter_kernel *kernel = mp_find_filter_kernel(name);
         if (kernel && (!tscale || !kernel->polar))
-                return kernel->name;
+                return kernel->f.name;
 
         for (const char *const *filter = tscale ? fixed_tscale_filters
                                                 : fixed_scale_filters;
@@ -2520,7 +2539,7 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
     if (queue_size && p->opts.interpolation && p->opts.scalers[2]) {
         const struct filter_kernel *kernel = mp_find_filter_kernel(p->opts.scalers[2]);
         if (kernel) {
-            double radius = kernel->radius;
+            double radius = kernel->f.radius;
             radius = radius > 0 ? radius : p->opts.scaler_radius[2];
            *queue_size = 50e3 * ceil(radius);
         }
@@ -2566,15 +2585,39 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
              *filter; filter++) {
             mp_info(log, "    %s\n", *filter);
         }
-        for (int n = 0; mp_filter_kernels[n].name; n++) {
+        for (int n = 0; mp_filter_kernels[n].f.name; n++) {
             if (!tscale || !mp_filter_kernels[n].polar)
-                mp_info(log, "    %s\n", mp_filter_kernels[n].name);
+                mp_info(log, "    %s\n", mp_filter_kernels[n].f.name);
         }
         if (s[0])
             mp_fatal(log, "No scaler named '%s' found!\n", s);
     }
     return r;
 }
+
+static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
+                               struct bstr name, struct bstr param)
+{
+    char s[20] = {0};
+    int r = 1;
+    if (bstr_equals0(param, "help")) {
+        r = M_OPT_EXIT - 1;
+    } else {
+        snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
+        const struct filter_window *window = mp_find_filter_window(s);
+        if (!window)
+            r = M_OPT_INVALID;
+    }
+    if (r < 1) {
+        mp_info(log, "Available windows:\n");
+        for (int n = 0; mp_filter_windows[n].name; n++)
+            mp_info(log, "    %s\n", mp_filter_windows[n].name);
+        if (s[0])
+            mp_fatal(log, "No window named '%s' found!\n", s);
+    }
+    return r;
+}
+
 
 // Resize and redraw the contents of the window without further configuration.
 // Intended to be used in situations where the frontend can't really be
