@@ -131,6 +131,7 @@ struct scaler {
 struct fbosurface {
     struct fbotex fbotex;
     int64_t pts;
+    double vpts; // used for synchronizing subtitles only
 };
 
 #define FBOSURFACES_MAX 10
@@ -492,8 +493,10 @@ void gl_video_set_debug(struct gl_video *p, bool enable)
 
 static void gl_video_reset_surfaces(struct gl_video *p)
 {
-    for (int i = 0; i < FBOSURFACES_MAX; i++)
+    for (int i = 0; i < FBOSURFACES_MAX; i++) {
         p->surfaces[i].pts = 0;
+        p->surfaces[i].vpts = MP_NOPTS_VALUE;
+    }
     p->surface_idx = 0;
     p->surface_now = 0;
 }
@@ -1734,6 +1737,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
         finish_pass_fbo(p, &p->surfaces[p->surface_now].fbotex,
                         vp_w, vp_h, 0, fuzz);
         p->surfaces[p->surface_now].pts = t ? t->pts : 0;
+        p->surfaces[p->surface_now].vpts = p->image.mpi->pts;
         p->surface_idx = p->surface_now;
     }
 
@@ -1769,6 +1773,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
         finish_pass_fbo(p, &p->surfaces[surface_dst].fbotex,
                         vp_w, vp_h, 0, fuzz);
         p->surfaces[surface_dst].pts = t->pts;
+        p->surfaces[surface_dst].vpts = p->image.mpi->pts;
         p->surface_idx = surface_dst;
     }
 
@@ -1785,6 +1790,22 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
         } else if (p->surfaces[ii].pts < p->surfaces[i].pts) {
             valid = false;
             MP_DBG(p, "interpolation queue underrun\n");
+        }
+    }
+
+    // Update OSD PTS to synchronize subtitles with the displayed frame
+    if (t) {
+        double vpts_now = p->surfaces[surface_now].vpts,
+               vpts_nxt = p->surfaces[surface_nxt].vpts,
+               vpts_new = p->image.mpi->pts;
+        if (vpts_now != MP_NOPTS_VALUE &&
+            vpts_nxt != MP_NOPTS_VALUE &&
+            vpts_new != MP_NOPTS_VALUE)
+        {
+            // Round to nearest neighbour
+            double vpts_vsync = (t->next_vsync - t->pts)/1e6 + vpts_new;
+            p->osd_pts = fabs(vpts_vsync-vpts_now) < fabs(vpts_vsync-vpts_nxt)
+                             ? vpts_now : vpts_nxt;
         }
     }
 
