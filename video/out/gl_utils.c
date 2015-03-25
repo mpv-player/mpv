@@ -462,7 +462,7 @@ void gl_set_debug_logger(GL *gl, struct mp_log *log)
     }
 }
 
-#define SC_ENTRIES 10
+#define SC_ENTRIES 16
 #define SC_UNIFORM_ENTRIES 20
 
 enum uniform_type {

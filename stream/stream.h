@@ -258,6 +258,8 @@ struct mpv_global;
 
 struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
                                  int max_size);
+struct bstr stream_read_file(const char *filename, void *talloc_ctx,
+                             struct mpv_global *global);
 int stream_control(stream_t *s, int cmd, void *arg);
 void free_stream(stream_t *s);
 struct stream *stream_create(const char *url, int flags,
