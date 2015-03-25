@@ -89,12 +89,12 @@ static bool check_ext(GL *gl, const char *name)
 
 #define FN_OFFS(name) offsetof(GL, name)
 
-#define DEF_FN(name)            {FN_OFFS(name), {"gl" # name}}
-#define DEF_FN_NAMES(name, ...) {FN_OFFS(name), {__VA_ARGS__}}
+#define DEF_FN(name)            {FN_OFFS(name), "gl" # name}
+#define DEF_FN_NAME(name, str)  {FN_OFFS(name), str}
 
 struct gl_function {
     ptrdiff_t offset;
-    char *funcnames[7];
+    char *name;
 };
 
 struct gl_functions {
@@ -255,22 +255,22 @@ static const struct gl_functions gl_functions[] = {
     {
         .extension = "GLX_SGI_swap_control",
         .functions = (const struct gl_function[]) {
-            DEF_FN_NAMES(SwapInterval, "glXSwapIntervalSGI"),
+            DEF_FN_NAME(SwapInterval, "glXSwapIntervalSGI"),
             {0},
         },
     },
     {
         .extension = "WGL_EXT_swap_control",
         .functions = (const struct gl_function[]) {
-            DEF_FN_NAMES(SwapInterval, "wglSwapIntervalEXT"),
+            DEF_FN_NAME(SwapInterval, "wglSwapIntervalEXT"),
             {0},
         },
     },
     {
         .extension = "GLX_SGI_video_sync",
         .functions = (const struct gl_function[]) {
-            DEF_FN_NAMES(GetVideoSync, "glXGetVideoSyncSGI"),
-            DEF_FN_NAMES(WaitVideoSync, "glXWaitVideoSyncSGI"),
+            DEF_FN_NAME(GetVideoSync, "glXGetVideoSyncSGI"),
+            DEF_FN_NAME(WaitVideoSync, "glXWaitVideoSyncSGI"),
             {0},
         },
     },
@@ -313,7 +313,7 @@ static const struct gl_functions gl_functions[] = {
 #undef FN_OFFS
 #undef DEF_FN_HARD
 #undef DEF_FN
-#undef DEF_FN_NAMES
+#undef DEF_FN_NAME
 
 
 // Fill the GL struct with function pointers and extensions from the current
@@ -437,18 +437,13 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         bool all_loaded = true;
         const struct gl_function *fnlist = section->functions;
 
-        for (int i = 0; fnlist && fnlist[i].funcnames[0]; i++) {
+        for (int i = 0; fnlist && fnlist[i].name; i++) {
             const struct gl_function *fn = &fnlist[i];
-            void *ptr = NULL;
-            for (int x = 0; fn->funcnames[x]; x++) {
-                ptr = get_fn(fn_ctx, fn->funcnames[x]);
-                if (ptr)
-                    break;
-            }
+            void *ptr = get_fn(fn_ctx, fn->name);
             if (!ptr) {
                 all_loaded = false;
                 mp_warn(log, "Required function '%s' not "
-                        "found for %s OpenGL %d.%d.\n", fn->funcnames[0],
+                        "found for %s OpenGL %d.%d.\n", fn->name,
                         section->extension ? section->extension : "builtin",
                         MPGL_VER_GET_MAJOR(ver_core),
                         MPGL_VER_GET_MINOR(ver_core));
@@ -464,7 +459,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
         if (all_loaded) {
             gl->mpgl_caps |= section->provides;
-            for (int i = 0; fnlist && fnlist[i].funcnames[0]; i++) {
+            for (int i = 0; fnlist && fnlist[i].name; i++) {
                 const struct gl_function *fn = &fnlist[i];
                 void **funcptr = (void**)(((char*)gl) + fn->offset);
                 if (loaded[i])
