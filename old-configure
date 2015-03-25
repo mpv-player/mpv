@@ -661,6 +661,8 @@ EOF
     _gl_wayland=yes
     libs_mplayer="$libs_mplayer -lGL -lEGL"
     test "$_gl_wayland" = yes && res_comment="$res_comment wayland"
+  else
+    _gl_wayland=no
   fi
   if test "$_x11" = yes && test "$_gl" = yes && pkg_config_add "egl"; then
     _gl_x11_egl=yes
