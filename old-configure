@@ -813,9 +813,11 @@ test_lua() {
 
 test_lua "lua >= 5.1.0 lua < 5.2.0"
 test_lua "lua5.1 >= 5.1.0" # debian
+test_lua "lua51 >= 5.1.0" # OpenBSD
 test_lua "luajit >= 2.0.0"
 test_lua "lua >= 5.2.0"
 test_lua "lua5.2 >= 5.2.0" # debian
+test_lua "lua52 >= 5.2.0" # OpenBSD
 
 test "$_lua" != yes && check_yes_no no LUA
 
@@ -929,8 +931,13 @@ cat > $TMPC << EOF
 #define HAVE_DXVA2_HWACCEL 0
 #define HAVE_FCHMOD 0
 
+#ifdef __OpenBSD__
+#define DEFAULT_CDROM_DEVICE "/dev/rcd0c"
+#define DEFAULT_DVD_DEVICE   "/dev/rcd0c"
+#else
 #define DEFAULT_CDROM_DEVICE "/dev/cdrom"
 #define DEFAULT_DVD_DEVICE   "/dev/dvd"
+#endif
 #define PATH_DEV_DSP "/dev/dsp"
 #define PATH_DEV_MIXER "/dev/mixer"
 
