@@ -125,7 +125,7 @@ static int init(struct ao *ao)
     const struct af_to_par *ap;
     int i;
 
-    p->hdl = sio_open(p->dev, SIO_PLAY, 1);
+    p->hdl = sio_open(p->dev, SIO_PLAY, 0);
     if (p->hdl == NULL) {
         MP_ERR(ao, "can't open sndio %s\n", p->dev);
         goto error;
@@ -304,25 +304,7 @@ static void audio_pause(struct ao *ao)
  */
 static void audio_resume(struct ao *ao)
 {
-    struct priv *p = ao->priv;
-    int n, count, todo;
-
-    /*
-     * we want to start with buffers full, because mpv uses
-     * get_delay() as clock, which would cause video to
-     * accelerate while buffers are filled.
-     */
-    todo = p->par.bufsz * p->par.pchan * p->par.bps;
-    while (todo > 0) {
-        count = todo;
-        if (count > SILENCE_NMAX)
-            count = SILENCE_NMAX;
-        n = sio_write(p->hdl, p->silence, count);
-        if (n == 0)
-            break;
-        todo -= n;
-        p->delay += n;
-    }
+    return;
 }
 
 #define OPT_BASE_STRUCT struct priv
