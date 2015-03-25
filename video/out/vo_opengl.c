@@ -463,8 +463,11 @@ static int preinit(struct vo *vo)
 
     mpgl_lock(p->glctx);
 
-    if (p->gl->SwapInterval)
+    if (p->gl->SwapInterval) {
         p->gl->SwapInterval(p->swap_interval);
+    } else {
+        MP_VERBOSE(vo, "swap_control extension missing.\n");
+    }
 
     p->renderer = gl_video_init(p->gl, vo->log);
     if (!p->renderer)

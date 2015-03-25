@@ -243,13 +243,19 @@ static const struct gl_functions gl_functions[] = {
         .provides = MPGL_CAP_TEX_RG,
     },
     // Swap control, always an OS specific extension
+    // The OSX code loads this manually.
     {
-        .extension = "_swap_control",
+        .extension = "GLX_SGI_swap_control",
         .functions = (const struct gl_function[]) {
-            DEF_FN_NAMES(SwapInterval, "glXSwapIntervalSGI", "glXSwapInterval",
-                         "wglSwapIntervalSGI", "wglSwapInterval",
-                         "wglSwapIntervalEXT"),
-            {0}
+            DEF_FN_NAMES(SwapInterval, "glXSwapIntervalSGI"),
+            {0},
+        },
+    },
+    {
+        .extension = "WGL_EXT_swap_control",
+        .functions = (const struct gl_function[]) {
+            DEF_FN_NAMES(SwapInterval, "wglSwapIntervalEXT"),
+            {0},
         },
     },
     {
