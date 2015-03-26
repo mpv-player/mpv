@@ -23,8 +23,9 @@
 
 struct filter_window {
     const char *name;
-    double radius; // A negative value will use user specified radius instead.
+    double radius; // Preferred radius, should only be changed if resizable
     double (*weight)(struct filter_window *k, double x);
+    bool resizable; // Filter supports any given radius
     double params[2]; // User-defined custom filter parameters. Not used by
                       // all filters
     double blur; // Blur coefficient (sharpens or widens the filter)
