@@ -305,10 +305,11 @@ static char *waveformat_to_str_buf(char *buf, size_t buf_size, WAVEFORMATEX *wf)
 
 static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
 {
-    if (src->wFormatTag == WAVE_FORMAT_EXTENSIBLE)
+    if (src->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
         *dst = *(WAVEFORMATEXTENSIBLE *)src;
-    else
+    } else {
         dst->Format = *src;
+    }
 }
 
 static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf)
@@ -571,15 +572,16 @@ static bool find_formats(struct ao *ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
 
-    if (state->opt_exclusive){
+    if (state->opt_exclusive) {
         // https://msdn.microsoft.com/en-us/library/windows/desktop/dd370811%28v=vs.85%29.aspx
         // "Many audio devices support both PCM and non-PCM stream formats.
         // However, the audio engine can mix only PCM streams. Thus, only
         // exclusive-mode streams can have non-PCM formats.
-        if (AF_FORMAT_IS_IEC61937(ao->format))
+        if (AF_FORMAT_IS_IEC61937(ao->format)) {
             return try_passthrough(ao);
-        else
+        } else {
             return find_formats_exclusive(ao);
+        }
     }
 
     return find_formats_shared(ao);
@@ -664,11 +666,11 @@ reinit:
                                  NULL);
     /* something about buffer sizes on Win7 */
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
-        if (retries > 0)
+        if (retries > 0) {
             EXIT_ON_ERROR(hr);
-        else
+        } else {
             retries ++;
-
+        }
         MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s (0x%"PRIx32"), used %lld * 100ns\n",
                    wasapi_explain_err(hr), (uint32_t) hr, bufferDuration);
 
@@ -739,9 +741,8 @@ exit_label:
 }
 
 static char* get_device_id(IMMDevice *pDevice) {
-    if (!pDevice) {
+    if (!pDevice)
         return NULL;
-    }
 
     LPWSTR devid = NULL;
     char *idstr = NULL;
@@ -763,9 +764,8 @@ exit_label:
 }
 
 static char* get_device_name(IMMDevice *pDevice) {
-    if (!pDevice) {
+    if (!pDevice)
         return NULL;
-    }
 
     IPropertyStore *pProps = NULL;
     char *namestr = NULL;
@@ -788,9 +788,8 @@ exit_label:
 }
 
 static char* get_device_desc(IMMDevice *pDevice) {
-    if (!pDevice) {
+    if (!pDevice)
         return NULL;
-    }
 
     IPropertyStore *pProps = NULL;
     char *desc = NULL;
@@ -862,9 +861,8 @@ static HRESULT enumerate_with_state(struct mp_log *log, struct ao *ao,
 
     int count;
     IMMDeviceCollection_GetCount(pDevices, &count);
-    if (count > 0) {
+    if (count > 0)
         mp_info(log, "%s\n", header);
-    }
 
     for (int i = 0; i < count; i++) {
         hr = IMMDeviceCollection_Item(pDevices, i, &pDevice);
@@ -954,9 +952,8 @@ static HRESULT find_and_load_device(struct ao *ao, IMMDeviceEnumerator* pEnumera
     int devno = (int) strtol(search, &end, 10);
 
     char *devid = NULL;
-    if (end == search || *end) {
+    if (end == search || *end)
         devid = search;
-    }
 
     int search_err = 0;
 
@@ -1025,9 +1022,8 @@ static HRESULT find_and_load_device(struct ao *ao, IMMDeviceEnumerator* pEnumera
             SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
         }
 
-        if (deviceID == NULL) {
+        if (deviceID == NULL)
             MP_ERR(ao, "Could not find device %s\n", devid);
-        }
     }
 
     SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
@@ -1040,9 +1036,8 @@ static HRESULT find_and_load_device(struct ao *ao, IMMDeviceEnumerator* pEnumera
 
         hr = IMMDeviceEnumerator_GetDevice(pEnumerator, deviceID, ppDevice);
 
-        if (FAILED(hr)) {
+        if (FAILED(hr))
             MP_ERR(ao, "Could not load requested device\n");
-        }
     }
 
 exit_label:
@@ -1157,10 +1152,11 @@ retry:
         device = ao->device;
 
 
-    if (!device || !device[0])
+    if (!device || !device[0]) {
         hr = load_default_device(ao, state->pEnumerator, &state->pDevice);
-    else
+    } else {
         hr = find_and_load_device(ao, state->pEnumerator, &state->pDevice, device);
+    }
     EXIT_ON_ERROR(hr);
 
     char *name = get_device_name(state->pDevice);
@@ -1181,9 +1177,10 @@ retry:
     MP_DBG(ao, "Query hardware volume support\n");
     hr = IAudioEndpointVolume_QueryHardwareSupport(state->pEndpointVolume,
                                                    &state->vol_hw_support);
-    if (hr != S_OK)
+    if (hr != S_OK) {
         MP_WARN(ao, "Error querying hardware volume control: %s (0x%"PRIx32")\n",
                 wasapi_explain_err(hr), (uint32_t) hr);
+    }
 
     MP_DBG(ao, "Probing formats\n");
     if (!find_formats(ao)) {
@@ -1195,7 +1192,8 @@ retry:
     hr = fix_format(ao);
     if ((hr == AUDCLNT_E_DEVICE_IN_USE ||
          hr == AUDCLNT_E_DEVICE_INVALIDATED) &&
-        retry_wait <= 8) {
+        retry_wait <= 8)
+    {
         wasapi_thread_uninit(ao);
         MP_WARN(ao, "Retrying in %"PRId64" us\n", retry_wait);
         mp_sleep_us(retry_wait);
@@ -1209,13 +1207,13 @@ retry:
     EXIT_ON_ERROR(hr);
 
     MP_DBG(ao, "Read volume levels\n");
-    if (state->opt_exclusive)
+    if (state->opt_exclusive) {
         IAudioEndpointVolume_GetMasterVolumeLevelScalar(state->pEndpointVolume,
                                                         &state->initial_volume);
-    else
+    } else {
         ISimpleAudioVolume_GetMasterVolume(state->pAudioVolume,
                                            &state->initial_volume);
-
+    }
     state->previous_volume = state->initial_volume;
 
     wasapi_change_init(ao);
@@ -1239,12 +1237,10 @@ void wasapi_thread_uninit(struct ao *ao)
 
     wasapi_change_uninit(ao);
 
-    if (state->opt_exclusive &&
-        state->pEndpointVolume &&
-        state->initial_volume > 0 )
+    if (state->opt_exclusive && state->pEndpointVolume && state->initial_volume > 0 ) {
         IAudioEndpointVolume_SetMasterVolumeLevelScalar(state->pEndpointVolume,
                                                         state->initial_volume, NULL);
-
+    }
     destroy_proxies(state);
 
     SAFE_RELEASE(state->pRenderClient,   IAudioRenderClient_Release(state->pRenderClient));

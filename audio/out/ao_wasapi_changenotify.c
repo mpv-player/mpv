@@ -52,7 +52,8 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_QueryInterface(
 {
     /* Compatible with IMMNotificationClient and IUnknown */
     if (IsEqualGUID(&IID_IMMNotificationClient, riid) ||
-        IsEqualGUID(&IID_IUnknown, riid)) {
+        IsEqualGUID(&IID_IUnknown, riid))
+    {
         *ppvObject = (void *)This;
         return S_OK;
     } else {
@@ -231,9 +232,10 @@ void wasapi_change_uninit(struct ao *ao)
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     struct change_notify *change = &state->change;
 
-    if(state->pEnumerator && change->client.lpVtbl)
+    if (state->pEnumerator && change->client.lpVtbl) {
         IMMDeviceEnumerator_UnregisterEndpointNotificationCallback(
             state->pEnumerator, (IMMNotificationClient *)change);
+    }
 
     if (change->monitored) CoTaskMemFree(change->monitored);
 }
