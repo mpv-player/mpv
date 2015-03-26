@@ -329,7 +329,7 @@ Available video output drivers are:
         ``mitchell``
             Mitchell-Netravali. The ``B`` and ``C`` parameters can be set with
             ``scale-param1`` and ``scale-param2``. This filter is very good at
-            downscaling (see ``scale-down``).
+            downscaling (see ``dscale``).
 
         ``oversample``
             A version of nearest neighbour that (naively) oversamples pixels,
@@ -373,8 +373,8 @@ Available video output drivers are:
         recommended to stick to values between 0.8 and 1.2.
 
     ``scale-radius=<value>``
-        Set radius for filters listed below, must be a float number between 1.0
-        and 16.0. Defaults to be 3.0 if not specified.
+        Set radius for filters listed below, must be a float number between 0.5
+        and 16.0. Defaults to the filter's preferred radius if not specified.
 
             ``sinc`` and derivatives, ``jinc`` and derivatives, ``gaussian``, ``box`` and ``triangle``
 
@@ -470,15 +470,13 @@ Available video output drivers are:
         also lead to bad results, as can missing or incorrect display FPS
         information (see ``--display-fps``).
 
+    ``dscale=<filter>``
+        Like ``scale``, but apply these filters on downscaling instead. If this
+        option is unset, the filter implied by ``scale`` will be applied.
+
     ``cscale=<filter>``
         As ``scale``, but for interpolating chroma information. If the image
         is not subsampled, this option is ignored entirely.
-
-    ``scale-down=<filter>``
-        Like ``scale``, but apply these filters on downscaling instead. If this
-        option is unset, the filter implied by ``scale`` will be applied. Note
-        that this is also affected by the other options related to ``scale``,
-        ie. there is no ``scale-down-param1`` or similar.
 
     ``tscale=<filter>``
         The filter used for interpolating the temporal axis (frames). This is
@@ -491,8 +489,9 @@ Available video output drivers are:
         framestepping, proportional to the radius used. It is recommended to
         stick to a radius of 1 or 2.
 
-    ``cscale-radius``, ``tscale-radius``, ``cscale-blur``, ``tscale-blur``, etc.
-        Set filter parameters for ``cscale`` and ``tscale``, respectively.
+    ``dscale-radius``, ``cscale-radius``, ``tscale-radius``, etc.
+        Set filter parameters for ``dscale``, ``cscale`` and ``tscale``,
+        respectively.
 
         See the corresponding options for ``scale``.
 
@@ -706,7 +705,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:scale=spline36:cscale=spline36:scale-down=mitchell:dither-depth=auto:fbo-format=rgba16:fancy-downscaling:sigmoid-upscaling
+        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:fbo-format=rgba16:fancy-downscaling:sigmoid-upscaling
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.

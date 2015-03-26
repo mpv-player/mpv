@@ -48,7 +48,7 @@
 
 // Other texture units are reserved for specific purposes
 #define TEXUNIT_SCALERS  TEXUNIT_VIDEO_NUM
-#define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+3)
+#define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+4)
 #define TEXUNIT_DITHER   (TEXUNIT_3DLUT+1)
 
 // scale/cscale arguments that map directly to shader filter routines.
@@ -112,11 +112,8 @@ struct video_image {
 
 struct scaler {
     int index;
-    const char *name;
+    struct scaler_config conf;
     double scale_factor;
-    float params[2];
-    float antiring;
-
     bool initialized;
     struct filter_kernel *kernel;
     GLuint gl_lut;
@@ -190,8 +187,8 @@ struct gl_video {
     int surface_now;
     bool is_interpolated;
 
-    // state for luma (0), chroma (1) and temporal (2) scalers
-    struct scaler scalers[3];
+    // state for luma (0), luma-down(1), chroma (2) and temporal (3) scalers
+    struct scaler scaler[4];
 
     struct mp_csp_equalizer video_eq;
 
@@ -326,10 +323,12 @@ const struct gl_video_opts gl_video_opts_def = {
     .fbo_format = GL_RGBA,
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
-    .scalers = { "bilinear", "bilinear", "oversample" },
-    .dscaler = "bilinear",
-    .scaler_params = {{NAN, NAN}, {NAN, NAN}, {NAN, NAN}},
-    .scaler_radius = {3, 3, 3},
+    .scaler = {
+        {{"bilinear",   .params={NAN, NAN}}}, // scale
+        {{NULL,         .params={NAN, NAN}}}, // dscale (defaults to scale)
+        {{"bilinear",   .params={NAN, NAN}}}, // cscale
+        {{"oversample", .params={NAN, NAN}}}  // tscale
+    },
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
@@ -344,10 +343,12 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .sigmoid_upscaling = 1,
-    .scalers = { "spline36", "spline36", "oversample" },
-    .dscaler = "mitchell",
-    .scaler_params = {{NAN, NAN}, {NAN, NAN}, {NAN, NAN}},
-    .scaler_radius = {3, 3, 3},
+    .scaler = {
+        {{"spline36",   .params={NAN, NAN}}}, // scale
+        {{"mitchell",   .params={NAN, NAN}}}, // dscale
+        {{"spline36",   .params={NAN, NAN}}}, // cscale
+        {{"oversample", .params={NAN, NAN}}}  // tscale
+    },
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
@@ -380,28 +381,34 @@ const struct m_sub_options gl_video_conf = {
                     {"gamma22", MP_CSP_TRC_GAMMA22})),
         OPT_FLAG("npot", npot, 0),
         OPT_FLAG("pbo", pbo, 0),
-        OPT_STRING_VALIDATE("scale", scalers[0], 0, validate_scaler_opt),
-        OPT_STRING_VALIDATE("cscale", scalers[1], 0, validate_scaler_opt),
-        OPT_STRING_VALIDATE("tscale", scalers[2], 0, validate_scaler_opt),
-        OPT_STRING_VALIDATE("scale-down", dscaler, 0, validate_scaler_opt),
-        OPT_FLOAT("scale-param1", scaler_params[0][0], 0),
-        OPT_FLOAT("scale-param2", scaler_params[0][1], 0),
-        OPT_FLOAT("cscale-param1", scaler_params[1][0], 0),
-        OPT_FLOAT("cscale-param2", scaler_params[1][1], 0),
-        OPT_FLOAT("tscale-param1", scaler_params[2][0], 0),
-        OPT_FLOAT("tscale-param2", scaler_params[2][1], 0),
-        OPT_FLOAT("scale-blur", scaler_blur[0], 0),
-        OPT_FLOAT("cscale-blur", scaler_blur[1], 0),
-        OPT_FLOAT("tscale-blur", scaler_blur[2], 0),
-        OPT_STRING_VALIDATE("scale-window", scaler_window[0], 0, validate_window_opt),
-        OPT_STRING_VALIDATE("cscale-window", scaler_window[1], 0, validate_window_opt),
-        OPT_STRING_VALIDATE("tscale-window", scaler_window[2], 0, validate_window_opt),
-        OPT_FLOATRANGE("scale-radius", scaler_radius[0], 0, 1.0, 16.0),
-        OPT_FLOATRANGE("cscale-radius", scaler_radius[1], 0, 1.0, 16.0),
-        OPT_FLOATRANGE("tscale-radius", scaler_radius[2], 0, 1.0, 3.0),
-        OPT_FLOATRANGE("scale-antiring", scaler_antiring[0], 0, 0.0, 1.0),
-        OPT_FLOATRANGE("cscale-antiring", scaler_antiring[1], 0, 0.0, 1.0),
-        OPT_FLOATRANGE("tscale-antiring", scaler_antiring[2], 0, 0.0, 1.0),
+        OPT_STRING_VALIDATE("scale",  scaler[0].kernel.name, 0, validate_scaler_opt),
+        OPT_STRING_VALIDATE("dscale", scaler[1].kernel.name, 0, validate_scaler_opt),
+        OPT_STRING_VALIDATE("cscale", scaler[2].kernel.name, 0, validate_scaler_opt),
+        OPT_STRING_VALIDATE("tscale", scaler[3].kernel.name, 0, validate_scaler_opt),
+        OPT_FLOAT("scale-param1", scaler[0].kernel.params[0], 0),
+        OPT_FLOAT("scale-param2", scaler[0].kernel.params[1], 0),
+        OPT_FLOAT("dscale-param1", scaler[1].kernel.params[0], 0),
+        OPT_FLOAT("dscale-param2", scaler[1].kernel.params[1], 0),
+        OPT_FLOAT("cscale-param1", scaler[2].kernel.params[0], 0),
+        OPT_FLOAT("cscale-param2", scaler[2].kernel.params[1], 0),
+        OPT_FLOAT("tscale-param1", scaler[3].kernel.params[0], 0),
+        OPT_FLOAT("tscale-param2", scaler[3].kernel.params[1], 0),
+        OPT_FLOAT("scale-blur",  scaler[0].kernel.blur, 0),
+        OPT_FLOAT("dscale-blur", scaler[1].kernel.blur, 0),
+        OPT_FLOAT("cscale-blur", scaler[2].kernel.blur, 0),
+        OPT_FLOAT("tscale-blur", scaler[3].kernel.blur, 0),
+        OPT_STRING_VALIDATE("scale-window",  scaler[0].window.name, 0, validate_window_opt),
+        OPT_STRING_VALIDATE("dscale-window", scaler[1].window.name, 0, validate_window_opt),
+        OPT_STRING_VALIDATE("cscale-window", scaler[2].window.name, 0, validate_window_opt),
+        OPT_STRING_VALIDATE("tscale-window", scaler[3].window.name, 0, validate_window_opt),
+        OPT_FLOATRANGE("scale-radius",  scaler[0].radius, 0, 0.5, 16.0),
+        OPT_FLOATRANGE("dscale-radius", scaler[1].radius, 0, 0.5, 16.0),
+        OPT_FLOATRANGE("cscale-radius", scaler[2].radius, 0, 0.5, 16.0),
+        OPT_FLOATRANGE("tscale-radius", scaler[3].radius, 0, 0.5, 3.0),
+        OPT_FLOATRANGE("scale-antiring",  scaler[0].antiring, 0, 0.0, 1.0),
+        OPT_FLOATRANGE("dscale-antiring", scaler[1].antiring, 0, 0.0, 1.0),
+        OPT_FLOATRANGE("cscale-antiring", scaler[2].antiring, 0, 0.0, 1.0),
+        OPT_FLOATRANGE("tscale-antiring", scaler[3].antiring, 0, 0.0, 1.0),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("linear-scaling", linear_scaling, 0),
         OPT_FLAG("fancy-downscaling", fancy_downscaling, 0),
@@ -454,6 +461,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_REPLACED("cantiring", "cscale-antiring"),
         OPT_REPLACED("smoothmotion", "interpolation"),
         OPT_REPLACED("smoothmotion-threshold", "tscale-param1"),
+        OPT_REPLACED("scale-down", "dscale"),
 
         {0}
     },
@@ -462,7 +470,7 @@ const struct m_sub_options gl_video_conf = {
 };
 
 static void uninit_rendering(struct gl_video *p);
-static void uninit_scaler(struct gl_video *p, int scaler_unit);
+static void uninit_scaler(struct gl_video *p, struct scaler *scaler);
 static void check_gl_features(struct gl_video *p);
 static bool init_format(int fmt, struct gl_video *init);
 
@@ -541,8 +549,8 @@ static void uninit_rendering(struct gl_video *p)
 {
     GL *gl = p->gl;
 
-    for (int n = 0; n < 3; n++)
-        uninit_scaler(p, n);
+    for (int n = 0; n < 4; n++)
+        uninit_scaler(p, &p->scaler[n]);
 
     gl->DeleteTextures(1, &p->dither_texture);
     p->dither_texture = 0;
@@ -870,11 +878,9 @@ static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
     pass_load_fbotex(p, dst_fbo, tex, w, h);
 }
 
-static void uninit_scaler(struct gl_video *p, int scaler_unit)
+static void uninit_scaler(struct gl_video *p, struct scaler *scaler)
 {
     GL *gl = p->gl;
-    struct scaler *scaler = &p->scalers[scaler_unit];
-
     fbotex_uninit(&scaler->sep_fbo);
     gl->DeleteTextures(1, &scaler->gl_lut);
     scaler->gl_lut = 0;
@@ -882,53 +888,79 @@ static void uninit_scaler(struct gl_video *p, int scaler_unit)
     scaler->initialized = false;
 }
 
-static void reinit_scaler(struct gl_video *p, int scaler_unit, const char *name,
-                          double scale_factor, int sizes[])
+// Semantic equality
+static bool double_seq(double a, double b)
+{
+    return (isnan(a) && isnan(b)) || a == b;
+}
+
+static bool scaler_fun_eq(struct scaler_fun a, struct scaler_fun b)
+{
+    if ((a.name && !b.name) || (b.name && !a.name))
+        return false;
+
+    return ((!a.name && !b.name) || strcmp(a.name, b.name) == 0) &&
+           double_seq(a.params[0], b.params[0]) &&
+           double_seq(a.params[1], b.params[1]) &&
+           a.blur == b.blur;
+}
+
+static bool scaler_conf_eq(struct scaler_config a, struct scaler_config b)
+{
+    // Note: antiring isn't compared because it doesn't affect LUT
+    // generation
+    return scaler_fun_eq(a.kernel, b.kernel) &&
+           scaler_fun_eq(a.window, b.window) &&
+           a.radius == b.radius;
+}
+
+static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
+                          const struct scaler_config *conf,
+                          double scale_factor,
+                          int sizes[])
 {
     GL *gl = p->gl;
-    struct scaler *scaler = &p->scalers[scaler_unit];
 
-    if (scaler->name && strcmp(scaler->name, name) == 0 &&
+    if (scaler_conf_eq(scaler->conf, *conf) &&
         scaler->scale_factor == scale_factor &&
         scaler->initialized)
         return;
 
-    uninit_scaler(p, scaler_unit);
+    uninit_scaler(p, scaler);
 
-    scaler->name = name;
+    scaler->conf = *conf;
     scaler->scale_factor = scale_factor;
     scaler->insufficient = false;
     scaler->initialized = true;
 
-    for (int n = 0; n < 2; n++)
-        scaler->params[n] = p->opts.scaler_params[scaler->index][n];
-    scaler->antiring = p->opts.scaler_antiring[scaler->index];
-
-    const struct filter_kernel *t_kernel = mp_find_filter_kernel(scaler->name);
+    const struct filter_kernel *t_kernel = mp_find_filter_kernel(conf->kernel.name);
     if (!t_kernel)
         return;
 
     scaler->kernel_storage = *t_kernel;
     scaler->kernel = &scaler->kernel_storage;
 
-    const char *win = p->opts.scaler_window[scaler->index];
+    const char *win = conf->window.name;
     if (!win || !win[0])
-        win = t_kernel->window;
+        win = t_kernel->window; // fall back to the scaler's default window
     const struct filter_window *t_window = mp_find_filter_window(win);
     if (t_window)
         scaler->kernel->w = *t_window;
 
     for (int n = 0; n < 2; n++) {
-        if (!isnan(scaler->params[n]))
-            scaler->kernel->f.params[n] = scaler->params[n];
+        if (!isnan(conf->kernel.params[n]))
+            scaler->kernel->f.params[n] = conf->kernel.params[n];
+        if (!isnan(conf->window.params[n]))
+            scaler->kernel->w.params[n] = conf->window.params[n];
     }
 
-    float blur = p->opts.scaler_blur[scaler->index];
-    if (blur > 0.0)
-        scaler->kernel->f.blur = blur;
+    if (conf->kernel.blur > 0.0)
+        scaler->kernel->f.blur = conf->kernel.blur;
+    if (conf->window.blur > 0.0)
+        scaler->kernel->w.blur = conf->window.blur;
 
-    if (scaler->kernel->f.radius < 0)
-        scaler->kernel->f.radius = p->opts.scaler_radius[scaler->index];
+    if (scaler->kernel->f.resizable && conf->radius > 0.0)
+        scaler->kernel->f.radius = conf->radius;
 
     scaler->insufficient = !mp_init_filter(scaler->kernel, sizes, scale_factor);
 
@@ -1026,7 +1058,7 @@ static void pass_sample_separated_gen(struct gl_video *p, struct scaler *scaler,
                                       int d_x, int d_y)
 {
     int N = scaler->kernel->size;
-    bool use_ar = scaler->antiring > 0;
+    bool use_ar = scaler->conf.antiring > 0;
     bool planar = d_x == 0 && d_y == 0;
     GLSL(vec4 color = vec4(0.0);)
     GLSLF("{\n");
@@ -1056,7 +1088,8 @@ static void pass_sample_separated_gen(struct gl_video *p, struct scaler *scaler,
         }
     }
     if (use_ar)
-        GLSLF("color = mix(color, clamp(color, lo, hi), %f);\n", scaler->antiring);
+        GLSLF("color = mix(color, clamp(color, lo, hi), %f);\n",
+              scaler->conf.antiring);
     GLSLF("}\n");
 }
 
@@ -1085,7 +1118,7 @@ static void pass_sample_polar(struct gl_video *p, struct scaler *scaler)
 {
     double radius = scaler->kernel->f.radius;
     int bound = (int)ceil(radius);
-    bool use_ar = scaler->antiring > 0;
+    bool use_ar = scaler->conf.antiring > 0;
     GLSL(vec4 color = vec4(0.0);)
     GLSLF("{\n");
     GLSL(vec2 fcoord = fract(pos * size - vec2(0.5));)
@@ -1127,7 +1160,8 @@ static void pass_sample_polar(struct gl_video *p, struct scaler *scaler)
     }
     GLSL(color = color / vec4(wsum);)
     if (use_ar)
-        GLSLF("color = mix(color, clamp(color, lo, hi), %f);\n", scaler->antiring);
+        GLSLF("color = mix(color, clamp(color, lo, hi), %f);\n",
+              scaler->conf.antiring);
     GLSLF("}\n");
 }
 
@@ -1181,7 +1215,8 @@ static void pass_sample_sharpen3(struct gl_video *p, struct scaler *scaler)
                   + texture(tex, pos + st * vec2(+1, -1))
                   + texture(tex, pos + st * vec2(-1, +1))
                   + texture(tex, pos + st * vec2(-1, -1));)
-    double param = isnan(scaler->params[0]) ? 0.5 : scaler->params[0];
+    float param = scaler->conf.kernel.params[0];
+    param = isnan(param) ? 0.5 : param;
     GLSLF("color = p + (p - 0.25 * sum) * %f;\n", param);
     GLSLF("}\n");
 }
@@ -1202,7 +1237,8 @@ static void pass_sample_sharpen5(struct gl_video *p, struct scaler *scaler)
                    + texture(tex, pos + st2 * vec2(-1,  0))
                    + texture(tex, pos + st2 * vec2( 0, -1));)
     GLSL(vec4 t = p * 0.859375 + sum2 * -0.1171875 + sum1 * -0.09765625;)
-    double param = isnan(scaler->params[0]) ? 0.5 : scaler->params[0];
+    float param = scaler->conf.kernel.params[0];
+    param = isnan(param) ? 0.5 : param;
     GLSLF("color = p + t * %f;\n", param);
     GLSLF("}\n");
 }
@@ -1224,11 +1260,12 @@ static void pass_sample_oversample(struct gl_video *p, struct scaler *scaler,
     gl_sc_uniform_vec2(p->sc, "output_size", (float[2]){w, h});
     GLSL(vec2 coeff = vec2((baseSE - pos) * output_size);)
     GLSL(coeff = clamp(coeff, 0.0, 1.0);)
-    if (scaler->params[0] > 0) { // also rules out NAN
+    float threshold = scaler->conf.kernel.params[0];
+    if (threshold > 0) { // also rules out NAN
         GLSLF("coeff = mix(coeff, vec2(0.0), "
-              "lessThanEqual(coeff, vec2(%f)));\n", scaler->params[0]);
+              "lessThanEqual(coeff, vec2(%f)));\n", threshold);
         GLSLF("coeff = mix(coeff, vec2(1.0), "
-              "greaterThanEqual(coeff, vec2(%f)));\n", scaler->params[0]);
+              "greaterThanEqual(coeff, vec2(%f)));\n", threshold);
     }
     // Compute the right blend of colors
     GLSL(vec4 left = mix(texture(tex, baseSW),
@@ -1250,12 +1287,11 @@ static void pass_sample_oversample(struct gl_video *p, struct scaler *scaler,
 // This will declare "vec4 color;", which contains the scaled contents.
 // The scaler unit is initialized by this function; in order to avoid cache
 // thrashing, the scaler unit should usually use the same parameters.
-static void pass_sample(struct gl_video *p, int src_tex,
-                        int scaler_unit, const char *name, double scale_factor,
+static void pass_sample(struct gl_video *p, int src_tex, struct scaler *scaler,
+                        const struct scaler_config *conf, double scale_factor,
                         int w, int h, struct gl_transform transform)
 {
-    struct scaler *scaler = &p->scalers[scaler_unit];
-    reinit_scaler(p, scaler_unit, name, scale_factor, filter_sizes);
+    reinit_scaler(p, scaler, conf, scale_factor, filter_sizes);
     sampler_prelude(p, src_tex);
 
     // Set up the transformation for everything other than separated scaling
@@ -1263,15 +1299,16 @@ static void pass_sample(struct gl_video *p, int src_tex,
         gl_transform_rect(transform, &p->pass_tex[src_tex].src);
 
     // Dispatch the scaler. They're all wildly different.
-    if (strcmp(scaler->name, "bilinear") == 0) {
+    const char *name = scaler->conf.kernel.name;
+    if (strcmp(name, "bilinear") == 0) {
         GLSL(vec4 color = texture(tex, pos);)
-    } else if (strcmp(scaler->name, "bicubic_fast") == 0) {
+    } else if (strcmp(name, "bicubic_fast") == 0) {
         pass_sample_bicubic_fast(p);
-    } else if (strcmp(scaler->name, "sharpen3") == 0) {
+    } else if (strcmp(name, "sharpen3") == 0) {
         pass_sample_sharpen3(p, scaler);
-    } else if (strcmp(scaler->name, "sharpen5") == 0) {
+    } else if (strcmp(name, "sharpen5") == 0) {
         pass_sample_sharpen5(p, scaler);
-    } else if (strcmp(scaler->name, "oversample") == 0) {
+    } else if (strcmp(name, "oversample") == 0) {
         pass_sample_oversample(p, scaler, w, h);
     } else if (scaler->kernel && scaler->kernel->polar) {
         pass_sample_polar(p, scaler);
@@ -1298,9 +1335,9 @@ static void pass_read_video(struct gl_video *p)
         return;
     }
 
-    const char *cscale = p->opts.scalers[1];
+    const struct scaler_config *cscale = &p->opts.scaler[2];
     if (p->image_desc.flags & MP_IMGFLAG_SUBSAMPLED &&
-            strcmp(cscale, "bilinear") != 0) {
+            strcmp(cscale->kernel.name, "bilinear") != 0) {
         struct src_tex luma = p->pass_tex[0];
         if (p->plane_count > 2) {
             // For simplicity and performance, we merge the chroma planes
@@ -1317,7 +1354,8 @@ static void pass_read_video(struct gl_video *p)
             finish_pass_fbo(p, &p->chroma_merge_fbo, c_w, c_h, 1, 0);
         }
         GLSLF("// chroma scaling\n");
-        pass_sample(p, 1, 1, cscale, 1.0, p->image_w, p->image_h, chromafix);
+        pass_sample(p, 1, &p->scaler[2], cscale, 1.0, p->image_w, p->image_h,
+                    chromafix);
         GLSL(vec2 chroma = color.rg;)
         // Always force rendering to a FBO before main scaling, or we would
         // scale chroma incorrectly.
@@ -1463,11 +1501,14 @@ static void pass_scale_main(struct gl_video *p)
     bool upscaling = !downscaling && (xy[0] > 1.0 || xy[1] > 1.0);
     double scale_factor = 1.0;
 
-    char *scaler = p->opts.scalers[0];
+    struct scaler *scaler = &p->scaler[0];
+    struct scaler_config scaler_conf = p->opts.scaler[0];
     if (p->opts.scaler_resizes_only && !downscaling && !upscaling)
-        scaler = "bilinear";
-    if (downscaling)
-        scaler = p->opts.dscaler;
+        scaler_conf.kernel.name = "bilinear";
+    if (downscaling && p->opts.scaler[1].kernel.name) {
+        scaler_conf = p->opts.scaler[1];
+        scaler = &p->scaler[1];
+    }
 
     double f = MPMIN(xy[0], xy[1]);
     if (p->opts.fancy_downscaling && f < 1.0 &&
@@ -1519,7 +1560,7 @@ static void pass_scale_main(struct gl_video *p)
     }
 
     GLSLF("// main scaling\n");
-    if (!p->use_indirect && strcmp(scaler, "bilinear") == 0) {
+    if (!p->use_indirect && strcmp(scaler_conf.kernel.name, "bilinear") == 0) {
         // implicitly scale in pass_video_to_screen, but set up the textures
         // manually (for cropping etc.). Special care has to be taken for the
         // chroma planes (everything except luma=tex0), to make sure the offset
@@ -1533,7 +1574,8 @@ static void pass_scale_main(struct gl_video *p)
             gl_transform_rect(n > 0 ? tchroma : transform, &p->pass_tex[n].src);
     } else {
         finish_pass_fbo(p, &p->indirect_fbo, p->image_w, p->image_h, 0, 0);
-        pass_sample(p, 0, 0, scaler, scale_factor, vp_w, vp_h, transform);
+        pass_sample(p, 0, scaler, &scaler_conf, scale_factor, vp_w, vp_h,
+                    transform);
     }
 
     GLSLF("// scaler post-conversion\n");
@@ -1834,9 +1876,9 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     // look like this: _ A [B] C D _
     // A is surface_bse, B is surface_now, C is surface_nxt and D is
     // surface_end.
-    struct scaler *tscale = &p->scalers[2];
-    reinit_scaler(p, 2, p->opts.scalers[2], 1, tscale_sizes);
-    bool oversample = strcmp(tscale->name, "oversample") == 0;
+    struct scaler *tscale = &p->scaler[3];
+    reinit_scaler(p, tscale, &p->opts.scaler[3], 1, tscale_sizes);
+    bool oversample = strcmp(tscale->conf.kernel.name, "oversample") == 0;
     int size;
     if (oversample) {
         size = 2;
@@ -1910,7 +1952,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
         double fscale = pts_nxt - pts_now, mix;
         if (oversample) {
             double vsync_interval = t->next_vsync - t->prev_vsync,
-                   threshold = isnan(tscale->params[0]) ? 0 : tscale->params[0];
+                   threshold = tscale->conf.kernel.params[0];
+            threshold = isnan(threshold) ? 0.0 : threshold;
             mix = (pts_nxt - t->next_vsync) / vsync_interval;
             mix = mix <= 0 + threshold ? 0 : mix;
             mix = mix >= 1 - threshold ? 1 : mix;
@@ -2133,8 +2176,9 @@ static void check_gl_features(struct gl_video *p)
     // because they will be slow (not critically slow, but still slower).
     // Without FP textures, we must always disable them.
     // I don't know if luminance alpha float textures exist, so disregard them.
-    for (int n = 0; n < 2; n++) {
-        const struct filter_kernel *kernel = mp_find_filter_kernel(p->opts.scalers[n]);
+    for (int n = 0; n < 4; n++) {
+        const struct filter_kernel *kernel =
+            mp_find_filter_kernel(p->opts.scaler[n].kernel.name);
         if (kernel) {
             char *reason = NULL;
             if (!test_fbo(p, &have_fbo))
@@ -2144,7 +2188,7 @@ static void check_gl_features(struct gl_video *p)
             if (!have_1d_tex && kernel->polar)
                 reason = "scaler (1D tex.)";
             if (reason) {
-                p->opts.scalers[n] = "bilinear";
+                p->opts.scaler[n].kernel.name = "bilinear";
                 disabled[n_disabled++] = reason;
             }
         }
@@ -2490,11 +2534,7 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log)
         .opts = gl_video_opts_def,
         .gl_target = GL_TEXTURE_2D,
         .texture_16bit_depth = 16,
-        .scalers = {
-            { .index = 0, .name = "bilinear" },
-            { .index = 1, .name = "bilinear" },
-            { .index = 2, .name = "oversample" },
-        },
+        .scaler = {{.index = 0}, {.index = 1}, {.index = 2}, {.index = 3}},
         .sc = gl_sc_create(gl, log),
     };
     gl_video_set_debug(p, true);
@@ -2528,19 +2568,21 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
                           int *queue_size)
 {
     p->opts = *opts;
-    for (int n = 0; n < 3; n++)
-        p->opts.scalers[n] = (char *)handle_scaler_opt(p->opts.scalers[n], n==2);
-    p->opts.dscaler = (char *)handle_scaler_opt(p->opts.dscaler, false);
+    for (int n = 0; n < 4; n++) {
+        p->opts.scaler[n].kernel.name =
+            (char *)handle_scaler_opt(p->opts.scaler[n].kernel.name, n==3);
+    }
 
     // Figure out an adequate size for the interpolation queue. The larger
     // the radius, the earlier we need to queue frames. This rough heuristic
     // seems to work for now, but ideally we want to rework the pause/unpause
     // logic to make larger queue sizes the default.
-    if (queue_size && p->opts.interpolation && p->opts.scalers[2]) {
-        const struct filter_kernel *kernel = mp_find_filter_kernel(p->opts.scalers[2]);
+    if (queue_size && p->opts.interpolation) {
+        const struct filter_kernel *kernel =
+            mp_find_filter_kernel(p->opts.scaler[3].kernel.name);
         if (kernel) {
             double radius = kernel->f.radius;
-            radius = radius > 0 ? radius : p->opts.scaler_radius[2];
+            radius = radius > 0 ? radius : p->opts.scaler[3].radius;
            *queue_size = 50e3 * ceil(radius);
         }
     }
