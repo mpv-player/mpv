@@ -45,7 +45,6 @@ const struct filter_window *mp_find_filter_window(const char *name)
 {
     if (!name)
         return NULL;
-
     for (const struct filter_window *w = mp_filter_windows; w->name; w++) {
         if (strcmp(w->name, name) == 0)
             return w;
@@ -55,6 +54,8 @@ const struct filter_window *mp_find_filter_window(const char *name)
 
 const struct filter_kernel *mp_find_filter_kernel(const char *name)
 {
+    if (!name)
+        return NULL;
     for (const struct filter_kernel *k = mp_filter_kernels; k->f.name; k++) {
         if (strcmp(k->f.name, name) == 0)
             return k;
@@ -313,7 +314,7 @@ const struct filter_window mp_filter_windows[] = {
     {"quadric",        1.5, quadric},
     {"kaiser",         1,   kaiser,   .params = {6.33, NAN} },
     {"hermite",        1,   cubic_bc, .params = {0.0, 0.0} },
-    {"gaussian",       -1,  gaussian, .params = {1.0, NAN} },
+    {"gaussian",       2,   gaussian, .params = {1.0, NAN} },
     {"sinc",           1,   sinc},
     {"jinc",           1.2196698912665045, jinc},
     {"sphinx",         1.4302966531242027, sphinx},
@@ -326,14 +327,14 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{"spline36",       3,   spline36}},
     {{"spline64",       4,   spline64}},
     // Sinc filters
-    {{"sinc",           -1,  sinc}},
-    {{"lanczos",        -1,  sinc}, .window = "sinc"},
-    {{"ginseng",        -1,  sinc}, .window = "jinc"},
+    {{"sinc",           2,  sinc, .resizable = true}},
+    {{"lanczos",        3,  sinc, .resizable = true}, .window = "sinc"},
+    {{"ginseng",        3,  sinc, .resizable = true}, .window = "jinc"},
     // Jinc filters
-    {{"jinc",           -1,  jinc}, .polar = true},
-    {{"ewa_lanczos",    -1,  jinc}, .polar = true, .window = "jinc"},
-    {{"ewa_hanning",    -1,  jinc}, .polar = true, .window = "hanning" },
-    {{"ewa_ginseng",    -1,  jinc}, .polar = true, .window = "sinc"},
+    {{"jinc",           3,  jinc, .resizable = true}, .polar = true},
+    {{"ewa_lanczos",    3,  jinc, .resizable = true}, .polar = true, .window = "jinc"},
+    {{"ewa_hanning",    3,  jinc, .resizable = true}, .polar = true, .window = "hanning" },
+    {{"ewa_ginseng",    3,  jinc, .resizable = true}, .polar = true, .window = "sinc"},
     // Radius is based on the true jinc radius, slightly sharpened as per
     // calculations by Nicolas Robidoux. Source: Imagemagick's magick/resize.c
     {{"ewa_lanczossharp", 3.2383154841662362, jinc, .blur = 0.9812505644269356},
@@ -350,10 +351,9 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{"robidoux",       2,   cubic_bc, .params = {0.3782, 0.3109}}, .polar = true},
     {{"robidouxsharp",  2,   cubic_bc, .params = {0.2620, 0.3690}}, .polar = true},
     // Miscalleaneous filters
-    {{"box",            -1,  box}},
+    {{"box",            1,   box, .resizable = true}},
     {{"nearest",        0.5, box}},
-    {{"triangle",       -1,  triangle}},
-    {{"bilinear_slow",  1,   triangle}},
-    {{"gaussian",       -1,  gaussian, .params = {1.0, NAN} }},
+    {{"triangle",       1,   triangle, .resizable = true}},
+    {{"gaussian",       2,   gaussian, .params = {1.0, NAN}, .resizable = true}},
     {{0}}
 };
