@@ -656,9 +656,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
     }
 
     // Last-frame seek
-    if (needs_new_frame(mpctx) && hrseek && mpctx->hrseek_lastframe &&
-        mpctx->saved_frame)
-    {
+    if (r <= 0 && hrseek && mpctx->hrseek_lastframe && mpctx->saved_frame) {
         add_new_frame(mpctx, mpctx->saved_frame);
         mpctx->saved_frame = NULL;
         r = VD_PROGRESS;
