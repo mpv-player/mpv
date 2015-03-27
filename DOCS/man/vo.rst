@@ -663,6 +663,9 @@ Available video output drivers are:
         visible portion of the video, so you can't have subtitles exist in the
         black margins below a video (for example).
 
+        .. warning:: This mangles colors in an incorrect way, but is on the
+                     other hand needed if an icc-profile is used.
+
     ``alpha=<blend|yes|no>``
         Decides what to do if the input has an alpha component (default: blend).
 
