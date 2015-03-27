@@ -217,7 +217,7 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
 
     mpgl_load_functions2(ctx->gl, get_proc_address, get_proc_address_ctx,
                          exts, ctx->log);
-    ctx->renderer = gl_video_init(ctx->gl, ctx->log);
+    ctx->renderer = gl_video_init(ctx->gl, ctx->log, NULL);
     if (!ctx->renderer)
         return MPV_ERROR_UNSUPPORTED;
 

@@ -497,6 +497,7 @@ struct gl_shader_cache {
 
     // this is modified during use (gl_sc_add() etc.)
     char *text;
+    char *header_text;
     struct gl_vao *vao;
 
     struct sc_entry entries[SC_ENTRIES];
@@ -513,6 +514,7 @@ struct gl_shader_cache *gl_sc_create(GL *gl, struct mp_log *log)
         .gl = gl,
         .log = log,
         .text = talloc_strdup(sc, ""),
+        .header_text = talloc_strdup(sc, ""),
     };
     return sc;
 }
@@ -520,6 +522,7 @@ struct gl_shader_cache *gl_sc_create(GL *gl, struct mp_log *log)
 void gl_sc_reset(struct gl_shader_cache *sc)
 {
     sc->text[0] = '\0';
+    sc->header_text[0] = '\0';
     for (int n = 0; n < sc->num_uniforms; n++)
         talloc_free(sc->uniforms[n].name);
     sc->num_uniforms = 0;
@@ -553,6 +556,11 @@ void gl_sc_addf(struct gl_shader_cache *sc, const char *textf, ...)
     va_start(ap, textf);
     ta_xvasprintf_append(&sc->text, textf, ap);
     va_end(ap);
+}
+
+void gl_sc_hadd(struct gl_shader_cache *sc, const char *text)
+{
+    sc->header_text = talloc_strdup_append(sc->header_text, text);
 }
 
 static struct sc_uniform *find_uniform(struct gl_shader_cache *sc,
@@ -762,6 +770,11 @@ static GLuint create_program(struct gl_shader_cache *sc, const char *vertex,
 {
     GL *gl = sc->gl;
     MP_VERBOSE(sc, "recompiling a shader program:\n");
+    if (sc->header_text[0]) {
+        MP_VERBOSE(sc, "header:\n");
+        mp_log_source(sc->log, MSGL_V, sc->header_text);
+        MP_VERBOSE(sc, "body:\n");
+    }
     mp_log_source(sc->log, MSGL_V, sc->text);
     GLuint prog = gl->CreateProgram();
     compile_attach_shader(sc, prog, GL_VERTEX_SHADER, vertex);
@@ -837,6 +850,12 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     for (int n = 0; n < sc->num_uniforms; n++) {
         struct sc_uniform *u = &sc->uniforms[n];
         ADD(frag, "uniform %s %s;\n", u->glsl_type, u->name);
+    }
+    // custom shader header
+    if (sc->header_text[0]) {
+        ADD(frag, "// header\n");
+        ADD(frag, "%s\n", sc->header_text);
+        ADD(frag, "// body\n");
     }
     ADD(frag, "void main() {\n");
     ADD(frag, "%s", sc->text);
