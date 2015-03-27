@@ -1421,10 +1421,11 @@ static void get_scale_factors(struct gl_video *p, double xy[2])
             (double)(p->src_rect.y1 - p->src_rect.y0);
 }
 
-static void pass_linearize(struct gl_video *p)
+// Linearize, given a TRC as input
+static void pass_linearize(struct gl_video *p, enum mp_csp_trc trc)
 {
     GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
-    switch (p->image_params.gamma) {
+    switch (trc) {
         case MP_CSP_TRC_SRGB:
             GLSL(color.rgb = mix(color.rgb / vec3(12.92),
                                  pow((color.rgb + vec3(0.055))/vec3(1.055),
@@ -1463,16 +1464,11 @@ static void pass_scale_main(struct gl_video *p)
         scale_factor = FFMAX(1.0, 1.0 / f);
     }
 
-    bool use_cms = p->use_lut_3d || p->opts.target_prim != MP_CSP_PRIM_AUTO
-                                 || p->opts.target_trc != MP_CSP_TRC_AUTO;
-
     // Pre-conversion, like linear light/sigmoidization
     GLSLF("// scaler pre-conversion\n");
-    p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling
-                    || use_cms || p->image_params.gamma == MP_CSP_TRC_LINEAR;
     if (p->use_linear) {
         p->use_indirect = true;
-        pass_linearize(p);
+        pass_linearize(p, p->image_params.gamma);
     }
 
     bool use_sigmoid = p->use_linear && p->opts.sigmoid_upscaling && upscaling;
@@ -1536,21 +1532,14 @@ static void pass_scale_main(struct gl_video *p)
     }
 }
 
-// Adapts the colors to the display device's native gamut. Assumes the input
-// is in linear RGB.
-static void pass_colormanage(struct gl_video *p)
+// Adapts the colors from the given color space to the display device's native
+// gamut.
+static void pass_colormanage(struct gl_video *p, enum mp_csp_prim prim_src,
+                             enum mp_csp_trc trc_src)
 {
     GLSLF("// color management\n");
     enum mp_csp_trc trc_dst = p->opts.target_trc;
-    enum mp_csp_prim prim_src = p->image_params.primaries,
-                     prim_dst = p->opts.target_prim;
-
-    if (p->user_gamma != 1) {
-        p->use_indirect = true;
-        gl_sc_uniform_f(p->sc, "user_gamma", p->user_gamma);
-        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
-        GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
-    }
+    enum mp_csp_prim prim_dst = p->opts.target_prim;
 
     if (p->use_lut_3d) {
         // The 3DLUT is hard-coded against BT.2020's gamut during creation, and
@@ -1562,10 +1551,18 @@ static void pass_colormanage(struct gl_video *p)
     if (prim_dst == MP_CSP_PRIM_AUTO)
         prim_dst = prim_src;
     if (trc_dst == MP_CSP_TRC_AUTO) {
-        trc_dst = p->image_params.gamma;
-        // Pick something more reasonable for linear light inputs
-        if (p->image_params.gamma == MP_CSP_TRC_LINEAR)
+        trc_dst = trc_src;
+        // Avoid outputting linear light at all costs
+        if (trc_dst == MP_CSP_TRC_LINEAR)
+            trc_dst = p->image_params.gamma;
+        if (trc_dst == MP_CSP_TRC_LINEAR)
             trc_dst = MP_CSP_TRC_GAMMA22;
+    }
+
+    bool need_cms = prim_src != prim_dst || p->use_lut_3d;
+    bool need_gamma = trc_src != trc_dst || need_cms;
+    if (need_gamma && trc_src != MP_CSP_TRC_LINEAR) {
+        pass_linearize(p, trc_src);
     }
 
     // Adapt to the right colorspace if necessary
@@ -1587,9 +1584,7 @@ static void pass_colormanage(struct gl_video *p)
         GLSL(color.rgb = texture3D(lut_3d, color.rgb).rgb;)
     }
 
-    // Don't perform any gamut mapping unless linear light input is present to
-    // begin with
-    if (p->use_linear && trc_dst != MP_CSP_TRC_LINEAR) {
+    if (need_gamma && trc_dst != MP_CSP_TRC_LINEAR) {
         GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         switch (trc_dst) {
             case MP_CSP_TRC_SRGB:
@@ -1707,11 +1702,11 @@ static void pass_dither(struct gl_video *p)
           dither_quantization);
 }
 
-// Draws the OSD. If linearize is true, the output will be converted to
-// linear light.
+// Draws the OSD, in linear light. If blend is true, subtitles are treated as
+// scene-referred, otherwise they are assumed sRGB and adapted to the output
 static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
                           struct mp_osd_res rect, int vp_w, int vp_h, int fbo,
-                          bool linearize)
+                          bool blend)
 {
     mpgl_osd_generate(p->osd, rect, pts, p->image_params.stereo_out, draw_flags);
 
@@ -1736,8 +1731,14 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
         default:
             abort();
         }
-        if (linearize)
-            pass_linearize(p);
+        // subtitle color management
+        if (blend) {
+            // Scene referred: no gamut adaptation needed, and implicit trc
+            pass_linearize(p, p->image_params.gamma);
+        } else {
+            // Assume sRGB (BT.709 primaries) and adapt to output
+            pass_colormanage(p, MP_CSP_PRIM_BT_709, MP_CSP_TRC_SRGB);
+        }
         gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
         gl_sc_gen_shader_and_reset(p->sc);
         mpgl_osd_draw_part(p->osd, vp_w, vp_h, n);
@@ -1749,6 +1750,10 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
 // upscaling
 static void pass_render_frame(struct gl_video *p)
 {
+    bool use_cms = p->use_lut_3d || p->opts.target_prim != MP_CSP_PRIM_AUTO
+                                 || p->opts.target_trc != MP_CSP_TRC_AUTO;
+    p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling
+                    || use_cms || p->image_params.gamma == MP_CSP_TRC_LINEAR;
     p->use_indirect = false; // set to true as needed by pass_*
     pass_read_video(p);
     pass_convert_yuv(p);
@@ -1781,7 +1786,14 @@ static void pass_render_frame(struct gl_video *p)
 
 static void pass_draw_to_screen(struct gl_video *p, int fbo)
 {
-    pass_colormanage(p);
+    // Adjust the overall gamma before drawing to screen
+    if (p->user_gamma != 1) {
+        gl_sc_uniform_f(p->sc, "user_gamma", p->user_gamma);
+        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
+        GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
+    }
+    pass_colormanage(p, p->image_params.primaries,
+                     p->use_linear ? MP_CSP_TRC_LINEAR : p->image_params.gamma);
     pass_dither(p);
     int flags = (p->image_params.rotate % 90 ? 0 : p->image_params.rotate / 90)
               | (p->image.image_flipped ? 4 : 0);
