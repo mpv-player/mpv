@@ -324,10 +324,10 @@ const struct gl_video_opts gl_video_opts_def = {
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .scaler = {
-        {{"bilinear",   .params={NAN, NAN}}}, // scale
-        {{NULL,         .params={NAN, NAN}}}, // dscale (defaults to scale)
-        {{"bilinear",   .params={NAN, NAN}}}, // cscale
-        {{"oversample", .params={NAN, NAN}}}  // tscale
+        {{"bilinear",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // scale
+        {{NULL,         .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // dscale
+        {{"bilinear",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // cscale
+        {{"oversample", .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // tscale
     },
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
@@ -344,10 +344,10 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .sigmoid_slope = 6.5,
     .sigmoid_upscaling = 1,
     .scaler = {
-        {{"spline36",   .params={NAN, NAN}}}, // scale
-        {{"mitchell",   .params={NAN, NAN}}}, // dscale
-        {{"spline36",   .params={NAN, NAN}}}, // cscale
-        {{"oversample", .params={NAN, NAN}}}  // tscale
+        {{"spline36",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // scale
+        {{"mitchell",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // dscale
+        {{"spline36",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // cscale
+        {{"oversample", .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // tscale
     },
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
@@ -401,6 +401,10 @@ const struct m_sub_options gl_video_conf = {
         OPT_STRING_VALIDATE("dscale-window", scaler[1].window.name, 0, validate_window_opt),
         OPT_STRING_VALIDATE("cscale-window", scaler[2].window.name, 0, validate_window_opt),
         OPT_STRING_VALIDATE("tscale-window", scaler[3].window.name, 0, validate_window_opt),
+        OPT_FLOAT("scale-wparam",  scaler[0].window.params[0], 0),
+        OPT_FLOAT("dscale-wparam", scaler[1].window.params[0], 0),
+        OPT_FLOAT("cscale-wparam", scaler[2].window.params[0], 0),
+        OPT_FLOAT("tscale-wparam", scaler[3].window.params[0], 0),
         OPT_FLOATRANGE("scale-radius",  scaler[0].radius, 0, 0.5, 16.0),
         OPT_FLOATRANGE("dscale-radius", scaler[1].radius, 0, 0.5, 16.0),
         OPT_FLOATRANGE("cscale-radius", scaler[2].radius, 0, 0.5, 16.0),
