@@ -45,26 +45,18 @@ void wasapi_change_uninit(struct ao* ao);
 
 typedef struct wasapi_state {
     struct mp_log *log;
-    HANDLE threadLoop;
-
     /* Init phase */
     HRESULT init_ret;
     HANDLE init_done;
     int share_mode;
 
-    HANDLE hUninit;
-
     /* volume control */
-    DWORD vol_hw_support, status;
+    DWORD vol_hw_support;
     float audio_volume;
     float previous_volume;
     float initial_volume;
 
-    /* Buffers */
-    size_t buffer_block_size; /* Size of each block in bytes */
-    UINT32 bufferFrameCount; /* wasapi buffer block size, number of frames, frame size at format.nBlockAlign */
-
-    /* WASAPI handles, owned by other thread */
+    /* WASAPI handles, owned by audio thread */
     IMMDevice *pDevice;
     IAudioClient *pAudioClient;
     IAudioRenderClient *pRenderClient;
@@ -73,15 +65,19 @@ typedef struct wasapi_state {
     IAudioSessionControl *pSessionControl;
     IMMDeviceEnumerator *pEnumerator;
 
+    /* thread handles */
+    HANDLE threadLoop; /* the thread itself */
+    HANDLE hUninit; /* thread shutdown */
     HANDLE hFeed; /* wasapi event */
     HANDLE hResume; /* signal audio thread to resume the stream */
     HANDLE hReset; /* signal audio thread to reset the stream */
+
+    /* for setting the audio thread priority */
     HANDLE hTask; /* AV thread */
     DWORD taskIndex; /* AV task ID */
-    WAVEFORMATEXTENSIBLE format;
 
     /* WASAPI proxy handles, for Single-Threaded Apartment communication.
-       One is needed for each object that's accessed by a different thread. */
+       One is needed for each audio thread object that's accessed from the main thread. */
     ISimpleAudioVolume *pAudioVolumeProxy;
     IAudioEndpointVolume *pEndpointVolumeProxy;
     IAudioSessionControl *pSessionControlProxy;
@@ -99,9 +95,15 @@ typedef struct wasapi_state {
     atomic_ullong sample_count; /* the amount of samples per channel written to a GetBuffer buffer */
     LARGE_INTEGER qpc_frequency; /* frequency of windows' high resolution timer */
 
+    /* ao options */
     int opt_exclusive;
     int opt_list;
     char *opt_device;
+
+    /* format info */
+    WAVEFORMATEXTENSIBLE format;
+    size_t buffer_block_size; /* Size of each block in bytes */
+    UINT32 bufferFrameCount; /* wasapi buffer block size, number of frames, frame size at format.nBlockAlign */
 
     /* Don't use these functions directly in case
        they are unimplemented for some reason.
