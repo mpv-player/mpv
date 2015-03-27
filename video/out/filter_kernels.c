@@ -225,6 +225,19 @@ static double kaiser(params *p, double x)
     return bessel_i0(epsilon, a * sqrt(1 - x * x)) * i0a;
 }
 
+static double blackman(params *p, double x)
+{
+    double a = p->params[0];
+    double a0 = (1-a)/2.0, a1 = 1/2.0, a2 = a/2.0;
+    double pix = M_PI * x;
+    return a0 + a1*cos(pix) + a2*cos(2 * pix);
+}
+
+static double welch(params *p, double x)
+{
+    return 1.0 - x*x;
+}
+
 // Family of cubic B/C splines
 static double cubic_bc(params *p, double x)
 {
@@ -309,12 +322,15 @@ static double sphinx(params *p, double x)
 const struct filter_window mp_filter_windows[] = {
     {"box",            1,   box},
     {"triangle",       1,   triangle},
+    {"bartlett",       1,   triangle},
     {"hanning",        1,   hanning},
     {"hamming",        1,   hamming},
     {"quadric",        1.5, quadric},
+    {"welch",          1,   welch},
     {"kaiser",         1,   kaiser,   .params = {6.33, NAN} },
     {"hermite",        1,   cubic_bc, .params = {0.0, 0.0} },
-    {"gaussian",       2,   gaussian, .params = {1.0, NAN} },
+    {"blackman",       1,   blackman, .params = {0.16, NAN} },
+    {"gaussian",       2,   gaussian, .params = {1.0,  NAN} },
     {"sinc",           1,   sinc},
     {"jinc",           1.2196698912665045, jinc},
     {"sphinx",         1.4302966531242027, sphinx},
