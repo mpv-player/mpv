@@ -39,13 +39,25 @@
 
 #include "filter_kernels.h"
 
-// NOTE: all filters are separable, symmetric, and are intended for use with
-//       a lookup table/texture.
+// NOTE: all filters are designed for discrete convolution
+
+const struct filter_window *mp_find_filter_window(const char *name)
+{
+    if (!name)
+        return NULL;
+    for (const struct filter_window *w = mp_filter_windows; w->name; w++) {
+        if (strcmp(w->name, name) == 0)
+            return w;
+    }
+    return NULL;
+}
 
 const struct filter_kernel *mp_find_filter_kernel(const char *name)
 {
-    for (const struct filter_kernel *k = mp_filter_kernels; k->name; k++) {
-        if (strcmp(k->name, name) == 0)
+    if (!name)
+        return NULL;
+    for (const struct filter_kernel *k = mp_filter_kernels; k->f.name; k++) {
+        if (strcmp(k->f.name, name) == 0)
             return k;
     }
     return NULL;
@@ -56,16 +68,22 @@ const struct filter_kernel *mp_find_filter_kernel(const char *name)
 bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
                     double inv_scale)
 {
-    assert(filter->radius > 0);
-    // polar filters are dependent only on the radius
+    assert(filter->f.radius > 0);
+    // Only downscaling requires widening the filter
+    filter->inv_scale = inv_scale >= 1.0 ? inv_scale : 1.0;
+    filter->f.radius *= filter->inv_scale;
+    // Polar filters are dependent solely on the radius
     if (filter->polar) {
+        filter->f.radius = fmin(filter->f.radius, 16.0);
         filter->size = 1;
+        // Safety precaution to avoid generating a gigantic shader
+        if (filter->f.radius > 16.0) {
+            filter->f.radius = 16.0;
+            return false;
+        }
         return true;
     }
-    // only downscaling requires widening the filter
-    filter->inv_scale = inv_scale >= 1.0 ? inv_scale : 1.0;
-    double support = filter->radius * filter->inv_scale;
-    int size = ceil(2.0 * support);
+    int size = ceil(2.0 * filter->f.radius);
     // round up to smallest available size that's still large enough
     if (size < sizes[0])
         size = sizes[0];
@@ -80,27 +98,42 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
         // largest filter available. This is incorrect, but better than refusing
         // to do anything.
         filter->size = cursize[-1];
-        filter->inv_scale = filter->size / 2.0 / filter->radius;
+        filter->inv_scale *= (filter->size/2.0) / filter->f.radius;
         return false;
     }
+}
+
+// Sample from the blurred, windowed kernel. Note: The window is always
+// stretched to the true radius, regardless of the filter blur/scale.
+static double sample_filter(struct filter_kernel *filter,
+                            struct filter_window *window, double x)
+{
+    double bk = filter->f.blur > 0.0 ? filter->f.blur : 1.0;
+    double bw = window->blur > 0.0 ? window->blur : 1.0;
+    double c = fabs(x) / (filter->inv_scale * bk);
+    double w = window->weight ? window->weight(window, x/bw * window->radius
+                                                            / filter->f.radius)
+                              : 1.0;
+    return c < filter->f.radius ? w * filter->f.weight(&filter->f, c) : 0.0;
 }
 
 // Calculate the 1D filtering kernel for N sample points.
 // N = number of samples, which is filter->size
 // The weights will be stored in out_w[0] to out_w[N - 1]
 // f = x0 - abs(x0), subpixel position in the range [0,1) or [0,1].
-void mp_compute_weights(struct filter_kernel *filter, double f, float *out_w)
+static void mp_compute_weights(struct filter_kernel *filter,
+                               struct filter_window *window,
+                               double f, float *out_w)
 {
     assert(filter->size > 0);
     double sum = 0;
     for (int n = 0; n < filter->size; n++) {
         double x = f - (n - filter->size / 2 + 1);
-        double c = fabs(x) / filter->inv_scale;
-        double w = c <= filter->radius ? filter->weight(filter, c) : 0;
+        double w = sample_filter(filter, window, x);
         out_w[n] = w;
         sum += w;
     }
-    //normalize
+    // Normalize to preserve energy
     for (int n = 0; n < filter->size; n++)
         out_w[n] /= sum;
 }
@@ -109,47 +142,47 @@ void mp_compute_weights(struct filter_kernel *filter, double f, float *out_w)
 // interpreted as rectangular array of count * filter->size items.
 void mp_compute_lut(struct filter_kernel *filter, int count, float *out_array)
 {
+    struct filter_window *window = &filter->w;
     if (filter->polar) {
         // Compute a 1D array indexed by radius
-        assert(filter->radius > 0);
         for (int x = 0; x < count; x++) {
-            double r = x * filter->radius / (count - 1);
-            out_array[x] = r <= filter->radius ? filter->weight(filter, r) : 0;
+            double r = x * filter->f.radius / (count - 1);
+            out_array[x] = sample_filter(filter, window, r);
         }
     } else {
         // Compute a 2D array indexed by subpixel position
         for (int n = 0; n < count; n++) {
-            mp_compute_weights(filter, n / (double)(count - 1),
+            mp_compute_weights(filter, window,  n / (double)(count - 1),
                                out_array + filter->size * n);
         }
     }
 }
 
-typedef struct filter_kernel kernel;
+typedef struct filter_window params;
 
-static double nearest(kernel *k, double x)
+static double box(params *p, double x)
 {
-    return x > 0.5 ? 0.0 : 1.0;
+    // This is mathematically 1.0 everywhere, the clipping is done implicitly
+    // based on the radius.
+    return 1.0;
 }
 
-static double triangle(kernel *k, double x)
+static double triangle(params *p, double x)
 {
-    if (fabs(x) > 1.0)
-        return 0.0;
-    return 1.0 - fabs(x);
+    return fmax(0.0, 1.0 - fabs(x / p->radius));
 }
 
-static double hanning(kernel *k, double x)
+static double hanning(params *p, double x)
 {
     return 0.5 + 0.5 * cos(M_PI * x);
 }
 
-static double hamming(kernel *k, double x)
+static double hamming(params *p, double x)
 {
     return 0.54 + 0.46 * cos(M_PI * x);
 }
 
-static double quadric(kernel *k, double x)
+static double quadric(params *p, double x)
 {
     // NOTE: glumpy uses 0.75, AGG uses 0.5
     if (x < 0.5)
@@ -164,7 +197,7 @@ static double bc_pow3(double x)
     return (x <= 0) ? 0 : x * x * x;
 }
 
-static double bicubic(kernel *k, double x)
+static double bicubic(params *p, double x)
 {
     return (1.0/6.0) * (      bc_pow3(x + 2)
                         - 4 * bc_pow3(x + 1)
@@ -184,19 +217,32 @@ static double bessel_i0(double epsilon, double x)
     return sum;
 }
 
-static double kaiser(kernel *k, double x)
+static double kaiser(params *p, double x)
 {
-    double a = k->params[0];
+    double a = p->params[0];
     double epsilon = 1e-12;
     double i0a = 1 / bessel_i0(epsilon, a);
     return bessel_i0(epsilon, a * sqrt(1 - x * x)) * i0a;
 }
 
-// Family of cubic B/C splines
-static double cubic_bc(kernel *k, double x)
+static double blackman(params *p, double x)
 {
-    double b = k->params[0];
-    double c = k->params[1];
+    double a = p->params[0];
+    double a0 = (1-a)/2.0, a1 = 1/2.0, a2 = a/2.0;
+    double pix = M_PI * x;
+    return a0 + a1*cos(pix) + a2*cos(2 * pix);
+}
+
+static double welch(params *p, double x)
+{
+    return 1.0 - x*x;
+}
+
+// Family of cubic B/C splines
+static double cubic_bc(params *p, double x)
+{
+    double b = p->params[0];
+    double c = p->params[1];
     double
         p0 = (6.0 - 2.0 * b) / 6.0,
         p2 = (-18.0 + 12.0 * b + 6.0 * c) / 6.0,
@@ -212,14 +258,14 @@ static double cubic_bc(kernel *k, double x)
     return 0;
 }
 
-static double spline16(kernel *k, double x)
+static double spline16(params *p, double x)
 {
     if (x < 1.0)
         return ((x - 9.0/5.0 ) * x - 1.0/5.0 ) * x + 1.0;
     return ((-1.0/3.0 * (x-1) + 4.0/5.0) * (x-1) - 7.0/15.0 ) * (x-1);
 }
 
-static double spline36(kernel *k, double x)
+static double spline36(params *p, double x)
 {
     if(x < 1.0)
         return ((13.0/11.0 * x - 453.0/209.0) * x - 3.0/209.0) * x + 1.0;
@@ -230,7 +276,7 @@ static double spline36(kernel *k, double x)
            * (x - 2);
 }
 
-static double spline64(kernel *k, double x)
+static double spline64(params *p, double x)
 {
     if (x < 1.0)
         return ((49.0 / 41.0 * x - 6387.0 / 2911.0) * x - 3.0 / 2911.0) * x + 1.0;
@@ -244,107 +290,88 @@ static double spline64(kernel *k, double x)
            * (x - 3);
 }
 
-static double gaussian(kernel *k, double x)
+static double gaussian(params *p, double x)
 {
-    double p = k->params[0];
-    return pow(2.0, -(M_E / p) * x * x);
+    return pow(2.0, -(M_E / p->params[0]) * x * x);
 }
 
-static double sinc(kernel *k, double x)
+static double sinc(params *p, double x)
 {
-    if (x == 0.0)
+    if (fabs(x) < 1e-8)
         return 1.0;
     double pix = M_PI * x;
     return sin(pix) / pix;
 }
 
-static double jinc(kernel *k, double x)
+static double jinc(params *p, double x)
 {
     if (fabs(x) < 1e-8)
         return 1.0;
-    double pix = M_PI * x / k->params[0]; // blur factor
+    double pix = M_PI * x;
     return 2.0 * j1(pix) / pix;
 }
 
-static double lanczos(kernel *k, double x)
+static double sphinx(params *p, double x)
 {
-    double radius = k->size / 2;
-    if (x < -radius || x > radius)
-        return 0;
-    if (x == 0)
-        return 1;
-    double pix = M_PI * x;
-    return radius * sin(pix) * sin(pix / radius) / (pix * pix);
-}
-
-static double ewa_ginseng(kernel *k, double x)
-{
-    // Note: This is EWA ginseng, aka sinc-windowed jinc.
-    // Not to be confused with tensor ginseng, aka jinc-windowed sinc.
-    double radius = k->radius;
-    if (fabs(x) >= radius)
-        return 0.0;
-    return jinc(k, x) * sinc(k, x / radius);
-}
-
-static double ewa_lanczos(kernel *k, double x)
-{
-    double radius = k->radius;
-    if (fabs(x) >= radius)
-        return 0.0;
-    // First zero of the jinc function. We simply scale it to fit into the
-    // given radius.
-    double jinc_zero = 1.2196698912665045;
-    return jinc(k, x) * jinc(k, x * jinc_zero / radius);
-}
-
-static double ewa_hanning(kernel *k, double x)
-{
-    double radius = k->radius;
-    if (fabs(x) >= radius)
-        return 0.0;
-    // Jinc windowed by the hanning window
-    return jinc(k, x) * hanning(k, x / radius);
-}
-
-static double blackman(kernel *k, double x)
-{
-    double radius = k->size / 2;
-    if (x == 0.0)
+    if (fabs(x) < 1e-8)
         return 1.0;
-    if (x > radius)
-        return 0.0;
-    x *= M_PI;
-    double xr = x / radius;
-    return (sin(x) / x) * (0.42 + 0.5 * cos(xr) + 0.08 * cos(2 * xr));
+    double pix = M_PI * x;
+    return 3.0 * (sin(pix) - pix * cos(pix)) / (pix * pix * pix);
 }
 
-const struct filter_kernel mp_filter_kernels[] = {
-    {"nearest",        0.5, nearest},
+const struct filter_window mp_filter_windows[] = {
+    {"box",            1,   box},
     {"triangle",       1,   triangle},
     {"hanning",        1,   hanning},
     {"hamming",        1,   hamming},
     {"quadric",        1.5, quadric},
-    {"bicubic",        2,   bicubic},
+    {"welch",          1,   welch},
     {"kaiser",         1,   kaiser,   .params = {6.33, NAN} },
-    {"catmull_rom",    2,   cubic_bc, .params = {0.0, 0.5} },
-    {"mitchell",       2,   cubic_bc, .params = {1.0/3.0, 1.0/3.0} },
-    {"hermite",        1,   cubic_bc, .params = {0.0, 0.0} },
-    {"robidoux",       2,   cubic_bc, .params = {0.3782, 0.3109}, .polar = true},
-    {"robidouxsharp",  2,   cubic_bc, .params = {0.2620, 0.3690}, .polar = true},
-    {"spline16",       2,   spline16},
-    {"spline36",       3,   spline36},
-    {"spline64",       4,   spline64},
-    {"gaussian",       -1,  gaussian, .params = {1.0, NAN} },
-    {"sinc",           -1,  sinc},
-    {"ewa_lanczos",    -1,  ewa_lanczos, .params = {1.0, NAN}, .polar = true},
-    {"ewa_hanning",    -1,  ewa_hanning, .params = {1.0, NAN}, .polar = true},
-    {"ewa_ginseng",    -1,  ewa_ginseng, .params = {1.0, NAN}, .polar = true},
+    {"blackman",       1,   blackman, .params = {0.16, NAN} },
+    {"gaussian",       2,   gaussian, .params = {1.0,  NAN} },
+    {"sinc",           1,   sinc},
+    {"jinc",           1.2196698912665045, jinc},
+    {"sphinx",         1.4302966531242027, sphinx},
+    {0}
+};
+
+const struct filter_kernel mp_filter_kernels[] = {
+    // Spline filters
+    {{"spline16",       2,   spline16}},
+    {{"spline36",       3,   spline36}},
+    {{"spline64",       4,   spline64}},
+    // Sinc filters
+    {{"sinc",           2,  sinc, .resizable = true}},
+    {{"lanczos",        3,  sinc, .resizable = true}, .window = "sinc"},
+    {{"ginseng",        3,  sinc, .resizable = true}, .window = "jinc"},
+    // Jinc filters
+    {{"jinc",           3,  jinc, .resizable = true}, .polar = true},
+    {{"ewa_lanczos",    3,  jinc, .resizable = true}, .polar = true, .window = "jinc"},
+    {{"ewa_hanning",    3,  jinc, .resizable = true}, .polar = true, .window = "hanning" },
+    {{"ewa_ginseng",    3,  jinc, .resizable = true}, .polar = true, .window = "sinc"},
     // Radius is based on the true jinc radius, slightly sharpened as per
     // calculations by Nicolas Robidoux. Source: Imagemagick's magick/resize.c
-    {"ewa_lanczossharp", 3.2383154841662362, ewa_lanczos,
-                         .params = {0.9812505644269356, NAN}, .polar = true},
-    {"lanczos",        -1,  lanczos},
-    {"blackman",       -1,  blackman},
-    {0}
+    {{"ewa_lanczossharp", 3.2383154841662362, jinc, .blur = 0.9812505644269356},
+          .polar = true, .window = "jinc"},
+    // Similar to the above, but softened instead. This one makes hash patterns
+    // disappear completely. Blur determined by trial and error.
+    {{"ewa_lanczossoft", 3.2383154841662362, jinc, .blur = 1.015},
+          .polar = true, .window = "jinc"},
+    // Very soft (blurred) hanning-windowed jinc; removes almost all aliasing.
+    // Blur paramater picked to match orthogonal and diagonal contributions
+    {{"haasnsoft", 3.2383154841662362, jinc, .blur = 1.11}, .polar = true,
+          .window = "hanning"},
+    // Cubic filters
+    {{"bicubic",        2,   bicubic}},
+    {{"bcspline",       2,   cubic_bc, .params = {0.5, 0.5} }},
+    {{"catmull_rom",    2,   cubic_bc, .params = {0.0, 0.5} }},
+    {{"mitchell",       2,   cubic_bc, .params = {1.0/3.0, 1.0/3.0} }},
+    {{"robidoux",       2,   cubic_bc, .params = {0.3782, 0.3109}}, .polar = true},
+    {{"robidouxsharp",  2,   cubic_bc, .params = {0.2620, 0.3690}}, .polar = true},
+    // Miscalleaneous filters
+    {{"box",            1,   box, .resizable = true}},
+    {{"nearest",        0.5, box}},
+    {{"triangle",       1,   triangle, .resizable = true}},
+    {{"gaussian",       2,   gaussian, .params = {1.0, NAN}, .resizable = true}},
+    {{0}}
 };
