@@ -396,6 +396,19 @@ Available video output drivers are:
         Defaults to the filter's preferred window if unset. Use
         ``scale-window=help`` to get a list of supported windowing functions.
 
+    ``scale-wparam=<window>``
+        (Advanced users only) Configure the parameter for the window function
+        given by ``scale-window``. Ignored if the window is not tunable.
+        Currently, this affects the following window parameters:
+
+        kaiser
+            Window parameter (alpha). Defaults to 6.33.
+        blackman
+            Window parameter (alpha). Defaults to 0.16.
+        gaussian
+            Scale parameter (t). Increasing this makes the window wider.
+            Defaults to 1.
+
     ``scaler-resizes-only``
         Disable the scaler if the video image is not resized. In that case,
         ``bilinear`` is used instead whatever is set with ``scale``. Bilinear
