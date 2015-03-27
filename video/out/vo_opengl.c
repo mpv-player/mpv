@@ -434,7 +434,7 @@ static int preinit(struct vo *vo)
     }
     p->current_swap_interval = p->swap_interval;
 
-    p->renderer = gl_video_init(p->gl, vo->log);
+    p->renderer = gl_video_init(p->gl, vo->log, vo->global);
     if (!p->renderer)
         goto err_out;
     gl_video_set_osd_source(p->renderer, vo->osd);

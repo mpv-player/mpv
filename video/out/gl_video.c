@@ -27,6 +27,7 @@
 #include <assert.h>
 
 #include <libavutil/common.h>
+#include <libavutil/lfg.h>
 
 #include "gl_video.h"
 
@@ -59,6 +60,7 @@ static const char *const fixed_scale_filters[] = {
     "sharpen3",
     "sharpen5",
     "oversample",
+    "custom",
     NULL
 };
 static const char *const fixed_tscale_filters[] = {
@@ -144,6 +146,7 @@ struct src_tex {
 struct gl_video {
     GL *gl;
 
+    struct mpv_global *global;
     struct mp_log *log;
     struct gl_video_opts opts;
     bool gl_debug;
@@ -179,10 +182,16 @@ struct gl_video {
 
     struct video_image image;
 
-    struct fbotex indirect_fbo;         // RGB target
     struct fbotex chroma_merge_fbo;
+    struct fbotex source_fbo;
+    struct fbotex indirect_fbo;
     struct fbotex blend_subs_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
+
+    // these are duplicated so we can keep rendering back and forth between
+    // them to support an unlimited number of shader passes per step
+    struct fbotex pre_fbo[2];
+    struct fbotex post_fbo[2];
 
     int surface_idx;
     int surface_now;
@@ -202,10 +211,13 @@ struct gl_video {
     struct src_tex pass_tex[TEXUNIT_VIDEO_NUM];
     bool use_indirect;
     bool use_linear;
+    bool use_full_range;
     float user_gamma;
     struct fbotex copy_fbos[4];
 
+    int frames_uploaded;
     int frames_rendered;
+    AVLFG lfg;
 
     // Cached because computing it can take relatively long
     int last_dither_matrix_size;
@@ -437,6 +449,10 @@ const struct m_sub_options gl_video_conf = {
                    ({"no", 0},
                     {"yes", 1},
                     {"video", 2})),
+        OPT_STRING("source-shader", source_shader, 0),
+        OPT_STRING("scale-shader", scale_shader, 0),
+        OPT_STRINGLIST("pre-shaders", pre_shaders, 0),
+        OPT_STRINGLIST("post-shaders", post_shaders, 0),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
@@ -551,9 +567,15 @@ static void uninit_rendering(struct gl_video *p)
     gl->DeleteTextures(1, &p->dither_texture);
     p->dither_texture = 0;
 
-    fbotex_uninit(&p->indirect_fbo);
     fbotex_uninit(&p->chroma_merge_fbo);
+    fbotex_uninit(&p->source_fbo);
+    fbotex_uninit(&p->indirect_fbo);
     fbotex_uninit(&p->blend_subs_fbo);
+
+    for (int n = 0; n < 2; n++) {
+        fbotex_uninit(&p->pre_fbo[n]);
+        fbotex_uninit(&p->post_fbo[n]);
+    }
 
     for (int n = 0; n < FBOSURFACES_MAX; n++)
         fbotex_uninit(&p->surfaces[n].fbotex);
@@ -690,6 +712,8 @@ static void init_video(struct gl_video *p)
     if (p->image_desc.flags & MP_IMGFLAG_XYZ)
         eq_caps |= MP_CSP_EQ_CAPS_BRIGHTNESS;
     p->video_eq.capabilities = eq_caps;
+
+    av_lfg_init(&p->lfg, 1);
 
     debug_check_gl(p, "before video texture creation");
 
@@ -872,6 +896,39 @@ static void uninit_scaler(struct gl_video *p, struct scaler *scaler)
     scaler->gl_lut = 0;
     scaler->kernel = NULL;
     scaler->initialized = false;
+}
+
+static void load_shader(struct gl_video *p, const char *body)
+{
+    gl_sc_hadd(p->sc, body);
+    gl_sc_uniform_f(p->sc, "random", (double)av_lfg_get(&p->lfg) / UINT32_MAX);
+    gl_sc_uniform_f(p->sc, "frame", p->frames_uploaded);
+    gl_sc_uniform_vec2(p->sc, "image_size", (GLfloat[]){p->image_w, p->image_h});
+}
+
+// Applies an arbitrary number of shaders in sequence, using the given pair
+// of FBOs as intermediate buffers. Returns whether any shaders were applied.
+static bool apply_shaders(struct gl_video *p, char **shaders,
+                          struct fbotex textures[2], int tex_num,
+                          int tex_w, int tex_h)
+{
+    if (!shaders)
+        return false;
+    bool success = false;
+    int tex = 0;
+    for (int n = 0; shaders[n]; n++) {
+        const char *body = gl_sc_loadfile(p->sc, shaders[n]);
+        if (!body)
+            continue;
+        finish_pass_fbo(p, &textures[tex], tex_w, tex_h, tex_num, 0);
+        load_shader(p, body);
+        GLSLF("// custom shader\n");
+        GLSLF("vec4 color = sample(texture%d, texcoord%d, texture_size%d);\n",
+              tex_num, tex_num, tex_num);
+        tex = (tex+1) % 2;
+        success = true;
+    }
+    return success;
 }
 
 // Semantic equality
@@ -1296,6 +1353,15 @@ static void pass_sample(struct gl_video *p, int src_tex, struct scaler *scaler,
         pass_sample_sharpen5(p, scaler);
     } else if (strcmp(name, "oversample") == 0) {
         pass_sample_oversample(p, scaler, w, h);
+    } else if (strcmp(name, "custom") == 0) {
+        const char *body = gl_sc_loadfile(p->sc, p->opts.scale_shader);
+        if (body) {
+            load_shader(p, body);
+            GLSLF("// custom scale-shader\n");
+            GLSL(vec4 color = sample(tex, pos, size);)
+        } else {
+            p->opts.scale_shader = NULL;
+        }
     } else if (scaler->kernel && scaler->kernel->polar) {
         pass_sample_polar(p, scaler);
     } else if (scaler->kernel) {
@@ -1347,53 +1413,116 @@ static void pass_read_video(struct gl_video *p)
     if (p->gl->version < 300 && p->pass_tex[0].gl_target == GL_TEXTURE_RECTANGLE)
         pass_copy_from_rect(p);
 
+    // The custom shader logic is a bit tricky, but there are basically three
+    // different places it can occur: RGB, or chroma *and* luma (which are
+    // treated separately even for 4:4:4 content, but the minor speed loss
+    // is not worth the complexity it would require).
+    const char *shader = gl_sc_loadfile(p->sc, p->opts.source_shader);
+
+    // Since this is before normalization, we have to take into account
+    // the bit depth. Specifically, we want the shader to perform normalization
+    // to 16 bit because otherwise it results in bad quantization, especially
+    // with 8-bit FBOs (where it just destroys the image completely)
+    int in_bits = p->image_desc.component_bits,
+        tx_bits = (in_bits + 7) & ~7;
+    float cmul = ((1 << tx_bits) - 1.0) / ((1 << in_bits) - 1.0);
+    // Custom source shaders are required to output at the full range
+    p->use_full_range = shader != NULL;
+
+    // Special case for non-planar content
     if (p->plane_count == 1) {
-        GLSL(vec4 color = texture(texture0, texcoord0);)
+        if (shader) {
+            load_shader(p, shader);
+            GLSLF("// custom source-shader (RGB)\n");
+            gl_sc_uniform_f(p->sc, "cmul", cmul);
+            GLSL(vec4 color = sample(texture0, texcoord0, texture_size0);)
+            p->use_indirect = true;
+        } else {
+            GLSL(vec4 color = texture(texture0, texcoord0);)
+        }
         return;
     }
 
+    // Chroma preprocessing (merging -> shaders -> scaling)
+    struct src_tex luma = p->pass_tex[0];
+    int c_w = p->pass_tex[1].src.x1 - p->pass_tex[1].src.x0;
+    int c_h = p->pass_tex[1].src.y1 - p->pass_tex[1].src.y0;
     const struct scaler_config *cscale = &p->opts.scaler[2];
-    if (p->image_desc.flags & MP_IMGFLAG_SUBSAMPLED &&
-            strcmp(cscale->kernel.name, "bilinear") != 0) {
-        struct src_tex luma = p->pass_tex[0];
-        if (p->plane_count > 2) {
-            // For simplicity and performance, we merge the chroma planes
-            // into a single texture before scaling, so the scaler doesn't
-            // need to run multiple times.
-            GLSLF("// chroma merging\n");
-            GLSL(vec4 color = vec4(texture(texture1, texcoord1).r,
-                                   texture(texture2, texcoord2).r,
-                                   0.0, 1.0);)
-            int c_w = p->pass_tex[1].src.x1 - p->pass_tex[1].src.x0;
-            int c_h = p->pass_tex[1].src.y1 - p->pass_tex[1].src.y0;
-            assert(c_w == p->pass_tex[2].src.x1 - p->pass_tex[2].src.x0);
-            assert(c_h == p->pass_tex[2].src.y1 - p->pass_tex[2].src.y0);
-            finish_pass_fbo(p, &p->chroma_merge_fbo, c_w, c_h, 1, 0);
-        }
+    // Non-trivial sampling is needed on the chroma plane
+    bool nontrivial = p->image_desc.flags & MP_IMGFLAG_SUBSAMPLED &&
+                      strcmp(cscale->kernel.name, "bilinear") != 0;
+
+    bool merged = false;
+    if (p->plane_count > 2 && (nontrivial || shader)) {
+        // For simplicity and performance, we merge the chroma planes
+        // into a single texture before scaling or shading, so the shader
+        // doesn't need to run multiple times.
+        GLSLF("// chroma merging\n");
+        GLSL(vec4 color = vec4(texture(texture1, texcoord1).r,
+                               texture(texture2, texcoord2).r,
+                               0.0, 1.0);)
+        // We also pull up here in this case to avoid the issues described
+        // above.
+        GLSLF("color.rg *= %f;\n", cmul);
+        p->use_full_range = true;
+        merged = true;
+        assert(c_w == p->pass_tex[2].src.x1 - p->pass_tex[2].src.x0);
+        assert(c_h == p->pass_tex[2].src.y1 - p->pass_tex[2].src.y0);
+        finish_pass_fbo(p, &p->chroma_merge_fbo, c_w, c_h, 1, 0);
+    }
+
+    if (shader) {
+        // Chroma plane shader logic
+        load_shader(p, shader);
+        gl_sc_uniform_f(p->sc, "cmul", merged ? 1.0 : cmul);
+        GLSLF("// custom source-shader (chroma)\n");
+        GLSL(vec4 color = sample(texture1, texcoord1, texture_size1);)
+        GLSL(color.ba = vec2(0.0, 1.0);) // skip unused
+        finish_pass_fbo(p, &p->source_fbo, c_w, c_h, 1, 0);
+        p->use_indirect = true;
+    }
+
+    if (p->image_desc.flags & MP_IMGFLAG_SUBSAMPLED && nontrivial) {
         GLSLF("// chroma scaling\n");
         pass_sample(p, 1, &p->scaler[2], cscale, 1.0, p->image_w, p->image_h,
                     chromafix);
         GLSL(vec2 chroma = color.rg;)
-        // Always force rendering to a FBO before main scaling, or we would
-        // scale chroma incorrectly.
         p->use_indirect = true;
-        p->pass_tex[0] = luma; // Restore luma after scaling
     } else {
+        // No explicit scaling needed, either because it's trivial (ie.
+        // bilinear), or because there's no subsampling. We have to manually
+        // apply the fix to the chroma coordinates because it's not implied by
+        // pass_sample.
         GLSL(vec4 color;)
-        if (p->plane_count == 2) {
-            gl_transform_rect(chromafix, &p->pass_tex[1].src);
-            GLSL(vec2 chroma = texture(texture1, texcoord1).rg;) // NV formats
-        } else {
-            gl_transform_rect(chromafix, &p->pass_tex[1].src);
+        gl_transform_rect(chromafix, &p->pass_tex[1].src);
+        if (p->plane_count > 2 && !merged) {
             gl_transform_rect(chromafix, &p->pass_tex[2].src);
             GLSL(vec2 chroma = vec2(texture(texture1, texcoord1).r,
                                     texture(texture2, texcoord2).r);)
+        } else {
+            GLSL(vec2 chroma = texture(texture1, texcoord1).rg;)
         }
     }
 
-    GLSL(color = vec4(texture(texture0, texcoord0).r, chroma, 1.0);)
-    if (p->has_alpha && p->plane_count >= 4)
+    p->pass_tex[0] = luma; // Restore the luma plane
+    if (shader) {
+        load_shader(p, shader);
+        gl_sc_uniform_f(p->sc, "cmul", cmul);
+        GLSLF("// custom source-shader (luma)\n");
+        GLSL(float luma = sample(texture0, texcoord0, texture_size0).r;)
+        p->use_indirect = true;
+    } else {
+        GLSL(float luma = texture(texture0, texcoord0).r;)
+        if (p->use_full_range)
+            GLSLF("luma *= %f;\n", cmul);
+    }
+
+    GLSL(color = vec4(luma, chroma, 1.0);)
+    if (p->has_alpha && p->plane_count >= 4) {
         GLSL(color.a = texture(texture3, texcoord3).r;)
+        if (p->use_full_range)
+            GLSLF("color.a *= %f;\n", cmul);
+    }
 }
 
 // yuv conversion, and any other conversions before main up/down-scaling
@@ -1424,6 +1553,10 @@ static void pass_convert_yuv(struct gl_video *p)
         // linear light
         GLSL(color.rgb = pow(color.rgb, vec3(2.6));)
     }
+
+    // Something already took care of expansion
+    if (p->use_full_range)
+        cparams.input_bits = cparams.texture_bits;
 
     // Conversion from Y'CbCr or other linear spaces to RGB
     if (!p->is_rgb) {
@@ -1870,12 +2003,18 @@ static void pass_render_frame(struct gl_video *p)
         GLSL(vec4 color = texture(texture0, texcoord0);)
     }
 
+    if (apply_shaders(p, p->opts.pre_shaders, &p->pre_fbo[0], 0,
+                      p->image_w, p->image_h))
+    {
+        p->use_indirect = true;
+    }
+
     pass_scale_main(p);
 
+    int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
+        vp_h = p->dst_rect.y1 - p->dst_rect.y0;
     if (p->osd && p->opts.blend_subs == 1) {
         // Recreate the real video size from the src/dst rects
-        int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
-            vp_h = p->dst_rect.y1 - p->dst_rect.y0;
         struct mp_osd_res rect = {
             .w = vp_w, .h = vp_h,
             .ml = -p->src_rect.x0, .mr = p->src_rect.x1 - p->image_w,
@@ -1897,6 +2036,8 @@ static void pass_render_frame(struct gl_video *p)
         if (p->use_linear)
             pass_linearize(p, p->image_params.gamma);
     }
+
+    apply_shaders(p, p->opts.post_shaders, &p->post_fbo[0], 0, vp_w, vp_h);
 }
 
 static void pass_draw_to_screen(struct gl_video *p, int fbo)
@@ -2170,6 +2311,7 @@ static void gl_video_upload_image(struct gl_video *p)
         return;
 
     vimg->needs_upload = false;
+    p->frames_uploaded++;
 
     assert(mpi->num_planes == p->plane_count);
 
@@ -2574,7 +2716,7 @@ void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd)
     recreate_osd(p);
 }
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log)
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
 {
     if (gl->version < 210 && gl->es < 200) {
         mp_err(log, "At least OpenGL 2.1 or OpenGL ES 2.0 required.\n");
@@ -2584,12 +2726,13 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log)
     struct gl_video *p = talloc_ptrtype(NULL, p);
     *p = (struct gl_video) {
         .gl = gl,
+        .global = g,
         .log = log,
         .opts = gl_video_opts_def,
         .gl_target = GL_TEXTURE_2D,
         .texture_16bit_depth = 16,
         .scaler = {{.index = 0}, {.index = 1}, {.index = 2}, {.index = 3}},
-        .sc = gl_sc_create(gl, log),
+        .sc = gl_sc_create(gl, log, g),
     };
     gl_video_set_debug(p, true);
     init_gl(p);
