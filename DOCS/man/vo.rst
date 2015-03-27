@@ -348,18 +348,18 @@ Available video output drivers are:
         Set filter parameters. Ignored if the filter is not tunable.
         Currently, this affects the following filter parameters:
 
-        ``bcspline``
+        bcspline
             Spline parameters (``B`` and ``C``). Defaults to 0.5 for both.
 
-        ``gaussian``
+        gaussian
             Scale parameter (``t``). Increasing this makes the result blurrier.
             Defaults to 1.
 
-        ``sharpen3``, ``sharpen5``
+        sharpen3, sharpen5
             Sharpening strength. Increasing this makes the image sharper but
             adds more ringing and aliasing. Defaults to 0.5.
 
-        ``oversample``
+        oversample
             Minimum distance to an edge before interpolation is used. Setting
             this to 0 will always interpolate edges, whereas setting it to 0.5
             will never interpolate, thus behaving as if the regular nearest
