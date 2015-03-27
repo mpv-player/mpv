@@ -19,7 +19,9 @@
 
 #include <math.h>
 #include <libavutil/common.h>
-#include <initguid.h>
+#include <windows.h>
+#include <ksguid.h>
+#include <ksmedia.h>
 #include <audioclient.h>
 #include <endpointvolume.h>
 #include <mmdeviceapi.h>
@@ -39,13 +41,6 @@ DEFINE_PROPERTYKEY(mp_PKEY_Device_FriendlyName,
 DEFINE_PROPERTYKEY(mp_PKEY_Device_DeviceDesc,
                    0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
                    0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 2);
-
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_PCM,
-            0x00000001, 0x0000, 0x0010, 0x80, 0x00,
-            0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
-DEFINE_GUID(mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT,
-            0x00000003, 0x0000, 0x0010, 0x80, 0x00,
-            0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71);
 
 char *mp_GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid)
 {
@@ -163,9 +158,9 @@ static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
     wformat->Format.wBitsPerSample = bits;
     wformat->Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
     if (is_float) {
-        wformat->SubFormat = mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
+        wformat->SubFormat = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
     } else {
-        wformat->SubFormat = mp_KSDATAFORMAT_SUBTYPE_PCM;
+        wformat->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
     }
     wformat->Samples.wValidBitsPerSample = valid_bits;
     wformat->dwChannelMask = mp_chmap_to_waveext(channels);
@@ -218,7 +213,7 @@ static bool waveformat_is_float(WAVEFORMATEX *wf)
     case WAVE_FORMAT_EXTENSIBLE:
     {
         WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
-        return IsEqualGUID(&mp_KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat->SubFormat);
+        return IsEqualGUID(&KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, &wformat->SubFormat);
     }
     case WAVE_FORMAT_IEEE_FLOAT:
         return true;
@@ -233,7 +228,7 @@ static bool waveformat_is_pcm_int(WAVEFORMATEX *wf)
     case WAVE_FORMAT_EXTENSIBLE:
     {
         WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
-        return IsEqualGUID(&mp_KSDATAFORMAT_SUBTYPE_PCM, &wformat->SubFormat);
+        return IsEqualGUID(&KSDATAFORMAT_SUBTYPE_PCM, &wformat->SubFormat);
     }
     case WAVE_FORMAT_PCM:
         return true;
@@ -551,7 +546,7 @@ static bool try_passthrough(struct ao *ao)
         },
         .Samples.wValidBitsPerSample = 16,
         .dwChannelMask = mp_chmap_to_waveext(&ao->channels),
-        .SubFormat = mp_KSDATAFORMAT_SUBTYPE_PCM,
+        .SubFormat = KSDATAFORMAT_SUBTYPE_PCM,
     };
     wformat.SubFormat.Data1 = WAVE_FORMAT_DOLBY_AC3_SPDIF; // see INIT_WAVEFORMATEX_GUID macro
 
