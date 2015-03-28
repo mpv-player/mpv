@@ -64,6 +64,7 @@ struct priv {
     int cfg_mixer_index;
     int cfg_resample;
     int cfg_ni;
+    int cfg_ignore_chmap;
 };
 
 #define BUFFER_TIME 250000  // 250ms
@@ -478,7 +479,7 @@ static int init_device(struct ao *ao)
     CHECK_ALSA_ERROR("Unable to set access type");
 
     struct mp_chmap dev_chmap = ao->channels;
-    if (AF_FORMAT_IS_IEC61937(ao->format)) {
+    if (AF_FORMAT_IS_IEC61937(ao->format) || p->cfg_ignore_chmap) {
         dev_chmap.num = 0; // disable chmap API
     } else if (query_chmaps(ao, &dev_chmap)) {
         ao->channels = dev_chmap;
@@ -571,7 +572,9 @@ static int init_device(struct ao *ao)
 
         MP_VERBOSE(ao, "which we understand as: %s\n", mp_chmap_to_str(&chmap));
 
-        if (AF_FORMAT_IS_IEC61937(ao->format)) {
+        if (p->cfg_ignore_chmap) {
+            MP_VERBOSE(ao, "user set ignore-chmap; ignoring the channel map.\n");
+        } else if (AF_FORMAT_IS_IEC61937(ao->format)) {
             MP_VERBOSE(ao, "using spdif passthrough; ignoring the channel map.\n");
         } else if (mp_chmap_is_valid(&chmap)) {
             if (mp_chmap_equals(&chmap, &ao->channels)) {
@@ -934,6 +937,7 @@ const struct ao_driver audio_out_alsa = {
         OPT_STRING("mixer-name", cfg_mixer_name, 0),
         OPT_INTRANGE("mixer-index", cfg_mixer_index, 0, 0, 99),
         OPT_FLAG("non-interleaved", cfg_ni, 0),
+        OPT_FLAG("ignore-chmap", cfg_ignore_chmap, 0),
         {0}
     },
 };
