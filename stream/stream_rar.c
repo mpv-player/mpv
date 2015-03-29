@@ -43,16 +43,14 @@ This works as follows:
 
 - stream_open() with file01.rar
     - is opened as normal file (stream_file.c or others) first
-    - the rar code in demux_playlist.c detects it
+    - demux_rar.c detects it
     - if multi-part, opens file02.rar, file03.rar, etc. as actual streams
-      (recursive opening is prevented with the STREAM_NO_FILTERS flag)
-    - it returns a playlist like this to the player:
+    - it returns a playlist with entries like this to the player:
         rar://bla01.rar|subfile.mkv
       (one such entry for each file contained in the rar)
 - stream_open() with the playlist entry, e.g. rar://bla01.rar|subfile.mkv
     - leads to rar_entry_open()
     - opens bla01.rar etc. again as actual streams
-      (again, STREAM_NO_FILTERS to open the actual files)
     - read accesses go into subfile.mkv contained in the rar file(s)
 */
 
