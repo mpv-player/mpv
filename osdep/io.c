@@ -121,32 +121,6 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s)
 #include <fcntl.h>
 #include <pthread.h>
 
-//http://git.libav.org/?p=libav.git;a=blob;f=cmdutils.c;h=ade3f10ce2fc030e32e375a85fbd06c26d43a433#l161
-
-static char** win32_argv_utf8;
-static int win32_argc;
-
-void mp_get_converted_argv(int *argc, char ***argv)
-{
-    if (!win32_argv_utf8) {
-        win32_argc = 0;
-        wchar_t **argv_w = CommandLineToArgvW(GetCommandLineW(), &win32_argc);
-        if (win32_argc <= 0 || !argv_w)
-            return;
-
-        win32_argv_utf8 = talloc_zero_array(NULL, char*, win32_argc + 1);
-
-        for (int i = 0; i < win32_argc; i++) {
-            win32_argv_utf8[i] = mp_to_utf8(NULL, argv_w[i]);
-        }
-
-        LocalFree(argv_w);
-    }
-
-    *argc = win32_argc;
-    *argv = win32_argv_utf8;
-}
-
 static void copy_stat(struct mp_stat *dst, struct _stat64 *src)
 {
     dst->st_dev = src->st_dev;

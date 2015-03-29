@@ -53,8 +53,8 @@ def __add_mswin_flags__(ctx):
 
 def __add_mingw_flags__(ctx):
     __add_mswin_flags__(ctx)
-    ctx.env.CFLAGS += ['-D__USE_MINGW_ANSI_STDIO=1']
-    ctx.env.LAST_LINKFLAGS += ['-mwindows']
+    ctx.env.CFLAGS += ['-municode', '-D__USE_MINGW_ANSI_STDIO=1']
+    ctx.env.LAST_LINKFLAGS += ['-municode', '-mwindows']
 
 def __add_cygwin_flags__(ctx):
     __add_mswin_flags__(ctx)

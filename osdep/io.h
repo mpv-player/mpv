@@ -65,8 +65,6 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 #include <sys/stat.h>
 #include <fcntl.h>
 
-void mp_get_converted_argv(int *argc, char ***argv);
-
 int mp_printf(const char *format, ...);
 int mp_fprintf(FILE *stream, const char *format, ...);
 int mp_open(const char *filename, int oflag, ...);
