@@ -40,8 +40,10 @@ end
 mp.add_hook("on_load", 10, function ()
     local url = mp.get_property("stream-open-filename")
 
+    local defsearch = mp.get_property("options/ytdl-defsearch")
+
     if (url:find("http://") == 1) or (url:find("https://") == 1)
-        or (url:find("ytdl://") == 1) then
+        or (url:find("ytdl://") == 1) or (defsearch ~= "") then
 
        -- check version of youtube-dl if not done yet
         if (ytdl.vercheck == nil) then
@@ -99,8 +101,15 @@ mp.add_hook("on_load", 10, function ()
                 table.insert(command, arg)
             end
         end
+
+        if (defsearch ~= "") then
+            table.insert(command, "--default-search")
+            table.insert(command, defsearch)
+        end
+
         table.insert(command, "--")
         table.insert(command, url)
+
         local es, json = exec(command)
 
         if (es < 0) or (json == nil) or (json == "") then

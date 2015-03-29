@@ -442,6 +442,9 @@ Program Behavior
     version of youtube-dl to be installed on the system. (Enabled by default,
     except when the client API / libmpv is used.)
 
+    Search terms in place of a URL can also be passed when ``--ytdl-defsearch`` is set
+    to a prefix youtube-dl understands.
+
     If the script can't do anything with an URL, it will do nothing.
 
     (Note: this is the replacement for the now removed libquvi support.)
@@ -466,6 +469,23 @@ Program Behavior
  
         ``--ytdl-raw-options=username=user,password=pass``
         ``--ytdl-raw-options=force-ipv6=``
+
+``--ytdl-defsearch=<ytdl-prefix>``
+    When using this option, instead of passing a video URL to mpv,
+    search terms can be passed. These terms are forwarded to youtube-dl's
+    search feature using ``ytdl-prefix`` as the search provider. The
+    resulting set of URLs are added as a playlist to mpv.
+
+    Note that by default, searches in youtube-dl return only 1 result.
+    When ``ytdl-prefix`` is suffixed with a number ``n``, or 'all', the
+    returned playlist will contain either ``n`` results, or all results,
+    respectively, the latter of which is not recommended.
+
+    .. admonition:: Example
+
+        ``--ytdl-defsearch=ytsearch``
+        ``--ytdl-defsearch=ytsearch5``
+        ``--ytdl-defsearch=gvsearch``
 
 Video
 -----
