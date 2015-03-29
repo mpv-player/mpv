@@ -453,7 +453,9 @@ static void m_config_add_option(struct m_config *config,
 struct m_config_option *m_config_get_co(const struct m_config *config,
                                         struct bstr name)
 {
-    const char *prefix = config->is_toplevel ? "--" : "";
+    if (!name.len)
+        return NULL;
+
     for (int n = 0; n < config->num_opts; n++) {
         struct m_config_option *co = &config->opts[n];
         struct bstr coname = bstr0(co->name);
@@ -466,6 +468,7 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
         } else if (bstrcmp(coname, name) == 0)
             matches = true;
         if (matches) {
+            const char *prefix = config->is_toplevel ? "--" : "";
             if (co->opt->type == &m_option_type_alias) {
                 const char *alias = (const char *)co->opt->priv;
                 if (!co->warning_was_printed) {
@@ -590,7 +593,6 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
                                  struct bstr param, int flags)
 {
     assert(config != NULL);
-    assert(name.len != 0);
 
     struct m_config_option *co = m_config_get_co(config, name);
     if (!co)
