@@ -126,9 +126,12 @@ static void thread_resume(struct ao *ao)
 
     /* Fill the buffer before starting, but only if there is no audio queued to play. */
     /* This prevents overfilling the buffer, which leads to problems in exclusive mode */
-    if (padding < (UINT32)state->bufferFrameCount)
+    if (padding < (UINT32) state->bufferFrameCount)
         thread_feed(ao);
 
+    // start feeding next wakeup if something else hasn't been requested
+    int expected = WASAPI_THREAD_RESUME;
+    atomic_compare_exchange_strong(&state->thread_state, &expected, WASAPI_THREAD_FEED);
     hr = IAudioClient_Start(state->pAudioClient);
     if (hr != S_OK)
         MP_ERR(state, "IAudioClient_Start returned %s\n", mp_HRESULT_to_str(hr));
@@ -152,46 +155,55 @@ static void thread_reset(struct ao *ao)
         MP_ERR(state, "IAudioClient_Reset returned: %s\n", mp_HRESULT_to_str(hr));
 
     atomic_store(&state->sample_count, 0);
+    // start feeding next wakeup if something else hasn't been requested
+    int expected = WASAPI_THREAD_RESET;
+    atomic_compare_exchange_strong(&state->thread_state, &expected, WASAPI_THREAD_FEED);
     return;
 }
 
-static DWORD __stdcall ThreadLoop(void *lpParameter)
+static DWORD __stdcall AudioThread(void *lpParameter)
 {
     struct ao *ao = lpParameter;
     struct wasapi_state *state = ao->priv;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
     state->init_ret = wasapi_thread_init(ao);
-    SetEvent(state->init_done);
+    SetEvent(state->hInitDone);
     if (state->init_ret != S_OK)
         goto exit_label;
 
-    DWORD waitstatus;
-    HANDLE playcontrol[] =
-        {state->hUninit, state->hFeed, state->hReset, state->hResume, NULL};
     MP_DBG(ao, "Entering dispatch loop\n");
     while (true) { /* watch events */
-        waitstatus = MsgWaitForMultipleObjects(4, playcontrol, FALSE, INFINITE,
-                                               QS_POSTMESSAGE | QS_SENDMESSAGE);
-        switch (waitstatus) {
-        case WAIT_OBJECT_0: /*shutdown*/
-            MP_DBG(ao, "Thread shutdown\n");
-            goto exit_label;
-        case (WAIT_OBJECT_0 + 1): /* feed */
-            thread_feed(ao);
+        HANDLE events[] = {state->hWake};
+        switch (MsgWaitForMultipleObjects(MP_ARRAY_SIZE(events), events, FALSE, INFINITE,
+                                          QS_POSTMESSAGE | QS_SENDMESSAGE)) {
+        /* AudioThread wakeup */
+        case WAIT_OBJECT_0:
+            switch (atomic_load(&state->thread_state)) {
+            case WASAPI_THREAD_FEED:
+                thread_feed(ao);
+                break;
+            case WASAPI_THREAD_RESET:
+                thread_reset(ao);
+                break;
+            case WASAPI_THREAD_RESUME:
+                thread_reset(ao);
+                thread_resume(ao);
+                break;
+            case WASAPI_THREAD_SHUTDOWN:
+                thread_reset(ao);
+                goto exit_label;
+            default:
+                MP_ERR(ao, "Unhandled thread state\n");
+                goto exit_label;
+            }
             break;
-        case (WAIT_OBJECT_0 + 2): /* reset */
-            thread_reset(ao);
-            break;
-        case (WAIT_OBJECT_0 + 3): /* resume */
-            thread_resume(ao);
-            break;
-        case (WAIT_OBJECT_0 + 4): /* messages to dispatch (COM marshalling) */
-            MP_DBG(ao, "Dispatch\n");
-            wasapi_dispatch();
+        /* messages to dispatch (COM marshalling) */
+        case (WAIT_OBJECT_0 + MP_ARRAY_SIZE(events)):
+            wasapi_dispatch(ao);
             break;
         default:
-            MP_ERR(ao, "Unhandled case in thread loop\n");
+            MP_ERR(ao, "Unhandled thread event\n");
             goto exit_label;
         }
     }
@@ -203,15 +215,11 @@ exit_label:
     return 0;
 }
 
-static void closehandles(struct ao *ao)
+static void set_thread_state(struct ao *ao, enum wasapi_thread_state thread_state)
 {
     struct wasapi_state *state = ao->priv;
-    if (state->init_done)  CloseHandle(state->init_done);
-    if (state->hUninit)    CloseHandle(state->hUninit);
-    if (state->hFeed)      CloseHandle(state->hFeed);
-    if (state->hResume)    CloseHandle(state->hResume);
-    if (state->hReset)     CloseHandle(state->hReset);
-    if (state->threadLoop) CloseHandle(state->threadLoop);
+    atomic_store(&state->thread_state, thread_state);
+    SetEvent(state->hWake);
 }
 
 static void uninit(struct ao *ao)
@@ -219,16 +227,23 @@ static void uninit(struct ao *ao)
     MP_DBG(ao, "Uninit wasapi\n");
     struct wasapi_state *state = ao->priv;
     wasapi_release_proxies(state);
-    if (state->hUninit)
-        SetEvent(state->hUninit);
+    if (state->hWake)
+        set_thread_state(ao, WASAPI_THREAD_SHUTDOWN);
+
     /* wait up to 10 seconds */
-    if (WaitForSingleObject(state->threadLoop, 10000) == WAIT_TIMEOUT) {
+    if (state->hAudioThread &&
+        WaitForSingleObject(state->hAudioThread, 10000) == WAIT_TIMEOUT)
+    {
         MP_ERR(ao, "Audio loop thread refuses to abort\n");
         return;
     }
     if (state->VistaBlob.hAvrt)
         FreeLibrary(state->VistaBlob.hAvrt);
-    closehandles(ao);
+
+    SAFE_RELEASE(state->hInitDone,   CloseHandle(state->hInitDone));
+    SAFE_RELEASE(state->hWake,       CloseHandle(state->hWake));
+    SAFE_RELEASE(state->hAudioThread,CloseHandle(state->hAudioThread));
+
     CoUninitialize();
     MP_DBG(ao, "Uninit wasapi done\n");
 }
@@ -243,30 +258,24 @@ static int init(struct ao *ao)
     if(!wasapi_fill_VistaBlob(state))
         MP_WARN(ao, "Error loading thread priority functions\n");
 
-    state->init_done = CreateEventW(NULL, FALSE, FALSE, NULL);
-    state->hUninit   = CreateEventW(NULL, FALSE, FALSE, NULL);
-    state->hFeed     = CreateEventW(NULL, FALSE, FALSE, NULL); /* for wasapi event mode */
-    state->hResume   = CreateEventW(NULL, FALSE, FALSE, NULL);
-    state->hReset    = CreateEventW(NULL, FALSE, FALSE, NULL);
-    if (!state->init_done || !state->hFeed || !state->hUninit ||
-        !state->hResume || !state->hReset)
-    {
-        MP_ERR(ao, "Error initing events\n");
+    state->hInitDone = CreateEventW(NULL, FALSE, FALSE, NULL);
+    state->hWake     = CreateEventW(NULL, FALSE, FALSE, NULL);
+    if (!state->hInitDone || !state->hWake) {
+        MP_ERR(ao, "Error creating events\n");
         uninit(ao);
-        /* failed to init events */
         return -1;
     }
 
     state->init_ret = E_FAIL;
-    state->threadLoop = CreateThread(NULL, 0, &ThreadLoop, ao, 0, NULL);
-    if (!state->threadLoop) {
-        /* failed to init thread */
-        MP_ERR(ao, "Failed to create thread\n");
+    state->hAudioThread = CreateThread(NULL, 0, &AudioThread, ao, 0, NULL);
+    if (!state->hAudioThread) {
+        MP_ERR(ao, "Failed to create audio thread\n");
         uninit(ao);
         return -1;
     }
 
-    WaitForSingleObject(state->init_done, INFINITE); /* wait on init complete */
+    WaitForSingleObject(state->hInitDone, INFINITE); /* wait on init complete */
+    SAFE_RELEASE(state->hInitDone,CloseHandle(state->hInitDone));
     if (state->init_ret != S_OK) {
         if (!ao->probing)
             MP_ERR(ao, "Received failure from audio thread\n");
@@ -360,14 +369,12 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
 static void audio_reset(struct ao *ao)
 {
-    struct wasapi_state *state = ao->priv;
-    SetEvent(state->hReset);
+    set_thread_state(ao, WASAPI_THREAD_RESET);
 }
 
 static void audio_resume(struct ao *ao)
 {
-    struct wasapi_state *state = ao->priv;
-    SetEvent(state->hResume);
+    set_thread_state(ao, WASAPI_THREAD_RESUME);
 }
 
 static void hotplug_uninit(struct ao *ao)

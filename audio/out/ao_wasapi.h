@@ -43,11 +43,18 @@ void wasapi_change_uninit(struct ao* ao);
 #define SAFE_RELEASE(unk, release) \
               do { if ((unk) != NULL) { release; (unk) = NULL; } } while(0)
 
+enum wasapi_thread_state {
+    WASAPI_THREAD_FEED = 0,
+    WASAPI_THREAD_RESUME,
+    WASAPI_THREAD_RESET,
+    WASAPI_THREAD_SHUTDOWN
+};
+
 typedef struct wasapi_state {
     struct mp_log *log;
     /* Init phase */
     HRESULT init_ret;
-    HANDLE init_done;
+    HANDLE hInitDone;
     int share_mode;
 
     /* volume control */
@@ -66,11 +73,9 @@ typedef struct wasapi_state {
     IMMDeviceEnumerator *pEnumerator;
 
     /* thread handles */
-    HANDLE threadLoop; /* the thread itself */
-    HANDLE hUninit; /* thread shutdown */
-    HANDLE hFeed; /* wasapi event */
-    HANDLE hResume; /* signal audio thread to resume the stream */
-    HANDLE hReset; /* signal audio thread to reset the stream */
+    HANDLE hAudioThread; /* the thread itself */
+    HANDLE hWake; /* thread wakeup event */
+    atomic_int thread_state; /* enum wasapi_thread_state */
 
     /* for setting the audio thread priority */
     HANDLE hTask; /* AV thread */
