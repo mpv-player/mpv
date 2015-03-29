@@ -47,4 +47,7 @@ void terminal_get_size(int *w, int *h);
 // Windows only.
 void mp_write_console_ansi(void *wstream, char *buf);
 
+/* Windows-only function to attach to the parent process's console */
+bool terminal_try_attach(void);
+
 #endif /* MPLAYER_GETCH2_H */

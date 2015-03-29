@@ -72,5 +72,9 @@ int wmain(int argc, wchar_t **argv, wchar_t **envp)
     GetModuleFileNameW(NULL, exe, MAX_PATH);
     wcscpy(wcsrchr(exe, '.') + 1, L"exe");
 
+    // Set an environment variable so the child process can tell whether it
+    // was started from this wrapper and attach to the console accordingly
+    SetEnvironmentVariableW(L"_started_from_console", L"yes");
+
     return cr_runproc(exe, cmd);
 }
