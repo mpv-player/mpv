@@ -697,7 +697,7 @@ reinit:
     EXIT_ON_ERROR(hr);
 
     MP_DBG(state, "IAudioClient::Initialize IAudioClient_SetEventHandle\n");
-    hr = IAudioClient_SetEventHandle(state->pAudioClient, state->hFeed);
+    hr = IAudioClient_SetEventHandle(state->pAudioClient, state->hWake);
     EXIT_ON_ERROR(hr);
 
     MP_DBG(state, "IAudioClient::Initialize IAudioClient_GetBufferSize\n");
@@ -1054,8 +1054,9 @@ static void destroy_proxies(struct wasapi_state *state) {
     SAFE_RELEASE(state->sSessionControl, IUnknown_Release(state->sSessionControl));
 }
 
-void wasapi_dispatch(void)
+void wasapi_dispatch(struct ao *ao)
 {
+    MP_DBG(ao, "Dispatch\n");
     /* dispatch any possible pending messages */
     MSG msg;
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -1154,8 +1155,8 @@ exit_label:
 void wasapi_thread_uninit(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
-
-    wasapi_dispatch();
+    MP_DBG(ao, "Thread shutdown\n");
+    wasapi_dispatch(ao);
 
     if (state->pAudioClient)
         IAudioClient_Stop(state->pAudioClient);

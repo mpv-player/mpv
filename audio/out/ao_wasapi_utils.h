@@ -38,7 +38,7 @@ bool wasapi_fill_VistaBlob(wasapi_state *state);
 
 void wasapi_list_devs(struct ao *ao, struct ao_device_list *list);
 
-void wasapi_dispatch(void);
+void wasapi_dispatch(struct ao *ao);
 HRESULT wasapi_thread_init(struct ao *ao);
 void wasapi_thread_uninit(struct ao *ao);
 
