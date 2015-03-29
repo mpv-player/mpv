@@ -206,6 +206,7 @@ enum mp_imgfmt {
     IMGFMT_VDA,
     IMGFMT_VAAPI,
     IMGFMT_DXVA2,           // IDirect3DSurface9 (NV12)
+    IMGFMT_MMAL,            // MMAL_BUFFER_HEADER_T
 
     // Generic pass-through of AV_PIX_FMT_*. Used for formats which don't have
     // a corresponding IMGFMT_ value.

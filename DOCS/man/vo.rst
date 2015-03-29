@@ -866,3 +866,16 @@ Available video output drivers are:
     ``mpv --vo=opengl-cb:help`` for a list.
 
     This also supports the ``vo_cmdline`` command.
+
+``rpi`` (Raspberry Pi)
+    Native video output on the Raspberry Pi using the MMAL API.
+
+    ``display=<number>``
+        Select the display number on which the video overlay should be shown
+        (default: 0).
+
+    ``layer=<number>``
+        Select the dispmanx layer on which the video overlay should be shown
+        (default: -10). Note that mpv will also use the 2 layers above the
+        selected layer, to handle the window background and OSD. Actual video
+        rendering will happen on the layer above the selected layer.

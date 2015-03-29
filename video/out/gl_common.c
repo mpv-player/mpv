@@ -529,6 +529,9 @@ struct backend {
 };
 
 static const struct backend backends[] = {
+#if HAVE_RPI_GLES
+    {"rpi", mpgl_set_backend_rpi},
+#endif
 #if HAVE_GL_COCOA
     {"cocoa", mpgl_set_backend_cocoa},
 #endif

@@ -292,7 +292,8 @@ const m_option_t mp_opts[] = {
                 {"vda", 2},
                 {"vaapi", 4},
                 {"vaapi-copy", 5},
-                {"dxva2-copy", 6})),
+                {"dxva2-copy", 6},
+                {"rpi", 7})),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
 
     OPT_SUBSTRUCT("sws", vo.sws_opts, sws_conf, 0),
@@ -796,6 +797,10 @@ const struct MPOpts mp_default_opts = {
     .dvd_angle = 1,
 
     .mf_fps = 1.0,
+
+#if HAVE_RPI
+    .hwdec_api = -1,
+#endif
 
     .display_tags = (char **)(const char*[]){
         "Artist", "Album", "Album_Artist", "Comment", "Composer", "Genre",

@@ -12,6 +12,7 @@ enum hwdec_type {
     HWDEC_VAAPI = 4,
     HWDEC_VAAPI_COPY = 5,
     HWDEC_DXVA2_COPY = 6,
+    HWDEC_RPI = 7,
 };
 
 struct mp_hwdec_ctx {

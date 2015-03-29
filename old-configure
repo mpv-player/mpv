@@ -932,6 +932,9 @@ cat > $TMPC << EOF
 #define HAVE_NETBSD_THREAD_NAME 0
 #define HAVE_DXVA2_HWACCEL 0
 #define HAVE_FCHMOD 0
+#define HAVE_RPI 0
+#define HAVE_RPI_GLES 0
+#define HAVE_AV_PIX_FMT_MMAL 0
 
 #ifdef __OpenBSD__
 #define DEFAULT_CDROM_DEVICE "/dev/rcd0c"

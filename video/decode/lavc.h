@@ -52,6 +52,8 @@ struct vd_lavc_hwdec {
     // For horrible Intel shit-drivers only
     void (*lock)(struct lavc_ctx *ctx);
     void (*unlock)(struct lavc_ctx *ctx);
+    // Optional; if a special hardware decoder is needed (instead of "hwaccel").
+    const char *(*get_codec)(struct lavc_ctx *ctx);
 };
 
 enum {

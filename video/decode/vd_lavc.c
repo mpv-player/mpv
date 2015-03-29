@@ -121,8 +121,12 @@ const struct vd_lavc_hwdec mp_vd_lavc_vda;
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi;
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy;
 const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy;
+const struct vd_lavc_hwdec mp_vd_lavc_rpi;
 
 static const struct vd_lavc_hwdec *const hwdec_list[] = {
+#if HAVE_RPI
+    &mp_vd_lavc_rpi,
+#endif
 #if HAVE_VDPAU_HWACCEL
     &mp_vd_lavc_vdpau,
 #endif
@@ -303,6 +307,8 @@ static int init(struct dec_video *vd, const char *decoder)
 
     if (hwdec) {
         ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
+        if (hwdec->get_codec)
+            decoder = hwdec->get_codec(ctx);
         MP_INFO(vd, "Using hardware decoding.\n");
     } else if (vd->opts->hwdec_api != HWDEC_NONE) {
         MP_INFO(vd, "Using software decoding.\n");
@@ -370,7 +376,8 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     if (ctx->hwdec) {
         avctx->thread_count    = 1;
         avctx->get_format      = get_format_hwdec;
-        avctx->get_buffer2     = get_buffer2_hwdec;
+        if (ctx->hwdec->allocate_image)
+            avctx->get_buffer2 = get_buffer2_hwdec;
         if (ctx->hwdec->init(ctx) < 0)
             goto error;
     } else {

@@ -137,6 +137,7 @@ void mpgl_set_backend_x11es(MPGLContext *ctx);
 void mpgl_set_backend_x11egl(MPGLContext *ctx);
 void mpgl_set_backend_x11egles(MPGLContext *ctx);
 void mpgl_set_backend_wayland(MPGLContext *ctx);
+void mpgl_set_backend_rpi(MPGLContext *ctx);
 
 void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                          const char *ext2, struct mp_log *log);

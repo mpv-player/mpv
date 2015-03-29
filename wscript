@@ -420,6 +420,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavutil/frame.h',
                                 'enum AVFrameSideDataType type = AV_FRAME_DATA_SKIP_SAMPLES',
                                 use='libav')
+    }, {
+        'name': 'av-pix-fmt-mmal',
+        'desc': 'libavutil AV_PIX_FMT_MMAL',
+        'func': check_statement('libavutil/pixfmt.h',
+                                'int x = AV_PIX_FMT_MMAL',
+                                use='libav'),
     }
 ]
 
@@ -590,11 +596,6 @@ video_output_features = [
         'func': check_statement('windows.h', 'wglCreateContext(0)',
                                 lib='opengl32')
     } , {
-        'name': '--gl',
-        'desc': 'OpenGL video outputs',
-        'deps_any': [ 'gl-cocoa', 'gl-x11', 'gl-win32', 'gl-wayland' ],
-        'func': check_true
-    } , {
         'name': '--vdpau',
         'desc': 'VDPAU acceleration',
         'deps': [ 'x11' ],
@@ -634,6 +635,39 @@ video_output_features = [
         'desc': 'Direct3D support',
         'deps': [ 'win32' ],
         'func': check_cc(header_name='d3d9.h'),
+    }, {
+        # We need MMAL/bcm_host/dispmanx APIs. Also, most RPI distros require
+        # every project to hardcode the paths to the include directories. Also,
+        # these headers are so broken that they spam tons of warnings by merely
+        # including them (compensate with -isystem and -fgnu89-inline).
+        'name': '--rpi',
+        'desc': 'Raspberry Pi support',
+        'func':
+            check_cc(cflags="-isystem/opt/vc/include/ "+
+                            "-isystem/opt/vc/include/interface/vcos/pthreads " +
+                            "-isystem/opt/vc/include/interface/vmcs_host/linux " +
+                            "-fgnu89-inline",
+                     linkflags="-L/opt/vc/lib",
+                     header_name="bcm_host.h",
+                     lib=['mmal_core', 'mmal_util', 'mmal_vc_client', 'bcm_host']),
+    }, {
+        'name': '--rpi-gles',
+        'desc': 'GLES on Raspberry Pi',
+        'groups': [ 'gl' ],
+        'deps': ['rpi'],
+        # We still need all OpenGL symbols, because the vo_opengl code is
+        # generic and supports anything from GLES2/OpenGL 2.1 to OpenGL 4 core.
+        'func': compose_checks(
+            check_cc(lib="EGL"),
+            check_cc(lib="GLESv2"),
+            check_statement('GL/gl.h', '(void)GL_RGB32F'),     # arbitrary OpenGL 3.0 symbol
+            check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
+            ),
+    } , {
+        'name': '--gl',
+        'desc': 'OpenGL video outputs',
+        'deps_any': [ 'gl-cocoa', 'gl-x11', 'gl-win32', 'gl-wayland', 'rpi-gles' ],
+        'func': check_true
     }
 ]
 
