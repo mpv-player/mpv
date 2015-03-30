@@ -82,39 +82,27 @@ $opts_str
 
 case \$state in
   ao)
-    local -a values
-    values=(
+    _values -s , 'audio outputs' \\
 $ao_str
-    )
-
-    _describe -t values 'audio outputs' values && rc=0
+    && rc=0
   ;;
 
   vo)
-    local -a values
-    values=(
+    _values -s , 'video outputs' \\
 $vo_str
-    )
-
-    _describe -t values 'video outputs' values && rc=0
+    && rc=0
   ;;
 
   af)
-    local -a values
-    values=(
+    _values -s , 'audio filters' \\
 $af_str
-    )
-
-    _describe -t values 'audio filters' values && rc=0
+    && rc=0
   ;;
 
   vf)
-    local -a values
-    values=(
+    _values -s , 'video filters' \\
 $vf_str
-    )
-
-    _describe -t values 'video filters' values && rc=0
+    && rc=0
   ;;
 
   profile|show-profile)
@@ -230,7 +218,7 @@ sub parse_opts {
         if (defined $2) {
             my $desc = $2;
             $desc =~ s/\:/\\:/g;
-            $entry .= ':' . $desc;
+            $entry .= "[$desc]";
         }
 
         push @list, $entry
