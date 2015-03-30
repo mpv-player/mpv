@@ -2022,11 +2022,11 @@ Equalizer
     Available color spaces are:
 
     :auto:          automatic selection (default)
-    :BT.601:        ITU-R BT.601 (SD)
-    :BT.709:        ITU-R BT.709 (HD)
-    :BT.2020-NCL:   ITU-R BT.2020 non-constant luminance system
-    :BT.2020-CL:    ITU-R BT.2020 constant luminance system
-    :SMPTE-240M:    SMPTE-240M
+    :bt.601:        ITU-R BT.601 (SD)
+    :bt.709:        ITU-R BT.709 (HD)
+    :bt.2020-ncl:   ITU-R BT.2020 non-constant luminance system
+    :bt.2020-cl:    ITU-R BT.2020 constant luminance system
+    :smpte-240m:    SMPTE-240M
 
 ``--colormatrix-input-range=<color-range>``
     YUV color levels used with YUV to RGB conversion. This option is only
@@ -2084,10 +2084,10 @@ Equalizer
     Available primaries are:
 
     :auto:         automatic selection (default)
-    :BT.601-525:   ITU-R BT.601 (SD) 525-line systems (NTSC, SMPTE-C)
-    :BT.601-625:   ITU-R BT.601 (SD) 625-line systems (PAL, SECAM)
-    :BT.709:       ITU-R BT.709 (HD) (same primaries as sRGB)
-    :BT.2020:      ITU-R BT.2020 (UHD)
+    :bt.601-525:   ITU-R BT.601 (SD) 525-line systems (NTSC, SMPTE-C)
+    :bt.601-625:   ITU-R BT.601 (SD) 625-line systems (PAL, SECAM)
+    :bt.709:       ITU-R BT.709 (HD) (same primaries as sRGB)
+    :bt.2020:      ITU-R BT.2020 (UHD)
 
 
 Demuxer

@@ -39,38 +39,38 @@
 #include "csputils.h"
 
 const char *const mp_csp_names[MP_CSP_COUNT] = {
-    "Autoselect",
-    "BT.601 (SD)",
-    "BT.709 (HD)",
-    "SMPTE-240M",
-    "BT.2020-NCL (UHD)",
-    "BT.2020-CL (UHD)",
-    "RGB",
-    "XYZ",
-    "YCgCo",
+    "auto",
+    "bt.601",
+    "bt.709",
+    "smpte-240m",
+    "bt.2020-ncl",
+    "bt.2020-cl",
+    "rgb",
+    "xyz",
+    "ycgco",
 };
 
 const char *const mp_csp_levels_names[MP_CSP_LEVELS_COUNT] = {
-    "Autoselect",
-    "TV",
-    "PC",
+    "auto",
+    "limited",
+    "full",
 };
 
 const char *const mp_csp_prim_names[MP_CSP_PRIM_COUNT] = {
-    "Autoselect",
-    "BT.601 (525-line SD)",
-    "BT.601 (625-line SD)",
-    "BT.709 (HD)",
-    "BT.2020 (UHD)",
-    "BT.470 M",
+    "auto",
+    "bt.601-525",
+    "bt.601-625",
+    "bt.709",
+    "bt.2020",
+    "bt.470 m",
 };
 
 const char *const mp_csp_trc_names[MP_CSP_TRC_COUNT] = {
-    "Autoselect",
-    "BT.1886 (SD, HD, UHD)",
-    "sRGB (IEC 61966-2-1)",
-    "Linear light",
-    "Pure power (gamma 2.2)",
+    "auto",
+    "bt.1886",
+    "srgb",
+    "linear",
+    "gamma2.2",
 };
 
 const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
