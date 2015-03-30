@@ -34,36 +34,35 @@ chomp $af_str;
 $vf_str .= qq{      '$_' \\\n} foreach (@vf);
 chomp $vf_str;
 
-$protos_str .= qq{$_ } foreach (@protos);
-chomp $protos_str;
+$protos_str = join(' ', @protos);
 
 my $profile_comp = <<'EOS';
-      local -a profiles
-      local current
-      for current in "${(@f)$($words[1] --profile=help)}"; do
-        current=${current//\*/\\\*}
-        current=${current//\:/\\\:}
-        current=${current//\[/\\\[}
-        current=${current//\]/\\\]}
-        if [[ $current =~ $'\t'([^$'\t']*)$'\t'(.*) ]]; then
-          if [[ -n $match[2] ]]; then
-            current="$match[1][$match[2]]"
-          else
-            current="$match[1]"
-          fi
-          profiles=($profiles $current)
+    local -a profiles
+    local current
+    for current in "${(@f)$($words[1] --profile=help)}"; do
+      current=${current//\*/\\\*}
+      current=${current//\:/\\\:}
+      current=${current//\[/\\\[}
+      current=${current//\]/\\\]}
+      if [[ $current =~ $'\t'([^$'\t']*)$'\t'(.*) ]]; then
+        if [[ -n $match[2] ]]; then
+          current="$match[1][$match[2]]"
+        else
+          current="$match[1]"
         fi
-      done
-      if [[ $state == show-profile ]]; then
-        # For --show-profile, only one allowed
-        if (( ${#profiles} > 0 )); then
-          _values 'profile' $profiles && rc=0
-        fi
-      else
-        # For --profile, multiple allowed
-        profiles=($profiles 'help[list profiles]')
-        _values -s , 'profile(s)' $profiles && rc=0
+        profiles=($profiles $current)
       fi
+    done
+    if [[ $state == show-profile ]]; then
+      # For --show-profile, only one allowed
+      if (( ${#profiles} > 0 )); then
+        _values 'profile' $profiles && rc=0
+      fi
+    else
+      # For --profile, multiple allowed
+      profiles=($profiles 'help[list profiles]')
+      _values -s , 'profile(s)' $profiles && rc=0
+    fi
 EOS
 chomp $profile_comp;
 
