@@ -917,10 +917,13 @@ Audio
 ``--ad-lavc-ac3drc=<level>``
     Select the Dynamic Range Compression level for AC-3 audio streams.
     ``<level>`` is a float value ranging from 0 to 1, where 0 means no
-    compression and 1 (which is the default) means full compression (make loud
-    passages more silent and vice versa). Values up to 2 are also accepted, but
+    compression (which is the default) and 1 means full compression (make loud
+    passages more silent and vice versa). Values up to 6 are also accepted, but
     are purely experimental. This option only shows an effect if the AC-3 stream
     contains the required range compression information.
+
+    The standard mandates that DRC is enabled by default, but mpv (and some
+    other players) ignore this for the sake of better audio quality.
 
 ``--ad-lavc-downmix=<yes|no>``
     Whether to request audio channel downmixing from the decoder (default: yes).
