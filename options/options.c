@@ -424,7 +424,7 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("video-align-y", vo.align_y, 0, -1.0, 1.0),
     OPT_FLAG("video-unscaled", vo.unscaled, 0),
     OPT_FLAG("force-rgba-osd-rendering", force_rgba_osd, 0),
-    OPT_CHOICE_OR_INT("video-rotate", video_rotate, 0, 0, 359,
+    OPT_CHOICE_OR_INT("video-rotate", video_rotate, 0, 0, 360,
                       ({"no", -1})),
     OPT_VID_STEREO_MODE("video-stereo-mode", video_stereo_mode, 0),
 
