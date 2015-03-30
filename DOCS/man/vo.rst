@@ -323,9 +323,6 @@ Available video output drivers are:
             an ideal radius and parameter. If your hardware can run it, this is
             probably what you should use by default.
 
-            Note: This filter has a fixed radius. Use ``ewa_lanczos`` if you
-            want to adjust it.
-
         ``mitchell``
             Mitchell-Netravali. The ``B`` and ``C`` parameters can be set with
             ``scale-param1`` and ``scale-param2``. This filter is very good at
