@@ -1146,7 +1146,6 @@ static int script_join_path(lua_State *L)
     return 1;
 }
 
-#if HAVE_POSIX_SPAWN || defined(__MINGW32__)
 struct subprocess_cb_ctx {
     struct mp_log *log;
     void* talloc_ctx;
@@ -1223,7 +1222,6 @@ static int script_subprocess(lua_State *L)
     lua_setfield(L, -2, "stdout"); // res
     return 1;
 }
-#endif
 
 static int script_parse_json(lua_State *L)
 {
@@ -1295,9 +1293,7 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(readdir),
     FN_ENTRY(split_path),
     FN_ENTRY(join_path),
-#if HAVE_POSIX_SPAWN || defined(__MINGW32__)
     FN_ENTRY(subprocess),
-#endif
     FN_ENTRY(parse_json),
     {0}
 };

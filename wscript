@@ -213,7 +213,13 @@ iconv support use --disable-iconv.",
         'name': 'posix-spawn',
         'desc': 'POSIX spawnp()/kill()',
         'func': check_statement(['spawn.h', 'signal.h'],
-            'posix_spawnp(0,0,0,0,0,0); kill(0,0)')
+            'posix_spawnp(0,0,0,0,0,0); kill(0,0)'),
+        'deps_neg': ['mingw'],
+    }, {
+        'name': 'subprocess',
+        'desc': 'posix_spawnp() or MinGW',
+        'func': check_true,
+        'deps_any': ['posix-spawn', 'mingw'],
     }, {
         'name': 'glob',
         'desc': 'glob()',
