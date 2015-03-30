@@ -2,15 +2,15 @@ from waflib.Build import BuildContext
 import os
 
 def __file2string_cmd__(ctx):
-    return "${{BIN_PERL}} {0}/TOOLS/file2string.pl ${{SRC}} > ${{TGT}}" \
+    return '"${{BIN_PERL}}" "{0}/TOOLS/file2string.pl" "${{SRC}}" > "${{TGT}}"' \
                 .format(ctx.srcnode.abspath())
 
 def __matroska_cmd__(ctx, argument):
-    return "${{BIN_PERL}} {0}/TOOLS/matroska.pl {1} ${{SRC}} > ${{TGT}}" \
+    return '"${{BIN_PERL}}" "{0}/TOOLS/matroska.pl" "{1}" "${{SRC}}" > "${{TGT}}"' \
                 .format(ctx.srcnode.abspath(), argument)
 
 def __zshcomp_cmd__(ctx, argument):
-    return "${{BIN_PERL}} {0}/TOOLS/zsh.pl {1} > ${{TGT}}" \
+    return '"${{BIN_PERL}}" "{0}/TOOLS/zsh.pl" "{1}" > "${{TGT}}"' \
                 .format(ctx.srcnode.abspath(), argument)
 
 def __file2string__(ctx, **kwargs):
