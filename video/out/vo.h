@@ -94,11 +94,6 @@ enum mp_voctrl {
     // names for displays the window is on
     VOCTRL_GET_DISPLAY_NAMES,
 
-    // The VO is supposed to set  "known" fields, and leave the others
-    // untouched or set to 0.
-    // imgfmt/w/h/d_w/d_h can be omitted for convenience.
-    VOCTRL_GET_COLORSPACE,              // struct mp_image_params*
-
     // Retrieve window contents. (Normal screenshots use vo_get_current_frame().)
     VOCTRL_SCREENSHOT_WIN,              // struct mp_image**
 

@@ -1014,15 +1014,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         struct voctrl_get_equalizer_args *args = data;
         return get_equalizer(vo, args->name, args->valueptr);
     }
-    case VOCTRL_GET_COLORSPACE: {
-        struct mp_image_params *params = data;
-        if (vo->params && !vc->rgb_mode) {
-            params->colorspace = vo->params->colorspace;
-            params->colorlevels = vo->params->colorlevels;
-            params->outputlevels = vo->params->outputlevels;
-        }
-        return true;
-    }
     case VOCTRL_REDRAW_FRAME:
         if (status_ok(vo))
             video_to_output_surface(vo);

@@ -821,12 +821,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         struct voctrl_get_equalizer_args *args = data;
         return xv_get_eq(vo, ctx->xv_port, args->name, args->valueptr);
     }
-    case VOCTRL_GET_COLORSPACE: {
-        struct mp_image_params *params = data;
-        read_xv_csp(vo);
-        params->colorspace = ctx->cached_csp;
-        return true;
-    }
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, ctx->original_image);
         return true;

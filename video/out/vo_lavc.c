@@ -54,8 +54,6 @@ struct priv {
     AVRational worst_time_base;
     int worst_time_base_is_stream;
 
-    struct mp_image_params real_colorspace;
-
     bool shutdown;
 };
 
@@ -166,11 +164,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     if (encode_lavc_open_codec(vo->encode_lavc_ctx, vc->stream) < 0)
         goto error;
-
-    vc->real_colorspace.colorspace =
-        encode_lavc_get_csp(vo->encode_lavc_ctx, vc->stream);
-    vc->real_colorspace.colorlevels =
-        encode_lavc_get_csp_levels(vo->encode_lavc_ctx, vc->stream);
 
     vc->buffer_size = 6 * width * height + 200;
     if (vc->buffer_size < FF_MIN_BUFFER_SIZE)
@@ -516,17 +509,7 @@ static void flip_page(struct vo *vo)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    struct priv *vc = vo->priv;
-    int r = VO_NOTIMPL;
-    pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
-    switch (request) {
-    case VOCTRL_GET_COLORSPACE:
-        *(struct mp_image_params *)data = vc->real_colorspace;
-        r = 1;
-        break;
-    }
-    pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
-    return r;
+    return VO_NOTIMPL;
 }
 
 const struct vo_driver video_out_lavc = {

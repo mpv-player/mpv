@@ -1263,15 +1263,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_REDRAW_FRAME:
         d3d_draw_frame(priv);
         return VO_TRUE;
-    case VOCTRL_GET_COLORSPACE: {
-        struct mp_image_params *p = data;
-        if (priv->use_shaders) { // no idea what the heck D3D YUV uses
-            p->colorspace = priv->params.colorspace;
-            p->colorlevels = priv->params.colorlevels;
-            p->outputlevels = priv->params.outputlevels;
-        }
-        return VO_TRUE;
-    }
     case VOCTRL_SET_EQUALIZER: {
         if (!priv->use_shaders)
             break;

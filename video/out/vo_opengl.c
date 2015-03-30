@@ -366,11 +366,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
             vo->want_redraw = true;
         return r ? VO_TRUE : VO_NOTIMPL;
     }
-    case VOCTRL_GET_COLORSPACE:
-        mpgl_lock(p->glctx);
-        gl_video_get_colorspace(p->renderer, data);
-        mpgl_unlock(p->glctx);
-        return VO_TRUE;
     case VOCTRL_SCREENSHOT_WIN:
         mpgl_lock(p->glctx);
         *(struct mp_image **)data = glGetWindowScreenshot(p->gl);
