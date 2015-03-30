@@ -1475,7 +1475,7 @@ static void get_scale_factors(struct gl_video *p, double xy[2])
             (double)(p->src_rect.y1 - p->src_rect.y0);
 }
 
-// Linearize, given a TRC as input
+// Linearize (expand), given a TRC as input
 static void pass_linearize(struct gl_video *p, enum mp_csp_trc trc)
 {
     if (trc == MP_CSP_TRC_LINEAR)
@@ -1487,7 +1487,7 @@ static void pass_linearize(struct gl_video *p, enum mp_csp_trc trc)
             GLSL(color.rgb = mix(color.rgb / vec3(12.92),
                                  pow((color.rgb + vec3(0.055))/vec3(1.055),
                                      vec3(2.4)),
-                                 lessThanEqual(vec3(0.04045), color.rgb));)
+                                 lessThan(vec3(0.04045), color.rgb));)
             break;
         case MP_CSP_TRC_BT_1886:
             GLSL(color.rgb = pow(color.rgb, vec3(1.961));)
@@ -1498,7 +1498,7 @@ static void pass_linearize(struct gl_video *p, enum mp_csp_trc trc)
     }
 }
 
-// Delinearize, given a TRC as output
+// Delinearize (compress), given a TRC as output
 static void pass_delinearize(struct gl_video *p, enum mp_csp_trc trc)
 {
     if (trc == MP_CSP_TRC_LINEAR)
@@ -1508,8 +1508,7 @@ static void pass_delinearize(struct gl_video *p, enum mp_csp_trc trc)
     switch (trc) {
         case MP_CSP_TRC_SRGB:
             GLSL(color.rgb = mix(color.rgb * vec3(12.92),
-                                 vec3(1.055) * pow(color.rgb,
-                                                   vec3(1.0/2.4))
+                                 vec3(1.055) * pow(color.rgb, vec3(1.0/2.4))
                                      - vec3(0.055),
                                  lessThanEqual(vec3(0.0031308), color.rgb));)
             break;
