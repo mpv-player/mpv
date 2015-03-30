@@ -21,8 +21,8 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "config.h"
 #include "common/msg.h"
+#include "common/common.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -35,11 +35,32 @@ struct vf_priv_s {
     int outfmt;
 };
 
+static bool is_compatible(int fmt1, int fmt2)
+{
+    struct mp_imgfmt_desc d1 = mp_imgfmt_get_desc(fmt1);
+    struct mp_imgfmt_desc d2 = mp_imgfmt_get_desc(fmt2);
+    if (d1.num_planes < d2.num_planes)
+        return false;
+    if (!(d1.flags & MP_IMGFLAG_BYTE_ALIGNED) ||
+        !(d2.flags & MP_IMGFLAG_BYTE_ALIGNED))
+        return false;
+    for (int n = 0; n < MPMIN(d1.num_planes, d2.num_planes); n++) {
+        if (d1.bytes[n] != d2.bytes[n])
+            return false;
+        if (d1.xs[n] != d2.xs[n] || d1.ys[n] != d2.ys[n])
+            return false;
+    }
+    return true;
+}
+
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
     if (fmt == vf->priv->fmt || !vf->priv->fmt) {
-        if (vf->priv->outfmt)
+        if (vf->priv->outfmt) {
+            if (!is_compatible(fmt, vf->priv->outfmt))
+                return 0;
             fmt = vf->priv->outfmt;
+        }
         return vf_next_query_format(vf, fmt);
     }
     return 0;
@@ -56,7 +77,6 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-    // As documented in the manpage, the user can easily provoke crashes
     if (vf->priv->outfmt)
         mp_image_setfmt(mpi, vf->priv->outfmt);
     return mpi;

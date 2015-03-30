@@ -209,17 +209,8 @@ Available filters are:
     ``<fmt>``
         Format name, e.g. rgb15, bgr24, 420p, etc. (default: don't change).
     ``<outfmt>``
-        Format name that should be substituted for the output. If this is not
-        100% compatible with the ``<fmt>`` value, it will crash.
-
-        .. admonition:: Examples
-
-            ====================== =====================
-            Valid                  Invalid (will crash)
-            ====================== =====================
-            ``format=rgb24:bgr24`` ``format=rgb24:420p``
-            ``format=yuyv:uyvy``
-            ====================== =====================
+        Format name that should be substituted for the output. If they do not
+        have the same bytes per pixel and chroma subsamplimg, it will fail.
 
 ``noformat[=fmt]``
     Restricts the color space for the next filter without doing any conversion.
