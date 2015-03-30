@@ -372,13 +372,20 @@ const struct m_sub_options gl_video_conf = {
                     {"bt601-625", MP_CSP_PRIM_BT_601_625},
                     {"bt709",     MP_CSP_PRIM_BT_709},
                     {"bt2020",    MP_CSP_PRIM_BT_2020},
-                    {"bt470m",    MP_CSP_PRIM_BT_470M})),
+                    {"bt470m",    MP_CSP_PRIM_BT_470M},
+                    {"apple",     MP_CSP_PRIM_APPLE},
+                    {"adobe",     MP_CSP_PRIM_ADOBE},
+                    {"prophoto",  MP_CSP_PRIM_PRO_PHOTO},
+                    {"cie1931",   MP_CSP_PRIM_CIE_1931})),
         OPT_CHOICE("target-trc", target_trc, 0,
                    ({"auto",    MP_CSP_TRC_AUTO},
                     {"bt1886",  MP_CSP_TRC_BT_1886},
                     {"srgb",    MP_CSP_TRC_SRGB},
                     {"linear",  MP_CSP_TRC_LINEAR},
-                    {"gamma22", MP_CSP_TRC_GAMMA22})),
+                    {"gamma18", MP_CSP_TRC_GAMMA18},
+                    {"gamma22", MP_CSP_TRC_GAMMA22},
+                    {"gamma28", MP_CSP_TRC_GAMMA28},
+                    {"prophoto", MP_CSP_TRC_PRO_PHOTO})),
         OPT_FLAG("npot", npot, 0),
         OPT_FLAG("pbo", pbo, 0),
         OPT_STRING_VALIDATE("scale",  scaler[0].kernel.name, 0, validate_scaler_opt),
@@ -1492,8 +1499,19 @@ static void pass_linearize(struct gl_video *p, enum mp_csp_trc trc)
         case MP_CSP_TRC_BT_1886:
             GLSL(color.rgb = pow(color.rgb, vec3(1.961));)
             break;
+        case MP_CSP_TRC_GAMMA18:
+            GLSL(color.rgb = pow(color.rgb, vec3(1.8));)
+            break;
         case MP_CSP_TRC_GAMMA22:
             GLSL(color.rgb = pow(color.rgb, vec3(2.2));)
+            break;
+        case MP_CSP_TRC_GAMMA28:
+            GLSL(color.rgb = pow(color.rgb, vec3(2.8));)
+            break;
+        case MP_CSP_TRC_PRO_PHOTO:
+            GLSL(color.rgb = mix(color.rgb / vec3(16.0),
+                                 pow(color.rgb, vec3(1.8)),
+                                 lessThan(vec3(0.03125), color.rgb));)
             break;
     }
 }
@@ -1515,8 +1533,19 @@ static void pass_delinearize(struct gl_video *p, enum mp_csp_trc trc)
         case MP_CSP_TRC_BT_1886:
             GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.961));)
             break;
+        case MP_CSP_TRC_GAMMA18:
+            GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.8));)
+            break;
         case MP_CSP_TRC_GAMMA22:
             GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.2));)
+            break;
+        case MP_CSP_TRC_GAMMA28:
+            GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.8));)
+            break;
+        case MP_CSP_TRC_PRO_PHOTO:
+            GLSL(color.rgb = mix(color.rgb * vec3(16.0),
+                                 pow(color.rgb, vec3(1.0/1.8)),
+                                 lessThanEqual(vec3(0.001953), color.rgb));)
             break;
     }
 }

@@ -616,6 +616,14 @@ Available video output drivers are:
             ITU-R BT.709 (HD), IEC 61966-2-4 (sRGB), SMPTE RP177 Annex B
         bt2020
             ITU-R BT.2020 (UHD)
+        apple
+            Apple RGB
+        adobe
+            Adobe RGB (1998)
+        prophoto
+            ProPhoto RGB (ROMM)
+        cie1931
+            CIE 1931 RGB (not to be confused with CIE XYZ)
 
     ``target-trc=<value>``
         Specifies the transfer characteristics (gamma) of the display. Video
@@ -629,8 +637,14 @@ Available video output drivers are:
             IEC 61966-2-4 (sRGB)
         linear
             Linear light output
+        gamma18
+            Pure power curve (gamma 1.8), also used for Apple RGB
         gamma22
             Pure power curve (gamma 2.2)
+        gamma28
+            Pure power curve (gamma 2.8), also used for BT.470-BG
+        prophoto
+            ProPhoto RGB (ROMM)
 
     ``icc-profile=<file>``
         Load an ICC profile and use it to transform linear RGB to screen output.

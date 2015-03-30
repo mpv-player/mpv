@@ -300,6 +300,10 @@ Available filters are:
         :bt.601-625:   ITU-R BT.601 (SD) 625-line systems (PAL, SECAM)
         :bt.709:       ITU-R BT.709 (HD) (same primaries as sRGB)
         :bt.2020:      ITU-R BT.2020 (UHD)
+        :apple:        Apple RGB
+        :adobe:        Adobe RGB (1998)
+        :prophoto:     ProPhoto RGB (ROMM)
+        :cie1931:      CIE 1931 RGB
 
     ``<stereo-in>``
         Set the stereo mode the video is assumed to be encoded in. Takes the
