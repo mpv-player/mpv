@@ -7,15 +7,15 @@ use warnings;
 
 my $mpv = $ARGV[0] || 'mpv';
 
-my @opts = parse_main_opts("$mpv --list-options", '^ (\-\-[^\s\*]*)\*?\s*(.*)');
+my @opts = parse_main_opts('--list-options', '^ (\-\-[^\s\*]*)\*?\s*(.*)');
 
-my @ao = parse_opts("$mpv --ao=help", '^  ([^\s\:]*)\s*: (.*)');
-my @vo = parse_opts("$mpv --vo=help", '^  ([^\s\:]*)\s*: (.*)');
+my @ao = parse_opts('--ao=help', '^  ([^\s\:]*)\s*: (.*)');
+my @vo = parse_opts('--vo=help', '^  ([^\s\:]*)\s*: (.*)');
 
-my @af = parse_opts("$mpv --af=help", '^  ([^\s\:]*)\s*: (.*)');
-my @vf = parse_opts("$mpv --vf=help", '^  ([^\s\:]*)\s*: (.*)');
+my @af = parse_opts('--af=help', '^  ([^\s\:]*)\s*: (.*)');
+my @vf = parse_opts('--vf=help', '^  ([^\s\:]*)\s*: (.*)');
 
-my @protos = parse_opts("$mpv --list-protocols", '^ ([^\s]*)');
+my @protos = parse_opts('--list-protocols', '^ ([^\s]*)');
 
 my ($opts_str, $ao_str, $vo_str, $af_str, $vf_str, $protos_str);
 
@@ -154,7 +154,7 @@ sub parse_main_opts {
     my ($cmd, $regex) = @_;
 
     my @list;
-    my @lines = split /\n/, `$cmd`;
+    my @lines = split /\n/, `"$mpv" --no-config $cmd`;
 
     foreach my $line (@lines) {
         my ($name, $desc) = ($line =~ /^$regex/) or next;
@@ -219,7 +219,7 @@ sub parse_opts {
     my ($cmd, $regex) = @_;
 
     my @list;
-    my @lines = split /\n/, `$cmd`;
+    my @lines = split /\n/, `"$mpv" --no-config $cmd`;
 
     foreach my $line (@lines) {
         if ($line !~ /^$regex/) {
