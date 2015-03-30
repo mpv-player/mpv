@@ -63,7 +63,7 @@ Available filters are:
         Set AVOptions on the SwrContext or AVAudioResampleContext. These should
         be documented by FFmpeg or Libav.
 
-``lavcac3enc[=tospdif[:bitrate[:minchn]]]``
+``lavcac3enc[=tospdif[:bitrate[:minch]]]``
     Encode multi-channel audio to AC-3 at runtime using libavcodec. Supports
     16-bit native-endian input format, maximum 6 channels. The output is
     big-endian when outputting a raw AC-3 stream, native-endian when
@@ -92,8 +92,8 @@ Available filters are:
         :5ch: 448
         :6ch: 448
 
-    ``minchn=<n>``
-        If the input channel number is less than ``<minchn>``, the filter will
+    ``minch=<n>``
+        If the input channel number is less than ``<minch>``, the filter will
         detach itself (default: 3).
 
 ``sweep[=speed]``
