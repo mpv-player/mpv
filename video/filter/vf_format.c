@@ -30,29 +30,28 @@
 
 #include "options/m_option.h"
 
-static struct vf_priv_s {
+struct vf_priv_s {
     int fmt;
     int outfmt;
-} const vf_priv_dflt = {
-  IMGFMT_YUYV,
-  0
 };
 
-//===========================================================================//
-
-static int query_format(struct vf_instance *vf, unsigned int fmt){
-    if(fmt==vf->priv->fmt) {
+static int query_format(struct vf_instance *vf, unsigned int fmt)
+{
+    if (fmt == vf->priv->fmt || !vf->priv->fmt) {
         if (vf->priv->outfmt)
             fmt = vf->priv->outfmt;
-        return vf_next_query_format(vf,fmt);
+        return vf_next_query_format(vf, fmt);
     }
     return 0;
 }
 
-static int config(struct vf_instance *vf, int width, int height,
-                  int d_width, int d_height,
-                  unsigned flags, unsigned outfmt){
-    return vf_next_config(vf, width, height, d_width, d_height, flags, vf->priv->outfmt);
+static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
+                    struct mp_image_params *out)
+{
+    *out = *in;
+    if (vf->priv->outfmt)
+        out->imgfmt = vf->priv->outfmt;
+    return 0;
 }
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
@@ -63,12 +62,11 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     return mpi;
 }
 
-static int vf_open(vf_instance_t *vf){
-    vf->query_format=query_format;
-    if (vf->priv->outfmt) {
-        vf->config=config;
-        vf->filter=filter;
-    }
+static int vf_open(vf_instance_t *vf)
+{
+    vf->query_format = query_format;
+    vf->reconfig = reconfig;
+    vf->filter = filter;
     return 1;
 }
 
@@ -84,8 +82,5 @@ const vf_info_t vf_info_format = {
     .name = "format",
     .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
-    .priv_defaults = &vf_priv_dflt,
     .options = vf_opts_fields,
 };
-
-//===========================================================================//

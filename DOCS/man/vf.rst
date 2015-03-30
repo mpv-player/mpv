@@ -207,7 +207,7 @@ Available filters are:
         For a list of available formats, see ``format=fmt=help``.
 
     ``<fmt>``
-        Format name, e.g. rgb15, bgr24, 420p, etc. (default: yuyv).
+        Format name, e.g. rgb15, bgr24, 420p, etc. (default: don't change).
     ``<outfmt>``
         Format name that should be substituted for the output. If this is not
         100% compatible with the ``<fmt>`` value, it will crash.
