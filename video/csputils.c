@@ -37,32 +37,36 @@
 
 #include "mp_image.h"
 #include "csputils.h"
+#include "options/m_option.h"
 
-const char *const mp_csp_names[MP_CSP_COUNT] = {
-    "auto",
-    "bt.601",
-    "bt.709",
-    "smpte-240m",
-    "bt.2020-ncl",
-    "bt.2020-cl",
-    "rgb",
-    "xyz",
-    "ycgco",
+const struct m_opt_choice_alternatives mp_csp_names[] = {
+    {"auto",        MP_CSP_AUTO},
+    {"bt.601",      MP_CSP_BT_601},
+    {"bt.709",      MP_CSP_BT_709},
+    {"smpte-240m",  MP_CSP_SMPTE_240M},
+    {"bt.2020-ncl", MP_CSP_BT_2020_NC},
+    {"bt.2020-cl",  MP_CSP_BT_2020_C},
+    {"rgb",         MP_CSP_RGB},
+    {"xyz",         MP_CSP_XYZ},
+    {"ycgco",       MP_CSP_YCGCO},
+    {0}
 };
 
-const char *const mp_csp_levels_names[MP_CSP_LEVELS_COUNT] = {
-    "auto",
-    "limited",
-    "full",
+const struct m_opt_choice_alternatives mp_csp_levels_names[] = {
+    {"auto",        MP_CSP_LEVELS_AUTO},
+    {"limited",     MP_CSP_LEVELS_TV},
+    {"full",        MP_CSP_LEVELS_PC},
+    {0}
 };
 
-const char *const mp_csp_prim_names[MP_CSP_PRIM_COUNT] = {
-    "auto",
-    "bt.601-525",
-    "bt.601-625",
-    "bt.709",
-    "bt.2020",
-    "bt.470 m",
+const struct m_opt_choice_alternatives mp_csp_prim_names[] = {
+    {"auto",        MP_CSP_PRIM_AUTO},
+    {"bt.601-525",  MP_CSP_PRIM_BT_601_525},
+    {"bt.601-625",  MP_CSP_PRIM_BT_601_625},
+    {"bt.709",      MP_CSP_PRIM_BT_709},
+    {"bt.2020",     MP_CSP_PRIM_BT_2020},
+    {"bt.470m",     MP_CSP_PRIM_BT_470M},
+    {0}
 };
 
 const char *const mp_csp_trc_names[MP_CSP_TRC_COUNT] = {
@@ -81,10 +85,11 @@ const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
     "gamma",
 };
 
-const char *const mp_chroma_names[MP_CHROMA_COUNT] = {
-    "unknown",
-    "mpeg2/4/h264",
-    "mpeg1/jpeg",
+const struct m_opt_choice_alternatives mp_chroma_names[] = {
+    {"unknown",     MP_CHROMA_AUTO},
+    {"mpeg2/4/h264",MP_CHROMA_LEFT},
+    {"mpeg1/jpeg",  MP_CHROMA_CENTER},
+    {0}
 };
 
 // The short name _must_ match with what vf_stereo3d accepts (if supported).

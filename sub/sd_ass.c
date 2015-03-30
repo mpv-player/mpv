@@ -459,9 +459,11 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
         int msgl = basic_conv ? MSGL_V : MSGL_WARN;
         ctx->last_params = params;
         MP_MSG(sd, msgl, "mangling colors like vsfilter: "
-               "RGB -> %s %s -> %s %s -> RGB\n", mp_csp_names[csp],
-               mp_csp_levels_names[levels], mp_csp_names[params.colorspace],
-               mp_csp_levels_names[params.colorlevels]);
+               "RGB -> %s %s -> %s %s -> RGB\n",
+               m_opt_choice_str(mp_csp_names, csp),
+               m_opt_choice_str(mp_csp_levels_names, levels),
+               m_opt_choice_str(mp_csp_names, params.colorspace),
+               m_opt_choice_str(mp_csp_names, params.colorlevels));
     }
 
     // Conversion that VSFilter would use

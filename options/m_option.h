@@ -165,6 +165,9 @@ struct m_opt_choice_alternatives {
     int value;
 };
 
+const char *m_opt_choice_str(const struct m_opt_choice_alternatives *choices,
+                             int value);
+
 // For OPT_STRING_VALIDATE(). Behaves like m_option_type.parse().
 typedef int (*m_opt_string_validate_fn)(struct mp_log *log, const m_option_t *opt,
                                         struct bstr name, struct bstr param);
@@ -626,6 +629,11 @@ extern const char m_option_path_separator;
     OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_choice)
 #define OPT_CHOICE_(optname, varname, flags, choices, ...) \
     OPT_GENERAL(int, optname, varname, flags, M_CHOICES(choices), __VA_ARGS__)
+// Variant which takes a pointer to struct m_opt_choice_alternatives directly
+#define OPT_CHOICE_C(optname, varname, flags, choices) \
+    OPT_GENERAL(int, optname, varname, flags, .priv = (void *) \
+                MP_EXPECT_TYPE(const struct m_opt_choice_alternatives*, choices), \
+                .type = &m_option_type_choice)
 
 #define OPT_FLAGS(...) \
     OPT_CHOICE_(__VA_ARGS__, .type = &m_option_type_flags)

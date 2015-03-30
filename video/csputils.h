@@ -27,6 +27,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "options/m_option.h"
+
 /* NOTE: the csp and levels AUTO values are converted to specific ones
  * above vf/vo level. At least vf_scale relies on all valid settings being
  * nonzero at vf/vo level.
@@ -45,8 +47,7 @@ enum mp_csp {
     MP_CSP_COUNT
 };
 
-// Any enum mp_csp value is a valid index (except MP_CSP_COUNT)
-extern const char *const mp_csp_names[MP_CSP_COUNT];
+extern const struct m_opt_choice_alternatives mp_csp_names[];
 
 enum mp_csp_levels {
     MP_CSP_LEVELS_AUTO,
@@ -55,8 +56,7 @@ enum mp_csp_levels {
     MP_CSP_LEVELS_COUNT,
 };
 
-// Any enum mp_csp_levels value is a valid index (except MP_CSP_LEVELS_COUNT)
-extern const char *const mp_csp_levels_names[MP_CSP_LEVELS_COUNT];
+extern const struct m_opt_choice_alternatives mp_csp_levels_names[];
 
 enum mp_csp_prim {
     MP_CSP_PRIM_AUTO,
@@ -68,8 +68,7 @@ enum mp_csp_prim {
     MP_CSP_PRIM_COUNT
 };
 
-// Any enum mp_csp_prim value is a valid index (except MP_CSP_PRIM_COUNT)
-extern const char *const mp_csp_prim_names[MP_CSP_PRIM_COUNT];
+extern const struct m_opt_choice_alternatives mp_csp_prim_names[];
 
 enum mp_csp_trc {
     MP_CSP_TRC_AUTO,
@@ -149,7 +148,7 @@ enum mp_chroma_location {
     MP_CHROMA_COUNT,
 };
 
-extern const char *const mp_chroma_names[MP_CHROMA_COUNT];
+extern const struct m_opt_choice_alternatives mp_chroma_names[];
 
 enum mp_csp_equalizer_param {
     MP_CSP_EQ_BRIGHTNESS,

@@ -522,6 +522,16 @@ const struct m_option_type m_option_type_intpair = {
     .copy  = copy_opt,
 };
 
+const char *m_opt_choice_str(const struct m_opt_choice_alternatives *choices,
+                             int value)
+{
+    for (const struct m_opt_choice_alternatives *c = choices; c->name; c++) {
+        if (c->value == value)
+            return c->name;
+    }
+    return NULL;
+}
+
 static int clamp_choice(const m_option_t *opt, void *val)
 {
     int v = *(int *)val;

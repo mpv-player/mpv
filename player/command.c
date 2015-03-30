@@ -2182,113 +2182,6 @@ static int video_simple_refresh_property(void *ctx, struct m_property *prop,
     return r;
 }
 
-static void append_csp(char **ptr, const char *name, const char *const *names,
-                       int value)
-{
-    const char *cspname = names[value];
-    if (name[0] == '*') {
-        name++;
-    } else if (value == 0) {
-        cspname = "unknown";
-    }
-    *ptr = talloc_asprintf_append(*ptr, "%s: %s\n", name, cspname);
-}
-
-static int mp_property_colormatrix(void *ctx, struct m_property *prop,
-                                   int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (action != M_PROPERTY_PRINT)
-        return video_refresh_property_helper(prop, action, arg, mpctx);
-
-    struct MPOpts *opts = mpctx->opts;
-
-    struct mp_image_params vo_csp = {0};
-    if (mpctx->video_out)
-        vo_control(mpctx->video_out, VOCTRL_GET_COLORSPACE, &vo_csp);
-
-    struct mp_image_params vd_csp = {0};
-    if (mpctx->d_video)
-        vd_csp = mpctx->d_video->decoder_output;
-
-    char *res = talloc_strdup(NULL, "");
-    append_csp(&res, "*Requested", mp_csp_names, opts->requested_colorspace);
-    append_csp(&res, "Video decoder", mp_csp_names, vd_csp.colorspace);
-    *(char **)arg = res;
-    return M_PROPERTY_OK;
-}
-
-static int mp_property_colormatrix_input_range(void *ctx, struct m_property *prop,
-                                               int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (action != M_PROPERTY_PRINT)
-        return video_refresh_property_helper(prop, action, arg, mpctx);
-
-    struct MPOpts *opts = mpctx->opts;
-
-    struct mp_image_params vo_csp = {0};
-    if (mpctx->video_out)
-        vo_control(mpctx->video_out, VOCTRL_GET_COLORSPACE, &vo_csp);
-
-    struct mp_image_params vd_csp = {0};
-    if (mpctx->d_video)
-        vd_csp = mpctx->d_video->decoder_output;
-
-    char *res = talloc_strdup(NULL, "");
-    append_csp(&res, "*Requested", mp_csp_levels_names,
-               opts->requested_input_range);
-    append_csp(&res, "Video decoder", mp_csp_levels_names, vd_csp.colorlevels);
-    *(char **)arg = res;
-    return M_PROPERTY_OK;
-}
-
-static int mp_property_colormatrix_output_range(void *ctx, struct m_property *prop,
-                                                int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (action != M_PROPERTY_PRINT)
-        return video_refresh_property_helper(prop, action, arg, mpctx);
-
-    struct MPOpts *opts = mpctx->opts;
-
-    struct mp_image_params actual = {0};
-    if (mpctx->video_out)
-        vo_control(mpctx->video_out, VOCTRL_GET_COLORSPACE, &actual);
-
-    char *res = talloc_strdup(NULL, "");
-    append_csp(&res, "*Requested", mp_csp_levels_names,
-               opts->requested_output_range);
-    append_csp(&res, "Video output", mp_csp_levels_names, actual.outputlevels);
-    *(char **)arg = res;
-    return M_PROPERTY_OK;
-}
-
-static int mp_property_primaries(void *ctx, struct m_property *prop,
-                                 int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (action != M_PROPERTY_PRINT)
-        return video_refresh_property_helper(prop, action, arg, mpctx);
-
-    struct MPOpts *opts = mpctx->opts;
-
-    struct mp_image_params vo_csp = {0};
-    if (mpctx->video_out)
-        vo_control(mpctx->video_out, VOCTRL_GET_COLORSPACE, &vo_csp);
-
-    struct mp_image_params vd_csp = {0};
-    if (mpctx->d_video)
-        vd_csp = mpctx->d_video->decoder_output;
-
-    char *res = talloc_strdup(NULL, "");
-    append_csp(&res, "*Requested", mp_csp_prim_names, opts->requested_primaries);
-    append_csp(&res, "Video decoder", mp_csp_prim_names, vd_csp.primaries);
-    append_csp(&res, "Video output", mp_csp_prim_names, vo_csp.primaries);
-    *(char **)arg = res;
-    return M_PROPERTY_OK;
-}
-
 // Update options which are managed through VOCTRL_GET/SET_PANSCAN.
 static int panscan_property_helper(void *ctx, struct m_property *prop,
                                    int action, void *arg)
@@ -2491,10 +2384,16 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
         {"dh",              SUB_PROP_INT(p.d_h)},
         {"aspect",          SUB_PROP_FLOAT(dar)},
         {"par",             SUB_PROP_FLOAT(dar / sar)},
-        {"colormatrix",     SUB_PROP_STR(mp_csp_names[p.colorspace])},
-        {"colorlevels",     SUB_PROP_STR(mp_csp_levels_names[p.colorlevels])},
-        {"primaries",       SUB_PROP_STR(mp_csp_prim_names[p.primaries])},
-        {"chroma-location", SUB_PROP_STR(mp_chroma_names[p.chroma_location])},
+        {"colormatrix",
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_names, p.colorspace))},
+        {"colorlevels",
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_levels_names, p.colorlevels))},
+        {"outputlevels",
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_levels_names, p.outputlevels))},
+        {"primaries",
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_prim_names, p.primaries))},
+        {"chroma-location",
+            SUB_PROP_STR(m_opt_choice_str(mp_chroma_names, p.chroma_location))},
         {"rotate",          SUB_PROP_INT(p.rotate)},
         {0}
     };
@@ -3437,10 +3336,6 @@ static const struct m_property mp_properties[] = {
     {"fullscreen", mp_property_fullscreen},
     {"deinterlace", mp_property_deinterlace},
     {"field-dominance", mp_property_generic_option},
-    {"colormatrix", mp_property_colormatrix},
-    {"colormatrix-input-range", mp_property_colormatrix_input_range},
-    {"colormatrix-output-range", mp_property_colormatrix_output_range},
-    {"colormatrix-primaries", mp_property_primaries},
     {"ontop", mp_property_ontop},
     {"border", mp_property_border},
     {"on-all-workspaces", mp_property_all_workspaces},
@@ -3534,10 +3429,6 @@ static const struct m_property mp_properties[] = {
     TRACK_FF("ff-aid", STREAM_AUDIO),
     TRACK_FF("ff-sid", STREAM_SUB),
 
-    M_PROPERTY_ALIAS("video", "vid"),
-    M_PROPERTY_ALIAS("audio", "aid"),
-    M_PROPERTY_ALIAS("sub", "sid"),
-
     {"window-minimized", mp_property_win_minimized},
     {"display-names", mp_property_display_names},
     {"display-fps", mp_property_display_fps},
@@ -3551,6 +3442,15 @@ static const struct m_property mp_properties[] = {
     {"file-local-options", mp_property_local_options},
     {"option-info", mp_property_option_info},
     {"property-list", mp_property_list},
+
+    // compatibility
+    M_PROPERTY_ALIAS("video", "vid"),
+    M_PROPERTY_ALIAS("audio", "aid"),
+    M_PROPERTY_ALIAS("sub", "sid"),
+    M_PROPERTY_ALIAS("colormatrix", "video-params/colormatrix"),
+    M_PROPERTY_ALIAS("colormatrix-input-range", "video-params/colorlevels"),
+    M_PROPERTY_ALIAS("colormatrix-output-range", "video-params/outputlevels"),
+    M_PROPERTY_ALIAS("colormatrix-primaries", "video-params/primaries"),
 
     {0},
 };
@@ -3575,7 +3475,8 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",
-      "detected-hwdec"),
+      "detected-hwdec", "colormatrix", "colormatrix-input-range",
+      "colormatrix-output-range", "colormatrix-primaries"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute", "balance",
       "volume-restore-data", "current-ao"),

@@ -446,11 +446,15 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
         if (p->w != p->d_w || p->h != p->d_h)
             mp_snprintf_cat(b, bs, "->%dx%d", p->d_w, p->d_h);
         mp_snprintf_cat(b, bs, " %s", mp_imgfmt_to_name(p->imgfmt));
-        mp_snprintf_cat(b, bs, " %s/%s", mp_csp_names[p->colorspace],
-                        mp_csp_levels_names[p->colorlevels]);
-        mp_snprintf_cat(b, bs, " CL=%s", mp_chroma_names[p->chroma_location]);
-        if (p->outputlevels)
-            mp_snprintf_cat(b, bs, " out=%s", mp_csp_levels_names[p->outputlevels]);
+        mp_snprintf_cat(b, bs, " %s/%s",
+                        m_opt_choice_str(mp_csp_names, p->colorspace),
+                        m_opt_choice_str(mp_csp_levels_names, p->colorlevels));
+        mp_snprintf_cat(b, bs, " CL=%s",
+                        m_opt_choice_str(mp_chroma_names, p->chroma_location));
+        if (p->outputlevels) {
+            mp_snprintf_cat(b, bs, " out=%s",
+                    m_opt_choice_str(mp_csp_levels_names, p->outputlevels));
+        }
         if (p->rotate)
             mp_snprintf_cat(b, bs, " rot=%d", p->rotate);
         if (p->stereo_in > 0 || p->stereo_out > 0) {

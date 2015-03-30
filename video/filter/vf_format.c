@@ -33,6 +33,11 @@
 struct vf_priv_s {
     int fmt;
     int outfmt;
+    int colormatrix;
+    int colorlevels;
+    int outputlevels;
+    int primaries;
+    int chroma_location;
 };
 
 static bool is_compatible(int fmt1, int fmt2)
@@ -69,9 +74,26 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
                     struct mp_image_params *out)
 {
+    struct vf_priv_s *p = vf->priv;
+
     *out = *in;
-    if (vf->priv->outfmt)
-        out->imgfmt = vf->priv->outfmt;
+
+    if (p->outfmt)
+        out->imgfmt = p->outfmt;
+    if (p->colormatrix)
+        out->colorspace = p->colormatrix;
+    if (p->colorlevels)
+        out->colorlevels = p->colorlevels;
+    if (p->outputlevels)
+        out->outputlevels = p->outputlevels;
+    if (p->primaries)
+        out->primaries = p->primaries;
+    if (p->chroma_location)
+        out->chroma_location = p->chroma_location;
+
+    // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.).
+    mp_image_params_guess_csp(out);
+
     return 0;
 }
 
@@ -94,6 +116,11 @@ static int vf_open(vf_instance_t *vf)
 static const m_option_t vf_opts_fields[] = {
     OPT_IMAGEFORMAT("fmt", fmt, 0),
     OPT_IMAGEFORMAT("outfmt", outfmt, 0),
+    OPT_CHOICE_C("colormatrix", colormatrix, 0, mp_csp_names),
+    OPT_CHOICE_C("colorlevels", colorlevels, 0, mp_csp_levels_names),
+    OPT_CHOICE_C("outputlevels", outputlevels, 0, mp_csp_levels_names),
+    OPT_CHOICE_C("primaries", primaries, 0, mp_csp_prim_names),
+    OPT_CHOICE_C("chroma-location", chroma_location, 0, mp_chroma_names),
     {0}
 };
 

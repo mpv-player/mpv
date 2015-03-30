@@ -412,17 +412,7 @@ int video_reconfig_filters(struct dec_video *d_video,
     if (force_aspect >= 0.0)
         vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, force_aspect);
 
-    // Apply user overrides
-    if (opts->requested_colorspace != MP_CSP_AUTO)
-        p.colorspace = opts->requested_colorspace;
-    if (opts->requested_input_range != MP_CSP_LEVELS_AUTO)
-        p.colorlevels = opts->requested_input_range;
-    p.outputlevels = opts->requested_output_range;
-    if (opts->requested_primaries != MP_CSP_PRIM_AUTO)
-        p.primaries = opts->requested_primaries;
-
     // Detect colorspace from resolution.
-    // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.).
     mp_image_params_guess_csp(&p);
 
     // Time to config libvo!
