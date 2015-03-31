@@ -29,6 +29,7 @@
 #include "video/fmt-conversion.h"
 #include "video/vdpau.h"
 #include "video/hwdec.h"
+#include "video/decode/dec_video.h"
 
 struct priv {
     struct mp_log              *log;
@@ -148,6 +149,24 @@ static void uninit(struct lavc_ctx *ctx)
     ctx->hwdec_priv = NULL;
 }
 
+#if LIBAVCODEC_VERSION_MICRO >= 100
+static int render2(struct AVCodecContext *avctx, struct AVFrame *frame,
+                   const VdpPictureInfo *pic_info, uint32_t buffers_used,
+                   const VdpBitstreamBuffer *buffers)
+{
+    struct dec_video *vd = avctx->opaque;
+    struct lavc_ctx *ctx = vd->priv;
+    struct priv *p = ctx->hwdec_priv;
+    VdpVideoSurface surf = (uintptr_t)frame->data[3];
+    VdpStatus status;
+
+    status = p->vdp->decoder_render(p->context->decoder, surf, pic_info,
+                                    buffers_used, buffers);
+
+    return status;
+}
+#endif
+
 static int init(struct lavc_ctx *ctx)
 {
     struct priv *p = talloc_ptrtype(NULL, p);
@@ -162,7 +181,11 @@ static int init(struct lavc_ctx *ctx)
         goto error;
 
     p->vdp = &p->mpvdp->vdp;
+#if LIBAVCODEC_VERSION_MICRO >= 100
+    p->context->render2 = render2;
+#else
     p->context->render = p->vdp->decoder_render;
+#endif
     p->context->decoder = VDP_INVALID_HANDLE;
 
     if (mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter) < 1)
