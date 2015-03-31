@@ -1211,7 +1211,7 @@ retry:
     }
     state->previous_volume = state->initial_volume;
 
-    wasapi_change_init(ao);
+    wasapi_change_init(ao, false);
 
     MP_DBG(ao, "Init wasapi thread done\n");
     return S_OK;
@@ -1219,6 +1219,30 @@ exit_label:
     MP_ERR(state, "Error setting up audio thread: %s (0x%"PRIx32")\n",
            wasapi_explain_err(hr), (uint32_t) hr);
     return hr;
+}
+
+HRESULT wasapi_hotplug_init(struct ao *ao)
+{
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+                                  &IID_IMMDeviceEnumerator, (void **)&state->pEnumerator);
+    EXIT_ON_ERROR(hr);
+
+    hr = wasapi_change_init(ao, true);
+    EXIT_ON_ERROR(hr);
+
+    return S_OK;
+exit_label:
+    MP_ERR(state, "Error setting up audio hotplug: %s (0x%"PRIx32")\n",
+           wasapi_explain_err(hr), (uint32_t) hr);
+    return hr;
+}
+
+void wasapi_hotplug_uninit(struct ao *ao)
+{
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    wasapi_change_uninit(ao);
+    SAFE_RELEASE(state->pEnumerator, IMMDeviceEnumerator_Release(state->pEnumerator));
 }
 
 void wasapi_thread_uninit(struct ao *ao)

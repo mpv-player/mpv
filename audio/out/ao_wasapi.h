@@ -20,6 +20,7 @@
 #ifndef MP_AO_WASAPI_H_
 #define MP_AO_WASAPI_H_
 
+#include <stdbool.h>
 #include <audioclient.h>
 #include <audiopolicy.h>
 #include <mmdeviceapi.h>
@@ -30,10 +31,11 @@
 typedef struct change_notify {
     IMMNotificationClient client; /* this must be first in the structure! */
     LPWSTR monitored; /* Monitored device */
+    bool is_hotplug;
     struct ao *ao;
 } change_notify;
 
-HRESULT wasapi_change_init(struct ao* ao);
+HRESULT wasapi_change_init(struct ao* ao, bool is_hotplug);
 void wasapi_change_uninit(struct ao* ao);
 
 #define EXIT_ON_ERROR(hres)  \

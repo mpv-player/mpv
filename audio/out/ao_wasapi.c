@@ -391,6 +391,24 @@ static void audio_resume(struct ao *ao)
     SetEvent(state->hResume);
 }
 
+static void hotplug_uninit(struct ao *ao)
+{
+    MP_DBG(ao, "Hotplug uninit\n");
+    wasapi_hotplug_uninit(ao);
+    CoUninitialize();
+}
+
+static int hotplug_init(struct ao *ao)
+{
+    MP_DBG(ao, "Hotplug init\n");
+    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
+    if (wasapi_hotplug_init(ao) != S_OK) {
+        hotplug_uninit(ao);
+        return -1;
+    }
+    return 0;
+}
+
 static void list_devs(struct ao *ao, struct ao_device_list *list)
 {
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
@@ -410,6 +428,8 @@ const struct ao_driver audio_out_wasapi = {
     .reset     = audio_reset,
     .resume    = audio_resume,
     .list_devs = list_devs,
+    .hotplug_init = hotplug_init,
+    .hotplug_uninit = hotplug_uninit,
     .priv_size = sizeof(wasapi_state),
     .options   = (const struct m_option[]) {
         OPT_FLAG("exclusive", opt_exclusive, 0),
