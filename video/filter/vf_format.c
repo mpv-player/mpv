@@ -37,6 +37,7 @@ struct vf_priv_s {
     int colorlevels;
     int outputlevels;
     int primaries;
+    int gamma;
     int chroma_location;
 };
 
@@ -88,6 +89,8 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         out->outputlevels = p->outputlevels;
     if (p->primaries)
         out->primaries = p->primaries;
+    if (p->gamma)
+        out->gamma = p->gamma;
     if (p->chroma_location)
         out->chroma_location = p->chroma_location;
 
@@ -120,6 +123,7 @@ static const m_option_t vf_opts_fields[] = {
     OPT_CHOICE_C("colorlevels", colorlevels, 0, mp_csp_levels_names),
     OPT_CHOICE_C("outputlevels", outputlevels, 0, mp_csp_levels_names),
     OPT_CHOICE_C("primaries", primaries, 0, mp_csp_prim_names),
+    OPT_CHOICE_C("gamma", gamma, 0, mp_csp_trc_names),
     OPT_CHOICE_C("chroma-location", chroma_location, 0, mp_chroma_names),
     {0}
 };
