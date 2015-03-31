@@ -442,6 +442,11 @@ Program Behavior
     version of youtube-dl to be installed on the system. (Enabled by default,
     except when the client API / libmpv is used.)
 
+    When using the special URL
+    ``ytdl-search://<search-prefix>/<max-results>/<search-term>[,<search-term>[,...]]``,
+    mpv will invoke youtube-dl's search feature using ``<search-prefix>``
+    (Example: ytsearch, gvsearch, etc) to retrieve a playlist of videos to play.
+
     If the script can't do anything with an URL, it will do nothing.
 
     (Note: this is the replacement for the now removed libquvi support.)

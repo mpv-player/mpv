@@ -41,7 +41,7 @@ mp.add_hook("on_load", 10, function ()
     local url = mp.get_property("stream-open-filename")
 
     if (url:find("http://") == 1) or (url:find("https://") == 1)
-        or (url:find("ytdl://") == 1) then
+        or (url:find("ytdl://") == 1) or (url:find("ytdl%-search://") == 1) then
 
        -- check version of youtube-dl if not done yet
         if (ytdl.vercheck == nil) then
@@ -99,8 +99,19 @@ mp.add_hook("on_load", 10, function ()
                 table.insert(command, arg)
             end
         end
-        table.insert(command, "--")
-        table.insert(command, url)
+
+        -- deconstruct ytdl-search://
+        if (url:find("ytdl%-search://") == 1) then
+            -- the only scheme we accept here is: ytdl-search://<search prefix as used by ytdl>/<max results>/<search term 1>[,<search term 2>[,...]]
+            local search_prefix, max_results, search_terms = url:sub(14):match("([^/]+)/([^/]+)/(.+)")
+            table.insert(command, "--default-search")
+            table.insert(command, search_prefix .. max_results)
+            table.insert(command, search_terms)
+        else
+            table.insert(command, "--")
+            table.insert(command, url)
+        end
+
         local es, json = exec(command)
 
         if (es < 0) or (json == nil) or (json == "") then
