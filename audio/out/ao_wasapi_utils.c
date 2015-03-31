@@ -875,7 +875,6 @@ exit_label:
     talloc_free(id);
     SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
-    return;
 }
 
 static HRESULT load_default_device(struct ao *ao, IMMDeviceEnumerator* pEnumerator,
