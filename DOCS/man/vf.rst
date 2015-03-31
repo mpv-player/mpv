@@ -278,12 +278,11 @@ Available filters are:
     ``<primaries>``
         RGB primaries the source file was encoded with. Normally this should be set
         in the file header, but when playing broken or mistagged files this can be
-        used to override the setting. By default, when unset, BT.709 is used for
-        all files except those tagged with a BT.2020 color matrix.
+        used to override the setting.
 
         This option only affects video output drivers that perform color
-        management, for example ``opengl`` with the ``srgb`` or ``icc-profile``
-        suboptions set.
+        management, for example ``opengl`` with the ``target-prim`` or
+        ``icc-profile`` suboptions set.
 
         If this option is set to ``auto`` (which is the default), the video's
         primaries flag will be used. If that flag is unset, the color space will
