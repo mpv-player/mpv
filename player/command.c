@@ -2158,20 +2158,6 @@ static int mp_property_deinterlace(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-// Generic option + requires hard refresh to make changes take effect.
-static int video_refresh_property_helper(struct m_property *prop, int action,
-                                         void *arg, MPContext *mpctx)
-{
-    int r = mp_property_generic_option(mpctx, prop, action, arg);
-    if (action == M_PROPERTY_SET) {
-        if (mpctx->d_video) {
-            reinit_video_filters(mpctx);
-            mp_force_video_refresh(mpctx);
-        }
-    }
-    return r;
-}
-
 static int video_simple_refresh_property(void *ctx, struct m_property *prop,
                                          int action, void *arg)
 {
