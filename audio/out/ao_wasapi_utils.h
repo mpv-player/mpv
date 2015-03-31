@@ -36,15 +36,11 @@ bool wasapi_fill_VistaBlob(wasapi_state *state);
 
 const char *wasapi_explain_err(const HRESULT hr);
 
-HRESULT wasapi_enumerate_devices(struct ao *ao,
-                                 struct ao_device_list *list);
+void wasapi_list_devs(struct ao *ao, struct ao_device_list *list);
 
 void wasapi_dispatch(void);
 HRESULT wasapi_thread_init(struct ao *ao);
 void wasapi_thread_uninit(struct ao *ao);
-
-HRESULT wasapi_hotplug_init(struct ao *ao);
-void wasapi_hotplug_uninit(struct ao *ao);
 
 HRESULT wasapi_setup_proxies(wasapi_state *state);
 void wasapi_release_proxies(wasapi_state *state);

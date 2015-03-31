@@ -389,26 +389,29 @@ static void audio_resume(struct ao *ao)
 static void hotplug_uninit(struct ao *ao)
 {
     MP_DBG(ao, "Hotplug uninit\n");
-    wasapi_hotplug_uninit(ao);
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    wasapi_change_uninit(ao);
+    SAFE_RELEASE(state->pEnumerator, IMMDeviceEnumerator_Release(state->pEnumerator));
     CoUninitialize();
 }
 
 static int hotplug_init(struct ao *ao)
 {
     MP_DBG(ao, "Hotplug init\n");
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    if (wasapi_hotplug_init(ao) != S_OK) {
-        hotplug_uninit(ao);
-        return -1;
-    }
-    return 0;
-}
+    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+                                  &IID_IMMDeviceEnumerator, (void **)&state->pEnumerator);
+    EXIT_ON_ERROR(hr);
+    hr = wasapi_change_init(ao, true);
+    EXIT_ON_ERROR(hr);
 
-static void list_devs(struct ao *ao, struct ao_device_list *list)
-{
-    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    wasapi_enumerate_devices(ao, list);
-    CoUninitialize();
+    return 0;
+    exit_label:
+    MP_ERR(state, "Error setting up audio hotplug: %s (0x%"PRIx32")\n",
+           wasapi_explain_err(hr), (uint32_t) hr);
+    hotplug_uninit(ao);
+    return -1;
 }
 
 #define OPT_BASE_STRUCT struct wasapi_state
@@ -421,7 +424,7 @@ const struct ao_driver audio_out_wasapi = {
     .control   = control,
     .reset     = audio_reset,
     .resume    = audio_resume,
-    .list_devs = list_devs,
+    .list_devs = wasapi_list_devs,
     .hotplug_init = hotplug_init,
     .hotplug_uninit = hotplug_uninit,
     .priv_size = sizeof(wasapi_state),
