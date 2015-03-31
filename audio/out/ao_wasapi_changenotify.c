@@ -127,7 +127,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDefaultDeviceChanged(
 {
     change_notify *change = (change_notify *)This;
     struct ao *ao = change->ao;
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
 
     /* don't care about "eCapture" or non-"eMultimedia" roles  */
     if (flow == eCapture || role != eMultimedia) return S_OK;
@@ -198,7 +198,7 @@ static CONST_VTBL IMMNotificationClientVtbl sIMMDeviceEnumeratorVtbl_vtbl = {
 
 HRESULT wasapi_change_init(struct ao *ao, bool is_hotplug)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     struct change_notify *change = &state->change;
     HRESULT hr;
     /* COM voodoo to emulate c++ class */
@@ -234,7 +234,7 @@ exit_label:
 
 void wasapi_change_uninit(struct ao *ao)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     struct change_notify *change = &state->change;
 
     if (state->pEnumerator && change->client.lpVtbl) {

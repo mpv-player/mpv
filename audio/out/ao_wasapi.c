@@ -70,7 +70,7 @@ exit_label:
 
 static void thread_feed(struct ao *ao)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     HRESULT hr;
 
     UINT32 frame_count = state->bufferFrameCount;
@@ -115,7 +115,7 @@ exit_label:
 
 static void thread_resume(struct ao *ao)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     HRESULT hr;
 
     MP_DBG(state, "Thread Resume\n");
@@ -142,7 +142,7 @@ static void thread_resume(struct ao *ao)
 
 static void thread_reset(struct ao *ao)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     HRESULT hr;
     MP_DBG(state, "Thread Reset\n");
     hr = IAudioClient_Stop(state->pAudioClient);
@@ -168,7 +168,7 @@ static void thread_reset(struct ao *ao)
 static DWORD __stdcall ThreadLoop(void *lpParameter)
 {
     struct ao *ao = lpParameter;
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
     state->init_ret = wasapi_thread_init(ao);
@@ -215,7 +215,7 @@ exit_label:
 
 static void closehandles(struct ao *ao)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     if (state->init_done)  CloseHandle(state->init_done);
     if (state->hUninit)    CloseHandle(state->hUninit);
     if (state->hFeed)      CloseHandle(state->hFeed);
@@ -227,7 +227,7 @@ static void closehandles(struct ao *ao)
 static void uninit(struct ao *ao)
 {
     MP_DBG(ao, "Uninit wasapi\n");
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     wasapi_release_proxies(state);
     if (state->hUninit)
         SetEvent(state->hUninit);
@@ -248,7 +248,7 @@ static int init(struct ao *ao)
     MP_DBG(ao, "Init wasapi\n");
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     state->log = ao->log;
     if(!wasapi_fill_VistaBlob(state))
         MP_WARN(ao, "Error loading thread priority functions\n");
@@ -274,7 +274,7 @@ static int init(struct ao *ao)
     }
 
     state->init_ret = E_FAIL;
-    state->threadLoop = (HANDLE) CreateThread(NULL, 0, &ThreadLoop, ao, 0, NULL);
+    state->threadLoop = CreateThread(NULL, 0, &ThreadLoop, ao, 0, NULL);
     if (!state->threadLoop) {
         /* failed to init thread */
         MP_ERR(ao, "Failed to create thread\n");
@@ -297,8 +297,8 @@ static int init(struct ao *ao)
 
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    ao_control_vol_t *vol = (ao_control_vol_t *)arg;
+    struct wasapi_state *state = ao->priv;
+    ao_control_vol_t *vol = arg;
     BOOL mute;
 
     switch (cmd) {
@@ -376,20 +376,20 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
 static void audio_reset(struct ao *ao)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     SetEvent(state->hReset);
 }
 
 static void audio_resume(struct ao *ao)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     SetEvent(state->hResume);
 }
 
 static void hotplug_uninit(struct ao *ao)
 {
     MP_DBG(ao, "Hotplug uninit\n");
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     wasapi_change_uninit(ao);
     SAFE_RELEASE(state->pEnumerator, IMMDeviceEnumerator_Release(state->pEnumerator));
     CoUninitialize();
@@ -398,7 +398,7 @@ static void hotplug_uninit(struct ao *ao)
 static int hotplug_init(struct ao *ao)
 {
     MP_DBG(ao, "Hotplug init\n");
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
                                   &IID_IMMDeviceEnumerator, (void **)&state->pEnumerator);

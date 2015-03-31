@@ -312,7 +312,7 @@ static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
 
 static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
 
     int format = format_from_waveformat(wf);
     if (!format) {
@@ -338,7 +338,7 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf)
 
 static bool try_format_exclusive(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     MP_VERBOSE(ao, "Trying %s\n", waveformat_to_str(&wformat->Format));
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 AUDCLNT_SHAREMODE_EXCLUSIVE,
@@ -424,7 +424,7 @@ static bool search_samplerates(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat,
 
 static bool search_channels(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     struct mp_chmap_sel chmap_sel = {.tmp = state};
     struct mp_chmap entry;
     // put common layouts first so that we find sample rate/format early
@@ -485,7 +485,7 @@ static bool find_formats_exclusive(struct ao *ao)
 
 static bool find_formats_shared(struct ao *ao)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
 
     WAVEFORMATEXTENSIBLE wformat;
     set_waveformat_with_ao(&wformat, ao);
@@ -535,7 +535,7 @@ static bool try_passthrough(struct ao *ao)
     // that the resulting waveformat is actually consistent with the ao
     // https://msdn.microsoft.com/en-us/library/windows/desktop/dd370811%28v=vs.85%29.aspx
     // https://msdn.microsoft.com/en-us/library/windows/desktop/dd316761(v=vs.85).aspx
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
 
     WAVEFORMATEXTENSIBLE wformat = {
         .Format = {
@@ -568,7 +568,7 @@ static bool try_passthrough(struct ao *ao)
 
 static bool find_formats(struct ao *ao)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
 
     if (state->opt_exclusive) {
         // https://msdn.microsoft.com/en-us/library/windows/desktop/dd370811%28v=vs.85%29.aspx
@@ -586,11 +586,9 @@ static bool find_formats(struct ao *ao)
 }
 
 static HRESULT init_clock(struct wasapi_state *state) {
-    HRESULT hr;
-
-    hr = IAudioClient_GetService(state->pAudioClient,
-                                 &IID_IAudioClock,
-                                 (void **)&state->pAudioClock);
+    HRESULT hr = IAudioClient_GetService(state->pAudioClient,
+                                         &IID_IAudioClock,
+                                         (void **)&state->pAudioClock);
     EXIT_ON_ERROR(hr);
     hr = IAudioClock_GetFrequency(state->pAudioClock, &state->clock_frequency);
     EXIT_ON_ERROR(hr);
@@ -610,12 +608,11 @@ exit_label:
 }
 
 static HRESULT init_session_display(struct wasapi_state *state) {
-    HRESULT hr;
     wchar_t path[MAX_PATH+12] = {0};
 
-    hr = IAudioClient_GetService(state->pAudioClient,
-                                 &IID_IAudioSessionControl,
-                                 (void **)&state->pSessionControl);
+    HRESULT hr = IAudioClient_GetService(state->pAudioClient,
+                                         &IID_IAudioSessionControl,
+                                         (void **)&state->pSessionControl);
     EXIT_ON_ERROR(hr);
 
     GetModuleFileNameW(NULL, path, MAX_PATH);
@@ -635,12 +632,11 @@ exit_label:
 
 static HRESULT fix_format(struct ao *ao)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    HRESULT hr;
+    struct wasapi_state *state = ao->priv;
 
     REFERENCE_TIME devicePeriod, bufferDuration, bufferPeriod;
     MP_DBG(state, "IAudioClient::GetDevicePeriod\n");
-    hr = IAudioClient_GetDevicePeriod(state->pAudioClient,&devicePeriod, NULL);
+    HRESULT hr = IAudioClient_GetDevicePeriod(state->pAudioClient,&devicePeriod, NULL);
     MP_VERBOSE(state, "Device period: %.2g ms\n", (double) devicePeriod / 10000.0 );
 
     /* integer multiple of device period close to 50ms */
@@ -831,7 +827,7 @@ end:
 
 void wasapi_list_devs(struct ao *ao, struct ao_device_list *list)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
     IMMDeviceCollection *pDevices = NULL;
     IMMDevice *pDevice = NULL;
     char *name = NULL, *id = NULL;
@@ -905,7 +901,7 @@ static HRESULT find_and_load_device(struct ao *ao, IMMDeviceEnumerator* pEnumera
     LPWSTR deviceID = NULL;
 
     char *end;
-    int devno = (int) strtol(search, &end, 10);
+    int devno = strtol(search, &end, 10);
 
     char *devid = NULL;
     if (end == search || *end)
@@ -1071,15 +1067,14 @@ void wasapi_dispatch(void)
 
 HRESULT wasapi_thread_init(struct ao *ao)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    HRESULT hr;
+    struct wasapi_state *state = ao->priv;
     MP_DBG(ao, "Init wasapi thread\n");
     int64_t retry_wait = 1;
 retry:
     state->initial_volume = -1.0;
 
-    hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                          &IID_IMMDeviceEnumerator, (void **)&state->pEnumerator);
+    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+                                  &IID_IMMDeviceEnumerator, (void **)&state->pEnumerator);
     EXIT_ON_ERROR(hr);
 
     char *device = state->opt_device;
@@ -1163,7 +1158,7 @@ exit_label:
 
 void wasapi_thread_uninit(struct ao *ao)
 {
-    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+    struct wasapi_state *state = ao->priv;
 
     wasapi_dispatch();
 
