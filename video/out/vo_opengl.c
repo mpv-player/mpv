@@ -238,7 +238,8 @@ static void call_request_hwdec_api(struct mp_hwdec_info *info,
 
 static bool get_and_update_icc_profile(struct gl_priv *p, int *events)
 {
-    if (p->icc_opts->profile_auto) {
+    bool has_profile = p->icc_opts->profile && p->icc_opts->profile[0];
+    if (p->icc_opts->profile_auto && !has_profile) {
         MP_VERBOSE(p, "Querying ICC profile...\n");
         bstr icc = bstr0(NULL);
         int r = mpgl_control(p->glctx, events, VOCTRL_GET_ICC_PROFILE, &icc);
