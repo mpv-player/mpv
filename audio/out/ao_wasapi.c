@@ -253,11 +253,6 @@ static int init(struct ao *ao)
     if(!wasapi_fill_VistaBlob(state))
         MP_WARN(ao, "Error loading thread priority functions\n");
 
-    if (state->opt_list) {
-        if(!wasapi_enumerate_devices(state->log, NULL, NULL))
-            MP_WARN(ao, "Error enumerating devices\n");
-    }
-
     if (state->opt_exclusive) {
         state->share_mode = AUDCLNT_SHAREMODE_EXCLUSIVE;
     } else {
@@ -412,8 +407,7 @@ static int hotplug_init(struct ao *ao)
 static void list_devs(struct ao *ao, struct ao_device_list *list)
 {
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    if(!wasapi_enumerate_devices(mp_null_log, ao, list))
-        MP_WARN(ao, "Error enumerating devices\n");
+    wasapi_enumerate_devices(ao, list);
     CoUninitialize();
 }
 
@@ -433,8 +427,7 @@ const struct ao_driver audio_out_wasapi = {
     .priv_size = sizeof(wasapi_state),
     .options   = (const struct m_option[]) {
         OPT_FLAG("exclusive", opt_exclusive, 0),
-        OPT_FLAG("list", opt_list, 0),
-        OPT_STRING_VALIDATE("device", opt_device, 0, wasapi_validate_device),
+        OPT_STRING("device", opt_device, 0),
         {NULL},
     },
 };

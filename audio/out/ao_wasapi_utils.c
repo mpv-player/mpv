@@ -20,6 +20,7 @@
 #include <math.h>
 #include <libavutil/common.h>
 #include <windows.h>
+#include <errors.h>
 #include <ksguid.h>
 #include <ksmedia.h>
 #include <audioclient.h>
@@ -96,12 +97,14 @@ const char *wasapi_explain_err(const HRESULT hr)
 #define E(x) case x : return # x ;
     switch (hr) {
     E(S_OK)
+    E(S_FALSE)
     E(E_FAIL)
     E(E_OUTOFMEMORY)
     E(E_POINTER)
     E(E_HANDLE)
     E(E_NOTIMPL)
     E(E_INVALIDARG)
+    E(E_PROP_ID_UNSUPPORTED)
     E(REGDB_E_IIDNOTREG)
     E(CO_E_NOTINITIALIZED)
     E(AUDCLNT_E_NOT_INITIALIZED)
@@ -826,94 +829,60 @@ end:
     return found;
 }
 
-// Warning: ao and list are NULL in the "--ao=wasapi:device=help" path!
-static HRESULT enumerate_with_state(struct mp_log *log, struct ao *ao,
-                                    struct ao_device_list *list,
-                                    char *header, int status, int with_id)
+HRESULT wasapi_enumerate_devices(struct ao *ao,
+                                 struct ao_device_list *list)
 {
-    HRESULT hr;
     IMMDeviceEnumerator *pEnumerator = NULL;
     IMMDeviceCollection *pDevices = NULL;
     IMMDevice *pDevice = NULL;
-    char *defid = NULL;
-
-    hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                          &IID_IMMDeviceEnumerator, (void **)&pEnumerator);
+    char *name = NULL, *id = NULL;
+    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+                                  &IID_IMMDeviceEnumerator,
+                                  (void **)&pEnumerator);
     EXIT_ON_ERROR(hr);
-
-    hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
-                                                     eRender, eMultimedia,
-                                                     &pDevice);
-    EXIT_ON_ERROR(hr);
-
-    defid = get_device_id(pDevice);
-
-    SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
 
     hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
-                                                status, &pDevices);
+                                                DEVICE_STATE_ACTIVE, &pDevices);
     EXIT_ON_ERROR(hr);
 
     int count;
-    IMMDeviceCollection_GetCount(pDevices, &count);
+    hr = IMMDeviceCollection_GetCount(pDevices, &count);
+    EXIT_ON_ERROR(hr);
     if (count > 0)
-        mp_info(log, "%s\n", header);
+        MP_VERBOSE(ao, "Output devices:\n");
 
     for (int i = 0; i < count; i++) {
         hr = IMMDeviceCollection_Item(pDevices, i, &pDevice);
         EXIT_ON_ERROR(hr);
 
-        char *name = get_device_name(pDevice);
-        char *id = get_device_id(pDevice);
-
-        char *mark = "";
-        if (strcmp(id, defid) == 0)
-            mark = " (default)";
-
-        if (with_id) {
-            mp_info(log, "Device #%d: %s, ID: %s%s\n", i, name, id, mark);
-        } else {
-            mp_info(log, "%s, ID: %s%s\n", name, id, mark);
+        name = get_device_name(pDevice);
+        id = get_device_id(pDevice);
+        if (!id) {
+            hr = E_FAIL;
+            EXIT_ON_ERROR(hr);
         }
+        char *safe_name = name ? name : "";
+        ao_device_list_add(list, ao, &(struct ao_device_desc){id, safe_name});
 
-        if (ao) {
-            char *desc = talloc_asprintf(NULL, "%s, ID: %s%s", name, id, mark);
-            struct ao_device_desc e = {id, desc};
-            ao_device_list_add(list, ao, &e);
-        }
+        MP_VERBOSE(ao, "#%d, GUID: \'%s\', name: \'%s\'\n", i, id, safe_name);
 
         talloc_free(name);
         talloc_free(id);
         SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
     }
-    talloc_free(defid);
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
     SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
 
     return S_OK;
 exit_label:
-    talloc_free(defid);
+    MP_ERR(ao, "Error enumerating devices: %s (0x%"PRIx32")\n",
+           wasapi_explain_err(hr), (uint32_t) hr);
+    talloc_free(name);
+    talloc_free(id);
     SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
     SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
     return hr;
-}
-
-bool wasapi_enumerate_devices(struct mp_log *log, struct ao *ao,
-                             struct ao_device_list *list)
-{
-    HRESULT hr;
-    hr = enumerate_with_state(log, ao, list, "Active devices:",
-                              DEVICE_STATE_ACTIVE, 1);
-    EXIT_ON_ERROR(hr);
-    hr = enumerate_with_state(log, ao, list, "Unplugged devices:",
-                              DEVICE_STATE_UNPLUGGED, 0);
-    EXIT_ON_ERROR(hr);
-    return true;
-exit_label:
-    mp_err(log, "Error enumerating devices: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t) hr);
-    return false;
 }
 
 static HRESULT load_default_device(struct ao *ao, IMMDeviceEnumerator* pEnumerator,
@@ -1041,27 +1010,6 @@ exit_label:
 
     CoTaskMemFree(deviceID);
     return hr;
-}
-
-int wasapi_validate_device(struct mp_log *log, const m_option_t *opt,
-                           struct bstr name, struct bstr param)
-{
-    if (bstr_equals0(param, "help")) {
-        wasapi_enumerate_devices(log, NULL, NULL);
-        return M_OPT_EXIT;
-    }
-
-    mp_dbg(log, "Validating device=%s\n", param.start);
-
-    char *end;
-    int devno = (int) strtol(param.start, &end, 10);
-
-    int ret = 1;
-    if ((end == (void *)param.start || *end) && devno < 0)
-        ret = M_OPT_OUT_OF_RANGE;
-
-    mp_dbg(log, "device=%s %svalid\n", param.start, ret == 1 ? "" : "not ");
-    return ret;
 }
 
 HRESULT wasapi_setup_proxies(struct wasapi_state *state) {

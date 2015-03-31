@@ -302,19 +302,19 @@ Available audio output drivers are:
 ``wasapi``
     Audio output to the Windows Audio Session API.
 
-    ``device=<id>``
-        Uses the requested endpoint instead of the system's default audio
-        endpoint. Both the number and the ID String are valid; the ID String
-        is guaranteed to not change unless the driver is uninstalled.
-
-        Also supports searching active devices by name. If more than one
-        device matches the name, refuses loading it.
-
-        To get a list of the valid devices, give ``help`` as the id. The
-        list is the same as the ``list`` suboption, but stops the player
-        initialization.
     ``exclusive``
         Requests exclusive, direct hardware access. By definition prevents
         sound playback of any other program until mpv exits.
-    ``list``
-        Lists all audio endpoints (output devices) present in the system.
+    ``device=<id>``
+        Uses the requested endpoint instead of the system's default audio
+        endpoint. Both an ordinal number (0,1,2,...) and the GUID
+        String are valid; the GUID string is guaranteed to not change
+        unless the driver is uninstalled.
+
+        Also supports searching active devices by human readable name. If more
+        than one device matches the name, refuses loading it.
+
+        This option is mostly deprecated in favour of the more general
+        ``--audio-device`` option. That said, ``--audio-device=help`` will give
+        a list of valid device GUIDs (prefixed with ``wasapi/``), as well as
+        their human readable names, which should work here.
