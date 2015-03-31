@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
 
 #include <libavutil/common.h>
 
@@ -251,7 +252,8 @@ static void probe_softvol(struct mixer *mixer)
 {
     bool ao_perapp = ao_control(mixer->ao, AOCONTROL_HAS_PER_APP_VOLUME, 0) == 1;
     bool ao_softvol = ao_control(mixer->ao, AOCONTROL_HAS_SOFT_VOLUME, 0) == 1;
-    mixer->persistent_volume = !ao_softvol || ao_perapp;
+    assert(!(ao_perapp && ao_softvol));
+    mixer->persistent_volume = !ao_softvol;
 
     if (mixer->opts->softvol == SOFTVOL_AUTO) {
         // No system-wide volume => fine with AO volume control.
