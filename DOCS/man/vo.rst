@@ -732,8 +732,8 @@ Available video output drivers are:
     ``icc-profile=<file>``
         Load an ICC profile and use it to transform linear RGB to screen output.
         Needs LittleCMS 2 support compiled in. This option overrides the
-        ``target-prim`` and ``target-trc`` options. It also enables
-        ``linear-scaling``.
+        ``target-prim``, ``target-trc`` and ``icc-profile-auto`` options. It
+        also enables ``linear-scaling``.
 
     ``icc-profile-auto``
         Automatically select the ICC display profile currently specified by
