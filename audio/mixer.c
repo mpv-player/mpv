@@ -89,6 +89,7 @@ static void checkvolume(struct mixer *mixer)
         vol.left = (gain / (mixer->opts->softvol_max / 100.0)) * 100.0;
         vol.right = (gain / (mixer->opts->softvol_max / 100.0)) * 100.0;
     } else {
+        MP_DBG(mixer, "Reading volume from AO.\n");
         // Rely on the values not changing if the query is not supported
         ao_control(mixer->ao, AOCONTROL_GET_VOLUME, &vol);
         ao_control(mixer->ao, AOCONTROL_GET_MUTE, &mixer->muted);
@@ -124,6 +125,7 @@ static void setvolume_internal(struct mixer *mixer, float l, float r)
 {
     struct ao_control_vol vol = {.left = l, .right = r};
     if (!mixer->softvol) {
+        MP_DBG(mixer, "Setting volume on AO.\n");
         if (ao_control(mixer->ao, AOCONTROL_SET_VOLUME, &vol) != CONTROL_OK)
             MP_ERR(mixer, "Failed to change audio output volume.\n");
         return;
@@ -252,13 +254,14 @@ static void probe_softvol(struct mixer *mixer)
     mixer->ao_softvol = mixer->ao_perapp ||
         ao_control(mixer->ao, AOCONTROL_HAS_SOFT_VOLUME, 0) == 1;
 
-
     if (mixer->opts->softvol == SOFTVOL_AUTO) {
         // No system-wide volume => fine with AO volume control.
         mixer->softvol = !mixer->ao_softvol;
     } else {
         mixer->softvol = mixer->opts->softvol == SOFTVOL_YES;
     }
+
+    MP_DBG(mixer, "Will use af_volume: %s\n", mixer->softvol ? "yes" : "no");
 
     // If we can't use real volume control => force softvol.
     if (!mixer->softvol) {
@@ -319,6 +322,7 @@ static void restore_volume(struct mixer *mixer)
                 force_vol_l = v_l;
                 force_vol_r = v_r;
                 force_mute = !!m;
+                MP_DBG(mixer, "Restoring volume from resume config.\n");
             }
         }
         talloc_free(mixer->opts->mixer_restore_volume_data);
@@ -334,10 +338,14 @@ static void restore_volume(struct mixer *mixer)
     opts->mixer_init_mute = -1;
 
     checkvolume(mixer);
-    if (force_vol_l >= 0 && force_vol_r >= 0)
+    if (force_vol_l >= 0 && force_vol_r >= 0) {
+        MP_DBG(mixer, "Restoring previous volume.\n");
         mixer_setvolume(mixer, force_vol_l, force_vol_r);
-    if (force_mute >= 0)
+    }
+    if (force_mute >= 0) {
+        MP_DBG(mixer, "Restoring previous mute toggle.\n");
         mixer_setmute(mixer, force_mute);
+    }
 }
 
 // Called after the audio filter chain is built or rebuilt.
@@ -348,6 +356,8 @@ void mixer_reinit_audio(struct mixer *mixer, struct ao *ao, struct af_stream *af
         return;
     mixer->ao = ao;
     mixer->af = af;
+
+    MP_DBG(mixer, "Reinit...\n");
 
     probe_softvol(mixer);
     restore_volume(mixer);
@@ -365,8 +375,11 @@ void mixer_uninit_audio(struct mixer *mixer)
     if (!mixer->ao)
         return;
 
+    MP_DBG(mixer, "Uninit...\n");
+
     checkvolume(mixer);
     if (mixer->muted_by_us && !mixer->softvol && !mixer->ao_softvol) {
+        MP_DBG(mixer, "Draining.\n");
         /* Current audio output API combines playing the remaining buffered
          * audio and uninitializing the AO into one operation, even though
          * ideally unmute would happen between those two steps. We can't do
