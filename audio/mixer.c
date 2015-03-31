@@ -131,6 +131,8 @@ static void setvolume_internal(struct mixer *mixer, float l, float r)
     }
     float gain = (l + r) / 2.0 / 100.0 * mixer->opts->softvol_max / 100.0;
     if (!af_control_any_rev(mixer->af, AF_CONTROL_SET_VOLUME, &gain)) {
+        if (gain == 1.0)
+            return;
         MP_VERBOSE(mixer, "Inserting volume filter.\n");
         if (!(af_add(mixer->af, "volume", NULL)
               && af_control_any_rev(mixer->af, AF_CONTROL_SET_VOLUME, &gain)))
@@ -141,8 +143,7 @@ static void setvolume_internal(struct mixer *mixer, float l, float r)
 void mixer_setvolume(struct mixer *mixer, float l, float r)
 {
     checkvolume(mixer);  // to check mute status
-    if (mixer->vol_l == l && mixer->vol_r == r)
-        return; // just prevent af_volume insertion when not needed
+
     mixer->vol_l = av_clipf(l, 0, 100);
     mixer->vol_r = av_clipf(r, 0, 100);
     if (mixer->ao && !(mixer->emulate_mute && mixer->muted))
