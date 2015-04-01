@@ -200,6 +200,10 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
 
     av_opt_set_double(s->avrctx, "cutoff",          s->ctx.cutoff, 0);
 
+#if HAVE_LIBSWRESAMPLE
+    av_opt_set_double(s->avrctx, "rematrix_maxval", 1.0, 0);
+#endif
+
     if (mp_set_avopts(af->log, s->avrctx, s->avopts) < 0)
         return AF_ERROR;
 
