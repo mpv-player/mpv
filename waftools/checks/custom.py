@@ -54,7 +54,7 @@ def check_lua(ctx, dependency_identifier):
         ( '51',     'lua >= 5.1.0 lua < 5.2.0'),
         ( '51deb',  'lua5.1 >= 5.1.0'), # debian
         ( '51fbsd', 'lua-5.1 >= 5.1.0'), # FreeBSD
-        ( '52',     'lua >= 5.2.0' ),
+        ( '52',     'lua >= 5.2.0 lua < 5.3.0' ),
         ( '52deb',  'lua5.2 >= 5.2.0'), # debian
         ( '52fbsd', 'lua-5.2 >= 5.2.0'), # FreeBSD
         ( 'luajit', 'luajit >= 2.0.0' ),

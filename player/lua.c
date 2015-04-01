@@ -377,6 +377,11 @@ static int load_lua(struct mpv_handle *client, const char *fname)
         .filename = fname,
     };
 
+    if (LUA_VERSION_NUM != 501 && LUA_VERSION_NUM != 502) {
+        MP_FATAL(ctx, "Only Lua 5.1 and 5.2 are supported.\n");
+        goto error_out;
+    }
+
     lua_State *L = ctx->state = luaL_newstate();
     if (!L)
         goto error_out;
