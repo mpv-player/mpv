@@ -2014,13 +2014,9 @@ static char *print_geometry(const m_option_t *opt, const void *val)
             APPEND_PER(h, h_per);
         }
         if (gm->xy_valid) {
-            res = talloc_asprintf_append(res, "+");
-            if (gm->x_sign)
-                res = talloc_asprintf_append(res, "-");
+            res = talloc_asprintf_append(res, gm->x_sign ? "-" : "+");
             APPEND_PER(x, x_per);
-            res = talloc_asprintf_append(res, "+");
-            if (gm->y_sign)
-                res = talloc_asprintf_append(res, "-");
+            res = talloc_asprintf_append(res, gm->y_sign ? "-" : "+");
             APPEND_PER(y, y_per);
         }
     }
