@@ -59,6 +59,7 @@ static const m_option_t style_opts[] = {
     OPT_CHOICE("align-y", align_y, 0,
                ({"top", -1}, {"center", 0}, {"bottom", +1})),
     OPT_FLOATRANGE("blur", blur, 0, 0, 20),
+    OPT_FLAG("bold", bold, 0),
     {0}
 };
 

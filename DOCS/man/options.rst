@@ -2405,6 +2405,9 @@ OSD
 ``--osd-blur=<0..20.0>``, ``--sub-text-blur=<0..20.0>``
     Gaussian blur factor. 0 means no blur applied (default).
 
+``--osd-bold=<yes|no>``, ``--sub-text-bold=<yes|no>``
+    Format text on bold.
+
 ``--osd-border-color=<color>``, ``--sub-text-border-color=<color>``
     See ``--osd-color``. Color used for the OSD/sub font border.
 

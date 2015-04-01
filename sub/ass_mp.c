@@ -74,6 +74,7 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
     style->ScaleY = 1.;
     style->Alignment = 1 + (opts->align_x + 1) + (opts->align_y + 2) % 3 * 4;
     style->Blur = opts->blur;
+    style->Bold = opts->bold;
 }
 
 // Add default styles, if the track does not have any styles yet.
