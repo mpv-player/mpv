@@ -313,6 +313,13 @@ static int cfg_include(void *ctx, char *filename, int flags)
     return r;
 }
 
+static void add_default_profiles(struct m_config *cfg)
+{
+    struct m_profile *ui = m_config_add_profile(cfg, "pseudo-gui");
+    m_config_set_profile_option(cfg, ui, bstr0("terminal"), bstr0("no"));
+    m_config_set_profile_option(cfg, ui, bstr0("force-window"), bstr0("yes"));
+}
+
 struct MPContext *mp_create(void)
 {
     mp_time_init();
@@ -346,6 +353,7 @@ struct MPContext *mp_create(void)
     mpctx->mconfig->includefunc_ctx = mpctx;
     mpctx->mconfig->use_profiles = true;
     mpctx->mconfig->is_toplevel = true;
+    add_default_profiles(mpctx->mconfig);
 
     mpctx->global->opts = mpctx->opts;
 

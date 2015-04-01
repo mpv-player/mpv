@@ -24,7 +24,7 @@ Comment[zh-CN]=播放电影和歌曲
 Comment[zh-TW]=播放電影和歌曲
 Icon=mpv
 TryExec=mpv
-Exec=mpv --no-terminal --force-window -- %U
+Exec=mpv --profile=pseudo-gui -- %U
 Terminal=false
 NoDisplay=true
 Categories=AudioVideo;Audio;Video;Player;TV;
