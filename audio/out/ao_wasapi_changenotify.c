@@ -227,7 +227,7 @@ HRESULT wasapi_change_init(struct ao *ao, bool is_hotplug)
     return hr;
 exit_label:
     MP_ERR(state, "Error setting up device change monitoring: %s\n",
-           wasapi_explain_err(hr));
+           mp_HRESULT_to_str(hr));
     wasapi_change_uninit(ao);
     return hr;
 }

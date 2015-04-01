@@ -29,12 +29,12 @@
 
 char *mp_GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid);
 char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey);
+char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr);
 #define mp_GUID_to_str(guid) mp_GUID_to_str_buf((char[40]){0}, 40, (guid))
 #define mp_PKEY_to_str(pkey) mp_PKEY_to_str_buf((char[42]){0}, 42, (pkey))
+#define mp_HRESULT_to_str(hr) mp_HRESULT_to_str_buf((char[60]){0}, 60, (hr))
 
 bool wasapi_fill_VistaBlob(wasapi_state *state);
-
-const char *wasapi_explain_err(const HRESULT hr);
 
 void wasapi_list_devs(struct ao *ao, struct ao_device_list *list);
 

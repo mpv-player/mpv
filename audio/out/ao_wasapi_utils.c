@@ -63,36 +63,7 @@ char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey)
     return buf;
 }
 
-bool wasapi_fill_VistaBlob(wasapi_state *state)
-{
-    if (!state)
-        goto exit_label;
-    state->VistaBlob.hAvrt = LoadLibraryW(L"avrt.dll");
-    if (!state->VistaBlob.hAvrt)
-        goto exit_label;
-
-    state->VistaBlob.pAvSetMmThreadCharacteristicsW =
-        (HANDLE (WINAPI *)(LPCWSTR, LPDWORD))
-        GetProcAddress(state->VistaBlob.hAvrt, "AvSetMmThreadCharacteristicsW");
-    if (!state->VistaBlob.pAvSetMmThreadCharacteristicsW)
-        goto exit_label;
-
-    state->VistaBlob.pAvRevertMmThreadCharacteristics =
-        (WINBOOL (WINAPI *)(HANDLE))
-        GetProcAddress(state->VistaBlob.hAvrt, "AvRevertMmThreadCharacteristics");
-    if (!state->VistaBlob.pAvRevertMmThreadCharacteristics)
-        goto exit_label;
-
-    return true;
-exit_label:
-    if (state->VistaBlob.hAvrt) {
-        FreeLibrary(state->VistaBlob.hAvrt);
-        state->VistaBlob.hAvrt = NULL;
-    }
-    return false;
-}
-
-const char *wasapi_explain_err(const HRESULT hr)
+static char *wasapi_explain_err(const HRESULT hr)
 {
 #define E(x) case x : return # x ;
     switch (hr) {
@@ -142,6 +113,42 @@ const char *wasapi_explain_err(const HRESULT hr)
         return "<Unknown>";
     }
 #undef E
+}
+
+char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr)
+{
+    snprintf(buf,buf_size,"%s (0x%"PRIx32")",
+             wasapi_explain_err(hr), (uint32_t) hr);
+    return buf;
+}
+
+bool wasapi_fill_VistaBlob(wasapi_state *state)
+{
+    if (!state)
+        goto exit_label;
+    state->VistaBlob.hAvrt = LoadLibraryW(L"avrt.dll");
+    if (!state->VistaBlob.hAvrt)
+        goto exit_label;
+
+    state->VistaBlob.pAvSetMmThreadCharacteristicsW =
+        (HANDLE (WINAPI *)(LPCWSTR, LPDWORD))
+        GetProcAddress(state->VistaBlob.hAvrt, "AvSetMmThreadCharacteristicsW");
+    if (!state->VistaBlob.pAvSetMmThreadCharacteristicsW)
+        goto exit_label;
+
+    state->VistaBlob.pAvRevertMmThreadCharacteristics =
+        (WINBOOL (WINAPI *)(HANDLE))
+        GetProcAddress(state->VistaBlob.hAvrt, "AvRevertMmThreadCharacteristics");
+    if (!state->VistaBlob.pAvRevertMmThreadCharacteristics)
+        goto exit_label;
+
+    return true;
+exit_label:
+    if (state->VistaBlob.hAvrt) {
+        FreeLibrary(state->VistaBlob.hAvrt);
+        state->VistaBlob.hAvrt = NULL;
+    }
+    return false;
 }
 
 static void update_waveformat_datarate_pcm(WAVEFORMATEXTENSIBLE *wformat)
@@ -348,8 +355,7 @@ static bool try_format_exclusive(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
 
     return hr == S_OK;
 exit_label:
-    MP_ERR(state, "Error testing exclusive format: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t) hr);
+    MP_ERR(state, "Error testing exclusive format: %s\n", mp_HRESULT_to_str(hr));
     return false;
 }
 
@@ -524,8 +530,7 @@ static bool find_formats_shared(struct ao *ao)
                af_fmt_to_str(ao->format), ao->samplerate);
     return true;
 exit_label:
-    MP_ERR(state, "Error finding shared mode format: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t) hr);
+    MP_ERR(state, "Error finding shared mode format: %s\n", mp_HRESULT_to_str(hr));
     return false;
 }
 
@@ -602,8 +607,8 @@ static HRESULT init_clock(struct wasapi_state *state) {
 
     return S_OK;
 exit_label:
-    MP_ERR(state, "Error obtaining the audio device's timing: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t) hr);
+    MP_ERR(state, "Error obtaining the audio device's timing: %s\n",
+           mp_HRESULT_to_str(hr));
     return hr;
 }
 
@@ -625,8 +630,8 @@ static HRESULT init_session_display(struct wasapi_state *state) {
 
     return S_OK;
 exit_label:
-    MP_WARN(state, "Error setting audio session display name: %s (0x%"PRIx32")\n",
-            wasapi_explain_err(hr), (uint32_t) hr);
+    MP_WARN(state, "Error setting audio session display name: %s\n",
+            mp_HRESULT_to_str(hr));
     return S_OK; // No reason to abort initialization.
 }
 
@@ -665,8 +670,8 @@ reinit:
         } else {
             retries ++;
         }
-        MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s (0x%"PRIx32"), used %lld * 100ns\n",
-                   wasapi_explain_err(hr), (uint32_t) hr, bufferDuration);
+        MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s, used %lld * 100ns\n",
+                   mp_HRESULT_to_str(hr), bufferDuration);
 
         IAudioClient_GetBufferSize(state->pAudioClient, &state->bufferFrameCount);
         bufferPeriod = bufferDuration =
@@ -729,8 +734,7 @@ reinit:
 
     return S_OK;
 exit_label:
-    MP_ERR(state, "Error initializing device: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t) hr);
+    MP_ERR(state, "Error initializing device: %s\n", mp_HRESULT_to_str(hr));
     return hr;
 }
 
@@ -865,8 +869,7 @@ void wasapi_list_devs(struct ao *ao, struct ao_device_list *list)
 
     return;
 exit_label:
-    MP_ERR(ao, "Error enumerating devices: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t) hr);
+    MP_ERR(ao, "Error enumerating devices: %s\n", mp_HRESULT_to_str(hr));
     talloc_free(name);
     talloc_free(id);
     SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
@@ -887,8 +890,7 @@ static HRESULT load_default_device(struct ao *ao, IMMDeviceEnumerator* pEnumerat
 
     return S_OK;
 exit_label:
-    MP_ERR(ao , "Error loading default device: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t) hr);
+    MP_ERR(ao , "Error loading default device: %s\n", mp_HRESULT_to_str(hr));
     return hr;
 }
 
@@ -1017,8 +1019,7 @@ HRESULT wasapi_setup_proxies(struct wasapi_state *state) {
 
     return S_OK;
 exit_label:
-    MP_ERR(state, "Error reading COM proxy: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t) hr);
+    MP_ERR(state, "Error reading COM proxy: %s\n", mp_HRESULT_to_str(hr));
     return hr;
 }
 
@@ -1046,8 +1047,7 @@ static HRESULT create_proxies(struct wasapi_state *state) {
 
     return S_OK;
 exit_label:
-    MP_ERR(state, "Error creating COM proxy: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t) hr);
+    MP_ERR(state, "Error creating COM proxy: %s\n", mp_HRESULT_to_str(hr));
     return hr;
 }
 
@@ -1108,8 +1108,8 @@ retry:
     hr = IAudioEndpointVolume_QueryHardwareSupport(state->pEndpointVolume,
                                                    &state->vol_hw_support);
     if (hr != S_OK) {
-        MP_WARN(ao, "Error querying hardware volume control: %s (0x%"PRIx32")\n",
-                wasapi_explain_err(hr), (uint32_t) hr);
+        MP_WARN(ao, "Error querying hardware volume control: %s\n",
+                mp_HRESULT_to_str(hr));
     }
 
     MP_DBG(ao, "Probing formats\n");
@@ -1151,8 +1151,7 @@ retry:
     MP_DBG(ao, "Init wasapi thread done\n");
     return S_OK;
 exit_label:
-    MP_ERR(state, "Error setting up audio thread: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t) hr);
+    MP_ERR(state, "Error setting up audio thread: %s\n", mp_HRESULT_to_str(hr));
     return hr;
 }
 

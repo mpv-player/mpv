@@ -63,8 +63,7 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay) {
 
     return S_OK;
 exit_label:
-    MP_ERR(state, "Error getting device delay: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t) hr);
+    MP_ERR(state, "Error getting device delay: %s\n", mp_HRESULT_to_str(hr));
     return hr;
 }
 
@@ -106,8 +105,7 @@ static void thread_feed(struct ao *ao)
 
     return;
 exit_label:
-    MP_ERR(state, "Error feeding audio: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t) hr);
+    MP_ERR(state, "Error feeding audio: %s\n", mp_HRESULT_to_str(hr));
     MP_VERBOSE(ao, "Requesting ao reload\n");
     ao_request_reload(ao);
     return;
@@ -122,8 +120,8 @@ static void thread_resume(struct ao *ao)
     UINT32 padding = 0;
     hr = IAudioClient_GetCurrentPadding(state->pAudioClient, &padding);
     if (hr != S_OK) {
-        MP_ERR(state, "IAudioClient_GetCurrentPadding returned %s (0x%"PRIx32")\n",
-               wasapi_explain_err(hr), (uint32_t) hr);
+        MP_ERR(state, "IAudioClient_GetCurrentPadding returned %s\n",
+               mp_HRESULT_to_str(hr));
     }
 
     /* Fill the buffer before starting, but only if there is no audio queued to play. */
@@ -132,10 +130,8 @@ static void thread_resume(struct ao *ao)
         thread_feed(ao);
 
     hr = IAudioClient_Start(state->pAudioClient);
-    if (hr != S_OK) {
-        MP_ERR(state, "IAudioClient_Start returned %s (0x%"PRIx32")\n",
-               wasapi_explain_err(hr), (uint32_t) hr);
-    }
+    if (hr != S_OK)
+        MP_ERR(state, "IAudioClient_Start returned %s\n", mp_HRESULT_to_str(hr));
 
     return;
 }
@@ -147,19 +143,13 @@ static void thread_reset(struct ao *ao)
     MP_DBG(state, "Thread Reset\n");
     hr = IAudioClient_Stop(state->pAudioClient);
     /* we may get S_FALSE if the stream is already stopped */
-    if (hr != S_OK &&
-        hr != S_FALSE) {
-        MP_ERR(state, "IAudioClient_Stop returned: %s (0x%"PRIx32")\n",
-               wasapi_explain_err(hr), (uint32_t) hr);
-    }
+    if (hr != S_OK && hr != S_FALSE)
+        MP_ERR(state, "IAudioClient_Stop returned: %s\n", mp_HRESULT_to_str(hr));
 
     /* we may get S_FALSE if the stream is already reset */
     hr = IAudioClient_Reset(state->pAudioClient);
-    if (hr != S_OK &&
-        hr != S_FALSE) {
-        MP_ERR(state, "IAudioClient_Reset returned: %s (0x%"PRIx32")\n",
-               wasapi_explain_err(hr), (uint32_t) hr);
-    }
+    if (hr != S_OK && hr != S_FALSE)
+        MP_ERR(state, "IAudioClient_Reset returned: %s\n", mp_HRESULT_to_str(hr));
 
     atomic_store(&state->sample_count, 0);
     return;
@@ -408,8 +398,7 @@ static int hotplug_init(struct ao *ao)
 
     return 0;
     exit_label:
-    MP_ERR(state, "Error setting up audio hotplug: %s (0x%"PRIx32")\n",
-           wasapi_explain_err(hr), (uint32_t) hr);
+    MP_ERR(state, "Error setting up audio hotplug: %s\n", mp_HRESULT_to_str(hr));
     hotplug_uninit(ao);
     return -1;
 }
