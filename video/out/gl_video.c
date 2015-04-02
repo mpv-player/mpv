@@ -418,10 +418,6 @@ const struct m_sub_options gl_video_conf = {
                    ({"fruit", 0}, {"ordered", 1}, {"no", -1})),
         OPT_INTRANGE("dither-size-fruit", dither_size, 0, 2, 8),
         OPT_FLAG("temporal-dither", temporal_dither, 0),
-        OPT_CHOICE("chroma-location", chroma_location, 0,
-                   ({"auto",   MP_CHROMA_AUTO},
-                    {"center", MP_CHROMA_CENTER},
-                    {"left",   MP_CHROMA_LEFT})),
         OPT_CHOICE("alpha", alpha_mode, 0,
                    ({"no", 0},
                     {"yes", 1},
@@ -612,12 +608,9 @@ static void pass_set_image_textures(struct gl_video *p, struct video_image *vimg
     float ls_w = 1.0 / (1 << p->image_desc.chroma_xs);
     float ls_h = 1.0 / (1 << p->image_desc.chroma_ys);
 
-    int chroma_loc = p->opts.chroma_location;
-    if (!chroma_loc)
-        chroma_loc = p->image_params.chroma_location;
-    if (chroma_loc != MP_CHROMA_CENTER) {
+    if (p->image_params.chroma_location != MP_CHROMA_CENTER) {
         int cx, cy;
-        mp_get_chroma_location(chroma_loc, &cx, &cy);
+        mp_get_chroma_location(p->image_params.chroma_location, &cx, &cy);
         // By default texture coordinates are such that chroma is centered with
         // any chroma subsampling. If a specific direction is given, make it
         // so that the luma and chroma sample line up exactly.

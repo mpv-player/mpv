@@ -685,10 +685,6 @@ Available video output drivers are:
         no
             Ignore alpha component.
 
-    ``chroma-location=<auto|center|left>``
-        Set the YUV chroma sample location. auto means use the bitstream
-        flags (default: auto).
-
     ``rectangle-textures``
         Force use of rectangle textures (default: no). Normally this shouldn't
         have any advantages over normal textures. Note that hardware decoding
