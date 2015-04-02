@@ -310,6 +310,10 @@ Available filters are:
         Set the stereo mode the video should be displayed as. Takes the
         same values as the ``--video-stereo-mode`` option.
 
+    ``<rotate>``
+        Set the rotation the video is assumed to be encoded with in degrees.
+        The special value ``-1`` uses the input format.
+
 
 ``noformat[=fmt]``
     Restricts the color space for the next filter without doing any conversion.
