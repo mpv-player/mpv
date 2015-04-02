@@ -38,6 +38,8 @@ struct vf_priv_s {
     int outputlevels;
     int primaries;
     int chroma_location;
+    int stereo_in;
+    int stereo_out;
 };
 
 static bool is_compatible(int fmt1, int fmt2)
@@ -90,6 +92,10 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         out->primaries = p->primaries;
     if (p->chroma_location)
         out->chroma_location = p->chroma_location;
+    if (p->stereo_in)
+        out->stereo_in = p->stereo_in;
+    if (p->stereo_out)
+        out->stereo_out = p->stereo_out;
 
     // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.).
     mp_image_params_guess_csp(out);
@@ -121,6 +127,8 @@ static const m_option_t vf_opts_fields[] = {
     OPT_CHOICE_C("outputlevels", outputlevels, 0, mp_csp_levels_names),
     OPT_CHOICE_C("primaries", primaries, 0, mp_csp_prim_names),
     OPT_CHOICE_C("chroma-location", chroma_location, 0, mp_chroma_names),
+    OPT_CHOICE_C("stereo-in", stereo_in, 0, mp_stereo3d_names),
+    OPT_CHOICE_C("stereo-out", stereo_out, 0, mp_stereo3d_names),
     {0}
 };
 

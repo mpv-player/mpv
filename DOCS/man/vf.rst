@@ -302,6 +302,14 @@ Available filters are:
         :bt.709:       ITU-R BT.709 (HD) (same primaries as sRGB)
         :bt.2020:      ITU-R BT.2020 (UHD)
 
+    ``<stereo-in>``
+        Set the stereo mode the video is assumed to be encoded in. Takes the
+        same values as the ``--video-stereo-mode`` option.
+
+    ``<stereo-out>``
+        Set the stereo mode the video should be displayed as. Takes the
+        same values as the ``--video-stereo-mode`` option.
+
 
 ``noformat[=fmt]``
     Restricts the color space for the next filter without doing any conversion.
