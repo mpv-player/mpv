@@ -243,12 +243,6 @@ static int init(struct ao *ao)
     if(!wasapi_fill_VistaBlob(state))
         MP_WARN(ao, "Error loading thread priority functions\n");
 
-    if (state->opt_exclusive) {
-        state->share_mode = AUDCLNT_SHAREMODE_EXCLUSIVE;
-    } else {
-        state->share_mode = AUDCLNT_SHAREMODE_SHARED;
-    }
-
     state->init_done = CreateEventW(NULL, FALSE, FALSE, NULL);
     state->hUninit = CreateEventW(NULL, FALSE, FALSE, NULL);
     state->hFeed = CreateEventW(NULL, FALSE, FALSE, NULL); /* for wasapi event mode */
