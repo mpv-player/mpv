@@ -19,7 +19,7 @@ static const char *const sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "sr
                                        "js", "ass", "mks", "vtt", NULL};
 
 static const char *const audio_exts[] = {"mp3", "aac", "mka", "dts", "flac",
-                                         "ogg", "m4a", NULL};
+                                         "ogg", "m4a", "ac3", NULL};
 
 static bool test_ext_list(bstr ext, const char *const *list)
 {
