@@ -314,6 +314,11 @@ Available filters are:
         Set the rotation the video is assumed to be encoded with in degrees.
         The special value ``-1`` uses the input format.
 
+    ``<dw>``, ``<dh>``
+        Set the display size. Note that setting the display size such that
+        the video is scaled in both directions instead of just changing the
+        aspect ratio is an implementation detail, and might change later.
+
 
 ``noformat[=fmt]``
     Restricts the color space for the next filter without doing any conversion.
