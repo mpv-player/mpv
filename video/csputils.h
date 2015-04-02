@@ -104,10 +104,10 @@ enum mp_stereo3d_mode {
     MP_STEREO3D_COUNT = 13, // 12 is last valid mode
 };
 
-extern const char *const mp_stereo3d_names[MP_STEREO3D_COUNT];
+extern const struct m_opt_choice_alternatives mp_stereo3d_names[];
 
-#define MP_STEREO3D_NAME(x) \
-    ((x) >= 0 && (x) < MP_STEREO3D_COUNT ? (char *)mp_stereo3d_names[(x)] : NULL)
+#define MP_STEREO3D_NAME(x) m_opt_choice_str(mp_stereo3d_names, x)
+
 #define MP_STEREO3D_NAME_DEF(x, def) \
     (MP_STEREO3D_NAME(x) ? MP_STEREO3D_NAME(x) : (def))
 

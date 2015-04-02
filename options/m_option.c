@@ -2162,59 +2162,6 @@ const m_option_type_t m_option_type_imgfmt = {
     .copy  = copy_opt,
 };
 
-#include "video/csputils.h"
-
-static int parse_stereo_mode(struct mp_log *log, const m_option_t *opt,
-                             struct bstr name, struct bstr param, void *dst)
-{
-    if (param.len == 0)
-        return M_OPT_MISSING_PARAM;
-
-    if (!bstrcmp0(param, "help")) {
-        mp_info(log, "Available modes:");
-        for (int n = 0; n < MP_STEREO3D_COUNT; n++) {
-            if (mp_stereo3d_names[n])
-                mp_info(log, " %s\n", mp_stereo3d_names[n]);
-        }
-        mp_info(log, " none\n");
-        return M_OPT_EXIT - 1;
-    }
-
-    int mode = -1;
-
-    for (int n = 0; n < MP_STEREO3D_COUNT; n++) {
-        if (bstr_equals(param, bstr0(mp_stereo3d_names[n]))) {
-            mode = n;
-            break;
-        }
-    }
-
-    if (mode < 0 && !bstr_equals0(param, "none")) {
-        mp_err(log, "Option %.*s: unknown parameter: '%.*s'\n",
-               BSTR_P(name), BSTR_P(param));
-        return M_OPT_INVALID;
-    }
-
-    if (dst)
-        *((int *)dst) = mode;
-
-    return 1;
-}
-
-static char *print_stereo_mode(const m_option_t *opt, const void *val)
-{
-    int mode = *(int *)val;
-    const char *name = mode >= 0 ? MP_STEREO3D_NAME(mode) : "none";
-    return talloc_strdup(NULL, name);
-}
-
-const m_option_type_t m_option_vid_stereo_mode = {
-    .name  = "Stereo 3D mode",
-    .size  = sizeof(int),
-    .parse = parse_stereo_mode,
-    .print = print_stereo_mode,
-};
-
 static int parse_fourcc(struct mp_log *log, const m_option_t *opt,
                         struct bstr name, struct bstr param, void *dst)
 {

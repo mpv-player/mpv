@@ -468,7 +468,7 @@ static const char *rev_map_name(int val)
 }
 
 // Extremely stupid; can be dropped when the internal filter is dropped,
-// and OPT_VID_STEREO_MODE() can be used instead.
+// and OPT_CHOICE_C() can be used instead.
 static int opt_to_stereo3dmode(int val)
 {
     // Find x for rev_map_name(val) == MP_STEREO3D_NAME(x)

@@ -57,7 +57,6 @@ extern const m_option_type_t m_option_type_msglevels;
 extern const m_option_type_t m_option_type_print_fn;
 extern const m_option_type_t m_option_type_subconfig;
 extern const m_option_type_t m_option_type_imgfmt;
-extern const m_option_type_t m_option_vid_stereo_mode;
 extern const m_option_type_t m_option_type_fourcc;
 extern const m_option_type_t m_option_type_afmt;
 extern const m_option_type_t m_option_type_color;
@@ -664,9 +663,6 @@ extern const char m_option_path_separator;
 
 #define OPT_TRACKCHOICE(name, var) \
     OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}))
-
-#define OPT_VID_STEREO_MODE(...) \
-    OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_vid_stereo_mode)
 
 #define OPT_STRING_VALIDATE_(optname, varname, flags, validate_fn, ...)        \
     OPT_GENERAL(char*, optname, varname, flags, __VA_ARGS__,                   \

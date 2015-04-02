@@ -159,7 +159,7 @@ static void filter_reconfig(struct MPContext *mpctx,
     if (params.stereo_in != params.stereo_out &&
         params.stereo_in > 0 && params.stereo_out >= 0)
     {
-        char *to = MP_STEREO3D_NAME(params.stereo_out);
+        char *to = (char *)MP_STEREO3D_NAME(params.stereo_out);
         if (to) {
             char *args[] = {"in", "auto", "out", to, NULL, NULL};
             if (try_filter(mpctx, params, "stereo3d", "stereo3d", args) < 0)

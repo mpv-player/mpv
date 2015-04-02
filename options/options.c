@@ -426,7 +426,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("force-rgba-osd-rendering", force_rgba_osd, 0),
     OPT_CHOICE_OR_INT("video-rotate", video_rotate, 0, 0, 360,
                       ({"no", -1})),
-    OPT_VID_STEREO_MODE("video-stereo-mode", video_stereo_mode, 0),
+    OPT_CHOICE_C("video-stereo-mode", video_stereo_mode, 0, mp_stereo3d_names),
 
     OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),
