@@ -42,6 +42,7 @@ struct vf_priv_s {
     int stereo_out;
     int rotate;
     int dw, dh;
+    double dar;
 };
 
 static bool is_compatible(int fmt1, int fmt2)
@@ -104,6 +105,8 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         out->d_w = p->dw;
     if (p->dh > 0)
         out->d_h = p->dh;
+    if (p->dar > 0)
+        vf_set_dar(&out->d_w, &out->d_h, out->w, out->h, p->dar);
 
     // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.).
     mp_image_params_guess_csp(out);
@@ -140,6 +143,7 @@ static const m_option_t vf_opts_fields[] = {
     OPT_INTRANGE("rotate", rotate, 0, -1, 359),
     OPT_INT("dw", dw, 0),
     OPT_INT("dh", dh, 0),
+    OPT_DOUBLE("dar", dar, 0),
     {0}
 };
 

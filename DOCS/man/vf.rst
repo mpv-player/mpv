@@ -319,6 +319,11 @@ Available filters are:
         the video is scaled in both directions instead of just changing the
         aspect ratio is an implementation detail, and might change later.
 
+    ``<dar>``
+        Set the display aspect ratio of the video frame. This is a float,
+        but values such as ``[16:9]`` can be passed too (``[...]`` for quoting
+        to prevent the option parser from interpreting the ``:`` character).
+
 
 ``noformat[=fmt]``
     Restricts the color space for the next filter without doing any conversion.
