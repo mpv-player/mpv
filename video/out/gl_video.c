@@ -1977,10 +1977,7 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
 // upscaling
 static void pass_render_frame(struct gl_video *p)
 {
-    bool use_cms = p->use_lut_3d || p->opts.target_prim != MP_CSP_PRIM_AUTO
-                                 || p->opts.target_trc != MP_CSP_TRC_AUTO;
-    p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling
-                    || use_cms || p->image_params.gamma == MP_CSP_TRC_LINEAR;
+    p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling;
     p->use_indirect = false; // set to true as needed by pass_*
     pass_read_video(p);
     pass_convert_yuv(p);

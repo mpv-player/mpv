@@ -515,10 +515,8 @@ Available video output drivers are:
         See the corresponding options for ``scale``.
 
     ``linear-scaling``
-        Scale in linear light. This is automatically enabled if
-        ``target-prim``, ``target-trc``, ``icc-profile`` or
-        ``sigmoid-upscaling`` is set. It should only be used with a
-        ``fbo-format`` that has at least 16 bit precision.
+        Scale in linear light. It should only be used with a ``fbo-format``
+        that has at least 16 bit precision.
 
     ``fancy-downscaling``
         When using convolution based filters, extend the filter size
@@ -594,7 +592,7 @@ Available video output drivers are:
 
     ``sigmoid-upscaling``
         When upscaling, use a sigmoidal color transform to avoid emphasizing
-        ringing artifacts. This also enables ``linear-scaling``.
+        ringing artifacts. This also implies ``linear-scaling``.
 
     ``sigmoid-center``
         The center of the sigmoid curve used for ``sigmoid-upscaling``, must
@@ -732,8 +730,7 @@ Available video output drivers are:
     ``icc-profile=<file>``
         Load an ICC profile and use it to transform linear RGB to screen output.
         Needs LittleCMS 2 support compiled in. This option overrides the
-        ``target-prim``, ``target-trc`` and ``icc-profile-auto`` options. It
-        also enables ``linear-scaling``.
+        ``target-prim``, ``target-trc`` and ``icc-profile-auto`` options.
 
     ``icc-profile-auto``
         Automatically select the ICC display profile currently specified by
@@ -772,9 +769,8 @@ Available video output drivers are:
         Blend subtitles directly onto upscaled video frames, before
         interpolation and/or color management (default: no). Enabling this
         causes subtitles to be affected by ``icc-profile``, ``target-prim``,
-        ``target-trc``, ``interpolation``, ``gamma``, ``post-shader`` and
-        ``linear-scaling``. It also increases subtitle performance when using
-        ``interpolation``.
+        ``target-trc``, ``interpolation``, ``gamma`` and ``post-shader``. It
+        also increases subtitle performance when using ``interpolation``.
 
         The downside of enabling this is that it restricts subtitles to the
         visible portion of the video, so you can't have subtitles exist in the
