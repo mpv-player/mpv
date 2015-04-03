@@ -28,16 +28,25 @@ struct lut3d {
     int size[3];
 };
 
+struct scaler_fun {
+    char *name;
+    float params[2];
+    float blur;
+};
+
+struct scaler_config {
+    struct scaler_fun kernel;
+    struct scaler_fun window;
+    float radius;
+    float antiring;
+};
+
 struct gl_video_opts {
-    char *scalers[3];
-    char *dscaler;
+    struct scaler_config scaler[4];
     float gamma;
     int gamma_auto;
     int target_prim;
     int target_trc;
-    float scaler_params[3][2];
-    float scaler_radius[3];
-    float scaler_antiring[3];
     int linear_scaling;
     int fancy_downscaling;
     int sigmoid_upscaling;

@@ -21,26 +21,35 @@
 
 #include <stdbool.h>
 
-struct filter_kernel {
+struct filter_window {
     const char *name;
-    double radius;  // A negative value will use user specified radius instead.
-    double (*weight)(struct filter_kernel *kernel, double x);
+    double radius; // Preferred radius, should only be changed if resizable
+    double (*weight)(struct filter_window *k, double x);
+    bool resizable; // Filter supports any given radius
+    double params[2]; // User-defined custom filter parameters. Not used by
+                      // all filters
+    double blur; // Blur coefficient (sharpens or widens the filter)
+};
 
-    // The filter params can be changed at runtime. Only used by some filters.
-    float params[2];
-    // Whether or not the filter uses polar coordinates
-    bool polar;
+struct filter_kernel {
+    struct filter_window f; // the kernel itself
+    struct filter_window w; // window storage
+    // Constant values
+    const char *window; // default window
+    bool polar;         // whether or not the filter uses polar coordinates
     // The following values are set by mp_init_filter() at runtime.
     int size;           // number of coefficients (may depend on radius)
     double inv_scale;   // scale factor (<1.0 is upscale, >1.0 downscale)
 };
 
+extern const struct filter_window mp_filter_windows[];
 extern const struct filter_kernel mp_filter_kernels[];
 
+const struct filter_window *mp_find_filter_window(const char *name);
 const struct filter_kernel *mp_find_filter_kernel(const char *name);
+
 bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
                     double scale);
-void mp_compute_weights(struct filter_kernel *filter, double f, float *out_w);
 void mp_compute_lut(struct filter_kernel *filter, int count, float *out_array);
 
 #endif /* MPLAYER_FILTER_KERNELS_H */
