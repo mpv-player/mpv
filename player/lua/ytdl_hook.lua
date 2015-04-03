@@ -37,6 +37,20 @@ local function set_http_headers(http_headers)
     end
 end
 
+local function append_rtmp_prop(props, name, value)
+    if not name or not value then
+        return props
+    end
+
+    if props and props ~= "" then
+        props = props..","
+    else
+        props = ""
+    end
+
+    return props..name.."=\""..value.."\""
+end
+
 mp.add_hook("on_load", 10, function ()
     local url = mp.get_property("stream-open-filename")
 
@@ -241,9 +255,13 @@ mp.add_hook("on_load", 10, function ()
 
             -- for rtmp
             if not (json.play_path == nil) then
-                mp.set_property("file-local-options/stream-lavf-o",
-                    "rtmp_tcurl=\""..streamurl..
-                    "\",rtmp_playpath=\""..json.play_path.."\"")
+                local rtmp_prop = append_rtmp_prop(nil, "rtmp_tcurl", streamurl)
+                rtmp_prop = append_rtmp_prop(rtmp_prop, "rtmp_pageurl", json.page_url)
+                rtmp_prop = append_rtmp_prop(rtmp_prop, "rtmp_playpath", json.play_path)
+                rtmp_prop = append_rtmp_prop(rtmp_prop, "rtmp_swfverify", json.player_url)
+                rtmp_prop = append_rtmp_prop(rtmp_prop, "rtmp_app", json.app)
+
+                mp.set_property("file-local-options/stream-lavf-o", rtmp_prop)
             end
         end
     end
