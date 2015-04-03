@@ -96,6 +96,9 @@ enum af_format {
 
 #define AF_FORMAT_IS_IEC61937(f) (((f) & AF_FORMAT_TYPE_MASK) == AF_FORMAT_S)
 #define AF_FORMAT_IS_SPECIAL(f) AF_FORMAT_IS_IEC61937(f)
+#define AF_FORMAT_IS_FLOAT(f) (!!((f) & AF_FORMAT_F))
+// false for interleaved and AF_FORMAT_UNKNOWN
+#define AF_FORMAT_IS_PLANAR(f) (!!((f) & AF_FORMAT_PLANAR))
 
 struct af_fmt_entry {
     const char *name;
@@ -109,12 +112,10 @@ const char *af_fmt_to_str(int format);
 
 int af_fmt2bps(int format);
 int af_fmt2bits(int format);
-bool af_fmt_is_float(int format);
 int af_fmt_change_bits(int format, int bits);
 
 int af_fmt_to_planar(int format);
 int af_fmt_from_planar(int format);
-bool af_fmt_is_planar(int format);
 
 // Amount of bytes that contain audio of the given duration, aligned to frames.
 int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int samplerate);

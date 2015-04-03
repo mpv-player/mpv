@@ -91,7 +91,7 @@ static const GUID *format_to_subtype(int format)
                 return wasapi_fmt_table[i].subtype;
         }
         return &KSDATAFORMAT_SPECIFIER_NONE;
-    } else if (af_fmt_is_float(format)) {
+    } else if (AF_FORMAT_IS_FLOAT(format)) {
         return &KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
     }
     return &KSDATAFORMAT_SUBTYPE_PCM;

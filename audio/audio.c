@@ -35,7 +35,7 @@ static void update_redundant_info(struct mp_audio *mpa)
            mp_chmap_is_valid(&mpa->channels));
     mpa->nch = mpa->channels.num;
     mpa->bps = af_fmt2bps(mpa->format);
-    if (af_fmt_is_planar(mpa->format)) {
+    if (AF_FORMAT_IS_PLANAR(mpa->format)) {
         mpa->spf = 1;
         mpa->num_planes = mpa->nch;
         mpa->sstride = mpa->bps;
@@ -101,7 +101,7 @@ char *mp_audio_config_to_str_buf(char *buf, size_t buf_sz, struct mp_audio *mpa)
 
 void mp_audio_force_interleaved_format(struct mp_audio *mpa)
 {
-    if (af_fmt_is_planar(mpa->format))
+    if (AF_FORMAT_IS_PLANAR(mpa->format))
         mp_audio_set_format(mpa, af_fmt_from_planar(mpa->format));
 }
 
