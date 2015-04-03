@@ -181,7 +181,7 @@ static char *wasapi_explain_err(const HRESULT hr)
 
 char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr)
 {
-    snprintf(buf,buf_size,"%s (0x%"PRIx32")",
+    snprintf(buf, buf_size, "%s (0x%"PRIx32")",
              wasapi_explain_err(hr), (uint32_t) hr);
     return buf;
 }
@@ -226,15 +226,15 @@ static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
                            int format, WORD valid_bits,
                            DWORD samplerate, struct mp_chmap *channels)
 {
-    wformat->Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE;
-    wformat->Format.nChannels = channels->num;
+    wformat->Format.wFormatTag     = WAVE_FORMAT_EXTENSIBLE;
+    wformat->Format.nChannels      = channels->num;
     wformat->Format.nSamplesPerSec = samplerate;
     wformat->Format.wBitsPerSample = af_fmt2bits(format);
     wformat->Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
 
-    wformat->SubFormat = *format_to_subtype(format);
+    wformat->SubFormat                   = *format_to_subtype(format);
     wformat->Samples.wValidBitsPerSample = valid_bits ? valid_bits : wformat->Format.wBitsPerSample;
-    wformat->dwChannelMask = mp_chmap_to_waveext(channels);
+    wformat->dwChannelMask               = mp_chmap_to_waveext(channels);
     update_waveformat_datarate(wformat);
 }
 
@@ -373,8 +373,8 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf, AUDCLNT_SHAREMODE sha
             return false;
         }
         ao->samplerate = wf->nSamplesPerSec;
-        ao->format = format;
-        ao->channels = channels;
+        ao->format     = format;
+        ao->channels   = channels;
     }
     waveformat_copy(&state->format, wf);
     state->share_mode = share_mode;
@@ -1117,8 +1117,7 @@ retry:
 
     MP_DBG(ao, "Fixing format\n");
     hr = fix_format(ao);
-    if ((hr == AUDCLNT_E_DEVICE_IN_USE ||
-         hr == AUDCLNT_E_DEVICE_INVALIDATED) &&
+    if ((hr == AUDCLNT_E_DEVICE_IN_USE || hr == AUDCLNT_E_DEVICE_INVALIDATED) &&
         retry_wait <= 8)
     {
         wasapi_thread_uninit(ao);
