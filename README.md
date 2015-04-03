@@ -1,4 +1,4 @@
-![http://mpv.io/](https://i.imgur.com/rshyWzk.png)
+![http://mpv.io/](https://i.imgur.com/K9wZEwB.png)
 
 ## mpv
 
