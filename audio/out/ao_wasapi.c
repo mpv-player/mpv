@@ -243,17 +243,11 @@ static int init(struct ao *ao)
     if(!wasapi_fill_VistaBlob(state))
         MP_WARN(ao, "Error loading thread priority functions\n");
 
-    if (state->opt_exclusive) {
-        state->share_mode = AUDCLNT_SHAREMODE_EXCLUSIVE;
-    } else {
-        state->share_mode = AUDCLNT_SHAREMODE_SHARED;
-    }
-
     state->init_done = CreateEventW(NULL, FALSE, FALSE, NULL);
-    state->hUninit = CreateEventW(NULL, FALSE, FALSE, NULL);
-    state->hFeed = CreateEventW(NULL, FALSE, FALSE, NULL); /* for wasapi event mode */
-    state->hResume = CreateEventW(NULL, FALSE, FALSE, NULL);
-    state->hReset = CreateEventW(NULL, FALSE, FALSE, NULL);
+    state->hUninit   = CreateEventW(NULL, FALSE, FALSE, NULL);
+    state->hFeed     = CreateEventW(NULL, FALSE, FALSE, NULL); /* for wasapi event mode */
+    state->hResume   = CreateEventW(NULL, FALSE, FALSE, NULL);
+    state->hReset    = CreateEventW(NULL, FALSE, FALSE, NULL);
     if (!state->init_done || !state->hFeed || !state->hUninit ||
         !state->hResume || !state->hReset)
     {
@@ -406,18 +400,18 @@ static int hotplug_init(struct ao *ao)
 #define OPT_BASE_STRUCT struct wasapi_state
 
 const struct ao_driver audio_out_wasapi = {
-    .description = "Windows WASAPI audio output (event mode)",
-    .name      = "wasapi",
-    .init      = init,
-    .uninit    = uninit,
-    .control   = control,
-    .reset     = audio_reset,
-    .resume    = audio_resume,
-    .list_devs = wasapi_list_devs,
-    .hotplug_init = hotplug_init,
+    .description    = "Windows WASAPI audio output (event mode)",
+    .name           = "wasapi",
+    .init           = init,
+    .uninit         = uninit,
+    .control        = control,
+    .reset          = audio_reset,
+    .resume         = audio_resume,
+    .list_devs      = wasapi_list_devs,
+    .hotplug_init   = hotplug_init,
     .hotplug_uninit = hotplug_uninit,
-    .priv_size = sizeof(wasapi_state),
-    .options   = (const struct m_option[]) {
+    .priv_size      = sizeof(wasapi_state),
+    .options        = (const struct m_option[]) {
         OPT_FLAG("exclusive", opt_exclusive, 0),
         OPT_STRING("device", opt_device, 0),
         {NULL},

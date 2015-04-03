@@ -467,11 +467,11 @@ static int init_device(struct ao *ao)
     err = snd_pcm_hw_params_set_format(p->alsa, alsa_hwparams, p->alsa_fmt);
     CHECK_ALSA_ERROR("Unable to set format");
 
-    snd_pcm_access_t access = af_fmt_is_planar(ao->format)
+    snd_pcm_access_t access = AF_FORMAT_IS_PLANAR(ao->format)
                                     ? SND_PCM_ACCESS_RW_NONINTERLEAVED
                                     : SND_PCM_ACCESS_RW_INTERLEAVED;
     err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
-    if (err < 0 && af_fmt_is_planar(ao->format)) {
+    if (err < 0 && AF_FORMAT_IS_PLANAR(ao->format)) {
         ao->format = af_fmt_from_planar(ao->format);
         access = SND_PCM_ACCESS_RW_INTERLEAVED;
         err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
@@ -817,7 +817,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         return 0;
 
     do {
-        if (af_fmt_is_planar(ao->format)) {
+        if (AF_FORMAT_IS_PLANAR(ao->format)) {
             res = snd_pcm_writen(p->alsa, data, samples);
         } else {
             res = snd_pcm_writei(p->alsa, data[0], samples);

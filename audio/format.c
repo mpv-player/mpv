@@ -45,11 +45,6 @@ int af_fmt2bits(int format)
     return af_fmt2bps(format) * 8;
 }
 
-bool af_fmt_is_float(int format)
-{
-    return !!(format & AF_FORMAT_F);
-}
-
 static int bits_to_mask(int bits)
 {
     switch (bits) {
@@ -105,12 +100,6 @@ int af_fmt_from_planar(int format)
     return format;
 }
 
-// false for interleaved and AF_FORMAT_UNKNOWN
-bool af_fmt_is_planar(int format)
-{
-    return !!(format & AF_FORMAT_PLANAR);
-}
-
 const struct af_fmt_entry af_fmtstr_table[] = {
     {"u8",          AF_FORMAT_U8},
     {"s8",          AF_FORMAT_S8},
@@ -161,7 +150,7 @@ const char *af_fmt_to_str(int format)
 
 int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int samplerate)
 {
-    assert(!af_fmt_is_planar(format));
+    assert(!AF_FORMAT_IS_PLANAR(format));
     int bps      = af_fmt2bps(format);
     int framelen = channels * bps;
     int bytes    = seconds  * bps * samplerate;
