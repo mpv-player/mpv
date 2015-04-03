@@ -240,11 +240,8 @@ static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
 
 // This implicitly transforms all pcm formats to:
 // interleaved / signed (except 8-bit is unsigned) / waveext channel order.
-// You must still call set_ao_format() to ensure consistency.
-//
 // "Special" formats should be exempt as they should already
-// satisfy these properties, although set_ao_format() will check
-// that they are consistent without changing the ao.
+// satisfy these properties.
 static void set_waveformat_with_ao(WAVEFORMATEXTENSIBLE *wformat, struct ao *ao)
 {
     struct mp_chmap channels = ao->channels;
@@ -333,7 +330,6 @@ static bool chmap_from_waveformat(struct mp_chmap *channels, const WAVEFORMATEX 
 
 static char *waveformat_to_str_buf(char *buf, size_t buf_size, WAVEFORMATEX *wf)
 {
-
     struct mp_chmap channels;
     chmap_from_waveformat(&channels, wf);
 
@@ -361,7 +357,6 @@ static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
 static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf, AUDCLNT_SHAREMODE share_mode)
 {
     struct wasapi_state *state = ao->priv;
-
     int format = format_from_waveformat(wf);
     if (!format) {
         MP_ERR(ao, "Unable to construct sample format from WAVEFORMAT %s\n",
@@ -369,25 +364,14 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf, AUDCLNT_SHAREMODE sha
         return false;
     }
 
-    struct mp_chmap channels;
-    if (!chmap_from_waveformat(&channels, wf)) {
-        MP_ERR(ao, "Unable to construct channel map from WAVEFORMAT %s\n",
-               waveformat_to_str(wf));
-        return false;
-    }
-
-    if (AF_FORMAT_IS_SPECIAL(format)) {
-        // Do not touch the ao. Only check that it's consistent.
-        if (ao->samplerate != wf->nSamplesPerSec || ao->format != format ||
-            mp_chmap_to_waveext(&ao->channels) != mp_chmap_to_waveext(&channels))
-        {
-            MP_ERR(ao, "Special WAVEFORAT %s does not match"
-                   "requested sample format %s %s @ %dhz.\n",
-                   waveformat_to_str(wf), mp_chmap_to_str(&ao->channels),
-                   af_fmt_to_str(ao->format), ao->samplerate);
+    // Do not touch the ao for passthrough, just assume that we set WAVEFORMATEX correctly.
+    if (!AF_FORMAT_IS_SPECIAL(format)) {
+        struct mp_chmap channels;
+        if (!chmap_from_waveformat(&channels, wf)) {
+            MP_ERR(ao, "Unable to construct channel map from WAVEFORMAT %s\n",
+                   waveformat_to_str(wf));
             return false;
         }
-    } else {
         ao->samplerate = wf->nSamplesPerSec;
         ao->format     = format;
         ao->channels   = channels;
