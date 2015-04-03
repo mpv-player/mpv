@@ -401,14 +401,19 @@ static bool search_sample_formats(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat,
                                   int samplerate, struct mp_chmap *channels)
 {
     // some common bit depths / container sizes (requests welcome)
-    int try[]        = {AF_FORMAT_DOUBLE, AF_FORMAT_FLOAT, AF_FORMAT_S32,
-                        AF_FORMAT_S24   , AF_FORMAT_S32  , AF_FORMAT_S16,
-                        AF_FORMAT_U8    , 0};
-    unsigned valid[] = {0               ,               0,             0,
-                        0               ,              24,             0,
-                        0               };
-    for (int i = 0; try[i]; i++) {
-        set_waveformat(wformat, try[i], valid[i], samplerate, channels);
+    struct {
+        int format;
+        unsigned valid;
+    } try[] = {{AF_FORMAT_DOUBLE,0},
+               {AF_FORMAT_FLOAT, 0},
+               {AF_FORMAT_S32,   0},
+               {AF_FORMAT_S24,   0},
+               {AF_FORMAT_S32,  24},
+               {AF_FORMAT_S16,   0},
+               {AF_FORMAT_U8,    0},
+               {0}};
+    for (int i = 0; try[i].format; i++) {
+        set_waveformat(wformat, try[i].format, try[i].valid, samplerate, channels);
         if (try_format_exclusive(ao, wformat))
             return true;
     }
