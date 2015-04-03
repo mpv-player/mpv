@@ -1,10 +1,7 @@
-<h1 align="center">
-<a href = "http://mpv.io/">
-<img  src="https://i.imgur.com/rshyWzk.png">
-</a></h1>
-<h1 align="center">
-mpv
-</h1>
+![http://mpv.io/](https://i.imgur.com/rshyWzk.png)
+
+## mpv
+
 --------------
 
 
