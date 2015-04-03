@@ -404,7 +404,7 @@ static int filter(struct af_instance *af, struct mp_audio *in)
     }
 
     if (needs_reorder(s->reorder_out, out->nch)) {
-        if (af_fmt_is_planar(out->format)) {
+        if (AF_FORMAT_IS_PLANAR(out->format)) {
             reorder_planes(out, s->reorder_out);
         } else if (out->samples) {
             struct mp_audio *new = mp_audio_pool_get(s->reorder_buffer, out,

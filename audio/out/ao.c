@@ -199,7 +199,7 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
 
     ao->sstride = af_fmt2bps(ao->format);
     ao->num_planes = 1;
-    if (af_fmt_is_planar(ao->format)) {
+    if (AF_FORMAT_IS_PLANAR(ao->format)) {
         ao->num_planes = ao->channels.num;
     } else {
         ao->sstride *= ao->channels.num;
