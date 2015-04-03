@@ -110,8 +110,8 @@ static int m_config_parse(m_config_t *config, const char *location, bstr data,
                     MP_ERR(config, "%s broken escaping with '%%'\n", loc);
                     goto error;
                 }
-                value = bstr_splice(line, 0, len);
-                line = bstr_cut(line, len);
+                value = bstr_splice(rest, 0, len);
+                line = bstr_cut(rest, len);
             } else {
                 // No quoting; take everything until the comment or end of line
                 int end = bstrchr(line, '#');
