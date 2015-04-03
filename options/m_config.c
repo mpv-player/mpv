@@ -42,6 +42,8 @@ static const union m_option_value default_value;
 // Profiles allow to predefine some sets of options that can then
 // be applied later on with the internal -profile option.
 #define MAX_PROFILE_DEPTH 20
+// Maximal include depth.
+#define MAX_RECURSION_DEPTH 8
 
 struct m_profile {
     struct m_profile *next;
@@ -66,8 +68,14 @@ static int parse_include(struct m_config *config, struct bstr param, bool set,
         return M_OPT_MISSING_PARAM;
     if (!set)
         return 1;
+    if (config->recursion_depth >= MAX_RECURSION_DEPTH) {
+        MP_ERR(config, "Maximum 'include' nesting depth exceeded.\n");
+        return M_OPT_INVALID;
+    }
     char *filename = bstrdup0(NULL, param);
+    config->recursion_depth += 1;
     config->includefunc(config->includefunc_ctx, filename, flags);
+    config->recursion_depth -= 1;
     talloc_free(filename);
     return 1;
 }
