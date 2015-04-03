@@ -1269,6 +1269,9 @@ Property list
     ``video-params/primaries``
         The primaries in use as string. (Exact values subject to change.)
 
+    ``video-params/gamma``
+        The gamma function in use as string. (Exact values subject to change.)
+
     ``video-params/chroma-location``
         Chroma location as string. (Exact values subject to change.)
 

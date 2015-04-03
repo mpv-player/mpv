@@ -2378,6 +2378,8 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
             SUB_PROP_STR(m_opt_choice_str(mp_csp_levels_names, p.outputlevels))},
         {"primaries",
             SUB_PROP_STR(m_opt_choice_str(mp_csp_prim_names, p.primaries))},
+        {"gamma",
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_trc_names, p.gamma))},
         {"chroma-location",
             SUB_PROP_STR(m_opt_choice_str(mp_chroma_names, p.chroma_location))},
         {"rotate",          SUB_PROP_INT(p.rotate)},
@@ -3437,6 +3439,7 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_ALIAS("colormatrix-input-range", "video-params/colorlevels"),
     M_PROPERTY_ALIAS("colormatrix-output-range", "video-params/outputlevels"),
     M_PROPERTY_ALIAS("colormatrix-primaries", "video-params/primaries"),
+    M_PROPERTY_ALIAS("colormatrix-gamma", "video-params/gamma"),
 
     {0},
 };
@@ -3627,6 +3630,8 @@ static const struct property_osd_display {
        .msg = "RGB output range:\n${colormatrix-output-range}" },
     { "colormatrix-primaries",
        .msg = "Colorspace primaries:\n${colormatrix-primaries}", },
+    { "colormatrix-gamma",
+       .msg = "Colorspace gamma:\n${colormatrix-gamma}", },
     { "gamma", "Gamma", .osd_progbar = OSD_BRIGHTNESS },
     { "brightness", "Brightness", .osd_progbar = OSD_BRIGHTNESS },
     { "contrast", "Contrast", .osd_progbar = OSD_CONTRAST },

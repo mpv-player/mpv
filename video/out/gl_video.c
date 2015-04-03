@@ -362,19 +362,8 @@ const struct m_sub_options gl_video_conf = {
     .opts = (const m_option_t[]) {
         OPT_FLOATRANGE("gamma", gamma, 0, 0.1, 2.0),
         OPT_FLAG("gamma-auto", gamma_auto, 0),
-        OPT_CHOICE("target-prim", target_prim, 0,
-                   ({"auto",      MP_CSP_PRIM_AUTO},
-                    {"bt601-525", MP_CSP_PRIM_BT_601_525},
-                    {"bt601-625", MP_CSP_PRIM_BT_601_625},
-                    {"bt709",     MP_CSP_PRIM_BT_709},
-                    {"bt2020",    MP_CSP_PRIM_BT_2020},
-                    {"bt470m",    MP_CSP_PRIM_BT_470M})),
-        OPT_CHOICE("target-trc", target_trc, 0,
-                   ({"auto",    MP_CSP_TRC_AUTO},
-                    {"bt1886",  MP_CSP_TRC_BT_1886},
-                    {"srgb",    MP_CSP_TRC_SRGB},
-                    {"linear",  MP_CSP_TRC_LINEAR},
-                    {"gamma22", MP_CSP_TRC_GAMMA22})),
+        OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
+        OPT_CHOICE_C("target-trc", target_trc, 0, mp_csp_trc_names),
         OPT_FLAG("npot", npot, 0),
         OPT_FLAG("pbo", pbo, 0),
         OPT_STRING_VALIDATE("scale", scalers[0], 0, validate_scaler_opt),
@@ -1414,22 +1403,70 @@ static void get_scale_factors(struct gl_video *p, double xy[2])
             (double)(p->src_rect.y1 - p->src_rect.y0);
 }
 
-// Linearize, given a TRC as input
+// Linearize (expand), given a TRC as input
 static void pass_linearize(struct gl_video *p, enum mp_csp_trc trc)
 {
+    if (trc == MP_CSP_TRC_LINEAR)
+        return;
+
     GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
     switch (trc) {
         case MP_CSP_TRC_SRGB:
             GLSL(color.rgb = mix(color.rgb / vec3(12.92),
                                  pow((color.rgb + vec3(0.055))/vec3(1.055),
                                      vec3(2.4)),
-                                 lessThanEqual(vec3(0.04045), color.rgb));)
+                                 lessThan(vec3(0.04045), color.rgb));)
             break;
         case MP_CSP_TRC_BT_1886:
             GLSL(color.rgb = pow(color.rgb, vec3(1.961));)
             break;
+        case MP_CSP_TRC_GAMMA18:
+            GLSL(color.rgb = pow(color.rgb, vec3(1.8));)
+            break;
         case MP_CSP_TRC_GAMMA22:
             GLSL(color.rgb = pow(color.rgb, vec3(2.2));)
+            break;
+        case MP_CSP_TRC_GAMMA28:
+            GLSL(color.rgb = pow(color.rgb, vec3(2.8));)
+            break;
+        case MP_CSP_TRC_PRO_PHOTO:
+            GLSL(color.rgb = mix(color.rgb / vec3(16.0),
+                                 pow(color.rgb, vec3(1.8)),
+                                 lessThan(vec3(0.03125), color.rgb));)
+            break;
+    }
+}
+
+// Delinearize (compress), given a TRC as output
+static void pass_delinearize(struct gl_video *p, enum mp_csp_trc trc)
+{
+    if (trc == MP_CSP_TRC_LINEAR)
+        return;
+
+    GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
+    switch (trc) {
+        case MP_CSP_TRC_SRGB:
+            GLSL(color.rgb = mix(color.rgb * vec3(12.92),
+                                 vec3(1.055) * pow(color.rgb, vec3(1.0/2.4))
+                                     - vec3(0.055),
+                                 lessThanEqual(vec3(0.0031308), color.rgb));)
+            break;
+        case MP_CSP_TRC_BT_1886:
+            GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.961));)
+            break;
+        case MP_CSP_TRC_GAMMA18:
+            GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.8));)
+            break;
+        case MP_CSP_TRC_GAMMA22:
+            GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.2));)
+            break;
+        case MP_CSP_TRC_GAMMA28:
+            GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.8));)
+            break;
+        case MP_CSP_TRC_PRO_PHOTO:
+            GLSL(color.rgb = mix(color.rgb * vec3(16.0),
+                                 pow(color.rgb, vec3(1.0/1.8)),
+                                 lessThanEqual(vec3(0.001953), color.rgb));)
             break;
     }
 }
@@ -1554,10 +1591,8 @@ static void pass_colormanage(struct gl_video *p, enum mp_csp_prim prim_src,
 
     bool need_cms = prim_src != prim_dst || p->use_lut_3d;
     bool need_gamma = trc_src != trc_dst || need_cms;
-    if (need_gamma && trc_src != MP_CSP_TRC_LINEAR) {
+    if (need_gamma)
         pass_linearize(p, trc_src);
-    }
-
     // Adapt to the right colorspace if necessary
     if (prim_src != prim_dst) {
         struct mp_csp_primaries csp_src = mp_get_csp_primaries(prim_src),
@@ -1567,7 +1602,6 @@ static void pass_colormanage(struct gl_video *p, enum mp_csp_prim prim_src,
         gl_sc_uniform_mat3(p->sc, "cms_matrix", true, &m[0][0]);
         GLSL(color.rgb = cms_matrix * color.rgb;)
     }
-
     if (p->use_lut_3d) {
         gl_sc_uniform_sampler(p->sc, "lut_3d", GL_TEXTURE_3D, TEXUNIT_3DLUT);
         // For the 3DLUT we are arbitrarily using 2.4 as input gamma to reduce
@@ -1576,25 +1610,8 @@ static void pass_colormanage(struct gl_video *p, enum mp_csp_prim prim_src,
         GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.4));)
         GLSL(color.rgb = texture3D(lut_3d, color.rgb).rgb;)
     }
-
-    if (need_gamma && trc_dst != MP_CSP_TRC_LINEAR) {
-        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
-        switch (trc_dst) {
-            case MP_CSP_TRC_SRGB:
-                GLSL(color.rgb = mix(color.rgb * vec3(12.92),
-                                     vec3(1.055) * pow(color.rgb,
-                                                       vec3(1.0/2.4))
-                                         - vec3(0.055),
-                                     lessThanEqual(vec3(0.0031308), color.rgb));)
-                break;
-            case MP_CSP_TRC_BT_1886:
-                GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.961));)
-                break;
-            case MP_CSP_TRC_GAMMA22:
-                GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.2));)
-                break;
-        }
-    }
+    if (need_gamma)
+        pass_delinearize(p, trc_dst);
 }
 
 static void pass_dither(struct gl_video *p)
@@ -1695,11 +1712,11 @@ static void pass_dither(struct gl_video *p)
           dither_quantization);
 }
 
-// Draws the OSD, in linear light. If blend is true, subtitles are treated as
-// scene-referred, otherwise they are assumed sRGB and adapted to the output
+// Draws the OSD, in scene-referred colors.. If cms is true, subtitles are
+// instead adapted to the display's gamut.
 static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
                           struct mp_osd_res rect, int vp_w, int vp_h, int fbo,
-                          bool blend)
+                          bool cms)
 {
     mpgl_osd_generate(p->osd, rect, pts, p->image_params.stereo_out, draw_flags);
 
@@ -1724,14 +1741,9 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
         default:
             abort();
         }
-        // subtitle color management
-        if (blend) {
-            // Scene referred: no gamut adaptation needed, and implicit trc
-            pass_linearize(p, p->image_params.gamma);
-        } else {
-            // Assume sRGB (BT.709 primaries) and adapt to output
+        // Subtitle color management, they're assumed to be sRGB by default
+        if (cms)
             pass_colormanage(p, MP_CSP_PRIM_BT_709, MP_CSP_TRC_SRGB);
-        }
         gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
         gl_sc_gen_shader_and_reset(p->sc);
         mpgl_osd_draw_part(p->osd, vp_w, vp_h, n);
@@ -1767,13 +1779,18 @@ static void pass_render_frame(struct gl_video *p)
         get_scale_factors(p, scale);
         rect.ml *= scale[0]; rect.mr *= scale[0];
         rect.mt *= scale[1]; rect.mb *= scale[1];
+        // We should always blend subtitles in non-linear light
+        if (p->use_linear)
+            pass_delinearize(p, p->image_params.gamma);
         finish_pass_fbo(p, &p->blend_subs_fbo, vp_w, vp_h, 0, FBOTEX_FUZZY);
         double vpts = p->image.mpi->pts;
         if (vpts == MP_NOPTS_VALUE)
             vpts = p->osd_pts;
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, vp_w, vp_h,
-                      p->blend_subs_fbo.fbo, p->use_linear);
+                      p->blend_subs_fbo.fbo, false);
         GLSL(vec4 color = texture(texture0, texcoord0);)
+        if (p->use_linear)
+            pass_linearize(p, p->image_params.gamma);
     }
 }
 
@@ -1963,7 +1980,7 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
 
     if (p->osd) {
         pass_draw_osd(p, p->opts.blend_subs ? OSD_DRAW_OSD_ONLY : 0,
-                      p->osd_pts, p->osd_rect, p->vp_w, p->vp_h, fbo, false);
+                      p->osd_pts, p->osd_rect, p->vp_w, p->vp_h, fbo, true);
         debug_check_gl(p, "after OSD rendering");
     }
 

@@ -65,6 +65,10 @@ enum mp_csp_prim {
     MP_CSP_PRIM_BT_709,
     MP_CSP_PRIM_BT_2020,
     MP_CSP_PRIM_BT_470M,
+    MP_CSP_PRIM_APPLE,
+    MP_CSP_PRIM_ADOBE,
+    MP_CSP_PRIM_PRO_PHOTO,
+    MP_CSP_PRIM_CIE_1931,
     MP_CSP_PRIM_COUNT
 };
 
@@ -75,12 +79,14 @@ enum mp_csp_trc {
     MP_CSP_TRC_BT_1886,
     MP_CSP_TRC_SRGB,
     MP_CSP_TRC_LINEAR,
+    MP_CSP_TRC_GAMMA18,
     MP_CSP_TRC_GAMMA22,
+    MP_CSP_TRC_GAMMA28,
+    MP_CSP_TRC_PRO_PHOTO,
     MP_CSP_TRC_COUNT
 };
 
-// Any enum mp_csp_trc value is a valid index (except MP_CSP_TRC_COUNT)
-extern const char *const mp_csp_trc_names[MP_CSP_TRC_COUNT];
+extern const struct m_opt_choice_alternatives mp_csp_trc_names[];
 
 // These constants are based on the ICC specification (Table 23) and match
 // up with the API of LittleCMS, which treats them as integers.

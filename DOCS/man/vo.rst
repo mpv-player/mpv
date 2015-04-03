@@ -590,16 +590,24 @@ Available video output drivers are:
 
         auto
             Disable any adaptation (default)
-        bt470m
+        bt.470m
             ITU-R BT.470 M
-        bt601-525
+        bt.601-525
             ITU-R BT.601 (525-line SD systems, eg. NTSC), SMPTE 170M/240M
-        bt601-625
+        bt.601-625
             ITU-R BT.601 (625-line SD systems, eg. PAL/SECAM), ITU-R BT.470 B/G
-        bt709
+        bt.709
             ITU-R BT.709 (HD), IEC 61966-2-4 (sRGB), SMPTE RP177 Annex B
-        bt2020
+        bt.2020
             ITU-R BT.2020 (UHD)
+        apple
+            Apple RGB
+        adobe
+            Adobe RGB (1998)
+        prophoto
+            ProPhoto RGB (ROMM)
+        cie1931
+            CIE 1931 RGB (not to be confused with CIE XYZ)
 
     ``target-trc=<value>``
         Specifies the transfer characteristics (gamma) of the display. Video
@@ -607,14 +615,20 @@ Available video output drivers are:
 
         auto
             Disable any adaptation (default)
-        bt1886
+        bt.1886
             ITU-R BT.1886 curve, without the brightness drop (approx. 1.961)
         srgb
             IEC 61966-2-4 (sRGB)
         linear
             Linear light output
-        gamma22
+        gamma1.8
+            Pure power curve (gamma 1.8), also used for Apple RGB
+        gamma2.2
             Pure power curve (gamma 2.2)
+        gamma2.8
+            Pure power curve (gamma 2.8), also used for BT.470-BG
+        prophoto
+            ProPhoto RGB (ROMM)
 
     ``icc-profile=<file>``
         Load an ICC profile and use it to transform linear RGB to screen output.

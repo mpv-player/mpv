@@ -278,12 +278,11 @@ Available filters are:
     ``<primaries>``
         RGB primaries the source file was encoded with. Normally this should be set
         in the file header, but when playing broken or mistagged files this can be
-        used to override the setting. By default, when unset, BT.709 is used for
-        all files except those tagged with a BT.2020 color matrix.
+        used to override the setting.
 
         This option only affects video output drivers that perform color
-        management, for example ``opengl`` with the ``srgb`` or ``icc-profile``
-        suboptions set.
+        management, for example ``opengl`` with the ``target-prim`` or
+        ``icc-profile`` suboptions set.
 
         If this option is set to ``auto`` (which is the default), the video's
         primaries flag will be used. If that flag is unset, the color space will
@@ -301,6 +300,32 @@ Available filters are:
         :bt.601-625:   ITU-R BT.601 (SD) 625-line systems (PAL, SECAM)
         :bt.709:       ITU-R BT.709 (HD) (same primaries as sRGB)
         :bt.2020:      ITU-R BT.2020 (UHD)
+        :apple:        Apple RGB
+        :adobe:        Adobe RGB (1998)
+        :prophoto:     ProPhoto RGB (ROMM)
+        :cie1931:      CIE 1931 RGB
+
+     ``<gamma>``
+        Gamma function the source file was encoded with. Normally this should be set
+        in the file header, but when playing broken or mistagged files this can be
+        used to override the setting.
+
+        This option only affects video output drivers that perform color management.
+
+        If this option is set to ``auto`` (which is the default), the gamma will
+        be set to BT.1886 for YCbCr content, sRGB for RGB content and Linear for
+        XYZ content.
+
+        Available gamma functions are:
+
+        :auto:         automatic selection (default)
+        :bt.1886:      ITU-R BT.1886 (approximation of BT.601/BT.709/BT.2020 curve)
+        :srgb:         IEC 61966-2-4 (sRGB)
+        :linear:       Linear light
+        :gamma1.8:     Pure power curve (gamma 1.8)
+        :gamma2.2:     Pure power curve (gamma 2.2)
+        :gamma2.8:     Pure power curve (gamma 2.8)
+        :prophoto:     ProPhoto RGB (ROMM) curve
 
     ``<stereo-in>``
         Set the stereo mode the video is assumed to be encoded in. Takes the
