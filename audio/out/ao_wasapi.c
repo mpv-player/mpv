@@ -215,15 +215,20 @@ exit_label:
     return 0;
 }
 
+static void set_thread_state(struct ao *ao, enum wasapi_thread_state thread_state)
+{
+    struct wasapi_state *state = ao->priv;
+    atomic_store(&state->thread_state, thread_state);
+    SetEvent(state->hWake);
+}
+
 static void uninit(struct ao *ao)
 {
     MP_DBG(ao, "Uninit wasapi\n");
     struct wasapi_state *state = ao->priv;
     wasapi_release_proxies(state);
-    if (state->hWake) {
-        atomic_store(&state->thread_state, WASAPI_THREAD_SHUTDOWN);
-        SetEvent(state->hWake);
-    }
+    if (state->hWake)
+        set_thread_state(ao, WASAPI_THREAD_SHUTDOWN);
 
     /* wait up to 10 seconds */
     if (state->hAudioThread &&
@@ -364,16 +369,12 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
 static void audio_reset(struct ao *ao)
 {
-    struct wasapi_state *state = ao->priv;
-    atomic_store(&state->thread_state, WASAPI_THREAD_RESET);
-    SetEvent(state->hWake);
+    set_thread_state(ao, WASAPI_THREAD_RESET);
 }
 
 static void audio_resume(struct ao *ao)
 {
-    struct wasapi_state *state = ao->priv;
-    atomic_store(&state->thread_state, WASAPI_THREAD_RESUME);
-    SetEvent(state->hWake);
+    set_thread_state(ao, WASAPI_THREAD_RESUME);
 }
 
 static void hotplug_uninit(struct ao *ao)
