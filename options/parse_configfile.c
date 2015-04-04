@@ -33,41 +33,39 @@
 #include "m_option.h"
 #include "m_config.h"
 
+#define PRINT_LINENUM   MP_ERR(config, "%s:%d: ", config_pathname, line_num)
+#define CONFIGFILE_ERR(...)  do { PRINT_LINENUM; MP_ERR(config, __VA_ARGS__); } while (0)
+
 /// Maximal include depth.
 #define MAX_RECURSION_DEPTH 8
 
 // Load options and profiles from from a config file.
-//  conffile: path to the config file
+//  config_pathname: path to the config file
 //  initial_section: default section where to add normal options
 //  flags: M_SETOPT_* bits
 //  returns: 1 on sucess, -1 on error, 0 if file not accessible.
-int m_config_parse_config_file(m_config_t *config, const char *conffile,
+int m_config_parse_config_file(m_config_t *config, const char *config_pathname,
                                char *initial_section, int flags)
 {
-#define PRINT_LINENUM   MP_ERR(config, "%s:%d: ", conffile, line_num)
 #define MAX_LINE_LEN    10000
 #define MAX_OPT_LEN     1000
 #define MAX_PARAM_LEN   1500
-    FILE *fp = NULL;
+    FILE *config_fp = NULL;
     char *line = NULL;
     char opt[MAX_OPT_LEN + 1];
     char param[MAX_PARAM_LEN + 1];
-    char c;             /* for the "" and '' check */
-    int tmp;
     int line_num = 0;
-    int line_pos;       /* line pos */
-    int opt_pos;        /* opt pos */
-    int param_pos;      /* param pos */
+    int line_pos, opt_pos, param_pos;
     int ret = 1;
     int errors = 0;
     m_profile_t *profile = m_config_add_profile(config, initial_section);
 
-    flags = flags | M_SETOPT_FROM_CONFIG_FILE;
+    flags |= M_SETOPT_FROM_CONFIG_FILE;
 
-    MP_VERBOSE(config, "Reading config file %s\n", conffile);
+    MP_VERBOSE(config, "Reading config file %s\n.", config_pathname);
 
     if (config->recursion_depth > MAX_RECURSION_DEPTH) {
-        MP_ERR(config, "Maximum 'include' nesting depth exceeded.\n");
+        MP_ERR(config, "maximum 'include' nesting depth exceeded\n");
         ret = -1;
         goto out;
     }
@@ -75,17 +73,17 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
     if ((line = malloc(MAX_LINE_LEN + 1)) == NULL) {
         ret = -1;
         goto out;
-    } else
-
+    } else {
         MP_VERBOSE(config, "\n");
+    }
 
-    if ((fp = fopen(conffile, "r")) == NULL) {
+    if ((config_fp = fopen(config_pathname, "r")) == NULL) {
         MP_VERBOSE(config, "Can't open config file: %s\n", mp_strerror(errno));
         ret = 0;
         goto out;
     }
 
-    while (fgets(line, MAX_LINE_LEN, fp)) {
+    while (fgets(line, MAX_LINE_LEN, config_fp)) {
         if (errors >= 16) {
             MP_FATAL(config, "too many errors\n");
             goto out;
@@ -104,28 +102,26 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
 
         /* EOL / comment */
         if (line[line_pos] == '\0' || line[line_pos] == '#')
-            continue;
+            goto nextline;
 
-        /* read option. */
+        /* read option */
         for (opt_pos = 0; mp_isprint(line[line_pos]) &&
              line[line_pos] != ' ' &&
              line[line_pos] != '#' &&
              line[line_pos] != '='; /* NOTHING */) {
             opt[opt_pos++] = line[line_pos++];
             if (opt_pos >= MAX_OPT_LEN) {
-                PRINT_LINENUM;
-                MP_ERR(config, "option name too long\n");
+                CONFIGFILE_ERR("option name too long\n");
                 errors++;
                 ret = -1;
                 goto nextline;
             }
         }
         if (opt_pos == 0) {
-            PRINT_LINENUM;
-            MP_ERR(config, "parse error\n");
+            CONFIGFILE_ERR("parse error\n");
             ret = -1;
             errors++;
-            continue;
+            goto nextline;
         }
         opt[opt_pos] = '\0';
 
@@ -133,7 +129,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
         if (opt_pos > 2 && opt[0] == '[' && opt[opt_pos - 1] == ']') {
             opt[opt_pos - 1] = '\0';
             profile = m_config_add_profile(config, opt + 1);
-            continue;
+            goto nextline;
         }
 
         /* skip whitespaces */
@@ -148,32 +144,30 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
             line_pos++;
             param_set = true;
 
-            /* whitespaces... */
+            /* skip whitespaces */
             while (mp_isspace(line[line_pos]))
                 ++line_pos;
 
-            /* read the parameter */
+            /* read parameter */
             if (line[line_pos] == '"' || line[line_pos] == '\'') {
-                c = line[line_pos];
+                char quote = line[line_pos];
                 ++line_pos;
-                for (param_pos = 0; line[line_pos] != c; /* NOTHING */) {
-                    if (!line[line_pos]) {
-                        PRINT_LINENUM;
-                        MP_ERR(config, "unterminated quotes\n");
+                for (param_pos = 0; line[line_pos] != quote; /* NOTHING */) {
+                    if (line[line_pos] == '\0') {
+                        CONFIGFILE_ERR("unterminated quotes\n");
                         ret = -1;
                         errors++;
                         goto nextline;
                     }
                     param[param_pos++] = line[line_pos++];
                     if (param_pos >= MAX_PARAM_LEN) {
-                        PRINT_LINENUM;
-                        MP_ERR(config, "option %s has a too long parameter\n", opt);
+                        CONFIGFILE_ERR("option '%s' parameter too long\n", opt);
                         ret = -1;
                         errors++;
                         goto nextline;
                     }
                 }
-                line_pos++;                 /* skip the closing " or ' */
+                line_pos++; /* skip the closing " or ' */
                 goto param_done;
             }
 
@@ -185,8 +179,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
                     if (len >= MAX_PARAM_LEN - 1 ||
                         strlen(end + 1) < len)
                     {
-                        PRINT_LINENUM;
-                        MP_ERR(config, "bogus %% length\n");
+                        CONFIGFILE_ERR("bogus %% length\n");
                         ret = -1;
                         errors++;
                         goto nextline;
@@ -203,8 +196,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
                     && line[line_pos] != '#'; /* NOTHING */) {
                 param[param_pos++] = line[line_pos++];
                 if (param_pos >= MAX_PARAM_LEN) {
-                    PRINT_LINENUM;
-                    MP_ERR(config, "too long parameter\n");
+                    CONFIGFILE_ERR("parameter too long");
                     ret = -1;
                     errors++;
                     goto nextline;
@@ -220,8 +212,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
 
         /* EOL / comment */
         if (line[line_pos] != '\0' && line[line_pos] != '#') {
-            PRINT_LINENUM;
-            MP_ERR(config, "extra characters: %s\n", line + line_pos);
+            CONFIGFILE_ERR("'%s': extra characters\n", line + line_pos);
             ret = -1;
         }
 
@@ -238,37 +229,34 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
 
         bool need_param = m_config_option_requires_param(config, bopt) > 0;
         if (need_param && !param_set) {
-            PRINT_LINENUM;
-            MP_ERR(config, "error parsing option %.*s=%.*s: %s\n",
+            CONFIGFILE_ERR("error parsing option '%.*s=%.*s': %s\n",
                    BSTR_P(bopt), BSTR_P(bparam),
                    m_option_strerror(M_OPT_MISSING_PARAM));
-            continue;
+            goto nextline;
         }
 
-        if (profile) {
-            tmp = m_config_set_profile_option(config, profile, bopt, bparam);
-        } else {
-            tmp = m_config_set_option_ext(config, bopt, bparam, flags);
-        }
-        if (tmp < 0) {
-            PRINT_LINENUM;
-            MP_ERR(config, "setting option %.*s='%.*s' failed.\n",
+        int r;
+        if (profile)
+            r = m_config_set_profile_option(config, profile, bopt, bparam);
+        else
+            r = m_config_set_option_ext(config, bopt, bparam, flags);
+        if (r < 0) {
+            CONFIGFILE_ERR("setting option '%.*s=%.*s' failed\n",
                    BSTR_P(bopt), BSTR_P(bparam));
-            continue;
-            /* break */
+            goto nextline;
         }
+
 nextline:
         ;
     }
 
 out:
-    free(line);
-    if (fp)
-        fclose(fp);
-    config->recursion_depth -= 1;
-    if (ret < 0) {
-        MP_FATAL(config, "Error loading config file %s.\n",
-               conffile);
-    }
+    if (line)
+        free(line);
+    if (config_fp)
+        fclose(config_fp);
+    config->recursion_depth--;
+    if (ret < 0)
+        MP_FATAL(config, "error loading config file %s\n", config_pathname);
     return ret;
 }
