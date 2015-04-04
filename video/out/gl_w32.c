@@ -21,20 +21,18 @@
 
 #include <assert.h>
 #include <windows.h>
-
-#include "config.h"
-
-#if HAVE_DWM
-#include <dwmapi.h>
-#endif
-
 #include "w32_common.h"
 #include "gl_common.h"
+
+typedef HRESULT (WINAPI *DwmFlush_t)(void);
 
 struct w32_context {
     HGLRC context;
     HDC hdc;
     int flags;
+
+    HINSTANCE dwmapi_dll;
+    DwmFlush_t dwmflush;
 };
 
 static bool create_dc(struct MPGLContext *ctx, int flags)
@@ -209,6 +207,11 @@ static void create_ctx(void *ptr)
     create_context_w32_gl3(ctx);
     if (!w32_ctx->context)
         create_context_w32_old(ctx);
+
+    w32_ctx->dwmapi_dll = LoadLibrary(L"Dwmapi.dll");
+    if (w32_ctx->dwmapi_dll)
+        w32_ctx->dwmflush = (DwmFlush_t)GetProcAddress(w32_ctx->dwmapi_dll, "DwmFlush");
+
     wglMakeCurrent(w32_ctx->hdc, NULL);
 }
 
@@ -247,6 +250,11 @@ static void releaseGlContext_w32(MPGLContext *ctx)
     if (w32_ctx->context)
         wglMakeCurrent(w32_ctx->hdc, 0);
     vo_w32_run_on_thread(ctx->vo, destroy_gl, ctx);
+
+    w32_ctx->dwmflush = NULL;
+    if (w32_ctx->dwmapi_dll)
+        FreeLibrary(w32_ctx->dwmapi_dll);
+    w32_ctx->dwmapi_dll = NULL;
 }
 
 static void swapGlBuffers_w32(MPGLContext *ctx)
@@ -263,21 +271,20 @@ static void swapGlBuffers_w32(MPGLContext *ctx)
 static int DwmFlush_w32(MPGLContext *ctx, int opt_dwmflush,
                         int opt_swapinterval, int current_swapinterval)
 {
-    int new_swapinterval = current_swapinterval;
+    struct w32_context *w32_ctx = ctx->priv;
+    int new_swapinterval = opt_swapinterval; // default if we don't DwmFLush
 
-#if HAVE_DWM
-    if (opt_dwmflush == 2  || (opt_dwmflush == 1 && !ctx->vo->opts->fullscreen)) {
-        DwmFlush();
+    if (w32_ctx->dwmflush &&
+        (opt_dwmflush == 2 || (opt_dwmflush == 1 && !ctx->vo->opts->fullscreen)) &&
+        S_OK == w32_ctx->dwmflush())
+    {
         new_swapinterval = 0;
-    } else {
-        new_swapinterval = opt_swapinterval;
     }
 
     if ((new_swapinterval != current_swapinterval) && ctx->gl->SwapInterval) {
         ctx->gl->SwapInterval(new_swapinterval);
         MP_VERBOSE(ctx->vo, "DwmFlush: set SwapInterval(%d)\n", new_swapinterval);
     }
-#endif
 
     return new_swapinterval;
 }
