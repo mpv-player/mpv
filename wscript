@@ -626,7 +626,7 @@ video_output_features = [
         'name': '--vaapi-glx',
         'desc': 'VAAPI GLX',
         'deps': [ 'vaapi', 'gl-x11' ],
-        'func': check_pkg_config('libva-glx', '>= 0.32.0'),
+        'func': check_true,
     }, {
         'name': '--caca',
         'desc': 'CACA',

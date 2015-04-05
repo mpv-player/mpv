@@ -18,10 +18,10 @@
  */
 
 #include <stddef.h>
+#include <string.h>
 #include <assert.h>
 
 #include <GL/glx.h>
-#include <va/va_glx.h>
 
 #include "x11_common.h"
 #include "gl_hwdec.h"
@@ -31,23 +31,29 @@ struct priv {
     struct mp_log *log;
     struct mp_vaapi_ctx *ctx;
     VADisplay *display;
+    Display *xdisplay;
     GLuint gl_texture;
-    void *vaglx_surface;
+    GLXFBConfig fbc;
+    Pixmap pixmap;
+    GLXPixmap glxpixmap;
+    void (*glXBindTexImage)(Display *dpy, GLXDrawable draw, int buffer, int *a);
+    void (*glXReleaseTexImage)(Display *dpy, GLXDrawable draw, int buffer);
 };
 
 static void destroy_texture(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
     GL *gl = hw->gl;
-    VAStatus status;
 
-    if (p->vaglx_surface) {
-        va_lock(p->ctx);
-        status = vaDestroySurfaceGLX(p->display, p->vaglx_surface);
-        va_unlock(p->ctx);
-        CHECK_VA_STATUS(p, "vaDestroySurfaceGLX()");
-        p->vaglx_surface = NULL;
+    if (p->glxpixmap) {
+        p->glXReleaseTexImage(p->xdisplay, p->glxpixmap, GLX_FRONT_EXT);
+        glXDestroyPixmap(p->xdisplay, p->glxpixmap);
     }
+    p->glxpixmap = 0;
+
+    if (p->pixmap)
+        XFreePixmap(p->xdisplay, p->pixmap);
+    p->pixmap = 0;
 
     gl->DeleteTextures(1, &p->gl_texture);
     p->gl_texture = 0;
@@ -67,10 +73,21 @@ static int create(struct gl_hwdec *hw)
     Display *x11disp = glXGetCurrentDisplay();
     if (!x11disp)
         return -1;
+    int x11scr = DefaultScreen(x11disp);
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
     p->log = hw->log;
-    p->display = vaGetDisplayGLX(x11disp);
+    p->xdisplay = x11disp;
+    const char *glxext = glXQueryExtensionsString(x11disp, x11scr);
+    if (!glxext || !strstr(glxext, "GLX_EXT_texture_from_pixmap"))
+        return -1;
+    p->glXBindTexImage =
+        (void*)glXGetProcAddressARB((void*)"glXBindTexImageEXT");
+    p->glXReleaseTexImage =
+        (void*)glXGetProcAddressARB((void*)"glXReleaseTexImageEXT");
+    if (!p->glXBindTexImage || !p->glXReleaseTexImage)
+        return -1;
+    p->display = vaGetDisplay(x11disp);
     if (!p->display)
         return -1;
     p->ctx = va_initialize(p->display, p->log);
@@ -82,6 +99,32 @@ static int create(struct gl_hwdec *hw)
         destroy(hw);
         return -1;
     }
+
+    int attribs[] = {
+        GLX_BIND_TO_TEXTURE_RGBA_EXT, True,
+        GLX_DRAWABLE_TYPE, GLX_PIXMAP_BIT,
+        GLX_BIND_TO_TEXTURE_TARGETS_EXT, GLX_TEXTURE_2D_BIT_EXT,
+        GLX_Y_INVERTED_EXT, True,
+        GLX_DOUBLEBUFFER, False,
+        GLX_RED_SIZE, 8,
+        GLX_GREEN_SIZE, 8,
+        GLX_BLUE_SIZE, 8,
+        GLX_ALPHA_SIZE, 0,
+        None
+    };
+
+    int fbcount;
+    GLXFBConfig *fbc = glXChooseFBConfig(x11disp, x11scr, attribs, &fbcount);
+    if (fbcount)
+        p->fbc = fbc[0];
+    if (fbc)
+        XFree(fbc);
+    if (!fbcount) {
+        MP_VERBOSE(p, "No texture-from-pixmap support.\n");
+        destroy(hw);
+        return -1;
+    }
+
     hw->hwctx = &p->ctx->hwctx;
     hw->converted_imgfmt = IMGFMT_RGB0;
     return 0;
@@ -91,7 +134,6 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 {
     struct priv *p = hw->priv;
     GL *gl = hw->gl;
-    VAStatus status;
 
     destroy_texture(hw);
 
@@ -103,15 +145,29 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, params->w, params->h, 0,
-                   GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    va_lock(p->ctx);
-    status = vaCreateSurfaceGLX(p->display, GL_TEXTURE_2D,
-                                p->gl_texture, &p->vaglx_surface);
-    va_unlock(p->ctx);
-    return CHECK_VA_STATUS(p, "vaCreateSurfaceGLX()") ? 0 : -1;
+    p->pixmap = XCreatePixmap(p->xdisplay,
+                        RootWindow(p->xdisplay, DefaultScreen(p->xdisplay)),
+                        params->w, params->h, 24);
+    if (!p->pixmap) {
+        MP_FATAL(hw, "could not create pixmap\n");
+        return -1;
+    }
+
+    int attribs[] = {
+        GLX_TEXTURE_TARGET_EXT, GLX_TEXTURE_2D_EXT,
+        GLX_TEXTURE_FORMAT_EXT, GLX_TEXTURE_FORMAT_RGB_EXT,
+        GLX_MIPMAP_TEXTURE_EXT, False,
+        None,
+    };
+    p->glxpixmap = glXCreatePixmap(p->xdisplay, p->fbc, p->pixmap, attribs);
+
+    gl->BindTexture(GL_TEXTURE_2D, p->gl_texture);
+    p->glXBindTexImage(p->xdisplay, p->glxpixmap, GLX_FRONT_EXT, NULL);
+    gl->BindTexture(GL_TEXTURE_2D, 0);
+
+    return 0;
 }
 
 static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
@@ -120,16 +176,17 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     struct priv *p = hw->priv;
     VAStatus status;
 
-    if (!p->vaglx_surface)
+    if (!p->pixmap)
         return -1;
 
     va_lock(p->ctx);
-    status = vaCopySurfaceGLX(p->display, p->vaglx_surface,
-                              va_surface_id(hw_image),
-                              va_get_colorspace_flag(hw_image->params.colorspace));
+    status = vaPutSurface(p->display, va_surface_id(hw_image), p->pixmap,
+                          0, 0, hw_image->w, hw_image->h,
+                          0, 0, hw_image->w, hw_image->h,
+                          NULL, 0,
+                          va_get_colorspace_flag(hw_image->params.colorspace));
+    CHECK_VA_STATUS(p, "vaPutSurface()");
     va_unlock(p->ctx);
-    if (!CHECK_VA_STATUS(p, "vaCopySurfaceGLX()"))
-        return -1;
 
     out_textures[0] = p->gl_texture;
     return 0;
