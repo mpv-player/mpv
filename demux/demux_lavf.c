@@ -584,16 +584,10 @@ static void handle_stream(demuxer_t *demuxer, int i)
         break;
     }
     case AVMEDIA_TYPE_ATTACHMENT: {
-        AVDictionaryEntry *ftag = av_dict_get(st->metadata, "filename",
-                                              NULL, 0);
+        AVDictionaryEntry *ftag = av_dict_get(st->metadata, "filename", NULL, 0);
         char *filename = ftag ? ftag->value : NULL;
-        char *mimetype = NULL;
-        switch (st->codec->codec_id) {
-        case AV_CODEC_ID_TTF: mimetype = "application/x-truetype-font"; break;
-#if LIBAVFORMAT_VERSION_MICRO >= 100
-        case AV_CODEC_ID_OTF: mimetype = "application/vnd.ms-opentype"; break;
-#endif
-        }
+        AVDictionaryEntry *mt = av_dict_get(st->metadata, "mimetype", NULL, 0);
+        char *mimetype = mt ? mt->value : NULL;
         if (mimetype) {
             demuxer_add_attachment(demuxer, bstr0(filename), bstr0(mimetype),
                                    (struct bstr){codec->extradata,
