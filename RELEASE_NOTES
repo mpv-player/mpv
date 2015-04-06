@@ -1,0 +1,114 @@
+Release 0.9.0 (Draft)
+=====================
+
+Changes
+-------
+
+Changes that may break users' config files have been annotated with a `(!)`.
+
+- Note: mpv is not compatible with Lua 5.3. Lua 5.1 or 5.2 is required.
+- The minimum required libass version is now 0.12.1 or newer.
+- The minimum required FFmpeg version is now 2.4.0 (equiv. Libav 11) or newer.
+- `(!)` The internal libmpg123 support was removed.
+- `(!)` The LIRC support was removed. Configure LIRC remotes as input devices instead.
+- `(!)` The Linux Joystick support was removed.
+- `(!)` `--ass-use-margins` has been renamed to `--sub-use-margins` and applies
+  only to plain-text (non-ASS) subtitles (enabled by default). The new
+  `--ass-force-margins` option applies only to ASS subtitles (disabled by
+  default). To get the old behaviour back, enable both at the same time.
+- `(!)` The `--sub-scale-with-window` option now only applies to plain text
+  (non-ASS) subtitles (enabled by default). The new `--ass-scale-with-window`
+  option does the same but only with ASS subtitles (disabled by default).
+- `(!)` The range for the `param1` for the `gaussian` `vo_opengl` scaler has
+  been redefined. Instead of being an arbitrary 1-100 range, have a default
+  value of 1.0, and anything higher is blurrier.
+- `(!)` The `seek`, `playlist_next, `playlist_prev`, `loadfile` and `loadlist`
+  parameters no longer accept numerical parameters where symbolic parameter
+  names exist.
+- `(!)` `vo_opengl` changes:
+  - `(!)` The `smoothmotion` suboption has been renamed to `interpolation`.
+    The old name is still supported for now.
+  - `(!)` The `bilinear_slow` scaler has been renamed to `triangle`.
+  - `(!)` `scale-down` has been renamed to `dscale` and now has its own set of
+    config options (e.g. `dscale-radius`).
+  - `(!)` Scaler radius no longer defaults to `3` but to a preferred value
+    that may be different for each filter.
+  - The `scale-radius` option may now go down as low as `0.5`, which is the
+    value used by the `nearest` filter.
+  - `spline36` is the new `cscale` default for `opengl-hq`.
+- `(!)` `vf_format` no longer converts video to YUYV if there is no parameter.
+  Video is now passed unchanged unless a format is specifically requested.
+- `(!)` The `--colormatrix`, `--colormatrix-input-range`,
+  `--colormatrix-output-range` and `--colormatrix-primaries` options have been
+  converted into `vf_format` suboptions. See commit 27715b7 and the manual for
+  details.
+- The `device` subption to `ao_wasapi` has been deprecated in favor of
+  `--audio-device`.
+- `--video-rotate` now allows 360 as an argument instead of stopping at 359.
+- Several improvements to `af_scaletempo`.
+- Options that have multiple options and also include a "yes" option now
+  default to that if specified with no arguments.
+- The default value of `--cache-default` is now 150000 (150 MB, ~146 MiB).
+
+Bug fixes
+---------
+
+- mpv no longer saves position on files that can't be resumed (issue #1701).
+- (X11) Fix the player thinking the mouse has left the window in some WMs /
+  embeddings (issue #1672).
+- mpv no longer freezes on wayland when the compositor stops asking it to draw
+  itself (e.g. when minimized) (issue #249).
+- `.ac3` files are no longer rejected by `--audio-file-auto` (issue #1759).
+- `ao_wasapi` now automatically enables `exclusive` when passthrough is
+  attempted (issue #1742).
+- Attempt to fix flickering on Intel VAAPI drivers (issue #1765).
+
+New features
+------------
+
+- `vo_opengl` features:
+  - Added `ewa_ginseng`, `ewa_hanning`, `robidoux`, `oversample` scalers.
+  - Added `gamma-auto` option that uses ambient light sensors to automatically
+    adjust the video gamma. See commit c028d78 for details.
+  - Added `blend-subtitles` option to draw subtitles directly into the video
+    instead of rendered afterwards. Potentially necessary for correct rendering
+    with files that use ASS subtitles for typesetting in combination with an
+    `icc-profile`. Enabled by default on `opengl-hq`. See warning on the
+    manual.
+  - There is now a `tscaler` option, used to choose the temporal scaler used
+    in the `interpolation` mode (previously `smoothmotion`).
+  - Some scalers now have aliases with "sharp" appended that have different
+    defaults from the base filter (`robidouxsharp`, `ewa_lanczossharp`).
+  - There is also an opposing "soft" alias to `ewa_lanczos`.
+  - The Jinc-using filters (EWA filters) now have a `scale-blur` parameter to
+    adjust the amount of blur that the filter produces. Deviating from the
+    default may introduce artifacts.
+- Add support to pitch correct stretched audio with librubberband.
+- Add support for the Raspberry Pi 2's hardware decoder when FFmpeg (or Libav)
+  is built with `--enable-mmal`. See commit 8fff125 for details.
+- The `--cache` option now accepts a "yes" option, that always enables a
+  `--cache-default`-sized cache on all cases a cache can be used, unless
+  `--cache-default` disables caching.
+- `ao_pulse`, `ao_coreaudio` and `ao_wasapi` now support device hotplugging.
+- New `--osd-align-x` and `--osd-align-y` options can be used to align the OSD
+  independently from subtitles.
+- New `--osd-bold` and `--sub-text-bold` options can be enabled to bold all
+  OSD or plain-text subtitle text, respectively.
+- Added a default keybind to the `u` key that enables/disables ASS style
+  overriding. When enabled, is equivalent to `--ass-style-override=force`.
+- There is now a `MOUSE_ENTER` keybind, that is called when the mouse cursor
+  enters the VO from outside.
+- The new `--ytdl-params` option can be set to arguments that are always given
+  to `youtube-dl` invocations. There is no sanity checking, so invalid options
+  can prevent `mpv` from working with http URLs.
+- `vo_direct3d_shaders` now supports NV12 colorspace without using stretchrect,
+  but it seems no drivers actually support that.
+- (Client API) Added a `rescan_external_files` command, as requested on issue
+  #1586.
+- (Client API) If enabled, initializing the Client API will now also load the
+  user's `mpv.conf`.
+- The `--input-file` argument may now also be a file descriptor in the form
+  "fd://N", where N is the FD number.
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.8.0..v0.9.0` in the git repository.
