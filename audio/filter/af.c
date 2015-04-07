@@ -561,6 +561,23 @@ static int af_reinit(struct af_stream *s)
                 retry++;
                 continue;
             }
+            // If the format conversion is (probably) caused by spdif, then
+            // (as a feature) drop the filter, instead of failing hard.
+            int fmt_in1 = af->prev->data->format;
+            int fmt_in2 = in.format;
+            if (af_fmt_is_valid(fmt_in1) && af_fmt_is_valid(fmt_in2)) {
+                bool spd1 = AF_FORMAT_IS_IEC61937(fmt_in1);
+                bool spd2 = AF_FORMAT_IS_IEC61937(fmt_in2);
+                if (spd1 != spd2) {
+                    MP_WARN(af, "Filter %s apparently cannot be used due to "
+                                "spdif passthrough - removing it.\n",
+                                af->info->name);
+                    struct af_instance *aft = af->prev;
+                    af_remove(s, af);
+                    af = aft->next;
+                    break;
+                }
+            }
             goto negotiate_error;
         }
         case AF_DETACH: { // Filter is redundant and wants to be unloaded
