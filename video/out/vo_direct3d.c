@@ -1517,7 +1517,7 @@ static mp_image_t *get_window_screenshot(d3d_priv *priv)
     if (width < 1 || height < 1)
         goto error_exit;
 
-    image = mp_image_alloc(IMGFMT_BGR32, width, height);
+    image = mp_image_alloc(IMGFMT_BGR0, width, height);
     if (!image)
         goto error_exit;
 
