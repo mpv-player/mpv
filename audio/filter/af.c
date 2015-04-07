@@ -689,8 +689,14 @@ int af_init(struct af_stream *s)
    to the stream s. The filter will be inserted somewhere nice in the
    list of filters. The return value is a pointer to the new filter,
    If the filter couldn't be added the return value is NULL. */
-struct af_instance *af_add(struct af_stream *s, char *name, char **args)
+struct af_instance *af_add(struct af_stream *s, char *name, char *label,
+                           char **args)
 {
+    assert(label);
+
+    if (af_find_by_label(s, label))
+        return NULL;
+
     struct af_instance *new;
     // Insert the filter somewhere nice
     if (af_is_conversion_filter(s->first->next))
@@ -699,17 +705,14 @@ struct af_instance *af_add(struct af_stream *s, char *name, char **args)
         new = af_prepend(s, s->first->next, name, args);
     if (!new)
         return NULL;
+    new->label = talloc_strdup(new, label);
 
     // Reinitalize the filter list
     if (af_reinit(s) != AF_OK) {
-        af_remove(s, new);
-        if (af_reinit(s) != AF_OK) {
-            af_uninit(s);
-            af_init(s);
-        }
+        af_remove_by_label(s, label);
         return NULL;
     }
-    return new;
+    return af_find_by_label(s, label);
 }
 
 struct af_instance *af_find_by_label(struct af_stream *s, char *label)

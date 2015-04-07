@@ -43,23 +43,6 @@
 #include "core.h"
 #include "command.h"
 
-static int try_filter(struct MPContext *mpctx,
-                      char *name, char *label, char **args)
-{
-    struct dec_audio *d_audio = mpctx->d_audio;
-
-    if (af_find_by_label(d_audio->afilter, label))
-        return 0;
-
-    struct af_instance *af = af_add(d_audio->afilter, name, args);
-    if (!af)
-        return -1;
-
-    af->label = talloc_strdup(af, label);
-
-    return 1;
-}
-
 static int update_playback_speed_filters(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -90,7 +73,7 @@ static int update_playback_speed_filters(struct MPContext *mpctx)
 
         char *filter = method == AF_CONTROL_SET_PLAYBACK_SPEED
                      ? "scaletempo" : "lavrresample";
-        if (try_filter(mpctx, filter, "playback-speed", NULL) < 0)
+        if (af_add(afs, filter, "playback-speed", NULL) < 0)
             return -1;
         // Try again.
         if (!af_control_any_rev(afs, method, &speed))
