@@ -117,12 +117,12 @@ OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device)
     if (mp_msg_test(ao->log, MSGL_V)) {
         char *desc;
         err = CA_GET_STR(*device, kAudioObjectPropertyName, &desc);
-        CHECK_CA_ERROR("could not get selected audio device name");
-
-        MP_VERBOSE(ao, "selected audio output device: %s (%" PRIu32 ")\n",
-                       desc, *device);
-
-        talloc_free(desc);
+        CHECK_CA_WARN("could not get selected audio device name");
+        if (err == noErr) {
+            MP_VERBOSE(ao, "selected audio output device: %s (%" PRIu32 ")\n",
+                           desc, *device);
+            talloc_free(desc);
+        }
     }
 
 coreaudio_error:
