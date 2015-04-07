@@ -2,7 +2,7 @@ language: c
 
 os:
   - linux
-#  - osx
+  - osx
 env:
   matrix:
     - LIBAV=libav-stable
