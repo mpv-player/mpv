@@ -195,7 +195,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 15)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 16)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.

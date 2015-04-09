@@ -1709,6 +1709,10 @@ int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4])
 {
     return MPV_ERROR_NOT_IMPLEMENTED;
 }
+int mpv_opengl_cb_report_flip(mpv_opengl_cb_context *ctx, int64_t time)
+{
+    return MPV_ERROR_NOT_IMPLEMENTED;
+}
 int mpv_opengl_cb_uninit_gl(mpv_opengl_cb_context *ctx)
 {
     return MPV_ERROR_NOT_IMPLEMENTED;

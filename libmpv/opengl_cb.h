@@ -199,6 +199,18 @@ int mpv_opengl_cb_init_gl(mpv_opengl_cb_context *ctx, const char *exts,
 int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4]);
 
 /**
+ * Tell the renderer that a frame was flipped at the given time. This is
+ * optional, but can help the player to achieve better timing.
+ *
+ * If this is called while no video or no OpenGL is initialized, it is ignored.
+ *
+ * @param time The mpv time (using mpv_get_time_us()) at which the flip call
+ *             returned. If 0 is passed, mpv_get_time_us() is used instead.
+ * @return error code
+ */
+int mpv_opengl_cb_report_flip(mpv_opengl_cb_context *ctx, int64_t time);
+
+/**
  * Destroy the mpv OpenGL state.
  *
  * If video is still active (e.g. a file playing), video will be disabled

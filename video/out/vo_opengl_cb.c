@@ -19,6 +19,7 @@
 #include "vo.h"
 #include "video/mp_image.h"
 #include "sub/osd.h"
+#include "osdep/timer.h"
 
 #include "common/global.h"
 #include "player/client.h"
@@ -76,6 +77,7 @@ struct mpv_opengl_cb_context {
     struct m_config *new_opts_cfg;
     bool eq_changed;
     struct mp_csp_equalizer eq;
+    int64_t recent_flip;
 
     // --- All of these can only be accessed from the thread where the host
     //     application's OpenGL context is current - i.e. only while the
@@ -342,6 +344,15 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
     return left;
 }
 
+int mpv_opengl_cb_report_flip(mpv_opengl_cb_context *ctx, int64_t time)
+{
+    pthread_mutex_lock(&ctx->lock);
+    ctx->recent_flip = time > 0 ? time : mp_time_us();
+    pthread_mutex_unlock(&ctx->lock);
+
+    return 0;
+}
+
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct vo_priv *p = vo->priv;
@@ -485,6 +496,16 @@ static int control(struct vo *vo, uint32_t request, void *data)
         struct mp_hwdec_info **arg = data;
         *arg = p->ctx ? &p->ctx->hwdec_info : NULL;
         return true;
+    }
+    case VOCTRL_GET_RECENT_FLIP_TIME: {
+        int r = VO_FALSE;
+        pthread_mutex_lock(&p->ctx->lock);
+        if (p->ctx->recent_flip) {
+            *(int64_t *)data = p->ctx->recent_flip;
+            r = VO_TRUE;
+        }
+        pthread_mutex_unlock(&p->ctx->lock);
+        return r;
     }
     }
 

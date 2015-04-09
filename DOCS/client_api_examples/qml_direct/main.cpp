@@ -96,6 +96,8 @@ void MpvObject::handleWindowChanged(QQuickWindow *win)
             this, &MpvObject::sync, Qt::DirectConnection);
     connect(win, &QQuickWindow::sceneGraphInvalidated,
             this, &MpvObject::cleanup, Qt::DirectConnection);
+    connect(win, &QQuickWindow::frameSwapped,
+            this, &MpvObject::swapped, Qt::DirectConnection);
     win->setClearBeforeRendering(false);
 }
 
@@ -108,6 +110,11 @@ void MpvObject::sync()
     }
     renderer->window = window();
     renderer->size = window()->size() * window()->devicePixelRatio();
+}
+
+void MpvObject::swapped()
+{
+    mpv_opengl_cb_report_flip(mpv_gl, 0);
 }
 
 void MpvObject::cleanup()

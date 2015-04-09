@@ -26,6 +26,7 @@ API changes
 ::
 
  --- mpv 0.9.0 will be released ---
+ 1.16   - add mpv_opengl_cb_report_flip()
  1.15   - mpv_initialize() will now load config files. This requires setting
           the "config" and "config-dir" options. In particular, it will load
           mpv.conf.
