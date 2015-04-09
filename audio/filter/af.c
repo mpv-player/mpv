@@ -561,6 +561,23 @@ static int af_reinit(struct af_stream *s)
                 retry++;
                 continue;
             }
+            // If the format conversion is (probably) caused by spdif, then
+            // (as a feature) drop the filter, instead of failing hard.
+            int fmt_in1 = af->prev->data->format;
+            int fmt_in2 = in.format;
+            if (af_fmt_is_valid(fmt_in1) && af_fmt_is_valid(fmt_in2)) {
+                bool spd1 = AF_FORMAT_IS_IEC61937(fmt_in1);
+                bool spd2 = AF_FORMAT_IS_IEC61937(fmt_in2);
+                if (spd1 != spd2) {
+                    MP_WARN(af, "Filter %s apparently cannot be used due to "
+                                "spdif passthrough - removing it.\n",
+                                af->info->name);
+                    struct af_instance *aft = af->prev;
+                    af_remove(s, af);
+                    af = aft->next;
+                    break;
+                }
+            }
             goto negotiate_error;
         }
         case AF_DETACH: { // Filter is redundant and wants to be unloaded
@@ -689,8 +706,14 @@ int af_init(struct af_stream *s)
    to the stream s. The filter will be inserted somewhere nice in the
    list of filters. The return value is a pointer to the new filter,
    If the filter couldn't be added the return value is NULL. */
-struct af_instance *af_add(struct af_stream *s, char *name, char **args)
+struct af_instance *af_add(struct af_stream *s, char *name, char *label,
+                           char **args)
 {
+    assert(label);
+
+    if (af_find_by_label(s, label))
+        return NULL;
+
     struct af_instance *new;
     // Insert the filter somewhere nice
     if (af_is_conversion_filter(s->first->next))
@@ -699,17 +722,14 @@ struct af_instance *af_add(struct af_stream *s, char *name, char **args)
         new = af_prepend(s, s->first->next, name, args);
     if (!new)
         return NULL;
+    new->label = talloc_strdup(new, label);
 
     // Reinitalize the filter list
     if (af_reinit(s) != AF_OK) {
-        af_remove(s, new);
-        if (af_reinit(s) != AF_OK) {
-            af_uninit(s);
-            af_init(s);
-        }
+        af_remove_by_label(s, label);
         return NULL;
     }
-    return new;
+    return af_find_by_label(s, label);
 }
 
 struct af_instance *af_find_by_label(struct af_stream *s, char *label)

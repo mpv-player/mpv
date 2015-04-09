@@ -49,8 +49,8 @@ static const struct sd_functions *const sd_list[] = {
     &sd_movtext,
     &sd_srt,
     &sd_lavf_srt,
-    &sd_lavc_conv,
     &sd_microdvd,
+    &sd_lavc_conv,
     NULL
 };
 
@@ -344,7 +344,7 @@ static void multiply_timings(struct packet_list *subs, double factor)
     }
 }
 
-#define MS_TS(f_ts) ((int)((f_ts) * 1000 + 0.5))
+#define MS_TS(f_ts) ((long long)((f_ts) * 1000 + 0.5))
 
 // Remove overlaps and fill gaps between adjacent subtitle packets. This is done
 // by adjusting the duration of the earlier packet. If the gaps or overlap are

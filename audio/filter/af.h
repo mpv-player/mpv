@@ -141,7 +141,8 @@ struct af_stream *af_new(struct mpv_global *global);
 void af_destroy(struct af_stream *s);
 int af_init(struct af_stream *s);
 void af_uninit(struct af_stream *s);
-struct af_instance *af_add(struct af_stream *s, char *name, char **args);
+struct af_instance *af_add(struct af_stream *s, char *name, char *label,
+                           char **args);
 int af_remove_by_label(struct af_stream *s, char *label);
 struct af_instance *af_find_by_label(struct af_stream *s, char *label);
 struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg);

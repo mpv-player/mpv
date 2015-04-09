@@ -421,7 +421,7 @@ static struct mp_image *take_screenshot(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    struct mp_image *img = mp_image_alloc(IMGFMT_BGRA, p->w, p->h);
+    struct mp_image *img = mp_image_alloc(IMGFMT_BGR0, p->w, p->h);
     if (!img)
         return NULL;
 

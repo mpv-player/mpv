@@ -376,6 +376,7 @@ static int try_open_device(struct ao *ao, const char *device)
                         IEC958_AES1_CON_ORIGINAL | IEC958_AES1_CON_PCM_CODER,
                         map_iec958_srate(ao->samplerate));
         const char *ac3_device = append_params(tmp, device, params);
+        MP_VERBOSE(ao, "opening device '%s' => '%s'\n", device, ac3_device);
         int err = snd_pcm_open
                     (&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, 0);
         talloc_free(tmp);
@@ -383,6 +384,7 @@ static int try_open_device(struct ao *ao, const char *device)
             return 0;
     }
 
+    MP_VERBOSE(ao, "opening device '%s'\n", device);
     return snd_pcm_open(&p->alsa, device, SND_PCM_STREAM_PLAYBACK, 0);
 }
 
@@ -408,22 +410,13 @@ static int init_device(struct ao *ao)
     struct priv *p = ao->priv;
     int err;
 
-    if (!p->cfg_ni)
-        ao->format = af_fmt_from_planar(ao->format);
-
     const char *device = "default";
-    if (AF_FORMAT_IS_IEC61937(ao->format)) {
+    if (AF_FORMAT_IS_IEC61937(ao->format))
         device = "iec958";
-        MP_VERBOSE(ao, "playing AC3/iec61937/iec958, %i channels\n",
-                   ao->channels.num);
-    }
     if (ao->device)
         device = ao->device;
     if (p->cfg_device && p->cfg_device[0])
         device = p->cfg_device;
-
-    MP_VERBOSE(ao, "using device: %s\n", device);
-    MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());
 
     err = try_open_device(ao, device);
     CHECK_ALSA_ERROR("Playback open error");
@@ -551,8 +544,11 @@ static int init_device(struct ao *ao)
 
         err = snd_pcm_set_chmap(p->alsa, alsa_chmap);
         if (err == -ENXIO) {
-            MP_WARN(ao, "Device does not support requested channel map (%s)\n",
-                    mp_chmap_to_str(&dev_chmap));
+            // I consider this an ALSA bug: the channel map was reported as
+            // supported, but we still can't set it. It happens virtually
+            // always with dmix, though.
+            MP_VERBOSE(ao, "Device does not support requested channel map (%s)\n",
+                       mp_chmap_to_str(&dev_chmap));
         } else {
             CHECK_ALSA_WARN("Channel map setup failed");
         }
@@ -607,6 +603,7 @@ static int init_device(struct ao *ao)
                 // the number of channels to 2 either, because the hw params
                 // are already set! So just fuck it and reopen the device with
                 // the chmap "cleaned out" of NA entries.
+                MP_VERBOSE(ao, "Working around braindead ALSA behavior.\n");
                 err = snd_pcm_close(p->alsa);
                 p->alsa = NULL;
                 CHECK_ALSA_ERROR("pcm close error");
@@ -678,6 +675,12 @@ alsa_error:
 
 static int init(struct ao *ao)
 {
+    struct priv *p = ao->priv;
+    if (!p->cfg_ni)
+        ao->format = af_fmt_from_planar(ao->format);
+
+    MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());
+
     int r = init_device(ao);
     if (r == INIT_BRAINDEATH)
         r = init_device(ao); // retry with normalized channel layout

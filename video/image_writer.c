@@ -221,22 +221,42 @@ static int write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
 
 #endif
 
+static int get_target_format(struct image_writer_ctx *ctx, int srcfmt)
+{
+    if (!ctx->writer->lavc_codec)
+        goto unknown;
+
+    struct AVCodec *codec = avcodec_find_encoder(ctx->writer->lavc_codec);
+    if (!codec)
+        goto unknown;
+
+    const enum AVPixelFormat *pix_fmts = codec->pix_fmts;
+    if (!pix_fmts)
+        goto unknown;
+
+    int current = 0;
+    for (int n = 0; pix_fmts[n] != AV_PIX_FMT_NONE; n++) {
+        int fmt = pixfmt2imgfmt(pix_fmts[n]);
+        if (!fmt)
+            continue;
+        current = current ? mp_imgfmt_select_best(current, fmt, srcfmt) : fmt;
+    }
+
+    if (!current)
+        goto unknown;
+
+    return current;
+
+unknown:
+    return IMGFMT_RGB24;
+}
+
 static const struct img_writer img_writers[] = {
     { "png", write_lavc, .lavc_codec = AV_CODEC_ID_PNG },
     { "ppm", write_lavc, .lavc_codec = AV_CODEC_ID_PPM },
-    { "pgm", write_lavc,
-      .lavc_codec = AV_CODEC_ID_PGM,
-      .pixfmts = (const int[]) { IMGFMT_Y8, 0 },
-    },
-    { "pgmyuv", write_lavc,
-      .lavc_codec = AV_CODEC_ID_PGMYUV,
-      .pixfmts = (const int[]) { IMGFMT_420P, 0 },
-    },
-    { "tga", write_lavc,
-      .lavc_codec = AV_CODEC_ID_TARGA,
-      .pixfmts = (const int[]) { IMGFMT_BGR24, IMGFMT_BGRA, IMGFMT_RGB555,
-                                 IMGFMT_Y8, 0},
-    },
+    { "pgm", write_lavc, .lavc_codec = AV_CODEC_ID_PGM },
+    { "pgmyuv", write_lavc, .lavc_codec = AV_CODEC_ID_PGMYUV },
+    { "tga", write_lavc, .lavc_codec = AV_CODEC_ID_TARGA },
 #if HAVE_JPEG
     { "jpg", write_jpeg },
     { "jpeg", write_jpeg },
@@ -280,17 +300,7 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
 
     const struct img_writer *writer = get_writer(opts);
     struct image_writer_ctx ctx = { log, opts, writer };
-    int destfmt = IMGFMT_RGB24;
-
-    if (writer->pixfmts) {
-        destfmt = writer->pixfmts[0];   // default to first pixel format
-        for (const int *fmt = writer->pixfmts; *fmt; fmt++) {
-            if (*fmt == image->imgfmt) {
-                destfmt = *fmt;
-                break;
-            }
-        }
-    }
+    int destfmt = get_target_format(&ctx, image->imgfmt);
 
     // Caveat: no colorspace/levels conversion done if pixel formats equal
     //         it's unclear what colorspace/levels the target wants

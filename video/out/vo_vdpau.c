@@ -831,7 +831,7 @@ static struct mp_image *read_output_surface(struct vo *vo,
     if (!vo->params)
         return NULL;
 
-    struct mp_image *image = mp_image_alloc(IMGFMT_BGR32, width, height);
+    struct mp_image *image = mp_image_alloc(IMGFMT_BGR0, width, height);
     if (!image)
         return NULL;
 

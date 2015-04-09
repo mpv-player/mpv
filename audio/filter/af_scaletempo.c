@@ -303,11 +303,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
         int nch = data->nch;
         int use_int = 0;
 
-        if (AF_FORMAT_IS_SPECIAL(data->format)) {
-            MP_ERR(af, "Changing speed is not supported with spdif formats.\n");
-            return AF_ERROR;
-        }
-
         mp_audio_force_interleaved_format(data);
         mp_audio_copy_config(af->data, data);
 

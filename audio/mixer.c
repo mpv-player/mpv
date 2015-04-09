@@ -135,7 +135,7 @@ static void setvolume_internal(struct mixer *mixer, float l, float r)
         if (gain == 1.0)
             return;
         MP_VERBOSE(mixer, "Inserting volume filter.\n");
-        if (!(af_add(mixer->af, "volume", NULL)
+        if (!(af_add(mixer->af, "volume", "softvol", NULL)
               && af_control_any_rev(mixer->af, AF_CONTROL_SET_VOLUME, &gain)))
             MP_ERR(mixer, "No volume control available.\n");
     }
@@ -222,7 +222,7 @@ void mixer_setbalance(struct mixer *mixer, float val)
     if (val == 0)
         return;
 
-    if (!(af_pan_balance = af_add(mixer->af, "pan", NULL))) {
+    if (!(af_pan_balance = af_add(mixer->af, "pan", "autopan", NULL))) {
         MP_ERR(mixer, "No balance control available.\n");
         return;
     }

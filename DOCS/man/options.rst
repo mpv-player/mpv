@@ -887,8 +887,7 @@ Audio
     delay the audio, and negative values delay the video.
 
 ``--no-audio``
-    Do not play sound. With some demuxers this may not work. In those cases
-    you can try ``--ao=null`` instead.
+    Do not play sound.
 
 ``--mute=<auto|yes|no>``
     Set startup audio mute status. ``auto`` (default) will not change the mute

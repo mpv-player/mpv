@@ -356,6 +356,23 @@ The ``mp`` module is preloaded, although it can be loaded manually with
             (``true``). This value is used when the timer expires (but before
             the timer callback function fn is run).
 
+    Note that these are method, and you have to call them using ``:`` instead
+    of ``.`` (Refer to http://www.lua.org/manual/5.2/manual.html#3.4.9 .)
+
+    Example:
+
+    ::
+
+        seconds = 0
+        timer = mp.add_periodic_timer(1, function()
+            print("called every second")
+            # stop it after 10 seconds
+            seconds = seconds + 1
+            if seconds >= 10 then
+                timer:kill()
+            end
+        end)
+
 
 ``mp.get_opt(key)``
     Return a setting from the ``--script-opts`` option. It's up to the user and
