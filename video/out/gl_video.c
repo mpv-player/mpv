@@ -2612,11 +2612,6 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
     uninit_rendering(p);
 }
 
-void gl_video_get_colorspace(struct gl_video *p, struct mp_image_params *params)
-{
-    *params = p->image_params; // supports everything
-}
-
 struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p)
 {
     return &p->video_eq;

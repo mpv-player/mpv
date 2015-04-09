@@ -89,7 +89,6 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t);
 void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
                      struct mp_rect *src, struct mp_rect *dst,
                      struct mp_osd_res *osd);
-void gl_video_get_colorspace(struct gl_video *p, struct mp_image_params *params);
 struct mp_csp_equalizer;
 struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p);
 void gl_video_eq_update(struct gl_video *p);
