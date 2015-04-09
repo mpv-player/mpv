@@ -96,8 +96,6 @@ typedef struct mp_image {
     int fields;
 
     /* redundant */
-    int chroma_width;
-    int chroma_height;
     int plane_w[MP_MAX_PLANES];
     int plane_h[MP_MAX_PLANES];
 

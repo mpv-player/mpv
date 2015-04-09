@@ -481,9 +481,9 @@ static struct mp_image *chroma_up(struct mp_draw_sub_cache *cache, int imgfmt,
         // The whole point is not having swscale copy the Y plane
         struct mp_image t_dst = *temp;
         mp_image_setfmt(&t_dst, IMGFMT_Y8);
-        mp_image_set_size(&t_dst, temp->chroma_width, temp->chroma_height);
+        mp_image_set_size(&t_dst, temp->w, temp->h);
         struct mp_image t_src = t_dst;
-        mp_image_set_size(&t_src, src->chroma_width, src->chroma_height);
+        mp_image_set_size(&t_src, src->w >> 1, src->h >> 1);
         for (int c = 0; c < 2; c++) {
             t_dst.planes[0] = temp->planes[1 + c];
             t_dst.stride[0] = temp->stride[1 + c];
@@ -511,10 +511,9 @@ static void chroma_down(struct mp_image *old_src, struct mp_image *temp)
             assert(temp->planes[0] == old_src->planes[0]);
             struct mp_image t_dst = *temp;
             mp_image_setfmt(&t_dst, IMGFMT_Y8);
-            mp_image_set_size(&t_dst, old_src->chroma_width,
-                              old_src->chroma_height);
+            mp_image_set_size(&t_dst, old_src->w >> 1, old_src->h >> 1);
             struct mp_image t_src = t_dst;
-            mp_image_set_size(&t_src, temp->chroma_width, temp->chroma_height);
+            mp_image_set_size(&t_src, temp->w, temp->h);
             for (int c = 0; c < 2; c++) {
                 t_dst.planes[0] = old_src->planes[1 + c];
                 t_dst.stride[0] = old_src->stride[1 + c];
