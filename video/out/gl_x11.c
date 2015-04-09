@@ -231,6 +231,7 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
         MP_ERR(vo, "no GLX support present\n");
         return false;
     }
+    MP_VERBOSE(vo, "GLX chose FB config with ID 0x%x\n", (int)(intptr_t)fbc);
 
     glx_ctx->fbc = fbc;
     glx_ctx->vinfo = glXGetVisualFromFBConfig(vo->x11->display, fbc);
