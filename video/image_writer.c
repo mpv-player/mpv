@@ -77,6 +77,7 @@ struct image_writer_ctx {
     struct mp_log *log;
     const struct image_writer_opts *opts;
     const struct img_writer *writer;
+    struct mp_imgfmt_desc original_format;
 };
 
 struct img_writer {
@@ -200,6 +201,9 @@ static int write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
     cinfo.optimize_coding = ctx->opts->jpeg_optimize;
     cinfo.smoothing_factor = ctx->opts->jpeg_smooth;
 
+    cinfo.comp_info[0].h_samp_factor = 1 << ctx->original_format.chroma_xs;
+    cinfo.comp_info[0].v_samp_factor = 1 << ctx->original_format.chroma_ys;
+
     if (ctx->opts->jpeg_progressive)
         jpeg_simple_progression(&cinfo);
 
@@ -299,7 +303,7 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
         opts = &defs;
 
     const struct img_writer *writer = get_writer(opts);
-    struct image_writer_ctx ctx = { log, opts, writer };
+    struct image_writer_ctx ctx = { log, opts, writer, image->fmt };
     int destfmt = get_target_format(&ctx, image->imgfmt);
 
     // Caveat: no colorspace/levels conversion done if pixel formats equal
