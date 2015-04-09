@@ -46,9 +46,8 @@ public:
     void render()
     {
         QOpenGLFramebufferObject *fbo = framebufferObject();
-        int vp[4] = {0, 0, fbo->width(), fbo->height()};
         window->resetOpenGLState();
-        mpv_opengl_cb_render(mpv_gl, fbo->handle(), vp);
+        mpv_opengl_cb_draw(mpv_gl, fbo->handle(), fbo->width(), fbo->height());
         window->resetOpenGLState();
     }
 };

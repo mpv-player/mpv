@@ -269,7 +269,7 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
     return 0;
 }
 
-int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
+int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
 {
     assert(ctx->renderer);
 
@@ -281,7 +281,6 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
 
     ctx->force_update |= ctx->reconfigured;
 
-    int vp_w = vp[2], vp_h = vp[3];
     if (ctx->vp_w != vp_w || ctx->vp_h != vp_h)
         ctx->force_update = true;
 
