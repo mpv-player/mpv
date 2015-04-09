@@ -35,7 +35,10 @@ Changes that may break users' config files have been annotated with a `(!)`.
     that may be different for each filter.
   - The `scale-radius` option may now go down as low as `0.5`, which is the
     value used by the `nearest` filter.
-  - `spline36` is the new `cscale` default for `opengl-hq`.
+  - `spline36` is the new `cscale` default for `opengl-hq`. This might break
+    setups that use `fbo-format=8` (or less). To work around it, leave
+    `fbo-format` as its default, or set to something higher than 8, or set
+    `cscale=bilinear`, the previous default.
 - `(!)` `vf_format` no longer converts video to YUYV if there is no parameter.
   Video is now passed unchanged unless a format is specifically requested.
 - `(!)` The `--colormatrix`, `--colormatrix-input-range`,
@@ -67,22 +70,21 @@ New features
 ------------
 
 - `vo_opengl` features:
-  - Added `ewa_ginseng`, `ewa_hanning`, `robidoux`, `oversample` scalers.
+  - Added `ewa_ginseng`, `ewa_hanning`, `robidoux`, `robidouxsharp`,
+    `oversample` and `haasnsoft` scalers.
+  - There are now `ewa_lanczonsoft` and `ewa_lanczossharp` aliases to
+    `ewa_lanczos` that are tuned to be blurrier and sharper, respectively.
   - Added `gamma-auto` option that uses ambient light sensors to automatically
     adjust the video gamma. See commit c028d78 for details.
   - Added `blend-subtitles` option to draw subtitles directly into the video
     instead of rendered afterwards. Potentially necessary for correct rendering
     with files that use ASS subtitles for typesetting in combination with an
-    `icc-profile`. Enabled by default on `opengl-hq`. See warning on the
-    manual.
-  - There is now a `tscaler` option, used to choose the temporal scaler used
+    `icc-profile`. See warning on the manual.
+  - There is now a `tscale` option, used to choose the temporal scaler used
     in the `interpolation` mode (previously `smoothmotion`).
-  - Some scalers now have aliases with "sharp" appended that have different
-    defaults from the base filter (`robidouxsharp`, `ewa_lanczossharp`).
-  - There is also an opposing "soft" alias to `ewa_lanczos`.
-  - The Jinc-using filters (EWA filters) now have a `scale-blur` parameter to
-    adjust the amount of blur that the filter produces. Deviating from the
-    default may introduce artifacts.
+  - There is a new `scale-blur` parameter to adjust the amount of blur that
+    most of the filters produce. Deviating from the default may introduce
+    artifacts in EWA filters.
 - Add support to pitch correct stretched audio with librubberband.
 - Add support for the Raspberry Pi 2's hardware decoder when FFmpeg (or Libav)
   is built with `--enable-mmal`. See commit 8fff125 for details.
