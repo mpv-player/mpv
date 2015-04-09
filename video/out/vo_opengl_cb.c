@@ -405,7 +405,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 #define OPT_BASE_STRUCT struct vo_priv
 static const struct m_option change_opts[] = {
     OPT_FLAG("debug", use_gl_debug, 0),
-    OPT_INTRANGE("frame-queue-size", frame_queue_size, 0, 1, 100, OPTDEF_INT(1)),
+    OPT_INTRANGE("frame-queue-size", frame_queue_size, 0, 1, 100, OPTDEF_INT(2)),
     OPT_CHOICE("frame-drop-mode", frame_drop_mode, 0,
                ({"pop", FRAME_DROP_POP},
                 {"clear", FRAME_DROP_CLEAR})),
@@ -531,7 +531,7 @@ static int preinit(struct vo *vo)
 #define OPT_BASE_STRUCT struct vo_priv
 static const struct m_option options[] = {
     OPT_FLAG("debug", use_gl_debug, 0),
-    OPT_INTRANGE("frame-queue-size", frame_queue_size, 0, 1, 100, OPTDEF_INT(1)),
+    OPT_INTRANGE("frame-queue-size", frame_queue_size, 0, 1, 100, OPTDEF_INT(2)),
     OPT_CHOICE("frame-drop-mode", frame_drop_mode, 0,
                ({"pop", FRAME_DROP_POP},
                 {"clear", FRAME_DROP_CLEAR})),
