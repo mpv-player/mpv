@@ -175,8 +175,6 @@ void mp_image_set_size(struct mp_image *mpi, int w, int h)
         mpi->plane_w[n] = mp_chroma_div_up(mpi->w, mpi->fmt.xs[n]);
         mpi->plane_h[n] = mp_chroma_div_up(mpi->h, mpi->fmt.ys[n]);
     }
-    mpi->chroma_width = mpi->plane_w[1];
-    mpi->chroma_height = mpi->plane_h[1];
 }
 
 void mp_image_set_params(struct mp_image *image,
