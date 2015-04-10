@@ -435,6 +435,9 @@ const struct m_sub_options gl_video_conf = {
         OPT_COLOR("background", background, 0),
         OPT_FLAG("interpolation", interpolation, 0),
         OPT_FLAG("blend-subtitles", blend_subs, 0),
+        OPT_CHOICE("blend-subtitles-res", blend_subs_res, 0,
+                   ({"display", 0},
+                    {"video", 1})),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
@@ -1827,9 +1830,23 @@ static void pass_render_frame(struct gl_video *p)
     p->use_indirect = false; // set to true as needed by pass_*
     pass_read_video(p);
     pass_convert_yuv(p);
+
+    // For subtitles
+    double vpts = p->image.mpi->pts;
+    if (vpts == MP_NOPTS_VALUE)
+        vpts = p->osd_pts;
+
+    if (p->osd && p->opts.blend_subs && p->opts.blend_subs_res == 1) {
+        struct mp_osd_res rect = { p->image_w, p->image_h, 0, 0, 0, 0, 1 };
+        finish_pass_fbo(p, &p->blend_subs_fbo, p->image_w, p->image_h, 0, 0);
+        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, p->image_w, p->image_h,
+                      p->blend_subs_fbo.fbo, false);
+        GLSL(vec4 color = texture(texture0, texcoord0);)
+    }
+
     pass_scale_main(p);
 
-    if (p->osd && p->opts.blend_subs) {
+    if (p->osd && p->opts.blend_subs && p->opts.blend_subs_res == 0) {
         // Recreate the real video size from the src/dst rects
         int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
             vp_h = p->dst_rect.y1 - p->dst_rect.y0;
@@ -1848,9 +1865,6 @@ static void pass_render_frame(struct gl_video *p)
         if (p->use_linear)
             pass_delinearize(p, p->image_params.gamma);
         finish_pass_fbo(p, &p->blend_subs_fbo, vp_w, vp_h, 0, FBOTEX_FUZZY);
-        double vpts = p->image.mpi->pts;
-        if (vpts == MP_NOPTS_VALUE)
-            vpts = p->osd_pts;
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, vp_w, vp_h,
                       p->blend_subs_fbo.fbo, false);
         GLSL(vec4 color = texture(texture0, texcoord0);)

@@ -710,6 +710,17 @@ Available video output drivers are:
                      things like softsubbed ASS signs to match the video colors,
                      but may cause SRT subtitles or similar to look slightly off.
 
+    ``blend-subtitles-res=<display|video>``
+        The resolution at which subtitles get drawn if ``blend-subtitles`` is
+        enabled (default: display). In the absence of ``blend-subtitles``,
+        subtitles are always drawn at the window's size, together with the OSD.
+
+        display
+            Subs are drawn directly at the window's size.
+        video
+            Subs are drawn at the video's native resolution, and scaled along
+            with the video.
+
     ``alpha=<blend|yes|no>``
         Decides what to do if the input has an alpha component (default: blend).
 

@@ -66,6 +66,7 @@ struct gl_video_opts {
     struct m_color background;
     int interpolation;
     int blend_subs;
+    int blend_subs_res;
 };
 
 extern const struct m_sub_options gl_video_conf;
