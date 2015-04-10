@@ -283,17 +283,17 @@ end:
 
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
-    //struct priv *priv = vo->priv;
-    //priv->image_height = params->h;
-    //priv->image_width  = params->w;
-    //priv->image_format = params->imgfmt;
+    //struct priv *p = vo->priv;
+    //p->image_height = params->h;
+    //p->image_width  = params->w;
+    //p->image_format = params->imgfmt;
     return 0;
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
-    struct priv *priv = vo->priv;
-    struct modeset_buf *front_buf = &priv->dev->bufs[priv->dev->front_buf];
+    struct priv *p = vo->priv;
+    struct modeset_buf *front_buf = &p->dev->bufs[p->dev->front_buf];
 
     //display random noise for now
     static int j = 0;
@@ -311,40 +311,40 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
 static void flip_page(struct vo *vo)
 {
-    struct priv *priv = vo->priv;
-    int ret = drmModeSetCrtc(priv->fd, priv->dev->crtc,
-                             priv->dev->bufs[priv->dev->front_buf].fb,
-                             0, 0, &priv->dev->conn, 1, &priv->dev->mode);
+    struct priv *p = vo->priv;
+    int ret = drmModeSetCrtc(p->fd, p->dev->crtc,
+                             p->dev->bufs[p->dev->front_buf].fb,
+                             0, 0, &p->dev->conn, 1, &p->dev->mode);
     if (ret) {
         MP_WARN(vo, "Cannot flip page for DRM connector\n");
     } else {
-        //priv->dev->front_buf ^= 1;
+        //p->dev->front_buf ^= 1;
     }
 }
 
 static int preinit(struct vo *vo)
 {
-    struct priv *priv = vo->priv;
-    priv->dev = NULL;
-    priv->fd = 0;
-    priv->old_crtc = NULL;
+    struct priv *p = vo->priv;
+    p->dev = NULL;
+    p->fd = 0;
+    p->old_crtc = NULL;
 
     int ret;
 
-    ret = modeset_open(vo, &priv->fd, path_to_device);
+    ret = modeset_open(vo, &p->fd, path_to_device);
     if (ret)
         return ret;
 
-    ret = modeset_prepare_dev(vo, priv->fd, connector_id, &priv->dev);
+    ret = modeset_prepare_dev(vo, p->fd, connector_id, &p->dev);
     if (ret)
         return ret;
 
-    assert(priv->dev != NULL);
+    assert(p->dev != NULL);
 
-    priv->old_crtc = drmModeGetCrtc(priv->fd, priv->dev->crtc);
-    ret = drmModeSetCrtc(priv->fd, priv->dev->crtc,
-                         priv->dev->bufs[priv->dev->front_buf ^ 1].fb,
-                         0, 0, &priv->dev->conn, 1, &priv->dev->mode);
+    p->old_crtc = drmModeGetCrtc(p->fd, p->dev->crtc);
+    ret = drmModeSetCrtc(p->fd, p->dev->crtc,
+                         p->dev->bufs[p->dev->front_buf ^ 1].fb,
+                         0, 0, &p->dev->conn, 1, &p->dev->mode);
     if (ret) {
         char *errstr = mp_strerror(errno);
         MP_ERR(vo, "Cannot set CRTC for connector %u: %s\n", connector_id,
@@ -356,26 +356,26 @@ static int preinit(struct vo *vo)
 
 static void uninit(struct vo *vo)
 {
-    struct priv *priv = vo->priv;
+    struct priv *p = vo->priv;
 
-    if (priv->dev != NULL) {
-        if (priv->old_crtc != NULL) {
-            drmModeSetCrtc(priv->fd,
-                    priv->old_crtc->crtc_id,
-                    priv->old_crtc->buffer_id,
-                    priv->old_crtc->x,
-                    priv->old_crtc->y,
-                    &priv->dev->conn,
+    if (p->dev != NULL) {
+        if (p->old_crtc != NULL) {
+            drmModeSetCrtc(p->fd,
+                    p->old_crtc->crtc_id,
+                    p->old_crtc->buffer_id,
+                    p->old_crtc->x,
+                    p->old_crtc->y,
+                    &p->dev->conn,
                     1,
-                    &priv->dev->mode);
-            drmModeFreeCrtc(priv->old_crtc);
+                    &p->dev->mode);
+            drmModeFreeCrtc(p->old_crtc);
         }
 
-        modeset_destroy_fb(priv->fd, &priv->dev->bufs[1]);
-        modeset_destroy_fb(priv->fd, &priv->dev->bufs[0]);
+        modeset_destroy_fb(p->fd, &p->dev->bufs[1]);
+        modeset_destroy_fb(p->fd, &p->dev->bufs[0]);
     }
 
-    talloc_free(priv->dev);
+    talloc_free(p->dev);
 }
 
 static int query_format(struct vo *vo, int format)
