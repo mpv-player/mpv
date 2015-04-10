@@ -77,7 +77,7 @@ struct mp_image_params {
  *   image data. mp_image_make_writeable() will do that copy if required.
  */
 typedef struct mp_image {
-    unsigned int flags; // same as fmt.flags
+    int w, h;  // visible dimensions (redundant with params.w/h)
 
     struct mp_image_params params;
 
@@ -86,7 +86,6 @@ typedef struct mp_image {
     enum mp_imgfmt imgfmt;
     int num_planes;
 
-    int w,h;  // visible dimensions
     uint8_t *planes[MP_MAX_PLANES];
     int stride[MP_MAX_PLANES];
 

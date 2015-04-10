@@ -295,7 +295,7 @@ static void draw_ass(struct mp_draw_sub_cache *cache, struct mp_rect bb,
     cspar.int_bits_out = 8;
 
     struct mp_cmat yuv2rgb, rgb2yuv;
-    bool need_conv = temp->flags & MP_IMGFLAG_YUV;
+    bool need_conv = temp->fmt.flags & MP_IMGFLAG_YUV;
     if (need_conv) {
         mp_get_yuv2rgb_coeffs(&cspar, &yuv2rgb);
         mp_invert_yuv2rgb(&rgb2yuv, &yuv2rgb);
@@ -470,7 +470,7 @@ static struct mp_image *chroma_up(struct mp_draw_sub_cache *cache, int imgfmt,
 
     // The temp image is always YUV, but src not necessarily.
     // Reduce amount of conversions in YUV case (upsampling/shifting only)
-    if (src->flags & MP_IMGFLAG_YUV) {
+    if (src->fmt.flags & MP_IMGFLAG_YUV) {
         temp->params.colorspace = src->params.colorspace;
         temp->params.colorlevels = src->params.colorlevels;
     }

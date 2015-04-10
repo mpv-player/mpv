@@ -146,7 +146,6 @@ void mp_image_setfmt(struct mp_image *mpi, int out_fmt)
     struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(out_fmt);
     mpi->params.imgfmt = fmt.id;
     mpi->fmt = fmt;
-    mpi->flags = fmt.flags;
     mpi->imgfmt = fmt.id;
     mpi->num_planes = fmt.num_planes;
     mp_image_set_size(mpi, mpi->w, mpi->h);
@@ -358,7 +357,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     }
     dst->params.primaries = src->params.primaries;
     dst->params.gamma = src->params.gamma;
-    if ((dst->flags & MP_IMGFLAG_YUV) == (src->flags & MP_IMGFLAG_YUV)) {
+    if ((dst->fmt.flags & MP_IMGFLAG_YUV) == (src->fmt.flags & MP_IMGFLAG_YUV)) {
         dst->params.colorspace = src->params.colorspace;
         dst->params.colorlevels = src->params.colorlevels;
         dst->params.chroma_location = src->params.chroma_location;
@@ -414,9 +413,9 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
         plane_clear[0] = av_le2ne16(0x0080);
     } else if (area.imgfmt == IMGFMT_NV12 || area.imgfmt == IMGFMT_NV21) {
         plane_clear[1] = 0x8080;
-    } else if (area.flags & MP_IMGFLAG_YUV_P) {
+    } else if (area.fmt.flags & MP_IMGFLAG_YUV_P) {
         uint16_t chroma_clear = (1 << area.fmt.plane_bits) / 2;
-        if (!(area.flags & MP_IMGFLAG_NE))
+        if (!(area.fmt.flags & MP_IMGFLAG_NE))
             chroma_clear = av_bswap16(chroma_clear);
         if (area.num_planes > 2)
             plane_clear[1] = plane_clear[2] = chroma_clear;
