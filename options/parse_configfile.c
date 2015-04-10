@@ -42,8 +42,8 @@ static bool skip_ws(bstr *s)
     return s->len;
 }
 
-static int m_config_parse(m_config_t *config, const char *location, bstr data,
-                          char *initial_section, int flags)
+int m_config_parse(m_config_t *config, const char *location, bstr data,
+                   char *initial_section, int flags)
 {
     m_profile_t *profile = m_config_add_profile(config, initial_section);
     void *tmp = talloc_new(NULL);
