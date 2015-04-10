@@ -1358,7 +1358,7 @@ static void pass_read_video(struct gl_video *p)
         GLSL(vec4 color;)
         if (p->plane_count == 2) {
             gl_transform_rect(chromafix, &p->pass_tex[1].src);
-            GLSL(vec2 chroma = texture(texture1, texcoord0).rg;) // NV formats
+            GLSL(vec2 chroma = texture(texture1, texcoord1).rg;) // NV formats
         } else {
             gl_transform_rect(chromafix, &p->pass_tex[1].src);
             gl_transform_rect(chromafix, &p->pass_tex[2].src);
