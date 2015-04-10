@@ -318,8 +318,7 @@ static void add_default_profiles(struct m_config *cfg)
     struct m_profile *ui = m_config_add_profile(cfg, "pseudo-gui");
     m_config_set_profile_option(cfg, ui, bstr0("terminal"), bstr0("no"));
     m_config_set_profile_option(cfg, ui, bstr0("force-window"), bstr0("yes"));
-    m_config_set_profile_option(cfg, ui, bstr0("idle"), bstr0("yes"));
-    m_config_set_profile_option(cfg, ui, bstr0("keep-open"), bstr0("yes"));
+    m_config_set_profile_option(cfg, ui, bstr0("idle"), bstr0("once"));
 }
 
 struct MPContext *mp_create(void)
