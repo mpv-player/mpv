@@ -63,10 +63,11 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     mp_image_copy_attributes(dmpi, mpi);
 
     for (int p = 0; p < mpi->num_planes; p++) {
-        for (int y = 0; y < mpi->plane_h[p]; y++) {
+        int plane_h = mp_image_plane_h(mpi, p);
+        for (int y = 0; y < plane_h; y++) {
             void *p_src = mpi->planes[p] + mpi->stride[p] * y;
             void *p_dst = dmpi->planes[p] + dmpi->stride[p] * y;
-            int w = dmpi->plane_w[p];
+            int w = mp_image_plane_w(dmpi, p);
             if (mpi->imgfmt == IMGFMT_YUYV) {
                 mirror_4_m(p_dst, p_src, w / 2, 2, 1, 0, 3);
             } else if (mpi->imgfmt == IMGFMT_UYVY) {

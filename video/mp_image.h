@@ -95,10 +95,6 @@ typedef struct mp_image {
     int pict_type; // 0->unknown, 1->I, 2->P, 3->B
     int fields;
 
-    /* redundant */
-    int plane_w[MP_MAX_PLANES];
-    int plane_h[MP_MAX_PLANES];
-
     /* only inside filter chain */
     double pts;
     /* memory management */
@@ -125,6 +121,8 @@ void mp_image_crop_rc(struct mp_image *img, struct mp_rect rc);
 void mp_image_vflip(struct mp_image *img);
 
 void mp_image_set_size(struct mp_image *mpi, int w, int h);
+int mp_image_plane_w(struct mp_image *mpi, int plane);
+int mp_image_plane_h(struct mp_image *mpi, int plane);
 
 void mp_image_setfmt(mp_image_t* mpi, int out_fmt);
 void mp_image_steal_data(struct mp_image *dst, struct mp_image *src);

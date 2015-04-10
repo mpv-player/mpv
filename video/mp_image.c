@@ -119,7 +119,7 @@ static bool mp_image_alloc_planes(struct mp_image *mpi)
     size_t plane_size[MP_MAX_PLANES];
     for (int n = 0; n < MP_MAX_PLANES; n++) {
         int alloc_h = MP_ALIGN_UP(mpi->h, 32) >> mpi->fmt.ys[n];
-        int line_bytes = (mpi->plane_w[n] * mpi->fmt.bpp[n] + 7) / 8;
+        int line_bytes = (mp_image_plane_w(mpi, n) * mpi->fmt.bpp[n] + 7) / 8;
         mpi->stride[n] = FFALIGN(line_bytes, SWS_MIN_BYTE_ALIGN);
         plane_size[n] = mpi->stride[n] * alloc_h;
     }
@@ -165,16 +165,24 @@ int mp_chroma_div_up(int size, int shift)
     return (size + (1 << shift) - 1) >> shift;
 }
 
+// Return the storage width in pixels of the given plane.
+int mp_image_plane_w(struct mp_image *mpi, int plane)
+{
+    return mp_chroma_div_up(mpi->w, mpi->fmt.xs[plane]);
+}
+
+// Return the storage height in pixels of the given plane.
+int mp_image_plane_h(struct mp_image *mpi, int plane)
+{
+    return mp_chroma_div_up(mpi->h, mpi->fmt.ys[plane]);
+}
+
 // Caller has to make sure this doesn't exceed the allocated plane data/strides.
 void mp_image_set_size(struct mp_image *mpi, int w, int h)
 {
     assert(w >= 0 && h >= 0);
     mpi->w = mpi->params.w = mpi->params.d_w = w;
     mpi->h = mpi->params.h = mpi->params.d_h = h;
-    for (int n = 0; n < mpi->num_planes; n++) {
-        mpi->plane_w[n] = mp_chroma_div_up(mpi->w, mpi->fmt.xs[n]);
-        mpi->plane_h[n] = mp_chroma_div_up(mpi->h, mpi->fmt.ys[n]);
-    }
 }
 
 void mp_image_set_params(struct mp_image *image,
@@ -328,8 +336,9 @@ void mp_image_copy(struct mp_image *dst, struct mp_image *src)
     assert(dst->w == src->w && dst->h == src->h);
     assert(mp_image_is_writeable(dst));
     for (int n = 0; n < dst->num_planes; n++) {
-        int line_bytes = (dst->plane_w[n] * dst->fmt.bpp[n] + 7) / 8;
-        memcpy_pic(dst->planes[n], src->planes[n], line_bytes, dst->plane_h[n],
+        int line_bytes = (mp_image_plane_w(dst, n) * dst->fmt.bpp[n] + 7) / 8;
+        int plane_h = mp_image_plane_h(dst, n);
+        memcpy_pic(dst->planes[n], src->planes[n], line_bytes, plane_h,
                    dst->stride[n], src->stride[n]);
     }
     // Watch out for AV_PIX_FMT_FLAG_PSEUDOPAL retardation
@@ -417,13 +426,13 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
 
     for (int p = 0; p < area.num_planes; p++) {
         int bpp = area.fmt.bpp[p];
-        int bytes = (area.plane_w[p] * bpp + 7) / 8;
+        int bytes = (mp_image_plane_w(&area, p) * bpp + 7) / 8;
         if (bpp <= 8) {
             memset_pic(area.planes[p], plane_clear[p], bytes,
-                       area.plane_h[p], area.stride[p]);
+                       mp_image_plane_h(&area, p), area.stride[p]);
         } else {
             memset16_pic(area.planes[p], plane_clear[p], (bytes + 1) / 2,
-                         area.plane_h[p], area.stride[p]);
+                         mp_image_plane_h(&area, p), area.stride[p]);
         }
     }
 }
@@ -431,7 +440,8 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
 void mp_image_vflip(struct mp_image *img)
 {
     for (int p = 0; p < img->num_planes; p++) {
-        img->planes[p] = img->planes[p] + img->stride[p] * (img->plane_h[p] - 1);
+        int plane_h = mp_image_plane_h(img, p);
+        img->planes[p] = img->planes[p] + img->stride[p] * (plane_h - 1);
         img->stride[p] = -img->stride[p];
     }
 }

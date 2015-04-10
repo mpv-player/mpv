@@ -2086,8 +2086,8 @@ static bool get_image(struct gl_video *p, struct mp_image *mpi)
 
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
-        mpi->stride[n] = mpi->plane_w[n] * p->image_desc.bytes[n];
-        int needed_size = mpi->plane_h[n] * mpi->stride[n];
+        mpi->stride[n] = mp_image_plane_w(mpi, n) * p->image_desc.bytes[n];
+        int needed_size = mp_image_plane_h(mpi, n) * mpi->stride[n];
         if (!plane->gl_buffer)
             gl->GenBuffers(1, &plane->gl_buffer);
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
@@ -2132,8 +2132,9 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     bool pbo = false;
     if (!vimg->planes[0].buffer_ptr && get_image(p, &mpi2)) {
         for (int n = 0; n < p->plane_count; n++) {
-            int line_bytes = mpi->plane_w[n] * p->image_desc.bytes[n];
-            memcpy_pic(mpi2.planes[n], mpi->planes[n], line_bytes, mpi->plane_h[n],
+            int line_bytes = mp_image_plane_w(mpi, n) * p->image_desc.bytes[n];
+            int plane_h = mp_image_plane_h(mpi, n);
+            memcpy_pic(mpi2.planes[n], mpi->planes[n], line_bytes, plane_h,
                        mpi2.stride[n], mpi->stride[n]);
         }
         pbo = true;
