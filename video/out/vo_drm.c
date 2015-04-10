@@ -22,12 +22,14 @@
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <libswscale/swscale.h>
 #include <sys/mman.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
 #include "common/msg.h"
 #include "video/mp_image.h"
+#include "video/sws_utils.h"
 #include "sub/osd.h"
 #include "vo.h"
 
@@ -58,6 +60,13 @@ struct priv {
     int fd;
     struct modeset_dev *dev;
     drmModeCrtc *old_crtc;
+
+    int dst_w;
+    int dst_h;
+    struct mp_rect src;
+    struct mp_rect dst;
+    struct mp_osd_res osd;
+    struct mp_sws_context *sws;
 };
 
 static int modeset_open(struct vo *vo, int *out, const char *node)
@@ -283,42 +292,70 @@ end:
 
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
-    //struct priv *p = vo->priv;
-    //p->image_height = params->h;
-    //p->image_width  = params->w;
-    //p->image_format = params->imgfmt;
+    struct priv *p = vo->priv;
+    //TODO: test on video with non-native resolution
+    //int32_t w = p->dev->bufs[0].width;
+    //int32_t h = p->dev->bufs[0].height;
+
+    vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
+    int src_w = p->src.x1 - p->src.x0;
+    int src_h = p->src.y1 - p->src.y0;
+    p->dst_w = p->dst.x1 - p->dst.x0;
+    p->dst_h = p->dst.y1 - p->dst.y0;
+
+    MP_INFO(vo, "resizing %dx%d -> %dx%d\n", src_w, src_h,
+                                             p->dst_w, p->dst_h);
+
+    mp_sws_set_from_cmdline(p->sws, vo->opts->sws_opts);
+    p->sws->src = *params;
+    p->sws->dst = (struct mp_image_params) {
+        .imgfmt = IMGFMT_BGR32,
+        .w = p->dst_w,
+        .h = p->dst_h,
+        .d_w = p->dst_w,
+        .d_h = p->dst_h,
+    };
+
+    mp_image_params_guess_csp(&p->sws->dst);
+
+    if (mp_sws_reinit(p->sws) < 0)
+        return 1;
+
+    vo->want_redraw = true;
     return 0;
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
-    struct modeset_buf *front_buf = &p->dev->bufs[p->dev->front_buf];
 
-    //display random noise for now
-    static int j = 0;
-    srand(j);
-    j++ ;
-    int i;
-    for (i = 0;  i < 5000; i ++)
-    {
-        int x = rand() % front_buf->width;
-        int y = rand() % front_buf->height;
-        int off = front_buf->stride * y + x * 4;
-        *(uint32_t*)(&front_buf->map[off]) = rand();
-    }
+    struct modeset_buf *front_buf = &p->dev->bufs[p->dev->front_buf];
+    struct mp_image img = {0};
+    mp_image_set_params(&img, &p->sws->dst);
+    img.planes[0] = front_buf->map;
+    img.stride[0] = front_buf->stride;
+
+    struct mp_rect src_rc = p->src;
+    src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, mpi->fmt.align_x);
+    src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, mpi->fmt.align_y);
+    mp_image_crop_rc(mpi, src_rc);
+
+    mp_sws_scale(p->sws, &img, mpi);
+
+    osd_draw_on_image(vo->osd, p->osd, mpi ? mpi->pts : 0, 0, &img);
 }
 
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    int ret = drmModeSetCrtc(p->fd, p->dev->crtc,
+
+    int ret = drmModePageFlip(p->fd, p->dev->crtc,
                              p->dev->bufs[p->dev->front_buf].fb,
                              0, 0, &p->dev->conn, 1, &p->dev->mode);
     if (ret) {
         MP_WARN(vo, "Cannot flip page for DRM connector\n");
     } else {
-        //p->dev->front_buf ^= 1;
+        p->dev->front_buf ^= 1;
     }
 }
 
@@ -328,6 +365,7 @@ static int preinit(struct vo *vo)
     p->dev = NULL;
     p->fd = 0;
     p->old_crtc = NULL;
+    p->sws = mp_sws_alloc(vo);
 
     int ret;
 
@@ -380,7 +418,7 @@ static void uninit(struct vo *vo)
 
 static int query_format(struct vo *vo, int format)
 {
-    return format == IMGFMT_BGR24;
+    return format == IMGFMT_BGR32;
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
