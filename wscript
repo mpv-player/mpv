@@ -632,6 +632,10 @@ video_output_features = [
         'desc': 'CACA',
         'func': check_pkg_config('caca', '>= 0.99.beta18'),
     }, {
+        'name': '--drm',
+        'desc': 'DRM',
+        'func': check_pkg_config('libdrm'),
+    }, {
         'name': '--jpeg',
         'desc': 'JPEG support',
         'func': check_cc(header_name=['stdio.h', 'jpeglib.h'],
