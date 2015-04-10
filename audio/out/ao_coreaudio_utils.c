@@ -141,16 +141,17 @@ char *fourcc_repr(void *talloc_ctx, uint32_t code)
     };
 
     bool valid_fourcc = true;
-    for (int i = 0; i < 4; i++)
-        if (fcc[i] >= 32 && fcc[i] < 128)
+    for (int i = 0; i < 4; i++) {
+        if (fcc[i] < 32 || fcc[i] >= 128)
             valid_fourcc = false;
+    }
 
     char *repr;
     if (valid_fourcc)
         repr = talloc_asprintf(talloc_ctx, "'%c%c%c%c'",
                                fcc[0], fcc[1], fcc[2], fcc[3]);
     else
-        repr = talloc_asprintf(NULL, "%d", code);
+        repr = talloc_asprintf(NULL, "%u", (unsigned int)code);
 
     return repr;
 }
