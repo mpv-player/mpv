@@ -386,8 +386,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     assert(!mpctx->initialized);
 
-    update_logging(mpctx);
-
     if (options) {
         // Preparse the command line, so we can init the terminal early.
         m_config_preparse_command_line(mpctx->mconfig, mpctx->global, options);
@@ -400,6 +398,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         MP_VERBOSE(mpctx, "\n");
     }
 
+    update_logging(mpctx);
     mp_print_version(mpctx->log, false);
 
     mp_parse_cfgfiles(mpctx);
