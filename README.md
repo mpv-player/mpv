@@ -111,7 +111,7 @@ or cross-compile from Linux with MinGW. See [Windows compilation][windows_compil
 
 Generally, mpv should work with the latest release as well as the git version
 of both FFmpeg and Libav. But FFmpeg is preferred, and some mpv features work
-with FFmpeg only. See the [wiki article][ffmpeg_vs_libav] about the issue.
+with FFmpeg only (subtitle formats in particular).
 
 
 ## Release cycle
