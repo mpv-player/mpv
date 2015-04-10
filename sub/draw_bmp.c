@@ -334,13 +334,13 @@ static void draw_ass(struct mp_draw_sub_cache *cache, struct mp_rect bb,
 static void get_swscale_alignment(const struct mp_image *img, int *out_xstep,
                                   int *out_ystep)
 {
-    int sx = (1 << img->chroma_x_shift);
-    int sy = (1 << img->chroma_y_shift);
+    int sx = (1 << img->fmt.chroma_xs);
+    int sy = (1 << img->fmt.chroma_ys);
 
     for (int p = 0; p < img->num_planes; ++p) {
         int bits = img->fmt.bpp[p];
         // the * 2 fixes problems with writing past the destination width
-        while (((sx >> img->chroma_x_shift) * bits) % (SWS_MIN_BYTE_ALIGN * 8 * 2))
+        while (((sx >> img->fmt.chroma_xs) * bits) % (SWS_MIN_BYTE_ALIGN * 8 * 2))
             sx *= 2;
     }
 

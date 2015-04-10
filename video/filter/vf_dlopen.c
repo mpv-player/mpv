@@ -82,11 +82,11 @@ static void set_imgprop(struct vf_dlopen_picdata *out, const mp_image_t *mpi)
         out->plane[i] = mpi->planes[i];
         out->planestride[i] = mpi->stride[i];
         out->planewidth[i] =
-            i ? (/*mpi->chroma_width*/ mpi->w >> mpi->chroma_x_shift) : mpi->w;
+            i ? (/*mpi->chroma_width*/ mpi->w >> mpi->fmt.chroma_xs) : mpi->w;
         out->planeheight[i] =
-            i ? (/*mpi->chroma_height*/ mpi->h >> mpi->chroma_y_shift) : mpi->h;
-        out->planexshift[i] = i ? mpi->chroma_x_shift : 0;
-        out->planeyshift[i] = i ? mpi->chroma_y_shift : 0;
+            i ? (/*mpi->chroma_height*/ mpi->h >> mpi->fmt.chroma_ys) : mpi->h;
+        out->planexshift[i] = i ? mpi->fmt.chroma_xs : 0;
+        out->planeyshift[i] = i ? mpi->fmt.chroma_ys : 0;
     }
 }
 

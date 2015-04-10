@@ -85,8 +85,6 @@ typedef struct mp_image {
     struct mp_imgfmt_desc fmt;
     enum mp_imgfmt imgfmt;
     int num_planes;
-    int chroma_x_shift; // horizontal
-    int chroma_y_shift; // vertical
 
     int w,h;  // visible dimensions
     uint8_t *planes[MP_MAX_PLANES];
