@@ -313,6 +313,16 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     if (w > p->device_w) w = p->device_w;
     if (h > p->device_h) h = p->device_h;
 
+    // p->osd contains the parameters assuming OSD rendering in window
+    // coordinates, but OSD can only be rendered in the intersection
+    // between window and video rectangle (i.e. not into panscan borders).
+    p->osd.w = w;
+    p->osd.h = h;
+    p->osd.mt = MPMIN(0, p->osd.mt);
+    p->osd.mb = MPMIN(0, p->osd.mb);
+    p->osd.mr = MPMIN(0, p->osd.mr);
+    p->osd.ml = MPMIN(0, p->osd.ml);
+
     p->x = (p->device_w - w) >> 1;
     p->y = (p->device_h - h) >> 1;
     p->buf = (char*)talloc_size(vo, p->device_w * p->device_h * 4);
