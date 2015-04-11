@@ -1837,7 +1837,12 @@ static void pass_render_frame(struct gl_video *p)
         vpts = p->osd_pts;
 
     if (p->osd && p->opts.blend_subs && p->opts.blend_subs_res == 1) {
-        struct mp_osd_res rect = { p->image_w, p->image_h, 0, 0, 0, 0, 1 };
+        double scale[2];
+        get_scale_factors(p, scale);
+        struct mp_osd_res rect = {
+            .w = p->image_w, .h = p->image_h,
+            .display_par = scale[1] / scale[0], // counter compensate scaling
+        };
         finish_pass_fbo(p, &p->blend_subs_fbo, p->image_w, p->image_h, 0, 0);
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, p->image_w, p->image_h,
                       p->blend_subs_fbo.fbo, false);
