@@ -372,7 +372,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     osd_draw_on_image(vo->osd, p->osd, mpi ? mpi->pts : 0, 0, &img);
 
-    memcpy(front_buf->map, p->buf, p->device_w * p->device_h * 4);
+    memmove(front_buf->map, p->buf, p->device_w * p->device_h * 4);
 }
 
 static void flip_page(struct vo *vo)
