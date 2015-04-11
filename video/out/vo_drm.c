@@ -349,7 +349,7 @@ static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    int ret = drmModePageFlip(p->fd, p->dev->crtc,
+    int ret = drmModeSetCrtc(p->fd, p->dev->crtc,
                              p->dev->bufs[p->dev->front_buf].fb,
                              0, 0, &p->dev->conn, 1, &p->dev->mode);
     if (ret) {
