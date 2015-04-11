@@ -321,7 +321,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     mp_sws_set_from_cmdline(p->sws, vo->opts->sws_opts);
     p->sws->src = *params;
     p->sws->dst = (struct mp_image_params) {
-        .imgfmt = IMGFMT_BGR32,
+        .imgfmt = IMGFMT_BGR0,
         .w = w,
         .h = h,
         .d_w = w,
@@ -442,7 +442,7 @@ static void uninit(struct vo *vo)
 
 static int query_format(struct vo *vo, int format)
 {
-    return format == IMGFMT_BGR32;
+    return format == IMGFMT_BGR0;
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
