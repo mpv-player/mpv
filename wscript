@@ -702,6 +702,13 @@ hwaccel_features = [
                             'av_vda_alloc_context()',
                             framework='IOSurface',
                             use='libav')),
+    } , {
+        'name': 'vda-default-init2',
+        'desc': 'libavcodec VDA hwaccel (configurable AVVDAContext)',
+        'deps': [ 'vda-hwaccel' ],
+        'func': check_statement('libavcodec/vda.h',
+                                'av_vda_default_init2(NULL, NULL)',
+                                use='libav'),
     }, {
         'name': '--vda-gl',
         'desc': 'VDA with OpenGL',

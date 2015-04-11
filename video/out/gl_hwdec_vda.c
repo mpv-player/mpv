@@ -25,11 +25,61 @@
 #include "video/mp_image_pool.h"
 #include "gl_hwdec.h"
 
+struct vda_gl_plane_format {
+    GLenum gl_format;
+    GLenum gl_type;
+    GLenum gl_internal_format;
+};
+
+struct vda_format {
+    uint32_t cvpixfmt;
+    int imgfmt;
+    int planes;
+    struct vda_gl_plane_format gl[MP_MAX_PLANES];
+};
+
 struct priv {
     CVPixelBufferRef pbuf;
-    GLuint gl_texture;
+    GLuint gl_planes[MP_MAX_PLANES];
     struct mp_hwdec_ctx hwctx;
 };
+
+static struct vda_format vda_formats[] = {
+    {
+        .cvpixfmt = kCVPixelFormatType_422YpCbCr8,
+        .imgfmt = IMGFMT_UYVY,
+        .planes = 1,
+        .gl = {
+            { GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, GL_RGB }
+        }
+    }, {
+        .cvpixfmt = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
+        .imgfmt = IMGFMT_NV12,
+        .planes = 2,
+        .gl = {
+            { GL_RED, GL_UNSIGNED_BYTE, GL_RED },
+            { GL_RG,  GL_UNSIGNED_BYTE, GL_RG } ,
+        }
+    }
+};
+
+static struct vda_format *vda_get_gl_format(uint32_t cvpixfmt)
+{
+    for (int i = 0; i < MP_ARRAY_SIZE(vda_formats); i++) {
+        if (vda_formats[i].cvpixfmt == cvpixfmt)
+            return &vda_formats[i];
+    }
+    return NULL;
+}
+
+static struct vda_format *vda_get_gl_format_from_imgfmt(uint32_t imgfmt)
+{
+    for (int i = 0; i < MP_ARRAY_SIZE(vda_formats); i++) {
+        if (vda_formats[i].imgfmt == imgfmt)
+            return &vda_formats[i];
+    }
+    return NULL;
+}
 
 static struct mp_image *download_image(struct mp_hwdec_ctx *ctx,
                                        struct mp_image *hw_image,
@@ -40,16 +90,22 @@ static struct mp_image *download_image(struct mp_hwdec_ctx *ctx,
 
     CVPixelBufferRef pbuf = (CVPixelBufferRef)hw_image->planes[3];
     CVPixelBufferLockBaseAddress(pbuf, 0);
-    void *base = CVPixelBufferGetBaseAddress(pbuf);
     size_t width  = CVPixelBufferGetWidth(pbuf);
     size_t height = CVPixelBufferGetHeight(pbuf);
-    size_t stride = CVPixelBufferGetBytesPerRow(pbuf);
+    uint32_t cvpixfmt = CVPixelBufferGetPixelFormatType(pbuf);
+    struct vda_format *f = vda_get_gl_format(cvpixfmt);
 
     struct mp_image img = {0};
-    mp_image_setfmt(&img, IMGFMT_UYVY);
+    mp_image_setfmt(&img, f->imgfmt);
     mp_image_set_size(&img, width, height);
-    img.planes[0] = base;
-    img.stride[0] = stride;
+
+    for (int i = 0; i < f->planes; i++) {
+        void *base    = CVPixelBufferGetBaseAddressOfPlane(pbuf, i);
+        size_t stride = CVPixelBufferGetBytesPerRowOfPlane(pbuf, i);
+        img.planes[i] = base;
+        img.stride[i] = stride;
+    }
+
     mp_image_copy_attributes(&img, hw_image);
 
     struct mp_image *image = mp_image_pool_new_copy(swpool, &img);
@@ -81,9 +137,17 @@ static bool check_hwdec(struct gl_hwdec *hw)
 static int create(struct gl_hwdec *hw)
 {
     struct priv *p = talloc_zero(hw, struct priv);
+
     hw->priv = p;
-    hw->converted_imgfmt = IMGFMT_UYVY;
     hw->gl_texture_target = GL_TEXTURE_RECTANGLE;
+
+#if HAVE_VDA_DEFAULT_INIT2
+    struct vda_format *f = vda_get_gl_format_from_imgfmt(IMGFMT_NV12);
+#else
+    struct vda_format *f = vda_get_gl_format_from_imgfmt(IMGFMT_UYVY);
+#endif
+
+    hw->converted_imgfmt = f->imgfmt;
 
     if (!check_hwdec(hw))
         return -1;
@@ -93,7 +157,7 @@ static int create(struct gl_hwdec *hw)
     hw->hwctx->download_image = download_image;
 
     GL *gl = hw->gl;
-    gl->GenTextures(1, &p->gl_texture);
+    gl->GenTextures(MP_MAX_PLANES, p->gl_planes);
 
     return 0;
 }
@@ -118,20 +182,36 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     CVPixelBufferRetain(p->pbuf);
     IOSurfaceRef surface = CVPixelBufferGetIOSurface(p->pbuf);
 
-    gl->BindTexture(hw->gl_texture_target, p->gl_texture);
+    uint32_t cvpixfmt = CVPixelBufferGetPixelFormatType(p->pbuf);
+    struct vda_format *f = vda_get_gl_format(cvpixfmt);
+    if (!f) {
+        MP_ERR(hw, "CVPixelBuffer has unsupported format type\n");
+        return -1;
+    }
 
-    CGLError err = CGLTexImageIOSurface2D(
-        CGLGetCurrentContext(), hw->gl_texture_target, GL_RGB,
-        CVPixelBufferGetWidth(p->pbuf), CVPixelBufferGetHeight(p->pbuf),
-        GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, surface, 0);
+    const bool planar = CVPixelBufferIsPlanar(p->pbuf);
+    const int planes  = CVPixelBufferGetPlaneCount(p->pbuf);
+    assert(planar && planes == f->planes || f->planes == 1);
 
-    if (err != kCGLNoError)
-        MP_ERR(hw, "error creating IOSurface texture: %s (%x)\n",
-               CGLErrorString(err), gl->GetError());
+    for (int i = 0; i < f->planes; i++) {
+        gl->BindTexture(hw->gl_texture_target, p->gl_planes[i]);
 
-    gl->BindTexture(hw->gl_texture_target, 0);
+        CGLError err = CGLTexImageIOSurface2D(
+            CGLGetCurrentContext(), hw->gl_texture_target,
+            f->gl[i].gl_internal_format,
+            IOSurfaceGetWidthOfPlane(surface, i),
+            IOSurfaceGetHeightOfPlane(surface, i),
+            f->gl[i].gl_format, f->gl[i].gl_type, surface, i);
 
-    out_textures[0] = p->gl_texture;
+        if (err != kCGLNoError)
+            MP_ERR(hw, "error creating IOSurface texture for plane %d: %s (%x)\n",
+                   i, CGLErrorString(err), gl->GetError());
+
+        gl->BindTexture(hw->gl_texture_target, 0);
+
+        out_textures[i] = p->gl_planes[i];
+    }
+
     return 0;
 }
 
@@ -141,8 +221,7 @@ static void destroy(struct gl_hwdec *hw)
     GL *gl = hw->gl;
 
     CVPixelBufferRelease(p->pbuf);
-    gl->DeleteTextures(1, &p->gl_texture);
-    p->gl_texture = 0;
+    gl->DeleteTextures(MP_MAX_PLANES, p->gl_planes);
 }
 
 const struct gl_hwdec_driver gl_hwdec_vda = {

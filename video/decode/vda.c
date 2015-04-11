@@ -31,7 +31,8 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
                  const char *decoder)
 {
     hwdec_request_api(info, "vda");
-
+    if (!info || !info->hwctx)
+        return HWDEC_ERR_NO_CTX;
     if (mp_codec_to_av_codec_id(decoder) != AV_CODEC_ID_H264)
         return HWDEC_ERR_NO_CODEC;
     return 0;
@@ -76,7 +77,14 @@ static void print_vda_error(struct mp_log *log, int lev, char *message,
 static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
 {
     av_vda_default_free(ctx->avctx);
+#if HAVE_VDA_DEFAULT_INIT2
+    AVVDAContext *vdactx = av_vda_alloc_context();
+    vdactx->cv_pix_fmt_type = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
+    int err = av_vda_default_init2(ctx->avctx, vdactx);
+#else
     int err = av_vda_default_init(ctx->avctx);
+#endif
+
     if (err < 0) {
         print_vda_error(ctx->log, MSGL_ERR, "failed to init VDA decoder", err);
         return -1;
