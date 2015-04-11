@@ -186,4 +186,4 @@ function u(t)
 end
 
 
-mp.add_key_binding("i", "stats", main, {repeatable=true})
+mp.add_key_binding("i", mp.get_script_name(), main, {repeatable=true})
