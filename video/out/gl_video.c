@@ -2210,9 +2210,6 @@ static void check_gl_features(struct gl_video *p)
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
 
-    char *disabled[10];
-    int n_disabled = 0;
-
     // Normally, we want to disable them by default if FBOs are unavailable,
     // because they will be slow (not critically slow, but still slower).
     // Without FP textures, we must always disable them.
@@ -2223,14 +2220,14 @@ static void check_gl_features(struct gl_video *p)
         if (kernel) {
             char *reason = NULL;
             if (!test_fbo(p, &have_fbo))
-                reason = "scaler (FBO)";
+                reason = "scaler (FBOs missing)";
             if (!have_float_tex)
-                reason = "scaler (float tex.)";
+                reason = "scaler (float tex. missing)";
             if (!have_1d_tex && kernel->polar)
-                reason = "scaler (1D tex.)";
+                reason = "scaler (1D tex. missing)";
             if (reason) {
                 p->opts.scaler[n].kernel.name = "bilinear";
-                disabled[n_disabled++] = reason;
+                MP_WARN(p, "Disabling %s.\n", reason);
             }
         }
     }
@@ -2239,13 +2236,13 @@ static void check_gl_features(struct gl_video *p)
     // GLES2 doesn't even provide 3D textures
     if (p->use_lut_3d && !(have_3d_tex && have_float_tex)) {
         p->use_lut_3d = false;
-        disabled[n_disabled++] = "color management (GLES unsupported)";
+        MP_WARN(p, "Disabling color management (GLES unsupported).\n");
     }
 
     // Missing float textures etc. (maybe ordered would actually work)
     if (p->opts.dither_algo >= 0 && gl->es) {
         p->opts.dither_algo = -1;
-        disabled[n_disabled++] = "dithering (GLES unsupported)";
+        MP_WARN(p, "Disabling dithering (GLES unsupported).\n");
     }
 
     int use_cms = p->opts.target_prim != MP_CSP_PRIM_AUTO ||
@@ -2255,41 +2252,31 @@ static void check_gl_features(struct gl_video *p)
     if (!have_mix && (p->opts.linear_scaling || p->opts.sigmoid_upscaling)) {
         p->opts.linear_scaling = false;
         p->opts.sigmoid_upscaling = false;
-        disabled[n_disabled++] = "linear/sigmoid scaling (GLSL version)";
+        MP_WARN(p, "Disabling linear/sigmoid scaling (GLSL version too old).\n");
     }
     if (!have_mix && use_cms) {
         p->opts.target_prim = MP_CSP_PRIM_AUTO;
         p->opts.target_trc = MP_CSP_TRC_AUTO;
         p->use_lut_3d = false;
-        disabled[n_disabled++] = "color management (GLSL version)";
+        MP_WARN(p, "Disabling color management (GLSL version too old).\n");
     }
     if (use_cms && !test_fbo(p, &have_fbo)) {
         p->opts.target_prim = MP_CSP_PRIM_AUTO;
         p->opts.target_trc = MP_CSP_TRC_AUTO;
         p->use_lut_3d = false;
-        disabled[n_disabled++] = "color management (FBO)";
+        MP_WARN(p, "Disabling color management (FBOs missing).\n");
     }
     if (p->opts.interpolation && !test_fbo(p, &have_fbo)) {
         p->opts.interpolation = false;
-        disabled[n_disabled++] = "interpolation (FBO)";
+        MP_WARN(p, "Disabling interpolation (FBOs missing).\n");
     }
     if (p->opts.blend_subs && !test_fbo(p, &have_fbo)) {
         p->opts.blend_subs = 0;
-        disabled[n_disabled++] = "subtitle blending (FBO)";
+        MP_WARN(p, "Disabling subtitle blending (FBOs missing).\n");
     }
     if (gl->es && p->opts.pbo) {
         p->opts.pbo = 0;
-        disabled[n_disabled++] = "PBOs (GLES unsupported)";
-    }
-
-    if (n_disabled) {
-        MP_ERR(p, "Some OpenGL extensions not detected, disabling: ");
-        for (int n = 0; n < n_disabled; n++) {
-            if (n)
-                MP_ERR(p, ", ");
-            MP_ERR(p, "%s", disabled[n]);
-        }
-        MP_ERR(p, ".\n");
+        MP_WARN(p, "Disabling PBOs (GLES unsupported).\n");
     }
 }
 
