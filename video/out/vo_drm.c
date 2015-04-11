@@ -33,6 +33,8 @@
 #include "sub/osd.h"
 #include "vo.h"
 
+#define BUF_COUNT 2
+
 //TODO: change path_to_device to option
 //TODO: change modeset_dev to option
 const char *path_to_device = "/dev/dri/card0";
@@ -49,7 +51,7 @@ struct modeset_buf {
 };
 
 struct modeset_dev {
-    struct modeset_buf bufs[2];
+    struct modeset_buf bufs[BUF_COUNT];
     drmModeModeInfo mode;
     uint32_t conn;
     uint32_t crtc;
@@ -263,17 +265,16 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
         goto end;
     }
 
-    ret = modeset_create_fb(vo, fd, &dev->bufs[0]);
-    if (ret) {
-        MP_ERR(vo, "Cannot create framebuffer for DRM connector %u\n", conn_id);
-        return ret;
-    }
-
-    ret = modeset_create_fb(vo, fd, &dev->bufs[1]);
-    if (ret) {
-        MP_ERR(vo, "Cannot create framebuffer for DRM connector %u\n", conn_id);
-        modeset_destroy_fb(fd, &dev->bufs[0]);
-        return ret;
+    unsigned int i, j;
+    for (i = 0; i < BUF_COUNT; i ++) {
+        ret = modeset_create_fb(vo, fd, &dev->bufs[i]);
+        if (ret) {
+            for (j = 0; j < i; j ++) {
+                modeset_destroy_fb(fd, &dev->bufs[j]);
+            }
+            MP_ERR(vo, "Cannot create framebuffer for DRM connector %u\n", conn_id);
+            return ret;
+        }
     }
 
 end:
@@ -369,7 +370,8 @@ static void flip_page(struct vo *vo)
     if (ret) {
         MP_WARN(vo, "Cannot flip page for DRM connector\n");
     } else {
-        p->dev->front_buf ^= 1;
+        p->dev->front_buf ++;
+        p->dev->front_buf %= BUF_COUNT;
     }
 }
 
@@ -395,7 +397,7 @@ static int preinit(struct vo *vo)
 
     p->old_crtc = drmModeGetCrtc(p->fd, p->dev->crtc);
     ret = drmModeSetCrtc(p->fd, p->dev->crtc,
-                         p->dev->bufs[p->dev->front_buf ^ 1].fb,
+                         p->dev->bufs[p->dev->front_buf + BUF_COUNT - 1].fb,
                          0, 0, &p->dev->conn, 1, &p->dev->mode);
     if (ret) {
         char *errstr = mp_strerror(errno);
