@@ -692,7 +692,7 @@ Available video output drivers are:
         Default is 128x256x64.
         Sizes must be a power of two, and 512 at most.
 
-    ``blend-subtitles``
+    ``blend-subtitles=<yes|video|no>``
         Blend subtitles directly onto upscaled video frames, before
         interpolation and/or color management (default: no). Enabling this
         causes subtitles to be affected by ``icc-profile``, ``target-prim``,
@@ -703,23 +703,16 @@ Available video output drivers are:
         visible portion of the video, so you can't have subtitles exist in the
         black margins below a video (for example).
 
+        If ``video`` is selected, the behavior is similar to ``yes``, but subs
+        are drawn at the video's native resolution, and scaled along with the
+        video.
+
         .. warning:: This changes the way subtitle colors are handled. Normally,
                      subtitle colors are assumed to be in sRGB and color managed
                      as such. Enabling this makes them treated as being in the
                      video's color space instead. This is good if you want
                      things like softsubbed ASS signs to match the video colors,
                      but may cause SRT subtitles or similar to look slightly off.
-
-    ``blend-subtitles-res=<display|video>``
-        The resolution at which subtitles get drawn if ``blend-subtitles`` is
-        enabled (default: display). In the absence of ``blend-subtitles``,
-        subtitles are always drawn at the window's size, together with the OSD.
-
-        display
-            Subs are drawn directly at the window's size.
-        video
-            Subs are drawn at the video's native resolution, and scaled along
-            with the video.
 
     ``alpha=<blend|yes|no>``
         Decides what to do if the input has an alpha component (default: blend).

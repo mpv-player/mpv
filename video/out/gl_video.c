@@ -434,10 +434,10 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("rectangle-textures", use_rectangle, 0),
         OPT_COLOR("background", background, 0),
         OPT_FLAG("interpolation", interpolation, 0),
-        OPT_FLAG("blend-subtitles", blend_subs, 0),
-        OPT_CHOICE("blend-subtitles-res", blend_subs_res, 0,
-                   ({"display", 0},
-                    {"video", 1})),
+        OPT_CHOICE("blend-subtitles", blend_subs, 0,
+                   ({"no", 0},
+                    {"yes", 1},
+                    {"video", 2})),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
@@ -1836,7 +1836,7 @@ static void pass_render_frame(struct gl_video *p)
     if (vpts == MP_NOPTS_VALUE)
         vpts = p->osd_pts;
 
-    if (p->osd && p->opts.blend_subs && p->opts.blend_subs_res == 1) {
+    if (p->osd && p->opts.blend_subs == 2) {
         double scale[2];
         get_scale_factors(p, scale);
         struct mp_osd_res rect = {
@@ -1851,7 +1851,7 @@ static void pass_render_frame(struct gl_video *p)
 
     pass_scale_main(p);
 
-    if (p->osd && p->opts.blend_subs && p->opts.blend_subs_res == 0) {
+    if (p->osd && p->opts.blend_subs == 1) {
         // Recreate the real video size from the src/dst rects
         int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
             vp_h = p->dst_rect.y1 - p->dst_rect.y0;
@@ -2274,7 +2274,7 @@ static void check_gl_features(struct gl_video *p)
         disabled[n_disabled++] = "interpolation (FBO)";
     }
     if (p->opts.blend_subs && !test_fbo(p, &have_fbo)) {
-        p->opts.blend_subs = false;
+        p->opts.blend_subs = 0;
         disabled[n_disabled++] = "subtitle blending (FBO)";
     }
     if (gl->es && p->opts.pbo) {
