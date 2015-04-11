@@ -61,8 +61,7 @@ struct priv {
     struct modeset_dev *dev;
     drmModeCrtc *old_crtc;
 
-    int dst_w;
-    int dst_h;
+    int32_t x, y;
     struct mp_rect src;
     struct mp_rect dst;
     struct mp_osd_res osd;
@@ -111,7 +110,7 @@ static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
 
     // create framebuffer object for the dumb-buffer
     ret = drmModeAddFB(fd, buf->width, buf->height, 24, 32, buf->stride,
-               buf->handle, &buf->fb);
+                       buf->handle, &buf->fb);
     if (ret) {
         char *errstr = mp_strerror(errno);
         MP_ERR(vo, "Cannot create framebuffer: %s\n", errstr);
@@ -132,7 +131,7 @@ static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
 
     // perform actual memory mapping
     buf->map = mmap(0, buf->size, PROT_READ | PROT_WRITE, MAP_SHARED,
-                fd, mreq.offset);
+                    fd, mreq.offset);
     if (buf->map == MAP_FAILED) {
         char *errstr = mp_strerror(errno);
         MP_ERR(vo, "Cannot map dumb buffer: %s\n", errstr);
@@ -293,28 +292,43 @@ end:
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct priv *p = vo->priv;
-    //TODO: test on video with non-native resolution
-    //int32_t w = p->dev->bufs[0].width;
-    //int32_t h = p->dev->bufs[0].height;
+    int32_t device_w = p->dev->bufs[0].width;
+    int32_t device_h = p->dev->bufs[0].height;
+    float device_ar = device_w / (float)device_h;
 
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
-    int src_w = p->src.x1 - p->src.x0;
-    int src_h = p->src.y1 - p->src.y0;
-    p->dst_w = p->dst.x1 - p->dst.x0;
-    p->dst_h = p->dst.y1 - p->dst.y0;
+    int32_t video_w = (p->dst.x1 - p->dst.x0);
+    int32_t video_h = (p->dst.y1 - p->dst.y0);
+    float video_ar = video_w / (float)video_h;
+    int32_t w, h;
+    if (device_ar > video_ar) {
+        w = device_h * video_ar;
+        h = device_h;
+    } else {
+        w = device_w;
+        h = device_w * video_ar;
+    }
+    if (w > device_w) w = device_w;
+    if (h > device_h) h = device_h;
 
-    MP_INFO(vo, "resizing %dx%d -> %dx%d\n", src_w, src_h,
-                                             p->dst_w, p->dst_h);
+    p->x = (device_w - w) >> 1;
+    p->y = (device_h - h) >> 1;
 
     mp_sws_set_from_cmdline(p->sws, vo->opts->sws_opts);
     p->sws->src = *params;
     p->sws->dst = (struct mp_image_params) {
         .imgfmt = IMGFMT_BGR32,
-        .w = p->dst_w,
-        .h = p->dst_h,
-        .d_w = p->dst_w,
-        .d_h = p->dst_h,
+        .w = w,
+        .h = h,
+        .d_w = w,
+        .d_h = h,
     };
+
+    MP_INFO(vo, "resizing %dx%d -> %dx%d\n",
+            p->sws->src.w,
+            p->sws->src.h,
+            p->sws->dst.w,
+            p->sws->dst.h);
 
     mp_image_params_guess_csp(&p->sws->dst);
 
@@ -332,7 +346,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct modeset_buf *front_buf = &p->dev->bufs[p->dev->front_buf];
     struct mp_image img = {0};
     mp_image_set_params(&img, &p->sws->dst);
-    img.planes[0] = front_buf->map;
+    img.planes[0] = front_buf->map + p->x * 4;
     img.stride[0] = front_buf->stride;
 
     struct mp_rect src_rc = p->src;
@@ -399,13 +413,13 @@ static void uninit(struct vo *vo)
     if (p->dev != NULL) {
         if (p->old_crtc != NULL) {
             drmModeSetCrtc(p->fd,
-                    p->old_crtc->crtc_id,
-                    p->old_crtc->buffer_id,
-                    p->old_crtc->x,
-                    p->old_crtc->y,
-                    &p->dev->conn,
-                    1,
-                    &p->dev->mode);
+                           p->old_crtc->crtc_id,
+                           p->old_crtc->buffer_id,
+                           p->old_crtc->x,
+                           p->old_crtc->y,
+                           &p->dev->conn,
+                           1,
+                           &p->dev->mode);
             drmModeFreeCrtc(p->old_crtc);
         }
 
