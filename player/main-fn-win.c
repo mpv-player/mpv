@@ -14,7 +14,8 @@ int _dowildcard = 0;
 
 static bool is_valid_handle(HANDLE h)
 {
-    return h != INVALID_HANDLE_VALUE && h != NULL;
+    return h != INVALID_HANDLE_VALUE && h != NULL &&
+           GetFileType(h) != FILE_TYPE_UNKNOWN;
 }
 
 static bool has_redirected_stdio(void)
