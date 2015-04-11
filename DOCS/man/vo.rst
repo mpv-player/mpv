@@ -548,6 +548,16 @@ Available video output drivers are:
 
         X11/GLX only.
 
+    ``dwmflush``
+        Calls ``DwmFlush`` after swapping buffers on Windows (default: 0).
+        It also sets ``SwapInterval(0)`` to ignore the OpenGL timing. Values
+        are: 0 (disabled), 1 (only in windowed mode), 2 (also in  full screen).
+        This may help getting more consistent frame intervals, especially with
+        high-fps clips - which might also reduce dropped frames. Typically a
+        value of 1 should be enough since full screen may bypass the DWM.
+
+        Windows only.
+
     ``sw``
         Continue even if a software renderer is detected.
 
@@ -699,6 +709,17 @@ Available video output drivers are:
                      video's color space instead. This is good if you want
                      things like softsubbed ASS signs to match the video colors,
                      but may cause SRT subtitles or similar to look slightly off.
+
+    ``blend-subtitles-res=<display|video>``
+        The resolution at which subtitles get drawn if ``blend-subtitles`` is
+        enabled (default: display). In the absence of ``blend-subtitles``,
+        subtitles are always drawn at the window's size, together with the OSD.
+
+        display
+            Subs are drawn directly at the window's size.
+        video
+            Subs are drawn at the video's native resolution, and scaled along
+            with the video.
 
     ``alpha=<blend|yes|no>``
         Decides what to do if the input has an alpha component (default: blend).

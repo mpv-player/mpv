@@ -99,6 +99,12 @@ const char mp_help_text[] =
 " --list-options    list all mpv options\n"
 "\n";
 
+static const char def_config[] =
+    "[pseudo-gui]\n"
+    "terminal=no\n"
+    "force-window=yes\n"
+    "idle=once\n";
+
 static pthread_mutex_t terminal_owner_lock = PTHREAD_MUTEX_INITIALIZER;
 static struct MPContext *terminal_owner;
 
@@ -313,15 +319,6 @@ static int cfg_include(void *ctx, char *filename, int flags)
     return r;
 }
 
-static void add_default_profiles(struct m_config *cfg)
-{
-    struct m_profile *ui = m_config_add_profile(cfg, "pseudo-gui");
-    m_config_set_profile_option(cfg, ui, bstr0("terminal"), bstr0("no"));
-    m_config_set_profile_option(cfg, ui, bstr0("force-window"), bstr0("yes"));
-    m_config_set_profile_option(cfg, ui, bstr0("idle"), bstr0("yes"));
-    m_config_set_profile_option(cfg, ui, bstr0("keep-open"), bstr0("yes"));
-}
-
 struct MPContext *mp_create(void)
 {
     mp_time_init();
@@ -355,7 +352,7 @@ struct MPContext *mp_create(void)
     mpctx->mconfig->includefunc_ctx = mpctx;
     mpctx->mconfig->use_profiles = true;
     mpctx->mconfig->is_toplevel = true;
-    add_default_profiles(mpctx->mconfig);
+    m_config_parse(mpctx->mconfig, "", bstr0(def_config), NULL, 0);
 
     mpctx->global->opts = mpctx->opts;
 
@@ -386,8 +383,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     assert(!mpctx->initialized);
 
-    update_logging(mpctx);
-
     if (options) {
         // Preparse the command line, so we can init the terminal early.
         m_config_preparse_command_line(mpctx->mconfig, mpctx->global, options);
@@ -400,6 +395,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         MP_VERBOSE(mpctx, "\n");
     }
 
+    update_logging(mpctx);
     mp_print_version(mpctx->log, false);
 
     mp_parse_cfgfiles(mpctx);

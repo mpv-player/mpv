@@ -72,6 +72,9 @@ struct gl_priv {
     int use_gl_debug;
     int allow_sw;
     int swap_interval;
+    int current_swap_interval;
+    int dwm_flush;
+
     char *backend;
 
     int vo_flipped;
@@ -152,6 +155,12 @@ static void flip_page(struct vo *vo)
             p->waitvsync = 0;
             p->opt_pattern[0] = 0;
         }
+    }
+
+    if (p->glctx->DwmFlush) {
+        p->current_swap_interval = p->glctx->DwmFlush(p->glctx, p->dwm_flush,
+                                                      p->swap_interval,
+                                                      p->current_swap_interval);
     }
 
     mpgl_unlock(p->glctx);
@@ -463,6 +472,7 @@ static int preinit(struct vo *vo)
     } else {
         MP_VERBOSE(vo, "swap_control extension missing.\n");
     }
+    p->current_swap_interval = p->swap_interval;
 
     p->renderer = gl_video_init(p->gl, vo->log);
     if (!p->renderer)
@@ -498,6 +508,7 @@ static const struct m_option options[] = {
     OPT_FLAG("glfinish", use_glFinish, 0),
     OPT_FLAG("waitvsync", waitvsync, 0),
     OPT_INT("swapinterval", swap_interval, 0, OPTDEF_INT(1)),
+    OPT_INT("dwmflush", dwm_flush, 0, OPTDEF_INT(0)),
     OPT_FLAG("debug", use_gl_debug, 0),
     OPT_STRING_VALIDATE("backend", backend, 0, mpgl_validate_backend_opt),
     OPT_FLAG("sw", allow_sw, 0),

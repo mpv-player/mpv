@@ -39,15 +39,13 @@ void MpvRenderer::paint()
 {
     window->resetOpenGLState();
 
-    // Render to the whole window.
-    int vp[4] = {0, 0, size.width(), -size.height()};
-
     // This uses 0 as framebuffer, which indicates that mpv will render directly
     // to the frontbuffer. Note that mpv will always switch framebuffers
     // explicitly. Some QWindow setups (such as using QQuickWidget) actually
     // want you to render into a FBO in the beforeRendering() signal, and this
     // code won't work there.
-    mpv_opengl_cb_render(mpv_gl, 0, vp);
+    // The negation is used for rendering with OpenGL's flipped coordinates.
+    mpv_opengl_cb_draw(mpv_gl, 0, size.width(), -size.height());
 
     window->resetOpenGLState();
 }
@@ -96,6 +94,8 @@ void MpvObject::handleWindowChanged(QQuickWindow *win)
             this, &MpvObject::sync, Qt::DirectConnection);
     connect(win, &QQuickWindow::sceneGraphInvalidated,
             this, &MpvObject::cleanup, Qt::DirectConnection);
+    connect(win, &QQuickWindow::frameSwapped,
+            this, &MpvObject::swapped, Qt::DirectConnection);
     win->setClearBeforeRendering(false);
 }
 
@@ -108,6 +108,11 @@ void MpvObject::sync()
     }
     renderer->window = window();
     renderer->size = window()->size() * window()->devicePixelRatio();
+}
+
+void MpvObject::swapped()
+{
+    mpv_opengl_cb_report_flip(mpv_gl, 0);
 }
 
 void MpvObject::cleanup()

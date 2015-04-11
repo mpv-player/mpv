@@ -22,7 +22,9 @@ mpv_get_wakeup_pipe
 mpv_initialize
 mpv_load_config_file
 mpv_observe_property
+mpv_opengl_cb_draw
 mpv_opengl_cb_init_gl
+mpv_opengl_cb_report_flip
 mpv_opengl_cb_render
 mpv_opengl_cb_set_update_callback
 mpv_opengl_cb_uninit_gl

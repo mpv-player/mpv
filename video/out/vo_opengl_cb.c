@@ -19,6 +19,7 @@
 #include "vo.h"
 #include "video/mp_image.h"
 #include "sub/osd.h"
+#include "osdep/timer.h"
 
 #include "common/global.h"
 #include "player/client.h"
@@ -76,6 +77,7 @@ struct mpv_opengl_cb_context {
     struct m_config *new_opts_cfg;
     bool eq_changed;
     struct mp_csp_equalizer eq;
+    int64_t recent_flip;
 
     // --- All of these can only be accessed from the thread where the host
     //     application's OpenGL context is current - i.e. only while the
@@ -267,7 +269,7 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
     return 0;
 }
 
-int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
+int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
 {
     assert(ctx->renderer);
 
@@ -279,7 +281,6 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
 
     ctx->force_update |= ctx->reconfigured;
 
-    int vp_w = vp[2], vp_h = vp[3];
     if (ctx->vp_w != vp_w || ctx->vp_h != vp_h)
         ctx->force_update = true;
 
@@ -340,6 +341,15 @@ int mpv_opengl_cb_render(struct mpv_opengl_cb_context *ctx, int fbo, int vp[4])
     pthread_mutex_unlock(&ctx->lock);
 
     return left;
+}
+
+int mpv_opengl_cb_report_flip(mpv_opengl_cb_context *ctx, int64_t time)
+{
+    pthread_mutex_lock(&ctx->lock);
+    ctx->recent_flip = time > 0 ? time : mp_time_us();
+    pthread_mutex_unlock(&ctx->lock);
+
+    return 0;
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
@@ -405,7 +415,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 #define OPT_BASE_STRUCT struct vo_priv
 static const struct m_option change_opts[] = {
     OPT_FLAG("debug", use_gl_debug, 0),
-    OPT_INTRANGE("frame-queue-size", frame_queue_size, 0, 1, 100, OPTDEF_INT(1)),
+    OPT_INTRANGE("frame-queue-size", frame_queue_size, 0, 1, 100, OPTDEF_INT(2)),
     OPT_CHOICE("frame-drop-mode", frame_drop_mode, 0,
                ({"pop", FRAME_DROP_POP},
                 {"clear", FRAME_DROP_CLEAR})),
@@ -486,6 +496,16 @@ static int control(struct vo *vo, uint32_t request, void *data)
         *arg = p->ctx ? &p->ctx->hwdec_info : NULL;
         return true;
     }
+    case VOCTRL_GET_RECENT_FLIP_TIME: {
+        int r = VO_FALSE;
+        pthread_mutex_lock(&p->ctx->lock);
+        if (p->ctx->recent_flip) {
+            *(int64_t *)data = p->ctx->recent_flip;
+            r = VO_TRUE;
+        }
+        pthread_mutex_unlock(&p->ctx->lock);
+        return r;
+    }
     }
 
     return VO_NOTIMPL;
@@ -531,7 +551,7 @@ static int preinit(struct vo *vo)
 #define OPT_BASE_STRUCT struct vo_priv
 static const struct m_option options[] = {
     OPT_FLAG("debug", use_gl_debug, 0),
-    OPT_INTRANGE("frame-queue-size", frame_queue_size, 0, 1, 100, OPTDEF_INT(1)),
+    OPT_INTRANGE("frame-queue-size", frame_queue_size, 0, 1, 100, OPTDEF_INT(2)),
     OPT_CHOICE("frame-drop-mode", frame_drop_mode, 0,
                ({"pop", FRAME_DROP_POP},
                 {"clear", FRAME_DROP_CLEAR})),

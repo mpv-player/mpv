@@ -435,6 +435,9 @@ const struct m_sub_options gl_video_conf = {
         OPT_COLOR("background", background, 0),
         OPT_FLAG("interpolation", interpolation, 0),
         OPT_FLAG("blend-subtitles", blend_subs, 0),
+        OPT_CHOICE("blend-subtitles-res", blend_subs_res, 0,
+                   ({"display", 0},
+                    {"video", 1})),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
@@ -1358,7 +1361,7 @@ static void pass_read_video(struct gl_video *p)
         GLSL(vec4 color;)
         if (p->plane_count == 2) {
             gl_transform_rect(chromafix, &p->pass_tex[1].src);
-            GLSL(vec2 chroma = texture(texture1, texcoord0).rg;) // NV formats
+            GLSL(vec2 chroma = texture(texture1, texcoord1).rg;) // NV formats
         } else {
             gl_transform_rect(chromafix, &p->pass_tex[1].src);
             gl_transform_rect(chromafix, &p->pass_tex[2].src);
@@ -1827,9 +1830,23 @@ static void pass_render_frame(struct gl_video *p)
     p->use_indirect = false; // set to true as needed by pass_*
     pass_read_video(p);
     pass_convert_yuv(p);
+
+    // For subtitles
+    double vpts = p->image.mpi->pts;
+    if (vpts == MP_NOPTS_VALUE)
+        vpts = p->osd_pts;
+
+    if (p->osd && p->opts.blend_subs && p->opts.blend_subs_res == 1) {
+        struct mp_osd_res rect = { p->image_w, p->image_h, 0, 0, 0, 0, 1 };
+        finish_pass_fbo(p, &p->blend_subs_fbo, p->image_w, p->image_h, 0, 0);
+        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, p->image_w, p->image_h,
+                      p->blend_subs_fbo.fbo, false);
+        GLSL(vec4 color = texture(texture0, texcoord0);)
+    }
+
     pass_scale_main(p);
 
-    if (p->osd && p->opts.blend_subs) {
+    if (p->osd && p->opts.blend_subs && p->opts.blend_subs_res == 0) {
         // Recreate the real video size from the src/dst rects
         int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
             vp_h = p->dst_rect.y1 - p->dst_rect.y0;
@@ -1848,9 +1865,6 @@ static void pass_render_frame(struct gl_video *p)
         if (p->use_linear)
             pass_delinearize(p, p->image_params.gamma);
         finish_pass_fbo(p, &p->blend_subs_fbo, vp_w, vp_h, 0, FBOTEX_FUZZY);
-        double vpts = p->image.mpi->pts;
-        if (vpts == MP_NOPTS_VALUE)
-            vpts = p->osd_pts;
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, vp_w, vp_h,
                       p->blend_subs_fbo.fbo, false);
         GLSL(vec4 color = texture(texture0, texcoord0);)
@@ -2086,8 +2100,8 @@ static bool get_image(struct gl_video *p, struct mp_image *mpi)
 
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
-        mpi->stride[n] = mpi->plane_w[n] * p->image_desc.bytes[n];
-        int needed_size = mpi->plane_h[n] * mpi->stride[n];
+        mpi->stride[n] = mp_image_plane_w(mpi, n) * p->image_desc.bytes[n];
+        int needed_size = mp_image_plane_h(mpi, n) * mpi->stride[n];
         if (!plane->gl_buffer)
             gl->GenBuffers(1, &plane->gl_buffer);
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
@@ -2132,8 +2146,9 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     bool pbo = false;
     if (!vimg->planes[0].buffer_ptr && get_image(p, &mpi2)) {
         for (int n = 0; n < p->plane_count; n++) {
-            int line_bytes = mpi->plane_w[n] * p->image_desc.bytes[n];
-            memcpy_pic(mpi2.planes[n], mpi->planes[n], line_bytes, mpi->plane_h[n],
+            int line_bytes = mp_image_plane_w(mpi, n) * p->image_desc.bytes[n];
+            int plane_h = mp_image_plane_h(mpi, n);
+            memcpy_pic(mpi2.planes[n], mpi->planes[n], line_bytes, plane_h,
                        mpi2.stride[n], mpi->stride[n]);
         }
         pbo = true;
@@ -2610,11 +2625,6 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
 
     check_gl_features(p);
     uninit_rendering(p);
-}
-
-void gl_video_get_colorspace(struct gl_video *p, struct mp_image_params *params)
-{
-    *params = p->image_params; // supports everything
 }
 
 struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p)
