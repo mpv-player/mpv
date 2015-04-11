@@ -63,7 +63,10 @@ struct priv {
     struct modeset_dev *dev;
     drmModeCrtc *old_crtc;
 
+    int32_t device_w;
+    int32_t device_h;
     int32_t x, y;
+    char *buf;
     struct mp_rect src;
     struct mp_rect dst;
     struct mp_osd_res osd;
@@ -293,9 +296,7 @@ end:
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct priv *p = vo->priv;
-    int32_t device_w = p->dev->bufs[0].width;
-    int32_t device_h = p->dev->bufs[0].height;
-    float device_ar = device_w / (float)device_h;
+    float device_ar = p->device_w / (float)p->device_h;
 
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
     int32_t video_w = (p->dst.x1 - p->dst.x0);
@@ -303,17 +304,19 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     float video_ar = video_w / (float)video_h;
     int32_t w, h;
     if (device_ar > video_ar) {
-        w = device_h * video_ar;
-        h = device_h;
+        w = p->device_h * video_ar;
+        h = p->device_h;
     } else {
-        w = device_w;
-        h = device_w * video_ar;
+        w = p->device_w;
+        h = p->device_w * video_ar;
     }
-    if (w > device_w) w = device_w;
-    if (h > device_h) h = device_h;
+    if (w > p->device_w) w = p->device_w;
+    if (h > p->device_h) h = p->device_h;
 
-    p->x = (device_w - w) >> 1;
-    p->y = (device_h - h) >> 1;
+    p->x = (p->device_w - w) >> 1;
+    p->y = (p->device_h - h) >> 1;
+    p->buf = (char*)talloc_size(vo, p->device_w * p->device_h * 4);
+    memset(p->buf, 0, p->device_w * p->device_h * 4);
 
     mp_sws_set_from_cmdline(p->sws, vo->opts->sws_opts);
     p->sws->src = *params;
@@ -347,7 +350,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct modeset_buf *front_buf = &p->dev->bufs[p->dev->front_buf];
     struct mp_image img = {0};
     mp_image_set_params(&img, &p->sws->dst);
-    img.planes[0] = front_buf->map + p->x * 4;
+    img.planes[0] = p->buf + p->x * 4;
     img.stride[0] = front_buf->stride;
 
     struct mp_rect src_rc = p->src;
@@ -358,6 +361,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     mp_sws_scale(p->sws, &img, mpi);
 
     osd_draw_on_image(vo->osd, p->osd, mpi ? mpi->pts : 0, 0, &img);
+
+    memcpy(front_buf->map, p->buf, p->device_w * p->device_h * 4);
 }
 
 static void flip_page(struct vo *vo)
@@ -394,6 +399,8 @@ static int preinit(struct vo *vo)
         return ret;
 
     assert(p->dev != NULL);
+    p->device_w = p->dev->bufs[0].width;
+    p->device_h = p->dev->bufs[0].height;
 
     p->old_crtc = drmModeGetCrtc(p->fd, p->dev->crtc);
     ret = drmModeSetCrtc(p->fd, p->dev->crtc,
@@ -429,6 +436,7 @@ static void uninit(struct vo *vo)
         modeset_destroy_fb(p->fd, &p->dev->bufs[0]);
     }
 
+    talloc_free(p->buf);
     talloc_free(p->dev);
 }
 
