@@ -24,6 +24,8 @@ struct osd_object {
 
     // OSDTYPE_EXTERNAL
     int external_res_x, external_res_y;
+    // do a terrible linked list thing.
+    struct osd_object *next;
 
     // OSDTYPE_EXTERNAL2
     struct sub_bitmaps *external2;

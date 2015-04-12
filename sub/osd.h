@@ -171,7 +171,9 @@ struct osd_progbar_state {
 };
 void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s);
 
-void osd_set_external(struct osd_state *osd, int res_x, int res_y, char *text);
+void osd_add_external(struct osd_state *osd);
+void osd_remove_external(struct osd_state *osd, int idx);
+void osd_set_external(struct osd_state *osd, int layer, int res_x, int res_y, char *text);
 
 void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs);
 

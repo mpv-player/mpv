@@ -457,6 +457,44 @@ function mp.dispatch_events(allow_wait)
 end
 
 -- additional helpers
+local osds = {}
+function mp.add_osd_layer(layer)
+    -- find the actual index corresponding to the osd layer
+    local osd_index = 0
+    for i = 1, #osds do
+        if osds[i].layer > layer then
+            osd_index = i
+            break
+        end
+    end
+    if osd_index == 0 then
+        osd_index = #osds + 1
+    end
+
+    -- create a new osd object
+    local new_osd = {
+        layer = layer,
+        index = osd_index,
+        res_x = 0,
+        res_y = 0,
+        text  = "",
+    }
+    -- rearrange all osds following the new insert.
+    table.insert(osds, osd_index, new_osd)
+    mp.osd_add_external()
+    for i = osd_index, #osds do
+        local osd = osds[i]
+        osd.index = i
+        mp.osd_set_external(osd.index, osd.res_x, osd.res_y, osd.text)
+    end
+
+    -- return a closure for updating the osd
+    return function(res_x, res_y, text)
+        new_osd.res_x, new_osd.res_y, new_osd.text = res_x, res_y, text
+        mp.osd_set_external(new_osd.index, res_x, res_y, text)
+    end
+end
+
 
 function mp.osd_message(text, duration)
     if not duration then

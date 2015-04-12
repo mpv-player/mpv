@@ -943,13 +943,32 @@ static int script_command_native(lua_State *L)
     return 2;
 }
 
+static int script_osd_add_external(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    osd_add_external(mpctx->osd);
+    return 0;
+}
+
+static int script_osd_set_external(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    int layer = luaL_checkinteger(L, 1);
+    int res_x = luaL_checkinteger(L, 2);
+    int res_y = luaL_checkinteger(L, 3);
+    const char *text = luaL_checkstring(L, 4);
+    osd_set_external(mpctx->osd, layer, res_x, res_y, (char *)text);
+    mp_input_wakeup(mpctx->input);
+    return 0;
+}
+
 static int script_set_osd_ass(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
     int res_x = luaL_checkinteger(L, 1);
     int res_y = luaL_checkinteger(L, 2);
     const char *text = luaL_checkstring(L, 3);
-    osd_set_external(mpctx->osd, res_x, res_y, (char *)text);
+    osd_set_external(mpctx->osd, 0, res_x, res_y, (char *)text);
     mp_input_wakeup(mpctx->input);
     return 0;
 }
@@ -1278,6 +1297,8 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(set_property_native),
     FN_ENTRY(raw_observe_property),
     FN_ENTRY(raw_unobserve_property),
+    FN_ENTRY(osd_add_external),
+    FN_ENTRY(osd_set_external),
     FN_ENTRY(set_osd_ass),
     FN_ENTRY(get_osd_resolution),
     FN_ENTRY(get_screen_size),
