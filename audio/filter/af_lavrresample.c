@@ -298,10 +298,11 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return r;
     }
     case AF_CONTROL_SET_FORMAT: {
-        if (af_to_avformat(*(int*)arg) == AV_SAMPLE_FMT_NONE)
+        int format = *(int *)arg;
+        if (format && af_to_avformat(format) == AV_SAMPLE_FMT_NONE)
             return AF_FALSE;
 
-        mp_audio_set_format(af->data, *(int*)arg);
+        mp_audio_set_format(af->data, format);
         return AF_OK;
     }
     case AF_CONTROL_SET_CHANNELS: {
