@@ -1429,6 +1429,11 @@ static void pass_read_video(struct gl_video *p)
     // Custom source shaders are required to output at the full range
     p->use_full_range = shader != NULL;
 
+    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
+        cmul = 1.0;
+        p->use_full_range = true;
+    }
+
     // Special case for non-planar content
     if (p->plane_count == 1) {
         if (shader) {
@@ -1546,8 +1551,6 @@ static void pass_convert_yuv(struct gl_video *p)
     // Pre-colormatrix input gamma correction
     if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
         cparams.colorspace = MP_CSP_XYZ;
-        cparams.input_bits = 8;
-        cparams.texture_bits = 8;
 
         // Pre-colormatrix input gamma correction. Note that this results in
         // linear light
