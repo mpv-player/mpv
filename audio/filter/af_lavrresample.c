@@ -264,12 +264,12 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
 
 static int control(struct af_instance *af, int cmd, void *arg)
 {
-    struct af_resample *s = (struct af_resample *) af->priv;
-    struct mp_audio *in   = (struct mp_audio *) arg;
-    struct mp_audio *out  = (struct mp_audio *) af->data;
+    struct af_resample *s = af->priv;
 
     switch (cmd) {
     case AF_CONTROL_REINIT: {
+        struct mp_audio *in = arg;
+        struct mp_audio *out = af->data;
         struct mp_audio orig_in = *in;
 
         if (((out->rate    == in->rate) || (out->rate == 0)) &&
@@ -310,7 +310,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return AF_OK;
     }
     case AF_CONTROL_SET_RESAMPLE_RATE:
-        out->rate = *(int *)arg;
+        af->data->rate = *(int *)arg;
         return AF_OK;
     case AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE: {
         s->playback_speed = *(double *)arg;
