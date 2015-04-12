@@ -20,7 +20,7 @@ shortcomings:
    part is this pieces are spread apart in the configure and copy pasted for
    any single case. That brings us to..
 
-2) --enable-feature has to override the user and help him understand that he
+2) --enable-feature has to override the user and help them understand that he
    has libraries missing and should install them for the feature to be enabled.
 
 3) Must be customizable, hackable, pleasant to the developer eyes and to work
