@@ -250,24 +250,48 @@ void mp_write_console_ansi(HANDLE wstream, char *buf)
     }
 }
 
+static bool is_a_console(HANDLE h)
+{
+    return GetConsoleMode(h, &(DWORD){0});
+}
+
+static void reopen_console_handle(DWORD std, FILE *stream)
+{
+    HANDLE wstream = GetStdHandle(std);
+    if (is_a_console(wstream)) {
+        int fd = _open_osfhandle((intptr_t)wstream, _O_TEXT);
+        dup2(fd, fileno(stream));
+        setvbuf(stream, NULL, _IONBF, 0);
+    }
+}
+
+bool terminal_try_attach(void)
+{
+    // mpv.exe is a flagged as a GUI application, but it acts as a console
+    // application when started from the console wrapper (see
+    // osdep/win32-console-wrapper.c). The console wrapper sets
+    // _started_from_console=yes, so check that variable before trying to
+    // attach to the console.
+    wchar_t console_env[4] = { 0 };
+    if (!GetEnvironmentVariableW(L"_started_from_console", console_env, 4))
+        return false;
+    if (wcsncmp(console_env, L"yes", 4))
+        return false;
+    SetEnvironmentVariableW(L"_started_from_console", NULL);
+
+    if (!AttachConsole(ATTACH_PARENT_PROCESS))
+        return false;
+
+    // We have a console window. Redirect output streams to that console's
+    // low-level handles, so we can actually use WriteConsole later on.
+    reopen_console_handle(STD_OUTPUT_HANDLE, stdout);
+    reopen_console_handle(STD_ERROR_HANDLE, stderr);
+
+    return true;
+}
+
 int terminal_init(void)
 {
-    if (AttachConsole(ATTACH_PARENT_PROCESS)) {
-        // We have been started by something with a console window.
-        // Redirect output streams to that console's low-level handles,
-        // so we can actually use WriteConsole later on.
-
-        int hConHandle;
-
-        hConHandle = _open_osfhandle((intptr_t)hSTDOUT, _O_TEXT);
-        *stdout = *_fdopen(hConHandle, "w");
-        setvbuf(stdout, NULL, _IONBF, 0);
-
-        hConHandle = _open_osfhandle((intptr_t)hSTDERR, _O_TEXT);
-        *stderr = *_fdopen(hConHandle, "w");
-        setvbuf(stderr, NULL, _IONBF, 0);
-    }
-
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
     DWORD cmode = 0;
     GetConsoleMode(hSTDOUT, &cmode);

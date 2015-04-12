@@ -618,8 +618,13 @@ is not a full GUI and is not meant to be. However, to compensate for the lack
 of expected GUI behavior, mpv will in some cases start with some settings
 changed to behave slightly more like a GUI mode.
 
-Currently this happens only if started using the ``mpv.desktop`` file in Linux
-(like started from menus or file associations provided by desktop environments).
+Currently this happens only in the following cases:
+
+- if started using the ``mpv.desktop`` file on Linux (e.g. started from menus
+  or file associations provided by desktop environments)
+- if started from explorer.exe on Windows (technically, if it was started on
+  Windows, and all of the stdout/stderr/stdin handles are unset)
+- manually adding ``--profile=pseudo-gui`` to the command line
 
 This mode implicitly adds ``--profile=pseudo-gui`` to the command line, with
 the ``pseudo-gui`` profile being predefined with the following contents:

@@ -275,18 +275,14 @@ static bool handle_help_options(struct MPContext *mpctx)
     return opt_exit;
 }
 
-static void osdep_preinit(int *p_argc, char ***p_argv)
+static void osdep_preinit(int argc, char **argv)
 {
     char *enable_talloc = getenv("MPV_LEAK_REPORT");
-    if (*p_argc > 1 && (strcmp((*p_argv)[1], "-leak-report") == 0 ||
-                        strcmp((*p_argv)[1], "--leak-report") == 0))
+    if (argc > 1 && (strcmp(argv[1], "-leak-report") == 0 ||
+                     strcmp(argv[1], "--leak-report") == 0))
         enable_talloc = "1";
     if (enable_talloc && strcmp(enable_talloc, "1") == 0)
         talloc_enable_leak_report();
-
-#ifdef __MINGW32__
-    mp_get_converted_argv(p_argc, p_argv);
-#endif
 
 #ifdef _WIN32
     // stop Windows from showing all kinds of annoying error dialogs
@@ -514,7 +510,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
 int mpv_main(int argc, char *argv[])
 {
-    osdep_preinit(&argc, &argv);
+    osdep_preinit(argc, argv);
 
     struct MPContext *mpctx = mp_create();
     struct MPOpts *opts = mpctx->opts;
