@@ -20,6 +20,7 @@
  */
 
 #include <assert.h>
+#include <stdbool.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <libswscale/swscale.h>
@@ -201,6 +202,34 @@ static void modeset_destroy_fb(int fd, struct modeset_buf *buf)
     drmIoctl(fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
 }
 
+static bool is_connector_valid(struct vo *vo, int conn_id,
+                               drmModeConnector *conn, bool silent)
+{
+    if (!conn) {
+        if (!silent) {
+            char *errstr = mp_strerror(errno);
+            MP_ERR(vo, "Cannot get connector %d: %s\n", conn_id, errstr);
+        }
+        return false;
+    }
+
+    if (conn->connection != DRM_MODE_CONNECTED) {
+        if (!silent) {
+            MP_ERR(vo, "Connector %d is disconnected\n", conn_id);
+        }
+        return false;
+    }
+
+    if (conn->count_modes == 0) {
+        if (!silent) {
+            MP_ERR(vo, "Connector %d has no valid modes\n", conn_id);
+        }
+        return false;
+    }
+
+    return true;
+}
+
 static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
                                struct modeset_dev **out)
 {
@@ -219,6 +248,26 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
         goto end;
     }
 
+    if (conn_id == -1) {
+        // get the first connected connector
+        for (int i = 0; i < res->count_connectors; i ++) {
+            conn = drmModeGetConnector(fd, res->connectors[i]);
+            if (is_connector_valid(vo, i, conn, true)) {
+                conn_id = i;
+                break;
+            }
+            if (conn) {
+                drmModeFreeConnector(conn);
+                conn = NULL;
+            }
+        }
+        if (conn_id == -1) {
+            MP_ERR(vo, "No connected connectors found\n");
+            ret = -ENODEV;
+            goto end;
+        }
+    }
+
     if (conn_id < 0 || conn_id >= res->count_connectors) {
         MP_ERR(vo, "Bad connector ID. Max valid connector ID = %u\n",
                res->count_connectors);
@@ -227,30 +276,14 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
     }
 
     conn = drmModeGetConnector(fd, res->connectors[conn_id]);
-    if (!conn) {
-        char *errstr = mp_strerror(errno);
-        MP_ERR(vo, "Cannot retrieve connector %u:%u: %s\n",
-               conn_id, res->connectors[conn_id], errstr);
-        ret = -errno;
+    if (!is_connector_valid(vo, conn_id, conn, true)) {
+        ret = -ENODEV;
         goto end;
     }
 
     dev = talloc_size(vo->priv, sizeof(*dev));
     dev->conn = conn->connector_id;
     dev->front_buf = 0;
-
-    if (conn->connection != DRM_MODE_CONNECTED) {
-        MP_ERR(vo, "Connector %u is disconnected\n", conn_id);
-        ret = -ENODEV;
-        goto end;
-    }
-
-    if (conn->count_modes == 0) {
-        MP_ERR(vo, "Connector %u has no valid modes\n", conn_id);
-        ret = -ENODEV;
-        goto end;
-    }
-
     memcpy(&dev->mode, &conn->modes[0], sizeof(dev->mode));
     dev->bufs[0].width = conn->modes[0].hdisplay;
     dev->bufs[0].height = conn->modes[0].vdisplay;
@@ -280,8 +313,14 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
     }
 
 end:
-    if (conn) drmModeFreeConnector(conn);
-    if (res) drmModeFreeResources(res);
+    if (conn) {
+        drmModeFreeConnector(conn);
+        conn = NULL;
+    }
+    if (res) {
+        drmModeFreeResources(res);
+        res = NULL;
+    }
     if (ret == 0) {
         *out = dev;
     } else {
@@ -479,6 +518,6 @@ const struct vo_driver video_out_drm = {
     },
     .priv_defaults = &(const struct priv) {
         .device_path = "/dev/dri/card0",
-        .connector_id = 0,
+        .connector_id = -1,
     },
 };
