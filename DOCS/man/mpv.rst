@@ -610,6 +610,39 @@ PROTOCOLS
 ``memory://data``
     Use the ``data`` part as source data.
 
+PSEUDO GUI MODE
+===============
+
+mpv has no official GUI, other than the OSC (`ON SCREEN CONTROLLER`_), which
+is not a full GUI and is not meant to be. However, to compensate for the lack
+of expected GUI behavior, mpv will in some cases start with some settings
+changed to behave slightly more like a GUI mode.
+
+Currently this happens only in the following cases:
+
+- if started using the ``mpv.desktop`` file on Linux (e.g. started from menus
+  or file associations provided by desktop environments)
+- if started from explorer.exe on Windows (technically, if it was started on
+  Windows, and all of the stdout/stderr/stdin handles are unset)
+- manually adding ``--profile=pseudo-gui`` to the command line
+
+This mode implicitly adds ``--profile=pseudo-gui`` to the command line, with
+the ``pseudo-gui`` profile being predefined with the following contents:
+
+::
+
+    [pseudo-gui]
+    terminal=no
+    force-window=yes
+    idle=once
+
+This follows the mpv config file format. To customize pseudo-GUI mode, you can
+put your own ``pseudo-gui`` profile into your ``mpv.conf``. This profile will
+enhance the default profile, rather than overwrite it.
+
+The profile always overrides other settings in ``mpv.conf``.
+
+
 .. include:: options.rst
 
 .. include:: ao.rst

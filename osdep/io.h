@@ -1,20 +1,20 @@
 /*
  * unicode/utf-8 I/O helpers and wrappers for Windows
  *
- * This file is part of mplayer2.
+ * This file is part of mpv.
  *
- * mplayer2 is free software; you can redistribute it and/or modify
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * mplayer2 is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with mplayer2.  If not, see <http://www.gnu.org/licenses/>.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPLAYER_OSDEP_IO
@@ -64,8 +64,6 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 #include <dirent.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-
-void mp_get_converted_argv(int *argc, char ***argv);
 
 int mp_printf(const char *format, ...);
 int mp_fprintf(FILE *stream, const char *format, ...);

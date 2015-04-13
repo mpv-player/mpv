@@ -37,6 +37,7 @@ public:
 public slots:
     void command(const QVariant& params);
     void sync();
+    void swapped();
     void cleanup();
 signals:
     void onUpdate();

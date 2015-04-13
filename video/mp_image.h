@@ -1,19 +1,18 @@
 /*
- * This file is part of MPlayer.
+ * This file is part of mpv.
  *
- * MPlayer is free software; you can redistribute it and/or modify
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * MPlayer is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with MPlayer; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPLAYER_MP_IMAGE_H
@@ -77,7 +76,7 @@ struct mp_image_params {
  *   image data. mp_image_make_writeable() will do that copy if required.
  */
 typedef struct mp_image {
-    unsigned int flags; // same as fmt.flags
+    int w, h;  // visible dimensions (redundant with params.w/h)
 
     struct mp_image_params params;
 
@@ -85,21 +84,12 @@ typedef struct mp_image {
     struct mp_imgfmt_desc fmt;
     enum mp_imgfmt imgfmt;
     int num_planes;
-    int chroma_x_shift; // horizontal
-    int chroma_y_shift; // vertical
 
-    int w,h;  // visible dimensions
     uint8_t *planes[MP_MAX_PLANES];
     int stride[MP_MAX_PLANES];
 
     int pict_type; // 0->unknown, 1->I, 2->P, 3->B
     int fields;
-
-    /* redundant */
-    int chroma_width;
-    int chroma_height;
-    int plane_w[MP_MAX_PLANES];
-    int plane_h[MP_MAX_PLANES];
 
     /* only inside filter chain */
     double pts;
@@ -127,6 +117,8 @@ void mp_image_crop_rc(struct mp_image *img, struct mp_rect rc);
 void mp_image_vflip(struct mp_image *img);
 
 void mp_image_set_size(struct mp_image *mpi, int w, int h);
+int mp_image_plane_w(struct mp_image *mpi, int plane);
+int mp_image_plane_h(struct mp_image *mpi, int plane);
 
 void mp_image_setfmt(mp_image_t* mpi, int out_fmt);
 void mp_image_steal_data(struct mp_image *dst, struct mp_image *src);

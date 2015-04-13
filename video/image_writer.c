@@ -1,18 +1,18 @@
 /*
- * This file is part of mplayer.
+ * This file is part of mpv.
  *
- * mplayer is free software; you can redistribute it and/or modify
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * mplayer is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with mplayer.  If not, see <http://www.gnu.org/licenses/>.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -47,8 +47,6 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .jpeg_quality = 90,
     .jpeg_optimize = 100,
     .jpeg_smooth = 0,
-    .jpeg_dpi = 72,
-    .jpeg_progressive = 0,
     .jpeg_baseline = 1,
     .tag_csp = 1,
 };
@@ -60,8 +58,6 @@ const struct m_sub_options image_writer_conf = {
         OPT_INTRANGE("jpeg-quality", jpeg_quality, 0, 0, 100),
         OPT_INTRANGE("jpeg-optimize", jpeg_optimize, 0, 0, 100),
         OPT_INTRANGE("jpeg-smooth", jpeg_smooth, 0, 0, 100),
-        OPT_INTRANGE("jpeg-dpi", jpeg_dpi, M_OPT_MIN, 1, 99999),
-        OPT_FLAG("jpeg-progressive", jpeg_progressive, 0),
         OPT_FLAG("jpeg-baseline", jpeg_baseline, 0),
         OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
         OPT_INTRANGE("png-filter", png_filter, 0, 0, 5),
@@ -77,6 +73,7 @@ struct image_writer_ctx {
     struct mp_log *log;
     const struct image_writer_opts *opts;
     const struct img_writer *writer;
+    struct mp_imgfmt_desc original_format;
 };
 
 struct img_writer {
@@ -190,18 +187,14 @@ static int write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
     cinfo.write_JFIF_header = TRUE;
     cinfo.JFIF_major_version = 1;
     cinfo.JFIF_minor_version = 2;
-    cinfo.density_unit = 1; /* 0=unknown, 1=dpi, 2=dpcm */
-    cinfo.X_density = ctx->opts->jpeg_dpi;
-    cinfo.Y_density = ctx->opts->jpeg_dpi;
-    cinfo.write_Adobe_marker = TRUE;
 
     jpeg_set_defaults(&cinfo);
     jpeg_set_quality(&cinfo, ctx->opts->jpeg_quality, ctx->opts->jpeg_baseline);
     cinfo.optimize_coding = ctx->opts->jpeg_optimize;
     cinfo.smoothing_factor = ctx->opts->jpeg_smooth;
 
-    if (ctx->opts->jpeg_progressive)
-        jpeg_simple_progression(&cinfo);
+    cinfo.comp_info[0].h_samp_factor = 1 << ctx->original_format.chroma_xs;
+    cinfo.comp_info[0].v_samp_factor = 1 << ctx->original_format.chroma_ys;
 
     jpeg_start_compress(&cinfo, TRUE);
 
@@ -299,7 +292,7 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
         opts = &defs;
 
     const struct img_writer *writer = get_writer(opts);
-    struct image_writer_ctx ctx = { log, opts, writer };
+    struct image_writer_ctx ctx = { log, opts, writer, image->fmt };
     int destfmt = get_target_format(&ctx, image->imgfmt);
 
     // Caveat: no colorspace/levels conversion done if pixel formats equal

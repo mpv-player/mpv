@@ -1,19 +1,18 @@
 /*
- * This file is part of MPlayer.
+ * This file is part of mpv.
  *
- * MPlayer is free software; you can redistribute it and/or modify
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * MPlayer is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with MPlayer; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -605,7 +604,15 @@ static bool render_frame(struct vo *vo)
     if (!in->hasframe_rendered)
         duration = -1; // disable framedrop
 
-    in->dropped_frame = duration >= 0 && end_time < next_vsync;
+    // if the clip and display have similar/identical fps, it's possible that
+    // we'll be very slightly late frequently due to timing jitter, or if the
+    // clip/container timestamps are not very accurate.
+    // so if we dropped the previous frame, keep dropping until we're aligned
+    // perfectly, else, allow some slack (1 vsync) to let it settle into a rhythm.
+    in->dropped_frame = duration >= 0 &&
+                            ((in->dropped_frame && end_time < next_vsync) ||
+                            (end_time < prev_vsync)); // hard threshold - 1 vsync late
+
     in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP);
     in->dropped_frame &= (vo->global->opts->frame_dropping & 1);
     // Even if we're hopelessly behind, rather degrade to 10 FPS playback,
@@ -615,7 +622,7 @@ static bool render_frame(struct vo *vo)
     if (in->vsync_timed) {
         // this is a heuristic that wakes the thread up some
         // time before the next vsync
-        target = next_vsync - MPMIN(in->vsync_interval / 3, 4e3);
+        target = next_vsync - MPMIN(in->vsync_interval / 2, 8e3);
 
         // We are very late with the frame and using vsync timing: probably
         // no new frames are coming in. This must be done whether or not

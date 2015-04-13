@@ -1,22 +1,24 @@
 /*
  * unicode/utf-8 I/O helpers and wrappers for Windows
  *
- * This file is part of mplayer2.
  * Contains parts based on libav code (http://libav.org).
  *
- * mplayer2 is free software; you can redistribute it and/or modify
+ * This file is part of mpv.
+ *
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * mplayer2 is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with mplayer2.  If not, see <http://www.gnu.org/licenses/>.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <unistd.h>
 #include <errno.h>
 #include <assert.h>
@@ -120,32 +122,6 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s)
 #include <io.h>
 #include <fcntl.h>
 #include <pthread.h>
-
-//http://git.libav.org/?p=libav.git;a=blob;f=cmdutils.c;h=ade3f10ce2fc030e32e375a85fbd06c26d43a433#l161
-
-static char** win32_argv_utf8;
-static int win32_argc;
-
-void mp_get_converted_argv(int *argc, char ***argv)
-{
-    if (!win32_argv_utf8) {
-        win32_argc = 0;
-        wchar_t **argv_w = CommandLineToArgvW(GetCommandLineW(), &win32_argc);
-        if (win32_argc <= 0 || !argv_w)
-            return;
-
-        win32_argv_utf8 = talloc_zero_array(NULL, char*, win32_argc + 1);
-
-        for (int i = 0; i < win32_argc; i++) {
-            win32_argv_utf8[i] = mp_to_utf8(NULL, argv_w[i]);
-        }
-
-        LocalFree(argv_w);
-    }
-
-    *argc = win32_argc;
-    *argv = win32_argv_utf8;
-}
 
 static void copy_stat(struct mp_stat *dst, struct _stat64 *src)
 {

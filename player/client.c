@@ -1705,7 +1705,11 @@ int mpv_opengl_cb_init_gl(mpv_opengl_cb_context *ctx, const char *exts,
 {
     return MPV_ERROR_NOT_IMPLEMENTED;
 }
-int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4])
+int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int w, int h)
+{
+    return MPV_ERROR_NOT_IMPLEMENTED;
+}
+int mpv_opengl_cb_report_flip(mpv_opengl_cb_context *ctx, int64_t time)
 {
     return MPV_ERROR_NOT_IMPLEMENTED;
 }
@@ -1714,6 +1718,11 @@ int mpv_opengl_cb_uninit_gl(mpv_opengl_cb_context *ctx)
     return MPV_ERROR_NOT_IMPLEMENTED;
 }
 #endif
+
+int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4])
+{
+    return mpv_opengl_cb_draw(ctx, fbo, vp[2], vp[3]);
+}
 
 void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api)
 {

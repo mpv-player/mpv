@@ -1,19 +1,18 @@
 /*
- * This file is part of MPlayer.
+ * This file is part of mpv.
  *
- * MPlayer is free software; you can redistribute it and/or modify
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * MPlayer is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with MPlayer; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -63,10 +62,11 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     mp_image_copy_attributes(dmpi, mpi);
 
     for (int p = 0; p < mpi->num_planes; p++) {
-        for (int y = 0; y < mpi->plane_h[p]; y++) {
+        int plane_h = mp_image_plane_h(mpi, p);
+        for (int y = 0; y < plane_h; y++) {
             void *p_src = mpi->planes[p] + mpi->stride[p] * y;
             void *p_dst = dmpi->planes[p] + dmpi->stride[p] * y;
-            int w = dmpi->plane_w[p];
+            int w = mp_image_plane_w(dmpi, p);
             if (mpi->imgfmt == IMGFMT_YUYV) {
                 mirror_4_m(p_dst, p_src, w / 2, 2, 1, 0, 3);
             } else if (mpi->imgfmt == IMGFMT_UYVY) {

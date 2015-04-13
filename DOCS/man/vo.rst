@@ -548,6 +548,16 @@ Available video output drivers are:
 
         X11/GLX only.
 
+    ``dwmflush``
+        Calls ``DwmFlush`` after swapping buffers on Windows (default: 0).
+        It also sets ``SwapInterval(0)`` to ignore the OpenGL timing. Values
+        are: 0 (disabled), 1 (only in windowed mode), 2 (also in  full screen).
+        This may help getting more consistent frame intervals, especially with
+        high-fps clips - which might also reduce dropped frames. Typically a
+        value of 1 should be enough since full screen may bypass the DWM.
+
+        Windows only.
+
     ``sw``
         Continue even if a software renderer is detected.
 
@@ -682,7 +692,7 @@ Available video output drivers are:
         Default is 128x256x64.
         Sizes must be a power of two, and 512 at most.
 
-    ``blend-subtitles``
+    ``blend-subtitles=<yes|video|no>``
         Blend subtitles directly onto upscaled video frames, before
         interpolation and/or color management (default: no). Enabling this
         causes subtitles to be affected by ``icc-profile``, ``target-prim``,
@@ -692,6 +702,10 @@ Available video output drivers are:
         The downside of enabling this is that it restricts subtitles to the
         visible portion of the video, so you can't have subtitles exist in the
         black margins below a video (for example).
+
+        If ``video`` is selected, the behavior is similar to ``yes``, but subs
+        are drawn at the video's native resolution, and scaled along with the
+        video.
 
         .. warning:: This changes the way subtitle colors are handled. Normally,
                      subtitle colors are assumed to be in sRGB and color managed

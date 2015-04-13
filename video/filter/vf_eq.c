@@ -6,21 +6,20 @@
  * Richard Felker (original MMX contrast/brightness code (vf_eq.c))
  * Michael Niedermayer <michalni@gmx.at> (LUT16)
  *
- * This file is part of MPlayer.
+ * This file is part of mpv.
  *
- * MPlayer is free software; you can redistribute it and/or modify
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * MPlayer is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with MPlayer; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -191,8 +190,8 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *src)
   if ((eq2->buf_w[0] != src->w) || (eq2->buf_h[0] != src->h)) {
     eq2->buf_w[0] = src->w;
     eq2->buf_h[0] = src->h;
-      eq2->buf_w[1] = eq2->buf_w[2] = src->w >> src->chroma_x_shift;
-      eq2->buf_h[1] = eq2->buf_h[2] = src->h >> src->chroma_y_shift;
+      eq2->buf_w[1] = eq2->buf_w[2] = src->w >> src->fmt.chroma_xs;
+      eq2->buf_h[1] = eq2->buf_h[2] = src->h >> src->fmt.chroma_ys;
     img_n = eq2->buf_w[0]*eq2->buf_h[0];
     if(src->num_planes>1){
       img_c = eq2->buf_w[1]*eq2->buf_h[1];

@@ -44,7 +44,7 @@ extern "C" {
  * the OpenGL API, because it's simpler and more flexible on the mpv side.
  *
  * The renderer needs to be explicitly initialized with mpv_opengl_cb_init_gl(),
- * and then video can be drawn with mpv_opengl_cb_render(). The user thread can
+ * and then video can be drawn with mpv_opengl_cb_draw(). The user thread can
  * be notified by new frames with mpv_opengl_cb_set_update_callback().
  *
  * OpenGL interop
@@ -53,7 +53,7 @@ extern "C" {
  * This assumes the OpenGL context lives on a certain thread controlled by the
  * API user. The following functions require access to the OpenGL context:
  *      mpv_opengl_cb_init_gl
- *      mpv_opengl_cb_render
+ *      mpv_opengl_cb_draw
  *      mpv_opengl_cb_uninit_gl
  *
  * The OpenGL context is indirectly accessed through the OpenGL function
@@ -172,31 +172,58 @@ int mpv_opengl_cb_init_gl(mpv_opengl_cb_context *ctx, const char *exts,
 /**
  * Render video. Requires that the OpenGL state is initialized.
  *
- * The video will use the provided viewport rectangle as window size. Options
- * like "panscan" are applied to determine which part of the video should be
- * visible and how the video should be scaled. You can change these options
- * at runtime by using the mpv property API.
+ * The video will use the full provided framebuffer. Options like "panscan" are
+ * applied to determine which part of the video should be visible and how the
+ * video should be scaled. You can change these options at runtime by using the
+ * mpv property API.
  *
  * The renderer will reconfigure itself every time the output rectangle/size
  * is changed. (If you want to do animations, it might be better to do the
  * animation on a FBO instead.)
  *
+ * This function implicitly pulls a video frame from the internal queue and
+ * renders it. If no new frame is available, the previous frame is redrawn.
+ * The update callback set with mpv_opengl_cb_set_update_callback() notifies
+ * you when a new frame was added.
+ *
  * @param fbo The framebuffer object to render on. Because the renderer might
  *            manage multiple FBOs internally for the purpose of video
  *            postprocessing, it will always bind and unbind FBOs itself. If
  *            you want mpv to render on the main framebuffer, pass 0.
- * @param vp Viewport to render on. The renderer will essentially call:
- *            glViewport(0, 0, vp[2], vp[3]);
- *           before rendering. The height (vp[3]) can be negative to flip the
- *           image - the renderer will flip it before setting the viewport
- *           (typically you want to flip the image if you are rendering
- *           directly to the main framebuffer).
- *           vp[0] and vp[1] should be set to 0.
- *           The viewport width and height imply the target FBO or framebuffer's
- *           size. It will always render to the full size of it.
+ * @param w Width of the framebuffer. This is either the video size if the fbo
+ *          parameter is 0, or the allocated size of the texture backing the
+ *          fbo. The renderer will always use the full size of the fbo.
+ * @param h Height of the framebuffer. Same as with the w parameter, except
+ *          that this parameter can be negative. In this case, the video
+ *          frame will be rendered flipped.
  * @return the number of left frames in the internal queue to be rendered
  */
+int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int w, int h);
+
+/**
+ * Deprecated. Use mpv_opengl_cb_draw(). This function is equivalent to:
+ *
+ * int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4])
+ *  { return mpv_opengl_cb_draw(ctx, fbo, vp[2], vp[3]); }
+ *
+ * vp[0] and vp[1] used to have a meaning, but are ignored in newer versions.
+ *
+ * This function will be removed in the future without version bump (this API
+ * was never marked as stable).
+ */
 int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4]);
+
+/**
+ * Tell the renderer that a frame was flipped at the given time. This is
+ * optional, but can help the player to achieve better timing.
+ *
+ * If this is called while no video or no OpenGL is initialized, it is ignored.
+ *
+ * @param time The mpv time (using mpv_get_time_us()) at which the flip call
+ *             returned. If 0 is passed, mpv_get_time_us() is used instead.
+ * @return error code
+ */
+int mpv_opengl_cb_report_flip(mpv_opengl_cb_context *ctx, int64_t time);
 
 /**
  * Destroy the mpv OpenGL state.

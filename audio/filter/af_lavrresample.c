@@ -2,22 +2,22 @@
  * Copyright (c) 2004 Michael Niedermayer <michaelni@gmx.at>
  * Copyright (c) 2013 Stefano Pigozzi <stefano.pigozzi@gmail.com>
  *
- * This file is part of mpv.
  * Based on Michael Niedermayer's lavcresample.
  *
- * MPlayer is free software; you can redistribute it and/or modify
+ * This file is part of mpv.
+ *
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * MPlayer is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with MPlayer; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -264,12 +264,12 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
 
 static int control(struct af_instance *af, int cmd, void *arg)
 {
-    struct af_resample *s = (struct af_resample *) af->priv;
-    struct mp_audio *in   = (struct mp_audio *) arg;
-    struct mp_audio *out  = (struct mp_audio *) af->data;
+    struct af_resample *s = af->priv;
 
     switch (cmd) {
     case AF_CONTROL_REINIT: {
+        struct mp_audio *in = arg;
+        struct mp_audio *out = af->data;
         struct mp_audio orig_in = *in;
 
         if (((out->rate    == in->rate) || (out->rate == 0)) &&
@@ -298,10 +298,11 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return r;
     }
     case AF_CONTROL_SET_FORMAT: {
-        if (af_to_avformat(*(int*)arg) == AV_SAMPLE_FMT_NONE)
+        int format = *(int *)arg;
+        if (format && af_to_avformat(format) == AV_SAMPLE_FMT_NONE)
             return AF_FALSE;
 
-        mp_audio_set_format(af->data, *(int*)arg);
+        mp_audio_set_format(af->data, format);
         return AF_OK;
     }
     case AF_CONTROL_SET_CHANNELS: {
@@ -309,7 +310,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return AF_OK;
     }
     case AF_CONTROL_SET_RESAMPLE_RATE:
-        out->rate = *(int *)arg;
+        af->data->rate = *(int *)arg;
         return AF_OK;
     case AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE: {
         s->playback_speed = *(double *)arg;

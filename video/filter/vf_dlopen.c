@@ -1,18 +1,18 @@
 /*
- * This file is part of mplayer.
+ * This file is part of mpv.
  *
- * mplayer is free software; you can redistribute it and/or modify
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * mplayer is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with mplayer.  If not, see <http://www.gnu.org/licenses/>.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -82,11 +82,11 @@ static void set_imgprop(struct vf_dlopen_picdata *out, const mp_image_t *mpi)
         out->plane[i] = mpi->planes[i];
         out->planestride[i] = mpi->stride[i];
         out->planewidth[i] =
-            i ? (/*mpi->chroma_width*/ mpi->w >> mpi->chroma_x_shift) : mpi->w;
+            i ? (/*mpi->chroma_width*/ mpi->w >> mpi->fmt.chroma_xs) : mpi->w;
         out->planeheight[i] =
-            i ? (/*mpi->chroma_height*/ mpi->h >> mpi->chroma_y_shift) : mpi->h;
-        out->planexshift[i] = i ? mpi->chroma_x_shift : 0;
-        out->planeyshift[i] = i ? mpi->chroma_y_shift : 0;
+            i ? (/*mpi->chroma_height*/ mpi->h >> mpi->fmt.chroma_ys) : mpi->h;
+        out->planexshift[i] = i ? mpi->fmt.chroma_xs : 0;
+        out->planeyshift[i] = i ? mpi->fmt.chroma_ys : 0;
     }
 }
 

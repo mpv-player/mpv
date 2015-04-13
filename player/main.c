@@ -1,19 +1,18 @@
 /*
- * This file is part of MPlayer.
+ * This file is part of mpv.
  *
- * MPlayer is free software; you can redistribute it and/or modify
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * MPlayer is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with MPlayer; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -98,6 +97,12 @@ const char mp_help_text[] =
 "\n"
 " --list-options    list all mpv options\n"
 "\n";
+
+static const char def_config[] =
+    "[pseudo-gui]\n"
+    "terminal=no\n"
+    "force-window=yes\n"
+    "idle=once\n";
 
 static pthread_mutex_t terminal_owner_lock = PTHREAD_MUTEX_INITIALIZER;
 static struct MPContext *terminal_owner;
@@ -269,18 +274,14 @@ static bool handle_help_options(struct MPContext *mpctx)
     return opt_exit;
 }
 
-static void osdep_preinit(int *p_argc, char ***p_argv)
+static void osdep_preinit(int argc, char **argv)
 {
     char *enable_talloc = getenv("MPV_LEAK_REPORT");
-    if (*p_argc > 1 && (strcmp((*p_argv)[1], "-leak-report") == 0 ||
-                        strcmp((*p_argv)[1], "--leak-report") == 0))
+    if (argc > 1 && (strcmp(argv[1], "-leak-report") == 0 ||
+                     strcmp(argv[1], "--leak-report") == 0))
         enable_talloc = "1";
     if (enable_talloc && strcmp(enable_talloc, "1") == 0)
         talloc_enable_leak_report();
-
-#ifdef __MINGW32__
-    mp_get_converted_argv(p_argc, p_argv);
-#endif
 
 #ifdef _WIN32
     // stop Windows from showing all kinds of annoying error dialogs
@@ -311,15 +312,6 @@ static int cfg_include(void *ctx, char *filename, int flags)
     int r = m_config_parse_config_file(mpctx->mconfig, fname, NULL, flags);
     talloc_free(fname);
     return r;
-}
-
-static void add_default_profiles(struct m_config *cfg)
-{
-    struct m_profile *ui = m_config_add_profile(cfg, "pseudo-gui");
-    m_config_set_profile_option(cfg, ui, bstr0("terminal"), bstr0("no"));
-    m_config_set_profile_option(cfg, ui, bstr0("force-window"), bstr0("yes"));
-    m_config_set_profile_option(cfg, ui, bstr0("idle"), bstr0("yes"));
-    m_config_set_profile_option(cfg, ui, bstr0("keep-open"), bstr0("yes"));
 }
 
 struct MPContext *mp_create(void)
@@ -355,7 +347,7 @@ struct MPContext *mp_create(void)
     mpctx->mconfig->includefunc_ctx = mpctx;
     mpctx->mconfig->use_profiles = true;
     mpctx->mconfig->is_toplevel = true;
-    add_default_profiles(mpctx->mconfig);
+    m_config_parse(mpctx->mconfig, "", bstr0(def_config), NULL, 0);
 
     mpctx->global->opts = mpctx->opts;
 
@@ -386,8 +378,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     assert(!mpctx->initialized);
 
-    update_logging(mpctx);
-
     if (options) {
         // Preparse the command line, so we can init the terminal early.
         m_config_preparse_command_line(mpctx->mconfig, mpctx->global, options);
@@ -400,6 +390,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         MP_VERBOSE(mpctx, "\n");
     }
 
+    update_logging(mpctx);
     mp_print_version(mpctx->log, false);
 
     mp_parse_cfgfiles(mpctx);
@@ -518,7 +509,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
 int mpv_main(int argc, char *argv[])
 {
-    osdep_preinit(&argc, &argv);
+    osdep_preinit(argc, argv);
 
     struct MPContext *mpctx = mp_create();
     struct MPOpts *opts = mpctx->opts;

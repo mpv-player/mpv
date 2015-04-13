@@ -71,6 +71,10 @@ def build(ctx):
         source = "demux/ebml.c",
         target = "ebml_defs.c")
 
+    main_fn_c = {
+        'win32':  'player/main-fn-win.c',
+    }.get(ctx.env.DEST_OS, "player/main-fn-unix.c")
+
     getch2_c = {
         'win32':  'osdep/terminal-win.c',
     }.get(ctx.env.DEST_OS, "osdep/terminal-unix.c")
@@ -418,7 +422,7 @@ def build(ctx):
     if ctx.dependency_satisfied('cplayer'):
         ctx(
             target       = "mpv",
-            source       = "player/main_fn.c",
+            source       = main_fn_c,
             use          = ctx.dependencies_use() + ['objects'],
             includes     = _all_includes(ctx),
             features     = "c cprogram",

@@ -1,19 +1,18 @@
 /*
- * This file is part of MPlayer.
+ * This file is part of mpv.
  *
- * MPlayer is free software; you can redistribute it and/or modify
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * MPlayer is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with MPlayer; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -505,6 +504,15 @@ static int af_fix_rate(struct af_stream *s, struct af_instance **p_af,
     return AF_OK;
 }
 
+static void reset_formats(struct af_stream *s)
+{
+    for (struct af_instance *af = s->first; af; af = af->next) {
+        af->control(af, AF_CONTROL_SET_RESAMPLE_RATE, &(int){0});
+        af->control(af, AF_CONTROL_SET_CHANNELS, &(struct mp_chmap){0});
+        af->control(af, AF_CONTROL_SET_FORMAT, &(int){0});
+    }
+}
+
 // Return AF_OK on success or AF_ERROR on failure.
 // Warning:
 // A failed af_reinit() leaves the audio chain behind in a useless, broken
@@ -515,6 +523,7 @@ static int af_reinit(struct af_stream *s)
 {
     remove_auto_inserted_filters(s);
     af_chain_forget_frames(s);
+    reset_formats(s);
     s->first->fmt_in = s->first->fmt_out = s->input;
     // Start with the second filter, as the first filter is the special input
     // filter which needs no initialization.

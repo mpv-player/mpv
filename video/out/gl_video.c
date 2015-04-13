@@ -434,7 +434,10 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("rectangle-textures", use_rectangle, 0),
         OPT_COLOR("background", background, 0),
         OPT_FLAG("interpolation", interpolation, 0),
-        OPT_FLAG("blend-subtitles", blend_subs, 0),
+        OPT_CHOICE("blend-subtitles", blend_subs, 0,
+                   ({"no", 0},
+                    {"yes", 1},
+                    {"video", 2})),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
@@ -1358,7 +1361,7 @@ static void pass_read_video(struct gl_video *p)
         GLSL(vec4 color;)
         if (p->plane_count == 2) {
             gl_transform_rect(chromafix, &p->pass_tex[1].src);
-            GLSL(vec2 chroma = texture(texture1, texcoord0).rg;) // NV formats
+            GLSL(vec2 chroma = texture(texture1, texcoord1).rg;) // NV formats
         } else {
             gl_transform_rect(chromafix, &p->pass_tex[1].src);
             gl_transform_rect(chromafix, &p->pass_tex[2].src);
@@ -1827,9 +1830,28 @@ static void pass_render_frame(struct gl_video *p)
     p->use_indirect = false; // set to true as needed by pass_*
     pass_read_video(p);
     pass_convert_yuv(p);
+
+    // For subtitles
+    double vpts = p->image.mpi->pts;
+    if (vpts == MP_NOPTS_VALUE)
+        vpts = p->osd_pts;
+
+    if (p->osd && p->opts.blend_subs == 2) {
+        double scale[2];
+        get_scale_factors(p, scale);
+        struct mp_osd_res rect = {
+            .w = p->image_w, .h = p->image_h,
+            .display_par = scale[1] / scale[0], // counter compensate scaling
+        };
+        finish_pass_fbo(p, &p->blend_subs_fbo, p->image_w, p->image_h, 0, 0);
+        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, p->image_w, p->image_h,
+                      p->blend_subs_fbo.fbo, false);
+        GLSL(vec4 color = texture(texture0, texcoord0);)
+    }
+
     pass_scale_main(p);
 
-    if (p->osd && p->opts.blend_subs) {
+    if (p->osd && p->opts.blend_subs == 1) {
         // Recreate the real video size from the src/dst rects
         int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
             vp_h = p->dst_rect.y1 - p->dst_rect.y0;
@@ -1848,9 +1870,6 @@ static void pass_render_frame(struct gl_video *p)
         if (p->use_linear)
             pass_delinearize(p, p->image_params.gamma);
         finish_pass_fbo(p, &p->blend_subs_fbo, vp_w, vp_h, 0, FBOTEX_FUZZY);
-        double vpts = p->image.mpi->pts;
-        if (vpts == MP_NOPTS_VALUE)
-            vpts = p->osd_pts;
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, vp_w, vp_h,
                       p->blend_subs_fbo.fbo, false);
         GLSL(vec4 color = texture(texture0, texcoord0);)
@@ -2086,8 +2105,8 @@ static bool get_image(struct gl_video *p, struct mp_image *mpi)
 
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
-        mpi->stride[n] = mpi->plane_w[n] * p->image_desc.bytes[n];
-        int needed_size = mpi->plane_h[n] * mpi->stride[n];
+        mpi->stride[n] = mp_image_plane_w(mpi, n) * p->image_desc.bytes[n];
+        int needed_size = mp_image_plane_h(mpi, n) * mpi->stride[n];
         if (!plane->gl_buffer)
             gl->GenBuffers(1, &plane->gl_buffer);
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
@@ -2132,8 +2151,9 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     bool pbo = false;
     if (!vimg->planes[0].buffer_ptr && get_image(p, &mpi2)) {
         for (int n = 0; n < p->plane_count; n++) {
-            int line_bytes = mpi->plane_w[n] * p->image_desc.bytes[n];
-            memcpy_pic(mpi2.planes[n], mpi->planes[n], line_bytes, mpi->plane_h[n],
+            int line_bytes = mp_image_plane_w(mpi, n) * p->image_desc.bytes[n];
+            int plane_h = mp_image_plane_h(mpi, n);
+            memcpy_pic(mpi2.planes[n], mpi->planes[n], line_bytes, plane_h,
                        mpi2.stride[n], mpi->stride[n]);
         }
         pbo = true;
@@ -2190,9 +2210,6 @@ static void check_gl_features(struct gl_video *p)
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
 
-    char *disabled[10];
-    int n_disabled = 0;
-
     // Normally, we want to disable them by default if FBOs are unavailable,
     // because they will be slow (not critically slow, but still slower).
     // Without FP textures, we must always disable them.
@@ -2203,14 +2220,14 @@ static void check_gl_features(struct gl_video *p)
         if (kernel) {
             char *reason = NULL;
             if (!test_fbo(p, &have_fbo))
-                reason = "scaler (FBO)";
+                reason = "scaler (FBOs missing)";
             if (!have_float_tex)
-                reason = "scaler (float tex.)";
+                reason = "scaler (float tex. missing)";
             if (!have_1d_tex && kernel->polar)
-                reason = "scaler (1D tex.)";
+                reason = "scaler (1D tex. missing)";
             if (reason) {
                 p->opts.scaler[n].kernel.name = "bilinear";
-                disabled[n_disabled++] = reason;
+                MP_WARN(p, "Disabling %s.\n", reason);
             }
         }
     }
@@ -2219,13 +2236,13 @@ static void check_gl_features(struct gl_video *p)
     // GLES2 doesn't even provide 3D textures
     if (p->use_lut_3d && !(have_3d_tex && have_float_tex)) {
         p->use_lut_3d = false;
-        disabled[n_disabled++] = "color management (GLES unsupported)";
+        MP_WARN(p, "Disabling color management (GLES unsupported).\n");
     }
 
     // Missing float textures etc. (maybe ordered would actually work)
     if (p->opts.dither_algo >= 0 && gl->es) {
         p->opts.dither_algo = -1;
-        disabled[n_disabled++] = "dithering (GLES unsupported)";
+        MP_WARN(p, "Disabling dithering (GLES unsupported).\n");
     }
 
     int use_cms = p->opts.target_prim != MP_CSP_PRIM_AUTO ||
@@ -2235,41 +2252,31 @@ static void check_gl_features(struct gl_video *p)
     if (!have_mix && (p->opts.linear_scaling || p->opts.sigmoid_upscaling)) {
         p->opts.linear_scaling = false;
         p->opts.sigmoid_upscaling = false;
-        disabled[n_disabled++] = "linear/sigmoid scaling (GLSL version)";
+        MP_WARN(p, "Disabling linear/sigmoid scaling (GLSL version too old).\n");
     }
     if (!have_mix && use_cms) {
         p->opts.target_prim = MP_CSP_PRIM_AUTO;
         p->opts.target_trc = MP_CSP_TRC_AUTO;
         p->use_lut_3d = false;
-        disabled[n_disabled++] = "color management (GLSL version)";
+        MP_WARN(p, "Disabling color management (GLSL version too old).\n");
     }
     if (use_cms && !test_fbo(p, &have_fbo)) {
         p->opts.target_prim = MP_CSP_PRIM_AUTO;
         p->opts.target_trc = MP_CSP_TRC_AUTO;
         p->use_lut_3d = false;
-        disabled[n_disabled++] = "color management (FBO)";
+        MP_WARN(p, "Disabling color management (FBOs missing).\n");
     }
     if (p->opts.interpolation && !test_fbo(p, &have_fbo)) {
         p->opts.interpolation = false;
-        disabled[n_disabled++] = "interpolation (FBO)";
+        MP_WARN(p, "Disabling interpolation (FBOs missing).\n");
     }
     if (p->opts.blend_subs && !test_fbo(p, &have_fbo)) {
-        p->opts.blend_subs = false;
-        disabled[n_disabled++] = "subtitle blending (FBO)";
+        p->opts.blend_subs = 0;
+        MP_WARN(p, "Disabling subtitle blending (FBOs missing).\n");
     }
     if (gl->es && p->opts.pbo) {
         p->opts.pbo = 0;
-        disabled[n_disabled++] = "PBOs (GLES unsupported)";
-    }
-
-    if (n_disabled) {
-        MP_ERR(p, "Some OpenGL extensions not detected, disabling: ");
-        for (int n = 0; n < n_disabled; n++) {
-            if (n)
-                MP_ERR(p, ", ");
-            MP_ERR(p, "%s", disabled[n]);
-        }
-        MP_ERR(p, ".\n");
+        MP_WARN(p, "Disabling PBOs (GLES unsupported).\n");
     }
 }
 
@@ -2610,11 +2617,6 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
 
     check_gl_features(p);
     uninit_rendering(p);
-}
-
-void gl_video_get_colorspace(struct gl_video *p, struct mp_image_params *params)
-{
-    *params = p->image_params; // supports everything
 }
 
 struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p)
