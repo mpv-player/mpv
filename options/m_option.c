@@ -2934,6 +2934,11 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
     }
 
     if (op == OP_CLR) {
+        if (param.len) {
+            mp_err(log, "Option %.*s: -clr does not take an argument.\n",
+                   BSTR_P(name));
+            return M_OPT_INVALID;
+        }
         if (dst)
             free_obj_settings_list(dst);
         return 0;
