@@ -220,7 +220,7 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
     }
 
     if (conn_id < 0 || conn_id >= res->count_connectors) {
-        MP_ERR(vo, "Bad DRM connector ID. Max valid DRM connector ID = %u",
+        MP_ERR(vo, "Bad DRM connector ID. Max valid DRM connector ID = %u\n",
                res->count_connectors);
         ret = -ENODEV;
         goto end;
@@ -273,7 +273,8 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
             for (j = 0; j < i; j ++) {
                 modeset_destroy_fb(fd, &dev->bufs[j]);
             }
-            MP_ERR(vo, "Cannot create framebuffer for DRM connector %u\n", conn_id);
+            MP_ERR(vo, "Cannot create framebuffer for DRM connector %u\n",
+                   conn_id);
             return ret;
         }
     }
