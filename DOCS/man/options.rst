@@ -983,8 +983,9 @@ Audio
 
 ``--audio-display=<no|attachment>``
     Setting this option to ``attachment`` (default) will display image
-    attachments when playing audio files. It will display the first image
-    found, and additional images are available as video tracks.
+    attachments (e.g. album cover art) when playing audio files. It will
+    display the first image found, and additional images are available as
+    video tracks.
 
     Setting this option to ``no`` disables display of video entirely when
     playing audio files.
