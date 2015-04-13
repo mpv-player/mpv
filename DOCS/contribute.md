@@ -14,6 +14,9 @@ Sending patches
   ``git format-patch``. diffs posted as pastebins (especially if the http link
   returns HTML) just cause extra work for everyone, because they lack commit
   message and authorship information.
+- When creating pull requests, be sure to test your changes. If you didn't, please
+  say so in the pull request message. 
+
 - Write informative commit messages. Use present tense to describe the
   situation with the patch applied, and past tense for the situation before
   the change.
