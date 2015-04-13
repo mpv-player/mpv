@@ -1,35 +1,34 @@
 /*
- * This file is part of mplayer2.
- *
  * Most code for computing the weights is taken from Anti-Grain Geometry (AGG)
  * (licensed under GPL 2 or later), with modifications.
+ *
  * Copyright (C) 2002-2006 Maxim Shemanarev
+ *
  * http://vector-agg.cvs.sourceforge.net/viewvc/vector-agg/agg-2.5/include/agg_image_filters.h?view=markup
  *
- * Also see glumpy (BSD licensed), contains the same code in Python:
- * http://code.google.com/p/glumpy/source/browse/glumpy/image/filter.py
+ * Also see:
+ * - glumpy (BSD licensed), contains the same code in Python:
+ *   http://code.google.com/p/glumpy/source/browse/glumpy/image/filter.py
+ * - Vapoursynth plugin fmtconv (WTFPL Licensed), which is based on
+ *   dither plugin for avisynth from the same author:
+ *   https://github.com/vapoursynth/fmtconv/tree/master/src/fmtc
+ * - Paul Heckbert's "zoom"
+ * - XBMC: ConvolutionKernels.cpp etc.
  *
- * Also see Vapoursynth plugin fmtconv (WTFPL Licensed), which is based on
- * dither plugin for avisynth from the same author:
- * https://github.com/vapoursynth/fmtconv/tree/master/src/fmtc
+ * This file is part of mpv.
  *
- * Also see: Paul Heckbert's "zoom"
- *
- * Also see XBMC: ConvolutionKernels.cpp etc.
- *
- * mplayer2 is free software; you can redistribute it and/or modify
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * mplayer2 is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with mplayer2; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stddef.h>
