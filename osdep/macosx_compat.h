@@ -1,5 +1,5 @@
 /*
- *  Application Event Handling
+ * Application Event Handling
  *
  * This file is part of mpv.
  *
@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License along
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 
 #ifndef MPV_MACOSX_COMPAT
 #define MPV_MACOSX_COMPAT

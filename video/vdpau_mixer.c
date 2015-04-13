@@ -1,6 +1,4 @@
 /*
- * This file is part of mpv.
- *
  * Parts of video mixer creation code:
  * Copyright (C) 2008 NVIDIA (Rajib Mahapatra <rmahapatra@nvidia.com>)
  * Copyright (C) 2009 Uoti Urpala

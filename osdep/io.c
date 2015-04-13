@@ -1,22 +1,24 @@
 /*
  * unicode/utf-8 I/O helpers and wrappers for Windows
  *
- * This file is part of mplayer2.
  * Contains parts based on libav code (http://libav.org).
  *
- * mplayer2 is free software; you can redistribute it and/or modify
+ * This file is part of mpv.
+ *
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * mplayer2 is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with mplayer2.  If not, see <http://www.gnu.org/licenses/>.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #include <unistd.h>
 #include <errno.h>
 #include <assert.h>

@@ -1,8 +1,9 @@
 /*
- * This file is part of mpv video player.
  * Copyright © 2008 Kristian Høgsberg
  * Copyright © 2012-2013 Collabora, Ltd.
  * Copyright © 2013 Alexander Preisinger <alexander.preisinger@gmail.com>
+ *
+ * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

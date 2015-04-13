@@ -1,9 +1,9 @@
 /*
- * This file is part of mpv.
- *
  * Based on code taken from libass (ISC license), which was originally part
  * of MPlayer (GPL).
  * Copyright (C) 2006 Evgeniy Stepanov <eugeni.stepanov@gmail.com>
+ *
+ * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
