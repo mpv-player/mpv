@@ -1,7 +1,6 @@
 #include <windows.h>
 
 #include "config.h"
-
 #include "osdep/io.h"
 #include "osdep/terminal.h"
 

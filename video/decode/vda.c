@@ -1,7 +1,7 @@
 /*
- * This file is part of mpv.
- *
  * Copyright (c) 2013 Stefano Pigozzi <stefano.pigozzi@gmail.com>
+ *
+ * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

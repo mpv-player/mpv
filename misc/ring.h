@@ -1,7 +1,8 @@
 /*
- * This file is part of mpv.
  * Copyright (c) 2012 wm4
  * Copyright (c) 2013 Stefano Pigozzi <stefano.pigozzi@gmail.com>
+ *
+ * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +15,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with mpv. If not, see <http://www.gnu.org/licenses/>.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MPV_MP_RING_H

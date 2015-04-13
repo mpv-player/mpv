@@ -1,7 +1,7 @@
 /*
- * This file is part of mpv.
- *
  * Parts based on fragments of vo_vdpau.c: Copyright (C) 2009 Uoti Urpala
+ *
+ * This file is part of mpv.
  *
  * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

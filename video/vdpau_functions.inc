@@ -1,4 +1,5 @@
-/* Lists the VDPAU functions used by MPV.
+/*
+ * Lists the VDPAU functions used by MPV.
  * First argument on each line is the VDPAU function type name,
  * second is the macro name needed to get the function address,
  * third is the name MPV uses for the function.

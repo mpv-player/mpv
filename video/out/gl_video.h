@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License along
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 #ifndef MP_GL_VIDEO_H
 #define MP_GL_VIDEO_H
 
