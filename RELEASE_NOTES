@@ -53,6 +53,8 @@ Changes that may break users' config files have been annotated with a `(!)`.
 - Options that have multiple options and also include a "yes" option now
   default to that if specified with no arguments.
 - The default value of `--cache-default` is now 150000 (153.6 MB, ~146 MiB).
+- JPEG screenshots now use the same subsampling as the source video. The images
+  are still RGB regardless of source format though.
 
 Bug fixes
 ---------
@@ -67,6 +69,8 @@ Bug fixes
   attempted (issue #1742).
 - Attempt to fix flickering on Intel VAAPI drivers with `--hwdec=vaapi` and
   `--vo=opengl` (issue #1765).
+- `youtube-dl` will no longer download video streams when video playback
+  is disabled with `--no-video`.
 
 New features
 ------------
@@ -81,12 +85,21 @@ New features
   - Added `blend-subtitles` option to draw subtitles directly into the video
     instead of rendered afterwards. Potentially necessary for correct rendering
     with files that use ASS subtitles for typesetting in combination with an
-    `icc-profile`. See warning on the manual.
+    `icc-profile`. There is a default option for drawing after upscaling,
+    and a `video` option for drawing before upscaling. See details and warning
+    on the manual.
   - There is now a `tscale` option, used to choose the temporal scaler used
     in the `interpolation` mode (previously `smoothmotion`).
   - There is a new `scale-blur` parameter to adjust the amount of blur that
     most of the filters produce. Deviating from the default may introduce
     artifacts in EWA filters.
+  - (Windows) There is now a `dwmflush` option that might help improve
+    rendering of high-fps video. Disabled by default. See manual for options.
+- New `pseudo-gui` builtin profile, automatically used when launched from
+  `mpv.desktop` or by opening `mpv.exe` on windows (`mpv.com` still works as
+  usual). The `pseudo-gui` tries to make the player window behave closer to
+  what a desktop player would do, by not immediately closing and allowing the
+  user to drag&drop files for playback. See manual for details.
 - Add support to pitch correct stretched audio with librubberband.
 - Add support for the Raspberry Pi 2's hardware decoder when FFmpeg (or Libav)
   is built with `--enable-mmal`. See commit 8fff125 for details.
@@ -111,6 +124,10 @@ New features
   #1586.
 - (Client API) If enabled, initializing the Client API will now also load the
   user's `mpv.conf`.
+- (Client API) There's a new `mpv_opengl_cb_report_flip()` call for API users
+  to call to inform mpv of when exactly a frame was displayed.
+- (Client API) The `mpv_opengl_cb_render()` function was deprecated in favor
+  of the new, simpler `mpv_opengl_cb_draw()` function.
 - The `--input-file` argument may now also be a file descriptor in the form
   "fd://N", where N is the FD number.
 
