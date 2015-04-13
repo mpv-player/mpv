@@ -184,7 +184,7 @@ static int modeset_find_crtc(struct vo *vo, int fd, drmModeRes *res,
         drmModeFreeEncoder(enc);
     }
 
-    MP_ERR(vo, "DRM connector %u has no suitable CRTC\n", conn->connector_id);
+    MP_ERR(vo, "Connector %u has no suitable CRTC\n", conn->connector_id);
     return -ENOENT;
 }
 
@@ -220,7 +220,7 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
     }
 
     if (conn_id < 0 || conn_id >= res->count_connectors) {
-        MP_ERR(vo, "Bad DRM connector ID. Max valid DRM connector ID = %u\n",
+        MP_ERR(vo, "Bad connector ID. Max valid connector ID = %u\n",
                res->count_connectors);
         ret = -ENODEV;
         goto end;
@@ -229,7 +229,7 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
     conn = drmModeGetConnector(fd, res->connectors[conn_id]);
     if (!conn) {
         char *errstr = mp_strerror(errno);
-        MP_ERR(vo, "Cannot retrieve DRM connector %u:%u: %s\n",
+        MP_ERR(vo, "Cannot retrieve connector %u:%u: %s\n",
                conn_id, res->connectors[conn_id], errstr);
         ret = -errno;
         goto end;
@@ -240,13 +240,13 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
     dev->front_buf = 0;
 
     if (conn->connection != DRM_MODE_CONNECTED) {
-        MP_ERR(vo, "DRM connector %u is disconnected\n", conn_id);
+        MP_ERR(vo, "Connector %u is disconnected\n", conn_id);
         ret = -ENODEV;
         goto end;
     }
 
     if (conn->count_modes == 0) {
-        MP_ERR(vo, "DRM connector %u has no valid modes\n", conn_id);
+        MP_ERR(vo, "Connector %u has no valid modes\n", conn_id);
         ret = -ENODEV;
         goto end;
     }
@@ -257,12 +257,12 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
     dev->bufs[1].width = conn->modes[0].hdisplay;
     dev->bufs[1].height = conn->modes[0].vdisplay;
 
-    MP_INFO(vo, "DRM connector using mode %ux%u\n",
+    MP_INFO(vo, "Connector using mode %ux%u\n",
             dev->bufs[0].width, dev->bufs[0].height);
 
     ret = modeset_find_crtc(vo, fd, res, conn, dev);
     if (ret) {
-        MP_ERR(vo, "DRM connector %u has no valid CRTC\n", conn_id);
+        MP_ERR(vo, "Connector %d has no valid CRTC\n", conn_id);
         goto end;
     }
 
@@ -273,7 +273,7 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
             for (j = 0; j < i; j ++) {
                 modeset_destroy_fb(fd, &dev->bufs[j]);
             }
-            MP_ERR(vo, "Cannot create framebuffer for DRM connector %u\n",
+            MP_ERR(vo, "Cannot create framebuffer for connector %d\n",
                    conn_id);
             return ret;
         }
@@ -382,7 +382,7 @@ static void flip_page(struct vo *vo)
                              p->dev->bufs[p->dev->front_buf].fb,
                              0, 0, &p->dev->conn, 1, &p->dev->mode);
     if (ret) {
-        MP_WARN(vo, "Cannot flip page for DRM connector\n");
+        MP_WARN(vo, "Cannot flip page for connector\n");
     } else {
         p->dev->front_buf ++;
         p->dev->front_buf %= BUF_COUNT;
