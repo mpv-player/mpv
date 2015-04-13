@@ -35,11 +35,6 @@
 
 #define BUF_COUNT 2
 
-//TODO: change path_to_device to option
-//TODO: change modeset_dev to option
-const char *path_to_device = "/dev/dri/card0";
-const unsigned int connector_id = 0;
-
 struct modeset_buf {
     uint32_t width;
     uint32_t height;
@@ -62,6 +57,9 @@ struct priv {
     int fd;
     struct modeset_dev *dev;
     drmModeCrtc *old_crtc;
+
+    char *device_path;
+    int connector_id;
 
     int32_t device_w;
     int32_t device_h;
@@ -400,11 +398,11 @@ static int preinit(struct vo *vo)
 
     int ret;
 
-    ret = modeset_open(vo, &p->fd, path_to_device);
+    ret = modeset_open(vo, &p->fd, p->device_path);
     if (ret)
         return ret;
 
-    ret = modeset_prepare_dev(vo, p->fd, connector_id, &p->dev);
+    ret = modeset_prepare_dev(vo, p->fd, p->connector_id, &p->dev);
     if (ret)
         return ret;
 
@@ -418,7 +416,7 @@ static int preinit(struct vo *vo)
                          0, 0, &p->dev->conn, 1, &p->dev->mode);
     if (ret) {
         char *errstr = mp_strerror(errno);
-        MP_ERR(vo, "Cannot set CRTC for connector %u: %s\n", connector_id,
+        MP_ERR(vo, "Cannot set CRTC for connector %u: %s\n", p->connector_id,
                errstr);
     }
 
@@ -460,6 +458,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return VO_NOTIMPL;
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct vo_driver video_out_drm = {
     .name = "drm",
     .description = "Direct Rendering Manager",
@@ -471,4 +471,13 @@ const struct vo_driver video_out_drm = {
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
+    .options = (const struct m_option[]) {
+        OPT_STRING("devpath", device_path, 0),
+        OPT_INT("connector", connector_id, 0),
+        {0},
+    },
+    .priv_defaults = &(const struct priv) {
+        .device_path = "/dev/dri/card0",
+        .connector_id = 0,
+    },
 };
