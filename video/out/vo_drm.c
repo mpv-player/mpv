@@ -277,7 +277,7 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
     dev = talloc_size(vo->priv, sizeof(*dev));
     dev->conn = conn->connector_id;
     dev->front_buf = 0;
-    memcpy(&dev->mode, &conn->modes[0], sizeof(dev->mode));
+    dev->mode = conn->modes[0];
     dev->bufs[0].width = conn->modes[0].hdisplay;
     dev->bufs[0].height = conn->modes[0].vdisplay;
     dev->bufs[1].width = conn->modes[0].hdisplay;
