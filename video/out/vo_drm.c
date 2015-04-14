@@ -65,7 +65,7 @@ struct priv {
     int32_t device_w;
     int32_t device_h;
     int32_t x, y;
-    char *buf;
+    struct mp_image *curframe;
     struct mp_rect src;
     struct mp_rect dst;
     struct mp_osd_res osd;
@@ -347,8 +347,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     p->x = (p->device_w - w) >> 1;
     p->y = (p->device_h - h) >> 1;
-    p->buf = (char*)talloc_size(vo, p->device_w * p->device_h * 4);
-    memset(p->buf, 0, p->device_w * p->device_h * 4);
 
     mp_sws_set_from_cmdline(p->sws, vo->opts->sws_opts);
     p->sws->src = *params;
@@ -360,7 +358,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
         .d_h = h,
     };
 
+    if (p->curframe) talloc_free(p->curframe);
+    p->curframe = mp_image_alloc(IMGFMT_BGR0, p->device_w, p->device_h);
     mp_image_params_guess_csp(&p->sws->dst);
+    mp_image_set_params(p->curframe, &p->sws->dst);
 
     if (mp_sws_reinit(p->sws) < 0)
         return 1;
@@ -374,21 +375,23 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct priv *p = vo->priv;
 
     struct modeset_buf *front_buf = &p->dev->bufs[p->dev->front_buf];
-    struct mp_image img = {0};
-    mp_image_set_params(&img, &p->sws->dst);
-    img.planes[0] = p->buf + p->x * 4;
-    img.stride[0] = front_buf->stride;
 
     struct mp_rect src_rc = p->src;
     src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, mpi->fmt.align_x);
     src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, mpi->fmt.align_y);
     mp_image_crop_rc(mpi, src_rc);
 
-    mp_sws_scale(p->sws, &img, mpi);
+    mp_sws_scale(p->sws, p->curframe, mpi);
 
-    osd_draw_on_image(vo->osd, p->osd, mpi ? mpi->pts : 0, 0, &img);
+    osd_draw_on_image(vo->osd, p->osd, mpi ? mpi->pts : 0, 0, p->curframe);
 
-    memmove(front_buf->map, p->buf, p->device_w * p->device_h * 4);
+    int32_t shift = (p->device_w * p->y + p->x) * 4;
+    memcpy_pic(front_buf->map + shift,
+               p->curframe->planes[0],
+               (p->dst.x1 - p->dst.x0) * 4,
+               p->device_h,
+               p->device_w * 4,
+               p->curframe->stride[0]);
 }
 
 static void flip_page(struct vo *vo)
@@ -412,6 +415,7 @@ static int preinit(struct vo *vo)
     p->dev = NULL;
     p->fd = 0;
     p->old_crtc = NULL;
+    p->curframe = NULL;
     p->sws = mp_sws_alloc(vo);
 
     int ret;
@@ -461,7 +465,7 @@ static void uninit(struct vo *vo)
         modeset_destroy_fb(p->fd, &p->dev->bufs[0]);
     }
 
-    talloc_free(p->buf);
+    talloc_free(p->curframe);
     talloc_free(p->dev);
 }
 
