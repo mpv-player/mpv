@@ -393,6 +393,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
                p->device_h,
                p->device_w * 4,
                p->curframe->stride[0]);
+
+    talloc_free(mpi);
 }
 
 static void flip_page(struct vo *vo)
