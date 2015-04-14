@@ -78,8 +78,7 @@ static int modeset_open(struct vo *vo, int *out, const char *node)
     uint64_t has_dumb;
     fd = open(node, O_RDWR | O_CLOEXEC);
     if (fd < 0) {
-        char *errstr = mp_strerror(errno);
-        MP_ERR(vo, "Cannot open \"%s\": %s.\n", node, errstr);
+        MP_ERR(vo, "Cannot open \"%s\": %s.\n", node, mp_strerror(errno));
         return -errno;
     }
     if (drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &has_dumb) < 0) {
@@ -104,8 +103,7 @@ static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
     creq.bpp = 32;
     ret = drmIoctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &creq);
     if (ret < 0) {
-        char *errstr = mp_strerror(errno);
-        MP_ERR(vo, "Cannot create dumb buffer: %s\n", errstr);
+        MP_ERR(vo, "Cannot create dumb buffer: %s\n", mp_strerror(errno));
         return -errno;
     }
     buf->stride = creq.pitch;
@@ -116,8 +114,7 @@ static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
     ret = drmModeAddFB(fd, buf->width, buf->height, 24, 32, buf->stride,
                        buf->handle, &buf->fb);
     if (ret) {
-        char *errstr = mp_strerror(errno);
-        MP_ERR(vo, "Cannot create framebuffer: %s\n", errstr);
+        MP_ERR(vo, "Cannot create framebuffer: %s\n", mp_strerror(errno));
         ret = -errno;
         goto err_destroy;
     }
@@ -127,8 +124,7 @@ static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
     mreq.handle = buf->handle;
     ret = drmIoctl(fd, DRM_IOCTL_MODE_MAP_DUMB, &mreq);
     if (ret) {
-        char *errstr = mp_strerror(errno);
-        MP_ERR(vo, "Cannot map dumb buffer: %s\n", errstr);
+        MP_ERR(vo, "Cannot map dumb buffer: %s\n", mp_strerror(errno));
         ret = -errno;
         goto err_fb;
     }
@@ -137,8 +133,7 @@ static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
     buf->map = mmap(0, buf->size, PROT_READ | PROT_WRITE, MAP_SHARED,
                     fd, mreq.offset);
     if (buf->map == MAP_FAILED) {
-        char *errstr = mp_strerror(errno);
-        MP_ERR(vo, "Cannot map dumb buffer: %s\n", errstr);
+        MP_ERR(vo, "Cannot map dumb buffer: %s\n", mp_strerror(errno));
         ret = -errno;
         goto err_fb;
     }
@@ -165,9 +160,8 @@ static int modeset_find_crtc(struct vo *vo, int fd, drmModeRes *res,
     for (i = 0; i < conn->count_encoders; ++i) {
         enc = drmModeGetEncoder(fd, conn->encoders[i]);
         if (!enc) {
-            char *errstr = mp_strerror(errno);
             MP_WARN(vo, "Cannot retrieve encoder %u:%u: %s\n",
-                    i, conn->encoders[i], errstr);
+                    i, conn->encoders[i], mp_strerror(errno));
             continue;
         }
 
@@ -207,8 +201,8 @@ static bool is_connector_valid(struct vo *vo, int conn_id,
 {
     if (!conn) {
         if (!silent) {
-            char *errstr = mp_strerror(errno);
-            MP_ERR(vo, "Cannot get connector %d: %s\n", conn_id, errstr);
+            MP_ERR(vo, "Cannot get connector %d: %s\n", conn_id,
+                   mp_strerror(errno));
         }
         return false;
     }
@@ -242,8 +236,7 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
 
     res = drmModeGetResources(fd);
     if (!res) {
-        char *errstr = mp_strerror(errno);
-        MP_ERR(vo, "Cannot retrieve DRM resources: %s\n", errstr);
+        MP_ERR(vo, "Cannot retrieve DRM resources: %s\n", mp_strerror(errno));
         ret = -errno;
         goto end;
     }
@@ -455,9 +448,8 @@ static int preinit(struct vo *vo)
                          p->dev->bufs[p->dev->front_buf + BUF_COUNT - 1].fb,
                          0, 0, &p->dev->conn, 1, &p->dev->mode);
     if (ret) {
-        char *errstr = mp_strerror(errno);
         MP_ERR(vo, "Cannot set CRTC for connector %u: %s\n", p->connector_id,
-               errstr);
+               mp_strerror(errno));
     }
 
     return 0;
