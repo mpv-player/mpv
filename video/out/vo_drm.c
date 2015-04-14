@@ -327,22 +327,13 @@ end:
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct priv *p = vo->priv;
-    float device_ar = p->device_w / (float)p->device_h;
 
+    vo->dwidth = p->device_w;
+    vo->dheight = p->device_h;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
-    int32_t video_w = (p->dst.x1 - p->dst.x0);
-    int32_t video_h = (p->dst.y1 - p->dst.y0);
-    float video_ar = video_w / (float)video_h;
-    int32_t w, h;
-    if (device_ar > video_ar) {
-        w = p->device_h * video_ar;
-        h = p->device_h;
-    } else {
-        w = p->device_w;
-        h = p->device_w * video_ar;
-    }
-    if (w > p->device_w) w = p->device_w;
-    if (h > p->device_h) h = p->device_h;
+
+    int32_t w = p->dst.x1 - p->dst.x0;
+    int32_t h = p->dst.y1 - p->dst.y0;
 
     // p->osd contains the parameters assuming OSD rendering in window
     // coordinates, but OSD can only be rendered in the intersection
