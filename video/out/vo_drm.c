@@ -274,7 +274,7 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
         goto end;
     }
 
-    dev = talloc_size(vo->priv, sizeof(*dev));
+    dev = talloc_zero(vo->priv, struct modeset_dev);
     dev->conn = conn->connector_id;
     dev->front_buf = 0;
     dev->mode = conn->modes[0];
