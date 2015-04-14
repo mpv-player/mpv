@@ -548,10 +548,11 @@ Available video output drivers are:
 
         X11/GLX only.
 
-    ``dwmflush``
-        Calls ``DwmFlush`` after swapping buffers on Windows (default: 0).
+    ``dwmflush=<no|windowed|yes>``
+        Calls ``DwmFlush`` after swapping buffers on Windows (default: no).
         It also sets ``SwapInterval(0)`` to ignore the OpenGL timing. Values
-        are: 0 (disabled), 1 (only in windowed mode), 2 (also in  full screen).
+        are: no (disabled), windowed (only in windowed mode), yes (also in
+        full screen).
         This may help getting more consistent frame intervals, especially with
         high-fps clips - which might also reduce dropped frames. Typically a
         value of 1 should be enough since full screen may bypass the DWM.
