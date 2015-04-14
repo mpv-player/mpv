@@ -446,7 +446,7 @@ static int preinit(struct vo *vo)
     if (ret)
         return ret;
 
-    assert(p->dev != NULL);
+    assert(p->dev);
     p->device_w = p->dev->bufs[0].width;
     p->device_h = p->dev->bufs[0].height;
 
@@ -467,8 +467,8 @@ static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    if (p->dev != NULL) {
-        if (p->old_crtc != NULL) {
+    if (p->dev) {
+        if (p->old_crtc) {
             drmModeSetCrtc(p->fd,
                            p->old_crtc->crtc_id,
                            p->old_crtc->buffer_id,
