@@ -784,7 +784,7 @@ void write_video(struct MPContext *mpctx, double endpts)
             vo_still_displaying(vo) ? STATUS_DRAINING : STATUS_EOF;
         mpctx->delay = 0;
         mpctx->last_av_difference = 0;
-        MP_VERBOSE(mpctx, "video EOF (status=%d)\n", mpctx->video_status);
+        MP_DBG(mpctx, "video EOF (status=%d)\n", mpctx->video_status);
         return;
     }
 
