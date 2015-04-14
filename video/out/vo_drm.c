@@ -20,18 +20,19 @@
  */
 
 #include <assert.h>
-#include <stdbool.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <stdbool.h>
 #include <libswscale/swscale.h>
 #include <sys/mman.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
 #include "common/msg.h"
+#include "sub/osd.h"
+#include "video/fmt-conversion.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
-#include "sub/osd.h"
 #include "vo.h"
 
 #define BUF_COUNT 2
@@ -471,6 +472,8 @@ static void uninit(struct vo *vo)
 
 static int query_format(struct vo *vo, int format)
 {
+    if (sws_isSupportedInput(imgfmt2pixfmt(format)))
+        return 1;
     return format == IMGFMT_BGR0;
 }
 
