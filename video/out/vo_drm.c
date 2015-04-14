@@ -369,12 +369,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
         .d_h = h,
     };
 
-    MP_INFO(vo, "resizing %dx%d -> %dx%d\n",
-            p->sws->src.w,
-            p->sws->src.h,
-            p->sws->dst.w,
-            p->sws->dst.h);
-
     mp_image_params_guess_csp(&p->sws->dst);
 
     if (mp_sws_reinit(p->sws) < 0)
