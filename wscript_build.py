@@ -344,6 +344,7 @@ def build(ctx):
         ( "video/out/gl_x11egl.c",               "egl-x11" ),
         ( "video/out/vo.c" ),
         ( "video/out/vo_caca.c",                 "caca" ),
+        ( "video/out/vo_drm.c",                  "drm" ),
         ( "video/out/vo_direct3d.c",             "direct3d" ),
         ( "video/out/vo_image.c" ),
         ( "video/out/vo_lavc.c",                 "encoding" ),
