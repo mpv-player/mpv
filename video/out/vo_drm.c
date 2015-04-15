@@ -304,7 +304,7 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
             for (unsigned int j = 0; j < i; j++) {
                 modeset_destroy_fb(fd, &dev->bufs[j]);
             }
-            return ret;
+            goto end;
         }
     }
 
@@ -439,6 +439,7 @@ static int preinit(struct vo *vo)
     if (ret) {
         MP_ERR(vo, "Cannot set CRTC for connector %u: %s\n", p->connector_id,
                mp_strerror(errno));
+        return -1;
     }
 
     return 0;
