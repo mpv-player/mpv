@@ -367,7 +367,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     mp_image_set_params(p->curframe, &p->sws->dst);
 
     if (mp_sws_reinit(p->sws) < 0)
-        return 1;
+        return -1;
 
     vo->want_redraw = true;
     return 0;
@@ -422,11 +422,11 @@ static int preinit(struct vo *vo)
 
     ret = modeset_open(vo, &p->fd, p->device_path);
     if (ret)
-        return ret;
+        return -1;
 
     ret = modeset_prepare_dev(vo, p->fd, p->connector_id, &p->dev);
     if (ret)
-        return ret;
+        return -1;
 
     assert(p->dev);
     p->device_w = p->dev->bufs[0].width;
