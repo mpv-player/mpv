@@ -121,7 +121,6 @@ struct osd_state *osd_create(struct mpv_global *global)
             .type = n,
             .text = talloc_strdup(obj, ""),
             .progbar_state = {.type = -1},
-            .next = NULL,
         };
         for (int i = 0; i < OSD_CONV_CACHE_MAX; i++)
             obj->cache[i] = talloc_steal(obj, osd_conv_cache_new());
@@ -133,45 +132,6 @@ struct osd_state *osd_create(struct mpv_global *global)
 
     osd_init_backend(osd);
     return osd;
-}
-
-// it gets worse
-void osd_add_external(struct osd_state *osd)
-{
-    // move to the top of the linked list (bad)
-    struct osd_object *old_top = osd->objs[OSDTYPE_EXTERNAL];
-    while (old_top->next) {
-        old_top = old_top->next;
-    }
-    struct osd_object *new_obj = talloc(osd, struct osd_object);
-    *new_obj = (struct osd_object) {
-        .type = OSDTYPE_EXTERNAL,
-        .text = talloc_strdup(new_obj, ""),
-        .progbar_state = {.type = -1},
-        .next = NULL,
-    };
-    for (int i = 0; i < OSD_CONV_CACHE_MAX; i++)
-        new_obj->cache[i] = talloc_steal(new_obj, osd_conv_cache_new());
-
-    old_top->next = new_obj;
-}
-
-// bad
-void osd_remove_external(struct osd_state *osd, int idx)
-{
-    if (idx < 1)
-        return;
-
-    struct osd_object *prev = osd->objs[OSDTYPE_EXTERNAL];
-    for (int i = 0; i < idx-1; i++) {
-        prev = prev->next;
-        if (prev == NULL)
-            return;
-    }
-
-    struct osd_object *next = prev->next->next;
-    talloc_free(prev->next);
-    prev->next = next;
 }
 
 void osd_free(struct osd_state *osd)
@@ -239,15 +199,13 @@ void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s)
     pthread_mutex_unlock(&osd->lock);
 }
 
-void osd_set_external(struct osd_state *osd, int layer, int res_x, int res_y, char *text)
+void osd_set_external(struct osd_state *osd, unsigned layer, int res_x, int res_y, char *text)
 {
     pthread_mutex_lock(&osd->lock);
-    struct osd_object *osd_obj = osd->objs[OSDTYPE_EXTERNAL];
-    for (int i = 0; i < layer; i++) {
-        osd_obj = osd_obj->next;
-        if (!osd_obj)
-            return;
-    }
+    if (layer > 7)
+        return;
+
+    struct osd_object *osd_obj = osd->objs[OSDTYPE_EXTERNAL_0 + layer];
     if (strcmp(osd_obj->text, text) != 0 ||
         osd_obj->external_res_x != res_x ||
         osd_obj->external_res_y != res_y)
@@ -256,9 +214,7 @@ void osd_set_external(struct osd_state *osd, int layer, int res_x, int res_y, ch
         osd_obj->text = talloc_strdup(osd_obj, text);
         osd_obj->external_res_x = res_x;
         osd_obj->external_res_y = res_y;
-        // osd_changed_unlocked(osd, osd_obj->type);
-        osd_obj->force_redraw = true;
-        osd->want_redraw = true;
+        osd_changed_unlocked(osd, osd_obj->type);
     }
     pthread_mutex_unlock(&osd->lock);
 }
@@ -359,22 +315,6 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
         obj->cached = *out_imgs;
 }
 
-// this is very bad and should probably be done much better.
-static void join_sub_bitmaps(struct sub_bitmaps *group, struct sub_bitmaps *joiner)
-{
-    // destroy everything
-    group->format = joiner->format;
-    group->scaled = joiner->scaled;
-    // this is just mp_osdtype
-    group->render_index = joiner->render_index;
-    // leak tons of memory
-    group->parts = talloc_realloc(NULL, group->parts, struct sub_bitmap, group->num_parts + joiner->num_parts);
-    memcpy(group->parts + group->num_parts, joiner->parts, joiner->num_parts * sizeof(struct sub_bitmap));
-    group->num_parts += joiner->num_parts;
-    // I didn't want the cache to work anyway.
-    group->change_id += joiner->change_id;
-}
-
 // draw_flags is a bit field of OSD_DRAW_* constants
 void osd_draw(struct osd_state *osd, struct mp_osd_res res,
               double video_pts, int draw_flags,
@@ -387,32 +327,22 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
         draw_flags |= OSD_DRAW_SUB_ONLY;
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        struct sub_bitmaps imgs = {0};
         struct osd_object *obj = osd->objs[n];
-        do {
 
-            // Object is drawn into the video frame itself; don't draw twice
-            if (osd->render_subs_in_filter && obj->is_sub &&
-                !(draw_flags & OSD_DRAW_SUB_FILTER))
-                continue;
-            if ((draw_flags & OSD_DRAW_SUB_ONLY) && !obj->is_sub)
-                continue;
-            if ((draw_flags & OSD_DRAW_OSD_ONLY) && obj->is_sub)
-                continue;
+        // Object is drawn into the video frame itself; don't draw twice
+        if (osd->render_subs_in_filter && obj->is_sub &&
+            !(draw_flags & OSD_DRAW_SUB_FILTER))
+            continue;
+        if ((draw_flags & OSD_DRAW_SUB_ONLY) && !obj->is_sub)
+            continue;
+        if ((draw_flags & OSD_DRAW_OSD_ONLY) && obj->is_sub)
+            continue;
 
-            if (obj->sub_state.dec_sub)
-                sub_lock(obj->sub_state.dec_sub);
+        if (obj->sub_state.dec_sub)
+            sub_lock(obj->sub_state.dec_sub);
 
-            struct sub_bitmaps img;
-            render_object(osd, obj, res, video_pts, formats, &img);
-            join_sub_bitmaps( &imgs, &img );
-
-            if (obj->sub_state.dec_sub)
-                sub_unlock(obj->sub_state.dec_sub);
-
-            obj = obj->next;
-        } while ( obj );
-
+        struct sub_bitmaps imgs;
+        render_object(osd, obj, res, video_pts, formats, &imgs);
         if (imgs.num_parts > 0) {
             if (formats[imgs.format]) {
                 cb(cb_ctx, &imgs);
@@ -421,6 +351,9 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
                        obj->type, imgs.format);
             }
         }
+
+        if (obj->sub_state.dec_sub)
+            sub_unlock(obj->sub_state.dec_sub);
     }
 
     pthread_mutex_unlock(&osd->lock);

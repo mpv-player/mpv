@@ -87,7 +87,17 @@ enum mp_osdtype {
     OSDTYPE_PROGBAR,
     OSDTYPE_OSD,
 
-    OSDTYPE_EXTERNAL,
+    // external ASS osd.
+    OSDTYPE_EXTERNAL_0,
+    OSDTYPE_EXTERNAL_1,
+    OSDTYPE_EXTERNAL_2,
+    OSDTYPE_EXTERNAL_3,
+    OSDTYPE_EXTERNAL_4,
+    OSDTYPE_EXTERNAL_5,
+    OSDTYPE_EXTERNAL_6,
+    OSDTYPE_EXTERNAL_7,
+
+    // external bitmap osd.
     OSDTYPE_EXTERNAL2,
 
     MAX_OSD_PARTS
@@ -171,9 +181,7 @@ struct osd_progbar_state {
 };
 void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s);
 
-void osd_add_external(struct osd_state *osd);
-void osd_remove_external(struct osd_state *osd, int idx);
-void osd_set_external(struct osd_state *osd, int layer, int res_x, int res_y, char *text);
+void osd_set_external(struct osd_state *osd, unsigned layer, int res_x, int res_y, char *text);
 
 void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs);
 

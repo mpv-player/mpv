@@ -943,13 +943,6 @@ static int script_command_native(lua_State *L)
     return 2;
 }
 
-static int script_osd_add_external(lua_State *L)
-{
-    struct MPContext *mpctx = get_mpctx(L);
-    osd_add_external(mpctx->osd);
-    return 0;
-}
-
 static int script_osd_set_external(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
@@ -977,7 +970,11 @@ static int script_get_osd_resolution(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
     int w, h;
-    osd_object_get_resolution(mpctx->osd, OSDTYPE_EXTERNAL, &w, &h);
+    int layer = 0;
+    if (lua_gettop(L)) {
+        layer = luaL_checkinteger(L, 1);
+    }
+    osd_object_get_resolution(mpctx->osd, OSDTYPE_EXTERNAL_0 + layer, &w, &h);
     lua_pushnumber(L, w);
     lua_pushnumber(L, h);
     return 2;
@@ -986,7 +983,11 @@ static int script_get_osd_resolution(lua_State *L)
 static int script_get_screen_size(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
-    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_EXTERNAL);
+    int layer = 0;
+    if (lua_gettop(L)) {
+        layer = luaL_checkinteger(L, 1);
+    }
+    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_EXTERNAL_0 + layer);
     double aspect = 1.0 * vo_res.w / MPMAX(vo_res.h, 1) /
                     (vo_res.display_par ? vo_res.display_par : 1);
     lua_pushnumber(L, vo_res.w);
@@ -998,7 +999,7 @@ static int script_get_screen_size(lua_State *L)
 static int script_get_screen_margins(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
-    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_EXTERNAL);
+    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_EXTERNAL_0);
     lua_pushnumber(L, vo_res.ml);
     lua_pushnumber(L, vo_res.mt);
     lua_pushnumber(L, vo_res.mr);
@@ -1011,10 +1012,8 @@ static int script_get_mouse_pos(lua_State *L)
     struct MPContext *mpctx = get_mpctx(L);
     int px, py;
     mp_input_get_mouse_pos(mpctx->input, &px, &py);
-    double sw, sh;
-    osd_object_get_scale_factor(mpctx->osd, OSDTYPE_EXTERNAL, &sw, &sh);
-    lua_pushnumber(L, px * sw);
-    lua_pushnumber(L, py * sh);
+    lua_pushnumber(L, px);
+    lua_pushnumber(L, py);
     return 2;
 }
 
@@ -1080,9 +1079,13 @@ static int script_input_disable_section(lua_State *L)
 static int script_input_set_section_mouse_area(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
+    int layer = 0;
+    if (lua_gettop(L)) {
+        layer = luaL_checkinteger(L, 1);
+    }
 
     double sw, sh;
-    osd_object_get_scale_factor(mpctx->osd, OSDTYPE_EXTERNAL, &sw, &sh);
+    osd_object_get_scale_factor(mpctx->osd, OSDTYPE_EXTERNAL_0 + layer, &sw, &sh);
 
     char *section = (char *)luaL_checkstring(L, 1);
     int x0 = sw ? luaL_checkinteger(L, 2) / sw : 0;
@@ -1297,7 +1300,6 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(set_property_native),
     FN_ENTRY(raw_observe_property),
     FN_ENTRY(raw_unobserve_property),
-    FN_ENTRY(osd_add_external),
     FN_ENTRY(osd_set_external),
     FN_ENTRY(set_osd_ass),
     FN_ENTRY(get_osd_resolution),

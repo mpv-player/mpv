@@ -460,6 +460,11 @@ end
 local osds = {}
 function mp.add_osd_layer(layer)
     -- find the actual index corresponding to the osd layer
+    if #osds == 7 then
+        mp.msg.warn("All OSD layers are in use.")
+        return function() end
+    end
+
     local osd_index = 0
     for i = 1, #osds do
         if osds[i].layer > layer then
@@ -479,9 +484,9 @@ function mp.add_osd_layer(layer)
         res_y = 0,
         text  = "",
     }
+
     -- rearrange all osds following the new insert.
     table.insert(osds, osd_index, new_osd)
-    mp.osd_add_external()
     for i = osd_index, #osds do
         local osd = osds[i]
         osd.index = i
@@ -490,8 +495,8 @@ function mp.add_osd_layer(layer)
 
     -- return a closure for updating the osd
     return function(res_x, res_y, text)
-        new_osd.res_x, new_osd.res_y, new_osd.text = res_x, res_y, text
         mp.osd_set_external(new_osd.index, res_x, res_y, text)
+        new_osd.res_x, new_osd.res_y, new_osd.text = res_x, res_y, text
     end
 end
 
