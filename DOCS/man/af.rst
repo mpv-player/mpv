@@ -629,4 +629,3 @@ Available filters are:
 
     ``o=<string>``
         AVOptions.
-
