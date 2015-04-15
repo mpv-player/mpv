@@ -472,9 +472,7 @@ static void uninit(struct vo *vo)
 
 static int query_format(struct vo *vo, int format)
 {
-    if (sws_isSupportedInput(imgfmt2pixfmt(format)))
-        return 1;
-    return format == IMGFMT_BGR0;
+    return sws_isSupportedInput(imgfmt2pixfmt(format));
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
