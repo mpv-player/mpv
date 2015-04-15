@@ -75,17 +75,18 @@ struct priv {
 
 static int modeset_open(struct vo *vo, int *out, const char *node)
 {
-    int fd;
-    uint64_t has_dumb;
-    fd = open(node, O_RDWR | O_CLOEXEC);
+    int fd = open(node, O_RDWR | O_CLOEXEC);
     if (fd < 0) {
         MP_ERR(vo, "Cannot open \"%s\": %s.\n", node, mp_strerror(errno));
         return -errno;
     }
+
+    uint64_t has_dumb;
     if (drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &has_dumb) < 0) {
         MP_ERR(vo, "Device \"%s\" does not support dumb buffers.\n", node);
         return -EOPNOTSUPP;
     }
+
     *out = fd;
     return 0;
 }
@@ -174,11 +175,8 @@ end:
 static int modeset_find_crtc(struct vo *vo, int fd, drmModeRes *res,
                              drmModeConnector *conn, struct modeset_dev *dev)
 {
-    drmModeEncoder *enc;
-    unsigned int i, j;
-
-    for (i = 0; i < conn->count_encoders; ++i) {
-        enc = drmModeGetEncoder(fd, conn->encoders[i]);
+    for (unsigned int i = 0; i < conn->count_encoders; ++i) {
+        drmModeEncoder *enc = drmModeGetEncoder(fd, conn->encoders[i]);
         if (!enc) {
             MP_WARN(vo, "Cannot retrieve encoder %u:%u: %s\n",
                     i, conn->encoders[i], mp_strerror(errno));
@@ -186,7 +184,7 @@ static int modeset_find_crtc(struct vo *vo, int fd, drmModeRes *res,
         }
 
         // iterate all global CRTCs
-        for (j = 0; j < res->count_crtcs; ++j) {
+        for (unsigned int j = 0; j < res->count_crtcs; ++j) {
             // check whether this CRTC works with the encoder
             if (!(enc->possible_crtcs & (1 << j)))
                 continue;
@@ -236,12 +234,11 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
 {
     struct modeset_dev *dev = NULL;
     drmModeConnector *conn = NULL;
-    drmModeRes *res = NULL;
-    int ret = 0;
 
+    int ret = 0;
     *out = NULL;
 
-    res = drmModeGetResources(fd);
+    drmModeRes *res = drmModeGetResources(fd);
     if (!res) {
         MP_ERR(vo, "Cannot retrieve DRM resources: %s\n", mp_strerror(errno));
         ret = -errno;
@@ -299,13 +296,12 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
         goto end;
     }
 
-    unsigned int i, j;
-    for (i = 0; i < BUF_COUNT; i++) {
+    for (unsigned int i = 0; i < BUF_COUNT; i++) {
         ret = modeset_create_fb(vo, fd, &dev->bufs[i]);
         if (ret) {
             MP_ERR(vo, "Cannot create framebuffer for connector %d\n",
                    conn_id);
-            for (j = 0; j < i; j++) {
+            for (unsigned int j = 0; j < i; j++) {
                 modeset_destroy_fb(fd, &dev->bufs[j]);
             }
             return ret;
@@ -381,8 +377,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
 
-    struct modeset_buf *front_buf = &p->dev->bufs[p->dev->front_buf];
-
     struct mp_rect src_rc = p->src;
     src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, mpi->fmt.align_x);
     src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, mpi->fmt.align_y);
@@ -392,6 +386,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     osd_draw_on_image(vo->osd, p->osd, mpi ? mpi->pts : 0, 0, p->curframe);
 
+    struct modeset_buf *front_buf = &p->dev->bufs[p->dev->front_buf];
     int32_t shift = (p->device_w * p->y + p->x) * 4;
     memcpy_pic(front_buf->map + shift,
                p->curframe->planes[0],
