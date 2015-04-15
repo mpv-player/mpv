@@ -90,22 +90,41 @@ static int modeset_open(struct vo *vo, int *out, const char *node)
     return 0;
 }
 
+static void modeset_destroy_fb(int fd, struct modeset_buf *buf)
+{
+    if (buf->map) {
+        munmap(buf->map, buf->size);
+    }
+    if (buf->fb) {
+        drmModeRmFB(fd, buf->fb);
+    }
+    if (buf->handle) {
+        struct drm_mode_destroy_dumb dreq =
+        {
+            .handle = buf->handle,
+        };
+        drmIoctl(fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
+    }
+}
+
 static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
 {
-    struct drm_mode_create_dumb creq;
-    struct drm_mode_destroy_dumb dreq;
-    struct drm_mode_map_dumb mreq;
-    int ret;
+    int ret = 0;
+
+    buf->handle = 0;
 
     // create dumb buffer
-    memset(&creq, 0, sizeof(creq));
-    creq.width = buf->width;
-    creq.height = buf->height;
-    creq.bpp = 32;
+    struct drm_mode_create_dumb creq =
+    {
+        .width = buf->width,
+        .height = buf->height,
+        .bpp = 32,
+    };
     ret = drmIoctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &creq);
     if (ret < 0) {
         MP_ERR(vo, "Cannot create dumb buffer: %s\n", mp_strerror(errno));
-        return -errno;
+        ret = -errno;
+        goto end;
     }
     buf->stride = creq.pitch;
     buf->size = creq.size;
@@ -117,17 +136,19 @@ static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
     if (ret) {
         MP_ERR(vo, "Cannot create framebuffer: %s\n", mp_strerror(errno));
         ret = -errno;
-        goto err_destroy;
+        goto end;
     }
 
     // prepare buffer for memory mapping
-    memset(&mreq, 0, sizeof(mreq));
-    mreq.handle = buf->handle;
+    struct drm_mode_map_dumb mreq =
+    {
+        .handle = buf->handle,
+    };
     ret = drmIoctl(fd, DRM_IOCTL_MODE_MAP_DUMB, &mreq);
     if (ret) {
         MP_ERR(vo, "Cannot map dumb buffer: %s\n", mp_strerror(errno));
         ret = -errno;
-        goto err_fb;
+        goto end;
     }
 
     // perform actual memory mapping
@@ -136,19 +157,17 @@ static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
     if (buf->map == MAP_FAILED) {
         MP_ERR(vo, "Cannot map dumb buffer: %s\n", mp_strerror(errno));
         ret = -errno;
-        goto err_fb;
+        goto end;
     }
 
     memset(buf->map, 0, buf->size);
 
-    return 0;
+end:
+    if (ret == 0) {
+        return 0;
+    }
 
-err_fb:
-    drmModeRmFB(fd, buf->fb);
-err_destroy:
-    memset(&dreq, 0, sizeof(dreq));
-    dreq.handle = buf->handle;
-    drmIoctl(fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
+    modeset_destroy_fb(fd, buf);
     return ret;
 }
 
@@ -182,19 +201,6 @@ static int modeset_find_crtc(struct vo *vo, int fd, drmModeRes *res,
 
     MP_ERR(vo, "Connector %u has no suitable CRTC\n", conn->connector_id);
     return -ENOENT;
-}
-
-static void modeset_destroy_fb(int fd, struct modeset_buf *buf)
-{
-    struct drm_mode_destroy_dumb dreq;
-
-    munmap(buf->map, buf->size);
-
-    drmModeRmFB(fd, buf->fb);
-
-    memset(&dreq, 0, sizeof(dreq));
-    dreq.handle = buf->handle;
-    drmIoctl(fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
 }
 
 static bool is_connector_valid(struct vo *vo, int conn_id,
@@ -297,11 +303,11 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
     for (i = 0; i < BUF_COUNT; i ++) {
         ret = modeset_create_fb(vo, fd, &dev->bufs[i]);
         if (ret) {
+            MP_ERR(vo, "Cannot create framebuffer for connector %d\n",
+                   conn_id);
             for (j = 0; j < i; j ++) {
                 modeset_destroy_fb(fd, &dev->bufs[j]);
             }
-            MP_ERR(vo, "Cannot create framebuffer for connector %d\n",
-                   conn_id);
             return ret;
         }
     }
@@ -415,10 +421,6 @@ static void flip_page(struct vo *vo)
 static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    p->dev = NULL;
-    p->fd = 0;
-    p->old_crtc = NULL;
-    p->curframe = NULL;
     p->sws = mp_sws_alloc(vo);
 
     int ret;
