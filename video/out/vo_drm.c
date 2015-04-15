@@ -250,7 +250,7 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
 
     if (conn_id == -1) {
         // get the first connected connector
-        for (int i = 0; i < res->count_connectors; i ++) {
+        for (int i = 0; i < res->count_connectors; i++) {
             conn = drmModeGetConnector(fd, res->connectors[i]);
             if (is_connector_valid(vo, i, conn, true)) {
                 conn_id = i;
@@ -300,12 +300,12 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
     }
 
     unsigned int i, j;
-    for (i = 0; i < BUF_COUNT; i ++) {
+    for (i = 0; i < BUF_COUNT; i++) {
         ret = modeset_create_fb(vo, fd, &dev->bufs[i]);
         if (ret) {
             MP_ERR(vo, "Cannot create framebuffer for connector %d\n",
                    conn_id);
-            for (j = 0; j < i; j ++) {
+            for (j = 0; j < i; j++) {
                 modeset_destroy_fb(fd, &dev->bufs[j]);
             }
             return ret;
@@ -413,7 +413,7 @@ static void flip_page(struct vo *vo)
     if (ret) {
         MP_WARN(vo, "Cannot flip page for connector\n");
     } else {
-        p->dev->front_buf ++;
+        p->dev->front_buf++;
         p->dev->front_buf %= BUF_COUNT;
     }
 }
