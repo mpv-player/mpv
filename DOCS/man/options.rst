@@ -181,6 +181,7 @@ Playback Control
                file, such as a chapter seek, but not for relative seeks like
                the default behavior of arrow keys (default).
     :yes:      Use precise seeks whenever possible.
+    :always:   Same as ``yes`` (for compatibility).
 
 ``--hr-seek-demuxer-offset=<seconds>``
     This option exists to work around failures to do precise seeks (as in
