@@ -101,8 +101,7 @@ static void modeset_destroy_fb(int fd, struct modeset_buf *buf)
         drmModeRmFB(fd, buf->fb);
     }
     if (buf->handle) {
-        struct drm_mode_destroy_dumb dreq =
-        {
+        struct drm_mode_destroy_dumb dreq = {
             .handle = buf->handle,
         };
         drmIoctl(fd, DRM_IOCTL_MODE_DESTROY_DUMB, &dreq);
@@ -116,8 +115,7 @@ static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
     buf->handle = 0;
 
     // create dumb buffer
-    struct drm_mode_create_dumb creq =
-    {
+    struct drm_mode_create_dumb creq = {
         .width = buf->width,
         .height = buf->height,
         .bpp = 32,
@@ -142,8 +140,7 @@ static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
     }
 
     // prepare buffer for memory mapping
-    struct drm_mode_map_dumb mreq =
-    {
+    struct drm_mode_map_dumb mreq = {
         .handle = buf->handle,
     };
     ret = drmIoctl(fd, DRM_IOCTL_MODE_MAP_DUMB, &mreq);
