@@ -66,7 +66,8 @@ struct priv {
     int32_t device_w;
     int32_t device_h;
     int32_t x, y;
-    struct mp_image *curframe;
+    struct mp_image *last_input;
+    struct mp_image *cur_frame;
     struct mp_rect src;
     struct mp_rect dst;
     struct mp_osd_res osd;
@@ -361,10 +362,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
         .d_h = h,
     };
 
-    if (p->curframe) talloc_free(p->curframe);
-    p->curframe = mp_image_alloc(IMGFMT_BGR0, p->device_w, p->device_h);
+    if (p->cur_frame) talloc_free(p->cur_frame);
+    p->cur_frame = mp_image_alloc(IMGFMT_BGR0, p->device_w, p->device_h);
     mp_image_params_guess_csp(&p->sws->dst);
-    mp_image_set_params(p->curframe, &p->sws->dst);
+    mp_image_set_params(p->cur_frame, &p->sws->dst);
 
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
@@ -382,20 +383,23 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, mpi->fmt.align_y);
     mp_image_crop_rc(mpi, src_rc);
 
-    mp_sws_scale(p->sws, p->curframe, mpi);
+    mp_sws_scale(p->sws, p->cur_frame, mpi);
 
-    osd_draw_on_image(vo->osd, p->osd, mpi ? mpi->pts : 0, 0, p->curframe);
+    osd_draw_on_image(vo->osd, p->osd, mpi ? mpi->pts : 0, 0, p->cur_frame);
 
     struct modeset_buf *front_buf = &p->dev->bufs[p->dev->front_buf];
     int32_t shift = (p->device_w * p->y + p->x) * 4;
     memcpy_pic(front_buf->map + shift,
-               p->curframe->planes[0],
+               p->cur_frame->planes[0],
                (p->dst.x1 - p->dst.x0) * 4,
                p->device_h,
                p->device_w * 4,
-               p->curframe->stride[0]);
+               p->cur_frame->stride[0]);
 
-    talloc_free(mpi);
+    if (mpi != p->last_input) {
+        talloc_free(p->last_input);
+        p->last_input = mpi;
+    }
 }
 
 static void flip_page(struct vo *vo)
@@ -466,7 +470,8 @@ static void uninit(struct vo *vo)
         modeset_destroy_fb(p->fd, &p->dev->bufs[0]);
     }
 
-    talloc_free(p->curframe);
+    talloc_free(p->last_input);
+    talloc_free(p->cur_frame);
     talloc_free(p->dev);
 }
 
@@ -477,6 +482,12 @@ static int query_format(struct vo *vo, int format)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
+    struct priv *p = vo->priv;
+    switch (request) {
+    case VOCTRL_REDRAW_FRAME:
+        draw_image(vo, p->last_input);
+        return VO_TRUE;
+    }
     return VO_NOTIMPL;
 }
 
