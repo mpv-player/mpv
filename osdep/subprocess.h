@@ -29,4 +29,7 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
                   subprocess_read_cb on_stdout, subprocess_read_cb on_stderr,
                   char **error);
 
+struct mp_log;
+void mp_subprocess_detached(struct mp_log *log, char **args);
+
 #endif

@@ -3960,39 +3960,6 @@ static void overlay_uninit(struct MPContext *mpctx)
     osd_set_external2(mpctx->osd, NULL);
 }
 
-struct subprocess_args {
-    struct mp_log *log;
-    char **args;
-};
-
-static void *run_subprocess(void *ptr)
-{
-    struct subprocess_args *p = ptr;
-    pthread_detach(pthread_self());
-
-    mp_msg_flush_status_line(p->log);
-
-    char *err = NULL;
-    if (mp_subprocess(p->args, NULL, NULL, NULL, NULL, &err) < 0)
-        mp_err(p->log, "Running subprocess failed: %s\n", err);
-
-    talloc_free(p);
-    return NULL;
-}
-
-static void subprocess_detached(struct mp_log *log, char **args)
-{
-    struct subprocess_args *p = talloc_zero(NULL, struct subprocess_args);
-    p->log = mp_log_new(p, log, NULL);
-    int num_args = 0;
-    for (int n = 0; args[n]; n++)
-        MP_TARRAY_APPEND(p, p->args, num_args, talloc_strdup(p, args[n]));
-    MP_TARRAY_APPEND(p, p->args, num_args, NULL);
-    pthread_t thread;
-    if (pthread_create(&thread, NULL, run_subprocess, p))
-        talloc_free(p);
-}
-
 struct cycle_counter {
     char **args;
     int counter;
@@ -4599,7 +4566,7 @@ int run_command(MPContext *mpctx, mp_cmd_t *cmd)
         char *args[MP_CMD_MAX_ARGS + 1] = {0};
         for (int n = 0; n < cmd->nargs; n++)
             args[n] = cmd->args[n].v.s;
-        subprocess_detached(mpctx->log, args);
+        mp_subprocess_detached(mpctx->log, args);
         break;
     }
 
