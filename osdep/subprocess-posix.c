@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <fcntl.h>
 #include <errno.h>
 #include <signal.h>
 
@@ -63,6 +64,7 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
     int status = -1;
     int p_stdout[2] = {-1, -1};
     int p_stderr[2] = {-1, -1};
+    int devnull = -1;
     pid_t pid = -1;
 
     if (on_stdout && mp_make_cloexec_pipe(p_stdout) < 0)
@@ -70,10 +72,16 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
     if (on_stderr && mp_make_cloexec_pipe(p_stderr) < 0)
         goto done;
 
+    devnull = open("/dev/null", O_RDONLY | O_CLOEXEC);
+    if (devnull < 0)
+        goto done;
+
     if (posix_spawn_file_actions_init(&fa))
         goto done;
     fa_destroy = true;
-    // redirect stdout and stderr
+    // redirect stdin/stdout/stderr
+    if (posix_spawn_file_actions_adddup2(&fa, devnull, 0))
+        goto done;
     if (p_stdout[1] >= 0 && posix_spawn_file_actions_adddup2(&fa, p_stdout[1], 1))
         goto done;
     if (p_stderr[1] >= 0 && posix_spawn_file_actions_adddup2(&fa, p_stderr[1], 2))
@@ -88,6 +96,8 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
     p_stdout[1] = -1;
     close(p_stderr[1]);
     p_stderr[1] = -1;
+    close(devnull);
+    devnull = -1;
 
     int *read_fds[2] = {&p_stdout[0], &p_stderr[0]};
     subprocess_read_cb read_cbs[2] = {on_stdout, on_stderr};
@@ -133,6 +143,7 @@ done:
     close(p_stdout[1]);
     close(p_stderr[0]);
     close(p_stderr[1]);
+    close(devnull);
 
     if (WIFEXITED(status) && WEXITSTATUS(status) != 127) {
         *error = NULL;
