@@ -362,7 +362,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
         .d_h = h,
     };
 
-    if (p->cur_frame) talloc_free(p->cur_frame);
+    talloc_free(p->cur_frame);
     p->cur_frame = mp_image_alloc(IMGFMT_BGR0, p->device_w, p->device_h);
     mp_image_params_guess_csp(&p->sws->dst);
     mp_image_set_params(p->cur_frame, &p->sws->dst);
