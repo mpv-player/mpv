@@ -517,10 +517,9 @@ listed.
   rendering is too slow. Also can be incremented on "hiccups" and when the video
   frame couldn't be displayed on time. (``vo-drop-frame-count`` property.)
   If the decoder drops frames, the number of decoder-dropped frames is appended
-  to the display as well, e.g.: ``Dropped: 4/34``. This should almost never
-  happen, unless decoder-framedropping is enabled with one of the
-  ``--framedrop`` options, the stream contains errors, or a weird codec is in
-  use. (``drop-frame-count`` property.)
+  to the display as well, e.g.: ``Dropped: 4/34``. This happens only if
+  decoder-framedropping is enabled with the ``--framedrop`` options.
+  (``drop-frame-count`` property.)
 - Cache state, e.g. ``Cache:  2s+134KB``. Visible if the stream cache is enabled.
   The first value shows the amount of video buffered in the demuxer in seconds,
   the second value shows *additional* data buffered in the stream cache in

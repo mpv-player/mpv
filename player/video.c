@@ -405,7 +405,8 @@ static int decode_image(struct MPContext *mpctx)
     talloc_free(pkt);
 
     if (had_packet && !d_video->waiting_decoded_mpi &&
-        mpctx->video_status == STATUS_PLAYING)
+        mpctx->video_status == STATUS_PLAYING &&
+        (mpctx->opts->frame_dropping & 2))
     {
         mpctx->dropped_frames_total++;
         mpctx->dropped_frames++;
