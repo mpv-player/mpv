@@ -21,7 +21,7 @@ script after that will start a new mpv instance.
 
 Note that you can control the mpv instance by writing to the command fifo:
 
-    echo "cycle fullscreen" > ~/.umpv-fifo
+    echo "cycle fullscreen" > ~/.umpv_fifo
 
 Note: you can supply custom mpv path and options with the MPV environment
       variable. The environment variable will be split on whitespace, and the
