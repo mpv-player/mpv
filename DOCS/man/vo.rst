@@ -920,3 +920,16 @@ Available video output drivers are:
         (default: -10). Note that mpv will also use the 2 layers above the
         selected layer, to handle the window background and OSD. Actual video
         rendering will happen on the layer above the selected layer.
+
+``drm`` (Direct Rendering Manager)
+    Video output driver using Kernel Mode Setting / Direct Rendering Manager.
+    Does not support hardware acceleration. Should be used when one doesn't
+    want to install full-blown graphical environment (e.g. no X).
+
+    ``connector=<number>``
+        Select the connector to use (usually this is a monitor.) If set to -1,
+        mpv renders the output on the first available connector. (default: -1)
+
+    ``devpath=<filename>``
+        Path to graphic card device.
+        (default: /dev/dri/card0)
