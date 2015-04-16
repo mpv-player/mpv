@@ -54,7 +54,6 @@ extern const vf_info_t vf_info_hqdn3d;
 extern const vf_info_t vf_info_dsize;
 extern const vf_info_t vf_info_pullup;
 extern const vf_info_t vf_info_delogo;
-extern const vf_info_t vf_info_screenshot;
 extern const vf_info_t vf_info_sub;
 extern const vf_info_t vf_info_yadif;
 extern const vf_info_t vf_info_stereo3d;
@@ -87,8 +86,6 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_delogo,
     &vf_info_yadif,
 #endif
-
-    &vf_info_screenshot,
 
     &vf_info_eq,
     &vf_info_dsize,

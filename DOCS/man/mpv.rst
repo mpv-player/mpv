@@ -475,11 +475,8 @@ A screenshot will usually contain the unscaled video contents at the end of the
 video filter chain and subtitles. By default, ``S`` takes screenshots without
 subtitles, while ``s`` includes subtitles.
 
-The ``screenshot`` video filter is not required when using a recommended GUI
-video output driver. It should normally not be added to the config file, as
-taking screenshots is handled by the VOs, and adding the screenshot filter will
-break hardware decoding. (The filter may still be useful for taking screenshots
-at a certain point within the video chain when using multiple video filters.)
+Unlike with MPlayer, the ``screenshot`` video filter is not required. This
+filter was never required in mpv, and has been removed.
 
 TERMINAL STATUS LINE
 ====================

@@ -144,7 +144,6 @@ enum vf_ctrl {
     VFCTRL_SEEK_RESET = 1,   // reset on picture and PTS discontinuities
     VFCTRL_SET_EQUALIZER,    // set color options (brightness,contrast etc)
     VFCTRL_GET_EQUALIZER,    // get color options (brightness,contrast etc)
-    VFCTRL_SCREENSHOT,       // Take screenshot, arg is mp_image**
     VFCTRL_INIT_OSD,         // Filter OSD renderer present?
     VFCTRL_SET_DEINTERLACE,  // Set deinterlacing status
     VFCTRL_GET_DEINTERLACE,  // Get deinterlacing status

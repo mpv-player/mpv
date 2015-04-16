@@ -32,7 +32,6 @@
 #include "options/path.h"
 #include "video/mp_image.h"
 #include "video/decode/dec_video.h"
-#include "video/filter/vf.h"
 #include "video/out/vo.h"
 #include "video/image_writer.h"
 #include "sub/osd.h"
@@ -330,11 +329,7 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
     if (mode == MODE_SUBTITLES && osd_get_render_subs_in_filter(mpctx->osd))
         mode = 0;
 
-    // vf_screenshot
-    if (mpctx->d_video && mpctx->d_video->vfilter)
-        vf_control_any(mpctx->d_video->vfilter, VFCTRL_SCREENSHOT, &image);
-
-    if (!image && mpctx->video_out && mpctx->video_out->config_ok) {
+    if (mpctx->video_out && mpctx->video_out->config_ok) {
         vo_wait_frame(mpctx->video_out); // important for each-frame mode
 
         if (mode != MODE_FULL_WINDOW)
