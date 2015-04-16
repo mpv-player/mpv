@@ -68,50 +68,50 @@ extern const struct vo_driver video_out_rpi;
 const struct vo_driver *const video_out_drivers[] =
 {
 #if HAVE_RPI
-        &video_out_rpi,
+    &video_out_rpi,
 #endif
 #if HAVE_GL
-        &video_out_opengl,
+    &video_out_opengl,
 #endif
 #if HAVE_VDPAU
-        &video_out_vdpau,
+    &video_out_vdpau,
 #endif
 #if HAVE_DIRECT3D
-        &video_out_direct3d_shaders,
-        &video_out_direct3d,
+    &video_out_direct3d_shaders,
+    &video_out_direct3d,
 #endif
 #if HAVE_XV
-        &video_out_xv,
+    &video_out_xv,
 #endif
 #if HAVE_SDL2
-        &video_out_sdl,
+    &video_out_sdl,
 #endif
 #if HAVE_VAAPI
-        &video_out_vaapi,
+    &video_out_vaapi,
 #endif
 #if HAVE_X11
-        &video_out_x11,
+    &video_out_x11,
 #endif
-        &video_out_null,
-        // should not be auto-selected
-        &video_out_image,
+    &video_out_null,
+    // should not be auto-selected
+    &video_out_image,
 #if HAVE_CACA
-        &video_out_caca,
+    &video_out_caca,
 #endif
 #if HAVE_DRM
-        &video_out_drm,
+    &video_out_drm,
 #endif
 #if HAVE_ENCODING
-        &video_out_lavc,
+    &video_out_lavc,
 #endif
 #if HAVE_GL
-        &video_out_opengl_hq,
-        &video_out_opengl_cb,
+    &video_out_opengl_hq,
+    &video_out_opengl_cb,
 #endif
 #if HAVE_WAYLAND
-        &video_out_wayland,
+    &video_out_wayland,
 #endif
-        NULL
+    NULL
 };
 
 struct vo_internal {
@@ -987,10 +987,10 @@ struct mp_image *vo_get_current_frame(struct vo *vo)
     return r;
 }
 
-/**
- * \brief lookup an integer in a table, table must have 0 as the last key
- * \param key key to search for
- * \result translation corresponding to key or "to" value of last mapping
+/*
+ * lookup an integer in a table, table must have 0 as the last key
+ * param: key key to search for
+ * returns translation corresponding to key or "to" value of last mapping
  *         if not found.
  */
 int lookup_keymap_table(const struct mp_keymap *map, int key)
