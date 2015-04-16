@@ -58,7 +58,7 @@ static int config(struct vf_instance *vf,
     // check:
     if(vf->priv->crop_w+vf->priv->crop_x>width ||
        vf->priv->crop_h+vf->priv->crop_y>height){
-        MP_WARN(vf, "[CROP] Bad position/width/height - cropped area outside of the original!\n");
+        MP_WARN(vf, "Bad position/width/height - cropped area outside of the original!\n");
         return 0;
     }
     vf_rescale_dsize(&d_width, &d_height, width, height,
@@ -85,11 +85,6 @@ static int vf_open(vf_instance_t *vf){
     vf->config=config;
     vf->filter=filter;
     vf->query_format=query_format;
-    MP_INFO(vf, "Crop: %d x %d, %d ; %d\n",
-    vf->priv->crop_w,
-    vf->priv->crop_h,
-    vf->priv->crop_x,
-    vf->priv->crop_y);
     return 1;
 }
 
