@@ -187,8 +187,7 @@ List of Input Commands
 
     The second argument is like the first argument to ``screenshot``.
 
-    This command tries to never overwrite files. If the file already exists,
-    it fails.
+    If the file already exists, it's overwritten.
 
     Like all input command parameters, the filename is subject to property
     expansion as described in `Property Expansion`_.

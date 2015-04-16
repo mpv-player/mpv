@@ -370,11 +370,6 @@ void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
     bool old_osd = ctx->osd;
     ctx->osd = osd;
 
-    if (mp_path_exists(filename)) {
-        screenshot_msg(ctx, SMSG_ERR, "Screenshot: file '%s' already exists.",
-                       filename);
-        goto end;
-    }
     char *ext = mp_splitext(filename, NULL);
     if (ext)
         opts.format = ext;
