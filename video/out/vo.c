@@ -755,7 +755,7 @@ static void *vo_thread(void *ptr)
         return NULL;
 
     update_display_fps(vo);
-    vo_event(vo, VO_WIN_STATE_MINIMIZED);
+    vo_event(vo, VO_EVENT_WIN_STATE);
 
     while (1) {
         mp_dispatch_queue_process(vo->in->dispatch, 0);
