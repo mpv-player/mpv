@@ -2022,6 +2022,12 @@ Demuxer
 ``--demuxer-lavf-format=<name>``
     Force a specific libavformat demuxer.
 
+``--demuxer-lavf-hacks=<yes|no>``
+    By default, some formats will be handled differently from other formats
+    by explicitly checking for them. Most of these compensate for weird or
+    imperfect behavior from libavformat demuxers. Passing ``no`` disables
+    these. For debugging and testing only.
+
 ``--demuxer-lavf-genpts-mode=<no|lavf>``
     Mode for deriving missing packet PTS values from packet DTS. ``lavf``
     enables libavformat's ``genpts`` option. ``no`` disables it. This used
