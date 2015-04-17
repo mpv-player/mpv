@@ -238,6 +238,7 @@ static int open_f(stream_t *stream)
         .fd = -1
     };
     stream->priv = priv;
+    stream->type = STREAMTYPE_FILE;
 
     bool write = stream->mode == STREAM_WRITE;
     int m = O_CLOEXEC | (write ? O_RDWR | O_CREAT | O_TRUNC : O_RDONLY);
@@ -278,9 +279,9 @@ static int open_f(stream_t *stream)
         struct stat st;
         if (fstat(fd, &st) == 0) {
             if (S_ISDIR(st.st_mode)) {
-                MP_ERR(stream, "File is a directory: '%s'\n", filename);
-                close(fd);
-                return STREAM_ERROR;
+                stream->type = STREAMTYPE_DIR;
+                stream->allow_caching = false;
+                MP_INFO(stream, "This is a directory - adding to playlist.\n");
             }
 #ifndef __MINGW32__
             if (S_ISREG(st.st_mode)) {
@@ -302,7 +303,6 @@ static int open_f(stream_t *stream)
         stream->seekable = true;
     }
 
-    stream->type = STREAMTYPE_FILE;
     stream->fast_skip = true;
     stream->fill_buffer = fill_buffer;
     stream->write_buffer = write_buffer;
