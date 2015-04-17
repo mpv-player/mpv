@@ -106,7 +106,10 @@ int m_config_parse(m_config_t *config, const char *location, bstr data,
                 if (rest.len == line.len || !bstr_eatstart0(&rest, "%") ||
                     len > rest.len)
                 {
-                    MP_ERR(config, "%s broken escaping with '%%'\n", loc);
+                    MP_ERR(config, "%s fixed-length quoting expected - put "
+                           "\"quotes\" around the option value if you did not "
+                           "intend to use this, but your option value starts "
+                           "with '%%'\n", loc);
                     goto error;
                 }
                 value = bstr_splice(rest, 0, len);

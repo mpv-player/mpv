@@ -280,10 +280,10 @@ The ``[...]`` from of quotes wraps everything between ``[`` and ``]``. It's
 useful with shells that don't interpret these characters in the middle of
 an argument (like bash).
 
-A special kind of string-escaping intended for use with external scripts and
-programs is started with ``%``.
+The fixed-length quoting syntax is intended for use with external
+scripts and programs.
 
-It has the following format::
+It is started with ``%`` and has the following format::
 
     %n%string_of_length_n
 
@@ -319,7 +319,8 @@ console controls. (Which makes it suitable for playing data piped to stdin.)
 
 For paths passed to suboptions, the situation is further complicated by the
 need to escape special characters. To work this around, the path can be
-additionally wrapped in the ``%n%string_of_length_n`` syntax (see above).
+additionally wrapped in the fixed-length syntax, e.g. ``%n%string_of_length_n``
+(see above).
 
 Some mpv options interpret paths starting with ``~``. Currently, the prefix
 ``~~/`` expands to the mpv configuration directory (usually ``~/.config/mpv/``).
@@ -397,10 +398,10 @@ Escaping spaces and special characters
 This is done like with command line options. The shell is not involved here,
 but option values still need to be quoted as a whole if it contains certain
 characters like spaces. A config entry can be quoted with ``"`` and ``'``,
-as well as with the ``%n%`` syntax mentioned before. This is like passing
-the exact contents of the quoted string as command line option. C-style escapes
-are currently _not_ interpreted on this level, although some options to this
-manually. (This is a mess and should probably be changed at some point.)
+as well as with the fixed-length syntax (``%n%``) mentioned before. This is like
+passing the exact contents of the quoted string as command line option. C-style
+escapes are currently _not_ interpreted on this level, although some options to
+this manually. (This is a mess and should probably be changed at some point.)
 
 Putting Command Line Options into the Configuration File
 --------------------------------------------------------
