@@ -295,7 +295,7 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
     }
 
     conn = drmModeGetConnector(fd, res->connectors[conn_id]);
-    if (!is_connector_valid(vo, conn_id, conn, true)) {
+    if (!is_connector_valid(vo, conn_id, conn, false)) {
         ret = -ENODEV;
         goto end;
     }
