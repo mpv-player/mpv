@@ -64,6 +64,7 @@ struct modeset_buf {
 struct modeset_dev {
     struct modeset_buf bufs[BUF_COUNT];
     drmModeModeInfo mode;
+    drmModeEncoder *enc;
     uint32_t conn;
     uint32_t crtc;
     int front_buf;
@@ -210,8 +211,8 @@ static int modeset_find_crtc(struct vo *vo, int fd, drmModeRes *res,
             if (!(enc->possible_crtcs & (1 << j)))
                 continue;
 
-            drmModeFreeEncoder(enc);
-            dev->crtc = res->crtcs[j];
+            dev->enc = enc;
+            dev->crtc = enc->crtc_id;
             return 0;
         }
 
@@ -603,6 +604,7 @@ static void uninit(struct vo *vo)
 
         modeset_destroy_fb(p->fd, &p->dev->bufs[1]);
         modeset_destroy_fb(p->fd, &p->dev->bufs[0]);
+        drmModeFreeEncoder(p->dev->enc);
     }
 
     vt_switcher_destroy(&p->vt_switcher);
