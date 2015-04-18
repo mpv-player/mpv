@@ -318,17 +318,17 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (new_rate != s->ctx.in_rate && s->avrctx_ok && af->fmt_out.format) {
             // Before reconfiguring, drain the audio that is still buffered
             // in the resampler.
-            talloc_free(s->pending);
-            s->pending = talloc_zero(NULL, struct mp_audio);
-            mp_audio_copy_config(s->pending, &af->fmt_out);
-            s->pending->samples = get_drain_samples(s);
-            if (s->pending->samples > 0) {
-                mp_audio_realloc_min(s->pending, s->pending->samples);
-                int r = resample_frame(s->avrctx, s->pending, NULL);
-                s->pending->samples = MPMAX(r, 0);
+            struct mp_audio *pending = talloc_zero(NULL, struct mp_audio);
+            mp_audio_copy_config(pending, &af->fmt_out);
+            pending->samples = get_drain_samples(s);
+            if (pending->samples > 0) {
+                mp_audio_realloc_min(pending, pending->samples);
+                int r = resample_frame(s->avrctx, pending, NULL);
+                pending->samples = MPMAX(r, 0);
             }
             // Reinitialize resampler.
             configure_lavrr(af, &af->fmt_in, &af->fmt_out);
+            s->pending = pending;
         }
         return AF_OK;
     }
