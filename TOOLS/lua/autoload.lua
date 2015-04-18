@@ -28,7 +28,9 @@ function find_and_add_entries()
     if files == nil then
         return
     end
-    table.sort(files)
+    table.sort(files, function (a, b)
+        return string.lower(a) < string.lower(b)
+    end)
     if dir == "." then
         dir = ""
     end
