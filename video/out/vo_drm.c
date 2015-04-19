@@ -22,14 +22,15 @@
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <linux/vt.h>
 #include <poll.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <sys/ioctl.h>
-#include <unistd.h>
-#include <libswscale/swscale.h>
 #include <sys/mman.h>
+#include <sys/vt.h>
+#include <unistd.h>
+
+#include <libswscale/swscale.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
