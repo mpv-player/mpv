@@ -1736,11 +1736,22 @@ static int read_subparam(struct mp_log *log, bstr optname,
         }
         p = bstr_cut(p, 1);
     } else if (bstr_eatstart0(&p, "[")) {
-        if (!bstr_split_tok(p, "]", &subparam, &p)) {
+        bstr s = p;
+        int balance = 1;
+        while (p.len && balance > 0) {
+            if (p.start[0] == '[') {
+                balance++;
+            } else if (p.start[0] == ']') {
+                balance--;
+            }
+            p = bstr_cut(p, 1);
+        }
+        if (balance != 0) {
             mp_err(log, "Terminating ']' missing for '%.*s'\n",
                    BSTR_P(optname));
             return M_OPT_INVALID;
         }
+        subparam = bstr_splice(s, 0, s.len - p.len - 1);
     } else if (bstr_eatstart0(&p, "%")) {
         int optlen = bstrtoll(p, &p, 0);
         if (!bstr_startswith0(p, "%") || (optlen > p.len - 1)) {

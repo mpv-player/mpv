@@ -278,7 +278,9 @@ quotes.
 
 The ``[...]`` from of quotes wraps everything between ``[`` and ``]``. It's
 useful with shells that don't interpret these characters in the middle of
-an argument (like bash).
+an argument (like bash). These quotes are balanced (since mpv 0.9.0): the ``[``
+and ``]`` nest, and the quote terminates on the last ``]`` that has no matching
+``[`` within the string. (For example, ``[a[b]c]`` results in ``a[b]c``.)
 
 The fixed-length quoting syntax is intended for use with external
 scripts and programs.
