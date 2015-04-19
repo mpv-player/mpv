@@ -363,6 +363,7 @@ def build(ctx):
         ( "video/out/wayland/memfile.c",         "wayland" ),
         ( "video/out/win_state.c"),
         ( "video/out/x11_common.c",              "x11" ),
+        ( "video/out/drm_common.c",              "drm" ),
 
         ## osdep
         ( getch2_c ),
