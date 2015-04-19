@@ -276,7 +276,7 @@ Shells may actually strip some quotes from the string passed to the commandline,
 so the example quotes the string twice, ensuring that mpv recieves the ``"``
 quotes.
 
-The ``[...]`` from of quotes wraps everything between ``[`` and ``]``. It's
+The ``[...]`` form of quotes wraps everything between ``[`` and ``]``. It's
 useful with shells that don't interpret these characters in the middle of
 an argument (like bash). These quotes are balanced (since mpv 0.9.0): the ``[``
 and ``]`` nest, and the quote terminates on the last ``]`` that has no matching
