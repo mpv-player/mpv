@@ -22,21 +22,18 @@
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <poll.h>
-#include <signal.h>
 #include <stdbool.h>
-#include <sys/ioctl.h>
 #include <sys/mman.h>
-#include <sys/vt.h>
 #include <unistd.h>
 
 #include <libswscale/swscale.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
-#include "osdep/io.h"
-#include "osdep/timer.h"
+#include "drm_common.h"
+
 #include "common/msg.h"
+#include "osdep/timer.h"
 #include "sub/osd.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
@@ -44,13 +41,7 @@
 #include "vo.h"
 
 #define USE_MASTER 0
-#define EVT_RELEASE 1
-#define EVT_ACQUIRE 2
-#define EVT_INTERRUPT 255
 #define BUF_COUNT 2
-
-static int setup_vo_crtc(struct vo *vo);
-static void release_vo_crtc(struct vo *vo);
 
 struct modeset_buf {
     uint32_t width;
@@ -69,11 +60,6 @@ struct modeset_dev {
     uint32_t conn;
     uint32_t crtc;
     int front_buf;
-};
-
-struct vt_switcher {
-    int tty_fd;
-    struct vo *vo;
 };
 
 struct priv {
@@ -350,119 +336,6 @@ end:
 
 
 
-static int vt_switcher_pipe[2];
-
-static void vt_switcher_sighandler(int sig)
-{
-    unsigned char event = sig == SIGUSR1 ? EVT_RELEASE : EVT_ACQUIRE;
-    write(vt_switcher_pipe[1], &event, sizeof(event));
-}
-
-static void vt_switcher_interrupt(struct vt_switcher *s)
-{
-    unsigned char event = EVT_INTERRUPT;
-    write(vt_switcher_pipe[1], &event, sizeof(event));
-}
-
-static int vt_switcher_init(struct vt_switcher *s, struct vo *vo)
-{
-    s->tty_fd = -1;
-    vt_switcher_pipe[0] = -1;
-    vt_switcher_pipe[1] = -1;
-
-    s->vo = vo;
-    if (mp_make_cloexec_pipe(vt_switcher_pipe)) {
-        MP_ERR(vo, "Creating pipe failed: %s", mp_strerror(errno));
-        return -1;
-    }
-
-    s->tty_fd = open("/dev/tty", O_RDWR | O_CLOEXEC);
-    if (s->tty_fd < 0) {
-        MP_ERR(vo, "Can't open TTY for VT control: %s", mp_strerror(errno));
-        return -1;
-    }
-
-    struct sigaction act;
-    act.sa_handler = vt_switcher_sighandler;
-    act.sa_flags = SA_RESTART;
-    sigemptyset(&act.sa_mask);
-    sigaction(SIGUSR1, &act, 0);
-    sigaction(SIGUSR2, &act, 0);
-
-    struct vt_mode vt_mode;
-    if (ioctl(s->tty_fd, VT_GETMODE, &vt_mode) < 0) {
-        MP_ERR(vo, "VT_GETMODE failed: %s", mp_strerror(errno));
-        return -1;
-    }
-
-    vt_mode.mode = VT_PROCESS;
-    vt_mode.relsig = SIGUSR1;
-    vt_mode.acqsig = SIGUSR2;
-    if (ioctl(s->tty_fd, VT_SETMODE, &vt_mode) < 0) {
-        MP_ERR(vo, "VT_SETMODE failed: %s", mp_strerror(errno));
-        return -1;
-    }
-
-    return 0;
-}
-
-static void vt_switcher_destroy(struct vt_switcher *s)
-{
-    close(s->tty_fd);
-    close(vt_switcher_pipe[0]);
-    close(vt_switcher_pipe[1]);
-}
-
-static void vt_switcher_poll(struct vt_switcher *s, int timeout_ms)
-{
-    struct pollfd fds[1] = {
-        { .events = POLLIN, .fd = vt_switcher_pipe[0] },
-    };
-    poll(fds, 1, timeout_ms);
-    if (!fds[0].revents) return;
-
-    unsigned char event;
-    if (read(fds[0].fd, &event, sizeof(event)) != sizeof(event)) return;
-
-    switch (event) {
-    case EVT_RELEASE:
-        release_vo_crtc(s->vo);
-        if (USE_MASTER) {
-            //this function enables support for switching to x, weston etc.
-            //however, for whatever reason, it can be called only by root users.
-            //until things change, this is commented.
-            struct priv *p = s->vo->priv;
-            if (drmDropMaster(p->fd)) {
-                MP_WARN(s->vo, "Failed to drop DRM master: %s\n", mp_strerror(errno));
-            }
-        }
-
-        if (ioctl(s->tty_fd, VT_RELDISP, 1) < 0) {
-            MP_ERR(s->vo, "Failed to release virtual terminal\n");
-        }
-        break;
-
-    case EVT_ACQUIRE:
-        if (USE_MASTER) {
-            struct priv *p = s->vo->priv;
-            if (drmSetMaster(p->fd)) {
-                MP_WARN(s->vo, "Failed to acquire DRM master: %s\n", mp_strerror(errno));
-            }
-        }
-
-        setup_vo_crtc(s->vo);
-        if (ioctl(s->tty_fd, VT_RELDISP, VT_ACKACQ) < 0) {
-            MP_ERR(s->vo, "Failed to acquire virtual terminal\n");
-        }
-        break;
-
-    case EVT_INTERRUPT:
-        break;
-    }
-}
-
-
-
 static int setup_vo_crtc(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -491,6 +364,36 @@ static void release_vo_crtc(struct vo *vo)
     }
 }
 
+static void release_vt(void *data)
+{
+    struct vo *vo = data;
+    release_vo_crtc(vo);
+    if (USE_MASTER) {
+        //this function enables support for switching to x, weston etc.
+        //however, for whatever reason, it can be called only by root users.
+        //until things change, this is commented.
+        struct priv *p = vo->priv;
+        if (drmDropMaster(p->fd)) {
+            MP_WARN(vo, "Failed to drop DRM master: %s\n", mp_strerror(errno));
+        }
+    }
+}
+
+static void acquire_vt(void *data)
+{
+    struct vo *vo = data;
+    if (USE_MASTER) {
+        struct priv *p = vo->priv;
+        if (drmSetMaster(p->fd)) {
+            MP_WARN(vo, "Failed to acquire DRM master: %s\n", mp_strerror(errno));
+        }
+    }
+
+    setup_vo_crtc(vo);
+}
+
+
+
 static int wait_events(struct vo *vo, int64_t until_time_us)
 {
     struct priv *p = vo->priv;
@@ -503,7 +406,7 @@ static int wait_events(struct vo *vo, int64_t until_time_us)
 static void wakeup(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    vt_switcher_interrupt(&p->vt_switcher);
+    vt_switcher_interrupt_poll(&p->vt_switcher);
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
@@ -621,8 +524,11 @@ static int preinit(struct vo *vo)
     p->sws = mp_sws_alloc(vo);
     p->fd = -1;
 
-    if (vt_switcher_init(&p->vt_switcher, vo))
+    if (vt_switcher_init(&p->vt_switcher, vo->log))
         goto err;
+
+    vt_switcher_acquire(&p->vt_switcher, acquire_vt, vo);
+    vt_switcher_release(&p->vt_switcher, release_vt, vo);
 
     if (modeset_open(vo, &p->fd, p->device_path))
         goto err;
