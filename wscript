@@ -235,6 +235,11 @@ iconv support use --disable-iconv.",
         'desc': 'fchmod()',
         'func': check_statement('sys/stat.h', 'fchmod(0, 0)'),
     }, {
+        'name': 'vt.h',
+        'desc': 'vt.h',
+        'func': check_statement(['sys/vt.h', 'sys/ioctl.h'],
+                                'int m; ioctl(0, VT_GETMODE, &m)'),
+    }, {
         'name': 'glibc-thread-name',
         'desc': 'GLIBC API for setting thread name',
         'func': check_statement('pthread.h',
@@ -634,6 +639,7 @@ video_output_features = [
     }, {
         'name': '--drm',
         'desc': 'DRM',
+        'deps': [ 'vt.h' ],
         'func': check_pkg_config('libdrm'),
     }, {
         'name': '--jpeg',
