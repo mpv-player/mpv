@@ -1316,7 +1316,8 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_KILL_SCREENSAVER:
         w32->disable_screensaver = true;
-        SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED);
+        SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED |
+                                ES_DISPLAY_REQUIRED);
         return VO_TRUE;
     case VOCTRL_RESTORE_SCREENSAVER:
         w32->disable_screensaver = false;
