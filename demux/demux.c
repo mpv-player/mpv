@@ -144,6 +144,8 @@ struct demux_stream {
     // all fields are protected by in->lock
     bool selected;          // user wants packets from this stream
     bool active;            // try to keep at least 1 packet queued
+                            // if false, this stream is disabled, or passively
+                            // read (like subtitles)
     bool eof;               // end of demuxed stream? (true if all buffer empty)
     bool refreshing;
     size_t packs;           // number of packets in buffer
@@ -431,7 +433,6 @@ static bool read_packet(struct demux_internal *in)
         for (int n = 0; n < in->d_buffer->num_streams; n++) {
             struct demux_stream *ds = in->d_buffer->streams[n]->ds;
             ds->eof = true;
-            ds->active = false;
         }
         // If we had EOF previously, then don't wakeup (avoids wakeup loop)
         if (!in->last_eof) {
@@ -1382,10 +1383,8 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             struct demux_stream *ds = in->d_user->streams[n]->ds;
             if (ds->active) {
                 r->underrun |= !ds->head && !ds->eof;
-                if (!ds->eof) {
-                    r->ts_range[0] = MP_PTS_MAX(r->ts_range[0], ds->base_ts);
-                    r->ts_range[1] = MP_PTS_MIN(r->ts_range[1], ds->last_ts);
-                }
+                r->ts_range[0] = MP_PTS_MAX(r->ts_range[0], ds->base_ts);
+                r->ts_range[1] = MP_PTS_MIN(r->ts_range[1], ds->last_ts);
                 num_packets += ds->packs;
             }
         }
