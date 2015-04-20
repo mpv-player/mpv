@@ -328,7 +328,7 @@ typedef struct MPContext {
     int max_frames;
     bool playing_msg_shown;
 
-    bool paused_for_cache;
+    bool paused_for_cache, cache_eof;
     double cache_stop_time, cache_wait_time;
 
     // Set after showing warning about decoding being too slow for realtime

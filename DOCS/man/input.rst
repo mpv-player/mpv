@@ -1077,6 +1077,12 @@ Property list
     guess is very unreliable, and often the property will not be available
     at all, even if data is buffered.
 
+``demuxer-ahead-duration``
+    Approximate aheaded duration in demuxer buffer, in seconds. This is similar
+    with ``demuxer-cache-duration`` but returns duration measured from current
+    ``time-pos``. Also, this property returns remaining time after bufferred
+    data in demuxer reach end-of-file.
+
 ``demuxer-cache-idle``
     Returns ``yes`` if the demuxer is idle, which means the demuxer cache is
     filled to the requested amount, and is currently not reading more data.

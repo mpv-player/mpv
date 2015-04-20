@@ -545,6 +545,11 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     struct demux_ctrl_reader_state s = {.idle = true, .ts_duration = -1};
     demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
 
+    if (mpctx->cache_eof != s.eof) {
+        mpctx->cache_eof = s.eof;
+        mp_notify(mpctx, MP_EVENT_CACHE_UPDATE, NULL);
+    }
+
     if (mpctx->restart_complete && idle != -1) {
         if (mpctx->paused && mpctx->paused_for_cache) {
             if (!opts->cache_pausing || s.ts_duration >= mpctx->cache_wait_time

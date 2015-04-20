@@ -1383,6 +1383,29 @@ static int mp_property_demuxer_cache_duration(void *ctx, struct m_property *prop
     return m_property_double_ro(action, arg, s.ts_duration);
 }
 
+static int mp_property_demuxer_ahead_duration(void *ctx, struct m_property *prop,
+                                          int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct demux_ctrl_reader_state s;
+    if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s) < 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    if (!s.eof && s.ts_range[1] == MP_NOPTS_VALUE)
+        return M_PROPERTY_UNAVAILABLE;
+    double ts = -1;
+    if (!s.eof) {
+        double time = get_current_time(mpctx);
+        if (time < 0)
+            return M_PROPERTY_UNAVAILABLE;
+        ts = s.ts_range[1] - time;
+    }
+    return m_property_double_ro(action, arg, ts);
+}
+
 static int mp_property_demuxer_cache_idle(void *ctx, struct m_property *prop,
                                           int action, void *arg)
 {
@@ -3283,6 +3306,7 @@ static const struct m_property mp_properties[] = {
     {"cache-size", mp_property_cache_size},
     {"cache-idle", mp_property_cache_idle},
     {"demuxer-cache-duration", mp_property_demuxer_cache_duration},
+    {"demuxer-ahead-duration", mp_property_demuxer_ahead_duration},
     {"demuxer-cache-idle", mp_property_demuxer_cache_idle},
     {"cache-buffering-state", mp_property_cache_buffering},
     {"paused-for-cache", mp_property_paused_for_cache},
@@ -3473,7 +3497,9 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata", "media-title"),
     E(MPV_EVENT_CHAPTER_CHANGE, "chapter", "chapter-metadata"),
     E(MP_EVENT_CACHE_UPDATE, "cache", "cache-free", "cache-used", "cache-idle",
-      "demuxer-cache-duration", "demuxer-cache-idle", "paused-for-cache"),
+      "demuxer-cache-duration", "demuxer-cache-idle", "paused-for-cache",
+      "demuxer-ahead-time"
+    ),
     E(MP_EVENT_WIN_RESIZE, "window-scale"),
     E(MP_EVENT_WIN_STATE, "window-minimized", "display-names", "display-fps"),
     E(MP_EVENT_AUDIO_DEVICES, "audio-device-list"),
