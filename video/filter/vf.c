@@ -73,9 +73,9 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_format,
     &vf_info_noformat,
     &vf_info_flip,
-    &vf_info_mirror,
 
 #if HAVE_LIBAVFILTER
+    &vf_info_mirror,
     &vf_info_lavfi,
     &vf_info_rotate,
     &vf_info_noise,
