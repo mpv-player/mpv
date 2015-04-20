@@ -279,15 +279,38 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts)
     return get_writer(opts)->file_ext;
 }
 
-bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
-                 const char *filename, struct mp_log *log)
+struct mp_image *convert_image(struct mp_image *image, int destfmt,
+                               struct mp_log *log)
 {
-    struct mp_image *allocated_image = NULL;
-    struct image_writer_opts defs = image_writer_opts_defaults;
     int d_w = image->params.d_w;
     int d_h = image->params.d_h;
     bool is_anamorphic = image->w != d_w || image->h != d_h;
 
+    // Caveat: no colorspace/levels conversion done if pixel formats equal
+    //         it's unclear what colorspace/levels the target wants
+    if (image->imgfmt == destfmt && !is_anamorphic)
+        return mp_image_new_ref(image);
+
+    struct mp_image *dst = mp_image_alloc(destfmt, d_w, d_h);
+    if (!dst) {
+        mp_err(log, "Out of memory.\n");
+        return NULL;
+    }
+    mp_image_copy_attributes(dst, image);
+
+    if (mp_image_swscale(dst, image, mp_sws_hq_flags) < 0) {
+        mp_err(log, "Error when converting image.\n");
+        talloc_free(dst);
+        return NULL;
+    }
+
+    return dst;
+}
+
+bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
+                const char *filename, struct mp_log *log)
+{
+    struct image_writer_opts defs = image_writer_opts_defaults;
     if (!opts)
         opts = &defs;
 
@@ -295,25 +318,9 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
     struct image_writer_ctx ctx = { log, opts, writer, image->fmt };
     int destfmt = get_target_format(&ctx, image->imgfmt);
 
-    // Caveat: no colorspace/levels conversion done if pixel formats equal
-    //         it's unclear what colorspace/levels the target wants
-    if (image->imgfmt != destfmt || is_anamorphic) {
-        struct mp_image *dst = mp_image_alloc(destfmt, d_w, d_h);
-        if (!dst) {
-            mp_err(log, "Out of memory.\n");
-            return 0;
-        }
-        mp_image_copy_attributes(dst, image);
-
-        if (mp_image_swscale(dst, image, mp_sws_hq_flags) < 0) {
-            mp_err(log, "Error when converting image.\n");
-            talloc_free(dst);
-            return 0;
-        }
-
-        allocated_image = dst;
-        image = dst;
-    }
+    struct mp_image *dst = convert_image(image, destfmt, log);
+    if (!dst)
+        return false;
 
     FILE *fp = fopen(filename, "wb");
     bool success = false;
@@ -326,8 +333,7 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
             mp_err(log, "Error writing file '%s'!\n", filename);
     }
 
-    talloc_free(allocated_image);
-
+    talloc_free(dst);
     return success;
 }
 
