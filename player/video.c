@@ -296,6 +296,8 @@ int reinit_video_chain(struct MPContext *mpctx)
     d_video->fps = sh->video->fps;
     d_video->vo = mpctx->video_out;
 
+    MP_VERBOSE(d_video, "Container reported FPS: %f\n", sh->video->fps);
+
     if (opts->force_fps) {
         d_video->fps = opts->force_fps;
         MP_INFO(mpctx, "FPS forced to %5.3f.\n", d_video->fps);
