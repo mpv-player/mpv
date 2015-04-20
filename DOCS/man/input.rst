@@ -919,6 +919,10 @@ Property list
     a BD or DVD. Use the ``discnav menu`` command to actually enter or leave
     menu mode.
 
+``disc-mouse-on-button``
+    Return ``yes`` when the mouse cursor is located on a button, or ``no``
+    when cursor is outside of any button for disc navigation.
+
 ``chapters``
     Number of chapters.
 
