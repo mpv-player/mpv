@@ -1090,6 +1090,11 @@ Property list
     guess is very unreliable, and often the property will not be available
     at all, even if data is buffered.
 
+``demuxer-cache-time``
+    Approximate time of video buffered in the demuxer, in seconds. Same as
+    ``demuxer-cache-duration`` but returns the last timestamp of bufferred
+    data in demuxer.
+
 ``demuxer-cache-idle``
     Returns ``yes`` if the demuxer is idle, which means the demuxer cache is
     filled to the requested amount, and is currently not reading more data.
