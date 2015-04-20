@@ -1939,6 +1939,26 @@ static int property_list_tracks(void *ctx, struct m_property *prop,
                                 get_track_entry, mpctx);
 }
 
+static int mp_property_audio_only(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    int ret = 0;
+    if (mpctx->num_tracks > 0) {
+        ret = 1;
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            struct track *track = mpctx->tracks[n];
+            if (track->type == STREAM_AUDIO)
+                continue;
+            if (track->type == STREAM_VIDEO && track->attached_picture)
+                continue;
+            ret = 0;
+            break;
+        }
+    }
+    return m_property_flag_ro(action, arg, ret);
+}
+
 /// Selected audio id (RW)
 static int mp_property_audio(void *ctx, struct m_property *prop,
                              int action, void *arg)
@@ -3320,6 +3340,7 @@ static const struct m_property mp_properties[] = {
     {"audio-bitrate", mp_property_audio_bitrate},
     {"audio-samplerate", mp_property_samplerate},
     {"audio-channels", mp_property_channels},
+    {"audio-only", mp_property_audio_only},
     {"aid", mp_property_audio},
     {"balance", mp_property_balance},
     {"volume-restore-data", mp_property_volrestore},
@@ -3459,7 +3480,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_END_FILE, "*"),
     E(MPV_EVENT_FILE_LOADED, "*"),
     E(MP_EVENT_CHANGE_ALL, "*"),
-    E(MPV_EVENT_TRACKS_CHANGED, "track-list"),
+    E(MPV_EVENT_TRACKS_CHANGED, "track-list", "audio-only"),
     E(MPV_EVENT_TRACK_SWITCHED, "vid", "video", "aid", "audio", "sid", "sub",
       "secondary-sid"),
     E(MPV_EVENT_IDLE, "*"),
