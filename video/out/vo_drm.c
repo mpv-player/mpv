@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <sys/mman.h>
+#include <sys/poll.h>
 #include <unistd.h>
 
 #include <libswscale/swscale.h>
@@ -63,14 +64,17 @@ struct modeset_dev {
 };
 
 struct priv {
+    char *device_path;
+    int connector_id;
+
     int fd;
     struct vt_switcher vt_switcher;
     struct modeset_dev *dev;
     drmModeCrtc *old_crtc;
+    drmEventContext ev;
 
     bool active;
-    char *device_path;
-    int connector_id;
+    bool pflip_happening;
 
     int32_t device_w;
     int32_t device_h;
@@ -334,6 +338,13 @@ end:
     return ret;
 }
 
+static void modeset_page_flipped(int fd, unsigned int frame, unsigned int sec,
+                                 unsigned int usec, void *data)
+{
+    struct priv *p = data;
+    p->pflip_happening = false;
+}
+
 
 
 static int setup_vo_crtc(struct vo *vo)
@@ -350,7 +361,18 @@ static int setup_vo_crtc(struct vo *vo)
 static void release_vo_crtc(struct vo *vo)
 {
     struct priv *p = vo->priv;
+
     p->active = false;
+
+    // wait for current page flip
+    while (p->pflip_happening) {
+        int ret = drmHandleEvent(p->fd, &p->ev);
+        if (ret) {
+            MP_ERR(vo, "drmHandleEvent failed: %i\n", ret);
+            break;
+        }
+    }
+
     if (p->old_crtc) {
         drmModeSetCrtc(p->fd,
                        p->old_crtc->crtc_id,
@@ -487,15 +509,31 @@ static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
     if (!p->active) return;
+    if (p->pflip_happening) return;
 
-    int ret = drmModeSetCrtc(p->fd, p->dev->crtc,
-                             p->dev->bufs[p->dev->front_buf].fb,
-                             0, 0, &p->dev->conn, 1, &p->dev->mode);
+    int ret = drmModePageFlip(p->fd, p->dev->crtc,
+                              p->dev->bufs[p->dev->front_buf].fb,
+                              DRM_MODE_PAGE_FLIP_EVENT, p);
     if (ret) {
         MP_WARN(vo, "Cannot flip page for connector\n");
     } else {
         p->dev->front_buf++;
         p->dev->front_buf %= BUF_COUNT;
+        p->pflip_happening = true;
+    }
+
+    // poll page flip finish event
+    const int timeout_ms = 3000;
+    struct pollfd fds[1] = {
+        { .events = POLLIN, .fd = p->fd },
+    };
+    poll(fds, 1, timeout_ms);
+    if (fds[0].revents & POLLIN) {
+        ret = drmHandleEvent(p->fd, &p->ev);
+        if (ret != 0) {
+            MP_ERR(vo, "drmHandleEvent failed: %i\n", ret);
+            return;
+        }
     }
 }
 
@@ -523,6 +561,8 @@ static int preinit(struct vo *vo)
     struct priv *p = vo->priv;
     p->sws = mp_sws_alloc(vo);
     p->fd = -1;
+    p->ev.version = DRM_EVENT_CONTEXT_VERSION;
+    p->ev.page_flip_handler = modeset_page_flipped;
 
     if (vt_switcher_init(&p->vt_switcher, vo->log))
         goto err;
