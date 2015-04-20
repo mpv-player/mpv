@@ -20,6 +20,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <pthread.h>
+#include <limits.h>
 #include <assert.h>
 
 #include <VapourSynth.h>
@@ -407,6 +408,10 @@ static void VS_CC infiltInit(VSMap *in, VSMap *out, void **instanceData,
 {
     struct vf_instance *vf = *instanceData;
     struct vf_priv_s *p = vf->priv;
+    // The number of frames of our input node is obviously unknown. The user
+    // could for example seek any time, randomly "ending" the clip.
+    // This specific value was suggested by the VapourSynth developer.
+    int enough_for_everyone = INT_MAX / 16;
 
     // Note: this is called from createFilter, so no need for locking.
 
@@ -414,6 +419,7 @@ static void VS_CC infiltInit(VSMap *in, VSMap *out, void **instanceData,
         .format = p->vsapi->getFormatPreset(mp_to_vs(p->fmt_in.imgfmt), p->vscore),
         .width = p->fmt_in.w,
         .height = p->fmt_in.h,
+        .numFrames = enough_for_everyone,
     };
     if (!fmt.format) {
         p->vsapi->setError(out, "Unsupported input format.\n");
