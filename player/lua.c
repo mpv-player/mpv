@@ -860,6 +860,9 @@ static void pushnode(lua_State *L, mpv_node *node)
             lua_rawset(L, -3);
         }
         break;
+    case MPV_FORMAT_BYTE_ARRAY:
+        lua_pushlstring(L, node->u.ba->data, node->u.ba->size);
+        break;
     default:
         // unknown value - what do we do?
         // for now, set a unique dummy value
