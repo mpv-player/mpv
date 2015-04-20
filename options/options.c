@@ -512,7 +512,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("initial-audio-sync", initial_audio_sync, 0),
     OPT_CHOICE("hr-seek", hr_seek, 0,
                ({"no", -1}, {"absolute", 0}, {"yes", 1}, {"always", 1})),
-    OPT_FLOATRANGE("hr-seek-demuxer-offset", hr_seek_demuxer_offset, 0, -9, 99),
+    OPT_FLOAT("hr-seek-demuxer-offset", hr_seek_demuxer_offset, 0),
     OPT_FLAG("hr-seek-framedrop", hr_seek_framedrop, 0),
     OPT_CHOICE_OR_INT("autosync", autosync, 0, 0, 10000,
                       ({"no", -1})),
