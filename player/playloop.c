@@ -67,7 +67,7 @@ void mp_process_input(struct MPContext *mpctx)
         mp_cmd_t *cmd = mp_input_read_cmd(mpctx->input);
         if (!cmd)
             break;
-        run_command(mpctx, cmd);
+        run_command(mpctx, cmd, NULL);
         mp_cmd_free(cmd);
         mp_dispatch_queue_process(mpctx->dispatch, 0);
     }
