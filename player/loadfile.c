@@ -1018,6 +1018,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->last_chapter = -2;
     mpctx->paused = false;
     mpctx->paused_for_cache = false;
+    mpctx->cache_eof = false;
     mpctx->playing_msg_shown = false;
     mpctx->backstep_active = false;
     mpctx->max_frames = -1;
