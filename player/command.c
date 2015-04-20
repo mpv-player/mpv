@@ -4040,6 +4040,22 @@ static bool check_property_autorepeat(char *property,  struct MPContext *mpctx)
     return true;
 }
 
+static struct mpv_node *add_map_entry(struct mpv_node *dst, const char *key)
+{
+    struct mpv_node_list *list = dst->u.list;
+    assert(dst->format == MPV_FORMAT_NODE_MAP && dst->u.list);
+    MP_TARRAY_GROW(list, list->values, list->num);
+    MP_TARRAY_GROW(list, list->keys, list->num);
+    list->keys[list->num] = talloc_strdup(list, key);
+    return &list->values[list->num++];
+}
+
+#define ADD_MAP_INT(dst, name, i) (*add_map_entry(dst, name) = \
+    (struct mpv_node){ .format = MPV_FORMAT_INT64, .u.int64 = (i) });
+
+#define ADD_MAP_CSTR(dst, name, s) (*add_map_entry(dst, name) = \
+    (struct mpv_node){ .format = MPV_FORMAT_STRING, .u.string = (s) });
+
 int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *res)
 {
     struct command_ctx *cmdctx = mpctx->command_ctx;
@@ -4551,6 +4567,29 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     case MP_CMD_SCREENSHOT_TO_FILE:
         screenshot_to_file(mpctx, cmd->args[0].v.s, cmd->args[1].v.i, msg_osd);
         break;
+
+    case MP_CMD_SCREENSHOT_RAW: {
+        if (!res)
+            return -1;
+        struct mp_image *img = screenshot_get_rgb(mpctx, cmd->args[0].v.i);
+        if (!img)
+            return -1;
+        struct mpv_node_list *info = talloc_zero(NULL, struct mpv_node_list);
+        talloc_steal(info, img);
+        *res = (mpv_node){ .format = MPV_FORMAT_NODE_MAP, .u.list = info };
+        ADD_MAP_INT(res, "w", img->w);
+        ADD_MAP_INT(res, "h", img->h);
+        ADD_MAP_INT(res, "stride", img->stride[0]);
+        ADD_MAP_CSTR(res, "format", "bgr0");
+        struct mpv_byte_array *ba = talloc_ptrtype(info, ba);
+        *ba = (struct mpv_byte_array){
+            .data = img->planes[0],
+            .size = img->stride[0] * img->h,
+        };
+        *add_map_entry(res, "data") =
+            (struct mpv_node){.format = MPV_FORMAT_BYTE_ARRAY, .u.ba = ba,};
+        break;
+    }
 
     case MP_CMD_RUN: {
         char *args[MP_CMD_MAX_ARGS + 1] = {0};

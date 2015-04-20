@@ -357,6 +357,16 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
     return image;
 }
 
+struct mp_image *screenshot_get_rgb(struct MPContext *mpctx, int mode)
+{
+    struct mp_image *mpi = screenshot_get(mpctx, mode);
+    if (!mpi)
+        return NULL;
+    struct mp_image *res = convert_image(mpi, IMGFMT_BGR0, mpctx->log);
+    talloc_free(mpi);
+    return res;
+}
+
 void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
                         bool osd)
 {

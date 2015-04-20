@@ -39,6 +39,9 @@ void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
 void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
                         bool osd);
 
+// mode is the same as in screenshot_request()
+struct mp_image *screenshot_get_rgb(struct MPContext *mpctx, int mode);
+
 // Called by the playback core code when a new frame is displayed.
 void screenshot_flip(struct MPContext *mpctx);
 
