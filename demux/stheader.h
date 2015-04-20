@@ -82,7 +82,6 @@ typedef struct sh_video {
     bool avi_dts;         // use DTS timing; first frame and DTS is 0
     float fps;            // frames per second (set only if constant fps)
     float aspect;         // aspect ratio stored in the file (for prescaling)
-    int bitrate;          // compressed bits/sec
     int bits_per_coded_sample;
     unsigned char *extradata;
     int extradata_len;

@@ -1126,9 +1126,6 @@ Property list
 ``audio-codec``
     Audio codec selected for decoding.
 
-``audio-bitrate``
-    Audio bitrate. This is probably a very bad guess in most cases.
-
 ``audio-samplerate``
     Audio samplerate.
 
@@ -1224,9 +1221,6 @@ Property list
 
 ``video-codec``
     Video codec selected for decoding.
-
-``video-bitrate``
-    Video bitrate (a bad guess).
 
 ``width``, ``height``
     Video size. This uses the size of the video as decoded, or if no video
@@ -1637,7 +1631,7 @@ Property list
     whether the video window is visible. If the ``--force-window`` option is
     used, this is usually always returns ``yes``.
 
-``packet-video-bitrate``, ``packet-audio-bitrate``, ``packet-sub-bitrate``
+``video-bitrate``, ``audio-bitrate``, ``sub-bitrate``
     Bitrate values calculated on the packet level. This works by dividing the
     bit size of all packets between two keyframes by their presentation
     timestamp distance. (This uses the timestamps are stored in the file, so
@@ -1646,7 +1640,28 @@ Property list
     bitrate. To make the property more UI friendly, updates to these properties
     are throttled in a certain way.
 
+    The unit is bits per second. OSD formatting turns these values in kilobits
+    (or megabits, if appropriate), which can be prevented by using the
+    raw property value, e.g. with ``${=video-bitrate}``.
+
+    Note that the accuracy of these properties is influenced by a few factors.
+    If the underlying demuxer rewrites the packets on demuxing (done for some
+    file formats), the bitrate might be slightly off. If timestamps are bad
+    or jittery (like in Matroska), even constant bitrate streams might show
+    fluctuating bitrate.
+
     How exactly these values are calculated might change in the future.
+
+    In earlier versions of mpv, these properties returned a static (but bad)
+    guess using a completely different method.
+
+``packet-video-bitrate``, ``packet-audio-bitrate``, ``packet-sub-bitrate``
+    Old and deprecated properties for ``video-bitrate``, ``audio-bitrate``,
+    ``sub-bitrate``. They behave exactly the same, but return a value in
+    kilobits. Also, they don't have any OSD formatting, though the same can be
+    achieved with e.g. ``${=video-bitrate}``.
+
+    These properties shouldn't be used anymore.
 
 ``audio-device-list``
     Return the list of discovered audio devices. This is mostly for use with

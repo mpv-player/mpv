@@ -545,10 +545,6 @@ static void handle_stream(demuxer_t *demuxer, int i)
             sh_video->aspect = codec->width  * codec->sample_aspect_ratio.num
                     / (float)(codec->height * codec->sample_aspect_ratio.den);
 
-        sh_video->bitrate = codec->bit_rate;
-        if (sh_video->bitrate == 0)
-            sh_video->bitrate = avfc->bit_rate;
-
         uint8_t *sd = av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX, NULL);
         if (sd)
             sh_video->rotate = -av_display_rotation_get((uint32_t *)sd);

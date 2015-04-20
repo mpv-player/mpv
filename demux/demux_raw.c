@@ -226,7 +226,6 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
     sh_video->fps = opts->fps;
     sh_video->disp_w = width;
     sh_video->disp_h = height;
-    sh_video->bitrate = sh_video->fps * imgsize * 8;
 
     struct priv *p = talloc_ptrtype(demuxer, p);
     demuxer->priv = p;

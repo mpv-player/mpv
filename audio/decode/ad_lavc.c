@@ -144,9 +144,6 @@ static int init(struct dec_audio *da, const char *decoder)
         return 0;
     }
 
-    if (lavc_context->bit_rate != 0)
-        da->bitrate = lavc_context->bit_rate;
-
     return 1;
 }
 

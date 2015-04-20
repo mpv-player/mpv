@@ -216,14 +216,6 @@ static void mark_seek(struct MPContext *mpctx)
     cmd->last_seek_time = now;
 }
 
-static char *format_bitrate(int rate)
-{
-    if (rate < 1024 * 1024)
-        return talloc_asprintf(NULL, "%.3f kbps", rate / 1000.0);
-
-    return talloc_asprintf(NULL, "%.3f mbps", rate / 1000000.0);
-}
-
 static char *format_file_size(int64_t size)
 {
     double s = size;
@@ -1644,20 +1636,6 @@ static int mp_property_audio_codec(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, c);
 }
 
-/// Audio bitrate (RO)
-static int mp_property_audio_bitrate(void *ctx, struct m_property *prop,
-                                     int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (!mpctx->d_audio)
-        return M_PROPERTY_UNAVAILABLE;
-    if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = format_bitrate(mpctx->d_audio->bitrate);
-        return M_PROPERTY_OK;
-    }
-    return m_property_int_ro(action, arg, mpctx->d_audio->bitrate);
-}
-
 /// Samplerate (RO)
 static int mp_property_samplerate(void *ctx, struct m_property *prop,
                                   int action, void *arg)
@@ -2335,21 +2313,6 @@ static int mp_property_video_codec(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     const char *c = mpctx->d_video ? mpctx->d_video->decoder_desc : NULL;
     return m_property_strdup_ro(action, arg, c);
-}
-
-
-/// Video bitrate (RO)
-static int mp_property_video_bitrate(void *ctx, struct m_property *prop,
-                                     int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (!mpctx->d_video)
-        return M_PROPERTY_UNAVAILABLE;
-    if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = format_bitrate(mpctx->d_video->bitrate);
-        return M_PROPERTY_OK;
-    }
-    return m_property_int_ro(action, arg, mpctx->d_video->bitrate);
 }
 
 static int property_imgparams(struct mp_image_params p, int action, void *arg)
@@ -3030,7 +2993,8 @@ static int mp_property_packet_bitrate(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    int type = (intptr_t)prop->priv;
+    int type = (uintptr_t)prop->priv & ~0x100;
+    bool old = (uintptr_t)prop->priv & 0x100;
 
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
@@ -3039,8 +3003,23 @@ static int mp_property_packet_bitrate(void *ctx, struct m_property *prop,
     if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_BITRATE_STATS, &r) < 1)
         return M_PROPERTY_UNAVAILABLE;
 
-    // r[type] is in bytes/second -> kilobits
-    return m_property_int64_ro(action, arg, r[type] * 8 / 1000.0 + 0.5);
+    // r[type] is in bytes/second -> bits
+    double rate = r[type] * 8;
+
+    // Same story, but used kilobits for some reason.
+    if (old)
+        return m_property_int64_ro(action, arg, rate / 1000.0 + 0.5);
+
+    if (action == M_PROPERTY_PRINT) {
+        rate /= 1000;
+        if (rate < 1000) {
+            *(char **)arg = talloc_asprintf(NULL, "%d kbps", (int)rate);
+        } else {
+            *(char **)arg = talloc_asprintf(NULL, "%.3f mbps", rate / 1000.0);
+        }
+        return M_PROPERTY_OK;
+    }
+    return m_property_int64_ro(action, arg, rate);
 }
 
 static int mp_property_cwd(void *ctx, struct m_property *prop,
@@ -3317,7 +3296,6 @@ static const struct m_property mp_properties[] = {
     {"audio-delay", mp_property_audio_delay},
     {"audio-format", mp_property_audio_format},
     {"audio-codec", mp_property_audio_codec},
-    {"audio-bitrate", mp_property_audio_bitrate},
     {"audio-samplerate", mp_property_samplerate},
     {"audio-channels", mp_property_channels},
     {"aid", mp_property_audio},
@@ -3352,7 +3330,6 @@ static const struct m_property mp_properties[] = {
     {"video-params", mp_property_vd_imgparams},
     {"video-format", mp_property_video_format},
     {"video-codec", mp_property_video_codec},
-    {"video-bitrate", mp_property_video_bitrate},
     M_PROPERTY_ALIAS("dwidth", "video-out-params/dw"),
     M_PROPERTY_ALIAS("dheight", "video-out-params/dh"),
     M_PROPERTY_ALIAS("width", "video-params/w"),
@@ -3399,11 +3376,15 @@ static const struct m_property mp_properties[] = {
     {"ab-loop-a", mp_property_ab_loop},
     {"ab-loop-b", mp_property_ab_loop},
 
-#define PROPERTY_BITRATE(name, type) \
-    {name, mp_property_packet_bitrate, (void *)(intptr_t)type}
-    PROPERTY_BITRATE("packet-video-bitrate", STREAM_VIDEO),
-    PROPERTY_BITRATE("packet-audio-bitrate", STREAM_AUDIO),
-    PROPERTY_BITRATE("packet-sub-bitrate", STREAM_SUB),
+#define PROPERTY_BITRATE(name, old, type) \
+    {name, mp_property_packet_bitrate, (void *)(uintptr_t)((type)|(old?0x100:0))}
+    PROPERTY_BITRATE("packet-video-bitrate", true, STREAM_VIDEO),
+    PROPERTY_BITRATE("packet-audio-bitrate", true, STREAM_AUDIO),
+    PROPERTY_BITRATE("packet-sub-bitrate", true, STREAM_SUB),
+
+    PROPERTY_BITRATE("video-bitrate", false, STREAM_VIDEO),
+    PROPERTY_BITRATE("audio-bitrate", false, STREAM_AUDIO),
+    PROPERTY_BITRATE("sub-bitrate", false, STREAM_SUB),
 
 #define PROPERTY_TV_COLOR(name, type) \
     {name, mp_property_tv_color, (void *)(intptr_t)type}
