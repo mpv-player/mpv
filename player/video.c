@@ -76,15 +76,6 @@ static const char av_desync_help_text[] =
 "  with --no-video, --no-audio, or --no-sub.\n"
 "If none of this helps you, file a bug report.\n\n";
 
-void update_fps(struct MPContext *mpctx)
-{
-#if HAVE_ENCODING
-    struct dec_video *d_video = mpctx->d_video;
-    if (mpctx->encode_lavc_ctx && d_video)
-        encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, d_video->fps);
-#endif
-}
-
 static void set_allowed_vo_formats(struct vf_chain *c, struct vo *vo)
 {
     vo_query_formats(vo, c->allowed_output_formats);
@@ -303,7 +294,11 @@ int reinit_video_chain(struct MPContext *mpctx)
         MP_INFO(mpctx, "FPS forced to %5.3f.\n", d_video->fps);
         MP_INFO(mpctx, "Use --no-correct-pts to force FPS based timing.\n");
     }
-    update_fps(mpctx);
+
+#if HAVE_ENCODING
+    if (mpctx->encode_lavc_ctx && d_video)
+        encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, d_video->fps);
+#endif
 
     vo_control(mpctx->video_out, VOCTRL_GET_HWDEC_INFO, &d_video->hwdec_info);
 
@@ -770,8 +765,6 @@ void write_video(struct MPContext *mpctx, double endpts)
 
     if (mpctx->paused && mpctx->video_status >= STATUS_READY)
         return;
-
-    update_fps(mpctx);
 
     int r = video_output_image(mpctx, endpts);
     MP_TRACE(mpctx, "video_output_image: %d\n", r);
