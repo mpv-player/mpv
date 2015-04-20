@@ -350,6 +350,7 @@ static void modeset_page_flipped(int fd, unsigned int frame, unsigned int sec,
 static int setup_vo_crtc(struct vo *vo)
 {
     struct priv *p = vo->priv;
+    if (p->active) return;
     p->old_crtc = drmModeGetCrtc(p->fd, p->dev->crtc);
     int ret = drmModeSetCrtc(p->fd, p->dev->crtc,
                           p->dev->bufs[p->dev->front_buf + BUF_COUNT - 1].fb,
@@ -362,6 +363,7 @@ static void release_vo_crtc(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
+    if (!p->active) return;
     p->active = false;
 
     // wait for current page flip
@@ -383,6 +385,7 @@ static void release_vo_crtc(struct vo *vo)
                        1,
                        &p->dev->mode);
         drmModeFreeCrtc(p->old_crtc);
+        p->old_crtc = NULL;
     }
 }
 
