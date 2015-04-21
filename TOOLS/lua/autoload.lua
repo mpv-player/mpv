@@ -24,6 +24,7 @@ function find_and_add_entries()
     if #dir == 0 then
         return
     end
+
     local files = mputils.readdir(dir, "files")
     if files == nil then
         return
@@ -31,9 +32,11 @@ function find_and_add_entries()
     table.sort(files, function (a, b)
         return string.lower(a) < string.lower(b)
     end)
+
     if dir == "." then
         dir = ""
     end
+
     local pl = mp.get_property_native("playlist", {})
     local pl_current = mp.get_property_number("playlist-pos", 0) + 1
     -- Find the current pl entry (dir+"/"+filename) in the sorted dir list
@@ -47,6 +50,7 @@ function find_and_add_entries()
     if current == nil then
         return
     end
+
     local append = {[-1] = {}, [1] = {}}
     for direction = -1, 1, 2 do -- 2 iterations, with direction = -1 and +1
         for i = 1, MAXENTRIES do
@@ -55,6 +59,7 @@ function find_and_add_entries()
             if file == nil or file[1] == "." then
                 break
             end
+
             local filepath = dir .. file
             if pl_e then
                 -- If there's a playlist entry, and it's the same file, stop.
@@ -62,6 +67,7 @@ function find_and_add_entries()
                     break
                 end
             end
+
             if direction == -1 then
                 if pl_current == 1 then -- never add additional entries in the middle
                     mp.msg.info("Prepending " .. file)
@@ -73,6 +79,7 @@ function find_and_add_entries()
             end
         end
     end
+
     add_files_at(pl_current + 1, append[1])
     add_files_at(pl_current, append[-1])
 end
