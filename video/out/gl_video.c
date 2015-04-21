@@ -1235,8 +1235,8 @@ static void pass_sample_riftdk2(struct gl_video *p, struct scaler *scaler)
     
     // check for being outside of the boundaries
     // outcommented code was expected to help, but does not help
-    GLSL(if(/*floor(r) == floor(gnRadius) && */newx >= startx &&
-               newx <= stopx /*&& newy >= 0.0*/ && newy <= 1.0)
+    GLSL(if(/*floor(r) == floor(gnRadius) && newx >= startx &&
+               newx <= stopx && newy >= 0.0 && */ newy <= 1.0)
            outside = false;)
 
     GLSL(vec4 p = texture(tex, pos);)
@@ -1250,8 +1250,10 @@ static void pass_sample_riftdk2(struct gl_video *p, struct scaler *scaler)
     
     // debugging: set different colors to see what the single checks do
     GLSL(if(floor(f_r) == floor(gnRadius/maxr)) p = vec4(1.0);)
-    GLSL(if(newx < startx || newx > stopx) p = vec4(1.0, 0.0, 0.0, 1.0);)
-    GLSL(if(/*newy < 0.0 ||*/ newy > 1.0) p = vec4(0.0, 1.0, 0.0, 1.0);)
+    GLSL(if(newx < startx) p = vec4(1.0, 0.0, 1.0, 0.0);)
+    GLSL(if(newx > stopx) p = vec4(1.0, 0.0, 0.0, 1.0);)
+    GLSL(if(newy < 0.0) p = vec4(0.0, 1.0, 1.0, 0.0);)
+    GLSL(if(newy > 1.0) p = vec4(0.0, 1.0, 0.0, 1.0);)
     // end of debugging code
     
     GLSLF("color = p;\n");
