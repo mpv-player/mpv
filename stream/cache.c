@@ -18,7 +18,7 @@
 // Time in seconds the main thread waits for the cache thread. On wakeups, the
 // code checks for user requested aborts and also prints warnings that the
 // cache is being slow.
-#define CACHE_WAIT_TIME 0.5
+#define CACHE_WAIT_TIME 1.0
 
 // The time the cache sleeps in idle mode. This controls how often the cache
 // retries reading from the stream after EOF has reached (in case the stream is
@@ -31,9 +31,6 @@
 // will block the cache from doing this, and this timeout is honored only if
 // the cache is active.
 #define CACHE_UPDATE_CONTROLS_TIME 2.0
-
-// Time in seconds the cache prints a new message at all.
-#define CACHE_NO_SPAM 5.0
 
 
 #include <stdio.h>
@@ -81,7 +78,6 @@ struct priv {
 
     // Owned by the main thread
     stream_t *cache;        // wrapper stream, used by demuxer etc.
-    double last_warn_time;
 
     // Owned by the cache thread
     stream_t *stream;       // "real" stream, used to read from the source media
@@ -138,22 +134,16 @@ static int cache_wakeup_and_wait(struct priv *s, double *retry_time)
         return CACHE_INTERRUPTED;
 
     double start = mp_time_sec();
-
-    if (!s->last_warn_time || start - s->last_warn_time >= CACHE_NO_SPAM) {
-        // Print a "more severe" warning after waiting 1 second and no new data
-        if ((*retry_time) >= 1.0) {
-            MP_ERR(s, "Cache keeps not responding.\n");
-            s->last_warn_time = start;
-        } else if (*retry_time > 0.1) {
-            MP_WARN(s, "Cache is not responding - slow/stuck network connection?\n");
-            s->last_warn_time = start;
-        }
+    if (*retry_time >= CACHE_WAIT_TIME) {
+        MP_WARN(s, "Cache is not responding - slow/stuck network connection?\n");
+        *retry_time = -1; // do not warn again for this call
     }
 
     pthread_cond_signal(&s->wakeup);
     mpthread_cond_timedwait_rel(&s->wakeup, &s->mutex, CACHE_WAIT_TIME);
 
-    *retry_time += mp_time_sec() - start;
+    if (*retry_time >= 0)
+        *retry_time += mp_time_sec() - start;
 
     return 0;
 }
