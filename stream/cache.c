@@ -208,6 +208,9 @@ static bool cache_fill(struct priv *s)
             goto done;
     }
 
+    if (mp_cancel_test(s->cache->cancel))
+        goto done;
+
     // number of buffer bytes which should be preserved in backwards direction
     int64_t back = MPCLAMP(read - s->min_filepos, 0, s->back_size);
 
