@@ -7,6 +7,17 @@
 -- Add at most 5 * 2 files when starting a file (before + after).
 MAXENTRIES = 5
 
+function Set (t)
+    local set = {}
+    for _, v in pairs(t) do set[v] = true end
+    return set
+end
+
+EXTENSIONS = Set {
+    'mkv', 'avi', 'mp4', 'ogv', 'webm', 'rmvb', 'flv', 'wmv', 'mpeg', 'mpg', 'm4v', '3gp',
+    'mp3', 'wav', 'ogv', 'flac', 'm4a', 'wma',
+}
+
 mputils = require 'mp.utils'
 
 function add_files_at(index, files)
@@ -15,6 +26,18 @@ function add_files_at(index, files)
     for i = 1, #files do
         mp.commandv("loadfile", files[i], "append")
         mp.commandv("playlist_move", oldcount + i - 1, index + i - 1)
+    end
+end
+
+function get_extension(path)
+    return string.match(path, "%.([^%.]+)$" )
+end
+
+table.filter = function(t, iter)
+    for i = #t, 1, -1 do
+        if not iter(t[i]) then
+            table.remove(t, i)
+        end
     end
 end
 
@@ -29,6 +52,13 @@ function find_and_add_entries()
     if files == nil then
         return
     end
+    table.filter(files, function (v, k)
+        local ext = get_extension(v)
+        if ext == nil then
+            return false
+        end
+        return EXTENSIONS[string.lower(ext)]
+    end)
     table.sort(files, function (a, b)
         return string.lower(a) < string.lower(b)
     end)
