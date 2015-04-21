@@ -114,8 +114,6 @@ struct priv {
 };
 
 enum {
-    CACHE_INTERRUPTED = -1,
-
     CACHE_CTRL_NONE = 0,
     CACHE_CTRL_QUIT = -1,
     CACHE_CTRL_PING = -2,
@@ -127,12 +125,8 @@ enum {
 // Used by the main thread to wakeup the cache thread, and to wait for the
 // cache thread. The cache mutex has to be locked when calling this function.
 // *retry_time should be set to 0 on the first call.
-// Returns CACHE_INTERRUPTED if the caller is supposed to abort.
-static int cache_wakeup_and_wait(struct priv *s, double *retry_time)
+static void cache_wakeup_and_wait(struct priv *s, double *retry_time)
 {
-    if (mp_cancel_test(s->cache->cancel))
-        return CACHE_INTERRUPTED;
-
     double start = mp_time_sec();
     if (*retry_time >= CACHE_WAIT_TIME) {
         MP_WARN(s, "Cache is not responding - slow/stuck network connection?\n");
@@ -144,8 +138,6 @@ static int cache_wakeup_and_wait(struct priv *s, double *retry_time)
 
     if (*retry_time >= 0)
         *retry_time += mp_time_sec() - start;
-
-    return 0;
 }
 
 // Runs in the cache thread
@@ -501,8 +493,9 @@ static int cache_fill_buffer(struct stream *cache, char *buffer, int max_len)
             if (s->eof && s->read_filepos >= s->max_filepos && s->reads >= retry)
                 break;
             s->idle = false;
-            if (cache_wakeup_and_wait(s, &retry_time) == CACHE_INTERRUPTED)
+            if (mp_cancel_test(s->cache->cancel))
                 break;
+            cache_wakeup_and_wait(s, &retry_time);
         }
     }
 
@@ -560,11 +553,12 @@ static int cache_control(stream_t *cache, int cmd, void *arg)
     s->control_arg = arg;
     double retry = 0;
     while (s->control != CACHE_CTRL_NONE) {
-        if (cache_wakeup_and_wait(s, &retry) == CACHE_INTERRUPTED) {
+        if (mp_cancel_test(s->cache->cancel)) {
             s->eof = 1;
             r = STREAM_UNSUPPORTED;
             goto done;
         }
+        cache_wakeup_and_wait(s, &retry);
     }
     r = s->control_res;
     if (s->control_flush) {
