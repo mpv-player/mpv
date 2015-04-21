@@ -72,16 +72,14 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
     // So we "divert" normal options into a separate section, and the diverted
     // section is never used - unless maybe it's explicitly referenced from an
     // encoding profile.
-    if (encoding)
+    if (encoding) {
         section = "playback-default";
 
-    // The #if is a stupid hack to avoid errors if libavfilter is not available.
-#if HAVE_LIBAVFILTER && HAVE_ENCODING
-    char *cf = mp_find_config_file(NULL, mpctx->global, "encoding-profiles.conf");
-    if (cf)
-        m_config_parse_config_file(mpctx->mconfig, cf, SECT_ENCODE, 0);
-    talloc_free(cf);
-#endif
+        char *cf = mp_find_config_file(NULL, mpctx->global, "encoding-profiles.conf");
+        if (cf)
+            m_config_parse_config_file(mpctx->mconfig, cf, SECT_ENCODE, 0);
+        talloc_free(cf);
+    }
 
     load_all_cfgfiles(mpctx, section, "mpv.conf|config");
 
