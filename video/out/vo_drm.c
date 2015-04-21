@@ -350,7 +350,8 @@ static void modeset_page_flipped(int fd, unsigned int frame, unsigned int sec,
 static int setup_vo_crtc(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    if (p->active) return;
+    if (p->active)
+        return;
     p->old_crtc = drmModeGetCrtc(p->fd, p->dev->crtc);
     int ret = drmModeSetCrtc(p->fd, p->dev->crtc,
                           p->dev->bufs[p->dev->front_buf + BUF_COUNT - 1].fb,
@@ -363,7 +364,8 @@ static void release_vo_crtc(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    if (!p->active) return;
+    if (!p->active)
+        return;
     p->active = false;
 
     // wait for current page flip
@@ -511,8 +513,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    if (!p->active) return;
-    if (p->pflip_happening) return;
+    if (!p->active || p->pflip_happening)
+        return;
 
     int ret = drmModePageFlip(p->fd, p->dev->crtc,
                               p->dev->bufs[p->dev->front_buf].fb,

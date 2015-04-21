@@ -119,14 +119,12 @@ void vt_switcher_poll(struct vt_switcher *s, int timeout_ms)
         { .events = POLLIN, .fd = vt_switcher_pipe[0] },
     };
     poll(fds, 1, timeout_ms);
-    if (!fds[0].revents) {
+    if (!fds[0].revents)
         return;
-    }
 
     unsigned char event;
-    if (read(fds[0].fd, &event, sizeof(event)) != sizeof(event)) {
+    if (read(fds[0].fd, &event, sizeof(event)) != sizeof(event))
         return;
-    }
 
     switch (event) {
     case EVT_RELEASE:
