@@ -351,7 +351,7 @@ static int setup_vo_crtc(struct vo *vo)
 {
     struct priv *p = vo->priv;
     if (p->active)
-        return;
+        return 0;
     p->old_crtc = drmModeGetCrtc(p->fd, p->dev->crtc);
     int ret = drmModeSetCrtc(p->fd, p->dev->crtc,
                           p->dev->bufs[p->dev->front_buf + BUF_COUNT - 1].fb,
