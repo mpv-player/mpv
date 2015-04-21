@@ -1396,7 +1396,8 @@ static int mp_property_demuxer_cache_time(void *ctx, struct m_property *prop,
 
     double ts = s.ts_range[1];
     if (ts == MP_NOPTS_VALUE)
-        ts = get_current_time(mpctx);
+        return M_PROPERTY_UNAVAILABLE;
+
     return m_property_double_ro(action, arg, ts);
 }
 
@@ -3467,7 +3468,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_TICK, "time-pos", "stream-pos", "stream-time-pos", "avsync",
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
-      "total-avsync-change", "demuxer-cache-time"),
+      "total-avsync-change"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",
