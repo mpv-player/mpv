@@ -327,7 +327,7 @@ bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
     if (fp == NULL) {
         mp_err(log, "Error opening '%s' for writing!\n", filename);
     } else {
-        success = writer->write(&ctx, image, fp);
+        success = writer->write(&ctx, dst, fp);
         success = !fclose(fp) && success;
         if (!success)
             mp_err(log, "Error writing file '%s'!\n", filename);
