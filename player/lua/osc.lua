@@ -266,11 +266,13 @@ end
 -- get the currently selected track of <type>, OSC-style counted
 function get_track(type)
     local track = mp.get_property(type)
-    if (track == "no" or track == nil) then
-        return 0
-    else
-        return tracks_mpv[type][tonumber(track)].osc_id
+    if track ~= "no" and track ~= nil then
+        local tr = tracks_mpv[type][tonumber(track)]
+        if tr then
+            return tr.osc_id
+        end
     end
+    return 0
 end
 
 
