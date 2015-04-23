@@ -61,8 +61,6 @@ struct mp_log_root {
     int num_buffers;
     FILE *log_file;
     FILE *stats_file;
-    // --- semi-atomic access
-    bool mute;
     // --- must be accessed atomically
     /* This is incremented every time the msglevels must be reloaded.
      * (This is perhaps better than maintaining a globally accessible and
@@ -133,7 +131,7 @@ static void update_loglevel(struct mp_log *log)
 bool mp_msg_test(struct mp_log *log, int lev)
 {
     struct mp_log_root *root = log->root;
-    if (!root || root->mute)
+    if (!root)
         return false;
     if (atomic_load_explicit(&log->reload_counter, memory_order_relaxed) !=
         atomic_load_explicit(&root->reload_counter, memory_order_relaxed))
@@ -484,13 +482,6 @@ void mp_msg_update_msglevels(struct mpv_global *global)
 
     atomic_fetch_add(&root->reload_counter, 1);
     pthread_mutex_unlock(&mp_msg_lock);
-}
-
-void mp_msg_mute(struct mpv_global *global, bool mute)
-{
-    struct mp_log_root *root = global->log->root;
-
-    root->mute = mute;
 }
 
 void mp_msg_force_stderr(struct mpv_global *global, bool force_stderr)

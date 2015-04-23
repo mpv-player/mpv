@@ -285,9 +285,6 @@ void m_config_preparse_command_line(m_config_t *config, struct mpv_global *globa
 {
     struct MPOpts *opts = global->opts;
 
-    // Hack to shut up parser error messages
-    mp_msg_mute(global, true);
-
     struct parse_state p = {config, argv};
     while (split_opt_silent(&p) == 0) {
         if (p.is_opt) {
@@ -299,8 +296,6 @@ void m_config_preparse_command_line(m_config_t *config, struct mpv_global *globa
                 opts->verbose++;
         }
     }
-
-    mp_msg_mute(global, false);
 
     for (int n = 0; n < config->num_opts; n++)
         config->opts[n].warning_was_printed = false;
