@@ -168,10 +168,10 @@ static void copy_mp_to_vs_frame_props_map(struct vf_priv_s *p, VSMap *map,
     }
     if (pict_type)
         p->vsapi->propSetData(map, "_PictType", &pict_type, 1, 0);
-    p->vsapi->propSetInt(map, "_FieldBased",
-            !!(img->fields & MP_IMGFIELD_INTERLACED), 0);
-    p->vsapi->propSetInt(map, "_Field",
-            !!(img->fields & MP_IMGFIELD_TOP_FIRST), 0);
+    int field = 0;
+    if (img->fields & MP_IMGFIELD_INTERLACED)
+        field = img->fields & MP_IMGFIELD_TOP_FIRST ? 2 : 1;
+    p->vsapi->propSetInt(map, "_FieldBased", field, 0);
 }
 
 static int set_vs_frame_props(struct vf_priv_s *p, VSFrameRef *frame,
