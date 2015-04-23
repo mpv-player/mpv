@@ -1524,6 +1524,13 @@ Property list
     ``track-list/N/selected``
         ``yes`` if the track is currently decoded, ``no`` otherwise.
 
+    ``track-list/N/ff-index``
+        The stream index as usually used by the FFmpeg utilities. Note that
+        this can be potentially wrong if a demuxer other than libavformat
+        (``--demuxer=lavf``) is used. For mkv files, the index will usually
+        match even if the default (builtin) demuxer is used, but there is
+        no hard guarantee.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
