@@ -2116,13 +2116,13 @@ Demuxer
     Fix rounded Matroska timestamps (enabled by default). Matroska usually
     stores timestamps rounded to milliseconds. This means timestamps jitter
     by some amount around the intended timestamp. mpv can correct the timestamps
-    based on the framerate value stored in the file: if the timestamps does
-    not deviate more than 1 frame (as implied by the framerate), the timestamp
-    is rounded to the next frame, which should undo the rounding the muxer
-    did.
+    based on the framerate value stored in the file: the timestamp is rounded
+    to the next frame (according to the framerate), unless the new timestamp
+    would deviate more than 1ms from the old one. This should undo the rounding
+    done by the muxer.
 
-    This can break playback if the framerate value stored in the file is too
-    high.
+    (The allowed deviation can be less than 1ms if the file uses a non-standard
+    timecode scale.)
 
 ``--demuxer-rawaudio-channels=<value>``
     Number of channels (or channel layout) if ``--demuxer=rawaudio`` is used

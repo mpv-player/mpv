@@ -2336,7 +2336,7 @@ static double fix_timestamp(demuxer_t *demuxer, mkv_track_t *track, double ts)
     mkv_demuxer_t *mkv_d = demuxer->priv;
     if (demuxer->opts->demux_mkv->fix_timestamps && track->default_duration > 0) {
         // Assume that timestamps have been rounded to the timecode scale.
-        double quant = mkv_d->tc_scale / 1e9;
+        double quant = MPMIN(mkv_d->tc_scale / 1e9, 0.001);
         double rts = rint(ts / track->default_duration) * track->default_duration;
         if (fabs(rts - ts) < quant)
             ts = rts;
