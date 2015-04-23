@@ -2625,17 +2625,7 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
     struct mkv_demuxer *mkv_d = demuxer->priv;
     struct mkv_index *index = NULL;
 
-    /* Find the entry in the index closest to the target timecode in the
-     * give direction. If there are no such entries - we're trying to seek
-     * backward from a target time before the first entry or forward from a
-     * target time after the last entry - then still seek to the first/last
-     * entry if that's further in the direction wanted than mkv_d->last_pts.
-     */
-    int64_t min_diff = target_timecode - (int64_t)(mkv_d->last_pts * 1e9 + 0.5);
-    if (flags & SEEK_BACKWARD)
-        min_diff = -min_diff;
-    min_diff = FFMAX(min_diff, 1);
-
+    int64_t min_diff = INT64_MIN;
     for (size_t i = 0; i < mkv_d->num_indexes; i++) {
         if (seek_id < 0 || mkv_d->indexes[i].tnum == seek_id) {
             int64_t diff =
@@ -2643,11 +2633,13 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
                 (int64_t) (mkv_d->indexes[i].timecode * mkv_d->tc_scale);
             if (flags & SEEK_BACKWARD)
                 diff = -diff;
-            if (diff <= 0) {
-                if (min_diff <= 0 && diff <= min_diff)
+            if (min_diff != INT64_MIN) {
+                if (diff <= 0) {
+                    if (min_diff <= 0 && diff <= min_diff)
+                        continue;
+                } else if (diff >= min_diff)
                     continue;
-            } else if (diff >= min_diff)
-                continue;
+            }
             min_diff = diff;
             index = mkv_d->indexes + i;
         }
