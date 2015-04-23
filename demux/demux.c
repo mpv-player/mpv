@@ -499,7 +499,7 @@ static void start_refreshing(struct demux_internal *in)
 
     // Seek back to player's current position, with a small offset added.
     in->d_thread->desc->seek(in->d_thread, start_ts - 1.0,
-                             SEEK_ABSOLUTE | SEEK_BACKWARD | SEEK_SUBPREROLL);
+                             SEEK_ABSOLUTE | SEEK_BACKWARD | SEEK_HR);
 
     pthread_mutex_lock(&in->lock);
 }

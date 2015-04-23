@@ -199,9 +199,6 @@ typedef struct MPOpts {
     double demuxer_min_secs;
     char *audio_demuxer_name;
     char *sub_demuxer_name;
-    int mkv_subtitle_preroll;
-    double mkv_subtitle_preroll_secs;
-    int mkv_probe_duration;
 
     double demuxer_min_secs_cache;
     int cache_pausing;
@@ -294,6 +291,7 @@ typedef struct MPOpts {
     struct demux_rawaudio_opts *demux_rawaudio;
     struct demux_rawvideo_opts *demux_rawvideo;
     struct demux_lavf_opts *demux_lavf;
+    struct demux_mkv_opts *demux_mkv;
 
     struct vd_lavc_params *vd_lavc_params;
     struct ad_lavc_params *ad_lavc_params;

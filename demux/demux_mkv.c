@@ -43,6 +43,7 @@
 #include "talloc.h"
 #include "common/av_common.h"
 #include "options/options.h"
+#include "options/m_option.h"
 #include "misc/bstr.h"
 #include "stream/stream.h"
 #include "video/csputils.h"
@@ -183,6 +184,27 @@ typedef struct mkv_demuxer {
 
     bool eof_warning;
 } mkv_demuxer_t;
+
+#define OPT_BASE_STRUCT struct demux_mkv_opts
+struct demux_mkv_opts {
+    int subtitle_preroll;
+    double subtitle_preroll_secs;
+    int probe_duration;
+};
+
+const struct m_sub_options demux_mkv_conf = {
+    .opts = (const m_option_t[]) {
+        OPT_FLAG("subtitle-preroll", subtitle_preroll, 0),
+        OPT_DOUBLE("subtitle-preroll-secs", subtitle_preroll_secs,
+                   M_OPT_MIN, .min = 0),
+        OPT_FLAG("probe-video-duration", probe_duration, 0),
+        {0}
+    },
+    .size = sizeof(struct demux_mkv_opts),
+    .defaults = &(const struct demux_mkv_opts){
+        .subtitle_preroll_secs = 1.0,
+    },
+};
 
 #define REALHEADER_SIZE    16
 #define RVPROPERTIES_SIZE  34
@@ -1751,6 +1773,7 @@ static int read_mkv_segment_header(demuxer_t *demuxer, int64_t *segment_end)
 static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
 {
     stream_t *s = demuxer->stream;
+    struct MPOpts *opts = demuxer->opts;
     mkv_demuxer_t *mkv_d;
     int64_t start_pos;
     int64_t end_pos;
@@ -1836,7 +1859,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     add_coverart(demuxer);
     demuxer->allow_refresh_seeks = true;
 
-    if (demuxer->opts->mkv_probe_duration)
+    if (opts->demux_mkv->probe_duration)
         probe_last_timestamp(demuxer);
 
     return 0;
@@ -2619,9 +2642,12 @@ static int create_index_until(struct demuxer *demuxer, uint64_t timecode)
     return 0;
 }
 
+#define FLAG_BACKWARD 1
+#define FLAG_SUBPREROLL 2
 static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
                                         int64_t target_timecode, int flags)
 {
+    struct MPOpts *opts = demuxer->opts;
     struct mkv_demuxer *mkv_d = demuxer->priv;
     struct mkv_index *index = NULL;
 
@@ -2631,7 +2657,7 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
             int64_t diff =
                 target_timecode -
                 (int64_t) (mkv_d->indexes[i].timecode * mkv_d->tc_scale);
-            if (flags & SEEK_BACKWARD)
+            if (flags & FLAG_BACKWARD)
                 diff = -diff;
             if (min_diff != INT64_MIN) {
                 if (diff <= 0) {
@@ -2647,10 +2673,10 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
 
     if (index) {        /* We've found an entry. */
         uint64_t seek_pos = index->filepos;
-        if (flags & SEEK_SUBPREROLL) {
+        if (flags & FLAG_SUBPREROLL) {
             // Find the cluster with the highest filepos, that has a timestamp
             // still lower than min_tc.
-            double secs = demuxer->opts->mkv_subtitle_preroll_secs;
+            double secs = opts->demux_mkv->subtitle_preroll_secs;
             uint64_t pre = MPMIN(INT64_MAX, secs * 1e9 / mkv_d->tc_scale);
             uint64_t min_tc = pre < index->timecode ? index->timecode - pre : 0;
             uint64_t prev_target = 0;
@@ -2709,9 +2735,13 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
                 a_tnum = track->tnum;
         }
     }
+
+    int cueflags = (flags & SEEK_BACKWARD) ? FLAG_BACKWARD : 0;
+
     mkv_d->subtitle_preroll = NUM_SUB_PREROLL_PACKETS;
-    if (!st_active[STREAM_SUB] || !st_active[STREAM_VIDEO])
-        flags &= ~SEEK_SUBPREROLL;
+    if (((flags & SEEK_HR) || demuxer->opts->demux_mkv->subtitle_preroll) &&
+        st_active[STREAM_SUB] && st_active[STREAM_VIDEO])
+        cueflags |= FLAG_SUBPREROLL;
 
     // Adjust the target a little bit to catch cases where the target position
     // specifies a keyframe with high, but not perfect, precision.
@@ -2727,9 +2757,9 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
 
         if (create_index_until(demuxer, target_timecode) >= 0) {
             int seek_id = st_active[STREAM_VIDEO] ? v_tnum : a_tnum;
-            index = seek_with_cues(demuxer, seek_id, target_timecode, flags);
+            index = seek_with_cues(demuxer, seek_id, target_timecode, cueflags);
             if (!index)
-                index = seek_with_cues(demuxer, -1, target_timecode, flags);
+                index = seek_with_cues(demuxer, -1, target_timecode, cueflags);
         }
 
         if (!index)

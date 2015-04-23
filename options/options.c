@@ -67,6 +67,7 @@ extern const struct m_sub_options sws_conf;
 extern const struct m_sub_options demux_rawaudio_conf;
 extern const struct m_sub_options demux_rawvideo_conf;
 extern const struct m_sub_options demux_lavf_conf;
+extern const struct m_sub_options demux_mkv_conf;
 extern const struct m_sub_options vd_lavc_conf;
 extern const struct m_sub_options ad_lavc_conf;
 extern const struct m_sub_options input_config;
@@ -311,11 +312,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("demuxer-lavf", demux_lavf, demux_lavf_conf, 0),
     OPT_SUBSTRUCT("demuxer-rawaudio", demux_rawaudio, demux_rawaudio_conf, 0),
     OPT_SUBSTRUCT("demuxer-rawvideo", demux_rawvideo, demux_rawvideo_conf, 0),
-
-    OPT_FLAG("demuxer-mkv-subtitle-preroll", mkv_subtitle_preroll, 0),
-    OPT_DOUBLE("demuxer-mkv-subtitle-preroll-secs", mkv_subtitle_preroll_secs,
-               M_OPT_MIN, .min = 0),
-    OPT_FLAG("demuxer-mkv-probe-video-duration", mkv_probe_duration, 0),
+    OPT_SUBSTRUCT("demuxer-mkv", demux_mkv, demux_mkv_conf, 0),
 
 // ------------------------- subtitles options --------------------
 
@@ -764,7 +761,6 @@ const struct MPOpts mp_default_opts = {
     .use_embedded_fonts = 1,
     .sub_fix_timing = 1,
     .sub_cp = "auto",
-    .mkv_subtitle_preroll_secs = 1.0,
     .screenshot_template = "shot%n",
 
     .hwdec_codecs = "h264,vc1,wmv3",

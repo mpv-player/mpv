@@ -240,8 +240,6 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     }
     if (hr_seek)
         demuxer_style |= SEEK_HR;
-    if (hr_seek || opts->mkv_subtitle_preroll)
-        demuxer_style |= SEEK_SUBPREROLL;
 
     if (hr_seek)
         demuxer_amount -= hr_seek_offset;
