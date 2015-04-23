@@ -24,6 +24,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include <math.h>
 #include <assert.h>
 
 #include <libavutil/common.h>
@@ -190,6 +191,7 @@ struct demux_mkv_opts {
     int subtitle_preroll;
     double subtitle_preroll_secs;
     int probe_duration;
+    int fix_timestamps;
 };
 
 const struct m_sub_options demux_mkv_conf = {
@@ -198,11 +200,13 @@ const struct m_sub_options demux_mkv_conf = {
         OPT_DOUBLE("subtitle-preroll-secs", subtitle_preroll_secs,
                    M_OPT_MIN, .min = 0),
         OPT_FLAG("probe-video-duration", probe_duration, 0),
+        OPT_FLAG("fix-timestamps", fix_timestamps, 0),
         {0}
     },
     .size = sizeof(struct demux_mkv_opts),
     .defaults = &(const struct demux_mkv_opts){
         .subtitle_preroll_secs = 1.0,
+        .fix_timestamps = 1,
     },
 };
 
@@ -2327,6 +2331,19 @@ exit:
     return res;
 }
 
+static double fix_timestamp(demuxer_t *demuxer, mkv_track_t *track, double ts)
+{
+    mkv_demuxer_t *mkv_d = demuxer->priv;
+    if (demuxer->opts->demux_mkv->fix_timestamps && track->default_duration > 0) {
+        // Assume that timestamps have been rounded to the timecode scale.
+        double quant = mkv_d->tc_scale / 1e9;
+        double rts = rint(ts / track->default_duration) * track->default_duration;
+        if (fabs(rts - ts) < quant)
+            ts = rts;
+    }
+    return ts;
+}
+
 static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
@@ -2349,7 +2366,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
         return 0;
     }
 
-    current_pts = tc / 1e9 - track->codec_delay;
+    current_pts = fix_timestamp(demuxer, track, tc / 1e9) - track->codec_delay;
 
     if (track->type == MATROSKA_TRACK_AUDIO) {
         if (mkv_d->a_skip_to_keyframe)
