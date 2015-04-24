@@ -377,7 +377,7 @@ static int decode_image(struct MPContext *mpctx)
     if (d_video->header->attached_picture) {
         d_video->waiting_decoded_mpi =
                     video_decode(d_video, d_video->header->attached_picture, 0);
-        return VD_EOF;
+        return d_video->waiting_decoded_mpi ? VD_EOF : VD_PROGRESS;
     }
 
     struct demux_packet *pkt;
