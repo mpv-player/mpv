@@ -400,6 +400,7 @@ const m_option_t mp_opts[] = {
     OPT_SIZE_BOX("autofit", vo.autofit, 0),
     OPT_SIZE_BOX("autofit-larger", vo.autofit_larger, 0),
     OPT_SIZE_BOX("autofit-smaller", vo.autofit_smaller, 0),
+    OPT_FLOATRANGE("window-scale", vo.window_scale, 0, 0.001, 100),
     OPT_FLAG("force-window-position", vo.force_window_position, 0),
     // vo name (X classname) and window title strings
     OPT_STRING("x11-name", vo.winname, 0),
@@ -662,6 +663,7 @@ const struct MPOpts mp_default_opts = {
         .keepaspect_window = 1,
         .border = 1,
         .WinID = -1,
+        .window_scale = 1.0,
     },
     .allow_win_drag = 1,
     .wintitle = "mpv - ${?media-title:${media-title}}${!media-title:No file.}",

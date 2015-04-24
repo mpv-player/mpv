@@ -1724,6 +1724,14 @@ Window
             (depending on the video aspect ratio, the width or height will be
             larger than 500 in order to keep the aspect ratio the same).
 
+``--window-scale=<factor>``
+    Resize the video window to a multiple (or fraction) of the video size. This
+    option is applied before ``--autofit`` and other options are applied (so
+    they override this option).
+
+    For example, ``--window-scale=0.5`` would show the window at half the
+    video size.
+
 ``--autosync=<factor>``
     Gradually adjusts the A/V sync based on audio delay measurements.
     Specifying ``--autosync=0``, the default, will cause frame timing to be

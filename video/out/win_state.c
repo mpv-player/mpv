@@ -90,6 +90,8 @@ void vo_calc_window_geometry(struct vo *vo, const struct mp_rect *screen,
     int d_h = params.d_h;
     if ((vo->driver->caps & VO_CAP_ROTATE90) && params.rotate % 180 == 90)
         MPSWAP(int, d_w, d_h);
+    d_w = MPCLAMP(d_w * opts->window_scale, 1, 16000);
+    d_h = MPCLAMP(d_h * opts->window_scale, 1, 16000);
 
     int scr_w = screen->x1 - screen->x0;
     int scr_h = screen->y1 - screen->y0;
