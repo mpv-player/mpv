@@ -1732,20 +1732,6 @@ Window
     For example, ``--window-scale=0.5`` would show the window at half the
     video size.
 
-``--autosync=<factor>``
-    Gradually adjusts the A/V sync based on audio delay measurements.
-    Specifying ``--autosync=0``, the default, will cause frame timing to be
-    based entirely on audio delay measurements. Specifying ``--autosync=1``
-    will do the same, but will subtly change the A/V correction algorithm. An
-    uneven video framerate in a video which plays fine with ``--no-audio`` can
-    often be helped by setting this to an integer value greater than 1. The
-    higher the value, the closer the timing will be to ``--no-audio``. Try
-    ``--autosync=30`` to smooth out problems with sound drivers which do not
-    implement a perfect audio delay measurement. With this value, if large A/V
-    sync offsets occur, they will only take about 1 or 2 seconds to settle
-    out. This delay in reaction time to sudden A/V offsets should be the only
-    side-effect of turning this option on, for all sound drivers.
-
 ``--cursor-autohide=<number|no|always>``
     Make mouse cursor automatically hide after given number of milliseconds.
     ``no`` will disable cursor autohide. ``always`` means the cursor will stay
@@ -3257,6 +3243,20 @@ Miscellaneous
 
 ``--mc=<seconds/frame>``
     Maximum A-V sync correction per frame (in seconds)
+
+``--autosync=<factor>``
+    Gradually adjusts the A/V sync based on audio delay measurements.
+    Specifying ``--autosync=0``, the default, will cause frame timing to be
+    based entirely on audio delay measurements. Specifying ``--autosync=1``
+    will do the same, but will subtly change the A/V correction algorithm. An
+    uneven video framerate in a video which plays fine with ``--no-audio`` can
+    often be helped by setting this to an integer value greater than 1. The
+    higher the value, the closer the timing will be to ``--no-audio``. Try
+    ``--autosync=30`` to smooth out problems with sound drivers which do not
+    implement a perfect audio delay measurement. With this value, if large A/V
+    sync offsets occur, they will only take about 1 or 2 seconds to settle
+    out. This delay in reaction time to sudden A/V offsets should be the only
+    side-effect of turning this option on, for all sound drivers.
 
 ``--mf-fps=<value>``
     Framerate used when decoding from multiple PNG or JPEG files with ``mf://``
