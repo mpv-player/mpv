@@ -266,11 +266,13 @@ end
 -- get the currently selected track of <type>, OSC-style counted
 function get_track(type)
     local track = mp.get_property(type)
-    if (track == "no" or track == nil) then
-        return 0
-    else
-        return tracks_mpv[type][tonumber(track)].osc_id
+    if track ~= "no" and track ~= nil then
+        local tr = tracks_mpv[type][tonumber(track)]
+        if tr then
+            return tr.osc_id
+        end
     end
+    return 0
 end
 
 
@@ -446,7 +448,7 @@ function render_elements(master_ass)
         style_ass:append(string.format("{\\1a&H%X&\\2a&H%X&\\3a&H%X&\\4a&H%X&}",
             ar[1], ar[2], ar[3], ar[4]))
 
-        if (state.active_element == n) then
+        if element.eventresponder and (state.active_element == n) then
 
             -- run render event functions
             if not (element.eventresponder.render == nil) then

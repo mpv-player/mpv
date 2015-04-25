@@ -67,7 +67,6 @@ struct demux_ctrl_stream_ctrl {
 #define SEEK_FACTOR   (1 << 1)      // argument is in range [0,1]
 #define SEEK_FORWARD  (1 << 2)      // prefer later time if not exact
 #define SEEK_BACKWARD (1 << 3)      // prefer earlier time if not exact
-#define SEEK_SUBPREROLL (1 << 4)    // try to get more subtitle packets
 #define SEEK_HR       (1 << 5)      // hr-seek (this is a weak hint only)
 
 // Strictness of the demuxer open format check.

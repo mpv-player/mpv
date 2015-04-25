@@ -21,11 +21,12 @@
 struct MPContext;
 struct mp_cmd;
 struct mp_log;
+struct mpv_node;
 
 void command_init(struct MPContext *mpctx);
 void command_uninit(struct MPContext *mpctx);
 
-int run_command(struct MPContext *mpctx, struct mp_cmd *cmd);
+int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *res);
 char *mp_property_expand_string(struct MPContext *mpctx, const char *str);
 char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str);
 void property_print_help(struct mp_log *log);

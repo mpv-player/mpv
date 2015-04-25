@@ -24,6 +24,7 @@
 #ifndef MPV_CLIENT_API_H_
 #define MPV_CLIENT_API_H_
 
+#include <stddef.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -632,7 +633,13 @@ typedef enum mpv_format {
     /**
      * See MPV_FORMAT_NODE_ARRAY.
      */
-    MPV_FORMAT_NODE_MAP         = 8
+    MPV_FORMAT_NODE_MAP         = 8,
+    /**
+     * A raw, untyped byte array. Only used only with mpv_node, and only in
+     * some very special situations. (Currently, only for the screenshot_raw
+     * command.)
+     */
+    MPV_FORMAT_BYTE_ARRAY       = 9
 } mpv_format;
 
 /**
@@ -654,6 +661,10 @@ typedef struct mpv_node {
          *    or if format==MPV_FORMAT_NODE_MAP
          */
         struct mpv_node_list *list;
+        /**
+         * valid if format==MPV_FORMAT_BYTE_ARRAY
+         */
+        struct mpv_byte_array *ba;
     } u;
     /**
      * Type of the data stored in this struct. This value rules what members in
@@ -666,6 +677,7 @@ typedef struct mpv_node {
      *  MPV_FORMAT_DOUBLE       (u.double_)
      *  MPV_FORMAT_NODE_ARRAY   (u.list)
      *  MPV_FORMAT_NODE_MAP     (u.list)
+     *  MPV_FORMAT_BYTE_ARRAY   (u.ba)
      *  MPV_FORMAT_NONE         (no member)
      *
      * If you encounter a value you don't know, you must not make any
@@ -705,6 +717,21 @@ typedef struct mpv_node_list {
      */
     char **keys;
 } mpv_node_list;
+
+/**
+ * (see mpv_node)
+ */
+typedef struct mpv_byte_array {
+    /**
+     * Pointer to the data. In what format the data is stored is up to whatever
+     * uses MPV_FORMAT_BYTE_ARRAY.
+     */
+    void *data;
+    /**
+     * Size of the data pointed to by ptr.
+     */
+    size_t size;
+} mpv_byte_array;
 
 /**
  * Frees any data referenced by the node. It doesn't free the node itself.

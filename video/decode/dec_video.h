@@ -71,7 +71,6 @@ struct dec_video {
     // Final PTS of previously decoded image
     double decoded_pts;
 
-    int bitrate;          // compressed bits/sec
     float fps;            // FPS from demuxer or from user override
     float initial_decoder_aspect;
 

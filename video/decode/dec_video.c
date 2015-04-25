@@ -385,13 +385,6 @@ int video_reconfig_filters(struct dec_video *d_video,
     struct mp_image_params p = *params;
     struct sh_video *sh = d_video->header->video;
 
-    MP_VERBOSE(d_video, "VIDEO:  %dx%d  %5.3f fps  %5.1f kbps (%4.1f kB/s)\n",
-               p.w, p.h, sh->fps, sh->bitrate / 1000.0,
-               sh->bitrate / 8000.0);
-
-    MP_VERBOSE(d_video, "VDec: vo config request - %d x %d (%s)\n",
-               p.w, p.h, vo_format_name(p.imgfmt));
-
     float decoder_aspect = p.d_w / (float)p.d_h;
     if (d_video->initial_decoder_aspect == 0)
         d_video->initial_decoder_aspect = decoder_aspect;
@@ -413,10 +406,6 @@ int video_reconfig_filters(struct dec_video *d_video,
 
     // Detect colorspace from resolution.
     mp_image_params_guess_csp(&p);
-
-    // Time to config libvo!
-    MP_VERBOSE(d_video, "VO Config (%dx%d->%dx%d,0x%X)\n",
-               p.w, p.h, p.d_w, p.d_h, p.imgfmt);
 
     if (vf_reconfig(d_video->vfilter, params, &p) < 0) {
         MP_FATAL(d_video, "Cannot initialize video filters.\n");

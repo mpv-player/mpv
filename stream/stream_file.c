@@ -155,12 +155,11 @@ char *mp_file_get_path(void *talloc_ctx, bstr url)
 }
 
 #if HAVE_BSD_FSTATFS
-static bool check_stream_network(stream_t *stream)
+static bool check_stream_network(int fd)
 {
     struct statfs fs;
     const char *stypes[] = { "afpfs", "nfs", "smbfs", "webdav", NULL };
-    struct priv *priv = stream->priv;
-    if (fstatfs(priv->fd, &fs) == 0)
+    if (fstatfs(fd, &fs) == 0)
         for (int i=0; stypes[i]; i++)
             if (strcmp(stypes[i], fs.f_fstypename) == 0)
                 return true;
@@ -168,7 +167,7 @@ static bool check_stream_network(stream_t *stream)
 
 }
 #elif HAVE_LINUX_FSTATFS
-static bool check_stream_network(stream_t *stream)
+static bool check_stream_network(int fd)
 {
     struct statfs fs;
     const uint32_t stypes[] = {
@@ -181,8 +180,7 @@ static bool check_stream_network(stream_t *stream)
         0xBEEFDEAD  /*SNFS*/,   0xBACBACBC  /*VMHGFS*/, 0x7461636f  /*OCFS2*/,
         0
     };
-    struct priv *priv = stream->priv;
-    if (fstatfs(priv->fd, &fs) == 0) {
+    if (fstatfs(fd, &fs) == 0) {
         for (int i=0; stypes[i]; i++) {
             if (stypes[i] == fs.f_type)
                 return true;
@@ -192,7 +190,7 @@ static bool check_stream_network(stream_t *stream)
 
 }
 #elif defined(_WIN32)
-static bool check_stream_network(stream_t *stream)
+static bool check_stream_network(int fd)
 {
     NTSTATUS (NTAPI *pNtQueryVolumeInformationFile)(HANDLE,
         PIO_STATUS_BLOCK, PVOID, ULONG, FS_INFORMATION_CLASS) = NULL;
@@ -208,8 +206,7 @@ static bool check_stream_network(stream_t *stream)
     if (!pNtQueryVolumeInformationFile)
         return false;
 
-    struct priv *priv = stream->priv;
-    HANDLE h = (HANDLE)_get_osfhandle(priv->fd);
+    HANDLE h = (HANDLE)_get_osfhandle(fd);
     if (h == INVALID_HANDLE_VALUE)
         return false;
 
@@ -224,7 +221,7 @@ static bool check_stream_network(stream_t *stream)
            (info.Characteristics & FILE_REMOTE_DEVICE);
 }
 #else
-static bool check_stream_network(stream_t *stream)
+static bool check_stream_network(int fd)
 {
     return false;
 }
@@ -238,6 +235,7 @@ static int open_f(stream_t *stream)
         .fd = -1
     };
     stream->priv = priv;
+    stream->type = STREAMTYPE_FILE;
 
     bool write = stream->mode == STREAM_WRITE;
     int m = O_CLOEXEC | (write ? O_RDWR | O_CREAT | O_TRUNC : O_RDONLY);
@@ -278,9 +276,9 @@ static int open_f(stream_t *stream)
         struct stat st;
         if (fstat(fd, &st) == 0) {
             if (S_ISDIR(st.st_mode)) {
-                MP_ERR(stream, "File is a directory: '%s'\n", filename);
-                close(fd);
-                return STREAM_ERROR;
+                stream->type = STREAMTYPE_DIR;
+                stream->allow_caching = false;
+                MP_INFO(stream, "This is a directory - adding to playlist.\n");
             }
 #ifndef __MINGW32__
             if (S_ISREG(st.st_mode)) {
@@ -302,7 +300,6 @@ static int open_f(stream_t *stream)
         stream->seekable = true;
     }
 
-    stream->type = STREAMTYPE_FILE;
     stream->fast_skip = true;
     stream->fill_buffer = fill_buffer;
     stream->write_buffer = write_buffer;
@@ -310,7 +307,7 @@ static int open_f(stream_t *stream)
     stream->read_chunk = 64 * 1024;
     stream->close = s_close;
 
-    if (check_stream_network(stream))
+    if (check_stream_network(fd))
         stream->streaming = true;
 
     return STREAM_OK;

@@ -181,6 +181,7 @@ Playback Control
                file, such as a chapter seek, but not for relative seeks like
                the default behavior of arrow keys (default).
     :yes:      Use precise seeks whenever possible.
+    :always:   Same as ``yes`` (for compatibility).
 
 ``--hr-seek-demuxer-offset=<seconds>``
     This option exists to work around failures to do precise seeks (as in
@@ -566,8 +567,7 @@ Video
 
     The ``vaapi-copy`` mode allows you to use vaapi with any VO. Because
     this copies the decoded video back to system RAM, it's likely less efficient
-    than the ``vaapi`` mode. But there are reports that this is actually faster
-    as well, and avoids many issues with ``vaapi``.
+    than the ``vaapi`` mode.
 
     .. note::
 
@@ -983,8 +983,9 @@ Audio
 
 ``--audio-display=<no|attachment>``
     Setting this option to ``attachment`` (default) will display image
-    attachments when playing audio files. It will display the first image
-    found, and additional images are available as video tracks.
+    attachments (e.g. album cover art) when playing audio files. It will
+    display the first image found, and additional images are available as
+    video tracks.
 
     Setting this option to ``no`` disables display of video entirely when
     playing audio files.
@@ -1723,19 +1724,13 @@ Window
             (depending on the video aspect ratio, the width or height will be
             larger than 500 in order to keep the aspect ratio the same).
 
-``--autosync=<factor>``
-    Gradually adjusts the A/V sync based on audio delay measurements.
-    Specifying ``--autosync=0``, the default, will cause frame timing to be
-    based entirely on audio delay measurements. Specifying ``--autosync=1``
-    will do the same, but will subtly change the A/V correction algorithm. An
-    uneven video framerate in a video which plays fine with ``--no-audio`` can
-    often be helped by setting this to an integer value greater than 1. The
-    higher the value, the closer the timing will be to ``--no-audio``. Try
-    ``--autosync=30`` to smooth out problems with sound drivers which do not
-    implement a perfect audio delay measurement. With this value, if large A/V
-    sync offsets occur, they will only take about 1 or 2 seconds to settle
-    out. This delay in reaction time to sudden A/V offsets should be the only
-    side-effect of turning this option on, for all sound drivers.
+``--window-scale=<factor>``
+    Resize the video window to a multiple (or fraction) of the video size. This
+    option is applied before ``--autofit`` and other options are applied (so
+    they override this option).
+
+    For example, ``--window-scale=0.5`` would show the window at half the
+    video size.
 
 ``--cursor-autohide=<number|no|always>``
     Make mouse cursor automatically hide after given number of milliseconds.
@@ -2021,6 +2016,12 @@ Demuxer
 ``--demuxer-lavf-format=<name>``
     Force a specific libavformat demuxer.
 
+``--demuxer-lavf-hacks=<yes|no>``
+    By default, some formats will be handled differently from other formats
+    by explicitly checking for them. Most of these compensate for weird or
+    imperfect behavior from libavformat demuxers. Passing ``no`` disables
+    these. For debugging and testing only.
+
 ``--demuxer-lavf-genpts-mode=<no|lavf>``
     Mode for deriving missing packet PTS values from packet DTS. ``lavf``
     enables libavformat's ``genpts`` option. ``no`` disables it. This used
@@ -2104,6 +2105,18 @@ Demuxer
     for compatibility with Haali only. In this mode, it's possible that opening
     will be slower (especially when playing over http), or that behavior with
     broken files is much worse. So don't use this option.
+
+``--demuxer-mkv-fix-timestamps=<yes|no>``
+    Fix rounded Matroska timestamps (enabled by default). Matroska usually
+    stores timestamps rounded to milliseconds. This means timestamps jitter
+    by some amount around the intended timestamp. mpv can correct the timestamps
+    based on the framerate value stored in the file: the timestamp is rounded
+    to the next frame (according to the framerate), unless the new timestamp
+    would deviate more than 1ms from the old one. This should undo the rounding
+    done by the muxer.
+
+    (The allowed deviation can be less than 1ms if the file uses a non-standard
+    timecode scale.)
 
 ``--demuxer-rawaudio-channels=<value>``
     Number of channels (or channel layout) if ``--demuxer=rawaudio`` is used
@@ -3230,6 +3243,20 @@ Miscellaneous
 
 ``--mc=<seconds/frame>``
     Maximum A-V sync correction per frame (in seconds)
+
+``--autosync=<factor>``
+    Gradually adjusts the A/V sync based on audio delay measurements.
+    Specifying ``--autosync=0``, the default, will cause frame timing to be
+    based entirely on audio delay measurements. Specifying ``--autosync=1``
+    will do the same, but will subtly change the A/V correction algorithm. An
+    uneven video framerate in a video which plays fine with ``--no-audio`` can
+    often be helped by setting this to an integer value greater than 1. The
+    higher the value, the closer the timing will be to ``--no-audio``. Try
+    ``--autosync=30`` to smooth out problems with sound drivers which do not
+    implement a perfect audio delay measurement. With this value, if large A/V
+    sync offsets occur, they will only take about 1 or 2 seconds to settle
+    out. This delay in reaction time to sudden A/V offsets should be the only
+    side-effect of turning this option on, for all sound drivers.
 
 ``--mf-fps=<value>``
     Framerate used when decoding from multiple PNG or JPEG files with ``mf://``

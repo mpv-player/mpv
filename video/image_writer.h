@@ -48,8 +48,14 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts);
  *       accordingly. Setting w and width or h and height to different values
  *       can be used to store snapshots of anamorphic video.
  */
-int write_image(struct mp_image *image, const struct image_writer_opts *opts,
-                const char *filename, struct mp_log *log);
+bool write_image(struct mp_image *image, const struct image_writer_opts *opts,
+                 const char *filename, struct mp_log *log);
+
+/* Return the image converted to the given format. If the pixel aspect ratio is
+ * not 1:1, the image is scaled as well. Returns NULL on failure.
+ */
+struct mp_image *convert_image(struct mp_image *image, int destfmt,
+                               struct mp_log *log);
 
 // Debugging helper.
 void dump_png(struct mp_image *image, const char *filename, struct mp_log *log);

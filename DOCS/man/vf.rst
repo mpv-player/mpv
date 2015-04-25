@@ -561,12 +561,6 @@ Available filters are:
     ``show``
         Draw a rectangle showing the area defined by x/y/w/h.
 
-``screenshot``
-    Optional filter for screenshot support. This is only needed if the video
-    output does not provide working direct screenshot support. Note that it is
-    not always safe to insert this filter by default. See `TAKING SCREENSHOTS`_
-    for details.
-
 ``sub=[=bottom-margin:top-margin]``
     Moves subtitle rendering to an arbitrary point in the filter chain, or force
     subtitle rendering in the video filter as opposed to using video output OSD

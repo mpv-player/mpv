@@ -65,6 +65,7 @@ struct demux_lavf_opts {
     char *format;
     char *cryptokey;
     char **avopts;
+    int hacks;
     int genptsmode;
 };
 
@@ -78,6 +79,7 @@ const struct m_sub_options demux_lavf_conf = {
         OPT_FLAG("allow-mimetype", allow_mimetype, 0),
         OPT_INTRANGE("probescore", probescore, 0, 1, AVPROBE_SCORE_MAX),
         OPT_STRING("cryptokey", cryptokey, 0),
+        OPT_FLAG("hacks", hacks, 0),
         OPT_CHOICE("genpts-mode", genptsmode, 0,
                    ({"lavf", 1}, {"no", 0})),
         OPT_KEYVALUELIST("o", avopts, 0),
@@ -86,6 +88,7 @@ const struct m_sub_options demux_lavf_conf = {
     .size = sizeof(struct demux_lavf_opts),
     .defaults = &(const struct demux_lavf_opts){
         .allow_mimetype = 1,
+        .hacks = 1,
         // AVPROBE_SCORE_MAX/4 + 1 is the "recommended" limit. Below that, the
         // user is supposed to retry with larger probe sizes until a higher
         // value is reached.
@@ -351,6 +354,8 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 
             for (int n = 0; format_hacks[n].ff_name; n++) {
                 const struct format_hack *entry = &format_hacks[n];
+                if (!lavfdopts->hacks)
+                    continue;
                 if (!matches_avinputformat_name(priv, entry->ff_name))
                     continue;
                 if (entry->mime_type && strcasecmp(entry->mime_type, mime_type) != 0)
@@ -539,10 +544,6 @@ static void handle_stream(demuxer_t *demuxer, int i)
         else
             sh_video->aspect = codec->width  * codec->sample_aspect_ratio.num
                     / (float)(codec->height * codec->sample_aspect_ratio.den);
-
-        sh_video->bitrate = codec->bit_rate;
-        if (sh_video->bitrate == 0)
-            sh_video->bitrate = avfc->bit_rate;
 
         uint8_t *sd = av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX, NULL);
         if (sd)

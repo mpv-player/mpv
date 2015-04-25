@@ -63,18 +63,12 @@ static int config(struct vf_instance *vf,
     vf->priv->exp_y = vf->priv->cfg_exp_y;
     vf->priv->exp_w = vf->priv->cfg_exp_w;
     vf->priv->exp_h = vf->priv->cfg_exp_h;
-    // calculate the missing parameters:
-#if 0
-    if(vf->priv->exp_w<width) vf->priv->exp_w=width;
-    if(vf->priv->exp_h<height) vf->priv->exp_h=height;
-#else
     if ( vf->priv->exp_w == -1 ) vf->priv->exp_w=width;
       else if (vf->priv->exp_w < -1 ) vf->priv->exp_w=width - vf->priv->exp_w;
         else if ( vf->priv->exp_w<width ) vf->priv->exp_w=width;
     if ( vf->priv->exp_h == -1 ) vf->priv->exp_h=height;
       else if ( vf->priv->exp_h < -1 ) vf->priv->exp_h=height - vf->priv->exp_h;
         else if( vf->priv->exp_h<height ) vf->priv->exp_h=height;
-#endif
     if (vf->priv->aspect) {
         float adjusted_aspect = vf->priv->aspect;
         adjusted_aspect *= ((double)width/height) / ((double)d_width/d_height);
@@ -149,13 +143,6 @@ static int vf_open(vf_instance_t *vf){
     vf->config=config;
     vf->query_format=query_format;
     vf->filter=filter;
-    MP_INFO(vf, "Expand: %d x %d, %d ; %d, aspect: %f, round: %d\n",
-    vf->priv->cfg_exp_w,
-    vf->priv->cfg_exp_h,
-    vf->priv->cfg_exp_x,
-    vf->priv->cfg_exp_y,
-    vf->priv->aspect,
-    vf->priv->round);
     return 1;
 }
 

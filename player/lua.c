@@ -860,6 +860,9 @@ static void pushnode(lua_State *L, mpv_node *node)
             lua_rawset(L, -3);
         }
         break;
+    case MPV_FORMAT_BYTE_ARRAY:
+        lua_pushlstring(L, node->u.ba->data, node->u.ba->size);
+        break;
     default:
         // unknown value - what do we do?
         // for now, set a unique dummy value
@@ -1252,6 +1255,23 @@ static int script_parse_json(lua_State *L)
     return 3;
 }
 
+static int script_format_json(lua_State *L)
+{
+    void *tmp = mp_lua_PITA(L);
+    struct mpv_node node;
+    makenode(tmp, &node, L, 1);
+    char *dst = talloc_strdup(tmp, "");
+    if (json_write(&dst, &node) >= 0) {
+        lua_pushstring(L, dst);
+        lua_pushnil(L);
+    } else {
+        lua_pushnil(L);
+        lua_pushstring(L, "error");
+    }
+    talloc_free_children(tmp);
+    return 2;
+}
+
 #define FN_ENTRY(name) {#name, script_ ## name}
 struct fn_entry {
     const char *name;
@@ -1300,6 +1320,7 @@ static const struct fn_entry utils_fns[] = {
     FN_ENTRY(join_path),
     FN_ENTRY(subprocess),
     FN_ENTRY(parse_json),
+    FN_ENTRY(format_json),
     {0}
 };
 

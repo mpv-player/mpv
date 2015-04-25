@@ -107,8 +107,10 @@ Available audio output drivers are:
         ``--audio-device`` to select the device (use ``--audio-device=help``
         to get a list of all devices and their mpv name).
 
-        You can also try
-        `Using the upmix plugin <https://github.com/mpv-player/mpv/wiki/ALSA:-Surround-Sound-and-Upmixing>`_.
+        You can also try `using the upmix plugin <http://git.io/vfuAy>`_.
+        This setup enables multichannel audio on the ``default`` device
+        with automatic upmixing with shared access, so playing stereo
+        and multichannel audio at the same time will work as expected.
 
 ``oss``
     OSS audio output driver

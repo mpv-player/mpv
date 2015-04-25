@@ -256,6 +256,9 @@ static void copy_nv12_fallback(struct mp_image *dest, uint8_t *src_bits,
     mp_image_copy(dest, &buf);
 }
 
+#pragma GCC push_options
+#pragma GCC target("sse4.1")
+
 static void copy_nv12_gpu_sse4(struct mp_image *dest, uint8_t *src_bits,
                                unsigned src_pitch, unsigned surf_height)
 {
@@ -290,6 +293,8 @@ static void copy_nv12_gpu_sse4(struct mp_image *dest, uint8_t *src_bits,
         }
     }
 }
+
+#pragma GCC pop_options
 
 static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
                                              struct mp_image *img)

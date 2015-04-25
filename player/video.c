@@ -76,15 +76,6 @@ static const char av_desync_help_text[] =
 "  with --no-video, --no-audio, or --no-sub.\n"
 "If none of this helps you, file a bug report.\n\n";
 
-void update_fps(struct MPContext *mpctx)
-{
-#if HAVE_ENCODING
-    struct dec_video *d_video = mpctx->d_video;
-    if (mpctx->encode_lavc_ctx && d_video)
-        encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, d_video->fps);
-#endif
-}
-
 static void set_allowed_vo_formats(struct vf_chain *c, struct vo *vo)
 {
     vo_query_formats(vo, c->allowed_output_formats);
@@ -296,12 +287,18 @@ int reinit_video_chain(struct MPContext *mpctx)
     d_video->fps = sh->video->fps;
     d_video->vo = mpctx->video_out;
 
+    MP_VERBOSE(d_video, "Container reported FPS: %f\n", sh->video->fps);
+
     if (opts->force_fps) {
         d_video->fps = opts->force_fps;
         MP_INFO(mpctx, "FPS forced to %5.3f.\n", d_video->fps);
         MP_INFO(mpctx, "Use --no-correct-pts to force FPS based timing.\n");
     }
-    update_fps(mpctx);
+
+#if HAVE_ENCODING
+    if (mpctx->encode_lavc_ctx && d_video)
+        encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, d_video->fps);
+#endif
 
     vo_control(mpctx->video_out, VOCTRL_GET_HWDEC_INFO, &d_video->hwdec_info);
 
@@ -380,7 +377,7 @@ static int decode_image(struct MPContext *mpctx)
     if (d_video->header->attached_picture) {
         d_video->waiting_decoded_mpi =
                     video_decode(d_video, d_video->header->attached_picture, 0);
-        return VD_EOF;
+        return d_video->waiting_decoded_mpi ? VD_EOF : VD_PROGRESS;
     }
 
     struct demux_packet *pkt;
@@ -405,7 +402,8 @@ static int decode_image(struct MPContext *mpctx)
     talloc_free(pkt);
 
     if (had_packet && !d_video->waiting_decoded_mpi &&
-        mpctx->video_status == STATUS_PLAYING)
+        mpctx->video_status == STATUS_PLAYING &&
+        (mpctx->opts->frame_dropping & 2))
     {
         mpctx->dropped_frames_total++;
         mpctx->dropped_frames++;
@@ -726,9 +724,9 @@ static void update_avsync_after_frame(struct MPContext *mpctx)
     mpctx->last_av_difference = a_pos - mpctx->video_pts + opts->audio_delay;
     if (mpctx->time_frame > 0)
         mpctx->last_av_difference += mpctx->time_frame * opts->playback_speed;
-    if (a_pos == MP_NOPTS_VALUE || mpctx->video_pts == MP_NOPTS_VALUE)
+    if (a_pos == MP_NOPTS_VALUE || mpctx->video_pts == MP_NOPTS_VALUE) {
         mpctx->last_av_difference = MP_NOPTS_VALUE;
-    if (fabs(mpctx->last_av_difference) > 0.5 && !mpctx->drop_message_shown) {
+    } else if (fabs(mpctx->last_av_difference) > 0.5 && !mpctx->drop_message_shown) {
         MP_WARN(mpctx, "%s", av_desync_help_text);
         mpctx->drop_message_shown = true;
     }
@@ -768,8 +766,6 @@ void write_video(struct MPContext *mpctx, double endpts)
     if (mpctx->paused && mpctx->video_status >= STATUS_READY)
         return;
 
-    update_fps(mpctx);
-
     int r = video_output_image(mpctx, endpts);
     MP_TRACE(mpctx, "video_output_image: %d\n", r);
 
@@ -784,7 +780,7 @@ void write_video(struct MPContext *mpctx, double endpts)
             vo_still_displaying(vo) ? STATUS_DRAINING : STATUS_EOF;
         mpctx->delay = 0;
         mpctx->last_av_difference = 0;
-        MP_VERBOSE(mpctx, "video EOF (status=%d)\n", mpctx->video_status);
+        MP_DBG(mpctx, "video EOF (status=%d)\n", mpctx->video_status);
         return;
     }
 

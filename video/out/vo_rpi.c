@@ -26,6 +26,7 @@
 #include <interface/mmal/mmal.h>
 #include <interface/mmal/util/mmal_util.h>
 #include <interface/mmal/util/mmal_default_components.h>
+#include <interface/mmal/vc/mmal_vc_api.h>
 
 #include <libavutil/rational.h>
 
@@ -488,6 +489,8 @@ static void uninit(struct vo *vo)
 
     if (p->display)
         vc_dispmanx_display_close(p->display);
+
+    mmal_vc_deinit();
 }
 
 static int preinit(struct vo *vo)
@@ -499,6 +502,11 @@ static int preinit(struct vo *vo)
     p->osd_layer = p->layer + 2;
 
     bcm_host_init();
+
+    if (mmal_vc_init()) {
+        MP_FATAL(vo, "Could not initialize MMAL.\n");
+        return -1;
+    }
 
     p->display = vc_dispmanx_display_open(p->display_nr);
     p->update = vc_dispmanx_update_start(0);

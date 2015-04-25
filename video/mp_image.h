@@ -30,11 +30,8 @@
 
 #define MP_PALETTE_SIZE (256 * 4)
 
-#define MP_IMGFIELD_ORDERED 0x01
 #define MP_IMGFIELD_TOP_FIRST 0x02
 #define MP_IMGFIELD_REPEAT_FIRST 0x04
-#define MP_IMGFIELD_TOP 0x08
-#define MP_IMGFIELD_BOTTOM 0x10
 #define MP_IMGFIELD_INTERLACED 0x20
 
 // Describes image parameters that usually stay constant.

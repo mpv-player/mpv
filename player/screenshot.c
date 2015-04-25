@@ -32,7 +32,6 @@
 #include "options/path.h"
 #include "video/mp_image.h"
 #include "video/decode/dec_video.h"
-#include "video/filter/vf.h"
 #include "video/out/vo.h"
 #include "video/image_writer.h"
 #include "sub/osd.h"
@@ -330,11 +329,7 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
     if (mode == MODE_SUBTITLES && osd_get_render_subs_in_filter(mpctx->osd))
         mode = 0;
 
-    // vf_screenshot
-    if (mpctx->d_video && mpctx->d_video->vfilter)
-        vf_control_any(mpctx->d_video->vfilter, VFCTRL_SCREENSHOT, &image);
-
-    if (!image && mpctx->video_out && mpctx->video_out->config_ok) {
+    if (mpctx->video_out && mpctx->video_out->config_ok) {
         vo_wait_frame(mpctx->video_out); // important for each-frame mode
 
         if (mode != MODE_FULL_WINDOW)
@@ -362,6 +357,16 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
     return image;
 }
 
+struct mp_image *screenshot_get_rgb(struct MPContext *mpctx, int mode)
+{
+    struct mp_image *mpi = screenshot_get(mpctx, mode);
+    if (!mpi)
+        return NULL;
+    struct mp_image *res = convert_image(mpi, IMGFMT_BGR0, mpctx->log);
+    talloc_free(mpi);
+    return res;
+}
+
 void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
                         bool osd)
 {
@@ -370,11 +375,6 @@ void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
     bool old_osd = ctx->osd;
     ctx->osd = osd;
 
-    if (mp_path_exists(filename)) {
-        screenshot_msg(ctx, SMSG_ERR, "Screenshot: file '%s' already exists.",
-                       filename);
-        goto end;
-    }
     char *ext = mp_splitext(filename, NULL);
     if (ext)
         opts.format = ext;

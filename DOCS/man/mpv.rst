@@ -276,14 +276,16 @@ Shells may actually strip some quotes from the string passed to the commandline,
 so the example quotes the string twice, ensuring that mpv recieves the ``"``
 quotes.
 
-The ``[...]`` from of quotes wraps everything between ``[`` and ``]``. It's
+The ``[...]`` form of quotes wraps everything between ``[`` and ``]``. It's
 useful with shells that don't interpret these characters in the middle of
-an argument (like bash).
+an argument (like bash). These quotes are balanced (since mpv 0.9.0): the ``[``
+and ``]`` nest, and the quote terminates on the last ``]`` that has no matching
+``[`` within the string. (For example, ``[a[b]c]`` results in ``a[b]c``.)
 
-A special kind of string-escaping intended for use with external scripts and
-programs is started with ``%``.
+The fixed-length quoting syntax is intended for use with external
+scripts and programs.
 
-It has the following format::
+It is started with ``%`` and has the following format::
 
     %n%string_of_length_n
 
@@ -319,7 +321,8 @@ console controls. (Which makes it suitable for playing data piped to stdin.)
 
 For paths passed to suboptions, the situation is further complicated by the
 need to escape special characters. To work this around, the path can be
-additionally wrapped in the ``%n%string_of_length_n`` syntax (see above).
+additionally wrapped in the fixed-length syntax, e.g. ``%n%string_of_length_n``
+(see above).
 
 Some mpv options interpret paths starting with ``~``. Currently, the prefix
 ``~~/`` expands to the mpv configuration directory (usually ``~/.config/mpv/``).
@@ -397,10 +400,10 @@ Escaping spaces and special characters
 This is done like with command line options. The shell is not involved here,
 but option values still need to be quoted as a whole if it contains certain
 characters like spaces. A config entry can be quoted with ``"`` and ``'``,
-as well as with the ``%n%`` syntax mentioned before. This is like passing
-the exact contents of the quoted string as command line option. C-style escapes
-are currently _not_ interpreted on this level, although some options to this
-manually. (This is a mess and should probably be changed at some point.)
+as well as with the fixed-length syntax (``%n%``) mentioned before. This is like
+passing the exact contents of the quoted string as command line option. C-style
+escapes are currently _not_ interpreted on this level, although some options to
+this manually. (This is a mess and should probably be changed at some point.)
 
 Putting Command Line Options into the Configuration File
 --------------------------------------------------------
@@ -475,11 +478,8 @@ A screenshot will usually contain the unscaled video contents at the end of the
 video filter chain and subtitles. By default, ``S`` takes screenshots without
 subtitles, while ``s`` includes subtitles.
 
-The ``screenshot`` video filter is not required when using a recommended GUI
-video output driver. It should normally not be added to the config file, as
-taking screenshots is handled by the VOs, and adding the screenshot filter will
-break hardware decoding. (The filter may still be useful for taking screenshots
-at a certain point within the video chain when using multiple video filters.)
+Unlike with MPlayer, the ``screenshot`` video filter is not required. This
+filter was never required in mpv, and has been removed.
 
 TERMINAL STATUS LINE
 ====================
@@ -517,10 +517,9 @@ listed.
   rendering is too slow. Also can be incremented on "hiccups" and when the video
   frame couldn't be displayed on time. (``vo-drop-frame-count`` property.)
   If the decoder drops frames, the number of decoder-dropped frames is appended
-  to the display as well, e.g.: ``Dropped: 4/34``. This should almost never
-  happen, unless decoder-framedropping is enabled with one of the
-  ``--framedrop`` options, the stream contains errors, or a weird codec is in
-  use. (``drop-frame-count`` property.)
+  to the display as well, e.g.: ``Dropped: 4/34``. This happens only if
+  decoder-framedropping is enabled with the ``--framedrop`` options.
+  (``drop-frame-count`` property.)
 - Cache state, e.g. ``Cache:  2s+134KB``. Visible if the stream cache is enabled.
   The first value shows the amount of video buffered in the demuxer in seconds,
   the second value shows *additional* data buffered in the stream cache in

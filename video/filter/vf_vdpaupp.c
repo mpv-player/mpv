@@ -92,9 +92,7 @@ static bool output_field(struct vf_instance *vf, int pos)
 
     frame->field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
     if (p->opts.deint) {
-        int top_field_first = 1;
-        if (mpi->fields & MP_IMGFIELD_ORDERED)
-            top_field_first = !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
+        int top_field_first = !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
         frame->field = top_field_first ^ (pos & 1) ?
             VDP_VIDEO_MIXER_PICTURE_STRUCTURE_BOTTOM_FIELD:
             VDP_VIDEO_MIXER_PICTURE_STRUCTURE_TOP_FIELD;

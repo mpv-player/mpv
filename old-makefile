@@ -196,6 +196,7 @@ SOURCES = audio/audio.c \
           options/path.c \
           osdep/io.c \
           osdep/semaphore_osx.c \
+          osdep/subprocess.c \
           osdep/subprocess-posix.c \
           osdep/terminal-unix.c \
           osdep/timer.c \
@@ -262,7 +263,6 @@ SOURCES = audio/audio.c \
           video/filter/vf_mirror.c \
           video/filter/vf_noformat.c \
           video/filter/vf_scale.c \
-          video/filter/vf_screenshot.c \
           video/filter/vf_stereo3d.c \
           video/filter/vf_sub.c \
           video/out/bitmap_packer.c \

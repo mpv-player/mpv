@@ -548,10 +548,11 @@ Available video output drivers are:
 
         X11/GLX only.
 
-    ``dwmflush``
-        Calls ``DwmFlush`` after swapping buffers on Windows (default: 0).
+    ``dwmflush=<no|windowed|yes>``
+        Calls ``DwmFlush`` after swapping buffers on Windows (default: no).
         It also sets ``SwapInterval(0)`` to ignore the OpenGL timing. Values
-        are: 0 (disabled), 1 (only in windowed mode), 2 (also in  full screen).
+        are: no (disabled), windowed (only in windowed mode), yes (also in
+        full screen).
         This may help getting more consistent frame intervals, especially with
         high-fps clips - which might also reduce dropped frames. Typically a
         value of 1 should be enough since full screen may bypass the DWM.
@@ -919,3 +920,16 @@ Available video output drivers are:
         (default: -10). Note that mpv will also use the 2 layers above the
         selected layer, to handle the window background and OSD. Actual video
         rendering will happen on the layer above the selected layer.
+
+``drm`` (Direct Rendering Manager)
+    Video output driver using Kernel Mode Setting / Direct Rendering Manager.
+    Does not support hardware acceleration. Should be used when one doesn't
+    want to install full-blown graphical environment (e.g. no X).
+
+    ``connector=<number>``
+        Select the connector to use (usually this is a monitor.) If set to -1,
+        mpv renders the output on the first available connector. (default: -1)
+
+    ``devpath=<filename>``
+        Path to graphic card device.
+        (default: /dev/dri/card0)

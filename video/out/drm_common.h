@@ -15,21 +15,22 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MP_SUBPROCESS_H_
-#define MP_SUBPROCESS_H_
+#ifndef MP_VT_SWITCHER_H
+#define MP_VT_SWITCHER_H
 
-#include <stddef.h>
+struct vt_switcher {
+    int tty_fd;
+    struct mp_log *log;
+    void (*handlers[2])(void*);
+    void *handler_data[2];
+};
 
-struct mp_cancel;
+int vt_switcher_init(struct vt_switcher *s, struct mp_log *log);
+void vt_switcher_destroy(struct vt_switcher *s);
+void vt_switcher_poll(struct vt_switcher *s, int timeout_ms);
+void vt_switcher_interrupt_poll(struct vt_switcher *s);
 
-typedef void (*subprocess_read_cb)(void *ctx, char *data, size_t size);
-
-// Start a subprocess. Uses callbacks to read from stdout and stderr.
-int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
-                  subprocess_read_cb on_stdout, subprocess_read_cb on_stderr,
-                  char **error);
-
-struct mp_log;
-void mp_subprocess_detached(struct mp_log *log, char **args);
+void vt_switcher_acquire(struct vt_switcher *s, void (*handler)(void*), void *user_data);
+void vt_switcher_release(struct vt_switcher *s, void (*handler)(void*), void *user_data);
 
 #endif

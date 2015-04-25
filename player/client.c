@@ -954,6 +954,7 @@ static int run_async(mpv_handle *ctx, void (*fn)(void *fn_data), void *fn_data)
 struct cmd_request {
     struct MPContext *mpctx;
     struct mp_cmd *cmd;
+    struct mpv_node *res;
     int status;
     struct mpv_handle *reply_ctx;
     uint64_t userdata;
@@ -962,7 +963,7 @@ struct cmd_request {
 static void cmd_fn(void *data)
 {
     struct cmd_request *req = data;
-    int r = run_command(req->mpctx, req->cmd);
+    int r = run_command(req->mpctx, req->cmd, req->res);
     req->status = r >= 0 ? 0 : MPV_ERROR_COMMAND;
     talloc_free(req->cmd);
     if (req->reply_ctx) {
@@ -971,7 +972,7 @@ static void cmd_fn(void *data)
     }
 }
 
-static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd)
+static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd, mpv_node *res)
 {
     if (!ctx->mpctx->initialized)
         return MPV_ERROR_UNINITIALIZED;
@@ -986,6 +987,7 @@ static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd)
     struct cmd_request req = {
         .mpctx = ctx->mpctx,
         .cmd = cmd,
+        .res = res,
     };
     run_locked(ctx, cmd_fn, &req);
     return req.status;
@@ -993,21 +995,22 @@ static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd)
 
 int mpv_command(mpv_handle *ctx, const char **args)
 {
-    return run_client_command(ctx, mp_input_parse_cmd_strv(ctx->log, args));
+    return run_client_command(ctx, mp_input_parse_cmd_strv(ctx->log, args), NULL);
 }
 
 int mpv_command_node(mpv_handle *ctx, mpv_node *args, mpv_node *result)
 {
-    int r = run_client_command(ctx, mp_input_parse_cmd_node(ctx->log, args));
+    struct mpv_node rn = {.format = MPV_FORMAT_NONE};
+    int r = run_client_command(ctx, mp_input_parse_cmd_node(ctx->log, args), &rn);
     if (result && r >= 0)
-        *result = (mpv_node){.format = MPV_FORMAT_NONE};
+        *result = rn;
     return r;
 }
 
 int mpv_command_string(mpv_handle *ctx, const char *args)
 {
     return run_client_command(ctx,
-        mp_input_parse_cmd(ctx->mpctx->input, bstr0((char*)args), ctx->name));
+        mp_input_parse_cmd(ctx->mpctx->input, bstr0((char*)args), ctx->name), NULL);
 }
 
 static int run_cmd_async(mpv_handle *ctx, uint64_t ud, struct mp_cmd *cmd)

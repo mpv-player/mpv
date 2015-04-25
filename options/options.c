@@ -67,6 +67,7 @@ extern const struct m_sub_options sws_conf;
 extern const struct m_sub_options demux_rawaudio_conf;
 extern const struct m_sub_options demux_rawvideo_conf;
 extern const struct m_sub_options demux_lavf_conf;
+extern const struct m_sub_options demux_mkv_conf;
 extern const struct m_sub_options vd_lavc_conf;
 extern const struct m_sub_options ad_lavc_conf;
 extern const struct m_sub_options input_config;
@@ -311,11 +312,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("demuxer-lavf", demux_lavf, demux_lavf_conf, 0),
     OPT_SUBSTRUCT("demuxer-rawaudio", demux_rawaudio, demux_rawaudio_conf, 0),
     OPT_SUBSTRUCT("demuxer-rawvideo", demux_rawvideo, demux_rawvideo_conf, 0),
-
-    OPT_FLAG("demuxer-mkv-subtitle-preroll", mkv_subtitle_preroll, 0),
-    OPT_DOUBLE("demuxer-mkv-subtitle-preroll-secs", mkv_subtitle_preroll_secs,
-               M_OPT_MIN, .min = 0),
-    OPT_FLAG("demuxer-mkv-probe-video-duration", mkv_probe_duration, 0),
+    OPT_SUBSTRUCT("demuxer-mkv", demux_mkv, demux_mkv_conf, 0),
 
 // ------------------------- subtitles options --------------------
 
@@ -403,6 +400,7 @@ const m_option_t mp_opts[] = {
     OPT_SIZE_BOX("autofit", vo.autofit, 0),
     OPT_SIZE_BOX("autofit-larger", vo.autofit_larger, 0),
     OPT_SIZE_BOX("autofit-smaller", vo.autofit_smaller, 0),
+    OPT_FLOATRANGE("window-scale", vo.window_scale, 0, 0.001, 100),
     OPT_FLAG("force-window-position", vo.force_window_position, 0),
     // vo name (X classname) and window title strings
     OPT_STRING("x11-name", vo.winname, 0),
@@ -511,8 +509,8 @@ const m_option_t mp_opts[] = {
                ({"auto", 0}, {"decoder", 1}, {"sort", 2})),
     OPT_FLAG("initial-audio-sync", initial_audio_sync, 0),
     OPT_CHOICE("hr-seek", hr_seek, 0,
-               ({"no", -1}, {"absolute", 0}, {"always", 1}, {"yes", 1})),
-    OPT_FLOATRANGE("hr-seek-demuxer-offset", hr_seek_demuxer_offset, 0, -9, 99),
+               ({"no", -1}, {"absolute", 0}, {"yes", 1}, {"always", 1})),
+    OPT_FLOAT("hr-seek-demuxer-offset", hr_seek_demuxer_offset, 0),
     OPT_FLAG("hr-seek-framedrop", hr_seek_framedrop, 0),
     OPT_CHOICE_OR_INT("autosync", autosync, 0, 0, 10000,
                       ({"no", -1})),
@@ -665,6 +663,7 @@ const struct MPOpts mp_default_opts = {
         .keepaspect_window = 1,
         .border = 1,
         .WinID = -1,
+        .window_scale = 1.0,
     },
     .allow_win_drag = 1,
     .wintitle = "mpv - ${?media-title:${media-title}}${!media-title:No file.}",
@@ -764,7 +763,6 @@ const struct MPOpts mp_default_opts = {
     .use_embedded_fonts = 1,
     .sub_fix_timing = 1,
     .sub_cp = "auto",
-    .mkv_subtitle_preroll_secs = 1.0,
     .screenshot_template = "shot%n",
 
     .hwdec_codecs = "h264,vc1,wmv3",

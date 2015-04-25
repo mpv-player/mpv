@@ -225,14 +225,21 @@ Available filters are:
         automatically up- and downmix standard channel layouts.
 
 ``format=format:srate:channels:out-format:out-srate:out-channels``
-    Force a specific audio format/configuration without actually changing the
-    audio data. Keep in mind that the filter system might auto-insert actual
-    conversion filters before or after this filter if needed.
+    Does not do any format conversion itself. Rather, it may cause the
+    filter system to insert necessary conversion filters before or after this
+    filter if needed. It is primarily useful for controlling the audio format
+    going into other filters. To specify the format for audio output, see
+    ``--audio-format``, ``--audio-samplerate``, and ``--audio-channels``. This
+    filter is able to force a particular format, whereas ``--audio-*``
+    may be overridden by the ao based on output compatibility.
 
     All parameters are optional. The first 3 parameters restrict what the filter
-    accepts as input. The ``out-`` parameters change the audio format, without
-    actually doing a conversion. The data will be 'reinterpreted' by the
-    filters or audio outputs following this filter.
+    accepts as input. They will therefore cause conversion filters to be
+    inserted before this one.  The ``out-`` parameters tell the filters or audio
+    outputs following this filter how to interpret the data without actually
+    doing a conversion. Setting these will probably just break things unless you
+    really know you want this for some reason, such as testing or dealing with
+    broken media.
 
     ``<format>``
         Force conversion to this format. Use ``--af=format=format=help`` to get
@@ -252,14 +259,9 @@ Available filters are:
 
     ``<out-channels>``
 
-    See also ``--audio-format``, ``--audio-samplerate``, and
-    ``--audio-channels`` for related options. Keep in mind that
-    ``--audio-channels`` does not actually force the number of
-    channels in most cases, while this filter can do this.
-
-    *NOTE*: this filter used to be named ``force``. Also, unlike the old
-    ``format`` filter, this does not do any actual conversion anymore.
-    Conversion is done by other, automatically inserted filters.
+    *NOTE*: this filter used to be named ``force``. The old ``format`` filter
+    used to do conversion itself, unlike this one which lets the filter system
+    handle the conversion.
 
 ``convert24``
     Filter for internal use only. Converts between 24-bit and 32-bit sample
@@ -629,4 +631,3 @@ Available filters are:
 
     ``o=<string>``
         AVOptions.
-

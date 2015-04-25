@@ -492,8 +492,11 @@ static int init_device(struct ao *ao)
     }
 
     if (num_channels != ao->channels.num) {
-        MP_ERR(ao, "Couldn't get requested number of channels.\n");
         mp_chmap_from_channels_alsa(&ao->channels, num_channels);
+        if (!mp_chmap_is_valid(&ao->channels))
+            mp_chmap_from_channels(&ao->channels, 2);
+        MP_ERR(ao, "Couldn't get requested number of channels, fallback to %s.\n",
+               mp_chmap_to_str(&ao->channels));
     }
 
     // Some ALSA drivers have broken delay reporting, so disable the ALSA

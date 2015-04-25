@@ -275,8 +275,7 @@ static void enable_kx(bool enable)
     // shouldn't be relied on here either.
     if (isatty(STDOUT_FILENO)) {
         char *cmd = enable ? "\033=" : "\033>";
-        printf("%s", cmd);
-        fflush(stdout);
+        write(STDOUT_FILENO, cmd, strlen(cmd));
     }
 }
 

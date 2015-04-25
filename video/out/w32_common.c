@@ -565,12 +565,15 @@ static void wakeup_gui_thread(void *ctx)
     PostMessage(w32->window, WM_USER, 0, 0);
 }
 
-static double vo_w32_get_display_fps(void)
+static double vo_w32_get_display_fps(struct vo_w32_state *w32)
 {
-    DEVMODE dm;
-    dm.dmSize = sizeof(DEVMODE);
-    dm.dmDriverExtra = 0;
-    if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &dm))
+    // Get the device name of the monitor containing the window
+    HMONITOR mon = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
+    MONITORINFOEXW mi = { .cbSize = sizeof mi };
+    GetMonitorInfoW(mon, (MONITORINFO*)&mi);
+
+    DEVMODE dm = { .dmSize = sizeof dm };
+    if (!EnumDisplaySettingsW(mi.szDevice, ENUM_CURRENT_SETTINGS, &dm))
         return -1;
 
     // May return 0 or 1 which "represent the display hardware's default refresh rate"
@@ -586,20 +589,22 @@ static double vo_w32_get_display_fps(void)
     switch (dm.dmDisplayFrequency) {
         case  23:
         case  29:
+        case  47:
         case  59:
         case  71:
+        case  89:
+        case  95:
         case 119:
+        case 143:
             rv = (rv + 1) / 1.001;
     }
 
     return rv;
 }
 
-static void update_display_fps(void *ctx)
+static void update_display_fps(struct vo_w32_state *w32)
 {
-    struct vo_w32_state *w32 = ctx;
-
-    double fps = vo_w32_get_display_fps();
+    double fps = vo_w32_get_display_fps(w32);
     if (fps != w32->display_fps) {
         w32->display_fps = fps;
         signal_events(w32, VO_EVENT_WIN_STATE);
@@ -1316,7 +1321,8 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_KILL_SCREENSAVER:
         w32->disable_screensaver = true;
-        SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED);
+        SetThreadExecutionState(ES_CONTINUOUS | ES_SYSTEM_REQUIRED |
+                                ES_DISPLAY_REQUIRED);
         return VO_TRUE;
     case VOCTRL_RESTORE_SCREENSAVER:
         w32->disable_screensaver = false;
