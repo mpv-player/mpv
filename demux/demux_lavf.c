@@ -276,13 +276,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     demuxer->priv = talloc_zero(NULL, lavf_priv_t);
     priv = demuxer->priv;
 
-    priv->filename = s->url;
-    if (!priv->filename) {
-        priv->filename = "mp:unknown";
-        MP_WARN(demuxer, "Stream url is not set!\n");
-    }
-
-    priv->filename = remove_prefix(priv->filename, prefixes);
+    priv->filename = remove_prefix(s->url, prefixes);
 
     char *avdevice_format = NULL;
     if (s->uncached_type == STREAMTYPE_AVDEVICE) {
