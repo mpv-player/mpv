@@ -85,7 +85,7 @@ New features
 - `vo_opengl` features:
   - Added `ewa_ginseng`, `ewa_hanning`, `robidoux`, `robidouxsharp`,
     `oversample` and `haasnsoft` scalers.
-  - There are now `ewa_lanczonsoft` and `ewa_lanczossharp` aliases to
+  - There are now `ewa_lanczossoft` and `ewa_lanczossharp` aliases to
     `ewa_lanczos` that are tuned to be blurrier and sharper, respectively.
   - Added `gamma-auto` option that uses ambient light sensors to automatically
     adjust the video gamma. See commit c028d78 for details.
