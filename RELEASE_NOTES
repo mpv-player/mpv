@@ -9,10 +9,13 @@ Changes that may break users' config files have been annotated with a `(!)`.
 - Note: mpv is not compatible with Lua 5.3. Lua 5.1 or 5.2 is required.
 - The minimum required libass version is now 0.12.1 or newer.
 - The minimum required FFmpeg version is now 2.4.0 (equiv. Libav 11) or newer.
-- The internal libmpg123 support was removed. This was already not used by default in
-  the previous release.
-- `(!)` The LIRC support was removed. Configure LIRC remotes as input devices instead.
+- The internal libmpg123 support was removed. This was already not used by
+  default in the previous release.
+- `(!)` The LIRC support was removed. Configure LIRC remotes as input devices
+  instead.
 - `(!)` The Linux Joystick support was removed.
+- `(!)` `vf_screenshot` was removed, as they are now handled at a VO level and
+  is compatible with all VOs.
 - `(!)` `--ass-use-margins` has been renamed to `--sub-use-margins` and applies
   only to plain-text (non-ASS) subtitles (enabled by default). The new
   `--ass-force-margins` option applies only to ASS subtitles (disabled by
@@ -46,6 +49,8 @@ Changes that may break users' config files have been annotated with a `(!)`.
   `--colormatrix-output-range` and `--colormatrix-primaries` options have been
   converted into `vf_format` suboptions. See commit 27715b7 and the manual for
   details.
+- `vf_mirror`'s implementation was replaced with calling into `libavfilter`'s
+  `vf_hflip` filter, thus depending on `libavfilter` to function.
 - The `device` subption to `ao_wasapi` has been deprecated in favor of
   `--audio-device`.
 - `--video-rotate` now allows 360 as an argument instead of stopping at 359.
@@ -71,6 +76,8 @@ Bug fixes
   `--vo=opengl` (issue #1765).
 - `youtube-dl` will no longer download video streams when video playback
   is disabled with `--no-video`.
+- (Windows) mpv now prevents system sleep when playing a video-only file.
+  Previously, only files with an opened audio track would prevent sleep.
 
 New features
 ------------
@@ -95,11 +102,17 @@ New features
     artifacts in EWA filters.
   - (Windows) There is now a `dwmflush` option that might help improve
     rendering of high-fps video. Disabled by default. See manual for options.
+- New Linux-only `vo_drm` video output driver. Uses the direct rendering /
+  kernel modesetting drivers to draw directly to the framebuffer, but with
+  no hardware acceleration. See manual for details.
 - New `pseudo-gui` builtin profile, automatically used when launched from
-  `mpv.desktop` or by opening `mpv.exe` on windows (`mpv.com` still works as
-  usual). The `pseudo-gui` tries to make the player window behave closer to
-  what a desktop player would do, by not immediately closing and allowing the
-  user to drag&drop files for playback. See manual for details.
+  `mpv.desktop` by opening `mpv.exe` on windows (`mpv.com` still works as
+  usual), or by opening the `mpv.app` bundle. The `pseudo-gui` tries to make
+  the player window behave closer to what a desktop player would do, by not
+  immediately closing and allowing the user to drag&drop files for playback.
+  See manual for details.
+- mpv can now play directories by automatically playing their contents instead.
+  Works everywhere but on Windows, due to issues with Windows' C runtime.
 - Add support to pitch correct stretched audio with librubberband.
 - Add support for the Raspberry Pi 2's hardware decoder when FFmpeg (or Libav)
   is built with `--enable-mmal`. See commit 8fff125 for details.
@@ -118,6 +131,11 @@ New features
 - The new `--ytdl-params` option can be set to arguments that are always given
   to `youtube-dl` invocations. There is no sanity checking, so invalid options
   can prevent `mpv` from working with http URLs.
+- There's a new `--demuxer-mkv-fix-timestamps` option, enabled by default, that
+  tries to guess more accurate video timestamps by using FPS information, if
+  available. See manual for details.
+- The new `--window-scale` option can be used to scale the video window by the
+  specified multiplier, before other options such as `--autofit` are applied.
 - `vo_direct3d_shaders` now supports NV12 colorspace without using stretchrect,
   but it seems no drivers actually support that.
 - (Client API) Added a `rescan_external_files` command, as requested on issue
@@ -128,6 +146,8 @@ New features
   to call to inform mpv of when exactly a frame was displayed.
 - (Client API) The `mpv_opengl_cb_render()` function was deprecated in favor
   of the new, simpler `mpv_opengl_cb_draw()` function.
+- (Client API) There is a new `screenshot_raw` command. See `input.rst` for
+  details.
 - The `--input-file` argument may now also be a file descriptor in the form
   "fd://N", where N is the FD number.
 
@@ -147,6 +167,9 @@ Bug fixes
 ---------
 
 - (X11) Fix crash on `vo_xv:no-colorkey` with the Overlay adapter. (bug #1629)
+- (X11) `--stop-screensaver` is now implemented by calling into
+  `xdg-screensaver`, fixing some compatibility issues that prevented it from
+  actually stopping screensavers.
 - Make the video equalizer work correctly on some VAAPI drivers. (bug #1647)
 - Prevent OSD from disappearing when clicking on mozplugger. (bug #1672)
 - The new DVB-S2 support code, using S2API, now builds on FreeBSD.
