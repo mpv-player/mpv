@@ -25,8 +25,8 @@ API changes
 
 ::
 
+ --- mpv 0.9.0 is released ---
  1.17   - add MPV_FORMAT_BYTE_ARRAY
- --- mpv 0.9.0 will be released ---
  1.16   - add mpv_opengl_cb_report_flip()
         - introduce mpv_opengl_cb_draw() and deprecate mpv_opengl_cb_render()
  1.15   - mpv_initialize() will now load config files. This requires setting
