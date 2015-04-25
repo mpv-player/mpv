@@ -39,6 +39,7 @@ struct priv {
     GLuint gl_texture;
     GLvdpauSurfaceNV vdpgl_surface;
     VdpOutputSurface vdp_surface;
+    VdpRect img_rect;
     struct mp_vdpau_mixer *mixer;
     bool mapped;
 };
@@ -122,6 +123,7 @@ static int create(struct gl_hwdec *hw)
     }
     hw->hwctx = &p->ctx->hwctx;
     hw->converted_imgfmt = IMGFMT_RGB0;
+    p->img_rect.x0 = p->img_rect.y0 = 0;
     return 0;
 }
 
@@ -136,6 +138,8 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 
     params->imgfmt = hw->driver->imgfmt;
     p->image_params = *params;
+    p->img_rect.x1 = params->w;
+    p->img_rect.y1 = params->h;
 
     if (mp_vdpau_handle_preemption(p->ctx, &p->preemption_counter) < 1)
         return -1;
@@ -191,7 +195,8 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     if (p->mapped)
         gl->VDPAUUnmapSurfacesNV(1, &p->vdpgl_surface);
 
-    mp_vdpau_mixer_render(p->mixer, NULL, p->vdp_surface, NULL, hw_image, NULL);
+    mp_vdpau_mixer_render(p->mixer, NULL, p->vdp_surface, NULL, hw_image,
+                          &p->img_rect);
 
     gl->VDPAUMapSurfacesNV(1, &p->vdpgl_surface);
     p->mapped = true;
