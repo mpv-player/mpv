@@ -476,9 +476,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     mp_image_set_params(p->cur_frame, &p->sws->dst);
 
     struct modeset_buf *buf=p->dev->bufs;
-    int stride=p->device_w*4;
-    memset_pic(buf[0].map,0,stride,p->device_h,stride);
-    memset_pic(buf[1].map,0,stride,p->device_h,stride);
+    memset(buf[0].map,0,buf[0].size);
+    memset(buf[1].map,0,buf[0].size);
 
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
