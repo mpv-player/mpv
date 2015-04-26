@@ -220,6 +220,10 @@ int mp_vdpau_mixer_render(struct mp_vdpau_mixer *mixer,
 {
     struct vdp_functions *vdp = &mixer->ctx->vdp;
     VdpStatus vdp_st;
+    VdpRect fallback_rect = {0, 0, video->w, video->h};
+
+    if (!video_rect)
+        video_rect = &fallback_rect;
 
     if (video->imgfmt == IMGFMT_VDPAU_OUTPUT) {
         VdpOutputSurface surface = (uintptr_t)video->planes[3];
