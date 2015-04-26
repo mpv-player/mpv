@@ -607,6 +607,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
     switch (request) {
+    case VOCTRL_SCREENSHOT_WIN:
+        *(struct mp_image**)data = mp_image_new_copy(p->cur_frame);
+        return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, p->last_input);
         return VO_TRUE;
