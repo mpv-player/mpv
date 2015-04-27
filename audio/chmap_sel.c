@@ -200,8 +200,8 @@ bool mp_chmap_sel_adjust(const struct mp_chmap_sel *s, struct mp_chmap *map)
 }
 
 #define UPMIX_IDX 0
-#define DOWNMIX_IDX 1
-#define FALLBACK_IDX 2
+#define FALLBACK_IDX 1
+#define DOWNMIX_IDX 2
 
 static bool test_fallbacks(struct mp_chmap *a, struct mp_chmap *b,
                            int best_diffs[2], struct mp_chmap best[2])
@@ -278,7 +278,7 @@ bool mp_chmap_sel_fallback(const struct mp_chmap_sel *s, struct mp_chmap *map)
         }
     }
 
-    for (int i = UPMIX_IDX; i < MP_ARRAY_SIZE(best); i++) {
+    for (int i = 0; i < MP_ARRAY_SIZE(best); i++) {
         if (best_diffs[i] < INT_MAX) {
             *map = best[i];
             return true;
