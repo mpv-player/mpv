@@ -198,7 +198,7 @@ Available filters are:
     ``<aspect>``
         Force an aspect ratio.
 
-``format[=fmt[:outfmt]]``
+``format=fmt=<value>:colormatrix=<value>:...``
     Restricts the color space for the next filter without doing any conversion.
     Use together with the scale filter for a real conversion.
 

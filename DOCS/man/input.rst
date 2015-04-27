@@ -1167,17 +1167,18 @@ Property list
 ``field-dominance`` (RW)
     See ``--field-dominance``
 
-``colormatrix`` (RW)
-    See ``--colormatrix``.
+``colormatrix`` (R)
+    Redirects to ``video-params/colormatrix``. This parameter (as well as
+    similar ones) can be overridden with the ``format`` video filter.
 
-``colormatrix-input-range`` (RW)
-    See ``--colormatrix-input-range``.
+``colormatrix-input-range`` (R)
+    See ``colormatrix``.
 
-``colormatrix-output-range`` (RW)
-    See ``--colormatrix-output-range``.
+``colormatrix-output-range`` (R)
+    See ``colormatrix``.
 
-``colormatrix-primaries`` (RW)
-    See ``--colormatrix-primaries``.
+``colormatrix-primaries`` (R)
+    See ``colormatrix``.
 
 ``ontop`` (RW)
     See ``--ontop``.
