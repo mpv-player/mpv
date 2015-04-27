@@ -47,7 +47,7 @@ notifications:
   email: false
   irc:
     channels:
-      - "irc.freenode.org#mpv-player-dev"
+      - "irc.freenode.org#mpv-devel"
     on_success: change
     on_failure: always
 
