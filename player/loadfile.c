@@ -653,8 +653,16 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     for (int n = mpctx->num_tracks - 1; n >= 0 && !in_use; n--)
         in_use |= mpctx->tracks[n]->demuxer == d;
 
-    if (!in_use)
+    if (!in_use) {
+        for (int n = 0; n < mpctx->num_sources; n++) {
+            if (mpctx->sources[n] == d) {
+                MP_TARRAY_REMOVE_AT(mpctx->sources, mpctx->num_sources, n);
+                break;
+            }
+        }
+        uninit_stream_sub_decoders(d);
         free_demuxer_and_stream(d);
+    }
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 
