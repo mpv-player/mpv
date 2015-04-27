@@ -1,3 +1,31 @@
+Release 0.9.1 (Draft)
+=====================
+
+Changes
+-------
+
+- mpv's IRC channel moved from #mpv-player to #mpv on chat.freenode.net.
+- Documentation updates.
+- The default value for the `--ytdl-format` option is now `best`, in order
+  to avoid current development `youtube-dl`'s enabling of DASH by default,
+  as mpv does not yet properly support DASH.
+
+Bug fixes
+---------
+
+- Corrected the release marker on DOCS/client-api-changes. The release manager
+  forgot to fix it before release...
+- Fix `vo_vdpau` rendering garbage lines on H.264 video with non-mod16 size
+  (issue #1863).
+- Fix a crash on exit if the "sub_reload" command had run successfully.
+
+New features
+------------
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.9.0..v0.9.1` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.9.0...v0.9.1 (up to 250 commits).
+
 Release 0.9.0
 =============
 
