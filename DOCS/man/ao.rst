@@ -260,6 +260,10 @@ Available audio output drivers are:
     ``broken-delay``
         Simulate broken audio drivers, which don't report latency correctly.
 
+    ``channel-layouts``
+        If not empty, this is a ``,`` separated list of channel layouts the
+        AO allows. This can be used to test channel layout selection.
+
 ``pcm``
     Raw PCM/WAVE file writer audio output
 

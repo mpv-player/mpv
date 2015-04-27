@@ -56,6 +56,8 @@ struct priv {
     // called with sizes not aligned to this, a rounded size will be returned.
     // (This is not needed by the AO API, but many AOs behave this way.)
     int outburst;       // samples
+
+    char **channel_layouts;
 };
 
 static void drain(struct ao *ao)
@@ -88,8 +90,19 @@ static int init(struct ao *ao)
 
     ao->untimed = priv->untimed;
 
-    struct mp_chmap_sel sel = {0};
-    mp_chmap_sel_add_any(&sel);
+    struct mp_chmap_sel sel = {.tmp = ao};
+    if (priv->channel_layouts) {
+        for (int n = 0; priv->channel_layouts[n]; n++) {
+            struct mp_chmap map = {0};
+            if (!mp_chmap_from_str(&map, bstr0(priv->channel_layouts[n]))) {
+                MP_FATAL(ao, "Invalid channel map in option.\n");
+                return -1;
+            }
+            mp_chmap_sel_add_map(&sel, &map);
+        }
+    } else {
+        mp_chmap_sel_add_any(&sel);
+    }
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         mp_chmap_from_channels(&ao->channels, 2);
 
@@ -231,6 +244,7 @@ const struct ao_driver audio_out_null = {
         OPT_FLOATRANGE("latency", latency_sec, 0, 0, 100),
         OPT_FLAG("broken-eof", broken_eof, 0),
         OPT_FLAG("broken-delay", broken_delay, 0),
+        OPT_STRINGLIST("channel-layouts", channel_layouts, 0),
         {0}
     },
 };
