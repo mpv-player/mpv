@@ -103,16 +103,17 @@ mp.add_hook("on_load", 10, function ()
             ytdl.path, "--no-warnings", "-J", "--flat-playlist", "--all-subs",
             "--sub-format", subformat, "--no-playlist"
         }
+
+	-- Checks if video option is "no", change options accordingly
+	if (mp.get_property("options/vid") == "no") then
+	    format = "bestaudio/best"
+	    msg.verbose("Video disabled. Only using audio")
+	end
+
         if (format ~= "") then
             table.insert(command, "--format")
             table.insert(command, format)
         end
-	
-	-- Checks if no-video option is set and disables video in ytdl if set
-	if (mp.get_property("options/vid") == "no") then
-	    table.insert(command, "-x")
-	    msg.verbose("Video disabled. Only using audio")
-	end
 
         for param, arg in pairs(raw_options) do
             table.insert(command, "--" .. param)
