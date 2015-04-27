@@ -13,6 +13,7 @@
 require 'mp.options'
 
 local o = {
+    no_osd = 0,
     duration = 3,
     -- text formatting
     font = "Source Sans Pro",
@@ -29,6 +30,13 @@ local o = {
     prop_indent = "\\h\\h\\h\\h\\h",
     kv_sep = "\\h\\h",  -- key<kv_sep>value
 
+    b1 = "{\\b1}",
+    b0 = "{\\b0}",
+    i1 = "{\\i1}",
+    i0 = "{\\i0}",
+    u1 = "{\\u1}",
+    u0 = "{\\u0}",
+
     -- Custom header for ASS tags to format the text output.
     -- Specifying this will ignore the text formatting values above and just
     -- use this string instead.
@@ -44,7 +52,21 @@ function main()
         video = "",
         audio = ""
     }
-    
+
+    if mp.get_property("video-codec") == nil then
+        o.nl = "\n"
+        duration = mp.get_property("length")
+        o.prop_indent = "\t"
+        o.kv_sep = ""
+        o.b1 = ""
+        o.b0 = ""
+        o.i1 = ""
+        o.i0 = ""
+        o.u1 = ""
+        o.u0 = ""
+        o.no_osd = 1
+    end
+
     add_header(stats)
     add_file(stats)
     add_video(stats)
@@ -117,6 +139,9 @@ end
 
 
 function add_header(s)
+    if o.no_osd == 1 then
+        return
+    end
     if o.custom_header and o.custom_header ~= "" then
         s.header = set_ASS(true) .. o.custom_header
     else
@@ -161,6 +186,9 @@ end
 
 
 function no_ASS(t)
+    if o.no_osd == 1 then
+        return t
+    end
     return set_ASS(false) .. t .. set_ASS(true)
 end
 
@@ -176,13 +204,13 @@ end
 
 
 function b(t)
-    return "{\\b1}" .. t .. "{\\b0}"
+    return o.b1 .. t .. o.b0
 end
 function i(t)
-    return "{\\i1}" .. t .. "{\\i0}"
+    return o.i1 .. t .. o.i0
 end
 function u(t)
-    return "{\\u1}" .. t .. "{\\u0}"
+    return o.u1 .. t .. o.u0
 end
 
 
