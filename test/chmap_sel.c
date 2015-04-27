@@ -145,6 +145,22 @@ static void test_mp_chmap_sel_fallback_stereo_to_stereo(void **state) {
     assert_string_equal(mp_chmap_to_str(&c), "stereo");
 }
 
+static void test_mp_chmap_sel_fallback_no_downmix(void **state) {
+    struct mp_chmap a;
+    struct mp_chmap b;
+    struct mp_chmap c;
+    struct mp_chmap_sel s = {0};
+
+    mp_chmap_from_str(&a, bstr0("stereo"));
+    mp_chmap_from_str(&b, bstr0("7.1(rear)"));
+    mp_chmap_from_str(&c, bstr0("5.1(side)"));
+
+    mp_chmap_sel_add_map(&s, &a);
+    mp_chmap_sel_add_map(&s, &b);
+    assert_true(mp_chmap_sel_fallback(&s, &c));
+    assert_string_equal(mp_chmap_to_str(&c), "7.1(rear)");
+}
+
 int main(void) {
     const UnitTest tests[] = {
         unit_test(test_mp_chmap_sel_fallback_upmix),
@@ -157,6 +173,7 @@ int main(void) {
         unit_test(test_mp_chmap_sel_fallback_works_on_alsa_chmaps),
         unit_test(test_mp_chmap_sel_fallback_mono_to_stereo),
         unit_test(test_mp_chmap_sel_fallback_stereo_to_stereo),
+        unit_test(test_mp_chmap_sel_fallback_no_downmix),
     };
     return run_tests(tests);
 }
