@@ -4,8 +4,8 @@ How to contribute
 General
 -------
 
-The main contact for mpv development is IRC, specifically #mpv-player
-and #mpv-player-dev on Freenode.
+The main contact for mpv development is IRC, specifically #mpv
+and #mpv-devel on Freenode.
 
 Sending patches
 ---------------
