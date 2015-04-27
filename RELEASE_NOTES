@@ -24,7 +24,7 @@ New features
 
 This listing is not complete. A complete changelog can be seen by running
 `git log v0.9.0..v0.9.1` in the git repository or by visiting
-https://github.com/mpv-player/mpv/compare/v0.9.0...v0.9.1 (up to 250 commits).
+https://github.com/mpv-player/mpv/compare/v0.9.0...v0.9.1.
 
 Release 0.9.0
 =============
@@ -180,7 +180,8 @@ New features
   "fd://N", where N is the FD number.
 
 This listing is not complete. A complete changelog can be seen by running
-`git log v0.8.0..v0.9.0` in the git repository.
+`git log v0.8.0..v0.9.0` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.8.0...v0.9.0 (only 250 commits).
 
 Release 0.8.3
 =============
@@ -213,7 +214,8 @@ Bug fixes
 - Fix anamorphic scaling being ignored if it was very minor.
 
 This listing is not complete. A complete changelog can be seen by running
-`git log v0.8.2..v0.8.3` in the git repository.
+`git log v0.8.2..v0.8.3` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.8.2...v0.8.3.
 
 Release 0.8.2
 =============
@@ -221,7 +223,7 @@ Release 0.8.2
 Bug fixes
 ---------
 
-- Fix OSD placement accidentally messed up in 0.8.1.
+- Fix OSD placement accidentally messed up in 0.8.1 (commit 22863d6).
 
 Release 0.8.1
 =============
@@ -252,7 +254,8 @@ New features
 - mpv now tries to load '.vtt' subtitles.
 
 This listing is not complete. A complete changelog can be seen by running
-`git log v0.8.0..v0.8.1` in the git repository.
+`git log v0.8.0..v0.8.1` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.8.0...v0.8.1.
 
 Release 0.8.0
 =============
@@ -418,7 +421,8 @@ New features
   files.
 
 This listing is not complete. A complete changelog can be seen by running
-`git log v0.7.0..v0.8.0` in the git repository.
+`git log v0.7.0..v0.8.0` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.7.0...v0.8.0 (only 250 commits).
 
 Release 0.7.3
 =============
@@ -497,7 +501,8 @@ New features
 - Client API: "display-names" property is now observable.
 
 This listing is not complete. A complete changelog can be seen by running
-`git log v0.7.2..v0.7.3` in the git repository.
+`git log v0.7.2..v0.7.3` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.7.2...v0.7.3.
 
 Release 0.7.2
 =============
@@ -535,7 +540,8 @@ New features
 
 This listing is not complete. There are many more bug fixes and changes. The
 complete change log can be viewed by running ``git log 47ec404..c7d6b21`` in
-the git repository.
+the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/47ec404...c7d6b21.
 
 Release 0.7.1
 =============
@@ -565,7 +571,8 @@ Bug fixes
 
 This listing is not complete. There are many more bug fixes and changes. The
 complete change log can be viewed by running ``git log 8d8b36d..6583ad6`` in
-the git repository.
+the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/8d8b36d...6583ad6.
 
 Release 0.7.0
 =============
@@ -633,4 +640,5 @@ New features
 
 This listing is not complete. There are many more bug fixes and changes. The
 complete change log can be viewed by running ``git log 7759c18..9479daa`` in
-the git repository.
+the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/7759c18...9479daa (only 250 commits).
