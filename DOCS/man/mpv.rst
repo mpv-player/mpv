@@ -134,6 +134,9 @@ x and z
 l
     Set/clear A-B loop points. See ``ab_loop`` command for details.
 
+L
+    Toggle infinite looping.
+
 Ctrl + and Ctrl -
     Adjust audio delay by +/- 0.1 seconds.
 
