@@ -200,9 +200,9 @@ void ca_print_asbd(struct ao *ao, const char *description,
     char *format    = fourcc_repr(NULL, asbd->mFormatID);
 
     MP_VERBOSE(ao,
-       "%s %7.1fHz %" PRIu32 "bit [%s]"
-       "[%" PRIu32 "][%" PRIu32 "][%" PRIu32 "]"
-       "[%" PRIu32 "][%" PRIu32 "] "
+       "%s %7.1fHz %" PRIu32 "bit %s "
+       "[%" PRIu32 "][%" PRIu32 "bpp][%" PRIu32 "fbp]"
+       "[%" PRIu32 "bpf][%" PRIu32 "ch] "
        "%s %s %s%s%s%s\n",
        description, asbd->mSampleRate, asbd->mBitsPerChannel, format,
        asbd->mFormatFlags, asbd->mBytesPerPacket, asbd->mFramesPerPacket,
