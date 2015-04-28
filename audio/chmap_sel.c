@@ -199,12 +199,16 @@ bool mp_chmap_sel_adjust(const struct mp_chmap_sel *s, struct mp_chmap *map)
     return false;
 }
 
-#define UPMIX_IDX 0
-#define FALLBACK_IDX 1
-#define DOWNMIX_IDX 2
+enum {
+    UPMIX_IDX,
+    FALLBACK_UPMIX_IDX,
+    DOWNMIX_IDX,
+    FALLBACK_DOWNMIX_IDX,
+    REMIX_COUNT
+};
 
 static bool test_fallbacks(struct mp_chmap *a, struct mp_chmap *b,
-                           int best_diffs[2], struct mp_chmap best[2])
+                           int best_diffs[], struct mp_chmap best[])
 {
     struct mp_chmap diff1, diff2;
 
@@ -222,15 +226,15 @@ static bool test_fallbacks(struct mp_chmap *a, struct mp_chmap *b,
         return true;
     }
 
-    if (diff1.num > 0 && best_diffs[FALLBACK_IDX] > diff1.num) {
-        best[FALLBACK_IDX] = *a;
-        best_diffs[FALLBACK_IDX] = diff1.num;
+    if (diff1.num > 0 && best_diffs[FALLBACK_UPMIX_IDX] > diff1.num) {
+        best[FALLBACK_UPMIX_IDX] = *a;
+        best_diffs[FALLBACK_UPMIX_IDX] = diff1.num;
         return true;
     }
 
-    if (diff2.num > 0 && best_diffs[FALLBACK_IDX] > diff2.num) {
-        best[FALLBACK_IDX] = *a;
-        best_diffs[FALLBACK_IDX] = diff2.num;
+    if (diff2.num > 0 && best_diffs[FALLBACK_DOWNMIX_IDX] > diff2.num) {
+        best[FALLBACK_DOWNMIX_IDX] = *a;
+        best_diffs[FALLBACK_DOWNMIX_IDX] = diff2.num;
         return true;
     }
 
@@ -255,8 +259,10 @@ bool mp_chmap_sel_fallback(const struct mp_chmap_sel *s, struct mp_chmap *map)
         return true;
     }
 
-    int best_diffs[] = { INT_MAX, INT_MAX, INT_MAX };
-    struct mp_chmap best[] = { {0}, {0}, {0} };
+    struct mp_chmap best[REMIX_COUNT] = {{0}};
+    int best_diffs[REMIX_COUNT];
+    for (int n = 0; n < REMIX_COUNT; n++)
+        best_diffs[n] = INT_MAX;
 
     for (int n = 0; n < s->num_chmaps; n++) {
         struct mp_chmap e = s->chmaps[n];
