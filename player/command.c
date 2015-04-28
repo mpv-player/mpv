@@ -4530,6 +4530,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         char *lang = cmd->args[3].v.s;
         if (lang && lang[0])
             t->lang = talloc_strdup(t, lang);
+        print_track_list(mpctx);
         break;
     }
 
@@ -4540,6 +4541,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (!t)
             return -1;
         mp_remove_track(mpctx, t);
+        print_track_list(mpctx);
         break;
     }
 
@@ -4553,6 +4555,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             if (nt) {
                 mp_remove_track(mpctx, t);
                 mp_switch_track(mpctx, nt->type, nt);
+                print_track_list(mpctx);
                 return 0;
             }
         }
@@ -4573,6 +4576,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                                            opts->sub_id_ff, opts->sub_lang);
             if (s && s->is_external)
                 mp_switch_track(mpctx, STREAM_SUB, s);
+
+            print_track_list(mpctx);
         }
         break;
     }
