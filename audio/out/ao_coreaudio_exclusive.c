@@ -501,10 +501,17 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
                    p->stream_asbd.mFramesPerPacket);
 
     uint32_t latency_frames = 0;
-    err = CA_GET_O(p->device, kAudioDevicePropertyLatency, &latency_frames);
-    if (err != noErr) {
+    uint32_t latency_properties[] = {
+        kAudioDevicePropertyLatency,
+        kAudioDevicePropertyBufferFrameSize,
+        kAudioDevicePropertySafetyOffset,
+    };
+    for (int n = 0; n < MP_ARRAY_SIZE(latency_properties); n++) {
+        uint32_t temp;
+        err = CA_GET_O(p->device, kAudioDevicePropertyLatency, &temp);
         CHECK_CA_WARN("cannot get device latency");
-        latency_frames = 0;
+        if (err == noErr)
+            latency_frames += temp;
     }
 
     p->hw_latency_us = ca_frames_to_us(ao, latency_frames);
