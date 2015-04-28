@@ -4549,15 +4549,17 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     case MP_CMD_AUDIO_RELOAD: {
         int type = cmd->id == MP_CMD_SUB_RELOAD ? STREAM_SUB : STREAM_AUDIO;
         struct track *t = mp_track_by_tid(mpctx, type, cmd->args[0].v.i);
+        struct track *nt = NULL;
         if (t && t->is_external && t->external_filename) {
-            struct track *nt = mp_add_external_file(mpctx, t->external_filename,
-                                                    type);
-            if (nt) {
-                mp_remove_track(mpctx, t);
-                mp_switch_track(mpctx, nt->type, nt);
-                print_track_list(mpctx);
-                return 0;
-            }
+            char *filename = talloc_strdup(NULL, t->external_filename);
+            mp_remove_track(mpctx, t);
+            nt = mp_add_external_file(mpctx, filename, type);
+            talloc_free(filename);
+        }
+        if (nt) {
+            mp_switch_track(mpctx, nt->type, nt);
+            print_track_list(mpctx);
+            return 0;
         }
         return -1;
     }
