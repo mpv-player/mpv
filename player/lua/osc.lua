@@ -141,16 +141,35 @@ function limit_range(min, max, val)
     return val
 end
 
+-- translate value into element coordinates
+function get_slider_ele_pos_for(element, val)
+
+    local ele_pos = scale_value(
+        element.slider.min.value, element.slider.max.value,
+        element.slider.min.ele_pos, element.slider.max.ele_pos,
+        val)
+
+    return limit_range(
+        element.slider.min.ele_pos, element.slider.max.ele_pos,
+        ele_pos)
+end
+
+-- translates global (mouse) coordinates to value
+function get_slider_value_at(element, glob_pos)
+
+    local val = scale_value(
+        element.slider.min.glob_pos, element.slider.max.glob_pos,
+        element.slider.min.value, element.slider.max.value,
+        glob_pos)
+
+    return limit_range(
+        element.slider.min.value, element.slider.max.value,
+        val)
+end
+
+-- get value at current mouse position
 function get_slider_value(element)
-    local foV = element.layout.slider.border
-    local pH = (element.layout.geometry.h - (2*foV)) / 2
-
-    local b_x1, b_x2 = element.hitbox.x1 + pH, element.hitbox.x2 - pH
-    local s_min, s_max = element.slider.min, element.slider.max
-
-    local pos = scale_value(b_x1, b_x2, s_min, s_max, mp.get_mouse_pos())
-
-    return limit_range(s_min, s_max, pos)
+    return get_slider_value_at(element, mp.get_mouse_pos())
 end
 
 function countone(val)
@@ -303,6 +322,11 @@ function prepare_elements()
     for _,element in pairs(elements) do
 
         local elem_geo = element.layout.geometry
+
+        -- Calculate the hitbox
+        local bX1, bY1, bX2, bY2 = get_hitbox_coords_geo(elem_geo)
+        element.hitbox = {x1 = bX1, y1 = bY1, x2 = bX2, y2 = bY2}
+
         local style_ass = assdraw.ass_new()
 
         -- prepare static elements
@@ -331,12 +355,25 @@ function prepare_elements()
             local slider_lo = element.layout.slider
             -- offset between element outline and drag-area
             local foV = slider_lo.border + slider_lo.gap
-            local foH = 0
+
+            -- calculate positions of min and max points
             if (slider_lo.stype == "slider") then
-                foH = elem_geo.h / 2
+                element.slider.min.ele_pos = elem_geo.h / 2
+                element.slider.max.ele_pos = elem_geo.w - (elem_geo.h / 2)
+
             elseif (slider_lo.stype == "bar") then
-                foH = slider_lo.border + slider_lo.gap
+                element.slider.min.ele_pos =
+                    slider_lo.border + slider_lo.gap
+                element.slider.max.ele_pos =
+                    elem_geo.w - (slider_lo.border + slider_lo.gap)
             end
+
+            element.slider.min.glob_pos =
+                element.hitbox.x1 + element.slider.min.ele_pos
+            element.slider.max.glob_pos =
+                element.hitbox.x1 + element.slider.max.ele_pos
+
+            -- -- --
 
             static_ass:draw_start()
 
@@ -351,11 +388,10 @@ function prepare_elements()
             if not (element.slider.markerF == nil) and (slider_lo.gap > 0) then
                 local markers = element.slider.markerF()
                 for _,marker in pairs(markers) do
-                    if (marker > element.slider.min) and
-                        (marker < element.slider.max) then
+                    if (marker > element.slider.min.value) and
+                        (marker < element.slider.max.value) then
 
-                        local s = scale_value(element.slider.min,
-                            element.slider.max, foH, (elem_geo.w - foH), marker)
+                        local s = get_slider_ele_pos_for(element, marker)
 
                         if (slider_lo.gap > 1) then -- draw triangles
 
@@ -407,18 +443,6 @@ function prepare_elements()
         if not (element.enabled) then
             element.layout.alpha[1] = 136
             element.eventresponder = nil
-        end
-
-        -- Calculate the hitbox
-        local bX1, bY1, bX2, bY2 = get_hitbox_coords_geo(elem_geo)
-        if type == "slider" then
-            -- if it's a slider, cut the border off,
-            -- as it is not of interest for eventhandling
-            element.hitbox = {
-                x1 = bX1 + slider.border, y1 = bY1 + slider.border,
-                x2 = bX2 - slider.border, y2 = bY2 - slider.border}
-        else
-            element.hitbox = {x1 = bX1, y1 = bY1, x2 = bX2, y2 = bY2}
         end
     end
 end
@@ -485,7 +509,8 @@ function render_elements(master_ass)
 
             local slider_lo = element.layout.slider
             local elem_geo = element.layout.geometry
-            local s_min, s_max = element.slider.min, element.slider.max
+            local s_min, s_max = element.slider.min.value, element.slider.max.value
+
 
             -- draw pos marker
             local pos = element.slider.posF()
@@ -500,12 +525,9 @@ function render_elements(master_ass)
                     foH = slider_lo.border + slider_lo.gap
                 end
 
-                pos = limit_range(s_min, s_max, pos)
+                local xp = get_slider_ele_pos_for(element, pos)
 
-                local xp = scale_value(s_min, s_max,
-                    foH, (elem_geo.w - foH), pos)
-
-                -- the filling, draw it only if positive
+                -- the filling
                 local innerH = elem_geo.h - (2*foV)
 
                 if (slider_lo.stype == "bar") then
@@ -657,7 +679,7 @@ function new_element(name, type)
     elements[name].state = {}
 
     if (type == "slider") then
-        elements[name].slider = {min = 0, max = 100}
+        elements[name].slider = {min = {value = 0}, max = {value = 100}}
     end
 
 
