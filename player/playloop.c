@@ -382,6 +382,13 @@ double get_playback_time(struct MPContext *mpctx)
 {
     double cur = get_current_time(mpctx);
     double start = get_start_time(mpctx);
+    // During seeking, the time corresponds to the last seek time - apply some
+    // cosmetics to it.
+    if (mpctx->playback_pts == MP_NOPTS_VALUE) {
+        double length = get_time_length(mpctx);
+        if (length >= 0)
+            cur = MPCLAMP(cur, start, start + length);
+    }
     return cur >= start ? cur - start : cur;
 }
 
