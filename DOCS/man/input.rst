@@ -405,13 +405,13 @@ List of Input Commands
 
     The ``mode`` argument is one of the following:
 
-    <keep-selection> (default)
-        Do not change current track selections.
-
-    <reselect>
-        Select the default audio and video streams, which typically selects
+    <reselect> (default)
+        Select the default audio and subtitle streams, which typically selects
         external files with highest preference. (The implementation is not
         perfect, and could be improved on request.)
+
+    <keep-selection>
+        Do not change current track selections.
 
 
 Input Commands that are Possibly Subject to Change
