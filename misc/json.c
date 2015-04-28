@@ -218,11 +218,11 @@ int json_parse(void *ta_parent, struct mpv_node *dst, char **src, int max_depth)
 
 #define APPEND(b, s) bstr_xappend(NULL, (b), bstr0(s))
 
-static void write_json_str(bstr *b, char *str)
+static void write_json_str(bstr *b, unsigned char *str)
 {
     APPEND(b, "\"");
     while (1) {
-        char *cur = str;
+        unsigned char *cur = str;
         while (cur[0] && cur[0] >= 32 && cur[0] != '"' && cur[0] != '\\')
             cur++;
         if (!cur[0])
