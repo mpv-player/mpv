@@ -6,9 +6,9 @@ Changes
 
 - mpv's IRC channel moved from #mpv-player to #mpv on chat.freenode.net.
 - Documentation updates.
-- The default value for the `--ytdl-format` option is now `best`, in order
-  to avoid current development `youtube-dl`'s enabling of DASH by default,
-  as mpv does not yet properly support DASH.
+- The default value for the `--ytdl-format` option is now `best`, in order to
+  work around `youtube-dl`'s 2015.04.26 release enabling DASH by default, as
+  FFmpeg / Libav do not yet properly support DASH.
 
 Bug fixes
 ---------
