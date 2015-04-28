@@ -381,7 +381,8 @@ Location and Syntax
 You can put all of the options in configuration files which will be read every
 time mpv is run. The system-wide configuration file 'mpv.conf' is in your
 configuration directory (e.g. ``/etc/mpv`` or ``/usr/local/etc/mpv``), the
-user-specific one is ``~/.config/mpv/mpv.conf``.
+user-specific one is ``~/.config/mpv/mpv.conf``. For details and platform
+specifics see the `FILES`_ section.
 User-specific options override system-wide options and options given on the
 command line override either. The syntax of the configuration files is
 ``option=<value>``; everything after a *#* is considered a comment. Options
@@ -798,6 +799,8 @@ input command can take an exit code: in this case, that exit code is returned.
 
 FILES
 =====
+
+For Windows-specifics, see `FILES ON WINDOWS`_ section.
 
 ``/usr/local/etc/mpv/mpv.conf``
     mpv system-wide settings (depends on ``--prefix`` passed to configure - mpv
