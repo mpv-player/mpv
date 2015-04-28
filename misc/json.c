@@ -220,18 +220,30 @@ int json_parse(void *ta_parent, struct mpv_node *dst, char **src, int max_depth)
 
 static void write_json_str(bstr *b, char *str)
 {
+    struct bstr prev, in_str = bstr0(str);
+    unsigned char *copy_from;
+
     APPEND(b, "\"");
     while (1) {
-        char *cur = str;
-        while (cur[0] && cur[0] >= 32 && cur[0] != '"' && cur[0] != '\\')
-            cur++;
-        if (!cur[0])
+        copy_from = in_str.start;
+
+        int chr;
+        do {
+            prev = in_str;
+            chr = bstr_decode_utf8(prev, &in_str);
+            if (chr == -1) {
+                chr = in_str.start[0];
+                in_str.start++;
+                in_str.len--;
+            }
+        } while (chr >= 0x20 && chr <= 0x7f && chr != '"' && chr != '\\');
+
+        if (!prev.start[0])
             break;
-        bstr_xappend(NULL, b, (bstr){str, cur - str});
-        bstr_xappend_asprintf(NULL, b, "\\u%04x", (unsigned char)cur[0]);
-        str = cur + 1;
+        bstr_xappend(NULL, b, (bstr){copy_from, prev.start - copy_from});
+        bstr_xappend_asprintf(NULL, b, "\\u%04x", chr);
     }
-    APPEND(b, str);
+    APPEND(b, copy_from);
     APPEND(b, "\"");
 }
 
