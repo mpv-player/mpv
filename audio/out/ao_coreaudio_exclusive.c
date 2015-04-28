@@ -433,12 +433,6 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
         bool digital = ca_stream_supports_digital(ao, streams[i]);
 
         if (digital) {
-            err = CA_GET(streams[i], kAudioStreamPropertyPhysicalFormat,
-                         &p->original_asbd);
-            if (!CHECK_CA_WARN("could not get stream's physical format to "
-                               "revert to, getting the next one"))
-                continue;
-
             AudioStreamRangedDescription *formats;
             size_t n_formats;
 
@@ -484,6 +478,10 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
         MP_WARN(ao , "can't find any digital output stream format\n");
         goto coreaudio_error;
     }
+
+    err = CA_GET(p->stream, kAudioStreamPropertyPhysicalFormat,
+                 &p->original_asbd);
+    CHECK_CA_ERROR("could not get stream's original physical format");
 
     if (!ca_change_format(ao, p->stream, p->stream_asbd))
         goto coreaudio_error;
