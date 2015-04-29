@@ -9,6 +9,9 @@ Changes
 - The default value for the `--ytdl-format` option is now `best`, in order to
   work around `youtube-dl`'s 2015.04.26 release enabling DASH by default, as
   FFmpeg / Libav do not yet properly support DASH.
+- When seeking, the current timestamp will show the predicted seek timestamp
+  instead, until the final timestamp is resolved. Improves UI responsiveness
+  on slow streams and/or large seeks.
 
 Bug fixes
 ---------
@@ -18,6 +21,9 @@ Bug fixes
 - Fix `vo_vdpau` rendering garbage lines on H.264 video with non-mod16 size
   (issue #1863).
 - Fix a crash on exit if the "sub_reload" command had run successfully.
+- Fixed seeking with the mouse when `osc-seekbarstyle=bar` is set (issue
+  #1876).
+- (IPC) Fixed encoding of UTF-8 data in JSON (issue #1874).
 
 New features
 ------------
