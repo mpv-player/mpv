@@ -357,12 +357,17 @@ static OSStatus render_cb_digital(
 
     // Check whether we need to reset the digital output stream.
     if (p->stream_asbd_changed) {
-        p->stream_asbd_changed = 0;
-        if (!p->reload_requested && ca_stream_supports_digital(ao, p->stream)) {
-            p->reload_requested = true;
-            ao_request_reload(ao);
-            MP_INFO(ao, "Stream format changed! Reloading.\n");
-        }
+        AudioStreamBasicDescription f;
+        OSErr err = CA_GET(p->stream, kAudioStreamPropertyPhysicalFormat, &f);
+        CHECK_CA_WARN("could not get stream format");
+        if (err == noErr && ca_asbd_equals(&p->stream_asbd, &f))
+            p->stream_asbd_changed = 0;
+    }
+
+    if (p->stream_asbd_changed && !p->reload_requested) {
+        p->reload_requested = true;
+        ao_request_reload(ao);
+        MP_INFO(ao, "Stream format changed! Reloading.\n");
     }
 
     return noErr;
