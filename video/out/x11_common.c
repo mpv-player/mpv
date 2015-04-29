@@ -1752,10 +1752,12 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_GET_ICC_PROFILE: {
         if (!x11->pseudo_mapped)
             return VO_NOTAVAIL;
+        int cx = x11->winrc.x0 + (x11->winrc.x1 - x11->winrc.x0)/2,
+            cy = x11->winrc.y0 + (x11->winrc.y1 - x11->winrc.y0)/2;
         int screen = 0; // xinerama screen number
         for (int n = 0; n < x11->num_displays; n++) {
             struct xrandr_display *disp = &x11->displays[n];
-            if (disp->overlaps) {
+            if (mp_rect_contains(&disp->rc, cx, cy)) {
                 screen = n;
                 break;
             }
