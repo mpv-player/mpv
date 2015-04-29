@@ -2564,6 +2564,11 @@ Screenshot
 
     Default: ``yes``.
 
+``--screenshot-high-bit-depth=<yes|no>``
+    If possible, write screenshots with a bit depth similar to the source
+    video (default: yes). This is interesting in particular for PNG, as this
+    sometimes triggers writing 16 bit PNGs with huge file sizes.
+
 ``--screenshot-template=<template>``
     Specify the filename template used to save screenshots. The template
     specifies the filename without file extension, and can contain format

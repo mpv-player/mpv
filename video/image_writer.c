@@ -42,6 +42,7 @@
 
 const struct image_writer_opts image_writer_opts_defaults = {
     .format = "jpg",
+    .high_bit_depth = 1,
     .png_compression = 7,
     .png_filter = 5,
     .jpeg_quality = 90,
@@ -64,6 +65,7 @@ const struct m_sub_options image_writer_conf = {
         OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
         OPT_INTRANGE("png-filter", png_filter, 0, 0, 5),
         OPT_STRING("format", format, 0),
+        OPT_FLAG("high-bit-depth", high_bit_depth, 0),
         OPT_FLAG("tag-colorspace", tag_csp, 0),
         {0},
     },
@@ -218,6 +220,22 @@ static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
 
 #endif
 
+static int get_encoder_format(struct AVCodec *codec, int srcfmt, bool highdepth)
+{
+    const enum AVPixelFormat *pix_fmts = codec->pix_fmts;
+    int current = 0;
+    for (int n = 0; pix_fmts && pix_fmts[n] != AV_PIX_FMT_NONE; n++) {
+        int fmt = pixfmt2imgfmt(pix_fmts[n]);
+        if (!fmt)
+            continue;
+        // Ignore formats larger than 8 bit per pixel.
+        if (!highdepth && IMGFMT_RGB_DEPTH(fmt) > 32)
+            continue;
+        current = current ? mp_imgfmt_select_best(current, fmt, srcfmt) : fmt;
+    }
+    return current;
+}
+
 static int get_target_format(struct image_writer_ctx *ctx, int srcfmt)
 {
     if (!ctx->writer->lavc_codec)
@@ -227,22 +245,14 @@ static int get_target_format(struct image_writer_ctx *ctx, int srcfmt)
     if (!codec)
         goto unknown;
 
-    const enum AVPixelFormat *pix_fmts = codec->pix_fmts;
-    if (!pix_fmts)
+    int target = get_encoder_format(codec, srcfmt, ctx->opts->high_bit_depth);
+    if (!target)
+        target = get_encoder_format(codec, srcfmt, true);
+
+    if (!target)
         goto unknown;
 
-    int current = 0;
-    for (int n = 0; pix_fmts[n] != AV_PIX_FMT_NONE; n++) {
-        int fmt = pixfmt2imgfmt(pix_fmts[n]);
-        if (!fmt)
-            continue;
-        current = current ? mp_imgfmt_select_best(current, fmt, srcfmt) : fmt;
-    }
-
-    if (!current)
-        goto unknown;
-
-    return current;
+    return target;
 
 unknown:
     return IMGFMT_RGB24;
