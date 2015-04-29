@@ -401,13 +401,15 @@ static bool stream_reconnect(stream_t *s)
         if (mp_cancel_wait(s->cancel, sleep_secs))
             break;
 
-        MP_WARN(s, "Connection lost! Attempting to reconnect (%d)...\n", retry + 1);
-
         int r = stream_control(s, STREAM_CTRL_RECONNECT, NULL);
         if (r == STREAM_UNSUPPORTED)
             break;
-        if (r == STREAM_OK && stream_seek_unbuffered(s, pos) && s->pos == pos)
+        if (r == STREAM_OK && stream_seek_unbuffered(s, pos) && s->pos == pos) {
+            MP_WARN(s, "Reconnected successfully.\n");
             return true;
+        }
+
+        MP_WARN(s, "Connection lost! Attempting to reconnect (%d)...\n", retry + 1);
 
         sleep_secs = MPMAX(sleep_secs, 0.1);
         sleep_secs = MPMIN(sleep_secs * 4, 10.0);
