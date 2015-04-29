@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "config.h"
 
@@ -265,28 +266,42 @@ error_exit:
 static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
 {
     int sequence = 0;
+    char *target_dir = mp_getcwd(NULL);
+    if(access(target_dir, W_OK|F_OK)) {
+        // Fallback to $HOME if cwd is not writable
+        talloc_free(target_dir);
+        target_dir = talloc_strdup(NULL, getenv("HOME"));
+    }
+    target_dir = talloc_strdup_append(target_dir, "/");
     for (;;) {
         int prev_sequence = sequence;
-        char *fname = create_fname(ctx->mpctx,
-                                   ctx->mpctx->opts->screenshot_template,
-                                   file_ext,
-                                   &sequence,
-                                   &ctx->frameno);
+        char *fname = talloc_strdup(NULL, target_dir);
+        char *filename = create_fname(ctx->mpctx,
+                                      ctx->mpctx->opts->screenshot_template,
+                                      file_ext,
+                                      &sequence,
+                                      &ctx->frameno);
+        fname = talloc_strdup_append(fname, filename);
+        talloc_free(filename);
 
         if (!fname) {
             screenshot_msg(ctx, SMSG_ERR, "Invalid screenshot filename "
                            "template! Fix or remove the --screenshot-template "
                            "option.");
+            talloc_free(target_dir);
             return NULL;
         }
 
-        if (!mp_path_exists(fname))
+        if (!mp_path_exists(fname)) {
+            talloc_free(target_dir);
             return fname;
+        }
 
         if (sequence == prev_sequence) {
             screenshot_msg(ctx, SMSG_ERR, "Can't save screenshot, file '%s' "
                            "already exists!", fname);
             talloc_free(fname);
+            talloc_free(target_dir);
             return NULL;
         }
 
