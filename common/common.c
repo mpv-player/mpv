@@ -95,6 +95,12 @@ void mp_rect_union(struct mp_rect *rc, const struct mp_rect *rc2)
     rc->y1 = FFMAX(rc->y1, rc2->y1);
 }
 
+// Returns whether or not a point is contained by rc
+bool mp_rect_contains(struct mp_rect *rc, int x, int y)
+{
+    return rc->x0 <= x && x < rc->x1 && rc->y0 <= y && y < rc->y1;
+}
+
 // Set rc to the intersection of rc and src.
 // Return false if the result is empty.
 bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2)
