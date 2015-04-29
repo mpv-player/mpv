@@ -178,11 +178,11 @@ void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd)
     asbd->mBitsPerChannel   = af_fmt2bits(ao->format);
     asbd->mFormatFlags      = kAudioFormatFlagIsPacked;
 
-    if ((ao->format & AF_FORMAT_TYPE_MASK) == AF_FORMAT_F)
+    if ((ao->format & AF_FORMAT_TYPE_MASK) == AF_FORMAT_F) {
         asbd->mFormatFlags |= kAudioFormatFlagIsFloat;
-
-    if ((ao->format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_SI)
+    } else if ((ao->format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_SI) {
         asbd->mFormatFlags |= kAudioFormatFlagIsSignedInteger;
+    }
 
     if (BYTE_ORDER == BIG_ENDIAN)
         asbd->mFormatFlags |= kAudioFormatFlagIsBigEndian;
