@@ -669,11 +669,14 @@ Available video output drivers are:
 
         NOTE: Only implemented on OS X and X11
 
-    ``icc-cache=<file>``
-        Store and load the 3D LUT created from the ICC profile in this file.
+    ``icc-cache-dir=<dirname>``
+        Store and load the 3D LUTs created from the ICC profile in this directory.
         This can be used to speed up loading, since LittleCMS 2 can take a while
-        to create the 3D LUT. Note that this file contains an uncompressed LUT.
-        Its size depends on the ``3dlut-size``, and can be very big.
+        to create a 3D LUT. Note that these files contain uncompressed LUTs.
+        Their size depends on the ``3dlut-size``, and can be very big.
+
+        NOTE: This is not cleaned automatically, so old, unused cache files
+        may stick around indefinitely.
 
     ``icc-intent=<value>``
         Specifies the ICC intent used for the color transformation (when using
