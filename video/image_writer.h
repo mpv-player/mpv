@@ -28,6 +28,7 @@ struct image_writer_opts {
     int jpeg_dpi;
     int jpeg_progressive;
     int jpeg_baseline;
+    int jpeg_source_chroma;
     int tag_csp;
 };
 

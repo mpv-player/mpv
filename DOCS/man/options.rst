@@ -2654,6 +2654,10 @@ Screenshot
 ``--screenshot-jpeg-quality=<0-100>``
     Set the JPEG quality level. Higher means better quality. The default is 90.
 
+``--screenshot-jpeg-source-chroma=<yes|no>``
+    Write JPEG files with the same chroma subsampling as the video
+    (default: yes). If disabled, the libjpeg default is used.
+
 ``--screenshot-png-compression=<0-9>``
     Set the PNG compression level. Higher means better compression. This will
     affect the file size of the written screenshot file and the time it takes
