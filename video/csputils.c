@@ -671,18 +671,22 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, struct mp_cmat *m)
         abort();
     }
 
-    rgblev.min = (rgblev.min + params->brightness) * params->contrast;
-    rgblev.max = (rgblev.max + params->brightness) * params->contrast;
-
     double ymul = (rgblev.max - rgblev.min) / (yuvlev.ymax - yuvlev.ymin);
     double cmul = (rgblev.max - rgblev.min) / (yuvlev.cmid - yuvlev.cmin) / 2;
+
+    // Contrast scales the output value range (gain)
+    ymul *= params->contrast;
+    cmul *= params->contrast;
+
     for (int i = 0; i < 3; i++) {
         m->m[i][0] *= ymul;
         m->m[i][1] *= cmul;
         m->m[i][2] *= cmul;
-        // Set c so that Y=umin,UV=cmid maps to RGB=min (black to black)
+        // Set c so that Y=umin,UV=cmid maps to RGB=min (black to black),
+        // also add brightness offset (black lift)
         m->c[i] = rgblev.min - m->m[i][0] * yuvlev.ymin
-                  -(m->m[i][1] + m->m[i][2]) * yuvlev.cmid;
+                  - (m->m[i][1] + m->m[i][2]) * yuvlev.cmid
+                  + params->brightness;
     }
 
     int in_bits = FFMAX(params->int_bits_in, 1);
