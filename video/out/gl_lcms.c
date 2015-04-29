@@ -122,7 +122,7 @@ static bool load_profile(struct gl_lcms *p)
     if (!p->icc_path)
         return false;
 
-    MP_INFO(p, "Opening ICC profile '%s'\n", p->icc_path);
+    MP_VERBOSE(p, "Opening ICC profile '%s'\n", p->icc_path);
     struct bstr iccdata = load_file(p, p->icc_path, p->global);
     if (!iccdata.len)
         return false;
@@ -232,7 +232,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d)
 
     // check cache
     if (cache_file) {
-        MP_INFO(p, "Opening 3D LUT cache in file '%s'.\n", cache_file);
+        MP_VERBOSE(p, "Opening 3D LUT cache in file '%s'.\n", cache_file);
         struct bstr cachedata = load_file(tmp, cache_file, p->global);
         if (cachedata.len == talloc_get_size(output)) {
             memcpy(output, cachedata.start, cachedata.len);
