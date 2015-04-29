@@ -374,11 +374,18 @@ static int control(struct vo *vo, uint32_t request, void *data)
             vo->want_redraw = true;
         return r ? VO_TRUE : VO_NOTIMPL;
     }
-    case VOCTRL_SCREENSHOT_WIN:
+    case VOCTRL_SCREENSHOT_WIN: {
         mpgl_lock(p->glctx);
-        *(struct mp_image **)data = glGetWindowScreenshot(p->gl);
+        struct mp_image *screen = glGetWindowScreenshot(p->gl);
+        // set image parameters according to the display, if possible
+        if (screen) {
+            screen->params.primaries = p->renderer_opts->target_prim;
+            screen->params.gamma = p->renderer_opts->target_trc;
+        }
+        *(struct mp_image **)data = screen;
         mpgl_unlock(p->glctx);
         return true;
+    }
     case VOCTRL_GET_HWDEC_INFO: {
         struct mp_hwdec_info **arg = data;
         *arg = &p->hwdec_info;
