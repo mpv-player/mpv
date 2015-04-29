@@ -55,6 +55,9 @@ OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device);
 void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd);
 void ca_print_asbd(struct ao *ao, const char *description,
                    const AudioStreamBasicDescription *asbd);
+bool ca_asbd_equals(const AudioStreamBasicDescription *a,
+                    const AudioStreamBasicDescription *b);
+int ca_asbd_to_mp_format(const AudioStreamBasicDescription *asbd);
 
 int64_t ca_frames_to_us(struct ao *ao, uint32_t frames);
 int64_t ca_get_latency(const AudioTimeStamp *ts);

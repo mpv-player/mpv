@@ -167,20 +167,21 @@ bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message)
     return false;
 }
 
-void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd)
+static void ca_fill_asbd_raw(AudioStreamBasicDescription *asbd, int mp_format,
+                             int samplerate, int num_channels)
 {
-    asbd->mSampleRate       = ao->samplerate;
+    asbd->mSampleRate       = samplerate;
     // Set "AC3" for other spdif formats too - unknown if that works.
-    asbd->mFormatID         = AF_FORMAT_IS_IEC61937(ao->format) ?
+    asbd->mFormatID         = AF_FORMAT_IS_IEC61937(mp_format) ?
                               kAudioFormat60958AC3 :
                               kAudioFormatLinearPCM;
-    asbd->mChannelsPerFrame = ao->channels.num;
-    asbd->mBitsPerChannel   = af_fmt2bits(ao->format);
+    asbd->mChannelsPerFrame = num_channels;
+    asbd->mBitsPerChannel   = af_fmt2bits(mp_format);
     asbd->mFormatFlags      = kAudioFormatFlagIsPacked;
 
-    if ((ao->format & AF_FORMAT_TYPE_MASK) == AF_FORMAT_F) {
+    if ((mp_format & AF_FORMAT_TYPE_MASK) == AF_FORMAT_F) {
         asbd->mFormatFlags |= kAudioFormatFlagIsFloat;
-    } else if ((ao->format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_SI) {
+    } else if ((mp_format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_SI) {
         asbd->mFormatFlags |= kAudioFormatFlagIsSignedInteger;
     }
 
@@ -191,6 +192,54 @@ void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd)
     asbd->mBytesPerPacket = asbd->mBytesPerFrame =
         asbd->mFramesPerPacket * asbd->mChannelsPerFrame *
         (asbd->mBitsPerChannel / 8);
+}
+
+void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd)
+{
+    ca_fill_asbd_raw(asbd, ao->format, ao->samplerate, ao->channels.num);
+}
+
+static bool ca_formatid_is_digital(uint32_t formatid)
+{
+    switch (formatid)
+    case 'IAC3':
+    case 'iac3':
+    case  kAudioFormat60958AC3:
+    case  kAudioFormatAC3:
+        return true;
+    return false;
+}
+
+// This might be wrong, but for now it's sufficient for us.
+static uint32_t ca_normalize_formatid(uint32_t formatID)
+{
+    return ca_formatid_is_digital(formatID) ? kAudioFormat60958AC3 : formatID;
+}
+
+bool ca_asbd_equals(const AudioStreamBasicDescription *a,
+                    const AudioStreamBasicDescription *b)
+{
+    int flags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat |
+            kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsBigEndian;
+
+    return (a->mFormatFlags & flags) == (b->mFormatFlags & flags) &&
+           a->mBitsPerChannel == b->mBitsPerChannel &&
+           ca_normalize_formatid(a->mFormatID) ==
+                ca_normalize_formatid(b->mFormatID) &&
+           a->mBytesPerPacket == b->mBytesPerPacket;
+}
+
+// Return the AF_FORMAT_* (AF_FORMAT_S16 etc.) corresponding to the asbd.
+int ca_asbd_to_mp_format(const AudioStreamBasicDescription *asbd)
+{
+    for (int n = 0; af_fmtstr_table[n].format; n++) {
+        int mp_format = af_fmtstr_table[n].format;
+        AudioStreamBasicDescription mp_asbd = {0};
+        ca_fill_asbd_raw(&mp_asbd, mp_format, 0, asbd->mChannelsPerFrame);
+        if (ca_asbd_equals(&mp_asbd, asbd))
+            return mp_format;
+    }
+    return 0;
 }
 
 void ca_print_asbd(struct ao *ao, const char *description,
