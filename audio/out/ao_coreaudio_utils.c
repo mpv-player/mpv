@@ -247,12 +247,13 @@ void ca_print_asbd(struct ao *ao, const char *description,
 {
     uint32_t flags  = asbd->mFormatFlags;
     char *format    = fourcc_repr(NULL, asbd->mFormatID);
+    int mpfmt       = ca_asbd_to_mp_format(asbd);
 
     MP_VERBOSE(ao,
        "%s %7.1fHz %" PRIu32 "bit %s "
        "[%" PRIu32 "][%" PRIu32 "bpp][%" PRIu32 "fbp]"
        "[%" PRIu32 "bpf][%" PRIu32 "ch] "
-       "%s %s %s%s%s%s\n",
+       "%s %s %s%s%s%s (%s)\n",
        description, asbd->mSampleRate, asbd->mBitsPerChannel, format,
        asbd->mFormatFlags, asbd->mBytesPerPacket, asbd->mFramesPerPacket,
        asbd->mBytesPerFrame, asbd->mChannelsPerFrame,
@@ -261,7 +262,8 @@ void ca_print_asbd(struct ao *ao, const char *description,
        (flags & kAudioFormatFlagIsSignedInteger) ? "S" : "U",
        (flags & kAudioFormatFlagIsPacked) ? " packed" : "",
        (flags & kAudioFormatFlagIsAlignedHigh) ? " aligned" : "",
-       (flags & kAudioFormatFlagIsNonInterleaved) ? " P" : "");
+       (flags & kAudioFormatFlagIsNonInterleaved) ? " P" : "",
+       mpfmt ? af_fmt_to_str(mpfmt) : "unusable");
 
     talloc_free(format);
 }
