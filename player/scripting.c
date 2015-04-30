@@ -135,8 +135,11 @@ static void mp_load_script(struct MPContext *mpctx, const char *fname)
     MP_VERBOSE(arg, "Loading script %s...\n", fname);
 
     pthread_t thread;
-    if (pthread_create(&thread, NULL, script_thread, arg))
+    if (pthread_create(&thread, NULL, script_thread, arg)) {
+        mpv_detach_destroy(arg->client);
         talloc_free(arg);
+        return;
+    }
 
     wait_loaded(mpctx);
     MP_VERBOSE(mpctx, "Done loading %s.\n", fname);
