@@ -30,6 +30,8 @@
 
 #include <libavutil/rational.h>
 
+#include "osdep/atomics.h"
+
 #include "common/common.h"
 #include "common/msg.h"
 #include "options/m_config.h"
@@ -72,6 +74,8 @@ struct priv {
 
     // for RAM input
     MMAL_POOL_T *swpool;
+
+    atomic_bool update_display;
 
     int background_layer;
     int video_layer;
@@ -525,14 +529,31 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SCREENSHOT_WIN:
         *(struct mp_image **)data = take_screenshot(vo);
         return VO_TRUE;
+    case VOCTRL_CHECK_EVENTS:
+        if (atomic_load(&p->update_display)) {
+            atomic_store(&p->update_display, false);
+            update_display_size(vo);
+        }
+        return VO_TRUE;
     }
 
     return VO_NOTIMPL;
 }
 
+static void tv_callback(void *callback_data, uint32_t reason, uint32_t param1,
+                        uint32_t param2)
+{
+    struct vo *vo = callback_data;
+    struct priv *p = vo->priv;
+    atomic_store(&p->update_display, true);
+    vo_wakeup(vo);
+}
+
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
+
+    vc_tv_unregister_callback_full(tv_callback, vo);
 
     talloc_free(p->next_image);
 
@@ -587,6 +608,8 @@ static int preinit(struct vo *vo)
 
     if (update_display_size(vo) < 0)
         goto fail;
+
+    vc_tv_register_callback(tv_callback, vo);
 
     return 0;
 
