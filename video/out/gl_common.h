@@ -114,13 +114,9 @@ typedef struct MPGLContext {
     void (*register_resize_callback)(struct vo *vo,
                                      void (*cb)(struct vo *vo, int w, int h));
 
-    // Optional activity state of context.
-    // If false, OpenGL renderers should not draw anything.
-    bool (*is_active)(struct MPGLContext *);
-
     // Optional callback on the beginning of a frame. The frame will be finished
-    // with swapGlBuffers(). Like is_active, this returns false if use of the
-    // OpenGL context should be avoided.
+    // with swapGlBuffers(). This returns false if use of the OpenGL context
+    // should be avoided.
     bool (*start_frame)(struct MPGLContext *);
 
     // For free use by the backend.

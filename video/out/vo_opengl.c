@@ -78,6 +78,8 @@ struct gl_priv {
 
     int vo_flipped;
 
+    bool frame_started;
+
     int frames_rendered;
     unsigned int prev_sgi_sync_count;
 
@@ -124,8 +126,11 @@ static void flip_page(struct vo *vo)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    if (p->glctx->is_active && !p->glctx->is_active(p->glctx))
+    if (!p->frame_started) {
+        vo_increment_drop_count(vo, 1);
         return;
+    }
+    p->frame_started = false;
 
     mpgl_lock(p->glctx);
 
@@ -171,25 +176,20 @@ static void draw_image_timed(struct vo *vo, mp_image_t *mpi,
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    if (p->glctx->is_active && !p->glctx->is_active(p->glctx)) {
-        if (mpi)
-            gl_video_skip_image(p->renderer, mpi);
-        return;
-    }
-
     if (p->vo_flipped)
         mp_image_vflip(mpi);
 
     mpgl_lock(p->glctx);
 
     if (mpi)
-        gl_video_upload_image(p->renderer, mpi);
+        gl_video_set_image(p->renderer, mpi);
 
     if (p->glctx->start_frame && !p->glctx->start_frame(p->glctx)) {
         mpgl_unlock(p->glctx);
         return;
     }
 
+    p->frame_started = true;
     gl_video_render_frame(p->renderer, 0, t);
 
     // The playloop calls this last before waiting some time until it decides
@@ -394,11 +394,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
         request_hwdec_api(p, data);
         return true;
     case VOCTRL_REDRAW_FRAME:
-        if (p->glctx->is_active && !p->glctx->is_active(p->glctx))
-            return true;
-
         mpgl_lock(p->glctx);
-        gl_video_render_frame(p->renderer, 0, NULL);
+        if (!(p->glctx->start_frame && !p->glctx->start_frame(p->glctx))) {
+            p->frame_started = true;
+            gl_video_render_frame(p->renderer, 0, NULL);
+        }
         mpgl_unlock(p->glctx);
         return true;
     case VOCTRL_SET_COMMAND_LINE: {
