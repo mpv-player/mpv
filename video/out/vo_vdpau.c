@@ -97,7 +97,6 @@ struct vdpctx {
     int                                flip_offset_window;
     int                                flip_offset_fs;
     int64_t                            flip_offset_us;
-    bool                               flip;
 
     VdpRect                            src_rect_vid;
     VdpRect                            out_rect_vid;
@@ -237,8 +236,8 @@ static void resize(struct vo *vo)
     vc->out_rect_vid.y1 = dst_rect.y1;
     vc->src_rect_vid.x0 = src_rect.x0;
     vc->src_rect_vid.x1 = src_rect.x1;
-    vc->src_rect_vid.y0 = vc->flip ? src_rect.y1 : src_rect.y0;
-    vc->src_rect_vid.y1 = vc->flip ? src_rect.y0 : src_rect.y1;
+    vc->src_rect_vid.y0 = src_rect.y0;
+    vc->src_rect_vid.y1 = src_rect.y1;
 
     vc->flip_offset_us = vo->opts->fullscreen ?
                          1000LL * vc->flip_offset_fs :
@@ -420,7 +419,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     if (!check_preemption(vo))
         return -1;
 
-    vc->flip = flags & VOFLAG_FLIPPING;
     vc->image_format = params->imgfmt;
     vc->vid_width    = params->w;
     vc->vid_height   = params->h;

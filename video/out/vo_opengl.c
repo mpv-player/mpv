@@ -76,8 +76,6 @@ struct gl_priv {
 
     char *backend;
 
-    int vo_flipped;
-
     bool frame_started;
 
     int frames_rendered;
@@ -176,9 +174,6 @@ static void draw_image_timed(struct vo *vo, mp_image_t *mpi,
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    if (p->vo_flipped)
-        mp_image_vflip(mpi);
-
     mpgl_lock(p->glctx);
 
     if (mpi)
@@ -241,8 +236,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     resize(p);
 
     gl_video_config(p->renderer, params);
-
-    p->vo_flipped = !!(flags & VOFLAG_FLIPPING);
 
     mpgl_unlock(p->glctx);
 
