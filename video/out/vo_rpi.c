@@ -533,6 +533,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         if (atomic_load(&p->update_display)) {
             atomic_store(&p->update_display, false);
             update_display_size(vo);
+            if (p->renderer_enabled)
+                resize(vo);
         }
         return VO_TRUE;
     }
