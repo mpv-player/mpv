@@ -632,13 +632,21 @@ static void draw_changes_after_next_frame(struct vo *vo)
     }
 }
 
+bool vo_cocoa_start_frame(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+
+    s->skip_swap_buffer = false;
+    return true;
+}
+
 void vo_cocoa_swap_buffers(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
     if (s->skip_swap_buffer && !s->waiting_frame) {
         s->skip_swap_buffer = false;
-        return;
+        s->pending_events |= VO_EVENT_EXPOSE;
     } else {
         [s->gl_ctx flushBuffer];
     }

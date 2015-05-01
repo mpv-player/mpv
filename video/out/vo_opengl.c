@@ -184,6 +184,12 @@ static void draw_image_timed(struct vo *vo, mp_image_t *mpi,
 
     if (mpi)
         gl_video_upload_image(p->renderer, mpi);
+
+    if (p->glctx->start_frame && !p->glctx->start_frame(p->glctx)) {
+        mpgl_unlock(p->glctx);
+        return;
+    }
+
     gl_video_render_frame(p->renderer, 0, t);
 
     // The playloop calls this last before waiting some time until it decides
