@@ -195,6 +195,7 @@ SOURCES = audio/audio.c \
           options/parse_configfile.c \
           options/path.c \
           osdep/io.c \
+          osdep/path-unix.c \
           osdep/semaphore_osx.c \
           osdep/subprocess.c \
           osdep/subprocess-posix.c \

@@ -19,12 +19,14 @@
 #include "options/path.h"
 #include "osdep/path.h"
 
-int mp_add_macosx_bundle_dir(struct mpv_global *global, char **dirs, int i)
+const char *mp_get_platform_path_osx(void *talloc_ctx, const char *type)
 {
-    void *talloc_ctx = dirs;
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSString *path = [[NSBundle mainBundle] resourcePath];
-    dirs[i++] = talloc_strdup(talloc_ctx, [path UTF8String]);
-    [pool release];
-    return i;
+    if (strcmp(type, "osxbundle") == 0) {
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+        NSString *path = [[NSBundle mainBundle] resourcePath];
+        char *res = talloc_strdup(talloc_ctx, [path UTF8String]);
+        [pool release];
+        return res;
+    }
+    return NULL;
 }

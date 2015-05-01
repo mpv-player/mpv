@@ -1,15 +1,22 @@
 #ifndef OSDEP_PATH_H
 #define OSDEP_PATH_H
 
-#define MAX_CONFIG_PATHS 32
+// Return a platform-specific path, identified by the type parameter. If the
+// return value is allocated, talloc_ctx is used as talloc parent context.
+//
+// The following type values are defined:
+//  "home"          the native mpv-specific user config dir
+//  "old_home"      same as "home", but lesser priority (compatibility)
+//  "osxbundle"     OSX bundle path
+//  "global"        the least priority, global config file location
+//
+// It is allowed to return a static string, so the caller must set talloc_ctx
+// to something other than NULL to avoid memory leaks.
+typedef const char *(*mp_get_platform_path_cb)(void *talloc_ctx, const char *type);
 
-struct mpv_global;
-
-// Append paths starting at dirs[i]. The dirs array has place only for at most
-// MAX_CONFIG_PATHS paths, but it's guaranteed that at least 4 paths can be
-// added without checking for i>=MAX_CONFIG_PATHS.
-// Return the new value of i.
-int mp_add_win_config_dirs(struct mpv_global *global, char **dirs, int i);
-int mp_add_macosx_bundle_dir(struct mpv_global *global, char **dirs, int i);
+// Conforming to mp_get_platform_path_cb.
+const char *mp_get_platform_path_win(void *talloc_ctx, const char *type);
+const char *mp_get_platform_path_osx(void *talloc_ctx, const char *type);
+const char *mp_get_platform_path_unix(void *talloc_ctx, const char *type);
 
 #endif

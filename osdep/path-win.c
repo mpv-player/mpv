@@ -58,14 +58,14 @@ static char *mp_get_win_app_dir(void *talloc_ctx)
     return talloc_asprintf(talloc_ctx, "%s/mpv", mp_to_utf8(talloc_ctx, w_appdir));
 }
 
-int mp_add_win_config_dirs(struct mpv_global *global, char **dirs, int i)
+const char *mp_get_platform_path_win(void *talloc_ctx, const char *type)
 {
-    void *talloc_ctx = dirs;
-    if ((dirs[i] = mp_get_win_app_dir(talloc_ctx)))
-        i++;
-    if ((dirs[i] = mp_get_win_exe_dir(talloc_ctx)))
-        i++;
-    if ((dirs[i] = mp_get_win_exe_subdir(talloc_ctx)))
-        i++;
-    return i;
+    if (strcmp(type, "home") == 0)
+        return mp_get_win_app_dir(talloc_ctx);
+    if (strcmp(type, "old_home") == 0)
+        return mp_get_win_exe_dir(talloc_ctx);
+    // Not really true, but serves as a way to return a lowest-priority dir.
+    if (strcmp(type, "global") == 0)
+        return mp_get_win_exe_subdir(talloc_ctx);
+    return NULL;
 }
