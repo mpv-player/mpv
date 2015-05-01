@@ -47,7 +47,7 @@ static char *mp_get_win_exe_subdir(void *talloc_ctx)
     return talloc_asprintf(talloc_ctx, "%s/mpv", mp_get_win_exe_dir(talloc_ctx));
 }
 
-static char *mp_get_win_app_dir(void *talloc_ctx)
+static char *mp_get_win_shell_dir(void *talloc_ctx, int folder)
 {
     wchar_t w_appdir[MAX_PATH + 1] = {0};
 
@@ -55,7 +55,13 @@ static char *mp_get_win_app_dir(void *talloc_ctx)
         SHGFP_TYPE_CURRENT, w_appdir) != S_OK)
         return NULL;
 
-    return talloc_asprintf(talloc_ctx, "%s/mpv", mp_to_utf8(talloc_ctx, w_appdir));
+    return mp_to_utf8(talloc_ctx, w_appdir);
+}
+
+static char *mp_get_win_app_dir(void *talloc_ctx)
+{
+    char *path = mp_get_win_shell_dir(talloc_ctx, CSIDL_APPDATA);
+    return path ? mp_path_join(talloc_ctx, bstr0(path), bstr0("mpv")) : NULL;
 }
 
 const char *mp_get_platform_path_win(void *talloc_ctx, const char *type)
@@ -67,5 +73,7 @@ const char *mp_get_platform_path_win(void *talloc_ctx, const char *type)
     // Not really true, but serves as a way to return a lowest-priority dir.
     if (strcmp(type, "global") == 0)
         return mp_get_win_exe_subdir(talloc_ctx);
+    if (strcmp(type, "desktop") == 0)
+        return mp_get_win_shell_dir(talloc_ctx, CSIDL_DESKTOPDIRECTORY);
     return NULL;
 }

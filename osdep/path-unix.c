@@ -60,5 +60,7 @@ const char *mp_get_platform_path_unix(void *talloc_ctx, const char *type)
         return old_home;
     if (strcmp(type, "global") == 0)
         return MPV_CONFDIR;
+    if (strcmp(type, "desktop") == 0)
+        return getenv("HOME");
     return NULL;
 }

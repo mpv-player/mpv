@@ -338,6 +338,7 @@ Name            Meaning
 ``~home/``      same as ``~~/``
 ``~global/``    the global config path, if available
 ``~osxbundle/`` the OSX bundle resource path (OSX only)
+``~desktop/``   the path to the desktop (win32, OSX)
 =============== ================================================================
 
 
