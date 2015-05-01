@@ -764,7 +764,7 @@ const struct MPOpts mp_default_opts = {
     .use_embedded_fonts = 1,
     .sub_fix_timing = 1,
     .sub_cp = "auto",
-    .screenshot_template = "shot%n",
+    .screenshot_template = "mpv-shot%n",
 
     .hwdec_codecs = "h264,vc1,wmv3",
 

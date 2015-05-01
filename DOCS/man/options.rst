@@ -2573,8 +2573,8 @@ Screenshot
     Specify the filename template used to save screenshots. The template
     specifies the filename without file extension, and can contain format
     specifiers, which will be substituted when taking a screenshot.
-    By default the template is ``shot%n``, which results in filenames like
-    ``shot0012.png`` for example.
+    By default the template is ``mpv-shot%n``, which results in filenames like
+    ``mpv-shot0012.png`` for example.
 
     The template can start with a relative or absolute path, in order to
     specify a directory location where screenshots should be saved.
