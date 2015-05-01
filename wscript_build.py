@@ -380,6 +380,7 @@ def build(ctx):
         ( "osdep/subprocess-posix.c",            "posix-spawn" ),
         ( "osdep/subprocess-win.c",              "os-win32" ),
         ( "osdep/path-macosx.m",                 "cocoa" ),
+        ( "osdep/path-unix.c"),
         ( "osdep/path-win.c",                    "os-win32" ),
         ( "osdep/path-win.c",                    "os-cygwin" ),
         ( "osdep/glob-win.c",                    "glob-win32-replacement" ),

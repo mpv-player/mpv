@@ -43,41 +43,36 @@
 #include "osdep/io.h"
 #include "osdep/path.h"
 
-#if !defined(_WIN32) || defined(__CYGWIN__)
-static int mp_add_xdg_config_dirs(struct mpv_global *global, char **dirs, int i)
+#define MAX_CONFIG_PATHS 32
+
+static const char *mp_get_forced_home(void *talloc_ctx, const char *type)
 {
-    void *talloc_ctx = dirs;
-
-    char *home = getenv("HOME");
-    char *tmp = NULL;
-
-    char *xdg_home = NULL;
-    tmp = getenv("XDG_CONFIG_HOME");
-    if (tmp && *tmp)
-        xdg_home = talloc_asprintf(talloc_ctx, "%s/mpv", tmp);
-    else if (home && *home)
-        xdg_home = talloc_asprintf(talloc_ctx, "%s/.config/mpv", home);
-
-    // Maintain compatibility with old ~/.mpv
-    char *old_home = NULL;
-    if (home && *home)
-        old_home = talloc_asprintf(talloc_ctx, "%s/.mpv", home);
-
-    // If the old ~/.mpv exists, and the XDG config dir doesn't, use the old
-    // config dir only.
-    if (mp_path_exists(xdg_home) || !mp_path_exists(old_home))
-        dirs[i++] = xdg_home;
-    dirs[i++] = old_home;
-
-#if HAVE_COCOA
-    i = mp_add_macosx_bundle_dir(global, dirs, i);
-#endif
-
-    dirs[i++] = MPV_CONFDIR;
-
-    return i;
+    return strcmp(type, "home") == 0 ? getenv("MPV_HOME") : NULL;
 }
+
+// In order of increasing priority: the first hiz has highest priority.
+static const mp_get_platform_path_cb path_resolvers[] = {
+    mp_get_forced_home,
+#if HAVE_COCOA
+    mp_get_platform_path_osx,
 #endif
+#if !defined(_WIN32) || defined(__CYGWIN__)
+    mp_get_platform_path_unix,
+#endif
+#if defined(_WIN32)
+    mp_get_platform_path_win,
+#endif
+};
+
+static const char *mp_get_platform_path(void *talloc_ctx, const char *type)
+{
+    for (int n = 0; n < MP_ARRAY_SIZE(path_resolvers); n++) {
+        const char *path = path_resolvers[n](talloc_ctx, type);
+        if (path && path[0])
+            return path;
+    }
+    return NULL;
+}
 
 // Return NULL-terminated array of config directories, from highest to lowest
 // priority
@@ -85,7 +80,8 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
 {
     struct MPOpts *opts = global->opts;
 
-    char **ret = talloc_zero_array(talloc_ctx, char*, MAX_CONFIG_PATHS);
+    char **ret = talloc_zero_array(talloc_ctx, char*, MAX_CONFIG_PATHS + 1);
+    int num_ret = 0;
 
     if (!opts->load_config)
         return ret;
@@ -95,22 +91,23 @@ static char **mp_config_dirs(void *talloc_ctx, struct mpv_global *global)
         return ret;
     }
 
-    const char *tmp = NULL;
-    int i = 0;
+    // from highest (most preferred) to lowest priority
+    static const char *const configdirs[] = {
+        "home",
+        "old_home",
+        "osxbundle",
+        "global",
+    };
 
-    tmp = getenv("MPV_HOME");
-    if (tmp && *tmp)
-        ret[i++] = talloc_strdup(ret, tmp);
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-    i = mp_add_win_config_dirs(global, ret, i);
-#else
-    i = mp_add_xdg_config_dirs(global, ret, i);
-#endif
+    for (int n = 0; n < MP_ARRAY_SIZE(configdirs); n++) {
+        const char *path = mp_get_platform_path(ret, configdirs[n]);
+        if (path && path[0] && num_ret < MAX_CONFIG_PATHS)
+            ret[num_ret++] = (char *)path;
+    }
 
     MP_VERBOSE(global, "search dirs:");
-    for (char **c = ret; *c; c++)
-        MP_VERBOSE(global, " %s", *c);
+    for (int n = 0; n < num_ret; n++)
+        MP_VERBOSE(global, " %s", ret[n]);
     MP_VERBOSE(global, "\n");
 
     return ret;
