@@ -2665,7 +2665,8 @@ Screenshot
     generated.
 
     This option is not set by default, and thus will write screenshots to the
-    directory from which mpv was started.
+    directory from which mpv was started. In pseudio-gui mode
+    (see `PSEUDO GUI MODE`_), this is set to the desktop.
 
 ``--screenshot-jpeg-quality=<0-100>``
     Set the JPEG quality level. Higher means better quality. The default is 90.

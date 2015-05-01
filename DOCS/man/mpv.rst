@@ -648,6 +648,7 @@ the ``pseudo-gui`` profile being predefined with the following contents:
     terminal=no
     force-window=yes
     idle=once
+    screenshot-directory=~desktop/
 
 This follows the mpv config file format. To customize pseudo-GUI mode, you can
 put your own ``pseudo-gui`` profile into your ``mpv.conf``. This profile will

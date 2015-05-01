@@ -102,7 +102,8 @@ static const char def_config[] =
     "[pseudo-gui]\n"
     "terminal=no\n"
     "force-window=yes\n"
-    "idle=once\n";
+    "idle=once\n"
+    "screenshot-directory=~desktop/\n";
 
 static pthread_mutex_t terminal_owner_lock = PTHREAD_MUTEX_INITIALIZER;
 static struct MPContext *terminal_owner;
