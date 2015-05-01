@@ -330,7 +330,16 @@ additionally wrapped in the fixed-length syntax, e.g. ``%n%string_of_length_n``
 Some mpv options interpret paths starting with ``~``. Currently, the prefix
 ``~~/`` expands to the mpv configuration directory (usually ``~/.config/mpv/``).
 ``~/`` expands to the user's home directory. (The trailing ``/`` is always
-required.)
+required.) There are the following paths as well:
+
+=============== ================================================================
+Name            Meaning
+=============== ================================================================
+``~home/``      same as ``~~/``
+``~global/``    the global config path, if available
+``~osxbundle/`` the OSX bundle resource path (OSX only)
+=============== ================================================================
+
 
 Per-File Options
 ----------------
