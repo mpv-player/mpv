@@ -169,34 +169,35 @@ Configurable Options
 
 ``showwindowed``
     | Default: yes
-    | Show OSC when windowed?
+    | Enable the OSC when windowed
 
 ``showfullscreen``
     | Default: yes
-    | Show OSC when fullscreen?
+    | Enable the OSC when fullscreen
 
 ``scalewindowed``
-    | Default: 1
-    | Scaling of the controller when windowed
+    | Default: 1.0
+    | Scale factor of the OSC when windowed
 
 ``scalefullscreen``
-    | Default: 1
-    | Scaling of the controller when fullscreen
+    | Default: 1.0
+    | Scale factor of the OSC when fullscreen
 
 ``scaleforcedwindow``
-    | Default: 2
-    | Scaling of the controller when rendered on a forced (dummy) window
+    | Default: 2.0
+    | Scale factor of the OSC when rendered on a forced (dummy) window
 
 ``vidscale``
     | Default: yes
-    | Scale the controller with the video?
+    | Scale the OSC with the video
+    | ``no`` tries to keep the OSC size constant as much as the window size allows
 
 ``valign``
     | Default: 0.8
     | Vertical alignment, -1 (top) to 1 (bottom)
 
 ``halign``
-    | Default: 0
+    | Default: 0.0
     | Horizontal alignment, -1 (left) to 1 (right)
 
 ``boxalpha``
