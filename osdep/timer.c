@@ -28,7 +28,7 @@
 #include "timer.h"
 
 static uint64_t raw_time_offset;
-pthread_once_t timer_init_once = PTHREAD_ONCE_INIT;
+static pthread_once_t timer_init_once = PTHREAD_ONCE_INIT;
 
 static void do_timer_init(void)
 {
