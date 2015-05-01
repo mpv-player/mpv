@@ -280,6 +280,14 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
             return NULL;
         }
 
+        char *dir = ctx->mpctx->opts->screenshot_direcrory;
+        if (dir && dir[0]) {
+            void *t = fname;
+            dir = mp_get_user_path(t, ctx->mpctx->global, dir);
+            fname = mp_path_join(NULL, bstr0(dir), bstr0(fname));
+            talloc_free(t);
+        }
+
         if (!mp_path_exists(fname))
             return fname;
 
