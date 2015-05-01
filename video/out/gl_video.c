@@ -107,6 +107,7 @@ struct texplane {
 struct video_image {
     struct texplane planes[4];
     bool image_flipped;
+    bool needs_upload;
     struct mp_image *mpi;       // original input image
 };
 
@@ -469,6 +470,7 @@ static void uninit_rendering(struct gl_video *p);
 static void uninit_scaler(struct gl_video *p, struct scaler *scaler);
 static void check_gl_features(struct gl_video *p);
 static bool init_format(int fmt, struct gl_video *init);
+static void gl_video_upload_image(struct gl_video *p);
 
 #define GLSL(x) gl_sc_add(p->sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
@@ -2048,6 +2050,8 @@ void gl_video_render_frame(struct gl_video *p, int fbo, struct frame_timing *t)
     }
 
     if (vimg->mpi) {
+        gl_video_upload_image(p);
+
         gl_sc_set_vao(p->sc, &p->vao);
 
         if (p->opts.interpolation) {
@@ -2124,26 +2128,29 @@ static bool get_image(struct gl_video *p, struct mp_image *mpi)
     return true;
 }
 
-void gl_video_skip_image(struct gl_video *p, struct mp_image *mpi)
+void gl_video_set_image(struct gl_video *p, struct mp_image *mpi)
 {
+    assert(mpi);
+
     struct video_image *vimg = &p->image;
     talloc_free(vimg->mpi);
     vimg->mpi = mpi;
+    vimg->needs_upload = true;
+
+    p->osd_pts = mpi->pts;
 }
 
-void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
+static void gl_video_upload_image(struct gl_video *p)
 {
     GL *gl = p->gl;
 
     struct video_image *vimg = &p->image;
+    struct mp_image *mpi = vimg->mpi;
 
-    p->osd_pts = mpi->pts;
-
-    talloc_free(vimg->mpi);
-    vimg->mpi = mpi;
-
-    if (p->hwdec_active)
+    if (p->hwdec_active || !mpi || !vimg->needs_upload)
         return;
+
+    vimg->needs_upload = false;
 
     assert(mpi->num_planes == p->plane_count);
 
