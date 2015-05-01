@@ -2665,7 +2665,7 @@ Screenshot
     generated.
 
     This option is not set by default, and thus will write screenshots to the
-    directory from which mpv was started. In pseudio-gui mode
+    directory from which mpv was started. In pseudo-gui mode
     (see `PSEUDO GUI MODE`_), this is set to the desktop.
 
 ``--screenshot-jpeg-quality=<0-100>``
