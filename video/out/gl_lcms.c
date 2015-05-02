@@ -36,6 +36,8 @@
 #include "gl_video.h"
 #include "gl_lcms.h"
 
+#include "osdep/io.h"
+
 #if HAVE_LCMS2
 
 #include <lcms2.h>
