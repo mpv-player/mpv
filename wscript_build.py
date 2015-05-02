@@ -71,9 +71,12 @@ def build(ctx):
         source = "demux/ebml.c",
         target = "ebml_defs.c")
 
-    main_fn_c = {
-        'win32':  'player/main-fn-win.c',
-    }.get(ctx.env.DEST_OS, "player/main-fn-unix.c")
+    if ctx.env.DEST_OS == 'win32':
+        main_fn_c = 'osdep/main-fn-win.c'
+    elif ctx.dependency_satisfied('cocoa'):
+        main_fn_c = 'osdep/main-fn-cocoa.c'
+    else:
+        main_fn_c = 'osdep/main-fn-unix.c'
 
     getch2_c = {
         'win32':  'osdep/terminal-win.c',

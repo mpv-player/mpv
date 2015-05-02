@@ -404,7 +404,6 @@ struct track *select_track(struct MPContext *mpctx, enum stream_type type,
                            int tid, int ffid, char **langs);
 
 // main.c
-int mpv_main(int argc, char *argv[]);
 int mp_initialize(struct MPContext *mpctx, char **argv);
 struct MPContext *mp_create(void);
 void mp_destroy(struct MPContext *mpctx);
