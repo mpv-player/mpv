@@ -16,6 +16,7 @@
  */
 
 #include <assert.h>
+#include <time.h>
 #include "config.h"
 #include "playlist.h"
 #include "common/common.h"
@@ -163,8 +164,14 @@ void playlist_shuffle(struct playlist *pl)
     struct playlist_entry *save_current = pl->current;
     bool save_replaced = pl->current_was_replaced;
     int count = playlist_count(pl);
+    unsigned int seed = time(NULL);
+
     struct playlist_entry **arr = talloc_array(NULL, struct playlist_entry *,
                                                count);
+
+    // Seed the random number-generator
+    srand(seed);
+
     for (int n = 0; n < count; n++) {
         arr[n] = pl->first;
         playlist_unlink(pl, pl->first);
