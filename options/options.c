@@ -95,10 +95,6 @@ const m_option_t mp_opts[] = {
     { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
     { "list-options", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
 
-    // handled in main.c (looks at the raw argv[])
-    { "leak-report", CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG | M_OPT_FIXED,
-      .offset = -1 },
-
     OPT_FLAG("shuffle", shuffle, 0),
 
 // ------------------------- common options --------------------

@@ -272,16 +272,6 @@ static bool handle_help_options(struct MPContext *mpctx)
     return opt_exit;
 }
 
-static void osdep_preinit(int argc, char **argv)
-{
-    char *enable_talloc = getenv("MPV_LEAK_REPORT");
-    if (argc > 1 && (strcmp(argv[1], "-leak-report") == 0 ||
-                     strcmp(argv[1], "--leak-report") == 0))
-        enable_talloc = "1";
-    if (enable_talloc && strcmp(enable_talloc, "1") == 0)
-        talloc_enable_leak_report();
-}
-
 static int cfg_include(void *ctx, char *filename, int flags)
 {
     struct MPContext *mpctx = ctx;
@@ -486,7 +476,9 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
 int mpv_main(int argc, char *argv[])
 {
-    osdep_preinit(argc, argv);
+    char *enable_talloc = getenv("MPV_LEAK_REPORT");
+    if (enable_talloc && strcmp(enable_talloc, "1") == 0)
+        talloc_enable_leak_report();
 
     struct MPContext *mpctx = mp_create();
     struct MPOpts *opts = mpctx->opts;

@@ -75,8 +75,7 @@ talloc.h & talloc.c:
     allocation call will never return NULL.
 
     One very useful feature of talloc is fast tracking of memory leaks. ("Fast"
-    as in it doesn't require valgrind.) You can enable it by passing the option
-    --leak-report as first parameter, or better, setting the
+    as in it doesn't require valgrind.) You can enable it by setting the
     MPV_LEAK_REPORT environment variable to "1":
         export MPV_LEAK_REPORT=1
     This will list all unfree'd allocations on exit.
