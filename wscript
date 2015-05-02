@@ -770,12 +770,6 @@ standalone_features = [
         'deps_any': [ 'os-win32', 'os-cygwin'],
         'func': check_ctx_vars('WINDRES')
     }, {
-        'name': 'cocoa-application',
-        'desc': 'standalone Cocoa application',
-        'deps': [ 'cocoa' ],
-        'deps_neg': [ 'libmpv-shared', 'libmpv-static' ],
-        'func': check_true
-    }, {
         'name': '--apple-remote',
         'desc': 'Apple Remote support',
         'deps': [ 'cocoa' ],

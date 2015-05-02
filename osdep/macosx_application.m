@@ -29,6 +29,10 @@
 
 #define MPV_PROTOCOL @"mpv://"
 
+// Whether the NSApplication singleton was created. If this is false, we are
+// running in libmpv mode, and cocoa_main() was never called.
+static bool application_instantiated;
+
 static pthread_t playback_thread_id;
 
 @interface Application ()
@@ -53,9 +57,15 @@ static pthread_t playback_thread_id;
 - (void)setAppleMenu:(NSMenu *)aMenu;
 @end
 
-Application *mpv_shared_app(void)
+static Application *mpv_shared_app(void)
 {
     return (Application *)[Application sharedApplication];
+}
+
+static void terminate_cocoa_application(void)
+{
+    [NSApp hide:NSApp];
+    [NSApp terminate:NSApp];
 }
 
 @implementation Application
@@ -247,12 +257,6 @@ struct playback_thread_ctx {
     char ***argv;
 };
 
-void terminate_cocoa_application(void)
-{
-    [NSApp hide:NSApp];
-    [NSApp terminate:NSApp];
-}
-
 static void cocoa_run_runloop(void)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -274,7 +278,8 @@ static void *playback_thread(void *ctx_obj)
 
 void cocoa_register_menu_item_action(MPMenuKey key, void* action)
 {
-    [NSApp registerSelector:(SEL)action forKey:key];
+    if (application_instantiated)
+        [NSApp registerSelector:(SEL)action forKey:key];
 }
 
 static void init_cocoa_application(bool regular)
@@ -359,6 +364,8 @@ static bool bundle_started_from_finder(int argc, char **argv)
 int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
 {
     @autoreleasepool {
+        application_instantiated = true;
+
         struct playback_thread_ctx ctx = {0};
         ctx.mpv_main = mpv_main;
         ctx.argc     = &argc;
