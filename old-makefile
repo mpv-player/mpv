@@ -335,7 +335,7 @@ all: $(ALL_TARGETS)
 %.o: %.c
 	$(CC) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
 
-mpv: $(OBJECTS) player/main-fn-unix.o
+mpv: $(OBJECTS) osdep/main-fn-unix.o
 	$(CC) -o $@ $^ $(EXTRALIBS)
 
 input/input.c: input/input_conf.h

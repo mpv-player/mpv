@@ -18,8 +18,6 @@
 #ifndef MPV_MACOSX_APPLICATION
 #define MPV_MACOSX_APPLICATION
 
-typedef int (*mpv_main_fn)(int, char**);
-
 // Menu Keys identifing menu items
 typedef enum {
     MPM_H_SIZE,
@@ -30,7 +28,7 @@ typedef enum {
 } MPMenuKey;
 
 // multithreaded wrapper for mpv_main
-int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[]);
+int cocoa_main(int argc, char *argv[]);
 void cocoa_register_menu_item_action(MPMenuKey key, void* action);
 
 #endif /* MPV_MACOSX_APPLICATION */

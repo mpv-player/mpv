@@ -2,10 +2,10 @@
 
 #include "config.h"
 
+#include "common/common.h"
 #include "osdep/io.h"
 #include "osdep/terminal.h"
-
-#include "core.h"
+#include "osdep/main-fn.h"
 
 int wmain(int argc, wchar_t *argv[]);
 
