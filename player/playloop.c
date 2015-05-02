@@ -1049,6 +1049,7 @@ void mp_idle(struct MPContext *mpctx)
     mp_wait_events(mpctx, mpctx->sleeptime);
     mpctx->sleeptime = 100.0;
     mp_process_input(mpctx);
+    handle_command_updates(mpctx);
     handle_cursor_autohide(mpctx);
     handle_vo_events(mpctx);
     update_osd_msg(mpctx);
