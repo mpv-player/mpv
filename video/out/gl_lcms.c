@@ -296,13 +296,12 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d)
     cmsDeleteTransform(trafo);
 
     if (cache_file) {
-        char *fname = mp_get_user_path(NULL, p->global, cache_file);
+        char *fname = mp_get_user_path(tmp, p->global, cache_file);
         FILE *out = fopen(fname, "wb");
         if (out) {
             fwrite(output, talloc_get_size(output), 1, out);
             fclose(out);
         }
-        talloc_free(fname);
     }
 
 done: ;
