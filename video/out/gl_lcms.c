@@ -230,6 +230,8 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d)
         for (int i = 0; i < sizeof(hash); i++)
             cache_file = talloc_asprintf_append(cache_file, "%02X", hash[i]);
         cache_file = mp_path_join(tmp, bstr0(p->opts.cache_dir), bstr0(cache_file));
+
+        mp_mkdirp(p->opts.cache_dir);
     }
 
     // check cache
