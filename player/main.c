@@ -65,10 +65,6 @@
 
 #ifdef _WIN32
 #include <windows.h>
-
-#ifndef BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE
-#define BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE (0x0001)
-#endif
 #endif
 
 #if HAVE_COCOA
@@ -284,27 +280,6 @@ static void osdep_preinit(int argc, char **argv)
         enable_talloc = "1";
     if (enable_talloc && strcmp(enable_talloc, "1") == 0)
         talloc_enable_leak_report();
-
-#ifdef _WIN32
-    // stop Windows from showing all kinds of annoying error dialogs
-    SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX);
-
-    // Enable heap corruption detection
-    HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
-
-    HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
-    WINBOOL (WINAPI *pSetDllDirectory)(LPCWSTR lpPathName) =
-        (WINBOOL (WINAPI *)(LPCWSTR))GetProcAddress(kernel32, "SetDllDirectoryW");
-    WINBOOL (WINAPI *pSetSearchPathMode)(DWORD Flags) =
-        (WINBOOL (WINAPI *)(DWORD))GetProcAddress(kernel32, "SetSearchPathMode");
-
-    // Always use safe search paths for DLLs and other files, ie. never use the
-    // current directory
-    if (pSetSearchPathMode)
-        pSetDllDirectory(L"");
-    if (pSetSearchPathMode)
-        pSetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE);
-#endif
 }
 
 static int cfg_include(void *ctx, char *filename, int flags)
