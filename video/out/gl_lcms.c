@@ -206,7 +206,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d)
     cmsContext cms = NULL;
 
     char *cache_file = NULL;
-    if (p->opts.cache_dir) {
+    if (p->opts.cache_dir && p->opts.cache_dir[0]) {
         // Gamma is included in the header to help uniquely identify it,
         // because we may change the parameter in the future or make it
         // customizable, same for the primaries.
@@ -224,10 +224,10 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d)
         av_sha_final(sha, hash);
         av_free(sha);
 
-        cache_file = talloc_strdup(tmp, p->opts.cache_dir);
-        cache_file = talloc_asprintf_append(cache_file, "/");
+        cache_file = talloc_strdup(tmp, "");
         for (int i = 0; i < sizeof(hash); i++)
             cache_file = talloc_asprintf_append(cache_file, "%02X", hash[i]);
+        cache_file = mp_path_join(tmp, bstr0(p->opts.cache_dir), bstr0(cache_file));
     }
 
     // check cache
