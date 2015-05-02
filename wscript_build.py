@@ -373,7 +373,7 @@ def build(ctx):
         ( "osdep/threads.c" ),
 
         ( "osdep/ar/HIDRemote.m",                "apple-remote" ),
-        ( "osdep/macosx_application.m",          "cocoa-application" ),
+        ( "osdep/macosx_application.m",          "cocoa" ),
         ( "osdep/macosx_events.m",               "cocoa" ),
         ( "osdep/semaphore_osx.c" ),
         ( "osdep/subprocess.c" ),

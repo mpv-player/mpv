@@ -32,6 +32,5 @@ typedef enum {
 // multithreaded wrapper for mpv_main
 int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[]);
 void cocoa_register_menu_item_action(MPMenuKey key, void* action);
-void terminate_cocoa_application(void);
 
 #endif /* MPV_MACOSX_APPLICATION */
