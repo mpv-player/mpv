@@ -332,14 +332,14 @@ Some mpv options interpret paths starting with ``~``. Currently, the prefix
 ``~/`` expands to the user's home directory. (The trailing ``/`` is always
 required.) There are the following paths as well:
 
-=============== ================================================================
-Name            Meaning
-=============== ================================================================
-``~home/``      same as ``~~/``
-``~global/``    the global config path, if available
-``~osxbundle/`` the OSX bundle resource path (OSX only)
-``~desktop/``   the path to the desktop (win32, OSX)
-=============== ================================================================
+================ ===============================================================
+Name             Meaning
+================ ===============================================================
+``~~home/``      same as ``~~/``
+``~~global/``    the global config path, if available (not on win32)
+``~~osxbundle/`` the OSX bundle resource path (OSX only)
+``~~desktop/``   the path to the desktop (win32, OSX)
+================ ===============================================================
 
 
 Per-File Options
@@ -648,7 +648,7 @@ the ``pseudo-gui`` profile being predefined with the following contents:
     terminal=no
     force-window=yes
     idle=once
-    screenshot-directory=~desktop/
+    screenshot-directory=~~desktop/
 
 This follows the mpv config file format. To customize pseudo-GUI mode, you can
 put your own ``pseudo-gui`` profile into your ``mpv.conf``. This profile will
