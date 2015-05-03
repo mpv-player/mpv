@@ -106,13 +106,11 @@ static struct bstr load_file(void *talloc_ctx, const char *filename,
                              struct mpv_global *global)
 {
     struct bstr res = {0};
-    char *fname = mp_get_user_path(NULL, global, filename);
-    stream_t *s = stream_open(fname, global);
+    stream_t *s = stream_open(filename, global);
     if (s) {
         res = stream_read_complete(s, talloc_ctx, 1000000000);
         free_stream(s);
     }
-    talloc_free(fname);
     return res;
 }
 
@@ -124,8 +122,10 @@ static bool load_profile(struct gl_lcms *p)
     if (!p->icc_path)
         return false;
 
-    MP_VERBOSE(p, "Opening ICC profile '%s'\n", p->icc_path);
-    struct bstr iccdata = load_file(p, p->icc_path, p->global);
+    char *fname = mp_get_user_path(NULL, p->global, p->icc_path);
+    MP_VERBOSE(p, "Opening ICC profile '%s'\n", fname);
+    struct bstr iccdata = load_file(p, fname, p->global);
+    talloc_free(fname);
     if (!iccdata.len)
         return false;
 
@@ -226,12 +226,13 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d)
         av_sha_final(sha, hash);
         av_free(sha);
 
+        char *cache_dir = mp_get_user_path(tmp, p->global, p->opts.cache_dir);
         cache_file = talloc_strdup(tmp, "");
         for (int i = 0; i < sizeof(hash); i++)
             cache_file = talloc_asprintf_append(cache_file, "%02X", hash[i]);
-        cache_file = mp_path_join(tmp, bstr0(p->opts.cache_dir), bstr0(cache_file));
+        cache_file = mp_path_join(tmp, bstr0(cache_dir), bstr0(cache_file));
 
-        mp_mkdirp(p->opts.cache_dir);
+        mp_mkdirp(cache_dir);
     }
 
     // check cache
@@ -300,8 +301,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d)
     cmsDeleteTransform(trafo);
 
     if (cache_file) {
-        char *fname = mp_get_user_path(tmp, p->global, cache_file);
-        FILE *out = fopen(fname, "wb");
+        FILE *out = fopen(cache_file, "wb");
         if (out) {
             fwrite(output, talloc_get_size(output), 1, out);
             fclose(out);
