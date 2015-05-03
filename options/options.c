@@ -539,7 +539,7 @@ const m_option_t mp_opts[] = {
 
     OPT_SUBSTRUCT("screenshot", screenshot_image_opts, image_writer_conf, 0),
     OPT_STRING("screenshot-template", screenshot_template, 0),
-    OPT_STRING("screenshot-directory", screenshot_direcrory, 0),
+    OPT_STRING("screenshot-directory", screenshot_directory, 0),
 
     OPT_SUBSTRUCT("input", input_opts, input_config, 0),
 
