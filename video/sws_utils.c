@@ -107,12 +107,9 @@ bool mp_sws_supported_format(int imgfmt)
 
 static int mp_csp_to_sws_colorspace(enum mp_csp csp)
 {
-    switch (csp) {
-    case MP_CSP_BT_601:     return SWS_CS_ITU601;
-    case MP_CSP_BT_709:     return SWS_CS_ITU709;
-    case MP_CSP_SMPTE_240M: return SWS_CS_SMPTE240M;
-    default:                return SWS_CS_DEFAULT;
-    }
+    // The SWS_CS_* macros are just convenience redefinitions of the
+    // AVCOL_SPC_* macros, inside swscale.h.
+    return mp_csp_to_avcol_spc(csp);
 }
 
 static bool cache_valid(struct mp_sws_context *ctx)
