@@ -51,7 +51,7 @@ static char *mp_get_win_shell_dir(void *talloc_ctx, int folder)
 {
     wchar_t w_appdir[MAX_PATH + 1] = {0};
 
-    if (SHGetFolderPathW(NULL, CSIDL_APPDATA|CSIDL_FLAG_CREATE, NULL,
+    if (SHGetFolderPathW(NULL, folder|CSIDL_FLAG_CREATE, NULL,
         SHGFP_TYPE_CURRENT, w_appdir) != S_OK)
         return NULL;
 
