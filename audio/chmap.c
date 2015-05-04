@@ -268,6 +268,7 @@ void mp_chmap_remove_useless_channels(struct mp_chmap *map,
 }
 
 // Return the ffmpeg/libav channel layout as in <libavutil/channel_layout.h>.
+// Speakers not representable by ffmpeg/libav are dropped.
 // Warning: this ignores the order of the channels, and will return a channel
 //          mask even if the order is different from libavcodec's.
 uint64_t mp_chmap_to_lavc_unchecked(const struct mp_chmap *src)
@@ -277,8 +278,10 @@ uint64_t mp_chmap_to_lavc_unchecked(const struct mp_chmap *src)
     if (mp_chmap_is_unknown(&t))
         mp_chmap_from_channels(&t, t.num);
     uint64_t mask = 0;
-    for (int n = 0; n < t.num; n++)
-        mask |= 1ULL << t.speaker[n];
+    for (int n = 0; n < t.num; n++) {
+        if (t.speaker[n] < 64)
+            mask |= 1ULL << t.speaker[n];
+    }
     return mask;
 }
 
