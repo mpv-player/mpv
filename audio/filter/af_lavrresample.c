@@ -81,6 +81,7 @@ struct af_resample {
     struct mp_audio *pending;
     bool avrctx_ok;
     struct AVAudioResampleContext *avrctx;
+    struct mp_audio avrctx_fmt; // output format of avrctx
     struct AVAudioResampleContext *avrctx_out; // for output channel reordering
     struct af_resample_opts ctx;   // opts in the context
     struct af_resample_opts opts;  // opts requested by the user
@@ -163,6 +164,22 @@ static bool test_conversion(int src_format, int dst_format)
            af_to_avformat(dst_format) != AV_SAMPLE_FMT_NONE;
 }
 
+// mp_chmap_get_reorder() performs:
+//  to->speaker[n] = from->speaker[src[n]]
+// but libavresample does:
+//  to->speaker[dst[n]] = from->speaker[n]
+static void transpose_order(int *map, int num)
+{
+    int nmap[MP_NUM_CHANNELS] = {0};
+    for (int n = 0; n < num; n++) {
+        for (int i = 0; i < num; i++) {
+            if (map[n] == i)
+                nmap[i] = n;
+        }
+    }
+    memcpy(map, nmap, sizeof(nmap));
+}
+
 static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
                            struct mp_audio *out)
 {
@@ -172,8 +189,12 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
 
     enum AVSampleFormat in_samplefmt = af_to_avformat(in->format);
     enum AVSampleFormat out_samplefmt = af_to_avformat(out->format);
+    enum AVSampleFormat out_samplefmtp =
+        af_to_avformat(af_fmt_to_planar(out->format));
 
-    if (in_samplefmt == AV_SAMPLE_FMT_NONE || out_samplefmt == AV_SAMPLE_FMT_NONE)
+    if (in_samplefmt == AV_SAMPLE_FMT_NONE ||
+        out_samplefmt == AV_SAMPLE_FMT_NONE ||
+        out_samplefmtp == AV_SAMPLE_FMT_NONE)
         return AF_ERROR;
 
     avresample_close(s->avrctx);
@@ -220,27 +241,52 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     uint64_t in_ch_layout = mp_chmap_to_lavc_unchecked(&map_in);
     uint64_t out_ch_layout = mp_chmap_to_lavc_unchecked(&map_out);
 
-    av_opt_set_int(s->avrctx, "in_channel_layout",  in_ch_layout, 0);
-    av_opt_set_int(s->avrctx, "out_channel_layout", out_ch_layout, 0);
-
-    av_opt_set_int(s->avrctx, "in_sample_rate",     s->ctx.in_rate, 0);
-    av_opt_set_int(s->avrctx, "out_sample_rate",    s->ctx.out_rate, 0);
-
-    av_opt_set_int(s->avrctx, "in_sample_fmt",      in_samplefmt, 0);
-    av_opt_set_int(s->avrctx, "out_sample_fmt",     out_samplefmt, 0);
-
     struct mp_chmap in_lavc;
     mp_chmap_from_lavc(&in_lavc, in_ch_layout);
+    if (in_lavc.num != map_in.num) {
+        // For handling NA channels, we would have to add a planarization step.
+        MP_FATAL(af, "Unsupported channel remapping.\n");
+        return AF_ERROR;
+    }
+
     mp_chmap_get_reorder(s->reorder_in, &map_in, &in_lavc);
+    transpose_order(s->reorder_in, map_in.num);
 
     struct mp_chmap out_lavc;
     mp_chmap_from_lavc(&out_lavc, out_ch_layout);
-    mp_chmap_get_reorder(s->reorder_out, &out_lavc, &map_out);
+    if (mp_chmap_equals(&out_lavc, &map_out)) {
+        // No intermediate step required - output new format directly.
+        out_samplefmtp = out_samplefmt;
+    } else {
+        // Verify that we really just reorder and/or insert NA channels.
+        struct mp_chmap withna = out_lavc;
+        mp_chmap_fill_na(&withna, map_out.num);
+        if (withna.num != map_out.num)
+            return AF_ERROR;
+        mp_chmap_get_reorder(s->reorder_out, &out_lavc, &map_out);
+    }
 
-    // Same configuration; we just reorder.
-    av_opt_set_int(s->avrctx_out, "in_channel_layout",  out_ch_layout, 0);
-    av_opt_set_int(s->avrctx_out, "out_channel_layout", out_ch_layout, 0);
-    av_opt_set_int(s->avrctx_out, "in_sample_fmt",      out_samplefmt, 0);
+    s->avrctx_fmt = *out;
+    mp_audio_set_channels(&s->avrctx_fmt, &out_lavc);
+    mp_audio_set_format(&s->avrctx_fmt, af_from_avformat(out_samplefmtp));
+
+    // Real conversion; output is input to avrctx_out.
+    av_opt_set_int(s->avrctx, "in_channel_layout",  in_ch_layout, 0);
+    av_opt_set_int(s->avrctx, "out_channel_layout", out_ch_layout, 0);
+    av_opt_set_int(s->avrctx, "in_sample_rate",     s->ctx.in_rate, 0);
+    av_opt_set_int(s->avrctx, "out_sample_rate",    s->ctx.out_rate, 0);
+    av_opt_set_int(s->avrctx, "in_sample_fmt",      in_samplefmt, 0);
+    av_opt_set_int(s->avrctx, "out_sample_fmt",     out_samplefmtp, 0);
+
+    // Just needs the correct number of channels.
+    int fake_out_ch_layout = av_get_default_channel_layout(map_out.num);
+    if (!fake_out_ch_layout)
+        return AF_ERROR;
+
+    // Deplanarize if needed.
+    av_opt_set_int(s->avrctx_out, "in_channel_layout",  fake_out_ch_layout, 0);
+    av_opt_set_int(s->avrctx_out, "out_channel_layout", fake_out_ch_layout, 0);
+    av_opt_set_int(s->avrctx_out, "in_sample_fmt",      out_samplefmtp, 0);
     av_opt_set_int(s->avrctx_out, "out_sample_fmt",     out_samplefmt, 0);
     av_opt_set_int(s->avrctx_out, "in_sample_rate",     s->ctx.out_rate, 0);
     av_opt_set_int(s->avrctx_out, "out_sample_rate",    s->ctx.out_rate, 0);
@@ -249,7 +295,6 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     //  * This function can only be called when the allocated context is not open.
     //  * Also, the input channel layout must have already been set.
     avresample_set_channel_mapping(s->avrctx, s->reorder_in);
-    avresample_set_channel_mapping(s->avrctx_out, s->reorder_out);
 
     if (avresample_open(s->avrctx) < 0 ||
         avresample_open(s->avrctx_out) < 0)
@@ -354,22 +399,22 @@ static void uninit(struct af_instance *af)
     talloc_free(s->pending);
 }
 
-static bool needs_reorder(int *reorder, int num_ch)
-{
-    for (int n = 0; n < num_ch; n++) {
-        if (reorder[n] != n)
-            return true;
-    }
-    return false;
-}
-
-static void reorder_planes(struct mp_audio *mpa, int *reorder)
+static void reorder_planes(struct mp_audio *mpa, int *reorder,
+                           struct mp_chmap *newmap)
 {
     struct mp_audio prev = *mpa;
-    for (int n = 0; n < mpa->num_planes; n++) {
-        assert(reorder[n] >= 0 && reorder[n] < mpa->num_planes);
-        mpa->planes[n] = prev.planes[reorder[n]];
+
+    for (int n = 0; n < newmap->num; n++) {
+        int src = reorder[n];
+        if (src < 0) {
+            src = 0;    // Use the first plane for padding channels.
+            mpa->readonly = true;
+        }
+        assert(src < mpa->num_planes);
+        mpa->planes[n] = prev.planes[src];
     }
+
+    mp_audio_set_channels(mpa, newmap);
 }
 
 static int filter(struct af_instance *af, struct mp_audio *in)
@@ -388,13 +433,13 @@ static int filter(struct af_instance *af, struct mp_audio *in)
     int samples = avresample_available(s->avrctx) +
         av_rescale_rnd(get_delay(s) + (in ? in->samples : 0),
                        s->ctx.out_rate, s->ctx.in_rate, AV_ROUND_UP);
-    struct mp_audio *out = mp_audio_pool_get(af->out_pool, af->data, samples);
+
+    struct mp_audio out_format = s->avrctx_fmt;
+    struct mp_audio *out = mp_audio_pool_get(af->out_pool, &out_format, samples);
     if (!out)
         goto error;
     if (in)
         mp_audio_copy_attributes(out, in);
-
-    mp_audio_realloc_min(out, out->samples);
 
     af->delay = get_delay(s) / (double)s->ctx.in_rate;
 
@@ -404,11 +449,11 @@ static int filter(struct af_instance *af, struct mp_audio *in)
             goto error;
     }
 
-    if (needs_reorder(s->reorder_out, out->nch)) {
-        if (AF_FORMAT_IS_PLANAR(out->format)) {
-            reorder_planes(out, s->reorder_out);
-        } else if (out->samples) {
-            struct mp_audio *new = mp_audio_pool_get(s->reorder_buffer, out,
+    if (out->samples && !mp_audio_config_equals(out, af->data)) {
+        assert(AF_FORMAT_IS_PLANAR(out->format));
+        reorder_planes(out, s->reorder_out, &af->data->channels);
+        if (!mp_audio_config_equals(out, af->data)) {
+            struct mp_audio *new = mp_audio_pool_get(s->reorder_buffer, af->data,
                                                      out->samples);
             if (!new)
                 goto error;
