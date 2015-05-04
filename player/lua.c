@@ -474,6 +474,12 @@ static int script_resume_all(lua_State *L)
 
 static void pushnode(lua_State *L, mpv_node *node);
 
+static bool is_int(double d)
+{
+    lua_Integer v = d;
+    return d == (double)v;
+}
+
 static int script_wait_event(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
@@ -485,7 +491,7 @@ static int script_wait_event(lua_State *L)
     lua_setfield(L, -2, "event"); // event
 
     if (event->reply_userdata) {
-        lua_pushnumber(L, event->reply_userdata);
+        lua_pushinteger(L, (lua_Integer)event->reply_userdata);
         lua_setfield(L, -2, "id");
     }
 
@@ -527,7 +533,10 @@ static int script_wait_event(lua_State *L)
             pushnode(L, prop->data);
             break;
         case MPV_FORMAT_DOUBLE:
-            lua_pushnumber(L, *(double *)prop->data);
+            if (is_int(*(double *)prop->data))
+                lua_pushinteger(L, *(lua_Integer *)prop->data);
+            else
+                lua_pushnumber(L, *(double *)prop->data);
             break;
         case MPV_FORMAT_FLAG:
             lua_pushboolean(L, *(int *)prop->data);
@@ -615,12 +624,6 @@ static int script_set_property_bool(lua_State *L)
     int v = lua_toboolean(L, 2);
 
     return check_error(L, mpv_set_property(ctx->client, p, MPV_FORMAT_FLAG, &v));
-}
-
-static bool is_int(double d)
-{
-    int64_t v = d;
-    return d == (double)v;
 }
 
 static int script_set_property_number(lua_State *L)
@@ -812,7 +815,10 @@ static int script_get_property_number(lua_State *L)
     double result = 0;
     int err = mpv_get_property(ctx->client, name, MPV_FORMAT_DOUBLE, &result);
     if (err >= 0) {
-        lua_pushnumber(L, result);
+        if (is_int(result))
+            lua_pushinteger(L, (lua_Integer)result);
+        else
+            lua_pushnumber(L, result);
         return 1;
     } else {
         lua_pushvalue(L, 2);
@@ -830,7 +836,7 @@ static void pushnode(lua_State *L, mpv_node *node)
         lua_pushstring(L, node->u.string);
         break;
     case MPV_FORMAT_INT64:
-        lua_pushnumber(L, node->u.int64);
+        lua_pushinteger(L, (lua_Integer)node->u.int64);
         break;
     case MPV_FORMAT_DOUBLE:
         lua_pushnumber(L, node->u.double_);
@@ -922,7 +928,7 @@ static int script_raw_unobserve_property(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
     uint64_t id = luaL_checknumber(L, 1);
-    lua_pushnumber(L, mpv_unobserve_property(ctx->client, id));
+    lua_pushinteger(L, mpv_unobserve_property(ctx->client, id));
     return 1;
 }
 
@@ -962,8 +968,8 @@ static int script_get_osd_resolution(lua_State *L)
     struct MPContext *mpctx = get_mpctx(L);
     int w, h;
     osd_object_get_resolution(mpctx->osd, OSDTYPE_EXTERNAL, &w, &h);
-    lua_pushnumber(L, w);
-    lua_pushnumber(L, h);
+    lua_pushinteger(L, w);
+    lua_pushinteger(L, h);
     return 2;
 }
 
@@ -971,10 +977,13 @@ static int script_get_screen_size(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
     struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_EXTERNAL);
-    double aspect = 1.0 * vo_res.w / MPMAX(vo_res.h, 1) /
-                    (vo_res.display_par ? vo_res.display_par : 1);
-    lua_pushnumber(L, vo_res.w);
-    lua_pushnumber(L, vo_res.h);
+    double aspect = 1.0;
+    if ((vo_res.w > 0) && (vo_res.h > 0))
+        aspect = 1.0 * vo_res.w / vo_res.h /
+                 (vo_res.display_par ? vo_res.display_par : 1);
+
+    lua_pushinteger(L, vo_res.w);
+    lua_pushinteger(L, vo_res.h);
     lua_pushnumber(L, aspect);
     return 3;
 }
@@ -983,10 +992,10 @@ static int script_get_screen_margins(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
     struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_EXTERNAL);
-    lua_pushnumber(L, vo_res.ml);
-    lua_pushnumber(L, vo_res.mt);
-    lua_pushnumber(L, vo_res.mr);
-    lua_pushnumber(L, vo_res.mb);
+    lua_pushinteger(L, vo_res.ml);
+    lua_pushinteger(L, vo_res.mt);
+    lua_pushinteger(L, vo_res.mr);
+    lua_pushinteger(L, vo_res.mb);
     return 4;
 }
 

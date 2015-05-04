@@ -11,12 +11,12 @@ local opt = require 'mp.options'
 local user_opts = {
     showwindowed = true,        -- show OSC when windowed?
     showfullscreen = true,      -- show OSC when fullscreen?
-    scalewindowed = 1,          -- scaling of the controller when windowed
-    scalefullscreen = 1,        -- scaling of the controller when fullscreen
-    scaleforcedwindow = 2,      -- scaling when rendered on a forced window
+    scalewindowed = 1.,         -- scaling of the controller when windowed
+    scalefullscreen = 1.,       -- scaling of the controller when fullscreen
+    scaleforcedwindow = 2.,     -- scaling when rendered on a forced window
     vidscale = true,            -- scale the controller with the video?
     valign = 0.8,               -- vertical alignment, -1 (top) to 1 (bottom)
-    halign = 0,                 -- horizontal alignment, -1 (left) to 1 (right)
+    halign = 0.,                -- horizontal alignment, -1 (left) to 1 (right)
     boxalpha = 80,              -- alpha of the background box,
                                 -- 0 (opaque) to 255 (fully transparent)
     hidetimeout = 500,          -- duration in ms until the OSC hides if no
@@ -38,7 +38,7 @@ read_options(user_opts, "osc")
 local osc_param = { -- calculated by osc_init()
     playresy = 0,                           -- canvas size Y
     playresx = 0,                           -- canvas size X
-    display_aspect = 1,
+    display_aspect = 1.,
     areas = {},
 }
 
@@ -189,7 +189,7 @@ end
 
 -- multiplies two alpha values, formular can probably be improved
 function mult_alpha(alphaA, alphaB)
-    return 255 - (((1-(alphaA/255)) * (1-(alphaB/255))) * 255)
+    return math.floor(255 - (((1-(alphaA/255)) * (1-(alphaB/255))) * 255))
 end
 
 function add_area(name, x1, y1, x2, y2)
@@ -739,8 +739,8 @@ layouts["box"] = function ()
 
     -- make sure the OSC actually fits into the video
     if (osc_param.playresx < (osc_geo.w + (2 * osc_geo.p))) then
-        osc_param.playresy = (osc_geo.w+(2*osc_geo.p))/osc_param.display_aspect
-        osc_param.playresx = osc_param.playresy * osc_param.display_aspect
+        osc_param.playresy = math.floor((osc_geo.w+(2*osc_geo.p))/osc_param.display_aspect)
+        osc_param.playresx = math.floor(osc_param.playresy * osc_param.display_aspect)
     end
 
     -- position of the controller according to video aspect and valignment
@@ -907,8 +907,8 @@ layouts["slimbox"] = function ()
 
     -- make sure the OSC actually fits into the video
     if (osc_param.playresx < (osc_geo.w)) then
-        osc_param.playresy = (osc_geo.w)/osc_param.display_aspect
-        osc_param.playresx = osc_param.playresy * osc_param.display_aspect
+        osc_param.playresy = math.floor((osc_geo.w)/osc_param.display_aspect)
+        osc_param.playresx = math.floor(osc_param.playresy * osc_param.display_aspect)
     end
 
     -- position of the controller according to video aspect and valignment
@@ -1297,11 +1297,11 @@ function osc_init()
     end
 
     if user_opts.vidscale then
-        osc_param.playresy = baseResY / scale
+        osc_param.playresy = math.floor(baseResY / scale)
     else
-        osc_param.playresy = display_h / scale
+        osc_param.playresy = math.floor(display_h / scale)
     end
-    osc_param.playresx = osc_param.playresy * display_aspect
+    osc_param.playresx = math.floor(osc_param.playresy * display_aspect)
     osc_param.display_aspect = display_aspect
 
 
@@ -1800,7 +1800,7 @@ function render()
     end
 
     -- submit
-    mp.set_osd_ass(osc_param.playresy * aspect, osc_param.playresy, ass.text)
+    mp.set_osd_ass(math.floor(osc_param.playresy * aspect), osc_param.playresy, ass.text)
 
 
 
