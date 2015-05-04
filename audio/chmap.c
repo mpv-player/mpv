@@ -190,6 +190,33 @@ void mp_chmap_reorder_norm(struct mp_chmap *map)
     qsort(arr, map->num, 1, comp_uint8);
 }
 
+// Remove silent (NA) channels, if any.
+void mp_chmap_remove_na(struct mp_chmap *map)
+{
+    struct mp_chmap new = {0};
+    for (int n = 0; n < map->num; n++) {
+        int sp = map->speaker[n];
+        if (!(sp >= MP_SPEAKER_ID_NA0 && sp <= MP_SPEAKER_ID_NA_LAST))
+            new.speaker[new.num++] = map->speaker[n];
+    }
+    *map = new;
+}
+
+// Add silent (NA) channels to map until map->num >= num.
+void mp_chmap_fill_na(struct mp_chmap *map, int num)
+{
+    assert(num <= MP_NUM_CHANNELS);
+    while (map->num < num) {
+        int sp = map->num ? map->speaker[map->num - 1] : -1;
+        if (sp >= MP_SPEAKER_ID_NA0 && sp < MP_SPEAKER_ID_NA_LAST) {
+            sp += 1;
+        } else {
+            sp = MP_SPEAKER_ID_NA0;
+        }
+        map->speaker[map->num++] = sp;
+    }
+}
+
 // Set *dst to a standard layout with the given number of channels.
 // If the number of channels is invalid, an invalid map is set, and
 // mp_chmap_is_valid(dst) will return false.
@@ -279,7 +306,7 @@ uint64_t mp_chmap_to_lavc_unchecked(const struct mp_chmap *src)
         mp_chmap_from_channels(&t, t.num);
     uint64_t mask = 0;
     for (int n = 0; n < t.num; n++) {
-        if (t.speaker[n] < 64)
+        if (t.speaker[n] < 64) // ignore MP_SPEAKER_ID_NA* etc.
             mask |= 1ULL << t.speaker[n];
     }
     return mask;
@@ -342,33 +369,35 @@ void mp_chmap_reorder_to_lavc(struct mp_chmap *map)
 
 // Get reordering array for from->to reordering. from->to must have the same set
 // of speakers (i.e. same number and speaker IDs, just different order). Then,
-// for each speaker n, dst[n] will be set such that:
-//      to->speaker[dst[n]] = from->speaker[n]
-// (dst[n] gives the source channel for destination channel n)
-void mp_chmap_get_reorder(int dst[MP_NUM_CHANNELS], const struct mp_chmap *from,
+// for each speaker n, src[n] will be set such that:
+//      to->speaker[n] = from->speaker[src[n]]
+// (src[n] gives the source channel for destination channel n)
+// If *from and *to don't contain the same set of speakers, then the above
+// invariant is not guaranteed. Instead, src[n] can be set to -1 if the channel
+// at to->speaker[n] is unmapped.
+void mp_chmap_get_reorder(int src[MP_NUM_CHANNELS], const struct mp_chmap *from,
                           const struct mp_chmap *to)
 {
-    assert(from->num == to->num);
+    for (int n = 0; n < MP_NUM_CHANNELS; n++)
+        src[n] = -1;
+
     if (mp_chmap_is_unknown(from) || mp_chmap_is_unknown(to)) {
-        for (int n = 0; n < from->num; n++)
-            dst[n] = n;
+        for (int n = 0; n < to->num; n++)
+            src[n] = n < from->num ? n : -1;
         return;
     }
-    // Same set of speakers required
-    assert(mp_chmap_equals_reordered(from, to));
+
     for (int n = 0; n < from->num; n++) {
-        int src = from->speaker[n];
-        dst[n] = -1;
         for (int i = 0; i < to->num; i++) {
-            if (src == to->speaker[i]) {
-                dst[n] = i;
+            if (to->speaker[n] == from->speaker[i]) {
+                src[n] = i;
                 break;
             }
         }
-        assert(dst[n] != -1);
     }
-    for (int n = 0; n < from->num; n++)
-        assert(to->speaker[dst[n]] == from->speaker[n]);
+
+    for (int n = 0; n < to->num; n++)
+        assert(to->speaker[n] == src[n] < 0 ? -1 : from->speaker[src[n]]);
 }
 
 // Performs the difference between a and b, and store it in diff. If b has
@@ -411,7 +440,12 @@ char *mp_chmap_to_str_buf(char *buf, size_t buf_size, const struct mp_chmap *src
         const char *s = sp < MP_SPEAKER_ID_COUNT ? speaker_names[sp][0] : NULL;
         char sp_buf[10];
         if (!s) {
-            snprintf(sp_buf, sizeof(sp_buf), "sp%d", sp);
+            const char *prefix = "sp";
+            if (sp >= MP_SPEAKER_ID_NA0 && sp <= MP_SPEAKER_ID_NA_LAST) {
+                sp -= MP_SPEAKER_ID_NA0;
+                prefix = "na";
+            }
+            snprintf(sp_buf, sizeof(sp_buf), "%s%d", prefix, sp);
             s = sp_buf;
         }
         mp_snprintf_cat(buf, buf_size, "%s%s", n > 0 ? "-" : "", s);
