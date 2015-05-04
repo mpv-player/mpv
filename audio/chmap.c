@@ -171,15 +171,6 @@ bool mp_chmap_equals_reordered(const struct mp_chmap *a, const struct mp_chmap *
     return mp_chmap_equals(&t1, &t2);
 }
 
-bool mp_chmap_is_compatible(const struct mp_chmap *a, const struct mp_chmap *b)
-{
-    if (mp_chmap_equals(a, b))
-        return true;
-    if (a->num == b->num && (mp_chmap_is_unknown(a) || mp_chmap_is_unknown(b)))
-        return true;
-    return false;
-}
-
 bool mp_chmap_is_stereo(const struct mp_chmap *src)
 {
     static const struct mp_chmap stereo = MP_CHMAP_INIT_STEREO;
