@@ -529,7 +529,7 @@ static void *client_thread(void *p)
         goto done;
     }
 
-    MP_INFO(arg, "Client connected\n");
+    MP_VERBOSE(arg, "Client connected\n");
 
     struct pollfd fds[2] = {
         {.events = POLLIN, .fd = pipe_fd},
@@ -597,7 +597,7 @@ static void *client_thread(void *p)
                 }
 
                 if (bytes == 0) {
-                    MP_INFO(arg, "Client disconnected\n");
+                    MP_VERBOSE(arg, "Client disconnected\n");
                     goto done;
                 }
 
@@ -731,7 +731,7 @@ static void *ipc_thread(void *p)
 
     mpthread_set_name("ipc socket listener");
 
-    MP_INFO(arg, "Starting IPC master\n");
+    MP_VERBOSE(arg, "Starting IPC master\n");
 
     ipc_fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (ipc_fd < 0) {
