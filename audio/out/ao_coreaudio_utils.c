@@ -268,6 +268,40 @@ void ca_print_asbd(struct ao *ao, const char *description,
     talloc_free(format);
 }
 
+// Return whether new is an improvement over old (req is the requested format).
+bool ca_asbd_is_better(AudioStreamBasicDescription *req,
+                       AudioStreamBasicDescription *old,
+                       AudioStreamBasicDescription *new)
+{
+    if (req->mFormatID != new->mFormatID)
+        return false;
+
+    int mpfmt_req = ca_asbd_to_mp_format(old);
+    int mpfmt_new = ca_asbd_to_mp_format(new);
+    if (!mpfmt_new)
+        return false;
+
+    if (mpfmt_req != mpfmt_new) {
+        int mpfmt_old = ca_asbd_to_mp_format(old);
+        if (af_format_conversion_score(mpfmt_req, mpfmt_old) >
+            af_format_conversion_score(mpfmt_req, mpfmt_new))
+            return false;
+    }
+
+    if (req->mSampleRate != new->mSampleRate) {
+        if (old->mSampleRate > new->mSampleRate)
+            return false;
+    }
+
+    if (req->mChannelsPerFrame != new->mChannelsPerFrame) {
+        if (old->mChannelsPerFrame > new->mChannelsPerFrame ||
+            new->mChannelsPerFrame > MP_NUM_CHANNELS)
+            return false;
+    }
+
+    return true;
+}
+
 int64_t ca_frames_to_us(struct ao *ao, uint32_t frames)
 {
     return frames / (float) ao->samplerate * 1e6;
