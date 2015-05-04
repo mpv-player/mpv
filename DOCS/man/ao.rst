@@ -162,6 +162,14 @@ Available audio output drivers are:
     Automatically redirects to ``coreaudio_exclusive`` when playing compressed
     formats.
 
+    ``change-physical-format=<yes|no>``
+        Change the physical format to one similar to the requested audio format
+        (default: no). This has the advantage that multichannel audio output
+        will actually work. The disadvantage is that it will change the
+        system-wide audio settings. This is equivalent to change the ``Format``
+        setting in the ``Audio Devices`` dialog in the ``Audio MIDI Setup``
+        utility. Note that this does not effect the selected speaker setup.
+
 ``coreaudio_exclusive`` (Mac OS X only)
     Native Mac OS X audio output driver using direct device access and
     exclusive mode (bypasses the sound server).

@@ -33,6 +33,8 @@ struct priv {
     AudioUnit audio_unit;
 
     uint64_t hw_latency_us;
+
+    int change_physical_format;
 };
 
 bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
@@ -260,11 +262,60 @@ coreaudio_error:
     return false;
 }
 
+static void init_physical_format(struct ao *ao, AudioStreamBasicDescription asbd)
+{
+    struct priv *p = ao->priv;
+    OSErr err;
+
+    AudioStreamID *streams;
+    size_t n_streams;
+
+    err = CA_GET_ARY_O(p->device, kAudioDevicePropertyStreams,
+                       &streams, &n_streams);
+    CHECK_CA_ERROR("could not get number of streams");
+
+    for (int i = 0; i < n_streams; i++) {
+        AudioStreamRangedDescription *formats;
+        size_t n_formats;
+
+        err = CA_GET_ARY(streams[i],
+                            kAudioStreamPropertyAvailablePhysicalFormats,
+                            &formats, &n_formats);
+
+        if (!CHECK_CA_WARN("could not get number of stream formats"))
+            continue; // try next one
+
+        AudioStreamBasicDescription best_asbd = {0};
+
+        for (int j = 0; j < n_formats; j++) {
+            AudioStreamBasicDescription *stream_asbd = &formats[j].mFormat;
+
+            if (!best_asbd.mFormatID || ca_asbd_is_better(&asbd, &best_asbd,
+                                                          stream_asbd))
+                best_asbd = *stream_asbd;
+        }
+
+        if (best_asbd.mFormatID) {
+            ca_print_asbd(ao, "Trying to set physical format:", &best_asbd);
+            err = CA_SET(streams[i], kAudioStreamPropertyPhysicalFormat,
+                         &best_asbd);
+            CHECK_CA_ERROR("could not set physical format");
+            break;
+        }
+    }
+
+coreaudio_error:
+    return;
+}
+
 static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
 {
     OSStatus err;
     uint32_t size;
     struct priv *p = ao->priv;
+
+    if (p->change_physical_format)
+        init_physical_format(ao, asbd);
 
     AudioComponentDescription desc = (AudioComponentDescription) {
         .componentType         = kAudioUnitType_Output,
@@ -583,4 +634,8 @@ const struct ao_driver audio_out_coreaudio = {
     .hotplug_uninit = hotplug_uninit,
     .list_devs      = ca_get_device_list,
     .priv_size      = sizeof(struct priv),
+    .options = (const struct m_option[]){
+        OPT_FLAG("change-physical-format", change_physical_format, 0),
+        {0}
+    },
 };
