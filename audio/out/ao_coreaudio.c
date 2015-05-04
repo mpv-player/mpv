@@ -78,7 +78,6 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
 
     int64_t end = mp_time_us();
     end += p->hw_latency_us + ca_get_latency(ts) + ca_frames_to_us(ao, frames);
-
     ao_read_data(ao, &buf.mData, frames, end);
     return noErr;
 }
@@ -445,7 +444,7 @@ static const int speaker_map[][2] = {
     { kAudioChannelLabel_HeadphonesLeft,       MP_SPEAKER_ID_DL   },
     { kAudioChannelLabel_HeadphonesRight,      MP_SPEAKER_ID_DR   },
 
-    { kAudioChannelLabel_Unknown,              MP_SPEAKER_ID_UNKNOWN0 },
+    { kAudioChannelLabel_Unknown,              MP_SPEAKER_ID_NA0  },
 
     { 0,                                       -1                 },
 };
@@ -543,9 +542,14 @@ bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
         return false;
     }
 
+    int next_na = MP_SPEAKER_ID_NA0;
     for (int n = 0; n < l->mNumberChannelDescriptions; n++) {
         AudioChannelLabel label = l->mChannelDescriptions[n].mChannelLabel;
         uint8_t speaker = ca_label_to_mp_speaker_id(label);
+        if (speaker == MP_SPEAKER_ID_NA0 && next_na < MP_SPEAKER_ID_NA_LAST)
+        {
+            speaker = next_na++;
+        }
         if (speaker < 0) {
             MP_VERBOSE(ao, "channel label=%u unusable to build channel "
                            "bitmap, skipping layout\n", (unsigned) label);
