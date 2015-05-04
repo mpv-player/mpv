@@ -384,9 +384,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
     return AF_UNKNOWN;
 }
 
-#undef ctx_opt_set_int
-#undef ctx_opt_set_dbl
-
 static void uninit(struct af_instance *af)
 {
     struct af_resample *s = af->priv;
