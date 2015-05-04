@@ -118,6 +118,7 @@ void mp_audio_set_null_data(struct mp_audio *mpa)
         mpa->allocated[n] = NULL;
     }
     mpa->samples = 0;
+    mpa->readonly = false;
 }
 
 static int get_plane_size(const struct mp_audio *mpa, int samples)
@@ -250,7 +251,7 @@ void mp_audio_skip_samples(struct mp_audio *data, int samples)
 // Will return true for non-refcounted frames.
 bool mp_audio_is_writeable(struct mp_audio *data)
 {
-    bool ok = true;
+    bool ok = !data->readonly;
     for (int n = 0; n < MP_NUM_CHANNELS; n++) {
         if (data->allocated[n])
             ok &= av_buffer_is_writable(data->allocated[n]);
