@@ -98,7 +98,6 @@ bool mp_chmap_is_empty(const struct mp_chmap *src);
 bool mp_chmap_is_unknown(const struct mp_chmap *src);
 bool mp_chmap_equals(const struct mp_chmap *a, const struct mp_chmap *b);
 bool mp_chmap_equals_reordered(const struct mp_chmap *a, const struct mp_chmap *b);
-bool mp_chmap_is_compatible(const struct mp_chmap *a, const struct mp_chmap *b);
 bool mp_chmap_is_stereo(const struct mp_chmap *src);
 
 void mp_chmap_reorder_norm(struct mp_chmap *map);
