@@ -534,7 +534,7 @@ static int script_wait_event(lua_State *L)
             break;
         case MPV_FORMAT_DOUBLE:
             if (is_int(*(double *)prop->data))
-                lua_pushinteger(L, *(lua_Integer *)prop->data);
+                lua_pushinteger(L, (lua_Integer)(*(double *)(prop->data)));
             else
                 lua_pushnumber(L, *(double *)prop->data);
             break;
