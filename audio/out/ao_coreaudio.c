@@ -446,6 +446,8 @@ static const int speaker_map[][2] = {
     { kAudioChannelLabel_HeadphonesRight,      MP_SPEAKER_ID_DR   },
 
     { kAudioChannelLabel_Unknown,              MP_SPEAKER_ID_UNKNOWN0 },
+
+    { 0,                                       -1                 },
 };
 
 static int ca_label_to_mp_speaker_id(AudioChannelLabel label)
