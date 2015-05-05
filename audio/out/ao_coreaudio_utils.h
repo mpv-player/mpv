@@ -31,7 +31,9 @@
 CFStringRef cfstr_from_cstr(char *str);
 char *cfstr_get_cstr(CFStringRef cfstr);
 
-char *fourcc_repr(void *talloc_ctx, uint32_t code);
+char *fourcc_repr_buf(char *buf, size_t buf_size, uint32_t code);
+#define fourcc_repr(code) fourcc_repr_buf((char[40]){0}, 40, code)
+
 bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message);
 
 #define CHECK_CA_ERROR_L(label, message) \

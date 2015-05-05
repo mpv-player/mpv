@@ -437,8 +437,8 @@ static int hotplug_init(struct ao *ao)
         err = AudioObjectAddPropertyListener(
             kAudioObjectSystemObject, &addr, hotplug_cb, (void *)ao);
         if (err != noErr) {
-            char *c1 = fourcc_repr(ao, hotplug_properties[i]);
-            char *c2 = fourcc_repr(ao, err);
+            char *c1 = fourcc_repr(hotplug_properties[i]);
+            char *c2 = fourcc_repr(err);
             MP_ERR(ao, "failed to set device listener %s (%s)", c1, c2);
             goto coreaudio_error;
         }
@@ -462,8 +462,8 @@ static void hotplug_uninit(struct ao *ao)
         err = AudioObjectRemovePropertyListener(
             kAudioObjectSystemObject, &addr, hotplug_cb, (void *)ao);
         if (err != noErr) {
-            char *c1 = fourcc_repr(ao, hotplug_properties[i]);
-            char *c2 = fourcc_repr(ao, err);
+            char *c1 = fourcc_repr(hotplug_properties[i]);
+            char *c2 = fourcc_repr(err);
             MP_ERR(ao, "failed to set device listener %s (%s)", c1, c2);
         }
     }

@@ -128,7 +128,7 @@ coreaudio_error:
     return err;
 }
 
-char *fourcc_repr(void *talloc_ctx, uint32_t code)
+char *fourcc_repr_buf(char *buf, size_t buf_size, uint32_t code)
 {
     // Extract FourCC letters from the uint32_t and finde out if it's a valid
     // code that is made of letters.
@@ -145,23 +145,19 @@ char *fourcc_repr(void *talloc_ctx, uint32_t code)
             valid_fourcc = false;
     }
 
-    char *repr;
     if (valid_fourcc)
-        repr = talloc_asprintf(talloc_ctx, "'%c%c%c%c'",
-                               fcc[0], fcc[1], fcc[2], fcc[3]);
+        snprintf(buf, buf_size, "'%c%c%c%c'", fcc[0], fcc[1], fcc[2], fcc[3]);
     else
-        repr = talloc_asprintf(NULL, "%u", (unsigned int)code);
+        snprintf(buf, buf_size, "%u", (unsigned int)code);
 
-    return repr;
+    return buf;
 }
 
 bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message)
 {
     if (code == noErr) return true;
 
-    char *error_string = fourcc_repr(NULL, code);
-    mp_msg(ao->log, level, "%s (%s)\n", message, error_string);
-    talloc_free(error_string);
+    mp_msg(ao->log, level, "%s (%s)\n", message, fourcc_repr(code));
 
     return false;
 }
@@ -245,7 +241,7 @@ void ca_print_asbd(struct ao *ao, const char *description,
                    const AudioStreamBasicDescription *asbd)
 {
     uint32_t flags  = asbd->mFormatFlags;
-    char *format    = fourcc_repr(NULL, asbd->mFormatID);
+    char *format    = fourcc_repr(asbd->mFormatID);
     int mpfmt       = ca_asbd_to_mp_format(asbd);
 
     MP_VERBOSE(ao,
@@ -263,8 +259,6 @@ void ca_print_asbd(struct ao *ao, const char *description,
        (flags & kAudioFormatFlagIsAlignedHigh) ? " aligned" : "",
        (flags & kAudioFormatFlagIsNonInterleaved) ? " P" : "",
        mpfmt ? af_fmt_to_str(mpfmt) : "unusable");
-
-    talloc_free(format);
 }
 
 // Return whether new is an improvement over old. Assume a higher value means
