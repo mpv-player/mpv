@@ -203,10 +203,14 @@ static void init_physical_format(struct ao *ao)
         if (!CHECK_CA_WARN("could not get number of stream formats"))
             continue; // try next one
 
+        MP_VERBOSE(ao, "Looking at formats in substream %d...\n", i);
+
         AudioStreamBasicDescription best_asbd = {0};
 
         for (int j = 0; j < n_formats; j++) {
             AudioStreamBasicDescription *stream_asbd = &formats[j].mFormat;
+
+            ca_print_asbd(ao, "- ", stream_asbd);
 
             if (!best_asbd.mFormatID || ca_asbd_is_better(&asbd, &best_asbd,
                                                           stream_asbd))
