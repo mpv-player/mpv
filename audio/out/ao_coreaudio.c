@@ -125,6 +125,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
 static bool init_chmap(struct ao *ao);
 static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd);
+static void init_physical_format(struct ao *ao);
 
 static bool reinit_device(struct ao *ao) {
     struct priv *p = ao->priv;
@@ -145,6 +146,8 @@ coreaudio_error:
 
 static int init(struct ao *ao)
 {
+    struct priv *p = ao->priv;
+
     if (AF_FORMAT_IS_IEC61937(ao->format)) {
         MP_WARN(ao, "detected IEC61937, redirecting to coreaudio_exclusive\n");
         ao->redirect = "coreaudio_exclusive";
@@ -153,6 +156,9 @@ static int init(struct ao *ao)
 
     if (!reinit_device(ao))
         goto coreaudio_error;
+
+    if (p->change_physical_format)
+        init_physical_format(ao);
 
     if (!init_chmap(ao))
         goto coreaudio_error;
@@ -262,10 +268,13 @@ coreaudio_error:
     return false;
 }
 
-static void init_physical_format(struct ao *ao, AudioStreamBasicDescription asbd)
+static void init_physical_format(struct ao *ao)
 {
     struct priv *p = ao->priv;
     OSErr err;
+
+    AudioStreamBasicDescription asbd;
+    ca_fill_asbd(ao, &asbd);
 
     AudioStreamID *streams;
     size_t n_streams;
@@ -313,9 +322,6 @@ static bool init_audiounit(struct ao *ao, AudioStreamBasicDescription asbd)
     OSStatus err;
     uint32_t size;
     struct priv *p = ao->priv;
-
-    if (p->change_physical_format)
-        init_physical_format(ao, asbd);
 
     AudioComponentDescription desc = (AudioComponentDescription) {
         .componentType         = kAudioUnitType_Output,
