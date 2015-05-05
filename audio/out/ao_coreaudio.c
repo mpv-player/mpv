@@ -35,6 +35,9 @@ struct priv {
 
     uint64_t hw_latency_us;
 
+    AudioStreamBasicDescription original_asbd;
+    AudioStreamID original_asbd_stream;
+
     int change_physical_format;
 };
 
@@ -211,6 +214,12 @@ static void init_physical_format(struct ao *ao)
         }
 
         if (best_asbd.mFormatID) {
+            p->original_asbd_stream = streams[i];
+            err = CA_GET(p->original_asbd_stream,
+                         kAudioStreamPropertyPhysicalFormat,
+                         &p->original_asbd);
+            CHECK_CA_WARN("could not get current physical stream format");
+
             ca_print_asbd(ao, "Trying to set physical format:", &best_asbd);
             err = CA_SET(streams[i], kAudioStreamPropertyPhysicalFormat,
                          &best_asbd);
@@ -313,6 +322,13 @@ static void uninit(struct ao *ao)
     AudioOutputUnitStop(p->audio_unit);
     AudioUnitUninitialize(p->audio_unit);
     AudioComponentInstanceDispose(p->audio_unit);
+
+    if (p->original_asbd.mFormatID) {
+        OSStatus err = CA_SET(p->original_asbd_stream,
+                              kAudioStreamPropertyPhysicalFormat,
+                              &p->original_asbd);
+        CHECK_CA_WARN("could not restore physical stream format");
+    }
 }
 
 static OSStatus hotplug_cb(AudioObjectID id, UInt32 naddr,
