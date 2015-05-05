@@ -132,6 +132,7 @@ def build(ctx):
         ( "audio/out/ao.c" ),
         ( "audio/out/ao_alsa.c",                 "alsa" ),
         ( "audio/out/ao_coreaudio.c",            "coreaudio" ),
+        ( "audio/out/ao_coreaudio_chmap.c",      "coreaudio" ),
         ( "audio/out/ao_coreaudio_exclusive.c",  "coreaudio" ),
         ( "audio/out/ao_coreaudio_properties.c", "coreaudio" ),
         ( "audio/out/ao_coreaudio_utils.c",      "coreaudio" ),
