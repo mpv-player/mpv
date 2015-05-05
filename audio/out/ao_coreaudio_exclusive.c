@@ -511,7 +511,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     };
     for (int n = 0; n < MP_ARRAY_SIZE(latency_properties); n++) {
         uint32_t temp;
-        err = CA_GET_O(p->device, kAudioDevicePropertyLatency, &temp);
+        err = CA_GET_O(p->device, latency_properties[n], &temp);
         CHECK_CA_WARN("cannot get device latency");
         if (err == noErr)
             latency_frames += temp;
