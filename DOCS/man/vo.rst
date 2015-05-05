@@ -586,7 +586,7 @@ Available video output drivers are:
         always used, and typically only when using extended scalers.)
         ``fmt`` can be one of: rgb, rgba, rgb8, rgb10, rgb10_a2, rgb16, rgb16f,
         rgb32f, rgba12, rgba16, rgba16f, rgba32f.
-        Default: rgba.
+        Default: rgba16.
 
     ``gamma=<0.1..2.0>``
         Set a gamma value (default: 1.0). If gamma is adjusted in other ways
@@ -747,7 +747,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:fbo-format=rgba16:fancy-downscaling:sigmoid-upscaling
+        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:fancy-downscaling:sigmoid-upscaling
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.
