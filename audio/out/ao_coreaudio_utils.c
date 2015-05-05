@@ -283,12 +283,13 @@ bool ca_asbd_is_better(AudioStreamBasicDescription *req,
         return false;
     if (old->mChannelsPerFrame > MP_NUM_CHANNELS)
         return true;
+    if (req->mFormatID != new->mFormatID)
+        return false;
+    if (req->mFormatID != old->mFormatID)
+        return true;
 
-    int mpfmt_req = ca_asbd_to_mp_format(req);
-    int mpfmt_old = ca_asbd_to_mp_format(old);
-    int mpfmt_new = ca_asbd_to_mp_format(new);
-    if (af_format_conversion_score(mpfmt_req, mpfmt_old) >
-        af_format_conversion_score(mpfmt_req, mpfmt_new))
+    if (!value_is_better(req->mBitsPerChannel, old->mBitsPerChannel,
+                         new->mBitsPerChannel))
         return false;
 
     if (!value_is_better(req->mSampleRate, old->mSampleRate, new->mSampleRate))
