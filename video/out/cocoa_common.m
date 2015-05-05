@@ -107,6 +107,14 @@ static void with_cocoa_lock_on_main_thread(struct vo *vo, void(^block)(void))
     });
 }
 
+static void with_cocoa_lock_on_main_thread_sync(struct vo *vo, void(^block)(void))
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        with_cocoa_lock(s, block);
+    });
+}
+
 static void queue_new_video_size(struct vo *vo, int w, int h)
 {
     struct vo_cocoa_state *s = vo->cocoa;
@@ -277,7 +285,7 @@ void vo_cocoa_uninit(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
-    with_cocoa_lock_on_main_thread(vo, ^{
+    with_cocoa_lock_on_main_thread_sync(vo, ^{
         enable_power_management(s);
         cocoa_uninit_light_sensor(s);
         cocoa_rm_fs_screen_profile_observer(s);
