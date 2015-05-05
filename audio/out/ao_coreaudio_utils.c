@@ -88,7 +88,7 @@ OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device)
     OSStatus err = noErr;
     *device = kAudioObjectUnknown;
 
-    if (name) {
+    if (name && name[0]) {
         CFStringRef uid = cfstr_from_cstr(name);
         AudioValueTranslation v = (AudioValueTranslation) {
             .mInputData = &uid,
@@ -116,9 +116,8 @@ OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device)
 
     if (mp_msg_test(ao->log, MSGL_V)) {
         char *desc;
-        err = CA_GET_STR(*device, kAudioObjectPropertyName, &desc);
-        CHECK_CA_WARN("could not get selected audio device name");
-        if (err == noErr) {
+        OSStatus err2 = CA_GET_STR(*device, kAudioObjectPropertyName, &desc);
+        if (err2 == noErr) {
             MP_VERBOSE(ao, "selected audio output device: %s (%" PRIu32 ")\n",
                            desc, *device);
             talloc_free(desc);
