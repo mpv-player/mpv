@@ -268,36 +268,42 @@ void ca_print_asbd(struct ao *ao, const char *description,
     talloc_free(format);
 }
 
+// Return whether new is an improvement over old. Assume a higher value means
+// better quality, and we always prefer the value closest to the requested one,
+// which is still larger than the requested one.
+// Equal values prefer the new one (so ca_asbd_is_better() checks other params).
+static bool value_is_better(double req, double old, double new)
+{
+    if (new >= req) {
+        return old < req || new <= old;
+    } else {
+        return old < req && new >= old;
+    }
+}
+
 // Return whether new is an improvement over old (req is the requested format).
 bool ca_asbd_is_better(AudioStreamBasicDescription *req,
                        AudioStreamBasicDescription *old,
                        AudioStreamBasicDescription *new)
 {
-    if (req->mFormatID != new->mFormatID)
+    if (new->mChannelsPerFrame > MP_NUM_CHANNELS)
         return false;
+    if (old->mChannelsPerFrame > MP_NUM_CHANNELS)
+        return true;
 
-    int mpfmt_req = ca_asbd_to_mp_format(old);
+    int mpfmt_req = ca_asbd_to_mp_format(req);
+    int mpfmt_old = ca_asbd_to_mp_format(old);
     int mpfmt_new = ca_asbd_to_mp_format(new);
-    if (!mpfmt_new)
+    if (af_format_conversion_score(mpfmt_req, mpfmt_old) >
+        af_format_conversion_score(mpfmt_req, mpfmt_new))
         return false;
 
-    if (mpfmt_req != mpfmt_new) {
-        int mpfmt_old = ca_asbd_to_mp_format(old);
-        if (af_format_conversion_score(mpfmt_req, mpfmt_old) >
-            af_format_conversion_score(mpfmt_req, mpfmt_new))
-            return false;
-    }
+    if (!value_is_better(req->mSampleRate, old->mSampleRate, new->mSampleRate))
+        return false;
 
-    if (req->mSampleRate != new->mSampleRate) {
-        if (old->mSampleRate > new->mSampleRate)
-            return false;
-    }
-
-    if (req->mChannelsPerFrame != new->mChannelsPerFrame) {
-        if (old->mChannelsPerFrame > new->mChannelsPerFrame ||
-            new->mChannelsPerFrame > MP_NUM_CHANNELS)
-            return false;
-    }
+    if (!value_is_better(req->mChannelsPerFrame, old->mChannelsPerFrame,
+                         new->mChannelsPerFrame))
+        return false;
 
     return true;
 }
