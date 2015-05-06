@@ -141,7 +141,7 @@ static bool config_window_cocoa(struct MPGLContext *ctx, int flags)
     if (!ctx->gl->SwapInterval)
         ctx->gl->SwapInterval = set_swap_interval;
 
-    vo_cocoa_config_window(ctx->vo, flags, p->ctx);
+    vo_cocoa_config_window(ctx->vo, flags);
 
     return true;
 }

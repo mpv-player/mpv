@@ -550,7 +550,7 @@ void vo_cocoa_release_nsgl_ctx(struct vo *vo)
     s->gl_ctx = nil;
 }
 
-int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx)
+int vo_cocoa_config_window(struct vo *vo, uint32_t flags)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     with_cocoa_lock_on_main_thread(vo, ^{

@@ -27,7 +27,7 @@ struct vo_cocoa_state;
 int vo_cocoa_init(struct vo *vo);
 void vo_cocoa_uninit(struct vo *vo);
 
-int vo_cocoa_config_window(struct vo *vo, uint32_t flags, void *gl_ctx);
+int vo_cocoa_config_window(struct vo *vo, uint32_t flags);
 
 void vo_cocoa_set_current_context(struct vo *vo, bool current);
 bool vo_cocoa_start_frame(struct vo *vo);
