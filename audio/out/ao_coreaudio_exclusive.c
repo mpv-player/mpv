@@ -46,7 +46,7 @@
 #include "audio/out/ao_coreaudio_properties.h"
 #include "audio/out/ao_coreaudio_utils.h"
 
-static bool ca_format_is_digital(AudioStreamBasicDescription asbd)
+static bool ca_format_is_compressed(AudioStreamBasicDescription asbd)
 {
     switch (asbd.mFormatID)
     case 'IAC3':
@@ -57,7 +57,7 @@ static bool ca_format_is_digital(AudioStreamBasicDescription asbd)
     return false;
 }
 
-static bool ca_stream_supports_digital(struct ao *ao, AudioStreamID stream)
+static bool ca_stream_supports_compressed(struct ao *ao, AudioStreamID stream)
 {
     AudioStreamRangedDescription *formats = NULL;
     size_t n_formats;
@@ -71,7 +71,7 @@ static bool ca_stream_supports_digital(struct ao *ao, AudioStreamID stream)
     for (int i = 0; i < n_formats; i++) {
         AudioStreamBasicDescription asbd = formats[i].mFormat;
         ca_print_asbd(ao, "supported format:", &(asbd));
-        if (ca_format_is_digital(asbd)) {
+        if (ca_format_is_compressed(asbd)) {
             talloc_free(formats);
             return true;
         }
@@ -82,7 +82,7 @@ coreaudio_error:
     return false;
 }
 
-static bool ca_device_supports_digital(struct ao *ao, AudioDeviceID device)
+static bool ca_device_supports_compressed(struct ao *ao, AudioDeviceID device)
 {
     AudioStreamID *streams = NULL;
     size_t n_streams;
@@ -94,7 +94,7 @@ static bool ca_device_supports_digital(struct ao *ao, AudioDeviceID device)
     CHECK_CA_ERROR("could not get number of streams.");
 
     for (int i = 0; i < n_streams; i++) {
-        if (ca_stream_supports_digital(ao, streams[i])) {
+        if (ca_stream_supports_compressed(ao, streams[i])) {
             talloc_free(streams);
             return true;
         }
@@ -306,21 +306,19 @@ struct priv {
 
     bool paused;
 
-    // digital render callback
+    // audio render callback
     AudioDeviceIOProcID render_cb;
 
     // pid set for hog mode, (-1) means that hog mode on the device was
     // released. hog mode is exclusive access to a device
     pid_t hog_pid;
 
-    // stream selected for digital playback by the detection in init
     AudioStreamID stream;
 
     // stream index in an AudioBufferList
     int stream_idx;
 
-    // format we changed the stream to: for the digital case each application
-    // sets the stream format for a device to what it needs
+    // format we changed the stream to, and the original format to restore
     AudioStreamBasicDescription stream_asbd;
     AudioStreamBasicDescription original_asbd;
 
@@ -331,7 +329,7 @@ struct priv {
     uint32_t hw_latency_us;
 };
 
-static OSStatus render_cb_digital(
+static OSStatus render_cb_compressed(
         AudioDeviceID device, const AudioTimeStamp *ts,
         const void *in_data, const AudioTimeStamp *in_ts,
         AudioBufferList *out_data, const AudioTimeStamp *out_ts, void *ctx)
@@ -355,7 +353,7 @@ static OSStatus render_cb_digital(
 
     ao_read_data(ao, &buf.mData, pseudo_frames, end);
 
-    // Check whether we need to reset the digital output stream.
+    // Check whether we need to reset the compressed output stream.
     if (p->stream_asbd_changed) {
         AudioStreamBasicDescription f;
         OSErr err = CA_GET(p->stream, kAudioStreamPropertyPhysicalFormat, &f);
@@ -387,8 +385,8 @@ static int init(struct ao *ao)
         goto coreaudio_error_nounlock;
     }
 
-    if (!ca_device_supports_digital(ao, p->device)) {
-        MP_ERR(ao, "selected device doesn't support digital formats\n");
+    if (!ca_device_supports_compressed(ao, p->device)) {
+        MP_ERR(ao, "selected device doesn't support compressed formats\n");
         goto coreaudio_error_nounlock;
     }
 
@@ -419,9 +417,9 @@ static int init(struct ao *ao)
     CHECK_CA_ERROR("could not get number of streams");
 
     for (int i = 0; i < n_streams && p->stream_idx < 0; i++) {
-        bool digital = ca_stream_supports_digital(ao, streams[i]);
+        bool compressed = ca_stream_supports_compressed(ao, streams[i]);
 
-        if (digital) {
+        if (compressed) {
             AudioStreamRangedDescription *formats;
             size_t n_formats;
 
@@ -439,8 +437,8 @@ static int init(struct ao *ao)
             p->stream_idx = i;
 
             for (int j = 0; j < n_formats; j++)
-                if (ca_format_is_digital(formats[j].mFormat)) {
-                    // select the digital format that has exactly the same
+                if (ca_format_is_compressed(formats[j].mFormat)) {
+                    // select the compressed format that has exactly the same
                     // samplerate. If an exact match cannot be found, select
                     // the format with highest samplerate as backup.
                     if (formats[j].mFormat.mSampleRate == asbd.mSampleRate) {
@@ -464,7 +462,7 @@ static int init(struct ao *ao)
     talloc_free(streams);
 
     if (p->stream_idx < 0) {
-        MP_WARN(ao , "can't find any digital output stream format\n");
+        MP_WARN(ao , "can't find any compressed output stream format\n");
         goto coreaudio_error;
     }
 
@@ -505,10 +503,10 @@ static int init(struct ao *ao)
     MP_VERBOSE(ao, "base latency: %d microseconds\n", (int)p->hw_latency_us);
 
     err = AudioDeviceCreateIOProcID(p->device,
-                                    (AudioDeviceIOProc)render_cb_digital,
+                                    (AudioDeviceIOProc)render_cb_compressed,
                                     (void *)ao,
                                     &p->render_cb);
-    CHECK_CA_ERROR("failed to register digital render callback");
+    CHECK_CA_ERROR("failed to register audio render callback");
 
     return CONTROL_TRUE;
 
@@ -549,7 +547,7 @@ static void audio_pause(struct ao *ao)
     struct priv *p = ao->priv;
 
     OSStatus err = AudioDeviceStop(p->device, p->render_cb);
-    CHECK_CA_WARN("can't stop digital device");
+    CHECK_CA_WARN("can't stop audio device");
 }
 
 static void audio_resume(struct ao *ao)
@@ -557,7 +555,7 @@ static void audio_resume(struct ao *ao)
     struct priv *p = ao->priv;
 
     OSStatus err = AudioDeviceStart(p->device, p->render_cb);
-    CHECK_CA_WARN("can't start digital device");
+    CHECK_CA_WARN("can't start audio device");
 }
 
 #define OPT_BASE_STRUCT struct priv
