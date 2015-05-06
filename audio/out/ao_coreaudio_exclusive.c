@@ -373,14 +373,12 @@ static OSStatus render_cb_digital(
     return noErr;
 }
 
-static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd);
-
 static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
     OSStatus err = ca_select_device(ao, ao->device, &p->device);
-    CHECK_CA_ERROR("failed to select device");
+    CHECK_CA_ERROR_L(coreaudio_error_nounlock, "failed to select device");
 
     ao->format = af_fmt_from_planar(ao->format);
 
@@ -394,23 +392,12 @@ static int init(struct ao *ao)
 
     if (!supports_digital) {
         MP_ERR(ao, "selected device doesn't support digital formats\n");
-        goto coreaudio_error;
+        goto coreaudio_error_nounlock;
     } // closes if (!supports_digital)
 
     // Build ASBD for the input format
     AudioStreamBasicDescription asbd;
     ca_fill_asbd(ao, &asbd);
-
-    return init_digital(ao, asbd);
-
-coreaudio_error:
-    return CONTROL_ERROR;
-}
-
-static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
-{
-    struct priv *p = ao->priv;
-    OSStatus err = noErr;
 
     uint32_t is_alive = 1;
     err = CA_GET(p->device, kAudioDevicePropertyDeviceIsAlive, &is_alive);
@@ -531,6 +518,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
 coreaudio_error:
     err = ca_unlock_device(p->device, &p->hog_pid);
     CHECK_CA_WARN("can't release hog mode");
+coreaudio_error_nounlock:
     return CONTROL_ERROR;
 }
 
