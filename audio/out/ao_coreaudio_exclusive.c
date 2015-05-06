@@ -264,28 +264,29 @@ static bool ca_change_format(struct ao *ao, AudioStreamID stream,
         return false;
     }
 
-    /* The AudioStreamSetProperty is not only asynchronious,
+    /* The AudioStreamSetProperty is not only asynchronous,
      * it is also not Atomic, in its behaviour.
      * Therefore we check 5 times before we really give up. */
     bool format_set = false;
-    for (int i = 0; !format_set && i < 5; i++) {
+    AudioStreamBasicDescription actual_format = {0};
+    for (int i = 0; i < 5; i++) {
+        err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &actual_format);
+        if (!CHECK_CA_WARN("could not retrieve physical format"))
+            break;
+
+        format_set = ca_asbd_equals(&change_format, &actual_format);
+        if (format_set)
+            break;
+
         for (int j = 0; !atomic_load(&stream_format_changed) && j < 50; j++)
             mp_sleep_us(10000);
 
         bool old = true;
         if (!atomic_compare_exchange_strong(&stream_format_changed, &old, false))
             MP_VERBOSE(ao, "reached timeout\n");
-
-        AudioStreamBasicDescription actual_format;
-        err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &actual_format);
-
-        ca_print_asbd(ao, "actual format in use:", &actual_format);
-        if (actual_format.mSampleRate == change_format.mSampleRate &&
-            actual_format.mFormatID == change_format.mFormatID &&
-            actual_format.mFramesPerPacket == change_format.mFramesPerPacket) {
-            format_set = true;
-        }
     }
+
+    ca_print_asbd(ao, "actual format in use:", &actual_format);
 
     err = AudioObjectRemovePropertyListener(stream, &p_addr, ca_stream_listener,
                                             &stream_format_changed);
