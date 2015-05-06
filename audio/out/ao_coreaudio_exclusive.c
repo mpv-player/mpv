@@ -382,18 +382,15 @@ static int init(struct ao *ao)
 
     ao->format = af_fmt_from_planar(ao->format);
 
-    bool supports_digital = false;
-    /* Probe whether device support S/PDIF stream output if input is AC3 stream,
-     * or anything else IEC61937-framed. */
-    if (AF_FORMAT_IS_IEC61937(ao->format)) {
-        if (ca_device_supports_digital(ao, p->device))
-            supports_digital = true;
+    if (!AF_FORMAT_IS_IEC61937(ao->format)) {
+        MP_ERR(ao, "Only compressed formats are supported.\n");
+        goto coreaudio_error_nounlock;
     }
 
-    if (!supports_digital) {
+    if (!ca_device_supports_digital(ao, p->device)) {
         MP_ERR(ao, "selected device doesn't support digital formats\n");
         goto coreaudio_error_nounlock;
-    } // closes if (!supports_digital)
+    }
 
     // Build ASBD for the input format
     AudioStreamBasicDescription asbd;
