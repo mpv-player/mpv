@@ -41,6 +41,7 @@
 #include "internal.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
+#include "osdep/atomics.h"
 #include "options/m_option.h"
 #include "common/msg.h"
 #include "audio/out/ao_coreaudio_properties.h"
@@ -112,15 +113,13 @@ static OSStatus ca_property_listener(
     const AudioObjectPropertyAddress addresses[],
     void *data)
 {
-    void *talloc_ctx = talloc_new(NULL);
-
     for (int i = 0; i < n_addresses; i++) {
         if (addresses[i].mSelector == selector) {
-            if (data) *(volatile int *)data = 1;
+            if (data)
+                atomic_store((atomic_bool *)data, true);
             break;
         }
     }
-    talloc_free(talloc_ctx);
     return noErr;
 }
 
@@ -242,7 +241,7 @@ static bool ca_change_format(struct ao *ao, AudioStreamID stream,
 {
     OSStatus err = noErr;
     AudioObjectPropertyAddress p_addr;
-    volatile int stream_format_changed = 0;
+    atomic_bool stream_format_changed = ATOMIC_VAR_INIT(false);
 
     ca_print_asbd(ao, "setting stream format:", &change_format);
 
@@ -254,7 +253,7 @@ static bool ca_change_format(struct ao *ao, AudioStreamID stream,
     };
 
     err = AudioObjectAddPropertyListener(stream, &p_addr, ca_stream_listener,
-                                         (void *)&stream_format_changed);
+                                         &stream_format_changed);
     if (!CHECK_CA_WARN("can't add property listener during format change")) {
         return false;
     }
@@ -270,14 +269,12 @@ static bool ca_change_format(struct ao *ao, AudioStreamID stream,
      * Therefore we check 5 times before we really give up. */
     bool format_set = false;
     for (int i = 0; !format_set && i < 5; i++) {
-        for (int j = 0; !stream_format_changed && j < 50; j++)
+        for (int j = 0; !atomic_load(&stream_format_changed) && j < 50; j++)
             mp_sleep_us(10000);
 
-        if (stream_format_changed) {
-            stream_format_changed = 0;
-        } else {
+        bool old = true;
+        if (!atomic_compare_exchange_strong(&stream_format_changed, &old, false))
             MP_VERBOSE(ao, "reached timeout\n");
-        }
 
         AudioStreamBasicDescription actual_format;
         err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &actual_format);
@@ -291,7 +288,7 @@ static bool ca_change_format(struct ao *ao, AudioStreamID stream,
     }
 
     err = AudioObjectRemovePropertyListener(stream, &p_addr, ca_stream_listener,
-                                            (void *)&stream_format_changed);
+                                            &stream_format_changed);
 
     if (!CHECK_CA_WARN("can't remove property listener")) {
         return false;
@@ -323,7 +320,7 @@ struct priv {
     AudioStreamBasicDescription original_asbd;
 
     bool changed_mixing;
-    int stream_asbd_changed;
+    atomic_bool stream_asbd_changed;
     bool reload_requested;
 
     uint32_t hw_latency_us;
@@ -354,15 +351,15 @@ static OSStatus render_cb_compressed(
     ao_read_data(ao, &buf.mData, pseudo_frames, end);
 
     // Check whether we need to reset the compressed output stream.
-    if (p->stream_asbd_changed) {
+    if (atomic_load(&p->stream_asbd_changed)) {
         AudioStreamBasicDescription f;
         OSErr err = CA_GET(p->stream, kAudioStreamPropertyPhysicalFormat, &f);
         CHECK_CA_WARN("could not get stream format");
         if (err == noErr && ca_asbd_equals(&p->stream_asbd, &f))
-            p->stream_asbd_changed = 0;
+            atomic_store(&p->stream_asbd_changed, false);
     }
 
-    if (p->stream_asbd_changed && !p->reload_requested) {
+    if (atomic_load(&p->stream_asbd_changed) && !p->reload_requested) {
         p->reload_requested = true;
         ao_request_reload(ao);
         MP_INFO(ao, "Stream format changed! Reloading.\n");
@@ -473,7 +470,7 @@ static int init(struct ao *ao)
     if (!ca_change_format(ao, p->stream, p->stream_asbd))
         goto coreaudio_error;
 
-    void *changed = (void *) &(p->stream_asbd_changed);
+    void *changed = &p->stream_asbd_changed;
     err = ca_enable_device_listener(p->device, changed);
     CHECK_CA_ERROR("cannot install format change listener during init");
 
@@ -522,7 +519,7 @@ static void uninit(struct ao *ao)
     struct priv *p = ao->priv;
     OSStatus err = noErr;
 
-    void *changed = (void *) &(p->stream_asbd_changed);
+    void *changed = &p->stream_asbd_changed;
     err = ca_disable_device_listener(p->device, changed);
     CHECK_CA_WARN("can't remove device listener, this may cause a crash");
 
@@ -570,7 +567,7 @@ const struct ao_driver audio_out_coreaudio_exclusive = {
     .list_devs = ca_get_device_list,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv){
-        .stream_asbd_changed = 0,
+        .stream_asbd_changed = ATOMIC_VAR_INIT(false),
         .hog_pid = -1,
         .stream = 0,
         .stream_idx = -1,
