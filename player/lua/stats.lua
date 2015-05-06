@@ -86,8 +86,6 @@ function add_file(s)
     if append_property(s, "file", "cache-used", "Cache:") then
         append_property_inline(s, "file", "demuxer-cache-duration", "+", " sec", true, true)
     end
-
-    s.file = s.file .. o.nl .. o.nl
 end
 
 
@@ -116,8 +114,6 @@ function add_video(s)
     append_property(s, "video", "video-params/primaries", "Primaries:")
     append_property(s, "video", "video-params/colorlevels", "Levels:")
     append_property(s, "video", "packet-video-bitrate", "Bitrate:", " kbps")
-
-    s.video = s.video .. o.nl .. o.nl
 end
 
 
@@ -132,8 +128,6 @@ function add_audio(s)
     append_property(s, "audio", "audio-samplerate", "Sample Rate:")
     append_property(s, "audio", "audio-channels", "Channels:")
     append_property(s, "audio", "packet-audio-bitrate", "Bitrate:", " kbps")
-
-    s.audio = s.audio .. o.nl .. o.nl
 end
 
 
@@ -199,7 +193,16 @@ end
 
 
 function join_stats(s)
-    return s.header .. s.file .. s.video .. s.audio
+    r = s.header .. s.file
+
+    if s.video and s.video ~= "" then
+        r = r .. o.nl .. o.nl .. s.video
+    end
+    if s.audio and s.audio ~= "" then
+        r = r .. o.nl .. o.nl .. s.audio
+    end
+
+    return r
 end
 
 
@@ -210,13 +213,13 @@ end
 
 function has_video()
     local r = mp.get_property("video")
-    return r ~= nil and r ~= "no" and r ~= ""
+    return r and r ~= "no" and r ~= ""
 end
 
 
 function has_audio()
     local r = mp.get_property("audio")
-    return r ~= nil and r ~= "no" and r ~= ""
+    return r and r ~= "no" and r ~= ""
 end
 
 
