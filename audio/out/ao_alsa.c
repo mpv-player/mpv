@@ -252,6 +252,7 @@ static const int alsa_to_mp_channels[][2] = {
     {SND_CHMAP_TRR,     MP_SP(TBR)},
     {SND_CHMAP_TRC,     MP_SP(TBC)},
     {SND_CHMAP_MONO,    MP_SP(FC)},
+    {SND_CHMAP_NA,      MP_SPEAKER_ID_NA0},
     {SND_CHMAP_LAST,    MP_SPEAKER_ID_COUNT}
 };
 
@@ -282,9 +283,14 @@ static int mp_chmap_from_alsa(struct mp_chmap *dst, snd_pcm_chmap_t *src)
     if (src->channels > MP_NUM_CHANNELS)
         return -1;
 
+    int next_na = MP_SPEAKER_ID_NA0;
+
     dst->num = src->channels;
-    for (int c = 0; c < dst->num; c++)
+    for (int c = 0; c < dst->num; c++) {
         dst->speaker[c] = find_mp_channel(src->pos[c]);
+        if (dst->speaker[c] == MP_SPEAKER_ID_NA0)
+            dst->speaker[c] = next_na++;
+    }
 
     return 0;
 }
@@ -412,7 +418,7 @@ alsa_error: ;
 #define INIT_OK 0
 #define INIT_ERROR -1
 #define INIT_BRAINDEATH -2
-static int init_device(struct ao *ao)
+static int init_device(struct ao *ao, bool second_try)
 {
     struct priv *p = ao->priv;
     int err;
@@ -582,24 +588,14 @@ static int init_device(struct ao *ao)
         } else if (AF_FORMAT_IS_IEC61937(ao->format)) {
             MP_VERBOSE(ao, "using spdif passthrough; ignoring the channel map.\n");
         } else if (mp_chmap_is_valid(&chmap)) {
-            if (mp_chmap_equals(&chmap, &ao->channels)) {
-                MP_VERBOSE(ao, "which is what we requested.\n");
-            } else if (chmap.num == ao->channels.num) {
-                MP_VERBOSE(ao, "using the ALSA channel map.\n");
-                ao->channels = chmap;
-            } else {
-                MP_WARN(ao, "ALSA channel map conflicts with channel count!\n");
-            }
-        } else {
             // Is it one that contains NA channels?
-            struct mp_chmap chmap2 = {0};
-            for (int c = 0; c < alsa_chmap->channels; c++) {
-                int alsa_ch = alsa_chmap->pos[c];
-                if (alsa_ch != SND_CHMAP_NA)
-                    chmap2.speaker[chmap2.num++] = find_mp_channel(alsa_ch);
-            }
+            struct mp_chmap without_na = chmap;
+            mp_chmap_remove_na(&without_na);
 
-            if (mp_chmap_is_valid(&chmap2)) {
+            if (mp_chmap_is_valid(&without_na) &&
+                !mp_chmap_equals(&without_na, &chmap) &&
+                !second_try)
+            {
                 // Sometimes, ALSA will advertise certain chmaps, but it's not
                 // possible to set them. This can happen with dmix: as of
                 // alsa 1.0.28, dmix can do stereo only, but advertises the
@@ -616,10 +612,19 @@ static int init_device(struct ao *ao)
                 err = snd_pcm_close(p->alsa);
                 p->alsa = NULL;
                 CHECK_ALSA_ERROR("pcm close error");
-                ao->channels = chmap2;
+                ao->channels = without_na;
                 return INIT_BRAINDEATH;
             }
 
+            if (mp_chmap_equals(&chmap, &ao->channels)) {
+                MP_VERBOSE(ao, "which is what we requested.\n");
+            } else if (chmap.num == ao->channels.num) {
+                MP_VERBOSE(ao, "using the ALSA channel map.\n");
+                ao->channels = chmap;
+            } else {
+                MP_WARN(ao, "ALSA channel map conflicts with channel count!\n");
+            }
+        } else {
             MP_WARN(ao, "Got unknown channel map from ALSA.\n");
         }
 
@@ -690,9 +695,9 @@ static int init(struct ao *ao)
 
     MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());
 
-    int r = init_device(ao);
+    int r = init_device(ao, false);
     if (r == INIT_BRAINDEATH)
-        r = init_device(ao); // retry with normalized channel layout
+        r = init_device(ao, true); // retry with normalized channel layout
     return r == INIT_OK ? 0 : -1;
 }
 
