@@ -2140,7 +2140,7 @@ Demuxer
         Play a raw YUV sample::
 
             mpv sample-720x576.yuv --demuxer=rawvideo \
-            --demuxer-rawvideo=w=720:h=576
+            --demuxer-rawvideo-w=720 --demuxer-rawvideo-h=576
 
 ``--demuxer-rawvideo-format=<value>``
     Color space (fourcc) in hex or string for ``--demuxer=rawvideo``
