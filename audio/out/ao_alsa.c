@@ -275,6 +275,20 @@ static int find_alsa_channel(int mp_channel)
     return SND_CHMAP_UNKNOWN;
 }
 
+static int mp_chmap_from_alsa(struct mp_chmap *dst, snd_pcm_chmap_t *src)
+{
+    *dst = (struct mp_chmap) {0};
+
+    if (src->channels > MP_NUM_CHANNELS)
+        return -1;
+
+    dst->num = src->channels;
+    for (int c = 0; c < dst->num; c++)
+        dst->speaker[c] = find_mp_channel(src->pos[c]);
+
+    return 0;
+}
+
 static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
 {
     struct priv *p = ao->priv;
@@ -285,14 +299,8 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
         return false;
 
     for (int i = 0; maps[i] != NULL; i++) {
-        if (maps[i]->map.channels > MP_NUM_CHANNELS) {
-            MP_VERBOSE(ao, "skipping ALSA channel map with too many channels.\n");
-            continue;
-        }
-
-        struct mp_chmap entry = {.num = maps[i]->map.channels};
-        for (int c = 0; c < entry.num; c++)
-            entry.speaker[c] = find_mp_channel(maps[i]->map.pos[c]);
+        struct mp_chmap entry;
+        mp_chmap_from_alsa(&entry, &maps[i]->map);
 
         if (mp_chmap_is_valid(&entry)) {
             MP_VERBOSE(ao, "Got supported channel map: %s (type %s)\n",
@@ -564,9 +572,8 @@ static int init_device(struct ao *ao)
         if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
             MP_VERBOSE(ao, "channel map reported by ALSA: %s\n", tmp);
 
-        struct mp_chmap chmap = {.num = alsa_chmap->channels};
-        for (int c = 0; c < chmap.num; c++)
-            chmap.speaker[c] = find_mp_channel(alsa_chmap->pos[c]);
+        struct mp_chmap chmap;
+        mp_chmap_from_alsa(&chmap, alsa_chmap);
 
         MP_VERBOSE(ao, "which we understand as: %s\n", mp_chmap_to_str(&chmap));
 
