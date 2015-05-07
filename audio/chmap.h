@@ -62,9 +62,9 @@ enum mp_speaker_id {
     MP_SPEAKER_ID_UNKNOWN_LAST = MP_SPEAKER_ID_UNKNOWN0 + MP_NUM_CHANNELS - 1,
 
     // "Silent" channels. These are sometimes used to insert padding for
-    // unused channels.
-    MP_SPEAKER_ID_NA0,
-    MP_SPEAKER_ID_NA_LAST = MP_SPEAKER_ID_NA0 + MP_NUM_CHANNELS - 1,
+    // unused channels. Unlike other speaker types, multiple of these can
+    // occur in a single mp_chmap.
+    MP_SPEAKER_ID_NA,
 
     // Including the unassigned IDs in between. This is not a valid ID anymore,
     // but is still within uint8_t.
