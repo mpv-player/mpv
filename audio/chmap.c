@@ -392,7 +392,7 @@ void mp_chmap_get_reorder(int src[MP_NUM_CHANNELS], const struct mp_chmap *from,
     }
 
     for (int n = 0; n < to->num; n++)
-        assert(to->speaker[n] == src[n] < 0 ? -1 : from->speaker[src[n]]);
+        assert(src[n] < 0 || (to->speaker[n] == from->speaker[src[n]]));
 }
 
 // Performs the difference between a and b, and store it in diff. If b has
