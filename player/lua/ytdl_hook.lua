@@ -162,7 +162,9 @@ mp.add_hook("on_load", 10, function ()
                 local playlist = "edl://"
                 for i, entry in pairs(json.entries) do
 
-                    playlist = playlist .. entry.url .. ";"
+                    local urllength = string.len(entry.url)
+                    playlist = playlist .. "%" .. urllength .. "%" .. entry.url .. ";"
+
                 end
 
                 msg.debug("EDL: " .. playlist)
