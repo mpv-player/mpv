@@ -89,9 +89,7 @@ static void test_mp_chmap_sel_fallback_reject_unknown(void **state) {
     struct mp_chmap b;
     struct mp_chmap_sel s = {0};
 
-    a.num = 2;
-    a.speaker[0] = MP_SPEAKER_ID_UNKNOWN0;
-    a.speaker[1] = MP_SPEAKER_ID_UNKNOWN0 + 1;
+    mp_chmap_set_unknown(&a, 2);
 
     mp_chmap_from_str(&b, bstr0("5.1"));
 

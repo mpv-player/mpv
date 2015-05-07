@@ -56,15 +56,12 @@ enum mp_speaker_id {
     MP_SPEAKER_ID_SDR,          // SURROUND_DIRECT_RIGHT
     MP_SPEAKER_ID_LFE2,         // LOW_FREQUENCY_2
 
-    // Special mpv-specific speaker entries reserved for channels which have no
-    // known meaning.
-    MP_SPEAKER_ID_UNKNOWN0 = 64,
-    MP_SPEAKER_ID_UNKNOWN_LAST = MP_SPEAKER_ID_UNKNOWN0 + MP_NUM_CHANNELS - 1,
+    // Speaker IDs >= 64 are not representable in WAVEFORMATEXTENSIBLE or libav*.
 
     // "Silent" channels. These are sometimes used to insert padding for
     // unused channels. Unlike other speaker types, multiple of these can
     // occur in a single mp_chmap.
-    MP_SPEAKER_ID_NA,
+    MP_SPEAKER_ID_NA = 64,
 
     // Including the unassigned IDs in between. This is not a valid ID anymore,
     // but is still within uint8_t.
