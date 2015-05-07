@@ -144,12 +144,10 @@ bool mp_chmap_is_empty(const struct mp_chmap *src)
 bool mp_chmap_is_unknown(const struct mp_chmap *src)
 {
     for (int n = 0; n < src->num; n++) {
-        int speaker = src->speaker[n];
-        if (speaker >= MP_SPEAKER_ID_UNKNOWN0 &&
-            speaker <= MP_SPEAKER_ID_UNKNOWN_LAST)
-            return true;
+        if (src->speaker[n] != MP_SPEAKER_ID_NA)
+            return false;
     }
-    return false;
+    return mp_chmap_is_valid(src);
 }
 
 // Note: empty channel maps compare as equal. Invalid ones can equal too.
@@ -240,6 +238,8 @@ void mp_chmap_from_channels_alsa(struct mp_chmap *dst, int num_channels)
 // Set *dst to an unknown layout for the given numbers of channels.
 // If the number of channels is invalid, an invalid map is set, and
 // mp_chmap_is_valid(dst) will return false.
+// A mp_chmap with all entries set to NA is treated specially in some
+// contexts (watch out for mp_chmap_is_unknown()).
 void mp_chmap_set_unknown(struct mp_chmap *dst, int num_channels)
 {
     if (num_channels < 0 || num_channels > MP_NUM_CHANNELS) {
@@ -247,7 +247,7 @@ void mp_chmap_set_unknown(struct mp_chmap *dst, int num_channels)
     } else {
         dst->num = num_channels;
         for (int n = 0; n < dst->num; n++)
-            dst->speaker[n] = MP_SPEAKER_ID_UNKNOWN0 + n;
+            dst->speaker[n] = MP_SPEAKER_ID_NA;
     }
 }
 
