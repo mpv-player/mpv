@@ -100,7 +100,36 @@ static const char def_config[] =
     "terminal=no\n"
     "force-window=yes\n"
     "idle=once\n"
-    "screenshot-directory=~~desktop/\n";
+    "screenshot-directory=~~desktop/\n"
+    "\n"
+    "[libmpv]\n"
+    "config=no\n"
+    "idle=yes\n"
+    "terminal=no\n"
+    "input-terminal=no\n"
+    "osc=no\n"
+    "ytdl=no\n"
+    "input-default-bindings=no\n"
+    "input-vo-keyboard=no\n"
+    "input-lirc=no\n"
+    "input-appleremote=no\n"
+    "input-media-keys=no\n"
+    "input-app-events=no\n"
+    "stop-playback-on-init-failure=yes\n"
+#if HAVE_ENCODING
+    "\n"
+    "[encoding]\n"
+    "vo=lavc\n"
+    "ao=lavc\n"
+    "keep-open=no\n"
+    "force-window=no\n"
+    "gapless-audio=yes\n"
+    "resume-playback=no\n"
+    "load-scripts=no\n"
+    "osc=no\n"
+    "framedrop=no\n"
+#endif
+;
 
 static pthread_mutex_t terminal_owner_lock = PTHREAD_MUTEX_INITIALIZER;
 static struct MPContext *terminal_owner;
@@ -402,15 +431,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
             MP_INFO(mpctx, "Encoding initialization failed.");
             return -1;
         }
-        m_config_set_option0(mpctx->mconfig, "vo", "lavc");
-        m_config_set_option0(mpctx->mconfig, "ao", "lavc");
-        m_config_set_option0(mpctx->mconfig, "keep-open", "no");
-        m_config_set_option0(mpctx->mconfig, "force-window", "no");
-        m_config_set_option0(mpctx->mconfig, "gapless-audio", "yes");
-        m_config_set_option0(mpctx->mconfig, "resume-playback", "no");
-        m_config_set_option0(mpctx->mconfig, "load-scripts", "no");
-        m_config_set_option0(mpctx->mconfig, "osc", "no");
-        m_config_set_option0(mpctx->mconfig, "framedrop", "no");
+        m_config_set_profile(mpctx->mconfig, "encoding", 0);
         // never use auto
         if (!opts->audio_output_channels.num) {
             m_config_set_option_ext(mpctx->mconfig, bstr0("audio-channels"),

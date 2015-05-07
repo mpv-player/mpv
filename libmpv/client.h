@@ -369,6 +369,8 @@ const char *mpv_client_name(mpv_handle *ctx);
  *   if there are no more files to play on the internal playlist, instead of
  *   exiting. This is equivalent to the --idle option.
  * - Disable parts of input handling.
+ * - Most of the different settings can be viewed with the command line player
+ *   by running "mpv --show-profile=libmpv".
  *
  * All this assumes that API users want a mpv instance that is strictly
  * isolated from the command line player's configuration, user settings, and
