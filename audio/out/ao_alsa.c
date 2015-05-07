@@ -252,7 +252,7 @@ static const int alsa_to_mp_channels[][2] = {
     {SND_CHMAP_TRR,     MP_SP(TBR)},
     {SND_CHMAP_TRC,     MP_SP(TBC)},
     {SND_CHMAP_MONO,    MP_SP(FC)},
-    {SND_CHMAP_NA,      MP_SPEAKER_ID_NA0},
+    {SND_CHMAP_NA,      MP_SPEAKER_ID_NA},
     {SND_CHMAP_LAST,    MP_SPEAKER_ID_COUNT}
 };
 
@@ -283,14 +283,9 @@ static int mp_chmap_from_alsa(struct mp_chmap *dst, snd_pcm_chmap_t *src)
     if (src->channels > MP_NUM_CHANNELS)
         return -1;
 
-    int next_na = MP_SPEAKER_ID_NA0;
-
     dst->num = src->channels;
-    for (int c = 0; c < dst->num; c++) {
+    for (int c = 0; c < dst->num; c++)
         dst->speaker[c] = find_mp_channel(src->pos[c]);
-        if (dst->speaker[c] == MP_SPEAKER_ID_NA0)
-            dst->speaker[c] = next_na++;
-    }
 
     return 0;
 }

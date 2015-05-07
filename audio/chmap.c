@@ -50,6 +50,7 @@ static const char *const speaker_names[MP_SPEAKER_ID_COUNT][2] = {
     [MP_SPEAKER_ID_SDL]         = {"sdl",  "surround direct left"},
     [MP_SPEAKER_ID_SDR]         = {"sdr",  "surround direct right"},
     [MP_SPEAKER_ID_LFE2]        = {"lfe2", "low frequency 2"},
+    [MP_SPEAKER_ID_NA]          = {"na",   "not available"},
 };
 
 // Names taken from libavutil/channel_layout.c (Not accessible by API.)
@@ -127,7 +128,8 @@ bool mp_chmap_is_valid(const struct mp_chmap *src)
         int sp = src->speaker[n];
         if (sp >= MP_SPEAKER_ID_COUNT || mapped[sp])
             return false;
-        mapped[sp] = true;
+        if (sp != MP_SPEAKER_ID_NA)
+            mapped[sp] = true;
     }
     return src->num > 0;
 }
@@ -196,7 +198,7 @@ void mp_chmap_remove_na(struct mp_chmap *map)
     struct mp_chmap new = {0};
     for (int n = 0; n < map->num; n++) {
         int sp = map->speaker[n];
-        if (!(sp >= MP_SPEAKER_ID_NA0 && sp <= MP_SPEAKER_ID_NA_LAST))
+        if (sp != MP_SPEAKER_ID_NA)
             new.speaker[new.num++] = map->speaker[n];
     }
     *map = new;
@@ -206,15 +208,8 @@ void mp_chmap_remove_na(struct mp_chmap *map)
 void mp_chmap_fill_na(struct mp_chmap *map, int num)
 {
     assert(num <= MP_NUM_CHANNELS);
-    while (map->num < num) {
-        int sp = map->num ? map->speaker[map->num - 1] : -1;
-        if (sp >= MP_SPEAKER_ID_NA0 && sp < MP_SPEAKER_ID_NA_LAST) {
-            sp += 1;
-        } else {
-            sp = MP_SPEAKER_ID_NA0;
-        }
-        map->speaker[map->num++] = sp;
-    }
+    while (map->num < num)
+        map->speaker[map->num++] = MP_SPEAKER_ID_NA;
 }
 
 // Set *dst to a standard layout with the given number of channels.
@@ -306,7 +301,7 @@ uint64_t mp_chmap_to_lavc_unchecked(const struct mp_chmap *src)
         mp_chmap_from_channels(&t, t.num);
     uint64_t mask = 0;
     for (int n = 0; n < t.num; n++) {
-        if (t.speaker[n] < 64) // ignore MP_SPEAKER_ID_NA* etc.
+        if (t.speaker[n] < 64) // ignore MP_SPEAKER_ID_NA etc.
             mask |= 1ULL << t.speaker[n];
     }
     return mask;
@@ -440,12 +435,7 @@ char *mp_chmap_to_str_buf(char *buf, size_t buf_size, const struct mp_chmap *src
         const char *s = sp < MP_SPEAKER_ID_COUNT ? speaker_names[sp][0] : NULL;
         char sp_buf[10];
         if (!s) {
-            const char *prefix = "sp";
-            if (sp >= MP_SPEAKER_ID_NA0 && sp <= MP_SPEAKER_ID_NA_LAST) {
-                sp -= MP_SPEAKER_ID_NA0;
-                prefix = "na";
-            }
-            snprintf(sp_buf, sizeof(sp_buf), "%s%d", prefix, sp);
+            snprintf(sp_buf, sizeof(sp_buf), "sp%d", sp);
             s = sp_buf;
         }
         mp_snprintf_cat(buf, buf_size, "%s%s", n > 0 ? "-" : "", s);
