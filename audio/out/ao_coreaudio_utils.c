@@ -258,7 +258,7 @@ void ca_print_asbd(struct ao *ao, const char *description,
        (flags & kAudioFormatFlagIsPacked) ? " packed" : "",
        (flags & kAudioFormatFlagIsAlignedHigh) ? " aligned" : "",
        (flags & kAudioFormatFlagIsNonInterleaved) ? " P" : "",
-       mpfmt ? af_fmt_to_str(mpfmt) : "unusable");
+       mpfmt ? af_fmt_to_str(mpfmt) : "-");
 }
 
 // Return whether new is an improvement over old. Assume a higher value means
