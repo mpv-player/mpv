@@ -84,7 +84,7 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
     load_all_cfgfiles(mpctx, section, "mpv.conf|config");
 
     if (encoding)
-        m_config_set_profile(conf, m_config_add_profile(conf, SECT_ENCODE), 0);
+        m_config_set_profile(conf, SECT_ENCODE, 0);
 }
 
 static int try_load_config(struct MPContext *mpctx, const char *file, int flags)
@@ -143,7 +143,7 @@ static void mp_auto_load_profile(struct MPContext *mpctx, char *category,
     m_profile_t *p = m_config_get_profile0(mpctx->mconfig, t);
     if (p) {
         MP_INFO(mpctx, "Auto-loading profile '%s'\n", t);
-        m_config_set_profile(mpctx->mconfig, p, FILE_LOCAL_FLAGS);
+        m_config_set_profile(mpctx->mconfig, t, FILE_LOCAL_FLAGS);
     }
 }
 
