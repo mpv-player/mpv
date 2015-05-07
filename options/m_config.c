@@ -102,12 +102,10 @@ static int parse_profile(struct m_config *config, const struct m_option *opt,
     if (!list || !list[0])
         return M_OPT_INVALID;
     for (int i = 0; list[i]; i++) {
-        struct m_profile *p = m_config_get_profile0(config, list[i]);
-        if (!p) {
-            MP_WARN(config, "Unknown profile '%s'.\n", list[i]);
-            r = M_OPT_INVALID;
-        } else if (set)
-            m_config_set_profile(config, p, flags);
+        if (set)
+            r = m_config_set_profile(config, list[i], flags);
+        if (r < 0)
+            break;
     }
     m_option_free(opt, &list);
     return r;
@@ -897,12 +895,17 @@ int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
     return 1;
 }
 
-void m_config_set_profile(struct m_config *config, struct m_profile *p,
-                          int flags)
+int m_config_set_profile(struct m_config *config, char *name, int flags)
 {
+    struct m_profile *p = m_config_get_profile0(config, name);
+    if (!p) {
+        MP_WARN(config, "Unknown profile '%s'.\n", name);
+        return M_OPT_INVALID;
+    }
+
     if (config->profile_depth > MAX_PROFILE_DEPTH) {
         MP_WARN(config, "WARNING: Profile inclusion too deep.\n");
-        return;
+        return M_OPT_UNKNOWN;
     }
     config->profile_depth++;
     for (int i = 0; i < p->num_opts; i++) {
@@ -912,6 +915,8 @@ void m_config_set_profile(struct m_config *config, struct m_profile *p,
                                 flags | M_SETOPT_FROM_CONFIG_FILE);
     }
     config->profile_depth--;
+
+    return 0;
 }
 
 void *m_config_alloc_struct(void *talloc_ctx,

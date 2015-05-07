@@ -241,9 +241,9 @@ int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
  *  \param config The config object.
  *  \param p The profile object.
  *  \param flags M_SETOPT_* bits
+ * Returns error code (<0) or 0 on success
  */
-void m_config_set_profile(struct m_config *config, struct m_profile *p,
-                          int flags);
+int m_config_set_profile(struct m_config *config, char *name, int flags);
 
 void *m_config_alloc_struct(void *talloc_ctx,
                             const struct m_sub_options *subopts);
