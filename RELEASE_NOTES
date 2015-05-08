@@ -1,3 +1,36 @@
+Release 0.9.2 (Draft)
+=====================
+
+Changes
+-------
+
+- (X11) `vo_opengl`'s `icc-profile-auto` now queries the current ICC profile
+  relative to the center of the window.
+- `ao_coreaudio`, `ao_alsa` now support adding dummy padding channels for
+  better compatibility with hardware decoders that only support specific
+  channel counts (e.g. 5.1 now should work on a decoder that only accepts 7.1).
+
+Bug fixes
+---------
+
+- `vo_opengl`'s default for `fbo-format` is now `rgba16`, to avoid rounding
+  errors when using non-default `cscale` (issue #1918).
+- Improved framedrop behavior when playing video that has higher framerate
+  than the display (issue #1897).
+- Trying to play a directory will no longer spam `Connection lost!` to the
+  console log.
+- (Linux) Several `vo_rpi` bugfixes.
+- (OSX) Several `ao_coreaudio` and `ao_coreaudio_exclusive` bugfixes.
+- (OSX) Fixed potential crash on exit when using Cocoa.
+- (OSX, ClientAPI) Cocoa now works when both the `cplayer` (`mpv`) and `libmpv`
+  are built at the same time; however, `libmpv` now always creates an
+  application singleton. Cocoa has to be disabled completely to prevent
+  `libmpv` from creating the singleton.
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.9.1..` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.9.1...release/0.9.
+
 Release 0.9.1
 =============
 
