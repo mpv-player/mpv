@@ -1,87 +1,71 @@
 #include "test_helpers.h"
 #include "audio/chmap_sel.h"
 
-static void test_mp_chmap_sel_fallback_upmix(void **state) {
-    struct mp_chmap a;
-    struct mp_chmap b;
+#define LAYOUTS(...) (char*[]){__VA_ARGS__, NULL}
+
+static void test_sel(const char *input, const char *expected_selection,
+                          char **layouts)
+{
     struct mp_chmap_sel s = {0};
+    struct mp_chmap input_map;
+    struct mp_chmap expected_map;
 
-    mp_chmap_from_str(&a, bstr0("7.1"));
-    mp_chmap_from_str(&b, bstr0("5.1"));
+    assert_true(mp_chmap_from_str(&input_map, bstr0(input)));
+    assert_true(mp_chmap_from_str(&expected_map, bstr0(expected_selection)));
 
-    mp_chmap_sel_add_map(&s, &a);
-    assert_true(mp_chmap_sel_fallback(&s, &b));
-    assert_string_equal(mp_chmap_to_str(&b), "7.1");
+    for (int n = 0; layouts[n]; n++) {
+        struct mp_chmap tmp;
+        assert_true(mp_chmap_from_str(&tmp, bstr0(layouts[n])));
+        int count = s.num_chmaps;
+        mp_chmap_sel_add_map(&s, &tmp);
+        assert_true(s.num_chmaps > count); // assure validity and max. count
+    }
+
+    assert_true(mp_chmap_sel_fallback(&s, &input_map));
+    // We convert expected_map to a chmap and then back to a string to avoid
+    // problems with ambiguous layouts.
+    assert_string_equal(mp_chmap_to_str(&input_map),
+                        mp_chmap_to_str(&expected_map));
+}
+
+static void test_mp_chmap_sel_fallback_upmix(void **state) {
+    test_sel("5.1", "7.1", LAYOUTS("7.1"));
 }
 
 static void test_mp_chmap_sel_fallback_downmix(void **state) {
-    struct mp_chmap a;
-    struct mp_chmap b;
-    struct mp_chmap_sel s = {0};
-
-    mp_chmap_from_str(&a, bstr0("5.1"));
-    mp_chmap_from_str(&b, bstr0("7.1"));
-
-    mp_chmap_sel_add_map(&s, &a);
-    assert_true(mp_chmap_sel_fallback(&s, &b));
-    assert_string_equal(mp_chmap_to_str(&b), "5.1");
+    test_sel("7.1", "5.1", LAYOUTS("5.1"));
 }
 
 static void test_mp_chmap_sel_fallback_incompatible(void **state) {
-    struct mp_chmap a;
-    struct mp_chmap b;
-    struct mp_chmap_sel s = {0};
-
-    mp_chmap_from_str(&a, bstr0("7.1"));
-    mp_chmap_from_str(&b, bstr0("7.1(wide-side)"));
-
-    mp_chmap_sel_add_map(&s, &a);
-    assert_true(mp_chmap_sel_fallback(&s, &b));
-    assert_string_equal(mp_chmap_to_str(&b), "7.1");
+    test_sel("7.1(wide-side)", "7.1", LAYOUTS("7.1"));
 }
 
 static void test_mp_chmap_sel_fallback_prefer_compatible(void **state) {
-    struct mp_chmap a, b, c;
-    struct mp_chmap_sel s = {0};
-
-    mp_chmap_from_str(&a, bstr0("7.1"));
-    mp_chmap_from_str(&b, bstr0("5.1(side)"));
-    mp_chmap_from_str(&c, bstr0("7.1(wide-side)"));
-
-    mp_chmap_sel_add_map(&s, &a);
-    mp_chmap_sel_add_map(&s, &b);
-
-    assert_true(mp_chmap_sel_fallback(&s, &c));
-    assert_string_equal(mp_chmap_to_str(&b), "5.1(side)");
+    test_sel("7.1(wide-side)", "7.1", LAYOUTS("7.1", "5.1(side)"));
 }
 
 static void test_mp_chmap_sel_fallback_prefer_closest_upmix(void **state) {
-    struct mp_chmap_sel s = {0};
-
-    char *maps[] = { "7.1", "5.1", "2.1", "stereo", "mono", NULL };
-    for (int i = 0; maps[i]; i++) {
-        struct mp_chmap m;
-        mp_chmap_from_str(&m, bstr0(maps[i]));
-        mp_chmap_sel_add_map(&s, &m);
-    }
-
-    struct mp_chmap c;
-    mp_chmap_from_str(&c, bstr0("3.1"));
-    assert_true(mp_chmap_sel_fallback(&s, &c));
-    assert_string_equal(mp_chmap_to_str(&c), "5.1");
+    test_sel("3.1", "5.1", LAYOUTS("7.1", "5.1", "2.1", "stereo", "mono"));
 }
 
 static void test_mp_chmap_sel_fallback_use_replacements(void **state) {
-    struct mp_chmap a;
-    struct mp_chmap b;
-    struct mp_chmap_sel s = {0};
+    test_sel("5.1", "7.1(rear)", LAYOUTS("7.1(rear)"));
+}
 
-    mp_chmap_from_str(&a, bstr0("7.1(rear)"));
-    mp_chmap_from_str(&b, bstr0("5.1"));
+static void test_mp_chmap_sel_fallback_works_on_alsa_chmaps(void **state) {
+    test_sel("5.1", "7.1(alsa)", LAYOUTS("7.1(alsa)"));
+}
 
-    mp_chmap_sel_add_map(&s, &a);
-    assert_true(mp_chmap_sel_fallback(&s, &b));
-    assert_string_equal(mp_chmap_to_str(&b), "7.1(rear)");
+static void test_mp_chmap_sel_fallback_mono_to_stereo(void **state) {
+    test_sel("mono", "stereo", LAYOUTS("stereo", "5.1"));
+}
+
+static void test_mp_chmap_sel_fallback_stereo_to_stereo(void **state) {
+    test_sel("stereo", "stereo", LAYOUTS("stereo", "5.1"));
+}
+
+static void test_mp_chmap_sel_fallback_no_downmix(void **state) {
+    test_sel("5.1(side)", "7.1(rear)", LAYOUTS("stereo", "7.1(rear)"));
 }
 
 static void test_mp_chmap_sel_fallback_reject_unknown(void **state) {
@@ -98,67 +82,6 @@ static void test_mp_chmap_sel_fallback_reject_unknown(void **state) {
     assert_string_equal(mp_chmap_to_str(&b), "5.1");
 }
 
-static void test_mp_chmap_sel_fallback_works_on_alsa_chmaps(void **state) {
-    struct mp_chmap a;
-    struct mp_chmap b;
-    struct mp_chmap_sel s = {0};
-
-    mp_chmap_from_str(&a, bstr0("7.1(alsa)"));
-    mp_chmap_from_str(&b, bstr0("5.1"));
-
-    mp_chmap_sel_add_map(&s, &a);
-    assert_true(mp_chmap_sel_fallback(&s, &b));
-    assert_string_equal(mp_chmap_to_str(&b), "7.1(alsa)");
-}
-
-static void test_mp_chmap_sel_fallback_mono_to_stereo(void **state) {
-    struct mp_chmap a;
-    struct mp_chmap b;
-    struct mp_chmap c;
-    struct mp_chmap_sel s = {0};
-
-    mp_chmap_from_str(&a, bstr0("stereo"));
-    mp_chmap_from_str(&b, bstr0("5.1"));
-    mp_chmap_from_str(&c, bstr0("mono"));
-
-    mp_chmap_sel_add_map(&s, &a);
-    mp_chmap_sel_add_map(&s, &b);
-    assert_true(mp_chmap_sel_fallback(&s, &c));
-    assert_string_equal(mp_chmap_to_str(&c), "stereo");
-}
-
-static void test_mp_chmap_sel_fallback_stereo_to_stereo(void **state) {
-    struct mp_chmap a;
-    struct mp_chmap b;
-    struct mp_chmap c;
-    struct mp_chmap_sel s = {0};
-
-    mp_chmap_from_str(&a, bstr0("stereo"));
-    mp_chmap_from_str(&b, bstr0("5.1"));
-    mp_chmap_from_str(&c, bstr0("stereo"));
-
-    mp_chmap_sel_add_map(&s, &a);
-    mp_chmap_sel_add_map(&s, &b);
-    assert_true(mp_chmap_sel_fallback(&s, &c));
-    assert_string_equal(mp_chmap_to_str(&c), "stereo");
-}
-
-static void test_mp_chmap_sel_fallback_no_downmix(void **state) {
-    struct mp_chmap a;
-    struct mp_chmap b;
-    struct mp_chmap c;
-    struct mp_chmap_sel s = {0};
-
-    mp_chmap_from_str(&a, bstr0("stereo"));
-    mp_chmap_from_str(&b, bstr0("7.1(rear)"));
-    mp_chmap_from_str(&c, bstr0("5.1(side)"));
-
-    mp_chmap_sel_add_map(&s, &a);
-    mp_chmap_sel_add_map(&s, &b);
-    assert_true(mp_chmap_sel_fallback(&s, &c));
-    assert_string_equal(mp_chmap_to_str(&c), "7.1(rear)");
-}
-
 int main(void) {
     const UnitTest tests[] = {
         unit_test(test_mp_chmap_sel_fallback_upmix),
@@ -167,11 +90,11 @@ int main(void) {
         unit_test(test_mp_chmap_sel_fallback_prefer_compatible),
         unit_test(test_mp_chmap_sel_fallback_prefer_closest_upmix),
         unit_test(test_mp_chmap_sel_fallback_use_replacements),
-        unit_test(test_mp_chmap_sel_fallback_reject_unknown),
         unit_test(test_mp_chmap_sel_fallback_works_on_alsa_chmaps),
         unit_test(test_mp_chmap_sel_fallback_mono_to_stereo),
         unit_test(test_mp_chmap_sel_fallback_stereo_to_stereo),
         unit_test(test_mp_chmap_sel_fallback_no_downmix),
+        unit_test(test_mp_chmap_sel_fallback_reject_unknown),
     };
     return run_tests(tests);
 }
