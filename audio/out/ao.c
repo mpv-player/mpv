@@ -415,12 +415,19 @@ bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
     if (mp_msg_test(ao->log, MSGL_DEBUG)) {
         for (int i = 0; i < s->num_chmaps; i++) {
             struct mp_chmap c = s->chmaps[i];
-            MP_DBG(ao, "chmap_sel #%d: %s\n", i, mp_chmap_to_str(&c));
+            struct mp_chmap cr = c;
+            mp_chmap_reorder_norm(&cr);
+            MP_DBG(ao, "chmap_sel #%d: %s (%s)\n", i, mp_chmap_to_str(&c),
+                   mp_chmap_to_str(&cr));
         }
     }
     bool r = mp_chmap_sel_adjust(s, map);
-    if (r)
-        MP_DBG(ao, "result: %s\n", mp_chmap_to_str(map));
+    if (r) {
+        struct mp_chmap mapr = *map;
+        mp_chmap_reorder_norm(&mapr);
+        MP_DBG(ao, "result: %s (%s)\n", mp_chmap_to_str(map),
+               mp_chmap_to_str(&mapr));
+    }
     return r;
 }
 
