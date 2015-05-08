@@ -618,6 +618,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, p->last_input);
         return VO_TRUE;
+    case VOCTRL_GET_PANSCAN:
+        return VO_TRUE;
+    case VOCTRL_SET_PANSCAN:
+        if (vo->config_ok)
+            reconfig(vo, vo->params, 0);
+        return VO_TRUE;
     }
     return VO_NOTIMPL;
 }
