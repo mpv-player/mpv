@@ -417,16 +417,6 @@ int mp_chmap_diffn(const struct mp_chmap *a, const struct mp_chmap *b)
     return diff.num;
 }
 
-// Checks whether a contains all the speakers in b
-bool mp_chmap_contains(const struct mp_chmap *a, const struct mp_chmap *b)
-{
-    struct mp_chmap d1;
-    struct mp_chmap d2;
-    mp_chmap_diff(a, b, &d1);
-    mp_chmap_diff(b, a, &d2);
-    return a->num >= b->num && d1.num >= 0 && d2.num == 0;
-}
-
 // Returns something like "fl-fr-fc". If there's a standard layout in lavc
 // order, return that, e.g. "3.0" instead of "fl-fr-fc".
 // Unassigned but valid speakers get names like "sp28".

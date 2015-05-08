@@ -127,8 +127,6 @@ void mp_chmap_diff(const struct mp_chmap *a, const struct mp_chmap *b,
                    struct mp_chmap *diff);
 int mp_chmap_diffn(const struct mp_chmap *a, const struct mp_chmap *b);
 
-bool mp_chmap_contains(const struct mp_chmap *a, const struct mp_chmap *b);
-
 char *mp_chmap_to_str_buf(char *buf, size_t buf_size, const struct mp_chmap *src);
 #define mp_chmap_to_str(m) mp_chmap_to_str_buf((char[64]){0}, 64, (m))
 
