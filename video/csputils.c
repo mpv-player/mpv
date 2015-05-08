@@ -689,6 +689,14 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, struct mp_cmat *m)
                   + params->brightness;
     }
 
+    // Brightness adds a constant to output R,G,B.
+    // Contrast scales Y around 1/2 (not 0 in this implementation).
+    for (int i = 0; i < 3; i++) {
+        m->c[i] += params->brightness;
+        m->m[i][0] *= params->contrast;
+        m->c[i] += (rgblev.max-rgblev.min) * (1 - params->contrast)/2;
+    }
+
     int in_bits = FFMAX(params->int_bits_in, 1);
     int out_bits = FFMAX(params->int_bits_out, 1);
     double in_scale = (1 << in_bits) - 1.0;
