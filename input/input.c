@@ -702,7 +702,9 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
     input_lock(ictx);
     MP_DBG(ictx, "mouse move %d/%d\n", x, y);
 
-    if (!ictx->opts->enable_mouse_movements) {
+    if ((ictx->mouse_vo_x == x && ictx->mouse_vo_y == y) ||
+        !ictx->opts->enable_mouse_movements)
+    {
         input_unlock(ictx);
         return;
     }
