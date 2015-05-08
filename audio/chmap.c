@@ -395,26 +395,20 @@ void mp_chmap_get_reorder(int src[MP_NUM_CHANNELS], const struct mp_chmap *from,
         assert(src[n] < 0 || (to->speaker[n] == from->speaker[src[n]]));
 }
 
-// Return channels that are only in a.
-// Performs the difference between a and b, and store it in diff. If b has
-// channels that do not appear in a, those will not appear in the difference.
-// To get to those the argument ordering in the function call has to be
-// inverted. For the same reason, the diff with a superset will return no
-// speakers.
-void mp_chmap_diff(const struct mp_chmap *a, const struct mp_chmap *b,
-                   struct mp_chmap *diff)
+static int popcount64(uint64_t bits)
 {
-    uint64_t a_mask = mp_chmap_to_lavc_unchecked(a);
-    uint64_t b_mask = mp_chmap_to_lavc_unchecked(b);
-    mp_chmap_from_lavc(diff, (a_mask ^ b_mask) & a_mask);
+    int r = 0;
+    for (int n = 0; n < 64; n++)
+        r += !!(bits & (1ULL << n));
+    return r;
 }
 
 // Return the number of channels only in a.
 int mp_chmap_diffn(const struct mp_chmap *a, const struct mp_chmap *b)
 {
-    struct mp_chmap diff;
-    mp_chmap_diff(a, b, &diff);
-    return diff.num;
+    uint64_t a_mask = mp_chmap_to_lavc_unchecked(a);
+    uint64_t b_mask = mp_chmap_to_lavc_unchecked(b);
+    return popcount64((a_mask ^ b_mask) & a_mask);
 }
 
 // Returns something like "fl-fr-fc". If there's a standard layout in lavc
