@@ -41,7 +41,7 @@ static void test_mp_chmap_sel_fallback_incompatible(void **state) {
 }
 
 static void test_mp_chmap_sel_fallback_prefer_compatible(void **state) {
-    test_sel("7.1(wide-side)", "7.1", LAYOUTS("7.1", "5.1(side)"));
+    test_sel("7.1(wide-side)", "5.1(side)", LAYOUTS("7.1", "5.1(side)"));
 }
 
 static void test_mp_chmap_sel_fallback_prefer_closest_upmix(void **state) {
@@ -66,6 +66,11 @@ static void test_mp_chmap_sel_fallback_stereo_to_stereo(void **state) {
 
 static void test_mp_chmap_sel_fallback_no_downmix(void **state) {
     test_sel("5.1(side)", "7.1(rear)", LAYOUTS("stereo", "7.1(rear)"));
+}
+
+static void test_mp_chmap_sel_fallback_minimal_downmix(void **state) {
+    test_sel("7.1", "fl-fr-lfe-fc-bl-br-flc-frc",
+             LAYOUTS("fl-fr-lfe-fc-bl-br-flc-frc", "3.0(back)"));
 }
 
 static void test_mp_chmap_sel_fallback_reject_unknown(void **state) {
@@ -94,6 +99,7 @@ int main(void) {
         unit_test(test_mp_chmap_sel_fallback_mono_to_stereo),
         unit_test(test_mp_chmap_sel_fallback_stereo_to_stereo),
         unit_test(test_mp_chmap_sel_fallback_no_downmix),
+        unit_test(test_mp_chmap_sel_fallback_minimal_downmix),
         unit_test(test_mp_chmap_sel_fallback_reject_unknown),
     };
     return run_tests(tests);
