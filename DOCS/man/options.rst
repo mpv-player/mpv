@@ -1586,7 +1586,7 @@ Window
     file.mkv normally, then fail to open ``/dev/null``, then exit). (In
     mpv 0.8.0, ``always`` was introduced, which restores the old behavior.)
 
-``--force-window``
+``--force-window=<yes|no|immediate>``
     Create a video output window even if there is no video. This can be useful
     when pretending that mpv is a GUI application. Currently, the window
     always has the size 640x480, and is subject to ``--geometry``,
@@ -1598,7 +1598,9 @@ Window
         window placement still works if the video size is different from the
         ``--force-window`` default window size). This can be a problem if
         initialization doesn't work perfectly, such as when opening URLs with
-        bad network connection, or opening broken video files.
+        bad network connection, or opening broken video files. The ``immediate``
+        mode can be used to create the window always on program start, but this
+        may cause other issues.
 
 ``--ontop``
     Makes the player window stay on top of other windows.

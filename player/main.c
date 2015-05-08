@@ -472,6 +472,8 @@ int mp_initialize(struct MPContext *mpctx, char **options)
                     "the selected video_out (-vo) device.\n");
             return -1;
         }
+        if (opts->force_vo == 2)
+            handle_force_window(mpctx, false);
         mpctx->mouse_cursor_visible = true;
     }
 
