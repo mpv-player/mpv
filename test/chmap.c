@@ -24,33 +24,9 @@ static void test_mp_chmap_diff(void **state) {
     assert_int_equal(diff.speaker[2], MP_SPEAKER_ID_BC);
 }
 
-static void test_mp_chmap_contains_with_related_chmaps(void **state) {
-    struct mp_chmap a;
-    struct mp_chmap b;
-
-    mp_chmap_from_str(&a, bstr0("3.1"));
-    mp_chmap_from_str(&b, bstr0("2.1"));
-
-    assert_true(mp_chmap_contains(&a, &b));
-    assert_false(mp_chmap_contains(&b, &a));
-}
-
-static void test_mp_chmap_contains_with_unrelated_chmaps(void **state) {
-    struct mp_chmap a;
-    struct mp_chmap b;
-
-    mp_chmap_from_str(&a, bstr0("mono"));
-    mp_chmap_from_str(&b, bstr0("stereo"));
-
-    assert_false(mp_chmap_contains(&a, &b));
-    assert_false(mp_chmap_contains(&b, &a));
-}
-
 int main(void) {
     const UnitTest tests[] = {
         unit_test(test_mp_chmap_diff),
-        unit_test(test_mp_chmap_contains_with_related_chmaps),
-        unit_test(test_mp_chmap_contains_with_unrelated_chmaps),
     };
     return run_tests(tests);
 }
