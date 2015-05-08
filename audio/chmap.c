@@ -395,6 +395,7 @@ void mp_chmap_get_reorder(int src[MP_NUM_CHANNELS], const struct mp_chmap *from,
         assert(src[n] < 0 || (to->speaker[n] == from->speaker[src[n]]));
 }
 
+// Return channels that are only in a.
 // Performs the difference between a and b, and store it in diff. If b has
 // channels that do not appear in a, those will not appear in the difference.
 // To get to those the argument ordering in the function call has to be
@@ -406,6 +407,14 @@ void mp_chmap_diff(const struct mp_chmap *a, const struct mp_chmap *b,
     uint64_t a_mask = mp_chmap_to_lavc_unchecked(a);
     uint64_t b_mask = mp_chmap_to_lavc_unchecked(b);
     mp_chmap_from_lavc(diff, (a_mask ^ b_mask) & a_mask);
+}
+
+// Return the number of channels only in a.
+int mp_chmap_diffn(const struct mp_chmap *a, const struct mp_chmap *b)
+{
+    struct mp_chmap diff;
+    mp_chmap_diff(a, b, &diff);
+    return diff.num;
 }
 
 // Checks whether a contains all the speakers in b

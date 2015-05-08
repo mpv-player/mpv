@@ -125,6 +125,7 @@ void mp_chmap_get_reorder(int src[MP_NUM_CHANNELS], const struct mp_chmap *from,
 
 void mp_chmap_diff(const struct mp_chmap *a, const struct mp_chmap *b,
                    struct mp_chmap *diff);
+int mp_chmap_diffn(const struct mp_chmap *a, const struct mp_chmap *b);
 
 bool mp_chmap_contains(const struct mp_chmap *a, const struct mp_chmap *b);
 
