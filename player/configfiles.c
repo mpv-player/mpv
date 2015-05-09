@@ -166,10 +166,10 @@ void mp_load_auto_profiles(struct MPContext *mpctx)
 
 #define MP_WATCH_LATER_CONF "watch_later"
 
-static char *mp_get_playback_resume_config_filename(struct mpv_global *global,
+static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
                                                     const char *fname)
 {
-    struct MPOpts *opts = global->opts;
+    struct MPOpts *opts = mpctx->opts;
     char *res = NULL;
     void *tmp = talloc_new(NULL);
     const char *realpath = fname;
@@ -195,14 +195,13 @@ static char *mp_get_playback_resume_config_filename(struct mpv_global *global,
     for (int i = 0; i < 16; i++)
         conf = talloc_asprintf_append(conf, "%02X", md5[i]);
 
-    res = talloc_asprintf(tmp, MP_WATCH_LATER_CONF "/%s", conf);
-    res = mp_find_config_file(NULL, global, res);
-
-    if (!res) {
-        res = mp_find_config_file(tmp, global, MP_WATCH_LATER_CONF);
-        if (res)
-            res = talloc_asprintf(NULL, "%s/%s", res, conf);
+    if (!mpctx->cached_watch_later_configdir) {
+        mpctx->cached_watch_later_configdir =
+            mp_find_user_config_file(mpctx, mpctx->global, MP_WATCH_LATER_CONF);
     }
+
+    if (mpctx->cached_watch_later_configdir)
+        res = mp_path_join(NULL, mpctx->cached_watch_later_configdir, conf);
 
 exit:
     talloc_free(tmp);
@@ -298,7 +297,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
 
     mp_mk_config_dir(mpctx->global, MP_WATCH_LATER_CONF);
 
-    conffile = mp_get_playback_resume_config_filename(mpctx->global, filename);
+    conffile = mp_get_playback_resume_config_filename(mpctx, filename);
     if (!conffile)
         goto exit;
 
@@ -342,7 +341,9 @@ exit:
 
 void mp_load_playback_resume(struct MPContext *mpctx, const char *file)
 {
-    char *fname = mp_get_playback_resume_config_filename(mpctx->global, file);
+    if (!mpctx->opts->position_resume)
+        return;
+    char *fname = mp_get_playback_resume_config_filename(mpctx, file);
     if (fname && mp_path_exists(fname)) {
         // Never apply the saved start position to following files
         m_config_backup_opt(mpctx->mconfig, "start");
@@ -365,8 +366,7 @@ struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
     if (!mpctx->opts->position_resume)
         return NULL;
     for (struct playlist_entry *e = playlist->first; e; e = e->next) {
-        char *conf = mp_get_playback_resume_config_filename(mpctx->global,
-                                                            e->filename);
+        char *conf = mp_get_playback_resume_config_filename(mpctx, e->filename);
         bool exists = conf && mp_path_exists(conf);
         talloc_free(conf);
         if (exists)

@@ -31,6 +31,12 @@ struct mpv_global;
 char *mp_find_config_file(void *talloc_ctx, struct mpv_global *global,
                           const char *filename);
 
+// Like mp_find_config_file(), but search only the local writable user config
+// dir. Also, this returns a result even if the file does not exist. Calling
+// it with filename="" is equivalent to retrieving the user config dir.
+char *mp_find_user_config_file(void *talloc_ctx, struct mpv_global *global,
+                               const char *filename);
+
 // Find all instances of the given config file. Paths are returned in order
 // from lowest to highest priority. filename can contain multiple names
 // separated with '|', with the first having highest priority.

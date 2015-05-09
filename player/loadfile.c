@@ -1063,8 +1063,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     mp_load_auto_profiles(mpctx);
 
-    if (opts->position_resume)
-        mp_load_playback_resume(mpctx, mpctx->filename);
+    mp_load_playback_resume(mpctx, mpctx->filename);
 
     load_per_file_options(mpctx->mconfig, mpctx->playing->params,
                           mpctx->playing->num_params);
