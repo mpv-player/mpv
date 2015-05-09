@@ -35,12 +35,13 @@ def __add_generic_flags__(ctx):
                                  "-Wdisabled-optimization",
                                  "-Wstrict-prototypes",
                                  "-Wno-format-zero-length",
-                                 "-Werror=format-security"])
+                                 "-Werror=format-security",
+                                 "-Wno-redundant-decls"])
 
 def __add_gcc_flags__(ctx):
     ctx.env.CFLAGS += ["-Wall", "-Wundef", "-Wmissing-prototypes", "-Wshadow",
                        "-Wno-switch", "-Wparentheses", "-Wpointer-arith",
-                       "-Wredundant-decls", "-Wno-pointer-sign"]
+                       "-Wno-pointer-sign"]
 
 def __add_clang_flags__(ctx):
     ctx.env.CFLAGS += ["-Wno-logical-op-parentheses", "-fcolor-diagnostics",

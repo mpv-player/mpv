@@ -30,8 +30,6 @@
 #include "common/common.h"
 #include "stream/stream.h"
 
-// Normally, this must be declared manually, but glibc is retarded
-// resulting in a warning.
 extern char **environ;
 
 // A silly helper: automatically skips entries with negative FDs
