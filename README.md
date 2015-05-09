@@ -57,9 +57,6 @@ To build the software you can use `./waf build`: the result of the compilation
 will be located in `build/mpv`. You can use `./waf install` to install mpv
 to the *prefix* after it is compiled.
 
-NOTE: Using the old build system (with `./old-configure`) should still work,
-but will be removed in a future version of mpv.
-
 Essential dependencies (incomplete list):
 
 - gcc or clang

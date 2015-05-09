@@ -858,7 +858,7 @@ CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE
 # in-tree builds.
 
 if test ! -f Makefile ; then
-    ln -s old-makefile Makefile
+    ln -s TOOLS/old-makefile Makefile
 fi
 
 cat > old_build/config.mak << EOF
