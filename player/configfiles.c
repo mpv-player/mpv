@@ -184,10 +184,10 @@ static char *mp_get_playback_resume_config_filename(struct mpv_global *global,
             realpath = mp_path_join(tmp, cwd, fname);
         }
     }
-    if (bstr_startswith0(bfname, "dvd://"))
+    if (bstr_startswith0(bfname, "dvd://") && opts->dvd_device)
         realpath = talloc_asprintf(tmp, "%s - %s", realpath, opts->dvd_device);
-    if (bstr_startswith0(bfname, "br://") || bstr_startswith0(bfname, "bd://") ||
-        bstr_startswith0(bfname, "bluray://"))
+    if ((bstr_startswith0(bfname, "br://") || bstr_startswith0(bfname, "bd://") ||
+         bstr_startswith0(bfname, "bluray://")) && opts->bluray_device)
         realpath = talloc_asprintf(tmp, "%s - %s", realpath, opts->bluray_device);
     uint8_t md5[16];
     av_md5_sum(md5, realpath, strlen(realpath));
