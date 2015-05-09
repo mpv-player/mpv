@@ -74,11 +74,7 @@ void mp_parse_cfgfiles(struct MPContext *mpctx)
     // encoding profile.
     if (encoding) {
         section = "playback-default";
-
-        char *cf = mp_find_config_file(NULL, mpctx->global, "encoding-profiles.conf");
-        if (cf)
-            m_config_parse_config_file(mpctx->mconfig, cf, SECT_ENCODE, 0);
-        talloc_free(cf);
+        load_all_cfgfiles(mpctx, SECT_ENCODE, "encoding-profiles.conf");
     }
 
     load_all_cfgfiles(mpctx, section, "mpv.conf|config");
