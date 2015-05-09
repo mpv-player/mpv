@@ -192,25 +192,11 @@ void mp_load_scripts(struct MPContext *mpctx)
 
     // Load all scripts
     void *tmp = talloc_new(NULL);
-    const char *dirs[] = {"scripts", "lua", NULL}; // 'lua' is deprecated
-    int warning_displayed = 0;
-    for (int s = 0; dirs[s]; s++) {
-        char **scriptsdir = mp_find_all_config_files(tmp, mpctx->global, dirs[s]);
-        for (int i = 0; scriptsdir && scriptsdir[i]; i++) {
-            files = list_script_files(tmp, scriptsdir[i]);
-            for (int n = 0; files && files[n]; n++) {
-                if (s && !warning_displayed) {
-                    warning_displayed = 1;
-                    char *cfg = mp_find_config_file(tmp, mpctx->global, "");
-                    if (cfg)
-                        cfg = mp_path_join(tmp, bstr0(cfg), bstr0("scripts"));
-                    MP_WARN(mpctx, "Warning: '%s' - lua subdir is deprecated.\n"
-                            "Please move scripts to '%s'.\n",
-                            files[n], cfg ? cfg : "/scripts");
-                }
-                mp_load_script(mpctx, files[n]);
-            }
-        }
+    char **scriptsdir = mp_find_all_config_files(tmp, mpctx->global, "scripts");
+    for (int i = 0; scriptsdir && scriptsdir[i]; i++) {
+        files = list_script_files(tmp, scriptsdir[i]);
+        for (int n = 0; files && files[n]; n++)
+            mp_load_script(mpctx, files[n]);
     }
     talloc_free(tmp);
 }

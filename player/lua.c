@@ -277,16 +277,10 @@ static void set_path(lua_State *L)
     const char *path = lua_tostring(L, -1);
 
     char *newpath = talloc_strdup(tmp, path ? path : "");
-    char *dirs[] = {"scripts", "lua", NULL};
-    for (int s = 0; dirs[s]; s++) {
-        char **luadir = mp_find_all_config_files(tmp, get_mpctx(L)->global,
-                                                 dirs[s]);
-        for (int i = 0; luadir && luadir[i]; i++) {
-            // No need to display a warning for lua files in the deprecated
-            // 'lua' dirs since scripting.c already warned on them
-            newpath = talloc_asprintf_append(newpath, ";%s",
-                    mp_path_join(tmp, bstr0(luadir[i]), bstr0("?.lua")));
-        }
+    char **luadir = mp_find_all_config_files(tmp, get_mpctx(L)->global, "scripts");
+    for (int i = 0; luadir && luadir[i]; i++) {
+        newpath = talloc_asprintf_append(newpath, ";%s",
+                        mp_path_join(tmp, bstr0(luadir[i]), bstr0("?.lua")));
     }
 
     lua_pushstring(L, newpath);  // package path newpath
