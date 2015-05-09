@@ -99,7 +99,7 @@ char *mp_find_user_config_file(void *talloc_ctx, struct mpv_global *global,
     if (res)
         res = mp_path_join(talloc_ctx, res, filename);
     talloc_free(tmp);
-    MP_VERBOSE(global, "config file: '%s' -> '%s'\n", filename, res ? res : "-");
+    MP_VERBOSE(global, "config path: '%s' -> '%s'\n", filename, res ? res : "-");
     return res;
 }
 
@@ -119,8 +119,14 @@ static char **mp_find_all_config_files_limited(void *talloc_ctx,
             bstr_split_tok(s, "|", &fn, &s);
 
             char *file = mp_path_join_bstr(ret, bstr0(dir), fn);
-            if (mp_path_exists(file))
+            if (mp_path_exists(file)) {
+                MP_VERBOSE(global, "config path: '%.*s' -> '%s'\n",
+                           BSTR_P(fn), file);
                 MP_TARRAY_APPEND(NULL, ret, num_ret, file);
+            } else {
+                MP_VERBOSE(global, "config path: '%.*s' -/-> '%s'\n",
+                           BSTR_P(fn), file);
+            }
         }
     }
 
@@ -129,12 +135,6 @@ static char **mp_find_all_config_files_limited(void *talloc_ctx,
 
     for (int n = 0; n < num_ret / 2; n++)
         MPSWAP(char*, ret[n], ret[num_ret - n - 1]);
-
-    MP_VERBOSE(global, "config file: '%s'\n", filename);
-
-    for (char** c = ret; *c; c++)
-        MP_VERBOSE(global, "    -> '%s'\n", *c);
-
     return ret;
 }
 
