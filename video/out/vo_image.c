@@ -95,7 +95,7 @@ static void flip_page(struct vo *vo)
                                      image_writer_file_ext(p->opts));
 
     if (p->outdir && strlen(p->outdir))
-        filename = mp_path_join(t, bstr0(p->outdir), bstr0(filename));
+        filename = mp_path_join(t, p->outdir, filename);
 
     MP_INFO(vo, "Saving %s\n", filename);
     write_image(p->current, p->opts, filename, vo->log);

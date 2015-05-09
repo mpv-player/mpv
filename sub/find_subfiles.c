@@ -188,7 +188,7 @@ static void append_dir_subtitles(struct mpv_global *global,
 
         if (prio) {
             prio += prio;
-            char *subpath = mp_path_join(*slist, path, dename);
+            char *subpath = mp_path_join_bstr(*slist, path, dename);
             if (mp_path_exists(subpath)) {
                 MP_GROW_ARRAY(*slist, *nsub);
                 struct subfn *sub = *slist + (*nsub)++;
@@ -256,8 +256,8 @@ struct subfn *find_external_files(struct mpv_global *global, const char *fname)
         // Load subtitles in dirs specified by sub-paths option
         if (opts->sub_paths) {
             for (int i = 0; opts->sub_paths[i]; i++) {
-                char *path = mp_path_join(slist, mp_dirname(fname),
-                                        bstr0(opts->sub_paths[i]));
+                char *path = mp_path_join_bstr(slist, mp_dirname(fname),
+                                               bstr0(opts->sub_paths[i]));
                 append_dir_subtitles(global, &slist, &n, bstr0(path), fname, 0);
             }
         }

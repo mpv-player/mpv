@@ -63,7 +63,8 @@ struct bstr mp_dirname(const char *path);
  * for the result. '/' is inserted between the components if needed.
  * If p2 is an absolute path then the value of p1 is ignored.
  */
-char *mp_path_join(void *talloc_ctx, struct bstr p1, struct bstr p2);
+char *mp_path_join(void *talloc_ctx, const char *p1, const char *p2);
+char *mp_path_join_bstr(void *talloc_ctx, struct bstr p1, struct bstr p2);
 
 char *mp_getcwd(void *talloc_ctx);
 

@@ -284,7 +284,7 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
         if (dir && dir[0]) {
             void *t = fname;
             dir = mp_get_user_path(t, ctx->mpctx->global, dir);
-            fname = mp_path_join(NULL, bstr0(dir), bstr0(fname));
+            fname = mp_path_join(NULL, dir, fname);
             talloc_free(t);
 
             mp_mkdirp(dir);

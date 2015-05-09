@@ -835,9 +835,9 @@ static int ifo_dvdnav_stream_open(stream_t *stream)
     // directory containing VIDEO_TS.IFO, or that file itself.
     if (!check_ifo(path)) {
         // On UNIX, just assume the filename is always uppercase.
-        char *npath = mp_path_join(priv, bstr0(path), bstr0("VIDEO_TS.IFO"));
+        char *npath = mp_path_join(priv, path, "VIDEO_TS.IFO");
         if (!check_ifo(npath)) {
-            npath = mp_path_join(priv, bstr0(path), bstr0("VIDEO_TS/VIDEO_TS.IFO"));
+            npath = mp_path_join(priv, path, "VIDEO_TS/VIDEO_TS.IFO");
             if (!check_ifo(npath))
                 goto unsupported;
         }

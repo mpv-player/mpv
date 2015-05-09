@@ -156,13 +156,13 @@ char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
             if (bstr_equals0(prefix, "~")) {
                 res = mp_find_config_file(talloc_ctx, global, rest0);
             } else if (bstr_equals0(prefix, "")) {
-                res = mp_path_join(talloc_ctx, bstr0(getenv("HOME")), rest);
+                res = mp_path_join_bstr(talloc_ctx, bstr0(getenv("HOME")), rest);
             } else if (bstr_eatstart0(&prefix, "~")) {
                 void *tmp = talloc_new(NULL);
                 char type[80];
                 snprintf(type, sizeof(type), "%.*s", BSTR_P(prefix));
                 const char *p = mp_get_platform_path(tmp, global, type);
-                res = mp_path_join(talloc_ctx, bstr0(p), rest);
+                res = mp_path_join_bstr(talloc_ctx, bstr0(p), rest);
                 talloc_free(tmp);
             }
         }
@@ -210,7 +210,7 @@ char *mp_splitext(const char *path, bstr *root)
     return (char *)split + 1;
 }
 
-char *mp_path_join(void *talloc_ctx, struct bstr p1, struct bstr p2)
+char *mp_path_join_bstr(void *talloc_ctx, struct bstr p1, struct bstr p2)
 {
     if (p1.len == 0)
         return bstrdup0(talloc_ctx, p2);
@@ -236,6 +236,11 @@ char *mp_path_join(void *talloc_ctx, struct bstr p1, struct bstr p2)
 
     return talloc_asprintf(talloc_ctx, "%.*s%s%.*s", BSTR_P(p1),
                            have_separator ? "" : "/", BSTR_P(p2));
+}
+
+char *mp_path_join(void *talloc_ctx, const char *p1, const char *p2)
+{
+    return mp_path_join_bstr(talloc_ctx, bstr0(p1), bstr0(p2));
 }
 
 char *mp_getcwd(void *talloc_ctx)

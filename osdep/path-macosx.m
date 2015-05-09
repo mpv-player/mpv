@@ -28,7 +28,7 @@ const char *mp_get_platform_path_osx(void *talloc_ctx, const char *type)
         [pool release];
         return res;
     }
-    if (strcmp(type, "desktop") == 0)
-        return mp_path_join(talloc_ctx, bstr0(getenv("HOME")), bstr0("Desktop"));
+    if (strcmp(type, "desktop") == 0 && getenv("HOME"))
+        return mp_path_join(talloc_ctx, getenv("HOME"), "Desktop");
     return NULL;
 }

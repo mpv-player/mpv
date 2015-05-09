@@ -61,7 +61,7 @@ static char *mp_get_win_shell_dir(void *talloc_ctx, int folder)
 static char *mp_get_win_app_dir(void *talloc_ctx)
 {
     char *path = mp_get_win_shell_dir(talloc_ctx, CSIDL_APPDATA);
-    return path ? mp_path_join(talloc_ctx, bstr0(path), bstr0("mpv")) : NULL;
+    return path ? mp_path_join(talloc_ctx, path, "mpv") : NULL;
 }
 
 const char *mp_get_platform_path_win(void *talloc_ctx, const char *type)

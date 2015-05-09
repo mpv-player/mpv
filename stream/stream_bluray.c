@@ -891,9 +891,9 @@ static int bdmv_dir_stream_open(stream_t *stream)
     // directory containing MovieObject.bdmv, or that file itself.
     if (!check_bdmv(path)) {
         // On UNIX, just assume the filename has always this case.
-        char *npath = mp_path_join(priv, bstr0(path), bstr0("MovieObject.bdmv"));
+        char *npath = mp_path_join(priv, path, "MovieObject.bdmv");
         if (!check_bdmv(npath)) {
-            npath = mp_path_join(priv, bstr0(path), bstr0("BDMV/MovieObject.bdmv"));
+            npath = mp_path_join(priv, path, "BDMV/MovieObject.bdmv");
             if (!check_bdmv(npath))
                 goto unsupported;
         }

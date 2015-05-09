@@ -245,7 +245,7 @@ static int parse_dir(struct pl_parser *p)
         qsort(files, num_files, sizeof(files[0]), cmp_filename);
 
     for (int n = 0; n < num_files; n++)
-        playlist_add_file(p->pl, mp_path_join(p, bstr0(path), bstr0(files[n])));
+        playlist_add_file(p->pl, mp_path_join(p, path, files[n]));
 
     closedir(dp);
 

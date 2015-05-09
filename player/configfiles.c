@@ -117,7 +117,7 @@ static void mp_load_per_file_config(struct MPContext *mpctx)
         char *name = mp_basename(cfg);
 
         bstr dir = mp_dirname(cfg);
-        char *dircfg = mp_path_join(NULL, dir, bstr0("mpv.conf"));
+        char *dircfg = mp_path_join_bstr(NULL, dir, bstr0("mpv.conf"));
         try_load_config(mpctx, dircfg, FILE_LOCAL_FLAGS);
         talloc_free(dircfg);
 
@@ -181,7 +181,7 @@ static char *mp_get_playback_resume_config_filename(struct mpv_global *global,
             char *cwd = mp_getcwd(tmp);
             if (!cwd)
                 goto exit;
-            realpath = mp_path_join(tmp, bstr0(cwd), bstr0(fname));
+            realpath = mp_path_join(tmp, cwd, fname);
         }
     }
     if (bstr_startswith0(bfname, "dvd://"))

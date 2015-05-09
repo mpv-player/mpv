@@ -226,7 +226,7 @@ static bool open_source(struct timeline *tl, struct bstr filename)
     if (!base_filename.len) {
         MP_WARN(tl, "CUE: Invalid audio filename in .cue file!\n");
     } else {
-        char *fullname = mp_path_join(ctx, dirname, base_filename);
+        char *fullname = mp_path_join_bstr(ctx, dirname, base_filename);
         if (try_open(tl, fullname)) {
             res = true;
             goto out;
@@ -252,7 +252,7 @@ static bool open_source(struct timeline *tl, struct bstr filename)
             MP_WARN(tl, "CUE: No useful audio filename "
                     "in .cue file found, trying with '%s' instead!\n",
                     dename0);
-            if (try_open(tl, mp_path_join(ctx, dirname, dename))) {
+            if (try_open(tl, mp_path_join_bstr(ctx, dirname, dename))) {
                 res = true;
                 break;
             }

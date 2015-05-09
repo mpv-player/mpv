@@ -272,7 +272,7 @@ static void fix_filenames(struct tl_parts *parts, char *source_path)
     for (int n = 0; n < parts->num_parts; n++) {
         struct tl_part *part = &parts->parts[n];
         char *filename = mp_basename(part->filename); // plain filename only
-        part->filename = mp_path_join(parts, dirname, bstr0(filename));
+        part->filename = mp_path_join_bstr(parts, dirname, bstr0(filename));
     }
 }
 
