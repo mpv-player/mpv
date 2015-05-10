@@ -498,6 +498,10 @@ Video
     Do not play video. With some demuxers this may not work. In those cases
     you can try ``--vo=null`` instead.
 
+    mpv will try to download the audio only if media is streamed with
+    youtube-dl, because it saves bandwidth. This is done by setting the ytdl_format
+    to "bestaudio/best" in the ytdl_hook.lua script.
+
 ``--untimed``
     Do not sleep when outputting video frames. Useful for benchmarks when used
     with ``--no-audio.``
