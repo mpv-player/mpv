@@ -206,7 +206,8 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
             }
         } else {
             if (wait > 0) {
-                mpthread_cond_timedwait(&queue->cond, &queue->lock, wait);
+                struct timespec ts = mp_time_us_to_timespec(wait);
+                pthread_cond_timedwait(&queue->cond, &queue->lock, &ts);
             } else {
                 pthread_cond_wait(&queue->cond, &queue->lock);
             }

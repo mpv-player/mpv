@@ -134,7 +134,8 @@ static void cache_wakeup_and_wait(struct priv *s, double *retry_time)
     }
 
     pthread_cond_signal(&s->wakeup);
-    mpthread_cond_timedwait_rel(&s->wakeup, &s->mutex, CACHE_WAIT_TIME);
+    struct timespec ts = mp_rel_time_to_timespec(CACHE_WAIT_TIME);
+    pthread_cond_timedwait(&s->wakeup, &s->mutex, &ts);
 
     if (*retry_time >= 0)
         *retry_time += mp_time_sec() - start;
@@ -465,8 +466,10 @@ static void *cache_thread(void *arg)
             pthread_cond_signal(&s->wakeup);
             s->control = CACHE_CTRL_NONE;
         }
-        if (s->idle && s->control == CACHE_CTRL_NONE)
-            mpthread_cond_timedwait_rel(&s->wakeup, &s->mutex, CACHE_IDLE_SLEEP_TIME);
+        if (s->idle && s->control == CACHE_CTRL_NONE) {
+            struct timespec ts = mp_rel_time_to_timespec(CACHE_IDLE_SLEEP_TIME);
+            pthread_cond_timedwait(&s->wakeup, &s->mutex, &ts);
+        }
     }
     pthread_cond_signal(&s->wakeup);
     pthread_mutex_unlock(&s->mutex);

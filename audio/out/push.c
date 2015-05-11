@@ -340,7 +340,8 @@ static void *playthread(void *arg)
                 pthread_cond_signal(&p->wakeup); // for draining
 
                 if (p->still_playing && timeout > 0) {
-                    mpthread_cond_timedwait_rel(&p->wakeup, &p->lock, timeout);
+                    struct timespec ts = mp_rel_time_to_timespec(timeout);
+                    pthread_cond_timedwait(&p->wakeup, &p->lock, &ts);
                 } else {
                     pthread_cond_wait(&p->wakeup, &p->lock);
                 }
@@ -352,8 +353,10 @@ static void *playthread(void *arg)
                     if (ao->driver->get_delay)
                         timeout = ao->driver->get_delay(ao);
                     timeout *= 0.25; // wake up if 25% played
-                    if (!p->need_wakeup)
-                        mpthread_cond_timedwait_rel(&p->wakeup, &p->lock, timeout);
+                    if (!p->need_wakeup) {
+                        struct timespec ts = mp_rel_time_to_timespec(timeout);
+                        pthread_cond_timedwait(&p->wakeup, &p->lock, &ts);
+                    }
                 }
             }
             MP_STATS(ao, "end audio wait");
