@@ -47,7 +47,6 @@
 
 #include "common/msg.h"
 
-#define CF_RELEASE(a) if ((a) != NULL) CFRelease(a)
 #define cocoa_lock(s)    pthread_mutex_lock(&s->mutex)
 #define cocoa_unlock(s)  pthread_mutex_unlock(&s->mutex)
 
