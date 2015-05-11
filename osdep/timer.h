@@ -52,4 +52,8 @@ int64_t mp_add_timeout(int64_t time_us, double timeout_sec);
 // Convert the mp time in microseconds to a timespec using CLOCK_REALTIME.
 struct timespec mp_time_us_to_timespec(int64_t time_us);
 
+// Convert the relative timeout in seconds to a timespec.
+// The timespec is absolute, using CLOCK_REALTIME.
+struct timespec mp_rel_time_to_timespec(double timeout_sec);
+
 #endif /* MPLAYER_TIMER_H */

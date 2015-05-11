@@ -116,6 +116,11 @@ struct timespec mp_time_us_to_timespec(int64_t time_us)
     return ts;
 }
 
+struct timespec mp_rel_time_to_timespec(double timeout_sec)
+{
+    return mp_time_us_to_timespec(mp_add_timeout(mp_time_us(), timeout_sec));
+}
+
 #if 0
 #include <stdio.h>
 #include "threads.h"
@@ -138,7 +143,8 @@ int main(void) {
 #if TEST_SLEEP
         mp_sleep_us(delay);
 #else
-        mpthread_cond_timedwait(&cnd, &mtx, r + delay);
+        struct timespec ts = mp_time_us_to_timespec(r + delay);
+        pthread_cond_timedwait(&cnd, &mtx, &ts);
 #endif
         j = (mp_time_us() - r) - delay;
         printf("sleep time: t=%"PRId64" sleep=%8i err=%5i\n", r, delay, (int)j);

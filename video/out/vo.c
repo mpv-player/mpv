@@ -471,8 +471,10 @@ static void wait_vo(struct vo *vo, int64_t until_time)
         pthread_mutex_unlock(&in->lock);
     } else {
         pthread_mutex_lock(&in->lock);
-        if (!in->need_wakeup)
-            mpthread_cond_timedwait(&in->wakeup, &in->lock, until_time);
+        if (!in->need_wakeup) {
+            struct timespec ts = mp_time_us_to_timespec(until_time);
+            pthread_cond_timedwait(&in->wakeup, &in->lock, &ts);
+        }
         in->need_wakeup = false;
         pthread_mutex_unlock(&in->lock);
     }

@@ -27,19 +27,6 @@
 #include "threads.h"
 #include "timer.h"
 
-int mpthread_cond_timedwait(pthread_cond_t *cond, pthread_mutex_t *mutex,
-                            int64_t abstime)
-{
-    struct timespec ts = mp_time_us_to_timespec(abstime);
-    return pthread_cond_timedwait(cond, mutex, &ts);
-}
-
-int mpthread_cond_timedwait_rel(pthread_cond_t *cond, pthread_mutex_t *mutex,
-                                double s)
-{
-    return mpthread_cond_timedwait(cond, mutex, mp_add_timeout(mp_time_us(), s));
-}
-
 int mpthread_mutex_init_recursive(pthread_mutex_t *mutex)
 {
     pthread_mutexattr_t attr;
