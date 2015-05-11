@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <string.h>
 #include <pthread.h>
+#include <signal.h>
 
 #include "config.h"
 #include "talloc.h"
@@ -488,6 +489,12 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 #ifdef _WIN32
     if (opts->w32_priority > 0)
         SetPriorityClass(GetCurrentProcess(), opts->w32_priority);
+#endif
+#ifndef _WIN32
+    // Deal with OpenSSL and GnuTLS not using MSG_NOSIGNAL.
+    struct sigaction sa = { .sa_handler = SIG_IGN, .sa_flags = SA_RESTART };
+    sigfillset(&sa.sa_mask);
+    sigaction(SIGPIPE, &sa, NULL);
 #endif
 
     prepare_playlist(mpctx, mpctx->playlist);

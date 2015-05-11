@@ -25,10 +25,11 @@ API changes
 
 ::
 
+ 1.17   - mpv_initialize() now blocks SIGPIPE (details see client.h)
  --- mpv 0.9.0 is released ---
- 1.17   - add MPV_FORMAT_BYTE_ARRAY
  1.16   - add mpv_opengl_cb_report_flip()
         - introduce mpv_opengl_cb_draw() and deprecate mpv_opengl_cb_render()
+        - add MPV_FORMAT_BYTE_ARRAY
  1.15   - mpv_initialize() will now load config files. This requires setting
           the "config" and "config-dir" options. In particular, it will load
           mpv.conf.
