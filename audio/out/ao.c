@@ -385,28 +385,26 @@ bool ao_eof_reached(struct ao *ao)
 // Query the AO_EVENT_*s as requested by the events parameter, and return them.
 int ao_query_and_reset_events(struct ao *ao, int events)
 {
-    int actual_events = 0;
-    if (atomic_load(&ao->request_reload)) // don't need to reset it
-        actual_events |= AO_EVENT_RELOAD;
-    if (atomic_load(&ao->request_hotplug))
-        actual_events |= AO_EVENT_HOTPLUG;
-    return actual_events & events;
+    return atomic_fetch_and(&ao->events_, ~(unsigned)events) & events;
+}
+
+static void ao_add_events(struct ao *ao, int events)
+{
+    atomic_fetch_or(&ao->events_, events);
+    if (ao->input_ctx)
+        mp_input_wakeup(ao->input_ctx);
 }
 
 // Request that the player core destroys and recreates the AO. Fully thread-safe.
 void ao_request_reload(struct ao *ao)
 {
-    atomic_store(&ao->request_reload, true);
-    if (ao->input_ctx)
-        mp_input_wakeup(ao->input_ctx);
+    ao_add_events(ao, AO_EVENT_RELOAD);
 }
 
 // Notify the player that the device list changed. Fully thread-safe.
 void ao_hotplug_event(struct ao *ao)
 {
-    atomic_store(&ao->request_hotplug, true);
-    if (ao->input_ctx)
-        mp_input_wakeup(ao->input_ctx);
+    ao_add_events(ao, AO_EVENT_HOTPLUG);
 }
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
@@ -503,7 +501,6 @@ bool ao_hotplug_check_update(struct ao_hotplug *hp)
 {
     if (hp->ao && ao_query_and_reset_events(hp->ao, AO_EVENT_HOTPLUG)) {
         hp->needs_update = true;
-        atomic_store(&hp->ao->request_hotplug, false);
         return true;
     }
     return false;

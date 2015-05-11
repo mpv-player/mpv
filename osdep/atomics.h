@@ -34,6 +34,7 @@
 
 typedef struct { volatile unsigned long v, t;       } atomic_ulong;
 typedef struct { volatile int v, t;                 } atomic_int;
+typedef struct { volatile unsigned int v, t;        } atomic_uint;
 typedef struct { volatile _Bool v, t;               } atomic_bool;
 typedef struct { volatile long long v, t;           } atomic_llong;
 typedef struct { volatile uint_least32_t v, t;      } atomic_uint_least32_t;
