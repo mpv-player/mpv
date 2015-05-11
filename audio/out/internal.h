@@ -59,7 +59,7 @@ struct ao {
     char *redirect;
 
     // Internal events (use ao_request_reload(), ao_hotplug_event())
-    atomic_bool request_reload, request_hotplug;
+    atomic_int events_;
 
     int buffer;
     double def_buffer;
