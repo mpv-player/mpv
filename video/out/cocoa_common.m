@@ -782,11 +782,13 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
             *(double *)arg = vo->cocoa->screen_fps;
             return VO_TRUE;
         }
+        break;
     case VOCTRL_GET_AMBIENT_LUX:
         if (vo->cocoa->light_sensor != IO_OBJECT_NULL) {
             *(int *)arg = vo->cocoa->last_lux;
             return VO_TRUE;
         }
+        break;
     }
     return VO_NOTIMPL;
 }
