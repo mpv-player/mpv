@@ -561,6 +561,22 @@ void vo_wait_frame(struct vo *vo)
     pthread_mutex_unlock(&in->lock);
 }
 
+// Wait until realtime is >= ts
+// called without lock
+static void wait_until(struct vo *vo, int64_t target)
+{
+    struct vo_internal *in = vo->in;
+    struct timespec ts = mp_time_us_to_timespec(target);
+    while (1) {
+        int64_t now = mp_time_us();
+        if (target <= now)
+            break;
+        pthread_mutex_lock(&in->lock);
+        pthread_cond_timedwait(&in->wakeup, &in->lock, &ts);
+        pthread_mutex_unlock(&in->lock);
+    }
+}
+
 // needs lock
 static int64_t prev_sync(struct vo *vo, int64_t ts)
 {
@@ -672,12 +688,7 @@ static bool render_frame(struct vo *vo)
             vo->driver->draw_image(vo, img);
         }
 
-        while (1) {
-            int64_t now = mp_time_us();
-            if (target <= now)
-                break;
-            mp_sleep_us(target - now);
-        }
+        wait_until(vo, target);
 
         bool drop = false;
         if (vo->driver->flip_page_timed)
