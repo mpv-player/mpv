@@ -35,6 +35,7 @@
 
 #include "config.h"
 
+#include "osdep/timer.h"
 #include "osdep/macosx_application.h"
 #include "osdep/macosx_application_objc.h"
 
@@ -88,7 +89,13 @@ struct vo_cocoa_state {
     NSData *icc_fs_profile;
     id   fs_icc_changed_ns_observer;
 
-    void (*resize_redraw)(struct vo *vo, int w, int h);
+    pthread_mutex_t resize_lock;
+    pthread_cond_t resize_wakeup;
+
+    // Protected by the resize_lock
+    bool vo_ready;                      // the VO is in a state in which it can
+                                        // render frames
+    int frame_w, frame_h;               // dimensions of the frame rendered
 };
 
 static void with_cocoa_lock(struct vo_cocoa_state *s, void(^block)(void))
@@ -248,6 +255,8 @@ int vo_cocoa_init(struct vo *vo)
         .embedded = vo->opts->WinID >= 0,
     };
     mpthread_mutex_init_recursive(&s->mutex);
+    pthread_mutex_init(&s->resize_lock, NULL);
+    pthread_cond_init(&s->resize_wakeup, NULL);
     vo->cocoa = s;
     cocoa_init_light_sensor(vo);
     return 1;
@@ -273,16 +282,14 @@ static int vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
     return VO_TRUE;
 }
 
-void vo_cocoa_register_resize_callback(struct vo *vo,
-                                       void (*cb)(struct vo *vo, int w, int h))
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    s->resize_redraw = cb;
-}
-
 void vo_cocoa_uninit(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
+
+    pthread_mutex_lock(&s->resize_lock);
+    s->vo_ready = false;
+    pthread_cond_signal(&s->resize_wakeup);
+    pthread_mutex_unlock(&s->resize_lock);
 
     with_cocoa_lock_on_main_thread_sync(vo, ^{
         enable_power_management(s);
@@ -580,6 +587,10 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags)
             vo_set_level(vo, vo->opts->ontop);
         }
 
+        pthread_mutex_lock(&s->resize_lock);
+        s->vo_ready = true;
+        pthread_mutex_unlock(&s->resize_lock);
+
         // trigger a resize -> don't set vo->dwidth and vo->dheight directly
         // since this block is executed asynchronously to the video
         // reconfiguration code.
@@ -610,20 +621,22 @@ static void vo_cocoa_resize_redraw(struct vo *vo, int width, int height)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
-    if (!s->gl_ctx)
-        return;
+    struct timespec e = mp_time_us_to_timespec(mp_add_timeout(mp_time_us(), 0.1));
 
-    if (!s->resize_redraw)
-        return;
+    pthread_mutex_lock(&s->resize_lock);
 
-    vo_cocoa_set_current_context(vo, true);
+    // Make sure at least one frame will be drawn
+    s->frame_w = s->frame_h = 0;
 
-    [s->gl_ctx update];
-    s->resize_redraw(vo, width, height);
-    s->skip_swap_buffer = true;
+    s->pending_events |= VO_EVENT_RESIZE | VO_EVENT_EXPOSE;
+    vo_wakeup(vo);
 
-    [s->gl_ctx flushBuffer];
-    vo_cocoa_set_current_context(vo, false);
+    while (s->frame_w != width && s->frame_h != height && s->vo_ready) {
+        if (pthread_cond_timedwait(&s->resize_wakeup, &s->resize_lock, &e))
+            break;
+    }
+
+    pthread_mutex_unlock(&s->resize_lock);
 }
 
 static void draw_changes_after_next_frame(struct vo *vo)
@@ -635,24 +648,21 @@ static void draw_changes_after_next_frame(struct vo *vo)
     }
 }
 
-bool vo_cocoa_start_frame(struct vo *vo)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-
-    s->skip_swap_buffer = false;
-    return true;
-}
-
 void vo_cocoa_swap_buffers(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
-    if (s->skip_swap_buffer && !s->waiting_frame) {
-        s->skip_swap_buffer = false;
-        s->pending_events |= VO_EVENT_EXPOSE;
-    } else {
-        [s->gl_ctx flushBuffer];
-    }
+    // Don't swap a frame with wrong size
+    if (s->pending_events & VO_EVENT_RESIZE)
+        return;
+
+    [s->gl_ctx flushBuffer];
+
+    pthread_mutex_lock(&s->resize_lock);
+    s->frame_w = vo->dwidth;
+    s->frame_h = vo->dheight;
+    pthread_cond_signal(&s->resize_wakeup);
+    pthread_mutex_unlock(&s->resize_lock);
 
     if (s->waiting_frame) {
         s->waiting_frame = false;

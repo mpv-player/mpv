@@ -30,13 +30,9 @@ void vo_cocoa_uninit(struct vo *vo);
 int vo_cocoa_config_window(struct vo *vo, uint32_t flags);
 
 void vo_cocoa_set_current_context(struct vo *vo, bool current);
-bool vo_cocoa_start_frame(struct vo *vo);
 void vo_cocoa_swap_buffers(struct vo *vo);
 int vo_cocoa_check_events(struct vo *vo);
 int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg);
-
-void vo_cocoa_register_resize_callback(struct vo *vo,
-                                       void (*cb)(struct vo *vo, int w, int h));
 
 void vo_cocoa_create_nsgl_ctx(struct vo *vo, void *ctx);
 void vo_cocoa_release_nsgl_ctx(struct vo *vo);

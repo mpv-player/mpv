@@ -153,11 +153,6 @@ static void releaseGlContext_cocoa(MPGLContext *ctx)
     CGLReleaseContext(p->ctx);
 }
 
-static bool start_frame_cocoa(MPGLContext *ctx)
-{
-    return vo_cocoa_start_frame(ctx->vo);
-}
-
 static void swapGlBuffers_cocoa(MPGLContext *ctx)
 {
     vo_cocoa_swap_buffers(ctx->vo);
@@ -174,9 +169,7 @@ void mpgl_set_backend_cocoa(MPGLContext *ctx)
     ctx->config_window = config_window_cocoa;
     ctx->releaseGlContext = releaseGlContext_cocoa;
     ctx->swapGlBuffers = swapGlBuffers_cocoa;
-    ctx->start_frame = start_frame_cocoa;
     ctx->vo_init = vo_cocoa_init;
-    ctx->register_resize_callback = vo_cocoa_register_resize_callback;
     ctx->vo_uninit = vo_cocoa_uninit;
     ctx->vo_control = vo_cocoa_control;
     ctx->set_current = set_current_cocoa;
