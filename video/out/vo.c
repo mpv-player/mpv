@@ -661,7 +661,7 @@ static bool render_frame(struct vo *vo)
 
         MP_STATS(vo, "start video");
 
-        if (in->vsync_timed) {
+        if (vo->driver->draw_image_timed) {
             struct frame_timing t = (struct frame_timing) {
                 .pts        = pts,
                 .next_vsync = next_vsync,
