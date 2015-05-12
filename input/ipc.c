@@ -43,6 +43,10 @@
 #include "options/path.h"
 #include "player/client.h"
 
+#ifndef MSG_NOSIGNAL
+#define MSG_NOSIGNAL 0
+#endif
+
 struct mp_ipc_ctx {
     struct mp_log *log;
     struct mp_client_api *client_api;
@@ -486,7 +490,7 @@ static int ipc_write_str(struct client_arg *client, const char *buf)
 {
     size_t count = strlen(buf);
     while (count > 0) {
-        ssize_t rc = write(client->client_fd, buf, count);
+        ssize_t rc = send(client->client_fd, buf, count, MSG_NOSIGNAL);
         if (rc <= 0) {
             if (rc == 0)
                 return -1;
