@@ -80,6 +80,9 @@ struct mpv_opengl_cb_context {
     bool eq_changed;
     struct mp_csp_equalizer eq;
     int64_t recent_flip;
+    int64_t approx_vsync;
+    int64_t cur_pts;
+    bool vsync_timed;
 
     // --- All of these can only be accessed from the thread where the host
     //     application's OpenGL context is current - i.e. only while the
@@ -280,6 +283,16 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
     return 0;
 }
 
+// needs lock
+static int64_t prev_sync(mpv_opengl_cb_context *ctx, int64_t ts)
+{
+    int64_t diff = (int64_t)(ts - ctx->recent_flip);
+    int64_t offset = diff % ctx->approx_vsync;
+    if (offset < 0)
+        offset += ctx->approx_vsync;
+    return ts - offset;
+}
+
 int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
 {
     assert(ctx->renderer);
@@ -317,7 +330,12 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         struct vo_priv *p = vo ? vo->priv : NULL;
         struct vo_priv *opts = ctx->new_opts ? ctx->new_opts : p;
         if (opts) {
-            gl_video_set_options(ctx->renderer, opts->renderer_opts, NULL);
+            int queue = 0;
+            gl_video_set_options(ctx->renderer, opts->renderer_opts, &queue);
+            ctx->vsync_timed = opts->renderer_opts->interpolation;
+            if (ctx->vsync_timed)
+                queue += 0.050 * 1e6; // disable video timing
+            vo_set_flip_queue_params(vo, queue, false);
             ctx->gl->debug_context = opts->use_gl_debug;
             gl_video_set_debug(ctx->renderer, opts->use_gl_debug);
             frame_queue_shrink(ctx, opts->frame_queue_size);
@@ -335,19 +353,32 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     ctx->eq = *eq;
 
     struct mp_image *mpi = frame_queue_pop(ctx);
+    if (mpi) {
+        struct frame_timing *t = mpi->priv; // set by draw_image_timed
+        if (t)
+            ctx->cur_pts = t->pts;
+    }
+
+    struct frame_timing timing = {
+        .pts = ctx->cur_pts,
+    };
+    if (ctx->approx_vsync > 0) {
+        timing.prev_vsync = prev_sync(ctx, mp_time_us());
+        timing.next_vsync = timing.prev_vsync + ctx->approx_vsync;
+    }
 
     pthread_mutex_unlock(&ctx->lock);
 
     if (mpi)
         gl_video_set_image(ctx->renderer, mpi);
 
-    gl_video_render_frame(ctx->renderer, fbo, NULL);
+    gl_video_render_frame(ctx->renderer, fbo, timing.pts ? &timing : NULL);
 
     gl_video_unset_gl_state(ctx->renderer);
 
     pthread_mutex_lock(&ctx->lock);
     const int left = ctx->queued_frames;
-    if (vo && left > 0)
+    if (vo && (left > 0 || ctx->vsync_timed))
         update(vo->priv);
     pthread_mutex_unlock(&ctx->lock);
 
@@ -357,20 +388,34 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
 int mpv_opengl_cb_report_flip(mpv_opengl_cb_context *ctx, int64_t time)
 {
     pthread_mutex_lock(&ctx->lock);
-    ctx->recent_flip = time > 0 ? time : mp_time_us();
+    int64_t next = time > 0 ? time : mp_time_us();
+    if (ctx->recent_flip)
+        ctx->approx_vsync = next - ctx->recent_flip;
+    ctx->recent_flip = next;
     pthread_mutex_unlock(&ctx->lock);
 
     return 0;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_image_timed(struct vo *vo, mp_image_t *mpi,
+                             struct frame_timing *t)
 {
     struct vo_priv *p = vo->priv;
 
     pthread_mutex_lock(&p->ctx->lock);
     mp_image_setrefp(&p->ctx->waiting_frame, mpi);
+    if (p->ctx->waiting_frame) {
+        p->ctx->waiting_frame->priv =
+            t ? talloc_memdup(p->ctx->waiting_frame, t, sizeof(*t))
+              : NULL;
+    }
     talloc_free(mpi);
     pthread_mutex_unlock(&p->ctx->lock);
+}
+
+static void draw_image(struct vo *vo, mp_image_t *mpi)
+{
+    draw_image_timed(vo, mpi, NULL);
 }
 
 // Called locked.
@@ -591,6 +636,7 @@ const struct vo_driver video_out_opengl_cb = {
     .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
+    .draw_image_timed = draw_image_timed,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct vo_priv),
