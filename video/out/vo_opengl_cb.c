@@ -39,6 +39,7 @@
 
 #define FRAME_DROP_POP      0 // drop the oldest frame in queue
 #define FRAME_DROP_CLEAR    1 // drop all frames in queue
+#define FRAME_DROP_BLOCK    2
 
 struct vo_priv {
     struct vo *vo;
@@ -57,6 +58,7 @@ struct mpv_opengl_cb_context {
     struct mp_client_api *client_api;
 
     pthread_mutex_t lock;
+    pthread_cond_t wakeup;
 
     // --- Protected by lock
     bool initialized;
@@ -104,6 +106,7 @@ static struct mp_image *frame_queue_pop(struct mpv_opengl_cb_context *ctx)
         return NULL;
     struct mp_image *ret = ctx->frame_queue[0];
     MP_TARRAY_REMOVE_AT(ctx->frame_queue, ctx->queued_frames, 0);
+    pthread_cond_broadcast(&ctx->wakeup);
     return ret;
 }
 
@@ -114,6 +117,7 @@ static void frame_queue_drop(struct mpv_opengl_cb_context *ctx)
         talloc_free(mpi);
         if (ctx->active)
             vo_increment_drop_count(ctx->active, 1);
+        pthread_cond_broadcast(&ctx->wakeup);
     }
 }
 
@@ -124,6 +128,7 @@ static void frame_queue_clear(struct mpv_opengl_cb_context *ctx)
     talloc_free(ctx->frame_queue);
     ctx->frame_queue = NULL;
     ctx->queued_frames = 0;
+    pthread_cond_broadcast(&ctx->wakeup);
 }
 
 static void frame_queue_drop_all(struct mpv_opengl_cb_context *ctx)
@@ -132,21 +137,25 @@ static void frame_queue_drop_all(struct mpv_opengl_cb_context *ctx)
     frame_queue_clear(ctx);
     if (ctx->active && frames > 0)
         vo_increment_drop_count(ctx->active, frames);
+    pthread_cond_broadcast(&ctx->wakeup);
 }
 
 static void frame_queue_push(struct mpv_opengl_cb_context *ctx, struct mp_image *mpi)
 {
     MP_TARRAY_APPEND(ctx, ctx->frame_queue, ctx->queued_frames, mpi);
+    pthread_cond_broadcast(&ctx->wakeup);
 }
 
 static void frame_queue_shrink(struct mpv_opengl_cb_context *ctx, int size)
 {
+    pthread_cond_broadcast(&ctx->wakeup);
     while (ctx->queued_frames > size)
         frame_queue_drop(ctx);
 }
 
 static void forget_frames(struct mpv_opengl_cb_context *ctx)
 {
+    pthread_cond_broadcast(&ctx->wakeup);
     frame_queue_clear(ctx);
     mp_image_unrefp(&ctx->waiting_frame);
 }
@@ -159,6 +168,7 @@ static void free_ctx(void *ptr)
     // mpv_opengl_cb_uninit_gl() properly.
     assert(!ctx->initialized);
 
+    pthread_cond_destroy(&ctx->wakeup);
     pthread_mutex_destroy(&ctx->lock);
 }
 
@@ -168,6 +178,7 @@ struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
     mpv_opengl_cb_context *ctx = talloc_zero(NULL, mpv_opengl_cb_context);
     talloc_set_destructor(ctx, free_ctx);
     pthread_mutex_init(&ctx->lock, NULL);
+    pthread_cond_init(&ctx->wakeup, NULL);
 
     ctx->gl = talloc_zero(ctx, GL);
 
@@ -374,11 +385,20 @@ static void flip_page(struct vo *vo)
     struct vo_priv *p = vo->priv;
 
     pthread_mutex_lock(&p->ctx->lock);
-    if (p->ctx->queued_frames >= p->frame_queue_size) {
-        if (p->frame_drop_mode == FRAME_DROP_CLEAR)
+    while (p->ctx->queued_frames >= p->frame_queue_size) {
+        switch (p->frame_drop_mode) {
+        case FRAME_DROP_CLEAR:
             frame_queue_drop_all(p->ctx);
-        else // FRAME_DROP_POP mode
+            break;
+        case FRAME_DROP_POP:
             frame_queue_shrink(p->ctx, p->frame_queue_size - 1);
+            break;
+        case FRAME_DROP_BLOCK: ;
+            struct timespec ts = mp_rel_time_to_timespec(0.2);
+            if (pthread_cond_timedwait(&p->ctx->wakeup, &p->ctx->lock, &ts))
+                frame_queue_drop_all(p->ctx);
+            break;
+        }
     }
     frame_queue_push(p->ctx, p->ctx->waiting_frame);
     p->ctx->waiting_frame = NULL;
@@ -418,7 +438,8 @@ static const struct m_option change_opts[] = {
     OPT_INTRANGE("frame-queue-size", frame_queue_size, 0, 1, 100, OPTDEF_INT(2)),
     OPT_CHOICE("frame-drop-mode", frame_drop_mode, 0,
                ({"pop", FRAME_DROP_POP},
-                {"clear", FRAME_DROP_CLEAR})),
+                {"clear", FRAME_DROP_CLEAR},
+                {"block", FRAME_DROP_BLOCK})),
     OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
     {0}
 };
@@ -555,7 +576,8 @@ static const struct m_option options[] = {
     OPT_INTRANGE("frame-queue-size", frame_queue_size, 0, 1, 100, OPTDEF_INT(2)),
     OPT_CHOICE("frame-drop-mode", frame_drop_mode, 0,
                ({"pop", FRAME_DROP_POP},
-                {"clear", FRAME_DROP_CLEAR})),
+                {"clear", FRAME_DROP_CLEAR},
+                {"block", FRAME_DROP_BLOCK}), OPTDEF_INT(FRAME_DROP_BLOCK)),
     OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
     {0},
 };

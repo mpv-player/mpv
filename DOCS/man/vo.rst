@@ -898,13 +898,15 @@ Available video output drivers are:
     ``frame-queue-size=<1..100>``
         The maximum count of frames which the frame queue can hold (default: 1)
 
-    ``frame-drop-mode=<pop|clear>``
+    ``frame-drop-mode=<pop|clear|block>``
         Select the behavior when the frame queue is full.
 
         pop
-            Drop the oldest frame in the frame queue. (default)
+            Drop the oldest frame in the frame queue.
         clear
             Drop all frames in the frame queue.
+        block
+            Wait for a short time, behave like ``clear`` on timeout. (default)
 
     This also supports many of the suboptions the ``opengl`` VO has. Run
     ``mpv --vo=opengl-cb:help`` for a list.
