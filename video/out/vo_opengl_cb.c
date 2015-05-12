@@ -542,6 +542,7 @@ static int preinit(struct vo *vo)
     }
     p->ctx->active = vo;
     p->ctx->reconfigured = true;
+    p->ctx->update_new_opts = true;
     copy_vo_opts(vo);
     pthread_mutex_unlock(&p->ctx->lock);
 
