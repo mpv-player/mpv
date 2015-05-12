@@ -629,12 +629,14 @@ static void vo_cocoa_resize_redraw(struct vo *vo, int width, int height)
     s->frame_w = s->frame_h = 0;
 
     s->pending_events |= VO_EVENT_RESIZE | VO_EVENT_EXPOSE;
-    vo_wakeup(vo);
+    vo_event(vo, VO_EVENT_LIVE_RESIZING);
 
     while (s->frame_w != width && s->frame_h != height && s->vo_ready) {
         if (pthread_cond_timedwait(&s->resize_wakeup, &s->resize_lock, &e))
             break;
     }
+
+    vo_query_and_reset_events(vo, VO_EVENT_LIVE_RESIZING);
 
     pthread_mutex_unlock(&s->resize_lock);
 }

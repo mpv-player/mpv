@@ -484,7 +484,7 @@ static void wakeup_locked(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
 
-    pthread_cond_signal(&in->wakeup);
+    pthread_cond_broadcast(&in->wakeup);
     if (vo->event_fd >= 0)
         wakeup_event_fd(vo);
     if (vo->driver->wakeup)
@@ -567,14 +567,14 @@ static void wait_until(struct vo *vo, int64_t target)
 {
     struct vo_internal *in = vo->in;
     struct timespec ts = mp_time_us_to_timespec(target);
-    while (1) {
-        int64_t now = mp_time_us();
-        if (target <= now)
+    pthread_mutex_lock(&in->lock);
+    while (target > mp_time_us()) {
+        if (in->queued_events & VO_EVENT_LIVE_RESIZING)
             break;
-        pthread_mutex_lock(&in->lock);
-        pthread_cond_timedwait(&in->wakeup, &in->lock, &ts);
-        pthread_mutex_unlock(&in->lock);
+        if (pthread_cond_timedwait(&in->wakeup, &in->lock, &ts))
+            break;
     }
+    pthread_mutex_unlock(&in->lock);
 }
 
 // needs lock
@@ -722,7 +722,7 @@ static bool render_frame(struct vo *vo)
         in->request_redraw = false;
     }
 
-    pthread_cond_signal(&in->wakeup); // for vo_wait_frame()
+    pthread_cond_broadcast(&in->wakeup); // for vo_wait_frame()
     mp_input_wakeup(vo->input_ctx);
 
     pthread_mutex_unlock(&in->lock);
@@ -984,6 +984,7 @@ void vo_event(struct vo *vo, int event)
         mp_input_wakeup(vo->input_ctx);
     in->queued_events |= event;
     in->internal_events |= event;
+    wakeup_locked(vo);
     pthread_mutex_unlock(&in->lock);
 }
 
