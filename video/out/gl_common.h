@@ -90,7 +90,6 @@ typedef struct MPGLContext {
     void (*vo_uninit)(struct vo *vo);
     int (*vo_control)(struct vo *vo, int *events, int request, void *arg);
     void (*releaseGlContext)(struct MPGLContext *);
-    void (*set_current)(struct MPGLContext *, bool current);
 
     // Used on windows only, tries to vsync with the DWM, and modifies SwapInterval
     // when it does so. Returns the possibly modified swapinterval value.
@@ -115,9 +114,6 @@ typedef struct MPGLContext {
     // For free use by the backend.
     void *priv;
 } MPGLContext;
-
-void mpgl_lock(MPGLContext *ctx);
-void mpgl_unlock(MPGLContext *ctx);
 
 MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags);
 void mpgl_uninit(MPGLContext *ctx);

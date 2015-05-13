@@ -664,15 +664,3 @@ void mpgl_uninit(MPGLContext *ctx)
     }
     talloc_free(ctx);
 }
-
-void mpgl_lock(MPGLContext *ctx)
-{
-    if (ctx->set_current)
-        ctx->set_current(ctx, true);
-}
-
-void mpgl_unlock(MPGLContext *ctx)
-{
-    if (ctx->set_current)
-        ctx->set_current(ctx, false);
-}
