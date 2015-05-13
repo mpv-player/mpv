@@ -982,9 +982,10 @@ void vo_event(struct vo *vo, int event)
     pthread_mutex_lock(&in->lock);
     if ((in->queued_events & event & VO_EVENTS_USER) != (event & VO_EVENTS_USER))
         mp_input_wakeup(vo->input_ctx);
+    if (event)
+        wakeup_locked(vo);
     in->queued_events |= event;
     in->internal_events |= event;
-    wakeup_locked(vo);
     pthread_mutex_unlock(&in->lock);
 }
 
