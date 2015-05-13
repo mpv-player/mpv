@@ -580,7 +580,7 @@ int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
 }
 
 static MPGLContext *init_backend(struct vo *vo, MPGLSetBackendFn set_backend,
-                                 bool probing)
+                                 bool probing, int vo_flags)
 {
     MPGLContext *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (MPGLContext) {
@@ -592,35 +592,9 @@ static MPGLContext *init_backend(struct vo *vo, MPGLSetBackendFn set_backend,
     set_backend(ctx);
     if (!ctx->vo_init(vo)) {
         talloc_free(ctx);
-        ctx = NULL;
+        return NULL;
     }
     vo->probing = old_probing;
-    return ctx;
-}
-
-static MPGLContext *mpgl_create(struct vo *vo, const char *backend_name)
-{
-    MPGLContext *ctx = NULL;
-    int index = mpgl_find_backend(backend_name);
-    if (index == -1) {
-        for (const struct backend *entry = backends; entry->name; entry++) {
-            ctx = init_backend(vo, entry->init, true);
-            if (ctx)
-                break;
-        }
-    } else if (index >= 0) {
-        ctx = init_backend(vo, backends[index].init, false);
-    }
-    return ctx;
-}
-
-// Create a VO window and create a GL context on it.
-//  vo_flags: passed to the backend's create window function
-MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags)
-{
-    MPGLContext *ctx = mpgl_create(vo, backend_name);
-    if (!ctx)
-        goto cleanup;
 
     ctx->requested_gl_version = 300;
 
@@ -648,6 +622,24 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags)
 cleanup:
     mpgl_uninit(ctx);
     return NULL;
+}
+
+// Create a VO window and create a GL context on it.
+//  vo_flags: passed to the backend's create window function
+MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags)
+{
+    MPGLContext *ctx = NULL;
+    int index = mpgl_find_backend(backend_name);
+    if (index == -1) {
+        for (const struct backend *entry = backends; entry->name; entry++) {
+            ctx = init_backend(vo, entry->init, true, vo_flags);
+            if (ctx)
+                break;
+        }
+    } else if (index >= 0) {
+        ctx = init_backend(vo, backends[index].init, false, vo_flags);
+    }
+    return ctx;
 }
 
 // flags: passed to the backend function
