@@ -30,6 +30,7 @@
 #import "video/out/cocoa/mpvadapter.h"
 
 #include "osdep/threads.h"
+#include "osdep/atomics.h"
 #include "osdep/macosx_compat.h"
 #include "osdep/macosx_events_objc.h"
 
@@ -48,18 +49,20 @@
 
 #include "common/msg.h"
 
-#define cocoa_lock(s)    pthread_mutex_lock(&s->mutex)
-#define cocoa_unlock(s)  pthread_mutex_unlock(&s->mutex)
-
-static void vo_cocoa_fullscreen(struct vo *vo);
+static int vo_cocoa_fullscreen(struct vo *vo);
 static void cocoa_rm_fs_screen_profile_observer(struct vo_cocoa_state *s);
 
 struct vo_cocoa_state {
+    // --- The following members can be accessed only by the main thread (i.e.
+    //     where Cocoa runs), or if the main thread is fully blocked.
+
     NSWindow *window;
     NSView *view;
     MpvVideoView *video;
     MpvCocoaAdapter *adapter;
-    NSOpenGLContext *gl_ctx;
+
+    CGLContextObj cgl_ctx;
+    NSOpenGLContext *nsgl_ctx;
 
     NSScreen *current_screen;
     NSScreen *fs_screen;
@@ -67,11 +70,9 @@ struct vo_cocoa_state {
 
     NSInteger window_level;
 
-    int pending_events;
-
-    bool waiting_frame;
-    bool skip_swap_buffer;
     bool embedded; // wether we are embedding in another GUI
+
+    atomic_bool waiting_frame;
 
     IOPMAssertionID power_mgmt_assertion;
     io_connect_t light_sensor;
@@ -79,7 +80,6 @@ struct vo_cocoa_state {
     int last_lux;
     IONotificationPortRef light_sensor_io_port;
 
-    pthread_mutex_t mutex;
     struct mp_log *log;
 
     uint32_t old_dwidth;
@@ -89,36 +89,26 @@ struct vo_cocoa_state {
     NSData *icc_fs_profile;
     id   fs_icc_changed_ns_observer;
 
-    pthread_mutex_t resize_lock;
-    pthread_cond_t resize_wakeup;
+    pthread_mutex_t lock;
+    pthread_cond_t wakeup;
 
-    // Protected by the resize_lock
+    // --- The following members are protected by the lock.
+    //     If the VO and main threads are both blocked, locking is optional
+    //     for members accessed only by VO and main thread.
+
+    int pending_events;
+
+    int vo_dwidth;                      // current or soon-to-be VO size
+    int vo_dheight;
+
     bool vo_ready;                      // the VO is in a state in which it can
                                         // render frames
     int frame_w, frame_h;               // dimensions of the frame rendered
 };
 
-static void with_cocoa_lock(struct vo_cocoa_state *s, void(^block)(void))
+static void run_on_main_thread(struct vo *vo, void(^block)(void))
 {
-    cocoa_lock(s);
-    block();
-    cocoa_unlock(s);
-}
-
-static void with_cocoa_lock_on_main_thread(struct vo *vo, void(^block)(void))
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        with_cocoa_lock(s, block);
-    });
-}
-
-static void with_cocoa_lock_on_main_thread_sync(struct vo *vo, void(^block)(void))
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        with_cocoa_lock(s, block);
-    });
+    dispatch_sync(dispatch_get_main_queue(), block);
 }
 
 static void queue_new_video_size(struct vo *vo, int w, int h)
@@ -128,6 +118,16 @@ static void queue_new_video_size(struct vo *vo, int w, int h)
         id<MpvSizing> win = (id<MpvSizing>) s->window;
         [win queueNewVideoSize:NSMakeSize(w, h)];
     }
+}
+
+static void flag_events(struct vo *vo, int events)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    pthread_mutex_lock(&s->lock);
+    s->pending_events |= events;
+    pthread_mutex_unlock(&s->lock);
+    if (events)
+        vo_wakeup(vo);
 }
 
 static void enable_power_management(struct vo_cocoa_state *s)
@@ -197,16 +197,14 @@ static void light_sensor_cb(void *ctx, io_service_t srv, natural_t mtype, void *
         if (s->last_lmuvalue != mean) {
             s->last_lmuvalue = mean;
             s->last_lux = lmuvalue_to_lux(s->last_lmuvalue);
-            s->pending_events |= VO_EVENT_AMBIENT_LIGHTING_CHANGED;
-            vo_wakeup(vo);
-            return;
+            flag_events(vo, VO_EVENT_AMBIENT_LIGHTING_CHANGED);
         }
     }
 }
 
 static void cocoa_init_light_sensor(struct vo *vo)
 {
-    with_cocoa_lock_on_main_thread(vo, ^{
+    run_on_main_thread(vo, ^{
         struct vo_cocoa_state *s = vo->cocoa;
         io_service_t srv = IOServiceGetMatchingService(
                 kIOMasterPortDefault, IOServiceMatching("AppleLMUController"));
@@ -249,14 +247,12 @@ int vo_cocoa_init(struct vo *vo)
 {
     struct vo_cocoa_state *s = talloc_zero(NULL, struct vo_cocoa_state);
     *s = (struct vo_cocoa_state){
-        .waiting_frame = false,
         .power_mgmt_assertion = kIOPMNullAssertionID,
         .log = mp_log_new(s, vo->log, "cocoa"),
         .embedded = vo->opts->WinID >= 0,
     };
-    mpthread_mutex_init_recursive(&s->mutex);
-    pthread_mutex_init(&s->resize_lock, NULL);
-    pthread_cond_init(&s->resize_wakeup, NULL);
+    pthread_mutex_init(&s->lock, NULL);
+    pthread_cond_init(&s->wakeup, NULL);
     vo->cocoa = s;
     cocoa_init_light_sensor(vo);
     return 1;
@@ -286,17 +282,18 @@ void vo_cocoa_uninit(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
-    pthread_mutex_lock(&s->resize_lock);
+    pthread_mutex_lock(&s->lock);
     s->vo_ready = false;
-    pthread_cond_signal(&s->resize_wakeup);
-    pthread_mutex_unlock(&s->resize_lock);
+    pthread_cond_signal(&s->wakeup);
+    pthread_mutex_unlock(&s->lock);
 
-    with_cocoa_lock_on_main_thread_sync(vo, ^{
+    run_on_main_thread(vo, ^{
         enable_power_management(s);
         cocoa_uninit_light_sensor(s);
         cocoa_rm_fs_screen_profile_observer(s);
 
-        [s->gl_ctx release];
+        [s->nsgl_ctx release];
+        CGLReleaseContext(s->cgl_ctx);
 
         // needed to stop resize events triggered by the event's view -clear
         // causing many uses after free
@@ -310,6 +307,8 @@ void vo_cocoa_uninit(struct vo *vo)
         if (s->window)
             [s->window release];
 
+        pthread_cond_destroy(&s->wakeup);
+        pthread_mutex_destroy(&s->lock);
         talloc_free(s);
     });
 }
@@ -369,7 +368,7 @@ static void vo_cocoa_update_screen_fps(struct vo *vo)
         CVDisplayLinkRelease(link);
     }
 
-    s->pending_events |= VO_EVENT_WIN_STATE;
+    flag_events(vo, VO_EVENT_WIN_STATE);
 }
 
 static void vo_cocoa_update_screen_info(struct vo *vo, struct mp_rect *out_rc)
@@ -386,15 +385,6 @@ static void vo_cocoa_update_screen_info(struct vo *vo, struct mp_rect *out_rc)
         NSRect r = [s->current_screen frame];
         *out_rc = (struct mp_rect){0, 0, r.size.width, r.size.height};
     }
-}
-
-static void resize_window(struct vo *vo)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    NSRect frame = [s->video frameInPixels];
-    vo->dwidth  = frame.size.width;
-    vo->dheight = frame.size.height;
-    [s->gl_ctx update];
 }
 
 static void vo_set_level(struct vo *vo, int ontop)
@@ -484,7 +474,7 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     [s->video setWantsBestResolutionOpenGLSurface:YES];
 
     [s->view addSubview:s->video];
-    [s->gl_ctx setView:s->video];
+    [s->nsgl_ctx setView:s->video];
     [s->video release];
 
     s->video.adapter = adapter;
@@ -532,7 +522,7 @@ static void cocoa_add_fs_screen_profile_observer(struct vo *vo)
         return;
 
     void (^nblock)(NSNotification *n) = ^(NSNotification *n) {
-        s->pending_events |= VO_EVENT_ICC_PROFILE_CHANGED;
+        flag_events(vo, VO_EVENT_ICC_PROFILE_CHANGED);
     };
 
     s->fs_icc_changed_ns_observer = [[NSNotificationCenter defaultCenter]
@@ -542,24 +532,19 @@ static void cocoa_add_fs_screen_profile_observer(struct vo *vo)
                 usingBlock:nblock];
 }
 
-void vo_cocoa_create_nsgl_ctx(struct vo *vo, void *ctx)
+void vo_cocoa_set_opengl_ctx(struct vo *vo, CGLContextObj ctx)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    s->gl_ctx = [[NSOpenGLContext alloc] initWithCGLContextObj:ctx];
-    [s->gl_ctx makeCurrentContext];
-}
-
-void vo_cocoa_release_nsgl_ctx(struct vo *vo)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    [s->gl_ctx release];
-    s->gl_ctx = nil;
+    run_on_main_thread(vo, ^{
+        s->cgl_ctx = CGLRetainContext(ctx);
+        s->nsgl_ctx = [[NSOpenGLContext alloc] initWithCGLContextObj:s->cgl_ctx];
+    });
 }
 
 int vo_cocoa_config_window(struct vo *vo, uint32_t flags)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    with_cocoa_lock_on_main_thread(vo, ^{
+    run_on_main_thread(vo, ^{
         struct mp_rect screenrc;
         vo_cocoa_update_screen_info(vo, &screenrc);
 
@@ -587,67 +572,73 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags)
             vo_set_level(vo, vo->opts->ontop);
         }
 
-        pthread_mutex_lock(&s->resize_lock);
         s->vo_ready = true;
-        pthread_mutex_unlock(&s->resize_lock);
 
-        // trigger a resize -> don't set vo->dwidth and vo->dheight directly
-        // since this block is executed asynchronously to the video
-        // reconfiguration code.
-        s->pending_events |= VO_EVENT_RESIZE;
+        // Use the actual size of the new window
+        NSRect frame = [s->video frameInPixels];
+        vo->dwidth  = s->vo_dwidth  = frame.size.width;
+        vo->dheight = s->vo_dheight = frame.size.height;
+
+        [s->nsgl_ctx update];
+
+        if (!s->embedded) {
+            [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+            set_application_icon(NSApp);
+        }
     });
-
-    if (!s->embedded) {
-        [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-        set_application_icon(NSApp);
-    }
     return 0;
 }
 
-void vo_cocoa_set_current_context(struct vo *vo, bool current)
+// Trigger a VO resize - called from the main thread. This is done async,
+// because the VO must resize and redraw while vo_cocoa_resize_redraw() is
+// blocking.
+static void resize_event(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
+    NSRect frame = [s->video frameInPixels];
 
-    if (current) {
-        cocoa_lock(s);
-        if (s->gl_ctx) [s->gl_ctx makeCurrentContext];
-    } else {
-        [NSOpenGLContext clearCurrentContext];
-        cocoa_unlock(s);
-    }
+    pthread_mutex_lock(&s->lock);
+    s->vo_dwidth  = frame.size.width;
+    s->vo_dheight = frame.size.height;
+    s->pending_events |= VO_EVENT_RESIZE | VO_EVENT_EXPOSE;
+    // Live-resizing: make sure at least one frame will be drawn
+    s->frame_w = s->frame_h = 0;
+    pthread_mutex_unlock(&s->lock);
+
+    [s->nsgl_ctx update];
+
+    vo_wakeup(vo);
 }
 
 static void vo_cocoa_resize_redraw(struct vo *vo, int width, int height)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
-    struct timespec e = mp_time_us_to_timespec(mp_add_timeout(mp_time_us(), 0.1));
+    resize_event(vo);
 
-    pthread_mutex_lock(&s->resize_lock);
+    pthread_mutex_lock(&s->lock);
 
-    // Make sure at least one frame will be drawn
-    s->frame_w = s->frame_h = 0;
-
-    s->pending_events |= VO_EVENT_RESIZE | VO_EVENT_EXPOSE;
+    // Make vo.c not do video timing, which would slow down resizing.
     vo_event(vo, VO_EVENT_LIVE_RESIZING);
 
+    // Wait until a new frame with the new size was rendered. For some reason,
+    // Cocoa requires this to be done before drawRect() returns.
+    struct timespec e = mp_time_us_to_timespec(mp_add_timeout(mp_time_us(), 0.1));
     while (s->frame_w != width && s->frame_h != height && s->vo_ready) {
-        if (pthread_cond_timedwait(&s->resize_wakeup, &s->resize_lock, &e))
+        if (pthread_cond_timedwait(&s->wakeup, &s->lock, &e))
             break;
     }
 
     vo_query_and_reset_events(vo, VO_EVENT_LIVE_RESIZING);
 
-    pthread_mutex_unlock(&s->resize_lock);
+    pthread_mutex_unlock(&s->lock);
 }
 
 static void draw_changes_after_next_frame(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    if (!s->waiting_frame) {
-        s->waiting_frame = true;
+    if (atomic_compare_exchange_strong(&s->waiting_frame, &(bool){false}, true))
         NSDisableScreenUpdates();
-    }
 }
 
 void vo_cocoa_swap_buffers(struct vo *vo)
@@ -655,57 +646,47 @@ void vo_cocoa_swap_buffers(struct vo *vo)
     struct vo_cocoa_state *s = vo->cocoa;
 
     // Don't swap a frame with wrong size
-    if (s->pending_events & VO_EVENT_RESIZE)
+    pthread_mutex_lock(&s->lock);
+    bool skip = s->pending_events & VO_EVENT_RESIZE;
+    pthread_mutex_unlock(&s->lock);
+    if (skip)
         return;
 
-    [s->gl_ctx flushBuffer];
+    CGLFlushDrawable(s->cgl_ctx);
 
-    pthread_mutex_lock(&s->resize_lock);
+    pthread_mutex_lock(&s->lock);
     s->frame_w = vo->dwidth;
     s->frame_h = vo->dheight;
-    pthread_cond_signal(&s->resize_wakeup);
-    pthread_mutex_unlock(&s->resize_lock);
+    pthread_cond_signal(&s->wakeup);
+    pthread_mutex_unlock(&s->lock);
 
-    if (s->waiting_frame) {
-        s->waiting_frame = false;
+    if (atomic_compare_exchange_strong(&s->waiting_frame, &(bool){true}, false))
         NSEnableScreenUpdates();
-    }
 }
 
-int vo_cocoa_check_events(struct vo *vo)
+static int vo_cocoa_check_events(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
+
+    pthread_mutex_lock(&s->lock);
     int events = s->pending_events;
     s->pending_events = 0;
-
     if (events & VO_EVENT_RESIZE) {
-        resize_window(vo);
+        vo->dwidth  = s->vo_dwidth;
+        vo->dheight = s->vo_dheight;
     }
+    pthread_mutex_unlock(&s->lock);
 
     return events;
 }
 
-static int vo_cocoa_fullscreen_sync(struct vo *vo)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-
-    if (s->embedded)
-        return VO_NOTIMPL;
-
-    with_cocoa_lock_on_main_thread(vo, ^{
-        vo_cocoa_fullscreen(vo);
-    });
-
-    return VO_TRUE;
-}
-
-static void vo_cocoa_fullscreen(struct vo *vo)
+static int vo_cocoa_fullscreen(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     struct mp_vo_opts *opts  = vo->opts;
 
     if (s->embedded)
-        return;
+        return VO_NOTIMPL;
 
     vo_cocoa_update_screen_info(vo, NULL);
 
@@ -719,8 +700,10 @@ static void vo_cocoa_fullscreen(struct vo *vo)
         [[s->view window] setDelegate:s->adapter];
     }
 
-    s->pending_events |= VO_EVENT_ICC_PROFILE_CHANGED;
-    s->pending_events |= VO_EVENT_RESIZE;
+    flag_events(vo, VO_EVENT_ICC_PROFILE_CHANGED);
+    resize_event(vo);
+
+    return VO_TRUE;
 }
 
 static void vo_cocoa_control_get_icc_profile(struct vo *vo, void *arg)
@@ -737,26 +720,21 @@ static void vo_cocoa_control_get_icc_profile(struct vo *vo, void *arg)
     p->len   = [profile length];
 }
 
-int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
+static int vo_cocoa_control_on_main_thread(struct vo *vo, int request, void *arg)
 {
     struct mp_vo_opts *opts  = vo->opts;
 
     switch (request) {
-    case VOCTRL_CHECK_EVENTS:
-        *events |= vo_cocoa_check_events(vo);
-        return VO_TRUE;
     case VOCTRL_FULLSCREEN:
         opts->fullscreen = !opts->fullscreen;
-        return vo_cocoa_fullscreen_sync(vo);
+        return vo_cocoa_fullscreen(vo);
     case VOCTRL_ONTOP:
         return vo_cocoa_ontop(vo);
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
-        with_cocoa_lock(vo->cocoa, ^{
-            NSSize size = [vo->cocoa->view frame].size;
-            s[0] = size.width;
-            s[1] = size.height;
-        });
+        NSSize size = [vo->cocoa->view frame].size;
+        s[0] = size.width;
+        s[1] = size.height;
         return VO_TRUE;
     }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
@@ -764,16 +742,12 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         int w, h;
         w = s[0];
         h = s[1];
-        with_cocoa_lock_on_main_thread(vo, ^{
-            queue_new_video_size(vo, w, h);
-        });
+        queue_new_video_size(vo, w, h);
         return VO_TRUE;
     }
     case VOCTRL_GET_WIN_STATE: {
-        with_cocoa_lock(vo->cocoa, ^{
-            const bool minimized = [[vo->cocoa->view window] isMiniaturized];
-            *(int *)arg = minimized ? VO_WIN_STATE_MINIMIZED : 0;
-        });
+        const bool minimized = [[vo->cocoa->view window] isMiniaturized];
+        *(int *)arg = minimized ? VO_WIN_STATE_MINIMIZED : 0;
         return VO_TRUE;
     }
     case VOCTRL_SET_CURSOR_VISIBILITY:
@@ -805,12 +779,35 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
+static int vo_cocoa_control_async(struct vo *vo, int *events, int request, void *arg)
+{
+    switch (request) {
+    case VOCTRL_CHECK_EVENTS:
+        *events |= vo_cocoa_check_events(vo);
+        return VO_TRUE;
+    case VOCTRL_GET_RECENT_FLIP_TIME:
+        return VO_FALSE; // unsupported, but avoid syncing with main thread
+    }
+    return VO_NOTIMPL;
+}
+
+int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
+{
+    __block int r = vo_cocoa_control_async(vo, events, request, arg);
+    if (r == VO_NOTIMPL) {
+        run_on_main_thread(vo, ^{
+            r = vo_cocoa_control_on_main_thread(vo, request, arg);
+        });
+    }
+    return r;
+}
+
 @implementation MpvCocoaAdapter
 @synthesize vout = _video_output;
 
 - (void)performAsyncResize:(NSSize)size {
     struct vo_cocoa_state *s = self.vout->cocoa;
-    if (!s->waiting_frame)
+    if (!atomic_load(&s->waiting_frame))
         vo_cocoa_resize_redraw(self.vout, size.width, size.height);
 }
 
@@ -823,9 +820,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 }
 
 - (void)setNeedsResize {
-    struct vo_cocoa_state *s = self.vout->cocoa;
-    s->pending_events |= VO_EVENT_RESIZE;
-    vo_wakeup(self.vout);
+    resize_event(self.vout);
 }
 
 - (void)recalcMovableByWindowBackground:(NSPoint)p
@@ -887,8 +882,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 
 - (void)didChangeWindowedScreenProfile:(NSScreen *)screen
 {
-    struct vo_cocoa_state *s = self.vout->cocoa;
-    s->pending_events |= VO_EVENT_ICC_PROFILE_CHANGED;
+    flag_events(self.vout, VO_EVENT_ICC_PROFILE_CHANGED);
 }
 
 - (void)didChangeMousePosition
@@ -909,14 +903,12 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 
 - (void)windowDidMiniaturize:(NSNotification *)notification
 {
-    struct vo_cocoa_state *s = self.vout->cocoa;
-    s->pending_events |= VO_EVENT_WIN_STATE;
+    flag_events(self.vout, VO_EVENT_WIN_STATE);
 }
 
 - (void)windowDidDeminiaturize:(NSNotification *)notification
 {
-    struct vo_cocoa_state *s = self.vout->cocoa;
-    s->pending_events |= VO_EVENT_WIN_STATE;
+    flag_events(self.vout, VO_EVENT_WIN_STATE);
 }
 
 @end

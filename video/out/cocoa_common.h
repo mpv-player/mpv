@@ -20,8 +20,11 @@
 #ifndef MPLAYER_COCOA_COMMON_H
 #define MPLAYER_COCOA_COMMON_H
 
-#include "vo.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <OpenGL/OpenGL.h>
 
+struct vo;
 struct vo_cocoa_state;
 
 int vo_cocoa_init(struct vo *vo);
@@ -29,12 +32,9 @@ void vo_cocoa_uninit(struct vo *vo);
 
 int vo_cocoa_config_window(struct vo *vo, uint32_t flags);
 
-void vo_cocoa_set_current_context(struct vo *vo, bool current);
-void vo_cocoa_swap_buffers(struct vo *vo);
-int vo_cocoa_check_events(struct vo *vo);
 int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg);
 
-void vo_cocoa_create_nsgl_ctx(struct vo *vo, void *ctx);
-void vo_cocoa_release_nsgl_ctx(struct vo *vo);
+void vo_cocoa_swap_buffers(struct vo *vo);
+void vo_cocoa_set_opengl_ctx(struct vo *vo, CGLContextObj ctx);
 
 #endif /* MPLAYER_COCOA_COMMON_H */
