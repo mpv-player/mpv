@@ -1805,7 +1805,10 @@ Property Expansion
 ------------------
 
 All string arguments to input commands as well as certain options (like
-``--term-playing-msg``) are subject to property expansion.
+``--term-playing-msg``) are subject to property expansion. Note that property
+expansion does not work in places where e.g. numeric parameters are expected.
+(For example, the ``add`` command does not do property expansion. The ``set``
+command is an exception and not a general rule.)
 
 .. admonition:: Example for input.conf
 
