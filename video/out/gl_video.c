@@ -2690,18 +2690,6 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
     return r;
 }
 
-
-// Resize and redraw the contents of the window without further configuration.
-// Intended to be used in situations where the frontend can't really be
-// involved with reconfiguring the VO properly.
-// gl_video_resize() should be called when user interaction is done.
-void gl_video_resize_redraw(struct gl_video *p, int w, int h)
-{
-    p->vp_w = w;
-    p->vp_h = h;
-    gl_video_render_frame(p, 0, NULL);
-}
-
 float gl_video_scale_ambient_lux(float lmin, float lmax,
                                  float rmin, float rmax, float lux)
 {

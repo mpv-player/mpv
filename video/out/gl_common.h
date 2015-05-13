@@ -107,13 +107,6 @@ typedef struct MPGLContext {
     // version is not available, and newer versions are incompatible.)
     bool (*config_window)(struct MPGLContext *ctx, int flags);
 
-    // An optional function to register a resize callback in the backend that
-    // can be called on separate thread to handle resize events immediately
-    // (without waiting for vo_check_events, which will come later for the
-    // proper resize)
-    void (*register_resize_callback)(struct vo *vo,
-                                     void (*cb)(struct vo *vo, int w, int h));
-
     // Optional callback on the beginning of a frame. The frame will be finished
     // with swapGlBuffers(). This returns false if use of the OpenGL context
     // should be avoided.

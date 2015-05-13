@@ -211,13 +211,6 @@ static int query_format(struct vo *vo, int format)
     return 1;
 }
 
-static void video_resize_redraw_callback(struct vo *vo, int w, int h)
-{
-    struct gl_priv *p = vo->priv;
-    gl_video_resize_redraw(p->renderer, w, -h);
-
-}
-
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct gl_priv *p = vo->priv;
@@ -227,10 +220,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     if (!mpgl_reconfig_window(p->glctx, flags)) {
         mpgl_unlock(p->glctx);
         return -1;
-    }
-
-    if (p->glctx->register_resize_callback) {
-        p->glctx->register_resize_callback(vo, video_resize_redraw_callback);
     }
 
     resize(p);
