@@ -1779,7 +1779,6 @@ Property list
         For many complex types, this isn't very accurate.
 
     ``option-info/<name>/set-from-commandline``
-
         Return ``yes`` if the option was set from the mpv command line,
         ``no`` otherwise. What this is set to if the option is e.g. changed
         at runtime is left undefined (meaning it could change in the future).
