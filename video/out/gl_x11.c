@@ -33,7 +33,6 @@ struct glx_context {
     XVisualInfo *vinfo;
     GLXContext context;
     GLXFBConfig fbc;
-    bool force_es;
 };
 
 static bool create_context_x11_old(struct MPGLContext *ctx)
@@ -252,7 +251,7 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
 
     int gl_version = ctx->requested_gl_version;
     bool success = false;
-    if (!glx_ctx->force_es) {
+    if (!(flags & VOFLAG_GLES)) {
         success = create_context_x11_gl3(ctx, flags, gl_version, false);
         if (!success)
             success = create_context_x11_old(ctx);
@@ -294,11 +293,4 @@ void mpgl_set_backend_x11(MPGLContext *ctx)
     ctx->vo_init = vo_x11_init;
     ctx->vo_uninit = vo_x11_uninit;
     ctx->vo_control = vo_x11_control;
-}
-
-void mpgl_set_backend_x11es(MPGLContext *ctx)
-{
-    mpgl_set_backend_x11(ctx);
-    struct glx_context *glx_ctx = ctx->priv;
-    glx_ctx->force_es = true;
 }

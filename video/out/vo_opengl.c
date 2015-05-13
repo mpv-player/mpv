@@ -75,6 +75,7 @@ struct gl_priv {
     int dwm_flush;
 
     char *backend;
+    int es;
 
     bool frame_started;
 
@@ -415,6 +416,9 @@ static int preinit(struct vo *vo)
     if (p->use_gl_debug)
         vo_flags |= VOFLAG_GL_DEBUG;
 
+    if (p->es)
+        vo_flags |= VOFLAG_GLES;
+
     if (p->allow_sw)
         vo->probing = false;
 
@@ -467,6 +471,7 @@ static const struct m_option options[] = {
     OPT_FLAG("debug", use_gl_debug, 0),
     OPT_STRING_VALIDATE("backend", backend, 0, mpgl_validate_backend_opt),
     OPT_FLAG("sw", allow_sw, 0),
+    OPT_FLAG("es", es, 0),
     OPT_INTPAIR("check-pattern", opt_pattern, 0),
 
     OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),

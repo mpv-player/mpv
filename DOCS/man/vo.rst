@@ -573,12 +573,15 @@ Available video output drivers are:
             Cocoa/OS X
         win
             Win32/WGL
-        x11, x11es
-            X11/GLX (the ``es`` variant forces GLES)
+        x11
+            X11/GLX
         wayland
             Wayland/EGL
-        x11egl, x11egles
-            X11/EGL (the ``es`` variant forces GLES)
+        x11egl
+            X11/EGL
+
+    ``es``
+        Force or prefer GLES2/3 over desktop OpenGL, if supported.
 
     ``fbo-format=<fmt>``
         Selects the internal format of textures used for FBOs. The format can

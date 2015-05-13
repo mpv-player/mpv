@@ -544,13 +544,10 @@ static const struct backend backends[] = {
 #endif
 #if HAVE_GL_X11
     {"x11", mpgl_set_backend_x11},
-    {"x11es", mpgl_set_backend_x11es},
 #endif
 #if HAVE_EGL_X11
     {"x11egl", mpgl_set_backend_x11egl},
-    {"x11egles", mpgl_set_backend_x11egles},
 #endif
-    {0}
 };
 
 int mpgl_find_backend(const char *name)

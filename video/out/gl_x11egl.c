@@ -93,10 +93,11 @@ static bool create_context_egl(MPGLContext *ctx, EGLConfig config,
     return true;
 }
 
-static bool config_window_x11_egl_(struct MPGLContext *ctx, int flags, bool es)
+static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
+    bool es = flags & VOFLAG_GLES;
 
     if (p->egl_context) {
         vo_x11_config_vo_window(vo, NULL, flags, "gl");
@@ -140,16 +141,6 @@ static bool config_window_x11_egl_(struct MPGLContext *ctx, int flags, bool es)
     return true;
 }
 
-static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
-{
-    return config_window_x11_egl_(ctx, flags, false);
-}
-
-static bool config_window_x11_egles(struct MPGLContext *ctx, int flags)
-{
-    return config_window_x11_egl_(ctx, flags, true);
-}
-
 static void releaseGlContext_egl(MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
@@ -171,17 +162,6 @@ void mpgl_set_backend_x11egl(MPGLContext *ctx)
 {
     ctx->priv = talloc_zero(ctx, struct priv);
     ctx->config_window = config_window_x11_egl;
-    ctx->releaseGlContext = releaseGlContext_egl;
-    ctx->swapGlBuffers = swapGlBuffers_egl;
-    ctx->vo_init = vo_x11_init;
-    ctx->vo_uninit = vo_x11_uninit;
-    ctx->vo_control = vo_x11_control;
-}
-
-void mpgl_set_backend_x11egles(MPGLContext *ctx)
-{
-    ctx->priv = talloc_zero(ctx, struct priv);
-    ctx->config_window = config_window_x11_egles;
     ctx->releaseGlContext = releaseGlContext_egl;
     ctx->swapGlBuffers = swapGlBuffers_egl;
     ctx->vo_init = vo_x11_init;
