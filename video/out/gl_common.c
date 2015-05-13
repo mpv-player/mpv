@@ -525,6 +525,7 @@ typedef void (*MPGLSetBackendFn)(MPGLContext *ctx);
 struct backend {
     const char *name;
     MPGLSetBackendFn init;
+    const struct mpgl_driver *driver;
 };
 
 static const struct backend backends[] = {
@@ -554,8 +555,10 @@ int mpgl_find_backend(const char *name)
 {
     if (name == NULL || strcmp(name, "auto") == 0)
         return -1;
-    for (const struct backend *entry = backends; entry->name; entry++) {
-        if (strcmp(entry->name, name) == 0)
+    for (int n = 0; n < MP_ARRAY_SIZE(backends); n++) {
+        const struct backend *entry = &backends[n];
+        const char *ename = entry->driver ? entry->driver->name : entry->name;
+        if (strcmp(ename, name) == 0)
             return entry - backends;
     }
     return -2;
@@ -567,8 +570,11 @@ int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
     if (bstr_equals0(param, "help")) {
         mp_info(log, "OpenGL windowing backends:\n");
         mp_info(log, "    auto (autodetect)\n");
-        for (const struct backend *entry = backends; entry->name; entry++)
-            mp_info(log, "    %s\n", entry->name);
+        for (int n = 0; n < MP_ARRAY_SIZE(backends); n++) {
+            const struct backend *entry = &backends[n];
+            const char *ename = entry->driver ? entry->driver->name : entry->name;
+            mp_info(log, "    %s\n", ename);
+        }
         return M_OPT_EXIT - 1;
     }
     char s[20];
@@ -576,26 +582,34 @@ int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
     return mpgl_find_backend(s) >= -1 ? 1 : M_OPT_INVALID;
 }
 
-static MPGLContext *init_backend(struct vo *vo, MPGLSetBackendFn set_backend,
+static MPGLContext *init_backend(struct vo *vo, const struct backend *backend,
                                  bool probing, int vo_flags)
 {
     MPGLContext *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (MPGLContext) {
         .gl = talloc_zero(ctx, GL),
         .vo = vo,
+        .driver = backend->driver,
+        .requested_gl_version = 300,
     };
     bool old_probing = vo->probing;
     vo->probing = probing; // hack; kill it once backends are separate
-    set_backend(ctx);
-    if (!ctx->vo_init(vo)) {
-        talloc_free(ctx);
-        return NULL;
+    if (ctx->driver) {
+        ctx->priv = talloc_zero_size(ctx, ctx->driver->priv_size);
+        if (ctx->driver->init(ctx, vo_flags) < 0) {
+            talloc_free(ctx);
+            return NULL;
+        }
+    } else {
+        backend->init(ctx);
+        if (!ctx->vo_init(vo)) {
+            talloc_free(ctx);
+            return NULL;
+        }
     }
     vo->probing = old_probing;
 
-    ctx->requested_gl_version = 300;
-
-    if (!ctx->config_window(ctx, vo_flags | VOFLAG_HIDDEN))
+    if (!ctx->driver && !ctx->config_window(ctx, vo_flags | VOFLAG_HIDDEN))
         goto cleanup;
 
     if (!ctx->gl->version && !ctx->gl->es)
@@ -628,13 +642,13 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags)
     MPGLContext *ctx = NULL;
     int index = mpgl_find_backend(backend_name);
     if (index == -1) {
-        for (const struct backend *entry = backends; entry->name; entry++) {
-            ctx = init_backend(vo, entry->init, true, vo_flags);
+        for (int n = 0; n < MP_ARRAY_SIZE(backends); n++) {
+            ctx = init_backend(vo, &backends[n], true, vo_flags);
             if (ctx)
                 break;
         }
     } else if (index >= 0) {
-        ctx = init_backend(vo, backends[index].init, false, vo_flags);
+        ctx = init_backend(vo, &backends[index], false, vo_flags);
     }
     return ctx;
 }
@@ -642,14 +656,40 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags)
 // flags: passed to the backend function
 bool mpgl_reconfig_window(struct MPGLContext *ctx, int vo_flags)
 {
-    return ctx->config_window(ctx, vo_flags);
+    if (ctx->driver) {
+        return ctx->driver->reconfig(ctx, vo_flags) >= 0;
+    } else {
+        return ctx->config_window(ctx, vo_flags);
+    }
+}
+
+int mpgl_control(struct MPGLContext *ctx, int *events, int request, void *arg)
+{
+    if (ctx->driver) {
+        return ctx->driver->control(ctx, events, request, arg);
+    } else {
+        return ctx->vo_control(ctx->vo, events, request, arg);
+    }
+}
+
+void mpgl_swap_buffers(struct MPGLContext *ctx)
+{
+    if (ctx->driver) {
+        ctx->driver->swap_buffers(ctx);
+    } else {
+        ctx->swapGlBuffers(ctx);
+    }
 }
 
 void mpgl_uninit(MPGLContext *ctx)
 {
     if (ctx) {
-        ctx->releaseGlContext(ctx);
-        ctx->vo_uninit(ctx->vo);
+        if (ctx->driver) {
+            ctx->driver->uninit(ctx);
+        } else {
+            ctx->releaseGlContext(ctx);
+            ctx->vo_uninit(ctx->vo);
+        }
     }
     talloc_free(ctx);
 }

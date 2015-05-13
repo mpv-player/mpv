@@ -130,7 +130,7 @@ static void flip_page(struct vo *vo)
     }
     p->frame_started = false;
 
-    p->glctx->swapGlBuffers(p->glctx);
+    mpgl_swap_buffers(p->glctx);
 
     p->frames_rendered++;
     if (p->frames_rendered > 5 && !p->use_gl_debug)
@@ -375,7 +375,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
 
     int events = 0;
-    int r = p->glctx->vo_control(vo, &events, request, data);
+    int r = mpgl_control(p->glctx, &events, request, data);
     if (events & VO_EVENT_ICC_PROFILE_CHANGED) {
         get_and_update_icc_profile(p, &events);
         vo->want_redraw = true;
