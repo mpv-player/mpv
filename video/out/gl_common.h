@@ -86,16 +86,12 @@ struct mpgl_driver {
     int priv_size;
 
     // Init the GL context and possibly the underlying VO backend.
+    // The created context should be compatible to GL 3.2 core profile, but
+    // some other GL versions are supported as well (e.g. GL 2.1 or GLES 2).
     // Return 0 on success, negative value (-1) on error.
     int (*init)(struct MPGLContext *ctx, int vo_flags);
 
     // Resize the window, or create a new window if there isn't one yet.
-    // On the first call, it creates a GL context according to what's specified
-    // in MPGLContext.requested_gl_version. This is just a hint, and if the
-    // requested version is not available, it may return a completely different
-    // GL context. (The caller must check if the created GL version is ok. The
-    // callee must try to fall back to an older version if the requested
-    // version is not available, and newer versions are incompatible.)
     // Currently, there is an unfortunate interaction with ctx->vo, and
     // display size etc. are determined by it.
     // Return 0 on success, negative value (-1) on error.
@@ -119,10 +115,6 @@ typedef struct MPGLContext {
     // Bit size of each component in the created framebuffer. 0 if unknown.
     int depth_r, depth_g, depth_b;
 
-    // GL version requested from config_window_gl3 backend (MPGL_VER mangled).
-    // (Might be different from the actual version in gl->version.)
-    int requested_gl_version;
-
     // For free use by the mpgl_driver.
     void *priv;
 
@@ -142,12 +134,7 @@ typedef struct MPGLContext {
 
 
     // Resize the window, or create a new window if there isn't one yet.
-    // On the first call, it creates a GL context according to what's specified
-    // in MPGLContext.requested_gl_version. This is just a hint, and if the
-    // requested version is not available, it may return a completely different
-    // GL context. (The caller must check if the created GL version is ok. The
-    // callee must try to fall back to an older version if the requested
-    // version is not available, and newer versions are incompatible.)
+    // On the first call, it creates a GL context.
     bool (*config_window)(struct MPGLContext *ctx, int flags);
 
     // Optional callback on the beginning of a frame. The frame will be finished

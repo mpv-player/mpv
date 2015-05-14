@@ -150,10 +150,9 @@ static bool create_context_w32_gl3(struct MPGLContext *ctx)
     if (!wglCreateContextAttribsARB)
         goto unsupported;
 
-    int gl_version = ctx->requested_gl_version;
     int attribs[] = {
-        WGL_CONTEXT_MAJOR_VERSION_ARB, MPGL_VER_GET_MAJOR(gl_version),
-        WGL_CONTEXT_MINOR_VERSION_ARB, MPGL_VER_GET_MINOR(gl_version),
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 0,
         WGL_CONTEXT_FLAGS_ARB, 0,
         WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
         0

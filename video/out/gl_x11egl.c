@@ -67,8 +67,8 @@ static bool create_context_egl(MPGLContext *ctx, EGLConfig config,
     struct priv *p = ctx->priv;
 
     EGLint context_attributes[] = {
-        EGL_CONTEXT_CLIENT_VERSION, // aka EGL_CONTEXT_MAJOR_VERSION_KHR
-        es ? 2 : MPGL_VER_GET_MAJOR(ctx->requested_gl_version),
+        // aka EGL_CONTEXT_MAJOR_VERSION_KHR
+        EGL_CONTEXT_CLIENT_VERSION, es ? 2 : 3,
         EGL_NONE
     };
 

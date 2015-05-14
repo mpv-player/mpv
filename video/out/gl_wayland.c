@@ -89,8 +89,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     MP_VERBOSE(wl, "EGL version %d.%d\n", major, minor);
 
     EGLint context_attribs[] = {
-        EGL_CONTEXT_MAJOR_VERSION_KHR,
-        MPGL_VER_GET_MAJOR(ctx->requested_gl_version),
+        EGL_CONTEXT_MAJOR_VERSION_KHR, 3,
         EGL_NONE
     };
 

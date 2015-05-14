@@ -592,7 +592,6 @@ static MPGLContext *init_backend(struct vo *vo, const struct backend *backend,
         .gl = talloc_zero(ctx, GL),
         .vo = vo,
         .driver = backend->driver,
-        .requested_gl_version = 300,
     };
     bool old_probing = vo->probing;
     vo->probing = probing; // hack; kill it once backends are separate

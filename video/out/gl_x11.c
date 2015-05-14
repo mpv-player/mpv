@@ -242,10 +242,9 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
 
     vo_x11_config_vo_window(vo, glx_ctx->vinfo, flags | VOFLAG_HIDDEN, "gl");
 
-    int gl_version = ctx->requested_gl_version;
     bool success = false;
     if (!(flags & VOFLAG_GLES)) {
-        success = create_context_x11_gl3(ctx, flags, gl_version, false);
+        success = create_context_x11_gl3(ctx, flags, 300, false);
         if (!success)
             success = create_context_x11_old(ctx);
     }
