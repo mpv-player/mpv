@@ -763,7 +763,7 @@ const struct MPOpts mp_default_opts = {
     .sub_cp = "auto",
     .screenshot_template = "mpv-shot%n",
 
-    .hwdec_codecs = "h264,vc1,wmv3",
+    .hwdec_codecs = "h264,vc1,wmv3,hevc",
 
     .index_mode = 1,
 
