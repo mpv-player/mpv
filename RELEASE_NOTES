@@ -4,11 +4,14 @@ Release 0.9.2 (Draft)
 Changes
 -------
 
+- The Lua check now also checks for `lua52.pc`, as used by Arch Linux testing.
 - (X11) `vo_opengl`'s `icc-profile-auto` now queries the current ICC profile
   relative to the center of the window.
 - `ao_coreaudio`, `ao_alsa` now support adding dummy padding channels for
   better compatibility with hardware decoders that only support specific
   channel counts (e.g. 5.1 now should work on a decoder that only accepts 7.1).
+- Channel fallback (in case the audio device doesn't natively support a given
+  channel layout) has been improved.
 
 Bug fixes
 ---------
@@ -20,8 +23,11 @@ Bug fixes
 - Trying to play a directory will no longer spam `Connection lost!` to the
   console log.
 - (Linux) Several `vo_rpi` bugfixes.
+- (Linux) Several `vo_drm` bugfixes. Pan&Scan is now supported.
+- (OSX) The OSD no longer always shows up on startup.
 - (OSX) Several `ao_coreaudio` and `ao_coreaudio_exclusive` bugfixes.
 - (OSX) Fixed potential crash on exit when using Cocoa.
+- (ClientAPI) `vo_opengl_cb` now actually applies options changed at runtime.
 - (OSX, ClientAPI) Cocoa now works when both the `cplayer` (`mpv`) and `libmpv`
   are built at the same time; however, `libmpv` now always creates an
   application singleton. Cocoa has to be disabled completely to prevent
