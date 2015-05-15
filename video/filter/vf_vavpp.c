@@ -163,14 +163,14 @@ static struct mp_image *render(struct vf_instance *vf, struct mp_image *in,
         status = vaMapBuffer(p->display, buffer, (void**)&param);
         if (!check_error(vf, status, "vaMapBuffer()"))
             break;
-        
+
         VAProcFilterParameterBufferDeinterlacing *filter_params;
         status = vaMapBuffer(p->display, *(p->pipe.filters), (void**)&filter_params);
         if (!check_error(vf, status, "vaMapBuffer()"))
             break;
         filter_params->flags = flags & VA_TOP_FIELD ? 0 : VA_DEINTERLACING_BOTTOM_FIELD;
         vaUnmapBuffer(p->display, *(p->pipe.filters));
-        
+
         param->surface = in_id;
         param->surface_region = NULL;
         param->output_region = NULL;

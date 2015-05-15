@@ -455,8 +455,8 @@ static void handle_nav_command(stream_t *s, struct mp_nav_cmd *ev)
         bd_vk_key_e key = translate_nav_menu_action(action);
         if (key != BD_VK_NONE) {
             if (key == BD_VK_MOUSE_ACTIVATE)
-                ev->mouse_on_button = bd_mouse_select(priv->bd, pts, 
-                                                      priv->mousex, 
+                ev->mouse_on_button = bd_mouse_select(priv->bd, pts,
+                                                      priv->mousex,
                                                       priv->mousey);
             bd_user_input(priv->bd, pts, key);
         } else if (strcmp(action, "menu") == 0) {
@@ -469,8 +469,8 @@ static void handle_nav_command(stream_t *s, struct mp_nav_cmd *ev)
     } case MP_NAV_CMD_MOUSE_POS:
         priv->mousex = ev->u.mouse_pos.x;
         priv->mousey = ev->u.mouse_pos.y;
-        ev->mouse_on_button = bd_mouse_select(priv->bd, mp_time_us(), 
-                                              priv->mousex, 
+        ev->mouse_on_button = bd_mouse_select(priv->bd, mp_time_us(),
+                                              priv->mousex,
                                               priv->mousey);
         break;
     case MP_NAV_CMD_SKIP_STILL:

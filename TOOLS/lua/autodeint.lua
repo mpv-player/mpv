@@ -102,7 +102,7 @@ function judge()
 
     mp.msg.verbose("progressive    = "..num_progressive)
     mp.msg.verbose("interlaced-tff = "..num_tff)
-    mp.msg.verbose("interlaced-bff = "..num_bff) 
+    mp.msg.verbose("interlaced-bff = "..num_bff)
     mp.msg.verbose("undetermined   = "..num_undetermined)
 
     if num_determined < num_undetermined then
