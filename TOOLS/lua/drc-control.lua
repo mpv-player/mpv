@@ -4,7 +4,7 @@
 -- parameters. See the entry for "drc" under the "AUDIO FILTERS"
 -- section of the man page for a complete description of the filter.
 --
--- This script registers the key-binding "\" to toggle the filter between 
+-- This script registers the key-binding "\" to toggle the filter between
 --
 -- * off
 -- * method=1 (single-sample smoothing)
@@ -92,7 +92,7 @@ function drc_quieter_handler()
     drc_scale_target(0.5)
 end
 
--- toggle between off, method 1 and method 2 
+-- toggle between off, method 1 and method 2
 mp.add_key_binding("\\", "drc_toggle_method", drc_toggle_method_handler)
 -- increase or decrease target volume
 mp.add_key_binding("ctrl+9", "drc_quieter", drc_quieter_handler)
