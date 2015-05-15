@@ -88,7 +88,7 @@ shm_buffer_t* shm_buffer_create(uint32_t width,
 
 // shm pool is only able to grow and won't shrink
 // returns 0 on success or buffer flags indicating the buffer status which
-// prevent it from resizing 
+// prevent it from resizing
 int shm_buffer_resize(shm_buffer_t *buffer, uint32_t width, uint32_t height);
 
 // if shm_buffer_resize returns SHM_BUFFER_BUSY this function can be called
