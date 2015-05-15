@@ -673,6 +673,13 @@ static int config(struct vf_instance *vf, int width, int height,
         return 0;
     }
 
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    if (width % desc.align_x || height % desc.align_y) {
+        MP_FATAL(vf, "VapourSynth does not allow unaligned/cropped video sizes.\n");
+        destroy_vs(vf);
+        return 0;
+    }
+
     vf_rescale_dsize(&d_width, &d_height, width, height, vi->width, vi->height);
 
     return vf_next_config(vf, vi->width, vi->height, d_width, d_height, flags, fmt);
