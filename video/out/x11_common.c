@@ -1389,6 +1389,9 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
     vo_x11_selectinput_witherr(vo, x11->display, x11->window, events);
     XMapWindow(x11->display, x11->window);
 
+    if (vo->opts->fullscreen && (x11->wm_type & vo_wm_FULLSCREEN))
+        x11_set_ewmh_state(x11, "_NET_WM_STATE_FULLSCREEN", 1);
+
     vo_x11_xembed_update(x11, XEMBED_MAPPED);
 }
 
