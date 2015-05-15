@@ -604,7 +604,7 @@ static bool render_frame(struct vo *vo)
     int64_t duration = in->frame_duration;
     struct mp_image *img = in->frame_queued;
 
-    if (!img && (!in->vsync_timed || in->paused || pts <= 0))
+    if (!img && (!in->vsync_timed || in->paused))
         goto nothing_done;
 
     if (in->vsync_timed && !in->hasframe)
