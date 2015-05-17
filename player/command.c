@@ -4483,6 +4483,11 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
     }
 
+    case MP_CMD_PLAYLIST_SHUFFLE: {
+        playlist_shuffle(mpctx->playlist);
+        break;
+    }
+
     case MP_CMD_STOP:
         playlist_clear(mpctx->playlist);
         mpctx->stop_play = PT_STOP;
