@@ -16,7 +16,7 @@
 
 static const char *const sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt",
                                        "smi", "rt", "txt", "ssa", "aqt", "jss",
-                                       "js", "ass", "mks", "vtt", NULL};
+                                       "js", "ass", "mks", "vtt", "sup", NULL};
 
 static const char *const audio_exts[] = {"mp3", "aac", "mka", "dts", "flac",
                                          "ogg", "m4a", "ac3", NULL};
