@@ -483,13 +483,11 @@ static void *screensaver_thread(void *arg)
         // don't queue multiple wakeups
         while (!sem_trywait(&x11->screensaver_sem)) {}
 
-        if (mp_cancel_test(x11->screensaver_terminate))
+        if (atomic_load(&x11->screensaver_terminate))
             break;
 
         char *args[] = {"xdg-screensaver", "reset", NULL};
-        if (mp_subprocess(args, x11->screensaver_terminate, NULL, NULL,
-                          NULL, &(char*){0}))
-        {
+        if (mp_subprocess(args, NULL, NULL, NULL, NULL, &(char*){0})) {
             MP_WARN(x11, "Disabling screensaver failed.\n");
             break;
         }
@@ -515,13 +513,12 @@ int vo_x11_init(struct vo *vo)
     };
     vo->x11 = x11;
 
-    x11->screensaver_terminate = mp_cancel_new(x11);
     sem_init(&x11->screensaver_sem, 0, 0);
     if (pthread_create(&x11->screensaver_thread, NULL, screensaver_thread, x11)) {
-        x11->screensaver_terminate = NULL;
         sem_destroy(&x11->screensaver_sem);
         goto error;
     }
+    x11->screensaver_thread_running = true;
 
     x11_error_output = x11->log;
     XSetErrorHandler(x11_errorhandler);
@@ -731,8 +728,8 @@ void vo_x11_uninit(struct vo *vo)
         XCloseDisplay(x11->display);
     }
 
-    if (x11->screensaver_terminate) {
-        mp_cancel_trigger(x11->screensaver_terminate);
+    if (x11->screensaver_thread_running) {
+        atomic_store(&x11->screensaver_terminate, true);
         sem_post(&x11->screensaver_sem);
         pthread_join(x11->screensaver_thread, NULL);
         sem_destroy(&x11->screensaver_sem);
