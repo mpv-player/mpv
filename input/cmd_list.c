@@ -63,6 +63,7 @@ const struct mp_cmd_def mp_cmds[] = {
       OARG_FLAGS(4|0, ({"relative", 4|0}, {"-", 4|0},
                        {"absolute-percent", 4|1},
                        {"absolute", 4|2},
+                       {"relative-percent", 4|3},
                        {"keyframes", 32|8},
                        {"exact", 32|16})),
       // backwards compatibility only

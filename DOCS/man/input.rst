@@ -86,7 +86,7 @@ List of Input Commands
     disabling default bindings, without disabling all bindings with
     ``--no-input-default-bindings``.
 
-``seek <seconds> [relative|absolute|absolute-percent|exact|keyframes]``
+``seek <seconds> [relative|absolute|absolute-percent|relative-percent|exact|keyframes]``
     Change the playback position. By default, seeks by a relative amount of
     seconds.
 
@@ -98,6 +98,8 @@ List of Input Commands
         Seek to a given time.
     absolute-percent
         Seek to a given percent position.
+    relative-percent
+        Seek relative to current position in percent.
     keyframes
         Always restart playback at keyframe boundaries (fast).
     exact
