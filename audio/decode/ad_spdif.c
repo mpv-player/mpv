@@ -34,6 +34,7 @@
 
 struct spdifContext {
     struct mp_log   *log;
+    enum AVCodecID   codec_id;
     AVFormatContext *lavf_ctx;
     int              out_buffer_len;
     uint8_t          out_buffer[OUTBUF_SIZE];
@@ -77,15 +78,23 @@ static int init(struct dec_audio *da, const char *decoder)
     da->priv = spdif_ctx;
     spdif_ctx->log = da->log;
 
+    spdif_ctx->codec_id = mp_codec_to_av_codec_id(decoder);
+    return spdif_ctx->codec_id != AV_CODEC_ID_NONE;
+}
+
+static int init_filter(struct dec_audio *da)
+{
+    struct spdifContext *spdif_ctx = da->priv;
+
     AVFormatContext *lavf_ctx  = avformat_alloc_context();
     if (!lavf_ctx)
         goto fail;
 
+    spdif_ctx->lavf_ctx = lavf_ctx;
+
     lavf_ctx->oformat = av_guess_format("spdif", NULL, NULL);
     if (!lavf_ctx->oformat)
         goto fail;
-
-    spdif_ctx->lavf_ctx = lavf_ctx;
 
     void *buffer = av_mallocz(OUTBUF_SIZE);
     if (!buffer)
@@ -106,14 +115,14 @@ static int init(struct dec_audio *da, const char *decoder)
     if (!stream)
         goto fail;
 
-    stream->codec->codec_id = mp_codec_to_av_codec_id(decoder);
+    stream->codec->codec_id = spdif_ctx->codec_id;
 
     AVDictionary *format_opts = NULL;
 
     int num_channels = 0;
     int sample_format = 0;
     int samplerate = 0;
-    switch (stream->codec->codec_id) {
+    switch (spdif_ctx->codec_id) {
     case AV_CODEC_ID_AAC:
         sample_format                   = AF_FORMAT_S_AAC;
         samplerate                      = 48000;
@@ -127,13 +136,13 @@ static int init(struct dec_audio *da, const char *decoder)
     case AV_CODEC_ID_DTS:
         if (da->opts->dtshd) {
             av_dict_set(&format_opts, "dtshd_rate", "768000", 0); // 4*192000
-            sample_format                   = AF_FORMAT_S_DTSHD;
-            samplerate                      = 192000;
-            num_channels                    = 2*4;
+            sample_format               = AF_FORMAT_S_DTSHD;
+            samplerate                  = 192000;
+            num_channels                = 2*4;
         } else {
-            sample_format                   = AF_FORMAT_S_DTS;
-            samplerate                      = 48000;
-            num_channels                    = 2;
+            sample_format               = AF_FORMAT_S_DTS;
+            samplerate                  = 48000;
+            num_channels                = 2;
         }
         break;
     case AV_CODEC_ID_EAC3:
@@ -167,17 +176,16 @@ static int init(struct dec_audio *da, const char *decoder)
 
     spdif_ctx->need_close = true;
 
-    return 1;
+    return 0;
 
 fail:
     uninit(da);
-    return 0;
+    return -1;
 }
 
 static int decode_packet(struct dec_audio *da, struct mp_audio **out)
 {
     struct spdifContext *spdif_ctx = da->priv;
-    AVFormatContext     *lavf_ctx  = spdif_ctx->lavf_ctx;
 
     spdif_ctx->out_buffer_len  = 0;
 
@@ -195,9 +203,13 @@ static int decode_packet(struct dec_audio *da, struct mp_audio **out)
         da->pts        = mpkt->pts;
         da->pts_offset = 0;
     }
-    int ret = av_write_frame(lavf_ctx, &pkt);
+    if (!spdif_ctx->lavf_ctx) {
+        if (init_filter(da) < 0)
+            return AD_ERR;
+    }
+    int ret = av_write_frame(spdif_ctx->lavf_ctx, &pkt);
     talloc_free(mpkt);
-    avio_flush(lavf_ctx->pb);
+    avio_flush(spdif_ctx->lavf_ctx->pb);
     if (ret < 0)
         return AD_ERR;
 
