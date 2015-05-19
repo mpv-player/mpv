@@ -354,8 +354,8 @@ Available filters are:
 
         If you just want to force remixing to a certain output channel layout,
         it is easier to use the ``format`` filter. For example,
-        ``mpv '--af=format=channels=5.1' '--audio-channels=5.1'`` would always force
-        remixing audio to 5.1 and output it like this.
+        ``mpv '--af=format=channels=5.1' '--audio-channels=5.1'`` would always
+        force remixing audio to 5.1 and output it like this.
 
 ``sub[=fc:ch]``
     Adds a subwoofer channel to the audio stream. The audio data used for
@@ -526,7 +526,9 @@ Available filters are:
     .. admonition:: Example
 
         ``mpv --af=ladspa='/usr/lib/ladspa/delay.so':delay_5s:[0.5,0.2] media.avi``
-            Does something.
+            Applies filter labeled ``delay_5s`` from LADSPA plugin library
+            ``/usr/lib/ladspa/delay.so`` with arguments 0.5 and 0.2, if it
+            exists.
 
 ``karaoke``
     Simple voice removal filter exploiting the fact that voice is usually

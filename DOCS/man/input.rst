@@ -147,7 +147,7 @@ List of Input Commands
 
 ``add <property> [<value>]``
     Add the given value to the property. On overflow or underflow, clamp the
-    property to the maximum. If ``<value>`` is omitted, assume ``1``.
+    property to its bounds. If ``<value>`` is omitted, assume ``1``.
 
 ``cycle <property> [up|down]``
     Cycle the given property. ``up`` and ``down`` set the cycle direction. On
@@ -155,7 +155,9 @@ List of Input Commands
     maximum. If ``up`` or ``down`` is omitted, assume ``up``.
 
 ``multiply <property> <factor>``
-    Multiplies the value of a property with the numeric factor.
+    Multiplies the value of a property with the numeric factor. Same clamping
+    rules apply as ``add``. Fractional numbers may be used for division, such as
+    ``0.5`` or ``1/2`` to halve the property.
 
 ``screenshot [subtitles|video|window|- [single|each-frame]]``
     Take a screenshot.
@@ -196,7 +198,7 @@ List of Input Commands
     Go to the next entry on the playlist.
 
     weak (default)
-        If the last file on the playlist is currently played, do nothing.
+        If the last file on the playlist is currently playing, do nothing.
     force
         Terminate playback if there are no more files on the playlist.
 
@@ -204,9 +206,9 @@ List of Input Commands
     Go to the previous entry on the playlist.
 
     weak (default)
-        If the first file on the playlist is currently played, do nothing.
+        If the first file on the playlist is currently playing, do nothing.
     force
-        Terminate playback if the first file is being played.
+        Terminate playback if the first file is currently playing.
 
 ``loadfile "<file>" [replace|append|append-play [options]]``
     Load the given file and play it.
@@ -231,7 +233,7 @@ List of Input Commands
     Load the given playlist file (like ``--playlist``).
 
 ``playlist_clear``
-    Clear the playlist, except the currently played file.
+    Clear the playlist, except the currently playing file.
 
 ``playlist_remove current|<index>``
     Remove the playlist entry at the given index. Index values start counting
@@ -269,7 +271,8 @@ List of Input Commands
         shell script, and call that with ``run``.
 
 ``quit [<code>]``
-    Exit the player. If an argument is given, it's used as process exit code.
+    Exit the player. If an argument is given, it's used as the process' exit
+    code.
 
 ``quit_watch_later [<code>]``
     Exit player, and store current playback position. Playing that file later
@@ -277,14 +280,13 @@ List of Input Commands
     exactly as in the ``quit`` command.
 
 ``sub_add "<file>" [<flags> [<title> [<lang>]]]``
-    Load the given subtitle file. It is selected as current subtitle after
-    loading.
+    Load the given subtitle file.
 
-    The ``flags`` args is one of the following values:
+    The ``flags`` argument is one of the following values:
 
     <select>
 
-        Select the subtitle immediately.
+        Select the subtitle immediately. (default)
 
     <auto>
 
@@ -295,8 +297,8 @@ List of Input Commands
 
         Select the subtitle. If a subtitle with the same filename was already
         added, that one is selected, instead of loading a duplicate entry.
-        (In this case, title/language are ignored, and if the was changed since
-        it was loaded, these changes won't be reflected.)
+        (In this case, title/language are ignored, and if the file has changed
+        since it was loaded, these changes won't be reflected.)
 
     The ``title`` argument sets the track title in the UI.
 
@@ -308,24 +310,26 @@ List of Input Commands
     the current track. (Works on external subtitle files only.)
 
 ``sub_reload [<id>]``
-    Reload the given subtitle tracks. If the ``id`` argument is missing, reload
+    Reload the given subtitle track. If the ``id`` argument is missing, reload
     the current track. (Works on external subtitle files only.)
 
     This works by unloading and re-adding the subtitle track.
 
 ``sub_step <skip>``
-    Change subtitle timing such, that the subtitle event after the next
-    ``<skip>`` subtitle events is displayed. ``<skip>`` can be negative to step
+    Change subtitle timing such that the subtitle event after the next
+     ``<skip>`` subtitle events is displayed. ``<skip>`` can be negative to step
     backwards.
+
+    This works with external text subtitles only. For embedded text subtitles
+    (like with Matroska), this works only with subtitle events that have already
+    been displayed.
 
 ``sub_seek <skip>``
     Seek to the next (skip set to 1) or the previous (skip set to -1) subtitle.
     This is similar to ``sub_step``, except that it seeks video and audio
     instead of adjusting the subtitle delay.
 
-    Like with ``sub_step``, this works with external text subtitles only. For
-    embedded text subtitles (like with Matroska), this works only with subtitle
-    events that have already been displayed.
+    Same limitations as ``sub_step`` apply.
 
 ``osd [<level>]``
     Toggle OSD level. If ``<level>`` is specified, set the OSD mode
@@ -448,7 +452,7 @@ Input Commands that are Possibly Subject to Change
         Remove all filters. Note that like the other sub-commands, this does
         not control automatically inserted filters.
 
-    You can assign labels to filter by prefixing them with ``@name:`` (where
+    You can assign labels to filters by prefixing them with ``@name:`` (where
     ``name`` is a user-chosen arbitrary identifier). Labels can be used to
     refer to filters by name in all of the filter chain modification commands.
     For ``add``, using an already used label will replace the existing filter.
@@ -473,8 +477,9 @@ Input Commands that are Possibly Subject to Change
 ``cycle_values ["!reverse"] <property> "<value1>" "<value2>" ...``
     Cycle through a list of values. Each invocation of the command will set the
     given property to the next value in the list. The command maintains an
-    internal counter which value to pick next, and which is initially 0. It is
-    reset to 0 once the last value is reached.
+    internal counter to keep track of which value to pick next, which starts at
+    0, then wraps around back to 0 once the last value is reached, reselecting
+    the first item in the list.
 
     The internal counter is associated using the property name and the value
     list. If multiple commands (bound to different keys) use the same name
@@ -573,13 +578,13 @@ Input Commands that are Possibly Subject to Change
         When updating the overlay, you should prepare a second shared memory
         region (e.g. make use of the offset parameter) and add this as overlay,
         instead of reusing the same memory every time. Otherwise, you might
-        get the equivalent of tearing, when your application and mpv write/read
+        get the equivalent of tearing when your application and mpv write/read
         the buffer at the same time. Also, keep in mind that mpv might access
         an overlay's memory at random times whenever it feels the need to do
         so, for example when redrawing the screen.
 
 ``overlay_remove <id>``
-    Remove an overlay added with ``overlay_add`` and the same ID. Does nothing
+    Remove an overlay added with ``overlay_add`` with the same ID. Does nothing
     if no overlay with this ID exists.
 
 ``script_message "<arg1>" "<arg2>" ...``
@@ -615,7 +620,7 @@ Input Commands that are Possibly Subject to Change
     either ``m`` (mouse button) or ``-`` (something else).
 
 ``ab_loop``
-    Cycle through A-B loop states. The first command will set the ``A`` point
+    Cycle through A-B loop states. The first invokation will set the ``A`` point
     (the ``ab-loop-a`` property); the second the ``B`` point, and the third
     will clear both points.
 
@@ -647,11 +652,11 @@ Hooks
 ~~~~~
 
 Hooks are synchronous events between player core and a script or similar. This
-applies to the Lua scripting interface and the client API and only. Normally,
-events are supposed to be asynchronous, and the hook API provides an awkward
-and obscure way to handle events that require stricter coordination. There are
-no API stability guarantees made. Not following the protocol exactly can make
-the player freeze randomly. Basically, nobody should use this API.
+applies to the Lua scripting interface and the client API only. Normally, events
+are supposed to be asynchronous, and the hook API provides an awkward and
+obscure way to handle events that require stricter coordination. There are no
+API stability guarantees made. Not following the protocol exactly can make the 
+player freeze randomly. Basically, nobody should use this API.
 
 There are two special commands involved. Also, the client must listen for
 client messages (``MPV_EVENT_CLIENT_MESSAGE`` in the C API).
@@ -695,7 +700,7 @@ The following hooks are currently defined:
     For example, you could read and write the ``stream-open-filename``
     property to redirect an URL to something else (consider support for
     streaming sites which rarely give the user a direct media URL), or
-    you could set per-file options with by setting the property
+    you could set per-file options by setting the property
     ``file-local-options/<option name>``. The player will wait until all
     hooks are run.
 
@@ -755,7 +760,7 @@ Properties
 ----------
 
 Properties are used to set mpv options during runtime, or to query arbitrary
-information. They can be manipulated with the ``set``/``add``/``cycle``
+information. They can be manipulated with the ``set``/``add``/``cycle``/``multiply``
 commands, and retrieved with ``show_text``, or anything else that uses property
 expansion. (See `Property Expansion`_.)
 
@@ -879,7 +884,8 @@ Property list
     ``time-remaining`` scaled by the the current ``speed``.
 
 ``playback-time``
-    Return the playback time, which is the time difference between start PTS and current PTS.
+    Return the playback time, which is the time difference between start PTS and
+    current PTS.
 
 ``chapter`` (RW)
     Current chapter number. The number of the first chapter is 0.
@@ -890,30 +896,6 @@ Property list
 
 ``disc-titles``
     Number of BD/DVD titles.
-
-    This has a number of sub-properties. Replace ``N`` with the 0-based edition
-    index.
-
-    ``disc-titles/count``
-        Number of titles.
-
-    ``disc-titles/id``
-        Title ID as integer. Currently, this is the same as the title index.
-
-    ``disc-titles/length``
-        Length in seconds. Can be unavailable in a number of cases (currently
-        it works for libdvdnav only).
-
-    When querying the property with the client API using ``MPV_FORMAT_NODE``,
-    or with Lua ``mp.get_property_native``, this will return a mpv_node with
-    the following contents:
-
-    ::
-
-        MPV_FORMAT_NODE_ARRAY
-            MPV_FORMAT_NODE_MAP (for each edition)
-                "id"                MPV_FORMAT_INT64
-                "length"            MPV_FORMAT_DOUBLE
 
 ``disc-title-list``
     List of BD/DVD titles.
@@ -1053,7 +1035,7 @@ Property list
 
 ``core-idle``
     Return ``yes`` if the playback core is paused, otherwise ``no``. This can
-    be different ``pause`` in special situations, such as when the player
+    be different than ``pause`` in special situations, such as when the player
     pauses itself due to low network cache.
 
     This also returns ``yes`` if playback is restarting or if nothing is
@@ -1221,11 +1203,11 @@ Property list
     Return the current hardware decoder that was detected and opened. Returns
     the same values as ``hwdec``.
 
-    This is known only once the VO has opened (and possibly later). With some
-    VOs (like ``opengl``), this is never known in advance, but only when the
-    decoder attempted to create the hw decoder successfully. Also, hw decoders
-    with ``-copy`` suffix are returned only while hw decoding is active (and
-    unset afterwards). All this reflects how detecting hw decoders are
+    This is known only once the VO has been opened (and possibly later). With
+    some VOs (like ``opengl``), this is never known in advance, but only when
+    the decoder attempted to create the hw decoder successfully. Also, hw
+    decoders with ``-copy`` suffix are returned only while hw decoding is
+    active (and unset afterwards). All this reflects how hw decoders are
     detected and used internally in mpv.
 
 ``panscan`` (RW)
@@ -1434,7 +1416,8 @@ Property list
     the given filename. Setting it to an empty string will stop it.
 
 ``tv-brightness``, ``tv-contrast``, ``tv-saturation``, ``tv-hue`` (RW)
-    TV stuff.
+    Controls analog TV capture devices.  This is separate from mpv's own video
+    equalizer and behavior depends on your capture hardware and drivers.
 
 ``playlist-pos`` (RW)
     Current position on playlist. The first entry is on position 0. Writing
@@ -1444,8 +1427,8 @@ Property list
     Number of total playlist entries.
 
 ``playlist``
-    Playlist, current entry marked. Currently, the raw property value is
-    useless.
+    The current playlist, current entry marked. Currently, the raw property
+    value is useless.
 
     This has a number of sub-properties. Replace ``N`` with the 0-based playlist
     entry index.
@@ -1486,7 +1469,7 @@ Property list
         Total number of tracks.
 
     ``track-list/N/id``
-        The ID as it's used for ``-sid``/``--aid``/``--vid``. This is unique
+        The ID as it's used for ``--sid``/``--aid``/``--vid``. This is unique
         within tracks of the same type (sub/audio/video), but otherwise not.
 
     ``track-list/N/type``
@@ -1626,7 +1609,8 @@ Property list
 ``osd-sym-cc``
     Inserts the current OSD symbol as opaque OSD control code (cc). This makes
     sense only with the ``show_text`` command or options which set OSD messages.
-    The control code is implementation specific and is useless for anything else.
+    The control code is implementation specific and is useless for anything
+    else.
 
 ``osd-ass-cc``
     ``${osd-ass-cc/0}`` disables escaping ASS sequences of text in OSD,
@@ -1639,7 +1623,7 @@ Property list
     .. admonition:: Example
 
         - ``--osd-status-msg='This is ${osd-ass-cc/0}{\\b1}bold text'``
-        - ``show_text "This is ${osd-ass-cc/0}{\b1}bold text"``
+        - ``show_text "This is ${osd-ass-cc/0}{\\b1}bold text"``
 
     Any ASS override tags as understood by libass can be used.
 
@@ -1651,16 +1635,16 @@ Property list
 ``vo-configured``
     Return whether the VO is configured right now. Usually this corresponds to
     whether the video window is visible. If the ``--force-window`` option is
-    used, this is usually always returns ``yes``.
+    used, this usually returns ``yes``.
 
 ``video-bitrate``, ``audio-bitrate``, ``sub-bitrate``
     Bitrate values calculated on the packet level. This works by dividing the
     bit size of all packets between two keyframes by their presentation
-    timestamp distance. (This uses the timestamps are stored in the file, so
-    e.g. playback speed does not influence the returned values.) In particular,
-    the video bitrate will update only per keyframe, and show the "past"
-    bitrate. To make the property more UI friendly, updates to these properties
-    are throttled in a certain way.
+    timestamp distance. (This uses the timestamps stored in the file, so e.g.
+    playback speed does not influence the returned values.) In particular, the
+    video bitrate will update only per keyframe, and show the "past" bitrate.
+    To make the property more UI friendly, updates to these properties are
+    throttled in a certain way.
 
     The unit is bits per second. OSD formatting turns these values in kilobits
     (or megabits, if appropriate), which can be prevented by using the
@@ -1779,7 +1763,6 @@ Property list
         For many complex types, this isn't very accurate.
 
     ``option-info/<name>/set-from-commandline``
-
         Return ``yes`` if the option was set from the mpv command line,
         ``no`` otherwise. What this is set to if the option is e.g. changed
         at runtime is left undefined (meaning it could change in the future).
@@ -1806,7 +1789,10 @@ Property Expansion
 ------------------
 
 All string arguments to input commands as well as certain options (like
-``--term-playing-msg``) are subject to property expansion.
+``--term-playing-msg``) are subject to property expansion. Note that property
+expansion does not work in places where e.g. numeric parameters are expected.
+(For example, the ``add`` command does not do property expansion. The ``set``
+command is an exception and not a general rule.)
 
 .. admonition:: Example for input.conf
 

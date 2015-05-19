@@ -73,7 +73,7 @@ You can encode files from one format/codec to another using this facility.
 
     .. admonition:: Example
 
-        "``--oac=libmp3lame --oacopts=b=128000``"
+        ``--oac=libmp3lame --oacopts=b=128000``
             selects 128 kbps MP3 encoding.
 
     Options are managed in lists. There are a few commands to manage the
@@ -111,10 +111,10 @@ You can encode files from one format/codec to another using this facility.
 
     .. admonition:: Examples
 
-        ``"--ovc=mpeg4 --oacopts=qscale=5"``
+        ``--ovc=mpeg4 --oacopts=qscale=5``
             selects constant quantizer scale 5 for MPEG-4 encoding.
 
-        ``"--ovc=libx264 --ovcopts=crf=23"``
+        ``--ovc=libx264 --ovcopts=crf=23``
             selects VBR quality factor 23 for H.264 encoding.
 
     Options are managed in lists. There are a few commands to manage the

@@ -18,11 +18,11 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-**mpv** is a media player based on MPlayer and mplayer2. It supports a wide variety of video
-file formats, audio and video codecs, and subtitle types. Special input URL
-types are available to read input from a variety of sources other than disk
-files. Depending on platform, a variety of different video and audio output
-methods are supported.
+**mpv** is a media player based on MPlayer and mplayer2. It supports a wide
+variety of video file formats, audio and video codecs, and subtitle types.
+Special input URL types are available to read input from a variety of sources
+other than diskfiles. Depending on platform, a variety of different video and
+audio output methods are supported.
 
 Usage examples to get you started quickly can be found at the end of this man
 page.
@@ -32,7 +32,7 @@ INTERACTIVE CONTROL
 ===================
 
 mpv has a fully configurable, command-driven control layer which allows you
-to control mpv using keyboard, mouse, or remote control (there is no
+to control mpv using a keyboard, mouse, or remote control (there is no
 LIRC support - configure remotes as input devices instead).
 
 See the ``--input-`` options for ways to customize it.
@@ -50,7 +50,7 @@ UP and DOWN
 
 Ctrl+LEFT and Ctrl+RIGHT
     Seek to the previous/next subtitle. Subject to some restrictions and
-    might not work always; see ``sub_seek`` command.
+    might not always work; see ``sub_seek`` command.
 
 [ and ]
     Decrease/increase current playback speed by 10%.
@@ -305,7 +305,7 @@ Suboptions passed to the client API are also subject to escaping. Using
 command line (but without shell processing of the string). Some options
 support passing values in a more structured way instead of flat strings, and
 can avoid the suboption parsing mess. For example, ``--vf`` supports
-``MPV_FORMAT_NODE``, which let's you pass suboptions as a nested data structure
+``MPV_FORMAT_NODE``, which lets you pass suboptions as a nested data structure
 of maps and arrays. (``--vo`` supports this in the same way, although this
 fact is undocumented.)
 
@@ -323,14 +323,14 @@ The name ``-`` itself is interpreted as stdin, and will cause mpv to disable
 console controls. (Which makes it suitable for playing data piped to stdin.)
 
 For paths passed to suboptions, the situation is further complicated by the
-need to escape special characters. To work this around, the path can be
+need to escape special characters. To work around this, the path can be
 additionally wrapped in the fixed-length syntax, e.g. ``%n%string_of_length_n``
 (see above).
 
 Some mpv options interpret paths starting with ``~``. Currently, the prefix
 ``~~/`` expands to the mpv configuration directory (usually ``~/.config/mpv/``).
 ``~/`` expands to the user's home directory. (The trailing ``/`` is always
-required.) There are the following paths as well:
+required.) There are these following paths as well:
 
 ================ ===============================================================
 Name             Meaning
@@ -394,7 +394,7 @@ configuration directory (e.g. ``/etc/mpv`` or ``/usr/local/etc/mpv``), the
 user-specific one is ``~/.config/mpv/mpv.conf``. For details and platform
 specifics see the `FILES`_ section.
 User-specific options override system-wide options and options given on the
-command line override either. The syntax of the configuration files is
+command line override both. The syntax of the configuration files is
 ``option=<value>``; everything after a *#* is considered a comment. Options
 that work without values can be enabled by setting them to *yes* and disabled by
 setting them to *no*. Even suboptions can be specified in this way.
@@ -416,7 +416,7 @@ but option values still need to be quoted as a whole if it contains certain
 characters like spaces. A config entry can be quoted with ``"`` and ``'``,
 as well as with the fixed-length syntax (``%n%``) mentioned before. This is like
 passing the exact contents of the quoted string as command line option. C-style
-escapes are currently _not_ interpreted on this level, although some options to
+escapes are currently _not_ interpreted on this level, although some options do
 this manually. (This is a mess and should probably be changed at some point.)
 
 Putting Command Line Options into the Configuration File
@@ -440,14 +440,15 @@ File-specific Configuration Files
 You can also write file-specific configuration files. If you wish to have a
 configuration file for a file called 'video.avi', create a file named
 'video.avi.conf' with the file-specific options in it and put it in
-``~/.config/mpv/``. You can also put the configuration file in the same directory
-as the file to be played. Both require you to set the ``--use-filedir-conf``
-option (either on the command line or in your global config file). If a
-file-specific configuration file is found in the same directory, no
-file-specific configuration is loaded from ``~/.config/mpv``. In addition, the
-``--use-filedir-conf`` option enables directory-specific configuration files.
-For this, mpv first tries to load a mpv.conf from the same directory
-as the file played and then tries to load any file-specific configuration.
+``~/.config/mpv/``. You can also put the configuration file in the same
+directory as the file to be played. Both require you to set the
+``--use-filedir-conf`` option (either on the command line or in your global
+config file). If a file-specific configuration file is found in the same
+directory, no file-specific configuration is loaded from ``~/.config/mpv``. In
+addition, the ``--use-filedir-conf`` option enables directory-specific
+configuration files. For this, mpv first tries to load a mpv.conf from the same
+directory as the file played and then tries to load any file-specific
+configuration.
 
 
 Profiles
@@ -458,7 +459,8 @@ configuration files. A profile starts with its name in square brackets,
 e.g. ``[my-profile]``. All following options will be part of the profile. A
 description (shown by ``--profile=help``) can be defined with the
 ``profile-desc`` option. To end the profile, start another one or use the
-profile name ``default`` to continue with normal options.
+profile name ``default`` to continue with normal options. Video output, audio
+output, protocol and extension-specific profiles are also supported as below.
 
 .. admonition:: Example mpv profile
 
@@ -489,8 +491,8 @@ input mode command, which is by default bound to the ``s`` key. Files named
 available number - no files will be overwritten.
 
 A screenshot will usually contain the unscaled video contents at the end of the
-video filter chain and subtitles. By default, ``S`` takes screenshots without
-subtitles, while ``s`` includes subtitles.
+video filter chain along with subtitles. By default, ``S`` takes screenshots
+without subtitles, while ``s`` includes subtitles.
 
 Unlike with MPlayer, the ``screenshot`` video filter is not required. This
 filter was never required in mpv, and has been removed.
@@ -498,7 +500,7 @@ filter was never required in mpv, and has been removed.
 TERMINAL STATUS LINE
 ====================
 
-During playback, mpv shows the playback status on the terminal. It looks like
+During playback, mpv shows the playback status on the terminal. It looks
 something like this:
 
     ``AV: 00:03:12 / 00:24:25 (13%) A-V: -0.000``
@@ -534,10 +536,10 @@ listed.
   to the display as well, e.g.: ``Dropped: 4/34``. This happens only if
   decoder-framedropping is enabled with the ``--framedrop`` options.
   (``drop-frame-count`` property.)
-- Cache state, e.g. ``Cache:  2s+134KB``. Visible if the stream cache is enabled.
-  The first value shows the amount of video buffered in the demuxer in seconds,
-  the second value shows *additional* data buffered in the stream cache in
-  kilobytes. (``demuxer-cache-duration`` and ``cache-used`` properties.)
+- Cache state, e.g. ``Cache:  2s+134KB``. Visible if the stream cache is
+  enabled. The first value shows the amount of video buffered in the demuxer in
+  seconds, the second value shows *additional* data buffered in the stream cache
+  in kilobytes. (``demuxer-cache-duration`` and ``cache-used`` properties.)
 
 
 PROTOCOLS
@@ -556,7 +558,7 @@ PROTOCOLS
     Play data from stdin.
 
 ``smb://PATH``
-    Play a path from  Samba share.
+    Play a path from a Samba share.
 
 ``bd://[title][/device]`` ``--bluray-device=PATH``
     Play a Blu-Ray disc. Currently, this does not accept ISO files. Instead,
@@ -583,16 +585,16 @@ PROTOCOLS
     Analogue TV via V4L. Also useful for webcams. (Linux only.)
 
 ``pvr://`` ``--pvr-...``
-    PVR. (Linux only.)
+    Video encoder PVR devices. Ususally analog video capture. (Linux only.)
 
 ``dvb://[cardnumber@]channel`` ``--dvbin-...``
     Digital TV via DVB. (Linux only.)
 
 ``mf://[filemask|@listfile]`` ``--mf-...``
-    Play a series of images as video.
+    Play a series of images as a video.
 
 ``cdda://track[-endtrack][:speed][/device]`` ``--cdrom-device=PATH`` ``--cdda-...``
-    Play CD.
+    Play an audio CD.
 
 ``lavf://...``
     Access any FFmpeg/Libav libavformat protocol. Basically, this passed the
@@ -720,9 +722,8 @@ behavior of mpv.
     Standard X11 display name to use.
 
 FFmpeg/Libav:
-    This library accesses various environment variables. However, they are not
-    centrally documented, and documenting them is not our job. Therefore, this
-    list is incomplete.
+    This library accesses various environment variables, however they are not
+    centrally documented. Some of the useful ones are provided here.
 
     Notable environment variables:
 
@@ -826,9 +827,9 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
 
 ``~/.config/mpv/scripts/``
     All files in this directory are loaded as if they were passed to the
-    ``--script`` option. They are loaded in alphabetical order, and sub-directories
-    and files with no ``.lua`` extension are ignored. The ``--load-scripts=no``
-    option disables loading these files.
+    ``--script`` option. They are loaded in alphabetical order, and
+    sub-directories and files with no ``.lua`` extension are ignored. The
+    ``--load-scripts=no`` option disables loading these files.
 
 ``~/.config/mpv/watch_later/``
     Contains temporary config files needed for resuming playback of files with

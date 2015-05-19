@@ -194,15 +194,17 @@ Available audio output drivers are:
         Set the audio buffer size in milliseconds. A higher value buffers
         more data, and has a lower probability of buffer underruns. A smaller
         value makes the audio stream react faster, e.g. to playback speed
-        changes. Default: 250.
+        changes. ``native`` instructs PulseAudio to use the largest possible
+        buffer, which can result in a very high latency imposed upon mpv which
+        may be over 2 seconds. Default: 250.
 
     ``latency-hacks=<yes|no>``
         Enable hacks to workaround PulseAudio timing bugs (default: no). If
         enabled, mpv will do elaborate latency calculations on its own. If
-        disabled, it will use PulseAudio automatically updated timing
-        information. Disabling this might help with e.g. networked audio or
-        some plugins, while enabling it might help in some unknown situations
-        (it used to be required to get good behavior on old PulseAudio versions).
+        disabled, mpv will use timing information periodically provided by 
+        PulseAudio. Disabling this might help with e.g. networked audio or some
+        plugins, while enabling it might help in some unknown situations. (It
+        used to be required to get good behavior on old PulseAudio versions.)
 
         If you have stuttering video when using pulse, try to enable this
         option. (Or alternatively, try to update PulseAudio.)
@@ -255,8 +257,8 @@ Available audio output drivers are:
 
     ``speed``
         Simulated audio playback speed as a multiplier. Usually, a real audio
-        device will not go exactly as fast as the system clock. It will deviate
-        just a little, and this option helps simulating this.
+        device will not go exactly as fast as the system clock but will deviate
+        just a little. This option allows to simulate this.
 
     ``latency``
         Simulated device latency. This is additional to EOF.
@@ -326,7 +328,8 @@ Available audio output drivers are:
         unless the driver is uninstalled.
 
         Also supports searching active devices by human readable name. If more
-        than one device matches the name, refuses loading it.
+        than one device matches the name, initialization will fail and mpv will
+        fall back to another audio output driver.
 
         This option is mostly deprecated in favour of the more general
         ``--audio-device`` option. That said, ``--audio-device=help`` will give

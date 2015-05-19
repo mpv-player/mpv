@@ -26,8 +26,9 @@ Track Selection
 
     .. admonition:: Examples
 
-        - ``mpv dvd://1 --slang=hu,en`` chooses the Hungarian subtitle track on
-          a DVD and falls back on English if Hungarian is not available.
+        - ``mpv dvd://1 --slang=hu,en``
+          chooses the Hungarian subtitle track on a DVD and falls back on
+          English if Hungarian is not available.
         - ``mpv --slang=jpn example.mkv`` plays a Matroska file with Japanese
           subtitles.
 
@@ -68,8 +69,8 @@ Playback Control
     Seek to given time position.
 
     The general format for absolute times is ``[[hh:]mm:]ss[.ms]``. If the time
-    is given with a prefix of ``+`` or ``-``, the seek is relative from the start
-    or end of the file.
+    is given with a prefix of ``+`` or ``-``, the seek is relative from the
+    start or end of the file.
 
     ``pp%`` seeks to percent position pp (0-100).
 
@@ -131,7 +132,7 @@ Playback Control
 
 ``--playlist=<filename>``
     Play files according to a playlist file (Supports some common formats. If
-    no format is detected, it will be treated as list of files, separated by
+    no format is detected, it will be treated as a list of files, separated by
     newline characters. Note that XML playlist formats are not supported.)
 
     You can play playlists directly and without this option, however, this
@@ -153,7 +154,7 @@ Playback Control
         inherently unsafe.
 
 ``--chapter-merge-threshold=<number>``
-    Threshold for merging almost consecutive ordered chapter parts in
+    Threshold for merging almost consecutive ordered chapter parts, in
     milliseconds (default: 100). Some Matroska files with ordered chapters
     have inaccurate chapter end timestamps, causing a small gap between the
     end of one chapter and the start of the next one when they should match.
@@ -179,7 +180,7 @@ Playback Control
     :no:       Never use precise seeks.
     :absolute: Use precise seeks if the seek is to an absolute position in the
                file, such as a chapter seek, but not for relative seeks like
-               the default behavior of arrow keys (default).
+               the default behavior of the arrow keys (default).
     :yes:      Use precise seeks whenever possible.
     :always:   Same as ``yes`` (for compatibility).
 
@@ -223,8 +224,8 @@ Playback Control
     includes special protocols and anything that doesn't refer to normal files.
     Local files and HTTP links on the other hand are always considered safe.
 
-    Note that ``--playlist`` always loads all entries, so you use that instead
-    if you really have the need for this functionality.
+    Note that ``--playlist`` always loads all entries, so you should use that
+    instead if you really have the need for this functionality.
 
 ``--loop-file=<N|inf|no>``
     Loop a single file N times. ``inf`` means forever, ``no`` means normal
@@ -261,8 +262,8 @@ Playback Control
     separated by newlines.
 
 ``--chapters-file=<filename>``
-    Load chapters from this file, instead of using the chapter metadata found
-    in the main file.
+    Load chapters from another file that has chapters, instead of using the
+    chapter metadata found in the main file.
 
 ``--sstep=<sec>``
     Skip <sec> seconds after every frame.
@@ -340,8 +341,8 @@ Program Behavior
 ``--dump-stats=<filename>``
     Write certain statistics to the given file. The file is truncated on
     opening. The file will contain raw samples, each with a timestamp. To
-    make this file into a readable, the script ``TOOLS/stats-conv.py`` can be
-    used (which currently displays it as a graph).
+    make this file readable, the script ``TOOLS/stats-conv.py`` can be used
+    (which currently displays it as a graph).
 
     This option is useful for debugging only.
 
@@ -459,12 +460,12 @@ Program Behavior
 ``--ytdl-raw-options=<key>=<value>[,<key>=<value>[,...]]``
     Pass arbitraty options to youtube-dl. Parameter and argument should be
     passed as a key-value pair. Options without argument must include ``=``.
-    
+
     There is no sanity checking so it's possible to break things (i.e.
     passing invalid parameters to youtube-dl).
 
     .. admonition:: Example
- 
+
         ``--ytdl-raw-options=username=user,password=pass``
         ``--ytdl-raw-options=force-ipv6=``
 
@@ -498,9 +499,13 @@ Video
     Do not play video. With some demuxers this may not work. In those cases
     you can try ``--vo=null`` instead.
 
+    mpv will try to download the audio only if media is streamed with
+    youtube-dl, because it saves bandwidth. This is done by setting the
+    ytdl_format to "bestaudio/best" in the ytdl_hook.lua script.
+
 ``--untimed``
     Do not sleep when outputting video frames. Useful for benchmarks when used
-    with ``--no-audio.``
+    with ``--no-audio`` or ``--ao=null:untimed``.
 
 ``--framedrop=<mode>``
     Skip displaying some frames to maintain A/V sync on slow systems, or
@@ -516,9 +521,9 @@ Video
         filters all frames, but doesn't render them on the VO. It tries to query
         the display FPS (X11 only, not correct on multi-monitor systems), or
         assumes infinite display FPS if that fails. Drops are indicated in
-        the terminal status line as ``D:`` field. If the decoder is too slow,
-        in theory all frames would have to be dropped (because all frames are
-        too late) - to avoid this, frame dropping stops if the effective
+        the terminal status line as ``Dropped:`` field. If the decoder is too
+        slow, in theory all frames would have to be dropped (because all frames
+        are too late) - to avoid this, frame dropping stops if the effective
         framerate is below 10 FPS.
     <decoder>
         Old, decoder-based framedrop mode. (This is the same as ``--framedrop=yes``
@@ -552,7 +557,7 @@ Video
     :no:        always use software decoding (default)
     :auto:      see below
     :vdpau:     requires ``--vo=vdpau`` or ``--vo=opengl`` (Linux only)
-    :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux with Intel GPUs only)
+    :vaapi:     requires ``--vo=vaapi`` or ``--vo=opengl`` (Linux with Intel GPUs only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
     :vda:       requires ``--vo=opengl`` (OS X only)
     :dxva2-copy: copies video back to system RAM (Windows only)
@@ -607,7 +612,7 @@ Video
     can be influenced by the other ``--video-...`` options. (But not all; for
     example ``--video-zoom`` does nothing if this option is enabled.)
 
-    The video and monitor aspects aspect will be ignored. Aspect correction
+    The video and monitor aspect ratios will be ignored. Aspect correction
     would require to scale the video in the X or Y direction, but this option
     disables scaling, disabling all aspect correction.
 
@@ -955,7 +960,7 @@ Audio
     ``--dtshd`` and ``--no-dtshd`` are deprecated aliases.
 
 ``--audio-channels=<number|layout>``
-    Request a channel layout for audio output (default: auto). This  will ask
+    Request a channel layout for audio output (default: auto). This will ask
     the AO to open a device with the given channel layout. It's up to the AO
     to accept this layout, or to pick a fallback or to error out if the
     requested layout is not supported.
@@ -1022,7 +1027,7 @@ Audio
             and ``--audio-format`` to explicitly select what the shared output
             format will be.
     :weak:  Normally, the audio device is kept open (using the format it was
-            first initialized with). If the audio format the decoder output
+            first initialized with). If the audio format the decoder outputs
             changes, the audio device is closed and reopened. This means that
             you will normally get gapless audio with files that were encoded
             using the same settings, but might not be gapless in other cases.
@@ -1132,11 +1137,10 @@ Subtitles
 
 ``--secondary-sid=<ID|auto|no>``
     Select a secondary subtitle stream. This is similar to ``--sid``. If a
-    secondary subtitle is selected, it will be rendered as toptitle (i.e. on
-    the top of the screen) alongside the normal subtitle, and provides a way
-    to render two subtitles at once.
+    secondary subtitle is selected, both will be rendered at the same time with
+    the secondary as a toptitle (i.e. on the top of the screen).
 
-    there are some caveats associated with this feature. For example, bitmap
+    There are some caveats associated with this feature. For example, bitmap
     subtitles will always be rendered in their usual position, so selecting a
     bitmap subtitle as secondary subtitle will result in overlapping subtitles.
     Secondary subtitles are never shown on the terminal if video is disabled.
@@ -1171,7 +1175,7 @@ Subtitles
 ``--sub-scale-with-window=<yes|no>``
     Make the subtitle font size relative to the window, instead of the video.
     This is useful if you always want the same font size, even if the video
-    doesn't covert the window fully, e.g. because screen aspect and window
+    doesn't cover the window fully, e.g. because screen aspect and window
     aspect mismatch (and the player adds black bars).
 
     Default: yes.
@@ -1401,10 +1405,9 @@ Subtitles
         - ``--sub-codepage=utf8:latin2`` Use Latin 2 if input is not UTF-8.
         - ``--sub-codepage=cp1250`` Always force recoding to cp1250.
 
-    The pseudo codepage ``UTF-8-BROKEN`` is used internally. When it
-    is the codepage, subtitles are interpreted as UTF-8 with "Latin 1" as
-    fallback for bytes which are not valid UTF-8 sequences. iconv is
-    never involved in this mode.
+    The pseudo codepage ``UTF-8-BROKEN`` is used internally. This codepage
+    interprets subtitles as UTF-8 with "Latin 1" as fallback for bytes which are
+    not valid UTF-8 sequences. iconv is never involved in this mode.
 
     If the player was compiled with ENCA support, you can control it with the
     following syntax:
@@ -1449,13 +1452,13 @@ Subtitles
 
     .. note::
 
-        ``<rate>`` > video fps speeds the subtitles up for frame-based
-        subtitle files and slows them down for time-based ones.
+        Higher values speed up frame-based subtitle files but will slow down
+        time-based subtitle files.
 
     Also see ``--sub-speed`` option.
 
 ``--sub-gauss=<0.0-3.0>``
-    Apply Gaussian blur to image subtitles (default: 0). This can help making
+    Apply Gaussian blur to image subtitles (default: 0). This can help make
     pixelated DVD/Vobsubs look nicer. A value other than 0 also switches to
     software subtitle scaling. Might be slow.
 
@@ -1464,7 +1467,7 @@ Subtitles
         Never applied to text subtitles.
 
 ``--sub-gray``
-    Convert image subtitles to grayscale. Can help making yellow DVD/Vobsubs
+    Convert image subtitles to grayscale. Can help make yellow DVD/Vobsubs
     look nicer.
 
     .. note::
@@ -1496,7 +1499,7 @@ Subtitles
 ``--sub-clear-on-seek``
     (Obscure, rarely useful.) Can be used to play broken mkv files with
     duplicate ReadOrder fields. ReadOrder is the first field in a
-    Matroska-style ASS subtitle packets. It should be unique, and libass
+    Matroska-style ASS subtitle packet. It should be unique, and libass
     uses it for fast elimination of duplicates. This option disables caching
     of subtitles across seeks, so after a seek libass can't eliminate subtitle
     packets with the same ReadOrder as earlier packets.
@@ -1541,8 +1544,8 @@ Window
 
     .. admonition:: Note (X11)
 
-        This option does works properly only with window managers which
-        understand the EWMH ``_NET_WM_FULLSCREEN_MONITORS`` hint.
+        This option works properly only with window managers which understand
+        the EWMH ``_NET_WM_FULLSCREEN_MONITORS`` hint.
 
     .. admonition:: Note (OS X)
 
@@ -1556,7 +1559,7 @@ Window
 
 ``--keep-open=<yes|no|always>``
     Do not terminate when playing or seeking beyond the end of the file, and
-    there is not next file to be played (and ``--loop`` is not used).
+    there are no more files to be played (and ``--loop`` is not used).
     Instead, pause the player. When trying to seek beyond end of the file, the
     player will attempt to seek to the last frame.
 
@@ -1568,7 +1571,8 @@ Window
                 Equivalent to ``--keep-open`` without arguments.
     :always:    Like ``yes``, but also applies to files before the last playlist
                 entry. This means playback will never automatically advance to
-                the next file.
+                the next file.  Sometimes referred to as "DJ Mode" in other
+                players.
 
     .. note::
 
@@ -1586,7 +1590,7 @@ Window
     file.mkv normally, then fail to open ``/dev/null``, then exit). (In
     mpv 0.8.0, ``always`` was introduced, which restores the old behavior.)
 
-``--force-window``
+``--force-window=<yes|no|immediate>``
     Create a video output window even if there is no video. This can be useful
     when pretending that mpv is a GUI application. Currently, the window
     always has the size 640x480, and is subject to ``--geometry``,
@@ -1598,7 +1602,9 @@ Window
         window placement still works if the video size is different from the
         ``--force-window`` default window size). This can be a problem if
         initialization doesn't work perfectly, such as when opening URLs with
-        bad network connection, or opening broken video files.
+        bad network connection, or opening broken video files. The ``immediate``
+        mode can be used to create the window always on program start, but this
+        may cause other issues.
 
 ``--ontop``
     Makes the player window stay on top of other windows.
@@ -1667,12 +1673,12 @@ Window
 ``--autofit=<[W[xH]]>``
     Set the initial window size to a maximum size specified by ``WxH``, without
     changing the window's aspect ratio. The size is measured in pixels, or if
-    a number is followed by a percentage sign (``%``), in percents of the
+    a number is followed by a percentage sign (``%``), in percent of the
     screen size.
 
     This option never changes the aspect ratio of the window. If the aspect
-    ratio mismatches, the window's size is reduced until it fits into the
-    specified size.
+    ratio mismatches, the window's size is reduced to fit within the given
+    dimensions while still maintaining aspect ratio.
 
     Window position is not taken into account, nor is it modified by this
     option (the window manager still may place the window differently depending
@@ -1709,9 +1715,10 @@ Window
     .. admonition:: Example
 
         ``90%x80%``
-            If the video is larger than 90% of the screen width or 80% of the
-            screen height, make the window smaller until either its width is 90%
-            of the screen, or its height is 80% of the screen.
+            If the window is to be larger than 90% of the screen width or 80% of
+            the screen height, size it to be as large as it can to fit within
+            90% of the screen width and 80% of the screen height while
+            preserving aspect ratio.
 
 ``--autofit-smaller=<[W[xH]]>``
     This option behaves exactly like ``--autofit``, except that it sets the
@@ -1776,7 +1783,7 @@ Window
     This can be "misused" to disable screensavers that do not support the
     proper X API (see also ``--stop-screensaver``). If you think this is too
     complicated, ask the author of the screensaver program to support the
-    proper X APIs. Note that the ``--stop-screensaver`` does not influence the
+    proper X APIs. Note that ``--stop-screensaver`` does not influence the
     heartbeat code at all.
 
     .. admonition:: Example for xscreensaver
@@ -1831,7 +1838,7 @@ Window
 
     This is not supported on all video outputs or platforms. Sometimes it is
     implemented, but does not work (happens often on GNOME). You might be able
-    to to work this around using ``--heartbeat-cmd`` instead.
+    to work this around using ``--heartbeat-cmd`` instead.
 
 ``--wid=<ID>``
     This tells mpv to attach to an existing window. If a VO is selected that
@@ -1839,11 +1846,10 @@ Window
     scale the video to the size of this window, and will add black bars to
     compensate if the aspect ratio of the video is different.
 
-    On X11, the ID is interpreted as a ``Window`` on X11. Unlike
-    MPlayer/mplayer2, mpv always creates its own window, and sets the wid
-    window as parent. The window will always be resized to cover the parent
-    window fully. The value ``0`` is interpreted specially, and mpv will
-    draw directly on the root window.
+    On X11, the ID is interpreted as a ``Window``. Unlike MPlayer/mplayer2, mpv
+    always creates its own window, and sets the wid window as parent. The window
+    will always be resized to cover the parent window fully. The value ``0`` is
+    interpreted specially, and mpv will draw directly on the root window.
 
     On win32, the ID is interpreted as ``HWND``. Pass it as value cast to
     ``intptr_t``. mpv will create its own window, and set the wid window as
@@ -1858,7 +1864,8 @@ Window
     Don't move the window when clicking on it and moving the mouse pointer.
 
 ``--x11-name``
-    Set the window class name for X11-based video output methods.
+    Set the window class name for X11-based video output methods. This is
+    different than ``--title``.
 
 ``--x11-netwm=<yes|no|auto>``
     (X11 only)
@@ -1909,9 +1916,6 @@ Disc Devices
 ``--bluray-angle=<ID>``
     Some Blu-ray discs contain scenes that can be viewed from multiple angles.
     This option tells mpv which angle to use (default: 1).
-
-``--cdda-...``
-    These options can be used to tune the CD Audio reading feature of mpv.
 
 ``--cdda-speed=<value>``
     Set CD spin speed.
@@ -2070,8 +2074,8 @@ Demuxer
     subtitle is close enough to the seek target.
 
     Works with the internal Matroska demuxer only. Always enabled for absolute
-    and hr-seeks, and this option changes behavior with relative or imprecise
-    seeks only.
+    and hr-seeks, so this option only changes behavior with relative or
+    imprecise seeks.
 
     You can use the ``--demuxer-mkv-subtitle-preroll-secs`` option to specify
     how mach data the demuxer should pre-read at most in order to find subtitle
@@ -2127,7 +2131,7 @@ Demuxer
     Use ``--demuxer-rawaudio-format=help`` to get a list of all formats.
 
 ``--demuxer-rawaudio-rate=<value>``
-    Sample rate for ``--demuxer=rawaudio`` (default: 44 kHz).
+    Sample rate for ``--demuxer=rawaudio`` (default: 44.1 kHz).
 
 ``--demuxer-rawvideo-fps=<value>``
     Rate in frames per second for ``--demuxer=rawvideo`` (default: 25.0).
@@ -2234,15 +2238,19 @@ Input
 ``--input-test``
     Input test mode. Instead of executing commands on key presses, mpv
     will show the keys and the bound commands on the OSD. Has to be used
-    with a dummy video, and the normal ways to quit the player will not
-    work (key bindings that normally quit will be shown on OSD only, just
-    like any other binding). See `INPUT.CONF`_.
+    with a dummy video or with ``--force-window`` and ``--idle``. The normal
+    ways to quit the player will not work (key bindings that normally quit will
+    be shown on OSD only, just like any other binding). See `INPUT.CONF`_.
+
+    .. admonition:: Example
+
+        ``mpv --input-test --force-window --idle``
 
 ``--input-file=<filename>``
     Read commands from the given file. Mostly useful with a FIFO. Since
     mpv 0.7.0 also understands JSON commands (see `JSON IPC`_), but you can't
-    get replies or events. Use ``--input-unix-socket`` for something
-    bi-directional. On MS Windows, JSON commands are not available.
+    get replies or events using this option. Use ``--input-unix-socket`` for
+    something bi-directional. On MS Windows, JSON commands are not available.
 
     This can also specify a direct file descriptor with ``fd://N`` (UNIX only).
     In this case, JSON replies will be written if the FD is writable.
@@ -2289,14 +2297,14 @@ Input
     count the right Alt as an Alt modifier key. Enabled by default.
 
 ``--input-vo-keyboard=<yes|no>``
-    Disable all keyboard input on for VOs which can't participate in proper
+    Disable all keyboard input for VOs which can't participate in proper
     keyboard input dispatching. May not affect all VOs. Generally useful for
     embedding only.
 
     On X11, a sub-window with input enabled grabs all keyboard input as long
     as it is 1. a child of a focused window, and 2. the mouse is inside of
-    the sub-window. The can steal away all keyboard input from the
-    application embedding the mpv window, and on the other hand, the mpv
+    the sub-window. This can steal away all keyboard input from the
+    application embedding the mpv window, but on the other hand, the mpv
     window will receive no input if the mouse is outside of the mpv window,
     even though mpv has focus. Modern toolkits work around this weird X11
     behavior, but naively embedding foreign windows breaks it.
@@ -2360,16 +2368,16 @@ OSD
 
 ``--osd-msg1=<string>``
     Show this string as message on OSD with OSD level 1 (visible by default).
-    The message will be visible by default, and as long no other message
+    The message will be visible by default, as long no other message
     covers it, and the OSD level isn't changed (see ``--osd-level``).
     Expands properties; see `Property Expansion`_.
 
 ``--osd-msg2=<string>``
-    Similar as ``--osd-msg1``, but for OSD level 2. If this is an empty string
+    Similar to ``--osd-msg1``, but for OSD level 2. If this is an empty string
     (default), then the playback time is shown.
 
 ``--osd-msg3=<string>``
-    Similar as ``--osd-msg1``, but for OSD level 3. If this is an empty string
+    Similar to ``--osd-msg1``, but for OSD level 3. If this is an empty string
     (default), then the playback time, duration, and some more information is
     shown.
 
@@ -2415,10 +2423,11 @@ OSD
     See ``--osd-color``. Color used for OSD/sub text background.
 
 ``--osd-blur=<0..20.0>``, ``--sub-text-blur=<0..20.0>``
-    Gaussian blur factor. 0 means no blur applied (default).
+    Gaussian blur factor applied to OSD/sub outlines. 0 means no blur applied 
+    (default).
 
 ``--osd-bold=<yes|no>``, ``--sub-text-bold=<yes|no>``
-    Format text on bold.
+    Format text as bold.
 
 ``--osd-border-color=<color>``, ``--sub-text-border-color=<color>``
     See ``--osd-color``. Color used for the OSD/sub font border.
@@ -2791,8 +2800,8 @@ Terminal
 
 ``--term-playing-msg=<string>``
     Print out a string after starting playback. The string is expanded for
-    properties, e.g. ``--term-playing-msg='file: ${filename}'`` will print the string
-    ``file:`` followed by a space and the currently played filename.
+    properties, e.g. ``--term-playing-msg='file: ${filename}'`` will print the
+    string ``file:`` followed by a space and the currently played filename.
 
     See `Property Expansion`_.
 
@@ -2825,7 +2834,7 @@ TV
     Set tuner to <value> channel.
 
 ``--no-tv-audio``
-    no sound
+    Don't capture audio.
 
 ``--tv-automute=<0-255> (v4l and v4l2 only)``
     If signal strength reported by device is less than this value, audio
@@ -2850,16 +2859,16 @@ TV
     as hex value.
 
 ``--tv-width=<value>``
-    output window width
+    Video capture width.
 
 ``--tv-height=<value>``
-    output window height
+    Video capture height.
 
 ``--tv-fps=<value>``
-    framerate at which to capture video (frames per second)
+    Framerate at which to capture video (frames per second).
 
 ``--tv-buffersize=<value>``
-    maximum size of the capture buffer in megabytes (default: dynamical)
+    Maximum size of the capture buffer in megabytes (default: dynamical).
 
 ``--tv-norm=<value>``
     See the console output for a list of all available norms, also see the
@@ -3258,7 +3267,7 @@ Miscellaneous
     Set the list of tags that should be displayed on the terminal. Tags that
     are in the list, but are not present in the played file, will not be shown.
     If a value ends with ``*``, all tags are matched by prefix (though there
-    is no general globbing). Just passing ``*`` essentially filtering.
+    is no general globbing). Just passing ``*`` disables filtering.
 
     The default includes a common list of tags, call mpv with ``--list-options``
     to see it.
@@ -3354,6 +3363,6 @@ Miscellaneous
         should not be used for new programs, nor should existing programs
         attempt to adapt to the changed output and use the ``--slave-broken``
         switch. Instead, a new, saner protocol should be developed (and will be,
-        if there is enough interest).
+        if there is enough interest). Alternatively, see `JSON IPC`_.
 
         This affects most third-party GUI frontends.

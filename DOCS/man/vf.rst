@@ -93,15 +93,18 @@ Available filters are:
 
 ``scale[=w:h:param:param2:chr-drop:noup:arnd``
     Scales the image with the software scaler (slow) and performs a YUV<->RGB
-    color space conversion (see also ``--sws``).
+    color space conversion (see also ``--sws-scaler``).
 
     All parameters are optional.
 
     ``<w>,<h>``
         scaled width/height (default: original width/height)
 
-        :0:      scaled d_width/d_height
-        :-1:     original width/height
+        :0:      The intended display width or height. Usually will be the
+                 dimensions with aspect ratio correction applied for anamorphic
+                 videos or just the original width and height otherwise. Can be
+                 modified using the ``dsize`` filter.
+        :-1:     Original width/height
         :-2:     Calculate w/h using the other dimension and the prescaled
                  aspect ratio.
         :-3:     Calculate w/h using the other dimension and the original
@@ -109,28 +112,28 @@ Available filters are:
         :-(n+8): Like -n above, but rounding the dimension to the closest
                  multiple of 16.
 
-    ``<param>[:<param2>]`` (see also ``--sws``)
+    ``<param>[:<param2>]`` (see also ``--sws-scaler``)
         Set some scaling parameters depending on the type of scaler selected
-        with ``--sws``::
+        with ``--sws-scaler``::
 
-            --sws=2 (bicubic):  B (blurring) and C (ringing)
+            --sws-scaler=2 (bicubic):  B (blurring) and C (ringing)
                 0.00:0.60 default
                 0.00:0.75 VirtualDub's "precise bicubic"
                 0.00:0.50 Catmull-Rom spline
                 0.33:0.33 Mitchell-Netravali spline
                 1.00:0.00 cubic B-spline
 
-            --sws=7 (Gaussian): sharpness (0 (soft) - 100 (sharp))
+            --sws-scaler=7 (Gaussian): sharpness (0 (soft) - 100 (sharp))
 
-            --sws=9 (Lanczos):  filter length (1-10)
+            --sws-scaler=9 (Lanczos):  filter length (1-10)
 
     ``<chr-drop>``
         chroma skipping
 
         :0: Use all available input lines for chroma (default).
-        :1: Use only every 2. input line for chroma.
-        :2: Use only every 4. input line for chroma.
-        :3: Use only every 8. input line for chroma.
+        :1: Use only every 2nd input line for chroma.
+        :2: Use only every 4th input line for chroma.
+        :3: Use only every 8th input line for chroma.
 
     ``<noup>``
         Disallow upscaling past the original dimensions.
@@ -140,8 +143,10 @@ Available filters are:
         :2: Disallow upscaling if both dimensions exceed their original values.
 
     ``<arnd>``
-        Accurate rounding for the vertical scaler, which may be faster or
-        slower than the default rounding.
+        Turning this off (default) will try to use faster methods for rounding
+        vertical pixel sample locations under certain circumstances. May be
+        faster or slower or possibly produce better or worse output, or make no
+        difference at all.
 
         :no:  Disable accurate rounding (default).
         :yes: Enable accurate rounding.
@@ -173,7 +178,9 @@ Available filters are:
                 video, or 800x450 for a 16/9 aspect video.
 
     ``<aspect-method>``
-        Modifies width and height according to original aspect ratios.
+        Modifies width and height according to original aspect ratios. Like
+        ``--autofit``, but anywhere in the filter chain, rather than at the 
+        VO.
 
         :-1: Ignore original aspect ratio (default).
         :0:  Keep display aspect ratio by using ``<w>`` and ``<h>`` as maximum
@@ -223,7 +230,7 @@ Available filters are:
         space if the system video driver supports it, but not input and output
         levels. The ``scale`` video filter can configure color space and input
         levels, but only if the output format is RGB (if the video output driver
-        supports RGB output, you can force this with ``-vf scale,format=rgba``).
+        supports RGB output, you can force this with ``-vf format=rgba,scale``).
 
         If this option is set to ``auto`` (which is the default), the video's
         color space flag will be used. If that flag is unset, the color space
@@ -347,7 +354,8 @@ Available filters are:
     ``<dar>``
         Set the display aspect ratio of the video frame. This is a float,
         but values such as ``[16:9]`` can be passed too (``[...]`` for quoting
-        to prevent the option parser from interpreting the ``:`` character).
+        to prevent the option parser from interpreting the ``:`` character), or
+        just ``16/9``.
 
 
 ``noformat[=fmt]``
@@ -435,13 +443,13 @@ Available filters are:
     still images really still (This should enhance compressibility.).
 
     ``<luma_spatial>``
-        spatial luma strength (default: 4)
+        Spatial luma strength (default: 4)
     ``<chroma_spatial>``
-        spatial chroma strength (default: 3)
+        Spatial chroma strength (default: 3)
     ``<luma_tmp>``
-        luma temporal strength (default: 6)
+        Temporal luma strength (default: 6)
     ``<chroma_tmp>``
-        chroma temporal strength (default:
+        Temporal chroma strength (default:
         ``luma_tmp*chroma_spatial/luma_spatial``)
 
 ``eq[=gamma:contrast:brightness:saturation:rg:gg:bg:weight]``
