@@ -82,9 +82,56 @@ static int init(struct dec_audio *da, const char *decoder)
     return spdif_ctx->codec_id != AV_CODEC_ID_NONE;
 }
 
-static int init_filter(struct dec_audio *da)
+static int determine_codec_profile(struct dec_audio *da, AVPacket *pkt)
 {
     struct spdifContext *spdif_ctx = da->priv;
+    int profile = FF_PROFILE_UNKNOWN;
+    AVCodecContext *ctx = NULL;
+    AVFrame *frame = NULL;
+
+    AVCodec *codec = avcodec_find_decoder(spdif_ctx->codec_id);
+    if (!codec)
+        goto done;
+
+    frame = av_frame_alloc();
+    if (!frame)
+        goto done;
+
+    ctx = avcodec_alloc_context3(codec);
+    if (!ctx)
+        goto done;
+
+    if (avcodec_open2(ctx, codec, NULL) < 0) {
+        av_free(ctx); // don't attempt to avcodec_close() an unopened ctx
+        ctx = NULL;
+        goto done;
+    }
+
+    int got_frame = 0;
+    if (avcodec_decode_audio4(ctx, frame, &got_frame, pkt) < 1 || !got_frame)
+        goto done;
+
+    profile = ctx->profile;
+
+done:
+    av_frame_free(&frame);
+    if (ctx)
+        avcodec_close(ctx);
+    avcodec_free_context(&ctx);
+
+    if (profile == FF_PROFILE_UNKNOWN)
+        MP_WARN(da, "Failed to parse codec profile.\n");
+
+    return profile;
+}
+
+static int init_filter(struct dec_audio *da, AVPacket *pkt)
+{
+    struct spdifContext *spdif_ctx = da->priv;
+
+    int profile = FF_PROFILE_UNKNOWN;
+    if (spdif_ctx->codec_id == AV_CODEC_ID_DTS)
+        profile = determine_codec_profile(da, pkt);
 
     AVFormatContext *lavf_ctx  = avformat_alloc_context();
     if (!lavf_ctx)
@@ -133,8 +180,10 @@ static int init_filter(struct dec_audio *da)
         samplerate                      = 48000;
         num_channels                    = 2;
         break;
-    case AV_CODEC_ID_DTS:
-        if (da->opts->dtshd) {
+    case AV_CODEC_ID_DTS: {
+        bool is_hd = profile == FF_PROFILE_DTS_HD_HRA ||
+                     profile == FF_PROFILE_DTS_HD_MA;
+        if (da->opts->dtshd && is_hd) {
             av_dict_set(&format_opts, "dtshd_rate", "768000", 0); // 4*192000
             sample_format               = AF_FORMAT_S_DTSHD;
             samplerate                  = 192000;
@@ -145,6 +194,7 @@ static int init_filter(struct dec_audio *da)
             num_channels                = 2;
         }
         break;
+    }
     case AV_CODEC_ID_EAC3:
         sample_format                   = AF_FORMAT_S_EAC3;
         samplerate                      = 192000;
@@ -204,7 +254,7 @@ static int decode_packet(struct dec_audio *da, struct mp_audio **out)
         da->pts_offset = 0;
     }
     if (!spdif_ctx->lavf_ctx) {
-        if (init_filter(da) < 0)
+        if (init_filter(da, &pkt) < 0)
             return AD_ERR;
     }
     int ret = av_write_frame(spdif_ctx->lavf_ctx, &pkt);
