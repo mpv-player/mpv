@@ -4123,7 +4123,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                               get_current_pos_ratio(mpctx, false) + v / 100.0,
                               precision, false);
             set_osd_function(mpctx, v > 0 ? OSD_FFW : OSD_REW);
-        } else if (abs) {           /* Absolute seek by percentage */
+        } else if (abs) {           // Absolute seek by percentage
             queue_seek(mpctx, MPSEEK_FACTOR, v / 100.0, precision, false);
             set_osd_function(mpctx, OSD_FFW); // Direction isn't set correctly
         } else {
