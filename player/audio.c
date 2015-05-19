@@ -478,6 +478,7 @@ static void do_fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     }
 
     int status = AD_OK;
+    bool working = false;
     if (playsize > mp_audio_buffer_samples(mpctx->ao_buffer)) {
         status = audio_decode(d_audio, mpctx->ao_buffer, playsize);
         if (status == AD_WAIT)
@@ -495,6 +496,7 @@ static void do_fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         }
         if (status == AD_ERR)
             mpctx->sleeptime = 0;
+        working = true;
     }
 
     // If EOF was reached before, but now something can be decoded, try to
@@ -527,7 +529,7 @@ static void do_fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
             mpctx->audio_status = STATUS_FILLING;
         if (status != AD_OK && !mp_audio_buffer_samples(mpctx->ao_buffer))
             mpctx->audio_status = STATUS_EOF;
-        if (mpctx->audio_status != STATUS_SYNCING)
+        if (working)
             mpctx->sleeptime = 0;
         return; // continue on next iteration
     }
