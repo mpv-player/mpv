@@ -1135,6 +1135,11 @@ Property list
 ``mute`` (RW)
     Current mute status (``yes``/``no``).
 
+``audio-only``
+    Return ``yes`` when only audio streams exist in file, or ``no`` for others.
+    This property returns ``yes`` even if video track for alburm art exists
+    in ``track-list`` for audio files.
+
 ``audio-delay`` (RW)
     See ``--audio-delay``.
 
