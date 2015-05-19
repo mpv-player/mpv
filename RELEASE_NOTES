@@ -12,6 +12,9 @@ Changes
   channel counts (e.g. 5.1 now should work on a decoder that only accepts 7.1).
 - Channel fallback (in case the audio device doesn't natively support a given
   channel layout) has been improved.
+- `vf_vapoursynth` now rejects unaligned video instead of outputting corrupted
+  video.
+- mpv now tries to autoload `.sup` subtitles as well.
 
 Bug fixes
 ---------
@@ -24,6 +27,8 @@ Bug fixes
   console log.
 - (Linux) Several `vo_rpi` bugfixes.
 - (Linux) Several `vo_drm` bugfixes. Pan&Scan is now supported.
+- (X11) Fix fullscreen behavior on certain window managers (issues #1937,
+  #1920).
 - (OSX) The OSD no longer always shows up on startup.
 - (OSX) Several `ao_coreaudio` and `ao_coreaudio_exclusive` bugfixes.
 - (OSX) Fixed potential crash on exit when using Cocoa.
