@@ -97,7 +97,7 @@ Available filters are:
 
     All parameters are optional.
 
-    ``<w>,<h>``
+    ``<w>:<h>``
         scaled width/height (default: original width/height)
 
         :0:      scaled d_width/d_height
