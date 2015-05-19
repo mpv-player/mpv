@@ -39,8 +39,8 @@ Bug fixes
   `libmpv` from creating the singleton.
 
 This listing is not complete. A complete changelog can be seen by running
-`git log v0.9.1..` in the git repository or by visiting
-https://github.com/mpv-player/mpv/compare/v0.9.1...release/0.9.
+`git log v0.9.1..v0.9.2` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.9.1...v0.9.2.
 
 Release 0.9.1
 =============
