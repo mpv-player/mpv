@@ -167,6 +167,7 @@ def build(ctx):
 
         ## Demuxers
         ( "demux/codec_tags.c" ),
+        ( "demux/cue.c" ),
         ( "demux/demux.c" ),
         ( "demux/demux_cue.c" ),
         ( "demux/demux_disc.c" ),
