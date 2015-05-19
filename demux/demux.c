@@ -37,8 +37,7 @@
 #include "stream/stream.h"
 #include "demux.h"
 #include "stheader.h"
-
-#include "audio/format.h"
+#include "cue.h"
 
 // Demuxer list
 extern const struct demuxer_desc demuxer_desc_edl;
@@ -902,6 +901,21 @@ static void demux_init_cache(struct demuxer *demuxer)
     in->stream_base_filename = talloc_steal(demuxer, base);
 }
 
+static void demux_init_cuesheet(struct demuxer *demuxer)
+{
+    char *cue = mp_tags_get_str(demuxer->metadata, "cuesheet");
+    if (cue && !demuxer->num_chapters) {
+        struct cue_file *f = mp_parse_cue(bstr0(cue));
+        if (f) {
+            for (int n = 0; n < f->num_tracks; n++) {
+                struct cue_track *t = &f->tracks[n];
+                demuxer_add_chapter(demuxer, t->title, t->start, -1);
+            }
+        }
+        talloc_free(f);
+    }
+}
+
 static struct demuxer *open_given_type(struct mpv_global *global,
                                        struct mp_log *log,
                                        const struct demuxer_desc *desc,
@@ -977,6 +991,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
             in->d_thread->seekable = true;
             in->d_thread->partially_seekable = true;
         }
+        demux_init_cuesheet(in->d_thread);
         demux_init_cache(demuxer);
         demux_changed(in->d_thread, DEMUX_EVENT_ALL);
         demux_update(demuxer);
