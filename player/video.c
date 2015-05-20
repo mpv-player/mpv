@@ -575,6 +575,7 @@ static void shift_new_frame(struct MPContext *mpctx)
             MP_WARN(mpctx, "Invalid video timestamp: %f -> %f\n",
                     mpctx->video_pts, pts);
             frame_time = 0;
+            mpctx->audio_status = STATUS_SYNCING;
         }
     }
     mpctx->video_next_pts = pts;
