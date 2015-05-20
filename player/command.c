@@ -4114,24 +4114,32 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (!mpctx->num_sources)
             return -1;
         mark_seek(mpctx);
-        if (abs == 2) {   // Absolute seek to a timestamp in seconds
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, v, precision, false);
-            set_osd_function(mpctx,
-                             v > get_current_time(mpctx) ? OSD_FFW : OSD_REW);
-        } else if (abs == 3) {   // Relative seeking by percentage
-            queue_seek(mpctx, MPSEEK_FACTOR,
-                              get_current_pos_ratio(mpctx, false) + v / 100.0,
-                              precision, false);
-            set_osd_function(mpctx, v > 0 ? OSD_FFW : OSD_REW);
-        } else if (abs) {           // Absolute seek by percentage
+        switch (abs) {
+        case 0: { // Relative seek
+            queue_seek(mpctx, MPSEEK_RELATIVE, v, precision, false);
+            set_osd_function(mpctx, (v > 0) ? OSD_FFW : OSD_REW);
+            break;
+        }
+        case 1: { // Absolute seek by percentage
             double ratio = v / 100.0;
             double cur_pos = get_current_pos_ratio(mpctx, false);
             queue_seek(mpctx, MPSEEK_FACTOR, ratio, precision, false);
             set_osd_function(mpctx, cur_pos < ratio ? OSD_FFW : OSD_REW);
-        } else {
-            queue_seek(mpctx, MPSEEK_RELATIVE, v, precision, false);
-            set_osd_function(mpctx, (v > 0) ? OSD_FFW : OSD_REW);
+            break;
         }
+        case 2: { // Absolute seek to a timestamp in seconds
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, v, precision, false);
+            set_osd_function(mpctx,
+                             v > get_current_time(mpctx) ? OSD_FFW : OSD_REW);
+            break;
+        }
+        case 3: { // Relative seek by percentage
+            queue_seek(mpctx, MPSEEK_FACTOR,
+                              get_current_pos_ratio(mpctx, false) + v / 100.0,
+                              precision, false);
+            set_osd_function(mpctx, v > 0 ? OSD_FFW : OSD_REW);
+            break;
+        }}
         if (bar_osd)
             mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
         if (msg_or_nobar_osd)
