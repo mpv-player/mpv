@@ -63,6 +63,8 @@
 #define CK_SRC_SET           1 // use and set specified / default colorkey
 #define CK_SRC_CUR           2 // use current colorkey (get it from xv)
 
+#define MAX_BUFFERS 10
+
 struct xvctx {
     struct xv_ck_info_s {
         int method; // CK_METHOD_* constants
@@ -72,13 +74,14 @@ struct xvctx {
     unsigned long xv_colorkey;
     int xv_port;
     int cfg_xv_adaptor;
+    int cfg_buffers;
     XvAdaptorInfo *ai;
     XvImageFormatValues *fo;
     unsigned int formats, adaptors, xv_format;
     int current_buf;
     int current_ip_buf;
     int num_buffers;
-    XvImage *xvimage[2];
+    XvImage *xvimage[MAX_BUFFERS];
     struct mp_image *original_image;
     uint32_t image_width;
     uint32_t image_height;
@@ -89,7 +92,7 @@ struct xvctx {
     uint32_t max_width, max_height; // zero means: not set
     int Shmem_Flag;
 #if HAVE_SHM && HAVE_XEXT
-    XShmSegmentInfo Shminfo[2];
+    XShmSegmentInfo Shminfo[MAX_BUFFERS];
     int Shm_Warned_Slow;
 #endif
 };
@@ -463,7 +466,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     for (i = 0; i < ctx->num_buffers; i++)
         deallocate_xvimage(vo, i);
 
-    ctx->num_buffers = 2;
+    ctx->num_buffers = ctx->cfg_buffers;
 
     for (i = 0; i < ctx->num_buffers; i++) {
         if (!allocate_xvimage(vo, i)) {
@@ -848,6 +851,7 @@ const struct vo_driver video_out_xv = {
         .xv_ck_info = {CK_METHOD_MANUALFILL, CK_SRC_CUR},
         .colorkey = 0x0000ff00, // default colorkey is green
                     // (0xff000000 means that colorkey has been disabled)
+        .cfg_buffers = 2,
     },
     .options = (const struct m_option[]) {
         OPT_INT("port", xv_port, M_OPT_MIN, .min = 0),
@@ -862,6 +866,7 @@ const struct vo_driver video_out_xv = {
                     {"auto", CK_METHOD_AUTOPAINT})),
         OPT_INT("colorkey", colorkey, 0),
         OPT_FLAG_STORE("no-colorkey", colorkey, 0, 0x1000000),
+        OPT_INTRANGE("buffers", cfg_buffers, 0, 1, MAX_BUFFERS),
         {0}
     },
 };

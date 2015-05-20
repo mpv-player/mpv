@@ -69,6 +69,12 @@ Available video output drivers are:
     ``no-colorkey``
         Disables color-keying.
 
+    ``buffers=<number>``
+        Number of image buffers to use for the internal ringbuffer (default: 2).
+        Increasing this will use more memory, but might help with the X server
+        not responding quickly enough if video FPS is close to or higher than
+        the display refresh rate.
+
 ``x11`` (X11 only)
     Shared memory video output driver without hardware acceleration that works
     whenever X11 is present.
