@@ -559,8 +559,19 @@ static void shift_new_frame(struct MPContext *mpctx)
     double pts = mpctx->next_frame[0]->pts;
     if (mpctx->video_pts != MP_NOPTS_VALUE) {
         frame_time = pts - mpctx->video_pts;
-        if (frame_time <= 0 || frame_time >= 60) {
-            // Assume a PTS difference >= 60 seconds is a discontinuity.
+        double tolerance = 15;
+        if (mpctx->demuxer->ts_resets_possible) {
+            // Fortunately no real framerate is likely to go below this. It
+            // still could be that the file is VFR, but the demuxer reports a
+            // higher rate, so account for the case of e.g. 60hz demuxer fps
+            // but 23hz actual fps.
+            double fps = 23.976;
+            if (mpctx->d_video->fps > 0 && mpctx->d_video->fps < fps)
+                fps = mpctx->d_video->fps;
+            tolerance = 3 * 1.0 / fps;
+        }
+        if (frame_time <= 0 || frame_time >= tolerance) {
+            // Assume a discontinuity.
             MP_WARN(mpctx, "Invalid video timestamp: %f -> %f\n",
                     mpctx->video_pts, pts);
             frame_time = 0;
