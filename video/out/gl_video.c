@@ -318,7 +318,6 @@ static const struct packed_fmt_entry mp_packed_formats[] = {
 };
 
 const struct gl_video_opts gl_video_opts_def = {
-    .npot = 1,
     .dither_depth = -1,
     .dither_size = 6,
     .fbo_format = GL_RGBA16,
@@ -336,7 +335,6 @@ const struct gl_video_opts gl_video_opts_def = {
 };
 
 const struct gl_video_opts gl_video_opts_hq_def = {
-    .npot = 1,
     .dither_depth = 0,
     .dither_size = 6,
     .fbo_format = GL_RGBA16,
@@ -369,7 +367,6 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("gamma-auto", gamma_auto, 0),
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
         OPT_CHOICE_C("target-trc", target_trc, 0, mp_csp_trc_names),
-        OPT_FLAG("npot", npot, 0),
         OPT_FLAG("pbo", pbo, 0),
         OPT_STRING_VALIDATE("scale",  scaler[0].kernel.name, 0, validate_scaler_opt),
         OPT_STRING_VALIDATE("dscale", scaler[1].kernel.name, 0, validate_scaler_opt),
@@ -662,14 +659,6 @@ static void pass_set_image_textures(struct gl_video *p, struct video_image *vimg
     }
 }
 
-static int align_pow2(int s)
-{
-    int r = 1;
-    while (r < s)
-        r *= 2;
-    return r;
-}
-
 static void init_video(struct gl_video *p)
 {
     GL *gl = p->gl;
@@ -714,11 +703,6 @@ static void init_video(struct gl_video *p)
         plane->tex_h = plane->h;
 
         if (!p->hwdec_active) {
-            if (!p->opts.npot) {
-                plane->tex_w = align_pow2(plane->tex_w);
-                plane->tex_h = align_pow2(plane->tex_h);
-            }
-
             gl->ActiveTexture(GL_TEXTURE0 + n);
             gl->GenTextures(1, &plane->gl_texture);
             gl->BindTexture(p->gl_target, plane->gl_texture);

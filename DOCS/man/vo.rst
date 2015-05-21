@@ -537,10 +537,6 @@ Available video output drivers are:
         The slope of the sigmoid curve used for ``sigmoid-upscaling``, must
         be a float between 1.0 and 20.0. Defaults to 6.5 if not specified.
 
-    ``no-npot``
-        Force use of power-of-2 texture sizes. For debugging only.
-        Borders will be distorted due to filtering.
-
     ``glfinish``
         Call ``glFinish()`` before and after swapping buffers (default: disabled).
         Slower, but might help getting better results when doing framedropping.
