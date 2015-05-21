@@ -3,7 +3,7 @@
 // but that's not quite ready yet.
 // You may need a basic Info.plist and MainMenu.xib to make this work.
 
-// Build with: clang -o cocoabasic cocoabasic.m `pkg-config --libs --cflags mpv`
+// Build with: clang -o cocoabasic cocoabasic.m `pkg-config --libs --cflags mpv` -framework cocoa
 
 #include <mpv/client.h>
 
@@ -207,5 +207,5 @@ int main(int argc, const char * argv[]) {
         app.delegate = delegate;
         [app run];
     }
-    return EXIT_SUCCESS;
+    return 0;
 }
