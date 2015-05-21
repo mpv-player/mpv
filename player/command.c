@@ -2211,8 +2211,12 @@ static int mp_property_fullscreen(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return mp_property_vo_flag(prop, action, arg, VOCTRL_FULLSCREEN,
-                               &mpctx->opts->vo.fullscreen, mpctx);
+    int oldval = mpctx->opts->vo.fullscreen;
+    int r = mp_property_vo_flag(prop, action, arg, VOCTRL_FULLSCREEN,
+                                &mpctx->opts->vo.fullscreen, mpctx);
+    if (oldval && oldval != mpctx->opts->vo.fullscreen)
+        mpctx->mouse_event_ts--; // Show mouse cursor
+    return r;
 }
 
 /// Window always on top (RW)
