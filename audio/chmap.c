@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include <libavutil/common.h>
+
 #include "common/common.h"
 #include "common/msg.h"
 #include "chmap.h"
@@ -395,20 +397,12 @@ void mp_chmap_get_reorder(int src[MP_NUM_CHANNELS], const struct mp_chmap *from,
         assert(src[n] < 0 || (to->speaker[n] == from->speaker[src[n]]));
 }
 
-static int popcount64(uint64_t bits)
-{
-    int r = 0;
-    for (int n = 0; n < 64; n++)
-        r += !!(bits & (1ULL << n));
-    return r;
-}
-
 // Return the number of channels only in a.
 int mp_chmap_diffn(const struct mp_chmap *a, const struct mp_chmap *b)
 {
     uint64_t a_mask = mp_chmap_to_lavc_unchecked(a);
     uint64_t b_mask = mp_chmap_to_lavc_unchecked(b);
-    return popcount64((a_mask ^ b_mask) & a_mask);
+    return av_popcount64((a_mask ^ b_mask) & a_mask);
 }
 
 // Returns something like "fl-fr-fc". If there's a standard layout in lavc
