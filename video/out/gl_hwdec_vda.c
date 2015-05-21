@@ -121,11 +121,6 @@ static bool check_hwdec(struct gl_hwdec *hw)
         return false;
     }
 
-    if (hw->gl->version < 300) {
-        MP_ERR(hw, "need >= OpenGL 3.0 for core rectangle texture support\n");
-        return false;
-    }
-
     if (!CGLGetCurrentContext()) {
         MP_ERR(hw, "need cocoa opengl backend to be active");
         return false;
