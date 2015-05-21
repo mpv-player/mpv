@@ -887,15 +887,15 @@ static uint32_t d3d_draw_frame(d3d_priv *priv)
     if (!priv->have_image)
         goto render_osd;
 
+    RECT rm = priv->fs_movie_rect;
+    RECT rs = priv->fs_panscan_rect;
+
     if (priv->use_textures) {
 
         for (n = 0; n < priv->plane_count; n++) {
             IDirect3DDevice9_SetTexture(priv->d3d_device, n,
                 d3dtex_get_render_texture(priv, &priv->planes[n].texture));
         }
-
-        RECT rm = priv->fs_movie_rect;
-        RECT rs = priv->fs_panscan_rect;
 
         vertex_video vb[] = {
             { rm.left,  rm.top,    0.0f},
@@ -941,11 +941,15 @@ static uint32_t d3d_draw_frame(d3d_priv *priv)
         }
 
     } else {
+        rs.left &= ~(ULONG)1;
+        rs.top &= ~(ULONG)1;
+        rs.right &= ~(ULONG)1;
+        rs.bottom &= ~(ULONG)1;
         if (FAILED(IDirect3DDevice9_StretchRect(priv->d3d_device,
                                                 priv->d3d_surface,
-                                                &priv->fs_panscan_rect,
+                                                &rs,
                                                 priv->d3d_backbuf,
-                                                &priv->fs_movie_rect,
+                                                &rm,
                                                 D3DTEXF_LINEAR))) {
             MP_ERR(priv, "Copying frame to the backbuffer failed.\n");
             return VO_ERROR;

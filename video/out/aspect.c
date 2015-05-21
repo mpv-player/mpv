@@ -67,10 +67,6 @@ static void clamp_size(int size, int *start, int *end)
     }
 }
 
-// Round source to a multiple of 2, this is at least needed for vo_direct3d
-// and ATI cards.
-#define VID_SRC_ROUND_UP(x) (((x) + 1) & ~1)
-
 static void src_dst_split_scaling(int src_size, int dst_size,
                                   int scaled_src_size, bool unscaled,
                                   float zoom, float align, float pan,
@@ -100,12 +96,12 @@ static void src_dst_split_scaling(int src_size, int dst_size,
     int s_dst = *dst_end - *dst_start;
     if (*dst_start < 0) {
         int border = -(*dst_start) * s_src / s_dst;
-        *src_start += VID_SRC_ROUND_UP(border);
+        *src_start += border;
         *dst_start = 0;
     }
     if (*dst_end > dst_size) {
         int border = (*dst_end - dst_size) * s_src / s_dst;
-        *src_end -= VID_SRC_ROUND_UP(border);
+        *src_end -= border;
         *dst_end = dst_size;
     }
 
