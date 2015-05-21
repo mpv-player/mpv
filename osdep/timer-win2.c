@@ -52,15 +52,7 @@ uint64_t mp_raw_time_us(void)
 }
 #endif
 
-static void restore_timer(void)
-{
-    // The MSDN documents that begin/end "must" be matched. This satisfies
-    // this requirement.
-    timeEndPeriod(1);
-}
-
 void mp_raw_time_init(void)
 {
     timeBeginPeriod(1); // request 1ms timer resolution
-    atexit(restore_timer);
 }
