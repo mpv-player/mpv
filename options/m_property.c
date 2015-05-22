@@ -36,49 +36,6 @@
 #include "common/msg.h"
 #include "common/common.h"
 
-struct legacy_prop {
-    const char *old, *new;
-};
-static const struct legacy_prop legacy_props[] = {
-    {"switch_video",    "video"},
-    {"switch_audio",    "audio"},
-    {"switch_program",  "program"},
-    {"framedropping",   "framedrop"},
-    {"osdlevel",        "osd-level"},
-    {0}
-};
-
-static bool translate_legacy_property(struct mp_log *log, const char *name,
-                                      char *buffer, size_t buffer_size)
-{
-    if (strlen(name) + 1 > buffer_size)
-        return false;
-
-    const char *old_name = name;
-
-    for (int n = 0; legacy_props[n].new; n++) {
-        if (strcmp(name, legacy_props[n].old) == 0) {
-            name = legacy_props[n].new;
-            break;
-        }
-    }
-
-    snprintf(buffer, buffer_size, "%s", name);
-
-    // Old names used "_" instead of "-"
-    for (int n = 0; buffer[n]; n++) {
-        if (buffer[n] == '_')
-            buffer[n] = '-';
-    }
-
-    if (log && strcmp(old_name, buffer) != 0) {
-        mp_warn(log, "Warning: property '%s' is deprecated, replaced with '%s'."
-                " Fix your input.conf!\n", old_name, buffer);
-    }
-
-    return true;
-}
-
 static struct m_property *m_property_list_find(const struct m_property *list,
                                                      const char *name)
 {
@@ -117,14 +74,10 @@ static int do_action(const struct m_property *prop_list, const char *name,
 
 // (as a hack, log can be NULL on read-only paths)
 int m_property_do(struct mp_log *log, const struct m_property *prop_list,
-                  const char *in_name, int action, void *arg, void *ctx)
+                  const char *name, int action, void *arg, void *ctx)
 {
     union m_option_value val = {0};
     int r;
-
-    char name[64];
-    if (!translate_legacy_property(log, in_name, name, sizeof(name)))
-        return M_PROPERTY_UNKNOWN;
 
     struct m_option opt = {0};
     r = do_action(prop_list, name, M_PROPERTY_GET_TYPE, &opt, ctx);
