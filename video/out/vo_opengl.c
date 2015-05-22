@@ -241,7 +241,7 @@ static bool get_and_update_icc_profile(struct gl_priv *p, int *events)
     if (p->icc_opts->profile_auto) {
         MP_VERBOSE(p, "Querying ICC profile...\n");
         bstr icc = bstr0(NULL);
-        int r = p->glctx->vo_control(p->vo, events, VOCTRL_GET_ICC_PROFILE, &icc);
+        int r = mpgl_control(p->glctx, events, VOCTRL_GET_ICC_PROFILE, &icc);
 
         if (r != VO_NOTAVAIL) {
             if (r == VO_FALSE) {
