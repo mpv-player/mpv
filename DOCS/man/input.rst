@@ -1156,6 +1156,42 @@ Property list
     Number of audio channels. The OSD value of this property is actually the
     channel layout, while the raw value returns the number of channels only.
 
+``audio-params``
+    Audio format as output by the audio decoder.
+    This has a number of sub-properties:
+
+    ``audio-params/format``
+        The sample format as string. This uses the same names as used in other
+        places of mpv.
+
+    ``audio-params/samplerate``
+        Samplerate.
+
+    ``audio-params/channels``
+        The channel layout as a string. This is similar to what the
+        ``--audio-channels`` accepts.
+
+    ``audio-params/channel-count``
+        Number of audio channels. This is redundant to the ``channels`` field
+        described above.
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (for each track)
+                "format"            MPV_FORMAT_STRING
+                "samplerate"        MPV_FORMAT_INT64
+                "channels"          MPV_FORMAT_STRING
+                "channel-count"     MPV_FORMAT_INT64
+
+``audio-out-params``
+    Same as ``audio-params``, but the format of the data written to the audio
+    API.
+
 ``aid`` (RW)
     Current audio track (similar to ``--aid``).
 

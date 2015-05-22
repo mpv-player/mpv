@@ -1656,6 +1656,42 @@ static int mp_property_audio_codec(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, c);
 }
 
+static int property_audiofmt(struct mp_audio a, int action, void *arg)
+{
+    if (!mp_audio_config_valid(&a))
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct m_sub_property props[] = {
+        {"samplerate",      SUB_PROP_INT(a.rate)},
+        {"channel-count",   SUB_PROP_INT(a.channels.num)},
+        {"channels",        SUB_PROP_STR(mp_chmap_to_str(&a.channels))},
+        {"format",          SUB_PROP_STR(af_fmt_to_str(a.format))},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
+static int mp_property_audio_params(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct mp_audio fmt = {0};
+    if (mpctx->d_audio)
+        fmt = mpctx->d_audio->decode_format;
+    return property_audiofmt(fmt, action, arg);
+}
+
+static int mp_property_audio_out_params(void *ctx, struct m_property *prop,
+                                        int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct mp_audio fmt = {0};
+    if (mpctx->ao)
+        ao_get_format(mpctx->ao, &fmt);
+    return property_audiofmt(fmt, action, arg);
+}
+
 /// Samplerate (RO)
 static int mp_property_samplerate(void *ctx, struct m_property *prop,
                                   int action, void *arg)
@@ -3348,6 +3384,8 @@ static const struct m_property mp_properties[] = {
     {"audio-delay", mp_property_audio_delay},
     {"audio-codec-name", mp_property_audio_codec_name},
     {"audio-codec", mp_property_audio_codec},
+    {"audio-params", mp_property_audio_params},
+    {"audio-out-params", mp_property_audio_out_params},
     {"audio-samplerate", mp_property_samplerate},
     {"audio-channels", mp_property_channels},
     {"aid", mp_property_audio},
@@ -3511,7 +3549,8 @@ static const char *const *const mp_event_property_change[] = {
       "colormatrix-output-range", "colormatrix-primaries"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute", "balance",
-      "volume-restore-data", "current-ao", "audio-codec-name"),
+      "volume-restore-data", "current-ao", "audio-codec-name", "audio-params",
+      "audio-out-params"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking", "core-idle"),
     E(MPV_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata", "media-title"),
