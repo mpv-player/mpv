@@ -1132,7 +1132,7 @@ Property list
     See ``--hr-seek``.
 
 ``volume`` (RW)
-    Current volume (0-100).
+    Current volume (see ``--volume`` for details).
 
 ``mute`` (RW)
     Current mute status (``yes``/``no``).

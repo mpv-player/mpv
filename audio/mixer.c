@@ -69,10 +69,10 @@ bool mixer_audio_initialized(struct mixer *mixer)
     return !!mixer->ao;
 }
 
-float mixer_getneutralvolume(struct mixer *mixer)
+float mixer_getmaxvolume(struct mixer *mixer)
 {
     // gain == 1
-    return mixer->softvol ? 1.0 / mixer->opts->softvol_max * 100.0 * 100.0 : 100;
+    return mixer->softvol ? mixer->opts->softvol_max : 100;
 }
 
 static void checkvolume(struct mixer *mixer)
@@ -85,8 +85,8 @@ static void checkvolume(struct mixer *mixer)
         float gain;
         if (!af_control_any_rev(mixer->af, AF_CONTROL_GET_VOLUME, &gain))
             gain = 1.0;
-        vol.left = (gain / (mixer->opts->softvol_max / 100.0)) * 100.0;
-        vol.right = (gain / (mixer->opts->softvol_max / 100.0)) * 100.0;
+        vol.left = gain * 100.0;
+        vol.right = gain * 100.0;
     } else {
         MP_DBG(mixer, "Reading volume from AO.\n");
         // Rely on the values not changing if the query is not supported
@@ -122,14 +122,14 @@ void mixer_getvolume(struct mixer *mixer, float *l, float *r)
 
 static void setvolume_internal(struct mixer *mixer, float l, float r)
 {
-    struct ao_control_vol vol = {.left = l, .right = r};
     if (!mixer->softvol) {
         MP_DBG(mixer, "Setting volume on AO.\n");
+        struct ao_control_vol vol = {.left = l, .right = r};
         if (ao_control(mixer->ao, AOCONTROL_SET_VOLUME, &vol) != CONTROL_OK)
             MP_ERR(mixer, "Failed to change audio output volume.\n");
         return;
     }
-    float gain = (l + r) / 2.0 / 100.0 * mixer->opts->softvol_max / 100.0;
+    float gain = (l + r) / 2.0 / 100.0;
     if (!af_control_any_rev(mixer->af, AF_CONTROL_SET_VOLUME, &gain)) {
         if (gain == 1.0)
             return;
@@ -144,8 +144,9 @@ void mixer_setvolume(struct mixer *mixer, float l, float r)
 {
     checkvolume(mixer);  // to check mute status
 
-    mixer->vol_l = av_clipf(l, 0, 100);
-    mixer->vol_r = av_clipf(r, 0, 100);
+    float max = mixer_getmaxvolume(mixer);
+    mixer->vol_l = MPCLAMP(l, 0, max);
+    mixer->vol_r = MPCLAMP(r, 0, max);
     if (mixer->ao && !(mixer->emulate_mute && mixer->muted))
         setvolume_internal(mixer, mixer->vol_l, mixer->vol_r);
 }
@@ -242,9 +243,8 @@ char *mixer_get_volume_restore_data(struct mixer *mixer)
 {
     if (!mixer->driver[0])
         return NULL;
-    return talloc_asprintf(NULL, "%s:%f:%f:%d:%f", mixer->driver, mixer->vol_l,
-                           mixer->vol_r, mixer->muted_by_us,
-                           mixer->opts->softvol_max);
+    return talloc_asprintf(NULL, "%s:%f:%f:%d", mixer->driver, mixer->vol_l,
+                           mixer->vol_r, mixer->muted_by_us);
 }
 
 static void probe_softvol(struct mixer *mixer)
@@ -315,11 +315,10 @@ static void restore_volume(struct mixer *mixer)
     char *data = mixer->opts->mixer_restore_volume_data;
     if (!mixer->persistent_volume && data && data[0]) {
         char drv[40];
-        float v_l, v_r, s;
+        float v_l, v_r;
         int m;
-        if (sscanf(data, "%39[^:]:%f:%f:%d:%f", drv, &v_l, &v_r, &m, &s) == 5) {
-            float diff = fabs(mixer->opts->softvol_max - s);
-            if (strcmp(mixer->driver, drv) == 0 && diff < 0.01) {
+        if (sscanf(data, "%39[^:]:%f:%f:%d", drv, &v_l, &v_r, &m) == 5) {
+            if (strcmp(mixer->driver, drv) == 0) {
                 force_vol_l = v_l;
                 force_vol_r = v_r;
                 force_mute = !!m;

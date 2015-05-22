@@ -1480,11 +1480,11 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
             .type = CONF_TYPE_FLOAT,
             .flags = M_OPT_RANGE,
             .min = 0,
-            .max = 100,
+            .max = mixer_getmaxvolume(mpctx->mixer),
         };
         return M_PROPERTY_OK;
     case M_PROPERTY_GET_NEUTRAL:
-        *(float *)arg = mixer_getneutralvolume(mpctx->mixer);
+        *(float *)arg = 100;
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
         float val;
