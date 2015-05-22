@@ -1639,8 +1639,8 @@ static int mp_property_audio_delay(void *ctx, struct m_property *prop,
 }
 
 /// Audio codec tag (RO)
-static int mp_property_audio_format(void *ctx, struct m_property *prop,
-                                    int action, void *arg)
+static int mp_property_audio_codec_name(void *ctx, struct m_property *prop,
+                                        int action, void *arg)
 {
     MPContext *mpctx = ctx;
     const char *c = mpctx->d_audio ? mpctx->d_audio->header->codec : NULL;
@@ -3346,7 +3346,7 @@ static const struct m_property mp_properties[] = {
     {"volume", mp_property_volume},
     {"mute", mp_property_mute},
     {"audio-delay", mp_property_audio_delay},
-    {"audio-format", mp_property_audio_format},
+    {"audio-codec-name", mp_property_audio_codec_name},
     {"audio-codec", mp_property_audio_codec},
     {"audio-samplerate", mp_property_samplerate},
     {"audio-channels", mp_property_channels},
@@ -3482,6 +3482,8 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_ALIAS("colormatrix-primaries", "video-params/primaries"),
     M_PROPERTY_ALIAS("colormatrix-gamma", "video-params/gamma"),
 
+    M_PROPERTY_DEPRECATED_ALIAS("audio-format", "audio-codec-name"),
+
     {0},
 };
 
@@ -3509,7 +3511,7 @@ static const char *const *const mp_event_property_change[] = {
       "colormatrix-output-range", "colormatrix-primaries"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute", "balance",
-      "volume-restore-data", "current-ao"),
+      "volume-restore-data", "current-ao", "audio-codec-name"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking", "core-idle"),
     E(MPV_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata", "media-title"),

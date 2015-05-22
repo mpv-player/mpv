@@ -1143,11 +1143,11 @@ Property list
 ``audio-delay`` (RW)
     See ``--audio-delay``.
 
-``audio-format``
-    Audio format as string.
-
 ``audio-codec``
     Audio codec selected for decoding.
+
+``audio-codec-name``
+    Audio codec.
 
 ``audio-samplerate``
     Audio samplerate.

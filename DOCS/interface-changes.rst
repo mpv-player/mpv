@@ -20,6 +20,7 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - deprecate "audio-format" property, replaced with "audio-codec-name"
     - deprecate --media-title, replaced with --force-media-title
     - deprecate "length" property, replaced with "duration"
     - change volume property:
