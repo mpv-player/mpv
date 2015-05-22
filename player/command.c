@@ -75,6 +75,9 @@ struct command_ctx {
 
     double prev_pts;
 
+    char **warned_deprecated;
+    int num_warned_deprecated;
+
     struct cycle_counter *cycle_counters;
     int num_cycle_counters;
 
@@ -3081,6 +3084,29 @@ static int mp_property_alias(void *ctx, struct m_property *prop,
     return mp_property_do(real_property, action, arg, ctx);
 }
 
+static int mp_property_deprecated_alias(void *ctx, struct m_property *prop,
+                                        int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct command_ctx *cmd = mpctx->command_ctx;
+    const char *real_property = prop->priv;
+    if (action == M_PROPERTY_SET || action == M_PROPERTY_GET ||
+        action == M_PROPERTY_PRINT)
+    {
+        for (int n = 0; n < cmd->num_warned_deprecated; n++) {
+            if (strcmp(cmd->warned_deprecated[n], prop->name) == 0)
+                goto done;
+        }
+        MP_WARN(mpctx, "Warning: property '%s' was replaced with '%s' and "
+                "might be removed in the future.\n", prop->name, real_property);
+        MP_TARRAY_APPEND(cmd, cmd->warned_deprecated, cmd->num_warned_deprecated,
+                         (char *)prop->name);
+
+    done:;
+    }
+    return mp_property_do(real_property, action, arg, ctx);
+}
+
 static int access_options(struct m_property_action_arg *ka, bool local,
                           MPContext *mpctx)
 {
@@ -3236,6 +3262,9 @@ static int mp_property_list(void *ctx, struct m_property *prop,
 // Redirect a property name to another
 #define M_PROPERTY_ALIAS(name, real_property) \
     {(name), mp_property_alias, .priv = (real_property)}
+
+#define M_PROPERTY_DEPRECATED_ALIAS(name, real_property) \
+    {(name), mp_property_deprecated_alias, .priv = (real_property)}
 
 /// All properties available in MPlayer.
 /** \ingroup Properties
