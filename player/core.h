@@ -402,8 +402,8 @@ void print_track_list(struct MPContext *mpctx);
 void reselect_demux_streams(struct MPContext *mpctx);
 void prepare_playlist(struct MPContext *mpctx, struct playlist *pl);
 void autoload_external_files(struct MPContext *mpctx);
-struct track *select_track(struct MPContext *mpctx, enum stream_type type,
-                           int tid, int ffid, char **langs);
+struct track *select_default_track(struct MPContext *mpctx, int order,
+                                   enum stream_type type);
 
 // main.c
 int mp_initialize(struct MPContext *mpctx, char **argv);

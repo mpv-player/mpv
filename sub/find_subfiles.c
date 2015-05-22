@@ -142,11 +142,11 @@ static void append_dir_subtitles(struct mpv_global *global,
         int fuzz = -1;
         switch (type) {
         case STREAM_SUB:
-            langs = opts->sub_lang;
+            langs = opts->stream_lang[type];
             fuzz = opts->sub_auto;
             break;
         case STREAM_AUDIO:
-            langs = opts->audio_lang;
+            langs = opts->stream_lang[type];
             fuzz = opts->audiofile_auto;
             break;
         }

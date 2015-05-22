@@ -4623,12 +4623,10 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         autoload_external_files(mpctx);
         if (cmd->args[0].v.i) {
             // somewhat fuzzy and not ideal
-            struct track *a = select_track(mpctx, STREAM_AUDIO, opts->audio_id,
-                                           opts->audio_id_ff, opts->audio_lang);
+            struct track *a = select_default_track(mpctx, 0, STREAM_AUDIO);
             if (a && a->is_external)
                 mp_switch_track(mpctx, STREAM_AUDIO, a);
-            struct track *s = select_track(mpctx, STREAM_SUB, opts->sub_id,
-                                           opts->sub_id_ff, opts->sub_lang);
+            struct track *s = select_default_track(mpctx, 0, STREAM_SUB);
             if (s && s->is_external)
                 mp_switch_track(mpctx, STREAM_SUB, s);
 

@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "m_option.h"
+#include "common/common.h"
 
 typedef struct mp_vo_opts {
     struct m_obj_settings *video_driver_list, *vo_defs;
@@ -170,15 +171,9 @@ typedef struct MPOpts {
     int ignore_path_in_watch_later_config;
     int pause;
     int keep_open;
-    int audio_id;
-    int video_id;
-    int sub_id;
-    int sub2_id;
-    int audio_id_ff;
-    int video_id_ff;
-    int sub_id_ff;
-    char **audio_lang;
-    char **sub_lang;
+    int stream_id[2][STREAM_TYPE_COUNT];
+    int stream_id_ff[STREAM_TYPE_COUNT];
+    char **stream_lang[STREAM_TYPE_COUNT];
     int audio_display;
     char **display_tags;
     int sub_visibility;
