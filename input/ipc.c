@@ -25,6 +25,8 @@
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/un.h>
+#include <netdb.h>
+
 
 #include "config.h"
 
@@ -729,7 +731,8 @@ static void *ipc_thread(void *p)
     int rc;
 
     int ipc_fd;
-    struct sockaddr_un ipc_un;
+    //struct sockaddr_un ipc_un;
+    struct addrinfo hints,*res;
 
     struct mp_ipc_ctx *arg = p;
 
@@ -737,13 +740,20 @@ static void *ipc_thread(void *p)
 
     MP_VERBOSE(arg, "Starting IPC master\n");
 
-    ipc_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
+    getaddrinfo("127.0.0.1", "4545", &hints, &res);
+
+    //ipc_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    ipc_fd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
     if (ipc_fd < 0) {
         MP_ERR(arg, "Could not create IPC socket\n");
         goto done;
     }
 
-#if HAVE_FCHMOD
+/*#if HAVE_FCHMOD
     fchmod(ipc_fd, 0600);
 #endif
 
@@ -765,6 +775,9 @@ static void *ipc_thread(void *p)
 
     size_t addr_len = offsetof(struct sockaddr_un, sun_path) + 1 + path_len;
     rc = bind(ipc_fd, (struct sockaddr *) &ipc_un, addr_len);
+    */
+
+    rc = bind(ipc_fd, res->ai_addr, res->ai_addrlen);
     if (rc < 0) {
         MP_ERR(arg, "Could not bind IPC socket\n");
         goto done;
