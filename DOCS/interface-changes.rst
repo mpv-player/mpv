@@ -20,6 +20,8 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - deprecate audio-samplerate and audio-channels properties
+      (audio-params sub-properties are the replacement)
     - add audio-params and audio-out-params properties
     - deprecate "audio-format" property, replaced with "audio-codec-name"
     - deprecate --media-title, replaced with --force-media-title

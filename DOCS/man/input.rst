@@ -1149,13 +1149,6 @@ Property list
 ``audio-codec-name``
     Audio codec.
 
-``audio-samplerate``
-    Audio samplerate.
-
-``audio-channels``
-    Number of audio channels. The OSD value of this property is actually the
-    channel layout, while the raw value returns the number of channels only.
-
 ``audio-params``
     Audio format as output by the audio decoder.
     This has a number of sub-properties:

@@ -1692,47 +1692,6 @@ static int mp_property_audio_out_params(void *ctx, struct m_property *prop,
     return property_audiofmt(fmt, action, arg);
 }
 
-/// Samplerate (RO)
-static int mp_property_samplerate(void *ctx, struct m_property *prop,
-                                  int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct mp_audio fmt = {0};
-    if (mpctx->d_audio)
-        fmt = mpctx->d_audio->decode_format;
-    if (!fmt.rate)
-        return M_PROPERTY_UNAVAILABLE;
-    if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = talloc_asprintf(NULL, "%d kHz", fmt.rate / 1000);
-        return M_PROPERTY_OK;
-    }
-    return m_property_int_ro(action, arg, fmt.rate);
-}
-
-/// Number of channels (RO)
-static int mp_property_channels(void *ctx, struct m_property *prop,
-                                int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct mp_audio fmt = {0};
-    if (mpctx->d_audio)
-        fmt = mpctx->d_audio->decode_format;
-    if (!fmt.channels.num)
-        return M_PROPERTY_UNAVAILABLE;
-    switch (action) {
-    case M_PROPERTY_PRINT:
-        *(char **) arg = talloc_strdup(NULL, mp_chmap_to_str(&fmt.channels));
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-        *(int *)arg = fmt.channels.num;
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_INT};
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
 /// Balance (RW)
 static int mp_property_balance(void *ctx, struct m_property *prop,
                                int action, void *arg)
@@ -3386,8 +3345,8 @@ static const struct m_property mp_properties[] = {
     {"audio-codec", mp_property_audio_codec},
     {"audio-params", mp_property_audio_params},
     {"audio-out-params", mp_property_audio_out_params},
-    {"audio-samplerate", mp_property_samplerate},
-    {"audio-channels", mp_property_channels},
+    M_PROPERTY_DEPRECATED_ALIAS("audio-samplerate", "audio-params/samplerate"),
+    M_PROPERTY_DEPRECATED_ALIAS("audio-channels", "audio-params/channel-count"),
     {"aid", mp_property_audio},
     {"balance", mp_property_balance},
     {"volume-restore-data", mp_property_volrestore},
