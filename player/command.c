@@ -487,9 +487,8 @@ static int property_time(int action, void *arg, double time)
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-/// Media length in seconds (RO)
-static int mp_property_length(void *ctx, struct m_property *prop,
-                              int action, void *arg)
+static int mp_property_duration(void *ctx, struct m_property *prop,
+                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
     double len = get_time_length(mpctx);
@@ -3287,7 +3286,8 @@ static const struct m_property mp_properties[] = {
     {"file-format", mp_property_file_format},
     {"stream-pos", mp_property_stream_pos},
     {"stream-end", mp_property_stream_end},
-    {"length", mp_property_length},
+    {"duration", mp_property_duration},
+    M_PROPERTY_DEPRECATED_ALIAS("length", "duration"),
     {"avsync", mp_property_avsync},
     {"total-avsync-change", mp_property_total_avsync_change},
     {"drop-frame-count", mp_property_drop_frame_cnt},

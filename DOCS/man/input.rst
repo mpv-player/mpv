@@ -842,10 +842,13 @@ Property list
 ``stream-end``
     Raw end position in bytes in source stream.
 
-``length``
-    Length of the current file in seconds. If the length is unknown, the
+``duration``
+    Duration of the current file in seconds. If the duration is unknown, the
     property is unavailable. Note that the file duration is not always exactly
     known, so this is an estimate.
+
+    This replaces the ``length`` property, which was deprecated after the
+    mpv 0.9 release. (The semantics are the same.)
 
 ``avsync``
     Last A/V synchronization difference. Unavailable if audio or video is

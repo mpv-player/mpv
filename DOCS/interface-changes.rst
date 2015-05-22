@@ -20,6 +20,7 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - deprecate "length" property, replaced with "duration"
     - change volume property:
         - the value 100 is now always "unchanged volume" - with softvol, the
           range is 0 to --softvol-max, without it is 0-100

@@ -1482,7 +1482,7 @@ function osc_init()
 
     ne.enabled = not (mp.get_property("percent-pos") == nil)
     ne.slider.markerF = function ()
-        local duration = mp.get_property_number("length", nil)
+        local duration = mp.get_property_number("duration", nil)
         if not (duration == nil) then
             local chapters = mp.get_property_native("chapter-list", {})
             local markers = {}
@@ -1497,7 +1497,7 @@ function osc_init()
     ne.slider.posF =
         function () return mp.get_property_number("percent-pos", nil) end
     ne.slider.tooltipF = function (pos)
-        local duration = mp.get_property_number("length", nil)
+        local duration = mp.get_property_number("duration", nil)
         if not ((duration == nil) or (pos == nil)) then
             possec = duration * (pos / 100)
             return mp.format_time(possec)
@@ -1542,8 +1542,8 @@ function osc_init()
     -- tc_right (total/remaining time)
     ne = new_element("tc_right", "button")
 
-    ne.visible = (not (mp.get_property("length") == nil))
-        and (mp.get_property_number("length") > 0)
+    ne.visible = (not (mp.get_property("duration") == nil))
+        and (mp.get_property_number("duration") > 0)
     ne.content = function ()
         if (state.rightTC_trem) then
             if state.tc_ms then
@@ -1555,7 +1555,7 @@ function osc_init()
             if state.tc_ms then
                 return (mp.get_property_osd("length/full"))
             else
-                return (mp.get_property_osd("length"))
+                return (mp.get_property_osd("duration"))
             end
         end
     end
