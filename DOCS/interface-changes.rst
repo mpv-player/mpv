@@ -20,6 +20,7 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - deprecate --media-title, replaced with --force-media-title
     - deprecate "length" property, replaced with "duration"
     - change volume property:
         - the value 100 is now always "unchanged volume" - with softvol, the

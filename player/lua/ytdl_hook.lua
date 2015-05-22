@@ -176,7 +176,7 @@ mp.add_hook("on_load", 10, function ()
 
                 mp.set_property("stream-open-filename", playlist)
                 if not (json.title == nil) then
-                    mp.set_property("file-local-options/media-title", json.title)
+                    mp.set_property("file-local-options/force-media-title", json.title)
                 end
 
             else
