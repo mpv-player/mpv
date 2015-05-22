@@ -1771,8 +1771,6 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
                                  MPContext *mpctx, int order,
                                  enum stream_type type)
 {
-    if (!mpctx->num_sources)
-        return M_PROPERTY_UNAVAILABLE;
     struct track *track = mpctx->current_track[order][type];
 
     switch (action) {
@@ -1804,9 +1802,13 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
-        track = mp_track_by_tid(mpctx, type, *(int *)arg);
-        mp_switch_track_n(mpctx, order, type, track);
-        mp_mark_user_track_selection(mpctx, order, type);
+        if (mpctx->num_sources) {
+            track = mp_track_by_tid(mpctx, type, *(int *)arg);
+            mp_switch_track_n(mpctx, order, type, track);
+            mp_mark_user_track_selection(mpctx, order, type);
+        } else {
+            mpctx->opts->stream_id[order][type] = *(int *)arg;
+        }
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
@@ -1818,8 +1820,6 @@ static int property_switch_track_ff(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     enum stream_type type = (intptr_t)prop->priv;
-    if (!mpctx->num_sources)
-        return M_PROPERTY_UNAVAILABLE;
     struct track *track = mpctx->current_track[0][type];
 
     switch (action) {
@@ -1828,17 +1828,21 @@ static int property_switch_track_ff(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     case M_PROPERTY_SET: {
         int id = *(int *)arg;
-        track = NULL;
-        for (int n = 0; n < mpctx->num_tracks; n++) {
-            struct track *cur = mpctx->tracks[n];
-            if (cur->type == type && cur->ff_index == id) {
-                track = cur;
-                break;
+        if (mpctx->num_sources) {
+            track = NULL;
+            for (int n = 0; n < mpctx->num_tracks; n++) {
+                struct track *cur = mpctx->tracks[n];
+                if (cur->type == type && cur->ff_index == id) {
+                    track = cur;
+                    break;
+                }
             }
+            if (!track && id >= 0)
+                return M_PROPERTY_ERROR;
+            mp_switch_track_n(mpctx, 0, type, track);
+        } else {
+            mpctx->opts->stream_id_ff[type] = *(int *)arg;
         }
-        if (!track && id >= 0)
-            return M_PROPERTY_ERROR;
-        mp_switch_track_n(mpctx, 0, type, track);
         return M_PROPERTY_OK;
     }
     }
