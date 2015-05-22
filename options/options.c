@@ -477,7 +477,7 @@ const m_option_t mp_opts[] = {
 
     OPT_CHOICE_OR_INT("loop", loop_times, 0, 1, 10000,
                       ({"no", 1},
-                       {"inf", -1},
+                       {"inf", -1}, {"yes", -1},
                        {"force", -2})),
     OPT_CHOICE_OR_INT("loop-file", loop_file, 0, 0, 10000,
                       ({"no", 0},
