@@ -125,8 +125,8 @@ function add_audio(s)
     local r = mp.get_property_osd("audio-codec")
     s.audio = s.audio .. b("Audio:") .. o.kv_sep .. no_ASS(r)
 
-    append_property(s, "audio", "audio-samplerate", "Sample Rate:")
-    append_property(s, "audio", "audio-channels", "Channels:")
+    append_property(s, "audio", "audio-params/samplerate", "Sample Rate:")
+    append_property(s, "audio", "audio-params/channel-count", "Channels:")
     append_property(s, "audio", "packet-audio-bitrate", "Bitrate:", " kbps")
 end
 
