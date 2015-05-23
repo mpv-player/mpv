@@ -3063,6 +3063,20 @@ static int mp_property_cwd(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_protocols(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(char ***)arg = stream_get_proto_list();
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_STRING_LIST};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_version(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
@@ -3464,6 +3478,8 @@ static const struct m_property mp_properties[] = {
     {"display-fps", mp_property_display_fps},
 
     {"working-directory", mp_property_cwd},
+
+    {"protocol-list", mp_property_protocols},
 
     {"mpv-version", mp_property_version},
     {"mpv-configuration", mp_property_configuration},

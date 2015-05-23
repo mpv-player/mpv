@@ -1778,6 +1778,12 @@ Property list
     Return the working directory of the mpv process. Can be useful for JSON IPC
     users, because the command line player usually works with relative paths.
 
+``protocol-list``
+    List of protocol prefixes potentially recognized by the player. They are
+    returned without trailing ``://`` suffix (which is still always required).
+    In some cases, the protocol will not actually be supported (consider
+    ``https`` if ffmpeg is not compiled with TLS support).
+
 ``mpv-version``
     Return the mpv version/copyright string. Depending on how the binary was
     built, it might contain either a release version, or just a git hash.

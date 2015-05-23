@@ -1024,11 +1024,10 @@ int mp_cancel_get_fd(struct mp_cancel *c)
     return c->wakeup_pipe[0];
 }
 
-void stream_print_proto_list(struct mp_log *log)
+char **stream_get_proto_list(void)
 {
-    int count = 0;
-
-    mp_info(log, "Protocols:\n\n");
+    char **list = NULL;
+    int num = 0;
     for (int i = 0; stream_list[i]; i++) {
         const stream_info_t *stream_info = stream_list[i];
 
@@ -1039,9 +1038,25 @@ void stream_print_proto_list(struct mp_log *log)
             if (*stream_info->protocols[j] == '\0')
                continue;
 
-            mp_info(log, " %s://\n", stream_info->protocols[j]);
-            count++;
+            MP_TARRAY_APPEND(NULL, list, num,
+                                talloc_strdup(NULL, stream_info->protocols[j]));
         }
     }
+    MP_TARRAY_APPEND(NULL, list, num, NULL);
+    return list;
+}
+
+void stream_print_proto_list(struct mp_log *log)
+{
+    int count = 0;
+
+    mp_info(log, "Protocols:\n\n");
+    char **list = stream_get_proto_list();
+    for (int i = 0; list[i]; i++) {
+        mp_info(log, " %s://\n", list[i]);
+        count++;
+        talloc_free(list[i]);
+    }
+    talloc_free(list);
     mp_info(log, "\nTotal: %d protocols\n", count);
 }

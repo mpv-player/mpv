@@ -20,6 +20,7 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - add protocol-list property
     - deprecate audio-samplerate and audio-channels properties
       (audio-params sub-properties are the replacement)
     - add audio-params and audio-out-params properties
