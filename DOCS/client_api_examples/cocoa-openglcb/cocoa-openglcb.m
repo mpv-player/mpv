@@ -34,7 +34,7 @@ static void glupdate(void *ctx);
 @property mpv_opengl_cb_context *mpvGL;
 - (instancetype)initWithFrame:(NSRect)frame;
 - (void)drawRect;
-- (void)flushBlack;
+- (void)fillBlack;
 @end
 
 @implementation MpvClientOGLView
@@ -55,29 +55,23 @@ static void glupdate(void *ctx);
         GLint swapInt = 1;
         [[self openGLContext] setValues:&swapInt forParameter:NSOpenGLCPSwapInterval];
         [[self openGLContext] makeCurrentContext];
+        self.mpvGL = nil;
     }
     return self;
 }
 
-- (void)flushBlack
+- (void)fillBlack
 {
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
-    [[self openGLContext] flushBuffer];
-    [[self openGLContext] flushBuffer];
-}
-
-- (void)prepareOpenGL
-{
-    [super prepareOpenGL];
-    [self flushBlack];
-    self.mpvGL = nil;
 }
 
 - (void)drawRect
 {
     if (self.mpvGL)
         mpv_opengl_cb_draw(self.mpvGL, 0, self.bounds.size.width, -self.bounds.size.height);
+    else
+        [self fillBlack];
     [[self openGLContext] flushBuffer];
 }
 
