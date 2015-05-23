@@ -234,7 +234,7 @@ mp.add_hook("on_load", 10, function ()
 
             mp.set_property("stream-open-filename", streamurl)
 
-            mp.set_property("file-local-options/media-title", json.title)
+            mp.set_property("file-local-options/force-media-title", json.title)
 
             -- add subtitles
             if not (json.requested_subtitles == nil) then
