@@ -824,6 +824,12 @@ Available video output drivers are:
 ``null``
     Produces no video output. Useful for benchmarking.
 
+    Usually, it's better to disable video with ``--no-video`` instead.
+
+    ``fps=<value>``
+        Simulate display FPS. This artificially limits how many frames the
+        VO accepts per second.
+
 ``caca``
     Color ASCII art video output driver that works on a text console.
 
