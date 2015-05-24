@@ -2595,25 +2595,14 @@ static int mp_property_vf_fps(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
-    double next_pts = mpctx->vo_pts_history_pts[0];
-    if (mpctx->vo_pts_history_seek[0] != mpctx->vo_pts_history_seek_ts)
+    double durations[10];
+    int num = get_past_frame_durations(mpctx, durations, MP_ARRAY_SIZE(durations));
+    if (num < MP_ARRAY_SIZE(durations))
         return M_PROPERTY_UNAVAILABLE;
-    if (next_pts == MP_NOPTS_VALUE)
-        return M_PROPERTY_UNAVAILABLE;
-    int num_samples = 10;
-    assert(num_samples + 1 <= MAX_NUM_VO_PTS);
     double duration = 0;
-    for (int n = 1; n < 1 + num_samples; n++) {
-        double frame_pts = mpctx->vo_pts_history_pts[n];
-        // Discontinuity -> refuse to return a value.
-        if (mpctx->vo_pts_history_seek[n] != mpctx->vo_pts_history_seek_ts)
-            return M_PROPERTY_UNAVAILABLE;
-        if (frame_pts == MP_NOPTS_VALUE)
-            return M_PROPERTY_UNAVAILABLE;
-        duration += next_pts - frame_pts;
-        next_pts = frame_pts;
-    }
-    return m_property_double_ro(action, arg, num_samples / duration);
+    for (int n = 0; n < num; n++)
+        duration += durations[n];
+    return m_property_double_ro(action, arg, num / duration);
 }
 
 /// Video aspect (RO)
