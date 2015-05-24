@@ -3338,7 +3338,7 @@ Miscellaneous
     You can also try to use ``--no-correct-pts`` for files with completely
     broken timestamps.
 
-``--media-title=<string>``
+``--force-media-title=<string>``
     Force the contents of the ``media-title`` property to this value. Useful
     for scripts which want to set a title, without overriding the user's
     setting in ``--title``.
