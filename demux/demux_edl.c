@@ -25,10 +25,10 @@
 
 #include "talloc.h"
 
-#include "player/core.h"
+#include "demux.h"
+#include "timeline.h"
 #include "common/msg.h"
 #include "common/global.h"
-#include "demux/demux.h"
 #include "options/path.h"
 #include "misc/bstr.h"
 #include "common/common.h"
