@@ -207,10 +207,7 @@ static void print_status(struct MPContext *mpctx)
 
     // A-V sync
     if (mpctx->d_audio && mpctx->d_video && mpctx->sync_audio_to_video) {
-        if (mpctx->last_av_difference != MP_NOPTS_VALUE)
-            saddf(&line, " A-V:%7.3f", mpctx->last_av_difference);
-        else
-            saddf(&line, " A-V: ???");
+        saddf(&line, " A-V:%7.3f", mpctx->last_av_difference);
         if (fabs(mpctx->total_avsync_change) > 0.05)
             saddf(&line, " ct:%7.3f", mpctx->total_avsync_change);
     }
