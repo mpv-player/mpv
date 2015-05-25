@@ -1,3 +1,7 @@
+/*
+ * Warning: this filter is deprecated.
+ */
+
 #ifndef VF_DLOPEN_H
 #define VF_DLOPEN_H
 

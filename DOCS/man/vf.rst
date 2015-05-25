@@ -669,6 +669,8 @@ Available filters are:
     Loads an external library to filter the image. The library interface
     is the ``vf_dlopen`` interface specified using ``libmpcodecs/vf_dlopen.h``.
 
+    .. warning:: This filter is deprecated.
+
     ``dll=<library>``
         Specify the library to load. This may require a full file system path
         in some cases. This argument is required.
