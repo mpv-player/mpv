@@ -89,7 +89,7 @@ function mp.set_key_bindings(list, section, flags)
                     cb()
                 end
             end
-            cfg = cfg .. key .. " script_binding " ..
+            cfg = cfg .. key .. " script-binding " ..
                   mp.script_name .. "/" .. mangle .. "\n"
         else
             cfg = cfg .. key .. " " .. cb .. "\n"
@@ -187,7 +187,7 @@ local function add_binding(attrs, key, name, fn, rp)
         end
         msg_cb = fn
     end
-    attrs.bind = bind .. " script_binding " .. mp.script_name .. "/" .. name
+    attrs.bind = bind .. " script-binding " .. mp.script_name .. "/" .. name
     attrs.name = name
     key_bindings[name] = attrs
     update_key_bindings()
@@ -464,7 +464,7 @@ function mp.osd_message(text, duration)
     else
         duration = tostring(math.floor(duration * 1000))
     end
-    mp.commandv("show_text", text, duration)
+    mp.commandv("show-text", text, duration)
 end
 
 local hook_table = {}
@@ -475,7 +475,7 @@ local function hook_run(id, cont)
     if fn then
         fn()
     end
-    mp.commandv("hook_ack", cont)
+    mp.commandv("hook-ack", cont)
 end
 
 function mp.add_hook(name, pri, cb)
@@ -485,7 +485,7 @@ function mp.add_hook(name, pri, cb)
     end
     local id = #hook_table + 1
     hook_table[id] = cb
-    mp.commandv("hook_add", name, id, pri)
+    mp.commandv("hook-add", name, id, pri)
 end
 
 local mp_utils = package.loaded["mp.utils"]

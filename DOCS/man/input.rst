@@ -65,11 +65,11 @@ C-style escaping can be used.
 
 You can bind multiple commands to one key. For example:
 
-| a show_text "command 1" ; show_text "command 2"
+| a show-text "command 1" ; show-text "command 2"
 
 It's also possible to bind a command to a sequence of keys:
 
-| a-b-c show_text "command run after a, b, c have been pressed"
+| a-b-c show-text "command run after a, b, c have been pressed"
 
 (This is not shown in the general command syntax.)
 
@@ -114,25 +114,25 @@ List of Input Commands
     3rd parameter (essentially using a space instead of ``+``). The 3rd
     parameter is still parsed, but is considered deprecated.
 
-``revert_seek [mode]``
+``revert-seek [mode]``
     Undoes the ``seek`` command, and some other commands that seek (but not
     necessarily all of them). Calling this command once will jump to the
     playback position before the seek. Calling it a second time undoes the
-    ``revert_seek`` command itself. This only works within a single file.
+    ``revert-seek`` command itself. This only works within a single file.
 
     The first argument is optional, and can change the behavior:
 
     mark
-        Mark the current time position. The next normal ``revert_seek`` command
+        Mark the current time position. The next normal ``revert-seek`` command
         will seek back to this point, no matter how many seeks happened since
         last time.
 
     Using it without any arguments gives you the default behavior.
 
-``frame_step``
+``frame-step``
     Play one frame, then pause. Does nothing with audio-only playback.
 
-``frame_back_step``
+``frame-back-step``
     Go back by one frame, then pause. Note that this can be very slow (it tries
     to be precise, not fast), and sometimes fails to behave as expected. How
     well this works depends on whether precise seeking works correctly (e.g.
@@ -182,7 +182,7 @@ List of Input Commands
         frame was dropped. This flag can be combined with the other flags,
         e.g. ``video+each-frame``.
 
-``screenshot_to_file "<filename>" [subtitles|video|window]``
+``screenshot-to-file "<filename>" [subtitles|video|window]``
     Take a screenshot and save it to a given file. The format of the file will
     be guessed by the extension (and ``--screenshot-format`` is ignored - the
     behavior when the extension is missing or unknown is arbitrary).
@@ -194,7 +194,7 @@ List of Input Commands
     Like all input command parameters, the filename is subject to property
     expansion as described in `Property Expansion`_.
 
-``playlist_next [weak|force]``
+``playlist-next [weak|force]``
     Go to the next entry on the playlist.
 
     weak (default)
@@ -202,7 +202,7 @@ List of Input Commands
     force
         Terminate playback if there are no more files on the playlist.
 
-``playlist_prev [weak|force]``
+``playlist-prev [weak|force]``
     Go to the previous entry on the playlist.
 
     weak (default)
@@ -232,23 +232,23 @@ List of Input Commands
 ``loadlist "<playlist>" [replace|append]``
     Load the given playlist file (like ``--playlist``).
 
-``playlist_clear``
+``playlist-clear``
     Clear the playlist, except the currently played file.
 
-``playlist_remove current|<index>``
+``playlist-remove current|<index>``
     Remove the playlist entry at the given index. Index values start counting
     with 0. The special value ``current`` removes the current entry. Note that
     removing the current entry also stops playback and starts playing the next
     entry.
 
-``playlist_move <index1> <index2>``
+``playlist-move <index1> <index2>``
     Move the playlist entry at index1, so that it takes the place of the
     entry index2. (Paradoxically, the moved playlist entry will not have
     the index value index2 after moving if index1 was lower than index2,
     because index2 refers to the target entry, not the index the entry
     will have after moving.)
 
-``playlist_shuffle``
+``playlist-shuffle``
     Shuffle the playlist. This is similar to what is done on start if the
     ``--shuffle`` option is used.
 
@@ -277,12 +277,12 @@ List of Input Commands
 ``quit [<code>]``
     Exit the player. If an argument is given, it's used as process exit code.
 
-``quit_watch_later [<code>]``
+``quit-watch-later [<code>]``
     Exit player, and store current playback position. Playing that file later
     will seek to the previous position on start. The (optional) argument is
     exactly as in the ``quit`` command.
 
-``sub_add "<file>" [<flags> [<title> [<lang>]]]``
+``sub-add "<file>" [<flags> [<title> [<lang>]]]``
     Load the given subtitle file. It is selected as current subtitle after
     loading.
 
@@ -309,27 +309,27 @@ List of Input Commands
     The ``lang`` argument sets the track language, and can also influence
     stream selection with ``flags`` set to ``auto``.
 
-``sub_remove [<id>]``
+``sub-remove [<id>]``
     Remove the given subtitle track. If the ``id`` argument is missing, remove
     the current track. (Works on external subtitle files only.)
 
-``sub_reload [<id>]``
+``sub-reload [<id>]``
     Reload the given subtitle tracks. If the ``id`` argument is missing, reload
     the current track. (Works on external subtitle files only.)
 
     This works by unloading and re-adding the subtitle track.
 
-``sub_step <skip>``
+``sub-step <skip>``
     Change subtitle timing such, that the subtitle event after the next
     ``<skip>`` subtitle events is displayed. ``<skip>`` can be negative to step
     backwards.
 
-``sub_seek <skip>``
+``sub-seek <skip>``
     Seek to the next (skip set to 1) or the previous (skip set to -1) subtitle.
-    This is similar to ``sub_step``, except that it seeks video and audio
+    This is similar to ``sub-step``, except that it seeks video and audio
     instead of adjusting the subtitle delay.
 
-    Like with ``sub_step``, this works with external text subtitles only. For
+    Like with ``sub-step``, this works with external text subtitles only. For
     embedded text subtitles (like with Matroska), this works only with subtitle
     events that have already been displayed.
 
@@ -337,11 +337,11 @@ List of Input Commands
     Toggle OSD level. If ``<level>`` is specified, set the OSD mode
     (see ``--osd-level`` for valid values).
 
-``print_text "<string>"``
+``print-text "<string>"``
     Print text to stdout. The string can contain properties (see
     `Property Expansion`_).
 
-``show_text "<string>" [<duration>|- [<level>]]``
+``show-text "<string>" [<duration>|- [<level>]]``
     Show text on the OSD. The string can contain properties, which are expanded
     as described in `Property Expansion`_. This can be used to show playback
     time, filename, and so on.
@@ -353,7 +353,7 @@ List of Input Commands
     <level>
         The minimum OSD level to show the text at (see ``--osd-level``).
 
-``show_progress``
+``show-progress``
     Show the progress bar, the elapsed time and the total duration of the file
     on the OSD.
 
@@ -369,8 +369,8 @@ List of Input Commands
     Note that while the menu is active, the input section ``discnav-menu`` will
     be enabled, so different key bindings can be mapped for menu mode.
 
-``write_watch_later_config``
-    Write the resume config file that the ``quit_watch_later`` command writes,
+``write-watch-later-config``
+    Write the resume config file that the ``quit-watch-later`` command writes,
     but continue playback normally.
 
 ``stop``
@@ -395,16 +395,16 @@ List of Input Commands
     <double>
         The mouse event represents double-click.
 
-``audio_add "<file>" [<flags> [<title> [<lang>]]]``
-    Load the given audio file. See ``sub_add`` command.
+``audio-add "<file>" [<flags> [<title> [<lang>]]]``
+    Load the given audio file. See ``sub-add`` command.
 
-``audio_remove [<id>]``
-    Remove the given audio track. See ``sub_remove`` command.
+``audio-remove [<id>]``
+    Remove the given audio track. See ``sub-remove`` command.
 
-``audio_reload [<id>]``
-    Reload the given audio tracks. See ``sub_reload`` command.
+``audio-reload [<id>]``
+    Reload the given audio tracks. See ``sub-reload`` command.
 
-``rescan_external_files [<mode>]``
+``rescan-external-files [<mode>]``
     Rescan external files according to the current ``--sub-auto`` and
     ``--audio-file-auto`` settings. This can be used to auto-load external
     files *after* the file was loaded.
@@ -461,7 +461,7 @@ Input Commands that are Possibly Subject to Change
 
     The ``vf`` command shows the list of requested filters on the OSD after
     changing the filter chain. This is roughly equivalent to
-    ``show_text ${vf}``. Note that auto-inserted filters for format conversion
+    ``show-text ${vf}``. Note that auto-inserted filters for format conversion
     are not shown on the list, only what was requested by the user.
 
     Normally, the commands will check whether the video chain is recreated
@@ -762,7 +762,7 @@ Properties
 
 Properties are used to set mpv options during runtime, or to query arbitrary
 information. They can be manipulated with the ``set``/``add``/``cycle``
-commands, and retrieved with ``show_text``, or anything else that uses property
+commands, and retrieved with ``show-text``, or anything else that uses property
 expansion. (See `Property Expansion`_.)
 
 The property name is annotated with RW to indicate whether the property is
@@ -1667,7 +1667,7 @@ Property list
 
 ``osd-sym-cc``
     Inserts the current OSD symbol as opaque OSD control code (cc). This makes
-    sense only with the ``show_text`` command or options which set OSD messages.
+    sense only with the ``show-text`` command or options which set OSD messages.
     The control code is implementation specific and is useless for anything else.
 
 ``osd-ass-cc``
@@ -1675,13 +1675,13 @@ Property list
     ``${osd-ass-cc/1}`` enables it again. By default, ASS sequences are
     escaped to avoid accidental formatting, and this property can disable
     this behavior. Note that the properties return an opaque OSD control
-    code, which only makes sense for the ``show_text`` command or options
+    code, which only makes sense for the ``show-text`` command or options
     which set OSD messages.
 
     .. admonition:: Example
 
         - ``--osd-status-msg='This is ${osd-ass-cc/0}{\\b1}bold text'``
-        - ``show_text "This is ${osd-ass-cc/0}{\b1}bold text"``
+        - ``show-text "This is ${osd-ass-cc/0}{\b1}bold text"``
 
     Any ASS override tags as understood by libass can be used.
 
@@ -1860,7 +1860,7 @@ command is an exception and not a general rule.)
 
 .. admonition:: Example for input.conf
 
-    ``i show_text "Filename: ${filename}"``
+    ``i show-text "Filename: ${filename}"``
         shows the filename of the current file when pressing the ``i`` key
 
 Within ``input.conf``, property expansion can be inhibited by putting the

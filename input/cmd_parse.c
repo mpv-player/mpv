@@ -69,8 +69,16 @@ static bool find_cmd(struct mp_log *log, struct mp_cmd *cmd, bstr name)
         mp_err(log, "Command name missing.\n");
         return false;
     }
+
+    char nname[80];
+    snprintf(nname, sizeof(nname), "%.*s", BSTR_P(name));
+    for (int n = 0; nname[n]; n++) {
+        if (nname[n] == '_')
+            nname[n] = '-';
+    }
+
     for (int n = 0; mp_cmds[n].name; n++) {
-        if (bstr_equals0(name, mp_cmds[n].name)) {
+        if (strcmp(nname, mp_cmds[n].name) == 0) {
             cmd->def = &mp_cmds[n];
             cmd->name = (char *)cmd->def->name;
             cmd->id = cmd->def->id;

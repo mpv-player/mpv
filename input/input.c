@@ -319,7 +319,7 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int code)
         msg = talloc_asprintf_append(msg, "(nothing)");
 
     MP_INFO(ictx, "%s\n", msg);
-    const char *args[] = {"show_text", msg, NULL};
+    const char *args[] = {"show-text", msg, NULL};
     mp_cmd_t *res = mp_input_parse_cmd_strv(ictx->log, args);
     talloc_free(msg);
     return res;
