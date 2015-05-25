@@ -1,5 +1,7 @@
 -- Rebuild the terminal status line as a lua script
 -- Be aware that this will require more cpu power!
+-- Also, this is based on a rather old version of the
+-- builtin mpv status line.
 
 -- Add a string to the status line
 function atsl(s)
@@ -28,7 +30,7 @@ function update_status_line()
     atsl(mp.get_property_osd("time-pos"))
 
     atsl(" / ");
-    atsl(mp.get_property_osd("length"));
+    atsl(mp.get_property_osd("duration"));
 
     atsl(" (")
     atsl(mp.get_property_osd("percent-pos", -1))
