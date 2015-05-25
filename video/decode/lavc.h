@@ -15,7 +15,6 @@ typedef struct lavc_ctx {
     AVCodecContext *avctx;
     AVFrame *pic;
     struct vd_lavc_hwdec *hwdec;
-    int selected_hwdec;
     enum AVPixelFormat pix_fmt;
     int best_csp;
     enum AVDiscard skip_frame;

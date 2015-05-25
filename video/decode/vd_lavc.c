@@ -273,8 +273,6 @@ static int init(struct dec_video *vd, const char *decoder)
     ctx->log = vd->log;
     ctx->opts = vd->opts;
 
-    ctx->selected_hwdec = vd->opts->hwdec_api;
-
     if (bstr_endswith0(bstr0(decoder), "_vdpau")) {
         MP_WARN(vd, "VDPAU decoder '%s' was requested. "
                 "This way of enabling hardware\ndecoding is not supported "
@@ -698,7 +696,7 @@ static int control(struct dec_video *vd, int cmd, void *arg)
         *(int *)arg = delay;
         return CONTROL_TRUE;
     case VDCTRL_GET_HWDEC: {
-        int hwdec = ctx->selected_hwdec;
+        int hwdec = ctx->hwdec ? ctx->hwdec->type : 0;
         if (!ctx->software_fallback_decoder)
             hwdec = 0;
         *(int *)arg = hwdec;
