@@ -482,6 +482,9 @@ static int init_device(struct ao *ao, bool second_try)
     struct mp_chmap dev_chmap = ao->channels;
     if (AF_FORMAT_IS_IEC61937(ao->format) || p->cfg_ignore_chmap) {
         dev_chmap.num = 0; // disable chmap API
+    } else if (dev_chmap.num == 1 && dev_chmap.speaker[0] == MP_SPEAKER_ID_FC) {
+        // As yet another ALSA API inconsistency, mono is not reported correctly.
+        dev_chmap.num = 0;
     } else if (query_chmaps(ao, &dev_chmap)) {
         ao->channels = dev_chmap;
     } else {
@@ -625,8 +628,10 @@ static int init_device(struct ao *ao, bool second_try)
         }
 
         // mpv and ALSA use different conventions for mono
-        if (ao->channels.num == 1)
+        if (ao->channels.num == 1) {
+            MP_VERBOSE(ao, "assuming we actually got MONO from ALSA.\n");
             ao->channels.speaker[0] = MP_SP(FC);
+        }
 
         free(alsa_chmap);
     }
