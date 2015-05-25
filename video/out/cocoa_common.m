@@ -154,6 +154,9 @@ static const char macosx_icon[] =
 static void set_application_icon(NSApplication *app)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSBundle *bundle = [NSBundle mainBundle];
+    if ([bundle pathForResource:@"icon" ofType:@"icns"])
+        return;
     NSData *icon_data = [NSData dataWithBytesNoCopy:(void *)macosx_icon
                                              length:sizeof(macosx_icon)
                                        freeWhenDone:NO];
