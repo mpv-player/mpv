@@ -2010,32 +2010,44 @@ static int mp_property_hwdec(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct MPOpts *opts = mpctx->opts;
     struct dec_video *vd = mpctx->d_video;
-    if (!vd)
-        return M_PROPERTY_UNAVAILABLE;
 
-    int current = 0;
-    video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
-
-    switch (action) {
-    case M_PROPERTY_GET:
-        *(int *)arg = current;
-        return M_PROPERTY_OK;
-    case M_PROPERTY_SET: {
+    if (action == M_PROPERTY_SET) {
         int new = *(int *)arg;
-        if (current == new)
+
+        if (opts->hwdec_api == new)
             return M_PROPERTY_OK;
-        if (!mpctx->d_video)
-            return M_PROPERTY_ERROR;
-        double last_pts = mpctx->last_vo_pts;
-        uninit_video_chain(mpctx);
+
         opts->hwdec_api = new;
-        reinit_video_chain(mpctx);
-        if (last_pts != MP_NOPTS_VALUE)
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, MPSEEK_EXACT, true);
+
+        if (!vd)
+            return M_PROPERTY_OK;
+
+        int current = -2;
+        video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
+        if (current != opts->hwdec_api) {
+            double last_pts = mpctx->last_vo_pts;
+            uninit_video_chain(mpctx);
+            reinit_video_chain(mpctx);
+            if (last_pts != MP_NOPTS_VALUE)
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, MPSEEK_EXACT, true);
+        }
         return M_PROPERTY_OK;
-    }
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
+}
+
+static int mp_property_hwdec_active(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct dec_video *vd = mpctx->d_video;
+    bool active = false;
+    if (vd) {
+        int current = 0;
+        video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
+        active = current > 0;
+    }
+    return m_property_flag_ro(action, arg, active);
 }
 
 static int mp_property_detected_hwdec(void *ctx, struct m_property *prop,
@@ -2043,8 +2055,6 @@ static int mp_property_detected_hwdec(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct dec_video *vd = mpctx->d_video;
-    if (!vd || !vd->hwdec_info)
-        return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
     case M_PROPERTY_GET_TYPE: {
@@ -2053,14 +2063,16 @@ static int mp_property_detected_hwdec(void *ctx, struct m_property *prop,
         return mp_property_generic_option(mpctx, &dummy, action, arg);
     }
     case M_PROPERTY_GET: {
-        int d = vd->hwdec_info->hwctx ? vd->hwdec_info->hwctx->type : HWDEC_NONE;
-        if (d) {
-            *(int *)arg = d;
-        } else {
-            // Maybe one of the "-copy" ones. These are "detected" every time
-            // the decoder is opened, so we don't know much about them otherwise.
-            return mp_property_hwdec(ctx, prop, action, arg);
-        }
+        int current = 0;
+        if (vd)
+            video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
+
+        if (current <= 0 && vd && vd->hwdec_info && vd->hwdec_info->hwctx)
+            current = vd->hwdec_info->hwctx->type;
+
+        // In case of the "-copy" ones, which are "detected" every time the
+        // decoder is opened, return "no" if no decoding is active.
+        *(int *)arg = current > 0 ? current : 0;
         return M_PROPERTY_OK;
     }
     }
@@ -3397,7 +3409,8 @@ static const struct m_property mp_properties[] = {
     {"vid", mp_property_video},
     {"program", mp_property_program},
     {"hwdec", mp_property_hwdec},
-    {"detected-hwdec", mp_property_detected_hwdec},
+    {"hwdec-active", mp_property_hwdec_active},
+    {"hwdec-detected", mp_property_detected_hwdec},
 
     {"estimated-frame-count", mp_property_frame_count},
     {"estimated-frame-number", mp_property_frame_number},

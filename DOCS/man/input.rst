@@ -1246,25 +1246,29 @@ Property list
     See ``--hue``.
 
 ``hwdec`` (RW)
-    Return the current hardware decoder that is used. This uses the same values
-    as the ``--hwdec`` option. If software decoding is active, this returns
-    ``no``. You can write this property. Then the ``--hwdec`` option is set to
-    the new value, and video decoding will be reinitialized (internally, the
-    player will perform a seek to refresh the video properly).
+    Reflects the ``--hwdec`` option.
 
-    Note that you don't know the success of the operation immediately after
-    writing this property. It happens with a delay as video is reinitialized.
+    Writing to it may change the currently used hardware decoder, if possible.
+    (Internally, the player may reinitialize the decoder, and will perform a
+    seek to refresh the video properly.) You can watch the other hwdec
+    properties to see whether this was successful.
 
-``detected-hwdec``
-    Return the current hardware decoder that was detected and opened. Returns
-    the same values as ``hwdec``.
+    Unlike in mpv 0.9.x and before, this does not return the currently active
+    hardware decoder.
 
-    This is known only once the VO has opened (and possibly later). With some
-    VOs (like ``opengl``), this is never known in advance, but only when the
-    decoder attempted to create the hw decoder successfully. Also, hw decoders
-    with ``-copy`` suffix are returned only while hw decoding is active (and
-    unset afterwards). All this reflects how detecting hw decoders are
-    detected and used internally in mpv.
+``hwdec-active``
+    Return ``yes`` or ``no``, depending on whether any type of hardware decoding
+    is actually in use.
+
+``hwdec-detected``
+    If software decoding is active, this returns the hardware decoder in use.
+    Otherwise, it returns either ``no``, or if applicable, the currently loaded
+    hardware decoding API. This is known only once the VO has opened (and
+    possibly later). With some VOs (like ``opengl``), this is never known in
+    advance, but only when the decoder attempted to create the hw decoder
+    successfully. Also, hw decoders with ``-copy`` suffix will return ``no``
+    while no video is being decoded. All this reflects how detecting hw decoders
+    are detected and used internally in mpv.
 
 ``panscan`` (RW)
     See ``--panscan``.

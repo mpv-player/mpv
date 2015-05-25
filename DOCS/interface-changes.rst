@@ -20,6 +20,11 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - completely change how the hwdec properties work:
+        - "hwdec" now reflects the --hwdec option
+        - "hwdec-detected" does partially what the old "hwdec" property did
+          (and also, "detected-hwdec" is removed)
+        - "hwdec-active" is added
     - add protocol-list property
     - deprecate audio-samplerate and audio-channels properties
       (audio-params sub-properties are the replacement)
