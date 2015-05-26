@@ -389,7 +389,8 @@ static bool read_packet(struct demux_internal *in)
         read_more |= ds->active && !ds->head;
         packs += ds->packs;
         bytes += ds->bytes;
-        if (ds->active && ds->last_ts != MP_NOPTS_VALUE && in->min_secs > 0)
+        if (ds->active && ds->last_ts != MP_NOPTS_VALUE && in->min_secs > 0 &&
+            ds->last_ts >= ds->base_ts)
             read_more |= ds->last_ts - ds->base_ts < in->min_secs;
     }
     MP_DBG(in, "packets=%zd, bytes=%zd, active=%d, more=%d\n",
