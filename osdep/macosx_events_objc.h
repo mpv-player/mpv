@@ -27,11 +27,17 @@ struct input_ctx;
 
 + (EventsResponder *)sharedInstance;
 
+- (void)setInputContext:(struct input_ctx *)ctx;
+
 /// Blocks until inputContext is present.
 - (void)waitForInputContext;
 
-- (void)handleFilesArray:(NSArray *)files;
+- (void)wakeup;
 
-@property(nonatomic, assign) struct input_ctx *inputContext;
+- (bool)queueCommand:(char *)cmd;
+
+- (void)putKey:(int)keycode;
+
+- (void)handleFilesArray:(NSArray *)files;
 
 @end

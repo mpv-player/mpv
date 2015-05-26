@@ -188,9 +188,7 @@ void cocoa_uninit_media_keys(void) {
 
 void cocoa_put_key(int keycode)
 {
-    struct input_ctx *inputContext = [EventsResponder sharedInstance].inputContext;
-    if (inputContext)
-        mp_input_put_key(inputContext, keycode);
+    [[EventsResponder sharedInstance] putKey:keycode];
 }
 
 void cocoa_put_key_event(void *event)
@@ -206,7 +204,7 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
 
 void cocoa_set_input_context(struct input_ctx *input_context)
 {
-    [EventsResponder sharedInstance].inputContext = input_context;
+    [[EventsResponder sharedInstance] setInputContext:input_context];
 }
 
 @implementation EventsResponder
@@ -233,7 +231,7 @@ void cocoa_set_input_context(struct input_ctx *input_context)
 - (void)waitForInputContext
 {
     [_input_ready lock];
-    while (!self.inputContext)
+    while (!_inputContext)
         [_input_ready wait];
     [_input_ready unlock];
 }
@@ -246,15 +244,31 @@ void cocoa_set_input_context(struct input_ctx *input_context)
     [_input_ready unlock];
 }
 
-- (struct input_ctx *)inputContext
+- (void)wakeup
 {
-    return _inputContext;
+    mp_input_wakeup(_inputContext);
+}
+
+- (bool)queueCommand:(char *)cmd
+{
+    if (!_inputContext)
+        return false;
+
+    mp_cmd_t *cmdt = mp_input_parse_cmd(_inputContext, bstr0(cmd), "");
+    mp_input_queue_cmd(_inputContext, cmdt);
+    return true;
+}
+
+- (void)putKey:(int)keycode
+{
+    if (_inputContext)
+        mp_input_put_key(_inputContext, keycode);
 }
 
 - (BOOL)useAltGr
 {
-    if (self.inputContext)
-        return mp_input_use_alt_gr(self.inputContext);
+    if (_inputContext)
+        return mp_input_use_alt_gr(_inputContext);
     else
         return YES;
 }

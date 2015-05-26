@@ -77,8 +77,7 @@ static void terminate_cocoa_application(void)
 {
     [super sendEvent:event];
 
-    if (_eventsResponder.inputContext)
-        mp_input_wakeup(_eventsResponder.inputContext);
+    [_eventsResponder wakeup];
 }
 
 - (id)init
@@ -167,15 +166,9 @@ static void terminate_cocoa_application(void)
 
 - (void)stopMPV:(char *)cmd
 {
-    struct input_ctx *inputContext = _eventsResponder.inputContext;
-    if (inputContext) {
-        mp_cmd_t *cmdt = mp_input_parse_cmd(inputContext, bstr0(cmd), "");
-        mp_input_queue_cmd(inputContext, cmdt);
-    } else {
+    if (![_eventsResponder queueCommand:cmd])
         terminate_cocoa_application();
-    }
 }
-
 
 - (void)registerMenuItem:(NSMenuItem*)menuItem forKey:(MPMenuKey)key
 {
