@@ -1793,6 +1793,8 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
         return M_PROPERTY_OK;
 
     case M_PROPERTY_SWITCH: {
+        if (!mpctx->num_sources)
+            return M_PROPERTY_ERROR;
         struct m_property_switch_arg *sarg = arg;
         mp_switch_track_n(mpctx, order, type,
             track_next(mpctx, order, type, sarg->inc >= 0 ? +1 : -1, track),
@@ -1800,8 +1802,12 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
-        track = mp_track_by_tid(mpctx, type, *(int *)arg);
-        mp_switch_track_n(mpctx, order, type, track, FLAG_MARK_SELECTION);
+        if (mpctx->num_sources) {
+            track = mp_track_by_tid(mpctx, type, *(int *)arg);
+            mp_switch_track_n(mpctx, order, type, track, FLAG_MARK_SELECTION);
+        } else {
+            mpctx->opts->stream_id[order][type] = *(int *)arg;
+        }
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
