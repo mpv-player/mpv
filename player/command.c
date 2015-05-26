@@ -1795,18 +1795,13 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
     case M_PROPERTY_SWITCH: {
         struct m_property_switch_arg *sarg = arg;
         mp_switch_track_n(mpctx, order, type,
-            track_next(mpctx, order, type, sarg->inc >= 0 ? +1 : -1, track));
-        mp_mark_user_track_selection(mpctx, order, type);
+            track_next(mpctx, order, type, sarg->inc >= 0 ? +1 : -1, track),
+            FLAG_MARK_SELECTION);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
-        if (mpctx->num_sources) {
-            track = mp_track_by_tid(mpctx, type, *(int *)arg);
-            mp_switch_track_n(mpctx, order, type, track);
-            mp_mark_user_track_selection(mpctx, order, type);
-        } else {
-            mpctx->opts->stream_id[order][type] = *(int *)arg;
-        }
+        track = mp_track_by_tid(mpctx, type, *(int *)arg);
+        mp_switch_track_n(mpctx, order, type, track, FLAG_MARK_SELECTION);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
@@ -1837,7 +1832,7 @@ static int property_switch_track_ff(void *ctx, struct m_property *prop,
             }
             if (!track && id >= 0)
                 return M_PROPERTY_ERROR;
-            mp_switch_track_n(mpctx, 0, type, track);
+            mp_switch_track_n(mpctx, 0, type, track, 0);
         } else {
             mpctx->opts->stream_id_ff[type] = *(int *)arg;
         }
@@ -1986,11 +1981,11 @@ static int mp_property_program(void *ctx, struct m_property *prop,
             return M_PROPERTY_ERROR;
         }
         mp_switch_track(mpctx, STREAM_VIDEO,
-                find_track_by_demuxer_id(mpctx, STREAM_VIDEO, prog.vid));
+                find_track_by_demuxer_id(mpctx, STREAM_VIDEO, prog.vid), 0);
         mp_switch_track(mpctx, STREAM_AUDIO,
-                find_track_by_demuxer_id(mpctx, STREAM_AUDIO, prog.aid));
+                find_track_by_demuxer_id(mpctx, STREAM_AUDIO, prog.aid), 0);
         mp_switch_track(mpctx, STREAM_SUB,
-                find_track_by_demuxer_id(mpctx, STREAM_VIDEO, prog.sid));
+                find_track_by_demuxer_id(mpctx, STREAM_VIDEO, prog.sid), 0);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){
@@ -4583,8 +4578,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             struct track *t = find_track_with_url(mpctx, type,
                                                     cmd->args[0].v.s);
             if (t) {
-                mp_switch_track(mpctx, t->type, t);
-                mp_mark_user_track_selection(mpctx, 0, t->type);
+                mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
                 return 0;
             }
         }
@@ -4594,8 +4588,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (cmd->args[1].v.i == 1) {
             t->no_default = true;
         } else {
-            mp_switch_track(mpctx, t->type, t);
-            mp_mark_user_track_selection(mpctx, 0, t->type);
+            mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
         }
         char *title = cmd->args[2].v.s;
         if (title && title[0])
@@ -4630,7 +4623,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             talloc_free(filename);
         }
         if (nt) {
-            mp_switch_track(mpctx, nt->type, nt);
+            mp_switch_track(mpctx, nt->type, nt, 0);
             print_track_list(mpctx);
             return 0;
         }
@@ -4645,10 +4638,10 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             // somewhat fuzzy and not ideal
             struct track *a = select_default_track(mpctx, 0, STREAM_AUDIO);
             if (a && a->is_external)
-                mp_switch_track(mpctx, STREAM_AUDIO, a);
+                mp_switch_track(mpctx, STREAM_AUDIO, a, 0);
             struct track *s = select_default_track(mpctx, 0, STREAM_SUB);
             if (s && s->is_external)
-                mp_switch_track(mpctx, STREAM_SUB, s);
+                mp_switch_track(mpctx, STREAM_SUB, s, 0);
 
             print_track_list(mpctx);
         }

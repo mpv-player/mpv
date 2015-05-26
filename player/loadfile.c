@@ -527,10 +527,19 @@ static void check_previous_track_selection(struct MPContext *mpctx)
 }
 
 void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type,
-                       struct track *track)
+                       struct track *track, int flags)
 {
     assert(!track || track->type == type);
     assert(order >= 0 && order < NUM_PTRACKS);
+
+    // Mark the current track selection as explicitly user-requested. (This is
+    // different from auto-selection or disabling a track due to errors.)
+    if (flags & FLAG_MARK_SELECTION)
+        mpctx->opts->stream_id[order][type] = track ? track->user_tid : -2;
+
+    // No decoder should be initialized yet.
+    if (!mpctx->demuxer)
+        return;
 
     struct track *current = mpctx->current_track[order][type];
     if (track == current)
@@ -592,28 +601,17 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
 }
 
 void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
-                     struct track *track)
+                     struct track *track, int flags)
 {
-    mp_switch_track_n(mpctx, 0, type, track);
+    mp_switch_track_n(mpctx, 0, type, track, flags);
 }
 
 void mp_deselect_track(struct MPContext *mpctx, struct track *track)
 {
     if (track && track->selected) {
         for (int t = 0; t < NUM_PTRACKS; t++)
-            mp_switch_track_n(mpctx, t, track->type, NULL);
+            mp_switch_track_n(mpctx, t, track->type, NULL, 0);
     }
-}
-
-// Mark the current track selection as explicitly user-requested. (This is
-// different from auto-selection or disabling a track due to errors.)
-void mp_mark_user_track_selection(struct MPContext *mpctx, int order,
-                                  enum stream_type type)
-{
-    struct track *track = mpctx->current_track[order][type];
-    int user_tid = track ? track->user_tid : -2;
-
-    mpctx->opts->stream_id[order][type] = user_tid;
 }
 
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
