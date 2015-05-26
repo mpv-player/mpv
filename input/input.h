@@ -106,11 +106,6 @@ struct mp_input_src {
     void *priv;
 };
 
-// Add a new input source. The input code can create a new thread, which feeds
-// keys or commands to input_ctx. mp_input_src.uninit must be set.
-// mp_input_src_kill() must not be called by anything after init.
-struct mp_input_src *mp_input_add_src(struct input_ctx *ictx);
-
 // Add an input source that runs on a thread. The source is automatically
 // removed if the thread loop exits.
 //  ctx: this is passed to loop_fn.
@@ -128,14 +123,6 @@ int mp_input_add_thread_src(struct input_ctx *ictx, void *ctx,
 // Must be called on the same thread as loop_fn (see mp_input_add_thread_src()).
 // Set src->cancel and src->uninit (if needed) before calling this.
 void mp_input_src_init_done(struct mp_input_src *src);
-
-// Currently only with mp_input_add_thread_src().
-int mp_input_src_get_wakeup_fd(struct mp_input_src *src);
-
-// Remove and free the source. You can call this only while the input_ctx
-// exists; otherwise there would be a race condition when another thread
-// destroys input_ctx.
-void mp_input_src_kill(struct mp_input_src *src);
 
 // Feed text data, which will be split into lines of commands.
 void mp_input_src_feed_cmd_text(struct mp_input_src *src, char *buf, size_t len);
