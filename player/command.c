@@ -550,7 +550,7 @@ static int mp_property_percent_pos(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->num_sources)
+    if (!mpctx->playback_initialized)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
@@ -600,7 +600,7 @@ static int mp_property_time_pos(void *ctx, struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->num_sources)
+    if (!mpctx->playback_initialized)
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_SET) {
@@ -646,7 +646,7 @@ static int mp_property_playback_time(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->num_sources)
+    if (!mpctx->playback_initialized)
         return M_PROPERTY_UNAVAILABLE;
 
     return property_time(action, arg, get_playback_time(mpctx));
@@ -789,7 +789,7 @@ static int mp_property_list_chapters(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     int count = get_chapter_count(mpctx);
     if (action == M_PROPERTY_PRINT) {
-        int cur = mpctx->num_sources ? get_current_chapter(mpctx) : -1;
+        int cur = mpctx->playback_initialized ? get_current_chapter(mpctx) : -1;
         char *res = NULL;
         int n;
 
@@ -965,7 +965,7 @@ static int mp_property_chapters(void *ctx, struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->num_sources)
+    if (!mpctx->playback_initialized)
         return M_PROPERTY_UNAVAILABLE;
     int count = get_chapter_count(mpctx);
     return m_property_int_ro(action, arg, count);
@@ -1229,7 +1229,7 @@ static int mp_property_eof_reached(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->num_sources)
+    if (!mpctx->playback_initialized)
         return M_PROPERTY_UNAVAILABLE;
     bool eof = mpctx->video_status == STATUS_EOF &&
                mpctx->audio_status == STATUS_EOF;
@@ -1240,7 +1240,7 @@ static int mp_property_seeking(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->num_sources)
+    if (!mpctx->playback_initialized)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_flag_ro(action, arg, !mpctx->restart_complete);
 }
@@ -1419,7 +1419,7 @@ static int mp_property_paused_for_cache(void *ctx, struct m_property *prop,
                                         int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->num_sources)
+    if (!mpctx->playback_initialized)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_flag_ro(action, arg, mpctx->paused_for_cache);
 }
@@ -1793,7 +1793,7 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
         return M_PROPERTY_OK;
 
     case M_PROPERTY_SWITCH: {
-        if (!mpctx->num_sources)
+        if (!mpctx->playback_initialized)
             return M_PROPERTY_ERROR;
         struct m_property_switch_arg *sarg = arg;
         mp_switch_track_n(mpctx, order, type,
@@ -1802,7 +1802,7 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
-        if (mpctx->num_sources) {
+        if (mpctx->playback_initialized) {
             track = mp_track_by_tid(mpctx, type, *(int *)arg);
             mp_switch_track_n(mpctx, order, type, track, FLAG_MARK_SELECTION);
         } else {
@@ -1827,7 +1827,7 @@ static int property_switch_track_ff(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     case M_PROPERTY_SET: {
         int id = *(int *)arg;
-        if (mpctx->num_sources) {
+        if (mpctx->playback_initialized) {
             track = NULL;
             for (int n = 0; n < mpctx->num_tracks; n++) {
                 struct track *cur = mpctx->tracks[n];
@@ -4165,7 +4165,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         case 1: precision = MPSEEK_KEYFRAME; break;
         case 2: precision = MPSEEK_EXACT; break;
         }
-        if (!mpctx->num_sources)
+        if (!mpctx->playback_initialized)
             return -1;
         mark_seek(mpctx);
         switch (abs) {
@@ -4202,7 +4202,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     }
 
     case MP_CMD_REVERT_SEEK: {
-        if (!mpctx->num_sources)
+        if (!mpctx->playback_initialized)
             return -1;
         double oldpts = cmdctx->last_seek_pts;
         if (cmdctx->marked_pts != MP_NOPTS_VALUE)
@@ -4348,7 +4348,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     }
 
     case MP_CMD_FRAME_STEP:
-        if (!mpctx->num_sources)
+        if (!mpctx->playback_initialized)
             return -1;
         if (cmd->is_up_down) {
             if (cmd->is_up) {
@@ -4367,7 +4367,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
 
     case MP_CMD_FRAME_BACK_STEP:
-        if (!mpctx->num_sources)
+        if (!mpctx->playback_initialized)
             return -1;
         add_step_frame(mpctx, -1);
         break;
@@ -4398,7 +4398,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
     case MP_CMD_SUB_STEP:
     case MP_CMD_SUB_SEEK: {
-        if (!mpctx->num_sources)
+        if (!mpctx->playback_initialized)
             return -1;
         struct osd_sub_state state;
         update_osd_sub_state(mpctx, 0, &state);
