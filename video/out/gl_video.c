@@ -211,7 +211,7 @@ struct gl_video {
     struct src_tex pass_tex[TEXUNIT_VIDEO_NUM];
     bool use_indirect;
     bool use_linear;
-    bool use_full_range;
+    bool use_normalized_range;
     float user_gamma;
     struct fbotex copy_fbos[4];
 
@@ -1426,12 +1426,12 @@ static void pass_read_video(struct gl_video *p)
     int in_bits = p->image_desc.component_bits,
         tx_bits = (in_bits + 7) & ~7;
     float cmul = ((1 << tx_bits) - 1.0) / ((1 << in_bits) - 1.0);
-    // Custom source shaders are required to output at the full range
-    p->use_full_range = shader != NULL;
+    // Custom source shaders are required to output at range [0.0, 1.0]
+    p->use_normalized_range = shader != NULL;
 
     if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
         cmul = 1.0;
-        p->use_full_range = true;
+        p->use_normalized_range = true;
     }
 
     // Special case for non-planar content
@@ -1469,7 +1469,7 @@ static void pass_read_video(struct gl_video *p)
         // We also pull up here in this case to avoid the issues described
         // above.
         GLSLF("color.rg *= %f;\n", cmul);
-        p->use_full_range = true;
+        p->use_normalized_range = true;
         merged = true;
         assert(c_w == p->pass_tex[2].src.x1 - p->pass_tex[2].src.x0);
         assert(c_h == p->pass_tex[2].src.y1 - p->pass_tex[2].src.y0);
@@ -1518,14 +1518,14 @@ static void pass_read_video(struct gl_video *p)
         p->use_indirect = true;
     } else {
         GLSL(float luma = texture(texture0, texcoord0).r;)
-        if (p->use_full_range)
+        if (p->use_normalized_range)
             GLSLF("luma *= %f;\n", cmul);
     }
 
     GLSL(color = vec4(luma, chroma, 1.0);)
     if (p->has_alpha && p->plane_count >= 4) {
         GLSL(color.a = texture(texture3, texcoord3).r;)
-        if (p->use_full_range)
+        if (p->use_normalized_range)
             GLSLF("color.a *= %f;\n", cmul);
     }
 }
@@ -1558,7 +1558,7 @@ static void pass_convert_yuv(struct gl_video *p)
     }
 
     // Something already took care of expansion
-    if (p->use_full_range)
+    if (p->use_normalized_range)
         cparams.input_bits = cparams.texture_bits;
 
     // Conversion from Y'CbCr or other linear spaces to RGB
