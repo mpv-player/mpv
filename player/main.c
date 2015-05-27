@@ -454,6 +454,10 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     mp_get_resume_defaults(mpctx);
 
+    // Lua user scripts (etc.) can call arbitrary functions. Load them at a point
+    // where this is safe.
+    mp_load_scripts(mpctx);
+
     if (opts->consolecontrols && cas_terminal_owner(mpctx, mpctx))
         terminal_setup_getch(mpctx->input);
 
@@ -477,10 +481,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
             handle_force_window(mpctx, false);
         mpctx->mouse_cursor_visible = true;
     }
-
-    // Lua user scripts (etc.) can call arbitrary functions. Load them at a point
-    // where this is safe.
-    mp_load_scripts(mpctx);
 
 #if !defined(__MINGW32__)
     mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
