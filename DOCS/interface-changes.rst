@@ -20,6 +20,8 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - add vo opengl custom shader suboptions (source-shader, scale-shader,
+      pre-shaders, post-shaders)
     - completely change how the hwdec properties work:
         - "hwdec" now reflects the --hwdec option
         - "hwdec-detected" does partially what the old "hwdec" property did
