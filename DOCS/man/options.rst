@@ -348,7 +348,7 @@ Program Behavior
 ``--idle=<no|yes|once>``
     Makes mpv wait idly instead of quitting when there is no file to play.
     Mostly useful in slave mode, where mpv can be controlled through input
-    commands (see also ``--slave-broken``).
+    commands.
 
     ``once`` will only idle at start and let the player close once the
     first playlist has finished playing back.
@@ -2250,8 +2250,6 @@ Input
     This can also specify a direct file descriptor with ``fd://N`` (UNIX only).
     In this case, JSON replies will be written if the FD is writable.
 
-    See also ``--slave-broken``.
-
     .. note::
 
         When the given file is a FIFO mpv opens both ends, so you can do several
@@ -3342,21 +3340,3 @@ Miscellaneous
     Force the contents of the ``media-title`` property to this value. Useful
     for scripts which want to set a title, without overriding the user's
     setting in ``--title``.
-
-``--slave-broken``
-    Switches on the old slave mode. This is for testing only, and incompatible
-    to the removed ``--slave`` switch.
-
-    .. attention::
-        Changes incompatible to slave mode applications have been made. In
-        particular, the status line output was changed, which is used by some
-        applications to determine the current playback position. This switch
-        has been renamed to prevent these applications from working with this
-        version of mpv, because it would lead to buggy and confusing behavior
-        only. Moreover, the slave mode protocol is so horribly bad that it
-        should not be used for new programs, nor should existing programs
-        attempt to adapt to the changed output and use the ``--slave-broken``
-        switch. Instead, a new, saner protocol should be developed (and will be,
-        if there is enough interest).
-
-        This affects most third-party GUI frontends.

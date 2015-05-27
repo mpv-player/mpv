@@ -414,12 +414,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     }
     MP_STATS(mpctx, "start init");
 
-    if (opts->slave_mode) {
-        MP_WARN(mpctx, "--slave-broken is deprecated (see manpage).\n");
-        opts->consolecontrols = 0;
-        m_config_set_option0(mpctx->mconfig, "input-file", "/dev/stdin");
-    }
-
     if (!mpctx->playlist->first && !opts->player_idle_mode)
         return -3;
 

@@ -555,8 +555,6 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", encode_opts, encode_config, 0),
 #endif
 
-    OPT_FLAG("slave-broken", slave_mode, CONF_GLOBAL),
-
     OPT_REMOVED("a52drc", "use --ad-lavc-ac3drc=level"),
     OPT_REMOVED("afm", "use --ad=..."),
     OPT_REPLACED("aspect", "video-aspect"),
