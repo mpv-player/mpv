@@ -355,6 +355,10 @@ struct MPContext *mp_create(void)
     init_libav(mpctx->global);
     mp_clients_init(mpctx);
 
+#if HAVE_COCOA
+    cocoa_set_input_context(mpctx->input);
+#endif
+
     return mpctx;
 }
 
@@ -460,10 +464,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     if (opts->consolecontrols && cas_terminal_owner(mpctx, mpctx))
         terminal_setup_getch(mpctx->input);
-
-#if HAVE_COCOA
-    cocoa_set_input_context(mpctx->input);
-#endif
 
     if (opts->force_vo) {
         struct vo_extra ex = {
