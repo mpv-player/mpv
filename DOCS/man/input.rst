@@ -647,7 +647,7 @@ Input Commands that are Possibly Subject to Change
     is freed as soon as the result node is freed.
 
 Undocumented commands: ``tv_last_channel`` (TV/DVB only),
-``get_property`` (deprecated), ``ao_reload`` (experimental/internal).
+``ao_reload`` (experimental/internal).
 
 Hooks
 ~~~~~

@@ -3797,21 +3797,6 @@ static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
     }
 }
 
-static const char *property_error_string(int error_value)
-{
-    switch (error_value) {
-    case M_PROPERTY_ERROR:
-        return "ERROR";
-    case M_PROPERTY_UNAVAILABLE:
-        return "PROPERTY_UNAVAILABLE";
-    case M_PROPERTY_NOT_IMPLEMENTED:
-        return "NOT_IMPLEMENTED";
-    case M_PROPERTY_UNKNOWN:
-        return "PROPERTY_UNKNOWN";
-    }
-    return "UNKNOWN";
-}
-
 static bool reinit_filters(MPContext *mpctx, enum stream_type mediatype)
 {
     switch (mediatype) {
@@ -4325,25 +4310,6 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                 return -1;
             }
         }
-        break;
-    }
-
-    case MP_CMD_GET_PROPERTY: {
-        char *tmp;
-        int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_GET_STRING,
-                               &tmp, mpctx);
-        if (r <= 0) {
-            MP_WARN(mpctx, "Failed to get value of property '%s'.\n",
-                    cmd->args[0].v.s);
-            MP_INFO(mpctx, "ANS_ERROR=%s\n", property_error_string(r));
-            return -1;
-        }
-        MP_INFO(mpctx, "ANS_%s=%s\n", cmd->args[0].v.s, tmp);
-        talloc_free(tmp);
-        MP_WARN(mpctx,  "The get_property command is deprecated and "
-                        "will be removed in the next release.\n"
-                        "Use libmpv or the JSON IPC. "
-                        "(Or print_text, if you must.)");
         break;
     }
 
