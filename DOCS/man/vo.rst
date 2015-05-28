@@ -1013,3 +1013,7 @@ Available video output drivers are:
     ``devpath=<filename>``
         Path to graphic card device.
         (default: /dev/dri/card0)
+
+    ``mode=<number>``
+        Mode ID to use (resolution, bit depth and frame rate).
+        (default: 0)

@@ -66,6 +66,7 @@ struct modeset_dev {
 struct priv {
     char *device_path;
     int connector_id;
+    int mode_id;
 
     int fd;
     struct vt_switcher vt_switcher;
@@ -242,7 +243,7 @@ static bool is_connector_valid(struct vo *vo, int conn_id,
     return true;
 }
 
-static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
+static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id, int mode_id,
                                struct modeset_dev **out)
 {
     struct modeset_dev *dev = NULL;
@@ -291,17 +292,23 @@ static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id,
         goto end;
     }
 
+    if (mode_id < 0 || mode_id >= conn->count_modes) {
+        MP_ERR(vo, "Bad mode ID (max = %d).\n", conn->count_modes - 1);
+        MP_INFO(vo, "Available modes:\n");
+        for (unsigned int i = 0; i < conn->count_modes; i++) {
+            MP_INFO(vo, "Mode %d: %s (%dx%d)\n", i, conn->modes[i].name,
+                    conn->modes[i].hdisplay, conn->modes[i].vdisplay);
+        }
+    }
+
     dev = talloc_zero(vo->priv, struct modeset_dev);
     dev->conn = conn->connector_id;
     dev->front_buf = 0;
-    dev->mode = conn->modes[0];
-    dev->bufs[0].width = conn->modes[0].hdisplay;
-    dev->bufs[0].height = conn->modes[0].vdisplay;
-    dev->bufs[1].width = conn->modes[0].hdisplay;
-    dev->bufs[1].height = conn->modes[0].vdisplay;
-
-    MP_INFO(vo, "Connector using mode %ux%u\n",
-            dev->bufs[0].width, dev->bufs[0].height);
+    dev->mode = conn->modes[mode_id];
+    for (unsigned int i = 0; i < 2; i++) {
+        dev->bufs[i].width = dev->mode.hdisplay;
+        dev->bufs[i].height = dev->mode.vdisplay;
+    }
 
     ret = modeset_find_crtc(vo, fd, res, conn, dev);
     if (ret) {
@@ -583,7 +590,7 @@ static int preinit(struct vo *vo)
     if (modeset_open(vo, &p->fd, p->device_path))
         goto err;
 
-    if (modeset_prepare_dev(vo, p->fd, p->connector_id, &p->dev))
+    if (modeset_prepare_dev(vo, p->fd, p->connector_id, p->mode_id, &p->dev))
         goto err;
 
     assert(p->dev);
@@ -646,10 +653,12 @@ const struct vo_driver video_out_drm = {
     .options = (const struct m_option[]) {
         OPT_STRING("devpath", device_path, 0),
         OPT_INT("connector", connector_id, 0),
+        OPT_INT("mode", mode_id, 0),
         {0},
     },
     .priv_defaults = &(const struct priv) {
         .device_path = "/dev/dri/card0",
         .connector_id = -1,
+        .mode_id = 0,
     },
 };
