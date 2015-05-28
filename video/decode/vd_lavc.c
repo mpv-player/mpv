@@ -514,12 +514,12 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                 // There could be more reasons for a change, and it's possible
                 // that we miss some. (Might also depend on the hwaccel type.)
                 bool change =
-                    ctx->hwdec_w != avctx->width ||
-                    ctx->hwdec_h != avctx->height ||
+                    ctx->hwdec_w != avctx->coded_width ||
+                    ctx->hwdec_h != avctx->coded_height ||
                     ctx->hwdec_fmt != ctx->hwdec->image_format ||
                     ctx->hwdec_profile != avctx->profile;
-                ctx->hwdec_w = avctx->width;
-                ctx->hwdec_h = avctx->height;
+                ctx->hwdec_w = avctx->coded_width;
+                ctx->hwdec_h = avctx->coded_height;
                 ctx->hwdec_fmt = ctx->hwdec->image_format;
                 ctx->hwdec_profile = avctx->profile;
                 if (ctx->hwdec->init_decoder && change) {
@@ -568,12 +568,11 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
     if (!IMGFMT_IS_HWACCEL(imgfmt) || !ctx->hwdec)
         return -1;
 
-    // Using frame->width/height is bad. For non-mod 16 video (which would
-    // require alignment of frame sizes) we want the decoded size, not the
-    // aligned size. At least vdpau needs this: the video mixer is created
-    // with decoded size, and the video surfaces must have matching size.
-    int w = ctx->avctx->width;
-    int h = ctx->avctx->height;
+    // We expect it to use the exact size used to create the hw decoder in
+    // get_format_hwdec(). For cropped video, this is expected to be the
+    // uncropped size (usually coded_width/coded_height).
+    int w = pic->width;
+    int h = pic->height;
 
     if (ctx->hwdec->init_decoder) {
         if (imgfmt != ctx->hwdec_fmt && w != ctx->hwdec_w && h != ctx->hwdec_h)
