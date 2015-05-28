@@ -115,7 +115,6 @@ struct vdpctx {
     uint64_t                           dropped_time;
     uint32_t                           vid_width, vid_height;
     uint32_t                           image_format;
-    VdpChromaType                      vdp_chroma_type;
     VdpYCbCrFormat                     vdp_pixel_format;
     bool                               rgb_mode;
 
@@ -339,10 +338,8 @@ static int initialize_vdpau_objects(struct vo *vo)
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
 
-    mp_vdpau_get_format(vc->image_format, &vc->vdp_chroma_type,
-                        &vc->vdp_pixel_format);
+    mp_vdpau_get_format(vc->image_format, NULL, &vc->vdp_pixel_format);
 
-    vc->video_mixer->chroma_type = vc->vdp_chroma_type;
     vc->video_mixer->initialized = false;
 
     if (win_x11_init_vdpau_flip_queue(vo) < 0)

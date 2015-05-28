@@ -67,7 +67,6 @@ struct mp_vdpau_mixer *mp_vdpau_mixer_create(struct mp_vdpau_ctx *vdp_ctx,
         .ctx = vdp_ctx,
         .log = log,
         .video_mixer = VDP_INVALID_HANDLE,
-        .chroma_type = VDP_CHROMA_TYPE_420,
         .video_eq = {
             .capabilities = MP_CSP_EQ_CAPS_COLORMATRIX,
         },
@@ -114,7 +113,8 @@ static int set_video_attribute(struct mp_vdpau_mixer *mixer,
 #define SET_VIDEO_ATTR(attr_name, attr_type, value) set_video_attribute(mixer, \
                  VDP_VIDEO_MIXER_ATTRIBUTE_ ## attr_name, &(attr_type){value},\
                  # attr_name)
-static int create_vdp_mixer(struct mp_vdpau_mixer *mixer)
+static int create_vdp_mixer(struct mp_vdpau_mixer *mixer,
+                            VdpChromaType chroma_type, uint32_t w, uint32_t h)
 {
     struct vdp_functions *vdp = &mixer->ctx->vdp;
     VdpDevice vdp_device = mixer->ctx->vdp_device;
@@ -135,9 +135,9 @@ static int create_vdp_mixer(struct mp_vdpau_mixer *mixer)
         VDP_VIDEO_MIXER_PARAMETER_CHROMA_TYPE,
     };
     const void *const parameter_values[VDP_NUM_MIXER_PARAMETER] = {
-        &(uint32_t){mixer->image_params.w},
-        &(uint32_t){mixer->image_params.h},
-        &(VdpChromaType){mixer->chroma_type},
+        &(uint32_t){w},
+        &(uint32_t){h},
+        &(VdpChromaType){chroma_type},
     };
     if (opts->deint >= 3)
         features[feature_count++] = VDP_VIDEO_MIXER_FEATURE_DEINTERLACE_TEMPORAL;
@@ -176,6 +176,9 @@ static int create_vdp_mixer(struct mp_vdpau_mixer *mixer)
     CHECK_VDP_ERROR(mixer, "Error when calling vdp_video_mixer_create");
 
     mixer->initialized = true;
+    mixer->current_chroma_type = chroma_type;
+    mixer->current_w = w;
+    mixer->current_h = h;
 
     for (i = 0; i < feature_count; i++)
         feature_enables[i] = VDP_TRUE;
@@ -257,8 +260,17 @@ int mp_vdpau_mixer_render(struct mp_vdpau_mixer *mixer,
     if (mixer->video_mixer == VDP_INVALID_HANDLE)
         mixer->initialized = false;
 
+    VdpChromaType s_chroma_type;
+    uint32_t s_w, s_h;
+
+    vdp_st = vdp->video_surface_get_parameters(frame->current, &s_chroma_type,
+                                               &s_w, &s_h);
+    CHECK_VDP_ERROR(mixer, "Error when calling vdp_video_surface_get_parameters");
+
     if (!mixer->initialized || !opts_equal(opts, &mixer->opts) ||
-        !mp_image_params_equal(&video->params, &mixer->image_params))
+        !mp_image_params_equal(&video->params, &mixer->image_params) ||
+        mixer->current_w != s_w || mixer->current_h != s_h ||
+        mixer->current_chroma_type != s_chroma_type)
     {
         mixer->opts = *opts;
         mixer->image_params = video->params;
@@ -268,7 +280,7 @@ int mp_vdpau_mixer_render(struct mp_vdpau_mixer *mixer,
         }
         mixer->video_mixer = VDP_INVALID_HANDLE;
         mixer->initialized = false;
-        if (create_vdp_mixer(mixer) < 0)
+        if (create_vdp_mixer(mixer, s_chroma_type, s_w, s_h) < 0)
             return -1;
     }
 

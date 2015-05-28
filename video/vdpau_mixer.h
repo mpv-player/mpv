@@ -34,7 +34,9 @@ struct mp_vdpau_mixer {
 
     struct mp_image_params image_params;
     struct mp_vdpau_mixer_opts opts;
-    VdpChromaType chroma_type;
+
+    VdpChromaType current_chroma_type;
+    int current_w, current_h;
 
     // set initialized=false to force reinit when changed
     struct mp_csp_equalizer video_eq;
