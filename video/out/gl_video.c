@@ -667,7 +667,10 @@ static void pass_set_image_textures(struct gl_video *p, struct video_image *vimg
                                / vimg->planes[1].tex_h;
 
     if (p->hwdec_active) {
-        p->hwdec->driver->map_image(p->hwdec, vimg->mpi, imgtex);
+        if (p->hwdec->driver->map_image(p->hwdec, vimg->mpi, imgtex) < 0) {
+            for (int n = 0; n < p->plane_count; n++)
+                imgtex[n] = -1;
+        }
     } else {
         for (int n = 0; n < p->plane_count; n++)
             imgtex[n] = vimg->planes[n].gl_texture;
