@@ -79,7 +79,7 @@ SOURCES-$(PULSE)                += audio/out/ao_pulse.c
 SOURCES-$(RSOUND)               += audio/out/ao_rsound.c
 SOURCES-$(SNDIO)                += audio/out/ao_sndio.c
 SOURCES-$(VDPAU)                += video/vdpau.c video/vdpau_mixer.c \
-                                   video/out/vo_vdpau.c video/decode/vdpau.c \
+                                   video/out/vo_vdpau.c video/decode/vdpau_old.c \
                                    video/filter/vf_vdpaupp.c
 SOURCES-$(VDPAU_GL_X11)         += video/out/gl_hwdec_vdpau.c
 SOURCES-$(VAAPI)                += video/out/vo_vaapi.c \
