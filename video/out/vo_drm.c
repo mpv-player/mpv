@@ -505,7 +505,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
                    p->cur_frame->planes[0],
                    (p->dst.x1 - p->dst.x0) * 4,
                    p->dst.y1 - p->dst.y0,
-                   p->device_w * 4,
+                   front_buf->stride,
                    p->cur_frame->stride[0]);
     }
 
