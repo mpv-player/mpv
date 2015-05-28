@@ -517,11 +517,13 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                     ctx->hwdec_w != avctx->coded_width ||
                     ctx->hwdec_h != avctx->coded_height ||
                     ctx->hwdec_fmt != ctx->hwdec->image_format ||
-                    ctx->hwdec_profile != avctx->profile;
+                    ctx->hwdec_profile != avctx->profile ||
+                    ctx->hwdec_request_reinit;
                 ctx->hwdec_w = avctx->coded_width;
                 ctx->hwdec_h = avctx->coded_height;
                 ctx->hwdec_fmt = ctx->hwdec->image_format;
                 ctx->hwdec_profile = avctx->profile;
+                ctx->hwdec_request_reinit = false;
                 if (ctx->hwdec->init_decoder && change) {
                     if (ctx->hwdec->init_decoder(ctx, ctx->hwdec_fmt,
                                                  ctx->hwdec_w, ctx->hwdec_h) < 0)
@@ -619,6 +621,9 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
             MP_WARN(vd, "Error while decoding frame!\n");
         return -1;
     }
+
+    if (ctx->hwdec_request_reinit)
+        avcodec_flush_buffers(avctx);
 
     // Skipped frame, or delayed output due to multithreaded decoding.
     if (!got_picture)

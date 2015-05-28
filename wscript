@@ -719,6 +719,14 @@ hwaccel_features = [
         'desc': 'libavcodec VDPAU hwaccel',
         'deps': [ 'vdpau' ],
         'func': check_statement('libavcodec/vdpau.h',
+                                'av_vdpau_bind_context(0,0,0,AV_HWACCEL_FLAG_ALLOW_HIGH_DEPTH)',
+                                use='libav'),
+    }, {
+        'name': '--vdpau-old-hwaccel',
+        'desc': 'libavcodec VDPAU hwaccel (old API)',
+        'deps': [ 'vdpau' ],
+        'deps_neg': [ 'vdpau-hwaccel' ],
+        'func': check_statement('libavcodec/vdpau.h',
                                 'av_vdpau_alloc_context()',
                                 use='libav'),
     }, {
