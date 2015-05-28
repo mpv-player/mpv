@@ -446,6 +446,8 @@ static void uninit_avctx(struct dec_video *vd)
     av_freep(&ctx->avctx);
 
     av_frame_free(&ctx->pic);
+
+    ctx->hwdec_failed = false;
 }
 
 static void update_image_params(struct dec_video *vd, AVFrame *frame,
@@ -533,7 +535,8 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
         }
     }
 
-    return AV_PIX_FMT_NONE;
+    ctx->hwdec_failed = true;
+    return fmt[0];
 }
 
 static struct mp_image *get_surface_hwdec(struct dec_video *vd, AVFrame *pic)
@@ -586,6 +589,10 @@ static void free_mpi(void *opaque, uint8_t *data)
 static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
 {
     struct dec_video *vd = avctx->opaque;
+    vd_ffmpeg_ctx *ctx = vd->priv;
+
+    if (ctx->hwdec_failed)
+        return avcodec_default_get_buffer2(avctx, pic, flags);
 
     struct mp_image *mpi = get_surface_hwdec(vd, pic);
     if (!mpi)
@@ -619,8 +626,10 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
     hwdec_lock(ctx);
     ret = avcodec_decode_video2(avctx, ctx->pic, &got_picture, &pkt);
     hwdec_unlock(ctx);
-    if (ret < 0) {
-        MP_WARN(vd, "Error while decoding frame!\n");
+
+    if (ctx->hwdec_failed || ret < 0) {
+        if (ret < 0)
+            MP_WARN(vd, "Error while decoding frame!\n");
         return -1;
     }
 
@@ -652,8 +661,8 @@ static int force_fallback(struct dec_video *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
     if (ctx->software_fallback_decoder) {
         uninit_avctx(vd);
-        MP_ERR(vd, "Error using hardware "
-                "decoding, falling back to software decoding.\n");
+        MP_WARN(vd, "Hardware decoding failed,"
+                " falling back to software decoding.\n");
         const char *decoder = ctx->software_fallback_decoder;
         ctx->software_fallback_decoder = NULL;
         init_avctx(vd, decoder, NULL);
