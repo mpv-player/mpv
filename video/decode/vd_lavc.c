@@ -539,47 +539,6 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     return fmt[0];
 }
 
-static struct mp_image *get_surface_hwdec(struct dec_video *vd, AVFrame *pic)
-{
-    vd_ffmpeg_ctx *ctx = vd->priv;
-
-    /* Decoders using ffmpeg's hwaccel architecture (everything except vdpau)
-     * can fall back to software decoding automatically. However, we don't
-     * want that: multithreading was already disabled. ffmpeg's fallback
-     * isn't really useful, and causes more trouble than it helps.
-     *
-     * Instead of trying to "adjust" the thread_count fields in avctx, let
-     * decoding fail hard. Then decode_with_fallback() will do our own software
-     * fallback. Fully reinitializing the decoder is saner, and will probably
-     * save us from other weird corner cases, like having to "reroute" the
-     * get_buffer callback.
-     */
-    int imgfmt = pixfmt2imgfmt(pic->format);
-    if (!IMGFMT_IS_HWACCEL(imgfmt) || !ctx->hwdec)
-        return NULL;
-
-    // Using frame->width/height is bad. For non-mod 16 video (which would
-    // require alignment of frame sizes) we want the decoded size, not the
-    // aligned size. At least vdpau needs this: the video mixer is created
-    // with decoded size, and the video surfaces must have matching size.
-    int w = ctx->avctx->width;
-    int h = ctx->avctx->height;
-
-    if (ctx->hwdec->init_decoder) {
-        if (imgfmt != ctx->hwdec_fmt && w != ctx->hwdec_w && h != ctx->hwdec_h)
-            return NULL;
-    }
-
-    struct mp_image *mpi = ctx->hwdec->allocate_image(ctx, imgfmt, w, h);
-
-    if (mpi) {
-        for (int i = 0; i < 4; i++)
-            pic->data[i] = mpi->planes[i];
-    }
-
-    return mpi;
-}
-
 static void free_mpi(void *opaque, uint8_t *data)
 {
     struct mp_image *mpi = opaque;
@@ -594,10 +553,39 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
     if (ctx->hwdec_failed)
         return avcodec_default_get_buffer2(avctx, pic, flags);
 
-    struct mp_image *mpi = get_surface_hwdec(vd, pic);
+    /* Decoders using ffmpeg's hwaccel architecture (everything except vdpau)
+     * can fall back to software decoding automatically. However, we don't
+     * want that: multithreading was already disabled. ffmpeg's fallback
+     * isn't really useful, and causes more trouble than it helps.
+     *
+     * Instead of trying to "adjust" the thread_count fields in avctx, let
+     * decoding fail hard. Then decode_with_fallback() will do our own software
+     * fallback. Fully reinitializing the decoder is saner, and will probably
+     * save us from other weird corner cases, like having to "reroute" the
+     * get_buffer callback.
+     */
+    int imgfmt = pixfmt2imgfmt(pic->format);
+    if (!IMGFMT_IS_HWACCEL(imgfmt) || !ctx->hwdec)
+        return -1;
+
+    // Using frame->width/height is bad. For non-mod 16 video (which would
+    // require alignment of frame sizes) we want the decoded size, not the
+    // aligned size. At least vdpau needs this: the video mixer is created
+    // with decoded size, and the video surfaces must have matching size.
+    int w = ctx->avctx->width;
+    int h = ctx->avctx->height;
+
+    if (ctx->hwdec->init_decoder) {
+        if (imgfmt != ctx->hwdec_fmt && w != ctx->hwdec_w && h != ctx->hwdec_h)
+            return -1;
+    }
+
+    struct mp_image *mpi = ctx->hwdec->allocate_image(ctx, imgfmt, w, h);
     if (!mpi)
         return -1;
 
+    for (int i = 0; i < 4; i++)
+        pic->data[i] = mpi->planes[i];
     pic->buf[0] = av_buffer_create(NULL, 0, free_mpi, mpi, 0);
 
     return 0;
