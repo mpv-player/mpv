@@ -45,6 +45,7 @@
 #include "demux.h"
 #include "stheader.h"
 #include "options/m_option.h"
+#include "options/path.h"
 
 
 #define INITIAL_PROBE_SIZE STREAM_BUFFER_SIZE
@@ -414,6 +415,43 @@ static void parse_cryptokey(AVFormatContext *avfc, const char *str)
         *key++ = (char2int(str[0]) << 4) | char2int(str[1]);
 }
 
+static char *replace_idx_ext(void *ta_ctx, bstr f)
+{
+    if (f.len < 4 || f.start[f.len - 4] != '.')
+        return NULL;
+    char *ext = bstr_endswith0(f, "IDX") ? "SUB" : "sub"; // match case
+    return talloc_asprintf(ta_ctx, "%.*s.%s", f.len - 4, f.start, ext);
+}
+
+static void guess_and_set_vobsub_name(struct demuxer *demuxer, AVDictionary **d)
+{
+    lavf_priv_t *priv = demuxer->priv;
+    if (!matches_avinputformat_name(priv, "vobsub"))
+        return;
+
+    void *tmp = talloc_new(NULL);
+    bstr bfilename = bstr0(priv->filename);
+    char *subname = NULL;
+    if (mp_is_url(bfilename)) {
+        // It might be a http URL, which has additional parameters after the
+        // end of the actual file path.
+        bstr start, end;
+        if (bstr_split_tok(bfilename, "?", &start, &end)) {
+            subname = replace_idx_ext(tmp, start);
+            if (subname)
+                subname = talloc_asprintf(tmp, "%s?%.*s", subname, BSTR_P(end));
+        }
+    }
+    if (!subname)
+        subname = replace_idx_ext(tmp, bfilename);
+    if (!subname)
+        subname = talloc_asprintf(tmp, "%.*s.sub", BSTR_P(bfilename));
+
+    MP_VERBOSE(demuxer, "Assuming associated .sub file: %s\n", subname);
+    av_dict_set(d, "sub_name", subname, 0);
+    talloc_free(tmp);
+}
+
 static void select_tracks(struct demuxer *demuxer, int start)
 {
     lavf_priv_t *priv = demuxer->priv;
@@ -741,6 +779,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         if (transport)
             av_dict_set(&dopts, "rtsp_transport", transport, 0);
     }
+
+    guess_and_set_vobsub_name(demuxer, &dopts);
 
     avfc->interrupt_callback = (AVIOInterruptCB){
         .callback = interrupt_cb,
