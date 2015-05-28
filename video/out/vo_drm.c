@@ -385,7 +385,7 @@ static void release_vo_crtc(struct vo *vo)
                        p->old_crtc->y,
                        &p->dev->conn,
                        1,
-                       &p->dev->mode);
+                       &p->old_crtc->mode);
         drmModeFreeCrtc(p->old_crtc);
         p->old_crtc = NULL;
     }
