@@ -482,8 +482,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     mp_image_set_params(p->cur_frame, &p->sws->dst);
 
     struct modeset_buf *buf = p->dev->bufs;
-    memset(buf[0].map, 0, buf[0].size);
-    memset(buf[1].map, 0, buf[1].size);
+    for (unsigned int i = 0; i < BUF_COUNT; i++)
+        memset(buf[i].map, 0, buf[i].size);
 
     if (mp_sws_reinit(p->sws) < 0)
         return -1;
@@ -563,9 +563,8 @@ static void uninit(struct vo *vo)
 
     if (p->dev) {
         release_vo_crtc(vo);
-
-        modeset_destroy_fb(p->fd, &p->dev->bufs[1]);
-        modeset_destroy_fb(p->fd, &p->dev->bufs[0]);
+        for (unsigned int i = 0; i < BUF_COUNT; i++)
+            modeset_destroy_fb(p->fd, &p->dev->bufs[i]);
         drmModeFreeEncoder(p->dev->enc);
     }
 
