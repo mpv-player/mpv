@@ -538,7 +538,12 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     }
 
     ctx->hwdec_failed = true;
-    return fmt[0];
+    for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
+        const AVPixFmtDescriptor *d = av_pix_fmt_desc_get(fmt[i]);
+        if (d && !(d->flags & AV_PIX_FMT_FLAG_HWACCEL))
+            return fmt[i];
+    }
+    return AV_PIX_FMT_NONE;
 }
 
 static void free_mpi(void *opaque, uint8_t *data)
