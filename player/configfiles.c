@@ -241,6 +241,7 @@ static const char *const backup_properties[] = {
     "options/ass-style-override",
     "options/ab-loop-a",
     "options/ab-loop-b",
+    "options/video-aspect",
     0
 };
 
