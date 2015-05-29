@@ -197,6 +197,7 @@ static int handle_preemption(struct mp_vdpau_ctx *ctx)
 // Check whether vdpau display preemption happened. The caller provides a
 // preemption counter, which contains the logical timestamp of the last
 // preemption handled by the caller. The counter can be 0 for init.
+// If counter is NULL, only ever return -1 or 1.
 // Return values:
 //  -1: the display is currently preempted, and vdpau can't be used
 //   0: a preemption event happened, and the caller must recover
@@ -208,13 +209,13 @@ int mp_vdpau_handle_preemption(struct mp_vdpau_ctx *ctx, uint64_t *counter)
     pthread_mutex_lock(&ctx->preempt_lock);
 
     // First time init
-    if (!*counter)
+    if (counter && !*counter)
         *counter = ctx->preemption_counter;
 
     if (handle_preemption(ctx) < 0)
         r = -1;
 
-    if (r > 0 && *counter < ctx->preemption_counter) {
+    if (counter && r > 0 && *counter < ctx->preemption_counter) {
         *counter = ctx->preemption_counter;
         r = 0; // signal recovery after preemption
     }
@@ -329,16 +330,22 @@ static struct mp_image *mp_vdpau_get_surface(struct mp_vdpau_ctx *ctx,
             e->rgb = rgb;
             e->w = w;
             e->h = h;
-            if (rgb) {
-                vdp_st = vdp->output_surface_create(ctx->vdp_device, rgb_format,
-                                                    w, h, &e->osurface);
-                e->allocated = e->osurface != VDP_INVALID_HANDLE;
+            if (mp_vdpau_handle_preemption(ctx, NULL) >= 0) {
+                if (rgb) {
+                    vdp_st = vdp->output_surface_create(ctx->vdp_device, rgb_format,
+                                                        w, h, &e->osurface);
+                    e->allocated = e->osurface != VDP_INVALID_HANDLE;
+                } else {
+                    vdp_st = vdp->video_surface_create(ctx->vdp_device, chroma,
+                                                    w, h, &e->surface);
+                    e->allocated = e->surface != VDP_INVALID_HANDLE;
+                }
+                CHECK_VDP_WARNING(ctx, "Error when allocating surface");
             } else {
-                vdp_st = vdp->video_surface_create(ctx->vdp_device, chroma,
-                                                   w, h, &e->surface);
-                e->allocated = e->surface != VDP_INVALID_HANDLE;
+                e->allocated = false;
+                e->osurface = VDP_INVALID_HANDLE;
+                e->surface = VDP_INVALID_HANDLE;
             }
-            CHECK_VDP_WARNING(ctx, "Error when allocating surface");
             surface_index = n;
             goto done;
         }
