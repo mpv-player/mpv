@@ -10,15 +10,15 @@
 -- Please note: not every property is always available and therefore not always
 -- visible.
 
-require 'mp.options'
+local options = require 'mp.options'
 
--- options
+-- Options
 local o = {
     ass_formatting = true,
     duration = 3,
     debug = false,
-    
-    -- text style
+
+    -- Text style
     font = "Source Sans Pro",
     font_size = 11,
     font_color = "FFFFFF",
@@ -34,21 +34,21 @@ local o = {
     -- use this string instead.
     custom_header = "",
 
-    -- text formatting
-    -- with ASS
+    -- Text formatting
+    -- With ASS
     nl = "\\N",
     prop_indent = "\\h\\h\\h\\h\\h",
     kv_sep = "\\h\\h",
     b1 = "{\\b1}",
     b0 = "{\\b0}",
-    -- without ASS
+    -- Without ASS
     no_ass_nl = "\n",
     no_ass_prop_indent = "\t",
     no_ass_kv_sep = " ",
     no_ass_b1 = "",
     no_ass_b0 = "",
 }
-read_options(o)
+options.read_options(o)
 
 
 function main()
@@ -81,7 +81,7 @@ function add_file(s)
     s.file = ""
     local r = mp.get_property_osd("filename")
     s.file = s.file .. b("File:") .. o.kv_sep .. no_ASS(r)
-    
+
     append_property(s, "file", "metadata/title", "Title:")
     append_property(s, "file", "chapter", "Chapter:")
     if append_property(s, "file", "cache-used", "Cache:") then
@@ -97,7 +97,7 @@ function add_video(s)
     end
     local r = mp.get_property_osd("video-codec")
     s.video = s.video .. b("Video:") .. o.kv_sep .. no_ASS(r)
-    
+
     append_property(s, "video", "avsync", "A-V:")
     if append_property(s, "video", "drop-frame-count", "Dropped:") then
         append_property_inline(s, "video", "vo-drop-frame-count", "   VO:")
@@ -142,8 +142,8 @@ function add_header(s)
     else
         s.header = string.format([[%s{\\fs%d}{\\fn%s}{\\bord%f}{\\3c&H%s&}{\\1c&H%s&}
                                  {\\alpha&H%s&}{\\xshad%f}{\\yshad%f}{\\4c&H%s&}]],
-                        set_ASS(true), o.font_size, o.font, o.border_size, 
-                        o.border_color, o.font_color, o.alpha, o.shadow_x_offset, 
+                        set_ASS(true), o.font_size, o.font, o.border_size,
+                        o.border_color, o.font_color, o.alpha, o.shadow_x_offset,
                         o.shadow_y_offset, o.shadow_color)
     end
 end
@@ -166,7 +166,7 @@ function append_property(s, sec, prop, prefix, suffix)
 end
 
 
--- one could merge this into append_property, it's just a bit more verbose this way imo
+-- One could merge this into append_property, it's just a bit more verbose this way imo
 function append_property_inline(s, sec, prop, prefix, suffix, no_prefix_markup, no_prefix_sep, no_indent)
     local ret = mp.get_property_osd(prop)
     if ret == nil or ret == "" then
