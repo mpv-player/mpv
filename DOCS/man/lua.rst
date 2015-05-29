@@ -519,7 +519,7 @@ Example implementation::
         optionC = true,
     }
     read_options(options, "myscript")
-    print(option.optionA)
+    print(options.optionA)
 
 
 The config file will be stored in ``lua-settings/identifier.conf`` in mpv's user

@@ -30,7 +30,7 @@ local function typeconv(desttypeval, val)
 end
 
 
-function read_options(options, identifier)
+local function read_options(options, identifier)
     if identifier == nil then
         identifier = mp.get_script_name()
     end
@@ -101,4 +101,9 @@ function read_options(options, identifier)
 
 end
 
+-- backwards compatibility with broken read_options export
+_G.read_options = read_options
 
+return {
+    read_options = read_options,
+}

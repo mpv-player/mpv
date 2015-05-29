@@ -33,7 +33,7 @@ local user_opts = {
 }
 
 -- read options from config and command-line
-read_options(user_opts, "osc")
+opt.read_options(user_opts, "osc")
 
 local osc_param = { -- calculated by osc_init()
     playresy = 0,                           -- canvas size Y
