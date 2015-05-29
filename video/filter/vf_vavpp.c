@@ -35,7 +35,6 @@ static bool check_error(struct vf_instance *vf, VAStatus status, const char *msg
 
 struct surface_refs {
     VASurfaceID *surfaces;
-    int num_allocated;
     int num_required;
 };
 
@@ -81,15 +80,6 @@ static const int deint_algorithm[] = {
     [5] = VAProcDeinterlacingMotionCompensated,
 };
 
-static inline void realloc_refs(struct surface_refs *refs, int num)
-{
-    if (refs->num_allocated < num) {
-        refs->surfaces = realloc(refs->surfaces, sizeof(VASurfaceID)*num);
-        refs->num_allocated = num;
-    }
-    refs->num_required = num;
-}
-
 static bool update_pipeline(struct vf_instance *vf, bool deint)
 {
     struct vf_priv_s *p = vf->priv;
@@ -120,8 +110,8 @@ static bool update_pipeline(struct vf_instance *vf, bool deint)
     p->pipe.num_filters = num_filters;
     p->pipe.num_input_colors = caps.num_input_color_standards;
     p->pipe.num_output_colors = caps.num_output_color_standards;
-    realloc_refs(&p->pipe.forward, caps.num_forward_references);
-    realloc_refs(&p->pipe.backward, caps.num_backward_references);
+    MP_TARRAY_GROW(vf, p->pipe.forward.surfaces, caps.num_forward_references);
+    MP_TARRAY_GROW(vf, p->pipe.backward.surfaces, caps.num_backward_references);
     return true;
 }
 
@@ -295,8 +285,6 @@ static void uninit(struct vf_instance *vf)
         vaDestroyContext(p->display, p->context);
     if (p->config != VA_INVALID_ID)
         vaDestroyConfig(p->display, p->config);
-    free(p->pipe.forward.surfaces);
-    free(p->pipe.backward.surfaces);
     talloc_free(p->pool);
 }
 
