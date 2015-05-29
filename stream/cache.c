@@ -215,6 +215,12 @@ static bool cache_fill(struct priv *s)
     // number of buffer bytes which should be preserved in backwards direction
     int64_t back = MPCLAMP(read - s->min_filepos, 0, s->back_size);
 
+    // limit maximum readahead to half the total buffer size, to ensure that
+    // we don't stall the network when starting a file (not reading new data
+    // by preserving the backbuffer) - unless the whole file fits in the cache
+    if (s->stream_size > s->buffer_size)
+        back = MPMAX(back, s->buffer_size / 2);
+
     // number of buffer bytes that are valid and can be read
     int64_t newb = FFMAX(s->max_filepos - read, 0);
 
