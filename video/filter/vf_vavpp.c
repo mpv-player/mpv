@@ -168,11 +168,13 @@ static struct mp_image *render(struct vf_instance *vf, struct mp_image *in,
         param->filter_flags = flags;
         param->filters = p->pipe.filters;
         param->num_filters = p->pipe.num_filters;
-        vaUnmapBuffer(p->display, buffer);
         param->forward_references = p->pipe.forward.surfaces;
         param->backward_references = p->pipe.backward.surfaces;
-        param->num_forward_references = p->pipe.forward.num_required;
-        param->num_backward_references = p->pipe.backward.num_required;
+        param->num_forward_references = 0;
+        param->num_backward_references = 0;
+
+        vaUnmapBuffer(p->display, buffer);
+
         status = vaRenderPicture(p->display, p->context, &buffer, 1);
         if (!check_error(vf, status, "vaRenderPicture()"))
             break;
