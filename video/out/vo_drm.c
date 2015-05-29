@@ -41,6 +41,9 @@
 #include "video/sws_utils.h"
 #include "vo.h"
 
+#define IMGFMT IMGFMT_BGR0
+#define BYTES_PER_PIXEL 4
+#define BITS_PER_PIXEL 32
 #define USE_MASTER 0
 #define BUF_COUNT 2
 
@@ -79,7 +82,6 @@ struct priv {
 
     int32_t device_w;
     int32_t device_h;
-    int32_t x, y;
     struct mp_image *last_input;
     struct mp_image *cur_frame;
     struct mp_rect src;
@@ -134,7 +136,7 @@ static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
     struct drm_mode_create_dumb creq = {
         .width = buf->width,
         .height = buf->height,
-        .bpp = 32,
+        .bpp = BITS_PER_PIXEL,
     };
     ret = drmIoctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &creq);
     if (ret < 0) {
@@ -147,7 +149,7 @@ static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
     buf->handle = creq.handle;
 
     // create framebuffer object for the dumb-buffer
-    ret = drmModeAddFB(fd, buf->width, buf->height, 24, 32, buf->stride,
+    ret = drmModeAddFB(fd, buf->width, buf->height, 24, creq.bpp, buf->stride,
                        buf->handle, &buf->fb);
     if (ret) {
         MP_ERR(vo, "Cannot create framebuffer: %s\n", mp_strerror(errno));
@@ -451,8 +453,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     vo->dheight = p->device_h;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
 
-    int32_t w = p->dst.x1 - p->dst.x0;
-    int32_t h = p->dst.y1 - p->dst.y0;
+    int w = p->dst.x1 - p->dst.x0;
+    int h = p->dst.y1 - p->dst.y0;
 
     // p->osd contains the parameters assuming OSD rendering in window
     // coordinates, but OSD can only be rendered in the intersection
@@ -464,13 +466,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     p->osd.mr = MPMIN(0, p->osd.mr);
     p->osd.ml = MPMIN(0, p->osd.ml);
 
-    p->x = (p->device_w - w) >> 1;
-    p->y = (p->device_h - h) >> 1;
-
     mp_sws_set_from_cmdline(p->sws, vo->opts->sws_opts);
     p->sws->src = *params;
     p->sws->dst = (struct mp_image_params) {
-        .imgfmt = IMGFMT_BGR0,
+        .imgfmt = IMGFMT,
         .w = w,
         .h = h,
         .d_w = w,
@@ -478,7 +477,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     };
 
     talloc_free(p->cur_frame);
-    p->cur_frame = mp_image_alloc(IMGFMT_BGR0, p->device_w, p->device_h);
+    p->cur_frame = mp_image_alloc(IMGFMT, p->device_w, p->device_h);
     mp_image_params_guess_csp(&p->sws->dst);
     mp_image_set_params(p->cur_frame, &p->sws->dst);
 
@@ -507,11 +506,15 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         osd_draw_on_image(vo->osd, p->osd, src.pts, 0, p->cur_frame);
 
         struct modeset_buf *front_buf = &p->dev->bufs[p->dev->front_buf];
-        int32_t shift = (p->device_w * p->y + p->x) * 4;
+        int w = p->dst.x1 - p->dst.x0;
+        int h = p->dst.y1 - p->dst.y0;
+        int x = (p->device_w - w) >> 1;
+        int y = (p->device_h - h) >> 1;
+        int shift = y * front_buf->stride + x * BYTES_PER_PIXEL;
         memcpy_pic(front_buf->map + shift,
                    p->cur_frame->planes[0],
-                   (p->dst.x1 - p->dst.x0) * 4,
-                   p->dst.y1 - p->dst.y0,
+                   w * BYTES_PER_PIXEL,
+                   h,
                    front_buf->stride,
                    p->cur_frame->stride[0]);
     }
