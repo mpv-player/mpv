@@ -596,12 +596,14 @@ static MPGLContext *init_backend(struct vo *vo, const struct backend *backend,
     bool old_probing = vo->probing;
     vo->probing = probing; // hack; kill it once backends are separate
     if (ctx->driver) {
+        MP_VERBOSE(vo, "Initializing OpenGL backend '%s'\n", ctx->driver->name);
         ctx->priv = talloc_zero_size(ctx, ctx->driver->priv_size);
         if (ctx->driver->init(ctx, vo_flags) < 0) {
             talloc_free(ctx);
             return NULL;
         }
     } else {
+        MP_VERBOSE(vo, "Initializing OpenGL backend '%s'\n", backend->name);
         backend->init(ctx);
         if (!ctx->vo_init(vo)) {
             talloc_free(ctx);
