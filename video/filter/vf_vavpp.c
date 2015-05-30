@@ -159,6 +159,8 @@ static struct mp_image *render(struct vf_instance *vf, struct mp_image *in,
         if (!check_error(vf, status, "vaMapBuffer()"))
             break;
         filter_params->flags = flags & VA_TOP_FIELD ? 0 : VA_DEINTERLACING_BOTTOM_FIELD;
+        if (!(in->fields & MP_IMGFIELD_TOP_FIRST))
+          filter_params->flags |= VA_DEINTERLACING_BOTTOM_FIELD_FIRST;
         vaUnmapBuffer(p->display, *(p->pipe.filters));
 
         param->surface = in_id;
