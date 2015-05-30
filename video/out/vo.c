@@ -80,6 +80,9 @@ const struct vo_driver *const video_out_drivers[] =
     &video_out_direct3d_shaders,
     &video_out_direct3d,
 #endif
+#if HAVE_WAYLAND
+    &video_out_wayland,
+#endif
 #if HAVE_XV
     &video_out_xv,
 #endif
@@ -107,9 +110,6 @@ const struct vo_driver *const video_out_drivers[] =
 #if HAVE_GL
     &video_out_opengl_hq,
     &video_out_opengl_cb,
-#endif
-#if HAVE_WAYLAND
-    &video_out_wayland,
 #endif
     NULL
 };
