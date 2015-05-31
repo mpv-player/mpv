@@ -86,8 +86,8 @@ static bool update_pipeline(struct vf_instance *vf, bool deint)
     VABufferID *filters = p->buffers;
     int num_filters = p->num_buffers;
     if (p->deint_type && !deint) {
-        ++filters;
-        --num_filters;
+        filters++;
+        num_filters--;
     }
     if (filters == p->pipe.filters && num_filters == p->pipe.num_filters)
         return true;
@@ -116,7 +116,7 @@ static bool update_pipeline(struct vf_instance *vf, bool deint)
 }
 
 static inline int get_deint_field(struct vf_priv_s *p, int i,
-                                  const struct mp_image *mpi)
+                                  struct mp_image *mpi)
 {
     if (!p->do_deint || !(mpi->fields & MP_IMGFIELD_INTERLACED))
         return VA_FRAME_PICTURE;
@@ -193,13 +193,13 @@ static struct mp_image *render(struct vf_instance *vf, struct mp_image *in,
 static void process(struct vf_instance *vf, struct mp_image *in)
 {
     struct vf_priv_s *p = vf->priv;
-    const bool deint = p->do_deint && p->deint_type > 0;
+    bool deint = p->do_deint && p->deint_type > 0;
     if (!update_pipeline(vf, deint) || !p->pipe.filters) { // no filtering
         vf_add_output_frame(vf, mp_image_new_ref(in));
         return;
     }
-    const unsigned int csp = va_get_colorspace_flag(p->params.colorspace);
-    const unsigned int field = get_deint_field(p, 0, in);
+    unsigned int csp = va_get_colorspace_flag(p->params.colorspace);
+    unsigned int field = get_deint_field(p, 0, in);
     struct mp_image *out1 = render(vf, in, field | csp);
     if (!out1) { // cannot render
         vf_add_output_frame(vf, mp_image_new_ref(in));
@@ -210,7 +210,7 @@ static void process(struct vf_instance *vf, struct mp_image *in)
     // first-field only
     if (field == VA_FRAME_PICTURE || (p->do_deint && p->deint_type < 2))
         return;
-    const double add = (in->pts - p->prev_pts)*0.5;
+    double add = (in->pts - p->prev_pts) * 0.5;
     if (p->prev_pts == MP_NOPTS_VALUE || add <= 0.0 || add > 0.5) // no pts, skip it
         return;
     struct mp_image *out2 = render(vf, in, get_deint_field(p, 1, in) | csp);
@@ -278,7 +278,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
 static void uninit(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
-    for (int i=0; i<p->num_buffers; ++i)
+    for (int i = 0; i < p->num_buffers; i++)
         vaDestroyBuffer(p->display, p->buffers[i]);
     if (p->context != VA_INVALID_ID)
         vaDestroyContext(p->display, p->context);
@@ -355,9 +355,9 @@ static bool initialize(struct vf_instance *vf)
         return false;
 
     VABufferID buffers[VAProcFilterCount];
-    for (int i=0; i<VAProcFilterCount; ++i)
+    for (int i = 0; i < VAProcFilterCount; i++)
         buffers[i] = VA_INVALID_ID;
-    for (int i=0; i<num_filters; ++i) {
+    for (int i = 0; i < num_filters; i++) {
         if (filters[i] == VAProcFilterDeinterlacing) {
             if (p->deint_type < 2)
                 continue;
