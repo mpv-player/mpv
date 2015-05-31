@@ -15,6 +15,8 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <assert.h>
+
 #include <va/va.h>
 #include <va/va_vpp.h>
 
@@ -35,8 +37,15 @@ static bool check_error(struct vf_instance *vf, VAStatus status, const char *msg
 
 struct surface_refs {
     VASurfaceID *surfaces;
-    int num_required;
+    int num_surfaces;
 };
+
+static void add_surface(void *ta_ctx, struct surface_refs *refs, struct mp_image *s)
+{
+    VASurfaceID id = va_surface_id(s);
+    if (id != VA_INVALID_ID)
+        MP_TARRAY_APPEND(ta_ctx, refs->surfaces, refs->num_surfaces, id);
+}
 
 struct pipeline {
     VABufferID *filters;
@@ -48,7 +57,6 @@ struct pipeline {
 };
 
 struct vf_priv_s {
-    double prev_pts;
     int deint_type; // 0: none, 1: discard, 2: double fps
     bool do_deint;
     VABufferID buffers[VAProcFilterCount];
@@ -61,10 +69,20 @@ struct vf_priv_s {
     struct pipeline pipe;
     struct mp_image_pool *pool;
     int current_rt_format;
+
+    int needed_future_frames;
+    int needed_past_frames;
+
+    // Queue of input frames, used to determine past/current/future frames.
+    // queue[0] is the newest frame, queue[num_queue - 1] the oldest.
+    struct mp_image **queue;
+    int num_queue;
+    // queue[current_pos] is the current frame, unless current_pos is not a
+    // valid index.
+    int current_pos;
 };
 
 static const struct vf_priv_s vf_priv_default = {
-    .prev_pts = MP_NOPTS_VALUE,
     .config = VA_INVALID_ID,
     .context = VA_INVALID_ID,
     .deint_type = 2,
@@ -80,6 +98,15 @@ static const int deint_algorithm[] = {
     [5] = VAProcDeinterlacingMotionCompensated,
 };
 
+static void flush_frames(struct vf_instance *vf)
+{
+    struct vf_priv_s *p = vf->priv;
+    for (int n = 0; n < p->num_queue; n++)
+        talloc_free(p->queue[n]);
+    p->num_queue = 0;
+    p->current_pos = -1;
+}
+
 static bool update_pipeline(struct vf_instance *vf, bool deint)
 {
     struct vf_priv_s *p = vf->priv;
@@ -91,7 +118,7 @@ static bool update_pipeline(struct vf_instance *vf, bool deint)
     }
     if (filters == p->pipe.filters && num_filters == p->pipe.num_filters)
         return true;
-    p->pipe.forward.num_required = p->pipe.backward.num_required = 0;
+    p->pipe.forward.num_surfaces = p->pipe.backward.num_surfaces = 0;
     p->pipe.num_input_colors = p->pipe.num_output_colors = 0;
     p->pipe.num_filters = 0;
     p->pipe.filters = NULL;
@@ -110,8 +137,8 @@ static bool update_pipeline(struct vf_instance *vf, bool deint)
     p->pipe.num_filters = num_filters;
     p->pipe.num_input_colors = caps.num_input_color_standards;
     p->pipe.num_output_colors = caps.num_output_color_standards;
-    MP_TARRAY_GROW(vf, p->pipe.forward.surfaces, caps.num_forward_references);
-    MP_TARRAY_GROW(vf, p->pipe.backward.surfaces, caps.num_backward_references);
+    p->needed_future_frames = caps.num_forward_references;
+    p->needed_past_frames = caps.num_backward_references;
     return true;
 }
 
@@ -178,10 +205,22 @@ static struct mp_image *render(struct vf_instance *vf, struct mp_image *in,
     param->filter_flags = flags;
     param->filters = p->pipe.filters;
     param->num_filters = p->pipe.num_filters;
+
+    for (int n = 0; n < p->needed_future_frames; n++) {
+        int idx = p->current_pos - 1 - n;
+        if (idx >= 0 && idx < p->num_queue)
+            add_surface(p, &p->pipe.forward, p->queue[idx]);
+    }
     param->forward_references = p->pipe.forward.surfaces;
+    param->num_forward_references = p->pipe.forward.num_surfaces;
+
+    for (int n = 0; n < p->needed_past_frames; n++) {
+        int idx = p->current_pos + 1 + n;
+        if (idx >= 0 && idx < p->num_queue)
+            add_surface(p, &p->pipe.backward, p->queue[idx]);
+    }
     param->backward_references = p->pipe.backward.surfaces;
-    param->num_forward_references = 0;
-    param->num_backward_references = 0;
+    param->num_backward_references = p->pipe.backward.num_surfaces;
 
     vaUnmapBuffer(p->display, buffer);
 
@@ -200,9 +239,14 @@ cleanup:
     return NULL;
 }
 
-static void process(struct vf_instance *vf, struct mp_image *in)
+static void output_frames(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
+
+    struct mp_image *in = p->queue[p->current_pos];
+    double prev_pts = p->current_pos + 1 < p->num_queue
+        ? p->queue[p->current_pos + 1]->pts : MP_NOPTS_VALUE;
+
     bool deint = p->do_deint && p->deint_type > 0;
     if (!update_pipeline(vf, deint) || !p->pipe.filters) { // no filtering
         vf_add_output_frame(vf, mp_image_new_ref(in));
@@ -220,8 +264,8 @@ static void process(struct vf_instance *vf, struct mp_image *in)
     // first-field only
     if (field == VA_FRAME_PICTURE || (p->do_deint && p->deint_type < 2))
         return;
-    double add = (in->pts - p->prev_pts) * 0.5;
-    if (p->prev_pts == MP_NOPTS_VALUE || add <= 0.0 || add > 0.5) // no pts, skip it
+    double add = (in->pts - prev_pts) * 0.5;
+    if (prev_pts == MP_NOPTS_VALUE || add <= 0.0 || add > 0.5) // no pts, skip it
         return;
     struct mp_image *out2 = render(vf, in, get_deint_field(p, 1, in) | csp);
     if (!out2) // cannot render
@@ -249,27 +293,46 @@ static struct mp_image *upload(struct vf_instance *vf, struct mp_image *in)
 static int filter_ext(struct vf_instance *vf, struct mp_image *in)
 {
     struct vf_priv_s *p = vf->priv;
-    if (!in)
-        return 0;
-    int rt_format = in->imgfmt == IMGFMT_VAAPI ? va_surface_rt_format(in)
-                                               : VA_RT_FORMAT_YUV420;
-    if (!p->pool || p->current_rt_format != rt_format) {
-        talloc_free(p->pool);
-        p->pool = mp_image_pool_new(20);
-        va_pool_set_allocator(p->pool, p->va, rt_format);
-        p->current_rt_format = rt_format;
-    }
-    if (in->imgfmt != IMGFMT_VAAPI) {
-        struct mp_image *tmp = upload(vf, in);
-        talloc_free(in);
-        in = tmp;
-        if (!in)
-            return -1;
+
+    if (in) {
+        int rt_format = in->imgfmt == IMGFMT_VAAPI ? va_surface_rt_format(in)
+                                                   : VA_RT_FORMAT_YUV420;
+        if (!p->pool || p->current_rt_format != rt_format) {
+            talloc_free(p->pool);
+            p->pool = mp_image_pool_new(20);
+            va_pool_set_allocator(p->pool, p->va, rt_format);
+            p->current_rt_format = rt_format;
+        }
+        if (in->imgfmt != IMGFMT_VAAPI) {
+            struct mp_image *tmp = upload(vf, in);
+            talloc_free(in);
+            in = tmp;
+            if (!in)
+                return -1;
+        }
     }
 
-    process(vf, in);
-    p->prev_pts = in->pts;
-    talloc_free(in);
+    if (in) {
+        MP_TARRAY_INSERT_AT(p, p->queue, p->num_queue, 0, in);
+        p->current_pos++;
+        assert(p->num_queue != 1 || p->current_pos == 0);
+    }
+
+    // Discard unneeded past frames.
+    // Note that we keep at least 1 past frame (for PTS calculations).
+    while (p->num_queue - (p->current_pos + 1) > MPMAX(p->needed_past_frames, 1)) {
+        assert(p->num_queue > 0);
+        talloc_free(p->queue[p->num_queue - 1]);
+        p->num_queue--;
+    }
+
+    if (p->current_pos < p->needed_future_frames && in)
+        return 0; // wait until future frames have been filled
+
+    if (p->current_pos >= 0 && p->current_pos < p->num_queue) {
+        output_frames(vf);
+        p->current_pos--;
+    }
     return 0;
 }
 
@@ -278,10 +341,10 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
 {
     struct vf_priv_s *p = vf->priv;
 
-    p->prev_pts = MP_NOPTS_VALUE;
     p->params = *in;
     *out = *in;
     out->imgfmt = IMGFMT_VAAPI;
+    flush_frames(vf);
     return 0;
 }
 
@@ -295,6 +358,7 @@ static void uninit(struct vf_instance *vf)
     if (p->config != VA_INVALID_ID)
         vaDestroyConfig(p->display, p->config);
     talloc_free(p->pool);
+    flush_frames(vf);
 }
 
 static int query_format(struct vf_instance *vf, unsigned int imgfmt)
@@ -314,6 +378,9 @@ static int control(struct vf_instance *vf, int request, void* data)
         return true;
     case VFCTRL_SET_DEINTERLACE:
         p->do_deint = *(int*)data;
+        return true;
+    case VFCTRL_SEEK_RESET:
+        flush_frames(vf);
         return true;
     default:
         return CONTROL_UNKNOWN;
