@@ -190,32 +190,36 @@ static struct mp_image *render(struct vf_instance *vf, struct mp_image *in,
     return NULL;
 }
 
-// return value: the number of created images
-static int process(struct vf_instance *vf, struct mp_image *in,
-                   struct mp_image **out1, struct mp_image **out2)
+static void process(struct vf_instance *vf, struct mp_image *in)
 {
     struct vf_priv_s *p = vf->priv;
     const bool deint = p->do_deint && p->deint_type > 0;
-    if (!update_pipeline(vf, deint) || !p->pipe.filters) // no filtering
-        return 0;
+    if (!update_pipeline(vf, deint) || !p->pipe.filters) { // no filtering
+        vf_add_output_frame(vf, mp_image_new_ref(in));
+        return;
+    }
     const unsigned int csp = va_get_colorspace_flag(p->params.colorspace);
     const unsigned int field = get_deint_field(p, 0, in);
-    *out1 = render(vf, in, field | csp);
-    if (!*out1) // cannot render
-        return 0;
-    mp_image_copy_attributes(*out1, in);
+    struct mp_image *out1 = render(vf, in, field | csp);
+    if (!out1) { // cannot render
+        vf_add_output_frame(vf, mp_image_new_ref(in));
+        return;
+    }
+    mp_image_copy_attributes(out1, in);
+    vf_add_output_frame(vf, out1);
     // first-field only
     if (field == VA_FRAME_PICTURE || (p->do_deint && p->deint_type < 2))
-        return 1;
+        return;
     const double add = (in->pts - p->prev_pts)*0.5;
     if (p->prev_pts == MP_NOPTS_VALUE || add <= 0.0 || add > 0.5) // no pts, skip it
-        return 1;
-    *out2 = render(vf, in, get_deint_field(p, 1, in) | csp);
-    if (!*out2) // cannot render
-        return 1;
-    mp_image_copy_attributes(*out2, in);
-    (*out2)->pts = in->pts + add;
-    return 2;
+        return;
+    struct mp_image *out2 = render(vf, in, get_deint_field(p, 1, in) | csp);
+    if (!out2) // cannot render
+        return;
+    mp_image_copy_attributes(out2, in);
+    out2->pts = in->pts + add;
+    vf_add_output_frame(vf, out2);
+    return;
 }
 
 static struct mp_image *upload(struct vf_instance *vf, struct mp_image *in)
@@ -253,18 +257,9 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *in)
             return -1;
     }
 
-    struct mp_image *out1, *out2;
-    const double pts = in->pts;
-    const int num = process(vf, in, &out1, &out2);
-    if (!num)
-        vf_add_output_frame(vf, in);
-    else {
-        vf_add_output_frame(vf, out1);
-        if (num > 1)
-            vf_add_output_frame(vf, out2);
-        talloc_free(in);
-    }
-    p->prev_pts = pts;
+    process(vf, in);
+    p->prev_pts = in->pts;
+    talloc_free(in);
     return 0;
 }
 
