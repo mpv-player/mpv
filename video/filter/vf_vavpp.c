@@ -130,61 +130,71 @@ static struct mp_image *render(struct vf_instance *vf, struct mp_image *in,
     VASurfaceID in_id = va_surface_id(in);
     if (!p->pipe.filters || in_id == VA_INVALID_ID)
         return NULL;
+
     struct mp_image *img = mp_image_pool_get(p->pool, IMGFMT_VAAPI, in->w, in->h);
     if (!img)
         return NULL;
-    enum {Begun = 1, Rendered = 2};
-    int state = 0;
-    do { // not a loop, just for break
-        VASurfaceID id = va_surface_id(img);
-        if (id == VA_INVALID_ID)
-            break;
-        VAStatus status = vaBeginPicture(p->display, p->context, id);
-        if (!check_error(vf, status, "vaBeginPicture()"))
-            break;
-        state |= Begun;
-        VABufferID buffer = VA_INVALID_ID;
-        VAProcPipelineParameterBuffer *param = NULL;
-        status = vaCreateBuffer(p->display, p->context,
-                                VAProcPipelineParameterBufferType,
-                                sizeof(*param), 1, NULL, &buffer);
-        if (!check_error(vf, status, "vaCreateBuffer()"))
-            break;
-        status = vaMapBuffer(p->display, buffer, (void**)&param);
-        if (!check_error(vf, status, "vaMapBuffer()"))
-            break;
 
-        VAProcFilterParameterBufferDeinterlacing *filter_params;
-        status = vaMapBuffer(p->display, *(p->pipe.filters), (void**)&filter_params);
-        if (!check_error(vf, status, "vaMapBuffer()"))
-            break;
-        filter_params->flags = flags & VA_TOP_FIELD ? 0 : VA_DEINTERLACING_BOTTOM_FIELD;
-        if (!(in->fields & MP_IMGFIELD_TOP_FIRST))
-          filter_params->flags |= VA_DEINTERLACING_BOTTOM_FIELD_FIRST;
-        vaUnmapBuffer(p->display, *(p->pipe.filters));
+    bool need_end_picture = false;
+    bool success = false;
 
-        param->surface = in_id;
-        param->surface_region = NULL;
-        param->output_region = NULL;
-        param->output_background_color = 0;
-        param->filter_flags = flags;
-        param->filters = p->pipe.filters;
-        param->num_filters = p->pipe.num_filters;
-        param->forward_references = p->pipe.forward.surfaces;
-        param->backward_references = p->pipe.backward.surfaces;
-        param->num_forward_references = 0;
-        param->num_backward_references = 0;
+    VASurfaceID id = va_surface_id(img);
+    if (id == VA_INVALID_ID)
+        goto cleanup;
 
-        vaUnmapBuffer(p->display, buffer);
+    VAStatus status = vaBeginPicture(p->display, p->context, id);
+    if (!check_error(vf, status, "vaBeginPicture()"))
+        goto cleanup;
 
-        status = vaRenderPicture(p->display, p->context, &buffer, 1);
-        if (!check_error(vf, status, "vaRenderPicture()"))
-            break;
-        state |= Rendered;
-    } while (false);
-    if (state & Begun)
+    need_end_picture = true;
+
+    VABufferID buffer = VA_INVALID_ID;
+    VAProcPipelineParameterBuffer *param = NULL;
+    status = vaCreateBuffer(p->display, p->context,
+                            VAProcPipelineParameterBufferType,
+                            sizeof(*param), 1, NULL, &buffer);
+    if (!check_error(vf, status, "vaCreateBuffer()"))
+        goto cleanup;
+
+    status = vaMapBuffer(p->display, buffer, (void**)&param);
+    if (!check_error(vf, status, "vaMapBuffer()"))
+        goto cleanup;
+
+    VAProcFilterParameterBufferDeinterlacing *filter_params;
+    status = vaMapBuffer(p->display, *(p->pipe.filters), (void**)&filter_params);
+    if (!check_error(vf, status, "vaMapBuffer()"))
+        goto cleanup;
+
+    filter_params->flags = flags & VA_TOP_FIELD ? 0 : VA_DEINTERLACING_BOTTOM_FIELD;
+    if (!(in->fields & MP_IMGFIELD_TOP_FIRST))
+        filter_params->flags |= VA_DEINTERLACING_BOTTOM_FIELD_FIRST;
+
+    vaUnmapBuffer(p->display, *(p->pipe.filters));
+
+    param->surface = in_id;
+    param->surface_region = NULL;
+    param->output_region = NULL;
+    param->output_background_color = 0;
+    param->filter_flags = flags;
+    param->filters = p->pipe.filters;
+    param->num_filters = p->pipe.num_filters;
+    param->forward_references = p->pipe.forward.surfaces;
+    param->backward_references = p->pipe.backward.surfaces;
+    param->num_forward_references = 0;
+    param->num_backward_references = 0;
+
+    vaUnmapBuffer(p->display, buffer);
+
+    status = vaRenderPicture(p->display, p->context, &buffer, 1);
+    if (!check_error(vf, status, "vaRenderPicture()"))
+        goto cleanup;
+
+    success = true;
+
+cleanup:
+    if (need_end_picture)
         vaEndPicture(p->display, p->context);
-    if (state & Rendered)
+    if (success)
         return img;
     talloc_free(img);
     return NULL;
