@@ -99,6 +99,17 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
         (idxvar)++;                                 \
     } while (0)
 
+#define MP_TARRAY_INSERT_AT(ctx, p, idxvar, at, ...)\
+    do {                                            \
+        size_t at_ = (at);                          \
+        assert(at_ <= (idxvar));                    \
+        MP_TARRAY_GROW(ctx, p, idxvar);             \
+        memmove((p) + at_ + 1, (p) + at_,           \
+                ((idxvar) - at_) * sizeof((p)[0])); \
+        (idxvar)++;                                 \
+        (p)[at_] = (TA_EXPAND_ARGS(__VA_ARGS__));   \
+    } while (0)
+
 // Doesn't actually free any memory, or do any other talloc calls.
 #define MP_TARRAY_REMOVE_AT(p, idxvar, at)          \
     do {                                            \
