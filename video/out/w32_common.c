@@ -1070,8 +1070,6 @@ static void gui_thread_reconfig(void *ptr)
     struct vo_win_geometry geo;
     vo_calc_window_geometry(vo, &w32->screenrc, &geo);
     vo_apply_window_geometry(vo, &geo);
-    w32->dw = vo->dwidth;
-    w32->dh = vo->dheight;
 
     bool reset_size = w32->o_dwidth != vo->dwidth || w32->o_dheight != vo->dheight;
 
@@ -1104,6 +1102,9 @@ static void gui_thread_reconfig(void *ptr)
         vo->dwidth = r.right;
         vo->dheight = r.bottom;
     }
+
+    w32->dw = vo->dwidth;
+    w32->dh = vo->dheight;
 
     *res = reinit_window_state(w32);
 }
