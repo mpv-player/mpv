@@ -247,7 +247,8 @@ void cocoa_set_input_context(struct input_ctx *input_context)
 - (void)wakeup
 {
     [_input_lock lock];
-    mp_input_wakeup(_inputContext);
+    if (_inputContext)
+        mp_input_wakeup(_inputContext);
     [_input_lock unlock];
 }
 
