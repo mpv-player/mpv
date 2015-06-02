@@ -99,9 +99,9 @@ static void drop_all_output(struct af_resample *s)
 {
     while (avresample_read(s->avrctx, NULL, 1000) > 0) {}
 }
-static int get_drain_samples(struct af_resample *s)
+static int get_out_samples(struct af_resample *s, int in_samples)
 {
-    return avresample_get_out_samples(s->avrctx, 0);
+    return avresample_get_out_samples(s->avrctx, in_samples);
 }
 #else
 static int get_delay(struct af_resample *s)
@@ -112,9 +112,10 @@ static void drop_all_output(struct af_resample *s)
 {
     while (swr_drop_output(s->avrctx, 1000) > 0) {}
 }
-static int get_drain_samples(struct af_resample *s)
+static int get_out_samples(struct af_resample *s, int in_samples)
 {
-    return 4096; // libswscale does not have this
+    return av_rescale_rnd(get_delay(s) + in_samples,
+                          s->ctx.out_rate, s->ctx.in_rate, AV_ROUND_UP);
 }
 #endif
 
@@ -405,9 +406,7 @@ static int filter(struct af_instance *af, struct mp_audio *in)
 {
     struct af_resample *s = af->priv;
 
-    int samples = avresample_available(s->avrctx) +
-        av_rescale_rnd(get_delay(s) + (in ? in->samples : 0),
-                       s->ctx.out_rate, s->ctx.in_rate, AV_ROUND_UP);
+    int samples = get_out_samples(s, in ? in->samples : 0);
 
     struct mp_audio out_format = s->avrctx_fmt;
     struct mp_audio *out = mp_audio_pool_get(af->out_pool, &out_format, samples);
