@@ -307,7 +307,8 @@ done:
 // Uninitialize and destroy the AO. Remaining audio must be dropped.
 void ao_uninit(struct ao *ao)
 {
-    ao->api->uninit(ao);
+    if (ao)
+        ao->api->uninit(ao);
     talloc_free(ao);
 }
 
