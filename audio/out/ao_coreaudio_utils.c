@@ -28,6 +28,7 @@
 #include "audio/out/ao_coreaudio_properties.h"
 #include "osdep/timer.h"
 #include "osdep/endian.h"
+#include "osdep/semaphore.h"
 #include "audio/format.h"
 
 CFStringRef cfstr_from_cstr(char *str)
@@ -194,7 +195,7 @@ void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd)
     ca_fill_asbd_raw(asbd, ao->format, ao->samplerate, ao->channels.num);
 }
 
-static bool ca_formatid_is_digital(uint32_t formatid)
+bool ca_formatid_is_compressed(uint32_t formatid)
 {
     switch (formatid)
     case 'IAC3':
@@ -208,7 +209,7 @@ static bool ca_formatid_is_digital(uint32_t formatid)
 // This might be wrong, but for now it's sufficient for us.
 static uint32_t ca_normalize_formatid(uint32_t formatID)
 {
-    return ca_formatid_is_digital(formatID) ? kAudioFormat60958AC3 : formatID;
+    return ca_formatid_is_compressed(formatID) ? kAudioFormat60958AC3 : formatID;
 }
 
 bool ca_asbd_equals(const AudioStreamBasicDescription *a,
@@ -317,3 +318,196 @@ int64_t ca_get_latency(const AudioTimeStamp *ts)
 
     return (out - now) * 1e-3;
 }
+
+bool ca_stream_supports_compressed(struct ao *ao, AudioStreamID stream)
+{
+    AudioStreamRangedDescription *formats = NULL;
+    size_t n_formats;
+
+    OSStatus err =
+        CA_GET_ARY(stream, kAudioStreamPropertyAvailablePhysicalFormats,
+                   &formats, &n_formats);
+
+    CHECK_CA_ERROR("Could not get number of stream formats.");
+
+    for (int i = 0; i < n_formats; i++) {
+        AudioStreamBasicDescription asbd = formats[i].mFormat;
+        ca_print_asbd(ao, "supported format:", &(asbd));
+        if (ca_formatid_is_compressed(asbd.mFormatID)) {
+            talloc_free(formats);
+            return true;
+        }
+    }
+
+    talloc_free(formats);
+coreaudio_error:
+    return false;
+}
+
+bool ca_device_supports_compressed(struct ao *ao, AudioDeviceID device)
+{
+    AudioStreamID *streams = NULL;
+    size_t n_streams;
+
+    /* Retrieve all the output streams. */
+    OSStatus err =
+        CA_GET_ARY_O(device, kAudioDevicePropertyStreams, &streams, &n_streams);
+
+    CHECK_CA_ERROR("could not get number of streams.");
+
+    for (int i = 0; i < n_streams; i++) {
+        if (ca_stream_supports_compressed(ao, streams[i])) {
+            talloc_free(streams);
+            return true;
+        }
+    }
+
+    talloc_free(streams);
+
+coreaudio_error:
+    return false;
+}
+
+OSStatus ca_lock_device(AudioDeviceID device, pid_t *pid)
+{
+    *pid = getpid();
+    OSStatus err = CA_SET(device, kAudioDevicePropertyHogMode, pid);
+    if (err != noErr)
+        *pid = -1;
+
+    return err;
+}
+
+OSStatus ca_unlock_device(AudioDeviceID device, pid_t *pid)
+{
+    if (*pid == getpid()) {
+        *pid = -1;
+        return CA_SET(device, kAudioDevicePropertyHogMode, &pid);
+    }
+    return noErr;
+}
+
+static OSStatus ca_change_mixing(struct ao *ao, AudioDeviceID device,
+                                 uint32_t val, bool *changed)
+{
+    *changed = false;
+
+    AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
+        .mSelector = kAudioDevicePropertySupportsMixing,
+        .mScope    = kAudioObjectPropertyScopeGlobal,
+        .mElement  = kAudioObjectPropertyElementMaster,
+    };
+
+    if (AudioObjectHasProperty(device, &p_addr)) {
+        OSStatus err;
+        Boolean writeable = 0;
+        err = CA_SETTABLE(device, kAudioDevicePropertySupportsMixing,
+                          &writeable);
+
+        if (!CHECK_CA_WARN("can't tell if mixing property is settable")) {
+            return err;
+        }
+
+        if (!writeable)
+            return noErr;
+
+        err = CA_SET(device, kAudioDevicePropertySupportsMixing, &val);
+        if (err != noErr)
+            return err;
+
+        if (!CHECK_CA_WARN("can't set mix mode")) {
+            return err;
+        }
+
+        *changed = true;
+    }
+
+    return noErr;
+}
+
+OSStatus ca_disable_mixing(struct ao *ao, AudioDeviceID device, bool *changed)
+{
+    return ca_change_mixing(ao, device, 0, changed);
+}
+
+OSStatus ca_enable_mixing(struct ao *ao, AudioDeviceID device, bool changed)
+{
+    if (changed) {
+        bool dont_care = false;
+        return ca_change_mixing(ao, device, 1, &dont_care);
+    }
+
+    return noErr;
+}
+
+static OSStatus ca_change_format_listener(
+    AudioObjectID object, uint32_t n_addresses,
+    const AudioObjectPropertyAddress addresses[],
+    void *data)
+{
+    sem_t *sem = data;
+    sem_post(sem);
+    return noErr;
+}
+
+bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
+                                    AudioStreamBasicDescription change_format)
+{
+    OSStatus err = noErr;
+    bool format_set = false;
+
+    ca_print_asbd(ao, "setting stream format:", &change_format);
+
+    sem_t wakeup;
+    if (sem_init(&wakeup, 0, 0)) {
+        MP_WARN(ao, "OOM\n");
+        return false;
+    }
+
+    /* Install the callback. */
+    AudioObjectPropertyAddress p_addr = {
+        .mSelector = kAudioStreamPropertyPhysicalFormat,
+        .mScope    = kAudioObjectPropertyScopeGlobal,
+        .mElement  = kAudioObjectPropertyElementMaster,
+    };
+
+    err = AudioObjectAddPropertyListener(stream, &p_addr,
+                                         ca_change_format_listener,
+                                         &wakeup);
+    CHECK_CA_ERROR("can't add property listener during format change");
+
+    /* Change the format. */
+    err = CA_SET(stream, kAudioStreamPropertyPhysicalFormat, &change_format);
+    CHECK_CA_ERROR("error changing physical format");
+
+    /* The AudioStreamSetProperty is not only asynchronous,
+     * it is also not Atomic, in its behaviour. */
+    struct timespec timeout = mp_rel_time_to_timespec(0.5);
+    AudioStreamBasicDescription actual_format = {0};
+    while (1) {
+        err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &actual_format);
+        if (!CHECK_CA_WARN("could not retrieve physical format"))
+            break;
+
+        format_set = ca_asbd_equals(&change_format, &actual_format);
+        if (format_set)
+            break;
+
+        if (sem_timedwait(&wakeup, &timeout)) {
+            MP_VERBOSE(ao, "reached timeout\n");
+            break;
+        }
+    }
+
+    ca_print_asbd(ao, "actual format in use:", &actual_format);
+
+    err = AudioObjectRemovePropertyListener(stream, &p_addr,
+                                            ca_change_format_listener,
+                                            &wakeup);
+    CHECK_CA_ERROR("can't remove property listener");
+
+coreaudio_error:
+    sem_destroy(&wakeup);
+    return format_set;
+}
+
