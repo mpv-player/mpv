@@ -305,19 +305,34 @@ static OSStatus enable_property_listener(struct ao *ao, bool enabled)
 {
     struct priv *p = ao->priv;
 
-    AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
-        .mSelector = kAudioDevicePropertyDeviceHasChanged,
-        .mScope    = kAudioObjectPropertyScopeGlobal,
-        .mElement  = kAudioObjectPropertyElementMaster,
-    };
+    uint32_t selectors[] = {kAudioDevicePropertyDeviceHasChanged,
+                            kAudioHardwarePropertyDevices};
+    AudioDeviceID devs[] = {p->device,
+                            kAudioObjectSystemObject};
+    assert(MP_ARRAY_SIZE(selectors) == MP_ARRAY_SIZE(devs));
 
-    if (enabled) {
-        return AudioObjectAddPropertyListener(
-            p->device, &p_addr, property_listener_cb, ao);
-    } else {
-        return AudioObjectRemovePropertyListener(
-            p->device, &p_addr, property_listener_cb, ao);
+    OSStatus status = noErr;
+    for (int n = 0; n < MP_ARRAY_SIZE(devs); n++) {
+        AudioObjectPropertyAddress addr = {
+            .mScope    = kAudioObjectPropertyScopeGlobal,
+            .mElement  = kAudioObjectPropertyElementMaster,
+            .mSelector = selectors[n],
+        };
+        AudioDeviceID device = devs[n];
+
+        OSStatus status2;
+        if (enabled) {
+            status2 = AudioObjectAddPropertyListener(
+                device, &addr, property_listener_cb, ao);
+        } else {
+            status2 = AudioObjectRemovePropertyListener(
+                device, &addr, property_listener_cb, ao);
+        }
+        if (status == noErr)
+            status = status2;
     }
+
+    return status;
 }
 
 static OSStatus render_cb_compressed(
