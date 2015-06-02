@@ -420,7 +420,7 @@ static char *replace_idx_ext(void *ta_ctx, bstr f)
     if (f.len < 4 || f.start[f.len - 4] != '.')
         return NULL;
     char *ext = bstr_endswith0(f, "IDX") ? "SUB" : "sub"; // match case
-    return talloc_asprintf(ta_ctx, "%.*s.%s", f.len - 4, f.start, ext);
+    return talloc_asprintf(ta_ctx, "%.*s.%s", BSTR_P(bstr_splice(f, 0, -4)), ext);
 }
 
 static void guess_and_set_vobsub_name(struct demuxer *demuxer, AVDictionary **d)
