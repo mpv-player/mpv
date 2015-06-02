@@ -78,7 +78,6 @@ struct af_resample {
     int allow_detach;
     char **avopts;
     double playback_speed;
-    struct mp_audio *pending;
     bool avrctx_ok;
     struct AVAudioResampleContext *avrctx;
     struct mp_audio avrctx_fmt; // output format of avrctx
@@ -199,9 +198,6 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
 
     avresample_close(s->avrctx);
     avresample_close(s->avrctx_out);
-
-    talloc_free(s->pending);
-    s->pending = NULL;
 
     s->ctx.out_rate    = out->rate;
     s->ctx.in_rate_af  = in->rate;
@@ -363,17 +359,9 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (new_rate != s->ctx.in_rate && s->avrctx_ok && af->fmt_out.format) {
             // Before reconfiguring, drain the audio that is still buffered
             // in the resampler.
-            struct mp_audio *pending = talloc_zero(NULL, struct mp_audio);
-            mp_audio_copy_config(pending, &af->fmt_out);
-            pending->samples = get_drain_samples(s);
-            if (pending->samples > 0) {
-                mp_audio_realloc_min(pending, pending->samples);
-                int r = resample_frame(s->avrctx, pending, NULL);
-                pending->samples = MPMAX(r, 0);
-            }
+            af->filter_frame(af, NULL);
             // Reinitialize resampler.
             configure_lavrr(af, &af->fmt_in, &af->fmt_out);
-            s->pending = pending;
         }
         return AF_OK;
     }
@@ -393,7 +381,6 @@ static void uninit(struct af_instance *af)
     if (s->avrctx_out)
         avresample_close(s->avrctx_out);
     avresample_free(&s->avrctx_out);
-    talloc_free(s->pending);
 }
 
 static void reorder_planes(struct mp_audio *mpa, int *reorder,
@@ -417,15 +404,6 @@ static void reorder_planes(struct mp_audio *mpa, int *reorder,
 static int filter(struct af_instance *af, struct mp_audio *in)
 {
     struct af_resample *s = af->priv;
-
-    if (s->pending) {
-        if (s->pending->samples) {
-            af_add_output_frame(af, s->pending);
-        } else {
-            talloc_free(s->pending);
-        }
-        s->pending = NULL;
-    }
 
     int samples = avresample_available(s->avrctx) +
         av_rescale_rnd(get_delay(s) + (in ? in->samples : 0),
