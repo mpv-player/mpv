@@ -47,7 +47,7 @@ judge()
         progressive=$((progressive + progressive1))
         undetermined=$((undetermined + undetermined1))
     done <<EOF
-$(testfun "$@")
+$(testfun "$@" | sed 's/:/: /g')
 EOF
 
     interlaced=$((bff + tff))
