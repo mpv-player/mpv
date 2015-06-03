@@ -1799,12 +1799,14 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
         mp_switch_track_n(mpctx, order, type,
             track_next(mpctx, order, type, sarg->inc >= 0 ? +1 : -1, track),
             FLAG_MARK_SELECTION);
+        print_track_list(mpctx, "Track switched:");
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
         if (mpctx->playback_initialized) {
             track = mp_track_by_tid(mpctx, type, *(int *)arg);
             mp_switch_track_n(mpctx, order, type, track, FLAG_MARK_SELECTION);
+            print_track_list(mpctx, "Track switched:");
         } else {
             mpctx->opts->stream_id[order][type] = *(int *)arg;
         }
@@ -1839,6 +1841,7 @@ static int property_switch_track_ff(void *ctx, struct m_property *prop,
             if (!track && id >= 0)
                 return M_PROPERTY_ERROR;
             mp_switch_track_n(mpctx, 0, type, track, 0);
+            print_track_list(mpctx, "Track switched:");
         } else {
             mpctx->opts->stream_id_ff[type] = *(int *)arg;
         }
@@ -1992,6 +1995,7 @@ static int mp_property_program(void *ctx, struct m_property *prop,
                 find_track_by_demuxer_id(mpctx, STREAM_AUDIO, prog.aid), 0);
         mp_switch_track(mpctx, STREAM_SUB,
                 find_track_by_demuxer_id(mpctx, STREAM_VIDEO, prog.sid), 0);
+        print_track_list(mpctx, "Program switched:");
         return M_PROPERTY_OK;
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){
