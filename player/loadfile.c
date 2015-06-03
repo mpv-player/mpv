@@ -143,8 +143,10 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
     MP_INFO(mpctx, "%s\n", b);
 }
 
-void print_track_list(struct MPContext *mpctx)
+void print_track_list(struct MPContext *mpctx, const char *msg)
 {
+    if (msg)
+        MP_INFO(mpctx, "%s\n", msg);
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int n = 0; n < mpctx->num_tracks; n++)
             if (mpctx->tracks[n]->type == t)
@@ -176,7 +178,7 @@ void update_demuxer_properties(struct MPContext *mpctx)
     struct demuxer *tracks = mpctx->track_layout;
     if (tracks->events & DEMUX_EVENT_STREAMS) {
         add_demuxer_tracks(mpctx, tracks);
-        print_track_list(mpctx);
+        print_track_list(mpctx, NULL);
         tracks->events &= ~DEMUX_EVENT_STREAMS;
     }
     if (events & DEMUX_EVENT_METADATA) {

@@ -4568,7 +4568,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (lang && lang[0])
             t->lang = talloc_strdup(t, lang);
         if (mpctx->playback_initialized)
-            print_track_list(mpctx);
+            print_track_list(mpctx, "Track added:");
         break;
     }
 
@@ -4580,7 +4580,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             return -1;
         mp_remove_track(mpctx, t);
         if (mpctx->playback_initialized)
-            print_track_list(mpctx);
+            print_track_list(mpctx, "Track removed:");
         break;
     }
 
@@ -4597,7 +4597,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         }
         if (nt) {
             mp_switch_track(mpctx, nt->type, nt, 0);
-            print_track_list(mpctx);
+            print_track_list(mpctx, "Reloaded:");
             return 0;
         }
         return -1;
@@ -4617,7 +4617,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                 mp_switch_track(mpctx, STREAM_SUB, s, 0);
 
             if (mpctx->playback_initialized)
-                print_track_list(mpctx);
+                print_track_list(mpctx, "Track list:\n");
         }
         break;
     }
