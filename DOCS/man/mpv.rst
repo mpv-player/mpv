@@ -116,7 +116,7 @@ o (also P)
     Show progression bar, elapsed time and total duration on the OSD.
 
 O
-    Toggle OSD states: none / seek / seek + timer / seek + timer + total time.
+    Toggle OSD states between normal and playback time/duration.
 
 d
     Toggle frame dropping states: none / skip display / skip decoding (see
