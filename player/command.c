@@ -4547,8 +4547,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             return -1;
         int type = cmd->id == MP_CMD_SUB_ADD ? STREAM_SUB : STREAM_AUDIO;
         if (cmd->args[1].v.i == 2) {
-            struct track *t = find_track_with_url(mpctx, type,
-                                                    cmd->args[0].v.s);
+            struct track *t = find_track_with_url(mpctx, type, cmd->args[0].v.s);
             if (t) {
                 mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
                 return 0;
@@ -4568,7 +4567,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         char *lang = cmd->args[3].v.s;
         if (lang && lang[0])
             t->lang = talloc_strdup(t, lang);
-        print_track_list(mpctx);
+        if (mpctx->playback_initialized)
+            print_track_list(mpctx);
         break;
     }
 
@@ -4579,7 +4579,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (!t)
             return -1;
         mp_remove_track(mpctx, t);
-        print_track_list(mpctx);
+        if (mpctx->playback_initialized)
+            print_track_list(mpctx);
         break;
     }
 
@@ -4615,7 +4616,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             if (s && s->is_external)
                 mp_switch_track(mpctx, STREAM_SUB, s, 0);
 
-            print_track_list(mpctx);
+            if (mpctx->playback_initialized)
+                print_track_list(mpctx);
         }
         break;
     }
