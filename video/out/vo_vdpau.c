@@ -412,9 +412,28 @@ static bool status_ok(struct vo *vo)
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct vdpctx *vc = vo->priv;
+    struct vdp_functions *vdp = vc->vdp;
+    VdpStatus vdp_st;
 
     if (!check_preemption(vo))
         return -1;
+
+    VdpChromaType chroma_type = VDP_CHROMA_TYPE_420;
+    mp_vdpau_get_format(params->imgfmt, &chroma_type, NULL);
+
+    VdpBool ok;
+    uint32_t max_w, max_h;
+    vdp_st = vdp->video_surface_query_capabilities(vc->vdp_device, chroma_type,
+                                                   &ok, &max_w, &max_h);
+    CHECK_VDP_ERROR(vo, "Error when calling vdp_video_surface_query_capabilities");
+
+    if (!ok)
+        return -1;
+    if (params->w > max_w || params->h > max_h) {
+        if (ok)
+            MP_ERR(vo, "Video too large for vdpau.\n");
+        return -1;
+    }
 
     vc->image_format = params->imgfmt;
     vc->vid_width    = params->w;
