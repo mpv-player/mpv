@@ -114,8 +114,8 @@ static void drop_all_output(struct af_resample *s)
 }
 static int get_out_samples(struct af_resample *s, int in_samples)
 {
-    return av_rescale_rnd(get_delay(s) + in_samples,
-                          s->ctx.out_rate, s->ctx.in_rate, AV_ROUND_UP);
+    return av_rescale_rnd(in_samples, s->ctx.out_rate, s->ctx.in_rate, AV_ROUND_UP)
+           + swr_get_delay(s->avrctx, s->ctx.out_rate);
 }
 #endif
 
