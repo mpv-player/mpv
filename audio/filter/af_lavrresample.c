@@ -91,9 +91,10 @@ struct af_resample {
 };
 
 #if HAVE_LIBAVRESAMPLE
-static int get_delay(struct af_resample *s)
+static double get_delay(struct af_resample *s)
 {
-    return avresample_get_delay(s->avrctx);
+    return avresample_get_delay(s->avrctx) / (double)s->ctx.in_rate +
+           avresample_available(s->avrctx) / (double)s->ctx.out_rate;
 }
 static void drop_all_output(struct af_resample *s)
 {
@@ -104,9 +105,10 @@ static int get_out_samples(struct af_resample *s, int in_samples)
     return avresample_get_out_samples(s->avrctx, in_samples);
 }
 #else
-static int get_delay(struct af_resample *s)
+static double get_delay(struct af_resample *s)
 {
-    return swr_get_delay(s->avrctx, s->ctx.in_rate);
+    int64_t base = s->ctx.in_rate * (int64_t)s->ctx.out_rate;
+    return swr_get_delay(s->avrctx, base) / (double)base;
 }
 static void drop_all_output(struct af_resample *s)
 {
@@ -419,8 +421,6 @@ static int filter(struct af_instance *af, struct mp_audio *in)
     if (in)
         mp_audio_copy_attributes(out, in);
 
-    af->delay = get_delay(s) / (double)s->ctx.in_rate;
-
     if (out->samples) {
         out->samples = resample_frame(s->avrctx, out, in);
         if (out->samples < 0)
@@ -450,6 +450,9 @@ static int filter(struct af_instance *af, struct mp_audio *in)
     } else {
         talloc_free(out);
     }
+
+    af->delay = get_delay(s);
+
     return 0;
 error:
     talloc_free(in);
