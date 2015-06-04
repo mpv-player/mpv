@@ -11,7 +11,7 @@ WAFURLS    = ["http://ftp.waf.io/pub/release/" + WAFRELEASE,
 SHA256HASH = "f02035fa5d8814f33f19b2b20d43822ddef6bb39b955ca196c2a247a1f9ffaa8"
 
 if os.path.exists("waf"):
-    wafver = subprocess.check_output(['./waf', '--version']).decode()
+    wafver = subprocess.check_output([sys.executable, './waf', '--version']).decode()
     if WAFRELEASE.split('-')[1] == wafver.split(' ')[1]:
         print("Found 'waf', skipping download.")
         sys.exit(0)
