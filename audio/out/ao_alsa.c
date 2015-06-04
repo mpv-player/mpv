@@ -375,6 +375,7 @@ static char *append_params(void *ta_parent, const char *device, const char *p)
 static int try_open_device(struct ao *ao, const char *device)
 {
     struct priv *p = ao->priv;
+    int err;
 
     if (AF_FORMAT_IS_IEC61937(ao->format)) {
         void *tmp = talloc_new(NULL);
@@ -385,8 +386,7 @@ static int try_open_device(struct ao *ao, const char *device)
                         map_iec958_srate(ao->samplerate));
         const char *ac3_device = append_params(tmp, device, params);
         MP_VERBOSE(ao, "opening device '%s' => '%s'\n", device, ac3_device);
-        int err = snd_pcm_open
-                    (&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, 0);
+        err = snd_pcm_open(&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, 0);
         if (err < 0) {
             // Some spdif-capable devices do not accept the AES0 parameter,
             // and instead require the iec958 pseudo-device (they will play
@@ -403,12 +403,12 @@ static int try_open_device(struct ao *ao, const char *device)
             }
         }
         talloc_free(tmp);
-        if (err >= 0)
-            return 0;
+    } else {
+        MP_VERBOSE(ao, "opening device '%s'\n", device);
+        err = snd_pcm_open(&p->alsa, device, SND_PCM_STREAM_PLAYBACK, 0);
     }
 
-    MP_VERBOSE(ao, "opening device '%s'\n", device);
-    return snd_pcm_open(&p->alsa, device, SND_PCM_STREAM_PLAYBACK, 0);
+    return err;
 }
 
 static void uninit(struct ao *ao)
