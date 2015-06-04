@@ -387,8 +387,23 @@ static int try_open_device(struct ao *ao, const char *device)
         MP_VERBOSE(ao, "opening device '%s' => '%s'\n", device, ac3_device);
         int err = snd_pcm_open
                     (&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, 0);
+        if (err < 0) {
+            // Some spdif-capable devices do not accept the AES0 parameter,
+            // and instead require the iec958 pseudo-device (they will play
+            // noise otherwise). Unfortunately, ALSA gives us no way to map
+            // these devices, so try it for the default device only.
+            bstr dev;
+            bstr_split_tok(bstr0(device), ":", &dev, &(bstr){0});
+            if (bstr_equals0(dev, "default")) {
+                ac3_device = append_params(tmp, "iec958", params);
+                MP_VERBOSE(ao, "got error %d; opening iec fallback device '%s'\n",
+                           err, ac3_device);
+                err = snd_pcm_open
+                            (&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, 0);
+            }
+        }
         talloc_free(tmp);
-        if (!err)
+        if (err >= 0)
             return 0;
     }
 
@@ -419,8 +434,6 @@ static int init_device(struct ao *ao, bool second_try)
     int err;
 
     const char *device = "default";
-    if (AF_FORMAT_IS_IEC61937(ao->format))
-        device = "iec958";
     if (ao->device)
         device = ao->device;
     if (p->cfg_device && p->cfg_device[0])
