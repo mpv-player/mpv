@@ -144,13 +144,12 @@ enum vf_ctrl {
     VFCTRL_SEEK_RESET = 1,   // reset on picture and PTS discontinuities
     VFCTRL_SET_EQUALIZER,    // set color options (brightness,contrast etc)
     VFCTRL_GET_EQUALIZER,    // get color options (brightness,contrast etc)
-    VFCTRL_INIT_OSD,         // Filter OSD renderer present?
     VFCTRL_SET_DEINTERLACE,  // Set deinterlacing status
     VFCTRL_GET_DEINTERLACE,  // Get deinterlacing status
     VFCTRL_GET_METADATA,     // Get frame metadata from lavfi filters (e.g., cropdetect)
     /* Hack to make the OSD state object available to vf_sub which
      * access OSD/subtitle state outside of normal OSD draw time. */
-    VFCTRL_SET_OSD_OBJ,
+    VFCTRL_INIT_OSD,
 };
 
 struct vf_chain *vf_new(struct mpv_global *global);

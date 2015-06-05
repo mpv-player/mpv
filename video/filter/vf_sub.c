@@ -121,10 +121,8 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 static int control(vf_instance_t *vf, int request, void *data)
 {
     switch (request) {
-    case VFCTRL_SET_OSD_OBJ:
-        vf->priv->osd = data;
-        return CONTROL_TRUE;
     case VFCTRL_INIT_OSD:
+        vf->priv->osd = data;
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;

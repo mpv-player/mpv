@@ -176,9 +176,8 @@ static void recreate_video_filters(struct MPContext *mpctx)
     vf_append_filter_list(d_video->vfilter, opts->vf_settings);
 
     // for vf_sub
-    vf_control_any(d_video->vfilter, VFCTRL_SET_OSD_OBJ, mpctx->osd);
     osd_set_render_subs_in_filter(mpctx->osd,
-        vf_control_any(d_video->vfilter, VFCTRL_INIT_OSD, NULL) == CONTROL_OK);
+        vf_control_any(d_video->vfilter, VFCTRL_INIT_OSD, mpctx->osd) > 0);
 
     set_allowed_vo_formats(d_video->vfilter, mpctx->video_out);
 }
