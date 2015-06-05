@@ -834,8 +834,7 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
 // warning: the size and pixel format of surface must match that of the
 //          surfaces in vc->output_surfaces
 static struct mp_image *read_output_surface(struct vo *vo,
-                                            VdpOutputSurface surface,
-                                            int width, int height)
+                                            VdpOutputSurface surface)
 {
     struct vdpctx *vc = vo->priv;
     VdpStatus vdp_st;
@@ -843,7 +842,15 @@ static struct mp_image *read_output_surface(struct vo *vo,
     if (!vo->params)
         return NULL;
 
-    struct mp_image *image = mp_image_alloc(IMGFMT_BGR0, width, height);
+    VdpRGBAFormat fmt;
+    uint32_t w, h;
+    vdp_st = vdp->output_surface_get_parameters(surface, &fmt, &w, &h);
+    if (vdp_st != VDP_STATUS_OK)
+        return NULL;
+
+    assert(fmt == OUTPUT_RGBA_FORMAT);
+
+    struct mp_image *image = mp_image_alloc(IMGFMT_BGR0, w, h);
     if (!image)
         return NULL;
 
@@ -865,9 +872,7 @@ static struct mp_image *get_window_screenshot(struct vo *vo)
     struct vdpctx *vc = vo->priv;
     int last_surface = WRAP_ADD(vc->surface_num, -1, vc->num_output_surfaces);
     VdpOutputSurface screen = vc->output_surfaces[last_surface];
-    struct mp_image *image = read_output_surface(vo, screen,
-                                                 vc->output_surface_w,
-                                                 vc->output_surface_h);
+    struct mp_image *image = read_output_surface(vo, screen);
     mp_image_set_size(image, vo->dwidth, vo->dheight);
     return image;
 }
