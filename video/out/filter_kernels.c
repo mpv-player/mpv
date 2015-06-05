@@ -366,8 +366,10 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{"bcspline",       2,   cubic_bc, .params = {0.5, 0.5} }},
     {{"catmull_rom",    2,   cubic_bc, .params = {0.0, 0.5} }},
     {{"mitchell",       2,   cubic_bc, .params = {1.0/3.0, 1.0/3.0} }},
-    {{"robidoux",       2,   cubic_bc, .params = {0.3782, 0.3109}}, .polar = true},
-    {{"robidouxsharp",  2,   cubic_bc, .params = {0.2620, 0.3690}}, .polar = true},
+    {{"robidoux",       2,   cubic_bc, .params = {0.3782, 0.3109} }},
+    {{"robidouxsharp",  2,   cubic_bc, .params = {0.2620, 0.3690} }},
+    {{"ewa_robidoux",       2,   cubic_bc, .params = {0.3782, 0.3109}}, .polar = true},
+    {{"ewa_robidouxsharp",  2,   cubic_bc, .params = {0.2620, 0.3690}}, .polar = true},
     // Miscalleaneous filters
     {{"box",            1,   box, .resizable = true}},
     {{"nearest",        0.5, box}},
