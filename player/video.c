@@ -253,12 +253,6 @@ int reinit_video_chain(struct MPContext *mpctx)
     if (!sh)
         goto no_video;
 
-    MP_VERBOSE(mpctx, "[V] fourcc:0x%X  size:%dx%d  fps:%5.3f\n",
-               sh->format,
-               sh->video->disp_w, sh->video->disp_h,
-               sh->video->fps);
-
-    //================== Init VIDEO (codec & libvo) ==========================
     if (!mpctx->video_out) {
         struct vo_extra ex = {
             .input_ctx = mpctx->input,
