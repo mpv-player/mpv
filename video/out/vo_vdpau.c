@@ -84,7 +84,7 @@ struct vdpctx {
 
     struct mp_image                   *current_image;
 
-    int                                output_surface_width, output_surface_height;
+    int                                output_surface_w, output_surface_h;
 
     int                                force_yuv;
     struct mp_vdpau_mixer             *video_mixer;
@@ -243,10 +243,9 @@ static void resize(struct vo *vo)
                          1000LL * vc->flip_offset_window;
     vo_set_flip_queue_params(vo, vc->flip_offset_us, false);
 
-    if (vc->output_surface_width < vo->dwidth
-        || vc->output_surface_height < vo->dheight) {
-        vc->output_surface_width = s_size(vc->output_surface_width, vo->dwidth);
-        vc->output_surface_height = s_size(vc->output_surface_height, vo->dheight);
+    if (vc->output_surface_w < vo->dwidth || vc->output_surface_h < vo->dheight) {
+        vc->output_surface_w = s_size(vc->output_surface_w, vo->dwidth);
+        vc->output_surface_h = s_size(vc->output_surface_h, vo->dheight);
         // Creation of output_surfaces
         for (int i = 0; i < vc->num_output_surfaces; i++)
             if (vc->output_surfaces[i] != VDP_INVALID_HANDLE) {
@@ -257,8 +256,8 @@ static void resize(struct vo *vo)
         for (int i = 0; i < vc->num_output_surfaces; i++) {
             vdp_st = vdp->output_surface_create(vc->vdp_device,
                                                 OUTPUT_RGBA_FORMAT,
-                                                vc->output_surface_width,
-                                                vc->output_surface_height,
+                                                vc->output_surface_w,
+                                                vc->output_surface_h,
                                                 &vc->output_surfaces[i]);
             CHECK_VDP_WARNING(vo, "Error when calling vdp_output_surface_create");
             MP_DBG(vo, "vdpau out create: %u\n",
@@ -381,7 +380,7 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
             .surface = VDP_INVALID_HANDLE,
         };
     }
-    vc->output_surface_width = vc->output_surface_height = -1;
+    vc->output_surface_w = vc->output_surface_h = -1;
 }
 
 static bool check_preemption(struct vo *vo)
@@ -867,8 +866,8 @@ static struct mp_image *get_window_screenshot(struct vo *vo)
     int last_surface = WRAP_ADD(vc->surface_num, -1, vc->num_output_surfaces);
     VdpOutputSurface screen = vc->output_surfaces[last_surface];
     struct mp_image *image = read_output_surface(vo, screen,
-                                                 vc->output_surface_width,
-                                                 vc->output_surface_height);
+                                                 vc->output_surface_w,
+                                                 vc->output_surface_h);
     mp_image_set_size(image, vo->dwidth, vo->dheight);
     return image;
 }
