@@ -249,15 +249,25 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->ao = ao_init_best(mpctx->global, mpctx->input,
                                  mpctx->encode_lavc_ctx, afs->output.rate,
                                  afs->output.format, afs->output.channels);
-        struct ao *ao = mpctx->ao;
-        if (!ao) {
+
+        struct mp_audio fmt = {0};
+        if (mpctx->ao)
+            ao_get_format(mpctx->ao, &fmt);
+
+        // Verify passthrough format was not changed.
+        if (mpctx->ao && AF_FORMAT_IS_SPECIAL(afs->output.format)) {
+            if (!mp_audio_config_equals(&afs->output, &fmt)) {
+                MP_ERR(mpctx, "Passthrough format unsupported.\n");
+                ao_uninit(mpctx->ao);
+                mpctx->ao = NULL;
+            }
+        }
+
+        if (!mpctx->ao) {
             MP_ERR(mpctx, "Could not open/initialize audio device -> no sound.\n");
             mpctx->error_playing = MPV_ERROR_AO_INIT_FAILED;
             goto init_error;
         }
-
-        struct mp_audio fmt;
-        ao_get_format(ao, &fmt);
 
         mp_audio_buffer_reinit(mpctx->ao_buffer, &fmt);
         afs->output = fmt;
@@ -267,9 +277,9 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->ao_decoder_fmt = talloc(NULL, struct mp_audio);
         *mpctx->ao_decoder_fmt = in_format;
 
-        MP_INFO(mpctx, "AO: [%s] %s\n", ao_get_name(ao),
+        MP_INFO(mpctx, "AO: [%s] %s\n", ao_get_name(mpctx->ao),
                 mp_audio_config_to_str(&fmt));
-        MP_VERBOSE(mpctx, "AO: Description: %s\n", ao_get_description(ao));
+        MP_VERBOSE(mpctx, "AO: Description: %s\n", ao_get_description(mpctx->ao));
         update_window_title(mpctx, true);
     }
 
