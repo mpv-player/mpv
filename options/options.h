@@ -109,6 +109,7 @@ typedef struct MPOpts {
 
     char *audio_decoders;
     char *video_decoders;
+    char *audio_spdif;
 
     int osd_level;
     int osd_duration;

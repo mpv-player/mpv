@@ -37,6 +37,13 @@ struct mp_decoder_list *mp_select_decoders(struct mp_decoder_list *all,
                                            const char *codec,
                                            const char *selection);
 
+struct mp_decoder_list *mp_select_decoder_list(struct mp_decoder_list *all,
+                                               const char *codec,
+                                               const char *family,
+                                               const char *selection);
+
+void mp_append_decoders(struct mp_decoder_list *list, struct mp_decoder_list *a);
+
 struct mp_log;
 void mp_print_decoders(struct mp_log *log, int msgl, const char *header,
                        struct mp_decoder_list *list);

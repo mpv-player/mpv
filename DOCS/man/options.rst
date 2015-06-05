@@ -855,6 +855,25 @@ Audio
     ``--af-clr`` exist to modify a previously specified list, but you
     should not need these for typical use.
 
+``--audio-spdif=<codecs>``
+    List of codecs for which compressed audio passthrough should be used. This
+    works for both classic S/PDIF and HDMI.
+
+    Possible codecs are ``ac3``, ``dts``, ``dts-hd``. Multiple codecs can be
+    specified by separating them with ``,``. ``dts`` refers to low bitrate DTS
+    core, while ``dts-hd`` refers to DTS MA (receiver and OS support varies).
+    You should only use either ``dts`` or ``dts-hd`` (if both are specified,
+    and ``dts`` comes first, only ``dts`` will be used).
+
+    In general, all codecs in the ``spdif`` family listed with ``--ad=help``
+    are supported in theory.
+
+    .. admonition:: Warning
+
+        There is not much reason to use this. HDMI supports uncompressed
+        multichannel PCM, and mpv supports lossless DTS-HD decoding via
+        FFmpeg's libdcadec wrapper.
+
 ``--ad=<[+|-]family1:(*|decoder1),[+|-]family2:(*|decoder2),...[-]>``
     Specify a priority list of audio decoders to be used, according to their
     family and decoder name. Entries like ``family:*`` prioritize all decoders
@@ -881,6 +900,11 @@ Audio
 
         ``--ad=help``
             List all available decoders.
+
+    .. admonition:: Warning
+
+        Enabling compressed audio passthrough (AC3 and DTS via SPDIF/HDMI) with
+        this option is deprecated. Use ``--audio-spdif`` instead.
 
 ``--volume=<value>``
     Set the startup volume. 0 means silence, 100 means no volume reduction or
@@ -953,17 +977,12 @@ Audio
     welcome. A full list of AVOptions can be found in the FFmpeg manual.
 
 ``--ad-spdif-dtshd=<yes|no>``, ``--dtshd``, ``--no-dtshd``
-    When using DTS pass-through, output any DTS-HD track as-is.
-    With ``ad-spdif-dtshd=no`` (the default), only the DTS Core parts will be
-    output.
+    If DTS is passed through, use DTS-HD.
 
-    DTS-HD tracks can be sent over HDMI but not over the original
-    coax/TOSLINK S/PDIF system.
+    .. admonition:: Warning
 
-    Some receivers don't accept DTS core-only when ``--ad-spdif-dtshd=yes`` is
-    used, even though they accept DTS-HD.
-
-    ``--dtshd`` and ``--no-dtshd`` are deprecated aliases.
+        This and enabling passthrough via ``--ad`` are deprecated in favor of
+        using ``--audio-spdif=dts-hd``.
 
 ``--audio-channels=<number|layout>``
     Request a channel layout for audio output (default: auto). This  will ask

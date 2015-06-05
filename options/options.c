@@ -279,6 +279,8 @@ const m_option_t mp_opts[] = {
     OPT_STRING("ad", audio_decoders, 0),
     OPT_STRING("vd", video_decoders, 0),
 
+    OPT_STRING("audio-spdif", audio_spdif, 0),
+
     OPT_FLAG("ad-spdif-dtshd", dtshd, 0),
 
     OPT_CHOICE("hwdec", hwdec_api, 0,

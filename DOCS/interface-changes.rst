@@ -20,6 +20,8 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - deprecate --ad-spdif-dtshd and enabling passthrough via --ad
+      add --audio-spdif as replacement
     - remove "get_property" command
     - remove --slave-broken
     - add vo opengl custom shader suboptions (source-shader, scale-shader,

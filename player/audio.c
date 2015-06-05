@@ -190,8 +190,9 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->d_audio->pool = mp_audio_pool_create(mpctx->d_audio);
         mpctx->d_audio->afilter = af_new(mpctx->global);
         mpctx->d_audio->afilter->replaygain_data = sh->audio->replaygain_data;
+        mpctx->d_audio->spdif_passthrough = true;
         mpctx->ao_buffer = mp_audio_buffer_create(NULL);
-        if (!audio_init_best_codec(mpctx->d_audio, opts->audio_decoders))
+        if (!audio_init_best_codec(mpctx->d_audio))
             goto init_error;
         reset_audio_state(mpctx);
 
@@ -264,6 +265,18 @@ void reinit_audio_chain(struct MPContext *mpctx)
         }
 
         if (!mpctx->ao) {
+            // If spdif was used, try to fallback to PCM.
+            if (AF_FORMAT_IS_SPECIAL(afs->output.format) &&
+                mpctx->d_audio->spdif_passthrough)
+            {
+                mpctx->d_audio->spdif_passthrough = false;
+                if (!audio_init_best_codec(mpctx->d_audio))
+                    goto init_error;
+                reset_audio_state(mpctx);
+                reinit_audio_chain(mpctx);
+                return;
+            }
+
             MP_ERR(mpctx, "Could not open/initialize audio device -> no sound.\n");
             mpctx->error_playing = MPV_ERROR_AO_INIT_FAILED;
             goto init_error;

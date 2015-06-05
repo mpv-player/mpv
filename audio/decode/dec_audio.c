@@ -52,6 +52,7 @@ static const struct ad_functions * const ad_drivers[] = {
 
 static void uninit_decoder(struct dec_audio *d_audio)
 {
+    audio_reset_decoding(d_audio);
     if (d_audio->ad_driver) {
         MP_VERBOSE(d_audio, "Uninit audio decoder.\n");
         d_audio->ad_driver->uninit(d_audio);
@@ -59,6 +60,8 @@ static void uninit_decoder(struct dec_audio *d_audio)
     d_audio->ad_driver = NULL;
     talloc_free(d_audio->priv);
     d_audio->priv = NULL;
+    d_audio->afilter->initialized = -1;
+    d_audio->decode_format = (struct mp_audio){0};
 }
 
 static int init_audio_codec(struct dec_audio *d_audio, const char *decoder)
@@ -81,11 +84,21 @@ struct mp_decoder_list *audio_decoder_list(void)
     return list;
 }
 
-static struct mp_decoder_list *audio_select_decoders(const char *codec,
-                                                     char *selection)
+static struct mp_decoder_list *audio_select_decoders(struct dec_audio *d_audio)
 {
+    struct MPOpts *opts = d_audio->opts;
+    const char *codec = d_audio->header->codec;
+
     struct mp_decoder_list *list = audio_decoder_list();
-    struct mp_decoder_list *new = mp_select_decoders(list, codec, selection);
+    struct mp_decoder_list *new =
+        mp_select_decoders(list, codec, opts->audio_decoders);
+    if (d_audio->spdif_passthrough) {
+        struct mp_decoder_list *spdif =
+            mp_select_decoder_list(list, codec, "spdif", opts->audio_spdif);
+        mp_append_decoders(spdif, new);
+        talloc_free(new);
+        new = spdif;
+    }
     talloc_free(list);
     return new;
 }
@@ -99,14 +112,13 @@ static const struct ad_functions *find_driver(const char *name)
     return NULL;
 }
 
-int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders)
+int audio_init_best_codec(struct dec_audio *d_audio)
 {
+    uninit_decoder(d_audio);
     assert(!d_audio->ad_driver);
-    audio_reset_decoding(d_audio);
 
     struct mp_decoder_entry *decoder = NULL;
-    struct mp_decoder_list *list =
-        audio_select_decoders(d_audio->header->codec, audio_decoders);
+    struct mp_decoder_list *list = audio_select_decoders(d_audio);
 
     mp_print_decoders(d_audio->log, MSGL_V, "Codec list:", list);
 

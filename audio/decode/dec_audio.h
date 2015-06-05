@@ -30,6 +30,7 @@ struct dec_audio {
     struct mp_log *log;
     struct MPOpts *opts;
     struct mpv_global *global;
+    bool spdif_passthrough;
     const struct ad_functions *ad_driver;
     struct sh_stream *header;
     struct af_stream *afilter;
@@ -57,7 +58,7 @@ enum {
 };
 
 struct mp_decoder_list *audio_decoder_list(void);
-int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders);
+int audio_init_best_codec(struct dec_audio *d_audio);
 int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
                  int minsamples);
 int initial_audio_decode(struct dec_audio *d_audio);

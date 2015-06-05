@@ -130,6 +130,28 @@ struct mp_decoder_list *mp_select_decoders(struct mp_decoder_list *all,
     return list;
 }
 
+// selection is a ","-separated list of decoders, all in the given family.
+struct mp_decoder_list *mp_select_decoder_list(struct mp_decoder_list *all,
+                                               const char *codec,
+                                               const char *family,
+                                               const char *selection)
+{
+    struct mp_decoder_list *list = talloc_zero(NULL, struct mp_decoder_list);
+    bstr sel = bstr0(selection);
+    while (sel.len) {
+        bstr decoder;
+        bstr_split_tok(sel, ",", &decoder, &sel);
+        add_new(list, find_decoder(all, bstr0(family), decoder), codec);
+    }
+    return list;
+}
+
+void mp_append_decoders(struct mp_decoder_list *list, struct mp_decoder_list *a)
+{
+    for (int n = 0; n < a->num_entries; n++)
+        add_new(list, &a->entries[n], NULL);
+}
+
 void mp_print_decoders(struct mp_log *log, int msgl, const char *header,
                        struct mp_decoder_list *list)
 {
