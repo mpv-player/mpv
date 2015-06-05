@@ -214,11 +214,11 @@ static void forget_frames(struct vo *vo, bool seek_reset)
     vc->dropped_frame = false;
 }
 
-static int s_size(int s, int disp)
+static int s_size(int max, int s, int disp)
 {
     disp = MPMAX(1, disp);
     s += s / 2;
-    return s >= disp ? s : disp;
+    return MPMIN(max, s >= disp ? s : disp);
 }
 
 static void resize(struct vo *vo)
@@ -238,14 +238,22 @@ static void resize(struct vo *vo)
     vc->src_rect_vid.y0 = src_rect.y0;
     vc->src_rect_vid.y1 = src_rect.y1;
 
+    VdpBool ok;
+    uint32_t max_w, max_h;
+    vdp_st = vdp->output_surface_query_capabilities(vc->vdp_device,
+                                                    OUTPUT_RGBA_FORMAT,
+                                                    &ok, &max_w, &max_h);
+    if (vdp_st != VDP_STATUS_OK || !ok)
+        return;
+
     vc->flip_offset_us = vo->opts->fullscreen ?
                          1000LL * vc->flip_offset_fs :
                          1000LL * vc->flip_offset_window;
     vo_set_flip_queue_params(vo, vc->flip_offset_us, false);
 
     if (vc->output_surface_w < vo->dwidth || vc->output_surface_h < vo->dheight) {
-        vc->output_surface_w = s_size(vc->output_surface_w, vo->dwidth);
-        vc->output_surface_h = s_size(vc->output_surface_h, vo->dheight);
+        vc->output_surface_w = s_size(max_w, vc->output_surface_w, vo->dwidth);
+        vc->output_surface_h = s_size(max_h, vc->output_surface_h, vo->dheight);
         // Creation of output_surfaces
         for (int i = 0; i < vc->num_output_surfaces; i++)
             if (vc->output_surfaces[i] != VDP_INVALID_HANDLE) {
