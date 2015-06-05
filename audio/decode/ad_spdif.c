@@ -39,6 +39,7 @@ struct spdifContext {
     int              out_buffer_len;
     uint8_t          out_buffer[OUTBUF_SIZE];
     bool             need_close;
+    bool             use_dts_hd;
     struct mp_audio  fmt;
 };
 
@@ -77,6 +78,12 @@ static int init(struct dec_audio *da, const char *decoder)
     struct spdifContext *spdif_ctx = talloc_zero(NULL, struct spdifContext);
     da->priv = spdif_ctx;
     spdif_ctx->log = da->log;
+    spdif_ctx->use_dts_hd = da->opts->dtshd;
+
+    if (strcmp(decoder, "dts-hd") == 0) {
+        decoder = "dts";
+        spdif_ctx->use_dts_hd = true;
+    }
 
     spdif_ctx->codec_id = mp_codec_to_av_codec_id(decoder);
     return spdif_ctx->codec_id != AV_CODEC_ID_NONE;
@@ -183,7 +190,7 @@ static int init_filter(struct dec_audio *da, AVPacket *pkt)
     case AV_CODEC_ID_DTS: {
         bool is_hd = profile == FF_PROFILE_DTS_HD_HRA ||
                      profile == FF_PROFILE_DTS_HD_MA;
-        if (da->opts->dtshd && is_hd) {
+        if (spdif_ctx->use_dts_hd && is_hd) {
             av_dict_set(&format_opts, "dtshd_rate", "768000", 0); // 4*192000
             sample_format               = AF_FORMAT_S_DTSHD;
             samplerate                  = 192000;
@@ -297,6 +304,8 @@ static void add_decoders(struct mp_decoder_list *list)
                            "libavformat/spdifenc audio pass-through decoder");
         }
     }
+    mp_add_decoder(list, "spdif", "dts", "dts-hd",
+                   "libavformat/spdifenc audio pass-through decoder");
 }
 
 const struct ad_functions ad_spdif = {
