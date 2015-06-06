@@ -881,7 +881,8 @@ static struct mp_image *get_window_screenshot(struct vo *vo)
     int last_surface = WRAP_ADD(vc->surface_num, -1, vc->num_output_surfaces);
     VdpOutputSurface screen = vc->output_surfaces[last_surface];
     struct mp_image *image = read_output_surface(vo, screen);
-    mp_image_set_size(image, vo->dwidth, vo->dheight);
+    if (image && image->w >= vo->dwidth && image->h >= vo->dheight)
+        mp_image_set_size(image, vo->dwidth, vo->dheight);
     return image;
 }
 
