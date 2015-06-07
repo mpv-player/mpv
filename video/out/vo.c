@@ -626,7 +626,29 @@ static bool render_frame(struct vo *vo)
     if (!in->hasframe_rendered)
         duration = -1; // disable framedrop
 
+    bool prev_dropped_frame = in->dropped_frame;
+
+    // "normal" strict drop threshold.
     in->dropped_frame = duration >= 0 && end_time < next_vsync;
+
+    // Clip has similar (within ~5%) or lower fps than the display.
+    if (duration > 0.95 * in->vsync_interval) {
+        // If the clip and display have similar/identical fps, it's possible that
+        // due to the very tight timing, we'll drop frames frequently even if on
+        // average we can keep up - especially if we have timing jitter (inaccurate
+        // clip timestamps, inaccurate timers, vsync block jitter, etc).
+        // So we're allowing to be 1 vsync late to prevent these frequent drops.
+        // However, once we've dropped a frame - "catch up" by using the strict
+        // threshold - which will typically be dropping 2 frames in a row.
+        // On low clip fps, we don't drop anyway and this logic doesn't matter.
+
+        // if we dropped previously - "catch up" by keeping the strict threshold.
+        in->dropped_frame &= prev_dropped_frame;
+
+        // if we haven't dropped - allow 1 frame late (prev_vsync as threshold).
+        in->dropped_frame |= end_time < prev_vsync;
+    }
+
     in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP);
     in->dropped_frame &= (vo->global->opts->frame_dropping & 1);
     // Even if we're hopelessly behind, rather degrade to 10 FPS playback,
