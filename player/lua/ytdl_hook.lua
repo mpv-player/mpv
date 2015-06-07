@@ -144,7 +144,7 @@ mp.add_hook("on_load", 10, function ()
             -- direct URL, nothing to do
             msg.verbose("Got direct URL")
             return
-        elseif not (json["_type"] == nil) and (json["_type"] == "playlist") then
+        elseif not (json["_type"] == nil) and ((json["_type"] == "playlist") or (json["_type"] == "multi_video")) then
             -- a playlist
 
             if (#json.entries == 0) then
