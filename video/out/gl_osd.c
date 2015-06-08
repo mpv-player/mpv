@@ -13,6 +13,11 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * You can alternatively redistribute this file and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  */
 
 #include <stdlib.h>
