@@ -632,7 +632,7 @@ static bool render_frame(struct vo *vo)
     in->dropped_frame = duration >= 0 && end_time < next_vsync;
 
     // Clip has similar (within ~5%) or lower fps than the display.
-    if (duration > 0.95 * in->vsync_interval) {
+    if (duration >= 0 && duration > 0.95 * in->vsync_interval) {
         // If the clip and display have similar/identical fps, it's possible that
         // due to the very tight timing, we'll drop frames frequently even if on
         // average we can keep up - especially if we have timing jitter (inaccurate
