@@ -1610,8 +1610,9 @@ static int mp_property_ao_detected_device(void *ctx,struct m_property *prop,
 {
     struct MPContext *mpctx = ctx;
     struct command_ctx *cmd = mpctx->command_ctx;
-    if (!mpctx->ao)
-        return M_PROPERTY_UNAVAILABLE;
+    if (!cmd->hotplug)
+        cmd->hotplug = ao_hotplug_create(mpctx->global, mpctx->input);
+
     const char *d = ao_hotplug_get_detected_device(cmd->hotplug);
     return m_property_strdup_ro(action, arg, d);
 }
