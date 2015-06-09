@@ -3549,10 +3549,11 @@ static const char *const *const mp_event_property_change[] = {
 };
 #undef E
 
+// If there is no prefix, return length+1 (avoids matching full name as prefix).
 static int prefix_len(const char *p)
 {
     const char *end = strchr(p, '/');
-    return end ? end - p : strlen(p);
+    return end ? end - p : strlen(p) + 1;
 }
 
 static bool match_property(const char *a, const char *b)
