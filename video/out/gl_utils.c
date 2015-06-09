@@ -597,7 +597,7 @@ const char *gl_sc_loadfile(struct gl_shader_cache *sc, const char *path)
     if (s.len) {
         struct sc_file *new = &sc->files[sc->num_files++];
         *new = (struct sc_file) {
-            .path = talloc_strdup(NULL, path),
+            .path = talloc_strdup(sc, path),
             .body = s.start
         };
         return new->body;
