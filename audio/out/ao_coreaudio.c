@@ -224,10 +224,7 @@ static void init_physical_format(struct ao *ao)
                          &p->original_asbd);
             CHECK_CA_WARN("could not get current physical stream format");
 
-            ca_print_asbd(ao, "Trying to set physical format:", &best_asbd);
-            err = CA_SET(streams[i], kAudioStreamPropertyPhysicalFormat,
-                         &best_asbd);
-            CHECK_CA_ERROR("could not set physical format");
+            ca_change_physical_format_sync(ao, streams[i], best_asbd);
             break;
         }
     }

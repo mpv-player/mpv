@@ -456,7 +456,7 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
     OSStatus err = noErr;
     bool format_set = false;
 
-    ca_print_asbd(ao, "setting stream format:", &change_format);
+    ca_print_asbd(ao, "setting stream physical format:", &change_format);
 
     sem_t wakeup;
     if (sem_init(&wakeup, 0, 0)) {
