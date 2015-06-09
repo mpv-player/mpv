@@ -206,21 +206,30 @@ static void resume(struct ao *ao)
     ao->driver->resume(ao);
 }
 
-static void drain(struct ao *ao)
-{
-    struct ao_pull_state *p = ao->api_priv;
-    int state = atomic_load(&p->state);
-    if (IS_PLAYING(state))
-        mp_sleep_us(get_delay(ao) * 1000000);
-    reset(ao);
-}
-
 static bool get_eof(struct ao *ao)
 {
     struct ao_pull_state *p = ao->api_priv;
     // For simplicity, ignore the latency. Otherwise, we would have to run an
     // extra thread to time it.
     return mp_ring_buffered(p->buffers[0]) == 0;
+}
+
+static void drain(struct ao *ao)
+{
+    struct ao_pull_state *p = ao->api_priv;
+    int state = atomic_load(&p->state);
+    if (IS_PLAYING(state)) {
+        // Wait for lower bound.
+        mp_sleep_us(mp_ring_buffered(p->buffers[0]) / (double)ao->bps * 1e6);
+        // And then poll for actual end. (Unfortunately, this code considers
+        // audio APIs which do not want you to use mutexes in the audio
+        // callback, and an extra semaphore would require slightly more effort.)
+        // Limit to arbitrary ~250ms max. waiting for robustness.
+        int64_t max = mp_time_us() + 250000;
+        while (mp_time_us() < max && !get_eof(ao))
+            mp_sleep_us(1);
+    }
+    reset(ao);
 }
 
 static void uninit(struct ao *ao)
