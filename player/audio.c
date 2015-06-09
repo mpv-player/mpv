@@ -150,6 +150,8 @@ void uninit_audio_out(struct MPContext *mpctx)
             ao_drain(mpctx->ao);
         mixer_uninit_audio(mpctx->mixer);
         ao_uninit(mpctx->ao);
+
+        mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
     }
     mpctx->ao = NULL;
     talloc_free(mpctx->ao_decoder_fmt);
@@ -166,6 +168,8 @@ void uninit_audio_chain(struct MPContext *mpctx)
         mpctx->ao_buffer = NULL;
         mpctx->audio_status = STATUS_EOF;
         reselect_demux_streams(mpctx);
+
+        mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
     }
 }
 
