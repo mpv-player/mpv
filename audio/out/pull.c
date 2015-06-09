@@ -155,7 +155,7 @@ end:
 
     // pad with silence (underflow/paused/eof)
     for (int n = 0; n < ao->num_planes; n++)
-        af_fill_silence(data[n], full_bytes - bytes, ao->format);
+        af_fill_silence((char *)data[n] + bytes, full_bytes - bytes, ao->format);
 
     return bytes / ao->sstride;
 }
