@@ -2762,12 +2762,31 @@ static const char *handle_scaler_opt(const char *name, bool tscale)
     return NULL;
 }
 
+static char **dup_str_array(void *parent, char **src)
+{
+    if (!src)
+        return NULL;
+
+    char **res = talloc_new(parent);
+    int num = 0;
+    for (int n = 0; src && src[n]; n++)
+        MP_TARRAY_APPEND(res, res, num, talloc_strdup(res, src[n]));
+    MP_TARRAY_APPEND(res, res, num, NULL);
+    return res;
+}
+
 // Set the options, and possibly update the filter chain too.
 // Note: assumes all options are valid and verified by the option parser.
 void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
                           int *queue_size)
 {
+    talloc_free(p->opts.source_shader);
+    talloc_free(p->opts.scale_shader);
+    talloc_free(p->opts.pre_shaders);
+    talloc_free(p->opts.post_shaders);
+
     p->opts = *opts;
+
     for (int n = 0; n < 4; n++) {
         p->opts.scaler[n].kernel.name =
             (char *)handle_scaler_opt(p->opts.scaler[n].kernel.name, n==3);
@@ -2786,6 +2805,11 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
            *queue_size = 50e3 * ceil(radius);
         }
     }
+
+    p->opts.source_shader = talloc_strdup(p, p->opts.source_shader);
+    p->opts.scale_shader = talloc_strdup(p, p->opts.scale_shader);
+    p->opts.pre_shaders = dup_str_array(p, p->opts.pre_shaders);
+    p->opts.post_shaders = dup_str_array(p, p->opts.post_shaders);
 
     check_gl_features(p);
     uninit_rendering(p);
