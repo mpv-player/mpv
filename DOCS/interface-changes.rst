@@ -20,6 +20,7 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - add "keypress", "keydown", and "keyup" commands
     - deprecate --ad-spdif-dtshd and enabling passthrough via --ad
       add --audio-spdif as replacement
     - remove "get_property" command

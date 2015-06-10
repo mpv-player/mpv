@@ -395,6 +395,23 @@ List of Input Commands
     <double>
         The mouse event represents double-click.
 
+``keypress <key_name>``
+    Send a key event through mpv's input handler, triggering whatever
+    behavior is configured to that key. ``key_name`` uses the ``input.conf``
+    naming scheme for keys and modifiers. Useful for the client API: key events
+    can be sent to libmpv to handle internally.
+
+``keydown <key_name>``
+    Similar to ``keypress``, but sets the ``KEYDOWN`` flag so that if the key is
+    bound to a repeatable command, it will be run repeatedly with mpv's key
+    repeat timing until the ``keyup`` command is called.
+
+``keyup [<key_name>]``
+    Set the ``KEYUP`` flag, stopping any repeated behavior that had been
+    triggered. ``key_name`` is optional. If ``key_name`` is not given or is an
+    empty string, ``KEYUP`` will be set on all keys. Otherwise, ``KEYUP`` will
+    only be set on the key specified by ``key_name``.
+
 ``audio-add "<file>" [<flags> [<title> [<lang>]]]``
     Load the given audio file. See ``sub-add`` command.
 
