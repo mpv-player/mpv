@@ -203,6 +203,9 @@ const struct mp_cmd_def mp_cmds[] = {
       OARG_CHOICE(0, ({"single", 0},
                       {"double", 1})),
   }},
+  { MP_CMD_KEYPRESS, "keypress", { ARG_STRING } },
+  { MP_CMD_KEYDOWN, "keydown", { ARG_STRING } },
+  { MP_CMD_KEYUP, "keyup", { OARG_STRING("") } },
 
   { MP_CMD_AUDIO_ADD, "audio-add", { ARG_STRING,
       OARG_CHOICE(0, ({"select", 0}, {"auto", 1}, {"cached", 2})),

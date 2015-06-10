@@ -87,6 +87,9 @@ enum mp_command_type {
     MP_CMD_DROP_BUFFERS,
 
     MP_CMD_MOUSE,
+    MP_CMD_KEYPRESS,
+    MP_CMD_KEYDOWN,
+    MP_CMD_KEYUP,
 
     /// Audio Filter commands
     MP_CMD_AF,

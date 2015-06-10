@@ -4846,6 +4846,36 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
     }
 
+    case MP_CMD_KEYPRESS:
+    case MP_CMD_KEYDOWN: {
+        const char *key_name = cmd->args[0].v.s;
+        int code = mp_input_get_key_from_name(key_name);
+        if (code < 0) {
+            MP_ERR(mpctx, "%s is not a valid input name.\n", key_name);
+            return -1;
+        }
+        if (cmd->id == MP_CMD_KEYDOWN)
+            code |= MP_KEY_STATE_DOWN;
+
+        mp_input_put_key(mpctx->input, code);
+        break;
+    }
+
+    case MP_CMD_KEYUP: {
+        const char *key_name = cmd->args[0].v.s;
+        if (key_name[0] == '\0') {
+            mp_input_put_key(mpctx->input, MP_INPUT_RELEASE_ALL);
+        } else {
+            int code = mp_input_get_key_from_name(key_name);
+            if (code < 0) {
+                MP_ERR(mpctx, "%s is not a valid input name.\n", key_name);
+                return -1;
+            }
+            mp_input_put_key(mpctx->input, code | MP_KEY_STATE_UP);
+        }
+        break;
+    }
+
     default:
         MP_VERBOSE(mpctx, "Received unknown cmd %s\n", cmd->name);
         return -1;
