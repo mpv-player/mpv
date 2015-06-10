@@ -1515,7 +1515,7 @@ const m_option_type_t m_option_type_string_append_list = {
     .set   = str_list_set,
 };
 
-static int read_subparam(struct mp_log *log, bstr optname,
+static int read_subparam(struct mp_log *log, bstr optname, char *termset,
                          bstr *str, bstr *out_subparam);
 
 static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
@@ -1527,7 +1527,7 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
 
     while (param.len) {
         bstr key, val;
-        r = read_subparam(log, name, &param, &key);
+        r = read_subparam(log, name, "=", &param, &key);
         if (r < 0)
             break;
         if (!bstr_eatstart0(&param, "=")) {
@@ -1535,7 +1535,7 @@ static int parse_keyvalue_list(struct mp_log *log, const m_option_t *opt,
             r = M_OPT_INVALID;
             break;
         }
-        r = read_subparam(log, name, &param, &val);
+        r = read_subparam(log, name, ",:", &param, &val);
         if (r < 0)
             break;
         if (dst) {
@@ -1717,9 +1717,10 @@ const m_option_type_t m_option_type_print_fn = {
 #define VAL(x) (*(char ***)(x))
 
 // Read s sub-option name, or a positional sub-opt value.
+// termset is a string containing the set of chars that terminate an option.
 // Return 0 on succes, M_OPT_ error code otherwise.
 // optname is for error reporting.
-static int read_subparam(struct mp_log *log, bstr optname,
+static int read_subparam(struct mp_log *log, bstr optname, char *termset,
                          bstr *str, bstr *out_subparam)
 {
     bstr p = *str;
@@ -1764,7 +1765,7 @@ static int read_subparam(struct mp_log *log, bstr optname,
     } else {
         // Skip until the next character that could possibly be a meta
         // character in option parsing.
-        int optlen = bstrcspn(p, ":=,\\%\"'[]");
+        int optlen = bstrcspn(p, termset);
         subparam = bstr_splice(p, 0, optlen);
         p = bstr_cut(p, optlen);
     }
@@ -1784,11 +1785,11 @@ static int split_subconf(struct mp_log *log, bstr optname, bstr *str,
     bstr p = *str;
     bstr subparam = {0};
     bstr subopt;
-    int r = read_subparam(log, optname, &p, &subopt);
+    int r = read_subparam(log, optname, ":=,\\%\"'[]", &p, &subopt);
     if (r < 0)
         return r;
     if (bstr_eatstart0(&p, "=")) {
-        r = read_subparam(log, subopt, &p, &subparam);
+        r = read_subparam(log, subopt, ":=,\\%\"'[]", &p, &subparam);
         if (r < 0)
             return r;
     }
