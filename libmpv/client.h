@@ -198,7 +198,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 17)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 18)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
@@ -1307,6 +1307,15 @@ typedef enum mpv_end_file_reason {
      * mpv_event_end_file.error will be set.
      */
     MPV_END_FILE_REASON_ERROR = 4,
+    /**
+     * The file was a playlist or similar. When the playlist is read, its
+     * entries will be appended to the playlist after the entry of the current
+     * file, the entry of the current file is removed, and a MPV_EVENT_END_FILE
+     * event is sent with reason set to MPV_END_FILE_REASON_REDIRECT. Then
+     * playback continues with the playlist contents.
+     * Since API version 1.18.
+     */
+    MPV_END_FILE_REASON_REDIRECT = 5,
 } mpv_end_file_reason;
 
 typedef struct mpv_event_end_file {

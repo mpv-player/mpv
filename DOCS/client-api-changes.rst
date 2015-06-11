@@ -32,6 +32,9 @@ API changes
 
 ::
 
+ 1.18   - add MPV_END_FILE_REASON_REDIRECT, and change behavior of
+          MPV_EVENT_END_FILE accordingly
+        - a bunch of interface-changes.rst changes
  1.17   - mpv_initialize() now blocks SIGPIPE (details see client.h)
  --- mpv 0.9.0 is released ---
  1.16   - add mpv_opengl_cb_report_flip()

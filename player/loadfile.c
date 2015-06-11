@@ -1130,7 +1130,7 @@ goto_reopen_demuxer: ;
             e->stream_flags |= entry_stream_flags;
         transfer_playlist(mpctx, pl);
         mp_notify_property(mpctx, "playlist");
-        mpctx->error_playing = 1;
+        mpctx->error_playing = 2;
         goto terminate_playback;
     }
 
@@ -1300,11 +1300,13 @@ terminate_playback:
     case PT_ERROR:
     case AT_END_OF_FILE:
     {
-        if (mpctx->error_playing >= 0 && nothing_played)
+        if (mpctx->error_playing == 0 && nothing_played)
             mpctx->error_playing = MPV_ERROR_NOTHING_TO_PLAY;
         if (mpctx->error_playing < 0) {
             end_event.error = mpctx->error_playing;
             end_event.reason = MPV_END_FILE_REASON_ERROR;
+        } else if (mpctx->error_playing == 2) {
+            end_event.reason = MPV_END_FILE_REASON_REDIRECT;
         } else {
             end_event.reason = MPV_END_FILE_REASON_EOF;
         }
