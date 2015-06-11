@@ -512,6 +512,26 @@ static int script_wait_event(lua_State *L)
         lua_setfield(L, -2, "args"); // event
         break;
     }
+    case MPV_EVENT_END_FILE: {
+        mpv_event_end_file *eef = event->data;
+        const char *reason;
+        switch (eef->reason) {
+        case MPV_END_FILE_REASON_EOF: reason = "eof"; break;
+        case MPV_END_FILE_REASON_STOP: reason = "stop"; break;
+        case MPV_END_FILE_REASON_QUIT: reason = "quit"; break;
+        case MPV_END_FILE_REASON_ERROR: reason = "error"; break;
+        default:
+            reason = "unknown";
+        }
+        lua_pushstring(L, reason); // event reason
+        lua_setfield(L, -2, "reason"); // event
+
+        if (eef->reason == MPV_END_FILE_REASON_ERROR) {
+            lua_pushstring(L, mpv_error_string(eef->error)); // event error
+            lua_setfield(L, -2, "error"); // event
+        }
+        break;
+    }
     case MPV_EVENT_PROPERTY_CHANGE: {
         mpv_event_property *prop = event->data;
         lua_pushstring(L, prop->name);

@@ -690,6 +690,23 @@ List of events
     Happens after a file was unloaded. Typically, the player will load the
     next file right away, or quit if this was the last file.
 
+    The event has the ``reason`` field, which takes one of these values:
+
+    ``eof``
+        The file has ended. This can (but doesn't have to) include
+        incomplete files or broken network connections under
+        circumstances.
+
+    ``stop``
+        Playback was ended by a command.
+
+    ``quit``
+        Playback was ended by sending the quit command.
+
+    ``error``
+        An error happened. In this case, an ``error`` field is present with
+        the error string.
+
 ``file-loaded``
     Happens after a file was loaded and begins playback.
 
