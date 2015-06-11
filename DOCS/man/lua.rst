@@ -707,6 +707,16 @@ List of events
         An error happened. In this case, an ``error`` field is present with
         the error string.
 
+    ``redirect``
+        Happens with playlists and similar. Details see
+        ``MPV_END_FILE_REASON_REDIRECT`` in the C API.
+
+    ``unknown``
+        Unknown. Normally doesn't happen, unless the Lua API is out of sync
+        with the C API. (Likewise, it could happen that your script gets
+        reason strings that did not exist yet at the time your script was
+        written.)
+
 ``file-loaded``
     Happens after a file was loaded and begins playback.
 

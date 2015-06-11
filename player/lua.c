@@ -520,6 +520,7 @@ static int script_wait_event(lua_State *L)
         case MPV_END_FILE_REASON_STOP: reason = "stop"; break;
         case MPV_END_FILE_REASON_QUIT: reason = "quit"; break;
         case MPV_END_FILE_REASON_ERROR: reason = "error"; break;
+        case MPV_END_FILE_REASON_REDIRECT: reason = "redirect"; break;
         default:
             reason = "unknown";
         }
