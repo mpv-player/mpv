@@ -606,17 +606,18 @@ static int init_device(struct ao *ao, bool second_try)
 
             if (mp_chmap_is_valid(&without_na) &&
                 !mp_chmap_equals(&without_na, &chmap) &&
+                !mp_chmap_equals(&chmap, &ao->channels) &&
                 !second_try)
             {
                 // Sometimes, ALSA will advertise certain chmaps, but it's not
                 // possible to set them. This can happen with dmix: as of
                 // alsa 1.0.28, dmix can do stereo only, but advertises the
                 // surround chmaps of the underlying device. In this case,
-                // requesting e.g. 5.1 will fail, but it will still allow
-                // setting 6 channels. Then it will return something like
+                // e.g. setting 6 channels will succeed, but requesting  5.1
+                // afterwards will fail. Then it will return something like
                 // "FL FR NA NA NA NA" as channel map. This means we would
                 // have to pad stereo output to 6 channels with silence, which
-                // is way too complicated in the general case. You can't change
+                // would require lots of extra processing. You can't change
                 // the number of channels to 2 either, because the hw params
                 // are already set! So just fuck it and reopen the device with
                 // the chmap "cleaned out" of NA entries.
