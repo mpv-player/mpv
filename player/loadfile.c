@@ -1302,8 +1302,8 @@ terminate_playback:
     {
         if (mpctx->error_playing >= 0 && nothing_played)
             mpctx->error_playing = MPV_ERROR_NOTHING_TO_PLAY;
-        end_event.error = mpctx->error_playing;
-        if (end_event.error < 0) {
+        if (mpctx->error_playing < 0) {
+            end_event.error = mpctx->error_playing;
             end_event.reason = MPV_END_FILE_REASON_ERROR;
         } else {
             end_event.reason = MPV_END_FILE_REASON_EOF;
