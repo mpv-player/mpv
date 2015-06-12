@@ -176,6 +176,10 @@ bool mp_chmap_sel_adjust(const struct mp_chmap_sel *s, struct mp_chmap *map)
             return true;
         }
     }
+
+    if (mp_chmap_sel_fallback(s, map))
+        return true;
+
     for (int i = 0; i < MP_ARRAY_SIZE(speaker_replacements); i++) {
         struct mp_chmap  t = *map;
         struct mp_chmap *r = (struct mp_chmap *)speaker_replacements[i];
@@ -184,9 +188,6 @@ bool mp_chmap_sel_adjust(const struct mp_chmap_sel *s, struct mp_chmap *map)
             return true;
         }
     }
-
-    if (mp_chmap_sel_fallback(s, map))
-        return true;
 
     // Fallback to mono/stereo as last resort
     *map = (struct mp_chmap) MP_CHMAP_INIT_STEREO;
