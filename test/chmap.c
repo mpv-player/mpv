@@ -16,8 +16,8 @@ static void test_mp_chmap_diff(void **state) {
 }
 
 int main(void) {
-    const UnitTest tests[] = {
-        unit_test(test_mp_chmap_diff),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_mp_chmap_diff),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

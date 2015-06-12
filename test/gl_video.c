@@ -31,12 +31,12 @@ static void test_scale_ambient_lux_log10_midpoint(void **state) {
 }
 
 int main(void) {
-    const UnitTest tests[] = {
-        unit_test(test_scale_ambient_lux_limits),
-        unit_test(test_scale_ambient_lux_sign),
-        unit_test(test_scale_ambient_lux_clamping),
-        unit_test(test_scale_ambient_lux_log10_midpoint),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_scale_ambient_lux_limits),
+        cmocka_unit_test(test_scale_ambient_lux_sign),
+        cmocka_unit_test(test_scale_ambient_lux_clamping),
+        cmocka_unit_test(test_scale_ambient_lux_log10_midpoint),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }
 

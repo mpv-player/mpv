@@ -102,20 +102,20 @@ static void test_mp_chmap_sel_fallback_more_replacements(void **state) {
 }
 
 int main(void) {
-    const UnitTest tests[] = {
-        unit_test(test_mp_chmap_sel_fallback_upmix),
-        unit_test(test_mp_chmap_sel_fallback_downmix),
-        unit_test(test_mp_chmap_sel_fallback_incompatible),
-        unit_test(test_mp_chmap_sel_fallback_prefer_compatible),
-        unit_test(test_mp_chmap_sel_fallback_prefer_closest_upmix),
-        unit_test(test_mp_chmap_sel_fallback_use_replacements),
-        unit_test(test_mp_chmap_sel_fallback_works_on_alsa_chmaps),
-        unit_test(test_mp_chmap_sel_fallback_mono_to_stereo),
-        unit_test(test_mp_chmap_sel_fallback_stereo_to_stereo),
-        unit_test(test_mp_chmap_sel_fallback_no_downmix),
-        unit_test(test_mp_chmap_sel_fallback_minimal_downmix),
-        unit_test(test_mp_chmap_sel_fallback_reject_unknown),
-        unit_test(test_mp_chmap_sel_fallback_more_replacements),
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_mp_chmap_sel_fallback_upmix),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_downmix),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_incompatible),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_prefer_compatible),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_prefer_closest_upmix),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_use_replacements),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_works_on_alsa_chmaps),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_mono_to_stereo),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_stereo_to_stereo),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_no_downmix),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_minimal_downmix),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_reject_unknown),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_more_replacements),
     };
-    return run_tests(tests);
+    return cmocka_run_group_tests(tests, NULL, NULL);
 }

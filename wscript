@@ -83,7 +83,7 @@ build_options = [
     }, {
         'name': '--test',
         'desc': 'test suite (using cmocka)',
-        'func': check_pkg_config('cmocka', '>= 0.4.1'),
+        'func': check_pkg_config('cmocka', '>= 1.0.0'),
         'default': 'disable',
     }, {
         'name': '--clang-database',
