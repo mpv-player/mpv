@@ -251,6 +251,8 @@ static const int alsa_to_mp_channels[][2] = {
     {SND_CHMAP_TRL,     MP_SP(TBL)},
     {SND_CHMAP_TRR,     MP_SP(TBR)},
     {SND_CHMAP_TRC,     MP_SP(TBC)},
+    {SND_CHMAP_RRC,     MP_SP(SDR)},
+    {SND_CHMAP_RLC,     MP_SP(SDL)},
     {SND_CHMAP_MONO,    MP_SP(FC)},
     {SND_CHMAP_NA,      MP_SPEAKER_ID_NA},
     {SND_CHMAP_LAST,    MP_SPEAKER_ID_COUNT}
