@@ -234,29 +234,45 @@ bool mp_chmap_sel_fallback(const struct mp_chmap_sel *s, struct mp_chmap *map)
         return true;
     }
 
-    struct mp_chmap best = {0};
+    struct mp_chmap best_of_best = {0};
 
-    for (int n = 0; n < s->num_chmaps; n++) {
-        struct mp_chmap e = s->chmaps[n];
+    for (int i = -1; i < (int)MP_ARRAY_SIZE(speaker_replacements); i++) {
+        struct mp_chmap best = {0};
+        struct mp_chmap t = *map;
 
-        if (mp_chmap_is_unknown(&e))
-            continue;
+        if (i >= 0) {
+            struct mp_chmap *r = (struct mp_chmap *)speaker_replacements[i];
+            if (!replace_speakers(&t, r))
+                continue;
+        }
 
-        // in case we didn't match any fallback retry after replacing speakers
-        for (int i = -1; i < (int)MP_ARRAY_SIZE(speaker_replacements); i++) {
-            struct mp_chmap  t = *map;
-            if (i >= 0) {
-                struct mp_chmap *r = (struct mp_chmap *)speaker_replacements[i];
-                if (!replace_speakers(&t, r))
-                    continue;
-            }
+        for (int n = 0; n < s->num_chmaps; n++) {
+            struct mp_chmap e = s->chmaps[n];
+
+            if (mp_chmap_is_unknown(&e))
+                continue;
+
             if (mp_chmap_is_better(&t, &best, &e))
                 best = e;
         }
+
+        if (best.num) {
+            if (best_of_best.num) {
+                // If best (without replacements) is not worse, but is actually
+                // better with replacements applied, pick it.
+                int bbest_lost = mp_chmap_diffn(map, &best_of_best);
+                int best_lost = mp_chmap_diffn(map, &best);
+                int repl_lost = mp_chmap_diffn(&t, &best);
+                if (best_lost <= bbest_lost && repl_lost < bbest_lost)
+                    best_of_best = best;
+            } else {
+                best_of_best = best;
+            }
+        }
     }
 
-    if (best.num) {
-        *map = best;
+    if (best_of_best.num) {
+        *map = best_of_best;
         return true;
     }
 
