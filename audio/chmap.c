@@ -70,6 +70,7 @@ static const char *const std_layout_names[][2] = {
     {"quad",            "fl-fr-bl-br"},
     {"quad(side)",      "fl-fr-sl-sr"},
     {"3.1",             "fl-fr-fc-lfe"},
+    {"3.1(back)",       "fl-fr-lfe-bc"}, // not in lavc
     {"5.0",             "fl-fr-fc-bl-br"},
     {"5.0(alsa)",       "fl-fr-bl-br-fc"}, // not in lavc
     {"5.0(side)",       "fl-fr-fc-sl-sr"},
@@ -83,9 +84,11 @@ static const char *const std_layout_names[][2] = {
     {"hexagonal",       "fl-fr-fc-bl-br-bc"},
     {"6.1",             "fl-fr-fc-lfe-bc-sl-sr"},
     {"6.1(back)",       "fl-fr-fc-lfe-bl-br-bc"}, // lavc calls this "6.1" too
+    {"6.1(top)",        "fl-fr-fc-lfe-bl-br-tc"}, // not in lavc
     {"6.1(front)",      "fl-fr-lfe-flc-frc-sl-sr"},
     {"7.0",             "fl-fr-fc-bl-br-sl-sr"},
     {"7.0(front)",      "fl-fr-fc-flc-frc-sl-sr"},
+    {"7.0(rear)",       "fl-fr-fc-bl-br-sdl-sdr"}, // not in lavc
     {"7.1",             "fl-fr-fc-lfe-bl-br-sl-sr"},
     {"7.1(alsa)",       "fl-fr-bl-br-fc-lfe-sl-sr"}, // not in lavc
     {"7.1(wide)",       "fl-fr-fc-lfe-bl-br-flc-frc"},
