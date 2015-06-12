@@ -97,7 +97,7 @@ static const char *const std_layout_names[][2] = {
     {0}
 };
 
-static const struct mp_chmap default_layouts[MP_NUM_CHANNELS + 1] = {
+static const struct mp_chmap default_layouts[] = {
     {0},                                        // empty
     MP_CHMAP_INIT_MONO,                         // mono
     MP_CHMAP2(FL, FR),                          // stereo
@@ -217,11 +217,11 @@ void mp_chmap_fill_na(struct mp_chmap *map, int num)
 // mp_chmap_is_valid(dst) will return false.
 void mp_chmap_from_channels(struct mp_chmap *dst, int num_channels)
 {
-    if (num_channels < 0 || num_channels > MP_NUM_CHANNELS) {
-        *dst = (struct mp_chmap) {0};
-    } else {
+    *dst = (struct mp_chmap) {0};
+    if (num_channels >= 0 && num_channels < MP_ARRAY_SIZE(default_layouts))
         *dst = default_layouts[num_channels];
-    }
+    if (!dst->num)
+        mp_chmap_set_unknown(dst, num_channels);
 }
 
 // Try to do what mplayer/mplayer2/mpv did before channel layouts were
