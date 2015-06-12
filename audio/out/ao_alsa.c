@@ -306,6 +306,8 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
         mp_chmap_from_alsa(&entry, &maps[i]->map);
 
         if (mp_chmap_is_valid(&entry)) {
+            if (maps[i]->type == SND_CHMAP_TYPE_VAR)
+                mp_chmap_reorder_norm(&entry);
             MP_VERBOSE(ao, "Got supported channel map: %s (type %s)\n",
                        mp_chmap_to_str(&entry),
                        snd_pcm_chmap_type_name(maps[i]->type));
