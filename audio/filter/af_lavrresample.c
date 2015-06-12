@@ -81,6 +81,7 @@ struct af_resample {
     bool avrctx_ok;
     struct AVAudioResampleContext *avrctx;
     struct mp_audio avrctx_fmt; // output format of avrctx
+    struct mp_audio pool_fmt; // format used to allocate frames for avrctx output
     struct AVAudioResampleContext *avrctx_out; // for output channel reordering
     struct af_resample_opts ctx;   // opts in the context
     struct af_resample_opts opts;  // opts requested by the user
@@ -273,6 +274,14 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     mp_audio_set_channels(&s->avrctx_fmt, &out_lavc);
     mp_audio_set_format(&s->avrctx_fmt, af_from_avformat(out_samplefmtp));
 
+    // If there are NA channels, the final output will have more channels than
+    // the avrctx output. Also, avrctx will output planar (out_samplefmtp was
+    // not overwritten). Allocate the output frame with more channels, so the
+    // NA channels can be trivially added.
+    s->pool_fmt = s->avrctx_fmt;
+    if (map_out.num > out_lavc.num)
+        mp_audio_set_channels(&s->pool_fmt, &map_out);
+
     // Real conversion; output is input to avrctx_out.
     av_opt_set_int(s->avrctx, "in_channel_layout",  in_ch_layout, 0);
     av_opt_set_int(s->avrctx, "out_channel_layout", out_ch_layout, 0);
@@ -390,22 +399,28 @@ static void uninit(struct af_instance *af)
     avresample_free(&s->avrctx_out);
 }
 
+// This relies on the tricky way mpa was allocated.
 static void reorder_planes(struct mp_audio *mpa, int *reorder,
                            struct mp_chmap *newmap)
 {
     struct mp_audio prev = *mpa;
-
-    for (int n = 0; n < newmap->num; n++) {
-        int src = reorder[n];
-        if (src < 0) {
-            src = 0;    // Use the first plane for padding channels.
-            mpa->readonly = true;
-        }
-        assert(src < mpa->num_planes);
-        mpa->planes[n] = prev.planes[src];
-    }
-
     mp_audio_set_channels(mpa, newmap);
+
+    // The trailing planes were never written by avrctx, they're the NA channels.
+    int next_na = prev.num_planes;
+
+    for (int n = 0; n < mpa->num_planes; n++) {
+        int src = reorder[n];
+        assert(src >= -1 && src < prev.num_planes);
+        if (src >= 0) {
+            mpa->planes[n] = prev.planes[src];
+        } else {
+            assert(next_na < mpa->num_planes);
+            mpa->planes[n] = prev.planes[next_na++];
+            af_fill_silence(mpa->planes[n], mpa->sstride * mpa->samples,
+                            mpa->format);
+        }
+    }
 }
 
 static int filter(struct af_instance *af, struct mp_audio *in)
@@ -414,7 +429,7 @@ static int filter(struct af_instance *af, struct mp_audio *in)
 
     int samples = get_out_samples(s, in ? in->samples : 0);
 
-    struct mp_audio out_format = s->avrctx_fmt;
+    struct mp_audio out_format = s->pool_fmt;
     struct mp_audio *out = mp_audio_pool_get(af->out_pool, &out_format, samples);
     if (!out)
         goto error;
@@ -427,9 +442,12 @@ static int filter(struct af_instance *af, struct mp_audio *in)
             goto error;
     }
 
+    struct mp_audio real_out = *out;
+    mp_audio_copy_config(out, &s->avrctx_fmt);
+
     if (out->samples && !mp_audio_config_equals(out, af->data)) {
-        assert(AF_FORMAT_IS_PLANAR(out->format));
-        reorder_planes(out, s->reorder_out, &af->data->channels);
+        assert(AF_FORMAT_IS_PLANAR(out->format) && out->format == real_out.format);
+        reorder_planes(out, s->reorder_out, &s->pool_fmt.channels);
         if (!mp_audio_config_equals(out, af->data)) {
             struct mp_audio *new = mp_audio_pool_get(s->reorder_buffer, af->data,
                                                      out->samples);
