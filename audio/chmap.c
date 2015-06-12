@@ -384,8 +384,8 @@ void mp_chmap_get_reorder(int src[MP_NUM_CHANNELS], const struct mp_chmap *from,
         return;
     }
 
-    for (int n = 0; n < from->num; n++) {
-        for (int i = 0; i < to->num; i++) {
+    for (int n = 0; n < to->num; n++) {
+        for (int i = 0; i < from->num; i++) {
             if (to->speaker[n] == from->speaker[i]) {
                 src[n] = i;
                 break;
