@@ -496,7 +496,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
 
-    if (p->active) {
+    if (p->active && mpi) {
         struct mp_image src = *mpi;
         struct mp_rect src_rc = p->src;
         src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, mpi->fmt.align_x);
