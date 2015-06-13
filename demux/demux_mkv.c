@@ -1201,7 +1201,7 @@ typedef struct {
 static const videocodec_info_t vinfo[] = {
     {MKV_V_MJPEG,     "mjpeg", 1},
     {MKV_V_MPEG1,     "mpeg1video", 0},
-    {MKV_V_MPEG2,     "mpeg1video", 0},
+    {MKV_V_MPEG2,     "mpeg2video", 0},
     {MKV_V_MPEG4_SP,  "mpeg4", 1},
     {MKV_V_MPEG4_ASP, "mpeg4", 1},
     {MKV_V_MPEG4_AP,  "mpeg4", 1},
