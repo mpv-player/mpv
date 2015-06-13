@@ -1194,24 +1194,24 @@ static void display_create_tracks(demuxer_t *demuxer)
 
 typedef struct {
     char *id;
-    int fourcc;
+    const char *codec;
     int extradata;
 } videocodec_info_t;
 
 static const videocodec_info_t vinfo[] = {
-    {MKV_V_MJPEG,     MP_FOURCC('m', 'j', 'p', 'g'), 1},
-    {MKV_V_MPEG1,     MP_FOURCC('m', 'p', 'g', '1'), 0},
-    {MKV_V_MPEG2,     MP_FOURCC('m', 'p', 'g', '2'), 0},
-    {MKV_V_MPEG4_SP,  MP_FOURCC('m', 'p', '4', 'v'), 1},
-    {MKV_V_MPEG4_ASP, MP_FOURCC('m', 'p', '4', 'v'), 1},
-    {MKV_V_MPEG4_AP,  MP_FOURCC('m', 'p', '4', 'v'), 1},
-    {MKV_V_MPEG4_AVC, MP_FOURCC('a', 'v', 'c', '1'), 1},
-    {MKV_V_THEORA,    MP_FOURCC('t', 'h', 'e', 'o'), 1},
-    {MKV_V_VP8,       MP_FOURCC('V', 'P', '8', '0'), 0},
-    {MKV_V_VP9,       MP_FOURCC('V', 'P', '9', '0'), 0},
-    {MKV_V_DIRAC,     MP_FOURCC('d', 'r', 'a', 'c'), 0},
-    {MKV_V_PRORES,    MP_FOURCC('p', 'r', '0', '0'), 0},
-    {MKV_V_HEVC,      MP_FOURCC('H', 'E', 'V', 'C'), 1},
+    {MKV_V_MJPEG,     "mjpeg", 1},
+    {MKV_V_MPEG1,     "mpeg1video", 0},
+    {MKV_V_MPEG2,     "mpeg1video", 0},
+    {MKV_V_MPEG4_SP,  "mpeg4", 1},
+    {MKV_V_MPEG4_ASP, "mpeg4", 1},
+    {MKV_V_MPEG4_AP,  "mpeg4", 1},
+    {MKV_V_MPEG4_AVC, "h264", 1},
+    {MKV_V_THEORA,    "theora", 1},
+    {MKV_V_VP8,       "vp8", 0},
+    {MKV_V_VP9,       "vp9", 0},
+    {MKV_V_DIRAC,     "dirac", 0},
+    {MKV_V_PRORES,    "prores", 0},
+    {MKV_V_HEVC,      "hevc", 1},
     {0}
 };
 
@@ -1253,23 +1253,23 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
                 || !strcmp(track->codec_id, MKV_V_REALV40)))
     {
         unsigned char *src;
-        uint32_t type2;
         unsigned int cnt;
 
         src = (uint8_t *) track->private_data + RVPROPERTIES_SIZE;
 
         cnt = track->private_size - RVPROPERTIES_SIZE;
-        type2 = AV_RB32(src - 4);
-        if (type2 == 0x10003000 || type2 == 0x10003001)
-            sh->format = MP_FOURCC('R', 'V', '1', '3');
-        else
-            sh->format = MP_FOURCC('R', 'V', track->codec_id[9], '0');
+        uint32_t t2 = AV_RB32(src - 4);
+        switch (t2 == 0x10003000 || t2 == 0x10003001 ? '1' : track->codec_id[9]) {
+        case '1': sh->codec = "rv10"; break;
+        case '2': sh->codec = "rv20"; break;
+        case '3': sh->codec = "rv30"; break;
+        case '4': sh->codec = "rv40"; break;
+        }
         // copy type1 and type2 info from rv properties
         extradata_size = cnt + 8;
         extradata = src - 8;
         track->parse = true;
         track->parse_timebase = 1e3;
-        mp_set_codec_from_tag(sh);
     } else if (strcmp(track->codec_id, MKV_V_UNCOMPRESSED) == 0) {
         // raw video, "like AVI" - this is a FourCC
         sh->format = track->colorspace;
@@ -1291,10 +1291,8 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         const videocodec_info_t *vi = vinfo;
         while (vi->id && strcmp(vi->id, track->codec_id))
             vi++;
-        if (vi->id) {
-            sh->format = vi->fourcc;
-            mp_set_codec_from_tag(sh);
-        }
+        if (vi->codec)
+            sh->codec = vi->codec;
         if (vi->extradata && track->private_data && track->private_size > 0)
         {
             extradata = track->private_data;
@@ -1302,9 +1300,12 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         }
     }
 
-    if (sh->format == MP_FOURCC('V', 'P', '9', '0')) {
+    const char *codec = sh->codec ? sh->codec : "";
+    if (!strcmp(codec, "vp9")) {
         track->parse = true;
         track->parse_timebase = 1e9;
+    } else if (!strcmp(codec, "mjpeg")) {
+        sh->format = MP_FOURCC('m', 'j', 'p', 'g');
     }
 
     if (extradata_size > 0x1000000) {

@@ -30,13 +30,6 @@ struct mp_codec_tag {
 static const struct mp_codec_tag mp_codec_tags[] = {
     // Made-up tags used by demux_mkv.c to map codecs.
     // (This is a leftover from MPlayer's codecs.conf mechanism.)
-    {MKTAG('p', 'r', '0', '0'), "prores"},
-    {MKTAG('H', 'E', 'V', 'C'), "hevc"},
-    {MKTAG('R', 'V', '2', '0'), "rv20"},
-    {MKTAG('R', 'V', '3', '0'), "rv30"},
-    {MKTAG('R', 'V', '4', '0'), "rv40"},
-    {MKTAG('R', 'V', '1', '0'), "rv10"},
-    {MKTAG('R', 'V', '1', '3'), "rv10"},
     {MKTAG('E', 'A', 'C', '3'), "eac3"},
     {MKTAG('M', 'P', '4', 'A'), "aac"},     // also the QT tag
     {MKTAG('v', 'r', 'b', 's'), "vorbis"},
@@ -51,12 +44,6 @@ static const struct mp_codec_tag mp_codec_tags[] = {
     {MKTAG('d', 'n', 'e', 't'), "ac3"},
     {MKTAG('s', 'i', 'p', 'r'), "sipr"},
     {MKTAG('T', 'T', 'A', '1'), "tta"},
-    // Fringe codecs, occur in the wild, but not mapped in FFmpeg.
-    {MKTAG('B', 'I', 'K', 'b'), "binkvideo"},
-    {MKTAG('B', 'I', 'K', 'f'), "binkvideo"},
-    {MKTAG('B', 'I', 'K', 'g'), "binkvideo"},
-    {MKTAG('B', 'I', 'K', 'h'), "binkvideo"},
-    {MKTAG('B', 'I', 'K', 'i'), "binkvideo"},
     {0}
 };
 
