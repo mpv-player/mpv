@@ -96,7 +96,6 @@ typedef struct mkv_track {
     struct sh_stream *stream;
 
     char *codec_id;
-    int ms_compat;
     char *language;
 
     int type;
@@ -610,9 +609,6 @@ static void parse_trackentry(struct demuxer *demuxer,
     if (entry->n_codec_id) {
         track->codec_id = talloc_strndup(track, entry->codec_id.start,
                                          entry->codec_id.len);
-        if (!strcmp(track->codec_id, MKV_V_MSCOMP)
-            || !strcmp(track->codec_id, MKV_A_ACM))
-            track->ms_compat = 1;
         MP_VERBOSE(demuxer, "|  + Codec ID: %s\n", track->codec_id);
     } else {
         MP_ERR(demuxer, "Missing codec ID!\n");
@@ -1231,7 +1227,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh->demuxer_id = track->tnum;
     sh->title = talloc_strdup(sh_v, track->name);
 
-    if (track->ms_compat) {     /* MS compatibility mode */
+    if (!strcmp(track->codec_id, MKV_V_MSCOMP)) { /* AVI compatibility mode */
         // The private_data contains a BITMAPINFOHEADER struct
         if (track->private_data == NULL || track->private_size < 40)
             return 1;
@@ -1247,6 +1243,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         extradata = track->private_data + 40;
         extradata_size = track->private_size - 40;
         mp_set_codec_from_tag(sh);
+        sh_v->avi_dts = true;
     } else {
         sh_v->bits_per_coded_sample = 24;
 
@@ -1332,7 +1329,6 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     uint32_t dh = track->v_dheight_set ? track->v_dheight : track->v_height;
     sh_v->aspect = (dw && dh) ? (double) dw / dh : 0;
     MP_VERBOSE(demuxer, "Aspect: %f\n", sh_v->aspect);
-    sh_v->avi_dts = track->ms_compat;
     sh_v->stereo_mode = track->stereo_mode;
 
     return 0;
@@ -1397,7 +1393,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     if (!track->a_osfreq)
         track->a_osfreq = track->a_sfreq;
 
-    if (track->ms_compat) {
+    if (!strcmp(track->codec_id, MKV_A_ACM)) { /* AVI compatibility mode */
         // The private_data contains a WAVEFORMATEX struct
         if (track->private_size < 18)
             goto error;
@@ -1569,8 +1565,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         sh_a->bitrate = 0;
         sh_a->block_align = 0;
 
-        if (track->ms_compat)
-            sh->format = MP_FOURCC('f', 'L', 'a', 'C');
         unsigned char *ptr = extradata;
         unsigned int size = extradata_len;
         if (size < 4 || ptr[0] != 'f' || ptr[1] != 'L' || ptr[2] != 'a'
@@ -1610,7 +1604,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         AV_WL32(data + 10, track->a_osfreq);
         // Bogus: last frame won't be played.
         AV_WL32(data + 14, 0);
-    } else if (!track->ms_compat) {
+    } else if (!track->a_formattag) {
         goto error;
     }
 
@@ -2416,7 +2410,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
              * packets resulting from parsing. */
             if (i == 0 || track->default_duration)
                 dp->pts = mkv_d->last_pts + i * track->default_duration;
-            if (track->ms_compat)
+            if (stream->video && stream->video->avi_dts)
                 MPSWAP(double, dp->pts, dp->dts);
             if (i == 0)
                 dp->duration = block_duration / 1e9;
