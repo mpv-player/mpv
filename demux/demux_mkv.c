@@ -1195,23 +1195,22 @@ static void display_create_tracks(demuxer_t *demuxer)
 typedef struct {
     char *id;
     const char *codec;
-    int extradata;
 } videocodec_info_t;
 
 static const videocodec_info_t vinfo[] = {
-    {MKV_V_MJPEG,     "mjpeg", 1},
-    {MKV_V_MPEG1,     "mpeg1video", 0},
-    {MKV_V_MPEG2,     "mpeg2video", 0},
-    {MKV_V_MPEG4_SP,  "mpeg4", 1},
-    {MKV_V_MPEG4_ASP, "mpeg4", 1},
-    {MKV_V_MPEG4_AP,  "mpeg4", 1},
-    {MKV_V_MPEG4_AVC, "h264", 1},
-    {MKV_V_THEORA,    "theora", 1},
-    {MKV_V_VP8,       "vp8", 0},
-    {MKV_V_VP9,       "vp9", 0},
-    {MKV_V_DIRAC,     "dirac", 0},
-    {MKV_V_PRORES,    "prores", 0},
-    {MKV_V_HEVC,      "hevc", 1},
+    {MKV_V_MJPEG,     "mjpeg"},
+    {MKV_V_MPEG1,     "mpeg1video"},
+    {MKV_V_MPEG2,     "mpeg2video"},
+    {MKV_V_MPEG4_SP,  "mpeg4"},
+    {MKV_V_MPEG4_ASP, "mpeg4"},
+    {MKV_V_MPEG4_AP,  "mpeg4"},
+    {MKV_V_MPEG4_AVC, "h264"},
+    {MKV_V_THEORA,    "theora"},
+    {MKV_V_VP8,       "vp8"},
+    {MKV_V_VP9,       "vp9"},
+    {MKV_V_DIRAC,     "dirac"},
+    {MKV_V_PRORES,    "prores"},
+    {MKV_V_HEVC,      "hevc"},
     {0}
 };
 
@@ -1293,8 +1292,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
             vi++;
         if (vi->codec)
             sh->codec = vi->codec;
-        if (vi->extradata && track->private_data && track->private_size > 0)
-        {
+        if (track->private_data && track->private_size > 0) {
             extradata = track->private_data;
             extradata_size = track->private_size;
         }
