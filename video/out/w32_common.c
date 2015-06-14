@@ -37,6 +37,7 @@
 #include "osdep/io.h"
 #include "osdep/threads.h"
 #include "osdep/w32_keyboard.h"
+#include "osdep/atomics.h"
 #include "misc/dispatch.h"
 #include "misc/rendezvous.h"
 #include "talloc.h"
@@ -111,7 +112,7 @@ struct vo_w32_state {
 
 typedef struct tagDropTarget {
     IDropTarget iface;
-    ULONG refCnt;
+    atomic_int refCnt;
     DWORD lastEffect;
     IDataObject* dataObj;
     struct vo_w32_state *w32;
@@ -148,13 +149,13 @@ static HRESULT STDMETHODCALLTYPE DropTarget_QueryInterface(IDropTarget* This,
 static ULONG STDMETHODCALLTYPE DropTarget_AddRef(IDropTarget* This)
 {
     DropTarget* t = (DropTarget*)This;
-    return ++(t->refCnt);
+    return atomic_fetch_add(&t->refCnt, 1) + 1;
 }
 
 static ULONG STDMETHODCALLTYPE DropTarget_Release(IDropTarget* This)
 {
     DropTarget* t = (DropTarget*)This;
-    ULONG cRef = --(t->refCnt);
+    ULONG cRef = atomic_fetch_add(&t->refCnt, -1) - 1;
 
     if (cRef == 0) {
         DropTarget_Destroy(t);
@@ -295,7 +296,7 @@ static void DropTarget_Init(DropTarget* This, struct vo_w32_state *w32)
     };
 
     This->iface.lpVtbl = vtbl;
-    This->refCnt = 0;
+    atomic_store(&This->refCnt, 0);
     This->lastEffect = 0;
     This->dataObj = NULL;
     This->w32 = w32;
