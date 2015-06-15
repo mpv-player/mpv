@@ -156,6 +156,13 @@ static void uninit(struct af_instance* af)
     }
 }
 
+static void update_delay(struct af_instance *af)
+{
+    af_ac3enc_t *s = af->priv;
+    af->delay = ((s->pending ? s->pending->samples : 0) + s->input->samples) /
+                (double)s->input->rate;
+}
+
 static int filter_frame(struct af_instance *af, struct mp_audio *audio)
 {
     af_ac3enc_t *s = af->priv;
@@ -166,6 +173,7 @@ static int filter_frame(struct af_instance *af, struct mp_audio *audio)
 
     talloc_free(s->pending);
     s->pending = audio;
+    update_delay(af);
     return 0;
 }
 
@@ -177,22 +185,27 @@ static void swap_16(uint16_t *ptr, size_t size)
 
 // Copy data from input frame to encode frame (because libavcodec wants a full
 // AC3 frame for encoding, while filter input frames can be smaller or larger).
-// Return true if the
-static bool fill_buffer(af_ac3enc_t *s)
+// Return true if the frame is complete.
+static bool fill_buffer(struct af_instance *af)
 {
+    af_ac3enc_t *s = af->priv;
+
+    af->delay = 0;
+
     if (s->pending) {
         int copy = MPMIN(s->in_samples - s->input->samples, s->pending->samples);
         s->input->samples += copy;
         mp_audio_copy(s->input, s->input->samples - copy, s->pending, 0, copy);
         mp_audio_skip_samples(s->pending, copy);
     }
+    update_delay(af);
     return s->input->samples >= s->in_samples;
 }
 
 static int filter_out(struct af_instance *af)
 {
     af_ac3enc_t *s = af->priv;
-    if (!fill_buffer(s))
+    if (!fill_buffer(af))
         return 0; // need more input
 
     AVFrame *frame = av_frame_alloc();
@@ -256,6 +269,7 @@ static int filter_out(struct af_instance *af)
     swap_16((uint16_t *)(buf + header_len), s->pkt.size / 2);
     out->samples = frame_size / out->sstride;
     af_add_output_frame(af, out);
+    update_delay(af);
     return 0;
 }
 
