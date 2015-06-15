@@ -157,8 +157,8 @@ void audio_uninit(struct dec_audio *d_audio)
     if (!d_audio)
         return;
     MP_VERBOSE(d_audio, "Uninit audio filters...\n");
-    af_destroy(d_audio->afilter);
     uninit_decoder(d_audio);
+    af_destroy(d_audio->afilter);
     talloc_free(d_audio->waiting);
     talloc_free(d_audio);
 }
