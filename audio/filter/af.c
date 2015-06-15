@@ -832,6 +832,16 @@ static struct mp_audio *af_dequeue_output_frame(struct af_instance *af)
     return res;
 }
 
+static void read_remaining(struct af_instance *af)
+{
+    int num_frames;
+    do {
+        num_frames = af->num_out_queued;
+        if (!af->filter_out || af->filter_out(af) < 0)
+            break;
+    } while (num_frames != af->num_out_queued);
+}
+
 static int af_do_filter(struct af_instance *af, struct mp_audio *frame)
 {
     if (frame)
@@ -871,6 +881,7 @@ int af_output_frame(struct af_stream *s, bool eof)
             // Flush remaining frames on EOF, but do that only if the previous
             // filters have been flushed (i.e. they have no more output).
             if (eof && !last) {
+                read_remaining(cur);
                 int r = af_do_filter(cur, NULL);
                 if (r < 0)
                     return r;
