@@ -137,7 +137,7 @@ pacman -S git pkg-config python3 mingw-w64-x86_64-gcc
 pacman -S mingw-w64-x86_64-ffmpeg mingw-w64-x86_64-libjpeg-turbo mingw-w64-x86_64-lua
 
 # Install additional (optional) dependencies
-pacman -S mingw-w64-x86_64-libdvdnav mingw-w64-x86_64-mpg123 mingw-w64-x86_64-libguess
+pacman -S mingw-w64-x86_64-libdvdnav mingw-w64-x86_64-libguess
 ```
 
 For a 32-bit build, install ``mingw-w64-i686-*`` packages instead.
