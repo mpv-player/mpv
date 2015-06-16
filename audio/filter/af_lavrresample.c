@@ -82,6 +82,7 @@ struct af_resample {
     struct AVAudioResampleContext *avrctx;
     struct mp_audio avrctx_fmt; // output format of avrctx
     struct mp_audio pool_fmt; // format used to allocate frames for avrctx output
+    struct mp_audio pre_out_fmt; // format before final conversion (S24)
     struct AVAudioResampleContext *avrctx_out; // for output channel reordering
     struct af_resample_opts ctx;   // opts in the context
     struct af_resample_opts opts;  // opts requested by the user
@@ -165,10 +166,21 @@ static bool needs_lavrctx_reconfigure(struct af_resample *s,
 
 }
 
+// Return the format libavresample should convert to, given the input format
+// mp_format. In some cases (S24) we perform an extra conversion step, and
+// signal here what exactly libavresample should output. It will be the input
+// to the final conversion to mp_format.
+static int check_output_conversion(int mp_format)
+{
+    if (mp_format == AF_FORMAT_S24)
+        return AV_SAMPLE_FMT_S32;
+    return af_to_avformat(mp_format);
+}
+
 static bool test_conversion(int src_format, int dst_format)
 {
     return af_to_avformat(src_format) != AV_SAMPLE_FMT_NONE &&
-           af_to_avformat(dst_format) != AV_SAMPLE_FMT_NONE;
+           check_output_conversion(dst_format) != AV_SAMPLE_FMT_NONE;
 }
 
 // mp_chmap_get_reorder() performs:
@@ -195,9 +207,8 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     s->avrctx_ok = false;
 
     enum AVSampleFormat in_samplefmt = af_to_avformat(in->format);
-    enum AVSampleFormat out_samplefmt = af_to_avformat(out->format);
-    enum AVSampleFormat out_samplefmtp =
-        af_to_avformat(af_fmt_to_planar(out->format));
+    enum AVSampleFormat out_samplefmt = check_output_conversion(out->format);
+    enum AVSampleFormat out_samplefmtp = av_get_planar_sample_fmt(out_samplefmt);
 
     if (in_samplefmt == AV_SAMPLE_FMT_NONE ||
         out_samplefmt == AV_SAMPLE_FMT_NONE ||
@@ -274,6 +285,9 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     mp_audio_set_channels(&s->avrctx_fmt, &out_lavc);
     mp_audio_set_format(&s->avrctx_fmt, af_from_avformat(out_samplefmtp));
 
+    s->pre_out_fmt = *out;
+    mp_audio_set_format(&s->pre_out_fmt, af_from_avformat(out_samplefmt));
+
     // If there are NA channels, the final output will have more channels than
     // the avrctx output. Also, avrctx will output planar (out_samplefmtp was
     // not overwritten). Allocate the output frame with more channels, so the
@@ -343,7 +357,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         if (af_to_avformat(in->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(in, AF_FORMAT_FLOAT);
-        if (af_to_avformat(out->format) == AV_SAMPLE_FMT_NONE)
+        if (check_output_conversion(out->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(out, in->format);
 
         int r = ((in->format == orig_in.format) &&
@@ -356,7 +370,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
     }
     case AF_CONTROL_SET_FORMAT: {
         int format = *(int *)arg;
-        if (format && af_to_avformat(format) == AV_SAMPLE_FMT_NONE)
+        if (format && check_output_conversion(format) == AV_SAMPLE_FMT_NONE)
             return AF_FALSE;
 
         mp_audio_set_format(af->data, format);
@@ -397,6 +411,28 @@ static void uninit(struct af_instance *af)
     if (s->avrctx_out)
         avresample_close(s->avrctx_out);
     avresample_free(&s->avrctx_out);
+}
+
+// The LSB is always ignored.
+#if BYTE_ORDER == BIG_ENDIAN
+#define SHIFT24(x) ((3-(x))*8)
+#else
+#define SHIFT24(x) (((x)+1)*8)
+#endif
+
+static void extra_output_conversion(struct af_instance *af, struct mp_audio *mpa)
+{
+    if (mpa->format == AF_FORMAT_S32 && af->data->format == AF_FORMAT_S24) {
+        size_t len = mp_audio_psize(mpa) / mpa->bps;
+        for (int s = 0; s < len; s++) {
+            uint32_t val = *((uint32_t *)mpa->planes[0] + s);
+            uint8_t *ptr = (uint8_t *)mpa->planes[0] + s * 3;
+            ptr[0] = val >> SHIFT24(0);
+            ptr[1] = val >> SHIFT24(1);
+            ptr[2] = val >> SHIFT24(2);
+        }
+        mp_audio_set_format(mpa, AF_FORMAT_S24);
+    }
 }
 
 // This relies on the tricky way mpa was allocated.
@@ -445,11 +481,12 @@ static int filter(struct af_instance *af, struct mp_audio *in)
     struct mp_audio real_out = *out;
     mp_audio_copy_config(out, &s->avrctx_fmt);
 
-    if (out->samples && !mp_audio_config_equals(out, af->data)) {
+    if (out->samples && !mp_audio_config_equals(out, &s->pre_out_fmt)) {
         assert(AF_FORMAT_IS_PLANAR(out->format) && out->format == real_out.format);
         reorder_planes(out, s->reorder_out, &s->pool_fmt.channels);
-        if (!mp_audio_config_equals(out, af->data)) {
-            struct mp_audio *new = mp_audio_pool_get(s->reorder_buffer, af->data,
+        if (!mp_audio_config_equals(out, &s->pre_out_fmt)) {
+            struct mp_audio *new = mp_audio_pool_get(s->reorder_buffer,
+                                                     &s->pre_out_fmt,
                                                      out->samples);
             if (!new)
                 goto error;
@@ -461,6 +498,8 @@ static int filter(struct af_instance *af, struct mp_audio *in)
                 goto error;
         }
     }
+
+    extra_output_conversion(af, out);
 
     talloc_free(in);
     if (out->samples) {
