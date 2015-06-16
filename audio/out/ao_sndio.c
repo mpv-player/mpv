@@ -116,12 +116,8 @@ static int init(struct ao *ao)
     };
     static const struct af_to_par af_to_par[] = {
         {AF_FORMAT_U8,   8, 0},
-        {AF_FORMAT_S8,   8, 1},
-        {AF_FORMAT_U16, 16, 0},
         {AF_FORMAT_S16, 16, 1},
-        {AF_FORMAT_U24, 24, 0},
         {AF_FORMAT_S24, 24, 1},
-        {AF_FORMAT_U32, 32, 0},
         {AF_FORMAT_S32, 32, 1},
     };
     const struct af_to_par *ap;
@@ -178,14 +174,14 @@ static int init(struct ao *ao)
         MP_ERR(ao, "swapped endian output not supported\n");
         goto error;
     }
-    if (p->par.bits == 8 && p->par.bps == 1) {
-        ao->format = p->par.sig ? AF_FORMAT_S8 : AF_FORMAT_U8;
-    } else if (p->par.bits == 16 && p->par.bps == 2) {
-        ao->format = p->par.sig ? AF_FORMAT_S16 : AF_FORMAT_U16;
-    } else if ((p->par.bits == 24 || p->par.msb) && p->par.bps == 3) {
-        ao->format = p->par.sig ? AF_FORMAT_S24 : AF_FORMAT_U24;
-    } else if ((p->par.bits == 32 || p->par.msb) && p->par.bps == 4) {
-        ao->format = p->par.sig ? AF_FORMAT_S32 : AF_FORMAT_U32;
+    if (p->par.bits == 8 && p->par.bps == 1 && !p->par.sig) {
+        ao->format = AF_FORMAT_U8;
+    } else if (p->par.bits == 16 && p->par.bps == 2 && p->par.sig) {
+        ao->format = AF_FORMAT_S16;
+    } else if ((p->par.bits == 24 || p->par.msb) && p->par.bps == 3 && p->par.sig) {
+        ao->format = AF_FORMAT_S24;
+    } else if ((p->par.bits == 32 || p->par.msb) && p->par.bps == 4 && p->par.sig) {
+        ao->format = AF_FORMAT_S32;
     } else {
         MP_ERR(ao, "couldn't set format\n");
         goto error;

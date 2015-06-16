@@ -204,14 +204,9 @@ alsa_error:
 }
 
 static const int mp_to_alsa_format[][2] = {
-    {AF_FORMAT_S8,          SND_PCM_FORMAT_S8},
     {AF_FORMAT_U8,          SND_PCM_FORMAT_U8},
-    {AF_FORMAT_U16,         SND_PCM_FORMAT_U16},
     {AF_FORMAT_S16,         SND_PCM_FORMAT_S16},
-    {AF_FORMAT_U32,         SND_PCM_FORMAT_U32},
     {AF_FORMAT_S32,         SND_PCM_FORMAT_S32},
-    {AF_FORMAT_U24,
-            MP_SELECT_LE_BE(SND_PCM_FORMAT_U24_3LE, SND_PCM_FORMAT_U24_3BE)},
     {AF_FORMAT_S24,
             MP_SELECT_LE_BE(SND_PCM_FORMAT_S24_3LE, SND_PCM_FORMAT_S24_3BE)},
     {AF_FORMAT_FLOAT,       SND_PCM_FORMAT_FLOAT},

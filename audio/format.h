@@ -26,11 +26,6 @@
 
 #include "misc/bstr.h"
 
-// Signed/unsigned
-#define AF_FORMAT_SI            (0<<0) // Signed
-#define AF_FORMAT_US            (1<<0) // Unsigned
-#define AF_FORMAT_SIGN_MASK     (1<<0)
-
 // Bits used
 // Some code assumes they're sorted by size.
 #define AF_FORMAT_8BIT          (0<<1)
@@ -64,22 +59,18 @@
 enum af_format {
     AF_FORMAT_UNKNOWN   = 0,
 
-    AF_FORMAT_U8        = AF_FORMAT_I|AF_FORMAT_US|AF_FORMAT_8BIT,
-    AF_FORMAT_S8        = AF_FORMAT_I|AF_FORMAT_SI|AF_FORMAT_8BIT,
-    AF_FORMAT_U16       = AF_FORMAT_I|AF_FORMAT_US|AF_FORMAT_16BIT,
-    AF_FORMAT_S16       = AF_FORMAT_I|AF_FORMAT_SI|AF_FORMAT_16BIT,
-    AF_FORMAT_U24       = AF_FORMAT_I|AF_FORMAT_US|AF_FORMAT_24BIT,
-    AF_FORMAT_S24       = AF_FORMAT_I|AF_FORMAT_SI|AF_FORMAT_24BIT,
-    AF_FORMAT_U32       = AF_FORMAT_I|AF_FORMAT_US|AF_FORMAT_32BIT,
-    AF_FORMAT_S32       = AF_FORMAT_I|AF_FORMAT_SI|AF_FORMAT_32BIT,
+    AF_FORMAT_U8        = AF_FORMAT_I|AF_FORMAT_8BIT,
+    AF_FORMAT_S16       = AF_FORMAT_I|AF_FORMAT_16BIT,
+    AF_FORMAT_S24       = AF_FORMAT_I|AF_FORMAT_24BIT,
+    AF_FORMAT_S32       = AF_FORMAT_I|AF_FORMAT_32BIT,
 
     AF_FORMAT_FLOAT     = AF_FORMAT_F|AF_FORMAT_32BIT,
     AF_FORMAT_DOUBLE    = AF_FORMAT_F|AF_FORMAT_64BIT,
 
     // Planar variants
-    AF_FORMAT_U8P       = AF_INTP|AF_FORMAT_US|AF_FORMAT_8BIT,
-    AF_FORMAT_S16P      = AF_INTP|AF_FORMAT_SI|AF_FORMAT_16BIT,
-    AF_FORMAT_S32P      = AF_INTP|AF_FORMAT_SI|AF_FORMAT_32BIT,
+    AF_FORMAT_U8P       = AF_INTP|AF_FORMAT_8BIT,
+    AF_FORMAT_S16P      = AF_INTP|AF_FORMAT_16BIT,
+    AF_FORMAT_S32P      = AF_INTP|AF_FORMAT_32BIT,
     AF_FORMAT_FLOATP    = AF_FLTP|AF_FORMAT_32BIT,
     AF_FORMAT_DOUBLEP   = AF_FLTP|AF_FORMAT_64BIT,
 
@@ -112,6 +103,8 @@ const char *af_fmt_to_str(int format);
 int af_fmt2bps(int format);
 int af_fmt2bits(int format);
 int af_fmt_change_bits(int format, int bits);
+
+bool af_fmt_unsigned(int format);
 
 int af_fmt_to_planar(int format);
 int af_fmt_from_planar(int format);

@@ -57,12 +57,8 @@ static int filter_##name(struct af_instance *af, struct mp_audio *data) \
 #define FILTERS \
     FILTER(FLOAT,   f)      \
     FILTER(S32,     s32)    \
-    FILTER(U32,     u32)    \
     FILTER(S24,     s24)    \
-    FILTER(U24,     u24)    \
     FILTER(S16,     s16)    \
-    FILTER(U16,     u16)    \
-    FILTER(S8,      s8)     \
     FILTER(U8,      u8)
 
 #define FILTER DEF_FILTER

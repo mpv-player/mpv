@@ -48,25 +48,8 @@ static int set_format(struct ao *ao)
     case AF_FORMAT_U8:
         rsd_format = RSD_U8;
         break;
-    case AF_FORMAT_S8:
-        rsd_format = RSD_S8;
-        break;
-    case AF_FORMAT_S16:
-        rsd_format = RSD_S16_NE;
-        break;
-    case AF_FORMAT_U16:
-        rsd_format = RSD_U16_NE;
-        break;
-    case AF_FORMAT_S24:
-    case AF_FORMAT_U24:
-        rsd_format = RSD_S32_NE;
-        ao->format = AF_FORMAT_S32;
-        break;
     case AF_FORMAT_S32:
         rsd_format = RSD_S32_NE;
-        break;
-    case AF_FORMAT_U32:
-        rsd_format = RSD_U32_NE;
         break;
     default:
         rsd_format = RSD_S16_NE;

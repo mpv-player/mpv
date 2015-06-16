@@ -177,7 +177,7 @@ static void ca_fill_asbd_raw(AudioStreamBasicDescription *asbd, int mp_format,
 
     if ((mp_format & AF_FORMAT_TYPE_MASK) == AF_FORMAT_F) {
         asbd->mFormatFlags |= kAudioFormatFlagIsFloat;
-    } else if ((mp_format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_SI) {
+    } else if (!af_fmt_unsigned(mp_format)) {
         asbd->mFormatFlags |= kAudioFormatFlagIsSignedInteger;
     }
 

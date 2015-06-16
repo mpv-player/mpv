@@ -39,8 +39,6 @@ struct priv
 
 static const int fmtmap[][2] = {
     {AF_FORMAT_U8,      AUDIO_U8},
-    {AF_FORMAT_S8,      AUDIO_S8},
-    {AF_FORMAT_U16,     AUDIO_U16SYS},
     {AF_FORMAT_S16,     AUDIO_S16SYS},
 #ifdef AUDIO_S32SYS
     {AF_FORMAT_S32,     AUDIO_S32SYS},

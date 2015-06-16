@@ -65,6 +65,12 @@ int af_fmt_change_bits(int format, int bits)
     return af_fmt_is_valid(format) ? format : 0;
 }
 
+// All formats are considered signed, except explicitly unsigned int formats.
+bool af_fmt_unsigned(int format)
+{
+    return format == AF_FORMAT_U8 || format == AF_FORMAT_U8P;
+}
+
 static const int planar_formats[][2] = {
     {AF_FORMAT_U8P,     AF_FORMAT_U8},
     {AF_FORMAT_S16P,    AF_FORMAT_S16},
@@ -101,12 +107,8 @@ int af_fmt_from_planar(int format)
 
 const struct af_fmt_entry af_fmtstr_table[] = {
     {"u8",          AF_FORMAT_U8},
-    {"s8",          AF_FORMAT_S8},
-    {"u16",         AF_FORMAT_U16},
     {"s16",         AF_FORMAT_S16},
-    {"u24",         AF_FORMAT_U24},
     {"s24",         AF_FORMAT_S24},
-    {"u32",         AF_FORMAT_U32},
     {"s32",         AF_FORMAT_S32},
     {"float",       AF_FORMAT_FLOAT},
     {"double",      AF_FORMAT_DOUBLE},
@@ -169,8 +171,7 @@ int af_str2fmt_short(bstr str)
 
 void af_fill_silence(void *dst, size_t bytes, int format)
 {
-    bool us = (format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_US;
-    memset(dst, us ? 0x80 : 0, bytes);
+    memset(dst, af_fmt_unsigned(format) ? 0x80 : 0, bytes);
 }
 
 #define FMT_DIFF(type, a, b) (((a) & type) - ((b) & type))
@@ -191,8 +192,6 @@ int af_format_conversion_score(int dst_format, int src_format)
     int score = 1024;
     if (FMT_DIFF(AF_FORMAT_INTERLEAVING_MASK, dst_format, src_format))
         score -= 1;     // has to (de-)planarize
-    if (FMT_DIFF(AF_FORMAT_SIGN_MASK, dst_format, src_format))
-        score -= 4;     // has to swap sign
     if (FMT_DIFF(AF_FORMAT_TYPE_MASK, dst_format, src_format)) {
         int dst_bits = dst_format & AF_FORMAT_BITS_MASK;
         if ((dst_format & AF_FORMAT_TYPE_MASK) == AF_FORMAT_F) {

@@ -24,9 +24,7 @@
 
 static bool test_conversion(int src_format, int dst_format)
 {
-    return (src_format == AF_FORMAT_U24 && dst_format == AF_FORMAT_U32) ||
-           (src_format == AF_FORMAT_S24 && dst_format == AF_FORMAT_S32) ||
-           (src_format == AF_FORMAT_U32 && dst_format == AF_FORMAT_U24) ||
+    return (src_format == AF_FORMAT_S24 && dst_format == AF_FORMAT_S32) ||
            (src_format == AF_FORMAT_S32 && dst_format == AF_FORMAT_S24);
 }
 
