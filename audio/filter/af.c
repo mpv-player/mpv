@@ -55,7 +55,6 @@ extern const struct af_info af_info_karaoke;
 extern const struct af_info af_info_scaletempo;
 extern const struct af_info af_info_bs2b;
 extern const struct af_info af_info_lavfi;
-extern const struct af_info af_info_convert24;
 extern const struct af_info af_info_rubberband;
 
 static const struct af_info *const filter_list[] = {
@@ -91,8 +90,6 @@ static const struct af_info *const filter_list[] = {
 #if HAVE_LIBAVFILTER
     &af_info_lavfi,
 #endif
-    // Must come last, because they're fallback format conversion filter
-    &af_info_convert24,
     NULL
 };
 

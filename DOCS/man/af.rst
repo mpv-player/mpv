@@ -263,13 +263,6 @@ Available filters are:
     used to do conversion itself, unlike this one which lets the filter system
     handle the conversion.
 
-``convert24``
-    Filter for internal use only. Converts between 24-bit and 32-bit sample
-    formats.
-
-``convertsign``
-    Filter for internal use only. Converts between signed/unsigned formats.
-
 ``volume[=<volumedb>[:...]]``
     Implements software volume control. Use this filter with caution since it
     can reduce the signal to noise ratio of the sound. In most cases it is
