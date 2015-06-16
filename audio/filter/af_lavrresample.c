@@ -267,8 +267,8 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
         mp_chmap_fill_na(&withna, map_out.num);
         if (withna.num != map_out.num)
             return AF_ERROR;
-        mp_chmap_get_reorder(s->reorder_out, &out_lavc, &map_out);
     }
+    mp_chmap_get_reorder(s->reorder_out, &out_lavc, &map_out);
 
     s->avrctx_fmt = *out;
     mp_audio_set_channels(&s->avrctx_fmt, &out_lavc);
