@@ -303,6 +303,10 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
                 enum seek_precision exact, bool immediate)
 {
     struct seek_params *seek = &mpctx->seek;
+
+    if (mpctx->stop_play == AT_END_OF_FILE)
+        mpctx->stop_play = KEEP_PLAYING;
+
     switch (type) {
     case MPSEEK_RELATIVE:
         seek->immediate |= immediate;
