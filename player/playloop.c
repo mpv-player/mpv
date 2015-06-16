@@ -1043,6 +1043,8 @@ void run_playloop(struct MPContext *mpctx)
 
     handle_loop_file(mpctx);
 
+    handle_ab_loop(mpctx);
+
     handle_keep_open(mpctx);
 
     handle_sstep(mpctx);

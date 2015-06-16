@@ -4903,30 +4903,12 @@ void command_init(struct MPContext *mpctx)
 static void command_event(struct MPContext *mpctx, int event, void *arg)
 {
     struct command_ctx *ctx = mpctx->command_ctx;
-    struct MPOpts *opts = mpctx->opts;
 
     if (event == MPV_EVENT_START_FILE) {
         ctx->last_seek_pts = MP_NOPTS_VALUE;
         ctx->marked_pts = MP_NOPTS_VALUE;
     }
 
-    if (event == MPV_EVENT_TICK) {
-        double now =
-            mpctx->restart_complete ? mpctx->playback_pts : MP_NOPTS_VALUE;
-        if (now != MP_NOPTS_VALUE && opts->ab_loop[0] != MP_NOPTS_VALUE &&
-            opts->ab_loop[1] != MP_NOPTS_VALUE)
-        {
-            if (ctx->prev_pts >= opts->ab_loop[0] &&
-                ctx->prev_pts < opts->ab_loop[1] &&
-                now >= opts->ab_loop[1])
-            {
-                mark_seek(mpctx);
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->ab_loop[0],
-                           MPSEEK_EXACT, false);
-            }
-        }
-        ctx->prev_pts = now;
-    }
     if (event == MPV_EVENT_SEEK)
         ctx->prev_pts = MP_NOPTS_VALUE;
     if (event == MPV_EVENT_IDLE)
@@ -4937,6 +4919,27 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         // Update chapters - does nothing if something else is visible.
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
     }
+}
+
+void handle_ab_loop(struct MPContext *mpctx)
+{
+    struct command_ctx *ctx = mpctx->command_ctx;
+    struct MPOpts *opts = mpctx->opts;
+
+    double now = mpctx->restart_complete ? mpctx->playback_pts : MP_NOPTS_VALUE;
+    if (now != MP_NOPTS_VALUE && opts->ab_loop[0] != MP_NOPTS_VALUE &&
+        opts->ab_loop[1] != MP_NOPTS_VALUE)
+    {
+        if (ctx->prev_pts >= opts->ab_loop[0] &&
+            ctx->prev_pts < opts->ab_loop[1] &&
+            (now >= opts->ab_loop[1] || mpctx->stop_play == AT_END_OF_FILE))
+        {
+            mark_seek(mpctx);
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->ab_loop[0],
+                       MPSEEK_EXACT, false);
+        }
+    }
+    ctx->prev_pts = now;
 }
 
 void handle_command_updates(struct MPContext *mpctx)

@@ -54,4 +54,6 @@ enum {
 bool mp_hook_test_completion(struct MPContext *mpctx, char *type);
 void mp_hook_run(struct MPContext *mpctx, char *client, char *type);
 
+void handle_ab_loop(struct MPContext *mpctx);
+
 #endif /* MPLAYER_COMMAND_H */
