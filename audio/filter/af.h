@@ -48,7 +48,6 @@ struct af_info {
     const char *name;
     const int flags;
     int (*open)(struct af_instance *vf);
-    bool (*test_conversion)(int src_format, int dst_format);
     int priv_size;
     const void *priv_defaults;
     const struct m_option *options;

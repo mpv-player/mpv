@@ -177,12 +177,6 @@ static int check_output_conversion(int mp_format)
     return af_to_avformat(mp_format);
 }
 
-static bool test_conversion(int src_format, int dst_format)
-{
-    return af_to_avformat(src_format) != AV_SAMPLE_FMT_NONE &&
-           check_output_conversion(dst_format) != AV_SAMPLE_FMT_NONE;
-}
-
 // mp_chmap_get_reorder() performs:
 //  to->speaker[n] = from->speaker[src[n]]
 // but libavresample does:
@@ -547,7 +541,6 @@ const struct af_info af_info_lavrresample = {
     .info = "Sample frequency conversion using libavresample",
     .name = "lavrresample",
     .open = af_open,
-    .test_conversion = test_conversion,
     .priv_size = sizeof(struct af_resample),
     .priv_defaults = &(const struct af_resample) {
         .opts = {

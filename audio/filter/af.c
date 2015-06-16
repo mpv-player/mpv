@@ -329,89 +329,9 @@ static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
     MP_MSG(s, msg_level, "  [ao] %s\n", mp_audio_config_to_str(&s->output));
 }
 
-static int af_count_filters(struct af_stream *s)
-{
-    int count = 0;
-    for (struct af_instance *af = s->first; af; af = af->next)
-        count++;
-    return count;
-}
-
-// Finds the first conversion filter on the way from srcfmt to dstfmt.
-// Conversions form a DAG: each node is a format/filter pair, and possible
-// conversions are edges. We search the DAG for the shortest path.
-// Some cases visit the same filter multiple times, but with different formats
-// (like u24le->s8), so one node per format or filter separate is not enough.
-// Returns the filter and dest. format for the first conversion step.
-// (So we know what conversion filter with what format to insert next.)
-static char *af_find_conversion_filter(int srcfmt, int *dstfmt)
-{
-#define MAX_NODES (64 * 32)
-    int num_fmt = 0, num_filt = 0;
-    for (int n = 0; filter_list[n]; n++)
-        num_filt = n + 1;
-    for (int n = 0; af_fmtstr_table[n].format; n++)
-        num_fmt = n + 1;
-
-    int num_nodes = num_fmt * num_filt;
-    assert(num_nodes < MAX_NODES);
-
-    bool visited[MAX_NODES] = {0};
-    unsigned char distance[MAX_NODES];
-    short previous[MAX_NODES] = {0};
-    for (int n = 0; n < num_nodes; n++) {
-        distance[n] = 255;
-        if (af_fmtstr_table[n % num_fmt].format == srcfmt)
-            distance[n] = 0;
-    }
-
-    while (1) {
-        int next = -1;
-        for (int n = 0; n < num_nodes; n++) {
-            if (!visited[n] && (next < 0 || (distance[n] < distance[next])))
-                next = n;
-        }
-        if (next < 0 || distance[next] == 255)
-            return NULL;
-        visited[next] = true;
-
-        int fmt = next % num_fmt;
-        if (af_fmtstr_table[fmt].format == *dstfmt) {
-            // Best match found
-            for (int cur = next; cur >= 0; cur = previous[cur] - 1) {
-                if (distance[cur] == 1) {
-                    *dstfmt = af_fmtstr_table[cur % num_fmt].format;
-                    return (char *)filter_list[cur / num_fmt]->name;
-                }
-            }
-            return NULL;
-        }
-
-        for (int n = 0; filter_list[n]; n++) {
-            const struct af_info *af = filter_list[n];
-            if (!af->test_conversion)
-                continue;
-            for (int i = 0; af_fmtstr_table[i].format; i++) {
-                if (i != fmt && af->test_conversion(af_fmtstr_table[fmt].format,
-                                                    af_fmtstr_table[i].format))
-                {
-                    int other = n * num_fmt + i;
-                    int ndist = distance[next] + 1;
-                    if (ndist < distance[other]) {
-                        distance[other] = ndist;
-                        previous[other] = next + 1;
-                    }
-                }
-            }
-        }
-    }
-    assert(0);
-#undef MAX_NODES
-}
-
 static bool af_is_conversion_filter(struct af_instance *af)
 {
-    return af && af->info->test_conversion != NULL;
+    return af && strcmp(af->info->name, "lavrresample") == 0;
 }
 
 // in is what af can take as input - insert a conversion filter if the actual
@@ -431,9 +351,7 @@ static int af_fix_format_conversion(struct af_stream *s,
     if (actual.format == in.format)
         return AF_FALSE;
     int dstfmt = in.format;
-    char *filter = af_find_conversion_filter(actual.format, &dstfmt);
-    if (!filter)
-        return AF_ERROR;
+    char *filter = "lavrresample";
     if (strcmp(filter, prev->info->name) == 0) {
         if (prev->control(prev, AF_CONTROL_SET_FORMAT, &dstfmt) == AF_OK) {
             *p_af = prev;
@@ -523,8 +441,8 @@ static int af_reinit(struct af_stream *s)
     // Start with the second filter, as the first filter is the special input
     // filter which needs no initialization.
     struct af_instance *af = s->first->next;
-    // Up to 7 retries per filter (channel, rate, 5x format conversions)
-    int max_retry = af_count_filters(s) * 7;
+    // Up to 4 retries per filter (channel, rate, format conversions)
+    int max_retry = 4;
     int retry = 0;
     while (af) {
         if (retry >= max_retry)
