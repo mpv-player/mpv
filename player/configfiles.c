@@ -281,7 +281,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     char *conffile = NULL;
     if (!filename)
         goto exit;
-
+    
     struct demuxer *demux = mpctx->demuxer;
     if (demux && (!demux->seekable || demux->partially_seekable)) {
         MP_INFO(mpctx, "Not seekable - not saving state.\n");
@@ -291,6 +291,12 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     double pos = get_current_time(mpctx);
     if (pos == MP_NOPTS_VALUE)
         goto exit;
+
+    double remaining = -pos + get_time_length(mpctx);
+    if (remaining < 10.0) {
+        MP_INFO(mpctx, "Within 10 seconds of the end - not saving state.\n");
+        goto exit;
+    }
 
     mp_mk_config_dir(mpctx->global, MP_WATCH_LATER_CONF);
 
