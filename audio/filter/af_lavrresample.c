@@ -58,6 +58,7 @@
 #include "options/m_option.h"
 #include "audio/filter/af.h"
 #include "audio/fmt-conversion.h"
+#include "osdep/endian.h"
 
 struct af_resample_opts {
     int filter_size;
