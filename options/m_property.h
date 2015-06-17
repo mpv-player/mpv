@@ -54,7 +54,7 @@ enum mp_property_action {
     //  arg: struct m_property_switch_arg*
     M_PROPERTY_SWITCH,
 
-    // Get a string containing a parsable representation.
+    // Get a string containing a parseable representation.
     // Can't be overridden by property implementations.
     //  arg: char**
     M_PROPERTY_GET_STRING,

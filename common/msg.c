@@ -52,7 +52,7 @@ struct mp_log_root {
     bool module;
     bool show_time;
     bool termosd;       // use terminal control codes for status line
-    int blank_lines;    // number of lines useable by status
+    int blank_lines;    // number of lines usable by status
     int status_lines;   // number of current status lines
     bool color;
     int verbose;

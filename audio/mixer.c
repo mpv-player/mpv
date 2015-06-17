@@ -227,7 +227,7 @@ void mixer_setbalance(struct mixer *mixer, float val)
         return;
     }
 
-    /* make all other channels pass thru since by default pan blocks all */
+    /* make all other channels pass through since by default pan blocks all */
     for (int i = 2; i < AF_NCH; i++) {
         float level[AF_NCH] = {0};
         level[i] = 1.f;

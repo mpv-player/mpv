@@ -288,7 +288,7 @@ static int InitDirectSound(struct ao *ao)
     /* Set DirectSound Cooperative level, ie what control we want over Windows
      * sound device. In our case, DSSCL_EXCLUSIVE means that we can modify the
      * settings of the primary buffer, but also that only the sound of our
-     * application will be hearable when it will have the focus.
+     * application will be audible when it will have the focus.
      * !!! (this is not really working as intended yet because to set the
      * cooperative level you need the window handle of your application, and
      * I don't know of any easy way to get it. Especially since we might play
@@ -616,9 +616,9 @@ static int check_free_buffer_size(struct ao *ao)
     space = p->buffer_size - (p->write_offset - play_offset);
     // |              | <-- const --> |                |                 |
     // buffer start   play_cursor     write_cursor     p->write_offset   buffer end
-    // play_cursor is the actual postion of the play cursor
+    // play_cursor is the actual position of the play cursor
     // write_cursor is the position after which it is assumed to be save to write data
-    // p->write_offset is the postion where we actually write the data to
+    // p->write_offset is the position where we actually write the data to
     if (space > p->buffer_size)
         space -= p->buffer_size;                        // p->write_offset < play_offset
     // Check for buffer underruns. An underrun happens if DirectSound

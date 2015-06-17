@@ -206,7 +206,7 @@ static inline void matrix_decode(short *in, const int k, const int il,
       information about Lt, Rt correlation.  This effectively reshapes
       the front and rear "cones" to concentrate Lt + Rt to C and
       introduce Lt - Rt in L, R. */
-   /* 0.67677 is the emprical lower bound for lpr_gain. */
+   /* 0.67677 is the empirical lower bound for lpr_gain. */
    c_gain = 8 * (*adapt_lpr_gain - 0.67677);
    c_gain = c_gain > 0 ? c_gain : 0;
    /* c_gain should not be too high, not even reaching full

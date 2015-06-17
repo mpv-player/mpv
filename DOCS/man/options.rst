@@ -838,7 +838,7 @@ Audio
     Note that many AOs have a ``device`` sub-option, which overrides the
     device selection of this option (but not the audio output selection).
     Likewise, forcing an AO with ``--ao`` will override the audio output
-    selection of ``--audio-device`` (but not the device selecton).
+    selection of ``--audio-device`` (but not the device selection).
 
     Currently not implemented for most AOs.
 
@@ -3347,7 +3347,7 @@ Miscellaneous
     you should not need to change this option.
 
     :decoder: Use decoder reordering functionality. Unlike in classic MPlayer
-              and mplayer2, this includes a dTS fallback. (Default.)
+              and mplayer2, this includes a DTS fallback. (Default.)
     :sort:    Maintain a buffer of unused pts values and use the lowest value
               for the frame.
     :auto:    Try to pick a working mode from the ones above automatically.

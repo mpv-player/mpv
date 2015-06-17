@@ -87,7 +87,7 @@ static const format_t format_table[] = {
 struct priv;
 
 // We only use double buffering but the creation and usage is still open to
-// triple buffering. Tripple buffering is now removed, because double buffering
+// triple buffering. Triple buffering is now removed, because double buffering
 // is now pixel-perfect.
 struct buffer_pool {
     shm_buffer_t **buffers;
@@ -159,7 +159,7 @@ static const format_t* is_wayland_format_supported(struct priv *p,
     return NULL;
 }
 
-// additinal buffer functions
+// additional buffer functions
 
 static void buffer_finalise_front(shm_buffer_t *buf)
 {
@@ -269,7 +269,7 @@ static bool resize(struct priv *p)
     struct vo_wayland_state *wl = p->wl;
 
     if (!p->video_bufpool.back_buffer || SHM_BUFFER_IS_BUSY(p->video_bufpool.back_buffer))
-        return false; // skip resizing if we can't garantuee pixel perfectness!
+        return false; // skip resizing if we can't guarantee pixel perfectness!
 
     int32_t x = wl->window.sh_x;
     int32_t y = wl->window.sh_y;
@@ -446,7 +446,7 @@ static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
         }
         else if (SHM_BUFFER_IS_BUSY(p->osd_buffers[id])) {
             // freed on release in buffer_listener
-            // garantuees pixel perfect resizing of subtitles and osd
+            // guarantees pixel perfect resizing of subtitles and osd
             SHM_BUFFER_SET_ONESHOT(p->osd_buffers[id]);
             p->osd_buffers[id] = shm_buffer_create(width,
                                                    height,
@@ -475,7 +475,7 @@ static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
         wl_surface_commit(s);
     }
     else {
-        // p->osd_buffer, garantueed to exist here
+        // p->osd_buffer, guaranteed to exist here
         assert(p->osd_buffers[id]);
         wl_surface_attach(s, p->osd_buffers[id]->buffer, 0, 0);
         wl_surface_commit(s);
@@ -490,7 +490,7 @@ static void draw_osd(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    // deattach all buffers and attach all needed buffers in osd_draw
+    // detach all buffers and attach all needed buffers in osd_draw
     // only the most recent attach & commit is applied once the parent surface
     // is committed
     for (int i = 0; i < MAX_OSD_PARTS; ++i) {
@@ -569,7 +569,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
             p->video_format = &format_table[DEFAULT_FORMAT_ENTRY];
     }
 
-    // overides alpha
+    // overrides alpha
     // use rgb565 if performance is your main concern
     if (p->use_rgb565) {
         MP_INFO(p->wl, "using rgb565\n");
@@ -625,7 +625,7 @@ static int preinit(struct vo *vo)
     wl_display_dispatch(wl->display.display);
 
     // Commits on surfaces bound to a subsurface are cached until the parent
-    // surface is commited, in this case the video surface.
+    // surface is committed, in this case the video surface.
     // Which means we can call commit anywhere.
     struct wl_region *input =
         wl_compositor_create_region(wl->display.compositor);
