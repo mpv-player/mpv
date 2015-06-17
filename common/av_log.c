@@ -173,6 +173,7 @@ void uninit_libav(struct mpv_global *global)
 {
     pthread_mutex_lock(&log_lock);
     if (log_mpv_instance == global) {
+        av_log_set_callback(av_log_default_callback);
         log_mpv_instance = NULL;
         talloc_free(log_root);
     }
