@@ -390,6 +390,7 @@ static int hotplug_init(struct ao *ao)
 {
     MP_DBG(ao, "Hotplug init\n");
     struct wasapi_state *state = ao->priv;
+    state->log = ao->log;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
                                   &IID_IMMDeviceEnumerator, (void **)&state->pEnumerator);
