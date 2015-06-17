@@ -1,7 +1,7 @@
 waf build system overview
 =========================
 
-mpv's new build system is based on waf and it should completly replace the
+mpv's new build system is based on waf and it should completely replace the
 custom ./configure + Makefile based system inherited from MPlayer.
 
 Goals and the choice of waf
@@ -65,7 +65,7 @@ This defines a feature called ``vdpau`` which can be enabled or disabled by
 the users with configure flags (that's the meaning of ``--``). This feature
 depends on another feature whose name is ``x11``, and the autodetection check
 consists of running ``pkg-config`` and looking for ``vdpau`` with version
-``>= 0.2``. If the check succeds a ``#define HAVE_VDPAU 1`` will be added to
+``>= 0.2``. If the check succeeds a ``#define HAVE_VDPAU 1`` will be added to
 ``config.h``, if not ``#define HAVE_VDPAU 0`` will be added.
 
 The defines names are automatically prepended with ``HAVE_``, capitalized and

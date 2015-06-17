@@ -1118,7 +1118,7 @@ Property list
 
 ``demuxer-cache-time``
     Approximate time of video buffered in the demuxer, in seconds. Same as
-    ``demuxer-cache-duration`` but returns the last timestamp of bufferred
+    ``demuxer-cache-duration`` but returns the last timestamp of buffered
     data in demuxer.
 
 ``demuxer-cache-idle``

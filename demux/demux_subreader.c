@@ -292,7 +292,7 @@ static subtitle *sub_read_line_subviewer(stream_t *st, subtitle *current,
         current->start = a1 * 360000 + a2 * 6000 + a3 * 100 + a4 / 10;
         current->end   = b1 * 360000 + b2 * 6000 + b3 * 100 + b4 / 10;
 
-        /* Concat lines */
+        /* Concatenate lines */
         full_line[0] = 0;
         for (i = 0; i < SUB_MAX_TEXT; i++) {
             int blank = 1, len = 0;

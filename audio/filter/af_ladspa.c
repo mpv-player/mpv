@@ -144,7 +144,7 @@ static int af_ladspa_parse_plugin(struct af_instance *af) {
     LADSPA_PortRangeHint hint;
 
     if (!setup->libhandle)
-        return AF_ERROR; /* only call parse after a succesful load */
+        return AF_ERROR; /* only call parse after a successful load */
     if (!setup->plugin_descriptor)
         return AF_ERROR; /* same as above */
 

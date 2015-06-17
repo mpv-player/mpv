@@ -92,7 +92,7 @@ static void read_input(void)
         case KEY_EVENT: {
             KEY_EVENT_RECORD *record = &eventbuffer[i].Event.KeyEvent;
 
-            /*only a pressed key is interresting for us*/
+            /*only a pressed key is interesting for us*/
             if (record->bKeyDown) {
                 UINT vkey = record->wVirtualKeyCode;
                 bool ext = record->dwControlKeyState & ENHANCED_KEY;

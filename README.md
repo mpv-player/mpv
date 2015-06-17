@@ -171,7 +171,7 @@ list of changes is located [here][mplayer-changes].
 Most activity happens on the IRC channel and the github issue tracker. The
 mailing lists are mostly unused.
 
- - **Github issue tracker**: [issue tracker][issue-tracker] (report bugs here)
+ - **GitHub issue tracker**: [issue tracker][issue-tracker] (report bugs here)
  - **User IRC Channel**: `#mpv` on `irc.freenode.net`
  - **Developer IRC Channel**: `#mpv-devel` on `irc.freenode.net`
  - **Users Mailing List**: `mpv-users@googlegroups.com` ([Archive / Subscribe][mpv-users]).

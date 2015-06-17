@@ -397,7 +397,7 @@ Slave mode
 
   Assuming the system supports ``/dev/stdin``.
 
-  (The option was readded in 0.5.1 and sets exactly these options. It was
+  (The option was added back in 0.5.1 and sets exactly these options. It was
   removed in 0.10.x again.)
 
 * A JSON RPC protocol giving access to the client API is also supported. See

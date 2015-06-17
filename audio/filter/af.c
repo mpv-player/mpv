@@ -646,7 +646,7 @@ struct af_instance *af_add(struct af_stream *s, char *name, char *label,
         return NULL;
     new->label = talloc_strdup(new, label);
 
-    // Reinitalize the filter list
+    // Reinitialize the filter list
     if (af_reinit(s) != AF_OK) {
         af_remove_by_label(s, label);
         return NULL;

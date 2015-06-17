@@ -47,7 +47,7 @@ enum mp_speaker_id {
     MP_SPEAKER_ID_TBL,          // TOP_BACK_LEFT
     MP_SPEAKER_ID_TBC,          // TOP_BACK_CENTER
     MP_SPEAKER_ID_TBR,          // TOP_BACK_RIGHT
-     // Inofficial/libav* extensions
+     // Unofficial/libav* extensions
     MP_SPEAKER_ID_DL = 29,      // STEREO_LEFT (stereo downmix special speakers)
     MP_SPEAKER_ID_DR,           // STEREO_RIGHT
     MP_SPEAKER_ID_WL,           // WIDE_LEFT

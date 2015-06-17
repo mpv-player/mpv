@@ -131,7 +131,7 @@ static void method1_int16(af_drc_t *s, struct mp_audio *c)
     data[i] = tmp;
   }
 
-  // Evaulation of newavg (not 100% accurate because of values clamping)
+  // Evaluation of newavg (not 100% accurate because of values clamping)
   newavg = s->mul * curavg;
 
   // Stores computed values for future smoothing
@@ -168,7 +168,7 @@ static void method1_float(af_drc_t *s, struct mp_audio *c)
   for (i = 0; i < len; i++)
     data[i] *= s->mul;
 
-  // Evaulation of newavg (not 100% accurate because of values clamping)
+  // Evaluation of newavg (not 100% accurate because of values clamping)
   newavg = s->mul * curavg;
 
   // Stores computed values for future smoothing
@@ -216,7 +216,7 @@ static void method2_int16(af_drc_t *s, struct mp_audio *c)
     data[i] = tmp;
   }
 
-  // Evaulation of newavg (not 100% accurate because of values clamping)
+  // Evaluation of newavg (not 100% accurate because of values clamping)
   newavg = s->mul * curavg;
 
   // Stores computed values for future smoothing
@@ -262,7 +262,7 @@ static void method2_float(af_drc_t *s, struct mp_audio *c)
   for (i = 0; i < len; i++)
     data[i] *= s->mul;
 
-  // Evaulation of newavg (not 100% accurate because of values clamping)
+  // Evaluation of newavg (not 100% accurate because of values clamping)
   newavg = s->mul * curavg;
 
   // Stores computed values for future smoothing

@@ -370,7 +370,7 @@ const struct filter_kernel mp_filter_kernels[] = {
     {{"robidouxsharp",  2,   cubic_bc, .params = {0.2620, 0.3690} }},
     {{"ewa_robidoux",       2,   cubic_bc, .params = {0.3782, 0.3109}}, .polar = true},
     {{"ewa_robidouxsharp",  2,   cubic_bc, .params = {0.2620, 0.3690}}, .polar = true},
-    // Miscalleaneous filters
+    // Miscellaneous filters
     {{"box",            1,   box, .resizable = true}},
     {{"nearest",        0.5, box}},
     {{"triangle",       1,   triangle, .resizable = true}},
