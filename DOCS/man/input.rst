@@ -902,7 +902,7 @@ Property list
     always exactly known, so this is an estimate.
 
 ``playtime-remaining``
-    ``time-remaining`` scaled by the the current ``speed``.
+    ``time-remaining`` scaled by the current ``speed``.
 
 ``playback-time``
     Return the playback time, which is the time difference between start PTS and current PTS.
@@ -1211,7 +1211,7 @@ Property list
 ``balance`` (RW)
     Audio channel balance. (The implementation of this feature is rather odd.
     It doesn't change the volumes of each channel, but instead sets up a pan
-    matrix to mix the the left and right channels.)
+    matrix to mix the left and right channels.)
 
 ``fullscreen`` (RW)
     See ``--fullscreen``.

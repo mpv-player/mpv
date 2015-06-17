@@ -280,7 +280,7 @@ spaces or characters like ``,`` or ``:``, you need to quote them:
     ``mpv '--vo=opengl:icc-profile="file with spaces.icc",xv'``
 
 Shells may actually strip some quotes from the string passed to the commandline,
-so the example quotes the string twice, ensuring that mpv recieves the ``"``
+so the example quotes the string twice, ensuring that mpv receives the ``"``
 quotes.
 
 The ``[...]`` form of quotes wraps everything between ``[`` and ``]``. It's

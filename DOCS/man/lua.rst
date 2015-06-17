@@ -99,7 +99,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     functions.
 
     Unlike ``mp.command``, this will not use OSD by default either (except
-    for some OSd-specific commands).
+    for some OSD-specific commands).
 
 ``mp.command_native(table [,def])``
     Similar to ``mp.commandv``, but pass the argument list as table. This has

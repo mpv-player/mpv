@@ -780,7 +780,7 @@ Available filters are:
 ``vapoursynth-lazy``
     The same as ``vapoursynth``, but doesn't load Python scripts. Instead, a
     custom backend using Lua and the raw VapourSynth API is used. The syntax
-    is completely different, and absolutely no conveniencve features are
+    is completely different, and absolutely no convenience features are
     provided. There's no type checking either, and you can trigger crashes.
 
     .. admonition:: Example:
