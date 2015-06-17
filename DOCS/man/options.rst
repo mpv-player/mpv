@@ -457,7 +457,7 @@ Program Behavior
     (Default: ``best``)
 
 ``--ytdl-raw-options=<key>=<value>[,<key>=<value>[,...]]``
-    Pass arbitraty options to youtube-dl. Parameter and argument should be
+    Pass arbitrary options to youtube-dl. Parameter and argument should be
     passed as a key-value pair. Options without argument must include ``=``.
 
     There is no sanity checking so it's possible to break things (i.e.
@@ -528,7 +528,7 @@ Video
         Old, decoder-based framedrop mode. (This is the same as ``--framedrop=yes``
         in mpv 0.5.x and before.) This tells the decoder to skip frames (unless
         they are needed to decode future frames). May help with slow systems,
-        but can produce unwatchably choppy output, or even freeze the display
+        but can produce unwatchable choppy output, or even freeze the display
         completely. Not recommended.
         The ``--vd-lavc-framedrop`` option controls what frames to drop.
     <decoder+vo>
@@ -1156,7 +1156,7 @@ Subtitles
     the top of the screen) alongside the normal subtitle, and provides a way
     to render two subtitles at once.
 
-    there are some caveats associated with this feature. For example, bitmap
+    There are some caveats associated with this feature. For example, bitmap
     subtitles will always be rendered in their usual position, so selecting a
     bitmap subtitle as secondary subtitle will result in overlapping subtitles.
     Secondary subtitles are never shown on the terminal if video is disabled.
@@ -1871,7 +1871,7 @@ Window
     ``intptr_t``. mpv will create its own window, and set the wid window as
     parent, like with X11.
 
-    On OSX/Cocoa. the ID is interpreted as ``NSView*``. Pass it as value cast
+    On OSX/Cocoa, the ID is interpreted as ``NSView*``. Pass it as value cast
     to ``intptr_t``. mpv will creates its own sub-view. Because OSX does not
     support window embedding of foreign processes, this works only with libmpv,
     and will crash when used from the command line.
@@ -1965,7 +1965,7 @@ Disc Devices
     (Never) accept imperfect data reconstruction.
 
 ``--cdda-cdtext=<yes|no>``
-    Print CD text. This is disabled by default, because it ruins perfomance
+    Print CD text. This is disabled by default, because it ruins performance
     with CD-ROM drives for unknown reasons.
 
 ``--dvd-speed=<speed>``
@@ -2096,7 +2096,7 @@ Demuxer
     seeks only.
 
     You can use the ``--demuxer-mkv-subtitle-preroll-secs`` option to specify
-    how mach data the demuxer should pre-read at most in order to find subtitle
+    how much data the demuxer should pre-read at most in order to find subtitle
     packets that may overlap. Setting this to 0 will effectively disable this
     preroll mechanism. Setting a very large value can make seeking very slow,
     and an extremely large value would completely reread the entire file from
