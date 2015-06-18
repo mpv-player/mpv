@@ -303,7 +303,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     if (!video_init_best_codec(d_video, opts->video_decoders))
         goto err_out;
 
-    if (!decode_coverart(d_video))
+    if (d_video->header->attached_picture && !decode_coverart(d_video))
         goto err_out;
 
     bool saver_state = opts->pause || !opts->stop_screensaver;
