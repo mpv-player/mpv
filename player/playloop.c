@@ -287,6 +287,9 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         mpctx->hrseek_framedrop = !hr_seek_very_exact;
         mpctx->hrseek_pts = hr_seek ? seek.amount
                                  : mpctx->timeline[mpctx->timeline_part].start;
+
+        MP_VERBOSE(mpctx, "hr-seek, skipping to %f%s\n", mpctx->hrseek_pts,
+                   mpctx->hrseek_framedrop ? "" : " (no framedrop)");
     }
 
     mpctx->start_timestamp = mp_time_sec();
@@ -960,6 +963,7 @@ static void handle_playback_restart(struct MPContext *mpctx, double endpts)
             }
         }
         mpctx->playing_msg_shown = true;
+        MP_VERBOSE(mpctx, "playback restart complete\n");
     }
 }
 

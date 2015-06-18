@@ -527,8 +527,12 @@ static void execute_seek(struct demux_internal *in)
 
     pthread_mutex_unlock(&in->lock);
 
+    MP_VERBOSE(in, "execute seek (to %f flags %d)\n", pts, flags);
+
     if (in->d_thread->desc->seek)
         in->d_thread->desc->seek(in->d_thread, pts, flags);
+
+    MP_VERBOSE(in, "seek done\n");
 
     pthread_mutex_lock(&in->lock);
 }
@@ -1123,6 +1127,9 @@ int demux_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
     }
 
     pthread_mutex_lock(&in->lock);
+
+    MP_VERBOSE(in, "queuing seek to %f%s\n", rel_seek_secs,
+               in->seeking ? " (cascade)" : "");
 
     flush_locked(demuxer);
     in->seeking = true;

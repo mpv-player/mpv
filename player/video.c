@@ -887,6 +887,7 @@ void write_video(struct MPContext *mpctx, double endpts)
         mpctx->video_status = STATUS_READY;
         // After a seek, make sure to wait until the first frame is visible.
         vo_wait_frame(vo);
+        MP_VERBOSE(mpctx, "first video frame after restart shown\n");
     }
     screenshot_flip(mpctx);
 
