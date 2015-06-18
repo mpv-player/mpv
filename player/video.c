@@ -76,6 +76,8 @@ static const char av_desync_help_text[] =
 "  with --no-video, --no-audio, or --no-sub.\n"
 "If none of this helps you, file a bug report.\n\n";
 
+static bool decode_coverart(struct dec_video *d_video);
+
 static void set_allowed_vo_formats(struct vf_chain *c, struct vo *vo)
 {
     vo_query_formats(vo, c->allowed_output_formats);
@@ -301,6 +303,9 @@ int reinit_video_chain(struct MPContext *mpctx)
     if (!video_init_best_codec(d_video, opts->video_decoders))
         goto err_out;
 
+    if (!decode_coverart(d_video))
+        goto err_out;
+
     bool saver_state = opts->pause || !opts->stop_screensaver;
     vo_control(mpctx->video_out, saver_state ? VOCTRL_RESTORE_SCREENSAVER
                                              : VOCTRL_KILL_SCREENSAVER, NULL);
@@ -362,6 +367,17 @@ static int check_framedrop(struct MPContext *mpctx)
     return 0;
 }
 
+static bool decode_coverart(struct dec_video *d_video)
+{
+    d_video->cover_art_mpi =
+        video_decode(d_video, d_video->header->attached_picture, 0);
+    // Might need flush.
+    if (!d_video->cover_art_mpi)
+        d_video->cover_art_mpi = video_decode(d_video, NULL, 0);
+
+    return !!d_video->cover_art_mpi;
+}
+
 // Read a packet, store decoded image into d_video->waiting_decoded_mpi
 // returns VD_* code
 static int decode_image(struct MPContext *mpctx)
@@ -369,9 +385,8 @@ static int decode_image(struct MPContext *mpctx)
     struct dec_video *d_video = mpctx->d_video;
 
     if (d_video->header->attached_picture) {
-        d_video->waiting_decoded_mpi =
-                    video_decode(d_video, d_video->header->attached_picture, 0);
-        return d_video->waiting_decoded_mpi ? VD_EOF : VD_PROGRESS;
+        d_video->waiting_decoded_mpi = mp_image_new_ref(d_video->cover_art_mpi);
+        return VD_EOF;
     }
 
     struct demux_packet *pkt;

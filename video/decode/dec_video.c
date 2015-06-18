@@ -117,6 +117,7 @@ int video_get_colors(struct dec_video *d_video, const char *item, int *value)
 void video_uninit(struct dec_video *d_video)
 {
     mp_image_unrefp(&d_video->waiting_decoded_mpi);
+    mp_image_unrefp(&d_video->cover_art_mpi);
     if (d_video->vd_driver) {
         MP_VERBOSE(d_video, "Uninit video.\n");
         d_video->vd_driver->uninit(d_video);

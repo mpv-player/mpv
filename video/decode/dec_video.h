@@ -43,6 +43,8 @@ struct dec_video {
     struct mp_image *waiting_decoded_mpi;
     struct mp_image_params decoder_output; // last output of the decoder
 
+    struct mp_image *cover_art_mpi;
+
     void *priv; // for free use by vd_driver
 
     // Last PTS from decoder (set with each vd_driver->decode() call)
