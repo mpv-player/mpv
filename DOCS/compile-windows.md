@@ -134,7 +134,7 @@ pacman -S git pkg-config python3 mingw-w64-x86_64-gcc
 
 # Install the most important MinGW-w64 dependencies. libass, libbluray and
 # lcms2 are also pulled in as dependencies of ffmpeg.
-pacman -S mingw-w64-x86_64-ffmpeg mingw-w64-x86_64-libjpeg-turbo mingw-w64-x86_64-lua
+pacman -S mingw-w64-x86_64-ffmpeg mingw-w64-x86_64-libjpeg-turbo mingw-w64-x86_64-lua51
 
 # Install additional (optional) dependencies
 pacman -S mingw-w64-x86_64-libdvdnav mingw-w64-x86_64-libguess
