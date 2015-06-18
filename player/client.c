@@ -1547,6 +1547,7 @@ static bool gen_log_message_event(struct mpv_handle *ctx)
         if (msg) {
             struct mpv_event_log_message *cmsg =
                 talloc_ptrtype(ctx->cur_event, cmsg);
+            talloc_steal(cmsg, msg);
             *cmsg = (struct mpv_event_log_message){
                 .prefix = msg->prefix,
                 .level = mp_log_levels[msg->level],
