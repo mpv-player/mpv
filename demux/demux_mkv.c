@@ -1334,18 +1334,13 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
 static const struct mkv_audio_tag {
     const char *id;
     const char *codec;
-    bool prefix;
 } mkv_audio_tags[] = {
     { "A_MPEG/L2",              "mp3" },
     { "A_MPEG/L3",              "mp3" },
-    { "A_AC3",                  "ac3", .prefix = true },
-    { "A_EAC3",                 "eac3", .prefix = true },
+    { "A_AC3",                  "ac3" },
+    { "A_EAC3",                 "eac3" },
     { "A_DTS",                  "dts" },
-    { "A_PCM/INT/LIT",          "pcm" }, // not a real lavc codec name
-    { "A_PCM/INT/BIG",          "pcm" },
-    { "A_PCM/FLOAT/IEEE",       "pcm-flt" }, // also not a real lavc codec name
     { "A_AAC",                  "aac" },
-    { "A_AAC/",                 "aac", .prefix = true },
     { "A_VORBIS",               "vorbis" },
     { "A_OPUS",                 "opus" },
     { "A_OPUS/EXPERIMENTAL",    "opus" },
@@ -1355,11 +1350,6 @@ static const struct mkv_audio_tag {
     { "A_TRUEHD",               "truehd" },
     { "A_FLAC",                 "flac" },
     { "A_ALAC",                 "alac" },
-    { "A_REAL/28_8",            "ra_288" },
-    { "A_REAL/ATRC",            "atrac3" },
-    { "A_REAL/COOK",            "cook" },
-    { "A_REAL/DNET",            "ac3" },
-    { "A_REAL/SIPR",            "sipr" },
     { "A_TTA1",                 "tta" },
     { NULL },
 };
@@ -1386,6 +1376,14 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     if (!track->a_osfreq)
         track->a_osfreq = track->a_sfreq;
     sh_a->bits_per_coded_sample = track->a_bps ? track->a_bps : 16;
+    sh_a->samplerate = (uint32_t) track->a_osfreq;
+
+    for (int i = 0; mkv_audio_tags[i].id; i++) {
+        if (!strcmp(track->codec_id, mkv_audio_tags[i].id)) {
+            sh->codec = mkv_audio_tags[i].codec;
+            break;
+        }
+    }
 
     if (!strcmp(track->codec_id, "A_MS/ACM")) { /* AVI compatibility mode */
         // The private_data contains a WAVEFORMATEX struct
@@ -1396,8 +1394,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         sh->format = AV_RL16(h + 0);            // wFormatTag
         if (track->a_channels == 0)
             track->a_channels = AV_RL16(h + 2); // nChannels
-        if (track->a_osfreq == 0.0)
-            track->a_osfreq = AV_RL32(h + 4);   // nSamplesPerSec
+        if (sh_a->samplerate == 0)
+            sh_a->samplerate = AV_RL32(h + 4);  // nSamplesPerSec
         sh_a->bitrate = AV_RL32(h + 8) * 8;     // nAvgBytesPerSec
         sh_a->block_align = AV_RL16(h + 12);    // nBlockAlign
         if (track->a_bps == 0)
@@ -1406,79 +1404,14 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         extradata_len = track->private_size - 18;
         sh_a->bits_per_coded_sample = track->a_bps;
         mp_set_codec_from_tag(sh);
-    } else {
-        for (int i = 0; ; i++) {
-            const struct mkv_audio_tag *t = mkv_audio_tags + i;
-            if (t->id == NULL)
-                goto error;
-            if (t->prefix) {
-                if (!bstr_startswith0(bstr0(track->codec_id), t->id))
-                    continue;
-            } else {
-                if (strcmp(track->codec_id, t->id))
-                    continue;
-            }
-            sh->codec = t->codec;
-            break;
-        }
-    }
-
-    if (!sh->codec)
-        goto error;
-
-    mp_chmap_set_unknown(&sh_a->channels, track->a_channels);
-    sh_a->samplerate = (uint32_t) track->a_osfreq;
-
-    const char *codec = sh->codec;
-    if (!strcmp(codec, "mp3")) {
-        sh_a->bitrate = 16000 * 8;
-        sh_a->block_align = 1152;
-        track->parse = true;
-    } else if (!strcmp(codec, "pcm")) {
-        bool is_be = !strcmp(track->codec_id, "A_PCM/INT/BIG");
+    } else if (!strcmp(track->codec_id, "A_PCM/INT/LIT")) {
         bool sign = sh_a->bits_per_coded_sample > 8;
-        mp_set_pcm_codec(sh, sign, false, sh_a->bits_per_coded_sample, is_be);
-    } else if (!strcmp(codec, "pcm-flt")) {
+        mp_set_pcm_codec(sh, sign, false, sh_a->bits_per_coded_sample, false);
+    } else if (!strcmp(track->codec_id, "A_PCM/INT/BIG")) {
+        bool sign = sh_a->bits_per_coded_sample > 8;
+        mp_set_pcm_codec(sh, sign, false, sh_a->bits_per_coded_sample, true);
+    } else if (!strcmp(track->codec_id, "A_PCM/FLOAT/IEEE")) {
         sh->codec = sh_a->bits_per_coded_sample == 64 ? "pcm_f64le" : "pcm_f32le";
-    } else if (!strcmp(codec, "qdmc") || !strcmp(codec, "qdm2")) {
-        sh_a->bitrate = 16000 * 8;
-        sh_a->block_align = 1486;
-    } else if (!strcmp(codec, "aac")) {
-        sh_a->bitrate = 16000 * 8;
-        sh_a->block_align = 1024;
-
-        if (!strncmp(track->codec_id, "A_AAC/", 6)) {
-            /* Recreate the 'private data' */
-            int srate_idx = aac_get_sample_rate_index(track->a_sfreq);
-            const char *tail = "";
-            if (strlen(track->codec_id) >= 12)
-                tail = &track->codec_id[12];
-            int profile = 3;
-            if (!strncmp(tail, "MAIN", 4))
-                profile = 0;
-            else if (!strncmp(tail, "LC", 2))
-                profile = 1;
-            else if (!strncmp(tail, "SSR", 3))
-                profile = 2;
-            sh_a->codecdata = talloc_size(sh_a, 5);
-            sh_a->codecdata[0] = ((profile + 1) << 3) | ((srate_idx & 0xE) >> 1);
-            sh_a->codecdata[1] =
-                ((srate_idx & 0x1) << 7) | (track->a_channels << 3);
-
-            if (strstr(track->codec_id, "SBR") != NULL) {
-                /* HE-AAC (aka SBR AAC) */
-                sh_a->codecdata_len = 5;
-
-                srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
-                sh_a->codecdata[2] = AAC_SYNC_EXTENSION_TYPE >> 3;
-                sh_a->codecdata[3] = ((AAC_SYNC_EXTENSION_TYPE & 0x07) << 5) | 5;
-                sh_a->codecdata[4] = (1 << 7) | (srate_idx << 3);
-                track->default_duration = 1024.0 / (sh_a->samplerate / 2);
-            } else {
-                sh_a->codecdata_len = 2;
-                track->default_duration = 1024.0 / sh_a->samplerate;
-            }
-        }
     } else if (!strncmp(track->codec_id, "A_REAL/", 7)) {
         if (track->private_size < RAPROPERTIES4_SIZE)
             goto error;
@@ -1517,31 +1450,93 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         extradata_len = codecdata_length;
         extradata = src;
 
-        if (!strcmp(codec, "atrac3")) {
+        if (!strcmp(track->codec_id, "A_REAL/ATRC")) {
+            sh->codec = "atrac3";
             if (flavor >= MP_ARRAY_SIZE(atrc_fl2bps))
                 goto error;
             sh_a->bitrate = atrc_fl2bps[flavor] * 8;
             sh_a->block_align = track->sub_packet_size;
-        } else if (!strcmp(codec, "cook")) {
+        } else if (!strcmp(track->codec_id, "A_REAL/COOK")) {
+            sh->codec = "cook";
             if (flavor >= MP_ARRAY_SIZE(cook_fl2bps))
                 goto error;
             sh_a->bitrate = cook_fl2bps[flavor] * 8;
             sh_a->block_align = track->sub_packet_size;
-        } else if (!strcmp(codec, "sipr")) {
+        } else if (!strcmp(track->codec_id, "A_REAL/SIPR")) {
+            sh->codec = "sipr";
             if (flavor >= MP_ARRAY_SIZE(sipr_fl2bps))
                 goto error;
             sh_a->bitrate = sipr_fl2bps[flavor] * 8;
             sh_a->block_align = track->coded_framesize;
-        } else if (!strcmp(codec, "ra_288")) {
+        } else if (!strcmp(track->codec_id, "A_REAL/28_8")) {
+            sh->codec = "ra_288";
             sh_a->bitrate = 3600 * 8;
             sh_a->block_align = track->coded_framesize;
+        } else if (!strcmp(track->codec_id, "A_REAL/DNET")) {
+            sh->codec = "ac3";
+        } else {
+            goto error;
         }
 
         track->audio_buf =
             talloc_array_size(track, track->sub_packet_h, track->audiopk_size);
         track->audio_timestamp =
             talloc_array(track, double, track->sub_packet_h);
+    } else if (!strncmp(track->codec_id, "A_AAC/", 6)) {
+        sh->codec = "aac";
 
+        /* Recreate the 'private data' (not needed for plain A_AAC) */
+        int srate_idx = aac_get_sample_rate_index(track->a_sfreq);
+        const char *tail = "";
+        if (strlen(track->codec_id) >= 12)
+            tail = &track->codec_id[12];
+        int profile = 3;
+        if (!strncmp(tail, "MAIN", 4))
+            profile = 0;
+        else if (!strncmp(tail, "LC", 2))
+            profile = 1;
+        else if (!strncmp(tail, "SSR", 3))
+            profile = 2;
+        sh_a->codecdata = talloc_size(sh_a, 5);
+        sh_a->codecdata[0] = ((profile + 1) << 3) | ((srate_idx & 0xE) >> 1);
+        sh_a->codecdata[1] =
+            ((srate_idx & 0x1) << 7) | (track->a_channels << 3);
+
+        if (strstr(track->codec_id, "SBR") != NULL) {
+            /* HE-AAC (aka SBR AAC) */
+            sh_a->codecdata_len = 5;
+
+            srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
+            sh_a->codecdata[2] = AAC_SYNC_EXTENSION_TYPE >> 3;
+            sh_a->codecdata[3] = ((AAC_SYNC_EXTENSION_TYPE & 0x07) << 5) | 5;
+            sh_a->codecdata[4] = (1 << 7) | (srate_idx << 3);
+            track->default_duration = 1024.0 / (sh_a->samplerate / 2);
+        } else {
+            sh_a->codecdata_len = 2;
+            track->default_duration = 1024.0 / sh_a->samplerate;
+        }
+    } else if (!strncmp(track->codec_id, "A_AC3/", 6)) {
+        sh->codec = "ac3";
+    } else if (!strncmp(track->codec_id, "A_EAC3/", 7)) {
+        sh->codec = "eac3";
+    }
+
+    if (!sh->codec)
+        goto error;
+
+    mp_chmap_set_unknown(&sh_a->channels, track->a_channels);
+
+    const char *codec = sh->codec;
+    if (!strcmp(codec, "mp3")) {
+        sh_a->bitrate = 16000 * 8;
+        sh_a->block_align = 1152;
+        track->parse = true;
+    } else if (!strcmp(codec, "qdmc") || !strcmp(codec, "qdm2")) {
+        sh_a->bitrate = 16000 * 8;
+        sh_a->block_align = 1486;
+    } else if (!strcmp(codec, "aac")) {
+        sh_a->bitrate = 16000 * 8;
+        sh_a->block_align = 1024;
     } else if (!strcmp(codec, "flac")) {
         sh_a->bits_per_coded_sample = 0;
         sh_a->bitrate = 0;
