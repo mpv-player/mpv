@@ -1418,8 +1418,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         /* Common initialization for all RealAudio codecs */
         unsigned char *src = track->private_data;
 
-        sh_a->bitrate = 0;  /* FIXME !? */
-
         int version = AV_RB16(src + 4);
         unsigned int flavor = AV_RB16(src + 22);
         track->coded_framesize = AV_RB32(src + 24);
@@ -1530,18 +1528,14 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 
     const char *codec = sh->codec;
     if (!strcmp(codec, "mp3")) {
-        sh_a->bitrate = 16000 * 8;
         sh_a->block_align = 1152;
         track->parse = true;
     } else if (!strcmp(codec, "qdmc") || !strcmp(codec, "qdm2")) {
-        sh_a->bitrate = 16000 * 8;
         sh_a->block_align = 1486;
     } else if (!strcmp(codec, "aac")) {
-        sh_a->bitrate = 16000 * 8;
         sh_a->block_align = 1024;
     } else if (!strcmp(codec, "flac")) {
         sh_a->bits_per_coded_sample = 0;
-        sh_a->bitrate = 0;
         sh_a->block_align = 0;
 
         unsigned char *ptr = extradata;
@@ -1586,7 +1580,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
                !strcmp(codec, "dts"))
     {
         sh_a->bits_per_coded_sample = 0;
-        sh_a->bitrate = 0;
         sh_a->block_align = 0;
     }
 
