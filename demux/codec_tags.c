@@ -22,40 +22,10 @@
 #include "stheader.h"
 #include "common/av_common.h"
 
-struct mp_codec_tag {
-    uint32_t tag;
-    const char *codec;
-};
-
-static const struct mp_codec_tag mp_codec_tags[] = {
-    // Made-up tags used by demux_mkv.c to map codecs.
-    // (This is a leftover from MPlayer's codecs.conf mechanism.)
-    {MKTAG('E', 'A', 'C', '3'), "eac3"},
-    {MKTAG('M', 'P', '4', 'A'), "aac"},     // also the QT tag
-    {MKTAG('v', 'r', 'b', 's'), "vorbis"},
-    {MKTAG('O', 'p', 'u', 's'), "opus"},
-    {MKTAG('W', 'V', 'P', 'K'), "wavpack"},
-    {MKTAG('T', 'R', 'H', 'D'), "truehd"},
-    {MKTAG('f', 'L', 'a', 'C'), "flac"},
-    {MKTAG('a', 'L', 'a', 'C'), "alac"},    // also the QT tag
-    {MKTAG('2', '8', '_', '8'), "ra_288"},
-    {MKTAG('a', 't', 'r', 'c'), "atrac3"},
-    {MKTAG('c', 'o', 'o', 'k'), "cook"},
-    {MKTAG('d', 'n', 'e', 't'), "ac3"},
-    {MKTAG('s', 'i', 'p', 'r'), "sipr"},
-    {MKTAG('T', 'T', 'A', '1'), "tta"},
-    {0}
-};
-
 #define HAVE_QT_TAGS (LIBAVFORMAT_VERSION_MICRO >= 100)
 
 static const char *lookup_tag(int type, uint32_t tag)
 {
-    for (int n = 0; mp_codec_tags[n].codec; n++) {
-        if (mp_codec_tags[n].tag == tag)
-            return mp_codec_tags[n].codec;
-    }
-
     const struct AVCodecTag *av_tags[3] = {0};
     switch (type) {
     case STREAM_VIDEO: {
