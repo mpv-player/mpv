@@ -1528,15 +1528,9 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 
     const char *codec = sh->codec;
     if (!strcmp(codec, "mp3")) {
-        sh_a->block_align = 1152;
         track->parse = true;
-    } else if (!strcmp(codec, "qdmc") || !strcmp(codec, "qdm2")) {
-        sh_a->block_align = 1486;
-    } else if (!strcmp(codec, "aac")) {
-        sh_a->block_align = 1024;
     } else if (!strcmp(codec, "flac")) {
         sh_a->bits_per_coded_sample = 0;
-        sh_a->block_align = 0;
 
         unsigned char *ptr = extradata;
         unsigned int size = extradata_len;
@@ -1580,7 +1574,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
                !strcmp(codec, "dts"))
     {
         sh_a->bits_per_coded_sample = 0;
-        sh_a->block_align = 0;
     }
 
     // Some files have broken default DefaultDuration set, which will lead to
