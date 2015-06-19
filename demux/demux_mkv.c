@@ -1197,19 +1197,19 @@ typedef struct {
 } videocodec_info_t;
 
 static const videocodec_info_t vinfo[] = {
-    {MKV_V_MJPEG,     "mjpeg"},
-    {MKV_V_MPEG1,     "mpeg1video"},
-    {MKV_V_MPEG2,     "mpeg2video"},
-    {MKV_V_MPEG4_SP,  "mpeg4"},
-    {MKV_V_MPEG4_ASP, "mpeg4"},
-    {MKV_V_MPEG4_AP,  "mpeg4"},
-    {MKV_V_MPEG4_AVC, "h264"},
-    {MKV_V_THEORA,    "theora"},
-    {MKV_V_VP8,       "vp8"},
-    {MKV_V_VP9,       "vp9"},
-    {MKV_V_DIRAC,     "dirac"},
-    {MKV_V_PRORES,    "prores"},
-    {MKV_V_HEVC,      "hevc"},
+    {"V_MJPEG",             "mjpeg"},
+    {"V_MPEG1",             "mpeg1video"},
+    {"V_MPEG2",             "mpeg2video"},
+    {"V_MPEG4/ISO/SP",      "mpeg4"},
+    {"V_MPEG4/ISO/ASP",     "mpeg4"},
+    {"V_MPEG4/ISO/AP",      "mpeg4"},
+    {"V_MPEG4/ISO/AVC",     "h264"},
+    {"V_THEORA",            "theora"},
+    {"V_VP8",               "vp8"},
+    {"V_VP9",               "vp9"},
+    {"V_DIRAC",             "dirac"},
+    {"V_PRORES",            "prores"},
+    {"V_MPEGH/ISO/HEVC",    "hevc"},
     {0}
 };
 
@@ -1227,7 +1227,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
 
     sh_v->bits_per_coded_sample = 24;
 
-    if (!strcmp(track->codec_id, MKV_V_MSCOMP)) { /* AVI compatibility mode */
+    if (!strcmp(track->codec_id, "V_MS/VFW/FOURCC")) { /* AVI compatibility mode */
         // The private_data contains a BITMAPINFOHEADER struct
         if (track->private_data == NULL || track->private_size < 40)
             return 1;
@@ -1245,10 +1245,10 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         mp_set_codec_from_tag(sh);
         sh_v->avi_dts = true;
     } else if (track->private_size >= RVPROPERTIES_SIZE
-               && (!strcmp(track->codec_id, MKV_V_REALV10)
-                || !strcmp(track->codec_id, MKV_V_REALV20)
-                || !strcmp(track->codec_id, MKV_V_REALV30)
-                || !strcmp(track->codec_id, MKV_V_REALV40)))
+               && (!strcmp(track->codec_id, "V_REAL/RV10")
+                || !strcmp(track->codec_id, "V_REAL/RV20")
+                || !strcmp(track->codec_id, "V_REAL/RV30")
+                || !strcmp(track->codec_id, "V_REAL/RV40")))
     {
         unsigned char *src;
         unsigned int cnt;
@@ -1268,11 +1268,11 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         extradata = src - 8;
         track->parse = true;
         track->parse_timebase = 1e3;
-    } else if (strcmp(track->codec_id, MKV_V_UNCOMPRESSED) == 0) {
+    } else if (strcmp(track->codec_id, "V_UNCOMPRESSED") == 0) {
         // raw video, "like AVI" - this is a FourCC
         sh->format = track->colorspace;
         sh->codec = "rawvideo";
-    } else if (strcmp(track->codec_id, MKV_V_QUICKTIME) == 0) {
+    } else if (strcmp(track->codec_id, "V_QUICKTIME") == 0) {
         uint32_t fourcc1 = 0, fourcc2 = 0;
         if (track->private_size >= 8) {
             fourcc1 = AV_RL32(track->private_data + 0);
@@ -1336,31 +1336,31 @@ static const struct mkv_audio_tag {
     const char *codec;
     bool prefix;
 } mkv_audio_tags[] = {
-    { MKV_A_MP2,       "mp3" },
-    { MKV_A_MP3,       "mp3" },
-    { MKV_A_AC3,       "ac3", .prefix = true },
-    { MKV_A_EAC3,      "eac3", .prefix = true },
-    { MKV_A_DTS,       "dts" },
-    { MKV_A_PCM,       "pcm" }, // not a real lavc codec name
-    { MKV_A_PCM_BE,    "pcm" },
-    { MKV_A_PCM_FLT,   "pcm-flt" }, // also not a real lavc codec name
-    { MKV_A_AAC,       "aac" },
-    { "A_AAC/",        "aac", .prefix = true },
-    { MKV_A_VORBIS,    "vorbis" },
-    { MKV_A_OPUS,      "opus" },
-    { MKV_A_OPUS_EXP,  "opus" },
-    { MKV_A_QDMC,      "qdmc" },
-    { MKV_A_QDMC2,     "qdm2" },
-    { MKV_A_WAVPACK,   "wavpack" },
-    { MKV_A_TRUEHD,    "truehd" },
-    { MKV_A_FLAC,      "flac" },
-    { MKV_A_ALAC,      "alac" },
-    { MKV_A_REAL28,    "ra_288" },
-    { MKV_A_REALATRC,  "atrac3" },
-    { MKV_A_REALCOOK,  "cook" },
-    { MKV_A_REALDNET,  "ac3" },
-    { MKV_A_REALSIPR,  "sipr" },
-    { MKV_A_TTA1,      "tta" },
+    { "A_MPEG/L2",              "mp3" },
+    { "A_MPEG/L3",              "mp3" },
+    { "A_AC3",                  "ac3", .prefix = true },
+    { "A_EAC3",                 "eac3", .prefix = true },
+    { "A_DTS",                  "dts" },
+    { "A_PCM/INT/LIT",          "pcm" }, // not a real lavc codec name
+    { "A_PCM/INT/BIG",          "pcm" },
+    { "A_PCM/FLOAT/IEEE",       "pcm-flt" }, // also not a real lavc codec name
+    { "A_AAC",                  "aac" },
+    { "A_AAC/",                 "aac", .prefix = true },
+    { "A_VORBIS",               "vorbis" },
+    { "A_OPUS",                 "opus" },
+    { "A_OPUS/EXPERIMENTAL",    "opus" },
+    { "A_QUICKTIME/QDMC",       "qdmc" },
+    { "A_QUICKTIME/QDM2",       "qdm2" },
+    { "A_WAVPACK4",             "wavpack" },
+    { "A_TRUEHD",               "truehd" },
+    { "A_FLAC",                 "flac" },
+    { "A_ALAC",                 "alac" },
+    { "A_REAL/28_8",            "ra_288" },
+    { "A_REAL/ATRC",            "atrac3" },
+    { "A_REAL/COOK",            "cook" },
+    { "A_REAL/DNET",            "ac3" },
+    { "A_REAL/SIPR",            "sipr" },
+    { "A_TTA1",                 "tta" },
     { NULL },
 };
 
@@ -1387,7 +1387,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         track->a_osfreq = track->a_sfreq;
     sh_a->bits_per_coded_sample = track->a_bps ? track->a_bps : 16;
 
-    if (!strcmp(track->codec_id, MKV_A_ACM)) { /* AVI compatibility mode */
+    if (!strcmp(track->codec_id, "A_MS/ACM")) { /* AVI compatibility mode */
         // The private_data contains a WAVEFORMATEX struct
         if (track->private_size < 18)
             goto error;
@@ -1435,7 +1435,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         sh_a->block_align = 1152;
         track->parse = true;
     } else if (!strcmp(codec, "pcm")) {
-        bool is_be = !strcmp(track->codec_id, MKV_A_PCM_BE);
+        bool is_be = !strcmp(track->codec_id, "A_PCM/INT/BIG");
         bool sign = sh_a->bits_per_coded_sample > 8;
         mp_set_pcm_codec(sh, sign, false, sh_a->bits_per_coded_sample, is_be);
     } else if (!strcmp(codec, "pcm-flt")) {
@@ -1614,17 +1614,17 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 }
 
 static const char *const mkv_sub_tag[][2] = {
-    { MKV_S_VOBSUB,     "dvd_subtitle" },
-    { MKV_S_TEXTSSA,    "ass"},
-    { MKV_S_TEXTASS,    "ass"},
-    { MKV_S_SSA,        "ass"},
-    { MKV_S_ASS,        "ass"},
-    { MKV_S_TEXTASCII,  "subrip"},
-    { MKV_S_TEXTUTF8,   "subrip"},
-    { MKV_S_PGS,        "hdmv_pgs_subtitle"},
-    { MKV_S_WEBVTT_S,   "webvtt-webm"},
-    { MKV_S_WEBVTT_C,   "webvtt-webm"},
-    { MKV_S_DVB,        "dvb_subtitle"},
+    { "S_VOBSUB",           "dvd_subtitle" },
+    { "S_TEXT/SSA",         "ass"},
+    { "S_TEXT/ASS",         "ass"},
+    { "S_SSA",              "ass"},
+    { "S_ASS",              "ass"},
+    { "S_TEXT/ASCII",       "subrip"},
+    { "S_TEXT/UTF8",        "subrip"},
+    { "S_HDMV/PGS",         "hdmv_pgs_subtitle"},
+    { "D_WEBVTT/SUBTITLES", "webvtt-webm"},
+    { "D_WEBVTT/CAPTIONS",  "webvtt-webm"},
+    { "S_DVBSUB",           "dvb_subtitle"},
     {0}
 };
 
