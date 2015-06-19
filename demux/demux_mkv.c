@@ -1530,8 +1530,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     if (!strcmp(codec, "mp3")) {
         track->parse = true;
     } else if (!strcmp(codec, "flac")) {
-        sh_a->bits_per_coded_sample = 0;
-
         unsigned char *ptr = extradata;
         unsigned int size = extradata_len;
         if (size < 4 || ptr[0] != 'f' || ptr[1] != 'L' || ptr[2] != 'a'
@@ -1569,11 +1567,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         AV_WL32(data + 10, track->a_osfreq);
         // Bogus: last frame won't be played.
         AV_WL32(data + 14, 0);
-    } else if (!strcmp(codec, "ac3") ||
-               !strcmp(codec, "eac3") ||
-               !strcmp(codec, "dts"))
-    {
-        sh_a->bits_per_coded_sample = 0;
     }
 
     // Some files have broken default DefaultDuration set, which will lead to
