@@ -1426,12 +1426,14 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         track->sub_packet_h = AV_RB16(src + 40);
         sh_a->block_align = track->audiopk_size = AV_RB16(src + 42);
         track->sub_packet_size = AV_RB16(src + 44);
+        int offset = 0;
         if (version == 4) {
-            src += RAPROPERTIES4_SIZE;
-            src += src[0] + 1;
-            src += src[0] + 1;
+            offset += RAPROPERTIES4_SIZE;
+            if (offset + 1 > track->private_size)
+                goto error;
+            offset += (src[offset] + 1) * 2 + 3;
         } else {
-            src += RAPROPERTIES5_SIZE;
+            offset += RAPROPERTIES5_SIZE + 3 + (version == 5 ? 1 : 0);
         }
 
         if (track->audiopk_size == 0 || track->sub_packet_size == 0 ||
@@ -1440,15 +1442,15 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         if (track->coded_framesize > 0x40000000)
             goto error;
 
-        src += 3;
-        if (version == 5)
-            src++;
-        uint32_t codecdata_length = AV_RB32(src);
-        if (codecdata_length > 0x1000000)
+        if (offset + 4 > track->private_size)
             goto error;
-        src += 4;
+        uint32_t codecdata_length = AV_RB32(src + offset);
+        offset += 4;
+        if (offset > track->private_size ||
+            codecdata_length > track->private_size - offset)
+            goto error;
         extradata_len = codecdata_length;
-        extradata = src;
+        extradata = src + offset;
 
         if (!strcmp(track->codec_id, "A_REAL/ATRC")) {
             sh->codec = "atrac3";
