@@ -30,6 +30,8 @@ local user_opts = {
                                 -- functions that depend on it)
     layout = "box",
     seekbarstyle = "slider",    -- slider (diamond marker) or bar (fill)
+    timetotal = false,          -- display total time instead of remaining time?
+    timems = false,             -- display timecodes with milliseconds?
 }
 
 -- read options from config and command-line
@@ -65,8 +67,8 @@ local state = {
     mouse_down_counter = 0,                 -- used for softrepeat
     active_element = nil,                   -- nil = none, 0 = background, 1+ = see elements[]
     active_event_source = nil,              -- the "button" that issued the current event
-    rightTC_trem = true,                    -- if the right timcode should display total or remaining time
-    tc_ms = false,                          -- Should the timecodes display their time with milliseconds
+    rightTC_trem = not user_opts.timetotal, -- if the right timecode should display total or remaining time
+    tc_ms = user_opts.timems,               -- Should the timecodes display their time with milliseconds
     mp_screen_sizeX, mp_screen_sizeY,       -- last screen-resolution, to detect resolution changes to issue reINITs
     initREQ = false,                        -- is a re-init request pending?
     last_mouseX, last_mouseY,               -- last mouse position, to detect siginificant mouse movement

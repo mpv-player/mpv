@@ -235,6 +235,14 @@ Configurable Options
     | Default: slider
     | Sets the style of the seekbar, slider (diamond marker) or bar (fill)
 
+``timetotal``
+    | Default: no
+    | Show total time instead of time remaining
+
+``timems``
+    | Default: no
+    | Display timecodes with milliseconds
+
 Script Commands
 ~~~~~~~~~~~~~~~
 
