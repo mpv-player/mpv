@@ -79,7 +79,8 @@ struct mp_vdpau_ctx {
     int getimg_w, getimg_h;
 };
 
-struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11);
+struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11,
+                                                bool probing);
 void mp_vdpau_destroy(struct mp_vdpau_ctx *ctx);
 
 int mp_vdpau_handle_preemption(struct mp_vdpau_ctx *ctx, uint64_t *counter);

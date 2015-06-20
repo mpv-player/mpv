@@ -111,7 +111,7 @@ bool check_va_status(struct mp_log *log, VAStatus status, const char *msg);
 
 int                      va_get_colorspace_flag(enum mp_csp csp);
 
-struct mp_vaapi_ctx     *va_initialize(VADisplay *display, struct mp_log *log);
+struct mp_vaapi_ctx *    va_initialize(VADisplay *display, struct mp_log *plog, bool probing);
 void                     va_destroy(struct mp_vaapi_ctx *ctx);
 
 enum mp_imgfmt           va_fourcc_to_imgfmt(uint32_t fourcc);

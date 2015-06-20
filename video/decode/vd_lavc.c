@@ -252,10 +252,11 @@ static struct vd_lavc_hwdec *probe_hwdec(struct dec_video *vd, bool autoprobe,
     if (r >= 0) {
         return hwdec;
     } else if (r == HWDEC_ERR_NO_CODEC) {
-        MP_VERBOSE(vd, "Hardware decoder '%s' not found in "
-                   "libavcodec.\n", decoder);
+        MP_VERBOSE(vd, "Hardware decoder '%s' not found in libavcodec.\n",
+                   decoder);
     } else if (r == HWDEC_ERR_NO_CTX && !autoprobe) {
-        MP_WARN(vd, "VO does not support requested hardware decoder.\n");
+        MP_WARN(vd, "VO does not support requested hardware decoder, or "
+                "loading it failed.\n");
     }
     return NULL;
 }

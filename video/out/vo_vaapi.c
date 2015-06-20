@@ -600,7 +600,7 @@ static int preinit(struct vo *vo)
     if (!p->display)
         goto fail;
 
-    p->mpvaapi = va_initialize(p->display, p->log);
+    p->mpvaapi = va_initialize(p->display, p->log, false);
     if (!p->mpvaapi) {
         vaTerminate(p->display);
         p->display = NULL;

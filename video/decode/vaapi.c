@@ -307,7 +307,7 @@ static bool create_va_dummy_ctx(struct priv *p)
     VADisplay *display = vaGetDisplay(p->x11_display);
     if (!display)
         goto destroy_ctx;
-    p->ctx = va_initialize(display, p->log);
+    p->ctx = va_initialize(display, p->log, true);
     if (!p->ctx) {
         vaTerminate(display);
         goto destroy_ctx;

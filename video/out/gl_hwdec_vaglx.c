@@ -90,7 +90,7 @@ static int create(struct gl_hwdec *hw)
     p->display = vaGetDisplay(x11disp);
     if (!p->display)
         return -1;
-    p->ctx = va_initialize(p->display, p->log);
+    p->ctx = va_initialize(p->display, p->log, true);
     if (!p->ctx) {
         vaTerminate(p->display);
         return -1;

@@ -114,12 +114,15 @@ static void va_get_formats(struct mp_vaapi_ctx *ctx)
     ctx->image_formats = formats;
 }
 
-struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog)
+struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
+                                   bool probing)
 {
     struct mp_vaapi_ctx *res = NULL;
     struct mp_log *log = mp_log_new(NULL, plog, "/vaapi");
     int major_version, minor_version;
     int status = vaInitialize(display, &major_version, &minor_version);
+    if (status != VA_STATUS_SUCCESS && probing)
+        goto error;
     if (!check_va_status(log, status, "vaInitialize()"))
         goto error;
 

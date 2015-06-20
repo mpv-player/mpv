@@ -109,7 +109,7 @@ static int create(struct gl_hwdec *hw)
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
     p->log = hw->log;
-    p->ctx = mp_vdpau_create_device_x11(hw->log, x11disp);
+    p->ctx = mp_vdpau_create_device_x11(hw->log, x11disp, true);
     if (!p->ctx)
         return -1;
     if (mp_vdpau_handle_preemption(p->ctx, &p->preemption_counter) < 1)

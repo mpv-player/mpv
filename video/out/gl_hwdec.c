@@ -60,7 +60,7 @@ static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
     };
     if (hwdec->driver->create(hwdec) < 0) {
         talloc_free(hwdec);
-        mp_err(log, "Couldn't load hwdec driver '%s'\n", drv->api_name);
+        mp_verbose(log, "Couldn't load hwdec driver '%s'\n", drv->api_name);
         return NULL;
     }
     return hwdec;

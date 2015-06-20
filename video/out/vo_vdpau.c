@@ -954,7 +954,7 @@ static int preinit(struct vo *vo)
     if (!vo_x11_init(vo))
         return -1;
 
-    vc->mpvdp = mp_vdpau_create_device_x11(vo->log, vo->x11->display);
+    vc->mpvdp = mp_vdpau_create_device_x11(vo->log, vo->x11->display, false);
     if (!vc->mpvdp) {
         vo_x11_uninit(vo);
         return -1;
