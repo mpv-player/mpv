@@ -658,7 +658,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     }
     case WM_SIZING:
         if (w32->opts->keepaspect && w32->opts->keepaspect_window &&
-            !w32->opts->fullscreen && !w32->parent)
+            !w32->current_fs && !w32->parent)
         {
             RECT *rc = (RECT*)lParam;
             // get client area of the windows if it had the rect rc
@@ -701,7 +701,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     case WM_NCHITTEST:
         // Provide sizing handles for borderless windows
-        if (!w32->opts->border && !w32->opts->fullscreen) {
+        if (!w32->opts->border && !w32->current_fs) {
             return borderless_nchittest(w32, GET_X_LPARAM(lParam),
                                         GET_Y_LPARAM(lParam));
         }
@@ -811,7 +811,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             int y = GET_Y_LPARAM(lParam);
 
             if (mouse_button == (MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN) &&
-                !w32->opts->fullscreen &&
+                !w32->current_fs &&
                 !mp_input_test_dragging(w32->input_ctx, x, y))
             {
                 // Window dragging hack
@@ -884,9 +884,9 @@ static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p)
 static void w32_update_xinerama_info(struct vo_w32_state *w32)
 {
     struct mp_vo_opts *opts = w32->opts;
-    int screen = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
+    int screen = w32->current_fs ? opts->fsscreen_id : opts->screen_id;
 
-    if (opts->fullscreen && screen == -2) {
+    if (w32->current_fs && screen == -2) {
         struct mp_rect rc = {
             GetSystemMetrics(SM_XVIRTUALSCREEN),
             GetSystemMetrics(SM_YVIRTUALSCREEN),
@@ -938,7 +938,7 @@ static DWORD update_style(struct vo_w32_state *w32, DWORD style)
     const DWORD NO_FRAME = WS_POPUP;
     const DWORD FRAME = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
     style &= ~(NO_FRAME | FRAME);
-    style |= (w32->opts->border && !w32->opts->fullscreen) ? FRAME : NO_FRAME;
+    style |= (w32->opts->border && !w32->current_fs) ? FRAME : NO_FRAME;
     return style;
 }
 
@@ -951,12 +951,13 @@ static int reinit_window_state(struct vo_w32_state *w32)
     if (w32->parent)
         return 1;
 
-    bool toggle_fs = w32->current_fs != w32->opts->fullscreen;
-    w32->current_fs = w32->opts->fullscreen;
+    bool new_fs = w32->opts->fullscreen;
+    bool toggle_fs = w32->current_fs != new_fs;
+    w32->current_fs = new_fs;
 
     if (w32->taskbar_list) {
         ITaskbarList2_MarkFullscreenWindow(w32->taskbar_list,
-                                           w32->window, w32->opts->fullscreen);
+                                           w32->window, w32->current_fs);
     }
 
     DWORD style = update_style(w32, GetWindowLong(w32->window, GWL_STYLE));
@@ -970,7 +971,7 @@ static int reinit_window_state(struct vo_w32_state *w32)
     int screen_w = w32->screenrc.x1 - w32->screenrc.x0;
     int screen_h = w32->screenrc.y1 - w32->screenrc.y0;
 
-    if (w32->opts->fullscreen) {
+    if (w32->current_fs) {
         // Save window position and size when switching to fullscreen.
         if (toggle_fs) {
             w32->prev_width = w32->dw;
@@ -1007,7 +1008,7 @@ static int reinit_window_state(struct vo_w32_state *w32)
     RECT cr = r;
     add_window_borders(w32->window, &r);
 
-    if (!w32->opts->fullscreen &&
+    if (!w32->current_fs &&
         ((r.right - r.left) >= screen_w || (r.bottom - r.top) >= screen_h))
     {
         MP_VERBOSE(w32, "requested window size larger than the screen\n");
