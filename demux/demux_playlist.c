@@ -35,7 +35,7 @@ static bool check_mimetype(struct stream *s, const char *const *list)
 {
     if (s->mime_type) {
         for (int n = 0; list && list[n]; n++) {
-            if (strcmp(s->mime_type, list[n]) == 0)
+            if (strcasecmp(s->mime_type, list[n]) == 0)
                 return true;
         }
     }
