@@ -18,6 +18,9 @@ struct mp_log_buffer_entry {
     char *text;
 };
 
+// Use --msg-level option for log level of this log buffer
+#define MP_LOG_BUFFER_MSGL_TERM (MSGL_MAX + 1)
+
 struct mp_log_buffer;
 struct mp_log_buffer *mp_msg_log_buffer_new(struct mpv_global *global,
                                             int size, int level,

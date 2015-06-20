@@ -1523,6 +1523,9 @@ int mpv_request_log_messages(mpv_handle *ctx, const char *min_level)
             break;
         }
     }
+    if (strcmp(min_level, "terminal-default") == 0)
+        level = MP_LOG_BUFFER_MSGL_TERM;
+
     if (level < 0 && strcmp(min_level, "no") != 0)
         return MPV_ERROR_INVALID_PARAMETER;
 

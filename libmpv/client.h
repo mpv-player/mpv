@@ -198,7 +198,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 18)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 19)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
@@ -1418,6 +1418,9 @@ int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable);
  * @param min_level Minimal log level as string. Valid log levels:
  *                      no fatal error warn info status v debug trace
  *                  The value "no" disables all messages. This is the default.
+ *                  An exception is the value "terminal-default", which uses the
+ *                  log level as set by the "--msg-level" option. This works
+ *                  even if the terminal is disabled. (Since API version 1.19.)
  *                  Also see mpv_log_level.
  */
 int mpv_request_log_messages(mpv_handle *ctx, const char *min_level);

@@ -106,16 +106,12 @@ static void update_loglevel(struct mp_log *log)
 {
     struct mp_log_root *root = log->root;
     pthread_mutex_lock(&mp_msg_lock);
-    log->level = -1;
-    log->terminal_level = -1;
-    if (log->root->use_terminal) {
-        log->level = MSGL_STATUS + log->root->verbose; // default log level
-        for (int n = 0; root->msg_levels && root->msg_levels[n * 2 + 0]; n++) {
-            if (match_mod(log->verbose_prefix, root->msg_levels[n * 2 + 0]))
-                log->level = mp_msg_find_level(root->msg_levels[n * 2 + 1]);
-        }
-        log->terminal_level = log->root->use_terminal ? log->level : -1;
+    log->level = MSGL_STATUS + log->root->verbose; // default log level
+    for (int n = 0; root->msg_levels && root->msg_levels[n * 2 + 0]; n++) {
+        if (match_mod(log->verbose_prefix, root->msg_levels[n * 2 + 0]))
+            log->level = mp_msg_find_level(root->msg_levels[n * 2 + 1]);
     }
+    log->terminal_level = log->level;
     for (int n = 0; n < log->root->num_buffers; n++)
         log->level = MPMAX(log->level, log->root->buffers[n]->level);
     if (log->root->log_file)
@@ -239,7 +235,7 @@ static void pretty_print_module(FILE* stream, const char *prefix, bool use_color
 
 static bool test_terminal_level(struct mp_log *log, int lev)
 {
-    return lev <= log->terminal_level &&
+    return lev <= log->terminal_level && log->root->use_terminal &&
            !(lev == MSGL_STATUS && terminal_in_background());
 }
 
@@ -297,7 +293,10 @@ static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
     struct mp_log_root *root = log->root;
     for (int n = 0; n < root->num_buffers; n++) {
         struct mp_log_buffer *buffer = root->buffers[n];
-        if (lev <= buffer->level && lev != MSGL_STATUS) {
+        int buffer_level = buffer->level;
+        if (buffer_level == MP_LOG_BUFFER_MSGL_TERM)
+            buffer_level = log->terminal_level;
+        if (lev <= buffer_level && lev != MSGL_STATUS) {
             // Assuming a single writer (serialized by msg lock)
             int avail = mp_ring_available(buffer->ring) / sizeof(void *);
             if (avail < 1)

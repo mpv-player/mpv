@@ -32,6 +32,7 @@ API changes
 
 ::
 
+ 1.19   - mpv_request_log_messages() now accepts "terminal-default" as parameter
  1.18   - add MPV_END_FILE_REASON_REDIRECT, and change behavior of
           MPV_EVENT_END_FILE accordingly
         - a bunch of interface-changes.rst changes
