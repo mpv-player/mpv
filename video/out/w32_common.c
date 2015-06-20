@@ -1040,14 +1040,7 @@ static int reinit_window_state(struct vo_w32_state *w32)
                (int)(r.bottom - r.top));
 
     SetWindowPos(w32->window, layer, r.left, r.top, r.right - r.left,
-                 r.bottom - r.top, SWP_FRAMECHANGED);
-    // For some reason, moving SWP_SHOWWINDOW to a second call works better
-    // with wine: returning from fullscreen doesn't cause a bogus resize to
-    // screen size.
-    // It's not needed on Windows XP or wine with a virtual desktop.
-    // It doesn't seem to have any negative effects.
-    SetWindowPos(w32->window, NULL, 0, 0, 0, 0,
-                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+                 r.bottom - r.top, SWP_FRAMECHANGED | SWP_SHOWWINDOW);
 
     signal_events(w32, VO_EVENT_RESIZE);
 
