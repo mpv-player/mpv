@@ -108,7 +108,7 @@ const char *mp_map_mimetype_to_video_codec(const char *mimetype)
 {
     if (mimetype) {
         for (int n = 0; mimetype_to_codec[n][0]; n++) {
-            if (strcmp(mimetype_to_codec[n][0], mimetype) == 0)
+            if (strcasecmp(mimetype_to_codec[n][0], mimetype) == 0)
                 return mimetype_to_codec[n][1];
         }
     }
