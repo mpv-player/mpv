@@ -1168,6 +1168,19 @@ static void add_coverart(struct demuxer *demuxer)
     }
 }
 
+static void init_track(demuxer_t *demuxer, mkv_track_t *track,
+                       struct sh_stream *sh)
+{
+    track->stream = sh;
+
+    if (track->language && (strcmp(track->language, "und") != 0))
+        sh->lang = track->language;
+
+    sh->demuxer_id = track->tnum;
+    sh->title = track->name;
+    sh->default_track = track->default_track;
+}
+
 static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track);
 static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track);
 static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track);
@@ -1220,10 +1233,8 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
     if (!sh)
         return 1;
-    track->stream = sh;
+    init_track(demuxer, track, sh);
     sh_video_t *sh_v = sh->video;
-    sh->demuxer_id = track->tnum;
-    sh->title = talloc_strdup(sh_v, track->name);
 
     sh_v->bits_per_coded_sample = 24;
 
@@ -1359,7 +1370,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     struct sh_stream *sh = new_sh_stream(demuxer, STREAM_AUDIO);
     if (!sh)
         return 1;
-    track->stream = sh;
+    init_track(demuxer, track, sh);
     sh_audio_t *sh_a = sh->audio;
 
     if (track->private_size > 0x1000000)
@@ -1368,11 +1379,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     unsigned char *extradata = track->private_data;
     unsigned int extradata_len = track->private_size;
 
-    if (track->language && (strcmp(track->language, "und") != 0))
-        sh->lang = talloc_strdup(sh_a, track->language);
-    sh->demuxer_id = track->tnum;
-    sh->title = talloc_strdup(sh_a, track->name);
-    sh->default_track = track->default_track;
     if (!track->a_osfreq)
         track->a_osfreq = track->a_sfreq;
     sh_a->bits_per_coded_sample = track->a_bps ? track->a_bps : 16;
@@ -1617,9 +1623,8 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
     struct sh_stream *sh = new_sh_stream(demuxer, STREAM_SUB);
     if (!sh)
         return 1;
-    track->stream = sh;
-    sh_sub_t *sh_s = sh->sub;
-    sh->demuxer_id = track->tnum;
+    init_track(demuxer, track, sh);
+
     sh->codec = subtitle_type;
     bstr in = (bstr){track->private_data, track->private_size};
     bstr buffer = demux_mkv_decode(demuxer->log, track, in, 2);
@@ -1631,10 +1636,6 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
     }
     sh->extradata = track->private_data;
     sh->extradata_size = track->private_size;
-    if (track->language && (strcmp(track->language, "und") != 0))
-        sh->lang = talloc_strdup(sh, track->language);
-    sh->title = talloc_strdup(sh, track->name);
-    sh->default_track = track->default_track;
 
     if (!subtitle_type)
         MP_ERR(demuxer, "Subtitle type '%s' is not supported.\n", track->codec_id);
