@@ -1238,7 +1238,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         if (track->v_height == 0)
             track->v_height = AV_RL32(h + 8);       // biHeight
         sh_v->bits_per_coded_sample = AV_RL16(h + 14); // biBitCount
-        sh->format = AV_RL32(h + 16);               // biCompression
+        sh->codec_tag = AV_RL32(h + 16);            // biCompression
 
         extradata = track->private_data + 40;
         extradata_size = track->private_size - 40;
@@ -1270,7 +1270,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         track->parse_timebase = 1e3;
     } else if (strcmp(track->codec_id, "V_UNCOMPRESSED") == 0) {
         // raw video, "like AVI" - this is a FourCC
-        sh->format = track->colorspace;
+        sh->codec_tag = track->colorspace;
         sh->codec = "rawvideo";
     } else if (strcmp(track->codec_id, "V_QUICKTIME") == 0) {
         uint32_t fourcc1 = 0, fourcc2 = 0;
@@ -1302,7 +1302,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         track->parse = true;
         track->parse_timebase = 1e9;
     } else if (!strcmp(codec, "mjpeg")) {
-        sh->format = MP_FOURCC('m', 'j', 'p', 'g');
+        sh->codec_tag = MP_FOURCC('m', 'j', 'p', 'g');
     }
 
     if (extradata_size > 0x1000000) {
@@ -1391,7 +1391,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             goto error;
         MP_VERBOSE(demuxer, "track with MS compat audio.\n");
         unsigned char *h = track->private_data;
-        sh->format = AV_RL16(h + 0);            // wFormatTag
+        sh->codec_tag = AV_RL16(h + 0);         // wFormatTag
         if (track->a_channels == 0)
             track->a_channels = AV_RL16(h + 2); // nChannels
         if (sh_a->samplerate == 0)

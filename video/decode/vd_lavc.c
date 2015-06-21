@@ -399,7 +399,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     // Do this after the above avopt handling in case it changes values
     ctx->skip_frame = avctx->skip_frame;
 
-    avctx->codec_tag = sh->format;
+    avctx->codec_tag = sh->codec_tag;
     avctx->coded_width  = sh->video->disp_w;
     avctx->coded_height = sh->video->disp_h;
     avctx->bits_per_coded_sample = sh->video->bits_per_coded_sample;
@@ -407,11 +407,11 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     mp_lavc_set_extradata(avctx, sh->video->extradata, sh->video->extradata_len);
 
     if (mp_rawvideo) {
-        avctx->pix_fmt = imgfmt2pixfmt(sh->format);
+        avctx->pix_fmt = imgfmt2pixfmt(sh->codec_tag);
         avctx->codec_tag = 0;
-        if (avctx->pix_fmt == AV_PIX_FMT_NONE && sh->format)
+        if (avctx->pix_fmt == AV_PIX_FMT_NONE && sh->codec_tag)
             MP_ERR(vd, "Image format %s not supported by lavc.\n",
-                   mp_imgfmt_to_name(sh->format));
+                   mp_imgfmt_to_name(sh->codec_tag));
     }
 
     if (sh->lav_headers)

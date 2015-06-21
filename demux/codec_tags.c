@@ -72,11 +72,11 @@ static const char *map_audio_pcm_tag(uint32_t tag, int bits)
 
 void mp_set_codec_from_tag(struct sh_stream *sh)
 {
-    sh->codec = lookup_tag(sh->type, sh->format);
+    sh->codec = lookup_tag(sh->type, sh->codec_tag);
 
     if (sh->audio && sh->audio->bits_per_coded_sample) {
         const char *codec =
-            map_audio_pcm_tag(sh->format, sh->audio->bits_per_coded_sample);
+            map_audio_pcm_tag(sh->codec_tag, sh->audio->bits_per_coded_sample);
         if (codec)
             sh->codec = codec;
     }

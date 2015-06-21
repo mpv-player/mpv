@@ -141,7 +141,7 @@ static void add_streams(demuxer_t *demuxer)
         MP_TARRAY_APPEND(p, p->streams, p->num_streams, sh);
         // Copy all stream fields that might be relevant
         sh->codec = talloc_strdup(sh, src->codec);
-        sh->format = src->format;
+        sh->codec_tag = src->codec_tag;
         sh->lav_headers = src->lav_headers;
         sh->demuxer_id = src->demuxer_id;
         if (src->video) {

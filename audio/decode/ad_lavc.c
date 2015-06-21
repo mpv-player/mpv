@@ -116,7 +116,7 @@ static int init(struct dec_audio *da, const char *decoder)
 
     mp_set_avopts(da->log, lavc_context, opts->avopts);
 
-    lavc_context->codec_tag = sh->format;
+    lavc_context->codec_tag = sh->codec_tag;
     lavc_context->sample_rate = sh_audio->samplerate;
     lavc_context->bit_rate = sh_audio->bitrate;
     lavc_context->block_align = sh_audio->block_align;

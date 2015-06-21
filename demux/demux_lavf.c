@@ -521,8 +521,6 @@ static void handle_stream(demuxer_t *demuxer, int i)
             break;
         sh_audio_t *sh_audio = sh->audio;
 
-        sh->format = codec->codec_tag;
-
         // probably unneeded
         mp_chmap_set_unknown(&sh_audio->channels, codec->channels);
         if (codec->channel_layout)
@@ -550,7 +548,6 @@ static void handle_stream(demuxer_t *demuxer, int i)
             }
         }
 
-        sh->format = codec->codec_tag;
         sh_video->disp_w = codec->width;
         sh_video->disp_h = codec->height;
         /* Try to make up some frame rate value, even if it's not reliable.
@@ -636,6 +633,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
     if (sh) {
         sh->ff_index = st->index;
         sh->codec = mp_codec_from_av_codec_id(codec->codec_id);
+        sh->codec_tag = codec->codec_tag;
         sh->lav_headers = codec;
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)

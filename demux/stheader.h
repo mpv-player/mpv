@@ -47,7 +47,7 @@ struct sh_stream {
     const char *codec;
 
     // Usually a FourCC, exact meaning depends on codec.
-    unsigned int format;
+    unsigned int codec_tag;
 
     // Codec specific header data (set by demux_lavf.c only)
     struct AVCodecContext *lav_headers;

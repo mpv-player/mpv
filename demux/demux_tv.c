@@ -60,7 +60,7 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
         sh_v->codec = "mjpeg";
     } else {
         sh_v->codec = "rawvideo";
-        sh_v->format = fourcc;
+        sh_v->codec_tag = fourcc;
     }
 
     /* set FPS and FRAMETIME */

@@ -222,7 +222,7 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
     sh = new_sh_stream(demuxer, STREAM_VIDEO);
     sh_video = sh->video;
     sh->codec = decoder;
-    sh->format = imgfmt;
+    sh->codec_tag = imgfmt;
     sh_video->fps = opts->fps;
     sh_video->disp_w = width;
     sh_video->disp_h = height;
