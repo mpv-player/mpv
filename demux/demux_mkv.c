@@ -1310,8 +1310,8 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         return 1;
     }
 
-    sh_v->extradata = talloc_memdup(sh_v, extradata, extradata_size);
-    sh_v->extradata_len = extradata_size;
+    sh->extradata = talloc_memdup(sh_v, extradata, extradata_size);
+    sh->extradata_size = extradata_size;
     if (!sh->codec) {
         MP_WARN(demuxer, "Unknown/unsupported CodecID (%s) or missing/bad "
                 "CodecPrivate data (track %u).\n",
@@ -1574,8 +1574,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     if (sh_a->samplerate == 8000 && strcmp(codec, "ac3") == 0)
         track->default_duration = 0;
 
-    sh_a->codecdata = extradata;
-    sh_a->codecdata_len = extradata_len;
+    sh->extradata = extradata;
+    sh->extradata_size = extradata_len;
 
     return 0;
 
@@ -1629,9 +1629,8 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
         track->private_data = buffer.start;
         track->private_size = buffer.len;
     }
-    sh_s->extradata = talloc_size(sh, track->private_size);
-    memcpy(sh_s->extradata, track->private_data, track->private_size);
-    sh_s->extradata_len = track->private_size;
+    sh->extradata = track->private_data;
+    sh->extradata_size = track->private_size;
     if (track->language && (strcmp(track->language, "und") != 0))
         sh->lang = talloc_strdup(sh, track->language);
     sh->title = talloc_strdup(sh, track->name);

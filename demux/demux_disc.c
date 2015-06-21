@@ -112,8 +112,8 @@ static void add_dvd_streams(demuxer_t *demuxer)
             }
             s = talloc_asprintf_append(s, "\n");
 
-            sh->sub->extradata = s;
-            sh->sub->extradata_len = strlen(s);
+            sh->extradata = s;
+            sh->extradata_size = strlen(s);
         }
     }
 }

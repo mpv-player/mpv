@@ -404,7 +404,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     avctx->coded_height = sh->video->disp_h;
     avctx->bits_per_coded_sample = sh->video->bits_per_coded_sample;
 
-    mp_lavc_set_extradata(avctx, sh->video->extradata, sh->video->extradata_len);
+    mp_lavc_set_extradata(avctx, sh->extradata, sh->extradata_size);
 
     if (mp_rawvideo) {
         avctx->pix_fmt = imgfmt2pixfmt(sh->codec_tag);

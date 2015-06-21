@@ -95,8 +95,8 @@ static int d_check_file(struct demuxer *demuxer, enum demux_check check)
 
     struct sh_stream *sh = new_sh_stream(demuxer, STREAM_SUB);
     sh->codec = "ass";
-    sh->sub->extradata = cbuf.start;
-    sh->sub->extradata_len = cbuf.len;
+    sh->extradata = cbuf.start;
+    sh->extradata_size = cbuf.len;
 
     demuxer->seekable = true;
     demuxer->fully_read = true;

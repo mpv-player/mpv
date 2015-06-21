@@ -202,8 +202,8 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh)
 
     pthread_mutex_lock(&sub->lock);
 
-    if (sh->sub->extradata && !sub->init_sd.extradata)
-        sub_set_extradata(sub, sh->sub->extradata, sh->sub->extradata_len);
+    if (sh->extradata && !sub->init_sd.extradata)
+        sub_set_extradata(sub, sh->extradata, sh->extradata_size);
     struct sd init_sd = sub->init_sd;
     init_sd.codec = sh->codec;
 

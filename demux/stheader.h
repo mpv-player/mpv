@@ -49,6 +49,9 @@ struct sh_stream {
     // Usually a FourCC, exact meaning depends on codec.
     unsigned int codec_tag;
 
+    unsigned char *extradata;   // codec specific per-stream header
+    int extradata_size;
+
     // Codec specific header data (set by demux_lavf.c only)
     struct AVCodecContext *lav_headers;
 
@@ -73,8 +76,6 @@ typedef struct sh_audio {
     int bitrate; // compressed bits/sec
     int block_align;
     int bits_per_coded_sample;
-    unsigned char *codecdata;
-    int codecdata_len;
     struct replaygain_data *replaygain_data;
 } sh_audio_t;
 
@@ -83,16 +84,12 @@ typedef struct sh_video {
     float fps;            // frames per second (set only if constant fps)
     float aspect;         // aspect ratio stored in the file (for prescaling)
     int bits_per_coded_sample;
-    unsigned char *extradata;
-    int extradata_len;
     int disp_w, disp_h;   // display size
     int rotate;           // intended display rotation, in degrees, [0, 359]
     int stereo_mode;      // mp_stereo3d_mode (0 if none/unknown)
 } sh_video_t;
 
 typedef struct sh_sub {
-    unsigned char *extradata;   // extra header data passed from demuxer
-    int extradata_len;
     double frame_based;         // timestamps are frame-based (and this is the
                                 // fallback framerate used for timestamps)
     bool is_utf8;               // if false, subtitle packet charset is unknown

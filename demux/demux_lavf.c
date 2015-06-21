@@ -592,9 +592,9 @@ static void handle_stream(demuxer_t *demuxer, int i)
         sh_sub = sh->sub;
 
         if (codec->extradata_size) {
-            sh_sub->extradata = talloc_size(sh, codec->extradata_size);
-            memcpy(sh_sub->extradata, codec->extradata, codec->extradata_size);
-            sh_sub->extradata_len = codec->extradata_size;
+            sh->extradata = talloc_size(sh, codec->extradata_size);
+            memcpy(sh->extradata, codec->extradata, codec->extradata_size);
+            sh->extradata_size = codec->extradata_size;
         }
 
         if (matches_avinputformat_name(priv, "microdvd")) {
