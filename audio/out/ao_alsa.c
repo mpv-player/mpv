@@ -571,10 +571,11 @@ static int init_device(struct ao *ao, bool second_try)
 
         err = snd_pcm_set_chmap(p->alsa, alsa_chmap);
         if (err == -ENXIO) {
-            // I consider this an ALSA bug: the channel map was reported as
-            // supported, but we still can't set it. It happens virtually
-            // always with dmix, though.
-            MP_VERBOSE(ao, "Device does not support requested channel map (%s)\n",
+            // A device my not be able to set any channel map, even channel maps
+            // that were reported as supported. This is either because the ALSA
+            // device is broken (dmix), or because the driver has only 1
+            // channel map per channel count, and setting the map is not needed.
+            MP_VERBOSE(ao, "device returned ENXIO when setting channel map %s\n",
                        mp_chmap_to_str(&dev_chmap));
         } else {
             CHECK_ALSA_WARN("Channel map setup failed");
