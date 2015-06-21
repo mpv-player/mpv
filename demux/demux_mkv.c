@@ -1497,22 +1497,21 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             profile = 1;
         else if (!strncmp(tail, "SSR", 3))
             profile = 2;
-        sh_a->codecdata = talloc_size(sh_a, 5);
-        sh_a->codecdata[0] = ((profile + 1) << 3) | ((srate_idx & 0xE) >> 1);
-        sh_a->codecdata[1] =
-            ((srate_idx & 0x1) << 7) | (track->a_channels << 3);
+        extradata = talloc_size(sh_a, 5);
+        extradata[0] = ((profile + 1) << 3) | ((srate_idx & 0xE) >> 1);
+        extradata[1] = ((srate_idx & 0x1) << 7) | (track->a_channels << 3);
 
         if (strstr(track->codec_id, "SBR") != NULL) {
             /* HE-AAC (aka SBR AAC) */
-            sh_a->codecdata_len = 5;
+            extradata_len = 5;
 
             srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
-            sh_a->codecdata[2] = AAC_SYNC_EXTENSION_TYPE >> 3;
-            sh_a->codecdata[3] = ((AAC_SYNC_EXTENSION_TYPE & 0x07) << 5) | 5;
-            sh_a->codecdata[4] = (1 << 7) | (srate_idx << 3);
+            extradata[2] = AAC_SYNC_EXTENSION_TYPE >> 3;
+            extradata[3] = ((AAC_SYNC_EXTENSION_TYPE & 0x07) << 5) | 5;
+            extradata[4] = (1 << 7) | (srate_idx << 3);
             track->default_duration = 1024.0 / (sh_a->samplerate / 2);
         } else {
-            sh_a->codecdata_len = 2;
+            extradata_len = 2;
             track->default_duration = 1024.0 / sh_a->samplerate;
         }
     } else if (!strncmp(track->codec_id, "A_AC3/", 6)) {
@@ -1534,20 +1533,20 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         unsigned int size = extradata_len;
         if (size < 4 || ptr[0] != 'f' || ptr[1] != 'L' || ptr[2] != 'a'
             || ptr[3] != 'C') {
-            sh_a->codecdata = talloc_size(sh_a, 4);
-            sh_a->codecdata_len = 4;
-            memcpy(sh_a->codecdata, "fLaC", 4);
+            extradata = talloc_size(sh_a, 4);
+            extradata_len = 4;
+            memcpy(extradata, "fLaC", 4);
         } else {
-            sh_a->codecdata = talloc_size(sh_a, size);
-            sh_a->codecdata_len = size;
-            memcpy(sh_a->codecdata, ptr, size);
+            extradata = talloc_size(sh_a, size);
+            extradata_len = size;
+            memcpy(extradata, ptr, size);
         }
     } else if (!strcmp(codec, "alac")) {
         if (track->private_size) {
-            sh_a->codecdata_len = track->private_size + 12;
-            sh_a->codecdata = talloc_size(sh_a, sh_a->codecdata_len);
-            char *data = sh_a->codecdata;
-            AV_WB32(data + 0, sh_a->codecdata_len);
+            extradata_len = track->private_size + 12;
+            extradata = talloc_size(sh_a, extradata_len);
+            char *data = extradata;
+            AV_WB32(data + 0, extradata_len);
             memcpy(data + 4, "alac", 4);
             AV_WB32(data + 8, 0);
             memcpy(data + 12, track->private_data, track->private_size);
@@ -1555,11 +1554,11 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     } else if (!strcmp(codec, "truehd")) {
         track->parse = true;
     } else if (!strcmp(codec, "tta")) {
-        sh_a->codecdata_len = 30;
-        sh_a->codecdata = talloc_zero_size(sh_a, sh_a->codecdata_len);
-        if (!sh_a->codecdata)
+        extradata_len = 30;
+        extradata = talloc_zero_size(sh_a, extradata_len);
+        if (!extradata)
             goto error;
-        char *data = sh_a->codecdata;
+        char *data = extradata;
         memcpy(data + 0, "TTA1", 4);
         AV_WL16(data + 4, 1);
         AV_WL16(data + 6, sh_a->channels.num);
@@ -1575,10 +1574,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     if (sh_a->samplerate == 8000 && strcmp(codec, "ac3") == 0)
         track->default_duration = 0;
 
-    if (!sh_a->codecdata && extradata_len) {
-        sh_a->codecdata = talloc_memdup(sh_a, extradata, extradata_len);
-        sh_a->codecdata_len = extradata_len;
-    }
+    sh_a->codecdata = extradata;
+    sh_a->codecdata_len = extradata_len;
 
     return 0;
 
