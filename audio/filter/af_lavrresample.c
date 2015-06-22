@@ -79,7 +79,6 @@ struct af_resample {
     int allow_detach;
     char **avopts;
     double playback_speed;
-    bool avrctx_ok;
     struct AVAudioResampleContext *avrctx;
     struct mp_audio avrctx_fmt; // output format of avrctx
     struct mp_audio pool_fmt; // format used to allocate frames for avrctx output
@@ -127,6 +126,18 @@ static int get_out_samples(struct af_resample *s, int in_samples)
 #endif
 }
 #endif
+
+static void close_lavrr(struct af_instance *af)
+{
+    struct af_resample *s = af->priv;
+
+    if (s->avrctx)
+        avresample_close(s->avrctx);
+    avresample_free(&s->avrctx);
+    if (s->avrctx_out)
+        avresample_close(s->avrctx_out);
+    avresample_free(&s->avrctx_out);
+}
 
 static int resample_frame(struct AVAudioResampleContext *r,
                           struct mp_audio *out, struct mp_audio *in)
@@ -205,7 +216,12 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
 {
     struct af_resample *s = af->priv;
 
-    s->avrctx_ok = false;
+    close_lavrr(af);
+
+    s->avrctx = avresample_alloc_context();
+    s->avrctx_out = avresample_alloc_context();
+    if (!s->avrctx || !s->avrctx_out)
+        goto error;
 
     enum AVSampleFormat in_samplefmt = af_to_avformat(in->format);
     enum AVSampleFormat out_samplefmt = check_output_conversion(out->format);
@@ -214,10 +230,7 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     if (in_samplefmt == AV_SAMPLE_FMT_NONE ||
         out_samplefmt == AV_SAMPLE_FMT_NONE ||
         out_samplefmtp == AV_SAMPLE_FMT_NONE)
-        return AF_ERROR;
-
-    avresample_close(s->avrctx);
-    avresample_close(s->avrctx_out);
+        goto error;
 
     s->ctx.out_rate    = out->rate;
     s->ctx.in_rate_af  = in->rate;
@@ -242,7 +255,7 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
 #endif
 
     if (mp_set_avopts(af->log, s->avrctx, s->avopts) < 0)
-        return AF_ERROR;
+        goto error;
 
     struct mp_chmap map_in = in->channels;
     struct mp_chmap map_out = out->channels;
@@ -262,7 +275,7 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     if (in_lavc.num != map_in.num) {
         // For handling NA channels, we would have to add a planarization step.
         MP_FATAL(af, "Unsupported channel remapping.\n");
-        return AF_ERROR;
+        goto error;
     }
 
     mp_chmap_get_reorder(s->reorder_in, &map_in, &in_lavc);
@@ -278,7 +291,7 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
         struct mp_chmap withna = out_lavc;
         mp_chmap_fill_na(&withna, map_out.num);
         if (withna.num != map_out.num)
-            return AF_ERROR;
+            goto error;
     }
     mp_chmap_get_reorder(s->reorder_out, &out_lavc, &map_out);
 
@@ -308,7 +321,7 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     // Just needs the correct number of channels.
     int fake_out_ch_layout = av_get_default_channel_layout(map_out.num);
     if (!fake_out_ch_layout)
-        return AF_ERROR;
+        goto error;
 
     // Deplanarize if needed.
     av_opt_set_int(s->avrctx_out, "in_channel_layout",  fake_out_ch_layout, 0);
@@ -327,10 +340,13 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
         avresample_open(s->avrctx_out) < 0)
     {
         MP_ERR(af, "Cannot open Libavresample Context. \n");
-        return AF_ERROR;
+        goto error;
     }
-    s->avrctx_ok = true;
     return AF_OK;
+
+error:
+    close_lavrr(af);
+    return AF_ERROR;
 }
 
 
@@ -387,7 +403,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
     case AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE: {
         s->playback_speed = *(double *)arg;
         int new_rate = rate_from_speed(s->ctx.in_rate_af, s->playback_speed);
-        if (new_rate != s->ctx.in_rate && s->avrctx_ok && af->fmt_out.format) {
+        if (new_rate != s->ctx.in_rate && s->avrctx && af->fmt_out.format) {
             // Before reconfiguring, drain the audio that is still buffered
             // in the resampler.
             af->filter_frame(af, NULL);
@@ -397,7 +413,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return AF_OK;
     }
     case AF_CONTROL_RESET:
-        if (s->avrctx_ok)
+        if (s->avrctx)
             drop_all_output(s);
         return AF_OK;
     }
@@ -406,13 +422,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
 static void uninit(struct af_instance *af)
 {
-    struct af_resample *s = af->priv;
-    if (s->avrctx)
-        avresample_close(s->avrctx);
-    avresample_free(&s->avrctx);
-    if (s->avrctx_out)
-        avresample_close(s->avrctx_out);
-    avresample_free(&s->avrctx_out);
+    close_lavrr(af);
 }
 
 // The LSB is always ignored.
@@ -474,6 +484,9 @@ static int filter(struct af_instance *af, struct mp_audio *in)
     if (in)
         mp_audio_copy_attributes(out, in);
 
+    if (!s->avrctx)
+        goto error;
+
     if (out->samples) {
         out->samples = resample_frame(s->avrctx, out, in);
         if (out->samples < 0)
@@ -530,17 +543,9 @@ static int af_open(struct af_instance *af)
     if (s->opts.cutoff <= 0.0)
         s->opts.cutoff = af_resample_default_cutoff(s->opts.filter_size);
 
-    s->avrctx = avresample_alloc_context();
-    s->avrctx_out = avresample_alloc_context();
     s->reorder_buffer = mp_audio_pool_create(s);
 
-    if (s->avrctx && s->avrctx_out) {
-        return AF_OK;
-    } else {
-        MP_ERR(af, "Cannot initialize Libavresample Context. \n");
-        uninit(af);
-        return AF_ERROR;
-    }
+    return AF_OK;
 }
 
 #define OPT_BASE_STRUCT struct af_resample
