@@ -178,6 +178,12 @@ static int check_output_conversion(int mp_format)
     return af_to_avformat(mp_format);
 }
 
+bool af_lavrresample_test_conversion(int src_format, int dst_format)
+{
+    return af_to_avformat(src_format) != AV_SAMPLE_FMT_NONE &&
+           check_output_conversion(dst_format) != AV_SAMPLE_FMT_NONE;
+}
+
 // mp_chmap_get_reorder() performs:
 //  to->speaker[n] = from->speaker[src[n]]
 // but libavresample does:

@@ -352,18 +352,23 @@ static int af_fix_format_conversion(struct af_stream *s,
         return AF_FALSE;
     int dstfmt = in.format;
     char *filter = "lavrresample";
+    if (!af_lavrresample_test_conversion(actual.format, dstfmt))
+        return AF_ERROR;
     if (strcmp(filter, prev->info->name) == 0) {
         if (prev->control(prev, AF_CONTROL_SET_FORMAT, &dstfmt) == AF_OK) {
             *p_af = prev;
             return AF_OK;
         }
+        return AF_ERROR;
     }
     struct af_instance *new = af_prepend(s, af, filter, NULL);
     if (new == NULL)
         return AF_ERROR;
     new->auto_inserted = true;
-    if (AF_OK != (rv = new->control(new, AF_CONTROL_SET_FORMAT, &dstfmt)))
+    if (AF_OK != (rv = new->control(new, AF_CONTROL_SET_FORMAT, &dstfmt))) {
+        af_remove(s, new);
         return rv;
+    }
     *p_af = new;
     return AF_OK;
 }
