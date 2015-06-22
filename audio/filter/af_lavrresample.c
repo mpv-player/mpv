@@ -391,7 +391,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return AF_OK;
     }
     case AF_CONTROL_RESET:
-        drop_all_output(s);
+        if (s->avrctx_ok)
+            drop_all_output(s);
         return AF_OK;
     }
     return AF_UNKNOWN;
