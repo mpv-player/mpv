@@ -167,10 +167,10 @@ static bool needs_lavrctx_reconfigure(struct af_resample *s,
 
 }
 
-// Return the format libavresample should convert to, given the input format
-// mp_format. In some cases (S24) we perform an extra conversion step, and
-// signal here what exactly libavresample should output. It will be the input
-// to the final conversion to mp_format.
+// Return the format libavresample should convert to, given the final output
+// format mp_format. In some cases (S24) we perform an extra conversion step,
+// and signal here what exactly libavresample should output. It will be the
+// input to the final conversion to mp_format.
 static int check_output_conversion(int mp_format)
 {
     if (mp_format == AF_FORMAT_S24)
