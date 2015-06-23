@@ -21,24 +21,6 @@
 #include "common/common.h"
 #include "af.h"
 
-/* Convert to gain value from dB. Returns AF_OK if of and AF_ERROR if
- * fail. input <= -200dB will become 0 gain. */
-int af_from_dB(int n, float* in, float* out, float k, float mi, float ma)
-{
-  int i = 0;
-  // Sanity check
-  if(!in || !out)
-    return AF_ERROR;
-
-  for(i=0;i<n;i++){
-    if(in[i]<=-200)
-      out[i]=0.0;
-    else
-      out[i]=pow(10.0,MPCLAMP(in[i],mi,ma)/k);
-  }
-  return AF_OK;
-}
-
 /* Convert from ms to sample time */
 int af_from_ms(int n, float* in, int* out, int rate, float mi, float ma)
 {

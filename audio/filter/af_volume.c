@@ -44,6 +44,14 @@ struct priv {
     float cfg_volume;
 };
 
+// Convert to gain value from dB. input <= -200dB will become 0 gain.
+static float from_dB(float in, float k, float mi, float ma)
+{
+    if (in <= -200)
+        return 0.0;
+    return pow(10.0, MPCLAMP(in, mi, ma) / k);
+}
+
 static int control(struct af_instance *af, int cmd, void *arg)
 {
     struct priv *s = af->priv;
@@ -75,7 +83,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
             }
 
             gain += s->rgain_preamp;
-            af_from_dB(1, &gain, &s->rgain, 20.0, -200.0, 60.0);
+            s->rgain = from_dB(gain, 20.0, -200.0, 60.0);
 
             MP_VERBOSE(af, "Applying replay-gain: %f\n", s->rgain);
 
@@ -84,7 +92,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
                 MP_VERBOSE(af, "...with clipping prevention: %f\n", s->rgain);
             }
         } else if (s->replaygain_fallback) {
-            af_from_dB(1, &s->replaygain_fallback, &s->rgain, 20.0, -200.0, 60.0);
+            s->rgain = from_dB(s->replaygain_fallback, 20.0, -200.0, 60.0);
             MP_VERBOSE(af, "Applying fallback gain: %f\n", s->rgain);
         }
         if (s->detach && fabs(s->level * s->rgain - 1.0) < 0.00001)
@@ -150,7 +158,7 @@ static int af_open(struct af_instance *af)
     struct priv *s = af->priv;
     af->control = control;
     af->filter_frame = filter;
-    af_from_dB(1, &s->cfg_volume, &s->level, 20.0, -200.0, 60.0);
+    s->level = from_dB(s->cfg_volume, 20.0, -200.0, 60.0);
     return AF_OK;
 }
 
