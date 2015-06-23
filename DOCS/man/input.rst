@@ -670,7 +670,7 @@ Hooks
 ~~~~~
 
 Hooks are synchronous events between player core and a script or similar. This
-applies to the Lua scripting interface and the client API and only. Normally,
+applies to client API (including the Lua scripting interface). Normally,
 events are supposed to be asynchronous, and the hook API provides an awkward
 and obscure way to handle events that require stricter coordination. There are
 no API stability guarantees made. Not following the protocol exactly can make
@@ -1372,6 +1372,7 @@ Property list
                 "primaries"         MPV_FORMAT_STRING
                 "chroma-location"   MPV_FORMAT_STRING
                 "rotate"            MPV_FORMAT_INT64
+                "stereo-in"         MPV_FORMAT_STRING
 
 ``dwidth``, ``dheight``
     Video display size. This is the video size after filters and aspect scaling
