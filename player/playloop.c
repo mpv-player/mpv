@@ -918,7 +918,7 @@ void handle_force_window(struct MPContext *mpctx, bool reconfig)
 static void handle_dummy_ticks(struct MPContext *mpctx)
 {
     if (mpctx->video_status == STATUS_EOF || mpctx->paused) {
-        if (mp_time_sec() - mpctx->last_idle_tick > 0.5) {
+        if (mp_time_sec() - mpctx->last_idle_tick > 0.050) {
             mpctx->last_idle_tick = mp_time_sec();
             mp_notify(mpctx, MPV_EVENT_TICK, NULL);
         }
