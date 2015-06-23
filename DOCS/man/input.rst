@@ -1349,6 +1349,9 @@ Property list
     ``video-params/rotate``
         Intended display rotation in degrees (clockwise).
 
+    ``video-params/stereo-in``
+        Source file stereo 3D mode. (See ``--video-stereo-mode`` option.)
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
