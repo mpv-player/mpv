@@ -287,6 +287,10 @@ Available filters are:
     ``replaygain-clip=yes|no``
         Prevent clipping caused by replaygain by automatically lowering the
         gain (default). Use ``replaygain-clip=no`` to disable this.
+    ``replaygain-fallback``
+        Gain in dB to apply if the file has no replay gain tags. This option
+        is always applied if the replaygain logic is somehow inactive. If this
+        is applied, no other replaygain options are applied.
     ``softclip``
         Turns soft clipping on. Soft-clipping can make the
         sound more smooth if very high volume levels are used. Enable this

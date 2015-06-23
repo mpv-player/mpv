@@ -37,6 +37,7 @@ struct priv {
     int rgain_album;            // Enable/disable album based replaygain
     float rgain_preamp;         // Set replaygain pre-amplification
     int rgain_clip;             // Enable/disable clipping prevention
+    float replaygain_fallback;
     int soft;                   // Enable/disable soft clipping
     int fast;                   // Use fix-point volume control
     int detach;                 // Detach if gain volume is neutral
@@ -82,6 +83,9 @@ static int control(struct af_instance *af, int cmd, void *arg)
                 s->rgain = MPMIN(s->rgain, 1.0 / peak);
                 MP_VERBOSE(af, "...with clipping prevention: %f\n", s->rgain);
             }
+        } else if (s->replaygain_fallback) {
+            af_from_dB(1, &s->replaygain_fallback, &s->rgain, 20.0, -200.0, 60.0);
+            MP_VERBOSE(af, "Applying fallback gain: %f\n", s->rgain);
         }
         if (s->detach && fabs(s->level * s->rgain - 1.0) < 0.00001)
             return AF_DETACH;
@@ -165,6 +169,7 @@ const struct af_info af_info_volume = {
         OPT_FLAG("replaygain-album", rgain_album, 0),
         OPT_FLOATRANGE("replaygain-preamp", rgain_preamp, 0, -15, 15),
         OPT_FLAG("replaygain-clip", rgain_clip, 0),
+        OPT_FLOATRANGE("replaygain-fallback", replaygain_fallback, 0, -200, 60),
         OPT_FLAG("softclip", soft, 0),
         OPT_FLAG("s16", fast, 0),
         OPT_FLAG("detach", detach, 0),
