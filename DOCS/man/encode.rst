@@ -111,7 +111,7 @@ You can encode files from one format/codec to another using this facility.
 
     .. admonition:: Examples
 
-        ``"--ovc=mpeg4 --oacopts=qscale=5"``
+        ``"--ovc=mpeg4 --ovcopts=qscale=5"``
             selects constant quantizer scale 5 for MPEG-4 encoding.
 
         ``"--ovc=libx264 --ovcopts=crf=23"``
