@@ -56,10 +56,7 @@ static bool try_open(struct timeline *tl, char *filename)
         || bstrcasecmp(bstr0(tl->demuxer->filename), bfilename) == 0)
         return false;
 
-    struct stream *s = stream_create(filename, STREAM_READ, tl->cancel, tl->global);
-    if (!s)
-        return false;
-    struct demuxer *d = demux_open(s, NULL, tl->global);
+    struct demuxer *d = demux_open_url(filename, NULL, tl->cancel, tl->global);
     // Since .bin files are raw PCM data with no headers, we have to explicitly
     // open them. Also, try to avoid to open files that are most likely not .bin
     // files, as that would only play noise. Checking the file extension is
@@ -69,14 +66,13 @@ static bool try_open(struct timeline *tl, char *filename)
     if (!d && bstr_case_endswith(bfilename, bstr0(".bin"))) {
         MP_WARN(tl, "CUE: Opening as BIN file!\n");
         struct demuxer_params p = {.force_format = "rawaudio"};
-        d = demux_open(s, &p, tl->global);
+        d = demux_open_url(filename, &p, tl->cancel, tl->global);
     }
     if (d) {
         add_source(tl, d);
         return true;
     }
     MP_ERR(tl, "Could not open source '%s'!\n", filename);
-    free_stream(s);
     return false;
 }
 

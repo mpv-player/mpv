@@ -875,14 +875,11 @@ static void load_chapters(struct MPContext *mpctx)
     bool free_src = false;
     char *chapter_file = mpctx->opts->chapter_file;
     if (chapter_file && chapter_file[0]) {
-        struct stream *stream = stream_create(chapter_file, STREAM_READ,
+        struct demuxer *demux = demux_open_url(chapter_file, NULL,
                                         mpctx->playback_abort, mpctx->global);
-        if (stream) {
-            struct demuxer *demux = demux_open(stream, NULL, mpctx->global);
-            if (demux) {
-                src = demux;
-                free_src = true;
-            }
+        if (demux) {
+            src = demux;
+            free_src = true;
         }
         talloc_free(mpctx->chapters);
         mpctx->chapters = NULL;
@@ -892,11 +889,8 @@ static void load_chapters(struct MPContext *mpctx)
         mpctx->num_chapters = src->num_chapters;
         mpctx->chapters = demux_copy_chapter_data(src->chapters, src->num_chapters);
     }
-    if (free_src) {
-        struct stream *s = src->stream;
-        free_demuxer(src);
-        free_stream(s);
-    }
+    if (free_src)
+        free_demuxer_and_stream(src);
 }
 
 static void load_per_file_options(m_config_t *conf,
