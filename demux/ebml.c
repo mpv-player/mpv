@@ -158,7 +158,7 @@ uint64_t ebml_read_uint(stream_t *s)
     uint64_t len, value = 0;
 
     len = ebml_read_length(s);
-    if (len == EBML_UINT_INVALID || len < 1 || len > 8)
+    if (len == EBML_UINT_INVALID || len > 8)
         return EBML_UINT_INVALID;
 
     while (len--)
@@ -177,8 +177,10 @@ int64_t ebml_read_int(stream_t *s)
     int l;
 
     len = ebml_read_length(s);
-    if (len == EBML_UINT_INVALID || len < 1 || len > 8)
+    if (len == EBML_UINT_INVALID || len > 8)
         return EBML_INT_INVALID;
+    if (!len)
+        return 0;
 
     len--;
     l = stream_read_char(s);
@@ -318,7 +320,7 @@ static uint64_t ebml_parse_length(uint8_t *data, size_t data_len, int *length)
 
 static uint64_t ebml_parse_uint(uint8_t *data, int length)
 {
-    assert(length >= 1 && length <= 8);
+    assert(length >= 0 && length <= 8);
     uint64_t r = 0;
     while (length--)
         r = (r << 8) + *data++;
@@ -327,7 +329,9 @@ static uint64_t ebml_parse_uint(uint8_t *data, int length)
 
 static int64_t ebml_parse_sint(uint8_t *data, int length)
 {
-    assert(length >=1 && length <= 8);
+    assert(length >= 0 && length <= 8);
+    if (!length)
+        return 0;
     uint64_t r = 0;
     if (*data & 0x80)
         r = -1;
@@ -338,7 +342,7 @@ static int64_t ebml_parse_sint(uint8_t *data, int length)
 
 static double ebml_parse_float(uint8_t *data, int length)
 {
-    assert(length == 4 || length == 8);
+    assert(length == 0 || length == 4 || length == 8);
     uint64_t i = ebml_parse_uint(data, length);
     if (length == 4)
         return av_int2float(i);
@@ -554,7 +558,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         case EBML_TYPE_SINT:;
             int64_t *sintptr;
             GETPTR(sintptr, int64_t);
-            if (length < 1 || length > 8) {
+            if (length > 8) {
                 MP_DBG(ctx, "sint invalid length %"PRIu64"\n", length);
                 goto error;
             }
@@ -565,7 +569,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         case EBML_TYPE_FLOAT:;
             double *floatptr;
             GETPTR(floatptr, double);
-            if (length != 4 && length != 8) {
+            if (length != 0 && length != 4 && length != 8) {
                 MP_DBG(ctx, "float invalid length %"PRIu64"\n", length);
                 goto error;
             }
