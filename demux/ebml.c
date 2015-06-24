@@ -415,7 +415,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
         break;
     }
 
-    for (int i = 0; i < type->field_count; i++)
+    for (int i = 0; i < type->field_count; i++) {
         if (num_elems[i] && type->fields[i].multiple) {
             char *ptr = s + type->fields[i].offset;
             switch (type->fields[i].desc->type) {
@@ -442,6 +442,9 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
                                                      double, num_elems[i]);
                 break;
             case EBML_TYPE_STR:
+                *(char ***) ptr = talloc_zero_array(ctx->talloc_ctx,
+                                                    char *, num_elems[i]);
+                break;
             case EBML_TYPE_BINARY:
                 *(struct bstr **) ptr = talloc_zero_array(ctx->talloc_ctx,
                                                           struct bstr,
@@ -455,6 +458,7 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
                 abort();
             }
         }
+    }
 
     while (data < end) {
         int len;
@@ -570,19 +574,26 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             break;
 
         case EBML_TYPE_STR:
+            if (length > 1024 * 1024) {
+                MP_ERR(ctx, "Not reading overly long string element.\n");
+                break;
+            }
+            char **strptr;
+            GETPTR(strptr, char *);
+            *strptr = talloc_strndup(ctx->talloc_ctx, data, length);
+            MP_DBG(ctx, "string \"%s\"\n", *strptr);
+            break;
+
         case EBML_TYPE_BINARY:;
             if (length > 0x80000000) {
                 MP_ERR(ctx, "Not reading overly long EBML element.\n");
                 break;
             }
-            struct bstr *strptr;
-            GETPTR(strptr, struct bstr);
-            strptr->start = data;
-            strptr->len = length;
-            if (ed->type == EBML_TYPE_STR)
-                MP_DBG(ctx, "string \"%.*s\"\n", BSTR_P(*strptr));
-            else
-                MP_DBG(ctx, "binary %zd bytes\n", strptr->len);
+            struct bstr *binptr;
+            GETPTR(binptr, struct bstr);
+            binptr->start = data;
+            binptr->len = length;
+            MP_DBG(ctx, "binary %zd bytes\n", binptr->len);
             break;
 
         case EBML_TYPE_EBML_ID:;

@@ -84,7 +84,7 @@ sub elem_by_hexid {
 # used by elem when setting the 'valname' key
 use constant TYPE_MAP => {
     uint    => 'uint64_t',
-    str     => 'struct bstr',
+    str     => 'char *',
     binary  => 'struct bstr',
     ebml_id => 'uint32_t',
     float   => 'double',

@@ -373,8 +373,8 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
         MP_VERBOSE(demuxer, "| + duration: %.3fs\n",
                mkv_d->duration);
     }
-    if (info.n_title) {
-        mp_tags_set_bstr(demuxer->metadata, bstr0("TITLE"), info.title);
+    if (info.title) {
+        mp_tags_set_str(demuxer->metadata, "TITLE", info.title);
     }
     if (info.n_segment_uid) {
         int len = info.segment_uid.len;
@@ -572,9 +572,8 @@ static void parse_trackentry(struct demuxer *demuxer,
         MP_ERR(demuxer, "Missing track number!\n");
     }
 
-    if (entry->n_name) {
-        track->name = talloc_strndup(track, entry->name.start,
-                                     entry->name.len);
+    if (entry->name) {
+        track->name = talloc_strdup(track, entry->name);
         MP_VERBOSE(demuxer, "|  + Name: %s\n", track->name);
     }
 
@@ -605,9 +604,8 @@ static void parse_trackentry(struct demuxer *demuxer,
         parse_trackvideo(demuxer, track, &entry->video);
     }
 
-    if (entry->n_codec_id) {
-        track->codec_id = talloc_strndup(track, entry->codec_id.start,
-                                         entry->codec_id.len);
+    if (entry->codec_id) {
+        track->codec_id = talloc_strdup(track, entry->codec_id);
         MP_VERBOSE(demuxer, "|  + Codec ID: %s\n", track->codec_id);
     } else {
         MP_ERR(demuxer, "Missing codec ID!\n");
@@ -622,9 +620,8 @@ static void parse_trackentry(struct demuxer *demuxer,
         MP_VERBOSE(demuxer, "|  + CodecPrivate, length %u\n", track->private_size);
     }
 
-    if (entry->n_language) {
-        track->language = talloc_strndup(track, entry->language.start,
-                                         entry->language.len);
+    if (entry->language) {
+        track->language = talloc_strdup(track, entry->language);
         MP_VERBOSE(demuxer, "|  + Language: %s\n", track->language);
     } else {
         track->language = talloc_strdup(track, "eng");
@@ -846,7 +843,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
         for (int i = 0; i < chapter_count; i++) {
             struct ebml_chapter_atom *ca = editions[idx].chapter_atom + i;
             struct matroska_chapter chapter = {0};
-            struct bstr name = { "(unnamed)", 9 };
+            char *name = "(unnamed)";
 
             if (!ca->n_chapter_time_start)
                 MP_MSG(demuxer, warn_level, "Chapter lacks start time\n");
@@ -857,7 +854,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                 if (ca->n_chapter_display > 1)
                     MP_MSG(demuxer, warn_level, "Multiple chapter "
                            "names not supported, picking first\n");
-                if (!ca->chapter_display[0].n_chap_string)
+                if (!ca->chapter_display[0].chap_string)
                     MP_MSG(demuxer, warn_level, "Malformed chapter name entry\n");
                 else
                     name = ca->chapter_display[0].chap_string;
@@ -885,7 +882,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
             }
 
             MP_VERBOSE(demuxer, "Chapter %u from %02d:%02d:%02d.%03d "
-                   "to %02d:%02d:%02d.%03d, %.*s\n", i,
+                   "to %02d:%02d:%02d.%03d, %s\n", i,
                    (int) (chapter.start / 60 / 60 / 1000000000),
                    (int) ((chapter.start / 60 / 1000000000) % 60),
                    (int) ((chapter.start / 1000000000) % 60),
@@ -894,14 +891,14 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                    (int) ((chapter.end / 60 / 1000000000) % 60),
                    (int) ((chapter.end / 1000000000) % 60),
                    (int) (chapter.end % 1000000000),
-                   BSTR_P(name));
+                   name);
 
             if (idx == selected_edition) {
-                demuxer_add_chapter(demuxer, name, chapter.start / 1e9,
+                demuxer_add_chapter(demuxer, bstr0(name), chapter.start / 1e9,
                                     ca->chapter_uid);
             }
             if (m_chapters) {
-                chapter.name = talloc_strndup(m_chapters, name.start, name.len);
+                chapter.name = talloc_strdup(m_chapters, name);
                 m_chapters[i] = chapter;
             }
         }
@@ -969,8 +966,10 @@ static void process_tags(demuxer_t *demuxer)
 
         if (dst) {
             for (int j = 0; j < tag.n_simple_tag; j++) {
-                mp_tags_set_bstr(dst, tag.simple_tag[j].tag_name,
-                                      tag.simple_tag[j].tag_string);
+                if (tag.simple_tag[j].tag_name && tag.simple_tag[j].tag_string) {
+                    mp_tags_set_str(dst, tag.simple_tag[j].tag_name,
+                                         tag.simple_tag[j].tag_string);
+                }
             }
         }
     }
@@ -990,16 +989,16 @@ static int demux_mkv_read_attachments(demuxer_t *demuxer)
 
     for (int i = 0; i < attachments.n_attached_file; i++) {
         struct ebml_attached_file *attachment = &attachments.attached_file[i];
-        if (!attachment->n_file_name || !attachment->n_file_mime_type
+        if (!attachment->file_name || !attachment->file_mime_type
             || !attachment->n_file_data) {
             MP_WARN(demuxer, "Malformed attachment\n");
             continue;
         }
-        struct bstr name = attachment->file_name;
-        struct bstr mime = attachment->file_mime_type;
-        demuxer_add_attachment(demuxer, name, mime, attachment->file_data);
-        MP_VERBOSE(demuxer, "Attachment: %.*s, %.*s, %zu bytes\n",
-                   BSTR_P(name), BSTR_P(mime), attachment->file_data.len);
+        char *name = attachment->file_name;
+        char *mime = attachment->file_mime_type;
+        demuxer_add_attachment(demuxer, bstr0(name), bstr0(mime), attachment->file_data);
+        MP_VERBOSE(demuxer, "Attachment: %s, %s, %zu bytes\n",
+                   name, mime, attachment->file_data.len);
     }
 
     talloc_free(parse_ctx.talloc_ctx);
@@ -1649,15 +1648,15 @@ static int read_ebml_header(demuxer_t *demuxer)
 
     if (ebml_read_id(s) != EBML_ID_EBML)
         return 0;
-    struct ebml_ebml ebml_master = {{0}};
+    struct ebml_ebml ebml_master = {0};
     struct ebml_parse_ctx parse_ctx = { demuxer->log, .no_error_messages = true };
     if (ebml_read_element(s, &parse_ctx, &ebml_master, &ebml_ebml_desc) < 0)
         return 0;
-    if (ebml_master.doc_type.start == NULL) {
+    if (!ebml_master.doc_type) {
         MP_VERBOSE(demuxer, "File has EBML header but no doctype."
                    " Assuming \"matroska\".\n");
-    } else if (bstrcmp(ebml_master.doc_type, bstr0("matroska")) != 0
-        && bstrcmp(ebml_master.doc_type, bstr0("webm")) != 0) {
+    } else if (strcmp(ebml_master.doc_type, "matroska") != 0
+        && strcmp(ebml_master.doc_type, "webm") != 0) {
         MP_DBG(demuxer, "no head found\n");
         talloc_free(parse_ctx.talloc_ctx);
         return 0;
