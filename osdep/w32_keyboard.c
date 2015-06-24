@@ -66,15 +66,6 @@ static const struct keymap vk_map[] = {
     {VK_RIGHT, MP_KEY_KP6}, {VK_HOME, MP_KEY_KP7}, {VK_UP, MP_KEY_KP8},
     {VK_PRIOR, MP_KEY_KP9}, {VK_DELETE, MP_KEY_KPDEL},
 
-    // multimedia and other special keys
-    {VK_VOLUME_MUTE, MP_KEY_MUTE},
-    {VK_VOLUME_DOWN, MP_KEY_VOLUME_DOWN},
-    {VK_VOLUME_UP, MP_KEY_VOLUME_UP},
-    {VK_MEDIA_NEXT_TRACK, MP_KEY_NEXT},
-    {VK_MEDIA_PREV_TRACK, MP_KEY_PREV},
-    {VK_MEDIA_STOP, MP_KEY_STOP},
-    {VK_MEDIA_PLAY_PAUSE, MP_KEY_PLAYPAUSE},
-
     {0, 0}
 };
 
