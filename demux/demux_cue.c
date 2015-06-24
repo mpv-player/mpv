@@ -80,14 +80,14 @@ static bool try_open(struct timeline *tl, char *filename)
     return false;
 }
 
-static bool open_source(struct timeline *tl, struct bstr filename)
+static bool open_source(struct timeline *tl, char *filename)
 {
     void *ctx = talloc_new(NULL);
     bool res = false;
 
     struct bstr dirname = mp_dirname(tl->demuxer->filename);
 
-    struct bstr base_filename = bstr0(mp_basename(bstrdup0(ctx, filename)));
+    struct bstr base_filename = bstr0(mp_basename(filename));
     if (!base_filename.len) {
         MP_WARN(tl, "CUE: Invalid audio filename in .cue file!\n");
     } else {
@@ -173,21 +173,21 @@ static void build_timeline(struct timeline *tl)
     // CUE files usually use either separate files for every single track, or
     // only one file for all tracks.
 
-    struct bstr *files = 0;
+    char **files = 0;
     size_t file_count = 0;
 
     for (size_t n = 0; n < track_count; n++) {
         struct cue_track *track = &tracks[n];
         track->source = -1;
         for (size_t file = 0; file < file_count; file++) {
-            if (bstrcmp(files[file], track->filename) == 0) {
+            if (strcmp(files[file], track->filename) == 0) {
                 track->source = file;
                 break;
             }
         }
         if (track->source == -1) {
             file_count++;
-            files = talloc_realloc(ctx, files, struct bstr, file_count);
+            files = talloc_realloc(ctx, files, char *, file_count);
             files[file_count - 1] = track->filename;
             track->source = file_count - 1;
         }
@@ -229,7 +229,7 @@ static void build_timeline(struct timeline *tl)
         chapters[i] = (struct demux_chapter) {
             .pts = timeline[i].start,
             // might want to include other metadata here
-            .name = bstrdup0(chapters, tracks[i].title),
+            .name = talloc_strdup(chapters, tracks[i].title),
         };
         starttime += duration;
     }

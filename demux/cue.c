@@ -90,17 +90,17 @@ static bool eat_char(struct bstr *data, char ch)
     }
 }
 
-static struct bstr read_quoted(struct bstr *data)
+static char *read_quoted(void *talloc_ctx, struct bstr *data)
 {
     *data = bstr_lstrip(*data);
     if (!eat_char(data, '"'))
-        return (struct bstr) {0};
+        return NULL;
     int end = bstrchr(*data, '"');
     if (end < 0)
-        return (struct bstr) {0};
+        return NULL;
     struct bstr res = bstr_splice(*data, 0, end);
     *data = bstr_cut(*data, end + 1);
-    return res;
+    return bstrto0(talloc_ctx, res);
 }
 
 // Read a 2 digit unsigned decimal integer.
@@ -163,7 +163,7 @@ struct cue_file *mp_parse_cue(struct bstr data)
 
     data = skip_utf8_bom(data);
 
-    struct bstr filename = {0};
+    char *filename = NULL;
     // Global metadata, and copied into new tracks.
     struct cue_track proto_track = {0};
     struct cue_track *cur_track = &proto_track;
@@ -182,7 +182,7 @@ struct cue_file *mp_parse_cue(struct bstr data)
             break;
         }
         case CUE_TITLE:
-            cur_track->title = read_quoted(&param);
+            cur_track->title = read_quoted(f, &param);
             break;
         case CUE_INDEX: {
             int type = read_int_2(&param);
@@ -197,7 +197,7 @@ struct cue_file *mp_parse_cue(struct bstr data)
         }
         case CUE_FILE:
             // NOTE: FILE comes before TRACK, so don't use cur_track->filename
-            filename = read_quoted(&param);
+            filename = read_quoted(f, &param);
             break;
         }
     }

@@ -30,9 +30,9 @@ struct cue_file {
 struct cue_track {
     double pregap_start;        // corresponds to INDEX 00
     double start;               // corresponds to INDEX 01
-    struct bstr filename;
+    char *filename;
     int source;
-    struct bstr title;
+    char *title;
 };
 
 bool mp_probe_cue(struct bstr data);

@@ -1217,21 +1217,19 @@ bool demux_stream_is_selected(struct sh_stream *stream)
     return r;
 }
 
-int demuxer_add_attachment(demuxer_t *demuxer, struct bstr name,
-                           struct bstr type, struct bstr data)
+int demuxer_add_attachment(demuxer_t *demuxer, char *name, char *type,
+                           void *data, size_t data_size)
 {
     if (!(demuxer->num_attachments % 32))
         demuxer->attachments = talloc_realloc(demuxer, demuxer->attachments,
                                               struct demux_attachment,
                                               demuxer->num_attachments + 32);
 
-    struct demux_attachment *att =
-        demuxer->attachments + demuxer->num_attachments;
-    att->name = talloc_strndup(demuxer->attachments, name.start, name.len);
-    att->type = talloc_strndup(demuxer->attachments, type.start, type.len);
-    att->data = talloc_size(demuxer->attachments, data.len);
-    memcpy(att->data, data.start, data.len);
-    att->data_size = data.len;
+    struct demux_attachment *att = &demuxer->attachments[demuxer->num_attachments];
+    att->name = talloc_strdup(demuxer->attachments, name);
+    att->type = talloc_strdup(demuxer->attachments, type);
+    att->data = talloc_memdup(demuxer->attachments, data, data_size);
+    att->data_size = data_size;
 
     return demuxer->num_attachments++;
 }
@@ -1254,17 +1252,17 @@ static void demuxer_sort_chapters(demuxer_t *demuxer)
           sizeof(struct demux_chapter), chapter_compare);
 }
 
-int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
+int demuxer_add_chapter(demuxer_t *demuxer, char *name,
                         double pts, uint64_t demuxer_id)
 {
     struct demux_chapter new = {
         .original_index = demuxer->num_chapters,
         .pts = pts,
-        .name = name.len ? bstrdup0(demuxer, name) : NULL,
+        .name = talloc_strdup(demuxer, name),
         .metadata = talloc_zero(demuxer, struct mp_tags),
         .demuxer_id = demuxer_id,
     };
-    mp_tags_set_bstr(new.metadata, bstr0("TITLE"), name);
+    mp_tags_set_str(new.metadata, "TITLE", name);
     MP_TARRAY_APPEND(demuxer, demuxer->chapters, demuxer->num_chapters, new);
     return demuxer->num_chapters - 1;
 }

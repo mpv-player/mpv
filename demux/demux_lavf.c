@@ -618,9 +618,8 @@ static void handle_stream(demuxer_t *demuxer, int i)
         AVDictionaryEntry *mt = av_dict_get(st->metadata, "mimetype", NULL, 0);
         char *mimetype = mt ? mt->value : NULL;
         if (mimetype) {
-            demuxer_add_attachment(demuxer, bstr0(filename), bstr0(mimetype),
-                                   (struct bstr){codec->extradata,
-                                                 codec->extradata_size});
+            demuxer_add_attachment(demuxer, filename, mimetype,
+                                   codec->extradata, codec->extradata_size);
         }
         break;
     }
@@ -808,7 +807,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     for (i = 0; i < avfc->nb_chapters; i++) {
         AVChapter *c = avfc->chapters[i];
         t = av_dict_get(c->metadata, "title", NULL, 0);
-        int index = demuxer_add_chapter(demuxer, t ? bstr0(t->value) : bstr0(""),
+        int index = demuxer_add_chapter(demuxer, t ? t : "",
                                         c->start * av_q2d(c->time_base), i);
         mp_tags_copy_from_av_dictionary(demuxer->chapters[index].metadata, c->metadata);
     }

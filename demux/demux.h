@@ -284,9 +284,9 @@ void demux_set_stream_autoselect(struct demuxer *demuxer, bool autoselect);
 
 void demuxer_help(struct mp_log *log);
 
-int demuxer_add_attachment(struct demuxer *demuxer, struct bstr name,
-                           struct bstr type, struct bstr data);
-int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
+int demuxer_add_attachment(struct demuxer *demuxer, char *name,
+                           char *type, void *data, size_t data_size);
+int demuxer_add_chapter(demuxer_t *demuxer, char *name,
                         double pts, uint64_t demuxer_id);
 
 double demuxer_get_time_length(struct demuxer *demuxer);

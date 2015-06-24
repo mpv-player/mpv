@@ -894,7 +894,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                    name);
 
             if (idx == selected_edition) {
-                demuxer_add_chapter(demuxer, bstr0(name), chapter.start / 1e9,
+                demuxer_add_chapter(demuxer, name, chapter.start / 1e9,
                                     ca->chapter_uid);
             }
             if (m_chapters) {
@@ -996,7 +996,8 @@ static int demux_mkv_read_attachments(demuxer_t *demuxer)
         }
         char *name = attachment->file_name;
         char *mime = attachment->file_mime_type;
-        demuxer_add_attachment(demuxer, bstr0(name), bstr0(mime), attachment->file_data);
+        demuxer_add_attachment(demuxer, name, mime, attachment->file_data.start,
+                               attachment->file_data.len);
         MP_VERBOSE(demuxer, "Attachment: %s, %s, %zu bytes\n",
                    name, mime, attachment->file_data.len);
     }

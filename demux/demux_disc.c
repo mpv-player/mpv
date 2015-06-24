@@ -282,7 +282,7 @@ static void add_stream_chapters(struct demuxer *demuxer)
         double p = n;
         if (stream_control(demuxer->stream, STREAM_CTRL_GET_CHAPTER_TIME, &p) < 1)
             continue;
-        demuxer_add_chapter(demuxer, bstr0(""), p, 0);
+        demuxer_add_chapter(demuxer, "", p, 0);
     }
 }
 
@@ -301,7 +301,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     char *t = NULL;
     stream_control(demuxer->stream, STREAM_CTRL_GET_DISC_NAME, &t);
     if (t) {
-        mp_tags_set_bstr(demuxer->metadata, bstr0("TITLE"), bstr0(t));
+        mp_tags_set_str(demuxer->metadata, "TITLE", t);
         talloc_free(t);
     }
 
