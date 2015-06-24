@@ -807,7 +807,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     for (i = 0; i < avfc->nb_chapters; i++) {
         AVChapter *c = avfc->chapters[i];
         t = av_dict_get(c->metadata, "title", NULL, 0);
-        int index = demuxer_add_chapter(demuxer, t ? t : "",
+        int index = demuxer_add_chapter(demuxer, t ? t->value : "",
                                         c->start * av_q2d(c->time_base), i);
         mp_tags_copy_from_av_dictionary(demuxer->chapters[index].metadata, c->metadata);
     }
