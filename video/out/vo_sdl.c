@@ -907,6 +907,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         mp_image_copy(&texmpi, mpi);
 
         SDL_UnlockTexture(vc->tex);
+
+        talloc_free(mpi);
     }
 
     SDL_Rect src, dst;
