@@ -93,9 +93,13 @@ bool mp_audio_config_valid(const struct mp_audio *mpa)
 
 char *mp_audio_config_to_str_buf(char *buf, size_t buf_sz, struct mp_audio *mpa)
 {
+    char ch[128];
+    mp_chmap_to_str_buf(ch, sizeof(ch), &mpa->channels);
+    char *hr_ch = mp_chmap_to_str_hr(&mpa->channels);
+    if (strcmp(hr_ch, ch) != 0)
+        mp_snprintf_cat(ch, sizeof(ch), " (%s)", hr_ch);
     snprintf(buf, buf_sz, "%dHz %s %dch %s", mpa->rate,
-             mp_chmap_to_str(&mpa->channels), mpa->channels.num,
-             af_fmt_to_str(mpa->format));
+             ch, mpa->channels.num, af_fmt_to_str(mpa->format));
     return buf;
 }
 

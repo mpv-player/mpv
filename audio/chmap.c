@@ -508,6 +508,25 @@ bool mp_chmap_from_str(struct mp_chmap *dst, bstr src)
     return true;
 }
 
+// Output a human readable "canonical" channel map string. Converting this from
+// a string back to a channel map can yield a different map, but the string
+// looks nicer. E.g. "fc-fl-fr-na" becomes "3.0".
+char *mp_chmap_to_str_hr_buf(char *buf, size_t buf_size, const struct mp_chmap *src)
+{
+    struct mp_chmap map = *src;
+    mp_chmap_remove_na(&map);
+    for (int n = 0; std_layout_names[n][0]; n++) {
+        struct mp_chmap s;
+        if (mp_chmap_from_str(&s, bstr0(std_layout_names[n][0])) &&
+            mp_chmap_equals_reordered(&s, &map))
+        {
+            map = s;
+            break;
+        }
+    }
+    return mp_chmap_to_str_buf(buf, buf_size, &map);
+}
+
 void mp_chmap_print_help(struct mp_log *log)
 {
     mp_info(log, "Speakers:\n");

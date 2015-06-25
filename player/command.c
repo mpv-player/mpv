@@ -1664,6 +1664,7 @@ static int property_audiofmt(struct mp_audio a, int action, void *arg)
         {"samplerate",      SUB_PROP_INT(a.rate)},
         {"channel-count",   SUB_PROP_INT(a.channels.num)},
         {"channels",        SUB_PROP_STR(mp_chmap_to_str(&a.channels))},
+        {"hr-channels",     SUB_PROP_STR(mp_chmap_to_str_hr(&a.channels))},
         {"format",          SUB_PROP_STR(af_fmt_to_str(a.format))},
         {0}
     };

@@ -1181,6 +1181,11 @@ Property list
         The channel layout as a string. This is similar to what the
         ``--audio-channels`` accepts.
 
+    ``audio-params/hr-channels``
+        As ``channels``, but instead of the possibly cryptic actual layout
+        sent to the audio device, return a hopefully more human readable form.
+        (Usually only ``audio-out-params/hr-channels`` makes sense.)
+
     ``audio-params/channel-count``
         Number of audio channels. This is redundant to the ``channels`` field
         described above.
@@ -1197,6 +1202,7 @@ Property list
                 "samplerate"        MPV_FORMAT_INT64
                 "channels"          MPV_FORMAT_STRING
                 "channel-count"     MPV_FORMAT_INT64
+                "hr-channels"       MPV_FORMAT_STRING
 
 ``audio-out-params``
     Same as ``audio-params``, but the format of the data written to the audio
