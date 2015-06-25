@@ -222,7 +222,9 @@ bool ca_asbd_equals(const AudioStreamBasicDescription *a,
            a->mBitsPerChannel == b->mBitsPerChannel &&
            ca_normalize_formatid(a->mFormatID) ==
                 ca_normalize_formatid(b->mFormatID) &&
-           a->mBytesPerPacket == b->mBytesPerPacket;
+           a->mBytesPerPacket == b->mBytesPerPacket &&
+           a->mChannelsPerFrame == b->mChannelsPerFrame &&
+           a->mSampleRate == b->mSampleRate;
 }
 
 // Return the AF_FORMAT_* (AF_FORMAT_S16 etc.) corresponding to the asbd.
