@@ -416,6 +416,7 @@ bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
             struct mp_chmap c = s->chmaps[i];
             struct mp_chmap cr = c;
             mp_chmap_reorder_norm(&cr);
+            mp_chmap_remove_na(&cr);
             MP_DBG(ao, "chmap_sel #%d: %s (%s)\n", i, mp_chmap_to_str(&c),
                    mp_chmap_to_str(&cr));
         }
@@ -424,6 +425,7 @@ bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
     if (r) {
         struct mp_chmap mapr = *map;
         mp_chmap_reorder_norm(&mapr);
+        mp_chmap_remove_na(&mapr);
         MP_DBG(ao, "result: %s (%s)\n", mp_chmap_to_str(map),
                mp_chmap_to_str(&mapr));
     }
