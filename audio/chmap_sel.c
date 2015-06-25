@@ -200,25 +200,72 @@ bool mp_chmap_sel_adjust(const struct mp_chmap_sel *s, struct mp_chmap *map)
     return false;
 }
 
+// Like mp_chmap_diffn(), but find the minimum difference with all possible
+// speaker replacements considered.
+static int mp_chmap_diffn_r(const struct mp_chmap *a, const struct mp_chmap *b)
+{
+    int mindiff = INT_MAX;
+
+    for (int i = -1; i < (int)MP_ARRAY_SIZE(speaker_replacements); i++) {
+        struct mp_chmap ar = *a;
+        if (i >= 0) {
+            struct mp_chmap *r = (struct mp_chmap *)speaker_replacements[i];
+            if (!replace_speakers(&ar, r))
+                continue;
+        }
+        int d = mp_chmap_diffn(&ar, b);
+        if (d < mindiff)
+            mindiff = d;
+    }
+
+    return mindiff;
+}
+
 // Decide whether we should prefer old or new for the requested layout.
 // Return true if new should be used, false if old should be used.
 // If old is empty, always return new (initial case).
 static bool mp_chmap_is_better(struct mp_chmap *req, struct mp_chmap *old,
                                struct mp_chmap *new)
 {
-    int old_lost = mp_chmap_diffn(req, old); // num. channels only in req
-    int new_lost = mp_chmap_diffn(req, new);
-
     // Initial case
     if (!old->num)
         return true;
 
+    // Exact pick - this also ensures that the best layout is chosen if the
+    // layouts are the same, but with different order of channels.
+    if (mp_chmap_equals(req, old))
+        return false;
+    if (mp_chmap_equals(req, new))
+        return true;
+
+    int old_lost_r = mp_chmap_diffn_r(req, old); // num. channels only in req
+    int new_lost_r = mp_chmap_diffn_r(req, new);
+
     // Imperfect upmix (no real superset) - minimize lost channels
+    if (new_lost_r != old_lost_r)
+        return new_lost_r < old_lost_r;
+
+    int old_lost = mp_chmap_diffn(req, old);
+    int new_lost = mp_chmap_diffn(req, new);
+
+    // If the situation is equal with replaced speakers, but one of them loses
+    // less if no replacements are performed, pick the better one, even if it
+    // means an upmix. This prefers exact supersets over inexact equivalents.
     if (new_lost != old_lost)
         return new_lost < old_lost;
 
+    struct mp_chmap old_p = *old, new_p = *new;
+    mp_chmap_remove_na(&old_p);
+    mp_chmap_remove_na(&new_p);
+
     // Some kind of upmix. If it's perfect, prefer the smaller one. Even if not,
     // both have equal loss, so also prefer the smaller one.
+    // Drop padding channels (NA) for the sake of this check, as the number of
+    // padding channels isn't really meaningful.
+    if (new_p.num != old_p.num)
+        return new_p.num < old_p.num;
+
+    // Again, with physical channels (minimizes number of NA channels).
     return new->num < old->num;
 }
 
@@ -234,45 +281,23 @@ bool mp_chmap_sel_fallback(const struct mp_chmap_sel *s, struct mp_chmap *map)
         return true;
     }
 
-    struct mp_chmap best_of_best = {0};
+    // Add layouts and replaced layouts. Layouts with replacements applied
+    // are considered equivalent to the original, but the ori
 
-    for (int i = -1; i < (int)MP_ARRAY_SIZE(speaker_replacements); i++) {
-        struct mp_chmap best = {0};
-        struct mp_chmap t = *map;
+    struct mp_chmap best = {0};
 
-        if (i >= 0) {
-            struct mp_chmap *r = (struct mp_chmap *)speaker_replacements[i];
-            if (!replace_speakers(&t, r))
-                continue;
-        }
+    for (int n = 0; n < s->num_chmaps; n++) {
+        struct mp_chmap e = s->chmaps[n];
 
-        for (int n = 0; n < s->num_chmaps; n++) {
-            struct mp_chmap e = s->chmaps[n];
+        if (mp_chmap_is_unknown(&e))
+            continue;
 
-            if (mp_chmap_is_unknown(&e))
-                continue;
-
-            if (mp_chmap_is_better(&t, &best, &e))
-                best = e;
-        }
-
-        if (best.num) {
-            if (best_of_best.num) {
-                // If best (without replacements) is not worse, but is actually
-                // better with replacements applied, pick it.
-                int bbest_lost = mp_chmap_diffn(map, &best_of_best);
-                int best_lost = mp_chmap_diffn(map, &best);
-                int repl_lost = mp_chmap_diffn(&t, &best);
-                if (best_lost <= bbest_lost && repl_lost < bbest_lost)
-                    best_of_best = best;
-            } else {
-                best_of_best = best;
-            }
-        }
+        if (mp_chmap_is_better(map, &best, &e))
+            best = e;
     }
 
-    if (best_of_best.num) {
-        *map = best_of_best;
+    if (best.num) {
+        *map = best;
         return true;
     }
 

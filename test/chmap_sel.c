@@ -99,6 +99,15 @@ static void test_mp_chmap_sel_fallback_more_replacements(void **state) {
              LAYOUTS("fl-fr-bl-br-na-na-na-na", "quad(side)", "stereo"));
     test_sel("quad", "fl-fr-bl-br-na-na-na-na",
              LAYOUTS("stereo", "quad(side)", "fl-fr-bl-br-na-na-na-na"));
+    test_sel("fl-fr-fc-lfe-sl-sr", "fl-fr-lfe-fc-bl-br-na-na",
+             LAYOUTS("fl-fr-lfe-fc-bl-br-na-na", "fl-fr-lfe-fc-bl-br-sdl-sdr"));
+    test_sel("fl-fr-fc-lfe-sl-sr", "fl-fr-lfe-fc-bl-br-na-na",
+             LAYOUTS("fl-fr-lfe-fc-bl-br-sdl-sdr", "fl-fr-lfe-fc-bl-br-na-na"));
+}
+
+static void test_mp_chmap_sel_fallback_na_channels(void **state) {
+    test_sel("na-fl-fr", "na-fl-fr", LAYOUTS("na-fl-fr-na", "fl-na-fr", "na-fl-fr",
+                                             "fl-fr-na-na", "na-na-fl-fr"));
 }
 
 int main(void) {
@@ -116,6 +125,7 @@ int main(void) {
         cmocka_unit_test(test_mp_chmap_sel_fallback_minimal_downmix),
         cmocka_unit_test(test_mp_chmap_sel_fallback_reject_unknown),
         cmocka_unit_test(test_mp_chmap_sel_fallback_more_replacements),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_na_channels),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
