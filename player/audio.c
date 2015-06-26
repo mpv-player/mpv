@@ -229,7 +229,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     afs->output = (struct mp_audio){0};
     if (mpctx->ao) {
         ao_get_format(mpctx->ao, &afs->output);
-    } else if (!AF_FORMAT_IS_SPECIAL(in_format.format)) {
+    } else if (af_fmt_is_pcm(in_format.format)) {
         afs->output.rate = opts->force_srate;
         mp_audio_set_format(&afs->output, opts->audio_output_format);
         mp_audio_set_channels(&afs->output, &opts->audio_output_channels);
@@ -260,7 +260,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
             ao_get_format(mpctx->ao, &fmt);
 
         // Verify passthrough format was not changed.
-        if (mpctx->ao && AF_FORMAT_IS_SPECIAL(afs->output.format)) {
+        if (mpctx->ao && af_fmt_is_spdif(afs->output.format)) {
             if (!mp_audio_config_equals(&afs->output, &fmt)) {
                 MP_ERR(mpctx, "Passthrough format unsupported.\n");
                 ao_uninit(mpctx->ao);
@@ -270,7 +270,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
 
         if (!mpctx->ao) {
             // If spdif was used, try to fallback to PCM.
-            if (AF_FORMAT_IS_SPECIAL(afs->output.format) &&
+            if (af_fmt_is_spdif(afs->output.format) &&
                 mpctx->d_audio->spdif_passthrough)
             {
                 mpctx->d_audio->spdif_passthrough = false;

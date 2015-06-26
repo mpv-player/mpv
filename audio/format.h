@@ -54,30 +54,24 @@ enum af_format {
     AF_FORMAT_COUNT
 };
 
-#define AF_FORMAT_IS_IEC61937(f) af_fmt_is_spdif(f)
-#define AF_FORMAT_IS_SPECIAL(f) af_fmt_is_spdif(f)
-#define AF_FORMAT_IS_FLOAT(f) af_fmt_is_float(f)
-#define AF_FORMAT_IS_PLANAR(f) af_fmt_is_planar(f)
-
 const char *af_fmt_to_str(int format);
 
-int af_fmt2bps(int format);
-int af_fmt2bits(int format);
-int af_fmt_change_bits(int format, int bits);
+int af_fmt_to_bytes(int format);
+int af_fmt_change_bytes(int format, int bytes);
 
-bool af_fmt_unsigned(int format);
+bool af_fmt_is_valid(int format);
+bool af_fmt_is_unsigned(int format);
 bool af_fmt_is_float(int format);
 bool af_fmt_is_int(int format);
 bool af_fmt_is_planar(int format);
 bool af_fmt_is_spdif(int format);
+bool af_fmt_is_pcm(int format);
 
 int af_fmt_to_planar(int format);
 int af_fmt_from_planar(int format);
 
 // Amount of bytes that contain audio of the given duration, aligned to frames.
 int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int samplerate);
-
-bool af_fmt_is_valid(int format);
 
 void af_fill_silence(void *dst, size_t bytes, int format);
 

@@ -184,7 +184,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             return CONTROL_OK;
 #endif
 
-        if (AF_FORMAT_IS_SPECIAL(ao->format))
+        if (!af_fmt_is_pcm(ao->format))
             return CONTROL_TRUE;
 
         if ((fd = open(p->oss_mixer_device, O_RDONLY)) != -1) {
@@ -247,7 +247,7 @@ static bool try_format(struct ao *ao, int *format)
     struct priv *p = ao->priv;
 
     int oss_format = format2oss(*format);
-    if (oss_format == -1 && AF_FORMAT_IS_IEC61937(*format))
+    if (oss_format == -1 && af_fmt_is_spdif(*format))
         oss_format = AFMT_AC3;
 
     if (oss_format == -1) {
@@ -303,7 +303,7 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
     fcntl(p->audio_fd, F_SETFD, FD_CLOEXEC);
 #endif
 
-    if (AF_FORMAT_IS_IEC61937(format)) {
+    if (af_fmt_is_spdif(format)) {
         if (ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &samplerate) == -1)
             goto fail;
         // Probably could be fixed by setting number of channels; needs testing.
@@ -327,7 +327,7 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
 
     MP_VERBOSE(ao, "sample format: %s\n", af_fmt_to_str(format));
 
-    if (!AF_FORMAT_IS_IEC61937(format)) {
+    if (!af_fmt_is_spdif(format)) {
         struct mp_chmap_sel sel = {0};
         for (int n = 0; n < MP_NUM_CHANNELS + 1; n++)
             mp_chmap_sel_add_map(&sel, &oss_layouts[n]);
@@ -392,7 +392,7 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
         }
     }
 
-    p->outburst -= p->outburst % (channels.num * af_fmt2bps(format)); // round down
+    p->outburst -= p->outburst % (channels.num * af_fmt_to_bytes(format)); // round down
 
     return 0;
 

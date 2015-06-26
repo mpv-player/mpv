@@ -168,22 +168,22 @@ static void ca_fill_asbd_raw(AudioStreamBasicDescription *asbd, int mp_format,
 {
     asbd->mSampleRate       = samplerate;
     // Set "AC3" for other spdif formats too - unknown if that works.
-    asbd->mFormatID         = AF_FORMAT_IS_IEC61937(mp_format) ?
+    asbd->mFormatID         = af_fmt_is_spdif(mp_format) ?
                               kAudioFormat60958AC3 :
                               kAudioFormatLinearPCM;
     asbd->mChannelsPerFrame = num_channels;
-    asbd->mBitsPerChannel   = af_fmt2bits(mp_format);
+    asbd->mBitsPerChannel   = af_fmt_to_bytes(mp_format) * 8;
     asbd->mFormatFlags      = kAudioFormatFlagIsPacked;
 
     int channels_per_buffer = num_channels;
-    if (AF_FORMAT_IS_PLANAR(mp_format)) {
+    if (af_fmt_is_planar(mp_format)) {
         asbd->mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
         channels_per_buffer = 1;
     }
 
-    if (AF_FORMAT_IS_FLOAT(mp_format)) {
+    if (af_fmt_is_float(mp_format)) {
         asbd->mFormatFlags |= kAudioFormatFlagIsFloat;
-    } else if (!af_fmt_unsigned(mp_format)) {
+    } else if (!af_fmt_is_unsigned(mp_format)) {
         asbd->mFormatFlags |= kAudioFormatFlagIsSignedInteger;
     }
 

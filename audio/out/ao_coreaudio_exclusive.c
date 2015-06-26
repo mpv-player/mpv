@@ -169,7 +169,7 @@ static int init(struct ao *ao)
 
     ao->format = af_fmt_from_planar(ao->format);
 
-    if (!AF_FORMAT_IS_IEC61937(ao->format)) {
+    if (!af_fmt_is_spdif(ao->format)) {
         MP_ERR(ao, "Only compressed formats are supported.\n");
         goto coreaudio_error_nounlock;
     }

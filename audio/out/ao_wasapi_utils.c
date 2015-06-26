@@ -85,13 +85,13 @@ const struct wasapi_fmt_mapping wasapi_fmt_table[] = {
 
 static const GUID *format_to_subtype(int format)
 {
-    if (AF_FORMAT_IS_SPECIAL(format)) {
+    if (af_fmt_is_spdif(format)) {
         for (int i = 0; wasapi_fmt_table[i].format; i++) {
             if (wasapi_fmt_table[i].format == format)
                 return wasapi_fmt_table[i].subtype;
         }
         return &KSDATAFORMAT_SPECIFIER_NONE;
-    } else if (AF_FORMAT_IS_FLOAT(format)) {
+    } else if (af_fmt_is_float(format)) {
         return &KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
     }
     return &KSDATAFORMAT_SUBTYPE_PCM;
@@ -229,7 +229,7 @@ static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
     wformat->Format.wFormatTag     = WAVE_FORMAT_EXTENSIBLE;
     wformat->Format.nChannels      = channels->num;
     wformat->Format.nSamplesPerSec = samplerate;
-    wformat->Format.wBitsPerSample = af_fmt2bits(format);
+    wformat->Format.wBitsPerSample = af_fmt_to_bytes(format) * 8;
     wformat->Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
 
     wformat->SubFormat                   = *format_to_subtype(format);
@@ -306,9 +306,11 @@ static int format_from_waveformat(WAVEFORMATEX *wf)
     // Since mpv doesn't have the notion of "valid bits", we just specify a
     // format with the container size. The least significant, "invalid"
     // bits will be excess precision ignored by wasapi.
-    // The change_bits operations should be a no-op for properly
+    // The change_bytes operations should be a no-op for properly
     // configured "special" formats, otherwise it will return 0.
-    return af_fmt_change_bits(format, wf->wBitsPerSample);
+    if (wf->wBitsPerSample % 8)
+        return 0;
+    return af_fmt_change_bytes(format, wf->wBitsPerSample / 8) * 8;
 }
 
 static bool chmap_from_waveformat(struct mp_chmap *channels, const WAVEFORMATEX *wf)
@@ -365,7 +367,7 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf, AUDCLNT_SHAREMODE sha
     }
 
     // Do not touch the ao for passthrough, just assume that we set WAVEFORMATEX correctly.
-    if (!AF_FORMAT_IS_SPECIAL(format)) {
+    if (af_fmt_is_pcm(format)) {
         struct mp_chmap channels;
         if (!chmap_from_waveformat(&channels, wf)) {
             MP_ERR(ao, "Unable to construct channel map from WAVEFORMAT %s\n",
@@ -575,7 +577,7 @@ static bool find_formats(struct ao *ao)
         // might be passthrough). If that fails, do a pcm format
         // search.
         return find_formats_exclusive(ao, true);
-    } else if (AF_FORMAT_IS_SPECIAL(ao->format)) {
+    } else if (af_fmt_is_spdif(ao->format)) {
         // If a passthrough format is requested, but exclusive mode
         // was not explicitly set, try only the requested passthrough
         // format in exclusive mode. Fall back on shared mode if that

@@ -438,7 +438,7 @@ const struct ao_driver ao_api_push = {
 int ao_play_silence(struct ao *ao, int samples)
 {
     assert(ao->api == &ao_api_push);
-    if (samples <= 0 || AF_FORMAT_IS_SPECIAL(ao->format) || !ao->driver->play)
+    if (samples <= 0 || !af_fmt_is_pcm(ao->format) || !ao->driver->play)
         return 0;
     char *p = talloc_size(NULL, samples * ao->sstride);
     af_fill_silence(p, samples * ao->sstride, ao->format);

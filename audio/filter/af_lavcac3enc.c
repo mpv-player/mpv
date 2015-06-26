@@ -75,7 +75,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         struct mp_audio *in = arg;
         struct mp_audio orig_in = *in;
 
-        if (AF_FORMAT_IS_SPECIAL(in->format) || in->nch < s->cfg_min_channel_num)
+        if (!af_fmt_is_pcm(in->format) || in->nch < s->cfg_min_channel_num)
             return AF_DETACH;
 
         mp_audio_set_format(in, s->in_sampleformat);

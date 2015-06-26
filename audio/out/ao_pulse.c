@@ -210,7 +210,7 @@ static pa_encoding_t map_digital_format(int format)
     case AF_FORMAT_S_AAC:   return PA_ENCODING_MPEG2_AAC_IEC61937;
 #endif
     default:
-        if (AF_FORMAT_IS_IEC61937(format))
+        if (af_fmt_is_spdif(format))
             return PA_ENCODING_ANY;
         return PA_ENCODING_PCM;
     }

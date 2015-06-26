@@ -136,7 +136,7 @@ static int init(struct ao *ao)
 
     select_format(ao, codec);
 
-    ac->sample_size = af_fmt2bps(ao->format);
+    ac->sample_size = af_fmt_to_bytes(ao->format);
     ac->stream->codec->sample_fmt = af_to_avformat(ao->format);
     ac->stream->codec->bits_per_raw_sample = ac->sample_size * 8;
 
@@ -241,7 +241,7 @@ static int encode(struct ao *ao, double apts, void **data)
         frame->format = af_to_avformat(ao->format);
         frame->nb_samples = ac->aframesize;
 
-        size_t num_planes = AF_FORMAT_IS_PLANAR(ao->format) ? ao->channels.num : 1;
+        size_t num_planes = af_fmt_is_planar(ao->format) ? ao->channels.num : 1;
         assert(num_planes <= AV_NUM_DATA_POINTERS);
         for (int n = 0; n < num_planes; n++)
             frame->extended_data[n] = data[n];
@@ -350,7 +350,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     double pts = ectx->last_audio_in_pts;
     pts += ectx->samples_since_last_pts / (double)ao->samplerate;
 
-    size_t num_planes = AF_FORMAT_IS_PLANAR(ao->format) ? ao->channels.num : 1;
+    size_t num_planes = af_fmt_is_planar(ao->format) ? ao->channels.num : 1;
 
     void *tempdata = NULL;
     void *padded[MP_NUM_CHANNELS];

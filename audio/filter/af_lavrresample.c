@@ -497,7 +497,7 @@ static int filter(struct af_instance *af, struct mp_audio *in)
     mp_audio_copy_config(out, &s->avrctx_fmt);
 
     if (out->samples && !mp_audio_config_equals(out, &s->pre_out_fmt)) {
-        assert(AF_FORMAT_IS_PLANAR(out->format) && out->format == real_out.format);
+        assert(af_fmt_is_planar(out->format) && out->format == real_out.format);
         reorder_planes(out, s->reorder_out, &s->pool_fmt.channels);
         if (!mp_audio_config_equals(out, &s->pre_out_fmt)) {
             struct mp_audio *new = mp_audio_pool_get(s->reorder_buffer,

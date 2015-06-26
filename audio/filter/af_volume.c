@@ -68,7 +68,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         } else {
             mp_audio_set_format(af->data, AF_FORMAT_FLOAT);
         }
-        if (AF_FORMAT_IS_PLANAR(in->format))
+        if (af_fmt_is_planar(in->format))
             mp_audio_set_format(af->data, af_fmt_to_planar(af->data->format));
         s->rgain = 1.0;
         if ((s->rgain_track || s->rgain_album) && af->replaygain_data) {

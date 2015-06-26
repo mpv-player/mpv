@@ -27,7 +27,8 @@
 #include "common/common.h"
 #include "audio/filter/af.h"
 
-int af_fmt2bps(int format)
+// number of bytes per sample, 0 if invalid/unknown
+int af_fmt_to_bytes(int format)
 {
     switch (af_fmt_from_planar(format)) {
     case AF_FORMAT_U8:      return 1;
@@ -42,27 +43,22 @@ int af_fmt2bps(int format)
     return 0;
 }
 
-int af_fmt2bits(int format)
+int af_fmt_change_bytes(int format, int bytes)
 {
-    return af_fmt2bps(format) * 8;
-}
-
-int af_fmt_change_bits(int format, int bits)
-{
-    if (!af_fmt_is_valid(format) || !bits)
+    if (!af_fmt_is_valid(format) || !bytes)
         return 0;
     for (int fmt = 1; fmt < AF_FORMAT_COUNT; fmt++) {
-        if (af_fmt2bits(fmt) == bits &&
+        if (af_fmt_to_bytes(fmt) == bytes &&
             af_fmt_is_float(fmt) == af_fmt_is_float(format) &&
             af_fmt_is_planar(fmt) == af_fmt_is_planar(format) &&
-            af_fmt_is_spdif(fmt) == af_fmt_is_planar(format))
+            af_fmt_is_spdif(fmt) == af_fmt_is_spdif(format))
             return fmt;
     }
     return 0;
 }
 
 // All formats are considered signed, except explicitly unsigned int formats.
-bool af_fmt_unsigned(int format)
+bool af_fmt_is_unsigned(int format)
 {
     return format == AF_FORMAT_U8 || format == AF_FORMAT_U8P;
 }
@@ -88,6 +84,11 @@ bool af_fmt_is_planar(int format)
 bool af_fmt_is_spdif(int format)
 {
     return af_format_sample_alignment(format) > 1;
+}
+
+bool af_fmt_is_pcm(int format)
+{
+    return af_fmt_is_valid(format) && !af_fmt_is_spdif(format);
 }
 
 static const int planar_formats[][2] = {
@@ -156,8 +157,8 @@ const char *af_fmt_to_str(int format)
 
 int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int samplerate)
 {
-    assert(!AF_FORMAT_IS_PLANAR(format));
-    int bps      = af_fmt2bps(format);
+    assert(!af_fmt_is_planar(format));
+    int bps      = af_fmt_to_bytes(format);
     int framelen = channels * bps;
     int bytes    = seconds  * bps * samplerate;
     if (bytes % framelen)
@@ -167,7 +168,7 @@ int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int sampler
 
 void af_fill_silence(void *dst, size_t bytes, int format)
 {
-    memset(dst, af_fmt_unsigned(format) ? 0x80 : 0, bytes);
+    memset(dst, af_fmt_is_unsigned(format) ? 0x80 : 0, bytes);
 }
 
 #define FMT_DIFF(type, a, b) (((a) & type) - ((b) & type))
@@ -183,28 +184,28 @@ int af_format_conversion_score(int dst_format, int src_format)
     if (dst_format == src_format)
         return 1024;
     // Can't be normally converted
-    if (AF_FORMAT_IS_SPECIAL(dst_format) || AF_FORMAT_IS_SPECIAL(src_format))
+    if (!af_fmt_is_pcm(dst_format) || !af_fmt_is_pcm(src_format))
         return INT_MIN;
     int score = 1024;
     if (af_fmt_is_planar(dst_format) != af_fmt_is_planar(src_format))
         score -= 1;     // has to (de-)planarize
     if (af_fmt_is_float(dst_format) != af_fmt_is_float(src_format)) {
-        int dst_bits = af_fmt2bits(dst_format);
+        int dst_bytes = af_fmt_to_bytes(dst_format);
         if (af_fmt_is_float(dst_format)) {
             // For int->float, always prefer 32 bit float.
-            score -= dst_bits == 32 ? 8 : 0;
+            score -= dst_bytes == 4 ? 1 : 0;
         } else {
             // For float->int, always prefer highest bit depth int
-            score -= 8 * (64 - dst_bits);
+            score -= 8 - dst_bytes;
         }
         // Has to convert float<->int - Consider this the worst case.
         score -= 2048;
     } else {
-        int bits = af_fmt2bits(dst_format) - af_fmt2bits(src_format);
-        if (bits > 0) {
-            score -= 8 * bits;          // has to add padding
-        } else if (bits < 0) {
-            score -= 1024 - 8 * bits;   // has to reduce bit depth
+        int bytes = af_fmt_to_bytes(dst_format) - af_fmt_to_bytes(src_format);
+        if (bytes > 0) {
+            score -= bytes;             // has to add padding
+        } else if (bytes < 0) {
+            score -= 1024 - bytes;      // has to reduce bit depth
         }
     }
     return score;

@@ -73,7 +73,7 @@ static void fput32le(uint32_t val, FILE *fp)
 static void write_wave_header(struct ao *ao, FILE *fp, uint64_t data_length)
 {
     uint16_t fmt = ao->format == AF_FORMAT_FLOAT ? WAV_ID_FLOAT_PCM : WAV_ID_PCM;
-    int bits = af_fmt2bits(ao->format);
+    int bits = af_fmt_to_bytes(ao->format) * 8;
 
     // Master RIFF chunk
     fput32le(WAV_ID_RIFF, fp);
@@ -135,7 +135,7 @@ static int init(struct ao *ao)
         case AF_FORMAT_FLOAT:
              break;
         default:
-            if (!AF_FORMAT_IS_IEC61937(ao->format))
+            if (!af_fmt_is_spdif(ao->format))
                 ao->format = AF_FORMAT_S16;
             break;
         }
@@ -146,7 +146,7 @@ static int init(struct ao *ao)
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         return -1;
 
-    ao->bps = ao->channels.num * ao->samplerate * af_fmt2bps(ao->format);
+    ao->bps = ao->channels.num * ao->samplerate * af_fmt_to_bytes(ao->format);
 
     MP_INFO(ao, "File: %s (%s)\nPCM: Samplerate: %d Hz Channels: %d Format: %s\n",
             priv->outputfilename,

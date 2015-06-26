@@ -493,8 +493,8 @@ static int af_reinit(struct af_stream *s)
             int fmt_in1 = af->prev->data->format;
             int fmt_in2 = in.format;
             if (af_fmt_is_valid(fmt_in1) && af_fmt_is_valid(fmt_in2)) {
-                bool spd1 = AF_FORMAT_IS_IEC61937(fmt_in1);
-                bool spd2 = AF_FORMAT_IS_IEC61937(fmt_in2);
+                bool spd1 = af_fmt_is_spdif(fmt_in1);
+                bool spd2 = af_fmt_is_spdif(fmt_in2);
                 if (spd1 != spd2 && af->next) {
                     MP_WARN(af, "Filter %s apparently cannot be used due to "
                                 "spdif passthrough - removing it.\n",
