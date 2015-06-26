@@ -29,13 +29,16 @@
 
 int af_fmt2bps(int format)
 {
-    switch (format & AF_FORMAT_BITS_MASK) {
-    case AF_FORMAT_8BIT:  return 1;
-    case AF_FORMAT_16BIT: return 2;
-    case AF_FORMAT_24BIT: return 3;
-    case AF_FORMAT_32BIT: return 4;
-    case AF_FORMAT_64BIT: return 8;
+    switch (af_fmt_from_planar(format)) {
+    case AF_FORMAT_U8:      return 1;
+    case AF_FORMAT_S16:     return 2;
+    case AF_FORMAT_S24:     return 3;
+    case AF_FORMAT_S32:     return 4;
+    case AF_FORMAT_FLOAT:   return 4;
+    case AF_FORMAT_DOUBLE:  return 8;
     }
+    if (af_fmt_is_spdif(format))
+        return 2;
     return 0;
 }
 
@@ -44,31 +47,47 @@ int af_fmt2bits(int format)
     return af_fmt2bps(format) * 8;
 }
 
-static int bits_to_mask(int bits)
-{
-    switch (bits) {
-    case 8:  return AF_FORMAT_8BIT;
-    case 16: return AF_FORMAT_16BIT;
-    case 24: return AF_FORMAT_24BIT;
-    case 32: return AF_FORMAT_32BIT;
-    case 64: return AF_FORMAT_64BIT;
-    }
-    return 0;
-}
-
 int af_fmt_change_bits(int format, int bits)
 {
-    if (!af_fmt_is_valid(format))
+    if (!af_fmt_is_valid(format) || !bits)
         return 0;
-    int mask = bits_to_mask(bits);
-    format = (format & ~AF_FORMAT_BITS_MASK) | mask;
-    return af_fmt_is_valid(format) ? format : 0;
+    for (int fmt = 1; fmt < AF_FORMAT_COUNT; fmt++) {
+        if (af_fmt2bits(fmt) == bits &&
+            af_fmt_is_float(fmt) == af_fmt_is_float(format) &&
+            af_fmt_is_planar(fmt) == af_fmt_is_planar(format) &&
+            af_fmt_is_spdif(fmt) == af_fmt_is_planar(format))
+            return fmt;
+    }
+    return 0;
 }
 
 // All formats are considered signed, except explicitly unsigned int formats.
 bool af_fmt_unsigned(int format)
 {
     return format == AF_FORMAT_U8 || format == AF_FORMAT_U8P;
+}
+
+bool af_fmt_is_float(int format)
+{
+    format = af_fmt_from_planar(format);
+    return format == AF_FORMAT_FLOAT || format == AF_FORMAT_DOUBLE;
+}
+
+// true for both unsigned and signed ints
+bool af_fmt_is_int(int format)
+{
+    return format && !af_fmt_is_spdif(format) && !af_fmt_is_float(format);
+}
+
+// false for interleaved and AF_FORMAT_UNKNOWN
+bool af_fmt_is_planar(int format)
+{
+    return format && af_fmt_to_planar(format) == format;
+}
+
+bool af_fmt_is_spdif(int format)
+{
+    return af_format_sample_alignment(format) > 1;
 }
 
 static const int planar_formats[][2] = {
@@ -132,11 +151,7 @@ const struct af_fmt_entry af_fmtstr_table[] = {
 
 bool af_fmt_is_valid(int format)
 {
-    for (int i = 0; af_fmtstr_table[i].name; i++) {
-        if (af_fmtstr_table[i].format == format)
-            return true;
-    }
-    return false;
+    return format > 0 && format < AF_FORMAT_COUNT;
 }
 
 const char *af_fmt_to_str(int format)
@@ -190,28 +205,27 @@ int af_format_conversion_score(int dst_format, int src_format)
     if (AF_FORMAT_IS_SPECIAL(dst_format) || AF_FORMAT_IS_SPECIAL(src_format))
         return INT_MIN;
     int score = 1024;
-    if (FMT_DIFF(AF_FORMAT_INTERLEAVING_MASK, dst_format, src_format))
+    if (af_fmt_is_planar(dst_format) != af_fmt_is_planar(src_format))
         score -= 1;     // has to (de-)planarize
-    if (FMT_DIFF(AF_FORMAT_TYPE_MASK, dst_format, src_format)) {
-        int dst_bits = dst_format & AF_FORMAT_BITS_MASK;
-        if ((dst_format & AF_FORMAT_TYPE_MASK) == AF_FORMAT_F) {
+    if (af_fmt_is_float(dst_format) != af_fmt_is_float(src_format)) {
+        int dst_bits = af_fmt2bits(dst_format);
+        if (af_fmt_is_float(dst_format)) {
             // For int->float, always prefer 32 bit float.
-            score -= dst_bits == AF_FORMAT_32BIT ? 8 : 0;
+            score -= dst_bits == 32 ? 8 : 0;
         } else {
             // For float->int, always prefer highest bit depth int
-            score -= 8 * (AF_FORMAT_64BIT - dst_bits);
+            score -= 8 * (64 - dst_bits);
         }
+        // Has to convert float<->int - Consider this the worst case.
+        score -= 2048;
     } else {
-        int bits = FMT_DIFF(AF_FORMAT_BITS_MASK, dst_format, src_format);
+        int bits = af_fmt2bits(dst_format) - af_fmt2bits(src_format);
         if (bits > 0) {
             score -= 8 * bits;          // has to add padding
         } else if (bits < 0) {
             score -= 1024 - 8 * bits;   // has to reduce bit depth
         }
     }
-    // Consider this the worst case.
-    if (FMT_DIFF(AF_FORMAT_TYPE_MASK, dst_format, src_format))
-        score -= 2048;  // has to convert float<->int
     return score;
 }
 

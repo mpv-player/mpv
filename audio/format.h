@@ -26,69 +26,39 @@
 
 #include "misc/bstr.h"
 
-// Bits used
-// Some code assumes they're sorted by size.
-#define AF_FORMAT_8BIT          (0<<1)
-#define AF_FORMAT_16BIT         (1<<1)
-#define AF_FORMAT_24BIT         (2<<1)
-#define AF_FORMAT_32BIT         (3<<1)
-#define AF_FORMAT_64BIT         (4<<1)
-#define AF_FORMAT_BITS_MASK     (7<<1)
-
-// Fixed/floating point/special
-#define AF_FORMAT_I             (1<<4) // Int
-#define AF_FORMAT_F             (2<<4) // Foating point
-#define AF_FORMAT_S             (4<<4) // special (IEC61937)
-#define AF_FORMAT_TYPE_MASK     (7<<4)
-
-// Interleaving (planar formats have data for each channel in separate planes)
-#define AF_FORMAT_INTERLEAVED        (0<<7) // must be 0
-#define AF_FORMAT_PLANAR             (1<<7)
-#define AF_FORMAT_INTERLEAVING_MASK  (1<<7)
-
-#define AF_FORMAT_S_CODEC(n)    ((n)<<8)
-#define AF_FORMAT_S_CODEC_MASK  (15 <<8) // 16 codecs max.
-
-#define AF_FORMAT_MASK          ((1<<12)-1)
-
-#define AF_INTP (AF_FORMAT_I|AF_FORMAT_PLANAR)
-#define AF_FLTP (AF_FORMAT_F|AF_FORMAT_PLANAR)
-#define AF_FORMAT_S_(n) (AF_FORMAT_S_CODEC(n)|AF_FORMAT_S|AF_FORMAT_16BIT)
-
-// actual sample formats
 enum af_format {
-    AF_FORMAT_UNKNOWN   = 0,
+    AF_FORMAT_UNKNOWN = 0,
 
-    AF_FORMAT_U8        = AF_FORMAT_I|AF_FORMAT_8BIT,
-    AF_FORMAT_S16       = AF_FORMAT_I|AF_FORMAT_16BIT,
-    AF_FORMAT_S24       = AF_FORMAT_I|AF_FORMAT_24BIT,
-    AF_FORMAT_S32       = AF_FORMAT_I|AF_FORMAT_32BIT,
-
-    AF_FORMAT_FLOAT     = AF_FORMAT_F|AF_FORMAT_32BIT,
-    AF_FORMAT_DOUBLE    = AF_FORMAT_F|AF_FORMAT_64BIT,
+    AF_FORMAT_U8,
+    AF_FORMAT_S16,
+    AF_FORMAT_S24,
+    AF_FORMAT_S32,
+    AF_FORMAT_FLOAT,
+    AF_FORMAT_DOUBLE,
 
     // Planar variants
-    AF_FORMAT_U8P       = AF_INTP|AF_FORMAT_8BIT,
-    AF_FORMAT_S16P      = AF_INTP|AF_FORMAT_16BIT,
-    AF_FORMAT_S32P      = AF_INTP|AF_FORMAT_32BIT,
-    AF_FORMAT_FLOATP    = AF_FLTP|AF_FORMAT_32BIT,
-    AF_FORMAT_DOUBLEP   = AF_FLTP|AF_FORMAT_64BIT,
+    AF_FORMAT_U8P,
+    AF_FORMAT_S16P,
+    AF_FORMAT_S32P,
+    AF_FORMAT_FLOATP,
+    AF_FORMAT_DOUBLEP,
 
     // All of these use IEC61937 framing, and otherwise pretend to be like PCM.
-    AF_FORMAT_S_AAC     = AF_FORMAT_S_(0),
-    AF_FORMAT_S_AC3     = AF_FORMAT_S_(1),
-    AF_FORMAT_S_DTS     = AF_FORMAT_S_(2),
-    AF_FORMAT_S_DTSHD   = AF_FORMAT_S_(3),
-    AF_FORMAT_S_EAC3    = AF_FORMAT_S_(4),
-    AF_FORMAT_S_MP3     = AF_FORMAT_S_(5),
-    AF_FORMAT_S_TRUEHD  = AF_FORMAT_S_(6),
+    AF_FORMAT_S_AAC,
+    AF_FORMAT_S_AC3,
+    AF_FORMAT_S_DTS,
+    AF_FORMAT_S_DTSHD,
+    AF_FORMAT_S_EAC3,
+    AF_FORMAT_S_MP3,
+    AF_FORMAT_S_TRUEHD,
+
+    AF_FORMAT_COUNT
 };
 
-#define AF_FORMAT_IS_IEC61937(f) (((f) & AF_FORMAT_TYPE_MASK) == AF_FORMAT_S)
-#define AF_FORMAT_IS_SPECIAL(f) AF_FORMAT_IS_IEC61937(f)
-#define AF_FORMAT_IS_FLOAT(f) (!!((f) & AF_FORMAT_F))
-// false for interleaved and AF_FORMAT_UNKNOWN
-#define AF_FORMAT_IS_PLANAR(f) (!!((f) & AF_FORMAT_PLANAR))
+#define AF_FORMAT_IS_IEC61937(f) af_fmt_is_spdif(f)
+#define AF_FORMAT_IS_SPECIAL(f) af_fmt_is_spdif(f)
+#define AF_FORMAT_IS_FLOAT(f) af_fmt_is_float(f)
+#define AF_FORMAT_IS_PLANAR(f) af_fmt_is_planar(f)
 
 struct af_fmt_entry {
     const char *name;
@@ -105,6 +75,10 @@ int af_fmt2bits(int format);
 int af_fmt_change_bits(int format, int bits);
 
 bool af_fmt_unsigned(int format);
+bool af_fmt_is_float(int format);
+bool af_fmt_is_int(int format);
+bool af_fmt_is_planar(int format);
+bool af_fmt_is_spdif(int format);
 
 int af_fmt_to_planar(int format);
 int af_fmt_from_planar(int format);
