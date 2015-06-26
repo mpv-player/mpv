@@ -175,6 +175,12 @@ static void ca_fill_asbd_raw(AudioStreamBasicDescription *asbd, int mp_format,
     asbd->mBitsPerChannel   = af_fmt2bits(mp_format);
     asbd->mFormatFlags      = kAudioFormatFlagIsPacked;
 
+    int channels_per_buffer = num_channels;
+    if (AF_FORMAT_IS_PLANAR(mp_format)) {
+        asbd->mFormatFlags |= kAudioFormatFlagIsNonInterleaved;
+        channels_per_buffer = 1;
+    }
+
     if ((mp_format & AF_FORMAT_TYPE_MASK) == AF_FORMAT_F) {
         asbd->mFormatFlags |= kAudioFormatFlagIsFloat;
     } else if (!af_fmt_unsigned(mp_format)) {
@@ -186,7 +192,7 @@ static void ca_fill_asbd_raw(AudioStreamBasicDescription *asbd, int mp_format,
 
     asbd->mFramesPerPacket = 1;
     asbd->mBytesPerPacket = asbd->mBytesPerFrame =
-        asbd->mFramesPerPacket * asbd->mChannelsPerFrame *
+        asbd->mFramesPerPacket * channels_per_buffer *
         (asbd->mBitsPerChannel / 8);
 }
 

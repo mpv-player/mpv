@@ -77,11 +77,14 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
 {
     struct ao *ao   = ctx;
     struct priv *p  = ao->priv;
-    AudioBuffer buf = buffer_list->mBuffers[0];
+    void *planes[MP_NUM_CHANNELS] = {0};
+
+    for (int n = 0; n < ao->num_planes; n++)
+        planes[n] = buffer_list->mBuffers[n].mData;
 
     int64_t end = mp_time_us();
     end += p->hw_latency_us + ca_get_latency(ts) + ca_frames_to_us(ao, frames);
-    ao_read_data(ao, &buf.mData, frames, end);
+    ao_read_data(ao, planes, frames, end);
     return noErr;
 }
 
@@ -162,8 +165,6 @@ static int init(struct ao *ao)
 
     if (!ca_init_chmap(ao, p->device))
         goto coreaudio_error;
-
-    ao->format = af_fmt_from_planar(ao->format);
 
     AudioStreamBasicDescription asbd;
     ca_fill_asbd(ao, &asbd);
