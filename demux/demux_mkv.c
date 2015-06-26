@@ -1532,7 +1532,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     mp_chmap_set_unknown(&sh_a->channels, track->a_channels);
 
     const char *codec = sh->codec;
-    if (!strcmp(codec, "mp3")) {
+    if (!strcmp(codec, "mp3") || !strcmp(codec, "truehd")) {
         track->parse = true;
     } else if (!strcmp(codec, "flac")) {
         unsigned char *ptr = extradata;
@@ -1557,8 +1557,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             AV_WB32(data + 8, 0);
             memcpy(data + 12, track->private_data, track->private_size);
         }
-    } else if (!strcmp(codec, "truehd")) {
-        track->parse = true;
     } else if (!strcmp(codec, "tta")) {
         extradata_len = 30;
         extradata = talloc_zero_size(sh_a, extradata_len);
