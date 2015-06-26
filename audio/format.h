@@ -22,9 +22,8 @@
 #ifndef MPLAYER_AF_FORMAT_H
 #define MPLAYER_AF_FORMAT_H
 
+#include <stddef.h>
 #include <stdbool.h>
-
-#include "misc/bstr.h"
 
 enum af_format {
     AF_FORMAT_UNKNOWN = 0,
@@ -60,14 +59,6 @@ enum af_format {
 #define AF_FORMAT_IS_FLOAT(f) af_fmt_is_float(f)
 #define AF_FORMAT_IS_PLANAR(f) af_fmt_is_planar(f)
 
-struct af_fmt_entry {
-    const char *name;
-    int format;
-};
-
-extern const struct af_fmt_entry af_fmtstr_table[];
-
-int af_str2fmt_short(bstr str);
 const char *af_fmt_to_str(int format);
 
 int af_fmt2bps(int format);

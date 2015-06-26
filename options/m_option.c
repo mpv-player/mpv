@@ -2217,13 +2217,17 @@ static int parse_afmt(struct mp_log *log, const m_option_t *opt,
 
     if (!bstrcmp0(param, "help")) {
         mp_info(log, "Available formats:");
-        for (int i = 0; af_fmtstr_table[i].name; i++)
-            mp_info(log, " %s", af_fmtstr_table[i].name);
+        for (int i = 1; i < AF_FORMAT_COUNT; i++)
+            mp_info(log, " %s", af_fmt_to_str(i));
         mp_info(log, "\n");
         return M_OPT_EXIT - 1;
     }
 
-    int fmt = af_str2fmt_short(param);
+    int fmt = 0;
+    for (int i = 1; i < AF_FORMAT_COUNT; i++) {
+        if (bstr_equals0(param, af_fmt_to_str(i)))
+            fmt = i;
+    }
     if (!fmt) {
         mp_err(log, "Option %.*s: unknown format name: '%.*s'\n",
                BSTR_P(name), BSTR_P(param));

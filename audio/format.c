@@ -124,31 +124,6 @@ int af_fmt_from_planar(int format)
     return format;
 }
 
-const struct af_fmt_entry af_fmtstr_table[] = {
-    {"u8",          AF_FORMAT_U8},
-    {"s16",         AF_FORMAT_S16},
-    {"s24",         AF_FORMAT_S24},
-    {"s32",         AF_FORMAT_S32},
-    {"float",       AF_FORMAT_FLOAT},
-    {"double",      AF_FORMAT_DOUBLE},
-
-    {"u8p",         AF_FORMAT_U8P},
-    {"s16p",        AF_FORMAT_S16P},
-    {"s32p",        AF_FORMAT_S32P},
-    {"floatp",      AF_FORMAT_FLOATP},
-    {"doublep",     AF_FORMAT_DOUBLEP},
-
-    {"spdif-aac",   AF_FORMAT_S_AAC},
-    {"spdif-ac3",   AF_FORMAT_S_AC3},
-    {"spdif-dts",   AF_FORMAT_S_DTS},
-    {"spdif-dtshd", AF_FORMAT_S_DTSHD},
-    {"spdif-eac3",  AF_FORMAT_S_EAC3},
-    {"spdif-mp3",   AF_FORMAT_S_MP3},
-    {"spdif-truehd",AF_FORMAT_S_TRUEHD},
-
-    {0}
-};
-
 bool af_fmt_is_valid(int format)
 {
     return format > 0 && format < AF_FORMAT_COUNT;
@@ -156,11 +131,26 @@ bool af_fmt_is_valid(int format)
 
 const char *af_fmt_to_str(int format)
 {
-    for (int i = 0; af_fmtstr_table[i].name; i++) {
-        if (af_fmtstr_table[i].format == format)
-            return af_fmtstr_table[i].name;
+    switch (format) {
+    case AF_FORMAT_U8:          return "u8";
+    case AF_FORMAT_S16:         return "s16";
+    case AF_FORMAT_S24:         return "s24";
+    case AF_FORMAT_S32:         return "s32";
+    case AF_FORMAT_FLOAT:       return "float";
+    case AF_FORMAT_DOUBLE:      return "double";
+    case AF_FORMAT_U8P:         return "u8p";
+    case AF_FORMAT_S16P:        return "s16p";
+    case AF_FORMAT_S32P:        return "s32p";
+    case AF_FORMAT_FLOATP:      return "floatp";
+    case AF_FORMAT_DOUBLEP:     return "doublep";
+    case AF_FORMAT_S_AAC:       return "spdif-aac";
+    case AF_FORMAT_S_AC3:       return "spdif-ac3";
+    case AF_FORMAT_S_DTS:       return "spdif-dts";
+    case AF_FORMAT_S_DTSHD:     return "spdif-dtshd";
+    case AF_FORMAT_S_EAC3:      return "spdif-eac3";
+    case AF_FORMAT_S_MP3:       return "spdif-mp3";
+    case AF_FORMAT_S_TRUEHD:    return "spdif-truehd";
     }
-
     return "??";
 }
 
@@ -173,15 +163,6 @@ int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int sampler
     if (bytes % framelen)
         bytes += framelen - (bytes % framelen);
     return bytes;
-}
-
-int af_str2fmt_short(bstr str)
-{
-    for (int i = 0; af_fmtstr_table[i].name; i++) {
-        if (!bstrcasecmp0(str, af_fmtstr_table[i].name))
-            return af_fmtstr_table[i].format;
-    }
-    return 0;
 }
 
 void af_fill_silence(void *dst, size_t bytes, int format)

@@ -236,12 +236,11 @@ bool ca_asbd_equals(const AudioStreamBasicDescription *a,
 // Return the AF_FORMAT_* (AF_FORMAT_S16 etc.) corresponding to the asbd.
 int ca_asbd_to_mp_format(const AudioStreamBasicDescription *asbd)
 {
-    for (int n = 0; af_fmtstr_table[n].format; n++) {
-        int mp_format = af_fmtstr_table[n].format;
+    for (int fmt = 1; fmt < AF_FORMAT_COUNT; fmt++) {
         AudioStreamBasicDescription mp_asbd = {0};
-        ca_fill_asbd_raw(&mp_asbd, mp_format, 0, asbd->mChannelsPerFrame);
+        ca_fill_asbd_raw(&mp_asbd, fmt, 0, asbd->mChannelsPerFrame);
         if (ca_asbd_equals(&mp_asbd, asbd))
-            return mp_format;
+            return fmt;
     }
     return 0;
 }
