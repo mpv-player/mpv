@@ -1204,12 +1204,7 @@ static void display_create_tracks(demuxer_t *demuxer)
     }
 }
 
-typedef struct {
-    char *id;
-    const char *codec;
-} videocodec_info_t;
-
-static const videocodec_info_t vinfo[] = {
+static const char *const mkv_video_tags[][2] = {
     {"V_MJPEG",             "mjpeg"},
     {"V_MPEG1",             "mpeg1video"},
     {"V_MPEG2",             "mpeg2video"},
@@ -1297,11 +1292,12 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
             extradata_size = track->private_size;
         }
     } else {
-        const videocodec_info_t *vi = vinfo;
-        while (vi->id && strcmp(vi->id, track->codec_id))
-            vi++;
-        if (vi->codec)
-            sh->codec = vi->codec;
+        for (int i = 0; mkv_video_tags[i][0]; i++) {
+            if (!strcmp(mkv_video_tags[i][0], track->codec_id)) {
+                sh->codec = mkv_video_tags[i][1];
+                break;
+            }
+        }
         if (track->private_data && track->private_size > 0) {
             extradata = track->private_data;
             extradata_size = track->private_size;
@@ -1342,10 +1338,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     return 0;
 }
 
-static const struct mkv_audio_tag {
-    const char *id;
-    const char *codec;
-} mkv_audio_tags[] = {
+static const char *const mkv_audio_tags[][2] = {
     { "A_MPEG/L2",              "mp3" },
     { "A_MPEG/L3",              "mp3" },
     { "A_AC3",                  "ac3" },
@@ -1384,9 +1377,9 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     sh_a->bits_per_coded_sample = track->a_bps ? track->a_bps : 16;
     sh_a->samplerate = (uint32_t) track->a_osfreq;
 
-    for (int i = 0; mkv_audio_tags[i].id; i++) {
-        if (!strcmp(track->codec_id, mkv_audio_tags[i].id)) {
-            sh->codec = mkv_audio_tags[i].codec;
+    for (int i = 0; mkv_audio_tags[i][0]; i++) {
+        if (!strcmp(mkv_audio_tags[i][0], track->codec_id)) {
+            sh->codec = mkv_audio_tags[i][1];
             break;
         }
     }
