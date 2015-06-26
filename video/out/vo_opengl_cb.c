@@ -372,7 +372,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     if (mpi)
         gl_video_set_image(ctx->renderer, mpi);
 
-    gl_video_render_frame(ctx->renderer, fbo, timing.pts ? &timing : NULL);
+    gl_video_render_frame(ctx->renderer, mpi, fbo, timing.pts ? &timing : NULL);
 
     gl_video_unset_gl_state(ctx->renderer);
 

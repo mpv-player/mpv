@@ -170,14 +170,11 @@ static void draw_image_timed(struct vo *vo, mp_image_t *mpi,
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    if (mpi)
-        gl_video_set_image(p->renderer, mpi);
-
     if (p->glctx->start_frame && !p->glctx->start_frame(p->glctx))
         return;
 
     p->frame_started = true;
-    gl_video_render_frame(p->renderer, 0, t);
+    gl_video_render_frame(p->renderer, mpi, 0, t);
 
     // The playloop calls this last before waiting some time until it decides
     // to call flip_page(). Tell OpenGL to start execution of the GPU commands
@@ -186,6 +183,8 @@ static void draw_image_timed(struct vo *vo, mp_image_t *mpi,
 
     if (p->use_glFinish)
         gl->Finish();
+
+    talloc_free(mpi);
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
@@ -302,9 +301,9 @@ static bool reparse_cmdline(struct gl_priv *p, char *args)
     }
 
     if (r >= 0) {
-        int queue = 0;
+        int queue = 1;
         gl_video_set_options(p->renderer, opts->renderer_opts, &queue);
-        vo_set_queue_params(p->vo, queue, opts->renderer_opts->interpolation, 1);
+        vo_set_queue_params(p->vo, 0, opts->renderer_opts->interpolation, queue);
         p->vo->want_redraw = true;
     }
 
@@ -359,7 +358,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_REDRAW_FRAME:
         if (!(p->glctx->start_frame && !p->glctx->start_frame(p->glctx))) {
             p->frame_started = true;
-            gl_video_render_frame(p->renderer, 0, NULL);
+            gl_video_render_frame(p->renderer, NULL, 0, NULL);
         }
         return true;
     case VOCTRL_SET_COMMAND_LINE: {
@@ -443,7 +442,7 @@ static int preinit(struct vo *vo)
                               p->glctx->depth_b);
     int queue = 0;
     gl_video_set_options(p->renderer, p->renderer_opts, &queue);
-    vo_set_queue_params(p->vo, queue, p->renderer_opts->interpolation, 0);
+    vo_set_queue_params(p->vo, 0, p->renderer_opts->interpolation, queue);
 
     p->cms = gl_lcms_init(p, vo->log, vo->global);
     if (!p->cms)
