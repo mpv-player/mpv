@@ -75,12 +75,6 @@ Available video output drivers are:
         not responding quickly enough if video FPS is close to or higher than
         the display refresh rate.
 
-``x11`` (X11 only)
-    Shared memory video output driver without hardware acceleration that works
-    whenever X11 is present.
-
-    .. note:: This is a fallback only, and should not be normally used.
-
 ``vdpau`` (X11 only)
     Uses the VDPAU interface to display and optionally also decode video.
     Hardware decoding is used with ``--hwdec=vdpau``.

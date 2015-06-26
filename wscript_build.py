@@ -359,7 +359,6 @@ def build(ctx):
         ( "video/out/vo_vaapi.c",                "vaapi" ),
         ( "video/out/vo_vdpau.c",                "vdpau" ),
         ( "video/out/vo_wayland.c",              "wayland" ),
-        ( "video/out/vo_x11.c" ,                 "x11" ),
         ( "video/out/vo_xv.c",                   "xv" ),
         ( "video/out/w32_common.c",              "win32" ),
         ( "video/out/wayland_common.c",          "wayland" ),
