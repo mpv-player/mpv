@@ -99,8 +99,7 @@ static const struct mp_chmap sndio_layouts[MP_NUM_CHANNELS + 1] = {
     MP_CHMAP8(FL, FR, BL, BR, FC, LFE, SL, SR), // 7.1
     /* above is the fixed channel assignment for sndio, since we need to fill
        all channels and cannot insert silence, not all layouts are supported.
-       NOTE: MP_SPEAKER_ID_NA could be used to add padding channels. Keep
-             in mind that they don't actually contain silence. */
+       NOTE: MP_SPEAKER_ID_NA could be used to add padding channels. */
 };
 
 /*
