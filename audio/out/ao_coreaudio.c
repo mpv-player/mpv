@@ -192,18 +192,28 @@ static void init_physical_format(struct ao *ao)
                        &streams, &n_streams);
     CHECK_CA_ERROR("could not get number of streams");
 
+    MP_VERBOSE(ao, "Found %zd substream(s).\n", n_streams);
+
     for (int i = 0; i < n_streams; i++) {
         AudioStreamRangedDescription *formats;
         size_t n_formats;
 
-        err = CA_GET_ARY(streams[i],
-                            kAudioStreamPropertyAvailablePhysicalFormats,
-                            &formats, &n_formats);
+        MP_VERBOSE(ao, "Looking at formats in substream %d...\n", i);
+
+        err = CA_GET_ARY(streams[i], kAudioStreamPropertyAvailablePhysicalFormats,
+                         &formats, &n_formats);
 
         if (!CHECK_CA_WARN("could not get number of stream formats"))
             continue; // try next one
 
-        MP_VERBOSE(ao, "Looking at formats in substream %d...\n", i);
+
+        uint32_t direction;
+        err = CA_GET(streams[i], kAudioStreamPropertyDirection, &direction);
+        CHECK_CA_ERROR("could not get stream direction");
+        if (direction != 0) {
+            MP_VERBOSE(ao, "Not an output stream.\n");
+            continue;
+        }
 
         AudioStreamBasicDescription best_asbd = {0};
 

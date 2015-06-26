@@ -206,6 +206,14 @@ static int init(struct ao *ao)
     CHECK_CA_ERROR("could not get number of streams");
 
     for (int i = 0; i < n_streams && p->stream_idx < 0; i++) {
+        uint32_t direction;
+        err = CA_GET(streams[i], kAudioStreamPropertyDirection, &direction);
+        CHECK_CA_ERROR("could not get stream direction");
+        if (direction != 0) {
+            MP_VERBOSE(ao, "Substream %d is not an output stream.\n", i);
+            continue;
+        }
+
         bool compressed = ca_stream_supports_compressed(ao, streams[i]);
 
         if (compressed) {
