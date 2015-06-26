@@ -94,6 +94,8 @@ Video
 
 * Image subtitles (DVDs etc.) are rendered in color and use more correct
   positioning (color for image subs can be disabled with ``--sub-gray``).
+* Support for the X11 video output is removed, since it was considered
+  deprecated. SDL video output can still be used as a fallback.
 
 OSD and terminal
 ~~~~~~~~~~~~~~~~
