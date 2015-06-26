@@ -279,7 +279,7 @@ Command Line Switches
     ``-xineramascreen``         ``--screen`` (different values)
     ``-xy W``                   ``--autofit=W``
     ``-zoom``                   Inverse available as ``--video-unscaled``
-    ``dvdnav://``               ``dvdnav://menu``
+    ``dvdnav://``               Removed.
     ``dvd://1``                 ``dvd://0`` (0-based offset)
     =========================== ========================================
 

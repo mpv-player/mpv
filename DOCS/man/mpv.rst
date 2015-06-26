@@ -567,13 +567,9 @@ PROTOCOLS
     you must mount the ISO file as filesystem, and point ``--bluray-device``
     to the mounted directory directly.
 
-``bdnav://[title][/device]``
-    Play a Blu-Ray disc, with navigation features enabled. This feature is
-    permanently experimental.
-
 ``dvd://[title|[starttitle]-endtitle][/device]`` ``--dvd-device=PATH``
-    Play a DVD. If you want dvdnav menus, use ``dvd://menu``. If no title
-    is given, the longest title is auto-selected.
+    Play a DVD. DVD menus are not supported. If no title is given, the longest
+    title is auto-selected.
 
     ``dvdnav://`` is an old alias for ``dvd://`` and does exactly the same
     thing.

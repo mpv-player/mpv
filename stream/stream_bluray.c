@@ -744,6 +744,8 @@ static int bluray_stream_open(stream_t *s)
 
     int title_guess = BLURAY_DEFAULT_TITLE;
     if (b->use_nav) {
+        MP_FATAL(s, "BluRay menu support has been removed.\n");
+        return STREAM_ERROR;
         const BLURAY_DISC_INFO *disc_info = bd_get_disc_info(b->bd);
         b->num_titles = disc_info->num_hdmv_titles + disc_info->num_bdj_titles;
         ++b->num_titles; // for BLURAY_TITLE_TOP_MENU

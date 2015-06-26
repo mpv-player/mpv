@@ -781,6 +781,8 @@ static int open_s(stream_t *stream)
             return STREAM_UNSUPPORTED;
         }
     } else {
+        MP_FATAL(stream, "DVD menu support has been removed.\n");
+        return STREAM_ERROR;
         if (dvdnav_menu_call(priv->dvdnav, DVD_MENU_Root) != DVDNAV_STATUS_OK)
             dvdnav_menu_call(priv->dvdnav, DVD_MENU_Title);
     }
