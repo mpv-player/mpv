@@ -630,6 +630,10 @@ strictly part of the guaranteed API.
             On Windows, ``killed`` is only returned when the process has been
             killed by mpv as a result of ``cancellable`` being set to ``true``.
 
+        ``killed_by_us``
+            Set to ``true`` if the process has been killed by mpv as a result
+            of ``cancellable`` being set to ``true``.
+
     In all cases, ``mp.resume_all()`` is implicitly called.
 
 ``utils.parse_json(str [, trail])``

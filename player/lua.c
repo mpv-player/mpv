@@ -1243,6 +1243,8 @@ static int script_subprocess(lua_State *L)
     lua_setfield(L, -2, "status"); // res
     lua_pushlstring(L, cb_ctx.output.start, cb_ctx.output.len); // res d
     lua_setfield(L, -2, "stdout"); // res
+    lua_pushboolean(L, status == MP_SUBPROCESS_EKILLED_BY_US); // res b
+    lua_setfield(L, -2, "killed_by_us"); // res
     return 1;
 }
 

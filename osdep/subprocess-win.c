@@ -357,6 +357,7 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
             if (pi.hProcess) {
                 TerminateProcess(pi.hProcess, 1);
                 *error = "killed";
+                status = MP_SUBPROCESS_EKILLED_BY_US;
                 goto done;
             }
             break;

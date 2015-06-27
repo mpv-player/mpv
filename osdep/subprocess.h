@@ -28,6 +28,8 @@ typedef void (*subprocess_read_cb)(void *ctx, char *data, size_t size);
 int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
                   subprocess_read_cb on_stdout, subprocess_read_cb on_stderr,
                   char **error);
+// mp_subprocess return values. -1 is a generic error code.
+#define MP_SUBPROCESS_EKILLED_BY_US -2
 
 struct mp_log;
 void mp_subprocess_detached(struct mp_log *log, char **args);
