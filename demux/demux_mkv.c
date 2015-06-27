@@ -507,10 +507,7 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
                              struct ebml_video *video)
 {
     if (video->n_frame_rate) {
-        track->v_frate = video->frame_rate;
-        MP_VERBOSE(demuxer, "|   + Frame rate: %f\n", track->v_frate);
-        if (track->v_frate > 0)
-            track->default_duration = 1 / track->v_frate;
+        MP_VERBOSE(demuxer, "|   + Frame rate: %f (ignored)\n", video->frame_rate);
     }
     if (video->n_display_width) {
         track->v_dwidth = video->display_width;
@@ -639,8 +636,7 @@ static void parse_trackentry(struct demuxer *demuxer,
         if (entry->default_duration == 0) {
             MP_VERBOSE(demuxer, "|  + Default duration: 0");
         } else {
-            if (!track->v_frate)
-                track->v_frate = 1e9 / entry->default_duration;
+            track->v_frate = 1e9 / entry->default_duration;
             MP_VERBOSE(demuxer, "|  + Default duration: %.3fms ( = %.3f fps)\n",
                        entry->default_duration / 1000000.0, track->v_frate);
         }
@@ -1320,8 +1316,6 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
                 "CodecPrivate data (track %u).\n",
                 track->codec_id, track->tnum);
     }
-    if (track->v_frate == 0.0)
-        track->v_frate = 25.0;
     sh_v->fps = track->v_frate;
     sh_v->disp_w = track->v_width;
     sh_v->disp_h = track->v_height;
