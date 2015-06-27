@@ -89,7 +89,7 @@ struct track {
     int ff_index; // same as stream->ff_index, or 0.
 
     char *title;
-    bool default_track;
+    bool default_track, forced_track;
     bool attached_picture;
     char *lang;
 

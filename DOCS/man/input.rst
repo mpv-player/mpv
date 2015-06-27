@@ -1579,6 +1579,10 @@ Property list
         ``yes`` if the track has the default flag set in the file, ``no``
         otherwise.
 
+    ``track-list/N/foced``
+        ``yes`` if the track has the forced flag set in the file, ``no``
+        otherwise.
+
     ``track-list/N/codec``
         The codec name used by this track, for example ``h264``. Unavailable
         in some rare cases.
@@ -1616,6 +1620,7 @@ Property list
                 "lang"              MPV_FORMAT_STRING
                 "albumart"          MPV_FORMAT_FLAG
                 "default"           MPV_FORMAT_FLAG
+                "forced"            MPV_FORMAT_FLAG
                 "external"          MPV_FORMAT_FLAG
                 "external-filename" MPV_FORMAT_STRING
                 "codec"             MPV_FORMAT_STRING

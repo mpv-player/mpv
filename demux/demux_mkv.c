@@ -114,6 +114,7 @@ typedef struct mkv_track {
     double codec_delay;
 
     int default_track;
+    int forced_track;
 
     unsigned char *private_data;
     unsigned int private_size;
@@ -629,6 +630,11 @@ static void parse_trackentry(struct demuxer *demuxer,
         MP_VERBOSE(demuxer, "|  + Default flag: %u\n", track->default_track);
     } else {
         track->default_track = 1;
+    }
+
+    if (entry->n_flag_forced) {
+        track->forced_track = entry->flag_forced;
+        MP_VERBOSE(demuxer, "|  + Forced flag: %u\n", track->forced_track);
     }
 
     if (entry->n_default_duration) {
@@ -1171,6 +1177,7 @@ static void init_track(demuxer_t *demuxer, mkv_track_t *track,
     sh->demuxer_id = track->tnum;
     sh->title = track->name;
     sh->default_track = track->default_track;
+    sh->forced_track = track->forced_track;
 }
 
 static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track);

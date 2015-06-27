@@ -132,6 +132,8 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
         APPEND(b, " --%s=%s", langopt, t->lang);
     if (t->default_track)
         APPEND(b, " (*)");
+    if (t->forced_track)
+        APPEND(b, " (f)");
     if (t->attached_picture)
         APPEND(b, " [P]");
     if (t->title)
@@ -383,6 +385,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
         .ff_index = stream->ff_index,
         .title = stream->title,
         .default_track = stream->default_track,
+        .forced_track = stream->forced_track,
         .attached_picture = stream->attached_picture != NULL,
         .lang = stream->lang,
         .under_timeline = under_timeline,
@@ -424,7 +427,8 @@ static int match_lang(char **langs, char *lang)
  * 1) track is external (no_default cancels this)
  * 1b) track was passed explicitly (is not an auto-loaded subtitle)
  * 2) earlier match in lang list
- * 3) track is marked default
+ * 3a) track is marked forced
+ * 3b) track is marked default
  * 4) attached picture, HLS bitrate
  * 5) lower track number
  * If select_fallback is not set, 5) is only used to determine whether a
@@ -444,6 +448,8 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs,
     int l1 = match_lang(langs, t1->lang), l2 = match_lang(langs, t2->lang);
     if (l1 != l2)
         return l1 > l2;
+    if (t1->forced_track != t2->forced_track)
+        return t1->forced_track;
     if (t1->default_track != t2->default_track)
         return t1->default_track;
     if (t1->attached_picture != t2->attached_picture)
@@ -480,7 +486,8 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             pick = track;
     }
     if (pick && !select_fallback && !(pick->is_external && !pick->no_default)
-        && !match_lang(langs, pick->lang) && !pick->default_track)
+        && !match_lang(langs, pick->lang) && !pick->default_track
+        && !pick->forced_track)
         pick = NULL;
     if (pick && pick->attached_picture && !mpctx->opts->audio_display)
         pick = NULL;

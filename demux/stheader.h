@@ -58,6 +58,7 @@ struct sh_stream {
     char *title;
     char *lang;                 // language code
     bool default_track;         // container default track flag
+    bool forced_track;          // container forced track flag
     int hls_bitrate;
 
     bool missing_timestamps;

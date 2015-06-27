@@ -636,7 +636,9 @@ static void handle_stream(demuxer_t *demuxer, int i)
         sh->lav_headers = codec;
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
-            sh->default_track = 1;
+            sh->default_track = true;
+        if (st->disposition & AV_DISPOSITION_FORCED)
+            sh->forced_track = true;
         if (priv->format_hack.use_stream_ids)
             sh->demuxer_id = st->id;
         AVDictionaryEntry *title = av_dict_get(st->metadata, "title", NULL, 0);
