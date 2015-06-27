@@ -9,7 +9,7 @@ local ytdl = {
 
 local function exec(args)
     local ret = utils.subprocess({args = args})
-    return ret.status, ret.stdout
+    return ret.status, ret.stdout, ret
 end
 
 -- return if it was explicitly set on the command line
@@ -123,10 +123,12 @@ mp.add_hook("on_load", 10, function ()
         end
         table.insert(command, "--")
         table.insert(command, url)
-        local es, json = exec(command)
+        local es, json, result = exec(command)
 
         if (es < 0) or (json == nil) or (json == "") then
-            msg.warn("youtube-dl failed, trying to play URL directly ...")
+            if not result.killed_by_us then
+                msg.warn("youtube-dl failed, trying to play URL directly ...")
+            end
             return
         end
 
