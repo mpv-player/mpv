@@ -386,6 +386,7 @@ static void *terminal_thread(void *ptr)
     mpthread_set_name("terminal");
     bool stdin_ok = read_terminal; // if false, we still wait for SIGTERM
     while (1) {
+        getch2_poll();
         struct pollfd fds[2] = {
             {.events = POLLIN, .fd = death_pipe[0]},
             {.events = POLLIN, .fd = STDIN_FILENO},
@@ -396,7 +397,6 @@ static void *terminal_thread(void *ptr)
             break;
         if (fds[1].revents)
             stdin_ok = getch2(input_ctx);
-        getch2_poll();
     }
     // Important if we received SIGTERM, rather than regular quit.
     struct mp_cmd *cmd = mp_input_parse_cmd(input_ctx, bstr0("quit"), "");
