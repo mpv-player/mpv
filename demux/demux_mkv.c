@@ -726,7 +726,7 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
         return 0;
     }
 
-    MP_VERBOSE(demuxer, "/---- [ parsing cues ] -----------\n");
+    MP_VERBOSE(demuxer, "Parsing cues...\n");
     struct ebml_cues cues = {0};
     struct ebml_parse_ctx parse_ctx = {demuxer->log};
     if (ebml_read_element(s, &parse_ctx, &cues, &ebml_cues_desc) < 0)
@@ -760,7 +760,6 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     // Do not attempt to create index on the fly.
     mkv_d->index_complete = true;
 
-    MP_VERBOSE(demuxer, "\\---- [ parsing cues ] -----------\n");
     talloc_free(parse_ctx.talloc_ctx);
     return 0;
 }
@@ -777,7 +776,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
     if (wanted_edition_uid)
         wanted_edition = -1;
 
-    MP_VERBOSE(demuxer, "/---- [ parsing chapters ] ---------\n");
+    MP_VERBOSE(demuxer, "Parsing chapters...\n");
     struct ebml_chapters file_chapters = {0};
     struct ebml_parse_ctx parse_ctx = {demuxer->log};
     if (ebml_read_element(s, &parse_ctx, &file_chapters,
@@ -908,7 +907,6 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
     demuxer->edition = selected_edition;
 
     talloc_free(parse_ctx.talloc_ctx);
-    MP_VERBOSE(demuxer, "\\---- [ parsing chapters ] ---------\n");
     return 0;
 }
 
@@ -979,7 +977,7 @@ static int demux_mkv_read_attachments(demuxer_t *demuxer)
 {
     stream_t *s = demuxer->stream;
 
-    MP_VERBOSE(demuxer, "/---- [ parsing attachments ] ---------\n");
+    MP_VERBOSE(demuxer, "Parsing attachments...\n");
 
     struct ebml_attachments attachments = {0};
     struct ebml_parse_ctx parse_ctx = {demuxer->log};
@@ -1003,7 +1001,6 @@ static int demux_mkv_read_attachments(demuxer_t *demuxer)
     }
 
     talloc_free(parse_ctx.talloc_ctx);
-    MP_VERBOSE(demuxer, "\\---- [ parsing attachments ] ---------\n");
     return 0;
 }
 
@@ -1055,7 +1052,7 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
     struct ebml_seek_head seekhead = {0};
     struct ebml_parse_ctx parse_ctx = {demuxer->log};
 
-    MP_VERBOSE(demuxer, "/---- [ parsing seek head ] ---------\n");
+    MP_VERBOSE(demuxer, "Parsing seek head...\n");
     if (ebml_read_element(s, &parse_ctx, &seekhead, &ebml_seek_head_desc) < 0) {
         res = -1;
         goto out;
@@ -1072,7 +1069,6 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
         get_header_element(demuxer, seek->seek_id, pos);
     }
  out:
-    MP_VERBOSE(demuxer, "\\---- [ parsing seek head ] ---------\n");
     talloc_free(parse_ctx.talloc_ctx);
     return res;
 }
