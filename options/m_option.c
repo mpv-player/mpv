@@ -2747,8 +2747,8 @@ print_help: ;
             desc->print_help(log);
         m_config_print_option_list(config);
     } else {
-        mp_warn(log, "Option %.*s doesn't exist.\n",
-               BSTR_P(opt_name));
+        mp_warn(log, "Option %.*s: item %.*s doesn't exist.\n",
+               BSTR_P(opt_name), BSTR_P(name));
     }
     r = M_OPT_EXIT - 1;
 
