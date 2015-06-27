@@ -58,6 +58,29 @@ static bool replace_speakers(struct mp_chmap *map, struct mp_chmap list[2])
     return false;
 }
 
+// These go strictly from the first to the second entry and always use the
+// full layout (possibly reordered and/or padding channels added).
+static const struct mp_chmap preferred_remix[][2] = {
+    // mono can be perfectly played as stereo
+    { MP_CHMAP_INIT_MONO, MP_CHMAP_INIT_STEREO },
+};
+
+// Conversion from src to dst is explicitly encouraged and should be preferred
+// over "mathematical" upmixes or downmixes (which minimize lost channels).
+static bool test_preferred_remix(const struct mp_chmap *src,
+                                 const struct mp_chmap *dst)
+{
+    struct mp_chmap src_p = *src, dst_p = *dst;
+    mp_chmap_remove_na(&src_p);
+    mp_chmap_remove_na(&dst_p);
+    for (int n = 0; n < MP_ARRAY_SIZE(preferred_remix); n++) {
+        if (mp_chmap_equals_reordered(&src_p, &preferred_remix[n][0]) &&
+            mp_chmap_equals_reordered(&dst_p, &preferred_remix[n][1]))
+            return true;
+    }
+    return false;
+}
+
 // Allow all channel layouts that can be expressed with mp_chmap.
 // (By default, all layouts are rejected.)
 void mp_chmap_sel_add_any(struct mp_chmap_sel *s)
@@ -218,6 +241,14 @@ static int mp_chmap_diffn_r(const struct mp_chmap *a, const struct mp_chmap *b)
             mindiff = d;
     }
 
+    // Special-case: we consider stereo a replacement for mono. (This is not
+    // true in the other direction. Also, fl-fr is generally not a replacement
+    // for fc. Thus it's not part of the speaker replacement list.)
+    struct mp_chmap mono   = MP_CHMAP_INIT_MONO;
+    struct mp_chmap stereo = MP_CHMAP_INIT_STEREO;
+    if (mp_chmap_equals(&mono, b) && mp_chmap_equals(&stereo, a))
+        mindiff = 0;
+
     return mindiff;
 }
 
@@ -236,6 +267,14 @@ static bool mp_chmap_is_better(struct mp_chmap *req, struct mp_chmap *old,
     if (mp_chmap_equals(req, old))
         return false;
     if (mp_chmap_equals(req, new))
+        return true;
+
+    // If there's no exact match, strictly do a preferred conversion.
+    bool old_pref = test_preferred_remix(req, old);
+    bool new_pref = test_preferred_remix(req, new);
+    if (old_pref && !new_pref)
+        return false;
+    if (!old_pref && new_pref)
         return true;
 
     int old_lost_r = mp_chmap_diffn_r(req, old); // num. channels only in req
@@ -272,15 +311,6 @@ static bool mp_chmap_is_better(struct mp_chmap *req, struct mp_chmap *old,
 // Determine which channel map to fallback to given a source channel map.
 bool mp_chmap_sel_fallback(const struct mp_chmap_sel *s, struct mp_chmap *map)
 {
-    // special case: if possible always fallback mono to stereo (instead of
-    // looking for a multichannel upmix)
-    struct mp_chmap mono   = MP_CHMAP_INIT_MONO;
-    struct mp_chmap stereo = MP_CHMAP_INIT_STEREO;
-    if (mp_chmap_equals(&mono, map) && test_layout(s, &stereo)) {
-        *map = stereo;
-        return true;
-    }
-
     struct mp_chmap best = {0};
 
     for (int n = 0; n < s->num_chmaps; n++) {
