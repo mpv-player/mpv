@@ -310,7 +310,7 @@ static int format_from_waveformat(WAVEFORMATEX *wf)
     // configured "special" formats, otherwise it will return 0.
     if (wf->wBitsPerSample % 8)
         return 0;
-    return af_fmt_change_bytes(format, wf->wBitsPerSample / 8) * 8;
+    return af_fmt_change_bytes(format, wf->wBitsPerSample / 8);
 }
 
 static bool chmap_from_waveformat(struct mp_chmap *channels, const WAVEFORMATEX *wf)
