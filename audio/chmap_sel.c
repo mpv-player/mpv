@@ -281,9 +281,6 @@ bool mp_chmap_sel_fallback(const struct mp_chmap_sel *s, struct mp_chmap *map)
         return true;
     }
 
-    // Add layouts and replaced layouts. Layouts with replacements applied
-    // are considered equivalent to the original, but the ori
-
     struct mp_chmap best = {0};
 
     for (int n = 0; n < s->num_chmaps; n++) {
