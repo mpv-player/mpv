@@ -3551,6 +3551,7 @@ static const char *const *const mp_event_property_change[] = {
       "demuxer-cache-time"),
     E(MP_EVENT_WIN_RESIZE, "window-scale"),
     E(MP_EVENT_WIN_STATE, "window-minimized", "display-names", "display-fps"),
+    E(MP_EVENT_EXT_FULLSCREEN_CHANGE, "fullscreen"),
 };
 #undef E
 

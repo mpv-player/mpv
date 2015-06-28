@@ -680,6 +680,8 @@ static void handle_vo_events(struct MPContext *mpctx)
         mp_notify(mpctx, MP_EVENT_WIN_RESIZE, NULL);
     if (events & VO_EVENT_WIN_STATE)
         mp_notify(mpctx, MP_EVENT_WIN_STATE, NULL);
+    if (events & VO_EVENT_EXT_FULLSCREEN_CHANGE)
+        mp_notify(mpctx, MP_EVENT_EXT_FULLSCREEN_CHANGE, NULL);
 }
 
 void add_frame_pts(struct MPContext *mpctx, double pts)

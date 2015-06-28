@@ -889,6 +889,9 @@ static int get_mods(unsigned int state)
     return modifiers;
 }
 
+static void vo_x11_move_resize(struct vo *vo, bool move, bool resize,
+                               struct mp_rect rc);
+
 int vo_x11_check_events(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -1028,6 +1031,38 @@ int vo_x11_check_events(struct vo *vo)
                 }
             } else if (Event.xproperty.atom == XA(x11, _NET_WM_STATE)) {
                 x11->pending_vo_events |= VO_EVENT_WIN_STATE;
+                
+                if (x11->wm_type & vo_wm_FULLSCREEN) {
+                    int num_elems;
+                    long *elems = x11_get_property(x11, x11->window, XA(x11, _NET_WM_STATE),
+                                                   XA_ATOM, 32, &num_elems);
+                    int is_fullscreen = 0;
+                    if (elems) {
+                        Atom fullscreen_prop = XA(x11, _NET_WM_STATE_FULLSCREEN);
+                        for (int n = 0; n < num_elems; n++) {
+                            if (elems[n] == fullscreen_prop) {
+                                is_fullscreen = 1;
+                                break;
+                            }
+                        }
+                        XFree(elems);
+                    }
+                    
+                    if((vo->opts->fullscreen && !is_fullscreen) ||
+                       (!vo->opts->fullscreen && is_fullscreen)) {
+                        vo->opts->fullscreen = is_fullscreen;
+                        x11->fs = is_fullscreen;
+                        x11->pending_vo_events |= VO_EVENT_EXT_FULLSCREEN_CHANGE;
+                        
+                        if (!is_fullscreen && (x11->pos_changed_during_fs ||
+                                               x11->size_changed_during_fs))
+                        {
+                            vo_x11_move_resize(vo, x11->pos_changed_during_fs,
+                                                   x11->size_changed_during_fs,
+                                                   x11->nofsrc);
+                        }
+                    }
+                }
             } else if (Event.xproperty.atom == x11->icc_profile_property) {
                 x11->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
             }
