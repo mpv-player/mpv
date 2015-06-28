@@ -135,6 +135,8 @@ static void vo_x11_selectinput_witherr(struct vo *vo, Display *display,
 static void vo_x11_setlayer(struct vo *vo, bool ontop);
 static void vo_x11_xembed_handle_message(struct vo *vo, XClientMessageEvent *ce);
 static void vo_x11_xembed_send_message(struct vo_x11_state *x11, long m[4]);
+static void vo_x11_move_resize(struct vo *vo, bool move, bool resize,
+                               struct mp_rect rc);
 
 #define XA(x11, s) (XInternAtom((x11)->display, # s, False))
 #define XAs(x11, s) XInternAtom((x11)->display, s, False)
@@ -888,9 +890,6 @@ static int get_mods(unsigned int state)
         modifiers |= MP_KEY_MODIFIER_META;
     return modifiers;
 }
-
-static void vo_x11_move_resize(struct vo *vo, bool move, bool resize,
-                               struct mp_rect rc);
 
 static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
 {
