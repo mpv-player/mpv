@@ -72,10 +72,12 @@ struct priv {
     int mode_id;
 
     int fd;
-    struct vt_switcher vt_switcher;
     struct modeset_dev *dev;
     drmModeCrtc *old_crtc;
     drmEventContext ev;
+
+    bool vt_switcher_active;
+    struct vt_switcher vt_switcher;
 
     bool active;
     bool pflip_happening;
@@ -433,16 +435,19 @@ static void acquire_vt(void *data)
 static int wait_events(struct vo *vo, int64_t until_time_us)
 {
     struct priv *p = vo->priv;
-    int64_t wait_us = until_time_us - mp_time_us();
-    int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
-    vt_switcher_poll(&p->vt_switcher, timeout_ms);
+    if (p->vt_switcher_active) {
+        int64_t wait_us = until_time_us - mp_time_us();
+        int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
+        vt_switcher_poll(&p->vt_switcher, timeout_ms);
+    }
     return 0;
 }
 
 static void wakeup(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    vt_switcher_interrupt_poll(&p->vt_switcher);
+    if (p->vt_switcher_active)
+        vt_switcher_interrupt_poll(&p->vt_switcher);
 }
 
 static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
@@ -568,7 +573,9 @@ static void uninit(struct vo *vo)
         drmModeFreeEncoder(p->dev->enc);
     }
 
-    vt_switcher_destroy(&p->vt_switcher);
+    if (p->vt_switcher_active)
+        vt_switcher_destroy(&p->vt_switcher);
+
     talloc_free(p->last_input);
     talloc_free(p->cur_frame);
     talloc_free(p->dev);
@@ -583,11 +590,13 @@ static int preinit(struct vo *vo)
     p->ev.version = DRM_EVENT_CONTEXT_VERSION;
     p->ev.page_flip_handler = modeset_page_flipped;
 
-    if (vt_switcher_init(&p->vt_switcher, vo->log))
-        goto err;
-
-    vt_switcher_acquire(&p->vt_switcher, acquire_vt, vo);
-    vt_switcher_release(&p->vt_switcher, release_vt, vo);
+    p->vt_switcher_active = vt_switcher_init(&p->vt_switcher, vo->log) == 0;
+    if (p->vt_switcher_active) {
+        vt_switcher_acquire(&p->vt_switcher, acquire_vt, vo);
+        vt_switcher_release(&p->vt_switcher, release_vt, vo);
+    } else {
+        MP_WARN(vo, "Failed to set up VT switcher. Terminal switching will be unavailable.\n");
+    }
 
     if (modeset_open(vo, &p->fd, p->device_path))
         goto err;
