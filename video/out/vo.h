@@ -42,11 +42,9 @@
 #define VO_EVENT_AMBIENT_LIGHTING_CHANGED 16
 // Special mechanism for making resizing with Cocoa react faster
 #define VO_EVENT_LIVE_RESIZING 32
-// Window entered or left fullscreen mode without mpv intervention
-#define VO_EVENT_EXT_FULLSCREEN_CHANGE 64
 
 // Set of events the player core may be interested in.
-#define VO_EVENTS_USER (VO_EVENT_RESIZE | VO_EVENT_WIN_STATE | VO_EVENT_EXT_FULLSCREEN_CHANGE)
+#define VO_EVENTS_USER (VO_EVENT_RESIZE | VO_EVENT_WIN_STATE)
 
 enum mp_voctrl {
     /* signal a device reset seek */

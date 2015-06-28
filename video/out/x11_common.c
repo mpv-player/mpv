@@ -1052,7 +1052,6 @@ int vo_x11_check_events(struct vo *vo)
                        (!vo->opts->fullscreen && is_fullscreen)) {
                         vo->opts->fullscreen = is_fullscreen;
                         x11->fs = is_fullscreen;
-                        x11->pending_vo_events |= VO_EVENT_EXT_FULLSCREEN_CHANGE;
                         
                         if (!is_fullscreen && (x11->pos_changed_during_fs ||
                                                x11->size_changed_during_fs))
