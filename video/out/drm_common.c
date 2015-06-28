@@ -52,13 +52,13 @@ int vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
     vt_switcher_pipe[1] = -1;
 
     if (mp_make_cloexec_pipe(vt_switcher_pipe)) {
-        MP_ERR(s, "Creating pipe failed: %s", mp_strerror(errno));
+        MP_ERR(s, "Creating pipe failed: %s\n", mp_strerror(errno));
         return -1;
     }
 
     s->tty_fd = open("/dev/tty", O_RDWR | O_CLOEXEC);
     if (s->tty_fd < 0) {
-        MP_ERR(s, "Can't open TTY for VT control: %s", mp_strerror(errno));
+        MP_ERR(s, "Can't open TTY for VT control: %s\n", mp_strerror(errno));
         return -1;
     }
 
@@ -71,7 +71,7 @@ int vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
 
     struct vt_mode vt_mode;
     if (ioctl(s->tty_fd, VT_GETMODE, &vt_mode) < 0) {
-        MP_ERR(s, "VT_GETMODE failed: %s", mp_strerror(errno));
+        MP_ERR(s, "VT_GETMODE failed: %s\n", mp_strerror(errno));
         return -1;
     }
 
@@ -79,7 +79,7 @@ int vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
     vt_mode.relsig = SIGUSR1;
     vt_mode.acqsig = SIGUSR2;
     if (ioctl(s->tty_fd, VT_SETMODE, &vt_mode) < 0) {
-        MP_ERR(s, "VT_SETMODE failed: %s", mp_strerror(errno));
+        MP_ERR(s, "VT_SETMODE failed: %s\n", mp_strerror(errno));
         return -1;
     }
 
