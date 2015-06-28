@@ -3550,7 +3550,7 @@ static const char *const *const mp_event_property_change[] = {
       "demuxer-cache-duration", "demuxer-cache-idle", "paused-for-cache",
       "demuxer-cache-time"),
     E(MP_EVENT_WIN_RESIZE, "window-scale"),
-    E(MP_EVENT_WIN_STATE, "window-minimized", "display-names", "display-fps"),
+    E(MP_EVENT_WIN_STATE, "window-minimized", "display-names", "display-fps", "fullscreen"),
 };
 #undef E
 

@@ -135,6 +135,8 @@ static void vo_x11_selectinput_witherr(struct vo *vo, Display *display,
 static void vo_x11_setlayer(struct vo *vo, bool ontop);
 static void vo_x11_xembed_handle_message(struct vo *vo, XClientMessageEvent *ce);
 static void vo_x11_xembed_send_message(struct vo_x11_state *x11, long m[4]);
+static void vo_x11_move_resize(struct vo *vo, bool move, bool resize,
+                               struct mp_rect rc);
 
 #define XA(x11, s) (XInternAtom((x11)->display, # s, False))
 #define XAs(x11, s) XInternAtom((x11)->display, s, False)
@@ -889,6 +891,46 @@ static int get_mods(unsigned int state)
     return modifiers;
 }
 
+static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    if (x11->wm_type & vo_wm_FULLSCREEN) {
+        int num_elems;
+        long *elems = x11_get_property(x11, x11->window, XA(x11, _NET_WM_STATE),
+                                       XA_ATOM, 32, &num_elems);
+        int is_fullscreen = 0;
+        if (elems) {
+            Atom fullscreen_prop = XA(x11, _NET_WM_STATE_FULLSCREEN);
+            for (int n = 0; n < num_elems; n++) {
+                if (elems[n] == fullscreen_prop) {
+                    is_fullscreen = 1;
+                    break;
+                }
+            }
+            XFree(elems);
+        }
+
+        if ((vo->opts->fullscreen && !is_fullscreen) ||
+            (!vo->opts->fullscreen && is_fullscreen))
+        {
+            vo->opts->fullscreen = is_fullscreen;
+            x11->fs = is_fullscreen;
+
+            if (!is_fullscreen && (x11->pos_changed_during_fs ||
+                                   x11->size_changed_during_fs))
+            {
+                vo_x11_move_resize(vo, x11->pos_changed_during_fs,
+                                       x11->size_changed_during_fs,
+                                       x11->nofsrc);
+            }
+            
+            x11->size_changed_during_fs = false;
+            x11->pos_changed_during_fs = false;
+        }
+    }
+}
+
 int vo_x11_check_events(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -1028,6 +1070,7 @@ int vo_x11_check_events(struct vo *vo)
                 }
             } else if (Event.xproperty.atom == XA(x11, _NET_WM_STATE)) {
                 x11->pending_vo_events |= VO_EVENT_WIN_STATE;
+                vo_x11_check_net_wm_state_fullscreen_change(vo);
             } else if (Event.xproperty.atom == x11->icc_profile_property) {
                 x11->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
             }
