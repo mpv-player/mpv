@@ -846,10 +846,19 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
             struct matroska_chapter chapter = {0};
             char *name = "(unnamed)";
 
-            if (!ca->n_chapter_time_start)
-                MP_MSG(demuxer, warn_level, "Chapter lacks start time\n");
             chapter.start = ca->chapter_time_start;
             chapter.end = ca->chapter_time_end;
+
+            if (!ca->n_chapter_time_start)
+                MP_MSG(demuxer, warn_level, "Chapter lacks start time\n");
+            if (!ca->n_chapter_time_start || !ca->n_chapter_time_end) {
+                if (demuxer->matroska_data.ordered_chapters) {
+                    MP_MSG(demuxer, warn_level, "Chapter lacks start or end "
+                           "time, disabling ordered chapters.\n");
+                    demuxer->matroska_data.ordered_chapters = NULL;
+                    demuxer->matroska_data.num_ordered_chapters = 0;
+                }
+            }
 
             if (ca->n_chapter_display) {
                 if (ca->n_chapter_display > 1)
