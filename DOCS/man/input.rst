@@ -1579,7 +1579,7 @@ Property list
         ``yes`` if the track has the default flag set in the file, ``no``
         otherwise.
 
-    ``track-list/N/foced``
+    ``track-list/N/forced``
         ``yes`` if the track has the forced flag set in the file, ``no``
         otherwise.
 
