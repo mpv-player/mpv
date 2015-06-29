@@ -924,7 +924,7 @@ static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
                                        x11->size_changed_during_fs,
                                        x11->nofsrc);
             }
-            
+
             x11->size_changed_during_fs = false;
             x11->pos_changed_during_fs = false;
         }
