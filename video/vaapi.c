@@ -185,6 +185,11 @@ struct va_surface {
     VASurfaceID id;
     int rt_format;
 
+    // The actually allocated surface size (needed for cropping).
+    // mp_images can have a smaller size than this, which means they are
+    // cropped down to a smaller size by removing right/bottom pixels.
+    int w, h;
+
     VAImage image;       // used for software decoding case
 };
 
@@ -239,6 +244,8 @@ static struct mp_image *alloc_surface(struct mp_vaapi_ctx *ctx, int rt_format,
         .ctx = ctx,
         .id = id,
         .rt_format = rt_format,
+        .w = w,
+        .h = h,
         .display = ctx->display,
         .image = { .image_id = VA_INVALID_ID, .buf = VA_INVALID_ID },
     };
@@ -274,7 +281,7 @@ static int va_surface_image_alloc(struct mp_image *img, VAImageFormat *format)
 
     va_surface_image_destroy(p);
 
-    VAStatus status = vaCreateImage(p->display, format, img->w, img->h, &p->image);
+    VAStatus status = vaCreateImage(p->display, format, p->w, p->h, &p->image);
     if (!CHECK_VA_STATUS(p->ctx, "vaCreateImage()")) {
         p->image.image_id = VA_INVALID_ID;
         r = -1;
@@ -355,6 +362,8 @@ int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src)
     struct mp_image img;
     if (!va_image_map(p->ctx, &p->image, &img))
         return -1;
+    assert(sw_src->w <= img.w && sw_src->h <= img.h);
+    mp_image_set_size(&img, sw_src->w, sw_src->h); // copy only visible part
     mp_image_copy(&img, sw_src);
     va_image_unmap(p->ctx, &p->image);
 
@@ -386,7 +395,7 @@ static struct mp_image *try_download(struct mp_image *src,
 
     va_lock(p->ctx);
     status = vaGetImage(p->display, p->id, 0, 0,
-                        src->w, src->h, image->image_id);
+                        p->w, p->h, image->image_id);
     va_unlock(p->ctx);
     if (status != VA_STATUS_SUCCESS)
         return NULL;
@@ -394,6 +403,8 @@ static struct mp_image *try_download(struct mp_image *src,
     struct mp_image *dst = NULL;
     struct mp_image tmp;
     if (va_image_map(p->ctx, image, &tmp)) {
+        assert(src->w <= tmp.w && src->h <= tmp.h);
+        mp_image_set_size(&tmp, src->w, src->h); // copy only visible part
         dst = mp_image_pool_get(pool, tmp.imgfmt, tmp.w, tmp.h);
         if (dst) {
             mp_image_copy(dst, &tmp);
