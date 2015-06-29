@@ -471,6 +471,10 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
         return false;
     }
 
+    AudioStreamBasicDescription prev_format;
+    err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &prev_format);
+    CHECK_CA_ERROR("can't get current physical format");
+
     /* Install the callback. */
     AudioObjectPropertyAddress p_addr = {
         .mSelector = kAudioStreamPropertyPhysicalFormat,
@@ -485,7 +489,7 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
 
     /* Change the format. */
     err = CA_SET(stream, kAudioStreamPropertyPhysicalFormat, &change_format);
-    CHECK_CA_ERROR("error changing physical format");
+    CHECK_CA_WARN("error changing physical format");
 
     /* The AudioStreamSetProperty is not only asynchronous,
      * it is also not Atomic, in its behaviour. */
@@ -507,6 +511,13 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
     }
 
     ca_print_asbd(ao, "actual format in use:", &actual_format);
+
+    if (!format_set) {
+        // Some drivers just fuck up and get into a broken state. Restore the
+        // old format in this case.
+        err = CA_SET(stream, kAudioStreamPropertyPhysicalFormat, &prev_format);
+        CHECK_CA_WARN("error restoring physical format");
+    }
 
     err = AudioObjectRemovePropertyListener(stream, &p_addr,
                                             ca_change_format_listener,

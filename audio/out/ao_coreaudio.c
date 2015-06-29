@@ -235,7 +235,8 @@ static void init_physical_format(struct ao *ao)
                          &p->original_asbd);
             CHECK_CA_WARN("could not get current physical stream format");
 
-            ca_change_physical_format_sync(ao, streams[i], best_asbd);
+            if (!ca_change_physical_format_sync(ao, streams[i], best_asbd))
+                p->original_asbd = (AudioStreamBasicDescription){0};
             break;
         }
     }
