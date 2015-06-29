@@ -561,7 +561,7 @@ Input Commands that are Possibly Subject to Change
     different memory region to prevent tearing).
 
     It is also possible to pass a raw memory address for use as bitmap memory
-    by passing a memory address as integer prefixed with a ``&`` character.
+    by passing a memory address as integer prefixed with an ``&`` character.
     Passing the wrong thing here will crash the player. This mode might be
     useful for use with libmpv. The ``offset`` parameter is simply added to the
     memory address (since mpv 0.8.0, ignored before).
