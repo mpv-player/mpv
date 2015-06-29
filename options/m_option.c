@@ -1018,7 +1018,8 @@ static char *print_float(const m_option_t *opt, const void *val)
 
 static char *print_float_f3(const m_option_t *opt, const void *val)
 {
-    return talloc_asprintf(NULL, "%.3f", VAL(val));
+    bool printing_zero = fabsf(VAL(val)) < 0.0005; // avoid printing -0.000
+    return talloc_asprintf(NULL, "%.3f", printing_zero ? 0.0 : VAL(val));
 }
 
 static void add_float(const m_option_t *opt, void *val, double add, bool wrap)
