@@ -49,11 +49,16 @@ static void aspect_calc_panscan(struct mp_log *log, struct mp_vo_opts *opts,
            fwidth, fheight, d_w, d_h);
 
     int vo_panscan_area = window_h - fheight;
-    if (!vo_panscan_area)
+    double f_w = fwidth / (double)fheight;
+    double f_h = 1;
+    if (!vo_panscan_area) {
         vo_panscan_area = window_w - fwidth;
+        f_w = 1;
+        f_h = fheight / (double)fwidth;
+    }
 
-    *out_w = fwidth + vo_panscan_area * opts->panscan * fwidth / fheight;
-    *out_h = fheight + vo_panscan_area * opts->panscan;
+    *out_w = fwidth + vo_panscan_area * opts->panscan * f_w;
+    *out_h = fheight + vo_panscan_area * opts->panscan * f_h;
 }
 
 // Clamp [start, end) to range [0, size) with various fallbacks.
