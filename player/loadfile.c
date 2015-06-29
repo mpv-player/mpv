@@ -421,8 +421,13 @@ static int match_lang(char **langs, char *lang)
 static int match_achans(char **achans, uint8_t tachans)
 {
     for (int idx = 0; achans && achans[idx]; idx++) {
-        if (tachans && (uint8_t)atoi(achans[idx]) == tachans)
-            return INT_MAX - idx;
+        char *endptr = NULL;
+        errno = 0;
+        int chans = strtoul(achans[idx], &endptr, 10);
+        if (!errno && *endptr == '\0') {
+            if (tachans && (uint8_t)chans == tachans)
+                return INT_MAX - idx;
+        }
     }
     return 0;
 }
@@ -459,7 +464,7 @@ static bool compare_track(struct track *t1, struct track *t2,
     int l1 = match_lang(langs, t1->lang), l2 = match_lang(langs, t2->lang);
     if (l1 != l2)
         return l1 > l2;
-    if (t1->type == STREAM_AUDIO && t2->type == STREAM_AUDIO) {
+    if (t1->type == STREAM_AUDIO) {
         int c1 = match_achans(achans, t1->stream->audio->channels.num);
         int c2 = match_achans(achans, t2->stream->audio->channels.num);
         if (c1 != c2)
@@ -504,9 +509,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             pick = track;
     }
     if (pick && !select_fallback && !(pick->is_external && !pick->no_default)
-        && !match_lang(langs, pick->lang) && (type == STREAM_AUDIO
-            && !match_achans(achans, pick->stream->audio->channels.num))
-        && !pick->default_track
+        && !match_lang(langs, pick->lang) && !pick->default_track
         && !pick->forced_track)
         pick = NULL;
     if (pick && pick->attached_picture && !mpctx->opts->audio_display)
