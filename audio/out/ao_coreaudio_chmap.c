@@ -241,6 +241,8 @@ bool ca_init_chmap(struct ao *ao, AudioDeviceID device)
     struct mp_chmap_sel chmap_sel = {.tmp = ta_ctx};
     struct mp_chmap chmap = {0};
 
+    mp_chmap_sel_add_map(&chmap_sel, &(struct mp_chmap)MP_CHMAP_INIT_MONO);
+
     AudioChannelLayout *ml = ca_query_layout(ao, device, ta_ctx);
     if (ml && ca_layout_to_mp_chmap(ao, ml, &chmap))
         mp_chmap_sel_add_map(&chmap_sel, &chmap);
