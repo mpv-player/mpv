@@ -206,6 +206,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG_STORE("no-audio", stream_id[0][STREAM_AUDIO], 0, -2),
     OPT_STRINGLIST("alang", stream_lang[STREAM_AUDIO], 0),
     OPT_STRINGLIST("slang", stream_lang[STREAM_SUB], 0),
+    OPT_STRINGLIST("achans", stream_achans, 0),
 
     OPT_CHOICE("audio-display", audio_display, 0,
                ({"no", 0}, {"attachment", 1})),
