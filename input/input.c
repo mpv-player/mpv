@@ -453,7 +453,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
         if (MP_KEY_IS_MOUSE_MOVE(code))
             msgl = MSGL_DEBUG;
         char *key_buf = mp_input_get_key_combo_name(&code, 1);
-        MP_MSG(ictx, msgl, "No bind found for key '%s'.\n", key_buf);
+        MP_MSG(ictx, msgl, "No key binding found for key '%s'.\n", key_buf);
         talloc_free(key_buf);
         return NULL;
     }
@@ -469,7 +469,7 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
         ret->is_mouse_button = code & MP_KEY_EMIT_ON_UP;
     } else {
         char *key_buf = mp_input_get_key_combo_name(&code, 1);
-        MP_ERR(ictx, "Invalid command for bound key '%s': '%s'\n",
+        MP_ERR(ictx, "Invalid command for key binding '%s': '%s'\n",
                key_buf, cmd->cmd);
         talloc_free(key_buf);
     }
