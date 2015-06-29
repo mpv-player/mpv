@@ -152,7 +152,7 @@ Available filters are:
     number (1.33). Alternatively, you may specify the exact display width and
     height desired. Note that this filter does *not* do any scaling itself; it
     just affects what later scalers (software or hardware) will do when
-    auto-scaling to correct aspect.
+    auto-scaling to the correct aspect.
 
     ``<w>,<h>``
         New display width and height.
