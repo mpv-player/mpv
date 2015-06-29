@@ -133,8 +133,8 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
     &mp_vd_lavc_vda,
 #endif
 #if HAVE_VAAPI_HWACCEL
-    &mp_vd_lavc_vaapi_copy,
     &mp_vd_lavc_vaapi,
+    &mp_vd_lavc_vaapi_copy,
 #endif
 #if HAVE_DXVA2_HWACCEL
     &mp_vd_lavc_dxva2_copy,
