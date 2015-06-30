@@ -270,8 +270,13 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     uint64_t in_ch_layout = mp_chmap_to_lavc_unchecked(&map_in);
     uint64_t out_ch_layout = mp_chmap_to_lavc_unchecked(&map_out);
 
-    struct mp_chmap in_lavc;
+    struct mp_chmap in_lavc, out_lavc;
     mp_chmap_from_lavc(&in_lavc, in_ch_layout);
+    mp_chmap_from_lavc(&out_lavc, out_ch_layout);
+
+    MP_VERBOSE(af, "Remix: %s -> %s\n", mp_chmap_to_str(&in_lavc),
+                                        mp_chmap_to_str(&out_lavc));
+
     if (in_lavc.num != map_in.num) {
         // For handling NA channels, we would have to add a planarization step.
         MP_FATAL(af, "Unsupported channel remapping.\n");
@@ -281,8 +286,6 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     mp_chmap_get_reorder(s->reorder_in, &map_in, &in_lavc);
     transpose_order(s->reorder_in, map_in.num);
 
-    struct mp_chmap out_lavc;
-    mp_chmap_from_lavc(&out_lavc, out_ch_layout);
     if (mp_chmap_equals(&out_lavc, &map_out)) {
         // No intermediate step required - output new format directly.
         out_samplefmtp = out_samplefmt;
