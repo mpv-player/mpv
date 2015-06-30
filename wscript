@@ -911,6 +911,12 @@ def configure(ctx):
 
     ctx.store_dependencies_lists()
 
+def __write_version__(ctx):
+    import subprocess
+    subprocess.call(["sh", "./version.sh",
+                     "--versionh=" + ctx.bldnode.abspath() + "/version.h"],
+                    cwd=ctx.srcnode.abspath())
+
 def build(ctx):
     if ctx.options.variant not in ctx.all_envs:
         from waflib import Errors
@@ -918,6 +924,7 @@ def build(ctx):
             'The project was not configured: run "waf --variant={0} configure" first!'
                 .format(ctx.options.variant))
     ctx.unpack_dependencies_lists()
+    __write_version__(ctx)
     ctx.load('wscript_build')
 
 def init(ctx):
