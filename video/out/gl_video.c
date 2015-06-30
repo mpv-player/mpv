@@ -2070,6 +2070,12 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
         vp_h = p->dst_rect.y1 - p->dst_rect.y0;
 
+    // Reset the queue completely if this is a still image, to avoid any
+    // interpolation artifacts from surrounding frames when unpausing or
+    // framestepping
+    if (t->still)
+        gl_video_reset_surfaces(p);
+
     // First of all, figure out if we have a frame availble at all, and draw
     // it manually + reset the queue if not
     if (p->surfaces[p->surface_now].pts == MP_NOPTS_VALUE) {
@@ -2158,7 +2164,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     p->osd_pts = p->surfaces[surface_now].pts;
 
     // Finally, draw the right mix of frames to the screen.
-    if (!valid) {
+    if (!valid || t->still) {
         // surface_now is guaranteed to be valid, so we can safely use it.
         pass_load_fbotex(p, &p->surfaces[surface_now].fbotex, 0, vp_w, vp_h);
         GLSL(vec4 color = texture(texture0, texcoord0);)
@@ -2223,7 +2229,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
     if (has_frame) {
         gl_sc_set_vao(p->sc, &p->vao);
 
-        if (p->opts.interpolation && !frame->still) {
+        if (p->opts.interpolation) {
             gl_video_interpolate_frame(p, frame, fbo);
         } else {
             // Skip interpolation if there's nothing to be done
