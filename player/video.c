@@ -58,23 +58,11 @@ enum {
 };
 
 static const char av_desync_help_text[] =
-"\n\n"
-"           *************************************************\n"
-"           **** Audio/Video desynchronisation detected! ****\n"
-"           *************************************************\n\n"
-"This means either the audio or the video is played too slowly.\n"
-"Possible reasons, problems, workarounds:\n"
-"- Your system is simply too slow for this file.\n"
-"     Transcode it to a lower bitrate file with e.g. mpv encoding support.\n"
-"- Slow video output.\n"
-"     Try a different --vo driver (--vo=help for a list). Make sure framedrop\n"
-"     is not disabled, or experiment with different values for --framedrop.\n"
-"     Make sure you have proper drivers for your GPU installed. If mpv\n"
-"     autoselects 'VO: [x11]', it's a sure sign your drivers are messed up.\n"
-"- Playing from a slow network source. Download the file instead.\n"
-"- Try to find out whether audio/video/subs are causing this by experimenting\n"
-"  with --no-video, --no-audio, or --no-sub.\n"
-"If none of this helps you, file a bug report.\n\n";
+"\n"
+"Audio/Video desynchronisation detected! Possible reasons include too slow\n"
+"hardware, temporary CPU spikes, broken drivers, and broken files. Audio\n"
+"position will not match to the video (see A-V status field).\n"
+"\n";
 
 static bool decode_coverart(struct dec_video *d_video);
 
