@@ -90,6 +90,8 @@ struct xvctx {
     struct mp_rect src_rect;
     struct mp_rect dst_rect;
     uint32_t max_width, max_height; // zero means: not set
+    GC f_gc;    // used to paint background
+    GC vo_gc;   // used to paint video
     int Shmem_Flag;
 #if HAVE_SHM && HAVE_XEXT
     XShmSegmentInfo Shminfo[MAX_BUFFERS];
@@ -381,11 +383,11 @@ static void xv_draw_colorkey(struct vo *vo, const struct mp_rect *rc)
     if (ctx->xv_ck_info.method == CK_METHOD_MANUALFILL ||
         ctx->xv_ck_info.method == CK_METHOD_BACKGROUND)
     {
-        if (!x11->vo_gc)
+        if (!ctx->vo_gc)
             return;
         //less tearing than XClearWindow()
-        XSetForeground(x11->display, x11->vo_gc, ctx->xv_colorkey);
-        XFillRectangle(x11->display, x11->window, x11->vo_gc, rc->x0, rc->y0,
+        XSetForeground(x11->display, ctx->vo_gc, ctx->xv_colorkey);
+        XFillRectangle(x11->display, x11->window, ctx->vo_gc, rc->x0, rc->y0,
                        rc->x1 - rc->x0, rc->y1 - rc->y0);
     }
 }
@@ -397,6 +399,38 @@ static void read_xv_csp(struct vo *vo)
     int bt709_enabled;
     if (xv_get_eq(vo, ctx->xv_port, "bt_709", &bt709_enabled))
         ctx->cached_csp = bt709_enabled == 100 ? MP_CSP_BT_709 : MP_CSP_BT_601;
+}
+
+
+static void fill_rect(struct vo *vo, GC gc, int x0, int y0, int x1, int y1)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    x0 = MPMAX(x0, 0);
+    y0 = MPMAX(y0, 0);
+    x1 = MPMIN(x1, vo->dwidth);
+    y1 = MPMIN(y1, vo->dheight);
+
+    if (x11->window && x1 > x0 && y1 > y0)
+        XFillRectangle(x11->display, x11->window, gc, x0, y0, x1 - x0, y1 - y0);
+}
+
+// Clear everything outside of rc with the background color
+static void vo_x11_clear_background(struct vo *vo, const struct mp_rect *rc)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    struct xvctx *ctx = vo->priv;
+    GC gc = ctx->f_gc;
+
+    int w = vo->dwidth;
+    int h = vo->dheight;
+
+    fill_rect(vo, gc, 0,      0,      w,      rc->y0); // top
+    fill_rect(vo, gc, 0,      rc->y1, w,      h);      // bottom
+    fill_rect(vo, gc, 0,      rc->y0, rc->x0, rc->y1); // left
+    fill_rect(vo, gc, rc->x1, rc->y0, w,      rc->y1); // right
+
+    XFlush(x11->display);
 }
 
 static void resize(struct vo *vo)
@@ -456,6 +490,12 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
         return -1;
 
     vo_x11_config_vo_window(vo, NULL, flags, "xv");
+
+    if (!ctx->f_gc && !ctx->vo_gc) {
+        ctx->f_gc = XCreateGC(x11->display, x11->window, 0, 0);
+        ctx->vo_gc = XCreateGC(x11->display, x11->window, 0, NULL);
+        XSetForeground(x11->display, ctx->f_gc, 0);
+    }
 
     if (ctx->xv_ck_info.method == CK_METHOD_BACKGROUND)
         XSetWindowBackground(x11->display, x11->window, ctx->xv_colorkey);
@@ -577,7 +617,7 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
     int sw = src->x1 - src->x0, sh = src->y1 - src->y0;
 #if HAVE_SHM && HAVE_XEXT
     if (ctx->Shmem_Flag) {
-        XvShmPutImage(x11->display, ctx->xv_port, x11->window, x11->vo_gc, xvi,
+        XvShmPutImage(x11->display, ctx->xv_port, x11->window, ctx->vo_gc, xvi,
                       src->x0, src->y0, sw, sh,
                       dst->x0, dst->y0, dw, dh,
                       True);
@@ -585,7 +625,7 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
     } else
 #endif
     {
-        XvPutImage(x11->display, ctx->xv_port, x11->window, x11->vo_gc, xvi,
+        XvPutImage(x11->display, ctx->xv_port, x11->window, ctx->vo_gc, xvi,
                    src->x0, src->y0, sw, sh,
                    dst->x0, dst->y0, dw, dh);
     }
@@ -702,6 +742,10 @@ static void uninit(struct vo *vo)
     }
     for (i = 0; i < ctx->num_buffers; i++)
         deallocate_xvimage(vo, i);
+    if (ctx->f_gc != None)
+        XFreeGC(vo->x11->display, ctx->f_gc);
+    if (ctx->vo_gc != None)
+        XFreeGC(vo->x11->display, ctx->vo_gc);
     // uninit() shouldn't get called unless initialization went past vo_init()
     vo_x11_uninit(vo);
 }

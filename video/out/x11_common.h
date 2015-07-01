@@ -70,8 +70,6 @@ struct vo_x11_state {
     XIC xic;
     bool no_autorepeat;
 
-    GC f_gc;    // used to paint background
-    GC vo_gc;   // used to paint video
     Colormap colormap;
 
     int wm_type;
@@ -128,7 +126,6 @@ int vo_x11_check_events(struct vo *vo);
 bool vo_x11_screen_is_composited(struct vo *vo);
 void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
                              const char *classname);
-void vo_x11_clear_background(struct vo *vo, const struct mp_rect *rc);
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg);
 
 #endif /* MPLAYER_X11_COMMON_H */

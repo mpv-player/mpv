@@ -710,10 +710,6 @@ void vo_x11_uninit(struct vo *vo)
     if (x11->window != None)
         vo_set_cursor_hidden(vo, false);
 
-    if (x11->f_gc != None)
-        XFreeGC(vo->x11->display, x11->f_gc);
-    if (x11->vo_gc != None)
-        XFreeGC(vo->x11->display, x11->vo_gc);
     if (x11->window != None && x11->window != x11->rootwin) {
         XUnmapWindow(x11->display, x11->window);
         XDestroyWindow(x11->display, x11->window);
@@ -1516,12 +1512,6 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
         x11->winrc = geo.win;
     }
 
-    if (!x11->f_gc && !x11->vo_gc) {
-        x11->f_gc = XCreateGC(x11->display, x11->window, 0, 0);
-        x11->vo_gc = XCreateGC(x11->display, x11->window, 0, NULL);
-        XSetForeground(x11->display, x11->f_gc, 0);
-    }
-
     if (flags & VOFLAG_HIDDEN)
         return;
 
@@ -1545,36 +1535,6 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
     vo_x11_update_geometry(vo);
     update_vo_size(vo);
     x11->pending_vo_events &= ~VO_EVENT_RESIZE; // implicitly done by the VO
-}
-
-static void fill_rect(struct vo *vo, GC gc, int x0, int y0, int x1, int y1)
-{
-    struct vo_x11_state *x11 = vo->x11;
-
-    x0 = MPMAX(x0, 0);
-    y0 = MPMAX(y0, 0);
-    x1 = MPMIN(x1, RC_W(x11->winrc));
-    y1 = MPMIN(y1, RC_H(x11->winrc));
-
-    if (x11->window && x1 > x0 && y1 > y0)
-        XFillRectangle(x11->display, x11->window, gc, x0, y0, x1 - x0, y1 - y0);
-}
-
-// Clear everything outside of rc with the background color
-void vo_x11_clear_background(struct vo *vo, const struct mp_rect *rc)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    GC gc = x11->f_gc;
-
-    int w = RC_W(x11->winrc);
-    int h = RC_H(x11->winrc);
-
-    fill_rect(vo, gc, 0,      0,      w,      rc->y0); // top
-    fill_rect(vo, gc, 0,      rc->y1, w,      h);      // bottom
-    fill_rect(vo, gc, 0,      rc->y0, rc->x0, rc->y1); // left
-    fill_rect(vo, gc, rc->x1, rc->y0, w,      rc->y1); // right
-
-    XFlush(x11->display);
 }
 
 static void vo_x11_setlayer(struct vo *vo, bool ontop)
