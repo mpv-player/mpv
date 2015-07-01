@@ -716,6 +716,7 @@ static bool render_frame(struct vo *vo)
                 .pts        = pts,
                 .next_vsync = next_vsync,
                 .prev_vsync = prev_vsync,
+                .vsync_offset = next_vsync - pts,
                 .frame = img,
                 .num_future_frames = num_future_frames,
                 .future_frames = future_frames,

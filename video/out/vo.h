@@ -160,6 +160,8 @@ struct frame_timing {
     // Realtime of estimated previous and next vsync events.
     int64_t next_vsync;
     int64_t prev_vsync;
+    // "ideal" display time within the vsync
+    int64_t vsync_offset;
     // The current frame to be drawn. NULL means redraw previous frame
     // (e.g. repeated frames).
     // (Equivalent to the mp_image parameter of draw_image_timed, until the
