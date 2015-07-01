@@ -182,8 +182,6 @@ struct GL {
     void (GLAPIENTRY *Clear)(GLbitfield);
     void (GLAPIENTRY *GenTextures)(GLsizei, GLuint *);
     void (GLAPIENTRY *DeleteTextures)(GLsizei, const GLuint *);
-    void (GLAPIENTRY *Color4ub)(GLubyte, GLubyte, GLubyte, GLubyte);
-    void (GLAPIENTRY *Color4f)(GLfloat, GLfloat, GLfloat, GLfloat);
     void (GLAPIENTRY *ClearColor)(GLclampf, GLclampf, GLclampf, GLclampf);
     void (GLAPIENTRY *Enable)(GLenum);
     void (GLAPIENTRY *Disable)(GLenum);
@@ -202,7 +200,6 @@ struct GL {
                                      const GLvoid *);
     void (GLAPIENTRY *TexParameteri)(GLenum, GLenum, GLint);
     void (GLAPIENTRY *GetIntegerv)(GLenum, GLint *);
-    void (GLAPIENTRY *GetBooleanv)(GLenum, GLboolean *);
     void (GLAPIENTRY *ReadPixels)(GLint, GLint, GLsizei, GLsizei, GLenum,
                                   GLenum, GLvoid *);
     void (GLAPIENTRY *ReadBuffer)(GLenum);

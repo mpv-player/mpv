@@ -142,7 +142,6 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(Flush),
             DEF_FN(GenBuffers),
             DEF_FN(GenTextures),
-            DEF_FN(GetBooleanv),
             DEF_FN(GetAttribLocation),
             DEF_FN(GetError),
             DEF_FN(GetIntegerv),
