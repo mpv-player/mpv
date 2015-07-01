@@ -1041,8 +1041,6 @@ int vo_x11_check_events(struct vo *vo)
                              get_mods(Event.xbutton.state) | MP_KEY_STATE_UP);
             break;
         case MapNotify:
-            if (x11->window_hidden)
-                vo_x11_clearwindow(vo, x11->window);
             x11->window_hidden = false;
             x11->pseudo_mapped = true;
             vo_x11_update_geometry(vo);
@@ -1576,15 +1574,6 @@ void vo_x11_clear_background(struct vo *vo, const struct mp_rect *rc)
     fill_rect(vo, gc, 0,      rc->y0, rc->x0, rc->y1); // left
     fill_rect(vo, gc, rc->x1, rc->y0, w,      rc->y1); // right
 
-    XFlush(x11->display);
-}
-
-void vo_x11_clearwindow(struct vo *vo, Window vo_window)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    if (x11->f_gc == None)
-        return;
-    XFillRectangle(x11->display, vo_window, x11->f_gc, 0, 0, INT_MAX, INT_MAX);
     XFlush(x11->display);
 }
 

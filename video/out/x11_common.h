@@ -129,7 +129,6 @@ bool vo_x11_screen_is_composited(struct vo *vo);
 void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
                              const char *classname);
 void vo_x11_clear_background(struct vo *vo, const struct mp_rect *rc);
-void vo_x11_clearwindow(struct vo *vo, Window vo_window);
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg);
 
 #endif /* MPLAYER_X11_COMMON_H */
