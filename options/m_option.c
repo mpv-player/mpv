@@ -743,12 +743,17 @@ static int apply_flag(const struct m_option *opt, int *val, bstr flag)
 
 static const char *find_next_flag(const struct m_option *opt, int *val)
 {
+    struct m_opt_choice_alternatives *best = NULL;
     struct m_opt_choice_alternatives *alt;
     for (alt = opt->priv; alt->name; alt++) {
         if (alt->value && (alt->value & (*val)) == alt->value) {
-            *val = *val & ~(unsigned)alt->value;
-            return alt->name;
+            if (!best || av_popcount64(alt->value) > av_popcount64(best->value))
+                best = alt;
         }
+    }
+    if (best) {
+        *val = *val & ~(unsigned)best->value;
+        return best->name;
     }
     *val = 0; // if there are still flags left, there's not much we can do
     return NULL;
