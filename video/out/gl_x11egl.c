@@ -99,11 +99,6 @@ static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
     struct vo *vo = ctx->vo;
     bool es = flags & VOFLAG_GLES;
 
-    if (p->egl_context) {
-        vo_x11_config_vo_window(vo, NULL, flags, "gl");
-        return true;
-    }
-
     if (!eglBindAPI(es ? EGL_OPENGL_ES_API : EGL_OPENGL_API))
         return false;
 
@@ -125,7 +120,7 @@ static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
         return false;
     }
 
-    vo_x11_config_vo_window(vo, vi, flags, "gl");
+    vo_x11_config_vo_window(vo, vi, flags | VOFLAG_HIDDEN, "gl");
 
     XFree(vi);
 
@@ -141,7 +136,27 @@ static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
     return true;
 }
 
-static void releaseGlContext_egl(MPGLContext *ctx)
+static int mpegl_init(struct MPGLContext *ctx, int vo_flags)
+{
+    if (vo_x11_init(ctx->vo) && config_window_x11_egl(ctx, vo_flags))
+        return 0;
+    vo_x11_uninit(ctx->vo);
+    return -1;
+}
+
+static int mpegl_reconfig(struct MPGLContext *ctx, int flags)
+{
+    vo_x11_config_vo_window(ctx->vo, NULL, flags, "gl");
+    return 0;
+}
+
+static int mpegl_control(struct MPGLContext *ctx, int *events, int request,
+                         void *arg)
+{
+    return vo_x11_control(ctx->vo, events, request, arg);
+}
+
+static void mpegl_uninit(MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
     if (p->egl_context) {
@@ -150,21 +165,21 @@ static void releaseGlContext_egl(MPGLContext *ctx)
         eglDestroyContext(p->egl_display, p->egl_context);
     }
     p->egl_context = EGL_NO_CONTEXT;
+    vo_x11_uninit(ctx->vo);
 }
 
-static void swapGlBuffers_egl(MPGLContext *ctx)
+static void mpegl_swap_buffers(MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
     eglSwapBuffers(p->egl_display, p->egl_surface);
 }
 
-void mpgl_set_backend_x11egl(MPGLContext *ctx)
-{
-    ctx->priv = talloc_zero(ctx, struct priv);
-    ctx->config_window = config_window_x11_egl;
-    ctx->releaseGlContext = releaseGlContext_egl;
-    ctx->swapGlBuffers = swapGlBuffers_egl;
-    ctx->vo_init = vo_x11_init;
-    ctx->vo_uninit = vo_x11_uninit;
-    ctx->vo_control = vo_x11_control;
-}
+const struct mpgl_driver mpgl_driver_x11egl = {
+    .name           = "x11egl",
+    .priv_size      = sizeof(struct priv),
+    .init           = mpegl_init,
+    .reconfig       = mpegl_reconfig,
+    .swap_buffers   = mpegl_swap_buffers,
+    .control        = mpegl_control,
+    .uninit         = mpegl_uninit,
+};
