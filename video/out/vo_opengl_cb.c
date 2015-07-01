@@ -335,7 +335,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
             ctx->vsync_timed = opts->renderer_opts->interpolation;
             if (ctx->vsync_timed)
                 queue += 0.050 * 1e6; // disable video timing
-            vo_set_flip_queue_params(vo, queue, false);
+            vo_set_queue_params(vo, queue, false, 0);
             ctx->gl->debug_context = opts->use_gl_debug;
             gl_video_set_debug(ctx->renderer, opts->use_gl_debug);
             frame_queue_shrink(ctx, opts->frame_queue_size);

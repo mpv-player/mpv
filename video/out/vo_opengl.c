@@ -304,7 +304,7 @@ static bool reparse_cmdline(struct gl_priv *p, char *args)
     if (r >= 0) {
         int queue = 0;
         gl_video_set_options(p->renderer, opts->renderer_opts, &queue);
-        vo_set_flip_queue_params(p->vo, queue, opts->renderer_opts->interpolation);
+        vo_set_queue_params(p->vo, queue, opts->renderer_opts->interpolation, 1);
         p->vo->want_redraw = true;
     }
 
@@ -443,7 +443,7 @@ static int preinit(struct vo *vo)
                               p->glctx->depth_b);
     int queue = 0;
     gl_video_set_options(p->renderer, p->renderer_opts, &queue);
-    vo_set_flip_queue_params(p->vo, queue, p->renderer_opts->interpolation);
+    vo_set_queue_params(p->vo, queue, p->renderer_opts->interpolation, 0);
 
     p->cms = gl_lcms_init(p, vo->log, vo->global);
     if (!p->cms)

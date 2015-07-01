@@ -26,6 +26,7 @@
 #include "options/options.h"
 #include "sub/osd.h"
 #include "demux/timeline.h"
+#include "video/out/vo.h"
 
 // definitions used internally by the core player code
 
@@ -227,7 +228,8 @@ typedef struct MPContext {
 
     struct vo *video_out;
     // next_frame[0] is the next frame, next_frame[1] the one after that.
-    struct mp_image *next_frame[2];
+    struct mp_image *next_frames[2 + VO_MAX_FUTURE_FRAMES];
+    int num_next_frames;
     struct mp_image *saved_frame;   // for hrseek_lastframe
 
     enum playback_status video_status, audio_status;

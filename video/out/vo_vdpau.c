@@ -249,7 +249,7 @@ static void resize(struct vo *vo)
     vc->flip_offset_us = vo->opts->fullscreen ?
                          1000LL * vc->flip_offset_fs :
                          1000LL * vc->flip_offset_window;
-    vo_set_flip_queue_params(vo, vc->flip_offset_us, false);
+    vo_set_queue_params(vo, vc->flip_offset_us, false, 0);
 
     if (vc->output_surface_w < vo->dwidth || vc->output_surface_h < vo->dheight) {
         vc->output_surface_w = s_size(max_w, vc->output_surface_w, vo->dwidth);
