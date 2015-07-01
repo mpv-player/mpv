@@ -985,7 +985,7 @@ int64_t vo_get_vsync_interval(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    int64_t res = vo->in->vsync_interval;
+    int64_t res = vo->in->vsync_interval > 1 ? vo->in->vsync_interval : -1;
     pthread_mutex_unlock(&in->lock);
     return res;
 }
