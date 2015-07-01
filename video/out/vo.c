@@ -140,17 +140,13 @@ struct vo_internal {
     int64_t drop_count;
     bool dropped_frame;             // the previous frame was dropped
 
-    struct mp_image *current_frame; // last frame queued to the VO
+    struct vo_frame *current_frame; // last frame queued to the VO
 
     int64_t wakeup_pts;             // time at which to pull frame from decoder
 
     bool rendering;                 // true if an image is being rendered
-    struct mp_image *frame_queued;  // the image that should be rendered
-    struct mp_image *future_frames[VO_MAX_FUTURE_FRAMES];
-    int num_future_frames;
-    int req_future_frames;          // VO's requested value of num_future_frames
-    int64_t frame_pts;              // realtime of intended display
-    int64_t frame_duration;         // realtime frame duration (for framedrop)
+    struct vo_frame *frame_queued;  // should be drawn next
+    int req_frames;                 // VO's requested value of num_frames
 
     double display_fps;
 
@@ -239,6 +235,7 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     talloc_steal(vo, log);
     *vo->in = (struct vo_internal) {
         .dispatch = mp_dispatch_create(vo),
+        .req_frames = 1,
     };
     mp_make_wakeup_pipe(vo->in->wakeup_pipe);
     mp_dispatch_set_wakeup_fn(vo->in->dispatch, dispatch_wakeup_cb, vo);
@@ -377,7 +374,8 @@ static void run_reconfig(void *p)
     }
 
     pthread_mutex_lock(&in->lock);
-    mp_image_unrefp(&in->current_frame);
+    talloc_free(in->current_frame);
+    in->current_frame = NULL;
     forget_frames(vo);
     pthread_mutex_unlock(&in->lock);
 
@@ -413,31 +411,14 @@ int vo_control(struct vo *vo, uint32_t request, void *data)
 }
 
 // must be called locked
-// transfers ownership of frames[] items to the VO
-static void set_future_frames(struct vo *vo, struct mp_image **frames)
-{
-    struct vo_internal *in = vo->in;
-    for (int n = 0; n < in->num_future_frames; n++)
-        talloc_free(in->future_frames[n]);
-    in->num_future_frames = 0;
-    for (int n = 0; frames && frames[n]; n++) {
-        if (n < in->req_future_frames) {
-            in->future_frames[in->num_future_frames++] = frames[n];
-        } else {
-            talloc_free(frames[n]);
-        }
-    }
-}
-
-// must be called locked
 static void forget_frames(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     in->hasframe = false;
     in->hasframe_rendered = false;
     in->drop_count = 0;
-    mp_image_unrefp(&in->frame_queued);
-    set_future_frames(vo, NULL);
+    talloc_free(in->frame_queued);
+    in->frame_queued = NULL;
     // don't unref current_frame; we always want to be able to redraw it
 }
 
@@ -551,22 +532,15 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
 
 // Direct the VO thread to put the currently queued image on the screen.
 // vo_is_ready_for_frame() must have returned true before this call.
-// images[0] is the frame to draw, images[n+1] are future frames (NULL
-// terminated). Ownership of all the images is handed to the vo.
-void vo_queue_frame(struct vo *vo, struct mp_image **images,
-                    int64_t pts_us, int64_t duration)
+// Ownership of frame is handed to the vo.
+void vo_queue_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    struct mp_image *image = images[0];
-    assert(image);
     assert(vo->config_ok && !in->frame_queued);
     in->hasframe = true;
-    in->frame_queued = image;
-    in->frame_pts = pts_us;
-    in->frame_duration = duration;
-    in->wakeup_pts = in->vsync_timed ? 0 : in->frame_pts + MPMAX(duration, 0);
-    set_future_frames(vo, images + 1);
+    in->frame_queued = frame;
+    in->wakeup_pts = in->vsync_timed ? 0 : frame->pts + MPMAX(frame->duration, 0);
     wakeup_locked(vo);
     pthread_mutex_unlock(&in->lock);
 }
@@ -613,6 +587,8 @@ static int64_t prev_sync(struct vo *vo, int64_t ts)
 static bool render_frame(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
+    struct vo_frame *frame = NULL;
+    bool got_frame = false;
 
     update_display_fps(vo);
 
@@ -621,31 +597,34 @@ static bool render_frame(struct vo *vo)
     vo->in->vsync_interval = in->display_fps > 0 ? 1e6 / in->display_fps : 0;
     vo->in->vsync_interval = MPMAX(vo->in->vsync_interval, 1);
 
-    int64_t pts = in->frame_pts;
-    int64_t duration = in->frame_duration;
-    struct mp_image *img = in->frame_queued;
+    if (in->frame_queued) {
+        talloc_free(in->current_frame);
+        in->current_frame = in->frame_queued;
+        in->frame_queued = NULL;
+    } else if (in->paused || !in->current_frame || !in->hasframe ||
+               !in->vsync_timed)
+    {
+        goto done;
+    }
 
-    if (!img && (!in->vsync_timed || in->paused))
-        goto nothing_done;
+    frame = vo_frame_ref(in->current_frame);
+    assert(frame);
 
-    if (in->vsync_timed && !in->hasframe)
-        goto nothing_done;
-
-    if (img)
-        mp_image_setrefp(&in->current_frame, img);
-
-    in->frame_queued = NULL;
+    int64_t pts = frame->pts;
+    int64_t duration = frame->duration;
+    int64_t end_time = pts + duration;
 
     // The next time a flip (probably) happens.
     int64_t prev_vsync = prev_sync(vo, mp_time_us());
     int64_t next_vsync = prev_vsync + in->vsync_interval;
-    int64_t end_time = pts + duration;
+
+    frame->next_vsync = next_vsync;
+    frame->prev_vsync = prev_vsync;
+
+    frame->vsync_offset = next_vsync - pts;
 
     // Time at which we should flip_page on the VO.
     int64_t target = pts - in->flip_queue_offset;
-
-    if (!in->hasframe_rendered)
-        duration = -1; // disable framedrop
 
     bool prev_dropped_frame = in->dropped_frame;
 
@@ -675,6 +654,7 @@ static bool render_frame(struct vo *vo)
     // Even if we're hopelessly behind, rather degrade to 10 FPS playback,
     // instead of just freezing the display forever.
     in->dropped_frame &= mp_time_us() - in->last_flip < 100 * 1000;
+    in->dropped_frame &= in->hasframe_rendered;
 
     if (in->vsync_timed) {
         // this is a heuristic that wakes the thread up some
@@ -684,55 +664,37 @@ static bool render_frame(struct vo *vo)
         // We are very late with the frame and using vsync timing: probably
         // no new frames are coming in. This must be done whether or not
         // framedrop is enabled. Also, if the frame is to be dropped, even
-        // though it's an interpolated frame (img==NULL), exit early.
-        if (!img && ((in->hasframe_rendered &&
-                      prev_vsync > pts + duration + in->vsync_interval_approx)
-                     || in->dropped_frame))
+        // though it's an interpolated frame (repeat set), exit early.
+        bool late = prev_vsync > pts + duration + in->vsync_interval_approx;
+        if (frame->repeat && ((in->hasframe_rendered && late) || in->dropped_frame))
         {
             in->dropped_frame = false;
-            goto nothing_done;
+            goto done;
         }
     }
 
-    if (in->dropped_frame) {
-        talloc_free(img);
-    } else {
+    // Setup parameters for the next time this frame is drawn. ("frame" is the
+    // frame currently drawn, while in->current_frame is the potentially next.)
+    in->current_frame->repeat = true;
+
+    if (!in->dropped_frame) {
         in->rendering = true;
         in->hasframe_rendered = true;
-        int num_future_frames = in->num_future_frames;
-        in->num_future_frames = 0;
-        struct mp_image *future_frames[VO_MAX_FUTURE_FRAMES];
-        for (int n = 0; n < num_future_frames; n++) {
-            future_frames[n] = in->future_frames[n];
-            in->future_frames[n] = NULL;
-        }
+        int64_t prev_drop_count = vo->in->drop_count;
         pthread_mutex_unlock(&in->lock);
         mp_input_wakeup(vo->input_ctx); // core can queue new video now
 
         MP_STATS(vo, "start video");
 
-        if (vo->driver->draw_image_timed) {
-            struct frame_timing t = (struct frame_timing) {
-                .pts        = pts,
-                .next_vsync = next_vsync,
-                .prev_vsync = prev_vsync,
-                .vsync_offset = next_vsync - pts,
-                .frame = img,
-                .num_future_frames = num_future_frames,
-                .future_frames = future_frames,
-            };
-            vo->driver->draw_image_timed(vo, img, &t);
+        if (vo->driver->draw_frame) {
+            vo->driver->draw_frame(vo, frame);
         } else {
-            vo->driver->draw_image(vo, img);
+            vo->driver->draw_image(vo, mp_image_new_ref(frame->current));
         }
 
         wait_until(vo, target);
 
-        bool drop = false;
-        if (vo->driver->flip_page_timed)
-            drop = vo->driver->flip_page_timed(vo, pts, duration) < 1;
-        else
-            vo->driver->flip_page(vo);
+        vo->driver->flip_page(vo);
 
         int64_t prev_flip = in->last_flip;
 
@@ -748,10 +710,8 @@ static bool render_frame(struct vo *vo)
         MP_STATS(vo, "end video");
 
         pthread_mutex_lock(&in->lock);
-        in->dropped_frame = drop;
+        in->dropped_frame = prev_drop_count < vo->in->drop_count;
         in->rendering = false;
-        for (int n = 0; n < num_future_frames; n++)
-            talloc_free(future_frames[n]);
     }
 
     if (in->dropped_frame) {
@@ -765,12 +725,12 @@ static bool render_frame(struct vo *vo)
     pthread_cond_broadcast(&in->wakeup); // for vo_wait_frame()
     mp_input_wakeup(vo->input_ctx);
 
-    pthread_mutex_unlock(&in->lock);
-    return true;
+    got_frame = true;
 
-nothing_done:
+done:
+    talloc_free(frame);
     pthread_mutex_unlock(&in->lock);
-    return false;
+    return got_frame;
 }
 
 static void do_redraw(struct vo *vo)
@@ -779,28 +739,37 @@ static void do_redraw(struct vo *vo)
 
     vo->want_redraw = false;
 
+    if (!vo->config_ok)
+        return;
+
     pthread_mutex_lock(&in->lock);
     in->request_redraw = false;
     in->want_redraw = false;
     bool full_redraw = in->dropped_frame;
-    struct mp_image *img = NULL;
-    if (vo->config_ok && !(vo->driver->untimed))
-        img = mp_image_new_ref(in->current_frame);
-    if (img)
+    struct vo_frame *frame = NULL;
+    if (!vo->driver->untimed)
+        frame = vo_frame_ref(in->current_frame);
+    if (frame)
         in->dropped_frame = false;
+    struct vo_frame dummy = {0};
+    if (!frame)
+        frame = &dummy;
+    frame->redraw = !full_redraw; // unconditionally redraw if it was dropped
+    frame->still = true;
     pthread_mutex_unlock(&in->lock);
 
-    if (full_redraw || vo->driver->control(vo, VOCTRL_REDRAW_FRAME, NULL) < 1) {
-        if (img)
-            vo->driver->draw_image(vo, img);
-    } else {
-        talloc_free(img);
+    if (vo->driver->draw_frame) {
+        vo->driver->draw_frame(vo, frame);
+    } else if ((!full_redraw || vo->driver->control(vo, VOCTRL_REDRAW_FRAME, NULL) < 1)
+               && frame->current)
+    {
+        vo->driver->draw_image(vo, mp_image_new_ref(frame->current));
     }
 
-    if (vo->driver->flip_page_timed)
-        vo->driver->flip_page_timed(vo, 0, -1);
-    else
-        vo->driver->flip_page(vo);
+    vo->driver->flip_page(vo);
+
+    if (frame != &dummy)
+        talloc_free(frame);
 }
 
 static void *vo_thread(void *ptr)
@@ -851,9 +820,10 @@ static void *vo_thread(void *ptr)
         }
         wait_vo(vo, wait_until);
     }
-    forget_frames(vo); // implicitly synchronized
-    mp_image_unrefp(&in->current_frame);
     vo->driver->uninit(vo);
+    forget_frames(vo); // implicitly synchronized
+    talloc_free(in->current_frame);
+    in->current_frame = NULL;
     return NULL;
 }
 
@@ -922,7 +892,9 @@ bool vo_still_displaying(struct vo *vo)
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&vo->in->lock);
     int64_t now = mp_time_us();
-    int64_t frame_end = in->frame_pts + MPMAX(in->frame_duration, 0);
+    int64_t frame_end = 0;
+    if (in->current_frame)
+        frame_end = in->current_frame->pts + MPMAX(in->current_frame->duration, 0);
     bool working = now < frame_end || in->rendering || in->frame_queued;
     pthread_mutex_unlock(&vo->in->lock);
     return working && in->hasframe;
@@ -995,7 +967,7 @@ void vo_set_queue_params(struct vo *vo, int64_t offset_us, bool vsync_timed,
     pthread_mutex_lock(&in->lock);
     in->flip_queue_offset = offset_us;
     in->vsync_timed = vsync_timed;
-    in->req_future_frames = MPMIN(num_future_frames, VO_MAX_FUTURE_FRAMES);
+    in->req_frames = 1 + MPMIN(num_future_frames, VO_MAX_FUTURE_FRAMES);
     pthread_mutex_unlock(&in->lock);
 }
 
@@ -1003,7 +975,7 @@ int vo_get_num_future_frames(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    int res = in->req_future_frames;
+    int res = in->req_frames + 1;
     pthread_mutex_unlock(&in->lock);
     return res;
 }
@@ -1058,9 +1030,38 @@ struct mp_image *vo_get_current_frame(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    struct mp_image *r = mp_image_new_ref(vo->in->current_frame);
+    struct mp_image *r = NULL;
+    if (vo->in->current_frame)
+        r = mp_image_new_ref(vo->in->current_frame->current);
     pthread_mutex_unlock(&in->lock);
     return r;
+}
+
+static void destroy_frame(void *p)
+{
+    struct vo_frame *frame = p;
+    for (int n = 0; n < frame->num_frames; n++)
+        talloc_free(frame->frames[n]);
+}
+
+// Return a new reference to the given frame. The image pointers are also new
+// references. Calling talloc_free() on the frame unrefs all currently set
+// image references. (Assuming current==frames[0].)
+struct vo_frame *vo_frame_ref(struct vo_frame *frame)
+{
+    if (!frame)
+        return NULL;
+
+    struct vo_frame *new = talloc_ptrtype(NULL, new);
+    talloc_set_destructor(new, destroy_frame);
+    *new = *frame;
+    for (int n = 0; n < frame->num_frames; n++) {
+        new->frames[n] = mp_image_new_ref(frame->frames[n]);
+        if (!new->frames[n])
+            abort(); // OOM on tiny allocs
+    }
+    new->current = new->num_frames ? new->frames[0] : NULL;
+    return new;
 }
 
 /*

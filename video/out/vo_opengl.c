@@ -164,8 +164,7 @@ static void flip_page(struct vo *vo)
     }
 }
 
-static void draw_image_timed(struct vo *vo, mp_image_t *mpi,
-                             struct frame_timing *t)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
@@ -174,7 +173,7 @@ static void draw_image_timed(struct vo *vo, mp_image_t *mpi,
         return;
 
     p->frame_started = true;
-    gl_video_render_frame(p->renderer, mpi, 0, t);
+    gl_video_render_frame(p->renderer, frame, 0);
 
     // The playloop calls this last before waiting some time until it decides
     // to call flip_page(). Tell OpenGL to start execution of the GPU commands
@@ -183,13 +182,6 @@ static void draw_image_timed(struct vo *vo, mp_image_t *mpi,
 
     if (p->use_glFinish)
         gl->Finish();
-
-    talloc_free(mpi);
-}
-
-static void draw_image(struct vo *vo, mp_image_t *mpi)
-{
-    draw_image_timed(vo, mpi, NULL);
 }
 
 static int query_format(struct vo *vo, int format)
@@ -355,12 +347,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_LOAD_HWDEC_API:
         request_hwdec_api(p, data);
         return true;
-    case VOCTRL_REDRAW_FRAME:
-        if (!(p->glctx->start_frame && !p->glctx->start_frame(p->glctx))) {
-            p->frame_started = true;
-            gl_video_render_frame(p->renderer, NULL, 0, NULL);
-        }
-        return true;
     case VOCTRL_SET_COMMAND_LINE: {
         char *arg = data;
         return reparse_cmdline(p, arg);
@@ -489,8 +475,7 @@ const struct vo_driver video_out_opengl = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
-    .draw_image_timed = draw_image_timed,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),
@@ -505,8 +490,7 @@ const struct vo_driver video_out_opengl_hq = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
-    .draw_image_timed = draw_image_timed,
+    .draw_frame = draw_frame,
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),

@@ -582,6 +582,17 @@ static void handle_new_frame(struct MPContext *mpctx)
     MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
 }
 
+// Remove the first frame in mpctx->next_frames
+static void shift_frames(struct MPContext *mpctx)
+{
+    if (mpctx->num_next_frames < 1)
+        return;
+    talloc_free(mpctx->next_frames[0]);
+    for (int n = 0; n < mpctx->num_next_frames - 1; n++)
+        mpctx->next_frames[n] = mpctx->next_frames[n + 1];
+    mpctx->num_next_frames -= 1;
+}
+
 static int get_req_frames(struct MPContext *mpctx, bool eof)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -880,17 +891,16 @@ void write_video(struct MPContext *mpctx, double endpts)
     update_subtitles(mpctx);
 
     assert(mpctx->num_next_frames >= 1);
-    struct mp_image *frames[VO_MAX_FUTURE_FRAMES + 2] = {0};
-    frames[0] = mpctx->next_frames[0];
-    for (int n = 0; n < mpctx->num_next_frames - 1; n++)
-        mpctx->next_frames[n] = mpctx->next_frames[n + 1];
-    mpctx->num_next_frames -= 1;
-    for (int n = 0; n < mpctx->num_next_frames && n < VO_MAX_FUTURE_FRAMES; n++) {
-        frames[n + 1] = mp_image_new_ref(mpctx->next_frames[n]);
-        if (!frames[n + 1])
-            break; // OOM
-    }
-    vo_queue_frame(vo, frames, pts, duration);
+    struct vo_frame dummy = {
+        .pts = pts,
+        .duration = duration,
+        .num_frames = mpctx->num_next_frames,
+    };
+    for (int n = 0; n < dummy.num_frames; n++)
+        dummy.frames[n] = mpctx->next_frames[n];
+    vo_queue_frame(vo, vo_frame_ref(&dummy));
+
+    shift_frames(mpctx);
 
     // The frames were shifted down; "initialize" the new first entry.
     if (mpctx->num_next_frames >= 1)

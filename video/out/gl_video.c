@@ -484,6 +484,7 @@ static void uninit_scaler(struct gl_video *p, struct scaler *scaler);
 static void check_gl_features(struct gl_video *p);
 static bool init_format(int fmt, struct gl_video *init);
 static void gl_video_upload_image(struct gl_video *p);
+static void gl_video_set_image(struct gl_video *p, struct mp_image *mpi);
 
 #define GLSL(x) gl_sc_add(p->sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
@@ -2063,8 +2064,8 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
 }
 
 // Draws an interpolate frame to fbo, based on the frame timing in t
-static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
-                                       struct frame_timing *t)
+static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
+                                       int fbo)
 {
     int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
         vp_h = p->dst_rect.y1 - p->dst_rect.y0;
@@ -2072,7 +2073,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     // First of all, figure out if we have a frame availble at all, and draw
     // it manually + reset the queue if not
     if (p->surfaces[p->surface_now].pts == MP_NOPTS_VALUE) {
-        pass_render_frame(p, t->frame);
+        pass_render_frame(p, t->current);
         finish_pass_fbo(p, &p->surfaces[p->surface_now].fbotex,
                         vp_w, vp_h, 0, FBOTEX_FUZZY);
         p->surfaces[p->surface_now].pts = p->image.mpi->pts;
@@ -2080,11 +2081,11 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     }
 
     // Find the right frame for this instant
-    if (t->frame && t->frame->pts != MP_NOPTS_VALUE) {
+    if (t->current&& t->current->pts != MP_NOPTS_VALUE) {
         int next = fbosurface_wrap(p->surface_now + 1);
         while (p->surfaces[next].pts != MP_NOPTS_VALUE &&
                p->surfaces[next].pts > p->surfaces[p->surface_now].pts &&
-               p->surfaces[p->surface_now].pts < t->frame->pts)
+               p->surfaces[p->surface_now].pts < t->current->pts)
         {
             p->surface_now = next;
             next = fbosurface_wrap(next + 1);
@@ -2115,12 +2116,12 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
     // it only barely matters at the very beginning of playback, and this way
     // makes the code much more linear.
     int surface_dst = fbosurface_wrap(p->surface_idx+1);
-    for (int i = -1; i < t->num_future_frames; i++) {
+    for (int i = 0; i < t->num_frames; i++) {
         // Avoid overwriting data we might still need
         if (surface_dst == surface_bse - 1)
             break;
 
-        struct mp_image *f = i < 0 ? t->frame : t->future_frames[i];
+        struct mp_image *f = t->frames[i];
         if (!f || f->pts == MP_NOPTS_VALUE)
             continue;
 
@@ -2202,15 +2203,16 @@ static void gl_video_interpolate_frame(struct gl_video *p, int fbo,
 }
 
 // (fbo==0 makes BindFramebuffer select the screen backbuffer)
-void gl_video_render_frame(struct gl_video *p, struct mp_image *mpi, int fbo,
-                           struct frame_timing *t)
+void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
 {
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    if ((!mpi && !vimg->mpi) || p->dst_rect.x0 > 0 || p->dst_rect.y0 > 0 ||
+    bool has_frame = frame->current || vimg->mpi;
+
+    if (!has_frame || p->dst_rect.x0 > 0 || p->dst_rect.y0 > 0 ||
         p->dst_rect.x1 < p->vp_w || p->dst_rect.y1 < abs(p->vp_h))
     {
         struct m_color c = p->opts.background;
@@ -2218,14 +2220,16 @@ void gl_video_render_frame(struct gl_video *p, struct mp_image *mpi, int fbo,
         gl->Clear(GL_COLOR_BUFFER_BIT);
     }
 
-    gl_sc_set_vao(p->sc, &p->vao);
+    if (has_frame) {
+        gl_sc_set_vao(p->sc, &p->vao);
 
-    if (p->opts.interpolation && t) {
-        gl_video_interpolate_frame(p, fbo, t);
-    } else {
-        // Skip interpolation if there's nothing to be done
-        pass_render_frame(p, mpi);
-        pass_draw_to_screen(p, fbo);
+        if (p->opts.interpolation && !frame->still) {
+            gl_video_interpolate_frame(p, frame, fbo);
+        } else {
+            // Skip interpolation if there's nothing to be done
+            pass_render_frame(p, frame->redraw ? NULL : frame->current);
+            pass_draw_to_screen(p, fbo);
+        }
     }
 
     debug_check_gl(p, "after video rendering");
@@ -2293,7 +2297,7 @@ static bool get_image(struct gl_video *p, struct mp_image *mpi)
     return true;
 }
 
-void gl_video_set_image(struct gl_video *p, struct mp_image *mpi)
+static void gl_video_set_image(struct gl_video *p, struct mp_image *mpi)
 {
     assert(mpi);
 

@@ -83,6 +83,8 @@ struct vdpctx {
     VdpOutputSurface                   black_pixel;
 
     struct mp_image                   *current_image;
+    int64_t                            current_pts;
+    int                                current_duration;
 
     int                                output_surface_w, output_surface_h;
 
@@ -701,16 +703,19 @@ static inline uint64_t prev_vsync(struct vdpctx *vc, uint64_t ts)
     return ts - offset;
 }
 
-static int flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
+static void flip_page(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
 
+    int64_t pts_us = vc->current_pts;
+    int duration = vc->current_duration;
+
     vc->dropped_frame = true; // changed at end if false
 
     if (!check_preemption(vo))
-        return 0;
+        goto drop;
 
     vc->vsync_interval = 1;
     if (vc->user_fps > 0) {
@@ -795,7 +800,7 @@ static int flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     pts = FFMAX(pts, vc->last_queue_time + vc->vsync_interval);
     pts = FFMAX(pts, now);
     if (npts < PREV_VSYNC(pts) + vc->vsync_interval)
-        return 0;
+        goto drop;
 
     int num_flips = update_presentation_queue_status(vo);
     vsync = vc->recent_vsync_time + num_flips * vc->vsync_interval;
@@ -803,7 +808,7 @@ static int flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     pts = FFMAX(pts, vsync + (vc->vsync_interval >> 2));
     vsync = PREV_VSYNC(pts);
     if (npts < vsync + vc->vsync_interval)
-        return 0;
+        goto drop;
     pts = vsync + (vc->vsync_interval >> 2);
     VdpOutputSurface frame = vc->output_surfaces[vc->surface_num];
     vdp_st = vdp->presentation_queue_display(vc->flip_queue, frame,
@@ -818,22 +823,30 @@ static int flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     vc->last_ideal_time = ideal_pts;
     vc->dropped_frame = false;
     vc->surface_num = WRAP_ADD(vc->surface_num, 1, vc->num_output_surfaces);
-    return 1;
+    return;
+
+drop:
+    vo_increment_drop_count(vo, 1);
 }
 
-static void draw_image(struct vo *vo, struct mp_image *mpi)
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct vdpctx *vc = vo->priv;
 
     check_preemption(vo);
 
-    struct mp_image *vdp_mpi = mp_vdpau_upload_video_surface(vc->mpvdp, mpi);
-    if (!vdp_mpi)
-        MP_ERR(vo, "Could not upload image.\n");
-    talloc_free(mpi);
+    if (frame->current && !frame->redraw) {
+        struct mp_image *vdp_mpi =
+            mp_vdpau_upload_video_surface(vc->mpvdp, frame->current);
+        if (!vdp_mpi)
+            MP_ERR(vo, "Could not upload image.\n");
 
-    talloc_free(vc->current_image);
-    vc->current_image = vdp_mpi;
+        talloc_free(vc->current_image);
+        vc->current_image = vdp_mpi;
+    }
+
+    vc->current_pts = frame->pts;
+    vc->current_duration = frame->duration;
 
     if (status_ok(vo))
         video_to_output_surface(vo);
@@ -1040,10 +1053,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         struct voctrl_get_equalizer_args *args = data;
         return get_equalizer(vo, args->name, args->valueptr);
     }
-    case VOCTRL_REDRAW_FRAME:
-        if (status_ok(vo))
-            video_to_output_surface(vo);
-        return true;
     case VOCTRL_RESET:
         forget_frames(vo, true);
         return true;
@@ -1080,8 +1089,8 @@ const struct vo_driver video_out_vdpau = {
     .query_format = query_format,
     .reconfig = reconfig,
     .control = control,
-    .draw_image = draw_image,
-    .flip_page_timed = flip_page_timed,
+    .draw_frame = draw_frame,
+    .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct vdpctx),
     .options = (const struct m_option []){
