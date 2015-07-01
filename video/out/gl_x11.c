@@ -257,7 +257,10 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
 
 static int glx_init(struct MPGLContext *ctx, int vo_flags)
 {
-    return vo_x11_init(ctx->vo) && config_window_x11(ctx, vo_flags) ? 0 : -1;
+    if (vo_x11_init(ctx->vo) && config_window_x11(ctx, vo_flags))
+        return 0;
+    vo_x11_uninit(ctx->vo);
+    return -1;
 }
 
 static int glx_reconfig(struct MPGLContext *ctx, int flags)
