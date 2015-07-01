@@ -99,12 +99,16 @@ static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
     struct vo *vo = ctx->vo;
     bool es = flags & VOFLAG_GLES;
 
-    if (!eglBindAPI(es ? EGL_OPENGL_ES_API : EGL_OPENGL_API))
+    if (!eglBindAPI(es ? EGL_OPENGL_ES_API : EGL_OPENGL_API)) {
+        MP_FATAL(vo, "Could not bind API (%s).\n", es ? "GLES" : "GL");
         return false;
+    }
 
     p->egl_display = eglGetDisplay(vo->x11->display);
-    if (!eglInitialize(p->egl_display, NULL, NULL))
+    if (!eglInitialize(p->egl_display, NULL, NULL)) {
+        MP_FATAL(vo, "Could not initialize EGL.\n");
         return false;
+    }
 
     EGLConfig config = select_fb_config_egl(ctx, es);
     if (!config)
