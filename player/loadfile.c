@@ -1079,6 +1079,12 @@ static void play_current_file(struct MPContext *mpctx)
     if (process_open_hooks(mpctx) < 0)
         goto terminate_playback;
 
+    if (opts->stream_dump && opts->stream_dump[0]) {
+        if (stream_dump(mpctx, mpctx->stream_open_filename) < 0)
+            mpctx->error_playing = 1;
+        goto terminate_playback;
+    }
+
     int stream_flags = STREAM_READ;
     if (!opts->load_unsafe_playlists)
         stream_flags |= mpctx->playing->stream_flags;
@@ -1086,12 +1092,6 @@ static void play_current_file(struct MPContext *mpctx)
                                           stream_flags);
     if (!mpctx->stream)
         goto terminate_playback;
-
-    if (opts->stream_dump && opts->stream_dump[0]) {
-        stream_dump(mpctx);
-        mpctx->error_playing = 1;
-        goto terminate_playback;
-    }
 
     // Must be called before enabling cache.
     mp_nav_init(mpctx);
