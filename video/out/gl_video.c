@@ -194,6 +194,7 @@ struct gl_video {
 
     int surface_idx;
     int surface_now;
+    int frames_drawn;
     bool is_interpolated;
 
     // state for luma (0), luma-down(1), chroma (2) and temporal (3) scalers
@@ -527,6 +528,7 @@ static void gl_video_reset_surfaces(struct gl_video *p)
     }
     p->surface_idx = 0;
     p->surface_now = 0;
+    p->frames_drawn = 0;
 }
 
 static inline int fbosurface_wrap(int id)
@@ -2206,6 +2208,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
         p->is_interpolated = true;
     }
     pass_draw_to_screen(p, fbo);
+
+    p->frames_drawn += 1;
 }
 
 // (fbo==0 makes BindFramebuffer select the screen backbuffer)
@@ -2229,7 +2233,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
     if (has_frame) {
         gl_sc_set_vao(p->sc, &p->vao);
 
-        if (p->opts.interpolation) {
+        if (p->opts.interpolation && (p->frames_drawn || !frame->still)) {
             gl_video_interpolate_frame(p, frame, fbo);
         } else {
             // Skip interpolation if there's nothing to be done
