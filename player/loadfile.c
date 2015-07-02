@@ -1069,6 +1069,8 @@ static void play_current_file(struct MPContext *mpctx)
 
     MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
 
+reopen_file:
+
     assert(mpctx->stream == NULL);
     assert(mpctx->demuxer == NULL);
     assert(mpctx->d_audio == NULL);
@@ -1104,8 +1106,6 @@ static void play_current_file(struct MPContext *mpctx)
         goto terminate_playback;
 
     stream_set_capture_file(mpctx->stream, opts->stream_capture);
-
-goto_reopen_demuxer: ;
 
     mp_nav_reset(mpctx);
 
@@ -1242,16 +1242,6 @@ goto_reopen_demuxer: ;
 
 terminate_playback:
 
-    if (mpctx->stop_play == PT_RELOAD_DEMUXER) {
-        mpctx->stop_play = KEEP_PLAYING;
-        mpctx->playback_initialized = false;
-        uninit_audio_chain(mpctx);
-        uninit_video_chain(mpctx);
-        uninit_sub_all(mpctx);
-        uninit_demuxer(mpctx);
-        goto goto_reopen_demuxer;
-    }
-
     process_unload_hooks(mpctx);
 
     mp_nav_destroy(mpctx);
@@ -1279,12 +1269,17 @@ terminate_playback:
     if (!opts->gapless_audio && !mpctx->encode_lavc_ctx)
         uninit_audio_out(mpctx);
 
+    mpctx->playback_initialized = false;
+
+    if (mpctx->stop_play == PT_RELOAD_FILE) {
+        mpctx->stop_play = KEEP_PLAYING;
+        goto reopen_file;
+    }
+
     m_config_restore_backups(mpctx->mconfig);
 
     talloc_free(mpctx->filtered_tags);
     mpctx->filtered_tags = NULL;
-
-    mpctx->playback_initialized = false;
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 

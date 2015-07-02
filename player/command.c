@@ -678,7 +678,7 @@ static int mp_property_disc_title(void *ctx, struct m_property *prop,
         title = *(int*)arg;
         if (demux_stream_control(d, STREAM_CTRL_SET_CURRENT_TITLE, &title) < 0)
             return M_PROPERTY_NOT_IMPLEMENTED;
-        mpctx->stop_play = PT_RELOAD_DEMUXER;
+        mpctx->stop_play = PT_RELOAD_FILE;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -837,7 +837,7 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
         edition = *(int *)arg;
         if (edition != demuxer->edition) {
             opts->edition_id = edition;
-            mpctx->stop_play = PT_RELOAD_DEMUXER;
+            mpctx->stop_play = PT_RELOAD_FILE;
         }
         return M_PROPERTY_OK;
     }
@@ -2847,7 +2847,7 @@ static int mp_property_dvb_channel(void *ctx, struct m_property *prop,
         mpctx->last_dvb_step = 1;
         r = prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_SET_CHANNEL, arg);
         if (r == M_PROPERTY_OK)
-            mpctx->stop_play = PT_RELOAD_DEMUXER;
+            mpctx->stop_play = PT_RELOAD_FILE;
         return r;
     case M_PROPERTY_SWITCH: {
         struct m_property_switch_arg *sa = arg;
@@ -2855,7 +2855,7 @@ static int mp_property_dvb_channel(void *ctx, struct m_property *prop,
         mpctx->last_dvb_step = dir;
         r = prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_STEP_CHANNEL, &dir);
         if (r == M_PROPERTY_OK)
-            mpctx->stop_play = PT_RELOAD_DEMUXER;
+            mpctx->stop_play = PT_RELOAD_FILE;
         return r;
     }
     case M_PROPERTY_GET_TYPE:

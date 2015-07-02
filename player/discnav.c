@@ -234,7 +234,7 @@ void mp_handle_nav(struct MPContext *mpctx)
             break;
         }
         case MP_NAV_EVENT_RESET_ALL: {
-            mpctx->stop_play = PT_RELOAD_DEMUXER;
+            mpctx->stop_play = PT_RELOAD_FILE; // would wipe DVD state -> broken
             MP_VERBOSE(nav, "reload\n");
             // return immediately.
             // other events should be handled after reloaded.
