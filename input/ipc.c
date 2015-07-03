@@ -257,6 +257,8 @@ static char *json_execute_command(struct client_arg *arg, void *ta_parent,
         goto error;
     }
 
+    mpv_node *reqid_node = mpv_node_map_get(&msg_node, "request_id");
+
     mpv_node *cmd_node = mpv_node_map_get(&msg_node, "command");
     if (!cmd_node ||
         (cmd_node->format != MPV_FORMAT_NODE_ARRAY) ||
@@ -470,6 +472,14 @@ static char *json_execute_command(struct client_arg *arg, void *ta_parent,
     }
 
 error:
+    /* If the request contains a "request_id", copy it back into the response.
+     * This makes it easier on the requester to match up the IPC results with
+     * the original requests.
+     */
+    if (reqid_node) {
+        mpv_node_map_add(ta_parent, &reply_node, "request_id", reqid_node);
+    }
+
     mpv_node_map_add_string(ta_parent, &reply_node, "error", mpv_error_string(rc));
 
     char *output = talloc_strdup(ta_parent, "");
