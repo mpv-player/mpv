@@ -160,6 +160,53 @@ static OSStatus render_cb_compressed(
     return noErr;
 }
 
+// Apparently, audio devices can have multiple sub-streams. It's not clear to
+// me what devices with multiple streams actually do. So only select the first
+// one that fulfills some minimum requirements.
+// If this is not sufficient, we could duplicate the device list entries for
+// each sub-stream, and make it explicit.
+static int select_stream(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+
+    AudioStreamID *streams;
+    size_t n_streams;
+    OSStatus err;
+
+    /* Get a list of all the streams on this device. */
+    err = CA_GET_ARY_O(p->device, kAudioDevicePropertyStreams,
+                       &streams, &n_streams);
+    CHECK_CA_ERROR("could not get number of streams");
+    for (int i = 0; i < n_streams; i++) {
+        uint32_t direction;
+        err = CA_GET(streams[i], kAudioStreamPropertyDirection, &direction);
+        CHECK_CA_WARN("could not get stream direction");
+        if (err == noErr && direction != 0) {
+            MP_VERBOSE(ao, "Substream %d is not an output stream.\n", i);
+            continue;
+        }
+
+        if (ca_stream_supports_compressed(ao, streams[i])) {
+            MP_VERBOSE(ao, "Using substream %d/%zd.\n", i, n_streams);
+            p->stream = streams[i];
+            p->stream_idx = i;
+            break;
+        }
+    }
+
+    talloc_free(streams);
+
+    if (p->stream_idx < 0) {
+        MP_ERR(ao, "No useable substream found.\n");
+        goto coreaudio_error;
+    }
+
+    return 0;
+
+coreaudio_error:
+    return -1;
+}
+
 static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -196,72 +243,40 @@ static int init(struct ao *ao)
     err = ca_disable_mixing(ao, p->device, &p->changed_mixing);
     CHECK_CA_WARN("failed to disable mixing");
 
-    AudioStreamID *streams;
-    size_t n_streams;
-
-    /* Get a list of all the streams on this device. */
-    err = CA_GET_ARY_O(p->device, kAudioDevicePropertyStreams,
-                       &streams, &n_streams);
-
-    CHECK_CA_ERROR("could not get number of streams");
-
-    for (int i = 0; i < n_streams && p->stream_idx < 0; i++) {
-        uint32_t direction;
-        err = CA_GET(streams[i], kAudioStreamPropertyDirection, &direction);
-        CHECK_CA_ERROR("could not get stream direction");
-        if (direction != 0) {
-            MP_VERBOSE(ao, "Substream %d is not an output stream.\n", i);
-            continue;
-        }
-
-        bool compressed = ca_stream_supports_compressed(ao, streams[i]);
-
-        if (compressed) {
-            AudioStreamRangedDescription *formats;
-            size_t n_formats;
-
-            err = CA_GET_ARY(streams[i],
-                             kAudioStreamPropertyAvailablePhysicalFormats,
-                             &formats, &n_formats);
-
-            if (!CHECK_CA_WARN("could not get number of stream formats"))
-                continue; // try next one
-
-            int req_rate_format = -1;
-            int max_rate_format = -1;
-
-            p->stream = streams[i];
-            p->stream_idx = i;
-
-            for (int j = 0; j < n_formats; j++)
-                if (ca_formatid_is_compressed(formats[j].mFormat.mFormatID)) {
-                    // select the compressed format that has exactly the same
-                    // samplerate. If an exact match cannot be found, select
-                    // the format with highest samplerate as backup.
-                    if (formats[j].mFormat.mSampleRate == asbd.mSampleRate) {
-                        req_rate_format = j;
-                        break;
-                    } else if (max_rate_format < 0 ||
-                        formats[j].mFormat.mSampleRate >
-                        formats[max_rate_format].mFormat.mSampleRate)
-                        max_rate_format = j;
-                }
-
-            if (req_rate_format >= 0)
-                p->stream_asbd = formats[req_rate_format].mFormat;
-            else
-                p->stream_asbd = formats[max_rate_format].mFormat;
-
-            talloc_free(formats);
-        }
-    }
-
-    talloc_free(streams);
-
-    if (p->stream_idx < 0) {
-        MP_WARN(ao , "can't find any compressed output stream format\n");
+    if (select_stream(ao) < 0)
         goto coreaudio_error;
+
+    AudioStreamRangedDescription *formats;
+    size_t n_formats;
+
+    err = CA_GET_ARY(p->stream, kAudioStreamPropertyAvailablePhysicalFormats,
+                     &formats, &n_formats);
+    CHECK_CA_ERROR("could not get number of stream formats");
+
+    int req_rate_format = -1;
+    int max_rate_format = -1;
+
+    for (int j = 0; j < n_formats; j++) {
+        if (ca_formatid_is_compressed(formats[j].mFormat.mFormatID)) {
+            // select the compressed format that has exactly the same
+            // samplerate. If an exact match cannot be found, select
+            // the format with highest samplerate as backup.
+            if (formats[j].mFormat.mSampleRate == asbd.mSampleRate) {
+                req_rate_format = j;
+                break;
+            } else if (max_rate_format < 0 ||
+                formats[j].mFormat.mSampleRate >
+                formats[max_rate_format].mFormat.mSampleRate)
+                max_rate_format = j;
+        }
     }
+
+    if (req_rate_format >= 0)
+        p->stream_asbd = formats[req_rate_format].mFormat;
+    else
+        p->stream_asbd = formats[max_rate_format].mFormat;
+
+    talloc_free(formats);
 
     err = CA_GET(p->stream, kAudioStreamPropertyPhysicalFormat,
                  &p->original_asbd);
