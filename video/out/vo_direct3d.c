@@ -34,6 +34,7 @@
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "video/img_format.h"
+#include "video/d3d.h"
 #include "common/msg.h"
 #include "common/common.h"
 #include "w32_common.h"
@@ -191,6 +192,10 @@ typedef struct d3d_priv {
     struct mp_csp_equalizer video_eq;
 
     struct osdpart *osd[MAX_OSD_PARTS];
+
+    struct mp_hwdec_info hwdec_info;
+    struct mp_hwdec_ctx hwdec_ctx;
+    struct mp_d3d_ctx hwdec_d3d;
 } d3d_priv;
 
 struct fmt_entry {
@@ -739,6 +744,9 @@ static bool change_d3d_backbuffer(d3d_priv *priv)
             MP_VERBOSE(priv, "Creating Direct3D device failed.\n");
             return 0;
         }
+
+        // (race condition if this is called when recovering from a "lost" device)
+        priv->hwdec_d3d.d3d9_device = priv->d3d_device;
     } else {
         if (FAILED(IDirect3DDevice9_Reset(priv->d3d_device, &present_params))) {
             MP_ERR(priv, "Reseting Direct3D device failed.\n");
@@ -772,6 +780,8 @@ static bool change_d3d_backbuffer(d3d_priv *priv)
 
 static void destroy_d3d(d3d_priv *priv)
 {
+    priv->hwdec_d3d.d3d9_device = NULL;
+
     destroy_d3d_surfaces(priv);
 
     for (int n = 0; n < NUM_SHADERS; n++) {
@@ -1216,6 +1226,9 @@ static int preinit(struct vo *vo)
     priv->vo = vo;
     priv->log = vo->log;
 
+    priv->hwdec_info.hwctx = &priv->hwdec_ctx;
+    priv->hwdec_ctx.d3d_ctx = &priv->hwdec_d3d;
+
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osdpart *osd = talloc_ptrtype(priv, osd);
         *osd = (struct osdpart) {
@@ -1263,6 +1276,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
     d3d_priv *priv = vo->priv;
 
     switch (request) {
+    case VOCTRL_GET_HWDEC_INFO: {
+        struct mp_hwdec_info **arg = data;
+        *arg = &priv->hwdec_info;
+        return true;
+    }
     case VOCTRL_REDRAW_FRAME:
         d3d_draw_frame(priv);
         return VO_TRUE;

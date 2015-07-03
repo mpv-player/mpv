@@ -36,6 +36,7 @@
 #include "video/fmt-conversion.h"
 #include "video/mp_image_pool.h"
 #include "video/hwdec.h"
+#include "video/d3d.h"
 #include "gpu_memcpy_sse4.h"
 
 // A minor evil.
@@ -340,6 +341,15 @@ static int create_device(struct lavc_ctx *s)
     D3DPRESENT_PARAMETERS d3dpp = {0};
     D3DDISPLAYMODE        d3ddm;
     UINT adapter = D3DADAPTER_DEFAULT;
+
+    if (s->hwdec_info && s->hwdec_info->hwctx && s->hwdec_info->hwctx->d3d_ctx) {
+        ctx->d3d9device = s->hwdec_info->hwctx->d3d_ctx->d3d9_device;
+        if (ctx->d3d9device) {
+            IDirect3D9_AddRef(ctx->d3d9device);
+            MP_VERBOSE(ctx, "Using VO-supplied device %p.\n", ctx->d3d9device);
+            return 0;
+        }
+    }
 
     ctx->d3dlib = LoadLibrary(L"d3d9.dll");
     if (!ctx->d3dlib) {
