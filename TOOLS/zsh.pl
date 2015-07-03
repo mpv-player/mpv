@@ -141,7 +141,7 @@ sub parse_main_opts {
     my ($cmd, $regex) = @_;
 
     my @list;
-    my @lines = split /\n/, `"$mpv" --no-config $cmd`;
+    my @lines = call_mpv($cmd);
 
     foreach my $line (@lines) {
         my ($name, $desc) = ($line =~ /^$regex/) or next;
@@ -206,7 +206,7 @@ sub parse_opts {
     my ($cmd, $regex) = @_;
 
     my @list;
-    my @lines = split /\n/, `"$mpv" --no-config $cmd`;
+    my @lines = call_mpv($cmd);
 
     foreach my $line (@lines) {
         if ($line !~ /^$regex/) {
@@ -225,4 +225,15 @@ sub parse_opts {
     }
 
     return @list;
+}
+
+sub call_mpv {
+    my ($cmd) = @_;
+    my $output = `"$mpv" --no-config $cmd`;
+    if ($? == -1) {
+        die "Could not run mpv: $!";
+    } elsif ($? != 0) {
+        die "mpv returned " . ($? >> 8) . " with output:\n$output";
+    }
+    return split /\n/, $output;
 }
