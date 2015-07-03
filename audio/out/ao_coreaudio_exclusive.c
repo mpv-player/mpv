@@ -207,6 +207,45 @@ coreaudio_error:
     return -1;
 }
 
+static int find_best_format(struct ao *ao, AudioStreamBasicDescription *out_fmt)
+{
+    struct priv *p = ao->priv;
+
+    // Build ASBD for the input format
+    AudioStreamBasicDescription asbd;
+    ca_fill_asbd(ao, &asbd);
+
+    *out_fmt = (AudioStreamBasicDescription){0};
+
+    AudioStreamRangedDescription *formats;
+    size_t n_formats;
+    OSStatus err;
+
+    err = CA_GET_ARY(p->stream, kAudioStreamPropertyAvailablePhysicalFormats,
+                     &formats, &n_formats);
+    CHECK_CA_ERROR("could not get number of stream formats");
+
+    for (int j = 0; j < n_formats; j++) {
+        AudioStreamBasicDescription *stream_asbd = &formats[j].mFormat;
+
+        ca_print_asbd(ao, "- ", stream_asbd);
+
+        if (!out_fmt->mFormatID || ca_asbd_is_better(&asbd, out_fmt, stream_asbd))
+            *out_fmt = *stream_asbd;
+    }
+
+    talloc_free(formats);
+
+    if (!out_fmt->mFormatID) {
+        MP_ERR(ao, "no format found\n");
+        return -1;
+    }
+
+    return 0;
+coreaudio_error:
+    return -1;
+}
+
 static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -226,10 +265,6 @@ static int init(struct ao *ao)
         goto coreaudio_error_nounlock;
     }
 
-    // Build ASBD for the input format
-    AudioStreamBasicDescription asbd;
-    ca_fill_asbd(ao, &asbd);
-
     uint32_t is_alive = 1;
     err = CA_GET(p->device, kAudioDevicePropertyDeviceIsAlive, &is_alive);
     CHECK_CA_WARN("could not check whether device is alive");
@@ -246,43 +281,17 @@ static int init(struct ao *ao)
     if (select_stream(ao) < 0)
         goto coreaudio_error;
 
-    AudioStreamRangedDescription *formats;
-    size_t n_formats;
+    AudioStreamBasicDescription hwfmt;
+    if (find_best_format(ao, &hwfmt) < 0)
+        goto coreaudio_error;
 
-    err = CA_GET_ARY(p->stream, kAudioStreamPropertyAvailablePhysicalFormats,
-                     &formats, &n_formats);
-    CHECK_CA_ERROR("could not get number of stream formats");
-
-    int req_rate_format = -1;
-    int max_rate_format = -1;
-
-    for (int j = 0; j < n_formats; j++) {
-        if (ca_formatid_is_compressed(formats[j].mFormat.mFormatID)) {
-            // select the compressed format that has exactly the same
-            // samplerate. If an exact match cannot be found, select
-            // the format with highest samplerate as backup.
-            if (formats[j].mFormat.mSampleRate == asbd.mSampleRate) {
-                req_rate_format = j;
-                break;
-            } else if (max_rate_format < 0 ||
-                formats[j].mFormat.mSampleRate >
-                formats[max_rate_format].mFormat.mSampleRate)
-                max_rate_format = j;
-        }
-    }
-
-    if (req_rate_format >= 0)
-        p->stream_asbd = formats[req_rate_format].mFormat;
-    else
-        p->stream_asbd = formats[max_rate_format].mFormat;
-
-    talloc_free(formats);
+    p->stream_asbd = hwfmt;
 
     err = CA_GET(p->stream, kAudioStreamPropertyPhysicalFormat,
                  &p->original_asbd);
     CHECK_CA_ERROR("could not get stream's original physical format");
 
-    if (!ca_change_physical_format_sync(ao, p->stream, p->stream_asbd))
+    if (!ca_change_physical_format_sync(ao, p->stream, hwfmt))
         goto coreaudio_error;
 
     err = enable_property_listener(ao, true);
