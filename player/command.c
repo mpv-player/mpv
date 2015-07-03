@@ -1853,6 +1853,15 @@ static int property_switch_track_ff(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
+static int track_channels(struct track *track)
+{
+    if (track->type == STREAM_AUDIO)
+    {
+        return track->stream->audio->channels.num;
+    }
+    return 0;
+}
+
 static int get_track_entry(int item, int action, void *arg, void *ctx)
 {
     struct MPContext *mpctx = ctx;
@@ -1870,6 +1879,8 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
                         .unavailable = !track->title},
         {"lang",        SUB_PROP_STR(track->lang),
                         .unavailable = !track->lang},
+        {"channels",    SUB_PROP_INT(track_channels(track)),
+                        .unavailable = track_channels(track) <= 0},
         {"albumart",    SUB_PROP_FLAG(track->attached_picture)},
         {"default",     SUB_PROP_FLAG(track->default_track)},
         {"forced",      SUB_PROP_FLAG(track->forced_track)},

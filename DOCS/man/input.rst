@@ -1570,6 +1570,10 @@ Property list
     ``track-list/N/lang``
         Track language as identified by the file. Not always available.
 
+    ``track-list/N/channels``
+        For audio tracks, the number of audio channels in the audio stream.
+        Not always accurate. Not always available.
+
     ``track-list/N/albumart``
         ``yes`` if this is a video track that consists of a single picture,
         ``no`` or unavailable otherwise. This is used for video tracks that are
@@ -1618,6 +1622,7 @@ Property list
                 "src-id"            MPV_FORMAT_INT64
                 "title"             MPV_FORMAT_STRING
                 "lang"              MPV_FORMAT_STRING
+                "channels"          MPV_FORMAT_INT64
                 "albumart"          MPV_FORMAT_FLAG
                 "default"           MPV_FORMAT_FLAG
                 "forced"            MPV_FORMAT_FLAG
