@@ -615,7 +615,8 @@ Available video output drivers are:
         full screen).
         This may help getting more consistent frame intervals, especially with
         high-fps clips - which might also reduce dropped frames. Typically a
-        value of 1 should be enough since full screen may bypass the DWM.
+        value of ``windowed`` should be enough since full screen may bypass the
+        DWM.
 
         Windows only.
 
