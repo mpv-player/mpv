@@ -44,6 +44,7 @@
 #include "osdep/atomics.h"
 #include "options/m_option.h"
 #include "common/msg.h"
+#include "audio/out/ao_coreaudio_chmap.h"
 #include "audio/out/ao_coreaudio_properties.h"
 #include "audio/out/ao_coreaudio_utils.h"
 
@@ -85,7 +86,7 @@ static OSStatus property_listener_cb(
 
     // Check whether we need to reset the compressed output stream.
     AudioStreamBasicDescription f;
-    OSErr err = CA_GET(p->stream, kAudioStreamPropertyPhysicalFormat, &f);
+    OSErr err = CA_GET(p->stream, kAudioStreamPropertyVirtualFormat, &f);
     CHECK_CA_WARN("could not get stream format");
     if (err != noErr || !ca_asbd_equals(&p->stream_asbd, &f)) {
         if (atomic_compare_exchange_strong(&p->reload_requested,
@@ -186,7 +187,9 @@ static int select_stream(struct ao *ao)
             continue;
         }
 
-        if (ca_stream_supports_compressed(ao, streams[i])) {
+        if (af_fmt_is_pcm(ao->format) || ca_stream_supports_compressed(ao,
+                                                                   streams[i]))
+        {
             MP_VERBOSE(ao, "Using substream %d/%zd.\n", i, n_streams);
             p->stream = streams[i];
             p->stream_idx = i;
@@ -214,6 +217,7 @@ static int find_best_format(struct ao *ao, AudioStreamBasicDescription *out_fmt)
     // Build ASBD for the input format
     AudioStreamBasicDescription asbd;
     ca_fill_asbd(ao, &asbd);
+    ca_print_asbd(ao, "our format:", &asbd);
 
     *out_fmt = (AudioStreamBasicDescription){0};
 
@@ -255,13 +259,8 @@ static int init(struct ao *ao)
 
     ao->format = af_fmt_from_planar(ao->format);
 
-    if (!af_fmt_is_spdif(ao->format)) {
-        MP_ERR(ao, "Only compressed formats are supported.\n");
-        goto coreaudio_error_nounlock;
-    }
-
-    if (!ca_device_supports_compressed(ao, p->device)) {
-        MP_ERR(ao, "selected device doesn't support compressed formats\n");
+    if (!af_fmt_is_pcm(ao->format) && !af_fmt_is_spdif(ao->format)) {
+        MP_ERR(ao, "Unsupported format.\n");
         goto coreaudio_error_nounlock;
     }
 
@@ -285,8 +284,6 @@ static int init(struct ao *ao)
     if (find_best_format(ao, &hwfmt) < 0)
         goto coreaudio_error;
 
-    p->stream_asbd = hwfmt;
-
     err = CA_GET(p->stream, kAudioStreamPropertyPhysicalFormat,
                  &p->original_asbd);
     CHECK_CA_ERROR("could not get stream's original physical format");
@@ -294,13 +291,33 @@ static int init(struct ao *ao)
     if (!ca_change_physical_format_sync(ao, p->stream, hwfmt))
         goto coreaudio_error;
 
-    err = enable_property_listener(ao, true);
-    CHECK_CA_ERROR("cannot install format change listener during init");
+    if (!ca_init_chmap(ao, p->device))
+        goto coreaudio_error;
 
-    if (p->stream_asbd.mFormatFlags & kAudioFormatFlagIsBigEndian)
-        MP_WARN(ao, "stream has non-native byte order, output may fail\n");
+    err = CA_GET(p->stream, kAudioStreamPropertyVirtualFormat, &p->stream_asbd);
+    CHECK_CA_ERROR("could not get stream's virtual format");
+
+    ca_print_asbd(ao, "virtual format", &p->stream_asbd);
+
+    int new_format = ca_asbd_to_mp_format(&p->stream_asbd);
+
+    // If both old and new formats are spdif, avoid changing it due to the
+    // imperfect mapping between mp and CA formats.
+    if (!(af_fmt_is_spdif(ao->format) && af_fmt_is_spdif(new_format)))
+        ao->format = new_format;
+
+    if (!ao->format || af_fmt_is_planar(ao->format)) {
+        MP_ERR(ao, "hardware format not supported\n");
+        goto coreaudio_error;
+    }
 
     ao->samplerate = p->stream_asbd.mSampleRate;
+
+    if (ao->channels.num != p->stream_asbd.mChannelsPerFrame) {
+        // We really expect that ca_init_chmap() fixes the layout to the HW's.
+        MP_ERR(ao, "number of channels changed, and unknown channel layout!\n");
+        goto coreaudio_error;
+    }
 
     uint32_t latency_frames = 0;
     uint32_t latency_properties[] = {
@@ -321,6 +338,9 @@ static int init(struct ao *ao)
 
     p->hw_latency_us = ca_frames_to_us(ao, latency_frames);
     MP_VERBOSE(ao, "base latency: %d microseconds\n", (int)p->hw_latency_us);
+
+    err = enable_property_listener(ao, true);
+    CHECK_CA_ERROR("cannot install format change listener during init");
 
     err = AudioDeviceCreateIOProcID(p->device,
                                     (AudioDeviceIOProc)render_cb_compressed,

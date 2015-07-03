@@ -174,8 +174,6 @@ Available audio output drivers are:
     Native Mac OS X audio output driver using direct device access and
     exclusive mode (bypasses the sound server).
 
-    Supports only compressed formats (AC3 and DTS).
-
 ``openal``
     Experimental OpenAL audio output driver
 
