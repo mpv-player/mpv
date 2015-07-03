@@ -275,6 +275,8 @@ struct GL {
 
     void (GLAPIENTRY *DebugMessageCallback)(MP_GLDEBUGPROC callback,
                                             const void *userParam);
+
+    void *(GLAPIENTRY *MPGetD3DInterface)(const char *name);
 };
 
 #endif /* MPLAYER_GL_COMMON_H */

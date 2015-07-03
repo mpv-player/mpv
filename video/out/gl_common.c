@@ -306,6 +306,15 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    // These don't exist - they are for the sake of mpv internals, and libmpv
+    // interaction (see libmpv/opengl_cb.h).
+    {
+        .extension = "GL_MP_D3D_interfaces",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(MPGetD3DInterface),
+            {0}
+        },
+    },
 };
 
 #undef FN_OFFS

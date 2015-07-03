@@ -107,6 +107,24 @@ extern "C" {
  * When the mpv core is destroyed (e.g. via mpv_terminate_destroy()), the OpenGL
  * context must have been uninitialized. If this doesn't happen, undefined
  * behavior will result.
+ *
+ * Special D3D interop considerations
+ * ----------------------------------
+ *
+ * If OpenGL switches to fullscreen, most players give it access GPU access,
+ * which means DXVA2 hardware decoding in mpv won't work. This can be worked
+ * around by giving mpv access to Direct3D device, which it will then use to
+ * create a decoder. The device can be either the real device used for display,
+ * or a "blank" device created before switching to fullscreen.
+ *
+ * You can do this by adding "GL_MP_D3D_interfaces" to the additional extension
+ * string when calling mpv_opengl_cb_init_gl(). The get_proc_address callback
+ * should resolve a function named "glMPGetD3DInterface", which has the
+ * signature: "void* __stdcall glMPGetD3DInterface(const char* name)". If
+ * name is "IDirect3DDevice9", it should return a IDirect3DDevice9 pointer
+ * (or NULL if not available). libmpv will release this interface when it is
+ * done with it (usually when mpv_opengl_cb_uninit_gl() is called). New
+ * interface names can be added in the future.
  */
 
 /**
