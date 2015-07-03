@@ -463,6 +463,8 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
                 if (loaded[i])
                     *funcptr = loaded[i];
             }
+            mp_verbose(log, "Loaded functions for %d/%s.\n", ver_core,
+                       section->extension ? section->extension : "builtin");
         }
     }
 

@@ -58,9 +58,10 @@ static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
         .gl_texture_target = GL_TEXTURE_2D,
         .reject_emulated = is_auto,
     };
+    mp_verbose(log, "Trying hwdec driver '%s'\n", drv->api_name);
     if (hwdec->driver->create(hwdec) < 0) {
         talloc_free(hwdec);
-        mp_verbose(log, "Couldn't load hwdec driver '%s'\n", drv->api_name);
+        mp_verbose(log, "Loading failed.\n");
         return NULL;
     }
     return hwdec;
