@@ -315,8 +315,11 @@ static int init(struct ao *ao)
         uint32_t temp;
         err = CA_GET_O(p->device, latency_properties[n], &temp);
         CHECK_CA_WARN("cannot get device latency");
-        if (err == noErr)
+        if (err == noErr) {
             latency_frames += temp;
+            MP_VERBOSE(ao, "Latency %s: %d\n", fourcc_repr(latency_properties[n]),
+                       (int)latency_frames);
+        }
     }
 
     p->hw_latency_us = ca_frames_to_us(ao, latency_frames);
