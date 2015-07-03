@@ -151,7 +151,7 @@ static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
-    if (af_fmt_is_spdif(ao->format)) {
+    if (!af_fmt_is_pcm(ao->format)) {
         MP_WARN(ao, "detected IEC61937, redirecting to coreaudio_exclusive\n");
         ao->redirect = "coreaudio_exclusive";
         return CONTROL_ERROR;
