@@ -301,9 +301,6 @@ static int init(struct ao *ao)
         MP_WARN(ao, "stream has non-native byte order, output may fail\n");
 
     ao->samplerate = p->stream_asbd.mSampleRate;
-    ao->bps = ao->samplerate *
-                  (p->stream_asbd.mBytesPerPacket /
-                   p->stream_asbd.mFramesPerPacket);
 
     uint32_t latency_frames = 0;
     uint32_t latency_properties[] = {
