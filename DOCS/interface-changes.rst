@@ -20,6 +20,7 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - add ao coreaudio exclusive suboption
     - add ``track-list/N/forced`` property
     - add audio-params/channel-count and ``audio-params-out/channel-count props.
     - add af volume replaygain-fallback suboption

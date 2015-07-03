@@ -39,6 +39,7 @@ struct priv {
     AudioStreamID original_asbd_stream;
 
     int change_physical_format;
+    int exclusive;
 };
 
 static int64_t ca_get_hardware_latency(struct ao *ao) {
@@ -151,8 +152,8 @@ static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
-    if (!af_fmt_is_pcm(ao->format)) {
-        MP_WARN(ao, "detected IEC61937, redirecting to coreaudio_exclusive\n");
+    if (!af_fmt_is_pcm(ao->format) || p->exclusive) {
+        MP_VERBOSE(ao, "redirecting to coreaudio_exclusive\n");
         ao->redirect = "coreaudio_exclusive";
         return CONTROL_ERROR;
     }
@@ -423,6 +424,7 @@ const struct ao_driver audio_out_coreaudio = {
     .priv_size      = sizeof(struct priv),
     .options = (const struct m_option[]){
         OPT_FLAG("change-physical-format", change_physical_format, 0),
+        OPT_FLAG("exclusive", exclusive, 0),
         {0}
     },
 };
