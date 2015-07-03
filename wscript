@@ -437,6 +437,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavutil/pixfmt.h',
                                 'int x = AV_PIX_FMT_MMAL',
                                 use='libav'),
+    }, {
+        'name': 'av-version-info',
+        'desc': 'libavtuil av_version_info()',
+        'func': check_statement('libavutil/avutil.h',
+                                'const char *x = av_version_info()',
+                                use='libav'),
     }
 ]
 

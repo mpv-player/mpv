@@ -786,6 +786,12 @@ api_statement_check \
     libavutil/frame.h \
     'enum AVFrameSideDataType type = AV_FRAME_DATA_SKIP_SAMPLES'
 
+api_statement_check \
+    "libavutil av_version_info()" \
+    HAVE_AV_VERSION_INFO \
+    libavutil/avutil.h \
+    'const char *x = av_version_info()'
+
 check_pkg_config "libavfilter" $_libavfilter LIBAVFILTER 'libavfilter >= 5.0.0'
 
 check_pkg_config "libavdevice" $_libavdevice LIBAVDEVICE 'libavdevice >= 55.0.0'

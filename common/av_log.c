@@ -239,6 +239,10 @@ void print_libav_versions(struct mp_log *log, int v)
                 "expose subtle ABI compatibility issues\nand can lead to "
                 "misbehavior and crashes.\n", LIB_PREFIX);
     }
+
+#if HAVE_AV_VERSION_INFO
+    mp_msg(log, v, "%s version: %s\n", LIB_PREFIX, av_version_info());
+#endif
 }
 
 #undef V
