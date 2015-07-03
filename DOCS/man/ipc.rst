@@ -79,6 +79,24 @@ mpv will also send events to clients with JSON messages of the following form:
 where ``event_name`` is the name of the event. Additional event-specific fields
 can also be present. See `List of events`_ for a list of all supported events.
 
+Because events can occur at any time, it may be difficult at times to determine
+which response goes with which command. Commands may optionally include a
+``request_id`` which, if provided in the command request, will be copied
+verbatim into the response. mpv does not intrepret the ``request_id`` in any
+way; it is solely for the use of the requester.
+
+For example, this request:
+
+::
+
+    { "command": ["get_property", "time-pos"], "request_id": 100 }
+
+Would generate this response:
+
+::
+
+    { "error": "success", "data": 1.468135, "request_id": 100 }
+
 All commands, replies, and events are separated from each other with a line
 break character (``\n``).
 
