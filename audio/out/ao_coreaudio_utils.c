@@ -222,14 +222,16 @@ bool ca_asbd_equals(const AudioStreamBasicDescription *a,
                     const AudioStreamBasicDescription *b)
 {
     int flags = kAudioFormatFlagIsPacked | kAudioFormatFlagIsFloat |
-            kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsBigEndian;
+                kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsBigEndian;
+    bool spdif = ca_formatid_is_compressed(a->mFormatID) &&
+                 ca_formatid_is_compressed(b->mFormatID);
 
     return (a->mFormatFlags & flags) == (b->mFormatFlags & flags) &&
            a->mBitsPerChannel == b->mBitsPerChannel &&
            ca_normalize_formatid(a->mFormatID) ==
                 ca_normalize_formatid(b->mFormatID) &&
-           a->mBytesPerPacket == b->mBytesPerPacket &&
-           a->mChannelsPerFrame == b->mChannelsPerFrame &&
+           (spdif || a->mBytesPerPacket == b->mBytesPerPacket) &&
+           (spdif || a->mChannelsPerFrame == b->mChannelsPerFrame) &&
            a->mSampleRate == b->mSampleRate;
 }
 
@@ -238,9 +240,9 @@ int ca_asbd_to_mp_format(const AudioStreamBasicDescription *asbd)
 {
     for (int fmt = 1; fmt < AF_FORMAT_COUNT; fmt++) {
         AudioStreamBasicDescription mp_asbd = {0};
-        ca_fill_asbd_raw(&mp_asbd, fmt, 0, asbd->mChannelsPerFrame);
+        ca_fill_asbd_raw(&mp_asbd, fmt, asbd->mSampleRate, asbd->mChannelsPerFrame);
         if (ca_asbd_equals(&mp_asbd, asbd))
-            return fmt;
+            return af_fmt_is_spdif(fmt) ? AF_FORMAT_S_AC3 : fmt;
     }
     return 0;
 }
