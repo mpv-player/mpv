@@ -756,8 +756,8 @@ static void do_redraw(struct vo *vo)
         frame = &dummy;
     frame->redraw = !full_redraw; // unconditionally redraw if it was dropped
     frame->still = true;
-    frame->pts = -1;
-    frame->duration = 0;
+    frame->pts = 0;
+    frame->duration = -1;
     pthread_mutex_unlock(&in->lock);
 
     if (vo->driver->draw_frame) {
