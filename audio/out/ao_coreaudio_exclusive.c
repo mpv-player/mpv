@@ -331,8 +331,8 @@ static int init(struct ao *ao)
         CHECK_CA_WARN("cannot get device latency");
         if (err == noErr) {
             latency_frames += temp;
-            MP_VERBOSE(ao, "Latency %s: %d\n", fourcc_repr(latency_properties[n]),
-                       (int)latency_frames);
+            MP_VERBOSE(ao, "Latency property %s: %d frames\n",
+                       fourcc_repr(latency_properties[n]), (int)temp);
         }
     }
 
