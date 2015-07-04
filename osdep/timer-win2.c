@@ -23,6 +23,8 @@
 #include <stdlib.h>
 #include "timer.h"
 
+static LARGE_INTEGER perf_freq;
+
 void mp_sleep_us(int64_t us)
 {
     if (us < 0)
@@ -35,24 +37,20 @@ void mp_sleep_us(int64_t us)
     Sleep(us / 1000);
 }
 
-#if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0 && defined(CLOCK_MONOTONIC)
 uint64_t mp_raw_time_us(void)
 {
-    struct timespec ts;
-    if (clock_gettime(CLOCK_MONOTONIC, &ts))
-        abort();
-    return ts.tv_sec * 1000000LL + ts.tv_nsec / 1000;
+    LARGE_INTEGER perf_count;
+    QueryPerformanceCounter(&perf_count);
+
+    // Convert QPC units (1/perf_freq seconds) to microseconds. This will work
+    // without overflow because the QPC value is guaranteed not to roll-over
+    // within 100 years, so perf_freq must be less than 2.9*10^9.
+    return perf_count.QuadPart / perf_freq.QuadPart * 1000000 +
+        perf_count.QuadPart % perf_freq.QuadPart * 1000000 / perf_freq.QuadPart;
 }
-#else
-uint64_t mp_raw_time_us(void)
-{
-    struct timeval tv;
-    gettimeofday(&tv,NULL);
-    return tv.tv_sec * 1000000LL + tv.tv_usec;
-}
-#endif
 
 void mp_raw_time_init(void)
 {
+    QueryPerformanceFrequency(&perf_freq);
     timeBeginPeriod(1); // request 1ms timer resolution
 }
