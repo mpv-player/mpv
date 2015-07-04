@@ -48,7 +48,10 @@ void mp_time_init(void)
 
 int64_t mp_time_us(void)
 {
-    return mp_raw_time_us() - raw_time_offset;
+    int64_t r = mp_raw_time_us() - raw_time_offset;
+    if (r < MP_START_TIME)
+        r = MP_START_TIME;
+    return r;
 }
 
 double mp_time_sec(void)
