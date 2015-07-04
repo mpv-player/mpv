@@ -822,10 +822,10 @@ static void *vo_thread(void *ptr)
         }
         wait_vo(vo, wait_until);
     }
-    vo->driver->uninit(vo);
     forget_frames(vo); // implicitly synchronized
     talloc_free(in->current_frame);
     in->current_frame = NULL;
+    vo->driver->uninit(vo);
     return NULL;
 }
 
