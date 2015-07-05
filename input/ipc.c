@@ -244,6 +244,7 @@ static char *json_execute_command(struct client_arg *arg, void *ta_parent,
 
     mpv_node msg_node;
     mpv_node reply_node = {.format = MPV_FORMAT_NODE_MAP, .u.list = NULL};
+    mpv_node *reqid_node = NULL;
 
     rc = json_parse(ta_parent, &msg_node, &src, 3);
     if (rc < 0) {
@@ -257,7 +258,7 @@ static char *json_execute_command(struct client_arg *arg, void *ta_parent,
         goto error;
     }
 
-    mpv_node *reqid_node = mpv_node_map_get(&msg_node, "request_id");
+    reqid_node = mpv_node_map_get(&msg_node, "request_id");
 
     mpv_node *cmd_node = mpv_node_map_get(&msg_node, "command");
     if (!cmd_node ||
