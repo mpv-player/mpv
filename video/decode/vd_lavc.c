@@ -547,12 +547,6 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     return AV_PIX_FMT_NONE;
 }
 
-static void free_mpi(void *opaque, uint8_t *data)
-{
-    struct mp_image *mpi = opaque;
-    talloc_free(mpi);
-}
-
 static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
 {
     struct dec_video *vd = avctx->opaque;
@@ -591,9 +585,12 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
     if (!mpi)
         return -1;
 
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 4; i++) {
         pic->data[i] = mpi->planes[i];
-    pic->buf[0] = av_buffer_create(NULL, 0, free_mpi, mpi, 0);
+        pic->buf[i] = mpi->bufs[i];
+        mpi->bufs[i] = NULL;
+    }
+    talloc_free(mpi);
 
     return 0;
 }

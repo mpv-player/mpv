@@ -22,6 +22,8 @@
 #include <pthread.h>
 #include <assert.h>
 
+#include <libavutil/buffer.h>
+
 #include "talloc.h"
 
 #include "common/common.h"
@@ -94,9 +96,9 @@ void mp_image_pool_clear(struct mp_image_pool *pool)
 
 // This is the only function that is allowed to run in a different thread.
 // (Consider passing an image to another thread, which frees it.)
-static void unref_image(void *ptr)
+static void unref_image(void *opaque, uint8_t *data)
 {
-    struct mp_image *img = ptr;
+    struct mp_image *img = opaque;
     struct image_flags *it = img->priv;
     bool alive;
     pool_lock();
@@ -135,11 +137,31 @@ struct mp_image *mp_image_pool_get_no_alloc(struct mp_image_pool *pool, int fmt,
     pool_unlock();
     if (!new)
         return NULL;
+
+    // Reference the new image. Since mp_image_pool is not declared thread-safe,
+    // and unreffing images from other threads does not allocate new images,
+    // no synchronization is required here.
+    for (int p = 0; p < MP_MAX_PLANES; p++)
+        assert(!!new->bufs[p] == !p); // only 1 AVBufferRef
+
+    struct mp_image *ref = mp_image_new_dummy_ref(new);
+
+    // This assumes the buffer is at this point exclusively owned by us: we
+    // can't track whether the buffer is unique otherwise.
+    // (av_buffer_is_writable() checks the refcount of the new buffer only.)
+    int flags = av_buffer_is_writable(new->bufs[0]) ? 0 : AV_BUFFER_FLAG_READONLY;
+    ref->bufs[0] = av_buffer_create(new->bufs[0]->data, new->bufs[0]->size,
+                                    unref_image, new, flags);
+    if (!ref->bufs[0]) {
+        talloc_free(ref);
+        return NULL;
+    }
+
     struct image_flags *it = new->priv;
     assert(!it->referenced && it->pool_alive);
     it->referenced = true;
     it->order = ++pool->lru_counter;
-    return mp_image_new_custom_ref(new, new, unref_image);
+    return ref;
 }
 
 // Return a new image of given format/size. The only difference to
@@ -204,6 +226,10 @@ bool mp_image_pool_make_writeable(struct mp_image_pool *pool,
     return true;
 }
 
+// Call cb(cb_data, fmt, w, h) to allocate an image. Note that the resulting
+// image must use only 1 AVBufferRef. The returned image must also be owned
+// exclusively by the image pool, otherwise mp_image_is_writeable() will not
+// work due to FFmpeg restrictions.
 void mp_image_pool_set_allocator(struct mp_image_pool *pool,
                                  mp_image_allocator cb, void  *cb_data)
 {
