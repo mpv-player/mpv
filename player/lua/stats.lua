@@ -79,13 +79,14 @@ end
 
 function add_file(s)
     s.file = ""
-    local r = mp.get_property_osd("filename")
-    s.file = s.file .. b("File:") .. o.kv_sep .. no_ASS(r)
 
-    append_property(s, "file", "metadata/title", "Title:")
-    append_property(s, "file", "chapter", "Chapter:")
-    if append_property(s, "file", "cache-used", "Cache:") then
-        append_property_inline(s, "file", "demuxer-cache-duration", "+", " sec", true, true)
+    append_property(s, "file", "filename", {prefix="File:", nl="", indent=""})
+    append_property(s, "file", "metadata/title", {prefix="Title:"})
+    append_property(s, "file", "chapter", {prefix="Chapter:"})
+    if append_property(s, "file", "cache-used", {prefix="Cache:"}) then
+        append_property(s, "file", "demuxer-cache-duration",
+                        {prefix="+", suffix=" sec", nl="", indent=o.kv_sep,
+                         prefix_sep="", no_prefix_markup=true})
     end
 end
 
@@ -95,26 +96,32 @@ function add_video(s)
     if not has_video() then
         return
     end
-    local r = mp.get_property_osd("video-codec")
-    s.video = s.video .. b("Video:") .. o.kv_sep .. no_ASS(r)
 
-    append_property(s, "video", "avsync", "A-V:")
-    if append_property(s, "video", "drop-frame-count", "Dropped:") then
-        append_property_inline(s, "video", "vo-drop-frame-count", "   VO:")
+    if append_property(s, "video", "video-codec", {prefix="Video:", nl="", indent=""}) then
+        append_property(s, "video", "hwdec-active",
+                        {prefix="(hwdec)", nl="", indent=" ",
+                         no_prefix_markup=true, no_value=true},
+                        {no=true})
     end
-    if append_property(s, "video", "fps", "FPS:", " (specified)") then
-        append_property_inline(s, "video", "estimated-vf-fps", "", " (estimated)", true, true)
+    append_property(s, "video", "avsync", {prefix="A-V:"})
+    if append_property(s, "video", "drop-frame-count", {prefix="Dropped:"}) then
+        append_property(s, "video", "vo-drop-frame-count", {prefix="VO:", nl=""})
     end
-    if append_property(s, "video", "video-params/w", "Native Resolution:") then
-        append_property_inline(s, "video", "video-params/h", " x ", "", true, true, true)
+    if append_property(s, "video", "fps", {prefix="FPS:", suffix=" (specified)"}) then
+        append_property(s, "video", "estimated-vf-fps",
+                        {suffix=" (estimated)", nl="", indent=o.kv_sep, prefix_sep=""})
     end
-    append_property(s, "video", "window-scale", "Window Scale:")
-    append_property(s, "video", "video-params/aspect", "Aspect Ratio:")
-    append_property(s, "video", "video-params/pixelformat", "Pixel format:")
-    append_property(s, "video", "video-params/colormatrix", "Colormatrix:")
-    append_property(s, "video", "video-params/primaries", "Primaries:")
-    append_property(s, "video", "video-params/colorlevels", "Levels:")
-    append_property(s, "video", "packet-video-bitrate", "Bitrate:", " kbps")
+    if append_property(s, "video", "video-params/w", {prefix="Native Resolution:"}) then
+        append_property(s, "video", "video-params/h",
+                        {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
+    end
+    append_property(s, "video", "window-scale", {prefix="Window Scale:"})
+    append_property(s, "video", "video-params/aspect", {prefix="Aspect Ratio:"})
+    append_property(s, "video", "video-params/pixelformat", {prefix="Pixel format:"})
+    append_property(s, "video", "video-params/colormatrix", {prefix="Colormatrix:"})
+    append_property(s, "video", "video-params/primaries", {prefix="Primaries:"})
+    append_property(s, "video", "video-params/colorlevels", {prefix="Levels:"})
+    append_property(s, "video", "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
 end
 
 
@@ -123,12 +130,11 @@ function add_audio(s)
     if not has_audio() then
         return
     end
-    local r = mp.get_property_osd("audio-codec")
-    s.audio = s.audio .. b("Audio:") .. o.kv_sep .. no_ASS(r)
 
-    append_property(s, "audio", "audio-params/samplerate", "Sample Rate:")
-    append_property(s, "audio", "audio-params/channel-count", "Channels:")
-    append_property(s, "audio", "packet-audio-bitrate", "Bitrate:", " kbps")
+    append_property(s, "audio", "audio-codec", {prefix="Audio:", nl="", indent=""})
+    append_property(s, "audio", "audio-params/samplerate", {prefix="Sample Rate:", suffix=" Hz"})
+    append_property(s, "audio", "audio-params/channel-count", {prefix="Channels:"})
+    append_property(s, "audio", "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
 end
 
 
@@ -149,39 +155,38 @@ function add_header(s)
 end
 
 
-function append_property(s, sec, prop, prefix, suffix)
+-- Format and append a property.
+-- A property whose value is either nil or empty is skipped and not appended.
+--
+-- s       : Table containing key `sec`.
+-- sec     : Existing key in table `s`, treated as a string.
+-- property: The property to query and format (using OSD representation).
+-- attr    : Optional table to overwrite certain (formatting) attributes for
+--           this property.
+-- exclude : Optional table containing keys which are considered invalid values
+--           for this property, therefore skipping it. This will replace empty
+--           string as default invalid value (nil is always invalid).
+function append_property(s, sec, prop, attr, excluded)
+    excluded = excluded or {[""] = true}
     local ret = mp.get_property_osd(prop)
-    if ret == nil or ret == "" then
+    if excluded[ret] then
         if o.debug then
             print("No value for property: " .. prop)
         end
         return false
     end
 
-    local suf = suffix or ""
-    local desc = prefix or ""
-    desc = no_prefix_markup and desc or b(desc)
-    s[sec] = s[sec] .. o.nl .. o.prop_indent .. b(desc) .. o.kv_sep .. no_ASS(ret) .. suf
-    return true
-end
+    attr.prefix_sep = attr.prefix_sep or o.kv_sep
+    attr.indent = attr.indent or o.prop_indent
+    attr.nl = attr.nl or o.nl
+    attr.suffix = attr.suffix or ""
+    attr.prefix = attr.prefix or ""
+    attr.no_prefix_markup = attr.no_prefix_markup or false
+    attr.prefix = attr.no_prefix_markup and attr.prefix or b(attr.prefix)
+    ret = attr.no_value and "" or ret
 
-
--- One could merge this into append_property, it's just a bit more verbose this way imo
-function append_property_inline(s, sec, prop, prefix, suffix, no_prefix_markup, no_prefix_sep, no_indent)
-    local ret = mp.get_property_osd(prop)
-    if ret == nil or ret == "" then
-        if o.debug then
-            print("No value for property: " .. prop)
-        end
-        return false
-    end
-
-    local suf = suffix or ""
-    local prefix_sep = no_prefix_sep and "" or o.kv_sep
-    local indent = no_indent and "" or o.kv_sep
-    local desc = prefix or ""
-    desc = no_prefix_markup and desc or b(desc)
-    s[sec] = s[sec] .. indent .. desc .. prefix_sep .. no_ASS(ret) .. suf
+    s[sec] = string.format("%s%s%s%s%s%s%s", s[sec], attr.nl, attr.indent,
+                           attr.prefix, attr.prefix_sep, no_ASS(ret), attr.suffix)
     return true
 end
 
