@@ -169,7 +169,7 @@ end
 function append_property(s, sec, prop, attr, excluded)
     excluded = excluded or {[""] = true}
     local ret = mp.get_property_osd(prop)
-    if excluded[ret] then
+    if not ret or excluded[ret] then
         if o.debug then
             print("No value for property: " .. prop)
         end
