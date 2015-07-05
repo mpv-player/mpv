@@ -288,8 +288,9 @@ static int init(struct ao *ao)
                  &p->original_asbd);
     CHECK_CA_ERROR("could not get stream's original physical format");
 
-    if (!ca_change_physical_format_sync(ao, p->stream, hwfmt))
-        goto coreaudio_error;
+    // Even if changing the physical format fails, we can try using the current
+    // virtual format.
+    ca_change_physical_format_sync(ao, p->stream, hwfmt);
 
     if (!ca_init_chmap(ao, p->device))
         goto coreaudio_error;

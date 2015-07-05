@@ -514,6 +514,7 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
     ca_print_asbd(ao, "actual format in use:", &actual_format);
 
     if (!format_set) {
+        MP_WARN(ao, "changing physical format failed\n");
         // Some drivers just fuck up and get into a broken state. Restore the
         // old format in this case.
         err = CA_SET(stream, kAudioStreamPropertyPhysicalFormat, &prev_format);
