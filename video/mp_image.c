@@ -364,8 +364,10 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     }
     mp_image_params_guess_csp(&dst->params); // ensure colorspace consistency
     if ((dst->fmt.flags & MP_IMGFLAG_PAL) && (src->fmt.flags & MP_IMGFLAG_PAL)) {
-        if (dst->planes[1] && src->planes[1])
-            memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
+        if (dst->planes[1] && src->planes[1]) {
+            if (mp_image_make_writeable(dst))
+                memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
+        }
     }
 }
 
