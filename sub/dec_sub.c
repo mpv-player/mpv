@@ -232,6 +232,7 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh)
             .extradata_len = sd->output_extradata_len,
             .ass_library = sub->init_sd.ass_library,
             .ass_renderer = sub->init_sd.ass_renderer,
+            .ass_lock = sub->init_sd.ass_lock,
         };
     }
 
