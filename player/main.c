@@ -222,6 +222,7 @@ void mp_destroy(struct MPContext *mpctx)
         pthread_detach(pthread_self());
 
     mp_msg_uninit(mpctx->global);
+    pthread_mutex_destroy(&mpctx->ass_lock);
     talloc_free(mpctx);
 }
 
@@ -328,6 +329,8 @@ struct MPContext *mp_create(void)
         .dispatch = mp_dispatch_create(mpctx),
         .playback_abort = mp_cancel_new(mpctx),
     };
+
+    pthread_mutex_init(&mpctx->ass_lock, NULL);
 
     mpctx->global = talloc_zero(mpctx, struct mpv_global);
 

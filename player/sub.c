@@ -306,12 +306,15 @@ static void reinit_subdec(struct MPContext *mpctx, struct track *track,
 
     sub_set_video_res(dec_sub, w, h);
     sub_set_video_fps(dec_sub, fps);
-    sub_set_ass_renderer(dec_sub, mpctx->ass_library, mpctx->ass_renderer);
+    sub_set_ass_renderer(dec_sub, mpctx->ass_library, mpctx->ass_renderer,
+                         &mpctx->ass_lock);
     sub_init_from_sh(dec_sub, track->stream);
 
     if (mpctx->ass_renderer) {
+        pthread_mutex_lock(&mpctx->ass_lock);
         mp_ass_configure_fonts(mpctx->ass_renderer, opts->sub_text_style,
                                mpctx->global, mpctx->ass_log);
+        pthread_mutex_unlock(&mpctx->ass_lock);
     }
 
     // Don't do this if the file has video/audio streams. Don't do it even

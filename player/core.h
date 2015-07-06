@@ -317,6 +317,7 @@ typedef struct MPContext {
      * loaded across ordered chapters, instead of reloading and rescanning
      * them on each transition. (Both of these objects contain this state.)
      */
+    pthread_mutex_t ass_lock;
     struct ass_renderer *ass_renderer;
     struct ass_library *ass_library;
     struct mp_log *ass_log;

@@ -28,6 +28,7 @@ struct sd {
     // Shared renderer for ASS - done to avoid reloading embedded fonts.
     struct ass_library *ass_library;
     struct ass_renderer *ass_renderer;
+    pthread_mutex_t *ass_lock;
 
     // If false, try to remove multiple subtitles.
     // (Only for decoders which have accept_packets_in_advance set.)

@@ -59,13 +59,15 @@ static bool supports_format(const char *format)
 static int init(struct sd *sd)
 {
     struct MPOpts *opts = sd->opts;
-    if (!sd->ass_library || !sd->ass_renderer || !sd->codec)
+    if (!sd->ass_library || !sd->ass_renderer || !sd->ass_lock || !sd->codec)
         return -1;
 
     struct sd_ass_priv *ctx = talloc_zero(NULL, struct sd_ass_priv);
     sd->priv = ctx;
 
     ctx->is_converted = sd->converted_from != NULL;
+
+    pthread_mutex_lock(sd->ass_lock);
 
     ctx->ass_track = ass_new_track(sd->ass_library);
     if (!ctx->is_converted)
@@ -77,6 +79,8 @@ static int init(struct sd *sd)
     }
 
     mp_ass_add_default_styles(ctx->ass_track, opts);
+
+    pthread_mutex_unlock(sd->ass_lock);
 
     return 0;
 }
@@ -197,6 +201,8 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     if (pts == MP_NOPTS_VALUE || !sd->ass_renderer)
         return;
 
+    pthread_mutex_lock(sd->ass_lock);
+
     ASS_Renderer *renderer = sd->ass_renderer;
     double scale = dim.display_par;
     if (!ctx->is_converted && (!opts->ass_style_override ||
@@ -224,6 +230,8 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
 
     if (!ctx->is_converted)
         mangle_colors(sd, res);
+
+    pthread_mutex_unlock(sd->ass_lock);
 }
 
 struct buf {
