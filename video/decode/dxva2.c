@@ -311,8 +311,11 @@ static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
 
     IDirect3DSurface9_GetDesc(surface, &surfaceDesc);
 
+    if (surfaceDesc.Width < img->w || surfaceDesc.Height < img->h)
+        return img;
+
     struct mp_image *sw_img =
-        mp_image_pool_get(ctx->sw_pool, IMGFMT_NV12, img->w, img->h);
+        mp_image_pool_get(ctx->sw_pool, IMGFMT_NV12, surfaceDesc.Width, surfaceDesc.Height);
 
     if (!sw_img)
         return img;
@@ -325,6 +328,7 @@ static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
     }
 
     ctx->copy_nv12(sw_img, LockedRect.pBits, LockedRect.Pitch, surfaceDesc.Height);
+    mp_image_set_size(sw_img, img->w, img->h);
     mp_image_copy_attributes(sw_img, img);
 
     IDirect3DSurface9_UnlockRect(surface);
