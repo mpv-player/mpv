@@ -74,6 +74,7 @@ OSStatus ca_lock_device(AudioDeviceID device, pid_t *pid);
 OSStatus ca_unlock_device(AudioDeviceID device, pid_t *pid);
 OSStatus ca_disable_mixing(struct ao *ao, AudioDeviceID device, bool *changed);
 OSStatus ca_enable_mixing(struct ao *ao, AudioDeviceID device, bool changed);
+int64_t ca_get_device_latency_us(struct ao *ao, AudioDeviceID device);
 bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
                                     AudioStreamBasicDescription change_format);
 

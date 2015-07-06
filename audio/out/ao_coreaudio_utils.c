@@ -448,6 +448,28 @@ OSStatus ca_enable_mixing(struct ao *ao, AudioDeviceID device, bool changed)
     return noErr;
 }
 
+int64_t ca_get_device_latency_us(struct ao *ao, AudioDeviceID device)
+{
+    uint32_t latency_frames = 0;
+    uint32_t latency_properties[] = {
+        kAudioDevicePropertyLatency,
+        kAudioDevicePropertyBufferFrameSize,
+        kAudioDevicePropertySafetyOffset,
+    };
+    for (int n = 0; n < MP_ARRAY_SIZE(latency_properties); n++) {
+        uint32_t temp;
+        OSStatus err = CA_GET_O(device, latency_properties[n], &temp);
+        CHECK_CA_WARN("cannot get device latency");
+        if (err == noErr) {
+            latency_frames += temp;
+            MP_VERBOSE(ao, "Latency property %s: %d frames\n",
+                       fourcc_repr(latency_properties[n]), (int)temp);
+        }
+    }
+
+    return ca_frames_to_us(ao, latency_frames);
+}
+
 static OSStatus ca_change_format_listener(
     AudioObjectID object, uint32_t n_addresses,
     const AudioObjectPropertyAddress addresses[],
