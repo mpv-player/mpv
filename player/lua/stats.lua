@@ -156,11 +156,12 @@ end
 
 
 -- Format and append a property.
--- A property whose value is either nil or empty is skipped and not appended.
+-- A property whose value is either `nil` or empty is skipped and not appended.
+-- Returns `false` in case nothing was appended, otherwise `true`.
 --
 -- s       : Table containing key `sec`.
 -- sec     : Existing key in table `s`, treated as a string.
--- property: The property to query and format (using OSD representation).
+-- property: The property to query and format (based on its OSD representation).
 -- attr    : Optional table to overwrite certain (formatting) attributes for
 --           this property.
 -- exclude : Optional table containing keys which are considered invalid values
