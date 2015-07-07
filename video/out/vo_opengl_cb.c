@@ -82,6 +82,7 @@ struct mpv_opengl_cb_context {
     struct mp_csp_equalizer eq;
     int64_t recent_flip;
     int64_t approx_vsync;
+    bool frozen; // libmpv user is not redrawing frames
 
     // --- All of these can only be accessed from the thread where the host
     //     application's OpenGL context is current - i.e. only while the
@@ -309,6 +310,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     struct vo *vo = ctx->active;
 
     ctx->force_update |= ctx->reconfigured;
+    ctx->frozen = false;
 
     if (ctx->vp_w != vp_w || ctx->vp_h != vp_h)
         ctx->force_update = true;
@@ -432,8 +434,12 @@ static void flip_page(struct vo *vo)
             break;
         case FRAME_DROP_BLOCK: ;
             struct timespec ts = mp_rel_time_to_timespec(0.2);
-            if (pthread_cond_timedwait(&p->ctx->wakeup, &p->ctx->lock, &ts))
+            if (p->ctx->frozen ||
+                pthread_cond_timedwait(&p->ctx->wakeup, &p->ctx->lock, &ts))
+            {
                 frame_queue_drop_all(p->ctx);
+                p->ctx->frozen = true;
+            }
             break;
         }
     }
