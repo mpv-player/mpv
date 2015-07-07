@@ -519,6 +519,8 @@ static int af_reinit(struct af_stream *s)
                    af->info->name, rv);
             goto error;
         }
+        if (af && !af->auto_inserted)
+            retry = 0;
     }
 
     /* Set previously unset fields in s->output to those of the filter chain
