@@ -1,9 +1,11 @@
 #ifndef MP_HWDEC_H_
 #define MP_HWDEC_H_
 
+#include "options/m_option.h"
+
 struct mp_image_pool;
 
-// keep in sync with --hwdec option
+// keep in sync with --hwdec option (see mp_hwdec_names)
 enum hwdec_type {
     HWDEC_AUTO = -1,
     HWDEC_NONE = 0,
@@ -14,6 +16,9 @@ enum hwdec_type {
     HWDEC_DXVA2_COPY = 6,
     HWDEC_RPI = 7,
 };
+
+// hwdec_type names (options.c)
+extern const struct m_opt_choice_alternatives mp_hwdec_names[];
 
 struct mp_hwdec_ctx {
     enum hwdec_type type;

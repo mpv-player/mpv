@@ -38,6 +38,7 @@
 #include "common/common.h"
 #include "stream/stream.h"
 #include "video/csputils.h"
+#include "video/hwdec.h"
 #include "sub/osd.h"
 #include "audio/mixer.h"
 #include "audio/filter/af.h"
@@ -78,6 +79,18 @@ extern const struct m_obj_list vf_obj_list;
 extern const struct m_obj_list af_obj_list;
 extern const struct m_obj_list vo_obj_list;
 extern const struct m_obj_list ao_obj_list;
+
+const struct m_opt_choice_alternatives mp_hwdec_names[] = {
+    {"no",          HWDEC_NONE},
+    {"auto",        HWDEC_AUTO},
+    {"vdpau",       HWDEC_VDPAU},
+    {"vda",         HWDEC_VDA},
+    {"vaapi",       HWDEC_VAAPI},
+    {"vaapi-copy",  HWDEC_VAAPI_COPY},
+    {"dxva2-copy",  HWDEC_DXVA2_COPY},
+    {"rpi",         HWDEC_RPI},
+    {0}
+};
 
 #define OPT_BASE_STRUCT struct MPOpts
 
@@ -283,15 +296,7 @@ const m_option_t mp_opts[] = {
 
     OPT_FLAG("ad-spdif-dtshd", dtshd, 0),
 
-    OPT_CHOICE("hwdec", hwdec_api, 0,
-               ({"no", 0},
-                {"auto", -1},
-                {"vdpau", 1},
-                {"vda", 2},
-                {"vaapi", 4},
-                {"vaapi-copy", 5},
-                {"dxva2-copy", 6},
-                {"rpi", 7})),
+    OPT_CHOICE_C("hwdec", hwdec_api, 0, mp_hwdec_names),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
 
     OPT_SUBSTRUCT("sws", vo.sws_opts, sws_conf, 0),
