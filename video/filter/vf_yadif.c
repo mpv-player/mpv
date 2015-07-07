@@ -28,12 +28,8 @@
 
 struct vf_priv_s {
     int mode;
-    int do_deinterlace;
+    int interlaced_only;
     struct vf_lw_opts *lw_opts;
-};
-
-static const struct vf_priv_s vf_priv_default = {
-    .do_deinterlace = 1,
 };
 
 static int vf_open(vf_instance_t *vf)
@@ -43,10 +39,11 @@ static int vf_open(vf_instance_t *vf)
     // Earlier libavfilter yadif versions used pure integers for the first
     // option. We can't/don't handle this, but at least allow usage of the
     // filter with default settings. So use an empty string for "send_frame".
-    const char *mode[] = {"", "send_field", "send_frame_nospatial",
+    const char *mode[] = {"send_frame", "send_field", "send_frame_nospatial",
                           "send_field_nospatial"};
 
-    if (vf_lw_set_graph(vf, p->lw_opts, "yadif", "%s", mode[p->mode]) >= 0)
+    if (vf_lw_set_graph(vf, p->lw_opts, "yadif", "mode=%s:deint=%s", mode[p->mode],
+                        p->interlaced_only ? "interlaced" : "all") >= 0)
     {
         return 1;
     }
@@ -62,7 +59,7 @@ static const m_option_t vf_opts_fields[] = {
                 {"field", 1},
                 {"frame-nospatial", 2},
                 {"field-nospatial", 3})),
-    OPT_FLAG("enabled", do_deinterlace, 0),
+    OPT_FLAG("interlaced-only", interlaced_only, 0),
     OPT_SUBSTRUCT("", lw_opts, vf_lw_conf, 0),
     {0}
 };
@@ -72,6 +69,5 @@ const vf_info_t vf_info_yadif = {
     .name = "yadif",
     .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
-    .priv_defaults = &vf_priv_default,
     .options = vf_opts_fields,
 };

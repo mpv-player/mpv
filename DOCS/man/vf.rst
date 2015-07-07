@@ -518,7 +518,7 @@ Available filters are:
         video. The main purpose of setting ``mp`` to a chroma plane is to reduce
         CPU load and make pullup usable in realtime on slow machines.
 
-``yadif=[mode[:enabled=yes|no]]``
+``yadif=[mode:interlaced-only]``
     Yet another deinterlacing filter
 
     ``<mode>``
@@ -527,10 +527,9 @@ Available filters are:
         :frame-nospatial: Like ``frame`` but skips spatial interlacing check.
         :field-nospatial: Like ``field`` but skips spatial interlacing check.
 
-    ``<enabled>``
-        :yes: Filter is active (default).
-        :no:  Filter is not active, but can be activated with the ``D`` key
-              (or any other key that toggles the ``deinterlace`` property).
+    ``<interlaced-only>``
+        :no:  Deinterlace all frames (default).
+        :yes: Only deinterlace frames marked as interlaced.
 
     This filter, is automatically inserted when using the ``D`` key (or any
     other key that toggles the ``deinterlace`` property or when using the
