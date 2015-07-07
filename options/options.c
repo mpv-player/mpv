@@ -297,6 +297,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("ad-spdif-dtshd", dtshd, 0),
 
     OPT_CHOICE_C("hwdec", hwdec_api, 0, mp_hwdec_names),
+    OPT_CHOICE_C("hwdec-preload", vo.hwdec_preload_api, 0, mp_hwdec_names),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
 
     OPT_SUBSTRUCT("sws", vo.sws_opts, sws_conf, 0),

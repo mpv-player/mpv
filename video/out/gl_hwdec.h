@@ -46,6 +46,7 @@ struct gl_hwdec_driver {
 
 struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
                                    const char *api_name);
+struct gl_hwdec *gl_hwdec_load_api_id(struct mp_log *log, GL *gl, int id);
 
 void gl_hwdec_uninit(struct gl_hwdec *hwdec);
 

@@ -42,7 +42,10 @@ typedef struct mp_vo_opts {
     float monitor_pixel_aspect;
     int force_window_position;
 
+    // vo_wayland, vo_drm
     struct sws_opts *sws_opts;
+    // vo_opengl, vo_opengl_cb
+    int hwdec_preload_api;
 } mp_vo_opts;
 
 struct mp_cache_opts {

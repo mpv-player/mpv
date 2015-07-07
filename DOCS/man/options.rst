@@ -579,6 +579,22 @@ Video
         codecs. See ``--hwdec-codecs`` to enable hardware decoding for more
         codecs.
 
+``--hwdec-preload=<api>``
+    This is useful for the ``opengl`` and ``opengl-cb`` VOs for creating the
+    hardware decoding OpenGL interop context, but without actually enabling
+    hardware decoding itself (like ``--hwdec`` does).
+
+    If set to ``no`` (default), the ``--hwdec`` option is used.
+
+    For ``opengl``, if set, do not create the interop context on demand, but
+    when the VO is created.
+
+    For ``opengl-cb``, if set, load the interop context as soon as the OpenGL
+    context is created. Since ``opengl-cb`` has no on-demand loading, this
+    allows enabling hardware decoding at runtime at all, without having to
+    to temporarily set the ``hwdec`` option just during OpenGL context
+    initialization with ``mpv_opengl_cb_init_gl()``.
+
 ``--panscan=<0.0-1.0>``
     Enables pan-and-scan functionality (cropping the sides of e.g. a 16:9
     video to make it fit a 4:3 display without black bands). The range

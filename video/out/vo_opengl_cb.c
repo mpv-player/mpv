@@ -83,6 +83,8 @@ struct mpv_opengl_cb_context {
     int64_t recent_flip;
     int64_t approx_vsync;
     bool frozen; // libmpv user is not redrawing frames
+    struct vo *active;
+    int hwdec_api;
 
     // --- All of these can only be accessed from the thread where the host
     //     application's OpenGL context is current - i.e. only while the
@@ -91,12 +93,6 @@ struct mpv_opengl_cb_context {
     struct gl_video *renderer;
     struct gl_hwdec *hwdec;
     struct mp_hwdec_info hwdec_info; // it's also semi-immutable after init
-
-    // --- Immutable or semi-threadsafe.
-
-    const char *hwapi;
-
-    struct vo *active;
 };
 
 static void update(struct vo_priv *p);
@@ -194,13 +190,9 @@ struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
     ctx->log = mp_log_new(ctx, g->log, "opengl-cb");
     ctx->client_api = client_api;
 
-    switch (g->opts->hwdec_api) {
-    case HWDEC_AUTO:    ctx->hwapi = "auto"; break;
-    case HWDEC_VDPAU:   ctx->hwapi = "vdpau"; break;
-    case HWDEC_VDA:     ctx->hwapi = "vda"; break;
-    case HWDEC_VAAPI:   ctx->hwapi = "vaapi"; break;
-    default:            ctx->hwapi = "";
-    }
+    ctx->hwdec_api = g->opts->vo.hwdec_preload_api;
+    if (ctx->hwdec_api == HWDEC_NONE)
+        ctx->hwdec_api = g->opts->hwdec_api;
 
     return ctx;
 }
@@ -243,7 +235,7 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
     if (!ctx->renderer)
         return MPV_ERROR_UNSUPPORTED;
 
-    ctx->hwdec = gl_hwdec_load_api(ctx->log, ctx->gl, ctx->hwapi);
+    ctx->hwdec = gl_hwdec_load_api_id(ctx->log, ctx->gl, ctx->hwdec_api);
     gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
     if (ctx->hwdec)
         ctx->hwdec_info.hwctx = ctx->hwdec->hwctx;

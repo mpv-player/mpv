@@ -440,6 +440,14 @@ static int preinit(struct vo *vo)
     p->hwdec_info.load_api = call_request_hwdec_api;
     p->hwdec_info.load_api_ctx = vo;
 
+    if (vo->opts->hwdec_preload_api != HWDEC_NONE) {
+        p->hwdec =
+            gl_hwdec_load_api_id(p->vo->log, p->gl, vo->opts->hwdec_preload_api);
+        gl_video_set_hwdec(p->renderer, p->hwdec);
+        if (p->hwdec)
+            p->hwdec_info.hwctx = p->hwdec->hwctx;
+    }
+
     return 0;
 
 err_out:

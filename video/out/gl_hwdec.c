@@ -86,6 +86,12 @@ struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
     return NULL;
 }
 
+// Like gl_hwdec_load_api(), but use HWDEC_... identifiers.
+struct gl_hwdec *gl_hwdec_load_api_id(struct mp_log *log, GL *gl, int id)
+{
+    return gl_hwdec_load_api(log, gl, m_opt_choice_str(mp_hwdec_names, id));
+}
+
 void gl_hwdec_uninit(struct gl_hwdec *hwdec)
 {
     if (hwdec)
