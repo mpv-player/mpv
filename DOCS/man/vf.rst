@@ -529,7 +529,8 @@ Available filters are:
 
     ``<interlaced-only>``
         :no:  Deinterlace all frames (default).
-        :yes: Only deinterlace frames marked as interlaced.
+        :yes: Only deinterlace frames marked as interlaced (default if this
+              filter is inserted via ``deinterlace`` property).
 
     This filter, is automatically inserted when using the ``D`` key (or any
     other key that toggles the ``deinterlace`` property or when using the
