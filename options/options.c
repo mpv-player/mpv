@@ -243,6 +243,8 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("demuxer-readahead-packets", demuxer_min_packs, 0, 0, MAX_PACKS),
     OPT_INTRANGE("demuxer-readahead-bytes", demuxer_min_bytes, 0, 0, MAX_PACK_BYTES),
 
+    OPT_FLAG("force-seekable", force_seekable, 0),
+
     OPT_DOUBLE("cache-secs", demuxer_min_secs_cache, M_OPT_MIN, .min = 0),
     OPT_FLAG("cache-pause", cache_pausing, 0),
 

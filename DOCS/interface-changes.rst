@@ -20,6 +20,7 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - add --force-seekable, and change default seekability in some cases
     - add vf yadif/vavpp/vdpaupp interlaced-only suboptions
       Also, the option is enabled by default (Except vf_yadif, which has
       it enabled only if it's inserted by the deinterlace property.)

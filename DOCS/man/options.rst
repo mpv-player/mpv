@@ -2229,6 +2229,11 @@ Demuxer
 ``--demuxer-readahead-bytes=<bytes>``
     See ``--demuxer-readahead-packets``.
 
+``--force-seekable=<yes|no>``
+    If the player thinks that the media is not seekable (e.g. playing from a
+    pipe, or it's a http stream with a server that doesn't support range
+    requests), seeking will be disabled. This option can forcibly enable it.
+    For seeks within the cache, there's a good chance of success.
 
 Input
 -----
