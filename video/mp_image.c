@@ -241,8 +241,6 @@ struct mp_image *mp_image_new_dummy_ref(struct mp_image *img)
 struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *free_arg,
                                          void (*free)(void *arg))
 {
-    assert(!img->bufs[0]);
-
     struct mp_image *new = mp_image_new_dummy_ref(img);
 
     struct free_args *args = talloc_ptrtype(NULL, args);
