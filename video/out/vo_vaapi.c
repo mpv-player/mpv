@@ -82,9 +82,6 @@ struct priv {
     int                      visible_surface;
     int                      scaling;
     int                      force_scaled_osd;
-    // with old libva versions only
-    int                      deint;
-    int                      deint_type;
 
     VAImageFormat            osd_format; // corresponds to OSD_VA_FORMAT
     struct vaapi_osd_part    osd_parts[MAX_OSD_PARTS];
@@ -207,7 +204,6 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
         surface = va_surface_id(p->black_surface);
     }
 
-    int fields = mpi ? mpi->fields : 0;
     if (surface == VA_INVALID_ID)
         return false;
 
@@ -220,23 +216,19 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
             int flags = 0;
             if (p->osd_screen)
                 flags |= VA_SUBPICTURE_DESTINATION_IS_SCREEN_COORD;
-            status = vaAssociateSubpicture2(p->display,
-                                            sp->id, &surface, 1,
-                                            sp->src_x, sp->src_y,
-                                            sp->src_w, sp->src_h,
-                                            sp->dst_x, sp->dst_y,
-                                            sp->dst_w, sp->dst_h,
-                                            flags);
+            status = vaAssociateSubpicture(p->display,
+                                           sp->id, &surface, 1,
+                                           sp->src_x, sp->src_y,
+                                           sp->src_w, sp->src_h,
+                                           sp->dst_x, sp->dst_y,
+                                           sp->dst_w, sp->dst_h,
+                                           flags);
             CHECK_VA_STATUS(p, "vaAssociateSubpicture()");
         }
     }
 
-    int flags = va_get_colorspace_flag(p->image_params.colorspace) | p->scaling;
-    if (p->deint && (fields & MP_IMGFIELD_INTERLACED)) {
-        flags |= (fields & MP_IMGFIELD_TOP_FIRST) ? VA_BOTTOM_FIELD : VA_TOP_FIELD;
-    } else {
-        flags |= VA_FRAME_PICTURE;
-    }
+    int flags = va_get_colorspace_flag(p->image_params.colorspace) |
+                p->scaling | VA_FRAME_PICTURE;
     status = vaPutSurface(p->display,
                           surface,
                           p->vo->x11->window,
@@ -524,16 +516,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct priv *p = vo->priv;
 
     switch (request) {
-    case VOCTRL_GET_DEINTERLACE:
-        if (!p->deint_type)
-            break;
-        *(int*)data = !!p->deint;
-        return VO_TRUE;
-    case VOCTRL_SET_DEINTERLACE:
-        if (!p->deint_type)
-            break;
-        p->deint = *(int*)data ? p->deint_type : 0;
-        return VO_TRUE;
     case VOCTRL_GET_HWDEC_INFO: {
         struct mp_hwdec_info **arg = data;
         *arg = &p->hwdec_info;
@@ -684,23 +666,13 @@ const struct vo_driver video_out_vaapi = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .scaling = VA_FILTER_SCALING_DEFAULT,
-        .deint = 0,
-#if !HAVE_VAAPI_VPP
-        .deint_type = 2,
-#endif
     },
     .options = (const struct m_option[]) {
-#if USE_VAAPI_SCALING
         OPT_CHOICE("scaling", scaling, 0,
                    ({"default", VA_FILTER_SCALING_DEFAULT},
                     {"fast", VA_FILTER_SCALING_FAST},
                     {"hq", VA_FILTER_SCALING_HQ},
                     {"nla", VA_FILTER_SCALING_NL_ANAMORPHIC})),
-#endif
-        OPT_CHOICE("deint", deint_type, 0,
-                   ({"no", 0},
-                    {"first-field", 1},
-                    {"bob", 2})),
         OPT_FLAG("scaled-osd", force_scaled_osd, 0),
         {0}
     },

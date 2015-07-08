@@ -101,7 +101,7 @@ static const vf_info_t *const filter_list[] = {
 #if HAVE_VAPOURSYNTH_CORE && HAVE_VAPOURSYNTH_LAZY
     &vf_info_vapoursynth_lazy,
 #endif
-#if HAVE_VAAPI_VPP
+#if HAVE_VAAPI
     &vf_info_vaapi,
 #endif
 #if HAVE_VDPAU

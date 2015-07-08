@@ -36,13 +36,11 @@ bool check_va_status(struct mp_log *log, VAStatus status, const char *msg)
 
 int va_get_colorspace_flag(enum mp_csp csp)
 {
-#if USE_VAAPI_COLORSPACE
     switch (csp) {
     case MP_CSP_BT_601:         return VA_SRC_BT601;
     case MP_CSP_BT_709:         return VA_SRC_BT709;
     case MP_CSP_SMPTE_240M:     return VA_SRC_SMPTE_240;
     }
-#endif
     return 0;
 }
 
@@ -231,7 +229,7 @@ static struct mp_image *alloc_surface(struct mp_vaapi_ctx *ctx, int rt_format,
     VASurfaceID id = VA_INVALID_ID;
     VAStatus status;
     va_lock(ctx);
-    status = vaCreateSurfaces(ctx->display, w, h, rt_format, 1, &id);
+    status = vaCreateSurfaces(ctx->display, rt_format, w, h, &id, 1, NULL, 0);
     va_unlock(ctx);
     if (!CHECK_VA_STATUS(ctx, "vaCreateSurfaces()"))
         return NULL;
@@ -368,10 +366,10 @@ int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src)
     va_image_unmap(p->ctx, &p->image);
 
     va_lock(p->ctx);
-    VAStatus status = vaPutImage2(p->display, p->id,
-                                    p->image.image_id,
-                                    0, 0, sw_src->w, sw_src->h,
-                                    0, 0, sw_src->w, sw_src->h);
+    VAStatus status = vaPutImage(p->display, p->id,
+                                 p->image.image_id,
+                                 0, 0, sw_src->w, sw_src->h,
+                                 0, 0, sw_src->w, sw_src->h);
     va_unlock(p->ctx);
     if (!CHECK_VA_STATUS(p->ctx, "vaPutImage()"))
         return -1;
