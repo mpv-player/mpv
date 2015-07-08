@@ -870,6 +870,8 @@ Available filters are:
     ``pullup``
         Try to apply inverse telecine, needs motion adaptive temporal
         deinterlacing.
+    ``interlaced-only=<yes|no>``
+        If ``yes`` (default), only deinterlace frames marked as interlaced.
     ``hqscaling=<0-9>``
         0
             Use default VDPAU scaling (default).

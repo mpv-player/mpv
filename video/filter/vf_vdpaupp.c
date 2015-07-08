@@ -50,6 +50,7 @@ struct vf_priv_s {
 
     int def_deintmode;
     int deint_enabled;
+    int interlaced_only;
     struct mp_vdpau_mixer_opts opts;
 };
 
@@ -78,7 +79,7 @@ static VdpVideoSurface ref_field(struct vf_priv_s *p,
 
 // pos==0 means last field of latest frame, 1 earlier field of latest frame,
 // 2 last field of previous frame and so on
-static bool output_field(struct vf_instance *vf, int pos)
+static bool output_field(struct vf_instance *vf, int pos, bool deint)
 {
     struct vf_priv_s *p = vf->priv;
 
@@ -91,7 +92,7 @@ static bool output_field(struct vf_instance *vf, int pos)
     struct mp_vdpau_mixer_frame *frame = mp_vdpau_mixed_frame_get(mpi);
 
     frame->field = VDP_VIDEO_MIXER_PICTURE_STRUCTURE_FRAME;
-    if (p->opts.deint) {
+    if (p->opts.deint && deint) {
         int top_field_first = !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
         frame->field = top_field_first ^ (pos & 1) ?
             VDP_VIDEO_MIXER_PICTURE_STRUCTURE_BOTTOM_FIELD:
@@ -109,7 +110,7 @@ static bool output_field(struct vf_instance *vf, int pos)
 
     // Interpolate timestamps of extra fields (these always have even indexes)
     int idx = pos / 2;
-    if (idx > 0 && !(pos & 1) && p->opts.deint >= 2) {
+    if (idx > 0 && !(pos & 1) && p->opts.deint >= 2 && deint) {
         double pts1 = p->buffered[idx - 1]->pts;
         double pts2 = p->buffered[idx]->pts;
         double diff = pts1 - pts2;
@@ -150,17 +151,19 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
         p->prev_pos += 2;
     }
 
+    bool deint = (mpi->fields & MP_IMGFIELD_INTERLACED) || !p->interlaced_only;
+
     while (1) {
         int current = p->prev_pos - 1;
         if (!FIELD_VALID(p, current))
             break;
         // No field-splitting deinterlace -> only output first field (odd index)
-        if ((current & 1) || p->opts.deint >= 2) {
+        if ((current & 1) || (deint && p->opts.deint >= 2)) {
             // Wait for enough future frames being buffered.
             // (Past frames are always around if available at all.)
             if (!eof && !FIELD_VALID(p, current - 1))
                 break;
-            if (!output_field(vf, current))
+            if (!output_field(vf, current, deint))
                 break;
         }
         p->prev_pos = current;
@@ -248,6 +251,7 @@ static const m_option_t vf_opts_fields[] = {
     OPT_FLOATRANGE("denoise", opts.denoise, 0, 0, 1),
     OPT_FLOATRANGE("sharpen", opts.sharpen, 0, -1, 1),
     OPT_INTRANGE("hqscaling", opts.hqscaling, 0, 0, 9),
+    OPT_FLAG("interlaced-only", interlaced_only, 0, OPTDEF_INT(1)),
     {0}
 };
 
