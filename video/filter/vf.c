@@ -63,6 +63,7 @@ extern const vf_info_t vf_info_vaapi;
 extern const vf_info_t vf_info_vapoursynth;
 extern const vf_info_t vf_info_vapoursynth_lazy;
 extern const vf_info_t vf_info_vdpaupp;
+extern const vf_info_t vf_info_vdpaurb;
 extern const vf_info_t vf_info_buffer;
 
 // list of available filters:
@@ -106,6 +107,7 @@ static const vf_info_t *const filter_list[] = {
 #endif
 #if HAVE_VDPAU
     &vf_info_vdpaupp,
+    &vf_info_vdpaurb,
 #endif
     NULL
 };
