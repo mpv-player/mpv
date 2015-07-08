@@ -40,15 +40,11 @@
  * The VAAPI decoder can work only with surfaces passed to the decoder at
  * creation time. This means all surfaces have to be created in advance.
  * So, additionally to the maximum number of reference frames, we need
- * surfaces for:
- * - 1 decode frame
- * - decoding 2 frames ahead (done by generic playback code)
- * - keeping the reference to the previous frame (done by vo_vaapi.c)
- * - keeping the reference to a dropped frame (done by vo.c)
+ * surfaces for all kinds of buffering between decoder and VO.
  * Note that redundant additional surfaces also might allow for some
  * buffering (i.e. not trying to reuse a surface while it's busy).
  */
-#define ADDTIONAL_SURFACES 5
+#define ADDTIONAL_SURFACES 6
 
 // Some upper bound.
 #define MAX_SURFACES 25
