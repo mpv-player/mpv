@@ -678,7 +678,8 @@ static int mp_property_disc_title(void *ctx, struct m_property *prop,
         title = *(int*)arg;
         if (demux_stream_control(d, STREAM_CTRL_SET_CURRENT_TITLE, &title) < 0)
             return M_PROPERTY_NOT_IMPLEMENTED;
-        mpctx->stop_play = PT_RELOAD_FILE;
+        if (!mpctx->stop_play)
+            mpctx->stop_play = PT_RELOAD_FILE;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -757,7 +758,8 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
             if (mpctx->opts->keep_open) {
                 seek_to_last_frame(mpctx);
             } else {
-                mpctx->stop_play = PT_NEXT_ENTRY;
+                if (!mpctx->stop_play)
+                    mpctx->stop_play = PT_NEXT_ENTRY;
             }
         } else {
             mp_seek_chapter(mpctx, chapter);
@@ -837,7 +839,8 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
         edition = *(int *)arg;
         if (edition != demuxer->edition) {
             opts->edition_id = edition;
-            mpctx->stop_play = PT_RELOAD_FILE;
+            if (!mpctx->stop_play)
+                mpctx->stop_play = PT_RELOAD_FILE;
         }
         return M_PROPERTY_OK;
     }
@@ -2846,7 +2849,7 @@ static int mp_property_dvb_channel(void *ctx, struct m_property *prop,
     case M_PROPERTY_SET:
         mpctx->last_dvb_step = 1;
         r = prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_SET_CHANNEL, arg);
-        if (r == M_PROPERTY_OK)
+        if (r == M_PROPERTY_OK && !mpctx->stop_play)
             mpctx->stop_play = PT_RELOAD_FILE;
         return r;
     case M_PROPERTY_SWITCH: {
@@ -2854,7 +2857,7 @@ static int mp_property_dvb_channel(void *ctx, struct m_property *prop,
         int dir = sa->inc >= 0 ? 1 : -1;
         mpctx->last_dvb_step = dir;
         r = prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_STEP_CHANNEL, &dir);
-        if (r == M_PROPERTY_OK)
+        if (r == M_PROPERTY_OK && !mpctx->stop_play)
             mpctx->stop_play = PT_RELOAD_FILE;
         return r;
     }
@@ -4509,7 +4512,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (!e)
             return -1;
         // Can't play a removed entry
-        if (mpctx->playlist->current == e)
+        if (mpctx->playlist->current == e && !mpctx->stop_play)
             mpctx->stop_play = PT_CURRENT_ENTRY;
         playlist_remove(mpctx->playlist, e);
         mp_notify_property(mpctx, "playlist");
@@ -4535,7 +4538,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
     case MP_CMD_STOP:
         playlist_clear(mpctx->playlist);
-        mpctx->stop_play = PT_STOP;
+        if (!mpctx->stop_play)
+            mpctx->stop_play = PT_STOP;
         break;
 
     case MP_CMD_SHOW_PROGRESS:

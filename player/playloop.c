@@ -798,7 +798,7 @@ static void handle_sstep(struct MPContext *mpctx)
     }
 
     if (mpctx->video_status >= STATUS_EOF) {
-        if (mpctx->max_frames >= 0)
+        if (mpctx->max_frames >= 0 && !mpctx->stop_play)
             mpctx->stop_play = AT_END_OF_FILE; // force EOF even if audio left
         if (mpctx->step_frames > 0 && !mpctx->paused)
             pause_player(mpctx);
@@ -991,7 +991,8 @@ static void handle_segment_switch(struct MPContext *mpctx, bool end_is_new_segme
                            .amount = mpctx->timeline[new_part].start
                            }, true);
         } else {
-            mpctx->stop_play = AT_END_OF_FILE;
+            if (!mpctx->stop_play)
+                mpctx->stop_play = AT_END_OF_FILE;
         }
     }
 }

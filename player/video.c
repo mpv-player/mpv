@@ -926,7 +926,7 @@ void write_video(struct MPContext *mpctx, double endpts)
             if (!mpctx->step_frames && !opts->pause)
                 pause_player(mpctx);
         }
-        if (mpctx->max_frames == 0)
+        if (mpctx->max_frames == 0 && !mpctx->stop_play)
             mpctx->stop_play = AT_END_OF_FILE;
         if (mpctx->max_frames > 0)
             mpctx->max_frames--;

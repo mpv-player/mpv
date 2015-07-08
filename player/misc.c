@@ -192,7 +192,8 @@ void error_on_track(struct MPContext *mpctx, struct track *track)
             (!mpctx->current_track[0][STREAM_AUDIO] &&
              !mpctx->current_track[0][STREAM_VIDEO]))
         {
-            mpctx->stop_play = PT_ERROR;
+            if (!mpctx->stop_play)
+                mpctx->stop_play = PT_ERROR;
             if (mpctx->error_playing >= 0)
                 mpctx->error_playing = MPV_ERROR_NOTHING_TO_PLAY;
         }

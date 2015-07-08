@@ -1207,7 +1207,8 @@ reopen_file:
     MP_VERBOSE(mpctx, "Starting playback...\n");
 
     if (mpctx->max_frames == 0) {
-        mpctx->stop_play = PT_NEXT_ENTRY;
+        if (!mpctx->stop_play)
+            mpctx->stop_play = PT_NEXT_ENTRY;
         mpctx->error_playing = 0;
         goto terminate_playback;
     }
@@ -1415,5 +1416,6 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
     assert(!e || playlist_entry_to_index(mpctx->playlist, e) >= 0);
     mpctx->playlist->current = e;
     mpctx->playlist->current_was_replaced = false;
-    mpctx->stop_play = PT_CURRENT_ENTRY;
+    if (!mpctx->stop_play)
+        mpctx->stop_play = PT_CURRENT_ENTRY;
 }
