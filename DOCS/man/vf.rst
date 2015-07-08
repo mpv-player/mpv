@@ -878,6 +878,13 @@ Available filters are:
         1-9
             Apply high quality VDPAU scaling (needs capable hardware).
 
+``vdpaurb``
+    VDPAU video read back. Works with ``--vo=vdpau`` and ``--vo=opengl`` only.
+    This filter will read back frames decoded by VDPAU so that other filters,
+    which are not normally compatible with VDPAU, can be used like normal.
+    This filter must be specified before ``vdpaupp`` in the filter chain if
+    ``vdpaupp`` is used.
+
 ``buffer=<num>``
     Buffer ``<num>`` frames in the filter chain. This filter is probably pretty
     useless, except for debugging. (Note that this won't help smoothing out
