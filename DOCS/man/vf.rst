@@ -822,6 +822,10 @@ Available filters are:
             depends on the GPU hardware, the GPU drivers, driver bugs, and
             mpv bugs.
 
+    ``<interlaced-only>``
+        :no:  Deinterlace all frames.
+        :yes: Only deinterlace frames marked as interlaced (default).
+
 ``vdpaupp``
     VDPAU video post processing. Works with ``--vo=vdpau`` and ``--vo=opengl``
     only. This filter is automatically inserted if deinterlacing is requested

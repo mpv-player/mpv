@@ -20,6 +20,7 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - add vf yadif/vavpp interlaced-only suboptions
     - add --hwdec-preload
     - add ao coreaudio exclusive suboption
     - add ``track-list/N/forced`` property

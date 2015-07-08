@@ -58,6 +58,7 @@ struct pipeline {
 
 struct vf_priv_s {
     int deint_type; // 0: none, 1: discard, 2: double fps
+    int interlaced_only;
     bool do_deint;
     VABufferID buffers[VAProcFilterCount];
     int num_buffers;
@@ -86,6 +87,7 @@ static const struct vf_priv_s vf_priv_default = {
     .config = VA_INVALID_ID,
     .context = VA_INVALID_ID,
     .deint_type = 2,
+    .interlaced_only = 1,
 };
 
 // The array items must match with the "deint" suboption values.
@@ -254,6 +256,10 @@ static void output_frames(struct vf_instance *vf)
     }
     unsigned int csp = va_get_colorspace_flag(p->params.colorspace);
     unsigned int field = get_deint_field(p, 0, in);
+    if (field == VA_FRAME_PICTURE && p->interlaced_only) {
+        vf_add_output_frame(vf, mp_image_new_ref(in));
+        return;
+    }
     struct mp_image *out1 = render(vf, in, field | csp);
     if (!out1) { // cannot render
         vf_add_output_frame(vf, mp_image_new_ref(in));
@@ -497,6 +503,7 @@ static const m_option_t vf_opts_fields[] = {
                 {"weave", 3},
                 {"motion-adaptive", 4},
                 {"motion-compensated", 5})),
+    OPT_FLAG("interlaced-only", interlaced_only, 0),
     {0}
 };
 
