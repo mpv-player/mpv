@@ -2165,7 +2165,7 @@ static int mp_property_deinterlace(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     if (!mpctx->d_video || !mpctx->d_video->vfilter)
-        return M_PROPERTY_UNAVAILABLE;
+        return mp_property_generic_option(mpctx, prop, action, arg);
     switch (action) {
     case M_PROPERTY_GET:
         *(int *)arg = get_deinterlacing(mpctx) > 0;
