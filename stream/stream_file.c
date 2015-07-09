@@ -249,11 +249,12 @@ static int open_f(stream_t *stream)
 
     if (strncmp(stream->url, "fd://", 5) == 0) {
         char *end = NULL;
-        priv->fd = strtol(stream->url + 5, &end, 0);
+        fd = strtol(stream->url + 5, &end, 0);
         if (!end || end == stream->url + 5 || end[0]) {
             MP_ERR(stream, "Invalid FD: %s\n", stream->url);
             return STREAM_ERROR;
         }
+        priv->fd = fd;
         priv->close = false;
     } else if (!strcmp(filename, "-")) {
         if (!write) {
