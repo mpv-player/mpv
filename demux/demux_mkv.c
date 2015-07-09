@@ -198,7 +198,8 @@ const struct m_sub_options demux_mkv_conf = {
         OPT_FLAG("subtitle-preroll", subtitle_preroll, 0),
         OPT_DOUBLE("subtitle-preroll-secs", subtitle_preroll_secs,
                    M_OPT_MIN, .min = 0),
-        OPT_FLAG("probe-video-duration", probe_duration, 0),
+        OPT_CHOICE("probe-video-duration", probe_duration, 0,
+                   ({"no", 0}, {"yes", 1}, {"full", 2})),
         OPT_FLAG("fix-timestamps", fix_timestamps, 0),
         {0}
     },
@@ -2794,23 +2795,32 @@ static void probe_last_timestamp(struct demuxer *demuxer)
     if (v_tnum < 0)
         return;
 
-    read_deferred_cues(demuxer);
+    // In full mode, we start reading data from the current file position,
+    // which works because this function is called after headers are parsed.
+    if (demuxer->opts->demux_mkv->probe_duration != 2) {
+        read_deferred_cues(demuxer);
+        if (mkv_d->index_complete) {
+            // Find last cluster that still has video packets
+            int64_t target = 0;
+            for (size_t i = 0; i < mkv_d->num_indexes; i++) {
+                struct mkv_index *cur = &mkv_d->indexes[i];
+                if (cur->tnum == v_tnum)
+                    target = MPMAX(target, cur->filepos);
+            }
+            if (!target)
+                return;
 
-    if (!mkv_d->index_complete)
-        return;
-
-    // Find last cluster that still has video packets
-    int64_t target = 0;
-    for (size_t i = 0; i < mkv_d->num_indexes; i++) {
-        struct mkv_index *cur = &mkv_d->indexes[i];
-        if (cur->tnum == v_tnum)
-            target = MPMAX(target, cur->filepos);
+            if (!stream_seek(demuxer->stream, target))
+                return;
+        } else {
+            // No index -> just try to find a random cluster towards file end.
+            int64_t size = 0;
+            stream_control(demuxer->stream, STREAM_CTRL_GET_SIZE, &size);
+            stream_seek(demuxer->stream, MPMAX(size - 10 * 1024 * 1024, 0));
+            if (ebml_resync_cluster(mp_null_log, demuxer->stream) < 0)
+                stream_seek(demuxer->stream, old_pos); // full scan otherwise
+        }
     }
-    if (!target)
-        return;
-
-    if (!stream_seek(demuxer->stream, target))
-        return;
 
     int64_t last_ts[STREAM_TYPE_COUNT] = {0};
     while (1) {
@@ -2828,6 +2838,9 @@ static void probe_last_timestamp(struct demuxer *demuxer)
             free_block(&block);
         }
     }
+
+    if (!last_ts[STREAM_VIDEO])
+        last_ts[STREAM_VIDEO] = mkv_d->cluster_tc;
 
     if (last_ts[STREAM_VIDEO])
         mkv_d->duration = last_ts[STREAM_VIDEO] / 1e9;

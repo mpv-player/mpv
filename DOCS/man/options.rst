@@ -2137,12 +2137,17 @@ Demuxer
 ``--demuxer-mkv-subtitle-preroll-secs=<value>``
     See ``--demuxer-mkv-subtitle-preroll``.
 
-``--demuxer-mkv-probe-video-duration``
+``--demuxer-mkv-probe-video-duration=<yes|no|full>``
     When opening the file, seek to the end of it, and check what timestamp the
     last video packet has, and report that as file duration. This is strictly
     for compatibility with Haali only. In this mode, it's possible that opening
     will be slower (especially when playing over http), or that behavior with
     broken files is much worse. So don't use this option.
+
+    The ``yes`` mode merely uses the index and reads a small number of blocks
+    from the end of the file. The ``full`` mode actually traverses the entire
+    file and can make a reliable estimate even without an index present (such
+    as partial files).
 
 ``--demuxer-mkv-fix-timestamps=<yes|no>``
     Fix rounded Matroska timestamps (enabled by default). Matroska usually
