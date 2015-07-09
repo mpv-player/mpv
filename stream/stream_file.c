@@ -247,7 +247,15 @@ static int open_f(stream_t *stream)
         filename = stream->path;
     }
 
-    if (!strcmp(filename, "-")) {
+    if (strncmp(stream->url, "fd://", 5) == 0) {
+        char *end = NULL;
+        priv->fd = strtol(stream->url + 5, &end, 0);
+        if (!end || end == stream->url + 5 || end[0]) {
+            MP_ERR(stream, "Invalid FD: %s\n", stream->url);
+            return STREAM_ERROR;
+        }
+        priv->close = false;
+    } else if (!strcmp(filename, "-")) {
         if (!write) {
             MP_INFO(stream, "Reading from stdin...\n");
             fd = 0;
@@ -316,7 +324,7 @@ static int open_f(stream_t *stream)
 const stream_info_t stream_info_file = {
     .name = "file",
     .open = open_f,
-    .protocols = (const char*const[]){ "file", "", NULL },
+    .protocols = (const char*const[]){ "file", "", "fd", NULL },
     .can_write = true,
     .is_safe = true,
 };

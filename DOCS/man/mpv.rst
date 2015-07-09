@@ -614,6 +614,11 @@ PROTOCOLS
     ``PATH`` itself should start with a third ``/`` to make the path an
     absolute path.
 
+``fd://123``
+    Read data from the given UNIX FD (for example 123). This is similar to
+    piping data to stdin via ``-``, but can use an arbitrary file descriptor.
+    Will not work correctly on MS Windows.
+
 ``edl://[edl specification as in edl-mpv.rst]``
     Stitch together parts of multiple files and play them.
 
