@@ -1193,7 +1193,7 @@ static void getproperty_fn(void *arg)
         char *s = NULL;
         err = mp_property_do(req->name, M_PROPERTY_GET_STRING, &s, req->mpctx);
         if (err == M_PROPERTY_OK)
-            *(char **)req->data = s;
+            *(char **)data = s;
         break;
     }
     case MPV_FORMAT_NODE:
