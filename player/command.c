@@ -762,7 +762,12 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
                     mpctx->stop_play = PT_NEXT_ENTRY;
             }
         } else {
-            mp_seek_chapter(mpctx, chapter);
+            double pts = chapter_start_time(mpctx, chapter);
+            if (pts != MP_NOPTS_VALUE) {
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, MPSEEK_DEFAULT, true);
+                mpctx->last_chapter_seek = chapter;
+                mpctx->last_chapter_pts = pts;
+            }
         }
         return M_PROPERTY_OK;
     }

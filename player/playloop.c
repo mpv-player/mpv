@@ -486,7 +486,7 @@ char *chapter_name(struct MPContext *mpctx, int chapter)
     return talloc_strdup(NULL, mpctx->chapters[chapter].name);
 }
 
-// returns the start of the chapter in seconds (-1 if unavailable)
+// returns the start of the chapter in seconds (NOPTS if unavailable)
 double chapter_start_time(struct MPContext *mpctx, int chapter)
 {
     if (chapter == -1)
@@ -499,27 +499,6 @@ double chapter_start_time(struct MPContext *mpctx, int chapter)
 int get_chapter_count(struct MPContext *mpctx)
 {
     return mpctx->num_chapters;
-}
-
-// Seek to a given chapter. Queues the seek.
-bool mp_seek_chapter(struct MPContext *mpctx, int chapter)
-{
-    int num = get_chapter_count(mpctx);
-    if (num == 0)
-        return false;
-    if (chapter < -1 || chapter >= num)
-        return false;
-
-    mpctx->last_chapter_seek = -2;
-
-    double pts = chapter_start_time(mpctx, chapter);
-    if (pts == MP_NOPTS_VALUE)
-        return false;
-
-    queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, MPSEEK_DEFAULT, true);
-    mpctx->last_chapter_seek = chapter;
-    mpctx->last_chapter_pts = pts;
-    return true;
 }
 
 static void handle_osd_redraw(struct MPContext *mpctx)
