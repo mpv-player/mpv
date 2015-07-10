@@ -104,6 +104,7 @@ const struct m_opt_choice_alternatives mp_chroma_names[] = {
 // The numeric index matches the Matroska StereoMode value. If you add entries
 // that don't match Matroska, make sure demux_mkv.c rejects them properly.
 const struct m_opt_choice_alternatives mp_stereo3d_names[] = {
+    {"no",     -1}, // disable/invalid
     {"mono",    0},
     {"sbs2l",   1}, // "side_by_side_left"
     {"ab2r",    2}, // "top_bottom_right"
