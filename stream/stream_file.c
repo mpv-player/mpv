@@ -230,11 +230,11 @@ static bool check_stream_network(int fd)
 static int open_f(stream_t *stream)
 {
     int fd;
-    struct priv *priv = talloc_ptrtype(stream, priv);
-    *priv = (struct priv) {
+    struct priv *p = talloc_ptrtype(stream, p);
+    *p = (struct priv) {
         .fd = -1
     };
-    stream->priv = priv;
+    stream->priv = p;
     stream->type = STREAMTYPE_FILE;
 
     bool write = stream->mode == STREAM_WRITE;
@@ -254,8 +254,8 @@ static int open_f(stream_t *stream)
             MP_ERR(stream, "Invalid FD: %s\n", stream->url);
             return STREAM_ERROR;
         }
-        priv->fd = fd;
-        priv->close = false;
+        p->fd = fd;
+        p->close = false;
     } else if (!strcmp(filename, "-")) {
         if (!write) {
             MP_INFO(stream, "Reading from stdin...\n");
@@ -267,8 +267,8 @@ static int open_f(stream_t *stream)
 #ifdef __MINGW32__
         setmode(fd, O_BINARY);
 #endif
-        priv->fd = fd;
-        priv->close = false;
+        p->fd = fd;
+        p->close = false;
     } else {
         mode_t openmode = S_IRUSR | S_IWUSR;
 #ifndef __MINGW32__
@@ -291,15 +291,15 @@ static int open_f(stream_t *stream)
             }
 #ifndef __MINGW32__
             if (S_ISREG(st.st_mode)) {
-                priv->regular = true;
+                p->regular = true;
                 // O_NONBLOCK has weird semantics on file locks; remove it.
                 int val = fcntl(fd, F_GETFL) & ~(unsigned)O_NONBLOCK;
                 fcntl(fd, F_SETFL, val);
             }
 #endif
         }
-        priv->fd = fd;
-        priv->close = true;
+        p->fd = fd;
+        p->close = true;
     }
 
     off_t len = lseek(fd, 0, SEEK_END);
