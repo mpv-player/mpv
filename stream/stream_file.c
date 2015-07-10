@@ -229,7 +229,6 @@ static bool check_stream_network(int fd)
 
 static int open_f(stream_t *stream)
 {
-    int fd;
     struct priv *p = talloc_ptrtype(stream, p);
     *p = (struct priv) {
         .fd = -1
@@ -249,25 +248,23 @@ static int open_f(stream_t *stream)
 
     if (strncmp(stream->url, "fd://", 5) == 0) {
         char *end = NULL;
-        fd = strtol(stream->url + 5, &end, 0);
+        p->fd = strtol(stream->url + 5, &end, 0);
         if (!end || end == stream->url + 5 || end[0]) {
             MP_ERR(stream, "Invalid FD: %s\n", stream->url);
             return STREAM_ERROR;
         }
-        p->fd = fd;
         p->close = false;
     } else if (!strcmp(filename, "-")) {
         if (!write) {
             MP_INFO(stream, "Reading from stdin...\n");
-            fd = 0;
+            p->fd = 0;
         } else {
             MP_INFO(stream, "Writing to stdout...\n");
-            fd = 1;
+            p->fd = 1;
         }
 #ifdef __MINGW32__
-        setmode(fd, O_BINARY);
+        setmode(p->fd, O_BINARY);
 #endif
-        p->fd = fd;
         p->close = false;
     } else {
         mode_t openmode = S_IRUSR | S_IWUSR;
@@ -276,14 +273,14 @@ static int open_f(stream_t *stream)
         if (!write)
             m |= O_NONBLOCK;
 #endif
-        fd = open(filename, m | O_BINARY, openmode);
-        if (fd < 0) {
+        p->fd = open(filename, m | O_BINARY, openmode);
+        if (p->fd < 0) {
             MP_ERR(stream, "Cannot open file '%s': %s\n",
-                    filename, mp_strerror(errno));
+                   filename, mp_strerror(errno));
             return STREAM_ERROR;
         }
         struct stat st;
-        if (fstat(fd, &st) == 0) {
+        if (fstat(p->fd, &st) == 0) {
             if (S_ISDIR(st.st_mode)) {
                 stream->type = STREAMTYPE_DIR;
                 stream->allow_caching = false;
@@ -293,17 +290,16 @@ static int open_f(stream_t *stream)
             if (S_ISREG(st.st_mode)) {
                 p->regular = true;
                 // O_NONBLOCK has weird semantics on file locks; remove it.
-                int val = fcntl(fd, F_GETFL) & ~(unsigned)O_NONBLOCK;
-                fcntl(fd, F_SETFL, val);
+                int val = fcntl(p->fd, F_GETFL) & ~(unsigned)O_NONBLOCK;
+                fcntl(p->fd, F_SETFL, val);
             }
 #endif
         }
-        p->fd = fd;
         p->close = true;
     }
 
-    off_t len = lseek(fd, 0, SEEK_END);
-    lseek(fd, 0, SEEK_SET);
+    off_t len = lseek(p->fd, 0, SEEK_END);
+    lseek(p->fd, 0, SEEK_SET);
     if (len != (off_t)-1) {
         stream->seek = seek;
         stream->seekable = true;
@@ -316,7 +312,7 @@ static int open_f(stream_t *stream)
     stream->read_chunk = 64 * 1024;
     stream->close = s_close;
 
-    if (check_stream_network(fd))
+    if (check_stream_network(p->fd))
         stream->streaming = true;
 
     return STREAM_OK;
