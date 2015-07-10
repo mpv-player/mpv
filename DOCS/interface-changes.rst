@@ -20,6 +20,7 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - add "playlist/N/title" property
     - add --video-stereo-mode=no to disable auto-conversions
     - add --force-seekable, and change default seekability in some cases
     - add vf yadif/vavpp/vdpaupp interlaced-only suboptions

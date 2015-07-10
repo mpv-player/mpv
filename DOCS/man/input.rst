@@ -1530,6 +1530,11 @@ Property list
         been unloaded yet; in this case, ``current`` refers to the new
         selection. (Since mpv 0.7.0.)
 
+    ``playlist/N/title``
+        Name of the Nth entry. Only available if the playlist file contains
+        such fields, and only if mpv's parser supports it for the given
+        playlist format.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -1541,6 +1546,7 @@ Property list
                 "filename"  MPV_FORMAT_STRING
                 "current"   MPV_FORMAT_FLAG (might be missing; since mpv 0.7.0)
                 "playing"   MPV_FORMAT_FLAG (same)
+                "title"     MPV_FORMAT_STRING (optional)
 
 ``track-list``
     List of audio/video/sub tracks, current entry marked. Currently, the raw

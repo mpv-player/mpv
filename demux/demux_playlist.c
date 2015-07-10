@@ -112,11 +112,25 @@ static int parse_m3u(struct pl_parser *p)
 ok:
     if (p->probing)
         return 0;
+    char *title = NULL;
     while (line.len || !pl_eof(p)) {
-        if (line.len > 0 && !bstr_startswith0(line, "#"))
-            pl_add(p, line);
+        if (bstr_eatstart0(&line, "#EXTINF:")) {
+            bstr duration, btitle;
+            if (bstr_split_tok(line, ",", &duration, &btitle) && btitle.len) {
+                talloc_free(title);
+                title = bstrto0(NULL, btitle);
+            }
+        } else if (line.len > 0 && !bstr_startswith0(line, "#")) {
+            char *fn = bstrto0(NULL, line);
+            struct playlist_entry *e = playlist_entry_new(fn);
+            talloc_free(fn);
+            e->title = talloc_steal(e, title);
+            title = NULL;
+            playlist_add(p->pl, e);
+        }
         line = bstr_strip(pl_get_line(p));
     }
+    talloc_free(title);
     return 0;
 }
 

@@ -34,6 +34,8 @@ struct playlist_entry {
     struct playlist_param *params;
     int num_params;
 
+    char *title;
+
     // Set to true if playback didn't seem to work, or if the file could be
     // played only for a very short time. This is used to make playlist
     // navigation just work in case the user has unplayable files in the

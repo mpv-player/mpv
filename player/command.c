@@ -363,8 +363,6 @@ static int mp_property_media_title(void *ctx, struct m_property *prop,
         name = mpctx->opts->media_title;
     if (name && name[0])
         return m_property_strdup_ro(action, arg, name);
-    if (name && name[0])
-        return m_property_strdup_ro(action, arg, name);
     if (mpctx->master_demuxer) {
         name = mp_tags_get_str(mpctx->master_demuxer->metadata, "title");
         if (name && name[0])
@@ -373,6 +371,8 @@ static int mp_property_media_title(void *ctx, struct m_property *prop,
         if (name && name[0])
             return m_property_strdup_ro(action, arg, name);
     }
+    if (mpctx->playing && mpctx->playing->title)
+        return m_property_strdup_ro(action, arg, mpctx->playing->title);
     return mp_property_filename(ctx, prop, action, arg);
 }
 
@@ -2923,6 +2923,7 @@ static int get_playlist_entry(int item, int action, void *arg, void *ctx)
         {"filename",    SUB_PROP_STR(e->filename)},
         {"current",     SUB_PROP_FLAG(1), .unavailable = !current},
         {"playing",     SUB_PROP_FLAG(1), .unavailable = !playing},
+        {"title",       SUB_PROP_STR(e->title), .unavailable = !e->title},
         {0}
     };
 
