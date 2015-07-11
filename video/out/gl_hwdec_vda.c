@@ -85,7 +85,7 @@ static struct mp_image *download_image(struct mp_hwdec_ctx *ctx,
                                        struct mp_image *hw_image,
                                        struct mp_image_pool *swpool)
 {
-    if (hw_image->imgfmt != IMGFMT_VDA)
+    if (hw_image->imgfmt != IMGFMT_VDA || hw_image->imgfmt != IMGFMT_VIDEOTOOLBOX)
         return NULL;
 
     CVPixelBufferRef pbuf = (CVPixelBufferRef)hw_image->planes[3];
@@ -129,26 +129,19 @@ static bool check_hwdec(struct gl_hwdec *hw)
     return true;
 }
 
-static int create(struct gl_hwdec *hw)
+static int create_common(struct gl_hwdec *hw, struct vda_format *format)
 {
     struct priv *p = talloc_zero(hw, struct priv);
 
     hw->priv = p;
     hw->gl_texture_target = GL_TEXTURE_RECTANGLE;
 
-#if HAVE_VDA_DEFAULT_INIT2
-    struct vda_format *f = vda_get_gl_format_from_imgfmt(IMGFMT_NV12);
-#else
-    struct vda_format *f = vda_get_gl_format_from_imgfmt(IMGFMT_UYVY);
-#endif
-
-    hw->converted_imgfmt = f->imgfmt;
+    hw->converted_imgfmt = format->imgfmt;
 
     if (!check_hwdec(hw))
         return -1;
 
     hw->hwctx = &p->hwctx;
-    hw->hwctx->type = HWDEC_VDA;
     hw->hwctx->download_image = download_image;
 
     GL *gl = hw->gl;
@@ -156,6 +149,36 @@ static int create(struct gl_hwdec *hw)
 
     return 0;
 }
+
+#if HAVE_VDA_GL
+static int create_vda(struct gl_hwdec *hw)
+{
+#if HAVE_VDA_DEFAULT_INIT2
+    struct vda_format *f = vda_get_gl_format_from_imgfmt(IMGFMT_NV12);
+#else
+    struct vda_format *f = vda_get_gl_format_from_imgfmt(IMGFMT_UYVY);
+#endif
+    if (create_common(hw, f))
+        return -1;
+
+    hw->hwctx->type = HWDEC_VDA;
+
+    return 0;
+}
+#endif
+
+#if HAVE_VIDEOTOOLBOX_GL
+static int create_videotoolbox(struct gl_hwdec *hw)
+{
+    struct vda_format *f = vda_get_gl_format_from_imgfmt(IMGFMT_NV12);
+    if (create_common(hw, f))
+        return -1;
+
+    hw->hwctx->type = HWDEC_VIDEOTOOLBOX;
+
+    return 0;
+}
+#endif
 
 static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 {
@@ -219,11 +242,24 @@ static void destroy(struct gl_hwdec *hw)
     gl->DeleteTextures(MP_MAX_PLANES, p->gl_planes);
 }
 
+#if HAVE_VDA_GL
 const struct gl_hwdec_driver gl_hwdec_vda = {
     .api_name = "vda",
     .imgfmt = IMGFMT_VDA,
-    .create = create,
+    .create = create_vda,
     .reinit = reinit,
     .map_image = map_image,
     .destroy = destroy,
 };
+#endif
+
+#if HAVE_VIDEOTOOLBOX_GL
+const struct gl_hwdec_driver gl_hwdec_videotoolbox = {
+    .api_name = "videotoolbox",
+    .imgfmt = IMGFMT_VIDEOTOOLBOX,
+    .create = create_videotoolbox,
+    .reinit = reinit,
+    .map_image = map_image,
+    .destroy = destroy,
+};
+#endif
