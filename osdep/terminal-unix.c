@@ -399,7 +399,7 @@ static void *terminal_thread(void *ptr)
             stdin_ok = getch2(input_ctx);
     }
     // Important if we received SIGTERM, rather than regular quit.
-    struct mp_cmd *cmd = mp_input_parse_cmd(input_ctx, bstr0("quit"), "");
+    struct mp_cmd *cmd = mp_input_parse_cmd(input_ctx, bstr0("quit 4"), "");
     if (cmd)
         mp_input_queue_cmd(input_ctx, cmd);
     return NULL;

@@ -808,7 +808,8 @@ If errors happen, the following exit codes can be returned:
         immediately after initialization.
     :3: There were some files that could be played, and some files which
         couldn't (using the definition of success from above).
-    :4: The ``quit`` command was issued (default exit code).
+    :4: Quit due to a signal, Ctrl+c in a VO window (by default), or from the
+        default quit key bindings in encoding mode.
 
 Note that quitting the player manually will always lead to exit code 0,
 overriding the exit code that would be returned normally. Also, the ``quit``

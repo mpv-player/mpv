@@ -76,8 +76,8 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_REVERT_SEEK, "revert-seek", {
       OARG_FLAGS(0, ({"mark", 1})),
   }},
-  { MP_CMD_QUIT, "quit", { OARG_INT(4) } },
-  { MP_CMD_QUIT_WATCH_LATER, "quit-watch-later", { OARG_INT(4) } },
+  { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
+  { MP_CMD_QUIT_WATCH_LATER, "quit-watch-later", { OARG_INT(0) } },
   { MP_CMD_STOP, "stop", },
   { MP_CMD_FRAME_STEP, "frame-step", .allow_auto_repeat = true,
     .on_updown = true },
