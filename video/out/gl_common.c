@@ -44,23 +44,6 @@
 #include "options/options.h"
 #include "options/m_option.h"
 
-struct feature {
-    int id;
-    const char *name;
-};
-
-static const struct feature features[] = {
-    {MPGL_CAP_FB,               "Framebuffers"},
-    {MPGL_CAP_VAO,              "VAOs"},
-    {MPGL_CAP_FLOAT_TEX,        "Float textures"},
-    {MPGL_CAP_TEX_RG,           "RG textures"},
-    {MPGL_CAP_1D_TEX,           "1D textures"},
-    {MPGL_CAP_3D_TEX,           "3D textures"},
-    {MPGL_CAP_DEBUG,            "debugging extensions"},
-    {MPGL_CAP_SW,               "suspected software renderer"},
-    {0},
-};
-
 // This guesses if the current GL context is a suspected software renderer.
 static bool is_software_gl(GL *gl)
 {
@@ -189,7 +172,6 @@ static const struct gl_functions gl_functions[] = {
     {
         .ver_core = 300,
         .ver_es_core = 300,
-        .provides = MPGL_CAP_3D_TEX,
         .functions = (const struct gl_function[]) {
             DEF_FN(GetStringi),
             // for ES 3.0
@@ -496,15 +478,9 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
             gl->glsl_version = 150;
     }
 
-    if (is_software_gl(gl))
+    if (is_software_gl(gl)) {
         gl->mpgl_caps |= MPGL_CAP_SW;
-
-    if (gl->mpgl_caps) {
-        mp_verbose(log, "Detected OpenGL features:\n");
-        for (const struct feature *f = &features[0]; f->id; f++) {
-            if ((f->id & gl->mpgl_caps))
-                mp_verbose(log, "  - %s\n", f->name);
-        }
+        mp_verbose(log, "Detected suspected software renderer.\n");
     }
 
     // Provided for simpler handling if no framebuffer support is available.
