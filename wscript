@@ -918,10 +918,16 @@ def configure(ctx):
     ctx.store_dependencies_lists()
 
 def __write_version__(ctx):
-    import subprocess
-    subprocess.call(["sh", "./version.sh",
-                     "--versionh=" + ctx.bldnode.abspath() + "/version.h"],
-                    cwd=ctx.srcnode.abspath())
+    ctx.env.VERSIONH_ST = '--versionh="%s"'
+    ctx.env.CWD_ST = '--cwd="%s"'
+    ctx.env.VERSIONSH_CWD = [ctx.srcnode.abspath()]
+
+    ctx(
+        source = 'version.sh',
+        target = 'version.h',
+        rule   = 'sh ${SRC} ${CWD_ST:VERSIONSH_CWD} ${VERSIONH_ST:TGT}',
+        always = True,
+        update_outputs = True)
 
 def build(ctx):
     if ctx.options.variant not in ctx.all_envs:

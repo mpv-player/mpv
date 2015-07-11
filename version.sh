@@ -11,7 +11,10 @@ for ac_option do
     extra="-$ac_arg"
     ;;
   --versionh=*)
-    version_h="$ac_arg"
+    version_h="$(pwd)/$ac_arg"
+    ;;
+  --cwd=*)
+    cwd="$ac_arg"
     ;;
   --print)
     print=yes
@@ -23,6 +26,10 @@ for ac_option do
 
   esac
 done
+
+if test "$cwd" ; then
+  cd "$cwd"
+fi
 
 # Extract revision number from file used by daily tarball snapshots
 # or from "git describe" output
