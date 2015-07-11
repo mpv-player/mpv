@@ -81,6 +81,7 @@ struct vdpctx {
     VdpOutputSurface                   output_surfaces[MAX_OUTPUT_SURFACES];
     int                                num_output_surfaces;
     VdpOutputSurface                   black_pixel;
+    VdpOutputSurface                   rotation_surface;
 
     struct mp_image                   *current_image;
     int64_t                            current_pts;
@@ -165,7 +166,7 @@ static int render_video_to_output_surface(struct vo *vo,
     // Clear the borders between video and window (if there are any).
     // For some reason, video_mixer_render doesn't need it for YUV.
     // Also, if there is nothing to render, at least clear the screen.
-    if (vc->rgb_mode || !mpi) {
+    if (vc->rgb_mode || !mpi || mpi->params.rotate != 0) {
         int flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_0;
         vdp_st = vdp->output_surface_render_output_surface(output_surface,
                                                            NULL, vc->black_pixel,
@@ -190,8 +191,50 @@ static int render_video_to_output_surface(struct vo *vo,
     if (vc->hqscaling)
         opts.hqscaling = vc->hqscaling;
 
-    mp_vdpau_mixer_render(vc->video_mixer, &opts, output_surface, output_rect,
-                          mpi, video_rect);
+    if (mpi->params.rotate != 0) {
+        int flags;
+        VdpRect r_rect;
+        switch (mpi->params.rotate) {
+        case 90:
+            r_rect.y0 = output_rect->x0;
+            r_rect.y1 = output_rect->x1;
+            r_rect.x0 = output_rect->y0;
+            r_rect.x1 = output_rect->y1;
+            flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_90;
+            break;
+        case 180:
+            r_rect.x0 = output_rect->x0;
+            r_rect.x1 = output_rect->x1;
+            r_rect.y0 = output_rect->y0;
+            r_rect.y1 = output_rect->y1;
+            flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_180;
+            break;
+        case 270:
+            r_rect.y0 = output_rect->x0;
+            r_rect.y1 = output_rect->x1;
+            r_rect.x0 = output_rect->y0;
+            r_rect.x1 = output_rect->y1;
+            flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_270;
+            break;
+        default:
+            MP_ERR(vo, "Unsupported rotation angle: %u\n", mpi->params.rotate);
+            return -1;
+        }
+
+        mp_vdpau_mixer_render(vc->video_mixer, &opts, vc->rotation_surface,
+                              &r_rect, mpi, video_rect);
+        vdp_st = vdp->output_surface_render_output_surface(output_surface,
+                                                           output_rect,
+                                                           vc->rotation_surface,
+                                                           &r_rect,
+                                                           NULL,
+                                                           NULL,
+                                                           flags);
+        CHECK_VDP_WARNING(vo, "Error rendering rotated frame");
+    } else {
+        mp_vdpau_mixer_render(vc->video_mixer, &opts, output_surface,
+                              output_rect, mpi, video_rect);
+    }
     return 0;
 }
 
@@ -235,10 +278,17 @@ static void resize(struct vo *vo)
     vc->out_rect_vid.x1 = dst_rect.x1;
     vc->out_rect_vid.y0 = dst_rect.y0;
     vc->out_rect_vid.y1 = dst_rect.y1;
-    vc->src_rect_vid.x0 = src_rect.x0;
-    vc->src_rect_vid.x1 = src_rect.x1;
-    vc->src_rect_vid.y0 = src_rect.y0;
-    vc->src_rect_vid.y1 = src_rect.y1;
+    if (vo->params->rotate == 90 || vo->params->rotate == 270) {
+        vc->src_rect_vid.y0 = src_rect.x0;
+        vc->src_rect_vid.y1 = src_rect.x1;
+        vc->src_rect_vid.x0 = src_rect.y0;
+        vc->src_rect_vid.x1 = src_rect.y1;
+    } else {
+        vc->src_rect_vid.x0 = src_rect.x0;
+        vc->src_rect_vid.x1 = src_rect.x1;
+        vc->src_rect_vid.y0 = src_rect.y0;
+        vc->src_rect_vid.y1 = src_rect.y1;
+    }
 
     VdpBool ok;
     uint32_t max_w, max_h;
@@ -273,6 +323,27 @@ static void resize(struct vo *vo)
             MP_DBG(vo, "vdpau out create: %u\n",
                    vc->output_surfaces[i]);
         }
+        if (vc->rotation_surface != VDP_INVALID_HANDLE) {
+            vdp_st = vdp->output_surface_destroy(vc->rotation_surface);
+            CHECK_VDP_WARNING(vo, "Error when calling "
+                              "vdp_output_surface_destroy");
+        }
+        if (vo->params->rotate == 90 || vo->params->rotate == 270) {
+            vdp_st = vdp->output_surface_create(vc->vdp_device,
+                                                OUTPUT_RGBA_FORMAT,
+                                                vc->output_surface_h,
+                                                vc->output_surface_w,
+                                                &vc->rotation_surface);
+        } else if (vo->params->rotate == 180) {
+            vdp_st = vdp->output_surface_create(vc->vdp_device,
+                                                OUTPUT_RGBA_FORMAT,
+                                                vc->output_surface_w,
+                                                vc->output_surface_h,
+                                                &vc->rotation_surface);
+        }
+        CHECK_VDP_WARNING(vo, "Error when calling vdp_output_surface_create");
+        MP_DBG(vo, "vdpau rotation surface create: %u\n",
+               vc->rotation_surface);
     }
     vo->want_redraw = true;
 }
@@ -381,6 +452,7 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
     vc->flip_target = VDP_INVALID_HANDLE;
     for (int i = 0; i < MAX_OUTPUT_SURFACES; i++)
         vc->output_surfaces[i] = VDP_INVALID_HANDLE;
+    vc->rotation_surface = VDP_INVALID_HANDLE;
     vc->vdp_device = VDP_INVALID_HANDLE;
     for (int i = 0; i < MAX_OSD_PARTS; i++) {
         struct osd_bitmap_surface *sfc = &vc->osd_surfaces[i];
@@ -937,6 +1009,10 @@ static void destroy_vdpau_objects(struct vo *vo)
         vdp_st = vdp->output_surface_destroy(vc->output_surfaces[i]);
         CHECK_VDP_WARNING(vo, "Error when calling vdp_output_surface_destroy");
     }
+    if (vc->rotation_surface != VDP_INVALID_HANDLE) {
+        vdp_st = vdp->output_surface_destroy(vc->rotation_surface);
+        CHECK_VDP_WARNING(vo, "Error when calling vdp_output_surface_destroy");
+    }
 
     for (int i = 0; i < MAX_OSD_PARTS; i++) {
         struct osd_bitmap_surface *sfc = &vc->osd_surfaces[i];
@@ -1085,7 +1161,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 const struct vo_driver video_out_vdpau = {
     .description = "VDPAU with X11",
     .name = "vdpau",
-    .caps = VO_CAP_FRAMEDROP,
+    .caps = VO_CAP_FRAMEDROP | VO_CAP_ROTATE90,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,
