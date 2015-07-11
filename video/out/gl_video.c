@@ -64,7 +64,7 @@ static const char *const fixed_scale_filters[] = {
     NULL
 };
 static const char *const fixed_tscale_filters[] = {
-    //"oversample",
+    "oversample",
     NULL
 };
 
@@ -340,7 +340,7 @@ const struct gl_video_opts gl_video_opts_def = {
         {{"bilinear",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // scale
         {{NULL,         .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // dscale
         {{"bilinear",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // cscale
-        {{"robidoux",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // tscale
+        {{"oversample", .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // tscale
     },
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
@@ -2106,11 +2106,16 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     // surface_end.
     struct scaler *tscale = &p->scaler[3];
     reinit_scaler(p, tscale, &p->opts.scaler[3], 1, tscale_sizes);
+    bool oversample = strcmp(tscale->conf.kernel.name, "oversample") == 0;
     int size;
 
-    assert(tscale->kernel && !tscale->kernel->polar);
-    size = ceil(tscale->kernel->size);
-    assert(size <= TEXUNIT_VIDEO_NUM);
+    if (oversample) {
+        size = 2;
+    } else {
+        assert(tscale->kernel && !tscale->kernel->polar);
+        size = ceil(tscale->kernel->size);
+        assert(size <= TEXUNIT_VIDEO_NUM);
+    }
 
     int radius = size/2;
     int surface_now = p->surface_now;
@@ -2192,9 +2197,24 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             }
         }
 
-        // Non-oversample case
-        gl_sc_uniform_f(p->sc, "fcoord", mix);
-        pass_sample_separated_gen(p, tscale, 0, 0);
+        // Blend the frames together
+        if (oversample) {
+            double vsync_dist = (t->next_vsync - t->prev_vsync)/1e6
+                                / (pts_nxt - pts_now),
+                   threshold = tscale->conf.kernel.params[0];
+            threshold = isnan(threshold) ? 0.0 : threshold;
+            mix = (1 - mix) / vsync_dist;
+            mix = mix <= 0 + threshold ? 0 : mix;
+            mix = mix >= 1 - threshold ? 1 : mix;
+            mix = 1 - mix;
+            gl_sc_uniform_f(p->sc, "inter_coeff", mix);
+            GLSL(vec4 color = mix(texture(texture0, texcoord0),
+                                  texture(texture1, texcoord1),
+                                  inter_coeff);)
+        } else {
+            gl_sc_uniform_f(p->sc, "fcoord", mix);
+            pass_sample_separated_gen(p, tscale, 0, 0);
+        }
 
         // Load all the required frames
         for (int i = 0; i < size; i++) {
@@ -2819,7 +2839,10 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
         if (kernel) {
             double radius = kernel->f.radius;
             radius = radius > 0 ? radius : p->opts.scaler[3].radius;
-           *queue_size = 1 + ceil(radius);
+            *queue_size = 1 + ceil(radius);
+        } else {
+            // Oversample case
+            *queue_size = 2;
         }
     }
 

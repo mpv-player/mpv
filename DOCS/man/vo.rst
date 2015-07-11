@@ -495,7 +495,7 @@ Available video output drivers are:
         The filter used for interpolating the temporal axis (frames). This is
         only used if ``interpolation`` is enabled. The only valid choices
         for ``tscale`` are separable convolution filters (use ``tscale=help``
-        to get a list). The default is ``robidoux``.
+        to get a list). The default is ``oversample``.
 
         Note that the maximum supported filter radius is currently 3, due to
         limitations in the number of video textures that can be loaded
