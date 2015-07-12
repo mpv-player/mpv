@@ -789,27 +789,29 @@ static int decode_peak(demuxer_t *demuxer, const char *tag, float *out)
     return 0;
 }
 
+static void apply_replaygain(demuxer_t *demuxer, struct replaygain_data *rg)
+{
+    for (int n = 0; n < demuxer->num_streams; n++) {
+        struct sh_stream *sh = demuxer->streams[n];
+        if (sh->audio && !sh->audio->replaygain_data) {
+            MP_VERBOSE(demuxer, "Replaygain: Track=%f/%f Album=%f/%f\n",
+                       rg->track_gain, rg->track_peak,
+                       rg->album_gain, rg->album_peak);
+            sh->audio->replaygain_data = talloc_memdup(demuxer, rg, sizeof(*rg));
+        }
+    }
+}
+
 static void demux_export_replaygain(demuxer_t *demuxer)
 {
-    float tg, tp, ag, ap;
+    struct replaygain_data rg = {0};
 
-    if (!decode_gain(demuxer, "REPLAYGAIN_TRACK_GAIN", &tg) &&
-        !decode_peak(demuxer, "REPLAYGAIN_TRACK_PEAK", &tp) &&
-        !decode_gain(demuxer, "REPLAYGAIN_ALBUM_GAIN", &ag) &&
-        !decode_peak(demuxer, "REPLAYGAIN_ALBUM_PEAK", &ap))
+    if (!decode_gain(demuxer, "REPLAYGAIN_TRACK_GAIN", &rg.track_gain) &&
+        !decode_peak(demuxer, "REPLAYGAIN_TRACK_PEAK", &rg.track_peak) &&
+        !decode_gain(demuxer, "REPLAYGAIN_ALBUM_GAIN", &rg.album_gain) &&
+        !decode_peak(demuxer, "REPLAYGAIN_ALBUM_PEAK", &rg.album_peak))
     {
-        struct replaygain_data *rgain = talloc_ptrtype(demuxer, rgain);
-
-        rgain->track_gain = tg;
-        rgain->track_peak = tp;
-        rgain->album_gain = ag;
-        rgain->album_peak = ap;
-
-        for (int n = 0; n < demuxer->num_streams; n++) {
-            struct sh_stream *sh = demuxer->streams[n];
-            if (sh->audio && !sh->audio->replaygain_data)
-                sh->audio->replaygain_data = rgain;
-        }
+        apply_replaygain(demuxer, &rg);
     }
 }
 
