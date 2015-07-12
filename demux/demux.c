@@ -813,6 +813,14 @@ static void demux_export_replaygain(demuxer_t *demuxer)
     {
         apply_replaygain(demuxer, &rg);
     }
+
+    if (!decode_gain(demuxer, "REPLAYGAIN_GAIN", &rg.track_gain) &&
+        !decode_peak(demuxer, "REPLAYGAIN_PEAK", &rg.track_peak))
+    {
+        rg.album_gain = rg.track_gain;
+        rg.album_peak = rg.track_peak;
+        apply_replaygain(demuxer, &rg);
+    }
 }
 
 // Copy all fields from src to dst, depending on event flags.
