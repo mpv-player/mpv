@@ -434,7 +434,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         mpctx->encode_lavc_ctx = encode_lavc_init(opts->encode_opts,
                                                   mpctx->global);
         if(!mpctx->encode_lavc_ctx) {
-            MP_INFO(mpctx, "Encoding initialization failed.");
+            MP_INFO(mpctx, "Encoding initialization failed.\n");
             return -1;
         }
         m_config_set_profile(mpctx->mconfig, "encoding", 0);
