@@ -2663,7 +2663,7 @@ Screenshot
 
         .. note::
 
-            This is a simple way for getting unique per-frame timestamps. Frame
+            This is a simple way for getting unique per-frame timestamps. (Frame
             numbers would be more intuitive, but are not easily implementable
             because container formats usually use time stamps for identifying
             frames.)
