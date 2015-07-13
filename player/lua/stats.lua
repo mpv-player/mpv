@@ -111,7 +111,10 @@ function add_video(s)
     end
     if append_property(s, sec, "fps", {prefix="FPS:", suffix=" (specified)"}) then
         append_property(s, sec, "estimated-vf-fps",
-                        {suffix=" (estimated)", nl="", indent=o.kv_sep, prefix_sep=""})
+                        {suffix=" (estimated)", nl="", indent=""})
+    else
+        append_property(s, sec, "estimated-vf-fps",
+                        {prefix="FPS:", suffix=" (estimated)"})
     end
     if append_property(s, sec, "video-params/w", {prefix="Native Resolution:"}) then
         append_property(s, sec, "video-params/h",
@@ -159,7 +162,8 @@ end
 
 
 -- Format and append a property.
--- A property whose value is either `nil` or empty is skipped and not appended.
+-- A property whose value is either `nil` or empty (hereafter called "invalid")
+-- is skipped and not appended.
 -- Returns `false` in case nothing was appended, otherwise `true`.
 --
 -- s       : Table containing key `sec`.
@@ -168,8 +172,8 @@ end
 -- attr    : Optional table to overwrite certain (formatting) attributes for
 --           this property.
 -- exclude : Optional table containing keys which are considered invalid values
---           for this property, therefore skipping it. This will replace empty
---           string as default invalid value (nil is always invalid).
+--           for this property. Specifying this will replace empty string as
+--           default invalid value (nil is always invalid).
 function append_property(s, sec, prop, attr, excluded)
     excluded = excluded or {[""] = true}
     local ret = mp.get_property_osd(prop)
