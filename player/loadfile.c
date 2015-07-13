@@ -454,10 +454,16 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs,
         return t1->default_track;
     if (t1->attached_picture != t2->attached_picture)
         return !t1->attached_picture;
-    if (t1->stream && t2->stream && opts->hls_bitrate) {
-        int d = t1->stream->hls_bitrate - t2->stream->hls_bitrate;
-        if (d)
-            return opts->hls_bitrate == 1 ? d < 0 : d > 0;
+    if (t1->stream && t2->stream && opts->hls_bitrate >= 0 &&
+        t1->stream->hls_bitrate != t2->stream->hls_bitrate)
+    {
+        bool t1_ok = t1->stream->hls_bitrate <= opts->hls_bitrate;
+        bool t2_ok = t2->stream->hls_bitrate <= opts->hls_bitrate;
+        if (t1_ok != t2_ok)
+            return t1_ok;
+        if (t1_ok && t2_ok)
+            return t1->stream->hls_bitrate > t2->stream->hls_bitrate;
+        return t1->stream->hls_bitrate < t2->stream->hls_bitrate;
     }
     return t1->user_tid <= t2->user_tid;
 }

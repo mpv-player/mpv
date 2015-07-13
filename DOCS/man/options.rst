@@ -3192,7 +3192,7 @@ Network
     network transport when playing ``rtsp://...`` URLs. The value ``lavf``
     leaves the decision to libavformat.
 
-``--hls-bitrate=<no|min|max>``
+``--hls-bitrate=<no|min|max|<rate>>``
     If HLS streams are played, this option controls what streams are selected
     by default. The option allows the following parameters:
 
@@ -3200,6 +3200,9 @@ Network
                 first audio/video streams it can find.
     :min:       Pick the streams with the lowest bitrate.
     :max:       Same, but highest bitrate. (Default.)
+
+    Additionally, if the option is a number, the stream with the highest rate
+    equal or below the option value is selected.
 
     The bitrate as used is sent by the server, and there's no guarantee it's
     actually meaningful.
