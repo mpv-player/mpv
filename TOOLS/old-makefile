@@ -381,8 +381,8 @@ config.mak: configure
 	@echo "####### Please run ./configure again - it's changed! #######"
 	@echo "############################################################"
 
-version.h .version: version.sh
-	./$<
+old_build/version.h .version: version.sh
+	./version.sh --versionh=old_build/version.h
 
 # Force version.sh to run to potentially regenerate version.h
 -include .version
@@ -393,7 +393,7 @@ version.h .version: version.sh
 
 ###### dependency declarations / specific CFLAGS ######
 
-common/version.c: version.h
+common/version.c: old_build/version.h
 
 DOCS/man/mpv.1: DOCS/man/af.rst \
                    DOCS/man/ao.rst \
@@ -464,7 +464,7 @@ clean:
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
 	-$(RM) mpv
 	-$(RM) DOCS/man/*/mpv.1
-	-$(RM) version.h
+	-$(RM) old_build/version.h version.h
 	-$(RM) input/input_conf.h
 	-$(RM) video/out/vdpau_template.c
 	-$(RM) demux/ebml_types.h demux/ebml_defs.c

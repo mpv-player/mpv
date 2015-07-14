@@ -3,6 +3,7 @@
 export LC_ALL=C
 
 version_h="version.h"
+print=yes
 
 for ac_option do
   ac_arg=$(echo $ac_option | cut -d '=' -f 2-)
@@ -12,12 +13,10 @@ for ac_option do
     ;;
   --versionh=*)
     version_h="$(pwd)/$ac_arg"
+    print=no
     ;;
   --cwd=*)
     cwd="$ac_arg"
-    ;;
-  --print)
-    print=yes
     ;;
   *)
     echo "Unknown parameter: $ac_option" >&2
