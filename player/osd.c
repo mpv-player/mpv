@@ -248,7 +248,11 @@ static void print_status(struct MPContext *mpctx)
             } else {
                 saddf(&line, "%2ds", (int)s.ts_duration);
             }
-            saddf(&line, "+%lldKB", (long long)(fill / 1024));
+            if (fill >= 1024 * 1024) {
+                saddf(&line, "+%lldMB", (long long)(fill / 1024 / 1024));
+            } else {
+                saddf(&line, "+%lldKB", (long long)(fill / 1024));
+            }
         }
     }
 
