@@ -151,7 +151,7 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
         p->prev_pos += 2;
     }
 
-    bool deint = (mpi->fields & MP_IMGFIELD_INTERLACED) || !p->interlaced_only;
+    bool deint = (mpi && (mpi->fields & MP_IMGFIELD_INTERLACED)) || !p->interlaced_only;
 
     while (1) {
         int current = p->prev_pos - 1;
