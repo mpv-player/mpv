@@ -275,10 +275,9 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int format,
 {
     struct priv *p = ctx->hwdec_priv;
 
-    struct mp_image *img =
-        mp_image_pool_get_no_alloc(p->pool, IMGFMT_VAAPI, w, h);
+    struct mp_image *img = mp_image_pool_get(p->pool, IMGFMT_VAAPI, w, h);
     if (!img)
-        MP_ERR(p, "Insufficient number of surfaces.\n");
+        MP_ERR(p, "Failed to allocate additional VAAPI surface.\n");
     return img;
 }
 
