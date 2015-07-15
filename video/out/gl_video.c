@@ -2131,7 +2131,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             break;
 
         struct mp_image *f = t->frames[i];
-        if (!f || f->pts == MP_NOPTS_VALUE)
+        if (!mp_image_params_equal(&f->params, &p->real_image_params) ||
+            f->pts == MP_NOPTS_VALUE)
             continue;
 
         if (f->pts > p->surfaces[p->surface_idx].pts) {
