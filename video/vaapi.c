@@ -189,6 +189,7 @@ struct va_surface {
     int w, h;
 
     VAImage image;       // used for software decoding case
+    bool is_derived;     // is image derived by vaDeriveImage()?
 };
 
 VASurfaceID va_surface_id(struct mp_image *mpi)
@@ -262,6 +263,7 @@ static void va_surface_image_destroy(struct va_surface *surface)
         return;
     vaDestroyImage(surface->display, surface->image.image_id);
     surface->image.image_id = VA_INVALID_ID;
+    surface->is_derived = false;
 }
 
 static int va_surface_image_alloc(struct mp_image *img, VAImageFormat *format)
@@ -269,6 +271,7 @@ static int va_surface_image_alloc(struct mp_image *img, VAImageFormat *format)
     struct va_surface *p = va_surface_in_mp_image(img);
     if (!format || !p)
         return -1;
+    VADisplay *display = p->display;
 
     if (p->image.image_id != VA_INVALID_ID &&
         p->image.format.fourcc == format->fourcc)
@@ -279,10 +282,26 @@ static int va_surface_image_alloc(struct mp_image *img, VAImageFormat *format)
 
     va_surface_image_destroy(p);
 
-    VAStatus status = vaCreateImage(p->display, format, p->w, p->h, &p->image);
-    if (!CHECK_VA_STATUS(p->ctx, "vaCreateImage()")) {
+    VAStatus status = vaDeriveImage(display, p->id, &p->image);
+    if (status == VA_STATUS_SUCCESS) {
+        /* vaDeriveImage() is supported, check format */
+        if (p->image.format.fourcc == format->fourcc &&
+            p->image.width == p->w && p->image.height == p->h)
+        {
+            p->is_derived = true;
+            MP_VERBOSE(p->ctx, "Using vaDeriveImage()\n");
+        } else {
+            vaDestroyImage(p->display, p->image.image_id);
+            status = VA_STATUS_ERROR_OPERATION_FAILED;
+        }
+    }
+    if (status != VA_STATUS_SUCCESS) {
         p->image.image_id = VA_INVALID_ID;
-        r = -1;
+        status = vaCreateImage(p->display, format, p->w, p->h, &p->image);
+        if (!CHECK_VA_STATUS(p->ctx, "vaCreateImage()")) {
+            p->image.image_id = VA_INVALID_ID;
+            r = -1;
+        }
     }
 
     va_unlock(p->ctx);
@@ -365,14 +384,16 @@ int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src)
     mp_image_copy(&img, sw_src);
     va_image_unmap(p->ctx, &p->image);
 
-    va_lock(p->ctx);
-    VAStatus status = vaPutImage(p->display, p->id,
-                                 p->image.image_id,
-                                 0, 0, sw_src->w, sw_src->h,
-                                 0, 0, sw_src->w, sw_src->h);
-    va_unlock(p->ctx);
-    if (!CHECK_VA_STATUS(p->ctx, "vaPutImage()"))
-        return -1;
+    if (!p->is_derived) {
+        va_lock(p->ctx);
+        VAStatus status = vaPutImage(p->display, p->id,
+                                     p->image.image_id,
+                                     0, 0, sw_src->w, sw_src->h,
+                                     0, 0, sw_src->w, sw_src->h);
+        va_unlock(p->ctx);
+        if (!CHECK_VA_STATUS(p->ctx, "vaPutImage()"))
+            return -1;
+    }
 
     return 0;
 }
@@ -391,12 +412,14 @@ static struct mp_image *try_download(struct mp_image *src,
         !va_fourcc_to_imgfmt(image->format.fourcc))
         return NULL;
 
-    va_lock(p->ctx);
-    status = vaGetImage(p->display, p->id, 0, 0,
-                        p->w, p->h, image->image_id);
-    va_unlock(p->ctx);
-    if (status != VA_STATUS_SUCCESS)
-        return NULL;
+    if (!p->is_derived) {
+        va_lock(p->ctx);
+        status = vaGetImage(p->display, p->id, 0, 0,
+                            p->w, p->h, image->image_id);
+        va_unlock(p->ctx);
+        if (status != VA_STATUS_SUCCESS)
+            return NULL;
+    }
 
     struct mp_image *dst = NULL;
     struct mp_image tmp;
