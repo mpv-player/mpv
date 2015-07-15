@@ -109,7 +109,6 @@ struct texplane {
 struct video_image {
     struct texplane planes[4];
     bool image_flipped;
-    bool needs_upload;
     struct mp_image *mpi;       // original input image
 };
 
@@ -484,8 +483,7 @@ static void uninit_rendering(struct gl_video *p);
 static void uninit_scaler(struct gl_video *p, struct scaler *scaler);
 static void check_gl_features(struct gl_video *p);
 static bool init_format(int fmt, struct gl_video *init);
-static void gl_video_upload_image(struct gl_video *p);
-static void gl_video_set_image(struct gl_video *p, struct mp_image *mpi);
+static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
 
 #define GLSL(x) gl_sc_add(p->sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
@@ -1984,10 +1982,8 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
 // upscaling
 static void pass_render_frame(struct gl_video *p, struct mp_image *img)
 {
-    if (img) {
-        gl_video_set_image(p, img);
-        gl_video_upload_image(p);
-    }
+    if (img)
+        gl_video_upload_image(p, img);
 
     p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling;
     p->use_indirect = false; // set to true as needed by pass_*
@@ -2327,33 +2323,22 @@ static bool get_image(struct gl_video *p, struct mp_image *mpi)
     return true;
 }
 
-static void gl_video_set_image(struct gl_video *p, struct mp_image *mpi)
-{
-    assert(mpi);
-
-    struct video_image *vimg = &p->image;
-    talloc_free(vimg->mpi);
-    vimg->mpi = mp_image_new_ref(mpi);
-    vimg->needs_upload = true;
-
-    if (!vimg->mpi)
-        abort();
-
-    p->osd_pts = mpi->pts;
-}
-
-static void gl_video_upload_image(struct gl_video *p)
+static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
 {
     GL *gl = p->gl;
-
     struct video_image *vimg = &p->image;
-    struct mp_image *mpi = vimg->mpi;
 
-    if (p->hwdec_active || !mpi || !vimg->needs_upload)
-        return;
+    mpi = mp_image_new_ref(mpi);
+    if (!mpi)
+        abort();
 
-    vimg->needs_upload = false;
+    talloc_free(vimg->mpi);
+    vimg->mpi = mpi;
+    p->osd_pts = mpi->pts;
     p->frames_uploaded++;
+
+    if (p->hwdec_active)
+        return;
 
     assert(mpi->num_planes == p->plane_count);
 
