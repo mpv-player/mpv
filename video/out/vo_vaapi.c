@@ -88,7 +88,6 @@ struct priv {
     bool                     osd_screen;
 
     struct mp_image_pool    *pool;
-    struct va_image_formats *va_image_formats;
 
     struct mp_image         *black_surface;
 
@@ -598,7 +597,6 @@ static int preinit(struct vo *vo)
 
     p->pool = mp_image_pool_new(MAX_OUTPUT_SURFACES + 3);
     va_pool_set_allocator(p->pool, p->mpvaapi, VA_RT_FORMAT_YUV420);
-    p->va_image_formats = p->mpvaapi->image_formats;
 
     int max_subpic_formats = vaMaxNumSubpictureFormats(p->display);
     p->va_subpic_formats = talloc_array(vo, VAImageFormat, max_subpic_formats);
