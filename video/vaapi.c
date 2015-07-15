@@ -50,10 +50,10 @@ struct fmtentry {
 };
 
 static const struct fmtentry va_to_imgfmt[] = {
+    {VA_FOURCC_NV12, IMGFMT_NV12},
     {VA_FOURCC_YV12, IMGFMT_420P},
     {VA_FOURCC_I420, IMGFMT_420P},
     {VA_FOURCC_IYUV, IMGFMT_420P},
-    {VA_FOURCC_NV12, IMGFMT_NV12},
     {VA_FOURCC_UYVY, IMGFMT_UYVY},
     {VA_FOURCC_YUY2, IMGFMT_YUYV},
     // Note: not sure about endian issues (the mp formats are byte-addressed)
@@ -456,13 +456,18 @@ struct mp_image *va_surface_download(struct mp_image *src,
         return mpi;
 
     // We have no clue which format will work, so try them all.
-    for (int i = 0; i < ctx->image_formats->num; i++) {
-        VAImageFormat *format = &ctx->image_formats->entries[i];
-        if (va_surface_image_alloc(src, format) < 0)
-            continue;
-        mpi = try_download(src, pool);
-        if (mpi)
-            return mpi;
+    // Make sure to start with the most preferred format (nv12), to avoid
+    // slower code paths.
+    for (int n = 0; va_to_imgfmt[n].mp; n++) {
+        VAImageFormat *format =
+            va_image_format_from_imgfmt(ctx, va_to_imgfmt[n].mp);
+        if (format) {
+            if (va_surface_image_alloc(src, format) < 0)
+                continue;
+            mpi = try_download(src, pool);
+            if (mpi)
+                return mpi;
+        }
     }
 
     MP_ERR(ctx, "failed to get surface data.\n");
