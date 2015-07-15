@@ -395,6 +395,8 @@ int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src)
             return -1;
     }
 
+    if (p->is_derived)
+        va_surface_image_destroy(p);
     return 0;
 }
 
@@ -433,6 +435,8 @@ static struct mp_image *try_download(struct mp_image *src,
         }
         va_image_unmap(p->ctx, image);
     }
+    if (p->is_derived)
+        va_surface_image_destroy(p);
     return dst;
 }
 
