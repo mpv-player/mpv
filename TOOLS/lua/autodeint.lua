@@ -2,21 +2,16 @@
 -- appropriate deinterlacing filter based on a short section of the
 -- currently playing video.
 --
--- It registers the key-binding ctrl+d, which when pressed, inserts
--- the filter vf=lavfi=idet. After 4 second, it examines the results
--- to determine whether the content progressive or interlaced and the
--- interlacing field dominance. It immediately sets the latter within
--- mpv.
+-- It registers the key-binding ctrl+d, which when pressed, inserts the filters
+-- ``vf=lavfi=idet,pullup,vf=lavfi=idet``. After 4 seconds, it removes these
+-- filters and decides whether the content is progressive, interlaced, or
+-- telecined and the interlacing field dominance.
 --
--- If the content is judged not to be progressive, it may be either
--- interlaced or telecined. To determine which one, the video is
--- seeked back to the detection starting point with the "pullup"
--- filter inserted. After another four seconds, if idet thinks that
--- the pulled up viedo is "progressive", then pullup is the correct
--- filter and this script leaves it in places while removing the idet
--- filter. Otherwise, the content plain interlaced and mpv's deinterlace
--- property is set. This will usually insert the yadif deinterlacing filter.
+-- Based on this information, it may set mpv's ``deinterlace`` property (which
+-- usually inserts the yadif filter), or insert the ``pullup`` filter if the
+-- content is telecined.  It also sets mpv's ``field-dominance`` property.
 --
+-- OPTIONS:
 -- The default detection time may be overridden by adding
 --
 -- --script-opts=autodeint.detect_seconds=<number of seconds>
@@ -37,6 +32,7 @@ require "mp.msg"
 script_name = mp.get_script_name()
 detect_label = string.format("%s-detect", script_name)
 pullup_label = string.format("%s", script_name)
+ivtc_detect_label = string.format("%s-ivtc-detect", script_name)
 
 -- number of seconds to gather cropdetect data
 detect_seconds = tonumber(mp.get_opt(string.format("%s.detect_seconds", script_name)))
@@ -69,30 +65,29 @@ function start_detect()
     mp.set_property("deinterlace","no")
     del_filter_if_present(pullup_label)
 
-    percent_pos = mp.get_property("percent-pos")
-
     -- insert the detection filter
-    local cmd = string.format('vf add @%s:lavfi=graph="idet"', detect_label)
+    local cmd = string.format('vf add @%s:lavfi=graph="idet",@%s:pullup,@%s:lavfi=graph="idet"',
+                              detect_label, pullup_label, ivtc_detect_label)
     if not mp.command(cmd) then
-        mp.msg.error("failed to insert detection filter")
+        mp.msg.error("failed to insert detection filters")
         return
     end
 
     -- wait to gather data
-    timer = mp.add_timeout(detect_seconds, judge_field_dominance)
+    timer = mp.add_timeout(detect_seconds, select_filter)
 end
 
 function stop_detect()
     del_filter_if_present(detect_label)
+    del_filter_if_present(ivtc_detect_label)
     timer = nil
-    mp.set_property("playback-pos", percent_pos)
 end
 
 progressive, interlaced_tff, interlaced_bff, interlaced = 0, 1, 2, 3, 4
 
-function judge()
+function judge(label)
     -- get the metadata
-    local result = mp.get_property_native(string.format("vf-metadata/%s", detect_label))
+    local result = mp.get_property_native(string.format("vf-metadata/%s", label))
     num_tff          = tonumber(result["lavfi.idet.multiple.tff"])
     num_bff          = tonumber(result["lavfi.idet.multiple.bff"])
     num_progressive  = tonumber(result["lavfi.idet.multiple.progressive"])
@@ -100,10 +95,10 @@ function judge()
     num_interlaced   = num_tff + num_bff
     num_determined   = num_interlaced + num_progressive
 
-    mp.msg.verbose("progressive    = "..num_progressive)
-    mp.msg.verbose("interlaced-tff = "..num_tff)
-    mp.msg.verbose("interlaced-bff = "..num_bff)
-    mp.msg.verbose("undetermined   = "..num_undetermined)
+    mp.msg.verbose(label.." progressive    = "..num_progressive)
+    mp.msg.verbose(label.." interlaced-tff = "..num_tff)
+    mp.msg.verbose(label.." interlaced-bff = "..num_bff)
+    mp.msg.verbose(label.." undetermined   = "..num_undetermined)
 
     if num_determined < num_undetermined then
         mp.msg.warn("majority undetermined frames")
@@ -119,11 +114,12 @@ function judge()
     end
 end
 
-function judge_field_dominance()
-    verdict = judge()
+function select_filter()
+    -- handle the first detection filter results
+    verdict = judge(detect_label)
     if verdict == progressive then
-        stop_detect()
         mp.msg.info("progressive: doing nothing")
+        stop_detect()
         return
     elseif verdict == interlaced_tff then
         mp.set_property("field-dominance", "top")
@@ -133,21 +129,8 @@ function judge_field_dominance()
         mp.set_property("field-dominance", "auto")
     end
 
-    local cmd = string.format("vf pre @%s:pullup", pullup_label)
-    if not mp.command(cmd) then
-        mp.msg.error("failed to insert pullup filter")
-        stop_detect()
-        return
-    end
-
-    -- redo the detection with the pullup filter to see if it's telecined
-    mp.set_property("percent-pos", percent_pos)
-    timer = mp.add_timeout(detect_seconds, judge_ivtc)
-end
-
-function judge_ivtc()
-    verdict = judge()
-
+    -- handle the ivtc detection filter results
+    verdict = judge(ivtc_detect_label)
     if verdict == progressive then
         mp.msg.info(string.format("telecinied with %s field dominance: using pullup", mp.get_property("field-dominance")))
         stop_detect()
@@ -157,8 +140,6 @@ function judge_ivtc()
         mp.set_property("deinterlace","yes")
         stop_detect()
     end
-
-    return
 end
 
 mp.add_key_binding("ctrl+d", script_name, start_detect)
