@@ -329,9 +329,8 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         struct vo_priv *p = vo ? vo->priv : NULL;
         struct vo_priv *opts = ctx->new_opts ? ctx->new_opts : p;
         if (opts) {
-            int queue = 0;
-            gl_video_set_options(ctx->renderer, opts->renderer_opts, &queue);
-            vo_set_queue_params(vo, 0, opts->renderer_opts->interpolation, queue);
+            gl_video_set_options(ctx->renderer, opts->renderer_opts);
+            gl_video_configure_queue(ctx->renderer, vo);
             ctx->gl->debug_context = opts->use_gl_debug;
             gl_video_set_debug(ctx->renderer, opts->use_gl_debug);
             frame_queue_shrink(ctx, opts->frame_queue_size);

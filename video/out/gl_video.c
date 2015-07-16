@@ -40,6 +40,7 @@
 #include "aspect.h"
 #include "bitmap_packer.h"
 #include "dither.h"
+#include "vo.h"
 
 // Pixel width of 1D lookup textures.
 #define LOOKUP_TEXTURE_SIZE 256
@@ -2802,8 +2803,7 @@ static char **dup_str_array(void *parent, char **src)
 
 // Set the options, and possibly update the filter chain too.
 // Note: assumes all options are valid and verified by the option parser.
-void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
-                          int *queue_size)
+void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
 {
     talloc_free(p->opts.source_shader);
     talloc_free(p->opts.scale_shader);
@@ -2817,21 +2817,6 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
             (char *)handle_scaler_opt(p->opts.scaler[n].kernel.name, n==3);
     }
 
-    // Figure out an adequate size for the interpolation queue. The larger
-    // the radius, the earlier we need to queue frames.
-    if (queue_size && p->opts.interpolation) {
-        const struct filter_kernel *kernel =
-            mp_find_filter_kernel(p->opts.scaler[3].kernel.name);
-        if (kernel) {
-            double radius = kernel->f.radius;
-            radius = radius > 0 ? radius : p->opts.scaler[3].radius;
-            *queue_size = 1 + ceil(radius);
-        } else {
-            // Oversample case
-            *queue_size = 2;
-        }
-    }
-
     p->opts.source_shader = talloc_strdup(p, p->opts.source_shader);
     p->opts.scale_shader = talloc_strdup(p, p->opts.scale_shader);
     p->opts.pre_shaders = dup_str_array(p, p->opts.pre_shaders);
@@ -2839,6 +2824,28 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts,
 
     check_gl_features(p);
     uninit_rendering(p);
+}
+
+void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
+{
+    int queue_size = 0;
+
+    // Figure out an adequate size for the interpolation queue. The larger
+    // the radius, the earlier we need to queue frames.
+    if (p->opts.interpolation) {
+        const struct filter_kernel *kernel =
+            mp_find_filter_kernel(p->opts.scaler[3].kernel.name);
+        if (kernel) {
+            double radius = kernel->f.radius;
+            radius = radius > 0 ? radius : p->opts.scaler[3].radius;
+            queue_size = 1 + ceil(radius);
+        } else {
+            // Oversample case
+            queue_size = 2;
+        }
+    }
+
+    vo_set_queue_params(vo, 0, p->opts.interpolation, queue_size);
 }
 
 struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p)
