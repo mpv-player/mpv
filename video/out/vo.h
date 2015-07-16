@@ -177,7 +177,7 @@ struct vo_frame {
     // Warning: When OSD should be redrawn in --force-window --idle mode, this
     //          can be NULL. The VO should draw a black background, OSD on top.
     struct mp_image *current;
-    // List of future images, starting with the next one. This does not
+    // List of future images, starting with the current one. This does not
     // care about repeated frames - it simply contains the next real frames.
     // vo_set_queue_params() sets how many future frames this should include.
     // The actual number of frames delivered to the VO can be lower.

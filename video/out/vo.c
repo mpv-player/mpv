@@ -977,7 +977,7 @@ int vo_get_num_future_frames(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    int res = in->req_frames + 1;
+    int res = in->req_frames - 1;
     pthread_mutex_unlock(&in->lock);
     return res;
 }
