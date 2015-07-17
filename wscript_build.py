@@ -418,9 +418,11 @@ def build(ctx):
                 ctx.path.find_node('osdep/mpv.rc'),
                 ctx.path.find_node(node))
 
-        ctx.add_manual_dependency(
-            ctx.path.find_node('osdep/mpv.rc'),
-            ctx.bldnode.find_node('version.h'))
+        version = ctx.bldnode.find_node('version.h')
+        if version:
+            ctx.add_manual_dependency(
+                ctx.path.find_node('osdep/mpv.rc'),
+                version)
 
     if ctx.dependency_satisfied('cplayer') or ctx.dependency_satisfied('test'):
         ctx(
