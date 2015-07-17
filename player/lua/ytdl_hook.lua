@@ -97,7 +97,7 @@ mp.add_hook("on_load", 10, function ()
         local raw_options = mp.get_property_native("options/ytdl-raw-options")
 
         local command = {
-            ytdl.path, "--no-warnings", "-J", "--flat-playlist", "--all-subs",
+            ytdl.path, "--no-warnings", "-J", "--flat-playlist",
             "--sub-format", "ass/srt/best", "--no-playlist"
         }
 
