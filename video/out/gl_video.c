@@ -1980,12 +1980,9 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
 }
 
 // The main rendering function, takes care of everything up to and including
-// upscaling
-static void pass_render_frame(struct gl_video *p, struct mp_image *img)
+// upscaling. p->image is rendered.
+static void pass_render_frame(struct gl_video *p)
 {
-    if (img)
-        gl_video_upload_image(p, img);
-
     p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling;
     p->use_indirect = false; // set to true as needed by pass_*
     pass_read_video(p);
@@ -2078,7 +2075,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     // First of all, figure out if we have a frame availble at all, and draw
     // it manually + reset the queue if not
     if (p->surfaces[p->surface_now].pts == MP_NOPTS_VALUE) {
-        pass_render_frame(p, t->current);
+        gl_video_upload_image(p, t->current);
+        pass_render_frame(p);
         finish_pass_fbo(p, &p->surfaces[p->surface_now].fbotex,
                         vp_w, vp_h, 0, FBOTEX_FUZZY);
         p->surfaces[p->surface_now].pts = p->image.mpi->pts;
@@ -2138,7 +2136,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 
         if (f->pts > p->surfaces[p->surface_idx].pts) {
             MP_STATS(p, "new-pts");
-            pass_render_frame(p, f);
+            gl_video_upload_image(p, f);
+            pass_render_frame(p);
             finish_pass_fbo(p, &p->surfaces[surface_dst].fbotex,
                             vp_w, vp_h, 0, FBOTEX_FUZZY);
             p->surfaces[surface_dst].pts = f->pts;
@@ -2255,7 +2254,9 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
             gl_video_interpolate_frame(p, frame, fbo);
         } else {
             // Skip interpolation if there's nothing to be done
-            pass_render_frame(p, frame->redraw ? NULL : frame->current);
+            if (!frame->redraw || !vimg->mpi)
+                gl_video_upload_image(p, frame->current);
+            pass_render_frame(p);
             pass_draw_to_screen(p, fbo);
         }
     }
