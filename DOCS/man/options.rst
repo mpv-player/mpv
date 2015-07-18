@@ -1388,6 +1388,18 @@ Subtitles
 
     Disabled by default.
 
+``--stretch-image-subs-to-screen=<yes|no>``
+    Stretch DVD and other image subtitles to the screen, ignoring the video
+    margins. This has a similar effect as ``--sub-use-margins`` for text
+    subtitles, except that the text itself will be stretched, not only just
+    repositioned. (At least in general it is unavoidable, as an image bitmap
+    can in theory consist of a single bitmap covering the whole screen, and
+    the player won't know where exactly the text parts are located.)
+
+    This option does not display subtitles correctly. Use with care.
+
+    Disabled by default.
+
 ``--sub-ass``, ``--no-sub-ass``
     Render ASS subtitles natively (enabled by default).
 

@@ -272,6 +272,8 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     }
     if (priv->avctx->codec_id == AV_CODEC_ID_HDMV_PGS_SUBTITLE)
         video_par = -1;
+    if (opts->stretch_image_subs)
+        d.ml = d.mr = d.mt = d.mb = 0;
     int insize[2];
     get_resolution(sd, insize);
     osd_rescale_bitmaps(res, insize[0], insize[1], d, video_par);
