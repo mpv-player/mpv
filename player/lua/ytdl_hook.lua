@@ -95,14 +95,27 @@ mp.add_hook("on_load", 10, function ()
 
         local format = mp.get_property("options/ytdl-format")
         local raw_options = mp.get_property_native("options/ytdl-raw-options")
+        local sublang = mp.get_property("options/slang")
+
 
         -- subformat workaround
         local subformat = "ass/srt/best"
 
         local command = {
-            ytdl.path, "--no-warnings", "-J", "--flat-playlist", "--all-subs",
+            ytdl.path, "--no-warnings", "-J", "--flat-playlist",
             "--sub-format", subformat, "--no-playlist"
         }
+
+        -- Checks if slang is populated, only require these subs
+        if (sublang ~= "") then
+            table.insert(command, "--write-sub")
+            table.insert(command, "--sub-lang")
+            table.insert(command, sublang)
+            msg.verbose("retrieving languages: " .. sublang)
+        else
+            table.insert(command, "--all-subs")
+            msg.verbose("retrieving all subs.")
+        end
 
         -- Checks if video option is "no", change options accordingly
         if (mp.get_property("options/vid") == "no") then
