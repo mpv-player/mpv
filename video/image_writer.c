@@ -50,7 +50,7 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .jpeg_smooth = 0,
     .jpeg_baseline = 1,
     .jpeg_source_chroma = 1,
-    .tag_csp = 1,
+    .tag_csp = 0,
 };
 
 #define OPT_BASE_STRUCT struct image_writer_opts

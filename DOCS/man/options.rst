@@ -2620,7 +2620,7 @@ Screenshot
 
     Note that not all formats are supported.
 
-    Default: ``yes``.
+    Default: ``no``.
 
 ``--screenshot-high-bit-depth=<yes|no>``
     If possible, write screenshots with a bit depth similar to the source
