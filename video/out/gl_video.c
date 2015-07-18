@@ -2078,7 +2078,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
         gl_video_upload_image(p, t->current);
         pass_render_frame(p);
         finish_pass_fbo(p, &p->surfaces[p->surface_now].fbotex,
-                        vp_w, vp_h, 0, FBOTEX_FUZZY);
+                        vp_w, vp_h, 0, 0);
         p->surfaces[p->surface_now].pts = p->image.mpi->pts;
         p->surface_idx = p->surface_now;
     }
@@ -2139,7 +2139,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             gl_video_upload_image(p, f);
             pass_render_frame(p);
             finish_pass_fbo(p, &p->surfaces[surface_dst].fbotex,
-                            vp_w, vp_h, 0, FBOTEX_FUZZY);
+                            vp_w, vp_h, 0, 0);
             p->surfaces[surface_dst].pts = f->pts;
             p->surface_idx = surface_dst;
             surface_dst = fbosurface_wrap(surface_dst+1);
