@@ -107,7 +107,9 @@ mp.add_hook("on_load", 10, function ()
         }
 
         -- Checks if slang is populated, only require these subs
-        if (sublang ~= "") then
+        if (mp.get_property("options/sid") == "no") or (mp.get_property("options/no-sub") ~= nil) then
+            msg.verbose("subtitles disabled.")
+        elseif (sublang ~= "") then
             table.insert(command, "--write-sub")
             table.insert(command, "--sub-lang")
             table.insert(command, sublang)
