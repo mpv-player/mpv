@@ -242,13 +242,17 @@ function get_tracklist(type)
     else
         for n = 1, #tracks_osc[type] do
             local track = tracks_osc[type][n]
-            local lang, title, selected = "unknown", "", "○"
+            local lang, title, channels, selected = "unknown", "", "", "○"
             if not(track.lang == nil) then lang = track.lang end
             if not(track.title == nil) then title = track.title end
+            if not(track.channels == nil) then
+                channels = "-"..track.channels.."ch"
+            end
             if (track.id == tonumber(mp.get_property(type))) then
                 selected = "●"
             end
-            msg = msg.."\n"..selected.." "..n..": ["..lang.."] "..title
+            msg = msg.."\n"..selected.." "..n..
+                ": ["..lang..channels.."] "..title
         end
     end
     return msg

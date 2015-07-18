@@ -418,6 +418,20 @@ static int match_lang(char **langs, char *lang)
     return 0;
 }
 
+static int match_achans(char **achans, uint8_t tachans)
+{
+    for (int idx = 0; achans && achans[idx]; idx++) {
+        char *endptr = NULL;
+        errno = 0;
+        int chans = strtoul(achans[idx], &endptr, 10);
+        if (!errno && *endptr == '\0') {
+            if (tachans && (uint8_t)chans == tachans)
+                return INT_MAX - idx;
+        }
+    }
+    return 0;
+}
+
 /* Get the track wanted by the user.
  * tid is the track ID requested by the user (-2: deselect, -1: default)
  * lang is a string list, NULL is same as empty list
@@ -427,16 +441,18 @@ static int match_lang(char **langs, char *lang)
  * 1) track is external (no_default cancels this)
  * 1b) track was passed explicitly (is not an auto-loaded subtitle)
  * 2) earlier match in lang list
- * 3a) track is marked forced
- * 3b) track is marked default
- * 4) attached picture, HLS bitrate
- * 5) lower track number
- * If select_fallback is not set, 5) is only used to determine whether a
+ * 3) track is audio, earlier match in achans list
+ * 4a) track is marked forced
+ * 4b) track is marked default
+ * 5) attached picture, HLS bitrate
+ * 6) lower track number
+ * If select_fallback is not set, 6) is only used to determine whether a
  * matching track is preferred over another track. Otherwise, always pick a
  * track (if nothing else matches, return the track with lowest ID).
  */
 // Return whether t1 is preferred over t2
-static bool compare_track(struct track *t1, struct track *t2, char **langs,
+static bool compare_track(struct track *t1, struct track *t2,
+                          char **langs, char **achans,
                           struct MPOpts *opts)
 {
     bool ext1 = t1->is_external && !t1->no_default;
@@ -448,6 +464,12 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs,
     int l1 = match_lang(langs, t1->lang), l2 = match_lang(langs, t2->lang);
     if (l1 != l2)
         return l1 > l2;
+    if (t1->type == STREAM_AUDIO) {
+        int c1 = match_achans(achans, t1->stream->audio->channels.num);
+        int c2 = match_achans(achans, t2->stream->audio->channels.num);
+        if (c1 != c2)
+            return c1 > c2;
+    }
     if (t1->forced_track != t2->forced_track)
         return t1->forced_track;
     if (t1->default_track != t2->default_track)
@@ -474,6 +496,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
     int tid = opts->stream_id[order][type];
     int ffid = order == 0 ? opts->stream_id_ff[type] : -1;
     char **langs = order == 0 ? opts->stream_lang[type] : NULL;
+    char **achans = order == 0 ? opts->stream_achans : NULL;
     if (ffid != -1)
         tid = -1; // prefer selecting ffid
     if (tid == -2 || ffid == -2)
@@ -488,7 +511,7 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
             return track;
         if (track->ff_index == ffid)
             return track;
-        if (!pick || compare_track(track, pick, langs, mpctx->opts))
+        if (!pick || compare_track(track, pick, langs, achans, mpctx->opts))
             pick = track;
     }
     if (pick && !select_fallback && !(pick->is_external && !pick->no_default)

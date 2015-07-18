@@ -31,6 +31,18 @@ Track Selection
         - ``mpv --slang=jpn example.mkv`` plays a Matroska file with Japanese
           subtitles.
 
+``--achans=<channels[,channels,...]>``
+    Specify a priority list of number of audio channels to use.
+    ``--alang`` takes priority over this.
+
+    .. admonition:: Examples
+
+        ``mpv dvd://1 --achans=2,6``
+            Chooses the audio track with 2 channels on a DVD and falls back
+            on one with 6 channels if one with 2 channels is not available.
+        ``mpv --achans=2 example.mkv``
+            Plays a Matroska file choosing the audio track with 2 channels.
+
 ``--aid=<ID|auto|no>``
     Select audio track. ``auto`` selects the default, ``no`` disables audio.
     See also ``--alang``. mpv normally prints available audio tracks on the
