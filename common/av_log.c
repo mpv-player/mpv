@@ -209,35 +209,12 @@ void print_libav_versions(struct mp_log *log, int v)
 
     mp_msg(log, v, "%s library versions:\n", LIB_PREFIX);
 
-    bool mismatch = false;
-    bool broken = false;
     for (int n = 0; n < MP_ARRAY_SIZE(libs); n++) {
         const struct lib *l = &libs[n];
         mp_msg(log, v, "   %-15s %d.%d.%d", l->name, V(l->buildv));
-        if (l->buildv != l->runv) {
+        if (l->buildv != l->runv)
             mp_msg(log, v, " (runtime %d.%d.%d)", V(l->runv));
-            mismatch = true;
-            broken |= ((l->buildv & 255) >= 100) != ((l->runv & 255) >= 100);
-        }
         mp_msg(log, v, "\n");
-    }
-    // This just won't work. It's 100% broken.
-    if (broken) {
-        mp_fatal(log, "mpv was compiled and linked against a mixture of Libav "
-                 "and FFmpeg versions. This won't work and will most likely "
-                 "crash at some point. Aborting.\n");
-        abort();
-    }
-    // We don't "really" support mismatched libraries, but if you like to
-    // suffer, you're free to enjoy the terrible aspects of dynamic linking.
-    // In particular, we don't use all these crazy accessors ffmpeg wants us
-    // to use in order to be ABI compatible after Libav merges - because that
-    // would make our code incompatible to Libav. It's madness.
-    if (mismatch) {
-        mp_warn(log, "Warning: mpv was compiled against a different version of "
-                "%s than the shared\nlibrary it is linked against. This can "
-                "expose subtle ABI compatibility issues\nand can lead to "
-                "misbehavior and crashes.\n", LIB_PREFIX);
     }
 
 #if HAVE_AV_VERSION_INFO
