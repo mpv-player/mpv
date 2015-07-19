@@ -359,7 +359,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
         {{"spline36",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // scale
         {{"mitchell",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // dscale
         {{"spline36",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // cscale
-        {{"robidoux",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // tscale
+        {{"oversample", .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // tscale
     },
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
