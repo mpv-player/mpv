@@ -161,23 +161,6 @@ static int rate_from_speed(int rate, double speed)
     return lrint(rate * speed);
 }
 
-static bool needs_lavrctx_reconfigure(struct af_resample *s,
-                                      struct mp_audio *in,
-                                      struct mp_audio *out)
-{
-    return s->ctx.in_rate_af  != in->rate ||
-           s->ctx.in_format   != in->format ||
-           !mp_chmap_equals(&s->ctx.in_channels, &in->channels) ||
-           s->ctx.out_rate    != out->rate ||
-           s->ctx.out_format  != out->format ||
-           !mp_chmap_equals(&s->ctx.out_channels, &out->channels) ||
-           s->ctx.filter_size != s->opts.filter_size ||
-           s->ctx.phase_shift != s->opts.phase_shift ||
-           s->ctx.linear      != s->opts.linear ||
-           s->ctx.cutoff      != s->opts.cutoff;
-
-}
-
 // Return the format libavresample should convert to, given the final output
 // format mp_format. In some cases (S24) we perform an extra conversion step,
 // and signal here what exactly libavresample should output. It will be the
@@ -384,7 +367,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
                 mp_chmap_equals(&in->channels, &orig_in.channels))
                 ? AF_OK : AF_FALSE;
 
-        if (r == AF_OK && needs_lavrctx_reconfigure(s, in, out))
+        if (r == AF_OK)
             r = configure_lavrr(af, in, out, true);
         return r;
     }
