@@ -212,7 +212,7 @@ static void transpose_order(int *map, int num)
 }
 
 static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
-                           struct mp_audio *out)
+                           struct mp_audio *out, bool verbose)
 {
     struct af_resample *s = af->priv;
 
@@ -274,8 +274,10 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     mp_chmap_from_lavc(&in_lavc, in_ch_layout);
     mp_chmap_from_lavc(&out_lavc, out_ch_layout);
 
-    MP_VERBOSE(af, "Remix: %s -> %s\n", mp_chmap_to_str(&in_lavc),
-                                        mp_chmap_to_str(&out_lavc));
+    if (verbose && !mp_chmap_equals(&in_lavc, &out_lavc)) {
+        MP_VERBOSE(af, "Remix: %s -> %s\n", mp_chmap_to_str(&in_lavc),
+                                            mp_chmap_to_str(&out_lavc));
+    }
 
     if (in_lavc.num != map_in.num) {
         // For handling NA channels, we would have to add a planarization step.
@@ -339,9 +341,7 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     //  * Also, the input channel layout must have already been set.
     avresample_set_channel_mapping(s->avrctx, s->reorder_in);
 
-    if (avresample_open(s->avrctx) < 0 ||
-        avresample_open(s->avrctx_out) < 0)
-    {
+    if (avresample_open(s->avrctx) < 0 || avresample_open(s->avrctx_out) < 0) {
         MP_ERR(af, "Cannot open Libavresample Context. \n");
         goto error;
     }
@@ -385,7 +385,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
                 ? AF_OK : AF_FALSE;
 
         if (r == AF_OK && needs_lavrctx_reconfigure(s, in, out))
-            r = configure_lavrr(af, in, out);
+            r = configure_lavrr(af, in, out, true);
         return r;
     }
     case AF_CONTROL_SET_FORMAT: {
@@ -411,7 +411,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
             // in the resampler.
             af->filter_frame(af, NULL);
             // Reinitialize resampler.
-            configure_lavrr(af, &af->fmt_in, &af->fmt_out);
+            configure_lavrr(af, &af->fmt_in, &af->fmt_out, false);
         }
         return AF_OK;
     }
