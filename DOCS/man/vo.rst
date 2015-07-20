@@ -455,6 +455,11 @@ Available video output drivers are:
         Unfortunately, this can lead to flicker on LCD displays, since these
         have a high reaction time.
 
+    ``temporal-dither-period=<1-128>``
+        Determines how often the dithering pattern is updated when
+        ``temporal-dither`` is in use. 1 (the default) will update on every
+        video frame, 2 on every other frame, etc.
+
     ``debug``
         Check for OpenGL errors, i.e. call ``glGetError()``. Also request a
         debug OpenGL context (which does nothing with current graphics drivers

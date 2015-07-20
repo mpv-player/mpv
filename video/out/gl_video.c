@@ -333,6 +333,7 @@ static const struct packed_fmt_entry mp_packed_formats[] = {
 const struct gl_video_opts gl_video_opts_def = {
     .dither_depth = -1,
     .dither_size = 6,
+    .temporal_dither_period = 1,
     .fbo_format = GL_RGBA16,
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
@@ -350,6 +351,7 @@ const struct gl_video_opts gl_video_opts_def = {
 const struct gl_video_opts gl_video_opts_hq_def = {
     .dither_depth = 0,
     .dither_size = 6,
+    .temporal_dither_period = 1,
     .fbo_format = GL_RGBA16,
     .fancy_downscaling = 1,
     .sigmoid_center = 0.75,
@@ -438,6 +440,7 @@ const struct m_sub_options gl_video_conf = {
                    ({"fruit", 0}, {"ordered", 1}, {"no", -1})),
         OPT_INTRANGE("dither-size-fruit", dither_size, 0, 2, 8),
         OPT_FLAG("temporal-dither", temporal_dither, 0),
+        OPT_INTRANGE("temporal-dither-period", temporal_dither_period, 0, 1, 128),
         OPT_CHOICE("alpha", alpha_mode, 0,
                    ({"no", 0},
                     {"yes", 1},
@@ -1923,7 +1926,7 @@ static void pass_dither(struct gl_video *p)
     GLSLF("vec2 dither_pos = gl_FragCoord.xy / %d;\n", p->dither_size);
 
     if (p->opts.temporal_dither) {
-        int phase = p->frames_rendered % 8u;
+        int phase = (p->frames_rendered / p->opts.temporal_dither_period) % 8u;
         float r = phase * (M_PI / 2); // rotate
         float m = phase < 4 ? 1 : -1; // mirror
 
