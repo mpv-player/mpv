@@ -1345,6 +1345,72 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     return 0;
 }
 
+// Parse VorbisComment and look for WAVEFORMATEXTENSIBLE_CHANNEL_MASK.
+// Do not change *channels if nothing found or an error happens.
+static void parse_vorbis_chmap(struct mp_chmap *channels, unsigned char *data,
+                               int size)
+{
+    // Skip the useless vendor string.
+    if (size < 4)
+        return;
+    uint32_t vendor_length = AV_RL32(data);
+    if (vendor_length + 4 > size) // also check for the next AV_RB32 below
+        return;
+    size -= vendor_length + 4;
+    data += vendor_length + 4;
+    uint32_t num_headers = AV_RL32(data);
+    size -= 4;
+    data += 4;
+    for (int n = 0; n < num_headers; n++) {
+        if (size < 4)
+            return;
+        uint32_t len = AV_RL32(data);
+        size -= 4;
+        data += 4;
+        if (len > size)
+            return;
+        if (len > 34 && !memcmp(data, "WAVEFORMATEXTENSIBLE_CHANNEL_MASK=", 34)) {
+            char smask[80];
+            snprintf(smask, sizeof(smask), "%.*s", (int)(len - 34), data + 34);
+            char *end = NULL;
+            uint32_t mask = strtol(smask, &end, 0);
+            if (!end || end[0])
+                mask = 0;
+            struct mp_chmap chmask = {0};
+            mp_chmap_from_waveext(&chmask, mask);
+            if (mp_chmap_is_valid(&chmask))
+                *channels = chmask;
+        }
+        size -= len;
+        data += len;
+    }
+}
+
+// Parse VorbisComment-in-FLAC and look for WAVEFORMATEXTENSIBLE_CHANNEL_MASK.
+// Do not change *channels if nothing found or an error happens.
+static void parse_flac_chmap(struct mp_chmap *channels, unsigned char *data,
+                             int size)
+{
+    // Skip FLAC header.
+    if (size < 4)
+        return;
+    data += 4;
+    size -= 4;
+    // Parse FLAC blocks...
+    while (size >= 4) {
+        unsigned btype = data[0] & 0x7F;
+        unsigned bsize = AV_RB24(data + 1);
+        data += 4;
+        size -= 4;
+        if (bsize > size)
+            return;
+        if (btype == 4) // VORBIS_COMMENT
+            parse_vorbis_chmap(channels, data, bsize);
+        data += bsize;
+        size -= bsize;
+    }
+}
+
 static const char *const mkv_audio_tags[][2] = {
     { "A_MPEG/L2",              "mp3" },
     { "A_MPEG/L3",              "mp3" },
@@ -1547,6 +1613,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             extradata_len = size;
             memcpy(extradata, ptr, size);
         }
+        parse_flac_chmap(&sh_a->channels, extradata, extradata_len);
     } else if (!strcmp(codec, "alac")) {
         if (track->private_size) {
             extradata_len = track->private_size + 12;
