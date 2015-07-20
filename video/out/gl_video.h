@@ -59,6 +59,7 @@ struct gl_video_opts {
     int dither_algo;
     int dither_size;
     int temporal_dither;
+    int temporal_dither_period;
     int fbo_format;
     int alpha_mode;
     int chroma_location;
