@@ -1608,10 +1608,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             extradata = talloc_size(sh_a, 4);
             extradata_len = 4;
             memcpy(extradata, "fLaC", 4);
-        } else {
-            extradata = talloc_size(sh_a, size);
-            extradata_len = size;
-            memcpy(extradata, ptr, size);
         }
         parse_flac_chmap(&sh_a->channels, extradata, extradata_len);
     } else if (!strcmp(codec, "alac")) {
