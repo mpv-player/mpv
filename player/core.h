@@ -229,7 +229,7 @@ typedef struct MPContext {
 
     struct vo *video_out;
     // next_frame[0] is the next frame, next_frame[1] the one after that.
-    struct mp_image *next_frames[2 + VO_MAX_FUTURE_FRAMES];
+    struct mp_image *next_frames[VO_MAX_REQ_FRAMES];
     int num_next_frames;
     struct mp_image *saved_frame;   // for hrseek_lastframe
 

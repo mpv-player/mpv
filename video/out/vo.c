@@ -959,25 +959,24 @@ const char *vo_get_window_title(struct vo *vo)
 // flip_page[_timed] will be called offset_us microseconds too early.
 // (For vo_vdpau, which does its own timing.)
 // Setting vsync_timed to true redraws as fast as possible.
-// num_future_frames set the requested number of future frames in
-// struct frame_timing.
-// (For vo_opengl smoothmotion.)
+// num_req_frames set the requested number of requested vo_frame.frames.
+// (For vo_opengl interpolation.)
 void vo_set_queue_params(struct vo *vo, int64_t offset_us, bool vsync_timed,
-                         int num_future_frames)
+                         int num_req_frames)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
     in->flip_queue_offset = offset_us;
     in->vsync_timed = vsync_timed;
-    in->req_frames = 1 + MPMIN(num_future_frames, VO_MAX_FUTURE_FRAMES);
+    in->req_frames = MPCLAMP(num_req_frames, 1, VO_MAX_REQ_FRAMES);
     pthread_mutex_unlock(&in->lock);
 }
 
-int vo_get_num_future_frames(struct vo *vo)
+int vo_get_num_req_frames(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    int res = in->req_frames - 1;
+    int res = in->req_frames;
     pthread_mutex_unlock(&in->lock);
     return res;
 }

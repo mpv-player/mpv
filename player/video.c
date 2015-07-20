@@ -604,10 +604,10 @@ static int get_req_frames(struct MPContext *mpctx, bool eof)
     if (eof || mpctx->video_pts == MP_NOPTS_VALUE)
         return 1;
 
-    int req = 1 + vo_get_num_future_frames(mpctx->video_out);
+    int req = vo_get_num_req_frames(mpctx->video_out);
     if (opts->frame_dropping & 1)
         req = MPMAX(req, 2);
-    return req;
+    return MPMIN(req, MP_ARRAY_SIZE(mpctx->next_frames));
 }
 
 // Whether it's fine to call add_new_frame() now.

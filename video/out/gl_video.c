@@ -2832,7 +2832,7 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
 
 void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
 {
-    int queue_size = 0;
+    int queue_size = 1;
 
     // Figure out an adequate size for the interpolation queue. The larger
     // the radius, the earlier we need to queue frames.
@@ -2842,10 +2842,10 @@ void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
         if (kernel) {
             double radius = kernel->f.radius;
             radius = radius > 0 ? radius : p->opts.scaler[3].radius;
-            queue_size = 1 + ceil(radius);
+            queue_size += 1 + ceil(radius);
         } else {
             // Oversample case
-            queue_size = 2;
+            queue_size += 2;
         }
     }
 
