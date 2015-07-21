@@ -45,8 +45,8 @@ local o = {
     no_ass_nl = "\n",
     no_ass_prop_indent = "\t",
     no_ass_kv_sep = " ",
-    no_ass_b1 = "",
-    no_ass_b0 = "",
+    no_ass_b1 = "\027[1m",
+    no_ass_b0 = "\027[0m",
 }
 options.read_options(o)
 
@@ -64,8 +64,13 @@ function main()
         o.nl = o.no_ass_nl
         o.prop_indent = o.no_ass_prop_indent
         o.kv_sep = o.no_ass_kv_sep
-        o.b1 = o.no_ass_b1
-        o.b0 = o.no_ass_b0
+        if not has_ansi() then
+            o.b1 = ""
+            o.b0 = ""
+        else
+            o.b1 = o.no_ass_b1
+            o.b0 = o.no_ass_b0
+        end
     end
 
     add_header(stats)
@@ -242,6 +247,13 @@ function has_audio()
     return r and r ~= "no" and r ~= ""
 end
 
+function has_ansi()
+    local is_windows = type(package) == 'table' and type(package.config) == 'string' and package.config:sub(1,1) == '\\'
+    if is_windows then
+        return os.getenv("ANSICON")
+    end
+    return true
+end
 
 function b(t)
     return o.b1 .. t .. o.b0
