@@ -110,7 +110,8 @@ struct hook_handler {
     bool active;    // hook is currently in progress (only 1 at a time for now)
 };
 
-static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
+static int edit_filters(struct MPContext *mpctx, struct mp_log *log,
+                        enum stream_type mediatype,
                         const char *cmd, const char *arg);
 static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
                        struct m_obj_settings *new_chain);
@@ -2110,7 +2111,7 @@ static bool probe_deint_filter(struct MPContext *mpctx, const char *filt)
     char filter[80];
     // add a label so that removing the filter is easier
     snprintf(filter, sizeof(filter), "@%s:%s", VF_DEINTERLACE_LABEL, filt);
-    return edit_filters(mpctx, STREAM_VIDEO, "pre", filter) >= 0;
+    return edit_filters(mpctx, mp_null_log, STREAM_VIDEO, "pre", filter) >= 0;
 }
 
 static bool check_output_format(struct MPContext *mpctx, int imgfmt)
@@ -2160,12 +2161,17 @@ static int get_deinterlacing(struct MPContext *mpctx)
     return enabled;
 }
 
-static void set_deinterlacing(struct MPContext *mpctx, bool enable)
+void remove_deint_filter(struct MPContext *mpctx)
+{
+    edit_filters(mpctx, mp_null_log, STREAM_VIDEO, "del", "@" VF_DEINTERLACE_LABEL);
+}
+
+void set_deinterlacing(struct MPContext *mpctx, bool enable)
 {
     struct dec_video *vd = mpctx->d_video;
     if (vf_find_by_label(vd->vfilter, VF_DEINTERLACE_LABEL)) {
         if (!enable)
-            edit_filters(mpctx, STREAM_VIDEO, "del", "@" VF_DEINTERLACE_LABEL);
+            remove_deint_filter(mpctx);
     } else {
         if ((get_deinterlacing(mpctx) > 0) != enable) {
             int arg = enable;
@@ -3870,7 +3876,8 @@ static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
     return success ? 0 : -1;
 }
 
-static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
+static int edit_filters(struct MPContext *mpctx, struct mp_log *log,
+                        enum stream_type mediatype,
                         const char *cmd, const char *arg)
 {
     bstr option = bstr0(filter_opt[mediatype]);
@@ -3885,8 +3892,7 @@ static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
     struct m_obj_settings *new_chain = NULL;
     m_option_copy(co->opt, &new_chain, co->data);
 
-    int r = m_option_parse(mpctx->log, co->opt, bstr0(optname), bstr0(arg),
-                           &new_chain);
+    int r = m_option_parse(log, co->opt, bstr0(optname), bstr0(arg), &new_chain);
     if (r >= 0)
         r = set_filters(mpctx, mediatype, new_chain);
 
@@ -3898,7 +3904,7 @@ static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
 static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
                             const char *cmd, const char *arg, bool on_osd)
 {
-    int r = edit_filters(mpctx, mediatype, cmd, arg);
+    int r = edit_filters(mpctx, mpctx->log, mediatype, cmd, arg);
     if (on_osd) {
         if (r >= 0) {
             const char *prop = filter_opt[mediatype];

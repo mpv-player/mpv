@@ -18,6 +18,8 @@
 #ifndef MPLAYER_COMMAND_H
 #define MPLAYER_COMMAND_H
 
+#include <stdbool.h>
+
 struct MPContext;
 struct mp_cmd;
 struct mp_log;
@@ -55,5 +57,8 @@ bool mp_hook_test_completion(struct MPContext *mpctx, char *type);
 void mp_hook_run(struct MPContext *mpctx, char *client, char *type);
 
 void handle_ab_loop(struct MPContext *mpctx);
+
+void remove_deint_filter(struct MPContext *mpctx);
+void set_deinterlacing(struct MPContext *mpctx, bool enable);
 
 #endif /* MPLAYER_COMMAND_H */
