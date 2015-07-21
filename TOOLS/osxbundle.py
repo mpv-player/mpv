@@ -40,7 +40,7 @@ def apply_plist_template(plist_file, version):
         print (line.rstrip().replace('${VERSION}', version))
 
 def main():
-    version = sh("./version.sh --print").strip()
+    version = sh("./version.sh").strip()
 
     usage = "usage: %prog [options] arg"
     parser = OptionParser(usage)
