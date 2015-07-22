@@ -283,11 +283,15 @@ done:
 }
 
 // This is called both during init and at runtime.
+// The size argument is the readahead half only; s->back_size is the backbuffer.
 static int resize_cache(struct priv *s, int64_t size)
 {
-    int64_t min_size = FILL_LIMIT * 4;
-    int64_t max_size = ((size_t)-1) / 4;
+    int64_t min_size = FILL_LIMIT * 2;
+    int64_t max_size = ((size_t)-1) / 8;
+
     int64_t buffer_size = MPCLAMP(size, min_size, max_size);
+    s->back_size = MPCLAMP(s->back_size, min_size, max_size);
+    buffer_size += s->back_size;
 
     unsigned char *buffer = malloc(buffer_size);
     if (!buffer) {
@@ -324,7 +328,6 @@ static int resize_cache(struct priv *s, int64_t size)
     free(s->buffer);
 
     s->buffer_size = buffer_size;
-    s->back_size = buffer_size / 2;
     s->buffer = buffer;
     s->idle = false;
     s->eof = false;
@@ -333,6 +336,8 @@ static int resize_cache(struct priv *s, int64_t size)
     //more data than it is allowed to fill
     if (s->seek_limit > s->buffer_size - FILL_LIMIT)
         s->seek_limit = s->buffer_size - FILL_LIMIT;
+
+    assert(s->back_size < s->buffer_size);
 
     return STREAM_OK;
 }
@@ -616,6 +621,7 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
     cache_drop_contents(s);
 
     s->seek_limit = opts->seek_min * 1024ULL;
+    s->back_size = opts->back_buffer * 1024ULL;
 
     int64_t cache_size = opts->size * 1024ULL;
 
@@ -630,8 +636,9 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
         return -1;
     }
 
-    MP_VERBOSE(cache, "Cache size set to %" PRId64 " KiB\n",
-               s->buffer_size / 1024);
+    MP_VERBOSE(cache, "Cache size set to %lld KiB (%lld KiB backbuffer)\n",
+               (long long)(s->buffer_size / 1024),
+               (long long)(s->back_size / 1024));
 
     pthread_mutex_init(&s->mutex, NULL);
     pthread_cond_init(&s->wakeup, NULL);

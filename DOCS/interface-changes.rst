@@ -20,6 +20,9 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - add --cache-backbuffer; change --cache-default default to 75MB
+      the new total cache size is the sum of backbuffer and the cache size
+      specified by --cache-default or --cache
     - add ``track-list/N/audio-channels`` property
     - change --screenshot-tag-colorspace default value
     - add --stretch-image-subs-to-screen

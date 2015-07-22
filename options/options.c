@@ -156,6 +156,7 @@ const m_option_t mp_opts[] = {
                       ({"no", 0})),
     OPT_INTRANGE("cache-initial", stream_cache.initial, 0, 0, 0x7fffffff),
     OPT_INTRANGE("cache-seek-min", stream_cache.seek_min, 0, 0, 0x7fffffff),
+    OPT_INTRANGE("cache-backbuffer", stream_cache.back_buffer, 0, 0, 0x7fffffff),
     OPT_STRING("cache-file", stream_cache.file, M_OPT_FILE),
     OPT_INTRANGE("cache-file-size", stream_cache.file_max, 0, 0, 0x7fffffff),
 
@@ -712,9 +713,10 @@ const struct MPOpts mp_default_opts = {
     .position_resume = 1,
     .stream_cache = {
         .size = -1,
-        .def_size = 150000,
+        .def_size = 75000,
         .initial = 0,
         .seek_min = 500,
+        .back_buffer = 75000,
         .file_max = 1024 * 1024,
     },
     .demuxer_thread = 1,

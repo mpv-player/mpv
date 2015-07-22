@@ -53,6 +53,7 @@ struct mp_cache_opts {
     int def_size;
     int initial;
     int seek_min;
+    int back_buffer;
     char *file;
     int file_max;
 };
