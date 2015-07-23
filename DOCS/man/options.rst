@@ -824,10 +824,11 @@ Video
     Set framedropping mode used with ``--framedrop`` (see skiploopfilter for
     available skip values).
 
-``--vd-lavc-threads=<0-16>``
+``--vd-lavc-threads=<N>``
     Number of threads to use for decoding. Whether threading is actually
-    supported depends on codec. 0 means autodetect number of cores on the
-    machine and use that, up to the maximum of 16 (default: 0).
+    supported depends on codec (default: 0). 0 means autodetect number of cores
+    on the machine and use that, up to the maximum of 16. You can set more than
+    16 threads manually.
 
 
 

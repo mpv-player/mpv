@@ -98,7 +98,7 @@ const struct m_sub_options vd_lavc_conf = {
         OPT_DISCARD("skipidct", skip_idct, 0),
         OPT_DISCARD("skipframe", skip_frame, 0),
         OPT_DISCARD("framedrop", framedrop, 0),
-        OPT_INTRANGE("threads", threads, 0, 0, 16),
+        OPT_INT("threads", threads, M_OPT_MIN, .min = 0),
         OPT_FLAG("bitexact", bitexact, 0),
         OPT_FLAG("check-hw-profile", check_hw_profile, 0),
         OPT_KEYVALUELIST("o", avopts, 0),
