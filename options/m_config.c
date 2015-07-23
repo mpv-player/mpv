@@ -272,6 +272,7 @@ static void ensure_backup(struct m_config *config, struct m_config_option *co)
     m_option_copy(co->opt, bc->backup, co->data);
     bc->next = config->backup_opts;
     config->backup_opts = bc;
+    co->is_set_locally = true;
 }
 
 void m_config_restore_backups(struct m_config *config)
@@ -282,6 +283,7 @@ void m_config_restore_backups(struct m_config *config)
 
         m_option_copy(bc->co->opt, bc->co->data, bc->backup);
         m_option_free(bc->co->opt, bc->backup);
+        bc->co->is_set_locally = false;
         talloc_free(bc);
     }
 }

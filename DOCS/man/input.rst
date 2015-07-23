@@ -1872,6 +1872,12 @@ Property list
         ``no`` otherwise. What this is set to if the option is e.g. changed
         at runtime is left undefined (meaning it could change in the future).
 
+    ``option-info/<name>/set-locally``
+        Return ``yes`` if the option was set per-file. This is the case with
+        automatically loaded profiles, file-dir configs, and other cases. It
+        means the option value will be restored to the value before playback
+        start when playback ends.
+
     ``option-info/<name>/default-value``
         The default value of the option. May not always be available.
 

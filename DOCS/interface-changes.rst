@@ -20,6 +20,7 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - add "option-info/<name>/set-locally" property
     - add --cache-backbuffer; change --cache-default default to 75MB
       the new total cache size is the sum of backbuffer and the cache size
       specified by --cache-default or --cache
