@@ -1314,7 +1314,7 @@ static void pass_sample_oversample(struct gl_video *p, struct scaler *scaler,
         GLSLF("coeff = mix(coeff, vec2(0.0), "
               "lessThanEqual(coeff, vec2(%f)));\n", threshold);
         GLSLF("coeff = mix(coeff, vec2(1.0), "
-              "greaterThanEqual(coeff, vec2(%f)));\n", threshold);
+              "greaterThanEqual(coeff, vec2(%f)));\n", 1.0 - threshold);
     }
     // Compute the right blend of colors
     GLSL(vec4 left = mix(texture(tex, baseSW),
