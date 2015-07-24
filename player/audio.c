@@ -369,8 +369,7 @@ double playing_audio_pts(struct MPContext *mpctx)
     return pts - mpctx->opts->playback_speed * ao_get_delay(mpctx->ao);
 }
 
-static int write_to_ao(struct MPContext *mpctx, struct mp_audio *data, int flags,
-                       double pts)
+static int write_to_ao(struct MPContext *mpctx, struct mp_audio *data, int flags)
 {
     if (mpctx->paused)
         return 0;
@@ -604,7 +603,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     struct mp_audio data;
     mp_audio_buffer_peek(mpctx->ao_buffer, &data);
     data.samples = MPMIN(data.samples, playsize);
-    int played = write_to_ao(mpctx, &data, playflags, written_audio_pts(mpctx));
+    int played = write_to_ao(mpctx, &data, playflags);
     assert(played >= 0 && played <= data.samples);
     mp_audio_buffer_skip(mpctx->ao_buffer, played);
 
