@@ -54,6 +54,9 @@ Sending patches
   change in the same commit.
 - If you add a new command line option, document it in options.rst. If you
   add a new input property, document it in input.rst.
+- All new code must be LGPLv2.1+ licensed, or come with the implicit agreement
+  that it will be relicensed to LGPLv2.1+ later (see ``Copyright`` in the
+  repository root directory).
 
 Code formatting
 ---------------

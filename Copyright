@@ -2,9 +2,15 @@ mpv is a fork of mplayer2, which is a fork of MPlayer.
 
 mpv as a whole is licensed as GPL version 2 or later (see LICENSE). Most source
 files are GPLv2+, but some files are available under a more liberal license,
-such as LGPLv2+, BSD, MIT, ISC, and possibly others. Look at the copyright
+such as LGPLv2.1+, BSD, MIT, ISC, and possibly others. Look at the copyright
 header of each source file, and grep the sources for "Copyright" if you need
-to know details. Files without Copyright notice are licensed as LGPLv2+.
+to know details. Files without Copyright notice are licensed as LGPLv2.1+.
+
+All new contributions must be LGPLv2.1+ licensed, or if the changes are done on
+GPL code, must come with the implicit agreement that the project can relicense
+the code to LGPLv2.1+ at a later point without asking the contributor. (This
+is a safeguard for making potential relicensing of the project to LGPLv2.1+
+easier.)
 
 For information about authors and contributors, consult the git log, which
 contains the complete SVN and CVS history as well.
@@ -17,3 +23,5 @@ MPlayer as a whole is licensed under GPLv2 (incompatible to GPLv3!), because
 some files are licensed to GPLv2 (and _not_ any later version of the license).
 In particular, this affects the file libmpdemux/demux_ty_osd.c. It is disabled
 under mplayer2, and has been removed from mpv.
+
+"v2.1+" in this context means "version 2.1 or later".
