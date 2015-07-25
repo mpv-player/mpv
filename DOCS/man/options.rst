@@ -1028,6 +1028,14 @@ Audio
     If the channel layout of the media file (i.e. the decoder) and the AO's
     channel layout don't match, mpv will attempt to insert a conversion filter.
 
+    .. admonition:: Warning
+
+        Using ``auto`` can cause issues when using audio over HDMI. The OS will
+        typically report all channel layouts that _can_ go over HDMI, even if
+        the receiver does not support them. If a receiver gets an unsupported
+        channel layout, random things can happen, such as dropping the
+        additional channels, or adding noise.
+
 ``--audio-display=<no|attachment>``
     Setting this option to ``attachment`` (default) will display image
     attachments (e.g. album cover art) when playing audio files. It will
