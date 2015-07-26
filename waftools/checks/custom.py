@@ -1,4 +1,4 @@
-from waftools.inflectors import DependencyInflector
+from waftools import inflector
 from waftools.checks.generic import *
 from waflib import Utils
 import os
@@ -88,8 +88,7 @@ def check_oss_4front(ctx, dependency_identifier):
 
     # avoid false positive from native sys/soundcard.h
     if not oss_libdir:
-        defkey = DependencyInflector(dependency_identifier).define_key()
-        ctx.undefine(defkey)
+        ctx.undefine(inflector.define_key(dependency_identifier))
         return False
 
     soundcard_h = os.path.join(oss_libdir, "include/sys/soundcard.h")

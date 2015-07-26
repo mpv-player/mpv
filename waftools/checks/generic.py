@@ -1,5 +1,5 @@
 import os
-from inflectors import DependencyInflector
+import inflector
 from waflib.ConfigSet import ConfigSet
 from waflib import Utils
 
@@ -14,10 +14,10 @@ def even(n):
     return n % 2 == 0
 
 def __define_options__(dependency_identifier):
-    return DependencyInflector(dependency_identifier).define_dict()
+    return inflector.define_dict(dependency_identifier)
 
 def __merge_options__(dependency_identifier, *args):
-    options_accu = DependencyInflector(dependency_identifier).storage_dict()
+    options_accu = inflector.storage_dict(dependency_identifier)
     options_accu['mandatory'] = False
     [options_accu.update(arg) for arg in args if arg]
     return options_accu
@@ -99,7 +99,7 @@ def check_pkg_config(*args, **kw_ext):
         result = bool(ctx.check_cfg(**opts))
         ConfigSet.append_unique = original_append_unique
 
-        defkey = DependencyInflector(dependency_identifier).define_key()
+        defkey = inflector.define_key(dependency_identifier)
         if result:
             ctx.define(defkey, 1)
         else:
@@ -113,8 +113,7 @@ def check_headers(*headers, **kw_ext):
     def undef_others(ctx, headers, found):
         not_found_hs = set(headers) - set([found])
         for not_found_h in not_found_hs:
-            defkey = DependencyInflector(not_found_h).define_key()
-            ctx.undefine(defkey)
+            ctx.undefine(inflector.define_key(not_found_h))
 
     def fn(ctx, dependency_identifier):
         for header in headers:
@@ -122,16 +121,14 @@ def check_headers(*headers, **kw_ext):
             options  = __merge_options__(dependency_identifier, defaults, kw_ext)
             if ctx.check(**options):
                 undef_others(ctx, headers, header)
-                defkey = DependencyInflector(dependency_identifier).define_key()
-                ctx.define(defkey, 1)
+                ctx.define(inflector.define_key(dependency_identifier), 1)
                 return True
         undef_others(ctx, headers, None)
         return False
     return fn
 
 def check_true(ctx, dependency_identifier):
-    defkey = DependencyInflector(dependency_identifier).define_key()
-    ctx.define(defkey, 1)
+    ctx.define(inflector.define_key(dependency_identifier), 1)
     return True
 
 def check_ctx_vars(*variables):
@@ -151,8 +148,7 @@ def check_ctx_vars(*variables):
     return fn
 
 def check_stub(ctx, dependency_identifier):
-    defkey = DependencyInflector(dependency_identifier).define_key()
-    ctx.undefine(defkey)
+    ctx.undefine(inflector.define_key(dependency_identifier))
     return False
 
 def compose_checks(*checks):

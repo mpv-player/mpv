@@ -15,10 +15,10 @@ def __escape_c_string(s):
     return s.replace("\"", "\\\"").replace("\n", "\\n")
 
 def __get_features_string__(ctx):
-    from inflectors import DependencyInflector
+    import inflector
     stuff = []
     for dependency_identifier in ctx.satisfied_deps:
-        defkey = DependencyInflector(dependency_identifier).define_key()
+        defkey = inflector.define_key(dependency_identifier)
         if ctx.is_defined(defkey) and ctx.get_define(defkey) == "1":
             stuff.append(dependency_identifier)
     stuff.sort()
