@@ -10,7 +10,7 @@ All new contributions must be LGPLv2.1+ licensed, or if the changes are done on
 GPL code, must come with the implicit agreement that the project can relicense
 the code to LGPLv2.1+ at a later point without asking the contributor. (This
 is a safeguard for making potential relicensing of the project to LGPLv2.1+
-easier.)
+easier.) Using a more liberal license compatible to LGPLv2.1+ is also ok.
 
 For information about authors and contributors, consult the git log, which
 contains the complete SVN and CVS history as well.
