@@ -2416,14 +2416,14 @@ static void check_gl_features(struct gl_video *p)
         if (kernel) {
             char *reason = NULL;
             if (!test_fbo(p, &have_fbo))
-                reason = "scaler (FBOs missing)";
+                reason = "(FBOs missing)";
             if (!have_float_tex)
-                reason = "scaler (float tex. missing)";
+                reason = "(float tex. missing)";
             if (!have_1d_tex && kernel->polar)
-                reason = "scaler (1D tex. missing)";
+                reason = "(1D tex. missing)";
             if (reason) {
                 p->opts.scaler[n].kernel.name = "bilinear";
-                MP_WARN(p, "Disabling %s.\n", reason);
+                MP_WARN(p, "Disabling scaler #%d %s.\n", n, reason);
             }
         }
     }
