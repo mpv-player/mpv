@@ -17,12 +17,17 @@
 
 #include <windows.h>
 #include <shlobj.h>
+#include <pthread.h>
 
 #include "osdep/path.h"
 #include "osdep/io.h"
 #include "options/path.h"
 
 // Warning: do not use PATH_MAX. Cygwin messed it up.
+
+static pthread_once_t path_init_once = PTHREAD_ONCE_INIT;
+
+static char *portable_path;
 
 static char *mp_get_win_exe_dir(void *talloc_ctx)
 {
@@ -42,9 +47,9 @@ static char *mp_get_win_exe_dir(void *talloc_ctx)
     return mp_to_utf8(talloc_ctx, w_exedir);
 }
 
-static char *mp_get_win_exe_subdir(void *talloc_ctx)
+static char *mp_get_win_exe_subdir(void *ta_ctx, const char *name)
 {
-    return talloc_asprintf(talloc_ctx, "%s/mpv", mp_get_win_exe_dir(talloc_ctx));
+    return talloc_asprintf(ta_ctx, "%s/%s", mp_get_win_exe_dir(ta_ctx), name);
 }
 
 static char *mp_get_win_shell_dir(void *talloc_ctx, int folder)
@@ -64,15 +69,31 @@ static char *mp_get_win_app_dir(void *talloc_ctx)
     return path ? mp_path_join(talloc_ctx, path, "mpv") : NULL;
 }
 
+
+static void path_init(void)
+{
+    void *tmp = talloc_new(NULL);
+    char *path = mp_get_win_exe_subdir(tmp, "portable_config");
+    if (path && mp_path_exists(path))
+        portable_path = talloc_strdup(NULL, path);
+    talloc_free(tmp);
+}
+
 const char *mp_get_platform_path_win(void *talloc_ctx, const char *type)
 {
-    if (strcmp(type, "home") == 0)
-        return mp_get_win_app_dir(talloc_ctx);
-    if (strcmp(type, "old_home") == 0)
-        return mp_get_win_exe_dir(talloc_ctx);
-    // Not really true, but serves as a way to return a lowest-priority dir.
-    if (strcmp(type, "global") == 0)
-        return mp_get_win_exe_subdir(talloc_ctx);
+    pthread_once(&path_init_once, path_init);
+    if (portable_path) {
+        if (strcmp(type, "home") == 0)
+            return portable_path;
+    } else {
+        if (strcmp(type, "home") == 0)
+            return mp_get_win_app_dir(talloc_ctx);
+        if (strcmp(type, "old_home") == 0)
+            return mp_get_win_exe_dir(talloc_ctx);
+        // Not really true, but serves as a way to return a lowest-priority dir.
+        if (strcmp(type, "global") == 0)
+            return mp_get_win_exe_subdir(talloc_ctx, "mpv");
+    }
     if (strcmp(type, "desktop") == 0)
         return mp_get_win_shell_dir(talloc_ctx, CSIDL_DESKTOPDIRECTORY);
     return NULL;

@@ -881,6 +881,14 @@ Other config files (such as ``input.conf``) are in the same directory. See the
 The environment variable ``$MPV_HOME`` completely overrides these, like on
 UNIX.
 
+If a directory named ``portable_config`` next to the mpv.exe exists, all
+config will be loaded from this directory only. Watch later config files are
+written to this directory as well. (This exists on Windows only and is redundant
+with ``$MPV_HOME``. However, since Windows is very scripting unfriendly, a
+wrapper script just setting ``$MPV_HOME``, like you could do it on other
+systems, won't work. ``portable_config`` is provided for convenience to get
+around this restriction.)
+
 Config files located in the same directory as ``mpv.exe`` are loaded with
 lower priority. Some config files are loaded only once, which means that
 e.g. of 2 ``input.conf`` files located in two config directories, only the
