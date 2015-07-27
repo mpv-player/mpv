@@ -62,6 +62,7 @@ struct priv {
     DISPMANX_RESOURCE_HANDLE_T window_back;
     DISPMANX_UPDATE_HANDLE_T update;
     uint32_t w, h;
+    double display_fps;
 
     struct osd_part osd_parts[MAX_OSD_PARTS];
     double osd_pts;
@@ -295,6 +296,26 @@ static int update_display_size(struct vo *vo)
         MP_FATAL(vo, "Could not add DISPMANX element.\n");
         return -1;
     }
+
+    p->display_fps = 0;
+    TV_GET_STATE_RESP_T tvstate;
+    TV_DISPLAY_STATE_T tvstate_disp;
+    if (!vc_tv_get_state(&tvstate) && !vc_tv_get_display_state(&tvstate_disp)) {
+        if (tvstate_disp.state & (VC_HDMI_HDMI | VC_HDMI_DVI)) {
+            p->display_fps = tvstate_disp.display.hdmi.frame_rate;
+
+            HDMI_PROPERTY_PARAM_T param = {
+                .property = HDMI_PROPERTY_PIXEL_CLOCK_TYPE,
+            };
+            if (!vc_tv_hdmi_get_property(&param) &&
+                param.param1 == HDMI_PIXEL_CLOCK_TYPE_NTSC)
+                p->display_fps = p->display_fps / 1.001;
+        } else {
+            p->display_fps = tvstate_disp.display.sdtv.frame_rate;
+        }
+    }
+
+    vo_event(vo, VO_EVENT_WIN_STATE);
 
     vc_dispmanx_update_submit_sync(p->update);
     p->update = vc_dispmanx_update_start(10);
@@ -536,6 +557,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
             if (p->renderer_enabled)
                 resize(vo);
         }
+        return VO_TRUE;
+    case VOCTRL_GET_DISPLAY_FPS:
+        *(double *)data = p->display_fps;
         return VO_TRUE;
     }
 
