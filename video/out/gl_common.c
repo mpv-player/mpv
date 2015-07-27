@@ -191,7 +191,7 @@ static const struct gl_functions gl_functions[] = {
     // Framebuffers, extension in GL 2.x, core in GL 3.x core.
     {
         .ver_core = 300,
-        .ver_es_core = 300,
+        .ver_es_core = 200,
         .extension = "GL_ARB_framebuffer_object",
         .provides = MPGL_CAP_FB,
         .functions = (const struct gl_function[]) {
