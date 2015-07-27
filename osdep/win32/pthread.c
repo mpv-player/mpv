@@ -18,27 +18,6 @@
 #include <errno.h>
 #include <sys/time.h>
 
-// We keep this around to avoid active waiting while handling static
-// initializers.
-static pthread_once_t init_cs_once = PTHREAD_ONCE_INIT;
-static CRITICAL_SECTION init_cs;
-
-static void init_init_cs(void)
-{
-    InitializeCriticalSection(&init_cs);
-}
-
-static void init_lock(void)
-{
-    pthread_once(&init_cs_once, init_init_cs);
-    EnterCriticalSection(&init_cs);
-}
-
-static void init_unlock(void)
-{
-    LeaveCriticalSection(&init_cs);
-}
-
 int pthread_once(pthread_once_t *once_control, void (*init_routine)(void))
 {
     BOOL pending;
@@ -66,12 +45,14 @@ int pthread_mutex_init(pthread_mutex_t *restrict mutex,
 
 int pthread_mutex_lock(pthread_mutex_t *mutex)
 {
-    if (mutex->requires_init) {
-        init_lock();
-        if (mutex->requires_init)
+    if (mutex->static_mutex) {
+        BOOL pending;
+        if (!InitOnceBeginInitialize(&mutex->static_init, 0, &pending, NULL))
+            abort();
+        if (pending) {
             InitializeCriticalSection(&mutex->cs);
-        _InterlockedAnd(&mutex->requires_init, 0);
-        init_unlock();
+            InitOnceComplete(&mutex->static_init, 0, NULL);
+        }
     }
     EnterCriticalSection(&mutex->cs);
     return 0;

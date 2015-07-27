@@ -25,11 +25,12 @@
 int pthread_once(pthread_once_t *once_control, void (*init_routine)(void));
 
 typedef struct {
-    volatile LONG requires_init;
+    char static_mutex;
+    INIT_ONCE static_init;
     CRITICAL_SECTION cs;
 } pthread_mutex_t;
 
-#define PTHREAD_MUTEX_INITIALIZER {1}
+#define PTHREAD_MUTEX_INITIALIZER {1, INIT_ONCE_STATIC_INIT}
 
 #define pthread_mutexattr_t int
 #define pthread_mutexattr_destroy(attr) (void)0
