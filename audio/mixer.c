@@ -317,7 +317,7 @@ static void restore_volume(struct mixer *mixer)
         char drv[40];
         float v_l, v_r;
         int m;
-        if (sscanf(data, "%39[^:]:%f:%f:%d", drv, &v_l, &v_r, &m) == 5) {
+        if (sscanf(data, "%39[^:]:%f:%f:%d", drv, &v_l, &v_r, &m) == 4) {
             if (strcmp(mixer->driver, drv) == 0) {
                 force_vol_l = v_l;
                 force_vol_r = v_r;
