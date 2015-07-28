@@ -860,9 +860,17 @@ void write_video(struct MPContext *mpctx, double endpts)
         return;
     }
 
-    int64_t duration = -1;
-    double diff = -1;
     assert(mpctx->num_next_frames >= 1);
+    struct vo_frame dummy = {
+        .pts = pts,
+        .duration = -1,
+        .num_frames = mpctx->num_next_frames,
+    };
+    for (int n = 0; n < dummy.num_frames; n++)
+        dummy.frames[n] = mpctx->next_frames[n];
+    struct vo_frame *frame = vo_frame_ref(&dummy);
+
+    double diff = -1;
     double vpts0 = mpctx->next_frames[0]->pts;
     double vpts1 = MP_NOPTS_VALUE;
     if (mpctx->num_next_frames >= 2)
@@ -878,7 +886,7 @@ void write_video(struct MPContext *mpctx, double endpts)
         diff /= opts->playback_speed;
         if (mpctx->time_frame < 0)
             diff += mpctx->time_frame;
-        duration = MPCLAMP(diff, 0, 10) * 1e6;
+        frame->duration = MPCLAMP(diff, 0, 10) * 1e6;
     }
 
     mpctx->video_pts = mpctx->next_frames[0]->pts;
@@ -891,15 +899,7 @@ void write_video(struct MPContext *mpctx, double endpts)
     update_osd_msg(mpctx);
     update_subtitles(mpctx);
 
-    assert(mpctx->num_next_frames >= 1);
-    struct vo_frame dummy = {
-        .pts = pts,
-        .duration = duration,
-        .num_frames = mpctx->num_next_frames,
-    };
-    for (int n = 0; n < dummy.num_frames; n++)
-        dummy.frames[n] = mpctx->next_frames[n];
-    vo_queue_frame(vo, vo_frame_ref(&dummy));
+    vo_queue_frame(vo, frame);
 
     shift_frames(mpctx);
 
