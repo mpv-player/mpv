@@ -25,6 +25,7 @@
 #include <endpointvolume.h>
 #include <mmdeviceapi.h>
 #include <avrt.h>
+#include <windows.h>
 
 #include "audio/out/ao_wasapi.h"
 #include "audio/out/ao_wasapi_utils.h"
@@ -344,9 +345,9 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         return CONTROL_TRUE;
     case AOCONTROL_UPDATE_STREAM_TITLE: {
         MP_VERBOSE(state, "Updating stream title to \"%s\"\n", (char*)arg);
-        wchar_t *title = mp_from_utf8(NULL, (char*)arg);
+        WCHAR *title = mp_from_utf8(NULL, (char*)arg);
 
-        wchar_t *tmp = NULL;
+        WCHAR *tmp = NULL;
 
         /* There is a weird race condition in the IAudioSessionControl itself --
            it seems that *sometimes* the SetDisplayName does not take effect and it still shows

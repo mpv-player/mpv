@@ -174,7 +174,7 @@ static BOOL CALLBACK DirectSoundEnum(LPGUID guid, LPCSTR desc, LPCSTR module,
     }
     char *guidstr = talloc_strdup(NULL, "");
     if (guid) {
-        wchar_t guidwstr[80] = {0};
+        WCHAR guidwstr[80] = {0};
         StringFromGUID2(guid, guidwstr, MP_ARRAY_SIZE(guidwstr));
         char *nstr = mp_to_utf8(NULL, guidwstr);
         if (nstr) {

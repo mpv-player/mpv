@@ -612,7 +612,7 @@ exit_label:
 }
 
 static HRESULT init_session_display(struct wasapi_state *state) {
-    wchar_t path[MAX_PATH+12] = {0};
+    WCHAR path[MAX_PATH+12] = {0};
 
     HRESULT hr = IAudioClient_GetService(state->pAudioClient,
                                          &IID_IAudioSessionControl,
