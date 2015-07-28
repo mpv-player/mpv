@@ -259,6 +259,12 @@ mp.add_hook("on_load", 10, function ()
                 end
             end
 
+            -- set start and end time
+            if not (json.start_time == nil) then
+                msg.debug("setting start to: " .. json.start_time .. " secs")
+                mp.set_property("file-local-options/start",json.start_time)
+            end
+
             -- for rtmp
             if not (json.play_path == nil) then
                 local rtmp_prop = append_rtmp_prop(nil, "rtmp_tcurl", streamurl)
