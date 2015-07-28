@@ -250,7 +250,7 @@ static int parse_dir(struct pl_parser *p)
 
     struct dirent *ep;
     while ((ep = readdir(dp))) {
-        if (strcmp(ep->d_name, ".") == 0 || strcmp(ep->d_name, "..") == 0)
+        if (ep->d_name[0] == '.')
             continue;
         MP_TARRAY_APPEND(p, files, num_files, talloc_strdup(p, ep->d_name));
     }
