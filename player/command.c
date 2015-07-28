@@ -1784,7 +1784,11 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_GET:
-        *(int *) arg = track ? track->user_tid : -2;
+        if (mpctx->playback_initialized) {
+            *(int *)arg = track ? track->user_tid : -2;
+        } else {
+            *(int *)arg = mpctx->opts->stream_id[order][type];
+        }
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
         if (!track)
