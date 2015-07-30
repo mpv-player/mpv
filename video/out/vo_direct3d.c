@@ -738,7 +738,8 @@ static bool change_d3d_backbuffer(d3d_priv *priv)
                                            D3DADAPTER_DEFAULT,
                                            DEVTYPE, vo_w32_hwnd(priv->vo),
                                            D3DCREATE_SOFTWARE_VERTEXPROCESSING
-                                           | D3DCREATE_FPU_PRESERVE,
+                                           | D3DCREATE_FPU_PRESERVE
+                                           | D3DCREATE_MULTITHREADED,
                                            &present_params, &priv->d3d_device)))
         {
             MP_VERBOSE(priv, "Creating Direct3D device failed.\n");
