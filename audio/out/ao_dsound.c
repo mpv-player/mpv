@@ -227,7 +227,7 @@ static int LoadDirectSound(struct ao *ao)
     struct priv *p = ao->priv;
 
     // initialize directsound
-    p->hdsound_dll = LoadLibrary(L"DSOUND.DLL");
+    p->hdsound_dll = LoadLibraryW(u"DSOUND.DLL");
     if (p->hdsound_dll == NULL) {
         MP_ERR(ao, "cannot load DSOUND.DLL\n");
         return 0;

@@ -84,7 +84,7 @@ static void *w32gpa(const GLubyte *procName)
     void *res = wglGetProcAddress(procName);
     if (res)
         return res;
-    oglmod = GetModuleHandle(L"opengl32.dll");
+    oglmod = GetModuleHandleW(u"opengl32.dll");
     return GetProcAddress(oglmod, procName);
 }
 
@@ -208,7 +208,7 @@ static void create_ctx(void *ptr)
     if (!w32_ctx->context)
         create_context_w32_old(ctx);
 
-    w32_ctx->dwmapi_dll = LoadLibrary(L"Dwmapi.dll");
+    w32_ctx->dwmapi_dll = LoadLibraryW(u"Dwmapi.dll");
     if (w32_ctx->dwmapi_dll)
         w32_ctx->dwmflush = (DwmFlush_t)GetProcAddress(w32_ctx->dwmapi_dll, "DwmFlush");
 

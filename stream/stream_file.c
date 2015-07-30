@@ -198,7 +198,7 @@ static bool check_stream_network(int fd)
     // NtQueryVolumeInformationFile is an internal Windows function. It has
     // been present since Windows XP, however this code should fail gracefully
     // if it's removed from a future version of Windows.
-    HMODULE ntdll = GetModuleHandleW(L"ntdll.dll");
+    HMODULE ntdll = GetModuleHandleW(u"ntdll.dll");
     pNtQueryVolumeInformationFile = (NTSTATUS (NTAPI*)(HANDLE,
         PIO_STATUS_BLOCK, PVOID, ULONG, FS_INFORMATION_CLASS))
         GetProcAddress(ntdll, "NtQueryVolumeInformationFile");

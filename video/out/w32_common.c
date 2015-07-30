@@ -42,7 +42,7 @@
 #include "misc/rendezvous.h"
 #include "talloc.h"
 
-static const WCHAR classname[] = L"mpv";
+static const WCHAR classname[] = u"mpv";
 
 static __thread struct vo_w32_state *w32_thread_context;
 
@@ -1129,7 +1129,7 @@ static void *gui_thread(void *ptr)
         .style = CS_HREDRAW | CS_VREDRAW,
         .lpfnWndProc = WndProc,
         .hInstance = hInstance,
-        .hIcon = LoadIconW(hInstance, L"IDI_ICON1"),
+        .hIcon = LoadIconW(hInstance, u"IDI_ICON1"),
         .hCursor = LoadCursor(NULL, IDC_ARROW),
         .lpszClassName = classname,
     };
