@@ -156,8 +156,8 @@ function add_header(s)
     if o.custom_header and o.custom_header ~= "" then
         s.header = set_ASS(true) .. o.custom_header
     else
-        s.header = string.format([[%s{\\fs%d}{\\fn%s}{\\bord%f}{\\3c&H%s&}{\\1c&H%s&}
-                                 {\\alpha&H%s&}{\\xshad%f}{\\yshad%f}{\\4c&H%s&}]],
+        s.header = string.format("%s{\\fs%d}{\\fn%s}{\\bord%f}{\\3c&H%s&}{\\1c&H%s&}" ..
+                                 "{\\alpha&H%s&}{\\xshad%f}{\\yshad%f}{\\4c&H%s&}",
                         set_ASS(true), o.font_size, o.font, o.border_size,
                         o.border_color, o.font_color, o.alpha, o.shadow_x_offset,
                         o.shadow_y_offset, o.shadow_color)
