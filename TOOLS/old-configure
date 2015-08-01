@@ -823,9 +823,9 @@ test_lua "lua >= 5.1.0 lua < 5.2.0"
 test_lua "lua5.1 >= 5.1.0" # debian
 test_lua "lua51 >= 5.1.0" # OpenBSD
 test_lua "luajit >= 2.0.0"
-test_lua "lua >= 5.2.0"
 test_lua "lua5.2 >= 5.2.0" # debian
 test_lua "lua52 >= 5.2.0" # OpenBSD
+test_lua "lua >= 5.2.0"
 
 test "$_lua" != yes && check_yes_no no LUA
 
@@ -911,7 +911,7 @@ cat > $TMPC << EOF
 /* we didn't bother to add actual config checks for this, or they are
    for platforms not supported by this configure script */
 #define HAVE_BSD_FSTATFS 0
-#define HAVE_LINUX_FSTATFS 0
+#define HAVE_LINUX_FSTATFS 1
 #define HAVE_VDA_AV_VDA_ALLOC_CONTEXT 0
 #define HAVE_VDA_HWACCEL 0
 #define HAVE_VDA_LIBAVCODEC_REFCOUNTING 0
