@@ -36,6 +36,10 @@
 #include <libguess.h>
 #endif
 
+#if HAVE_UCHARDET
+#include <uchardet.h>
+#endif
+
 #if HAVE_ICONV
 #include <iconv.h>
 #endif
@@ -81,6 +85,7 @@ bool mp_charset_requires_guess(const char *user_cp)
     // Note that "utf8" is the UTF-8 codepage, while "utf8:..." specifies UTF-8
     // by default, plus a codepage that is used if the input is not UTF-8.
     return bstrcasecmp0(res[0], "enca") == 0 ||
+           bstrcasecmp0(res[0], "uchardet") == 0 ||
            bstrcasecmp0(res[0], "auto") == 0 ||
            bstrcasecmp0(res[0], "guess") == 0 ||
            (r > 1 && bstrcasecmp0(res[0], "utf-8") == 0) ||
@@ -145,6 +150,35 @@ static const char *libguess_guess(struct mp_log *log, bstr buf,
 }
 #endif
 
+#if HAVE_UCHARDET
+static const char *mp_uchardet(void *talloc_ctx, struct mp_log *log, bstr buf)
+{
+    uchardet_t det = uchardet_new();
+    if (!det)
+        return NULL;
+    if (uchardet_handle_data(det, buf.start, buf.len) != 0) {
+        uchardet_delete(det);
+        return NULL;
+    }
+    uchardet_data_end(det);
+    char *res = talloc_strdup(talloc_ctx, uchardet_get_charset(det));
+    if (res && !res[0])
+        res = NULL;
+    if (res) {
+        iconv_t icdsc = iconv_open("UTF-8", res);
+        if (icdsc == (iconv_t)(-1)) {
+            mp_warn(log, "Charset detected as %s, but not supported by iconv.\n",
+                    res);
+            res = NULL;
+        } else {
+            iconv_close(icdsc);
+        }
+    }
+    uchardet_delete(det);
+    return res;
+}
+#endif
+
 // Runs charset auto-detection on the input buffer, and returns the result.
 // If auto-detection fails, NULL is returned.
 // If user_cp doesn't refer to any known auto-detection (for example because
@@ -196,6 +230,11 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log, bstr buf,
     if (bstrcasecmp0(type, "guess") == 0)
         res = libguess_guess(log, buf, lang);
 #endif
+#if HAVE_UCHARDET
+    if (bstrcasecmp0(type, "uchardet") == 0)
+        res = mp_uchardet(talloc_ctx, log, buf);
+#endif
+
     if (bstrcasecmp0(type, "utf8") == 0 || bstrcasecmp0(type, "utf-8") == 0) {
         if (!fallback)
             fallback = params[1].start; // must be already 0-terminated

@@ -176,6 +176,7 @@ options_state_machine() {
     opt_yes_no _dvdread     "libdvdread"
     opt_yes_no _dvdnav      "libdvdnav"
     opt_yes_no _enca        "ENCA charset oracle library"
+    opt_yes_no _uchardet    "uchardet charset detection library"
     opt_yes_no _libass      "subtitle rendering with libass"
     opt_yes_no _libavdevice "libavdevice demuxers"
     opt_yes_no _libavfilter "libavfilter"
@@ -732,6 +733,7 @@ echo "LIBASS_OSD = $_libass" >> $CONFIG_MAK
 echo "DUMMY_OSD = $_dummy_osd" >> $CONFIG_MAK
 
 check_pkg_config "ENCA" $_enca ENCA 'enca'
+check_pkg_config "uchardet" $_uchardet UCHARDET 'uchardet'
 
 check_pkg_config "zlib" auto ZLIB 'zlib'
 test $(defretval) = no && die "Unable to find development files for zlib."

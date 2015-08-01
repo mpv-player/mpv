@@ -1491,6 +1491,12 @@ Subtitles
     mode. Use ``--sub-codepage=guess:help`` to get a list of
     languages subject to the same caveat as with ENCA above.
 
+    If the player was compiled with uchardet support you can use it with:
+
+    ``--sub-codepage=uchardet``
+
+    This mode doesn't take language or fallback codepage.
+
 ``--sub-fix-timing``, ``--no-sub-fix-timing``
     By default, external text subtitles are preprocessed to remove minor gaps
     or overlaps between subtitles (if the difference is smaller than 200 ms,
