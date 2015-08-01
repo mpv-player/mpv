@@ -46,9 +46,7 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .png_compression = 7,
     .png_filter = 5,
     .jpeg_quality = 90,
-    .jpeg_optimize = 100,
     .jpeg_smooth = 0,
-    .jpeg_baseline = 1,
     .jpeg_source_chroma = 1,
     .tag_csp = 0,
 };
@@ -58,9 +56,7 @@ const struct image_writer_opts image_writer_opts_defaults = {
 const struct m_sub_options image_writer_conf = {
     .opts = (const m_option_t[]) {
         OPT_INTRANGE("jpeg-quality", jpeg_quality, 0, 0, 100),
-        OPT_INTRANGE("jpeg-optimize", jpeg_optimize, 0, 0, 100),
         OPT_INTRANGE("jpeg-smooth", jpeg_smooth, 0, 0, 100),
-        OPT_FLAG("jpeg-baseline", jpeg_baseline, 0),
         OPT_FLAG("jpeg-source-chroma", jpeg_source_chroma, 0),
         OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
         OPT_INTRANGE("png-filter", png_filter, 0, 0, 5),
@@ -193,8 +189,7 @@ static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     cinfo.JFIF_minor_version = 2;
 
     jpeg_set_defaults(&cinfo);
-    jpeg_set_quality(&cinfo, ctx->opts->jpeg_quality, ctx->opts->jpeg_baseline);
-    cinfo.optimize_coding = ctx->opts->jpeg_optimize;
+    jpeg_set_quality(&cinfo, ctx->opts->jpeg_quality, 0);
     cinfo.smoothing_factor = ctx->opts->jpeg_smooth;
 
     if (ctx->opts->jpeg_source_chroma) {
