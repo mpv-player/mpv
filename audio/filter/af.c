@@ -31,7 +31,6 @@
 #include "af.h"
 
 // Static list of filters
-extern const struct af_info af_info_dummy;
 extern const struct af_info af_info_delay;
 extern const struct af_info af_info_channels;
 extern const struct af_info af_info_format;
@@ -58,7 +57,6 @@ extern const struct af_info af_info_lavfi;
 extern const struct af_info af_info_rubberband;
 
 static const struct af_info *const filter_list[] = {
-    &af_info_dummy,
     &af_info_delay,
     &af_info_channels,
     &af_info_format,
