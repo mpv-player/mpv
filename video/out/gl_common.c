@@ -377,7 +377,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
     mp_dbg(log, "Combined OpenGL extensions string:\n%s\n", gl->extensions);
 
-    for (int n = 0; n < sizeof(gl_functions) / sizeof(gl_functions[0]); n++) {
+    for (int n = 0; n < MP_ARRAY_SIZE(gl_functions); n++) {
         const struct gl_functions *section = &gl_functions[n];
         int version = gl->es ? gl->es : gl->version;
         int ver_core = gl->es ? section->ver_es_core : section->ver_core;
@@ -414,10 +414,8 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
                         section->extension ? section->extension : "builtin",
                         MPGL_VER_GET_MAJOR(ver_core),
                         MPGL_VER_GET_MINOR(ver_core));
-                if (must_exist) {
-                    gl->mpgl_caps = 0;
+                if (must_exist)
                     goto error;
-                }
                 break;
             }
             assert(i < MAX_FN_COUNT);
