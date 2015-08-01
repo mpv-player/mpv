@@ -34,7 +34,7 @@
 #include "osdep/io.h"
 #include "osdep/timer.h"
 
-#define MIXER_DEFAULT_LABEL u"mpv - video player"
+#define MIXER_DEFAULT_LABEL L"mpv - video player"
 
 DEFINE_PROPERTYKEY(mp_PKEY_Device_FriendlyName,
                    0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
@@ -190,7 +190,7 @@ bool wasapi_fill_VistaBlob(wasapi_state *state)
 {
     if (!state)
         goto exit_label;
-    state->VistaBlob.hAvrt = LoadLibraryW(u"avrt.dll");
+    state->VistaBlob.hAvrt = LoadLibraryW(L"avrt.dll");
     if (!state->VistaBlob.hAvrt)
         goto exit_label;
 
@@ -612,7 +612,7 @@ exit_label:
 }
 
 static HRESULT init_session_display(struct wasapi_state *state) {
-    WCHAR path[MAX_PATH+12] = {0};
+    wchar_t path[MAX_PATH+12] = {0};
 
     HRESULT hr = IAudioClient_GetService(state->pAudioClient,
                                          &IID_IAudioSessionControl,
@@ -620,7 +620,7 @@ static HRESULT init_session_display(struct wasapi_state *state) {
     EXIT_ON_ERROR(hr);
 
     GetModuleFileNameW(NULL, path, MAX_PATH);
-    lstrcatW(path, u",-IDI_ICON1");
+    lstrcatW(path, L",-IDI_ICON1");
 
     hr = IAudioSessionControl_SetDisplayName(state->pSessionControl, MIXER_DEFAULT_LABEL, NULL);
     EXIT_ON_ERROR(hr);
@@ -725,7 +725,7 @@ reinit:
 
     if (state->VistaBlob.hAvrt) {
         state->hTask =
-            state->VistaBlob.pAvSetMmThreadCharacteristicsW(u"Pro Audio", &state->taskIndex);
+            state->VistaBlob.pAvSetMmThreadCharacteristicsW(L"Pro Audio", &state->taskIndex);
     }
 
     MP_VERBOSE(state, "Format fixed. Using %lld byte buffer block size\n",

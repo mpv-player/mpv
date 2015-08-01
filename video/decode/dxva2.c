@@ -355,7 +355,7 @@ static int create_device(struct lavc_ctx *s)
         }
     }
 
-    ctx->d3dlib = LoadLibraryW(u"d3d9.dll");
+    ctx->d3dlib = LoadLibrary(L"d3d9.dll");
     if (!ctx->d3dlib) {
         MP_ERR(ctx, "Failed to load D3D9 library\n");
         goto fail;
@@ -423,7 +423,7 @@ static int dxva2_init(struct lavc_ctx *s)
 
     ctx->deviceHandle = INVALID_HANDLE_VALUE;
 
-    ctx->dxva2lib = LoadLibraryW(u"dxva2.dll");
+    ctx->dxva2lib = LoadLibrary(L"dxva2.dll");
     if (!ctx->dxva2lib) {
         MP_ERR(ctx, "Failed to load DXVA2 library\n");
         goto fail;

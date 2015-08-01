@@ -42,7 +42,7 @@
 #include "misc/rendezvous.h"
 #include "talloc.h"
 
-static const WCHAR classname[] = u"mpv";
+static const wchar_t classname[] = L"mpv";
 
 static __thread struct vo_w32_state *w32_thread_context;
 
@@ -237,7 +237,7 @@ static HRESULT STDMETHODCALLTYPE DropTarget_Drop(IDropTarget* This,
             UINT nrecvd_files = 0;
             for (UINT i = 0; i < numFiles; i++) {
                 UINT len = DragQueryFileW(hDrop, i, NULL, 0);
-                WCHAR* buf = talloc_array(NULL, WCHAR, len + 1);
+                wchar_t* buf = talloc_array(NULL, wchar_t, len + 1);
 
                 if (DragQueryFileW(hDrop, i, buf, len + 1) == len) {
                     char* fname = mp_to_utf8(files, buf);
@@ -400,12 +400,12 @@ static int mod_state(struct vo_w32_state *w32)
     return res;
 }
 
-static int decode_surrogate_pair(WCHAR lead, WCHAR trail)
+static int decode_surrogate_pair(wchar_t lead, wchar_t trail)
 {
     return 0x10000 + (((lead & 0x3ff) << 10) | (trail & 0x3ff));
 }
 
-static int decode_utf16(struct vo_w32_state *w32, WCHAR c)
+static int decode_utf16(struct vo_w32_state *w32, wchar_t c)
 {
     // Decode UTF-16, keeping state in w32->high_surrogate
     if (IS_HIGH_SURROGATE(c)) {
@@ -435,7 +435,7 @@ static void clear_keyboard_buffer(void)
     static const UINT vkey = VK_DECIMAL;
     static const BYTE keys[256] = { 0 };
     UINT scancode = MapVirtualKey(vkey, MAPVK_VK_TO_VSC);
-    WCHAR buf[10];
+    wchar_t buf[10];
     int ret = 0;
 
     // Use the method suggested by Michael Kaplan to clear any pending dead
@@ -453,7 +453,7 @@ static int to_unicode(UINT vkey, UINT scancode, const BYTE keys[256])
 
     // Make the buffer 10 code units long to be safe, same as here:
     // https://web.archive.org/web/20101013215215/http://blogs.msdn.com/b/michkap/archive/2006/03/24/559169.aspx
-    WCHAR buf[10] = { 0 };
+    wchar_t buf[10] = { 0 };
 
     // Dead keys aren't useful for key shortcuts, so clear the keyboard state
     clear_keyboard_buffer();
@@ -541,7 +541,7 @@ static void handle_key_up(struct vo_w32_state *w32, UINT vkey, UINT scancode)
     }
 }
 
-static bool handle_char(struct vo_w32_state *w32, WCHAR wc)
+static bool handle_char(struct vo_w32_state *w32, wchar_t wc)
 {
     int c = decode_utf16(w32, wc);
 
@@ -1129,7 +1129,7 @@ static void *gui_thread(void *ptr)
         .style = CS_HREDRAW | CS_VREDRAW,
         .lpfnWndProc = WndProc,
         .hInstance = hInstance,
-        .hIcon = LoadIconW(hInstance, u"IDI_ICON1"),
+        .hIcon = LoadIconW(hInstance, L"IDI_ICON1"),
         .hCursor = LoadCursor(NULL, IDC_ARROW),
         .lpszClassName = classname,
     };
@@ -1325,7 +1325,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         SetThreadExecutionState(ES_CONTINUOUS);
         return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE: {
-        WCHAR *title = mp_from_utf8(NULL, (char *)arg);
+        wchar_t *title = mp_from_utf8(NULL, (char *)arg);
         SetWindowTextW(w32->window, title);
         talloc_free(title);
         return VO_TRUE;

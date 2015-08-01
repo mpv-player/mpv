@@ -49,9 +49,9 @@ int mp_make_cloexec_pipe(int pipes[2]);
 int mp_make_wakeup_pipe(int pipes[2]);
 
 #ifdef _WIN32
-#include <windows.h>
-WCHAR *mp_from_utf8(void *talloc_ctx, const char *s);
-char *mp_to_utf8(void *talloc_ctx, const WCHAR *s);
+#include <wchar.h>
+wchar_t *mp_from_utf8(void *talloc_ctx, const char *s);
+char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 #endif
 
 #ifdef __CYGWIN__

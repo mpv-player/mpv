@@ -95,17 +95,17 @@ int mp_make_wakeup_pipe(int pipes[2])
 //copied and modified from libav
 //http://git.libav.org/?p=libav.git;a=blob;f=libavformat/os_support.c;h=a0fcd6c9ba2be4b0dbcc476f6c53587345cc1152;hb=HEADl30
 
-WCHAR *mp_from_utf8(void *talloc_ctx, const char *s)
+wchar_t *mp_from_utf8(void *talloc_ctx, const char *s)
 {
     int count = MultiByteToWideChar(CP_UTF8, 0, s, -1, NULL, 0);
     if (count <= 0)
         abort();
-    WCHAR *ret = talloc_array(talloc_ctx, WCHAR, count);
+    wchar_t *ret = talloc_array(talloc_ctx, wchar_t, count);
     MultiByteToWideChar(CP_UTF8, 0, s, -1, ret, count);
     return ret;
 }
 
-char *mp_to_utf8(void *talloc_ctx, const WCHAR *s)
+char *mp_to_utf8(void *talloc_ctx, const wchar_t *s)
 {
     int count = WideCharToMultiByte(CP_UTF8, 0, s, -1, NULL, 0, NULL, NULL);
     if (count <= 0)
@@ -141,7 +141,7 @@ static void copy_stat(struct mp_stat *dst, struct _stat64 *src)
 int mp_stat(const char *path, struct mp_stat *buf)
 {
     struct _stat64 buf_;
-    WCHAR *wpath = mp_from_utf8(NULL, path);
+    wchar_t *wpath = mp_from_utf8(NULL, path);
     int res = _wstat64(wpath, &buf_);
     talloc_free(wpath);
     copy_stat(buf, &buf_);
@@ -237,7 +237,7 @@ int mp_open(const char *filename, int oflag, ...)
         mode = va_arg(va, int);
         va_end(va);
     }
-    WCHAR *wpath = mp_from_utf8(NULL, filename);
+    wchar_t *wpath = mp_from_utf8(NULL, filename);
     int res = _wopen(wpath, oflag, mode);
     talloc_free(wpath);
     return res;
@@ -250,16 +250,16 @@ int mp_creat(const char *filename, int mode)
 
 FILE *mp_fopen(const char *filename, const char *mode)
 {
-    WCHAR *wpath = mp_from_utf8(NULL, filename);
-    WCHAR *wmode = mp_from_utf8(wpath, mode);
+    wchar_t *wpath = mp_from_utf8(NULL, filename);
+    wchar_t *wmode = mp_from_utf8(wpath, mode);
     FILE *res = _wfopen(wpath, wmode);
     talloc_free(wpath);
     return res;
 }
 
 // Windows' MAX_PATH/PATH_MAX/FILENAME_MAX is fixed to 260, but this limit
-// applies to unicode paths encoded with WCHAR (2 bytes). The UTF-8
-// version could end up bigger in memory. In the worst case each WCHAR is
+// applies to unicode paths encoded with wchar_t (2 bytes on Windows). The UTF-8
+// version could end up bigger in memory. In the worst case each wchar_t is
 // encoded to 3 bytes in UTF-8, so in the worst case we have:
 //      wcslen(wpath) * 3 <= strlen(utf8path)
 // Thus we need MP_PATH_MAX as the UTF-8/char version of PATH_MAX.
@@ -273,7 +273,7 @@ struct mp_dir {
     union {
         struct dirent dirent;
         // dirent has space only for FILENAME_MAX bytes. _wdirent has space for
-        // FILENAME_MAX WCHAR, which might end up bigger as UTF-8 in some
+        // FILENAME_MAX wchar_t, which might end up bigger as UTF-8 in some
         // cases. Guarantee we can always hold _wdirent.d_name converted to
         // UTF-8 (see MP_PATH_MAX).
         // This works because dirent.d_name is the last member of dirent.
@@ -283,7 +283,7 @@ struct mp_dir {
 
 DIR* mp_opendir(const char *path)
 {
-    WCHAR *wpath = mp_from_utf8(NULL, path);
+    wchar_t *wpath = mp_from_utf8(NULL, path);
     _WDIR *wdir = _wopendir(wpath);
     talloc_free(wpath);
     if (!wdir)
@@ -321,7 +321,7 @@ int mp_closedir(DIR *dir)
 
 int mp_mkdir(const char *path, int mode)
 {
-    WCHAR *wpath = mp_from_utf8(NULL, path);
+    wchar_t *wpath = mp_from_utf8(NULL, path);
     int res = _wmkdir(wpath);
     talloc_free(wpath);
     return res;
@@ -330,10 +330,10 @@ int mp_mkdir(const char *path, int mode)
 FILE *mp_tmpfile(void)
 {
     // Reserve a file name in the format %TMP%\mpvXXXX.TMP
-    WCHAR tmp_path[MAX_PATH + 1];
+    wchar_t tmp_path[MAX_PATH + 1];
     if (!GetTempPathW(MAX_PATH + 1, tmp_path))
         return NULL;
-    WCHAR tmp_name[MAX_PATH + 1];
+    wchar_t tmp_name[MAX_PATH + 1];
     if (!GetTempFileNameW(tmp_path, L"mpv", 0, tmp_name))
         return NULL;
 
@@ -379,7 +379,7 @@ static void init_getenv(void)
 {
     if (utf8_environ_ctx)
         return;
-    WCHAR *wenv = GetEnvironmentStringsW();
+    wchar_t *wenv = GetEnvironmentStringsW();
     if (!wenv)
         return;
     utf8_environ_ctx = talloc_new(NULL);

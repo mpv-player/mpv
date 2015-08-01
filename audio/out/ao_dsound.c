@@ -174,7 +174,7 @@ static BOOL CALLBACK DirectSoundEnum(LPGUID guid, LPCSTR desc, LPCSTR module,
     }
     char *guidstr = talloc_strdup(NULL, "");
     if (guid) {
-        WCHAR guidwstr[80] = {0};
+        wchar_t guidwstr[80] = {0};
         StringFromGUID2(guid, guidwstr, MP_ARRAY_SIZE(guidwstr));
         char *nstr = mp_to_utf8(NULL, guidwstr);
         if (nstr) {
@@ -227,7 +227,7 @@ static int LoadDirectSound(struct ao *ao)
     struct priv *p = ao->priv;
 
     // initialize directsound
-    p->hdsound_dll = LoadLibraryW(u"DSOUND.DLL");
+    p->hdsound_dll = LoadLibrary(L"DSOUND.DLL");
     if (p->hdsound_dll == NULL) {
         MP_ERR(ao, "cannot load DSOUND.DLL\n");
         return 0;

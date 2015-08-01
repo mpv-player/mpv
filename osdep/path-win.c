@@ -31,7 +31,7 @@ static char *portable_path;
 
 static char *mp_get_win_exe_dir(void *talloc_ctx)
 {
-    WCHAR w_exedir[MAX_PATH + 1] = {0};
+    wchar_t w_exedir[MAX_PATH + 1] = {0};
 
     int len = (int)GetModuleFileNameW(NULL, w_exedir, MAX_PATH);
     int imax = 0;
@@ -54,7 +54,7 @@ static char *mp_get_win_exe_subdir(void *ta_ctx, const char *name)
 
 static char *mp_get_win_shell_dir(void *talloc_ctx, int folder)
 {
-    WCHAR w_appdir[MAX_PATH + 1] = {0};
+    wchar_t w_appdir[MAX_PATH + 1] = {0};
 
     if (SHGetFolderPathW(NULL, folder|CSIDL_FLAG_CREATE, NULL,
         SHGFP_TYPE_CURRENT, w_appdir) != S_OK)

@@ -112,7 +112,7 @@ static int create_overlapped_pipe(HANDLE *read, HANDLE *write)
     unsigned long id = atomic_fetch_add(&counter, 1);
     unsigned pid = GetCurrentProcessId();
     wchar_t buf[36];
-    swprintf(buf, sizeof(buf), u"\\\\.\\pipe\\mpv-anon-%08x-%08lx", pid, id);
+    swprintf(buf, sizeof(buf), L"\\\\.\\pipe\\mpv-anon-%08x-%08lx", pid, id);
 
     // The function for creating anonymous pipes (CreatePipe) can't create
     // overlapped pipes, so instead, use a named pipe with a unique name

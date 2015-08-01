@@ -67,7 +67,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDeviceStateChanged(
     if (change->is_hotplug) {
         MP_VERBOSE(ao, "OnDeviceStateChanged triggered: sending hotplug event\n");
         ao_hotplug_event(ao);
-    } else if (pwstrDeviceId && !lstrcmpW(pwstrDeviceId, change->monitored)) {
+    } else if (pwstrDeviceId && !wcscmp(pwstrDeviceId, change->monitored)) {
         switch (dwNewState) {
         case DEVICE_STATE_DISABLED:
         case DEVICE_STATE_NOTPRESENT:
@@ -110,7 +110,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDeviceRemoved(
     if (change->is_hotplug) {
         MP_VERBOSE(ao, "OnDeviceRemoved triggered: sending hotplug event\n");
         ao_hotplug_event(ao);
-    } else if (pwstrDeviceId && !lstrcmpW(pwstrDeviceId, change->monitored)) {
+    } else if (pwstrDeviceId && !wcscmp(pwstrDeviceId, change->monitored)) {
         MP_VERBOSE(ao, "OnDeviceRemoved triggered for device %S: "
                    "requesting ao reload\n", pwstrDeviceId);
         ao_request_reload(ao);
@@ -144,7 +144,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnDefaultDeviceChanged(
         }
 
         /* don't reload if already on the new default */
-        if (pwstrDeviceId && !lstrcmpW(pwstrDeviceId, change->monitored)) {
+        if (pwstrDeviceId && !wcscmp(pwstrDeviceId, change->monitored)) {
             MP_VERBOSE(ao, "OnDefaultDeviceChanged triggered: "
                        "already using default device, no reload required\n");
             return S_OK;
@@ -167,7 +167,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnPropertyValueChanged(
     struct ao *ao = change->ao;
 
     if (!change->is_hotplug && pwstrDeviceId &&
-        !lstrcmpW(pwstrDeviceId, change->monitored))
+        !wcscmp(pwstrDeviceId, change->monitored))
     {
         MP_VERBOSE(ao, "OnPropertyValueChanged triggered on device %S\n",
                    pwstrDeviceId);
