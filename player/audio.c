@@ -121,9 +121,6 @@ void set_playback_speed(struct MPContext *mpctx, double new_speed)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    // Adjust time until next frame flip for nosound mode
-    mpctx->time_frame *= opts->playback_speed / new_speed;
-
     opts->playback_speed = new_speed;
 
     if (!mpctx->d_audio || mpctx->d_audio->afilter->initialized < 1)
