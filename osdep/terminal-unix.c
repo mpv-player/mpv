@@ -391,8 +391,7 @@ static void *terminal_thread(void *ptr)
             {.events = POLLIN, .fd = death_pipe[0]},
             {.events = POLLIN, .fd = STDIN_FILENO},
         };
-        // Wait with some timeout, so we can call getch2_poll() frequently.
-        poll(fds, stdin_ok ? 2 : 1, 1000);
+        poll(fds, stdin_ok ? 2 : 1, -1);
         if (fds[0].revents)
             break;
         if (fds[1].revents)
