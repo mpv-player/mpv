@@ -150,8 +150,9 @@ static const char *libguess_guess(struct mp_log *log, bstr buf,
 // If user_cp doesn't refer to any known auto-detection (for example because
 // it's a real iconv codepage), user_cp is returned without even looking at
 // the buf data.
-const char *mp_charset_guess(struct mp_log *log, bstr buf, const char *user_cp,
-                             int flags)
+// The return value may (but doesn't have to) be allocated under talloc_ctx.
+const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log, bstr buf,
+                             const char *user_cp, int flags)
 {
     if (!mp_charset_requires_guess(user_cp))
         return user_cp;
@@ -225,8 +226,11 @@ const char *mp_charset_guess(struct mp_log *log, bstr buf, const char *user_cp,
 bstr mp_charset_guess_and_conv_to_utf8(struct mp_log *log, bstr buf,
                                        const char *user_cp, int flags)
 {
-    return mp_iconv_to_utf8(log, buf, mp_charset_guess(log, buf, user_cp, flags),
-                            flags);
+    void *tmp = talloc_new(NULL);
+    const char *cp = mp_charset_guess(log, tmp, buf, user_cp, flags);
+    bstr res = mp_iconv_to_utf8(log, buf, cp, flags);
+    talloc_free(tmp);
+    return res;
 }
 
 // Use iconv to convert buf to UTF-8.
