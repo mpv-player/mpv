@@ -783,6 +783,28 @@ static void init_vo(struct MPContext *mpctx)
     mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }
 
+// Return the next frame duration as stored in the file.
+// frame=0 means the current frame, 1 the frame after that etc.
+// Can return -1, though usually will return a fallback if frame unavailable.
+static double get_frame_duration(struct MPContext *mpctx, int frame)
+{
+    struct MPOpts *opts = mpctx->opts;
+    struct vo *vo = mpctx->video_out;
+
+    double diff = -1;
+    if (frame + 2 <= mpctx->num_next_frames) {
+        double vpts0 = mpctx->next_frames[frame]->pts;
+        double vpts1 = mpctx->next_frames[frame + 1]->pts;
+        if (vpts0 != MP_NOPTS_VALUE && vpts1 != MP_NOPTS_VALUE)
+            diff = vpts1 - vpts0;
+    }
+    if (diff < 0 && mpctx->d_video->fps > 0)
+        diff = 1.0 / mpctx->d_video->fps; // fallback to demuxer-reported fps
+    if (opts->untimed || vo->driver->untimed)
+        diff = -1; // disable frame dropping and aspects of frame timing
+    return diff;
+}
+
 void write_video(struct MPContext *mpctx, double endpts)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -870,17 +892,7 @@ void write_video(struct MPContext *mpctx, double endpts)
         dummy.frames[n] = mpctx->next_frames[n];
     struct vo_frame *frame = vo_frame_ref(&dummy);
 
-    double diff = -1;
-    double vpts0 = mpctx->next_frames[0]->pts;
-    double vpts1 = MP_NOPTS_VALUE;
-    if (mpctx->num_next_frames >= 2)
-        vpts1 = mpctx->next_frames[1]->pts;
-    if (vpts0 != MP_NOPTS_VALUE && vpts1 != MP_NOPTS_VALUE)
-        diff = vpts1 - vpts0;
-    if (diff < 0 && mpctx->d_video->fps > 0)
-        diff = 1.0 / mpctx->d_video->fps; // fallback to demuxer-reported fps
-    if (opts->untimed || vo->driver->untimed)
-        diff = -1; // disable frame dropping and aspects of frame timing
+    double diff = get_frame_duration(mpctx, 0);
     if (diff >= 0) {
         // expected A/V sync correction is ignored
         diff /= opts->playback_speed;
