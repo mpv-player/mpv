@@ -677,7 +677,9 @@ static bool render_frame(struct vo *vo)
     // frame currently drawn, while in->current_frame is the potentially next.)
     in->current_frame->repeat = true;
 
-    if (!in->dropped_frame) {
+    if (in->dropped_frame) {
+        in->drop_count += 1;
+    } else {
         in->rendering = true;
         in->hasframe_rendered = true;
         int64_t prev_drop_count = vo->in->drop_count;
@@ -714,9 +716,7 @@ static bool render_frame(struct vo *vo)
         in->rendering = false;
     }
 
-    if (in->dropped_frame) {
-        in->drop_count += 1;
-    } else {
+    if (!in->dropped_frame) {
         vo->want_redraw = false;
         in->want_redraw = false;
         in->request_redraw = false;
