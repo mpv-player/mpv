@@ -266,7 +266,7 @@ bstr mp_charset_guess_and_conv_to_utf8(struct mp_log *log, bstr buf,
                                        const char *user_cp, int flags)
 {
     void *tmp = talloc_new(NULL);
-    const char *cp = mp_charset_guess(log, tmp, buf, user_cp, flags);
+    const char *cp = mp_charset_guess(tmp, log, buf, user_cp, flags);
     bstr res = mp_iconv_to_utf8(log, buf, cp, flags);
     talloc_free(tmp);
     return res;
