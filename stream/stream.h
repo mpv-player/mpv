@@ -103,8 +103,6 @@ enum stream_ctrl {
     // Optical discs
     STREAM_CTRL_GET_TIME_LENGTH,
     STREAM_CTRL_GET_DVD_INFO,
-    STREAM_CTRL_GET_NAV_EVENT,          // struct mp_nav_event**
-    STREAM_CTRL_NAV_CMD,                // struct mp_nav_cmd*
     STREAM_CTRL_GET_DISC_NAME,
     STREAM_CTRL_GET_NUM_CHAPTERS,
     STREAM_CTRL_GET_CURRENT_TIME,
