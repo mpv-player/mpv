@@ -594,18 +594,15 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     if (audio_eof && !opts->gapless_audio)
         playflags |= AOPLAY_FINAL_CHUNK;
 
-    if (mpctx->paused)
-        playsize = 0;
-
     struct mp_audio data;
     mp_audio_buffer_peek(mpctx->ao_buffer, &data);
-    data.samples = MPMIN(data.samples, playsize);
+    data.samples = MPMIN(data.samples, mpctx->paused ? 0 : playsize);
     int played = write_to_ao(mpctx, &data, playflags);
     assert(played >= 0 && played <= data.samples);
     mp_audio_buffer_skip(mpctx->ao_buffer, played);
 
     mpctx->audio_status = STATUS_PLAYING;
-    if (audio_eof && !mp_audio_buffer_samples(mpctx->ao_buffer)) {
+    if (audio_eof && !playsize) {
         mpctx->audio_status = STATUS_DRAINING;
         // Wait until the AO has played all queued data. In the gapless case,
         // we trigger EOF immediately, and let it play asynchronously.
