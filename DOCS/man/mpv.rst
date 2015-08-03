@@ -118,10 +118,6 @@ o (also P)
 O
     Toggle OSD states between normal and playback time/duration.
 
-d
-    Toggle frame dropping states: none / skip display / skip decoding (see
-    ``--framedrop``).
-
 v
     Toggle subtitle visibility.
 
@@ -175,7 +171,7 @@ Shift+PGUP and Shift+PGDWN
     Seek backward or forward by 10 minutes. (This used to be mapped to
     PGUP/PGDWN without Shift.)
 
-D
+d
     Activate/deactivate deinterlacer.
 
 A
