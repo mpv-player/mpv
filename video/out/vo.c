@@ -762,7 +762,7 @@ static void do_redraw(struct vo *vo)
 
     if (vo->driver->draw_frame) {
         vo->driver->draw_frame(vo, frame);
-    } else if ((!full_redraw || vo->driver->control(vo, VOCTRL_REDRAW_FRAME, NULL) < 1)
+    } else if ((full_redraw || vo->driver->control(vo, VOCTRL_REDRAW_FRAME, NULL) < 1)
                && frame->current)
     {
         vo->driver->draw_image(vo, mp_image_new_ref(frame->current));
