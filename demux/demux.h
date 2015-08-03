@@ -169,7 +169,12 @@ struct demuxer_params {
     int matroska_wanted_segment;
     bool *matroska_was_valid;
     bool expect_subtitle;
-    bool disable_cache; // demux_open_url() only
+    // -- demux_open_url() only
+    int stream_flags;
+    bool allow_capture;
+    bool disable_cache;
+    // result
+    bool demuxer_failed;
 };
 
 typedef struct demuxer {

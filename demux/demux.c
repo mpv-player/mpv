@@ -1077,14 +1077,22 @@ struct demuxer *demux_open_url(const char *url,
                                 struct mpv_global *global)
 {
     struct MPOpts *opts = global->opts;
-    struct stream *s = stream_create(url, STREAM_READ, cancel, global);
+    struct demuxer_params dummy = {0};
+    if (!params)
+        params = &dummy;
+    struct stream *s = stream_create(url, STREAM_READ | params->stream_flags,
+                                     cancel, global);
     if (!s)
         return NULL;
-    if (!(params && params->disable_cache))
+    if (params->allow_capture)
+        stream_set_capture_file(s, opts->stream_capture);
+    if (!params->disable_cache)
         stream_enable_cache(&s, &opts->stream_cache);
     struct demuxer *d = demux_open(s, params, global);
-    if (!d)
+    if (!d) {
+        params->demuxer_failed = true;
         free_stream(s);
+    }
     return d;
 }
 
