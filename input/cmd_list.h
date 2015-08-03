@@ -80,8 +80,6 @@ enum mp_command_type {
     MP_CMD_ENABLE_INPUT_SECTION,
     MP_CMD_DISABLE_INPUT_SECTION,
 
-    MP_CMD_DISCNAV,
-
     MP_CMD_AB_LOOP,
 
     MP_CMD_DROP_BUFFERS,

@@ -205,7 +205,6 @@ SOURCES = audio/audio.c \
           player/client.c \
           player/configfiles.c \
           player/command.c \
-          player/discnav.c \
           player/loadfile.c \
           player/main.c \
           player/misc.c \

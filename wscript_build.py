@@ -214,7 +214,6 @@ def build(ctx):
         ( "player/client.c" ),
         ( "player/command.c" ),
         ( "player/configfiles.c" ),
-        ( "player/discnav.c" ),
         ( "player/loadfile.c" ),
         ( "player/main.c" ),
         ( "player/misc.c" ),

@@ -224,14 +224,6 @@ void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs)
     pthread_mutex_unlock(&osd->lock);
 }
 
-void osd_set_nav_highlight(struct osd_state *osd, void *priv)
-{
-    pthread_mutex_lock(&osd->lock);
-    osd->objs[OSDTYPE_NAV_HIGHLIGHT]->highlight_priv = priv;
-    osd_changed_unlocked(osd, OSDTYPE_NAV_HIGHLIGHT);
-    pthread_mutex_unlock(&osd->lock);
-}
-
 static void render_object(struct osd_state *osd, struct osd_object *obj,
                           struct mp_osd_res res, double video_pts,
                           const bool sub_formats[SUBBITMAP_COUNT],
@@ -265,9 +257,6 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
             *out_imgs = *obj->external2;
             obj->external2->change_id = 0;
         }
-    } else if (obj->type == OSDTYPE_NAV_HIGHLIGHT) {
-        if (obj->highlight_priv)
-            mp_nav_get_highlight(obj->highlight_priv, obj->vo_res, out_imgs);
     } else {
         osd_object_get_bitmaps(osd, obj, out_imgs);
     }

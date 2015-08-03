@@ -1101,9 +1101,6 @@ reopen_file:
     if (!mpctx->stream)
         goto terminate_playback;
 
-    // Must be called before enabling cache.
-    mp_nav_init(mpctx);
-
     stream_enable_cache(&mpctx->stream, &opts->stream_cache);
 
     mp_notify(mpctx, MP_EVENT_CHANGE_ALL, NULL);
@@ -1112,8 +1109,6 @@ reopen_file:
         goto terminate_playback;
 
     stream_set_capture_file(mpctx->stream, opts->stream_capture);
-
-    mp_nav_reset(mpctx);
 
     open_demux_reentrant(mpctx);
     if (!mpctx->master_demuxer) {
@@ -1250,8 +1245,6 @@ reopen_file:
 terminate_playback:
 
     process_unload_hooks(mpctx);
-
-    mp_nav_destroy(mpctx);
 
     if (mpctx->stop_play == KEEP_PLAYING)
         mpctx->stop_play = AT_END_OF_FILE;

@@ -361,9 +361,6 @@ static int d_control(demuxer_t *demuxer, int cmd, void *arg)
     case DEMUXER_CTRL_SWITCHED_TRACKS:
         reselect_streams(demuxer);
         return DEMUXER_CTRL_OK;
-    case DEMUXER_CTRL_GET_NAV_EVENT:
-        return stream_control(demuxer->stream, STREAM_CTRL_GET_NAV_EVENT, arg)
-               == STREAM_OK ? DEMUXER_CTRL_OK : DEMUXER_CTRL_DONTKNOW;
     }
     return demux_control(p->slave, cmd, arg);
 }

@@ -28,9 +28,6 @@ struct osd_object {
     // OSDTYPE_EXTERNAL2
     struct sub_bitmaps *external2;
 
-    // OSDTYPE_NAV_HIGHLIGHT
-    void *highlight_priv;
-
     // caches for OSD conversion (internal to render_object())
     struct osd_conv_cache *cache[OSD_CONV_CACHE_MAX];
     struct sub_bitmaps cached;

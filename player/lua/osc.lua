@@ -1975,15 +1975,6 @@ mp.observe_property("idle", "bool",
 mp.observe_property("pause", "bool", pause_state)
 mp.observe_property("cache-idle", "bool", cache_state)
 
-mp.observe_property("disc-menu-active", "bool", function(name, val)
-    if val == true then
-        hide_osc()
-        mp.disable_key_bindings("showhide")
-    else
-        do_enable_keybindings()
-    end
-end)
-
 -- mouse show/hide bindings
 mp.set_key_bindings({
     {"mouse_move",              function(e) process_event("mouse_move", nil) end},
