@@ -46,11 +46,9 @@
 #include "options/path.h"
 #include "stream.h"
 #include "osdep/timer.h"
-#include "discnav.h"
 #include "sub/osd.h"
 #include "sub/img_convert.h"
 #include "video/mp_image.h"
-#include "video/mp_image_pool.h"
 
 #define BLURAY_SECTOR_SIZE     6144
 
@@ -74,12 +72,6 @@
 #define AACS_ERROR_MMC_FAILURE    -7 /* MMC failed */
 #define AACS_ERROR_NO_DK          -8 /* no matching device key */
 
-struct bluray_overlay {
-    struct sub_bitmap *image;
-    bool clean, hidden;
-    int x, y, w, h;
-};
-
 struct bluray_priv_s {
     BLURAY *bd;
     BLURAY_TITLE_INFO *title_info;
@@ -91,15 +83,7 @@ struct bluray_priv_s {
     int cfg_title;
     char *cfg_device;
 
-    // overlay stuffs
-    struct bluray_overlay overlays[2], ol_flushed[2];
-    struct mp_image_pool *pool;
-
-    // navigation stuffs
-    uint64_t next_event;
-    uint32_t still_length;
-    int mousex, mousey;
-    bool in_menu, use_nav, nav_enabled, popup_enabled;
+    bool use_nav;
 };
 
 static const struct bluray_priv_s bluray_stream_priv_dflts = {
@@ -132,191 +116,11 @@ static void destruct(struct bluray_priv_s *priv)
     if (priv->title_info)
         bd_free_title_info(priv->title_info);
     bd_close(priv->bd);
-    talloc_free(priv->pool);
 }
 
 inline static int play_title(struct bluray_priv_s *priv, int title)
 {
-    if (priv->use_nav) {
-        if (title == priv->num_titles - 1)
-            title = BLURAY_TITLE_FIRST_PLAY;
-        return bd_play_title(priv->bd, title);
-    } else
-        return bd_select_title(priv->bd, title);
-}
-
-static void overlay_release(struct bluray_overlay *overlay)
-{
-    if (overlay->image)
-        talloc_free(overlay->image);
-    *overlay = (struct bluray_overlay) { .clean = true };
-}
-
-static void overlay_alloc(struct bluray_priv_s *priv,
-                          struct bluray_overlay *overlay,
-                          int x, int y, int w, int h)
-{
-    assert(overlay->image == NULL);
-    struct sub_bitmap *image = talloc_zero(NULL, struct sub_bitmap);
-    overlay->w = image->w = image->dw = w;
-    overlay->h = image->h = image->dh = h;
-    overlay->x = image->x = x;
-    overlay->y = image->y = y;
-    struct mp_image *mpi = mp_image_pool_get(priv->pool, IMGFMT_RGBA, w, h);
-    mpi = talloc_steal(image, mpi);
-    assert(image->w > 0 && image->h > 0 && mpi != NULL);
-    image->stride = mpi->stride[0];
-    image->bitmap = mpi->planes[0];
-    overlay->image = image;
-    overlay->clean = true;
-    overlay->hidden = false;
-}
-
-static void overlay_close_all(struct bluray_priv_s *priv)
-{
-    for (int i = 0; i < 2; i++)
-        overlay_release(&priv->overlays[i]);
-}
-
-static void overlay_close(struct bluray_priv_s *priv,
-                          const BD_OVERLAY *const bo)
-{
-    overlay_release(&priv->overlays[bo->plane]);
-}
-
-static inline uint32_t conv_rgba(const BD_PG_PALETTE_ENTRY *p)
-{
-    uint32_t rgba;
-    uint8_t *out = (uint8_t*)&rgba;
-    const int y = p->Y,  cb = (int)p->Cb - 128,  cr = (int)p->Cr - 128;
-    // CAUTION: inaccurate but fast, broken in big endian
-#define CONV(a) (MPCLAMP((a), 0, 255)*p->T >> 8)
-    out[0] = CONV(y + cb + (cb >> 1) + (cb >> 2) + (cb >> 6));
-    out[1] = CONV(y - ((cb >> 2) + (cb >> 4) + (cb >> 5))
-                    - ((cr >> 3) + (cr >> 4) + (cr >> 5)));
-    out[2] = CONV(y + cr + (cr >> 2) + (cr >> 3) + (cr >> 5));
-    out[3] = p->T;
-#undef CONV
-    return rgba;
-}
-
-static void overlay_process(void *data, const BD_OVERLAY *const bo)
-{
-    stream_t *s = data;
-    struct bluray_priv_s *priv = s->priv;
-    if (!bo) {
-        overlay_close_all(priv);
-        return;
-    }
-    struct bluray_overlay *overlay = &priv->overlays[bo->plane];
-    switch (bo->cmd) {
-    case BD_OVERLAY_INIT:
-        overlay_alloc(priv, overlay, bo->x, bo->y, bo->w, bo->h);
-        break;
-    case BD_OVERLAY_CLOSE:
-        overlay_close(priv, bo);
-        break;
-    case BD_OVERLAY_CLEAR:
-        if (!overlay->clean) {
-            memset(overlay->image->bitmap, 0,
-                   overlay->image->stride*overlay->h);
-            overlay->clean = true;
-        }
-        break;
-    case BD_OVERLAY_DRAW: {
-        if (!bo->img)
-            break;
-        overlay->hidden = false;
-        overlay->clean = false;
-        struct sub_bitmap *img = overlay->image;
-        uint32_t *const origin = img->bitmap;
-        const BD_PG_RLE_ELEM *in = bo->img;
-        for (int y = 0; y < bo->h; y++) {
-            uint32_t *out = origin + (img->stride/4) * (y + bo->y) + bo->x;
-            for (int x = 0; x < bo->w; ) {
-                uint32_t c = 0;
-                if (bo->palette[in->color].T) {
-                    c = conv_rgba(&bo->palette[in->color]);
-                    for (int i = 0; i < in->len; i++)
-                        *out++ = c;
-                } else {
-                    memset(out, 0, in->len*4);
-                    out += in->len;
-                }
-                x += in->len;
-                ++in;
-            }
-        }
-        break;
-    }
-    case BD_OVERLAY_WIPE: {
-        uint32_t *const origin = overlay->image->bitmap;
-        for (int y = 0; y < bo->h; y++)
-            memset(origin + overlay->w * (y + bo->y) + bo->x, 0, 4 * bo->w);
-        break;
-    }
-    case BD_OVERLAY_HIDE:
-        priv->overlays[bo->plane].hidden = true;
-        break;
-    case BD_OVERLAY_FLUSH: {
-        struct bluray_overlay *in = overlay;
-        struct bluray_overlay *out = &priv->ol_flushed[bo->plane];
-        if (out->image && (out->image->stride != in->image->stride ||
-                           out->image->h != in->image->h))
-            overlay_release(out);
-        if (!out->image)
-            overlay_alloc(priv, out, in->x, in->y, in->w, in->h);
-        const int len = in->image->stride*in->image->h;
-        memcpy(out->image->bitmap, in->image->bitmap, len);
-        out->clean = in->clean;
-        out->hidden = in->hidden;
-        priv->next_event |= 1 << MP_NAV_EVENT_OVERLAY;
-        break;
-    } default:
-        break;
-    }
-}
-
-static inline bool set_event_type(struct bluray_priv_s *priv, int type,
-                                struct mp_nav_event *event)
-{
-    if (!(priv->next_event & (1 << type)))
-        return false;
-    priv->next_event &= ~(1 << type);
-    event->event = type;
-    return true;
-}
-
-static void fill_next_event(stream_t *s, struct mp_nav_event **ret)
-{
-    struct bluray_priv_s *priv = s->priv;
-    struct mp_nav_event e = {0};
-    // this should be checked before any other events
-    if (!set_event_type(priv, MP_NAV_EVENT_RESET_ALL, &e))
-        for (int n = 0; n < 30 && !set_event_type(priv, n, &e); n++) ;
-    switch (e.event) {
-    case MP_NAV_EVENT_NONE:
-        return;
-    case MP_NAV_EVENT_OVERLAY: {
-        for (int i = 0; i < 2; i++) {
-            struct bluray_overlay *o = &priv->ol_flushed[i];
-            e.u.overlay.images[i] = NULL;
-            if (!o->clean && !o->hidden) {
-                e.u.overlay.images[i] = o->image;
-                o->image = NULL;
-            }
-        }
-        break;
-    }
-    case MP_NAV_EVENT_MENU_MODE:
-        e.u.menu_mode.enable = priv->in_menu;
-        break;
-    case MP_NAV_EVENT_STILL_FRAME:
-        e.u.still_frame.seconds = priv->still_length;
-        break;
-    }
-    *ret = talloc(NULL, struct mp_nav_event);
-    **ret = e;
+    return bd_select_title(priv->bd, title);
 }
 
 static void bluray_stream_close(stream_t *s)
@@ -326,46 +130,28 @@ static void bluray_stream_close(stream_t *s)
 
 static void handle_event(stream_t *s, const BD_EVENT *ev)
 {
-    static const int reset_flags = (1 << MP_NAV_EVENT_RESET_ALL)
-                                 | (1 << MP_NAV_EVENT_RESET);
     struct bluray_priv_s *b = s->priv;
     switch (ev->event) {
     case BD_EVENT_MENU:
-        b->in_menu = ev->param;
-        b->next_event |= 1 << MP_NAV_EVENT_MENU_MODE;
         break;
     case BD_EVENT_STILL:
-        b->still_length = ev->param ? -1 : 0;
-        if (b->nav_enabled)
-            b->next_event |= 1 << MP_NAV_EVENT_STILL_FRAME;
         break;
     case BD_EVENT_STILL_TIME:
-        b->still_length = ev->param ? -1 : ev->param*1000;
-        if (b->nav_enabled)
-            b->next_event |= 1 << MP_NAV_EVENT_STILL_FRAME;
-        else
-            bd_read_skip_still(b->bd);
+        bd_read_skip_still(b->bd);
         break;
     case BD_EVENT_END_OF_TITLE:
-        overlay_close_all(b);
         break;
     case BD_EVENT_PLAYLIST:
-        b->next_event = reset_flags;
         b->current_playlist = ev->param;
-        if (!b->use_nav)
-            b->current_title = bd_get_current_title(b->bd);
+        b->current_title = bd_get_current_title(b->bd);
         if (b->title_info)
             bd_free_title_info(b->title_info);
         b->title_info = bd_get_playlist_info(b->bd, b->current_playlist,
                                              b->current_angle);
         break;
     case BD_EVENT_TITLE:
-        b->next_event = reset_flags;
         if (ev->param == BLURAY_TITLE_FIRST_PLAY) {
-            if (b->use_nav)
-                b->current_title = b->num_titles - 1;
-            else
-                b->current_title = bd_get_current_title(b->bd);
+            b->current_title = bd_get_current_title(b->bd);
         } else
             b->current_title = ev->param;
         if (b->title_info) {
@@ -382,11 +168,9 @@ static void handle_event(stream_t *s, const BD_EVENT *ev)
         }
         break;
     case BD_EVENT_POPUP:
-        b->popup_enabled = ev->param;
         break;
 #if BLURAY_VERSION >= BLURAY_VERSION_CODE(0, 5, 0)
     case BD_EVENT_DISCONTINUITY:
-        b->next_event = reset_flags;
         break;
 #endif
     default:
@@ -398,85 +182,10 @@ static void handle_event(stream_t *s, const BD_EVENT *ev)
 static int bluray_stream_fill_buffer(stream_t *s, char *buf, int len)
 {
     struct bluray_priv_s *b = s->priv;
-    assert(!b->use_nav);
     BD_EVENT event;
     while (bd_get_event(b->bd, &event))
         handle_event(s, &event);
     return bd_read(b->bd, buf, len);
-}
-
-static int bdnav_stream_fill_buffer(stream_t *s, char *buf, int len)
-{
-    struct bluray_priv_s *b = s->priv;
-    assert(b->use_nav);
-    BD_EVENT event;
-    int read = -1;
-    for (;;) {
-        read = bd_read_ext(b->bd, buf, len, &event);
-        if (read < 0)
-            return read;
-        if (read == 0) {
-            if (event.event == BD_EVENT_NONE)
-                return 0; // end of stream
-            handle_event(s, &event);
-        } else
-            break;
-    }
-    return read;
-}
-
-static bd_vk_key_e translate_nav_menu_action(const char *cmd)
-{
-    if (strcmp(cmd, "mouse") == 0)
-        return BD_VK_MOUSE_ACTIVATE;
-    if (strcmp(cmd, "up") == 0)
-        return BD_VK_UP;
-    if (strcmp(cmd, "down") == 0)
-        return BD_VK_DOWN;
-    if (strcmp(cmd, "left") == 0)
-        return BD_VK_LEFT;
-    if (strcmp(cmd, "right") == 0)
-        return BD_VK_RIGHT;
-    if (strcmp(cmd, "select") == 0)
-        return BD_VK_ENTER;
-    return BD_VK_NONE;
-}
-
-static void handle_nav_command(stream_t *s, struct mp_nav_cmd *ev)
-{
-    struct bluray_priv_s *priv = s->priv;
-    switch (ev->event) {
-    case MP_NAV_CMD_ENABLE:
-        priv->nav_enabled = true;
-        break;
-    case MP_NAV_CMD_MENU: {
-        const int64_t pts = mp_time_us();
-        const char *action = ev->u.menu.action;
-        bd_vk_key_e key = translate_nav_menu_action(action);
-        if (key != BD_VK_NONE) {
-            if (key == BD_VK_MOUSE_ACTIVATE)
-                ev->mouse_on_button = bd_mouse_select(priv->bd, pts,
-                                                      priv->mousex,
-                                                      priv->mousey);
-            bd_user_input(priv->bd, pts, key);
-        } else if (strcmp(action, "menu") == 0) {
-            if (priv->popup_enabled)
-                bd_user_input(priv->bd, pts, BD_VK_POPUP);
-            else
-                bd_menu_call(priv->bd, pts);
-        }
-        break;
-    } case MP_NAV_CMD_MOUSE_POS:
-        priv->mousex = ev->u.mouse_pos.x;
-        priv->mousey = ev->u.mouse_pos.y;
-        ev->mouse_on_button = bd_mouse_select(priv->bd, mp_time_us(),
-                                              priv->mousex,
-                                              priv->mousey);
-        break;
-    case MP_NAV_CMD_SKIP_STILL:
-        bd_read_skip_still(priv->bd);
-        break;
-    }
 }
 
 static int bluray_stream_control(stream_t *s, int cmd, void *arg)
@@ -592,17 +301,6 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
         *(char**)arg = talloc_strdup(NULL, meta->di_name);
         return STREAM_OK;
     }
-    case STREAM_CTRL_NAV_CMD:
-        if (!b->use_nav)
-            return STREAM_UNSUPPORTED;
-        handle_nav_command(s, arg);
-        return STREAM_OK;
-    case STREAM_CTRL_GET_NAV_EVENT: {
-        struct mp_nav_event **ev = arg;
-        if (ev)
-            fill_next_event(s, ev);
-        return STREAM_OK;
-    }
     case STREAM_CTRL_GET_SIZE:
         *(int64_t *)arg = bd_get_title_size(b->bd);
         return STREAM_OK;
@@ -670,19 +368,10 @@ static void select_initial_title(stream_t *s, int title_guess) {
     struct bluray_priv_s *b = s->priv;
 
     int title = -1;
-    if (b->use_nav) {
-        if (b->cfg_title == BLURAY_MENU_TITLE)
-            title = 0; // BLURAY_TITLE_TOP_MENU
-        else if (b->cfg_title == BLURAY_DEFAULT_TITLE)
-            title = b->num_titles - 1;
-        else
-            title = b->cfg_title;
-    } else {
-        if (b->cfg_title != BLURAY_DEFAULT_TITLE )
-            title = b->cfg_title;
-        else
-            title = title_guess;
-    }
+    if (b->cfg_title != BLURAY_DEFAULT_TITLE )
+        title = b->cfg_title;
+    else
+        title = title_guess;
     if (title < 0)
         return;
 
@@ -690,27 +379,8 @@ static void select_initial_title(stream_t *s, int title_guess) {
         b->current_title = title;
     else {
         MP_WARN(s, "Couldn't start title '%d'.\n", title);
-        if (!b->use_nav) // cannot query title info in nav
-            b->current_title = bd_get_current_title(b->bd);
+        b->current_title = bd_get_current_title(b->bd);
     }
-}
-
-static void select_initial_angle(stream_t *s) {
-    struct bluray_priv_s *b = s->priv;
-    if (!b->use_nav) // no way to figure out current title info
-        return;
-    BLURAY_TITLE_INFO *info = bd_get_title_info(b->bd, b->current_title, 0);
-    if (!info)
-        return;
-    /* Select angle */
-    unsigned int angle = s->opts->bluray_angle;
-    if (!angle)
-        angle = BLURAY_DEFAULT_ANGLE;
-    angle = FFMIN(angle, info->angle_count);
-    if (angle)
-        bd_select_angle(b->bd, angle);
-    b->current_angle = bd_get_current_angle(b->bd);
-    bd_free_title_info(info);
 }
 
 static int bluray_stream_open(stream_t *s)
@@ -746,10 +416,6 @@ static int bluray_stream_open(stream_t *s)
     if (b->use_nav) {
         MP_FATAL(s, "BluRay menu support has been removed.\n");
         return STREAM_ERROR;
-        const BLURAY_DISC_INFO *disc_info = bd_get_disc_info(b->bd);
-        b->num_titles = disc_info->num_hdmv_titles + disc_info->num_bdj_titles;
-        ++b->num_titles; // for BLURAY_TITLE_TOP_MENU
-        ++b->num_titles; // for BLURAY_TITLE_FIRST_PLAY
     } else {
         /* check for available titles on disc */
         b->num_titles = bd_get_titles(bd, TITLES_RELEVANT, 0);
@@ -777,28 +443,15 @@ static int bluray_stream_open(stream_t *s)
     }
 
     // these should be set before any callback
-    b->pool = mp_image_pool_new(6);
     b->current_angle = -1;
     b->current_title = -1;
 
     // initialize libbluray event queue
     bd_get_event(bd, NULL);
 
-    if (b->use_nav) {
-        if (!bd_play(bd)) {
-            destruct(b);
-            return STREAM_ERROR;
-        }
-        bd_register_overlay_proc(bd, s, overlay_process);
-    }
-
     select_initial_title(s, title_guess);
-    select_initial_angle(s);
 
-    if (b->use_nav)
-        s->fill_buffer = bdnav_stream_fill_buffer;
-    else
-        s->fill_buffer = bluray_stream_fill_buffer;
+    s->fill_buffer = bluray_stream_fill_buffer;
     s->close       = bluray_stream_close;
     s->control     = bluray_stream_control;
     s->type        = STREAMTYPE_BLURAY;
