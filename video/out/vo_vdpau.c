@@ -110,7 +110,7 @@ struct vdpctx {
     VdpTime                            recent_vsync_time;
     float                              user_fps;
     int                                composite_detect;
-    unsigned int                       vsync_interval;
+    int                                vsync_interval;
     uint64_t                           last_queue_time;
     uint64_t                           queue_time[MAX_OUTPUT_SURFACES];
     uint64_t                           last_ideal_time;

@@ -135,6 +135,8 @@ struct vo_internal {
     int queued_events;              // event mask for the user
     int internal_events;            // event mask for us
 
+    int64_t vsync_interval;
+
     int64_t flip_queue_offset; // queue flip events at most this much in advance
 
     int64_t drop_count;
@@ -151,7 +153,6 @@ struct vo_internal {
     double display_fps;
 
     // --- The following fields can be accessed from the VO thread only
-    int64_t vsync_interval;
     int64_t vsync_interval_approx;
     int64_t last_flip;
     char *window_title;
@@ -981,7 +982,6 @@ int vo_get_num_req_frames(struct vo *vo)
     return res;
 }
 
-// to be called from the VO thread only
 int64_t vo_get_vsync_interval(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
