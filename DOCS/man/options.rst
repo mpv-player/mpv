@@ -1438,10 +1438,11 @@ Subtitles
 
 ``--sub-codepage=<codepage>``
     If your system supports ``iconv(3)``, you can use this option to specify
-    the subtitle codepage. By default, ENCA will be used to guess the charset.
-    If mpv is not compiled with ENCA, ``UTF-8:UTF-8-BROKEN`` is the default,
-    which means it will try to use UTF-8, otherwise the ``UTF-8-BROKEN``
-    pseudo codepage (see below).
+    the subtitle codepage. By default, uchardet will be used to guess the
+    charset. If mpv is not compiled with uchardet, enca will be used.
+    If mpv is compiled with neither uchardet nor enca, ``UTF-8:UTF-8-BROKEN``
+    is the default, which means it will try to use UTF-8, otherwise the
+    ``UTF-8-BROKEN`` pseudo codepage (see below).
 
     The default value for this option is ``auto``, whose actual effect depends
     on whether ENCA is compiled.
