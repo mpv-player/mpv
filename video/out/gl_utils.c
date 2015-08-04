@@ -736,15 +736,18 @@ static const char *vao_glsl_type(const struct gl_vao_entry *e)
 }
 
 // Assumes program is current (gl->UseProgram(program)).
-static void update_uniform(GL *gl, GLuint program, struct sc_uniform *u)
+static void update_uniform(struct gl_shader_cache *sc, GLuint program, struct sc_uniform *u)
 {
+    const GL *gl = sc->gl;
     GLint loc = gl->GetUniformLocation(program, u->name);
     if (loc < 0)
         return;
+    MP_DBG(sc, "updating uniform %s =", u->name);
     switch (u->type) {
     case UT_i:
         assert(u->size == 1);
         gl->Uniform1i(loc, u->v.i[0]);
+        MP_DBG(sc, " %d\n", u->v.i[0]);
         break;
     case UT_f:
         switch (u->size) {
@@ -754,6 +757,10 @@ static void update_uniform(GL *gl, GLuint program, struct sc_uniform *u)
         case 4: gl->Uniform4f(loc, u->v.f[0], u->v.f[1], u->v.f[2], u->v.f[3]); break;
         default: abort();
         }
+        MP_DBG(sc, " [%d]", u->size);
+        for (int i = 0; i < u->size; i++)
+            MP_DBG(sc, " %f", u->v.f[i]);
+        MP_DBG(sc, "\n");
         break;
     case UT_m:
         switch (u->size) {
@@ -761,6 +768,10 @@ static void update_uniform(GL *gl, GLuint program, struct sc_uniform *u)
         case 3: gl->UniformMatrix3fv(loc, 1, GL_FALSE, &u->v.f[0]); break;
         default: abort();
         }
+        MP_DBG(sc, " [%dx%d]", u->size, u->size);
+        for (int i = 0; i < u->size*u->size; i++)
+            MP_DBG(sc, " %f", u->v.f[i]);
+        MP_DBG(sc, "\n");
         break;
     default:
         abort();
@@ -941,7 +952,7 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     // For now we set the uniforms every time. This is probably bad, and we
     // should switch to caching them.
     for (int n = 0; n < sc->num_uniforms; n++)
-        update_uniform(gl, entry->gl_shader, &sc->uniforms[n]);
+        update_uniform(sc, entry->gl_shader, &sc->uniforms[n]);
 
     talloc_free(tmp);
 
