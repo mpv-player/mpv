@@ -1952,7 +1952,6 @@ end
 
 validate_user_opts()
 
-mp.register_event("tick", tick)
 mp.register_event("start-file", request_init)
 mp.register_event("tracks-changed", request_init)
 
@@ -1974,6 +1973,13 @@ mp.observe_property("idle", "bool",
 )
 mp.observe_property("pause", "bool", pause_state)
 mp.observe_property("cache-idle", "bool", cache_state)
+mp.observe_property("vo-configured", "bool", function(name, val)
+    if val then
+        mp.register_event("tick", tick)
+    else
+        mp.unregister_event(tick)
+    end
+end)
 
 -- mouse show/hide bindings
 mp.set_key_bindings({
