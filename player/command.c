@@ -2128,7 +2128,7 @@ static int probe_deint_filters(struct MPContext *mpctx)
     if (check_output_format(mpctx, IMGFMT_VAAPI) &&
         probe_deint_filter(mpctx, "vavpp"))
         return 0;
-    if (probe_deint_filter(mpctx, "yadif:interlaced-only=yes"))
+    if (probe_deint_filter(mpctx, "yadif:mode=field:interlaced-only=yes"))
         return 0;
     return -1;
 }
