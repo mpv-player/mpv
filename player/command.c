@@ -2640,27 +2640,27 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->d_video)
-        return M_PROPERTY_UNAVAILABLE;
-    struct dec_video *d_video = mpctx->d_video;
-    struct sh_video *sh_video = d_video->header->video;
     switch (action) {
     case M_PROPERTY_SET: {
         mpctx->opts->movie_aspect = *(float *)arg;
-        reinit_video_filters(mpctx);
-        mp_force_video_refresh(mpctx);
+        if (mpctx->d_video) {
+            reinit_video_filters(mpctx);
+            mp_force_video_refresh(mpctx);
+        }
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET: {
-        float aspect = -1;
-        struct mp_image_params *params = &d_video->vfilter->override_params;
-        if (params && params->d_w && params->d_h) {
-            aspect = (float)params->d_w / params->d_h;
-        } else if (sh_video->disp_w && sh_video->disp_h) {
-            aspect = (float)sh_video->disp_w / sh_video->disp_h;
+        float aspect = mpctx->opts->movie_aspect;
+        if (mpctx->d_video && aspect <= 0) {
+            struct dec_video *d_video = mpctx->d_video;
+            struct sh_video *sh_video = d_video->header->video;
+            struct mp_image_params *params = &d_video->vfilter->override_params;
+            if (params && params->d_w && params->d_h) {
+                aspect = (float)params->d_w / params->d_h;
+            } else if (sh_video->disp_w && sh_video->disp_h) {
+                aspect = (float)sh_video->disp_w / sh_video->disp_h;
+            }
         }
-        if (aspect <= 0)
-            return M_PROPERTY_UNAVAILABLE;
         *(float *)arg = aspect;
         return M_PROPERTY_OK;
     }
