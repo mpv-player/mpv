@@ -202,12 +202,6 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log, bstr buf,
 #endif
     }
 
-    // Do our own UTF-8 detection, because at least ENCA seems to get it
-    // wrong sometimes (suggested by divVerent).
-    int r = bstr_validate_utf8(buf);
-    if (r >= 0 || (r > -8 && (flags & MP_ICONV_ALLOW_CUTOFF)))
-        return "UTF-8";
-
     bstr params[3] = {{0}};
     split_colon(user_cp, 3, params);
 
