@@ -107,6 +107,11 @@ static const char *ms_bom_guess(bstr buf)
 #if HAVE_ENCA
 static const char *enca_guess(struct mp_log *log, bstr buf, const char *language)
 {
+    // Do our own UTF-8 detection, because ENCA seems to get it wrong sometimes
+    // (suggested by divVerent). Explicitly allow cut-off UTF-8.
+    if (bstr_validate_utf8(buf) > -8)
+        return "UTF-8";
+
     if (!language || !language[0])
         language = "__"; // neutral language
 
@@ -201,12 +206,6 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log, bstr buf,
         user_cp = "UTF-8:UTF-8-BROKEN";
 #endif
     }
-
-    // Do our own UTF-8 detection, because at least ENCA seems to get it
-    // wrong sometimes (suggested by divVerent).
-    int r = bstr_validate_utf8(buf);
-    if (r >= 0 || (r > -8 && (flags & MP_ICONV_ALLOW_CUTOFF)))
-        return "UTF-8";
 
     bstr params[3] = {{0}};
     split_colon(user_cp, 3, params);
