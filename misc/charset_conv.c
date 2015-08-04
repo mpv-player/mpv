@@ -193,7 +193,9 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log, bstr buf,
 
     bool use_auto = strcasecmp(user_cp, "auto") == 0;
     if (use_auto) {
-#if HAVE_ENCA
+#if HAVE_UCHARDET
+        user_cp = "uchardet";
+#elif HAVE_ENCA
         user_cp = "enca";
 #else
         user_cp = "UTF-8:UTF-8-BROKEN";
