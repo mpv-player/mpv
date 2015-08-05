@@ -744,7 +744,7 @@ hwaccel_features = [
     } , {
         'name': 'videotoolbox-vda-gl',
         'desc': 'Videotoolbox or VDA with OpenGL',
-        'deps': [ 'videotoolbox-gl', 'vda-gl' ],
+        'deps_any': [ 'videotoolbox-gl', 'vda-gl' ],
         'func': check_true
     }, {
         'name': '--vdpau-hwaccel',
