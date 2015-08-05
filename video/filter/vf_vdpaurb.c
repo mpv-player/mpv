@@ -40,6 +40,10 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
     struct mp_vdpau_ctx *ctx = p->ctx;
     struct vdp_functions *vdp = &ctx->vdp;
 
+    if (!mpi) {
+        return 0;
+    }
+
     if (mp_vdpau_mixed_frame_get(mpi)) {
         MP_ERR(vf, "Can't apply vdpaurb filter after vdpaupp filter.\n");
         mp_image_unrefp(&mpi);
