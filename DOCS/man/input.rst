@@ -521,6 +521,8 @@ Input Commands that are Possibly Subject to Change
     ``input.conf`` file (except that using the section syntax in it is not
     allowed), including the need to separate bindings with a newline character.
 
+    If the ``contents`` parameter is an empty string, the section is removed.
+
     The section with the name ``default`` is the normal input section.
 
     In general, input sections have to be enabled with the ``enable-section``

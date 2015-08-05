@@ -1016,7 +1016,7 @@ void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
     // Delete:
     struct cmd_bind_section *bs = get_bind_section(ictx, bstr0(name));
     remove_binds(bs, builtin);
-    if (contents) {
+    if (contents && contents[0]) {
         // Redefine:
         parse_config(ictx, builtin, bstr0(contents), location, name);
     } else {
