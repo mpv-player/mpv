@@ -4,6 +4,13 @@
 # Cleanups all over the place (c) 2001 pl
 # Rewritten for mpv in 2014.
 #
+#
+# Warning: this is not officially supported. Use on your own risk. Might require
+#          modifications when used on systems other than Linux. Contributors
+#          are not expected to update these files when making changes to the
+#          normal/preferred waf build system.
+#
+#
 # This configure script is *not* autoconf-based and has different semantics.
 # It attempts to autodetect all settings and options where possible. It is
 # possible to override autodetection with the --enable-option/--disable-option
@@ -944,6 +951,8 @@ cat > $TMPC << EOF
 #define HAVE_RPI_GLES 0
 #define HAVE_AV_PIX_FMT_MMAL 0
 #define HAVE_DRM 0
+#define HAVE_VIDEOTOOLBOX_HWACCEL 0
+#define HAVE_VIDEOTOOLBOX_GL 0
 
 #ifdef __OpenBSD__
 #define DEFAULT_CDROM_DEVICE "/dev/rcd0c"
