@@ -481,7 +481,7 @@ Input Commands that are Possibly Subject to Change
         - ``b vf set ""`` remove all video filters on ``b``
         - ``c vf toggle lavfi=gradfun`` toggle debanding on ``c``
 
-``cycle_values ["!reverse"] <property> "<value1>" "<value2>" ...``
+``cycle-values ["!reverse"] <property> "<value1>" "<value2>" ...``
     Cycle through a list of values. Each invocation of the command will set the
     given property to the next value in the list. The command maintains an
     internal counter which value to pick next, and which is initially 0. It is
@@ -499,7 +499,7 @@ Input Commands that are Possibly Subject to Change
     Note that there is a static limit of (as of this writing) 10 arguments
     (this limit could be raised on demand).
 
-``enable_section "<section>" [flags]``
+``enable-section "<section>" [flags]``
     Enable all key bindings in the named input section.
 
     The enabled input sections form a stack. Bindings in sections on the top of
@@ -521,8 +521,8 @@ Input Commands that are Possibly Subject to Change
     <allow-vo-dragging>
         Same.
 
-``disable_section "<section>"``
-    Disable the named input section. Undoes ``enable_section``.
+``disable-section "<section>"``
+    Disable the named input section. Undoes ``enable-section``.
 
 ``define-section "<section>" "<contents>" [default|forced]``
     Create a named input section, or replace the contents of an already existing
@@ -546,7 +546,7 @@ Input Commands that are Possibly Subject to Change
         Always bind a key. (The input section that was made active most recently
         wins if there are ambiguities.)
 
-``overlay_add <id> <x> <y> "<file>" <offset> "<fmt>" <w> <h> <stride>``
+``overlay-add <id> <x> <y> "<file>" <offset> "<fmt>" <w> <h> <stride>``
     Add an OSD overlay sourced from raw data. This might be useful for scripts
     and applications controlling mpv, and which want to display things on top
     of the video window.
@@ -562,7 +562,7 @@ Input Commands that are Possibly Subject to Change
     ``id`` is an integer between 0 and 63 identifying the overlay element. The
     ID can be used to add multiple overlay parts, update a part by using this
     command with an already existing ID, or to remove a part with
-    ``overlay_remove``. Using a previously unused ID will add a new overlay,
+    ``overlay-remove``. Using a previously unused ID will add a new overlay,
     while reusing an ID will update it. (Future directions: there should be
     something to ensure different programs wanting to create overlays don't
     conflict with each others, should that ever be needed.)
@@ -576,7 +576,7 @@ Input Commands that are Possibly Subject to Change
     vdpau), so no actual copying is involved. Truncating the source file while
     the overlay is active will crash the player. You shouldn't change the data
     while the overlay is active, because the data is essentially accessed at
-    random points. Instead, call ``overlay_add`` again (preferably with a
+    random points. Instead, call ``overlay-add`` again (preferably with a
     different memory region to prevent tearing).
 
     It is also possible to pass a raw memory address for use as bitmap memory
@@ -620,22 +620,22 @@ Input Commands that are Possibly Subject to Change
         an overlay's memory at random times whenever it feels the need to do
         so, for example when redrawing the screen.
 
-``overlay_remove <id>``
-    Remove an overlay added with ``overlay_add`` and the same ID. Does nothing
+``overlay-remove <id>``
+    Remove an overlay added with ``overlay-add`` and the same ID. Does nothing
     if no overlay with this ID exists.
 
-``script_message "<arg1>" "<arg2>" ...``
+``script-message "<arg1>" "<arg2>" ...``
     Send a message to all clients, and pass it the following list of arguments.
     What this message means, how many arguments it takes, and what the arguments
     mean is fully up to the receiver and the sender. Every client receives the
     message, so be careful about name clashes (or use ``script_message_to``).
 
-``script_message_to "<target>" "<arg1>" "<arg2>" ...``
+``script-message-to "<target>" "<arg1>" "<arg2>" ...``
     Same as ``script_message``, but send it only to the client named
     ``<target>``. Each client (scripts etc.) has a unique name. For example,
     Lua scripts can get their name via ``mp.get_script_name()``.
 
-``script_binding "<name>"``
+``script-binding "<name>"``
     Invoke a script-provided key binding. This can be used to remap key
     bindings provided by external Lua scripts.
 
@@ -656,24 +656,24 @@ Input Commands that are Possibly Subject to Change
     tracked). The second letter whether the event originates from the mouse,
     either ``m`` (mouse button) or ``-`` (something else).
 
-``ab_loop``
+``ab-loop``
     Cycle through A-B loop states. The first command will set the ``A`` point
     (the ``ab-loop-a`` property); the second the ``B`` point, and the third
     will clear both points.
 
-``vo_cmdline "<args>"``
+``vo-cmdline "<args>"``
     Reset the sub-option of the current VO. Currently works with ``opengl``
     (including ``opengl-hq``). The argument is the sub-option string usually
     passed to the VO on the command line. Not all sub-options can be set, but
     those which can will be reset even if they don't appear in the argument.
     This command might be changed or removed in the future.
 
-``drop_buffers``
+``drop-buffers``
     Drop audio/video/demuxer buffers, and restart from fresh. Might help with
     unseekable streams that are going out of sync.
     This command might be changed or removed in the future.
 
-``screenshot_raw [subtitles|video|window]``
+``screenshot-raw [subtitles|video|window]``
     Return a screenshot in memory. This can be used only through the client
     API. The MPV_FORMAT_NODE_MAP returned by this command has the ``w``, ``h``,
     ``stride`` fields set to obvious contents. A ``format`` field is set to
@@ -682,8 +682,8 @@ Input Commands that are Possibly Subject to Change
     field is of type MPV_FORMAT_BYTE_ARRAY with the actual image data. The image
     is freed as soon as the result node is freed.
 
-Undocumented commands: ``tv_last_channel`` (TV/DVB only),
-``ao_reload`` (experimental/internal).
+Undocumented commands: ``tv-last-channel`` (TV/DVB only),
+``ao-reload`` (experimental/internal).
 
 Hooks
 ~~~~~
@@ -698,7 +698,7 @@ the player freeze randomly. Basically, nobody should use this API.
 There are two special commands involved. Also, the client must listen for
 client messages (``MPV_EVENT_CLIENT_MESSAGE`` in the C API).
 
-``hook_add <hook-name> <id> <priority>``
+``hook-add <hook-name> <id> <priority>``
     Subscribe to the hook identified by the first argument (basically, the
     name of event). The ``id`` argument is an arbitrary integer chosen by the
     user. ``priority`` is used to sort all hook handlers globally across all
@@ -711,7 +711,7 @@ client messages (``MPV_EVENT_CLIENT_MESSAGE`` in the C API).
     the client which registered the hook. This message has the following
     arguments:
 
-    1. the string ``hook_run``
+    1. the string ``hook-run``
     2. the ``id`` argument the hook was registered with as string (this can be
        used to correctly handle multiple hooks registered by the same client,
        as long as the ``id`` argument is unique in the client)
@@ -723,9 +723,9 @@ client messages (``MPV_EVENT_CLIENT_MESSAGE`` in the C API).
     typically be stopped.
 
     When the client is done, it must continue the core's hook execution by
-    running the ``hook_ack`` command.
+    running the ``hook-ack`` command.
 
-``hook_ack <string>``
+``hook-ack <string>``
     Run the next hook in the global chain of hooks. The argument is the 3rd
     argument of the client message that starts hook execution for the
     current client.
