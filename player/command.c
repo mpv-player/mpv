@@ -4692,6 +4692,11 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         mp_input_disable_section(mpctx->input, cmd->args[0].v.s);
         break;
 
+    case MP_CMD_DEFINE_INPUT_SECTION:
+        mp_input_define_section(mpctx->input, cmd->args[0].v.s, "<api>",
+                                cmd->args[1].v.s, !!cmd->args[2].v.i);
+        break;
+
     case MP_CMD_AB_LOOP: {
         double now = get_current_time(mpctx);
         int r = 0;

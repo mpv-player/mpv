@@ -515,6 +515,26 @@ Input Commands that are Possibly Subject to Change
 ``disable_section "<section>"``
     Disable the named input section. Undoes ``enable_section``.
 
+``define-section "<section>" "<contents>" [default|forced]``
+    Create a named input section, or replace the contents of an already existing
+    input section. The ``contents`` parameter uses the same syntax as the
+    ``input.conf`` file (except that using the section syntax in it is not
+    allowed), including the need to separate bindings with a newline character.
+
+    The section with the name ``default`` is the normal input section.
+
+    In general, input sections have to be enabled with the ``enable-section``
+    command, or they are ignored.
+
+    The last parameter has the following meaning:
+
+    <default> (also used if parameter omitted)
+        Use a key binding defined by this section only if the user hasn't
+        already bound this key to a command.
+    <forced>
+        Always bind a key. (The input section that was made active most recently
+        wins if there are ambiguities.)
+
 ``overlay_add <id> <x> <y> "<file>" <offset> "<fmt>" <w> <h> <stride>``
     Add an OSD overlay sourced from raw data. This might be useful for scripts
     and applications controlling mpv, and which want to display things on top
