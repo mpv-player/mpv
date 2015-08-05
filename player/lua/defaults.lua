@@ -24,6 +24,13 @@ function mp.get_opt(key, def)
     return val
 end
 
+function mp.input_define_section(section, contents, flags)
+    if flags == nil or flags == "" then
+        flags = "default"
+    end
+    mp.commandv("define-section", section, contents, flags)
+end
+
 -- For dispatching script_binding. This is sent as:
 --      script_message_to $script_name $binding_name $keystate
 -- The array is indexed by $binding_name, and has functions like this as value:

@@ -1024,26 +1024,6 @@ static int script_get_time(lua_State *L)
     return 1;
 }
 
-static int script_input_define_section(lua_State *L)
-{
-    struct MPContext *mpctx = get_mpctx(L);
-    char *section = (char *)luaL_checkstring(L, 1);
-    char *contents = (char *)luaL_checkstring(L, 2);
-    char *flags = (char *)luaL_optstring(L, 3, "");
-    bool builtin = true;
-    if (strcmp(flags, "default") == 0) {
-        builtin = true;
-    } else if (strcmp(flags, "force") == 0) {
-        builtin = false;
-    } else if (strcmp(flags, "") == 0) {
-        //pass
-    } else {
-        luaL_error(L, "invalid flags: '%s'", flags);
-    }
-    mp_input_define_section(mpctx->input, section, "<script>", contents, builtin);
-    return 0;
-}
-
 static int script_input_enable_section(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
@@ -1321,7 +1301,6 @@ static const struct fn_entry main_fns[] = {
     FN_ENTRY(get_screen_margins),
     FN_ENTRY(get_mouse_pos),
     FN_ENTRY(get_time),
-    FN_ENTRY(input_define_section),
     FN_ENTRY(input_enable_section),
     FN_ENTRY(input_disable_section),
     FN_ENTRY(input_set_section_mouse_area),
