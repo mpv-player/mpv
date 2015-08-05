@@ -162,8 +162,10 @@ const struct mp_cmd_def mp_cmds[] = {
 
   { MP_CMD_ENABLE_INPUT_SECTION,  "enable-section",  {
       ARG_STRING,
-      OARG_CHOICE(0, ({"default", 0},
-                      {"exclusive", 1})),
+      OARG_FLAGS(0, ({"default", 0},
+                     {"exclusive", MP_INPUT_EXCLUSIVE},
+                     {"allow-hide-cursor", MP_INPUT_ALLOW_HIDE_CURSOR},
+                     {"allow-vo-dragging", MP_INPUT_ALLOW_VO_DRAGGING})),
   }},
   { MP_CMD_DISABLE_INPUT_SECTION, "disable-section", { ARG_STRING } },
   { MP_CMD_DEFINE_INPUT_SECTION, "define-section", {

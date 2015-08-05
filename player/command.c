@@ -4684,8 +4684,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     }
 
     case MP_CMD_ENABLE_INPUT_SECTION:
-        mp_input_enable_section(mpctx->input, cmd->args[0].v.s,
-                                cmd->args[1].v.i == 1 ? MP_INPUT_EXCLUSIVE : 0);
+        mp_input_enable_section(mpctx->input, cmd->args[0].v.s, cmd->args[1].v.i);
         break;
 
     case MP_CMD_DISABLE_INPUT_SECTION:

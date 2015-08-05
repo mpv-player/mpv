@@ -1935,7 +1935,7 @@ end
 
 function do_enable_keybindings()
     if state.enabled then
-        mp.enable_key_bindings("showhide", "allow-vo-dragging|allow-hide-cursor")
+        mp.enable_key_bindings("showhide", "allow-vo-dragging+allow-hide-cursor")
     end
 end
 

@@ -499,7 +499,7 @@ Input Commands that are Possibly Subject to Change
     Note that there is a static limit of (as of this writing) 10 arguments
     (this limit could be raised on demand).
 
-``enable_section "<section>" [default|exclusive]``
+``enable_section "<section>" [flags]``
     Enable all key bindings in the named input section.
 
     The enabled input sections form a stack. Bindings in sections on the top of
@@ -508,9 +508,18 @@ Input Commands that are Possibly Subject to Change
     implicitly removed beforehand. (A section cannot be on the stack more than
     once.)
 
-    If ``exclusive`` is specified as second argument, all sections below the
-    newly enabled section are disabled. They will be re-enabled as soon as
-    all exclusive sections above them are removed.
+    The ``flags`` parameter can be a combination (separated by ``+``) of the
+    following flags:
+
+    <exclusive>
+        All sections enabled before the newly enabled section are disabled.
+        They will be re-enabled as soon as all exclusive sections above them
+        are removed. In other words, the new section shadows all previous
+        sections.
+    <allow-hide-cursor>
+        This feature can't be used through the public API.
+    <allow-vo-dragging>
+        Same.
 
 ``disable_section "<section>"``
     Disable the named input section. Undoes ``enable_section``.
