@@ -2229,6 +2229,20 @@ Demuxer
 ``--demuxer-rawvideo-size=<value>``
     Frame size in bytes when using ``--demuxer=rawvideo``.
 
+``--demuxer-max-packets=<packets>``, ``--demuxer-max-bytes=<bytes>``
+    This controls how much the demuxer is allowed to buffer ahead. The demuxer
+    will normally try to read ahead as much as necessary, or as much is
+    requested with ``--demuxer-readahead-secs``. The ``--demuxer-max-...``
+    options can be used to restrict the maximum readahead. This limits excessive
+    readahead in case of broken files or desynced playback. The demuxer will
+    stop reading additional packets as soon as one of the limits is reached.
+    (The limits still can be slightly overstepped due to technical reasons.)
+
+    Set these limits highher if you get a packet queue overflow warning, and
+    you think normal playback would be possible with a larger packet queue.
+
+    See ``--list-options`` for defaults and value range.
+
 ``--demuxer-thread=<yes|no>``
     Run the demuxer in a separate thread, and let it prefetch a certain amount
     of packets (default: yes). Having this enabled may lead to smoother

@@ -112,6 +112,8 @@ struct demux_internal {
     bool idle;
     bool autoselect;
     double min_secs;
+    int max_packs;
+    int max_bytes;
 
     bool tracks_switched;       // thread needs to inform demuxer of this
 
@@ -391,7 +393,7 @@ static bool read_packet(struct demux_internal *in)
     }
     MP_DBG(in, "packets=%zd, bytes=%zd, active=%d, more=%d\n",
            packs, bytes, active, read_more);
-    if (packs >= MAX_PACKS || bytes >= MAX_PACK_BYTES) {
+    if (packs >= in->max_packs || bytes >= in->max_bytes) {
         if (!in->warned_queue_overflow) {
             in->warned_queue_overflow = true;
             MP_ERR(in, "Too many packets in the demuxer packet queues:\n");
@@ -957,6 +959,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .d_buffer = talloc(demuxer, struct demuxer),
         .d_user = demuxer,
         .min_secs = demuxer->opts->demuxer_min_secs,
+        .max_packs = demuxer->opts->demuxer_max_packs,
+        .max_bytes = demuxer->opts->demuxer_max_bytes,
     };
     pthread_mutex_init(&in->lock, NULL);
     pthread_cond_init(&in->wakeup, NULL);

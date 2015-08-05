@@ -30,11 +30,6 @@
 #include "packet.h"
 #include "stheader.h"
 
-// Maximum total size of packets queued - if larger, no new packets are read,
-// and the demuxer pretends EOF was reached.
-#define MAX_PACKS 16000
-#define MAX_PACK_BYTES (400 * 1024 * 1024)
-
 // DEMUXER control commands/answers
 #define DEMUXER_CTRL_NOTIMPL -1
 #define DEMUXER_CTRL_DONTKNOW 0

@@ -21,6 +21,8 @@ Interface changes
 
  --- mpv 0.10.0 will be released ---
     - remove --demuxer-readahead-packets and --demuxer-readahead-bytes
+      add --demuxer-max-packets and --demuxer-max-bytes
+      (the new options are not replacement and have very different semantics)
     - change "video-aspect" property: always settable, even if no video is
       running; always return the override - if no override is set, return
       the video's aspect ratio
