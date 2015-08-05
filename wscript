@@ -797,6 +797,7 @@ radio_and_tv_features = [
     }, {
         'name': '--pvr',
         'desc': 'Video4Linux2 MPEG PVR interface',
+        'deps': [ 'tv' ],
         'func': check_cc(fragment=load_fragment('pvr.c')),
     }, {
         'name': '--audio-input',
