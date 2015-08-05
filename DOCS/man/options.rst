@@ -2247,21 +2247,6 @@ Demuxer
     (This value tends to be fuzzy, because many file formats don't store linear
     timestamps.)
 
-``--demuxer-readahead-packets=<packets>``
-    If ``--demuxer-thread`` is enabled, this controls how much the demuxer
-    should buffer ahead. As long as the number of packets in the packet queue
-    doesn't exceed ``--demuxer-readahead-packets``, and the total number of
-    bytes doesn't exceed ``--demuxer-readahead-bytes``, the thread keeps
-    reading ahead.
-
-    Note that if you set these options near the maximum, you might get a
-    packet queue overflow warning.
-
-    See ``--list-options`` for defaults and value range.
-
-``--demuxer-readahead-bytes=<bytes>``
-    See ``--demuxer-readahead-packets``.
-
 ``--force-seekable=<yes|no>``
     If the player thinks that the media is not seekable (e.g. playing from a
     pipe, or it's a http stream with a server that doesn't support range

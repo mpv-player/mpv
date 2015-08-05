@@ -242,8 +242,6 @@ const m_option_t mp_opts[] = {
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
     OPT_FLAG("demuxer-thread", demuxer_thread, 0),
     OPT_DOUBLE("demuxer-readahead-secs", demuxer_min_secs, M_OPT_MIN, .min = 0),
-    OPT_INTRANGE("demuxer-readahead-packets", demuxer_min_packs, 0, 0, MAX_PACKS),
-    OPT_INTRANGE("demuxer-readahead-bytes", demuxer_min_bytes, 0, 0, MAX_PACK_BYTES),
 
     OPT_FLAG("force-seekable", force_seekable, 0),
 
@@ -721,8 +719,6 @@ const struct MPOpts mp_default_opts = {
         .file_max = 1024 * 1024,
     },
     .demuxer_thread = 1,
-    .demuxer_min_packs = 0,
-    .demuxer_min_bytes = 0,
     .demuxer_min_secs = 1.0,
     .network_rtsp_transport = 2,
     .network_timeout = 0.0,

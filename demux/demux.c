@@ -112,8 +112,6 @@ struct demux_internal {
     bool idle;
     bool autoselect;
     double min_secs;
-    int min_packs;
-    int min_bytes;
 
     bool tracks_switched;       // thread needs to inform demuxer of this
 
@@ -412,8 +410,6 @@ static bool read_packet(struct demux_internal *in)
         pthread_cond_signal(&in->wakeup);
         return false;
     }
-    if (packs < in->min_packs && bytes < in->min_bytes)
-        read_more |= active;
 
     if (!read_more)
         return false;
@@ -961,8 +957,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .d_buffer = talloc(demuxer, struct demuxer),
         .d_user = demuxer,
         .min_secs = demuxer->opts->demuxer_min_secs,
-        .min_packs = demuxer->opts->demuxer_min_packs,
-        .min_bytes = demuxer->opts->demuxer_min_bytes,
     };
     pthread_mutex_init(&in->lock, NULL);
     pthread_cond_init(&in->wakeup, NULL);
