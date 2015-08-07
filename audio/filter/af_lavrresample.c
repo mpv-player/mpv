@@ -28,7 +28,6 @@
 #include <assert.h>
 
 #include <libavutil/opt.h>
-#include <libavutil/audioconvert.h>
 #include <libavutil/common.h>
 #include <libavutil/samplefmt.h>
 #include <libavutil/mathematics.h>

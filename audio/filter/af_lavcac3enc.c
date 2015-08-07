@@ -26,7 +26,6 @@
 #include <assert.h>
 
 #include <libavcodec/avcodec.h>
-#include <libavutil/audioconvert.h>
 #include <libavutil/intreadwrite.h>
 #include <libavutil/common.h>
 #include <libavutil/bswap.h>
