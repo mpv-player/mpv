@@ -66,8 +66,6 @@ void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st)
     avctx->block_align              = st->block_align;
     avctx->channel_layout           = st->channel_layout;
     avctx->bits_per_coded_sample    = st->bits_per_coded_sample;
-    // Required in FFmpeg 2.5.x / Libav 11, deprecated afterwards.
-    avctx->stream_codec_tag         = st->stream_codec_tag;
 }
 
 // We merely pass-through our PTS/DTS as an int64_t; libavcodec won't use it.
