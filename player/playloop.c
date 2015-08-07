@@ -1039,7 +1039,7 @@ void run_playloop(struct MPContext *mpctx)
     handle_osd_redraw(mpctx);
 
     mp_wait_events(mpctx, mpctx->sleeptime);
-    mpctx->sleeptime = 100.0; // infinite for all practical purposes
+    mpctx->sleeptime = 1e9; // infinite for all practical purposes
 
     handle_pause_on_low_cache(mpctx);
 
