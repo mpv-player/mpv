@@ -47,6 +47,10 @@ function find_and_add_entries()
     if #dir == 0 then
         return
     end
+    local isplaylist = mp.get_property("playlist-count")
+    if #isplaylist > 1 then
+        return
+    end
 
     local files = mputils.readdir(dir, "files")
     if files == nil then
