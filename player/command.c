@@ -3736,8 +3736,8 @@ static const struct property_osd_display {
     { "tv-hue", "Hue", .osd_progbar = OSD_HUE},
     { "tv-saturation", "Saturation", .osd_progbar = OSD_SATURATION },
     { "tv-contrast", "Contrast", .osd_progbar = OSD_CONTRAST },
-    { "ab-loop-a", "A-B loop point A"},
-    { "ab-loop-b", "A-B loop point B"},
+    { "ab-loop-a", "A-B loop start"},
+    { "ab-loop-b", .msg = "A-B loop: ${ab-loop-a} - ${ab-loop-b}"},
     { "audio-device", "Audio device"},
     // By default, don't display the following properties on OSD
     { "pause", NULL },
