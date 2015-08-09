@@ -676,7 +676,7 @@ const struct MPOpts mp_default_opts = {
         .window_scale = 1.0,
     },
     .allow_win_drag = 1,
-    .wintitle = "mpv - ${?media-title:${media-title}}${!media-title:No file.}",
+    .wintitle = "${?media-title:${media-title}}${!media-title:No file.} - mpv",
     .heartbeat_interval = 30.0,
     .stop_screensaver = 1,
     .cursor_autohide_delay = 1000,
