@@ -18,9 +18,9 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <CoreServices/CoreServices.h> // for CGDisplayHideCursor
 #import <IOKit/pwr_mgt/IOPMLib.h>
 #import <IOKit/IOKitLib.h>
+#import <AppKit/AppKit.h>
 #include <mach/mach.h>
 
 #import "cocoa_common.h"
@@ -104,6 +104,8 @@ struct vo_cocoa_state {
     bool vo_ready;                      // the VO is in a state in which it can
                                         // render frames
     int frame_w, frame_h;               // dimensions of the frame rendered
+
+    NSCursor *blankCursor;
 };
 
 static void run_on_main_thread(struct vo *vo, void(^block)(void))
@@ -254,6 +256,11 @@ int vo_cocoa_init(struct vo *vo)
         .log = mp_log_new(s, vo->log, "cocoa"),
         .embedded = vo->opts->WinID >= 0,
     };
+    if (!s->embedded) {
+        NSImage* blankImage = [[NSImage alloc] initWithSize:NSMakeSize(1, 1)];
+        s->blankCursor = [[NSCursor alloc] initWithImage:blankImage hotSpot:NSZeroPoint];
+        [blankImage release];
+    }
     pthread_mutex_init(&s->lock, NULL);
     pthread_cond_init(&s->wakeup, NULL);
     vo->cocoa = s;
@@ -271,9 +278,9 @@ static int vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
     MpvEventsView *v = (MpvEventsView *) s->view;
 
     if (*visible) {
-        CGDisplayShowCursor(kCGDirectMainDisplay);
-    } else if ([v canHideCursor]) {
-        CGDisplayHideCursor(kCGDirectMainDisplay);
+        [[NSCursor arrowCursor] set];
+    } else if ([v canHideCursor] && s->blankCursor) {
+        [s->blankCursor set];
     } else {
         *visible = true;
     }
@@ -309,6 +316,9 @@ void vo_cocoa_uninit(struct vo *vo)
         // if using --wid + libmpv there's no window to release
         if (s->window)
             [s->window release];
+
+        if (!s->embedded)
+            [s->blankCursor release];
 
         pthread_cond_destroy(&s->wakeup);
         pthread_mutex_destroy(&s->lock);
