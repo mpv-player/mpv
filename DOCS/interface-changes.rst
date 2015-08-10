@@ -20,7 +20,10 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
-    - add "audio-speed-correction" and "video-speed-correction" properties
+    - add --video-sync* options
+      "display-sync-active" property
+      "vo-missed-frame-count" property
+      "audio-speed-correction" and "video-speed-correction" properties
     - remove --demuxer-readahead-packets and --demuxer-readahead-bytes
       add --demuxer-max-packets and --demuxer-max-bytes
       (the new options are not replacement and have very different semantics)

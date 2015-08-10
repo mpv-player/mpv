@@ -144,6 +144,9 @@ typedef struct MPOpts {
     int correct_pts;
     int user_pts_assoc_mode;
     int initial_audio_sync;
+    int video_sync;
+    double sync_max_video_change;
+    double sync_max_audio_change;
     int hr_seek;
     float hr_seek_demuxer_offset;
     int hr_seek_framedrop;

@@ -3363,6 +3363,72 @@ Miscellaneous
     out. This delay in reaction time to sudden A/V offsets should be the only
     side-effect of turning this option on, for all sound drivers.
 
+``--video-sync=<audio|...>``
+    How the player synchronizes audio and video.
+
+    The modes starting with ``display-`` try to output video frames completely
+    synchronously to the display, using the detected display vertical refresh
+    rate as a hint how fast frames will be displayed on average. These modes
+    change video speed slightly to match the display. See ``--video-sync-...``
+    options for fine tuning. The robustness of this mode is further reduced by
+    making a some idealized assumptions, which may not always apply in reality.
+    Behavior can depend on the VO and the system's video and audio drivers.
+    Media files must use constant framerate. Section-wise VFR might work as well
+    with some container formats (but not e.g. mkv). If the sync code detects
+    severe A/V desync, or the framerate cannot be detected, the player
+    automatically reverts to ``audio`` mode for some time or permanently.
+
+    The modes with ``desync`` in their names do not attempt to keep audio/video
+    in sync. They will slowly (or quickly) desync, until e.g. the next seek
+    happens. These modes are meant for testing, not serious use.
+
+    :audio:             Time video frames to audio. This is the most robust
+                        mode, because the player doesn't have to assume anything
+                        about how the display behaves. The disadvantage is that
+                        it can lead to occasional frame drops or repeats. If
+                        audio is disabled, this uses the system clock. This is
+                        the default mode.
+    :display-resample:  Resample audio to match the video. This mode will also
+                        try to adjust audio speed to compensate for other drift.
+                        (This means it will play the audio at a different speed
+                        every once in a while to reduce the A/V difference.)
+    :display-resample-vdrop:  Resample audio to match the video. Drop video
+                        frames to compensate for drift.
+    :display-resample-desync: Like the previous mode, but no A/V compensation.
+    :display-vdrop:     Drop or repeat video frames to compensate desyncing
+                        video. (Although it should have the same effects as
+                        ``audio``, the implementation is very different.)
+    :display-desync:    Sync video to display, and let audio play on its own.
+    :desync:            Sync video according to system clock, and let audio play
+                        on its own.
+
+``--video-sync-max-video-change=<value>``
+    Maximum speed difference in percent that is applied to video with
+    ``--video-sync=display-...`` (default: 1). Display sync mode will be
+    disabled if the monitor and video refresh way do not match within the
+    given range. It tries multiples as well: playing 30 fps video on a 60 Hz
+    screen will duplicate every second frame. Playing 24 fps video on a 60 Hz
+    screen will play video in a 2-3-2-3-... pattern.
+
+    The default settings are not loose enough to speed up 23.976 fps video to
+    25 fps. We consider the pitch change too extreme to allow this behavior
+    by default. Set this option to a value of ``5`` to enable it.
+
+    Note that in the ``--video-sync=display-resample`` mode, audio speed will
+    additionally be changed by a small amount if necessary for A/V sync. See
+    ``--video-sync-max-audio-change``.
+
+``--video-sync-max-video-change=<value>``
+    Maximum *additional* speed difference in percent that is applied to audio
+    with ``--video-sync=display-...`` (default: 0.125). Normally, the player
+    play the audio at the speed of the video. But if the difference between
+    audio and video position is too high, e.g. due to drift or other timing
+    errors, it will attempt to speed up or slow down audio by this additional
+    factor. Too low values could lead to video frame dropping or repeating if
+    the A/V desync cannot be compensated, too high values could lead to chaotic
+    frame dropping due to the audio "overshooting" and skipping multiple video
+    frames before the sync logic can react.
+
 ``--mf-fps=<value>``
     Framerate used when decoding from multiple PNG or JPEG files with ``mf://``
     (default: 1).

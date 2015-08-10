@@ -165,6 +165,8 @@ struct vo_frame {
     int64_t prev_vsync;
     // "ideal" display time within the vsync
     int64_t vsync_offset;
+    // how often the frame will be repeated (does not include OSD redraws)
+    int num_vsyncs;
     // Set if the current frame is repeated from the previous. It's guaranteed
     // that the current is the same as the previous one, even if the image
     // pointer is different.
@@ -173,6 +175,8 @@ struct vo_frame {
     bool redraw, repeat;
     // The frame is not in movement - e.g. redrawing while paused.
     bool still;
+    // Frames are output as fast as possible, with implied vsync blocking.
+    bool display_synced;
     // The current frame to be drawn.
     // Warning: When OSD should be redrawn in --force-window --idle mode, this
     //          can be NULL. The VO should draw a black background, OSD on top.
@@ -333,6 +337,7 @@ void vo_destroy(struct vo *vo);
 void vo_set_paused(struct vo *vo, bool paused);
 int64_t vo_get_drop_count(struct vo *vo);
 void vo_increment_drop_count(struct vo *vo, int64_t n);
+int64_t vo_get_missed_count(struct vo *vo);
 void vo_query_formats(struct vo *vo, uint8_t *list);
 void vo_event(struct vo *vo, int event);
 int vo_query_and_reset_events(struct vo *vo, int events);
@@ -342,6 +347,7 @@ void vo_set_queue_params(struct vo *vo, int64_t offset_us, bool vsync_timed,
 int vo_get_num_req_frames(struct vo *vo);
 int64_t vo_get_vsync_interval(struct vo *vo);
 double vo_get_display_fps(struct vo *vo);
+int64_t vo_get_next_frame_start_time(struct vo *vo);
 
 void vo_wakeup(struct vo *vo);
 

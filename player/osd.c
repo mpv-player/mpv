@@ -225,6 +225,12 @@ static void print_status(struct MPContext *mpctx)
     {
         // VO stats
         if (mpctx->d_video) {
+            if (mpctx->display_sync_active) {
+                saddf(&line, " DS: %f", mpctx->speed_factor_a);
+                int64_t m = vo_get_missed_count(mpctx->video_out);
+                if (m > 0)
+                    saddf(&line, " Missed: %"PRId64, m);
+            }
             int64_t c = vo_get_drop_count(mpctx->video_out);
             if (c > 0 || mpctx->dropped_frames_total > 0) {
                 saddf(&line, " Dropped: %"PRId64, c);

@@ -295,11 +295,26 @@ static int mp_property_av_speed_correction(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     char *type = prop->priv;
+    double val = 0;
     switch (type[0]) {
-    case 'a': return m_property_double_ro(action, arg, mpctx->speed_factor_a);
-    case 'v': return m_property_double_ro(action, arg, mpctx->speed_factor_v);
+    case 'a': val = mpctx->speed_factor_a; break;
+    case 'v': val = mpctx->speed_factor_v; break;
+    default: abort();
     }
-    abort();
+
+    if (action == M_PROPERTY_PRINT) {
+        *(char **)arg = talloc_asprintf(NULL, "%+.05f%%", (val - 1) * 100);
+        return M_PROPERTY_OK;
+    }
+
+    return m_property_double_ro(action, arg, val);
+}
+
+static int mp_property_display_sync_active(void *ctx, struct m_property *prop,
+                                           int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return m_property_flag_ro(action, arg, mpctx->display_sync_active);
 }
 
 /// filename with path (RO)
@@ -555,6 +570,16 @@ static int mp_property_vo_drop_frame_count(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     return m_property_int_ro(action, arg, vo_get_drop_count(mpctx->video_out));
+}
+
+static int mp_property_vo_missed_frame_count(void *ctx, struct m_property *prop,
+                                             int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->d_video)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_int_ro(action, arg, vo_get_missed_count(mpctx->video_out));
 }
 
 /// Current position in percent (RW)
@@ -3318,6 +3343,7 @@ static const struct m_property mp_properties[] = {
     {"speed", mp_property_playback_speed},
     {"audio-speed-correction", mp_property_av_speed_correction, .priv = "a"},
     {"video-speed-correction", mp_property_av_speed_correction, .priv = "v"},
+    {"display-sync-active", mp_property_display_sync_active},
     {"filename", mp_property_filename},
     {"stream-open-filename", mp_property_stream_open_filename},
     {"file-size", mp_property_file_size},
@@ -3335,6 +3361,7 @@ static const struct m_property mp_properties[] = {
     {"total-avsync-change", mp_property_total_avsync_change},
     {"drop-frame-count", mp_property_drop_frame_cnt},
     {"vo-drop-frame-count", mp_property_vo_drop_frame_count},
+    {"vo-missed-frame-count", mp_property_vo_missed_frame_count},
     {"percent-pos", mp_property_percent_pos},
     {"time-start", mp_property_time_start},
     {"time-pos", mp_property_time_pos},
@@ -3549,7 +3576,8 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_TICK, "time-pos", "stream-pos", "stream-time-pos", "avsync",
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
-      "total-avsync-change", "audio-speed-correction", "video-speed-correction"),
+      "total-avsync-change", "audio-speed-correction", "video-speed-correction",
+      "vo-missed-frame-count"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",

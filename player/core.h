@@ -79,6 +79,22 @@ enum seek_precision {
 // Comes from the assumption that some formats round timestamps to ms.
 #define FRAME_DURATION_TOLERANCE 0.0011
 
+enum video_sync {
+    VS_DEFAULT = 0,
+    VS_DISP_RESAMPLE,
+    VS_DISP_RESAMPLE_VDROP,
+    VS_DISP_RESAMPLE_NONE,
+    VS_DISP_VDROP,
+    VS_DISP_NONE,
+    VS_NONE,
+};
+
+#define VS_IS_DISP(x) ((x) == VS_DISP_RESAMPLE ||       \
+                       (x) == VS_DISP_RESAMPLE_VDROP || \
+                       (x) == VS_DISP_RESAMPLE_NONE ||  \
+                       (x) == VS_DISP_VDROP ||          \
+                       (x) == VS_DISP_NONE)
+
 struct track {
     enum stream_type type;
 
@@ -244,7 +260,13 @@ typedef struct MPContext {
     // Redundant values set from opts->playback_speed and speed_factor_*.
     // update_playback_speed() updates them from the other fields.
     double audio_speed, video_speed;
+    bool display_sync_active;
     bool broken_fps_header;
+    double display_sync_frameduration;
+    int display_sync_drift_dir;
+    // Timing error (in seconds) due to rounding on vsync boundaries
+    double display_sync_error;
+    int display_sync_disable_counter;
     /* Set if audio should be timed to start with video frame after seeking,
      * not set when e.g. playing cover art */
     bool sync_audio_to_video;
