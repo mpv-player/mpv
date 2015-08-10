@@ -3418,7 +3418,7 @@ Miscellaneous
     additionally be changed by a small amount if necessary for A/V sync. See
     ``--video-sync-max-audio-change``.
 
-``--video-sync-max-video-change=<value>``
+``--video-sync-max-audio-change=<value>``
     Maximum *additional* speed difference in percent that is applied to audio
     with ``--video-sync=display-...`` (default: 0.125). Normally, the player
     play the audio at the speed of the video. But if the difference between
