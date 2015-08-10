@@ -79,6 +79,8 @@ local state = {
     cache_idle = false,
     idle = false,
     enabled = true,
+    input_enabled = true,
+    showhide_enabled = false,
 }
 
 
@@ -1771,9 +1773,14 @@ function render()
     for _,cords in ipairs(osc_param.areas["input"]) do
         if state.osc_visible then -- activate only when OSC is actually visible
             mp.set_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "input")
-            mp.enable_key_bindings("input")
-        else
-            mp.disable_key_bindings("input")
+        end
+        if state.osc_visible ~= state.input_enabled then
+            if state.osc_visible then
+                mp.enable_key_bindings("input")
+            else
+                mp.disable_key_bindings("input")
+            end
+            state.input_enabled = state.osc_visible
         end
 
         if (mouse_hit_coords(cords.x1, cords.y1, cords.x2, cords.y2)) then
@@ -1919,7 +1926,10 @@ function tick()
         ass:append("Drop files to play here.")
         mp.set_osd_ass(640, 360, ass.text)
 
-        mp.disable_key_bindings("showhide")
+        if state.showhide_enabled then
+            mp.disable_key_bindings("showhide")
+            state.showhide_enabled = false
+        end
 
 
     elseif (state.fullscreen and user_opts.showfullscreen)
@@ -1935,7 +1945,10 @@ end
 
 function do_enable_keybindings()
     if state.enabled then
-        mp.enable_key_bindings("showhide", "allow-vo-dragging+allow-hide-cursor")
+        if not state.showhide_enabled then
+            mp.enable_key_bindings("showhide", "allow-vo-dragging+allow-hide-cursor")
+        end
+        state.showhide_enabled = true
     end
 end
 
@@ -1946,7 +1959,10 @@ function enable_osc(enable)
         show_osc()
     else
         hide_osc()
-        mp.disable_key_bindings("showhide")
+        if state.showhide_enabled then
+            mp.disable_key_bindings("showhide")
+        end
+        state.showhide_enabled = false
     end
 end
 
