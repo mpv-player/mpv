@@ -112,6 +112,7 @@ function add_video(s)
     append_property(s, sec, "avsync", {prefix="A-V:"})
     if append_property(s, sec, "drop-frame-count", {prefix="Dropped:"}) then
         append_property(s, sec, "vo-drop-frame-count", {prefix="VO:", nl=""})
+        append_property(s, sec, "vo-missed-frame-count", {prefix="Missed:", nl=""})
     end
     if append_property(s, sec, "fps", {prefix="FPS:", suffix=" (specified)"}) then
         append_property(s, sec, "estimated-vf-fps",
@@ -119,6 +120,10 @@ function add_video(s)
     else
         append_property(s, sec, "estimated-vf-fps",
                         {prefix="FPS:", suffix=" (estimated)"})
+    end
+    if append_property(s, sec, "video-speed-correction", {prefix="DS:"}) then
+        append_property(s, sec, "audio-speed-correction",
+                        {prefix="/", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
     if append_property(s, sec, "video-params/w", {prefix="Native Resolution:"}) then
         append_property(s, sec, "video-params/h",
