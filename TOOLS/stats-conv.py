@@ -5,7 +5,10 @@ import re
 
 filename = sys.argv[1]
 
-event_regex = re.compile(".*")
+events = ".*"
+if len(sys.argv) > 2:
+    events = sys.argv[2]
+event_regex = re.compile(events)
 
 """
 This script is meant to display stats written by mpv --dump-stats=filename.
