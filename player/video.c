@@ -581,7 +581,7 @@ static void handle_new_frame(struct MPContext *mpctx)
     mpctx->video_next_pts = pts;
     mpctx->delay -= frame_time;
     if (mpctx->video_status >= STATUS_PLAYING) {
-        mpctx->time_frame += frame_time / mpctx->opts->playback_speed;
+        mpctx->time_frame += frame_time / mpctx->video_speed;
         adjust_sync(mpctx, pts, frame_time);
     }
     mpctx->dropped_frames = 0;
@@ -711,7 +711,7 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
     {
         double buffered_audio = ao_get_delay(mpctx->ao);
 
-        double predicted = mpctx->delay / opts->playback_speed +
+        double predicted = mpctx->delay / mpctx->video_speed +
                            mpctx->time_frame;
         double difference = buffered_audio - predicted;
         MP_STATS(mpctx, "value %f audio-diff", difference);
@@ -727,7 +727,7 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
             buffered_audio = predicted + difference / opts->autosync;
         }
 
-        mpctx->time_frame = buffered_audio - mpctx->delay / opts->playback_speed;
+        mpctx->time_frame = buffered_audio - mpctx->delay / mpctx->video_speed;
     } else {
         /* If we're more than 200 ms behind the right playback
          * position, don't try to speed up display of following
@@ -756,7 +756,7 @@ static void update_avsync_after_frame(struct MPContext *mpctx)
 
     mpctx->last_av_difference = a_pos - mpctx->video_pts + opts->audio_delay;
     if (mpctx->time_frame > 0)
-        mpctx->last_av_difference += mpctx->time_frame * opts->playback_speed;
+        mpctx->last_av_difference += mpctx->time_frame * mpctx->video_speed;
     if (a_pos == MP_NOPTS_VALUE || mpctx->video_pts == MP_NOPTS_VALUE) {
         mpctx->last_av_difference = 0;
     } else if (fabs(mpctx->last_av_difference) > 0.5 && !mpctx->drop_message_shown) {
@@ -968,7 +968,7 @@ void write_video(struct MPContext *mpctx, double endpts)
     double diff = get_frame_duration(mpctx, 0);
     if (diff >= 0) {
         // expected A/V sync correction is ignored
-        diff /= opts->playback_speed;
+        diff /= mpctx->video_speed;
         if (mpctx->time_frame < 0)
             diff += mpctx->time_frame;
         frame->duration = MPCLAMP(diff, 0, 10) * 1e6;

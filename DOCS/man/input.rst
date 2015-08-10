@@ -826,6 +826,10 @@ Property list
 ``speed`` (RW)
     See ``--speed``.
 
+``audio-speed-correction``, ``video-speed-correction``
+    Factor multiplied with ``speed`` at which the player attempts to play the
+    file. Usually it's exactly 1. (Display sync mode will make this useful.)
+
 ``filename``
     Currently played file, with path stripped. If this is an URL, try to undo
     percent encoding as well. (The result is not necessarily correct, but

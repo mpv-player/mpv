@@ -279,9 +279,8 @@ static int mp_property_playback_speed(void *ctx, struct m_property *prop,
     double speed = mpctx->opts->playback_speed;
     switch (action) {
     case M_PROPERTY_SET: {
-        double new_speed = *(double *)arg;
-        if (speed != new_speed)
-            set_playback_speed(mpctx, new_speed);
+        mpctx->opts->playback_speed = *(double *)arg;
+        update_playback_speed(mpctx);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_PRINT:
@@ -289,6 +288,18 @@ static int mp_property_playback_speed(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
+}
+
+static int mp_property_av_speed_correction(void *ctx, struct m_property *prop,
+                                           int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    char *type = prop->priv;
+    switch (type[0]) {
+    case 'a': return m_property_double_ro(action, arg, mpctx->speed_factor_a);
+    case 'v': return m_property_double_ro(action, arg, mpctx->speed_factor_v);
+    }
+    abort();
 }
 
 /// filename with path (RO)
@@ -639,7 +650,7 @@ static int mp_property_playtime_remaining(void *ctx, struct m_property *prop,
     if (!time_remaining(mpctx, &remaining))
         return M_PROPERTY_UNAVAILABLE;
 
-    double speed = mpctx->opts->playback_speed;
+    double speed = mpctx->video_speed;
     return property_time(action, arg, remaining / speed);
 }
 
@@ -3305,6 +3316,8 @@ static const struct m_property mp_properties[] = {
     {"loop", mp_property_generic_option},
     {"loop-file", mp_property_generic_option},
     {"speed", mp_property_playback_speed},
+    {"audio-speed-correction", mp_property_av_speed_correction, .priv = "a"},
+    {"video-speed-correction", mp_property_av_speed_correction, .priv = "v"},
     {"filename", mp_property_filename},
     {"stream-open-filename", mp_property_stream_open_filename},
     {"file-size", mp_property_file_size},
@@ -3536,7 +3549,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_TICK, "time-pos", "stream-pos", "stream-time-pos", "avsync",
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
-      "total-avsync-change"),
+      "total-avsync-change", "audio-speed-correction", "video-speed-correction"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",

@@ -238,6 +238,12 @@ typedef struct MPContext {
 
     enum playback_status video_status, audio_status;
     bool restart_complete;
+    // Factors to multiply with opts->playback_speed to get the total audio or
+    // video speed (usually 1.0, but can be set to by the sync code).
+    double speed_factor_v, speed_factor_a;
+    // Redundant values set from opts->playback_speed and speed_factor_*.
+    // update_playback_speed() updates them from the other fields.
+    double audio_speed, video_speed;
     bool broken_fps_header;
     /* Set if audio should be timed to start with video frame after seeking,
      * not set when e.g. playing cover art */
@@ -362,7 +368,7 @@ double playing_audio_pts(struct MPContext *mpctx);
 void fill_audio_out_buffers(struct MPContext *mpctx, double endpts);
 double written_audio_pts(struct MPContext *mpctx);
 void clear_audio_output_buffers(struct MPContext *mpctx);
-void set_playback_speed(struct MPContext *mpctx, double new_speed);
+void update_playback_speed(struct MPContext *mpctx);
 void uninit_audio_out(struct MPContext *mpctx);
 void uninit_audio_chain(struct MPContext *mpctx);
 
