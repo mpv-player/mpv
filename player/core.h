@@ -76,6 +76,9 @@ enum seek_precision {
     MPSEEK_VERY_EXACT,
 };
 
+// Comes from the assumption that some formats round timestamps to ms.
+#define FRAME_DURATION_TOLERANCE 0.0011
+
 struct track {
     enum stream_type type;
 
@@ -235,6 +238,7 @@ typedef struct MPContext {
 
     enum playback_status video_status, audio_status;
     bool restart_complete;
+    bool broken_fps_header;
     /* Set if audio should be timed to start with video frame after seeking,
      * not set when e.g. playing cover art */
     bool sync_audio_to_video;
@@ -488,5 +492,6 @@ void write_video(struct MPContext *mpctx, double endpts);
 void mp_force_video_refresh(struct MPContext *mpctx);
 void uninit_video_out(struct MPContext *mpctx);
 void uninit_video_chain(struct MPContext *mpctx);
+double stabilize_frame_duration(struct MPContext *mpctx, bool require_exact);
 
 #endif /* MPLAYER_MP_CORE_H */

@@ -784,6 +784,78 @@ static void init_vo(struct MPContext *mpctx)
     mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }
 
+// Attempt to stabilize frame duration from jittery timestamps. This is mostly
+// needed with semi-broken file formats which round timestamps to ms, or files
+// created from them.
+// We do this to make a stable decision how much to change video playback speed.
+// Otherwise calc_best_speed() could make a different decision every frame, and
+// also audio speed would have to be readjusted all the time.
+// Return -1 if the frame duration seems to be unstable.
+// If require_exact is false, just return the average frame duration on failure.
+double stabilize_frame_duration(struct MPContext *mpctx, bool require_exact)
+{
+    if (require_exact && mpctx->broken_fps_header)
+        return -1;
+
+    // Note: the past frame durations are raw and unadjusted.
+    double fd[10];
+    int num = get_past_frame_durations(mpctx, fd, MP_ARRAY_SIZE(fd));
+    if (num < MP_ARRAY_SIZE(fd))
+        return -1;
+
+    bool ok = true;
+    double min = fd[0];
+    double max = fd[0];
+    double total_duration = 0;
+    for (int n = 0; n < num; n++) {
+        double cur = fd[n];
+        if (fabs(cur - fd[num - 1]) > FRAME_DURATION_TOLERANCE)
+            ok = false;
+        min = MPMIN(min, cur);
+        max = MPMAX(max, cur);
+        total_duration += cur;
+    }
+
+    if (max - min > FRAME_DURATION_TOLERANCE || !ok)
+        goto fail;
+
+    // It's not really possible to compute the actual, correct FPS, unless we
+    // e.g. consider a list of potentially correct values, detect cycles, or
+    // use similar guessing methods.
+    // Naively using the average between min and max should give a stable, but
+    // still relatively close value.
+    double modified_duration = (min + max) / 2;
+
+    // Except for the demuxer reported FPS, which might be the correct one.
+    // VFR files could contain segments that don't match.
+    if (mpctx->d_video->fps > 0) {
+        double demux_duration = 1.0 / mpctx->d_video->fps;
+        if (fabs(modified_duration - demux_duration) <= FRAME_DURATION_TOLERANCE)
+            modified_duration = demux_duration;
+    }
+
+    // Verify the estimated stabilized frame duration with the actual time
+    // passed in these frames. If it's wrong (wrong FPS in the header), then
+    // this will deviate a bit.
+    if (fabs(total_duration - modified_duration * num) > FRAME_DURATION_TOLERANCE)
+    {
+        if (require_exact && !mpctx->broken_fps_header) {
+            // The error message is slightly misleading: a framerate header
+            // field is not really needed, as long as the file has an exact
+            // timebase.
+            MP_WARN(mpctx, "File has broken or missing framerate header\n"
+                            "field, or is VFR with broken timestamps.\n");
+            mpctx->broken_fps_header = true;
+        }
+        goto fail;
+    }
+
+    return modified_duration;
+
+fail:
+    return require_exact ? -1 : total_duration / num;
+}
+
 // Return the next frame duration as stored in the file.
 // frame=0 means the current frame, 1 the frame after that etc.
 // Can return -1, though usually will return a fallback if frame unavailable.

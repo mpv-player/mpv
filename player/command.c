@@ -2625,14 +2625,10 @@ static int mp_property_vf_fps(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
-    double durations[10];
-    int num = get_past_frame_durations(mpctx, durations, MP_ARRAY_SIZE(durations));
-    if (num < MP_ARRAY_SIZE(durations))
+    double res = stabilize_frame_duration(mpctx, false);
+    if (res <= 0)
         return M_PROPERTY_UNAVAILABLE;
-    double duration = 0;
-    for (int n = 0; n < num; n++)
-        duration += durations[n];
-    return m_property_double_ro(action, arg, num / duration);
+    return m_property_double_ro(action, arg, 1 / res);
 }
 
 /// Video aspect (RO)
