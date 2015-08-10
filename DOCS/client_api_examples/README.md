@@ -24,6 +24,11 @@ qml_direct
 Alternative example, which typically avoids a FBO indirection. Might be
 slightly faster, but is less flexible and harder to use.
 
+sdl
+---
+
+Show how to embed the mpv OpenGL renderer in SDL.
+
 simple
 ------
 
