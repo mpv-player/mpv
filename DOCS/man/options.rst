@@ -2179,7 +2179,7 @@ Demuxer
     as partial files).
 
 ``--demuxer-mkv-fix-timestamps=<yes|no>``
-    Fix rounded Matroska timestamps (enabled by default). Matroska usually
+    Fix rounded Matroska timestamps (disabled by default). Matroska usually
     stores timestamps rounded to milliseconds. This means timestamps jitter
     by some amount around the intended timestamp. mpv can correct the timestamps
     based on the framerate value stored in the file: the timestamp is rounded

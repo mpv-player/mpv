@@ -206,7 +206,7 @@ const struct m_sub_options demux_mkv_conf = {
     .size = sizeof(struct demux_mkv_opts),
     .defaults = &(const struct demux_mkv_opts){
         .subtitle_preroll_secs = 1.0,
-        .fix_timestamps = 1,
+        .fix_timestamps = 0,
     },
 };
 
