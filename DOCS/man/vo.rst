@@ -545,9 +545,9 @@ Available video output drivers are:
         When using convolution based filters, extend the filter size
         when downscaling. Trades quality for reduced downscaling performance.
 
-        This is automatically disabled for anamorphic video, because this
-        feature doesn't work correctly with different scale factors in
-        different directions.
+        This will perform slightly sub-optimally for anamorphic video (but still
+        better than without it) since it will extend the size to match only the
+        milder of the scale factors between the axes.
 
     ``prescale=<filter>``
         This option provides non-convolution-based filters for upscaling. These

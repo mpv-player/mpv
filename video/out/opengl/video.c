@@ -1592,11 +1592,16 @@ static void pass_scale_main(struct gl_video *p)
         scaler = &p->scaler[1];
     }
 
-    double f = MPMIN(xy[0], xy[1]);
-    if (p->opts.fancy_downscaling && f < 1.0 &&
-        fabs(xy[0] - f) < 0.01 && fabs(xy[1] - f) < 0.01)
+    // When requesting fancy-downscaling and the clip is anamorphic, and because
+    // only a single fancy scale factor is used for both axes, enable fancy only
+    // when both axes are downscaled, and use the milder of the factors to not
+    // end up with too much blur on one axis (even if we end up with sub-optimal
+    // fancy factor on the other axis).
+    // This is better than not respecting fancy at all for anamorphic clips.
+    double f = MPMAX(xy[0], xy[1]);
+    if (p->opts.fancy_downscaling && f < 1.0)
     {
-        scale_factor = FFMAX(1.0, 1.0 / f);
+        scale_factor = 1.0 / f;
     }
 
     // Pre-conversion, like linear light/sigmoidization
