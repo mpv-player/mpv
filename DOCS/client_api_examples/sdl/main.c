@@ -72,10 +72,6 @@ int main(int argc, char *argv[])
     if (mpv_set_option_string(mpv, "vo", "opengl-cb") < 0)
         die("failed to set VO");
 
-    // Play this file. Note that this asynchronously starts playback.
-    const char *cmd[] = {"loadfile", argv[1], NULL};
-    mpv_command(mpv, cmd);
-
     // We use events for thread-safe notification of the SDL main loop.
     wakeup_on_mpv_redraw = SDL_RegisterEvents(1);
     wakeup_on_mpv_events = SDL_RegisterEvents(1);
@@ -89,6 +85,10 @@ int main(int argc, char *argv[])
     // (Separate from the normal event handling mechanism for the sake of
     //  users which run OpenGL on a different thread.)
     mpv_opengl_cb_set_update_callback(mpv_gl, on_mpv_redraw, NULL);
+
+    // Play this file. Note that this asynchronously starts playback.
+    const char *cmd[] = {"loadfile", argv[1], NULL};
+    mpv_command(mpv, cmd);
 
     while (1) {
         SDL_Event event;
