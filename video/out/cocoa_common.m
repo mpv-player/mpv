@@ -271,9 +271,9 @@ static int vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
     MpvEventsView *v = (MpvEventsView *) s->view;
 
     if (*visible) {
-        CGDisplayShowCursor(kCGDirectMainDisplay);
+        [v setCursorVisible:YES];
     } else if ([v canHideCursor]) {
-        CGDisplayHideCursor(kCGDirectMainDisplay);
+        [v setCursorVisible:NO];
     } else {
         *visible = true;
     }
