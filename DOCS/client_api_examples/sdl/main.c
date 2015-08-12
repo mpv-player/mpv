@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     if (!mpv)
         die("context init failed");
 
-    // Done setting up options.
+    // Some minor options can only be set before mpv_initialize().
     if (mpv_initialize(mpv) < 0)
         die("mpv init failed");
 
@@ -56,6 +56,8 @@ int main(int argc, char *argv[])
     if (!window)
         die("failed to create SDL window");
 
+    // The OpenGL API is somewhat separate from the normal mpv API. This only
+    // returns NULL if no OpenGL support is compiled.
     mpv_opengl_cb_context *mpv_gl = mpv_get_sub_api(mpv, MPV_SUB_API_OPENGL_CB);
     if (!mpv_gl)
         die("failed to create mpv GL API handle");
@@ -64,6 +66,8 @@ int main(int argc, char *argv[])
     if (!glcontext)
         die("failed to create SDL GL context");
 
+    // This makes mpv use the currently set GL context. It will use the callback
+    // to resolve GL builtin functions, as well as extensions.
     if (mpv_opengl_cb_init_gl(mpv_gl, NULL, get_proc_address_mpv, NULL) < 0)
         die("failed to initialize mpv GL context");
 
@@ -73,6 +77,10 @@ int main(int argc, char *argv[])
         die("failed to set VO");
 
     // We use events for thread-safe notification of the SDL main loop.
+    // Generally, the wakeup callbacks (set further below) should do as least
+    // work as possible, and merely wake up another thread to do actual work.
+    // On SDL, waking up the mainloop is the ideal curse of action. SDL's
+    // SDL_PushEvent() is thread-safe, so we use that.
     wakeup_on_mpv_redraw = SDL_RegisterEvents(1);
     wakeup_on_mpv_events = SDL_RegisterEvents(1);
     if (wakeup_on_mpv_redraw == (Uint32)-1 || wakeup_on_mpv_events == (Uint32)-1)
@@ -125,13 +133,25 @@ int main(int argc, char *argv[])
         if (redraw) {
             int w, h;
             SDL_GetWindowSize(window, &w, &h);
+            // Note:
+            // - The 0 is the FBO to use; 0 is the default framebuffer (i.e.
+            //   render to the window directly.
+            // - The negative height tells mpv to flip the coordinate system.
+            // - If you do not want the video to cover the whole screen, or want
+            //   to apply any form of fancy transformation, you will have to
+            //   render to a FBO.
+            // - See opengl_cb.h on what OpenGL environment mpv expects, and
+            //   other API details.
             mpv_opengl_cb_draw(mpv_gl, 0, w, -h);
             SDL_GL_SwapWindow(window);
         }
     }
 done:
 
+    // Destroy the GL renderer and all of the GL objects it allocated. If video
+    // is still running, the video track will be deselected.
     mpv_opengl_cb_uninit_gl(mpv_gl);
+
     mpv_terminate_destroy(mpv);
     return 0;
 }
