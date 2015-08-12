@@ -113,7 +113,6 @@ typedef struct demux_chapter
 {
     int original_index;
     double pts;
-    char *name;
     struct mp_tags *metadata;
     uint64_t demuxer_id; // for mapping to internal demuxer data structures
 } demux_chapter_t;

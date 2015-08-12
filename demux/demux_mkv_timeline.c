@@ -372,7 +372,8 @@ static void build_timeline_loop(struct tl_ctx *ctx,
                     break; // malformed files can cause this to happen.
 
                 chapters[i].pts = ctx->start_time / 1e9;
-                chapters[i].name = talloc_strdup(chapters, c->name);
+                chapters[i].metadata = talloc_zero(chapters, struct mp_tags);
+                mp_tags_set_str(chapters[i].metadata, "title", c->name);
             }
 
             /* If we're the source or it's a non-ordered edition reference,
@@ -556,9 +557,6 @@ void build_ordered_chapter_timeline(struct timeline *tl)
 
     struct demux_chapter *chapters =
         talloc_zero_array(tl, struct demux_chapter, m->num_ordered_chapters);
-    // Stupid hack, because fuck everything.
-    for (int n = 0; n < m->num_ordered_chapters; n++)
-        chapters[n].pts = -1;
 
     ctx->timeline = talloc_array_ptrtype(tl, ctx->timeline, 0);
     ctx->num_chapters = m->num_ordered_chapters;
@@ -569,9 +567,9 @@ void build_ordered_chapter_timeline(struct timeline *tl)
     };
     build_timeline_loop(ctx, chapters, &info, 0);
 
-    // Fuck everything (2): filter out all "unset" chapters.
+    // Fuck everything: filter out all "unset" chapters.
     for (int n = m->num_ordered_chapters - 1; n >= 0; n--) {
-        if (chapters[n].pts == -1)
+        if (!chapters[n].metadata)
             MP_TARRAY_REMOVE_AT(chapters, m->num_ordered_chapters, n);
     }
 

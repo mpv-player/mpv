@@ -805,7 +805,6 @@ static int get_chapter_entry(int item, int action, void *arg, void *ctx)
     };
 
     int r = m_property_read_sub(props, action, arg);
-    talloc_free(name);
     return r;
 }
 
@@ -1178,11 +1177,8 @@ static int mp_property_chapter_metadata(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     int chapter = get_current_chapter(mpctx);
-    if (chapter < 0 || chapter >= mpctx->num_chapters)
+    if (chapter < 0)
         return M_PROPERTY_UNAVAILABLE;
-    if (!mpctx->chapters[chapter].metadata)
-        return M_PROPERTY_UNAVAILABLE;
-
     return tag_property(action, arg, mpctx->chapters[chapter].metadata);
 }
 

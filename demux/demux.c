@@ -1271,7 +1271,6 @@ int demuxer_add_chapter(demuxer_t *demuxer, char *name,
     struct demux_chapter new = {
         .original_index = demuxer->num_chapters,
         .pts = pts,
-        .name = talloc_strdup(demuxer, name),
         .metadata = talloc_zero(demuxer, struct mp_tags),
         .demuxer_id = demuxer_id,
     };
@@ -1511,9 +1510,7 @@ struct demux_chapter *demux_copy_chapter_data(struct demux_chapter *c, int num)
     struct demux_chapter *new = talloc_array(NULL, struct demux_chapter, num);
     for (int n = 0; n < num; n++) {
         new[n] = c[n];
-        new[n].name = talloc_strdup(new, new[n].name);
-        if (new[n].metadata)
-            new[n].metadata = mp_tags_dup(new, new[n].metadata);
+        new[n].metadata = mp_tags_dup(new, new[n].metadata);
     }
     return new;
 }

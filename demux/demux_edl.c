@@ -167,7 +167,7 @@ static void copy_chapters(struct demux_chapter **chapters, int *num_chapters,
         if (time >= start && time <= start + len) {
             struct demux_chapter ch = {
                 .pts = dest_offset + time - start,
-                .name = talloc_strdup(*chapters, src->chapters[n].name),
+                .metadata = mp_tags_dup(*chapters, src->chapters[n].metadata),
             };
             MP_TARRAY_APPEND(NULL, *chapters, *num_chapters, ch);
         }
@@ -238,8 +238,9 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
         // Add a chapter between each file.
         struct demux_chapter ch = {
             .pts = starttime,
-            .name = talloc_strdup(tl, part->filename),
+            .metadata = talloc_zero(tl, struct mp_tags),
         };
+        mp_tags_set_str(ch.metadata, "title", part->filename);
         MP_TARRAY_APPEND(tl, tl->chapters, tl->num_chapters, ch);
 
         // Also copy the source file's chapters for the relevant parts

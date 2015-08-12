@@ -474,7 +474,6 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter)
             dname = talloc_asprintf(NULL, "(%d) of %d", chapter + 1,
                                     chapter_count);
     }
-    talloc_free(name);
     return dname;
 }
 
@@ -483,7 +482,7 @@ char *chapter_name(struct MPContext *mpctx, int chapter)
 {
     if (chapter < 0 || chapter >= mpctx->num_chapters)
         return NULL;
-    return talloc_strdup(NULL, mpctx->chapters[chapter].name);
+    return mp_tags_get_str(mpctx->chapters[chapter].metadata, "title");
 }
 
 // returns the start of the chapter in seconds (NOPTS if unavailable)

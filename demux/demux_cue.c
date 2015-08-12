@@ -224,9 +224,10 @@ static void build_timeline(struct timeline *tl)
         };
         chapters[i] = (struct demux_chapter) {
             .pts = timeline[i].start,
-            // might want to include other metadata here
-            .name = talloc_strdup(chapters, tracks[i].title),
+            .metadata = talloc_zero(tl, struct mp_tags),
         };
+        // might want to include other metadata here
+        mp_tags_set_str(chapters[i].metadata, "title", tracks[i].title);
         starttime += duration;
     }
 
