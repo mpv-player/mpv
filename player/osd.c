@@ -226,7 +226,11 @@ static void print_status(struct MPContext *mpctx)
         // VO stats
         if (mpctx->d_video) {
             if (mpctx->display_sync_active) {
-                saddf(&line, " DS: %f", mpctx->speed_factor_a);
+                char *f =
+                    mp_property_expand_string(mpctx, "${audio-speed-correction}");
+                if (f)
+                    saddf(&line, " DS: %s", f);
+                talloc_free(f);
                 int64_t m = vo_get_missed_count(mpctx->video_out);
                 if (m > 0)
                     saddf(&line, " Missed: %"PRId64, m);

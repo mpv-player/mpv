@@ -527,9 +527,10 @@ listed.
   this will indicate a problem. (``total-avsync-change`` property.)
 - Encoding state in ``{...}``, only shown in encoding mode.
 - Display sync state. If display sync is active (``display-sync-active``
-  property), this shows ``DS: 1.002``, where the number is the speed change
-  factor applied to audio to achieve sync to display (``audio-speed-correction``
-  property). In sync modes which don't resample, this will always be ``1.000``.
+  property), this shows ``DS: +0.02598%``, where the number is the speed change
+  factor applied to audio to achieve sync to display, expressed in percent
+  deviation from 1.0 (``audio-speed-correction`` property). In sync modes which
+  don't resample, this will always be ``+0.00000%``.
 - Missed frames, e.g. ``Missed: 4``. (``vo-missed-frame-count`` property.) Shows
   up in display sync mode only. This is incremented each time a frame took
   longer to display than intended.
