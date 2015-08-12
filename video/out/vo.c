@@ -930,8 +930,8 @@ bool vo_still_displaying(struct vo *vo)
     int64_t frame_end = 0;
     if (in->current_frame) {
         frame_end = in->current_frame->pts + MPMAX(in->current_frame->duration, 0);
-        if (in->current_frame->num_vsyncs > 0)
-            frame_end = INT64_MAX;
+        if (in->current_frame->display_synced)
+            frame_end = in->current_frame->num_vsyncs > 0 ? INT64_MAX : 0;
     }
     bool working = now < frame_end || in->rendering || in->frame_queued;
     pthread_mutex_unlock(&vo->in->lock);
