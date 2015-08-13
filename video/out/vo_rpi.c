@@ -71,7 +71,7 @@ struct priv {
     MMAL_COMPONENT_T *renderer;
     bool renderer_enabled;
 
-    bool display_synced;
+    bool display_synced, skip_osd;
     struct mp_image *next_image;
 
     // for RAM input
@@ -345,8 +345,11 @@ static void flip_page(struct vo *vo)
     p->next_image = NULL;
 
     // For OSD
-    vc_dispmanx_update_submit_sync(p->update);
-    p->update = vc_dispmanx_update_start(10);
+    if (!p->skip_osd) {
+        vc_dispmanx_update_submit_sync(p->update);
+        p->update = vc_dispmanx_update_start(10);
+    }
+    p->skip_osd = false;
 
     if (mpi) {
         MMAL_PORT_T *input = p->renderer->input[0];
@@ -387,7 +390,8 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     // Redraw only if the OSD has meaningfully changed, which we assume it
     // hasn't when a frame is merely repeated for display sync.
-    if (frame->redraw || !frame->repeat)
+    p->skip_osd = !frame->redraw && frame->repeat;
+    if (!p->skip_osd)
         update_osd(vo);
 
     p->display_synced = frame->display_synced;
