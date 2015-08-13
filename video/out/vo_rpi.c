@@ -59,7 +59,6 @@ struct osd_part {
 struct priv {
     DISPMANX_DISPLAY_HANDLE_T display;
     DISPMANX_ELEMENT_HANDLE_T window;
-    DISPMANX_RESOURCE_HANDLE_T window_back;
     DISPMANX_UPDATE_HANDLE_T update;
     uint32_t w, h;
     double display_fps;
@@ -270,22 +269,7 @@ static int update_display_size(struct vo *vo)
 
     if (p->window)
         vc_dispmanx_element_remove(p->update, p->window);
-    if (p->window_back)
-        vc_dispmanx_resource_delete(p->window_back);
     p->window = 0;
-    p->window_back = 0;
-
-    VC_IMAGE_TYPE_T format = VC_IMAGE_ARGB8888; // assuming RPI is always LE
-    p->window_back = vc_dispmanx_resource_create(format, 1 | (4 << 16), 1,
-                                                 &(int32_t){0});
-    if (!p->window_back) {
-        MP_ERR(vo, "Could not create background bitmap.\n");
-        return -1;
-    }
-
-    uint32_t px = 0;
-    VC_RECT_T rc = {.width = 1, .height = 1};
-    vc_dispmanx_resource_write_data(p->window_back, format, 4, &px, &rc);
 
     // Use the whole screen.
     VC_RECT_T dst = {.width = p->w, .height = p->h};
@@ -295,7 +279,7 @@ static int update_display_size(struct vo *vo)
         .opacity = 0xFF,
     };
     p->window = vc_dispmanx_element_add(p->update, p->display, p->background_layer,
-                                        &dst, p->window_back, &src,
+                                        &dst, 0, &src,
                                         DISPMANX_PROTECTION_NONE, &alpha, 0, 0);
     if (!p->window) {
         MP_FATAL(vo, "Could not add DISPMANX element.\n");
@@ -630,8 +614,6 @@ static void uninit(struct vo *vo)
 
     if (p->window)
         vc_dispmanx_element_remove(p->update, p->window);
-    if (p->window_back)
-        vc_dispmanx_resource_delete(p->window_back);
 
     if (p->update)
         vc_dispmanx_update_submit_sync(p->update);
