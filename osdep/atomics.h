@@ -22,8 +22,6 @@
 #include <inttypes.h>
 #include "config.h"
 
-#define HAVE_ATOMICS 1
-
 #if HAVE_STDATOMIC
 #include <stdatomic.h>
 #else
@@ -96,9 +94,6 @@ typedef struct { volatile unsigned long long v, t;  } atomic_ullong;
 #define atomic_fetch_or(a, b) atomic_fetch_op_(a, b, |)
 #define atomic_compare_exchange_strong(p, old, new) \
     ((p)->v == *(old) ? ((p)->v = (new), 1) : (*(old) = (p)->v, 0))
-
-#undef HAVE_ATOMICS
-#define HAVE_ATOMICS 0
 
 #endif /* no atomics */
 
