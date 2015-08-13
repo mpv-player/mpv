@@ -641,8 +641,10 @@ static void uninit(struct vo *vo)
         mmal_component_release(p->renderer);
     }
 
-    if (p->display)
+    if (p->display) {
+        vc_dispmanx_vsync_callback(p->display, NULL, NULL);
         vc_dispmanx_display_close(p->display);
+    }
 
     mmal_vc_deinit();
 
