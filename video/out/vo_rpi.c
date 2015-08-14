@@ -380,7 +380,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     p->display_synced = frame->display_synced;
 
-    if (vo->params->imgfmt != IMGFMT_MMAL) {
+    if (mpi && mpi->imgfmt != IMGFMT_MMAL) {
         MMAL_BUFFER_HEADER_T *buffer = mmal_queue_wait(p->swpool->queue);
         if (!buffer) {
             talloc_free(mpi);
