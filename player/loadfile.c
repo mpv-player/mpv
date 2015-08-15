@@ -90,7 +90,7 @@ static void uninit_demuxer(struct MPContext *mpctx)
     timeline_destroy(mpctx->tl);
     mpctx->tl = NULL;
 
-    free_demuxer(mpctx->master_demuxer);
+    free_demuxer_and_stream(mpctx->master_demuxer);
     mpctx->master_demuxer = NULL;
 
     talloc_free(mpctx->sources);
