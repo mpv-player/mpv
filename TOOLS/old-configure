@@ -216,6 +216,7 @@ options_state_machine() {
     opt_yes_no _lua         "Lua scripting"
     opt_yes_no _vapoursynth "VapourSynth filter bridge (Python)"
     opt_yes_no _vapoursynth_lazy "VapourSynth filter bridge (Lua)"
+    opt_yes_no _libarchive  "libarchive"
     opt_yes_no _encoding    "encoding functionality" yes
     opt_yes_no _build_man   "building manpage"
 }
@@ -858,6 +859,8 @@ if test "$_vapoursynth" = no && test "$_vapoursynth_lazy" = no ; then
     _vapoursynth_core=no
 fi
 check_trivial "VapourSynth core" $_vapoursynth_core VAPOURSYNTH_CORE
+
+check_pkg_config "libarchive support" $_libarchive LIBARCHIVE 'libarchive >= 3.0.0'
 
 check_trivial "encoding" $_encoding ENCODING
 

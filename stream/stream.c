@@ -75,6 +75,7 @@ extern const stream_info_t stream_info_bluray;
 extern const stream_info_t stream_info_bdnav;
 extern const stream_info_t stream_info_rar;
 extern const stream_info_t stream_info_edl;
+extern const stream_info_t stream_info_libarchive;
 
 static const stream_info_t *const stream_list[] = {
 #if HAVE_CDDA
@@ -107,6 +108,9 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_bdmv_dir,
     &stream_info_bluray,
     &stream_info_bdnav,
+#endif
+#if HAVE_LIBARCHIVE
+    &stream_info_libarchive,
 #endif
 
     &stream_info_memory,

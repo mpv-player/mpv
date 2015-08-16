@@ -108,6 +108,8 @@ SOURCES-$(LIBAVFILTER)          += video/filter/vf_lavfi.c \
 
 SOURCES-$(LUA)                  += player/lua.c
 SOURCES-$(VAPOURSYNTH_CORE)     += video/filter/vf_vapoursynth.c
+SOURCES-$(LIBARCHIVE)           += demux/demux_libarchive.c \
+                                   stream/stream_libarchive.c
 SOURCES-$(DLOPEN)               += video/filter/vf_dlopen.c
 
 SOURCES = audio/audio.c \
