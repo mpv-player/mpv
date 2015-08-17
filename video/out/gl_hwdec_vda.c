@@ -17,6 +17,8 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Note: handles both VDA and VideoToolbox
+
 #include <IOSurface/IOSurface.h>
 #include <CoreVideo/CoreVideo.h>
 #include <OpenGL/OpenGL.h>
@@ -116,11 +118,6 @@ static struct mp_image *download_image(struct mp_hwdec_ctx *ctx,
 
 static bool check_hwdec(struct gl_hwdec *hw)
 {
-    if (hw->gl_texture_target != GL_TEXTURE_RECTANGLE) {
-        MP_ERR(hw, "must use rectangle video textures with VDA\n");
-        return false;
-    }
-
     if (!CGLGetCurrentContext()) {
         MP_ERR(hw, "need cocoa opengl backend to be active");
         return false;
@@ -150,9 +147,9 @@ static int create_common(struct gl_hwdec *hw, struct vda_format *format)
     return 0;
 }
 
-#if HAVE_VDA_GL
-static int create_vda(struct gl_hwdec *hw)
+static int create(struct gl_hwdec *hw)
 {
+    // For videotoolbox, we always request NV12.
 #if HAVE_VDA_DEFAULT_INIT2
     struct vda_format *f = vda_get_gl_format_from_imgfmt(IMGFMT_NV12);
 #else
@@ -161,24 +158,10 @@ static int create_vda(struct gl_hwdec *hw)
     if (create_common(hw, f))
         return -1;
 
-    hw->hwctx->type = HWDEC_VDA;
-
-    return 0;
-}
-#endif
-
-#if HAVE_VIDEOTOOLBOX_GL
-static int create_videotoolbox(struct gl_hwdec *hw)
-{
-    struct vda_format *f = vda_get_gl_format_from_imgfmt(IMGFMT_NV12);
-    if (create_common(hw, f))
-        return -1;
-
     hw->hwctx->type = HWDEC_VIDEOTOOLBOX;
 
     return 0;
 }
-#endif
 
 static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 {
@@ -242,24 +225,11 @@ static void destroy(struct gl_hwdec *hw)
     gl->DeleteTextures(MP_MAX_PLANES, p->gl_planes);
 }
 
-#if HAVE_VDA_GL
-const struct gl_hwdec_driver gl_hwdec_vda = {
-    .api_name = "vda",
-    .imgfmt = IMGFMT_VDA,
-    .create = create_vda,
-    .reinit = reinit,
-    .map_image = map_image,
-    .destroy = destroy,
-};
-#endif
-
-#if HAVE_VIDEOTOOLBOX_GL
 const struct gl_hwdec_driver gl_hwdec_videotoolbox = {
     .api_name = "videotoolbox",
     .imgfmt = IMGFMT_VIDEOTOOLBOX,
-    .create = create_videotoolbox,
+    .create = create,
     .reinit = reinit,
     .map_image = map_image,
     .destroy = destroy,
 };
-#endif
