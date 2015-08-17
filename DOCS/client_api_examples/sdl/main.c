@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     // We use events for thread-safe notification of the SDL main loop.
     // Generally, the wakeup callbacks (set further below) should do as least
     // work as possible, and merely wake up another thread to do actual work.
-    // On SDL, waking up the mainloop is the ideal curse of action. SDL's
+    // On SDL, waking up the mainloop is the ideal course of action. SDL's
     // SDL_PushEvent() is thread-safe, so we use that.
     wakeup_on_mpv_redraw = SDL_RegisterEvents(1);
     wakeup_on_mpv_events = SDL_RegisterEvents(1);
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
     //  users which run OpenGL on a different thread.)
     mpv_opengl_cb_set_update_callback(mpv_gl, on_mpv_redraw, NULL);
 
-    // Play this file. Note that this asynchronously starts playback.
+    // Play this file. Note that this starts playback asynchronously.
     const char *cmd[] = {"loadfile", argv[1], NULL};
     mpv_command(mpv, cmd);
 
