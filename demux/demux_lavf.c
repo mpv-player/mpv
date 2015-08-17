@@ -204,8 +204,8 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
     int64_t current_pos;
     MP_TRACE(demuxer, "mp_seek(%p, %"PRId64", %d)\n", stream, pos, whence);
     if (whence == SEEK_END || whence == AVSEEK_SIZE) {
-        int64_t end;
-        if (stream_control(stream, STREAM_CTRL_GET_SIZE, &end) != STREAM_OK)
+        int64_t end = stream_get_size(stream);
+        if (end < 0)
             return -1;
         if (whence == AVSEEK_SIZE)
             return end;
@@ -917,8 +917,7 @@ static void demux_seek_lavf(demuxer_t *demuxer, double rel_seek_secs, int flags)
 
     if (flags & SEEK_FACTOR) {
         struct stream *s = demuxer->stream;
-        int64_t end = 0;
-        stream_control(s, STREAM_CTRL_GET_SIZE, &end);
+        int64_t end = stream_get_size(s);
         if (end > 0 && demuxer->ts_resets_possible &&
             !(priv->avif_flags & AVFMT_NO_BYTE_SEEK))
         {

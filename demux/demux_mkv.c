@@ -1768,9 +1768,7 @@ static int read_mkv_segment_header(demuxer_t *demuxer, int64_t *segment_end)
         MP_VERBOSE(demuxer, "  (skipping)\n");
         if (*segment_end <= 0)
             break;
-        int64_t end = 0;
-        stream_control(s, STREAM_CTRL_GET_SIZE, &end);
-        if (*segment_end >= end)
+        if (*segment_end >= stream_get_size(s))
             return 0;
         if (!stream_seek(s, *segment_end)) {
             MP_WARN(demuxer, "Failed to seek in file\n");
@@ -1834,8 +1832,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
             return -1;
     }
 
-    int64_t end = 0;
-    stream_control(s, STREAM_CTRL_GET_SIZE, &end);
+    int64_t end = stream_get_size(s);
 
     // Read headers that come after the first cluster (i.e. require seeking).
     // Note: reading might increase ->num_headers.
@@ -2800,9 +2797,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
 
         read_deferred_cues(demuxer);
 
-        int64_t size = 0;
-        stream_control(s, STREAM_CTRL_GET_SIZE, &size);
-
+        int64_t size = stream_get_size(s);
         int64_t target_filepos = size * MPCLAMP(rel_seek_secs, 0, 1);
 
         mkv_index_t *index = NULL;
@@ -2824,7 +2819,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
             stream_seek(s, index->filepos);
             mkv_d->skip_to_timecode = index->timecode * mkv_d->tc_scale;
         } else {
-            stream_seek(s, target_filepos);
+            stream_seek(s, MPMAX(target_filepos, 0));
             if (ebml_resync_cluster(mp_null_log, s) < 0) {
                 // Assume EOF
                 mkv_d->cluster_end = size;
@@ -2877,8 +2872,7 @@ static void probe_last_timestamp(struct demuxer *demuxer)
                 return;
         } else {
             // No index -> just try to find a random cluster towards file end.
-            int64_t size = 0;
-            stream_control(demuxer->stream, STREAM_CTRL_GET_SIZE, &size);
+            int64_t size = stream_get_size(demuxer->stream);
             stream_seek(demuxer->stream, MPMAX(size - 10 * 1024 * 1024, 0));
             if (ebml_resync_cluster(mp_null_log, demuxer->stream) < 0)
                 stream_seek(demuxer->stream, old_pos); // full scan otherwise

@@ -208,8 +208,7 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
     if (!stream)
         return -1;
 
-    int64_t size = 0;
-    stream_control(stream, STREAM_CTRL_GET_SIZE, &size);
+    int64_t size = stream_get_size(stream);
 
     stream_set_capture_file(stream, opts->stream_dump);
 

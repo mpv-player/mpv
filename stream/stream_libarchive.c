@@ -42,8 +42,7 @@ static ssize_t seek_cb(struct archive *arch, void *priv,
         offset += mpa->src->pos;
         break;
     case SEEK_END: ;
-        int64_t size = -1;
-        stream_control(mpa->src, STREAM_CTRL_GET_SIZE, &size);
+        int64_t size = stream_get_size(mpa->src);
         if (size < 0)
             return -1;
         offset += size;

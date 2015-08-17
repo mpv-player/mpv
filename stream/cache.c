@@ -355,7 +355,8 @@ static void update_cached_controls(struct priv *s)
         s->stream_metadata = talloc_steal(s, tags);
     }
     s->stream_size = s->eof_pos;
-    if (stream_control(s->stream, STREAM_CTRL_GET_SIZE, &i64) == STREAM_OK)
+    i64 = stream_get_size(s->stream);
+    if (i64 >= 0)
         s->stream_size = i64;
     s->has_avseek = stream_control(s->stream, STREAM_CTRL_HAS_AVSEEK, NULL) > 0;
 }
@@ -625,8 +626,7 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
 
     int64_t cache_size = opts->size * 1024ULL;
 
-    int64_t file_size = -1;
-    stream_control(stream, STREAM_CTRL_GET_SIZE, &file_size);
+    int64_t file_size = stream_get_size(stream);
     if (file_size >= 0)
         cache_size = MPMIN(cache_size, file_size);
 

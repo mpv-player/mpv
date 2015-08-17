@@ -66,8 +66,7 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
     }
     // Size of file changes -> invalidate last block
     if (s->pos >= p->size - BLOCK_SIZE) {
-        int64_t new_size = -1;
-        stream_control(s, STREAM_CTRL_GET_SIZE, &new_size);
+        int64_t new_size = stream_get_size(s);
         if (p->size >= 0 && new_size != p->size)
             set_bit(p, BLOCK_ALIGN(p->size), 0);
         p->size = MPMIN(p->max_size, new_size);

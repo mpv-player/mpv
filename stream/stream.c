@@ -468,8 +468,7 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
         // just in case this is an error e.g. due to network
         // timeout reset and retry
         // do not retry if this looks like proper eof
-        int64_t size = -1;
-        stream_control(s, STREAM_CTRL_GET_SIZE, &size);
+        int64_t size = stream_get_size(s);
         if (!s->eof && s->pos != size && stream_reconnect(s)) {
             s->eof = 1; // make sure EOF is set to ensure no endless recursion
             return stream_read_unbuffered(s, buf, orig_len);
@@ -702,6 +701,15 @@ int stream_control(stream_t *s, int cmd, void *arg)
     return s->control ? s->control(s, cmd, arg) : STREAM_UNSUPPORTED;
 }
 
+// Return the current size of the stream, or a negative value if unknown.
+int64_t stream_get_size(stream_t *s)
+{
+    int64_t size = -1;
+    if (stream_control(s, STREAM_CTRL_GET_SIZE, &size) != STREAM_OK)
+        size = -1;
+    return size;
+}
+
 void free_stream(stream_t *s)
 {
     if (!s)
@@ -908,8 +916,7 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
     int total_read = 0;
     int padding = 1;
     char *buf = NULL;
-    int64_t size = 0;
-    stream_control(s, STREAM_CTRL_GET_SIZE, &size);
+    int64_t size = stream_get_size(s);
     if (size > max_size)
         return (struct bstr){NULL, 0};
     if (size > 0)
