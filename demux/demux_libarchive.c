@@ -32,6 +32,9 @@ static int cmp_filename(const void *a, const void *b)
 
 static int open_file(struct demuxer *demuxer, enum demux_check check)
 {
+    if (stream_get_size(demuxer->stream) == 0)
+        return -1;
+
     int flags = 0;
     if (check <= DEMUX_CHECK_REQUEST)
         flags |= MP_ARCHIVE_FLAG_UNSAFE;
