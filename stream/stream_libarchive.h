@@ -7,4 +7,7 @@ struct mp_archive {
 };
 
 void mp_archive_free(struct mp_archive *mpa);
-struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src);
+
+#define MP_ARCHIVE_FLAG_UNSAFE 1
+struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
+                                  int flags);

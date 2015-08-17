@@ -71,7 +71,8 @@ void mp_archive_free(struct mp_archive *mpa)
     talloc_free(mpa);
 }
 
-struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src)
+struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
+                                  int flags)
 {
     struct mp_archive *mpa = talloc_zero(NULL, struct mp_archive);
     mpa->src = src;
@@ -81,6 +82,8 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src)
         goto err;
     archive_read_support_format_all(mpa->arch);
     archive_read_support_filter_all(mpa->arch);
+    if (flags & MP_ARCHIVE_FLAG_UNSAFE)
+        archive_read_support_format_raw(mpa->arch);
     archive_read_set_callback_data(mpa->arch, mpa);
     archive_read_set_read_callback(mpa->arch, read_cb);
     archive_read_set_skip_callback(mpa->arch, skip_cb);
@@ -106,7 +109,7 @@ static int reopen_archive(stream_t *s)
 {
     struct priv *p = s->priv;
     mp_archive_free(p->mpa);
-    p->mpa = mp_archive_new(s->log, p->src);
+    p->mpa = mp_archive_new(s->log, p->src, MP_ARCHIVE_FLAG_UNSAFE);
     if (!p->mpa)
         return STREAM_ERROR;
 

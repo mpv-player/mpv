@@ -32,7 +32,10 @@ static int cmp_filename(const void *a, const void *b)
 
 static int open_file(struct demuxer *demuxer, enum demux_check check)
 {
-    struct mp_archive *mpa = mp_archive_new(demuxer->log, demuxer->stream);
+    int flags = 0;
+    if (check <= DEMUX_CHECK_REQUEST)
+        flags |= MP_ARCHIVE_FLAG_UNSAFE;
+    struct mp_archive *mpa = mp_archive_new(demuxer->log, demuxer->stream, flags);
     if (!mpa)
         return -1;
 
