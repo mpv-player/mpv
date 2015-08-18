@@ -95,6 +95,7 @@ the autodetection check failed.".format(self.identifier)
             self.success(self.identifier)
         else:
             self.fail()
+            self.ctx.undefine(inflector.define_key(self.identifier))
             self.fatal_if_needed()
 
     def enabled_option(self, identifier=None):
