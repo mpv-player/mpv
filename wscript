@@ -676,7 +676,7 @@ video_output_features = [
         # including them (compensate with -isystem and -fgnu89-inline).
         'name': '--rpi',
         'desc': 'Raspberry Pi support',
-        'func':
+        'func': compose_checks(
             check_cc(cflags="-isystem/opt/vc/include/ "+
                             "-isystem/opt/vc/include/interface/vcos/pthreads " +
                             "-isystem/opt/vc/include/interface/vmcs_host/linux " +
@@ -684,23 +684,17 @@ video_output_features = [
                      linkflags="-L/opt/vc/lib",
                      header_name="bcm_host.h",
                      lib=['mmal_core', 'mmal_util', 'mmal_vc_client', 'bcm_host']),
-    }, {
-        'name': '--rpi-gles',
-        'desc': 'GLES on Raspberry Pi',
-        'groups': [ 'gl' ],
-        'deps': ['rpi'],
-        # We still need all OpenGL symbols, because the vo_opengl code is
-        # generic and supports anything from GLES2/OpenGL 2.1 to OpenGL 4 core.
-        'func': compose_checks(
+            # We still need all OpenGL symbols, because the vo_opengl code is
+            # generic and supports anything from GLES2/OpenGL 2.1 to OpenGL 4 core.
             check_cc(lib="EGL"),
             check_cc(lib="GLESv2"),
             check_statement('GL/gl.h', '(void)GL_RGB32F'),     # arbitrary OpenGL 3.0 symbol
             check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
-            ),
+        ),
     } , {
         'name': '--gl',
         'desc': 'OpenGL video outputs',
-        'deps_any': [ 'gl-cocoa', 'gl-x11', 'gl-win32', 'gl-wayland', 'rpi-gles' ],
+        'deps_any': [ 'gl-cocoa', 'gl-x11', 'gl-win32', 'gl-wayland', 'rpi' ],
         'func': check_true
     }
 ]

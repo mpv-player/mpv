@@ -333,7 +333,7 @@ def build(ctx):
         ( "video/out/filter_kernels.c" ),
         ( "video/out/gl_cocoa.c",                "gl-cocoa" ),
         ( "video/out/gl_common.c",               "gl" ),
-        ( "video/out/gl_rpi.c",                  "rpi-gles" ),
+        ( "video/out/gl_rpi.c",                  "rpi" ),
         ( "video/out/gl_hwdec.c",                "gl" ),
         ( "video/out/gl_hwdec_dxva2.c",          "gl-win32" ),
         ( "video/out/gl_hwdec_vaglx.c",          "vaapi-glx" ),

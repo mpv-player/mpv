@@ -553,6 +553,8 @@ static void sc_flush_cache(struct gl_shader_cache *sc)
 
 void gl_sc_destroy(struct gl_shader_cache *sc)
 {
+    if (!sc)
+        return;
     gl_sc_reset(sc);
     sc_flush_cache(sc);
     talloc_free(sc);
