@@ -674,7 +674,7 @@ video_output_features = [
         # every project to hardcode the paths to the include directories. Also,
         # these headers are so broken that they spam tons of warnings by merely
         # including them (compensate with -isystem and -fgnu89-inline).
-        'name': '--not-really-rpi',
+        'name': '--rpi',
         'desc': 'Raspberry Pi support',
         'func': compose_checks(
             check_cc(cflags="-isystem/opt/vc/include/ "+
@@ -691,12 +691,6 @@ video_output_features = [
             check_statement('GL/gl.h', '(void)GL_RGB32F'),     # arbitrary OpenGL 3.0 symbol
             check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
         ),
-    }, {
-        # workaround for buggy compose_checks
-        'name': 'rpi',
-        'desc': 'RPI',
-        'deps': ['not-really-rpi'],
-        'func': check_true,
     } , {
         'name': '--gl',
         'desc': 'OpenGL video outputs',
