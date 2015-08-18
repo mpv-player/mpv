@@ -711,7 +711,7 @@ client messages (``MPV_EVENT_CLIENT_MESSAGE`` in the C API).
     the client which registered the hook. This message has the following
     arguments:
 
-    1. the string ``hook-run``
+    1. the string ``hook_run``
     2. the ``id`` argument the hook was registered with as string (this can be
        used to correctly handle multiple hooks registered by the same client,
        as long as the ``id`` argument is unique in the client)
