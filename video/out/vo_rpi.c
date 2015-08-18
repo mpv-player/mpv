@@ -56,6 +56,7 @@ struct priv {
     struct mp_egl_rpi egl;
     struct gl_shader_cache *sc;
     struct mpgl_osd *osd;
+    int64_t osd_change_counter;
 
     MMAL_COMPONENT_T *renderer;
     bool renderer_enabled;
@@ -116,6 +117,16 @@ static void update_osd(struct vo *vo)
     struct priv *p = vo->priv;
 
     mpgl_osd_generate(p->osd, p->osd_res, p->osd_pts, 0, 0);
+
+    int64_t osd_change_counter = mpgl_get_change_counter(p->osd);
+    if (p->osd_change_counter == osd_change_counter) {
+        p->skip_osd = true;
+        return;
+    }
+    p->osd_change_counter = osd_change_counter;
+
+    p->egl.gl->ClearColor(0, 0, 0, 0);
+    p->egl.gl->Clear(GL_COLOR_BUFFER_BIT);
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         enum sub_bitmap_format fmt = mpgl_osd_get_part_format(p->osd, n);
@@ -331,11 +342,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     // Redraw only if the OSD has meaningfully changed, which we assume it
     // hasn't when a frame is merely repeated for display sync.
     p->skip_osd = !frame->redraw && frame->repeat;
-    if (!p->skip_osd && p->egl.gl) {
-        p->egl.gl->ClearColor(0, 0, 0, 0);
-        p->egl.gl->Clear(GL_COLOR_BUFFER_BIT);
+
+    if (!p->skip_osd && p->egl.gl)
         update_osd(vo);
-    }
 
     p->display_synced = frame->display_synced;
 
@@ -519,8 +528,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_PANSCAN:
         if (p->renderer_enabled)
             resize(vo);
+        vo->want_redraw = true;
         return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
+        p->osd_change_counter = -1;
         update_osd(vo);
         return VO_TRUE;
     case VOCTRL_SCREENSHOT_WIN:

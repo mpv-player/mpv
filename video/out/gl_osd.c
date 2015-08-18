@@ -78,6 +78,7 @@ struct mpgl_osd_part {
     int w, h;
     GLuint buffer;
     int num_subparts;
+    int prev_num_subparts;
     struct sub_bitmap *subparts;
     struct vertex *vertices;
     struct bitmap_packer *packer;
@@ -93,6 +94,7 @@ struct mpgl_osd {
     const struct osd_fmt_entry *fmt_table;
     bool formats[SUBBITMAP_COUNT];
     struct gl_vao vao;
+    int64_t change_counter;
     // temporary
     int stereo_mode;
     int display_size[2];
@@ -288,6 +290,7 @@ static void gen_osd_cb(void *pctx, struct sub_bitmaps *imgs)
             osd->packer->count = 0;
 
         osd->change_id = imgs->change_id;
+        ctx->change_counter += 1;
     }
     osd->num_subparts = osd->packer->count;
 
@@ -420,4 +423,18 @@ void mpgl_osd_generate(struct mpgl_osd *ctx, struct mp_osd_res res, double pts,
 
     osd_draw(ctx->osd, s_res, pts, draw_flags, ctx->formats, gen_osd_cb, ctx);
     ctx->stereo_mode = stereo_mode;
+
+    // Parts going away does not necessarily result in gen_osd_cb() being called
+    // (not even with num_parts==0), so check this separately.
+    for (int n = 0; n < MAX_OSD_PARTS; n++) {
+        struct mpgl_osd_part *part = ctx->parts[n];
+        if (part->num_subparts !=  part->prev_num_subparts)
+            ctx->change_counter += 1;
+        part->prev_num_subparts = part->num_subparts;
+    }
+}
+
+int64_t mpgl_get_change_counter(struct mpgl_osd *ctx)
+{
+    return ctx->change_counter;
 }
