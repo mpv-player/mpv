@@ -210,6 +210,11 @@ static void swapGlBuffers_wayland(MPGLContext *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wayland;
 
+    if (!wl->frame.callback)
+        vo_wayland_request_frame(ctx->vo, NULL, NULL);
+
+    if (!vo_wayland_wait_frame(ctx->vo))
+        MP_DBG(wl, "discarding frame callback\n");
 
     eglSwapBuffers(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
 }
