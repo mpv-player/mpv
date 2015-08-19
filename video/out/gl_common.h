@@ -136,11 +136,6 @@ typedef struct MPGLContext {
     // Resize the window, or create a new window if there isn't one yet.
     // On the first call, it creates a GL context.
     bool (*config_window)(struct MPGLContext *ctx, int flags);
-
-    // Optional callback on the beginning of a frame. The frame will be finished
-    // with swapGlBuffers(). This returns false if use of the OpenGL context
-    // should be avoided.
-    bool (*start_frame)(struct MPGLContext *);
 } MPGLContext;
 
 MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags);

@@ -144,6 +144,20 @@ static void egl_create_window(struct vo_wayland_state *wl)
                    wl->egl_context.egl.ctx);
 
     wl_display_dispatch_pending(wl->display.display);
+
+    /**
+     * <http://lists.freedesktop.org/archives/wayland-devel/2013-November/012019.html>
+     *
+     * The main change is that if the swap interval is 0 then Mesa won't install a
+     * frame callback so that eglSwapBuffers can be executed as often as necessary.
+     * Instead it will do a sync request after the swap buffers. It will block for
+     * sync complete event in get_back_bo instead of the frame callback. The
+     * compositor is likely to send a release event while processing the new buffer
+     * attach and this makes sure we will receive that before deciding whether to
+     * allocate a new buffer.
+     */
+
+    eglSwapInterval(wl->egl_context.egl.dpy, 0);
 }
 
 static bool config_window_wayland(struct MPGLContext *ctx, int flags)
@@ -196,11 +210,8 @@ static void swapGlBuffers_wayland(MPGLContext *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wayland;
 
-    if (!wl->frame.pending)
-        return;
 
     eglSwapBuffers(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
-    wl->frame.pending = false;
 }
 
 static int control(struct vo *vo, int *events, int request, void *data)
@@ -214,12 +225,6 @@ static int control(struct vo *vo, int *events, int request, void *data)
     return r;
 }
 
-static bool start_frame(struct MPGLContext *ctx)
-{
-    struct vo_wayland_state *wl = ctx->vo->wayland;
-    return wl->frame.pending;
-}
-
 void mpgl_set_backend_wayland(MPGLContext *ctx)
 {
     ctx->config_window = config_window_wayland;
@@ -228,5 +233,4 @@ void mpgl_set_backend_wayland(MPGLContext *ctx)
     ctx->vo_control = control;
     ctx->vo_init = vo_wayland_init;
     ctx->vo_uninit = vo_wayland_uninit;
-    ctx->start_frame = start_frame;
 }
