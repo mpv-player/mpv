@@ -812,6 +812,9 @@ static void frame_callback(void *data,
 {
     struct vo_wayland_state *wl = data;
 
+    if (wl->frame.function)
+        wl->frame.function(wl->frame.data, time);
+
     if (callback)
         wl_callback_destroy(callback);
 
@@ -823,7 +826,11 @@ static void frame_callback(void *data,
     }
 
     wl_callback_add_listener(wl->frame.callback, &frame_listener, wl);
+    wl_surface_commit(wl->window.video_surface);
+
+    wl->frame.last_us = mp_time_us();
     wl->frame.pending = true;
+    wl->frame.dropping = false;
 }
 
 static const struct wl_callback_listener frame_listener = {
@@ -913,7 +920,6 @@ static bool create_window (struct vo_wayland_state *wl)
         wl_shell_surface_set_class(wl->window.shell_surface, "mpv");
     }
 
-    frame_callback(wl, NULL, 0);
     return true;
 }
 
@@ -1083,7 +1089,7 @@ static void vo_wayland_fullscreen (struct vo *vo)
     }
 }
 
-static int vo_wayland_check_events (struct vo *vo)
+static int vo_wayland_poll (struct vo *vo, int timeout_msecs)
 {
     struct vo_wayland_state *wl = vo->wayland;
     struct wl_display *dp = wl->display.display;
@@ -1102,7 +1108,8 @@ static int vo_wayland_check_events (struct vo *vo)
      *
      * when pausing no input events get queued so we have to check if there
      * are events to read from the file descriptor through poll */
-    if (poll(&fd, 1, 0) > 0) {
+    int polled;
+    if ((polled = poll(&fd, 1, timeout_msecs)) > 0) {
         if (fd.revents & POLLERR || fd.revents & POLLHUP) {
             MP_FATAL(wl, "error occurred on the display fd: "
                          "closing file descriptor\n");
@@ -1115,13 +1122,25 @@ static int vo_wayland_check_events (struct vo *vo)
             wl_display_flush(dp);
     }
 
+    return polled;
+}
+
+static int vo_wayland_check_events (struct vo *vo)
+{
+    struct vo_wayland_state *wl = vo->wayland;
+
+    vo_wayland_poll(vo, 0);
+
     /* If drag & drop was ended poll the file descriptor from the offer if
      * there is data to read.
      * We only accept the mime type text/uri-list.
      */
     if (wl->input.dnd_fd != -1) {
-        fd.fd = wl->input.dnd_fd;
-        fd.events = POLLIN | POLLHUP | POLLERR;
+        struct pollfd fd = {
+            wl->input.dnd_fd,
+            POLLIN | POLLERR | POLLHUP,
+            0
+        };
 
         if (poll(&fd, 1, 0) > 0) {
             if (fd.revents & POLLERR) {
@@ -1296,4 +1315,40 @@ bool vo_wayland_config (struct vo *vo, uint32_t flags)
     }
 
     return true;
+}
+
+void vo_wayland_request_frame(struct vo *vo, void *data, vo_wayland_frame_cb cb)
+{
+    struct vo_wayland_state *wl = vo->wayland;
+    wl->frame.data = data;
+    wl->frame.function = cb;
+    MP_DBG(wl, "restart frame callback\n");
+    frame_callback(wl, NULL, 0);
+}
+
+bool vo_wayland_wait_frame(struct vo *vo)
+{
+    struct vo_wayland_state *wl = vo->wayland;
+
+    if (!wl->frame.callback || wl->frame.dropping)
+        return false;
+
+    // If mpv isn't receiving frame callbacks (for 100ms), this usually means that
+    // mpv window is not visible and compositor tells kindly to not draw anything.
+    while (!wl->frame.pending) {
+        int64_t timeout = wl->frame.last_us + (100 * 1000) - mp_time_us();
+
+        if (timeout <= 0)
+            break;
+
+        if (vo_wayland_poll(vo, timeout) <= 0)
+            break;
+    }
+
+    wl->frame.dropping = !wl->frame.pending;
+    wl->frame.pending = false;
+
+    // Return false if the frame callback was not received
+    // Handler should act accordingly.
+    return !wl->frame.dropping;
 }

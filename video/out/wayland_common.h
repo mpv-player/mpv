@@ -47,14 +47,19 @@ struct vo_wayland_output {
     struct wl_list link;
 };
 
+typedef void (*vo_wayland_frame_cb)(void *data, uint32_t time);
 
 struct vo_wayland_state {
     struct vo *vo;
     struct mp_log* log;
 
     struct {
+        void *data;
+        vo_wayland_frame_cb function;
         struct wl_callback *callback;
+        uint64_t last_us;
         bool pending;
+        bool dropping;
     } frame;
 
 #if HAVE_GL_WAYLAND
@@ -144,6 +149,8 @@ int vo_wayland_init(struct vo *vo);
 void vo_wayland_uninit(struct vo *vo);
 bool vo_wayland_config(struct vo *vo, uint32_t flags);
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
+void vo_wayland_request_frame(struct vo *vo, void *data, vo_wayland_frame_cb cb);
+bool vo_wayland_wait_frame(struct vo *vo);
 
 #endif /* MPLAYER_WAYLAND_COMMON_H */
 
