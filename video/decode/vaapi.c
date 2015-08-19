@@ -179,7 +179,7 @@ static bool has_profile(VAProfile *va_profiles, int num_profiles, VAProfile p)
     return false;
 }
 
-static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
+static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 {
     void *tmp = talloc_new(NULL);
 
@@ -270,8 +270,7 @@ error:
     return res;
 }
 
-static struct mp_image *allocate_image(struct lavc_ctx *ctx, int format,
-                                       int w, int h)
+static struct mp_image *allocate_image(struct lavc_ctx *ctx, int w, int h)
 {
     struct priv *p = ctx->hwdec_priv;
 

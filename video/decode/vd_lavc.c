@@ -529,9 +529,8 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                 ctx->hwdec_fmt = ctx->hwdec->image_format;
                 ctx->hwdec_profile = avctx->profile;
                 ctx->hwdec_request_reinit = false;
-                if (ctx->hwdec->init_decoder && change) {
-                    if (ctx->hwdec->init_decoder(ctx, ctx->hwdec_fmt,
-                                                 ctx->hwdec_w, ctx->hwdec_h) < 0)
+                if (change) {
+                    if (ctx->hwdec->init_decoder(ctx, ctx->hwdec_w, ctx->hwdec_h) < 0)
                     {
                         ctx->hwdec_fmt = 0;
                         break;
@@ -580,12 +579,10 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
     int w = pic->width;
     int h = pic->height;
 
-    if (ctx->hwdec->init_decoder) {
-        if (imgfmt != ctx->hwdec_fmt && w != ctx->hwdec_w && h != ctx->hwdec_h)
-            return -1;
-    }
+    if (imgfmt != ctx->hwdec_fmt && w != ctx->hwdec_w && h != ctx->hwdec_h)
+        return -1;
 
-    struct mp_image *mpi = ctx->hwdec->allocate_image(ctx, imgfmt, w, h);
+    struct mp_image *mpi = ctx->hwdec->allocate_image(ctx, w, h);
     if (!mpi)
         return -1;
 

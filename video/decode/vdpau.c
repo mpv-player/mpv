@@ -30,7 +30,7 @@ struct priv {
     uint64_t                    preemption_counter;
 };
 
-static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
+static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 {
     struct priv *p = ctx->hwdec_priv;
 
@@ -44,8 +44,7 @@ static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
                                  AV_HWACCEL_FLAG_ALLOW_HIGH_DEPTH);
 }
 
-static struct mp_image *allocate_image(struct lavc_ctx *ctx, int fmt,
-                                       int w, int h)
+static struct mp_image *allocate_image(struct lavc_ctx *ctx, int w, int h)
 {
     struct priv *p = ctx->hwdec_priv;
 

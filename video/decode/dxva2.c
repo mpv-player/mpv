@@ -205,13 +205,10 @@ static void dxva2_release_img(void *ptr)
     av_free(w);
 }
 
-static struct mp_image *dxva2_allocate_image(struct lavc_ctx *s, int fmt,
+static struct mp_image *dxva2_allocate_image(struct lavc_ctx *s,
                                              int img_w, int img_h)
 {
     DXVA2Context *ctx = s->hwdec_priv;
-
-    if (fmt != IMGFMT_DXVA2)
-        return NULL;
 
     int i, old_unused = -1;
     for (i = 0; i < ctx->num_surfaces; i++) {
@@ -652,7 +649,7 @@ fail:
     return -1;
 }
 
-static int dxva2_init_decoder(struct lavc_ctx *s, int fmt, int w, int h)
+static int dxva2_init_decoder(struct lavc_ctx *s, int w, int h)
 {
     DXVA2Context *ctx = s->hwdec_priv;
 

@@ -83,7 +83,7 @@ static void print_videotoolbox_error(struct mp_log *log, int lev, char *message,
     mp_msg(log, lev, "%s: %d\n", message, error_code);
 }
 
-static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
+static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 {
     av_videotoolbox_default_free(ctx->avctx);
 

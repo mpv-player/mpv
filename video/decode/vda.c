@@ -73,7 +73,7 @@ static void print_vda_error(struct mp_log *log, int lev, char *message,
     mp_msg(log, lev, "%s: %d\n", message, error_code);
 }
 
-static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
+static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 {
     av_vda_default_free(ctx->avctx);
 #if HAVE_VDA_DEFAULT_INIT2

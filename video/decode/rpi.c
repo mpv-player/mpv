@@ -18,7 +18,7 @@
 #include "lavc.h"
 #include "common/common.h"
 
-static int init_decoder(struct lavc_ctx *ctx, int fmt, int w, int h)
+static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 {
     return 0;
 }
