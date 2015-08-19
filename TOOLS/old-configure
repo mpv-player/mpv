@@ -959,6 +959,7 @@ cat > $TMPC << EOF
 #define HAVE_DRM 0
 #define HAVE_VIDEOTOOLBOX_HWACCEL 0
 #define HAVE_VIDEOTOOLBOX_GL 0
+#define HAVE_VIDEOTOOLBOX_VDA_GL 0
 
 #ifdef __OpenBSD__
 #define DEFAULT_CDROM_DEVICE "/dev/rcd0c"
