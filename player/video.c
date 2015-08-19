@@ -610,9 +610,8 @@ static int get_req_frames(struct MPContext *mpctx, bool eof)
     if (eof || mpctx->video_pts == MP_NOPTS_VALUE)
         return 1;
 
-    int min = 2 + (VS_IS_DISP(mpctx->opts->video_sync) ? 1 : 0);
     int req = vo_get_num_req_frames(mpctx->video_out);
-    return MPCLAMP(req, min, MP_ARRAY_SIZE(mpctx->next_frames));
+    return MPCLAMP(req, 2, MP_ARRAY_SIZE(mpctx->next_frames));
 }
 
 // Whether it's fine to call add_new_frame() now.
