@@ -169,9 +169,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    if (p->glctx->start_frame && !p->glctx->start_frame(p->glctx))
-        return;
-
     p->frame_started = true;
     gl_video_render_frame(p->renderer, frame, 0);
 
