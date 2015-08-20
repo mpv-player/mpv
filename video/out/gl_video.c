@@ -415,6 +415,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLOATRANGE("dscale-antiring", scaler[1].antiring, 0, 0.0, 1.0),
         OPT_FLOATRANGE("cscale-antiring", scaler[2].antiring, 0, 0.0, 1.0),
         OPT_FLOATRANGE("tscale-antiring", scaler[3].antiring, 0, 0.0, 1.0),
+        OPT_FLAG("tscale-clamp", scaler[3].clamp, 0),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("linear-scaling", linear_scaling, 0),
         OPT_FLAG("fancy-downscaling", fancy_downscaling, 0),
@@ -950,7 +951,8 @@ static bool scaler_conf_eq(struct scaler_config a, struct scaler_config b)
     // generation
     return scaler_fun_eq(a.kernel, b.kernel) &&
            scaler_fun_eq(a.window, b.window) &&
-           a.radius == b.radius;
+           a.radius == b.radius &&
+           a.clamp == b.clamp;
 }
 
 static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
@@ -1000,6 +1002,8 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
 
     if (scaler->kernel->f.resizable && conf->radius > 0.0)
         scaler->kernel->f.radius = conf->radius;
+
+    scaler->kernel->clamp = conf->clamp;
 
     scaler->insufficient = !mp_init_filter(scaler->kernel, sizes, scale_factor);
 

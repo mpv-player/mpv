@@ -506,6 +506,12 @@ Available video output drivers are:
         limitations in the number of video textures that can be loaded
         simultaneously.
 
+    ``tscale-clamp``
+        Clamp the ``tscale`` filter kernel's value range to [0-1]. This reduces
+        excessive ringing artifacts in the temporal domain (which typically
+        manifest themselves as short flashes or fringes of black, mostly
+        around moving edges) in exchange for potentially adding more blur.
+
     ``dscale-radius``, ``cscale-radius``, ``tscale-radius``, etc.
         Set filter parameters for ``dscale``, ``cscale`` and ``tscale``,
         respectively.

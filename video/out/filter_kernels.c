@@ -113,7 +113,8 @@ static double sample_filter(struct filter_kernel *filter,
     double w = window->weight ? window->weight(window, x/bw * window->radius
                                                             / filter->f.radius)
                               : 1.0;
-    return c < filter->f.radius ? w * filter->f.weight(&filter->f, c) : 0.0;
+    double v = c < filter->f.radius ? w * filter->f.weight(&filter->f, c) : 0.0;
+    return filter->clamp ? fmax(0.0, fmin(1.0, v)) : v;
 }
 
 // Calculate the 1D filtering kernel for N sample points.
