@@ -4,8 +4,8 @@
 -- alphabetically, and adds entries before and after the current file to
 -- the internal playlist. (It stops if the it would add an already existing
 -- playlist entry at the same position - this makes it "stable".)
--- Add at most 5 * 2 files when starting a file (before + after).
-MAXENTRIES = 5
+-- Add at most 5000 * 2 files when starting a file (before + after).
+MAXENTRIES = 5000
 
 function Set (t)
     local set = {}
