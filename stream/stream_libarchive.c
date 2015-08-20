@@ -90,8 +90,6 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
     archive_read_support_filter_gzip(mpa->arch);
     archive_read_support_filter_xz(mpa->arch);
 
-    if (flags & MP_ARCHIVE_FLAG_UNSAFE)
-        archive_read_support_format_raw(mpa->arch);
     archive_read_set_callback_data(mpa->arch, mpa);
     archive_read_set_read_callback(mpa->arch, read_cb);
     archive_read_set_skip_callback(mpa->arch, skip_cb);
