@@ -131,11 +131,14 @@ fail:
 
 void mp_egl_rpi_destroy(struct mp_egl_rpi *p)
 {
-    if (p->egl_context) {
+    if (p->egl_display) {
         eglMakeCurrent(p->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
                        EGL_NO_CONTEXT);
-        eglDestroyContext(p->egl_display, p->egl_context);
     }
+    if (p->egl_surface)
+        eglDestroySurface(p->egl_display, p->egl_surface);
+    if (p->egl_context)
+        eglDestroyContext(p->egl_display, p->egl_context);
     p->egl_context = EGL_NO_CONTEXT;
     if (p->egl_display)
         eglTerminate(p->egl_display);
