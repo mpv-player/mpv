@@ -1000,6 +1000,11 @@ Available video output drivers are:
         selected layer, to handle the window background and OSD. Actual video
         rendering will happen on the layer above the selected layer.
 
+    ``background=<yes|no>``
+        Whether to render a black background behind the video (default: no).
+        Normally it's better to kill the console framebuffer instead, which
+        gives better performance.
+
 ``drm`` (Direct Rendering Manager)
     Video output driver using Kernel Mode Setting / Direct Rendering Manager.
     Does not support hardware acceleration. Should be used when one doesn't

@@ -79,6 +79,7 @@ struct priv {
 
     int display_nr;
     int layer;
+    int background;
 };
 
 // Magic alignments (in pixels) expected by the MMAL internals.
@@ -226,12 +227,17 @@ static int update_display_size(struct vo *vo)
         .flags = DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS,
         .opacity = 0xFF,
     };
-    p->window = vc_dispmanx_element_add(p->update, p->display, p->background_layer,
-                                        &dst, 0, &src,
-                                        DISPMANX_PROTECTION_NONE, &alpha, 0, 0);
-    if (!p->window) {
-        MP_FATAL(vo, "Could not add DISPMANX element.\n");
-        return -1;
+
+    if (p->background) {
+        p->window = vc_dispmanx_element_add(p->update, p->display,
+                                            p->background_layer,
+                                            &dst, 0, &src,
+                                            DISPMANX_PROTECTION_NONE,
+                                            &alpha, 0, 0);
+        if (!p->window) {
+            MP_FATAL(vo, "Could not add DISPMANX element.\n");
+            return -1;
+        }
     }
 
     alpha = (VC_DISPMANX_ALPHA_T){
@@ -653,6 +659,7 @@ fail:
 static const struct m_option options[] = {
     OPT_INT("display", display_nr, 0),
     OPT_INT("layer", layer, 0, OPTDEF_INT(-10)),
+    OPT_FLAG("background", background, 0),
     {0},
 };
 
