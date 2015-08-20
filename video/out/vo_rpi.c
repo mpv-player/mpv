@@ -254,6 +254,7 @@ static int update_display_size(struct vo *vo)
     }
     p->sc = gl_sc_create(p->egl.gl, vo->log, vo->global),
     p->osd = mpgl_osd_init(p->egl.gl, vo->log, vo->osd);
+    p->osd_change_counter = -1; // force initial overlay rendering
 
     p->display_fps = 0;
     TV_GET_STATE_RESP_T tvstate;
