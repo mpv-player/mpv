@@ -1075,10 +1075,10 @@ void idle_loop(struct MPContext *mpctx)
            && mpctx->stop_play != PT_QUIT)
     {
         if (need_reinit) {
-            mp_notify(mpctx, MPV_EVENT_IDLE, NULL);
             uninit_audio_out(mpctx);
             handle_force_window(mpctx, true);
             mpctx->sleeptime = 0;
+            mp_notify(mpctx, MPV_EVENT_IDLE, NULL);
             need_reinit = false;
         }
         mp_idle(mpctx);
