@@ -31,7 +31,7 @@ static ssize_t read_cb(struct archive *arch, void *priv, const void **buffer)
     return MPMAX(res, 0);
 }
 
-static ssize_t seek_cb(struct archive *arch, void *priv,
+static int64_t seek_cb(struct archive *arch, void *priv,
                        int64_t offset, int whence)
 {
     struct mp_archive *mpa = priv;
