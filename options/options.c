@@ -629,7 +629,7 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("sub", "sub-file"),
     OPT_REPLACED("subcp", "sub-codepage"),
     OPT_REPLACED("subdelay", "sub-delay"),
-    OPT_REPLACED("subfile", "sub"),
+    OPT_REPLACED("subfile", "sub-file"),
     OPT_REPLACED("subfont-text-scale", "sub-scale"),
     OPT_REPLACED("subfont", "sub-text-font"),
     OPT_REPLACED("subfps", "sub-fps"),
