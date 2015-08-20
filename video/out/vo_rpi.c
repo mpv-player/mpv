@@ -239,7 +239,7 @@ static int update_display_size(struct vo *vo)
         .opacity = 0xFF,
     };
     p->osd_overlay = vc_dispmanx_element_add(p->update, p->display,
-                                             p->background_layer + 2,
+                                             p->osd_layer,
                                              &dst, 0, &src,
                                              DISPMANX_PROTECTION_NONE,
                                              &alpha, 0, 0);
