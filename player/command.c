@@ -686,6 +686,11 @@ static int mp_property_playback_time(void *ctx, struct m_property *prop,
     if (!mpctx->playback_initialized)
         return M_PROPERTY_UNAVAILABLE;
 
+    if (action == M_PROPERTY_SET) {
+        double target = get_start_time(mpctx) + *(double *)arg;
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, target, MPSEEK_DEFAULT, true);
+        return M_PROPERTY_OK;
+    }
     return property_time(action, arg, get_playback_time(mpctx));
 }
 

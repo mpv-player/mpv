@@ -933,8 +933,10 @@ Property list
 ``playtime-remaining``
     ``time-remaining`` scaled by the current ``speed``.
 
-``playback-time``
-    Return the playback time, which is the time difference between start PTS and current PTS.
+``playback-time`` (RW)
+    The playback time, which is the time relative to playback start. (This can
+    be different from the ``time-pos`` property if the file does not start at
+    position ``0``, in which case ``time-pos`` is the source timestamp.)
 
 ``chapter`` (RW)
     Current chapter number. The number of the first chapter is 0.
