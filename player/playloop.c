@@ -190,25 +190,40 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     if (hr_seek_very_exact)
         hr_seek_offset = MPMAX(hr_seek_offset, 0.5); // arbitrary
 
+    double target_time = MP_NOPTS_VALUE;
+    int direction = 0;
+
+    switch (seek.type) {
+    case MPSEEK_ABSOLUTE:
+        target_time = seek.amount;
+        break;
+    case MPSEEK_RELATIVE:
+        direction = seek.amount > 0 ? 1 : -1;
+        target_time = seek.amount + get_current_time(mpctx);
+        break;
+    case MPSEEK_FACTOR: ;
+        double len = get_time_length(mpctx);
+        if (len >= 0)
+            target_time = seek.amount * len + get_start_time(mpctx);
+        break;
+    }
+
     bool hr_seek = opts->correct_pts && seek.exact != MPSEEK_KEYFRAME;
     hr_seek &= (opts->hr_seek == 0 && seek.type == MPSEEK_ABSOLUTE) ||
                opts->hr_seek > 0 || seek.exact >= MPSEEK_EXACT;
     if (seek.type == MPSEEK_FACTOR || seek.amount < 0 ||
         (seek.type == MPSEEK_ABSOLUTE && seek.amount < mpctx->last_chapter_pts))
         mpctx->last_chapter_seek = -2;
-    if (seek.type == MPSEEK_FACTOR && !mpctx->demuxer->ts_resets_possible) {
-        double len = get_time_length(mpctx);
-        if (len >= 0) {
-            seek.amount = seek.amount * len + get_start_time(mpctx);
-            seek.type = MPSEEK_ABSOLUTE;
-        }
-    }
-    int direction = 0;
-    if (seek.type == MPSEEK_RELATIVE && (!mpctx->demuxer->rel_seeks || hr_seek)) {
+
+    // Prefer doing absolute seeks, unless not possible.
+    if ((seek.type == MPSEEK_FACTOR && !mpctx->demuxer->ts_resets_possible &&
+         target_time != MP_NOPTS_VALUE) ||
+        (seek.type == MPSEEK_RELATIVE && (!mpctx->demuxer->rel_seeks || hr_seek)))
+    {
         seek.type = MPSEEK_ABSOLUTE;
-        direction = seek.amount > 0 ? 1 : -1;
-        seek.amount += get_current_time(mpctx);
+        seek.amount = target_time;
     }
+
     hr_seek &= seek.type == MPSEEK_ABSOLUTE; // otherwise, no target PTS known
 
     double demuxer_amount = seek.amount;
@@ -273,8 +288,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */
-    if (seek.type == MPSEEK_ABSOLUTE)
-        mpctx->last_seek_pts = seek.amount;
+    mpctx->last_seek_pts = target_time;
 
     // The hr_seek==false case is for skipping frames with PTS before the
     // current timeline chapter start. It's not really known where the demuxer
