@@ -77,8 +77,6 @@ struct gl_priv {
     char *backend;
     int es;
 
-    bool frame_started;
-
     int frames_rendered;
     unsigned int prev_sgi_sync_count;
 
@@ -124,12 +122,6 @@ static void flip_page(struct vo *vo)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    if (!p->frame_started) {
-        vo_increment_drop_count(vo, 1);
-        return;
-    }
-    p->frame_started = false;
-
     mpgl_swap_buffers(p->glctx);
 
     p->frames_rendered++;
@@ -169,7 +161,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    p->frame_started = true;
     gl_video_render_frame(p->renderer, frame, 0);
 
     // The playloop calls this last before waiting some time until it decides
