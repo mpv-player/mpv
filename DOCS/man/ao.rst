@@ -55,7 +55,7 @@ Available audio output drivers are:
         Allow output of non-interleaved formats (if the audio decoder uses
         this format). Currently disabled by default, because some popular
         ALSA plugins are utterly broken with non-interleaved formats.
-    ``ingore-chmap``
+    ``ignore-chmap``
         Don't read or set the channel map of the ALSA device - only request the
         required number of channels, and then pass the audio as-is to it. This
         option most likely should not be used. It can be useful for debugging,
