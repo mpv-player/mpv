@@ -81,14 +81,16 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
         goto err;
 
     archive_read_support_format_7zip(mpa->arch);
-    archive_read_support_format_gnutar(mpa->arch);
-    archive_read_support_format_tar(mpa->arch);
     archive_read_support_format_iso9660(mpa->arch);
     archive_read_support_format_rar(mpa->arch);
     archive_read_support_format_zip(mpa->arch);
     archive_read_support_filter_bzip2(mpa->arch);
     archive_read_support_filter_gzip(mpa->arch);
     archive_read_support_filter_xz(mpa->arch);
+    if (flags & MP_ARCHIVE_FLAG_UNSAFE) {
+        archive_read_support_format_gnutar(mpa->arch);
+        archive_read_support_format_tar(mpa->arch);
+    }
 
     archive_read_set_callback_data(mpa->arch, mpa);
     archive_read_set_read_callback(mpa->arch, read_cb);
