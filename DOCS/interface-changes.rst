@@ -20,6 +20,7 @@ Interface changes
 ::
 
  --- mpv 0.10.0 will be released ---
+    - add --playlist-pos option
     - add --video-sync* options
       "display-sync-active" property
       "vo-missed-frame-count" property

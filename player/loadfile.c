@@ -804,13 +804,20 @@ void prepare_playlist(struct MPContext *mpctx, struct playlist *pl)
 {
     struct MPOpts *opts = mpctx->opts;
 
+    pl->current = NULL;
+
+    if (opts->playlist_pos >= 0)
+        pl->current = playlist_entry_from_index(pl, opts->playlist_pos);
+
     if (opts->shuffle)
         playlist_shuffle(pl);
 
     if (opts->merge_files)
         merge_playlist_files(pl);
 
-    pl->current = mp_check_playlist_resume(mpctx, pl);
+    if (!pl->current)
+        pl->current = mp_check_playlist_resume(mpctx, pl);
+
     if (!pl->current)
         pl->current = pl->first;
 }

@@ -200,6 +200,8 @@ const m_option_t mp_opts[] = {
     OPT_TIME("ab-loop-a", ab_loop[0], 0, .min = MP_NOPTS_VALUE),
     OPT_TIME("ab-loop-b", ab_loop[1], 0, .min = MP_NOPTS_VALUE),
 
+    OPT_CHOICE_OR_INT("playlist-pos", playlist_pos, 0, 0, INT_MAX, ({"no", -1})),
+
     OPT_FLAG("pause", pause, M_OPT_FIXED),
     OPT_CHOICE("keep-open", keep_open, 0,
                ({"no", 0},
@@ -754,6 +756,7 @@ const struct MPOpts mp_default_opts = {
     .term_osd = 2,
     .term_osd_bar_chars = "[-+-]",
     .consolecontrols = 1,
+    .playlist_pos = -1,
     .play_frames = -1,
     .keep_open = 0,
     .stream_id = { { [STREAM_AUDIO] = -1,

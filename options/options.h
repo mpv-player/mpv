@@ -167,6 +167,7 @@ typedef struct MPOpts {
     float heartbeat_interval;
     int player_idle_mode;
     int consolecontrols;
+    int playlist_pos;
     struct m_rel_time play_start;
     struct m_rel_time play_end;
     struct m_rel_time play_length;

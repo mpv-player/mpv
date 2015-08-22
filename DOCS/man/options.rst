@@ -129,6 +129,17 @@ Playback Control
     Specify which chapter to start playing at. Optionally specify which
     chapter to end playing at. Also see ``--start``.
 
+``--playlist-pos=<no|index>``
+    Set which file on the internal playlist to start playback with. The index
+    is an integer, with 0 meaning the first file. The value ``no`` means that
+    the selection of the entry to play is left to the playback resume mechanism
+    (default). If an entry with the given index doesn't exist, the behavior is
+    unspecified and might change in future mpv versions. The same applies if
+    the playlist contains further playlists (don't expect any reasonable
+    behavior). Passing a playlist file to mpv should work with this option,
+    though. E.g. ``mpv playlist.m3u --playlist-pos=123`` will work as expected,
+    as long as ``playlist.m3u`` does not link to further playlists.
+
 ``--playlist=<filename>``
     Play files according to a playlist file (Supports some common formats. If
     no format is detected, it will be treated as list of files, separated by
