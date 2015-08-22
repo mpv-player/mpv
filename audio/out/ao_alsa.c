@@ -457,14 +457,14 @@ static int init_device(struct ao *ao, bool second_try)
         if (ao->format == AF_FORMAT_S_MP3) {
             p->alsa_fmt = SND_PCM_FORMAT_MPEG;
         } else {
-            p->alsa_fmt = SND_PCM_FORMAT_S16;
+            p->alsa_fmt = SND_PCM_FORMAT_S32;
         }
     } else {
         p->alsa_fmt = find_alsa_format(ao->format);
     }
     if (p->alsa_fmt == SND_PCM_FORMAT_UNKNOWN) {
-        p->alsa_fmt = SND_PCM_FORMAT_S16;
-        ao->format = AF_FORMAT_S16;
+        p->alsa_fmt = SND_PCM_FORMAT_S32;
+        ao->format = AF_FORMAT_S32;
     }
 
     err = snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt);
@@ -473,8 +473,8 @@ static int init_device(struct ao *ao, bool second_try)
             CHECK_ALSA_ERROR("Unable to set IEC61937 format");
         MP_INFO(ao, "Format %s is not supported by hardware, trying default.\n",
                 af_fmt_to_str(ao->format));
-        p->alsa_fmt = SND_PCM_FORMAT_S16;
-        ao->format = AF_FORMAT_S16;
+        p->alsa_fmt = SND_PCM_FORMAT_S32;
+        ao->format = AF_FORMAT_S32;
     }
 
     err = snd_pcm_hw_params_set_format(p->alsa, alsa_hwparams, p->alsa_fmt);
