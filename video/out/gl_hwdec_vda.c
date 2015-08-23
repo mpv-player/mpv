@@ -96,6 +96,10 @@ static struct mp_image *download_image(struct mp_hwdec_ctx *ctx,
     size_t height = CVPixelBufferGetHeight(pbuf);
     uint32_t cvpixfmt = CVPixelBufferGetPixelFormatType(pbuf);
     struct vda_format *f = vda_get_gl_format(cvpixfmt);
+    if (!f) {
+        CVPixelBufferUnlockBaseAddress(pbuf, 0);
+        return NULL;
+    }
 
     struct mp_image img = {0};
     mp_image_setfmt(&img, f->imgfmt);
