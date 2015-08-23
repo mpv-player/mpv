@@ -87,7 +87,7 @@ static struct mp_image *download_image(struct mp_hwdec_ctx *ctx,
                                        struct mp_image *hw_image,
                                        struct mp_image_pool *swpool)
 {
-    if (hw_image->imgfmt != IMGFMT_VDA || hw_image->imgfmt != IMGFMT_VIDEOTOOLBOX)
+    if (hw_image->imgfmt != IMGFMT_VDA && hw_image->imgfmt != IMGFMT_VIDEOTOOLBOX)
         return NULL;
 
     CVPixelBufferRef pbuf = (CVPixelBufferRef)hw_image->planes[3];
