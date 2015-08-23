@@ -568,7 +568,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
             mpctx->audio_status = STATUS_FILLING;
         if (status != AD_OK && !mp_audio_buffer_samples(mpctx->ao_buffer))
             mpctx->audio_status = STATUS_EOF;
-        if (working)
+        if (working || end_sync)
             mpctx->sleeptime = 0;
         return; // continue on next iteration
     }
