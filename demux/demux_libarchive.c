@@ -32,13 +32,25 @@ static int cmp_filename(const void *a, const void *b)
 
 static int open_file(struct demuxer *demuxer, enum demux_check check)
 {
-    if (stream_get_size(demuxer->stream) == 0)
+    int flags = 0;
+    int probe_size = STREAM_BUFFER_SIZE;
+    if (check <= DEMUX_CHECK_REQUEST) {
+        flags |= MP_ARCHIVE_FLAG_UNSAFE;
+        probe_size *= 100;
+    }
+
+    bstr probe = stream_peek(demuxer->stream, probe_size);
+    if (probe.len == 0)
+        return -1;
+    struct stream *probe_stream = open_memory_stream(probe.start, probe.len);
+    struct mp_archive *mpa = mp_archive_new(mp_null_log, probe_stream, flags);
+    bool ok = !!mpa;
+    free_stream(probe_stream);
+    mp_archive_free(mpa);
+    if (!ok)
         return -1;
 
-    int flags = 0;
-    if (check <= DEMUX_CHECK_REQUEST)
-        flags |= MP_ARCHIVE_FLAG_UNSAFE;
-    struct mp_archive *mpa = mp_archive_new(demuxer->log, demuxer->stream, flags);
+    mpa = mp_archive_new(demuxer->log, demuxer->stream, flags);
     if (!mpa)
         return -1;
 
