@@ -218,7 +218,10 @@ bool hwdec_check_codec_support(const char *decoder,
 
 int hwdec_get_max_refs(struct lavc_ctx *ctx)
 {
-    return ctx->avctx->codec_id == AV_CODEC_ID_H264 ? 16 : 2;
+    if (ctx->avctx->codec_id == AV_CODEC_ID_H264 ||
+        ctx->avctx->codec_id == AV_CODEC_ID_HEVC)
+        return 16;
+    return 2;
 }
 
 void hwdec_request_api(struct mp_hwdec_info *info, const char *api_name)
