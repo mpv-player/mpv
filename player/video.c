@@ -1157,6 +1157,7 @@ void write_video(struct MPContext *mpctx, double endpts)
     struct vo_frame dummy = {
         .pts = pts,
         .duration = -1,
+        .still = mpctx->step_frames > 0,
         .num_frames = mpctx->num_next_frames,
         .num_vsyncs = 1,
     };
