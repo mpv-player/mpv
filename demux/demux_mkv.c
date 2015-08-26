@@ -735,15 +735,25 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     if (ebml_read_element(s, &parse_ctx, &cues, &ebml_cues_desc) < 0)
         return -1;
 
+    for (int i = 0; i < cues.n_cue_point; i++) {
+        struct ebml_cue_point *cuepoint = &cues.cue_point[i];
+        if (cuepoint->n_cue_time != 1 || !cuepoint->n_cue_track_positions) {
+            MP_WARN(demuxer, "Malformed CuePoint element\n");
+            goto done;
+        }
+        if (cuepoint->cue_time / 1e9 > mkv_d->duration / mkv_d->tc_scale * 10 &&
+            mkv_d->duration != 0)
+            goto done;
+    }
+    if (cues.n_cue_point <= 3) // probably too sparse and will just break seeking
+        goto done;
+
+    // Discard incremental index.
     mkv_d->num_indexes = 0;
     mkv_d->index_has_durations = false;
 
     for (int i = 0; i < cues.n_cue_point; i++) {
         struct ebml_cue_point *cuepoint = &cues.cue_point[i];
-        if (cuepoint->n_cue_time != 1 || !cuepoint->n_cue_track_positions) {
-            MP_WARN(demuxer, "Malformed CuePoint element\n");
-            continue;
-        }
         uint64_t time = cuepoint->cue_time;
         for (int c = 0; c < cuepoint->n_cue_track_positions; c++) {
             struct ebml_cue_track_positions *trackpos =
@@ -763,6 +773,9 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     // Do not attempt to create index on the fly.
     mkv_d->index_complete = true;
 
+done:
+    if (!mkv_d->index_complete)
+        MP_WARN(demuxer, "Discarding potentially broken or useless index.\n");
     talloc_free(parse_ctx.talloc_ctx);
     return 0;
 }
