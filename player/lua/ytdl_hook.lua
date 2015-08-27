@@ -96,12 +96,9 @@ mp.add_hook("on_load", 10, function ()
         local format = mp.get_property("options/ytdl-format")
         local raw_options = mp.get_property_native("options/ytdl-raw-options")
 
-        -- subformat workaround
-        local subformat = "ass/srt/best"
-
         local command = {
             ytdl.path, "--no-warnings", "-J", "--flat-playlist", "--all-subs",
-            "--sub-format", subformat, "--no-playlist"
+            "--sub-format", "ass/srt/best", "--no-playlist"
         }
 
         -- Checks if video option is "no", change options accordingly
@@ -147,7 +144,8 @@ mp.add_hook("on_load", 10, function ()
             -- direct URL, nothing to do
             msg.verbose("Got direct URL")
             return
-        elseif not (json["_type"] == nil) and ((json["_type"] == "playlist") or (json["_type"] == "multi_video")) then
+        elseif not (json["_type"] == nil)
+            and ((json["_type"] == "playlist") or (json["_type"] == "multi_video")) then
             -- a playlist
 
             if (#json.entries == 0) then
@@ -244,18 +242,20 @@ mp.add_hook("on_load", 10, function ()
                 for lang, sub_info in pairs(json.requested_subtitles) do
                     msg.verbose("adding subtitle ["..lang.."]")
 
-                    local slang = lang
-                    if (lang:len() > 3) then
-                        slang = lang:sub(1,2)
-                    end
+                    local sub = nil
 
                     if not (sub_info.data == nil) then
                         sub = "memory://"..sub_info.data
-                    else
+                    elseif not (sub_info.url == nil) then
                         sub = sub_info.url
                     end
-                    mp.commandv("sub_add", sub,
-                        "auto", lang.." "..sub_info.ext, slang)
+
+                    if not (sub == nil) then
+                        mp.commandv("sub_add", sub,
+                            "auto", sub_info.ext, lang)
+                    else
+                        msg.verbose("No subtitle data/url for ["..lang.."]")
+                    end
                 end
             end
 
