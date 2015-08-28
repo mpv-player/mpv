@@ -22,7 +22,7 @@
 
 #include <OpenGL/OpenGL.h>
 #include <dlfcn.h>
-#include "cocoa_common.h"
+#include "video/out/cocoa_common.h"
 #include "osdep/macosx_versions.h"
 #include "gl_common.h"
 

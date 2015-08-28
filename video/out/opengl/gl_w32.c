@@ -22,7 +22,7 @@
 
 #include <assert.h>
 #include <windows.h>
-#include "w32_common.h"
+#include "video/out/w32_common.h"
 #include "gl_common.h"
 
 typedef HRESULT (WINAPI *DwmFlush_t)(void);

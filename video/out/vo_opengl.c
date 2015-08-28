@@ -42,14 +42,14 @@
 #include "video/mp_image.h"
 #include "sub/osd.h"
 
-#include "gl_common.h"
-#include "gl_utils.h"
-#include "gl_hwdec.h"
-#include "gl_osd.h"
+#include "opengl/gl_common.h"
+#include "opengl/gl_utils.h"
+#include "opengl/gl_hwdec.h"
+#include "opengl/gl_osd.h"
 #include "filter_kernels.h"
 #include "video/hwdec.h"
-#include "gl_video.h"
-#include "gl_lcms.h"
+#include "opengl/gl_video.h"
+#include "opengl/gl_lcms.h"
 
 struct gl_priv {
     struct vo *vo;

@@ -36,11 +36,11 @@
 #include "gl_utils.h"
 #include "gl_hwdec.h"
 #include "gl_osd.h"
-#include "filter_kernels.h"
-#include "aspect.h"
-#include "bitmap_packer.h"
-#include "dither.h"
-#include "vo.h"
+#include "video/out/filter_kernels.h"
+#include "video/out/aspect.h"
+#include "video/out/bitmap_packer.h"
+#include "video/out/dither.h"
+#include "video/out/vo.h"
 
 // Pixel width of 1D lookup textures.
 #define LOOKUP_TEXTURE_SIZE 256
