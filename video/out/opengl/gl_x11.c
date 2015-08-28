@@ -26,7 +26,7 @@
 #define MP_GET_GLX_WORKAROUNDS
 #include "gl_header_fixes.h"
 
-#include "x11_common.h"
+#include "video/out/x11_common.h"
 #include "gl_common.h"
 
 struct glx_context {

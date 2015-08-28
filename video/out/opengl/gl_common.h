@@ -31,7 +31,7 @@
 #include "common/msg.h"
 #include "misc/bstr.h"
 
-#include "vo.h"
+#include "video/out/vo.h"
 #include "video/csputils.h"
 
 #include "video/mp_image.h"
@@ -47,7 +47,7 @@
 #endif
 
 #define MP_GET_GL_WORKAROUNDS
-#include "video/out/gl_header_fixes.h"
+#include "gl_header_fixes.h"
 
 struct GL;
 typedef struct GL GL;

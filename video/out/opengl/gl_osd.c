@@ -24,7 +24,7 @@
 #include <assert.h>
 #include <libavutil/common.h>
 
-#include "bitmap_packer.h"
+#include "video/out/bitmap_packer.h"
 
 #include "gl_utils.h"
 #include "gl_osd.h"

@@ -25,7 +25,7 @@
 #include <EGL/eglext.h>
 
 #include "common/common.h"
-#include "x11_common.h"
+#include "video/out/x11_common.h"
 #include "gl_common.h"
 
 struct priv {
