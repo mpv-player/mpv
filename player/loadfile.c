@@ -945,8 +945,13 @@ static void open_demux_thread(void *pctx)
         .stream_flags = args->stream_flags,
     };
     args->demux = demux_open_url(args->url, &p, args->cancel, global);
-    if (!args->demux && p.demuxer_failed)
-        args->err = MPV_ERROR_UNKNOWN_FORMAT;
+    if (!args->demux) {
+        if (p.demuxer_failed) {
+            args->err = MPV_ERROR_UNKNOWN_FORMAT;
+        } else {
+            args->err = MPV_ERROR_LOADING_FAILED;
+        }
+    }
     if (args->demux)
         args->tl = timeline_load(global, args->log, args->demux);
 }
