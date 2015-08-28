@@ -1895,6 +1895,8 @@ end
 
 -- called by mpv on every frame
 function tick()
+    if (not state.enabled) then return end
+
     if (state.idle) then
 
         -- render idle message
