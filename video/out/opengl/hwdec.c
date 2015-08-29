@@ -27,7 +27,7 @@
 
 #include "common/common.h"
 #include "common/msg.h"
-#include "gl_hwdec.h"
+#include "hwdec.h"
 
 extern const struct gl_hwdec_driver gl_hwdec_vaglx;
 extern const struct gl_hwdec_driver gl_hwdec_vda;

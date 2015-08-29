@@ -24,10 +24,10 @@
 #include <GL/glx.h>
 
 #define MP_GET_GLX_WORKAROUNDS
-#include "gl_header_fixes.h"
+#include "header_fixes.h"
 
 #include "video/out/x11_common.h"
-#include "gl_common.h"
+#include "common.h"
 
 struct glx_context {
     XVisualInfo *vinfo;

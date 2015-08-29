@@ -29,13 +29,13 @@
 #include <libavutil/common.h>
 #include <libavutil/lfg.h>
 
-#include "gl_video.h"
+#include "video.h"
 
 #include "misc/bstr.h"
-#include "gl_common.h"
-#include "gl_utils.h"
-#include "gl_hwdec.h"
-#include "gl_osd.h"
+#include "common.h"
+#include "utils.h"
+#include "hwdec.h"
+#include "osd.h"
 #include "video/out/filter_kernels.h"
 #include "video/out/aspect.h"
 #include "video/out/bitmap_packer.h"

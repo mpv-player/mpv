@@ -33,8 +33,8 @@
 #include "options/m_option.h"
 #include "options/path.h"
 
-#include "gl_video.h"
-#include "gl_lcms.h"
+#include "video.h"
+#include "lcms.h"
 
 #include "osdep/io.h"
 

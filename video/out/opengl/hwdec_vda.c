@@ -25,7 +25,7 @@
 #include <OpenGL/CGLIOSurface.h>
 
 #include "video/mp_image_pool.h"
-#include "gl_hwdec.h"
+#include "hwdec.h"
 
 struct vda_gl_plane_format {
     GLenum gl_format;

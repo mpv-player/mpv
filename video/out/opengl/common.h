@@ -47,7 +47,7 @@
 #endif
 
 #define MP_GET_GL_WORKAROUNDS
-#include "gl_header_fixes.h"
+#include "header_fixes.h"
 
 struct GL;
 typedef struct GL GL;

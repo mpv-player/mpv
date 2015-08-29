@@ -20,8 +20,8 @@
 
 #include <GL/glx.h>
 
-#include "gl_hwdec.h"
-#include "gl_utils.h"
+#include "hwdec.h"
+#include "utils.h"
 #include "video/vdpau.h"
 #include "video/vdpau_mixer.h"
 

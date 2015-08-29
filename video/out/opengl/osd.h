@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 
-#include "gl_utils.h"
+#include "utils.h"
 #include "sub/osd.h"
 
 struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd);

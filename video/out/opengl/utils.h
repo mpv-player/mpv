@@ -24,7 +24,7 @@
 #ifndef MP_GL_UTILS_
 #define MP_GL_UTILS_
 
-#include "gl_common.h"
+#include "common.h"
 
 struct mp_log;
 
