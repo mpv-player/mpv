@@ -20,9 +20,10 @@
 struct input_ctx;
 
 // Enqueue files for playback after drag and drop
-void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files);
+void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files,
+                         bool append);
 
 // Drop data in a specific format (identified by the mimetype).
 // Returns <0 on error, ==0 if data was ok but empty, >0 on success.
 int mp_event_drop_mime_data(struct input_ctx *ictx, const char *mime_type,
-                            bstr data);
+                            bstr data, bool append);
