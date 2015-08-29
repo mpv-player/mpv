@@ -253,7 +253,8 @@ static HRESULT STDMETHODCALLTYPE DropTarget_Drop(IDropTarget* This,
             }
 
             GlobalUnlock(medium.hGlobal);
-            mp_event_drop_files(t->w32->input_ctx, nrecvd_files, files);
+            mp_event_drop_files(t->w32->input_ctx, nrecvd_files, files,
+                                DND_REPLACE);
 
             talloc_free(files);
         }
@@ -265,7 +266,7 @@ static HRESULT STDMETHODCALLTYPE DropTarget_Drop(IDropTarget* This,
         char* url = (char*)GlobalLock(medium.hGlobal);
         if (url != NULL) {
             if (mp_event_drop_mime_data(t->w32->input_ctx, "text/uri-list",
-                                        bstr0(url)) > 0) {
+                                        bstr0(url), DND_REPLACE) > 0) {
                 MP_VERBOSE(t->w32, "received dropped URL: %s\n", url);
             } else {
                 MP_ERR(t->w32, "error getting dropped URL\n");

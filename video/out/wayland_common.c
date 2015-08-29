@@ -1176,7 +1176,7 @@ static int vo_wayland_check_events (struct vo *vo)
                         buffer[str_len] = 0;
                         struct bstr file_list = bstr0(buffer);
                         mp_event_drop_mime_data(vo->input_ctx, "text/uri-list",
-                                                file_list);
+                                                file_list, DND_REPLACE);
                         break;
                     }
                 }

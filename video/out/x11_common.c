@@ -838,7 +838,7 @@ static void vo_x11_dnd_handle_selection(struct vo *vo, XSelectionEvent *se)
         if (prop) {
             // No idea if this is guaranteed to be \0-padded, so use bstr.
             success = mp_event_drop_mime_data(vo->input_ctx, "text/uri-list",
-                                              (bstr){prop, nitems}) > 0;
+                                              (bstr){prop, nitems}, DND_REPLACE) > 0;
             XFree(prop);
         }
     }
