@@ -24,9 +24,9 @@
 #include "common/global.h"
 #include "player/client.h"
 
-#include "opengl/gl_common.h"
-#include "opengl/gl_video.h"
-#include "opengl/gl_hwdec.h"
+#include "opengl/common.h"
+#include "opengl/video.h"
+#include "opengl/hwdec.h"
 
 #include "libmpv/opengl_cb.h"
 

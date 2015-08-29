@@ -24,7 +24,7 @@
 #include <GL/glx.h>
 
 #include "video/out/x11_common.h"
-#include "gl_hwdec.h"
+#include "hwdec.h"
 #include "video/vaapi.h"
 
 struct priv {

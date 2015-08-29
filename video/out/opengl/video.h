@@ -21,7 +21,7 @@
 
 #include "options/m_option.h"
 #include "sub/osd.h"
-#include "gl_common.h"
+#include "common.h"
 
 struct lut3d {
     uint16_t *data;

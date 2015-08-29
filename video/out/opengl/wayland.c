@@ -17,7 +17,7 @@
  */
 
 #include "video/out/wayland_common.h"
-#include "gl_common.h"
+#include "common.h"
 
 static void egl_resize(struct vo_wayland_state *wl)
 {

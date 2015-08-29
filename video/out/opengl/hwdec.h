@@ -1,7 +1,7 @@
 #ifndef MPGL_HWDEC_H_
 #define MPGL_HWDEC_H_
 
-#include "gl_common.h"
+#include "common.h"
 #include "video/hwdec.h"
 
 struct mp_hwdec_info;
