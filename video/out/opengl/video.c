@@ -372,6 +372,18 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
                                struct bstr name, struct bstr param);
 
 #define OPT_BASE_STRUCT struct gl_video_opts
+
+#define SCALER_OPTS(n, i) \
+    OPT_STRING_VALIDATE(n, scaler[i].kernel.name, 0, validate_scaler_opt), \
+    OPT_FLOAT(n"-param1", scaler[i].kernel.params[0], 0),                  \
+    OPT_FLOAT(n"-param2", scaler[i].kernel.params[1], 0),                  \
+    OPT_FLOAT(n"-blur",   scaler[i].kernel.blur, 0),                       \
+    OPT_FLOAT(n"-wparam", scaler[i].window.params[0], 0),                  \
+    OPT_FLAG(n"-clamp",   scaler[i].clamp, 0),                             \
+    OPT_FLOATRANGE(n"-radius",    scaler[i].radius, 0, 0.5, 16.0),         \
+    OPT_FLOATRANGE(n"-antiring",  scaler[i].antiring, 0, 0.0, 1.0),        \
+    OPT_STRING_VALIDATE(n"-window", scaler[i].window.name, 0, validate_window_opt)
+
 const struct m_sub_options gl_video_conf = {
     .opts = (const m_option_t[]) {
         OPT_FLAG("dumb-mode", dumb_mode, 0),
@@ -380,39 +392,10 @@ const struct m_sub_options gl_video_conf = {
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
         OPT_CHOICE_C("target-trc", target_trc, 0, mp_csp_trc_names),
         OPT_FLAG("pbo", pbo, 0),
-        OPT_STRING_VALIDATE("scale",  scaler[0].kernel.name, 0, validate_scaler_opt),
-        OPT_STRING_VALIDATE("dscale", scaler[1].kernel.name, 0, validate_scaler_opt),
-        OPT_STRING_VALIDATE("cscale", scaler[2].kernel.name, 0, validate_scaler_opt),
-        OPT_STRING_VALIDATE("tscale", scaler[3].kernel.name, 0, validate_scaler_opt),
-        OPT_FLOAT("scale-param1", scaler[0].kernel.params[0], 0),
-        OPT_FLOAT("scale-param2", scaler[0].kernel.params[1], 0),
-        OPT_FLOAT("dscale-param1", scaler[1].kernel.params[0], 0),
-        OPT_FLOAT("dscale-param2", scaler[1].kernel.params[1], 0),
-        OPT_FLOAT("cscale-param1", scaler[2].kernel.params[0], 0),
-        OPT_FLOAT("cscale-param2", scaler[2].kernel.params[1], 0),
-        OPT_FLOAT("tscale-param1", scaler[3].kernel.params[0], 0),
-        OPT_FLOAT("tscale-param2", scaler[3].kernel.params[1], 0),
-        OPT_FLOAT("scale-blur",  scaler[0].kernel.blur, 0),
-        OPT_FLOAT("dscale-blur", scaler[1].kernel.blur, 0),
-        OPT_FLOAT("cscale-blur", scaler[2].kernel.blur, 0),
-        OPT_FLOAT("tscale-blur", scaler[3].kernel.blur, 0),
-        OPT_STRING_VALIDATE("scale-window",  scaler[0].window.name, 0, validate_window_opt),
-        OPT_STRING_VALIDATE("dscale-window", scaler[1].window.name, 0, validate_window_opt),
-        OPT_STRING_VALIDATE("cscale-window", scaler[2].window.name, 0, validate_window_opt),
-        OPT_STRING_VALIDATE("tscale-window", scaler[3].window.name, 0, validate_window_opt),
-        OPT_FLOAT("scale-wparam",  scaler[0].window.params[0], 0),
-        OPT_FLOAT("dscale-wparam", scaler[1].window.params[0], 0),
-        OPT_FLOAT("cscale-wparam", scaler[2].window.params[0], 0),
-        OPT_FLOAT("tscale-wparam", scaler[3].window.params[0], 0),
-        OPT_FLOATRANGE("scale-radius",  scaler[0].radius, 0, 0.5, 16.0),
-        OPT_FLOATRANGE("dscale-radius", scaler[1].radius, 0, 0.5, 16.0),
-        OPT_FLOATRANGE("cscale-radius", scaler[2].radius, 0, 0.5, 16.0),
-        OPT_FLOATRANGE("tscale-radius", scaler[3].radius, 0, 0.5, 3.0),
-        OPT_FLOATRANGE("scale-antiring",  scaler[0].antiring, 0, 0.0, 1.0),
-        OPT_FLOATRANGE("dscale-antiring", scaler[1].antiring, 0, 0.0, 1.0),
-        OPT_FLOATRANGE("cscale-antiring", scaler[2].antiring, 0, 0.0, 1.0),
-        OPT_FLOATRANGE("tscale-antiring", scaler[3].antiring, 0, 0.0, 1.0),
-        OPT_FLAG("tscale-clamp", scaler[3].clamp, 0),
+        SCALER_OPTS("scale",  0),
+        SCALER_OPTS("dscale", 1),
+        SCALER_OPTS("cscale", 2),
+        SCALER_OPTS("tscale", 3),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("linear-scaling", linear_scaling, 0),
         OPT_FLAG("fancy-downscaling", fancy_downscaling, 0),
