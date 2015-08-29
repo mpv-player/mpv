@@ -112,6 +112,7 @@ struct vo_x11_state {
 
     /* drag and drop */
     Atom dnd_requested_format;
+    Atom dnd_requested_action;
     Window dnd_src_window;
 
     /* dragging the window */

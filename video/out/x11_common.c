@@ -793,6 +793,8 @@ static void vo_x11_dnd_handle_message(struct vo *vo, XClientMessageEvent *ce)
             dnd_select_format(x11, args, 3);
         }
     } else if (ce->message_type == XA(x11, XdndPosition)) {
+        x11->dnd_requested_action = ce->data.l[4];
+
         Window src = ce->data.l[0];
         XEvent xev;
 
@@ -836,9 +838,10 @@ static void vo_x11_dnd_handle_selection(struct vo *vo, XSelectionEvent *se)
         void *prop = x11_get_property(x11, x11->window, XAs(x11, DND_PROPERTY),
                                       x11->dnd_requested_format, 8, &nitems);
         if (prop) {
+            bool append = x11->dnd_requested_action != XA(x11, XdndActionCopy);
             // No idea if this is guaranteed to be \0-padded, so use bstr.
             success = mp_event_drop_mime_data(vo->input_ctx, "text/uri-list",
-                                              (bstr){prop, nitems}) > 0;
+                                              (bstr){prop, nitems}, append) > 0;
             XFree(prop);
         }
     }

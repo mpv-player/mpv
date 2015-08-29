@@ -20,7 +20,8 @@
 #include "common/msg.h"
 #include "sub/find_subfiles.h"
 
-void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files)
+void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files,
+                         bool append)
 {
     bool all_sub = true;
     for (int i = 0; i < num_files; i++)
@@ -42,8 +43,9 @@ void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files)
                 "osd-auto",
                 "loadfile",
                 files[i],
-                /* Start playing the dropped files right away */
-                (i == 0) ? "replace" : "append",
+                /* Either start playing the dropped files right away
+                   or add them to the end of the current playlist */
+                (i == 0) ? (append ? "append-play" : "replace") : "append",
                 NULL
             };
             mp_input_run_cmd(ictx, cmd);
@@ -52,7 +54,7 @@ void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files)
 }
 
 int mp_event_drop_mime_data(struct input_ctx *ictx, const char *mime_type,
-                            bstr data)
+                            bstr data, bool append)
 {
     // X11 and Wayland file list format.
     if (strcmp(mime_type, "text/uri-list") == 0) {
@@ -67,7 +69,7 @@ int mp_event_drop_mime_data(struct input_ctx *ictx, const char *mime_type,
             char *s = bstrto0(tmp, line);
             MP_TARRAY_APPEND(tmp, files, num_files, s);
         }
-        mp_event_drop_files(ictx, num_files, files);
+        mp_event_drop_files(ictx, num_files, files, append);
         talloc_free(tmp);
         return num_files > 0;
     } else {
