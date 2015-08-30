@@ -1450,6 +1450,7 @@ static void pass_read_video(struct gl_video *p)
 
     // Chroma preprocessing (merging -> shaders -> scaling)
     struct src_tex luma = p->pass_tex[0];
+    struct src_tex alpha = p->pass_tex[3];
     int c_w = p->pass_tex[1].src.x1 - p->pass_tex[1].src.x0;
     int c_h = p->pass_tex[1].src.y1 - p->pass_tex[1].src.y0;
     const struct scaler_config *cscale = &p->opts.scaler[2];
@@ -1510,6 +1511,7 @@ static void pass_read_video(struct gl_video *p)
     }
 
     p->pass_tex[0] = luma; // Restore the luma plane
+    p->pass_tex[3] = alpha; // Restore the alpha plane (if set)
     if (shader) {
         load_shader(p, shader);
         gl_sc_uniform_f(p->sc, "cmul", cmul);
