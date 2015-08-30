@@ -312,6 +312,8 @@ const m_option_t mp_opts[] = {
     //  0 means square pixels
     OPT_FLOATRANGE("video-aspect", movie_aspect, 0, -1.0, 10.0),
     OPT_FLOAT_STORE("no-video-aspect", movie_aspect, 0, 0.0),
+    OPT_CHOICE("video-aspect-method", aspect_method, 0,
+               ({"hybrid", 0}, {"bitstream", 1}, {"container", 2})),
 
     OPT_CHOICE("field-dominance", field_dominance, 0,
                ({"auto", -1}, {"top", 0}, {"bottom", 1})),

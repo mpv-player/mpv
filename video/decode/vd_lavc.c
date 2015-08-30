@@ -476,15 +476,12 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
                    av_get_pix_fmt_name(pix_fmt));
     }
 
-    int d_w, d_h;
-    vf_set_dar(&d_w, &d_h, width, height, aspect);
-
     *out_params = (struct mp_image_params) {
         .imgfmt = ctx->best_csp,
         .w = width,
         .h = height,
-        .d_w = d_w,
-        .d_h = d_h,
+        .d_w = 0,
+        .d_h = 0,
         .colorspace = avcol_spc_to_mp_csp(ctx->avctx->colorspace),
         .colorlevels = avcol_range_to_mp_csp_levels(ctx->avctx->color_range),
         .primaries = avcol_pri_to_mp_csp_prim(ctx->avctx->color_primaries),
@@ -494,6 +491,9 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
         .rotate = vd->header->video->rotate,
         .stereo_in = vd->header->video->stereo_mode,
     };
+
+    if (aspect > 0)
+        vf_set_dar(&out_params->d_w, &out_params->d_h, width, height, aspect);
 
     if (opts->video_rotate < 0) {
         out_params->rotate = 0;

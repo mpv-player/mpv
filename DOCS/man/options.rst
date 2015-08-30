@@ -633,6 +633,23 @@ Video
     Ignore aspect ratio information from video file and assume the video has
     square pixels. See also ``--video-aspect``.
 
+``--video-aspect-method=<hybrid|bitstream|container>``
+    This sets the default video aspect determination method (if the aspect is
+    _not_ overridden by the user with ``--video-aspect`` or others).
+
+    :hybrid:    Prefer the container aspect ratio. If the bitstream aspect
+                switches mid-stream, switch to preferring the bitstream aspect.
+                This is the default behavior in mpv and mplayer2.
+    :container: Strictly prefer the container aspect ratio. This is apparently
+                the default behavior with VLC, at least with Matroska.
+    :bitstream: Strictly prefer the bitstream aspect ratio, unless the bitstream
+                aspect ratio is not set. This is apparently the default behavior
+                with XBMC/kodi, at least with Matroska.
+
+    Normally you should not set this. Try the ``container`` and ``bitstream``
+    choices if you encounter video that has the wrong aspect ratio in mpv,
+    but seems to be correct in other players.
+
 ``--video-unscaled``
     Disable scaling of the video. If the window is larger than the video,
     black bars are added. Otherwise, the video is cropped. The video still

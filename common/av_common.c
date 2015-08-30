@@ -59,7 +59,6 @@ void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st)
     avctx->width                    = st->width;
     avctx->height                   = st->height;
     avctx->pix_fmt                  = st->pix_fmt;
-    avctx->sample_aspect_ratio      = st->sample_aspect_ratio;
     avctx->chroma_sample_location   = st->chroma_sample_location;
     avctx->sample_rate              = st->sample_rate;
     avctx->channels                 = st->channels;

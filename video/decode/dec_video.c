@@ -386,24 +386,45 @@ int video_reconfig_filters(struct dec_video *d_video,
     struct mp_image_params p = *params;
     struct sh_video *sh = d_video->header->video;
 
-    float decoder_aspect = p.d_w / (float)p.d_h;
+    // While mp_image_params normally always have to have d_w/d_h set, the
+    // decoder signals unknown bitstream aspect ratio with both set to 0.
+    float dec_aspect = p.d_w > 0 && p.d_h > 0 ? p.d_w / (float)p.d_h : 0;
     if (d_video->initial_decoder_aspect == 0)
-        d_video->initial_decoder_aspect = decoder_aspect;
+        d_video->initial_decoder_aspect = dec_aspect;
 
-    // We normally prefer the container aspect, unless the decoder aspect
-    // changes at least once.
-    if (d_video->initial_decoder_aspect == decoder_aspect) {
-        if (sh->aspect > 0)
-            vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, sh->aspect);
-    } else {
-        MP_VERBOSE(d_video, "Using bitstream aspect ratio.\n");
-        // Even if the aspect switches back, don't use container aspect again.
-        d_video->initial_decoder_aspect = -1;
+    bool use_container = true;
+    switch (opts->aspect_method) {
+    case 0:
+        // We normally prefer the container aspect, unless the decoder aspect
+        // changes at least once.
+        if (dec_aspect > 0 && d_video->initial_decoder_aspect != dec_aspect) {
+            MP_VERBOSE(d_video, "Using bitstream aspect ratio.\n");
+            // Even if the aspect switches back, don't use container aspect again.
+            d_video->initial_decoder_aspect = -1;
+            use_container = false;
+        }
+        break;
+    case 1:
+        use_container = false;
+        break;
+    }
+
+    if (use_container && sh->aspect > 0) {
+        MP_VERBOSE(d_video, "Using container aspect ratio.\n");
+        vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, sh->aspect);
     }
 
     float force_aspect = opts->movie_aspect;
-    if (force_aspect >= 0.0)
+    if (force_aspect >= 0.0) {
+        MP_VERBOSE(d_video, "Forcing user-set aspect ratio.\n");
         vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, force_aspect);
+    }
+
+    // Assume square pixels if no aspect ratio is set at all.
+    if (p.d_w <= 0 || p.d_h <= 0) {
+        p.d_w = p.w;
+        p.d_h = p.h;
+    }
 
     // Detect colorspace from resolution.
     mp_image_params_guess_csp(&p);
