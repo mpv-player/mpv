@@ -72,6 +72,9 @@ struct gl_video_opts {
     char *scale_shader;
     char **pre_shaders;
     char **post_shaders;
+    int super_xbr;
+    float xbr_edge_str;
+    float xbr_weight;
 };
 
 extern const struct m_sub_options gl_video_conf;

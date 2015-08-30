@@ -594,6 +594,14 @@ Available video output drivers are:
                 return vec4(1.0 - color.rgb, color.a);
             }
 
+    ``super-xbr=<0..8>``
+        Apply passes of the Super-xBR algorithm for image doubling. Each pass
+        doubles the image size, so setting super-xbr=2 is equivalent to 4x
+        scaling. This gets applied before upscaling.
+
+        ``xbr-edge-strength`` and ``xbr-weight`` can be used to tweak the
+        algorithm's parameters. (Both default to 1.0)
+
     ``sigmoid-upscaling``
         When upscaling, use a sigmoidal color transform to avoid emphasizing
         ringing artifacts. This also implies ``linear-scaling``.

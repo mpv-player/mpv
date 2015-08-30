@@ -436,6 +436,18 @@ void gl_transform_ortho(struct gl_transform *t, float x0, float x1,
     t->t[1] = -(y1 + y0) / (y1 - y0);
 }
 
+// Apply the effects of one transformation to another, transforming it in the
+// process. In other words: post-composes t onto x
+void gl_transform_trans(struct gl_transform t, struct gl_transform *x)
+{
+    float x00 = x->m[0][0], x01 = x->m[0][1], x10 = x->m[1][0], x11 = x->m[1][1];
+    x->m[0][0] = t.m[0][0] * x00 + t.m[0][1] * x10;
+    x->m[1][0] = t.m[0][0] * x01 + t.m[0][1] * x11;
+    x->m[0][1] = t.m[1][0] * x00 + t.m[1][1] * x10;
+    x->m[1][1] = t.m[1][0] * x01 + t.m[1][1] * x11;
+    gl_transform_vec(t, &x->t[0], &x->t[1]);
+}
+
 static void GLAPIENTRY gl_debug_cb(GLenum source, GLenum type, GLuint id,
                                    GLenum severity, GLsizei length,
                                    const GLchar *message, const void *userParam)
@@ -576,6 +588,14 @@ void gl_sc_addf(struct gl_shader_cache *sc, const char *textf, ...)
 void gl_sc_hadd(struct gl_shader_cache *sc, const char *text)
 {
     sc->header_text = talloc_strdup_append(sc->header_text, text);
+}
+
+void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...)
+{
+    va_list ap;
+    va_start(ap, textf);
+    ta_xvasprintf_append(&sc->header_text, textf, ap);
+    va_end(ap);
 }
 
 const char *gl_sc_loadfile(struct gl_shader_cache *sc, const char *path)
