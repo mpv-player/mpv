@@ -225,6 +225,8 @@ static HRESULT STDMETHODCALLTYPE DropTarget_Drop(IDropTarget* This,
         t->dataObj = NULL;
     }
 
+    enum mp_dnd_action action = (grfKeyState & MK_SHIFT) ? DND_APPEND : DND_REPLACE;
+
     pDataObj->lpVtbl->AddRef(pDataObj);
 
     if (pDataObj->lpVtbl->GetData(pDataObj, &fmtetc_file, &medium) == S_OK) {
@@ -254,7 +256,7 @@ static HRESULT STDMETHODCALLTYPE DropTarget_Drop(IDropTarget* This,
 
             GlobalUnlock(medium.hGlobal);
             mp_event_drop_files(t->w32->input_ctx, nrecvd_files, files,
-                                DND_REPLACE);
+                                action);
 
             talloc_free(files);
         }
@@ -266,7 +268,7 @@ static HRESULT STDMETHODCALLTYPE DropTarget_Drop(IDropTarget* This,
         char* url = (char*)GlobalLock(medium.hGlobal);
         if (url != NULL) {
             if (mp_event_drop_mime_data(t->w32->input_ctx, "text/uri-list",
-                                        bstr0(url), DND_REPLACE) > 0) {
+                                        bstr0(url), action) > 0) {
                 MP_VERBOSE(t->w32, "received dropped URL: %s\n", url);
             } else {
                 MP_ERR(t->w32, "error getting dropped URL\n");
