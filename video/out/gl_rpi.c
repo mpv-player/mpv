@@ -140,8 +140,7 @@ void mp_egl_rpi_destroy(struct mp_egl_rpi *p)
     if (p->egl_context)
         eglDestroyContext(p->egl_display, p->egl_context);
     p->egl_context = EGL_NO_CONTEXT;
-    if (p->egl_display)
-        eglTerminate(p->egl_display);
+    eglReleaseThread();
     p->egl_display = EGL_NO_DISPLAY;
     talloc_free(p->gl);
     p->gl = NULL;
