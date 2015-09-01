@@ -239,6 +239,9 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log, bstr buf,
     if (bstrcasecmp0(type, "utf8") == 0 || bstrcasecmp0(type, "utf-8") == 0) {
         if (!fallback)
             fallback = params[1].start; // must be already 0-terminated
+        int r = bstr_validate_utf8(buf);
+        if (r >= 0 || (r > -8 && (flags & MP_ICONV_ALLOW_CUTOFF)))
+            res = "utf-8";
     }
 
     if (res) {
@@ -252,6 +255,7 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log, bstr buf,
     if (!res && !(flags & MP_STRICT_UTF8))
         res = "UTF-8-BROKEN";
 
+    mp_verbose(log, "Using charset '%s'.\n", res);
     return res;
 }
 
