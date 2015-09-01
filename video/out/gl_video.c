@@ -213,7 +213,6 @@ struct gl_video {
     bool use_linear;
     bool use_normalized_range;
     float user_gamma;
-    struct fbotex copy_fbos[4];
 
     int frames_uploaded;
     int frames_rendered;
@@ -583,9 +582,6 @@ static void uninit_rendering(struct gl_video *p)
 
     for (int n = 0; n < FBOSURFACES_MAX; n++)
         fbotex_uninit(&p->surfaces[n].fbotex);
-
-    for (int n = 0; n < 4; n++)
-        fbotex_uninit(&p->copy_fbos[n]);
 
     gl_video_reset_surfaces(p);
 }
