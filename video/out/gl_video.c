@@ -1376,42 +1376,11 @@ static void pass_sample(struct gl_video *p, int src_tex, struct scaler *scaler,
         GLSL(color.a = 1.0;)
 }
 
-static void pass_copy_from_rect(struct gl_video *p)
-{
-    struct src_tex new_pass_tex[TEXUNIT_VIDEO_NUM];
-    assert(sizeof(new_pass_tex) == sizeof(p->pass_tex));
-    memcpy(&new_pass_tex, &p->pass_tex, sizeof(p->pass_tex));
-    memset(&p->pass_tex, 0, sizeof(p->pass_tex));
-
-    for (int n = 0; n < TEXUNIT_VIDEO_NUM; n++) {
-        struct src_tex *src = &new_pass_tex[n];
-        if (src->gl_tex && src->gl_target == GL_TEXTURE_RECTANGLE) {
-            p->pass_tex[0] = (struct src_tex){
-                .gl_tex = src->gl_tex,
-                .gl_target = GL_TEXTURE_RECTANGLE,
-                .tex_w = src->tex_w,
-                .tex_h = src->tex_h,
-                .src = {0, 0, src->tex_w, src->tex_h},
-            };
-            const char *get = p->gl->version < 300 ? "texture2DRect" : "texture";
-            GLSLF("vec4 color = %s(texture0, texcoord0);\n", get);
-            finish_pass_fbo(p, &p->copy_fbos[n], src->tex_w, src->tex_h, 0, 0);
-            src->gl_tex = p->copy_fbos[n].texture;
-            src->gl_target = GL_TEXTURE_2D;
-        }
-    }
-
-    memcpy(&p->pass_tex, &new_pass_tex, sizeof(p->pass_tex));
-}
-
 // sample from video textures, set "color" variable to yuv value
 static void pass_read_video(struct gl_video *p)
 {
     struct gl_transform chromafix;
     pass_set_image_textures(p, &p->image, &chromafix);
-
-    if (p->gl->version < 300 && p->pass_tex[0].gl_target == GL_TEXTURE_RECTANGLE)
-        pass_copy_from_rect(p);
 
     // The custom shader logic is a bit tricky, but there are basically three
     // different places it can occur: RGB, or chroma *and* luma (which are
