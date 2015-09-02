@@ -243,6 +243,7 @@ static struct vd_lavc_hwdec *probe_hwdec(struct dec_video *vd, bool autoprobe,
                                          enum hwdec_type api,
                                          const char *decoder)
 {
+    MP_VERBOSE(vd, "Probing '%s'...\n", m_opt_choice_str(mp_hwdec_names, api));
     struct vd_lavc_hwdec *hwdec = find_hwcodec(api);
     if (!hwdec) {
         MP_VERBOSE(vd, "Requested hardware decoder not compiled.\n");
@@ -281,7 +282,8 @@ static bool force_fallback(struct dec_video *vd)
         return false;
 
     uninit_avctx(vd);
-    MP_WARN(vd, "Falling back to software decoding.\n");
+    int lev = ctx->hwdec_notified ? MSGL_WARN : MSGL_V;
+    mp_msg(vd->log, lev, "Falling back to software decoding.\n");
     const char *decoder = ctx->software_fallback_decoder;
     ctx->software_fallback_decoder = NULL;
     init_avctx(vd, decoder, NULL);
@@ -328,9 +330,9 @@ static int init(struct dec_video *vd, const char *decoder)
         ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
         if (hwdec->get_codec)
             decoder = hwdec->get_codec(ctx);
-        MP_INFO(vd, "Using hardware decoding.\n");
-    } else if (vd->opts->hwdec_api != HWDEC_NONE) {
-        MP_INFO(vd, "Using software decoding.\n");
+        MP_VERBOSE(vd, "Trying hardware decoding.\n");
+    } else {
+        MP_VERBOSE(vd, "Using software decoding.\n");
     }
 
     init_avctx(vd, decoder, hwdec);
@@ -676,6 +678,16 @@ static struct mp_image *decode_with_fallback(struct dec_video *vd,
         // Failed hardware decoding? Try again in software.
         if (force_fallback(vd) && ctx->avctx)
             decode(vd, packet, flags, &mpi);
+    }
+
+    if (mpi && !ctx->hwdec_notified && vd->opts->hwdec_api != HWDEC_NONE) {
+        if (ctx->hwdec) {
+            MP_INFO(vd, "Using hardware decoding (%s).\n",
+                    m_opt_choice_str(mp_hwdec_names, ctx->hwdec->type));
+        } else {
+            MP_INFO(vd, "Using software decoding.\n");
+        }
+        ctx->hwdec_notified = true;
     }
 
     return mpi;

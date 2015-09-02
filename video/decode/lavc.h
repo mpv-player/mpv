@@ -20,6 +20,7 @@ typedef struct lavc_ctx {
     enum AVDiscard skip_frame;
     const char *software_fallback_decoder;
     bool hwdec_failed;
+    bool hwdec_notified;
 
     // From VO
     struct mp_hwdec_info *hwdec_info;
