@@ -2283,6 +2283,7 @@ static bool map_image(struct gl_video *p, struct mp_image *mpi)
         mpi->planes[n] = plane->buffer_ptr;
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     }
+    memset(mpi->bufs, 0, sizeof(mpi->bufs));
     return true;
 }
 
@@ -2313,12 +2314,7 @@ static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     mp_image_t mpi2 = *mpi;
     bool pbo = false;
     if (!vimg->planes[0].buffer_ptr && map_image(p, &mpi2)) {
-        for (int n = 0; n < p->plane_count; n++) {
-            int line_bytes = mp_image_plane_w(mpi, n) * p->image_desc.bytes[n];
-            int plane_h = mp_image_plane_h(mpi, n);
-            memcpy_pic(mpi2.planes[n], mpi->planes[n], line_bytes, plane_h,
-                       mpi2.stride[n], mpi->stride[n]);
-        }
+        mp_image_copy(&mpi2, mpi);
         pbo = true;
     }
     vimg->image_flipped = mpi2.stride[0] < 0;
