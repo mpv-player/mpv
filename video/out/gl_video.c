@@ -2265,10 +2265,6 @@ static bool get_image(struct gl_video *p, struct mp_image *mpi)
 
     struct video_image *vimg = &p->image;
 
-    // See comments in init_video() about odd video sizes.
-    // The normal upload path does this too, but less explicit.
-    mp_image_set_size(mpi, vimg->planes[0].w, vimg->planes[0].h);
-
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
         mpi->stride[n] = mp_image_plane_w(mpi, n) * p->image_desc.bytes[n];
