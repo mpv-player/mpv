@@ -710,13 +710,16 @@ static void init_video(struct gl_video *p)
 
     struct video_image *vimg = &p->image;
 
+    struct mp_image layout = {0};
+    mp_image_set_params(&layout, &p->image_params);
+
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
 
         plane->gl_target = p->gl_target;
 
-        plane->w = mp_chroma_div_up(p->image_w, p->image_desc.xs[n]);
-        plane->h = mp_chroma_div_up(p->image_h, p->image_desc.ys[n]);
+        plane->w = mp_image_plane_w(&layout, n);
+        plane->h = mp_image_plane_h(&layout, n);
 
         if (!p->hwdec_active) {
             gl->ActiveTexture(GL_TEXTURE0 + n);
