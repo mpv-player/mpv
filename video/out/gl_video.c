@@ -2256,7 +2256,7 @@ void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
     gl_video_reset_surfaces(p);
 }
 
-static bool get_image(struct gl_video *p, struct mp_image *mpi)
+static bool map_image(struct gl_video *p, struct mp_image *mpi)
 {
     GL *gl = p->gl;
 
@@ -2312,7 +2312,7 @@ static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
 
     mp_image_t mpi2 = *mpi;
     bool pbo = false;
-    if (!vimg->planes[0].buffer_ptr && get_image(p, &mpi2)) {
+    if (!vimg->planes[0].buffer_ptr && map_image(p, &mpi2)) {
         for (int n = 0; n < p->plane_count; n++) {
             int line_bytes = mp_image_plane_w(mpi, n) * p->image_desc.bytes[n];
             int plane_h = mp_image_plane_h(mpi, n);
