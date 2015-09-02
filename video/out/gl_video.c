@@ -96,7 +96,6 @@ static const struct gl_vao_entry vertex_vao[] = {
 
 struct texplane {
     int w, h;
-    int tex_w, tex_h;
     GLint gl_internal_format;
     GLenum gl_target;
     GLenum gl_format;
@@ -138,7 +137,7 @@ struct fbosurface {
 struct src_tex {
     GLuint gl_tex;
     GLenum gl_target;
-    int tex_w, tex_h;
+    int w, h;
     struct mp_rect_f src;
 };
 
@@ -629,8 +628,8 @@ static void pass_load_fbotex(struct gl_video *p, struct fbotex *src_fbo, int id,
     p->pass_tex[id] = (struct src_tex){
         .gl_tex = src_fbo->texture,
         .gl_target = GL_TEXTURE_2D,
-        .tex_w = src_fbo->tex_w,
-        .tex_h = src_fbo->tex_h,
+        .w = src_fbo->w,
+        .h = src_fbo->h,
         .src = {0, 0, w, h},
     };
 }
@@ -660,18 +659,18 @@ static void pass_set_image_textures(struct gl_video *p, struct video_image *vimg
     // Make sure luma/chroma sizes are aligned.
     // Example: For 4:2:0 with size 3x3, the subsampled chroma plane is 2x2
     // so luma (3,3) has to align with chroma (2,2).
-    chroma->m[0][0] = ls_w * (float)vimg->planes[0].tex_w
-                               / vimg->planes[1].tex_w;
-    chroma->m[1][1] = ls_h * (float)vimg->planes[0].tex_h
-                               / vimg->planes[1].tex_h;
+    chroma->m[0][0] = ls_w * (float)vimg->planes[0].w
+                               / vimg->planes[1].w;
+    chroma->m[1][1] = ls_h * (float)vimg->planes[0].h
+                               / vimg->planes[1].h;
 
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *t = &vimg->planes[n];
         p->pass_tex[n] = (struct src_tex){
             .gl_tex = vimg->planes[n].gl_texture,
             .gl_target = t->gl_target,
-            .tex_w = t->tex_w,
-            .tex_h = t->tex_h,
+            .w = t->w,
+            .h = t->h,
             .src = {0, 0, t->w, t->h},
         };
     }
@@ -719,16 +718,13 @@ static void init_video(struct gl_video *p)
         plane->w = mp_chroma_div_up(p->image_w, p->image_desc.xs[n]);
         plane->h = mp_chroma_div_up(p->image_h, p->image_desc.ys[n]);
 
-        plane->tex_w = plane->w;
-        plane->tex_h = plane->h;
-
         if (!p->hwdec_active) {
             gl->ActiveTexture(GL_TEXTURE0 + n);
             gl->GenTextures(1, &plane->gl_texture);
             gl->BindTexture(p->gl_target, plane->gl_texture);
 
             gl->TexImage2D(p->gl_target, 0, plane->gl_internal_format,
-                           plane->tex_w, plane->tex_h, 0,
+                           plane->w, plane->h, 0,
                            plane->gl_format, plane->gl_type, NULL);
 
             gl->TexParameteri(p->gl_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -737,8 +733,7 @@ static void init_video(struct gl_video *p)
             gl->TexParameteri(p->gl_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         }
 
-        MP_VERBOSE(p, "Texture for plane %d: %dx%d\n",
-                   n, plane->tex_w, plane->tex_h);
+        MP_VERBOSE(p, "Texture for plane %d: %dx%d\n", n, plane->w, plane->h);
     }
     gl->ActiveTexture(GL_TEXTURE0);
 
@@ -792,8 +787,8 @@ static void pass_prepare_src_tex(struct gl_video *p)
         gl_sc_uniform_sampler(sc, texture_name, s->gl_target, n);
         float f[2] = {1, 1};
         if (s->gl_target != GL_TEXTURE_RECTANGLE) {
-            f[0] = s->tex_w;
-            f[1] = s->tex_h;
+            f[0] = s->w;
+            f[1] = s->h;
         }
         gl_sc_uniform_vec2(sc, texture_size, f);
 
@@ -829,8 +824,8 @@ static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
                 if (flags & 4)
                     MPSWAP(float, ty[0], ty[1]);
                 bool rect = s->gl_target == GL_TEXTURE_RECTANGLE;
-                v->texcoord[i].x = tx[n / 2] / (rect ? 1 : s->tex_w);
-                v->texcoord[i].y = ty[n % 2] / (rect ? 1 : s->tex_h);
+                v->texcoord[i].x = tx[n / 2] / (rect ? 1 : s->w);
+                v->texcoord[i].y = ty[n % 2] / (rect ? 1 : s->h);
             }
         }
     }
@@ -876,7 +871,7 @@ static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
 {
     fbotex_change(dst_fbo, p->gl, p->log, w, h, p->opts.fbo_format, flags);
 
-    finish_pass_direct(p, dst_fbo->fbo, dst_fbo->tex_w, dst_fbo->tex_h,
+    finish_pass_direct(p, dst_fbo->fbo, dst_fbo->w, dst_fbo->h,
                        &(struct mp_rect){0, 0, w, h}, 0);
     pass_load_fbotex(p, dst_fbo, tex, w, h);
 }
@@ -902,8 +897,7 @@ static void load_shader(struct gl_video *p, const char *body)
 // Applies an arbitrary number of shaders in sequence, using the given pair
 // of FBOs as intermediate buffers. Returns whether any shaders were applied.
 static bool apply_shaders(struct gl_video *p, char **shaders,
-                          struct fbotex textures[2], int tex_num,
-                          int tex_w, int tex_h)
+                          struct fbotex textures[2], int tex_num, int w, int h)
 {
     if (!shaders)
         return false;
@@ -913,7 +907,7 @@ static bool apply_shaders(struct gl_video *p, char **shaders,
         const char *body = gl_sc_loadfile(p->sc, shaders[n]);
         if (!body)
             continue;
-        finish_pass_fbo(p, &textures[tex], tex_w, tex_h, tex_num, 0);
+        finish_pass_fbo(p, &textures[tex], w, h, tex_num, 0);
         load_shader(p, body);
         GLSLF("// custom shader\n");
         GLSLF("vec4 color = sample(texture%d, texcoord%d, texture_size%d);\n",

@@ -74,7 +74,7 @@ struct fbotex {
     GLuint texture;
     GLenum iformat;
     GLenum tex_filter;
-    int tex_w, tex_h;   // size of .texture
+    int w, h;   // size of .texture
 };
 
 bool fbotex_init(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
