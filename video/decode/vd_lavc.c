@@ -274,6 +274,20 @@ static void uninit(struct dec_video *vd)
     talloc_free(vd->priv);
 }
 
+static bool force_fallback(struct dec_video *vd)
+{
+    vd_ffmpeg_ctx *ctx = vd->priv;
+    if (!ctx->software_fallback_decoder)
+        return false;
+
+    uninit_avctx(vd);
+    MP_WARN(vd, "Falling back to software decoding.\n");
+    const char *decoder = ctx->software_fallback_decoder;
+    ctx->software_fallback_decoder = NULL;
+    init_avctx(vd, decoder, NULL);
+    return true;
+}
+
 static int init(struct dec_video *vd, const char *decoder)
 {
     vd_ffmpeg_ctx *ctx;
@@ -321,13 +335,7 @@ static int init(struct dec_video *vd, const char *decoder)
 
     init_avctx(vd, decoder, hwdec);
     if (!ctx->avctx) {
-        if (ctx->software_fallback_decoder) {
-            MP_ERR(vd, "Error initializing hardware decoding, "
-                   "falling back to software decoding.\n");
-            decoder = ctx->software_fallback_decoder;
-            ctx->software_fallback_decoder = NULL;
-            init_avctx(vd, decoder, NULL);
-        }
+        force_fallback(vd);
         if (!ctx->avctx) {
             uninit(vd);
             return 0;
@@ -655,21 +663,6 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
     return 1;
 }
 
-static int force_fallback(struct dec_video *vd)
-{
-    vd_ffmpeg_ctx *ctx = vd->priv;
-    if (ctx->software_fallback_decoder) {
-        uninit_avctx(vd);
-        MP_WARN(vd, "Hardware decoding failed,"
-                " falling back to software decoding.\n");
-        const char *decoder = ctx->software_fallback_decoder;
-        ctx->software_fallback_decoder = NULL;
-        init_avctx(vd, decoder, NULL);
-        return ctx->avctx ? CONTROL_OK : CONTROL_ERROR;
-    }
-    return CONTROL_FALSE;
-}
-
 static struct mp_image *decode_with_fallback(struct dec_video *vd,
                                 struct demux_packet *packet, int flags)
 {
@@ -681,7 +674,7 @@ static struct mp_image *decode_with_fallback(struct dec_video *vd,
     int res = decode(vd, packet, flags, &mpi);
     if (res < 0) {
         // Failed hardware decoding? Try again in software.
-        if (force_fallback(vd) == CONTROL_OK)
+        if (force_fallback(vd) && ctx->avctx)
             decode(vd, packet, flags, &mpi);
     }
 
@@ -711,7 +704,9 @@ static int control(struct dec_video *vd, int cmd, void *arg)
         return CONTROL_TRUE;
     }
     case VDCTRL_FORCE_HWDEC_FALLBACK:
-        return force_fallback(vd);
+        if (force_fallback(vd))
+            return ctx->avctx ? CONTROL_OK : CONTROL_ERROR;
+        return CONTROL_FALSE;
     }
     return CONTROL_UNKNOWN;
 }
