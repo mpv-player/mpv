@@ -102,8 +102,6 @@ struct texplane {
     GLenum gl_type;
     GLuint gl_texture;
     int gl_buffer;
-    int buffer_size;
-    void *buffer_ptr;
 };
 
 struct video_image {
@@ -762,8 +760,6 @@ static void uninit_video(struct gl_video *p)
         plane->gl_texture = 0;
         gl->DeleteBuffers(1, &plane->gl_buffer);
         plane->gl_buffer = 0;
-        plane->buffer_ptr = NULL;
-        plane->buffer_size = 0;
     }
     mp_image_unrefp(&vimg->mpi);
 
@@ -2254,6 +2250,21 @@ void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
     gl_video_reset_surfaces(p);
 }
 
+static bool unmap_image(struct gl_video *p, struct mp_image *mpi)
+{
+    GL *gl = p->gl;
+    bool ok = true;
+    struct video_image *vimg = &p->image;
+    for (int n = 0; n < p->plane_count; n++) {
+        struct texplane *plane = &vimg->planes[n];
+        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
+        ok = gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER) && ok;
+        mpi->planes[n] = NULL; // PBO offset 0
+    }
+    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    return ok;
+}
+
 static bool map_image(struct gl_video *p, struct mp_image *mpi)
 {
     GL *gl = p->gl;
@@ -2266,20 +2277,20 @@ static bool map_image(struct gl_video *p, struct mp_image *mpi)
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
         mpi->stride[n] = mp_image_plane_w(mpi, n) * p->image_desc.bytes[n];
-        int needed_size = mp_image_plane_h(mpi, n) * mpi->stride[n];
-        if (!plane->gl_buffer)
+        if (!plane->gl_buffer) {
             gl->GenBuffers(1, &plane->gl_buffer);
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
-        if (needed_size > plane->buffer_size) {
-            plane->buffer_size = needed_size;
-            gl->BufferData(GL_PIXEL_UNPACK_BUFFER, plane->buffer_size,
+            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
+            size_t buffer_size = mp_image_plane_h(mpi, n) * mpi->stride[n];
+            gl->BufferData(GL_PIXEL_UNPACK_BUFFER, buffer_size,
                            NULL, GL_DYNAMIC_DRAW);
         }
-        if (!plane->buffer_ptr)
-            plane->buffer_ptr = gl->MapBuffer(GL_PIXEL_UNPACK_BUFFER,
-                                              GL_WRITE_ONLY);
-        mpi->planes[n] = plane->buffer_ptr;
+        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
+        mpi->planes[n] = gl->MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        if (!mpi->planes[n]) {
+            unmap_image(p, mpi);
+            return false;
+        }
     }
     memset(mpi->bufs, 0, sizeof(mpi->bufs));
     return true;
@@ -2309,28 +2320,28 @@ static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
 
     assert(mpi->num_planes == p->plane_count);
 
-    mp_image_t mpi2 = *mpi;
-    bool pbo = false;
-    if (!vimg->planes[0].buffer_ptr && map_image(p, &mpi2)) {
-        mp_image_copy(&mpi2, mpi);
-        pbo = true;
+    mp_image_t pbo_mpi = *mpi;
+    bool pbo = map_image(p, &pbo_mpi);
+    if (pbo) {
+        mp_image_copy(&pbo_mpi, mpi);
+        if (unmap_image(p, &pbo_mpi)) {
+            mpi = &pbo_mpi;
+        } else {
+            MP_FATAL(p, "Video PBO upload failed. Disabling PBOs.\n");
+            pbo = false;
+            p->opts.pbo = 0;
+        }
     }
-    vimg->image_flipped = mpi2.stride[0] < 0;
+
+    vimg->image_flipped = mpi->stride[0] < 0;
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
-        void *plane_ptr = mpi2.planes[n];
-        if (pbo) {
+        if (pbo)
             gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
-            if (!gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER))
-                MP_FATAL(p, "Video PBO upload failed. "
-                         "Remove the 'pbo' suboption.\n");
-            plane->buffer_ptr = NULL;
-            plane_ptr = NULL; // PBO offset 0
-        }
         gl->ActiveTexture(GL_TEXTURE0 + n);
         gl->BindTexture(p->gl_target, plane->gl_texture);
         glUploadTex(gl, p->gl_target, plane->gl_format, plane->gl_type,
-                    plane_ptr, mpi2.stride[n], 0, 0, plane->w, plane->h, 0);
+                    mpi->planes[n], mpi->stride[n], 0, 0, plane->w, plane->h, 0);
     }
     gl->ActiveTexture(GL_TEXTURE0);
     if (pbo)
