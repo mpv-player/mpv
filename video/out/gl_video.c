@@ -173,7 +173,6 @@ struct gl_video {
     struct mp_image_params image_params;        // texture format (mind hwdec case)
     struct mp_imgfmt_desc image_desc;
     int plane_count;
-    int image_w, image_h;
 
     bool is_yuv, is_rgb, is_packed_yuv;
     bool has_alpha;
@@ -192,6 +191,9 @@ struct gl_video {
     struct fbotex pre_fbo[2];
     struct fbotex post_fbo[2];
 
+    // requires multiple passes
+    struct fbotex super_xbr_fbo[2];
+
     int surface_idx;
     int surface_now;
     int frames_drawn;
@@ -209,6 +211,7 @@ struct gl_video {
 
     // temporary during rendering
     struct src_tex pass_tex[TEXUNIT_VIDEO_NUM];
+    int image_w, image_h;
     bool use_indirect;
     bool use_linear;
     bool use_normalized_range;
@@ -342,6 +345,8 @@ const struct gl_video_opts gl_video_opts_def = {
         {{"bilinear",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // cscale
         {{"oversample", .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // tscale
     },
+    .xbr_edge_str = 1.0,
+    .xbr_weight = 1.0,
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
@@ -362,6 +367,8 @@ const struct gl_video_opts gl_video_opts_hq_def = {
         {{"spline36",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // cscale
         {{"oversample", .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // tscale
     },
+    .xbr_edge_str = 1.0,
+    .xbr_weight = 1.0,
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
@@ -456,6 +463,9 @@ const struct m_sub_options gl_video_conf = {
         OPT_STRING("scale-shader", scale_shader, 0),
         OPT_STRINGLIST("pre-shaders", pre_shaders, 0),
         OPT_STRINGLIST("post-shaders", post_shaders, 0),
+        OPT_INTRANGE("super-xbr", super_xbr, 0, 0, 8),
+        OPT_FLOAT("xbr-edge-strength", xbr_edge_str, 0),
+        OPT_FLOAT("xbr-weight", xbr_weight, 0),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
@@ -491,6 +501,8 @@ static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
 
 #define GLSL(x) gl_sc_add(p->sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
+#define GLSLH(x) gl_sc_hadd(p->sc, #x "\n");
+#define GLSLHF(...) gl_sc_haddf(p->sc, __VA_ARGS__)
 
 static const struct fmt_entry *find_tex_format(GL *gl, int bytes_per_comp,
                                                int n_channels)
@@ -695,9 +707,6 @@ static void init_video(struct gl_video *p)
 
     mp_image_params_guess_csp(&p->image_params);
 
-    p->image_w = p->image_params.w;
-    p->image_h = p->image_params.h;
-
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
     if (p->is_yuv && p->image_params.colorspace != MP_CSP_BT_2020_C)
         eq_caps |= MP_CSP_EQ_CAPS_COLORMATRIX;
@@ -716,8 +725,8 @@ static void init_video(struct gl_video *p)
 
         plane->gl_target = p->gl_target;
 
-        plane->w = mp_chroma_div_up(p->image_w, p->image_desc.xs[n]);
-        plane->h = mp_chroma_div_up(p->image_h, p->image_desc.ys[n]);
+        plane->w = mp_chroma_div_up(p->image_params.w, p->image_desc.xs[n]);
+        plane->h = mp_chroma_div_up(p->image_params.h, p->image_desc.ys[n]);
 
         plane->tex_w = plane->w;
         plane->tex_h = plane->h;
@@ -1660,11 +1669,15 @@ static void pass_delinearize(struct gl_video *p, enum mp_csp_trc trc)
 }
 
 // Takes care of the main scaling and pre/post-conversions
-static void pass_scale_main(struct gl_video *p)
+static void pass_scale_main(struct gl_video *p, struct gl_transform offset)
 {
     // Figure out the main scaler.
     double xy[2];
     get_scale_factors(p, xy);
+    // Adjust the scale factors to account for the pre-scaler. For simplicity
+    // we just disregard shearing (no pre-scaler does shearing anyway)
+    xy[0] /= offset.m[0][0];
+    xy[1] /= offset.m[1][1];
     bool downscaling = xy[0] < 1.0 || xy[1] < 1.0;
     bool upscaling = !downscaling && (xy[0] > 1.0 || xy[1] > 1.0);
     double scale_factor = 1.0;
@@ -1715,6 +1728,9 @@ static void pass_scale_main(struct gl_video *p)
           oy = p->src_rect.y0;
     struct gl_transform transform = {{{sx,0.0}, {0.0,sy}}, {ox,oy}};
 
+    // Post-compose any offset from the pre-scaler
+    gl_transform_trans(offset, &transform);
+
     int xc = 0, yc = 1,
         vp_w = p->dst_rect.x1 - p->dst_rect.x0,
         vp_h = p->dst_rect.y1 - p->dst_rect.y0;
@@ -1751,6 +1767,213 @@ static void pass_scale_main(struct gl_video *p)
         // Inverse of the transformation above
         GLSLF("color.rgb = (1.0/(1.0 + exp(%f * (%f - color.rgb))) - %f) / %f;\n",
                 sig_slope, sig_center, sig_offset, sig_scale);
+    }
+}
+
+// Defines a colorspace-dependent macro to obtain a sample's luminance
+static void luma_header(struct gl_video *p)
+{
+    if (p->image_desc.flags & MP_IMGFLAG_YUV) {
+        GLSLH(#define luma(v) (v.x))
+        return;
+    }
+
+    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
+        GLSLH(#define luma(v) (v.y))
+        return;
+    }
+
+    // For RGB, obtain the luma conversion from the XYZ matrix
+    float m[3][3];
+    struct mp_csp_primaries csp = mp_get_csp_primaries(p->image_params.primaries);
+    mp_get_rgb2xyz_matrix(csp, m);
+    GLSLHF("#define luma(v) dot(vec3(%f, %f, %f), v.rgb)\n",
+                m[1][0], m[1][1], m[1][2]);
+}
+
+static void super_xbr_header(struct gl_video *p, int pass)
+{
+    // Sample from the appropriately rotated plane. This could possibly
+    // be done in a better way by rotating the actual source coordinates,
+    // but I'd rather the algorithm work first. Also set up the weights.
+    if (pass == 0) {
+        GLSLH(#define get(x, y) texture(tex, pos + pt * (vec2(x,y) - vec2(0.25))).rgb)
+
+        GLSLH(#define wp1  2.0)
+        GLSLH(#define wp2  1.0)
+        GLSLH(#define wp3 -1.0)
+        GLSLH(#define wp4  4.0)
+        GLSLH(#define wp5 -1.0)
+        GLSLH(#define wp6  1.0)
+
+        GLSLHF("#define weight1 (%f*0.129633)\n", p->opts.xbr_weight);
+        GLSLHF("#define weight2 (%f*0.175068)\n", p->opts.xbr_weight/2.0);
+
+    } else {
+        GLSLH(#define get(x, y) texture(tex, pos + pt * vec2((x)+(y)-1, (y)-(x))).rgb)
+
+        GLSLH(#define wp1 2.0)
+        GLSLH(#define wp2 0.0)
+        GLSLH(#define wp3 0.0)
+        GLSLH(#define wp4 0.0)
+        GLSLH(#define wp5 0.0)
+        GLSLH(#define wp6 0.0)
+
+        GLSLHF("#define weight1 (%f*0.175068)\n", p->opts.xbr_weight);
+        GLSLHF("#define weight2 (%f*0.129633)\n", p->opts.xbr_weight/2.0);
+    }
+
+    // Weight function helpers
+    GLSLH(#define d(a,b) distance(a,b))
+    GLSLH(float d_wd(float b0, float b1, float c0, float c1, float c2,
+                     float d0, float d1, float d2, float d3, float e1,
+                     float e2, float e3, float f2, float f3)
+          {
+              return wp1*(d(c1,c2) + d(c1,c0) + d(e2,e1) + d(e2,e3))
+                   + wp2*(d(d2,d3) + d(d0,d1))
+                   + wp3*(d(d1,d3) + d(d0,d2))
+                   + wp4*d(d1,d2)
+                   + wp5*(d(c0,c2) + d(e1,e3))
+                   + wp6*(d(b0,b1) + d(f2,f3));
+          }
+
+          float o_wd(float i1, float i2, float i3, float i4,
+                     float e1, float e2, float e3, float e4)
+          {
+              return wp4*(d(i1,i2) + d(i3,i4))
+                   + wp1*(d(i1,e1) + d(i2,e2) + d(i3,e3) + d(i4,e4))
+                   + wp3*(d(i1,e2) + d(i3,e4) + d(e1,i2) + d(e3,i4));
+          }
+    )
+
+    // The shader logic is inside a sub-function to let us return prematurely
+    GLSLHF("vec3 super_xbr(sampler2D tex, vec2 pos, vec2 size) {\n");
+
+    // Return untouched the pixels that form part of the original image
+    GLSLH(vec2 pt = vec2(1.0) / size;)
+    GLSLHF("vec2 dir = fract(pos * size / %f) - 0.5;\n", pass+1.0);
+    if (pass == 0) {
+        // Optimization: Discard (skip drawing) unused pixels, except those
+        // at the edge.
+        GLSLH(vec2 dist = size * min(pos, vec2(1.0) - pos);)
+        GLSLH(if (dir.x * dir.y < 0 && dist.x > 1 && dist.y > 1)
+                  return vec3(0.0);)
+        GLSLH(if (dir.x < 0 || dir.y < 0 || dist.x < 1 || dist.y < 1)
+                  return texture(tex, pos - pt * dir).rgb;)
+    } else {
+        GLSLH(if (dir.x * dir.y > 0) return texture(tex, pos).rgb;)
+    }
+
+    // Sample all the necessary pixels
+    GLSLH(vec3 P0 = get(-1,-1);)
+    GLSLH(vec3 P1 = get( 2,-1);)
+    GLSLH(vec3 P2 = get(-1, 2);)
+    GLSLH(vec3 P3 = get( 2, 2);)
+
+    GLSLH(vec3 B = get( 0,-1);)
+    GLSLH(vec3 C = get( 1,-1);)
+    GLSLH(vec3 D = get(-1, 0);)
+    GLSLH(vec3 E = get( 0, 0);)
+    GLSLH(vec3 F = get( 1, 0);)
+    GLSLH(vec3 G = get(-1, 1);)
+    GLSLH(vec3 H = get( 0, 1);)
+    GLSLH(vec3 I = get( 1, 1);)
+
+    GLSLH(vec3 F4 = get(2, 0);)
+    GLSLH(vec3 I4 = get(2, 1);)
+    GLSLH(vec3 H5 = get(0, 2);)
+    GLSLH(vec3 I5 = get(1, 2);)
+
+    // Get their corresponding brightness values
+    luma_header(p);
+    GLSLH(float b = luma(B);)
+    GLSLH(float c = luma(C);)
+    GLSLH(float d = luma(D);)
+    GLSLH(float e = luma(E);)
+    GLSLH(float f = luma(F);)
+    GLSLH(float g = luma(G);)
+    GLSLH(float h = luma(H);)
+    GLSLH(float i = luma(I);)
+
+    GLSLH(float i4 = luma(I4); float p0 = luma(P0);)
+    GLSLH(float i5 = luma(I5); float p1 = luma(P1);)
+    GLSLH(float h5 = luma(H5); float p2 = luma(P2);)
+    GLSLH(float f4 = luma(F4); float p3 = luma(P3);)
+
+    /*
+                                  P1
+         |P0|B |C |P1|         C     F4          |a0|b1|c2|d3|
+         |D |E |F |F4|      B     F     I4       |b0|c1|d2|e3|   |e1|i1|i2|e2|
+         |G |H |I |I4|   P0    E  A  I     P3    |c0|d1|e2|f3|   |e3|i3|i4|e4|
+         |P2|H5|I5|P3|      D     H     I5       |d0|e1|f2|g3|
+                               G     H5
+                                  P2
+    */
+
+    // Compute edge coefficients in the diagonal and orthogonal directions
+    GLSLH(float d_edge = (d_wd(d, b, g, e, c, p2, h, f, p1, h5, i, f4, i5, i4)
+                        - d_wd(c, f4, b, f, i4, p0, e, i, p3, d, h, i5, g, h5));)
+    GLSLH(float o_edge = (o_wd(f, i, e, h, c, i5, b, h5)
+                        - o_wd(e, f, h, i, d, f4, g, i4));)
+
+    // Weight vectors for filtering (two taps)
+    GLSLH(vec4 w1 = vec4(-weight1, vec2(weight1+0.50), -weight1);)
+    GLSLH(vec4 w2 = vec4(-weight2, vec2(weight2+0.25), -weight2);)
+
+    // Filtering and normalization in four directions
+    GLSLH(vec3 c1 = mat4x3(P2, H, F, P1) * w1;)
+    GLSLH(vec3 c2 = mat4x3(P0, E, I, P3) * w1;)
+    GLSLH(vec3 c3 = mat4x3( D, E, F, F4) * w2 + mat4x3( G, H, I, I4) * w2;)
+    GLSLH(vec3 c4 = mat4x3( C, F, I, I5) * w2 + mat4x3( B, E, H, H5) * w2;)
+
+    // Generate the output color by smoothly blending the two strongest dirs
+    GLSLHF("float edge_str = smoothstep(0.0, %f + 1e-6, abs(d_edge));\n",
+                p->opts.xbr_edge_str);
+    GLSLH(vec3 color = mix(mix(c1, c2, step(0.0, d_edge)),
+                           mix(c3, c4, step(0.0, o_edge)),
+                           1 - edge_str);)
+
+    // Simple anti-ringing code
+    GLSLH(vec3 lo = min(min(E, F), min(H, I));)
+    GLSLH(vec3 hi = max(max(E, F), max(H, I));)
+    GLSLH(vec3 clamped = clamp(color, lo, hi);)
+    GLSLH(color = mix(color, clamped, 1.0 - 2.0 * abs(edge_str - 0.5));)
+
+    GLSLH(return color;)
+    GLSLHF("}\n");
+}
+
+// Applies any pre-scaling, eg. image doubling algorithms. Such pre-scalers
+// should apply their coordinate transformations onto *offset
+static void pass_scale_pre(struct gl_video *p, struct gl_transform *offset)
+{
+    // Apply passes of SuperXBR
+    for (int i = 0; i < p->opts.super_xbr; i++) {
+        // This algorithm is adopted from a HLSL shader, which was originally
+        // copyright 2015 Hyllian - sergiogdb@gmail and was distributed under
+        // the terms of the MIT license.
+        finish_pass_fbo(p, &p->super_xbr_fbo[0], p->image_w, p->image_h, 0, 0);
+        const struct gl_transform xbr_trans = {{{2.0, 0.0}, {0.0, 2.0}}, {-0.5, -0.5}};
+        gl_transform_trans(xbr_trans, offset);
+        // Prevent throwing off subsequent FBO sizes
+        p->image_w *= 2;
+        p->image_h *= 2;
+        p->use_indirect = true;
+
+        for (int pass = 0; pass < 2; pass++) {
+            super_xbr_header(p, pass);
+            GLSLF("// super xbr (pass %d)\n", pass + 1);
+            GLSL(vec4 color = vec4(1.0);)
+            GLSL(color.rgb = super_xbr(texture0, texcoord0, texture_size0);)
+
+            // Just use bilinear for the alpha channel. We don't care about its
+            // quality to the degree that it would slow down the shader.
+            if (p->has_alpha && p->opts.alpha_mode != 0)
+                GLSL(color.a = texture(texture0, texcoord0).a;)
+
+            if (pass == 0)
+                finish_pass_fbo(p, &p->super_xbr_fbo[1], p->image_w, p->image_h, 0, 0);
+        }
     }
 }
 
@@ -1947,9 +2170,17 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
 // upscaling. p->image is rendered.
 static void pass_render_frame(struct gl_video *p)
 {
+    // Initialize per-pass size variables
+    p->image_w = p->image_params.w;
+    p->image_h = p->image_params.h;
+
     p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling;
     p->use_indirect = false; // set to true as needed by pass_*
     pass_read_video(p);
+
+    struct gl_transform offset = {{{1.0, 0.0}, {0.0, 1.0}}, {0.0, 0.0}};
+    pass_scale_pre(p, &offset);
+
     pass_convert_yuv(p);
 
     // For subtitles
@@ -1976,7 +2207,7 @@ static void pass_render_frame(struct gl_video *p)
         p->use_indirect = true;
     }
 
-    pass_scale_main(p);
+    pass_scale_main(p, offset);
 
     int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
         vp_h = p->dst_rect.y1 - p->dst_rect.y0;
@@ -1984,8 +2215,8 @@ static void pass_render_frame(struct gl_video *p)
         // Recreate the real video size from the src/dst rects
         struct mp_osd_res rect = {
             .w = vp_w, .h = vp_h,
-            .ml = -p->src_rect.x0, .mr = p->src_rect.x1 - p->image_w,
-            .mt = -p->src_rect.y0, .mb = p->src_rect.y1 - p->image_h,
+            .ml = -p->src_rect.x0, .mr = p->src_rect.x1 - p->image_params.w,
+            .mt = -p->src_rect.y0, .mb = p->src_rect.y1 - p->image_params.h,
             .display_par = 1.0,
         };
         // Adjust margins for scale

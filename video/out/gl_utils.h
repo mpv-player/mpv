@@ -115,6 +115,8 @@ static inline void gl_transform_rect(struct gl_transform t, struct mp_rect_f *r)
     gl_transform_vec(t, &r->x1, &r->y1);
 }
 
+void gl_transform_trans(struct gl_transform t, struct gl_transform *x);
+
 void gl_set_debug_logger(GL *gl, struct mp_log *log);
 
 struct gl_shader_cache;
@@ -125,6 +127,7 @@ void gl_sc_destroy(struct gl_shader_cache *sc);
 void gl_sc_add(struct gl_shader_cache *sc, const char *text);
 void gl_sc_addf(struct gl_shader_cache *sc, const char *textf, ...);
 void gl_sc_hadd(struct gl_shader_cache *sc, const char *text);
+void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...);
 const char *gl_sc_loadfile(struct gl_shader_cache *sc, const char *path);
 void gl_sc_uniform_sampler(struct gl_shader_cache *sc, char *name, GLenum target,
                            int unit);

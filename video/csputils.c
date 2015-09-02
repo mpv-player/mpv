@@ -412,7 +412,7 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
 
 // Compute the RGB/XYZ matrix as described here:
 // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
-static void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3])
+void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3])
 {
     float S[3], X[4], Z[4];
 
