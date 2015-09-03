@@ -191,7 +191,6 @@ options_state_machine() {
     opt_yes_no _libcdio     "libcdio support"
     opt_yes_no _librubberband "librubberband support"
     opt_yes_no _ffmpeg      "skip FFmpeg/Libav autodetection"
-    opt_yes_no _libbs2b     "libbs2b audio filter support"
     opt_yes_no _libavresample "libavresample (preferred over libswresample)"
     opt_yes_no _libswresample "libswresample"
     opt_yes_no _caca        "CACA  video output"
@@ -747,8 +746,6 @@ check_pkg_config "uchardet" $_uchardet UCHARDET 'uchardet'
 
 check_pkg_config "zlib" auto ZLIB 'zlib'
 test $(defretval) = no && die "Unable to find development files for zlib."
-
-check_pkg_config "libbs2b audio filter support" $_libbs2b LIBBS2B 'libbs2b'
 
 check_pkg_config "LCMS2 support" $_lcms2 LCMS2 'lcms2 >= 2.6'
 

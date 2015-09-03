@@ -96,28 +96,6 @@ Available filters are:
         If the input channel number is less than ``<minch>``, the filter will
         detach itself (default: 3).
 
-``bs2b[=option1:option2:...]``
-    Bauer stereophonic to binaural transformation using libbs2b. Improves the
-    headphone listening experience by making the sound similar to that from
-    loudspeakers, allowing each ear to hear both channels and taking into
-    account the distance difference and the head shadowing effect. It is
-    applicable only to 2-channel audio.
-
-    ``fcut=<300-1000>``
-        Set cut frequency in Hz.
-    ``feed=<10-150>``
-        Set feed level for low frequencies in 0.1*dB.
-    ``profile=<value>``
-        Several profiles are available for convenience:
-
-        :default: will be used if nothing else was specified (fcut=700,
-                  feed=45)
-        :cmoy:    Chu Moy circuit implementation (fcut=700, feed=60)
-        :jmeier:  Jan Meier circuit implementation (fcut=650, feed=95)
-
-    If ``fcut`` or ``feed`` options are specified together with a profile, they
-    will be applied on top of the selected profile.
-
 ``equalizer=g1:g2:g3:...:g10``
     10 octave band graphic equalizer, implemented using 10 IIR band-pass
     filters. This means that it works regardless of what type of audio is

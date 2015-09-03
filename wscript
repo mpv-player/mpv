@@ -352,10 +352,6 @@ iconv support use --disable-iconv.",
         'desc': 'librubberband support',
         'func': check_pkg_config('rubberband', '>= 1.8.0'),
     }, {
-        'name': '--libbs2b',
-        'desc': 'libbs2b audio filter support',
-        'func': check_pkg_config('libbs2b'),
-    }, {
         'name': '--lcms2',
         'desc': 'LCMS2 support',
         'func': check_pkg_config('lcms2', '>= 2.6'),

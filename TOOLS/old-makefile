@@ -40,7 +40,6 @@ SOURCES-$(LIBASS)               += sub/ass_mp.c sub/sd_ass.c \
                                    demux/demux_libass.c
 
 SOURCES-$(LIBBLURAY)            += stream/stream_bluray.c
-SOURCES-$(LIBBS2B)              += audio/filter/af_bs2b.c
 
 SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 
