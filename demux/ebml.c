@@ -631,6 +631,10 @@ int ebml_read_element(struct stream *s, struct ebml_parse_ctx *ctx,
                    "- partial or corrupt file?\n");
         return -1;
     }
+    if (length == EBML_UINT_INVALID) {
+        MP_MSG(ctx, msglevel, "EBML element with unknown length - unsupported\n");
+        return -1;
+    }
     if (length > 1000000000) {
         MP_MSG(ctx, msglevel, "Refusing to read element over 100 MB in size\n");
         return -1;
