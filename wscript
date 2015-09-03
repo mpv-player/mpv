@@ -348,10 +348,6 @@ iconv support use --disable-iconv.",
         'deps': [ 'iconv' ],
         'func': check_pkg_config('uchardet'),
     }, {
-        'name': '--ladspa',
-        'desc': 'LADSPA plugin support',
-        'func': check_statement('ladspa.h', 'LADSPA_Descriptor ld = {0}'),
-    }, {
         'name': '--rubberband',
         'desc': 'librubberband support',
         'func': check_pkg_config('rubberband', '>= 1.8.0'),
