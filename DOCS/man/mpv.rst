@@ -416,7 +416,7 @@ but option values still need to be quoted as a whole if it contains certain
 characters like spaces. A config entry can be quoted with ``"`` and ``'``,
 as well as with the fixed-length syntax (``%n%``) mentioned before. This is like
 passing the exact contents of the quoted string as command line option. C-style
-escapes are currently _not_ interpreted on this level, although some options to
+escapes are currently _not_ interpreted on this level, although some options do
 this manually. (This is a mess and should probably be changed at some point.)
 
 Putting Command Line Options into the Configuration File
