@@ -1,0 +1,979 @@
+Release 0.10.0
+==============
+
+
+Features
+--------
+
+New
+~~~
+
+- uchardet support
+- Matroska: reading cue sheets embedded in tags
+- Support for VideoToolbox hardware decoding
+- Display sync mode (--display-sync)
+- --force-window=immediate mode
+- fd:// protocol
+- libarchive wrapper for reading compressed archives
+- TOOLS/lua: zones.lua
+- Support for the "new" libavcodec VDPAU API
+- vf_vdpaurb, Add a new filter for reading back VDPAU decoded frames
+- DXVA2: HEVC support
+- Enabled HEVC profiles with VA API
+- HEVC added to whitelist of hwdec codecs
+- vo_null: framerate emulation
+- vo_opengl: support for custom shaders
+- vo_opengl: temporal-dither-period option
+- vo_opengl: tscale-clamp option
+- vo_opengl: option to attach target-prim/target-csp to window screenshots
+- vo_opengl_cb: "block" framedrop mode (now default)
+- vo_opengl_cb: support for interpolation
+- vo_vdpau: rotation support
+- ytdl_hook: support for 'multi_video' results
+
+
+Removed
+~~~~~~~
+
+- af_convert24 (af_lavrresample does this now)
+- af_dummy
+- audio: S8, U16, U24, U32 formats
+- DVD and BD menu support
+- TOOLS: youtube-starttime.lua
+- VA API: compatibility crap (< 0.34.0) and vo_vaapi deinterlacer
+- vo_x11
+
+
+Deprecated
+~~~~~~~~~~
+
+- vf_dlopen
+
+
+Behavior
+--------
+
+- audio: softvol scale is now cubic
+- cache: readahead size is limited to half the cache size at the beginning
+- charset_conv: "auto" encoding detection now prefers uchardet
+- demux_playlist: skip hidden directories
+- input.conf: O toggles between 2 states only
+- input.conf: Ctrl+s key binding for window screenshots
+- input.conf: mouse volume control (horizontal scrolling) inverted
+- input.conf: L to toggle infinite looping
+- input.conf: remap d/D keys (dropped framedrop cycle, replaced with deinterlacing toggle)
+- player: disabled seeking on unseekable streams even if the cache is enabled
+- player: parses and exposes m3u playlist titles
+- player: --term-playing-msg is now in a separate log category
+- player: removed automatic DVB channel advancement on no data
+- player: now restores video-aspect on playback resume
+- player: now uses exit code 0 by default for quit, 4 for signals, etc.
+- player: warns against using HLS URLs with --playlist
+- screenshots: changed the default directory in pseudo-gui mode to desktop
+- screenshots: screenshot directory is now created automatically
+- screenshots: default template is now prefixed with "mpv-"
+- TOOLS/lua/autoload: adds all files on start
+- vo: vo_wayland moved up in autoprobe list
+- vo_opengl: enabled pbo by default with opengl-hq
+- vo_opengl: cache dir for ICC profiles is now created automatically
+- w32: shift drag and drop appends
+- x11: shift drag and drop appends
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- af_volume: replaygain-fallback option
+- ao_coreaudio: change-physical-format option
+- ao_coreaudio: exclusive option
+- ao_null: channel-layouts option for testing channel layout selection
+- audio: --audio-spdif as new method for enabling passthrough
+- cache: --cache-backbuffer to configure cache backbuffer size
+- command: define-section command for defining input bindings
+- command: audio-params and audio-out-params properties
+- command: keypress, keydown, and keyup commands
+- command: playlist_shuffle command
+- command: option-info/N/set-locally property indicating per-file options
+- command: protocol-list property
+- command: track-list/N/audio-channels property
+- demux: --demuxer-max-packets and --demuxer-max-bytes options to control maximum queue size
+- input: relative percentage seek
+- osc: time display configuration options
+- player: --playlist-pos option
+- screenshots: --screenshot-jpeg-source-chroma option to disable JPEG 4:4:4 output
+- screenshots: --screenshot-high-bit-depth option to allow or disallow 16 bit output
+- screenshots: --screenshot-directory option
+- sub: --stretch-image-subs-to-screen option for stretching image subtitles to screen
+- TOOLS/stats-conv: allow passing regex via command line
+- video: --video-aspect-method option to configure container vs. bitstream aspect ratio
+- vo_drm: mode suboption to set the mode ID to use
+- vo_opengl_cb, vo_opengl: --hwdec-preload option for preloading hwdec context
+- vo_rpi: background disabled by default
+- vo_xv: buffers suboption to configure number of buffers
+- win32: portable config mode
+
+
+Changed
+~~~~~~~
+
+- audio: changed the range of the volume option/property (0 is still silence, and 100 now always means unchanged volume)
+- command: allow changing deinterlace property any time
+- command: allow changing track properties while no file is loaded
+- command: always make video-aspect property accessible
+- command: better choice when to allow playback-related commands
+- command: change OSD symbol for absolute perc. seek
+- command: change the default action for rescan_external_files
+- command: change the hwdec properties
+- command: define-section with empty contents removes a section
+- command: export stereo 3D tags
+- command: make auto-deinterlacing output at field rate
+- command: make deinterlace property use interlaced-only yadif mode
+- command: make property event mask matching more restrictive
+- command: make the playback-time property writable
+- input: allow - as separator between commands, instead of _
+- options: --loop without argument means looping forever
+- options: make keyvalue list parsing less strict
+- player: extend --hls-bitrate option
+- vf_yadif: expose interlaced frame mode
+- video: --video-stereo-mode=no to disable automatic stereo conversion
+- vo_opengl_cb, vo_opengl: --hwdec-preload for preloading hwdec context
+- vo_opengl: replace icc-cache with icc-cache-dir
+- vo_opengl: icc-profile overrides icc-profile-auto
+
+
+Renamed
+~~~~~~~
+
+- command: rename audio-format property to audio-codec-name
+- options: rename --media-title option to --force-media-title
+- vo_opengl: rename use_full_range to use_normalized_range
+
+
+Deprecated
+~~~~~~~~~~
+
+- --ad-spdif-dtshd (use --audio-spdif=dts-hd)
+- audio-samplerate property
+- length property
+
+
+Removed
+~~~~~~~
+
+- get_property command
+- --demuxer-readahead-packets and --demuxer-readahead-bytes
+- image_writer: don't use jpeg baseline, and remove useless jpeg-optimize and jpeg-baseline options
+- --leak-report
+- --slave-broken
+- vo_opengl: npot suboption
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- ad_spdif: use DTS-HD passthrough only if the audio is really DTS-HD
+- af: fix behavior with filter chains that require a large number of auto-inserted conversion filters
+- af_lavcac3enc: fix A/V sync
+- ao_alsa: accept 7.1 over HDMI
+- ao_alsa: refuse to use spdif if AES flags can't be set
+- ao_wasapi: fix crash on hotplug init error
+- audio: avoid wasting CPU due to continuous wakeup
+- audio: do not exit when loading small files in paused mode
+- audio: fix channel map fallback selection
+- audio: fix crash on uninit
+- audio: fix --end handling
+- audio: fix EOF state with --keep-open
+- audio: fix restoring volume
+- charset_conv: fix switched parameters
+- charset_conv: use our own UTF-8 check with ENCA only
+- cocoa: don't load hardcoded icon if running from bundle
+- cocoa: hide cursor using a blank image instead of a system-wide API
+- command: do not exit playback if the B point of A-B loop is past EOF
+- command: fix audio-out-detected-device property
+- command: fix track property when no file is loaded
+- command: fix video-aspect property update notification
+- command: let track properties return option value in idle mode
+- demux: don't get stuck on some cases of timestamp resets
+- demux: handle Matroska-style replaygain tags as well
+- demux_lavf: do a better job at guessing the vobsub .sub filename
+- demux_mkv: disable ordered chapters if ChapterTimeEnd is missing
+- demux_mkv: discard broken index
+- demux_mkv: fix mpeg2 mapping
+- demux_mkv: ignore deprecated FrameRate, do not assume PAL
+- demux_mkv: improve video duration detection heuristic
+- demux_mkv: parse FLAC channel layouts
+- demux_playlist: make mime type comparison case-insensitive
+- dxva2: fix handling of cropped video
+- idet.sh: Support larger files
+- mp_image: fix vf_vdpaupp references
+- options: fix conversion of flags to strings
+- options: move program name to end of window title
+- options: remove the period at the end of "No file."
+- osc: completely disable if no VO window exists
+- osc: exit tick immediately if disabled
+- osc: reinit on playlist changes
+- osx: add NULL check for input context in a missing case
+- player: fix crashes when adding external tracks before loading main file
+- player: increase tick event update frequency
+- player: make decoding cover art more robust
+- player: raise maximum idle time
+- player: return better guess for playback time during seeks
+- player: show larger cache sizes in MB on status line
+- player: slim down A/V desync warning
+- sd_ass: assume negative durations are unknown durations, and handle them
+- terminal: disable terminal foreground state polling
+- terminal-unix: set terminal mode on init
+- timer: fix a corner case on clock changes
+- TOOLS: make autodeint detect telecine in parallel
+- TOOLS/zsh.pl: die loudly if mpv fails to run
+- vaapi: prefer direct display over copy-back
+- vaapi: fix some videos only showing up green
+- vaapi: treat cropped decoder output slightly more correctly
+- vda: add support for nv12 image formats
+- vd_lavc: fix a hw decoding fallback case
+- vf_stereo3d: drop internal implementation
+- vf_vavpp: don't attempt to deinterlace progressive frames
+- vf_vavpp: fix bob deinterlacing for bottom field first videos
+- vf_vdpaupp: Don't crash when evaluating interlacing of NULL mpi
+- video: always re-probe auto deint filter on filter reconfig
+- video: better heuristic for timestamp resets
+- video: fix panscan in vertical case
+- video: fix VideoToolbox/VDA autodetection
+- video: unbreak EOF with video-only files that have timestamp resets
+- vo_direct3d: fix broken pseudo GUI drag and drop hint
+- vo_drm: fix centering with regard to stride
+- vo_drm: fix crashes with --profile=pseudo-gui
+- vo_drm: fix resolution not restored after exiting
+- vo_drm: fix stride problem for certain devices
+- vo_drm: make VT switching non mandatory
+- vo: free frames before killing VO
+- vo_opengl: avoid broken shader if hwdec fails to provide textures
+- vo_opengl_cb: drop frames eagerly if frames are not rendered
+- vo_opengl: CMS no longer implies linear scaling
+- vo_opengl: fix alpha video in one case
+- vo_opengl: fix dangling pointers with vo_cmdline
+- vo_opengl: fix framestepping/pausing + interpolation
+- vo_opengl: fix "freezes" after seeking with interpolation on
+- vo_opengl: fix scale=oversample's threshold calculations
+- vo_opengl: framebuffers work under GLES 2
+- vo_opengl: improve robustness against PBO failure
+- vo_opengl: reimplement tscale=oversample
+- vo_opengl: reject future images in different formats
+- vo_opengl: X11: don't leak when GL init fails
+- vo: restore frame-drop logic for high-fps clips
+- vo_rpi: fix blackscreen before the first subtitle/OSD is rendered
+- vo_rpi, vo_opengl: do not globally terminate EGL on VO uninit
+- vo_sdl: fix glaring memory leak
+- vo_vdpau: check maximum video size
+- vo_vdpau: limit output surfaces to allowed maximum dimensions
+- win32: fix window resize logic
+- win32: fix crashes when changing system time
+- x11: Handle external fullscreen toggles
+- ytdl: catch bogus extractor info
+- ytdl: do not use deprecated media-title option
+- ytdl: don't print failure warning when youtube-dl was killed by us
+- ytdl: get start_time
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API. A complete changelog can be seen by running
+`git log v0.9.2..v0.10.0` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.9.2...v0.10.0.
+
+
+Release 0.9.2
+=============
+
+Changes
+-------
+
+- The Lua check now also checks for `lua52.pc`, as used by Arch Linux testing.
+- (X11) `vo_opengl`'s `icc-profile-auto` now queries the current ICC profile
+  relative to the center of the window.
+- `ao_coreaudio`, `ao_alsa` now support adding dummy padding channels for
+  better compatibility with hardware decoders that only support specific
+  channel counts (e.g. 5.1 now should work on a decoder that only accepts 7.1).
+- Channel fallback (in case the audio device doesn't natively support a given
+  channel layout) has been improved.
+- `vf_vapoursynth` now rejects unaligned video instead of outputting corrupted
+  video.
+- mpv now tries to autoload `.sup` subtitles as well.
+
+Bug fixes
+---------
+
+- `vo_opengl`'s default for `fbo-format` is now `rgba16`, to avoid rounding
+  errors when using non-default `cscale` (issue #1918).
+- Improved framedrop behavior when playing video that has higher framerate
+  than the display (issue #1897).
+- Trying to play a directory will no longer spam `Connection lost!` to the
+  console log.
+- (Linux) Several `vo_rpi` bugfixes.
+- (Linux) Several `vo_drm` bugfixes. Pan&Scan is now supported.
+- (X11) Fix fullscreen behavior on certain window managers (issues #1937,
+  #1920).
+- (OSX) The OSD no longer always shows up on startup.
+- (OSX) Several `ao_coreaudio` and `ao_coreaudio_exclusive` bugfixes.
+- (OSX) Fixed potential crash on exit when using Cocoa.
+- (ClientAPI) `vo_opengl_cb` now actually applies options changed at runtime.
+- (OSX, ClientAPI) Cocoa now works when both the `cplayer` (`mpv`) and `libmpv`
+  are built at the same time; however, `libmpv` now always creates an
+  application singleton. Cocoa has to be disabled completely to prevent
+  `libmpv` from creating the singleton.
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.9.1..v0.9.2` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.9.1...v0.9.2.
+
+Release 0.9.1
+=============
+
+Changes
+-------
+
+- mpv's IRC channel moved from #mpv-player to #mpv on chat.freenode.net.
+- Documentation updates.
+- The default value for the `--ytdl-format` option is now `best`, in order to
+  work around `youtube-dl`'s 2015.04.26 release enabling DASH by default, as
+  FFmpeg / Libav do not yet properly support DASH.
+- When seeking, the current timestamp will show the predicted seek timestamp
+  instead, until the final timestamp is resolved. Improves UI responsiveness
+  on slow streams and/or large seeks.
+
+Bug fixes
+---------
+
+- Corrected the release marker on DOCS/client-api-changes. The release manager
+  forgot to fix it before release...
+- Fix `vo_vdpau` rendering garbage lines on H.264 video with non-mod16 size
+  (issue #1863).
+- Fix a crash on exit if the "sub_reload" command had run successfully.
+- Fixed seeking with the mouse when `osc-seekbarstyle=bar` is set (issue
+  #1876).
+- (IPC) Fixed encoding of UTF-8 data in JSON (issue #1874).
+
+New features
+------------
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.9.0..v0.9.1` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.9.0...v0.9.1.
+
+Release 0.9.0
+=============
+
+Changes
+-------
+
+Changes that may break users' config files have been annotated with a `(!)`.
+
+- Note: mpv is not compatible with Lua 5.3. Lua 5.1 or 5.2 is required.
+- The minimum required libass version is now 0.12.1 or newer.
+- The minimum required FFmpeg version is now 2.4.0 (equiv. Libav 11) or newer.
+- The internal libmpg123 support was removed. This was already not used by
+  default in the previous release.
+- `(!)` The LIRC support was removed. Configure LIRC remotes as input devices
+  instead.
+- `(!)` The Linux Joystick support was removed.
+- `(!)` `vf_screenshot` was removed, as they are now handled at a VO level and
+  is compatible with all VOs.
+- `(!)` `--ass-use-margins` has been renamed to `--sub-use-margins` and applies
+  only to plain-text (non-ASS) subtitles (enabled by default). The new
+  `--ass-force-margins` option applies only to ASS subtitles (disabled by
+  default). To get the old behaviour back, enable both at the same time.
+- `(!)` The `--sub-scale-with-window` option now only applies to plain text
+  (non-ASS) subtitles (enabled by default). The new `--ass-scale-with-window`
+  option does the same but only with ASS subtitles (disabled by default).
+- `(!)` The range for the `param1` for the `gaussian` `vo_opengl` scaler has
+  been redefined. Instead of being an arbitrary 1-100 range, have a default
+  value of 1.0, and anything higher is blurrier.
+- `(!)` The `seek`, `playlist_next, `playlist_prev`, `loadfile` and `loadlist`
+  parameters no longer accept numerical parameters where symbolic parameter
+  names exist.
+- `(!)` `vo_opengl` changes:
+  - `(!)` The `smoothmotion` suboption has been renamed to `interpolation`.
+    The old name is still supported for now.
+  - `(!)` The `bilinear_slow` scaler has been renamed to `triangle`.
+  - `(!)` `scale-down` has been renamed to `dscale` and now has its own set of
+    config options (e.g. `dscale-radius`).
+  - `(!)` Scaler radius no longer defaults to `3` but to a preferred value
+    that may be different for each filter.
+  - The `scale-radius` option may now go down as low as `0.5`, which is the
+    value used by the `nearest` filter.
+  - `spline36` is the new `cscale` default for `opengl-hq`. This might break
+    setups that use `fbo-format=rgb8`. To work around it, leave `fbo-format`
+    as its default, or set to something higher than 8, or set `cscale=bilinear`,
+    the previous default.
+- `(!)` `vf_format` no longer converts video to YUYV if there is no parameter.
+  Video is now passed unchanged unless a format is specifically requested.
+- `(!)` The `--colormatrix`, `--colormatrix-input-range`,
+  `--colormatrix-output-range` and `--colormatrix-primaries` options have been
+  converted into `vf_format` suboptions. See commit 27715b7 and the manual for
+  details.
+- `vf_mirror`'s implementation was replaced with calling into `libavfilter`'s
+  `vf_hflip` filter, thus depending on `libavfilter` to function.
+- The `device` subption to `ao_wasapi` has been deprecated in favor of
+  `--audio-device`.
+- `--video-rotate` now allows 360 as an argument instead of stopping at 359.
+- Several improvements to `af_scaletempo`.
+- Options that have multiple options and also include a "yes" option now
+  default to that if specified with no arguments.
+- The default value of `--cache-default` is now 150000 (153.6 MB, ~146 MiB).
+- JPEG screenshots now use the same subsampling as the source video. The images
+  are still RGB regardless of source format though.
+
+Bug fixes
+---------
+
+- mpv no longer saves position on files that can't be resumed (issue #1701).
+- (X11) Fix the player thinking the mouse has left the window in some WMs /
+  embeddings (issue #1672).
+- mpv no longer freezes on wayland when the compositor stops asking it to draw
+  itself (e.g. when minimized) (issue #249).
+- `.ac3` files are no longer rejected by `--audio-file-auto` (issue #1759).
+- `ao_wasapi` now automatically enables `exclusive` when passthrough is
+  attempted (issue #1742).
+- Attempt to fix flickering on Intel VAAPI drivers with `--hwdec=vaapi` and
+  `--vo=opengl` (issue #1765).
+- `youtube-dl` will no longer download video streams when video playback
+  is disabled with `--no-video`.
+- (Windows) mpv now prevents system sleep when playing a video-only file.
+  Previously, only files with an opened audio track would prevent sleep.
+
+New features
+------------
+
+- `vo_opengl` features:
+  - Added `ewa_ginseng`, `ewa_hanning`, `robidoux`, `robidouxsharp`,
+    `oversample` and `haasnsoft` scalers.
+  - There are now `ewa_lanczossoft` and `ewa_lanczossharp` aliases to
+    `ewa_lanczos` that are tuned to be blurrier and sharper, respectively.
+  - Added `gamma-auto` option that uses ambient light sensors to automatically
+    adjust the video gamma. See commit c028d78 for details.
+  - Added `blend-subtitles` option to draw subtitles directly into the video
+    instead of rendered afterwards. Potentially necessary for correct rendering
+    with files that use ASS subtitles for typesetting in combination with an
+    `icc-profile`. There is a default option for drawing after upscaling,
+    and a `video` option for drawing before upscaling. See details and warning
+    on the manual.
+  - There is now a `tscale` option, used to choose the temporal scaler used
+    in the `interpolation` mode (previously `smoothmotion`).
+  - There is a new `scale-blur` parameter to adjust the amount of blur that
+    most of the filters produce. Deviating from the default may introduce
+    artifacts in EWA filters.
+  - (Windows) There is now a `dwmflush` option that might help improve
+    rendering of high-fps video. Disabled by default. See manual for options.
+- New Linux-only `vo_drm` video output driver. Uses the direct rendering /
+  kernel modesetting drivers to draw directly to the framebuffer, but with
+  no hardware acceleration. See manual for details.
+- New `pseudo-gui` builtin profile, automatically used when launched from
+  `mpv.desktop` by opening `mpv.exe` on windows (`mpv.com` still works as
+  usual), or by opening the `mpv.app` bundle. The `pseudo-gui` tries to make
+  the player window behave closer to what a desktop player would do, by not
+  immediately closing and allowing the user to drag&drop files for playback.
+  See manual for details.
+- mpv can now play directories by automatically playing their contents instead.
+  Works everywhere but on Windows, due to issues with Windows' C runtime.
+- Add support to pitch correct stretched audio with librubberband.
+- Add support for the Raspberry Pi 2's hardware decoder when FFmpeg (or Libav)
+  is built with `--enable-mmal`. See commit 8fff125 for details.
+- The `--cache` option now accepts a "yes" option, that always enables a
+  `--cache-default`-sized cache on all cases a cache can be used, unless
+  `--cache-default` disables caching.
+- `ao_pulse`, `ao_coreaudio` and `ao_wasapi` now support device hotplugging.
+- New `--osd-align-x` and `--osd-align-y` options can be used to align the OSD
+  independently from subtitles.
+- New `--osd-bold` and `--sub-text-bold` options can be enabled to bold all
+  OSD or plain-text subtitle text, respectively.
+- Added a default keybind to the `u` key that enables/disables ASS style
+  overriding. When enabled, is equivalent to `--ass-style-override=force`.
+- There is now a `MOUSE_ENTER` keybind, that is called when the mouse cursor
+  enters the VO from outside.
+- The new `--ytdl-params` option can be set to arguments that are always given
+  to `youtube-dl` invocations. There is no sanity checking, so invalid options
+  can prevent `mpv` from working with http URLs.
+- There's a new `--demuxer-mkv-fix-timestamps` option, enabled by default, that
+  tries to guess more accurate video timestamps by using FPS information, if
+  available. See manual for details.
+- The new `--window-scale` option can be used to scale the video window by the
+  specified multiplier, before other options such as `--autofit` are applied.
+- `vo_direct3d_shaders` now supports NV12 colorspace without using stretchrect,
+  but it seems no drivers actually support that.
+- (Client API) Added a `rescan_external_files` command, as requested on issue
+  #1586.
+- (Client API) If enabled, initializing the Client API will now also load the
+  user's `mpv.conf`.
+- (Client API) There's a new `mpv_opengl_cb_report_flip()` call for API users
+  to call to inform mpv of when exactly a frame was displayed.
+- (Client API) The `mpv_opengl_cb_render()` function was deprecated in favor
+  of the new, simpler `mpv_opengl_cb_draw()` function.
+- (Client API) There is a new `screenshot_raw` command. See `input.rst` for
+  details.
+- The `--input-file` argument may now also be a file descriptor in the form
+  "fd://N", where N is the FD number.
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.8.0..v0.9.0` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.8.0...v0.9.0 (only 250 commits).
+
+Release 0.8.3
+=============
+
+Changes
+-------
+
+- Documentation fixes and updates.
+- (Client API) Clarify `mpv_opengl_cb_render`'s viewport parameter behavior.
+
+Bug fixes
+---------
+
+- (X11) Fix crash on `vo_xv:no-colorkey` with the Overlay adapter. (bug #1629)
+- (X11) `--stop-screensaver` is now implemented by calling into
+  `xdg-screensaver`, fixing some compatibility issues that prevented it from
+  actually stopping screensavers.
+- Make the video equalizer work correctly on some VAAPI drivers. (bug #1647)
+- Prevent OSD from disappearing when clicking on mozplugger. (bug #1672)
+- The new DVB-S2 support code, using S2API, now builds on FreeBSD.
+- Fix decoding of seekable matroska from unseekable network stream. (bug #1656)
+- (OSX) Fix crashing when closing a VO's window (usually at exit). (bug #1657)
+- (OSX) Unhide the mouse cursor when over the Dock or Launchpad. (bug #513)
+- (OSX) Fix mouse cursor autohiding when the player is fullscreen.
+- `vf_vavpp` (VAAPI postprocessing) now deinterlaces video correctly.
+- `smb://` streams now use the stream cache (used to be inefficient).
+- (Windows) Do not hide the mouse cursor when it is hovering the window menu.
+- Fix 8-channel output on `ao_jack`. (bug #1688)
+- Fix `--mf-fps` parameter on JPEG files. (bug #1689)
+- Fix anamorphic scaling being ignored if it was very minor.
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.8.2..v0.8.3` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.8.2...v0.8.3.
+
+Release 0.8.2
+=============
+
+Bug fixes
+---------
+
+- Fix OSD placement accidentally messed up in 0.8.1 (commit 22863d6).
+
+Release 0.8.1
+=============
+
+Changes
+-------
+
+- DOCS/client-api-changes has been correctly updated for the v0.8.0 release
+  series.
+- Quality and major perfomance improvements to smoothmotion.
+- Silence the "[ytdl_hook] WARNING: video doesn't have subtitles" warning.
+- Other documentation updates.
+
+Bug fixes
+---------
+
+- Attempt to fix OpenGL shader compilation on Intel windows drivers. (bug
+  #1536)
+- Attempt to improve the OpenGL shader's compatibility with GLES2.
+- (Windows) Fix noise when seeking while using wasapi:exclusive. (bug #1529)
+- Fix the waf-based build system when used with newer versions of waf with
+  python3.
+- Documentation fixes. (includes bug #1608)
+
+New features
+------------
+
+- mpv now tries to load '.vtt' subtitles.
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.8.0..v0.8.1` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.8.0...v0.8.1.
+
+Release 0.8.0
+=============
+
+Changes
+-------
+
+Changes that may break users' config files have been annotated with a `(!)`.
+
+- `(!)` vo_opengl_old has been removed. OpenGL rendering now requires hardware
+  that can do at least OpenGL 2.1, the oldest version supported by vo_opengl.
+- `(!)` vf_pp has been removed. A version of it can still be accessed through
+  lavfilter (e.g. --vf=lavfi=[pp...]), but it receives no QP information.
+  Also, vf_dlopen no longer passes QP information to its loaded plugin either
+  (it's always 0).
+- `(!)` vf_softpulldown, vf_swapuv, vf_phase, vf_divtc and vf_ilpack have all
+  been removed. Ports or alternative versions of these filters are available
+  through libavfilter (vf_lavfi).
+- vf_pullup and vf_noise now are simply wrappers to their libavfilter
+  equivalents. Both are only currently available on FFmpeg (not Libav).
+- `(!)` ao_portaudio has been removed. There is good support for the native
+  audio drivers of all major desktop platforms, as well as ao_sdl and
+  ao_openal as fallbacks.
+- `(!)` vo_opengl's `lscale` suboption has been renamed to `scale`; `lradius`
+  is now `scale-radius`, `lparam1` and `lparam2` are now respectively
+  `scale-param1` and `scale-param2`; `lscale-down` is now `scale-down`.
+  The `cscale` suboption remains as is.
+- `(!)` Several of the `vo_opengl` radius-preset aliases supported by `scale`
+  have been removed; use `scale-radius` to set if needed. For example, use
+  `--vo=opengl:scale=lanczos:scale-radius=2` instead of `scale=lanczos2`.
+  The default radius is recommended for most filters.
+- `(!)` vo_opengl no longer supports the `stereo` suboption. The anaglyph
+  effect can be reproduced with the stereo3d filter. The quadbuffer support,
+  which requires expensive specialized hardware to begin with, is removed.
+- `(!)` The `approx-gamma` suboption to vo_opengl has been removed. The
+  BT.1886 specification says that it's actually how it's supposed to be done
+  so it is now the default when `srgb` or `icc-profile` are enabled. This does
+  not include BT.1886's gamma drop.
+- `(!)` The `no-scale-sep` and `indirect` suboptions to vo_opengl have been
+  removed. These are now autodetected and enabled whenever they would have
+  benefit.
+- `(!)` The `--lua` and `--lua-opts` parameters / options are now called
+  `--script` and `--script-opts`, respectively. The `lua` subdir of the mpv
+  config dir is also now expected to be called `scripts` instead.
+- `(!)` The `--fixed-vo` option has been removed. It has been the default for
+  a long time anyway, and disabling fixed-vo is not useful.
+- vo_opengl_hq has been updated to take into account new features.
+  `fancy-downscaling` and `sigmoid-upscaling` are enabled,
+  "mitchell" is now the default for `scale-down`.
+- The `sub-visibility` OSD message is now clearer about whether subtitles
+  are hidden or just not available / selected.
+- The device IDs given to `--audio-device` for use with ao_coreaudio now use
+  UIDs, so they don't change when devices are added/removed or after reboots.
+- `--msg-level` now also accepts ',' as separator.
+- (Client API) The client API now refuses to initialize if the LC_NUMERIC
+  locale is not "C".
+- (Client API) The native type of the `msg-level` parameter is now a key-value
+  list. Setting or reading it as a string still works.
+- (Slave API) The `get_property` command is now deprecated.
+- Documentation updates.
+- PDF documentation is now disabled by default due to rst2pdf being fickle,
+  causing weird build errors.
+- Print desync messages with negative A/V sync as well. While rare, it could
+  happen with some uses of `--autosync`.
+
+Bug fixes
+---------
+
+- (Windows) Avoid resizing the video window when player is minimized, might
+  address bug #1547.
+- (NetBSD) Fix build with v4l2.
+- (Linux) Attempt to address conflicts with the pulseaudio mixer. (bug #1578)
+- Multiple cdda:// fixes. (bugs #1555, #1560)
+- VP9 timestamps no longer cause "missing PTS" warnings with new enough FFmpeg
+  builds.
+- Fix a crash when using H.264 hardware decoding on new enough libavcodecs.
+  (bug #1587)
+
+New features
+------------
+
+- vo_opengl now supports frame blending to eliminate stuttering when the video
+  framerate does not nicely match the display framerate through the
+  `smoothmotion` suboption. This is not meant to artificially increase the
+  video's FPS, so there is no "soap opera effect" or difficulties with some
+  video types (e.g. anime).
+- vo_opengl now supports sigmoidal upscaling (e.g. for fullscreen), which
+  reduces ringing induced by upscaling, enabled through the
+  `sigmoid-upscaling` suboption.
+- vo_opengl now supports ewa_lanczos (Jinc) scaling, which provides higher
+  quality with less aliasing. It supports an experimental `scale-antiringing`
+  parameter, which tries to further reduce video ringing.
+- vo_opengl now has a `linear-scaling` suboption, that makes the scalers work
+  in linear light. Implied by the `srgb`, `icc-profile` or the new
+  `sigmoid-upscaling` suboption.
+- vo_opengl has improved downscaling for higher downscale ratios when
+  `fancy-downscaling` is enabled.
+- Add `--keep-open=always` to make `--keep-open` apply to all files instead of
+  only the last.
+- mpv now filters the tags that are printed on the console to try to hide
+  useless metadata. The filter works as a whitelist, and can be configured
+  with the `--display-tags` option.
+- Add a `--sub-scale-by-window` option that, when set to 'no', prevents
+  subtitles from changing their pixel size when the window changes sizes.
+- vo_opengl now technically has GLES 2 and 3 support (but not GLES 1). GLES 3
+  support is only tested on Mesa's software emulation. GLES 2 has been tested
+  on nvidia drivers. Both GLES modes are feature deficient and inefficient due
+  to GLES limitations, so they should not be preferred over the standard
+  OpenGL mode.
+- (X11) vo_opengl now supports the `icc-profile-auto` option on X11 hosts.
+- The 'A' key now by default cycles through a list of preset aspect ratios.
+  Meant to be used to work around broken files.
+- There is now a "force" mode for `--loop`. Works like "inf", but tries to
+  open files/streams even if there was an error on the previous attempt.
+- There is now a `--log-file` option to write mpv's log messages to a specifed
+  file.
+- There is now a `--audio-file-auto` option to automatically load an external
+  audio file with certain constraints. Will only load external audio if the
+  playing file has a video stream. Set to "exact" by default. (bug #967)
+- There is now a `--network-timeout` option to specify a timeout in seconds
+  for network access. If 0 (default), uses the libavformat default. If a
+  protocol that doesn't support timeouts is used, this option is ignored.
+- (X11) The XF86 special keys are now all mappable in `input.conf`. All keys
+  documented in `XF86keysym.h` are available, but only as their numeric codes.
+- (Linux) The DVB implementation now supports DVB-S2 through S2API.
+- (Linux) The VDR format for `channels.conf` is now supported and preferred.
+  See http://linuxtv.org/vdrwiki/index.php/Syntax_of_channels.conf for the
+  syntax. Tuning to DVB-S2 channels requires the VDR-format `channels.conf`.
+- (Linux) There is now a `--dvbin-full-transponder` option for handling
+  special broadcast cases where PIDs switch, or just to work around incomplete
+  PID data.
+- (Client API) There is now an opengl_cb VO, which receives the OpenGL context
+  from the libmpv client. This allows a client to render libmpv video directly
+  to a provided OpenGL context without having to use --wid embedding.
+- (Client API) The aforementioned --wid parameter can now be set at any time,
+  but has no effect if a file is already loaded.
+- (Client API) The list of DVD titles can now be queried.
+- (Client API) There is now a `filtered-metadata` property, containing only
+  the tags allowed by `--display-tags`.
+- (Client API) There is now support for XEmbed `--wid` targets, such as a
+  `GtkSocket`'s `gtk_socket_get_id()`.
+- (Client API) There is now a `file-format` property with a symbolic name
+  for the file format. In some cases this might be a comma separated list
+  of various different extensions due to libavformat idiosyncrasies.
+- (Client API) There is now a `mouse` command for generating mouse events
+  over the video window.
+- (Client API) There is now a `partially-seekable` property that indicates
+  whether a file is only considered `seekable` because of the stream cache,
+  but would not be seekable otherwise (e.g. realtime stream, or HTTP with
+  no resume support). Small relative seeks may be fine, but larger seeks
+  will likely fail.
+- (Client API) There is now an MPV_EVENT_QUEUE_OVERFLOW event that is posted
+  whenever events have to be dropped because the queue is full. No further
+  events are posted until the MPV_EVENT_QUEUE_OVERFLOW is consumed to avoid
+  duplicated posting.
+- (Client API) There is now a helper `mpv_wait_async_requests()` function
+  that blocks until all known async requests have completed. (bug #1542)
+- (Client API) There is now a `detected-hwdec` property that returns the
+  detected hardware decoder when one is successfully opened. This probably
+  only returns a valid value after playback has started.
+- (Client API) There are now `audio_add`, `audio_remove` and `audio_reload`
+  counterparts to the equivalent `sub_` commands for handling external audio
+  files.
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.7.0..v0.8.0` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.7.0...v0.8.0 (only 250 commits).
+
+Release 0.7.3
+=============
+
+Changes
+-------
+
+- Several documentation updates and typo fixes.
+- Don't show "0%" position when the stream is infinite / has unknown length.
+- Fixes the config file loading order so that lower priority `mpv.conf` files
+  don't override higher priority `config` files.
+- (OSX) Remove coreaudio_exclusive from the "auto" codec list.
+- Failing to create a GL3 context is now a warning instead of error, to reduce
+  user confusion.
+- The subtitle decoder now gets reset when cycling subtitles. This makes the
+  currently shown subtitle event disappear even if cycling back to the current
+  subtitle track.
+- `--shuffle` and `--merge-files` now affects the contents of playlist files,
+  instead of just the list of files given as arguments to mpv.
+- `./waf install` avoids installing a few additional data/config files if only
+  libmpv was built.
+- Improved channel mapping when the file's channel map doesn't match the AO's
+  available channel maps.
+- (OSX) VDA now gracefully refuses to run on non-OpenGL3-capable systems instead
+  of trying and failing to build its shaders.
+- Add workaround for vf_vapoursynth filters that expect an FPS.
+- The default value for `--screenshot-template` now shows up in
+  `--list-options`.
+- `ao_pulse`'s `latency-hacks` suboption is now off by default, as it causes
+  issues with newer pulseaudio releases. If A/V Sync issues happen, either
+  add the `latency-hacks=on` pulse suboption in mpv.conf, or update the
+  pulseaudio daemon (bug #1430).
+- (Linux) `ao_alsa` now deals better with audio device disconnection.
+- Client API: timestamp properties that have no value return "no" instead of
+  magic number.
+
+Bug fixes
+---------
+
+- (Windows, OSX) Many `ao_wasapi` and `ao_coreaudio` fixes.
+- (OSX) Make the window title update correctly on OS X Yosemite.
+- Fixes for handling mono audio on various AOs.
+- (Linux) Fixes resuming from suspend on ao_alsa.
+- Fixes for playlist file parsing.
+- Overly long options in the --list-options output now break the column layout
+  instead of getting truncated; fixes shell completion scripts.
+- Fix rendering resolution of certain DVB subtitles (bug #1425).
+- Fix EDL or --merge-files breaking timestamps with .avi files.
+- Workaround for libavcodec bug with the VP9 codec parser (bug #1448),
+  fixes possible crash.
+- Improve robustness of the matroska parser with broken files (bugs #1457,
+  #1461).
+- Improve 10bit video compatibility with older GPUs (specially Intel) (bug
+  #1383).
+- Fixes flashing the VO window when playing a list of files that includes
+  non-media files (bug #1459).
+- Workaround for window embedding in OpenBox (bug #1235)
+- Fixes for several crashes and lockups (bugs #838, #1389, #1408, #1463, #1473,
+  #1474).
+- Fixes for the zsh completion script (bugs #997)
+
+New features
+------------
+
+- mpv now prints the contents of its config.h when running in verbose mode, to
+  aid with debugging.
+- The `include=` option now accepts `~` to refer to the HOME dir (bug #1406).
+- `af_volume` now prints ReplayGain values in verbose mode.
+- m3u playlists that don't have the `#EXTM3U` header are now accepted if they
+  "look like" ASCII or UTF-8 text and have the .m3u extension.
+- Chapter marks in the seek bar now update when switching files.
+- Supports embedded cover art in MKV files (bug #1374).
+- (Windows) Video window can now be resized even with --no-border.
+- (Windows) Client API: the "run" command now works on Windows too.
+- (Linux) vo_wayland now supports key modifiers (Meta, Alt, Control, Shift)
+- Client API: "display-names" property is now observable.
+
+This listing is not complete. A complete changelog can be seen by running
+`git log v0.7.2..v0.7.3` in the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/v0.7.2...v0.7.3.
+
+Release 0.7.2
+=============
+
+Changes
+-------
+
+- Give precedence to the DVD menu navigation keyboard bindings so that user
+  defined LEFT/RIGHT/... bindings don't break DVD menu navigation.
+- Try to fallback to the "default" device if the selected device is busy in the
+  alsa AO.
+- Don't create Dock icon for audio only files on OS X.
+- Save screenshots to desktop when using the app bundle on OS X.
+- Restore ab-loop settings with playback resume.
+- Bump required youtube-dl version to 2014.11.26 and enable the ytdl_hook Lua
+  script by default (now playing videos from YouTube and the like will work
+  out of the box without any configuration change needed).
+
+Bug fixes
+---------
+
+- Don't signal an error if --stream-dump is used.
+- Fix removing key bindings from Lua scripts.
+- Reject channel descriptions with too many channels in the coreaudio AO.
+- Don't async redraw when waiting for VO redraw on OS X (this fixes the very
+  annoying glitch where the black bars disappear for a single frame when going
+  fullscreen).
+- Fix mono playback with the also AO.
+- Don't crash if framebuffers are not available in the opengl VO.
+
+New features
+------------
+
+- Try to handle multi-arc videos in the ytdl_hook Lua script.
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log 47ec404..c7d6b21`` in
+the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/47ec404...c7d6b21.
+
+Release 0.7.1
+=============
+
+Changes
+-------
+
+- Don't show the volume neutral marker on the OSD if softvol is disabled.
+- Don't select a subtitle track when executing the sub_add input command in
+  "auto" mode.
+
+Bug fixes
+---------
+
+- Fix busy loop when seeking while paused (this fixes a problem with pulseaudio
+  that caused mpv and the pulseaudio daemon to use 100% CPU).
+- Fix Lua function utils.subprocess() in Windows versions older than Vista.
+- Avoid creating a window bigger than the screen on Windows.
+- Don't ignore the last line in m3u playlists.
+- Don't crash if a codec could not be opened.
+- Dynamically allocate audio channel map entries (this should fix a crash in
+  the alsa and coreaudio AOs with audio devices that support more than 20
+  channel maps).
+- Ignore the "srgb" option in the opengl VO if hardware decoding is enabled.
+- Linearize non-RGB sRGB files correctly (eg. JPEG).
+- Fix opening reference URLs (.file/id=) on OS X.
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log 8d8b36d..6583ad6`` in
+the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/8d8b36d...6583ad6.
+
+Release 0.7.0
+=============
+
+Changes
+-------
+
+- Buffer partial log messages in the client API (the client API will now only
+  pass full log messages to clients).
+- Remove ncurses/terminfo/termcap support (it was disabled by default and
+  replaced by new code since v0.6.0).
+- Enable cdda:// support by default again (it was disabled since v0.6.0).
+- Cascade-load input.conf (if there are several input.confs in the set of valid
+  config paths, load them all).
+- Draw the OSD twice in 3D mode (this fixes subtitles display in 3D mode).
+- Make wasapi the default AO on Windows again since many of its problems have
+  been solved.
+- Use "site-functions" subdir to install the zsh completion script instead of
+  the Debian-specific "vendor-completions" (also provide the --zshdir waf
+  configure option for changing this value).
+- Improve synchronization between the Cocoa GUI and the player (this fixes some
+  long standing deadlock issues on Mac OS X).
+- Remove --fs-missioncontrol option (only relevant to Mac OS X).
+
+New features
+------------
+
+- Enable pitch correction by default when playing at higher speeds (this can be
+  controlled with the --audio-pitch-correction option).
+- Open stream and demuxer asynchronously (this should avoid having the player
+  get blocked on network streams).
+- Add cache-buffering-state property for querying the cache fill status until
+  the player unpauses.
+- Add support for listing and selecting the audio device (note that it is not
+  implemented for all AOs, see the --audio-device option for more information).
+- Add support for a JSON-based IPC mechanism (note that this is not currently
+  supported on Windows, see the JSON IPC section in the manpage for more
+  information).
+- Add Lua utility function for starting processes (see utils.subprocess() in the
+  manpage).
+- Add Lua utility function for parsing JSON (see utils.parse_json() in the
+  manpage).
+- Add field-dominance property (see --field-dominance option).
+- Add video-rotate property (see --video-rotate option).
+- Add playback-abort property for querying whether playback is stopped or is to
+  be stopped.
+- Add cursor-autohide property (see --cursor-autohide option).
+- Add vo-configured property for querying whether a window is created.
+- Add support for dxva2 hardware acceleration on Windows.
+- Drop libquvi support (this has been replaced by a built-in Lua script that
+  invokes the youtube-dl tool, which needs to be installed, see the --ytdl
+  option).
+- Add support for loading chapters from an external file (see the
+  --chapters-file option).
+- Add window-minimized property for querying whether the window is minimized
+  (works for X11 only).
+- Make it possible to configure the OSC seekbar style (see the "seekbarstyle"
+  OSC option).
+- Add support for libmpv on Mac OS X (it used to be broken, now it's fully
+  functional and also provides support for embedding the mpv window inside a
+  Cocoa/Qt application).
+- Try to use the audio channel map reported by ALSA in the alsa AO.
+- Add option to disable text OSD rendering completely (useful for working around
+  certain fontconfig issues, see the --use-text-osd option).
+
+This listing is not complete. There are many more bug fixes and changes. The
+complete change log can be viewed by running ``git log 7759c18..9479daa`` in
+the git repository or by visiting
+https://github.com/mpv-player/mpv/compare/7759c18...9479daa (only 250 commits).
