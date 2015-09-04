@@ -877,8 +877,8 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
         if (strcmp(e->name, "position") == 0) {
             // setting raster pos. requires setting gl_Position magic variable
             assert(e->num_elems == 2 && e->type == GL_FLOAT);
-            ADD(vert_head, "%s vec2 position;\n", vert_in);
-            ADD(vert_body, "gl_Position = vec4(position, 1.0, 1.0);\n");
+            ADD(vert_head, "%s vec2 vertex_position;\n", vert_in);
+            ADD(vert_body, "gl_Position = vec4(vertex_position, 1.0, 1.0);\n");
         } else {
             ADD(vert_head, "%s %s vertex_%s;\n", vert_in, glsl_type, e->name);
             ADD(vert_head, "%s %s %s;\n", vert_out, glsl_type, e->name);
