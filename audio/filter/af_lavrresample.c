@@ -30,6 +30,7 @@
 #include <libavutil/opt.h>
 #include <libavutil/common.h>
 #include <libavutil/samplefmt.h>
+#include <libavutil/channel_layout.h>
 #include <libavutil/mathematics.h>
 
 #include "common/common.h"
