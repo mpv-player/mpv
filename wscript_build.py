@@ -330,6 +330,7 @@ def build(ctx):
         ( "video/out/opengl/osd.c",              "gl" ),
         ( "video/out/opengl/utils.c",            "gl" ),
         ( "video/out/opengl/video.c",            "gl" ),
+        ( "video/out/opengl/video_shaders.c",    "gl" ),
         ( "video/out/opengl/w32.c",              "gl-win32" ),
         ( "video/out/opengl/wayland.c",          "gl-wayland" ),
         ( "video/out/opengl/x11.c",              "gl-x11" ),
