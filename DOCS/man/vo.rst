@@ -290,6 +290,13 @@ Available video output drivers are:
     color space conversion and chroma upsampling is generally in the hand of
     the hardware decoder APIs.
 
+    ``opengl`` makes use of FBOs by default. Sometimes you can achieve better
+    quality or performance by changing the ``fbo-format`` suboption to
+    ``rgb16f``, ``rgb32f`` or ``rgb``. Known problems include Mesa/Intel not
+    accepting ``rgb16``, Mesa sometimes not being compiled with float texture
+    support, and some OS X setups being very slow with ``rgb16`` but fast
+    with ``rgb32f``.
+
     ``scale=<filter>``
 
         ``bilinear``
@@ -657,8 +664,7 @@ Available video output drivers are:
 
     ``fbo-format=<fmt>``
         Selects the internal format of textures used for FBOs. The format can
-        influence performance and quality of the video output. (FBOs are not
-        always used, and typically only when using extended scalers.)
+        influence performance and quality of the video output.
         ``fmt`` can be one of: rgb, rgba, rgb8, rgb10, rgb10_a2, rgb16, rgb16f,
         rgb32f, rgba12, rgba16, rgba16f, rgba32f.
         Default: rgba16.
@@ -825,13 +831,6 @@ Available video output drivers are:
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.
-
-    Unlike ``opengl``, ``opengl-hq`` makes use of FBOs by default. Sometimes you
-    can achieve better quality or performance by changing the ``fbo-format``
-    suboption to ``rgb16f``, ``rgb32f`` or ``rgb``. Known problems include
-    Mesa/Intel not accepting ``rgb16``, Mesa sometimes not being compiled with
-    float texture support, and some OS X setups being very slow with ``rgb16``
-    but fast with ``rgb32f``.
 
 ``sdl``
     SDL 2.0+ Render video output driver, depending on system with or without
