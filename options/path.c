@@ -76,10 +76,12 @@ static const char *mp_get_platform_path(void *talloc_ctx,
     const char *force_configdir = getenv("MPV_HOME");
     if (global->opts->force_configdir && global->opts->force_configdir[0])
         force_configdir = global->opts->force_configdir;
+    if (!global->opts->load_config)
+        force_configdir = "";
     if (force_configdir) {
         for (int n = 0; n < MP_ARRAY_SIZE(config_dirs); n++) {
             if (strcmp(config_dirs[n], type) == 0)
-                return n == 0 ? force_configdir : NULL;
+                return (n == 0 && force_configdir[0]) ? force_configdir : NULL;
         }
     }
 
