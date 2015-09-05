@@ -22,6 +22,16 @@
 #include "options/m_option.h"
 #include "sub/osd.h"
 #include "common.h"
+#include "utils.h"
+#include "video/out/filter_kernels.h"
+
+// Texture units 0-5 are used by the video, and for free use by the passes
+#define TEXUNIT_VIDEO_NUM 6
+
+// Other texture units are reserved for specific purposes
+#define TEXUNIT_SCALERS  TEXUNIT_VIDEO_NUM
+#define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+4)
+#define TEXUNIT_DITHER   (TEXUNIT_3DLUT+1)
 
 struct lut3d {
     uint16_t *data;
@@ -40,6 +50,21 @@ struct scaler_config {
     float radius;
     float antiring;
     int clamp;
+};
+
+struct scaler {
+    int index;
+    struct scaler_config conf;
+    double scale_factor;
+    bool initialized;
+    struct filter_kernel *kernel;
+    GLuint gl_lut;
+    GLenum gl_target;
+    struct fbotex sep_fbo;
+    bool insufficient;
+
+    // kernel points here
+    struct filter_kernel kernel_storage;
 };
 
 struct gl_video_opts {
