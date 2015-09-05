@@ -578,6 +578,14 @@ void gl_sc_hadd(struct gl_shader_cache *sc, const char *text)
     sc->header_text = talloc_strdup_append(sc->header_text, text);
 }
 
+void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...)
+{
+    va_list ap;
+    va_start(ap, textf);
+    ta_xvasprintf_append(&sc->header_text, textf, ap);
+    va_end(ap);
+}
+
 const char *gl_sc_loadfile(struct gl_shader_cache *sc, const char *path)
 {
     if (!path || !path[0] || !sc->global)

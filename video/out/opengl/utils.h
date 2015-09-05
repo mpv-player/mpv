@@ -125,6 +125,7 @@ void gl_sc_destroy(struct gl_shader_cache *sc);
 void gl_sc_add(struct gl_shader_cache *sc, const char *text);
 void gl_sc_addf(struct gl_shader_cache *sc, const char *textf, ...);
 void gl_sc_hadd(struct gl_shader_cache *sc, const char *text);
+void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...);
 const char *gl_sc_loadfile(struct gl_shader_cache *sc, const char *path);
 void gl_sc_uniform_sampler(struct gl_shader_cache *sc, char *name, GLenum target,
                            int unit);
