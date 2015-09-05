@@ -166,6 +166,7 @@ struct gl_video {
     struct fbotex indirect_fbo;
     struct fbotex blend_subs_fbo;
     struct fbotex unsharp_fbo;
+    struct fbotex output_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
 
     // these are duplicated so we can keep rendering back and forth between
@@ -177,6 +178,7 @@ struct gl_video {
     int surface_now;
     int frames_drawn;
     bool is_interpolated;
+    bool output_fbo_valid;
 
     // state for luma (0), luma-down(1), chroma (2) and temporal (3) scalers
     struct scaler scaler[4];
@@ -533,6 +535,7 @@ static void gl_video_reset_surfaces(struct gl_video *p)
     p->surface_idx = 0;
     p->surface_now = 0;
     p->frames_drawn = 0;
+    p->output_fbo_valid = false;
 }
 
 static inline int fbosurface_wrap(int id)
@@ -1913,11 +1916,33 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
         if (p->opts.interpolation && (p->frames_drawn || !frame->still)) {
             gl_video_interpolate_frame(p, frame, fbo);
         } else {
-            // Skip interpolation if there's nothing to be done
-            if (!frame->redraw || !vimg->mpi)
+            // For the non-interplation case, we draw to a single "cache"
+            // FBO to speed up subsequent re-draws (if any exist)
+            int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
+                vp_h = p->dst_rect.y1 - p->dst_rect.y0;
+
+            bool is_new = !frame->redraw && !frame->repeat;
+            if (is_new || !p->output_fbo_valid) {
                 gl_video_upload_image(p, frame->current);
-            pass_render_frame(p);
-            pass_draw_to_screen(p, fbo);
+                pass_render_frame(p);
+
+                if (frame->num_vsyncs == 1) {
+                    // Disable output_fbo_valid to signal that this frame
+                    // does not require any redraws from the FBO.
+                    pass_draw_to_screen(p, fbo);
+                    p->output_fbo_valid = false;
+                } else {
+                    finish_pass_fbo(p, &p->output_fbo, vp_w, vp_h, 0, FBOTEX_FUZZY);
+                    p->output_fbo_valid = true;
+                }
+            }
+
+            // "output fbo valid" and "output fbo needed" are equivalent
+            if (p->output_fbo_valid) {
+                pass_load_fbotex(p, &p->output_fbo, vp_w, vp_h, 0);
+                GLSL(vec4 color = texture(texture0, texcoord0);)
+                pass_draw_to_screen(p, fbo);
+            }
         }
     }
 
