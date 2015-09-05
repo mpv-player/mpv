@@ -622,8 +622,8 @@ void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d)
     reinit_rendering(p);
 }
 
-static void pass_load_fbotex(struct gl_video *p, struct fbotex *src_fbo, int id,
-                             int w, int h)
+static void pass_load_fbotex(struct gl_video *p, struct fbotex *src_fbo,
+                             int w, int h, int id)
 {
     p->pass_tex[id] = (struct src_tex){
         .gl_tex = src_fbo->texture,
@@ -872,7 +872,7 @@ static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
 
     finish_pass_direct(p, dst_fbo->fbo, dst_fbo->w, dst_fbo->h,
                        &(struct mp_rect){0, 0, w, h}, 0);
-    pass_load_fbotex(p, dst_fbo, tex, w, h);
+    pass_load_fbotex(p, dst_fbo, w, h, tex);
 }
 
 static void uninit_scaler(struct gl_video *p, struct scaler *scaler)
@@ -2141,7 +2141,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     // Finally, draw the right mix of frames to the screen.
     if (!valid || t->still) {
         // surface_now is guaranteed to be valid, so we can safely use it.
-        pass_load_fbotex(p, &p->surfaces[surface_now].fbotex, 0, vp_w, vp_h);
+        pass_load_fbotex(p, &p->surfaces[surface_now].fbotex, vp_w, vp_h, 0);
         GLSL(vec4 color = texture(texture0, texcoord0);)
         p->is_interpolated = false;
     } else {
@@ -2187,7 +2187,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
         // Load all the required frames
         for (int i = 0; i < size; i++) {
             pass_load_fbotex(p, &p->surfaces[fbosurface_wrap(surface_bse+i)].fbotex,
-                             i, vp_w, vp_h);
+                             vp_w, vp_h, i);
         }
 
         MP_STATS(p, "frame-mix");
