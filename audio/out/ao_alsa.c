@@ -224,6 +224,25 @@ static int find_alsa_format(int af_format)
     return SND_PCM_FORMAT_UNKNOWN;
 }
 
+static bool query_formats(struct ao *ao, snd_pcm_hw_params_t *alsa_hwparams, int *af_format)
+{
+    struct priv *p = ao->priv;
+    int alsa_fmt = find_alsa_format(*af_format);
+    if (alsa_fmt != SND_PCM_FORMAT_UNKNOWN &&
+        snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, alsa_fmt) >= 0) {
+        return true;
+    }
+    MP_VERBOSE(ao, "Format %s is not supported by hardware, finding best supported format.\n",
+               af_fmt_to_str(*af_format));
+    for (int n = 0; mp_to_alsa_format[n][0] != AF_FORMAT_UNKNOWN; n++) {
+        if (snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, mp_to_alsa_format[n][1]) >= 0) {
+            *af_format = mp_to_alsa_format[n][0];
+            return true;
+        }
+    }
+    return false;
+}
+
 #if HAVE_CHMAP_API
 
 static const int alsa_to_mp_channels[][2] = {
@@ -460,19 +479,12 @@ static int init_device(struct ao *ao, bool second_try)
         } else {
             p->alsa_fmt = SND_PCM_FORMAT_S16;
         }
-    } else {
+        err = snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt);
+        CHECK_ALSA_ERROR("Unable to set IEC61937 format");
+    } else if (query_formats(ao, alsa_hwparams, &ao->format)) {
         p->alsa_fmt = find_alsa_format(ao->format);
-    }
-    if (p->alsa_fmt == SND_PCM_FORMAT_UNKNOWN) {
-        p->alsa_fmt = SND_PCM_FORMAT_S16;
-        ao->format = AF_FORMAT_S16;
-    }
-
-    err = snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt);
-    if (err < 0) {
-        if (af_fmt_is_spdif(ao->format))
-            CHECK_ALSA_ERROR("Unable to set IEC61937 format");
-        MP_INFO(ao, "Format %s is not supported by hardware, trying default.\n",
+    } else {
+        MP_INFO(ao, "Could not find matching format for %s, trying default.\n",
                 af_fmt_to_str(ao->format));
         p->alsa_fmt = SND_PCM_FORMAT_S16;
         ao->format = AF_FORMAT_S16;
