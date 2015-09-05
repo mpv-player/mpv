@@ -30,7 +30,7 @@
 
 #include "stream/stream.h"
 #include "common/common.h"
-#include "gl_utils.h"
+#include "utils.h"
 
 // GLU has this as gluErrorString (we don't use GLU, as it is legacy-OpenGL)
 static const char *gl_error_to_string(GLenum error)

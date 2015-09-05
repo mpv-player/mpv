@@ -16,8 +16,8 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "wayland_common.h"
-#include "gl_common.h"
+#include "video/out/wayland_common.h"
+#include "common.h"
 
 static void egl_resize(struct vo_wayland_state *wl)
 {

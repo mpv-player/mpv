@@ -1,7 +1,7 @@
 #include "common/common.h"
 
-#include "gl_hwdec.h"
-#include "gl_utils.h"
+#include "hwdec.h"
+#include "utils.h"
 #include "video/d3d.h"
 #include "video/hwdec.h"
 

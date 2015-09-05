@@ -39,7 +39,7 @@
 #include <math.h>
 #include <assert.h>
 #include "talloc.h"
-#include "gl_common.h"
+#include "common.h"
 #include "common/common.h"
 #include "options/options.h"
 #include "options/m_option.h"

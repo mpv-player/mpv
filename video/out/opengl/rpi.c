@@ -24,10 +24,10 @@
 #include <assert.h>
 
 #include "common/common.h"
-#include "x11_common.h"
-#include "gl_common.h"
+#include "video/out/x11_common.h"
+#include "common.h"
 
-#include "gl_rpi.h"
+#include "rpi.h"
 
 static void *get_proc_address(const GLubyte *name)
 {
