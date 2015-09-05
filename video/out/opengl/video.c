@@ -157,7 +157,7 @@ struct gl_video {
     struct video_image image;
 
     struct fbotex chroma_merge_fbo;
-    struct fbotex source_fbo;
+    struct fbotex chroma_deband_fbo;
     struct fbotex indirect_fbo;
     struct fbotex blend_subs_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
@@ -341,6 +341,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .gamma = 1.0f,
     .blend_subs = 0,
     .pbo = 1,
+    .deband = 1,
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
@@ -411,16 +412,18 @@ const struct m_sub_options gl_video_conf = {
                    ({"no", 0},
                     {"yes", 1},
                     {"video", 2})),
-        OPT_STRING("source-shader", source_shader, 0),
         OPT_STRING("scale-shader", scale_shader, 0),
         OPT_STRINGLIST("pre-shaders", pre_shaders, 0),
         OPT_STRINGLIST("post-shaders", post_shaders, 0),
+        OPT_FLAG("deband", deband, 0),
+        OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
         OPT_REMOVED("scale-sep", "this is set automatically whenever sane"),
         OPT_REMOVED("indirect", "this is set automatically whenever sane"),
         OPT_REMOVED("srgb", "use target-prim=bt709:target-trc=srgb instead"),
+        OPT_REMOVED("source-shader", "use :deband to enable debanding"),
 
         OPT_REPLACED("lscale", "scale"),
         OPT_REPLACED("lscale-down", "scale-down"),
@@ -531,7 +534,7 @@ static void uninit_rendering(struct gl_video *p)
     p->dither_texture = 0;
 
     fbotex_uninit(&p->chroma_merge_fbo);
-    fbotex_uninit(&p->source_fbo);
+    fbotex_uninit(&p->chroma_deband_fbo);
     fbotex_uninit(&p->indirect_fbo);
     fbotex_uninit(&p->blend_subs_fbo);
 
@@ -1091,102 +1094,93 @@ static void pass_read_video(struct gl_video *p)
     struct gl_transform chromafix;
     pass_set_image_textures(p, &p->image, &chromafix);
 
-    // The custom shader logic is a bit tricky, but there are basically three
-    // different places it can occur: RGB, or chroma *and* luma (which are
-    // treated separately even for 4:4:4 content, but the minor speed loss
-    // is not worth the complexity it would require).
-    const char *shader = gl_sc_loadfile(p->sc, p->opts.source_shader);
-
-    // Since this is before normalization, we have to take into account
-    // the bit depth. Specifically, we want the shader to perform normalization
-    // to 16 bit because otherwise it results in bad quantization, especially
-    // with 8-bit FBOs (where it just destroys the image completely)
     int in_bits = p->image_desc.component_bits,
         tx_bits = (in_bits + 7) & ~7;
-    float cmul = ((1 << tx_bits) - 1.0) / ((1 << in_bits) - 1.0);
-    // Custom source shaders are required to output at range [0.0, 1.0]
-    p->use_normalized_range = shader != NULL;
+    float tex_mul = ((1 << tx_bits) - 1.0) / ((1 << in_bits) - 1.0);
 
-    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
-        cmul = 1.0;
-        p->use_normalized_range = true;
-    }
+    bool color_defined = false;
+    if (p->plane_count > 1) {
+        // Chroma processing (merging -> debanding -> scaling)
+        struct src_tex luma = p->pass_tex[0];
+        struct src_tex alpha = p->pass_tex[3];
+        int c_w = p->pass_tex[1].src.x1 - p->pass_tex[1].src.x0;
+        int c_h = p->pass_tex[1].src.y1 - p->pass_tex[1].src.y0;
+        const struct scaler_config *cscale = &p->opts.scaler[2];
 
-    // Special case for non-planar content
-    if (p->plane_count == 1) {
-        if (shader) {
-            load_shader(p, shader);
-            GLSLF("// custom source-shader (RGB)\n");
-            gl_sc_uniform_f(p->sc, "cmul", cmul);
-            GLSL(vec4 color = sample(texture0, texcoord0, texture_size0);)
-        } else {
-            GLSL(vec4 color = texture(texture0, texcoord0);)
+        bool merged = false;
+        if (p->plane_count > 2) {
+            // For simplicity and performance, we merge the chroma planes
+            // into a single texture before scaling or debanding, so the shader
+            // doesn't need to run multiple times.
+            GLSLF("// chroma merging\n");
+            GLSL(vec4 color = vec4(texture(texture1, texcoord1).x,
+                                   texture(texture2, texcoord2).x,
+                                   0.0, 1.0);)
+            // We also pull up to the full dynamic range of the texture to avoid
+            // heavy clipping when using low-bit-depth FBOs
+            GLSLF("color.xy *= %f;\n", tex_mul);
+            assert(c_w == p->pass_tex[2].src.x1 - p->pass_tex[2].src.x0);
+            assert(c_h == p->pass_tex[2].src.y1 - p->pass_tex[2].src.y0);
+            finish_pass_fbo(p, &p->chroma_merge_fbo, c_w, c_h, 1, 0);
+            p->use_normalized_range = true;
+            merged = true;
         }
-        return;
+
+        if (p->opts.deband) {
+            pass_sample_deband(p->sc, p->opts.deband_opts, 1, merged ? 1.0 : tex_mul,
+                               p->image_w, p->image_h, &p->lfg);
+            GLSL(color.zw = vec2(0.0, 1.0);) // skip unused
+            finish_pass_fbo(p, &p->chroma_deband_fbo, c_w, c_h, 1, 0);
+            p->use_normalized_range = true;
+        }
+
+        // Sample either directly or by upscaling
+        if (p->image_desc.flags & MP_IMGFLAG_SUBSAMPLED) {
+            GLSLF("// chroma scaling\n");
+            pass_sample(p, 1, &p->scaler[2], cscale, 1.0,
+                        p->image_w, p->image_h, chromafix);
+            GLSL(vec2 chroma = color.xy;)
+            color_defined = true; // pass_sample defines vec4 color
+        } else {
+            GLSL(vec2 chroma = texture(texture1, texcoord1).xy;)
+        }
+
+        p->pass_tex[0] = luma; // Restore the luma and alpha planes
+        p->pass_tex[3] = alpha;
     }
 
-    // Chroma preprocessing (merging -> shaders -> scaling)
-    struct src_tex luma = p->pass_tex[0];
-    struct src_tex alpha = p->pass_tex[3];
-    int c_w = p->pass_tex[1].src.x1 - p->pass_tex[1].src.x0;
-    int c_h = p->pass_tex[1].src.y1 - p->pass_tex[1].src.y0;
-    const struct scaler_config *cscale = &p->opts.scaler[2];
+    // As an unfortunate side-effect of re-using the vec4 color constant in
+    // both the luma and chroma stages, vec4 color may or may not be defined
+    // at this point. If it's missing, define it since the code from here on
+    // relies on it.
+    if (!color_defined)
+        GLSL(vec4 color;)
 
-    bool merged = false;
-    if (p->plane_count > 2) {
-        // For simplicity and performance, we merge the chroma planes
-        // into a single texture before scaling or shading, so the shader
-        // doesn't need to run multiple times.
-        GLSLF("// chroma merging\n");
-        GLSL(vec4 color = vec4(texture(texture1, texcoord1).r,
-                               texture(texture2, texcoord2).r,
-                               0.0, 1.0);)
-        // We also pull up here in this case to avoid the issues described
-        // above.
-        GLSLF("color.rg *= %f;\n", cmul);
+    // Sample the main (luma/RGB) plane. This is inside a sub-block to avoid
+    // colliding with the vec4 color that may be left over from the chroma
+    // stuff
+    GLSL(vec4 main;)
+    GLSLF("{\n");
+    if (p->opts.deband) {
+        pass_sample_deband(p->sc, p->opts.deband_opts, 0, tex_mul,
+                           p->image_w, p->image_h, &p->lfg);
         p->use_normalized_range = true;
-        merged = true;
-        assert(c_w == p->pass_tex[2].src.x1 - p->pass_tex[2].src.x0);
-        assert(c_h == p->pass_tex[2].src.y1 - p->pass_tex[2].src.y0);
-        finish_pass_fbo(p, &p->chroma_merge_fbo, c_w, c_h, 1, 0);
-    }
-
-    if (shader) {
-        // Chroma plane shader logic
-        load_shader(p, shader);
-        gl_sc_uniform_f(p->sc, "cmul", merged ? 1.0 : cmul);
-        GLSLF("// custom source-shader (chroma)\n");
-        GLSL(vec4 color = sample(texture1, texcoord1, texture_size1);)
-        GLSL(color.ba = vec2(0.0, 1.0);) // skip unused
-        finish_pass_fbo(p, &p->source_fbo, c_w, c_h, 1, 0);
-    }
-
-    if (p->image_desc.flags & MP_IMGFLAG_SUBSAMPLED) {
-        GLSLF("// chroma scaling\n");
-        pass_sample(p, 1, &p->scaler[2], cscale, 1.0, p->image_w, p->image_h,
-                    chromafix);
-        GLSL(vec2 chroma = color.rg;)
-    }
-
-    p->pass_tex[0] = luma; // Restore the luma plane
-    if (shader) {
-        load_shader(p, shader);
-        gl_sc_uniform_f(p->sc, "cmul", cmul);
-        GLSLF("// custom source-shader (luma)\n");
-        GLSL(float luma = sample(texture0, texcoord0, texture_size0).r;)
     } else {
-        GLSL(float luma = texture(texture0, texcoord0).r;)
+        GLSL(vec4 color = texture(texture0, texcoord0);)
         if (p->use_normalized_range)
-            GLSLF("luma *= %f;\n", cmul);
+            GLSLF("color *= %f;\n", tex_mul);
     }
+    GLSL(main = color;)
+    GLSLF("}\n");
 
-    GLSL(color = vec4(luma, chroma, 1.0);)
-
-    p->pass_tex[3] = alpha; // Restore the alpha plane (if set)
+    // Set up the right combination of planes
+    GLSL(color = main;)
+    if (p->plane_count > 1)
+        GLSL(color.yz = chroma;)
     if (p->has_alpha && p->plane_count >= 4) {
         GLSL(color.a = texture(texture3, texcoord3).r;)
         if (p->use_normalized_range)
-            GLSLF("color.a *= %f;\n", cmul);
+            GLSLF("color.a *= %f;\n", tex_mul);
     }
 }
 

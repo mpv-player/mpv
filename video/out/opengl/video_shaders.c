@@ -27,10 +27,13 @@
 
 #define GLSL(x) gl_sc_add(sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(sc, __VA_ARGS__)
+#define GLSLH(x) gl_sc_hadd(sc, #x "\n");
+#define GLSLHF(...) gl_sc_haddf(sc, __VA_ARGS__)
 
 // Set up shared/commonly used variables
 void sampler_prelude(struct gl_shader_cache *sc, int tex_num)
 {
+    GLSLF("#undef tex\n");
     GLSLF("#define tex texture%d\n", tex_num);
     GLSLF("vec2 pos = texcoord%d;\n", tex_num);
     GLSLF("vec2 size = texture_size%d;\n", tex_num);
@@ -336,4 +339,90 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
                                  lessThanEqual(vec3(0.001953), color.rgb));)
             break;
     }
+}
+
+// Wide usage friendly PRNG, shamelessly stolen from a GLSL tricks forum post.
+// Obtain random numbers by calling rand(h), followed by h = permute(h) to
+// update the state.
+static void prng_init(struct gl_shader_cache *sc, AVLFG *lfg)
+{
+    GLSLH(float mod289(float x)  { return x - floor(x / 289.0) * 289.0; })
+    GLSLH(float permute(float x) { return mod289((34.0*x + 1.0) * x); })
+    GLSLH(float rand(float x)    { return fract(x / 41.0); })
+
+    // Initialize the PRNG by hashing the position + a random uniform
+    GLSL(vec3 _m = vec3(pos, random) + vec3(1.0);)
+    GLSL(float h = permute(permute(permute(_m.x)+_m.y)+_m.z);)
+    gl_sc_uniform_f(sc, "random", (double)av_lfg_get(lfg) / UINT32_MAX);
+}
+
+const struct deband_opts deband_opts_def = {
+    .iterations = 4,
+    .threshold = 64.0,
+    .range = 8.0,
+    .grain = 48.0,
+};
+
+#define OPT_BASE_STRUCT struct deband_opts
+const struct m_sub_options deband_conf = {
+    .opts = (const m_option_t[]) {
+        OPT_INTRANGE("iterations", iterations, 0, 1, 16),
+        OPT_FLOATRANGE("threshold", threshold, 0, 0.0, 4096.0),
+        OPT_FLOATRANGE("range", range, 0, 1.0, 64.0),
+        OPT_FLOATRANGE("grain", grain, 0, 0.0, 4096.0),
+        {0}
+    },
+    .size = sizeof(struct deband_opts),
+    .defaults = &deband_opts_def,
+};
+
+// Stochastically sample a debanded result from a given texture
+void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
+                        int tex_num, float tex_mul, float img_w, float img_h,
+                        AVLFG *lfg)
+{
+    // Set up common variables and initialize the PRNG
+    GLSLF("// debanding (tex %d)\n", tex_num);
+    sampler_prelude(sc, tex_num);
+    prng_init(sc, lfg);
+
+    // Helper: Compute a stochastic approximation of the avg color around a
+    // pixel
+    GLSLH(vec4 average(sampler2D tex, vec2 pos, float range, inout float h) {)
+        // Compute a random rangle and distance
+        GLSLH(float dist = rand(h) * range;     h = permute(h);)
+        GLSLH(float dir  = rand(h) * 6.2831853; h = permute(h);)
+
+        GLSLHF("vec2 pt = dist / vec2(%f, %f);\n", img_w, img_h);
+        GLSLH(vec2 o = vec2(cos(dir), sin(dir));)
+
+        // Sample at quarter-turn intervals around the source pixel
+        GLSLH(vec4 ref[4];)
+        GLSLH(ref[0] = texture(tex, pos + pt * vec2( o.x,  o.y));)
+        GLSLH(ref[1] = texture(tex, pos + pt * vec2(-o.y,  o.x));)
+        GLSLH(ref[2] = texture(tex, pos + pt * vec2(-o.x, -o.y));)
+        GLSLH(ref[3] = texture(tex, pos + pt * vec2( o.y, -o.x));)
+
+        // Return the (normalized) average
+        GLSLHF("return %f * (ref[0] + ref[1] + ref[2] + ref[3])/4.0;\n", tex_mul);
+    GLSLH(})
+
+    // Sample the source pixel
+    GLSLF("vec4 color = %f * texture(tex, pos);\n", tex_mul);
+    GLSLF("vec4 avg, diff;\n");
+    for (int i = 1; i <= opts->iterations; i++) {
+        // Sample the average pixel and use it instead of the original if
+        // the difference is below the given threshold
+        GLSLF("avg = average(tex, pos, %f, h);\n", i * opts->range);
+        GLSL(diff = abs(color - avg);)
+        GLSLF("color = mix(avg, color, greaterThan(diff, vec4(%f)));\n",
+              opts->threshold / (i * 16384.0));
+    }
+
+    // Add some random noise to smooth out residual differences
+    GLSL(vec3 noise;)
+    GLSL(noise.x = rand(h); h = permute(h);)
+    GLSL(noise.y = rand(h); h = permute(h);)
+    GLSL(noise.z = rand(h); h = permute(h);)
+    GLSLF("color.xyz += %f * (noise - vec3(0.5));\n", opts->grain/8192.0);
 }

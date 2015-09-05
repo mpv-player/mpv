@@ -550,17 +550,9 @@ Available video output drivers are:
         feature doesn't work correctly with different scale factors in
         different directions.
 
-    ``source-shader=<file>``, ``scale-shader=<file>``, ``pre-shaders=<files>``, ``post-shaders=<files>``
+    ``pre-shaders=<files>``, ``post-shaders=<files>``, ``scale-shader=<file>``
         Custom GLSL fragment shaders.
 
-        source-shader
-            This gets applied directly onto the source planes, before
-            any sort of upscaling or conversion whatsoever. For YCbCr content,
-            this means it gets applied on the luma and chroma planes
-            separately. In general, this shader shouldn't be making any
-            assumptions about the colorspace. It could be RGB, YCbCr, XYZ or
-            something else entirely. It's used purely for fixing numerical
-            quirks of the input, eg. debanding or deblocking.
         pre-shaders (list)
             These get applied after conversion to RGB and before linearization
             and upscaling. Operates on non-linear RGB (same as input). This is
@@ -601,10 +593,6 @@ Available video output drivers are:
             never resets (regardless of seeks).
         vec2 image_size
             The size in pixels of the input image.
-        float cmul (source-shader only)
-            The multiplier needed to pull colors up to the right bit depth. The
-            source-shader must multiply any sampled colors by this, in order
-            to normalize them to the full scale.
 
         For example, a shader that inverts the colors could look like this::
 
@@ -613,6 +601,37 @@ Available video output drivers are:
                 vec4 color = texture(tex, pos);
                 return vec4(1.0 - color.rgb, color.a);
             }
+
+    ``deband``
+        Enable the debanding algorithm. This greatly reduces the amount of
+        visible banding, blocking and other quantization artifacts, at the
+        expensive of very slightly blurring some of the finest details. In
+        practice, it's virtually always an improvement - the only reason to
+        disable it would be for performance.
+
+    ``deband-iterations=<1..16>``
+        The number of debanding steps to perform per sample. Each step reduces
+        a bit more banding, but takes time to compute. Note that the strength
+        of each step falls off very quickly, so high numbers are practically
+        useless. (Default 4)
+
+        If the performance hit of debanding is too great, you can reduce this
+        to 2 or 1 with marginal visual quality loss.
+
+    ``deband-threshold=<0..4096>``
+        The debanding filter's cut-off threshold. Higher numbers increase the
+        debanding strength dramatically but progressively diminish image
+        details. (Default 64)
+
+    ``deband-range=<1..64>``
+        The debanding filter's initial radius. The radius increases linearly
+        for each iteration. A higher radius will find more gradients, but
+        a lower radius will smooth more aggressively. (Default 8)
+
+    ``deband-grain=<0..4096>``
+        Add some extra noise to the image. This significantly helps cover up
+        remaining quantization artifacts. Higher numbers add more noise.
+        (Default 48)
 
     ``sigmoid-upscaling``
         When upscaling, use a sigmoidal color transform to avoid emphasizing
@@ -840,7 +859,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:fancy-downscaling:sigmoid-upscaling:pbo
+        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:fancy-downscaling:sigmoid-upscaling:pbo:deband
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.

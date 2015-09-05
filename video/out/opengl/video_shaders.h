@@ -23,9 +23,14 @@
 #ifndef MP_GL_VIDEO_SHADERS_H
 #define MP_GL_VIDEO_SHADERS_H
 
+#include <libavutil/lfg.h>
+
 #include "common.h"
 #include "utils.h"
 #include "video.h"
+
+extern const struct deband_opts deband_opts_def;
+extern const struct m_sub_options deband_conf;
 
 void sampler_prelude(struct gl_shader_cache *sc, int tex_num);
 void pass_sample_separated_gen(struct gl_shader_cache *sc, struct scaler *scaler,
@@ -39,5 +44,9 @@ void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
 
 void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc);
 void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc);
+
+void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
+                        int tex_num, float tex_mul, float img_w, float img_h,
+                        AVLFG *lfg);
 
 #endif
