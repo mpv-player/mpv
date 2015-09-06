@@ -458,7 +458,14 @@ static void update_object(struct osd_state *osd, struct osd_object *obj)
     case OSDTYPE_PROGBAR:
         update_progbar(osd, obj);
         break;
-    case OSDTYPE_EXTERNAL:
+    case OSDTYPE_EXTERNAL_0:
+    case OSDTYPE_EXTERNAL_1:
+    case OSDTYPE_EXTERNAL_2:
+    case OSDTYPE_EXTERNAL_3:
+    case OSDTYPE_EXTERNAL_4:
+    case OSDTYPE_EXTERNAL_5:
+    case OSDTYPE_EXTERNAL_6:
+    case OSDTYPE_EXTERNAL_7:
         update_external(osd, obj);
         break;
     }

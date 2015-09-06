@@ -199,10 +199,13 @@ void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s)
     pthread_mutex_unlock(&osd->lock);
 }
 
-void osd_set_external(struct osd_state *osd, int res_x, int res_y, char *text)
+void osd_set_external(struct osd_state *osd, unsigned layer, int res_x, int res_y, char *text)
 {
     pthread_mutex_lock(&osd->lock);
-    struct osd_object *osd_obj = osd->objs[OSDTYPE_EXTERNAL];
+    if (layer > 7)
+        return;
+
+    struct osd_object *osd_obj = osd->objs[OSDTYPE_EXTERNAL_0 + layer];
     if (strcmp(osd_obj->text, text) != 0 ||
         osd_obj->external_res_x != res_x ||
         osd_obj->external_res_y != res_y)
