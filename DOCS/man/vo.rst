@@ -295,7 +295,20 @@ Available video output drivers are:
     ``rgb16f``, ``rgb32f`` or ``rgb``. Known problems include Mesa/Intel not
     accepting ``rgb16``, Mesa sometimes not being compiled with float texture
     support, and some OS X setups being very slow with ``rgb16`` but fast
-    with ``rgb32f``.
+    with ``rgb32f``. If you have problems, you can also try passing the
+    ``dumb-mode=yes`` sub-option.
+
+    ``dumb-mode=<yes|no>``
+        This mode is extremely restricted, and will disable most extended
+        OpenGL features. This includes high quality scalers and custom
+        shaders!
+
+        It is intended for hardware that does not support FBOs (including GLES,
+        which supports it insufficiently), or to get some more performance out
+        of bad or old hardware.
+
+        This mode is forced automatically if needed, and this option is mostly
+        useful for debugging.
 
     ``scale=<filter>``
 

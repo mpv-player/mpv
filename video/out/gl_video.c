@@ -374,6 +374,7 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
 #define OPT_BASE_STRUCT struct gl_video_opts
 const struct m_sub_options gl_video_conf = {
     .opts = (const m_option_t[]) {
+        OPT_FLAG("dumb-mode", dumb_mode, 0),
         OPT_FLOATRANGE("gamma", gamma, 0, 0.1, 2.0),
         OPT_FLAG("gamma-auto", gamma_auto, 0),
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
@@ -482,7 +483,7 @@ const struct m_sub_options gl_video_conf = {
 
 static void uninit_rendering(struct gl_video *p);
 static void uninit_scaler(struct gl_video *p, struct scaler *scaler);
-static bool check_gl_features(struct gl_video *p);
+static void check_gl_features(struct gl_video *p);
 static bool init_format(int fmt, struct gl_video *init);
 static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
 
@@ -1907,10 +1908,52 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
     gl_sc_set_vao(p->sc, &p->vao);
 }
 
+// Minimal rendering code path, for GLES or OpenGL 2.1 without proper FBOs.
+static void pass_render_frame_dumb(struct gl_video *p, int fbo)
+{
+    p->gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+    struct gl_transform chromafix;
+    pass_set_image_textures(p, &p->image, &chromafix);
+
+    struct gl_transform transform;
+    int vp_w, vp_h;
+    compute_src_transform(p, &transform, &vp_w, &vp_h);
+
+    struct gl_transform tchroma = transform;
+    tchroma.t[0] /= 1 << p->image_desc.chroma_xs;
+    tchroma.t[1] /= 1 << p->image_desc.chroma_ys;
+
+    gl_transform_rect(transform, &p->pass_tex[0].src);
+    for (int n = 1; n < 3; n++) {
+        gl_transform_rect(chromafix, &p->pass_tex[n].src);
+        gl_transform_rect(tchroma, &p->pass_tex[n].src);
+    }
+    gl_transform_rect(transform, &p->pass_tex[3].src);
+
+    GLSL(vec4 color = texture(texture0, texcoord0);)
+    if (p->image_params.imgfmt == IMGFMT_NV12 ||
+        p->image_params.imgfmt == IMGFMT_NV21)
+    {
+        GLSL(color.gb = texture(texture1, texcoord1).RG;)
+    } else if (p->plane_count >= 3) {
+        GLSL(color.g = texture(texture1, texcoord1).r;)
+        GLSL(color.b = texture(texture2, texcoord2).r;)
+    }
+    if (p->plane_count >= 4)
+        GLSL(color.a = texture(texture3, texcoord3).r;);
+
+    p->use_normalized_range = false;
+    pass_convert_yuv(p);
+}
+
 // The main rendering function, takes care of everything up to and including
 // upscaling. p->image is rendered.
 static void pass_render_frame(struct gl_video *p)
 {
+    if (p->opts.dumb_mode)
+        return;
+
     p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling;
     pass_read_video(p);
     pass_convert_yuv(p);
@@ -1969,6 +2012,9 @@ static void pass_render_frame(struct gl_video *p)
 
 static void pass_draw_to_screen(struct gl_video *p, int fbo)
 {
+    if (p->opts.dumb_mode)
+        pass_render_frame_dumb(p, fbo);
+
     // Adjust the overall gamma before drawing to screen
     if (p->user_gamma != 1) {
         gl_sc_uniform_f(p->sc, "user_gamma", p->user_gamma);
@@ -2332,7 +2378,7 @@ static bool test_fbo(struct gl_video *p)
 }
 
 // Disable features that are not supported with the current OpenGL version.
-static bool check_gl_features(struct gl_video *p)
+static void check_gl_features(struct gl_video *p)
 {
     GL *gl = p->gl;
     bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
@@ -2341,11 +2387,33 @@ static bool check_gl_features(struct gl_video *p)
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
 
-    // Immediately error out if FBOs are missing, since they are required
-    // for basic operation.
-    if (!have_fbo || !test_fbo(p)) {
-        MP_ERR(p, "FBOs unsupported, required for vo_opengl.\n");
-        return false;
+    if (gl->es && p->opts.pbo) {
+        p->opts.pbo = 0;
+        MP_WARN(p, "Disabling PBOs (GLES unsupported).\n");
+    }
+
+    //
+    if (p->opts.dumb_mode || gl->es || !have_fbo || !test_fbo(p)) {
+        if (!p->opts.dumb_mode) {
+            MP_WARN(p, "High bit depth FBOs unsupported. Enabling dumb mode.\n"
+                       "Most extended features will be disabled.\n");
+        }
+        p->opts.dumb_mode = 1;
+        for (int n = 0; n < 4; n++)
+            p->opts.scaler[n].kernel.name = "bilinear";
+        p->use_lut_3d = false;
+        p->opts.dither_algo = -1;
+        p->opts.interpolation = 0;
+        p->opts.blend_subs = 0;
+        p->opts.linear_scaling = 0;
+        p->opts.sigmoid_upscaling = 0;
+        p->opts.target_prim = MP_CSP_PRIM_AUTO;
+        p->opts.target_trc = MP_CSP_TRC_AUTO;
+        talloc_free(p->opts.source_shader);     p->opts.source_shader = NULL;
+        talloc_free(p->opts.scale_shader);      p->opts.scale_shader = NULL;
+        talloc_free(p->opts.pre_shaders);       p->opts.pre_shaders = NULL;
+        talloc_free(p->opts.post_shaders);      p->opts.post_shaders = NULL;
+        return;
     }
 
     // Normally, we want to disable them by default if FBOs are unavailable,
@@ -2375,12 +2443,6 @@ static bool check_gl_features(struct gl_video *p)
         MP_WARN(p, "Disabling color management (GLES unsupported).\n");
     }
 
-    // Missing float textures etc. (maybe ordered would actually work)
-    if (p->opts.dither_algo >= 0 && gl->es) {
-        p->opts.dither_algo = -1;
-        MP_WARN(p, "Disabling dithering (GLES unsupported).\n");
-    }
-
     int use_cms = p->opts.target_prim != MP_CSP_PRIM_AUTO ||
                   p->opts.target_trc != MP_CSP_TRC_AUTO || p->use_lut_3d;
 
@@ -2396,22 +2458,13 @@ static bool check_gl_features(struct gl_video *p)
         p->use_lut_3d = false;
         MP_WARN(p, "Disabling color management (GLSL version too old).\n");
     }
-    if (gl->es && p->opts.pbo) {
-        p->opts.pbo = 0;
-        MP_WARN(p, "Disabling PBOs (GLES unsupported).\n");
-    }
-
-    return true;
 }
 
-static bool init_gl(struct gl_video *p)
+static void init_gl(struct gl_video *p)
 {
     GL *gl = p->gl;
 
     debug_check_gl(p, "before init_gl");
-
-    if (!check_gl_features(p))
-        return false;
 
     gl->Disable(GL_DITHER);
 
@@ -2444,8 +2497,6 @@ static bool init_gl(struct gl_video *p)
     }
 
     debug_check_gl(p, "after init_gl");
-
-    return true;
 }
 
 void gl_video_uninit(struct gl_video *p)
@@ -2692,11 +2743,7 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
         .sc = gl_sc_create(gl, log, g),
     };
     gl_video_set_debug(p, true);
-    if (!init_gl(p)) {
-        mp_err(log, "Failed to initialize OpenGL.\n");
-        gl_video_uninit(p);
-        return NULL;
-    }
+    init_gl(p);
     recreate_osd(p);
     return p;
 }
