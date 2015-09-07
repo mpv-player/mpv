@@ -1629,6 +1629,32 @@ static void pass_delinearize(struct gl_video *p, enum mp_csp_trc trc)
     }
 }
 
+// Compute the cropped and rotated transformation of the video source rectangle.
+// vp_w and vp_h are set to the _destination_ video size.
+static void compute_src_transform(struct gl_video *p, struct gl_transform *tr,
+                                  int *vp_w, int *vp_h)
+{
+    float sx = (p->src_rect.x1 - p->src_rect.x0) / (float)p->image_w,
+          sy = (p->src_rect.y1 - p->src_rect.y0) / (float)p->image_h,
+          ox = p->src_rect.x0,
+          oy = p->src_rect.y0;
+    struct gl_transform transform = {{{sx,0.0}, {0.0,sy}}, {ox,oy}};
+
+    int xc = 0, yc = 1;
+    *vp_w = p->dst_rect.x1 - p->dst_rect.x0,
+    *vp_h = p->dst_rect.y1 - p->dst_rect.y0;
+
+    if ((p->image_params.rotate % 180) == 90) {
+        MPSWAP(float, transform.m[0][xc], transform.m[0][yc]);
+        MPSWAP(float, transform.m[1][xc], transform.m[1][yc]);
+        MPSWAP(float, transform.t[0], transform.t[1]);
+        MPSWAP(int, xc, yc);
+        MPSWAP(int, *vp_w, *vp_h);
+    }
+
+    *tr = transform;
+}
+
 // Takes care of the main scaling and pre/post-conversions
 static void pass_scale_main(struct gl_video *p)
 {
@@ -1675,24 +1701,9 @@ static void pass_scale_main(struct gl_video *p)
                 sig_center, sig_scale, sig_offset, sig_slope);
     }
 
-    // Compute the cropped and rotated transformation
-    float sx = (p->src_rect.x1 - p->src_rect.x0) / (float)p->image_w,
-          sy = (p->src_rect.y1 - p->src_rect.y0) / (float)p->image_h,
-          ox = p->src_rect.x0,
-          oy = p->src_rect.y0;
-    struct gl_transform transform = {{{sx,0.0}, {0.0,sy}}, {ox,oy}};
-
-    int xc = 0, yc = 1,
-        vp_w = p->dst_rect.x1 - p->dst_rect.x0,
-        vp_h = p->dst_rect.y1 - p->dst_rect.y0;
-
-    if ((p->image_params.rotate % 180) == 90) {
-        MPSWAP(float, transform.m[0][xc], transform.m[0][yc]);
-        MPSWAP(float, transform.m[1][xc], transform.m[1][yc]);
-        MPSWAP(float, transform.t[0], transform.t[1]);
-        MPSWAP(int, xc, yc);
-        MPSWAP(int, vp_w, vp_h);
-    }
+    struct gl_transform transform;
+    int vp_w, vp_h;
+    compute_src_transform(p, &transform, &vp_w, &vp_h);
 
     GLSLF("// main scaling\n");
     finish_pass_fbo(p, &p->indirect_fbo, p->image_w, p->image_h, 0, 0);
