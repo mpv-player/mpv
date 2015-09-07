@@ -206,7 +206,6 @@ struct gl_video {
 
     // temporary during rendering
     struct src_tex pass_tex[TEXUNIT_VIDEO_NUM];
-    bool use_indirect;
     bool use_linear;
     bool use_normalized_range;
     float user_gamma;
@@ -483,7 +482,7 @@ const struct m_sub_options gl_video_conf = {
 
 static void uninit_rendering(struct gl_video *p);
 static void uninit_scaler(struct gl_video *p, struct scaler *scaler);
-static void check_gl_features(struct gl_video *p);
+static bool check_gl_features(struct gl_video *p);
 static bool init_format(int fmt, struct gl_video *init);
 static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
 
@@ -1400,7 +1399,6 @@ static void pass_read_video(struct gl_video *p)
             GLSLF("// custom source-shader (RGB)\n");
             gl_sc_uniform_f(p->sc, "cmul", cmul);
             GLSL(vec4 color = sample(texture0, texcoord0, texture_size0);)
-            p->use_indirect = true;
         } else {
             GLSL(vec4 color = texture(texture0, texcoord0);)
         }
@@ -1413,12 +1411,9 @@ static void pass_read_video(struct gl_video *p)
     int c_w = p->pass_tex[1].src.x1 - p->pass_tex[1].src.x0;
     int c_h = p->pass_tex[1].src.y1 - p->pass_tex[1].src.y0;
     const struct scaler_config *cscale = &p->opts.scaler[2];
-    // Non-trivial sampling is needed on the chroma plane
-    bool nontrivial = p->image_desc.flags & MP_IMGFLAG_SUBSAMPLED &&
-                      strcmp(cscale->kernel.name, "bilinear") != 0;
 
     bool merged = false;
-    if (p->plane_count > 2 && (nontrivial || shader)) {
+    if (p->plane_count > 2) {
         // For simplicity and performance, we merge the chroma planes
         // into a single texture before scaling or shading, so the shader
         // doesn't need to run multiple times.
@@ -1444,39 +1439,21 @@ static void pass_read_video(struct gl_video *p)
         GLSL(vec4 color = sample(texture1, texcoord1, texture_size1);)
         GLSL(color.ba = vec2(0.0, 1.0);) // skip unused
         finish_pass_fbo(p, &p->source_fbo, c_w, c_h, 1, 0);
-        p->use_indirect = true;
     }
 
-    if (p->image_desc.flags & MP_IMGFLAG_SUBSAMPLED && nontrivial) {
+    if (p->image_desc.flags & MP_IMGFLAG_SUBSAMPLED) {
         GLSLF("// chroma scaling\n");
         pass_sample(p, 1, &p->scaler[2], cscale, 1.0, p->image_w, p->image_h,
                     chromafix);
         GLSL(vec2 chroma = color.rg;)
-        p->use_indirect = true;
-    } else {
-        // No explicit scaling needed, either because it's trivial (ie.
-        // bilinear), or because there's no subsampling. We have to manually
-        // apply the fix to the chroma coordinates because it's not implied by
-        // pass_sample.
-        GLSL(vec4 color;)
-        gl_transform_rect(chromafix, &p->pass_tex[1].src);
-        if (p->plane_count > 2 && !merged) {
-            gl_transform_rect(chromafix, &p->pass_tex[2].src);
-            GLSL(vec2 chroma = vec2(texture(texture1, texcoord1).r,
-                                    texture(texture2, texcoord2).r);)
-        } else {
-            GLSL(vec2 chroma = texture(texture1, texcoord1).rg;)
-        }
     }
 
     p->pass_tex[0] = luma; // Restore the luma plane
-    p->pass_tex[3] = alpha; // Restore the alpha plane (if set)
     if (shader) {
         load_shader(p, shader);
         gl_sc_uniform_f(p->sc, "cmul", cmul);
         GLSLF("// custom source-shader (luma)\n");
         GLSL(float luma = sample(texture0, texcoord0, texture_size0).r;)
-        p->use_indirect = true;
     } else {
         GLSL(float luma = texture(texture0, texcoord0).r;)
         if (p->use_normalized_range)
@@ -1484,6 +1461,8 @@ static void pass_read_video(struct gl_video *p)
     }
 
     GLSL(color = vec4(luma, chroma, 1.0);)
+
+    p->pass_tex[3] = alpha; // Restore the alpha plane (if set)
     if (p->has_alpha && p->plane_count >= 4) {
         GLSL(color.a = texture(texture3, texcoord3).r;)
         if (p->use_normalized_range)
@@ -1538,7 +1517,6 @@ static void pass_convert_yuv(struct gl_video *p)
     }
 
     if (p->image_params.colorspace == MP_CSP_BT_2020_C) {
-        p->use_indirect = true;
         // Conversion for C'rcY'cC'bc via the BT.2020 CL system:
         // C'bc = (B'-Y'c) / 1.9404  | C'bc <= 0
         //      = (B'-Y'c) / 1.5816  | C'bc >  0
@@ -1681,15 +1659,12 @@ static void pass_scale_main(struct gl_video *p)
 
     // Pre-conversion, like linear light/sigmoidization
     GLSLF("// scaler pre-conversion\n");
-    if (p->use_linear) {
-        p->use_indirect = true;
+    if (p->use_linear)
         pass_linearize(p, p->image_params.gamma);
-    }
 
     bool use_sigmoid = p->use_linear && p->opts.sigmoid_upscaling && upscaling;
     float sig_center, sig_slope, sig_offset, sig_scale;
     if (use_sigmoid) {
-        p->use_indirect = true;
         // Coefficients for the sigmoidal transform are taken from the
         // formula here: http://www.imagemagick.org/Usage/color_mods/#sigmoidal
         sig_center = p->opts.sigmoid_center;
@@ -1722,23 +1697,9 @@ static void pass_scale_main(struct gl_video *p)
     }
 
     GLSLF("// main scaling\n");
-    if (!p->use_indirect && strcmp(scaler_conf.kernel.name, "bilinear") == 0) {
-        // implicitly scale in pass_video_to_screen, but set up the textures
-        // manually (for cropping etc.). Special care has to be taken for the
-        // chroma planes (everything except luma=tex0), to make sure the offset
-        // is scaled to the correct reference frame (in the case of subsampled
-        // input)
-        struct gl_transform tchroma = transform;
-        tchroma.t[xc] /= 1 << p->image_desc.chroma_xs;
-        tchroma.t[yc] /= 1 << p->image_desc.chroma_ys;
-
-        for (int n = 0; n < p->plane_count; n++)
-            gl_transform_rect(n > 0 ? tchroma : transform, &p->pass_tex[n].src);
-    } else {
-        finish_pass_fbo(p, &p->indirect_fbo, p->image_w, p->image_h, 0, 0);
-        pass_sample(p, 0, scaler, &scaler_conf, scale_factor, vp_w, vp_h,
-                    transform);
-    }
+    finish_pass_fbo(p, &p->indirect_fbo, p->image_w, p->image_h, 0, 0);
+    pass_sample(p, 0, scaler, &scaler_conf, scale_factor, vp_w, vp_h,
+                transform);
 
     GLSLF("// scaler post-conversion\n");
     if (use_sigmoid) {
@@ -1942,7 +1903,6 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
 static void pass_render_frame(struct gl_video *p)
 {
     p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling;
-    p->use_indirect = false; // set to true as needed by pass_*
     pass_read_video(p);
     pass_convert_yuv(p);
 
@@ -1964,11 +1924,8 @@ static void pass_render_frame(struct gl_video *p)
         GLSL(vec4 color = texture(texture0, texcoord0);)
     }
 
-    if (apply_shaders(p, p->opts.pre_shaders, &p->pre_fbo[0], 0,
-                      p->image_w, p->image_h))
-    {
-        p->use_indirect = true;
-    }
+    apply_shaders(p, p->opts.pre_shaders, &p->pre_fbo[0], 0,
+                  p->image_w, p->image_h);
 
     pass_scale_main(p);
 
@@ -2348,28 +2305,25 @@ static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
-static bool test_fbo(struct gl_video *p, bool *success)
+static bool test_fbo(struct gl_video *p)
 {
-    if (!*success)
-        return false;
-
     GL *gl = p->gl;
-    *success = false;
+    bool success = false;
     MP_VERBOSE(p, "Testing user-set FBO format (0x%x)\n",
                    (unsigned)p->opts.fbo_format);
     struct fbotex fbo = {0};
     if (fbotex_init(&fbo, p->gl, p->log, 16, 16, p->opts.fbo_format)) {
         gl->BindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
         gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-        *success = true;
+        success = true;
     }
     fbotex_uninit(&fbo);
     glCheckError(gl, p->log, "FBO test");
-    return *success;
+    return success;
 }
 
 // Disable features that are not supported with the current OpenGL version.
-static void check_gl_features(struct gl_video *p)
+static bool check_gl_features(struct gl_video *p)
 {
     GL *gl = p->gl;
     bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
@@ -2377,6 +2331,13 @@ static void check_gl_features(struct gl_video *p)
     bool have_1d_tex = gl->mpgl_caps & MPGL_CAP_1D_TEX;
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
+
+    // Immediately error out if FBOs are missing, since they are required
+    // for basic operation.
+    if (!have_fbo || !test_fbo(p)) {
+        MP_ERR(p, "FBOs unsupported, required for vo_opengl.\n");
+        return false;
+    }
 
     // Normally, we want to disable them by default if FBOs are unavailable,
     // because they will be slow (not critically slow, but still slower).
@@ -2387,8 +2348,6 @@ static void check_gl_features(struct gl_video *p)
             mp_find_filter_kernel(p->opts.scaler[n].kernel.name);
         if (kernel) {
             char *reason = NULL;
-            if (!test_fbo(p, &have_fbo))
-                reason = "(FBOs missing)";
             if (!have_float_tex)
                 reason = "(float tex. missing)";
             if (!have_1d_tex && kernel->polar)
@@ -2428,33 +2387,22 @@ static void check_gl_features(struct gl_video *p)
         p->use_lut_3d = false;
         MP_WARN(p, "Disabling color management (GLSL version too old).\n");
     }
-    if (use_cms && !test_fbo(p, &have_fbo)) {
-        p->opts.target_prim = MP_CSP_PRIM_AUTO;
-        p->opts.target_trc = MP_CSP_TRC_AUTO;
-        p->use_lut_3d = false;
-        MP_WARN(p, "Disabling color management (FBOs missing).\n");
-    }
-    if (p->opts.interpolation && !test_fbo(p, &have_fbo)) {
-        p->opts.interpolation = false;
-        MP_WARN(p, "Disabling interpolation (FBOs missing).\n");
-    }
-    if (p->opts.blend_subs && !test_fbo(p, &have_fbo)) {
-        p->opts.blend_subs = 0;
-        MP_WARN(p, "Disabling subtitle blending (FBOs missing).\n");
-    }
     if (gl->es && p->opts.pbo) {
         p->opts.pbo = 0;
         MP_WARN(p, "Disabling PBOs (GLES unsupported).\n");
     }
+
+    return true;
 }
 
-static int init_gl(struct gl_video *p)
+static bool init_gl(struct gl_video *p)
 {
     GL *gl = p->gl;
 
     debug_check_gl(p, "before init_gl");
 
-    check_gl_features(p);
+    if (!check_gl_features(p))
+        return false;
 
     gl->Disable(GL_DITHER);
 
@@ -2488,7 +2436,7 @@ static int init_gl(struct gl_video *p)
 
     debug_check_gl(p, "after init_gl");
 
-    return 1;
+    return true;
 }
 
 void gl_video_uninit(struct gl_video *p)
@@ -2735,7 +2683,11 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
         .sc = gl_sc_create(gl, log, g),
     };
     gl_video_set_debug(p, true);
-    init_gl(p);
+    if (!init_gl(p)) {
+        mp_err(log, "Failed to initialize OpenGL.\n");
+        gl_video_uninit(p);
+        return NULL;
+    }
     recreate_osd(p);
     return p;
 }
