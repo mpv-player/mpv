@@ -201,10 +201,11 @@ static void update_osd(struct osd_state *osd, struct osd_object *obj)
 {
     struct MPOpts *opts = osd->opts;
 
-    create_ass_track(osd, obj, 0, 0);
     clear_obj(obj);
     if (!obj->text[0])
         return;
+
+    create_ass_track(osd, obj, 0, 0);
 
     struct osd_style_opts font = *opts->osd_style;
     font.font_size *= opts->osd_scale;
@@ -326,13 +327,13 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
 
 static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 {
-    float px, py, width, height, border;
-    get_osd_bar_box(osd, obj, &px, &py, &width, &height, &border);
-
     clear_obj(obj);
 
     if (obj->progbar_state.type < 0)
         return;
+
+    float px, py, width, height, border;
+    get_osd_bar_box(osd, obj, &px, &py, &width, &height, &border);
 
     float sx = px - border * 2 - height / 4; // includes additional spacing
     float sy = py + height / 2;
@@ -404,10 +405,13 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 
 static void update_external(struct osd_state *osd, struct osd_object *obj)
 {
-    create_ass_track(osd, obj, obj->external_res_x, obj->external_res_y);
     clear_obj(obj);
 
     bstr t = bstr0(obj->text);
+    if (!t.len)
+        return;
+    create_ass_track(osd, obj, obj->external_res_x, obj->external_res_y);
+
     while (t.len) {
         bstr line;
         bstr_split_tok(t, "\n", &line, &t);
