@@ -657,10 +657,8 @@ static void pass_set_image_textures(struct gl_video *p, struct video_image *vimg
     // Make sure luma/chroma sizes are aligned.
     // Example: For 4:2:0 with size 3x3, the subsampled chroma plane is 2x2
     // so luma (3,3) has to align with chroma (2,2).
-    chroma->m[0][0] = ls_w * (float)vimg->planes[0].w
-                               / vimg->planes[1].w;
-    chroma->m[1][1] = ls_h * (float)vimg->planes[0].h
-                               / vimg->planes[1].h;
+    chroma->m[0][0] = ls_w * (float)vimg->planes[0].w / vimg->planes[1].w;
+    chroma->m[1][1] = ls_h * (float)vimg->planes[0].h / vimg->planes[1].h;
 
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *t = &vimg->planes[n];
