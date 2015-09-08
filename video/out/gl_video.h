@@ -43,6 +43,7 @@ struct scaler_config {
 };
 
 struct gl_video_opts {
+    int dumb_mode;
     struct scaler_config scaler[4];
     float gamma;
     int gamma_auto;
@@ -71,7 +72,6 @@ struct gl_video_opts {
     char *scale_shader;
     char **pre_shaders;
     char **post_shaders;
-    int dumb_mode;
 };
 
 extern const struct m_sub_options gl_video_conf;

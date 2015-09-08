@@ -486,6 +486,7 @@ static void uninit_scaler(struct gl_video *p, struct scaler *scaler);
 static void check_gl_features(struct gl_video *p);
 static bool init_format(int fmt, struct gl_video *init);
 static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
+static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src);
 
 #define GLSL(x) gl_sc_add(p->sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
@@ -2518,6 +2519,7 @@ void gl_video_uninit(struct gl_video *p)
 
     gl_set_debug_logger(gl, NULL);
 
+    assign_options(&p->opts, &(struct gl_video_opts){0});
     talloc_free(p);
 }
 
@@ -2780,26 +2782,31 @@ static char **dup_str_array(void *parent, char **src)
     return res;
 }
 
+static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
+{
+    talloc_free(dst->source_shader);
+    talloc_free(dst->scale_shader);
+    talloc_free(dst->pre_shaders);
+    talloc_free(dst->post_shaders);
+
+    *dst = *src;
+
+    for (int n = 0; n < 4; n++) {
+        dst->scaler[n].kernel.name =
+            (char *)handle_scaler_opt(dst->scaler[n].kernel.name, n == 3);
+    }
+
+    dst->source_shader = talloc_strdup(NULL, dst->source_shader);
+    dst->scale_shader = talloc_strdup(NULL, dst->scale_shader);
+    dst->pre_shaders = dup_str_array(NULL, dst->pre_shaders);
+    dst->post_shaders = dup_str_array(NULL, dst->post_shaders);
+}
+
 // Set the options, and possibly update the filter chain too.
 // Note: assumes all options are valid and verified by the option parser.
 void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
 {
-    talloc_free(p->opts.source_shader);
-    talloc_free(p->opts.scale_shader);
-    talloc_free(p->opts.pre_shaders);
-    talloc_free(p->opts.post_shaders);
-
-    p->opts = *opts;
-
-    for (int n = 0; n < 4; n++) {
-        p->opts.scaler[n].kernel.name =
-            (char *)handle_scaler_opt(p->opts.scaler[n].kernel.name, n==3);
-    }
-
-    p->opts.source_shader = talloc_strdup(p, p->opts.source_shader);
-    p->opts.scale_shader = talloc_strdup(p, p->opts.scale_shader);
-    p->opts.pre_shaders = dup_str_array(p, p->opts.pre_shaders);
-    p->opts.post_shaders = dup_str_array(p, p->opts.post_shaders);
+    assign_options(&p->opts, opts);
 
     check_gl_features(p);
     uninit_rendering(p);
