@@ -120,6 +120,7 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
             fmtstr = talloc_asprintf_append_buffer(fmtstr, "%s%s", s, name);
         }
     }
+    fmtstr = talloc_asprintf_append_buffer(fmtstr, ":channel_layouts=mono|stereo|2.1|3.0|3.0(back)|4.0|quad|quad(side)|3.1|5.0|5.0(side)|4.1|5.1|5.1(side)|6.0|6.0(front)|hexagonal|6.1|6.1(front)|7.0|7.0(front)|7.1|7.1(wide)|7.1(wide-side)|octagonal|downmix");
 
     char *src_args = talloc_asprintf(tmp,
         "sample_rate=%d:sample_fmt=%s:time_base=%d/%d:"
