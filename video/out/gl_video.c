@@ -2399,21 +2399,21 @@ static void check_gl_features(struct gl_video *p)
             MP_WARN(p, "High bit depth FBOs unsupported. Enabling dumb mode.\n"
                        "Most extended features will be disabled.\n");
         }
-        p->opts.dumb_mode = 1;
-        for (int n = 0; n < 4; n++)
-            p->opts.scaler[n].kernel.name = "bilinear";
         p->use_lut_3d = false;
-        p->opts.dither_algo = -1;
-        p->opts.interpolation = 0;
-        p->opts.blend_subs = 0;
-        p->opts.linear_scaling = 0;
-        p->opts.sigmoid_upscaling = 0;
-        p->opts.target_prim = MP_CSP_PRIM_AUTO;
-        p->opts.target_trc = MP_CSP_TRC_AUTO;
-        talloc_free(p->opts.source_shader);     p->opts.source_shader = NULL;
-        talloc_free(p->opts.scale_shader);      p->opts.scale_shader = NULL;
-        talloc_free(p->opts.pre_shaders);       p->opts.pre_shaders = NULL;
-        talloc_free(p->opts.post_shaders);      p->opts.post_shaders = NULL;
+        // Most things don't work, so whitelist all options that still work.
+        struct gl_video_opts new_opts = {
+            .gamma = p->opts.gamma,
+            .gamma_auto = p->opts.gamma_auto,
+            .pbo = p->opts.pbo,
+            .fbo_format = p->opts.fbo_format,
+            .alpha_mode = p->opts.alpha_mode,
+            .chroma_location = p->opts.chroma_location,
+            .use_rectangle = p->opts.use_rectangle,
+            .background = p->opts.background,
+            .dither_algo = -1,
+            .dumb_mode = 1,
+        };
+        assign_options(&p->opts, &new_opts);
         return;
     }
 
