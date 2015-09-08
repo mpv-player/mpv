@@ -65,6 +65,7 @@ struct af_resample_opts {
     int phase_shift;
     int linear;
     double cutoff;
+    int normalize;
 
     int in_rate_af; // filter input sample rate
     int in_rate;    // actual rate (used by lavr), adjusted for playback speed
@@ -234,7 +235,9 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     av_opt_set_double(s->avrctx, "cutoff",          s->ctx.cutoff, 0);
 
 #if HAVE_LIBSWRESAMPLE
-    av_opt_set_double(s->avrctx, "rematrix_maxval", 1.0, 0);
+    av_opt_set_double(s->avrctx, "rematrix_maxval", s->opts.normalize ? 1 : 1000, 0);
+#else
+    av_opt_set_int(s->avrctx, "normalize_mix_level", s->opts.normalize, 0);
 #endif
 
     if (mp_set_avopts(af->log, s->avrctx, s->avopts) < 0)
@@ -546,6 +549,7 @@ const struct af_info af_info_lavrresample = {
             .filter_size = 16,
             .cutoff      = 0.0,
             .phase_shift = 10,
+            .normalize   = 1,
         },
         .playback_speed = 1.0,
         .allow_detach = 1,
@@ -556,6 +560,7 @@ const struct af_info af_info_lavrresample = {
         OPT_FLAG("linear", opts.linear, 0),
         OPT_DOUBLE("cutoff", opts.cutoff, M_OPT_RANGE, .min = 0, .max = 1),
         OPT_FLAG("detach", allow_detach, 0),
+        OPT_FLAG("normalize", opts.normalize, 0),
         OPT_KEYVALUELIST("o", avopts, 0),
         {0}
     },

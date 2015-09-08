@@ -59,6 +59,13 @@ Available filters are:
         (If you just want to set defaults for this filter that will be used
         even by automatically inserted lavrresample instances, you should
         prefer setting them with ``--af-defaults=lavrresample:...``.)
+    ``normalize=<yes|no>``
+        Whether to normalize when remixing channel layouts (default: yes). This
+        is e.g. applied when downmixing surround audio to stereo. The advantage
+        is that this guarantees that no clipping can happen. Unfortunately,
+        this can also lead to too low volume levels. Whether you enable or
+        disable this is essentially a matter of taste, but the default uses
+        the safer choice.
     ``o=<string>``
         Set AVOptions on the SwrContext or AVAudioResampleContext. These should
         be documented by FFmpeg or Libav.
