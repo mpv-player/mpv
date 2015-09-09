@@ -32,6 +32,7 @@
 #include "video.h"
 
 #include "misc/bstr.h"
+#include "options/m_config.h"
 #include "common.h"
 #include "utils.h"
 #include "hwdec.h"
@@ -2039,7 +2040,6 @@ static void check_gl_features(struct gl_video *p)
         MP_WARN(p, "Disabling PBOs (GLES unsupported).\n");
     }
 
-    //
     if (p->opts.dumb_mode || gl->es || !have_fbo || !test_fbo(p)) {
         if (!p->opts.dumb_mode) {
             MP_WARN(p, "High bit depth FBOs unsupported. Enabling dumb mode.\n"
@@ -2060,6 +2060,7 @@ static void check_gl_features(struct gl_video *p)
             .dumb_mode = 1,
         };
         assign_options(&p->opts, &new_opts);
+        p->opts.deband_opts = m_config_alloc_struct(NULL, &deband_conf);
         return;
     }
 
@@ -2434,8 +2435,12 @@ static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
     talloc_free(dst->scale_shader);
     talloc_free(dst->pre_shaders);
     talloc_free(dst->post_shaders);
+    talloc_free(dst->deband_opts);
 
     *dst = *src;
+
+    if (src->deband_opts)
+        dst->deband_opts = m_sub_options_copy(NULL, &deband_conf, src->deband_opts);
 
     for (int n = 0; n < 4; n++) {
         dst->scaler[n].kernel.name =
