@@ -761,6 +761,13 @@ Video
     :top:     top field first
     :bottom:  bottom field first
 
+    .. note::
+
+        This option only changes the field dominance, leaving the interlaced flag
+        untouched. Therefore it may not have the intended effect if the
+        underlying stream is incorrectly labelled progressive. For these cases,
+        you may want to use ``--vf=lavfi=[setfield=bff]`` (or ``tff``) instead.
+
 ``--frames=<number>``
     Play/convert only first ``<number>`` video frames, then quit.
 
