@@ -58,6 +58,7 @@
 static const char *const fixed_scale_filters[] = {
     "bilinear",
     "bicubic_fast",
+    "riftdk2",
     "sharpen3",
     "sharpen5",
     "oversample",
@@ -1237,6 +1238,64 @@ static void pass_sample_bicubic_fast(struct gl_video *p)
     GLSLF("}\n");
 }
 
+static void pass_sample_riftdk2(struct gl_video *p, struct scaler *scaler)
+{
+    GLSL(vec4 color;)
+    GLSLF("{\n");
+    // central points for the 2 eyes assumed at (0.25, 0.5) and (0.75, 0.5)
+    GLSL(vec2 mypos = pos.xy - 0.5;)
+    GLSL(mypos.x = pos.x - 0.25; if (pos.x > 0.5) mypos.x = pos.x - 0.75;)
+    
+    GLSL(float maxr = sqrt(pow(0.25, 2.0) + pow(0.5, 2.0));)
+    GLSL(float r = sqrt(pow(mypos.x, 2.0) + pow(mypos.y, 2.0));)
+    
+    // needed to normalize r to have the transformation below working
+    GLSL(float rn = r / maxr;)
+
+    // -> range of f_r: [1, 1.46] -> factor of elongation
+    GLSL(float f_r = 0.24 * pow(rn, 4) + 0.22 * pow(rn, 2) + 1;)
+
+    GLSL(float alpha = atan(mypos.y, mypos.x);)
+
+    GLSL(float offset_x = r * f_r * cos(alpha);)
+    GLSL(float newx = abs(0.25 + offset_x);)
+    GLSL(if (pos.x > 0.5) newx = abs(0.75 + offset_x);)
+    GLSL(float newy = abs(0.5 + r * sin(alpha) * f_r);)
+    
+    GLSL(float gnRadius = pow(newx - 0.25, 2) + pow(newy - 0.5, 2);)
+    GLSL(if (pos.x > 0.5) gnRadius = pow(newx - 0.75, 2) + pow(newy - 0.5, 2);)
+    GLSL(float startx = 0.0;)
+    GLSL(if (pos.x > 0.5) startx = 0.5;)
+    GLSL(float stopx = startx + 0.5;)
+    GLSL(bool outside = true;)
+    
+    // check for being outside of the boundaries
+    // outcommented code was expected to help, but does not help
+    GLSL(if(/*floor(r) == floor(gnRadius) && newx >= startx &&
+               newx <= stopx && newy >= 0.0 && */ newy <= 1.0)
+           outside = false;)
+
+    GLSL(vec4 p = texture(tex, pos);)
+    
+    GLSL(pos.x = newx;)
+    GLSL(pos.y = newy;)
+    GLSL(p = texture(tex, pos);)
+    
+    // set everything outside the "barrel" to black
+    GLSL(if (outside) p = vec4(0.0);)
+    
+    // debugging: set different colors to see what the single checks do
+    GLSL(if(floor(f_r) == floor(gnRadius/maxr)) p = vec4(1.0);)
+    GLSL(if(newx < startx) p = vec4(1.0, 0.0, 1.0, 0.0);)
+    GLSL(if(newx > stopx) p = vec4(1.0, 0.0, 0.0, 1.0);)
+    GLSL(if(newy < 0.0) p = vec4(0.0, 1.0, 1.0, 0.0);)
+    GLSL(if(newy > 1.0) p = vec4(0.0, 1.0, 0.0, 1.0);)
+    // end of debugging code
+    
+    GLSLF("color = p;\n");
+    GLSLF("}\n");
+}
+
 static void pass_sample_sharpen3(struct gl_video *p, struct scaler *scaler)
 {
     GLSL(vec4 color;)
@@ -1336,6 +1395,8 @@ static void pass_sample(struct gl_video *p, int src_tex, struct scaler *scaler,
         GLSL(vec4 color = texture(tex, pos);)
     } else if (strcmp(name, "bicubic_fast") == 0) {
         pass_sample_bicubic_fast(p);
+    } else if (strcmp(name, "riftdk2") == 0) {
+        pass_sample_riftdk2(p, scaler);
     } else if (strcmp(name, "sharpen3") == 0) {
         pass_sample_sharpen3(p, scaler);
     } else if (strcmp(name, "sharpen5") == 0) {
