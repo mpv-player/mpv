@@ -95,18 +95,18 @@ case "$verdict" in
         exit 0
         ;;
     interlaced-tff)
-        judge "$@" --vf-clr --vf-pre=pullup --field-dominance=top
+        judge "$@" --vf-clr --vf-pre=lavfi=\[setfield=tff\],pullup
         case "$verdict" in
             progressive)
                 [ -n "$ILDETECT_DRY_RUN" ] || \
-                    $ILDETECT_MPV "$@" --vf-pre=pullup --field-dominance=top
+                    $ILDETECT_MPV "$@" --vf-pre=lavfi=\[setfield=tff\],pullup
                 r=$?
                 [ $r -eq 0 ] || exit $((r | 16))
                 exit 1
                 ;;
             *)
                 [ -n "$ILDETECT_DRY_RUN" ] || \
-                    $ILDETECT_MPV "$@" --vf-pre=yadif --field-dominance=top
+                    $ILDETECT_MPV "$@" --vf-pre=lavfi=\[setfield=tff\],yadif
                 r=$?
                 [ $r -eq 0 ] || exit $((r | 16))
                 exit 2
@@ -114,18 +114,18 @@ case "$verdict" in
         esac
         ;;
     interlaced-bff)
-        judge "$@" --vf-clr --vf-pre=pullup --field-dominance=bottom
+        judge "$@" --vf-clr --vf-pre=lavfi=\[setfield=bff\],pullup
         case "$verdict" in
             progressive)
                 [ -n "$ILDETECT_DRY_RUN" ] || \
-                    $ILDETECT_MPV "$@" --vf-pre=pullup --field-dominance=bottom
+                    $ILDETECT_MPV "$@" --vf-pre=lavfi=\[setfield=bff\],pullup
                 r=$?
                 [ $r -eq 0 ] || exit $((r | 16))
                 exit 1
                 ;;
             *)
                 [ -n "$ILDETECT_DRY_RUN" ] || \
-                    $ILDETECT_MPV "$@" --vf-pre=yadif --field-dominance=bottom
+                    $ILDETECT_MPV "$@" --vf-pre=lavfi=\[setfield=bff\],yadif
                 r=$?
                 [ $r -eq 0 ] || exit $((r | 16))
                 exit 2
