@@ -629,19 +629,24 @@ static struct sc_uniform *find_uniform(struct gl_shader_cache *sc,
     return new;
 }
 
+const char* mp_sampler_type(GLenum texture_target)
+{
+    switch (texture_target) {
+    case GL_TEXTURE_1D:         return "sampler1D";
+    case GL_TEXTURE_2D:         return "sampler2D";
+    case GL_TEXTURE_RECTANGLE:  return "sampler2DRect";
+    case GL_TEXTURE_3D:         return "sampler3D";
+    default: abort();
+    }
+}
+
 void gl_sc_uniform_sampler(struct gl_shader_cache *sc, char *name, GLenum target,
                            int unit)
 {
     struct sc_uniform *u = find_uniform(sc, name);
     u->type = UT_i;
     u->size = 1;
-    switch (target) {
-    case GL_TEXTURE_1D: u->glsl_type = "sampler1D"; break;
-    case GL_TEXTURE_2D: u->glsl_type = "sampler2D"; break;
-    case GL_TEXTURE_RECTANGLE: u->glsl_type = "sampler2DRect"; break;
-    case GL_TEXTURE_3D: u->glsl_type = "sampler3D"; break;
-    default: abort();
-    }
+    u->glsl_type = mp_sampler_type(target);
     u->v.i[0] = unit;
 }
 
