@@ -171,13 +171,11 @@ void af_fill_silence(void *dst, size_t bytes, int format)
     memset(dst, af_fmt_is_unsigned(format) ? 0x80 : 0, bytes);
 }
 
-#define FMT_DIFF(type, a, b) (((a) & type) - ((b) & type))
-
 // Returns a "score" that serves as heuristic how lossy or hard a conversion is.
 // If the formats are equal, 1024 is returned. If they are gravely incompatible
 // (like s16<->ac3), INT_MIN is returned. If there is implied loss of precision
 // (like s16->s8), a value <0 is returned.
-int af_format_conversion_score(int dst_format, int src_format)
+static int af_format_conversion_score(int dst_format, int src_format)
 {
     if (dst_format == AF_FORMAT_UNKNOWN || src_format == AF_FORMAT_UNKNOWN)
         return INT_MIN;
