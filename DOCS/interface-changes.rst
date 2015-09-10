@@ -19,7 +19,7 @@ Interface changes
 
 ::
 
- --- mpv 0.10.0 will be released ---
+ --- mpv 0.10.0 ---
     - add --video-aspect-method option
     - add --playlist-pos option
     - add --video-sync* options
@@ -85,4 +85,4 @@ Interface changes
     - add --screenshot-high-bit-depth
     - add --screenshot-jpeg-source-chroma
     - default action for "rescan_external_files" command changes
- --- mpv 0.9.0 is released ---
+ --- mpv 0.9.0 ---
