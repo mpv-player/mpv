@@ -471,8 +471,15 @@ static int parse_cycle_dir(struct mp_log *log, const struct m_option *opt,
     return 1;
 }
 
+static void copy_opt(const m_option_t *opt, void *dst, const void *src)
+{
+    if (dst && src)
+        memcpy(dst, src, opt->type->size);
+}
+
 const struct m_option_type m_option_type_cycle_dir = {
     .name = "up|down",
     .parse = parse_cycle_dir,
+    .copy = copy_opt,
     .size = sizeof(double),
 };

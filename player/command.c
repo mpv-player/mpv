@@ -4286,13 +4286,11 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     case MP_CMD_ADD:
     case MP_CMD_CYCLE:
     {
+        char *property = cmd->args[0].v.s;
         struct m_property_switch_arg s = {
-            .inc = 1,
+            .inc = cmd->args[1].v.d * cmd->scale,
             .wrap = cmd->id == MP_CMD_CYCLE,
         };
-        if (cmd->args[1].v.d)
-            s.inc = cmd->args[1].v.d * cmd->scale;
-        char *property = cmd->args[0].v.s;
         if (cmd->repeated && !check_property_autorepeat(property, mpctx)) {
             MP_VERBOSE(mpctx, "Dropping command '%.*s' from auto-repeated key.\n",
                        BSTR_P(cmd->original));
