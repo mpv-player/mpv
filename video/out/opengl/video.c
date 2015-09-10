@@ -1128,8 +1128,9 @@ static void pass_read_video(struct gl_video *p)
         }
 
         if (p->opts.deband) {
-            pass_sample_deband(p->sc, p->opts.deband_opts, 1, merged ? 1.0 : tex_mul,
-                               p->image_w, p->image_h, &p->lfg);
+            pass_sample_deband(p->sc, p->opts.deband_opts, 1, p->gl_target,
+                               merged ? 1.0 : tex_mul, p->image_w, p->image_h,
+                               &p->lfg);
             GLSL(color.zw = vec2(0.0, 1.0);) // skip unused
             finish_pass_fbo(p, &p->chroma_deband_fbo, c_w, c_h, 1, 0);
             p->use_normalized_range = true;
@@ -1163,7 +1164,7 @@ static void pass_read_video(struct gl_video *p)
     GLSL(vec4 main;)
     GLSLF("{\n");
     if (p->opts.deband) {
-        pass_sample_deband(p->sc, p->opts.deband_opts, 0, tex_mul,
+        pass_sample_deband(p->sc, p->opts.deband_opts, 0, p->gl_target, tex_mul,
                            p->image_w, p->image_h, &p->lfg);
         p->use_normalized_range = true;
     } else {

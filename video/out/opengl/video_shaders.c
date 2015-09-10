@@ -378,8 +378,8 @@ const struct m_sub_options deband_conf = {
 
 // Stochastically sample a debanded result from a given texture
 void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
-                        int tex_num, float tex_mul, float img_w, float img_h,
-                        AVLFG *lfg)
+                        int tex_num, GLenum tex_target, float tex_mul,
+                        float img_w, float img_h, AVLFG *lfg)
 {
     // Set up common variables and initialize the PRNG
     GLSLF("// debanding (tex %d)\n", tex_num);
@@ -388,7 +388,8 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
 
     // Helper: Compute a stochastic approximation of the avg color around a
     // pixel
-    GLSLH(vec4 average(sampler2D tex, vec2 pos, float range, inout float h) {)
+    GLSLHF("vec4 average(%s tex, vec2 pos, float range, inout float h) {",
+           mp_sampler_type(tex_target));
         // Compute a random rangle and distance
         GLSLH(float dist = rand(h) * range;     h = permute(h);)
         GLSLH(float dir  = rand(h) * 6.2831853; h = permute(h);)
