@@ -447,6 +447,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavutil/avutil.h',
                                 'const char *x = av_version_info()',
                                 use='libav'),
+    }, {
+        'name': 'av-new-pixdesc',
+        'desc': 'libavutil new pixdesc fields',
+        'func': check_statement('libavutil/pixdesc.h',
+                                'AVComponentDescriptor d; int x = d.depth',
+                                use='libav'),
     }
 ]
 

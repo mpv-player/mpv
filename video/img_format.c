@@ -22,6 +22,8 @@
 #include <libavutil/pixfmt.h>
 #include <libavutil/pixdesc.h>
 
+#include "config.h"
+
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/fmt-conversion.h"
@@ -142,7 +144,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         .avformat = fmt,
         .chroma_xs = pd->log2_chroma_w,
         .chroma_ys = pd->log2_chroma_h,
-        .component_bits = pd->comp[0].depth_minus1 + 1,
     };
 
     int planedepth[4] = {0};
@@ -150,12 +151,21 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     bool need_endian = false; // single component is spread over >1 bytes
     for (int c = 0; c < pd->nb_components; c++) {
         AVComponentDescriptor d = pd->comp[c];
+#if HAVE_AV_NEW_PIXDESC
+        int depth = d.depth;
+        int step = d.step;
+#else
+        int depth = d.depth_minus1 + 1;
+        int step = d.step_minus1 + 1;
+#endif
         // multiple components per plane -> Y is definitive, ignore chroma
         if (!desc.bpp[d.plane])
-            desc.bpp[d.plane] = (d.step_minus1 + 1) * el_size;
-        planedepth[d.plane] += d.depth_minus1 + 1;
-        need_endian |= (d.depth_minus1 + 1 + d.shift) > 8;
-        if (d.depth_minus1 + 1 != desc.component_bits)
+            desc.bpp[d.plane] = step * el_size;
+        planedepth[d.plane] += depth;
+        need_endian |= (depth + d.shift) > 8;
+        if (c == 0)
+            desc.component_bits = depth;
+        if (depth != desc.component_bits)
             desc.component_bits = 0;
     }
 
