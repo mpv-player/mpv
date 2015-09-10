@@ -193,7 +193,7 @@ int af_format_conversion_score(int dst_format, int src_format)
         int dst_bytes = af_fmt_to_bytes(dst_format);
         if (af_fmt_is_float(dst_format)) {
             // For int->float, always prefer 32 bit float.
-            score -= dst_bytes == 4 ? 1 : 0;
+            score -= dst_bytes == 4 ? 0 : 1;
         } else {
             // For float->int, always prefer highest bit depth int
             score -= 8 - dst_bytes;
