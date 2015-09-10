@@ -326,11 +326,13 @@ struct mp_image *video_decode(struct dec_video *d_video,
         return NULL;            // error / skipped frame
     }
 
-    if (opts->field_dominance == 0)
-        mpi->fields |= MP_IMGFIELD_TOP_FIRST;
-    else if (opts->field_dominance == 1)
+    if (opts->field_dominance == 0) {
+        mpi->fields |= MP_IMGFIELD_TOP_FIRST | MP_IMGFIELD_INTERLACED;
+    } else if (opts->field_dominance == 1) {
         mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
-
+        mpi->fields |= MP_IMGFIELD_INTERLACED;
+    }
+    
     // Note: the PTS is reordered, but the DTS is not. Both should be monotonic.
     double pts = d_video->codec_pts;
     double dts = d_video->codec_dts;

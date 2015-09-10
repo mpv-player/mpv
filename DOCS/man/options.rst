@@ -761,6 +761,10 @@ Video
     :top:     top field first
     :bottom:  bottom field first
 
+    .. note::
+
+        Setting either ``top`` or ``bottom`` will flag all frames as interlaced.
+
 ``--frames=<number>``
     Play/convert only first ``<number>`` video frames, then quit.
 
