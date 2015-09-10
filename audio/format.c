@@ -211,6 +211,37 @@ int af_format_conversion_score(int dst_format, int src_format)
     return score;
 }
 
+struct entry {
+    int fmt;
+    int score;
+};
+
+static int cmp_entry(const void *a, const void *b)
+{
+#define CMP_INT(a, b) (a > b ? 1 : (a < b ? -1 : 0))
+    return -CMP_INT(((struct entry *)a)->score, ((struct entry *)b)->score);
+}
+
+// Return a list of sample format compatible to src_format, sorted by order
+// of preference. out_formats[0] will be src_format (as long as it's valid),
+// and the list is terminated with 0 (AF_FORMAT_UNKNOWN).
+// Keep in mind that this also returns formats with flipped interleaving
+// (e.g. for s16, it returns [s16, s16p, ...]).
+void af_get_best_sample_formats(int src_format, int out_formats[AF_FORMAT_COUNT])
+{
+    int num = 0;
+    struct entry e[AF_FORMAT_COUNT];
+    for (int fmt = 1; fmt < AF_FORMAT_COUNT; fmt++) {
+        int score = af_format_conversion_score(fmt, src_format);
+        if (score > INT_MIN)
+            e[num++] = (struct entry){fmt, score};
+    }
+    qsort(e, num, sizeof(e[0]), cmp_entry);
+    for (int n = 0; n < num; n++)
+        out_formats[n] = e[n].fmt;
+    out_formats[num] = 0;
+}
+
 // Return the number of samples that make up one frame in this format.
 // You get the byte size by multiplying them with sample size and channel count.
 int af_format_sample_alignment(int format)
