@@ -203,7 +203,7 @@ int af_format_conversion_score(int dst_format, int src_format)
     } else {
         int bytes = af_fmt_to_bytes(dst_format) - af_fmt_to_bytes(src_format);
         if (bytes > 0) {
-            score -= bytes;             // has to add padding
+            score -= 1 + bytes;         // has to add padding
         } else if (bytes < 0) {
             score -= 1024 - bytes;      // has to reduce bit depth
         }
