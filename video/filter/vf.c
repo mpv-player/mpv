@@ -86,12 +86,12 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_pullup,
     &vf_info_delogo,
     &vf_info_yadif,
+    &vf_info_stereo3d,
 #endif
 
     &vf_info_eq,
     &vf_info_dsize,
     &vf_info_sub,
-    &vf_info_stereo3d,
     &vf_info_buffer,
 #if HAVE_DLOPEN
     &vf_info_dlopen,

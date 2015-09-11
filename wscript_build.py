@@ -302,7 +302,7 @@ def build(ctx):
         ( "video/filter/vf_pullup.c",            "libavfilter"),
         ( "video/filter/vf_rotate.c",            "libavfilter"),
         ( "video/filter/vf_scale.c" ),
-        ( "video/filter/vf_stereo3d.c" ),
+        ( "video/filter/vf_stereo3d.c",          "libavfilter"),
         ( "video/filter/vf_sub.c" ),
         ( "video/filter/vf_unsharp.c",           "libavfilter"),
         ( "video/filter/vf_vapoursynth.c",       "vapoursynth-core" ),
