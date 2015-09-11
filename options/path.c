@@ -259,6 +259,10 @@ char *mp_path_join(void *talloc_ctx, const char *p1, const char *p2)
 
 char *mp_getcwd(void *talloc_ctx)
 {
+    char *e_wd = getenv("PWD");
+    if (e_wd)
+        return talloc_strdup(talloc_ctx, e_wd);
+
     char *wd = talloc_array(talloc_ctx, char, 20);
     while (getcwd(wd, talloc_get_size(wd)) == NULL) {
         if (errno != ERANGE) {
