@@ -99,13 +99,9 @@ SOURCES-$(WAYLAND)              += video/out/vo_wayland.c \
                                    video/out/wayland/memfile.c
 
 SOURCES-$(LIBAVFILTER)          += video/filter/vf_lavfi.c \
-                                   video/filter/vf_delogo.c \
                                    video/filter/vf_gradfun.c \
-                                   video/filter/vf_hqdn3d.c \
-                                   video/filter/vf_noise.c \
                                    video/filter/vf_pullup.c \
                                    video/filter/vf_rotate.c \
-                                   video/filter/vf_unsharp.c \
                                    video/filter/vf_yadif.c \
                                    audio/filter/af_lavfi.c
 
