@@ -462,20 +462,18 @@ static int init_device(struct ao *ao, bool second_try)
     err = snd_pcm_hw_params_any(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to get initial parameters");
 
-    p->alsa_fmt = find_alsa_format(ao->format);
-    if (p->alsa_fmt == SND_PCM_FORMAT_UNKNOWN) {
-        p->alsa_fmt = SND_PCM_FORMAT_S16;
-        ao->format = AF_FORMAT_S16;
+    int try_formats[AF_FORMAT_COUNT];
+    af_get_best_sample_formats(ao->format, try_formats);
+    for (int n = 0; try_formats[n]; n++) {
+        ao->format = try_formats[n];
+        p->alsa_fmt = find_alsa_format(ao->format);
+        if (snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt) >= 0)
+            break;
     }
 
-    err = snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt);
-    if (err < 0) {
-        if (af_fmt_is_spdif(ao->format))
-            CHECK_ALSA_ERROR("Unable to set IEC61937 format");
-        MP_INFO(ao, "Format %s is not supported by hardware, trying default.\n",
-                af_fmt_to_str(ao->format));
-        p->alsa_fmt = SND_PCM_FORMAT_S16;
-        ao->format = AF_FORMAT_S16;
+    if (!ao->format) {
+        MP_ERR(ao, "Can't find appropriate sample format.\n");
+        goto alsa_error;
     }
 
     err = snd_pcm_hw_params_set_format(p->alsa, alsa_hwparams, p->alsa_fmt);
