@@ -19,6 +19,8 @@ Interface changes
 
 ::
 
+ --- mpv 0.11.0 ---
+    - add "af-metadata" property
  --- mpv 0.10.0 ---
     - add --video-aspect-method option
     - add --playlist-pos option

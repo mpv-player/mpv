@@ -127,6 +127,7 @@ enum af_control {
     AF_CONTROL_GET_PAN_BALANCE,
     AF_CONTROL_SET_PLAYBACK_SPEED,
     AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE,
+    AF_CONTROL_GET_METADATA,
 };
 
 // Argument for AF_CONTROL_SET_PAN_LEVEL
@@ -145,6 +146,7 @@ int af_remove_by_label(struct af_stream *s, char *label);
 struct af_instance *af_find_by_label(struct af_stream *s, char *label);
 struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg);
 void af_control_all(struct af_stream *s, int cmd, void *arg);
+int af_control_by_label(struct af_stream *s, int cmd, void *arg, bstr label);
 void af_seek_reset(struct af_stream *s);
 
 void af_add_output_frame(struct af_instance *af, struct mp_audio *frame);

@@ -695,6 +695,18 @@ void af_control_all(struct af_stream *s, int cmd, void *arg)
         af->control(af, cmd, arg);
 }
 
+int af_control_by_label(struct af_stream *s, int cmd, void *arg, bstr label)
+{
+    char *label_str = bstrdup0(NULL, label);
+    struct af_instance *cur = af_find_by_label(s, label_str);
+    talloc_free(label_str);
+    if (cur) {
+        return cur->control ? cur->control(cur, cmd, arg) : CONTROL_NA;
+    } else {
+        return CONTROL_UNKNOWN;
+    }
+}
+
 // Used by filters to add a filtered frame to the output queue.
 // Ownership of frame is transferred from caller to the filter chain.
 void af_add_output_frame(struct af_instance *af, struct mp_audio *frame)

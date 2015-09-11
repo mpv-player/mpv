@@ -1091,6 +1091,9 @@ Property list
     An example of these kind of metadata are the cropping parameters
     added by ``--vf=lavfi=cropdetect``.
 
+``af-metadata/<filter-label>``
+    Equivalent to ``vf-metadata/<filter-label>``, but for audio filters.
+
 ``pause`` (RW)
     Pause status. This is usually ``yes`` or ``no``. See ``--pause``.
 
