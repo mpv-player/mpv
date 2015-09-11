@@ -210,6 +210,7 @@ static const int mp_to_alsa_format[][2] = {
     {AF_FORMAT_S24,
             MP_SELECT_LE_BE(SND_PCM_FORMAT_S24_3LE, SND_PCM_FORMAT_S24_3BE)},
     {AF_FORMAT_FLOAT,       SND_PCM_FORMAT_FLOAT},
+    {AF_FORMAT_DOUBLE,      SND_PCM_FORMAT_FLOAT64},
     {AF_FORMAT_UNKNOWN,     SND_PCM_FORMAT_UNKNOWN},
 };
 
