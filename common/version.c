@@ -19,9 +19,11 @@
 #include "version.h"
 #ifdef NO_BUILD_TIMESTAMPS
 #undef BUILDDATE
-#define BUILDDATE "UNKNOWN"
+#define BUILDDATE_FULL ""
+#else
+#define BUILDDATE_FULL "\n built on " BUILDDATE
 #endif
 
 const char mpv_version[]  = "mpv " VERSION;
-const char mpv_builddate[] = BUILDDATE;
+const char mpv_builddate[] = BUILDDATE_FULL;
 const char mpv_copyright[] = MPVCOPYRIGHT;
