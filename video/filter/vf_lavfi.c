@@ -71,7 +71,7 @@ struct vf_priv_s {
     AVRational timebase_out;
     AVRational par_in;
 
-    struct mp_tags* metadata;
+    struct mp_tags *metadata;
 
     // for the lw wrapper
     void *old_priv;
@@ -302,11 +302,11 @@ static struct mp_image *av_to_mp(struct vf_instance *vf, AVFrame *av_frame)
 static void get_metadata_from_av_frame(struct vf_instance *vf, AVFrame *frame)
 {
 #if HAVE_AVFRAME_METADATA
-  struct vf_priv_s *p = vf->priv;
-  if (!p->metadata)
-      p->metadata = talloc_zero(p, struct mp_tags);
+    struct vf_priv_s *p = vf->priv;
+    if (!p->metadata)
+        p->metadata = talloc_zero(p, struct mp_tags);
 
-  mp_tags_copy_from_av_dictionary(p->metadata, av_frame_get_metadata(frame));
+    mp_tags_copy_from_av_dictionary(p->metadata, av_frame_get_metadata(frame));
 #endif
 }
 
@@ -363,12 +363,12 @@ static int control(vf_instance_t *vf, int request, void *data)
         reset(vf);
         return CONTROL_OK;
     case VFCTRL_GET_METADATA:
-      if (vf->priv && vf->priv->metadata) {
-          *(struct mp_tags*) data = *vf->priv->metadata;
-          return CONTROL_OK;
-      } else {
-          return CONTROL_NA;
-      }
+        if (vf->priv && vf->priv->metadata) {
+            *(struct mp_tags *)data = *vf->priv->metadata;
+            return CONTROL_OK;
+        } else {
+            return CONTROL_NA;
+        }
     }
     return CONTROL_UNKNOWN;
 }
