@@ -11,6 +11,10 @@ syntax is:
 
     To get a full list of available audio filters, see ``--af=help``.
 
+    Also, keep in mind that most actual filters are available via the ``lavfi``
+    wrapper, which gives you access to most of libavfilter's filters. This
+    includes all filters that have been ported from MPlayer to libavfilter.
+
 You can also set defaults for each filter. The defaults are applied before the
 normal filter parameters.
 

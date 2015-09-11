@@ -17,6 +17,10 @@ normal filter parameters.
 
     To get a full list of available video filters, see ``--vf=help``.
 
+    Also, keep in mind that most actual filters are available via the ``lavfi``
+    wrapper, which gives you access to most of libavfilter's filters. This
+    includes all filters that have been ported from MPlayer to libavfilter.
+
 Video filters are managed in lists. There are a few commands to manage the
 filter list.
 
