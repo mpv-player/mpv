@@ -38,9 +38,9 @@
 #include "vo.h"
 #include "video/mp_image.h"
 #include "sub/osd.h"
-#include "gl_osd.h"
 
-#include "gl_rpi.h"
+#include "opengl/osd.h"
+#include "opengl/rpi.h"
 
 struct priv {
     DISPMANX_DISPLAY_HANDLE_T display;
