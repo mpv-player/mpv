@@ -64,7 +64,7 @@ static bool supports_format(AVCodec *codec, int format)
          sampleformat && *sampleformat != AV_SAMPLE_FMT_NONE;
          ++sampleformat)
     {
-        if (format && af_from_avformat(*sampleformat) == format)
+        if (af_from_avformat(*sampleformat) == format)
             return true;
     }
     return false;
@@ -75,7 +75,7 @@ static void select_format(struct ao *ao, AVCodec *codec)
     int formats[AF_FORMAT_COUNT];
     af_get_best_sample_formats(ao->format, formats);
 
-    for (int n = 0; n < AF_FORMAT_COUNT; n++) {
+    for (int n = 0; formats[n]; n++) {
         if (supports_format(codec, formats[n])) {
             ao->format = formats[n];
             break;
