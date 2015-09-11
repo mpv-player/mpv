@@ -190,20 +190,25 @@ static int af_format_conversion_score(int dst_format, int src_format)
     if (af_fmt_is_float(dst_format) != af_fmt_is_float(src_format)) {
         int dst_bytes = af_fmt_to_bytes(dst_format);
         if (af_fmt_is_float(dst_format)) {
-            // For int->float, always prefer 32 bit float.
-            score -= dst_bytes == 4 ? 0 : 1;
+            // For int->float, consider a lower bound on the precision difference.
+            int bytes = (dst_bytes == 4 ? 3 : 6) - af_fmt_to_bytes(src_format);
+            if (bytes >= 0) {
+                score -= 8 * bytes;          // excess precision
+            } else {
+                score += 1024 * (bytes - 1); // precision is lost (i.e. s32 -> float)
+            }
         } else {
-            // For float->int, always prefer highest bit depth int
-            score -= 8 - dst_bytes;
+            // float->int is the worst case. Penalize heavily and
+            // prefer highest bit depth int.
+            score -= 1048576 * (8 - dst_bytes);
         }
-        // Has to convert float<->int - Consider this the worst case.
-        score -= 2048;
+        score -= 512; // penalty for any float <-> int conversion
     } else {
         int bytes = af_fmt_to_bytes(dst_format) - af_fmt_to_bytes(src_format);
         if (bytes > 0) {
-            score -= 1 + bytes;         // has to add padding
+            score -= 8 * bytes;          // has to add padding
         } else if (bytes < 0) {
-            score -= 1024 - bytes;      // has to reduce bit depth
+            score += 1024 * (bytes - 1); // has to reduce bit depth
         }
     }
     return score;
