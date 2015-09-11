@@ -27,6 +27,7 @@
 #include "audio/chmap.h"
 #include "audio/audio.h"
 #include "common/msg.h"
+#include "common/common.h"
 
 struct af_instance;
 struct mpv_global;
@@ -104,13 +105,12 @@ struct af_stream {
 };
 
 // Return values
-#define AF_DETACH   2
-#define AF_OK       1
-#define AF_TRUE     1
-#define AF_FALSE    0
-#define AF_UNKNOWN -1
-#define AF_ERROR   -2
-#define AF_FATAL   -3
+#define AF_DETACH   (CONTROL_OK + 1)
+#define AF_OK       CONTROL_OK
+#define AF_TRUE     CONTROL_TRUE
+#define AF_FALSE    CONTROL_FALSE
+#define AF_UNKNOWN  CONTROL_UNKNOWN
+#define AF_ERROR    CONTROL_ERROR
 
 // Parameters for af_control_*
 enum af_control {
