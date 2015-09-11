@@ -215,6 +215,14 @@ static const int mp_to_alsa_format[][2] = {
 
 static int find_alsa_format(int af_format)
 {
+    if (af_fmt_is_spdif(af_format)) {
+        if (af_format == AF_FORMAT_S_MP3) {
+            return SND_PCM_FORMAT_MPEG;
+        } else {
+            return SND_PCM_FORMAT_S16;
+        }
+    }
+
     af_format = af_fmt_from_planar(af_format);
     for (int n = 0; mp_to_alsa_format[n][0] != AF_FORMAT_UNKNOWN; n++) {
         if (mp_to_alsa_format[n][0] == af_format)
@@ -453,15 +461,7 @@ static int init_device(struct ao *ao, bool second_try)
     err = snd_pcm_hw_params_any(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to get initial parameters");
 
-    if (af_fmt_is_spdif(ao->format)) {
-        if (ao->format == AF_FORMAT_S_MP3) {
-            p->alsa_fmt = SND_PCM_FORMAT_MPEG;
-        } else {
-            p->alsa_fmt = SND_PCM_FORMAT_S16;
-        }
-    } else {
-        p->alsa_fmt = find_alsa_format(ao->format);
-    }
+    p->alsa_fmt = find_alsa_format(ao->format);
     if (p->alsa_fmt == SND_PCM_FORMAT_UNKNOWN) {
         p->alsa_fmt = SND_PCM_FORMAT_S16;
         ao->format = AF_FORMAT_S16;
