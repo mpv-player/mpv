@@ -87,6 +87,11 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     return 0;
 }
 
+static int query_format(struct vf_instance *vf, unsigned int fmt)
+{
+    return vf_next_query_format(vf, fmt == IMGFMT_VDPAU ? IMGFMT_NV12 : fmt);
+}
+
 static int vf_open(vf_instance_t *vf)
 {
     struct vf_priv_s *p = vf->priv;
@@ -94,6 +99,7 @@ static int vf_open(vf_instance_t *vf)
     vf->filter_ext = filter_ext;
     vf->filter = NULL;
     vf->reconfig = reconfig;
+    vf->query_format = query_format;
 
     if (!vf->hwdec) {
         return 0;
