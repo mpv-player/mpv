@@ -466,22 +466,8 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     if (opts->consolecontrols && cas_terminal_owner(mpctx, mpctx))
         terminal_setup_getch(mpctx->input);
 
-    if (opts->force_vo) {
-        struct vo_extra ex = {
-            .input_ctx = mpctx->input,
-            .osd = mpctx->osd,
-            .encode_lavc_ctx = mpctx->encode_lavc_ctx,
-        };
-        mpctx->video_out = init_best_video_out(mpctx->global, &ex);
-        if (!mpctx->video_out) {
-            MP_FATAL(mpctx, "Error opening/initializing "
-                    "the selected video_out (-vo) device.\n");
-            return -1;
-        }
-        if (opts->force_vo == 2)
-            handle_force_window(mpctx, false);
-        mpctx->mouse_cursor_visible = true;
-    }
+    if (handle_force_window(mpctx, false) < 0)
+        return -1;
 
 #if !defined(__MINGW32__)
     mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);

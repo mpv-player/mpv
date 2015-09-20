@@ -1072,8 +1072,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     mpctx->max_frames = opts->play_frames;
 
-    if (opts->force_vo == 2)
-        handle_force_window(mpctx, false);
+    handle_force_window(mpctx, false);
 
     MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
 
