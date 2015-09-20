@@ -19,6 +19,8 @@
 
 #include <stdlib.h>
 
+#include <libavfilter/version.h>
+
 #include "options/options.h"
 
 #include "common/msg.h"
@@ -36,9 +38,7 @@ static int vf_open(vf_instance_t *vf)
 {
     struct vf_priv_s *p = vf->priv;
 
-    // Earlier libavfilter yadif versions used pure integers for the first
-    // option. We can't/don't handle this, but at least allow usage of the
-    // filter with default settings. So use an empty string for "send_frame".
+#if LIBAVFILTER_VERSION_MICRO >= 100
     const char *mode[] = {"send_frame", "send_field", "send_frame_nospatial",
                           "send_field_nospatial"};
 
@@ -47,6 +47,15 @@ static int vf_open(vf_instance_t *vf)
     {
         return 1;
     }
+#else
+    // Libav numeric modes happen to match ours, but keep it explicit.
+    const char *mode[] = {"0", "1", "2", "3"};
+    if (vf_lw_set_graph(vf, p->lw_opts, "yadif", "mode=%s:auto=%d", mode[p->mode],
+                        p->interlaced_only) >= 0)
+    {
+        return 1;
+    }
+#endif
 
     MP_FATAL(vf, "This version of libavfilter has no 'yadif' filter.\n");
     return 0;
