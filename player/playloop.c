@@ -872,7 +872,8 @@ int handle_force_window(struct MPContext *mpctx, bool reconfig)
         return 0;
 
     if (!mpctx->opts->force_vo) {
-        uninit_video_out(mpctx);
+        if (!mpctx->playing || mpctx->playback_initialized)
+            uninit_video_out(mpctx);
         return 0;
     }
 
