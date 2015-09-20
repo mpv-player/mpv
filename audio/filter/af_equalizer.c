@@ -203,7 +203,6 @@ static int af_open(struct af_instance* af){
 const struct af_info af_info_equalizer = {
   .info = "Equalizer audio filter",
   .name = "equalizer",
-  .flags = AF_FLAGS_NOT_REENTRANT,
   .open = af_open,
   .priv_size = sizeof(af_equalizer_t),
   .options = (const struct m_option[]) {

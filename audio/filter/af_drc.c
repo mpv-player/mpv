@@ -324,7 +324,6 @@ static int af_open(struct af_instance* af){
 const struct af_info af_info_drc = {
     .info = "Dynamic range compression filter",
     .name = "drc",
-    .flags = AF_FLAGS_NOT_REENTRANT,
     .open = af_open,
     .priv_size = sizeof(af_drc_t),
     .options = (const struct m_option[]) {
