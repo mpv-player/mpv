@@ -195,6 +195,7 @@ SOURCES = audio/audio.c \
           player/client.c \
           player/configfiles.c \
           player/command.c \
+          player/external_files.c \
           player/loadfile.c \
           player/main.c \
           player/misc.c \
@@ -219,7 +220,6 @@ SOURCES = audio/audio.c \
           stream/stream_rar.c \
           sub/dec_sub.c \
           sub/draw_bmp.c \
-          sub/find_subfiles.c \
           sub/img_convert.c \
           sub/osd.c \
           sub/sd_lavc.c \

@@ -12,7 +12,7 @@
 #include "misc/ctype.h"
 #include "options/options.h"
 #include "options/path.h"
-#include "sub/find_subfiles.h"
+#include "external_files.h"
 
 static const char *const sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt",
                                        "smi", "rt", "txt", "ssa", "aqt", "jss",
