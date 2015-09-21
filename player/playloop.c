@@ -861,21 +861,30 @@ static void handle_chapter_change(struct MPContext *mpctx)
     }
 }
 
-// Execute a forceful refresh of the VO window, if it hasn't had a valid frame
-// for a while. The problem is that a VO with no valid frame (vo->hasframe==0)
-// doesn't redraw video and doesn't do OSD interaction. So screw it, hard.
-// It also closes the VO if force_window or video display is not active.
-int handle_force_window(struct MPContext *mpctx, bool reconfig)
+// Execute a forceful refresh of the VO window. This clears the window from
+// the previous video. It also creates/destroys the VO on demand.
+// It tries to make the change only in situations where the window is
+// definitely needed or not needed, or if the force parameter is set (the
+// latter also decides whether to clear an existing window, because there's
+// no way to know if this has already been done or not).
+int handle_force_window(struct MPContext *mpctx, bool force)
 {
     // Don't interfere with real video playback
     if (mpctx->d_video)
         return 0;
 
+    // True if we're either in idle mode, or loading of the file has finished.
+    // It's also set via force in some stages during file loading.
+    bool act = !mpctx->playing || mpctx->playback_initialized || force;
+
     if (!mpctx->opts->force_vo) {
-        if (!mpctx->playing || mpctx->playback_initialized)
+        if (act)
             uninit_video_out(mpctx);
         return 0;
     }
+
+    if (mpctx->opts->force_vo != 2 && !act)
+        return 0;
 
     if (!mpctx->video_out) {
         struct vo_extra ex = {
@@ -889,12 +898,8 @@ int handle_force_window(struct MPContext *mpctx, bool reconfig)
         mpctx->mouse_cursor_visible = true;
     }
 
-    if (mpctx->opts->force_vo != 2 && !mpctx->playback_initialized)
-        return 0;
-
-    if (!mpctx->video_out->config_ok || reconfig) {
+    if (!mpctx->video_out->config_ok || force) {
         struct vo *vo = mpctx->video_out;
-        MP_INFO(mpctx, "Creating non-video VO window.\n");
         // Pick whatever works
         int config_format = 0;
         uint8_t fmts[IMGFMT_END - IMGFMT_START] = {0};
