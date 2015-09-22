@@ -1,3 +1,82 @@
+Release 0.11.0
+==============
+
+Features
+--------
+
+New
+~~~
+
+- vo_opengl: implement debanding
+
+Removed
+~~~~~~~
+
+- audio/filter: remove center, extrastereo, karaoke, sinesuppress, sub,
+  surround, sweep, ladspa, hrtf, export and bs2b filters (these are either
+  considered useless or have replacements in lavfi)
+- video/filter: remove lavfi wrappers for noise, hqdn3d, unsharp and delogo
+  (these filters remain usable through lavfi)
+
+Behavior
+--------
+
+- vo_opengl: require FBOs by default (use dumb-mode suboption for old hardware
+  and broken drivers)
+- vo_opengl: enable debanding by default for the opengl-hq preset
+- audio/out: use new sample format determination code
+- player: prefer logical current directory path (affects logic for resuming
+  playback)
+- vf_vdpaurb: Pass through non-hardware-decoded content
+- player: make force-window=immediate work in auto-profiles
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- af_lavrresample: add normalize suboption
+- vo_opengl: add deband, deband-iterations, deband-threshold, deband-range and
+  deband-grain suboptions
+- af_lavfi: implement af-metadata property (like vf-metadata)
+
+Changed
+~~~~~~~
+
+- command: make "add <property> 0" not change the value
+
+Removed
+~~~~~~~
+
+- vo_opengl: remove source-shader suboption
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- options: fix --no-config
+- cache: do not include backbuffer size in total stream cache size
+- audio/format: actually prefer float over double sample format for
+  int->float conversions
+- audio/format: fix interlaved vs. non-interleaved conversions
+- audio/format: revise format conversion scoring
+- video: make --field-dominance set interlaced flag
+- vf: vf_stereo3d compilation depends on libavfilter
+- vf_yadif: add hack for Libav compatibility
+- player: add opus to list of external audio file extensions
+- build: allow disabling vapoursynth completely
+- libmpv/win32: allow multiple windows at the same time
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API. A complete changelog can be seen by running
+`git log v0.10.0..v0.11.0` in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.10.0...v0.11.0 or
+http://git.srsfckn.biz/mpv/log/?qt=range&q=v0.10.0..v0.11.0
+
+
 Release 0.10.0
 ==============
 
