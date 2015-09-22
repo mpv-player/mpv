@@ -50,7 +50,7 @@
 #include "demux/demux.h"
 #include "stream/stream.h"
 #include "sub/dec_sub.h"
-#include "sub/find_subfiles.h"
+#include "external_files.h"
 #include "video/decode/dec_video.h"
 #include "video/out/vo.h"
 
@@ -1071,6 +1071,8 @@ static void play_current_file(struct MPContext *mpctx)
                           mpctx->playing->num_params);
 
     mpctx->max_frames = opts->play_frames;
+
+    handle_force_window(mpctx, false);
 
     MP_INFO(mpctx, "Playing: %s\n", mpctx->filename);
 

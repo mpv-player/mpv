@@ -146,7 +146,7 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_RUN, "run", { ARG_STRING, ARG_STRING }, .vararg = true },
 
   { MP_CMD_SET, "set", { ARG_STRING,  ARG_STRING } },
-  { MP_CMD_ADD, "add", { ARG_STRING, OARG_DOUBLE(0) },
+  { MP_CMD_ADD, "add", { ARG_STRING, OARG_DOUBLE(1) },
     .allow_auto_repeat = true},
   { MP_CMD_CYCLE, "cycle", {
       ARG_STRING,

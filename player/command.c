@@ -1187,21 +1187,31 @@ static int mp_property_chapter_metadata(void *ctx, struct m_property *prop,
     return tag_property(action, arg, mpctx->chapters[chapter].metadata);
 }
 
-static int mp_property_vf_metadata(void *ctx, struct m_property *prop,
-                                   int action, void *arg)
+static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
+                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!(mpctx->d_video && mpctx->d_video->vfilter))
-        return M_PROPERTY_UNAVAILABLE;
-    struct vf_chain *vf = mpctx->d_video->vfilter;
+    const char *type = prop->priv;
 
     if (action == M_PROPERTY_KEY_ACTION) {
         struct m_property_action_arg *ka = arg;
         bstr key;
         char *rem;
         m_property_split_path(ka->key, &key, &rem);
-        struct mp_tags vf_metadata = {0};
-        switch (vf_control_by_label(vf, VFCTRL_GET_METADATA, &vf_metadata, key)) {
+        struct mp_tags metadata = {0};
+        int res = CONTROL_UNKNOWN;
+        if (strcmp(type, "vf") == 0) {
+            if (!(mpctx->d_video && mpctx->d_video->vfilter))
+                return M_PROPERTY_UNAVAILABLE;
+            struct vf_chain *vf = mpctx->d_video->vfilter;
+            res = vf_control_by_label(vf, VFCTRL_GET_METADATA, &metadata, key);
+        } else if (strcmp(type, "af") == 0) {
+            if (!(mpctx->d_audio && mpctx->d_audio->afilter))
+                return M_PROPERTY_UNAVAILABLE;
+            struct af_stream *af = mpctx->d_audio->afilter;
+            res = af_control_by_label(af, AF_CONTROL_GET_METADATA, &metadata, key);
+        }
+        switch (res) {
         case CONTROL_UNKNOWN:
             return M_PROPERTY_UNKNOWN;
         case CONTROL_NA: // empty
@@ -1209,9 +1219,9 @@ static int mp_property_vf_metadata(void *ctx, struct m_property *prop,
             if (strlen(rem)) {
                 struct m_property_action_arg next_ka = *ka;
                 next_ka.key = rem;
-                return tag_property(M_PROPERTY_KEY_ACTION, &next_ka, &vf_metadata);
+                return tag_property(M_PROPERTY_KEY_ACTION, &next_ka, &metadata);
             } else {
-                return tag_property(ka->action, ka->arg, &vf_metadata);
+                return tag_property(ka->action, ka->arg, &metadata);
             }
             return M_PROPERTY_OK;
         default:
@@ -3379,7 +3389,8 @@ static const struct m_property mp_properties[] = {
     {"metadata", mp_property_metadata},
     {"filtered-metadata", mp_property_filtered_metadata},
     {"chapter-metadata", mp_property_chapter_metadata},
-    {"vf-metadata", mp_property_vf_metadata},
+    {"vf-metadata", mp_property_filter_metadata, .priv = "vf"},
+    {"af-metadata", mp_property_filter_metadata, .priv = "af"},
     {"pause", mp_property_pause},
     {"core-idle", mp_property_core_idle},
     {"eof-reached", mp_property_eof_reached},
@@ -4286,13 +4297,11 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     case MP_CMD_ADD:
     case MP_CMD_CYCLE:
     {
+        char *property = cmd->args[0].v.s;
         struct m_property_switch_arg s = {
-            .inc = 1,
+            .inc = cmd->args[1].v.d * cmd->scale,
             .wrap = cmd->id == MP_CMD_CYCLE,
         };
-        if (cmd->args[1].v.d)
-            s.inc = cmd->args[1].v.d * cmd->scale;
-        char *property = cmd->args[0].v.s;
         if (cmd->repeated && !check_property_autorepeat(property, mpctx)) {
             MP_VERBOSE(mpctx, "Dropping command '%.*s' from auto-repeated key.\n",
                        BSTR_P(cmd->original));

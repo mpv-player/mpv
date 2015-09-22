@@ -191,8 +191,6 @@ options_state_machine() {
     opt_yes_no _libcdio     "libcdio support"
     opt_yes_no _librubberband "librubberband support"
     opt_yes_no _ffmpeg      "skip FFmpeg/Libav autodetection"
-    opt_yes_no _ladspa      "LADSPA plugin support"
-    opt_yes_no _libbs2b     "libbs2b audio filter support"
     opt_yes_no _libavresample "libavresample (preferred over libswresample)"
     opt_yes_no _libswresample "libswresample"
     opt_yes_no _caca        "CACA  video output"
@@ -749,11 +747,6 @@ check_pkg_config "uchardet" $_uchardet UCHARDET 'uchardet'
 check_pkg_config "zlib" auto ZLIB 'zlib'
 test $(defretval) = no && die "Unable to find development files for zlib."
 
-test "$_dl" = no && _ladspa=no
-check_statement_libs "LADSPA plugin support" $_ladspa LADSPA ladspa.h 'LADSPA_Descriptor ld = {0}'
-
-check_pkg_config "libbs2b audio filter support" $_libbs2b LIBBS2B 'libbs2b'
-
 check_pkg_config "LCMS2 support" $_lcms2 LCMS2 'lcms2 >= 2.6'
 
 check_pkg_config "FFmpeg/Libav" $_ffmpeg FFMPEG \
@@ -804,6 +797,12 @@ api_statement_check \
     HAVE_AV_VERSION_INFO \
     libavutil/avutil.h \
     'const char *x = av_version_info()'
+
+api_statement_check \
+    "libavutil new pixdesc fields" \
+    HAVE_AV_NEW_PIXDESC \
+    libavutil/pixdesc.h \
+    'AVComponentDescriptor d; int x = d.depth'
 
 check_pkg_config "libavfilter" $_libavfilter LIBAVFILTER 'libavfilter >= 5.0.0'
 

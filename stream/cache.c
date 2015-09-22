@@ -367,7 +367,7 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
     struct priv *s = cache->priv;
     switch (cmd) {
     case STREAM_CTRL_GET_CACHE_SIZE:
-        *(int64_t *)arg = s->buffer_size;
+        *(int64_t *)arg = s->buffer_size - s->back_size;
         return STREAM_OK;
     case STREAM_CTRL_GET_CACHE_FILL:
         *(int64_t *)arg = s->max_filepos - s->read_filepos;

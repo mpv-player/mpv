@@ -58,33 +58,28 @@ struct priv {
     bool shutdown;
 };
 
-static void select_format(struct ao *ao, AVCodec *codec)
+static bool supports_format(AVCodec *codec, int format)
 {
-    int best_score = INT_MIN;
-    int best_format = 0;
-
-    // Check the encoder's list of supported formats.
     for (const enum AVSampleFormat *sampleformat = codec->sample_fmts;
          sampleformat && *sampleformat != AV_SAMPLE_FMT_NONE;
          ++sampleformat)
     {
-        int fmt = af_from_avformat(*sampleformat);
-        if (!fmt) {
-            MP_WARN(ao, "unsupported lavc format %s\n",
-                    av_get_sample_fmt_name(*sampleformat));
-            continue;
-        }
-        int score = af_format_conversion_score(fmt, ao->format);
-        if (score > best_score) {
-            best_score = score;
-            best_format = fmt;
-        }
+        if (af_from_avformat(*sampleformat) == format)
+            return true;
     }
+    return false;
+}
 
-    if (best_format) {
-        ao->format = best_format;
-    } else {
-        MP_ERR(ao, "sample format not found\n"); // shouldn't happen
+static void select_format(struct ao *ao, AVCodec *codec)
+{
+    int formats[AF_FORMAT_COUNT];
+    af_get_best_sample_formats(ao->format, formats);
+
+    for (int n = 0; formats[n]; n++) {
+        if (supports_format(codec, formats[n])) {
+            ao->format = formats[n];
+            break;
+        }
     }
 }
 

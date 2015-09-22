@@ -861,22 +861,45 @@ static void handle_chapter_change(struct MPContext *mpctx)
     }
 }
 
-// Execute a forceful refresh of the VO window, if it hasn't had a valid frame
-// for a while. The problem is that a VO with no valid frame (vo->hasframe==0)
-// doesn't redraw video and doesn't OSD interaction. So screw it, hard.
-// It also closes the VO if force_window or video display is not active.
-void handle_force_window(struct MPContext *mpctx, bool reconfig)
+// Execute a forceful refresh of the VO window. This clears the window from
+// the previous video. It also creates/destroys the VO on demand.
+// It tries to make the change only in situations where the window is
+// definitely needed or not needed, or if the force parameter is set (the
+// latter also decides whether to clear an existing window, because there's
+// no way to know if this has already been done or not).
+int handle_force_window(struct MPContext *mpctx, bool force)
 {
     // Don't interfere with real video playback
     if (mpctx->d_video)
-        return;
+        return 0;
 
-    if (!mpctx->opts->force_vo && mpctx->video_out)
-        uninit_video_out(mpctx);
+    // True if we're either in idle mode, or loading of the file has finished.
+    // It's also set via force in some stages during file loading.
+    bool act = !mpctx->playing || mpctx->playback_initialized || force;
 
-    if (mpctx->video_out && (!mpctx->video_out->config_ok || reconfig)) {
+    if (!mpctx->opts->force_vo) {
+        if (act)
+            uninit_video_out(mpctx);
+        return 0;
+    }
+
+    if (mpctx->opts->force_vo != 2 && !act)
+        return 0;
+
+    if (!mpctx->video_out) {
+        struct vo_extra ex = {
+            .input_ctx = mpctx->input,
+            .osd = mpctx->osd,
+            .encode_lavc_ctx = mpctx->encode_lavc_ctx,
+        };
+        mpctx->video_out = init_best_video_out(mpctx->global, &ex);
+        if (!mpctx->video_out)
+            goto err;
+        mpctx->mouse_cursor_visible = true;
+    }
+
+    if (!mpctx->video_out->config_ok || force) {
         struct vo *vo = mpctx->video_out;
-        MP_INFO(mpctx, "Creating non-video VO window.\n");
         // Pick whatever works
         int config_format = 0;
         uint8_t fmts[IMGFMT_END - IMGFMT_START] = {0};
@@ -894,16 +917,21 @@ void handle_force_window(struct MPContext *mpctx, bool reconfig)
             .w = w,   .h = h,
             .d_w = w, .d_h = h,
         };
-        if (vo_reconfig(vo, &p, 0) < 0) {
-            mpctx->opts->force_vo = 0;
-            uninit_video_out(mpctx);
-            return;
-        }
+        if (vo_reconfig(vo, &p, 0) < 0)
+            goto err;
         vo_control(vo, VOCTRL_RESTORE_SCREENSAVER, NULL);
         vo_set_paused(vo, true);
         vo_redraw(vo);
         mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
     }
+
+    return 0;
+
+err:
+    mpctx->opts->force_vo = 0;
+    uninit_video_out(mpctx);
+    MP_FATAL(mpctx, "Error opening/initializing the VO window.\n");
+    return -1;
 }
 
 // Potentially needed by some Lua scripts, which assume TICK always comes.

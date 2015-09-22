@@ -34,23 +34,12 @@
 extern const struct af_info af_info_delay;
 extern const struct af_info af_info_channels;
 extern const struct af_info af_info_format;
-extern const struct af_info af_info_force;
 extern const struct af_info af_info_volume;
 extern const struct af_info af_info_equalizer;
 extern const struct af_info af_info_pan;
-extern const struct af_info af_info_surround;
-extern const struct af_info af_info_sub;
-extern const struct af_info af_info_export;
 extern const struct af_info af_info_drc;
-extern const struct af_info af_info_extrastereo;
 extern const struct af_info af_info_lavcac3enc;
 extern const struct af_info af_info_lavrresample;
-extern const struct af_info af_info_sweep;
-extern const struct af_info af_info_hrtf;
-extern const struct af_info af_info_ladspa;
-extern const struct af_info af_info_center;
-extern const struct af_info af_info_sinesuppress;
-extern const struct af_info af_info_karaoke;
 extern const struct af_info af_info_scaletempo;
 extern const struct af_info af_info_bs2b;
 extern const struct af_info af_info_lavfi;
@@ -63,28 +52,13 @@ static const struct af_info *const filter_list[] = {
     &af_info_volume,
     &af_info_equalizer,
     &af_info_pan,
-    &af_info_surround,
-    &af_info_sub,
-    &af_info_export,
     &af_info_drc,
-    &af_info_extrastereo,
     &af_info_lavcac3enc,
     &af_info_lavrresample,
-    &af_info_sweep,
-    &af_info_hrtf,
-#if HAVE_LADSPA
-    &af_info_ladspa,
-#endif
 #if HAVE_RUBBERBAND
     &af_info_rubberband,
 #endif
-    &af_info_center,
-    &af_info_sinesuppress,
-    &af_info_karaoke,
     &af_info_scaletempo,
-#if HAVE_LIBBS2B
-    &af_info_bs2b,
-#endif
 #if HAVE_LIBAVFILTER
     &af_info_lavfi,
 #endif
@@ -185,24 +159,11 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
         MP_ERR(s, "Couldn't find audio filter '%s'.\n", name);
         return NULL;
     }
-    const struct af_info *info = desc.p;
-    /* Make sure that the filter is not already in the list if it is
-       non-reentrant */
-    if (info->flags & AF_FLAGS_NOT_REENTRANT) {
-        for (struct af_instance *cur = s->first; cur; cur = cur->next) {
-            if (cur->info == info) {
-                MP_ERR(s, "There can only be one "
-                       "instance of the filter '%s' in each stream\n", name);
-                return NULL;
-            }
-        }
-    }
-
     MP_VERBOSE(s, "Adding filter %s \n", name);
 
     struct af_instance *af = talloc_zero(NULL, struct af_instance);
     *af = (struct af_instance) {
-        .info = info,
+        .info = desc.p,
         .data = talloc_zero(af, struct mp_audio),
         .log = mp_log_new(af, s->log, name),
         .replaygain_data = s->replaygain_data,
@@ -719,6 +680,18 @@ void af_control_all(struct af_stream *s, int cmd, void *arg)
 {
     for (struct af_instance *af = s->first; af; af = af->next)
         af->control(af, cmd, arg);
+}
+
+int af_control_by_label(struct af_stream *s, int cmd, void *arg, bstr label)
+{
+    char *label_str = bstrdup0(NULL, label);
+    struct af_instance *cur = af_find_by_label(s, label_str);
+    talloc_free(label_str);
+    if (cur) {
+        return cur->control ? cur->control(cur, cmd, arg) : CONTROL_NA;
+    } else {
+        return CONTROL_UNKNOWN;
+    }
 }
 
 // Used by filters to add a filtered frame to the output queue.

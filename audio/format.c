@@ -171,13 +171,11 @@ void af_fill_silence(void *dst, size_t bytes, int format)
     memset(dst, af_fmt_is_unsigned(format) ? 0x80 : 0, bytes);
 }
 
-#define FMT_DIFF(type, a, b) (((a) & type) - ((b) & type))
-
 // Returns a "score" that serves as heuristic how lossy or hard a conversion is.
 // If the formats are equal, 1024 is returned. If they are gravely incompatible
 // (like s16<->ac3), INT_MIN is returned. If there is implied loss of precision
 // (like s16->s8), a value <0 is returned.
-int af_format_conversion_score(int dst_format, int src_format)
+static int af_format_conversion_score(int dst_format, int src_format)
 {
     if (dst_format == AF_FORMAT_UNKNOWN || src_format == AF_FORMAT_UNKNOWN)
         return INT_MIN;
@@ -192,23 +190,59 @@ int af_format_conversion_score(int dst_format, int src_format)
     if (af_fmt_is_float(dst_format) != af_fmt_is_float(src_format)) {
         int dst_bytes = af_fmt_to_bytes(dst_format);
         if (af_fmt_is_float(dst_format)) {
-            // For int->float, always prefer 32 bit float.
-            score -= dst_bytes == 4 ? 1 : 0;
+            // For int->float, consider a lower bound on the precision difference.
+            int bytes = (dst_bytes == 4 ? 3 : 6) - af_fmt_to_bytes(src_format);
+            if (bytes >= 0) {
+                score -= 8 * bytes;          // excess precision
+            } else {
+                score += 1024 * (bytes - 1); // precision is lost (i.e. s32 -> float)
+            }
         } else {
-            // For float->int, always prefer highest bit depth int
-            score -= 8 - dst_bytes;
+            // float->int is the worst case. Penalize heavily and
+            // prefer highest bit depth int.
+            score -= 1048576 * (8 - dst_bytes);
         }
-        // Has to convert float<->int - Consider this the worst case.
-        score -= 2048;
+        score -= 512; // penalty for any float <-> int conversion
     } else {
         int bytes = af_fmt_to_bytes(dst_format) - af_fmt_to_bytes(src_format);
         if (bytes > 0) {
-            score -= bytes;             // has to add padding
+            score -= 8 * bytes;          // has to add padding
         } else if (bytes < 0) {
-            score -= 1024 - bytes;      // has to reduce bit depth
+            score += 1024 * (bytes - 1); // has to reduce bit depth
         }
     }
     return score;
+}
+
+struct entry {
+    int fmt;
+    int score;
+};
+
+static int cmp_entry(const void *a, const void *b)
+{
+#define CMP_INT(a, b) (a > b ? 1 : (a < b ? -1 : 0))
+    return -CMP_INT(((struct entry *)a)->score, ((struct entry *)b)->score);
+}
+
+// Return a list of sample format compatible to src_format, sorted by order
+// of preference. out_formats[0] will be src_format (as long as it's valid),
+// and the list is terminated with 0 (AF_FORMAT_UNKNOWN).
+// Keep in mind that this also returns formats with flipped interleaving
+// (e.g. for s16, it returns [s16, s16p, ...]).
+void af_get_best_sample_formats(int src_format, int out_formats[AF_FORMAT_COUNT])
+{
+    int num = 0;
+    struct entry e[AF_FORMAT_COUNT];
+    for (int fmt = 1; fmt < AF_FORMAT_COUNT; fmt++) {
+        int score = af_format_conversion_score(fmt, src_format);
+        if (score > INT_MIN)
+            e[num++] = (struct entry){fmt, score};
+    }
+    qsort(e, num, sizeof(e[0]), cmp_entry);
+    for (int n = 0; n < num; n++)
+        out_formats[n] = e[n].fmt;
+    out_formats[num] = 0;
 }
 
 // Return the number of samples that make up one frame in this format.

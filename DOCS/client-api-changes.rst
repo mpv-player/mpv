@@ -32,14 +32,15 @@ API changes
 
 ::
 
- ...    - add "GL_MP_D3D_interfaces" pseudo extension to make it possible to
+ --- mpv 0.11.0 ---
+ 1.19   - add "GL_MP_D3D_interfaces" pseudo extension to make it possible to
           use DXVA2 in OpenGL fullscreen mode in some situations
- 1.19   - mpv_request_log_messages() now accepts "terminal-default" as parameter
+        - mpv_request_log_messages() now accepts "terminal-default" as parameter
  1.18   - add MPV_END_FILE_REASON_REDIRECT, and change behavior of
           MPV_EVENT_END_FILE accordingly
         - a bunch of interface-changes.rst changes
  1.17   - mpv_initialize() now blocks SIGPIPE (details see client.h)
- --- mpv 0.9.0 is released ---
+ --- mpv 0.9.0 ---
  1.16   - add mpv_opengl_cb_report_flip()
         - introduce mpv_opengl_cb_draw() and deprecate mpv_opengl_cb_render()
         - add MPV_FORMAT_BYTE_ARRAY
@@ -48,7 +49,7 @@ API changes
           mpv.conf.
         - minor backwards-compatible change to the "seek" and "screenshot"
           commands (new flag syntax, old additional args deprecated)
- --- mpv 0.8.0 is released ---
+ --- mpv 0.8.0 ---
  1.14   - add mpv_wait_async_requests()
         - the --msg-level option changes its native type from a flat string to
           a key-value list (setting/reading the option as string still works)
@@ -61,7 +62,7 @@ API changes
           its own and mpv's OpenGL rendering
           Warning: this API is not stable yet - anything in opengl_cb.h might
                    be changed in completely incompatible ways in minor API bumps
- --- mpv 0.7.0 is released ---
+ --- mpv 0.7.0 ---
  1.10   - deprecate/disable everything directly related to script_dispatch
           (most likely affects nobody)
  1.9    - add enum mpv_end_file_reason for mpv_event_end_file.reason
@@ -84,7 +85,7 @@ API changes
  1.6    - modify "core-idle" property behavior
         - MPV_EVENT_LOG_MESSAGE now always sends complete lines
         - introduce numeric log levels (mpv_log_level)
- --- mpv 0.6.0 is released ---
+ --- mpv 0.6.0 ---
  1.5    - change in X11 and "--wid" behavior again. The previous change didn't
           work as expected, and now the behavior can be explicitly controlled
           with the "input-x11-keyboard" option. This is only a temporary
@@ -93,7 +94,7 @@ API changes
           although the old option name still works.
  1.4    - subtle change in X11 and "--wid" behavior
           (this change was added to 0.5.2, and broke some things, see #1090)
- --- mpv 0.5.0 is released ---
+ --- mpv 0.5.0 ---
  1.3    - add MPV_MAKE_VERSION()
  1.2    - remove "stream-time-pos" property (no replacement)
  1.1    - remap dvdnav:// to dvd://
@@ -105,6 +106,6 @@ API changes
           insignificant is now significant
         - add "cache-free" and "cache-used" properties
         - OSX: the "coreaudio" AO spdif code is split into a separate AO
- --- mpv 0.4.0 is released ---
+ --- mpv 0.4.0 ---
  1.0    - the API is declared stable
 

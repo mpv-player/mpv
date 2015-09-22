@@ -34,11 +34,14 @@
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
 
+#include "config.h"
+
 #include "audio/format.h"
 #include "audio/fmt-conversion.h"
 #include "af.h"
 
 #include "common/av_common.h"
+#include "common/tags.h"
 
 #include "options/m_option.h"
 
@@ -62,6 +65,8 @@ struct priv {
     AVRational timebase_out;
 
     bool eof;
+
+    struct mp_tags *metadata;
 
     // options
     char *cfg_graph;
@@ -213,11 +218,28 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
     }
+    case AF_CONTROL_GET_METADATA:
+        if (p->metadata) {
+            *(struct mp_tags *)arg = *p->metadata;
+            return CONTROL_OK;
+        }
+        return CONTROL_NA;
     case AF_CONTROL_RESET:
         reset(af);
         return AF_OK;
     }
     return AF_UNKNOWN;
+}
+
+static void get_metadata_from_av_frame(struct af_instance *af, AVFrame *frame)
+{
+#if HAVE_AVFRAME_METADATA
+    struct priv *p = af->priv;
+    if (!p->metadata)
+        p->metadata = talloc_zero(p, struct mp_tags);
+
+    mp_tags_copy_from_av_dictionary(p->metadata, av_frame_get_metadata(frame));
+#endif
 }
 
 static int filter_frame(struct af_instance *af, struct mp_audio *data)
@@ -307,6 +329,7 @@ static int filter_out(struct af_instance *af)
         af->delay = in_time - out_time;
     }
 
+    get_metadata_from_av_frame(af, frame);
     af_add_output_frame(af, out);
     av_frame_free(&frame);
     return 0;

@@ -75,7 +75,7 @@ int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int sampler
 
 void af_fill_silence(void *dst, size_t bytes, int format);
 
-int af_format_conversion_score(int dst_format, int src_format);
+void af_get_best_sample_formats(int src_format, int out_formats[AF_FORMAT_COUNT]);
 
 int af_format_sample_alignment(int format);
 

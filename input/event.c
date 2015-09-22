@@ -18,7 +18,7 @@
 #include "event.h"
 #include "input.h"
 #include "common/msg.h"
-#include "sub/find_subfiles.h"
+#include "player/external_files.h"
 
 void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files,
                          enum mp_dnd_action action)

@@ -35,13 +35,11 @@ SOURCES-$(DVDREAD)              += stream/stream_dvd.c \
 SOURCES-$(DVDNAV)               += stream/stream_dvdnav.c \
                                    stream/stream_dvd_common.c
 
-SOURCES-$(LADSPA)               += audio/filter/af_ladspa.c
 SOURCES-$(RUBBERBAND)           += audio/filter/af_rubberband.c
 SOURCES-$(LIBASS)               += sub/ass_mp.c sub/sd_ass.c \
                                    demux/demux_libass.c
 
 SOURCES-$(LIBBLURAY)            += stream/stream_bluray.c
-SOURCES-$(LIBBS2B)              += audio/filter/af_bs2b.c
 
 SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 
@@ -58,19 +56,24 @@ SOURCES-$(LIBASS_OSD)           += sub/osd_libass.c
 SOURCES-$(ALSA)                 += audio/out/ao_alsa.c
 SOURCES-$(CACA)                 += video/out/vo_caca.c
 SOURCES-$(SDL2)                 += audio/out/ao_sdl.c video/out/vo_sdl.c
-SOURCES-$(GL)                   += video/out/gl_common.c video/out/gl_osd.c \
-                                   video/out/vo_opengl.c video/out/gl_lcms.c \
-                                   video/out/gl_video.c video/out/dither.c \
-                                   video/out/gl_hwdec.c video/out/gl_utils.c \
+SOURCES-$(GL)                   += video/out/opengl/common.c \
+                                   video/out/opengl/osd.c \
+                                   video/out/opengl/lcms.c \
+                                   video/out/opengl/video.c \
+                                   video/out/opengl/video_shaders.c \
+                                   video/out/dither.c \
+                                   video/out/opengl/hwdec.c \
+                                   video/out/opengl/utils.c \
+                                   video/out/vo_opengl.c \
                                    video/out/vo_opengl_cb.c
 
 SOURCES-$(ENCODING)             += video/out/vo_lavc.c audio/out/ao_lavc.c \
                                    common/encode_lavc.c
 
-SOURCES-$(GL_X11)               += video/out/x11_common.c video/out/gl_x11.c
-SOURCES-$(EGL_X11)              += video/out/x11_common.c video/out/gl_x11egl.c
+SOURCES-$(GL_X11)               += video/out/x11_common.c video/out/opengl/x11.c
+SOURCES-$(EGL_X11)              += video/out/x11_common.c video/out/opengl/x11egl.c
 SOURCES-$(GL_WAYLAND)           += video/out/wayland_common.c \
-                                   video/out/gl_wayland.c
+                                   video/out/opengl/wayland.c
 
 SOURCES-$(JACK)                 += audio/out/ao_jack.c
 SOURCES-$(OPENAL)               += audio/out/ao_openal.c
@@ -82,12 +85,12 @@ SOURCES-$(VDPAU)                += video/vdpau.c video/vdpau_mixer.c \
                                    video/out/vo_vdpau.c video/decode/vdpau.c \
                                    video/filter/vf_vdpaupp.c \
                                    video/filter/vf_vdpaurb.c
-SOURCES-$(VDPAU_GL_X11)         += video/out/gl_hwdec_vdpau.c
+SOURCES-$(VDPAU_GL_X11)         += video/out/opengl/hwdec_vdpau.c
 SOURCES-$(VAAPI)                += video/out/vo_vaapi.c \
                                    video/decode/vaapi.c \
                                    video/vaapi.c
 SOURCES-$(VAAPI_VPP)            += video/filter/vf_vavpp.c
-SOURCES-$(VAAPI_GLX)            += video/out/gl_hwdec_vaglx.c
+SOURCES-$(VAAPI_GLX)            += video/out/opengl/hwdec_vaglx.c
 
 SOURCES-$(XV)                   += video/out/x11_common.c video/out/vo_xv.c
 SOURCES-$(WAYLAND)              += video/out/vo_wayland.c \
@@ -96,13 +99,9 @@ SOURCES-$(WAYLAND)              += video/out/vo_wayland.c \
                                    video/out/wayland/memfile.c
 
 SOURCES-$(LIBAVFILTER)          += video/filter/vf_lavfi.c \
-                                   video/filter/vf_delogo.c \
                                    video/filter/vf_gradfun.c \
-                                   video/filter/vf_hqdn3d.c \
-                                   video/filter/vf_noise.c \
                                    video/filter/vf_pullup.c \
                                    video/filter/vf_rotate.c \
-                                   video/filter/vf_unsharp.c \
                                    video/filter/vf_yadif.c \
                                    audio/filter/af_lavfi.c
 
@@ -123,28 +122,17 @@ SOURCES = audio/audio.c \
           audio/decode/ad_spdif.c      \
           audio/decode/dec_audio.c \
           audio/filter/af.c \
-          audio/filter/af_center.c \
           audio/filter/af_channels.c \
           audio/filter/af_delay.c \
           audio/filter/af_equalizer.c \
-          audio/filter/af_export.c \
-          audio/filter/af_extrastereo.c \
           audio/filter/af_format.c \
-          audio/filter/af_hrtf.c \
-          audio/filter/af_karaoke.c \
           audio/filter/af_lavcac3enc.c \
           audio/filter/af_lavrresample.c \
           audio/filter/af_pan.c \
           audio/filter/af_scaletempo.c \
-          audio/filter/af_sinesuppress.c \
-          audio/filter/af_sub.c \
-          audio/filter/af_surround.c \
-          audio/filter/af_sweep.c \
           audio/filter/af_drc.c \
           audio/filter/af_volume.c \
-          audio/filter/filter.c \
           audio/filter/tools.c \
-          audio/filter/window.c \
           audio/out/ao.c \
           audio/out/ao_null.c \
           audio/out/ao_pcm.c \
@@ -207,6 +195,7 @@ SOURCES = audio/audio.c \
           player/client.c \
           player/configfiles.c \
           player/command.c \
+          player/external_files.c \
           player/loadfile.c \
           player/main.c \
           player/misc.c \
@@ -231,7 +220,6 @@ SOURCES = audio/audio.c \
           stream/stream_rar.c \
           sub/dec_sub.c \
           sub/draw_bmp.c \
-          sub/find_subfiles.c \
           sub/img_convert.c \
           sub/osd.c \
           sub/sd_lavc.c \

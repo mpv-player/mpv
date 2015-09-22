@@ -210,11 +210,20 @@ static const int mp_to_alsa_format[][2] = {
     {AF_FORMAT_S24,
             MP_SELECT_LE_BE(SND_PCM_FORMAT_S24_3LE, SND_PCM_FORMAT_S24_3BE)},
     {AF_FORMAT_FLOAT,       SND_PCM_FORMAT_FLOAT},
+    {AF_FORMAT_DOUBLE,      SND_PCM_FORMAT_FLOAT64},
     {AF_FORMAT_UNKNOWN,     SND_PCM_FORMAT_UNKNOWN},
 };
 
 static int find_alsa_format(int af_format)
 {
+    if (af_fmt_is_spdif(af_format)) {
+        if (af_format == AF_FORMAT_S_MP3) {
+            return SND_PCM_FORMAT_MPEG;
+        } else {
+            return SND_PCM_FORMAT_S16;
+        }
+    }
+
     af_format = af_fmt_from_planar(af_format);
     for (int n = 0; mp_to_alsa_format[n][0] != AF_FORMAT_UNKNOWN; n++) {
         if (mp_to_alsa_format[n][0] == af_format)
@@ -453,28 +462,18 @@ static int init_device(struct ao *ao, bool second_try)
     err = snd_pcm_hw_params_any(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to get initial parameters");
 
-    if (af_fmt_is_spdif(ao->format)) {
-        if (ao->format == AF_FORMAT_S_MP3) {
-            p->alsa_fmt = SND_PCM_FORMAT_MPEG;
-        } else {
-            p->alsa_fmt = SND_PCM_FORMAT_S16;
-        }
-    } else {
+    int try_formats[AF_FORMAT_COUNT];
+    af_get_best_sample_formats(ao->format, try_formats);
+    for (int n = 0; try_formats[n]; n++) {
+        ao->format = try_formats[n];
         p->alsa_fmt = find_alsa_format(ao->format);
-    }
-    if (p->alsa_fmt == SND_PCM_FORMAT_UNKNOWN) {
-        p->alsa_fmt = SND_PCM_FORMAT_S16;
-        ao->format = AF_FORMAT_S16;
+        if (snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt) >= 0)
+            break;
     }
 
-    err = snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt);
-    if (err < 0) {
-        if (af_fmt_is_spdif(ao->format))
-            CHECK_ALSA_ERROR("Unable to set IEC61937 format");
-        MP_INFO(ao, "Format %s is not supported by hardware, trying default.\n",
-                af_fmt_to_str(ao->format));
-        p->alsa_fmt = SND_PCM_FORMAT_S16;
-        ao->format = AF_FORMAT_S16;
+    if (!ao->format) {
+        MP_ERR(ao, "Can't find appropriate sample format.\n");
+        goto alsa_error;
     }
 
     err = snd_pcm_hw_params_set_format(p->alsa, alsa_hwparams, p->alsa_fmt);

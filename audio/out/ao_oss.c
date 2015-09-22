@@ -313,7 +313,8 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
         }
     }
 
-    int try_formats[] = {format, AF_FORMAT_S32, AF_FORMAT_S24, AF_FORMAT_S16, 0};
+    int try_formats[AF_FORMAT_COUNT];
+    af_get_best_sample_formats(format, try_formats);
     for (int n = 0; try_formats[n]; n++) {
         format = try_formats[n];
         if (try_format(ao, &format))

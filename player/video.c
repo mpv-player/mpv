@@ -220,10 +220,11 @@ void reset_video_state(struct MPContext *mpctx)
 void uninit_video_out(struct MPContext *mpctx)
 {
     uninit_video_chain(mpctx);
-    if (mpctx->video_out)
+    if (mpctx->video_out) {
         vo_destroy(mpctx->video_out);
+        mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
+    }
     mpctx->video_out = NULL;
-    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }
 
 void uninit_video_chain(struct MPContext *mpctx)
@@ -236,8 +237,8 @@ void uninit_video_chain(struct MPContext *mpctx)
         mpctx->sync_audio_to_video = false;
         reselect_demux_streams(mpctx);
         remove_deint_filter(mpctx);
+        mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
     }
-    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }
 
 int reinit_video_chain(struct MPContext *mpctx)

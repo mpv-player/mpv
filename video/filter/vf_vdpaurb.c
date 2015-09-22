@@ -44,6 +44,12 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
         return 0;
     }
 
+    // Pass-through anything that's not been decoded by VDPAU
+    if (mpi->imgfmt != IMGFMT_VDPAU) {
+        vf_add_output_frame(vf, mpi);
+        return 0;
+    }
+
     if (mp_vdpau_mixed_frame_get(mpi)) {
         MP_ERR(vf, "Can't apply vdpaurb filter after vdpaupp filter.\n");
         mp_image_unrefp(&mpi);
@@ -75,16 +81,15 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
                     struct mp_image_params *out)
 {
     *out = *in;
-    out->imgfmt = IMGFMT_NV12;
+    if (in->imgfmt == IMGFMT_VDPAU) {
+        out->imgfmt = IMGFMT_NV12;
+    }
     return 0;
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    if (fmt == IMGFMT_VDPAU) {
-        return vf_next_query_format(vf, IMGFMT_NV12);
-    }
-    return 0;
+    return vf_next_query_format(vf, fmt == IMGFMT_VDPAU ? IMGFMT_NV12 : fmt);
 }
 
 static int vf_open(vf_instance_t *vf)

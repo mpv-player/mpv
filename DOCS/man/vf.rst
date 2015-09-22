@@ -17,6 +17,10 @@ normal filter parameters.
 
     To get a full list of available video filters, see ``--vf=help``.
 
+    Also, keep in mind that most actual filters are available via the ``lavfi``
+    wrapper, which gives you access to most of libavfilter's filters. This
+    includes all filters that have been ported from MPlayer to libavfilter.
+
 Video filters are managed in lists. There are a few commands to manage the
 filter list.
 
@@ -409,41 +413,6 @@ Available filters are:
             ``'--vf=lavfi=yadif:o="threads=2,thread_type=slice"'``
                 forces a specific threading configuration.
 
-``noise[=<strength>[:averaged][:pattern][:temporal][:uniform][:hq]``
-    Adds noise.
-
-    ``strength``
-        Set the noise for all components. If you want different strength
-        values for luma and chroma, use libavfilter's noise filter directly
-        (using ``--vf=lavfi=[noise=...]``), or tell the libavfilter developers
-        to stop being stupid.
-
-    ``averaged``
-        averaged temporal noise (smoother, but a lot slower)
-
-    ``pattern``
-        mix random noise with a (semi)regular pattern
-
-    ``temporal``
-        temporal noise (noise pattern changes between frames)
-
-    ``uniform``
-        uniform noise (Gaussian otherwise)
-
-``hqdn3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]``
-    This filter aims to reduce image noise producing smooth images and making
-    still images really still (This should enhance compressibility.).
-
-    ``<luma_spatial>``
-        spatial luma strength (default: 4)
-    ``<chroma_spatial>``
-        spatial chroma strength (default: 3)
-    ``<luma_tmp>``
-        luma temporal strength (default: 6)
-    ``<chroma_tmp>``
-        chroma temporal strength (default:
-        ``luma_tmp*chroma_spatial/luma_spatial``)
-
 ``eq[=gamma:contrast:brightness:saturation:rg:gg:bg:weight]``
     Software equalizer that uses lookup tables (slow), allowing gamma correction
     in addition to simple brightness and contrast adjustment. The parameters are
@@ -469,23 +438,6 @@ Available filters are:
         value on bright image areas, e.g. keep them from getting overamplified
         and just plain white. A value of 0.0 turns the gamma correction all
         the way down while 1.0 leaves it at its full strength (default: 1.0).
-
-``unsharp[=lx:ly:la:cx:cy:ca]``
-    unsharp mask / Gaussian blur
-
-    ``l`` is for the luma component, ``c`` for the chroma component. ``x``/``y``
-    is the filter size. ``a`` is the amount.
-
-    ``lx``, ``ly``, ``cx``, ``cy``
-        width and height of the matrix, odd sized in both directions (min =
-        3:3, max = 13:11 or 11:13, usually something between 3:3 and 7:7)
-
-    ``la``, ``ca``
-        Relative amount of sharpness/blur to add to the image (a sane range
-        should be -1.5-1.5).
-
-        :<0: blur
-        :>0: sharpen
 
 ``pullup[=jl:jr:jt:jb:sb:mp]``
     Pulldown reversal (inverse telecine) filter, capable of handling mixed
@@ -544,22 +496,6 @@ Available filters are:
     Also note that the ``D`` key is stupid enough to insert an interlacer twice
     when inserting yadif with ``--vf``, so using the above methods is
     recommended.
-
-``delogo[=x:y:w:h:t:show]``
-    Suppresses a TV station logo by a simple interpolation of the surrounding
-    pixels. Just set a rectangle covering the logo and watch it disappear (and
-    sometimes something even uglier appear - your mileage may vary).
-
-    ``<x>,<y>``
-        top left corner of the logo
-    ``<w>,<h>``
-        width and height of the cleared rectangle
-    ``<t>``
-        Thickness of the fuzzy edge of the rectangle (added to ``w`` and
-        ``h``). When set to -1, a green rectangle is drawn on the screen to
-        simplify finding the right ``x``,``y``,``w``,``h`` parameters.
-    ``show``
-        Draw a rectangle showing the area defined by x/y/w/h.
 
 ``sub=[=bottom-margin:top-margin]``
     Moves subtitle rendering to an arbitrary point in the filter chain, or force

@@ -348,34 +348,27 @@ iconv support use --disable-iconv.",
         'deps': [ 'iconv' ],
         'func': check_pkg_config('uchardet'),
     }, {
-        'name': '--ladspa',
-        'desc': 'LADSPA plugin support',
-        'func': check_statement('ladspa.h', 'LADSPA_Descriptor ld = {0}'),
-    }, {
         'name': '--rubberband',
         'desc': 'librubberband support',
         'func': check_pkg_config('rubberband', '>= 1.8.0'),
-    }, {
-        'name': '--libbs2b',
-        'desc': 'libbs2b audio filter support',
-        'func': check_pkg_config('libbs2b'),
     }, {
         'name': '--lcms2',
         'desc': 'LCMS2 support',
         'func': check_pkg_config('lcms2', '>= 2.6'),
     }, {
-        'name': 'vapoursynth-core',
-        'desc': 'VapourSynth filter bridge (core)',
-        'func': check_pkg_config('vapoursynth >= 24'),
-    }, {
         'name': '--vapoursynth',
         'desc': 'VapourSynth filter bridge (Python)',
-        'deps': ['vapoursynth-core'],
-        'func': check_pkg_config('vapoursynth-script >= 23'),
+        'func': check_pkg_config('vapoursynth',        '>= 24',
+                                 'vapoursynth-script', '>= 23'),
     }, {
         'name': '--vapoursynth-lazy',
         'desc': 'VapourSynth filter bridge (Lazy Lua)',
-        'deps': ['vapoursynth-core', 'lua'],
+        'deps': ['lua'],
+        'func': check_pkg_config('vapoursynth',        '>= 24'),
+    }, {
+        'name': 'vapoursynth-core',
+        'desc': 'VapourSynth filter bridge (core)',
+        'deps_any': ['vapoursynth', 'vapoursynth-lazy'],
         'func': check_true,
     }, {
         'name': '--libarchive',
@@ -454,6 +447,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'desc': 'libavtuil av_version_info()',
         'func': check_statement('libavutil/avutil.h',
                                 'const char *x = av_version_info()',
+                                use='libav'),
+    }, {
+        'name': 'av-new-pixdesc',
+        'desc': 'libavutil new pixdesc fields',
+        'func': check_statement('libavutil/pixdesc.h',
+                                'AVComponentDescriptor d; int x = d.depth',
                                 use='libav'),
     }
 ]

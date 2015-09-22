@@ -11,6 +11,10 @@ syntax is:
 
     To get a full list of available audio filters, see ``--af=help``.
 
+    Also, keep in mind that most actual filters are available via the ``lavfi``
+    wrapper, which gives you access to most of libavfilter's filters. This
+    includes all filters that have been ported from MPlayer to libavfilter.
+
 You can also set defaults for each filter. The defaults are applied before the
 normal filter parameters.
 
@@ -59,6 +63,13 @@ Available filters are:
         (If you just want to set defaults for this filter that will be used
         even by automatically inserted lavrresample instances, you should
         prefer setting them with ``--af-defaults=lavrresample:...``.)
+    ``normalize=<yes|no>``
+        Whether to normalize when remixing channel layouts (default: yes). This
+        is e.g. applied when downmixing surround audio to stereo. The advantage
+        is that this guarantees that no clipping can happen. Unfortunately,
+        this can also lead to too low volume levels. Whether you enable or
+        disable this is essentially a matter of taste, but the default uses
+        the safer choice.
     ``o=<string>``
         Set AVOptions on the SwrContext or AVAudioResampleContext. These should
         be documented by FFmpeg or Libav.
@@ -95,59 +106,6 @@ Available filters are:
     ``minch=<n>``
         If the input channel number is less than ``<minch>``, the filter will
         detach itself (default: 3).
-
-``sweep[=speed]``
-    Produces a sine sweep.
-
-    ``<0.0-1.0>``
-        Sine function delta, use very low values to hear the sweep.
-
-``sinesuppress[=freq:decay]``
-    Remove a sine at the specified frequency. Useful to get rid of the 50/60 Hz
-    noise on low quality audio equipment. It only works on mono input.
-
-    ``<freq>``
-        The frequency of the sine which should be removed (in Hz) (default:
-        50)
-    ``<decay>``
-        Controls the adaptivity (a larger value will make the filter adapt to
-        amplitude and phase changes quicker, a smaller value will make the
-        adaptation slower) (default: 0.0001). Reasonable values are around
-        0.001.
-
-``bs2b[=option1:option2:...]``
-    Bauer stereophonic to binaural transformation using libbs2b. Improves the
-    headphone listening experience by making the sound similar to that from
-    loudspeakers, allowing each ear to hear both channels and taking into
-    account the distance difference and the head shadowing effect. It is
-    applicable only to 2-channel audio.
-
-    ``fcut=<300-1000>``
-        Set cut frequency in Hz.
-    ``feed=<10-150>``
-        Set feed level for low frequencies in 0.1*dB.
-    ``profile=<value>``
-        Several profiles are available for convenience:
-
-        :default: will be used if nothing else was specified (fcut=700,
-                  feed=45)
-        :cmoy:    Chu Moy circuit implementation (fcut=700, feed=60)
-        :jmeier:  Jan Meier circuit implementation (fcut=650, feed=95)
-
-    If ``fcut`` or ``feed`` options are specified together with a profile, they
-    will be applied on top of the selected profile.
-
-``hrtf[=flag]``
-    Head-related transfer function: Converts multichannel audio to 2-channel
-    output for headphones, preserving the spatiality of the sound.
-
-    ==== ===================================
-    Flag Meaning
-    ==== ===================================
-    m    matrix decoding of the rear channel
-    s    2-channel matrix decoding
-    0    no matrix decoding (default)
-    ==== ===================================
 
 ``equalizer=g1:g2:g3:...:g10``
     10 octave band graphic equalizer, implemented using 10 IIR band-pass
@@ -354,64 +312,6 @@ Available filters are:
         ``mpv '--af=format=channels=5.1' '--audio-channels=5.1'`` would always force
         remixing audio to 5.1 and output it like this.
 
-``sub[=fc:ch]``
-    Adds a subwoofer channel to the audio stream. The audio data used for
-    creating the subwoofer channel is an average of the sound in channel 0 and
-    channel 1. The resulting sound is then low-pass filtered by a 4th order
-    Butterworth filter with a default cutoff frequency of 60Hz and added to a
-    separate channel in the audio stream.
-
-    .. warning::
-
-        Disable this filter when you are playing media with an LFE channel
-        (e.g. 5.1 surround sound), otherwise this filter will disrupt the sound
-        to the subwoofer.
-
-    ``<fc>``
-        cutoff frequency in Hz for the low-pass filter (20 Hz to 300 Hz)
-        (default: 60 Hz) For the best result try setting the cutoff frequency
-        as low as possible. This will improve the stereo or surround sound
-        experience.
-    ``<ch>``
-        Determines the channel number in which to insert the sub-channel
-        audio. Channel number can be between 0 and 7 (default: 5). Observe
-        that the number of channels will automatically be increased to <ch> if
-        necessary.
-
-    .. admonition:: Example
-
-        ``mpv --af=sub=100:4 --audio-channels=5 media.avi``
-            Would add a subwoofer channel with a cutoff frequency of 100 Hz to
-            output channel 4.
-
-``center``
-    Creates a center channel from the front channels. May currently be low
-    quality as it does not implement a high-pass filter for proper extraction
-    yet, but averages and halves the channels instead.
-
-    ``<ch>``
-        Determines the channel number in which to insert the center channel.
-        Channel number can be between 0 and 7 (default: 5). Observe that the
-        number of channels will automatically be increased to ``<ch>`` if
-        necessary.
-
-``surround[=delay]``
-    Decoder for matrix encoded surround sound like Dolby Surround. Some files
-    with 2-channel audio actually contain matrix encoded surround sound.
-
-    ``<delay>``
-        delay time in ms for the rear speakers (0 to 1000) (default: 20) This
-        delay should be set as follows: If d1 is the distance from the
-        listening position to the front speakers and d2 is the distance from
-        the listening position to the rear speakers, then the delay should be
-        set to 15ms if d1 <= d2 and to 15 + 5*(d1-d2) if d1 > d2.
-
-    .. admonition:: Example
-
-        ``mpv --af=surround=15 --audio-channels=4 media.avi``
-            Would add surround sound decoding with 15 ms delay for the sound to
-            the rear speakers.
-
 ``delay[=[ch1,ch2,...]]``
     Delays the sound to the loudspeakers such that the sound from the
     different channels arrives at the listening position simultaneously. It is
@@ -440,36 +340,6 @@ Available filters are:
             Would delay front left and right by 10.5 ms, the two rear channels
             and the subwoofer by 0 ms and the center channel by 7 ms.
 
-``export=mmapped_file:nsamples]``
-    Exports the incoming signal to other processes using memory mapping
-    (``mmap()``). Memory mapped areas contain a header::
-
-        int nch                      /* number of channels */
-        int size                     /* buffer size */
-        unsigned long long counter   /* Used to keep sync, updated every time
-                                        new data is exported. */
-
-    The rest is payload (non-interleaved) 16-bit data.
-
-    ``<mmapped_file>``
-        File to map data to (required)
-    ``<nsamples>``
-        number of samples per channel (default: 512).
-
-    .. admonition:: Example
-
-        ``mpv --af=export=/tmp/mpv-af_export:1024 media.avi``
-            Would export 1024 samples per channel to ``/tmp/mpv-af_export``.
-
-``extrastereo[=mul]``
-    (Linearly) increases the difference between left and right channels which
-    adds some sort of "live" effect to playback.
-
-    ``<mul>``
-        Sets the difference coefficient (default: 2.5). 0.0 means mono sound
-        (average of both channels), with 1.0 sound will be unchanged, with
-        -1.0 left and right channels will be swapped.
-
 ``drc[=method:target]``
     Applies dynamic range compression. This maximizes the volume by compressing
     the audio signal's dynamic range. (Formerly called ``volnorm``.)
@@ -492,45 +362,6 @@ Available filters are:
 
         This filter can cause distortion with audio signals that have a very
         large dynamic range.
-
-``ladspa=file:label:[<control0>,<control1>,...]``
-    Load a LADSPA (Linux Audio Developer's Simple Plugin API) plugin. This
-    filter is reentrant, so multiple LADSPA plugins can be used at once.
-
-    ``<file>``
-        Specifies the LADSPA plugin library file.
-
-        .. note::
-
-            See also the note about the ``LADSPA_PATH`` variable in the
-            `ENVIRONMENT VARIABLES`_ section.
-    ``<label>``
-        Specifies the filter within the library. Some libraries contain only
-        one filter, but others contain many of them. Entering 'help' here
-        will list all available filters within the specified library, which
-        eliminates the use of 'listplugins' from the LADSPA SDK.
-    ``[<control0>,<control1>,...]``
-        Controls are zero or more ``,`` separated floating point values that
-        determine the behavior of the loaded plugin (for example delay,
-        threshold or gain).
-        In verbose mode (add ``-v`` to the mpv command line), all
-        available controls and their valid ranges are printed. This eliminates
-        the use of 'analyseplugin' from the LADSPA SDK.
-        Note that ``,`` is already used by the option parser to separate
-        filters, so you must quote the list of values with ``[...]`` or
-        similar.
-
-    .. admonition:: Example
-
-        ``mpv --af=ladspa='/usr/lib/ladspa/delay.so':delay_5s:[0.5,0.2] media.avi``
-            Does something.
-
-``karaoke``
-    Simple voice removal filter exploiting the fact that voice is usually
-    recorded with mono gear and later 'center' mixed onto the final audio
-    stream. Beware that this filter will turn your signal into mono. Works
-    well for 2 channel tracks; do not bother trying it on anything but 2
-    channel stereo.
 
 ``scaletempo[=option1:option2:...]``
     Scales audio tempo without altering pitch, optionally synced to playback

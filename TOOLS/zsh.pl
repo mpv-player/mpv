@@ -232,8 +232,8 @@ sub call_mpv {
     my $output = `"$mpv" --no-config $cmd`;
     if ($? == -1) {
         die "Could not run mpv: $!";
-    } elsif ($? != 0) {
-        die "mpv returned " . ($? >> 8) . " with output:\n$output";
+    } elsif ((my $exit_code = $? >> 8) != 0) {
+        die "mpv returned $exit_code with output:\n$output";
     }
     return split /\n/, $output;
 }

@@ -58,13 +58,6 @@ void mp_audio_set_num_channels(struct mp_audio *mpa, int num_channels)
     update_redundant_info(mpa);
 }
 
-// Use old MPlayer/ALSA channel layout.
-void mp_audio_set_channels_old(struct mp_audio *mpa, int num_channels)
-{
-    mp_chmap_from_channels_alsa(&mpa->channels, num_channels);
-    update_redundant_info(mpa);
-}
-
 void mp_audio_set_channels(struct mp_audio *mpa, const struct mp_chmap *chmap)
 {
     mpa->channels = *chmap;
