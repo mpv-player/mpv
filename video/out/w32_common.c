@@ -1136,11 +1136,7 @@ static void *gui_thread(void *ptr)
         .hCursor = LoadCursor(NULL, IDC_ARROW),
         .lpszClassName = classname,
     };
-
-    if (!RegisterClassExW(&wcex)) {
-        MP_ERR(w32, "unable to register window class!\n");
-        goto done;
-    }
+    RegisterClassExW(&wcex);
 
     w32_thread_context = w32;
 
@@ -1227,7 +1223,6 @@ done:
     if (ole_ok)
         OleUninitialize();
     SetThreadExecutionState(ES_CONTINUOUS);
-    UnregisterClassW(classname, 0);
 
     w32_thread_context = NULL;
     return NULL;
