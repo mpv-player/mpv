@@ -356,18 +356,19 @@ iconv support use --disable-iconv.",
         'desc': 'LCMS2 support',
         'func': check_pkg_config('lcms2', '>= 2.6'),
     }, {
-        'name': 'vapoursynth-core',
-        'desc': 'VapourSynth filter bridge (core)',
-        'func': check_pkg_config('vapoursynth >= 24'),
-    }, {
         'name': '--vapoursynth',
         'desc': 'VapourSynth filter bridge (Python)',
-        'deps': ['vapoursynth-core'],
-        'func': check_pkg_config('vapoursynth-script >= 23'),
+        'func': check_pkg_config('vapoursynth',        '>= 24',
+                                 'vapoursynth-script', '>= 23'),
     }, {
         'name': '--vapoursynth-lazy',
         'desc': 'VapourSynth filter bridge (Lazy Lua)',
-        'deps': ['vapoursynth-core', 'lua'],
+        'deps': ['lua'],
+        'func': check_pkg_config('vapoursynth',        '>= 24'),
+    }, {
+        'name': 'vapoursynth-core',
+        'desc': 'VapourSynth filter bridge (core)',
+        'deps_any': ['vapoursynth', 'vapoursynth-lazy'],
         'func': check_true,
     }, {
         'name': '--libarchive',
