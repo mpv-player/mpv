@@ -201,8 +201,8 @@ static struct mp_image *render(struct vf_instance *vf, struct mp_image *in,
         goto cleanup;
 
     param->surface = in_id;
-    param->surface_region = NULL;
-    param->output_region = NULL;
+    param->surface_region = &(VARectangle){0, 0, in->w, in->h};
+    param->output_region = &(VARectangle){0, 0, img->w, img->h};
     param->output_background_color = 0;
     param->filter_flags = flags;
     param->filters = p->pipe.filters;
