@@ -53,8 +53,6 @@
 static const char *const fixed_scale_filters[] = {
     "bilinear",
     "bicubic_fast",
-    "sharpen3",
-    "sharpen5",
     "oversample",
     "custom",
     NULL
@@ -167,6 +165,7 @@ struct gl_video {
     struct fbotex chroma_deband_fbo;
     struct fbotex indirect_fbo;
     struct fbotex blend_subs_fbo;
+    struct fbotex unsharp_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
 
     // these are duplicated so we can keep rendering back and forth between
@@ -427,6 +426,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_STRINGLIST("post-shaders", post_shaders, 0),
         OPT_FLAG("deband", deband, 0),
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
+        OPT_FLOAT("sharpen", unsharp, 0),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
@@ -576,6 +576,7 @@ static void uninit_rendering(struct gl_video *p)
     fbotex_uninit(&p->chroma_deband_fbo);
     fbotex_uninit(&p->indirect_fbo);
     fbotex_uninit(&p->blend_subs_fbo);
+    fbotex_uninit(&p->unsharp_fbo);
 
     for (int n = 0; n < 2; n++) {
         fbotex_uninit(&p->pre_fbo[n]);
@@ -1098,10 +1099,6 @@ static void pass_sample(struct gl_video *p, int src_tex, struct scaler *scaler,
         GLSL(vec4 color = texture(tex, pos);)
     } else if (strcmp(name, "bicubic_fast") == 0) {
         pass_sample_bicubic_fast(p->sc);
-    } else if (strcmp(name, "sharpen3") == 0) {
-        pass_sample_sharpen3(p->sc, scaler);
-    } else if (strcmp(name, "sharpen5") == 0) {
-        pass_sample_sharpen5(p->sc, scaler);
     } else if (strcmp(name, "oversample") == 0) {
         pass_sample_oversample(p->sc, scaler, w, h);
     } else if (strcmp(name, "custom") == 0) {
@@ -1665,6 +1662,11 @@ static void pass_render_frame(struct gl_video *p)
 
     apply_shaders(p, p->opts.pre_shaders, &p->pre_fbo[0], 0,
                   p->image_w, p->image_h);
+
+    if (p->opts.unsharp != 0.0) {
+        finish_pass_fbo(p, &p->unsharp_fbo, p->image_w, p->image_h, 0, 0);
+        pass_sample_unsharp(p->sc, p->opts.unsharp);
+    }
 
     pass_scale_main(p);
 

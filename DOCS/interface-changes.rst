@@ -19,6 +19,8 @@ Interface changes
 
 ::
 
+ --- mpv 0.12.0 ---
+    - vo_opengl: remove sharpen3/sharpen5 scale filters, add sharpen sub-option
  --- mpv 0.11.0 ---
     - add "af-metadata" property
  --- mpv 0.10.0 ---

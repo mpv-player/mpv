@@ -98,6 +98,7 @@ struct gl_video_opts {
     char **post_shaders;
     int deband;
     struct deband_opts *deband_opts;
+    float unsharp;
 };
 
 extern const struct m_sub_options gl_video_conf;

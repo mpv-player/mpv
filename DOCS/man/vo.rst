@@ -375,10 +375,6 @@ Available video output drivers are:
             Scale parameter (``t``). Increasing this makes the result blurrier.
             Defaults to 1.
 
-        sharpen3, sharpen5
-            Sharpening strength. Increasing this makes the image sharper but
-            adds more ringing and aliasing. Defaults to 0.5.
-
         oversample
             Minimum distance to an edge before interpolation is used. Setting
             this to 0 will always interpolate edges, whereas setting it to 0.5
@@ -408,8 +404,8 @@ Available video output drivers are:
         between 0.0 and 1.0. The default value of 0.0 disables antiringing
         entirely.
 
-        Note that this doesn't affect the special filters ``bilinear``,
-        ``bicubic_fast`` or ``sharpen``.
+        Note that this doesn't affect the special filters ``bilinear`` and
+        ``bicubic_fast``.
 
     ``scale-window=<window>``
         (Advanced users only) Choose a custom windowing function for the kernel.
@@ -644,6 +640,16 @@ Available video output drivers are:
     ``sigmoid-slope``
         The slope of the sigmoid curve used for ``sigmoid-upscaling``, must
         be a float between 1.0 and 20.0. Defaults to 6.5 if not specified.
+
+    ``sharpen=<value>``
+        If set to a value other than 0, enable an unsharp masking filter.
+        Positive values will sharpen the image (but add more ringing and
+        aliasing). Negative values will blur the image. If your GPU is powerful
+        enough, consider alternatives like the ``ewa_lanczossharp`` scale
+        filter, or the ``scale-blur`` sub-option.
+
+        (This feature is the replacement for the old ``sharpen3`` and
+        ``sharpen5`` scalers.)
 
     ``glfinish``
         Call ``glFinish()`` before and after swapping buffers (default: disabled).

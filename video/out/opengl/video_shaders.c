@@ -200,44 +200,6 @@ void pass_sample_bicubic_fast(struct gl_shader_cache *sc)
     GLSLF("}\n");
 }
 
-void pass_sample_sharpen3(struct gl_shader_cache *sc, struct scaler *scaler)
-{
-    GLSL(vec4 color;)
-    GLSLF("{\n");
-    GLSL(vec2 st = pt * 0.5;)
-    GLSL(vec4 p = texture(tex, pos);)
-    GLSL(vec4 sum = texture(tex, pos + st * vec2(+1, +1))
-                  + texture(tex, pos + st * vec2(+1, -1))
-                  + texture(tex, pos + st * vec2(-1, +1))
-                  + texture(tex, pos + st * vec2(-1, -1));)
-    float param = scaler->conf.kernel.params[0];
-    param = isnan(param) ? 0.5 : param;
-    GLSLF("color = p + (p - 0.25 * sum) * %f;\n", param);
-    GLSLF("}\n");
-}
-
-void pass_sample_sharpen5(struct gl_shader_cache *sc, struct scaler *scaler)
-{
-    GLSL(vec4 color;)
-    GLSLF("{\n");
-    GLSL(vec2 st1 = pt * 1.2;)
-    GLSL(vec4 p = texture(tex, pos);)
-    GLSL(vec4 sum1 = texture(tex, pos + st1 * vec2(+1, +1))
-                   + texture(tex, pos + st1 * vec2(+1, -1))
-                   + texture(tex, pos + st1 * vec2(-1, +1))
-                   + texture(tex, pos + st1 * vec2(-1, -1));)
-    GLSL(vec2 st2 = pt * 1.5;)
-    GLSL(vec4 sum2 = texture(tex, pos + st2 * vec2(+1,  0))
-                   + texture(tex, pos + st2 * vec2( 0, +1))
-                   + texture(tex, pos + st2 * vec2(-1,  0))
-                   + texture(tex, pos + st2 * vec2( 0, -1));)
-    GLSL(vec4 t = p * 0.859375 + sum2 * -0.1171875 + sum1 * -0.09765625;)
-    float param = scaler->conf.kernel.params[0];
-    param = isnan(param) ? 0.5 : param;
-    GLSLF("color = p + t * %f;\n", param);
-    GLSLF("}\n");
-}
-
 void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
                                    int w, int h)
 {
@@ -434,4 +396,27 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
     GLSL(noise.y = rand(h); h = permute(h);)
     GLSL(noise.z = rand(h); h = permute(h);)
     GLSLF("color.xyz += %f * (noise - vec3(0.5));\n", opts->grain/8192.0);
+}
+
+void pass_sample_unsharp(struct gl_shader_cache *sc, float param)
+{
+    GLSLF("// unsharp\n");
+    sampler_prelude(sc, 0);
+
+    GLSL(vec4 color;)
+    GLSLF("{\n");
+    GLSL(vec2 st1 = pt * 1.2;)
+    GLSL(vec4 p = texture(tex, pos);)
+    GLSL(vec4 sum1 = texture(tex, pos + st1 * vec2(+1, +1))
+                   + texture(tex, pos + st1 * vec2(+1, -1))
+                   + texture(tex, pos + st1 * vec2(-1, +1))
+                   + texture(tex, pos + st1 * vec2(-1, -1));)
+    GLSL(vec2 st2 = pt * 1.5;)
+    GLSL(vec4 sum2 = texture(tex, pos + st2 * vec2(+1,  0))
+                   + texture(tex, pos + st2 * vec2( 0, +1))
+                   + texture(tex, pos + st2 * vec2(-1,  0))
+                   + texture(tex, pos + st2 * vec2( 0, -1));)
+    GLSL(vec4 t = p * 0.859375 + sum2 * -0.1171875 + sum1 * -0.09765625;)
+    GLSLF("color = p + t * %f;\n", param);
+    GLSLF("}\n");
 }
