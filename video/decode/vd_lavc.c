@@ -602,8 +602,8 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
     return 0;
 }
 
-static int decode(struct dec_video *vd, struct demux_packet *packet,
-                  int flags, struct mp_image **out_image)
+static void decode(struct dec_video *vd, struct demux_packet *packet,
+                   int flags, struct mp_image **out_image)
 {
     int got_picture = 0;
     int ret;
@@ -629,7 +629,7 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
     if (ctx->hwdec_failed || ret < 0) {
         if (ret < 0)
             MP_WARN(vd, "Error while decoding frame!\n");
-        return -1;
+        return;
     }
 
     if (ctx->hwdec_request_reinit)
@@ -637,7 +637,7 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
 
     // Skipped frame, or delayed output due to multithreaded decoding.
     if (!got_picture)
-        return 0;
+        return;
 
     struct mp_image_params params;
     update_image_params(vd, ctx->pic, &params);
@@ -647,7 +647,7 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
     struct mp_image *mpi = mp_image_from_av_frame(ctx->pic);
     av_frame_unref(ctx->pic);
     if (!mpi)
-        return 0; // mpi==NULL, or OOM
+        return;
     assert(mpi->planes[0] || mpi->planes[3]);
     mp_image_set_params(mpi, &params);
 
@@ -655,7 +655,6 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
         mpi = ctx->hwdec->process_image(ctx, mpi);
 
     *out_image = mp_img_swap_to_native(mpi);
-    return 1;
 }
 
 static struct mp_image *decode_with_fallback(struct dec_video *vd,
@@ -666,8 +665,8 @@ static struct mp_image *decode_with_fallback(struct dec_video *vd,
         return NULL;
 
     struct mp_image *mpi = NULL;
-    int res = decode(vd, packet, flags, &mpi);
-    if (res < 0) {
+    decode(vd, packet, flags, &mpi);
+    if (ctx->hwdec_failed) {
         // Failed hardware decoding? Try again in software.
         if (force_fallback(vd) && ctx->avctx)
             decode(vd, packet, flags, &mpi);
