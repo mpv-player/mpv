@@ -258,7 +258,7 @@ static int update_display_size(struct vo *vo)
         MP_FATAL(vo, "EGL/GLES initialization for OSD renderer failed.\n");
         return -1;
     }
-    p->sc = gl_sc_create(p->egl.gl, vo->log, vo->global),
+    p->sc = gl_sc_create(p->egl.gl, vo->log),
     p->osd = mpgl_osd_init(p->egl.gl, vo->log, vo->osd);
     p->osd_change_counter = -1; // force initial overlay rendering
 
