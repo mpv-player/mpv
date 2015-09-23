@@ -568,23 +568,16 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
     struct dec_video *vd = avctx->opaque;
     vd_ffmpeg_ctx *ctx = vd->priv;
 
-    if (ctx->hwdec_failed)
-        return avcodec_default_get_buffer2(avctx, pic, flags);
-
-    /* Decoders using ffmpeg's hwaccel architecture (everything except vdpau)
-     * can fall back to software decoding automatically. However, we don't
-     * want that: multithreading was already disabled. ffmpeg's fallback
-     * isn't really useful, and causes more trouble than it helps.
-     *
-     * Instead of trying to "adjust" the thread_count fields in avctx, let
-     * decoding fail hard. Then decode_with_fallback() will do our own software
-     * fallback. Fully reinitializing the decoder is saner, and will probably
-     * save us from other weird corner cases, like having to "reroute" the
-     * get_buffer callback.
-     */
     int imgfmt = pixfmt2imgfmt(pic->format);
     if (!IMGFMT_IS_HWACCEL(imgfmt) || !ctx->hwdec)
-        return -1;
+        ctx->hwdec_failed = true;
+
+    /* Hardware decoding failed, and we will trigger a proper fallback later
+     * when returning from the decode call. (We are forcing complete
+     * reinitialization later to reset the thread count properly.)
+     */
+    if (ctx->hwdec_failed)
+        return avcodec_default_get_buffer2(avctx, pic, flags);
 
     // We expect it to use the exact size used to create the hw decoder in
     // get_format_hwdec(). For cropped video, this is expected to be the
