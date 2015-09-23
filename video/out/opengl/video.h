@@ -67,14 +67,6 @@ struct scaler {
     struct filter_kernel kernel_storage;
 };
 
-struct deband_opts {
-    int enabled;
-    int iterations;
-    float threshold;
-    float range;
-    float grain;
-};
-
 struct gl_video_opts {
     int dumb_mode;
     struct scaler_config scaler[4];
