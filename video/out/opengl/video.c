@@ -2092,7 +2092,6 @@ static void check_gl_features(struct gl_video *p)
             .pbo = p->opts.pbo,
             .fbo_format = p->opts.fbo_format,
             .alpha_mode = p->opts.alpha_mode,
-            .chroma_location = p->opts.chroma_location,
             .use_rectangle = p->opts.use_rectangle,
             .background = p->opts.background,
             .dither_algo = -1,

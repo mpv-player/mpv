@@ -96,7 +96,6 @@ struct gl_video_opts {
     int temporal_dither_period;
     int fbo_format;
     int alpha_mode;
-    int chroma_location;
     int use_rectangle;
     struct m_color background;
     int interpolation;
