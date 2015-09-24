@@ -691,6 +691,7 @@ static void init_video(struct gl_video *p)
         if (p->hwdec->driver->reinit(p->hwdec, &p->image_params) < 0)
             MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
         init_format(p->image_params.imgfmt, p);
+        p->image_params.imgfmt = p->image_desc.id;
         p->gl_target = p->hwdec->gl_texture_target;
     }
 

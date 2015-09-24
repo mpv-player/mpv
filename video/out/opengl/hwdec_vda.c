@@ -19,6 +19,8 @@
 
 // Note: handles both VDA and VideoToolbox
 
+#include <assert.h>
+
 #include <IOSurface/IOSurface.h>
 #include <CoreVideo/CoreVideo.h>
 #include <OpenGL/OpenGL.h>
@@ -174,7 +176,7 @@ static int create(struct gl_hwdec *hw)
 
 static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 {
-    params->imgfmt = hw->driver->imgfmt;
+    assert(params->imgfmt == hw->driver->imgfmt);
     return 0;
 }
 
