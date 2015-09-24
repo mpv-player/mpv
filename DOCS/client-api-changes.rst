@@ -32,7 +32,12 @@ API changes
 
 ::
 
+ --- mpv 0.12.0 ---
+ 1.20   - deprecate "GL_MP_D3D_interfaces"/"glMPGetD3DInterface", and introduce
+          "GL_MP_MPGetNativeDisplay"/"glMPGetNativeDisplay" (this is a
+          backwards-compatible rename)
  --- mpv 0.11.0 ---
+ --- mpv 0.10.0 ---
  1.19   - add "GL_MP_D3D_interfaces" pseudo extension to make it possible to
           use DXVA2 in OpenGL fullscreen mode in some situations
         - mpv_request_log_messages() now accepts "terminal-default" as parameter

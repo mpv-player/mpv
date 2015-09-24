@@ -23,13 +23,13 @@ static void destroy(struct gl_hwdec *hw)
 static int create(struct gl_hwdec *hw)
 {
     GL *gl = hw->gl;
-    if (hw->hwctx || !gl->MPGetD3DInterface)
+    if (hw->hwctx || !gl->MPGetNativeDisplay)
         return -1;
 
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
 
-    p->ctx.d3d9_device = gl->MPGetD3DInterface("IDirect3DDevice9");
+    p->ctx.d3d9_device = gl->MPGetNativeDisplay("IDirect3DDevice9");
     if (!p->ctx.d3d9_device)
         return -1;
 
