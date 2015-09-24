@@ -690,6 +690,7 @@ fi
 check_yes_no $_gl GL
 check_yes_no $_gl_x11 GL_X11
 check_yes_no $_gl_x11_egl EGL_X11
+check_yes_no $_gl_x11_egl EGL
 check_yes_no $_gl_wayland GL_WAYLAND
 echores "$_gl"
 

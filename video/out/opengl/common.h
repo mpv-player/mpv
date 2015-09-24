@@ -46,6 +46,11 @@
 #include <GL/glext.h>
 #endif
 
+#if HAVE_EGL
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+#endif
+
 #define MP_GET_GL_WORKAROUNDS
 #include "header_fixes.h"
 
@@ -267,6 +272,12 @@ struct GL {
 
     GLint (GLAPIENTRY *GetVideoSync)(GLuint *);
     GLint (GLAPIENTRY *WaitVideoSync)(GLint, GLint, unsigned int *);
+
+    EGLImageKHR (EGLAPIENTRY *CreateImageKHR)(EGLDisplay, EGLContext,
+                                              EGLenum, EGLClientBuffer,
+                                              const EGLint *);
+    EGLBoolean (EGLAPIENTRY *DestroyImageKHR)(EGLDisplay, EGLImageKHR);
+    void (EGLAPIENTRY *EGLImageTargetTexture2DOES)(GLenum, GLeglImageOES);
 
     void (GLAPIENTRY *DebugMessageCallback)(MP_GLDEBUGPROC callback,
                                             const void *userParam);

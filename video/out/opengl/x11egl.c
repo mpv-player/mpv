@@ -134,8 +134,10 @@ static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
         return false;
     }
 
+    const char *egl_exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
+
     void *(*gpa)(const GLubyte*) = (void *(*)(const GLubyte*))eglGetProcAddress;
-    mpgl_load_functions(ctx->gl, gpa, NULL, vo->log);
+    mpgl_load_functions(ctx->gl, gpa, egl_exts, vo->log);
 
     return true;
 }

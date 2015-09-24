@@ -60,6 +60,25 @@
 #define GLvdpauSurfaceNV GLintptr
 #endif
 
+typedef void *MP_voidptr;
+
+#ifndef GL_OES_EGL_image
+#define GLeglImageOES MP_voidptr
+#endif
+#ifndef EGL_KHR_image
+#define EGLImageKHR MP_voidptr
+#endif
+
+#if !HAVE_EGL
+#define EGLBoolean unsigned int
+#define EGLenum unsigned int
+#define EGLint int
+#define EGLContext MP_voidptr
+#define EGLDisplay MP_voidptr
+#define EGLClientBuffer MP_voidptr
+#define EGLAPIENTRY GLAPIENTRY
+#endif
+
 #ifndef GL_DEBUG_SEVERITY_HIGH
 #define GL_DEBUG_SEVERITY_HIGH            0x9146
 #define GL_DEBUG_SEVERITY_MEDIUM          0x9147

@@ -72,6 +72,7 @@ static bool check_ext(GL *gl, const char *name)
 #define FN_OFFS(name) offsetof(GL, name)
 
 #define DEF_FN(name)            {FN_OFFS(name), "gl" # name}
+#define DEF_FN_EGL(name)        {FN_OFFS(name), "egl" # name}
 #define DEF_FN_NAME(name, str)  {FN_OFFS(name), str}
 
 struct gl_function {
@@ -277,6 +278,22 @@ static const struct gl_functions gl_functions[] = {
     {
         .extension = "GL_APPLE_rgb_422",
         .provides = MPGL_CAP_APPLE_RGB_422,
+    },
+    // EGL extensions for vaapi EGL interop
+    {
+        .extension = "EGL_KHR_image_base",
+        .functions = (const struct gl_function[]) {
+            DEF_FN_EGL(CreateImageKHR),
+            DEF_FN_EGL(DestroyImageKHR),
+            {0}
+        },
+    },
+    {
+        .extension = "GL_OES_EGL_image",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(EGLImageTargetTexture2DOES),
+            {0}
+        },
     },
     {
         .ver_core = 430,
