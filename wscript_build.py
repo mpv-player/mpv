@@ -319,6 +319,7 @@ def build(ctx):
         ( "video/out/opengl/rpi.c",              "rpi" ),
         ( "video/out/opengl/hwdec.c",            "gl" ),
         ( "video/out/opengl/hwdec_dxva2.c",      "gl-win32" ),
+        ( "video/out/opengl/hwdec_vaegl.c",      "vaapi-x-egl" ),
         ( "video/out/opengl/hwdec_vaglx.c",      "vaapi-glx" ),
         ( "video/out/opengl/hwdec_vda.c",        "videotoolbox-vda-gl" ),
         ( "video/out/opengl/hwdec_vdpau.c",      "vdpau-gl-x11" ),

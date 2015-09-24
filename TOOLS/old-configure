@@ -704,6 +704,10 @@ _vaapi_glx=no
 (test "$_gl_x11" = yes && test "$_vaapi" = yes) && _vaapi_glx=auto
 check_pkg_config "VAAPI with OpenGL/X11" $_vaapi_glx VAAPI_GLX 'libva-glx >= 0.32.0'
 
+_vaapi_x_egl=no
+(test "$_gl_x11_egl" = yes && test "$_vaapi" = yes) && _vaapi_x_egl=yes
+check_yes_no $_vaapi_x_egl VAAPI_X_EGL
+
 check_pkg_config "SDL 2.0" $_sdl2 SDL2 'sdl2'
 
 check_statement_libs "OSS Audio" $_ossaudio OSS_AUDIO $_soundcard_header "int x = SNDCTL_DSP_SETFRAGMENT;"

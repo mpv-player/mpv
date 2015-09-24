@@ -29,6 +29,7 @@
 #include "common/msg.h"
 #include "hwdec.h"
 
+extern const struct gl_hwdec_driver gl_hwdec_vaegl;
 extern const struct gl_hwdec_driver gl_hwdec_vaglx;
 extern const struct gl_hwdec_driver gl_hwdec_vda;
 extern const struct gl_hwdec_driver gl_hwdec_videotoolbox;
@@ -36,6 +37,9 @@ extern const struct gl_hwdec_driver gl_hwdec_vdpau;
 extern const struct gl_hwdec_driver gl_hwdec_dxva2;
 
 static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
+#if HAVE_VAAPI_X_EGL
+    &gl_hwdec_vaegl,
+#endif
 #if HAVE_VAAPI_GLX
     &gl_hwdec_vaglx,
 #endif
