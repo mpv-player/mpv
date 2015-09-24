@@ -126,6 +126,16 @@ extern "C" {
  * up until mpv_opengl_cb_uninit_gl() is called. If the name is not anything
  * you know/expected, return NULL from the function.
  *
+ * Windowing system interop on Linux
+ * ---------------------------------
+ *
+ * The new VAAPI OpenGL interop requires an EGL context. EGL provides no way
+ * to query the X11 Display associated to a specific EGL context, so this API
+ * is used to pass it through.
+ *
+ * glMPGetNativeDisplay("x11") should return a X11 "Display*", which then will
+ * be used to create the hardware decoder state. (On GLX, this is not needed.)
+ *
  * Windowing system interop on MS win32
  * ------------------------------------
  *

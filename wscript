@@ -173,6 +173,10 @@ main_dependencies = [
         'func': check_true,
         'deps_any': ['stdatomic', 'atomic-builtins', 'sync-builtins'],
     }, {
+        'name': 'c11-tls',
+        'desc': 'C11 TLS support',
+        'func': check_statement('stddef.h', 'static _Thread_local int x = 0'),
+    }, {
         'name': 'librt',
         'desc': 'linking with -lrt',
         'deps': [ 'pthreads' ],
@@ -605,7 +609,7 @@ video_output_features = [
     } , {
         'name': '--egl-x11',
         'desc': 'OpenGL X11 EGL Backend',
-        'deps': [ 'x11' ],
+        'deps': [ 'x11', 'c11-tls' ],
         'groups': [ 'gl' ],
         'func': check_pkg_config('egl', 'gl'),
     } , {
