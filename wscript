@@ -608,7 +608,6 @@ video_output_features = [
         'deps': [ 'x11' ],
         'groups': [ 'gl' ],
         'func': check_pkg_config('egl', 'gl'),
-        'default': 'disable',
     } , {
         'name': '--gl-wayland',
         'desc': 'OpenGL Wayland Backend',
