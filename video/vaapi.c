@@ -298,7 +298,7 @@ static int va_surface_image_alloc(struct mp_image *img, VAImageFormat *format)
             p->image.width == p->w && p->image.height == p->h)
         {
             p->is_derived = true;
-            MP_VERBOSE(p->ctx, "Using vaDeriveImage()\n");
+            MP_TRACE(p->ctx, "Using vaDeriveImage()\n");
         } else {
             vaDestroyImage(p->display, p->image.image_id);
             status = VA_STATUS_ERROR_OPERATION_FAILED;
@@ -359,7 +359,7 @@ bool va_image_map(struct mp_vaapi_ctx *ctx, VAImage *image, struct mp_image *mpi
     }
 
     if (image->format.fourcc == VA_FOURCC_YV12) {
-        MPSWAP(unsigned int, mpi->stride[1], mpi->stride[2]);
+        MPSWAP(int, mpi->stride[1], mpi->stride[2]);
         MPSWAP(uint8_t *, mpi->planes[1], mpi->planes[2]);
     }
 
@@ -375,7 +375,7 @@ bool va_image_unmap(struct mp_vaapi_ctx *ctx, VAImage *image)
 }
 
 // va_dst: copy destination, must be IMGFMT_VAAPI
-// sw_src: copy source, must be a software p
+// sw_src: copy source, must be a software pixel format
 int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src)
 {
     struct va_surface *p = va_surface_in_mp_image(va_dst);
