@@ -109,8 +109,7 @@ static int create(struct gl_hwdec *hw)
 
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
-    for (int n = 0; n < 4; n++)
-        p->current_image.buf = p->current_image.image_id = VA_INVALID_ID;
+    p->current_image.buf = p->current_image.image_id = VA_INVALID_ID;
     p->log = hw->log;
     p->xdisplay = x11disp;
     p->display = vaGetDisplay(x11disp);
