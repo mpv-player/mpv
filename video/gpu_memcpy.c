@@ -19,18 +19,20 @@
  *  Taken from the QuickSync decoder by Eric Gur
  */
 
-#ifndef GPU_MEMCPY_SSE4_H_
-#define GPU_MEMCPY_SSE4_H_
-
 #pragma GCC push_options
 #pragma GCC target("sse4.1")
 #include <smmintrin.h>
+
+#include <stdbool.h>
+#include <string.h>
+
+#include "gpu_memcpy.h"
 
 // gpu_memcpy is a memcpy style function that copied data very fast from a
 // GPU tiled memory (write back)
 // Performance tip: page offset (12 lsb) of both addresses should be different
 //  optimally use a 2K offset between them.
-static inline void *gpu_memcpy(void *restrict d, const void *restrict s, size_t size)
+void *gpu_memcpy(void *restrict d, const void *restrict s, size_t size)
 {
     static const size_t regsInLoop = sizeof(size_t) * 2; // 8 or 16
 
@@ -131,6 +133,3 @@ static inline void *gpu_memcpy(void *restrict d, const void *restrict s, size_t 
 
     return d;
 }
-
-#pragma GCC pop_options
-#endif

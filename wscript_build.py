@@ -267,6 +267,7 @@ def build(ctx):
         ## Video
         ( "video/csputils.c" ),
         ( "video/fmt-conversion.c" ),
+        ( "video/gpu_memcpy.c",                  "sse4-intrinsics" ),
         ( "video/image_writer.c" ),
         ( "video/img_format.c" ),
         ( "video/mp_image.c" ),

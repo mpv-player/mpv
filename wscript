@@ -769,6 +769,11 @@ hwaccel_features = [
         'desc': 'libavcodec DXVA2 hwaccel',
         'deps': [ 'win32' ],
         'func': check_headers('libavcodec/dxva2.h', use='libav'),
+    }, {
+        'name': 'sse4-intrinsics',
+        'desc': 'GCC SSE4 intrinsics for GPU memcpy',
+        'deps_any': [ 'dxva2-hwaccel' ],
+        'func': check_cc(fragment=load_fragment('sse.c')),
     }
 ]
 

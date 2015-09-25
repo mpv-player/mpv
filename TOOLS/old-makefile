@@ -234,6 +234,7 @@ SOURCES = audio/audio.c \
           ta/ta_talloc.c \
           video/csputils.c \
           video/fmt-conversion.c \
+          video/gpu_memcpy.c \
           video/image_writer.c \
           video/img_format.c \
           video/mp_image.c \

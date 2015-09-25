@@ -106,6 +106,7 @@ int mp_chroma_div_up(int size, int shift);
 
 struct mp_image *mp_image_alloc(int fmt, int w, int h);
 void mp_image_copy(struct mp_image *dmpi, struct mp_image *mpi);
+void mp_image_copy_gpu(struct mp_image *dst, struct mp_image *src);
 void mp_image_copy_attributes(struct mp_image *dmpi, struct mp_image *mpi);
 struct mp_image *mp_image_new_copy(struct mp_image *img);
 struct mp_image *mp_image_new_ref(struct mp_image *img);
@@ -158,5 +159,7 @@ void memcpy_pic(void *dst, const void *src, int bytesPerLine, int height,
                 int dstStride, int srcStride);
 void memset_pic(void *dst, int fill, int bytesPerLine, int height, int stride);
 void memset16_pic(void *dst, int fill, int unitsPerLine, int height, int stride);
+
+void mp_check_gpu_memcpy(struct mp_log *log, bool *once);
 
 #endif /* MPLAYER_MP_IMAGE_H */
