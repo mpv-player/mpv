@@ -228,6 +228,9 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     }
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
+    if (va_image->format.fourcc == VA_FOURCC_YV12)
+        MPSWAP(GLuint, out_textures[1], out_textures[2]);
+
     va_unlock(p->ctx);
     return 0;
 
