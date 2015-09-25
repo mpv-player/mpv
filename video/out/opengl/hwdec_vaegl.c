@@ -39,6 +39,7 @@ struct priv {
     GLuint gl_textures[4];
     EGLImageKHR images[4];
     VAImage current_image;
+    bool buffer_acquired;
     struct mp_image *current_ref;
 };
 
@@ -55,10 +56,10 @@ static void unref_image(struct gl_hwdec *hw)
 
     va_lock(p->ctx);
 
-    if (p->current_image.buf != VA_INVALID_ID) {
+    if (p->buffer_acquired) {
         status = vaReleaseBufferHandle(p->display, p->current_image.buf);
         CHECK_VA_STATUS(p, "vaReleaseBufferHandle()");
-        p->current_image.buf = VA_INVALID_ID;
+        p->buffer_acquired = false;
     }
     if (p->current_image.image_id != VA_INVALID_ID) {
         status = vaDestroyImage(p->display, p->current_image.image_id);
@@ -194,6 +195,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     status = vaAcquireBufferHandle(p->display, va_image->buf, &buffer_info);
     if (!CHECK_VA_STATUS(p, "vaAcquireBufferHandle()"))
         goto err;
+    p->buffer_acquired = true;
 
     struct mp_image layout = {0};
     mp_image_set_params(&layout, &hw_image->params);
