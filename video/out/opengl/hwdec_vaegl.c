@@ -50,6 +50,7 @@ static void unref_image(struct gl_hwdec *hw)
     for (int n = 0; n < 4; n++) {
         if (p->images[n])
             hw->gl->DestroyImageKHR(eglGetCurrentDisplay(), p->images[n]);
+        p->images[n] = 0;
     }
 
     va_lock(p->ctx);
@@ -83,6 +84,7 @@ static void destroy_textures(struct gl_hwdec *hw)
 static void destroy(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
+    unref_image(hw);
     destroy_textures(hw);
     va_destroy(p->ctx);
 }
