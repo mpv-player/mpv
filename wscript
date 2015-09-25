@@ -613,11 +613,6 @@ video_output_features = [
         'groups': [ 'gl' ],
         'func': check_pkg_config('egl', 'gl'),
     } , {
-        'name': 'egl',
-        'desc': 'EGL',
-        'deps': [ 'egl-x11' ],
-        'func': check_true,
-    } , {
         'name': '--gl-wayland',
         'desc': 'OpenGL Wayland Backend',
         'deps': [ 'wayland' ],
@@ -708,6 +703,11 @@ video_output_features = [
         'desc': 'OpenGL video outputs',
         'deps_any': [ 'gl-cocoa', 'gl-x11', 'gl-win32', 'gl-wayland', 'rpi' ],
         'func': check_true
+    } , {
+        'name': 'egl',
+        'desc': 'EGL',
+        'deps_any': [ 'egl-x11', 'rpi' , 'gl-wayland' ],
+        'func': check_true,
     }
 ]
 
