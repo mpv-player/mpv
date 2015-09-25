@@ -772,7 +772,7 @@ hwaccel_features = [
     }, {
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',
-        'deps_any': [ 'dxva2-hwaccel' ],
+        'deps_any': [ 'dxva2-hwaccel', 'vaapi-hwaccel' ],
         'func': check_cc(fragment=load_fragment('sse.c')),
     }
 ]

@@ -439,7 +439,11 @@ static struct mp_image *try_download(struct mp_image *src,
         mp_image_set_size(&tmp, src->w, src->h); // copy only visible part
         dst = mp_image_pool_get(pool, tmp.imgfmt, tmp.w, tmp.h);
         if (dst) {
-            mp_image_copy(dst, &tmp);
+            va_lock(p->ctx);
+            mp_check_gpu_memcpy(p->ctx->log, &p->ctx->gpu_memcpy_message);
+            va_unlock(p->ctx);
+
+            mp_image_copy_gpu(dst, &tmp);
             mp_image_copy_attributes(dst, src);
         }
         va_image_unmap(p->ctx, image);
