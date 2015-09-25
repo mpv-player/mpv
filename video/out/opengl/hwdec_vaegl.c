@@ -200,9 +200,10 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     mp_image_setfmt(&layout, mpfmt);
 
     // (it would be nice if we could use EGL_IMAGE_INTERNAL_FORMAT_EXT)
-    int drm_fmts[4] = {MP_FOURCC('R', '8', ' ', ' '),
-                       MP_FOURCC('G', 'R', '8', '8'),
-                       0, 0};
+    int drm_fmts[4] = {MP_FOURCC('R', '8', ' ', ' '),   // DRM_FORMAT_R8
+                       MP_FOURCC('G', 'R', '8', '8'),   // DRM_FORMAT_GR88
+                       MP_FOURCC('R', 'G', '2', '4'),   // DRM_FORMAT_RGB888
+                       MP_FOURCC('R', 'A', '2', '4')};  // DRM_FORMAT_RGBA8888
 
     for (int n = 0; n < layout.num_planes; n++) {
         int attribs[20] = {EGL_NONE};
