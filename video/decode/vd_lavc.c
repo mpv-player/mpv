@@ -612,6 +612,9 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     struct vd_lavc_params *lavc_param = ctx->opts->vd_lavc_params;
     AVPacket pkt;
 
+    if (ctx->hwdec_request_reinit)
+        avcodec_flush_buffers(avctx);
+
     if (flags) {
         // hr-seek framedrop vs. normal framedrop
         avctx->skip_frame = flags == 2 ? AVDISCARD_NONREF : lavc_param->framedrop;
@@ -631,9 +634,6 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
             MP_WARN(vd, "Error while decoding frame!\n");
         return;
     }
-
-    if (ctx->hwdec_request_reinit)
-        avcodec_flush_buffers(avctx);
 
     // Skipped frame, or delayed output due to multithreaded decoding.
     if (!got_picture)
