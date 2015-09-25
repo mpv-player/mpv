@@ -195,23 +195,22 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     if (!CHECK_VA_STATUS(p, "vaAcquireBufferHandle()"))
         goto err;
 
-    int num_planes = 2;
-    int plane_sizes[2] = {1, 2};
-    int plane_xs[2] = {0, 1};
-    int plane_ys[2] = {0, 1};
+    struct mp_image layout = {0};
+    mp_image_set_params(&layout, &hw_image->params);
+    mp_image_setfmt(&layout, mpfmt);
 
     // (it would be nice if we could use EGL_IMAGE_INTERNAL_FORMAT_EXT)
     int drm_fmts[4] = {MP_FOURCC('R', '8', ' ', ' '),
                        MP_FOURCC('G', 'R', '8', '8'),
                        0, 0};
 
-    for (int n = 0; n < num_planes; n++) {
-        int attribs[20];
+    for (int n = 0; n < layout.num_planes; n++) {
+        int attribs[20] = {EGL_NONE};
         int num_attribs = 0;
 
-        ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, drm_fmts[plane_sizes[n] - 1]);
-        ADD_ATTRIB(EGL_WIDTH, mp_chroma_div_up(hw_image->w, plane_xs[n]));
-        ADD_ATTRIB(EGL_HEIGHT, mp_chroma_div_up(hw_image->h, plane_ys[n]));
+        ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, drm_fmts[layout.fmt.bytes[n] - 1]);
+        ADD_ATTRIB(EGL_WIDTH, mp_image_plane_w(&layout, n));
+        ADD_ATTRIB(EGL_HEIGHT, mp_image_plane_h(&layout, n));
         ADD_ATTRIB(EGL_DMA_BUF_PLANE0_FD_EXT, buffer_info.handle);
         ADD_ATTRIB(EGL_DMA_BUF_PLANE0_OFFSET_EXT, va_image->offsets[n]);
         ADD_ATTRIB(EGL_DMA_BUF_PLANE0_PITCH_EXT, va_image->pitches[n]);
