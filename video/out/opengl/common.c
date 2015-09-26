@@ -533,11 +533,11 @@ static const struct backend backends[] = {
 #if HAVE_GL_WAYLAND
     {"wayland", mpgl_set_backend_wayland},
 #endif
-#if HAVE_GL_X11
-    {.driver = &mpgl_driver_x11},
-#endif
 #if HAVE_EGL_X11
     {.driver = &mpgl_driver_x11egl},
+#endif
+#if HAVE_GL_X11
+    {.driver = &mpgl_driver_x11},
 #endif
 };
 

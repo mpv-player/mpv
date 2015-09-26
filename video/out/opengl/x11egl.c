@@ -123,6 +123,7 @@ static int mpegl_init(struct MPGLContext *ctx, int flags)
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
     bool es = flags & VOFLAG_GLES;
+    int msgl = vo->probing ? MSGL_V : MSGL_FATAL;
 
     if (!vo_x11_init(vo))
         goto uninit;
@@ -130,13 +131,13 @@ static int mpegl_init(struct MPGLContext *ctx, int flags)
     p->x_display = vo->x11->display;
 
     if (!eglBindAPI(es ? EGL_OPENGL_ES_API : EGL_OPENGL_API)) {
-        MP_FATAL(vo, "Could not bind API (%s).\n", es ? "GLES" : "GL");
+        mp_msg(vo->log, msgl, "Could not bind API (%s).\n", es ? "GLES" : "GL");
         goto uninit;
     }
 
     p->egl_display = eglGetDisplay(vo->x11->display);
     if (!eglInitialize(p->egl_display, NULL, NULL)) {
-        MP_FATAL(vo, "Could not initialize EGL.\n");
+        mp_msg(vo->log, msgl, "Could not initialize EGL.\n");
         goto uninit;
     }
 
