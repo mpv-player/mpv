@@ -33,6 +33,20 @@
 #include "video/mp_image_pool.h"
 #include "common.h"
 
+#ifndef GL_OES_EGL_image
+typedef void* GLeglImageOES;
+#endif
+#ifndef EGL_KHR_image
+typedef void *EGLImageKHR;
+#endif
+
+#ifndef EGL_LINUX_DRM_FOURCC_EXT
+#define EGL_LINUX_DRM_FOURCC_EXT          0x3271
+#define EGL_DMA_BUF_PLANE0_FD_EXT         0x3272
+#define EGL_DMA_BUF_PLANE0_OFFSET_EXT     0x3273
+#define EGL_DMA_BUF_PLANE0_PITCH_EXT      0x3274
+#endif
+
 struct priv {
     struct mp_log *log;
     struct mp_vaapi_ctx *ctx;
