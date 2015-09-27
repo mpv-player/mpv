@@ -32,10 +32,8 @@
 static void *get_proc_address(const GLubyte *name)
 {
     void *p = eglGetProcAddress(name);
-    // It looks like eglGetProcAddress() should work even for builtin
-    // functions, but it doesn't work at least with RPI/Broadcom crap.
-    // (EGL 1.4, which current RPI firmware pretends to support, definitely
-    // is required to return non-extension functions.)
+    // EGL 1.4 (supported by the RPI firmware) does not necessarily return
+    // function pointers for core functions.
     if (!p) {
         void *h = dlopen("/opt/vc/lib/libGLESv2.so", RTLD_LAZY);
         if (h) {
