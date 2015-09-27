@@ -164,7 +164,7 @@ Available filters are:
 
     .. admonition:: Examples
 
-        ``mpv --af=channels=4:[0-1,1-0,0-2,1-3] media.avi``
+        ``mpv --af=channels=4:[0-1,1-0,2-2,3-3] media.avi``
             Would change the number of channels to 4 and set up 4 routes that
             swap channel 0 and channel 1 and leave channel 2 and 3 intact.
             Observe that if media containing two channels were played back,
