@@ -22,6 +22,7 @@
 #include <assert.h>
 
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 
 #include <va/va_drmcommon.h>
 
@@ -42,6 +43,12 @@ struct priv {
     VAImage current_image;
     bool buffer_acquired;
     struct mp_image *current_ref;
+
+    EGLImageKHR (EGLAPIENTRY *CreateImageKHR)(EGLDisplay, EGLContext,
+                                              EGLenum, EGLClientBuffer,
+                                              const EGLint *);
+    EGLBoolean (EGLAPIENTRY *DestroyImageKHR)(EGLDisplay, EGLImageKHR);
+    void (EGLAPIENTRY *EGLImageTargetTexture2DOES)(GLenum, GLeglImageOES);
 };
 
 static bool test_format(struct gl_hwdec *hw);
@@ -53,7 +60,7 @@ static void unref_image(struct gl_hwdec *hw)
 
     for (int n = 0; n < 4; n++) {
         if (p->images[n])
-            hw->gl->DestroyImageKHR(eglGetCurrentDisplay(), p->images[n]);
+            p->DestroyImageKHR(eglGetCurrentDisplay(), p->images[n]);
         p->images[n] = 0;
     }
 
@@ -121,26 +128,38 @@ static int create(struct gl_hwdec *hw)
 {
     GL *gl = hw->gl;
 
+    struct priv *p = talloc_zero(hw, struct priv);
+    hw->priv = p;
+    p->current_image.buf = p->current_image.image_id = VA_INVALID_ID;
+    p->log = hw->log;
+
     if (hw->hwctx)
         return -1;
     if (!eglGetCurrentDisplay())
         return -1;
 
-    Display *x11disp =
+    p->xdisplay =
         hw->gl->MPGetNativeDisplay ? hw->gl->MPGetNativeDisplay("x11") : NULL;
-    if (!x11disp)
+    if (!p->xdisplay)
         return -1;
-    if (!gl->CreateImageKHR || !gl->EGLImageTargetTexture2DOES ||
-        !strstr(gl->extensions, "EXT_image_dma_buf_import") ||
+    if (!strstr(gl->extensions, "EXT_image_dma_buf_import") ||
+        !strstr(gl->extensions, "EGL_KHR_image_base") ||
+        !strstr(gl->extensions, "GL_OES_EGL_image") ||
         !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
         return -1;
 
-    struct priv *p = talloc_zero(hw, struct priv);
-    hw->priv = p;
-    p->current_image.buf = p->current_image.image_id = VA_INVALID_ID;
-    p->log = hw->log;
-    p->xdisplay = x11disp;
-    p->display = vaGetDisplay(x11disp);
+    // EGL_KHR_image_base
+    p->CreateImageKHR = (void *)eglGetProcAddress("eglCreateImageKHR");
+    p->DestroyImageKHR = (void *)eglGetProcAddress("eglDestroyImageKHR");
+    // GL_OES_EGL_image
+    p->EGLImageTargetTexture2DOES =
+        (void *)eglGetProcAddress("glEGLImageTargetTexture2DOES");
+
+    if (!p->CreateImageKHR || !p->DestroyImageKHR ||
+        !p->EGLImageTargetTexture2DOES)
+        return -1;
+
+    p->display = vaGetDisplay(p->xdisplay);
     if (!p->display)
         return -1;
 
@@ -262,13 +281,13 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
         ADD_ATTRIB(EGL_DMA_BUF_PLANE0_OFFSET_EXT, va_image->offsets[n]);
         ADD_ATTRIB(EGL_DMA_BUF_PLANE0_PITCH_EXT, va_image->pitches[n]);
 
-        p->images[n] = hw->gl->CreateImageKHR(eglGetCurrentDisplay(),
+        p->images[n] = p->CreateImageKHR(eglGetCurrentDisplay(),
             EGL_NO_CONTEXT, EGL_LINUX_DMA_BUF_EXT, NULL, attribs);
         if (!p->images[n])
             goto err;
 
         gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
-        gl->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
+        p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
 
         out_textures[n] = p->gl_textures[n];
     }

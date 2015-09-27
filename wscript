@@ -703,11 +703,6 @@ video_output_features = [
         'desc': 'OpenGL video outputs',
         'deps_any': [ 'gl-cocoa', 'gl-x11', 'gl-win32', 'gl-wayland', 'rpi' ],
         'func': check_true
-    } , {
-        'name': 'egl',
-        'desc': 'EGL',
-        'deps_any': [ 'egl-x11', 'rpi' , 'gl-wayland' ],
-        'func': check_true,
     }
 ]
 

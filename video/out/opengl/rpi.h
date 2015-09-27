@@ -1,5 +1,8 @@
 #include <bcm_host.h>
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
 #include "common.h"
 
 struct mp_egl_rpi {
