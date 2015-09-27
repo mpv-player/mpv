@@ -22,6 +22,7 @@
 #include <assert.h>
 
 #include <GL/glx.h>
+#include <va/va_x11.h>
 
 #include "video/out/x11_common.h"
 #include "hwdec.h"

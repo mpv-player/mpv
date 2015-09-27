@@ -639,9 +639,14 @@ video_output_features = [
     }, {
         'name': '--vaapi',
         'desc': 'VAAPI acceleration',
-        'deps': [ 'x11', 'libdl' ],
-        'func': check_pkg_config(
-            'libva', '>= 0.34.0', 'libva-x11', '>= 0.34.0'),
+        'deps': [ 'libdl' ],
+        'deps_any': [ 'x11' ],
+        'func': check_pkg_config('libva', '>= 0.34.0'),
+    }, {
+        'name': '--vaapi-x11',
+        'desc': 'VAAPI (X11 support)',
+        'deps': [ 'vaapi', 'x11' ],
+        'func': check_pkg_config('libva-x11', '>= 0.34.0'),
     }, {
         'name': '--vaapi-vpp',
         'desc': 'VAAPI VPP',
@@ -650,12 +655,17 @@ video_output_features = [
     }, {
         'name': '--vaapi-glx',
         'desc': 'VAAPI GLX',
-        'deps': [ 'vaapi', 'gl-x11' ],
+        'deps': [ 'vaapi-x11', 'gl-x11' ],
         'func': check_true,
     }, {
         'name': '--vaapi-x-egl',
         'desc': 'VAAPI EGL on X11',
-        'deps': [ 'vaapi', 'egl-x11' ],
+        'deps': [ 'vaapi-x11', 'egl-x11' ],
+        'func': check_true,
+    }, {
+        'name': 'vaapi-egl',
+        'desc': 'VAAPI EGL',
+        'deps_any': [ 'vaapi-x-egl' ],
         'func': check_true,
     }, {
         'name': '--caca',

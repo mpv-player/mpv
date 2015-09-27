@@ -22,7 +22,6 @@
 #include <inttypes.h>
 #include <pthread.h>
 #include <va/va.h>
-#include <va/va_x11.h>
 
 #ifndef VA_FOURCC_I420
 #define VA_FOURCC_I420 VA_FOURCC('I', '4', '2', '0')
