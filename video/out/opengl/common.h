@@ -115,6 +115,10 @@ typedef struct MPGLContext {
     // Bit size of each component in the created framebuffer. 0 if unknown.
     int depth_r, depth_g, depth_b;
 
+    // For hwdec_vaegl.c.
+    const char *native_display_type;
+    void *native_display;
+
     // For free use by the mpgl_driver.
     void *priv;
 

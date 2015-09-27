@@ -609,7 +609,7 @@ video_output_features = [
     } , {
         'name': '--egl-x11',
         'desc': 'OpenGL X11 EGL Backend',
-        'deps': [ 'x11', 'c11-tls' ],
+        'deps': [ 'x11' ],
         'groups': [ 'gl' ],
         'func': check_pkg_config('egl', 'gl'),
     } , {
@@ -665,6 +665,7 @@ video_output_features = [
     }, {
         'name': 'vaapi-egl',
         'desc': 'VAAPI EGL',
+        'deps': [ 'c11-tls' ], # indirectly
         'deps_any': [ 'vaapi-x-egl' ],
         'func': check_true,
     }, {

@@ -31,20 +31,10 @@
 #include "common.h"
 
 struct priv {
-    Display *x_display;
     EGLDisplay egl_display;
     EGLContext egl_context;
     EGLSurface egl_surface;
 };
-
-static _Thread_local struct priv *current_context;
-
-static void * GLAPIENTRY get_native_display(const char *name)
-{
-    if (current_context && strcmp(name, "x11") == 0)
-        return current_context->x_display;
-    return NULL;
-}
 
 static void mpegl_uninit(MPGLContext *ctx)
 {
@@ -55,7 +45,6 @@ static void mpegl_uninit(MPGLContext *ctx)
         eglDestroyContext(p->egl_display, p->egl_context);
     }
     p->egl_context = EGL_NO_CONTEXT;
-    current_context = NULL;
     vo_x11_uninit(ctx->vo);
 }
 
@@ -128,8 +117,6 @@ static int mpegl_init(struct MPGLContext *ctx, int flags)
     if (!vo_x11_init(vo))
         goto uninit;
 
-    p->x_display = vo->x11->display;
-
     if (!eglBindAPI(es ? EGL_OPENGL_ES_API : EGL_OPENGL_API)) {
         mp_msg(vo->log, msgl, "Could not bind API (%s).\n", es ? "GLES" : "GL");
         goto uninit;
@@ -166,10 +153,10 @@ static int mpegl_init(struct MPGLContext *ctx, int flags)
 
     void *(*gpa)(const GLubyte*) = (void *(*)(const GLubyte*))eglGetProcAddress;
     mpgl_load_functions(ctx->gl, gpa, egl_exts, vo->log);
-    ctx->gl->MPGetNativeDisplay = get_native_display;
 
-    assert(!current_context);
-    current_context = p;
+    ctx->native_display_type = "x11";
+    ctx->native_display = vo->x11->display;
+
     return true;
 
 uninit:
