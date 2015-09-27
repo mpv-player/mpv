@@ -56,6 +56,16 @@ static VADisplay *create_x11_va_display(GL *gl)
 }
 #endif
 
+#if HAVE_VAAPI_WAYLAND
+#include <va/va_wayland.h>
+
+static VADisplay *create_wayland_va_display(GL *gl)
+{
+    struct wl_display *wl = gl->MPGetNativeDisplay("wl");
+    return wl ? vaGetDisplayWl(wl) : NULL;
+}
+#endif
+
 static VADisplay *create_native_va_display(GL *gl)
 {
     if (!gl->MPGetNativeDisplay)
@@ -63,6 +73,11 @@ static VADisplay *create_native_va_display(GL *gl)
     VADisplay *display = NULL;
 #if HAVE_VAAPI_X11
     display = create_x11_va_display(gl);
+    if (display)
+        return display;
+#endif
+#if HAVE_VAAPI_WAYLAND
+    display = create_wayland_va_display(gl);
     if (display)
         return display;
 #endif

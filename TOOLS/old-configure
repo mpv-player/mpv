@@ -612,6 +612,12 @@ _vaapi=$(defretval)
 define_yes_no $_vaapi HAVE_VAAPI_HWACCEL
 define_yes_no $_vaapi HAVE_VAAPI_X11
 
+_vaapi_wayland=no
+if test "$_vaapi" = yes ; then
+_vaapi_wayland=auto
+fi
+check_pkg_config "VAAPI Wayland" $_vaapi_wayland VAAPI_WAYLAND 'libva-wayland >= 0.34.0'
+
 if test "$_vaapi" = yes ; then
     check_pkg_config "VAAPI VPP" auto VAAPI_VPP 'libva >= 0.34.0'
 else

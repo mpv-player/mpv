@@ -640,13 +640,18 @@ video_output_features = [
         'name': '--vaapi',
         'desc': 'VAAPI acceleration',
         'deps': [ 'libdl' ],
-        'deps_any': [ 'x11' ],
+        'deps_any': [ 'x11', 'wayland' ],
         'func': check_pkg_config('libva', '>= 0.34.0'),
     }, {
         'name': '--vaapi-x11',
         'desc': 'VAAPI (X11 support)',
         'deps': [ 'vaapi', 'x11' ],
         'func': check_pkg_config('libva-x11', '>= 0.34.0'),
+    }, {
+        'name': '--vaapi-wayland',
+        'desc': 'VAAPI (Wayland support)',
+        'deps': [ 'vaapi', 'wayland' ],
+        'func': check_pkg_config('libva-wayland', '>= 0.34.0'),
     }, {
         'name': '--vaapi-vpp',
         'desc': 'VAAPI VPP',
@@ -666,7 +671,7 @@ video_output_features = [
         'name': 'vaapi-egl',
         'desc': 'VAAPI EGL',
         'deps': [ 'c11-tls' ], # indirectly
-        'deps_any': [ 'vaapi-x-egl' ],
+        'deps_any': [ 'vaapi-x-egl', 'vaapi-wayland' ],
         'func': check_true,
     }, {
         'name': '--caca',

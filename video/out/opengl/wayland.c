@@ -124,6 +124,9 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     mpgl_load_functions(gl, (void*(*)(const GLubyte*))eglGetProcAddress, eglstr,
                         wl->log);
 
+    ctx->native_display_type = "wl";
+    ctx->native_display = wl->display.display;
+
     return true;
 }
 
