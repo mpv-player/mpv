@@ -27,17 +27,17 @@
 #include "video/mp_image_pool.h"
 #include "hwdec.h"
 
-struct vda_gl_plane_format {
+struct vt_gl_plane_format {
     GLenum gl_format;
     GLenum gl_type;
     GLenum gl_internal_format;
 };
 
-struct vda_format {
+struct vt_format {
     uint32_t cvpixfmt;
     int imgfmt;
     int planes;
-    struct vda_gl_plane_format gl[MP_MAX_PLANES];
+    struct vt_gl_plane_format gl[MP_MAX_PLANES];
 };
 
 struct priv {
@@ -46,15 +46,8 @@ struct priv {
     struct mp_hwdec_ctx hwctx;
 };
 
-static struct vda_format vda_formats[] = {
+static struct vt_format vt_formats[] = {
     {
-        .cvpixfmt = kCVPixelFormatType_422YpCbCr8,
-        .imgfmt = IMGFMT_UYVY,
-        .planes = 1,
-        .gl = {
-            { GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, GL_RGB }
-        }
-    }, {
         .cvpixfmt = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange,
         .imgfmt = IMGFMT_NV12,
         .planes = 2,
@@ -65,20 +58,20 @@ static struct vda_format vda_formats[] = {
     }
 };
 
-static struct vda_format *vda_get_gl_format(uint32_t cvpixfmt)
+static struct vt_format *vt_get_gl_format(uint32_t cvpixfmt)
 {
-    for (int i = 0; i < MP_ARRAY_SIZE(vda_formats); i++) {
-        if (vda_formats[i].cvpixfmt == cvpixfmt)
-            return &vda_formats[i];
+    for (int i = 0; i < MP_ARRAY_SIZE(vt_formats); i++) {
+        if (vt_formats[i].cvpixfmt == cvpixfmt)
+            return &vt_formats[i];
     }
     return NULL;
 }
 
-static struct vda_format *vda_get_gl_format_from_imgfmt(uint32_t imgfmt)
+static struct vt_format *vt_get_gl_format_from_imgfmt(uint32_t imgfmt)
 {
-    for (int i = 0; i < MP_ARRAY_SIZE(vda_formats); i++) {
-        if (vda_formats[i].imgfmt == imgfmt)
-            return &vda_formats[i];
+    for (int i = 0; i < MP_ARRAY_SIZE(vt_formats); i++) {
+        if (vt_formats[i].imgfmt == imgfmt)
+            return &vt_formats[i];
     }
     return NULL;
 }
@@ -87,7 +80,7 @@ static struct mp_image *download_image(struct mp_hwdec_ctx *ctx,
                                        struct mp_image *hw_image,
                                        struct mp_image_pool *swpool)
 {
-    if (hw_image->imgfmt != IMGFMT_VDA && hw_image->imgfmt != IMGFMT_VIDEOTOOLBOX)
+    if (hw_image->imgfmt != IMGFMT_VIDEOTOOLBOX)
         return NULL;
 
     CVPixelBufferRef pbuf = (CVPixelBufferRef)hw_image->planes[3];
@@ -95,7 +88,7 @@ static struct mp_image *download_image(struct mp_hwdec_ctx *ctx,
     size_t width  = CVPixelBufferGetWidth(pbuf);
     size_t height = CVPixelBufferGetHeight(pbuf);
     uint32_t cvpixfmt = CVPixelBufferGetPixelFormatType(pbuf);
-    struct vda_format *f = vda_get_gl_format(cvpixfmt);
+    struct vt_format *f = vt_get_gl_format(cvpixfmt);
     if (!f) {
         CVPixelBufferUnlockBaseAddress(pbuf, 0);
         return NULL;
@@ -135,34 +128,24 @@ static bool check_hwdec(struct gl_hwdec *hw)
     return true;
 }
 
-static int create_common(struct gl_hwdec *hw, struct vda_format *format)
+static int create(struct gl_hwdec *hw)
 {
-    struct priv *p = talloc_zero(hw, struct priv);
-
-    hw->priv = p;
-    hw->gl_texture_target = GL_TEXTURE_RECTANGLE;
-
-    hw->converted_imgfmt = format->imgfmt;
-
     if (!check_hwdec(hw))
         return -1;
 
-    hw->hwctx = &p->hwctx;
-    hw->hwctx->download_image = download_image;
-
-    GL *gl = hw->gl;
-    gl->GenTextures(MP_MAX_PLANES, p->gl_planes);
-
-    return 0;
-}
-
-static int create(struct gl_hwdec *hw)
-{
-    struct vda_format *f = vda_get_gl_format_from_imgfmt(IMGFMT_NV12);
-    if (create_common(hw, f))
+    struct priv *p = talloc_zero(hw, struct priv);
+    struct vt_format *f = vt_get_gl_format_from_imgfmt(IMGFMT_NV12);
+    if (!f)
         return -1;
 
+    hw->priv = p;
+    hw->converted_imgfmt = f->imgfmt;
+    hw->hwctx = &p->hwctx;
+    hw->hwctx->download_image = download_image;
     hw->hwctx->type = HWDEC_VIDEOTOOLBOX;
+
+    hw->gl_texture_target = GL_TEXTURE_RECTANGLE;
+    hw->gl->GenTextures(MP_MAX_PLANES, p->gl_planes);
 
     return 0;
 }
@@ -188,7 +171,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     IOSurfaceRef surface = CVPixelBufferGetIOSurface(p->pbuf);
 
     uint32_t cvpixfmt = CVPixelBufferGetPixelFormatType(p->pbuf);
-    struct vda_format *f = vda_get_gl_format(cvpixfmt);
+    struct vt_format *f = vt_get_gl_format(cvpixfmt);
     if (!f) {
         MP_ERR(hw, "CVPixelBuffer has unsupported format type\n");
         return -1;
