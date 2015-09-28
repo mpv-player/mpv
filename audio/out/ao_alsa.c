@@ -50,6 +50,7 @@
 
 struct priv {
     snd_pcm_t *alsa;
+    bool device_lost;
     snd_pcm_format_t alsa_fmt;
     int can_pause;
     snd_pcm_sframes_t prepause_frames;
@@ -82,6 +83,21 @@ struct priv {
         if (err < 0) \
             MP_WARN(ao, "%s: %s\n", (message), snd_strerror(err)); \
     } while (0)
+
+// Common code for handling ENODEV, which happens if a device gets "lost", and
+// can't be used anymore. Returns true if alsa_err is not ENODEV.
+static bool check_device_present(struct ao *ao, int alsa_err)
+{
+    struct priv *p = ao->priv;
+    if (alsa_err != -ENODEV)
+        return true;
+    if (!p->device_lost) {
+        MP_WARN(ao, "Device lost, trying to recover...\n");
+        ao_request_reload(ao);
+        p->device_lost = true;
+    }
+    return false;
+}
 
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
@@ -730,6 +746,8 @@ static int get_space(struct ao *ao)
     snd_pcm_status_alloca(&status);
 
     err = snd_pcm_status(p->alsa, status);
+    if (!check_device_present(ao, err))
+        goto alsa_error;
     CHECK_ALSA_ERROR("cannot get pcm status");
 
     unsigned space = snd_pcm_status_get_avail(status);
@@ -856,9 +874,8 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
         if (res == -EINTR || res == -EAGAIN) { /* retry */
             res = 0;
-        } else if (res == -ENODEV) {
-            MP_WARN(ao, "Device lost, trying to recover...\n");
-            ao_request_reload(ao);
+        } else if (!check_device_present(ao, res)) {
+            goto alsa_error;
         } else if (res < 0) {
             if (res == -ESTRPIPE) {  /* suspend */
                 resume_device(ao);
