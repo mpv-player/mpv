@@ -728,27 +728,6 @@ hwaccel_features = [
         'desc': 'libavcodec VAAPI hwaccel',
         'deps': [ 'vaapi' ],
         'func': check_headers('libavcodec/vaapi.h', use='libav'),
-    } , {
-        'name': '--vda-hwaccel',
-        'desc': 'libavcodec VDA hwaccel',
-        'func': compose_checks(
-            check_headers('VideoDecodeAcceleration/VDADecoder.h'),
-            check_statement('libavcodec/vda.h',
-                            'av_vda_alloc_context()',
-                            framework='IOSurface',
-                            use='libav')),
-    } , {
-        'name': 'vda-default-init2',
-        'desc': 'libavcodec VDA hwaccel (configurable AVVDAContext)',
-        'deps': [ 'vda-hwaccel' ],
-        'func': check_statement('libavcodec/vda.h',
-                                'av_vda_default_init2(NULL, NULL)',
-                                use='libav'),
-    }, {
-        'name': '--vda-gl',
-        'desc': 'VDA with OpenGL',
-        'deps': [ 'gl-cocoa', 'vda-hwaccel' ],
-        'func': check_true
     }, {
         'name': '--videotoolbox-hwaccel',
         'desc': 'libavcodec videotoolbox hwaccel',
@@ -764,11 +743,6 @@ hwaccel_features = [
         'deps': [ 'gl-cocoa', 'videotoolbox-hwaccel' ],
         'func': check_true
     } , {
-        'name': 'videotoolbox-vda-gl',
-        'desc': 'Videotoolbox or VDA with OpenGL',
-        'deps_any': [ 'videotoolbox-gl', 'vda-gl' ],
-        'func': check_true
-    }, {
         'name': '--vdpau-hwaccel',
         'desc': 'libavcodec VDPAU hwaccel',
         'deps': [ 'vdpau' ],

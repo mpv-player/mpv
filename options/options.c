@@ -84,7 +84,6 @@ const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"no",          HWDEC_NONE},
     {"auto",        HWDEC_AUTO},
     {"vdpau",       HWDEC_VDPAU},
-    {"vda",         HWDEC_VDA},
     {"videotoolbox",HWDEC_VIDEOTOOLBOX},
     {"vaapi",       HWDEC_VAAPI},
     {"vaapi-copy",  HWDEC_VAAPI_COPY},

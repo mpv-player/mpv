@@ -37,7 +37,6 @@ static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
     // not in ffmpeg
     {"vdpau_output",    IMGFMT_VDPAU_OUTPUT},
     // FFmpeg names have an annoying "_vld" suffix
-    {"vda",             IMGFMT_VDA},
     {"videotoolbox",    IMGFMT_VIDEOTOOLBOX},
     {"vaapi",           IMGFMT_VAAPI},
     // names below this are not preferred over the FFmpeg names

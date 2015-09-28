@@ -17,8 +17,6 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Note: handles both VDA and VideoToolbox
-
 #include <assert.h>
 
 #include <IOSurface/IOSurface.h>
@@ -160,12 +158,7 @@ static int create_common(struct gl_hwdec *hw, struct vda_format *format)
 
 static int create(struct gl_hwdec *hw)
 {
-    // For videotoolbox, we always request NV12.
-#if HAVE_VDA_DEFAULT_INIT2
     struct vda_format *f = vda_get_gl_format_from_imgfmt(IMGFMT_NV12);
-#else
-    struct vda_format *f = vda_get_gl_format_from_imgfmt(IMGFMT_UYVY);
-#endif
     if (create_common(hw, f))
         return -1;
 

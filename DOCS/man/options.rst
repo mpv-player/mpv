@@ -569,7 +569,6 @@ Video
     :vdpau:     requires ``--vo=vdpau`` or ``--vo=opengl`` (Linux only)
     :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux with Intel GPUs only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
-    :vda:       requires ``--vo=opengl`` (OS X only)
     :videotoolbox: requires ``--vo=opengl`` (newer OS X only)
     :dxva2-copy: copies video back to system RAM (Windows only)
     :rpi:      requires ``--vo=rpi`` (Raspberry Pi only - default if available)

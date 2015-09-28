@@ -205,11 +205,7 @@ enum mp_imgfmt {
     IMGFMT_VAAPI,
     IMGFMT_DXVA2,           // IDirect3DSurface9 (NV12)
     IMGFMT_MMAL,            // MMAL_BUFFER_HEADER_T
-    // These use the same underlying format, but FFmpeg requires us to keep
-    // them separate. The VDA decoder will change the format to
-    // IMGFMT_VIDEOTOOLBOX, though.
-    IMGFMT_VIDEOTOOLBOX,
-    IMGFMT_VDA,
+    IMGFMT_VIDEOTOOLBOX,    // CVPixelBufferRef
 
     // Generic pass-through of AV_PIX_FMT_*. Used for formats which don't have
     // a corresponding IMGFMT_ value.

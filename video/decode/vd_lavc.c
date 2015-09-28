@@ -116,7 +116,6 @@ const struct m_sub_options vd_lavc_conf = {
 };
 
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau;
-const struct vd_lavc_hwdec mp_vd_lavc_vda;
 const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox;
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi;
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy;
@@ -132,9 +131,6 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #endif
 #if HAVE_VIDEOTOOLBOX_HWACCEL
     &mp_vd_lavc_videotoolbox,
-#endif
-#if HAVE_VDA_HWACCEL
-    &mp_vd_lavc_vda,
 #endif
 #if HAVE_VAAPI_HWACCEL
     &mp_vd_lavc_vaapi,

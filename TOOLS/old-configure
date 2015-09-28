@@ -938,10 +938,6 @@ cat > $TMPC << EOF
    for platforms not supported by this configure script */
 #define HAVE_BSD_FSTATFS 0
 #define HAVE_LINUX_FSTATFS 1
-#define HAVE_VDA_AV_VDA_ALLOC_CONTEXT 0
-#define HAVE_VDA_HWACCEL 0
-#define HAVE_VDA_LIBAVCODEC_REFCOUNTING 0
-#define HAVE_VDA_GL 0
 #define HAVE_GL_COCOA 0
 #define HAVE_COCOA 0
 #define HAVE_COCOA_APPLICATION 0
@@ -970,7 +966,6 @@ cat > $TMPC << EOF
 #define HAVE_DRM 0
 #define HAVE_VIDEOTOOLBOX_HWACCEL 0
 #define HAVE_VIDEOTOOLBOX_GL 0
-#define HAVE_VIDEOTOOLBOX_VDA_GL 0
 #define HAVE_SSE4_INTRINSICS 1
 #define HAVE_C11_TLS 1
 

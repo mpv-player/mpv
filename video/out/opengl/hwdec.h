@@ -21,7 +21,7 @@ struct gl_hwdec {
     // IMGFMT_RGB0 indicates that the video texture is RGB.
     int converted_imgfmt;
     // Normally this is GL_TEXTURE_2D, but the hwdec driver can set it to
-    // GL_TEXTURE_RECTANGLE. This is needed because VDA is shit.
+    // GL_TEXTURE_RECTANGLE. This is needed because VideoToolbox is shit.
     GLenum gl_texture_target;
 };
 
