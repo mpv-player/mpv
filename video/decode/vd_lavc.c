@@ -627,6 +627,7 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     if (ctx->hwdec_failed || ret < 0) {
         if (ret < 0)
             MP_WARN(vd, "Error while decoding frame!\n");
+        ctx->hwdec_failed = true;
         return;
     }
 
