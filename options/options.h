@@ -103,6 +103,7 @@ typedef struct MPOpts {
     int gamma_contrast;
     int gamma_saturation;
     int gamma_hue;
+    int video_output_levels;
 
     int stop_screensaver;
     int cursor_autohide_delay;

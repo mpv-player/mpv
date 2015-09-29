@@ -463,6 +463,8 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("contrast", gamma_contrast, 0, -100, 100),
     OPT_INTRANGE("hue", gamma_hue, 0, -100, 100),
     OPT_INTRANGE("gamma", gamma_gamma, 0, -100, 100),
+    OPT_CHOICE_C("video-output-levels", video_output_levels, 0,
+                 mp_csp_levels_names),
     OPT_FLAG("keepaspect", vo.keepaspect, 0),
     OPT_FLAG("keepaspect-window", vo.keepaspect_window, 0),
 

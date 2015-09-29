@@ -90,6 +90,7 @@ const char *const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
     "hue",
     "saturation",
     "gamma",
+    "output-levels",
 };
 
 const struct m_opt_choice_alternatives mp_chroma_names[] = {
@@ -709,7 +710,6 @@ void mp_csp_set_image_params(struct mp_csp_params *params,
     mp_image_params_guess_csp(&p); // ensure consistency
     params->colorspace = p.colorspace;
     params->levels_in = p.colorlevels;
-    params->levels_out = p.outputlevels;
 }
 
 // Copy settings from eq into params.
@@ -721,6 +721,7 @@ void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
     params->hue = eq->values[MP_CSP_EQ_HUE] / 100.0 * M_PI;
     params->saturation = (eq->values[MP_CSP_EQ_SATURATION] + 100) / 100.0;
     params->gamma = exp(log(8.0) * eq->values[MP_CSP_EQ_GAMMA] / 100.0);
+    params->levels_out = eq->values[MP_CSP_EQ_OUTPUT_LEVELS];
 }
 
 static int find_eq(int capabilities, const char *name)

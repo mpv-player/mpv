@@ -774,6 +774,26 @@ Video
     For audio-only playback, any value greater than 0 will quit playback
     immediately after initialization. The value 0 works as with video.
 
+``--video-output-levels=<outputlevels>``
+    RGB color levels used with YUV to RGB conversion. Normally, output devices
+    such as PC monitors use full range color levels. However, some TVs and
+    video monitors expect studio RGB levels. Providing full range output to a
+    device expecting studio level input results in crushed blacks and whites,
+    the reverse in dim gray blacks and dim whites.
+
+    Not all VOs support this option. Some will silently ignore it.
+
+    Available color ranges are:
+
+    :auto:      automatic selection (equals to full range) (default)
+    :limited:   limited range (16-235 per component), studio levels
+    :full:      full range (0-255 per component), PC levels
+
+    .. note::
+
+        It is advisable to use your graphics driver's color range option
+        instead, if available.
+
 ``--hwdec-codecs=<codec1,codec2,...|all>``
     Allow hardware decoding for a given list of codecs only. The special value
     ``all`` always allows all codecs.

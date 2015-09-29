@@ -948,10 +948,6 @@ static struct mp_image *read_output_surface(struct vo *vo,
     if (!image)
         return NULL;
 
-    image->params.colorspace = MP_CSP_RGB;
-    // hardcoded with conv. matrix
-    image->params.colorlevels = vo->params->outputlevels;
-
     void *dst_planes[] = { image->planes[0] };
     uint32_t dst_pitches[] = { image->stride[0] };
     vdp_st = vdp->output_surface_get_bits_native(surface, NULL, dst_planes,

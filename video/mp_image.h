@@ -46,10 +46,6 @@ struct mp_image_params {
     enum mp_csp_prim primaries;
     enum mp_csp_trc gamma;
     enum mp_chroma_location chroma_location;
-    // The image should be converted to these levels. Unlike colorlevels, it
-    // does not describe the current state of the image. (Somewhat similar to
-    // d_w/d_h vs. w/h.)
-    enum mp_csp_levels outputlevels;
     // The image should be rotated clockwise (0-359 degrees).
     int rotate;
     enum mp_stereo3d_mode stereo_in;    // image is encoded with this mode

@@ -161,6 +161,7 @@ enum mp_csp_equalizer_param {
     MP_CSP_EQ_HUE,
     MP_CSP_EQ_SATURATION,
     MP_CSP_EQ_GAMMA,
+    MP_CSP_EQ_OUTPUT_LEVELS,
     MP_CSP_EQ_COUNT,
 };
 
@@ -168,7 +169,8 @@ enum mp_csp_equalizer_param {
     ( (1 << MP_CSP_EQ_BRIGHTNESS) \
     | (1 << MP_CSP_EQ_CONTRAST) \
     | (1 << MP_CSP_EQ_HUE) \
-    | (1 << MP_CSP_EQ_SATURATION) )
+    | (1 << MP_CSP_EQ_SATURATION) \
+    | (1 << MP_CSP_EQ_OUTPUT_LEVELS) )
 
 #define MP_CSP_EQ_CAPS_GAMMA (1 << MP_CSP_EQ_GAMMA)
 #define MP_CSP_EQ_CAPS_BRIGHTNESS (1 << MP_CSP_EQ_BRIGHTNESS)

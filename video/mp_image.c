@@ -394,7 +394,6 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
         dst->params.colorspace = src->params.colorspace;
         dst->params.colorlevels = src->params.colorlevels;
         dst->params.chroma_location = src->params.chroma_location;
-        dst->params.outputlevels = src->params.outputlevels;
     }
     mp_image_params_guess_csp(&dst->params); // ensure colorspace consistency
     if ((dst->fmt.flags & MP_IMGFLAG_PAL) && (src->fmt.flags & MP_IMGFLAG_PAL)) {
@@ -491,10 +490,6 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
                         m_opt_choice_str(mp_csp_levels_names, p->colorlevels));
         mp_snprintf_cat(b, bs, " CL=%s",
                         m_opt_choice_str(mp_chroma_names, p->chroma_location));
-        if (p->outputlevels) {
-            mp_snprintf_cat(b, bs, " out=%s",
-                    m_opt_choice_str(mp_csp_levels_names, p->outputlevels));
-        }
         if (p->rotate)
             mp_snprintf_cat(b, bs, " rot=%d", p->rotate);
         if (p->stereo_in > 0 || p->stereo_out > 0) {
@@ -541,7 +536,6 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            p1->d_w == p2->d_w && p1->d_h == p2->d_h &&
            p1->colorspace == p2->colorspace &&
            p1->colorlevels == p2->colorlevels &&
-           p1->outputlevels == p2->outputlevels &&
            p1->primaries == p2->primaries &&
            p1->gamma == p2->gamma &&
            p1->chroma_location == p2->chroma_location &&

@@ -787,6 +787,7 @@ static void init_vo(struct MPContext *mpctx)
         video_set_colors(d_video, "saturation", opts->gamma_saturation);
     if (opts->gamma_hue != 1000)
         video_set_colors(d_video, "hue", opts->gamma_hue);
+    video_set_colors(d_video, "output-levels", opts->video_output_levels);
 
     mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }
