@@ -202,7 +202,9 @@ static int parse_webvtt(AVPacket *in, AVPacket *pkt)
 
     pkt->pts = in->pts;
     pkt->duration = in->duration;
+#if !HAVE_AV_AVPACKET_INT64_DURATION
     pkt->convergence_duration = in->convergence_duration;
+#endif
     return 0;
 }
 

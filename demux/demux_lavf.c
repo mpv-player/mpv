@@ -882,8 +882,10 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     if (pkt->dts != AV_NOPTS_VALUE)
         dp->dts = pkt->dts * av_q2d(st->time_base);
     dp->duration = pkt->duration * av_q2d(st->time_base);
+#if !HAVE_AV_AVPACKET_INT64_DURATION
     if (pkt->convergence_duration > 0)
         dp->duration = pkt->convergence_duration * av_q2d(st->time_base);
+#endif
     dp->pos = pkt->pos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
     if (dp->pts != MP_NOPTS_VALUE) {

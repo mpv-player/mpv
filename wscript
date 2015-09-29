@@ -458,7 +458,13 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavutil/pixdesc.h',
                                 'AVComponentDescriptor d; int x = d.depth',
                                 use='libav'),
-    }
+    }, {
+        'name': 'av-avpacket-int64-duration',
+        'desc': 'libavcodec 64 bit AVPacket.duration',
+        'func': check_statement('libavcodec/avcodec.h',
+                                'int x[(int)sizeof(((AVPacket){0}).duration) - 7]',
+                                use='libav'),
+    },
 ]
 
 audio_output_features = [

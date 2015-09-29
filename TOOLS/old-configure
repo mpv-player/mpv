@@ -816,6 +816,12 @@ api_statement_check \
     libavutil/pixdesc.h \
     'AVComponentDescriptor d; int x = d.depth'
 
+api_statement_check \
+    "libavcodec 64 bit AVPacket.duration" \
+    HAVE_AV_AVPACKET_INT64_DURATION \
+    libavcodec/avcodec.h \
+    'int x[(int)sizeof(((AVPacket){0}).duration) - 7]'
+
 check_pkg_config "libavfilter" $_libavfilter LIBAVFILTER 'libavfilter >= 5.0.0'
 
 check_pkg_config "libavdevice" $_libavdevice LIBAVDEVICE 'libavdevice >= 55.0.0'
