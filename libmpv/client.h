@@ -31,6 +31,21 @@
 extern "C" {
 #endif
 
+struct stream_client_info {
+    int read_chunk;
+    void* userdata;
+    int (*fill_buffer)(struct stream *s, char *buffer, int max_len);
+    int (*write_buffer)(struct stream *s, char *buffer, int len);
+    int (*seek)(struct stream *s, int64_t pos);
+    int (*control)(struct stream *s, int cmd, void *arg);
+    void (*close)(struct stream *s);
+
+};
+
+void set_stream_client_info(struct stream_client_info *info);
+
+struct stream_client_info *get_stream_client_info();
+
 /**
  * Mechanisms provided by this API
  * -------------------------------
