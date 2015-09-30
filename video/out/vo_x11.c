@@ -196,7 +196,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
 
     p->sws->src = *fmt;
 
-    vo_x11_config_vo_window(vo, NULL, flags, "x11");
+    vo_x11_config_vo_window(vo);
 
     if (!resize(vo))
         return -1;
@@ -402,7 +402,9 @@ static int preinit(struct vo *vo)
 
     MP_VERBOSE(vo, "selected visual: %d\n", (int)p->vinfo.visualid);
 
-    vo_x11_config_vo_window(vo, &p->vinfo, VOFLAG_HIDDEN, "x11");
+    if (!vo_x11_create_vo_window(vo, &p->vinfo, "x11"))
+        goto error;
+
     p->gc = XCreateGC(x11->display, x11->window, 0, NULL);
     return 0;
 

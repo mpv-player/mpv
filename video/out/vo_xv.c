@@ -489,7 +489,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     if (!ctx->xv_format)
         return -1;
 
-    vo_x11_config_vo_window(vo, NULL, flags, "xv");
+    vo_x11_config_vo_window(vo);
 
     if (!ctx->f_gc && !ctx->vo_gc) {
         ctx->f_gc = XCreateGC(x11->display, x11->window, 0, 0);
@@ -760,6 +760,9 @@ static int preinit(struct vo *vo)
 
     if (!vo_x11_init(vo))
         return -1;
+
+    if (!vo_x11_create_vo_window(vo, NULL, "xv"))
+        goto error;
 
     struct vo_x11_state *x11 = vo->x11;
 

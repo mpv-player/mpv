@@ -142,7 +142,10 @@ static int mpegl_init(struct MPGLContext *ctx, int flags)
         goto uninit;
     }
 
-    vo_x11_config_vo_window(vo, vi, flags | VOFLAG_HIDDEN, "gl");
+    if (!vo_x11_create_vo_window(vo, vi, "gl")) {
+        XFree(vi);
+        goto uninit;
+    }
 
     XFree(vi);
 
@@ -166,7 +169,7 @@ uninit:
 
 static int mpegl_reconfig(struct MPGLContext *ctx, int flags)
 {
-    vo_x11_config_vo_window(ctx->vo, NULL, flags, "gl");
+    vo_x11_config_vo_window(ctx->vo);
     return 0;
 }
 

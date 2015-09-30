@@ -1477,20 +1477,39 @@ static void wait_until_mapped(struct vo *vo)
     }
 }
 
-/* Create and setup a window suitable for display
- * vis: Visual to use for creating the window (NULL for default)
- * x, y: position of window (might be ignored)
- * width, height: size of window
- * flags: flags for window creation (VOFLAG_*)
- * classname: name to use for the X11 classhint
- *
- * If the window already exists, it just moves and resizes it.
- */
-void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
+// Create the X11 window. There is only 1, and it must be created before
+// vo_x11_config_vo_window() is called. vis can be NULL for default.
+bool vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
                              const char *classname)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    assert(!x11->window);
+
+    if (x11->parent) {
+        if (x11->parent == x11->rootwin) {
+            x11->window = x11->rootwin;
+            x11->pseudo_mapped = true;
+            XSelectInput(x11->display, x11->window, StructureNotifyMask);
+        } else {
+            XSelectInput(x11->display, x11->parent, StructureNotifyMask);
+        }
+    }
+    if (x11->window == None) {
+        vo_x11_create_window(vo, vis, (struct mp_rect){.x1 = 320, .y1 = 200 });
+        vo_x11_classhint(vo, x11->window, classname);
+        x11->window_hidden = true;
+    }
+
+    return !!x11->window;
+}
+
+// Resize the window (e.g. new file, or video resolution change)
+void vo_x11_config_vo_window(struct vo *vo)
 {
     struct mp_vo_opts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
+
+    assert(x11->window);
 
     vo_x11_update_screeninfo(vo);
 
@@ -1501,25 +1520,9 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
     struct mp_rect rc = geo.win;
 
     if (x11->parent) {
-        if (x11->parent == x11->rootwin) {
-            x11->window = x11->rootwin;
-            x11->pseudo_mapped = true;
-            XSelectInput(x11->display, x11->window, StructureNotifyMask);
-        } else {
-            XSelectInput(x11->display, x11->parent, StructureNotifyMask);
-        }
         vo_x11_update_geometry(vo);
         rc = (struct mp_rect){0, 0, RC_W(x11->winrc), RC_H(x11->winrc)};
     }
-    if (x11->window == None) {
-        vo_x11_create_window(vo, vis, rc);
-        vo_x11_classhint(vo, x11->window, classname);
-        x11->window_hidden = true;
-        x11->winrc = geo.win;
-    }
-
-    if (flags & VOFLAG_HIDDEN)
-        return;
 
     bool reset_size = x11->old_dw != RC_W(rc) || x11->old_dh != RC_H(rc);
     x11->old_dw = RC_W(rc);
