@@ -47,6 +47,7 @@
 #include "osdep/io.h"
 #include "osdep/threads.h"
 
+extern const struct vo_driver video_out_x11;
 extern const struct vo_driver video_out_vdpau;
 extern const struct vo_driver video_out_xv;
 extern const struct vo_driver video_out_opengl;
@@ -90,6 +91,9 @@ const struct vo_driver *const video_out_drivers[] =
 #endif
 #if HAVE_VAAPI
     &video_out_vaapi,
+#endif
+#if HAVE_X11
+    &video_out_x11,
 #endif
     &video_out_null,
     // should not be auto-selected

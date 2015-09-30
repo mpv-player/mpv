@@ -93,7 +93,8 @@ SOURCES-$(VAAPI_VPP)            += video/filter/vf_vavpp.c
 SOURCES-$(VAAPI_GLX)            += video/out/opengl/hwdec_vaglx.c
 SOURCES-$(VAAPI_X_EGL)          += video/out/opengl/hwdec_vaegl.c
 
-SOURCES-$(XV)                   += video/out/x11_common.c video/out/vo_xv.c
+SOURCES-$(X11)                  += video/out/vo_x11.c video/out/x11_common.c
+SOURCES-$(XV)                   += video/out/vo_xv.c
 SOURCES-$(WAYLAND)              += video/out/vo_wayland.c \
                                    video/out/wayland_common.c \
                                    video/out/wayland/buffer.c \
