@@ -242,7 +242,6 @@ static int open_f(stream_t *stream)
         talloc_free(temp);
         return STREAM_OK;
     }
-    MP_VERBOSE(stream, "Opening %s\n", filename);
 
     // Replace "mms://" with "mmsh://", so that most mms:// URLs just work.
     bstr b_filename = bstr0(filename);

@@ -288,6 +288,8 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
     s->is_network = sinfo->is_network;
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
 
+    MP_VERBOSE(s, "Opening %s\n", url);
+
     if ((s->mode & STREAM_WRITE) && !sinfo->can_write) {
         MP_VERBOSE(s, "No write access implemented.\n");
         talloc_free(s);
@@ -328,10 +330,10 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
 
     s->uncached_type = s->type;
 
-    MP_VERBOSE(s, "Opened: %s\n", url);
-
     if (s->mime_type)
         MP_VERBOSE(s, "Mime-type: '%s'\n", s->mime_type);
+
+    MP_VERBOSE(s, "Stream opened successfully.\n");
 
     *ret = s;
     return STREAM_OK;
