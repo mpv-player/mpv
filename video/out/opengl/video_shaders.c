@@ -243,29 +243,28 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 
     GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
     switch (trc) {
-        case MP_CSP_TRC_SRGB:
-            GLSL(color.rgb = mix(color.rgb / vec3(12.92),
-                                 pow((color.rgb + vec3(0.055))/vec3(1.055),
-                                     vec3(2.4)),
-                                 lessThan(vec3(0.04045), color.rgb));)
-            break;
-        case MP_CSP_TRC_BT_1886:
-            GLSL(color.rgb = pow(color.rgb, vec3(1.961));)
-            break;
-        case MP_CSP_TRC_GAMMA18:
-            GLSL(color.rgb = pow(color.rgb, vec3(1.8));)
-            break;
-        case MP_CSP_TRC_GAMMA22:
-            GLSL(color.rgb = pow(color.rgb, vec3(2.2));)
-            break;
-        case MP_CSP_TRC_GAMMA28:
-            GLSL(color.rgb = pow(color.rgb, vec3(2.8));)
-            break;
-        case MP_CSP_TRC_PRO_PHOTO:
-            GLSL(color.rgb = mix(color.rgb / vec3(16.0),
-                                 pow(color.rgb, vec3(1.8)),
-                                 lessThan(vec3(0.03125), color.rgb));)
-            break;
+    case MP_CSP_TRC_SRGB:
+        GLSL(color.rgb = mix(color.rgb / vec3(12.92),
+                             pow((color.rgb + vec3(0.055))/vec3(1.055), vec3(2.4)),
+                             lessThan(vec3(0.04045), color.rgb));)
+        break;
+    case MP_CSP_TRC_BT_1886:
+        GLSL(color.rgb = pow(color.rgb, vec3(1.961));)
+        break;
+    case MP_CSP_TRC_GAMMA18:
+        GLSL(color.rgb = pow(color.rgb, vec3(1.8));)
+        break;
+    case MP_CSP_TRC_GAMMA22:
+        GLSL(color.rgb = pow(color.rgb, vec3(2.2));)
+        break;
+    case MP_CSP_TRC_GAMMA28:
+        GLSL(color.rgb = pow(color.rgb, vec3(2.8));)
+        break;
+    case MP_CSP_TRC_PRO_PHOTO:
+        GLSL(color.rgb = mix(color.rgb / vec3(16.0),
+                             pow(color.rgb, vec3(1.8)),
+                             lessThan(vec3(0.03125), color.rgb));)
+        break;
     }
 }
 
@@ -277,29 +276,29 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 
     GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
     switch (trc) {
-        case MP_CSP_TRC_SRGB:
-            GLSL(color.rgb = mix(color.rgb * vec3(12.92),
-                                 vec3(1.055) * pow(color.rgb, vec3(1.0/2.4))
-                                     - vec3(0.055),
-                                 lessThanEqual(vec3(0.0031308), color.rgb));)
-            break;
-        case MP_CSP_TRC_BT_1886:
-            GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.961));)
-            break;
-        case MP_CSP_TRC_GAMMA18:
-            GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.8));)
-            break;
-        case MP_CSP_TRC_GAMMA22:
-            GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.2));)
-            break;
-        case MP_CSP_TRC_GAMMA28:
-            GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.8));)
-            break;
-        case MP_CSP_TRC_PRO_PHOTO:
-            GLSL(color.rgb = mix(color.rgb * vec3(16.0),
-                                 pow(color.rgb, vec3(1.0/1.8)),
-                                 lessThanEqual(vec3(0.001953), color.rgb));)
-            break;
+    case MP_CSP_TRC_SRGB:
+        GLSL(color.rgb = mix(color.rgb * vec3(12.92),
+                             vec3(1.055) * pow(color.rgb, vec3(1.0/2.4))
+                                 - vec3(0.055),
+                             lessThanEqual(vec3(0.0031308), color.rgb));)
+        break;
+    case MP_CSP_TRC_BT_1886:
+        GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.961));)
+        break;
+    case MP_CSP_TRC_GAMMA18:
+        GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.8));)
+        break;
+    case MP_CSP_TRC_GAMMA22:
+        GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.2));)
+        break;
+    case MP_CSP_TRC_GAMMA28:
+        GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.8));)
+        break;
+    case MP_CSP_TRC_PRO_PHOTO:
+        GLSL(color.rgb = mix(color.rgb * vec3(16.0),
+                             pow(color.rgb, vec3(1.0/1.8)),
+                             lessThanEqual(vec3(0.001953), color.rgb));)
+        break;
     }
 }
 
