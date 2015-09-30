@@ -12,7 +12,7 @@ local function exec(args)
     return ret.status, ret.stdout, ret
 end
 
--- return if it was explicitly set on the command line
+-- return true if it was explicitly set on the command line
 local function option_was_set(name)
     return mp.get_property_bool("option-info/" .. name .. "/set-from-commandline",
                                 false)
@@ -50,6 +50,11 @@ local function append_rtmp_prop(props, name, value)
 
     return props..name.."=\""..value.."\""
 end
+
+local function edl_escape(url)
+    return "%" .. string.len(url) .. "%" .. url
+end
+
 
 mp.add_hook("on_load", 10, function ()
     local url = mp.get_property("stream-open-filename")
@@ -101,8 +106,11 @@ mp.add_hook("on_load", 10, function ()
             "--sub-format", "ass/srt/best", "--no-playlist"
         }
 
-        -- Checks if video option is "no", change options accordingly
-        if (mp.get_property("options/vid") == "no") then
+        -- Checks if video option is "no", change format accordingly,
+        -- but only if user didn't explicitly set one
+        if (mp.get_property("options/vid") == "no")
+            and not option_was_set("ytdl-format") then
+
             format = "bestaudio/best"
             msg.verbose("Video disabled. Only using audio")
         end
@@ -162,10 +170,7 @@ mp.add_hook("on_load", 10, function ()
 
                 local playlist = "edl://"
                 for i, entry in pairs(json.entries) do
-
-                    local urllength = string.len(entry.url)
-                    playlist = playlist .. "%" .. urllength .. "%" .. entry.url .. ";"
-
+                    playlist = playlist .. edl_escape(entry.url) .. ";"
                 end
 
                 msg.debug("EDL: " .. playlist)
@@ -206,13 +211,20 @@ mp.add_hook("on_load", 10, function ()
 
             -- DASH?
             if not (json["requested_formats"] == nil) then
-                msg.info("Using DASH, expect inaccurate duration.")
-                if not (json.duration == nil) then
-                    msg.info("Actual duration: " .. mp.format_time(json.duration))
-                end
 
                 -- video url
                 streamurl = json["requested_formats"][1].url
+
+                -- fake duration
+                --if (true) and not (json.duration == nil) then
+                --    streamurl = "edl://" .. edl_escape(streamurl)
+                --        .. ",0," .. json.duration .. ";"
+                --    msg.info("Faking duration, ignore the following warning.")
+
+                --elseif not (json.duration == nil) then
+                    msg.info("Using DASH, expect inaccurate duration.")
+                    msg.info("Actual duration: " .. mp.format_time(json.duration))
+                --end
 
                 -- audio url
                 mp.set_property("file-local-options/audio-file",
