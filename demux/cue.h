@@ -25,6 +25,7 @@
 struct cue_file {
     struct cue_track *tracks;
     int num_tracks;
+    struct mp_tags *tags;
 };
 
 struct cue_track {
@@ -32,7 +33,7 @@ struct cue_track {
     double start;               // corresponds to INDEX 01
     char *filename;
     int source;
-    char *title;
+    struct mp_tags *tags;
 };
 
 bool mp_probe_cue(struct bstr data);

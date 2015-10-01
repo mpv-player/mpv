@@ -24,6 +24,7 @@
 
 #include "misc/bstr.h"
 #include "common/common.h"
+#include "common/tags.h"
 
 #include "cue.h"
 
@@ -37,6 +38,7 @@ enum cue_command {
     CUE_TRACK,
     CUE_INDEX,
     CUE_TITLE,
+    CUE_PERFORMER,
 };
 
 static const struct {
@@ -51,7 +53,7 @@ static const struct {
     { CUE_UNUSED, "CDTEXTFILE" },
     { CUE_UNUSED, "FLAGS" },
     { CUE_UNUSED, "ISRC" },
-    { CUE_UNUSED, "PERFORMER" },
+    { CUE_PERFORMER, "PERFORMER" },
     { CUE_UNUSED, "POSTGAP" },
     { CUE_UNUSED, "PREGAP" },
     { CUE_UNUSED, "REM" },
@@ -160,17 +162,19 @@ bool mp_probe_cue(struct bstr data)
 struct cue_file *mp_parse_cue(struct bstr data)
 {
     struct cue_file *f = talloc_zero(NULL, struct cue_file);
+    f->tags = talloc_zero(f, struct mp_tags);
 
     data = skip_utf8_bom(data);
 
     char *filename = NULL;
     // Global metadata, and copied into new tracks.
     struct cue_track proto_track = {0};
-    struct cue_track *cur_track = &proto_track;
+    struct cue_track *cur_track = NULL;
 
     while (data.len) {
         struct bstr param;
-        switch (read_cmd(&data, &param)) {
+        int cmd = read_cmd(&data, &param);
+        switch (cmd) {
         case CUE_ERROR:
             talloc_free(f);
             return NULL;
@@ -179,19 +183,29 @@ struct cue_file *mp_parse_cue(struct bstr data)
             f->num_tracks += 1;
             cur_track = &f->tracks[f->num_tracks - 1];
             *cur_track = proto_track;
+            cur_track->tags = talloc_zero(f, struct mp_tags);
             break;
         }
         case CUE_TITLE:
-            cur_track->title = read_quoted(f, &param);
+        case CUE_PERFORMER: {
+            static const char *metanames[] = {
+                [CUE_TITLE] = "title",
+                [CUE_PERFORMER] = "performer",
+            };
+            struct mp_tags *tags = cur_track ? cur_track->tags : f->tags;
+            mp_tags_set_bstr(tags, bstr0(metanames[cmd]), param);
             break;
+        }
         case CUE_INDEX: {
             int type = read_int_2(&param);
             double time = read_time(&param);
-            if (type == 1) {
-                cur_track->start = time;
-                cur_track->filename = filename;
-            } else if (type == 0) {
-                cur_track->pregap_start = time;
+            if (cur_track) {
+                if (type == 1) {
+                    cur_track->start = time;
+                    cur_track->filename = filename;
+                } else if (type == 0) {
+                    cur_track->pregap_start = time;
+                }
             }
             break;
         }

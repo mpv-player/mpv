@@ -924,7 +924,8 @@ static void demux_init_cuesheet(struct demuxer *demuxer)
         if (f) {
             for (int n = 0; n < f->num_tracks; n++) {
                 struct cue_track *t = &f->tracks[n];
-                demuxer_add_chapter(demuxer, t->title, t->start, -1);
+                int idx = demuxer_add_chapter(demuxer, "", t->start, -1);
+                mp_tags_merge(demuxer->chapters[idx].metadata, t->tags);
             }
         }
         talloc_free(f);
