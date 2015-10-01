@@ -586,7 +586,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
     buffer_pool_reinit(p, &p->video_bufpool, 2, p->width, p->height,
                        *p->video_format, p->wl->display.shm);
 
-    vo_wayland_config(vo, flags);
+    vo_wayland_config(vo);
 
     resize(p);
 

@@ -1293,7 +1293,7 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
-bool vo_wayland_config (struct vo *vo, uint32_t flags)
+bool vo_wayland_config (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
 
@@ -1308,11 +1308,9 @@ bool vo_wayland_config (struct vo *vo, uint32_t flags)
     wl->window.p_height = vo->dheight;
     wl->window.aspect = vo->dwidth / (float) MPMAX(vo->dheight, 1);
 
-    if (!(flags & VOFLAG_HIDDEN)) {
-        wl->window.width = vo->dwidth;
-        wl->window.height = vo->dheight;
-        vo_wayland_fullscreen(vo);
-    }
+    wl->window.width = vo->dwidth;
+    wl->window.height = vo->dheight;
+    vo_wayland_fullscreen(vo);
 
     return true;
 }

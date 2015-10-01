@@ -59,9 +59,9 @@ static void egl_resize(struct vo_wayland_state *wl)
     wl->window.events = 0;
 }
 
-static bool egl_create_context(struct vo_wayland_state *wl,
-                               MPGLContext *ctx,
-                               bool enable_alpha)
+static int egl_create_context(struct vo_wayland_state *wl,
+                              MPGLContext *ctx,
+                              bool enable_alpha)
 {
     EGLint major, minor, n;
 
@@ -69,7 +69,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     const char *eglstr = "";
 
     if (!(wl->egl_context.egl.dpy = eglGetDisplay(wl->display.display)))
-        return false;
+        return -1;
 
     EGLint config_attribs[] = {
         EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
@@ -84,7 +84,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
 
     /* major and minor here returns the supported EGL version (e.g.: 1.4) */
     if (eglInitialize(wl->egl_context.egl.dpy, &major, &minor) != EGL_TRUE)
-        return false;
+        return -1;
 
     MP_VERBOSE(wl, "EGL version %d.%d\n", major, minor);
 
@@ -94,7 +94,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     };
 
     if (eglBindAPI(EGL_OPENGL_API) != EGL_TRUE)
-        return false;
+        return -1;
 
     eglChooseConfig(wl->egl_context.egl.dpy, config_attribs,
                     &wl->egl_context.egl.conf, 1, &n);
@@ -114,7 +114,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
                                                    context_attribs);
 
         if (!wl->egl_context.egl.ctx)
-            return false;
+            return -1;
     }
 
     eglMakeCurrent(wl->egl_context.egl.dpy, NULL, NULL, wl->egl_context.egl.ctx);
@@ -127,7 +127,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     ctx->native_display_type = "wl";
     ctx->native_display = wl->display.display;
 
-    return true;
+    return 0;
 }
 
 static void egl_create_window(struct vo_wayland_state *wl)
@@ -163,38 +163,20 @@ static void egl_create_window(struct vo_wayland_state *wl)
     eglSwapInterval(wl->egl_context.egl.dpy, 0);
 }
 
-static bool config_window_wayland(struct MPGLContext *ctx, int flags)
+static int waylandgl_reconfig(struct MPGLContext *ctx, int flags)
 {
     struct vo_wayland_state * wl = ctx->vo->wayland;
-    bool enable_alpha = !!(flags & VOFLAG_ALPHA);
-    bool ret = false;
 
-    if (!vo_wayland_config(ctx->vo, flags))
-        return false;
+    if (!vo_wayland_config(ctx->vo))
+        return -1;
 
-    if (!wl->egl_context.egl.ctx) {
-        /* Create OpenGL context */
-        ret = egl_create_context(wl, ctx, enable_alpha);
+    if (!wl->egl_context.egl_window)
+        egl_create_window(wl);
 
-        /* If successfully created the context and we don't want to hide the
-         * window than also create the window immediately */
-        if (ret && !(VOFLAG_HIDDEN & flags))
-            egl_create_window(wl);
-
-        return ret;
-    }
-    else {
-        if (!wl->egl_context.egl_window) {
-            /* If the context exists and the hidden flag is unset then
-             * create the window */
-            if (!(VOFLAG_HIDDEN & flags))
-                egl_create_window(wl);
-        }
-        return true;
-    }
+    return 0;
 }
 
-static void releaseGlContext_wayland(MPGLContext *ctx)
+static void waylandgl_uninit(MPGLContext *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wayland;
 
@@ -207,9 +189,11 @@ static void releaseGlContext_wayland(MPGLContext *ctx)
     }
     eglTerminate(wl->egl_context.egl.dpy);
     wl->egl_context.egl.ctx = NULL;
+
+    vo_wayland_uninit(ctx->vo);
 }
 
-static void swapGlBuffers_wayland(MPGLContext *ctx)
+static void waylandgl_swap_buffers(MPGLContext *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wayland;
 
@@ -222,10 +206,11 @@ static void swapGlBuffers_wayland(MPGLContext *ctx)
     eglSwapBuffers(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
 }
 
-static int control(struct vo *vo, int *events, int request, void *data)
+static int waylandgl_control(MPGLContext *ctx, int *events, int request,
+                             void *data)
 {
-    struct vo_wayland_state *wl = vo->wayland;
-    int r = vo_wayland_control(vo, events, request, data);
+    struct vo_wayland_state *wl = ctx->vo->wayland;
+    int r = vo_wayland_control(ctx->vo, events, request, data);
 
     if (*events & VO_EVENT_RESIZE)
         egl_resize(wl);
@@ -233,12 +218,19 @@ static int control(struct vo *vo, int *events, int request, void *data)
     return r;
 }
 
-void mpgl_set_backend_wayland(MPGLContext *ctx)
+static int waylandgl_init(struct MPGLContext *ctx, int flags)
 {
-    ctx->config_window = config_window_wayland;
-    ctx->releaseGlContext = releaseGlContext_wayland;
-    ctx->swapGlBuffers = swapGlBuffers_wayland;
-    ctx->vo_control = control;
-    ctx->vo_init = vo_wayland_init;
-    ctx->vo_uninit = vo_wayland_uninit;
+    if (!vo_wayland_init(ctx->vo))
+        return -1;
+
+    return egl_create_context(ctx->vo->wayland, ctx, !!(flags & VOFLAG_ALPHA));
 }
+
+const struct mpgl_driver mpgl_driver_wayland = {
+    .name           = "wayland",
+    .init           = waylandgl_init,
+    .reconfig       = waylandgl_reconfig,
+    .swap_buffers   = waylandgl_swap_buffers,
+    .control        = waylandgl_control,
+    .uninit         = waylandgl_uninit,
+};
