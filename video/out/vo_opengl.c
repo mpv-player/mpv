@@ -247,7 +247,7 @@ static bool get_and_update_icc_profile(struct gl_priv *p, int *events)
 static void get_and_update_ambient_lighting(struct gl_priv *p, int *events)
 {
     int lux;
-    int r = p->glctx->vo_control(p->vo, events, VOCTRL_GET_AMBIENT_LUX, &lux);
+    int r = mpgl_control(p->glctx, events, VOCTRL_GET_AMBIENT_LUX, &lux);
     if (r == VO_TRUE) {
         gl_video_set_ambient_lux(p->renderer, lux);
     }

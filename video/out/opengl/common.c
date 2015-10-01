@@ -500,13 +500,14 @@ struct backend {
 
 extern const struct mpgl_driver mpgl_driver_x11;
 extern const struct mpgl_driver mpgl_driver_x11egl;
+extern const struct mpgl_driver mpgl_driver_cocoa;
 
 static const struct backend backends[] = {
 #if HAVE_RPI
     {"rpi", mpgl_set_backend_rpi},
 #endif
 #if HAVE_GL_COCOA
-    {"cocoa", mpgl_set_backend_cocoa},
+    {.driver = &mpgl_driver_cocoa},
 #endif
 #if HAVE_GL_WIN32
     {"win", mpgl_set_backend_w32},

@@ -154,7 +154,6 @@ struct m_option;
 int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
                               struct bstr name, struct bstr param);
 
-void mpgl_set_backend_cocoa(MPGLContext *ctx);
 void mpgl_set_backend_w32(MPGLContext *ctx);
 void mpgl_set_backend_wayland(MPGLContext *ctx);
 void mpgl_set_backend_rpi(MPGLContext *ctx);
