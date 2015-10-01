@@ -619,7 +619,7 @@ static MPGLContext *init_backend(struct vo *vo, const struct backend *backend,
 
     if (ctx->gl->mpgl_caps & MPGL_CAP_SW) {
         MP_WARN(ctx->vo, "Suspected software renderer or indirect context.\n");
-        if (vo->probing)
+        if (vo->probing && !(vo_flags & VOFLAG_SW))
             goto cleanup;
     }
 

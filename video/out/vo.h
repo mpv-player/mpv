@@ -134,6 +134,7 @@ struct voctrl_get_equalizer_args {
 #define VOFLAG_GLES             0x20  // Hint to prefer GLES2 if possible
 #define VOFLAG_GL_DEBUG         0x40  // Hint to request debug OpenGL context
 #define VOFLAG_ALPHA            0x80  // Hint to request alpha framebuffer
+#define VOFLAG_SW               0x100 // Hint to accept a software GL renderer
 
 // VO does handle mp_image_params.rotate in 90 degree steps
 #define VO_CAP_ROTATE90 1

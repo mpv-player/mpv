@@ -395,7 +395,7 @@ static int preinit(struct vo *vo)
         vo_flags |= VOFLAG_GLES;
 
     if (p->allow_sw)
-        vo->probing = false;
+        vo_flags |= VOFLAG_SW;
 
     p->glctx = mpgl_init(vo, p->backend, vo_flags);
     if (!p->glctx)
