@@ -2147,6 +2147,10 @@ static void check_gl_features(struct gl_video *p)
         p->use_lut_3d = false;
         MP_WARN(p, "Disabling color management (GLSL version too old).\n");
     }
+    if (!have_mix && p->opts.deband) {
+        p->opts.deband = 0;
+        MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
+    }
 }
 
 static void init_gl(struct gl_video *p)
