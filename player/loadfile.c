@@ -198,10 +198,12 @@ void update_demuxer_properties(struct MPContext *mpctx)
                         continue;
                 }
             }
+            struct mp_log *log = mp_log_new(NULL, mpctx->log, "!display-tags");
             if (!had_output)
-                MP_INFO(mpctx, "File tags:\n");
-            MP_INFO(mpctx, " %s: %s\n", info->keys[n], info->values[n]);
+                mp_info(log, "File tags:\n");
+            mp_info(log, " %s: %s\n", info->keys[n], info->values[n]);
             had_output = true;
+            talloc_free(log);
         }
         talloc_free(mpctx->filtered_tags);
         mpctx->filtered_tags = info;
