@@ -151,8 +151,6 @@ struct m_option;
 int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
                               struct bstr name, struct bstr param);
 
-void mpgl_set_backend_rpi(MPGLContext *ctx);
-
 void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                          const char *ext2, struct mp_log *log);
 void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),

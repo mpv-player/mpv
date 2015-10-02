@@ -503,10 +503,11 @@ extern const struct mpgl_driver mpgl_driver_x11egl;
 extern const struct mpgl_driver mpgl_driver_cocoa;
 extern const struct mpgl_driver mpgl_driver_wayland;
 extern const struct mpgl_driver mpgl_driver_w32;
+extern const struct mpgl_driver mpgl_driver_rpi;
 
 static const struct backend backends[] = {
 #if HAVE_RPI
-    {"rpi", mpgl_set_backend_rpi},
+    {.driver = &mpgl_driver_rpi},
 #endif
 #if HAVE_GL_COCOA
     {.driver = &mpgl_driver_cocoa},
