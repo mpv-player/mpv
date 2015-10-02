@@ -71,7 +71,6 @@ struct gl_priv {
     int use_gl_debug;
     int allow_sw;
     int swap_interval;
-    int current_swap_interval;
     int dwm_flush;
 
     char *backend;
@@ -147,12 +146,6 @@ static void flip_page(struct vo *vo)
             p->waitvsync = 0;
             p->opt_pattern[0] = 0;
         }
-    }
-
-    if (p->glctx->DwmFlush) {
-        p->current_swap_interval = p->glctx->DwmFlush(p->glctx, p->dwm_flush,
-                                                      p->swap_interval,
-                                                      p->current_swap_interval);
     }
 }
 
@@ -402,12 +395,13 @@ static int preinit(struct vo *vo)
         goto err_out;
     p->gl = p->glctx->gl;
 
+    p->glctx->dwm_flush_opt = p->dwm_flush;
+
     if (p->gl->SwapInterval) {
         p->gl->SwapInterval(p->swap_interval);
     } else {
         MP_VERBOSE(vo, "swap_control extension missing.\n");
     }
-    p->current_swap_interval = p->swap_interval;
 
     p->renderer = gl_video_init(p->gl, vo->log, vo->global);
     if (!p->renderer)

@@ -119,6 +119,9 @@ typedef struct MPGLContext {
     const char *native_display_type;
     void *native_display;
 
+    // Windows-specific hack. See vo_opengl dwmflush suboption.
+    int dwm_flush_opt;
+
     // For free use by the mpgl_driver.
     void *priv;
 
@@ -130,12 +133,6 @@ typedef struct MPGLContext {
     void (*vo_uninit)(struct vo *vo);
     int (*vo_control)(struct vo *vo, int *events, int request, void *arg);
     void (*releaseGlContext)(struct MPGLContext *);
-
-    // Used on windows only, tries to vsync with the DWM, and modifies SwapInterval
-    // when it does so. Returns the possibly modified swapinterval value.
-    int (*DwmFlush)(struct MPGLContext *, int opt_dwmflush,
-                    int opt_swapinterval, int current_swapinterval);
-
 
     // Resize the window, or create a new window if there isn't one yet.
     // On the first call, it creates a GL context.

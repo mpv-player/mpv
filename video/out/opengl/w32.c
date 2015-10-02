@@ -25,16 +25,28 @@
 #include "video/out/w32_common.h"
 #include "common.h"
 
-typedef HRESULT (WINAPI *DwmFlush_t)(void);
-
 struct w32_context {
+    int opt_swapinterval;
+    int current_swapinterval;
+
+    int (GLAPIENTRY *real_wglSwapInterval)(int);
+
     HGLRC context;
     HDC hdc;
     int flags;
 
     HINSTANCE dwmapi_dll;
-    DwmFlush_t dwmflush;
+    HRESULT (WINAPI *dwmflush)(void);
 };
+
+static __thread struct w32_context *current_w32_context;
+
+static int GLAPIENTRY w32_swap_interval(int interval)
+{
+    if (current_w32_context)
+        current_w32_context->opt_swapinterval = interval;
+    return 0;
+}
 
 static bool create_dc(struct MPGLContext *ctx, int flags)
 {
@@ -210,7 +222,7 @@ static void create_ctx(void *ptr)
 
     w32_ctx->dwmapi_dll = LoadLibrary(L"Dwmapi.dll");
     if (w32_ctx->dwmapi_dll)
-        w32_ctx->dwmflush = (DwmFlush_t)GetProcAddress(w32_ctx->dwmapi_dll, "DwmFlush");
+        w32_ctx->dwmflush = (void *)GetProcAddress(w32_ctx->dwmapi_dll, "DwmFlush");
 
     wglMakeCurrent(w32_ctx->hdc, NULL);
 }
@@ -227,9 +239,18 @@ static bool config_window_w32(struct MPGLContext *ctx, int flags)
     w32_ctx->flags = flags;
     vo_w32_run_on_thread(ctx->vo, create_ctx, ctx);
 
-    if (w32_ctx->context)
-        wglMakeCurrent(w32_ctx->hdc, w32_ctx->context);
-    return !!w32_ctx->context;
+    if (!w32_ctx->context)
+        return false;
+
+    if (!ctx->gl->SwapInterval)
+        MP_VERBOSE(ctx->vo, "WGL_EXT_swap_control missing.");
+    w32_ctx->real_wglSwapInterval = ctx->gl->SwapInterval;
+    ctx->gl->SwapInterval = w32_swap_interval;
+    w32_ctx->current_swapinterval = -1;
+
+    current_w32_context = w32_ctx;
+    wglMakeCurrent(w32_ctx->hdc, w32_ctx->context);
+    return true;
 }
 
 static void destroy_gl(void *ptr)
@@ -242,6 +263,7 @@ static void destroy_gl(void *ptr)
     if (w32_ctx->hdc)
         ReleaseDC(vo_w32_hwnd(ctx->vo), w32_ctx->hdc);
     w32_ctx->hdc = NULL;
+    current_w32_context = NULL;
 }
 
 static void releaseGlContext_w32(MPGLContext *ctx)
@@ -251,7 +273,6 @@ static void releaseGlContext_w32(MPGLContext *ctx)
         wglMakeCurrent(w32_ctx->hdc, 0);
     vo_w32_run_on_thread(ctx->vo, destroy_gl, ctx);
 
-    w32_ctx->dwmflush = NULL;
     if (w32_ctx->dwmapi_dll)
         FreeLibrary(w32_ctx->dwmapi_dll);
     w32_ctx->dwmapi_dll = NULL;
@@ -261,32 +282,24 @@ static void swapGlBuffers_w32(MPGLContext *ctx)
 {
     struct w32_context *w32_ctx = ctx->priv;
     SwapBuffers(w32_ctx->hdc);
-}
 
-// opt_dwmflush: 0 - never DwmFlush, 1 - only in windowed mode, 2 - always
-// return: the current (applied if modified) SwapInterval value.
-// DwmFlush waits on DWM vsync similar to SwapBuffers but a bit more noisy.
-// SwapBuffers still needs to be called, but we SwapInterval(0) when DwmFLush is
-// used (will get applied for the following SwapBuffers calls)
-static int DwmFlush_w32(MPGLContext *ctx, int opt_dwmflush,
-                        int opt_swapinterval, int current_swapinterval)
-{
-    struct w32_context *w32_ctx = ctx->priv;
-    int new_swapinterval = opt_swapinterval; // default if we don't DwmFLush
+    // default if we don't DwmFLush
+    int new_swapinterval = w32_ctx->opt_swapinterval;
 
-    if (w32_ctx->dwmflush &&
-        (opt_dwmflush == 2 || (opt_dwmflush == 1 && !ctx->vo->opts->fullscreen)) &&
-        S_OK == w32_ctx->dwmflush())
+    if (w32_ctx->dwmflush && w32_ctx->dwmflush() == S_OK &&
+        ((ctx->dwm_flush_opt == 1 && !ctx->vo->opts->fullscreen) ||
+         ctx->dwm_flush_opt == 2))
     {
         new_swapinterval = 0;
     }
 
-    if ((new_swapinterval != current_swapinterval) && ctx->gl->SwapInterval) {
-        ctx->gl->SwapInterval(new_swapinterval);
-        MP_VERBOSE(ctx->vo, "DwmFlush: set SwapInterval(%d)\n", new_swapinterval);
+    if (new_swapinterval != w32_ctx->current_swapinterval &&
+        w32_ctx->real_wglSwapInterval)
+    {
+        w32_ctx->real_wglSwapInterval(new_swapinterval);
+        MP_VERBOSE(ctx->vo, "set SwapInterval(%d)\n", new_swapinterval);
     }
-
-    return new_swapinterval;
+    w32_ctx->current_swapinterval = new_swapinterval;
 }
 
 void mpgl_set_backend_w32(MPGLContext *ctx)
@@ -298,5 +311,4 @@ void mpgl_set_backend_w32(MPGLContext *ctx)
     ctx->vo_init = vo_w32_init;
     ctx->vo_uninit = vo_w32_uninit;
     ctx->vo_control = vo_w32_control;
-    ctx->DwmFlush = DwmFlush_w32;
 }
