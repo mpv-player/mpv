@@ -1059,12 +1059,6 @@ static void gui_thread_reconfig(void *ptr)
 
     struct vo *vo = w32->vo;
 
-    // we already have a fully initialized window, so nothing needs to be done
-    if (flags & VOFLAG_HIDDEN) {
-        *res = 1;
-        return;
-    }
-
     struct vo_win_geometry geo;
     vo_calc_window_geometry(vo, &w32->screenrc, &geo);
     vo_apply_window_geometry(vo, &geo);
@@ -1107,7 +1101,7 @@ static void gui_thread_reconfig(void *ptr)
     *res = reinit_window_state(w32);
 }
 
-// Resize the window. On the first non-VOFLAG_HIDDEN call, it's also made visible.
+// Resize the window. On the first call, it's also made visible.
 int vo_w32_config(struct vo *vo, uint32_t flags)
 {
     struct vo_w32_state *w32 = vo->w32;

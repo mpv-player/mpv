@@ -502,6 +502,7 @@ extern const struct mpgl_driver mpgl_driver_x11;
 extern const struct mpgl_driver mpgl_driver_x11egl;
 extern const struct mpgl_driver mpgl_driver_cocoa;
 extern const struct mpgl_driver mpgl_driver_wayland;
+extern const struct mpgl_driver mpgl_driver_w32;
 
 static const struct backend backends[] = {
 #if HAVE_RPI
@@ -511,7 +512,7 @@ static const struct backend backends[] = {
     {.driver = &mpgl_driver_cocoa},
 #endif
 #if HAVE_GL_WIN32
-    {"win", mpgl_set_backend_w32},
+    {.driver = &mpgl_driver_w32},
 #endif
 
 //Add the wayland backend before x11, in order to probe for a wayland-server before a x11-server and avoid using xwayland

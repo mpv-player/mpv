@@ -39,6 +39,8 @@ struct w32_context {
     HRESULT (WINAPI *dwmflush)(void);
 };
 
+static void w32_uninit(MPGLContext *ctx);
+
 static __thread struct w32_context *current_w32_context;
 
 static int GLAPIENTRY w32_swap_interval(int interval)
@@ -227,20 +229,18 @@ static void create_ctx(void *ptr)
     wglMakeCurrent(w32_ctx->hdc, NULL);
 }
 
-static bool config_window_w32(struct MPGLContext *ctx, int flags)
+static int w32_init(struct MPGLContext *ctx, int flags)
 {
-    struct w32_context *w32_ctx = ctx->priv;
-    if (!vo_w32_config(ctx->vo, flags))
-        return false;
+    if (!vo_w32_init(ctx->vo))
+        goto fail;
 
-    if (w32_ctx->context) // reuse existing context
-        return true;
+    struct w32_context *w32_ctx = ctx->priv;
 
     w32_ctx->flags = flags;
     vo_w32_run_on_thread(ctx->vo, create_ctx, ctx);
 
     if (!w32_ctx->context)
-        return false;
+        goto fail;
 
     if (!ctx->gl->SwapInterval)
         MP_VERBOSE(ctx->vo, "WGL_EXT_swap_control missing.");
@@ -250,7 +250,17 @@ static bool config_window_w32(struct MPGLContext *ctx, int flags)
 
     current_w32_context = w32_ctx;
     wglMakeCurrent(w32_ctx->hdc, w32_ctx->context);
-    return true;
+    return 0;
+
+fail:
+    w32_uninit(ctx);
+    return -1;
+}
+
+static int w32_reconfig(struct MPGLContext *ctx, int flags)
+{
+    vo_w32_config(ctx->vo, flags);
+    return 0;
 }
 
 static void destroy_gl(void *ptr)
@@ -266,7 +276,7 @@ static void destroy_gl(void *ptr)
     current_w32_context = NULL;
 }
 
-static void releaseGlContext_w32(MPGLContext *ctx)
+static void w32_uninit(MPGLContext *ctx)
 {
     struct w32_context *w32_ctx = ctx->priv;
     if (w32_ctx->context)
@@ -276,9 +286,10 @@ static void releaseGlContext_w32(MPGLContext *ctx)
     if (w32_ctx->dwmapi_dll)
         FreeLibrary(w32_ctx->dwmapi_dll);
     w32_ctx->dwmapi_dll = NULL;
+    vo_w32_uninit(ctx->vo);
 }
 
-static void swapGlBuffers_w32(MPGLContext *ctx)
+static void w32_swap_buffers(MPGLContext *ctx)
 {
     struct w32_context *w32_ctx = ctx->priv;
     SwapBuffers(w32_ctx->hdc);
@@ -302,13 +313,17 @@ static void swapGlBuffers_w32(MPGLContext *ctx)
     w32_ctx->current_swapinterval = new_swapinterval;
 }
 
-void mpgl_set_backend_w32(MPGLContext *ctx)
+static int w32_control(MPGLContext *ctx, int *events, int request, void *arg)
 {
-    ctx->priv = talloc_zero(ctx, struct w32_context);
-    ctx->config_window = config_window_w32;
-    ctx->releaseGlContext = releaseGlContext_w32;
-    ctx->swapGlBuffers = swapGlBuffers_w32;
-    ctx->vo_init = vo_w32_init;
-    ctx->vo_uninit = vo_w32_uninit;
-    ctx->vo_control = vo_w32_control;
+    return vo_w32_control(ctx->vo, events, request, arg);
 }
+
+const struct mpgl_driver mpgl_driver_w32 = {
+    .name           = "w32",
+    .priv_size      = sizeof(struct w32_context),
+    .init           = w32_init,
+    .reconfig       = w32_reconfig,
+    .swap_buffers   = w32_swap_buffers,
+    .control        = w32_control,
+    .uninit         = w32_uninit,
+};
