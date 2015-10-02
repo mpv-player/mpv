@@ -76,9 +76,7 @@ enum {
 
 struct MPGLContext;
 
-// A backend (like X11, win32, ...), which provides OpenGL rendering.
-// This should be preferred for new code, instead of setting the callbacks
-// in MPGLContext directly.
+// A windowing backend (like X11, win32, ...), which provides OpenGL rendering.
 struct mpgl_driver {
     const char *name;
 
@@ -124,19 +122,6 @@ typedef struct MPGLContext {
 
     // For free use by the mpgl_driver.
     void *priv;
-
-    // Warning: all callbacks below are legacy. Newer code should use
-    //          a mpgl_driver struct, which replaces these callbacks.
-
-    void (*swapGlBuffers)(struct MPGLContext *);
-    int (*vo_init)(struct vo *vo);
-    void (*vo_uninit)(struct vo *vo);
-    int (*vo_control)(struct vo *vo, int *events, int request, void *arg);
-    void (*releaseGlContext)(struct MPGLContext *);
-
-    // Resize the window, or create a new window if there isn't one yet.
-    // On the first call, it creates a GL context.
-    bool (*config_window)(struct MPGLContext *ctx, int flags);
 } MPGLContext;
 
 MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags);

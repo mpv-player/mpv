@@ -130,7 +130,6 @@ struct voctrl_get_equalizer_args {
 #define VO_NOTAVAIL     -2
 #define VO_NOTIMPL      -3
 
-#define VOFLAG_HIDDEN           0x10  //< Use to create a hidden window
 #define VOFLAG_GLES             0x20  // Hint to prefer GLES2 if possible
 #define VOFLAG_GL_DEBUG         0x40  // Hint to request debug OpenGL context
 #define VOFLAG_ALPHA            0x80  // Hint to request alpha framebuffer
