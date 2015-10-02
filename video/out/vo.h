@@ -130,15 +130,19 @@ struct voctrl_get_equalizer_args {
 #define VO_NOTAVAIL     -2
 #define VO_NOTIMPL      -3
 
-#define VOFLAG_GLES             0x20  // Hint to prefer GLES2 if possible
-#define VOFLAG_GL_DEBUG         0x40  // Hint to request debug OpenGL context
-#define VOFLAG_ALPHA            0x80  // Hint to request alpha framebuffer
-#define VOFLAG_SW               0x100 // Hint to accept a software GL renderer
+enum {
+    VOFLAG_GLES         = 1 << 0,       // Hint to prefer GLES2 if possible
+    VOFLAG_GL_DEBUG     = 1 << 1,       // Hint to request debug OpenGL context
+    VOFLAG_ALPHA        = 1 << 2,       // Hint to request alpha framebuffer
+    VOFLAG_SW           = 1 << 3,       // Hint to accept a software GL renderer
+};
 
-// VO does handle mp_image_params.rotate in 90 degree steps
-#define VO_CAP_ROTATE90 1
-// VO does framedrop itself (vo_vdpau). Untimed/encoding VOs never drop.
-#define VO_CAP_FRAMEDROP 2
+enum {
+    // VO does handle mp_image_params.rotate in 90 degree steps
+    VO_CAP_ROTATE90     = 1 << 0,
+    // VO does framedrop itself (vo_vdpau). Untimed/encoding VOs never drop.
+    VO_CAP_FRAMEDROP    = 1 << 1,
+};
 
 #define VO_MAX_REQ_FRAMES 10
 
