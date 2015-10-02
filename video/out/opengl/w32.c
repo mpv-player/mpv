@@ -259,7 +259,7 @@ fail:
 
 static int w32_reconfig(struct MPGLContext *ctx, int flags)
 {
-    vo_w32_config(ctx->vo, flags);
+    vo_w32_config(ctx->vo);
     return 0;
 }
 

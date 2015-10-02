@@ -946,13 +946,13 @@ static DWORD update_style(struct vo_w32_state *w32, DWORD style)
 }
 
 // Update the window title, position, size, and border style.
-static int reinit_window_state(struct vo_w32_state *w32)
+static void reinit_window_state(struct vo_w32_state *w32)
 {
     HWND layer = HWND_NOTOPMOST;
     RECT r;
 
     if (w32->parent)
-        return 1;
+        return;
 
     bool new_fs = w32->opts->fullscreen;
     bool toggle_fs = w32->current_fs != new_fs;
@@ -1046,16 +1046,11 @@ static int reinit_window_state(struct vo_w32_state *w32)
                  r.bottom - r.top, SWP_FRAMECHANGED | SWP_SHOWWINDOW);
 
     signal_events(w32, VO_EVENT_RESIZE);
-
-    return 1;
 }
 
 static void gui_thread_reconfig(void *ptr)
 {
-    void **p = ptr;
-    struct vo_w32_state *w32 = p[0];
-    uint32_t flags = *(uint32_t *)p[1];
-    int *res = p[2];
+    struct vo_w32_state *w32 = ptr;
 
     struct vo *vo = w32->vo;
 
@@ -1098,17 +1093,15 @@ static void gui_thread_reconfig(void *ptr)
     w32->dw = vo->dwidth;
     w32->dh = vo->dheight;
 
-    *res = reinit_window_state(w32);
+    reinit_window_state(w32);
 }
 
 // Resize the window. On the first call, it's also made visible.
-int vo_w32_config(struct vo *vo, uint32_t flags)
+int vo_w32_config(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
-    int r;
-    void *p[] = {w32, &flags, &r};
-    mp_dispatch_run(w32->dispatch, gui_thread_reconfig, p);
-    return r;
+    mp_dispatch_run(w32->dispatch, gui_thread_reconfig, w32);
+    return 0;
 }
 
 static void *gui_thread(void *ptr)
