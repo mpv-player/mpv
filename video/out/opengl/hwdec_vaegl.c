@@ -88,7 +88,6 @@ struct priv {
     struct mp_log *log;
     struct mp_vaapi_ctx *ctx;
     VADisplay *display;
-    Display *xdisplay;
     GLuint gl_textures[4];
     EGLImageKHR images[4];
     VAImage current_image;
