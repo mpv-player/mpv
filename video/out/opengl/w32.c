@@ -257,7 +257,7 @@ fail:
     return -1;
 }
 
-static int w32_reconfig(struct MPGLContext *ctx, int flags)
+static int w32_reconfig(struct MPGLContext *ctx)
 {
     vo_w32_config(ctx->vo);
     return 0;

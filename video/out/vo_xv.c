@@ -456,7 +456,7 @@ static void resize(struct vo *vo)
  * create and map window,
  * allocate colors and (shared) memory
  */
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct vo_x11_state *x11 = vo->x11;
     struct xvctx *ctx = vo->priv;

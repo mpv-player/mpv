@@ -1132,7 +1132,7 @@ void write_video(struct MPContext *mpctx, double endpts)
                 info->name, p.w, p.h, extra, vo_format_name(p.imgfmt));
         MP_VERBOSE(mpctx, "VO: Description: %s\n", info->description);
 
-        int vo_r = vo_reconfig(vo, &p, 0);
+        int vo_r = vo_reconfig(vo, &p);
         if (vo_r < 0) {
             mpctx->error_playing = MPV_ERROR_VO_INIT_FAILED;
             goto error;

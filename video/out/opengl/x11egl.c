@@ -167,7 +167,7 @@ uninit:
     return false;
 }
 
-static int mpegl_reconfig(struct MPGLContext *ctx, int flags)
+static int mpegl_reconfig(struct MPGLContext *ctx)
 {
     vo_x11_config_vo_window(ctx->vo);
     return 0;

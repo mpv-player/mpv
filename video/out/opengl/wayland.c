@@ -163,7 +163,7 @@ static void egl_create_window(struct vo_wayland_state *wl)
     eglSwapInterval(wl->egl_context.egl.dpy, 0);
 }
 
-static int waylandgl_reconfig(struct MPGLContext *ctx, int flags)
+static int waylandgl_reconfig(struct MPGLContext *ctx)
 {
     struct vo_wayland_state * wl = ctx->vo->wayland;
 

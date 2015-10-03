@@ -452,7 +452,7 @@ static int query_format(struct vo *vo, int format)
     return ok;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct vo_priv *p = vo->priv;
 

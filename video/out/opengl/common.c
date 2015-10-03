@@ -629,10 +629,9 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags)
     return ctx;
 }
 
-// flags: passed to the backend function
-bool mpgl_reconfig_window(struct MPGLContext *ctx, int vo_flags)
+int mpgl_reconfig_window(struct MPGLContext *ctx)
 {
-    return ctx->driver->reconfig(ctx, vo_flags) >= 0;
+    return ctx->driver->reconfig(ctx);
 }
 
 int mpgl_control(struct MPGLContext *ctx, int *events, int request, void *arg)

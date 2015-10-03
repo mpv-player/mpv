@@ -490,7 +490,7 @@ static bool status_ok(struct vo *vo)
  * connect to X server, create and map window, initialize all
  * VDPAU objects, create different surfaces etc.
  */
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;

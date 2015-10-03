@@ -264,7 +264,7 @@ static int glx_init(struct MPGLContext *ctx, int vo_flags)
     return -1;
 }
 
-static int glx_reconfig(struct MPGLContext *ctx, int flags)
+static int glx_reconfig(struct MPGLContext *ctx)
 {
     vo_x11_config_vo_window(ctx->vo);
     return 0;

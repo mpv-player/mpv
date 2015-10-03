@@ -131,13 +131,6 @@ struct voctrl_get_equalizer_args {
 #define VO_NOTIMPL      -3
 
 enum {
-    VOFLAG_GLES         = 1 << 0,       // Hint to prefer GLES2 if possible
-    VOFLAG_GL_DEBUG     = 1 << 1,       // Hint to request debug OpenGL context
-    VOFLAG_ALPHA        = 1 << 2,       // Hint to request alpha framebuffer
-    VOFLAG_SW           = 1 << 3,       // Hint to accept a software GL renderer
-};
-
-enum {
     // VO does handle mp_image_params.rotate in 90 degree steps
     VO_CAP_ROTATE90     = 1 << 0,
     // VO does framedrop itself (vo_vdpau). Untimed/encoding VOs never drop.
@@ -224,10 +217,9 @@ struct vo_driver {
     /*
      * Initialize or reconfigure the display driver.
      *   params: video parameters, like pixel format and frame size
-     *   flags: combination of VOFLAG_ values
      * returns: < 0 on error, >= 0 on success
      */
-    int (*reconfig)(struct vo *vo, struct mp_image_params *params, int flags);
+    int (*reconfig)(struct vo *vo, struct mp_image_params *params);
 
     /*
      * Control interface
@@ -326,7 +318,7 @@ struct vo {
 
 struct mpv_global;
 struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex);
-int vo_reconfig(struct vo *vo, struct mp_image_params *p, int flags);
+int vo_reconfig(struct vo *vo, struct mp_image_params *p);
 
 int vo_control(struct vo *vo, uint32_t request, void *data);
 bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts);

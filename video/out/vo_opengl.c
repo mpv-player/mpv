@@ -173,11 +173,11 @@ static int query_format(struct vo *vo, int format)
     return 1;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct gl_priv *p = vo->priv;
 
-    if (!mpgl_reconfig_window(p->glctx, flags))
+    if (mpgl_reconfig_window(p->glctx) < 0)
         return -1;
 
     resize(p);

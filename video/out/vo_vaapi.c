@@ -152,7 +152,7 @@ static void resize(struct priv *p)
     p->vo->want_redraw = true;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *p = vo->priv;
 

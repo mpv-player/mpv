@@ -74,6 +74,13 @@ enum {
 
 #define MPGL_VER_P(ver) MPGL_VER_GET_MAJOR(ver), MPGL_VER_GET_MINOR(ver)
 
+enum {
+    VOFLAG_GLES         = 1 << 0,       // Hint to prefer GLES2 if possible
+    VOFLAG_GL_DEBUG     = 1 << 1,       // Hint to request debug OpenGL context
+    VOFLAG_ALPHA        = 1 << 2,       // Hint to request alpha framebuffer
+    VOFLAG_SW           = 1 << 3,       // Hint to accept a software GL renderer
+};
+
 struct MPGLContext;
 
 // A windowing backend (like X11, win32, ...), which provides OpenGL rendering.
@@ -93,7 +100,7 @@ struct mpgl_driver {
     // Currently, there is an unfortunate interaction with ctx->vo, and
     // display size etc. are determined by it.
     // Return 0 on success, negative value (-1) on error.
-    int (*reconfig)(struct MPGLContext *ctx, int flags);
+    int (*reconfig)(struct MPGLContext *ctx);
 
     // Present the frame.
     void (*swap_buffers)(struct MPGLContext *ctx);
@@ -126,7 +133,7 @@ typedef struct MPGLContext {
 
 MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags);
 void mpgl_uninit(MPGLContext *ctx);
-bool mpgl_reconfig_window(struct MPGLContext *ctx, int vo_flags);
+int mpgl_reconfig_window(struct MPGLContext *ctx);
 int mpgl_control(struct MPGLContext *ctx, int *events, int request, void *arg);
 void mpgl_swap_buffers(struct MPGLContext *ctx);
 

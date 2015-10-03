@@ -917,7 +917,7 @@ int handle_force_window(struct MPContext *mpctx, bool force)
             .w = w,   .h = h,
             .d_w = w, .d_h = h,
         };
-        if (vo_reconfig(vo, &p, 0) < 0)
+        if (vo_reconfig(vo, &p) < 0)
             goto err;
         vo_control(vo, VOCTRL_RESTORE_SCREENSAVER, NULL);
         vo_set_paused(vo, true);

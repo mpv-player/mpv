@@ -188,7 +188,7 @@ const struct fmt_entry {
     {0}
 };
 
-static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *fmt)
 {
     struct priv *p = vo->priv;
 

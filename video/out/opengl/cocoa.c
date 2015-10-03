@@ -150,7 +150,7 @@ static int cocoa_init(MPGLContext *ctx, int vo_flags)
     return 0;
 }
 
-static int cocoa_reconfig(struct MPGLContext *ctx, int flags)
+static int cocoa_reconfig(struct MPGLContext *ctx)
 {
     vo_cocoa_config_window(ctx->vo);
     return 0;

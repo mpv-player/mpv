@@ -1327,7 +1327,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return r;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     d3d_priv *priv = vo->priv;
 

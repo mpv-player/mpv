@@ -214,7 +214,7 @@ fail:
     return -1;
 }
 
-static int rpi_reconfig(struct MPGLContext *ctx, int flags)
+static int rpi_reconfig(struct MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
     ctx->vo->dwidth = p->w;

@@ -432,7 +432,7 @@ static void disable_renderer(struct vo *vo)
     p->renderer_enabled = false;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *p = vo->priv;
     MMAL_PORT_T *input = p->renderer->input[0];

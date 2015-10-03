@@ -89,7 +89,7 @@ static void uninit(struct vo *vo)
     vc->shutdown = true;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *vc = vo->priv;
     enum AVPixelFormat pix_fmt = imgfmt2pixfmt(params->imgfmt);
