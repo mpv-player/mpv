@@ -689,13 +689,6 @@ static int control(struct dec_video *vd, int cmd, void *arg)
     case VDCTRL_RESET:
         avcodec_flush_buffers(avctx);
         return CONTROL_TRUE;
-    case VDCTRL_QUERY_UNSEEN_FRAMES:;
-        int delay = avctx->has_b_frames;
-        assert(delay >= 0);
-        if (avctx->active_thread_type & FF_THREAD_FRAME)
-            delay += avctx->thread_count - 1;
-        *(int *)arg = delay;
-        return CONTROL_TRUE;
     case VDCTRL_GET_HWDEC: {
         int hwdec = ctx->hwdec ? ctx->hwdec->type : 0;
         if (!ctx->software_fallback_decoder)

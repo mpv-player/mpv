@@ -213,14 +213,9 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
 static void add_pts_to_sort(struct dec_video *d_video, double pts)
 {
     if (pts != MP_NOPTS_VALUE) {
-        int delay = -1;
-        video_vd_control(d_video, VDCTRL_QUERY_UNSEEN_FRAMES, &delay);
-        if (delay >= 0 && delay < d_video->num_buffered_pts)
-            d_video->num_buffered_pts = delay;
-        if (d_video->num_buffered_pts ==
-            sizeof(d_video->buffered_pts) / sizeof(double))
+        if (d_video->num_buffered_pts == MP_ARRAY_SIZE(d_video->buffered_pts)) {
             MP_ERR(d_video, "Too many buffered pts\n");
-        else {
+        } else {
             int i, j;
             for (i = 0; i < d_video->num_buffered_pts; i++)
                 if (d_video->buffered_pts[i] < pts)
