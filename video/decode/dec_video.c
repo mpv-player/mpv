@@ -332,7 +332,7 @@ struct mp_image *video_decode(struct dec_video *d_video,
         mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
         mpi->fields |= MP_IMGFIELD_INTERLACED;
     }
-    
+
     // Note: the PTS is reordered, but the DTS is not. Both should be monotonic.
     double pts = d_video->codec_pts;
     double dts = d_video->codec_dts;
