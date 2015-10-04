@@ -404,9 +404,7 @@ static void vo_set_level(struct vo *vo, int ontop)
     struct vo_cocoa_state *s = vo->cocoa;
 
     if (ontop) {
-        // +1 is not enough as that will show the icon layer on top of the
-        // menubar when the application is not frontmost. so use +2
-        s->window_level = NSMainMenuWindowLevel + 2;
+        s->window_level = NSModalPanelWindowLevel;
     } else {
         s->window_level = NSNormalWindowLevel;
     }
