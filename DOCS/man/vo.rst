@@ -20,13 +20,10 @@ normal driver parameters.
 
     See ``--vo=help`` for a list of compiled-in video output drivers.
 
-    The recommended output drivers are ``--vo=vdpau`` and ``--vo=opengl-hq``.
-    All other drivers are just for compatibility or special purposes.
-
-.. admonition:: Example
-
-    ``--vo=opengl,xv,``
-        Try the ``opengl`` driver, then the ``xv`` driver, then others.
+    The recommended output driver is ``--vo=opengl-hq``. All other drivers are
+    for compatibility or special purposes. By default, ``--vo=opengl`` is used,
+    but if that appears not to work, it fallback to other drivers (in the same
+    order as listed by ``--vo=help``).
 
 Available video output drivers are:
 
