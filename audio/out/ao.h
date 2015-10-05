@@ -72,6 +72,7 @@ struct encode_lavc_context;
 struct mp_audio;
 
 struct ao *ao_init_best(struct mpv_global *global,
+                        bool ao_null_fallback,
                         struct input_ctx *input_ctx,
                         struct encode_lavc_context *encode_lavc_ctx,
                         int samplerate, int format, struct mp_chmap channels);

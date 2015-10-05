@@ -240,6 +240,7 @@ static void split_ao_device(void *tmp, char *opt, char **out_ao, char **out_dev)
 }
 
 struct ao *ao_init_best(struct mpv_global *global,
+                        bool ao_null_fallback,
                         struct input_ctx *input_ctx,
                         struct encode_lavc_context *encode_lavc_ctx,
                         int samplerate, int format, struct mp_chmap channels)
@@ -280,6 +281,11 @@ struct ao *ao_init_best(struct mpv_global *global,
             MP_TARRAY_APPEND(tmp, ao_list, ao_num,
                 (struct m_obj_settings){.name = (char *)driver->name});
         }
+    }
+
+    if (ao_null_fallback) {
+        MP_TARRAY_APPEND(tmp, ao_list, ao_num,
+            (struct m_obj_settings){.name = "null"});
     }
 
     for (int n = 0; n < ao_num; n++) {

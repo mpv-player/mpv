@@ -260,11 +260,15 @@ void reinit_audio_chain(struct MPContext *mpctx)
     }
 
     if (!mpctx->ao) {
+        bool spdif_fallback = af_fmt_is_spdif(afs->output.format) &&
+                              mpctx->d_audio->spdif_passthrough;
+        bool ao_null_fallback = opts->ao_null_fallback && !spdif_fallback;
+
         mp_chmap_remove_useless_channels(&afs->output.channels,
                                          &opts->audio_output_channels);
         mp_audio_set_channels(&afs->output, &afs->output.channels);
 
-        mpctx->ao = ao_init_best(mpctx->global, mpctx->input,
+        mpctx->ao = ao_init_best(mpctx->global, ao_null_fallback, mpctx->input,
                                  mpctx->encode_lavc_ctx, afs->output.rate,
                                  afs->output.format, afs->output.channels);
 
@@ -283,9 +287,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
 
         if (!mpctx->ao) {
             // If spdif was used, try to fallback to PCM.
-            if (af_fmt_is_spdif(afs->output.format) &&
-                mpctx->d_audio->spdif_passthrough)
-            {
+            if (spdif_fallback) {
                 mpctx->d_audio->spdif_passthrough = false;
                 if (!audio_init_best_codec(mpctx->d_audio))
                     goto init_error;

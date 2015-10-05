@@ -917,6 +917,14 @@ Audio
 
     Currently not implemented for most AOs.
 
+``--audio-fallback-to-null=<yes|no>``
+    If no audio device can be opened, behave as if ``--ao=null`` was given. This
+    is useful in combination with ``--audio-device``: instead of causing an
+    error if the selected device does not exist, the client API user (or a
+    Lua script) could let playback continue normally, and check the
+    ``current-ao`` and ``audio-device-list`` properties to make high-level
+    decisions about how to continue.
+
 ``--ao=<driver1[:suboption1[=value]:...],driver2,...[,]>``
     Specify a priority list of audio output drivers to be used. For
     interactive use one would normally specify a single one to use, but in

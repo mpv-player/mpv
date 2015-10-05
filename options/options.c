@@ -383,6 +383,7 @@ const m_option_t mp_opts[] = {
     OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list),
     OPT_STRING("audio-device", audio_device, 0),
     OPT_STRING("audio-client-name", audio_client_name, 0),
+    OPT_FLAG("audio-fallback-to-null", ao_null_fallback, 0),
     OPT_CHOICE("force-window", force_vo, 0,
                ({"no", 0}, {"yes", 1}, {"immediate", 2})),
     OPT_FLAG("ontop", vo.ontop, M_OPT_FIXED),
