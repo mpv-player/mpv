@@ -63,7 +63,7 @@ void video_reset_decoding(struct dec_video *d_video)
     mp_image_unrefp(&d_video->waiting_decoded_mpi);
     d_video->num_buffered_pts = 0;
     d_video->last_pts = MP_NOPTS_VALUE;
-    d_video->last_packet_pdts = MP_NOPTS_VALUE;
+    d_video->first_packet_pdts = MP_NOPTS_VALUE;
     d_video->decoded_pts = MP_NOPTS_VALUE;
     d_video->codec_pts = MP_NOPTS_VALUE;
     d_video->codec_dts = MP_NOPTS_VALUE;
@@ -250,8 +250,8 @@ struct mp_image *video_decode(struct dec_video *d_video,
     double pkt_dts = packet ? packet->dts : MP_NOPTS_VALUE;
 
     double pkt_pdts = pkt_pts == MP_NOPTS_VALUE ? pkt_dts : pkt_pts;
-    if (pkt_pdts != MP_NOPTS_VALUE)
-        d_video->last_packet_pdts = pkt_pdts;
+    if (pkt_pdts != MP_NOPTS_VALUE && d_video->first_packet_pdts == MP_NOPTS_VALUE)
+        d_video->first_packet_pdts = pkt_pdts;
 
     if (avi_pts)
         add_avi_pts(d_video, pkt_pdts);
@@ -310,12 +310,13 @@ struct mp_image *video_decode(struct dec_video *d_video,
             MP_WARN(d_video, "No video PTS! Making something up.\n");
 
         double frame_time = 1.0f / (d_video->fps > 0 ? d_video->fps : 25);
-        double base = d_video->last_packet_pdts;
+        double base = d_video->first_packet_pdts;
         pts = d_video->decoded_pts;
-        if (pts == MP_NOPTS_VALUE)
+        if (pts == MP_NOPTS_VALUE) {
             pts = base == MP_NOPTS_VALUE ? 0 : base;
-
-        pts += frame_time;
+        } else {
+            pts += frame_time;
+        }
     }
 
     if (d_video->has_broken_packet_pts < 0)
