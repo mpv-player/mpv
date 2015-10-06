@@ -190,4 +190,4 @@ only if discretion is required.
 ## License
 
 
-Mostly GPLv2 or later. See [details.](https://github.com/mpv-player/mpv/blob/master/LICENSE)
+Mostly GPLv2 or later. See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)
