@@ -208,25 +208,21 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
     return !!d_video->vd_driver;
 }
 
-static void add_pts_to_sort(struct dec_video *d_video, double pts)
+static void add_avi_pts(struct dec_video *d_video, double pts)
 {
     if (pts != MP_NOPTS_VALUE) {
         if (d_video->num_buffered_pts == MP_ARRAY_SIZE(d_video->buffered_pts)) {
             MP_ERR(d_video, "Too many buffered pts\n");
         } else {
-            int i, j;
-            for (i = 0; i < d_video->num_buffered_pts; i++)
-                if (d_video->buffered_pts[i] < pts)
-                    break;
-            for (j = d_video->num_buffered_pts; j > i; j--)
-                d_video->buffered_pts[j] = d_video->buffered_pts[j - 1];
-            d_video->buffered_pts[i] = pts;
+            for (int i = d_video->num_buffered_pts; i > 0; i--)
+                d_video->buffered_pts[i] = d_video->buffered_pts[i - 1];
+            d_video->buffered_pts[0] = pts;
             d_video->num_buffered_pts++;
         }
     }
 }
 
-static double retrieve_sorted_pts(struct dec_video *d_video, double codec_pts)
+static double retrieve_avi_pts(struct dec_video *d_video, double codec_pts)
 {
     if (d_video->num_buffered_pts) {
         d_video->num_buffered_pts--;
@@ -241,7 +237,7 @@ struct mp_image *video_decode(struct dec_video *d_video,
                               int drop_frame)
 {
     struct MPOpts *opts = d_video->opts;
-    bool sort_pts = d_video->header->video->avi_dts && opts->correct_pts;
+    bool avi_pts = d_video->header->video->avi_dts && opts->correct_pts;
 
     struct demux_packet packet_copy;
     if (packet && packet->dts == MP_NOPTS_VALUE) {
@@ -257,8 +253,8 @@ struct mp_image *video_decode(struct dec_video *d_video,
     if (pkt_pdts != MP_NOPTS_VALUE)
         d_video->last_packet_pdts = pkt_pdts;
 
-    if (sort_pts)
-        add_pts_to_sort(d_video, pkt_pdts);
+    if (avi_pts)
+        add_avi_pts(d_video, pkt_pdts);
 
     double prev_codec_pts = d_video->codec_pts;
     double prev_codec_dts = d_video->codec_dts;
@@ -306,8 +302,8 @@ struct mp_image *video_decode(struct dec_video *d_video,
         pts = dts;
 
     // Alternative PTS determination methods
-    if (sort_pts)
-        pts = retrieve_sorted_pts(d_video, pts);
+    if (avi_pts)
+        pts = retrieve_avi_pts(d_video, pts);
 
     if (!opts->correct_pts || pts == MP_NOPTS_VALUE) {
         if (opts->correct_pts && !d_video->header->missing_timestamps)
