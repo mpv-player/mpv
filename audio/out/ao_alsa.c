@@ -478,16 +478,19 @@ static int init_device(struct ao *ao, bool second_try)
     err = snd_pcm_hw_params_any(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to get initial parameters");
 
+    bool found_format = false;
     int try_formats[AF_FORMAT_COUNT];
     af_get_best_sample_formats(ao->format, try_formats);
     for (int n = 0; try_formats[n]; n++) {
-        ao->format = try_formats[n];
-        p->alsa_fmt = find_alsa_format(ao->format);
-        if (snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt) >= 0)
+        p->alsa_fmt = find_alsa_format(try_formats[n]);
+        if (snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt) >= 0) {
+            ao->format = try_formats[n];
+            found_format = true;
             break;
+        }
     }
 
-    if (!ao->format) {
+    if (!found_format) {
         MP_ERR(ao, "Can't find appropriate sample format.\n");
         goto alsa_error;
     }
