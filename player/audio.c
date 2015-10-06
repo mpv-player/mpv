@@ -289,6 +289,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
             // If spdif was used, try to fallback to PCM.
             if (spdif_fallback) {
                 mpctx->d_audio->spdif_passthrough = false;
+                mpctx->d_audio->spdif_failed = true;
                 if (!audio_init_best_codec(mpctx->d_audio))
                     goto init_error;
                 reset_audio_state(mpctx);
@@ -474,7 +475,15 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         ao_reset(mpctx->ao);
         uninit_audio_out(mpctx);
         if (d_audio) {
-            mpctx->d_audio->spdif_passthrough = true;
+            if (mpctx->d_audio->spdif_failed) {
+                mpctx->d_audio->spdif_failed = false;
+                mpctx->d_audio->spdif_passthrough = true;
+                if (!audio_init_best_codec(mpctx->d_audio)) {
+                    MP_ERR(mpctx, "Error reinitializing audio.\n");
+                    error_on_track(mpctx, mpctx->current_track[0][STREAM_AUDIO]);
+                    return;
+                }
+            }
             mpctx->audio_status = STATUS_SYNCING;
         }
     }
