@@ -310,6 +310,9 @@ struct mp_image *video_decode(struct dec_video *d_video,
     double prev_codec_pts = d_video->codec_pts;
     double prev_codec_dts = d_video->codec_dts;
 
+    if (d_video->header->video->avi_dts)
+        drop_frame = 0;
+
     MP_STATS(d_video, "start decode video");
 
     struct mp_image *mpi = d_video->vd_driver->decode(d_video, packet, drop_frame);
