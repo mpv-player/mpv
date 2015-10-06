@@ -4588,7 +4588,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
     case MP_CMD_STOP:
         playlist_clear(mpctx->playlist);
-        if (!mpctx->stop_play)
+        if (mpctx->stop_play != PT_QUIT)
             mpctx->stop_play = PT_STOP;
         break;
 

@@ -1097,7 +1097,7 @@ reopen_file:
     }
 
     open_demux_reentrant(mpctx);
-    if (!mpctx->master_demuxer)
+    if (!mpctx->master_demuxer || mpctx->stop_play)
         goto terminate_playback;
     mpctx->demuxer = mpctx->master_demuxer;
 
