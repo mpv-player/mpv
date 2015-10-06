@@ -939,6 +939,9 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                                        struct demuxer_params *params,
                                        enum demux_check check)
 {
+    if (mp_cancel_test(stream->cancel))
+        return NULL;
+
     struct demuxer *demuxer = talloc_ptrtype(NULL, demuxer);
     *demuxer = (struct demuxer) {
         .desc = desc,
