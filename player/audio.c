@@ -473,8 +473,10 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     if (mpctx->ao && ao_query_and_reset_events(mpctx->ao, AO_EVENT_RELOAD)) {
         ao_reset(mpctx->ao);
         uninit_audio_out(mpctx);
-        if (d_audio)
+        if (d_audio) {
+            mpctx->d_audio->spdif_passthrough = true;
             mpctx->audio_status = STATUS_SYNCING;
+        }
     }
 
     if (!d_audio)
