@@ -144,7 +144,6 @@ typedef struct MPOpts {
     int chapterrange[2];
     int edition_id;
     int correct_pts;
-    int user_pts_assoc_mode;
     int initial_audio_sync;
     int video_sync;
     double sync_max_video_change;

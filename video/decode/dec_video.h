@@ -55,14 +55,9 @@ struct dec_video {
     double codec_dts;
     int num_codec_dts_problems;
 
-    // PTS sorting (obscure, non-default)
+    // PTS sorting (needed for AVI-style timestamps)
     double buffered_pts[32];
     int num_buffered_pts;
-    double sorted_pts;
-    int num_sorted_pts_problems;
-    double unsorted_pts;
-    int num_unsorted_pts_problems;
-    int pts_assoc_mode;
 
     // PTS or DTS of packet last read
     double last_packet_pdts;

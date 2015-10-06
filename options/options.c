@@ -521,8 +521,6 @@ const m_option_t mp_opts[] = {
 
     // a-v sync stuff:
     OPT_FLAG("correct-pts", correct_pts, 0),
-    OPT_CHOICE("pts-association-mode", user_pts_assoc_mode, 0,
-               ({"auto", 0}, {"decoder", 1}, {"sort", 2})),
     OPT_FLAG("initial-audio-sync", initial_audio_sync, 0),
     OPT_CHOICE("video-sync", video_sync, 0,
                ({"audio", VS_DEFAULT},
@@ -754,7 +752,6 @@ const struct MPOpts mp_default_opts = {
     .edition_id = -1,
     .default_max_pts_correction = -1,
     .correct_pts = 1,
-    .user_pts_assoc_mode = 1,
     .initial_audio_sync = 1,
     .frame_dropping = 1,
     .term_osd = 2,

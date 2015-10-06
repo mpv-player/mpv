@@ -1171,9 +1171,6 @@ Property list
     is loaded, or when switching ordered chapter segments. This is because
     the same underlying code is used for seeking and resyncing.)
 
-``pts-association-mode`` (RW)
-    See ``--pts-association-mode``.
-
 ``hr-seek`` (RW)
     See ``--hr-seek``.
 

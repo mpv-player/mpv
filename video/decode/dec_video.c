@@ -67,8 +67,6 @@ void video_reset_decoding(struct dec_video *d_video)
     d_video->decoded_pts = MP_NOPTS_VALUE;
     d_video->codec_pts = MP_NOPTS_VALUE;
     d_video->codec_dts = MP_NOPTS_VALUE;
-    d_video->sorted_pts = MP_NOPTS_VALUE;
-    d_video->unsorted_pts = MP_NOPTS_VALUE;
 }
 
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg)
@@ -228,57 +226,14 @@ static void add_pts_to_sort(struct dec_video *d_video, double pts)
     }
 }
 
-// Return true if pts1 comes before pts2. pts1 can be MP_NOPTS_VALUE, but pts2
-// always has to be valid. pts1 can't be equal or larger than pts2.
-#define PTS_IS_ORDERED(pts1, pts2) \
-    ((pts2) != MP_NOPTS_VALUE && ((pts1) == MP_NOPTS_VALUE || ((pts1) < (pts2))))
-
 static double retrieve_sorted_pts(struct dec_video *d_video, double codec_pts)
 {
-    struct MPOpts *opts = d_video->opts;
-
-    double sorted_pts;
     if (d_video->num_buffered_pts) {
         d_video->num_buffered_pts--;
-        sorted_pts = d_video->buffered_pts[d_video->num_buffered_pts];
-    } else {
-        MP_ERR(d_video, "No pts value from demuxer to use for frame!\n");
-        sorted_pts = MP_NOPTS_VALUE;
+        return d_video->buffered_pts[d_video->num_buffered_pts];
     }
-
-    if (!PTS_IS_ORDERED(d_video->sorted_pts, sorted_pts))
-        d_video->num_sorted_pts_problems++;
-    d_video->sorted_pts = sorted_pts;
-
-    if (!PTS_IS_ORDERED(d_video->unsorted_pts, codec_pts))
-        d_video->num_unsorted_pts_problems++;
-    d_video->unsorted_pts = codec_pts;
-
-    if (d_video->header->video->avi_dts) {
-        // Actually, they don't need to be sorted, we just reuse the buffering.
-        d_video->pts_assoc_mode = 2;
-    } else if (opts->user_pts_assoc_mode) {
-        d_video->pts_assoc_mode = opts->user_pts_assoc_mode;
-    } else if (d_video->pts_assoc_mode == 0) {
-        if (codec_pts != MP_NOPTS_VALUE)
-            d_video->pts_assoc_mode = 1;
-        else
-            d_video->pts_assoc_mode = 2;
-    } else {
-        int probcount1 = d_video->num_unsorted_pts_problems;
-        int probcount2 = d_video->num_sorted_pts_problems;
-        if (d_video->pts_assoc_mode == 2) {
-            int tmp = probcount1;
-            probcount1 = probcount2;
-            probcount2 = tmp;
-        }
-        if (probcount1 >= probcount2 * 1.5 + 2) {
-            d_video->pts_assoc_mode = 3 - d_video->pts_assoc_mode;
-            MP_WARN(d_video, "Switching to pts association mode %d.\n",
-                    d_video->pts_assoc_mode);
-        }
-    }
-    return d_video->pts_assoc_mode == 1 ? codec_pts : sorted_pts;
+    MP_ERR(d_video, "No pts value from demuxer to use for frame!\n");
+    return MP_NOPTS_VALUE;
 }
 
 struct mp_image *video_decode(struct dec_video *d_video,
@@ -286,9 +241,7 @@ struct mp_image *video_decode(struct dec_video *d_video,
                               int drop_frame)
 {
     struct MPOpts *opts = d_video->opts;
-    bool sort_pts =
-        (opts->user_pts_assoc_mode != 1 || d_video->header->video->avi_dts)
-        && opts->correct_pts;
+    bool sort_pts = d_video->header->video->avi_dts && opts->correct_pts;
 
     struct demux_packet packet_copy;
     if (packet && packet->dts == MP_NOPTS_VALUE) {
