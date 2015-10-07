@@ -411,7 +411,7 @@ static void fill_rect(struct vo *vo, GC gc, int x0, int y0, int x1, int y1)
     x1 = MPMIN(x1, vo->dwidth);
     y1 = MPMIN(y1, vo->dheight);
 
-    if (x11->window && x1 > x0 && y1 > y0)
+    if (x11->window && gc && x1 > x0 && y1 > y0)
         XFillRectangle(x11->display, x11->window, gc, x0, y0, x1 - x0, y1 - y0);
 }
 
