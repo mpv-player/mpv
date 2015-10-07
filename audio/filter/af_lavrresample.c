@@ -49,6 +49,7 @@
 #define avresample_convert(ctx, out, out_planesize, out_samples, in, in_planesize, in_samples) \
     swr_convert(ctx, out, out_samples, (const uint8_t**)(in), in_samples)
 #define avresample_set_channel_mapping swr_set_channel_mapping
+#define avresample_set_compensation swr_set_compensation
 #else
 #error "config.h broken or no resampler found"
 #endif
@@ -386,14 +387,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return AF_OK;
     case AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE: {
         s->playback_speed = *(double *)arg;
-        int new_rate = rate_from_speed(s->in_rate_af, s->playback_speed);
-        if (new_rate != s->in_rate && s->avrctx && af->fmt_out.format) {
-            // Before reconfiguring, drain the audio that is still buffered
-            // in the resampler.
-            af->filter_frame(af, NULL);
-            // Reinitialize resampler.
-            configure_lavrr(af, &af->fmt_in, &af->fmt_out, false);
-        }
         return AF_OK;
     }
     case AF_CONTROL_RESET:
@@ -455,7 +448,7 @@ static void reorder_planes(struct mp_audio *mpa, int *reorder,
     }
 }
 
-static int filter(struct af_instance *af, struct mp_audio *in)
+static int filter_resample(struct af_instance *af, struct mp_audio *in)
 {
     struct af_resample *s = af->priv;
 
@@ -514,6 +507,30 @@ error:
     talloc_free(in);
     talloc_free(out);
     return -1;
+}
+
+static int filter(struct af_instance *af, struct mp_audio *in)
+{
+    struct af_resample *s = af->priv;
+
+    int in_samples = in ? in->samples : 0;
+    int wanted_samples = lrint(in_samples / s->playback_speed);
+
+    if (avresample_set_compensation(s->avrctx,
+            (wanted_samples - in_samples) * s->out_rate / s->in_rate,
+            wanted_samples * s->out_rate / s->in_rate) < 0)
+    {
+        int new_rate = rate_from_speed(s->in_rate_af, s->playback_speed);
+        if (new_rate != s->in_rate && s->avrctx && af->fmt_out.format) {
+            // Before reconfiguring, drain the audio that is still buffered
+            // in the resampler.
+            filter_resample(af, NULL);
+            // Reinitialize resampler.
+            configure_lavrr(af, &af->fmt_in, &af->fmt_out, false);
+        }
+    }
+
+    return filter_resample(af, in);
 }
 
 static int af_open(struct af_instance *af)
