@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <stdbool.h>
 #include <pthread.h>
+#include <math.h>
 
 #ifndef __MINGW32__
 #include <unistd.h>
@@ -750,6 +751,10 @@ static bool render_frame(struct vo *vo)
         if (in->current_frame && in->current_frame->display_synced &&
             continuous && in->vsync_interval_approx > in->vsync_interval * 3 / 2)
             in->missed_count += 1;
+
+        double diff = (in->vsync_interval - in->vsync_interval_approx) / 1e6;
+        if (fabs(diff) < 0.150)
+            MP_STATS(vo, "value %f vsync-diff", diff);
     }
 
     if (!in->dropped_frame) {
