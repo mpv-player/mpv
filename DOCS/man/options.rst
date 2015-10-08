@@ -2474,20 +2474,23 @@ OSD
 ``--osd-duration=<time>``
     Set the duration of the OSD messages in ms (default: 1000).
 
-``--osd-font=<pattern>``, ``--sub-text-font=<pattern>``
+``--osd-font=<name>``, ``--sub-text-font=<name>``
     Specify font to use for OSD and for subtitles that do not themselves
     specify a particular font. The default is ``sans-serif``.
 
     .. admonition:: Examples
 
         - ``--osd-font='Bitstream Vera Sans'``
-        - ``--osd-font='Bitstream Vera Sans:style=Bold'`` (fontconfig pattern)
+        - ``--osd-font='MS Comic Sans'``
 
     .. note::
 
         The ``--sub-text-font`` option (and most other ``--sub-text-``
         options) are ignored when ASS-subtitles are rendered, unless the
         ``--no-sub-ass`` option is specified.
+
+        This used to support fontconfig patterns. Starting with libass 0.13.0,
+        this stopped working.
 
 ``--osd-font-size=<size>``, ``--sub-text-font-size=<size>``
     Specify the OSD/sub font size. The unit is the size in scaled pixels at a
