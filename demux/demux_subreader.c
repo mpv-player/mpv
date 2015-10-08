@@ -758,6 +758,10 @@ static int d_open_file(struct demuxer *demuxer, enum demux_check check)
 {
     if (check > DEMUX_CHECK_REQUEST)
         return -1;
+#if LIBAVUTIL_VERSION_MICRO >= 100
+    if (check != DEMUX_CHECK_FORCE)
+        return -1;
+#endif
 
     if (!demuxer->params || !demuxer->params->expect_subtitle)
         return -1;
