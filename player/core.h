@@ -302,6 +302,9 @@ typedef struct MPContext {
     double last_vo_pts;
     // Video PTS, or audio PTS if video has ended.
     double playback_pts;
+    // audio stats only
+    int64_t audio_stat_start;
+    double written_audio;
 
     int last_chapter;
 
