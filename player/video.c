@@ -1101,11 +1101,14 @@ void write_video(struct MPContext *mpctx, double endpts)
         return;
 
     if (r == VD_EOF) {
+        int prev_state = mpctx->video_status;
         mpctx->video_status =
             vo_still_displaying(vo) ? STATUS_DRAINING : STATUS_EOF;
         mpctx->delay = 0;
         mpctx->last_av_difference = 0;
         MP_DBG(mpctx, "video EOF (status=%d)\n", mpctx->video_status);
+        if (prev_state != mpctx->video_status)
+            mpctx->sleeptime = 0;
         return;
     }
 
