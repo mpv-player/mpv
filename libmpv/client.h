@@ -49,6 +49,22 @@ extern "C" {
  * 2) Using mpv as a library with mpv_create(). This basically allows embedding
  *    mpv in other applications.
  *
+ * Documentation
+ * -------------
+ *
+ * The libmpv C API is documented directly in this header. Note that most
+ * actual interaction with this player is done through
+ * options/commands/properties, which can be accessed through this API.
+ * Essentially everything is done with them, including loading a file,
+ * retrieving playback progress, and so on.
+ *
+ * These are documented elsewhere:
+ *      * http://mpv.io/manual/master/#options
+ *      * http://mpv.io/manual/master/#list-of-input-commands
+ *      * http://mpv.io/manual/master/#properties
+ *
+ * You can also look at the examples in DOCS/client_api_examples/.
+ *
  * Event loop
  * ----------
  *
