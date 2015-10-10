@@ -515,3 +515,25 @@ Available video output drivers are:
 
     To use hardware decoding with ``--vo-gpu`` instead, use
     ``--hwdec=mediacodec-copy`` along with ``--gpu-context=android``.
+
+``exynos`` (Samsung Exynos)
+    Native video output on development boards using an Exynos SoC.
+
+    Uses the atomic KMS kernel API in combination with the IPPv2 kernel API.
+    This provides hardware acceleration for color space conversion and
+    scaling. If possible, composition of video and OSD is also done in
+    hardware.
+
+    The following global options are supported by this video output:
+
+    ``--exynos-ipp=<number>``
+        Select the IPP module to use for CSC and scaling.
+        (default: 0)
+
+    ``--exynos-disable-vp=<yes|no>``
+        Disable the Video Processor and also perform scaling via IPPv2.
+        (default: no)
+
+    ``--drm-mode=<number>``
+        Mode ID to use (resolution, bit depth and frame rate).
+        (default: 0)

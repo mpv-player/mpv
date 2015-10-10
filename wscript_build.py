@@ -451,6 +451,7 @@ def build(ctx):
         ( "video/out/vo_caca.c",                 "caca" ),
         ( "video/out/vo_drm.c",                  "drm" ),
         ( "video/out/vo_direct3d.c",             "direct3d" ),
+        ( "video/out/vo_exynos.c",               "exynos" ),
         ( "video/out/vo_image.c" ),
         ( "video/out/vo_lavc.c",                 "encoding" ),
         ( "video/out/vo_rpi.c",                  "rpi" ),
@@ -483,6 +484,7 @@ def build(ctx):
         ( "video/out/win_state.c"),
         ( "video/out/x11_common.c",              "x11" ),
         ( "video/out/drm_common.c",              "drm" ),
+        ( "video/out/drm_atomic.c",              "exynos" ),
 
         ## osdep
         ( getch2_c ),
