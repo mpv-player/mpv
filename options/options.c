@@ -717,7 +717,7 @@ const struct MPOpts mp_default_opts = {
 #if HAVE_LUA
     .lua_load_osc = 1,
     .lua_load_ytdl = 1,
-    .lua_ytdl_format = "best",
+    .lua_ytdl_format = NULL,
     .lua_ytdl_raw_options = NULL,
 #endif
     .auto_load_scripts = 1,

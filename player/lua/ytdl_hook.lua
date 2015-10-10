@@ -2,7 +2,8 @@ local utils = require 'mp.utils'
 local msg = require 'mp.msg'
 
 local ytdl = {
-    path = "youtube-dl"
+    path = "youtube-dl",
+    searched = false
 }
 
 local function exec(args)
@@ -59,6 +60,16 @@ mp.add_hook("on_load", 10, function ()
 
     if (url:find("http://") == 1) or (url:find("https://") == 1)
         or (url:find("ytdl://") == 1) then
+
+        -- check for youtube-dl in mpv's config dir
+        if not (ytdl.searched) then
+            local ytdl_mcd = mp.find_config_file("youtube-dl")
+            if not (ytdl_mcd == nil) then
+                msg.verbose("found youtube-dl at: " .. ytdl_mcd)
+                ytdl.path = ytdl_mcd
+            end
+            ytdl.searched = true
+        end
 
         -- strip ytdl://
         if (url:find("ytdl://") == 1) then
@@ -183,18 +194,9 @@ mp.add_hook("on_load", 10, function ()
                 -- video url
                 streamurl = json["requested_formats"][1].url
 
-                if (json["ext"] == "mp4") and not (json.duration == nil) then
-                    msg.info("Using DASH, expect inaccurate duration.")
-                    msg.info("Actual duration: "..mp.format_time(json.duration))
-                end
-
                 -- audio url
                 mp.set_property("file-local-options/audio-file",
                     json["requested_formats"][2].url)
-
-                -- workaround for slow startup (causes inaccurate duration)
-                mp.set_property("file-local-options/demuxer-lavf-o",
-                    "fflags=+ignidx")
 
             elseif not (json.url == nil) then
                 -- normal video

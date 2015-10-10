@@ -456,16 +456,13 @@ Program Behavior
 
     If the script can't do anything with an URL, it will do nothing.
 
-    (Note: this is the replacement for the now removed libquvi support.)
-
 ``--ytdl-format=<best|worst|mp4|webm|...>``
     Video format/quality that is directly passed to youtube-dl. The possible
     values are specific to the website and the video, for a given url the
     available formats can be found with the command
     ``youtube-dl --list-formats URL``. See youtube-dl's documentation for
-    available aliases. To use experimental DASH support for youtube, use
-    ``bestvideo+bestaudio``.
-    (Default: ``best``)
+    available aliases.
+    (Default: youtube-dl's default, currently ``bestvideo+bestaudio/best``)
 
 ``--ytdl-raw-options=<key>=<value>[,<key>=<value>[,...]]``
     Pass arbitrary options to youtube-dl. Parameter and argument should be
