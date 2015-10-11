@@ -265,6 +265,10 @@ void vo_cocoa_init(struct vo *vo)
     pthread_cond_init(&s->wakeup, NULL);
     vo->cocoa = s;
     cocoa_init_light_sensor(vo);
+    if (!s->embedded) {
+        [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+        set_application_icon(NSApp);
+    }
 }
 
 static int vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
@@ -592,11 +596,6 @@ int vo_cocoa_config_window(struct vo *vo)
         vo->dheight = s->vo_dheight = frame.size.height;
 
         [s->nsgl_ctx update];
-
-        if (!s->embedded) {
-            [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-            set_application_icon(NSApp);
-        }
     });
     return 0;
 }
