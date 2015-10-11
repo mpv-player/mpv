@@ -195,8 +195,8 @@ mp.add_hook("on_load", 10, function ()
                 streamurl = json["requested_formats"][1].url
 
                 -- audio url
-                mp.set_property("file-local-options/audio-file",
-                    json["requested_formats"][2].url)
+                mp.commandv("audio-add", json["requested_formats"][2].url,
+                    "select", json["requested_formats"][2]["format_note"])
 
             elseif not (json.url == nil) then
                 -- normal video
@@ -227,7 +227,7 @@ mp.add_hook("on_load", 10, function ()
                     end
 
                     if not (sub == nil) then
-                        mp.commandv("sub_add", sub,
+                        mp.commandv("sub-add", sub,
                             "auto", sub_info.ext, lang)
                     else
                         msg.verbose("No subtitle data/url for ["..lang.."]")
