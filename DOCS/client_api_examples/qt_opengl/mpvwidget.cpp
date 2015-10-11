@@ -47,6 +47,7 @@ MpvWidget::MpvWidget(QWidget *parent, Qt::WindowFlags f)
 
 MpvWidget::~MpvWidget()
 {
+    makeCurrent();
     if (mpv_gl)
         mpv_opengl_cb_set_update_callback(mpv_gl, NULL, NULL);
     // Until this call is done, we need to make sure the player remains
