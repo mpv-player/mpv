@@ -190,9 +190,7 @@ const struct hwdec_profile_entry *hwdec_find_profile(
     }
     for (int n = 0; table[n].av_codec; n++) {
         if (table[n].av_codec == codec) {
-            if (table[n].ff_profile == FF_PROFILE_UNKNOWN ||
-                profile == FF_PROFILE_UNKNOWN ||
-                table[n].ff_profile == profile ||
+            if (table[n].ff_profile == profile ||
                 !lavc_param->check_hw_profile)
                 return &table[n];
         }
