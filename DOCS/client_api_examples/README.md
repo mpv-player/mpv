@@ -70,6 +70,10 @@ support both methods if possible.
 
 ## List of examples
 
+### simple
+
+Very primitive terminal-only example. Shows some most basic API usage.
+
 ### cocoa
 
 Shows how to embed the mpv video window in Objective-C/Cocoa.
@@ -84,25 +88,27 @@ with Cocoa elements from different libraries, it's more robust.
 
 Shows how to embed the mpv video window in Qt (using normal desktop widgets).
 
+### qt_opengl
+
+Shows how to use mpv's OpenGL video renderer in Qt. This uses the opengl-cb API
+for video. Since it does not rely on embedding "foreign" native Windows, it's
+usually more robust, potentially faster, and it's easier to control how your
+GUI interacts with the video. You can do your own OpenGL rendering on top of
+the video as well.
+
 ### qml
 
 Shows how to use mpv's OpenGL video renderer in QtQuick2 with QML. Uses the
-opengl-cb API for video. Since it does not rely on embedding "foreign" native
-Windows, it's usually more robust, potentially faster, and it's easier to
-control how your GUI interacts with the video. It's trivial to create OSD
-overlays with QML-native graphical elements as well.
+opengl-cb API for video. Since the video is a normal QML element, it's trivial
+to create OSD overlays with QML-native graphical elements as well.
 
 ### qml_direct
 
 Alternative example, which typically avoids a FBO indirection. Might be
-slightly faster, but is less flexible and harder to use. Uses the
-opengl-cb API for video.
+slightly faster, but is less flexible and harder to use. In particular, the
+video is not a normal QML element. Uses the opengl-cb API for video.
 
 ### sdl
 
 Show how to embed the mpv OpenGL renderer in SDL. Uses the opengl-cb API for
 video.
-
-### simple
-
-Very primitive terminal-only example. Shows some most basic API usage.
