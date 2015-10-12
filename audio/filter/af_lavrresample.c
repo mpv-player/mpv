@@ -513,21 +513,25 @@ static int filter(struct af_instance *af, struct mp_audio *in)
 {
     struct af_resample *s = af->priv;
 
-    int in_samples = in ? in->samples : 0;
-    int wanted_samples = lrint(in_samples / s->playback_speed);
+    int new_rate = rate_from_speed(s->in_rate_af, s->playback_speed);
+    bool need_reinit = fabs(new_rate / (double)s->in_rate - 1) > 0.01;
 
-    if (avresample_set_compensation(s->avrctx,
-            (wanted_samples - in_samples) * s->out_rate / s->in_rate,
-            wanted_samples * s->out_rate / s->in_rate) < 0)
-    {
-        int new_rate = rate_from_speed(s->in_rate_af, s->playback_speed);
-        if (new_rate != s->in_rate && s->avrctx && af->fmt_out.format) {
-            // Before reconfiguring, drain the audio that is still buffered
-            // in the resampler.
-            filter_resample(af, NULL);
-            // Reinitialize resampler.
-            configure_lavrr(af, &af->fmt_in, &af->fmt_out, false);
-        }
+    if (!need_reinit && s->avrctx) {
+        double speed_factor = s->playback_speed * s->in_rate_af / s->in_rate;
+        int in_samples = in ? in->samples : 0;
+        int wanted_samples = lrint(in_samples / speed_factor);
+        if (avresample_set_compensation(s->avrctx,
+                (wanted_samples - in_samples) * s->out_rate / s->in_rate,
+                wanted_samples * s->out_rate / s->in_rate) < 0)
+            need_reinit = true;
+    }
+
+    if (need_reinit && new_rate != s->in_rate) {
+        // Before reconfiguring, drain the audio that is still buffered
+        // in the resampler.
+        filter_resample(af, NULL);
+        // Reinitialize resampler.
+        configure_lavrr(af, &af->fmt_in, &af->fmt_out, false);
     }
 
     return filter_resample(af, in);
