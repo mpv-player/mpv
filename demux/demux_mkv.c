@@ -2389,8 +2389,12 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
         if (mkv_d->a_skip_to_keyframe)
             use_this_block &= keyframe;
     } else if (track->type == MATROSKA_TRACK_SUBTITLE) {
-        if (!use_this_block && mkv_d->subtitle_preroll)
-            use_this_block = 1;
+        if (!use_this_block && mkv_d->subtitle_preroll) {
+            int64_t end_time = block_info->timecode + block_info->duration;
+            if (!block_info->duration)
+                end_time = INT64_MAX;
+            use_this_block = end_time > mkv_d->skip_to_timecode;
+        }
         if (use_this_block) {
             if (mkv_d->subtitle_preroll) {
                 mkv_d->subtitle_preroll--;
