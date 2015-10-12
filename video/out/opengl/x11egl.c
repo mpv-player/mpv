@@ -166,11 +166,11 @@ static int mpegl_init(struct MPGLContext *ctx, int flags)
             goto uninit;
     }
 
-    return true;
+    return 0;
 
 uninit:
     mpegl_uninit(ctx);
-    return false;
+    return -1;
 }
 
 static int mpegl_reconfig(struct MPGLContext *ctx)
