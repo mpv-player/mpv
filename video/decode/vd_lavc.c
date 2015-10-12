@@ -519,6 +519,9 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
 
     assert(ctx->hwdec);
 
+    ctx->hwdec_request_reinit |= ctx->hwdec_failed;
+    ctx->hwdec_failed = false;
+
     if (ctx->hwdec->image_format) {
         for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
             if (ctx->hwdec->image_format == pixfmt2imgfmt(fmt[i])) {
