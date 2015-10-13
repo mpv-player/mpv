@@ -1611,7 +1611,7 @@ static int mp_property_audio_device(void *ctx, struct m_property *prop,
         struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug);
         for (int n = 0; n < list->num_devices; n++) {
             struct ao_device_desc *dev = &list->devices[n];
-            if (dev->name && strcmp(dev->name, mpctx->opts->audio_device)) {
+            if (dev->name && strcmp(dev->name, mpctx->opts->audio_device) == 0) {
                 *(char **)arg = talloc_strdup(NULL, dev->desc ? dev->desc : "?");
                 return M_PROPERTY_OK;
             }
