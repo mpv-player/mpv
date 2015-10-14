@@ -69,7 +69,7 @@ struct mpv_opengl_cb_context {
     int queued_frames;
     struct vo_frame *cur_frame;
     struct mp_image_params img_params;
-    bool reconfigured;
+    bool reconfigured, reset;
     int vp_w, vp_h;
     bool flip;
     bool force_update;
@@ -339,6 +339,13 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     ctx->reconfigured = false;
     ctx->update_new_opts = false;
 
+    if (ctx->reset) {
+        gl_video_reset(ctx->renderer);
+        ctx->reset = false;
+        if (ctx->cur_frame)
+            ctx->cur_frame->still = true;
+    }
+
     struct mp_csp_equalizer *eq = gl_video_eq_ptr(ctx->renderer);
     if (ctx->eq_changed) {
         memcpy(eq->values, ctx->eq.values, sizeof(eq->values));
@@ -353,6 +360,8 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         ctx->cur_frame = vo_frame_ref(frame);
     } else {
         frame = vo_frame_ref(ctx->cur_frame);
+        if (frame)
+            frame->redraw = true;
     }
     struct vo_frame dummy = {0};
     if (!frame)
@@ -510,6 +519,16 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct vo_priv *p = vo->priv;
 
     switch (request) {
+    case VOCTRL_RESET:
+        pthread_mutex_lock(&p->ctx->lock);
+        forget_frames(p->ctx, false);
+        p->ctx->reset = true;
+        pthread_mutex_unlock(&p->ctx->lock);
+        return VO_TRUE;
+    case VOCTRL_PAUSE:
+        vo->want_redraw = true;
+        vo_wakeup(vo);
+        return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_GET_EQUALIZER: {
