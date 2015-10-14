@@ -36,14 +36,14 @@ local o = {
     -- Text formatting
     -- With ASS
     nl = "\\N",
-    prop_indent = "\\h\\h\\h\\h\\h",
-    kv_sep = "\\h\\h",
+    indent = "\\h\\h\\h\\h\\h",
+    prefix_sep = "\\h\\h",
     b1 = "{\\b1}",
     b0 = "{\\b0}",
     -- Without ASS
     no_ass_nl = "\n",
-    no_ass_prop_indent = "\t",
-    no_ass_kv_sep = " ",
+    no_ass_indent = "\t",
+    no_ass_prefix_sep = " ",
     no_ass_b1 = "\027[1m",
     no_ass_b0 = "\027[0m",
 }
@@ -61,8 +61,8 @@ function main()
     o.ass_formatting = o.ass_formatting and has_vo_window()
     if not o.ass_formatting then
         o.nl = o.no_ass_nl
-        o.prop_indent = o.no_ass_prop_indent
-        o.kv_sep = o.no_ass_kv_sep
+        o.indent = o.no_ass_indent
+        o.prefix_sep = o.no_ass_prefix_sep
         if not has_ansi() then
             o.b1 = ""
             o.b0 = ""
@@ -90,7 +90,7 @@ function add_file(s)
     append_property(s, sec, "chapter", {prefix="Chapter:"})
     if append_property(s, sec, "cache-used", {prefix="Cache:"}) then
         append_property(s, sec, "demuxer-cache-duration",
-                        {prefix="+", suffix=" sec", nl="", indent=o.kv_sep,
+                        {prefix="+", suffix=" sec", nl="", indent=o.prefix_sep,
                          prefix_sep="", no_prefix_markup=true})
     end
 end
@@ -193,8 +193,8 @@ function append_property(s, sec, prop, attr, excluded)
         return false
     end
 
-    attr.prefix_sep = attr.prefix_sep or o.kv_sep
-    attr.indent = attr.indent or o.prop_indent
+    attr.prefix_sep = attr.prefix_sep or o.prefix_sep
+    attr.indent = attr.indent or o.indent
     attr.nl = attr.nl or o.nl
     attr.suffix = attr.suffix or ""
     attr.prefix = attr.prefix or ""
