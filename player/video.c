@@ -962,7 +962,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // particular, don't attempt to change speed for them.
     if (drop) {
         drop_repeat = -av_diff / vsync; // round towards 0
-        av_diff -= drop_repeat * vsync;
+        av_diff += drop_repeat * vsync;
     }
 
     if (resample) {
