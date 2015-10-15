@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-import matplotlib.pyplot as plot
+from pyqtgraph.Qt import QtGui, QtCore
+import pyqtgraph as pg
 import sys
 import re
 
@@ -38,8 +39,8 @@ Currently, the following event types are supported:
 class G:
     events = {}
     start = None
-    # http://matplotlib.org/api/markers_api.html#module-matplotlib.markers
-    markers = ["o", "8", "s", "p", "*", "h", "+", "x", "D"]
+    markers = ["o", "s", "t", "d"]
+    curveno = 0
 
 def find_marker():
     if len(G.markers) == 0:
@@ -128,20 +129,31 @@ for e, index in zip(G.sevents, range(len(G.sevents))):
     else:
         e.vals = [(x, y * (m - index) / m) for (x, y) in e.vals]
 
-fig = plot.figure()
-fig.hold(True)
+pg.setConfigOption('background', 'w')
+pg.setConfigOption('foreground', 'k')
+app = QtGui.QApplication([])
+win = pg.GraphicsWindow()
+#win.resize(1500, 900)
+
 ax = [None, None]
 plots = 2 if hasval else 1
-ax[0] = fig.add_subplot(plots, 1, 1)
+ax[0] = win.addPlot()
 if hasval:
-    ax[1] = fig.add_subplot(plots, 1, 2, sharex=ax[0])
-legends = [[], []]
+    win.nextRow()
+    ax[1] = win.addPlot()
+    ax[1].setXLink(ax[0])
+for cur in ax:
+   if cur is not None:
+       cur.addLegend(offset = (-1, 1))
 for e in G.sevents:
     cur = ax[1 if e.type == "value" else 0]
-    pl, = cur.plot([x for x,y in e.vals], [y for x,y in e.vals], label=e.name)
+    args = {'name': e.name,'antialias':True}
     if e.type == "event-signal":
-        plot.setp(pl, marker = e.marker, linestyle = "None")
-for cur in ax:
-    if cur is not None:
-        cur.legend()
-plot.show()
+        args['symbol'] = e.marker
+        args['pen'] = None
+    else:
+        args['pen'] = pg.mkPen(pg.intColor(G.curveno), width=0)
+        G.curveno += 1
+    n = cur.plot([x for x,y in e.vals], [y for x,y in e.vals], **args)
+
+QtGui.QApplication.instance().exec_()
