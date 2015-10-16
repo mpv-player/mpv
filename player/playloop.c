@@ -199,7 +199,8 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         break;
     case MPSEEK_RELATIVE:
         direction = seek.amount > 0 ? 1 : -1;
-        target_time = seek.amount + get_current_time(mpctx);
+        double cur = get_current_time(mpctx);
+        target_time = seek.amount + (cur == MP_NOPTS_VALUE ? 0 : cur);
         break;
     case MPSEEK_FACTOR: ;
         double len = get_time_length(mpctx);
@@ -390,18 +391,20 @@ double get_time_length(struct MPContext *mpctx)
 double get_current_time(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
-    if (!demuxer)
-        return 0;
-    if (mpctx->playback_pts != MP_NOPTS_VALUE)
-        return mpctx->playback_pts;
-    if (mpctx->last_seek_pts != MP_NOPTS_VALUE)
-        return mpctx->last_seek_pts;
-    return 0;
+    if (demuxer) {
+        if (mpctx->playback_pts != MP_NOPTS_VALUE)
+            return mpctx->playback_pts;
+        if (mpctx->last_seek_pts != MP_NOPTS_VALUE)
+            return mpctx->last_seek_pts;
+    }
+    return MP_NOPTS_VALUE;
 }
 
 double get_playback_time(struct MPContext *mpctx)
 {
     double cur = get_current_time(mpctx);
+    if (cur == MP_NOPTS_VALUE)
+        return cur;
     double start = get_start_time(mpctx);
     // During seeking, the time corresponds to the last seek time - apply some
     // cosmetics to it.

@@ -286,10 +286,6 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         goto exit;
     }
 
-    double pos = get_current_time(mpctx);
-    if (pos == MP_NOPTS_VALUE)
-        goto exit;
-
     mp_mk_config_dir(mpctx->global, MP_WATCH_LATER_CONF);
 
     conffile = mp_get_playback_resume_config_filename(mpctx, filename);
@@ -307,7 +303,9 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
             write_name[n] = (unsigned char)filename[n] < 32 ? '_' : filename[n];
         fprintf(file, "# %s\n", write_name);
     }
-    fprintf(file, "start=%f\n", pos);
+    double pos = get_current_time(mpctx);
+    if (pos != MP_NOPTS_VALUE)
+        fprintf(file, "start=%f\n", pos);
     for (int i = 0; backup_properties[i]; i++) {
         const char *pname = backup_properties[i];
         char *val = NULL;

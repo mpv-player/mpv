@@ -484,6 +484,9 @@ static int mp_property_stream_end(void *ctx, struct m_property *prop,
 // Assumes prop is the type of the actual property.
 static int property_time(int action, void *arg, double time)
 {
+    if (time == MP_NOPTS_VALUE)
+        return M_PROPERTY_UNAVAILABLE;
+
     const struct m_option time_type = {.type = CONF_TYPE_TIME};
     switch (action) {
     case M_PROPERTY_GET:
@@ -651,6 +654,9 @@ static bool time_remaining(MPContext *mpctx, double *remaining)
 {
     double len = get_time_length(mpctx);
     double playback = get_playback_time(mpctx);
+
+    if (playback == MP_NOPTS_VALUE)
+        return false;
 
     *remaining = len - playback;
 

@@ -54,6 +54,14 @@ static void sadd_hhmmssff(char **buf, double time, bool fractions)
     talloc_free(s);
 }
 
+// If time unknown (MP_NOPTS_VALUE), use 0 instead.
+static void sadd_hhmmssff_u(char **buf, double time, bool fractions)
+{
+    if (time == MP_NOPTS_VALUE)
+        time = 0;
+    sadd_hhmmssff(buf, time, fractions);
+}
+
 static void sadd_percentage(char **buf, int percent) {
     if (percent >= 0)
         *buf = talloc_asprintf_append(*buf, " (%d%%)", percent);
@@ -191,7 +199,7 @@ static void print_status(struct MPContext *mpctx)
     saddf(&line, ": ");
 
     // Playback position
-    sadd_hhmmssff(&line, get_playback_time(mpctx), mpctx->opts->osd_fractions);
+    sadd_hhmmssff_u(&line, get_playback_time(mpctx), mpctx->opts->osd_fractions);
 
     double len = get_time_length(mpctx);
     if (len >= 0) {
@@ -429,7 +437,7 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, int level)
             *buffer = talloc_strdup_append(*buffer, text);
             talloc_free(text);
         } else {
-            sadd_hhmmssff(buffer, get_playback_time(mpctx), fractions);
+            sadd_hhmmssff_u(buffer, get_playback_time(mpctx), fractions);
             if (level == 3) {
                 double len = get_time_length(mpctx);
                 if (len >= 0) {

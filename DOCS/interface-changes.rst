@@ -20,6 +20,10 @@ Interface changes
 ::
 
  --- mpv 0.12.0 ---
+    - some time properties (at least "playback-time", "time-pos",
+      "time-remaining", "playtime-remaining") now are unavailable if the time
+      is unknown, instead of just assuming that the internal playback position
+      is 0
     - add --audio-fallback-to-null option
     - replace vf_format outputlevels suboption with "video-output-levels" global
       property/option; also remove "colormatrix-output-range" property
