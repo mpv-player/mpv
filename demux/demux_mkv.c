@@ -149,6 +149,16 @@ typedef struct mkv_index {
     uint64_t filepos; // position of the cluster which contains the packet
 } mkv_index_t;
 
+struct block_info {
+    uint64_t duration, discardpadding;
+    bool simple, keyframe;
+    uint64_t timecode;
+    mkv_track_t *track;
+    bstr data;
+    void *alloc;
+    int64_t filepos;
+};
+
 typedef struct mkv_demuxer {
     int64_t segment_start, segment_end;
 
@@ -183,6 +193,8 @@ typedef struct mkv_demuxer {
     bool index_has_durations;
 
     bool eof_warning;
+
+    struct block_info tmp_block;
 } mkv_demuxer_t;
 
 #define OPT_BASE_STRUCT struct demux_mkv_opts
@@ -190,6 +202,7 @@ struct demux_mkv_opts {
     int subtitle_preroll;
     double subtitle_preroll_secs;
     int probe_duration;
+    int probe_start_time;
     int fix_timestamps;
 };
 
@@ -200,12 +213,14 @@ const struct m_sub_options demux_mkv_conf = {
                    M_OPT_MIN, .min = 0),
         OPT_CHOICE("probe-video-duration", probe_duration, 0,
                    ({"no", 0}, {"yes", 1}, {"full", 2})),
+        OPT_FLAG("probe-start-time", probe_start_time, 0),
         OPT_FLAG("fix-timestamps", fix_timestamps, 0),
         {0}
     },
     .size = sizeof(struct demux_mkv_opts),
     .defaults = &(const struct demux_mkv_opts){
         .subtitle_preroll_secs = 1.0,
+        .probe_start_time = 1,
         .fix_timestamps = 0,
     },
 };
@@ -220,6 +235,8 @@ const struct m_sub_options demux_mkv_conf = {
 #define NUM_SUB_PREROLL_PACKETS 500
 
 static void probe_last_timestamp(struct demuxer *demuxer);
+static void probe_first_timestamp(struct demuxer *demuxer);
+static void free_block(struct block_info *block);
 
 #define AAC_SYNC_EXTENSION_TYPE 0x02b7
 static int aac_get_sample_rate_index(uint32_t sample_rate)
@@ -1884,6 +1901,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     add_coverart(demuxer);
     demuxer->allow_refresh_seeks = true;
 
+    probe_first_timestamp(demuxer);
     if (opts->demux_mkv->probe_duration)
         probe_last_timestamp(demuxer);
 
@@ -2095,6 +2113,8 @@ static void mkv_seek_reset(demuxer_t *demuxer)
         }
         track->av_parser_codec = NULL;
     }
+
+    free_block(&mkv_d->tmp_block);
 }
 
 // Copied from libavformat/matroskadec.c (FFmpeg 310f9dd / 2013-05-30)
@@ -2267,16 +2287,6 @@ static void mkv_parse_and_add_packet(demuxer_t *demuxer, mkv_track_t *track,
         talloc_free(dp);
     }
 }
-
-struct block_info {
-    uint64_t duration, discardpadding;
-    bool simple, keyframe;
-    uint64_t timecode;
-    mkv_track_t *track;
-    bstr data;
-    void *alloc;
-    int64_t filepos;
-};
 
 static void free_block(struct block_info *block)
 {
@@ -2525,6 +2535,12 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     stream_t *s = demuxer->stream;
+
+    if (mkv_d->tmp_block.alloc) {
+        *block = mkv_d->tmp_block;
+        mkv_d->tmp_block = (struct block_info){0};
+        return 1;
+    }
 
     while (1) {
         while (stream_tell(s) < mkv_d->cluster_end) {
@@ -2921,6 +2937,23 @@ static void probe_last_timestamp(struct demuxer *demuxer)
 
     stream_seek(demuxer->stream, old_pos);
     mkv_d->cluster_start = mkv_d->cluster_end = 0;
+}
+
+static void probe_first_timestamp(struct demuxer *demuxer)
+{
+    mkv_demuxer_t *mkv_d = demuxer->priv;
+
+    if (!demuxer->opts->demux_mkv->probe_start_time)
+        return;
+
+    struct block_info block;
+    if (read_next_block(demuxer, &block) > 0)
+        mkv_d->tmp_block = block;
+
+    demuxer->start_time = mkv_d->cluster_tc / 1e9;
+
+    if (demuxer->start_time > 0)
+        MP_VERBOSE(demuxer, "Start PTS: %f\n", demuxer->start_time);
 }
 
 static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)
