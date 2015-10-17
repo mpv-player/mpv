@@ -52,7 +52,6 @@ struct fmtentry {
 static const struct fmtentry va_to_imgfmt[] = {
     {VA_FOURCC_NV12, IMGFMT_NV12},
     {VA_FOURCC_YV12, IMGFMT_420P},
-    {VA_FOURCC_I420, IMGFMT_420P},
     {VA_FOURCC_IYUV, IMGFMT_420P},
     {VA_FOURCC_UYVY, IMGFMT_UYVY},
     {VA_FOURCC_YUY2, IMGFMT_YUYV},

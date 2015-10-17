@@ -23,10 +23,6 @@
 #include <pthread.h>
 #include <va/va.h>
 
-#ifndef VA_FOURCC_I420
-#define VA_FOURCC_I420 VA_FOURCC('I', '4', '2', '0')
-#endif
-
 #define VA_STR_FOURCC(fcc) \
     (const char[]){(fcc), (fcc) >> 8u, (fcc) >> 16u, (fcc) >> 24u, 0}
 
