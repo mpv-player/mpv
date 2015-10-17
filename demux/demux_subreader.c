@@ -804,7 +804,9 @@ static int d_fill_buffer(struct demuxer *demuxer)
     struct priv *p = demuxer->priv;
     struct demux_packet *dp = demux_packet_list_fill(p->pkts, p->num_pkts,
                                                      &p->current);
-    return demux_add_packet(p->sh, dp);
+    int have_packet = !!dp;
+    demux_add_packet(p->sh, dp);
+    return have_packet;
 }
 
 static void d_seek(struct demuxer *demuxer, double secs, int flags)

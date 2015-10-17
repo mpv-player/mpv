@@ -307,13 +307,12 @@ const char *stream_type_name(enum stream_type type)
     }
 }
 
-// Returns the same value as demuxer->fill_buffer: 1 ok, 0 EOF/not selected.
-int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
+void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
 {
     struct demux_stream *ds = stream ? stream->ds : NULL;
     if (!dp || !ds) {
         talloc_free(dp);
-        return 0;
+        return;
     }
     struct demux_internal *in = ds->in;
     pthread_mutex_lock(&in->lock);
@@ -330,7 +329,7 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     if (!ds->selected || in->seeking || drop) {
         pthread_mutex_unlock(&in->lock);
         talloc_free(dp);
-        return 0;
+        return;
     }
 
     dp->stream = stream->index;
@@ -371,7 +370,6 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
         ds->in->wakeup_cb(ds->in->wakeup_cb_ctx);
     pthread_cond_signal(&in->wakeup);
     pthread_mutex_unlock(&in->lock);
-    return 1;
 }
 
 // Returns true if there was "progress" (lock was released temporarily).
