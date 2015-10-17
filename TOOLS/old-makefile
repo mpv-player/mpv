@@ -88,8 +88,8 @@ SOURCES-$(VDPAU)                += video/vdpau.c video/vdpau_mixer.c \
 SOURCES-$(VDPAU_GL_X11)         += video/out/opengl/hwdec_vdpau.c
 SOURCES-$(VAAPI)                += video/out/vo_vaapi.c \
                                    video/decode/vaapi.c \
+                                   video/filter/vf_vavpp.c \
                                    video/vaapi.c
-SOURCES-$(VAAPI_VPP)            += video/filter/vf_vavpp.c
 SOURCES-$(VAAPI_GLX)            += video/out/opengl/hwdec_vaglx.c
 SOURCES-$(VAAPI_X_EGL)          += video/out/opengl/hwdec_vaegl.c
 

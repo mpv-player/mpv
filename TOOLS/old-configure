@@ -618,12 +618,6 @@ _vaapi_wayland=auto
 fi
 check_pkg_config "VAAPI Wayland" $_vaapi_wayland VAAPI_WAYLAND 'libva-wayland >= 0.34.0'
 
-if test "$_vaapi" = yes ; then
-    check_pkg_config "VAAPI VPP" auto VAAPI_VPP 'libva >= 0.34.0'
-else
-    check_yes_no no VAAPI_VPP
-fi
-
 check_pkg_config "Xinerama" $_xinerama XINERAMA 'xinerama'
 
 check_pkg_config "Xrandr" $_xrandr XRANDR 'xrandr >= 1.2.0'

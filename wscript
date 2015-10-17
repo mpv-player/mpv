@@ -658,11 +658,7 @@ video_output_features = [
         'desc': 'VAAPI (Wayland support)',
         'deps': [ 'vaapi', 'wayland' ],
         'func': check_pkg_config('libva-wayland', '>= 0.36.0'),
-    }, {
-        'name': '--vaapi-vpp',
-        'desc': 'VAAPI VPP',
-        'deps': [ 'vaapi' ],
-        'func': check_pkg_config('libva', '>= 0.36.0'),
+
     }, {
         'name': '--vaapi-glx',
         'desc': 'VAAPI GLX',
