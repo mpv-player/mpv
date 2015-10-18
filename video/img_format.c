@@ -231,15 +231,21 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     if (pd->flags & (AV_PIX_FMT_FLAG_PAL | AV_PIX_FMT_FLAG_PSEUDOPAL))
         desc.flags |= MP_IMGFLAG_PAL;
 
-    if ((desc.flags & MP_IMGFLAG_YUV) && (desc.flags & MP_IMGFLAG_BYTE_ALIGNED))
+    if ((desc.flags & (MP_IMGFLAG_YUV | MP_IMGFLAG_RGB))
+        && (desc.flags & MP_IMGFLAG_BYTE_ALIGNED))
     {
         bool same_depth = true;
         for (int p = 0; p < desc.num_planes; p++) {
             same_depth &= planedepth[p] == planedepth[0] &&
                           desc.bpp[p] == desc.bpp[0];
         }
-        if (same_depth && pd->nb_components == desc.num_planes)
-            desc.flags |= MP_IMGFLAG_YUV_P;
+        if (same_depth && pd->nb_components == desc.num_planes) {
+            if (desc.flags & MP_IMGFLAG_YUV) {
+                desc.flags |= MP_IMGFLAG_YUV_P;
+            } else {
+                desc.flags |= MP_IMGFLAG_RGB_P;
+            }
+        }
     }
 
     for (int p = 0; p < desc.num_planes; p++) {

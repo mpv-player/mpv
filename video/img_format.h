@@ -67,6 +67,8 @@
 #define MP_IMGFLAG_HWACCEL 0x10000
 // Set if the chroma resolution is lower than luma resolution. Unset for non-YUV.
 #define MP_IMGFLAG_SUBSAMPLED 0x20000
+// Like MP_IMGFLAG_YUV_P, but RGB. The planes are organized as in IMGFMT_GBRP.
+#define MP_IMGFLAG_RGB_P 0x40000
 
 // Exactly one of these bits is set in mp_imgfmt_desc.flags
 #define MP_IMGFLAG_COLOR_CLASS_MASK \

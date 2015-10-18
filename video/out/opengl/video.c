@@ -2278,13 +2278,16 @@ static bool init_format(int fmt, struct gl_video *init)
     init->has_alpha = false;
 
     // YUV/planar formats
-    if (desc.flags & MP_IMGFLAG_YUV_P) {
+    if (desc.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_RGB_P)) {
         int bits = desc.component_bits;
         if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
             init->has_alpha = desc.num_planes > 3;
             plane_format[0] = find_tex_format(gl, (bits + 7) / 8, 1);
             for (int p = 1; p < desc.num_planes; p++)
                 plane_format[p] = plane_format[0];
+            // RGB/planar
+            if (desc.flags & MP_IMGFLAG_RGB_P)
+                snprintf(init->color_swizzle, sizeof(init->color_swizzle), "brga");
             goto supported;
         }
     }
@@ -2297,15 +2300,6 @@ static bool init_format(int fmt, struct gl_video *init)
         plane_format[1] = find_tex_format(gl, 1, 2);
         if (fmt == IMGFMT_NV21)
             snprintf(init->color_swizzle, sizeof(init->color_swizzle), "rbga");
-        goto supported;
-    }
-
-    // RGB/planar
-    if (fmt == IMGFMT_GBRP) {
-        snprintf(init->color_swizzle, sizeof(init->color_swizzle), "brga");
-        plane_format[0] = find_tex_format(gl, 1, 1);
-        for (int p = 1; p < desc.num_planes; p++)
-            plane_format[p] = plane_format[0];
         goto supported;
     }
 
