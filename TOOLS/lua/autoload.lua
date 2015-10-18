@@ -30,7 +30,12 @@ function add_files_at(index, files)
 end
 
 function get_extension(path)
-    return string.match(path, "%.([^%.]+)$" )
+    match = string.match(path, "%.([^%.]+)$" )
+    if match == nil then
+        return "nomatch"
+    else
+        return match
+    end
 end
 
 table.filter = function(t, iter)
