@@ -986,7 +986,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
             if (av_diff * -mpctx->display_sync_drift_dir >= 0)
                 new = 0;
             if (fabs(av_diff) > max_drift)
-                new = copysign(1, av_diff);
+                new = av_diff >= 0 ? 1 : -1;
             if (mpctx->display_sync_drift_dir != new) {
                 MP_VERBOSE(mpctx, "Change display sync audio drift: %d\n", new);
                 mpctx->display_sync_drift_dir = new;
