@@ -635,7 +635,10 @@ static void handle_stream(demuxer_t *demuxer, int i)
         sh->ff_index = st->index;
         sh->codec = mp_codec_from_av_codec_id(codec->codec_id);
         sh->codec_tag = codec->codec_tag;
-        sh->lav_headers = codec;
+        sh->lav_headers = avcodec_alloc_context3(NULL);
+        if (!sh->lav_headers)
+            return;
+        mp_copy_lav_codec_headers(sh->lav_headers, codec);
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = true;
@@ -1076,6 +1079,10 @@ static void demux_close_lavf(demuxer_t *demuxer)
         if (priv->pb)
             av_freep(&priv->pb->buffer);
         av_freep(&priv->pb);
+        for (int n = 0; n < priv->num_streams; n++) {
+            if (priv->streams[n])
+                avcodec_free_context(&priv->streams[n]->lav_headers);
+        }
         talloc_free(priv);
         demuxer->priv = NULL;
     }
