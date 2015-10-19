@@ -631,14 +631,14 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         return;
     }
 
-    // Skipped frame, or delayed output due to multithreaded decoding.
-    if (!got_picture)
-        return;
-
     if (ctx->hwdec && ctx->hwdec_failed) {
         av_frame_unref(ctx->pic);
         return;
     }
+
+    // Skipped frame, or delayed output due to multithreaded decoding.
+    if (!got_picture)
+        return;
 
     struct mp_image_params params;
     update_image_params(vd, ctx->pic, &params);
