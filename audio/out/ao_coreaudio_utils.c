@@ -523,7 +523,7 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
 
     /* The AudioStreamSetProperty is not only asynchronous,
      * it is also not Atomic, in its behaviour. */
-    struct timespec timeout = mp_rel_time_to_timespec(0.5);
+    struct timespec timeout = mp_rel_time_to_timespec(2.0);
     AudioStreamBasicDescription actual_format = {0};
     while (1) {
         err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &actual_format);
