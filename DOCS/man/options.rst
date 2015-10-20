@@ -3278,6 +3278,13 @@ Network
     Verify peer certificates when using TLS (e.g. with ``https://...``).
     (Silently fails with older FFmpeg or Libav versions.)
 
+``--tls-cert-file``
+    A file containing a certificate to use in the handshake with the
+    peer.
+
+``--tls-key-file``
+    A file containing the private key for the certificate.
+
 ``--referrer=<string>``
     Specify a referrer path or URL for HTTP requests.
 
