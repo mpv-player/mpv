@@ -185,6 +185,8 @@ const m_option_t mp_opts[] = {
                 {"http", 3})),
     OPT_FLAG("tls-verify", network_tls_verify, 0),
     OPT_STRING("tls-ca-file", network_tls_ca_file, M_OPT_FILE),
+    OPT_STRING("tls-cert-file", network_tls_cert_file, M_OPT_FILE),
+    OPT_STRING("tls-key-file", network_tls_key_file, M_OPT_FILE),
     OPT_DOUBLE("network-timeout", network_timeout, M_OPT_MIN, .min = 0),
 
 // ------------------------- demuxer options --------------------
