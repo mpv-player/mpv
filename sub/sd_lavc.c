@@ -276,6 +276,15 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
         d.ml = d.mr = d.mt = d.mb = 0;
     int insize[2];
     get_resolution(sd, insize);
+    for (int n = 0; n < res->num_parts; n++) {
+        struct sub_bitmap *p = &res->parts[n];
+        if ((p->x + p->w > insize[0] || p->y + p->h > insize[1]) &&
+            priv->video_params.w > insize[0] && priv->video_params.h > insize[1])
+        {
+            insize[0] = priv->video_params.w;
+            insize[1] = priv->video_params.h;
+        }
+    }
     osd_rescale_bitmaps(res, insize[0], insize[1], d, video_par);
 }
 
