@@ -180,6 +180,8 @@ static void init_physical_format(struct ao *ao)
     struct priv *p = ao->priv;
     OSErr err;
 
+    void *tmp = talloc_new(NULL);
+
     AudioStreamBasicDescription asbd;
     ca_fill_asbd(ao, &asbd);
 
@@ -189,6 +191,8 @@ static void init_physical_format(struct ao *ao)
     err = CA_GET_ARY_O(p->device, kAudioDevicePropertyStreams,
                        &streams, &n_streams);
     CHECK_CA_ERROR("could not get number of streams");
+
+    talloc_steal(tmp, streams);
 
     MP_VERBOSE(ao, "Found %zd substream(s).\n", n_streams);
 
@@ -204,6 +208,7 @@ static void init_physical_format(struct ao *ao)
         if (!CHECK_CA_WARN("could not get number of stream formats"))
             continue; // try next one
 
+        talloc_steal(tmp, formats);
 
         uint32_t direction;
         err = CA_GET(streams[i], kAudioStreamPropertyDirection, &direction);
@@ -239,6 +244,7 @@ static void init_physical_format(struct ao *ao)
     }
 
 coreaudio_error:
+    talloc_free(tmp);
     return;
 }
 
