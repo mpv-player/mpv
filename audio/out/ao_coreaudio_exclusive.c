@@ -315,8 +315,8 @@ static int init(struct ao *ao)
     ao->samplerate = p->stream_asbd.mSampleRate;
 
     if (ao->channels.num != p->stream_asbd.mChannelsPerFrame) {
-        ca_active_chmap(ao, p->device, p->stream_asbd.mChannelsPerFrame,
-                        &ao->channels);
+        ca_get_active_chmap(ao, p->device, p->stream_asbd.mChannelsPerFrame,
+                            &ao->channels);
     }
     if (!ao->channels.num) {
         MP_ERR(ao, "number of channels changed, and unknown channel layout!\n");
