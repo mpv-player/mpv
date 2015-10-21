@@ -164,7 +164,7 @@ static bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
     }
 
     talloc_free(talloc_ctx);
-    return chmap->num > 0;
+    return mp_chmap_is_valid(chmap) && !mp_chmap_is_unknown(chmap);
 coreaudio_error:
     MP_VERBOSE(ao, "converted input channel layout (failed):\n");
     ca_log_layout(ao, MSGL_V, layout);
