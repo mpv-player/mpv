@@ -428,10 +428,8 @@ static bool read_packet(struct demux_internal *in)
     pthread_mutex_lock(&in->lock);
 
     if (eof) {
-        for (int n = 0; n < in->d_buffer->num_streams; n++) {
-            struct demux_stream *ds = in->d_buffer->streams[n]->ds;
-            ds->eof = true;
-        }
+        for (int n = 0; n < in->d_buffer->num_streams; n++)
+            in->d_buffer->streams[n]->ds->eof = true;
         // If we had EOF previously, then don't wakeup (avoids wakeup loop)
         if (!in->last_eof) {
             if (in->wakeup_cb)
