@@ -237,6 +237,12 @@ static void init_physical_format(struct ao *ao)
                          &p->original_asbd);
             CHECK_CA_WARN("could not get current physical stream format");
 
+            if (ca_asbd_equals(&p->original_asbd, &best_asbd)) {
+                MP_VERBOSE(ao, "Requested format already set, not changing.\n");
+                p->original_asbd.mFormatID = 0;
+                break;
+            }
+
             if (!ca_change_physical_format_sync(ao, streams[i], best_asbd))
                 p->original_asbd = (AudioStreamBasicDescription){0};
             break;
