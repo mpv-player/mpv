@@ -505,6 +505,8 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
     err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &prev_format);
     CHECK_CA_ERROR("can't get current physical format");
 
+    ca_print_asbd(ao, "format in use before switching:", &prev_format);
+
     /* Install the callback. */
     AudioObjectPropertyAddress p_addr = {
         .mSelector = kAudioStreamPropertyPhysicalFormat,
