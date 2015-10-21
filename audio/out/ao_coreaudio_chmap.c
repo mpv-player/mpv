@@ -265,3 +265,28 @@ coreaudio_error:
     talloc_free(ta_ctx);
     return false;
 }
+
+void ca_get_active_chmap(struct ao *ao, AudioDeviceID device, int channel_count,
+                         struct mp_chmap *out_map)
+{
+    void *ta_ctx = talloc_new(NULL);
+
+    // Apparently, we have to guess by looking back at the supported layouts,
+    // and I haven't found a property that retrieves the actual currently
+    // active channel layout.
+
+    AudioChannelLayout *ml = ca_query_layout(ao, device, ta_ctx);
+    if (ml && ca_layout_to_mp_chmap(ao, ml, out_map)) {
+        if (channel_count == out_map->num)
+            goto done;
+    }
+
+    AudioChannelLayout *sl = ca_query_stereo_layout(ao, device, ta_ctx);
+    if (sl && ca_layout_to_mp_chmap(ao, sl, out_map)) {
+        if (channel_count == out_map->num)
+            goto done;
+    }
+
+    out_map->num = 0;
+done: ;
+}
