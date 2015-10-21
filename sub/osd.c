@@ -480,13 +480,8 @@ void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
     double yscale = (double)vidh / frame_h;
     if (compensate_par < 0)
         compensate_par = xscale / yscale / res.display_par;
-    if (compensate_par > 0) {
-        if (compensate_par > 1.0) {
-            xscale /= compensate_par;
-        } else {
-            yscale *= compensate_par;
-        }
-    }
+    if (compensate_par > 0)
+        xscale /= compensate_par;
     int cx = vidw / 2 - (int)(frame_w * xscale) / 2;
     int cy = vidh / 2 - (int)(frame_h * yscale) / 2;
     for (int i = 0; i < imgs->num_parts; i++) {
