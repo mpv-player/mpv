@@ -611,11 +611,8 @@ Available video output drivers are:
     ``deband-iterations=<1..16>``
         The number of debanding steps to perform per sample. Each step reduces
         a bit more banding, but takes time to compute. Note that the strength
-        of each step falls off very quickly, so high numbers are practically
-        useless. (Default 4)
-
-        If the performance hit of debanding is too great, you can reduce this
-        to 2 or 1 with marginal visual quality loss.
+        of each step falls off very quickly, so high numbers (>4) are
+        practically useless. (Default 1)
 
     ``deband-threshold=<0..4096>``
         The debanding filter's cut-off threshold. Higher numbers increase the
@@ -625,7 +622,10 @@ Available video output drivers are:
     ``deband-range=<1..64>``
         The debanding filter's initial radius. The radius increases linearly
         for each iteration. A higher radius will find more gradients, but
-        a lower radius will smooth more aggressively. (Default 8)
+        a lower radius will smooth more aggressively. (Default 16)
+
+        If you increase the ``deband-iterations``, you should probably
+        decrease this to compensate.
 
     ``deband-grain=<0..4096>``
         Add some extra noise to the image. This significantly helps cover up
