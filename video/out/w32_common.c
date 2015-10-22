@@ -835,21 +835,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     return DefWindowProcW(hWnd, message, wParam, lParam);
 }
 
-static bool is_key_message(UINT msg)
-{
-    return msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN ||
-           msg == WM_KEYUP || msg == WM_SYSKEYUP;
-}
-
 // Dispatch incoming window events and handle them.
 // This returns only when the thread is asked to terminate.
 static void run_message_loop(struct vo_w32_state *w32)
 {
     MSG msg;
     while (GetMessageW(&msg, 0, 0, 0) > 0) {
-        // Only send IME messages to TranslateMessage
-        if (is_key_message(msg.message) && msg.wParam == VK_PROCESSKEY)
-            TranslateMessage(&msg);
         DispatchMessageW(&msg);
 
         if (w32->parent) {
@@ -1104,6 +1095,20 @@ int vo_w32_config(struct vo *vo)
     return 0;
 }
 
+static void thread_disable_ime(void)
+{
+    // Disables the IME for windows on this thread. imm32.dll must be loaded
+    // dynamically to account for machines without East Asian language support.
+    HMODULE imm32 = LoadLibraryW(L"imm32.dll");
+    if (!imm32)
+        return;
+    BOOL (WINAPI *pImmDisableIME)(DWORD) = (BOOL (WINAPI*)(DWORD))
+        GetProcAddress(imm32, "ImmDisableIME");
+    if (pImmDisableIME)
+        pImmDisableIME(0);
+    FreeLibrary(imm32);
+}
+
 static void *gui_thread(void *ptr)
 {
     struct vo_w32_state *w32 = ptr;
@@ -1111,6 +1116,8 @@ static void *gui_thread(void *ptr)
     int res = 0;
 
     mpthread_set_name("win32 window");
+
+    thread_disable_ime();
 
     HINSTANCE hInstance = GetModuleHandleW(NULL);
 
