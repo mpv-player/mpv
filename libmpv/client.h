@@ -69,9 +69,9 @@ extern "C" {
  * ----------
  *
  * In general, the API user should run an event loop in order to receive events.
- * This even loop should call mpv_wait_event(), which will return once a new
- * mpv client API is available. It should also be possible to integrate client
- * API usage in other event loops (e.g. GUI toolkits) with the
+ * This event loop should call mpv_wait_event(), which will return once a new
+ * mpv client API is available. It is also possible to integrate client API
+ * usage in other event loops (e.g. GUI toolkits) with the
  * mpv_set_wakeup_callback() function, and then polling for events by calling
  * mpv_wait_event() with a 0 timeout.
  *
