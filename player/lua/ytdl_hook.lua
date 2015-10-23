@@ -78,9 +78,10 @@ mp.add_hook("on_load", 10, function ()
 
         local format = mp.get_property("options/ytdl-format")
         local raw_options = mp.get_property_native("options/ytdl-raw-options")
+        local allsubs = true
 
         local command = {
-            ytdl.path, "--no-warnings", "-J", "--flat-playlist", "--all-subs",
+            ytdl.path, "--no-warnings", "-J", "--flat-playlist",
             "--sub-format", "ass/srt/best", "--no-playlist"
         }
 
@@ -103,6 +104,13 @@ mp.add_hook("on_load", 10, function ()
             if (arg ~= "") then
                 table.insert(command, arg)
             end
+            if (param == "sub-lang") and (arg ~= "") then
+                allsubs = false
+            end
+        end
+
+        if (allsubs == true) then
+            table.insert(command, "--all-subs")
         end
         table.insert(command, "--")
         table.insert(command, url)
