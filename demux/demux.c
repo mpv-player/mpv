@@ -1392,10 +1392,11 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
     case DEMUXER_CTRL_GET_BITRATE_STATS: {
         double *rates = arg;
         for (int n = 0; n < STREAM_TYPE_COUNT; n++)
-            rates[n] = 0;
+            rates[n] = -1;
         for (int n = 0; n < in->d_user->num_streams; n++) {
             struct demux_stream *ds = in->d_user->streams[n]->ds;
-            rates[ds->type] += MPMAX(0, ds->bitrate);
+            if (ds->selected && ds->bitrate >= 0)
+                rates[ds->type] = MPMAX(0, rates[ds->type]) + ds->bitrate;
         }
         return DEMUXER_CTRL_OK;
     }

@@ -3093,6 +3093,8 @@ static int mp_property_packet_bitrate(void *ctx, struct m_property *prop,
     double r[STREAM_TYPE_COUNT];
     if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_BITRATE_STATS, &r) < 1)
         return M_PROPERTY_UNAVAILABLE;
+    if (r[type] < 0)
+        return M_PROPERTY_UNAVAILABLE;
 
     // r[type] is in bytes/second -> bits
     double rate = r[type] * 8;
