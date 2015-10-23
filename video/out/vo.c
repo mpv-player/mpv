@@ -646,7 +646,6 @@ static bool render_frame(struct vo *vo)
 
     frame->next_vsync = next_vsync;
     frame->prev_vsync = prev_vsync;
-    frame->num_vsyncs = 1;
 
     // Time at which we should flip_page on the VO.
     int64_t target = frame->display_synced ? 0 : pts - in->flip_queue_offset;
