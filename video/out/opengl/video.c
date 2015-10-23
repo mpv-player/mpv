@@ -153,7 +153,6 @@ struct gl_video {
     struct mp_image_params image_params;        // texture format (mind hwdec case)
     struct mp_imgfmt_desc image_desc;
     int plane_count;
-    int image_w, image_h;
 
     bool is_yuv, is_rgb, is_packed_yuv;
     bool has_alpha;
@@ -192,6 +191,7 @@ struct gl_video {
 
     // temporary during rendering
     struct src_tex pass_tex[TEXUNIT_VIDEO_NUM];
+    int texture_w, texture_h;
     bool use_linear;
     bool use_normalized_range;
     float user_gamma;
@@ -700,9 +700,6 @@ static void init_video(struct gl_video *p)
 
     mp_image_params_guess_csp(&p->image_params);
 
-    p->image_w = p->image_params.w;
-    p->image_h = p->image_params.h;
-
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
     if (p->is_yuv && p->image_params.colorspace != MP_CSP_BT_2020_C)
         eq_caps |= MP_CSP_EQ_CAPS_COLORMATRIX;
@@ -898,7 +895,8 @@ static void load_shader(struct gl_video *p, const char *body)
     gl_sc_hadd(p->sc, body);
     gl_sc_uniform_f(p->sc, "random", (double)av_lfg_get(&p->lfg) / UINT32_MAX);
     gl_sc_uniform_f(p->sc, "frame", p->frames_uploaded);
-    gl_sc_uniform_vec2(p->sc, "image_size", (GLfloat[]){p->image_w, p->image_h});
+    gl_sc_uniform_vec2(p->sc, "image_size", (GLfloat[]){p->texture_w,
+                                                        p->texture_h});
 }
 
 // Applies an arbitrary number of shaders in sequence, using the given pair
@@ -1168,8 +1166,8 @@ static void pass_read_video(struct gl_video *p)
 
         if (p->opts.deband) {
             pass_sample_deband(p->sc, p->opts.deband_opts, 1, p->gl_target,
-                               merged ? 1.0 : tex_mul, p->image_w, p->image_h,
-                               &p->lfg);
+                               merged ? 1.0 : tex_mul,
+                               p->texture_w, p->texture_h, &p->lfg);
             GLSL(color.zw = vec2(0.0, 1.0);) // skip unused
             finish_pass_fbo(p, &p->chroma_deband_fbo, c_w, c_h, 1, 0);
             p->use_normalized_range = true;
@@ -1179,7 +1177,7 @@ static void pass_read_video(struct gl_video *p)
         if (p->image_desc.flags & MP_IMGFLAG_SUBSAMPLED) {
             GLSLF("// chroma scaling\n");
             pass_sample(p, 1, &p->scaler[2], cscale, 1.0,
-                        p->image_w, p->image_h, chromafix);
+                        p->texture_w, p->texture_h, chromafix);
             GLSL(vec2 chroma = color.xy;)
             color_defined = true; // pass_sample defines vec4 color
         } else {
@@ -1204,7 +1202,7 @@ static void pass_read_video(struct gl_video *p)
     GLSLF("{\n");
     if (p->opts.deband) {
         pass_sample_deband(p->sc, p->opts.deband_opts, 0, p->gl_target, tex_mul,
-                           p->image_w, p->image_h, &p->lfg);
+                           p->texture_w, p->texture_h, &p->lfg);
         p->use_normalized_range = true;
     } else {
         GLSL(vec4 color = texture(texture0, texcoord0);)
@@ -1323,8 +1321,8 @@ static void get_scale_factors(struct gl_video *p, double xy[2])
 static void compute_src_transform(struct gl_video *p, struct gl_transform *tr,
                                   int *vp_w, int *vp_h)
 {
-    float sx = (p->src_rect.x1 - p->src_rect.x0) / (float)p->image_w,
-          sy = (p->src_rect.y1 - p->src_rect.y0) / (float)p->image_h,
+    float sx = (p->src_rect.x1 - p->src_rect.x0) / (float)p->texture_w,
+          sy = (p->src_rect.y1 - p->src_rect.y0) / (float)p->texture_h,
           ox = p->src_rect.x0,
           oy = p->src_rect.y0;
     struct gl_transform transform = {{{sx,0.0}, {0.0,sy}}, {ox,oy}};
@@ -1395,9 +1393,13 @@ static void pass_scale_main(struct gl_video *p)
     compute_src_transform(p, &transform, &vp_w, &vp_h);
 
     GLSLF("// main scaling\n");
-    finish_pass_fbo(p, &p->indirect_fbo, p->image_w, p->image_h, 0, 0);
+    finish_pass_fbo(p, &p->indirect_fbo, p->texture_w, p->texture_h, 0, 0);
     pass_sample(p, 0, scaler, &scaler_conf, scale_factor, vp_w, vp_h,
                 transform);
+
+    // Changes the texture size to display size after main scaler.
+    p->texture_w = vp_w;
+    p->texture_h = vp_h;
 
     GLSLF("// scaler post-conversion\n");
     if (use_sigmoid) {
@@ -1639,6 +1641,10 @@ static void pass_render_frame_dumb(struct gl_video *p, int fbo)
 // upscaling. p->image is rendered.
 static void pass_render_frame(struct gl_video *p)
 {
+    // initialize the texture parameters
+    p->texture_w = p->image_params.w;
+    p->texture_h = p->image_params.h;
+
     if (p->opts.dumb_mode)
         return;
 
@@ -1655,20 +1661,21 @@ static void pass_render_frame(struct gl_video *p)
         double scale[2];
         get_scale_factors(p, scale);
         struct mp_osd_res rect = {
-            .w = p->image_w, .h = p->image_h,
+            .w = p->texture_w, .h = p->texture_h,
             .display_par = scale[1] / scale[0], // counter compensate scaling
         };
-        finish_pass_fbo(p, &p->blend_subs_fbo, p->image_w, p->image_h, 0, 0);
-        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, p->image_w, p->image_h,
-                      p->blend_subs_fbo.fbo, false);
+        finish_pass_fbo(p, &p->blend_subs_fbo,
+                        p->texture_w, p->texture_h, 0, 0);
+        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
+                      p->texture_w, p->texture_h, p->blend_subs_fbo.fbo, false);
         GLSL(vec4 color = texture(texture0, texcoord0);)
     }
 
     apply_shaders(p, p->opts.pre_shaders, &p->pre_fbo[0], 0,
-                  p->image_w, p->image_h);
+                  p->texture_w, p->texture_h);
 
     if (p->opts.unsharp != 0.0) {
-        finish_pass_fbo(p, &p->unsharp_fbo, p->image_w, p->image_h, 0, 0);
+        finish_pass_fbo(p, &p->unsharp_fbo, p->texture_w, p->texture_h, 0, 0);
         pass_sample_unsharp(p->sc, p->opts.unsharp);
     }
 
@@ -1680,8 +1687,8 @@ static void pass_render_frame(struct gl_video *p)
         // Recreate the real video size from the src/dst rects
         struct mp_osd_res rect = {
             .w = vp_w, .h = vp_h,
-            .ml = -p->src_rect.x0, .mr = p->src_rect.x1 - p->image_w,
-            .mt = -p->src_rect.y0, .mb = p->src_rect.y1 - p->image_h,
+            .ml = -p->src_rect.x0, .mr = p->src_rect.x1 - p->image_params.w,
+            .mt = -p->src_rect.y0, .mb = p->src_rect.y1 - p->image_params.h,
             .display_par = 1.0,
         };
         // Adjust margins for scale
@@ -1692,15 +1699,17 @@ static void pass_render_frame(struct gl_video *p)
         // We should always blend subtitles in non-linear light
         if (p->use_linear)
             pass_delinearize(p->sc, p->image_params.gamma);
-        finish_pass_fbo(p, &p->blend_subs_fbo, vp_w, vp_h, 0, FBOTEX_FUZZY);
-        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, vp_w, vp_h,
-                      p->blend_subs_fbo.fbo, false);
+        finish_pass_fbo(p, &p->blend_subs_fbo, p->texture_w, p->texture_h, 0,
+                        FBOTEX_FUZZY);
+        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
+                      p->texture_w, p->texture_h, p->blend_subs_fbo.fbo, false);
         GLSL(vec4 color = texture(texture0, texcoord0);)
         if (p->use_linear)
             pass_linearize(p->sc, p->image_params.gamma);
     }
 
-    apply_shaders(p, p->opts.post_shaders, &p->post_fbo[0], 0, vp_w, vp_h);
+    apply_shaders(p, p->opts.post_shaders, &p->post_fbo[0], 0,
+                  p->texture_w, p->texture_h);
 }
 
 static void pass_draw_to_screen(struct gl_video *p, int fbo)
