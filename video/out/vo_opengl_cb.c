@@ -241,7 +241,10 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
         ctx->hwdec_info.hwctx = ctx->hwdec->hwctx;
 
     pthread_mutex_lock(&ctx->lock);
-    ctx->eq = *gl_video_eq_ptr(ctx->renderer);
+    // We don't know the exact caps yet - use a known superset
+    ctx->eq.capabilities = MP_CSP_EQ_CAPS_GAMMA | MP_CSP_EQ_CAPS_BRIGHTNESS |
+                           MP_CSP_EQ_CAPS_COLORMATRIX;
+    ctx->eq_changed = true;
     for (int n = IMGFMT_START; n < IMGFMT_END; n++) {
         ctx->imgfmt_supported[n - IMGFMT_START] =
             gl_video_check_format(ctx->renderer, n);
@@ -324,6 +327,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     if (ctx->reconfigured) {
         gl_video_set_osd_source(ctx->renderer, vo ? vo->osd : NULL);
         gl_video_config(ctx->renderer, &ctx->img_params);
+        ctx->eq_changed = true;
     }
     if (ctx->update_new_opts) {
         struct vo_priv *p = vo ? vo->priv : NULL;
@@ -352,7 +356,6 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         gl_video_eq_update(ctx->renderer);
     }
     ctx->eq_changed = false;
-    ctx->eq = *eq;
 
     struct vo_frame *frame = frame_queue_pop(ctx);
     if (frame) {
@@ -613,6 +616,8 @@ static int preinit(struct vo *vo)
     p->ctx->reconfigured = true;
     p->ctx->update_new_opts = true;
     copy_vo_opts(vo);
+    memset(p->ctx->eq.values, 0, sizeof(p->ctx->eq.values));
+    p->ctx->eq_changed = true;
     pthread_mutex_unlock(&p->ctx->lock);
 
     return 0;
