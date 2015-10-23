@@ -464,6 +464,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavcodec/avcodec.h',
                                 'int x[(int)sizeof(((AVPacket){0}).duration) - 7]',
                                 use='libav'),
+    }, {
+        'name': 'av-subtitle-nopict',
+        'desc': 'libavcodec AVSubtitleRect AVPicture removal',
+        'func': check_statement('libavcodec/avcodec.h',
+                                'AVSubtitleRect r = {.linesize={0}}',
+                                use='libav'),
     },
 ]
 
