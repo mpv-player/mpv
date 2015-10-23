@@ -3087,11 +3087,16 @@ static int mp_property_packet_bitrate(void *ctx, struct m_property *prop,
     int type = (uintptr_t)prop->priv & ~0x100;
     bool old = (uintptr_t)prop->priv & 0x100;
 
-    if (!mpctx->demuxer)
+    struct demuxer *demuxer = NULL;
+    if (mpctx->current_track[0][type])
+        demuxer = mpctx->current_track[0][type]->demuxer;
+    if (!demuxer)
+        demuxer = mpctx->demuxer;
+    if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
     double r[STREAM_TYPE_COUNT];
-    if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_BITRATE_STATS, &r) < 1)
+    if (demux_control(demuxer, DEMUXER_CTRL_GET_BITRATE_STATS, &r) < 1)
         return M_PROPERTY_UNAVAILABLE;
     if (r[type] < 0)
         return M_PROPERTY_UNAVAILABLE;
