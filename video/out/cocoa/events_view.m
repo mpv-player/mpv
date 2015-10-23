@@ -80,6 +80,8 @@
 
         [self enterFullScreenMode:[self.adapter fsScreen]
                                   withOptions:fsopts];
+
+        [self signalMousePosition];
     }
 
     if (!willBeFullscreen && [self isInFullScreenMode]) {
@@ -123,6 +125,9 @@
                                      userInfo:nil] autorelease];
 
     [self addTrackingArea:self.tracker];
+
+    if (![self containsMouseLocation])
+        [self.adapter putKey:MP_KEY_MOUSE_LEAVE withModifiers:0];
 }
 
 - (NSPoint)mouseLocation
