@@ -2669,17 +2669,6 @@ OSD
 
     Default: 0.
 
-``--use-text-osd=<yes|no>``
-    Disable text OSD rendering completely. (This includes the complete OSC as
-    well.) This is mostly useful for avoiding loading fontconfig in situations
-    where fontconfig does not behave well, and OSD is unused - this could for
-    example allow GUI programs using libmpv to workaround fontconfig issues.
-
-    Note that selecting subtitles of any kind still initializes fontconfig.
-
-    Default: ``no``.
-
-
 Screenshot
 ----------
 

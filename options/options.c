@@ -374,7 +374,6 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("osd-bar-w", osd_bar_w, 0, 1, 100),
     OPT_FLOATRANGE("osd-bar-h", osd_bar_h, 0, 0.1, 50),
     OPT_SUBSTRUCT("osd", osd_style, osd_style_conf, 0),
-    OPT_FLAG("use-text-osd", use_text_osd, CONF_GLOBAL),
     OPT_SUBSTRUCT("sub-text", sub_text_style, sub_style_conf, 0),
     OPT_FLAG("sub-clear-on-seek", sub_clear_on_seek, 0),
 
@@ -715,7 +714,6 @@ const struct MPOpts mp_default_opts = {
     .sub_use_margins = 1,
     .ass_scale_with_window = 0,
     .sub_scale_with_window = 1,
-    .use_text_osd = 1,
 #if HAVE_LUA
     .lua_load_osc = 1,
     .lua_load_ytdl = 1,

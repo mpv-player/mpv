@@ -20,6 +20,8 @@ Interface changes
 ::
 
  --- mpv 0.12.0 ---
+    - remove --use-text-osd (useless; fontconfig isn't a requirement anymore,
+      and text rendering is also lazily initialized)
     - some time properties (at least "playback-time", "time-pos",
       "time-remaining", "playtime-remaining") now are unavailable if the time
       is unknown, instead of just assuming that the internal playback position
