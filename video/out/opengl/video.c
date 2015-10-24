@@ -2495,7 +2495,6 @@ static char **dup_str_array(void *parent, char **src)
 
 static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
 {
-    talloc_free(dst->source_shader);
     talloc_free(dst->scale_shader);
     talloc_free(dst->pre_shaders);
     talloc_free(dst->post_shaders);
@@ -2511,7 +2510,6 @@ static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
             (char *)handle_scaler_opt(dst->scaler[n].kernel.name, n == 3);
     }
 
-    dst->source_shader = talloc_strdup(NULL, dst->source_shader);
     dst->scale_shader = talloc_strdup(NULL, dst->scale_shader);
     dst->pre_shaders = dup_str_array(NULL, dst->pre_shaders);
     dst->post_shaders = dup_str_array(NULL, dst->post_shaders);
