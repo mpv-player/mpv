@@ -74,6 +74,7 @@ struct vd_lavc_params {
     int threads;
     int bitexact;
     int check_hw_profile;
+    int software_fallback;
     char **avopts;
 };
 
@@ -101,6 +102,7 @@ const struct m_sub_options vd_lavc_conf = {
         OPT_INT("threads", threads, M_OPT_MIN, .min = 0),
         OPT_FLAG("bitexact", bitexact, 0),
         OPT_FLAG("check-hw-profile", check_hw_profile, 0),
+        OPT_FLAG("software-fallback", software_fallback, 0),
         OPT_KEYVALUELIST("o", avopts, 0),
         {0}
     },
@@ -108,6 +110,7 @@ const struct m_sub_options vd_lavc_conf = {
     .defaults = &(const struct vd_lavc_params){
         .show_all = 0,
         .check_hw_profile = 1,
+        .software_fallback = 1,
         .skip_loop_filter = AVDISCARD_DEFAULT,
         .skip_idct = AVDISCARD_DEFAULT,
         .skip_frame = AVDISCARD_DEFAULT,
@@ -627,7 +630,8 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
 
     if (ret < 0) {
         MP_WARN(vd, "Error while decoding frame!\n");
-        ctx->hwdec_failed = true;
+        if (lavc_param->software_fallback)
+            ctx->hwdec_failed = true;
         return;
     }
 
