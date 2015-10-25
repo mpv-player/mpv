@@ -483,11 +483,10 @@ static int init_device(struct ao *ao, bool second_try)
     af_get_best_sample_formats(ao->format, try_formats);
     for (int n = 0; try_formats[n]; n++) {
         p->alsa_fmt = find_alsa_format(try_formats[n]);
-        MP_DBG(ao, "Trying format %s\n", af_fmt_to_str(try_formats[n]));
+        MP_VERBOSE(ao, "trying format %s\n", af_fmt_to_str(try_formats[n]));
         if (snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt) >= 0) {
             ao->format = try_formats[n];
             found_format = true;
-            MP_DBG(ao, "Selectedformat %s\n", af_fmt_to_str(ao->format));
             break;
         }
     }
