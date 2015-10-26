@@ -309,14 +309,15 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     av_opt_set_int(s->avrctx, "in_sample_fmt",      in_samplefmt, 0);
     av_opt_set_int(s->avrctx, "out_sample_fmt",     out_samplefmtp, 0);
 
-    // Just needs the correct number of channels.
-    int fake_out_ch_layout = av_get_default_channel_layout(map_out.num);
+    // Just needs the correct number of channels for deplanarization.
+    struct mp_chmap fake_chmap;
+    mp_chmap_set_unknown(&fake_chmap, map_out.num);
+    uint64_t fake_out_ch_layout = mp_chmap_to_lavc_unchecked(&fake_chmap);
     if (!fake_out_ch_layout)
         goto error;
-
-    // Deplanarize if needed.
     av_opt_set_int(s->avrctx_out, "in_channel_layout",  fake_out_ch_layout, 0);
     av_opt_set_int(s->avrctx_out, "out_channel_layout", fake_out_ch_layout, 0);
+
     av_opt_set_int(s->avrctx_out, "in_sample_fmt",      out_samplefmtp, 0);
     av_opt_set_int(s->avrctx_out, "out_sample_fmt",     out_samplefmt, 0);
     av_opt_set_int(s->avrctx_out, "in_sample_rate",     s->out_rate, 0);
