@@ -281,6 +281,7 @@ void ca_get_active_chmap(struct ao *ao, AudioDeviceID device, int channel_count,
     struct mp_chmap_sel chmap_sel = {0};
     ca_retrieve_layouts(ao, &chmap_sel, device);
 
+    // Use any exact match.
     for (int n = 0; n < chmap_sel.num_chmaps; n++) {
         if (chmap_sel.chmaps[n].num == channel_count) {
             MP_VERBOSE(ao, "mismatching channels - fallback #%d\n", n);
@@ -289,5 +290,13 @@ void ca_get_active_chmap(struct ao *ao, AudioDeviceID device, int channel_count,
         }
     }
 
-    out_map->num = 0;
+    // Fall back to stereo or mono, and fill the rest with silence. (We don't
+    // know what the device expects. We could use a larger default layout here,
+    // but let's not.)
+    mp_chmap_from_channels(out_map, MPMIN(2, channel_count));
+    out_map->num = channel_count;
+    for (int n = 2; n < out_map->num; n++)
+        out_map->speaker[n] = MP_SPEAKER_ID_NA;
+    MP_WARN(ao, "mismatching channels - falling back to %s\n",
+            mp_chmap_to_str(out_map));
 }
