@@ -235,20 +235,27 @@ coreaudio_error:
     return r;
 }
 
-bool ca_init_chmap(struct ao *ao, AudioDeviceID device)
+static void ca_retrieve_layouts(struct ao *ao, struct mp_chmap_sel *s,
+                                AudioDeviceID device)
 {
     void *ta_ctx = talloc_new(NULL);
-
-    struct mp_chmap_sel chmap_sel = {.tmp = ta_ctx};
-    struct mp_chmap chmap = {0};
+    struct mp_chmap chmap;
 
     AudioChannelLayout *ml = ca_query_layout(ao, device, ta_ctx);
     if (ml && ca_layout_to_mp_chmap(ao, ml, &chmap))
-        mp_chmap_sel_add_map(&chmap_sel, &chmap);
+        mp_chmap_sel_add_map(s, &chmap);
 
     AudioChannelLayout *sl = ca_query_stereo_layout(ao, device, ta_ctx);
     if (sl && ca_layout_to_mp_chmap(ao, sl, &chmap))
-        mp_chmap_sel_add_map(&chmap_sel, &chmap);
+        mp_chmap_sel_add_map(s, &chmap);
+
+    talloc_free(ta_ctx);
+}
+
+bool ca_init_chmap(struct ao *ao, AudioDeviceID device)
+{
+    struct mp_chmap_sel chmap_sel = {0};
+    ca_retrieve_layouts(ao, &chmap_sel, device);
 
     if (!chmap_sel.num_chmaps)
         mp_chmap_sel_add_map(&chmap_sel, &(struct mp_chmap)MP_CHMAP_INIT_STEREO);
@@ -259,39 +266,28 @@ bool ca_init_chmap(struct ao *ao, AudioDeviceID device)
         MP_ERR(ao, "could not select a suitable channel map among the "
                    "hardware supported ones. Make sure to configure your "
                    "output device correctly in 'Audio MIDI Setup.app'\n");
-        goto coreaudio_error;
+        return false;
     }
-
-    talloc_free(ta_ctx);
     return true;
-
-coreaudio_error:
-    talloc_free(ta_ctx);
-    return false;
 }
 
 void ca_get_active_chmap(struct ao *ao, AudioDeviceID device, int channel_count,
                          struct mp_chmap *out_map)
 {
-    void *ta_ctx = talloc_new(NULL);
-
     // Apparently, we have to guess by looking back at the supported layouts,
     // and I haven't found a property that retrieves the actual currently
     // active channel layout.
 
-    AudioChannelLayout *ml = ca_query_layout(ao, device, ta_ctx);
-    if (ml && ca_layout_to_mp_chmap(ao, ml, out_map)) {
-        if (channel_count == out_map->num)
-            goto done;
-    }
+    struct mp_chmap_sel chmap_sel = {0};
+    ca_retrieve_layouts(ao, &chmap_sel, device);
 
-    AudioChannelLayout *sl = ca_query_stereo_layout(ao, device, ta_ctx);
-    if (sl && ca_layout_to_mp_chmap(ao, sl, out_map)) {
-        if (channel_count == out_map->num)
-            goto done;
+    for (int n = 0; n < chmap_sel.num_chmaps; n++) {
+        if (chmap_sel.chmaps[n].num == channel_count) {
+            MP_VERBOSE(ao, "mismatching channels - fallback #%d\n", n);
+            *out_map = chmap_sel.chmaps[n];
+            return;
+        }
     }
 
     out_map->num = 0;
-done:
-    talloc_free(ta_ctx);
 }
