@@ -2933,7 +2933,7 @@ static void probe_last_timestamp(struct demuxer *demuxer)
         last_ts[STREAM_VIDEO] = mkv_d->cluster_tc;
 
     if (last_ts[STREAM_VIDEO])
-        mkv_d->duration = last_ts[STREAM_VIDEO] / 1e9;
+        mkv_d->duration = last_ts[STREAM_VIDEO] / 1e9 - demuxer->start_time;
 
     stream_seek(demuxer->stream, old_pos);
     mkv_d->cluster_start = mkv_d->cluster_end = 0;
