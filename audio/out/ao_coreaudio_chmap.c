@@ -98,6 +98,9 @@ static AudioChannelLayout *ca_layout_to_custom_layout(struct ao *ao,
     AudioChannelLayout *r;
     OSStatus err;
 
+    if (tag == kAudioChannelLayoutTag_UseChannelDescriptions)
+        return l;
+
     if (tag == kAudioChannelLayoutTag_UseChannelBitmap) {
         uint32_t psize;
         err = AudioFormatGetPropertyInfo(
@@ -109,7 +112,7 @@ static AudioChannelLayout *ca_layout_to_custom_layout(struct ao *ao,
             kAudioFormatProperty_ChannelLayoutForBitmap,
             sizeof(uint32_t), &l->mChannelBitmap, &psize, r);
         CHECK_CA_ERROR("failed to convert channel bitmap to descriptions (get)");
-    } else if (tag != kAudioChannelLayoutTag_UseChannelDescriptions) {
+    } else {
         uint32_t psize;
         err = AudioFormatGetPropertyInfo(
             kAudioFormatProperty_ChannelLayoutForTag,
@@ -120,9 +123,10 @@ static AudioChannelLayout *ca_layout_to_custom_layout(struct ao *ao,
             kAudioFormatProperty_ChannelLayoutForTag,
             sizeof(AudioChannelLayoutTag), &l->mChannelLayoutTag, &psize, r);
         CHECK_CA_ERROR("failed to convert channel tag to descriptions (get)");
-    } else {
-        r = l;
     }
+
+    MP_VERBOSE(ao, "converted input channel layout:\n");
+    ca_log_layout(ao, MSGL_V, l);
 
     return r;
 coreaudio_error:
@@ -134,15 +138,12 @@ static bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
 {
     void *talloc_ctx = talloc_new(NULL);
 
-    MP_DBG(ao, "input channel layout:\n");
-    ca_log_layout(ao, MSGL_DEBUG, layout);
+    MP_VERBOSE(ao, "input channel layout:\n");
+    ca_log_layout(ao, MSGL_V, layout);
 
     AudioChannelLayout *l = ca_layout_to_custom_layout(ao, talloc_ctx, layout);
     if (!l)
         goto coreaudio_error;
-
-    MP_VERBOSE(ao, "converted input channel layout:\n");
-    ca_log_layout(ao, MSGL_V, l);
 
     if (l->mNumberChannelDescriptions > MP_NUM_CHANNELS) {
         MP_VERBOSE(ao, "layout has too many descriptions (%u, max: %d)\n",
@@ -164,6 +165,7 @@ static bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
     }
 
     talloc_free(talloc_ctx);
+    MP_VERBOSE(ao, "mp chmap: %s\n", mp_chmap_to_str(chmap));
     return mp_chmap_is_valid(chmap) && !mp_chmap_is_unknown(chmap);
 coreaudio_error:
     MP_VERBOSE(ao, "converted input channel layout (failed):\n");
