@@ -151,6 +151,7 @@ static bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
         return false;
     }
 
+    chmap->num = l->mNumberChannelDescriptions;
     for (int n = 0; n < l->mNumberChannelDescriptions; n++) {
         AudioChannelLabel label = l->mChannelDescriptions[n].mChannelLabel;
         int speaker = ca_label_to_mp_speaker_id(label);
@@ -158,10 +159,8 @@ static bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
             MP_VERBOSE(ao, "channel label=%u unusable to build channel "
                            "bitmap, skipping layout\n", (unsigned) label);
             goto coreaudio_error;
-        } else {
-            chmap->speaker[n] = speaker;
-            chmap->num = n + 1;
         }
+        chmap->speaker[n] = speaker;
     }
 
     talloc_free(talloc_ctx);
