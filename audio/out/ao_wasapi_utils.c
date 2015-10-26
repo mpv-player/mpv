@@ -486,10 +486,8 @@ static bool search_channels(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
             }
         } else {
             change_waveformat_channels(wformat, &entry);
-            if (try_format_exclusive(ao, wformat)) {
+            if (try_format_exclusive(ao, wformat))
                 mp_chmap_sel_add_map(&chmap_sel, &entry);
-                MP_VERBOSE(ao, "%s is supported\n", mp_chmap_to_str(&entry));
-            }
         }
     }
 

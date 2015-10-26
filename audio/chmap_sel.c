@@ -20,6 +20,7 @@
 #include <limits.h>
 
 #include "common/common.h"
+#include "common/msg.h"
 #include "chmap_sel.h"
 
 static const struct mp_chmap speaker_replacements[][2] = {
@@ -356,4 +357,25 @@ bool mp_chmap_sel_get_def(const struct mp_chmap_sel *s, struct mp_chmap *map,
         }
     }
     return map->num > 0;
+}
+
+// Print the set of allowed channel layouts.
+void mp_chmal_sel_log(const struct mp_chmap_sel *s, struct mp_log *log, int lev)
+{
+    if (!mp_msg_test(log, lev))
+        return;
+
+    for (int i = 0; i < s->num_chmaps; i++)
+        mp_msg(log, lev, " - %s\n", mp_chmap_to_str(&s->chmaps[i]));
+    for (int i = 0; i < MP_SPEAKER_ID_COUNT; i++) {
+        if (!s->speakers[i])
+            continue;
+        struct mp_chmap l = {.num = 1, .speaker = { i }};
+        mp_msg(log, lev, " - #%s\n",
+                    i == MP_SPEAKER_ID_FC ? "fc" : mp_chmap_to_str_hr(&l));
+    }
+    if (s->allow_waveext)
+        mp_msg(log, lev, " - waveext\n");
+    if (s->allow_any)
+        mp_msg(log, lev, " - anything\n");
 }

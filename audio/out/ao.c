@@ -421,18 +421,11 @@ void ao_hotplug_event(struct ao *ao)
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map)
 {
-    if (mp_msg_test(ao->log, MSGL_DEBUG)) {
-        for (int i = 0; i < s->num_chmaps; i++) {
-            struct mp_chmap c = s->chmaps[i];
-            MP_DBG(ao, "chmap_sel #%d: %s (%s)\n", i, mp_chmap_to_str(&c),
-                   mp_chmap_to_str_hr(&c));
-        }
-    }
+    MP_VERBOSE(ao, "Channel layouts:\n");
+    mp_chmal_sel_log(s, ao->log, MSGL_V);
     bool r = mp_chmap_sel_adjust(s, map);
-    if (r) {
-        MP_DBG(ao, "result: %s (%s)\n", mp_chmap_to_str(map),
-               mp_chmap_to_str_hr(map));
-    }
+    if (r)
+        MP_VERBOSE(ao, "result: %s\n", mp_chmap_to_str(map));
     return r;
 }
 

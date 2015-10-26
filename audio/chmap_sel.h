@@ -45,4 +45,7 @@ bool mp_chmap_sel_fallback(const struct mp_chmap_sel *s, struct mp_chmap *map);
 bool mp_chmap_sel_get_def(const struct mp_chmap_sel *s, struct mp_chmap *map,
                           int num);
 
+struct mp_log;
+void mp_chmal_sel_log(const struct mp_chmap_sel *s, struct mp_log *log, int lev);
+
 #endif

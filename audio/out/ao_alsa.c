@@ -328,9 +328,9 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
         if (mp_chmap_is_valid(&entry)) {
             if (maps[i]->type == SND_CHMAP_TYPE_VAR)
                 mp_chmap_reorder_norm(&entry);
-            MP_VERBOSE(ao, "Got supported channel map: %s (type %s)\n",
-                       mp_chmap_to_str(&entry),
-                       snd_pcm_chmap_type_name(maps[i]->type));
+            MP_DBG(ao, "Got supported channel map: %s (type %s)\n",
+                   mp_chmap_to_str(&entry),
+                   snd_pcm_chmap_type_name(maps[i]->type));
             mp_chmap_sel_add_map(&chmap_sel, &entry);
         } else {
             char tmp[128];
