@@ -289,5 +289,6 @@ void ca_get_active_chmap(struct ao *ao, AudioDeviceID device, int channel_count,
     }
 
     out_map->num = 0;
-done: ;
+done:
+    talloc_free(ta_ctx);
 }
