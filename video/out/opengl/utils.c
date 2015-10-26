@@ -435,6 +435,18 @@ void gl_transform_ortho(struct gl_transform *t, float x0, float x1,
     t->t[1] = -(y1 + y0) / (y1 - y0);
 }
 
+// Apply the effects of one transformation to another, transforming it in the
+// process. In other words: post-composes t onto x
+void gl_transform_trans(struct gl_transform t, struct gl_transform *x)
+{
+    float x00 = x->m[0][0], x01 = x->m[0][1], x10 = x->m[1][0], x11 = x->m[1][1];
+    x->m[0][0] = t.m[0][0] * x00 + t.m[0][1] * x10;
+    x->m[1][0] = t.m[0][0] * x01 + t.m[0][1] * x11;
+    x->m[0][1] = t.m[1][0] * x00 + t.m[1][1] * x10;
+    x->m[1][1] = t.m[1][0] * x01 + t.m[1][1] * x11;
+    gl_transform_vec(t, &x->t[0], &x->t[1]);
+}
+
 static void GLAPIENTRY gl_debug_cb(GLenum source, GLenum type, GLuint id,
                                    GLenum severity, GLsizei length,
                                    const GLchar *message, const void *userParam)
@@ -462,7 +474,7 @@ void gl_set_debug_logger(GL *gl, struct mp_log *log)
     }
 }
 
-#define SC_ENTRIES 16
+#define SC_ENTRIES 32
 #define SC_UNIFORM_ENTRIES 20
 
 enum uniform_type {
