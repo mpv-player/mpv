@@ -300,6 +300,12 @@ static int init(struct ao *ao)
 
     ca_print_asbd(ao, "virtual format", &p->stream_asbd);
 
+    if (p->stream_asbd.mChannelsPerFrame > MP_NUM_CHANNELS) {
+        MP_ERR(ao, "unsupported number of channels: %d > %d.\n",
+               p->stream_asbd.mChannelsPerFrame, MP_NUM_CHANNELS);
+        goto coreaudio_error;
+    }
+
     int new_format = ca_asbd_to_mp_format(&p->stream_asbd);
 
     // If both old and new formats are spdif, avoid changing it due to the
