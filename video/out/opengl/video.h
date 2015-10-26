@@ -98,6 +98,10 @@ struct gl_video_opts {
     int deband;
     struct deband_opts *deband_opts;
     float unsharp;
+    int prescale;
+    int prescale_passes;
+    float prescale_downscaling_threshold;
+    struct superxbr_opts *superxbr_opts;
 };
 
 extern const struct m_sub_options gl_video_conf;
