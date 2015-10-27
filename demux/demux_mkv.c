@@ -234,7 +234,7 @@ const struct m_sub_options demux_mkv_conf = {
 // (Subtitle packets added before first A/V keyframe packet is found with seek.)
 #define NUM_SUB_PREROLL_PACKETS 500
 
-static void probe_last_timestamp(struct demuxer *demuxer);
+static void probe_last_timestamp(struct demuxer *demuxer, int64_t start_pos);
 static void probe_first_timestamp(struct demuxer *demuxer);
 static void free_block(struct block_info *block);
 
@@ -1903,7 +1903,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
 
     probe_first_timestamp(demuxer);
     if (opts->demux_mkv->probe_duration)
-        probe_last_timestamp(demuxer);
+        probe_last_timestamp(demuxer, start_pos);
 
     return 0;
 }
@@ -2867,10 +2867,9 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
     demux_mkv_fill_buffer(demuxer);
 }
 
-static void probe_last_timestamp(struct demuxer *demuxer)
+static void probe_last_timestamp(struct demuxer *demuxer, int64_t start_pos)
 {
     mkv_demuxer_t *mkv_d = demuxer->priv;
-    int64_t old_pos = stream_tell(demuxer->stream);
 
     if (!demuxer->seekable)
         return;
@@ -2908,9 +2907,11 @@ static void probe_last_timestamp(struct demuxer *demuxer)
             int64_t size = stream_get_size(demuxer->stream);
             stream_seek(demuxer->stream, MPMAX(size - 10 * 1024 * 1024, 0));
             if (ebml_resync_cluster(mp_null_log, demuxer->stream) < 0)
-                stream_seek(demuxer->stream, old_pos); // full scan otherwise
+                stream_seek(demuxer->stream, start_pos); // full scan otherwise
         }
     }
+
+    free_block(&mkv_d->tmp_block);
 
     int64_t last_ts[STREAM_TYPE_COUNT] = {0};
     while (1) {
@@ -2935,7 +2936,7 @@ static void probe_last_timestamp(struct demuxer *demuxer)
     if (last_ts[STREAM_VIDEO])
         mkv_d->duration = last_ts[STREAM_VIDEO] / 1e9 - demuxer->start_time;
 
-    stream_seek(demuxer->stream, old_pos);
+    stream_seek(demuxer->stream, start_pos);
     mkv_d->cluster_start = mkv_d->cluster_end = 0;
 }
 
