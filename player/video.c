@@ -1037,6 +1037,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // align frame timings on the vsync boundaries. This is unavoidable, and
     // for the sake of the video sync calculations we pretend it's perfect.
     mpctx->time_frame -= mpctx->display_sync_error;
+    mpctx->time_frame /= opts->playback_speed * video_speed_correction;
 
     mpctx->speed_factor_v = video_speed_correction;
 
