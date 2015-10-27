@@ -550,6 +550,9 @@ static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time
         change = max_change;
     mpctx->delay += change;
     mpctx->total_avsync_change += change;
+
+    if (mpctx->display_sync_active)
+        mpctx->total_avsync_change = 0;
 }
 
 // Make the frame at position 0 "known" to the playback logic. This must happen
@@ -1038,6 +1041,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // for the sake of the video sync calculations we pretend it's perfect.
     mpctx->time_frame -= mpctx->display_sync_error;
     mpctx->time_frame /= opts->playback_speed * video_speed_correction;
+    mpctx->total_avsync_change = 0;
 
     mpctx->speed_factor_v = video_speed_correction;
 
