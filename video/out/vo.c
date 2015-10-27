@@ -613,8 +613,6 @@ static bool render_frame(struct vo *vo)
     vo->in->vsync_interval = in->display_fps > 0 ? 1e6 / in->display_fps : 0;
     vo->in->vsync_interval = MPMAX(vo->in->vsync_interval, 1);
 
-    bool continuous = in->current_frame && in->current_frame->display_synced;
-
     if (in->frame_queued) {
         talloc_free(in->current_frame);
         in->current_frame = in->frame_queued;
@@ -746,10 +744,6 @@ static bool render_frame(struct vo *vo)
         pthread_mutex_lock(&in->lock);
         in->dropped_frame = prev_drop_count < vo->in->drop_count;
         in->rendering = false;
-
-        if (in->current_frame && in->current_frame->display_synced &&
-            continuous && in->vsync_interval_approx > in->vsync_interval * 3 / 2)
-            in->missed_count += 1;
 
         double diff = (in->vsync_interval - in->vsync_interval_approx) / 1e6;
         if (fabs(diff) < 0.150)
