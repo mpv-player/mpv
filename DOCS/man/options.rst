@@ -3463,6 +3463,11 @@ Miscellaneous
     :display-vdrop:     Drop or repeat video frames to compensate desyncing
                         video. (Although it should have the same effects as
                         ``audio``, the implementation is very different.)
+    :display-adrop:     Drop or repeat audio data to compensate desyncing
+                        video. See ``--video-sync-adrop-size``. This mode will
+                        cause severe audio artifacts if the real monitor
+                        refresh rate is too different from the reported or
+                        forced rate.
     :display-desync:    Sync video to display, and let audio play on its own.
     :desync:            Sync video according to system clock, and let audio play
                         on its own.
@@ -3493,6 +3498,13 @@ Miscellaneous
     the A/V desync cannot be compensated, too high values could lead to chaotic
     frame dropping due to the audio "overshooting" and skipping multiple video
     frames before the sync logic can react.
+
+``--video-sync-adrop-size=<value``
+    For the ``--video-sync=display-adrop`` mode. This mode duplicates/drops
+    audio data to keep audio in sync with video. To avoid audio artifacts on
+    jitter (which would add/remove samples all the time), this is done in
+    relatively large, fixed units, controlled by this option. The unit is
+    seconds.
 
 ``--mf-fps=<value>``
     Framerate used when decoding from multiple PNG or JPEG files with ``mf://``

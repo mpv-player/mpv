@@ -119,6 +119,15 @@ void mp_audio_buffer_prepend_silence(struct mp_audio_buffer *ab, int samples)
     mp_audio_fill_silence(ab->buffer, 0, samples);
 }
 
+void mp_audio_buffer_duplicate(struct mp_audio_buffer *ab, int samples)
+{
+    assert(samples >= 0 && samples <= ab->buffer->samples);
+    int oldlen = ab->buffer->samples;
+    ab->buffer->samples += samples;
+    mp_audio_realloc_min(ab->buffer, ab->buffer->samples);
+    mp_audio_copy(ab->buffer, oldlen, ab->buffer, oldlen - samples, samples);
+}
+
 // Get the start of the current readable buffer.
 void mp_audio_buffer_peek(struct mp_audio_buffer *ab, struct mp_audio *out_mpa)
 {

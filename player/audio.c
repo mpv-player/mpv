@@ -551,6 +551,27 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         playsize = MPMAX(1, playsize + skip); // silence will be prepended
     }
 
+    int skip_duplicate = 0; // >0: skip, <0: duplicate
+    if (mpctx->display_sync_active && opts->video_sync == VS_DISP_ADROP &&
+        fabs(mpctx->last_av_difference) >= opts->sync_audio_drop_size &&
+        mpctx->audio_status == STATUS_PLAYING)
+    {
+        int samples = ceil(opts->sync_audio_drop_size * play_samplerate);
+        int align = af_format_sample_alignment(out_format.format);
+        samples = (samples + align / 2) / align * align;
+
+        skip_duplicate = mpctx->last_av_difference >= 0 ? -samples : samples;
+
+        // safeguard against excessively growing audio buffer sizes
+        if (skip_duplicate < 0 && mp_audio_buffer_seconds(mpctx->ao_buffer) > 5) {
+            skip_duplicate = 0;
+            samples = 0;
+        }
+
+        if (playsize < samples)
+            playsize = samples;
+    }
+
     int status = AD_OK;
     bool working = false;
     if (playsize > mp_audio_buffer_samples(mpctx->ao_buffer)) {
@@ -596,6 +617,21 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         }
         mp_audio_buffer_prepend_silence(mpctx->ao_buffer, -skip);
         end_sync = true;
+    }
+
+    if (skip_duplicate) {
+        int max = mp_audio_buffer_samples(mpctx->ao_buffer);
+        if (abs(skip_duplicate) > max)
+            skip_duplicate = skip_duplicate >= 0 ? max : -max;
+        mpctx->last_av_difference += skip_duplicate / play_samplerate;
+        if (skip_duplicate >= 0) {
+            mp_audio_buffer_skip(mpctx->ao_buffer, skip_duplicate);
+            MP_STATS(mpctx, "drop-audio");
+        } else {
+            mp_audio_buffer_duplicate(mpctx->ao_buffer, -skip_duplicate);
+            MP_STATS(mpctx, "duplicate-audio");
+        }
+        MP_VERBOSE(mpctx, "audio skip_duplicate=%d\n", skip_duplicate);
     }
 
     if (mpctx->audio_status == STATUS_SYNCING) {

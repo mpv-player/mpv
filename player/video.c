@@ -912,7 +912,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     bool resample = mode == VS_DISP_RESAMPLE || mode == VS_DISP_RESAMPLE_VDROP ||
                     mode == VS_DISP_RESAMPLE_NONE;
     bool drop = mode == VS_DISP_VDROP || mode == VS_DISP_RESAMPLE ||
-                mode == VS_DISP_RESAMPLE_VDROP;
+                mode == VS_DISP_ADROP || mode == VS_DISP_RESAMPLE_VDROP;
     drop &= (opts->frame_dropping & 1);
 
     if (resample && using_spdif_passthrough(mpctx))
