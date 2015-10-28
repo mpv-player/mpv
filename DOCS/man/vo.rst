@@ -565,6 +565,13 @@ Available video output drivers are:
             Some parameters can be tuned with ``superxbr-sharpness`` and
             ``superxbr-edge-strength`` options.
 
+        ``nnedi3``
+            An artificial neural network based deinterlacer, which can be used
+            to upscale images.
+
+            Extremely slow and requires a recent mid or high end graphics card
+            to work smoothly (as of 2015).
+
         Note that all the filters above are designed (or implemented) to process
         luma plane only and probably won't work as intended for video in RGB
         format.
@@ -586,6 +593,29 @@ Available video output drivers are:
         to a smaller value between 1.0 and 1.5 for better performance.
 
         A value less than 1.0 will disable the check.
+
+    ``nnedi3-neurons=<16|32|64|128>``
+        Specify the neurons for nnedi3 prescaling (defaults to be 32). The
+        rendering time is expected to be linear to the number of neurons.
+
+    ``nnedi3-window=<8x4|8x6>``
+        Specify the size of local window for sampling in nnedi3 prescaling
+        (defaults to be ``8x4``). The ``8x6`` window produces sharper images,
+        but is also slower.
+
+    ``nnedi3-upload=<ubo|shader>``
+        Specify how to upload the NN weights to GPU. Depending on the graphics
+        card, driver, shader compiler and nnedi3 settings, both method can be
+        faster or slower.
+
+        ``ubo``
+            Upload these weights via uniform buffer objects. This is the
+            default. (requires OpenGL 3.1)
+
+        ``shader``
+            Hard code all the weights into the shader source code. (requires
+            OpenGL 3.3)
+
 
     ``pre-shaders=<files>``, ``post-shaders=<files>``, ``scale-shader=<file>``
         Custom GLSL fragment shaders.
