@@ -9,8 +9,8 @@ use warnings;
 # the exact contents of the original file.
 # FIXME: why not a char array?
 
-# treat only alphanumeric and not-" punctuation as safe
-my $unsafe_chars = qr{[^][A-Za-z0-9!#%&'()*+,./:;<=>?^_{|}~ -]};
+# treat only alphanumeric and punctuations (excluding " and ?) as safe
+my $unsafe_chars = qr{[^][A-Za-z0-9!#%&'()*+,./:;<=>^_{|}~ -]};
 
 for my $file (@ARGV) {
     open my $fh, '<:raw', $file or next;
