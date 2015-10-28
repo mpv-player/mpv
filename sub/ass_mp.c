@@ -44,7 +44,6 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
         if (!style->FontName || strcmp(style->FontName, opts->font) != 0) {
             free(style->FontName);
             style->FontName = strdup(opts->font);
-            style->treat_fontname_as_pattern = 1;
         }
     }
 
