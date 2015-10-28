@@ -751,8 +751,8 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
     }
 }
 
-// Update the A/V sync difference after a video frame has been shown.
-static void update_avsync_after_frame(struct MPContext *mpctx)
+// Update the A/V sync difference when a new video frame is being shown.
+static void update_av_diff(struct MPContext *mpctx, double offset)
 {
     struct MPOpts *opts = mpctx->opts;
 
@@ -763,13 +763,12 @@ static void update_avsync_after_frame(struct MPContext *mpctx)
         return;
 
     double a_pos = playing_audio_pts(mpctx);
+    if (a_pos != MP_NOPTS_VALUE && mpctx->video_pts != MP_NOPTS_VALUE) {
+        mpctx->last_av_difference = a_pos - mpctx->video_pts
+                                  + opts->audio_delay + offset;
+    }
 
-    mpctx->last_av_difference = a_pos - mpctx->video_pts + opts->audio_delay;
-    if (mpctx->time_frame > 0)
-        mpctx->last_av_difference += mpctx->time_frame * mpctx->video_speed;
-    if (a_pos == MP_NOPTS_VALUE || mpctx->video_pts == MP_NOPTS_VALUE) {
-        mpctx->last_av_difference = 0;
-    } else if (fabs(mpctx->last_av_difference) > 0.5 && !mpctx->drop_message_shown) {
+    if (fabs(mpctx->last_av_difference) > 0.5 && !mpctx->drop_message_shown) {
         MP_WARN(mpctx, "%s", av_desync_help_text);
         mpctx->drop_message_shown = true;
     }
@@ -1030,20 +1029,21 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
         vo_increment_drop_count(vo, 1);
 
     // Estimate the video position, so we can calculate a good A/V difference
-    // value with update_avsync_after_frame() later. This is used to estimate
-    // A/V drift.
-    mpctx->time_frame = 0;
+    // value below. This is used to estimate A/V drift.
     double time_left = (vo_get_next_frame_start_time(vo) - mp_time_us()) / 1e6;
-    if (time_left >= 0)
-        mpctx->time_frame += time_left;
+    time_left = MPMAX(time_left, 0);
     // We also know that the timing is (necessarily) off, because we have to
     // align frame timings on the vsync boundaries. This is unavoidable, and
     // for the sake of the video sync calculations we pretend it's perfect.
-    mpctx->time_frame -= mpctx->display_sync_error;
+    time_left -= mpctx->display_sync_error;
     // Likewise, we know sync is off, but is going to be compensated.
-    mpctx->time_frame += drop_repeat * vsync;
-    mpctx->time_frame /= opts->playback_speed * video_speed_correction;
+    time_left += drop_repeat * vsync;
+
     mpctx->total_avsync_change = 0;
+    update_av_diff(mpctx, time_left);
+
+    // A bad guess, only needed when reverting to audio sync.
+    mpctx->time_frame = time_left;
 
     mpctx->speed_factor_v = video_speed_correction;
 
@@ -1063,6 +1063,16 @@ done:
 
     mpctx->display_sync_disable_counter =
         MPMAX(0, mpctx->display_sync_disable_counter - 1);
+}
+
+static void schedule_frame(struct MPContext *mpctx, struct vo_frame *frame)
+{
+    handle_display_sync_frame(mpctx, frame);
+
+    if (!mpctx->display_sync_active) {
+        update_av_diff(mpctx, mpctx->time_frame > 0 ?
+            mpctx->time_frame * mpctx->video_speed : 0);
+    }
 }
 
 // Return the next frame duration as stored in the file.
@@ -1190,13 +1200,11 @@ void write_video(struct MPContext *mpctx, double endpts)
         frame->duration = MPCLAMP(diff, 0, 10) * 1e6;
     }
 
-    handle_display_sync_frame(mpctx, frame);
-
     mpctx->video_pts = mpctx->next_frames[0]->pts;
     mpctx->last_vo_pts = mpctx->video_pts;
     mpctx->playback_pts = mpctx->video_pts;
 
-    update_avsync_after_frame(mpctx);
+    schedule_frame(mpctx, frame);
 
     mpctx->osd_force_update = true;
     update_osd_msg(mpctx);
