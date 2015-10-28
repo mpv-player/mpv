@@ -183,7 +183,7 @@ static int parse_webvtt(AVPacket *in, AVPacket *pkt)
                                       AV_PKT_DATA_WEBVTT_IDENTIFIER,
                                       id_len);
         if (buf == NULL) {
-            av_free_packet(pkt);
+            av_packet_unref(pkt);
             return AVERROR(ENOMEM);
         }
         memcpy(buf, id, id_len);
@@ -194,7 +194,7 @@ static int parse_webvtt(AVPacket *in, AVPacket *pkt)
                                       AV_PKT_DATA_WEBVTT_SETTINGS,
                                       settings_len);
         if (buf == NULL) {
-            av_free_packet(pkt);
+            av_packet_unref(pkt);
             return AVERROR(ENOMEM);
         }
         memcpy(buf, settings, settings_len);
@@ -256,7 +256,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 
 done:
     avsubtitle_free(&sub);
-    av_free_packet(&parsed_pkt);
+    av_packet_unref(&parsed_pkt);
 }
 
 static void reset(struct sd *sd)

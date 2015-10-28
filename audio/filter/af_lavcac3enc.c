@@ -146,7 +146,7 @@ static void uninit(struct af_instance* af)
     af_ac3enc_t *s = af->priv;
 
     if (s) {
-        av_free_packet(&s->pkt);
+        av_packet_unref(&s->pkt);
         if(s->lavc_actx) {
             avcodec_close(s->lavc_actx);
             av_free(s->lavc_actx);
