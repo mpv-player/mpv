@@ -415,8 +415,10 @@ static void dump_audio_stats(struct MPContext *mpctx)
 {
     if (!mp_msg_test(mpctx->log, MSGL_STATS))
         return;
-    if (mpctx->audio_status != STATUS_PLAYING || !mpctx->ao)
+    if (mpctx->audio_status != STATUS_PLAYING || !mpctx->ao || mpctx->paused) {
+        mpctx->audio_stat_start = 0;
         return;
+    }
 
     double delay = ao_get_delay(mpctx->ao);
     if (!mpctx->audio_stat_start) {
