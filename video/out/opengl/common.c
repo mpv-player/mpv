@@ -104,6 +104,7 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(AttachShader),
             DEF_FN(BindAttribLocation),
             DEF_FN(BindBuffer),
+            DEF_FN(BindBufferBase),
             DEF_FN(BindTexture),
             DEF_FN(BlendFuncSeparate),
             DEF_FN(BufferData),
@@ -315,6 +316,16 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    // uniform buffer object extensions, requires OpenGL 3.1.
+    {
+        .ver_core = 310,
+        .extension = "ARB_uniform_buffer_object",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(GetUniformBlockIndex),
+            DEF_FN(UniformBlockBinding),
+            {0}
+        },
+    },
 };
 
 #undef FN_OFFS
@@ -466,10 +477,10 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
             gl->glsl_version = 120;
         if (gl->version >= 300)
             gl->glsl_version = 130;
-        // Specifically needed for OSX (normally we request 3.0 contexts only, but
-        // OSX always creates 3.2 contexts when requesting a core context).
         if (gl->version >= 320)
             gl->glsl_version = 150;
+        if (gl->version >= 330)
+            gl->glsl_version = 330;
     }
 
     if (is_software_gl(gl)) {
