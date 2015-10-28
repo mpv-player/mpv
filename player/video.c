@@ -962,12 +962,9 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 
     // If we are too far ahead/behind, attempt to drop/repeat frames. In
     // particular, don't attempt to change speed for them.
-    if (drop)
+    // Tolerate some desync to avoid frame dropping due to jitter.
+    if (drop && fabs(av_diff) >= 0.080 && fabs(av_diff) / vsync >= 2)
         drop_repeat = -av_diff / vsync; // round towards 0
-
-    // Tolerate at least 1 video frame desync.
-    if (abs(drop_repeat) <= 1)
-        drop_repeat = 0;
 
     av_diff += drop_repeat * vsync;
 
