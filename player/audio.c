@@ -562,14 +562,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 
         skip_duplicate = mpctx->last_av_difference >= 0 ? -samples : samples;
 
-        // safeguard against excessively growing audio buffer sizes
-        if (skip_duplicate < 0 && mp_audio_buffer_seconds(mpctx->ao_buffer) > 5) {
-            skip_duplicate = 0;
-            samples = 0;
-        }
-
-        if (playsize < samples)
-            playsize = samples;
+        playsize = MPMAX(playsize, samples);
     }
 
     int status = AD_OK;
