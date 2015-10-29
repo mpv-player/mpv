@@ -623,9 +623,6 @@ static bool render_frame(struct vo *vo)
         goto done;
     }
 
-    if (in->current_frame->display_synced && in->current_frame->num_vsyncs < 1)
-        goto done;
-
     frame = vo_frame_ref(in->current_frame);
     assert(frame);
 
@@ -701,8 +698,10 @@ static bool render_frame(struct vo *vo)
     // Setup parameters for the next time this frame is drawn. ("frame" is the
     // frame currently drawn, while in->current_frame is the potentially next.)
     in->current_frame->repeat = true;
-    if (frame->display_synced)
+    if (frame->display_synced) {
         in->current_frame->vsync_offset += in->vsync_interval;
+        in->dropped_frame |= in->current_frame->num_vsyncs < 1;
+    }
     if (in->current_frame->num_vsyncs > 0)
         in->current_frame->num_vsyncs -= 1;
 
