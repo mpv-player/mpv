@@ -52,7 +52,6 @@ struct fmtentry {
 static const struct fmtentry va_to_imgfmt[] = {
     {VA_FOURCC_NV12, IMGFMT_NV12},
     {VA_FOURCC_YV12, IMGFMT_420P},
-    {VA_FOURCC_I420, IMGFMT_420P},
     {VA_FOURCC_IYUV, IMGFMT_420P},
     {VA_FOURCC_UYVY, IMGFMT_UYVY},
     {VA_FOURCC_YUY2, IMGFMT_YUYV},
@@ -210,6 +209,15 @@ int va_surface_rt_format(struct mp_image *mpi)
     return surface ? surface->rt_format : 0;
 }
 
+// Return the real size of the underlying surface. (HW decoding might allocate
+// padded surfaces for example.)
+void va_surface_get_uncropped_size(struct mp_image *mpi, int *out_w, int *out_h)
+{
+    struct va_surface *s = va_surface_in_mp_image(mpi);
+    *out_w = s ? s->w : 0;
+    *out_h = s ? s->h : 0;
+}
+
 static void release_va_surface(void *arg)
 {
     struct va_surface *surface = arg;
@@ -289,7 +297,7 @@ static int va_surface_image_alloc(struct mp_image *img, VAImageFormat *format)
             p->image.width == p->w && p->image.height == p->h)
         {
             p->is_derived = true;
-            MP_VERBOSE(p->ctx, "Using vaDeriveImage()\n");
+            MP_TRACE(p->ctx, "Using vaDeriveImage()\n");
         } else {
             vaDestroyImage(p->display, p->image.image_id);
             status = VA_STATUS_ERROR_OPERATION_FAILED;
@@ -350,7 +358,7 @@ bool va_image_map(struct mp_vaapi_ctx *ctx, VAImage *image, struct mp_image *mpi
     }
 
     if (image->format.fourcc == VA_FOURCC_YV12) {
-        MPSWAP(unsigned int, mpi->stride[1], mpi->stride[2]);
+        MPSWAP(int, mpi->stride[1], mpi->stride[2]);
         MPSWAP(uint8_t *, mpi->planes[1], mpi->planes[2]);
     }
 
@@ -366,7 +374,7 @@ bool va_image_unmap(struct mp_vaapi_ctx *ctx, VAImage *image)
 }
 
 // va_dst: copy destination, must be IMGFMT_VAAPI
-// sw_src: copy source, must be a software p
+// sw_src: copy source, must be a software pixel format
 int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src)
 {
     struct va_surface *p = va_surface_in_mp_image(va_dst);
@@ -430,7 +438,11 @@ static struct mp_image *try_download(struct mp_image *src,
         mp_image_set_size(&tmp, src->w, src->h); // copy only visible part
         dst = mp_image_pool_get(pool, tmp.imgfmt, tmp.w, tmp.h);
         if (dst) {
-            mp_image_copy(dst, &tmp);
+            va_lock(p->ctx);
+            mp_check_gpu_memcpy(p->ctx->log, &p->ctx->gpu_memcpy_message);
+            va_unlock(p->ctx);
+
+            mp_image_copy_gpu(dst, &tmp);
             mp_image_copy_attributes(dst, src);
         }
         va_image_unmap(p->ctx, image);

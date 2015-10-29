@@ -37,8 +37,6 @@ void pass_sample_separated_gen(struct gl_shader_cache *sc, struct scaler *scaler
                                int d_x, int d_y);
 void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler);
 void pass_sample_bicubic_fast(struct gl_shader_cache *sc);
-void pass_sample_sharpen3(struct gl_shader_cache *sc, struct scaler *scaler);
-void pass_sample_sharpen5(struct gl_shader_cache *sc, struct scaler *scaler);
 void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
                             int w, int h);
 
@@ -48,5 +46,7 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc);
 void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
                         int tex_num, GLenum tex_target, float tex_mul,
                         float img_w, float img_h, AVLFG *lfg);
+
+void pass_sample_unsharp(struct gl_shader_cache *sc, float param);
 
 #endif

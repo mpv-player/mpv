@@ -195,6 +195,10 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (af_to_avformat(in->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(in, AF_FORMAT_FLOAT);
 
+        // Removing this requires fixing AVFrame.data vs. AVFrame.extended_data
+        if (in->channels.num > AV_NUM_DATA_POINTERS)
+            return AF_ERROR;
+
         if (!mp_chmap_is_lavc(&in->channels))
             mp_chmap_reorder_to_lavc(&in->channels); // will always work
 
@@ -211,7 +215,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         mp_chmap_from_lavc(&out_cm, l_out->channel_layout);
         mp_audio_set_channels(out, &out_cm);
 
-        if (!mp_audio_config_valid(out))
+        if (!mp_audio_config_valid(out) || out->channels.num > AV_NUM_DATA_POINTERS)
             return AF_ERROR;
 
         p->timebase_out = l_out->time_base;
@@ -349,8 +353,6 @@ static int af_open(struct af_instance *af)
     af->uninit = uninit;
     af->filter_frame = filter_frame;
     af->filter_out = filter_out;
-    // Removing this requires fixing AVFrame.data vs. AVFrame.extended_data
-    assert(MP_NUM_CHANNELS <= AV_NUM_DATA_POINTERS);
     return AF_OK;
 }
 

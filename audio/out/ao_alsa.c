@@ -50,6 +50,7 @@
 
 struct priv {
     snd_pcm_t *alsa;
+    bool device_lost;
     snd_pcm_format_t alsa_fmt;
     int can_pause;
     snd_pcm_sframes_t prepause_frames;
@@ -82,6 +83,21 @@ struct priv {
         if (err < 0) \
             MP_WARN(ao, "%s: %s\n", (message), snd_strerror(err)); \
     } while (0)
+
+// Common code for handling ENODEV, which happens if a device gets "lost", and
+// can't be used anymore. Returns true if alsa_err is not ENODEV.
+static bool check_device_present(struct ao *ao, int alsa_err)
+{
+    struct priv *p = ao->priv;
+    if (alsa_err != -ENODEV)
+        return true;
+    if (!p->device_lost) {
+        MP_WARN(ao, "Device lost, trying to recover...\n");
+        ao_request_reload(ao);
+        p->device_lost = true;
+    }
+    return false;
+}
 
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
@@ -312,9 +328,9 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
         if (mp_chmap_is_valid(&entry)) {
             if (maps[i]->type == SND_CHMAP_TYPE_VAR)
                 mp_chmap_reorder_norm(&entry);
-            MP_VERBOSE(ao, "Got supported channel map: %s (type %s)\n",
-                       mp_chmap_to_str(&entry),
-                       snd_pcm_chmap_type_name(maps[i]->type));
+            MP_DBG(ao, "Got supported channel map: %s (type %s)\n",
+                   mp_chmap_to_str(&entry),
+                   snd_pcm_chmap_type_name(maps[i]->type));
             mp_chmap_sel_add_map(&chmap_sel, &entry);
         } else {
             char tmp[128];
@@ -462,16 +478,20 @@ static int init_device(struct ao *ao, bool second_try)
     err = snd_pcm_hw_params_any(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to get initial parameters");
 
+    bool found_format = false;
     int try_formats[AF_FORMAT_COUNT];
     af_get_best_sample_formats(ao->format, try_formats);
     for (int n = 0; try_formats[n]; n++) {
-        ao->format = try_formats[n];
-        p->alsa_fmt = find_alsa_format(ao->format);
-        if (snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt) >= 0)
+        p->alsa_fmt = find_alsa_format(try_formats[n]);
+        MP_VERBOSE(ao, "trying format %s\n", af_fmt_to_str(try_formats[n]));
+        if (snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt) >= 0) {
+            ao->format = try_formats[n];
+            found_format = true;
             break;
+        }
     }
 
-    if (!ao->format) {
+    if (!found_format) {
         MP_ERR(ao, "Can't find appropriate sample format.\n");
         goto alsa_error;
     }
@@ -730,6 +750,8 @@ static int get_space(struct ao *ao)
     snd_pcm_status_alloca(&status);
 
     err = snd_pcm_status(p->alsa, status);
+    if (!check_device_present(ao, err))
+        goto alsa_error;
     CHECK_ALSA_ERROR("cannot get pcm status");
 
     unsigned space = snd_pcm_status_get_avail(status);
@@ -856,9 +878,8 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
         if (res == -EINTR || res == -EAGAIN) { /* retry */
             res = 0;
-        } else if (res == -ENODEV) {
-            MP_WARN(ao, "Device lost, trying to recover...\n");
-            ao_request_reload(ao);
+        } else if (!check_device_present(ao, res)) {
+            goto alsa_error;
         } else if (res < 0) {
             if (res == -ESTRPIPE) {  /* suspend */
                 resume_device(ao);

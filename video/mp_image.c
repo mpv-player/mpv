@@ -35,6 +35,7 @@
 #include "mp_image.h"
 #include "sws_utils.h"
 #include "fmt-conversion.h"
+#include "gpu_memcpy.h"
 
 #include "video/filter/vf.h"
 
@@ -300,7 +301,30 @@ void mp_image_unrefp(struct mp_image **p_img)
     *p_img = NULL;
 }
 
-void mp_image_copy(struct mp_image *dst, struct mp_image *src)
+typedef void *(*memcpy_fn)(void *d, const void *s, size_t size);
+
+static void memcpy_pic_cb(void *dst, const void *src, int bytesPerLine, int height,
+                          int dstStride, int srcStride, memcpy_fn cpy)
+{
+    if (bytesPerLine == dstStride && dstStride == srcStride && height) {
+        if (srcStride < 0) {
+            src = (uint8_t*)src + (height - 1) * srcStride;
+            dst = (uint8_t*)dst + (height - 1) * dstStride;
+            srcStride = -srcStride;
+        }
+
+        cpy(dst, src, srcStride * (height - 1) + bytesPerLine);
+    } else {
+        for (int i = 0; i < height; i++) {
+            cpy(dst, src, bytesPerLine);
+            src = (uint8_t*)src + srcStride;
+            dst = (uint8_t*)dst + dstStride;
+        }
+    }
+}
+
+static void mp_image_copy_cb(struct mp_image *dst, struct mp_image *src,
+                             memcpy_fn cpy)
 {
     assert(dst->imgfmt == src->imgfmt);
     assert(dst->w == src->w && dst->h == src->h);
@@ -308,12 +332,48 @@ void mp_image_copy(struct mp_image *dst, struct mp_image *src)
     for (int n = 0; n < dst->num_planes; n++) {
         int line_bytes = (mp_image_plane_w(dst, n) * dst->fmt.bpp[n] + 7) / 8;
         int plane_h = mp_image_plane_h(dst, n);
-        memcpy_pic(dst->planes[n], src->planes[n], line_bytes, plane_h,
-                   dst->stride[n], src->stride[n]);
+        memcpy_pic_cb(dst->planes[n], src->planes[n], line_bytes, plane_h,
+                      dst->stride[n], src->stride[n], cpy);
     }
     // Watch out for AV_PIX_FMT_FLAG_PSEUDOPAL retardation
     if ((dst->fmt.flags & MP_IMGFLAG_PAL) && dst->planes[1] && src->planes[1])
         memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
+}
+
+void mp_image_copy(struct mp_image *dst, struct mp_image *src)
+{
+    mp_image_copy_cb(dst, src, memcpy);
+}
+
+void mp_image_copy_gpu(struct mp_image *dst, struct mp_image *src)
+{
+#if HAVE_SSE4_INTRINSICS
+    if (av_get_cpu_flags() & AV_CPU_FLAG_SSE4) {
+        mp_image_copy_cb(dst, src, gpu_memcpy);
+        return;
+    }
+#endif
+    mp_image_copy(dst, src);
+}
+
+// Helper, only for outputting some log info.
+void mp_check_gpu_memcpy(struct mp_log *log, bool *once)
+{
+    if (once) {
+        if (*once)
+            return;
+        *once = true;
+    }
+
+    bool have_sse = false;
+#if HAVE_SSE4_INTRINSICS
+    have_sse = av_get_cpu_flags() & AV_CPU_FLAG_SSE4;
+#endif
+    if (have_sse) {
+        mp_verbose(log, "Using SSE4 memcpy\n");
+    } else {
+        mp_warn(log, "Using fallback memcpy (slow)\n");
+    }
 }
 
 void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
@@ -334,7 +394,6 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
         dst->params.colorspace = src->params.colorspace;
         dst->params.colorlevels = src->params.colorlevels;
         dst->params.chroma_location = src->params.chroma_location;
-        dst->params.outputlevels = src->params.outputlevels;
     }
     mp_image_params_guess_csp(&dst->params); // ensure colorspace consistency
     if ((dst->fmt.flags & MP_IMGFLAG_PAL) && (src->fmt.flags & MP_IMGFLAG_PAL)) {
@@ -431,10 +490,6 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
                         m_opt_choice_str(mp_csp_levels_names, p->colorlevels));
         mp_snprintf_cat(b, bs, " CL=%s",
                         m_opt_choice_str(mp_chroma_names, p->chroma_location));
-        if (p->outputlevels) {
-            mp_snprintf_cat(b, bs, " out=%s",
-                    m_opt_choice_str(mp_csp_levels_names, p->outputlevels));
-        }
         if (p->rotate)
             mp_snprintf_cat(b, bs, " rot=%d", p->rotate);
         if (p->stereo_in > 0 || p->stereo_out > 0) {
@@ -481,7 +536,6 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            p1->d_w == p2->d_w && p1->d_h == p2->d_h &&
            p1->colorspace == p2->colorspace &&
            p1->colorlevels == p2->colorlevels &&
-           p1->outputlevels == p2->outputlevels &&
            p1->primaries == p2->primaries &&
            p1->gamma == p2->gamma &&
            p1->chroma_location == p2->chroma_location &&
@@ -675,21 +729,7 @@ struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
 void memcpy_pic(void *dst, const void *src, int bytesPerLine, int height,
                 int dstStride, int srcStride)
 {
-    if (bytesPerLine == dstStride && dstStride == srcStride && height) {
-        if (srcStride < 0) {
-            src = (uint8_t*)src + (height - 1) * srcStride;
-            dst = (uint8_t*)dst + (height - 1) * dstStride;
-            srcStride = -srcStride;
-        }
-
-        memcpy(dst, src, srcStride * (height - 1) + bytesPerLine);
-    } else {
-        for (int i = 0; i < height; i++) {
-            memcpy(dst, src, bytesPerLine);
-            src = (uint8_t*)src + srcStride;
-            dst = (uint8_t*)dst + dstStride;
-        }
-    }
+    memcpy_pic_cb(dst, src, bytesPerLine, height, dstStride, srcStride, memcpy);
 }
 
 void memset_pic(void *dst, int fill, int bytesPerLine, int height, int stride)

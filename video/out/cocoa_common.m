@@ -248,7 +248,7 @@ static void cocoa_uninit_light_sensor(struct vo_cocoa_state *s)
     }
 }
 
-int vo_cocoa_init(struct vo *vo)
+void vo_cocoa_init(struct vo *vo)
 {
     struct vo_cocoa_state *s = talloc_zero(NULL, struct vo_cocoa_state);
     *s = (struct vo_cocoa_state){
@@ -265,7 +265,10 @@ int vo_cocoa_init(struct vo *vo)
     pthread_cond_init(&s->wakeup, NULL);
     vo->cocoa = s;
     cocoa_init_light_sensor(vo);
-    return 1;
+    if (!s->embedded) {
+        [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+        set_application_icon(NSApp);
+    }
 }
 
 static int vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
@@ -554,7 +557,7 @@ void vo_cocoa_set_opengl_ctx(struct vo *vo, CGLContextObj ctx)
     });
 }
 
-int vo_cocoa_config_window(struct vo *vo, uint32_t flags)
+int vo_cocoa_config_window(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     run_on_main_thread(vo, ^{
@@ -572,7 +575,7 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags)
         s->old_dwidth  = width;
         s->old_dheight = height;
 
-        if (!(flags & VOFLAG_HIDDEN) && !s->view) {
+        if (!s->view) {
             create_ui(vo, &geo.win, geo.flags);
         }
 
@@ -593,11 +596,6 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t flags)
         vo->dheight = s->vo_dheight = frame.size.height;
 
         [s->nsgl_ctx update];
-
-        if (!s->embedded) {
-            [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-            set_application_icon(NSApp);
-        }
     });
     return 0;
 }

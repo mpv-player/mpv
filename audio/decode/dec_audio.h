@@ -30,7 +30,7 @@ struct dec_audio {
     struct mp_log *log;
     struct MPOpts *opts;
     struct mpv_global *global;
-    bool spdif_passthrough;
+    bool spdif_passthrough, spdif_failed;
     const struct ad_functions *ad_driver;
     struct sh_stream *header;
     struct af_stream *afilter;

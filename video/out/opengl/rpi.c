@@ -32,10 +32,8 @@
 static void *get_proc_address(const GLubyte *name)
 {
     void *p = eglGetProcAddress(name);
-    // It looks like eglGetProcAddress() should work even for builtin
-    // functions, but it doesn't work at least with RPI/Broadcom crap.
-    // (EGL 1.4, which current RPI firmware pretends to support, definitely
-    // is required to return non-extension functions.)
+    // EGL 1.4 (supported by the RPI firmware) does not necessarily return
+    // function pointers for core functions.
     if (!p) {
         void *h = dlopen("/opt/vc/lib/libGLESv2.so", RTLD_LAZY);
         if (h) {
@@ -154,18 +152,20 @@ struct priv {
     int w, h;
 };
 
-static bool sc_config_window(struct MPGLContext *ctx, int flags)
+static void rpi_uninit(MPGLContext *ctx)
+{
+    struct priv *p = ctx->priv;
+    mp_egl_rpi_destroy(&p->egl);
+    if (p->display)
+        vc_dispmanx_display_close(p->display);
+}
+
+static int rpi_init(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
 
     p->egl.log = vo->log;
-
-    if (p->egl.gl) {
-        vo->dwidth = p->w;
-        vo->dheight = p->h;
-        return true;
-    }
 
     bcm_host_init();
 
@@ -173,13 +173,13 @@ static bool sc_config_window(struct MPGLContext *ctx, int flags)
     p->update = vc_dispmanx_update_start(0);
     if (!p->display || !p->update) {
         MP_FATAL(ctx->vo, "Could not get DISPMANX objects.\n");
-        return false;
+        goto fail;
     }
 
     uint32_t w, h;
     if (graphics_get_display_size(0, &w, &h) < 0) {
         MP_FATAL(ctx->vo, "Could not get display size.\n");
-        return false;
+        goto fail;
     }
 
     // dispmanx is like a neanderthal version of Wayland - you can add an
@@ -194,56 +194,51 @@ static bool sc_config_window(struct MPGLContext *ctx, int flags)
                                         &src, DISPMANX_PROTECTION_NONE, &alpha, 0, 0);
     if (!p->window) {
         MP_FATAL(ctx->vo, "Could not add DISPMANX element.\n");
-        return false;
+        goto fail;
     }
 
     vc_dispmanx_update_submit_sync(p->update);
 
     if (mp_egl_rpi_init(&p->egl, p->window, w, h) < 0)
-        return false;
+        goto fail;
 
     ctx->gl = p->egl.gl;
 
     vo->dwidth = p->w = w;
     vo->dheight = p->h = h;
 
-    return true;
+    return 0;
+
+fail:
+    rpi_uninit(ctx);
+    return -1;
 }
 
-static void sc_releaseGlContext(MPGLContext *ctx)
+static int rpi_reconfig(struct MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
-    mp_egl_rpi_destroy(&p->egl);
-    vc_dispmanx_display_close(p->display);
+    ctx->vo->dwidth = p->w;
+    ctx->vo->dheight = p->h;
+    return 0;
 }
 
-static void sc_swapGlBuffers(MPGLContext *ctx)
+static void rpi_swap_buffers(MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
     eglSwapBuffers(p->egl.egl_display, p->egl.egl_surface);
 }
 
-static int sc_vo_init(struct vo *vo)
-{
-    return 1;
-}
-
-static void sc_vo_uninit(struct vo *vo)
-{
-}
-
-static int sc_vo_control(struct vo *vo, int *events, int request, void *arg)
+static int rpi_control(MPGLContext *ctx, int *events, int request, void *arg)
 {
     return VO_NOTIMPL;
 }
 
-void mpgl_set_backend_rpi(MPGLContext *ctx)
-{
-    ctx->priv = talloc_zero(ctx, struct priv);
-    ctx->config_window = sc_config_window;
-    ctx->releaseGlContext = sc_releaseGlContext;
-    ctx->swapGlBuffers = sc_swapGlBuffers;
-    ctx->vo_init = sc_vo_init;
-    ctx->vo_uninit = sc_vo_uninit;
-    ctx->vo_control = sc_vo_control;
-}
+const struct mpgl_driver mpgl_driver_rpi = {
+    .name           = "rpi",
+    .priv_size      = sizeof(struct priv),
+    .init           = rpi_init,
+    .reconfig       = rpi_reconfig,
+    .swap_buffers   = rpi_swap_buffers,
+    .control        = rpi_control,
+    .uninit         = rpi_uninit,
+};

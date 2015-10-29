@@ -635,7 +635,10 @@ static void handle_stream(demuxer_t *demuxer, int i)
         sh->ff_index = st->index;
         sh->codec = mp_codec_from_av_codec_id(codec->codec_id);
         sh->codec_tag = codec->codec_tag;
-        sh->lav_headers = codec;
+        sh->lav_headers = avcodec_alloc_context3(NULL);
+        if (!sh->lav_headers)
+            return;
+        mp_copy_lav_codec_headers(sh->lav_headers, codec);
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = true;
@@ -850,7 +853,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     AVPacket *pkt = &(AVPacket){0};
     int r = av_read_frame(priv->avfc, pkt);
     if (r < 0) {
-        av_free_packet(pkt);
+        av_packet_unref(pkt);
         if (r == AVERROR(EAGAIN))
             return 1;
         if (r == AVERROR_EOF)
@@ -867,13 +870,13 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     AVStream *st = priv->avfc->streams[pkt->stream_index];
 
     if (!demux_stream_is_selected(stream)) {
-        av_free_packet(pkt);
+        av_packet_unref(pkt);
         return 1; // don't signal EOF if skipping a packet
     }
 
     struct demux_packet *dp = new_demux_packet_from_avpacket(pkt);
     if (!dp) {
-        av_free_packet(pkt);
+        av_packet_unref(pkt);
         return 1;
     }
 
@@ -882,8 +885,10 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     if (pkt->dts != AV_NOPTS_VALUE)
         dp->dts = pkt->dts * av_q2d(st->time_base);
     dp->duration = pkt->duration * av_q2d(st->time_base);
+#if !HAVE_AV_AVPACKET_INT64_DURATION
     if (pkt->convergence_duration > 0)
         dp->duration = pkt->convergence_duration * av_q2d(st->time_base);
+#endif
     dp->pos = pkt->pos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
     if (dp->pts != MP_NOPTS_VALUE) {
@@ -891,7 +896,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     } else if (dp->dts != MP_NOPTS_VALUE) {
         priv->last_pts = dp->dts * AV_TIME_BASE;
     }
-    av_free_packet(pkt);
+    av_packet_unref(pkt);
 
     if (priv->format_hack.clear_filepos)
         dp->pos = -1;
@@ -1074,6 +1079,10 @@ static void demux_close_lavf(demuxer_t *demuxer)
         if (priv->pb)
             av_freep(&priv->pb->buffer);
         av_freep(&priv->pb);
+        for (int n = 0; n < priv->num_streams; n++) {
+            if (priv->streams[n])
+                avcodec_free_context(&priv->streams[n]->lav_headers);
+        }
         talloc_free(priv);
         demuxer->priv = NULL;
     }

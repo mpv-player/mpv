@@ -20,13 +20,10 @@ normal driver parameters.
 
     See ``--vo=help`` for a list of compiled-in video output drivers.
 
-    The recommended output drivers are ``--vo=vdpau`` and ``--vo=opengl-hq``.
-    All other drivers are just for compatibility or special purposes.
-
-.. admonition:: Example
-
-    ``--vo=opengl,xv,``
-        Try the ``opengl`` driver, then the ``xv`` driver, then others.
+    The recommended output driver is ``--vo=opengl-hq``. All other drivers are
+    for compatibility or special purposes. By default, ``--vo=opengl`` is used,
+    but if that appears not to work, it fallback to other drivers (in the same
+    order as listed by ``--vo=help``).
 
 Available video output drivers are:
 
@@ -74,6 +71,12 @@ Available video output drivers are:
         Increasing this will use more memory, but might help with the X server
         not responding quickly enough if video FPS is close to or higher than
         the display refresh rate.
+
+``x11`` (X11 only)
+    Shared memory video output driver without hardware acceleration that works
+    whenever X11 is present.
+
+    .. note:: This is a fallback only, and should not be normally used.
 
 ``vdpau`` (X11 only)
     Uses the VDPAU interface to display and optionally also decode video.
@@ -375,10 +378,6 @@ Available video output drivers are:
             Scale parameter (``t``). Increasing this makes the result blurrier.
             Defaults to 1.
 
-        sharpen3, sharpen5
-            Sharpening strength. Increasing this makes the image sharper but
-            adds more ringing and aliasing. Defaults to 0.5.
-
         oversample
             Minimum distance to an edge before interpolation is used. Setting
             this to 0 will always interpolate edges, whereas setting it to 0.5
@@ -408,8 +407,8 @@ Available video output drivers are:
         between 0.0 and 1.0. The default value of 0.0 disables antiringing
         entirely.
 
-        Note that this doesn't affect the special filters ``bilinear``,
-        ``bicubic_fast`` or ``sharpen``.
+        Note that this doesn't affect the special filters ``bilinear`` and
+        ``bicubic_fast``.
 
     ``scale-window=<window>``
         (Advanced users only) Choose a custom windowing function for the kernel.
@@ -612,11 +611,8 @@ Available video output drivers are:
     ``deband-iterations=<1..16>``
         The number of debanding steps to perform per sample. Each step reduces
         a bit more banding, but takes time to compute. Note that the strength
-        of each step falls off very quickly, so high numbers are practically
-        useless. (Default 4)
-
-        If the performance hit of debanding is too great, you can reduce this
-        to 2 or 1 with marginal visual quality loss.
+        of each step falls off very quickly, so high numbers (>4) are
+        practically useless. (Default 1)
 
     ``deband-threshold=<0..4096>``
         The debanding filter's cut-off threshold. Higher numbers increase the
@@ -626,7 +622,10 @@ Available video output drivers are:
     ``deband-range=<1..64>``
         The debanding filter's initial radius. The radius increases linearly
         for each iteration. A higher radius will find more gradients, but
-        a lower radius will smooth more aggressively. (Default 8)
+        a lower radius will smooth more aggressively. (Default 16)
+
+        If you increase the ``deband-iterations``, you should probably
+        decrease this to compensate.
 
     ``deband-grain=<0..4096>``
         Add some extra noise to the image. This significantly helps cover up
@@ -644,6 +643,16 @@ Available video output drivers are:
     ``sigmoid-slope``
         The slope of the sigmoid curve used for ``sigmoid-upscaling``, must
         be a float between 1.0 and 20.0. Defaults to 6.5 if not specified.
+
+    ``sharpen=<value>``
+        If set to a value other than 0, enable an unsharp masking filter.
+        Positive values will sharpen the image (but add more ringing and
+        aliasing). Negative values will blur the image. If your GPU is powerful
+        enough, consider alternatives like the ``ewa_lanczossharp`` scale
+        filter, or the ``scale-blur`` sub-option.
+
+        (This feature is the replacement for the old ``sharpen3`` and
+        ``sharpen5`` scalers.)
 
     ``glfinish``
         Call ``glFinish()`` before and after swapping buffers (default: disabled).

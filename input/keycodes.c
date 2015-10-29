@@ -36,6 +36,7 @@ struct key_name {
 static const struct key_name key_names[] = {
   { ' ', "SPACE" },
   { '#', "SHARP" },
+  { 0x3000, "IDEOGRAPHIC_SPACE" },
   { MP_KEY_ENTER, "ENTER" },
   { MP_KEY_TAB, "TAB" },
   { MP_KEY_BACKSPACE, "BS" },

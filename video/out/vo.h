@@ -130,15 +130,12 @@ struct voctrl_get_equalizer_args {
 #define VO_NOTAVAIL     -2
 #define VO_NOTIMPL      -3
 
-#define VOFLAG_HIDDEN           0x10  //< Use to create a hidden window
-#define VOFLAG_GLES             0x20  // Hint to prefer GLES2 if possible
-#define VOFLAG_GL_DEBUG         0x40  // Hint to request debug OpenGL context
-#define VOFLAG_ALPHA            0x80  // Hint to request alpha framebuffer
-
-// VO does handle mp_image_params.rotate in 90 degree steps
-#define VO_CAP_ROTATE90 1
-// VO does framedrop itself (vo_vdpau). Untimed/encoding VOs never drop.
-#define VO_CAP_FRAMEDROP 2
+enum {
+    // VO does handle mp_image_params.rotate in 90 degree steps
+    VO_CAP_ROTATE90     = 1 << 0,
+    // VO does framedrop itself (vo_vdpau). Untimed/encoding VOs never drop.
+    VO_CAP_FRAMEDROP    = 1 << 1,
+};
 
 #define VO_MAX_REQ_FRAMES 10
 
@@ -220,10 +217,9 @@ struct vo_driver {
     /*
      * Initialize or reconfigure the display driver.
      *   params: video parameters, like pixel format and frame size
-     *   flags: combination of VOFLAG_ values
      * returns: < 0 on error, >= 0 on success
      */
-    int (*reconfig)(struct vo *vo, struct mp_image_params *params, int flags);
+    int (*reconfig)(struct vo *vo, struct mp_image_params *params);
 
     /*
      * Control interface
@@ -322,7 +318,7 @@ struct vo {
 
 struct mpv_global;
 struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex);
-int vo_reconfig(struct vo *vo, struct mp_image_params *p, int flags);
+int vo_reconfig(struct vo *vo, struct mp_image_params *p);
 
 int vo_control(struct vo *vo, uint32_t request, void *data);
 bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts);

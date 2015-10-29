@@ -29,7 +29,7 @@ struct vo;
 int vo_w32_init(struct vo *vo);
 void vo_w32_uninit(struct vo *vo);
 int vo_w32_control(struct vo *vo, int *events, int request, void *arg);
-int vo_w32_config(struct vo *vo, uint32_t);
+int vo_w32_config(struct vo *vo);
 HWND vo_w32_hwnd(struct vo *vo);
 void vo_w32_run_on_thread(struct vo *vo, void (*cb)(void *ctx), void *ctx);
 

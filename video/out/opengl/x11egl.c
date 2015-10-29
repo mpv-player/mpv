@@ -20,6 +20,8 @@
  * version 2.1 of the License, or (at your option) any later version.
  */
 
+#include <assert.h>
+
 #include <X11/Xlib.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -33,6 +35,18 @@ struct priv {
     EGLContext egl_context;
     EGLSurface egl_surface;
 };
+
+static void mpegl_uninit(MPGLContext *ctx)
+{
+    struct priv *p = ctx->priv;
+    if (p->egl_context) {
+        eglMakeCurrent(p->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                       EGL_NO_CONTEXT);
+        eglDestroyContext(p->egl_display, p->egl_context);
+    }
+    p->egl_context = EGL_NO_CONTEXT;
+    vo_x11_uninit(ctx->vo);
+}
 
 static EGLConfig select_fb_config_egl(struct MPGLContext *ctx, bool es)
 {
@@ -93,26 +107,30 @@ static bool create_context_egl(MPGLContext *ctx, EGLConfig config,
     return true;
 }
 
-static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
+static int mpegl_init(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
     bool es = flags & VOFLAG_GLES;
+    int msgl = vo->probing ? MSGL_V : MSGL_FATAL;
+
+    if (!vo_x11_init(vo))
+        goto uninit;
 
     if (!eglBindAPI(es ? EGL_OPENGL_ES_API : EGL_OPENGL_API)) {
-        MP_FATAL(vo, "Could not bind API (%s).\n", es ? "GLES" : "GL");
-        return false;
+        mp_msg(vo->log, msgl, "Could not bind API (%s).\n", es ? "GLES" : "GL");
+        goto uninit;
     }
 
     p->egl_display = eglGetDisplay(vo->x11->display);
     if (!eglInitialize(p->egl_display, NULL, NULL)) {
-        MP_FATAL(vo, "Could not initialize EGL.\n");
-        return false;
+        mp_msg(vo->log, msgl, "Could not initialize EGL.\n");
+        goto uninit;
     }
 
     EGLConfig config = select_fb_config_egl(ctx, es);
     if (!config)
-        return false;
+        goto uninit;
 
     int vID, n;
     eglGetConfigAttrib(p->egl_display, config, EGL_NATIVE_VISUAL_ID, &vID);
@@ -120,37 +138,44 @@ static bool config_window_x11_egl(struct MPGLContext *ctx, int flags)
     XVisualInfo *vi = XGetVisualInfo(vo->x11->display, VisualIDMask, &template, &n);
 
     if (!vi) {
-        MP_FATAL(ctx->vo, "Getting X visual failed!\n");
-        return false;
+        MP_FATAL(vo, "Getting X visual failed!\n");
+        goto uninit;
     }
 
-    vo_x11_config_vo_window(vo, vi, flags | VOFLAG_HIDDEN, "gl");
+    if (!vo_x11_create_vo_window(vo, vi, "gl")) {
+        XFree(vi);
+        goto uninit;
+    }
 
     XFree(vi);
 
     if (!create_context_egl(ctx, config, (EGLNativeWindowType)vo->x11->window, es))
-    {
-        vo_x11_uninit(ctx->vo);
-        return false;
-    }
+        goto uninit;
+
+    const char *egl_exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
 
     void *(*gpa)(const GLubyte*) = (void *(*)(const GLubyte*))eglGetProcAddress;
-    mpgl_load_functions(ctx->gl, gpa, NULL, vo->log);
+    mpgl_load_functions(ctx->gl, gpa, egl_exts, vo->log);
 
-    return true;
-}
+    ctx->native_display_type = "x11";
+    ctx->native_display = vo->x11->display;
 
-static int mpegl_init(struct MPGLContext *ctx, int vo_flags)
-{
-    if (vo_x11_init(ctx->vo) && config_window_x11_egl(ctx, vo_flags))
-        return 0;
-    vo_x11_uninit(ctx->vo);
+    if (vo->probing) {
+        const char *vendor = ctx->gl->GetString(GL_VENDOR);
+        if (vendor && strstr(vendor, "NVIDIA Corporation"))
+            goto uninit;
+    }
+
+    return 0;
+
+uninit:
+    mpegl_uninit(ctx);
     return -1;
 }
 
-static int mpegl_reconfig(struct MPGLContext *ctx, int flags)
+static int mpegl_reconfig(struct MPGLContext *ctx)
 {
-    vo_x11_config_vo_window(ctx->vo, NULL, flags, "gl");
+    vo_x11_config_vo_window(ctx->vo);
     return 0;
 }
 
@@ -158,18 +183,6 @@ static int mpegl_control(struct MPGLContext *ctx, int *events, int request,
                          void *arg)
 {
     return vo_x11_control(ctx->vo, events, request, arg);
-}
-
-static void mpegl_uninit(MPGLContext *ctx)
-{
-    struct priv *p = ctx->priv;
-    if (p->egl_context) {
-        eglMakeCurrent(p->egl_display, EGL_NO_SURFACE, EGL_NO_SURFACE,
-                       EGL_NO_CONTEXT);
-        eglDestroyContext(p->egl_display, p->egl_context);
-    }
-    p->egl_context = EGL_NO_CONTEXT;
-    vo_x11_uninit(ctx->vo);
 }
 
 static void mpegl_swap_buffers(MPGLContext *ctx)

@@ -20,6 +20,10 @@
 
 #include <AudioToolbox/AudioToolbox.h>
 
+struct mp_chmap;
+
 bool ca_init_chmap(struct ao *ao, AudioDeviceID device);
+void ca_get_active_chmap(struct ao *ao, AudioDeviceID device, int channel_count,
+                         struct mp_chmap *out_map);
 
 #endif

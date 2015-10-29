@@ -307,13 +307,12 @@ const char *stream_type_name(enum stream_type type)
     }
 }
 
-// Returns the same value as demuxer->fill_buffer: 1 ok, 0 EOF/not selected.
-int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
+void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
 {
     struct demux_stream *ds = stream ? stream->ds : NULL;
     if (!dp || !ds) {
         talloc_free(dp);
-        return 0;
+        return;
     }
     struct demux_internal *in = ds->in;
     pthread_mutex_lock(&in->lock);
@@ -330,7 +329,7 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     if (!ds->selected || in->seeking || drop) {
         pthread_mutex_unlock(&in->lock);
         talloc_free(dp);
-        return 0;
+        return;
     }
 
     dp->stream = stream->index;
@@ -371,7 +370,6 @@ int demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
         ds->in->wakeup_cb(ds->in->wakeup_cb_ctx);
     pthread_cond_signal(&in->wakeup);
     pthread_mutex_unlock(&in->lock);
-    return 1;
 }
 
 // Returns true if there was "progress" (lock was released temporarily).
@@ -430,10 +428,8 @@ static bool read_packet(struct demux_internal *in)
     pthread_mutex_lock(&in->lock);
 
     if (eof) {
-        for (int n = 0; n < in->d_buffer->num_streams; n++) {
-            struct demux_stream *ds = in->d_buffer->streams[n]->ds;
-            ds->eof = true;
-        }
+        for (int n = 0; n < in->d_buffer->num_streams; n++)
+            in->d_buffer->streams[n]->ds->eof = true;
         // If we had EOF previously, then don't wakeup (avoids wakeup loop)
         if (!in->last_eof) {
             if (in->wakeup_cb)
@@ -924,7 +920,8 @@ static void demux_init_cuesheet(struct demuxer *demuxer)
         if (f) {
             for (int n = 0; n < f->num_tracks; n++) {
                 struct cue_track *t = &f->tracks[n];
-                demuxer_add_chapter(demuxer, t->title, t->start, -1);
+                int idx = demuxer_add_chapter(demuxer, "", t->start, -1);
+                mp_tags_merge(demuxer->chapters[idx].metadata, t->tags);
             }
         }
         talloc_free(f);
@@ -938,6 +935,9 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                                        struct demuxer_params *params,
                                        enum demux_check check)
 {
+    if (mp_cancel_test(stream->cancel))
+        return NULL;
+
     struct demuxer *demuxer = talloc_ptrtype(NULL, demuxer);
     *demuxer = (struct demuxer) {
         .desc = desc,
@@ -1392,10 +1392,11 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
     case DEMUXER_CTRL_GET_BITRATE_STATS: {
         double *rates = arg;
         for (int n = 0; n < STREAM_TYPE_COUNT; n++)
-            rates[n] = 0;
+            rates[n] = -1;
         for (int n = 0; n < in->d_user->num_streams; n++) {
             struct demux_stream *ds = in->d_user->streams[n]->ds;
-            rates[ds->type] += MPMAX(0, ds->bitrate);
+            if (ds->selected && ds->bitrate >= 0)
+                rates[ds->type] = MPMAX(0, rates[ds->type]) + ds->bitrate;
         }
         return DEMUXER_CTRL_OK;
     }

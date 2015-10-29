@@ -50,7 +50,7 @@ Item {
                 text: "Make video look like on a Smart TV"
                 onClicked: {
                     if (checkbox.checked) {
-                        renderer.command(["vo_cmdline", "scale=sharpen3:scale-param1=5.0"])
+                        renderer.command(["vo_cmdline", "sharpen=5.0"])
                     } else {
                         renderer.command(["vo_cmdline", ""])
                     }

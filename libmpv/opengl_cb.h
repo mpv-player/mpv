@@ -108,8 +108,36 @@ extern "C" {
  * context must have been uninitialized. If this doesn't happen, undefined
  * behavior will result.
  *
- * Special D3D interop considerations
- * ----------------------------------
+ * Special windowing system interop considerations
+ * ------------------------------------------------
+ *
+ * In some cases, libmpv needs to have access to the windowing system's handles.
+ * This can be a pointer to a X11 "Display" for example. Usually this is needed
+ * only for hardware decoding.
+ *
+ * You can communicate these handles to libmpv by adding a pseudo-OpenGL
+ * extension "GL_MP_MPGetNativeDisplay" to the additional extension string when
+ * calling mpv_opengl_cb_init_gl(). The get_proc_address callback should resolve
+ * a function named "glMPGetNativeDisplay", which has the signature:
+ *
+ *    void* GLAPIENTRY glMPGetNativeDisplay(const char* name)
+ *
+ * See below what names are defined. Usually, libmpv will use the native handle
+ * up until mpv_opengl_cb_uninit_gl() is called. If the name is not anything
+ * you know/expected, return NULL from the function.
+ *
+ * Windowing system interop on Linux
+ * ---------------------------------
+ *
+ * The new VAAPI OpenGL interop requires an EGL context. EGL provides no way
+ * to query the X11 Display associated to a specific EGL context, so this API
+ * is used to pass it through.
+ *
+ * glMPGetNativeDisplay("x11") should return a X11 "Display*", which then will
+ * be used to create the hardware decoder state. (On GLX, this is not needed.)
+ *
+ * Windowing system interop on MS win32
+ * ------------------------------------
  *
  * If OpenGL switches to fullscreen, most players give it access GPU access,
  * which means DXVA2 hardware decoding in mpv won't work. This can be worked
@@ -117,14 +145,14 @@ extern "C" {
  * create a decoder. The device can be either the real device used for display,
  * or a "blank" device created before switching to fullscreen.
  *
- * You can do this by adding "GL_MP_D3D_interfaces" to the additional extension
- * string when calling mpv_opengl_cb_init_gl(). The get_proc_address callback
- * should resolve a function named "glMPGetD3DInterface", which has the
- * signature: "void* __stdcall glMPGetD3DInterface(const char* name)". If
- * name is "IDirect3DDevice9", it should return a IDirect3DDevice9 pointer
- * (or NULL if not available). libmpv will release this interface when it is
- * done with it (usually when mpv_opengl_cb_uninit_gl() is called). New
- * interface names can be added in the future.
+ * You can provide glMPGetNativeDisplay as described in the previous section.
+ * If it is called with name set to "IDirect3DDevice9", it should return a
+ * IDirect3DDevice9 pointer (or NULL if not available). libmpv will release
+ * this interface when it is done with it.
+ *
+ * In previous libmpv releases, this used "GL_MP_D3D_interfaces" and
+ * "glMPGetD3DInterface". This is deprecated; use glMPGetNativeDisplay instead
+ * (the semantics are 100% compatible).
  */
 
 /**

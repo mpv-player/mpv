@@ -71,7 +71,6 @@ struct gl_priv {
     int use_gl_debug;
     int allow_sw;
     int swap_interval;
-    int current_swap_interval;
     int dwm_flush;
 
     char *backend;
@@ -148,12 +147,6 @@ static void flip_page(struct vo *vo)
             p->opt_pattern[0] = 0;
         }
     }
-
-    if (p->glctx->DwmFlush) {
-        p->current_swap_interval = p->glctx->DwmFlush(p->glctx, p->dwm_flush,
-                                                      p->swap_interval,
-                                                      p->current_swap_interval);
-    }
 }
 
 static void draw_frame(struct vo *vo, struct vo_frame *frame)
@@ -180,11 +173,11 @@ static int query_format(struct vo *vo, int format)
     return 1;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct gl_priv *p = vo->priv;
 
-    if (!mpgl_reconfig_window(p->glctx, flags))
+    if (mpgl_reconfig_window(p->glctx) < 0)
         return -1;
 
     resize(p);
@@ -247,7 +240,7 @@ static bool get_and_update_icc_profile(struct gl_priv *p, int *events)
 static void get_and_update_ambient_lighting(struct gl_priv *p, int *events)
 {
     int lux;
-    int r = p->glctx->vo_control(p->vo, events, VOCTRL_GET_AMBIENT_LUX, &lux);
+    int r = mpgl_control(p->glctx, events, VOCTRL_GET_AMBIENT_LUX, &lux);
     if (r == VO_TRUE) {
         gl_video_set_ambient_lux(p->renderer, lux);
     }
@@ -395,19 +388,20 @@ static int preinit(struct vo *vo)
         vo_flags |= VOFLAG_GLES;
 
     if (p->allow_sw)
-        vo->probing = false;
+        vo_flags |= VOFLAG_SW;
 
     p->glctx = mpgl_init(vo, p->backend, vo_flags);
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;
 
+    p->glctx->dwm_flush_opt = p->dwm_flush;
+
     if (p->gl->SwapInterval) {
         p->gl->SwapInterval(p->swap_interval);
     } else {
         MP_VERBOSE(vo, "swap_control extension missing.\n");
     }
-    p->current_swap_interval = p->swap_interval;
 
     p->renderer = gl_video_init(p->gl, vo->log, vo->global);
     if (!p->renderer)

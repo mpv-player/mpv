@@ -795,15 +795,6 @@ static void schedule_resize(struct vo_wayland_state *wl,
     wl->window.events |= VO_EVENT_RESIZE;
     wl->vo->dwidth = width;
     wl->vo->dheight = height;
-
-    struct wl_region *region = wl_compositor_create_region(wl->display.compositor);
-
-    if (region) {
-        wl_region_add(region, x, y, width, height);
-        wl_surface_set_opaque_region(wl->window.video_surface, region);
-        wl_surface_commit(wl->window.video_surface);
-        wl_region_destroy(region);
-    }
 }
 
 static void frame_callback(void *data,
@@ -1293,7 +1284,7 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
-bool vo_wayland_config (struct vo *vo, uint32_t flags)
+bool vo_wayland_config (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
 
@@ -1308,11 +1299,9 @@ bool vo_wayland_config (struct vo *vo, uint32_t flags)
     wl->window.p_height = vo->dheight;
     wl->window.aspect = vo->dwidth / (float) MPMAX(vo->dheight, 1);
 
-    if (!(flags & VOFLAG_HIDDEN)) {
-        wl->window.width = vo->dwidth;
-        wl->window.height = vo->dheight;
-        vo_wayland_fullscreen(vo);
-    }
+    wl->window.width = vo->dwidth;
+    wl->window.height = vo->dheight;
+    vo_wayland_fullscreen(vo);
 
     return true;
 }

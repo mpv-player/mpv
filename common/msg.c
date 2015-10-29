@@ -326,10 +326,8 @@ static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
 static void dump_stats(struct mp_log *log, int lev, char *text)
 {
     struct mp_log_root *root = log->root;
-    if (lev == MSGL_STATS && root->stats_file) {
-        fprintf(root->stats_file, "%"PRId64" %s #%s\n", mp_time_us(), text,
-                log->verbose_prefix);
-    }
+    if (lev == MSGL_STATS && root->stats_file)
+        fprintf(root->stats_file, "%"PRId64" %s\n", mp_time_us(), text);
 }
 
 void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)

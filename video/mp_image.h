@@ -46,10 +46,6 @@ struct mp_image_params {
     enum mp_csp_prim primaries;
     enum mp_csp_trc gamma;
     enum mp_chroma_location chroma_location;
-    // The image should be converted to these levels. Unlike colorlevels, it
-    // does not describe the current state of the image. (Somewhat similar to
-    // d_w/d_h vs. w/h.)
-    enum mp_csp_levels outputlevels;
     // The image should be rotated clockwise (0-359 degrees).
     int rotate;
     enum mp_stereo3d_mode stereo_in;    // image is encoded with this mode
@@ -106,6 +102,7 @@ int mp_chroma_div_up(int size, int shift);
 
 struct mp_image *mp_image_alloc(int fmt, int w, int h);
 void mp_image_copy(struct mp_image *dmpi, struct mp_image *mpi);
+void mp_image_copy_gpu(struct mp_image *dst, struct mp_image *src);
 void mp_image_copy_attributes(struct mp_image *dmpi, struct mp_image *mpi);
 struct mp_image *mp_image_new_copy(struct mp_image *img);
 struct mp_image *mp_image_new_ref(struct mp_image *img);
@@ -158,5 +155,7 @@ void memcpy_pic(void *dst, const void *src, int bytesPerLine, int height,
                 int dstStride, int srcStride);
 void memset_pic(void *dst, int fill, int bytesPerLine, int height, int stride);
 void memset16_pic(void *dst, int fill, int unitsPerLine, int height, int stride);
+
+void mp_check_gpu_memcpy(struct mp_log *log, bool *once);
 
 #endif /* MPLAYER_MP_IMAGE_H */

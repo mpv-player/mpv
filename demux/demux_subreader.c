@@ -758,6 +758,10 @@ static int d_open_file(struct demuxer *demuxer, enum demux_check check)
 {
     if (check > DEMUX_CHECK_REQUEST)
         return -1;
+#if LIBAVUTIL_VERSION_MICRO >= 100
+    if (check != DEMUX_CHECK_FORCE)
+        return -1;
+#endif
 
     if (!demuxer->params || !demuxer->params->expect_subtitle)
         return -1;
@@ -800,7 +804,9 @@ static int d_fill_buffer(struct demuxer *demuxer)
     struct priv *p = demuxer->priv;
     struct demux_packet *dp = demux_packet_list_fill(p->pkts, p->num_pkts,
                                                      &p->current);
-    return demux_add_packet(p->sh, dp);
+    int have_packet = !!dp;
+    demux_add_packet(p->sh, dp);
+    return have_packet;
 }
 
 static void d_seek(struct demuxer *demuxer, double secs, int flags)

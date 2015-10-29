@@ -471,9 +471,6 @@ static void update_object(struct osd_state *osd, struct osd_object *obj)
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
                             struct sub_bitmaps *out_imgs)
 {
-    if (!osd->opts->use_text_osd)
-        return;
-
     if (obj->force_redraw)
         update_object(osd, obj);
 

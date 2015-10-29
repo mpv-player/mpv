@@ -298,12 +298,18 @@ void mp_chmap_remove_useless_channels(struct mp_chmap *map,
 // Speakers not representable by ffmpeg/libav are dropped.
 // Warning: this ignores the order of the channels, and will return a channel
 //          mask even if the order is different from libavcodec's.
+//          Also, "unknown" channel maps are translated to non-sense channel
+//          maps with the same number of channels.
 uint64_t mp_chmap_to_lavc_unchecked(const struct mp_chmap *src)
 {
-    // lavc has no concept for unknown layouts yet, so pick a default
     struct mp_chmap t = *src;
+    if (t.num > 64)
+        return 0;
+    // lavc has no concept for unknown layouts yet, so pick something that does
+    // the job of signaling the number of channels, even if it makes no sense
+    // as a proper layout.
     if (mp_chmap_is_unknown(&t))
-        mp_chmap_from_channels(&t, t.num);
+        return t.num == 64 ? (uint64_t)-1 : (1ULL << t.num) - 1;
     uint64_t mask = 0;
     for (int n = 0; n < t.num; n++) {
         if (t.speaker[n] < 64) // ignore MP_SPEAKER_ID_NA etc.
@@ -359,6 +365,8 @@ bool mp_chmap_is_lavc(const struct mp_chmap *src)
     return true;
 }
 
+// Warning: for "unknown" channel maps, this returns something that may not
+//          make sense. Invalid channel maps are not changed.
 void mp_chmap_reorder_to_lavc(struct mp_chmap *map)
 {
     if (!mp_chmap_is_valid(map))

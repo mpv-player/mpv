@@ -22,6 +22,7 @@
 #include <assert.h>
 
 #include <GL/glx.h>
+#include <va/va_x11.h>
 
 #include "video/out/x11_common.h"
 #include "hwdec.h"
@@ -137,7 +138,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 
     destroy_texture(hw);
 
-    params->imgfmt = hw->driver->imgfmt;
+    assert(params->imgfmt == hw->driver->imgfmt);
 
     gl->GenTextures(1, &p->gl_texture);
     gl->BindTexture(GL_TEXTURE_2D, p->gl_texture);

@@ -51,7 +51,9 @@ static bool ca_is_output_device(struct ao *ao, AudioDeviceID dev)
     size_t n_buffers;
     AudioBufferList *buffers;
     const ca_scope scope = kAudioDevicePropertyStreamConfiguration;
-    CA_GET_ARY_O(dev, scope, &buffers, &n_buffers);
+    OSStatus err = CA_GET_ARY_O(dev, scope, &buffers, &n_buffers);
+    if (err != noErr)
+        return false;
     talloc_free(buffers);
     return n_buffers > 0;
 }
@@ -71,11 +73,16 @@ void ca_get_device_list(struct ao *ao, struct ao_device_list *list)
         char *name;
         char *desc;
         err = CA_GET_STR(devs[i], kAudioDevicePropertyDeviceUID, &name);
+        if (err != noErr) {
+            MP_VERBOSE(ao, "skipping device %d, which has no UID\n", i);
+            talloc_free(ta_ctx);
+            continue;
+        }
         talloc_steal(ta_ctx, name);
         err = CA_GET_STR(devs[i], kAudioObjectPropertyName, &desc);
-        talloc_steal(ta_ctx, desc);
         if (err != noErr)
-            desc = "Unknown";
+            desc = talloc_strdup(NULL, "Unknown");
+        talloc_steal(ta_ctx, desc);
         ao_device_list_add(list, ao, &(struct ao_device_desc){name, desc});
         talloc_free(ta_ctx);
     }
@@ -498,6 +505,8 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
     err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &prev_format);
     CHECK_CA_ERROR("can't get current physical format");
 
+    ca_print_asbd(ao, "format in use before switching:", &prev_format);
+
     /* Install the callback. */
     AudioObjectPropertyAddress p_addr = {
         .mSelector = kAudioStreamPropertyPhysicalFormat,
@@ -516,7 +525,7 @@ bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
 
     /* The AudioStreamSetProperty is not only asynchronous,
      * it is also not Atomic, in its behaviour. */
-    struct timespec timeout = mp_rel_time_to_timespec(0.5);
+    struct timespec timeout = mp_rel_time_to_timespec(2.0);
     AudioStreamBasicDescription actual_format = {0};
     while (1) {
         err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &actual_format);

@@ -187,7 +187,7 @@ only if discretion is required.
 [windows_compilation]: https://github.com/mpv-player/mpv/blob/master/DOCS/compile-windows.md
 [mplayer-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/mplayer-changes.rst
 
-## License 
+## License
 
 
-[GPLv2](https://github.com/mpv-player/mpv/blob/master/LICENSE)
+Mostly GPLv2 or later. See [details.](https://github.com/mpv-player/mpv/blob/master/Copyright)

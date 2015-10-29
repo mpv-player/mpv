@@ -134,7 +134,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 
     destroy_objects(hw);
 
-    params->imgfmt = hw->driver->imgfmt;
+    assert(params->imgfmt == hw->driver->imgfmt);
     p->image_params = *params;
 
     if (mp_vdpau_handle_preemption(p->ctx, &p->preemption_counter) < 1)

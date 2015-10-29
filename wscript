@@ -173,6 +173,10 @@ main_dependencies = [
         'func': check_true,
         'deps_any': ['stdatomic', 'atomic-builtins', 'sync-builtins'],
     }, {
+        'name': 'c11-tls',
+        'desc': 'C11 TLS support',
+        'func': check_statement('stddef.h', 'static _Thread_local int x = 0'),
+    }, {
         'name': 'librt',
         'desc': 'linking with -lrt',
         'deps': [ 'pthreads' ],
@@ -454,7 +458,19 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavutil/pixdesc.h',
                                 'AVComponentDescriptor d; int x = d.depth',
                                 use='libav'),
-    }
+    }, {
+        'name': 'av-avpacket-int64-duration',
+        'desc': 'libavcodec 64 bit AVPacket.duration',
+        'func': check_statement('libavcodec/avcodec.h',
+                                'int x[(int)sizeof(((AVPacket){0}).duration) - 7]',
+                                use='libav'),
+    }, {
+        'name': 'av-subtitle-nopict',
+        'desc': 'libavcodec AVSubtitleRect AVPicture removal',
+        'func': check_statement('libavcodec/avcodec.h',
+                                'AVSubtitleRect r = {.linesize={0}}',
+                                use='libav'),
+    },
 ]
 
 audio_output_features = [
@@ -608,7 +624,6 @@ video_output_features = [
         'deps': [ 'x11' ],
         'groups': [ 'gl' ],
         'func': check_pkg_config('egl', 'gl'),
-        'default': 'disable',
     } , {
         'name': '--gl-wayland',
         'desc': 'OpenGL Wayland Backend',
@@ -636,18 +651,35 @@ video_output_features = [
     }, {
         'name': '--vaapi',
         'desc': 'VAAPI acceleration',
-        'deps': [ 'x11', 'libdl' ],
-        'func': check_pkg_config(
-            'libva', '>= 0.34.0', 'libva-x11', '>= 0.34.0'),
+        'deps': [ 'libdl' ],
+        'deps_any': [ 'x11', 'wayland' ],
+        'func': check_pkg_config('libva', '>= 0.36.0'),
     }, {
-        'name': '--vaapi-vpp',
-        'desc': 'VAAPI VPP',
-        'deps': [ 'vaapi' ],
-        'func': check_pkg_config('libva', '>= 0.34.0'),
+        'name': '--vaapi-x11',
+        'desc': 'VAAPI (X11 support)',
+        'deps': [ 'vaapi', 'x11' ],
+        'func': check_pkg_config('libva-x11', '>= 0.36.0'),
+    }, {
+        'name': '--vaapi-wayland',
+        'desc': 'VAAPI (Wayland support)',
+        'deps': [ 'vaapi', 'wayland' ],
+        'func': check_pkg_config('libva-wayland', '>= 0.36.0'),
+
     }, {
         'name': '--vaapi-glx',
         'desc': 'VAAPI GLX',
-        'deps': [ 'vaapi', 'gl-x11' ],
+        'deps': [ 'vaapi-x11', 'gl-x11' ],
+        'func': check_true,
+    }, {
+        'name': '--vaapi-x-egl',
+        'desc': 'VAAPI EGL on X11',
+        'deps': [ 'vaapi-x11', 'egl-x11' ],
+        'func': check_true,
+    }, {
+        'name': 'vaapi-egl',
+        'desc': 'VAAPI EGL',
+        'deps': [ 'c11-tls' ], # indirectly
+        'deps_any': [ 'vaapi-x-egl', 'vaapi-wayland' ],
         'func': check_true,
     }, {
         'name': '--caca',
@@ -704,27 +736,6 @@ hwaccel_features = [
         'desc': 'libavcodec VAAPI hwaccel',
         'deps': [ 'vaapi' ],
         'func': check_headers('libavcodec/vaapi.h', use='libav'),
-    } , {
-        'name': '--vda-hwaccel',
-        'desc': 'libavcodec VDA hwaccel',
-        'func': compose_checks(
-            check_headers('VideoDecodeAcceleration/VDADecoder.h'),
-            check_statement('libavcodec/vda.h',
-                            'av_vda_alloc_context()',
-                            framework='IOSurface',
-                            use='libav')),
-    } , {
-        'name': 'vda-default-init2',
-        'desc': 'libavcodec VDA hwaccel (configurable AVVDAContext)',
-        'deps': [ 'vda-hwaccel' ],
-        'func': check_statement('libavcodec/vda.h',
-                                'av_vda_default_init2(NULL, NULL)',
-                                use='libav'),
-    }, {
-        'name': '--vda-gl',
-        'desc': 'VDA with OpenGL',
-        'deps': [ 'gl-cocoa', 'vda-hwaccel' ],
-        'func': check_true
     }, {
         'name': '--videotoolbox-hwaccel',
         'desc': 'libavcodec videotoolbox hwaccel',
@@ -740,11 +751,6 @@ hwaccel_features = [
         'deps': [ 'gl-cocoa', 'videotoolbox-hwaccel' ],
         'func': check_true
     } , {
-        'name': 'videotoolbox-vda-gl',
-        'desc': 'Videotoolbox or VDA with OpenGL',
-        'deps_any': [ 'videotoolbox-gl', 'vda-gl' ],
-        'func': check_true
-    }, {
         'name': '--vdpau-hwaccel',
         'desc': 'libavcodec VDPAU hwaccel',
         'deps': [ 'vdpau' ],
@@ -756,6 +762,11 @@ hwaccel_features = [
         'desc': 'libavcodec DXVA2 hwaccel',
         'deps': [ 'win32' ],
         'func': check_headers('libavcodec/dxva2.h', use='libav'),
+    }, {
+        'name': 'sse4-intrinsics',
+        'desc': 'GCC SSE4 intrinsics for GPU memcpy',
+        'deps_any': [ 'dxva2-hwaccel', 'vaapi-hwaccel' ],
+        'func': check_cc(fragment=load_fragment('sse.c')),
     }
 ]
 
@@ -859,7 +870,7 @@ def options(opt):
     group.add_option('--lua',
         type    = 'string',
         dest    = 'LUA_VER',
-        help    = "select Lua package which should be autodetected. Choices: 51 51deb 51fbsd 52 52deb 52fbsd luajit")
+        help    = "select Lua package which should be autodetected. Choices: 51 51deb 51fbsd 52 52deb 52arch 52fbsd luajit")
 
 @conf
 def is_optimization(ctx):

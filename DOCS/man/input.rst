@@ -1171,9 +1171,6 @@ Property list
     is loaded, or when switching ordered chapter segments. This is because
     the same underlying code is used for seeking and resyncing.)
 
-``pts-association-mode`` (RW)
-    See ``--pts-association-mode``.
-
 ``hr-seek`` (RW)
     See ``--hr-seek``.
 
@@ -1260,8 +1257,8 @@ Property list
 ``colormatrix-input-range`` (R)
     See ``colormatrix``.
 
-``colormatrix-output-range`` (R)
-    See ``colormatrix``.
+``video-output-levels`` (RW)
+    See ``--video-output-levels``,
 
 ``colormatrix-primaries`` (R)
     See ``colormatrix``.

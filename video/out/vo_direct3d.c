@@ -1327,7 +1327,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return r;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     d3d_priv *priv = vo->priv;
 
@@ -1336,7 +1336,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     /* w32_common framework call. Creates window on the screen with
      * the given coordinates.
      */
-    if (!vo_w32_config(vo, flags)) {
+    if (!vo_w32_config(vo)) {
         MP_VERBOSE(priv, "Creating window failed.\n");
         return VO_ERROR;
     }

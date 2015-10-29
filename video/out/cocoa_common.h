@@ -27,10 +27,10 @@
 struct vo;
 struct vo_cocoa_state;
 
-int vo_cocoa_init(struct vo *vo);
+void vo_cocoa_init(struct vo *vo);
 void vo_cocoa_uninit(struct vo *vo);
 
-int vo_cocoa_config_window(struct vo *vo, uint32_t flags);
+int vo_cocoa_config_window(struct vo *vo);
 
 int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg);
 

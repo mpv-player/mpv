@@ -125,8 +125,9 @@ int vo_x11_init(struct vo *vo);
 void vo_x11_uninit(struct vo *vo);
 int vo_x11_check_events(struct vo *vo);
 bool vo_x11_screen_is_composited(struct vo *vo);
-void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int flags,
+bool vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
                              const char *classname);
+void vo_x11_config_vo_window(struct vo *vo);
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg);
 
 #endif /* MPLAYER_X11_COMMON_H */

@@ -34,7 +34,6 @@ struct vf_priv_s {
     int outfmt;
     int colormatrix;
     int colorlevels;
-    int outputlevels;
     int primaries;
     int gamma;
     int chroma_location;
@@ -89,8 +88,6 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         out->colorspace = p->colormatrix;
     if (p->colorlevels)
         out->colorlevels = p->colorlevels;
-    if (p->outputlevels)
-        out->outputlevels = p->outputlevels;
     if (p->primaries)
         out->primaries = p->primaries;
     if (p->gamma)
@@ -137,7 +134,6 @@ static const m_option_t vf_opts_fields[] = {
     OPT_IMAGEFORMAT("outfmt", outfmt, 0),
     OPT_CHOICE_C("colormatrix", colormatrix, 0, mp_csp_names),
     OPT_CHOICE_C("colorlevels", colorlevels, 0, mp_csp_levels_names),
-    OPT_CHOICE_C("outputlevels", outputlevels, 0, mp_csp_levels_names),
     OPT_CHOICE_C("primaries", primaries, 0, mp_csp_prim_names),
     OPT_CHOICE_C("gamma", gamma, 0, mp_csp_trc_names),
     OPT_CHOICE_C("chroma-location", chroma_location, 0, mp_chroma_names),
@@ -147,6 +143,7 @@ static const m_option_t vf_opts_fields[] = {
     OPT_INT("dw", dw, 0),
     OPT_INT("dh", dh, 0),
     OPT_DOUBLE("dar", dar, 0),
+    OPT_REMOVED("outputlevels", "use the --video-output-levels global option"),
     {0}
 };
 

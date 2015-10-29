@@ -164,6 +164,9 @@ static int init(struct ao *ao)
 
     ao->untimed = true;
 
+    if (ao->channels.num > AV_NUM_DATA_POINTERS)
+        goto fail;
+
     pthread_mutex_unlock(&ao->encode_lavc_ctx->lock);
     return 0;
 

@@ -456,16 +456,13 @@ Program Behavior
 
     If the script can't do anything with an URL, it will do nothing.
 
-    (Note: this is the replacement for the now removed libquvi support.)
-
 ``--ytdl-format=<best|worst|mp4|webm|...>``
     Video format/quality that is directly passed to youtube-dl. The possible
     values are specific to the website and the video, for a given url the
     available formats can be found with the command
     ``youtube-dl --list-formats URL``. See youtube-dl's documentation for
-    available aliases. To use experimental DASH support for youtube, use
-    ``bestvideo+bestaudio``.
-    (Default: ``best``)
+    available aliases.
+    (Default: youtube-dl's default, currently ``bestvideo+bestaudio/best``)
 
 ``--ytdl-raw-options=<key>=<value>[,<key>=<value>[,...]]``
     Pass arbitrary options to youtube-dl. Parameter and argument should be
@@ -567,12 +564,11 @@ Video
     :no:        always use software decoding (default)
     :auto:      see below
     :vdpau:     requires ``--vo=vdpau`` or ``--vo=opengl`` (Linux only)
-    :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux with Intel GPUs only)
+    :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
-    :vda:       requires ``--vo=opengl`` (OS X only)
-    :videotoolbox: requires ``--vo=opengl`` (newer OS X only)
+    :videotoolbox: requires ``--vo=opengl`` (OS X 10.8 and up only)
     :dxva2-copy: copies video back to system RAM (Windows only)
-    :rpi:      requires ``--vo=rpi`` (Raspberry Pi only - default if available)
+    :rpi:       requires ``--vo=rpi`` (Raspberry Pi only - default if available)
 
     ``auto`` tries to automatically enable hardware decoding using the first
     available method. This still depends what VO you are using. For example,
@@ -580,6 +576,12 @@ Video
     never be enabled. Also note that if the first found method doesn't actually
     work, it will always fall back to software decoding, instead of trying the
     next method (might matter on some Linux systems).
+
+    The ``vaapi`` mode, if used with ``--vo=opengl``, requires Mesa 11 and most
+    likely works with Intel GPUs only. It also requires the opengl EGL backend
+    (automatically used if available). You can also try the old GLX backend by
+    forcing it with ``--vo=opengl:backend=x11``, but the vaapi/GLX interop is
+    said to be slower than ``vaapi-copy``.
 
     The ``vaapi-copy`` mode allows you to use vaapi with any VO. Because
     this copies the decoded video back to system RAM, it's likely less efficient
@@ -775,6 +777,26 @@ Video
     For audio-only playback, any value greater than 0 will quit playback
     immediately after initialization. The value 0 works as with video.
 
+``--video-output-levels=<outputlevels>``
+    RGB color levels used with YUV to RGB conversion. Normally, output devices
+    such as PC monitors use full range color levels. However, some TVs and
+    video monitors expect studio RGB levels. Providing full range output to a
+    device expecting studio level input results in crushed blacks and whites,
+    the reverse in dim gray blacks and dim whites.
+
+    Not all VOs support this option. Some will silently ignore it.
+
+    Available color ranges are:
+
+    :auto:      automatic selection (equals to full range) (default)
+    :limited:   limited range (16-235 per component), studio levels
+    :full:      full range (0-255 per component), PC levels
+
+    .. note::
+
+        It is advisable to use your graphics driver's color range option
+        instead, if available.
+
 ``--hwdec-codecs=<codec1,codec2,...|all>``
     Allow hardware decoding for a given list of codecs only. The special value
     ``all`` always allows all codecs.
@@ -800,6 +822,10 @@ Video
     decoding is forced even if the profile of the video is higher than that.
     The result is most likely broken decoding, but may also help if the
     detected or reported profiles are somehow incorrect.
+
+``--vd-lavc-software-fallback=<yes|no>``
+    Fallback to software decoding if the hardware-accelerated decoder fails
+    (default: yes).
 
 ``--vd-lavc-bitexact``
     Only use bit-exact algorithms in all decoding steps (for codec testing).
@@ -891,6 +917,14 @@ Audio
     selection of ``--audio-device`` (but not the device selection).
 
     Currently not implemented for most AOs.
+
+``--audio-fallback-to-null=<yes|no>``
+    If no audio device can be opened, behave as if ``--ao=null`` was given. This
+    is useful in combination with ``--audio-device``: instead of causing an
+    error if the selected device does not exist, the client API user (or a
+    Lua script) could let playback continue normally, and check the
+    ``current-ao`` and ``audio-device-list`` properties to make high-level
+    decisions about how to continue.
 
 ``--ao=<driver1[:suboption1[=value]:...],driver2,...[,]>``
     Specify a priority list of audio output drivers to be used. For
@@ -2441,20 +2475,23 @@ OSD
 ``--osd-duration=<time>``
     Set the duration of the OSD messages in ms (default: 1000).
 
-``--osd-font=<pattern>``, ``--sub-text-font=<pattern>``
+``--osd-font=<name>``, ``--sub-text-font=<name>``
     Specify font to use for OSD and for subtitles that do not themselves
     specify a particular font. The default is ``sans-serif``.
 
     .. admonition:: Examples
 
         - ``--osd-font='Bitstream Vera Sans'``
-        - ``--osd-font='Bitstream Vera Sans:style=Bold'`` (fontconfig pattern)
+        - ``--osd-font='MS Comic Sans'``
 
     .. note::
 
         The ``--sub-text-font`` option (and most other ``--sub-text-``
         options) are ignored when ASS-subtitles are rendered, unless the
         ``--no-sub-ass`` option is specified.
+
+        This used to support fontconfig patterns. Starting with libass 0.13.0,
+        this stopped working.
 
 ``--osd-font-size=<size>``, ``--sub-text-font-size=<size>``
     Specify the OSD/sub font size. The unit is the size in scaled pixels at a
@@ -2635,17 +2672,6 @@ OSD
     values are allowed.
 
     Default: 0.
-
-``--use-text-osd=<yes|no>``
-    Disable text OSD rendering completely. (This includes the complete OSC as
-    well.) This is mostly useful for avoiding loading fontconfig in situations
-    where fontconfig does not behave well, and OSD is unused - this could for
-    example allow GUI programs using libmpv to workaround fontconfig issues.
-
-    Note that selecting subtitles of any kind still initializes fontconfig.
-
-    Default: ``no``.
-
 
 Screenshot
 ----------
@@ -3245,6 +3271,13 @@ Network
     Verify peer certificates when using TLS (e.g. with ``https://...``).
     (Silently fails with older FFmpeg or Libav versions.)
 
+``--tls-cert-file``
+    A file containing a certificate to use in the handshake with the
+    peer.
+
+``--tls-key-file``
+    A file containing the private key for the certificate.
+
 ``--referrer=<string>``
     Specify a referrer path or URL for HTTP requests.
 
@@ -3430,6 +3463,11 @@ Miscellaneous
     :display-vdrop:     Drop or repeat video frames to compensate desyncing
                         video. (Although it should have the same effects as
                         ``audio``, the implementation is very different.)
+    :display-adrop:     Drop or repeat audio data to compensate desyncing
+                        video. See ``--video-sync-adrop-size``. This mode will
+                        cause severe audio artifacts if the real monitor
+                        refresh rate is too different from the reported or
+                        forced rate.
     :display-desync:    Sync video to display, and let audio play on its own.
     :desync:            Sync video according to system clock, and let audio play
                         on its own.
@@ -3460,6 +3498,13 @@ Miscellaneous
     the A/V desync cannot be compensated, too high values could lead to chaotic
     frame dropping due to the audio "overshooting" and skipping multiple video
     frames before the sync logic can react.
+
+``--video-sync-adrop-size=<value``
+    For the ``--video-sync=display-adrop`` mode. This mode duplicates/drops
+    audio data to keep audio in sync with video. To avoid audio artifacts on
+    jitter (which would add/remove samples all the time), this is done in
+    relatively large, fixed units, controlled by this option. The unit is
+    seconds.
 
 ``--mf-fps=<value>``
     Framerate used when decoding from multiple PNG or JPEG files with ``mf://``
@@ -3501,20 +3546,6 @@ Miscellaneous
     idle|belownormal|normal|abovenormal|high|realtime
 
     .. warning:: Using realtime priority can cause system lockup.
-
-``--pts-association-mode=<decode|sort|auto>``
-    Select the method used to determine which container packet timestamp
-    corresponds to a particular output frame from the video decoder. Normally
-    you should not need to change this option.
-
-    :decoder: Use decoder reordering functionality. Unlike in classic MPlayer
-              and mplayer2, this includes a DTS fallback. (Default.)
-    :sort:    Maintain a buffer of unused pts values and use the lowest value
-              for the frame.
-    :auto:    Try to pick a working mode from the ones above automatically.
-
-    You can also try to use ``--no-correct-pts`` for files with completely
-    broken timestamps.
 
 ``--force-media-title=<string>``
     Force the contents of the ``media-title`` property to this value. Useful

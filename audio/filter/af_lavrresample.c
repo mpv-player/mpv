@@ -49,6 +49,7 @@
 #define avresample_convert(ctx, out, out_planesize, out_samples, in, in_planesize, in_samples) \
     swr_convert(ctx, out, out_samples, (const uint8_t**)(in), in_samples)
 #define avresample_set_channel_mapping swr_set_channel_mapping
+#define avresample_set_compensation swr_set_compensation
 #else
 #error "config.h broken or no resampler found"
 #endif
@@ -90,6 +91,8 @@ struct af_resample {
     int out_rate;
     int out_format;
     struct mp_chmap out_channels;
+
+    double missing_samples;     // fractional samples not yet output
 };
 
 #if HAVE_LIBAVRESAMPLE
@@ -223,6 +226,8 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     s->out_channels= out->channels;
     s->in_channels = in->channels;
 
+    s->missing_samples = 0;
+
     av_opt_set_int(s->avrctx, "filter_size",        s->opts.filter_size, 0);
     av_opt_set_int(s->avrctx, "phase_shift",        s->opts.phase_shift, 0);
     av_opt_set_int(s->avrctx, "linear_interp",      s->opts.linear, 0);
@@ -304,14 +309,15 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     av_opt_set_int(s->avrctx, "in_sample_fmt",      in_samplefmt, 0);
     av_opt_set_int(s->avrctx, "out_sample_fmt",     out_samplefmtp, 0);
 
-    // Just needs the correct number of channels.
-    int fake_out_ch_layout = av_get_default_channel_layout(map_out.num);
+    // Just needs the correct number of channels for deplanarization.
+    struct mp_chmap fake_chmap;
+    mp_chmap_set_unknown(&fake_chmap, map_out.num);
+    uint64_t fake_out_ch_layout = mp_chmap_to_lavc_unchecked(&fake_chmap);
     if (!fake_out_ch_layout)
         goto error;
-
-    // Deplanarize if needed.
     av_opt_set_int(s->avrctx_out, "in_channel_layout",  fake_out_ch_layout, 0);
     av_opt_set_int(s->avrctx_out, "out_channel_layout", fake_out_ch_layout, 0);
+
     av_opt_set_int(s->avrctx_out, "in_sample_fmt",      out_samplefmtp, 0);
     av_opt_set_int(s->avrctx_out, "out_sample_fmt",     out_samplefmt, 0);
     av_opt_set_int(s->avrctx_out, "in_sample_rate",     s->out_rate, 0);
@@ -386,14 +392,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return AF_OK;
     case AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE: {
         s->playback_speed = *(double *)arg;
-        int new_rate = rate_from_speed(s->in_rate_af, s->playback_speed);
-        if (new_rate != s->in_rate && s->avrctx && af->fmt_out.format) {
-            // Before reconfiguring, drain the audio that is still buffered
-            // in the resampler.
-            af->filter_frame(af, NULL);
-            // Reinitialize resampler.
-            configure_lavrr(af, &af->fmt_in, &af->fmt_out, false);
-        }
         return AF_OK;
     }
     case AF_CONTROL_RESET:
@@ -455,7 +453,7 @@ static void reorder_planes(struct mp_audio *mpa, int *reorder,
     }
 }
 
-static int filter(struct af_instance *af, struct mp_audio *in)
+static int filter_resample(struct af_instance *af, struct mp_audio *in)
 {
     struct af_resample *s = af->priv;
 
@@ -514,6 +512,36 @@ error:
     talloc_free(in);
     talloc_free(out);
     return -1;
+}
+
+static int filter(struct af_instance *af, struct mp_audio *in)
+{
+    struct af_resample *s = af->priv;
+
+    int new_rate = rate_from_speed(s->in_rate_af, s->playback_speed);
+    bool need_reinit = fabs(new_rate / (double)s->in_rate - 1) > 0.01;
+
+    if (!need_reinit && s->avrctx) {
+        double speed_factor = s->playback_speed * s->in_rate_af / s->in_rate;
+        int in_samples = in ? in->samples : 0;
+        double wanted_samples = in_samples / speed_factor + s->missing_samples;
+        int wanted_samples_i = lrint(wanted_samples);
+        s->missing_samples = wanted_samples - wanted_samples_i;
+        if (avresample_set_compensation(s->avrctx,
+                (wanted_samples_i - in_samples) * s->out_rate / s->in_rate,
+                wanted_samples_i * s->out_rate / s->in_rate) < 0)
+            need_reinit = true;
+    }
+
+    if (need_reinit && new_rate != s->in_rate) {
+        // Before reconfiguring, drain the audio that is still buffered
+        // in the resampler.
+        filter_resample(af, NULL);
+        // Reinitialize resampler.
+        configure_lavrr(af, &af->fmt_in, &af->fmt_out, false);
+    }
+
+    return filter_resample(af, in);
 }
 
 static int af_open(struct af_instance *af)

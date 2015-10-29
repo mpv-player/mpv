@@ -461,7 +461,8 @@ static int af_reinit(struct af_stream *s)
                     struct af_instance *aft = af->prev;
                     af_remove(s, af);
                     af = aft->next;
-                    break;
+                    retry++;
+                    continue;
                 }
             }
             goto negotiate_error;

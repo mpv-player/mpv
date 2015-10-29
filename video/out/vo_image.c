@@ -64,7 +64,7 @@ static bool checked_mkdir(struct vo *vo, const char *buf)
     return true;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *p = vo->priv;
     mp_image_unrefp(&p->current);

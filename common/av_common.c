@@ -65,6 +65,7 @@ void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st)
     avctx->block_align              = st->block_align;
     avctx->channel_layout           = st->channel_layout;
     avctx->bits_per_coded_sample    = st->bits_per_coded_sample;
+    avctx->has_b_frames             = st->has_b_frames;
 }
 
 // We merely pass-through our PTS/DTS as an int64_t; libavcodec won't use it.

@@ -160,9 +160,12 @@ static struct mp_image *render(struct vf_instance *vf, struct mp_image *in,
     if (!p->pipe.filters || in_id == VA_INVALID_ID)
         return NULL;
 
-    struct mp_image *img = mp_image_pool_get(p->pool, IMGFMT_VAAPI, in->w, in->h);
+    int r_w, r_h;
+    va_surface_get_uncropped_size(in, &r_w, &r_h);
+    struct mp_image *img = mp_image_pool_get(p->pool, IMGFMT_VAAPI, r_w, r_h);
     if (!img)
         return NULL;
+    mp_image_set_size(img, in->w, in->h);
 
     bool need_end_picture = false;
     bool success = false;
@@ -201,8 +204,8 @@ static struct mp_image *render(struct vf_instance *vf, struct mp_image *in,
         goto cleanup;
 
     param->surface = in_id;
-    param->surface_region = NULL;
-    param->output_region = NULL;
+    param->surface_region = &(VARectangle){0, 0, in->w, in->h};
+    param->output_region = &(VARectangle){0, 0, img->w, img->h};
     param->output_background_color = 0;
     param->filter_flags = flags;
     param->filters = p->pipe.filters;

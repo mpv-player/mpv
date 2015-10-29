@@ -146,7 +146,7 @@ error_exit:
         avcodec_close(avctx);
     av_free(avctx);
     av_frame_free(&pic);
-    av_free_packet(&pkt);
+    av_packet_unref(&pkt);
     return success;
 }
 

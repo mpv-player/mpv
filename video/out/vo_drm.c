@@ -450,7 +450,7 @@ static void wakeup(struct vo *vo)
         vt_switcher_interrupt_poll(&p->vt_switcher);
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *p = vo->priv;
 
@@ -640,7 +640,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         if (vo->config_ok)
-            reconfig(vo, vo->params, 0);
+            reconfig(vo, vo->params);
         return VO_TRUE;
     }
     return VO_NOTIMPL;

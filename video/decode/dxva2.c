@@ -37,7 +37,6 @@
 #include "video/mp_image_pool.h"
 #include "video/hwdec.h"
 #include "video/d3d.h"
-#include "gpu_memcpy_sse4.h"
 
 // A minor evil.
 #ifndef FF_DXVA2_WORKAROUND_INTEL_CLEARVIDEO
@@ -97,9 +96,6 @@ typedef struct surface_info {
 
 typedef struct DXVA2Context {
     struct mp_log *log;
-
-    void (*copy_nv12)(struct mp_image *dest, uint8_t *src_bits,
-                      unsigned src_pitch, unsigned surf_height);
 
     HMODULE d3dlib;
     HMODULE dxva2lib;
@@ -243,8 +239,8 @@ static struct mp_image *dxva2_allocate_image(struct lavc_ctx *s,
     return mp_image_new_custom_ref(&mpi, w, dxva2_release_img);
 }
 
-static void copy_nv12_fallback(struct mp_image *dest, uint8_t *src_bits,
-                               unsigned src_pitch, unsigned surf_height)
+static void copy_nv12(struct mp_image *dest, uint8_t *src_bits,
+                      unsigned src_pitch, unsigned surf_height)
 {
     struct mp_image buf = {0};
     mp_image_setfmt(&buf, IMGFMT_NV12);
@@ -254,48 +250,8 @@ static void copy_nv12_fallback(struct mp_image *dest, uint8_t *src_bits,
     buf.stride[0] = src_pitch;
     buf.planes[1] = src_bits + src_pitch * surf_height;
     buf.stride[1] = src_pitch;
-    mp_image_copy(dest, &buf);
+    mp_image_copy_gpu(dest, &buf);
 }
-
-#pragma GCC push_options
-#pragma GCC target("sse4.1")
-
-static void copy_nv12_gpu_sse4(struct mp_image *dest, uint8_t *src_bits,
-                               unsigned src_pitch, unsigned surf_height)
-{
-    const int lines = dest->h;
-    const int stride_y = dest->stride[0];
-    const int stride_uv = dest->stride[1];
-
-    // If the strides match, the image can be copied in one go
-    if (stride_y == src_pitch && stride_uv == src_pitch) {
-        const size_t size = lines * src_pitch;
-        gpu_memcpy(dest->planes[0], src_bits, size);
-        gpu_memcpy(dest->planes[1], src_bits + src_pitch * surf_height, size / 2);
-
-    } else {
-        // Copy the Y plane line-by-line
-        uint8_t *dest_y = dest->planes[0];
-        const uint8_t *src_y = src_bits;
-        const int bytes_per_line = dest->w;
-        for (int i = 0; i < lines; i++) {
-            gpu_memcpy(dest_y, src_y, bytes_per_line);
-            dest_y += stride_y;
-            src_y += src_pitch;
-        }
-
-        // Copy the UV plane line-by-line
-        uint8_t *dest_uv = dest->planes[1];
-        const uint8_t *src_uv = src_bits + src_pitch * surf_height;
-        for (int i = 0; i < lines / 2; i++) {
-            gpu_memcpy(dest_uv, src_uv, bytes_per_line);
-            dest_uv += stride_uv;
-            src_uv += src_pitch;
-        }
-    }
-}
-
-#pragma GCC pop_options
 
 static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
                                              struct mp_image *img)
@@ -324,7 +280,7 @@ static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
         return img;
     }
 
-    ctx->copy_nv12(sw_img, LockedRect.pBits, LockedRect.Pitch, surfaceDesc.Height);
+    copy_nv12(sw_img, LockedRect.pBits, LockedRect.Pitch, surfaceDesc.Height);
     mp_image_set_size(sw_img, img->w, img->h);
     mp_image_copy_attributes(sw_img, img);
 
@@ -408,15 +364,7 @@ static int dxva2_init(struct lavc_ctx *s)
     ctx->log = mp_log_new(s, s->log, "dxva2");
     ctx->sw_pool = talloc_steal(ctx, mp_image_pool_new(17));
 
-    if (av_get_cpu_flags() & AV_CPU_FLAG_SSE4) {
-        // Use a memcpy implementation optimised for copying from GPU memory
-        MP_DBG(ctx, "Using SSE4 memcpy\n");
-        ctx->copy_nv12 = copy_nv12_gpu_sse4;
-    } else {
-        // Use the CRT memcpy. This can be slower than software decoding.
-        MP_WARN(ctx, "Using fallback memcpy (slow)\n");
-        ctx->copy_nv12 = copy_nv12_fallback;
-    }
+    mp_check_gpu_memcpy(ctx->log, NULL);
 
     ctx->deviceHandle = INVALID_HANDLE_VALUE;
 

@@ -152,13 +152,13 @@ static void resize(struct priv *p)
     p->vo->want_redraw = true;
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *p = vo->priv;
 
     free_video_specific(p);
 
-    vo_x11_config_vo_window(vo, NULL, flags, "vaapi");
+    vo_x11_config_vo_window(vo);
 
     if (params->imgfmt != IMGFMT_VAAPI) {
         if (!alloc_swdec_surfaces(p, params->w, params->h, params->imgfmt))
@@ -575,6 +575,9 @@ static int preinit(struct vo *vo)
     VAStatus status;
 
     if (!vo_x11_init(vo))
+        goto fail;
+
+    if (!vo_x11_create_vo_window(vo, NULL, "vaapi"))
         goto fail;
 
     p->display = vaGetDisplay(vo->x11->display);

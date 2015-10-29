@@ -38,7 +38,7 @@
 #define PROBE_SIZE 512
 
 struct priv {
-    bstr data;
+    struct cue_file *f;
 };
 
 static void add_source(struct timeline *tl, struct demuxer *d)
@@ -150,15 +150,8 @@ static void build_timeline(struct timeline *tl)
 
     add_source(tl, tl->demuxer);
 
-    struct cue_file *f = mp_parse_cue(p->data);
-    if (!f) {
-        MP_ERR(tl, "CUE: error parsing input file!\n");
-        goto out;
-    }
-    talloc_steal(ctx, f);
-
-    struct cue_track *tracks = f->tracks;
-    size_t track_count = f->num_tracks;
+    struct cue_track *tracks = p->f->tracks;
+    size_t track_count = p->f->num_tracks;
 
     if (track_count == 0) {
         MP_ERR(tl, "CUE: no tracks found!\n");
@@ -224,10 +217,8 @@ static void build_timeline(struct timeline *tl)
         };
         chapters[i] = (struct demux_chapter) {
             .pts = timeline[i].start,
-            .metadata = talloc_zero(tl, struct mp_tags),
+            .metadata = mp_tags_dup(tl, tracks[i].tags),
         };
-        // might want to include other metadata here
-        mp_tags_set_str(chapters[i].metadata, "title", tracks[i].title);
         starttime += duration;
     }
 
@@ -261,9 +252,18 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
     struct priv *p = talloc_zero(demuxer, struct priv);
     demuxer->priv = p;
     demuxer->fully_read = true;
-    p->data = stream_read_complete(s, demuxer, 1000000);
-    if (p->data.start == NULL)
+
+    bstr data = stream_read_complete(s, p, 1000000);
+    if (data.start == NULL)
         return -1;
+    p->f = mp_parse_cue(data);
+    talloc_steal(p, p->f);
+    if (!p->f) {
+        MP_ERR(demuxer, "error parsing input file!\n");
+        return -1;
+    }
+
+    mp_tags_merge(demuxer->metadata, p->f->tags);
     return 0;
 }
 

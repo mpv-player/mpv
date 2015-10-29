@@ -10,7 +10,6 @@ enum hwdec_type {
     HWDEC_AUTO = -1,
     HWDEC_NONE = 0,
     HWDEC_VDPAU = 1,
-    HWDEC_VDA = 2,
     HWDEC_VIDEOTOOLBOX = 3,
     HWDEC_VAAPI = 4,
     HWDEC_VAAPI_COPY = 5,

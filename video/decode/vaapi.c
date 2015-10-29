@@ -25,7 +25,7 @@
 #include <libavcodec/vaapi.h>
 #include <libavutil/common.h>
 
-#include <X11/Xlib.h>
+#include "config.h"
 
 #include "lavc.h"
 #include "common/common.h"
@@ -53,7 +53,9 @@ struct priv {
     struct mp_log *log;
     struct mp_vaapi_ctx *ctx;
     VADisplay display;
-    Display *x11_display;
+
+    const struct va_native_display *native_display_fns;
+    void *native_display;
 
     // libavcodec shared struct
     struct vaapi_context *va_context;
@@ -64,6 +66,47 @@ struct priv {
 
     struct mp_image_pool *sw_pool;
 };
+
+struct va_native_display {
+    void (*create)(struct priv *p);
+    void (*destroy)(struct priv *p);
+};
+
+static const struct va_native_display disp_x11;
+
+static const struct va_native_display *const native_displays[] = {
+#if HAVE_VAAPI_X11
+    &disp_x11,
+#endif
+    NULL
+};
+
+#if HAVE_VAAPI_X11
+#include <X11/Xlib.h>
+#include <va/va_x11.h>
+
+static void x11_destroy(struct priv *p)
+{
+    if (p->native_display)
+        XCloseDisplay(p->native_display);
+    p->native_display = NULL;
+}
+
+static void x11_create(struct priv *p)
+{
+    p->native_display = XOpenDisplay(NULL);
+    if (!p->native_display)
+        return;
+    p->display = vaGetDisplay(p->native_display);
+    if (!p->display)
+        x11_destroy(p);
+}
+
+static const struct va_native_display disp_x11 = {
+    .create = x11_create,
+    .destroy = x11_destroy,
+};
+#endif
 
 #define HAS_HEVC VA_CHECK_VERSION(0, 38, 0)
 
@@ -295,9 +338,8 @@ static void destroy_va_dummy_ctx(struct priv *p)
     va_destroy(p->ctx);
     p->ctx = NULL;
     p->display = NULL;
-    if (p->x11_display)
-        XCloseDisplay(p->x11_display);
-    p->x11_display = NULL;
+    if (p->native_display_fns)
+        p->native_display_fns->destroy(p);
 }
 
 // Creates a "private" VADisplay, disconnected from the VO. We just create a
@@ -305,15 +347,18 @@ static void destroy_va_dummy_ctx(struct priv *p)
 // connection along with struct mp_hwdec_info, if we wanted.)
 static bool create_va_dummy_ctx(struct priv *p)
 {
-    p->x11_display = XOpenDisplay(NULL);
-    if (!p->x11_display)
+    for (int n = 0; native_displays[n]; n++) {
+        native_displays[n]->create(p);
+        if (p->display) {
+            p->native_display_fns = native_displays[n];
+            break;
+        }
+    }
+    if (!p->display)
         goto destroy_ctx;
-    VADisplay *display = vaGetDisplay(p->x11_display);
-    if (!display)
-        goto destroy_ctx;
-    p->ctx = va_initialize(display, p->log, true);
+    p->ctx = va_initialize(p->display, p->log, true);
     if (!p->ctx) {
-        vaTerminate(display);
+        vaTerminate(p->display);
         goto destroy_ctx;
     }
     return true;
@@ -334,7 +379,7 @@ static void uninit(struct lavc_ctx *ctx)
     talloc_free(p->pool);
     p->pool = NULL;
 
-    if (p->x11_display)
+    if (p->native_display_fns)
         destroy_va_dummy_ctx(p);
 
     talloc_free(p);

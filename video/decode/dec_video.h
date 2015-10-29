@@ -55,17 +55,12 @@ struct dec_video {
     double codec_dts;
     int num_codec_dts_problems;
 
-    // PTS sorting (obscure, non-default)
-    double buffered_pts[32];
+    // PTS sorting (needed for AVI-style timestamps)
+    double buffered_pts[64];
     int num_buffered_pts;
-    double sorted_pts;
-    int num_sorted_pts_problems;
-    double unsorted_pts;
-    int num_unsorted_pts_problems;
-    int pts_assoc_mode;
 
-    // PTS or DTS of packet last read
-    double last_packet_pdts;
+    // PTS or DTS of packet first read
+    double first_packet_pdts;
 
     // There was at least one packet with non-sense timestamps.
     int has_broken_packet_pts; // <0: uninitialized, 0: no problems, 1: broken

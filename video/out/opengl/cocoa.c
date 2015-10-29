@@ -132,40 +132,47 @@ static bool create_gl_context(struct MPGLContext *ctx)
     return true;
 }
 
-static bool config_window_cocoa(struct MPGLContext *ctx, int flags)
-{
-    struct cgl_context *p = ctx->priv;
-
-    if (p->ctx == NULL)
-        if (!create_gl_context(ctx))
-            return false;
-
-    if (!ctx->gl->SwapInterval)
-        ctx->gl->SwapInterval = set_swap_interval;
-
-    vo_cocoa_config_window(ctx->vo, flags);
-
-    return true;
-}
-
-static void releaseGlContext_cocoa(MPGLContext *ctx)
+static void cocoa_uninit(MPGLContext *ctx)
 {
     struct cgl_context *p = ctx->priv;
     CGLReleaseContext(p->ctx);
+    vo_cocoa_uninit(ctx->vo);
 }
 
-static void swapGlBuffers_cocoa(MPGLContext *ctx)
+static int cocoa_init(MPGLContext *ctx, int vo_flags)
+{
+    vo_cocoa_init(ctx->vo);
+
+    if (!create_gl_context(ctx))
+        return -1;
+
+    ctx->gl->SwapInterval = set_swap_interval;
+    return 0;
+}
+
+static int cocoa_reconfig(struct MPGLContext *ctx)
+{
+    vo_cocoa_config_window(ctx->vo);
+    return 0;
+}
+
+static int cocoa_control(struct MPGLContext *ctx, int *events, int request,
+                         void *arg)
+{
+    return vo_cocoa_control(ctx->vo, events, request, arg);
+}
+
+static void cocoa_swap_buffers(struct MPGLContext *ctx)
 {
     vo_cocoa_swap_buffers(ctx->vo);
 }
 
-void mpgl_set_backend_cocoa(MPGLContext *ctx)
-{
-    ctx->priv = talloc_zero(ctx, struct cgl_context);
-    ctx->config_window = config_window_cocoa;
-    ctx->releaseGlContext = releaseGlContext_cocoa;
-    ctx->swapGlBuffers = swapGlBuffers_cocoa;
-    ctx->vo_init = vo_cocoa_init;
-    ctx->vo_uninit = vo_cocoa_uninit;
-    ctx->vo_control = vo_cocoa_control;
-}
+const struct mpgl_driver mpgl_driver_cocoa = {
+    .name           = "cocoa",
+    .priv_size      = sizeof(struct cgl_context),
+    .init           = cocoa_init,
+    .reconfig       = cocoa_reconfig,
+    .swap_buffers   = cocoa_swap_buffers,
+    .control        = cocoa_control,
+    .uninit         = cocoa_uninit,
+};

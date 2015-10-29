@@ -259,26 +259,6 @@ Available filters are:
         :limited:   limited range (16-235 for luma, 16-240 for chroma)
         :full:      full range (0-255 for both luma and chroma)
 
-    ``<outputlevels>``
-        RGB color levels used with YUV to RGB conversion. Normally, output devices
-        such as PC monitors use full range color levels. However, some TVs and
-        video monitors expect studio RGB levels. Providing full range output to a
-        device expecting studio level input results in crushed blacks and whites,
-        the reverse in dim gray blacks and dim whites.
-
-        The same limitations as with ``<colormatrix>`` apply.
-
-        Available color ranges are:
-
-        :auto:      automatic selection (equals to full range) (default)
-        :limited:   limited range (16-235 per component), studio levels
-        :full:      full range (0-255 per component), PC levels
-
-        .. note::
-
-            It is advisable to use your graphics driver's color range option
-            instead, if available.
-
     ``<primaries>``
         RGB primaries the source file was encoded with. Normally this should be set
         in the file header, but when playing broken or mistagged files this can be

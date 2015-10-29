@@ -300,6 +300,12 @@ static int init(struct ao *ao)
 
     ca_print_asbd(ao, "virtual format", &p->stream_asbd);
 
+    if (p->stream_asbd.mChannelsPerFrame > MP_NUM_CHANNELS) {
+        MP_ERR(ao, "unsupported number of channels: %d > %d.\n",
+               p->stream_asbd.mChannelsPerFrame, MP_NUM_CHANNELS);
+        goto coreaudio_error;
+    }
+
     int new_format = ca_asbd_to_mp_format(&p->stream_asbd);
 
     // If both old and new formats are spdif, avoid changing it due to the
@@ -315,7 +321,10 @@ static int init(struct ao *ao)
     ao->samplerate = p->stream_asbd.mSampleRate;
 
     if (ao->channels.num != p->stream_asbd.mChannelsPerFrame) {
-        // We really expect that ca_init_chmap() fixes the layout to the HW's.
+        ca_get_active_chmap(ao, p->device, p->stream_asbd.mChannelsPerFrame,
+                            &ao->channels);
+    }
+    if (!ao->channels.num) {
         MP_ERR(ao, "number of channels changed, and unknown channel layout!\n");
         goto coreaudio_error;
     }

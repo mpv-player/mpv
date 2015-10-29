@@ -23,6 +23,8 @@
 #include <libavutil/common.h>
 #include <libavutil/intreadwrite.h>
 
+#include "config.h"
+
 #include "talloc.h"
 #include "common/msg.h"
 #include "common/av_common.h"
@@ -210,12 +212,19 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             continue;
         if (r->w <= 0 || r->h <= 0)
             continue;
-        img->bitmap = r->pict.data[0];
+#if HAVE_AV_SUBTITLE_NOPICT
+        uint8_t **data = r->data;
+        int *linesize = r->linesize;
+#else
+        uint8_t **data = r->pict.data;
+        int *linesize = r->pict.linesize;
+#endif
+        img->bitmap = data[0];
         assert(r->nb_colors > 0);
         assert(r->nb_colors * 4 <= sizeof(img->palette));
-        memcpy(img->palette, r->pict.data[1], r->nb_colors * 4);
+        memcpy(img->palette, data[1], r->nb_colors * 4);
         b->bitmap = img;
-        b->stride = r->pict.linesize[0];
+        b->stride = linesize[0];
         b->w = r->w;
         b->h = r->h;
         b->x = r->x;
@@ -276,6 +285,15 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
         d.ml = d.mr = d.mt = d.mb = 0;
     int insize[2];
     get_resolution(sd, insize);
+    for (int n = 0; n < res->num_parts; n++) {
+        struct sub_bitmap *p = &res->parts[n];
+        if ((p->x + p->w > insize[0] || p->y + p->h > insize[1]) &&
+            priv->video_params.w > insize[0] && priv->video_params.h > insize[1])
+        {
+            insize[0] = priv->video_params.w;
+            insize[1] = priv->video_params.h;
+        }
+    }
     osd_rescale_bitmaps(res, insize[0], insize[1], d, video_par);
 }
 

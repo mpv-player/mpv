@@ -835,21 +835,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     return DefWindowProcW(hWnd, message, wParam, lParam);
 }
 
-static bool is_key_message(UINT msg)
-{
-    return msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN ||
-           msg == WM_KEYUP || msg == WM_SYSKEYUP;
-}
-
 // Dispatch incoming window events and handle them.
 // This returns only when the thread is asked to terminate.
 static void run_message_loop(struct vo_w32_state *w32)
 {
     MSG msg;
     while (GetMessageW(&msg, 0, 0, 0) > 0) {
-        // Only send IME messages to TranslateMessage
-        if (is_key_message(msg.message) && msg.wParam == VK_PROCESSKEY)
-            TranslateMessage(&msg);
         DispatchMessageW(&msg);
 
         if (w32->parent) {
@@ -946,13 +937,13 @@ static DWORD update_style(struct vo_w32_state *w32, DWORD style)
 }
 
 // Update the window title, position, size, and border style.
-static int reinit_window_state(struct vo_w32_state *w32)
+static void reinit_window_state(struct vo_w32_state *w32)
 {
     HWND layer = HWND_NOTOPMOST;
     RECT r;
 
     if (w32->parent)
-        return 1;
+        return;
 
     bool new_fs = w32->opts->fullscreen;
     bool toggle_fs = w32->current_fs != new_fs;
@@ -1046,24 +1037,13 @@ static int reinit_window_state(struct vo_w32_state *w32)
                  r.bottom - r.top, SWP_FRAMECHANGED | SWP_SHOWWINDOW);
 
     signal_events(w32, VO_EVENT_RESIZE);
-
-    return 1;
 }
 
 static void gui_thread_reconfig(void *ptr)
 {
-    void **p = ptr;
-    struct vo_w32_state *w32 = p[0];
-    uint32_t flags = *(uint32_t *)p[1];
-    int *res = p[2];
+    struct vo_w32_state *w32 = ptr;
 
     struct vo *vo = w32->vo;
-
-    // we already have a fully initialized window, so nothing needs to be done
-    if (flags & VOFLAG_HIDDEN) {
-        *res = 1;
-        return;
-    }
 
     struct vo_win_geometry geo;
     vo_calc_window_geometry(vo, &w32->screenrc, &geo);
@@ -1104,17 +1084,29 @@ static void gui_thread_reconfig(void *ptr)
     w32->dw = vo->dwidth;
     w32->dh = vo->dheight;
 
-    *res = reinit_window_state(w32);
+    reinit_window_state(w32);
 }
 
-// Resize the window. On the first non-VOFLAG_HIDDEN call, it's also made visible.
-int vo_w32_config(struct vo *vo, uint32_t flags)
+// Resize the window. On the first call, it's also made visible.
+int vo_w32_config(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
-    int r;
-    void *p[] = {w32, &flags, &r};
-    mp_dispatch_run(w32->dispatch, gui_thread_reconfig, p);
-    return r;
+    mp_dispatch_run(w32->dispatch, gui_thread_reconfig, w32);
+    return 0;
+}
+
+static void thread_disable_ime(void)
+{
+    // Disables the IME for windows on this thread. imm32.dll must be loaded
+    // dynamically to account for machines without East Asian language support.
+    HMODULE imm32 = LoadLibraryW(L"imm32.dll");
+    if (!imm32)
+        return;
+    BOOL (WINAPI *pImmDisableIME)(DWORD) = (BOOL (WINAPI*)(DWORD))
+        GetProcAddress(imm32, "ImmDisableIME");
+    if (pImmDisableIME)
+        pImmDisableIME(0);
+    FreeLibrary(imm32);
 }
 
 static void *gui_thread(void *ptr)
@@ -1124,6 +1116,8 @@ static void *gui_thread(void *ptr)
     int res = 0;
 
     mpthread_set_name("win32 window");
+
+    thread_disable_ime();
 
     HINSTANCE hInstance = GetModuleHandleW(NULL);
 

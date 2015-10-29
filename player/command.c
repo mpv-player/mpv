@@ -484,6 +484,9 @@ static int mp_property_stream_end(void *ctx, struct m_property *prop,
 // Assumes prop is the type of the actual property.
 static int property_time(int action, void *arg, double time)
 {
+    if (time == MP_NOPTS_VALUE)
+        return M_PROPERTY_UNAVAILABLE;
+
     const struct m_option time_type = {.type = CONF_TYPE_TIME};
     switch (action) {
     case M_PROPERTY_GET:
@@ -651,6 +654,9 @@ static bool time_remaining(MPContext *mpctx, double *remaining)
 {
     double len = get_time_length(mpctx);
     double playback = get_playback_time(mpctx);
+
+    if (playback == MP_NOPTS_VALUE)
+        return false;
 
     *remaining = len - playback;
 
@@ -1611,7 +1617,7 @@ static int mp_property_audio_device(void *ctx, struct m_property *prop,
         struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug);
         for (int n = 0; n < list->num_devices; n++) {
             struct ao_device_desc *dev = &list->devices[n];
-            if (dev->name && strcmp(dev->name, mpctx->opts->audio_device)) {
+            if (dev->name && strcmp(dev->name, mpctx->opts->audio_device) == 0) {
                 *(char **)arg = talloc_strdup(NULL, dev->desc ? dev->desc : "?");
                 return M_PROPERTY_OK;
             }
@@ -2370,18 +2376,19 @@ static int mp_property_framedrop(void *ctx, struct m_property *prop,
 static int mp_property_video_color(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
+    const char *name = prop->priv ? prop->priv : prop->name;
     MPContext *mpctx = ctx;
     if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
     case M_PROPERTY_SET: {
-        if (video_set_colors(mpctx->d_video, prop->name, *(int *) arg) <= 0)
+        if (video_set_colors(mpctx->d_video, name, *(int *) arg) <= 0)
             return M_PROPERTY_UNAVAILABLE;
         break;
     }
     case M_PROPERTY_GET:
-        if (video_get_colors(mpctx->d_video, prop->name, (int *)arg) <= 0)
+        if (video_get_colors(mpctx->d_video, name, (int *)arg) <= 0)
             return M_PROPERTY_UNAVAILABLE;
         // Write new value to option variable
         mp_property_generic_option(mpctx, prop, M_PROPERTY_SET, arg);
@@ -2440,8 +2447,6 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
             SUB_PROP_STR(m_opt_choice_str(mp_csp_names, p.colorspace))},
         {"colorlevels",
             SUB_PROP_STR(m_opt_choice_str(mp_csp_levels_names, p.colorlevels))},
-        {"outputlevels",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_levels_names, p.outputlevels))},
         {"primaries",
             SUB_PROP_STR(m_opt_choice_str(mp_csp_prim_names, p.primaries))},
         {"gamma",
@@ -3082,11 +3087,18 @@ static int mp_property_packet_bitrate(void *ctx, struct m_property *prop,
     int type = (uintptr_t)prop->priv & ~0x100;
     bool old = (uintptr_t)prop->priv & 0x100;
 
-    if (!mpctx->demuxer)
+    struct demuxer *demuxer = NULL;
+    if (mpctx->current_track[0][type])
+        demuxer = mpctx->current_track[0][type]->demuxer;
+    if (!demuxer)
+        demuxer = mpctx->demuxer;
+    if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
     double r[STREAM_TYPE_COUNT];
-    if (demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_BITRATE_STATS, &r) < 1)
+    if (demux_control(demuxer, DEMUXER_CTRL_GET_BITRATE_STATS, &r) < 1)
+        return M_PROPERTY_UNAVAILABLE;
+    if (r[type] < 0)
         return M_PROPERTY_UNAVAILABLE;
 
     // r[type] is in bytes/second -> bits
@@ -3406,7 +3418,6 @@ static const struct m_property mp_properties[] = {
     {"demuxer-cache-idle", mp_property_demuxer_cache_idle},
     {"cache-buffering-state", mp_property_cache_buffering},
     {"paused-for-cache", mp_property_paused_for_cache},
-    {"pts-association-mode", mp_property_generic_option},
     {"hr-seek", mp_property_generic_option},
     {"clock", mp_property_clock},
     {"seekable", mp_property_seekable},
@@ -3453,6 +3464,8 @@ static const struct m_property mp_properties[] = {
     {"contrast", mp_property_video_color},
     {"saturation", mp_property_video_color},
     {"hue", mp_property_video_color},
+    {"video-output-levels", mp_property_video_color,
+     .priv = (void *)"output-levels"},
     {"panscan", panscan_property_helper},
     {"video-zoom", panscan_property_helper},
     {"video-align-x", panscan_property_helper},
@@ -3563,7 +3576,6 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_ALIAS("sub", "sid"),
     M_PROPERTY_ALIAS("colormatrix", "video-params/colormatrix"),
     M_PROPERTY_ALIAS("colormatrix-input-range", "video-params/colorlevels"),
-    M_PROPERTY_ALIAS("colormatrix-output-range", "video-params/outputlevels"),
     M_PROPERTY_ALIAS("colormatrix-primaries", "video-params/primaries"),
     M_PROPERTY_ALIAS("colormatrix-gamma", "video-params/gamma"),
 
@@ -3734,7 +3746,6 @@ static const struct property_osd_display {
     { "chapter", .seek_msg = OSD_SEEK_INFO_CHAPTER_TEXT,
                  .seek_bar = OSD_SEEK_INFO_BAR },
     { "edition", .seek_msg = OSD_SEEK_INFO_EDITION },
-    { "pts-association-mode", "PTS association mode" },
     { "hr-seek", "hr-seek" },
     { "speed", "Speed" },
     { "clock", "Clock" },
@@ -4590,7 +4601,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
     case MP_CMD_STOP:
         playlist_clear(mpctx->playlist);
-        if (!mpctx->stop_play)
+        if (mpctx->stop_play != PT_QUIT)
             mpctx->stop_play = PT_STOP;
         break;
 

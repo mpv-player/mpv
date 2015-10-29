@@ -3,8 +3,7 @@ local msg = require 'mp.msg'
 
 local ytdl = {
     path = "youtube-dl",
-    minver = "2015.02.23.1",
-    vercheck = nil,
+    searched = false
 }
 
 local function exec(args)
@@ -12,9 +11,9 @@ local function exec(args)
     return ret.status, ret.stdout, ret
 end
 
--- return if it was explicitly set on the command line
+-- return true if it was explicitly set on the command line
 local function option_was_set(name)
-    return mp.get_property_bool("option-info/" .. name .. "/set-from-commandline",
+    return mp.get_property_bool("option-info/" ..name.. "/set-from-commandline",
                                 false)
 end
 
@@ -51,41 +50,25 @@ local function append_rtmp_prop(props, name, value)
     return props..name.."=\""..value.."\""
 end
 
+local function edl_escape(url)
+    return "%" .. string.len(url) .. "%" .. url
+end
+
+
 mp.add_hook("on_load", 10, function ()
     local url = mp.get_property("stream-open-filename")
 
     if (url:find("http://") == 1) or (url:find("https://") == 1)
         or (url:find("ytdl://") == 1) then
 
-       -- check version of youtube-dl if not done yet
-        if (ytdl.vercheck == nil) then
-
-             -- check for youtube-dl in mpv's config dir
+        -- check for youtube-dl in mpv's config dir
+        if not (ytdl.searched) then
             local ytdl_mcd = mp.find_config_file("youtube-dl")
             if not (ytdl_mcd == nil) then
                 msg.verbose("found youtube-dl at: " .. ytdl_mcd)
                 ytdl.path = ytdl_mcd
             end
-
-            msg.debug("checking ytdl version ...")
-            local es, version = exec({ytdl.path, "--version"})
-            if (es < 0) then
-                msg.warn("youtube-dl not found, not executable, or broken.")
-                ytdl.vercheck = false
-            elseif (version < ytdl.minver) then
-                msg.verbose("found youtube-dl version: " .. version)
-                msg.warn("Your version of youtube-dl is too old! "
-                    .. "You need at least version '"..ytdl.minver
-                    .. "', try running `youtube-dl -U`.")
-                ytdl.vercheck = false
-            else
-                msg.verbose("found youtube-dl version: " .. version)
-                ytdl.vercheck = true
-            end
-        end
-
-        if not (ytdl.vercheck) then
-            return
+            ytdl.searched = true
         end
 
         -- strip ytdl://
@@ -95,14 +78,18 @@ mp.add_hook("on_load", 10, function ()
 
         local format = mp.get_property("options/ytdl-format")
         local raw_options = mp.get_property_native("options/ytdl-raw-options")
+        local allsubs = true
 
         local command = {
-            ytdl.path, "--no-warnings", "-J", "--flat-playlist", "--all-subs",
+            ytdl.path, "--no-warnings", "-J", "--flat-playlist",
             "--sub-format", "ass/srt/best", "--no-playlist"
         }
 
-        -- Checks if video option is "no", change options accordingly
-        if (mp.get_property("options/vid") == "no") then
+        -- Checks if video option is "no", change format accordingly,
+        -- but only if user didn't explicitly set one
+        if (mp.get_property("options/vid") == "no")
+            and not option_was_set("ytdl-format") then
+
             format = "bestaudio/best"
             msg.verbose("Video disabled. Only using audio")
         end
@@ -117,6 +104,13 @@ mp.add_hook("on_load", 10, function ()
             if (arg ~= "") then
                 table.insert(command, arg)
             end
+            if (param == "sub-lang") and (arg ~= "") then
+                allsubs = false
+            end
+        end
+
+        if (allsubs == true) then
+            table.insert(command, "--all-subs")
         end
         table.insert(command, "--")
         table.insert(command, url)
@@ -145,7 +139,8 @@ mp.add_hook("on_load", 10, function ()
             msg.verbose("Got direct URL")
             return
         elseif not (json["_type"] == nil)
-            and ((json["_type"] == "playlist") or (json["_type"] == "multi_video")) then
+            and ((json["_type"] == "playlist")
+            or (json["_type"] == "multi_video")) then
             -- a playlist
 
             if (#json.entries == 0) then
@@ -159,13 +154,9 @@ mp.add_hook("on_load", 10, function ()
                 and (json.entries[1]["webpage_url"] == json["webpage_url"]) then
                 msg.verbose("multi-arc video detected, building EDL")
 
-
                 local playlist = "edl://"
                 for i, entry in pairs(json.entries) do
-
-                    local urllength = string.len(entry.url)
-                    playlist = playlist .. "%" .. urllength .. "%" .. entry.url .. ";"
-
+                    playlist = playlist .. edl_escape(entry.url) .. ";"
                 end
 
                 msg.debug("EDL: " .. playlist)
@@ -177,7 +168,8 @@ mp.add_hook("on_load", 10, function ()
 
                 mp.set_property("stream-open-filename", playlist)
                 if not (json.title == nil) then
-                    mp.set_property("file-local-options/force-media-title", json.title)
+                    mp.set_property("file-local-options/force-media-title",
+                        json.title)
                 end
 
             else
@@ -206,21 +198,13 @@ mp.add_hook("on_load", 10, function ()
 
             -- DASH?
             if not (json["requested_formats"] == nil) then
-                msg.info("Using DASH, expect inaccurate duration.")
-                if not (json.duration == nil) then
-                    msg.info("Actual duration: " .. mp.format_time(json.duration))
-                end
 
                 -- video url
                 streamurl = json["requested_formats"][1].url
 
                 -- audio url
-                mp.set_property("file-local-options/audio-file",
-                    json["requested_formats"][2].url)
-
-                -- workaround for slow startup (causes inaccurate duration)
-                mp.set_property("file-local-options/demuxer-lavf-o",
-                    "fflags=+ignidx")
+                mp.commandv("audio-add", json["requested_formats"][2].url,
+                    "select", json["requested_formats"][2]["format_note"])
 
             elseif not (json.url == nil) then
                 -- normal video
@@ -251,7 +235,7 @@ mp.add_hook("on_load", 10, function ()
                     end
 
                     if not (sub == nil) then
-                        mp.commandv("sub_add", sub,
+                        mp.commandv("sub-add", sub,
                             "auto", sub_info.ext, lang)
                     else
                         msg.verbose("No subtitle data/url for ["..lang.."]")
@@ -259,19 +243,24 @@ mp.add_hook("on_load", 10, function ()
                 end
             end
 
-            -- set start and end time
+            -- set start time
             if not (json.start_time == nil) then
-                msg.debug("setting start to: " .. json.start_time .. " secs")
-                mp.set_property("file-local-options/start",json.start_time)
+                msg.debug("Setting start to: " .. json.start_time .. " secs")
+                mp.set_property("file-local-options/start", json.start_time)
             end
 
             -- for rtmp
             if not (json.play_path == nil) then
-                local rtmp_prop = append_rtmp_prop(nil, "rtmp_tcurl", streamurl)
-                rtmp_prop = append_rtmp_prop(rtmp_prop, "rtmp_pageurl", json.page_url)
-                rtmp_prop = append_rtmp_prop(rtmp_prop, "rtmp_playpath", json.play_path)
-                rtmp_prop = append_rtmp_prop(rtmp_prop, "rtmp_swfverify", json.player_url)
-                rtmp_prop = append_rtmp_prop(rtmp_prop, "rtmp_app", json.app)
+                local rtmp_prop = append_rtmp_prop(nil,
+                    "rtmp_tcurl", streamurl)
+                rtmp_prop = append_rtmp_prop(rtmp_prop,
+                    "rtmp_pageurl", json.page_url)
+                rtmp_prop = append_rtmp_prop(rtmp_prop,
+                    "rtmp_playpath", json.play_path)
+                rtmp_prop = append_rtmp_prop(rtmp_prop,
+                    "rtmp_swfverify", json.player_url)
+                rtmp_prop = append_rtmp_prop(rtmp_prop,
+                    "rtmp_app", json.app)
 
                 mp.set_property("file-local-options/stream-lavf-o", rtmp_prop)
             end

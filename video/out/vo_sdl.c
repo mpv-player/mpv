@@ -453,7 +453,7 @@ static void update_screeninfo(struct vo *vo, struct mp_rect *screenrc)
     *screenrc = (struct mp_rect){0, 0, mode.w, mode.h};
 }
 
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *vc = vo->priv;
 

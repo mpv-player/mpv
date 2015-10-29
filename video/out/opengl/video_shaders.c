@@ -200,44 +200,6 @@ void pass_sample_bicubic_fast(struct gl_shader_cache *sc)
     GLSLF("}\n");
 }
 
-void pass_sample_sharpen3(struct gl_shader_cache *sc, struct scaler *scaler)
-{
-    GLSL(vec4 color;)
-    GLSLF("{\n");
-    GLSL(vec2 st = pt * 0.5;)
-    GLSL(vec4 p = texture(tex, pos);)
-    GLSL(vec4 sum = texture(tex, pos + st * vec2(+1, +1))
-                  + texture(tex, pos + st * vec2(+1, -1))
-                  + texture(tex, pos + st * vec2(-1, +1))
-                  + texture(tex, pos + st * vec2(-1, -1));)
-    float param = scaler->conf.kernel.params[0];
-    param = isnan(param) ? 0.5 : param;
-    GLSLF("color = p + (p - 0.25 * sum) * %f;\n", param);
-    GLSLF("}\n");
-}
-
-void pass_sample_sharpen5(struct gl_shader_cache *sc, struct scaler *scaler)
-{
-    GLSL(vec4 color;)
-    GLSLF("{\n");
-    GLSL(vec2 st1 = pt * 1.2;)
-    GLSL(vec4 p = texture(tex, pos);)
-    GLSL(vec4 sum1 = texture(tex, pos + st1 * vec2(+1, +1))
-                   + texture(tex, pos + st1 * vec2(+1, -1))
-                   + texture(tex, pos + st1 * vec2(-1, +1))
-                   + texture(tex, pos + st1 * vec2(-1, -1));)
-    GLSL(vec2 st2 = pt * 1.5;)
-    GLSL(vec4 sum2 = texture(tex, pos + st2 * vec2(+1,  0))
-                   + texture(tex, pos + st2 * vec2( 0, +1))
-                   + texture(tex, pos + st2 * vec2(-1,  0))
-                   + texture(tex, pos + st2 * vec2( 0, -1));)
-    GLSL(vec4 t = p * 0.859375 + sum2 * -0.1171875 + sum1 * -0.09765625;)
-    float param = scaler->conf.kernel.params[0];
-    param = isnan(param) ? 0.5 : param;
-    GLSLF("color = p + t * %f;\n", param);
-    GLSLF("}\n");
-}
-
 void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
                                    int w, int h)
 {
@@ -281,29 +243,28 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 
     GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
     switch (trc) {
-        case MP_CSP_TRC_SRGB:
-            GLSL(color.rgb = mix(color.rgb / vec3(12.92),
-                                 pow((color.rgb + vec3(0.055))/vec3(1.055),
-                                     vec3(2.4)),
-                                 lessThan(vec3(0.04045), color.rgb));)
-            break;
-        case MP_CSP_TRC_BT_1886:
-            GLSL(color.rgb = pow(color.rgb, vec3(1.961));)
-            break;
-        case MP_CSP_TRC_GAMMA18:
-            GLSL(color.rgb = pow(color.rgb, vec3(1.8));)
-            break;
-        case MP_CSP_TRC_GAMMA22:
-            GLSL(color.rgb = pow(color.rgb, vec3(2.2));)
-            break;
-        case MP_CSP_TRC_GAMMA28:
-            GLSL(color.rgb = pow(color.rgb, vec3(2.8));)
-            break;
-        case MP_CSP_TRC_PRO_PHOTO:
-            GLSL(color.rgb = mix(color.rgb / vec3(16.0),
-                                 pow(color.rgb, vec3(1.8)),
-                                 lessThan(vec3(0.03125), color.rgb));)
-            break;
+    case MP_CSP_TRC_SRGB:
+        GLSL(color.rgb = mix(color.rgb / vec3(12.92),
+                             pow((color.rgb + vec3(0.055))/vec3(1.055), vec3(2.4)),
+                             lessThan(vec3(0.04045), color.rgb));)
+        break;
+    case MP_CSP_TRC_BT_1886:
+        GLSL(color.rgb = pow(color.rgb, vec3(1.961));)
+        break;
+    case MP_CSP_TRC_GAMMA18:
+        GLSL(color.rgb = pow(color.rgb, vec3(1.8));)
+        break;
+    case MP_CSP_TRC_GAMMA22:
+        GLSL(color.rgb = pow(color.rgb, vec3(2.2));)
+        break;
+    case MP_CSP_TRC_GAMMA28:
+        GLSL(color.rgb = pow(color.rgb, vec3(2.8));)
+        break;
+    case MP_CSP_TRC_PRO_PHOTO:
+        GLSL(color.rgb = mix(color.rgb / vec3(16.0),
+                             pow(color.rgb, vec3(1.8)),
+                             lessThan(vec3(0.03125), color.rgb));)
+        break;
     }
 }
 
@@ -315,29 +276,29 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 
     GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
     switch (trc) {
-        case MP_CSP_TRC_SRGB:
-            GLSL(color.rgb = mix(color.rgb * vec3(12.92),
-                                 vec3(1.055) * pow(color.rgb, vec3(1.0/2.4))
-                                     - vec3(0.055),
-                                 lessThanEqual(vec3(0.0031308), color.rgb));)
-            break;
-        case MP_CSP_TRC_BT_1886:
-            GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.961));)
-            break;
-        case MP_CSP_TRC_GAMMA18:
-            GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.8));)
-            break;
-        case MP_CSP_TRC_GAMMA22:
-            GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.2));)
-            break;
-        case MP_CSP_TRC_GAMMA28:
-            GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.8));)
-            break;
-        case MP_CSP_TRC_PRO_PHOTO:
-            GLSL(color.rgb = mix(color.rgb * vec3(16.0),
-                                 pow(color.rgb, vec3(1.0/1.8)),
-                                 lessThanEqual(vec3(0.001953), color.rgb));)
-            break;
+    case MP_CSP_TRC_SRGB:
+        GLSL(color.rgb = mix(color.rgb * vec3(12.92),
+                             vec3(1.055) * pow(color.rgb, vec3(1.0/2.4))
+                                 - vec3(0.055),
+                             lessThanEqual(vec3(0.0031308), color.rgb));)
+        break;
+    case MP_CSP_TRC_BT_1886:
+        GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.961));)
+        break;
+    case MP_CSP_TRC_GAMMA18:
+        GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.8));)
+        break;
+    case MP_CSP_TRC_GAMMA22:
+        GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.2));)
+        break;
+    case MP_CSP_TRC_GAMMA28:
+        GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.8));)
+        break;
+    case MP_CSP_TRC_PRO_PHOTO:
+        GLSL(color.rgb = mix(color.rgb * vec3(16.0),
+                             pow(color.rgb, vec3(1.0/1.8)),
+                             lessThanEqual(vec3(0.001953), color.rgb));)
+        break;
     }
 }
 
@@ -356,10 +317,18 @@ static void prng_init(struct gl_shader_cache *sc, AVLFG *lfg)
     gl_sc_uniform_f(sc, "random", (double)av_lfg_get(lfg) / UINT32_MAX);
 }
 
+struct deband_opts {
+    int enabled;
+    int iterations;
+    float threshold;
+    float range;
+    float grain;
+};
+
 const struct deband_opts deband_opts_def = {
-    .iterations = 4,
+    .iterations = 1,
     .threshold = 64.0,
-    .range = 8.0,
+    .range = 16.0,
     .grain = 48.0,
 };
 
@@ -426,4 +395,27 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
     GLSL(noise.y = rand(h); h = permute(h);)
     GLSL(noise.z = rand(h); h = permute(h);)
     GLSLF("color.xyz += %f * (noise - vec3(0.5));\n", opts->grain/8192.0);
+}
+
+void pass_sample_unsharp(struct gl_shader_cache *sc, float param)
+{
+    GLSLF("// unsharp\n");
+    sampler_prelude(sc, 0);
+
+    GLSL(vec4 color;)
+    GLSLF("{\n");
+    GLSL(vec2 st1 = pt * 1.2;)
+    GLSL(vec4 p = texture(tex, pos);)
+    GLSL(vec4 sum1 = texture(tex, pos + st1 * vec2(+1, +1))
+                   + texture(tex, pos + st1 * vec2(+1, -1))
+                   + texture(tex, pos + st1 * vec2(-1, +1))
+                   + texture(tex, pos + st1 * vec2(-1, -1));)
+    GLSL(vec2 st2 = pt * 1.5;)
+    GLSL(vec4 sum2 = texture(tex, pos + st2 * vec2(+1,  0))
+                   + texture(tex, pos + st2 * vec2( 0, +1))
+                   + texture(tex, pos + st2 * vec2(-1,  0))
+                   + texture(tex, pos + st2 * vec2( 0, -1));)
+    GLSL(vec4 t = p * 0.859375 + sum2 * -0.1171875 + sum1 * -0.09765625;)
+    GLSLF("color = p + t * %f;\n", param);
+    GLSLF("}\n");
 }

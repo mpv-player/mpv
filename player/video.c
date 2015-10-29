@@ -550,6 +550,9 @@ static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time
         change = max_change;
     mpctx->delay += change;
     mpctx->total_avsync_change += change;
+
+    if (mpctx->display_sync_active)
+        mpctx->total_avsync_change = 0;
 }
 
 // Make the frame at position 0 "known" to the playback logic. This must happen
@@ -748,8 +751,8 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
     }
 }
 
-// Update the A/V sync difference after a video frame has been shown.
-static void update_avsync_after_frame(struct MPContext *mpctx)
+// Update the A/V sync difference when a new video frame is being shown.
+static void update_av_diff(struct MPContext *mpctx, double offset)
 {
     struct MPOpts *opts = mpctx->opts;
 
@@ -760,13 +763,12 @@ static void update_avsync_after_frame(struct MPContext *mpctx)
         return;
 
     double a_pos = playing_audio_pts(mpctx);
+    if (a_pos != MP_NOPTS_VALUE && mpctx->video_pts != MP_NOPTS_VALUE) {
+        mpctx->last_av_difference = a_pos - mpctx->video_pts
+                                  + opts->audio_delay + offset;
+    }
 
-    mpctx->last_av_difference = a_pos - mpctx->video_pts + opts->audio_delay;
-    if (mpctx->time_frame > 0)
-        mpctx->last_av_difference += mpctx->time_frame * mpctx->video_speed;
-    if (a_pos == MP_NOPTS_VALUE || mpctx->video_pts == MP_NOPTS_VALUE) {
-        mpctx->last_av_difference = 0;
-    } else if (fabs(mpctx->last_av_difference) > 0.5 && !mpctx->drop_message_shown) {
+    if (fabs(mpctx->last_av_difference) > 0.5 && !mpctx->drop_message_shown) {
         MP_WARN(mpctx, "%s", av_desync_help_text);
         mpctx->drop_message_shown = true;
     }
@@ -787,6 +789,7 @@ static void init_vo(struct MPContext *mpctx)
         video_set_colors(d_video, "saturation", opts->gamma_saturation);
     if (opts->gamma_hue != 1000)
         video_set_colors(d_video, "hue", opts->gamma_hue);
+    video_set_colors(d_video, "output-levels", opts->video_output_levels);
 
     mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }
@@ -911,7 +914,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     bool resample = mode == VS_DISP_RESAMPLE || mode == VS_DISP_RESAMPLE_VDROP ||
                     mode == VS_DISP_RESAMPLE_NONE;
     bool drop = mode == VS_DISP_VDROP || mode == VS_DISP_RESAMPLE ||
-                mode == VS_DISP_RESAMPLE_VDROP;
+                mode == VS_DISP_ADROP || mode == VS_DISP_RESAMPLE_VDROP;
     drop &= (opts->frame_dropping & 1);
 
     if (resample && using_spdif_passthrough(mpctx))
@@ -959,10 +962,11 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 
     // If we are too far ahead/behind, attempt to drop/repeat frames. In
     // particular, don't attempt to change speed for them.
-    if (drop) {
+    // Tolerate some desync to avoid frame dropping due to jitter.
+    if (drop && fabs(av_diff) >= 0.080 && fabs(av_diff) / vsync >= 2)
         drop_repeat = -av_diff / vsync; // round towards 0
-        av_diff -= drop_repeat * vsync;
-    }
+
+    av_diff += drop_repeat * vsync;
 
     if (resample) {
         double audio_factor = 1.0;
@@ -985,7 +989,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
             if (av_diff * -mpctx->display_sync_drift_dir >= 0)
                 new = 0;
             if (fabs(av_diff) > max_drift)
-                new = copysign(1, av_diff);
+                new = av_diff >= 0 ? 1 : -1;
             if (mpctx->display_sync_drift_dir != new) {
                 MP_VERBOSE(mpctx, "Change display sync audio drift: %d\n", new);
                 mpctx->display_sync_drift_dir = new;
@@ -1022,16 +1026,21 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
         vo_increment_drop_count(vo, 1);
 
     // Estimate the video position, so we can calculate a good A/V difference
-    // value with update_avsync_after_frame() later. This is used to estimate
-    // A/V drift.
-    mpctx->time_frame = 0;
+    // value below. This is used to estimate A/V drift.
     double time_left = (vo_get_next_frame_start_time(vo) - mp_time_us()) / 1e6;
-    if (time_left >= 0)
-        mpctx->time_frame += time_left;
+    time_left = MPMAX(time_left, 0);
     // We also know that the timing is (necessarily) off, because we have to
     // align frame timings on the vsync boundaries. This is unavoidable, and
     // for the sake of the video sync calculations we pretend it's perfect.
-    mpctx->time_frame -= mpctx->display_sync_error;
+    time_left -= mpctx->display_sync_error;
+    // Likewise, we know sync is off, but is going to be compensated.
+    time_left += drop_repeat * vsync;
+
+    mpctx->total_avsync_change = 0;
+    update_av_diff(mpctx, time_left);
+
+    // A bad guess, only needed when reverting to audio sync.
+    mpctx->time_frame = time_left;
 
     mpctx->speed_factor_v = video_speed_correction;
 
@@ -1051,6 +1060,16 @@ done:
 
     mpctx->display_sync_disable_counter =
         MPMAX(0, mpctx->display_sync_disable_counter - 1);
+}
+
+static void schedule_frame(struct MPContext *mpctx, struct vo_frame *frame)
+{
+    handle_display_sync_frame(mpctx, frame);
+
+    if (!mpctx->display_sync_active) {
+        update_av_diff(mpctx, mpctx->time_frame > 0 ?
+            mpctx->time_frame * mpctx->video_speed : 0);
+    }
 }
 
 // Return the next frame duration as stored in the file.
@@ -1100,11 +1119,14 @@ void write_video(struct MPContext *mpctx, double endpts)
         return;
 
     if (r == VD_EOF) {
+        int prev_state = mpctx->video_status;
         mpctx->video_status =
             vo_still_displaying(vo) ? STATUS_DRAINING : STATUS_EOF;
         mpctx->delay = 0;
         mpctx->last_av_difference = 0;
         MP_DBG(mpctx, "video EOF (status=%d)\n", mpctx->video_status);
+        if (prev_state != mpctx->video_status)
+            mpctx->sleeptime = 0;
         return;
     }
 
@@ -1131,7 +1153,7 @@ void write_video(struct MPContext *mpctx, double endpts)
                 info->name, p.w, p.h, extra, vo_format_name(p.imgfmt));
         MP_VERBOSE(mpctx, "VO: Description: %s\n", info->description);
 
-        int vo_r = vo_reconfig(vo, &p, 0);
+        int vo_r = vo_reconfig(vo, &p);
         if (vo_r < 0) {
             mpctx->error_playing = MPV_ERROR_VO_INIT_FAILED;
             goto error;
@@ -1175,13 +1197,11 @@ void write_video(struct MPContext *mpctx, double endpts)
         frame->duration = MPCLAMP(diff, 0, 10) * 1e6;
     }
 
-    handle_display_sync_frame(mpctx, frame);
-
     mpctx->video_pts = mpctx->next_frames[0]->pts;
     mpctx->last_vo_pts = mpctx->video_pts;
     mpctx->playback_pts = mpctx->video_pts;
 
-    update_avsync_after_frame(mpctx);
+    schedule_frame(mpctx, frame);
 
     mpctx->osd_force_update = true;
     update_osd_msg(mpctx);

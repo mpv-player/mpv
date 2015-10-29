@@ -411,7 +411,7 @@ static void fill_rect(struct vo *vo, GC gc, int x0, int y0, int x1, int y1)
     x1 = MPMIN(x1, vo->dwidth);
     y1 = MPMIN(y1, vo->dheight);
 
-    if (x11->window && x1 > x0 && y1 > y0)
+    if (x11->window && gc && x1 > x0 && y1 > y0)
         XFillRectangle(x11->display, x11->window, gc, x0, y0, x1 - x0, y1 - y0);
 }
 
@@ -456,7 +456,7 @@ static void resize(struct vo *vo)
  * create and map window,
  * allocate colors and (shared) memory
  */
-static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
+static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct vo_x11_state *x11 = vo->x11;
     struct xvctx *ctx = vo->priv;
@@ -489,7 +489,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     if (!ctx->xv_format)
         return -1;
 
-    vo_x11_config_vo_window(vo, NULL, flags, "xv");
+    vo_x11_config_vo_window(vo);
 
     if (!ctx->f_gc && !ctx->vo_gc) {
         ctx->f_gc = XCreateGC(x11->display, x11->window, 0, 0);
@@ -760,6 +760,9 @@ static int preinit(struct vo *vo)
 
     if (!vo_x11_init(vo))
         return -1;
+
+    if (!vo_x11_create_vo_window(vo, NULL, "xv"))
+        goto error;
 
     struct vo_x11_state *x11 = vo->x11;
 

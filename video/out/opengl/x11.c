@@ -240,7 +240,8 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_GREEN_SIZE, &ctx->depth_g);
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_BLUE_SIZE, &ctx->depth_b);
 
-    vo_x11_config_vo_window(vo, glx_ctx->vinfo, flags | VOFLAG_HIDDEN, "gl");
+    if (!vo_x11_create_vo_window(vo, glx_ctx->vinfo, "gl"))
+        return false;
 
     bool success = false;
     if (!(flags & VOFLAG_GLES)) {
@@ -263,10 +264,9 @@ static int glx_init(struct MPGLContext *ctx, int vo_flags)
     return -1;
 }
 
-static int glx_reconfig(struct MPGLContext *ctx, int flags)
+static int glx_reconfig(struct MPGLContext *ctx)
 {
-    struct glx_context *glx_ctx = ctx->priv;
-    vo_x11_config_vo_window(ctx->vo, glx_ctx->vinfo, flags, "gl");
+    vo_x11_config_vo_window(ctx->vo);
     return 0;
 }
 

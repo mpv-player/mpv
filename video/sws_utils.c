@@ -161,7 +161,6 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     // Neutralize unsupported or ignored parameters.
     src->d_w = dst->d_w = 0;
     src->d_h = dst->d_h = 0;
-    src->outputlevels = dst->outputlevels = MP_CSP_LEVELS_AUTO;
 
     if (cache_valid(ctx))
         return 0;

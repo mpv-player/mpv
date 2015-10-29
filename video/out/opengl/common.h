@@ -74,11 +74,16 @@ enum {
 
 #define MPGL_VER_P(ver) MPGL_VER_GET_MAJOR(ver), MPGL_VER_GET_MINOR(ver)
 
+enum {
+    VOFLAG_GLES         = 1 << 0,       // Hint to prefer GLES2 if possible
+    VOFLAG_GL_DEBUG     = 1 << 1,       // Hint to request debug OpenGL context
+    VOFLAG_ALPHA        = 1 << 2,       // Hint to request alpha framebuffer
+    VOFLAG_SW           = 1 << 3,       // Hint to accept a software GL renderer
+};
+
 struct MPGLContext;
 
-// A backend (like X11, win32, ...), which provides OpenGL rendering.
-// This should be preferred for new code, instead of setting the callbacks
-// in MPGLContext directly.
+// A windowing backend (like X11, win32, ...), which provides OpenGL rendering.
 struct mpgl_driver {
     const char *name;
 
@@ -95,7 +100,7 @@ struct mpgl_driver {
     // Currently, there is an unfortunate interaction with ctx->vo, and
     // display size etc. are determined by it.
     // Return 0 on success, negative value (-1) on error.
-    int (*reconfig)(struct MPGLContext *ctx, int flags);
+    int (*reconfig)(struct MPGLContext *ctx);
 
     // Present the frame.
     void (*swap_buffers)(struct MPGLContext *ctx);
@@ -115,32 +120,20 @@ typedef struct MPGLContext {
     // Bit size of each component in the created framebuffer. 0 if unknown.
     int depth_r, depth_g, depth_b;
 
+    // For hwdec_vaegl.c.
+    const char *native_display_type;
+    void *native_display;
+
+    // Windows-specific hack. See vo_opengl dwmflush suboption.
+    int dwm_flush_opt;
+
     // For free use by the mpgl_driver.
     void *priv;
-
-    // Warning: all callbacks below are legacy. Newer code should use
-    //          a mpgl_driver struct, which replaces these callbacks.
-
-    void (*swapGlBuffers)(struct MPGLContext *);
-    int (*vo_init)(struct vo *vo);
-    void (*vo_uninit)(struct vo *vo);
-    int (*vo_control)(struct vo *vo, int *events, int request, void *arg);
-    void (*releaseGlContext)(struct MPGLContext *);
-
-    // Used on windows only, tries to vsync with the DWM, and modifies SwapInterval
-    // when it does so. Returns the possibly modified swapinterval value.
-    int (*DwmFlush)(struct MPGLContext *, int opt_dwmflush,
-                    int opt_swapinterval, int current_swapinterval);
-
-
-    // Resize the window, or create a new window if there isn't one yet.
-    // On the first call, it creates a GL context.
-    bool (*config_window)(struct MPGLContext *ctx, int flags);
 } MPGLContext;
 
 MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags);
 void mpgl_uninit(MPGLContext *ctx);
-bool mpgl_reconfig_window(struct MPGLContext *ctx, int vo_flags);
+int mpgl_reconfig_window(struct MPGLContext *ctx);
 int mpgl_control(struct MPGLContext *ctx, int *events, int request, void *arg);
 void mpgl_swap_buffers(struct MPGLContext *ctx);
 
@@ -149,11 +142,6 @@ int mpgl_find_backend(const char *name);
 struct m_option;
 int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
                               struct bstr name, struct bstr param);
-
-void mpgl_set_backend_cocoa(MPGLContext *ctx);
-void mpgl_set_backend_w32(MPGLContext *ctx);
-void mpgl_set_backend_wayland(MPGLContext *ctx);
-void mpgl_set_backend_rpi(MPGLContext *ctx);
 
 void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                          const char *ext2, struct mp_log *log);
@@ -271,7 +259,7 @@ struct GL {
     void (GLAPIENTRY *DebugMessageCallback)(MP_GLDEBUGPROC callback,
                                             const void *userParam);
 
-    void *(GLAPIENTRY *MPGetD3DInterface)(const char *name);
+    void *(GLAPIENTRY *MPGetNativeDisplay)(const char *name);
 };
 
 #endif /* MPLAYER_GL_COMMON_H */
