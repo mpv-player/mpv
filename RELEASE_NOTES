@@ -1,3 +1,91 @@
+Release 0.12.0
+==============
+
+NOTE: This release changes the default format for youtube-dl and removes some
+workarounds related to MPEG DASH support. However, the required changes to
+FFmpeg code are not in any FFmpeg release yet (as of 2015-10-29), so for now,
+playing DASH streams requires using FFmpeg git master. You can work around
+this by using the --ytdl-format=best option.
+
+
+Features
+--------
+
+New
+~~~
+
+- vo_opengl: support new VAAPI EGL interop (requires Mesa 11)
+- vo_opengl: vaapi: add Wayland support
+- bring back the x11 video output
+- vo_opengl: support all kinds of GBRP formats
+
+Removed
+~~~~~~~
+
+- video: remove VDA support (VideoToolbox is preferred)
+
+Behavior
+--------
+
+- vo_opengl: enable X11 EGL backend by default (disabled for NVIDIA due to driver bugs)
+- ytdl: don't override user-set format in no-video mode
+- sub: adjust behavior on mismatching video/subtitle aspect ratio
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- audio: add option for falling back to ao_null
+- options: add support for client certificate authentication
+- input: add key name for U+3000 IDEOGRAPHIC SPACE
+- player: add audio drop/duplicate mode to video-sync
+
+Changed
+~~~~~~~
+
+- vo_opengl: remove sharpen scalers, add sharpen sub-option
+- vo_opengl: make sw suboption work without explicit backend selection
+- command: make time properties unavailable if timestamp is unknown
+- command: do not return 0 for bitrate if unknown (make property unavailable instead)
+- vo_opengl: make the default debanding settings less excessive
+- ytdl: disable --all-subs if "sub-lang" is in raw-options
+
+Removed
+~~~~~~~
+
+- video: remove user-controllable PTS sorting (--pts-association-mode)
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- player: fix another --force-window bug
+- player: add wav to list of external audio file extensions
+- ao_alsa: fix failure to find any sample format
+- player: make stop command actually stop in all cases
+- audio: various fixes related to audio device hotplugging
+- vo_xv: fix crash with --wid
+- ytdl: Remove DASH hacks, use DASH by default
+- player: be slightly less prone to framedrop in display sync mode
+- sd_lavc: extend subtitle resolution if images go outside video frame
+- player: offset chapter display by start time
+- command: make bitrate properties work correctly for external tracks
+- w32_common: disable IME
+- player: fix display-sync A/V calculation on high playback speeds
+- player: fix display sync A/V difference estimation on drops
+- player: raise display sync desync tolerance
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API. A complete changelog can be seen by running
+`git log v0.11.0..v0.12.0` in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.11.0...v0.12.0 or
+http://git.srsfckn.biz/mpv/log/?qt=range&q=v0.11.0..v0.12.0
+
+
 Release 0.11.0
 ==============
 
