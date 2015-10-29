@@ -460,7 +460,38 @@ description (shown by ``--profile=help``) can be defined with the
 ``profile-desc`` option. To end the profile, start another one or use the
 profile name ``default`` to continue with normal options.
 
-.. admonition:: Example mpv profile
+.. admonition:: Example mpv config file with profiles
+
+    ::
+
+        # normal top-level option
+        fullscreen=yes
+
+        # a profile that can be enabled with --profile=big-cache
+        [big-cache]
+        cache=123400
+        demuxer-readahead-secs=20
+
+        [slow]
+        profile-desc="some profile name"
+        vo=opengl:scale=ewa_lanczos:scale-radius=16
+
+        [fast]
+        vo=vdpau
+
+        # using a profile again extends it
+        [slow]
+        framedrop=no
+        # you can also include other profiles
+        profile=big-cache
+
+
+Auto profiles
+-------------
+
+Some profiles are loaded automatically. The following example demonstrates this:
+
+.. admonition:: Auto profile loading
 
     ::
 
@@ -479,6 +510,13 @@ profile name ``default`` to continue with normal options.
         [ao.alsa]
         device=spdif
 
+The profile name follows the schema ``type.name``, where type can be ``vo``
+to match the value the ``--vo`` option is set to, ``ao`` for ``--ao``,
+``protocol`` for the input/output protocol in use (see ``--list-protocols``),
+and ``extension`` for the extension of the path of the currently played file
+(*not* the file format).
+
+This feature is very limited, and there are no other auto profiles.
 
 TAKING SCREENSHOTS
 ==================
