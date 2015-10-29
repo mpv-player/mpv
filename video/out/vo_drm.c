@@ -501,14 +501,19 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
 
-    if (p->active && mpi) {
-        struct mp_image src = *mpi;
-        struct mp_rect src_rc = p->src;
-        src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, mpi->fmt.align_x);
-        src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, mpi->fmt.align_y);
-        mp_image_crop_rc(&src, src_rc);
-        mp_sws_scale(p->sws, p->cur_frame, &src);
-        osd_draw_on_image(vo->osd, p->osd, src.pts, 0, p->cur_frame);
+    if (p->active) {
+        if (mpi) {
+            struct mp_image src = *mpi;
+            struct mp_rect src_rc = p->src;
+            src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, mpi->fmt.align_x);
+            src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, mpi->fmt.align_y);
+            mp_image_crop_rc(&src, src_rc);
+            mp_sws_scale(p->sws, p->cur_frame, &src);
+            osd_draw_on_image(vo->osd, p->osd, src.pts, 0, p->cur_frame);
+        } else {
+            mp_image_clear(p->cur_frame, 0, 0, p->cur_frame->w, p->cur_frame->h);
+            osd_draw_on_image(vo->osd, p->osd, 0, 0, p->cur_frame);
+        }
 
         struct modeset_buf *front_buf = &p->dev->bufs[p->dev->front_buf];
         int w = p->dst.x1 - p->dst.x0;
