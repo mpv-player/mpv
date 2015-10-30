@@ -667,6 +667,15 @@ Available video output drivers are:
 
         X11/GLX only.
 
+    ``vsync-fences=<N>``
+        Synchronize the CPU to the Nth past frame using the ``GL_ARB_sync``
+        extension. A value of 0 disables this behavior (default). A value of
+        1 means it will synchronize to the current frame after rendering it.
+        Like ``glfinish`` and ``waitvsync``, this can lower or ruin performance.
+        Its advantage is that it can span multiple frames, and effectively limit
+        the number of frames the GPU queues ahead (which also has an influence
+        on vsync).
+
     ``dwmflush=<no|windowed|yes>``
         Calls ``DwmFlush`` after swapping buffers on Windows (default: no).
         It also sets ``SwapInterval(0)`` to ignore the OpenGL timing. Values

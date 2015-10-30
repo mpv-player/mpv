@@ -230,6 +230,16 @@ static const struct gl_functions gl_functions[] = {
         .extension = "GL_ARB_texture_rg",
         .provides = MPGL_CAP_TEX_RG,
     },
+    {
+        .ver_core = 320,
+        .extension = "GL_ARB_sync",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(FenceSync),
+            DEF_FN(ClientWaitSync),
+            DEF_FN(DeleteSync),
+            {0}
+        },
+    },
     // Swap control, always an OS specific extension
     // The OSX code loads this manually.
     {

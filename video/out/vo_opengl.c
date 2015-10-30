@@ -51,6 +51,8 @@
 #include "opengl/video.h"
 #include "opengl/lcms.h"
 
+#define NUM_VSYNC_FENCES 10
+
 struct gl_priv {
     struct vo *vo;
     struct mp_log *log;
@@ -72,6 +74,7 @@ struct gl_priv {
     int allow_sw;
     int swap_interval;
     int dwm_flush;
+    int opt_vsync_fences;
 
     char *backend;
     int es;
@@ -83,6 +86,9 @@ struct gl_priv {
     int opt_pattern[2];
     int last_pattern;
     int matches, mismatches;
+
+    GLsync vsync_fences[NUM_VSYNC_FENCES];
+    int num_vsync_fences;
 };
 
 static void resize(struct gl_priv *p)
@@ -120,6 +126,12 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
+
+    if (gl->FenceSync && p->num_vsync_fences < p->opt_vsync_fences) {
+        GLsync fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);;
+        if (fence)
+            p->vsync_fences[p->num_vsync_fences++] = fence;
+    }
 
     gl_video_render_frame(p->renderer, frame, 0);
 
@@ -162,6 +174,11 @@ static void flip_page(struct vo *vo)
             p->waitvsync = 0;
             p->opt_pattern[0] = 0;
         }
+    }
+    while (p->opt_vsync_fences > 0 && p->num_vsync_fences >= p->opt_vsync_fences) {
+        gl->ClientWaitSync(p->vsync_fences[0], GL_SYNC_FLUSH_COMMANDS_BIT, 1e9);
+        gl->DeleteSync(p->vsync_fences[0]);
+        MP_TARRAY_REMOVE_AT(p->vsync_fences, p->num_vsync_fences, 0);
     }
 }
 
@@ -449,6 +466,7 @@ static const struct m_option options[] = {
     OPT_FLAG("sw", allow_sw, 0),
     OPT_FLAG("es", es, 0),
     OPT_INTPAIR("check-pattern", opt_pattern, 0),
+    OPT_INTRANGE("vsync-fences", opt_vsync_fences, 0, 0, NUM_VSYNC_FENCES),
 
     OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
     OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),

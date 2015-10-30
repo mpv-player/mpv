@@ -244,6 +244,10 @@ struct GL {
     void (GLAPIENTRY *UniformMatrix3fv)(GLint, GLsizei, GLboolean,
                                         const GLfloat *);
 
+    GLsync (GLAPIENTRY *FenceSync)(GLenum, GLbitfield);
+    GLenum (GLAPIENTRY *ClientWaitSync)(GLsync, GLbitfield, GLuint64);
+    void (GLAPIENTRY *DeleteSync)(GLsync sync);
+
     void (GLAPIENTRY *VDPAUInitNV)(const GLvoid *, const GLvoid *);
     void (GLAPIENTRY *VDPAUFiniNV)(void);
     GLvdpauSurfaceNV (GLAPIENTRY *VDPAURegisterOutputSurfaceNV)
