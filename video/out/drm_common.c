@@ -53,6 +53,15 @@ static bool has_signal_installed(int signo)
     return act.sa_handler != 0;
 }
 
+static int install_signal(int signo, void (*handler)(int))
+{
+    struct sigaction act = { 0 };
+    act.sa_handler = handler;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = SA_RESTART;
+    return sigaction(signo, &act, NULL);
+}
+
 int vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
 {
     s->log = log;
@@ -80,12 +89,14 @@ int vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
         return -1;
     }
 
-    struct sigaction act;
-    act.sa_handler = vt_switcher_sighandler;
-    act.sa_flags = SA_RESTART;
-    sigemptyset(&act.sa_mask);
-    sigaction(RELEASE_SIGNAL, &act, 0);
-    sigaction(ACQUIRE_SIGNAL, &act, 0);
+    if (install_signal(RELEASE_SIGNAL, vt_switcher_sighandler)) {
+        MP_ERR(s, "Failed to install release signal: %s\n", mp_strerror(errno));
+        return -1;
+    }
+    if (install_signal(ACQUIRE_SIGNAL, vt_switcher_sighandler)) {
+        MP_ERR(s, "Failed to install acquire signal: %s\n", mp_strerror(errno));
+        return -1;
+    }
 
     struct vt_mode vt_mode;
     if (ioctl(s->tty_fd, VT_GETMODE, &vt_mode) < 0) {
