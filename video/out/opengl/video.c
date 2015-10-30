@@ -1926,7 +1926,9 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
                 gl_video_upload_image(p, frame->current);
                 pass_render_frame(p);
 
-                if (frame->num_vsyncs == 1 || p->opts.dumb_mode) {
+                if (frame->num_vsyncs == 1 || !frame->display_synced ||
+                    p->opts.dumb_mode)
+                {
                     // Disable output_fbo_valid to signal that this frame
                     // does not require any redraws from the FBO.
                     pass_draw_to_screen(p, fbo);
