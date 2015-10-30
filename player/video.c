@@ -211,6 +211,7 @@ void reset_video_state(struct MPContext *mpctx)
     mpctx->display_sync_disable_counter = 0;
     mpctx->dropped_frames_total = 0;
     mpctx->dropped_frames = 0;
+    mpctx->mistimed_frames_total = 0;
     mpctx->drop_message_shown = 0;
     mpctx->display_sync_drift_dir = 0;
 
@@ -1033,6 +1034,9 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     time_left -= mpctx->display_sync_error;
     // Likewise, we know sync is off, but is going to be compensated.
     time_left += drop_repeat * vsync;
+
+    if (drop_repeat)
+        mpctx->mistimed_frames_total += 1;
 
     mpctx->total_avsync_change = 0;
     update_av_diff(mpctx, time_left);

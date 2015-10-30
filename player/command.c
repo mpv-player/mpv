@@ -553,8 +553,6 @@ static int mp_property_total_avsync_change(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, mpctx->total_avsync_change);
 }
 
-
-/// Late frames
 static int mp_property_drop_frame_cnt(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
@@ -563,6 +561,16 @@ static int mp_property_drop_frame_cnt(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     return m_property_int_ro(action, arg, mpctx->dropped_frames_total);
+}
+
+static int mp_property_mistimed_frame_count(void *ctx, struct m_property *prop,
+                                            int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+     if (!mpctx->d_video || !mpctx->display_sync_active)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_int_ro(action, arg, mpctx->mistimed_frames_total);
 }
 
 static int mp_property_vo_drop_frame_count(void *ctx, struct m_property *prop,
@@ -3383,6 +3391,7 @@ static const struct m_property mp_properties[] = {
     {"avsync", mp_property_avsync},
     {"total-avsync-change", mp_property_total_avsync_change},
     {"drop-frame-count", mp_property_drop_frame_cnt},
+    {"mistimed-frame-count", mp_property_mistimed_frame_count},
     {"vo-drop-frame-count", mp_property_vo_drop_frame_count},
     {"vo-missed-frame-count", mp_property_vo_missed_frame_count},
     {"percent-pos", mp_property_percent_pos},
@@ -3601,7 +3610,7 @@ static const char *const *const mp_event_property_change[] = {
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
       "total-avsync-change", "audio-speed-correction", "video-speed-correction",
-      "vo-missed-frame-count"),
+      "vo-missed-frame-count", "mistimed-frame-count"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",
