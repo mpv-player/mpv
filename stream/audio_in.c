@@ -45,19 +45,19 @@ int audio_in_init(audio_in_t *ai, struct mp_log *log, int type)
     case AUDIO_IN_ALSA:
         ai->alsa.handle = NULL;
         ai->alsa.log = NULL;
-        ai->alsa.device = strdup("default");
+        ai->alsa.device = NULL;
         return 0;
 #endif
 #if HAVE_OSS_AUDIO
     case AUDIO_IN_OSS:
         ai->oss.audio_fd = -1;
-        ai->oss.device = strdup("/dev/dsp");
+        ai->oss.device = NULL;
         return 0;
 #endif
 #if HAVE_SNDIO
     case AUDIO_IN_SNDIO:
         ai->sndio.hdl = NULL;
-        ai->sndio.device = strdup("default");
+        ai->sndio.device = NULL;
         return 0;
 #endif
     default:
@@ -161,9 +161,11 @@ int audio_in_set_device(audio_in_t *ai, char *device)
     case AUDIO_IN_ALSA:
         free(ai->alsa.device);
         ai->alsa.device = strdup(device);
-        /* mplayer cannot handle colons in arguments */
-        for (i = 0; i < (int)strlen(ai->alsa.device); i++) {
-            if (ai->alsa.device[i] == '.') ai->alsa.device[i] = ':';
+        if (ai->alsa.device) {
+            /* mplayer could not handle colons in arguments */
+            for (i = 0; i < (int)strlen(ai->alsa.device); i++) {
+                if (ai->alsa.device[i] == '.') ai->alsa.device[i] = ':';
+            }
         }
         return 0;
 #endif
