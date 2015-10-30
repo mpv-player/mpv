@@ -137,6 +137,8 @@ void vt_switcher_interrupt_poll(struct vt_switcher *s)
 
 void vt_switcher_destroy(struct vt_switcher *s)
 {
+    install_signal(RELEASE_SIGNAL, SIG_DFL);
+    install_signal(ACQUIRE_SIGNAL, SIG_DFL);
     close(s->tty_fd);
     close(vt_switcher_pipe[0]);
     close(vt_switcher_pipe[1]);
