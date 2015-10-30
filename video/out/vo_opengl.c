@@ -116,6 +116,22 @@ static void check_pattern(struct vo *vo, int item)
     }
 }
 
+static void draw_frame(struct vo *vo, struct vo_frame *frame)
+{
+    struct gl_priv *p = vo->priv;
+    GL *gl = p->gl;
+
+    gl_video_render_frame(p->renderer, frame, 0);
+
+    // The playloop calls this last before waiting some time until it decides
+    // to call flip_page(). Tell OpenGL to start execution of the GPU commands
+    // while we sleep (this happens asynchronously).
+    gl->Flush();
+
+    if (p->use_glFinish)
+        gl->Finish();
+}
+
 static void flip_page(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
@@ -147,22 +163,6 @@ static void flip_page(struct vo *vo)
             p->opt_pattern[0] = 0;
         }
     }
-}
-
-static void draw_frame(struct vo *vo, struct vo_frame *frame)
-{
-    struct gl_priv *p = vo->priv;
-    GL *gl = p->gl;
-
-    gl_video_render_frame(p->renderer, frame, 0);
-
-    // The playloop calls this last before waiting some time until it decides
-    // to call flip_page(). Tell OpenGL to start execution of the GPU commands
-    // while we sleep (this happens asynchronously).
-    gl->Flush();
-
-    if (p->use_glFinish)
-        gl->Finish();
 }
 
 static int query_format(struct vo *vo, int format)
