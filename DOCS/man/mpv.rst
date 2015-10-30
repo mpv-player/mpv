@@ -726,6 +726,15 @@ The profile always overrides other settings in ``mpv.conf``.
 
 .. include:: changes.rst
 
+
+EMBEDDING INTO OTHER PROGRAMS (LIBMPV)
+======================================
+
+mpv can be embedded into other programs as video/audio playback backend. The
+recommended way to to so is using libmpv. See ``libmpv/client.h`` in the mpv
+source code repository. This provides a C API. Bindings for other languages
+might be available (see wiki).
+
 ENVIRONMENT VARIABLES
 =====================
 
