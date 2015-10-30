@@ -35,13 +35,22 @@
 #define EVT_INTERRUPT 255
 #define HANDLER_ACQUIRE 0
 #define HANDLER_RELEASE 1
+#define RELEASE_SIGNAL SIGUSR1
+#define ACQUIRE_SIGNAL SIGUSR2
 
 static int vt_switcher_pipe[2];
 
 static void vt_switcher_sighandler(int sig)
 {
-    unsigned char event = sig == SIGUSR1 ? EVT_RELEASE : EVT_ACQUIRE;
+    unsigned char event = sig == RELEASE_SIGNAL ? EVT_RELEASE : EVT_ACQUIRE;
     write(vt_switcher_pipe[1], &event, sizeof(event));
+}
+
+static bool has_signal_installed(int signo)
+{
+    struct sigaction act = { 0 };
+    sigaction(signo, 0, &act);
+    return act.sa_handler != 0;
 }
 
 int vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
@@ -62,12 +71,21 @@ int vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
         return -1;
     }
 
+    if (has_signal_installed(RELEASE_SIGNAL)) {
+        MP_ERR(s, "Can't handle VT release - signal already used\n");
+        return -1;
+    }
+    if (has_signal_installed(ACQUIRE_SIGNAL)) {
+        MP_ERR(s, "Can't handle VT acquire - signal already used\n");
+        return -1;
+    }
+
     struct sigaction act;
     act.sa_handler = vt_switcher_sighandler;
     act.sa_flags = SA_RESTART;
     sigemptyset(&act.sa_mask);
-    sigaction(SIGUSR1, &act, 0);
-    sigaction(SIGUSR2, &act, 0);
+    sigaction(RELEASE_SIGNAL, &act, 0);
+    sigaction(ACQUIRE_SIGNAL, &act, 0);
 
     struct vt_mode vt_mode;
     if (ioctl(s->tty_fd, VT_GETMODE, &vt_mode) < 0) {
@@ -76,8 +94,8 @@ int vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
     }
 
     vt_mode.mode = VT_PROCESS;
-    vt_mode.relsig = SIGUSR1;
-    vt_mode.acqsig = SIGUSR2;
+    vt_mode.relsig = RELEASE_SIGNAL;
+    vt_mode.acqsig = ACQUIRE_SIGNAL;
     if (ioctl(s->tty_fd, VT_SETMODE, &vt_mode) < 0) {
         MP_ERR(s, "VT_SETMODE failed: %s\n", mp_strerror(errno));
         return -1;
