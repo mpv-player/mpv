@@ -1022,8 +1022,6 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // corner cases or exceptional situations cause too much havoc.
     drop_repeat = MPCLAMP(drop_repeat, -num_vsyncs, num_vsyncs * 10);
     num_vsyncs += drop_repeat;
-    if (drop_repeat < 0)
-        vo_increment_drop_count(vo, 1);
 
     // Estimate the video position, so we can calculate a good A/V difference
     // value below. This is used to estimate A/V drift.

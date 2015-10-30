@@ -618,6 +618,7 @@ static bool render_frame(struct vo *vo)
         in->current_frame = in->frame_queued;
         in->frame_queued = NULL;
     } else if (in->paused || !in->current_frame || !in->hasframe ||
+               in->current_frame->num_vsyncs < 1 ||
                (!in->vsync_timed && !in->current_frame->display_synced))
     {
         goto done;
