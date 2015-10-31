@@ -1088,11 +1088,10 @@ static void gui_thread_reconfig(void *ptr)
 }
 
 // Resize the window. On the first call, it's also made visible.
-int vo_w32_config(struct vo *vo)
+void vo_w32_config(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
     mp_dispatch_run(w32->dispatch, gui_thread_reconfig, w32);
-    return 0;
 }
 
 static void thread_disable_ime(void)
