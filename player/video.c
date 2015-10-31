@@ -1011,6 +1011,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     double frame_duration = adjusted_duration / video_speed_correction;
     double ratio = (frame_duration + mpctx->display_sync_error) / vsync;
     int num_vsyncs = MPMAX(floor(ratio + 0.5), 0);
+    double prev_error = mpctx->display_sync_error;
     mpctx->display_sync_error += frame_duration - num_vsyncs * vsync;
     frame->vsync_offset = mpctx->display_sync_error * 1e6;
 
@@ -1030,8 +1031,8 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     time_left = MPMAX(time_left, 0);
     // We also know that the timing is (necessarily) off, because we have to
     // align frame timings on the vsync boundaries. This is unavoidable, and
-    // for the sake of the video sync calculations we pretend it's perfect.
-    time_left -= mpctx->display_sync_error;
+    // for the sake of the A/V sync calculations we pretend it's perfect.
+    time_left += prev_error;
     // Likewise, we know sync is off, but is going to be compensated.
     time_left += drop_repeat * vsync;
 
