@@ -460,7 +460,7 @@ static const struct m_option options[] = {
     OPT_FLAG("waitvsync", waitvsync, 0),
     OPT_INT("swapinterval", swap_interval, 0, OPTDEF_INT(1)),
     OPT_CHOICE("dwmflush", dwm_flush, 0,
-               ({"no", 0}, {"windowed", 1}, {"yes", 2})),
+               ({"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})),
     OPT_FLAG("debug", use_gl_debug, 0),
     OPT_STRING_VALIDATE("backend", backend, 0, mpgl_validate_backend_opt),
     OPT_FLAG("sw", allow_sw, 0),

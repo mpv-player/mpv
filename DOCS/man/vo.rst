@@ -676,11 +676,15 @@ Available video output drivers are:
         the number of frames the GPU queues ahead (which also has an influence
         on vsync).
 
-    ``dwmflush=<no|windowed|yes>``
-        Calls ``DwmFlush`` after swapping buffers on Windows (default: no).
+    ``dwmflush=<no|windowed|yes|auto>``
+        Calls ``DwmFlush`` after swapping buffers on Windows (default: auto).
         It also sets ``SwapInterval(0)`` to ignore the OpenGL timing. Values
         are: no (disabled), windowed (only in windowed mode), yes (also in
         full screen).
+
+        The value ``auto`` will try to determine whether the compositor is
+        active, and calls ``DwmFlush`` only if it seems to be.
+
         This may help getting more consistent frame intervals, especially with
         high-fps clips - which might also reduce dropped frames. Typically a
         value of ``windowed`` should be enough since full screen may bypass the
