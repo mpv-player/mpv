@@ -1040,7 +1040,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
         mpctx->mistimed_frames_total += 1;
 
     mpctx->total_avsync_change = 0;
-    update_av_diff(mpctx, time_left);
+    update_av_diff(mpctx, time_left * opts->playback_speed);
 
     // A bad guess, only needed when reverting to audio sync.
     mpctx->time_frame = time_left;
