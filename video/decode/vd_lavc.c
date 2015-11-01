@@ -456,6 +456,7 @@ static void uninit_avctx(struct dec_video *vd)
 
     if (ctx->hwdec && ctx->hwdec->uninit)
         ctx->hwdec->uninit(ctx);
+    ctx->hwdec = NULL;
 
     av_freep(&ctx->avctx);
 
