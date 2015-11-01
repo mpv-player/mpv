@@ -22,7 +22,7 @@
 
 #include <assert.h>
 #include <windows.h>
-#include <Dwmapi.h>
+#include <dwmapi.h>
 #include "video/out/w32_common.h"
 #include "common.h"
 
