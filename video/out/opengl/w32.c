@@ -262,6 +262,8 @@ static int w32_init(struct MPGLContext *ctx, int flags)
 
     current_w32_context = w32_ctx;
     wglMakeCurrent(w32_ctx->hdc, w32_ctx->context);
+    if (w32_ctx->pDwmEnableMMCSS)
+        w32_ctx->pDwmEnableMMCSS(TRUE);
     return 0;
 
 fail:
@@ -294,6 +296,9 @@ static void w32_uninit(MPGLContext *ctx)
     if (w32_ctx->context)
         wglMakeCurrent(w32_ctx->hdc, 0);
     vo_w32_run_on_thread(ctx->vo, destroy_gl, ctx);
+
+    if (w32_ctx->pDwmEnableMMCSS)
+        w32_ctx->pDwmEnableMMCSS(FALSE);
 
     if (w32_ctx->dwmapi_dll)
         FreeLibrary(w32_ctx->dwmapi_dll);
