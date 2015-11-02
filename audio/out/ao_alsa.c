@@ -713,6 +713,8 @@ static int init_device(struct ao *ao, bool second_try)
     /* end setting sw-params */
 
     p->can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
+    if (p->can_pause)
+        MP_VERBOSE(ao, "pausing supported by device\n");
 
     return INIT_OK;
 
@@ -795,7 +797,6 @@ static void audio_pause(struct ao *ao)
             CHECK_ALSA_ERROR("pcm pause error");
         }
     } else {
-        MP_VERBOSE(ao, "pause not supported by hardware\n");
         if (snd_pcm_delay(p->alsa, &p->prepause_frames) < 0
             || p->prepause_frames < 0)
             p->prepause_frames = 0;
