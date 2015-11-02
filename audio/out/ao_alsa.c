@@ -479,6 +479,13 @@ static int init_device(struct ao *ao, bool second_try)
     err = snd_pcm_hw_params_any(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to get initial parameters");
 
+    // Some ALSA drivers have broken delay reporting, so disable the ALSA
+    // resampling plugin by default.
+    if (!p->cfg_resample) {
+        err = snd_pcm_hw_params_set_rate_resample(p->alsa, alsa_hwparams, 0);
+        CHECK_ALSA_ERROR("Unable to disable resampling");
+    }
+
     snd_pcm_access_t access = af_fmt_is_planar(ao->format)
                                     ? SND_PCM_ACCESS_RW_NONINTERLEAVED
                                     : SND_PCM_ACCESS_RW_INTERLEAVED;
@@ -535,13 +542,6 @@ static int init_device(struct ao *ao, bool second_try)
     if (num_channels > MP_NUM_CHANNELS) {
         MP_FATAL(ao, "Too many audio channels (%d).\n", num_channels);
         goto alsa_error;
-    }
-
-    // Some ALSA drivers have broken delay reporting, so disable the ALSA
-    // resampling plugin by default.
-    if (!p->cfg_resample) {
-        err = snd_pcm_hw_params_set_rate_resample(p->alsa, alsa_hwparams, 0);
-        CHECK_ALSA_ERROR("Unable to disable resampling");
     }
 
     err = snd_pcm_hw_params_set_rate_near
