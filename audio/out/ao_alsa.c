@@ -627,6 +627,7 @@ static int init_device(struct ao *ao, bool second_try)
             if (mp_chmap_is_valid(&without_na) &&
                 !mp_chmap_equals(&without_na, &chmap) &&
                 !mp_chmap_equals(&chmap, &ao->channels) &&
+                without_na.num <= 2 &&
                 !second_try)
             {
                 // Sometimes, ALSA will advertise certain chmaps, but it's not
