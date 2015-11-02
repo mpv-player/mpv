@@ -479,10 +479,23 @@ static int init_device(struct ao *ao, bool second_try)
     err = snd_pcm_hw_params_any(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to get initial parameters");
 
+    snd_pcm_access_t access = af_fmt_is_planar(ao->format)
+                                    ? SND_PCM_ACCESS_RW_NONINTERLEAVED
+                                    : SND_PCM_ACCESS_RW_INTERLEAVED;
+    err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
+    if (err < 0 && af_fmt_is_planar(ao->format)) {
+        ao->format = af_fmt_from_planar(ao->format);
+        access = SND_PCM_ACCESS_RW_INTERLEAVED;
+        err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
+    }
+    CHECK_ALSA_ERROR("Unable to set access type");
+
     bool found_format = false;
     int try_formats[AF_FORMAT_COUNT];
     af_get_best_sample_formats(ao->format, try_formats);
     for (int n = 0; try_formats[n]; n++) {
+        if (af_fmt_is_planar(ao->format) != af_fmt_is_planar(try_formats[n]))
+            continue; // implied SND_PCM_ACCESS mismatches
         p->alsa_fmt = find_alsa_format(try_formats[n]);
         MP_VERBOSE(ao, "trying format %s\n", af_fmt_to_str(try_formats[n]));
         if (snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt) >= 0) {
@@ -499,17 +512,6 @@ static int init_device(struct ao *ao, bool second_try)
 
     err = snd_pcm_hw_params_set_format(p->alsa, alsa_hwparams, p->alsa_fmt);
     CHECK_ALSA_ERROR("Unable to set format");
-
-    snd_pcm_access_t access = af_fmt_is_planar(ao->format)
-                                    ? SND_PCM_ACCESS_RW_NONINTERLEAVED
-                                    : SND_PCM_ACCESS_RW_INTERLEAVED;
-    err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
-    if (err < 0 && af_fmt_is_planar(ao->format)) {
-        ao->format = af_fmt_from_planar(ao->format);
-        access = SND_PCM_ACCESS_RW_INTERLEAVED;
-        err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
-    }
-    CHECK_ALSA_ERROR("Unable to set access type");
 
     struct mp_chmap dev_chmap = ao->channels;
     if (af_fmt_is_spdif(ao->format) || p->cfg_ignore_chmap) {
