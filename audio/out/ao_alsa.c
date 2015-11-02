@@ -84,11 +84,6 @@ struct priv {
             MP_WARN(ao, "%s: %s\n", (message), snd_strerror(err)); \
     } while (0)
 
-// init_device(), set_chmap()
-#define INIT_OK 0
-#define INIT_ERROR -1
-#define INIT_BRAINDEATH -2
-
 // Common code for handling ENODEV, which happens if a device gets "lost", and
 // can't be used anymore. Returns true if alsa_err is not ENODEV.
 static bool check_device_present(struct ao *ao, int alsa_err)
@@ -350,8 +345,7 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
     return ao_chmap_sel_adjust(ao, &chmap_sel, chmap);
 }
 
-static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels,
-                     bool second_try)
+static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels)
 {
     struct priv *p = ao->priv;
     int err;
@@ -405,44 +399,15 @@ static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels
             MP_VERBOSE(ao, "user set ignore-chmap; ignoring the channel map.\n");
         } else if (af_fmt_is_spdif(ao->format)) {
             MP_VERBOSE(ao, "using spdif passthrough; ignoring the channel map.\n");
-        } else if (mp_chmap_is_valid(&chmap)) {
-            // Is it one that contains NA channels?
-            struct mp_chmap without_na = chmap;
-            mp_chmap_remove_na(&without_na);
-
-            if (mp_chmap_is_valid(&without_na) &&
-                !mp_chmap_equals(&without_na, &chmap) &&
-                !mp_chmap_equals(&chmap, &ao->channels) &&
-                without_na.num <= 2 &&
-                !second_try)
-            {
-                // Sometimes, ALSA will advertise certain chmaps, but it's not
-                // possible to set them. This can happen with dmix: as of
-                // alsa 1.0.28, dmix can do stereo only, but advertises the
-                // surround chmaps of the underlying device. In this case,
-                // e.g. setting 6 channels will succeed, but requesting  5.1
-                // afterwards will fail. Then it will return something like
-                // "FL FR NA NA NA NA" as channel map. This means we would
-                // have to pad stereo output to 6 channels with silence, which
-                // would require lots of extra processing. You can't change
-                // the number of channels to 2 either, because the hw params
-                // are already set! So just fuck it and reopen the device with
-                // the chmap "cleaned out" of NA entries.
-                MP_VERBOSE(ao, "Working around braindead ALSA behavior.\n");
-                ao->channels = without_na;
-                return INIT_BRAINDEATH;
-            }
-
-            if (chmap.num == num_channels) {
-                MP_VERBOSE(ao, "using the ALSA channel map.\n");
-                if (mp_chmap_equals(&chmap, &ao->channels))
-                    MP_VERBOSE(ao, "which is what we requested.\n");
-                ao->channels = chmap;
-            } else {
-                MP_WARN(ao, "ALSA channel map conflicts with channel count!\n");
-            }
-        } else {
+        } else if (!mp_chmap_is_valid(&chmap)) {
             MP_WARN(ao, "Got unknown channel map from ALSA.\n");
+        } else if (chmap.num != num_channels) {
+            MP_WARN(ao, "ALSA channel map conflicts with channel count!\n");
+        } else {
+            MP_VERBOSE(ao, "using the ALSA channel map.\n");
+            if (mp_chmap_equals(&chmap, &ao->channels))
+                MP_VERBOSE(ao, "which is what we requested.\n");
+            ao->channels = chmap;
         }
 
         // mpv and ALSA use different conventions for mono
@@ -457,7 +422,7 @@ static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels
     return 0;
 
 alsa_error:
-    return INIT_ERROR;
+    return -1;
 }
 
 #else /* HAVE_CHMAP_API */
@@ -564,13 +529,14 @@ static void uninit(struct ao *ao)
         int err;
 
         err = snd_pcm_close(p->alsa);
+        p->alsa = NULL;
         CHECK_ALSA_ERROR("pcm close error");
     }
 
 alsa_error: ;
 }
 
-static int init_device(struct ao *ao, bool second_try)
+static int init_device(struct ao *ao)
 {
     struct priv *p = ao->priv;
     int err;
@@ -687,12 +653,8 @@ static int init_device(struct ao *ao, bool second_try)
 
     /* end setting hw-params */
 
-    err = set_chmap(ao, &dev_chmap, num_channels, second_try);
-    if (err < 0) {
-        snd_pcm_close(p->alsa);
-        p->alsa = NULL;
-        return err;
-    }
+    if (set_chmap(ao, &dev_chmap, num_channels) < 0)
+        goto alsa_error;
 
     if (num_channels != ao->channels.num) {
         int req = ao->channels.num;
@@ -749,11 +711,11 @@ static int init_device(struct ao *ao, bool second_try)
     if (p->can_pause)
         MP_VERBOSE(ao, "pausing supported by device\n");
 
-    return INIT_OK;
+    return 0;
 
 alsa_error:
     uninit(ao);
-    return INIT_ERROR;
+    return -1;
 }
 
 static int init(struct ao *ao)
@@ -764,10 +726,33 @@ static int init(struct ao *ao)
 
     MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());
 
-    int r = init_device(ao, false);
-    if (r == INIT_BRAINDEATH)
-        r = init_device(ao, true); // retry with normalized channel layout
-    return r == INIT_OK ? 0 : -1;
+    int r = init_device(ao);
+
+    // Sometimes, ALSA will advertise certain chmaps, but it's not possible to
+    // set them. This can happen with dmix: as of alsa 1.0.29, dmix can do
+    // stereo only, but advertises the surround chmaps of the underlying device.
+    // In this case, e.g. setting 6 channels will succeed, but requesting  5.1
+    // afterwards will fail. Then it will return something like "FL FR NA NA NA NA"
+    // as channel map. This means we would have to pad stereo output to 6
+    // channels with silence, which would require lots of extra processing. You
+    // can't change the number of channels to 2 either, because the hw params
+    // are already set! So just fuck it and reopen the device with the chmap
+    // "cleaned out" of NA entries.
+    if (r >= 0) {
+        struct mp_chmap without_na = ao->channels;
+        mp_chmap_remove_na(&without_na);
+
+        if (mp_chmap_is_valid(&without_na) && without_na.num <= 2 &&
+            ao->channels.num > 2)
+        {
+            MP_VERBOSE(ao, "Working around braindead dmix multichannel behavior.\n");
+            uninit(ao);
+            ao->channels = without_na;
+            r = init_device(ao);
+        }
+    }
+
+    return r;
 }
 
 static void drain(struct ao *ao)
