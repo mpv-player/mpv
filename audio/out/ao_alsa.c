@@ -84,6 +84,11 @@ struct priv {
             MP_WARN(ao, "%s: %s\n", (message), snd_strerror(err)); \
     } while (0)
 
+// init_device(), set_chmap()
+#define INIT_OK 0
+#define INIT_ERROR -1
+#define INIT_BRAINDEATH -2
+
 // Common code for handling ENODEV, which happens if a device gets "lost", and
 // can't be used anymore. Returns true if alsa_err is not ENODEV.
 static bool check_device_present(struct ao *ao, int alsa_err)
@@ -345,11 +350,126 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
     return ao_chmap_sel_adjust(ao, &chmap_sel, chmap);
 }
 
+static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels,
+                     bool second_try)
+{
+    struct priv *p = ao->priv;
+    int err;
+
+    if (mp_chmap_is_valid(dev_chmap)) {
+        snd_pcm_chmap_t *alsa_chmap =
+            calloc(1, sizeof(*alsa_chmap) +
+                      sizeof(alsa_chmap->pos[0]) * dev_chmap->num);
+        if (!alsa_chmap)
+            goto alsa_error;
+
+        alsa_chmap->channels = dev_chmap->num;
+        for (int c = 0; c < dev_chmap->num; c++)
+            alsa_chmap->pos[c] = find_alsa_channel(dev_chmap->speaker[c]);
+
+        // mpv and ALSA use different conventions for mono
+        if (dev_chmap->num == 1 && dev_chmap->speaker[0] == MP_SP(FC))
+            alsa_chmap->pos[0] = SND_CHMAP_MONO;
+
+        char tmp[128];
+        if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
+            MP_VERBOSE(ao, "trying to set ALSA channel map: %s\n", tmp);
+
+        err = snd_pcm_set_chmap(p->alsa, alsa_chmap);
+        if (err == -ENXIO) {
+            // A device my not be able to set any channel map, even channel maps
+            // that were reported as supported. This is either because the ALSA
+            // device is broken (dmix), or because the driver has only 1
+            // channel map per channel count, and setting the map is not needed.
+            MP_VERBOSE(ao, "device returned ENXIO when setting channel map %s\n",
+                       mp_chmap_to_str(dev_chmap));
+        } else {
+            CHECK_ALSA_WARN("Channel map setup failed");
+        }
+
+        free(alsa_chmap);
+    }
+
+    snd_pcm_chmap_t *alsa_chmap = snd_pcm_get_chmap(p->alsa);
+    if (alsa_chmap) {
+        char tmp[128];
+        if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
+            MP_VERBOSE(ao, "channel map reported by ALSA: %s\n", tmp);
+
+        struct mp_chmap chmap;
+        mp_chmap_from_alsa(&chmap, alsa_chmap);
+
+        MP_VERBOSE(ao, "which we understand as: %s\n", mp_chmap_to_str(&chmap));
+
+        if (p->cfg_ignore_chmap) {
+            MP_VERBOSE(ao, "user set ignore-chmap; ignoring the channel map.\n");
+        } else if (af_fmt_is_spdif(ao->format)) {
+            MP_VERBOSE(ao, "using spdif passthrough; ignoring the channel map.\n");
+        } else if (mp_chmap_is_valid(&chmap)) {
+            // Is it one that contains NA channels?
+            struct mp_chmap without_na = chmap;
+            mp_chmap_remove_na(&without_na);
+
+            if (mp_chmap_is_valid(&without_na) &&
+                !mp_chmap_equals(&without_na, &chmap) &&
+                !mp_chmap_equals(&chmap, &ao->channels) &&
+                without_na.num <= 2 &&
+                !second_try)
+            {
+                // Sometimes, ALSA will advertise certain chmaps, but it's not
+                // possible to set them. This can happen with dmix: as of
+                // alsa 1.0.28, dmix can do stereo only, but advertises the
+                // surround chmaps of the underlying device. In this case,
+                // e.g. setting 6 channels will succeed, but requesting  5.1
+                // afterwards will fail. Then it will return something like
+                // "FL FR NA NA NA NA" as channel map. This means we would
+                // have to pad stereo output to 6 channels with silence, which
+                // would require lots of extra processing. You can't change
+                // the number of channels to 2 either, because the hw params
+                // are already set! So just fuck it and reopen the device with
+                // the chmap "cleaned out" of NA entries.
+                MP_VERBOSE(ao, "Working around braindead ALSA behavior.\n");
+                ao->channels = without_na;
+                return INIT_BRAINDEATH;
+            }
+
+            if (chmap.num == num_channels) {
+                MP_VERBOSE(ao, "using the ALSA channel map.\n");
+                if (mp_chmap_equals(&chmap, &ao->channels))
+                    MP_VERBOSE(ao, "which is what we requested.\n");
+                ao->channels = chmap;
+            } else {
+                MP_WARN(ao, "ALSA channel map conflicts with channel count!\n");
+            }
+        } else {
+            MP_WARN(ao, "Got unknown channel map from ALSA.\n");
+        }
+
+        // mpv and ALSA use different conventions for mono
+        if (ao->channels.num == 1) {
+            MP_VERBOSE(ao, "assuming we actually got MONO from ALSA.\n");
+            ao->channels.speaker[0] = MP_SP(FC);
+        }
+
+        free(alsa_chmap);
+    }
+
+    return 0;
+
+alsa_error:
+    return INIT_ERROR;
+}
+
 #else /* HAVE_CHMAP_API */
 
 static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
 {
     return false;
+}
+
+static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels)
+{
+    return 0;
 }
 
 #endif /* else HAVE_CHMAP_API */
@@ -450,9 +570,6 @@ static void uninit(struct ao *ao)
 alsa_error: ;
 }
 
-#define INIT_OK 0
-#define INIT_ERROR -1
-#define INIT_BRAINDEATH -2
 static int init_device(struct ao *ao, bool second_try)
 {
     struct priv *p = ao->priv;
@@ -570,108 +687,12 @@ static int init_device(struct ao *ao, bool second_try)
 
     /* end setting hw-params */
 
-#if HAVE_CHMAP_API
-    if (mp_chmap_is_valid(&dev_chmap)) {
-        snd_pcm_chmap_t *alsa_chmap =
-            calloc(1, sizeof(*alsa_chmap) +
-                      sizeof(alsa_chmap->pos[0]) * dev_chmap.num);
-        if (!alsa_chmap)
-            goto alsa_error;
-
-        alsa_chmap->channels = dev_chmap.num;
-        for (int c = 0; c < dev_chmap.num; c++)
-            alsa_chmap->pos[c] = find_alsa_channel(dev_chmap.speaker[c]);
-
-        // mpv and ALSA use different conventions for mono
-        if (dev_chmap.num == 1 && dev_chmap.speaker[0] == MP_SP(FC))
-            alsa_chmap->pos[0] = SND_CHMAP_MONO;
-
-        char tmp[128];
-        if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
-            MP_VERBOSE(ao, "trying to set ALSA channel map: %s\n", tmp);
-
-        err = snd_pcm_set_chmap(p->alsa, alsa_chmap);
-        if (err == -ENXIO) {
-            // A device my not be able to set any channel map, even channel maps
-            // that were reported as supported. This is either because the ALSA
-            // device is broken (dmix), or because the driver has only 1
-            // channel map per channel count, and setting the map is not needed.
-            MP_VERBOSE(ao, "device returned ENXIO when setting channel map %s\n",
-                       mp_chmap_to_str(&dev_chmap));
-        } else {
-            CHECK_ALSA_WARN("Channel map setup failed");
-        }
-
-        free(alsa_chmap);
+    err = set_chmap(ao, &dev_chmap, num_channels, second_try);
+    if (err < 0) {
+        snd_pcm_close(p->alsa);
+        p->alsa = NULL;
+        return err;
     }
-
-    snd_pcm_chmap_t *alsa_chmap = snd_pcm_get_chmap(p->alsa);
-    if (alsa_chmap) {
-        char tmp[128];
-        if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
-            MP_VERBOSE(ao, "channel map reported by ALSA: %s\n", tmp);
-
-        struct mp_chmap chmap;
-        mp_chmap_from_alsa(&chmap, alsa_chmap);
-
-        MP_VERBOSE(ao, "which we understand as: %s\n", mp_chmap_to_str(&chmap));
-
-        if (p->cfg_ignore_chmap) {
-            MP_VERBOSE(ao, "user set ignore-chmap; ignoring the channel map.\n");
-        } else if (af_fmt_is_spdif(ao->format)) {
-            MP_VERBOSE(ao, "using spdif passthrough; ignoring the channel map.\n");
-        } else if (mp_chmap_is_valid(&chmap)) {
-            // Is it one that contains NA channels?
-            struct mp_chmap without_na = chmap;
-            mp_chmap_remove_na(&without_na);
-
-            if (mp_chmap_is_valid(&without_na) &&
-                !mp_chmap_equals(&without_na, &chmap) &&
-                !mp_chmap_equals(&chmap, &ao->channels) &&
-                without_na.num <= 2 &&
-                !second_try)
-            {
-                // Sometimes, ALSA will advertise certain chmaps, but it's not
-                // possible to set them. This can happen with dmix: as of
-                // alsa 1.0.28, dmix can do stereo only, but advertises the
-                // surround chmaps of the underlying device. In this case,
-                // e.g. setting 6 channels will succeed, but requesting  5.1
-                // afterwards will fail. Then it will return something like
-                // "FL FR NA NA NA NA" as channel map. This means we would
-                // have to pad stereo output to 6 channels with silence, which
-                // would require lots of extra processing. You can't change
-                // the number of channels to 2 either, because the hw params
-                // are already set! So just fuck it and reopen the device with
-                // the chmap "cleaned out" of NA entries.
-                MP_VERBOSE(ao, "Working around braindead ALSA behavior.\n");
-                err = snd_pcm_close(p->alsa);
-                p->alsa = NULL;
-                CHECK_ALSA_ERROR("pcm close error");
-                ao->channels = without_na;
-                return INIT_BRAINDEATH;
-            }
-
-            if (chmap.num == num_channels) {
-                MP_VERBOSE(ao, "using the ALSA channel map.\n");
-                if (mp_chmap_equals(&chmap, &ao->channels))
-                    MP_VERBOSE(ao, "which is what we requested.\n");
-                ao->channels = chmap;
-            } else {
-                MP_WARN(ao, "ALSA channel map conflicts with channel count!\n");
-            }
-        } else {
-            MP_WARN(ao, "Got unknown channel map from ALSA.\n");
-        }
-
-        // mpv and ALSA use different conventions for mono
-        if (ao->channels.num == 1) {
-            MP_VERBOSE(ao, "assuming we actually got MONO from ALSA.\n");
-            ao->channels.speaker[0] = MP_SP(FC);
-        }
-
-        free(alsa_chmap);
-    }
-#endif
 
     if (num_channels != ao->channels.num) {
         int req = ao->channels.num;
