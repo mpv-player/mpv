@@ -535,15 +535,6 @@ static int init_device(struct ao *ao, bool second_try)
         goto alsa_error;
     }
 
-    if (num_channels != ao->channels.num) {
-        int req = ao->channels.num;
-        mp_chmap_from_channels_alsa(&ao->channels, num_channels);
-        if (!mp_chmap_is_valid(&ao->channels))
-            mp_chmap_from_channels(&ao->channels, 2);
-        MP_ERR(ao, "Asked for %d channels, got %d - fallback to %s.\n", req,
-               num_channels, mp_chmap_to_str(&ao->channels));
-    }
-
     // Some ALSA drivers have broken delay reporting, so disable the ALSA
     // resampling plugin by default.
     if (!p->cfg_resample) {
@@ -650,10 +641,10 @@ static int init_device(struct ao *ao, bool second_try)
                 return INIT_BRAINDEATH;
             }
 
-            if (mp_chmap_equals(&chmap, &ao->channels)) {
-                MP_VERBOSE(ao, "which is what we requested.\n");
-            } else if (chmap.num == ao->channels.num) {
+            if (chmap.num == num_channels) {
                 MP_VERBOSE(ao, "using the ALSA channel map.\n");
+                if (mp_chmap_equals(&chmap, &ao->channels))
+                    MP_VERBOSE(ao, "which is what we requested.\n");
                 ao->channels = chmap;
             } else {
                 MP_WARN(ao, "ALSA channel map conflicts with channel count!\n");
@@ -671,6 +662,15 @@ static int init_device(struct ao *ao, bool second_try)
         free(alsa_chmap);
     }
 #endif
+
+    if (num_channels != ao->channels.num) {
+        int req = ao->channels.num;
+        mp_chmap_from_channels_alsa(&ao->channels, num_channels);
+        if (!mp_chmap_is_valid(&ao->channels))
+            mp_chmap_from_channels(&ao->channels, 2);
+        MP_ERR(ao, "Asked for %d channels, got %d - fallback to %s.\n", req,
+               num_channels, mp_chmap_to_str(&ao->channels));
+    }
 
     snd_pcm_uframes_t bufsize;
     err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &bufsize);
