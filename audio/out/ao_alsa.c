@@ -548,13 +548,21 @@ static int init_device(struct ao *ao, bool second_try)
             (p->alsa, alsa_hwparams, &ao->samplerate, NULL);
     CHECK_ALSA_ERROR("Unable to set samplerate-2");
 
+    snd_pcm_hw_params_t *hwparams_backup;
+    snd_pcm_hw_params_alloca(&hwparams_backup);
+    snd_pcm_hw_params_copy(hwparams_backup, alsa_hwparams);
+
+    // Cargo-culted buffer settings; might still be useful for PulseAudio.
     err = snd_pcm_hw_params_set_buffer_time_near
             (p->alsa, alsa_hwparams, &(unsigned int){BUFFER_TIME}, NULL);
     CHECK_ALSA_WARN("Unable to set buffer time near");
-
-    err = snd_pcm_hw_params_set_periods_near
-            (p->alsa, alsa_hwparams, &(unsigned int){FRAGCOUNT}, NULL);
-    CHECK_ALSA_WARN("Unable to set periods");
+    if (err >= 0) {
+        err = snd_pcm_hw_params_set_periods_near
+                    (p->alsa, alsa_hwparams, &(unsigned int){FRAGCOUNT}, NULL);
+        CHECK_ALSA_WARN("Unable to set periods");
+    }
+    if (err < 0)
+        snd_pcm_hw_params_copy(alsa_hwparams, hwparams_backup);
 
     /* finally install hardware parameters */
     err = snd_pcm_hw_params(p->alsa, alsa_hwparams);
