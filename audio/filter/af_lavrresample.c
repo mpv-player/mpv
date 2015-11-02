@@ -197,6 +197,24 @@ static void transpose_order(int *map, int num)
     memcpy(map, nmap, sizeof(nmap));
 }
 
+static uint64_t fudge_output_channel_layout(uint64_t in, uint64_t out)
+{
+    // If it tries to convert SR/SL to SDR/SLD, keep it SR/SL.
+    // This effectively makes it not rematrix at all when outputting
+    // 7.1 on ALSA. It could also be considered messing with FFmpeg's
+    // matrix generation.
+    uint64_t sp[][2] = {
+        {AV_CH_SIDE_LEFT,  AV_CH_SURROUND_DIRECT_LEFT},
+        {AV_CH_SIDE_RIGHT, AV_CH_SURROUND_DIRECT_RIGHT},
+    };
+    for (int n = 0; n < MP_ARRAY_SIZE(sp); n++) {
+        if ((in & sp[n][0]) && !(out & sp[n][0]) &&
+            !(in & sp[n][1]) && (out & sp[n][1]))
+            out = (out & ~sp[n][1]) | sp[n][0];
+    }
+    return out;
+}
+
 static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
                            struct mp_audio *out, bool verbose)
 {
@@ -260,11 +278,6 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     mp_chmap_from_lavc(&in_lavc, in_ch_layout);
     mp_chmap_from_lavc(&out_lavc, out_ch_layout);
 
-    if (verbose && !mp_chmap_equals(&in_lavc, &out_lavc)) {
-        MP_VERBOSE(af, "Remix: %s -> %s\n", mp_chmap_to_str(&in_lavc),
-                                            mp_chmap_to_str(&out_lavc));
-    }
-
     if (in_lavc.num != map_in.num) {
         // For handling NA channels, we would have to add a planarization step.
         MP_FATAL(af, "Unsupported channel remapping.\n");
@@ -300,6 +313,16 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     s->pool_fmt = s->avrctx_fmt;
     if (map_out.num > out_lavc.num)
         mp_audio_set_channels(&s->pool_fmt, &map_out);
+
+    out_ch_layout = fudge_output_channel_layout(in_ch_layout, out_ch_layout);
+
+    struct mp_chmap out_lavc_actual;
+    mp_chmap_from_lavc(&out_lavc_actual, out_ch_layout);
+
+    if (verbose && !mp_chmap_equals(&in_lavc, &out_lavc)) {
+        MP_VERBOSE(af, "Remix: %s -> %s\n", mp_chmap_to_str(&in_lavc),
+                                            mp_chmap_to_str(&out_lavc_actual));
+    }
 
     // Real conversion; output is input to avrctx_out.
     av_opt_set_int(s->avrctx, "in_channel_layout",  in_ch_layout, 0);
