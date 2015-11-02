@@ -52,11 +52,11 @@ struct priv {
     snd_pcm_t *alsa;
     bool device_lost;
     snd_pcm_format_t alsa_fmt;
-    int can_pause;
+    bool can_pause;
     snd_pcm_sframes_t prepause_frames;
     double delay_before_pause;
-    int buffersize; // in frames
-    int outburst; // in frames
+    snd_pcm_uframes_t buffersize;
+    snd_pcm_uframes_t outburst;
 
     char *cfg_device;
     char *cfg_mixer_device;
@@ -227,24 +227,19 @@ static const int mp_to_alsa_format[][2] = {
             MP_SELECT_LE_BE(SND_PCM_FORMAT_S24_3LE, SND_PCM_FORMAT_S24_3BE)},
     {AF_FORMAT_FLOAT,       SND_PCM_FORMAT_FLOAT},
     {AF_FORMAT_DOUBLE,      SND_PCM_FORMAT_FLOAT64},
+    {AF_FORMAT_S_MP3,       SND_PCM_FORMAT_MPEG},
     {AF_FORMAT_UNKNOWN,     SND_PCM_FORMAT_UNKNOWN},
 };
 
 static int find_alsa_format(int af_format)
 {
-    if (af_fmt_is_spdif(af_format)) {
-        if (af_format == AF_FORMAT_S_MP3) {
-            return SND_PCM_FORMAT_MPEG;
-        } else {
-            return SND_PCM_FORMAT_S16;
-        }
-    }
-
     af_format = af_fmt_from_planar(af_format);
     for (int n = 0; mp_to_alsa_format[n][0] != AF_FORMAT_UNKNOWN; n++) {
         if (mp_to_alsa_format[n][0] == af_format)
             return mp_to_alsa_format[n][1];
     }
+    if (af_fmt_is_spdif(af_format))
+        return SND_PCM_FORMAT_S16;
     return SND_PCM_FORMAT_UNKNOWN;
 }
 
@@ -457,8 +452,8 @@ static int map_iec958_srate(int srate)
 }
 
 // ALSA device strings can have parameters. They are usually appended to the
-// device name. Since there can be various forms, and we (sometimes) want to
-// append them to unknown device strings, which possibly already include params.
+// device name. There can be various forms, and we (sometimes) want to append
+// them to unknown device strings, which possibly already include params.
 static char *append_params(void *ta_parent, const char *device, const char *p)
 {
     if (!p || !p[0])
@@ -554,10 +549,7 @@ static int init_device(struct ao *ao)
     CHECK_ALSA_WARN("Unable to set blocking mode");
 
     snd_pcm_hw_params_t *alsa_hwparams;
-    snd_pcm_sw_params_t *alsa_swparams;
-
     snd_pcm_hw_params_alloca(&alsa_hwparams);
-    snd_pcm_sw_params_alloca(&alsa_swparams);
 
     err = snd_pcm_hw_params_any(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to get initial parameters");
@@ -651,8 +643,6 @@ static int init_device(struct ao *ao)
     err = snd_pcm_hw_params(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to set hw-parameters");
 
-    /* end setting hw-params */
-
     if (set_chmap(ao, &dev_chmap, num_channels) < 0)
         goto alsa_error;
 
@@ -665,21 +655,17 @@ static int init_device(struct ao *ao)
                num_channels, mp_chmap_to_str(&ao->channels));
     }
 
-    snd_pcm_uframes_t bufsize;
-    err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &bufsize);
+    err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &p->buffersize);
     CHECK_ALSA_ERROR("Unable to get buffersize");
 
-    p->buffersize = bufsize;
-    MP_VERBOSE(ao, "got buffersize=%i samples\n", p->buffersize);
-
-    snd_pcm_uframes_t chunk_size;
-    err = snd_pcm_hw_params_get_period_size(alsa_hwparams, &chunk_size, NULL);
+    err = snd_pcm_hw_params_get_period_size(alsa_hwparams, &p->outburst, NULL);
     CHECK_ALSA_ERROR("Unable to get period size");
 
-    MP_VERBOSE(ao, "got period size %li\n", chunk_size);
-    p->outburst = chunk_size;
+    p->can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
 
-    /* setting software parameters */
+    snd_pcm_sw_params_t *alsa_swparams;
+    snd_pcm_sw_params_alloca(&alsa_swparams);
+
     err = snd_pcm_sw_params_current(p->alsa, alsa_swparams);
     CHECK_ALSA_ERROR("Unable to get sw-parameters");
 
@@ -689,7 +675,7 @@ static int init_device(struct ao *ao)
 
     /* start playing when one period has been written */
     err = snd_pcm_sw_params_set_start_threshold
-            (p->alsa, alsa_swparams, chunk_size);
+            (p->alsa, alsa_swparams, p->outburst);
     CHECK_ALSA_ERROR("Unable to set start threshold");
 
     /* disable underrun reporting */
@@ -705,11 +691,9 @@ static int init_device(struct ao *ao)
     err = snd_pcm_sw_params(p->alsa, alsa_swparams);
     CHECK_ALSA_ERROR("Unable to set sw-parameters");
 
-    /* end setting sw-params */
-
-    p->can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
-    if (p->can_pause)
-        MP_VERBOSE(ao, "pausing supported by device\n");
+    MP_VERBOSE(ao, "hw pausing supported: %s\n", p->can_pause ? "yes" : "no");
+    MP_VERBOSE(ao, "buffersize: %d samples\n", (int)p->buffersize);
+    MP_VERBOSE(ao, "period size: %d samples\n", (int)p->outburst);
 
     return 0;
 
