@@ -764,7 +764,7 @@ static bool render_frame(struct vo *vo)
 done:
     talloc_free(frame);
     pthread_mutex_unlock(&in->lock);
-    return got_frame;
+    return got_frame || (in->frame_queued && in->frame_queued->display_synced);
 }
 
 static void do_redraw(struct vo *vo)
@@ -828,9 +828,9 @@ static void *vo_thread(void *ptr)
         if (in->terminate)
             break;
         vo->driver->control(vo, VOCTRL_CHECK_EVENTS, NULL);
-        bool frame_shown = render_frame(vo);
+        bool working = render_frame(vo);
         int64_t now = mp_time_us();
-        int64_t wait_until = now + (frame_shown ? 0 : (int64_t)1e9);
+        int64_t wait_until = now + (working ? 0 : (int64_t)1e9);
         pthread_mutex_lock(&in->lock);
         if (in->wakeup_pts) {
             if (in->wakeup_pts > now) {
