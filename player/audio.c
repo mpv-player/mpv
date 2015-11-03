@@ -154,6 +154,7 @@ void reset_audio_state(struct MPContext *mpctx)
         mp_audio_buffer_clear(mpctx->ao_buffer);
     mpctx->audio_status = mpctx->d_audio ? STATUS_SYNCING : STATUS_EOF;
     mpctx->delay = 0;
+    mpctx->audio_drop_throttle = 0;
     mpctx->audio_stat_start = 0;
 }
 
@@ -554,8 +555,11 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     }
 
     int skip_duplicate = 0; // >0: skip, <0: duplicate
+    double drop_limit =
+        (opts->sync_max_audio_change + opts->sync_max_video_change) / 100;
     if (mpctx->display_sync_active && opts->video_sync == VS_DISP_ADROP &&
         fabs(mpctx->last_av_difference) >= opts->sync_audio_drop_size &&
+        mpctx->audio_drop_throttle < drop_limit &&
         mpctx->audio_status == STATUS_PLAYING)
     {
         int samples = ceil(opts->sync_audio_drop_size * play_samplerate);
@@ -565,6 +569,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         skip_duplicate = mpctx->last_av_difference >= 0 ? -samples : samples;
 
         playsize = MPMAX(playsize, samples);
+
+        mpctx->audio_drop_throttle += 1 - drop_limit - samples / play_samplerate;
     }
 
     int status = AD_OK;
@@ -682,6 +688,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     int played = write_to_ao(mpctx, &data, playflags);
     assert(played >= 0 && played <= data.samples);
     mp_audio_buffer_skip(mpctx->ao_buffer, played);
+
+    mpctx->audio_drop_throttle -= played / play_samplerate;
 
     dump_audio_stats(mpctx);
 
