@@ -823,9 +823,10 @@ Video
     The result is most likely broken decoding, but may also help if the
     detected or reported profiles are somehow incorrect.
 
-``--vd-lavc-software-fallback=<yes|no>``
+``--vd-lavc-software-fallback=<yes|no|N>``
     Fallback to software decoding if the hardware-accelerated decoder fails
-    (default: yes).
+    (default: 3). If this is a number, then fallback will be triggered if
+    N frames fail to decode in a row. 1 is equivalent to ``yes``.
 
 ``--vd-lavc-bitexact``
     Only use bit-exact algorithms in all decoding steps (for codec testing).

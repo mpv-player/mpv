@@ -102,7 +102,8 @@ const struct m_sub_options vd_lavc_conf = {
         OPT_INT("threads", threads, M_OPT_MIN, .min = 0),
         OPT_FLAG("bitexact", bitexact, 0),
         OPT_FLAG("check-hw-profile", check_hw_profile, 0),
-        OPT_FLAG("software-fallback", software_fallback, 0),
+        OPT_CHOICE_OR_INT("software-fallback", software_fallback, 0, 1, INT_MAX,
+                          ({"no", INT_MAX}, {"yes", 1})),
         OPT_KEYVALUELIST("o", avopts, 0),
         {0}
     },
@@ -110,7 +111,7 @@ const struct m_sub_options vd_lavc_conf = {
     .defaults = &(const struct vd_lavc_params){
         .show_all = 0,
         .check_hw_profile = 1,
-        .software_fallback = 1,
+        .software_fallback = 3,
         .skip_loop_filter = AVDISCARD_DEFAULT,
         .skip_idct = AVDISCARD_DEFAULT,
         .skip_frame = AVDISCARD_DEFAULT,
@@ -463,6 +464,7 @@ static void uninit_avctx(struct dec_video *vd)
     av_frame_free(&ctx->pic);
 
     ctx->hwdec_failed = false;
+    ctx->hwdec_fail_count = 0;
 }
 
 static void update_image_params(struct dec_video *vd, AVFrame *frame,
@@ -609,7 +611,7 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     int ret;
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
-    struct vd_lavc_params *lavc_param = ctx->opts->vd_lavc_params;
+    struct vd_lavc_params *opts = ctx->opts->vd_lavc_params;
     AVPacket pkt;
 
     if (ctx->hwdec_request_reinit)
@@ -617,7 +619,7 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
 
     if (flags) {
         // hr-seek framedrop vs. normal framedrop
-        avctx->skip_frame = flags == 2 ? AVDISCARD_NONREF : lavc_param->framedrop;
+        avctx->skip_frame = flags == 2 ? AVDISCARD_NONREF : opts->framedrop;
     } else {
         // normal playback
         avctx->skip_frame = ctx->skip_frame;
@@ -631,8 +633,11 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
 
     if (ret < 0) {
         MP_WARN(vd, "Error while decoding frame!\n");
-        if (lavc_param->software_fallback)
-            ctx->hwdec_failed = true;
+        if (ctx->hwdec) {
+            ctx->hwdec_fail_count += 1;
+            if (ctx->hwdec_fail_count >= opts->software_fallback)
+                ctx->hwdec_failed = true;
+        }
         return;
     }
 
@@ -644,6 +649,8 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     // Skipped frame, or delayed output due to multithreaded decoding.
     if (!got_picture)
         return;
+
+    ctx->hwdec_fail_count = 0;
 
     struct mp_image_params params;
     update_image_params(vd, ctx->pic, &params);
