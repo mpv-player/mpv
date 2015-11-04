@@ -354,6 +354,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         frame = vo_frame_ref(ctx->cur_frame);
         if (frame)
             frame->redraw = true;
+        MP_STATS(ctx, "glcb-noframe");
     }
     struct vo_frame dummy = {0};
     if (!frame)
@@ -361,6 +362,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
 
     pthread_mutex_unlock(&ctx->lock);
 
+    MP_STATS(ctx, "glcb-render");
     gl_video_render_frame(ctx->renderer, frame, fbo);
 
     gl_video_unset_gl_state(ctx->renderer);
@@ -379,6 +381,8 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
 
 int mpv_opengl_cb_report_flip(mpv_opengl_cb_context *ctx, int64_t time)
 {
+    MP_STATS(ctx, "glcb-reportflip");
+
     pthread_mutex_lock(&ctx->lock);
     ctx->recent_flip = time > 0 ? time : mp_time_us();
     pthread_mutex_unlock(&ctx->lock);
