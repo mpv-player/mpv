@@ -351,6 +351,7 @@ struct MPContext *mp_create(void)
     mpctx->mconfig->includefunc_ctx = mpctx;
     mpctx->mconfig->use_profiles = true;
     mpctx->mconfig->is_toplevel = true;
+    mpctx->mconfig->global = mpctx->global;
     m_config_parse(mpctx->mconfig, "", bstr0(def_config), NULL, 0);
 
     mpctx->global->opts = mpctx->opts;

@@ -35,6 +35,7 @@
 #include "m_config.h"
 #include "options/m_option.h"
 #include "common/msg.h"
+#include "common/msg_control.h"
 
 static const union m_option_value default_value;
 
@@ -557,18 +558,23 @@ static int handle_set_opt_flags(struct m_config *config,
     return set ? 2 : 1;
 }
 
-static void handle_set_from_cmdline(struct m_config *config,
-                                    struct m_config_option *co)
+static void handle_on_set(struct m_config *config, struct m_config_option *co,
+                          int flags)
 {
-    co->is_set_from_cmdline = true;
-    // Mark aliases too
-    if (co->data) {
-        for (int n = 0; n < config->num_opts; n++) {
-            struct m_config_option *co2 = &config->opts[n];
-            if (co2->data == co->data)
-                co2->is_set_from_cmdline = true;
+    if (flags & M_SETOPT_FROM_CMDLINE) {
+        co->is_set_from_cmdline = true;
+        // Mark aliases too
+        if (co->data) {
+            for (int n = 0; n < config->num_opts; n++) {
+                struct m_config_option *co2 = &config->opts[n];
+                if (co2->data == co->data)
+                    co2->is_set_from_cmdline = true;
+            }
         }
     }
+
+    if (config->global && (co->opt->flags & M_OPT_TERM))
+        mp_msg_update_msglevels(config->global);
 }
 
 // The type data points to is as in: m_config_get_co(config, name)->opt
@@ -588,8 +594,7 @@ int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
         return r;
 
     m_option_copy(co->opt, co->data, data);
-    if (flags & M_SETOPT_FROM_CMDLINE)
-        handle_set_from_cmdline(config, co);
+    handle_on_set(config, co, flags);
     return 0;
 }
 
@@ -637,8 +642,8 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
 
     r = m_option_parse(config->log, co->opt, name, param, set ? co->data : NULL);
 
-    if (r >= 0 && set && (flags & M_SETOPT_FROM_CMDLINE))
-        handle_set_from_cmdline(config, co);
+    if (r >= 0 && set)
+        handle_on_set(config, co, flags);
 
     return r;
 }
