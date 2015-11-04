@@ -485,7 +485,7 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     }
 
     int align = af_format_sample_alignment(out_format.format);
-    *skip = (-ptsdiff * play_samplerate) / align * align;
+    *skip = (int)(-ptsdiff * play_samplerate) / align * align;
     return true;
 }
 
@@ -538,6 +538,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     struct mp_audio out_format = {0};
     ao_get_format(mpctx->ao, &out_format);
     double play_samplerate = out_format.rate / mpctx->audio_speed;
+    int align = af_format_sample_alignment(out_format.format);
 
     // If audio is infinitely fast, somehow try keeping approximate A/V sync.
     if (mpctx->audio_status == STATUS_PLAYING && ao_untimed(mpctx->ao) &&
@@ -563,7 +564,6 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         mpctx->audio_status == STATUS_PLAYING)
     {
         int samples = ceil(opts->sync_audio_drop_size * play_samplerate);
-        int align = af_format_sample_alignment(out_format.format);
         samples = (samples + align / 2) / align * align;
 
         skip_duplicate = mpctx->last_av_difference >= 0 ? -samples : samples;
@@ -572,6 +572,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 
         mpctx->audio_drop_throttle += 1 - drop_limit - samples / play_samplerate;
     }
+
+    playsize = playsize / align * align;
 
     int status = AD_OK;
     bool working = false;
@@ -664,7 +666,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         double samples = (endpts - written_audio_pts(mpctx) - opts->audio_delay)
                          * play_samplerate;
         if (playsize > samples) {
-            playsize = MPMAX(samples, 0);
+            playsize = MPMAX((int)samples / align * align, 0);
             audio_eof = true;
             partial_fill = true;
         }
@@ -684,6 +686,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 
     struct mp_audio data;
     mp_audio_buffer_peek(mpctx->ao_buffer, &data);
+    if (audio_eof || data.samples >= align)
+        data.samples = data.samples / align * align;
     data.samples = MPMIN(data.samples, mpctx->paused ? 0 : playsize);
     int played = write_to_ao(mpctx, &data, playflags);
     assert(played >= 0 && played <= data.samples);
