@@ -104,6 +104,7 @@ struct vdpctx {
     VdpRect                            src_rect_vid;
     VdpRect                            out_rect_vid;
     struct mp_osd_res                  osd_rect;
+    VdpBool                            supports_a8;
 
     int                                surface_num; // indexes output_surfaces
     int                                query_surface_num;
@@ -711,8 +712,8 @@ static void draw_osd(struct vo *vo)
     if (!status_ok(vo))
         return;
 
-    static const bool formats[SUBBITMAP_COUNT] = {
-        [SUBBITMAP_LIBASS] = true,
+    bool formats[SUBBITMAP_COUNT] = {
+        [SUBBITMAP_LIBASS] = vc->supports_a8,
         [SUBBITMAP_RGBA] = true,
     };
 
@@ -1068,6 +1069,9 @@ static int preinit(struct vo *vo)
 
     vc->vdp_device = vc->mpvdp->vdp_device;
     vc->vdp = &vc->mpvdp->vdp;
+
+    vc->vdp->bitmap_surface_query_capabilities(vc->vdp_device, VDP_RGBA_FORMAT_A8,
+                            &vc->supports_a8, &(uint32_t){0}, &(uint32_t){0});
 
     vc->video_eq.capabilities = MP_CSP_EQ_CAPS_COLORMATRIX;
 
