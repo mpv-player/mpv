@@ -284,6 +284,28 @@ static int find_mp_channel(int alsa_channel)
     return MP_SPEAKER_ID_COUNT;
 }
 
+#define CHMAP(n, ...) &(struct mp_chmap) MP_CONCAT(MP_CHMAP, n) (__VA_ARGS__)
+
+// Replace each channel in a with b (a->num == b->num)
+static void replace_submap(struct mp_chmap *dst, struct mp_chmap *a,
+                           struct mp_chmap *b)
+{
+    struct mp_chmap t = *dst;
+    if (!mp_chmap_is_valid(&t) || mp_chmap_diffn(a, &t) != 0)
+        return;
+    assert(a->num == b->num);
+    for (int n = 0; n < t.num; n++) {
+        for (int i = 0; i < a->num; i++) {
+            if (t.speaker[n] == a->speaker[i]) {
+                t.speaker[n] = b->speaker[i];
+                break;
+            }
+        }
+    }
+    if (mp_chmap_is_valid(&t))
+        *dst = t;
+}
+
 static bool mp_chmap_from_alsa(struct mp_chmap *dst, snd_pcm_chmap_t *src)
 {
     *dst = (struct mp_chmap) {0};
@@ -298,6 +320,10 @@ static bool mp_chmap_from_alsa(struct mp_chmap *dst, snd_pcm_chmap_t *src)
     // Assume anything with 1 channel is mono.
     if (dst->num == 1)
         dst->speaker[0] = MP_SP(FC);
+
+    // Remap weird Intel HDA HDMI 7.1 layouts correctly.
+    replace_submap(dst, CHMAP(6, FL, FR, BL, BR, SDL, SDR),
+                        CHMAP(6, FL, FR, SL, SR, BL,  BR));
 
     return mp_chmap_is_valid(dst);
 }
