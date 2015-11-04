@@ -318,20 +318,22 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
         return false;
 
     for (int i = 0; maps[i] != NULL; i++) {
+        char aname[128];
+        if (snd_pcm_chmap_print(&maps[i]->map, sizeof(aname), aname) <= 0)
+            aname[0] = '\0';
+
         struct mp_chmap entry;
         mp_chmap_from_alsa(&entry, &maps[i]->map);
-
         if (mp_chmap_is_valid(&entry)) {
+            struct mp_chmap reorder = entry;
             if (maps[i]->type == SND_CHMAP_TYPE_VAR)
-                mp_chmap_reorder_norm(&entry);
-            MP_DBG(ao, "Got supported channel map: %s (type %s)\n",
-                   mp_chmap_to_str(&entry),
-                   snd_pcm_chmap_type_name(maps[i]->type));
-            mp_chmap_sel_add_map(&chmap_sel, &entry);
+                mp_chmap_reorder_norm(&reorder);
+            MP_DBG(ao, "Got supported channel map: %s (type %s) -> %s -> %s\n",
+                   aname, snd_pcm_chmap_type_name(maps[i]->type),
+                   mp_chmap_to_str(&entry), mp_chmap_to_str(&reorder));
+            mp_chmap_sel_add_map(&chmap_sel, &reorder);
         } else {
-            char tmp[128];
-            if (snd_pcm_chmap_print(&maps[i]->map, sizeof(tmp), tmp) > 0)
-                MP_VERBOSE(ao, "skipping unknown ALSA channel map: %s\n", tmp);
+            MP_VERBOSE(ao, "skipping unknown ALSA channel map: %s\n", aname);
         }
     }
 
