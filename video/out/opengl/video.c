@@ -1859,8 +1859,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 
         // Blend the frames together
         if (oversample) {
-            double vsync_dist = (t->next_vsync - t->prev_vsync)/1e6
-                                / (pts_nxt - pts_now),
+            double vsync_dist = t->vsync_interval / 1e6 / (pts_nxt - pts_now),
                    threshold = tscale->conf.kernel.params[0];
             threshold = isnan(threshold) ? 0.0 : threshold;
             mix = (1 - mix) / vsync_dist;
@@ -1884,7 +1883,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 
         MP_STATS(p, "frame-mix");
         MP_DBG(p, "inter frame pts: %lld, vsync: %lld, mix: %f\n",
-               (long long)t->pts, (long long)t->next_vsync, mix);
+               (long long)t->pts, (long long)t->vsync_interval, mix);
         p->is_interpolated = true;
     }
     pass_draw_to_screen(p, fbo);
