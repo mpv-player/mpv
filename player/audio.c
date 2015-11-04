@@ -689,7 +689,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     assert(played >= 0 && played <= data.samples);
     mp_audio_buffer_skip(mpctx->ao_buffer, played);
 
-    mpctx->audio_drop_throttle -= played / play_samplerate;
+    mpctx->audio_drop_throttle =
+        MPMAX(0, mpctx->audio_drop_throttle - played / play_samplerate);
 
     dump_audio_stats(mpctx);
 
