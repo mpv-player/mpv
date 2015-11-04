@@ -870,7 +870,7 @@ fail:
 static bool using_spdif_passthrough(struct MPContext *mpctx)
 {
     if (mpctx->d_audio && mpctx->d_audio->afilter)
-        return !af_fmt_is_pcm(mpctx->d_audio->afilter->output.format);
+        return !af_fmt_is_pcm(mpctx->d_audio->afilter->input.format);
     return false;
 }
 
