@@ -2585,6 +2585,20 @@ static int mp_property_display_fps(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, fps);
 }
 
+static int mp_property_vo_refresh(void *ctx, struct m_property *prop,
+                                  int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return M_PROPERTY_UNAVAILABLE;
+
+    double res = vo_get_vsync_interval(vo);
+    if (res <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_double_ro(action, arg, 1e6 / res);
+}
+
 static int mp_property_display_names(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -3566,6 +3580,7 @@ static const struct m_property mp_properties[] = {
     {"window-minimized", mp_property_win_minimized},
     {"display-names", mp_property_display_names},
     {"display-fps", mp_property_display_fps},
+    {"vo-refresh", mp_property_vo_refresh},
 
     {"working-directory", mp_property_cwd},
 

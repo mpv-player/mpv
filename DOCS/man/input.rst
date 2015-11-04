@@ -1459,6 +1459,11 @@ Property list
     available on all platforms. Note that any of the listed facts may change
     any time without a warning.
 
+``vo-refresh``
+    The measured vertical sync rate of the output on the current display. This
+    is computed by counting the interval between frames output to the graphics
+    card.
+
 ``video-aspect`` (RW)
     Video aspect, see ``--video-aspect``.
 
