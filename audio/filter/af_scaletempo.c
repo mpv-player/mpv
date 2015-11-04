@@ -286,9 +286,6 @@ static void update_speed(struct af_instance *af, float speed)
 
     s->frames_stride_scaled = s->scale * s->frames_stride;
     s->frames_stride_error = MPMIN(s->frames_stride_error, s->frames_stride_scaled);
-
-    MP_VERBOSE(af, "%.3f speed * %.3f scale_nominal = %.3f\n",
-               s->speed, s->scale_nominal, s->scale);
 }
 
 // Initialization and runtime control
