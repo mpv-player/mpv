@@ -284,28 +284,22 @@ static int find_mp_channel(int alsa_channel)
     return MP_SPEAKER_ID_COUNT;
 }
 
-static int find_alsa_channel(int mp_channel)
-{
-    for (int i = 0; alsa_to_mp_channels[i][1] != MP_SPEAKER_ID_COUNT; i++) {
-        if (alsa_to_mp_channels[i][1] == mp_channel)
-            return alsa_to_mp_channels[i][0];
-    }
-
-    return SND_CHMAP_UNKNOWN;
-}
-
-static int mp_chmap_from_alsa(struct mp_chmap *dst, snd_pcm_chmap_t *src)
+static bool mp_chmap_from_alsa(struct mp_chmap *dst, snd_pcm_chmap_t *src)
 {
     *dst = (struct mp_chmap) {0};
 
     if (src->channels > MP_NUM_CHANNELS)
-        return -1;
+        return false;
 
     dst->num = src->channels;
     for (int c = 0; c < dst->num; c++)
         dst->speaker[c] = find_mp_channel(src->pos[c]);
 
-    return 0;
+    // Assume anything with 1 channel is mono.
+    if (dst->num == 1)
+        dst->speaker[0] = MP_SP(FC);
+
+    return mp_chmap_is_valid(dst);
 }
 
 static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
@@ -323,8 +317,7 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
             aname[0] = '\0';
 
         struct mp_chmap entry;
-        mp_chmap_from_alsa(&entry, &maps[i]->map);
-        if (mp_chmap_is_valid(&entry)) {
+        if (mp_chmap_from_alsa(&entry, &maps[i]->map)) {
             struct mp_chmap reorder = entry;
             if (maps[i]->type == SND_CHMAP_TYPE_VAR)
                 mp_chmap_reorder_norm(&reorder);
@@ -342,26 +335,57 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
     return ao_chmap_sel_adjust(ao, &chmap_sel, chmap);
 }
 
+// Map back our selected channel layout to an ALSA one. This is done this way so
+// that our ALSA->mp_chmap mapping function only has to go one way.
+// The return value is to be freed with free().
+static snd_pcm_chmap_t *map_back_chmap(struct ao *ao, struct mp_chmap *chmap)
+{
+    struct priv *p = ao->priv;
+    if (!mp_chmap_is_valid(chmap))
+        return NULL;
+
+    snd_pcm_chmap_query_t **maps = snd_pcm_query_chmaps(p->alsa);
+    if (!maps)
+        return NULL;
+
+    snd_pcm_chmap_t *alsa_chmap = NULL;
+
+    for (int i = 0; maps[i] != NULL; i++) {
+        struct mp_chmap entry;
+        if (!mp_chmap_from_alsa(&entry, &maps[i]->map))
+            continue;
+
+        if (mp_chmap_equals(chmap, &entry) ||
+            (mp_chmap_equals_reordered(chmap, &entry) &&
+                maps[i]->type == SND_CHMAP_TYPE_VAR))
+        {
+            alsa_chmap = calloc(1, sizeof(*alsa_chmap) +
+                                   sizeof(alsa_chmap->pos[0]) * entry.num);
+            if (!alsa_chmap)
+                break;
+            alsa_chmap->channels = entry.num;
+
+            // Undo if mp_chmap_reorder() was called on the result.
+            int reorder[MP_NUM_CHANNELS];
+            mp_chmap_get_reorder(reorder, chmap, &entry);
+            for (int n = 0; n < entry.num; n++)
+                alsa_chmap->pos[n] = maps[i]->map.pos[reorder[n]];
+            break;
+        }
+    }
+
+    snd_pcm_free_chmaps(maps);
+    return alsa_chmap;
+}
+
+
 static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels)
 {
     struct priv *p = ao->priv;
     int err;
 
-    if (mp_chmap_is_valid(dev_chmap)) {
-        snd_pcm_chmap_t *alsa_chmap =
-            calloc(1, sizeof(*alsa_chmap) +
-                      sizeof(alsa_chmap->pos[0]) * dev_chmap->num);
-        if (!alsa_chmap)
-            goto alsa_error;
-
-        alsa_chmap->channels = dev_chmap->num;
-        for (int c = 0; c < dev_chmap->num; c++)
-            alsa_chmap->pos[c] = find_alsa_channel(dev_chmap->speaker[c]);
-
-        // mpv and ALSA use different conventions for mono
-        if (dev_chmap->num == 1 && dev_chmap->speaker[0] == MP_SP(FC))
-            alsa_chmap->pos[0] = SND_CHMAP_MONO;
-
+    snd_pcm_chmap_t *alsa_chmap = map_back_chmap(ao, dev_chmap);
+    if (alsa_chmap) {
         char tmp[128];
         if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
             MP_VERBOSE(ao, "trying to set ALSA channel map: %s\n", tmp);
@@ -381,7 +405,7 @@ static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels
         free(alsa_chmap);
     }
 
-    snd_pcm_chmap_t *alsa_chmap = snd_pcm_get_chmap(p->alsa);
+    alsa_chmap = snd_pcm_get_chmap(p->alsa);
     if (alsa_chmap) {
         char tmp[128];
         if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
@@ -407,19 +431,10 @@ static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels
             ao->channels = chmap;
         }
 
-        // mpv and ALSA use different conventions for mono
-        if (ao->channels.num == 1) {
-            MP_VERBOSE(ao, "assuming we actually got MONO from ALSA.\n");
-            ao->channels.speaker[0] = MP_SP(FC);
-        }
-
         free(alsa_chmap);
     }
 
     return 0;
-
-alsa_error:
-    return -1;
 }
 
 #else /* HAVE_CHMAP_API */
