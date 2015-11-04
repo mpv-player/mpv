@@ -874,6 +874,46 @@ static bool using_spdif_passthrough(struct MPContext *mpctx)
     return false;
 }
 
+static void adjust_audio_speed(struct MPContext *mpctx, double vsync)
+{
+    struct MPOpts *opts = mpctx->opts;
+    int mode = opts->video_sync;
+    double audio_factor = 1.0;
+
+    if (mode == VS_DISP_RESAMPLE && mpctx->audio_status == STATUS_PLAYING) {
+        // Try to smooth out audio timing drifts. This can happen if either
+        // video isn't playing at expected speed, or audio is not playing at
+        // the requested speed. Both are unavoidable.
+        // The audio desync is made up of 2 parts: 1. drift due to rounding
+        // errors and imperfect information, and 2. an offset, due to
+        // unaligned audio/video start, or disruptive events halting audio
+        // or video for a small time.
+        // Instead of trying to be clever, just apply an awfully dumb drift
+        // compensation with a constant factor, which does what we want. In
+        // theory we could calculate the exact drift compensation needed,
+        // but it likely would be wrong anyway, and we'd run into the same
+        // issues again, except with more complex code.
+        // 1 means drifts to positive, -1 means drifts to negative
+        double max_drift = vsync / 2;
+        double av_diff = mpctx->last_av_difference;
+        int new = mpctx->display_sync_drift_dir;
+        if (av_diff * -mpctx->display_sync_drift_dir >= 0)
+            new = 0;
+        if (fabs(av_diff) > max_drift)
+            new = av_diff >= 0 ? 1 : -1;
+        if (mpctx->display_sync_drift_dir != new) {
+            MP_VERBOSE(mpctx, "Change display sync audio drift: %d\n", new);
+            mpctx->display_sync_drift_dir = new;
+        }
+        double max_correct = opts->sync_max_audio_change / 100;
+        audio_factor = 1 + max_correct * -mpctx->display_sync_drift_dir;
+    }
+
+    mpctx->speed_factor_a = audio_factor * mpctx->speed_factor_v;
+
+    MP_STATS(mpctx, "value %f aspeed", mpctx->speed_factor_a - 1);
+}
+
 // Find a speed factor such that the display FPS is an integer multiple of the
 // effective video FPS. If this is not possible, try to do it for multiples,
 // which still leads to an improved end result.
@@ -938,9 +978,11 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
         goto done;
     }
 
-    double video_speed_correction = calc_best_speed(mpctx, vsync, adjusted_duration);
-    if (video_speed_correction <= 0)
+    mpctx->speed_factor_v = calc_best_speed(mpctx, vsync, adjusted_duration);
+    if (mpctx->speed_factor_v <= 0) {
+        mpctx->speed_factor_v = 1.0;
         goto done;
+    }
 
     double av_diff = mpctx->last_av_difference;
     if (fabs(av_diff) > 0.5)
@@ -956,6 +998,21 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
         mpctx->display_sync_disable_counter = 50;
     }
 
+    // Determine for how many vsyncs a frame should be displayed. This can be
+    // e.g. 2 for 30hz on a 60hz display. It can also be 0 if the video
+    // framerate is higher than the display framerate.
+    // We use the speed-adjusted (i.e. real) frame duration for this.
+    double frame_duration = adjusted_duration / mpctx->speed_factor_v;
+    double ratio = (frame_duration + mpctx->display_sync_error) / vsync;
+    int num_vsyncs = MPMAX(floor(ratio + 0.5), 0);
+    double prev_error = mpctx->display_sync_error;
+    mpctx->display_sync_error += frame_duration - num_vsyncs * vsync;
+    frame->vsync_offset = mpctx->display_sync_error * 1e6;
+
+    MP_DBG(mpctx, "s=%f vsyncs=%d dur=%f ratio=%f err=%.20f (%f)\n",
+           mpctx->speed_factor_v, num_vsyncs, adjusted_duration, ratio,
+           mpctx->display_sync_error, mpctx->display_sync_error / vsync);
+
     MP_STATS(mpctx, "value %f avdiff", av_diff);
 
     // Intended number of additional display frames to drop (<0) or repeat (>0)
@@ -966,58 +1023,6 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // Tolerate some desync to avoid frame dropping due to jitter.
     if (drop && fabs(av_diff) >= 0.080 && fabs(av_diff) / vsync >= 2)
         drop_repeat = -av_diff / vsync; // round towards 0
-
-    av_diff += drop_repeat * vsync;
-
-    if (resample) {
-        double audio_factor = 1.0;
-        if (mode == VS_DISP_RESAMPLE && mpctx->audio_status == STATUS_PLAYING) {
-            // Try to smooth out audio timing drifts. This can happen if either
-            // video isn't playing at expected speed, or audio is not playing at
-            // the requested speed. Both are unavoidable.
-            // The audio desync is made up of 2 parts: 1. drift due to rounding
-            // errors and imperfect information, and 2. an offset, due to
-            // unaligned audio/video start, or disruptive events halting audio
-            // or video for a small time.
-            // Instead of trying to be clever, just apply an awfully dumb drift
-            // compensation with a constant factor, which does what we want. In
-            // theory we could calculate the exact drift compensation needed,
-            // but it likely would be wrong anyway, and we'd run into the same
-            // issues again, except with more complex code.
-            // 1 means drifts to positive, -1 means drifts to negative
-            double max_drift = vsync / 2;
-            int new = mpctx->display_sync_drift_dir;
-            if (av_diff * -mpctx->display_sync_drift_dir >= 0)
-                new = 0;
-            if (fabs(av_diff) > max_drift)
-                new = av_diff >= 0 ? 1 : -1;
-            if (mpctx->display_sync_drift_dir != new) {
-                MP_VERBOSE(mpctx, "Change display sync audio drift: %d\n", new);
-                mpctx->display_sync_drift_dir = new;
-            }
-            double max_correct = opts->sync_max_audio_change / 100;
-            audio_factor = 1 + max_correct * -mpctx->display_sync_drift_dir;
-        }
-
-        mpctx->speed_factor_a = audio_factor * video_speed_correction;
-
-        MP_STATS(mpctx, "value %f aspeed", mpctx->speed_factor_a - 1);
-    }
-
-    // Determine for how many vsyncs a frame should be displayed. This can be
-    // e.g. 2 for 30hz on a 60hz display. It can also be 0 if the video
-    // framerate is higher than the display framerate.
-    // We use the speed-adjusted (i.e. real) frame duration for this.
-    double frame_duration = adjusted_duration / video_speed_correction;
-    double ratio = (frame_duration + mpctx->display_sync_error) / vsync;
-    int num_vsyncs = MPMAX(floor(ratio + 0.5), 0);
-    double prev_error = mpctx->display_sync_error;
-    mpctx->display_sync_error += frame_duration - num_vsyncs * vsync;
-    frame->vsync_offset = mpctx->display_sync_error * 1e6;
-
-    MP_DBG(mpctx, "s=%f vsyncs=%d dur=%f ratio=%f err=%.20f (%f)\n",
-           video_speed_correction, num_vsyncs, adjusted_duration, ratio,
-           mpctx->display_sync_error, mpctx->display_sync_error / vsync);
 
     // We can only drop all frames at most. We can repeat much more frames,
     // but we still limit it to 10 times the original frames to avoid that
@@ -1042,10 +1047,11 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     mpctx->total_avsync_change = 0;
     update_av_diff(mpctx, time_left * opts->playback_speed);
 
+    if (resample)
+        adjust_audio_speed(mpctx, vsync);
+
     // A bad guess, only needed when reverting to audio sync.
     mpctx->time_frame = time_left;
-
-    mpctx->speed_factor_v = video_speed_correction;
 
     frame->num_vsyncs = num_vsyncs;
     frame->display_synced = true;
