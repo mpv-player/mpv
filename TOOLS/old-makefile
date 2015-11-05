@@ -64,6 +64,8 @@ SOURCES-$(GL)                   += video/out/opengl/common.c \
                                    video/out/dither.c \
                                    video/out/opengl/hwdec.c \
                                    video/out/opengl/utils.c \
+                                   video/out/opengl/superxbr.c \
+                                   video/out/opengl/nnedi3.c \
                                    video/out/vo_opengl.c \
                                    video/out/vo_opengl_cb.c
 
@@ -348,6 +350,10 @@ demux/ebml_defs.c: TOOLS/matroska.pl $(MKVLIB_DEPS)
 
 video/out/x11_common.c: video/out/x11_icon.inc
 video/out/x11_icon.inc: TOOLS/file2string.pl video/out/x11_icon.bin
+	./$^ >$@
+
+video/out/opengl/nnedi3.c: video/out/opengl/nnedi3_weights.inc
+video/out/opengl/nnedi3_weights.inc: TOOLS/file2string.pl video/out/opengl/nnedi3_weights.bin
 	./$^ >$@
 
 sub/osd_libass.c: sub/osd_font.h
