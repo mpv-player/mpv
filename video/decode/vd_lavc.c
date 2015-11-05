@@ -327,7 +327,7 @@ static int init(struct dec_video *vd, const char *decoder)
     if (hwdec) {
         ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
         if (hwdec->get_codec)
-            decoder = hwdec->get_codec(ctx);
+            decoder = hwdec->get_codec(ctx, decoder);
         MP_VERBOSE(vd, "Trying hardware decoding.\n");
     } else {
         MP_VERBOSE(vd, "Using software decoding.\n");
