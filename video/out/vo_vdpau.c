@@ -651,13 +651,15 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
         CHECK_VDP_WARNING(vo, "OSD: error when creating surface");
     }
     if (imgs->scaled) {
-        char zeros[sfc->packer->used_width * format_size];
-        memset(zeros, 0, sizeof(zeros));
+        char *zeros = calloc(sfc->packer->used_width, format_size);
+        if (!zeros)
+            return;
         vdp_st = vdp->bitmap_surface_put_bits_native(sfc->surface,
                 &(const void *){zeros}, &(uint32_t){0},
                 &(VdpRect){0, 0, sfc->packer->used_width,
                                  sfc->packer->used_height});
         CHECK_VDP_WARNING(vo, "OSD: error uploading OSD bitmap");
+        free(zeros);
     }
 
     if (sfc->surface == VDP_INVALID_HANDLE)

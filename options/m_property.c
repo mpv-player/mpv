@@ -49,14 +49,12 @@ static struct m_property *m_property_list_find(const struct m_property *list,
 static int do_action(const struct m_property *prop_list, const char *name,
                      int action, void *arg, void *ctx)
 {
-    const char *sep;
     struct m_property *prop;
     struct m_property_action_arg ka;
-    if ((sep = strchr(name, '/')) && sep[1]) {
-        int len = sep - name;
-        char base[len + 1];
-        memcpy(base, name, len);
-        base[len] = 0;
+    const char *sep = strchr(name, '/');
+    if (sep && sep[1]) {
+        char base[128];
+        snprintf(base, sizeof(base), "%.*s", (int)(sep - name), name);
         prop = m_property_list_find(prop_list, base);
         ka = (struct m_property_action_arg) {
             .key = sep + 1,

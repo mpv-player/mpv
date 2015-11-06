@@ -269,12 +269,15 @@ static vf_instance_t *vf_open_filter(struct vf_chain *c, const char *name,
     for (i = 0; args && args[2 * i]; i++)
         l += 1 + strlen(args[2 * i]) + 1 + strlen(args[2 * i + 1]);
     l += strlen(name);
-    char str[l + 1];
+    char *str = malloc(l + 1);
+    if (!str)
+        return NULL;
     char *p = str;
     p += sprintf(str, "%s", name);
     for (i = 0; args && args[2 * i]; i++)
         p += sprintf(p, " %s=%s", args[2 * i], args[2 * i + 1]);
     MP_INFO(c, "Opening video filter: [%s]\n", str);
+    free(str);
     return vf_open(c, name, args);
 }
 

@@ -115,7 +115,6 @@ static int parse_profile(struct m_config *config, const struct m_option *opt,
 static int show_profile(struct m_config *config, bstr param)
 {
     struct m_profile *p;
-    int i, j;
     if (!param.len)
         return M_OPT_MISSING_PARAM;
     if (!(p = m_config_get_profile(config, param))) {
@@ -126,25 +125,18 @@ static int show_profile(struct m_config *config, bstr param)
         MP_INFO(config, "Profile %s: %s\n", p->name,
                 p->desc ? p->desc : "");
     config->profile_depth++;
-    for (i = 0; i < p->num_opts; i++) {
-        char spc[config->profile_depth + 1];
-        for (j = 0; j < config->profile_depth; j++)
-            spc[j] = ' ';
-        spc[config->profile_depth] = '\0';
-
-        MP_INFO(config, "%s%s=%s\n", spc, p->opts[2 * i], p->opts[2 * i + 1]);
+    for (int i = 0; i < p->num_opts; i++) {
+        MP_INFO(config, "%*s%s=%s\n", config->profile_depth, "",
+                p->opts[2 * i], p->opts[2 * i + 1]);
 
         if (config->profile_depth < MAX_PROFILE_DEPTH
             && !strcmp(p->opts[2*i], "profile")) {
             char *e, *list = p->opts[2 * i + 1];
             while ((e = strchr(list, ','))) {
                 int l = e - list;
-                char tmp[l+1];
                 if (!l)
                     continue;
-                memcpy(tmp, list, l);
-                tmp[l] = '\0';
-                show_profile(config, bstr0(tmp));
+                show_profile(config, (bstr){list, e - list});
                 list = e + 1;
             }
             if (list[0] != '\0')
