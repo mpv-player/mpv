@@ -379,6 +379,10 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
     struct ebml_parse_ctx parse_ctx = {demuxer->log};
     if (ebml_read_element(s, &parse_ctx, &info, &ebml_info_desc) < 0)
         return -1;
+    if (info.muxing_app)
+        MP_VERBOSE(demuxer, "| + muxing app: %s\n", info.muxing_app);
+    if (info.writing_app)
+        MP_VERBOSE(demuxer, "| + writing app: %s\n", info.writing_app);
     if (info.n_timecode_scale) {
         mkv_d->tc_scale = info.timecode_scale;
         MP_VERBOSE(demuxer, "| + timecode scale: %" PRIu64 "\n", mkv_d->tc_scale);
