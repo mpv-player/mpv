@@ -83,9 +83,7 @@ struct gl_functions {
     const char *extension;      // introduced with this extension in any version
     int provides;               // bitfield of MPGL_CAP_* constants
     int ver_core;               // introduced as required function
-    int ver_removed;            // removed as required function (no replacement)
     int ver_es_core;            // introduced as required GL ES function
-    int ver_es_removed;         // removed as required function (no replacement)
     const struct gl_function *functions;
 };
 
@@ -410,10 +408,6 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         const struct gl_functions *section = &gl_functions[n];
         int version = gl->es ? gl->es : gl->version;
         int ver_core = gl->es ? section->ver_es_core : section->ver_core;
-        int ver_removed = gl->es ? section->ver_es_removed : section->ver_removed;
-
-        if (ver_removed && version >= ver_removed)
-            continue;
 
         // NOTE: Function entrypoints can exist, even if they do not work.
         //       We must always check extension strings and versions.
