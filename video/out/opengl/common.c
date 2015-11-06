@@ -104,7 +104,6 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(AttachShader),
             DEF_FN(BindAttribLocation),
             DEF_FN(BindBuffer),
-            DEF_FN(BindBufferBase),
             DEF_FN(BindTexture),
             DEF_FN(BlendFuncSeparate),
             DEF_FN(BufferData),
@@ -174,6 +173,7 @@ static const struct gl_functions gl_functions[] = {
         .ver_core = 300,
         .ver_es_core = 300,
         .functions = (const struct gl_function[]) {
+            DEF_FN(BindBufferBase),
             DEF_FN(GetStringi),
             // for ES 3.0
             DEF_FN(GetTexLevelParameteriv),

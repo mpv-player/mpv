@@ -2422,7 +2422,7 @@ static void check_gl_features(struct gl_video *p)
     if (p->opts.prescale == 2) {
         if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_UBO) {
             // Check features for uniform buffer objects.
-            if (!p->gl->GetUniformBlockIndex || !p->gl->UniformBlockBinding) {
+            if (!p->gl->BindBufferBase || !p->gl->GetUniformBlockIndex) {
                 MP_WARN(p, "Disabling NNEDI3 (OpenGL 3.1 required).\n");
                 p->opts.prescale = 0;
             }
