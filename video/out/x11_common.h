@@ -130,4 +130,6 @@ bool vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
 void vo_x11_config_vo_window(struct vo *vo);
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg);
 
+void vo_x11_silence_xlib(int dir);
+
 #endif /* MPLAYER_X11_COMMON_H */

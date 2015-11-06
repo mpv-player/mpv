@@ -37,6 +37,7 @@
 
 #include "vo.h"
 #include "win_state.h"
+#include "osdep/atomics.h"
 #include "osdep/timer.h"
 #include "osdep/subprocess.h"
 
@@ -125,6 +126,7 @@ static const char x11_icon[] =
 ;
 
 static struct mp_log *x11_error_output;
+static atomic_int x11_error_silence;
 
 static void vo_x11_update_geometry(struct vo *vo);
 static void vo_x11_fullscreen(struct vo *vo);
@@ -262,8 +264,11 @@ static void vo_set_cursor_hidden(struct vo *vo, bool cursor_hidden)
 static int x11_errorhandler(Display *display, XErrorEvent *event)
 {
     struct mp_log *log = x11_error_output;
-    char msg[60];
 
+    if (atomic_load(&x11_error_silence))
+        return 0;
+
+    char msg[60];
     XGetErrorText(display, event->error_code, (char *) &msg, sizeof(msg));
 
     mp_err(log, "X11 error: %s\n", msg);
@@ -274,6 +279,11 @@ static int x11_errorhandler(Display *display, XErrorEvent *event)
                event->error_code, event->request_code, event->minor_code);
 
     return 0;
+}
+
+void vo_x11_silence_xlib(int dir)
+{
+    atomic_fetch_add(&x11_error_silence, dir);
 }
 
 static int net_wm_support_state_test(struct vo_x11_state *x11, Atom atom)
