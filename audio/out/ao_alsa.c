@@ -691,9 +691,7 @@ static int init_device(struct ao *ao)
 
     if (num_channels != ao->channels.num) {
         int req = ao->channels.num;
-        mp_chmap_from_channels_alsa(&ao->channels, num_channels);
-        if (!mp_chmap_is_valid(&ao->channels))
-            mp_chmap_from_channels(&ao->channels, 2);
+        mp_chmap_from_channels(&ao->channels, MPMIN(2, num_channels));
         MP_ERR(ao, "Asked for %d channels, got %d - fallback to %s.\n", req,
                num_channels, mp_chmap_to_str(&ao->channels));
     }
