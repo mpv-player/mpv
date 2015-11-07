@@ -68,7 +68,7 @@ static EGLConfig select_fb_config_egl(struct MPGLContext *ctx, bool es)
     eglChooseConfig(p->egl_display, attributes, &config, 1, &config_count);
 
     if (!config_count) {
-        MP_FATAL(ctx->vo, "Could find EGL configuration!\n");
+        MP_FATAL(ctx->vo, "Could not find EGL configuration!\n");
         return NULL;
     }
 
