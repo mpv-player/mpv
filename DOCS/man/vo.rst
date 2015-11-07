@@ -541,7 +541,7 @@ Available video output drivers are:
         Scale in linear light. It should only be used with a ``fbo-format``
         that has at least 16 bit precision.
 
-    ``fancy-downscaling``
+    ``correct-downscaling``
         When using convolution based filters, extend the filter size
         when downscaling. Trades quality for reduced downscaling performance.
 
@@ -949,7 +949,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:fancy-downscaling:sigmoid-upscaling:pbo:deband
+        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:correct-downscaling:sigmoid-upscaling:pbo:deband
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.

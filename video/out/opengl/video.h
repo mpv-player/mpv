@@ -75,7 +75,7 @@ struct gl_video_opts {
     int target_prim;
     int target_trc;
     int linear_scaling;
-    int fancy_downscaling;
+    int correct_downscaling;
     int sigmoid_upscaling;
     float sigmoid_center;
     float sigmoid_slope;

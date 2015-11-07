@@ -353,7 +353,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .dither_size = 6,
     .temporal_dither_period = 1,
     .fbo_format = GL_RGBA16,
-    .fancy_downscaling = 1,
+    .correct_downscaling = 1,
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .sigmoid_upscaling = 1,
@@ -406,7 +406,7 @@ const struct m_sub_options gl_video_conf = {
         SCALER_OPTS("tscale", 3),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("linear-scaling", linear_scaling, 0),
-        OPT_FLAG("fancy-downscaling", fancy_downscaling, 0),
+        OPT_FLAG("correct-downscaling", correct_downscaling, 0),
         OPT_FLAG("sigmoid-upscaling", sigmoid_upscaling, 0),
         OPT_FLOATRANGE("sigmoid-center", sigmoid_center, 0, 0.0, 1.0),
         OPT_FLOATRANGE("sigmoid-slope", sigmoid_slope, 0, 1.0, 20.0),
@@ -478,6 +478,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_REPLACED("smoothmotion", "interpolation"),
         OPT_REPLACED("smoothmotion-threshold", "tscale-param1"),
         OPT_REPLACED("scale-down", "dscale"),
+        OPT_REPLACED("fancy-downscaling", "correct-downscaling"),
 
         {0}
     },
@@ -1592,17 +1593,15 @@ static void pass_scale_main(struct gl_video *p)
         scaler = &p->scaler[1];
     }
 
-    // When requesting fancy-downscaling and the clip is anamorphic, and because
-    // only a single fancy scale factor is used for both axes, enable fancy only
+    // When requesting correct-downscaling and the clip is anamorphic, and
+    // because only a single scale factor is used for both axes, enable it only
     // when both axes are downscaled, and use the milder of the factors to not
     // end up with too much blur on one axis (even if we end up with sub-optimal
-    // fancy factor on the other axis).
-    // This is better than not respecting fancy at all for anamorphic clips.
+    // scale factor on the other axis). This is better than not respecting
+    // correct scaling at all for anamorphic clips.
     double f = MPMAX(xy[0], xy[1]);
-    if (p->opts.fancy_downscaling && f < 1.0)
-    {
+    if (p->opts.correct_downscaling && f < 1.0)
         scale_factor = 1.0 / f;
-    }
 
     // Pre-conversion, like linear light/sigmoidization
     GLSLF("// scaler pre-conversion\n");
