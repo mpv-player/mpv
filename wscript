@@ -244,6 +244,10 @@ iconv support use --disable-iconv.",
         'func': check_statement(['sys/vt.h', 'sys/ioctl.h'],
                                 'int m; ioctl(0, VT_GETMODE, &m)'),
     }, {
+        'name': 'gbm.h',
+        'desc': 'gbm.h',
+        'func': check_cc(header_name=['stdio.h', 'gbm.h']),
+    }, {
         'name': 'glibc-thread-name',
         'desc': 'GLIBC API for setting thread name',
         'func': check_statement('pthread.h',
@@ -569,6 +573,16 @@ video_output_features = [
         'name': '--cocoa',
         'desc': 'Cocoa',
         'func': check_cocoa
+    }, {
+        'name': '--drm',
+        'desc': 'DRM',
+        'deps': [ 'vt.h' ],
+        'func': check_pkg_config('libdrm'),
+    }, {
+        'name': '--gbm',
+        'desc': 'GBM',
+        'deps': [ 'gbm.h' ],
+        'func': check_pkg_config('gbm'),
     } , {
         'name': '--wayland',
         'desc': 'Wayland',
@@ -622,6 +636,12 @@ video_output_features = [
         'name': '--egl-x11',
         'desc': 'OpenGL X11 EGL Backend',
         'deps': [ 'x11' ],
+        'groups': [ 'gl' ],
+        'func': check_pkg_config('egl', 'gl'),
+    } , {
+        'name': '--egl-drm',
+        'desc': 'OpenGL DRM EGL Backend',
+        'deps': [ 'drm', 'gbm' ],
         'groups': [ 'gl' ],
         'func': check_pkg_config('egl', 'gl'),
     } , {
@@ -686,11 +706,6 @@ video_output_features = [
         'desc': 'CACA',
         'func': check_pkg_config('caca', '>= 0.99.beta18'),
     }, {
-        'name': '--drm',
-        'desc': 'DRM',
-        'deps': [ 'vt.h' ],
-        'func': check_pkg_config('libdrm'),
-    }, {
         'name': '--jpeg',
         'desc': 'JPEG support',
         'func': check_cc(header_name=['stdio.h', 'jpeglib.h'],
@@ -725,7 +740,7 @@ video_output_features = [
     } , {
         'name': '--gl',
         'desc': 'OpenGL video outputs',
-        'deps_any': [ 'gl-cocoa', 'gl-x11', 'gl-win32', 'gl-wayland', 'rpi' ],
+        'deps_any': [ 'gl-cocoa', 'gl-x11', 'egl-drm', 'gl-win32', 'gl-wayland', 'rpi' ],
         'func': check_true
     }
 ]

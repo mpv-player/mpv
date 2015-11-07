@@ -778,6 +778,8 @@ Available video output drivers are:
             X11/GLX
         wayland
             Wayland/EGL
+        drm_egl
+            DRM/EGL
         x11egl
             X11/EGL
 
@@ -1134,8 +1136,9 @@ Available video output drivers are:
 
 ``drm`` (Direct Rendering Manager)
     Video output driver using Kernel Mode Setting / Direct Rendering Manager.
-    Does not support hardware acceleration. Should be used when one doesn't
-    want to install full-blown graphical environment (e.g. no X).
+    Should be used when one doesn't want to install full-blown graphical
+    environment (e.g. no X). Does not support hardware acceleration (if you
+    need this, check ``drm_egl`` backend for ``opengl`` VO).
 
     ``connector=<number>``
         Select the connector to use (usually this is a monitor.) If set to -1,

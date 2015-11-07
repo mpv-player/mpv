@@ -338,6 +338,7 @@ def build(ctx):
         ( "video/out/opengl/wayland.c",          "gl-wayland" ),
         ( "video/out/opengl/x11.c",              "gl-x11" ),
         ( "video/out/opengl/x11egl.c",           "egl-x11" ),
+        ( "video/out/opengl/drm_egl.c",          "egl-drm" ),
         ( "video/out/vo.c" ),
         ( "video/out/vo_caca.c",                 "caca" ),
         ( "video/out/vo_drm.c",                  "drm" ),
