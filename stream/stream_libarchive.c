@@ -132,7 +132,7 @@ static int reopen_archive(stream_t *s)
             goto error;
         }
         if (r < ARCHIVE_OK)
-            MP_ERR(s, "libarchive: %s\n", archive_error_string(mpa->arch));
+            MP_ERR(s, "%s\n", archive_error_string(mpa->arch));
         if (r < ARCHIVE_WARN)
             goto error;
         if (archive_entry_filetype(entry) != AE_IFREG)
@@ -166,7 +166,7 @@ static int archive_entry_fill_buffer(stream_t *s, char *buffer, int max_len)
         return 0;
     int r = archive_read_data(p->mpa->arch, buffer, max_len);
     if (r < 0)
-        MP_ERR(s, "libarchive: %s\n", archive_error_string(p->mpa->arch));
+        MP_ERR(s, "%s\n", archive_error_string(p->mpa->arch));
     return r;
 }
 
@@ -194,7 +194,7 @@ static int archive_entry_seek(stream_t *s, int64_t newpos)
             int size = MPMIN(newpos - s->pos, sizeof(buffer));
             int r = archive_read_data(p->mpa->arch, buffer, size);
             if (r < 0) {
-                MP_ERR(s, "libarchive: %s\n", archive_error_string(p->mpa->arch));
+                MP_ERR(s, "%s\n", archive_error_string(p->mpa->arch));
                 return -1;
             }
             s->pos += r;

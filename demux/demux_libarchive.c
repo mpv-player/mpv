@@ -71,7 +71,7 @@ static int open_file(struct demuxer *demuxer, enum demux_check check)
         if (r == ARCHIVE_EOF)
             break;
         if (r < ARCHIVE_OK)
-            MP_ERR(demuxer, "libarchive: %s\n", archive_error_string(mpa->arch));
+            MP_ERR(demuxer, "%s\n", archive_error_string(mpa->arch));
         if (r < ARCHIVE_WARN)
             break;
         if (archive_entry_filetype(entry) != AE_IFREG)
