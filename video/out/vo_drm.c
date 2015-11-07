@@ -47,7 +47,7 @@
 #define USE_MASTER 0
 #define BUF_COUNT 2
 
-struct modeset_buf {
+struct framebuffer {
     uint32_t width;
     uint32_t height;
     uint32_t stride;
@@ -57,28 +57,20 @@ struct modeset_buf {
     uint32_t fb;
 };
 
-struct modeset_dev {
-    struct modeset_buf bufs[BUF_COUNT];
-    drmModeModeInfo mode;
-    drmModeEncoder *enc;
-    uint32_t conn;
-    uint32_t crtc;
-    int front_buf;
-};
-
 struct priv {
     char *device_path;
     int connector_id;
     int mode_id;
 
-    int fd;
-    struct modeset_dev *dev;
+    struct kms *kms;
     drmModeCrtc *old_crtc;
     drmEventContext ev;
 
     bool vt_switcher_active;
     struct vt_switcher vt_switcher;
 
+    struct framebuffer bufs[BUF_COUNT];
+    int front_buf;
     bool active;
     bool pflip_happening;
 
@@ -92,27 +84,7 @@ struct priv {
     struct mp_sws_context *sws;
 };
 
-static int modeset_open(struct vo *vo, int *out, const char *node)
-{
-    *out = -1;
-
-    int fd = open(node, O_RDWR | O_CLOEXEC);
-    if (fd < 0) {
-        MP_ERR(vo, "Cannot open \"%s\": %s.\n", node, mp_strerror(errno));
-        return -errno;
-    }
-
-    uint64_t has_dumb;
-    if (drmGetCap(fd, DRM_CAP_DUMB_BUFFER, &has_dumb) < 0) {
-        MP_ERR(vo, "Device \"%s\" does not support dumb buffers.\n", node);
-        return -EOPNOTSUPP;
-    }
-
-    *out = fd;
-    return 0;
-}
-
-static void modeset_destroy_fb(int fd, struct modeset_buf *buf)
+static void fb_destroy(int fd, struct framebuffer *buf)
 {
     if (buf->map) {
         munmap(buf->map, buf->size);
@@ -128,7 +100,7 @@ static void modeset_destroy_fb(int fd, struct modeset_buf *buf)
     }
 }
 
-static int modeset_create_fb(struct vo *vo, int fd, struct modeset_buf *buf)
+static int fb_setup_single(struct vo *vo, int fd, struct framebuffer *buf)
 {
     int ret = 0;
 
@@ -186,192 +158,60 @@ end:
         return 0;
     }
 
-    modeset_destroy_fb(fd, buf);
+    fb_destroy(fd, buf);
     return ret;
 }
 
-static int modeset_find_crtc(struct vo *vo, int fd, drmModeRes *res,
-                             drmModeConnector *conn, struct modeset_dev *dev)
+static int fb_setup_double_buffering(struct vo *vo)
 {
-    for (unsigned int i = 0; i < conn->count_encoders; ++i) {
-        drmModeEncoder *enc = drmModeGetEncoder(fd, conn->encoders[i]);
-        if (!enc) {
-            MP_WARN(vo, "Cannot retrieve encoder %u:%u: %s\n",
-                    i, conn->encoders[i], mp_strerror(errno));
-            continue;
-        }
+    struct priv *p = vo->priv;
 
-        // iterate all global CRTCs
-        for (unsigned int j = 0; j < res->count_crtcs; ++j) {
-            // check whether this CRTC works with the encoder
-            if (!(enc->possible_crtcs & (1 << j)))
-                continue;
-
-            dev->enc = enc;
-            dev->crtc = enc->crtc_id;
-            return 0;
-        }
-
-        drmModeFreeEncoder(enc);
-    }
-
-    MP_ERR(vo, "Connector %u has no suitable CRTC\n", conn->connector_id);
-    return -ENOENT;
-}
-
-static bool is_connector_valid(struct vo *vo, int conn_id,
-                               drmModeConnector *conn, bool silent)
-{
-    if (!conn) {
-        if (!silent) {
-            MP_ERR(vo, "Cannot get connector %d: %s\n", conn_id,
-                   mp_strerror(errno));
-        }
-        return false;
-    }
-
-    if (conn->connection != DRM_MODE_CONNECTED) {
-        if (!silent) {
-            MP_ERR(vo, "Connector %d is disconnected\n", conn_id);
-        }
-        return false;
-    }
-
-    if (conn->count_modes == 0) {
-        if (!silent) {
-            MP_ERR(vo, "Connector %d has no valid modes\n", conn_id);
-        }
-        return false;
-    }
-
-    return true;
-}
-
-static int modeset_prepare_dev(struct vo *vo, int fd, int conn_id, int mode_id,
-                               struct modeset_dev **out)
-{
-    struct modeset_dev *dev = NULL;
-    drmModeConnector *conn = NULL;
-
-    int ret = 0;
-    *out = NULL;
-
-    drmModeRes *res = drmModeGetResources(fd);
-    if (!res) {
-        MP_ERR(vo, "Cannot retrieve DRM resources: %s\n", mp_strerror(errno));
-        ret = -errno;
-        goto end;
-    }
-
-    if (conn_id == -1) {
-        // get the first connected connector
-        for (int i = 0; i < res->count_connectors; i++) {
-            conn = drmModeGetConnector(fd, res->connectors[i]);
-            if (is_connector_valid(vo, i, conn, true)) {
-                conn_id = i;
-                break;
-            }
-            if (conn) {
-                drmModeFreeConnector(conn);
-                conn = NULL;
-            }
-        }
-        if (conn_id == -1) {
-            MP_ERR(vo, "No connected connectors found\n");
-            ret = -ENODEV;
-            goto end;
-        }
-    }
-
-    if (conn_id < 0 || conn_id >= res->count_connectors) {
-        MP_ERR(vo, "Bad connector ID. Max valid connector ID = %u\n",
-               res->count_connectors);
-        ret = -ENODEV;
-        goto end;
-    }
-
-    conn = drmModeGetConnector(fd, res->connectors[conn_id]);
-    if (!is_connector_valid(vo, conn_id, conn, false)) {
-        ret = -ENODEV;
-        goto end;
-    }
-
-    if (mode_id < 0 || mode_id >= conn->count_modes) {
-        MP_ERR(vo, "Bad mode ID (max = %d).\n", conn->count_modes - 1);
-        MP_INFO(vo, "Available modes:\n");
-        for (unsigned int i = 0; i < conn->count_modes; i++) {
-            MP_INFO(vo, "Mode %d: %s (%dx%d)\n", i, conn->modes[i].name,
-                    conn->modes[i].hdisplay, conn->modes[i].vdisplay);
-        }
-    }
-
-    dev = talloc_zero(vo->priv, struct modeset_dev);
-    dev->conn = conn->connector_id;
-    dev->front_buf = 0;
-    dev->mode = conn->modes[mode_id];
+    p->front_buf = 0;
     for (unsigned int i = 0; i < 2; i++) {
-        dev->bufs[i].width = dev->mode.hdisplay;
-        dev->bufs[i].height = dev->mode.vdisplay;
-    }
-
-    ret = modeset_find_crtc(vo, fd, res, conn, dev);
-    if (ret) {
-        MP_ERR(vo, "Connector %d has no valid CRTC\n", conn_id);
-        goto end;
+        p->bufs[i].width = p->kms->mode.hdisplay;
+        p->bufs[i].height = p->kms->mode.vdisplay;
     }
 
     for (unsigned int i = 0; i < BUF_COUNT; i++) {
-        ret = modeset_create_fb(vo, fd, &dev->bufs[i]);
+        int ret = fb_setup_single(vo, p->kms->fd, &p->bufs[i]);
         if (ret) {
             MP_ERR(vo, "Cannot create framebuffer for connector %d\n",
-                   conn_id);
+                   p->kms->connector->connector_id);
             for (unsigned int j = 0; j < i; j++) {
-                modeset_destroy_fb(fd, &dev->bufs[j]);
+                fb_destroy(p->kms->fd, &p->bufs[j]);
             }
-            goto end;
+            return ret;
         }
     }
 
-end:
-    if (conn) {
-        drmModeFreeConnector(conn);
-        conn = NULL;
-    }
-    if (res) {
-        drmModeFreeResources(res);
-        res = NULL;
-    }
-    if (ret == 0) {
-        *out = dev;
-    } else {
-        talloc_free(dev);
-    }
-    return ret;
+    return 0;
 }
 
-static void modeset_page_flipped(int fd, unsigned int frame, unsigned int sec,
+static void page_flipped(int fd, unsigned int frame, unsigned int sec,
                                  unsigned int usec, void *data)
 {
     struct priv *p = data;
     p->pflip_happening = false;
 }
 
-
-
-static int setup_vo_crtc(struct vo *vo)
+static int crtc_setup(struct vo *vo)
 {
     struct priv *p = vo->priv;
     if (p->active)
         return 0;
-    p->old_crtc = drmModeGetCrtc(p->fd, p->dev->crtc);
-    int ret = drmModeSetCrtc(p->fd, p->dev->crtc,
-                          p->dev->bufs[p->dev->front_buf + BUF_COUNT - 1].fb,
-                          0, 0, &p->dev->conn, 1, &p->dev->mode);
+    p->old_crtc = drmModeGetCrtc(p->kms->fd, p->kms->crtc_id);
+    int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id,
+                             p->bufs[p->front_buf + BUF_COUNT - 1].fb,
+                             0,
+                             0,
+                             &p->kms->connector->connector_id,
+                             1,
+                             &p->kms->mode);
     p->active = true;
     return ret;
 }
 
-static void release_vo_crtc(struct vo *vo)
+static void crtc_release(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
@@ -381,7 +221,7 @@ static void release_vo_crtc(struct vo *vo)
 
     // wait for current page flip
     while (p->pflip_happening) {
-        int ret = drmHandleEvent(p->fd, &p->ev);
+        int ret = drmHandleEvent(p->kms->fd, &p->ev);
         if (ret) {
             MP_ERR(vo, "drmHandleEvent failed: %i\n", ret);
             break;
@@ -389,12 +229,12 @@ static void release_vo_crtc(struct vo *vo)
     }
 
     if (p->old_crtc) {
-        drmModeSetCrtc(p->fd,
+        drmModeSetCrtc(p->kms->fd,
                        p->old_crtc->crtc_id,
                        p->old_crtc->buffer_id,
                        p->old_crtc->x,
                        p->old_crtc->y,
-                       &p->dev->conn,
+                       &p->kms->connector->connector_id,
                        1,
                        &p->old_crtc->mode);
         drmModeFreeCrtc(p->old_crtc);
@@ -405,13 +245,13 @@ static void release_vo_crtc(struct vo *vo)
 static void release_vt(void *data)
 {
     struct vo *vo = data;
-    release_vo_crtc(vo);
+    crtc_release(vo);
     if (USE_MASTER) {
         //this function enables support for switching to x, weston etc.
         //however, for whatever reason, it can be called only by root users.
         //until things change, this is commented.
         struct priv *p = vo->priv;
-        if (drmDropMaster(p->fd)) {
+        if (drmDropMaster(p->kms->fd)) {
             MP_WARN(vo, "Failed to drop DRM master: %s\n", mp_strerror(errno));
         }
     }
@@ -422,12 +262,12 @@ static void acquire_vt(void *data)
     struct vo *vo = data;
     if (USE_MASTER) {
         struct priv *p = vo->priv;
-        if (drmSetMaster(p->fd)) {
+        if (drmSetMaster(p->kms->fd)) {
             MP_WARN(vo, "Failed to acquire DRM master: %s\n", mp_strerror(errno));
         }
     }
 
-    setup_vo_crtc(vo);
+    crtc_setup(vo);
 }
 
 
@@ -486,7 +326,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     mp_image_params_guess_csp(&p->sws->dst);
     mp_image_set_params(p->cur_frame, &p->sws->dst);
 
-    struct modeset_buf *buf = p->dev->bufs;
+    struct framebuffer *buf = p->bufs;
     for (unsigned int i = 0; i < BUF_COUNT; i++)
         memset(buf[i].map, 0, buf[i].size);
 
@@ -515,7 +355,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
             osd_draw_on_image(vo->osd, p->osd, 0, 0, p->cur_frame);
         }
 
-        struct modeset_buf *front_buf = &p->dev->bufs[p->dev->front_buf];
+        struct framebuffer *front_buf = &p->bufs[p->front_buf];
         int w = p->dst.x1 - p->dst.x0;
         int h = p->dst.y1 - p->dst.y0;
         int x = (p->device_w - w) >> 1;
@@ -541,25 +381,25 @@ static void flip_page(struct vo *vo)
     if (!p->active || p->pflip_happening)
         return;
 
-    int ret = drmModePageFlip(p->fd, p->dev->crtc,
-                              p->dev->bufs[p->dev->front_buf].fb,
+    int ret = drmModePageFlip(p->kms->fd, p->kms->crtc_id,
+                              p->bufs[p->front_buf].fb,
                               DRM_MODE_PAGE_FLIP_EVENT, p);
     if (ret) {
         MP_WARN(vo, "Cannot flip page for connector\n");
     } else {
-        p->dev->front_buf++;
-        p->dev->front_buf %= BUF_COUNT;
+        p->front_buf++;
+        p->front_buf %= BUF_COUNT;
         p->pflip_happening = true;
     }
 
     // poll page flip finish event
     const int timeout_ms = 3000;
     struct pollfd fds[1] = {
-        { .events = POLLIN, .fd = p->fd },
+        { .events = POLLIN, .fd = p->kms->fd },
     };
     poll(fds, 1, timeout_ms);
     if (fds[0].revents & POLLIN) {
-        ret = drmHandleEvent(p->fd, &p->ev);
+        ret = drmHandleEvent(p->kms->fd, &p->ev);
         if (ret != 0) {
             MP_ERR(vo, "drmHandleEvent failed: %i\n", ret);
             return;
@@ -571,11 +411,13 @@ static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    if (p->dev) {
-        release_vo_crtc(vo);
-        for (unsigned int i = 0; i < BUF_COUNT; i++)
-            modeset_destroy_fb(p->fd, &p->dev->bufs[i]);
-        drmModeFreeEncoder(p->dev->enc);
+    crtc_release(vo);
+    for (unsigned int i = 0; i < BUF_COUNT; i++)
+        fb_destroy(p->kms->fd, &p->bufs[i]);
+
+    if (p->kms) {
+        kms_destroy(p->kms);
+        p->kms = NULL;
     }
 
     if (p->vt_switcher_active)
@@ -583,17 +425,14 @@ static void uninit(struct vo *vo)
 
     talloc_free(p->last_input);
     talloc_free(p->cur_frame);
-    talloc_free(p->dev);
-    close(p->fd);
 }
 
 static int preinit(struct vo *vo)
 {
     struct priv *p = vo->priv;
     p->sws = mp_sws_alloc(vo);
-    p->fd = -1;
     p->ev.version = DRM_EVENT_CONTEXT_VERSION;
-    p->ev.page_flip_handler = modeset_page_flipped;
+    p->ev.page_flip_handler = page_flipped;
 
     p->vt_switcher_active = vt_switcher_init(&p->vt_switcher, vo->log) == 0;
     if (p->vt_switcher_active) {
@@ -603,18 +442,35 @@ static int preinit(struct vo *vo)
         MP_WARN(vo, "Failed to set up VT switcher. Terminal switching will be unavailable.\n");
     }
 
-    if (modeset_open(vo, &p->fd, p->device_path))
+    p->kms = kms_create(vo->log);
+    if (!p->kms) {
+        MP_ERR(vo, "Failed to create KMS.\n");
         goto err;
+    }
 
-    if (modeset_prepare_dev(vo, p->fd, p->connector_id, p->mode_id, &p->dev))
+    if (kms_setup(p->kms, p->device_path, p->connector_id, p->mode_id)) {
+        MP_ERR(vo, "Failed to configure KMS.\n");
         goto err;
+    }
 
-    assert(p->dev);
-    p->device_w = p->dev->bufs[0].width;
-    p->device_h = p->dev->bufs[0].height;
+    if (fb_setup_double_buffering(vo)) {
+        MP_ERR(vo, "Failed to set up double buffering.\n");
+        goto err;
+    }
 
-    if (setup_vo_crtc(vo)) {
-        MP_ERR(vo, "Cannot set CRTC for connector %u: %s\n", p->connector_id,
+    uint64_t has_dumb;
+    if (drmGetCap(p->kms->fd, DRM_CAP_DUMB_BUFFER, &has_dumb) < 0) {
+        MP_ERR(vo, "Device \"%s\" does not support dumb buffers.\n", p->device_path);
+        goto err;
+    }
+
+    p->device_w = p->bufs[0].width;
+    p->device_h = p->bufs[0].height;
+
+    if (crtc_setup(vo)) {
+        MP_ERR(vo,
+               "Cannot set CRTC for connector %u: %s\n",
+               p->kms->connector->connector_id,
                mp_strerror(errno));
         goto err;
     }

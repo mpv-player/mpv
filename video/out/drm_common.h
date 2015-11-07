@@ -18,6 +18,18 @@
 #ifndef MP_VT_SWITCHER_H
 #define MP_VT_SWITCHER_H
 
+#include <xf86drm.h>
+#include <xf86drmMode.h>
+
+struct kms {
+    struct mp_log *log;
+    int fd;
+    drmModeConnector *connector;
+    drmModeEncoder *encoder;
+    drmModeModeInfo mode;
+    uint32_t crtc_id;
+};
+
 struct vt_switcher {
     int tty_fd;
     struct mp_log *log;
@@ -32,5 +44,9 @@ void vt_switcher_interrupt_poll(struct vt_switcher *s);
 
 void vt_switcher_acquire(struct vt_switcher *s, void (*handler)(void*), void *user_data);
 void vt_switcher_release(struct vt_switcher *s, void (*handler)(void*), void *user_data);
+
+struct kms *kms_create(struct mp_log *log);
+int kms_setup(struct kms *kms, const char *device_path, int conn_id, int mode_id);
+void kms_destroy(struct kms *kms);
 
 #endif

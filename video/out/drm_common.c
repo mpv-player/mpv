@@ -40,6 +40,192 @@
 
 static int vt_switcher_pipe[2];
 
+// KMS ------------------------------------------------------------------------
+
+static bool is_connector_valid(struct kms *kms, int connector_id,
+                               drmModeConnector *connector, bool silent)
+{
+    if (!connector) {
+        if (!silent) {
+            MP_ERR(kms, "Cannot get connector %d: %s\n", connector_id,
+                   mp_strerror(errno));
+        }
+        return false;
+    }
+
+    if (connector->connection != DRM_MODE_CONNECTED) {
+        if (!silent) {
+            MP_ERR(kms, "Connector %d is disconnected\n", connector_id);
+        }
+        return false;
+    }
+
+    if (connector->count_modes == 0) {
+        if (!silent) {
+            MP_ERR(kms, "Connector %d has no valid modes\n", connector_id);
+        }
+        return false;
+    }
+
+    return true;
+}
+
+static int setup_connector(
+    struct kms *kms, const drmModeRes *res, int connector_id)
+{
+    drmModeConnector *connector = NULL;
+    if (connector_id == -1) {
+        // get the first connected connector
+        for (int i = 0; i < res->count_connectors; i++) {
+            connector = drmModeGetConnector(kms->fd, res->connectors[i]);
+            if (is_connector_valid(kms, i, connector, true)) {
+                connector_id = i;
+                break;
+            }
+            if (connector) {
+                drmModeFreeConnector(connector);
+                connector = NULL;
+            }
+        }
+        if (connector_id == -1) {
+            MP_ERR(kms, "No connected connectors found\n");
+            return -ENODEV;
+        }
+    }
+
+    if (connector_id < 0 || connector_id >= res->count_connectors) {
+        MP_ERR(kms, "Bad connector ID. Max valid connector ID = %u\n",
+               res->count_connectors);
+        return -ENODEV;
+    }
+
+    connector = drmModeGetConnector(kms->fd, res->connectors[connector_id]);
+    if (!is_connector_valid(kms, connector_id, connector, false)) {
+        return -ENODEV;
+    }
+
+    kms->connector = connector;
+    return 0;
+}
+
+static int setup_crtc(struct kms *kms, const drmModeRes *res)
+{
+    for (unsigned int i = 0; i < kms->connector->count_encoders; ++i) {
+        drmModeEncoder *encoder
+            = drmModeGetEncoder(kms->fd, kms->connector->encoders[i]);
+        if (!encoder) {
+            MP_WARN(kms, "Cannot retrieve encoder %u:%u: %s\n",
+                    i, kms->connector->encoders[i], mp_strerror(errno));
+            continue;
+        }
+
+        // iterate all global CRTCs
+        for (unsigned int j = 0; j < res->count_crtcs; ++j) {
+            // check whether this CRTC works with the encoder
+            if (!(encoder->possible_crtcs & (1 << j)))
+                continue;
+
+            kms->encoder = encoder;
+            kms->crtc_id = encoder->crtc_id;
+            return 0;
+        }
+
+        drmModeFreeEncoder(encoder);
+    }
+
+    MP_ERR(kms,
+           "Connector %u has no suitable CRTC\n",
+           kms->connector->connector_id);
+    return -ENODEV;
+}
+
+static int setup_mode(struct kms *kms, int mode_id)
+{
+    if (mode_id < 0 || mode_id >= kms->connector->count_modes) {
+        MP_ERR(
+            kms,
+            "Bad mode ID (max = %d).\n",
+            kms->connector->count_modes - 1);
+
+        MP_INFO(kms, "Available modes:\n");
+        for (unsigned int i = 0; i < kms->connector->count_modes; i++) {
+            MP_INFO(kms,
+                    "Mode %d: %s (%dx%d)\n",
+                    i,
+                    kms->connector->modes[i].name,
+                    kms->connector->modes[i].hdisplay,
+                    kms->connector->modes[i].vdisplay);
+        }
+        return -EINVAL;
+    }
+
+    kms->mode = kms->connector->modes[mode_id];
+    return 0;
+}
+
+
+struct kms *kms_create(struct mp_log *log)
+{
+    struct kms *ret = talloc(NULL, struct kms);
+    *ret = (struct kms) {
+        .log = mp_log_new(ret, log, "kms"),
+        .fd = -1,
+        .connector = NULL,
+        .encoder = NULL,
+        .mode = { 0 },
+        .crtc_id = -1,
+    };
+    return ret;
+}
+
+int kms_setup(struct kms *kms, const char *device_path, int connector_id, int mode_id)
+{
+    int ret = 0;
+    kms->fd = open(device_path, O_RDWR | O_CLOEXEC);
+    if (kms->fd < 0) {
+        MP_ERR(kms, "Cannot open \"%s\": %s.\n", device_path, mp_strerror(errno));
+        ret = -errno;
+        goto end;
+    }
+
+    drmModeRes *res = drmModeGetResources(kms->fd);
+    if (!res) {
+        MP_ERR(kms, "Cannot retrieve DRM resources: %s\n", mp_strerror(errno));
+        ret = -errno;
+        goto end;
+    }
+
+    if (setup_connector(kms, res, mode_id))
+        goto end;
+    if (setup_crtc(kms, res))
+        goto end;
+    if (setup_mode(kms, mode_id))
+        goto end;
+
+end:
+    return ret;
+}
+
+void kms_destroy(struct kms *kms)
+{
+    if (!kms)
+        return;
+    if (kms->connector) {
+        drmModeFreeConnector(kms->connector);
+        kms->connector = NULL;
+    }
+    if (kms->encoder) {
+        drmModeFreeEncoder(kms->encoder);
+        kms->encoder = NULL;
+    }
+    close(kms->fd);
+    talloc_free(kms);
+}
+
+
+
+// VT switcher ----------------------------------------------------------------
+
 static void vt_switcher_sighandler(int sig)
 {
     unsigned char event = sig == RELEASE_SIGNAL ? EVT_RELEASE : EVT_ACQUIRE;
@@ -61,6 +247,7 @@ static int install_signal(int signo, void (*handler)(int))
     act.sa_flags = SA_RESTART;
     return sigaction(signo, &act, NULL);
 }
+
 
 int vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
 {
