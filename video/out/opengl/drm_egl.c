@@ -313,7 +313,7 @@ static int drm_egl_init(struct MPGLContext *ctx, int flags)
     p->ev.version = DRM_EVENT_CONTEXT_VERSION;
     p->ev.page_flip_handler = page_flipped;
 
-    p->vt_switcher_active = vt_switcher_init(&p->vt_switcher, ctx->vo->log) == 0;
+    p->vt_switcher_active = vt_switcher_init(&p->vt_switcher, ctx->vo->log);
     if (p->vt_switcher_active) {
         vt_switcher_acquire(&p->vt_switcher, acquire_vt, ctx);
         vt_switcher_release(&p->vt_switcher, release_vt, ctx);
@@ -329,8 +329,7 @@ static int drm_egl_init(struct MPGLContext *ctx, int flags)
     }
 
     // TODO: arguments should be configurable
-    int ret = kms_setup(p->kms, "/dev/dri/card0", -1, 0);
-    if (ret) {
+    if (!kms_setup(p->kms, "/dev/dri/card0", -1, 0)) {
         MP_ERR(ctx->vo, "Failed to configure KMS.\n");
         return -1;
     }
