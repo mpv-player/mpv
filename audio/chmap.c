@@ -112,19 +112,6 @@ static const struct mp_chmap default_layouts[] = {
     MP_CHMAP8(FL, FR, FC, LFE, BL, BR, SL, SR), // 7.1
 };
 
-// The channel order was lavc/waveex, but differs from lavc for 5, 6 and 8
-// channels. 3 and 7 channels were likely undefined (no ALSA support).
-// I'm not sure about the 4 channel case: ALSA uses "quad", while the ffmpeg
-// default layout is "4.0".
-static const char *const mplayer_layouts[MP_NUM_CHANNELS + 1] = {
-    [1] = "mono",
-    [2] = "stereo",
-    [4] = "quad",
-    [5] = "5.0(alsa)",
-    [6] = "5.1(alsa)",
-    [8] = "7.1(alsa)",
-};
-
 // Returns true if speakers are mapped uniquely, and there's at least 1 channel.
 bool mp_chmap_is_valid(const struct mp_chmap *src)
 {
@@ -225,19 +212,6 @@ void mp_chmap_from_channels(struct mp_chmap *dst, int num_channels)
         *dst = default_layouts[num_channels];
     if (!dst->num)
         mp_chmap_set_unknown(dst, num_channels);
-}
-
-// Try to do what mplayer/mplayer2/mpv did before channel layouts were
-// introduced, i.e. get the old default channel order.
-void mp_chmap_from_channels_alsa(struct mp_chmap *dst, int num_channels)
-{
-    if (num_channels < 0 || num_channels > MP_NUM_CHANNELS) {
-        *dst = (struct mp_chmap) {0};
-    } else {
-        mp_chmap_from_str(dst, bstr0(mplayer_layouts[num_channels]));
-        if (!dst->num)
-            mp_chmap_from_channels(dst, num_channels);
-    }
 }
 
 // Set *dst to an unknown layout for the given numbers of channels.

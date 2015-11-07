@@ -95,17 +95,6 @@ void mp_chmap_sel_add_waveext(struct mp_chmap_sel *s)
     s->allow_waveext = true;
 }
 
-// Classic ALSA-based MPlayer layouts.
-void mp_chmap_sel_add_alsa_def(struct mp_chmap_sel *s)
-{
-    for (int n = 1; n <= MP_NUM_CHANNELS; n++) {
-        struct mp_chmap t;
-        mp_chmap_from_channels_alsa(&t, n);
-        if (t.num)
-            mp_chmap_sel_add_map(s, &t);
-    }
-}
-
 // Add a channel map that should be allowed.
 void mp_chmap_sel_add_map(struct mp_chmap_sel *s, const struct mp_chmap *map)
 {

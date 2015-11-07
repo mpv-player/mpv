@@ -37,7 +37,6 @@ struct mp_chmap_sel {
 void mp_chmap_sel_add_any(struct mp_chmap_sel *s);
 void mp_chmap_sel_add_waveext(struct mp_chmap_sel *s);
 void mp_chmap_sel_add_waveext_def(struct mp_chmap_sel *s);
-void mp_chmap_sel_add_alsa_def(struct mp_chmap_sel *s);
 void mp_chmap_sel_add_map(struct mp_chmap_sel *s, const struct mp_chmap *map);
 void mp_chmap_sel_add_speaker(struct mp_chmap_sel *s, int id);
 bool mp_chmap_sel_adjust(const struct mp_chmap_sel *s, struct mp_chmap *map);
