@@ -264,19 +264,15 @@ static void vo_set_cursor_hidden(struct vo *vo, bool cursor_hidden)
 static int x11_errorhandler(Display *display, XErrorEvent *event)
 {
     struct mp_log *log = x11_error_output;
-
-    if (atomic_load(&x11_error_silence))
-        return 0;
-
     char msg[60];
     XGetErrorText(display, event->error_code, (char *) &msg, sizeof(msg));
 
-    mp_err(log, "X11 error: %s\n", msg);
-
-    mp_verbose(log, "Type: %x, display: %p, resourceid: %lx, serial: %lx\n",
+    int lev = atomic_load(&x11_error_silence) ? MSGL_V : MSGL_ERR;
+    mp_msg(log, lev, "X11 error: %s\n", msg);
+    mp_msg(log, lev, "Type: %x, display: %p, resourceid: %lx, serial: %lx\n",
                event->type, event->display, event->resourceid, event->serial);
-    mp_verbose(log, "Error code: %x, request code: %x, minor code: %x\n",
-               event->error_code, event->request_code, event->minor_code);
+    mp_msg(log, lev, "Error code: %x, request code: %x, minor code: %x\n",
+           event->error_code, event->request_code, event->minor_code);
 
     return 0;
 }
