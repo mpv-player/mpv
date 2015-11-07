@@ -162,10 +162,6 @@ static int init(struct ao *ao)
         mp_chmap_sel_add_waveext(&sel);
         break;
 
-    case 1:
-        mp_chmap_sel_add_alsa_def(&sel);
-        break;
-
     default:
         mp_chmap_sel_add_any(&sel);
     }
@@ -236,7 +232,7 @@ const struct ao_driver audio_out_jack = {
         OPT_FLAG("autostart", autostart, 0),
         OPT_FLAG("connect", connect, 0),
         OPT_CHOICE("std-channel-layout", stdlayout, 0,
-                ({"waveext", 0}, {"alsa", 1}, {"any", 2})),
+                ({"waveext", 0}, {"any", 1})),
         {0}
     },
 };
