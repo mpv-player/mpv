@@ -70,7 +70,7 @@ static bool is_connector_valid(struct kms *kms, int connector_id,
     return true;
 }
 
-static int setup_connector(
+static bool setup_connector(
     struct kms *kms, const drmModeRes *res, int connector_id)
 {
     drmModeConnector *connector = NULL;
@@ -89,26 +89,25 @@ static int setup_connector(
         }
         if (connector_id == -1) {
             MP_ERR(kms, "No connected connectors found\n");
-            return -ENODEV;
+            return false;
         }
     }
 
     if (connector_id < 0 || connector_id >= res->count_connectors) {
         MP_ERR(kms, "Bad connector ID. Max valid connector ID = %u\n",
                res->count_connectors);
-        return -ENODEV;
+        return false;
     }
 
     connector = drmModeGetConnector(kms->fd, res->connectors[connector_id]);
-    if (!is_connector_valid(kms, connector_id, connector, false)) {
-        return -ENODEV;
-    }
+    if (!is_connector_valid(kms, connector_id, connector, false))
+        return false;
 
     kms->connector = connector;
-    return 0;
+    return true;
 }
 
-static int setup_crtc(struct kms *kms, const drmModeRes *res)
+static bool setup_crtc(struct kms *kms, const drmModeRes *res)
 {
     for (unsigned int i = 0; i < kms->connector->count_encoders; ++i) {
         drmModeEncoder *encoder
@@ -127,7 +126,7 @@ static int setup_crtc(struct kms *kms, const drmModeRes *res)
 
             kms->encoder = encoder;
             kms->crtc_id = encoder->crtc_id;
-            return 0;
+            return true;
         }
 
         drmModeFreeEncoder(encoder);
@@ -136,10 +135,10 @@ static int setup_crtc(struct kms *kms, const drmModeRes *res)
     MP_ERR(kms,
            "Connector %u has no suitable CRTC\n",
            kms->connector->connector_id);
-    return -ENODEV;
+    return false;
 }
 
-static int setup_mode(struct kms *kms, int mode_id)
+static bool setup_mode(struct kms *kms, int mode_id)
 {
     if (mode_id < 0 || mode_id >= kms->connector->count_modes) {
         MP_ERR(
@@ -156,11 +155,11 @@ static int setup_mode(struct kms *kms, int mode_id)
                     kms->connector->modes[i].hdisplay,
                     kms->connector->modes[i].vdisplay);
         }
-        return -EINVAL;
+        return false;
     }
 
     kms->mode = kms->connector->modes[mode_id];
-    return 0;
+    return true;
 }
 
 
@@ -178,32 +177,28 @@ struct kms *kms_create(struct mp_log *log)
     return ret;
 }
 
-int kms_setup(struct kms *kms, const char *device_path, int connector_id, int mode_id)
+bool kms_setup(struct kms *kms, const char *device_path, int connector_id, int mode_id)
 {
-    int ret = 0;
     kms->fd = open(device_path, O_RDWR | O_CLOEXEC);
     if (kms->fd < 0) {
         MP_ERR(kms, "Cannot open \"%s\": %s.\n", device_path, mp_strerror(errno));
-        ret = -errno;
-        goto end;
+        return false;
     }
 
     drmModeRes *res = drmModeGetResources(kms->fd);
     if (!res) {
         MP_ERR(kms, "Cannot retrieve DRM resources: %s\n", mp_strerror(errno));
-        ret = -errno;
-        goto end;
+        return false;
     }
 
-    if (setup_connector(kms, res, mode_id))
-        goto end;
-    if (setup_crtc(kms, res))
-        goto end;
-    if (setup_mode(kms, mode_id))
-        goto end;
+    if (!setup_connector(kms, res, mode_id))
+        return false;
+    if (!setup_crtc(kms, res))
+        return false;
+    if (!setup_mode(kms, mode_id))
+        return false;
 
-end:
-    return ret;
+    return true;
 }
 
 void kms_destroy(struct kms *kms)
@@ -249,7 +244,7 @@ static int install_signal(int signo, void (*handler)(int))
 }
 
 
-int vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
+bool vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
 {
     s->log = log;
     s->tty_fd = -1;
@@ -258,37 +253,37 @@ int vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
 
     if (mp_make_cloexec_pipe(vt_switcher_pipe)) {
         MP_ERR(s, "Creating pipe failed: %s\n", mp_strerror(errno));
-        return -1;
+        return false;
     }
 
     s->tty_fd = open("/dev/tty", O_RDWR | O_CLOEXEC);
     if (s->tty_fd < 0) {
         MP_ERR(s, "Can't open TTY for VT control: %s\n", mp_strerror(errno));
-        return -1;
+        return false;
     }
 
     if (has_signal_installed(RELEASE_SIGNAL)) {
         MP_ERR(s, "Can't handle VT release - signal already used\n");
-        return -1;
+        return false;
     }
     if (has_signal_installed(ACQUIRE_SIGNAL)) {
         MP_ERR(s, "Can't handle VT acquire - signal already used\n");
-        return -1;
+        return false;
     }
 
     if (install_signal(RELEASE_SIGNAL, vt_switcher_sighandler)) {
         MP_ERR(s, "Failed to install release signal: %s\n", mp_strerror(errno));
-        return -1;
+        return false;
     }
     if (install_signal(ACQUIRE_SIGNAL, vt_switcher_sighandler)) {
         MP_ERR(s, "Failed to install acquire signal: %s\n", mp_strerror(errno));
-        return -1;
+        return false;
     }
 
     struct vt_mode vt_mode;
     if (ioctl(s->tty_fd, VT_GETMODE, &vt_mode) < 0) {
         MP_ERR(s, "VT_GETMODE failed: %s\n", mp_strerror(errno));
-        return -1;
+        return false;
     }
 
     vt_mode.mode = VT_PROCESS;
@@ -296,10 +291,10 @@ int vt_switcher_init(struct vt_switcher *s, struct mp_log *log)
     vt_mode.acqsig = ACQUIRE_SIGNAL;
     if (ioctl(s->tty_fd, VT_SETMODE, &vt_mode) < 0) {
         MP_ERR(s, "VT_SETMODE failed: %s\n", mp_strerror(errno));
-        return -1;
+        return false;
     }
 
-    return 0;
+    return true;
 }
 
 void vt_switcher_acquire(struct vt_switcher *s,

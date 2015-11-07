@@ -100,10 +100,8 @@ static void fb_destroy(int fd, struct framebuffer *buf)
     }
 }
 
-static int fb_setup_single(struct vo *vo, int fd, struct framebuffer *buf)
+static bool fb_setup_single(struct vo *vo, int fd, struct framebuffer *buf)
 {
-    int ret = 0;
-
     buf->handle = 0;
 
     // create dumb buffer
@@ -112,34 +110,28 @@ static int fb_setup_single(struct vo *vo, int fd, struct framebuffer *buf)
         .height = buf->height,
         .bpp = BITS_PER_PIXEL,
     };
-    ret = drmIoctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &creq);
-    if (ret < 0) {
+    if (drmIoctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &creq) < 0) {
         MP_ERR(vo, "Cannot create dumb buffer: %s\n", mp_strerror(errno));
-        ret = -errno;
-        goto end;
+        goto err;
     }
     buf->stride = creq.pitch;
     buf->size = creq.size;
     buf->handle = creq.handle;
 
     // create framebuffer object for the dumb-buffer
-    ret = drmModeAddFB(fd, buf->width, buf->height, 24, creq.bpp, buf->stride,
-                       buf->handle, &buf->fb);
-    if (ret) {
+    if (drmModeAddFB(fd, buf->width, buf->height, 24, creq.bpp, buf->stride,
+                     buf->handle, &buf->fb)) {
         MP_ERR(vo, "Cannot create framebuffer: %s\n", mp_strerror(errno));
-        ret = -errno;
-        goto end;
+        goto err;
     }
 
     // prepare buffer for memory mapping
     struct drm_mode_map_dumb mreq = {
         .handle = buf->handle,
     };
-    ret = drmIoctl(fd, DRM_IOCTL_MODE_MAP_DUMB, &mreq);
-    if (ret) {
+    if (drmIoctl(fd, DRM_IOCTL_MODE_MAP_DUMB, &mreq)) {
         MP_ERR(vo, "Cannot map dumb buffer: %s\n", mp_strerror(errno));
-        ret = -errno;
-        goto end;
+        goto err;
     }
 
     // perform actual memory mapping
@@ -147,22 +139,18 @@ static int fb_setup_single(struct vo *vo, int fd, struct framebuffer *buf)
                     fd, mreq.offset);
     if (buf->map == MAP_FAILED) {
         MP_ERR(vo, "Cannot map dumb buffer: %s\n", mp_strerror(errno));
-        ret = -errno;
-        goto end;
+        goto err;
     }
 
     memset(buf->map, 0, buf->size);
+    return true;
 
-end:
-    if (ret == 0) {
-        return 0;
-    }
-
+err:
     fb_destroy(fd, buf);
-    return ret;
+    return false;
 }
 
-static int fb_setup_double_buffering(struct vo *vo)
+static bool fb_setup_double_buffering(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
@@ -173,18 +161,17 @@ static int fb_setup_double_buffering(struct vo *vo)
     }
 
     for (unsigned int i = 0; i < BUF_COUNT; i++) {
-        int ret = fb_setup_single(vo, p->kms->fd, &p->bufs[i]);
-        if (ret) {
+        if (!fb_setup_single(vo, p->kms->fd, &p->bufs[i])) {
             MP_ERR(vo, "Cannot create framebuffer for connector %d\n",
                    p->kms->connector->connector_id);
             for (unsigned int j = 0; j < i; j++) {
                 fb_destroy(p->kms->fd, &p->bufs[j]);
             }
-            return ret;
+            return false;
         }
     }
 
-    return 0;
+    return true;
 }
 
 static void page_flipped(int fd, unsigned int frame, unsigned int sec,
@@ -194,11 +181,11 @@ static void page_flipped(int fd, unsigned int frame, unsigned int sec,
     p->pflip_happening = false;
 }
 
-static int crtc_setup(struct vo *vo)
+static bool crtc_setup(struct vo *vo)
 {
     struct priv *p = vo->priv;
     if (p->active)
-        return 0;
+        return true;
     p->old_crtc = drmModeGetCrtc(p->kms->fd, p->kms->crtc_id);
     int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id,
                              p->bufs[p->front_buf + BUF_COUNT - 1].fb,
@@ -208,7 +195,7 @@ static int crtc_setup(struct vo *vo)
                              1,
                              &p->kms->mode);
     p->active = true;
-    return ret;
+    return ret == 0;
 }
 
 static void crtc_release(struct vo *vo)
@@ -434,7 +421,7 @@ static int preinit(struct vo *vo)
     p->ev.version = DRM_EVENT_CONTEXT_VERSION;
     p->ev.page_flip_handler = page_flipped;
 
-    p->vt_switcher_active = vt_switcher_init(&p->vt_switcher, vo->log) == 0;
+    p->vt_switcher_active = vt_switcher_init(&p->vt_switcher, vo->log);
     if (p->vt_switcher_active) {
         vt_switcher_acquire(&p->vt_switcher, acquire_vt, vo);
         vt_switcher_release(&p->vt_switcher, release_vt, vo);
@@ -448,12 +435,12 @@ static int preinit(struct vo *vo)
         goto err;
     }
 
-    if (kms_setup(p->kms, p->device_path, p->connector_id, p->mode_id)) {
+    if (!kms_setup(p->kms, p->device_path, p->connector_id, p->mode_id)) {
         MP_ERR(vo, "Failed to configure KMS.\n");
         goto err;
     }
 
-    if (fb_setup_double_buffering(vo)) {
+    if (!fb_setup_double_buffering(vo)) {
         MP_ERR(vo, "Failed to set up double buffering.\n");
         goto err;
     }
@@ -467,7 +454,7 @@ static int preinit(struct vo *vo)
     p->device_w = p->bufs[0].width;
     p->device_h = p->bufs[0].height;
 
-    if (crtc_setup(vo)) {
+    if (!crtc_setup(vo)) {
         MP_ERR(vo,
                "Cannot set CRTC for connector %u: %s\n",
                p->kms->connector->connector_id,
