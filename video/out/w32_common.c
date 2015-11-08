@@ -24,6 +24,7 @@
 #include <initguid.h>
 #include <ole2.h>
 #include <shobjidl.h>
+#include <avrt.h>
 
 #include "options/options.h"
 #include "input/keycodes.h"
@@ -107,6 +108,8 @@ struct vo_w32_state {
 
     // updates on move/resize/displaychange
     double display_fps;
+
+    HANDLE avrt_handle;
 };
 
 typedef struct tagDropTarget {
@@ -1263,6 +1266,11 @@ int vo_w32_init(struct vo *vo)
         goto fail;
     }
 
+    // While the UI runs in its own thread, the thread in which this function
+    // runs in will be the renderer thread. Apply magic MMCSS cargo-cult,
+    // which might stop Windows from throttling clock rate and so on.
+    w32->avrt_handle = AvSetMmThreadCharacteristicsW(L"Playback", &(DWORD){0});
+
     return 1;
 fail:
     talloc_free(w32);
@@ -1392,6 +1400,8 @@ void vo_w32_uninit(struct vo *vo)
 
     mp_dispatch_run(w32->dispatch, do_terminate, w32);
     pthread_join(w32->thread, NULL);
+
+    AvRevertMmThreadCharacteristics(w32->avrt_handle);
 
     talloc_free(w32);
     vo->w32 = NULL;

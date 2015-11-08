@@ -130,7 +130,7 @@ main_dependencies = [
         'name': 'win32',
         'desc': 'win32',
         'deps_any': [ 'os-win32', 'os-cygwin' ],
-        'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'uuid']),
+        'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'uuid', 'avrt']),
     }, {
         'name': '--win32-internal-pthreads',
         'desc': 'internal pthread wrapper for win32 (Vista+)',
