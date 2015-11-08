@@ -253,13 +253,11 @@ static int decode_packet(struct dec_audio *da, struct mp_audio **out)
     if (!mpkt)
         return AD_EOF;
 
+    double pts = mpkt->pts;
+
     AVPacket pkt;
     mp_set_av_packet(&pkt, mpkt, NULL);
     pkt.pts = pkt.dts = 0;
-    if (mpkt->pts != MP_NOPTS_VALUE) {
-        da->pts        = mpkt->pts;
-        da->pts_offset = 0;
-    }
     if (!spdif_ctx->lavf_ctx) {
         if (init_filter(da, &pkt) < 0)
             return AD_ERR;
@@ -276,6 +274,7 @@ static int decode_packet(struct dec_audio *da, struct mp_audio **out)
         return AD_ERR;
 
     memcpy((*out)->planes[0], spdif_ctx->out_buffer, spdif_ctx->out_buffer_len);
+    (*out)->pts = pts;
 
     return 0;
 }

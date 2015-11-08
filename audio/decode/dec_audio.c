@@ -170,14 +170,18 @@ static int decode_new_frame(struct dec_audio *da)
         if (ret < 0)
             return ret;
 
-        if (da->pts == MP_NOPTS_VALUE && da->header->missing_timestamps)
-            da->pts = 0;
-
         if (da->waiting) {
+            if (da->waiting->pts != MP_NOPTS_VALUE) {
+                da->pts = da->waiting->pts;
+                da->pts_offset = 0;
+            }
             da->pts_offset += da->waiting->samples;
             da->decode_format = *da->waiting;
             mp_audio_set_null_data(&da->decode_format);
         }
+
+        if (da->pts == MP_NOPTS_VALUE && da->header->missing_timestamps)
+            da->pts = 0;
     }
     return mp_audio_config_valid(da->waiting) ? AD_OK : AD_ERR;
 }
