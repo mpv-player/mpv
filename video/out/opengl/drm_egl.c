@@ -304,6 +304,10 @@ static void drm_egl_uninit(MPGLContext *ctx)
 
 static int drm_egl_init(struct MPGLContext *ctx, int flags)
 {
+    if (ctx->vo->probing) {
+        MP_VERBOSE(ctx->vo, "DRM EGL backend can be activated only manually.\n");
+        return -1;
+    }
     struct priv *p = ctx->priv;
     p->kms = NULL;
     p->old_crtc = NULL;
