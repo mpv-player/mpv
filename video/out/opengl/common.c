@@ -465,16 +465,10 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         if (gl->es >= 300)
             gl->glsl_version = 300;
     } else {
-        if (gl->version >= 200)
-            gl->glsl_version = 110;
-        if (gl->version >= 210)
-            gl->glsl_version = 120;
-        if (gl->version >= 300)
-            gl->glsl_version = 130;
-        if (gl->version >= 320)
-            gl->glsl_version = 150;
-        if (gl->version >= 330)
-            gl->glsl_version = 330;
+        gl->glsl_version = 110;
+        int glsl_major = 0, glsl_minor = 0;
+        if (sscanf(shader, "%d.%d", &glsl_major, &glsl_minor) == 2)
+            gl->glsl_version = glsl_major * 100 + glsl_minor;
     }
 
     if (is_software_gl(gl)) {
