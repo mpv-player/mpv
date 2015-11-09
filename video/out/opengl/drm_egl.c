@@ -429,7 +429,7 @@ static void drm_egl_swap_buffers(MPGLContext *ctx)
 }
 
 const struct mpgl_driver mpgl_driver_drm_egl = {
-    .name           = "drm_egl",
+    .name           = "drm-egl",
     .priv_size      = sizeof(struct priv),
     .init           = drm_egl_init,
     .reconfig       = drm_egl_reconfig,
