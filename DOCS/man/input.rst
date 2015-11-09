@@ -1452,7 +1452,7 @@ Property list
     Names of the displays that the mpv window covers. On X11, these
     are the xrandr names (LVDS1, HDMI1, DP1, VGA1, etc.).
 
-``display-fps``
+``display-fps`` (RW)
     The refresh rate of the current display. Currently, this is the lowest FPS
     of any display covered by the video, as retrieved by the underlying system
     APIs (e.g. xrandr on X11). It is not the measured FPS. It's not necessarily
