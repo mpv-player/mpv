@@ -1213,7 +1213,7 @@ static void pass_prescale(struct gl_video *p, int src_tex_num, int dst_tex_num,
                               p->opts.superxbr_opts, &transform);
                 break;
             case 2:
-                pass_nnedi3(p->sc, planes, tex_num, step,
+                pass_nnedi3(p->gl, p->sc, planes, tex_num, step,
                             p->opts.nnedi3_opts, &transform);
                 break;
             default:

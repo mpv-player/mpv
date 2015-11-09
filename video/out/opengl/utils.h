@@ -142,6 +142,7 @@ void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
 void gl_sc_uniform_buffer(struct gl_shader_cache *sc, char *name,
                           const char *text, int binding);
 void gl_sc_set_vao(struct gl_shader_cache *sc, struct gl_vao *vao);
+void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name);
 void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc);
 void gl_sc_reset(struct gl_shader_cache *sc);
 

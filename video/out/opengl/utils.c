@@ -513,8 +513,9 @@ struct gl_shader_cache {
     struct mp_log *log;
 
     // this is modified during use (gl_sc_add() etc.)
-    char *text;
+    char *prelude_text;
     char *header_text;
+    char *text;
     struct gl_vao *vao;
 
     struct sc_entry entries[SC_ENTRIES];
@@ -530,16 +531,18 @@ struct gl_shader_cache *gl_sc_create(GL *gl, struct mp_log *log)
     *sc = (struct gl_shader_cache){
         .gl = gl,
         .log = log,
-        .text = talloc_strdup(sc, ""),
+        .prelude_text = talloc_strdup(sc, ""),
         .header_text = talloc_strdup(sc, ""),
+        .text = talloc_strdup(sc, ""),
     };
     return sc;
 }
 
 void gl_sc_reset(struct gl_shader_cache *sc)
 {
-    sc->text[0] = '\0';
+    sc->prelude_text[0] = '\0';
     sc->header_text[0] = '\0';
+    sc->text[0] = '\0';
     for (int n = 0; n < sc->num_uniforms; n++) {
         talloc_free(sc->uniforms[n].name);
         if (sc->uniforms[n].type == UT_buffer)
@@ -565,6 +568,12 @@ void gl_sc_destroy(struct gl_shader_cache *sc)
     gl_sc_reset(sc);
     sc_flush_cache(sc);
     talloc_free(sc);
+}
+
+void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name)
+{
+    sc->prelude_text = talloc_asprintf_append(sc->prelude_text,
+                                              "#extension %s : enable\n", name);
 }
 
 void gl_sc_add(struct gl_shader_cache *sc, const char *text)
@@ -867,6 +876,7 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
                                    gl->es >= 300 ? " es" : "");
     if (gl->es)
         ADD(header, "precision mediump float;\n");
+    ADD(header, "%s", sc->prelude_text);
     char *vert_in = gl->glsl_version >= 130 ? "in" : "attribute";
     char *vert_out = gl->glsl_version >= 130 ? "out" : "varying";
     char *frag_in = gl->glsl_version >= 130 ? "in" : "varying";

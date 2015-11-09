@@ -80,7 +80,7 @@ const float* get_nnedi3_weights(const struct nnedi3_opts *conf, int *size)
     return (const float*)(nnedi3_weights + offset * 4);
 }
 
-void pass_nnedi3(struct gl_shader_cache *sc, int planes, int tex_num,
+void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
                  int step, const struct nnedi3_opts *conf,
                  struct gl_transform *transform)
 {
@@ -108,6 +108,8 @@ void pass_nnedi3(struct gl_shader_cache *sc, int planes, int tex_num,
         snprintf(buf, sizeof(buf), "vec4 weights[%d];",
                  neurons * (sample_count * 2 + 1));
         gl_sc_uniform_buffer(sc, "NNEDI3_WEIGHTS", buf, 0);
+        if (gl->glsl_version < 140)
+            gl_sc_enable_extension(sc, "GL_ARB_uniform_buffer_object");
     } else if (conf->upload == NNEDI3_UPLOAD_SHADER) {
         // Somehow necessary for hard coding approach.
         GLSLH(#pragma optionNV(fastprecision on))
