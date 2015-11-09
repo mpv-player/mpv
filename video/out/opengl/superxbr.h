@@ -30,7 +30,7 @@ extern const struct superxbr_opts superxbr_opts_def;
 extern const struct m_sub_options superxbr_conf;
 
 void pass_superxbr(struct gl_shader_cache *sc, int planes, int tex_num,
-                   int step, const struct superxbr_opts *conf,
+                   int step, float tex_mul, const struct superxbr_opts *conf,
                    struct gl_transform *transform);
 
 #endif
