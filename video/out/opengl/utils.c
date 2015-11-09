@@ -865,6 +865,7 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     // set up shader text (header + uniforms + body)
     char *header = talloc_asprintf(tmp, "#version %d%s\n", gl->glsl_version,
                                    gl->es >= 300 ? " es" : "");
+    ADD(header, "#extension all : warn\n");
     if (gl->es)
         ADD(header, "precision mediump float;\n");
     char *vert_in = gl->glsl_version >= 130 ? "in" : "attribute";
