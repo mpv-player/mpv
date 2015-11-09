@@ -27,43 +27,61 @@
 struct mp_archive_volume {
     struct mp_archive *mpa;
     struct stream *src;
+    int64_t seek_to;
     char *url;
 };
+
+static bool volume_seek(struct mp_archive_volume *vol)
+{
+    if (vol->seek_to < 0)
+        return true;
+    bool r = stream_seek(vol->src, vol->seek_to);
+    vol->seek_to = -1;
+    return r;
+}
 
 static ssize_t read_cb(struct archive *arch, void *priv, const void **buffer)
 {
     struct mp_archive_volume *vol = priv;
+    if (!volume_seek(vol))
+        return -1;
     int res = stream_read_partial(vol->src, vol->mpa->buffer,
                                   sizeof(vol->mpa->buffer));
     *buffer = vol->mpa->buffer;
     return MPMAX(res, 0);
 }
 
+// lazy seek to avoid problems with end seeking over http
 static int64_t seek_cb(struct archive *arch, void *priv,
                        int64_t offset, int whence)
 {
     struct mp_archive_volume *vol = priv;
     switch (whence) {
     case SEEK_SET:
+        vol->seek_to = offset;
         break;
     case SEEK_CUR:
-        offset += vol->src->pos;
+        if (vol->seek_to < 0)
+            vol->seek_to = stream_tell(vol->src);
+        vol->seek_to += offset;
         break;
     case SEEK_END: ;
         int64_t size = stream_get_size(vol->src);
         if (size < 0)
             return -1;
-        offset += size;
+        vol->seek_to = size + offset;
         break;
     default:
         return -1;
     }
-    return stream_seek(vol->src, offset) ? offset : -1;
+    return vol->seek_to;
 }
 
 static int64_t skip_cb(struct archive *arch, void *priv, int64_t request)
 {
     struct mp_archive_volume *vol = priv;
+    if (!volume_seek(vol))
+        return -1;
     int64_t old = stream_tell(vol->src);
     stream_skip(vol->src, request);
     return stream_tell(vol->src) - old;
@@ -72,6 +90,7 @@ static int64_t skip_cb(struct archive *arch, void *priv, int64_t request)
 static int open_cb(struct archive *arch, void *priv)
 {
     struct mp_archive_volume *vol = priv;
+    vol->seek_to = -1;
     if (!vol->src) {
         vol->src = stream_create(vol->url, STREAM_READ,
                                  vol->mpa->primary_src->cancel,
