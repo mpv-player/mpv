@@ -2347,6 +2347,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_1d_tex = gl->mpgl_caps & MPGL_CAP_1D_TEX;
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
+    bool have_float_bits_enc = gl->mpgl_caps & MPGL_CAP_FLOAT_BIT_ENC;
 
     if (gl->es && p->opts.pbo) {
         p->opts.pbo = 0;
@@ -2432,7 +2433,7 @@ static void check_gl_features(struct gl_video *p)
             }
         } else if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_SHADER) {
             // Check features for hard coding approach.
-            if (p->gl->glsl_version < 330) {
+            if (!have_float_bits_enc) {
                 MP_WARN(p, "Disabling NNEDI3 (OpenGL 3.3 required).\n");
                 p->opts.prescale = 0;
             }

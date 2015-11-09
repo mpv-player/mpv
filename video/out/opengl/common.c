@@ -324,6 +324,12 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    // Extension to encode float in bits, required by NNEDI3.
+    {
+        .ver_core = 330,
+        .extension = "GL_ARB_shader_bit_encoding",
+        .provides = MPGL_CAP_FLOAT_BIT_ENC,
+    },
 };
 
 #undef FN_OFFS
