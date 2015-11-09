@@ -63,6 +63,7 @@ enum {
     MPGL_CAP_1D_TEX             = (1 << 14),
     MPGL_CAP_3D_TEX             = (1 << 15),
     MPGL_CAP_DEBUG              = (1 << 16),
+    MPGL_CAP_FLOAT_BIT_ENC      = (1 << 17),    // GL_ARB_shader_bit_encoding
     MPGL_CAP_SW                 = (1 << 30),    // indirect or sw renderer
 };
 
