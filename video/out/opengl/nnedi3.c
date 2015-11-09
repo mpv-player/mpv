@@ -81,7 +81,7 @@ const float* get_nnedi3_weights(const struct nnedi3_opts *conf, int *size)
 }
 
 void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
-                 int step, const struct nnedi3_opts *conf,
+                 int step, float tex_mul, const struct nnedi3_opts *conf,
                  struct gl_transform *transform)
 {
     assert(0 <= step && step < 2);
@@ -115,23 +115,23 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
         GLSLH(#pragma optionNV(fastprecision on))
     }
 
-    GLSLHF("float nnedi3(sampler2D tex, vec2 pos, vec2 tex_size, int plane) {\n");
+    GLSLHF("float nnedi3(sampler2D tex, vec2 pos, vec2 tex_size, int plane, float tex_mul) {\n");
 
     if (step == 0) {
         *transform = (struct gl_transform){{{1.0,0.0}, {0.0,2.0}}, {0.0,-0.5}};
 
         GLSLH(if (fract(pos.y * tex_size.y) < 0.5)
-                  return texture(tex, pos + vec2(0, 0.25) / tex_size)[plane];)
+                  return texture(tex, pos + vec2(0, 0.25) / tex_size)[plane] * tex_mul;)
         GLSLHF("#define GET(i, j) "
-               "(texture(tex, pos+vec2((i)-(%f),(j)-(%f)+0.25)/tex_size)[plane])\n",
+               "(texture(tex, pos+vec2((i)-(%f),(j)-(%f)+0.25)/tex_size)[plane]*tex_mul)\n",
                width / 2.0 - 1, (height - 1) / 2.0);
     } else {
         *transform = (struct gl_transform){{{2.0,0.0}, {0.0,1.0}}, {-0.5,0.0}};
 
         GLSLH(if (fract(pos.x * tex_size.x) < 0.5)
-                  return texture(tex, pos + vec2(0.25, 0) / tex_size)[plane];)
+                  return texture(tex, pos + vec2(0.25, 0) / tex_size)[plane] * tex_mul;)
         GLSLHF("#define GET(i, j) "
-               "(texture(tex, pos+vec2((j)-(%f)+0.25,(i)-(%f))/tex_size)[plane])\n",
+               "(texture(tex, pos+vec2((j)-(%f)+0.25,(i)-(%f))/tex_size)[plane]*tex_mul)\n",
                (height - 1) / 2.0, width / 2.0 - 1);
     }
 
@@ -213,7 +213,7 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
     GLSL(vec4 color = vec4(1.0);)
 
     for (int i = 0; i < planes; i++) {
-        GLSLF("color[%d] = nnedi3(texture%d, texcoord%d, texture_size%d, %d);\n",
-              i, tex_num, tex_num, tex_num, i);
+        GLSLF("color[%d] = nnedi3(texture%d, texcoord%d, texture_size%d, %d, %f);\n",
+              i, tex_num, tex_num, tex_num, i, tex_mul);
     }
 }
