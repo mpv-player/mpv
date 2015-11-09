@@ -116,7 +116,7 @@ static int create(struct gl_hwdec *hw)
         return -1;
     p->vdp_surface = VDP_INVALID_HANDLE;
     p->mixer = mp_vdpau_mixer_create(p->ctx, hw->log);
-    if (hw->reject_emulated && mp_vdpau_guess_if_emulated(p->ctx)) {
+    if (hw->probing && mp_vdpau_guess_if_emulated(p->ctx)) {
         destroy(hw);
         return -1;
     }

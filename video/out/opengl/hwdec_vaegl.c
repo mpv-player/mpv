@@ -216,7 +216,7 @@ static int create(struct gl_hwdec *hw)
         return -1;
     }
 
-    if (hw->reject_emulated && va_guess_if_emulated(p->ctx)) {
+    if (hw->probing && va_guess_if_emulated(p->ctx)) {
         destroy(hw);
         return -1;
     }
