@@ -1,3 +1,74 @@
+Release 0.13.0
+==============
+
+NOTE: The previous release changed the default format for youtube-dl and
+removed some workarounds related to MPEG DASH support. However, the required
+changes to FFmpeg code (FFmpeg commit 4ab56667594842283dc5ae07f0daba2a2cb4d3af)
+are not in any FFmpeg release yet (as of 2015-11-10), so for now, playing DASH
+streams requires using FFmpeg git master. You can work around this by using the
+--ytdl-format=best option.
+
+
+Features
+--------
+
+New
+~~~
+
+- SVG version of the icon (with symbolic counterpart)
+- stream_libarchive: add multivolume support
+- vo_opengl: add prescaling framework along with Super-xBR and NNEDI3 (currently very slow) prescalers (issue #2230)
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- command: add mistimed-frame-count property
+- vo_opengl: add vsync-fences option
+
+
+Changed
+~~~~~~~
+
+- command: make display-fps property writable
+- options: enable mpeg2 hw decoding by default if hw decoding is requested
+- vo_opengl: rename fancy-downscaling to correct-downscaling
+- vo_opengl: correct-downscaling: enable also for anamorphic clips
+- vo_opengl: rename "drm_egl" to "drm-egl"
+- vo_opengl: disable drm-egl autopickup
+- vo_opengl: never load vaapi GLX interop by default
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- ao_alsa: fix 7.1 over HDMI
+- audio: do not require full audio chain reinit for speed changes
+- rpi: add support for codecs other than h264 (mpeg2 for now)
+- vd_lavc: make hwdec fallback more tolerant
+- video: fix playback of pal8
+- video: multiple display-sync fixes
+- vo: fix no-audio mode with interpolation enabled/display-sync disabled
+- vo_direct3d: fix operation (issue #2434)
+- vo_drm: handle possible errors from sigaction
+- vo_drm: show osd in audio only mode
+- vo_opengl: do not attempt to cache frames in FBO in dumb-mode (issue #2432)
+- vo_opengl: win32: always request MMCSS for DWM
+- vo_opengl: win32: try to enable DwmFlush by default
+- vo_vdpau: check VDP_RGBA_FORMAT_A8 support
+- win32: request MMCSS "Playback" profile
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API. A complete changelog can be seen by running
+`git log v0.12.0..v0.13.0` in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.12.0...v0.13.0 or
+http://git.srsfckn.biz/mpv/log/?qt=range&q=v0.12.0..v0.13.0
+
+
 Release 0.12.0
 ==============
 
