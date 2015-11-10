@@ -443,6 +443,15 @@ error:
     uninit_avctx(vd);
 }
 
+static void reset_avctx(struct dec_video *vd)
+{
+    vd_ffmpeg_ctx *ctx = vd->priv;
+
+    if (ctx->avctx)
+        avcodec_flush_buffers(ctx->avctx);
+    ctx->flushing = false;
+}
+
 static void uninit_avctx(struct dec_video *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
@@ -463,6 +472,7 @@ static void uninit_avctx(struct dec_video *vd)
 
     av_frame_free(&ctx->pic);
 
+    ctx->flushing = false;
     ctx->hwdec_failed = false;
     ctx->hwdec_fail_count = 0;
 }
@@ -614,9 +624,6 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     struct vd_lavc_params *opts = ctx->opts->vd_lavc_params;
     AVPacket pkt;
 
-    if (ctx->hwdec_request_reinit)
-        avcodec_flush_buffers(avctx);
-
     if (flags) {
         // hr-seek framedrop vs. normal framedrop
         avctx->skip_frame = flags == 2 ? AVDISCARD_NONREF : opts->framedrop;
@@ -626,10 +633,20 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     }
 
     mp_set_av_packet(&pkt, packet, NULL);
+    ctx->flushing |= !pkt.data;
+
+    // Reset decoder if hw state got reset, or new data comes during flushing.
+    if (ctx->hwdec_request_reinit || (pkt.data && ctx->flushing))
+        reset_avctx(vd);
 
     hwdec_lock(ctx);
     ret = avcodec_decode_video2(avctx, ctx->pic, &got_picture, &pkt);
     hwdec_unlock(ctx);
+
+    // Reset decoder if it was fully flushed. Caller might send more flush
+    // packets, or even new actual packets.
+    if (ctx->flushing && (ret < 0 || !got_picture))
+        reset_avctx(vd);
 
     if (ret < 0) {
         MP_WARN(vd, "Error while decoding frame!\n");
@@ -701,10 +718,9 @@ static struct mp_image *decode_with_fallback(struct dec_video *vd,
 static int control(struct dec_video *vd, int cmd, void *arg)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
-    AVCodecContext *avctx = ctx->avctx;
     switch (cmd) {
     case VDCTRL_RESET:
-        avcodec_flush_buffers(avctx);
+        reset_avctx(vd);
         return CONTROL_TRUE;
     case VDCTRL_GET_HWDEC: {
         int hwdec = ctx->hwdec ? ctx->hwdec->type : 0;
