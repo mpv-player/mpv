@@ -392,10 +392,11 @@ You can put all of the options in configuration files which will be read every
 time mpv is run. The system-wide configuration file 'mpv.conf' is in your
 configuration directory (e.g. ``/etc/mpv`` or ``/usr/local/etc/mpv``), the
 user-specific one is ``~/.config/mpv/mpv.conf``. For details and platform
-specifics see the `FILES`_ section.
+specifics (in particular Windows paths) see the `FILES`_ section.
+
 User-specific options override system-wide options and options given on the
 command line override either. The syntax of the configuration files is
-``option=<value>``; everything after a *#* is considered a comment. Options
+``option=value``. Everything after a *#* is considered a comment. Options
 that work without values can be enabled by setting them to *yes* and disabled by
 setting them to *no*. Even suboptions can be specified in this way.
 
@@ -460,7 +461,38 @@ description (shown by ``--profile=help``) can be defined with the
 ``profile-desc`` option. To end the profile, start another one or use the
 profile name ``default`` to continue with normal options.
 
-.. admonition:: Example mpv profile
+.. admonition:: Example mpv config file with profiles
+
+    ::
+
+        # normal top-level option
+        fullscreen=yes
+
+        # a profile that can be enabled with --profile=big-cache
+        [big-cache]
+        cache=123400
+        demuxer-readahead-secs=20
+
+        [slow]
+        profile-desc="some profile name"
+        vo=opengl:scale=ewa_lanczos:scale-radius=16
+
+        [fast]
+        vo=vdpau
+
+        # using a profile again extends it
+        [slow]
+        framedrop=no
+        # you can also include other profiles
+        profile=big-cache
+
+
+Auto profiles
+-------------
+
+Some profiles are loaded automatically. The following example demonstrates this:
+
+.. admonition:: Auto profile loading
 
     ::
 
@@ -479,6 +511,13 @@ profile name ``default`` to continue with normal options.
         [ao.alsa]
         device=spdif
 
+The profile name follows the schema ``type.name``, where type can be ``vo``
+to match the value the ``--vo`` option is set to, ``ao`` for ``--ao``,
+``protocol`` for the input/output protocol in use (see ``--list-protocols``),
+and ``extension`` for the extension of the path of the currently played file
+(*not* the file format).
+
+This feature is very limited, and there are no other auto profiles.
 
 TAKING SCREENSHOTS
 ==================
@@ -687,6 +726,15 @@ The profile always overrides other settings in ``mpv.conf``.
 .. include:: ipc.rst
 
 .. include:: changes.rst
+
+
+EMBEDDING INTO OTHER PROGRAMS (LIBMPV)
+======================================
+
+mpv can be embedded into other programs as video/audio playback backend. The
+recommended way to to so is using libmpv. See ``libmpv/client.h`` in the mpv
+source code repository. This provides a C API. Bindings for other languages
+might be available (see wiki).
 
 ENVIRONMENT VARIABLES
 =====================
@@ -905,49 +953,3 @@ future.
 
 Note that mpv likes to mix ``/`` and ``\`` path separators for simplicity.
 kernel32.dll accepts this, but cmd.exe does not.
-
-EXAMPLES OF MPV USAGE
-=====================
-
-Blu-ray playback:
-    - ``mpv bd:////path/to/disc``
-    - ``mpv bd:// --bluray-device=/path/to/disc``
-
-Play in Japanese with English subtitles:
-    ``mpv dvd://1 --alang=ja --slang=en``
-
-Play only chapters 5, 6, 7:
-    ``mpv dvd://1 --chapter=5-7``
-
-Play only titles 5, 6, 7:
-    ``mpv dvd://5-7``
-
-Play a multi-angle DVD:
-    ``mpv dvd://1 --dvd-angle=2``
-
-Play from a different DVD device:
-    ``mpv dvd://1 --dvd-device=/dev/dvd2``
-
-Play DVD video from a directory with VOB files:
-    ``mpv dvd://1 --dvd-device=/path/to/directory/``
-
-Stream from HTTP:
-    ``mpv http://example.com/example.avi``
-
-Stream using RTSP:
-    ``mpv rtsp://server.example.com/streamName``
-
-Play a libavfilter graph:
-    ``mpv avdevice://lavfi:mandelbrot``
-
-AUTHORS
-=======
-
-mpv is a MPlayer fork based on mplayer2, which in turn is a fork of MPlayer.
-
-MPlayer was initially written by Arpad Gereoffy. See the ``AUTHORS`` file for
-a list of some of the many other contributors.
-
-MPlayer is (C) 2000-2013 The MPlayer Team
-
-This man page was written mainly by Gabucino, Jonas Jermann and Diego Biurrun.

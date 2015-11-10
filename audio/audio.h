@@ -37,6 +37,8 @@ struct mp_audio {
     int num_planes;     // number of planes
     int bps;            // size of sub-samples (af_fmt_to_bytes(format))
 
+    double pts;         // currently invalid within the filter chain
+
     // --- private
     // These do not necessarily map directly to planes[]. They can have
     // different order or count. There shouldn't be more buffers than planes.

@@ -117,6 +117,8 @@ static inline void gl_transform_rect(struct gl_transform t, struct mp_rect_f *r)
     gl_transform_vec(t, &r->x1, &r->y1);
 }
 
+void gl_transform_trans(struct gl_transform t, struct gl_transform *x);
+
 void gl_set_debug_logger(GL *gl, struct mp_log *log);
 
 struct gl_shader_cache;
@@ -137,7 +139,10 @@ void gl_sc_uniform_mat2(struct gl_shader_cache *sc, char *name,
                         bool transpose, GLfloat *v);
 void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
                         bool transpose, GLfloat *v);
+void gl_sc_uniform_buffer(struct gl_shader_cache *sc, char *name,
+                          const char *text, int binding);
 void gl_sc_set_vao(struct gl_shader_cache *sc, struct gl_vao *vao);
+void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name);
 void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc);
 void gl_sc_reset(struct gl_shader_cache *sc);
 

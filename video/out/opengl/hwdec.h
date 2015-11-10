@@ -14,7 +14,7 @@ struct gl_hwdec {
     // For free use by hwdec driver
     void *priv;
     // For working around the vdpau vs. vaapi mess.
-    bool reject_emulated;
+    bool probing;
     // hwdec backends must set this to an IMGFMT_ that has an equivalent
     // internal representation in gl_video.c as the hardware texture.
     // It's used to build the rendering chain. For example, setting it to

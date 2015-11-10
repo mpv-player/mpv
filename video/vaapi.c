@@ -95,19 +95,16 @@ struct va_image_formats {
 
 static void va_get_formats(struct mp_vaapi_ctx *ctx)
 {
-    int num = vaMaxNumImageFormats(ctx->display);
-    VAImageFormat entries[num];
-    VAStatus status = vaQueryImageFormats(ctx->display, entries, &num);
+    struct va_image_formats *formats = talloc_ptrtype(ctx, formats);
+    formats->num = vaMaxNumImageFormats(ctx->display);
+    formats->entries = talloc_array(formats, VAImageFormat, formats->num);
+    VAStatus status = vaQueryImageFormats(ctx->display, formats->entries,
+                                          &formats->num);
     if (!CHECK_VA_STATUS(ctx, "vaQueryImageFormats()"))
         return;
-    struct va_image_formats *formats = talloc_ptrtype(ctx, formats);
-    formats->entries = talloc_array(formats, VAImageFormat, num);
-    formats->num = num;
-    MP_VERBOSE(ctx, "%d image formats available:\n", num);
-    for (int i = 0; i < num; i++) {
-        formats->entries[i] = entries[i];
-        MP_VERBOSE(ctx, "  %s\n", VA_STR_FOURCC(entries[i].fourcc));
-    }
+    MP_VERBOSE(ctx, "%d image formats available:\n", formats->num);
+    for (int i = 0; i < formats->num; i++)
+        MP_VERBOSE(ctx, "  %s\n", VA_STR_FOURCC(formats->entries[i].fourcc));
     ctx->image_formats = formats;
 }
 

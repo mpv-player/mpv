@@ -191,12 +191,6 @@ static int decode_packet(struct dec_audio *da, struct mp_audio **out)
     AVPacket pkt;
     mp_set_av_packet(&pkt, mpkt, NULL);
 
-    // If we don't have a PTS yet, use the first packet PTS we can get.
-    if (da->pts == MP_NOPTS_VALUE && mpkt && mpkt->pts != MP_NOPTS_VALUE) {
-        da->pts = mpkt->pts;
-        da->pts_offset = 0;
-    }
-
     int got_frame = 0;
     av_frame_unref(priv->avframe);
     int ret = avcodec_decode_audio4(avctx, priv->avframe, &got_frame, &pkt);
@@ -225,10 +219,6 @@ static int decode_packet(struct dec_audio *da, struct mp_audio **out)
         return mpkt ? AD_OK : AD_EOF;
 
     double out_pts = mp_pts_from_av(priv->avframe->pkt_pts, NULL);
-    if (out_pts != MP_NOPTS_VALUE) {
-        da->pts = out_pts;
-        da->pts_offset = 0;
-    }
 
     struct mp_audio *mpframe = mp_audio_from_avframe(priv->avframe);
     if (!mpframe)
@@ -244,6 +234,8 @@ static int decode_packet(struct dec_audio *da, struct mp_audio **out)
     }
     mp_audio_set_channels(mpframe, &lavc_chmap);
 
+    mpframe->pts = out_pts;
+
 #if HAVE_AVFRAME_SKIP_SAMPLES
     AVFrameSideData *sd =
         av_frame_get_side_data(priv->avframe, AV_FRAME_DATA_SKIP_SAMPLES);
@@ -254,7 +246,8 @@ static int decode_packet(struct dec_audio *da, struct mp_audio **out)
         uint32_t skip = MPMIN(priv->skip_samples, mpframe->samples);
         if (skip) {
             mp_audio_skip_samples(mpframe, skip);
-            da->pts_offset += skip;
+            if (mpframe->pts != MP_NOPTS_VALUE)
+                mpframe->pts += skip / (double)mpframe->rate;
             priv->skip_samples -= skip;
         }
         if (pad <= mpframe->samples)

@@ -38,6 +38,8 @@
 #include "hwdec.h"
 #include "osd.h"
 #include "stream/stream.h"
+#include "superxbr.h"
+#include "nnedi3.h"
 #include "video_shaders.h"
 #include "video/out/filter_kernels.h"
 #include "video/out/aspect.h"
@@ -47,6 +49,12 @@
 
 // Pixel width of 1D lookup textures.
 #define LOOKUP_TEXTURE_SIZE 256
+
+// Maximal number of passes that prescaler can be applied.
+#define MAX_PRESCALE_PASSES 5
+
+// Maximal number of steps each pass of prescaling contains
+#define MAX_PRESCALE_STEPS 2
 
 // scale/cscale arguments that map directly to shader filter routines.
 // Note that the convolution filters are not included in this list.
@@ -149,11 +157,12 @@ struct gl_video {
     GLuint dither_texture;
     int dither_size;
 
+    GLuint nnedi3_weights_buffer;
+
     struct mp_image_params real_image_params;   // configured format
     struct mp_image_params image_params;        // texture format (mind hwdec case)
     struct mp_imgfmt_desc image_desc;
     int plane_count;
-    int image_w, image_h;
 
     bool is_yuv, is_rgb, is_packed_yuv;
     bool has_alpha;
@@ -167,12 +176,15 @@ struct gl_video {
     struct fbotex blend_subs_fbo;
     struct fbotex unsharp_fbo;
     struct fbotex output_fbo;
+    struct fbotex deband_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
 
     // these are duplicated so we can keep rendering back and forth between
     // them to support an unlimited number of shader passes per step
     struct fbotex pre_fbo[2];
     struct fbotex post_fbo[2];
+
+    struct fbotex prescale_fbo[MAX_PRESCALE_PASSES][MAX_PRESCALE_STEPS];
 
     int surface_idx;
     int surface_now;
@@ -192,6 +204,8 @@ struct gl_video {
 
     // temporary during rendering
     struct src_tex pass_tex[TEXUNIT_VIDEO_NUM];
+    int texture_w, texture_h;
+    struct gl_transform texture_offset; // texture transform without rotation
     bool use_linear;
     bool use_normalized_range;
     float user_gamma;
@@ -330,6 +344,8 @@ const struct gl_video_opts gl_video_opts_def = {
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
+    .prescale_passes = 1,
+    .prescale_downscaling_threshold = 2.0f,
 };
 
 const struct gl_video_opts gl_video_opts_hq_def = {
@@ -337,7 +353,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .dither_size = 6,
     .temporal_dither_period = 1,
     .fbo_format = GL_RGBA16,
-    .fancy_downscaling = 1,
+    .correct_downscaling = 1,
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .sigmoid_upscaling = 1,
@@ -353,6 +369,8 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .blend_subs = 0,
     .pbo = 1,
     .deband = 1,
+    .prescale_passes = 1,
+    .prescale_downscaling_threshold = 2.0f,
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
@@ -388,7 +406,7 @@ const struct m_sub_options gl_video_conf = {
         SCALER_OPTS("tscale", 3),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("linear-scaling", linear_scaling, 0),
-        OPT_FLAG("fancy-downscaling", fancy_downscaling, 0),
+        OPT_FLAG("correct-downscaling", correct_downscaling, 0),
         OPT_FLAG("sigmoid-upscaling", sigmoid_upscaling, 0),
         OPT_FLOATRANGE("sigmoid-center", sigmoid_center, 0, 0.0, 1.0),
         OPT_FLOATRANGE("sigmoid-slope", sigmoid_slope, 0, 1.0, 20.0),
@@ -429,6 +447,16 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("deband", deband, 0),
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
         OPT_FLOAT("sharpen", unsharp, 0),
+        OPT_CHOICE("prescale", prescale, 0,
+                   ({"none", 0},
+                    {"superxbr", 1},
+                    {"nnedi3", 2})),
+        OPT_INTRANGE("prescale-passes",
+                     prescale_passes, 0, 1, MAX_PRESCALE_PASSES),
+        OPT_FLOATRANGE("prescale-downscaling-threshold",
+                       prescale_downscaling_threshold, 0, 0.0, 32.0),
+        OPT_SUBSTRUCT("superxbr", superxbr_opts, superxbr_conf, 0),
+        OPT_SUBSTRUCT("nnedi3", nnedi3_opts, nnedi3_conf, 0),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
@@ -450,6 +478,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_REPLACED("smoothmotion", "interpolation"),
         OPT_REPLACED("smoothmotion-threshold", "tscale-param1"),
         OPT_REPLACED("scale-down", "dscale"),
+        OPT_REPLACED("fancy-downscaling", "correct-downscaling"),
 
         {0}
     },
@@ -463,6 +492,7 @@ static void check_gl_features(struct gl_video *p);
 static bool init_format(int fmt, struct gl_video *init);
 static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
 static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src);
+static void get_scale_factors(struct gl_video *p, double xy[2]);
 
 #define GLSL(x) gl_sc_add(p->sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
@@ -575,15 +605,23 @@ static void uninit_rendering(struct gl_video *p)
     gl->DeleteTextures(1, &p->dither_texture);
     p->dither_texture = 0;
 
+    gl->DeleteBuffers(1, &p->nnedi3_weights_buffer);
+
     fbotex_uninit(&p->chroma_merge_fbo);
     fbotex_uninit(&p->chroma_deband_fbo);
     fbotex_uninit(&p->indirect_fbo);
     fbotex_uninit(&p->blend_subs_fbo);
     fbotex_uninit(&p->unsharp_fbo);
+    fbotex_uninit(&p->deband_fbo);
 
     for (int n = 0; n < 2; n++) {
         fbotex_uninit(&p->pre_fbo[n]);
         fbotex_uninit(&p->post_fbo[n]);
+    }
+
+    for (int pass = 0; pass < MAX_PRESCALE_PASSES; pass++) {
+        for (int step = 0; step < MAX_PRESCALE_STEPS; step++)
+            fbotex_uninit(&p->prescale_fbo[pass][step]);
     }
 
     for (int n = 0; n < FBOSURFACES_MAX; n++)
@@ -699,9 +737,6 @@ static void init_video(struct gl_video *p)
     }
 
     mp_image_params_guess_csp(&p->image_params);
-
-    p->image_w = p->image_params.w;
-    p->image_h = p->image_params.h;
 
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
     if (p->is_yuv && p->image_params.colorspace != MP_CSP_BT_2020_C)
@@ -898,7 +933,8 @@ static void load_shader(struct gl_video *p, const char *body)
     gl_sc_hadd(p->sc, body);
     gl_sc_uniform_f(p->sc, "random", (double)av_lfg_get(&p->lfg) / UINT32_MAX);
     gl_sc_uniform_f(p->sc, "frame", p->frames_uploaded);
-    gl_sc_uniform_vec2(p->sc, "image_size", (GLfloat[]){p->image_w, p->image_h});
+    gl_sc_uniform_vec2(p->sc, "image_size", (GLfloat[]){p->texture_w,
+                                                        p->texture_h});
 }
 
 // Applies an arbitrary number of shaders in sequence, using the given pair
@@ -1128,6 +1164,147 @@ static void pass_sample(struct gl_video *p, int src_tex, struct scaler *scaler,
         GLSL(color.a = 1.0;)
 }
 
+// Get the number of passes for prescaler, with given display size.
+static int get_prescale_passes(struct gl_video *p)
+{
+    if (!p->opts.prescale)
+        return 0;
+    // The downscaling threshold check is turned off.
+    if (p->opts.prescale_downscaling_threshold < 1.0f)
+        return p->opts.prescale_passes;
+
+    double scale_factors[2];
+    get_scale_factors(p, scale_factors);
+
+    int passes = 0;
+    for (; passes < p->opts.prescale_passes; passes ++) {
+        // The scale factor happens to be the same for superxbr and nnedi3.
+        scale_factors[0] /= 2;
+        scale_factors[1] /= 2;
+
+        if (1.0f / scale_factors[0] > p->opts.prescale_downscaling_threshold)
+            break;
+        if (1.0f / scale_factors[1] > p->opts.prescale_downscaling_threshold)
+            break;
+    }
+
+    return passes;
+}
+
+// apply pre-scalers
+static void pass_prescale(struct gl_video *p, int src_tex_num, int dst_tex_num,
+                          int planes, int w, int h, int passes,
+                          float tex_mul, struct gl_transform *offset)
+{
+    *offset = (struct gl_transform){{{1.0,0.0}, {0.0,1.0}}, {0.0,0.0}};
+
+    int tex_num = src_tex_num;
+
+    // Happens to be the same for superxbr and nnedi3.
+    const int steps_per_pass = 2;
+
+    for (int pass = 0; pass < passes; pass++) {
+        for (int step = 0; step < steps_per_pass; step++) {
+            struct gl_transform transform = {{{0}}};
+
+            switch(p->opts.prescale) {
+            case 1:
+                pass_superxbr(p->sc, planes, tex_num, step,
+                              tex_mul, p->opts.superxbr_opts, &transform);
+                break;
+            case 2:
+                pass_nnedi3(p->gl, p->sc, planes, tex_num, step,
+                            tex_mul, p->opts.nnedi3_opts, &transform);
+                break;
+            default:
+                abort();
+            }
+
+            tex_mul = 1.0;
+
+            gl_transform_trans(transform, offset);
+
+            w *= (int)transform.m[0][0];
+            h *= (int)transform.m[1][1];
+
+            finish_pass_fbo(p, &p->prescale_fbo[pass][step],
+                            w, h, dst_tex_num, 0);
+            tex_num = dst_tex_num;
+        }
+    }
+}
+
+// Prescale the planes from the main textures.
+static bool pass_prescale_luma(struct gl_video *p, float tex_mul,
+                               struct gl_transform *chromafix,
+                               struct gl_transform *transform,
+                               struct src_tex *prescaled_tex,
+                               int *prescaled_planes)
+{
+    if (p->opts.prescale == 2 &&
+            p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_UBO)
+    {
+        // nnedi3 are configured to use uniform buffer objects.
+        if (!p->nnedi3_weights_buffer) {
+            p->gl->GenBuffers(1, &p->nnedi3_weights_buffer);
+            p->gl->BindBufferBase(GL_UNIFORM_BUFFER, 0,
+                                  p->nnedi3_weights_buffer);
+            int weights_size;
+            const float *weights =
+                get_nnedi3_weights(p->opts.nnedi3_opts, &weights_size);
+
+            MP_VERBOSE(p, "Uploading NNEDI3 weights via uniform buffer (size=%d)\n",
+                       weights_size);
+
+            // We don't know the endianness of GPU, just assume it's little
+            // endian.
+            p->gl->BufferData(GL_UNIFORM_BUFFER, weights_size, weights,
+                              GL_STATIC_DRAW);
+        }
+    }
+    // number of passes to apply prescaler, can be zero.
+    int prescale_passes = get_prescale_passes(p);
+
+    if (prescale_passes == 0)
+        return false;
+
+    p->use_normalized_range = true;
+
+    // estimate a safe upperbound of planes being prescaled on texture0.
+    *prescaled_planes = p->is_yuv ? 1 :
+        (!p->color_swizzle[0] || p->color_swizzle[3] == 'a') ? 3 : 4;
+
+    struct src_tex tex_backup[4];
+    for (int i = 0; i < 4; i++)
+        tex_backup[i] = p->pass_tex[i];
+
+    if (p->opts.deband) {
+        // apply debanding before upscaling.
+        pass_sample_deband(p->sc, p->opts.deband_opts, 0, p->gl_target,
+                           tex_mul, p->texture_w, p->texture_h, &p->lfg);
+        finish_pass_fbo(p, &p->deband_fbo, p->texture_w,
+                        p->texture_h, 0, 0);
+        tex_backup[0] = p->pass_tex[0];
+    }
+
+    // process texture0 and store the result in texture4.
+    pass_prescale(p, 0, 4, *prescaled_planes, p->texture_w, p->texture_h,
+                  prescale_passes, p->opts.deband ? 1.0 : tex_mul, transform);
+
+    // correct the chromafix under new transform.
+    chromafix->t[0] -= transform->t[0] / transform->m[0][0];
+    chromafix->t[1] -= transform->t[1] / transform->m[1][1];
+
+    // restore the first four texture.
+    for (int i = 0; i < 4; i++)
+        p->pass_tex[i] = tex_backup[i];
+
+    // backup texture4 for later use.
+    *prescaled_tex = p->pass_tex[4];
+
+    return true;
+}
+
 // sample from video textures, set "color" variable to yuv value
 static void pass_read_video(struct gl_video *p)
 {
@@ -1137,6 +1314,16 @@ static void pass_read_video(struct gl_video *p)
     int in_bits = p->image_desc.component_bits,
         tx_bits = (in_bits + 7) & ~7;
     float tex_mul = ((1 << tx_bits) - 1.0) / ((1 << in_bits) - 1.0);
+
+    struct src_tex prescaled_tex;
+    struct gl_transform offset = {{{0}}};
+    int prescaled_planes;
+
+    bool prescaled = pass_prescale_luma(p, tex_mul, &chromafix, &offset,
+                                        &prescaled_tex, &prescaled_planes);
+
+    const int scale_factor_x = prescaled ? (int)offset.m[0][0] : 1;
+    const int scale_factor_y = prescaled ? (int)offset.m[1][1] : 1;
 
     bool color_defined = false;
     if (p->plane_count > 1) {
@@ -1168,18 +1355,19 @@ static void pass_read_video(struct gl_video *p)
 
         if (p->opts.deband) {
             pass_sample_deband(p->sc, p->opts.deband_opts, 1, p->gl_target,
-                               merged ? 1.0 : tex_mul, p->image_w, p->image_h,
-                               &p->lfg);
+                               merged ? 1.0 : tex_mul,
+                               p->texture_w, p->texture_h, &p->lfg);
             GLSL(color.zw = vec2(0.0, 1.0);) // skip unused
             finish_pass_fbo(p, &p->chroma_deband_fbo, c_w, c_h, 1, 0);
             p->use_normalized_range = true;
         }
 
         // Sample either directly or by upscaling
-        if (p->image_desc.flags & MP_IMGFLAG_SUBSAMPLED) {
+        if ((p->image_desc.flags & MP_IMGFLAG_SUBSAMPLED) || prescaled) {
             GLSLF("// chroma scaling\n");
             pass_sample(p, 1, &p->scaler[2], cscale, 1.0,
-                        p->image_w, p->image_h, chromafix);
+                        p->texture_w * scale_factor_x,
+                        p->texture_h * scale_factor_y, chromafix);
             GLSL(vec2 chroma = color.xy;)
             color_defined = true; // pass_sample defines vec4 color
         } else {
@@ -1202,12 +1390,20 @@ static void pass_read_video(struct gl_video *p)
     // stuff
     GLSL(vec4 main;)
     GLSLF("{\n");
-    if (p->opts.deband) {
+    if (!prescaled && p->opts.deband) {
         pass_sample_deband(p->sc, p->opts.deband_opts, 0, p->gl_target, tex_mul,
-                           p->image_w, p->image_h, &p->lfg);
+                           p->texture_w, p->texture_h, &p->lfg);
         p->use_normalized_range = true;
     } else {
-        GLSL(vec4 color = texture(texture0, texcoord0);)
+        if (!prescaled) {
+            GLSL(vec4 color = texture(texture0, texcoord0);)
+        } else {
+            // just use bilinear for non-essential planes.
+            GLSLF("vec4 color = texture(texture0, "
+                       "texcoord0 + vec2(%f,%f) / texture_size0);\n",
+                  -offset.t[0] / scale_factor_x,
+                  -offset.t[1] / scale_factor_y);
+        }
         if (p->use_normalized_range)
             GLSLF("color *= %f;\n", tex_mul);
     }
@@ -1216,13 +1412,33 @@ static void pass_read_video(struct gl_video *p)
 
     // Set up the right combination of planes
     GLSL(color = main;)
+    if (prescaled) {
+        // Restore texture4 and merge it into the main texture.
+        p->pass_tex[4] = prescaled_tex;
+
+        const char* planes_to_copy = "abgr" + 4 - prescaled_planes;
+        GLSLF("color.%s = texture(texture4, texcoord4).%s;\n",
+              planes_to_copy, planes_to_copy);
+
+        p->texture_w *= scale_factor_x;
+        p->texture_h *= scale_factor_y;
+        gl_transform_trans(offset, &p->texture_offset);
+    }
     if (p->plane_count > 1)
         GLSL(color.yz = chroma;)
     if (p->has_alpha && p->plane_count >= 4) {
-        GLSL(color.a = texture(texture3, texcoord3).r;)
+        if (!prescaled) {
+            GLSL(color.a = texture(texture3, texcoord3).r;)
+        } else {
+            GLSLF("color.a = texture(texture3, "
+                      "texcoord3 + vec2(%f,%f) / texture_size3).r;",
+                  -offset.t[0] / scale_factor_x,
+                  -offset.t[1] / scale_factor_y);
+        }
         if (p->use_normalized_range)
             GLSLF("color.a *= %f;\n", tex_mul);
     }
+
 }
 
 // yuv conversion, and any other conversions before main up/down-scaling
@@ -1323,11 +1539,13 @@ static void get_scale_factors(struct gl_video *p, double xy[2])
 static void compute_src_transform(struct gl_video *p, struct gl_transform *tr,
                                   int *vp_w, int *vp_h)
 {
-    float sx = (p->src_rect.x1 - p->src_rect.x0) / (float)p->image_w,
-          sy = (p->src_rect.y1 - p->src_rect.y0) / (float)p->image_h,
+    float sx = (p->src_rect.x1 - p->src_rect.x0) / (float)p->texture_w,
+          sy = (p->src_rect.y1 - p->src_rect.y0) / (float)p->texture_h,
           ox = p->src_rect.x0,
           oy = p->src_rect.y0;
     struct gl_transform transform = {{{sx,0.0}, {0.0,sy}}, {ox,oy}};
+
+    gl_transform_trans(p->texture_offset, &transform);
 
     int xc = 0, yc = 1;
     *vp_w = p->dst_rect.x1 - p->dst_rect.x0,
@@ -1350,25 +1568,37 @@ static void pass_scale_main(struct gl_video *p)
     // Figure out the main scaler.
     double xy[2];
     get_scale_factors(p, xy);
+
+    // actual scale factor should be divided by the scale factor of prescaling.
+    xy[0] /= p->texture_offset.m[0][0];
+    xy[1] /= p->texture_offset.m[1][1];
+
     bool downscaling = xy[0] < 1.0 || xy[1] < 1.0;
     bool upscaling = !downscaling && (xy[0] > 1.0 || xy[1] > 1.0);
     double scale_factor = 1.0;
 
     struct scaler *scaler = &p->scaler[0];
     struct scaler_config scaler_conf = p->opts.scaler[0];
-    if (p->opts.scaler_resizes_only && !downscaling && !upscaling)
+    if (p->opts.scaler_resizes_only && !downscaling && !upscaling) {
         scaler_conf.kernel.name = "bilinear";
+        // bilinear is going to be used, just remove all sub-pixel offsets.
+        p->texture_offset.t[0] = (int)p->texture_offset.t[0];
+        p->texture_offset.t[1] = (int)p->texture_offset.t[1];
+    }
     if (downscaling && p->opts.scaler[1].kernel.name) {
         scaler_conf = p->opts.scaler[1];
         scaler = &p->scaler[1];
     }
 
-    double f = MPMIN(xy[0], xy[1]);
-    if (p->opts.fancy_downscaling && f < 1.0 &&
-        fabs(xy[0] - f) < 0.01 && fabs(xy[1] - f) < 0.01)
-    {
-        scale_factor = FFMAX(1.0, 1.0 / f);
-    }
+    // When requesting correct-downscaling and the clip is anamorphic, and
+    // because only a single scale factor is used for both axes, enable it only
+    // when both axes are downscaled, and use the milder of the factors to not
+    // end up with too much blur on one axis (even if we end up with sub-optimal
+    // scale factor on the other axis). This is better than not respecting
+    // correct scaling at all for anamorphic clips.
+    double f = MPMAX(xy[0], xy[1]);
+    if (p->opts.correct_downscaling && f < 1.0)
+        scale_factor = 1.0 / f;
 
     // Pre-conversion, like linear light/sigmoidization
     GLSLF("// scaler pre-conversion\n");
@@ -1395,9 +1625,13 @@ static void pass_scale_main(struct gl_video *p)
     compute_src_transform(p, &transform, &vp_w, &vp_h);
 
     GLSLF("// main scaling\n");
-    finish_pass_fbo(p, &p->indirect_fbo, p->image_w, p->image_h, 0, 0);
+    finish_pass_fbo(p, &p->indirect_fbo, p->texture_w, p->texture_h, 0, 0);
     pass_sample(p, 0, scaler, &scaler_conf, scale_factor, vp_w, vp_h,
                 transform);
+
+    // Changes the texture size to display size after main scaler.
+    p->texture_w = vp_w;
+    p->texture_h = vp_h;
 
     GLSLF("// scaler post-conversion\n");
     if (use_sigmoid) {
@@ -1639,6 +1873,11 @@ static void pass_render_frame_dumb(struct gl_video *p, int fbo)
 // upscaling. p->image is rendered.
 static void pass_render_frame(struct gl_video *p)
 {
+    // initialize the texture parameters
+    p->texture_w = p->image_params.w;
+    p->texture_h = p->image_params.h;
+    p->texture_offset = (struct gl_transform){{{1.0,0.0}, {0.0,1.0}}, {0.0,0.0}};
+
     if (p->opts.dumb_mode)
         return;
 
@@ -1655,20 +1894,21 @@ static void pass_render_frame(struct gl_video *p)
         double scale[2];
         get_scale_factors(p, scale);
         struct mp_osd_res rect = {
-            .w = p->image_w, .h = p->image_h,
+            .w = p->texture_w, .h = p->texture_h,
             .display_par = scale[1] / scale[0], // counter compensate scaling
         };
-        finish_pass_fbo(p, &p->blend_subs_fbo, p->image_w, p->image_h, 0, 0);
-        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, p->image_w, p->image_h,
-                      p->blend_subs_fbo.fbo, false);
+        finish_pass_fbo(p, &p->blend_subs_fbo,
+                        p->texture_w, p->texture_h, 0, 0);
+        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
+                      p->texture_w, p->texture_h, p->blend_subs_fbo.fbo, false);
         GLSL(vec4 color = texture(texture0, texcoord0);)
     }
 
     apply_shaders(p, p->opts.pre_shaders, &p->pre_fbo[0], 0,
-                  p->image_w, p->image_h);
+                  p->texture_w, p->texture_h);
 
     if (p->opts.unsharp != 0.0) {
-        finish_pass_fbo(p, &p->unsharp_fbo, p->image_w, p->image_h, 0, 0);
+        finish_pass_fbo(p, &p->unsharp_fbo, p->texture_w, p->texture_h, 0, 0);
         pass_sample_unsharp(p->sc, p->opts.unsharp);
     }
 
@@ -1680,8 +1920,8 @@ static void pass_render_frame(struct gl_video *p)
         // Recreate the real video size from the src/dst rects
         struct mp_osd_res rect = {
             .w = vp_w, .h = vp_h,
-            .ml = -p->src_rect.x0, .mr = p->src_rect.x1 - p->image_w,
-            .mt = -p->src_rect.y0, .mb = p->src_rect.y1 - p->image_h,
+            .ml = -p->src_rect.x0, .mr = p->src_rect.x1 - p->image_params.w,
+            .mt = -p->src_rect.y0, .mb = p->src_rect.y1 - p->image_params.h,
             .display_par = 1.0,
         };
         // Adjust margins for scale
@@ -1692,15 +1932,17 @@ static void pass_render_frame(struct gl_video *p)
         // We should always blend subtitles in non-linear light
         if (p->use_linear)
             pass_delinearize(p->sc, p->image_params.gamma);
-        finish_pass_fbo(p, &p->blend_subs_fbo, vp_w, vp_h, 0, FBOTEX_FUZZY);
-        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect, vp_w, vp_h,
-                      p->blend_subs_fbo.fbo, false);
+        finish_pass_fbo(p, &p->blend_subs_fbo, p->texture_w, p->texture_h, 0,
+                        FBOTEX_FUZZY);
+        pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
+                      p->texture_w, p->texture_h, p->blend_subs_fbo.fbo, false);
         GLSL(vec4 color = texture(texture0, texcoord0);)
         if (p->use_linear)
             pass_linearize(p->sc, p->image_params.gamma);
     }
 
-    apply_shaders(p, p->opts.post_shaders, &p->post_fbo[0], 0, vp_w, vp_h);
+    apply_shaders(p, p->opts.post_shaders, &p->post_fbo[0], 0,
+                  p->texture_w, p->texture_h);
 }
 
 static void pass_draw_to_screen(struct gl_video *p, int fbo)
@@ -1859,8 +2101,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 
         // Blend the frames together
         if (oversample) {
-            double vsync_dist = (t->next_vsync - t->prev_vsync)/1e6
-                                / (pts_nxt - pts_now),
+            double vsync_dist = t->vsync_interval / 1e6 / (pts_nxt - pts_now),
                    threshold = tscale->conf.kernel.params[0];
             threshold = isnan(threshold) ? 0.0 : threshold;
             mix = (1 - mix) / vsync_dist;
@@ -1884,7 +2125,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 
         MP_STATS(p, "frame-mix");
         MP_DBG(p, "inter frame pts: %lld, vsync: %lld, mix: %f\n",
-               (long long)t->pts, (long long)t->next_vsync, mix);
+               (long long)t->pts, (long long)t->vsync_interval, mix);
         p->is_interpolated = true;
     }
     pass_draw_to_screen(p, fbo);
@@ -1926,7 +2167,9 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
                 gl_video_upload_image(p, frame->current);
                 pass_render_frame(p);
 
-                if (frame->num_vsyncs == 1) {
+                if (frame->num_vsyncs == 1 || !frame->display_synced ||
+                    p->opts.dumb_mode)
+                {
                     // Disable output_fbo_valid to signal that this frame
                     // does not require any redraws from the FBO.
                     pass_draw_to_screen(p, fbo);
@@ -1958,6 +2201,11 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
 
     gl->UseProgram(0);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // The playloop calls this last before waiting some time until it decides
+    // to call flip_page(). Tell OpenGL to start execution of the GPU commands
+    // while we sleep (this happens asynchronously).
+    gl->Flush();
 
     p->frames_rendered++;
 }
@@ -2175,6 +2423,22 @@ static void check_gl_features(struct gl_video *p)
     if (!have_mix && p->opts.deband) {
         p->opts.deband = 0;
         MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
+    }
+
+    if (p->opts.prescale == 2) {
+        if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_UBO) {
+            // Check features for uniform buffer objects.
+            if (!p->gl->BindBufferBase || !p->gl->GetUniformBlockIndex) {
+                MP_WARN(p, "Disabling NNEDI3 (OpenGL 3.1 required).\n");
+                p->opts.prescale = 0;
+            }
+        } else if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_SHADER) {
+            // Check features for hard coding approach.
+            if (p->gl->glsl_version < 330) {
+                MP_WARN(p, "Disabling NNEDI3 (OpenGL 3.3 required).\n");
+                p->opts.prescale = 0;
+            }
+        }
     }
 }
 
@@ -2499,11 +2763,23 @@ static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
     talloc_free(dst->pre_shaders);
     talloc_free(dst->post_shaders);
     talloc_free(dst->deband_opts);
+    talloc_free(dst->superxbr_opts);
+    talloc_free(dst->nnedi3_opts);
 
     *dst = *src;
 
     if (src->deband_opts)
         dst->deband_opts = m_sub_options_copy(NULL, &deband_conf, src->deband_opts);
+
+    if (src->superxbr_opts) {
+        dst->superxbr_opts = m_sub_options_copy(NULL, &superxbr_conf,
+                                                src->superxbr_opts);
+    }
+
+    if (src->nnedi3_opts) {
+        dst->nnedi3_opts = m_sub_options_copy(NULL, &nnedi3_conf,
+                                                src->nnedi3_opts);
+    }
 
     for (int n = 0; n < 4; n++) {
         dst->scaler[n].kernel.name =

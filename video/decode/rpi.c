@@ -18,6 +18,21 @@
 #include "lavc.h"
 #include "common/common.h"
 
+static const char *const codecs[][2] = {
+    {"h264",        "h264_mmal"},
+    {"mpeg2video",  "mpeg2_mmal"},
+    {0}
+};
+
+static const char *map_codec(const char *c)
+{
+    for (int n = 0; codecs[n][0]; n++) {
+        if (c && strcmp(codecs[n][0], c) == 0)
+            return codecs[n][1];
+    }
+    return NULL;
+}
+
 static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 {
     return 0;
@@ -35,14 +50,12 @@ static int init(struct lavc_ctx *ctx)
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
                  const char *decoder)
 {
-    if (strcmp(decoder, "h264") != 0)
-        return HWDEC_ERR_NO_CODEC;
-    return 0;
+    return map_codec(decoder) ? 0 : HWDEC_ERR_NO_CODEC;
 }
 
-static const char *get_codec(struct lavc_ctx *ctx)
+static const char *get_codec(struct lavc_ctx *ctx, const char *codec)
 {
-    return "h264_mmal";
+    return map_codec(codec);
 }
 
 const struct vd_lavc_hwdec mp_vd_lavc_rpi = {

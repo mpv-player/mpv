@@ -242,7 +242,7 @@ int mpv_opengl_cb_init_gl(mpv_opengl_cb_context *ctx, const char *exts,
  * @param h Height of the framebuffer. Same as with the w parameter, except
  *          that this parameter can be negative. In this case, the video
  *          frame will be rendered flipped.
- * @return the number of left frames in the internal queue to be rendered
+ * @return 0
  */
 int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int w, int h);
 
@@ -263,10 +263,14 @@ int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4]);
  * Tell the renderer that a frame was flipped at the given time. This is
  * optional, but can help the player to achieve better timing.
  *
+ * Note that calling this at least once informs libmpv that you will use this
+ * function. If you use it inconsistently, expect bad video playback.
+ *
  * If this is called while no video or no OpenGL is initialized, it is ignored.
  *
  * @param time The mpv time (using mpv_get_time_us()) at which the flip call
  *             returned. If 0 is passed, mpv_get_time_us() is used instead.
+ *             Currently, this parameter is ignored.
  * @return error code
  */
 int mpv_opengl_cb_report_flip(mpv_opengl_cb_context *ctx, int64_t time);

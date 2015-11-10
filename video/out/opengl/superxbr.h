@@ -13,24 +13,24 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * You can alternatively redistribute this file and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  */
 
-#ifndef MPLAYER_W32_COMMON_H
-#define MPLAYER_W32_COMMON_H
+#ifndef MP_GL_SUPERXBR_H
+#define MP_GL_SUPERXBR_H
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <windows.h>
+#include "common.h"
+#include "utils.h"
 
-#include "common/common.h"
+extern const struct superxbr_opts superxbr_opts_def;
+extern const struct m_sub_options superxbr_conf;
 
-struct vo;
+void pass_superxbr(struct gl_shader_cache *sc, int planes, int tex_num,
+                   int step, float tex_mul, const struct superxbr_opts *conf,
+                   struct gl_transform *transform);
 
-int vo_w32_init(struct vo *vo);
-void vo_w32_uninit(struct vo *vo);
-int vo_w32_control(struct vo *vo, int *events, int request, void *arg);
-void vo_w32_config(struct vo *vo);
-HWND vo_w32_hwnd(struct vo *vo);
-void vo_w32_run_on_thread(struct vo *vo, void (*cb)(void *ctx), void *ctx);
-
-#endif /* MPLAYER_W32_COMMON_H */
+#endif

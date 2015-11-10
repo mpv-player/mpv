@@ -192,6 +192,7 @@ struct GL {
     void (GLAPIENTRY *GenBuffers)(GLsizei, GLuint *);
     void (GLAPIENTRY *DeleteBuffers)(GLsizei, const GLuint *);
     void (GLAPIENTRY *BindBuffer)(GLenum, GLuint);
+    void (GLAPIENTRY *BindBufferBase)(GLenum, GLuint, GLuint);
     GLvoid * (GLAPIENTRY * MapBuffer)(GLenum, GLenum);
     GLboolean (GLAPIENTRY *UnmapBuffer)(GLenum);
     void (GLAPIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
@@ -244,6 +245,10 @@ struct GL {
     void (GLAPIENTRY *UniformMatrix3fv)(GLint, GLsizei, GLboolean,
                                         const GLfloat *);
 
+    GLsync (GLAPIENTRY *FenceSync)(GLenum, GLbitfield);
+    GLenum (GLAPIENTRY *ClientWaitSync)(GLsync, GLbitfield, GLuint64);
+    void (GLAPIENTRY *DeleteSync)(GLsync sync);
+
     void (GLAPIENTRY *VDPAUInitNV)(const GLvoid *, const GLvoid *);
     void (GLAPIENTRY *VDPAUFiniNV)(void);
     GLvdpauSurfaceNV (GLAPIENTRY *VDPAURegisterOutputSurfaceNV)
@@ -255,6 +260,9 @@ struct GL {
 
     GLint (GLAPIENTRY *GetVideoSync)(GLuint *);
     GLint (GLAPIENTRY *WaitVideoSync)(GLint, GLint, unsigned int *);
+
+    GLuint (GLAPIENTRY *GetUniformBlockIndex)(GLuint, const GLchar *);
+    void (GLAPIENTRY *UniformBlockBinding)(GLuint, GLuint, GLuint);
 
     void (GLAPIENTRY *DebugMessageCallback)(MP_GLDEBUGPROC callback,
                                             const void *userParam);

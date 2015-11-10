@@ -5,7 +5,7 @@
 
 conv() {
     echo
-    identify -format "icon: %w %h" "$1"
+    echo `identify -format "icon: %w %h" "$1"`
     convert "$1" -depth 8 rgba:-
 }
 

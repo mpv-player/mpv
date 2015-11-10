@@ -22,6 +22,7 @@
 
 #include <assert.h>
 #include <windows.h>
+#include <dwmapi.h>
 #include "video/out/w32_common.h"
 #include "common.h"
 
@@ -36,7 +37,11 @@ struct w32_context {
     int flags;
 
     HINSTANCE dwmapi_dll;
-    HRESULT (WINAPI *dwmflush)(void);
+    HRESULT (WINAPI *pDwmFlush)(void);
+    HRESULT (WINAPI *pDwmIsCompositionEnabled)(BOOL *pfEnabled);
+    HRESULT (WINAPI *pDwmEnableMMCSS)(BOOL fEnableMMCSS);
+    HRESULT (WINAPI *pDwmGetCompositionTimingInfo)
+                            (HWND hwnd, DWM_TIMING_INFO *pTimingInfo);
 };
 
 static void w32_uninit(MPGLContext *ctx);
@@ -223,8 +228,15 @@ static void create_ctx(void *ptr)
         create_context_w32_old(ctx);
 
     w32_ctx->dwmapi_dll = LoadLibrary(L"Dwmapi.dll");
-    if (w32_ctx->dwmapi_dll)
-        w32_ctx->dwmflush = (void *)GetProcAddress(w32_ctx->dwmapi_dll, "DwmFlush");
+    if (w32_ctx->dwmapi_dll) {
+        w32_ctx->pDwmFlush = (void *)GetProcAddress(w32_ctx->dwmapi_dll, "DwmFlush");
+        w32_ctx->pDwmIsCompositionEnabled =
+            (void *)GetProcAddress(w32_ctx->dwmapi_dll, "DwmIsCompositionEnabled");
+        w32_ctx->pDwmGetCompositionTimingInfo =
+            (void *)GetProcAddress(w32_ctx->dwmapi_dll, "DwmGetCompositionTimingInfo");
+        w32_ctx->pDwmEnableMMCSS =
+            (void *)GetProcAddress(w32_ctx->dwmapi_dll, "DwmEnableMMCSS");
+    }
 
     wglMakeCurrent(w32_ctx->hdc, NULL);
 }
@@ -250,6 +262,8 @@ static int w32_init(struct MPGLContext *ctx, int flags)
 
     current_w32_context = w32_ctx;
     wglMakeCurrent(w32_ctx->hdc, w32_ctx->context);
+    if (w32_ctx->pDwmEnableMMCSS)
+        w32_ctx->pDwmEnableMMCSS(TRUE);
     return 0;
 
 fail:
@@ -283,10 +297,35 @@ static void w32_uninit(MPGLContext *ctx)
         wglMakeCurrent(w32_ctx->hdc, 0);
     vo_w32_run_on_thread(ctx->vo, destroy_gl, ctx);
 
+    if (w32_ctx->pDwmEnableMMCSS)
+        w32_ctx->pDwmEnableMMCSS(FALSE);
+
     if (w32_ctx->dwmapi_dll)
         FreeLibrary(w32_ctx->dwmapi_dll);
     w32_ctx->dwmapi_dll = NULL;
     vo_w32_uninit(ctx->vo);
+}
+
+static bool compositor_active(MPGLContext *ctx)
+{
+    struct w32_context *w32_ctx = ctx->priv;
+
+    if (!w32_ctx->pDwmIsCompositionEnabled || !w32_ctx->pDwmGetCompositionTimingInfo)
+        return false;
+
+    // For Windows 7.
+    BOOL enabled = 0;
+    if (FAILED(w32_ctx->pDwmIsCompositionEnabled(&enabled)) || !enabled)
+        return false;
+
+    // This works at least on Windows 8.1: it returns an error in fullscreen,
+    // which is also when we get consistent timings without DwmFlush. Might
+    // be cargo-cult.
+    DWM_TIMING_INFO info = { .cbSize = sizeof(DWM_TIMING_INFO) };
+    if (FAILED(w32_ctx->pDwmGetCompositionTimingInfo(0, &info)))
+        return false;
+
+    return true;
 }
 
 static void w32_swap_buffers(MPGLContext *ctx)
@@ -297,11 +336,14 @@ static void w32_swap_buffers(MPGLContext *ctx)
     // default if we don't DwmFLush
     int new_swapinterval = w32_ctx->opt_swapinterval;
 
-    if (w32_ctx->dwmflush && w32_ctx->dwmflush() == S_OK &&
-        ((ctx->dwm_flush_opt == 1 && !ctx->vo->opts->fullscreen) ||
-         ctx->dwm_flush_opt == 2))
-    {
-        new_swapinterval = 0;
+    if (ctx->dwm_flush_opt >= 0) {
+        if ((ctx->dwm_flush_opt == 1 && !ctx->vo->opts->fullscreen) ||
+            (ctx->dwm_flush_opt == 2) ||
+            (ctx->dwm_flush_opt == 0 && compositor_active(ctx)))
+        {
+            if (w32_ctx->pDwmFlush && w32_ctx->pDwmFlush() == S_OK)
+                new_swapinterval = 0;
+        }
     }
 
     if (new_swapinterval != w32_ctx->current_swapinterval &&

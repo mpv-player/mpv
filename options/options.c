@@ -113,14 +113,14 @@ const m_option_t mp_opts[] = {
 // ------------------------- common options --------------------
     OPT_FLAG("quiet", quiet, CONF_GLOBAL),
     OPT_FLAG_STORE("really-quiet", verbose, CONF_GLOBAL | CONF_PRE_PARSE, -10),
-    OPT_FLAG("terminal", use_terminal, CONF_GLOBAL | CONF_PRE_PARSE),
-    OPT_GENERAL(char**, "msg-level", msg_levels, CONF_GLOBAL|CONF_PRE_PARSE,
-                .type = &m_option_type_msglevels),
+    OPT_FLAG("terminal", use_terminal, CONF_GLOBAL | CONF_PRE_PARSE | M_OPT_TERM),
+    OPT_GENERAL(char**, "msg-level", msg_levels, CONF_GLOBAL|CONF_PRE_PARSE |
+                M_OPT_TERM, .type = &m_option_type_msglevels),
     OPT_STRING("dump-stats", dump_stats, CONF_GLOBAL | CONF_PRE_PARSE),
-    OPT_FLAG("msg-color", msg_color, CONF_GLOBAL | CONF_PRE_PARSE),
+    OPT_FLAG("msg-color", msg_color, CONF_GLOBAL | CONF_PRE_PARSE | M_OPT_TERM),
     OPT_STRING("log-file", log_file, CONF_GLOBAL | CONF_PRE_PARSE | M_OPT_FILE),
-    OPT_FLAG("msg-module", msg_module, CONF_GLOBAL),
-    OPT_FLAG("msg-time", msg_time, CONF_GLOBAL),
+    OPT_FLAG("msg-module", msg_module, CONF_GLOBAL | M_OPT_TERM),
+    OPT_FLAG("msg-time", msg_time, CONF_GLOBAL | M_OPT_TERM),
 #ifdef _WIN32
     OPT_CHOICE("priority", w32_priority, 0,
                ({"no",          0},
@@ -800,7 +800,7 @@ const struct MPOpts mp_default_opts = {
     .sub_cp = "auto",
     .screenshot_template = "mpv-shot%n",
 
-    .hwdec_codecs = "h264,vc1,wmv3,hevc",
+    .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video",
 
     .index_mode = 1,
 

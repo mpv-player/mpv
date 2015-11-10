@@ -2,7 +2,7 @@ struct mp_log;
 
 struct mp_archive {
     struct archive *arch;
-    struct stream *src;
+    struct stream *primary_src;
     char buffer[4096];
 };
 

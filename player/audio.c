@@ -43,16 +43,23 @@
 #include "core.h"
 #include "command.h"
 
-static int update_playback_speed_filters(struct MPContext *mpctx)
+// Use pitch correction only for speed adjustments by the user, not minor sync
+// correction ones.
+static int get_speed_method(struct MPContext *mpctx)
 {
-    struct MPOpts *opts = mpctx->opts;
-    double speed = mpctx->audio_speed;
-    struct af_stream *afs = mpctx->d_audio->afilter;
+    return mpctx->opts->pitch_correction && mpctx->opts->playback_speed != 1.0
+        ? AF_CONTROL_SET_PLAYBACK_SPEED : AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE;
+}
 
-    // Use pitch correction only for speed adjustments by the user, not minor
-    // sync correction ones.
-    bool use_pitch_correction = opts->pitch_correction &&
-                                opts->playback_speed != 1.0;
+// Try to reuse the existing filters to change playback speed. If it works,
+// return true; if filter recreation is needed, return false.
+static bool update_speed_filters(struct MPContext *mpctx)
+{
+    struct af_stream *afs = mpctx->d_audio->afilter;
+    double speed = mpctx->audio_speed;
+
+    if (afs->initialized < 1)
+        return false;
 
     // Make sure only exactly one filter changes speed; resetting them all
     // and setting 1 filter is the easiest way to achieve this.
@@ -60,54 +67,69 @@ static int update_playback_speed_filters(struct MPContext *mpctx)
     af_control_all(afs, AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE, &(double){1});
 
     if (speed == 1.0)
-        return af_remove_by_label(afs, "playback-speed");
+        return !af_find_by_label(afs, "playback-speed");
 
     // Compatibility: if the user uses --af=scaletempo, always use this
     // filter to change speed. Don't insert a second filter (any) either.
     if (!af_find_by_label(afs, "playback-speed") &&
         af_control_any_rev(afs, AF_CONTROL_SET_PLAYBACK_SPEED, &speed))
-        return 0;
+        return true;
 
-    int method = AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE;
-    if (use_pitch_correction)
-        method = AF_CONTROL_SET_PLAYBACK_SPEED;
+    return !!af_control_any_rev(afs, get_speed_method(mpctx), &speed);
+}
 
-    if (!af_control_any_rev(afs, method, &speed)) {
-        if (af_remove_by_label(afs, "playback-speed") < 0)
-            return -1;
+// Update speed, and insert/remove filters if necessary.
+static void recreate_speed_filters(struct MPContext *mpctx)
+{
+    struct af_stream *afs = mpctx->d_audio->afilter;
 
-        char *filter = method == AF_CONTROL_SET_PLAYBACK_SPEED
-                     ? "scaletempo" : "lavrresample";
-        if (af_add(afs, filter, "playback-speed", NULL) < 0)
-            return -1;
-        // Try again.
-        if (!af_control_any_rev(afs, method, &speed))
-            return -1;
-    }
+    if (update_speed_filters(mpctx))
+        return;
 
-    return 0;
+    if (af_remove_by_label(afs, "playback-speed") < 0)
+        goto fail;
+
+    if (mpctx->audio_speed == 1.0)
+        return;
+
+    int method = get_speed_method(mpctx);
+    char *filter = method == AF_CONTROL_SET_PLAYBACK_SPEED
+                 ? "scaletempo" : "lavrresample";
+
+    if (!af_add(afs, filter, "playback-speed", NULL))
+        goto fail;
+
+    if (!update_speed_filters(mpctx))
+        goto fail;
+
+    return;
+
+fail:
+    mpctx->opts->playback_speed = 1.0;
+    mpctx->speed_factor_a = 1.0;
+    mpctx->audio_speed = 1.0;
+    mp_notify(mpctx, MP_EVENT_CHANGE_ALL, NULL);
 }
 
 static int recreate_audio_filters(struct MPContext *mpctx)
 {
     assert(mpctx->d_audio);
 
-    if (update_playback_speed_filters(mpctx) < 0) {
-        mpctx->opts->playback_speed = 1.0;
-        mpctx->speed_factor_a = 1.0;
-        mpctx->audio_speed = 1.0;
-        mp_notify(mpctx, MP_EVENT_CHANGE_ALL, NULL);
-    }
-
     struct af_stream *afs = mpctx->d_audio->afilter;
-    if (afs->initialized < 1 && af_init(afs) < 0) {
-        MP_ERR(mpctx, "Couldn't find matching filter/ao format!\n");
-        return -1;
-    }
+    if (afs->initialized < 1 && af_init(afs) < 0)
+        goto fail;
+
+    recreate_speed_filters(mpctx);
+    if (afs->initialized < 1 && af_init(afs) < 0)
+        goto fail;
 
     mixer_reinit_audio(mpctx->mixer, mpctx->ao, afs);
 
     return 0;
+
+fail:
+    MP_ERR(mpctx, "Couldn't find matching filter/ao format!\n");
+    return -1;
 }
 
 int reinit_audio_filters(struct MPContext *mpctx)
@@ -117,33 +139,20 @@ int reinit_audio_filters(struct MPContext *mpctx)
         return 0;
 
     af_uninit(mpctx->d_audio->afilter);
-    if (af_init(mpctx->d_audio->afilter) < 0)
-        return -1;
-    if (recreate_audio_filters(mpctx) < 0)
-        return -1;
-
-    return 1;
+    return recreate_audio_filters(mpctx) < 0 ? -1 : 1;
 }
 
-// Call this if opts->playback_speed or mpctx->speed_correction changes.
+// Call this if opts->playback_speed or mpctx->speed_factor_* change.
 void update_playback_speed(struct MPContext *mpctx)
 {
-    struct MPOpts *opts = mpctx->opts;
-
-    double old_speed_factor_a = mpctx->speed_factor_a;
-    double old_audio_speed = mpctx->audio_speed;
-
-    mpctx->audio_speed = opts->playback_speed * mpctx->speed_factor_a;
-    mpctx->video_speed = opts->playback_speed * mpctx->speed_factor_v;
-
-    if (mpctx->speed_factor_a == old_speed_factor_a &&
-        mpctx->audio_speed == old_audio_speed)
-        return;
+    mpctx->audio_speed = mpctx->opts->playback_speed * mpctx->speed_factor_a;
+    mpctx->video_speed = mpctx->opts->playback_speed * mpctx->speed_factor_v;
 
     if (!mpctx->d_audio || mpctx->d_audio->afilter->initialized < 1)
         return;
 
-    recreate_audio_filters(mpctx);
+    if (!update_speed_filters(mpctx))
+        recreate_audio_filters(mpctx);
 }
 
 void reset_audio_state(struct MPContext *mpctx)
@@ -154,6 +163,7 @@ void reset_audio_state(struct MPContext *mpctx)
         mp_audio_buffer_clear(mpctx->ao_buffer);
     mpctx->audio_status = mpctx->d_audio ? STATUS_SYNCING : STATUS_EOF;
     mpctx->delay = 0;
+    mpctx->audio_drop_throttle = 0;
     mpctx->audio_stat_start = 0;
 }
 
@@ -484,7 +494,7 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     }
 
     int align = af_format_sample_alignment(out_format.format);
-    *skip = (-ptsdiff * play_samplerate) / align * align;
+    *skip = (int)(-ptsdiff * play_samplerate) / align * align;
     return true;
 }
 
@@ -537,6 +547,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     struct mp_audio out_format = {0};
     ao_get_format(mpctx->ao, &out_format);
     double play_samplerate = out_format.rate / mpctx->audio_speed;
+    int align = af_format_sample_alignment(out_format.format);
 
     // If audio is infinitely fast, somehow try keeping approximate A/V sync.
     if (mpctx->audio_status == STATUS_PLAYING && ao_untimed(mpctx->ao) &&
@@ -554,18 +565,24 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     }
 
     int skip_duplicate = 0; // >0: skip, <0: duplicate
+    double drop_limit =
+        (opts->sync_max_audio_change + opts->sync_max_video_change) / 100;
     if (mpctx->display_sync_active && opts->video_sync == VS_DISP_ADROP &&
         fabs(mpctx->last_av_difference) >= opts->sync_audio_drop_size &&
+        mpctx->audio_drop_throttle < drop_limit &&
         mpctx->audio_status == STATUS_PLAYING)
     {
         int samples = ceil(opts->sync_audio_drop_size * play_samplerate);
-        int align = af_format_sample_alignment(out_format.format);
         samples = (samples + align / 2) / align * align;
 
         skip_duplicate = mpctx->last_av_difference >= 0 ? -samples : samples;
 
         playsize = MPMAX(playsize, samples);
+
+        mpctx->audio_drop_throttle += 1 - drop_limit - samples / play_samplerate;
     }
+
+    playsize = playsize / align * align;
 
     int status = AD_OK;
     bool working = false;
@@ -658,7 +675,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         double samples = (endpts - written_audio_pts(mpctx) - opts->audio_delay)
                          * play_samplerate;
         if (playsize > samples) {
-            playsize = MPMAX(samples, 0);
+            playsize = MPMAX((int)samples / align * align, 0);
             audio_eof = true;
             partial_fill = true;
         }
@@ -678,10 +695,15 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 
     struct mp_audio data;
     mp_audio_buffer_peek(mpctx->ao_buffer, &data);
+    if (audio_eof || data.samples >= align)
+        data.samples = data.samples / align * align;
     data.samples = MPMIN(data.samples, mpctx->paused ? 0 : playsize);
     int played = write_to_ao(mpctx, &data, playflags);
     assert(played >= 0 && played <= data.samples);
     mp_audio_buffer_skip(mpctx->ao_buffer, played);
+
+    mpctx->audio_drop_throttle =
+        MPMAX(0, mpctx->audio_drop_throttle - played / play_samplerate);
 
     dump_audio_stats(mpctx);
 

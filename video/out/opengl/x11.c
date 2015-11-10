@@ -112,11 +112,13 @@ static bool create_context_x11_gl3(struct MPGLContext *ctx, int vo_flags,
         GLX_CONTEXT_FLAGS_ARB, ctx_flags,
         None
     };
+    vo_x11_silence_xlib(1);
     GLXContext context = glXCreateContextAttribsARB(vo->x11->display,
                                                     glx_ctx->fbc, 0, True,
                                                     context_attribs);
+    vo_x11_silence_xlib(-1);
     if (!context) {
-        MP_INFO(vo, "Could not create GL3 context. Retrying with legacy context.\n");
+        MP_VERBOSE(vo, "Could not create GL3 context. Retrying with legacy context.\n");
         return false;
     }
 

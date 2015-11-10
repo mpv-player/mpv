@@ -913,6 +913,14 @@ Property list
 ``vo-drop-frame-count``
     Frames dropped by VO (when using ``--framedrop=vo``).
 
+``mistimed-frame-count``
+    Number of video frames that were not timed correctly in display-sync mode
+    for the sake of keeping A/V sync. This does not include external
+    circumstances, such as video rendering being too slow or the graphics
+    driver somehow skipping a vsync. It does not include rounding errors either
+    (which can happen especially with bad source timestamps). For example,
+    using the ``display-desync`` mode should never change this value from 0.
+
 ``percent-pos`` (RW)
     Position in current file (0-100). The advantage over using this instead of
     calculating it out of other properties is that it properly falls back to
@@ -1444,7 +1452,7 @@ Property list
     Names of the displays that the mpv window covers. On X11, these
     are the xrandr names (LVDS1, HDMI1, DP1, VGA1, etc.).
 
-``display-fps``
+``display-fps`` (RW)
     The refresh rate of the current display. Currently, this is the lowest FPS
     of any display covered by the video, as retrieved by the underlying system
     APIs (e.g. xrandr on X11). It is not the measured FPS. It's not necessarily

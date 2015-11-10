@@ -80,13 +80,9 @@ static int init(struct lavc_ctx *ctx)
     ctx->hwdec_priv = p;
 
     if (mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter) < 1)
-        goto error;
+        return -1;
 
     return 0;
-
-error:
-    uninit(ctx);
-    return -1;
 }
 
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,

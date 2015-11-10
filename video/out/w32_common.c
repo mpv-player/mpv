@@ -24,6 +24,7 @@
 #include <initguid.h>
 #include <ole2.h>
 #include <shobjidl.h>
+#include <avrt.h>
 
 #include "options/options.h"
 #include "input/keycodes.h"
@@ -34,6 +35,7 @@
 #include "vo.h"
 #include "win_state.h"
 #include "w32_common.h"
+#include "win32/displayconfig.h"
 #include "osdep/io.h"
 #include "osdep/threads.h"
 #include "osdep/w32_keyboard.h"
@@ -59,8 +61,8 @@ struct vo_w32_state {
     HWND window;
     HWND parent; // 0 normally, set in embedding mode
 
-    // Size and virtual position of the current screen.
-    struct mp_rect screenrc;
+    HMONITOR monitor; // Handle of the current screen
+    struct mp_rect screenrc; // Size and virtual position of the current screen
 
     // last non-fullscreen extends (updated only on fullscreen or on initialization)
     int prev_width;
@@ -89,8 +91,6 @@ struct vo_w32_state {
     bool disable_screensaver;
     bool cursor_visible;
     int event_flags;
-    int mon_cnt;
-    int mon_id;
 
     BOOL tracking;
     TRACKMOUSEEVENT trackEvent;
@@ -108,6 +108,8 @@ struct vo_w32_state {
 
     // updates on move/resize/displaychange
     double display_fps;
+
+    HANDLE avrt_handle;
 };
 
 typedef struct tagDropTarget {
@@ -569,22 +571,17 @@ static void wakeup_gui_thread(void *ctx)
     PostMessage(w32->window, WM_USER, 0, 0);
 }
 
-static double vo_w32_get_display_fps(struct vo_w32_state *w32)
+static double get_refresh_rate_from_gdi(const wchar_t *device)
 {
-    // Get the device name of the monitor containing the window
-    HMONITOR mon = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
-    MONITORINFOEXW mi = { .cbSize = sizeof mi };
-    GetMonitorInfoW(mon, (MONITORINFO*)&mi);
-
-    DEVMODE dm = { .dmSize = sizeof dm };
-    if (!EnumDisplaySettingsW(mi.szDevice, ENUM_CURRENT_SETTINGS, &dm))
-        return -1;
+    DEVMODEW dm = { .dmSize = sizeof dm };
+    if (!EnumDisplaySettingsW(device, ENUM_CURRENT_SETTINGS, &dm))
+        return 0.0;
 
     // May return 0 or 1 which "represent the display hardware's default refresh rate"
     // https://msdn.microsoft.com/en-us/library/windows/desktop/dd183565%28v=vs.85%29.aspx
     // mpv validates this value with a threshold of 1, so don't return exactly 1
     if (dm.dmDisplayFrequency == 1)
-        return 0;
+        return 0.0;
 
     // dm.dmDisplayFrequency is an integer which is rounded down, so it's
     // highly likely that 23 represents 24/1.001, 59 represents 60/1.001, etc.
@@ -608,12 +605,35 @@ static double vo_w32_get_display_fps(struct vo_w32_state *w32)
 
 static void update_display_fps(struct vo_w32_state *w32)
 {
-    double fps = vo_w32_get_display_fps(w32);
-    if (fps != w32->display_fps) {
-        w32->display_fps = fps;
+    HMONITOR monitor = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
+    if (w32->monitor == monitor)
+        return;
+    w32->monitor = monitor;
+
+    MONITORINFOEXW mi = { .cbSize = sizeof mi };
+    GetMonitorInfoW(monitor, (MONITORINFO*)&mi);
+
+    // Try to get the monitor refresh rate.
+    double freq = 0.0;
+
+    if (freq == 0.0)
+        freq = mp_w32_displayconfig_get_refresh_rate(mi.szDevice);
+    if (freq == 0.0)
+        freq = get_refresh_rate_from_gdi(mi.szDevice);
+
+    if (freq != w32->display_fps) {
+        MP_VERBOSE(w32, "display-fps: %f\n", freq);
+        if (freq == 0.0)
+            MP_WARN(w32, "Couldn't determine monitor refresh rate\n");
+        w32->display_fps = freq;
         signal_events(w32, VO_EVENT_WIN_STATE);
-        MP_VERBOSE(w32, "display-fps: %f\n", fps);
     }
+}
+
+static void force_update_display_fps(struct vo_w32_state *w32)
+{
+    w32->monitor = 0;
+    update_display_fps(w32);
 }
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
@@ -650,13 +670,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         if (GetClientRect(w32->window, &r) && r.right > 0 && r.bottom > 0) {
             w32->dw = r.right;
             w32->dh = r.bottom;
-            update_display_fps(w32); // if we moved between monitors
             signal_events(w32, VO_EVENT_RESIZE);
             MP_VERBOSE(w32, "resize window: %d:%d\n", w32->dw, w32->dh);
         }
 
         // Window may have been minimized or restored
         signal_events(w32, VO_EVENT_WIN_STATE);
+
+        update_display_fps(w32);
         break;
     }
     case WM_SIZING:
@@ -801,7 +822,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         mouse_button |= MP_KEY_STATE_UP;
         break;
     case WM_DISPLAYCHANGE:
-        update_display_fps(w32);
+        force_update_display_fps(w32);
         break;
     }
 
@@ -862,24 +883,37 @@ static void run_message_loop(struct vo_w32_state *w32)
         mp_dispatch_queue_process(w32->dispatch, 1000);
 }
 
-static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p)
+struct get_monitor_data {
+    int i;
+    int target;
+    HMONITOR mon;
+};
+
+static BOOL CALLBACK get_monitor_proc(HMONITOR mon, HDC dc, LPRECT r, LPARAM p)
 {
-    struct vo_w32_state *w32 = (void *)p;
-    // this defaults to the last screen if specified number does not exist
-    w32->screenrc = (struct mp_rect){r->left, r->top, r->right, r->bottom};
+    struct get_monitor_data *data = (struct get_monitor_data*)p;
 
-    if (w32->mon_cnt == w32->mon_id)
+    if (data->i == data->target) {
+        data->mon = mon;
         return FALSE;
-
-    w32->mon_cnt++;
+    }
+    data->i++;
     return TRUE;
 }
 
-static void w32_update_xinerama_info(struct vo_w32_state *w32)
+static HMONITOR get_monitor(int id)
+{
+    struct get_monitor_data data = { .target = id };
+    EnumDisplayMonitors(NULL, NULL, get_monitor_proc, (LPARAM)&data);
+    return data.mon;
+}
+
+static void update_screen_rect(struct vo_w32_state *w32)
 {
     struct mp_vo_opts *opts = w32->opts;
     int screen = w32->current_fs ? opts->fsscreen_id : opts->screen_id;
 
+    // Handle --fs-screen=all
     if (w32->current_fs && screen == -2) {
         struct mp_rect rc = {
             GetSystemMetrics(SM_XVIRTUALSCREEN),
@@ -887,44 +921,32 @@ static void w32_update_xinerama_info(struct vo_w32_state *w32)
             GetSystemMetrics(SM_CXVIRTUALSCREEN),
             GetSystemMetrics(SM_CYVIRTUALSCREEN),
         };
-        if (!rc.x1 || !rc.y1) {
-            rc.x0 = rc.y0 = 0;
-            rc.x1 = w32->screenrc.x1;
-            rc.y1 = w32->screenrc.y1;
-        }
         rc.x1 += rc.x0;
         rc.y1 += rc.y0;
         w32->screenrc = rc;
-    } else if (screen == -1) {
-        MONITORINFO mi;
-        HMONITOR m = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
-        mi.cbSize = sizeof(mi);
-        GetMonitorInfoW(m, &mi);
-        w32->screenrc = (struct mp_rect){
-            mi.rcMonitor.left, mi.rcMonitor.top,
-            mi.rcMonitor.right, mi.rcMonitor.bottom,
-        };
-    } else if (screen >= 0) {
-        w32->mon_cnt = 0;
-        w32->mon_id = screen;
-        EnumDisplayMonitors(NULL, NULL, mon_enum, (LONG_PTR)w32);
-    }
-}
-
-static void updateScreenProperties(struct vo_w32_state *w32)
-{
-    DEVMODE dm;
-    dm.dmSize = sizeof dm;
-    dm.dmDriverExtra = 0;
-    dm.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-
-    if (!EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &dm)) {
-        MP_ERR(w32, "unable to enumerate display settings!\n");
         return;
     }
 
-    w32->screenrc = (struct mp_rect){0, 0, dm.dmPelsWidth, dm.dmPelsHeight};
-    w32_update_xinerama_info(w32);
+    // When not using --fs-screen=all, mpv belongs to a specific HMONITOR
+    HMONITOR mon;
+    if (screen == -1) {
+        // Handle --fs-screen=current and --screen=default
+        mon = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
+    } else {
+        mon = get_monitor(screen);
+        if (!mon) {
+            MP_INFO(w32, "Screen %d does not exist, falling back to primary\n",
+                    screen);
+            mon = MonitorFromPoint((POINT){0, 0}, MONITOR_DEFAULTTOPRIMARY);
+        }
+    }
+
+    MONITORINFO mi = { .cbSize = sizeof(mi) };
+    GetMonitorInfoW(mon, &mi);
+    w32->screenrc = (struct mp_rect){
+        mi.rcMonitor.left, mi.rcMonitor.top,
+        mi.rcMonitor.right, mi.rcMonitor.bottom,
+    };
 }
 
 static DWORD update_style(struct vo_w32_state *w32, DWORD style)
@@ -960,7 +982,7 @@ static void reinit_window_state(struct vo_w32_state *w32)
         layer = HWND_TOPMOST;
 
     // xxx not sure if this can trigger any unwanted messages (WM_MOVE/WM_SIZE)
-    updateScreenProperties(w32);
+    update_screen_rect(w32);
 
     int screen_w = w32->screenrc.x1 - w32->screenrc.x0;
     int screen_h = w32->screenrc.y1 - w32->screenrc.y0;
@@ -1088,11 +1110,10 @@ static void gui_thread_reconfig(void *ptr)
 }
 
 // Resize the window. On the first call, it's also made visible.
-int vo_w32_config(struct vo *vo)
+void vo_w32_config(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
     mp_dispatch_run(w32->dispatch, gui_thread_reconfig, w32);
-    return 0;
 }
 
 static void thread_disable_ime(void)
@@ -1193,7 +1214,7 @@ static void *gui_thread(void *ptr)
 
     w32->cursor_visible = true;
 
-    updateScreenProperties(w32);
+    update_screen_rect(w32);
 
     mp_dispatch_set_wakeup_fn(w32->dispatch, wakeup_gui_thread, w32);
 
@@ -1244,6 +1265,11 @@ int vo_w32_init(struct vo *vo)
         pthread_join(w32->thread, NULL);
         goto fail;
     }
+
+    // While the UI runs in its own thread, the thread in which this function
+    // runs in will be the renderer thread. Apply magic MMCSS cargo-cult,
+    // which might stop Windows from throttling clock rate and so on.
+    w32->avrt_handle = AvSetMmThreadCharacteristicsW(L"Playback", &(DWORD){0});
 
     return 1;
 fail:
@@ -1374,6 +1400,8 @@ void vo_w32_uninit(struct vo *vo)
 
     mp_dispatch_run(w32->dispatch, do_terminate, w32);
     pthread_join(w32->thread, NULL);
+
+    AvRevertMmThreadCharacteristics(w32->avrt_handle);
 
     talloc_free(w32);
     vo->w32 = NULL;

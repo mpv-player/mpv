@@ -83,9 +83,7 @@ struct gl_functions {
     const char *extension;      // introduced with this extension in any version
     int provides;               // bitfield of MPGL_CAP_* constants
     int ver_core;               // introduced as required function
-    int ver_removed;            // removed as required function (no replacement)
     int ver_es_core;            // introduced as required GL ES function
-    int ver_es_removed;         // removed as required function (no replacement)
     const struct gl_function *functions;
 };
 
@@ -173,6 +171,7 @@ static const struct gl_functions gl_functions[] = {
         .ver_core = 300,
         .ver_es_core = 300,
         .functions = (const struct gl_function[]) {
+            DEF_FN(BindBufferBase),
             DEF_FN(GetStringi),
             // for ES 3.0
             DEF_FN(GetTexLevelParameteriv),
@@ -229,6 +228,16 @@ static const struct gl_functions gl_functions[] = {
         .ver_es_core = 300,
         .extension = "GL_ARB_texture_rg",
         .provides = MPGL_CAP_TEX_RG,
+    },
+    {
+        .ver_core = 320,
+        .extension = "GL_ARB_sync",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(FenceSync),
+            DEF_FN(ClientWaitSync),
+            DEF_FN(DeleteSync),
+            {0}
+        },
     },
     // Swap control, always an OS specific extension
     // The OSX code loads this manually.
@@ -302,6 +311,16 @@ static const struct gl_functions gl_functions[] = {
         .extension = "GL_MP_D3D_interfaces",
         .functions = (const struct gl_function[]) {
             DEF_FN_NAME(MPGetNativeDisplay, "glMPGetD3DInterface"),
+            {0}
+        },
+    },
+    // uniform buffer object extensions, requires OpenGL 3.1.
+    {
+        .ver_core = 310,
+        .extension = "GL_ARB_uniform_buffer_object",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(GetUniformBlockIndex),
+            DEF_FN(UniformBlockBinding),
             {0}
         },
     },
@@ -389,10 +408,6 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         const struct gl_functions *section = &gl_functions[n];
         int version = gl->es ? gl->es : gl->version;
         int ver_core = gl->es ? section->ver_es_core : section->ver_core;
-        int ver_removed = gl->es ? section->ver_es_removed : section->ver_removed;
-
-        if (ver_removed && version >= ver_removed)
-            continue;
 
         // NOTE: Function entrypoints can exist, even if they do not work.
         //       We must always check extension strings and versions.
@@ -450,16 +465,12 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         if (gl->es >= 300)
             gl->glsl_version = 300;
     } else {
-        if (gl->version >= 200)
-            gl->glsl_version = 110;
-        if (gl->version >= 210)
-            gl->glsl_version = 120;
-        if (gl->version >= 300)
-            gl->glsl_version = 130;
-        // Specifically needed for OSX (normally we request 3.0 contexts only, but
-        // OSX always creates 3.2 contexts when requesting a core context).
-        if (gl->version >= 320)
-            gl->glsl_version = 150;
+        gl->glsl_version = 110;
+        int glsl_major = 0, glsl_minor = 0;
+        if (sscanf(shader, "%d.%d", &glsl_major, &glsl_minor) == 2)
+            gl->glsl_version = glsl_major * 100 + glsl_minor;
+        // GLSL 400 defines "sample" as keyword - breaks custom shaders.
+        gl->glsl_version = MPMIN(gl->glsl_version, 330);
     }
 
     if (is_software_gl(gl)) {
@@ -492,6 +503,7 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
 
 extern const struct mpgl_driver mpgl_driver_x11;
 extern const struct mpgl_driver mpgl_driver_x11egl;
+extern const struct mpgl_driver mpgl_driver_drm_egl;
 extern const struct mpgl_driver mpgl_driver_cocoa;
 extern const struct mpgl_driver mpgl_driver_wayland;
 extern const struct mpgl_driver mpgl_driver_w32;
@@ -512,6 +524,9 @@ static const struct mpgl_driver *const backends[] = {
 #endif
 #if HAVE_EGL_X11
     &mpgl_driver_x11egl,
+#endif
+#if HAVE_EGL_DRM
+    &mpgl_driver_drm_egl,
 #endif
 #if HAVE_GL_X11
     &mpgl_driver_x11,

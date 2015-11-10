@@ -541,13 +541,81 @@ Available video output drivers are:
         Scale in linear light. It should only be used with a ``fbo-format``
         that has at least 16 bit precision.
 
-    ``fancy-downscaling``
+    ``correct-downscaling``
         When using convolution based filters, extend the filter size
         when downscaling. Trades quality for reduced downscaling performance.
 
-        This is automatically disabled for anamorphic video, because this
-        feature doesn't work correctly with different scale factors in
-        different directions.
+        This will perform slightly sub-optimally for anamorphic video (but still
+        better than without it) since it will extend the size to match only the
+        milder of the scale factors between the axes.
+
+    ``prescale=<filter>``
+        This option provides non-convolution-based filters for upscaling. These
+        filters resize the video to multiple of the original size (all currently
+        supported prescalers can only perform image doubling in a single pass).
+        Generally another convolution based filter (the main scaler) will be
+        applied after prescaler to match the target display size.
+
+        ``none``
+            Disable all prescalers. This is the default.
+
+        ``superxbr``
+            A relatively fast prescaler originally developed for pixel art.
+
+            Some parameters can be tuned with ``superxbr-sharpness`` and
+            ``superxbr-edge-strength`` options.
+
+        ``nnedi3``
+            An artificial neural network based deinterlacer, which can be used
+            to upscale images.
+
+            Extremely slow and requires a recent mid or high end graphics card
+            to work smoothly (as of 2015).
+
+        Note that all the filters above are designed (or implemented) to process
+        luma plane only and probably won't work as intended for video in RGB
+        format.
+
+    ``prescale-passes=<1..5>``
+        The number of passes to apply the prescaler (defaults to be 1). Setting
+        it to 2 will perform a 4x upscaling.
+
+    ``prescale-downscaling-threshold=<0..32>``
+        This option prevents "overkill" use of prescalers, which can be caused
+        by misconfiguration, or user trying to play a video with much larger
+        size. With this option, user can specify the maximal allowed downscaling
+        ratio in both dimension. To satisfy it, the number of passes for
+        prescaler will be reduced, and if necessary prescaler could also be
+        disabled.
+
+        The default value is 2.0, and should be able to prevent most seemingly
+        unreasonable use of prescalers. Most user would probably want to set it
+        to a smaller value between 1.0 and 1.5 for better performance.
+
+        A value less than 1.0 will disable the check.
+
+    ``nnedi3-neurons=<16|32|64|128>``
+        Specify the neurons for nnedi3 prescaling (defaults to be 32). The
+        rendering time is expected to be linear to the number of neurons.
+
+    ``nnedi3-window=<8x4|8x6>``
+        Specify the size of local window for sampling in nnedi3 prescaling
+        (defaults to be ``8x4``). The ``8x6`` window produces sharper images,
+        but is also slower.
+
+    ``nnedi3-upload=<ubo|shader>``
+        Specify how to upload the NN weights to GPU. Depending on the graphics
+        card, driver, shader compiler and nnedi3 settings, both method can be
+        faster or slower.
+
+        ``ubo``
+            Upload these weights via uniform buffer objects. This is the
+            default. (requires OpenGL 3.1)
+
+        ``shader``
+            Hard code all the weights into the shader source code. (requires
+            OpenGL 3.3)
+
 
     ``pre-shaders=<files>``, ``post-shaders=<files>``, ``scale-shader=<file>``
         Custom GLSL fragment shaders.
@@ -667,11 +735,24 @@ Available video output drivers are:
 
         X11/GLX only.
 
-    ``dwmflush=<no|windowed|yes>``
-        Calls ``DwmFlush`` after swapping buffers on Windows (default: no).
+    ``vsync-fences=<N>``
+        Synchronize the CPU to the Nth past frame using the ``GL_ARB_sync``
+        extension. A value of 0 disables this behavior (default). A value of
+        1 means it will synchronize to the current frame after rendering it.
+        Like ``glfinish`` and ``waitvsync``, this can lower or ruin performance.
+        Its advantage is that it can span multiple frames, and effectively limit
+        the number of frames the GPU queues ahead (which also has an influence
+        on vsync).
+
+    ``dwmflush=<no|windowed|yes|auto>``
+        Calls ``DwmFlush`` after swapping buffers on Windows (default: auto).
         It also sets ``SwapInterval(0)`` to ignore the OpenGL timing. Values
         are: no (disabled), windowed (only in windowed mode), yes (also in
         full screen).
+
+        The value ``auto`` will try to determine whether the compositor is
+        active, and calls ``DwmFlush`` only if it seems to be.
+
         This may help getting more consistent frame intervals, especially with
         high-fps clips - which might also reduce dropped frames. Typically a
         value of ``windowed`` should be enough since full screen may bypass the
@@ -697,6 +778,8 @@ Available video output drivers are:
             X11/GLX
         wayland
             Wayland/EGL
+        drm-egl
+            DRM/EGL
         x11egl
             X11/EGL
 
@@ -868,7 +951,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:fancy-downscaling:sigmoid-upscaling:pbo:deband
+        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:correct-downscaling:sigmoid-upscaling:pbo:deband
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.
@@ -1006,27 +1089,6 @@ Available video output drivers are:
 ``opengl-cb``
     For use with libmpv direct OpenGL embedding; useless in any other contexts.
     (See ``<mpv/opengl_cb.h>``.)
-    Usually, ``opengl-cb`` renders frames asynchronously by client and this
-    can cause some frame drops. In order to provide a way to handle this
-    situation, ``opengl-cb`` has its own frame queue and calls update callback
-    more frequently if the queue is not empty regardless of existence of new frame.
-    Once the queue is filled, ``opengl-cb`` drops frames automatically.
-
-    With default options, ``opengl-cb`` renders only the latest frame and drops
-    all frames handed over while waiting render function after update callback.
-
-    ``frame-queue-size=<1..100>``
-        The maximum count of frames which the frame queue can hold (default: 1)
-
-    ``frame-drop-mode=<pop|clear|block>``
-        Select the behavior when the frame queue is full.
-
-        pop
-            Drop the oldest frame in the frame queue.
-        clear
-            Drop all frames in the frame queue.
-        block
-            Wait for a short time, behave like ``clear`` on timeout. (default)
 
     This also supports many of the suboptions the ``opengl`` VO has. Run
     ``mpv --vo=opengl-cb:help`` for a list.
@@ -1053,8 +1115,9 @@ Available video output drivers are:
 
 ``drm`` (Direct Rendering Manager)
     Video output driver using Kernel Mode Setting / Direct Rendering Manager.
-    Does not support hardware acceleration. Should be used when one doesn't
-    want to install full-blown graphical environment (e.g. no X).
+    Should be used when one doesn't want to install full-blown graphical
+    environment (e.g. no X). Does not support hardware acceleration (if you
+    need this, check the ``drm-egl`` backend for ``opengl`` VO).
 
     ``connector=<number>``
         Select the connector to use (usually this is a monitor.) If set to -1,

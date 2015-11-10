@@ -51,6 +51,7 @@ struct m_config_option {
 /** \ingroup Config */
 typedef struct m_config {
     struct mp_log *log;
+    struct mpv_global *global; // can be NULL
 
     // Registered options.
     struct m_config_option *opts; // all options, even suboptions

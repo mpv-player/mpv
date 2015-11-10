@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <math.h>
 #include <assert.h>
 
 #include <libavutil/mem.h>
@@ -170,14 +171,28 @@ static int decode_new_frame(struct dec_audio *da)
         if (ret < 0)
             return ret;
 
-        if (da->pts == MP_NOPTS_VALUE && da->header->missing_timestamps)
-            da->pts = 0;
-
         if (da->waiting) {
+            if (da->waiting->pts != MP_NOPTS_VALUE) {
+                if (da->pts != MP_NOPTS_VALUE) {
+                    da->pts += da->pts_offset / (double)da->waiting->rate;
+                    da->pts_offset = 0;
+                }
+                // Keep the interpolated timestamp if it doesn't deviate more
+                // than 1 ms from the real one. (MKV rounded timestamps.)
+                if (da->pts == MP_NOPTS_VALUE || da->pts_offset != 0 ||
+                    fabs(da->pts - da->waiting->pts) > 0.001)
+                {
+                    da->pts = da->waiting->pts;
+                    da->pts_offset = 0;
+                }
+            }
             da->pts_offset += da->waiting->samples;
             da->decode_format = *da->waiting;
             mp_audio_set_null_data(&da->decode_format);
         }
+
+        if (da->pts == MP_NOPTS_VALUE && da->header->missing_timestamps)
+            da->pts = 0;
     }
     return mp_audio_config_valid(da->waiting) ? AD_OK : AD_ERR;
 }

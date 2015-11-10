@@ -804,9 +804,9 @@ Video
     You can get the list of allowed codecs with ``mpv --vd=help``. Remove the
     prefix, e.g. instead of ``lavc:h264`` use ``h264``.
 
-    By default this is set to ``h264,vc1,wmv3,hevc``. Note that the hardware
-    acceleration special codecs like ``h264_vdpau`` are not relevant anymore,
-    and in fact have been removed from Libav in this form.
+    By default this is set to ``h264,vc1,wmv3,hevc,mpeg2video``. Note that the
+    hardware acceleration special codecs like ``h264_vdpau`` are not relevant
+    anymore, and in fact have been removed from Libav in this form.
 
     This is usually only needed with broken GPUs, where a codec is reported
     as supported, but decoding causes more problems than it solves.
@@ -823,9 +823,10 @@ Video
     The result is most likely broken decoding, but may also help if the
     detected or reported profiles are somehow incorrect.
 
-``--vd-lavc-software-fallback=<yes|no>``
+``--vd-lavc-software-fallback=<yes|no|N>``
     Fallback to software decoding if the hardware-accelerated decoder fails
-    (default: yes).
+    (default: 3). If this is a number, then fallback will be triggered if
+    N frames fail to decode in a row. 1 is equivalent to ``yes``.
 
 ``--vd-lavc-bitexact``
     Only use bit-exact algorithms in all decoding steps (for codec testing).
@@ -2243,18 +2244,6 @@ Demuxer
     from the end of the file. The ``full`` mode actually traverses the entire
     file and can make a reliable estimate even without an index present (such
     as partial files).
-
-``--demuxer-mkv-fix-timestamps=<yes|no>``
-    Fix rounded Matroska timestamps (disabled by default). Matroska usually
-    stores timestamps rounded to milliseconds. This means timestamps jitter
-    by some amount around the intended timestamp. mpv can correct the timestamps
-    based on the framerate value stored in the file: the timestamp is rounded
-    to the next frame (according to the framerate), unless the new timestamp
-    would deviate more than 1ms from the old one. This should undo the rounding
-    done by the muxer.
-
-    (The allowed deviation can be less than 1ms if the file uses a non-standard
-    timecode scale.)
 
 ``--demuxer-rawaudio-channels=<value>``
     Number of channels (or channel layout) if ``--demuxer=rawaudio`` is used

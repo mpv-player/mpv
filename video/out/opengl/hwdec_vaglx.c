@@ -74,6 +74,10 @@ static int create(struct gl_hwdec *hw)
     Display *x11disp = glXGetCurrentDisplay();
     if (!x11disp)
         return -1;
+    if (hw->probing) {
+        MP_VERBOSE(hw, "Not using this by default.\n");
+        return -1;
+    }
     int x11scr = DefaultScreen(x11disp);
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
@@ -94,10 +98,6 @@ static int create(struct gl_hwdec *hw)
     p->ctx = va_initialize(p->display, p->log, true);
     if (!p->ctx) {
         vaTerminate(p->display);
-        return -1;
-    }
-    if (hw->reject_emulated && va_guess_if_emulated(p->ctx)) {
-        destroy(hw);
         return -1;
     }
 

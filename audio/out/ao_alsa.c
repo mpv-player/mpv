@@ -52,11 +52,11 @@ struct priv {
     snd_pcm_t *alsa;
     bool device_lost;
     snd_pcm_format_t alsa_fmt;
-    int can_pause;
+    bool can_pause;
     snd_pcm_sframes_t prepause_frames;
     double delay_before_pause;
-    int buffersize; // in frames
-    int outburst; // in frames
+    snd_pcm_uframes_t buffersize;
+    snd_pcm_uframes_t outburst;
 
     char *cfg_device;
     char *cfg_mixer_device;
@@ -227,24 +227,19 @@ static const int mp_to_alsa_format[][2] = {
             MP_SELECT_LE_BE(SND_PCM_FORMAT_S24_3LE, SND_PCM_FORMAT_S24_3BE)},
     {AF_FORMAT_FLOAT,       SND_PCM_FORMAT_FLOAT},
     {AF_FORMAT_DOUBLE,      SND_PCM_FORMAT_FLOAT64},
+    {AF_FORMAT_S_MP3,       SND_PCM_FORMAT_MPEG},
     {AF_FORMAT_UNKNOWN,     SND_PCM_FORMAT_UNKNOWN},
 };
 
 static int find_alsa_format(int af_format)
 {
-    if (af_fmt_is_spdif(af_format)) {
-        if (af_format == AF_FORMAT_S_MP3) {
-            return SND_PCM_FORMAT_MPEG;
-        } else {
-            return SND_PCM_FORMAT_S16;
-        }
-    }
-
     af_format = af_fmt_from_planar(af_format);
     for (int n = 0; mp_to_alsa_format[n][0] != AF_FORMAT_UNKNOWN; n++) {
         if (mp_to_alsa_format[n][0] == af_format)
             return mp_to_alsa_format[n][1];
     }
+    if (af_fmt_is_spdif(af_format))
+        return SND_PCM_FORMAT_S16;
     return SND_PCM_FORMAT_UNKNOWN;
 }
 
@@ -275,6 +270,7 @@ static const int alsa_to_mp_channels[][2] = {
     {SND_CHMAP_RLC,     MP_SP(SDL)},
     {SND_CHMAP_MONO,    MP_SP(FC)},
     {SND_CHMAP_NA,      MP_SPEAKER_ID_NA},
+    {SND_CHMAP_UNKNOWN, MP_SPEAKER_ID_NA},
     {SND_CHMAP_LAST,    MP_SPEAKER_ID_COUNT}
 };
 
@@ -288,28 +284,48 @@ static int find_mp_channel(int alsa_channel)
     return MP_SPEAKER_ID_COUNT;
 }
 
-static int find_alsa_channel(int mp_channel)
-{
-    for (int i = 0; alsa_to_mp_channels[i][1] != MP_SPEAKER_ID_COUNT; i++) {
-        if (alsa_to_mp_channels[i][1] == mp_channel)
-            return alsa_to_mp_channels[i][0];
-    }
+#define CHMAP(n, ...) &(struct mp_chmap) MP_CONCAT(MP_CHMAP, n) (__VA_ARGS__)
 
-    return SND_CHMAP_UNKNOWN;
+// Replace each channel in a with b (a->num == b->num)
+static void replace_submap(struct mp_chmap *dst, struct mp_chmap *a,
+                           struct mp_chmap *b)
+{
+    struct mp_chmap t = *dst;
+    if (!mp_chmap_is_valid(&t) || mp_chmap_diffn(a, &t) != 0)
+        return;
+    assert(a->num == b->num);
+    for (int n = 0; n < t.num; n++) {
+        for (int i = 0; i < a->num; i++) {
+            if (t.speaker[n] == a->speaker[i]) {
+                t.speaker[n] = b->speaker[i];
+                break;
+            }
+        }
+    }
+    if (mp_chmap_is_valid(&t))
+        *dst = t;
 }
 
-static int mp_chmap_from_alsa(struct mp_chmap *dst, snd_pcm_chmap_t *src)
+static bool mp_chmap_from_alsa(struct mp_chmap *dst, snd_pcm_chmap_t *src)
 {
     *dst = (struct mp_chmap) {0};
 
     if (src->channels > MP_NUM_CHANNELS)
-        return -1;
+        return false;
 
     dst->num = src->channels;
     for (int c = 0; c < dst->num; c++)
         dst->speaker[c] = find_mp_channel(src->pos[c]);
 
-    return 0;
+    // Assume anything with 1 channel is mono.
+    if (dst->num == 1)
+        dst->speaker[0] = MP_SP(FC);
+
+    // Remap weird Intel HDA HDMI 7.1 layouts correctly.
+    replace_submap(dst, CHMAP(6, FL, FR, BL, BR, SDL, SDR),
+                        CHMAP(6, FL, FR, SL, SR, BL,  BR));
+
+    return mp_chmap_is_valid(dst);
 }
 
 static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
@@ -322,20 +338,21 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
         return false;
 
     for (int i = 0; maps[i] != NULL; i++) {
-        struct mp_chmap entry;
-        mp_chmap_from_alsa(&entry, &maps[i]->map);
+        char aname[128];
+        if (snd_pcm_chmap_print(&maps[i]->map, sizeof(aname), aname) <= 0)
+            aname[0] = '\0';
 
-        if (mp_chmap_is_valid(&entry)) {
+        struct mp_chmap entry;
+        if (mp_chmap_from_alsa(&entry, &maps[i]->map)) {
+            struct mp_chmap reorder = entry;
             if (maps[i]->type == SND_CHMAP_TYPE_VAR)
-                mp_chmap_reorder_norm(&entry);
-            MP_DBG(ao, "Got supported channel map: %s (type %s)\n",
-                   mp_chmap_to_str(&entry),
-                   snd_pcm_chmap_type_name(maps[i]->type));
-            mp_chmap_sel_add_map(&chmap_sel, &entry);
+                mp_chmap_reorder_norm(&reorder);
+            MP_DBG(ao, "Got supported channel map: %s (type %s) -> %s -> %s\n",
+                   aname, snd_pcm_chmap_type_name(maps[i]->type),
+                   mp_chmap_to_str(&entry), mp_chmap_to_str(&reorder));
+            mp_chmap_sel_add_map(&chmap_sel, &reorder);
         } else {
-            char tmp[128];
-            if (snd_pcm_chmap_print(&maps[i]->map, sizeof(tmp), tmp) > 0)
-                MP_VERBOSE(ao, "skipping unknown ALSA channel map: %s\n", tmp);
+            MP_VERBOSE(ao, "skipping unknown ALSA channel map: %s\n", aname);
         }
     }
 
@@ -344,11 +361,118 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
     return ao_chmap_sel_adjust(ao, &chmap_sel, chmap);
 }
 
+// Map back our selected channel layout to an ALSA one. This is done this way so
+// that our ALSA->mp_chmap mapping function only has to go one way.
+// The return value is to be freed with free().
+static snd_pcm_chmap_t *map_back_chmap(struct ao *ao, struct mp_chmap *chmap)
+{
+    struct priv *p = ao->priv;
+    if (!mp_chmap_is_valid(chmap))
+        return NULL;
+
+    snd_pcm_chmap_query_t **maps = snd_pcm_query_chmaps(p->alsa);
+    if (!maps)
+        return NULL;
+
+    snd_pcm_chmap_t *alsa_chmap = NULL;
+
+    for (int i = 0; maps[i] != NULL; i++) {
+        struct mp_chmap entry;
+        if (!mp_chmap_from_alsa(&entry, &maps[i]->map))
+            continue;
+
+        if (mp_chmap_equals(chmap, &entry) ||
+            (mp_chmap_equals_reordered(chmap, &entry) &&
+                maps[i]->type == SND_CHMAP_TYPE_VAR))
+        {
+            alsa_chmap = calloc(1, sizeof(*alsa_chmap) +
+                                   sizeof(alsa_chmap->pos[0]) * entry.num);
+            if (!alsa_chmap)
+                break;
+            alsa_chmap->channels = entry.num;
+
+            // Undo if mp_chmap_reorder() was called on the result.
+            int reorder[MP_NUM_CHANNELS];
+            mp_chmap_get_reorder(reorder, chmap, &entry);
+            for (int n = 0; n < entry.num; n++)
+                alsa_chmap->pos[n] = maps[i]->map.pos[reorder[n]];
+            break;
+        }
+    }
+
+    snd_pcm_free_chmaps(maps);
+    return alsa_chmap;
+}
+
+
+static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels)
+{
+    struct priv *p = ao->priv;
+    int err;
+
+    snd_pcm_chmap_t *alsa_chmap = map_back_chmap(ao, dev_chmap);
+    if (alsa_chmap) {
+        char tmp[128];
+        if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
+            MP_VERBOSE(ao, "trying to set ALSA channel map: %s\n", tmp);
+
+        err = snd_pcm_set_chmap(p->alsa, alsa_chmap);
+        if (err == -ENXIO) {
+            // A device my not be able to set any channel map, even channel maps
+            // that were reported as supported. This is either because the ALSA
+            // device is broken (dmix), or because the driver has only 1
+            // channel map per channel count, and setting the map is not needed.
+            MP_VERBOSE(ao, "device returned ENXIO when setting channel map %s\n",
+                       mp_chmap_to_str(dev_chmap));
+        } else {
+            CHECK_ALSA_WARN("Channel map setup failed");
+        }
+
+        free(alsa_chmap);
+    }
+
+    alsa_chmap = snd_pcm_get_chmap(p->alsa);
+    if (alsa_chmap) {
+        char tmp[128];
+        if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
+            MP_VERBOSE(ao, "channel map reported by ALSA: %s\n", tmp);
+
+        struct mp_chmap chmap;
+        mp_chmap_from_alsa(&chmap, alsa_chmap);
+
+        MP_VERBOSE(ao, "which we understand as: %s\n", mp_chmap_to_str(&chmap));
+
+        if (p->cfg_ignore_chmap) {
+            MP_VERBOSE(ao, "user set ignore-chmap; ignoring the channel map.\n");
+        } else if (af_fmt_is_spdif(ao->format)) {
+            MP_VERBOSE(ao, "using spdif passthrough; ignoring the channel map.\n");
+        } else if (!mp_chmap_is_valid(&chmap)) {
+            MP_WARN(ao, "Got unknown channel map from ALSA.\n");
+        } else if (chmap.num != num_channels) {
+            MP_WARN(ao, "ALSA channel map conflicts with channel count!\n");
+        } else {
+            MP_VERBOSE(ao, "using the ALSA channel map.\n");
+            if (mp_chmap_equals(&chmap, &ao->channels))
+                MP_VERBOSE(ao, "which is what we requested.\n");
+            ao->channels = chmap;
+        }
+
+        free(alsa_chmap);
+    }
+
+    return 0;
+}
+
 #else /* HAVE_CHMAP_API */
 
 static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
 {
     return false;
+}
+
+static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels)
+{
+    return 0;
 }
 
 #endif /* else HAVE_CHMAP_API */
@@ -371,8 +495,8 @@ static int map_iec958_srate(int srate)
 }
 
 // ALSA device strings can have parameters. They are usually appended to the
-// device name. Since there can be various forms, and we (sometimes) want to
-// append them to unknown device strings, which possibly already include params.
+// device name. There can be various forms, and we (sometimes) want to append
+// them to unknown device strings, which possibly already include params.
 static char *append_params(void *ta_parent, const char *device, const char *p)
 {
     if (!p || !p[0])
@@ -443,16 +567,14 @@ static void uninit(struct ao *ao)
         int err;
 
         err = snd_pcm_close(p->alsa);
+        p->alsa = NULL;
         CHECK_ALSA_ERROR("pcm close error");
     }
 
 alsa_error: ;
 }
 
-#define INIT_OK 0
-#define INIT_ERROR -1
-#define INIT_BRAINDEATH -2
-static int init_device(struct ao *ao, bool second_try)
+static int init_device(struct ao *ao)
 {
     struct priv *p = ao->priv;
     int err;
@@ -470,18 +592,35 @@ static int init_device(struct ao *ao, bool second_try)
     CHECK_ALSA_WARN("Unable to set blocking mode");
 
     snd_pcm_hw_params_t *alsa_hwparams;
-    snd_pcm_sw_params_t *alsa_swparams;
-
     snd_pcm_hw_params_alloca(&alsa_hwparams);
-    snd_pcm_sw_params_alloca(&alsa_swparams);
 
     err = snd_pcm_hw_params_any(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to get initial parameters");
+
+    // Some ALSA drivers have broken delay reporting, so disable the ALSA
+    // resampling plugin by default.
+    if (!p->cfg_resample) {
+        err = snd_pcm_hw_params_set_rate_resample(p->alsa, alsa_hwparams, 0);
+        CHECK_ALSA_ERROR("Unable to disable resampling");
+    }
+
+    snd_pcm_access_t access = af_fmt_is_planar(ao->format)
+                                    ? SND_PCM_ACCESS_RW_NONINTERLEAVED
+                                    : SND_PCM_ACCESS_RW_INTERLEAVED;
+    err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
+    if (err < 0 && af_fmt_is_planar(ao->format)) {
+        ao->format = af_fmt_from_planar(ao->format);
+        access = SND_PCM_ACCESS_RW_INTERLEAVED;
+        err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
+    }
+    CHECK_ALSA_ERROR("Unable to set access type");
 
     bool found_format = false;
     int try_formats[AF_FORMAT_COUNT];
     af_get_best_sample_formats(ao->format, try_formats);
     for (int n = 0; try_formats[n]; n++) {
+        if (af_fmt_is_planar(ao->format) != af_fmt_is_planar(try_formats[n]))
+            continue; // implied SND_PCM_ACCESS mismatches
         p->alsa_fmt = find_alsa_format(try_formats[n]);
         MP_VERBOSE(ao, "trying format %s\n", af_fmt_to_str(try_formats[n]));
         if (snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt) >= 0) {
@@ -498,17 +637,6 @@ static int init_device(struct ao *ao, bool second_try)
 
     err = snd_pcm_hw_params_set_format(p->alsa, alsa_hwparams, p->alsa_fmt);
     CHECK_ALSA_ERROR("Unable to set format");
-
-    snd_pcm_access_t access = af_fmt_is_planar(ao->format)
-                                    ? SND_PCM_ACCESS_RW_NONINTERLEAVED
-                                    : SND_PCM_ACCESS_RW_INTERLEAVED;
-    err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
-    if (err < 0 && af_fmt_is_planar(ao->format)) {
-        ao->format = af_fmt_from_planar(ao->format);
-        access = SND_PCM_ACCESS_RW_INTERLEAVED;
-        err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
-    }
-    CHECK_ALSA_ERROR("Unable to set access type");
 
     struct mp_chmap dev_chmap = ao->channels;
     if (af_fmt_is_spdif(ao->format) || p->cfg_ignore_chmap) {
@@ -534,157 +662,51 @@ static int init_device(struct ao *ao, bool second_try)
         goto alsa_error;
     }
 
-    if (num_channels != ao->channels.num) {
-        int req = ao->channels.num;
-        mp_chmap_from_channels_alsa(&ao->channels, num_channels);
-        if (!mp_chmap_is_valid(&ao->channels))
-            mp_chmap_from_channels(&ao->channels, 2);
-        MP_ERR(ao, "Asked for %d channels, got %d - fallback to %s.\n", req,
-               num_channels, mp_chmap_to_str(&ao->channels));
-    }
-
-    // Some ALSA drivers have broken delay reporting, so disable the ALSA
-    // resampling plugin by default.
-    if (!p->cfg_resample) {
-        err = snd_pcm_hw_params_set_rate_resample(p->alsa, alsa_hwparams, 0);
-        CHECK_ALSA_ERROR("Unable to disable resampling");
-    }
-
     err = snd_pcm_hw_params_set_rate_near
             (p->alsa, alsa_hwparams, &ao->samplerate, NULL);
     CHECK_ALSA_ERROR("Unable to set samplerate-2");
 
+    snd_pcm_hw_params_t *hwparams_backup;
+    snd_pcm_hw_params_alloca(&hwparams_backup);
+    snd_pcm_hw_params_copy(hwparams_backup, alsa_hwparams);
+
+    // Cargo-culted buffer settings; might still be useful for PulseAudio.
     err = snd_pcm_hw_params_set_buffer_time_near
             (p->alsa, alsa_hwparams, &(unsigned int){BUFFER_TIME}, NULL);
     CHECK_ALSA_WARN("Unable to set buffer time near");
-
-    err = snd_pcm_hw_params_set_periods_near
-            (p->alsa, alsa_hwparams, &(unsigned int){FRAGCOUNT}, NULL);
-    CHECK_ALSA_WARN("Unable to set periods");
+    if (err >= 0) {
+        err = snd_pcm_hw_params_set_periods_near
+                    (p->alsa, alsa_hwparams, &(unsigned int){FRAGCOUNT}, NULL);
+        CHECK_ALSA_WARN("Unable to set periods");
+    }
+    if (err < 0)
+        snd_pcm_hw_params_copy(alsa_hwparams, hwparams_backup);
 
     /* finally install hardware parameters */
     err = snd_pcm_hw_params(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to set hw-parameters");
 
-    /* end setting hw-params */
+    if (set_chmap(ao, &dev_chmap, num_channels) < 0)
+        goto alsa_error;
 
-#if HAVE_CHMAP_API
-    if (mp_chmap_is_valid(&dev_chmap)) {
-        snd_pcm_chmap_t *alsa_chmap =
-            calloc(1, sizeof(*alsa_chmap) +
-                      sizeof(alsa_chmap->pos[0]) * dev_chmap.num);
-        if (!alsa_chmap)
-            goto alsa_error;
-
-        alsa_chmap->channels = dev_chmap.num;
-        for (int c = 0; c < dev_chmap.num; c++)
-            alsa_chmap->pos[c] = find_alsa_channel(dev_chmap.speaker[c]);
-
-        // mpv and ALSA use different conventions for mono
-        if (dev_chmap.num == 1 && dev_chmap.speaker[0] == MP_SP(FC))
-            alsa_chmap->pos[0] = SND_CHMAP_MONO;
-
-        char tmp[128];
-        if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
-            MP_VERBOSE(ao, "trying to set ALSA channel map: %s\n", tmp);
-
-        err = snd_pcm_set_chmap(p->alsa, alsa_chmap);
-        if (err == -ENXIO) {
-            // A device my not be able to set any channel map, even channel maps
-            // that were reported as supported. This is either because the ALSA
-            // device is broken (dmix), or because the driver has only 1
-            // channel map per channel count, and setting the map is not needed.
-            MP_VERBOSE(ao, "device returned ENXIO when setting channel map %s\n",
-                       mp_chmap_to_str(&dev_chmap));
-        } else {
-            CHECK_ALSA_WARN("Channel map setup failed");
-        }
-
-        free(alsa_chmap);
+    if (num_channels != ao->channels.num) {
+        int req = ao->channels.num;
+        mp_chmap_from_channels(&ao->channels, MPMIN(2, num_channels));
+        MP_ERR(ao, "Asked for %d channels, got %d - fallback to %s.\n", req,
+               num_channels, mp_chmap_to_str(&ao->channels));
     }
 
-    snd_pcm_chmap_t *alsa_chmap = snd_pcm_get_chmap(p->alsa);
-    if (alsa_chmap) {
-        char tmp[128];
-        if (snd_pcm_chmap_print(alsa_chmap, sizeof(tmp), tmp) > 0)
-            MP_VERBOSE(ao, "channel map reported by ALSA: %s\n", tmp);
-
-        struct mp_chmap chmap;
-        mp_chmap_from_alsa(&chmap, alsa_chmap);
-
-        MP_VERBOSE(ao, "which we understand as: %s\n", mp_chmap_to_str(&chmap));
-
-        if (p->cfg_ignore_chmap) {
-            MP_VERBOSE(ao, "user set ignore-chmap; ignoring the channel map.\n");
-        } else if (af_fmt_is_spdif(ao->format)) {
-            MP_VERBOSE(ao, "using spdif passthrough; ignoring the channel map.\n");
-        } else if (mp_chmap_is_valid(&chmap)) {
-            // Is it one that contains NA channels?
-            struct mp_chmap without_na = chmap;
-            mp_chmap_remove_na(&without_na);
-
-            if (mp_chmap_is_valid(&without_na) &&
-                !mp_chmap_equals(&without_na, &chmap) &&
-                !mp_chmap_equals(&chmap, &ao->channels) &&
-                !second_try)
-            {
-                // Sometimes, ALSA will advertise certain chmaps, but it's not
-                // possible to set them. This can happen with dmix: as of
-                // alsa 1.0.28, dmix can do stereo only, but advertises the
-                // surround chmaps of the underlying device. In this case,
-                // e.g. setting 6 channels will succeed, but requesting  5.1
-                // afterwards will fail. Then it will return something like
-                // "FL FR NA NA NA NA" as channel map. This means we would
-                // have to pad stereo output to 6 channels with silence, which
-                // would require lots of extra processing. You can't change
-                // the number of channels to 2 either, because the hw params
-                // are already set! So just fuck it and reopen the device with
-                // the chmap "cleaned out" of NA entries.
-                MP_VERBOSE(ao, "Working around braindead ALSA behavior.\n");
-                err = snd_pcm_close(p->alsa);
-                p->alsa = NULL;
-                CHECK_ALSA_ERROR("pcm close error");
-                ao->channels = without_na;
-                return INIT_BRAINDEATH;
-            }
-
-            if (mp_chmap_equals(&chmap, &ao->channels)) {
-                MP_VERBOSE(ao, "which is what we requested.\n");
-            } else if (chmap.num == ao->channels.num) {
-                MP_VERBOSE(ao, "using the ALSA channel map.\n");
-                ao->channels = chmap;
-            } else {
-                MP_WARN(ao, "ALSA channel map conflicts with channel count!\n");
-            }
-        } else {
-            MP_WARN(ao, "Got unknown channel map from ALSA.\n");
-        }
-
-        // mpv and ALSA use different conventions for mono
-        if (ao->channels.num == 1) {
-            MP_VERBOSE(ao, "assuming we actually got MONO from ALSA.\n");
-            ao->channels.speaker[0] = MP_SP(FC);
-        }
-
-        free(alsa_chmap);
-    }
-#endif
-
-    snd_pcm_uframes_t bufsize;
-    err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &bufsize);
+    err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &p->buffersize);
     CHECK_ALSA_ERROR("Unable to get buffersize");
 
-    p->buffersize = bufsize;
-    MP_VERBOSE(ao, "got buffersize=%i samples\n", p->buffersize);
-
-    snd_pcm_uframes_t chunk_size;
-    err = snd_pcm_hw_params_get_period_size(alsa_hwparams, &chunk_size, NULL);
+    err = snd_pcm_hw_params_get_period_size(alsa_hwparams, &p->outburst, NULL);
     CHECK_ALSA_ERROR("Unable to get period size");
 
-    MP_VERBOSE(ao, "got period size %li\n", chunk_size);
-    p->outburst = chunk_size;
+    p->can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
 
-    /* setting software parameters */
+    snd_pcm_sw_params_t *alsa_swparams;
+    snd_pcm_sw_params_alloca(&alsa_swparams);
+
     err = snd_pcm_sw_params_current(p->alsa, alsa_swparams);
     CHECK_ALSA_ERROR("Unable to get sw-parameters");
 
@@ -694,7 +716,7 @@ static int init_device(struct ao *ao, bool second_try)
 
     /* start playing when one period has been written */
     err = snd_pcm_sw_params_set_start_threshold
-            (p->alsa, alsa_swparams, chunk_size);
+            (p->alsa, alsa_swparams, p->outburst);
     CHECK_ALSA_ERROR("Unable to set start threshold");
 
     /* disable underrun reporting */
@@ -710,15 +732,15 @@ static int init_device(struct ao *ao, bool second_try)
     err = snd_pcm_sw_params(p->alsa, alsa_swparams);
     CHECK_ALSA_ERROR("Unable to set sw-parameters");
 
-    /* end setting sw-params */
+    MP_VERBOSE(ao, "hw pausing supported: %s\n", p->can_pause ? "yes" : "no");
+    MP_VERBOSE(ao, "buffersize: %d samples\n", (int)p->buffersize);
+    MP_VERBOSE(ao, "period size: %d samples\n", (int)p->outburst);
 
-    p->can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
-
-    return INIT_OK;
+    return 0;
 
 alsa_error:
     uninit(ao);
-    return INIT_ERROR;
+    return -1;
 }
 
 static int init(struct ao *ao)
@@ -729,10 +751,33 @@ static int init(struct ao *ao)
 
     MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());
 
-    int r = init_device(ao, false);
-    if (r == INIT_BRAINDEATH)
-        r = init_device(ao, true); // retry with normalized channel layout
-    return r == INIT_OK ? 0 : -1;
+    int r = init_device(ao);
+
+    // Sometimes, ALSA will advertise certain chmaps, but it's not possible to
+    // set them. This can happen with dmix: as of alsa 1.0.29, dmix can do
+    // stereo only, but advertises the surround chmaps of the underlying device.
+    // In this case, e.g. setting 6 channels will succeed, but requesting  5.1
+    // afterwards will fail. Then it will return something like "FL FR NA NA NA NA"
+    // as channel map. This means we would have to pad stereo output to 6
+    // channels with silence, which would require lots of extra processing. You
+    // can't change the number of channels to 2 either, because the hw params
+    // are already set! So just fuck it and reopen the device with the chmap
+    // "cleaned out" of NA entries.
+    if (r >= 0) {
+        struct mp_chmap without_na = ao->channels;
+        mp_chmap_remove_na(&without_na);
+
+        if (mp_chmap_is_valid(&without_na) && without_na.num <= 2 &&
+            ao->channels.num > 2)
+        {
+            MP_VERBOSE(ao, "Working around braindead dmix multichannel behavior.\n");
+            uninit(ao);
+            ao->channels = without_na;
+            r = init_device(ao);
+        }
+    }
+
+    return r;
 }
 
 static void drain(struct ao *ao)
@@ -795,7 +840,6 @@ static void audio_pause(struct ao *ao)
             CHECK_ALSA_ERROR("pcm pause error");
         }
     } else {
-        MP_VERBOSE(ao, "pause not supported by hardware\n");
         if (snd_pcm_delay(p->alsa, &p->prepause_frames) < 0
             || p->prepause_frames < 0)
             p->prepause_frames = 0;

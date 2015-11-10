@@ -232,7 +232,8 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         desc.flags |= MP_IMGFLAG_PAL;
 
     if ((desc.flags & (MP_IMGFLAG_YUV | MP_IMGFLAG_RGB))
-        && (desc.flags & MP_IMGFLAG_BYTE_ALIGNED))
+        && (desc.flags & MP_IMGFLAG_BYTE_ALIGNED)
+        && !(pd->flags & AV_PIX_FMT_FLAG_PAL))
     {
         bool same_depth = true;
         for (int p = 0; p < desc.num_planes; p++) {

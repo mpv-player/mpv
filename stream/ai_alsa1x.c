@@ -134,7 +134,11 @@ int ai_alsa_init(audio_in_t *ai)
 {
     int err;
 
-    err = snd_pcm_open(&ai->alsa.handle, ai->alsa.device, SND_PCM_STREAM_CAPTURE, 0);
+    const char *device = ai->alsa.device;
+    if (!device)
+        device = "default";
+
+    err = snd_pcm_open(&ai->alsa.handle, device, SND_PCM_STREAM_CAPTURE, 0);
     if (err < 0) {
         MP_ERR(ai, "Error opening audio: %s\n", snd_strerror(err));
         return -1;

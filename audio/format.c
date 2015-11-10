@@ -51,7 +51,7 @@ int af_fmt_change_bytes(int format, int bytes)
         if (af_fmt_to_bytes(fmt) == bytes &&
             af_fmt_is_float(fmt) == af_fmt_is_float(format) &&
             af_fmt_is_planar(fmt) == af_fmt_is_planar(format) &&
-            af_fmt_is_spdif(fmt) == af_fmt_is_spdif(format))
+            (fmt == format || (!af_fmt_is_spdif(fmt) && !af_fmt_is_spdif(format))))
             return fmt;
     }
     return 0;
