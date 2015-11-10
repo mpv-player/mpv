@@ -148,7 +148,7 @@ void update_playback_speed(struct MPContext *mpctx)
     mpctx->audio_speed = mpctx->opts->playback_speed * mpctx->speed_factor_a;
     mpctx->video_speed = mpctx->opts->playback_speed * mpctx->speed_factor_v;
 
-    if (!mpctx->d_audio)
+    if (!mpctx->d_audio || mpctx->d_audio->afilter->initialized < 1)
         return;
 
     if (!update_speed_filters(mpctx))
