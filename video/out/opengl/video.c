@@ -2202,6 +2202,11 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
     gl->UseProgram(0);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
+    // The playloop calls this last before waiting some time until it decides
+    // to call flip_page(). Tell OpenGL to start execution of the GPU commands
+    // while we sleep (this happens asynchronously).
+    gl->Flush();
+
     p->frames_rendered++;
 }
 

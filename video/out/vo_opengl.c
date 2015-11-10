@@ -136,11 +136,6 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     gl_video_render_frame(p->renderer, frame, 0);
 
-    // The playloop calls this last before waiting some time until it decides
-    // to call flip_page(). Tell OpenGL to start execution of the GPU commands
-    // while we sleep (this happens asynchronously).
-    gl->Flush();
-
     if (p->use_glFinish)
         gl->Finish();
 }
