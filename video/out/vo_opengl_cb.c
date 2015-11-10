@@ -363,8 +363,10 @@ static void flip_page(struct vo *vo)
 
     // Wait until frame was rendered
     while (p->ctx->next_frame) {
-        if (pthread_cond_timedwait(&p->ctx->wakeup, &p->ctx->lock, &ts))
-            break;
+        if (pthread_cond_timedwait(&p->ctx->wakeup, &p->ctx->lock, &ts)) {
+            MP_VERBOSE(vo, "mpv_opengl_cb_draw() not being called or stuck.\n");
+            goto done;
+        }
     }
 
     // Unblock mpv_opengl_cb_draw().
@@ -377,15 +379,19 @@ static void flip_page(struct vo *vo)
         // Assume the user calls it consistently _if_ it's called at all.
         if (!p->ctx->flip_count)
             break;
-        if (pthread_cond_timedwait(&p->ctx->wakeup, &p->ctx->lock, &ts))
-            break;
+        if (pthread_cond_timedwait(&p->ctx->wakeup, &p->ctx->lock, &ts)) {
+            MP_VERBOSE(vo, "mpv_opengl_cb_report_flip() not being called.\n");
+            goto done;
+        }
     }
 
-    // The API user is not reacting, or is being unusually slow => drop.
+done:
+
+    // Cleanup after the API user is not reacting, or is being unusually slow.
     if (p->ctx->next_frame) {
         talloc_free(p->ctx->next_frame);
         p->ctx->next_frame = NULL;
-        p->ctx->present_count += 1;
+        p->ctx->present_count += 2;
         pthread_cond_signal(&p->ctx->wakeup);
         vo_increment_drop_count(vo, 1);
     }
