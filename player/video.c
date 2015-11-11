@@ -1004,7 +1004,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // We use the speed-adjusted (i.e. real) frame duration for this.
     double frame_duration = adjusted_duration / mpctx->speed_factor_v;
     double ratio = (frame_duration + mpctx->display_sync_error) / vsync;
-    int num_vsyncs = MPMAX(floor(ratio + 0.5), 0);
+    int num_vsyncs = MPMAX(lrint(ratio), 0);
     double prev_error = mpctx->display_sync_error;
     mpctx->display_sync_error += frame_duration - num_vsyncs * vsync;
     frame->vsync_offset = mpctx->display_sync_error * 1e6;
