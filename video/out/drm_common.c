@@ -194,7 +194,7 @@ bool kms_setup(struct kms *kms, const char *device_path, int connector_id, int m
         return false;
     }
 
-    if (!setup_connector(kms, res, mode_id))
+    if (!setup_connector(kms, res, connector_id))
         return false;
     if (!setup_crtc(kms, res))
         return false;
