@@ -91,8 +91,6 @@ struct af_resample {
     int out_rate;
     int out_format;
     struct mp_chmap out_channels;
-
-    double missing_samples;     // fractional samples not yet output
 };
 
 #if HAVE_LIBAVRESAMPLE
@@ -225,8 +223,6 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     s->in_format   = in->format;
     s->out_channels= out->channels;
     s->in_channels = in->channels;
-
-    s->missing_samples = 0;
 
     av_opt_set_int(s->avrctx, "filter_size",        s->opts.filter_size, 0);
     av_opt_set_int(s->avrctx, "phase_shift",        s->opts.phase_shift, 0);
@@ -521,15 +517,18 @@ static int filter(struct af_instance *af, struct mp_audio *in)
     int new_rate = rate_from_speed(s->in_rate_af, s->playback_speed);
     bool need_reinit = fabs(new_rate / (double)s->in_rate - 1) > 0.01;
 
-    if (!need_reinit && s->avrctx) {
-        double speed_factor = s->playback_speed * s->in_rate_af / s->in_rate;
-        int in_samples = in ? in->samples : 0;
-        double wanted_samples = in_samples / speed_factor + s->missing_samples;
-        int wanted_samples_i = lrint(wanted_samples);
-        s->missing_samples = wanted_samples - wanted_samples_i;
-        if (avresample_set_compensation(s->avrctx,
-                (wanted_samples_i - in_samples) * s->out_rate / s->in_rate,
-                wanted_samples_i * s->out_rate / s->in_rate) < 0)
+    if (s->avrctx) {
+        AVRational r = av_d2q(s->playback_speed * s->in_rate_af / s->in_rate,
+                              INT_MAX / 2);
+        // Essentially, swr/avresample_set_compensation() does 2 things:
+        // - adjust output sample rate by sample_delta/compensation_distance
+        // - reset the adjustment after compensation_distance output samples
+        // Increase the compensation_distance to avoid undesired reset
+        // semantics - we want to keep the ratio for the whole frame we're
+        // feeding it, until the next filter() call.
+        int mult = INT_MAX / 2 / MPMAX(MPMAX(abs(r.num), abs(r.den)), 1);
+        r = (AVRational){ r.num * mult, r.den * mult };
+        if (avresample_set_compensation(s->avrctx, r.den - r.num, r.den) < 0)
             need_reinit = true;
     }
 
