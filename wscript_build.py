@@ -162,7 +162,6 @@ def build(ctx):
         ( "demux/demux_edl.c" ),
         ( "demux/demux_lavf.c" ),
         ( "demux/demux_libarchive.c",            "libarchive" ),
-        ( "demux/demux_libass.c",                "libass"),
         ( "demux/demux_mf.c" ),
         ( "demux/demux_mkv.c" ),
         ( "demux/demux_mkv_timeline.c" ),

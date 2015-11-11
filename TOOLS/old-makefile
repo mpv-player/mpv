@@ -36,8 +36,7 @@ SOURCES-$(DVDNAV)               += stream/stream_dvdnav.c \
                                    stream/stream_dvd_common.c
 
 SOURCES-$(RUBBERBAND)           += audio/filter/af_rubberband.c
-SOURCES-$(LIBASS)               += sub/ass_mp.c sub/sd_ass.c \
-                                   demux/demux_libass.c
+SOURCES-$(LIBASS)               += sub/ass_mp.c sub/sd_ass.c
 
 SOURCES-$(LIBBLURAY)            += stream/stream_bluray.c
 

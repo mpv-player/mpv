@@ -48,7 +48,6 @@ extern const demuxer_desc_t demuxer_desc_tv;
 extern const demuxer_desc_t demuxer_desc_mf;
 extern const demuxer_desc_t demuxer_desc_matroska;
 extern const demuxer_desc_t demuxer_desc_lavf;
-extern const demuxer_desc_t demuxer_desc_libass;
 extern const demuxer_desc_t demuxer_desc_subreader;
 extern const demuxer_desc_t demuxer_desc_playlist;
 extern const demuxer_desc_t demuxer_desc_disc;
@@ -67,9 +66,6 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_rawvideo,
 #if HAVE_TV
     &demuxer_desc_tv,
-#endif
-#if HAVE_LIBASS
-    &demuxer_desc_libass,
 #endif
     &demuxer_desc_matroska,
 #if HAVE_LIBARCHIVE
