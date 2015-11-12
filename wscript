@@ -682,7 +682,7 @@ video_output_features = [
     }, {
         'name': '--vaapi-wayland',
         'desc': 'VAAPI (Wayland support)',
-        'deps': [ 'vaapi', 'wayland' ],
+        'deps': [ 'vaapi', 'gl-wayland' ],
         'func': check_pkg_config('libva-wayland', '>= 0.36.0'),
 
     }, {
