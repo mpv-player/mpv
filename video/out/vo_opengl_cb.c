@@ -70,6 +70,7 @@ struct mpv_opengl_cb_context {
     struct vo_frame *next_frame;    // next frame to draw
     int64_t present_count;          // incremented when next frame can be shown
     int64_t expected_flip_count;    // next vsync event for next_frame
+    bool redrawing;                 // next_frame was a redraw request
     int64_t flip_count;
     struct vo_frame *cur_frame;
     struct mp_image_params img_params;
@@ -350,6 +351,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     assert(!p->ctx->next_frame);
     p->ctx->next_frame = vo_frame_ref(frame);
     p->ctx->expected_flip_count = p->ctx->flip_count + 1;
+    p->ctx->redrawing = frame ? frame->redraw : false;
     update(p);
     pthread_mutex_unlock(&p->ctx->lock);
 }
@@ -372,6 +374,9 @@ static void flip_page(struct vo *vo)
     // Unblock mpv_opengl_cb_draw().
     p->ctx->present_count += 1;
     pthread_cond_signal(&p->ctx->wakeup);
+
+    if (p->ctx->redrawing)
+        goto done; // do not block for redrawing
 
     // Wait until frame was presented
     while (p->ctx->expected_flip_count > p->ctx->flip_count) {
