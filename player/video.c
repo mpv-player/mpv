@@ -611,9 +611,13 @@ static void shift_frames(struct MPContext *mpctx)
 static int get_req_frames(struct MPContext *mpctx, bool eof)
 {
     // On EOF, drain all frames.
-    // On the first frame, output a new frame as quickly as possible.
-    if (eof || mpctx->video_pts == MP_NOPTS_VALUE)
+    if (eof)
         return 1;
+
+    // On the first frame, output a new frame as quickly as possible.
+    // But display-sync likes to have a correct frame duration always.
+    if (mpctx->video_pts == MP_NOPTS_VALUE)
+        return mpctx->opts->video_sync == VS_DEFAULT ? 1 : 2;
 
     int req = vo_get_num_req_frames(mpctx->video_out);
     return MPCLAMP(req, 2, MP_ARRAY_SIZE(mpctx->next_frames));
