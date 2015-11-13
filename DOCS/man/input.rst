@@ -921,6 +921,11 @@ Property list
     (which can happen especially with bad source timestamps). For example,
     using the ``display-desync`` mode should never change this value from 0.
 
+``vo-delayed-frame-count``
+    Estimated number of frames delayed due to external circumstances in
+    display-sync mode. Note that in general, mpv has to guess that this is
+    happening, and the guess can be inaccurate.
+
 ``percent-pos`` (RW)
     Position in current file (0-100). The advantage over using this instead of
     calculating it out of other properties is that it properly falls back to

@@ -234,14 +234,8 @@ static void print_status(struct MPContext *mpctx)
         // VO stats
         if (mpctx->d_video) {
             if (mpctx->display_sync_active) {
-                char *f =
-                    mp_property_expand_string(mpctx, "${audio-speed-correction}");
-                if (f)
-                    saddf(&line, " DS: %s", f);
-                talloc_free(f);
-                int64_t m = vo_get_missed_count(mpctx->video_out);
-                if (m > 0)
-                    saddf(&line, " Missed: %"PRId64, m);
+                saddf(&line, " DS: %d/%"PRId64, mpctx->mistimed_frames_total,
+                      vo_get_delayed_count(mpctx->video_out));
             }
             int64_t c = vo_get_drop_count(mpctx->video_out);
             if (c > 0 || mpctx->dropped_frames_total > 0) {

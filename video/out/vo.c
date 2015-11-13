@@ -144,7 +144,7 @@ struct vo_internal {
 
     int64_t flip_queue_offset; // queue flip events at most this much in advance
 
-    int64_t missed_count;
+    int64_t delayed_count;
     int64_t drop_count;
     bool dropped_frame;             // the previous frame was dropped
 
@@ -423,7 +423,7 @@ static void forget_frames(struct vo *vo)
     in->hasframe = false;
     in->hasframe_rendered = false;
     in->drop_count = 0;
-    in->missed_count = 0;
+    in->delayed_count = 0;
     talloc_free(in->frame_queued);
     in->frame_queued = NULL;
     // don't unref current_frame; we always want to be able to redraw it
@@ -1050,11 +1050,11 @@ int64_t vo_get_next_frame_start_time(struct vo *vo)
     return res;
 }
 
-int64_t vo_get_missed_count(struct vo *vo)
+int64_t vo_get_delayed_count(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    int64_t res = vo->in->missed_count;
+    int64_t res = vo->in->delayed_count;
     pthread_mutex_unlock(&in->lock);
     return res;
 }

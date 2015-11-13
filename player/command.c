@@ -583,14 +583,14 @@ static int mp_property_vo_drop_frame_count(void *ctx, struct m_property *prop,
     return m_property_int_ro(action, arg, vo_get_drop_count(mpctx->video_out));
 }
 
-static int mp_property_vo_missed_frame_count(void *ctx, struct m_property *prop,
-                                             int action, void *arg)
+static int mp_property_vo_delayed_frame_count(void *ctx, struct m_property *prop,
+                                              int action, void *arg)
 {
     MPContext *mpctx = ctx;
     if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_int_ro(action, arg, vo_get_missed_count(mpctx->video_out));
+    return m_property_int_ro(action, arg, vo_get_delayed_count(mpctx->video_out));
 }
 
 /// Current position in percent (RW)
@@ -3395,7 +3395,7 @@ static const struct m_property mp_properties[] = {
     {"drop-frame-count", mp_property_drop_frame_cnt},
     {"mistimed-frame-count", mp_property_mistimed_frame_count},
     {"vo-drop-frame-count", mp_property_vo_drop_frame_count},
-    {"vo-missed-frame-count", mp_property_vo_missed_frame_count},
+    {"vo-delayed-frame-count", mp_property_vo_delayed_frame_count},
     {"percent-pos", mp_property_percent_pos},
     {"time-start", mp_property_time_start},
     {"time-pos", mp_property_time_pos},
@@ -3612,7 +3612,7 @@ static const char *const *const mp_event_property_change[] = {
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
       "total-avsync-change", "audio-speed-correction", "video-speed-correction",
-      "vo-missed-frame-count", "mistimed-frame-count"),
+      "vo-delayed-frame-count", "mistimed-frame-count"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",
