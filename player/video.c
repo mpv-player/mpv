@@ -1011,10 +1011,9 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // Intended number of additional display frames to drop (<0) or repeat (>0)
     int drop_repeat = 0;
 
-    // If we are too far ahead/behind, attempt to drop/repeat frames. In
-    // particular, don't attempt to change speed for them.
+    // If we are too far ahead/behind, attempt to drop/repeat frames.
     // Tolerate some desync to avoid frame dropping due to jitter.
-    if (drop && fabs(av_diff) >= 0.080 && fabs(av_diff) / vsync >= 2)
+    if (drop && fabs(av_diff) >= 0.020 && fabs(av_diff) / vsync >= 1)
         drop_repeat = -av_diff / vsync; // round towards 0
 
     // We can only drop all frames at most. We can repeat much more frames,
