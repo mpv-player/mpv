@@ -814,6 +814,40 @@ double calc_average_frame_duration(struct MPContext *mpctx)
     return num > 0 ? total / num : 0;
 }
 
+// Find a speed factor such that the display FPS is an integer multiple of the
+// effective video FPS. If this is not possible, try to do it for multiples,
+// which still leads to an improved end result.
+// Both parameters are durations in seconds.
+static double calc_best_speed(double vsync, double frame)
+{
+    double ratio = frame / vsync;
+    double best_scale = -1;
+    double best_dev = INFINITY;
+    for (int factor = 1; factor <= 5; factor++) {
+        double scale = ratio * factor / rint(ratio * factor);
+        double dev = fabs(scale - 1);
+        if (dev < best_dev) {
+            best_scale = scale;
+            best_dev = dev;
+        }
+    }
+    return best_scale;
+}
+
+static double find_best_speed(struct MPContext *mpctx, double vsync)
+{
+    double total = 0;
+    int num = 0;
+    for (int n = 0; n < mpctx->num_past_frames; n++) {
+        double dur = mpctx->past_frames[n].approx_duration;
+        if (dur <= 0)
+            continue;
+        total += calc_best_speed(vsync, dur / mpctx->opts->playback_speed);
+        num++;
+    }
+    return num > 0 ? total / num : 1;
+}
+
 static bool using_spdif_passthrough(struct MPContext *mpctx)
 {
     if (mpctx->d_audio && mpctx->d_audio->afilter)
@@ -861,24 +895,6 @@ static void adjust_audio_speed(struct MPContext *mpctx, double vsync)
     MP_STATS(mpctx, "value %f aspeed", mpctx->speed_factor_a - 1);
 }
 
-// Find a speed factor such that the display FPS is an integer multiple of the
-// effective video FPS. If this is not possible, try to do it for multiples,
-// which still leads to an improved end result.
-// Both parameters are durations in seconds.
-static double calc_best_speed(struct MPContext *mpctx, double vsync, double frame)
-{
-    struct MPOpts *opts = mpctx->opts;
-
-    double ratio = frame / vsync;
-    for (int factor = 1; factor <= 5; factor++) {
-        double scale = ratio * factor / floor(ratio * factor + 0.5);
-        if (fabs(scale - 1) > opts->sync_max_video_change / 100)
-            continue; // large deviation, skip
-        return scale; // decent match found
-    }
-    return -1;
-}
-
 // Manipulate frame timing for display sync, or do nothing for normal timing.
 static void handle_display_sync_frame(struct MPContext *mpctx,
                                       struct vo_frame *frame)
@@ -913,15 +929,13 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
         goto done;
 
     double adjusted_duration = mpctx->past_frames[0].approx_duration;
-    double avg_duration = calc_average_frame_duration(mpctx);
     adjusted_duration /= opts->playback_speed;
-    avg_duration /= opts->playback_speed;
     if (adjusted_duration <= 0.001 || adjusted_duration > 0.5)
         goto done;
 
-    mpctx->speed_factor_v = calc_best_speed(mpctx, vsync, avg_duration);
+    mpctx->speed_factor_v = find_best_speed(mpctx, vsync);
     // If it doesn't work, play at normal speed.
-    if (mpctx->speed_factor_v <= 0)
+    if (fabs(mpctx->speed_factor_v - 1.0) > opts->sync_max_video_change / 100)
         mpctx->speed_factor_v = 1.0;
 
     double av_diff = mpctx->last_av_difference;
