@@ -854,6 +854,32 @@ static bool using_spdif_passthrough(struct MPContext *mpctx)
     return false;
 }
 
+// Compute the relative audio speed by taking A/V dsync into account.
+static double compute_audio_speed(struct MPContext *mpctx, double vsync)
+{
+    // Least-squares linear regression, using relative file PTS values for x,
+    // and audio time for y. Assume speed didn't change for the frames we're
+    // looking at for simplicity. This also should actually use the realtime
+    // (minus paused time) for x, but use vsync scheduling points instead.
+    if (mpctx->num_past_frames <= 10)
+        return NAN;
+    int num = mpctx->num_past_frames - 1;
+    double sum_x = 0, sum_y = 0, sum_xy = 0, sum_xx = 0;
+    double x = 0;
+    for (int n = 0; n < num; n++) {
+        struct frame_info *frame = &mpctx->past_frames[n + 1];
+        if (frame->num_vsyncs < 0)
+            return NAN;
+        double y = frame->av_diff + x;
+        sum_x += x;
+        sum_y += y;
+        sum_xy += x * y;
+        sum_xx += x * x;
+        x -= frame->num_vsyncs * vsync;
+    }
+    return (sum_x * sum_y - num * sum_xy) / (sum_x * sum_x - num * sum_xx);
+}
+
 static void adjust_audio_resample_speed(struct MPContext *mpctx, double vsync)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -893,6 +919,19 @@ static void adjust_audio_resample_speed(struct MPContext *mpctx, double vsync)
 
         double max_correct = opts->sync_max_audio_change / 100;
         double audio_factor = 1 + max_correct * -mpctx->display_sync_drift_dir;
+
+        if (new == 0) {
+            // If we're resetting, actually try to be clever and pick a speed
+            // which compensates the general drift we're getting.
+            double drift = compute_audio_speed(mpctx, vsync);
+            if (isnormal(drift)) {
+                drift /= mpctx->audio_speed; // eliminate intended speed
+                audio_factor = 1.0 / drift / mpctx->speed_factor_v;
+                MP_VERBOSE(mpctx, "Compensation factor: %f\n", audio_factor);
+            }
+        }
+
+        audio_factor = MPCLAMP(audio_factor, 1 - max_correct, 1 + max_correct);
         mpctx->speed_factor_a = audio_factor * mpctx->speed_factor_v;
     }
 }
@@ -1002,6 +1041,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     update_av_diff(mpctx, time_left * opts->playback_speed);
 
     mpctx->past_frames[0].num_vsyncs = num_vsyncs;
+    mpctx->past_frames[0].av_diff = mpctx->last_av_difference;
 
     if (resample) {
         adjust_audio_resample_speed(mpctx, vsync);
