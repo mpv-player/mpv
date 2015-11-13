@@ -567,10 +567,32 @@ static int mp_property_mistimed_frame_count(void *ctx, struct m_property *prop,
                                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
-     if (!mpctx->d_video || !mpctx->display_sync_active)
+    if (!mpctx->d_video || !mpctx->display_sync_active)
         return M_PROPERTY_UNAVAILABLE;
 
     return m_property_int_ro(action, arg, mpctx->mistimed_frames_total);
+}
+
+static int mp_property_vsync_ratio(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->d_video || !mpctx->display_sync_active)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int vsyncs = 0, frames = 0;
+    for (int n = 0; n < mpctx->num_past_frames; n++) {
+        int vsync = mpctx->past_frames[n].num_vsyncs;
+        if (vsync < 0)
+            break;
+        vsyncs += vsync;
+        frames += 1;
+    }
+
+    if (!frames)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_double_ro(action, arg, vsyncs / (double)frames);
 }
 
 static int mp_property_vo_drop_frame_count(void *ctx, struct m_property *prop,
@@ -3394,6 +3416,7 @@ static const struct m_property mp_properties[] = {
     {"total-avsync-change", mp_property_total_avsync_change},
     {"drop-frame-count", mp_property_drop_frame_cnt},
     {"mistimed-frame-count", mp_property_mistimed_frame_count},
+    {"vsync-ratio", mp_property_vsync_ratio},
     {"vo-drop-frame-count", mp_property_vo_drop_frame_count},
     {"vo-delayed-frame-count", mp_property_vo_delayed_frame_count},
     {"percent-pos", mp_property_percent_pos},
@@ -3612,7 +3635,7 @@ static const char *const *const mp_event_property_change[] = {
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
       "total-avsync-change", "audio-speed-correction", "video-speed-correction",
-      "vo-delayed-frame-count", "mistimed-frame-count"),
+      "vo-delayed-frame-count", "mistimed-frame-count", "vsync-ratio"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",

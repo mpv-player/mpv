@@ -921,6 +921,13 @@ Property list
     (which can happen especially with bad source timestamps). For example,
     using the ``display-desync`` mode should never change this value from 0.
 
+``vsync-ratio``
+    For how many vsyncs a frame is displayed on average. This is available if
+    display-sync is active only. For 30 FPS video on a 60 Hz screen, this will
+    be 2. This is the moving average of what actually has been scheduled, so
+    24 FPS on 60 Hz will never remain exactly on 2.5, but jitter depending on
+    the last frame displayed.
+
 ``vo-delayed-frame-count``
     Estimated number of frames delayed due to external circumstances in
     display-sync mode. Note that in general, mpv has to guess that this is

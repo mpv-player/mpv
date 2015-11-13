@@ -19,6 +19,8 @@ Interface changes
 
 ::
 
+ --- mpv 0.14.0 ---
+    - add "vsync-ratio" property
  --- mpv 0.13.0 ---
     - remove VO opengl-cb frame queue suboptions (no replacement)
  --- mpv 0.12.0 ---

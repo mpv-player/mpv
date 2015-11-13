@@ -1001,6 +1001,8 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     mpctx->total_avsync_change = 0;
     update_av_diff(mpctx, time_left * opts->playback_speed);
 
+    mpctx->past_frames[0].num_vsyncs = num_vsyncs;
+
     if (resample)
         adjust_audio_speed(mpctx, vsync);
 
@@ -1177,9 +1179,10 @@ void write_video(struct MPContext *mpctx, double endpts)
         mpctx->num_past_frames--;
     MP_TARRAY_INSERT_AT(mpctx, mpctx->past_frames, mpctx->num_past_frames, 0,
                         (struct frame_info){0});
-    struct frame_info *frame_info = &mpctx->past_frames[0];
-
-    frame_info->pts = mpctx->next_frames[0]->pts;
+    mpctx->past_frames[0] = (struct frame_info){
+        .pts = mpctx->next_frames[0]->pts,
+        .num_vsyncs = -1,
+    };
     calculate_frame_duration(mpctx);
 
     struct vo_frame dummy = {
@@ -1193,7 +1196,7 @@ void write_video(struct MPContext *mpctx, double endpts)
         dummy.frames[n] = mpctx->next_frames[n];
     struct vo_frame *frame = vo_frame_ref(&dummy);
 
-    double diff = frame_info->approx_duration;
+    double diff = mpctx->past_frames[0].approx_duration;
     if (opts->untimed || vo->driver->untimed)
         diff = -1; // disable frame dropping and aspects of frame timing
     if (diff >= 0) {

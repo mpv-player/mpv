@@ -99,6 +99,7 @@ struct frame_info {
     double pts;
     double duration;        // PTS difference to next frame
     double approx_duration; // possibly fixed/smoothed out duration
+    int num_vsyncs;         // scheduled vsyncs, if using display-sync
 };
 
 struct track {
