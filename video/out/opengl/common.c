@@ -509,6 +509,7 @@ extern const struct mpgl_driver mpgl_driver_drm_egl;
 extern const struct mpgl_driver mpgl_driver_cocoa;
 extern const struct mpgl_driver mpgl_driver_wayland;
 extern const struct mpgl_driver mpgl_driver_w32;
+extern const struct mpgl_driver mpgl_driver_angle;
 extern const struct mpgl_driver mpgl_driver_rpi;
 
 static const struct mpgl_driver *const backends[] = {
@@ -520,6 +521,9 @@ static const struct mpgl_driver *const backends[] = {
 #endif
 #if HAVE_GL_WIN32
     &mpgl_driver_w32,
+#endif
+#if HAVE_EGL_ANGLE
+    &mpgl_driver_angle,
 #endif
 #if HAVE_GL_WAYLAND
     &mpgl_driver_wayland,

@@ -659,6 +659,14 @@ video_output_features = [
         'func': check_statement('windows.h', 'wglCreateContext(0)',
                                 lib='opengl32')
     } , {
+        'name': '--egl-angle',
+        'desc': 'OpenGL Win32 ANGLE Backend',
+        'deps_any': [ 'os-win32', 'os-cygwin' ],
+        'groups': [ 'gl' ],
+        'func': check_statement(['EGL/egl.h'],
+                                'eglCreateWindowSurface(0, 0, 0, 0)',
+                                lib='EGL')
+    } , {
         'name': '--vdpau',
         'desc': 'VDPAU acceleration',
         'deps': [ 'x11' ],
