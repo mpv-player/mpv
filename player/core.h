@@ -273,7 +273,6 @@ typedef struct MPContext {
     // Timing error (in seconds) due to rounding on vsync boundaries
     double display_sync_error;
     double audio_drop_throttle;
-    int display_sync_disable_counter;
     // Number of mistimed frames.
     int mistimed_frames_total;
     /* Set if audio should be timed to start with video frame after seeking,

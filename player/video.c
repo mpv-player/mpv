@@ -209,7 +209,6 @@ void reset_video_state(struct MPContext *mpctx)
     mpctx->num_past_frames = 0;
     mpctx->total_avsync_change = 0;
     mpctx->last_av_difference = 0;
-    mpctx->display_sync_disable_counter = 0;
     mpctx->dropped_frames_total = 0;
     mpctx->dropped_frames = 0;
     mpctx->mistimed_frames_total = 0;
@@ -901,7 +900,6 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 {
     struct MPOpts *opts = mpctx->opts;
     struct vo *vo = mpctx->video_out;
-    bool old_display_sync = mpctx->display_sync_active;
     int mode = opts->video_sync;
 
     if (!mpctx->display_sync_active) {
@@ -946,10 +944,11 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // But if we switch too often between these modes, keep it disabled. In
     // fact, we disable it if it just wants to switch between enable/disable
     // more than once in the last N frames.
-    if (!old_display_sync) {
-        if (mpctx->display_sync_disable_counter > 0)
-            goto done; // keep disabled
-        mpctx->display_sync_disable_counter = 50;
+    if (mpctx->num_past_frames > 1 && mpctx->past_frames[1].num_vsyncs < 0) {
+        for (int n = 1; n < mpctx->num_past_frames; n++) {
+            if (mpctx->past_frames[n].num_vsyncs >= 0)
+                goto done;
+        }
     }
 
     // Determine for how many vsyncs a frame should be displayed. This can be
@@ -1018,13 +1017,12 @@ done:
 
     update_playback_speed(mpctx);
 
-    if (old_display_sync != mpctx->display_sync_active) {
+    if (mpctx->num_past_frames > 1 &&
+        ((mpctx->past_frames[1].num_vsyncs >= 0) != mpctx->display_sync_active))
+    {
         MP_VERBOSE(mpctx, "Video sync mode %s.\n",
                    mpctx->display_sync_active ? "enabled" : "disabled");
     }
-
-    mpctx->display_sync_disable_counter =
-        MPMAX(0, mpctx->display_sync_disable_counter - 1);
 }
 
 static void schedule_frame(struct MPContext *mpctx, struct vo_frame *frame)
