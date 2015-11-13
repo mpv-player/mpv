@@ -2687,10 +2687,10 @@ static int mp_property_vf_fps(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
-    double res = stabilize_frame_duration(mpctx, false);
-    if (res <= 0)
+    double avg = calc_average_frame_duration(mpctx);
+    if (avg <= 0)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_double_ro(action, arg, 1 / res);
+    return m_property_double_ro(action, arg, 1.0 / avg);
 }
 
 /// Video aspect (RO)

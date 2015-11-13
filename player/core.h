@@ -76,9 +76,6 @@ enum seek_precision {
     MPSEEK_VERY_EXACT,
 };
 
-// Comes from the assumption that some formats round timestamps to ms.
-#define FRAME_DURATION_TOLERANCE 0.0011
-
 enum video_sync {
     VS_DEFAULT = 0,
     VS_DISP_RESAMPLE,
@@ -96,6 +93,13 @@ enum video_sync {
                        (x) == VS_DISP_ADROP ||          \
                        (x) == VS_DISP_VDROP ||          \
                        (x) == VS_DISP_NONE)
+
+// Information about past video frames that have been sent to the VO.
+struct frame_info {
+    double pts;
+    double duration;        // PTS difference to next frame
+    double approx_duration; // possibly fixed/smoothed out duration
+};
 
 struct track {
     enum stream_type type;
@@ -264,7 +268,6 @@ typedef struct MPContext {
     double audio_speed, video_speed;
     bool display_sync_active;
     bool broken_fps_header;
-    double display_sync_frameduration;
     int display_sync_drift_dir;
     // Timing error (in seconds) due to rounding on vsync boundaries
     double display_sync_error;
@@ -321,6 +324,10 @@ typedef struct MPContext {
     uint64_t vo_pts_history_seek_ts;
     uint64_t backstep_start_seek_ts;
     bool backstep_active;
+    // Past timestamps etc. (stupidly duplicated with vo_pts_history).
+    // The newest frame is at index 0.
+    struct frame_info *past_frames;
+    int num_past_frames;
 
     double next_heartbeat;
     double last_idle_tick;
@@ -498,7 +505,6 @@ void mp_idle(struct MPContext *mpctx);
 void idle_loop(struct MPContext *mpctx);
 int handle_force_window(struct MPContext *mpctx, bool force);
 void add_frame_pts(struct MPContext *mpctx, double pts);
-int get_past_frame_durations(struct MPContext *mpctx, double *fd, int num);
 void seek_to_last_frame(struct MPContext *mpctx);
 
 // scripting.c
@@ -528,6 +534,6 @@ void write_video(struct MPContext *mpctx, double endpts);
 void mp_force_video_refresh(struct MPContext *mpctx);
 void uninit_video_out(struct MPContext *mpctx);
 void uninit_video_chain(struct MPContext *mpctx);
-double stabilize_frame_duration(struct MPContext *mpctx, bool require_exact);
+double calc_average_frame_duration(struct MPContext *mpctx);
 
 #endif /* MPLAYER_MP_CORE_H */

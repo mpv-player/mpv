@@ -206,6 +206,7 @@ void reset_video_state(struct MPContext *mpctx)
     mpctx->time_frame = 0;
     mpctx->video_pts = MP_NOPTS_VALUE;
     mpctx->video_next_pts = MP_NOPTS_VALUE;
+    mpctx->num_past_frames = 0;
     mpctx->total_avsync_change = 0;
     mpctx->last_av_difference = 0;
     mpctx->display_sync_disable_counter = 0;
@@ -799,76 +800,18 @@ static void init_vo(struct MPContext *mpctx)
     mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }
 
-// Attempt to stabilize frame duration from jittery timestamps. This is mostly
-// needed with semi-broken file formats which round timestamps to ms, or files
-// created from them.
-// We do this to make a stable decision how much to change video playback speed.
-// Otherwise calc_best_speed() could make a different decision every frame, and
-// also audio speed would have to be readjusted all the time.
-// Return -1 if the frame duration seems to be unstable.
-// If require_exact is false, just return the average frame duration on failure.
-double stabilize_frame_duration(struct MPContext *mpctx, bool require_exact)
+double calc_average_frame_duration(struct MPContext *mpctx)
 {
-    if (require_exact && mpctx->broken_fps_header)
-        return -1;
-
-    // Note: the past frame durations are raw and unadjusted.
-    double fd[10];
-    int num = get_past_frame_durations(mpctx, fd, MP_ARRAY_SIZE(fd));
-    if (num < MP_ARRAY_SIZE(fd))
-        return -1;
-
-    bool ok = true;
-    double min = fd[0];
-    double max = fd[0];
-    double total_duration = 0;
-    for (int n = 0; n < num; n++) {
-        double cur = fd[n];
-        if (fabs(cur - fd[num - 1]) > FRAME_DURATION_TOLERANCE)
-            ok = false;
-        min = MPMIN(min, cur);
-        max = MPMAX(max, cur);
-        total_duration += cur;
+    double total = 0;
+    int num = 0;
+    for (int n = 0; n < mpctx->num_past_frames; n++) {
+        double dur = mpctx->past_frames[0].approx_duration;
+        if (dur <= 0)
+            continue;
+        total += dur;
+        num += 1;
     }
-
-    if (max - min > FRAME_DURATION_TOLERANCE || !ok)
-        goto fail;
-
-    // It's not really possible to compute the actual, correct FPS, unless we
-    // e.g. consider a list of potentially correct values, detect cycles, or
-    // use similar guessing methods.
-    // Naively using the average between min and max should give a stable, but
-    // still relatively close value.
-    double modified_duration = (min + max) / 2;
-
-    // Except for the demuxer reported FPS, which might be the correct one.
-    // VFR files could contain segments that don't match.
-    if (mpctx->d_video->fps > 0) {
-        double demux_duration = 1.0 / mpctx->d_video->fps;
-        if (fabs(modified_duration - demux_duration) <= FRAME_DURATION_TOLERANCE)
-            modified_duration = demux_duration;
-    }
-
-    // Verify the estimated stabilized frame duration with the actual time
-    // passed in these frames. If it's wrong (wrong FPS in the header), then
-    // this will deviate a bit.
-    if (fabs(total_duration - modified_duration * num) > FRAME_DURATION_TOLERANCE)
-    {
-        if (require_exact && !mpctx->broken_fps_header) {
-            // The error message is slightly misleading: a framerate header
-            // field is not really needed, as long as the file has an exact
-            // timebase.
-            MP_WARN(mpctx, "File has broken or missing framerate header\n"
-                            "field, or is VFR with broken timestamps.\n");
-            mpctx->broken_fps_header = true;
-        }
-        goto fail;
-    }
-
-    return modified_duration;
-
-fail:
-    return require_exact ? -1 : total_duration / num;
+    return num > 0 ? total / num : 0;
 }
 
 static bool using_spdif_passthrough(struct MPContext *mpctx)
@@ -969,24 +912,17 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     if (vsync <= 0)
         goto done;
 
-    double adjusted_duration = stabilize_frame_duration(mpctx, true);
-    if (adjusted_duration >= 0)
-        adjusted_duration /= opts->playback_speed;
-    if (adjusted_duration <= 0.002 || adjusted_duration > 0.05)
+    double adjusted_duration = mpctx->past_frames[0].approx_duration;
+    double avg_duration = calc_average_frame_duration(mpctx);
+    adjusted_duration /= opts->playback_speed;
+    avg_duration /= opts->playback_speed;
+    if (adjusted_duration <= 0.001 || adjusted_duration > 0.5)
         goto done;
 
-    double prev_duration = mpctx->display_sync_frameduration;
-    mpctx->display_sync_frameduration = adjusted_duration;
-    if (adjusted_duration != prev_duration) {
-        mpctx->display_sync_disable_counter = 50;
-        goto done;
-    }
-
-    mpctx->speed_factor_v = calc_best_speed(mpctx, vsync, adjusted_duration);
-    if (mpctx->speed_factor_v <= 0) {
+    mpctx->speed_factor_v = calc_best_speed(mpctx, vsync, avg_duration);
+    // If it doesn't work, play at normal speed.
+    if (mpctx->speed_factor_v <= 0)
         mpctx->speed_factor_v = 1.0;
-        goto done;
-    }
 
     double av_diff = mpctx->last_av_difference;
     if (fabs(av_diff) > 0.5)
@@ -1085,26 +1021,58 @@ static void schedule_frame(struct MPContext *mpctx, struct vo_frame *frame)
     }
 }
 
-// Return the next frame duration as stored in the file.
-// frame=0 means the current frame, 1 the frame after that etc.
-// Can return -1, though usually will return a fallback if frame unavailable.
-static double get_frame_duration(struct MPContext *mpctx, int frame)
+// Determine the mpctx->past_frames[0] frame duration.
+static void calculate_frame_duration(struct MPContext *mpctx)
 {
-    struct MPOpts *opts = mpctx->opts;
-    struct vo *vo = mpctx->video_out;
+    assert(mpctx->num_past_frames >= 1 && mpctx->num_next_frames >= 1);
 
-    double diff = -1;
-    if (frame + 2 <= mpctx->num_next_frames) {
-        double vpts0 = mpctx->next_frames[frame]->pts;
-        double vpts1 = mpctx->next_frames[frame + 1]->pts;
-        if (vpts0 != MP_NOPTS_VALUE && vpts1 != MP_NOPTS_VALUE)
-            diff = vpts1 - vpts0;
+    double demux_duration =
+        mpctx->d_video->fps > 0 ? 1.0 / mpctx->d_video->fps : -1;
+    double duration = -1;
+
+    if (mpctx->num_next_frames >= 2) {
+        double pts0 = mpctx->next_frames[0]->pts;
+        double pts1 = mpctx->next_frames[1]->pts;
+        if (pts0 != MP_NOPTS_VALUE && pts1 != MP_NOPTS_VALUE && pts1 >= pts0)
+            duration = pts1 - pts0;
+    } else {
+        // E.g. last frame on EOF.
+        duration = demux_duration;
     }
-    if (diff < 0 && mpctx->d_video->fps > 0)
-        diff = 1.0 / mpctx->d_video->fps; // fallback to demuxer-reported fps
-    if (opts->untimed || vo->driver->untimed)
-        diff = -1; // disable frame dropping and aspects of frame timing
-    return diff;
+
+    // The following code tries to compensate for rounded Matroska timestamps
+    // by "unrounding" frame durations, or if not possible, approximating them.
+    // These formats usually round on 1ms. (Some muxers do this incorrectly,
+    // and might be off by 2ms or more, and compensate for it later by an
+    // equal rounding error into the opposite direction. Don't try to deal
+    // with them; too much potential damage to timing.)
+    double tolerance = 0.0011;
+
+    double total = 0;
+    int num_dur = 0;
+    for (int n = 1; n < mpctx->num_past_frames; n++) {
+        // Eliminate likely outliers using a really dumb heuristic.
+        double dur = mpctx->past_frames[n].duration;
+        if (dur <= 0 || fabs(dur - duration) >= tolerance)
+            break;
+        total += dur;
+        num_dur += 1;
+    }
+
+    // Try if the demuxer frame rate fits - if so, just take it.
+    double approx_duration = duration;
+    if (demux_duration > 0) {
+        // Note that even if each timestamp is within rounding tolerance, it
+        // could literally not add up (e.g. if demuxer FPS is rounded itself).
+        if (fabs(duration - demux_duration) < tolerance &&
+            fabs(total - demux_duration * num_dur) < tolerance)
+        {
+            approx_duration = demux_duration;
+        }
+    }
+
+    mpctx->past_frames[0].duration = duration;
+    mpctx->past_frames[0].approx_duration = approx_duration;
 }
 
 void write_video(struct MPContext *mpctx, double endpts)
@@ -1190,6 +1158,16 @@ void write_video(struct MPContext *mpctx, double endpts)
     }
 
     assert(mpctx->num_next_frames >= 1);
+
+    if (mpctx->num_past_frames >= MAX_NUM_VO_PTS)
+        mpctx->num_past_frames--;
+    MP_TARRAY_INSERT_AT(mpctx, mpctx->past_frames, mpctx->num_past_frames, 0,
+                        (struct frame_info){0});
+    struct frame_info *frame_info = &mpctx->past_frames[0];
+
+    frame_info->pts = mpctx->next_frames[0]->pts;
+    calculate_frame_duration(mpctx);
+
     struct vo_frame dummy = {
         .pts = pts,
         .duration = -1,
@@ -1201,7 +1179,9 @@ void write_video(struct MPContext *mpctx, double endpts)
         dummy.frames[n] = mpctx->next_frames[n];
     struct vo_frame *frame = vo_frame_ref(&dummy);
 
-    double diff = get_frame_duration(mpctx, 0);
+    double diff = frame_info->approx_duration;
+    if (opts->untimed || vo->driver->untimed)
+        diff = -1; // disable frame dropping and aspects of frame timing
     if (diff >= 0) {
         // expected A/V sync correction is ignored
         diff /= mpctx->video_speed;
@@ -1214,6 +1194,8 @@ void write_video(struct MPContext *mpctx, double endpts)
     mpctx->last_vo_pts = mpctx->video_pts;
     mpctx->playback_pts = mpctx->video_pts;
 
+    shift_frames(mpctx);
+
     schedule_frame(mpctx, frame);
 
     mpctx->osd_force_update = true;
@@ -1221,8 +1203,6 @@ void write_video(struct MPContext *mpctx, double endpts)
     update_subtitles(mpctx);
 
     vo_queue_frame(vo, frame);
-
-    shift_frames(mpctx);
 
     // The frames were shifted down; "initialize" the new first entry.
     if (mpctx->num_next_frames >= 1)
