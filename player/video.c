@@ -1058,9 +1058,9 @@ static void calculate_frame_duration(struct MPContext *mpctx)
         total += dur;
         num_dur += 1;
     }
+    double approx_duration = num_dur > 0 ? total / num_dur : duration;
 
     // Try if the demuxer frame rate fits - if so, just take it.
-    double approx_duration = duration;
     if (demux_duration > 0) {
         // Note that even if each timestamp is within rounding tolerance, it
         // could literally not add up (e.g. if demuxer FPS is rounded itself).
