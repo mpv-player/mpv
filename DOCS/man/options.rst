@@ -1737,6 +1737,10 @@ Window
 ``--ontop``
     Makes the player window stay on top of other windows.
 
+    On Windows, if combined with fullscreen mode, this causes mpv to be
+    treated as exclusive fullscreen window that bypasses the Desktop Window
+    Manager.
+
 ``--border``, ``--no-border``
     Play video with window border and decorations. Since this is on by
     default, use ``--no-border`` to disable the standard window decorations.

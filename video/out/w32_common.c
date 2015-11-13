@@ -951,7 +951,7 @@ static void update_screen_rect(struct vo_w32_state *w32)
 
 static DWORD update_style(struct vo_w32_state *w32, DWORD style)
 {
-    const DWORD NO_FRAME = WS_POPUP;
+    const DWORD NO_FRAME = WS_OVERLAPPED;
     const DWORD FRAME = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
     style &= ~(NO_FRAME | FRAME);
     style |= (w32->opts->border && !w32->current_fs) ? FRAME : NO_FRAME;
