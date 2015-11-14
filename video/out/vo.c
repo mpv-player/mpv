@@ -868,8 +868,11 @@ void vo_set_paused(struct vo *vo, bool paused)
     pthread_mutex_lock(&in->lock);
     if (in->paused != paused) {
         in->paused = paused;
-        if (in->paused && in->dropped_frame)
-            in->request_redraw = true;
+        if (in->paused) {
+            if (in->dropped_frame)
+                in->request_redraw = true;
+            in->last_flip = 0;
+        }
     }
     pthread_mutex_unlock(&in->lock);
     vo_control(vo, paused ? VOCTRL_PAUSE : VOCTRL_RESUME, NULL);
@@ -913,11 +916,13 @@ bool vo_want_redraw(struct vo *vo)
 
 void vo_seek_reset(struct vo *vo)
 {
-    pthread_mutex_lock(&vo->in->lock);
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
     forget_frames(vo);
-    vo->in->send_reset = true;
+    in->last_flip = 0;
+    in->send_reset = true;
     wakeup_locked(vo);
-    pthread_mutex_unlock(&vo->in->lock);
+    pthread_mutex_unlock(&in->lock);
 }
 
 // Return true if there is still a frame being displayed (or queued).
@@ -1026,12 +1031,13 @@ int64_t vo_get_vsync_interval(struct vo *vo)
     return res;
 }
 
-// Get the mp_time_us() time at which the currently rendering frame will end
-// (i.e. time of the last flip call needed to display it).
+// Get the time in seconds at after which the currently rendering frame will
+// end. Returns positive values if the frame is yet to be finished, negative
+// values if it already finished.
 // This can only be called while no new frame is queued (after
 // vo_is_ready_for_frame). Returns 0 for non-display synced frames, or if the
 // deadline for continuous display was missed.
-int64_t vo_get_next_frame_start_time(struct vo *vo)
+double vo_get_delay(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
@@ -1047,7 +1053,7 @@ int64_t vo_get_next_frame_start_time(struct vo *vo)
             res = 0;
     }
     pthread_mutex_unlock(&in->lock);
-    return res;
+    return res ? (res - mp_time_us()) / 1e6 : 0;
 }
 
 int64_t vo_get_delayed_count(struct vo *vo)

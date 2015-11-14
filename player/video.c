@@ -1025,8 +1025,8 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 
     // Estimate the video position, so we can calculate a good A/V difference
     // value below. This is used to estimate A/V drift.
-    double time_left = (vo_get_next_frame_start_time(vo) - mp_time_us()) / 1e6;
-    time_left = MPMAX(time_left, 0);
+    double time_left = vo_get_delay(vo);
+
     // We also know that the timing is (necessarily) off, because we have to
     // align frame timings on the vsync boundaries. This is unavoidable, and
     // for the sake of the A/V sync calculations we pretend it's perfect.
