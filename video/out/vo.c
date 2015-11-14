@@ -1049,8 +1049,6 @@ double vo_get_delay(struct vo *vo)
         res += (in->current_frame->num_vsyncs + extra) * in->vsync_interval;
         if (!in->current_frame->display_synced)
             res = 0;
-        if (in->current_frame->num_vsyncs < 1 && !in->rendering)
-            res = 0;
     }
     pthread_mutex_unlock(&in->lock);
     return res ? (res - mp_time_us()) / 1e6 : 0;
