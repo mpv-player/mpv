@@ -234,6 +234,8 @@ struct GL {
     GLenum (GLAPIENTRY *CheckFramebufferStatus)(GLenum);
     void (GLAPIENTRY *FramebufferTexture2D)(GLenum, GLenum, GLenum, GLuint,
                                             GLint);
+    void (GLAPIENTRY *BlitFramebuffer)(GLint, GLint, GLint, GLint, GLint, GLint,
+                                       GLint, GLint, GLbitfield, GLenum);
 
     void (GLAPIENTRY *Uniform1f)(GLint, GLfloat);
     void (GLAPIENTRY *Uniform2f)(GLint, GLfloat, GLfloat);
