@@ -1035,7 +1035,6 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->video_speed = mpctx->audio_speed = opts->playback_speed;
     mpctx->speed_factor_a = mpctx->speed_factor_v = 1.0;
     mpctx->display_sync_error = 0.0;
-    mpctx->broken_fps_header = false;
     mpctx->display_sync_active = false;
     mpctx->seek = (struct seek_params){ 0 };
 

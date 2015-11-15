@@ -342,7 +342,7 @@ void vo_set_queue_params(struct vo *vo, int64_t offset_us, bool vsync_timed,
 int vo_get_num_req_frames(struct vo *vo);
 int64_t vo_get_vsync_interval(struct vo *vo);
 double vo_get_display_fps(struct vo *vo);
-int64_t vo_get_next_frame_start_time(struct vo *vo);
+double vo_get_delay(struct vo *vo);
 
 void vo_wakeup(struct vo *vo);
 

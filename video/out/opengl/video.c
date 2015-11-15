@@ -2157,34 +2157,42 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
         if (p->opts.interpolation && (p->frames_drawn || !frame->still)) {
             gl_video_interpolate_frame(p, frame, fbo);
         } else {
-            // For the non-interplation case, we draw to a single "cache"
-            // FBO to speed up subsequent re-draws (if any exist)
-            int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
-                vp_h = p->dst_rect.y1 - p->dst_rect.y0;
-
             bool is_new = !frame->redraw && !frame->repeat;
             if (is_new || !p->output_fbo_valid) {
+                p->output_fbo_valid = false;
+
                 gl_video_upload_image(p, frame->current);
                 pass_render_frame(p);
 
-                if (frame->num_vsyncs == 1 || !frame->display_synced ||
-                    p->opts.dumb_mode)
+                // For the non-interplation case, we draw to a single "cache"
+                // FBO to speed up subsequent re-draws (if any exist)
+                int dest_fbo = fbo;
+                if (frame->num_vsyncs > 1 && frame->display_synced &&
+                    !p->opts.dumb_mode && gl->BlitFramebuffer)
                 {
-                    // Disable output_fbo_valid to signal that this frame
-                    // does not require any redraws from the FBO.
-                    pass_draw_to_screen(p, fbo);
-                    p->output_fbo_valid = false;
-                } else {
-                    finish_pass_fbo(p, &p->output_fbo, vp_w, vp_h, 0, FBOTEX_FUZZY);
+                    fbotex_change(&p->output_fbo, p->gl, p->log,
+                                  p->vp_w, abs(p->vp_h),
+                                  p->opts.fbo_format, 0);
+                    dest_fbo = p->output_fbo.fbo;
                     p->output_fbo_valid = true;
                 }
+                pass_draw_to_screen(p, dest_fbo);
             }
 
             // "output fbo valid" and "output fbo needed" are equivalent
             if (p->output_fbo_valid) {
-                pass_load_fbotex(p, &p->output_fbo, vp_w, vp_h, 0);
-                GLSL(vec4 color = texture(texture0, texcoord0);)
-                pass_draw_to_screen(p, fbo);
+                gl->BindFramebuffer(GL_READ_FRAMEBUFFER, p->output_fbo.fbo);
+                gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+                struct mp_rect rc = p->dst_rect;
+                if (p->vp_h < 0) {
+                    rc.y1 = -p->vp_h - p->dst_rect.y0;
+                    rc.y0 = -p->vp_h - p->dst_rect.y1;
+                }
+                gl->BlitFramebuffer(rc.x0, rc.y0, rc.x1, rc.y1,
+                                    rc.x0, rc.y0, rc.x1, rc.y1,
+                                    GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                gl->BindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+                gl->BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
             }
         }
     }
