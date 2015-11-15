@@ -868,11 +868,9 @@ void vo_set_paused(struct vo *vo, bool paused)
     pthread_mutex_lock(&in->lock);
     if (in->paused != paused) {
         in->paused = paused;
-        if (in->paused) {
-            if (in->dropped_frame)
-                in->request_redraw = true;
-            in->last_flip = 0;
-        }
+        if (in->paused && in->dropped_frame)
+            in->request_redraw = true;
+        in->last_flip = 0;
     }
     pthread_mutex_unlock(&in->lock);
     vo_control(vo, paused ? VOCTRL_PAUSE : VOCTRL_RESUME, NULL);
