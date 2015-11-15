@@ -153,6 +153,26 @@ bool mp_get_cache_idle(struct MPContext *mpctx)
     return idle;
 }
 
+void update_vo_playback_state(struct MPContext *mpctx)
+{
+    if (mpctx->video_out) {
+        struct voctrl_playback_state oldstate = mpctx->vo_playback_state;
+        struct voctrl_playback_state newstate = {
+            .paused = mpctx->paused,
+            .percent_pos = get_percent_pos(mpctx),
+        };
+
+        if (oldstate.paused != newstate.paused ||
+            oldstate.percent_pos != newstate.percent_pos) {
+            vo_control(mpctx->video_out,
+                       VOCTRL_UPDATE_PLAYBACK_STATE, &newstate);
+            mpctx->vo_playback_state = newstate;
+        }
+    } else {
+        mpctx->vo_playback_state = (struct voctrl_playback_state){ 0 };
+    }
+}
+
 void update_window_title(struct MPContext *mpctx, bool force)
 {
     if (!mpctx->video_out && !mpctx->ao) {

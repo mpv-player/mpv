@@ -105,6 +105,9 @@ struct vo_w32_state {
     int high_surrogate;
 
     ITaskbarList2 *taskbar_list;
+    ITaskbarList3 *taskbar_list3;
+    UINT tbtnCreatedMsg;
+    bool tbtnCreated;
 
     // updates on move/resize/displaychange
     double display_fps;
@@ -826,6 +829,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         break;
     }
 
+    if (message == w32->tbtnCreatedMsg) {
+        w32->tbtnCreated = true;
+        return 0;
+    }
+
     if (mouse_button) {
         mouse_button |= mod_state(w32);
         mp_input_put_key(w32->input_ctx, mouse_button);
@@ -1198,6 +1206,20 @@ static void *gui_thread(void *ptr)
                 w32->taskbar_list = NULL;
             }
         }
+
+        // ITaskbarList3 has methods for status indication on taskbar buttons,
+        // however that interface is only available on Win7/2008 R2 or newer
+        if (SUCCEEDED(CoCreateInstance(&CLSID_TaskbarList, NULL,
+                                       CLSCTX_INPROC_SERVER, &IID_ITaskbarList3,
+                                       (void**)&w32->taskbar_list3)))
+        {
+            if (FAILED(ITaskbarList3_HrInit(w32->taskbar_list3))) {
+                ITaskbarList3_Release(w32->taskbar_list3);
+                w32->taskbar_list3 = NULL;
+            } else {
+                w32->tbtnCreatedMsg = RegisterWindowMessage(L"TaskbarButtonCreated");
+            }
+        }
     } else {
         MP_ERR(w32, "Failed to initialize OLE/COM\n");
     }
@@ -1235,6 +1257,8 @@ done:
     }
     if (w32->taskbar_list)
         ITaskbarList2_Release(w32->taskbar_list);
+    if (w32->taskbar_list3)
+        ITaskbarList3_Release(w32->taskbar_list3);
     if (ole_ok)
         OleUninitialize();
     SetThreadExecutionState(ES_CONTINUOUS);
@@ -1346,6 +1370,19 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         wchar_t *title = mp_from_utf8(NULL, (char *)arg);
         SetWindowTextW(w32->window, title);
         talloc_free(title);
+        return VO_TRUE;
+    }
+    case VOCTRL_UPDATE_PLAYBACK_STATE: {
+        struct voctrl_playback_state *pstate =
+            (struct voctrl_playback_state *)arg;
+
+        if (w32->taskbar_list3 && w32->tbtnCreated) {
+            ITaskbarList3_SetProgressValue(w32->taskbar_list3, w32->window,
+                                           pstate->percent_pos, 100);
+            ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
+                                           pstate->paused ? TBPF_PAUSED :
+                                                            TBPF_NORMAL);
+        }
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_FPS:

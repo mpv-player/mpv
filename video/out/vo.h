@@ -76,6 +76,7 @@ enum mp_voctrl {
     VOCTRL_ALL_WORKSPACES,
 
     VOCTRL_UPDATE_WINDOW_TITLE,         // char*
+    VOCTRL_UPDATE_PLAYBACK_STATE,       // struct voctrl_playback_state*
 
     VOCTRL_SET_CURSOR_VISIBILITY,       // bool*
 
@@ -129,6 +130,12 @@ struct voctrl_get_equalizer_args {
 #define VO_ERROR        -1
 #define VO_NOTAVAIL     -2
 #define VO_NOTIMPL      -3
+
+// VOCTRL_UPDATE_PLAYBACK_STATE
+struct voctrl_playback_state {
+    bool paused;
+    int percent_pos;
+};
 
 enum {
     // VO does handle mp_image_params.rotate in 90 degree steps

@@ -164,6 +164,7 @@ static void print_status(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
 
     update_window_title(mpctx, false);
+    update_vo_playback_state(mpctx);
 
     if (!opts->use_terminal)
         return;
