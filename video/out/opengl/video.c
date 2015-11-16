@@ -2357,13 +2357,15 @@ static void check_gl_features(struct gl_video *p)
     bool have_1d_tex = gl->mpgl_caps & MPGL_CAP_1D_TEX;
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
+    bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
 
     if (gl->es && p->opts.pbo) {
         p->opts.pbo = 0;
         MP_WARN(p, "Disabling PBOs (GLES unsupported).\n");
     }
 
-    if (p->opts.dumb_mode || gl->es || !have_fbo || !test_fbo(p)) {
+    if (p->opts.dumb_mode || gl->es || !have_fbo || !test_fbo(p) || !have_texrg)
+    {
         if (!p->opts.dumb_mode) {
             MP_WARN(p, "High bit depth FBOs unsupported. Enabling dumb mode.\n"
                        "Most extended features will be disabled.\n");
@@ -2591,8 +2593,6 @@ static bool init_format(int fmt, struct gl_video *init)
 
     // YUV/half-packed
     if (fmt == IMGFMT_NV12 || fmt == IMGFMT_NV21) {
-        if (!(init->gl->mpgl_caps & MPGL_CAP_TEX_RG))
-            return false;
         plane_format[0] = find_tex_format(gl, 1, 1);
         plane_format[1] = find_tex_format(gl, 1, 2);
         if (fmt == IMGFMT_NV21)
