@@ -504,6 +504,7 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
 
 extern const struct mpgl_driver mpgl_driver_x11;
 extern const struct mpgl_driver mpgl_driver_x11egl;
+extern const struct mpgl_driver mpgl_driver_x11_probe;
 extern const struct mpgl_driver mpgl_driver_drm_egl;
 extern const struct mpgl_driver mpgl_driver_cocoa;
 extern const struct mpgl_driver mpgl_driver_wayland;
@@ -523,14 +524,17 @@ static const struct mpgl_driver *const backends[] = {
 #if HAVE_GL_WAYLAND
     &mpgl_driver_wayland,
 #endif
+#if HAVE_GL_X11
+    &mpgl_driver_x11_probe,
+#endif
 #if HAVE_EGL_X11
     &mpgl_driver_x11egl,
 #endif
-#if HAVE_EGL_DRM
-    &mpgl_driver_drm_egl,
-#endif
 #if HAVE_GL_X11
     &mpgl_driver_x11,
+#endif
+#if HAVE_EGL_DRM
+    &mpgl_driver_drm_egl,
 #endif
 };
 
