@@ -70,7 +70,7 @@ Essential dependencies (incomplete list):
 - libass (OSD, OSC, text subtitles)
 - Lua (optional, required for the OSC pseudo-GUI and youtube-dl integration)
 - libjpeg (optional, used for screenshots only)
-- Enca (optional, for subtitle charset detection)
+- uchardet (optional, for subtitle charset detection)
 - vdpau and vaapi libraries for hardware decoding on Linux (optional)
 
 Libass dependencies:
