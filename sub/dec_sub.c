@@ -479,17 +479,6 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh)
     if (opts->sub_fix_timing)
         fix_overlaps_and_gaps(subs);
 
-    if (sh->codec && strcmp(sh->codec, "microdvd") == 0) {
-        // The last subtitle event in MicroDVD subs can have duration unset,
-        // which means show the subtitle until end of video.
-        // See FFmpeg FATE MicroDVD_capability_tester.sub
-        if (subs->num_packets) {
-            struct demux_packet *last = subs->packets[subs->num_packets - 1];
-            if (last->duration <= 0)
-                last->duration = 10; // arbitrary
-        }
-    }
-
     add_sub_list(sub, preprocess, subs);
 
     pthread_mutex_unlock(&sub->lock);
