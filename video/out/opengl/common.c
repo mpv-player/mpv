@@ -597,6 +597,7 @@ static MPGLContext *init_backend(struct vo *vo, const struct mpgl_driver *driver
     MP_VERBOSE(vo, "Initializing OpenGL backend '%s'\n", ctx->driver->name);
     ctx->priv = talloc_zero_size(ctx, ctx->driver->priv_size);
     if (ctx->driver->init(ctx, vo_flags) < 0) {
+        vo->probing = old_probing;
         talloc_free(ctx);
         return NULL;
     }
@@ -638,6 +639,14 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags)
             ctx = init_backend(vo, backends[n], true, vo_flags);
             if (ctx)
                 break;
+        }
+        // VO forced, but no backend is ok => force the first that works at all
+        if (!ctx && !vo->probing) {
+            for (int n = 0; n < MP_ARRAY_SIZE(backends); n++) {
+                ctx = init_backend(vo, backends[n], false, vo_flags);
+                if (ctx)
+                    break;
+            }
         }
     } else if (index >= 0) {
         ctx = init_backend(vo, backends[index], false, vo_flags);
