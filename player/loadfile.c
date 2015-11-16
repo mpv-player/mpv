@@ -96,8 +96,6 @@ static void uninit_demuxer(struct MPContext *mpctx)
     talloc_free(mpctx->sources);
     mpctx->sources = NULL;
     mpctx->num_sources = 0;
-
-    mpctx->video_offset = 0;
 }
 
 static void uninit_stream(struct MPContext *mpctx)
@@ -288,14 +286,10 @@ static void enable_demux_thread(struct MPContext *mpctx)
     }
 }
 
-static bool timeline_set_part(struct MPContext *mpctx, int i, bool initial)
+void timeline_set_part(struct MPContext *mpctx, int i, bool initial)
 {
-    struct timeline_part *p = mpctx->timeline + mpctx->timeline_part;
     struct timeline_part *n = mpctx->timeline + i;
     mpctx->timeline_part = i;
-    mpctx->video_offset = n->start - n->source_start;
-    if (n->source == p->source && !initial)
-        return false;
 
     uninit_audio_chain(mpctx);
     uninit_video_chain(mpctx);
@@ -311,6 +305,7 @@ static bool timeline_set_part(struct MPContext *mpctx, int i, bool initial)
     }
 
     mpctx->demuxer = n->source;
+    demux_set_ts_offset(mpctx->demuxer, n->start - n->source_start);
 
     // While another timeline was active, the selection of active tracks might
     // have been changed - possibly we need to update this source.
@@ -334,27 +329,20 @@ static bool timeline_set_part(struct MPContext *mpctx, int i, bool initial)
         reselect_demux_streams(mpctx);
         enable_demux_thread(mpctx);
     }
-
-    return true;
 }
 
-// Given pts, switch playback to the corresponding part.
-// Return offset within that part.
-double timeline_set_from_time(struct MPContext *mpctx, double pts, bool *need_reset)
+// Given pts, return the segment number of the corresponding part.
+int timeline_get_for_time(struct MPContext *mpctx, double pts)
 {
     if (pts < 0)
         pts = 0;
 
-    int new = mpctx->num_timeline_parts - 1;
     for (int i = 0; i < mpctx->num_timeline_parts; i++) {
-        if (pts < mpctx->timeline[i + 1].start) {
-            new = i;
-            break;
-        }
+        if (pts < mpctx->timeline[i + 1].start)
+            return i;
     }
 
-    *need_reset = timeline_set_part(mpctx, new, false);
-    return pts - mpctx->timeline[new].start + mpctx->timeline[new].source_start;
+    return mpctx->num_timeline_parts - 1;
 }
 
 static int find_new_tid(struct MPContext *mpctx, enum stream_type t)

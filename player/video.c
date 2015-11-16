@@ -390,10 +390,6 @@ static int decode_image(struct MPContext *mpctx)
     struct demux_packet *pkt;
     if (demux_read_packet_async(d_video->header, &pkt) == 0)
         return VD_WAIT;
-    if (pkt && pkt->pts != MP_NOPTS_VALUE)
-        pkt->pts += mpctx->video_offset;
-    if (pkt && pkt->dts != MP_NOPTS_VALUE)
-        pkt->dts += mpctx->video_offset;
     if ((pkt && pkt->pts >= mpctx->hrseek_pts - .005) ||
         d_video->has_broken_packet_pts ||
         !mpctx->opts->hr_seek_framedrop)

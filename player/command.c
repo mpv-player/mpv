@@ -4477,7 +4477,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         double refpts = get_current_time(mpctx);
         if (state.dec_sub && refpts != MP_NOPTS_VALUE) {
             double a[2];
-            a[0] = refpts - state.video_offset - opts->sub_delay;
+            a[0] = refpts - opts->sub_delay;
             a[1] = cmd->args[0].v.i;
             if (sub_control(state.dec_sub, SD_CTRL_SUB_STEP, a) > 0) {
                 if (cmd->id == MP_CMD_SUB_STEP) {

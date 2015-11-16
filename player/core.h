@@ -226,7 +226,6 @@ typedef struct MPContext {
     int timeline_part;
     struct demux_chapter *chapters;
     int num_chapters;
-    double video_offset;
 
     struct demuxer *demuxer; // can change with timeline
     struct mp_tags *filtered_tags;
@@ -431,7 +430,8 @@ void mp_switch_track_n(struct MPContext *mpctx, int order,
 void mp_deselect_track(struct MPContext *mpctx, struct track *track);
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid);
-double timeline_set_from_time(struct MPContext *mpctx, double pts, bool *need_reset);
+void timeline_set_part(struct MPContext *mpctx, int i, bool initial);
+int timeline_get_for_time(struct MPContext *mpctx, double pts);
 void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer);
 bool mp_remove_track(struct MPContext *mpctx, struct track *track);
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
@@ -455,7 +455,6 @@ void wakeup_playloop(void *ctx);
 
 // misc.c
 double get_main_demux_pts(struct MPContext *mpctx);
-double get_track_video_offset(struct MPContext *mpctx, struct track *track);
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t);
 double get_play_end_pts(struct MPContext *mpctx);
 double get_relative_time(struct MPContext *mpctx);

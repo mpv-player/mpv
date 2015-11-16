@@ -229,10 +229,9 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
 
     double demuxer_amount = seek.amount;
     if (mpctx->timeline) {
-        bool need_reset = false;
-        demuxer_amount = timeline_set_from_time(mpctx, seek.amount,
-                                                &need_reset);
-        if (need_reset) {
+        int segment = timeline_get_for_time(mpctx, seek.amount);
+        if (segment != mpctx->timeline_part) {
+            timeline_set_part(mpctx, segment, false);
             reinit_video_chain(mpctx);
             reinit_audio_chain(mpctx);
             reinit_subs(mpctx, 0);
@@ -268,7 +267,6 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
             double main_new_pos = seek.amount;
             if (seek.type != MPSEEK_ABSOLUTE)
                 main_new_pos = get_main_demux_pts(mpctx);
-            main_new_pos -= get_track_video_offset(mpctx, track);
             demux_seek(track->demuxer, main_new_pos, SEEK_ABSOLUTE | SEEK_BACKWARD);
         }
     }

@@ -384,8 +384,7 @@ double written_audio_pts(struct MPContext *mpctx)
     // to get the length in original units without speedup or slowdown
     a_pts -= buffered_output * mpctx->audio_speed;
 
-    return a_pts +
-        get_track_video_offset(mpctx, mpctx->current_track[0][STREAM_AUDIO]);
+    return a_pts;
 }
 
 // Return pts value corresponding to currently playing audio.

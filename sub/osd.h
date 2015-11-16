@@ -153,7 +153,6 @@ void osd_set_text(struct osd_state *osd, int obj, const char *text);
 
 struct osd_sub_state {
     struct dec_sub *dec_sub;
-    double video_offset;
     bool render_bitmap_subs;
 };
 void osd_set_sub(struct osd_state *osd, int obj, struct osd_sub_state *substate);

@@ -115,14 +115,6 @@ double get_main_demux_pts(struct MPContext *mpctx)
     return main_new_pos;
 }
 
-// Get the offset from the given track to the video.
-double get_track_video_offset(struct MPContext *mpctx, struct track *track)
-{
-    if (track && track->under_timeline)
-        return mpctx->video_offset;
-    return 0;
-}
-
 float mp_get_cache_percent(struct MPContext *mpctx)
 {
     if (mpctx->demuxer) {
