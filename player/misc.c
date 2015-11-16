@@ -56,21 +56,20 @@ double get_relative_time(struct MPContext *mpctx)
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t)
 {
     double length = get_time_length(mpctx);
-    double start = get_start_time(mpctx);
     switch (t.type) {
     case REL_TIME_ABSOLUTE:
         return t.pos;
     case REL_TIME_RELATIVE:
         if (t.pos >= 0) {
-            return start + t.pos;
+            return t.pos;
         } else {
             if (length >= 0)
-                return MPMAX(start + length + t.pos, 0.0);
+                return MPMAX(length + t.pos, 0.0);
         }
         break;
     case REL_TIME_PERCENT:
         if (length >= 0)
-            return start + length * (t.pos / 100.0);
+            return length * (t.pos / 100.0);
         break;
     case REL_TIME_CHAPTER:
         if (chapter_start_time(mpctx, t.pos) != MP_NOPTS_VALUE)
@@ -87,12 +86,11 @@ double get_play_end_pts(struct MPContext *mpctx)
     if (opts->play_end.type) {
         end = rel_time_to_abs(mpctx, opts->play_end);
     } else if (opts->play_length.type) {
-        double startpts = get_start_time(mpctx);
         double start = rel_time_to_abs(mpctx, opts->play_start);
         if (start == MP_NOPTS_VALUE)
-            start = startpts;
+            start = 0;
         double length = rel_time_to_abs(mpctx, opts->play_length);
-        if (start != MP_NOPTS_VALUE && length != MP_NOPTS_VALUE)
+        if (length != MP_NOPTS_VALUE)
             end = start + length;
     }
     if (opts->chapterrange[1] > 0) {
@@ -117,18 +115,11 @@ double get_main_demux_pts(struct MPContext *mpctx)
     return main_new_pos;
 }
 
-double get_start_time(struct MPContext *mpctx)
-{
-    return mpctx->demuxer ? mpctx->demuxer->start_time : 0;
-}
-
 // Get the offset from the given track to the video.
 double get_track_video_offset(struct MPContext *mpctx, struct track *track)
 {
     if (track && track->under_timeline)
         return mpctx->video_offset;
-    if (track && track->is_external)
-        return get_start_time(mpctx);
     return 0;
 }
 

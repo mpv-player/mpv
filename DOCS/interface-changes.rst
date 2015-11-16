@@ -21,6 +21,12 @@ Interface changes
 
  --- mpv 0.14.0 ---
     - add "vsync-ratio" property
+    - add --rebase-start-time option
+      This is a breaking change to start time handling. Instead of making start
+      time handling an aspect of different options and properties (like
+      "time-pos" vs. "playback-time"), make it dependent on the new option. For
+      compatibility, the "time-start" property now always returns 0, so code
+      which attempted to handle rebasing manually will not break.
  --- mpv 0.13.0 ---
     - remove VO opengl-cb frame queue suboptions (no replacement)
  --- mpv 0.12.0 ---

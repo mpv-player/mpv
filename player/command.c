@@ -658,11 +658,8 @@ static int mp_property_percent_pos(void *ctx, struct m_property *prop,
 static int mp_property_time_start(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
-    MPContext *mpctx = ctx;
-    double start = get_start_time(mpctx);
-    if (start < 0)
-        return M_PROPERTY_UNAVAILABLE;
-    return property_time(action, arg, start);
+    // minor backwards-compat.
+    return property_time(action, arg, 0);
 }
 
 /// Current position in seconds (RW)
@@ -723,8 +720,7 @@ static int mp_property_playback_time(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_SET) {
-        double target = get_start_time(mpctx) + *(double *)arg;
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, target, MPSEEK_DEFAULT, true);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, MPSEEK_DEFAULT, true);
         return M_PROPERTY_OK;
     }
     return property_time(action, arg, get_playback_time(mpctx));

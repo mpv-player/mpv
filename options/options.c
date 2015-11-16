@@ -198,6 +198,8 @@ const m_option_t mp_opts[] = {
     OPT_REL_TIME("end", play_end, 0),
     OPT_REL_TIME("length", play_length, 0),
 
+    OPT_FLAG("rebase-start-time", rebase_start_time, 0),
+
     OPT_TIME("ab-loop-a", ab_loop[0], 0, .min = MP_NOPTS_VALUE),
     OPT_TIME("ab-loop-b", ab_loop[1], 0, .min = MP_NOPTS_VALUE),
 
@@ -763,6 +765,7 @@ const struct MPOpts mp_default_opts = {
     .consolecontrols = 1,
     .playlist_pos = -1,
     .play_frames = -1,
+    .rebase_start_time = 1,
     .keep_open = 0,
     .stream_id = { { [STREAM_AUDIO] = -1,
                      [STREAM_VIDEO] = -1,

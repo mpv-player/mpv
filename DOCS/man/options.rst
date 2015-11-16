@@ -69,7 +69,8 @@ Playback Control
 
     The general format for absolute times is ``[[hh:]mm:]ss[.ms]``. If the time
     is given with a prefix of ``+`` or ``-``, the seek is relative from the start
-    or end of the file.
+    or end of the file. (Since mpv 0.14, the start of the file is always
+    considered 0.)
 
     ``pp%`` seeks to percent position pp (0-100).
 
@@ -100,6 +101,14 @@ Playback Control
 ``--length=<relative time>``
     Stop after a given time relative to the start time.
     See ``--start`` for valid option values and examples.
+
+``--rebase-start-time=<yes|no>``
+    Whether to move the file start time to ``00:00:00`` (default: yes). This
+    is less awkward for files which start at a random timestamp, such as
+    transport streams. On the other hand, if there are timestamp resets, the
+    resulting behavior can be rather weird. For this reason, and in case you
+    are actually interested in the real timestamps, this behavior can be
+    disabled with ``no``.
 
 ``--speed=<0.01-100>``
     Slow down or speed up playback by the factor given as parameter.

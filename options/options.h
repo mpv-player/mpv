@@ -173,6 +173,7 @@ typedef struct MPOpts {
     struct m_rel_time play_start;
     struct m_rel_time play_end;
     struct m_rel_time play_length;
+    int rebase_start_time;
     int play_frames;
     double ab_loop[2];
     double step_sec;

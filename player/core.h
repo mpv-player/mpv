@@ -454,7 +454,6 @@ void mp_print_version(struct mp_log *log, int always);
 void wakeup_playloop(void *ctx);
 
 // misc.c
-double get_start_time(struct MPContext *mpctx);
 double get_main_demux_pts(struct MPContext *mpctx);
 double get_track_video_offset(struct MPContext *mpctx, struct track *track);
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t);

@@ -714,6 +714,9 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
     if (!demuxer)
         goto err_out;
 
+    if (filter != STREAM_SUB && opts->rebase_start_time)
+        demux_set_ts_offset(demuxer, -demuxer->start_time);
+
     struct track *first = NULL;
     for (int n = 0; n < demuxer->num_streams; n++) {
         struct sh_stream *sh = demuxer->streams[n];
@@ -910,6 +913,10 @@ static void load_chapters(struct MPContext *mpctx)
         talloc_free(mpctx->chapters);
         mpctx->num_chapters = src->num_chapters;
         mpctx->chapters = demux_copy_chapter_data(src->chapters, src->num_chapters);
+        if (mpctx->opts->rebase_start_time) {
+            for (int n = 0; n < mpctx->num_chapters; n++)
+                mpctx->chapters[n].pts -= src->start_time;
+        }
     }
     if (free_src)
         free_demuxer_and_stream(src);
@@ -954,8 +961,11 @@ static void open_demux_thread(void *pctx)
             args->err = MPV_ERROR_LOADING_FAILED;
         }
     }
-    if (args->demux)
+    if (args->demux) {
         args->tl = timeline_load(global, args->log, args->demux);
+        if (global->opts->rebase_start_time)
+            demux_set_ts_offset(args->demux, -args->demux->start_time);
+    }
 }
 
 static void open_demux_reentrant(struct MPContext *mpctx)

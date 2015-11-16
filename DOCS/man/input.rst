@@ -943,8 +943,9 @@ Property list
     Position in current file in seconds.
 
 ``time-start``
-    Return the start time of the file. (Usually 0, but some kind of files,
-    especially transport streams, can have a different start time.)
+    Deprecated. Always returns 0. Before mpv 0.14, this used to return the start
+    time of the file (could affect e.g. transport streams). See
+    ``--rebase-start-time`` option.
 
 ``time-remaining``
     Remaining length of the file in seconds. Note that the file duration is not
@@ -954,9 +955,11 @@ Property list
     ``time-remaining`` scaled by the current ``speed``.
 
 ``playback-time`` (RW)
-    The playback time, which is the time relative to playback start. (This can
-    be different from the ``time-pos`` property if the file does not start at
-    position ``0``, in which case ``time-pos`` is the source timestamp.)
+    Position in current file in seconds. Unlike ``time-pos``, the time is
+    clamped to the range of the file. (Inaccurate file durations etc. could
+    make it go out of range. Also helpful when the user attempts to seek
+    outside of the file, as the seek target time is considered the current
+    position during seeking.)
 
 ``chapter`` (RW)
     Current chapter number. The number of the first chapter is 0.

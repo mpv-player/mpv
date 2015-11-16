@@ -205,7 +205,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     case MPSEEK_FACTOR: ;
         double len = get_time_length(mpctx);
         if (len >= 0)
-            target_time = seek.amount * len + get_start_time(mpctx);
+            target_time = seek.amount * len;
         break;
     }
 
@@ -405,15 +405,14 @@ double get_playback_time(struct MPContext *mpctx)
     double cur = get_current_time(mpctx);
     if (cur == MP_NOPTS_VALUE)
         return cur;
-    double start = get_start_time(mpctx);
     // During seeking, the time corresponds to the last seek time - apply some
     // cosmetics to it.
     if (mpctx->playback_pts == MP_NOPTS_VALUE) {
         double length = get_time_length(mpctx);
         if (length >= 0)
-            cur = MPCLAMP(cur, start, start + length);
+            cur = MPCLAMP(cur, 0, length);
     }
-    return cur >= start ? cur - start : cur;
+    return cur;
 }
 
 // Return playback position in 0.0-1.0 ratio, or -1 if unknown.
@@ -423,15 +422,15 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
     if (!demuxer)
         return -1;
     double ans = -1;
-    double start = get_start_time(mpctx);
+    double start = 0;
     double len = get_time_length(mpctx);
     if (use_range) {
         double startpos = rel_time_to_abs(mpctx, mpctx->opts->play_start);
         double endpos = get_play_end_pts(mpctx);
-        if (endpos == MP_NOPTS_VALUE || endpos > start + MPMAX(0, len))
-            endpos = start + MPMAX(0, len);
-        if (startpos == MP_NOPTS_VALUE || startpos < start)
-            startpos = start;
+        if (endpos == MP_NOPTS_VALUE || endpos > MPMAX(0, len))
+            endpos = MPMAX(0, len);
+        if (startpos == MP_NOPTS_VALUE || startpos < 0)
+            startpos = 0;
         if (endpos < startpos)
             endpos = startpos;
         start = startpos;
@@ -506,7 +505,7 @@ char *chapter_name(struct MPContext *mpctx, int chapter)
 double chapter_start_time(struct MPContext *mpctx, int chapter)
 {
     if (chapter == -1)
-        return get_start_time(mpctx);
+        return 0;
     if (chapter >= 0 && chapter < mpctx->num_chapters)
         return mpctx->chapters[chapter].pts;
     return MP_NOPTS_VALUE;
@@ -785,8 +784,7 @@ static void handle_loop_file(struct MPContext *mpctx)
     if (opts->loop_file && mpctx->stop_play == AT_END_OF_FILE) {
         mpctx->stop_play = KEEP_PLAYING;
         set_osd_function(mpctx, OSD_FFW);
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, get_start_time(mpctx),
-                   MPSEEK_DEFAULT, true);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, 0, MPSEEK_DEFAULT, true);
         if (opts->loop_file > 0)
             opts->loop_file--;
     }
