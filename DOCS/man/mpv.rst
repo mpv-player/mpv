@@ -192,23 +192,19 @@ corresponding adjustment, or the software equalizer (``--vf=eq``).)
 7 and 8
     Adjust saturation.
 
-(The following keys are valid only on OS X.)
-
-command + 0
+Alt+0 (and command+0 on OSX)
     Resize video window to half its original size.
-    (On other platforms, you can bind keys to change the ``window-scale``
-    property.)
 
-command + 1
+Alt+1 (and command+1 on OSX)
     Resize video window to its original size.
 
-command + 2
+Alt+2 (and command+2 on OSX)
     Resize video window to double its original size.
 
-command + f
+command + f (OSX only)
     Toggle fullscreen (see also ``--fs``).
 
-command + [ and command + ]
+command + [ and command + ] (OSX only)
     Set video window alpha.
 
 (The following keys are valid if you have a keyboard with multimedia keys.)
