@@ -618,6 +618,14 @@ Video
     to temporarily set the ``hwdec`` option just during OpenGL context
     initialization with ``mpv_opengl_cb_init_gl()``.
 
+``--videotoolbox-format=<name>``
+    Set the internal pixel format used by ``--hwdec=videotoolbox`` on OSX. The
+    choice of the format can influence performance considerably. On the other
+    hand, there doesn't appear to be a good way to detect the best format for
+    the given hardware. ``nv12``, the default works better on modern hardware,
+    while ``uyvy422`` appears to be better for old hardware. ``rgb0`` also
+    works.
+
 ``--panscan=<0.0-1.0>``
     Enables pan-and-scan functionality (cropping the sides of e.g. a 16:9
     video to make it fit a 4:3 display without black bands). The range

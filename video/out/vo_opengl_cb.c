@@ -58,6 +58,7 @@ struct vo_priv {
 
 struct mpv_opengl_cb_context {
     struct mp_log *log;
+    struct mpv_global *global;
     struct mp_client_api *client_api;
 
     pthread_mutex_t lock;
@@ -130,6 +131,7 @@ struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
 
     ctx->gl = talloc_zero(ctx, GL);
 
+    ctx->global = g;
     ctx->log = mp_log_new(ctx, g->log, "opengl-cb");
     ctx->client_api = client_api;
 
@@ -178,7 +180,8 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
     if (!ctx->renderer)
         return MPV_ERROR_UNSUPPORTED;
 
-    ctx->hwdec = gl_hwdec_load_api_id(ctx->log, ctx->gl, ctx->hwdec_api);
+    ctx->hwdec = gl_hwdec_load_api_id(ctx->log, ctx->gl, ctx->global,
+                                      ctx->hwdec_api);
     gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
     if (ctx->hwdec)
         ctx->hwdec_info.hwctx = ctx->hwdec->hwctx;

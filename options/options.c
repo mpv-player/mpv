@@ -308,6 +308,9 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_C("hwdec", hwdec_api, 0, mp_hwdec_names),
     OPT_CHOICE_C("hwdec-preload", vo.hwdec_preload_api, 0, mp_hwdec_names),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
+#if HAVE_VIDEOTOOLBOX_HWACCEL
+    OPT_IMAGEFORMAT("videotoolbox-format", videotoolbox_format, 0),
+#endif
 
     OPT_SUBSTRUCT("sws", vo.sws_opts, sws_conf, 0),
 
@@ -804,6 +807,7 @@ const struct MPOpts mp_default_opts = {
     .screenshot_template = "mpv-shot%n",
 
     .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video",
+    .videotoolbox_format = IMGFMT_NV12,
 
     .index_mode = 1,
 

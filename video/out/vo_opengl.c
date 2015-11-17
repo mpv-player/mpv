@@ -205,7 +205,7 @@ static void request_hwdec_api(struct gl_priv *p, const char *api_name)
     if (p->hwdec)
         return;
 
-    p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, api_name);
+    p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, p->vo->global, api_name);
     gl_video_set_hwdec(p->renderer, p->hwdec);
     if (p->hwdec)
         p->hwdec_info.hwctx = p->hwdec->hwctx;
@@ -439,7 +439,7 @@ static int preinit(struct vo *vo)
     if (hwdec == HWDEC_NONE)
         hwdec = vo->global->opts->hwdec_api;
     if (hwdec != HWDEC_NONE) {
-        p->hwdec = gl_hwdec_load_api_id(p->vo->log, p->gl, hwdec);
+        p->hwdec = gl_hwdec_load_api_id(p->vo->log, p->gl, vo->global, hwdec);
         gl_video_set_hwdec(p->renderer, p->hwdec);
         if (p->hwdec)
             p->hwdec_info.hwctx = p->hwdec->hwctx;
