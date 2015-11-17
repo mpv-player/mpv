@@ -2659,8 +2659,7 @@ static int create_index_until(struct demuxer *demuxer, uint64_t timecode)
     mkv_index_t *index = get_highest_index_entry(demuxer);
 
     if (!index || index->timecode * mkv_d->tc_scale < timecode) {
-        if (index)
-            stream_seek(s, index->filepos);
+        stream_seek(s, index ? index->filepos : mkv_d->cluster_start);
         MP_VERBOSE(demuxer, "creating index until TC %" PRIu64 "\n", timecode);
         for (;;) {
             int res;
