@@ -133,11 +133,9 @@ void uninit_sub_renderer(struct MPContext *mpctx) {}
 
 static void reset_subtitles(struct MPContext *mpctx, int order)
 {
-    int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
     if (mpctx->d_sub[order])
         sub_reset(mpctx->d_sub[order]);
-    set_osd_subtitle(mpctx, NULL);
-    osd_set_text(mpctx->osd, obj, NULL);
+    term_osd_set_subs(mpctx, NULL);
 }
 
 void reset_subtitle_state(struct MPContext *mpctx)
@@ -162,7 +160,7 @@ void uninit_sub(struct MPContext *mpctx, int order)
     if (mpctx->d_sub[order]) {
         reset_subtitles(mpctx, order);
         mpctx->d_sub[order] = NULL; // Note: not free'd.
-        update_osd_sub_state(mpctx, order, NULL); // unset
+        osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, NULL);
         reselect_demux_streams(mpctx);
     }
 }
@@ -191,33 +189,6 @@ static bool is_interleaved(struct MPContext *mpctx, struct track *track)
     return track->demuxer == mpctx->demuxer;
 }
 
-void update_osd_sub_state(struct MPContext *mpctx, int order,
-                          struct osd_sub_state *out_state)
-{
-    struct MPOpts *opts = mpctx->opts;
-    struct dec_sub *dec_sub = mpctx->d_sub[order];
-    int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
-    bool textsub = dec_sub && sub_has_get_text(dec_sub);
-
-    struct osd_sub_state state = {
-        .dec_sub = dec_sub,
-        // Decides whether to use OSD path or normal subtitle rendering path.
-        .render_bitmap_subs = opts->ass_enabled || !textsub,
-    };
-
-    // Secondary subs are rendered with the "text" renderer to transform them
-    // to toptitles.
-    if (order == 1 && textsub)
-        state.render_bitmap_subs = false;
-
-    if (!mpctx->current_track[0][STREAM_VIDEO])
-        state.render_bitmap_subs = false;
-
-    osd_set_sub(mpctx->osd, obj, &state);
-    if (out_state)
-        *out_state = state;
-}
-
 static void update_subtitle(struct MPContext *mpctx, int order)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -227,16 +198,11 @@ static void update_subtitle(struct MPContext *mpctx, int order)
     if (!track || !dec_sub)
         return;
 
-    int obj = order ? OSDTYPE_SUB2 : OSDTYPE_SUB;
-
     if (mpctx->d_video) {
         struct mp_image_params params = mpctx->d_video->vfilter->override_params;
         if (params.imgfmt)
             sub_control(dec_sub, SD_CTRL_SET_VIDEO_PARAMS, &params);
     }
-
-    struct osd_sub_state state;
-    update_osd_sub_state(mpctx, order, &state);
 
     double refpts_s = mpctx->playback_pts;
     double curpts_s = refpts_s - opts->sub_delay;
@@ -272,12 +238,8 @@ static void update_subtitle(struct MPContext *mpctx, int order)
     }
 
     // Handle displaying subtitles on terminal; never done for secondary subs
-    if (order == 0) {
-        if (!state.render_bitmap_subs || !mpctx->video_out)
-            set_osd_subtitle(mpctx, sub_get_text(dec_sub, curpts_s));
-    } else if (order == 1) {
-        osd_set_text(mpctx->osd, obj, sub_get_text(dec_sub, curpts_s));
-    }
+    if (order == 0 && !mpctx->video_out)
+        term_osd_set_subs(mpctx, sub_get_text(dec_sub, curpts_s));
 }
 
 void update_subtitles(struct MPContext *mpctx)
@@ -335,8 +297,7 @@ void reinit_subs(struct MPContext *mpctx, int order)
         sh->sub->dec_sub = sub_create(mpctx->global);
     mpctx->d_sub[order] = sh->sub->dec_sub;
 
-    struct dec_sub *dec_sub = mpctx->d_sub[order];
-    reinit_subdec(mpctx, track, dec_sub);
-
-    update_osd_sub_state(mpctx, order, NULL);
+    reinit_subdec(mpctx, track, sh->sub->dec_sub);
+    osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, sh->sub->dec_sub);
+    sub_control(sh->sub->dec_sub, SD_CTRL_SET_TOP, &(bool){!!order});
 }

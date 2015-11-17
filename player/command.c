@@ -4472,14 +4472,13 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     case MP_CMD_SUB_SEEK: {
         if (!mpctx->playback_initialized)
             return -1;
-        struct osd_sub_state state;
-        update_osd_sub_state(mpctx, 0, &state);
+        struct dec_sub *sub = mpctx->d_sub[0];
         double refpts = get_current_time(mpctx);
-        if (state.dec_sub && refpts != MP_NOPTS_VALUE) {
+        if (sub && refpts != MP_NOPTS_VALUE) {
             double a[2];
             a[0] = refpts - opts->sub_delay;
             a[1] = cmd->args[0].v.i;
-            if (sub_control(state.dec_sub, SD_CTRL_SUB_STEP, a) > 0) {
+            if (sub_control(sub, SD_CTRL_SUB_STEP, a) > 0) {
                 if (cmd->id == MP_CMD_SUB_STEP) {
                     opts->sub_delay -= a[0];
                     osd_changed_all(mpctx->osd);

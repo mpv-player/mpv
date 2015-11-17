@@ -21,6 +21,7 @@ enum sd_ctrl {
     SD_CTRL_SUB_STEP,
     SD_CTRL_SET_VIDEO_PARAMS,
     SD_CTRL_GET_RESOLUTION,
+    SD_CTRL_SET_TOP,
 };
 
 struct dec_sub *sub_create(struct mpv_global *global);

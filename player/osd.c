@@ -103,7 +103,7 @@ static void term_osd_update(struct MPContext *mpctx)
     }
 }
 
-static void term_osd_set_subs(struct MPContext *mpctx, const char *text)
+void term_osd_set_subs(struct MPContext *mpctx, const char *text)
 {
     if (mpctx->video_out || !text)
         text = ""; // disable
@@ -384,15 +384,6 @@ void set_osd_function(struct MPContext *mpctx, int osd_function)
     mpctx->osd_function_visible = mp_time_sec() + opts->osd_duration / 1000.0;
     mpctx->osd_force_update = true;
     mpctx->sleeptime = 0;
-}
-
-/**
- * \brief Display text subtitles on the OSD
- */
-void set_osd_subtitle(struct MPContext *mpctx, const char *text)
-{
-    osd_set_text(mpctx->osd, OSDTYPE_SUB, text);
-    term_osd_set_subs(mpctx, text);
 }
 
 void get_current_osd_sym(struct MPContext *mpctx, char *buf, size_t buf_size)

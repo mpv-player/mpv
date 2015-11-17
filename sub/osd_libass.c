@@ -423,41 +423,11 @@ static void update_external(struct osd_state *osd, struct osd_object *obj)
     }
 }
 
-static void update_sub(struct osd_state *osd, struct osd_object *obj)
-{
-    struct MPOpts *opts = osd->opts;
-
-    clear_obj(obj);
-
-    if (!obj->text || !obj->text[0] || obj->sub_state.render_bitmap_subs)
-        return;
-
-    create_ass_renderer(osd, obj);
-    if (!obj->osd_track)
-        obj->osd_track = mp_ass_default_track(obj->osd_ass_library, osd->opts);
-
-    struct osd_style_opts font = *opts->sub_text_style;
-    font.font_size *= opts->sub_scale;
-
-    ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
-    mp_ass_set_style(style, obj->osd_track->PlayResY, &font);
-    if (obj->type == OSDTYPE_SUB2)
-        style->Alignment = 6;
-
-    ass_set_line_position(obj->osd_render, 100 - opts->sub_pos);
-
-    add_osd_ass_event_escaped(obj->osd_track, obj->text);
-}
-
 static void update_object(struct osd_state *osd, struct osd_object *obj)
 {
     switch (obj->type) {
     case OSDTYPE_OSD:
         update_osd(osd, obj);
-        break;
-    case OSDTYPE_SUB:
-    case OSDTYPE_SUB2:
-        update_sub(osd, obj);
         break;
     case OSDTYPE_PROGBAR:
         update_progbar(osd, obj);

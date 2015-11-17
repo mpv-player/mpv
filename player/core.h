@@ -475,7 +475,7 @@ void set_osd_bar(struct MPContext *mpctx, int type,
 bool set_osd_msg(struct MPContext *mpctx, int level, int time,
                  const char* fmt, ...) PRINTF_ATTRIBUTE(4,5);
 void set_osd_function(struct MPContext *mpctx, int osd_function);
-void set_osd_subtitle(struct MPContext *mpctx, const char *text);
+void term_osd_set_subs(struct MPContext *mpctx, const char *text);
 void get_current_osd_sym(struct MPContext *mpctx, char *buf, size_t buf_size);
 void set_osd_bar_chapters(struct MPContext *mpctx, int type);
 
@@ -523,8 +523,6 @@ void uninit_sub_all(struct MPContext *mpctx);
 void update_osd_msg(struct MPContext *mpctx);
 void update_subtitles(struct MPContext *mpctx);
 void uninit_sub_renderer(struct MPContext *mpctx);
-void update_osd_sub_state(struct MPContext *mpctx, int order,
-                          struct osd_sub_state *out_state);
 
 // video.c
 void reset_video_state(struct MPContext *mpctx);

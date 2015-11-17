@@ -37,7 +37,9 @@
 
 struct sd_ass_priv {
     struct ass_track *ass_track;
+    struct ass_track *shadow_track; // for --sub-ass=no rendering
     bool is_converted;
+    bool on_top;
     struct sub_bitmap *parts;
     bool flush_on_seek;
     int extend_event;
@@ -47,6 +49,7 @@ struct sd_ass_priv {
 };
 
 static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts);
+static void fill_plaintext(struct sd *sd, double pts);
 
 static bool supports_format(const char *format)
 {
@@ -75,6 +78,11 @@ static int init(struct sd *sd)
     ctx->ass_track = ass_new_track(sd->ass_library);
     if (!ctx->is_converted)
         ctx->ass_track->track_type = TRACK_TYPE_ASS;
+
+    ctx->shadow_track = ass_new_track(sd->ass_library);
+    ctx->shadow_track->PlayResX = 384;
+    ctx->shadow_track->PlayResY = 288;
+    mp_ass_add_default_styles(ctx->shadow_track, opts);
 
     if (sd->extradata) {
         ass_process_codec_private(ctx->ass_track, sd->extradata,
@@ -147,12 +155,11 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     event->Text = strdup(text);
 }
 
-static void configure_ass(struct sd *sd, struct mp_osd_res *dim)
+static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
+                          bool converted, ASS_Track *track)
 {
-    struct sd_ass_priv *ctx = sd->priv;
     struct MPOpts *opts = sd->opts;
     ASS_Renderer *priv = sd->ass_renderer;
-    ASS_Track *track = ctx->ass_track;
 
     ass_set_frame_size(priv, dim->w, dim->h);
     ass_set_margins(priv, dim->mt, dim->mb, dim->ml, dim->mr);
@@ -166,7 +173,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim)
     bool set_scale_by_window = true;
     bool total_override = false;
     // With forced overrides, apply the --sub-* specific options
-    if (ctx->is_converted || opts->ass_style_override == 3) {
+    if (converted || opts->ass_style_override == 3) {
         set_scale_with_window = opts->sub_scale_with_window;
         set_use_margins = opts->sub_use_margins;
         set_scale_by_window = opts->sub_scale_by_window;
@@ -175,7 +182,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim)
         set_scale_with_window = opts->ass_scale_with_window;
         set_use_margins = opts->ass_use_margins;
     }
-    if (ctx->is_converted || opts->ass_style_override) {
+    if (converted || opts->ass_style_override) {
         set_sub_pos = 100 - opts->sub_pos;
         set_line_spacing = opts->ass_line_spacing;
         set_hinting = opts->ass_hinting;
@@ -203,7 +210,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim)
     mp_ass_set_style(&style, 288, opts->sub_text_style);
     ass_set_selective_style_override(priv, &style);
     free(style.FontName);
-    if (ctx->is_converted && track->default_style < track->n_styles) {
+    if (converted && track->default_style < track->n_styles) {
         mp_ass_set_style(track->styles + track->default_style,
                          track->PlayResY, opts->sub_text_style);
     }
@@ -217,6 +224,9 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct MPOpts *opts = sd->opts;
+    bool no_ass = !opts->ass_enabled;
+    bool converted = ctx->is_converted || no_ass;
+    ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
 
     if (pts == MP_NOPTS_VALUE || !sd->ass_renderer)
         return;
@@ -225,8 +235,8 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
 
     ASS_Renderer *renderer = sd->ass_renderer;
     double scale = dim.display_par;
-    if (!ctx->is_converted && (!opts->ass_style_override ||
-                               opts->ass_vsfilter_aspect_compat))
+    if (!converted && (!opts->ass_style_override ||
+                       opts->ass_vsfilter_aspect_compat))
     {
         // Let's use the original video PAR for vsfilter compatibility:
         double par = scale
@@ -235,20 +245,21 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
         if (isnormal(par))
             scale = par;
     }
-    configure_ass(sd, &dim);
+    configure_ass(sd, &dim, converted, track);
     ass_set_pixel_aspect(renderer, scale);
-    if (!ctx->is_converted && (!opts->ass_style_override ||
-                               opts->ass_vsfilter_blur_compat))
+    if (!converted && (!opts->ass_style_override ||
+                       opts->ass_vsfilter_blur_compat))
     {
         ass_set_storage_size(renderer, ctx->video_params.w, ctx->video_params.h);
     } else {
         ass_set_storage_size(renderer, 0, 0);
     }
-    mp_ass_render_frame(renderer, ctx->ass_track, pts * 1000 + .5,
-                        &ctx->parts, res);
+    if (no_ass)
+        fill_plaintext(sd, pts);
+    mp_ass_render_frame(renderer, track, pts * 1000 + .5, &ctx->parts, res);
     talloc_steal(ctx, ctx->parts);
 
-    if (!ctx->is_converted)
+    if (!converted)
         mangle_colors(sd, res);
 
     pthread_mutex_unlock(sd->ass_lock);
@@ -360,6 +371,42 @@ static char *get_text(struct sd *sd, double pts)
     return ctx->last_text;
 }
 
+static void fill_plaintext(struct sd *sd, double pts)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    ASS_Track *track = ctx->shadow_track;
+
+    ass_flush_events(track);
+
+    char *text = get_text(sd, pts);
+    if (!text)
+        return;
+
+    bstr dst = {0};
+    while (*text) {
+        if (*text == '{')
+            bstr_xappend(NULL, &dst, bstr0("\\"));
+        bstr_xappend(NULL, &dst, (bstr){text, 1});
+        // Break ASS escapes with U+2060 WORD JOINER
+        if (*text == '\\')
+            mp_append_utf8_bstr(NULL, &dst, 0x2060);
+        text++;
+    }
+
+    if (!dst.start || !dst.start[0])
+        return;
+
+    int n = ass_alloc_event(track);
+    ASS_Event *event = track->events + n;
+    event->Start = 0;
+    event->Duration = INT_MAX;
+    event->Style = track->default_style;
+    event->Text = strdup(dst.start);
+
+    if (track->default_style < track->n_styles)
+        track->styles[track->default_style].Alignment = ctx->on_top ? 6 : 2;
+}
+
 static void fix_events(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
@@ -395,10 +442,13 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
             return false;
         a[0] = res / 1000.0;
         return true;
+    }
     case SD_CTRL_SET_VIDEO_PARAMS:
         ctx->video_params = *(struct mp_image_params *)arg;
         return CONTROL_OK;
-    }
+    case SD_CTRL_SET_TOP:
+        ctx->on_top = *(bool *)arg;
+        return CONTROL_OK;
     default:
         return CONTROL_UNKNOWN;
     }

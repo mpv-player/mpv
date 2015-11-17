@@ -20,7 +20,7 @@ struct osd_object {
     struct osd_progbar_state progbar_state;
 
     // OSDTYPE_SUB/OSDTYPE_SUB2
-    struct osd_sub_state sub_state;
+    struct dec_sub *sub;
 
     // OSDTYPE_EXTERNAL
     int external_res_x, external_res_y;
