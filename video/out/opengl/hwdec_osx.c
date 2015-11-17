@@ -169,6 +169,10 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     p->pbuf = (CVPixelBufferRef)hw_image->planes[3];
     CVPixelBufferRetain(p->pbuf);
     IOSurfaceRef surface = CVPixelBufferGetIOSurface(p->pbuf);
+    if (!surface) {
+        MP_ERR(hw, "CVPixelBuffer has no IOSurface\n");
+        return -1;
+    }
 
     uint32_t cvpixfmt = CVPixelBufferGetPixelFormatType(p->pbuf);
     struct vt_format *f = vt_get_gl_format(cvpixfmt);
