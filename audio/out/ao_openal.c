@@ -129,6 +129,18 @@ static const struct speaker speaker_pos[] = {
     {-1},
 };
 
+// close audio device
+static void uninit(struct ao *ao)
+{
+    ALCcontext *ctx = alcGetCurrentContext();
+    ALCdevice *dev = alcGetContextsDevice(ctx);
+    reset(ao);
+    alcMakeContextCurrent(NULL);
+    alcDestroyContext(ctx);
+    alcCloseDevice(dev);
+    ao_data = NULL;
+}
+
 static int init(struct ao *ao)
 {
     float position[3] = {0, 0, 0};
@@ -189,18 +201,6 @@ static int init(struct ao *ao)
 
 err_out:
     return -1;
-}
-
-// close audio device
-static void uninit(struct ao *ao)
-{
-    ALCcontext *ctx = alcGetCurrentContext();
-    ALCdevice *dev = alcGetContextsDevice(ctx);
-    reset(ao);
-    alcMakeContextCurrent(NULL);
-    alcDestroyContext(ctx);
-    alcCloseDevice(dev);
-    ao_data = NULL;
 }
 
 static void drain(struct ao *ao)
