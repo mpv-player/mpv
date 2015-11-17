@@ -44,8 +44,7 @@
 
 #define MAX_CHANS MP_NUM_CHANNELS
 #define NUM_BUF 128
-#define CHUNK_SIZE 512
-#define CHUNK_SAMPLES (CHUNK_SIZE / 2)
+#define CHUNK_SAMPLES 256
 static ALuint buffers[MAX_CHANS][NUM_BUF];
 static ALuint sources[MAX_CHANS];
 
@@ -56,6 +55,8 @@ static struct ao *ao_data;
 
 struct priv {
     char *cfg_device;
+    ALenum al_format;
+    int chunk_size;
 };
 
 static void reset(struct ao *ao);
@@ -129,6 +130,23 @@ static const struct speaker speaker_pos[] = {
     {-1},
 };
 
+static ALenum get_al_format(int format)
+{
+    switch (format) {
+    case AF_FORMAT_U8P: return AL_FORMAT_MONO8;
+    case AF_FORMAT_S16P: return  AL_FORMAT_MONO16;
+    case AF_FORMAT_FLOATP:
+        if (alIsExtensionPresent((ALchar*)"AL_EXT_float32") == AL_TRUE)
+            return AL_FORMAT_MONO_FLOAT32;
+        break;
+    case AF_FORMAT_DOUBLEP:
+        if (alIsExtensionPresent((ALchar*)"AL_EXT_double") == AL_TRUE)
+            return AL_FORMAT_MONO_DOUBLE_EXT;
+        break;
+    }
+    return AL_FALSE;
+}
+
 // close audio device
 static void uninit(struct ao *ao)
 {
@@ -196,7 +214,25 @@ static int init(struct ao *ao)
     alcGetIntegerv(dev, ALC_FREQUENCY, 1, &freq);
     if (alcGetError(dev) == ALC_NO_ERROR && freq)
         ao->samplerate = freq;
-    ao->format = AF_FORMAT_S16P;
+
+    p->al_format = AL_FALSE;
+    int try_formats[AF_FORMAT_COUNT];
+    af_get_best_sample_formats(ao->format, try_formats);
+    for (int n = 0; try_formats[n]; n++) {
+        p->al_format = get_al_format(try_formats[n]);
+        if (p->al_format != AL_FALSE) {
+            ao->format = try_formats[n];
+            break;
+        }
+    }
+
+    if (p->al_format == AL_FALSE) {
+        MP_FATAL(ao, "Can't find appropriate sample format.\n");
+        uninit(ao);
+        goto err_out;
+    }
+
+    p->chunk_size = CHUNK_SAMPLES * af_fmt_to_bytes(ao->format);
     return 0;
 
 err_out:
@@ -274,14 +310,15 @@ static int get_space(struct ao *ao)
  */
 static int play(struct ao *ao, void **data, int samples, int flags)
 {
+    struct priv *p = ao->priv;
     ALint state;
     int num = samples / CHUNK_SAMPLES;
     for (int i = 0; i < num; i++) {
         for (int ch = 0; ch < ao->channels.num; ch++) {
-            int16_t *d = data[ch];
-            d += i * CHUNK_SAMPLES;
-            alBufferData(buffers[ch][cur_buf[ch]], AL_FORMAT_MONO16, d,
-                         CHUNK_SIZE, ao->samplerate);
+            char *d = data[ch];
+            d += i * p->chunk_size;
+            alBufferData(buffers[ch][cur_buf[ch]], p->al_format, d,
+                         p->chunk_size, ao->samplerate);
             alSourceQueueBuffers(sources[ch], 1, &buffers[ch][cur_buf[ch]]);
             cur_buf[ch] = (cur_buf[ch] + 1) % NUM_BUF;
         }
