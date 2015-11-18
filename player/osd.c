@@ -235,8 +235,10 @@ static void print_status(struct MPContext *mpctx)
         // VO stats
         if (mpctx->d_video) {
             if (mpctx->display_sync_active) {
-                saddf(&line, " DS: %d/%"PRId64, mpctx->mistimed_frames_total,
+                char *r = mp_property_expand_string(mpctx, "${vsync-ratio}");
+                saddf(&line, " DS: %s/%"PRId64, r,
                       vo_get_delayed_count(mpctx->video_out));
+                talloc_free(r);
             }
             int64_t c = vo_get_drop_count(mpctx->video_out);
             if (c > 0 || mpctx->dropped_frames_total > 0) {

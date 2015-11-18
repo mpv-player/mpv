@@ -562,11 +562,13 @@ listed.
   this will indicate a problem. (``total-avsync-change`` property.)
 - Encoding state in ``{...}``, only shown in encoding mode.
 - Display sync state. If display sync is active (``display-sync-active``
-  property), this shows ``DS: 12/13``, where the first number is the number of
-  frames where a vsync was intentionally added or removed
-  (``mistimed-frame-count``), and the second number of estimated number of vsyncs
-  which took too long (``vo-delayed-frame-count`` property). The latter is a
-  heuristic, as it's generally not possible to determine this with certainty.
+  property), this shows ``DS: 2.500/13``, where the first number is average
+  number of vsyncs per video frame (e.g. 2.5 when playing 24Hz videos on 60Hz
+  screens), which might jitter if the ratio doesn't round off, or there are
+  mistimed frames (``vsync-ratio``), and the second number of estimated number
+  of vsyncs which took too long (``vo-delayed-frame-count`` property). The
+  latter is a heuristic, as it's generally not possible to determine this with
+  certainty.
 - Dropped frames, e.g. ``Dropped: 4``. Shows up only if the count is not 0. Can
   grow if the video framerate is higher than that of the display, or if video
   rendering is too slow. Also can be incremented on "hiccups" and when the video
