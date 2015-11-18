@@ -123,7 +123,7 @@ static const struct speaker speaker_pos[] = {
     {MP_SPEAKER_ID_FC,   {     0,  0,     -1}}, //   0 deg
     {MP_SPEAKER_ID_LFE,  {     0, -1,      0}}, //   below
     {MP_SPEAKER_ID_BL,   {-0.609,  0,  0.793}}, // -142.5 deg
-    {MP_SPEAKER_ID_BR,   { 0.609,  0,  0.793}}, // -142.5 deg
+    {MP_SPEAKER_ID_BR,   { 0.609,  0,  0.793}}, //  142.5 deg
     {MP_SPEAKER_ID_BC,   {     0,  0,      1}}, //  180 deg
     {MP_SPEAKER_ID_SL,   {-0.985,  0,  0.174}}, // -100 deg
     {MP_SPEAKER_ID_SR,   { 0.985,  0,  0.174}}, //  100 deg
