@@ -454,6 +454,7 @@ const m_option_t mp_opts[] = {
 #if HAVE_X11
     OPT_CHOICE("x11-netwm", vo.x11_netwm, 0,
                ({"auto", 0}, {"no", -1}, {"yes", 1})),
+    OPT_FLAG("x11-bypass-compositor", vo.x11_bypass_compositor, 0),
 #endif
     OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0),
     OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
@@ -699,6 +700,7 @@ const struct MPOpts mp_default_opts = {
         .border = 1,
         .WinID = -1,
         .window_scale = 1.0,
+        .x11_bypass_compositor = 1,
     },
     .allow_win_drag = 1,
     .wintitle = "${?media-title:${media-title}}${!media-title:No file} - mpv",

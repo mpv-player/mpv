@@ -1385,6 +1385,12 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
     }
 
     if (!x11->parent) {
+        if (vo->opts->x11_bypass_compositor) {
+            long v = 1; // request disabling compositor
+            XChangeProperty(x11->display, x11->window,
+                XA(x11,_NET_WM_BYPASS_COMPOSITOR), XA_CARDINAL, 32,
+                PropModeReplace, (unsigned char *)&v, 1);
+        }
         vo_x11_set_wm_icon(x11);
         vo_x11_update_window_title(vo);
         vo_x11_dnd_init_window(vo);
