@@ -286,10 +286,24 @@ static void enable_demux_thread(struct MPContext *mpctx)
     }
 }
 
-void timeline_set_part(struct MPContext *mpctx, int i, bool initial)
+// Returns whether reinitialization is required (i.e. it switched to a new part)
+bool timeline_switch_to_time(struct MPContext *mpctx, double pts)
 {
-    struct timeline_part *n = mpctx->timeline + i;
-    mpctx->timeline_part = i;
+    if (!mpctx->timeline)
+        return false;
+
+    int new_part = mpctx->num_timeline_parts - 1;
+    for (int i = 0; i < mpctx->num_timeline_parts; i++) {
+        if (pts < mpctx->timeline[i + 1].start) {
+            new_part = i;
+            break;
+        }
+    }
+
+    if (mpctx->timeline_part == new_part)
+        return false;
+    mpctx->timeline_part = new_part;
+    struct timeline_part *n = mpctx->timeline + mpctx->timeline_part;
 
     uninit_audio_chain(mpctx);
     uninit_video_chain(mpctx);
@@ -325,24 +339,12 @@ void timeline_set_part(struct MPContext *mpctx, int i, bool initial)
         }
     }
 
-    if (!initial) {
+    if (mpctx->playback_initialized) {
         reselect_demux_streams(mpctx);
         enable_demux_thread(mpctx);
     }
-}
 
-// Given pts, return the segment number of the corresponding part.
-int timeline_get_for_time(struct MPContext *mpctx, double pts)
-{
-    if (pts < 0)
-        pts = 0;
-
-    for (int i = 0; i < mpctx->num_timeline_parts; i++) {
-        if (pts < mpctx->timeline[i + 1].start)
-            return i;
-    }
-
-    return mpctx->num_timeline_parts - 1;
+    return true;
 }
 
 static int find_new_tid(struct MPContext *mpctx, enum stream_type t)
@@ -1118,9 +1120,8 @@ reopen_file:
     load_chapters(mpctx);
     add_demuxer_tracks(mpctx, mpctx->track_layout);
 
-    mpctx->timeline_part = 0;
-    if (mpctx->timeline)
-        timeline_set_part(mpctx, mpctx->timeline_part, true);
+    mpctx->timeline_part = mpctx->num_timeline_parts;
+    timeline_switch_to_time(mpctx, 0);
 
     open_subtitles_from_options(mpctx);
     open_audiofiles_from_options(mpctx);

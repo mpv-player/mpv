@@ -430,7 +430,7 @@ void mp_switch_track_n(struct MPContext *mpctx, int order,
 void mp_deselect_track(struct MPContext *mpctx, struct track *track);
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid);
-void timeline_set_part(struct MPContext *mpctx, int i, bool initial);
+bool timeline_switch_to_time(struct MPContext *mpctx, double pts);
 int timeline_get_for_time(struct MPContext *mpctx, double pts);
 void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer);
 bool mp_remove_track(struct MPContext *mpctx, struct track *track);
