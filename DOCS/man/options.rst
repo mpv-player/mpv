@@ -865,7 +865,7 @@ Video
 
     .. admonition:: Example
 
-        ``--vd--lavc-o=debug=pict``
+        ``--vd-lavc-o=debug=pict``
 
 ``--vd-lavc-show-all=<yes|no>``
     Show even broken/corrupt frames (default: no). If this option is set to
