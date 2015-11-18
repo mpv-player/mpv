@@ -622,7 +622,7 @@ Video
     Set the internal pixel format used by ``--hwdec=videotoolbox`` on OSX. The
     choice of the format can influence performance considerably. On the other
     hand, there doesn't appear to be a good way to detect the best format for
-    the given hardware. ``nv12``, the default works better on modern hardware,
+    the given hardware. ``nv12``, the default, works better on modern hardware,
     while ``uyvy422`` appears to be better for old hardware. ``rgb0`` also
     works.
 
