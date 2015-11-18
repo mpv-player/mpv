@@ -399,6 +399,23 @@ exit_label:
     return false;
 }
 
+// This works like try_format_exclusive(), but will try to fallback to the AC3
+// format if the format is a non-AC3 passthrough format. *wformat will be
+// adjusted accordingly.
+static bool try_format_exclusive_with_spdif_fallback(struct ao *ao,
+                                                WAVEFORMATEXTENSIBLE *wformat)
+{
+    if (try_format_exclusive(ao, wformat))
+        return true;
+    int special_format = special_subtype_to_format(&wformat->SubFormat);
+    if (special_format && special_format != AF_FORMAT_S_AC3) {
+        MP_VERBOSE(ao, "Retrying as AC3.\n");
+        wformat->SubFormat = *format_to_subtype(AF_FORMAT_S_AC3);
+        return try_format_exclusive(ao, wformat);
+    }
+    return false;
+}
+
 static bool search_sample_formats(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat,
                                   int samplerate, struct mp_chmap *channels)
 {
@@ -508,7 +525,7 @@ static bool find_formats_exclusive(struct ao *ao, bool do_search)
 
     // Try the requested format as is. If that doesn't work, and the
     // do_search argument is set, do the pcm format search.
-    if (!try_format_exclusive(ao, &wformat) &&
+    if (!try_format_exclusive_with_spdif_fallback(ao, &wformat) &&
         (!do_search || !search_channels(ao, &wformat)))
         return false;
 
