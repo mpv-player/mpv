@@ -1771,7 +1771,7 @@ static void pass_dither(struct gl_video *p)
 
     gl_sc_uniform_sampler(p->sc, "dither", GL_TEXTURE_2D, TEXUNIT_DITHER);
 
-    GLSLF("vec2 dither_pos = gl_FragCoord.xy / %d;\n", p->dither_size);
+    GLSLF("vec2 dither_pos = gl_FragCoord.xy / %d.0;\n", p->dither_size);
 
     if (p->opts.temporal_dither) {
         int phase = (p->frames_rendered / p->opts.temporal_dither_period) % 8u;
@@ -1786,8 +1786,8 @@ static void pass_dither(struct gl_video *p)
     }
 
     GLSL(float dither_value = texture(dither, dither_pos).r;)
-    GLSLF("color = floor(color * %d + dither_value + 0.5 / (%d * %d)) / %d;\n",
-          dither_quantization, p->dither_size, p->dither_size,
+    GLSLF("color = floor(color * %d.0 + dither_value + 0.5 / %d.0) / %d.0;\n",
+          dither_quantization, p->dither_size * p->dither_size,
           dither_quantization);
 }
 
