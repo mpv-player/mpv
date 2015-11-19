@@ -644,8 +644,10 @@ void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d)
         return;
     }
 
-    if (!(gl->mpgl_caps & MPGL_CAP_3D_TEX))
+    if (!(gl->mpgl_caps & MPGL_CAP_3D_TEX) || gl->es) {
+        MP_ERR(p, "16 bit fixed point 3D textures not available.\n");
         return;
+    }
 
     if (!p->lut_3d_texture)
         gl->GenTextures(1, &p->lut_3d_texture);
