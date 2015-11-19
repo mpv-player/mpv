@@ -223,13 +223,6 @@ static const struct gl_functions gl_functions[] = {
             {0}
         }
     },
-    // Float textures, extension in GL 2.x, core in GL 3.x core.
-    {
-        .ver_core = 300,
-        .ver_es_core = 300,
-        .extension = "GL_ARB_texture_float",
-        .provides = MPGL_CAP_FLOAT_TEX,
-    },
     // GL_RED / GL_RG textures, extension in GL 2.x, core in GL 3.x core.
     {
         .ver_core = 300,
@@ -484,6 +477,14 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     if (is_software_gl(gl)) {
         gl->mpgl_caps |= MPGL_CAP_SW;
         mp_verbose(log, "Detected suspected software renderer.\n");
+    }
+
+    // Detect 16F textures that work with GL_LINEAR filtering.
+    if ((!gl->es && (gl->version >= 300 || check_ext(gl, "GL_ARB_texture_float"))) ||
+        (gl->es && (gl->version >= 310 || check_ext(gl, "GL_OES_texture_half_float_linear"))))
+    {
+        mp_verbose(log, "Filterable half-float textures supported.\n");
+        gl->mpgl_caps |= MPGL_CAP_FLOAT_TEX;
     }
 
     // Provided for simpler handling if no framebuffer support is available.
