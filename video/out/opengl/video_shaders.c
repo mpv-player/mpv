@@ -141,7 +141,11 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler)
             // Check for samples that might be skippable
             if (dmax >= radius - 1)
                 GLSLF("if (d < 1.0) {\n");
-            GLSL(w = texture1D(lut, d).r;)
+            if (scaler->gl_target == GL_TEXTURE_1D) {
+                GLSL(w = texture1D(lut, d).r;)
+            } else {
+                GLSL(w = texture(lut, vec2(0.5, d)).r;)
+            }
             GLSL(wsum += w;)
             GLSLF("c = texture(tex, base + pt * vec2(%d.0, %d.0));\n", x, y);
             GLSL(color += vec4(w) * c;)

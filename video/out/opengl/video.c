@@ -1041,7 +1041,7 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
 
     scaler->insufficient = !mp_init_filter(scaler->kernel, sizes, scale_factor);
 
-    if (scaler->kernel->polar) {
+    if (scaler->kernel->polar && (gl->mpgl_caps & MPGL_CAP_1D_TEX)) {
         scaler->gl_target = GL_TEXTURE_1D;
     } else {
         scaler->gl_target = GL_TEXTURE_2D;
@@ -2355,7 +2355,6 @@ static void check_gl_features(struct gl_video *p)
     GL *gl = p->gl;
     bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
     bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
-    bool have_1d_tex = gl->mpgl_caps & MPGL_CAP_1D_TEX;
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
     bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
@@ -2400,8 +2399,6 @@ static void check_gl_features(struct gl_video *p)
             char *reason = NULL;
             if (!have_float_tex)
                 reason = "(float tex. missing)";
-            if (!have_1d_tex && kernel->polar)
-                reason = "(1D tex. missing)";
             if (reason) {
                 p->opts.scaler[n].kernel.name = "bilinear";
                 MP_WARN(p, "Disabling scaler #%d %s.\n", n, reason);
