@@ -255,7 +255,7 @@ static int w32_init(struct MPGLContext *ctx, int flags)
         goto fail;
 
     if (!ctx->gl->SwapInterval)
-        MP_VERBOSE(ctx->vo, "WGL_EXT_swap_control missing.");
+        MP_VERBOSE(ctx->vo, "WGL_EXT_swap_control missing.\n");
     w32_ctx->real_wglSwapInterval = ctx->gl->SwapInterval;
     ctx->gl->SwapInterval = w32_swap_interval;
     w32_ctx->current_swapinterval = -1;
