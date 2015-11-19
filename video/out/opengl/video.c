@@ -414,6 +414,7 @@ const struct m_sub_options gl_video_conf = {
                    ({"rgb",    GL_RGB},
                     {"rgba",   GL_RGBA},
                     {"rgb8",   GL_RGB8},
+                    {"rgba8",  GL_RGBA8},
                     {"rgb10",  GL_RGB10},
                     {"rgb10_a2", GL_RGB10_A2},
                     {"rgb16",  GL_RGB16},
@@ -2364,7 +2365,7 @@ static void check_gl_features(struct gl_video *p)
         MP_WARN(p, "Disabling PBOs (GLES unsupported).\n");
     }
 
-    if (p->opts.dumb_mode || gl->es || !have_fbo || !test_fbo(p) || !have_texrg)
+    if (p->opts.dumb_mode || !have_fbo || !test_fbo(p) || !have_texrg)
     {
         if (!p->opts.dumb_mode) {
             MP_WARN(p, "High bit depth FBOs unsupported. Enabling dumb mode.\n"
