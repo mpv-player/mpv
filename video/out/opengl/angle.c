@@ -83,7 +83,7 @@ static bool create_context_egl(MPGLContext *ctx, EGLConfig config,
     struct priv *p = ctx->priv;
 
     EGLint context_attributes[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 2,
+        EGL_CONTEXT_CLIENT_VERSION, 3,
         EGL_NONE
     };
 
