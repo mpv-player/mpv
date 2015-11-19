@@ -332,7 +332,7 @@ const struct gl_video_opts gl_video_opts_def = {
     .dither_depth = -1,
     .dither_size = 6,
     .temporal_dither_period = 1,
-    .fbo_format = GL_RGBA16,
+    .fbo_format = 0,
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
     .scaler = {
@@ -352,7 +352,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .dither_depth = 0,
     .dither_size = 6,
     .temporal_dither_period = 1,
-    .fbo_format = GL_RGBA16,
+    .fbo_format = 0,
     .correct_downscaling = 1,
     .sigmoid_center = 0.75,
     .sigmoid_slope = 6.5,
@@ -423,7 +423,8 @@ const struct m_sub_options gl_video_conf = {
                     {"rgba12", GL_RGBA12},
                     {"rgba16", GL_RGBA16},
                     {"rgba16f", GL_RGBA16F},
-                    {"rgba32f", GL_RGBA32F})),
+                    {"rgba32f", GL_RGBA32F},
+                    {"auto",   0})),
         OPT_CHOICE_OR_INT("dither-depth", dither_depth, 0, -1, 16,
                           ({"no", -1}, {"auto", 0})),
         OPT_CHOICE("dither", dither_algo, 0,
@@ -2359,13 +2360,18 @@ static void check_gl_features(struct gl_video *p)
     bool have_mix = gl->glsl_version >= 130;
     bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
 
+    if (have_fbo) {
+        if (!p->opts.fbo_format)
+            p->opts.fbo_format = gl->es ? GL_RGB10_A2 : GL_RGBA16;
+        have_fbo = test_fbo(p);
+    }
+
     if (gl->es && p->opts.pbo) {
         p->opts.pbo = 0;
         MP_WARN(p, "Disabling PBOs (GLES unsupported).\n");
     }
 
-    if (p->opts.dumb_mode || !have_fbo || !test_fbo(p) || !have_texrg)
-    {
+    if (p->opts.dumb_mode || !have_fbo || !have_texrg) {
         if (!p->opts.dumb_mode) {
             MP_WARN(p, "High bit depth FBOs unsupported. Enabling dumb mode.\n"
                        "Most extended features will be disabled.\n");
