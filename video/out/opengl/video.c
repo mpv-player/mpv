@@ -170,6 +170,8 @@ struct gl_video {
 
     struct video_image image;
 
+    bool dumb_mode;
+
     struct fbotex chroma_merge_fbo;
     struct fbotex chroma_deband_fbo;
     struct fbotex indirect_fbo;
@@ -1882,7 +1884,7 @@ static void pass_render_frame(struct gl_video *p)
     p->texture_h = p->image_params.h;
     p->texture_offset = (struct gl_transform){{{1.0,0.0}, {0.0,1.0}}, {0.0,0.0}};
 
-    if (p->opts.dumb_mode)
+    if (p->dumb_mode)
         return;
 
     p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling;
@@ -1951,7 +1953,7 @@ static void pass_render_frame(struct gl_video *p)
 
 static void pass_draw_to_screen(struct gl_video *p, int fbo)
 {
-    if (p->opts.dumb_mode)
+    if (p->dumb_mode)
         pass_render_frame_dumb(p, fbo);
 
     // Adjust the overall gamma before drawing to screen
@@ -2172,7 +2174,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
                 // FBO to speed up subsequent re-draws (if any exist)
                 int dest_fbo = fbo;
                 if (frame->num_vsyncs > 1 && frame->display_synced &&
-                    !p->opts.dumb_mode && gl->BlitFramebuffer)
+                    !p->dumb_mode && gl->BlitFramebuffer)
                 {
                     fbotex_change(&p->output_fbo, p->gl, p->log,
                                   p->vp_w, abs(p->vp_h),
@@ -2352,6 +2354,32 @@ static bool test_fbo(struct gl_video *p)
     return success;
 }
 
+// Return whether dumb-mode can be used without disabling any features.
+// Essentially, vo_opengl with mostly default settings will return true.
+static bool check_dumb_mode(struct gl_video *p)
+{
+    struct gl_video_opts *o = &p->opts;
+    if (o->dumb_mode)
+        return true;
+    if (o->target_prim || o->target_trc || o->linear_scaling ||
+        o->correct_downscaling || o->sigmoid_upscaling || o->interpolation ||
+        o->blend_subs || o->deband || o->unsharp || o->prescale)
+        return false;
+    // check scale, dscale, cscale (tscale is already implicitly excluded above)
+    for (int i = 0; i < 3; i++) {
+        const char *name = o->scaler[i].kernel.name;
+        if (name && strcmp(name, "bilinear") != 0)
+            return false;
+    }
+    if (o->pre_shaders && o->pre_shaders[0])
+        return false;
+    if (o->post_shaders && o->post_shaders[0])
+        return false;
+    if (p->use_lut_3d)
+        return false;
+    return true;
+}
+
 // Disable features that are not supported with the current OpenGL version.
 static void check_gl_features(struct gl_video *p)
 {
@@ -2373,11 +2401,15 @@ static void check_gl_features(struct gl_video *p)
         MP_WARN(p, "Disabling PBOs (GLES unsupported).\n");
     }
 
-    if (p->opts.dumb_mode || !have_fbo || !have_texrg) {
-        if (!p->opts.dumb_mode) {
+    bool voluntarily_dumb = check_dumb_mode(p);
+    if (p->opts.dumb_mode || !have_fbo || !have_texrg || voluntarily_dumb) {
+        if (voluntarily_dumb) {
+            MP_VERBOSE(p, "No advanced processing required. Enabling dumb mode.\n");
+        } else if (!p->opts.dumb_mode) {
             MP_WARN(p, "High bit depth FBOs unsupported. Enabling dumb mode.\n"
                        "Most extended features will be disabled.\n");
         }
+        p->dumb_mode = true;
         p->use_lut_3d = false;
         // Most things don't work, so whitelist all options that still work.
         struct gl_video_opts new_opts = {
@@ -2389,12 +2421,18 @@ static void check_gl_features(struct gl_video *p)
             .use_rectangle = p->opts.use_rectangle,
             .background = p->opts.background,
             .dither_algo = -1,
-            .dumb_mode = 1,
+            .scaler = {
+                gl_video_opts_def.scaler[0],
+                gl_video_opts_def.scaler[1],
+                gl_video_opts_def.scaler[2],
+                gl_video_opts_def.scaler[3],
+            },
         };
         assign_options(&p->opts, &new_opts);
         p->opts.deband_opts = m_config_alloc_struct(NULL, &deband_conf);
         return;
     }
+    p->dumb_mode = false;
 
     // Normally, we want to disable them by default if FBOs are unavailable,
     // because they will be slow (not critically slow, but still slower).

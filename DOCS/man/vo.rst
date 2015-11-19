@@ -311,7 +311,10 @@ Available video output drivers are:
         of bad or old hardware.
 
         This mode is forced automatically if needed, and this option is mostly
-        useful for debugging.
+        useful for debugging. It's also enabled automatically if nothing uses
+        features which require FBOs.
+
+        This option might be silently removed in the future.
 
     ``scale=<filter>``
 
