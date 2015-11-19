@@ -57,7 +57,7 @@ static void pass_sample_separated_get_weights(struct gl_shader_cache *sc,
     } else {
         GLSLF("float weights[%d];\n", N);
         for (int n = 0; n < N / 4; n++) {
-            GLSLF("c = texture(lut, vec2(1.0 / %d + %d / float(%d), fcoord));\n",
+            GLSLF("c = texture(lut, vec2(1.0 / %d.0 + %d.0 / %d.0, fcoord));\n",
                     N / 2, n, N / 4);
             GLSLF("weights[%d] = c.r;\n", n * 4 + 0);
             GLSLF("weights[%d] = c.g;\n", n * 4 + 1);
@@ -79,10 +79,10 @@ void pass_sample_separated_gen(struct gl_shader_cache *sc, struct scaler *scaler
     GLSL(vec4 color = vec4(0.0);)
     GLSLF("{\n");
     if (!planar) {
-        GLSLF("vec2 dir = vec2(%d, %d);\n", d_x, d_y);
+        GLSLF("vec2 dir = vec2(%d.0, %d.0);\n", d_x, d_y);
         GLSL(pt *= dir;)
         GLSL(float fcoord = dot(fract(pos * size - vec2(0.5)), dir);)
-        GLSLF("vec2 base = pos - fcoord * pt - pt * vec2(%d);\n", N / 2 - 1);
+        GLSLF("vec2 base = pos - fcoord * pt - pt * vec2(%d.0);\n", N / 2 - 1);
     }
     GLSL(vec4 c;)
     if (use_ar) {
@@ -95,7 +95,7 @@ void pass_sample_separated_gen(struct gl_shader_cache *sc, struct scaler *scaler
         if (planar) {
             GLSLF("c = texture(texture%d, texcoord%d);\n", n, n);
         } else {
-            GLSLF("c = texture(tex, base + pt * vec2(%d));\n", n);
+            GLSLF("c = texture(tex, base + pt * vec2(%d.0));\n", n);
         }
         GLSLF("color += vec4(weights[%d]) * c;\n", n);
         if (use_ar && (n == N/2-1 || n == N/2)) {
@@ -137,13 +137,13 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler)
             // Skip samples definitely outside the radius
             if (dmax >= radius)
                 continue;
-            GLSLF("d = length(vec2(%d, %d) - fcoord)/%f;\n", x, y, radius);
+            GLSLF("d = length(vec2(%d.0, %d.0) - fcoord)/%f;\n", x, y, radius);
             // Check for samples that might be skippable
             if (dmax >= radius - 1)
                 GLSLF("if (d < 1.0) {\n");
             GLSL(w = texture1D(lut, d).r;)
             GLSL(wsum += w;)
-            GLSLF("c = texture(tex, base + pt * vec2(%d, %d));\n", x, y);
+            GLSLF("c = texture(tex, base + pt * vec2(%d.0, %d.0));\n", x, y);
             GLSL(color += vec4(w) * c;)
             if (use_ar && x >= 0 && y >= 0 && x <= 1 && y <= 1) {
                 GLSL(lo = min(lo, c);)
