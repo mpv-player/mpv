@@ -77,28 +77,20 @@ static EGLConfig select_fb_config_egl(struct MPGLContext *ctx)
     return config;
 }
 
-static bool create_context_egl(MPGLContext *ctx, EGLConfig config,
-                               EGLNativeWindowType window)
+static bool create_context_egl(MPGLContext *ctx, EGLConfig config, int version)
 {
     struct priv *p = ctx->priv;
 
     EGLint context_attributes[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 3,
+        EGL_CONTEXT_CLIENT_VERSION, version,
         EGL_NONE
     };
-
-    p->egl_surface = eglCreateWindowSurface(p->egl_display, config, window, NULL);
-
-    if (p->egl_surface == EGL_NO_SURFACE) {
-        MP_FATAL(ctx->vo, "Could not create EGL surface!\n");
-        return false;
-    }
 
     p->egl_context = eglCreateContext(p->egl_display, config,
                                       EGL_NO_CONTEXT, context_attributes);
 
     if (p->egl_context == EGL_NO_CONTEXT) {
-        MP_FATAL(ctx->vo, "Could not create EGL context!\n");
+        MP_VERBOSE(ctx->vo, "Could not create EGL GLES %d context!\n", version);
         return false;
     }
 
@@ -145,16 +137,22 @@ static int angle_init(struct MPGLContext *ctx, int flags)
         goto fail;
     }
 
-    EGLint display_attributes[] = {
-        EGL_PLATFORM_ANGLE_TYPE_ANGLE,
-            EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
-        EGL_PLATFORM_ANGLE_DEVICE_TYPE_ANGLE,
-            EGL_PLATFORM_ANGLE_DEVICE_TYPE_HARDWARE_ANGLE,
-        EGL_NONE,
-    };
+    EGLint d3d_types[] = {EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
+                          EGL_PLATFORM_ANGLE_TYPE_D3D9_ANGLE};
+    for (int i = 0; i < MP_ARRAY_SIZE(d3d_types); i++) {
+        EGLint display_attributes[] = {
+            EGL_PLATFORM_ANGLE_TYPE_ANGLE,
+                d3d_types[i],
+            EGL_PLATFORM_ANGLE_DEVICE_TYPE_ANGLE,
+                EGL_PLATFORM_ANGLE_DEVICE_TYPE_HARDWARE_ANGLE,
+            EGL_NONE,
+        };
 
-    p->egl_display = eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE, dc,
-        display_attributes);
+        p->egl_display = eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE, dc,
+            display_attributes);
+        if (p->egl_display != EGL_NO_DISPLAY)
+            break;
+    }
     if (p->egl_display == EGL_NO_DISPLAY) {
         MP_FATAL(vo, "Couldn't get display\n");
         goto fail;
@@ -175,8 +173,19 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     if (!config)
         goto fail;
 
-    if (!create_context_egl(ctx, config, vo_w32_hwnd(vo)))
+    p->egl_surface = eglCreateWindowSurface(p->egl_display, config,
+                                            vo_w32_hwnd(vo), NULL);
+    if (p->egl_surface == EGL_NO_SURFACE) {
+        MP_FATAL(ctx->vo, "Could not create EGL surface!\n");
         goto fail;
+    }
+
+    if (!create_context_egl(ctx, config, 3) &&
+        !create_context_egl(ctx, config, 2))
+    {
+        MP_FATAL(ctx->vo, "Could not create EGL context!\n");
+        goto fail;
+    }
 
     mpgl_load_functions(ctx->gl, get_proc_address, NULL, vo->log);
 
