@@ -75,10 +75,11 @@ enum {
 #define MPGL_VER_P(ver) MPGL_VER_GET_MAJOR(ver), MPGL_VER_GET_MINOR(ver)
 
 enum {
-    VOFLAG_GLES         = 1 << 0,       // Hint to prefer GLES2 if possible
-    VOFLAG_GL_DEBUG     = 1 << 1,       // Hint to request debug OpenGL context
-    VOFLAG_ALPHA        = 1 << 2,       // Hint to request alpha framebuffer
-    VOFLAG_SW           = 1 << 3,       // Hint to accept a software GL renderer
+    VOFLAG_GLES         = 1 << 0,       // Hint to create a GLES2 context
+    VOFLAG_NO_GLES      = 1 << 1,       // Hint to create a desktop GL context
+    VOFLAG_GL_DEBUG     = 1 << 2,       // Hint to request debug OpenGL context
+    VOFLAG_ALPHA        = 1 << 3,       // Hint to request alpha framebuffer
+    VOFLAG_SW           = 1 << 4,       // Hint to accept a software GL renderer
 };
 
 struct MPGLContext;

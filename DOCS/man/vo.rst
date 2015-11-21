@@ -777,6 +777,10 @@ Available video output drivers are:
             Cocoa/OS X
         win
             Win32/WGL
+        angle
+            Direct3D11 through the OpenGL ES translation layer ANGLE. This
+            supports almost everything the ``win`` backend does, except ICC
+            profiles, high bit depth video input, and the ``nnedi3`` prescaler.
         x11
             X11/GLX
         wayland
@@ -786,8 +790,15 @@ Available video output drivers are:
         x11egl
             X11/EGL
 
-    ``es``
-        Force or prefer GLES2/3 over desktop OpenGL, if supported.
+    ``es=<mode>``
+        Select whether to use GLES:
+
+        yes
+            Try to prefer ES over Desktop GL
+        no
+            Try to prefer desktop GL over ES
+        auto
+            Use the default for each backend (default)
 
     ``fbo-format=<fmt>``
         Selects the internal format of textures used for FBOs. The format can
@@ -955,7 +966,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:correct-downscaling:sigmoid-upscaling:pbo:deband
+        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:correct-downscaling:sigmoid-upscaling:pbo:deband:es=no
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.

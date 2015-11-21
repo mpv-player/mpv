@@ -535,11 +535,11 @@ static const struct mpgl_driver *const backends[] = {
 #if HAVE_GL_COCOA
     &mpgl_driver_cocoa,
 #endif
-#if HAVE_GL_WIN32
-    &mpgl_driver_w32,
-#endif
 #if HAVE_EGL_ANGLE
     &mpgl_driver_angle,
+#endif
+#if HAVE_GL_WIN32
+    &mpgl_driver_w32,
 #endif
 #if HAVE_GL_WAYLAND
     &mpgl_driver_wayland,
@@ -630,8 +630,8 @@ static MPGLContext *init_backend(struct vo *vo, const struct mpgl_driver *driver
     if (!ctx->gl->version && !ctx->gl->es)
         goto cleanup;
 
-    if (ctx->gl->es && vo->probing) {
-        MP_INFO(ctx->vo, "Skipping experimental GLES support (use --vo=opengl).\n");
+    if (probing && ctx->gl->es && (vo_flags & VOFLAG_NO_GLES)) {
+        MP_VERBOSE(ctx->vo, "Skipping GLES backend.\n");
         goto cleanup;
     }
 
