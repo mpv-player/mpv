@@ -899,10 +899,10 @@ layouts["box"] = function ()
         {x = posX + pos_offsetX, y = bottomrowY, an = 6, w = 110, h = 18}
     lo.style = osc_styles.timecodes
 
-    lo = add_layout("cache")
-    lo.geometry =
-        {x = posX, y = bottomrowY, an = 5, w = 110, h = 18}
-    lo.style = osc_styles.timecodes
+--    lo = add_layout("cache")
+--    lo.geometry =
+--        {x = posX, y = bottomrowY, an = 5, w = 110, h = 18}
+--    lo.style = osc_styles.timecodes
 
 end
 
