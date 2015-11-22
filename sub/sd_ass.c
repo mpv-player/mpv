@@ -224,7 +224,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct MPOpts *opts = sd->opts;
-    bool no_ass = !opts->ass_enabled;
+    bool no_ass = !opts->ass_enabled || ctx->on_top;
     bool converted = ctx->is_converted || no_ass;
     ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
 
