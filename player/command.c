@@ -2528,6 +2528,30 @@ static int mp_property_vd_imgparams(void *ctx, struct m_property *prop,
     return M_PROPERTY_UNAVAILABLE;
 }
 
+static int mp_property_video_frame_info(void *ctx, struct m_property *prop,
+                                        int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct mp_image *f =
+        mpctx->video_out ? vo_get_current_frame(mpctx->video_out) : NULL;
+    if (!f)
+        return M_PROPERTY_UNAVAILABLE;
+
+    const char *pict_types[] = {0, "I", "P", "B"};
+    const char *pict_type = f->pict_type >= 1 && f->pict_type <= 3
+                          ? pict_types[f->pict_type] : NULL;
+
+    struct m_sub_property props[] = {
+        {"picture-type",    SUB_PROP_STR(pict_type), .unavailable = !pict_type},
+        {"interlaced",      SUB_PROP_FLAG(!!(f->fields & MP_IMGFIELD_INTERLACED))},
+        {"tff",             SUB_PROP_FLAG(!!(f->fields & MP_IMGFIELD_TOP_FIRST))},
+        {"repeat",          SUB_PROP_FLAG(!!(f->fields & MP_IMGFIELD_REPEAT_FIRST))},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
 static int mp_property_window_scale(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
@@ -3506,6 +3530,7 @@ static const struct m_property mp_properties[] = {
     {"video-out-params", mp_property_vo_imgparams},
     {"video-params", mp_property_vd_imgparams},
     {"video-format", mp_property_video_format},
+    {"video-frame-info", mp_property_video_frame_info},
     {"video-codec", mp_property_video_codec},
     M_PROPERTY_ALIAS("dwidth", "video-out-params/dw"),
     M_PROPERTY_ALIAS("dheight", "video-out-params/dh"),

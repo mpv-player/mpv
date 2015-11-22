@@ -1441,6 +1441,19 @@ Property list
 
     Has the same sub-properties as ``video-params``.
 
+``video-frame-info``
+    Approximate information of the current frame. Note that if any of these
+    are used on OSD, the information might be off by a few frames due to OSD
+    redrawing and frame display being somewhat disconnected, and you might
+    have to pause and force a redraw.
+
+    Sub-properties:
+
+    ``video-frame-info/picture-type``
+    ``video-frame-info/interlaced``
+    ``video-frame-info/tff``
+    ``video-frame-info/repeat``
+
 ``fps``
     Container FPS. This can easily contain bogus values. For videos that use
     modern container formats or video codecs, this will often be incorrect.
