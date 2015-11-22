@@ -133,6 +133,7 @@ struct voctrl_get_equalizer_args {
 
 // VOCTRL_UPDATE_PLAYBACK_STATE
 struct voctrl_playback_state {
+    bool playing;
     bool paused;
     int percent_pos;
 };

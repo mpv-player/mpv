@@ -141,11 +141,13 @@ void update_vo_playback_state(struct MPContext *mpctx)
     if (mpctx->video_out) {
         struct voctrl_playback_state oldstate = mpctx->vo_playback_state;
         struct voctrl_playback_state newstate = {
+            .playing = mpctx->playing,
             .paused = mpctx->paused,
             .percent_pos = get_percent_pos(mpctx),
         };
 
-        if (oldstate.paused != newstate.paused ||
+        if (oldstate.playing != newstate.playing ||
+            oldstate.paused != newstate.paused ||
             oldstate.percent_pos != newstate.percent_pos) {
             vo_control(mpctx->video_out,
                        VOCTRL_UPDATE_PLAYBACK_STATE, &newstate);

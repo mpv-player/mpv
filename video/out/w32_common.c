@@ -1376,13 +1376,20 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         struct voctrl_playback_state *pstate =
             (struct voctrl_playback_state *)arg;
 
-        if (w32->taskbar_list3 && w32->tbtnCreated) {
-            ITaskbarList3_SetProgressValue(w32->taskbar_list3, w32->window,
-                                           pstate->percent_pos, 100);
+        if (!w32->taskbar_list3 || !w32->tbtnCreated)
+            return VO_TRUE;
+
+        if (!pstate->playing) {
             ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
-                                           pstate->paused ? TBPF_PAUSED :
-                                                            TBPF_NORMAL);
+                                           TBPF_NOPROGRESS);
+            return VO_TRUE;
         }
+
+        ITaskbarList3_SetProgressValue(w32->taskbar_list3, w32->window,
+                                       pstate->percent_pos, 100);
+        ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
+                                       pstate->paused ? TBPF_PAUSED :
+                                                        TBPF_NORMAL);
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_FPS:
