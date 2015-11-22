@@ -26,6 +26,21 @@ variety of video file formats, audio and video codecs, and subtitle types.
 
 Releases can be found on the [release list][releases].
 
+## System requirements
+
+- A not too ancient Linux, or Windows Vista or later, or OSX 10.8 or later.
+- A somewhat capable CPU. Hardware decoding might sometimes help if the CPU
+  is too slow to decode video realtime, but must be explicitly enabled with
+  the `--hwdec` option. On Windows, a CPU with SSE4 instruction set is required
+  to get decent hardware decoding performance.
+- A not too crappy GPU. mpv is not intended to be used with bad GPUs. There are
+  many caveats with drivers or system compositors causing tearing, stutter,
+  etc. On Windows, you might want to make sure the graphics drivers are
+  current, especially OpenGL. In some cases, ancient fallback video output
+  methods can help (such as `--vo=xv` on Linux), but this use is not
+  recommended or supported.
+
+
 ## Downloads
 
 
@@ -102,6 +117,7 @@ OSX.
 
 If you want to build a Windows binary, you either have to use MSYS2 and MinGW,
 or cross-compile from Linux with MinGW. See [Windows compilation][windows_compilation].
+
 
 ## FFmpeg vs. Libav
 
