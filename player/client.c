@@ -43,6 +43,16 @@
 
 #include "config.h"
 
+static struct stream_client_info client_info;
+
+void set_stream_client_info(struct stream_client_info *info) {
+    client_info = *info;
+}
+
+struct stream_client_info *get_stream_client_info() {
+    return &client_info;
+}
+
 /*
  * Locking hierarchy:
  *

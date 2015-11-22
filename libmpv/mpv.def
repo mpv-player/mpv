@@ -43,3 +43,5 @@ mpv_unobserve_property
 mpv_wait_async_requests
 mpv_wait_event
 mpv_wakeup
+set_stream_client_info
+get_stream_client_info

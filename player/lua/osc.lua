@@ -851,6 +851,12 @@ layouts["box"] = function ()
         {x = posX + (bigbtndist * 2), y = bigbtnrowY, an = 5, w = 40, h = 40}
     lo.style = osc_styles.bigButtons
 
+    lo = add_layout("stop")
+    lo.geometry =
+    {x = posX + (bigbtndist * 3), y = bigbtnrowY, an = 5, w = 40, h = 40}
+    lo.style = osc_styles.bigButtons
+
+
     lo = add_layout("cy_audio")
     lo.geometry =
         {x = posX - pos_offsetX, y = bigbtnrowY, an = 1, w = 70, h = 18}
@@ -893,10 +899,10 @@ layouts["box"] = function ()
         {x = posX + pos_offsetX, y = bottomrowY, an = 6, w = 110, h = 18}
     lo.style = osc_styles.timecodes
 
-    lo = add_layout("cache")
-    lo.geometry =
-        {x = posX, y = bottomrowY, an = 5, w = 110, h = 18}
-    lo.style = osc_styles.timecodes
+--    lo = add_layout("cache")
+--    lo.geometry =
+--        {x = posX, y = bottomrowY, an = 5, w = 110, h = 18}
+--    lo.style = osc_styles.timecodes
 
 end
 
@@ -1382,6 +1388,15 @@ function osc_init()
     end
     ne.eventresponder["mouse_btn0_up"] =
         function () mp.commandv("cycle", "pause") end
+
+    --stop
+    ne = new_element("stop", "button")
+
+    ne.content = function ()
+        return ("↵")
+    end
+    ne.eventresponder["mouse_btn0_up"] =
+    function () mp.command("stop") end
 
     --skipback
     ne = new_element("skipback", "button")
