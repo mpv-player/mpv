@@ -546,7 +546,8 @@ Available video output drivers are:
 
     ``correct-downscaling``
         When using convolution based filters, extend the filter size
-        when downscaling. Trades quality for reduced downscaling performance.
+        when downscaling. Increases quality, but reduces performance while
+        downscaling.
 
         This will perform slightly sub-optimally for anamorphic video (but still
         better than without it) since it will extend the size to match only the
