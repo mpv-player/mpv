@@ -105,7 +105,7 @@ Available video output drivers are:
         Select deinterlacing mode (default: 0). In older versions (as well as
         MPlayer/mplayer2) you could use this option to enable deinterlacing.
         This doesn't work anymore, and deinterlacing is enabled with either
-        the ``D`` key (by default mapped to the command ``cycle deinterlace``),
+        the ``d`` key (by default mapped to the command ``cycle deinterlace``),
         or the ``--deinterlace`` option. Also, to select the default deint mode,
         you should use something like ``--vf-defaults=vdpaupp:deint-mode=temporal``
         instead of this sub-option.
@@ -1007,7 +1007,7 @@ Available video output drivers are:
 
     ``deint-mode=<mode>``
         Select deinterlacing algorithm. Note that by default deinterlacing is
-        initially always off, and needs to be enabled with the ``D`` key
+        initially always off, and needs to be enabled with the ``d`` key
         (default key binding for ``cycle deinterlace``).
 
         This option doesn't apply if libva supports video post processing (vpp).

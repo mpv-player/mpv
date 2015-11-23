@@ -764,7 +764,7 @@ Video
     if supported.
 
     This behaves exactly like the ``deinterlace`` input property (usually
-    mapped to ``Shift+D``).
+    mapped to ``d``).
 
     ``auto`` is a technicality. Strictly speaking, the default for this option
     is deinterlacing disabled, but the ``auto`` case is needed if ``yadif`` was
