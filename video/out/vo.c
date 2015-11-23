@@ -727,14 +727,7 @@ static bool render_frame(struct vo *vo)
         vo->driver->flip_page(vo);
 
         int64_t prev_flip = in->last_flip;
-
-        in->last_flip = -1;
-
-        vo->driver->control(vo, VOCTRL_GET_RECENT_FLIP_TIME, &in->last_flip);
-
-        if (in->last_flip < 0)
-            in->last_flip = mp_time_us();
-
+        in->last_flip = mp_time_us();
         in->vsync_interval_approx = in->last_flip - prev_flip;
 
         MP_STATS(vo, "end video");

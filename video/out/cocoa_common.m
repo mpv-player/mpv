@@ -796,8 +796,6 @@ static int vo_cocoa_control_async(struct vo *vo, int *events, int request, void 
     case VOCTRL_CHECK_EVENTS:
         *events |= vo_cocoa_check_events(vo);
         return VO_TRUE;
-    case VOCTRL_GET_RECENT_FLIP_TIME:
-        return VO_FALSE; // unsupported, but avoid syncing with main thread
     }
     return VO_NOTIMPL;
 }
