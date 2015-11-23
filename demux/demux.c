@@ -1163,7 +1163,7 @@ int demux_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
     in->seeking = true;
     in->seek_flags = flags;
     in->seek_pts = rel_seek_secs;
-    if (flags & SEEK_ABSOLUTE)
+    if ((flags & SEEK_ABSOLUTE) && !(flags & SEEK_FACTOR))
         in->seek_pts = MP_ADD_PTS(in->seek_pts, -in->ts_offset);
 
     if (!in->threading)
