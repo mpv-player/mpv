@@ -32,7 +32,6 @@ struct priv {
     EGLDisplay egl_display;
     EGLContext egl_context;
     EGLSurface egl_surface;
-    HMODULE libglesv2;
 };
 
 static void angle_uninit(MPGLContext *ctx)
@@ -45,10 +44,6 @@ static void angle_uninit(MPGLContext *ctx)
         eglDestroyContext(p->egl_display, p->egl_context);
     }
     p->egl_context = EGL_NO_CONTEXT;
-
-    if (p->libglesv2)
-        FreeLibrary(p->libglesv2);
-
     vo_w32_uninit(ctx->vo);
 }
 
@@ -102,12 +97,7 @@ static bool create_context_egl(MPGLContext *ctx, EGLConfig config, int version)
 
 static void *get_proc_address(const GLubyte *proc_name)
 {
-    void *res = eglGetProcAddress(proc_name);
-    if (res)
-        return res;
-
-    // ANGLE's eglGetProcAddress only works for extensions
-    return GetProcAddress(GetModuleHandleW(L"libGLESv2.dll"), proc_name);
+    return eglGetProcAddress(proc_name);
 }
 
 static int angle_init(struct MPGLContext *ctx, int flags)
@@ -117,12 +107,6 @@ static int angle_init(struct MPGLContext *ctx, int flags)
 
     if (!vo_w32_init(vo))
         goto fail;
-
-    p->libglesv2 = LoadLibraryW(L"libGLESv2.dll");
-    if (!p->libglesv2) {
-        MP_FATAL(vo, "Couldn't load GLES functions\n");
-        goto fail;
-    }
 
     HDC dc = GetDC(vo_w32_hwnd(vo));
     if (!dc) {
