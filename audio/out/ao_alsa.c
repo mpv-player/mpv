@@ -987,7 +987,7 @@ static void list_devs(struct ao *ao, struct ao_device_list *list)
         char *name = snd_device_name_get_hint(hints[n], "NAME");
         char *desc = snd_device_name_get_hint(hints[n], "DESC");
         char *io = snd_device_name_get_hint(hints[n], "IOID");
-        if (io && strcmp(io, "Output") == 0) {
+        if (!io || strcmp(io, "Output") == 0) {
             char desc2[1024];
             snprintf(desc2, sizeof(desc2), "%s", desc ? desc : "");
             for (int i = 0; desc2[i]; i++) {
