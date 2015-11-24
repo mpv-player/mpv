@@ -237,8 +237,6 @@ static void uninit(struct ao *ao)
         MP_ERR(ao, "Audio loop thread refuses to abort\n");
         return;
     }
-    if (state->VistaBlob.hAvrt)
-        FreeLibrary(state->VistaBlob.hAvrt);
 
     SAFE_RELEASE(state->hInitDone,   CloseHandle(state->hInitDone));
     SAFE_RELEASE(state->hWake,       CloseHandle(state->hWake));
@@ -255,8 +253,6 @@ static int init(struct ao *ao)
 
     struct wasapi_state *state = ao->priv;
     state->log = ao->log;
-    if(!wasapi_fill_VistaBlob(state))
-        MP_WARN(ao, "Error loading thread priority functions\n");
 
     state->hInitDone = CreateEventW(NULL, FALSE, FALSE, NULL);
     state->hWake     = CreateEventW(NULL, FALSE, FALSE, NULL);

@@ -79,7 +79,6 @@ typedef struct wasapi_state {
 
     /* for setting the audio thread priority */
     HANDLE hTask; /* AV thread */
-    DWORD taskIndex; /* AV task ID */
 
     /* WASAPI proxy handles, for Single-Threaded Apartment communication.
        One is needed for each audio thread object that's accessed from the main thread. */
@@ -109,16 +108,6 @@ typedef struct wasapi_state {
     WAVEFORMATEXTENSIBLE format;
     size_t buffer_block_size; /* Size of each block in bytes */
     UINT32 bufferFrameCount; /* wasapi buffer block size, number of frames, frame size at format.nBlockAlign */
-
-    /* Don't use these functions directly in case
-       they are unimplemented for some reason.
-       (XP shouldn't be an issue since it doesn't support wasapi, maybe wine?)
-       Blob is owned by the main thread */
-    struct {
-        HMODULE hAvrt;
-        HANDLE (WINAPI *pAvSetMmThreadCharacteristicsW)(LPCWSTR, LPDWORD);
-        WINBOOL (WINAPI *pAvRevertMmThreadCharacteristics)(HANDLE);
-    } VistaBlob;
 
     change_notify change;
 } wasapi_state;

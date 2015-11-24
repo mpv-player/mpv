@@ -185,36 +185,6 @@ char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr)
              wasapi_explain_err(hr), (uint32_t) hr);
     return buf;
 }
-
-bool wasapi_fill_VistaBlob(wasapi_state *state)
-{
-    if (!state)
-        goto exit_label;
-    state->VistaBlob.hAvrt = LoadLibraryW(L"avrt.dll");
-    if (!state->VistaBlob.hAvrt)
-        goto exit_label;
-
-    state->VistaBlob.pAvSetMmThreadCharacteristicsW =
-        (HANDLE (WINAPI *)(LPCWSTR, LPDWORD))
-        GetProcAddress(state->VistaBlob.hAvrt, "AvSetMmThreadCharacteristicsW");
-    if (!state->VistaBlob.pAvSetMmThreadCharacteristicsW)
-        goto exit_label;
-
-    state->VistaBlob.pAvRevertMmThreadCharacteristics =
-        (WINBOOL (WINAPI *)(HANDLE))
-        GetProcAddress(state->VistaBlob.hAvrt, "AvRevertMmThreadCharacteristics");
-    if (!state->VistaBlob.pAvRevertMmThreadCharacteristics)
-        goto exit_label;
-
-    return true;
-exit_label:
-    if (state->VistaBlob.hAvrt) {
-        FreeLibrary(state->VistaBlob.hAvrt);
-        state->VistaBlob.hAvrt = NULL;
-    }
-    return false;
-}
-
 static void update_waveformat_datarate(WAVEFORMATEXTENSIBLE *wformat)
 {
     WAVEFORMATEX *wf = &wformat->Format;
@@ -738,9 +708,10 @@ reinit:
     hr = init_session_display(state);
     EXIT_ON_ERROR(hr);
 
-    if (state->VistaBlob.hAvrt) {
-        state->hTask =
-            state->VistaBlob.pAvSetMmThreadCharacteristicsW(L"Pro Audio", &state->taskIndex);
+    state->hTask = AvSetMmThreadCharacteristics(L"Pro Audio", &(DWORD){0});
+    if (!state->hTask) {
+        MP_WARN(state, "Failed to set AV thread to Pro Audio: %s\n",
+                mp_LastError_to_str());
     }
 
     MP_VERBOSE(state, "Format fixed. Using %lld byte buffer block size\n",
@@ -1194,8 +1165,6 @@ void wasapi_thread_uninit(struct ao *ao)
     SAFE_RELEASE(state->pAudioClient,    IAudioClient_Release(state->pAudioClient));
     SAFE_RELEASE(state->pDevice,         IMMDevice_Release(state->pDevice));
     SAFE_RELEASE(state->pEnumerator,     IMMDeviceEnumerator_Release(state->pEnumerator));
-
-    if (state->hTask)
-        state->VistaBlob.pAvRevertMmThreadCharacteristics(state->hTask);
+    SAFE_RELEASE(state->hTask,           AvRevertMmThreadCharacteristics(state->hTask));
     MP_DBG(ao, "Thread uninit done\n");
 }
