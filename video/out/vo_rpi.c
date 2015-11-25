@@ -129,6 +129,8 @@ static void update_osd(struct vo *vo)
     }
     p->osd_change_counter = osd_change_counter;
 
+    MP_STATS(vo, "start rpi_osd");
+
     p->egl.gl->ClearColor(0, 0, 0, 0);
     p->egl.gl->Clear(GL_COLOR_BUFFER_BIT);
 
@@ -156,6 +158,8 @@ static void update_osd(struct vo *vo)
         gl_sc_gen_shader_and_reset(p->sc);
         mpgl_osd_draw_part(p->osd, p->w, -p->h, n);
     }
+
+    MP_STATS(vo, "stop rpi_osd");
 }
 
 static void resize(struct vo *vo)
