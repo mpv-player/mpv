@@ -143,6 +143,7 @@ struct vo_internal {
     int64_t *vsync_samples;
     int num_vsync_samples;
     int64_t prev_vsync;
+    int64_t base_vsync;
     double estimated_vsync_interval;
     double estimated_vsync_jitter;
     bool expecting_vsync;
@@ -326,6 +327,7 @@ static void reset_vsync_timings(struct vo *vo)
     in->prev_vsync = 0;
     in->estimated_vsync_interval = 0;
     in->estimated_vsync_jitter = -1;
+    in->base_vsync = 0;
     in->expecting_vsync = false;
 }
 
@@ -344,6 +346,8 @@ static void update_vsync_timing_after_swap(struct vo *vo)
         in->num_vsync_samples -= 1;
     MP_TARRAY_INSERT_AT(in, in->vsync_samples, in->num_vsync_samples, 0,
                         now - in->prev_vsync);
+    if (!in->base_vsync)
+        in->base_vsync = now;
     in->prev_vsync = now;
 
     double avg = 0, jitter = 0;
@@ -357,6 +361,17 @@ static void update_vsync_timing_after_swap(struct vo *vo)
     in->estimated_vsync_jitter = sqrt(jitter / in->num_vsync_samples);
 
     MP_STATS(vo, "value %f jitter", in->estimated_vsync_jitter);
+
+    if (llabs(in->base_vsync - now) > in->vsync_interval * 2 / 3) {
+        // Assume a drop. An underflow can technically speaking not be a drop
+        // (it's up to the driver what this is supposed to mean), but no reason
+        // to treat it differently.
+        in->base_vsync = now;
+        in->delayed_count += 1;
+        MP_STATS(vo, "vo-delayed");
+    }
+
+    in->base_vsync += in->vsync_interval;
 }
 
 // to be called from VO thread only
