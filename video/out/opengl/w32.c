@@ -24,6 +24,7 @@
 #include <windows.h>
 #include <dwmapi.h>
 #include "video/out/w32_common.h"
+#include "video/out/win32/exclusive_hack.h"
 #include "common.h"
 
 struct w32_context {
@@ -323,6 +324,11 @@ static bool compositor_active(MPGLContext *ctx)
     // be cargo-cult.
     DWM_TIMING_INFO info = { .cbSize = sizeof(DWM_TIMING_INFO) };
     if (FAILED(w32_ctx->pDwmGetCompositionTimingInfo(0, &info)))
+        return false;
+
+    // Test if a program is running in exclusive fullscreen mode. If so, it's
+    // probably this one, so it's not getting redirected by the compositor.
+    if (mp_w32_is_in_exclusive_mode())
         return false;
 
     return true;
