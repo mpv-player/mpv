@@ -135,8 +135,6 @@ struct vo_internal {
     bool want_redraw;               // redraw request from VO to player
     bool send_reset;                // send VOCTRL_RESET
     bool paused;
-    bool vsync_timed;               // the VO redraws itself as fast as possible
-                                    // at every vsync
     int queued_events;              // event mask for the user
     int internal_events;            // event mask for us
 
@@ -586,7 +584,7 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
         if (next_pts > now)
             r = false;
         if (!in->wakeup_pts || next_pts < in->wakeup_pts) {
-            in->wakeup_pts = in->vsync_timed ? 0 : next_pts;
+            in->wakeup_pts = next_pts;
             wakeup_locked(vo);
         }
     }
@@ -605,7 +603,7 @@ void vo_queue_frame(struct vo *vo, struct vo_frame *frame)
            (!in->current_frame || in->current_frame->num_vsyncs < 1));
     in->hasframe = true;
     in->frame_queued = frame;
-    in->wakeup_pts = (frame->display_synced || in->vsync_timed)
+    in->wakeup_pts = frame->display_synced
                    ? 0 : frame->pts + MPMAX(frame->duration, 0);
     wakeup_locked(vo);
     pthread_mutex_unlock(&in->lock);
@@ -669,7 +667,7 @@ static bool render_frame(struct vo *vo)
         in->frame_queued = NULL;
     } else if (in->paused || !in->current_frame || !in->hasframe ||
                (in->current_frame->display_synced && in->current_frame->num_vsyncs < 1) ||
-               (!in->vsync_timed && !in->current_frame->display_synced))
+               !in->current_frame->display_synced)
     {
         goto done;
     }
@@ -725,25 +723,6 @@ static bool render_frame(struct vo *vo)
     // instead of just freezing the display forever.
     in->dropped_frame &= mp_time_us() - in->last_flip < 100 * 1000;
     in->dropped_frame &= in->hasframe_rendered;
-
-    if (in->vsync_timed && !frame->display_synced) {
-        // this is a heuristic that wakes the thread up some
-        // time before the next vsync
-        target = next_vsync - MPMIN(in->vsync_interval / 2, 8e3);
-
-        // We are very late with the frame and using vsync timing: probably
-        // no new frames are coming in. This must be done whether or not
-        // framedrop is enabled. Also, if the frame is to be dropped, even
-        // though it's an interpolated frame (repeat set), exit early.
-        bool late = prev_vsync > pts + duration + in->vsync_interval_approx;
-        if (frame->repeat && ((in->hasframe_rendered && late) || in->dropped_frame))
-        {
-            in->dropped_frame = false;
-            goto done;
-        }
-
-        frame->vsync_offset = next_vsync - pts;
-    }
 
     // Setup parameters for the next time this frame is drawn. ("frame" is the
     // frame currently drawn, while in->current_frame is the potentially next.)
@@ -1048,16 +1027,13 @@ const char *vo_get_window_title(struct vo *vo)
 
 // flip_page[_timed] will be called offset_us microseconds too early.
 // (For vo_vdpau, which does its own timing.)
-// Setting vsync_timed to true redraws as fast as possible.
 // num_req_frames set the requested number of requested vo_frame.frames.
 // (For vo_opengl interpolation.)
-void vo_set_queue_params(struct vo *vo, int64_t offset_us, bool vsync_timed,
-                         int num_req_frames)
+void vo_set_queue_params(struct vo *vo, int64_t offset_us, int num_req_frames)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
     in->flip_queue_offset = offset_us;
-    in->vsync_timed = vsync_timed;
     in->req_frames = MPCLAMP(num_req_frames, 1, VO_MAX_REQ_FRAMES);
     pthread_mutex_unlock(&in->lock);
 }

@@ -491,6 +491,10 @@ Available video output drivers are:
         Reduce stuttering caused by mismatches in the video fps and display
         refresh rate (also known as judder).
 
+        .. warning:: This requires setting the ``--video-sync`` option to one
+                     of the ``display-`` modes, or it will be silently disabled.
+                     This was not required before mpv 0.14.0.
+
         This essentially attempts to interpolate the missing frames by
         convoluting the video along the temporal axis. The filter used can be
         controlled using the ``tscale`` setting.

@@ -2160,7 +2160,9 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
     if (has_frame) {
         gl_sc_set_vao(p->sc, &p->vao);
 
-        if (p->opts.interpolation && (p->frames_drawn || !frame->still)) {
+        if (p->opts.interpolation && frame->display_synced &&
+            (p->frames_drawn || !frame->still))
+        {
             gl_video_interpolate_frame(p, frame, fbo);
         } else {
             bool is_new = !frame->redraw && !frame->repeat;
@@ -2872,7 +2874,7 @@ void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
         }
     }
 
-    vo_set_queue_params(vo, 0, p->opts.interpolation, queue_size);
+    vo_set_queue_params(vo, 0, queue_size);
 }
 
 struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p)
