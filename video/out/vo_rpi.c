@@ -80,6 +80,7 @@ struct priv {
     int display_nr;
     int layer;
     int background;
+    int enable_osd;
 };
 
 // Magic alignments (in pixels) expected by the MMAL internals.
@@ -116,6 +117,8 @@ static size_t layout_buffer(struct mp_image *mpi, MMAL_BUFFER_HEADER_T *buffer,
 static void update_osd(struct vo *vo)
 {
     struct priv *p = vo->priv;
+    if (!p->enable_osd)
+        return;
 
     mpgl_osd_generate(p->osd, p->osd_res, p->osd_pts, 0, 0);
 
@@ -240,27 +243,29 @@ static int update_display_size(struct vo *vo)
         }
     }
 
-    alpha = (VC_DISPMANX_ALPHA_T){
-        .flags = DISPMANX_FLAGS_ALPHA_FROM_SOURCE,
-        .opacity = 0xFF,
-    };
-    p->osd_overlay = vc_dispmanx_element_add(p->update, p->display,
-                                             p->osd_layer,
-                                             &dst, 0, &src,
-                                             DISPMANX_PROTECTION_NONE,
-                                             &alpha, 0, 0);
-    if (!p->osd_overlay) {
-        MP_FATAL(vo, "Could not add DISPMANX element.\n");
-        return -1;
-    }
+    if (p->enable_osd) {
+        alpha = (VC_DISPMANX_ALPHA_T){
+            .flags = DISPMANX_FLAGS_ALPHA_FROM_SOURCE,
+            .opacity = 0xFF,
+        };
+        p->osd_overlay = vc_dispmanx_element_add(p->update, p->display,
+                                                 p->osd_layer,
+                                                 &dst, 0, &src,
+                                                 DISPMANX_PROTECTION_NONE,
+                                                 &alpha, 0, 0);
+        if (!p->osd_overlay) {
+            MP_FATAL(vo, "Could not add DISPMANX element.\n");
+            return -1;
+        }
 
-    if (mp_egl_rpi_init(&p->egl, p->osd_overlay, p->w, p->h) < 0) {
-        MP_FATAL(vo, "EGL/GLES initialization for OSD renderer failed.\n");
-        return -1;
+        if (mp_egl_rpi_init(&p->egl, p->osd_overlay, p->w, p->h) < 0) {
+            MP_FATAL(vo, "EGL/GLES initialization for OSD renderer failed.\n");
+            return -1;
+        }
+        p->sc = gl_sc_create(p->egl.gl, vo->log),
+        p->osd = mpgl_osd_init(p->egl.gl, vo->log, vo->osd);
+        p->osd_change_counter = -1; // force initial overlay rendering
     }
-    p->sc = gl_sc_create(p->egl.gl, vo->log),
-    p->osd = mpgl_osd_init(p->egl.gl, vo->log, vo->osd);
-    p->osd_change_counter = -1; // force initial overlay rendering
 
     p->display_fps = 0;
     TV_GET_STATE_RESP_T tvstate;
@@ -660,6 +665,7 @@ static const struct m_option options[] = {
     OPT_INT("display", display_nr, 0),
     OPT_INT("layer", layer, 0, OPTDEF_INT(-10)),
     OPT_FLAG("background", background, 0),
+    OPT_FLAG("osd", enable_osd, 0, OPTDEF_INT(1)),
     {0},
 };
 

@@ -1129,6 +1129,10 @@ Available video output drivers are:
         Normally it's better to kill the console framebuffer instead, which
         gives better performance.
 
+    ``osd=<yes|no>``
+        Enabled by default. If disabled with ``no``, no OSD layer is created.
+        This also means there will be no subtitles rendered.
+
 ``drm`` (Direct Rendering Manager)
     Video output driver using Kernel Mode Setting / Direct Rendering Manager.
     Should be used when one doesn't want to install full-blown graphical
