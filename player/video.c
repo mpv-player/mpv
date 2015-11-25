@@ -999,9 +999,10 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     mpctx->display_sync_error += frame_duration - num_vsyncs * vsync;
     frame->vsync_offset = mpctx->display_sync_error * 1e6;
 
-    MP_DBG(mpctx, "s=%f vsyncs=%d dur=%f ratio=%f err=%.20f (%f)\n",
+    MP_DBG(mpctx, "s=%f vsyncs=%d dur=%f ratio=%f err=%.20f (%f/%f)\n",
            mpctx->speed_factor_v, num_vsyncs, adjusted_duration, ratio,
-           mpctx->display_sync_error, mpctx->display_sync_error / vsync);
+           mpctx->display_sync_error, mpctx->display_sync_error / vsync,
+           mpctx->display_sync_error / frame_duration);
 
     MP_STATS(mpctx, "value %f avdiff", av_diff);
 
@@ -1030,8 +1031,10 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // Likewise, we know sync is off, but is going to be compensated.
     time_left += drop_repeat * vsync;
 
-    if (drop_repeat)
+    if (drop_repeat) {
         mpctx->mistimed_frames_total += 1;
+        MP_STATS(mpctx, "mistimed");
+    }
 
     mpctx->total_avsync_change = 0;
     update_av_diff(mpctx, time_left * opts->playback_speed);
