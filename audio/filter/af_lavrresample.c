@@ -423,6 +423,18 @@ static void extra_output_conversion(struct af_instance *af, struct mp_audio *mpa
         }
         mp_audio_set_format(mpa, AF_FORMAT_S24);
     }
+
+    for (int p = 0; p < mpa->num_planes; p++) {
+        void *ptr = mpa->planes[p];
+        int total = mpa->samples * mpa->spf;
+        if (af_fmt_from_planar(mpa->format) == AF_FORMAT_FLOAT) {
+            for (int s = 0; s < total; s++)
+                ((float *)ptr)[s] = av_clipf(((float *)ptr)[s], -1.0f, 1.0f);
+        } else if (af_fmt_from_planar(mpa->format) == AF_FORMAT_DOUBLE) {
+            for (int s = 0; s < total; s++)
+                ((double *)ptr)[s] = av_clipd(((double *)ptr)[s], -1.0, 1.0);
+        }
+    }
 }
 
 // This relies on the tricky way mpa was allocated.
