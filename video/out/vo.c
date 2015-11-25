@@ -142,6 +142,13 @@ struct vo_internal {
 
     int64_t vsync_interval;
 
+    int64_t *vsync_samples;
+    int num_vsync_samples;
+    int64_t prev_vsync;
+    double estimated_vsync_interval;
+    double estimated_vsync_jitter;
+    bool expecting_vsync;
+
     int64_t flip_queue_offset; // queue flip events at most this much in advance
 
     int64_t delayed_count;
@@ -312,6 +319,48 @@ void vo_destroy(struct vo *vo)
     dealloc_vo(vo);
 }
 
+// Drop timing information on discontinuities like seeking.
+// Always called locked.
+static void reset_vsync_timings(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    in->num_vsync_samples = 0;
+    in->prev_vsync = 0;
+    in->estimated_vsync_interval = 0;
+    in->estimated_vsync_jitter = -1;
+    in->expecting_vsync = false;
+}
+
+// Always called locked.
+static void update_vsync_timing_after_swap(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+
+    if (!in->expecting_vsync || !in->prev_vsync) {
+        reset_vsync_timings(vo);
+        return;
+    }
+
+    int64_t now = mp_time_us();
+    if (in->num_vsync_samples >= 200)
+        in->num_vsync_samples -= 1;
+    MP_TARRAY_INSERT_AT(in, in->vsync_samples, in->num_vsync_samples, 0,
+                        now - in->prev_vsync);
+    in->prev_vsync = now;
+
+    double avg = 0, jitter = 0;
+    for (int n = 0; n < in->num_vsync_samples; n++) {
+        avg += in->vsync_samples[n] / 1e6;
+        double diff = in->vsync_samples[n] / (double)in->vsync_interval - 1.0;
+        jitter += diff * diff;
+    }
+    avg /= in->num_vsync_samples;
+    in->estimated_vsync_interval = avg;
+    in->estimated_vsync_jitter = sqrt(jitter / in->num_vsync_samples);
+
+    MP_STATS(vo, "value %f jitter", in->estimated_vsync_jitter);
+}
+
 // to be called from VO thread only
 static void update_display_fps(struct vo *vo)
 {
@@ -383,6 +432,7 @@ static void run_reconfig(void *p)
     talloc_free(in->current_frame);
     in->current_frame = NULL;
     forget_frames(vo);
+    reset_vsync_timings(vo);
     pthread_mutex_unlock(&in->lock);
 
     update_display_fps(vo);
@@ -705,6 +755,10 @@ static bool render_frame(struct vo *vo)
     if (in->current_frame->num_vsyncs > 0)
         in->current_frame->num_vsyncs -= 1;
 
+    in->expecting_vsync = in->current_frame->display_synced && !in->paused;
+    if (in->expecting_vsync && !in->prev_vsync)
+        in->prev_vsync = mp_time_us();
+
     if (in->dropped_frame) {
         in->drop_count += 1;
     } else {
@@ -740,6 +794,8 @@ static bool render_frame(struct vo *vo)
         double diff = (in->vsync_interval - in->vsync_interval_approx) / 1e6;
         if (fabs(diff) < 0.150)
             MP_STATS(vo, "value %f vsync-diff", diff);
+
+        update_vsync_timing_after_swap(vo);
     }
 
     if (!in->dropped_frame) {
@@ -864,6 +920,7 @@ void vo_set_paused(struct vo *vo, bool paused)
         if (in->paused && in->dropped_frame)
             in->request_redraw = true;
         in->last_flip = 0;
+        reset_vsync_timings(vo);
     }
     pthread_mutex_unlock(&in->lock);
     vo_control(vo, paused ? VOCTRL_PAUSE : VOCTRL_RESUME, NULL);
@@ -911,6 +968,7 @@ void vo_seek_reset(struct vo *vo)
     pthread_mutex_lock(&in->lock);
     forget_frames(vo);
     in->last_flip = 0;
+    reset_vsync_timings(vo);
     in->send_reset = true;
     wakeup_locked(vo);
     pthread_mutex_unlock(&in->lock);
@@ -1018,6 +1076,25 @@ int64_t vo_get_vsync_interval(struct vo *vo)
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
     int64_t res = vo->in->vsync_interval > 1 ? vo->in->vsync_interval : -1;
+    pthread_mutex_unlock(&in->lock);
+    return res;
+}
+
+// Returns duration of a display refresh in seconds.
+double vo_get_estimated_vsync_interval(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    double res = in->estimated_vsync_interval;
+    pthread_mutex_unlock(&in->lock);
+    return res;
+}
+
+double vo_get_estimated_vsync_jitter(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    double res = in->estimated_vsync_jitter;
     pthread_mutex_unlock(&in->lock);
     return res;
 }

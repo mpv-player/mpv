@@ -1487,6 +1487,14 @@ Property list
     available on all platforms. Note that any of the listed facts may change
     any time without a warning.
 
+``estimated-display-fps``
+    Only available if display-sync mode (as selected by ``--video-sync``) is
+    active. Returns the actual rate at which display refreshes seem to occur,
+    measured by system time.
+
+``vsync-jitter``
+    Estimated deviation factor of the vsync duration.
+
 ``video-aspect`` (RW)
     Video aspect, see ``--video-aspect``.
 

@@ -2629,6 +2629,32 @@ static int mp_property_display_fps(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, fps);
 }
 
+static int mp_property_estimated_display_fps(void *ctx, struct m_property *prop,
+                                             int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return M_PROPERTY_UNAVAILABLE;
+    double interval = vo_get_estimated_vsync_interval(vo);
+    if (interval <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_double_ro(action, arg, 1.0 / interval);
+}
+
+static int mp_property_vsync_jitter(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return M_PROPERTY_UNAVAILABLE;
+    double stddev = vo_get_estimated_vsync_jitter(vo);
+    if (stddev < 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_double_ro(action, arg, stddev);
+}
+
 static int mp_property_display_names(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
@@ -3612,6 +3638,8 @@ static const struct m_property mp_properties[] = {
     {"window-minimized", mp_property_win_minimized},
     {"display-names", mp_property_display_names},
     {"display-fps", mp_property_display_fps},
+    {"estimated-display-fps", mp_property_estimated_display_fps},
+    {"vsync-jitter", mp_property_vsync_jitter},
 
     {"working-directory", mp_property_cwd},
 
@@ -3656,7 +3684,8 @@ static const char *const *const mp_event_property_change[] = {
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
       "total-avsync-change", "audio-speed-correction", "video-speed-correction",
-      "vo-delayed-frame-count", "mistimed-frame-count", "vsync-ratio"),
+      "vo-delayed-frame-count", "mistimed-frame-count", "vsync-ratio",
+      "estimated-display-fps", "vsync-jitter"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",
