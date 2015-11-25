@@ -432,7 +432,7 @@ static void extra_output_conversion(struct af_instance *af, struct mp_audio *mpa
                 ((float *)ptr)[s] = av_clipf(((float *)ptr)[s], -1.0f, 1.0f);
         } else if (af_fmt_from_planar(mpa->format) == AF_FORMAT_DOUBLE) {
             for (int s = 0; s < total; s++)
-                ((double *)ptr)[s] = av_clipd(((double *)ptr)[s], -1.0, 1.0);
+                ((double *)ptr)[s] = MPCLAMP(((double *)ptr)[s], -1.0, 1.0);
         }
     }
 }
