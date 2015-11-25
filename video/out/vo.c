@@ -380,7 +380,7 @@ static void update_display_fps(struct vo *vo)
 
         if (in->display_fps != display_fps) {
             in->display_fps = display_fps;
-            MP_VERBOSE(vo, "Assuming %f FPS for framedrop.\n", display_fps);
+            MP_VERBOSE(vo, "Assuming %f FPS for display sync.\n", display_fps);
 
             // make sure to update the player
             in->queued_events |= VO_EVENT_WIN_STATE;
@@ -636,18 +636,6 @@ static void wait_until(struct vo *vo, int64_t target)
     pthread_mutex_unlock(&in->lock);
 }
 
-// needs lock
-static int64_t prev_sync(struct vo *vo, int64_t ts)
-{
-    struct vo_internal *in = vo->in;
-
-    int64_t diff = (int64_t)(ts - in->last_flip);
-    int64_t offset = diff % in->vsync_interval;
-    if (offset < 0)
-        offset += in->vsync_interval;
-    return ts - offset;
-}
-
 static bool render_frame(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
@@ -684,37 +672,13 @@ static bool render_frame(struct vo *vo)
     int64_t duration = frame->duration;
     int64_t end_time = pts + duration;
 
-    // The next time a flip (probably) happens.
-    int64_t prev_vsync = prev_sync(vo, mp_time_us());
-    int64_t next_vsync = prev_vsync + in->vsync_interval;
-
     frame->vsync_interval = in->vsync_interval;
 
     // Time at which we should flip_page on the VO.
     int64_t target = frame->display_synced ? 0 : pts - in->flip_queue_offset;
 
-    bool prev_dropped_frame = in->dropped_frame;
-
     // "normal" strict drop threshold.
-    in->dropped_frame = duration >= 0 && end_time < next_vsync;
-
-    // Clip has similar (within ~5%) or lower fps than the display.
-    if (duration >= 0 && duration > 0.95 * in->vsync_interval) {
-        // If the clip and display have similar/identical fps, it's possible that
-        // due to the very tight timing, we'll drop frames frequently even if on
-        // average we can keep up - especially if we have timing jitter (inaccurate
-        // clip timestamps, inaccurate timers, vsync block jitter, etc).
-        // So we're allowing to be 1 vsync late to prevent these frequent drops.
-        // However, once we've dropped a frame - "catch up" by using the strict
-        // threshold - which will typically be dropping 2 frames in a row.
-        // On low clip fps, we don't drop anyway and this logic doesn't matter.
-
-        // if we dropped previously - "catch up" by keeping the strict threshold.
-        in->dropped_frame &= prev_dropped_frame;
-
-        // if we haven't dropped - allow 1 frame late (prev_vsync as threshold).
-        in->dropped_frame |= end_time < prev_vsync;
-    }
+    in->dropped_frame = duration >= 0 && end_time < mp_time_us();
 
     in->dropped_frame &= !frame->display_synced;
     in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP);

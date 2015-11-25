@@ -557,11 +557,10 @@ Video
         differences to other VOs are possible.
 
 ``--display-fps=<fps>``
-    Set the maximum assumed display FPS used with ``--framedrop``. By default
-    a detected value is used (X11 only, not correct on multi-monitor systems),
-    or infinite display FPS if that fails. Infinite FPS means only frames too
-    late are dropped. If a correct FPS is provided, frames that are predicted
-    to be too late are dropped too.
+    Set the display FPS used with the ``--video-sync=display-*`` modes. By
+    default a detected value is used (X11 only, not correct on multi-monitor
+    systems). Keep in mind that setting an incorrect value (even if slightly
+    incorrect) can ruin video playback.
 
 ``--hwdec=<api>``
     Specify the hardware video decoding API that should be used if possible.
