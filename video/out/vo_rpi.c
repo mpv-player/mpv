@@ -171,17 +171,20 @@ static void resize(struct vo *vo)
 
     vo_get_src_dst_rects(vo, &src, &dst, &p->osd_res);
 
+    int src_w = src.x1 - src.x0, src_h = src.y1 - src.y0,
+        dst_w = dst.x1 - dst.x0, dst_h = dst.y1 - dst.y0;
     MMAL_DISPLAYREGION_T dr = {
         .hdr = { .id = MMAL_PARAMETER_DISPLAYREGION,
                  .size = sizeof(MMAL_DISPLAYREGION_T), },
-        .src_rect = { .x = src.x0, .y = src.y0,
-                      .width = src.x1 - src.x0, .height = src.y1 - src.y0, },
-        .dest_rect = { .x = dst.x0, .y = dst.y0,
-                       .width = dst.x1 - dst.x0, .height = dst.y1 - dst.y0, },
+        .src_rect = { .x = src.x0, .y = src.y0, .width = src_w, .height = src_h },
+        .dest_rect = { .x = dst.x0, .y = dst.y0, .width = dst_w, .height = dst_h },
         .layer = p->video_layer,
         .display_num = p->display_nr,
+        .pixel_x = dst_w * src_h,
+        .pixel_y = src_w * dst_h,
         .set = MMAL_DISPLAY_SET_SRC_RECT | MMAL_DISPLAY_SET_DEST_RECT |
-               MMAL_DISPLAY_SET_LAYER | MMAL_DISPLAY_SET_NUM,
+               MMAL_DISPLAY_SET_LAYER | MMAL_DISPLAY_SET_NUM |
+               MMAL_DISPLAY_SET_PIXEL,
     };
 
     if (mmal_port_parameter_set(input, &dr.hdr))
