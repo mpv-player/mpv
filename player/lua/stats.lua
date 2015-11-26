@@ -114,6 +114,13 @@ function add_video(s)
         append_property(s, sec, "vo-drop-frame-count", {prefix="VO:", nl=""})
         append_property(s, sec, "vo-missed-frame-count", {prefix="Missed:", nl=""})
     end
+    if append_property(s, sec, "display-fps", {prefix="Display FPS:", suffix=" (specified)"}) then
+        append_property(s, sec, "estimated-display-fps",
+                        {suffix=" (estimated)", nl="", indent=""})
+    else
+        append_property(s, sec, "estimated-display-fps",
+                        {prefix="Display FPS:", suffix=" (estimated)"})
+    end
     if append_property(s, sec, "fps", {prefix="FPS:", suffix=" (specified)"}) then
         append_property(s, sec, "estimated-vf-fps",
                         {suffix=" (estimated)", nl="", indent=""})
