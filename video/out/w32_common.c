@@ -30,6 +30,7 @@
 #include "input/keycodes.h"
 #include "input/input.h"
 #include "input/event.h"
+#include "stream/stream.h"
 #include "common/msg.h"
 #include "common/common.h"
 #include "vo.h"
@@ -63,6 +64,7 @@ struct vo_w32_state {
 
     HMONITOR monitor; // Handle of the current screen
     struct mp_rect screenrc; // Size and virtual position of the current screen
+    char *color_profile; // Path of the current screen's color profile
 
     // last non-fullscreen extends (updated only on fullscreen or on initialization)
     int prev_width;
@@ -606,7 +608,25 @@ static double get_refresh_rate_from_gdi(const wchar_t *device)
     return rv;
 }
 
-static void update_display_fps(struct vo_w32_state *w32)
+static char *get_color_profile(void *ctx, const wchar_t *device)
+{
+    char *name = NULL;
+
+    HDC ic = CreateICW(device, NULL, NULL, NULL);
+    if (!ic)
+        goto done;
+    wchar_t wname[MAX_PATH + 1];
+    if (!GetICMProfileW(ic, &(DWORD){ MAX_PATH }, wname))
+        goto done;
+
+    name = mp_to_utf8(ctx, wname);
+done:
+    if (ic)
+        DeleteDC(ic);
+    return name;
+}
+
+static void update_display_info(struct vo_w32_state *w32)
 {
     HMONITOR monitor = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
     if (w32->monitor == monitor)
@@ -631,12 +651,26 @@ static void update_display_fps(struct vo_w32_state *w32)
         w32->display_fps = freq;
         signal_events(w32, VO_EVENT_WIN_STATE);
     }
+
+    char *color_profile = get_color_profile(w32, mi.szDevice);
+    if ((color_profile == NULL) != (w32->color_profile == NULL) ||
+        (color_profile && strcmp(color_profile, w32->color_profile)))
+    {
+        if (color_profile)
+            MP_VERBOSE(w32, "color-profile: %s\n", color_profile);
+        talloc_free(w32->color_profile);
+        w32->color_profile = color_profile;
+        color_profile = NULL;
+        signal_events(w32, VO_EVENT_ICC_PROFILE_CHANGED);
+    }
+
+    talloc_free(color_profile);
 }
 
-static void force_update_display_fps(struct vo_w32_state *w32)
+static void force_update_display_info(struct vo_w32_state *w32)
 {
     w32->monitor = 0;
-    update_display_fps(w32);
+    update_display_info(w32);
 }
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
@@ -664,7 +698,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         ClientToScreen(w32->window, &p);
         w32->window_x = p.x;
         w32->window_y = p.y;
-        update_display_fps(w32);  // if we moved between monitors
+        update_display_info(w32);  // if we moved between monitors
         MP_VERBOSE(w32, "move window: %d:%d\n", w32->window_x, w32->window_y);
         break;
     }
@@ -680,7 +714,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         // Window may have been minimized or restored
         signal_events(w32, VO_EVENT_WIN_STATE);
 
-        update_display_fps(w32);
+        update_display_info(w32);
         break;
     }
     case WM_SIZING:
@@ -825,7 +859,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         mouse_button |= MP_KEY_STATE_UP;
         break;
     case WM_DISPLAYCHANGE:
-        force_update_display_fps(w32);
+        force_update_display_info(w32);
         break;
     }
 
@@ -1393,9 +1427,18 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_FPS:
-        update_display_fps(w32);
+        update_display_info(w32);
         *(double*) arg = w32->display_fps;
         return VO_TRUE;
+    case VOCTRL_GET_ICC_PROFILE:
+        update_display_info(w32);
+        if (w32->color_profile) {
+            bstr *p = arg;
+            *p = stream_read_file(w32->color_profile, NULL,
+                w32->vo->global, 100000000); // 100 MB
+            return p->len ? VO_TRUE : VO_FALSE;
+        }
+        return VO_FALSE;
     }
     return VO_NOTIMPL;
 }

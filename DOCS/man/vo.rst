@@ -891,7 +891,8 @@ Available video output drivers are:
         Automatically select the ICC display profile currently specified by
         the display settings of the operating system.
 
-        NOTE: Only implemented on OS X and X11
+        NOTE: On Windows, the default profile must be an ICC profile. WCS
+        profiles are not supported.
 
     ``icc-cache-dir=<dirname>``
         Store and load the 3D LUTs created from the ICC profile in this directory.
