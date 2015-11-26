@@ -968,10 +968,13 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     if (adjusted_duration <= 0.001 || adjusted_duration > 0.5)
         goto done;
 
-    mpctx->speed_factor_v = find_best_speed(mpctx, vsync);
-    // If it doesn't work, play at normal speed.
-    if (fabs(mpctx->speed_factor_v - 1.0) > opts->sync_max_video_change / 100)
-        mpctx->speed_factor_v = 1.0;
+    mpctx->speed_factor_v = 1.0;
+    if (mode != VS_DISP_VDROP) {
+        double best = find_best_speed(mpctx, vsync);
+        // If it doesn't work, play at normal speed.
+        if (fabs(best - 1.0) <= opts->sync_max_video_change / 100)
+            mpctx->speed_factor_v = best;
+    }
 
     double av_diff = mpctx->last_av_difference;
     if (fabs(av_diff) > 0.5)
