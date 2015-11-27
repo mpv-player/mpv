@@ -377,6 +377,7 @@ static void update_vsync_timing_after_swap(struct vo *vo)
 
     // Switch to assumed display FPS if it seems "better". (Note that small
     // differences are handled as drift instead.)
+    bool use_estimated = false;
     if (in->num_vsync_samples == max_samples &&
         fabs((in->nominal_vsync_interval - in->estimated_vsync_interval))
             >= 0.01 * in->nominal_vsync_interval &&
@@ -385,15 +386,16 @@ static void update_vsync_timing_after_swap(struct vo *vo)
     {
         double mjitter = vsync_stddef(vo, in->estimated_vsync_interval);
         double njitter = vsync_stddef(vo, in->nominal_vsync_interval);
-        if (mjitter * 1.01 < njitter) {
-            if (in->vsync_interval == in->nominal_vsync_interval) {
-                MP_WARN(vo, "Reported display FPS seems incorrect.\n"
-                            "Assuming a value closer to %.3f Hz.\n",
-                            1e6 / in->estimated_vsync_interval);
-            }
-            in->vsync_interval = in->estimated_vsync_interval;
-        }
+        if (mjitter * 1.01 < njitter)
+            use_estimated = true;
     }
+    if (use_estimated && in->vsync_interval == in->nominal_vsync_interval) {
+        MP_WARN(vo, "Reported display FPS seems incorrect.\n"
+                    "Assuming a value closer to %.3f Hz.\n",
+                    1e6 / in->estimated_vsync_interval);
+    }
+    in->vsync_interval = use_estimated ? (int64_t)in->estimated_vsync_interval
+                                       : in->nominal_vsync_interval;
 
     MP_STATS(vo, "value %f jitter", in->estimated_vsync_jitter);
     MP_STATS(vo, "value %f vsync-diff", in->vsync_samples[0] / 1e6);
