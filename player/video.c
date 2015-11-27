@@ -992,7 +992,6 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     int num_vsyncs = MPMAX(lrint(ratio), 0);
     double prev_error = mpctx->display_sync_error;
     mpctx->display_sync_error += frame_duration - num_vsyncs * vsync;
-    frame->vsync_offset = mpctx->display_sync_error * 1e6;
 
     MP_DBG(mpctx, "s=%f vsyncs=%d dur=%f ratio=%f err=%.20f (%f/%f)\n",
            mpctx->speed_factor_v, num_vsyncs, adjusted_duration, ratio,
@@ -1046,6 +1045,8 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // A bad guess, only needed when reverting to audio sync.
     mpctx->time_frame = time_left;
 
+    frame->vsync_interval = vsync;
+    frame->vsync_offset = mpctx->display_sync_error;
     frame->num_vsyncs = num_vsyncs;
     frame->display_synced = true;
 

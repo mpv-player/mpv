@@ -165,9 +165,9 @@ struct vo_frame {
     // Approximate frame duration, in us.
     int duration;
     // Realtime of estimated distance between 2 vsync events.
-    int64_t vsync_interval;
+    double vsync_interval;
     // "ideal" display time within the vsync
-    int64_t vsync_offset;
+    double vsync_offset;
     // how often the frame will be repeated (does not include OSD redraws)
     int num_vsyncs;
     // Set if the current frame is repeated from the previous. It's guaranteed

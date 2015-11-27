@@ -741,8 +741,6 @@ static bool render_frame(struct vo *vo)
     int64_t duration = frame->duration;
     int64_t end_time = pts + duration;
 
-    frame->vsync_interval = in->vsync_interval;
-
     // Time at which we should flip_page on the VO.
     int64_t target = frame->display_synced ? 0 : pts - in->flip_queue_offset;
 
@@ -761,7 +759,7 @@ static bool render_frame(struct vo *vo)
     // frame currently drawn, while in->current_frame is the potentially next.)
     in->current_frame->repeat = true;
     if (frame->display_synced) {
-        in->current_frame->vsync_offset += in->vsync_interval;
+        in->current_frame->vsync_offset += in->current_frame->vsync_interval;
         in->dropped_frame |= in->current_frame->num_vsyncs < 1;
     }
     if (in->current_frame->num_vsyncs > 0)

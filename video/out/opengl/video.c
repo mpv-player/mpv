@@ -2088,7 +2088,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
         double pts_now = p->surfaces[surface_now].pts,
                pts_nxt = p->surfaces[surface_nxt].pts;
 
-        double mix = (t->vsync_offset / 1e6) / (pts_nxt - pts_now);
+        double mix = t->vsync_offset / (pts_nxt - pts_now);
         // The scaler code always wants the fcoord to be between 0 and 1,
         // so we try to adjust by using the previous set of N frames instead
         // (which requires some extra checking to make sure it's valid)
@@ -2107,7 +2107,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 
         // Blend the frames together
         if (oversample) {
-            double vsync_dist = t->vsync_interval / 1e6 / (pts_nxt - pts_now),
+            double vsync_dist = t->vsync_interval / (pts_nxt - pts_now),
                    threshold = tscale->conf.kernel.params[0];
             threshold = isnan(threshold) ? 0.0 : threshold;
             mix = (1 - mix) / vsync_dist;
@@ -2130,8 +2130,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
         }
 
         MP_STATS(p, "frame-mix");
-        MP_DBG(p, "inter frame pts: %lld, vsync: %lld, mix: %f\n",
-               (long long)t->pts, (long long)t->vsync_interval, mix);
+        MP_DBG(p, "inter frame vsync: %f, mix: %f\n", t->vsync_interval, mix);
         p->is_interpolated = true;
     }
     pass_draw_to_screen(p, fbo);
