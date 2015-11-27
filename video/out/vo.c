@@ -368,7 +368,19 @@ static void update_vsync_timing_after_swap(struct vo *vo)
     MP_STATS(vo, "value %f jitter", in->estimated_vsync_jitter);
     MP_STATS(vo, "value %f vsync-diff", in->vsync_samples[0] / 1e6);
 
-    if (llabs(in->base_vsync - now) > in->vsync_interval * 2 / 3) {
+    int window = 4;
+    int64_t t_r = now, t_e = in->base_vsync, diff = 0, desync_early = 0;
+    for (int n = 0; n < in->drop_point; n++) {
+        diff += t_r - t_e;
+        t_r -= in->vsync_samples[n];
+        t_e -= in->vsync_interval;
+        if (n == window + 1)
+            desync_early = diff / window;
+    }
+    int64_t desync = diff / in->num_vsync_samples;
+    if (in->drop_point > window * 2 &&
+        labs(desync - desync_early) >= in->vsync_interval * 3 / 4)
+    {
         // Assume a drop. An underflow can technically speaking not be a drop
         // (it's up to the driver what this is supposed to mean), but no reason
         // to treat it differently.
@@ -376,17 +388,11 @@ static void update_vsync_timing_after_swap(struct vo *vo)
         in->delayed_count += 1;
         in->drop_point = 0;
         MP_STATS(vo, "vo-delayed");
+        desync = 0;
     }
-
     // Smooth out drift.
-    int64_t t_r = now, t_e = in->base_vsync, diff = 0;
-    for (int n = 0; n < in->drop_point - 1; n++) {
-        diff += t_r - t_e;
-        t_r -= in->vsync_samples[n];
-        t_e -= in->vsync_interval;
-    }
     if (in->drop_point > 10)
-        in->base_vsync += diff * 0.1 / in->num_vsync_samples;
+        in->base_vsync += desync / 10;
 }
 
 // to be called from VO thread only
