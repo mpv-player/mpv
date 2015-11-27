@@ -734,6 +734,7 @@ static bool render_frame(struct vo *vo)
         frame->duration = -1;
     }
 
+    int64_t now = mp_time_us();
     int64_t pts = frame->pts;
     int64_t duration = frame->duration;
     int64_t end_time = pts + duration;
@@ -744,14 +745,14 @@ static bool render_frame(struct vo *vo)
     int64_t target = frame->display_synced ? 0 : pts - in->flip_queue_offset;
 
     // "normal" strict drop threshold.
-    in->dropped_frame = duration >= 0 && end_time < mp_time_us();
+    in->dropped_frame = duration >= 0 && end_time < now;
 
     in->dropped_frame &= !frame->display_synced;
     in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP);
     in->dropped_frame &= (vo->global->opts->frame_dropping & 1);
     // Even if we're hopelessly behind, rather degrade to 10 FPS playback,
     // instead of just freezing the display forever.
-    in->dropped_frame &= mp_time_us() - in->prev_vsync < 100 * 1000;
+    in->dropped_frame &= now - in->prev_vsync < 100 * 1000;
     in->dropped_frame &= in->hasframe_rendered;
 
     // Setup parameters for the next time this frame is drawn. ("frame" is the
@@ -766,7 +767,7 @@ static bool render_frame(struct vo *vo)
 
     in->expecting_vsync = in->current_frame->display_synced && !in->paused;
     if (in->expecting_vsync && !in->num_vsync_samples) // first DS frame in a row
-        in->prev_vsync = mp_time_us();
+        in->prev_vsync = now;
 
     if (in->dropped_frame) {
         in->drop_count += 1;
