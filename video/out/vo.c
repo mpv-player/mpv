@@ -325,7 +325,6 @@ static void reset_vsync_timings(struct vo *vo)
     struct vo_internal *in = vo->in;
     in->num_vsync_samples = 0;
     in->drop_point = 0;
-    in->prev_vsync = 0;
     in->estimated_vsync_interval = 0;
     in->estimated_vsync_jitter = -1;
     in->base_vsync = 0;
@@ -348,12 +347,14 @@ static void update_vsync_timing_after_swap(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
 
-    if (!in->expecting_vsync || !in->prev_vsync) {
+    int64_t now = mp_time_us();
+
+    if (!in->expecting_vsync) {
+        in->prev_vsync = now; // for normal system-time framedrop
         reset_vsync_timings(vo);
         return;
     }
 
-    int64_t now = mp_time_us();
     int max_samples = 200;
     if (in->num_vsync_samples >= max_samples)
         in->num_vsync_samples -= 1;
@@ -764,7 +765,7 @@ static bool render_frame(struct vo *vo)
         in->current_frame->num_vsyncs -= 1;
 
     in->expecting_vsync = in->current_frame->display_synced && !in->paused;
-    if (in->expecting_vsync && !in->prev_vsync)
+    if (in->expecting_vsync && !in->num_vsync_samples) // first DS frame in a row
         in->prev_vsync = mp_time_us();
 
     if (in->dropped_frame) {
