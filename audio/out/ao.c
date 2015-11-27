@@ -493,8 +493,12 @@ static void get_devices(struct ao *ao, struct ao_device_list *list)
     if (ao->driver->list_devs)
         ao->driver->list_devs(ao, list);
     // Add at least a default entry
-    if (list->num_devices == num)
-        ao_device_list_add(list, ao, &(struct ao_device_desc){"", "Default"});
+    if (list->num_devices == num) {
+        char name[80] = "Default";
+        if (num > 1)
+            mp_snprintf_cat(name, sizeof(name), " (%s)", ao->driver->name);
+        ao_device_list_add(list, ao, &(struct ao_device_desc){"", name});
+    }
 }
 
 bool ao_hotplug_check_update(struct ao_hotplug *hp)
