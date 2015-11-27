@@ -214,6 +214,7 @@ void reset_video_state(struct MPContext *mpctx)
     mpctx->mistimed_frames_total = 0;
     mpctx->drop_message_shown = 0;
     mpctx->display_sync_drift_dir = 0;
+    mpctx->display_sync_broken = false;
 
     mpctx->video_status = mpctx->d_video ? STATUS_SYNCING : STATUS_EOF;
 }
@@ -949,7 +950,7 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     mpctx->display_sync_active = false;
 
     if (!VS_IS_DISP(mode))
-        goto done;
+        return;
     bool resample = mode == VS_DISP_RESAMPLE || mode == VS_DISP_RESAMPLE_VDROP ||
                     mode == VS_DISP_RESAMPLE_NONE;
     bool drop = mode == VS_DISP_VDROP || mode == VS_DISP_RESAMPLE ||
@@ -957,16 +958,16 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     drop &= (opts->frame_dropping & 1);
 
     if (resample && using_spdif_passthrough(mpctx))
-        goto done;
+        return;
 
     double vsync = vo_get_vsync_interval(vo) / 1e6;
     if (vsync <= 0)
-        goto done;
+        return;
 
     double adjusted_duration = mpctx->past_frames[0].approx_duration;
     adjusted_duration /= opts->playback_speed;
     if (adjusted_duration <= 0.001 || adjusted_duration > 0.5)
-        goto done;
+        return;
 
     mpctx->speed_factor_v = 1.0;
     if (mode != VS_DISP_VDROP) {
@@ -977,18 +978,9 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     }
 
     double av_diff = mpctx->last_av_difference;
-    if (fabs(av_diff) > 0.5)
-        goto done;
-
-    // At this point, we decided that we could use display sync for this frame.
-    // But if we switch too often between these modes, keep it disabled. In
-    // fact, we disable it if it just wants to switch between enable/disable
-    // more than once in the last N frames.
-    if (mpctx->num_past_frames > 1 && mpctx->past_frames[1].num_vsyncs < 0) {
-        for (int n = 1; n < mpctx->num_past_frames; n++) {
-            if (mpctx->past_frames[n].num_vsyncs >= 0)
-                goto done;
-        }
+    if (fabs(av_diff) > 0.5) {
+        mpctx->display_sync_broken = true;
+        return;
     }
 
     // Determine for how many vsyncs a frame should be displayed. This can be
@@ -1062,8 +1054,11 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 
     MP_STATS(mpctx, "value %f aspeed", mpctx->speed_factor_a - 1);
     MP_STATS(mpctx, "value %f vspeed", mpctx->speed_factor_v - 1);
+}
 
-done:
+static void schedule_frame(struct MPContext *mpctx, struct vo_frame *frame)
+{
+    handle_display_sync_frame(mpctx, frame);
 
     if (mpctx->num_past_frames > 1 &&
         ((mpctx->past_frames[1].num_vsyncs >= 0) != mpctx->display_sync_active))
@@ -1071,11 +1066,6 @@ done:
         MP_VERBOSE(mpctx, "Video sync mode %s.\n",
                    mpctx->display_sync_active ? "enabled" : "disabled");
     }
-}
-
-static void schedule_frame(struct MPContext *mpctx, struct vo_frame *frame)
-{
-    handle_display_sync_frame(mpctx, frame);
 
     if (!mpctx->display_sync_active) {
         mpctx->speed_factor_a = 1.0;
