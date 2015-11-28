@@ -82,7 +82,6 @@ enum mp_osdtype {
     OSDTYPE_SUB,
     OSDTYPE_SUB2, // IDs must be numerically successive
 
-    OSDTYPE_PROGBAR,
     OSDTYPE_OSD,
 
     OSDTYPE_EXTERNAL,

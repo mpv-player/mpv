@@ -188,7 +188,7 @@ void osd_set_render_subs_in_filter(struct osd_state *osd, bool s)
 void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s)
 {
     pthread_mutex_lock(&osd->lock);
-    struct osd_object *osd_obj = osd->objs[OSDTYPE_PROGBAR];
+    struct osd_object *osd_obj = osd->objs[OSDTYPE_OSD];
     osd_obj->progbar_state.type = s->type;
     osd_obj->progbar_state.value = s->value;
     osd_obj->progbar_state.num_stops = s->num_stops;
