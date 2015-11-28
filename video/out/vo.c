@@ -143,6 +143,7 @@ struct vo_internal {
     int64_t vsync_interval;
     int64_t *vsync_samples;
     int num_vsync_samples;
+    int64_t num_total_vsync_samples;
     int64_t prev_vsync;
     int64_t base_vsync;
     int drop_point;
@@ -324,6 +325,7 @@ static void reset_vsync_timings(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     in->num_vsync_samples = 0;
+    in->num_total_vsync_samples = 0;
     in->drop_point = 0;
     in->estimated_vsync_interval = 0;
     in->estimated_vsync_jitter = -1;
@@ -361,6 +363,7 @@ static void update_vsync_timing_after_swap(struct vo *vo)
     MP_TARRAY_INSERT_AT(in, in->vsync_samples, in->num_vsync_samples, 0,
                         now - in->prev_vsync);
     in->drop_point = MPMIN(in->drop_point + 1, in->num_vsync_samples);
+    in->num_total_vsync_samples += 1;
     if (in->base_vsync) {
         in->base_vsync += in->vsync_interval;
     } else {
@@ -378,7 +381,7 @@ static void update_vsync_timing_after_swap(struct vo *vo)
     // Switch to assumed display FPS if it seems "better". (Note that small
     // differences are handled as drift instead.)
     bool use_estimated = false;
-    if (in->num_vsync_samples == max_samples &&
+    if (in->num_total_vsync_samples >= max_samples * 2 &&
         fabs((in->nominal_vsync_interval - in->estimated_vsync_interval))
             >= 0.01 * in->nominal_vsync_interval &&
         in->estimated_vsync_interval <= 1e6 / 20.0 &&
