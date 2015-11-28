@@ -33,6 +33,8 @@
 
 #include "misc/bstr.h"
 #include "options/m_config.h"
+#include "common/global.h"
+#include "options/options.h"
 #include "common.h"
 #include "utils.h"
 #include "hwdec.h"
@@ -225,6 +227,8 @@ struct gl_video {
 
     struct gl_hwdec *hwdec;
     bool hwdec_active;
+
+    bool dsi_warned;
 };
 
 struct fmt_entry {
@@ -2846,6 +2850,12 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
 
     check_gl_features(p);
     uninit_rendering(p);
+
+    if (p->opts.interpolation && !p->global->opts->video_sync && !p->dsi_warned) {
+        MP_WARN(p, "Interpolation now requires enabling display-sync mode.\n"
+                   "E.g.: --video-sync=display-resample\n");
+        p->dsi_warned = true;
+    }
 }
 
 void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
