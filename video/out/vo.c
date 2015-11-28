@@ -392,10 +392,17 @@ static void update_vsync_timing_after_swap(struct vo *vo)
         if (mjitter * 1.01 < njitter)
             use_estimated = true;
     }
-    if (use_estimated && in->vsync_interval == in->nominal_vsync_interval) {
-        MP_WARN(vo, "Reported display FPS seems incorrect.\n"
-                    "Assuming a value closer to %.3f Hz.\n",
-                    1e6 / in->estimated_vsync_interval);
+    if (use_estimated == (in->vsync_interval == in->nominal_vsync_interval)) {
+        if (use_estimated) {
+            MP_WARN(vo, "Reported display FPS seems incorrect.\n"
+                        "Assuming a value closer to %.3f Hz.\n",
+                        1e6 / in->estimated_vsync_interval);
+            in->vsync_interval = in->estimated_vsync_interval;
+        } else {
+            MP_WARN(vo, "Switching back to assuming %.3f Hz.\n",
+                    1e6 / in->nominal_vsync_interval);
+            in->vsync_interval = in->nominal_vsync_interval;
+        }
     }
     in->vsync_interval = use_estimated ? (int64_t)in->estimated_vsync_interval
                                        : in->nominal_vsync_interval;
