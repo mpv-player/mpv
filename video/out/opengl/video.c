@@ -563,9 +563,8 @@ void gl_video_set_debug(struct gl_video *p, bool enable)
 
 static void gl_video_reset_surfaces(struct gl_video *p)
 {
-    for (int i = 0; i < FBOSURFACES_MAX; i++) {
+    for (int i = 0; i < FBOSURFACES_MAX; i++)
         p->surfaces[i].pts = MP_NOPTS_VALUE;
-    }
     p->surface_idx = 0;
     p->surface_now = 0;
     p->frames_drawn = 0;
@@ -2008,7 +2007,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 
     // Figure out the queue size. For illustration, a filter radius of 2 would
     // look like this: _ A [B] C D _
-    // A is surface_bse, B is surface_now, C is surface_nxt and D is
+    // A is surface_bse, B is surface_now, C is surface_now+1 and D is
     // surface_end.
     struct scaler *tscale = &p->scaler[3];
     reinit_scaler(p, tscale, &p->opts.scaler[3], 1, tscale_sizes);
@@ -2025,7 +2024,6 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 
     int radius = size/2;
     int surface_now = p->surface_now;
-    int surface_nxt = fbosurface_wrap(surface_now + 1);
     int surface_bse = fbosurface_wrap(surface_now - (radius-1));
     int surface_end = fbosurface_wrap(surface_now + radius);
     assert(fbosurface_wrap(surface_bse + size-1) == surface_end);
@@ -2046,7 +2044,6 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             continue;
 
         if (f->pts > p->surfaces[p->surface_idx].pts) {
-            MP_STATS(p, "new-pts");
             gl_video_upload_image(p, f);
             pass_render_frame(p);
             finish_pass_fbo(p, &p->surfaces[surface_dst].fbotex,
@@ -2085,10 +2082,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
         GLSL(vec4 color = texture(texture0, texcoord0);)
         p->is_interpolated = false;
     } else {
-        double pts_now = p->surfaces[surface_now].pts,
-               pts_nxt = p->surfaces[surface_nxt].pts;
-
-        double mix = t->vsync_offset / (pts_nxt - pts_now);
+        double mix = t->vsync_offset / t->ideal_frame_duration;
         // The scaler code always wants the fcoord to be between 0 and 1,
         // so we try to adjust by using the previous set of N frames instead
         // (which requires some extra checking to make sure it's valid)
@@ -2107,7 +2101,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 
         // Blend the frames together
         if (oversample) {
-            double vsync_dist = t->vsync_interval / (pts_nxt - pts_now),
+            double vsync_dist = t->vsync_interval / t->ideal_frame_duration,
                    threshold = tscale->conf.kernel.params[0];
             threshold = isnan(threshold) ? 0.0 : threshold;
             mix = (1 - mix) / vsync_dist;
@@ -2129,8 +2123,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
                              vp_w, vp_h, i);
         }
 
-        MP_STATS(p, "frame-mix");
-        MP_DBG(p, "inter frame vsync: %f, mix: %f\n", t->vsync_interval, mix);
+        MP_DBG(p, "inter frame dur: %f vsync: %f, mix: %f\n",
+               t->ideal_frame_duration, t->vsync_interval, mix);
         p->is_interpolated = true;
     }
     pass_draw_to_screen(p, fbo);

@@ -168,6 +168,9 @@ struct vo_frame {
     double vsync_interval;
     // "ideal" display time within the vsync
     double vsync_offset;
+    // "ideal" frame duration (can be different from num_vsyncs*vsync_interval
+    // up to a vsync) - valid for the entire frame, i.e. not changed for repeats
+    double ideal_frame_duration;
     // how often the frame will be repeated (does not include OSD redraws)
     int num_vsyncs;
     // Set if the current frame is repeated from the previous. It's guaranteed

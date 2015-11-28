@@ -1046,7 +1046,8 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     mpctx->time_frame = time_left;
 
     frame->vsync_interval = vsync;
-    frame->vsync_offset = mpctx->display_sync_error;
+    frame->vsync_offset = -prev_error;
+    frame->ideal_frame_duration = frame_duration;
     frame->num_vsyncs = num_vsyncs;
     frame->display_synced = true;
 
