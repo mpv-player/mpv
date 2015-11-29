@@ -345,7 +345,8 @@ const struct gl_video_opts gl_video_opts_def = {
         {{"bilinear",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // scale
         {{NULL,         .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // dscale
         {{"bilinear",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // cscale
-        {{"oversample", .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // tscale
+        {{"mitchell",   .params={NAN, NAN}}, {.params = {NAN, NAN}},
+         .clamp = 1, }, // tscale
     },
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
@@ -367,7 +368,8 @@ const struct gl_video_opts gl_video_opts_hq_def = {
         {{"spline36",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // scale
         {{"mitchell",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // dscale
         {{"spline36",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // cscale
-        {{"oversample", .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // tscale
+        {{"mitchell",   .params={NAN, NAN}}, {.params = {NAN, NAN}},
+         .clamp = 1, }, // tscale
     },
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
