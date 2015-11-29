@@ -860,7 +860,11 @@ Property list
               quantities: fps and possibly rounded timestamps.)
 
 ``path``
-    Full path of the currently played file.
+    Full path of the currently played file. Usually this is exactly the same
+    string you pass on the mpv command line or the ``loadfile`` command, even
+    if it's a relative path. If you expect an absolute path, you will have to
+    determine it yourself, for example by using the ``working-directory``
+    property.
 
 ``media-title``
     If the currently played file has a ``title`` tag, use that.
