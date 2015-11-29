@@ -387,10 +387,16 @@ static void update_vsync_timing_after_swap(struct vo *vo)
         in->estimated_vsync_interval <= 1e6 / 20.0 &&
         in->estimated_vsync_interval >= 1e6 / 99.0)
     {
+        for (int n = 0; n < in->num_vsync_samples; n++) {
+            if (fabs(in->vsync_samples[n] - in->estimated_vsync_interval)
+                >= in->estimated_vsync_interval / 4)
+                goto done;
+        }
         double mjitter = vsync_stddef(vo, in->estimated_vsync_interval);
         double njitter = vsync_stddef(vo, in->nominal_vsync_interval);
         if (mjitter * 1.01 < njitter)
             use_estimated = true;
+        done: ;
     }
     if (use_estimated == (in->vsync_interval == in->nominal_vsync_interval)) {
         if (use_estimated) {
