@@ -51,6 +51,30 @@ struct sd_ass_priv {
 static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts);
 static void fill_plaintext(struct sd *sd, double pts);
 
+// Add default styles, if the track does not have any styles yet.
+// Apply style overrides if the user provides any.
+static void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts)
+{
+    if (opts->ass_styles_file && opts->ass_style_override)
+        ass_read_styles(track, opts->ass_styles_file, NULL);
+
+    if (track->n_styles == 0) {
+        if (!track->PlayResY) {
+            track->PlayResY = MP_ASS_FONT_PLAYRESY;
+            track->PlayResX = track->PlayResY * 4 / 3;
+        }
+        track->Kerning = true;
+        int sid = ass_alloc_style(track);
+        track->default_style = sid;
+        ASS_Style *style = track->styles + sid;
+        style->Name = strdup("Default");
+        mp_ass_set_style(style, track->PlayResY, opts->sub_text_style);
+    }
+
+    if (opts->ass_style_override)
+        ass_process_force_style(track);
+}
+
 static bool supports_format(const char *format)
 {
     // ass-text is produced by converters and the subreader.c ssa parser; this

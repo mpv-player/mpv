@@ -47,10 +47,6 @@ struct osd_style_opts;
 void mp_ass_set_style(ASS_Style *style, double res_y,
                       const struct osd_style_opts *opts);
 
-void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts);
-
-ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts);
-
 void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,
                             struct mpv_global *global, struct mp_log *log);
 ASS_Library *mp_ass_init(struct mpv_global *global, struct mp_log *log);
