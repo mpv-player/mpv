@@ -40,6 +40,9 @@
 void mp_ass_set_style(ASS_Style *style, double res_y,
                       const struct osd_style_opts *opts)
 {
+    if (!style)
+        return;
+
     if (opts->font) {
         if (!style->FontName || strcmp(style->FontName, opts->font) != 0) {
             free(style->FontName);
