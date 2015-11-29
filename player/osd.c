@@ -116,7 +116,8 @@ void term_osd_set_subs(struct MPContext *mpctx, const char *text)
 
 static void term_osd_set_text(struct MPContext *mpctx, const char *text)
 {
-    if ((mpctx->video_out && mpctx->opts->term_osd != 1) || !mpctx->opts->term_osd)
+    if ((mpctx->video_out && mpctx->opts->term_osd != 1) ||
+        !mpctx->opts->term_osd || !text)
         text = ""; // disable
     talloc_free(mpctx->term_osd_text);
     mpctx->term_osd_text = talloc_strdup(mpctx, text);
@@ -543,26 +544,19 @@ void update_osd_msg(struct MPContext *mpctx)
         update_osd_bar(mpctx, OSD_BAR_SEEK, 0, 1, MPCLAMP(pos, 0, 1));
     }
 
+    term_osd_set_text(mpctx, mpctx->osd_msg_text);
     print_status(mpctx);
 
-    // Look if we have a msg
-    if (mpctx->osd_msg_text && !mpctx->osd_show_pos) {
-        osd_set_text(osd, OSDTYPE_OSD, mpctx->osd_msg_text);
-        term_osd_set_text(mpctx, mpctx->osd_msg_text);
-        return;
-    }
-
     int osd_level = opts->osd_level;
-    if (mpctx->osd_msg_text && mpctx->osd_show_pos)
+    if (mpctx->osd_show_pos)
         osd_level = 3;
 
-    // clear, or if OSD level demands it, show the status
     char *text = NULL;
     sadd_osd_status(&text, mpctx, osd_level);
-
+    if (mpctx->osd_msg_text && mpctx->osd_msg_text[0]) {
+        text = talloc_asprintf_append(text, "%s%s", text ? "\n" : "",
+                                      mpctx->osd_msg_text);
+    }
     osd_set_text(osd, OSDTYPE_OSD, text);
     talloc_free(text);
-
-    // always clear (term-osd has separate status line)
-    term_osd_set_text(mpctx, "");
 }
