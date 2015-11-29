@@ -20,7 +20,9 @@ Interface changes
 ::
 
  --- mpv 0.14.0 ---
-    - add "vsync-ratio" property
+    - vo_opengl interpolation now requires --video-sync=display-... to be set
+    - change some vo_opengl defaults (including changing tscale)
+    - add "vsync-ratio", "estimated-display-fps" properties
     - add --rebase-start-time option
       This is a breaking change to start time handling. Instead of making start
       time handling an aspect of different options and properties (like
