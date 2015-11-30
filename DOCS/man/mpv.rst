@@ -258,7 +258,7 @@ parser puts several options into a single string, and passes them to a
 component at once, instead of using multiple options on the level of the
 command line.
 
-The suboption parser can quote strings with ``"``, ``'``, and ``[...]``.
+The suboption parser can quote strings with ``"`` and ``[...]``.
 Additionally, there is a special form of quoting with ``%n%`` described below.
 
 For example, the ``opengl`` VO can take multiple options:
@@ -410,7 +410,7 @@ Escaping spaces and special characters
 
 This is done like with command line options. The shell is not involved here,
 but option values still need to be quoted as a whole if it contains certain
-characters like spaces. A config entry can be quoted with ``"`` and ``'``,
+characters like spaces. A config entry can be quoted with ``"``,
 as well as with the fixed-length syntax (``%n%``) mentioned before. This is like
 passing the exact contents of the quoted string as command line option. C-style
 escapes are currently _not_ interpreted on this level, although some options do
