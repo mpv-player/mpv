@@ -102,7 +102,8 @@ static void resize(struct gl_priv *p)
     struct mp_osd_res osd;
     vo_get_src_dst_rects(vo, &src, &dst, &osd);
 
-    gl_video_resize(p->renderer, vo->dwidth, -vo->dheight, &src, &dst, &osd);
+    int height = p->glctx->flip_v ? vo->dheight : -vo->dheight;
+    gl_video_resize(p->renderer, vo->dwidth, height, &src, &dst, &osd);
 
     vo->want_redraw = true;
 }
