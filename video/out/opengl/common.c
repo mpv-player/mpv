@@ -289,6 +289,22 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+#if HAVE_GL_DXINTEROP
+    {
+        .extension = "WGL_NV_DX_interop",
+        .provides = MPGL_CAP_DXINTEROP,
+        .functions = (const struct gl_function[]) {
+            DEF_FN_NAME(DXSetResourceShareHandleNV, "wglDXSetResourceShareHandleNV"),
+            DEF_FN_NAME(DXOpenDeviceNV, "wglDXOpenDeviceNV"),
+            DEF_FN_NAME(DXCloseDeviceNV, "wglDXCloseDeviceNV"),
+            DEF_FN_NAME(DXRegisterObjectNV, "wglDXRegisterObjectNV"),
+            DEF_FN_NAME(DXUnregisterObjectNV, "wglDXUnregisterObjectNV"),
+            DEF_FN_NAME(DXLockObjectsNV, "wglDXLockObjectsNV"),
+            DEF_FN_NAME(DXUnlockObjectsNV, "wglDXUnlockObjectsNV"),
+            {0}
+        },
+    },
+#endif
     // Apple Packed YUV Formats
     // For gl_hwdec_vda.c
     // http://www.opengl.org/registry/specs/APPLE/rgb_422.txt
@@ -527,6 +543,7 @@ extern const struct mpgl_driver mpgl_driver_cocoa;
 extern const struct mpgl_driver mpgl_driver_wayland;
 extern const struct mpgl_driver mpgl_driver_w32;
 extern const struct mpgl_driver mpgl_driver_angle;
+extern const struct mpgl_driver mpgl_driver_dxinterop;
 extern const struct mpgl_driver mpgl_driver_rpi;
 
 static const struct mpgl_driver *const backends[] = {
@@ -541,6 +558,9 @@ static const struct mpgl_driver *const backends[] = {
 #endif
 #if HAVE_GL_WIN32
     &mpgl_driver_w32,
+#endif
+#if HAVE_GL_DXINTEROP
+    &mpgl_driver_dxinterop,
 #endif
 #if HAVE_GL_WAYLAND
     &mpgl_driver_wayland,

@@ -795,6 +795,9 @@ Available video output drivers are:
             Direct3D11 through the OpenGL ES translation layer ANGLE. This
             supports almost everything the ``win`` backend does, except ICC
             profiles, high bit depth video input, and the ``nnedi3`` prescaler.
+        dxinterop (experimental)
+            Win32, using WGL for rendering and Direct3D 9Ex for presentation.
+            Works on Nvidia and AMD only.
         x11
             X11/GLX
         wayland

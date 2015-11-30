@@ -333,6 +333,7 @@ def build(ctx):
         ( "video/out/opengl/video_shaders.c",    "gl" ),
         ( "video/out/opengl/w32.c",              "gl-win32" ),
         ( "video/out/opengl/angle.c",            "egl-angle" ),
+        ( "video/out/opengl/dxinterop.c",        "gl-dxinterop" ),
         ( "video/out/opengl/wayland.c",          "gl-wayland" ),
         ( "video/out/opengl/x11.c",              "gl-x11" ),
         ( "video/out/opengl/x11egl.c",           "egl-x11" ),
