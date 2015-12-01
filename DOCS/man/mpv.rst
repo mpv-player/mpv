@@ -128,7 +128,7 @@ x and z
     Adjust subtitle delay by +/- 0.1 seconds.
 
 l
-    Set/clear A-B loop points. See ``ab_loop`` command for details.
+    Set/clear A-B loop points. See ``ab-loop`` command for details.
 
 L
     Toggle infinite looping.
