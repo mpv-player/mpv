@@ -557,3 +557,7 @@ def build(ctx):
             ctx.install_as(
                 ctx.env.DATADIR + '/icons/hicolor/' + size + '/apps/mpv.png',
                 'etc/mpv-icon-8bit-' + size + '.png')
+
+        ctx.install_as(
+                ctx.env.DATADIR + '/icons/hicolor/scalable/apps/mpv.svg',
+                'etc/mpv-gradient.svg')
