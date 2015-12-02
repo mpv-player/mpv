@@ -30,6 +30,22 @@
 
 #include "video.h"
 
+/*
+ * NNEDI3, an intra-field deinterlacer
+ *
+ * The original filter was authored by Kevin Stone (aka. tritical) and is
+ * licensed under GPL2 terms:
+ *     http://bengal.missouri.edu/~kes25c/
+ *
+ * A LGPLv3 licensed OpenCL kernel was created by SEt:
+ *     http://forum.doom9.org/showthread.php?t=169766
+ *
+ * A HLSL port further modified by madshi, Shiandow and Zach Saw could be
+ * found at (also LGPLv3 licensed):
+ *     https://github.com/zachsaw/MPDN_Extensions
+ *
+ */
+
 #define GLSL(x) gl_sc_add(sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(sc, __VA_ARGS__)
 #define GLSLH(x) gl_sc_hadd(sc, #x "\n");
