@@ -41,7 +41,6 @@
 #include "osd.h"
 #include "stream/stream.h"
 #include "superxbr.h"
-#include "nnedi3.h"
 #include "video_shaders.h"
 #include "video/out/filter_kernels.h"
 #include "video/out/aspect.h"
@@ -158,8 +157,6 @@ struct gl_video {
 
     GLuint dither_texture;
     int dither_size;
-
-    GLuint nnedi3_weights_buffer;
 
     struct mp_image_params real_image_params;   // configured format
     struct mp_image_params image_params;        // texture format (mind hwdec case)
@@ -459,14 +456,12 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLOAT("sharpen", unsharp, 0),
         OPT_CHOICE("prescale", prescale, 0,
                    ({"none", 0},
-                    {"superxbr", 1},
-                    {"nnedi3", 2})),
+                    {"superxbr", 1})),
         OPT_INTRANGE("prescale-passes",
                      prescale_passes, 0, 1, MAX_PRESCALE_PASSES),
         OPT_FLOATRANGE("prescale-downscaling-threshold",
                        prescale_downscaling_threshold, 0, 0.0, 32.0),
         OPT_SUBSTRUCT("superxbr", superxbr_opts, superxbr_conf, 0),
-        OPT_SUBSTRUCT("nnedi3", nnedi3_opts, nnedi3_conf, 0),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
@@ -613,8 +608,6 @@ static void uninit_rendering(struct gl_video *p)
 
     gl->DeleteTextures(1, &p->dither_texture);
     p->dither_texture = 0;
-
-    gl->DeleteBuffers(1, &p->nnedi3_weights_buffer);
 
     fbotex_uninit(&p->chroma_merge_fbo);
     fbotex_uninit(&p->chroma_deband_fbo);
@@ -1189,7 +1182,7 @@ static int get_prescale_passes(struct gl_video *p)
 
     int passes = 0;
     for (; passes < p->opts.prescale_passes; passes ++) {
-        // The scale factor happens to be the same for superxbr and nnedi3.
+        // The scale factor for superxbr.
         scale_factors[0] /= 2;
         scale_factors[1] /= 2;
 
@@ -1211,7 +1204,6 @@ static void pass_prescale(struct gl_video *p, int src_tex_num, int dst_tex_num,
 
     int tex_num = src_tex_num;
 
-    // Happens to be the same for superxbr and nnedi3.
     const int steps_per_pass = 2;
 
     for (int pass = 0; pass < passes; pass++) {
@@ -1222,10 +1214,6 @@ static void pass_prescale(struct gl_video *p, int src_tex_num, int dst_tex_num,
             case 1:
                 pass_superxbr(p->sc, planes, tex_num, step,
                               tex_mul, p->opts.superxbr_opts, &transform);
-                break;
-            case 2:
-                pass_nnedi3(p->gl, p->sc, planes, tex_num, step,
-                            tex_mul, p->opts.nnedi3_opts, &transform);
                 break;
             default:
                 abort();
@@ -1252,27 +1240,6 @@ static bool pass_prescale_luma(struct gl_video *p, float tex_mul,
                                struct src_tex *prescaled_tex,
                                int *prescaled_planes)
 {
-    if (p->opts.prescale == 2 &&
-            p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_UBO)
-    {
-        // nnedi3 are configured to use uniform buffer objects.
-        if (!p->nnedi3_weights_buffer) {
-            p->gl->GenBuffers(1, &p->nnedi3_weights_buffer);
-            p->gl->BindBufferBase(GL_UNIFORM_BUFFER, 0,
-                                  p->nnedi3_weights_buffer);
-            int weights_size;
-            const float *weights =
-                get_nnedi3_weights(p->opts.nnedi3_opts, &weights_size);
-
-            MP_VERBOSE(p, "Uploading NNEDI3 weights via uniform buffer (size=%d)\n",
-                       weights_size);
-
-            // We don't know the endianness of GPU, just assume it's little
-            // endian.
-            p->gl->BufferData(GL_UNIFORM_BUFFER, weights_size, weights,
-                              GL_STATIC_DRAW);
-        }
-    }
     // number of passes to apply prescaler, can be zero.
     int prescale_passes = get_prescale_passes(p);
 
@@ -2479,26 +2446,6 @@ static void check_gl_features(struct gl_video *p)
         p->opts.deband = 0;
         MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
     }
-
-    if (p->opts.prescale == 2) {
-        if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_UBO) {
-            // Check features for uniform buffer objects.
-            if (!gl->BindBufferBase || !gl->GetUniformBlockIndex) {
-                MP_WARN(p, "Disabling NNEDI3 (%s required).\n",
-                        gl->es ? "OpenGL ES 3.0" : "OpenGL 3.1");
-                p->opts.prescale = 0;
-            }
-        } else if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_SHADER) {
-            // Check features for hard coding approach.
-            if ((!gl->es && gl->glsl_version < 330) ||
-                (gl->es && gl->glsl_version < 300))
-            {
-                MP_WARN(p, "Disabling NNEDI3 (%s required).\n",
-                        gl->es ? "OpenGL ES 3.0" : "OpenGL 3.3");
-                p->opts.prescale = 0;
-            }
-        }
-    }
 }
 
 static void init_gl(struct gl_video *p)
@@ -2821,7 +2768,6 @@ static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
     talloc_free(dst->post_shaders);
     talloc_free(dst->deband_opts);
     talloc_free(dst->superxbr_opts);
-    talloc_free(dst->nnedi3_opts);
 
     *dst = *src;
 
@@ -2831,11 +2777,6 @@ static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
     if (src->superxbr_opts) {
         dst->superxbr_opts = m_sub_options_copy(NULL, &superxbr_conf,
                                                 src->superxbr_opts);
-    }
-
-    if (src->nnedi3_opts) {
-        dst->nnedi3_opts = m_sub_options_copy(NULL, &nnedi3_conf,
-                                                src->nnedi3_opts);
     }
 
     for (int n = 0; n < 4; n++) {
