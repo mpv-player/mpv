@@ -2483,14 +2483,18 @@ static void check_gl_features(struct gl_video *p)
     if (p->opts.prescale == 2) {
         if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_UBO) {
             // Check features for uniform buffer objects.
-            if (!p->gl->BindBufferBase || !p->gl->GetUniformBlockIndex) {
-                MP_WARN(p, "Disabling NNEDI3 (OpenGL 3.1 required).\n");
+            if (!gl->BindBufferBase || !gl->GetUniformBlockIndex) {
+                MP_WARN(p, "Disabling NNEDI3 (%s required).\n",
+                        gl->es ? "OpenGL ES 3.0" : "OpenGL 3.1");
                 p->opts.prescale = 0;
             }
         } else if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_SHADER) {
             // Check features for hard coding approach.
-            if (p->gl->glsl_version < 330) {
-                MP_WARN(p, "Disabling NNEDI3 (OpenGL 3.3 required).\n");
+            if ((!gl->es && gl->glsl_version < 330) ||
+                (gl->es && gl->glsl_version < 300))
+            {
+                MP_WARN(p, "Disabling NNEDI3 (%s required).\n",
+                        gl->es ? "OpenGL ES 3.0" : "OpenGL 3.3");
                 p->opts.prescale = 0;
             }
         }
