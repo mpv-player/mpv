@@ -170,7 +170,6 @@ static const struct gl_functions gl_functions[] = {
         .ver_core = 300,
         .ver_es_core = 300,
         .functions = (const struct gl_function[]) {
-            DEF_FN(BindBufferBase),
             DEF_FN(BlitFramebuffer),
             DEF_FN(GetStringi),
             // for ES 3.0
@@ -320,17 +319,6 @@ static const struct gl_functions gl_functions[] = {
         .extension = "GL_MP_D3D_interfaces",
         .functions = (const struct gl_function[]) {
             DEF_FN_NAME(MPGetNativeDisplay, "glMPGetD3DInterface"),
-            {0}
-        },
-    },
-    // uniform buffer object extensions, requires OpenGL 3.1.
-    {
-        .ver_core = 310,
-        .ver_es_core = 300,
-        .extension = "GL_ARB_uniform_buffer_object",
-        .functions = (const struct gl_function[]) {
-            DEF_FN(GetUniformBlockIndex),
-            DEF_FN(UniformBlockBinding),
             {0}
         },
     },

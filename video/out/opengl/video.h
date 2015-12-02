@@ -102,7 +102,6 @@ struct gl_video_opts {
     int prescale_passes;
     float prescale_downscaling_threshold;
     struct superxbr_opts *superxbr_opts;
-    struct nnedi3_opts *nnedi3_opts;
 };
 
 extern const struct m_sub_options gl_video_conf;

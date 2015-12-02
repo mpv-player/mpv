@@ -15,7 +15,6 @@
 /tags
 /TAGS
 /video/out/x11_icon.inc
-/video/out/opengl/nnedi3_weights.inc
 /demux/ebml_defs.c
 /demux/ebml_types.h
 /sub/osd_font.h
