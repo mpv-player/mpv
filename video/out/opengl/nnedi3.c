@@ -108,7 +108,7 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
         snprintf(buf, sizeof(buf), "vec4 weights[%d];",
                  neurons * (sample_count * 2 + 1));
         gl_sc_uniform_buffer(sc, "NNEDI3_WEIGHTS", buf, 0);
-        if (gl->glsl_version < 140)
+        if (!gl->es && gl->glsl_version < 140)
             gl_sc_enable_extension(sc, "GL_ARB_uniform_buffer_object");
     } else if (conf->upload == NNEDI3_UPLOAD_SHADER) {
         // Somehow necessary for hard coding approach.
@@ -139,12 +139,12 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
 
     for (int y = 0; y < height; y++)
         for (int x = 0; x < width; x += 4) {
-            GLSLHF("samples[%d] = vec4(GET(%d, %d), GET(%d, %d),"
-                                      "GET(%d, %d), GET(%d, %d));\n",
+            GLSLHF("samples[%d] = vec4(GET(%d.0, %d.0), GET(%d.0, %d.0),"
+                                      "GET(%d.0, %d.0), GET(%d.0, %d.0));\n",
                    (y * width + x) / 4, x, y, x+1, y, x+2, y, x+3, y);
         }
 
-    GLSLHF("float sum = 0, sumsq = 0;"
+    GLSLHF("float sum = 0.0, sumsq = 0.0;"
            "for (int i = 0; i < %d; i++) {"
                "sum += dot(samples[i], vec4(1.0));"
                "sumsq += dot(samples[i], samples[i]);"
@@ -152,11 +152,11 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
 
     GLSLHF("float mstd0 = sum / %d.0;\n"
            "float mstd1 = sumsq / %d.0 - mstd0 * mstd0;\n"
-           "float mstd2 = mix(0, inversesqrt(mstd1), mstd1 >= %.12e);\n"
+           "float mstd2 = mix(0.0, inversesqrt(mstd1), mstd1 >= %.12e);\n"
            "mstd1 *= mstd2;\n",
            width * height, width * height, FLT_EPSILON);
 
-    GLSLHF("float vsum = 0, wsum = 0, sum1, sum2;\n");
+    GLSLHF("float vsum = 0.0, wsum = 0.0, sum1, sum2;\n");
 
     if (conf->upload == NNEDI3_UPLOAD_SHADER) {
         GLSLH(#define T(x) intBitsToFloat(x))
@@ -166,7 +166,7 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
                "sum1 = exp(sum1 * mstd2 + T(w0));"
                "sum2 = sum2 * mstd2 + T(w1);"
                "wsum += sum1;"
-               "vsum += sum1*(sum2/(1+abs(sum2)));\n");
+               "vsum += sum1*(sum2/(1.0+abs(sum2)));\n");
 
         for (int n = 0; n < neurons; n++) {
             const uint32_t *weights_ptr = weights + (sample_count * 2 + 1) * 4 * n;
@@ -191,7 +191,7 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
         GLSLHF("for (int n = 0; n < %d; n++) {\n", neurons);
 
         for (int s = 0; s < 2; s++) {
-            GLSLHF("sum%d = 0;\n"
+            GLSLHF("sum%d = 0.0;\n"
                    "for (int i = 0; i < %d; i++) {"
                        "sum%d += dot(samples[i], weights[idx++]);"
                    "}\n",
@@ -201,12 +201,12 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
         GLSLH(sum1 = exp(sum1 * mstd2 + weights[idx][0]);
               sum2 = sum2 * mstd2 + weights[idx++][1];
               wsum += sum1;
-              vsum += sum1*(sum2/(1+abs(sum2)));)
+              vsum += sum1*(sum2/(1.0+abs(sum2)));)
 
         GLSLHF("}\n");
     }
 
-    GLSLH(return clamp(mstd0 + 5.0 * vsum / wsum * mstd1, 0, 1);)
+    GLSLH(return clamp(mstd0 + 5.0 * vsum / wsum * mstd1, 0.0, 1.0);)
 
     GLSLHF("}\n"); // nnedi3
 

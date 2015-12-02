@@ -618,11 +618,11 @@ Available video output drivers are:
 
         ``ubo``
             Upload these weights via uniform buffer objects. This is the
-            default. (requires OpenGL 3.1)
+            default. (requires OpenGL 3.1 / GLES 3.0)
 
         ``shader``
             Hard code all the weights into the shader source code. (requires
-            OpenGL 3.3)
+            OpenGL 3.3 / GLES 3.0)
 
 
     ``pre-shaders=<files>``, ``post-shaders=<files>``, ``scale-shader=<file>``
