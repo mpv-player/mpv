@@ -322,7 +322,7 @@ const struct mpgl_driver mpgl_driver_x11 = {
 };
 
 const struct mpgl_driver mpgl_driver_x11_probe = {
-    .name           = "x11",
+    .name           = "x11probe",
     .priv_size      = sizeof(struct glx_context),
     .init           = glx_init_probe,
     .reconfig       = glx_reconfig,
