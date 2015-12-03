@@ -80,7 +80,7 @@ void MpvWidget::initializeGL()
 
 void MpvWidget::paintGL()
 {
-    mpv_opengl_cb_draw(mpv_gl, QOpenGLContext::currentContext()->defaultFramebufferObject(), width(), -height());
+    mpv_opengl_cb_draw(mpv_gl, defaultFramebufferObject(), width(), -height());
 }
 
 void MpvWidget::swapped()
