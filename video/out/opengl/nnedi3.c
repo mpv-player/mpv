@@ -18,9 +18,14 @@
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
+ *
+ * The shader portions may have been derived from existing LGPLv3 shaders
+ * (see below), possibly making this file effectively LGPLv3.
  */
 
 #include "nnedi3.h"
+
+#if HAVE_NNEDI
 
 #include <assert.h>
 #include <stdint.h>
@@ -233,3 +238,21 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
               i, tex_num, tex_num, tex_num, i, tex_mul);
     }
 }
+
+#else
+
+const struct m_sub_options nnedi3_conf = {0};
+
+
+const float* get_nnedi3_weights(const struct nnedi3_opts *conf, int *size)
+{
+    return NULL;
+}
+
+void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
+                 int step, float tex_mul, const struct nnedi3_opts *conf,
+                 struct gl_transform *transform)
+{
+}
+
+#endif

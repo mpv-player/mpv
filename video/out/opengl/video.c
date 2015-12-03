@@ -459,8 +459,11 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLOAT("sharpen", unsharp, 0),
         OPT_CHOICE("prescale", prescale, 0,
                    ({"none", 0},
-                    {"superxbr", 1},
-                    {"nnedi3", 2})),
+                    {"superxbr", 1}
+#if HAVE_NNEDI
+                    , {"nnedi3", 2}
+#endif
+                    )),
         OPT_INTRANGE("prescale-passes",
                      prescale_passes, 0, 1, MAX_PRESCALE_PASSES),
         OPT_FLOATRANGE("prescale-downscaling-threshold",

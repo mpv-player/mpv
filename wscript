@@ -10,6 +10,11 @@ from waftools.checks.custom import *
 
 build_options = [
     {
+        'name': '--gpl3',
+        'desc': 'GPL3 license',
+        'default': 'disable',
+        'func': check_true
+    }, {
         'name': '--cplayer',
         'desc': 'mpv CLI player',
         'default': 'enable',
