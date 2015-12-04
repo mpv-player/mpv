@@ -964,9 +964,9 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     if (vsync <= 0)
         return;
 
-    double adjusted_duration = mpctx->past_frames[0].approx_duration;
+    double adjusted_duration = MPMAX(0, mpctx->past_frames[0].approx_duration);
     adjusted_duration /= opts->playback_speed;
-    if (adjusted_duration <= 0.001 || adjusted_duration > 0.5)
+    if (adjusted_duration > 0.5)
         return;
 
     mpctx->speed_factor_v = 1.0;
