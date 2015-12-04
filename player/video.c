@@ -579,9 +579,9 @@ static void handle_new_frame(struct MPContext *mpctx)
             // Assume a discontinuity.
             MP_WARN(mpctx, "Invalid video timestamp: %f -> %f\n",
                     mpctx->video_pts, pts);
-            frame_time = 0;
-            if (mpctx->d_audio)
+            if (mpctx->d_audio && fabs(frame_time) > 1.0)
                 mpctx->audio_status = STATUS_SYNCING;
+            frame_time = 0;
         }
     }
     mpctx->video_next_pts = pts;
