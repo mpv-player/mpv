@@ -73,7 +73,6 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
     filter->f.radius *= filter->inv_scale;
     // Polar filters are dependent solely on the radius
     if (filter->polar) {
-        filter->f.radius = fmin(filter->f.radius, 16.0);
         filter->size = 1;
         // Safety precaution to avoid generating a gigantic shader
         if (filter->f.radius > 16.0) {
