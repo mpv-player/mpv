@@ -30,7 +30,7 @@
 #define GLSLH(x) gl_sc_hadd(sc, #x "\n");
 #define GLSLHF(...) gl_sc_haddf(sc, __VA_ARGS__)
 
-// Set up shared/commonly used variables
+// Set up shared/commonly used variables and macros
 void sampler_prelude(struct gl_shader_cache *sc, int tex_num)
 {
     GLSLF("#undef tex\n");
@@ -38,6 +38,10 @@ void sampler_prelude(struct gl_shader_cache *sc, int tex_num)
     GLSLF("vec2 pos = texcoord%d;\n", tex_num);
     GLSLF("vec2 size = texture_size%d;\n", tex_num);
     GLSLF("vec2 pt = vec2(1.0) / size;\n");
+    GLSLF("#undef LUT_POS\n");
+    // The variant of mix() with three floats as parameters is supported in
+    // all GLSL versions.
+    GLSLF("#define LUT_POS(x, lut_size) mix(0.5 / (lut_size), 1.0 - 0.5 / (lut_size), (x))\n");
 }
 
 static void pass_sample_separated_get_weights(struct gl_shader_cache *sc,
@@ -45,19 +49,21 @@ static void pass_sample_separated_get_weights(struct gl_shader_cache *sc,
 {
     gl_sc_uniform_sampler(sc, "lut", scaler->gl_target,
                           TEXUNIT_SCALERS + scaler->index);
+    // Define a new variable to cache the corrected fcoord.
+    GLSLF("float fcoord_lut = LUT_POS(fcoord, %d.0);\n", scaler->lut_size);
 
     int N = scaler->kernel->size;
     if (N == 2) {
-        GLSL(vec2 c1 = texture(lut, vec2(0.5, fcoord)).RG;)
+        GLSL(vec2 c1 = texture(lut, vec2(0.5, fcoord_lut)).RG;)
         GLSL(float weights[2] = float[](c1.r, c1.g);)
     } else if (N == 6) {
-        GLSL(vec4 c1 = texture(lut, vec2(0.25, fcoord));)
-        GLSL(vec4 c2 = texture(lut, vec2(0.75, fcoord));)
+        GLSL(vec4 c1 = texture(lut, vec2(0.25, fcoord_lut));)
+        GLSL(vec4 c2 = texture(lut, vec2(0.75, fcoord_lut));)
         GLSL(float weights[6] = float[](c1.r, c1.g, c1.b, c2.r, c2.g, c2.b);)
     } else {
         GLSLF("float weights[%d];\n", N);
         for (int n = 0; n < N / 4; n++) {
-            GLSLF("c = texture(lut, vec2(1.0 / %d.0 + %d.0 / %d.0, fcoord));\n",
+            GLSLF("c = texture(lut, vec2(1.0 / %d.0 + %d.0 / %d.0, fcoord_lut));\n",
                     N / 2, n, N / 4);
             GLSLF("weights[%d] = c.r;\n", n * 4 + 0);
             GLSLF("weights[%d] = c.g;\n", n * 4 + 1);
@@ -142,9 +148,11 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler)
             if (dmax >= radius - M_SQRT2)
                 GLSLF("if (d < 1.0) {\n");
             if (scaler->gl_target == GL_TEXTURE_1D) {
-                GLSL(w = texture1D(lut, d).r;)
+                GLSLF("w = texture1D(lut, LUT_POS(d, %d.0)).r;\n",
+                      scaler->lut_size);
             } else {
-                GLSL(w = texture(lut, vec2(0.5, d)).r;)
+                GLSLF("w = texture(lut, vec2(0.5, LUT_POS(d, %d.0))).r;\n",
+                      scaler->lut_size);
             }
             GLSL(wsum += w;)
             GLSLF("c = texture(tex, base + pt * vec2(%d.0, %d.0));\n", x, y);

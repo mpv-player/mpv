@@ -62,6 +62,7 @@ struct scaler {
     GLenum gl_target;
     struct fbotex sep_fbo;
     bool insufficient;
+    int lut_size;
 
     // kernel points here
     struct filter_kernel kernel_storage;

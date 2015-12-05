@@ -1081,14 +1081,16 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
 
     gl->BindTexture(target, scaler->gl_lut);
 
-    float *weights = talloc_array(NULL, float, LOOKUP_TEXTURE_SIZE * size);
-    mp_compute_lut(scaler->kernel, LOOKUP_TEXTURE_SIZE, weights);
+    scaler->lut_size = LOOKUP_TEXTURE_SIZE;
+
+    float *weights = talloc_array(NULL, float, scaler->lut_size * size);
+    mp_compute_lut(scaler->kernel, scaler->lut_size, weights);
 
     if (target == GL_TEXTURE_1D) {
-        gl->TexImage1D(target, 0, fmt->internal_format, LOOKUP_TEXTURE_SIZE,
+        gl->TexImage1D(target, 0, fmt->internal_format, scaler->lut_size,
                        0, fmt->format, GL_FLOAT, weights);
     } else {
-        gl->TexImage2D(target, 0, fmt->internal_format, width, LOOKUP_TEXTURE_SIZE,
+        gl->TexImage2D(target, 0, fmt->internal_format, width, scaler->lut_size,
                        0, fmt->format, GL_FLOAT, weights);
     }
 
