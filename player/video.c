@@ -289,7 +289,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     }
 
 #if HAVE_ENCODING
-    if (mpctx->encode_lavc_ctx && d_video)
+    if (mpctx->encode_lavc_ctx)
         encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, d_video->fps);
 #endif
 
