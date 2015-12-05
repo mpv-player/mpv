@@ -269,7 +269,8 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         struct vo_priv *opts = ctx->new_opts ? ctx->new_opts : p;
         if (opts) {
             gl_video_set_options(ctx->renderer, opts->renderer_opts);
-            gl_video_configure_queue(ctx->renderer, vo);
+            if (vo)
+                gl_video_configure_queue(ctx->renderer, vo);
             ctx->gl->debug_context = opts->use_gl_debug;
             gl_video_set_debug(ctx->renderer, opts->use_gl_debug);
         }
