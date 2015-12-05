@@ -54,6 +54,8 @@ struct sd_lavc_priv {
     int64_t new_id;
     struct mp_image_params video_params;
     double current_pts;
+    double *timestamps;
+    int num_timestamps;
 };
 
 static bool supports_format(const char *format)
@@ -235,6 +237,18 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         b->y = r->y;
         current->count++;
     }
+
+    if (pts != MP_NOPTS_VALUE && current->count) {
+        for (int n = 0; n < priv->num_timestamps; n++) {
+            if (priv->timestamps[n] == pts)
+                goto skip;
+        }
+        // Set arbitrary limit as safe-guard against insane files.
+        if (priv->num_timestamps >= 10000)
+            MP_TARRAY_REMOVE_AT(priv->timestamps, priv->num_timestamps, 0);
+        MP_TARRAY_APPEND(priv, priv->timestamps, priv->num_timestamps, pts);
+        skip: ;
+    }
 }
 
 static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
@@ -349,10 +363,72 @@ static void uninit(struct sd *sd)
     talloc_free(priv);
 }
 
+static int compare_double(const void *pa, const void *pb)
+{
+    double diff = *(double *)pa - *(double *)pb;
+    return diff == 0 ? 0 : (diff < 0 ? -1 : +1);
+}
+
+// taken from ass_step_sub(), libass (ISC)
+static double step_sub(struct sd *sd, double now, int movement)
+{
+    struct sd_lavc_priv *priv = sd->priv;
+    int best = -1;
+    double target = now;
+    int direction = movement > 0 ? 1 : -1;
+
+    if (movement == 0 || priv->num_timestamps == 0)
+        return MP_NOPTS_VALUE;
+
+    qsort(priv->timestamps, priv->num_timestamps, sizeof(priv->timestamps[0]),
+          compare_double);
+
+    while (movement) {
+        int closest = -1;
+        double closest_time = 0;
+        for (int i = 0; i < priv->num_timestamps; i++) {
+            double start = priv->timestamps[i];
+            if (direction < 0) {
+                double end = start;
+                if (i + 1 < priv->num_timestamps)
+                    end = priv->timestamps[i + 1];
+                if (end < target) {
+                    if (closest < 0 || end > closest_time) {
+                        closest = i;
+                        closest_time = end;
+                    }
+                }
+            } else {
+                if (start > target) {
+                    if (closest < 0 || start < closest_time) {
+                        closest = i;
+                        closest_time = start;
+                    }
+                }
+            }
+        }
+        if (closest < 0)
+            break;
+        target = closest_time + direction;
+        best = closest;
+        movement -= direction;
+    }
+
+    return best < 0 ? 0 : priv->timestamps[best] - now;
+}
+
 static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
 {
     struct sd_lavc_priv *priv = sd->priv;
     switch (cmd) {
+    case SD_CTRL_SUB_STEP: {
+        double *a = arg;
+        double res = step_sub(sd, a[0], a[1]);
+        if (res == MP_NOPTS_VALUE)
+            return false;
+        a[0] = res;
+        return true;
+    }
     case SD_CTRL_SET_VIDEO_PARAMS:
         priv->video_params = *(struct mp_image_params *)arg;
         return CONTROL_OK;
