@@ -46,6 +46,11 @@ struct sub {
     int64_t id;
 };
 
+struct seekpoint {
+    double pts;
+    double endpts;
+};
+
 struct sd_lavc_priv {
     AVCodecContext *avctx;
     struct sub subs[MAX_QUEUE]; // most recent event first
@@ -54,8 +59,8 @@ struct sd_lavc_priv {
     int64_t new_id;
     struct mp_image_params video_params;
     double current_pts;
-    double *timestamps;
-    int num_timestamps;
+    struct seekpoint *seekpoints;
+    int num_seekpoints;
 };
 
 static bool supports_format(const char *format)
@@ -158,6 +163,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     struct sd_lavc_priv *priv = sd->priv;
     AVCodecContext *ctx = priv->avctx;
     double pts = packet->pts;
+    double endpts = MP_NOPTS_VALUE;
     double duration = packet->duration;
     AVSubtitle sub;
     AVPacket pkt;
@@ -186,14 +192,30 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             duration = (sub.end_display_time - sub.start_display_time) / 1000.0;
         }
         pts += sub.start_display_time / 1000.0;
-    }
-    double endpts = MP_NOPTS_VALUE;
-    if (pts != MP_NOPTS_VALUE && duration >= 0)
-        endpts = pts + duration;
 
-    // set end time of previous sub
-    if (priv->subs[0].endpts == MP_NOPTS_VALUE || priv->subs[0].endpts > pts)
-        priv->subs[0].endpts = pts;
+        if (duration >= 0)
+            endpts = pts + duration;
+
+        // set end time of previous sub
+        struct sub *prev = &priv->subs[0];
+        if (prev->valid) {
+            if (prev->endpts == MP_NOPTS_VALUE || prev->endpts > pts)
+                prev->endpts = pts;
+
+            for (int n = 0; n < priv->num_seekpoints; n++) {
+                if (priv->seekpoints[n].pts == prev->pts) {
+                    priv->seekpoints[n].endpts = prev->endpts;
+                    break;
+                }
+            }
+        }
+
+        // This subtitle packet only signals the end of subtitle display.
+        if (!sub.num_rects) {
+            avsubtitle_free(&sub);
+            return;
+        }
+    }
 
     alloc_sub(priv);
     struct sub *current = &priv->subs[0];
@@ -238,15 +260,16 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         current->count++;
     }
 
-    if (pts != MP_NOPTS_VALUE && current->count) {
-        for (int n = 0; n < priv->num_timestamps; n++) {
-            if (priv->timestamps[n] == pts)
+    if (pts != MP_NOPTS_VALUE) {
+        for (int n = 0; n < priv->num_seekpoints; n++) {
+            if (priv->seekpoints[n].pts == pts)
                 goto skip;
         }
         // Set arbitrary limit as safe-guard against insane files.
-        if (priv->num_timestamps >= 10000)
-            MP_TARRAY_REMOVE_AT(priv->timestamps, priv->num_timestamps, 0);
-        MP_TARRAY_APPEND(priv, priv->timestamps, priv->num_timestamps, pts);
+        if (priv->num_seekpoints >= 10000)
+            MP_TARRAY_REMOVE_AT(priv->seekpoints, priv->num_seekpoints, 0);
+        MP_TARRAY_APPEND(priv, priv->seekpoints, priv->num_seekpoints,
+                         (struct seekpoint){.pts = pts, .endpts = endpts});
         skip: ;
     }
 }
@@ -363,10 +386,10 @@ static void uninit(struct sd *sd)
     talloc_free(priv);
 }
 
-static int compare_double(const void *pa, const void *pb)
+static int compare_seekpoint(const void *pa, const void *pb)
 {
-    double diff = *(double *)pa - *(double *)pb;
-    return diff == 0 ? 0 : (diff < 0 ? -1 : +1);
+    const struct seekpoint *a = pa, *b = pb;
+    return a->pts == b->pts ? 0 : (a->pts < b->pts ? -1 : +1);
 }
 
 // taken from ass_step_sub(), libass (ISC)
@@ -377,21 +400,20 @@ static double step_sub(struct sd *sd, double now, int movement)
     double target = now;
     int direction = movement > 0 ? 1 : -1;
 
-    if (movement == 0 || priv->num_timestamps == 0)
+    if (movement == 0 || priv->num_seekpoints == 0)
         return MP_NOPTS_VALUE;
 
-    qsort(priv->timestamps, priv->num_timestamps, sizeof(priv->timestamps[0]),
-          compare_double);
+    qsort(priv->seekpoints, priv->num_seekpoints, sizeof(priv->seekpoints[0]),
+          compare_seekpoint);
 
     while (movement) {
         int closest = -1;
         double closest_time = 0;
-        for (int i = 0; i < priv->num_timestamps; i++) {
-            double start = priv->timestamps[i];
+        for (int i = 0; i < priv->num_seekpoints; i++) {
+            struct seekpoint *p = &priv->seekpoints[i];
+            double start = p->pts;
             if (direction < 0) {
-                double end = start;
-                if (i + 1 < priv->num_timestamps)
-                    end = priv->timestamps[i + 1];
+                double end = p->endpts == MP_NOPTS_VALUE ? INFINITY : p->endpts;
                 if (end < target) {
                     if (closest < 0 || end > closest_time) {
                         closest = i;
@@ -414,7 +436,7 @@ static double step_sub(struct sd *sd, double now, int movement)
         movement -= direction;
     }
 
-    return best < 0 ? 0 : priv->timestamps[best] - now;
+    return best < 0 ? 0 : priv->seekpoints[best].pts - now;
 }
 
 static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
