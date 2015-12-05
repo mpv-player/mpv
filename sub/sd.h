@@ -52,6 +52,7 @@ struct sd_functions {
     void (*reset)(struct sd *sd);
     void (*uninit)(struct sd *sd);
 
+    bool (*accepts_packet)(struct sd *sd); // implicit default if NULL: true
     void (*fix_events)(struct sd *sd);
     int (*control)(struct sd *sd, enum sd_ctrl cmd, void *arg);
 

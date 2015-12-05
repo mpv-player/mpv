@@ -222,8 +222,8 @@ static void update_subtitle(struct MPContext *mpctx, int order)
             if (subpts_s > curpts_s) {
                 MP_DBG(mpctx, "Sub early: c_pts=%5.3f s_pts=%5.3f\n",
                        curpts_s, subpts_s);
-                // Libass handled subs can be fed to it in advance
-                if (!sub_accept_packets_in_advance(dec_sub))
+                // Often subs can be handled in advance
+                if (!sub_accepts_packet_in_advance(dec_sub))
                     break;
                 // Try to avoid demuxing whole file at once
                 if (subpts_s > curpts_s + 1 && !interleaved)

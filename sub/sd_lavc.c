@@ -53,6 +53,7 @@ struct sd_lavc_priv {
     int64_t displayed_id;
     int64_t new_id;
     struct mp_image_params video_params;
+    double current_pts;
 };
 
 static bool supports_format(const char *format)
@@ -116,6 +117,7 @@ static int init(struct sd *sd)
     priv->avctx = ctx;
     sd->priv = priv;
     priv->displayed_id = -1;
+    priv->current_pts = MP_NOPTS_VALUE;
     return 0;
 
  error:
@@ -138,8 +140,10 @@ static void clear_sub(struct sub *sub)
 static void alloc_sub(struct sd_lavc_priv *priv)
 {
     clear_sub(&priv->subs[MAX_QUEUE - 1]);
+    struct sub tmp = priv->subs[MAX_QUEUE - 1];
     for (int n = MAX_QUEUE - 1; n > 0; n--)
         priv->subs[n] = priv->subs[n - 1];
+    priv->subs[0] = tmp;
     // clear only some fields; the memory allocs can be reused
     priv->subs[0].valid = false;
     priv->subs[0].count = 0;
@@ -239,8 +243,10 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     struct sd_lavc_priv *priv = sd->priv;
     struct MPOpts *opts = sd->opts;
 
+    priv->current_pts = pts;
+
     struct sub *current = NULL;
-    for (int n = 0; n < MAX_QUEUE; n++) {
+    for (int n = MAX_QUEUE - 1; n >= 0; n--) {
         struct sub *sub = &priv->subs[n];
         if (!sub->valid)
             continue;
@@ -297,6 +303,28 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     osd_rescale_bitmaps(res, insize[0], insize[1], d, video_par);
 }
 
+static bool accepts_packet(struct sd *sd)
+{
+    struct sd_lavc_priv *priv = sd->priv;
+
+    double pts = priv->current_pts;
+    int last_needed = -1;
+    for (int n = 0; n < MAX_QUEUE; n++) {
+        struct sub *sub = &priv->subs[n];
+        if (!sub->valid)
+            continue;
+        if (pts == MP_NOPTS_VALUE ||
+            ((sub->pts == MP_NOPTS_VALUE || sub->pts >= pts) ||
+             (sub->endpts == MP_NOPTS_VALUE || pts < sub->endpts)))
+        {
+            last_needed = n;
+        }
+    }
+    // We can accept a packet if it wouldn't overflow the fixed subtitle queue.
+    // We assume that get_bitmaps() never decreases the PTS.
+    return last_needed + 1 < MAX_QUEUE;
+}
+
 static void reset(struct sd *sd)
 {
     struct sd_lavc_priv *priv = sd->priv;
@@ -305,6 +333,8 @@ static void reset(struct sd *sd)
         clear_sub(&priv->subs[n]);
     // lavc might not do this right for all codecs; may need close+reopen
     avcodec_flush_buffers(priv->avctx);
+
+    priv->current_pts = MP_NOPTS_VALUE;
 }
 
 static void uninit(struct sd *sd)
@@ -340,6 +370,7 @@ const struct sd_functions sd_lavc = {
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,
+    .accepts_packet = accepts_packet,
     .control = control,
     .reset = reset,
     .uninit = uninit,

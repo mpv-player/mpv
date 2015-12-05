@@ -415,7 +415,9 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh)
 
     pthread_mutex_lock(&sub->lock);
 
-    if (!sub_accept_packets_in_advance(sub) || sub->num_sd < 1) {
+    // Converters are assumed to always accept packets in advance
+    struct sd *sd = sub_get_last_sd(sub);
+    if (!(sd && sd->driver->accept_packets_in_advance)) {
         pthread_mutex_unlock(&sub->lock);
         return false;
     }
@@ -486,14 +488,16 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh)
     return true;
 }
 
-bool sub_accept_packets_in_advance(struct dec_sub *sub)
+bool sub_accepts_packet_in_advance(struct dec_sub *sub)
 {
+    bool res = true;
     pthread_mutex_lock(&sub->lock);
-    // Converters are assumed to always accept packets in advance
-    struct sd *sd = sub_get_last_sd(sub);
-    bool r = sd && sd->driver->accept_packets_in_advance;
+    for (int n = 0; n < sub->num_sd; n++) {
+        if (sub->sd[n]->driver->accepts_packet)
+            res &= sub->sd[n]->driver->accepts_packet(sub->sd[n]);
+    }
     pthread_mutex_unlock(&sub->lock);
-    return r;
+    return res;
 }
 
 // You must call sub_lock/sub_unlock if more than 1 thread access sub.
