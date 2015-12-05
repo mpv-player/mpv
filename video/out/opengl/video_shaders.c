@@ -139,7 +139,7 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler)
                 continue;
             GLSLF("d = length(vec2(%d.0, %d.0) - fcoord)/%f;\n", x, y, radius);
             // Check for samples that might be skippable
-            if (dmax >= radius - 1)
+            if (dmax >= radius - M_SQRT2)
                 GLSLF("if (d < 1.0) {\n");
             if (scaler->gl_target == GL_TEXTURE_1D) {
                 GLSL(w = texture1D(lut, d).r;)
@@ -153,7 +153,7 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler)
                 GLSL(lo = min(lo, c);)
                 GLSL(hi = max(hi, c);)
             }
-            if (dmax >= radius -1)
+            if (dmax >= radius - M_SQRT2)
                 GLSLF("}\n");
         }
     }
