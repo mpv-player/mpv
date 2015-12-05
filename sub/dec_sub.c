@@ -356,8 +356,8 @@ static void multiply_timings(struct packet_list *subs, double factor)
 // overlapping lines. (It's not worth the trouble.)
 static void fix_overlaps_and_gaps(struct packet_list *subs)
 {
-    double threshold = 0.2;     // up to 200 ms overlaps or gaps are removed
-    double keep = threshold * 2;// don't change timings if durations are smaller
+    double threshold = SUB_GAP_THRESHOLD;
+    double keep = SUB_GAP_KEEP;
     for (int i = 0; i < subs->num_packets - 1; i++) {
         struct demux_packet *cur = subs->packets[i];
         struct demux_packet *next = subs->packets[i + 1];
