@@ -337,7 +337,7 @@ static const char *guess_sub_cp(struct mp_log *log, void *talloc_ctx,
     return guess;
 }
 
-static void add_sub_list(struct dec_sub *sub, int at, struct packet_list *subs)
+static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
 {
     struct sd *sd = sub_get_last_sd(sub);
     assert(sd);
@@ -345,7 +345,7 @@ static void add_sub_list(struct dec_sub *sub, int at, struct packet_list *subs)
     sd->no_remove_duplicates = true;
 
     for (int n = 0; n < subs->num_packets; n++)
-        decode_chain_recode(sub, sub->sd + at, sub->num_sd - at, subs->packets[n]);
+        decode_chain_recode(sub, sub->sd, sub->num_sd, subs->packets[n]);
 
     // Hack for broken FFmpeg packet format: make sd_ass keep the subtitle
     // events on reset(), even if broken FFmpeg ASS packets were received
@@ -384,45 +384,25 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh)
 
     struct packet_list *subs = talloc_zero(NULL, struct packet_list);
 
-    // In some cases, we want to put the packets through a decoder first.
-    // Preprocess until sub->sd[preprocess].
-    int preprocess = 0;
-
-    // movtext is currently the only subtitle format that has text output,
-    // but binary input. Do charset conversion after converting to text.
-    if (sub->sd[0]->driver == &sd_movtext)
-        preprocess = 1;
-
-    // Broken Libav libavformat srt packet format (fix timestamps first).
-    if (sub->sd[0]->driver == &sd_lavf_srt)
-        preprocess = 1;
-
     for (;;) {
         struct demux_packet *pkt = demux_read_packet(sh);
         if (!pkt)
             break;
-        if (preprocess) {
-            decode_chain(sub->sd, preprocess, pkt);
-            talloc_free(pkt);
-            while (1) {
-                pkt = get_decoded_packet(sub->sd[preprocess - 1]);
-                if (!pkt)
-                    break;
-                add_packet(subs, pkt);
-            }
-        } else {
-            add_packet(subs, pkt);
-            talloc_free(pkt);
-        }
+        add_packet(subs, pkt);
+        talloc_free(pkt);
     }
 
-    if (opts->sub_cp && !sh->sub->is_utf8)
+    // movtext is currently the only subtitle format that has text output,
+    // but binary input. Skip charset conversion (they're UTF-8 anyway).
+    bool binary = sub->sd[0]->driver == &sd_movtext;
+
+    if (opts->sub_cp && !sh->sub->is_utf8 && !binary)
         sub->charset = guess_sub_cp(sub->log, sub, subs, opts->sub_cp);
 
     if (sub->charset && sub->charset[0] && !mp_charset_is_utf8(sub->charset))
         MP_INFO(sub, "Using subtitle charset: %s\n", sub->charset);
 
-    add_sub_list(sub, preprocess, subs);
+    add_sub_list(sub, subs);
 
     pthread_mutex_unlock(&sub->lock);
     talloc_free(subs);
