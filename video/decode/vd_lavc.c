@@ -624,6 +624,9 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     struct vd_lavc_params *opts = ctx->opts->vd_lavc_params;
     AVPacket pkt;
 
+    if (!avctx)
+        return;
+
     if (flags) {
         // hr-seek framedrop vs. normal framedrop
         avctx->skip_frame = flags == 2 ? AVDISCARD_NONREF : opts->framedrop;
@@ -724,7 +727,7 @@ static int control(struct dec_video *vd, int cmd, void *arg)
         return CONTROL_TRUE;
     case VDCTRL_QUERY_UNSEEN_FRAMES: {
         AVCodecContext *avctx = ctx->avctx;
-        if (!ctx)
+        if (!avctx)
             break;
         if (ctx->hwdec && ctx->hwdec->type == HWDEC_RPI)
             break; // MMAL has arbitrary buffering, thus unknown
