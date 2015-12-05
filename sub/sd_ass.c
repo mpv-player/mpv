@@ -29,6 +29,7 @@
 #include "options/options.h"
 #include "common/common.h"
 #include "common/msg.h"
+#include "demux/stheader.h"
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "dec_sub.h"
@@ -46,6 +47,7 @@ struct sd_ass_priv {
     char last_text[500];
     struct mp_image_params video_params;
     struct mp_image_params last_params;
+    double sub_speed;
 };
 
 static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts);
@@ -116,6 +118,19 @@ static int init(struct sd *sd)
     mp_ass_add_default_styles(ctx->ass_track, opts);
 
     pthread_mutex_unlock(sd->ass_lock);
+
+    ctx->sub_speed = 1.0;
+
+    if (sd->video_fps && sd->sh && sd->sh->sub->frame_based > 0) {
+        MP_VERBOSE(sd, "Frame based format, dummy FPS: %f, video FPS: %f\n",
+                   sd->sh->sub->frame_based, sd->video_fps);
+        ctx->sub_speed *= sd->sh->sub->frame_based / sd->video_fps;
+    }
+
+    if (opts->sub_fps && sd->video_fps)
+        ctx->sub_speed *= opts->sub_fps / sd->video_fps;
+
+    ctx->sub_speed *= opts->sub_speed;
 
     return 0;
 }
@@ -250,6 +265,8 @@ static long long find_timestamp(struct sd *sd, double pts)
     struct sd_ass_priv *priv = sd->priv;
     if (pts == MP_NOPTS_VALUE)
         return 0;
+
+    pts /= priv->sub_speed;
 
     long long ts = llrint(pts * 1000);
 
@@ -528,10 +545,11 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     switch (cmd) {
     case SD_CTRL_SUB_STEP: {
         double *a = arg;
-        long long res = ass_step_sub(ctx->ass_track, a[0] * 1000 + 0.5, a[1]);
+        long long ts = llrint(a[0] * (1000.0 / ctx->sub_speed));
+        long long res = ass_step_sub(ctx->ass_track, ts, a[1]);
         if (!res)
             return false;
-        a[0] = res / 1000.0;
+        a[0] = res / (1000.0 / ctx->sub_speed);
         return true;
     }
     case SD_CTRL_SET_VIDEO_PARAMS:

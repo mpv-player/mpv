@@ -62,7 +62,6 @@ struct dec_sub {
     struct MPOpts *opts;
     struct sd init_sd;
 
-    double video_fps;
     const char *charset;
 
     struct sd *sd[MAX_NUM_SD];
@@ -143,7 +142,7 @@ void sub_set_video_res(struct dec_sub *sub, int w, int h)
 void sub_set_video_fps(struct dec_sub *sub, double fps)
 {
     pthread_mutex_lock(&sub->lock);
-    sub->video_fps = fps;
+    sub->init_sd.video_fps = fps;
     pthread_mutex_unlock(&sub->lock);
 }
 
@@ -208,6 +207,7 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh)
         sub_set_extradata(sub, sh->extradata, sh->extradata_size);
     struct sd init_sd = sub->init_sd;
     init_sd.codec = sh->codec;
+    init_sd.sh = sh;
 
     while (sub->num_sd < MAX_NUM_SD) {
         struct sd *sd = talloc(NULL, struct sd);
@@ -230,6 +230,8 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh)
             .converted_from = sd->codec,
             .extradata = sd->output_extradata,
             .extradata_len = sd->output_extradata_len,
+            .sh = sub->init_sd.sh,
+            .video_fps = sub->init_sd.video_fps,
             .ass_library = sub->init_sd.ass_library,
             .ass_renderer = sub->init_sd.ass_renderer,
             .ass_lock = sub->init_sd.ass_lock,
@@ -335,17 +337,6 @@ static const char *guess_sub_cp(struct mp_log *log, void *talloc_ctx,
     return guess;
 }
 
-static void multiply_timings(struct packet_list *subs, double factor)
-{
-    for (int n = 0; n < subs->num_packets; n++) {
-        struct demux_packet *pkt = subs->packets[n];
-        if (pkt->pts != MP_NOPTS_VALUE)
-            pkt->pts *= factor;
-        if (pkt->duration > 0)
-            pkt->duration *= factor;
-    }
-}
-
 static void add_sub_list(struct dec_sub *sub, int at, struct packet_list *subs)
 {
     struct sd *sd = sub_get_last_sd(sub);
@@ -430,22 +421,6 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh)
 
     if (sub->charset && sub->charset[0] && !mp_charset_is_utf8(sub->charset))
         MP_INFO(sub, "Using subtitle charset: %s\n", sub->charset);
-
-    double sub_speed = 1.0;
-
-    if (sub->video_fps && sh->sub->frame_based > 0) {
-        MP_VERBOSE(sub, "Frame based format, dummy FPS: %f, video FPS: %f\n",
-                   sh->sub->frame_based, sub->video_fps);
-        sub_speed *= sh->sub->frame_based / sub->video_fps;
-    }
-
-    if (opts->sub_fps && sub->video_fps)
-        sub_speed *= opts->sub_fps / sub->video_fps;
-
-    sub_speed *= opts->sub_speed;
-
-    if (sub_speed != 1.0)
-        multiply_timings(subs, sub_speed);
 
     add_sub_list(sub, preprocess, subs);
 

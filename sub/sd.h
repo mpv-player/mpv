@@ -22,6 +22,8 @@ struct sd {
     char *extradata;
     int extradata_len;
 
+    struct sh_stream *sh;
+
     // Set to !=NULL if the input packets are being converted from another
     // format.
     const char *converted_from;
@@ -29,6 +31,8 @@ struct sd {
     // Video resolution used for subtitle decoding. Doesn't necessarily match
     // the resolution of the VO, nor does it have to be the OSD resolution.
     int sub_video_w, sub_video_h;
+
+    double video_fps;
 
     // Shared renderer for ASS - done to avoid reloading embedded fonts.
     struct ass_library *ass_library;
