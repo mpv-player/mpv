@@ -49,9 +49,6 @@
 #include "video/out/dither.h"
 #include "video/out/vo.h"
 
-// Pixel width of 1D lookup textures.
-#define LOOKUP_TEXTURE_SIZE 256
-
 // Maximal number of passes that prescaler can be applied.
 #define MAX_PRESCALE_PASSES 5
 
@@ -348,6 +345,7 @@ const struct gl_video_opts gl_video_opts_def = {
         {{"mitchell",   .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .clamp = 1, }, // tscale
     },
+    .scaler_lut_size = 8,
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
@@ -371,6 +369,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
         {{"mitchell",   .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .clamp = 1, }, // tscale
     },
+    .scaler_lut_size = 8,
     .alpha_mode = 2,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
@@ -412,6 +411,7 @@ const struct m_sub_options gl_video_conf = {
         SCALER_OPTS("dscale", 1),
         SCALER_OPTS("cscale", 2),
         SCALER_OPTS("tscale", 3),
+        OPT_INTRANGE("scaler-lut-size", scaler_lut_size, 0, 4, 10),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("linear-scaling", linear_scaling, 0),
         OPT_FLAG("correct-downscaling", correct_downscaling, 0),
@@ -1081,7 +1081,7 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
 
     gl->BindTexture(target, scaler->gl_lut);
 
-    scaler->lut_size = LOOKUP_TEXTURE_SIZE;
+    scaler->lut_size = 1 << p->opts.scaler_lut_size;
 
     float *weights = talloc_array(NULL, float, scaler->lut_size * size);
     mp_compute_lut(scaler->kernel, scaler->lut_size, weights);

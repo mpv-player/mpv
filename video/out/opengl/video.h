@@ -71,6 +71,7 @@ struct scaler {
 struct gl_video_opts {
     int dumb_mode;
     struct scaler_config scaler[4];
+    int scaler_lut_size;
     float gamma;
     int gamma_auto;
     int target_prim;
