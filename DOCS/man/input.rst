@@ -329,9 +329,9 @@ List of Input Commands
     This is similar to ``sub-step``, except that it seeks video and audio
     instead of adjusting the subtitle delay.
 
-    Like with ``sub-step``, this works with external text subtitles only. For
-    embedded text subtitles (like with Matroska), this works only with subtitle
-    events that have already been displayed.
+    For embedded subtitles (like with Matroska), this works only with subtitle
+    events that have already been displayed, or are within a short prefetch
+    range.
 
 ``osd [<level>]``
     Toggle OSD level. If ``<level>`` is specified, set the OSD mode
