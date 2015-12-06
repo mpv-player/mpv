@@ -1194,14 +1194,13 @@ static void vo_x11_update_window_title(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
 
-    if (!x11->window)
+    if (!x11->window || !x11->window_title)
         return;
 
-    const char *title = vo_get_window_title(vo);
-    vo_x11_set_property_string(vo, XA_WM_NAME, title);
-    vo_x11_set_property_string(vo, XA_WM_ICON_NAME, title);
-    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_NAME), title);
-    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_ICON_NAME), title);
+    vo_x11_set_property_string(vo, XA_WM_NAME, x11->window_title);
+    vo_x11_set_property_string(vo, XA_WM_ICON_NAME, x11->window_title);
+    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_NAME), x11->window_title);
+    vo_x11_set_property_utf8(vo, XA(x11, _NET_WM_ICON_NAME), x11->window_title);
 }
 
 static void vo_x11_xembed_update(struct vo_x11_state *x11, int flags)
@@ -1804,6 +1803,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         set_screensaver(x11, true);
         return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE:
+        talloc_free(x11->window_title);
+        x11->window_title = talloc_strdup(x11, (char *)arg);
         if (!x11->parent)
             vo_x11_update_window_title(vo);
         return VO_TRUE;

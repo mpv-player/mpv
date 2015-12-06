@@ -52,6 +52,7 @@ struct vo_x11_state {
     int ws_width;
     int ws_height;
     struct mp_rect screenrc;
+    char *window_title;
 
     struct xrandr_display displays[MAX_DISPLAYS];
     int num_displays;

@@ -357,8 +357,6 @@ double vo_get_delay(struct vo *vo);
 
 void vo_wakeup(struct vo *vo);
 
-const char *vo_get_window_title(struct vo *vo);
-
 struct mp_keymap {
   int from;
   int to;

@@ -166,9 +166,6 @@ struct vo_internal {
     int req_frames;                 // VO's requested value of num_frames
 
     double display_fps;
-
-    // --- The following fields can be accessed from the VO thread only
-    char *window_title;
 };
 
 static void forget_frames(struct vo *vo);
@@ -550,8 +547,6 @@ static void run_control(void *p)
     struct vo *vo = pp[0];
     uint32_t request = *(int *)pp[1];
     void *data = pp[2];
-    if (request == VOCTRL_UPDATE_WINDOW_TITLE) // legacy fallback
-        vo->in->window_title = talloc_strdup(vo, data);
     int ret = vo->driver->control(vo, request, data);
     *(int *)pp[3] = ret;
 }
@@ -1061,18 +1056,6 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
     mp_get_src_dst_rects(vo->log, vo->opts, vo->driver->caps, vo->params,
                          vo->dwidth, vo->dheight, vo->monitor_par,
                          out_src, out_dst, out_osd);
-}
-
-// Return the window title the VO should set. Always returns a null terminated
-// string. The string is valid until frontend code is invoked again. Copy it if
-// you need to keep the string for an extended period of time.
-// Must be called from the VO thread only.
-// Don't use for new code.
-const char *vo_get_window_title(struct vo *vo)
-{
-    if (!vo->in->window_title)
-        vo->in->window_title = talloc_strdup(vo, "");
-    return vo->in->window_title;
 }
 
 // flip_page[_timed] will be called offset_us microseconds too early.
