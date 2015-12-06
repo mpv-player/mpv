@@ -38,15 +38,12 @@ static void microsoft_nonsense(void)
     HeapSetInformation(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
 
     HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
-    WINBOOL (WINAPI *pSetDllDirectory)(LPCWSTR lpPathName) =
-        (WINBOOL (WINAPI *)(LPCWSTR))GetProcAddress(kernel32, "SetDllDirectoryW");
     WINBOOL (WINAPI *pSetSearchPathMode)(DWORD Flags) =
         (WINBOOL (WINAPI *)(DWORD))GetProcAddress(kernel32, "SetSearchPathMode");
 
     // Always use safe search paths for DLLs and other files, ie. never use the
     // current directory
-    if (pSetSearchPathMode)
-        pSetDllDirectory(L"");
+    SetDllDirectoryW(L"");
     if (pSetSearchPathMode)
         pSetSearchPathMode(BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE);
 }
