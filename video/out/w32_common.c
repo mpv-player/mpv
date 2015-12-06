@@ -1327,7 +1327,11 @@ int vo_w32_init(struct vo *vo)
     // While the UI runs in its own thread, the thread in which this function
     // runs in will be the renderer thread. Apply magic MMCSS cargo-cult,
     // which might stop Windows from throttling clock rate and so on.
-    w32->avrt_handle = AvSetMmThreadCharacteristicsW(L"Playback", &(DWORD){0});
+    if (vo->opts->mmcss_profile[0]) {
+        wchar_t *profile = mp_from_utf8(NULL, vo->opts->mmcss_profile);
+        w32->avrt_handle = AvSetMmThreadCharacteristicsW(profile, &(DWORD){0});
+        talloc_free(profile);
+    }
 
     return 1;
 fail:

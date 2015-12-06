@@ -3550,6 +3550,10 @@ Miscellaneous
     other options such as e.g. user agent are not available with all protocols,
     and printing errors for unknown options would end up being too noisy.)
 
+``--vo-mmcss-profile=<name>``
+    (Windows only.)
+    Set the MMCSS profile for the video renderer thread (default: ``Playback``).
+
 ``--priority=<prio>``
     (Windows only.)
     Set process priority for mpv according to the predefined priorities

@@ -456,6 +456,10 @@ const m_option_t mp_opts[] = {
                ({"auto", 0}, {"no", -1}, {"yes", 1})),
     OPT_FLAG("x11-bypass-compositor", vo.x11_bypass_compositor, 0),
 #endif
+#if HAVE_WIN32
+    OPT_STRING("vo-mmcss-profile", vo.mmcss_profile, M_OPT_FIXED),
+#endif
+
     OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0),
     OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
 
@@ -701,6 +705,7 @@ const struct MPOpts mp_default_opts = {
         .WinID = -1,
         .window_scale = 1.0,
         .x11_bypass_compositor = 1,
+        .mmcss_profile = "Playback",
     },
     .allow_win_drag = 1,
     .wintitle = "${?media-title:${media-title}}${!media-title:No file} - mpv",
