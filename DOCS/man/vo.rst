@@ -432,9 +432,9 @@ Available video output drivers are:
             Defaults to 1.
 
     ``scaler-lut-size=<4..10>``
-        Set the size of the lookup texture for scaler kernels (default: 8).
+        Set the size of the lookup texture for scaler kernels (default: 6).
         The actual size of the texture is ``2^N`` for an option value of ``N``.
-        So the lookup texture with the default setting uses 256 samples.
+        So the lookup texture with the default setting uses 64 samples.
 
         All weights are bilinearly interpolated from those samples, so
         increasing the size of lookup table might improve the accuracy of
