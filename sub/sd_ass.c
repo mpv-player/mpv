@@ -258,6 +258,14 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
     ass_set_line_spacing(priv, set_line_spacing);
 }
 
+static bool has_overrides(char *s)
+{
+    if (!s)
+        return false;
+    return strstr(s, "\\pos") || strstr(s, "\\move") || strstr(s, "\\clip") ||
+           strstr(s, "\\iclip") || strstr(s, "\\org") || strstr(s, "\\p");
+}
+
 #define END(ev) ((ev)->Start + (ev)->Duration)
 
 static long long find_timestamp(struct sd *sd, double pts)
@@ -294,7 +302,8 @@ static long long find_timestamp(struct sd *sd, double pts)
         return ts;
 
     // Simple/minor heuristic against destroying typesetting.
-    if (ev[0]->Style != ev[1]->Style)
+    if (ev[0]->Style != ev[1]->Style || has_overrides(ev[0]->Text) ||
+        has_overrides(ev[1]->Text))
         return ts;
 
     // Sort by start timestamps.
