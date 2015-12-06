@@ -118,7 +118,8 @@ static int create_overlapped_pipe(HANDLE *read, HANDLE *write)
     // overlapped pipes, so instead, use a named pipe with a unique name
     *read = CreateNamedPipeW(buf, PIPE_ACCESS_INBOUND |
         FILE_FLAG_FIRST_PIPE_INSTANCE | FILE_FLAG_OVERLAPPED,
-        PIPE_TYPE_BYTE | PIPE_WAIT, 1, 0, 4096, 0, NULL);
+        PIPE_TYPE_BYTE | PIPE_WAIT | PIPE_REJECT_REMOTE_CLIENTS,
+        1, 0, 4096, 0, NULL);
     if (*read == INVALID_HANDLE_VALUE)
         goto error;
 
