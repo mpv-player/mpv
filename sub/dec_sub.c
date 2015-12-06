@@ -286,14 +286,13 @@ static struct demux_packet *recode_packet(struct mp_log *log,
     return pkt;
 }
 
-static void decode_chain_recode(struct dec_sub *sub, struct sd **sd, int num_sd,
-                                struct demux_packet *packet)
+static void decode_chain_recode(struct dec_sub *sub, struct demux_packet *packet)
 {
-    if (num_sd > 0) {
+    if (sub->num_sd > 0) {
         struct demux_packet *recoded = NULL;
         if (sub->charset)
             recoded = recode_packet(sub->log, packet, sub->charset);
-        decode_chain(sd, num_sd, recoded ? recoded : packet);
+        decode_chain(sub->sd, sub->num_sd, recoded ? recoded : packet);
         talloc_free(recoded);
     }
 }
@@ -301,7 +300,7 @@ static void decode_chain_recode(struct dec_sub *sub, struct sd **sd, int num_sd,
 void sub_decode(struct dec_sub *sub, struct demux_packet *packet)
 {
     pthread_mutex_lock(&sub->lock);
-    decode_chain_recode(sub, sub->sd, sub->num_sd, packet);
+    decode_chain_recode(sub, packet);
     pthread_mutex_unlock(&sub->lock);
 }
 
@@ -345,7 +344,7 @@ static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
     sd->no_remove_duplicates = true;
 
     for (int n = 0; n < subs->num_packets; n++)
-        decode_chain_recode(sub, sub->sd, sub->num_sd, subs->packets[n]);
+        decode_chain_recode(sub, subs->packets[n]);
 
     // Hack for broken FFmpeg packet format: make sd_ass keep the subtitle
     // events on reset(), even if broken FFmpeg ASS packets were received
