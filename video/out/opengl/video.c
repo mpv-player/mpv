@@ -163,7 +163,7 @@ struct gl_video {
     struct mp_imgfmt_desc image_desc;
     int plane_count;
 
-    bool is_yuv, is_rgb, is_packed_yuv;
+    bool is_yuv, is_packed_yuv;
     bool has_alpha;
     char color_swizzle[5];
 
@@ -1488,20 +1488,19 @@ static void pass_convert_yuv(struct gl_video *p)
     if (p->use_normalized_range)
         cparams.input_bits = cparams.texture_bits = 0;
 
-    // Conversion from Y'CbCr or other linear spaces to RGB
-    if (!p->is_rgb) {
-        struct mp_cmat m = {{{0}}};
-        if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
-            struct mp_csp_primaries csp = mp_get_csp_primaries(p->image_params.primaries);
-            mp_get_xyz2rgb_coeffs(&cparams, csp, MP_INTENT_RELATIVE_COLORIMETRIC, &m);
-        } else {
-            mp_get_yuv2rgb_coeffs(&cparams, &m);
-        }
-        gl_sc_uniform_mat3(sc, "colormatrix", true, &m.m[0][0]);
-        gl_sc_uniform_vec3(sc, "colormatrix_c", m.c);
-
-        GLSL(color.rgb = mat3(colormatrix) * color.rgb + colormatrix_c;)
+    // Conversion to RGB. For RGB itself, this still applies e.g. brightness
+    // and contrast controls, or expansion of e.g. LSB-packed 10 bit data.
+    struct mp_cmat m = {{{0}}};
+    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
+        struct mp_csp_primaries csp = mp_get_csp_primaries(p->image_params.primaries);
+        mp_get_xyz2rgb_coeffs(&cparams, csp, MP_INTENT_RELATIVE_COLORIMETRIC, &m);
+    } else {
+        mp_get_yuv2rgb_coeffs(&cparams, &m);
     }
+    gl_sc_uniform_mat3(sc, "colormatrix", true, &m.m[0][0]);
+    gl_sc_uniform_vec3(sc, "colormatrix_c", m.c);
+
+    GLSL(color.rgb = mat3(colormatrix) * color.rgb + colormatrix_c;)
 
     if (p->image_params.colorspace == MP_CSP_BT_2020_C) {
         // Conversion for C'rcY'cC'bc via the BT.2020 CL system:
@@ -2721,7 +2720,6 @@ supported:
     }
 
     init->is_yuv = desc.flags & MP_IMGFLAG_YUV;
-    init->is_rgb = desc.flags & MP_IMGFLAG_RGB;
     init->plane_count = desc.num_planes;
     init->image_desc = desc;
 
