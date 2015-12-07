@@ -1265,11 +1265,7 @@ void mp_input_load(struct input_ctx *ictx)
 
 #if defined(__MINGW32__)
     if (ictx->global->opts->input_file && *ictx->global->opts->input_file)
-#if HAVE_WAIO
         mp_input_pipe_add(ictx, ictx->global->opts->input_file);
-#else
-        MP_ERR(ictx, "Pipes not available.\n");
-#endif
 #endif
 }
 
