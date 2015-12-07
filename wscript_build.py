@@ -180,7 +180,7 @@ def build(ctx):
         ( "input/input.c" ),
         ( "input/ipc.c",                         "!mingw" ),
         ( "input/keycodes.c" ),
-        ( "input/pipe-win32.c",                  "waio" ),
+        ( "input/pipe-win32.c",                  "mingw" ),
 
         ## Misc
         ( "misc/bstr.c" ),

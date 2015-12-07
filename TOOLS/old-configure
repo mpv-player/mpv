@@ -954,7 +954,6 @@ cat > $TMPC << EOF
 #define HAVE_GLOB 1
 #define HAVE_NANOSLEEP 1
 #define HAVE_SDL1 0
-#define HAVE_WAIO 0
 #define HAVE_POSIX_SPAWN 1
 #define HAVE_GLIBC_THREAD_NAME (!!__GLIBC__)
 #define HAVE_OSX_THREAD_NAME 0

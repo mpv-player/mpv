@@ -188,25 +188,3 @@ a pthreads wrapper or you want to build mpv without one, configure with:
 ```bash
 ./waf configure --enable-win32-internal-pthreads
 ```
-
-libwaio
--------
-
-If you want to use ``--input-file``, you need libwaio. It's available from
-git://midipix.org/waio
-
-To compile libwaio in MSYS2, run:
-
-```bash
-git clone git://midipix.org/waio && cd waio
-
-# 32-bit build, run from mingw32_shell.bat
-./build-mingw-nt32 lib-static CC=gcc AR=ar
-cp -r include/waio /mingw32/include
-cp lib32/libwaio.a /mingw32/lib
-
-# 64-bit build, run from mingw64_shell.bat
-./build-mingw-nt64 lib-static CC=gcc AR=ar
-cp -r include/waio /mingw64/include
-cp lib64/libwaio.a /mingw64/lib
-```
