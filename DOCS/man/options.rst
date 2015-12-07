@@ -1584,7 +1584,7 @@ Subtitles
 
 ``--sub-fix-timing``, ``--no-sub-fix-timing``
     By default, subtitle timing is adjusted to remove minor gaps or overlaps
-    between subtitles (if the difference is smaller than 200 ms, the gap or
+    between subtitles (if the difference is smaller than 210 ms, the gap or
     overlap is removed).
 
 ``--sub-forced-only``

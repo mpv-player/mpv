@@ -4,8 +4,8 @@
 #include "dec_sub.h"
 #include "demux/packet.h"
 
-// up to 200 ms overlaps or gaps are removed
-#define SUB_GAP_THRESHOLD 0.2
+// up to 210 ms overlaps or gaps are removed
+#define SUB_GAP_THRESHOLD 0.210
 // don't change timings if durations are smaller
 #define SUB_GAP_KEEP 0.4
 
