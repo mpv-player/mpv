@@ -251,6 +251,8 @@ struct mp_cmat {
 void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest,
                        enum mp_render_intent intent, float cms_matrix[3][3]);
 
+double mp_get_csp_mul(enum mp_csp csp, int input_bits, int texture_bits);
+
 void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params, struct mp_csp_primaries prim,
                            enum mp_render_intent intent, struct mp_cmat *xyz2rgb);
 void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, struct mp_cmat *yuv2rgb);

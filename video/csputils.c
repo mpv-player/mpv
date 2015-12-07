@@ -552,6 +552,27 @@ void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params,
         m->c[i] = brightness;
 }
 
+// Get multiplication factor required if image data is fit within the LSBs of a
+// higher smaller bit depth isfixed-point texture data.
+double mp_get_csp_mul(enum mp_csp csp, int input_bits, int texture_bits)
+{
+    assert(texture_bits >= input_bits);
+
+    // Convenience for some irrelevant cases, e.g. rgb565 or disabling expansion.
+    if (!input_bits)
+        return 1;
+
+    // RGB always uses the full range available.
+    if (csp == MP_CSP_RGB)
+        return ((1LL << input_bits) - 1.) / ((1LL << texture_bits) - 1.);
+
+    if (csp == MP_CSP_XYZ)
+        return 1;
+
+    // High bit depth YUV uses a range shifted from 8 bit.
+    return (1LL << input_bits) / ((1LL << texture_bits) - 1.) * 255 / 256;
+}
+
 /* Fill in the Y, U, V vectors of a yuv2rgb conversion matrix
  * based on the given luma weights of the R, G and B components (lr, lg, lb).
  * lr+lg+lb is assumed to equal 1.
@@ -642,10 +663,9 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, struct mp_cmat *m)
         m->m[i][2] = huesin * u + huecos * v;
     }
 
-    assert(params->input_bits >= 8);
-    assert(params->texture_bits >= params->input_bits);
-    double s = (1 << (params->input_bits-8)) / ((1<<params->texture_bits)-1.);
-    // The values below are written in 0-255 scale
+    // The values below are written in 0-255 scale - thus bring s into range.
+    double s =
+        mp_get_csp_mul(colorspace, params->input_bits, params->texture_bits) / 255;
     struct yuvlevels { double ymin, ymax, cmin, cmid; }
         yuvlim =  { 16*s, 235*s, 16*s, 128*s },
         yuvfull = {  0*s, 255*s,  1*s, 128*s },  // '1' for symmetry around 128

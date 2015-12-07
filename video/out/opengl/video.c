@@ -1327,9 +1327,9 @@ static void pass_read_video(struct gl_video *p)
     struct gl_transform chromafix;
     pass_set_image_textures(p, &p->image, &chromafix);
 
-    int in_bits = p->image_desc.component_bits,
-        tx_bits = (in_bits + 7) & ~7;
-    float tex_mul = ((1 << tx_bits) - 1.0) / ((1 << in_bits) - 1.0);
+    float tex_mul = 1 / mp_get_csp_mul(p->image_params.colorspace,
+                                       p->image_desc.component_bits,
+                                       p->image_desc.component_full_bits);
 
     struct src_tex prescaled_tex;
     struct gl_transform offset = {{{0}}};
@@ -1465,7 +1465,7 @@ static void pass_convert_yuv(struct gl_video *p)
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
     cparams.gray = p->is_yuv && !p->is_packed_yuv && p->plane_count == 1;
     cparams.input_bits = p->image_desc.component_bits;
-    cparams.texture_bits = (cparams.input_bits + 7) & ~7;
+    cparams.texture_bits = p->image_desc.component_full_bits;
     mp_csp_set_image_params(&cparams, &p->image_params);
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
     p->user_gamma = 1.0 / (cparams.gamma * p->opts.gamma);
@@ -1484,9 +1484,9 @@ static void pass_convert_yuv(struct gl_video *p)
         GLSL(color.rgb = pow(color.rgb, vec3(2.6));)
     }
 
-    // Something already took care of expansion
+    // Something already took care of expansion - disable it.
     if (p->use_normalized_range)
-        cparams.input_bits = cparams.texture_bits;
+        cparams.input_bits = cparams.texture_bits = 0;
 
     // Conversion from Y'CbCr or other linear spaces to RGB
     if (!p->is_rgb) {
