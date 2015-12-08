@@ -1736,9 +1736,16 @@ static void pass_dither(struct gl_video *p)
                 p->last_dither_matrix_size = size;
             }
 
+            const struct fmt_entry *fmt = find_tex_format(gl, 2, 1);
             tex_size = size;
-            tex_iformat = gl_float16_formats[0].internal_format;
-            tex_format = gl_float16_formats[0].format;
+            // Prefer R16 texture since they provide higher precision.
+            if (fmt->internal_format) {
+                tex_iformat = fmt->internal_format;
+                tex_format = fmt->format;
+            } else {
+                tex_iformat = gl_float16_formats[0].internal_format;
+                tex_format = gl_float16_formats[0].format;
+            }
             tex_type = GL_FLOAT;
             tex_data = p->last_dither_matrix;
         } else {
