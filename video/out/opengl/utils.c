@@ -960,6 +960,11 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
         else
             ADD(frag, "uniform %s %s;\n", u->glsl_type, u->name);
     }
+
+    // Additional helpers.
+    ADD(frag, "#define LUT_POS(x, lut_size) \\\n");
+    ADD(frag, "    mix(0.5 / (lut_size), 1.0 - 0.5 / (lut_size), (x))\n");
+
     // custom shader header
     if (sc->header_text[0]) {
         ADD(frag, "// header\n");

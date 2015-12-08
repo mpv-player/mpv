@@ -38,10 +38,6 @@ void sampler_prelude(struct gl_shader_cache *sc, int tex_num)
     GLSLF("vec2 pos = texcoord%d;\n", tex_num);
     GLSLF("vec2 size = texture_size%d;\n", tex_num);
     GLSLF("vec2 pt = vec2(1.0) / size;\n");
-    GLSLF("#undef LUT_POS\n");
-    // The variant of mix() with three floats as parameters is supported in
-    // all GLSL versions.
-    GLSLF("#define LUT_POS(x, lut_size) mix(0.5 / (lut_size), 1.0 - 0.5 / (lut_size), (x))\n");
 }
 
 static void pass_sample_separated_get_weights(struct gl_shader_cache *sc,
