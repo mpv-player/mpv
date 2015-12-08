@@ -120,6 +120,7 @@ struct mp_csp_params {
     enum mp_csp colorspace;
     enum mp_csp_levels levels_in;      // encoded video
     enum mp_csp_levels levels_out;     // output device
+    enum mp_csp_prim primaries;
     float brightness;
     float contrast;
     float hue;
@@ -135,6 +136,7 @@ struct mp_csp_params {
 #define MP_CSP_PARAMS_DEFAULTS {                                \
     .colorspace = MP_CSP_BT_601,                                \
     .levels_in = MP_CSP_LEVELS_TV,                              \
+    .primaries = MP_CSP_PRIM_AUTO,                              \
     .levels_out = MP_CSP_LEVELS_PC,                             \
     .brightness = 0, .contrast = 1, .hue = 0, .saturation = 1,  \
     .gamma = 1, .texture_bits = 8, .input_bits = 8}
@@ -249,9 +251,6 @@ void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest
                        enum mp_render_intent intent, float cms_matrix[3][3]);
 
 double mp_get_csp_mul(enum mp_csp csp, int input_bits, int texture_bits);
-
-void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params, struct mp_csp_primaries prim,
-                           enum mp_render_intent intent, struct mp_cmat *xyz2rgb);
 void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, struct mp_cmat *yuv2rgb);
 
 void mp_invert_matrix3x3(float m[3][3]);
