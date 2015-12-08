@@ -130,9 +130,6 @@ struct mp_csp_params {
     // texture_bits/input_bits is for rescaling fixed point input to range [0,1]
     int texture_bits;
     int input_bits;
-    // for scaling integer input and output (if 0, assume range [0,1])
-    int int_bits_in;
-    int int_bits_out;
 };
 
 #define MP_CSP_PARAMS_DEFAULTS {                                \
@@ -259,6 +256,7 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, struct mp_cmat *yuv2rgb
 
 void mp_invert_matrix3x3(float m[3][3]);
 void mp_invert_yuv2rgb(struct mp_cmat *out, struct mp_cmat *in);
-void mp_map_int_color(struct mp_cmat *matrix, int clip_bits, int c[3]);
+void mp_map_fixp_color(struct mp_cmat *matrix, int ibits, int in[3],
+                                               int obits, int out[3]);
 
 #endif /* MPLAYER_CSPUTILS_H */

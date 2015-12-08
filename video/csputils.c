@@ -710,16 +710,6 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, struct mp_cmat *m)
                   - (m->m[i][1] + m->m[i][2]) * yuvlev.cmid
                   + params->brightness;
     }
-
-    int in_bits = FFMAX(params->int_bits_in, 1);
-    int out_bits = FFMAX(params->int_bits_out, 1);
-    double in_scale = (1 << in_bits) - 1.0;
-    double out_scale = (1 << out_bits) - 1.0;
-    for (int i = 0; i < 3; i++) {
-        m->c[i] *= out_scale; // constant is 1.0
-        for (int x = 0; x < 3; x++)
-            m->m[i][x] *= out_scale / in_scale;
-    }
 }
 
 // Set colorspace related fields in p from f. Don't touch other fields.
@@ -793,16 +783,17 @@ void mp_invert_yuv2rgb(struct mp_cmat *out, struct mp_cmat *in)
 }
 
 // Multiply the color in c with the given matrix.
-// c is {R, G, B} or {Y, U, V} (depending on input/output and matrix).
-// Output is clipped to the given number of bits.
-void mp_map_int_color(struct mp_cmat *matrix, int clip_bits, int c[3])
+// i/o is {R, G, B} or {Y, U, V} (depending on input/output and matrix), using
+// a fixed point representation with the given number of bits (so for bits==8,
+// [0,255] maps to [0,1]). The output is clipped to the range as needed.
+void mp_map_fixp_color(struct mp_cmat *matrix, int ibits, int in[3],
+                                               int obits, int out[3])
 {
-    int in[3] = {c[0], c[1], c[2]};
     for (int i = 0; i < 3; i++) {
         double val = matrix->c[i];
         for (int x = 0; x < 3; x++)
-            val += matrix->m[i][x] * in[x];
-        int ival = lrint(val);
-        c[i] = av_clip(ival, 0, (1 << clip_bits) - 1);
+            val += matrix->m[i][x] * in[x] / ((1 << ibits) - 1);
+        int ival = lrint(val * ((1 << obits) - 1));
+        out[i] = av_clip(ival, 0, (1 << obits) - 1);
     }
 }
