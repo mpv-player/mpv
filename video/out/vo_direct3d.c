@@ -1205,7 +1205,7 @@ static void update_colorspace(d3d_priv *priv)
         csp.texture_bits = (csp.input_bits + 7) & ~7;
 
         struct mp_cmat coeff;
-        mp_get_yuv2rgb_coeffs(&csp, &coeff);
+        mp_get_csp_matrix(&csp, &coeff);
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++)
                 priv->d3d_colormatrix.m[row][col] = coeff.m[row][col];

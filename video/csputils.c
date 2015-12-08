@@ -3,7 +3,7 @@
  *
  * Copyleft (C) 2009 Reimar Döffinger <Reimar.Doeffinger@gmx.de>
  *
- * mp_invert_yuv2rgb based on DarkPlaces engine, original code (GPL2 or later)
+ * mp_invert_cmat based on DarkPlaces engine, original code (GPL2 or later)
  *
  * This file is part of mpv.
  *
@@ -573,7 +573,7 @@ double mp_get_csp_mul(enum mp_csp csp, int input_bits, int texture_bits)
     return (1LL << input_bits) / ((1LL << texture_bits) - 1.) * 255 / 256;
 }
 
-/* Fill in the Y, U, V vectors of a yuv2rgb conversion matrix
+/* Fill in the Y, U, V vectors of a yuv-to-rgb conversion matrix
  * based on the given luma weights of the R, G and B components (lr, lg, lb).
  * lr+lg+lb is assumed to equal 1.
  * This function is meant for colorspaces satisfying the following
@@ -605,7 +605,7 @@ static void luma_coeffs(struct mp_cmat *mat, float lr, float lg, float lb)
 }
 
 // get the coefficients of the yuv -> rgb conversion matrix
-void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, struct mp_cmat *m)
+void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
 {
     int colorspace = params->colorspace;
     if (colorspace <= MP_CSP_AUTO || colorspace >= MP_CSP_COUNT)
@@ -767,7 +767,7 @@ int mp_csp_equalizer_set(struct mp_csp_equalizer *eq, const char *property,
     return 1;
 }
 
-void mp_invert_yuv2rgb(struct mp_cmat *out, struct mp_cmat *in)
+void mp_invert_cmat(struct mp_cmat *out, struct mp_cmat *in)
 {
     *out = *in;
     mp_invert_matrix3x3(out->m);

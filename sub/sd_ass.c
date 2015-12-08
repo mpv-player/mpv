@@ -668,15 +668,15 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
     vs_params.colorspace = csp;
     vs_params.levels_in = levels;
     struct mp_cmat vs_yuv2rgb, vs_rgb2yuv;
-    mp_get_yuv2rgb_coeffs(&vs_params, &vs_yuv2rgb);
-    mp_invert_yuv2rgb(&vs_rgb2yuv, &vs_yuv2rgb);
+    mp_get_csp_matrix(&vs_params, &vs_yuv2rgb);
+    mp_invert_cmat(&vs_rgb2yuv, &vs_yuv2rgb);
 
     // Proper conversion to RGB
     struct mp_csp_params rgb_params = MP_CSP_PARAMS_DEFAULTS;
     rgb_params.colorspace = params.colorspace;
     rgb_params.levels_in = params.colorlevels;
     struct mp_cmat vs2rgb;
-    mp_get_yuv2rgb_coeffs(&rgb_params, &vs2rgb);
+    mp_get_csp_matrix(&rgb_params, &vs2rgb);
 
     for (int n = 0; n < parts->num_parts; n++) {
         struct sub_bitmap *sb = &parts->parts[n];

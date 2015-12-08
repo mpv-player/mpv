@@ -296,8 +296,8 @@ static void draw_ass(struct mp_draw_sub_cache *cache, struct mp_rect bb,
     struct mp_cmat yuv2rgb, rgb2yuv;
     bool need_conv = temp->fmt.flags & MP_IMGFLAG_YUV;
     if (need_conv) {
-        mp_get_yuv2rgb_coeffs(&cspar, &yuv2rgb);
-        mp_invert_yuv2rgb(&rgb2yuv, &yuv2rgb);
+        mp_get_csp_matrix(&cspar, &yuv2rgb);
+        mp_invert_cmat(&rgb2yuv, &yuv2rgb);
     }
 
     for (int i = 0; i < sbs->num_parts; ++i) {

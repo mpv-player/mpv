@@ -94,7 +94,7 @@ static void add_dvd_streams(demuxer_t *demuxer)
             // emulate the extradata
             struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
             struct mp_cmat cmatrix;
-            mp_get_yuv2rgb_coeffs(&csp, &cmatrix);
+            mp_get_csp_matrix(&csp, &cmatrix);
 
             char *s = talloc_strdup(sh, "");
             s = talloc_asprintf_append(s, "palette: ");

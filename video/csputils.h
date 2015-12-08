@@ -251,10 +251,10 @@ void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest
                        enum mp_render_intent intent, float cms_matrix[3][3]);
 
 double mp_get_csp_mul(enum mp_csp csp, int input_bits, int texture_bits);
-void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, struct mp_cmat *yuv2rgb);
+void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *out);
 
 void mp_invert_matrix3x3(float m[3][3]);
-void mp_invert_yuv2rgb(struct mp_cmat *out, struct mp_cmat *in);
+void mp_invert_cmat(struct mp_cmat *out, struct mp_cmat *in);
 void mp_map_fixp_color(struct mp_cmat *matrix, int ibits, int in[3],
                                                int obits, int out[3]);
 

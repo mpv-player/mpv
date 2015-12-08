@@ -1491,7 +1491,7 @@ static void pass_convert_yuv(struct gl_video *p)
     // Conversion to RGB. For RGB itself, this still applies e.g. brightness
     // and contrast controls, or expansion of e.g. LSB-packed 10 bit data.
     struct mp_cmat m = {{{0}}};
-    mp_get_yuv2rgb_coeffs(&cparams, &m);
+    mp_get_csp_matrix(&cparams, &m);
     gl_sc_uniform_mat3(sc, "colormatrix", true, &m.m[0][0]);
     gl_sc_uniform_vec3(sc, "colormatrix_c", m.c);
 
