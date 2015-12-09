@@ -1476,13 +1476,8 @@ static void pass_convert_yuv(struct gl_video *p)
         GLSLF("color = color.%s;\n", p->color_swizzle);
 
     // Pre-colormatrix input gamma correction
-    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
-        cparams.colorspace = MP_CSP_XYZ;
-
-        // Pre-colormatrix input gamma correction. Note that this results in
-        // linear light
-        GLSL(color.rgb = pow(color.rgb, vec3(2.6));)
-    }
+    if (cparams.colorspace == MP_CSP_XYZ)
+        GLSL(color.rgb = pow(color.rgb, vec3(2.6));) // linear light
 
     // Something already took care of expansion - disable it.
     if (p->use_normalized_range)
