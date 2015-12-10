@@ -48,7 +48,6 @@ extern const demuxer_desc_t demuxer_desc_tv;
 extern const demuxer_desc_t demuxer_desc_mf;
 extern const demuxer_desc_t demuxer_desc_matroska;
 extern const demuxer_desc_t demuxer_desc_lavf;
-extern const demuxer_desc_t demuxer_desc_subreader;
 extern const demuxer_desc_t demuxer_desc_playlist;
 extern const demuxer_desc_t demuxer_desc_disc;
 extern const demuxer_desc_t demuxer_desc_rar;
@@ -75,8 +74,6 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_lavf,
     &demuxer_desc_mf,
     &demuxer_desc_playlist,
-    // Pretty aggressive, so should be last.
-    &demuxer_desc_subreader,
     NULL
 };
 
