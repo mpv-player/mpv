@@ -1180,6 +1180,8 @@ reopen_file:
         goto terminate_playback;
     }
 
+    update_playback_speed(mpctx);
+
     reinit_video_chain(mpctx);
     reinit_audio_chain(mpctx);
     reinit_subs(mpctx, 0);
