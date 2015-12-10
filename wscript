@@ -823,11 +823,6 @@ radio_and_tv_features = [
         'func': check_pkg_config('libv4l2'),
         'deps': [ 'tv-v4l2' ],
     }, {
-        'name': '--pvr',
-        'desc': 'Video4Linux2 MPEG PVR interface',
-        'deps': [ 'tv' ],
-        'func': check_cc(fragment=load_fragment('pvr.c')),
-    }, {
         'name': '--audio-input',
         'desc': 'audio input support',
         'deps_any': [ 'tv-v4l2' ],

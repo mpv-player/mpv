@@ -42,8 +42,6 @@ SOURCES-$(LIBBLURAY)            += stream/stream_bluray.c
 
 SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 
-SOURCES-$(PVR)                  += stream/stream_pvr.c
-
 SOURCES-$(TV)                   += stream/stream_tv.c stream/tv.c \
                                    stream/frequencies.c stream/tvi_dummy.c \
                                    demux/demux_tv.c

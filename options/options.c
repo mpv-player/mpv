@@ -60,7 +60,6 @@ static void print_help(struct mp_log *log)
 }
 
 extern const struct m_sub_options tv_params_conf;
-extern const struct m_sub_options stream_pvr_conf;
 extern const struct m_sub_options stream_cdda_conf;
 extern const struct m_sub_options stream_dvb_conf;
 extern const struct m_sub_options stream_lavf_conf;
@@ -260,9 +259,6 @@ const m_option_t mp_opts[] = {
 #if HAVE_TV
     OPT_SUBSTRUCT("tv", tv_params, tv_params_conf, 0),
 #endif /* HAVE_TV */
-#if HAVE_PVR
-    OPT_SUBSTRUCT("pvr", stream_pvr_opts, stream_pvr_conf, 0),
-#endif /* HAVE_PVR */
 #if HAVE_DVBIN
     OPT_SUBSTRUCT("dvbin", stream_dvb_opts, stream_dvb_conf, 0),
 #endif

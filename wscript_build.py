@@ -243,7 +243,6 @@ def build(ctx):
         ( "stream/stream_memory.c" ),
         ( "stream/stream_mf.c" ),
         ( "stream/stream_null.c" ),
-        ( "stream/stream_pvr.c",                 "pvr" ),
         ( "stream/stream_rar.c" ),
         ( "stream/stream_smb.c",                 "libsmbclient" ),
         ( "stream/stream_tv.c",                  "tv" ),

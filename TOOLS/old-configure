@@ -176,7 +176,6 @@ options_state_machine() {
     opt_yes_no _tv          "TV interface (TV/DVB grabbers)" yes
     opt_yes_no _tv_v4l2     "Video4Linux2 TV interface"
     opt_yes_no _libv4l2     "libv4l2"
-    opt_yes_no _pvr         "Video4Linux2 MPEG PVR"
     opt_yes_no _smb         "Samba (SMB) input"
     opt_yes_no _lcms2       "LCMS2 support"
     opt_yes_no _bluray      "Blu-ray support"
@@ -835,9 +834,6 @@ check_trivial "TV audio input" $_tv_v4l2 AUDIO_INPUT
 
 test $_tv_v4l2 = no && _libv4l2=no
 check_pkg_config "libv4l2 support" $_libv4l2 LIBV4L2 'libv4l2'
-
-test "$_tv_v4l2" = no && _pvr=no
-check_compile "Video 4 Linux 2 MPEG PVR interface" $_pvr PVR waftools/fragments/pvr.c
 
 # Note: Lua has no official .pc file, so there are different OS-specific ones.
 # Also, we support luajit, which is compatible to 5.1.
