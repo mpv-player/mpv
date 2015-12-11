@@ -35,6 +35,19 @@ struct glx_context {
     GLXFBConfig fbc;
 };
 
+static void glx_uninit(MPGLContext *ctx)
+{
+    struct glx_context *glx_ctx = ctx->priv;
+    if (glx_ctx->vinfo)
+        XFree(glx_ctx->vinfo);
+    if (glx_ctx->context) {
+        Display *display = ctx->vo->x11->display;
+        glXMakeCurrent(display, None, NULL);
+        glXDestroyContext(display, glx_ctx->context);
+    }
+    vo_x11_uninit(ctx->vo);
+}
+
 static bool create_context_x11_old(struct MPGLContext *ctx)
 {
     struct glx_context *glx_ctx = ctx->priv;
@@ -184,21 +197,24 @@ static void set_glx_attrib(int *attribs, int name, int value)
     }
 }
 
-static bool config_window_x11(struct MPGLContext *ctx, int flags)
+static int glx_init(struct MPGLContext *ctx, int flags)
 {
     struct vo *vo = ctx->vo;
     struct glx_context *glx_ctx = ctx->priv;
+
+    if (!vo_x11_init(ctx->vo))
+        goto uninit;
 
     int glx_major, glx_minor;
 
     if (!glXQueryVersion(vo->x11->display, &glx_major, &glx_minor)) {
         MP_ERR(vo, "GLX not found.\n");
-        return false;
+        goto uninit;
     }
     // FBConfigs were added in GLX version 1.3.
     if (MPGL_VER(glx_major, glx_minor) <  MPGL_VER(1, 3)) {
         MP_ERR(vo, "GLX version older than 1.3.\n");
-        return false;
+        goto uninit;
     }
 
     int glx_attribs[] = {
@@ -224,7 +240,7 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
         fbc = select_fb_config(vo, glx_attribs, flags);
     if (!fbc) {
         MP_ERR(vo, "no GLX support present\n");
-        return false;
+        goto uninit;
     }
     MP_VERBOSE(vo, "GLX chose FB config with ID 0x%x\n", (int)(intptr_t)fbc);
 
@@ -243,7 +259,7 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_BLUE_SIZE, &ctx->depth_b);
 
     if (!vo_x11_create_vo_window(vo, glx_ctx->vinfo, "gl"))
-        return false;
+        goto uninit;
 
     bool success = false;
     if (!(flags & VOFLAG_GLES)) {
@@ -255,15 +271,27 @@ static bool config_window_x11(struct MPGLContext *ctx, int flags)
         success = create_context_x11_gl3(ctx, flags, 200, true);
     if (success && !glXIsDirect(vo->x11->display, glx_ctx->context))
         ctx->gl->mpgl_caps |= MPGL_CAP_SW;
-    return success;
+    if (!success)
+        goto uninit;
+
+    return 0;
+
+uninit:
+    glx_uninit(ctx);
+    return -1;
 }
 
-static int glx_init(struct MPGLContext *ctx, int vo_flags)
+static int glx_init_probe(struct MPGLContext *ctx, int flags)
 {
-    if (vo_x11_init(ctx->vo) && config_window_x11(ctx, vo_flags))
-        return 0;
-    vo_x11_uninit(ctx->vo);
-    return -1;
+    int r = glx_init(ctx, flags);
+    if (r >= 0) {
+        if (!(ctx->gl->mpgl_caps & MPGL_CAP_VDPAU)) {
+            MP_VERBOSE(ctx->vo, "No vdpau support found - probing more things.\n");
+            glx_uninit(ctx);
+            r = -1;
+        }
+    }
+    return r;
 }
 
 static int glx_reconfig(struct MPGLContext *ctx)
@@ -278,21 +306,6 @@ static int glx_control(struct MPGLContext *ctx, int *events, int request,
     return vo_x11_control(ctx->vo, events, request, arg);
 }
 
-static void glx_uninit(MPGLContext *ctx)
-{
-    struct glx_context *glx_ctx = ctx->priv;
-    XVisualInfo **vinfo = &glx_ctx->vinfo;
-    GLXContext *context = &glx_ctx->context;
-    Display *display = ctx->vo->x11->display;
-    if (*vinfo)
-        XFree(*vinfo);
-    if (*context) {
-        glXMakeCurrent(display, None, NULL);
-        glXDestroyContext(display, *context);
-    }
-    vo_x11_uninit(ctx->vo);
-}
-
 static void glx_swap_buffers(struct MPGLContext *ctx)
 {
     glXSwapBuffers(ctx->vo->x11->display, ctx->vo->x11->window);
@@ -302,6 +315,16 @@ const struct mpgl_driver mpgl_driver_x11 = {
     .name           = "x11",
     .priv_size      = sizeof(struct glx_context),
     .init           = glx_init,
+    .reconfig       = glx_reconfig,
+    .swap_buffers   = glx_swap_buffers,
+    .control        = glx_control,
+    .uninit         = glx_uninit,
+};
+
+const struct mpgl_driver mpgl_driver_x11_probe = {
+    .name           = "x11probe",
+    .priv_size      = sizeof(struct glx_context),
+    .init           = glx_init_probe,
     .reconfig       = glx_reconfig,
     .swap_buffers   = glx_swap_buffers,
     .control        = glx_control,

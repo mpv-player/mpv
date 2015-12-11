@@ -46,6 +46,11 @@ struct sub {
     int64_t id;
 };
 
+struct seekpoint {
+    double pts;
+    double endpts;
+};
+
 struct sd_lavc_priv {
     AVCodecContext *avctx;
     struct sub subs[MAX_QUEUE]; // most recent event first
@@ -53,6 +58,9 @@ struct sd_lavc_priv {
     int64_t displayed_id;
     int64_t new_id;
     struct mp_image_params video_params;
+    double current_pts;
+    struct seekpoint *seekpoints;
+    int num_seekpoints;
 };
 
 static bool supports_format(const char *format)
@@ -116,6 +124,7 @@ static int init(struct sd *sd)
     priv->avctx = ctx;
     sd->priv = priv;
     priv->displayed_id = -1;
+    priv->current_pts = MP_NOPTS_VALUE;
     return 0;
 
  error:
@@ -138,8 +147,10 @@ static void clear_sub(struct sub *sub)
 static void alloc_sub(struct sd_lavc_priv *priv)
 {
     clear_sub(&priv->subs[MAX_QUEUE - 1]);
+    struct sub tmp = priv->subs[MAX_QUEUE - 1];
     for (int n = MAX_QUEUE - 1; n > 0; n--)
         priv->subs[n] = priv->subs[n - 1];
+    priv->subs[0] = tmp;
     // clear only some fields; the memory allocs can be reused
     priv->subs[0].valid = false;
     priv->subs[0].count = 0;
@@ -152,6 +163,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     struct sd_lavc_priv *priv = sd->priv;
     AVCodecContext *ctx = priv->avctx;
     double pts = packet->pts;
+    double endpts = MP_NOPTS_VALUE;
     double duration = packet->duration;
     AVSubtitle sub;
     AVPacket pkt;
@@ -180,14 +192,33 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             duration = (sub.end_display_time - sub.start_display_time) / 1000.0;
         }
         pts += sub.start_display_time / 1000.0;
-    }
-    double endpts = MP_NOPTS_VALUE;
-    if (pts != MP_NOPTS_VALUE && duration >= 0)
-        endpts = pts + duration;
 
-    // set end time of previous sub
-    if (priv->subs[0].endpts == MP_NOPTS_VALUE || priv->subs[0].endpts > pts)
-        priv->subs[0].endpts = pts;
+        if (duration >= 0)
+            endpts = pts + duration;
+
+        // set end time of previous sub
+        struct sub *prev = &priv->subs[0];
+        if (prev->valid) {
+            if (prev->endpts == MP_NOPTS_VALUE || prev->endpts > pts)
+                prev->endpts = pts;
+
+            if (opts->sub_fix_timing && pts - prev->endpts <= SUB_GAP_THRESHOLD)
+                prev->endpts = pts;
+
+            for (int n = 0; n < priv->num_seekpoints; n++) {
+                if (priv->seekpoints[n].pts == prev->pts) {
+                    priv->seekpoints[n].endpts = prev->endpts;
+                    break;
+                }
+            }
+        }
+
+        // This subtitle packet only signals the end of subtitle display.
+        if (!sub.num_rects) {
+            avsubtitle_free(&sub);
+            return;
+        }
+    }
 
     alloc_sub(priv);
     struct sub *current = &priv->subs[0];
@@ -231,6 +262,19 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         b->y = r->y;
         current->count++;
     }
+
+    if (pts != MP_NOPTS_VALUE) {
+        for (int n = 0; n < priv->num_seekpoints; n++) {
+            if (priv->seekpoints[n].pts == pts)
+                goto skip;
+        }
+        // Set arbitrary limit as safe-guard against insane files.
+        if (priv->num_seekpoints >= 10000)
+            MP_TARRAY_REMOVE_AT(priv->seekpoints, priv->num_seekpoints, 0);
+        MP_TARRAY_APPEND(priv, priv->seekpoints, priv->num_seekpoints,
+                         (struct seekpoint){.pts = pts, .endpts = endpts});
+        skip: ;
+    }
 }
 
 static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
@@ -239,8 +283,10 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     struct sd_lavc_priv *priv = sd->priv;
     struct MPOpts *opts = sd->opts;
 
+    priv->current_pts = pts;
+
     struct sub *current = NULL;
-    for (int n = 0; n < MAX_QUEUE; n++) {
+    for (int n = MAX_QUEUE - 1; n >= 0; n--) {
         struct sub *sub = &priv->subs[n];
         if (!sub->valid)
             continue;
@@ -297,6 +343,28 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     osd_rescale_bitmaps(res, insize[0], insize[1], d, video_par);
 }
 
+static bool accepts_packet(struct sd *sd)
+{
+    struct sd_lavc_priv *priv = sd->priv;
+
+    double pts = priv->current_pts;
+    int last_needed = -1;
+    for (int n = 0; n < MAX_QUEUE; n++) {
+        struct sub *sub = &priv->subs[n];
+        if (!sub->valid)
+            continue;
+        if (pts == MP_NOPTS_VALUE ||
+            ((sub->pts == MP_NOPTS_VALUE || sub->pts >= pts) ||
+             (sub->endpts == MP_NOPTS_VALUE || pts < sub->endpts)))
+        {
+            last_needed = n;
+        }
+    }
+    // We can accept a packet if it wouldn't overflow the fixed subtitle queue.
+    // We assume that get_bitmaps() never decreases the PTS.
+    return last_needed + 1 < MAX_QUEUE;
+}
+
 static void reset(struct sd *sd)
 {
     struct sd_lavc_priv *priv = sd->priv;
@@ -305,6 +373,8 @@ static void reset(struct sd *sd)
         clear_sub(&priv->subs[n]);
     // lavc might not do this right for all codecs; may need close+reopen
     avcodec_flush_buffers(priv->avctx);
+
+    priv->current_pts = MP_NOPTS_VALUE;
 }
 
 static void uninit(struct sd *sd)
@@ -319,10 +389,71 @@ static void uninit(struct sd *sd)
     talloc_free(priv);
 }
 
+static int compare_seekpoint(const void *pa, const void *pb)
+{
+    const struct seekpoint *a = pa, *b = pb;
+    return a->pts == b->pts ? 0 : (a->pts < b->pts ? -1 : +1);
+}
+
+// taken from ass_step_sub(), libass (ISC)
+static double step_sub(struct sd *sd, double now, int movement)
+{
+    struct sd_lavc_priv *priv = sd->priv;
+    int best = -1;
+    double target = now;
+    int direction = movement > 0 ? 1 : -1;
+
+    if (movement == 0 || priv->num_seekpoints == 0)
+        return MP_NOPTS_VALUE;
+
+    qsort(priv->seekpoints, priv->num_seekpoints, sizeof(priv->seekpoints[0]),
+          compare_seekpoint);
+
+    while (movement) {
+        int closest = -1;
+        double closest_time = 0;
+        for (int i = 0; i < priv->num_seekpoints; i++) {
+            struct seekpoint *p = &priv->seekpoints[i];
+            double start = p->pts;
+            if (direction < 0) {
+                double end = p->endpts == MP_NOPTS_VALUE ? INFINITY : p->endpts;
+                if (end < target) {
+                    if (closest < 0 || end > closest_time) {
+                        closest = i;
+                        closest_time = end;
+                    }
+                }
+            } else {
+                if (start > target) {
+                    if (closest < 0 || start < closest_time) {
+                        closest = i;
+                        closest_time = start;
+                    }
+                }
+            }
+        }
+        if (closest < 0)
+            break;
+        target = closest_time + direction;
+        best = closest;
+        movement -= direction;
+    }
+
+    return best < 0 ? 0 : priv->seekpoints[best].pts - now;
+}
+
 static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
 {
     struct sd_lavc_priv *priv = sd->priv;
     switch (cmd) {
+    case SD_CTRL_SUB_STEP: {
+        double *a = arg;
+        double res = step_sub(sd, a[0], a[1]);
+        if (res == MP_NOPTS_VALUE)
+            return false;
+        a[0] = res;
+        return true;
+    }
     case SD_CTRL_SET_VIDEO_PARAMS:
         priv->video_params = *(struct mp_image_params *)arg;
         return CONTROL_OK;
@@ -340,6 +471,7 @@ const struct sd_functions sd_lavc = {
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,
+    .accepts_packet = accepts_packet,
     .control = control,
     .reset = reset,
     .uninit = uninit,

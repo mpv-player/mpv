@@ -609,6 +609,10 @@ static int dxva2_init_decoder(struct lavc_ctx *s, int w, int h)
         MP_ERR(ctx, "Unsupported H.264 profile for DXVA2 HWAccel: %d\n", profile);
         return -1;
     }
+    if (codec == AV_CODEC_ID_HEVC && profile != FF_PROFILE_HEVC_MAIN) {
+        MP_ERR(ctx, "Unsupported H.265 profile for DXVA2 HWAccel: %d\n", profile);
+        return -1;
+    }
 
     if (ctx->decoder)
         dxva2_destroy_decoder(s);

@@ -9,6 +9,7 @@ struct mp_hwdec_info;
 struct gl_hwdec {
     const struct gl_hwdec_driver *driver;
     struct mp_log *log;
+    struct mpv_global *global;
     GL *gl;
     struct mp_hwdec_ctx *hwctx;
     // For free use by hwdec driver
@@ -45,8 +46,9 @@ struct gl_hwdec_driver {
 };
 
 struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
-                                   const char *api_name);
-struct gl_hwdec *gl_hwdec_load_api_id(struct mp_log *log, GL *gl, int id);
+                                   struct mpv_global *g, const char *api_name);
+struct gl_hwdec *gl_hwdec_load_api_id(struct mp_log *log, GL *gl,
+                                      struct mpv_global *g, int id);
 
 void gl_hwdec_uninit(struct gl_hwdec *hwdec);
 

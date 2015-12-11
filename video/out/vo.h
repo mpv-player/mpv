@@ -76,6 +76,7 @@ enum mp_voctrl {
     VOCTRL_ALL_WORKSPACES,
 
     VOCTRL_UPDATE_WINDOW_TITLE,         // char*
+    VOCTRL_UPDATE_PLAYBACK_STATE,       // struct voctrl_playback_state*
 
     VOCTRL_SET_CURSOR_VISIBILITY,       // bool*
 
@@ -104,7 +105,6 @@ enum mp_voctrl {
     VOCTRL_GET_ICC_PROFILE,             // bstr*
     VOCTRL_GET_AMBIENT_LUX,             // int*
     VOCTRL_GET_DISPLAY_FPS,             // double*
-    VOCTRL_GET_RECENT_FLIP_TIME,        // int64_t* (using mp_time_us())
 
     VOCTRL_GET_PREF_DEINT,              // int*
 };
@@ -129,6 +129,13 @@ struct voctrl_get_equalizer_args {
 #define VO_ERROR        -1
 #define VO_NOTAVAIL     -2
 #define VO_NOTIMPL      -3
+
+// VOCTRL_UPDATE_PLAYBACK_STATE
+struct voctrl_playback_state {
+    bool playing;
+    bool paused;
+    int percent_pos;
+};
 
 enum {
     // VO does handle mp_image_params.rotate in 90 degree steps
@@ -158,9 +165,12 @@ struct vo_frame {
     // Approximate frame duration, in us.
     int duration;
     // Realtime of estimated distance between 2 vsync events.
-    int64_t vsync_interval;
+    double vsync_interval;
     // "ideal" display time within the vsync
-    int64_t vsync_offset;
+    double vsync_offset;
+    // "ideal" frame duration (can be different from num_vsyncs*vsync_interval
+    // up to a vsync) - valid for the entire frame, i.e. not changed for repeats
+    double ideal_frame_duration;
     // how often the frame will be repeated (does not include OSD redraws)
     int num_vsyncs;
     // Set if the current frame is repeated from the previous. It's guaranteed
@@ -332,21 +342,20 @@ void vo_destroy(struct vo *vo);
 void vo_set_paused(struct vo *vo, bool paused);
 int64_t vo_get_drop_count(struct vo *vo);
 void vo_increment_drop_count(struct vo *vo, int64_t n);
-int64_t vo_get_missed_count(struct vo *vo);
+int64_t vo_get_delayed_count(struct vo *vo);
 void vo_query_formats(struct vo *vo, uint8_t *list);
 void vo_event(struct vo *vo, int event);
 int vo_query_and_reset_events(struct vo *vo, int events);
 struct mp_image *vo_get_current_frame(struct vo *vo);
-void vo_set_queue_params(struct vo *vo, int64_t offset_us, bool vsync_timed,
-                         int num_req_frames);
+void vo_set_queue_params(struct vo *vo, int64_t offset_us, int num_req_frames);
 int vo_get_num_req_frames(struct vo *vo);
 int64_t vo_get_vsync_interval(struct vo *vo);
+double vo_get_estimated_vsync_interval(struct vo *vo);
+double vo_get_estimated_vsync_jitter(struct vo *vo);
 double vo_get_display_fps(struct vo *vo);
-int64_t vo_get_next_frame_start_time(struct vo *vo);
+double vo_get_delay(struct vo *vo);
 
 void vo_wakeup(struct vo *vo);
-
-const char *vo_get_window_title(struct vo *vo);
 
 struct mp_keymap {
   int from;

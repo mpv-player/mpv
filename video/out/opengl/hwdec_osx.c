@@ -26,6 +26,8 @@
 
 #include "video/mp_image_pool.h"
 #include "hwdec.h"
+#include "common/global.h"
+#include "options/options.h"
 
 struct vt_gl_plane_format {
     GLenum gl_format;
@@ -55,7 +57,23 @@ static struct vt_format vt_formats[] = {
             { GL_RED, GL_UNSIGNED_BYTE, GL_RED },
             { GL_RG,  GL_UNSIGNED_BYTE, GL_RG } ,
         }
-    }
+    },
+    {
+        .cvpixfmt = kCVPixelFormatType_422YpCbCr8,
+        .imgfmt = IMGFMT_UYVY,
+        .planes = 1,
+        .gl = {
+            { GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, GL_RGB }
+        }
+    },
+    {
+        .cvpixfmt = kCVPixelFormatType_32BGRA,
+        .imgfmt = IMGFMT_RGB0,
+        .planes = 1,
+        .gl = {
+            { GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, GL_RGBA }
+        }
+    },
 };
 
 static struct vt_format *vt_get_gl_format(uint32_t cvpixfmt)
@@ -134,7 +152,8 @@ static int create(struct gl_hwdec *hw)
         return -1;
 
     struct priv *p = talloc_zero(hw, struct priv);
-    struct vt_format *f = vt_get_gl_format_from_imgfmt(IMGFMT_NV12);
+    struct vt_format *f =
+        vt_get_gl_format_from_imgfmt(hw->global->opts->videotoolbox_format);
     if (!f)
         return -1;
 
@@ -143,6 +162,7 @@ static int create(struct gl_hwdec *hw)
     hw->hwctx = &p->hwctx;
     hw->hwctx->download_image = download_image;
     hw->hwctx->type = HWDEC_VIDEOTOOLBOX;
+    hw->hwctx->priv = (void *)(uintptr_t)f->cvpixfmt;
 
     hw->gl_texture_target = GL_TEXTURE_RECTANGLE;
     hw->gl->GenTextures(MP_MAX_PLANES, p->gl_planes);
@@ -169,6 +189,10 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     p->pbuf = (CVPixelBufferRef)hw_image->planes[3];
     CVPixelBufferRetain(p->pbuf);
     IOSurfaceRef surface = CVPixelBufferGetIOSurface(p->pbuf);
+    if (!surface) {
+        MP_ERR(hw, "CVPixelBuffer has no IOSurface\n");
+        return -1;
+    }
 
     uint32_t cvpixfmt = CVPixelBufferGetPixelFormatType(p->pbuf);
     struct vt_format *f = vt_get_gl_format(cvpixfmt);

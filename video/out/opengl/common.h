@@ -63,6 +63,7 @@ enum {
     MPGL_CAP_1D_TEX             = (1 << 14),
     MPGL_CAP_3D_TEX             = (1 << 15),
     MPGL_CAP_DEBUG              = (1 << 16),
+    MPGL_CAP_DXINTEROP          = (1 << 17),    // WGL_NV_DX_interop
     MPGL_CAP_SW                 = (1 << 30),    // indirect or sw renderer
 };
 
@@ -75,10 +76,11 @@ enum {
 #define MPGL_VER_P(ver) MPGL_VER_GET_MAJOR(ver), MPGL_VER_GET_MINOR(ver)
 
 enum {
-    VOFLAG_GLES         = 1 << 0,       // Hint to prefer GLES2 if possible
-    VOFLAG_GL_DEBUG     = 1 << 1,       // Hint to request debug OpenGL context
-    VOFLAG_ALPHA        = 1 << 2,       // Hint to request alpha framebuffer
-    VOFLAG_SW           = 1 << 3,       // Hint to accept a software GL renderer
+    VOFLAG_GLES         = 1 << 0,       // Hint to create a GLES2 context
+    VOFLAG_NO_GLES      = 1 << 1,       // Hint to create a desktop GL context
+    VOFLAG_GL_DEBUG     = 1 << 2,       // Hint to request debug OpenGL context
+    VOFLAG_ALPHA        = 1 << 3,       // Hint to request alpha framebuffer
+    VOFLAG_SW           = 1 << 4,       // Hint to accept a software GL renderer
 };
 
 struct MPGLContext;
@@ -126,6 +128,9 @@ typedef struct MPGLContext {
 
     // Windows-specific hack. See vo_opengl dwmflush suboption.
     int dwm_flush_opt;
+
+    // Flip the rendered image vertically. This is useful for dxinterop.
+    bool flip_v;
 
     // For free use by the mpgl_driver.
     void *priv;
@@ -234,6 +239,8 @@ struct GL {
     GLenum (GLAPIENTRY *CheckFramebufferStatus)(GLenum);
     void (GLAPIENTRY *FramebufferTexture2D)(GLenum, GLenum, GLenum, GLuint,
                                             GLint);
+    void (GLAPIENTRY *BlitFramebuffer)(GLint, GLint, GLint, GLint, GLint, GLint,
+                                       GLint, GLint, GLbitfield, GLenum);
 
     void (GLAPIENTRY *Uniform1f)(GLint, GLfloat);
     void (GLAPIENTRY *Uniform2f)(GLint, GLfloat, GLfloat);
@@ -257,6 +264,21 @@ struct GL {
     void (GLAPIENTRY *VDPAUSurfaceAccessNV)(GLvdpauSurfaceNV, GLenum);
     void (GLAPIENTRY *VDPAUMapSurfacesNV)(GLsizei, const GLvdpauSurfaceNV *);
     void (GLAPIENTRY *VDPAUUnmapSurfacesNV)(GLsizei, const GLvdpauSurfaceNV *);
+
+#if HAVE_GL_WIN32
+    // The HANDLE type might not be present on non-Win32
+    BOOL (GLAPIENTRY *DXSetResourceShareHandleNV)(void *dxObject,
+        HANDLE shareHandle);
+    HANDLE (GLAPIENTRY *DXOpenDeviceNV)(void *dxDevice);
+    BOOL (GLAPIENTRY *DXCloseDeviceNV)(HANDLE hDevice);
+    HANDLE (GLAPIENTRY *DXRegisterObjectNV)(HANDLE hDevice, void *dxObject,
+        GLuint name, GLenum type, GLenum access);
+    BOOL (GLAPIENTRY *DXUnregisterObjectNV)(HANDLE hDevice, HANDLE hObject);
+    BOOL (GLAPIENTRY *DXLockObjectsNV)(HANDLE hDevice, GLint count,
+        HANDLE *hObjects);
+    BOOL (GLAPIENTRY *DXUnlockObjectsNV)(HANDLE hDevice, GLint count,
+        HANDLE *hObjects);
+#endif
 
     GLint (GLAPIENTRY *GetVideoSync)(GLuint *);
     GLint (GLAPIENTRY *WaitVideoSync)(GLint, GLint, unsigned int *);

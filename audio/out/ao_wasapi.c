@@ -237,8 +237,6 @@ static void uninit(struct ao *ao)
         MP_ERR(ao, "Audio loop thread refuses to abort\n");
         return;
     }
-    if (state->VistaBlob.hAvrt)
-        FreeLibrary(state->VistaBlob.hAvrt);
 
     SAFE_RELEASE(state->hInitDone,   CloseHandle(state->hInitDone));
     SAFE_RELEASE(state->hWake,       CloseHandle(state->hWake));
@@ -255,8 +253,6 @@ static int init(struct ao *ao)
 
     struct wasapi_state *state = ao->priv;
     state->log = ao->log;
-    if(!wasapi_fill_VistaBlob(state))
-        MP_WARN(ao, "Error loading thread priority functions\n");
 
     state->hInitDone = CreateEventW(NULL, FALSE, FALSE, NULL);
     state->hWake     = CreateEventW(NULL, FALSE, FALSE, NULL);
@@ -341,7 +337,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
         return CONTROL_OK;
     case AOCONTROL_HAS_PER_APP_VOLUME:
-        return CONTROL_TRUE;
+        return state->share_mode == AUDCLNT_SHAREMODE_SHARED ?
+            CONTROL_TRUE : CONTROL_FALSE;
     case AOCONTROL_UPDATE_STREAM_TITLE: {
         MP_VERBOSE(state, "Updating stream title to \"%s\"\n", (char*)arg);
         wchar_t *title = mp_from_utf8(NULL, (char*)arg);

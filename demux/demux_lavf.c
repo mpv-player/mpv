@@ -612,6 +612,10 @@ static void handle_stream(demuxer_t *demuxer, int i)
                     sh_sub->frame_based = 23.976;
             }
         }
+
+        if (matches_avinputformat_name(priv, "ass"))
+            sh_sub->is_utf8 = true;
+
         break;
     }
     case AVMEDIA_TYPE_ATTACHMENT: {

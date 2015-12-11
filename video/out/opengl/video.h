@@ -62,6 +62,7 @@ struct scaler {
     GLenum gl_target;
     struct fbotex sep_fbo;
     bool insufficient;
+    int lut_size;
 
     // kernel points here
     struct filter_kernel kernel_storage;
@@ -70,6 +71,7 @@ struct scaler {
 struct gl_video_opts {
     int dumb_mode;
     struct scaler_config scaler[4];
+    int scaler_lut_size;
     float gamma;
     int gamma_auto;
     int target_prim;

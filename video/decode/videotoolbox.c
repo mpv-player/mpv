@@ -31,7 +31,7 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
                  const char *decoder)
 {
     hwdec_request_api(info, "videotoolbox");
-    if (!info || !info->hwctx)
+    if (!info || !info->hwctx || info->hwctx->type != HWDEC_VIDEOTOOLBOX)
         return HWDEC_ERR_NO_CTX;
     switch (mp_codec_to_av_codec_id(decoder)) {
     case AV_CODEC_ID_H264:
@@ -88,7 +88,7 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
     av_videotoolbox_default_free(ctx->avctx);
 
     AVVideotoolboxContext *vtctx = av_videotoolbox_alloc_context();
-    vtctx->cv_pix_fmt_type = kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange;
+    vtctx->cv_pix_fmt_type = (uintptr_t)ctx->hwdec_info->hwctx->priv;
     int err = av_videotoolbox_default_init2(ctx->avctx, vtctx);
 
     if (err < 0) {

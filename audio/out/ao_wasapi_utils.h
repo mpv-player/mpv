@@ -33,6 +33,7 @@ char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr);
 #define mp_GUID_to_str(guid) mp_GUID_to_str_buf((char[40]){0}, 40, (guid))
 #define mp_PKEY_to_str(pkey) mp_PKEY_to_str_buf((char[42]){0}, 42, (pkey))
 #define mp_HRESULT_to_str(hr) mp_HRESULT_to_str_buf((char[60]){0}, 60, (hr))
+#define mp_LastError_to_str() mp_HRESULT_to_str(HRESULT_FROM_WIN32(GetLastError()))
 
 bool wasapi_fill_VistaBlob(wasapi_state *state);
 

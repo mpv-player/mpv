@@ -567,10 +567,32 @@ static int mp_property_mistimed_frame_count(void *ctx, struct m_property *prop,
                                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
-     if (!mpctx->d_video || !mpctx->display_sync_active)
+    if (!mpctx->d_video || !mpctx->display_sync_active)
         return M_PROPERTY_UNAVAILABLE;
 
     return m_property_int_ro(action, arg, mpctx->mistimed_frames_total);
+}
+
+static int mp_property_vsync_ratio(void *ctx, struct m_property *prop,
+                                   int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->d_video || !mpctx->display_sync_active)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int vsyncs = 0, frames = 0;
+    for (int n = 0; n < mpctx->num_past_frames; n++) {
+        int vsync = mpctx->past_frames[n].num_vsyncs;
+        if (vsync < 0)
+            break;
+        vsyncs += vsync;
+        frames += 1;
+    }
+
+    if (!frames)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_double_ro(action, arg, vsyncs / (double)frames);
 }
 
 static int mp_property_vo_drop_frame_count(void *ctx, struct m_property *prop,
@@ -583,14 +605,14 @@ static int mp_property_vo_drop_frame_count(void *ctx, struct m_property *prop,
     return m_property_int_ro(action, arg, vo_get_drop_count(mpctx->video_out));
 }
 
-static int mp_property_vo_missed_frame_count(void *ctx, struct m_property *prop,
-                                             int action, void *arg)
+static int mp_property_vo_delayed_frame_count(void *ctx, struct m_property *prop,
+                                              int action, void *arg)
 {
     MPContext *mpctx = ctx;
     if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_int_ro(action, arg, vo_get_missed_count(mpctx->video_out));
+    return m_property_int_ro(action, arg, vo_get_delayed_count(mpctx->video_out));
 }
 
 /// Current position in percent (RW)
@@ -636,11 +658,8 @@ static int mp_property_percent_pos(void *ctx, struct m_property *prop,
 static int mp_property_time_start(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
-    MPContext *mpctx = ctx;
-    double start = get_start_time(mpctx);
-    if (start < 0)
-        return M_PROPERTY_UNAVAILABLE;
-    return property_time(action, arg, start);
+    // minor backwards-compat.
+    return property_time(action, arg, 0);
 }
 
 /// Current position in seconds (RW)
@@ -701,8 +720,7 @@ static int mp_property_playback_time(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_SET) {
-        double target = get_start_time(mpctx) + *(double *)arg;
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, target, MPSEEK_DEFAULT, true);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, MPSEEK_DEFAULT, true);
         return M_PROPERTY_OK;
     }
     return property_time(action, arg, get_playback_time(mpctx));
@@ -2510,6 +2528,30 @@ static int mp_property_vd_imgparams(void *ctx, struct m_property *prop,
     return M_PROPERTY_UNAVAILABLE;
 }
 
+static int mp_property_video_frame_info(void *ctx, struct m_property *prop,
+                                        int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct mp_image *f =
+        mpctx->video_out ? vo_get_current_frame(mpctx->video_out) : NULL;
+    if (!f)
+        return M_PROPERTY_UNAVAILABLE;
+
+    const char *pict_types[] = {0, "I", "P", "B"};
+    const char *pict_type = f->pict_type >= 1 && f->pict_type <= 3
+                          ? pict_types[f->pict_type] : NULL;
+
+    struct m_sub_property props[] = {
+        {"picture-type",    SUB_PROP_STR(pict_type), .unavailable = !pict_type},
+        {"interlaced",      SUB_PROP_FLAG(!!(f->fields & MP_IMGFIELD_INTERLACED))},
+        {"tff",             SUB_PROP_FLAG(!!(f->fields & MP_IMGFIELD_TOP_FIRST))},
+        {"repeat",          SUB_PROP_FLAG(!!(f->fields & MP_IMGFIELD_REPEAT_FIRST))},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
 static int mp_property_window_scale(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
@@ -2585,6 +2627,32 @@ static int mp_property_display_fps(void *ctx, struct m_property *prop,
         return ret;
     }
     return m_property_double_ro(action, arg, fps);
+}
+
+static int mp_property_estimated_display_fps(void *ctx, struct m_property *prop,
+                                             int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return M_PROPERTY_UNAVAILABLE;
+    double interval = vo_get_estimated_vsync_interval(vo);
+    if (interval <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_double_ro(action, arg, 1.0 / interval);
+}
+
+static int mp_property_vsync_jitter(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return M_PROPERTY_UNAVAILABLE;
+    double stddev = vo_get_estimated_vsync_jitter(vo);
+    if (stddev < 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_double_ro(action, arg, stddev);
 }
 
 static int mp_property_display_names(void *ctx, struct m_property *prop,
@@ -2687,10 +2755,10 @@ static int mp_property_vf_fps(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
-    double res = stabilize_frame_duration(mpctx, false);
-    if (res <= 0)
+    double avg = calc_average_frame_duration(mpctx);
+    if (avg <= 0)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_double_ro(action, arg, 1 / res);
+    return m_property_double_ro(action, arg, 1.0 / avg);
 }
 
 /// Video aspect (RO)
@@ -3394,8 +3462,9 @@ static const struct m_property mp_properties[] = {
     {"total-avsync-change", mp_property_total_avsync_change},
     {"drop-frame-count", mp_property_drop_frame_cnt},
     {"mistimed-frame-count", mp_property_mistimed_frame_count},
+    {"vsync-ratio", mp_property_vsync_ratio},
     {"vo-drop-frame-count", mp_property_vo_drop_frame_count},
-    {"vo-missed-frame-count", mp_property_vo_missed_frame_count},
+    {"vo-delayed-frame-count", mp_property_vo_delayed_frame_count},
     {"percent-pos", mp_property_percent_pos},
     {"time-start", mp_property_time_start},
     {"time-pos", mp_property_time_pos},
@@ -3487,6 +3556,7 @@ static const struct m_property mp_properties[] = {
     {"video-out-params", mp_property_vo_imgparams},
     {"video-params", mp_property_vd_imgparams},
     {"video-format", mp_property_video_format},
+    {"video-frame-info", mp_property_video_frame_info},
     {"video-codec", mp_property_video_codec},
     M_PROPERTY_ALIAS("dwidth", "video-out-params/dw"),
     M_PROPERTY_ALIAS("dheight", "video-out-params/dh"),
@@ -3568,6 +3638,8 @@ static const struct m_property mp_properties[] = {
     {"window-minimized", mp_property_win_minimized},
     {"display-names", mp_property_display_names},
     {"display-fps", mp_property_display_fps},
+    {"estimated-display-fps", mp_property_estimated_display_fps},
+    {"vsync-jitter", mp_property_vsync_jitter},
 
     {"working-directory", mp_property_cwd},
 
@@ -3612,7 +3684,8 @@ static const char *const *const mp_event_property_change[] = {
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
       "total-avsync-change", "audio-speed-correction", "video-speed-correction",
-      "vo-missed-frame-count", "mistimed-frame-count"),
+      "vo-delayed-frame-count", "mistimed-frame-count", "vsync-ratio",
+      "estimated-display-fps", "vsync-jitter"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",
@@ -4453,14 +4526,13 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     case MP_CMD_SUB_SEEK: {
         if (!mpctx->playback_initialized)
             return -1;
-        struct osd_sub_state state;
-        update_osd_sub_state(mpctx, 0, &state);
+        struct dec_sub *sub = mpctx->d_sub[0];
         double refpts = get_current_time(mpctx);
-        if (state.dec_sub && refpts != MP_NOPTS_VALUE) {
+        if (sub && refpts != MP_NOPTS_VALUE) {
             double a[2];
-            a[0] = refpts - state.video_offset - opts->sub_delay;
+            a[0] = refpts - opts->sub_delay;
             a[1] = cmd->args[0].v.i;
-            if (sub_control(state.dec_sub, SD_CTRL_SUB_STEP, a) > 0) {
+            if (sub_control(sub, SD_CTRL_SUB_STEP, a) > 0) {
                 if (cmd->id == MP_CMD_SUB_STEP) {
                     opts->sub_delay -= a[0];
                     osd_changed_all(mpctx->osd);

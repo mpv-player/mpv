@@ -464,16 +464,16 @@ Available filters are:
         :yes: Only deinterlace frames marked as interlaced (default if this
               filter is inserted via ``deinterlace`` property).
 
-    This filter, is automatically inserted when using the ``D`` key (or any
+    This filter, is automatically inserted when using the ``d`` key (or any
     other key that toggles the ``deinterlace`` property or when using the
     ``--deinterlace`` switch), assuming the video output does not have native
     deinterlacing support.
 
     If you just want to set the default mode, put this filter and its options
-    into ``--vf-defaults`` instead, and enable deinterlacing with ``D`` or
+    into ``--vf-defaults`` instead, and enable deinterlacing with ``d`` or
     ``--deinterlace``.
 
-    Also note that the ``D`` key is stupid enough to insert an interlacer twice
+    Also note that the ``d`` key is stupid enough to insert a deinterlacer twice
     when inserting yadif with ``--vf``, so using the above methods is
     recommended.
 
@@ -721,7 +721,7 @@ Available filters are:
 ``vavpp``
     VA-AP-API video post processing. Works with ``--vo=vaapi`` and ``--vo=opengl``
     only. Currently deinterlaces. This filter is automatically inserted if
-    deinterlacing is requested (either using the ``D`` key, by default mapped to
+    deinterlacing is requested (either using the ``d`` key, by default mapped to
     the command ``cycle deinterlace``, or the ``--deinterlace`` option).
 
     ``deint=<method>``
@@ -745,7 +745,7 @@ Available filters are:
 ``vdpaupp``
     VDPAU video post processing. Works with ``--vo=vdpau`` and ``--vo=opengl``
     only. This filter is automatically inserted if deinterlacing is requested
-    (either using the ``D`` key, by default mapped to the command
+    (either using the ``d`` key, by default mapped to the command
     ``cycle deinterlace``, or the ``--deinterlace`` option). When enabling
     deinterlacing, it is always preferred over software deinterlacer filters
     if the ``vdpau`` VO is used, and also if ``opengl`` is used and hardware

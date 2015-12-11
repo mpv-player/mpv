@@ -271,6 +271,7 @@ bool demux_cancel_test(struct demuxer *demuxer);
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, double rel_seek_secs, int flags);
 void demux_set_enable_refresh_seeks(struct demuxer *demuxer, bool enabled);
+void demux_set_ts_offset(struct demuxer *demuxer, double offset);
 
 int demux_control(struct demuxer *demuxer, int cmd, void *arg);
 

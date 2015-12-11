@@ -48,6 +48,5 @@ void MainWindow::pauseResume()
 
 void MainWindow::setSliderRange(int duration)
 {
-    const int time0 = m_mpv->getProperty("time-start").toInt();
-    m_slider->setRange(time0, time0+duration);
+    m_slider->setRange(0, duration);
 }

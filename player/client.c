@@ -711,6 +711,8 @@ int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable)
 {
     if (!mpv_event_name(event) || enable < 0 || enable > 1)
         return MPV_ERROR_INVALID_PARAMETER;
+    if (event == MPV_EVENT_SHUTDOWN && !enable)
+        return MPV_ERROR_INVALID_PARAMETER;
     assert(event < (int)INTERNAL_EVENT_BASE); // excluded above; they have no name
     pthread_mutex_lock(&ctx->lock);
     uint64_t bit = 1ULL << event;

@@ -16,11 +16,11 @@ struct osd_object {
     // OSDTYPE_SUB/OSDTYPE_SUB2/OSDTYPE_OSD/OSDTYPE_EXTERNAL
     char *text;
 
-    // OSDTYPE_PROGBAR
+    // OSDTYPE_OSD
     struct osd_progbar_state progbar_state;
 
     // OSDTYPE_SUB/OSDTYPE_SUB2
-    struct osd_sub_state sub_state;
+    struct dec_sub *sub;
 
     // OSDTYPE_EXTERNAL
     int external_res_x, external_res_y;

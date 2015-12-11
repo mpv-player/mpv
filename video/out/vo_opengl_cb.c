@@ -58,6 +58,7 @@ struct vo_priv {
 
 struct mpv_opengl_cb_context {
     struct mp_log *log;
+    struct mpv_global *global;
     struct mp_client_api *client_api;
 
     pthread_mutex_t lock;
@@ -70,6 +71,7 @@ struct mpv_opengl_cb_context {
     struct vo_frame *next_frame;    // next frame to draw
     int64_t present_count;          // incremented when next frame can be shown
     int64_t expected_flip_count;    // next vsync event for next_frame
+    bool redrawing;                 // next_frame was a redraw request
     int64_t flip_count;
     struct vo_frame *cur_frame;
     struct mp_image_params img_params;
@@ -129,6 +131,7 @@ struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
 
     ctx->gl = talloc_zero(ctx, GL);
 
+    ctx->global = g;
     ctx->log = mp_log_new(ctx, g->log, "opengl-cb");
     ctx->client_api = client_api;
 
@@ -173,11 +176,12 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
 
     mpgl_load_functions2(ctx->gl, get_proc_address, get_proc_address_ctx,
                          exts, ctx->log);
-    ctx->renderer = gl_video_init(ctx->gl, ctx->log, NULL);
+    ctx->renderer = gl_video_init(ctx->gl, ctx->log, ctx->global);
     if (!ctx->renderer)
         return MPV_ERROR_UNSUPPORTED;
 
-    ctx->hwdec = gl_hwdec_load_api_id(ctx->log, ctx->gl, ctx->hwdec_api);
+    ctx->hwdec = gl_hwdec_load_api_id(ctx->log, ctx->gl, ctx->global,
+                                      ctx->hwdec_api);
     gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
     if (ctx->hwdec)
         ctx->hwdec_info.hwctx = ctx->hwdec->hwctx;
@@ -265,7 +269,8 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         struct vo_priv *opts = ctx->new_opts ? ctx->new_opts : p;
         if (opts) {
             gl_video_set_options(ctx->renderer, opts->renderer_opts);
-            gl_video_configure_queue(ctx->renderer, vo);
+            if (vo)
+                gl_video_configure_queue(ctx->renderer, vo);
             ctx->gl->debug_context = opts->use_gl_debug;
             gl_video_set_debug(ctx->renderer, opts->use_gl_debug);
         }
@@ -350,6 +355,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     assert(!p->ctx->next_frame);
     p->ctx->next_frame = vo_frame_ref(frame);
     p->ctx->expected_flip_count = p->ctx->flip_count + 1;
+    p->ctx->redrawing = frame ? frame->redraw : false;
     update(p);
     pthread_mutex_unlock(&p->ctx->lock);
 }
@@ -372,6 +378,9 @@ static void flip_page(struct vo *vo)
     // Unblock mpv_opengl_cb_draw().
     p->ctx->present_count += 1;
     pthread_cond_signal(&p->ctx->wakeup);
+
+    if (p->ctx->redrawing)
+        goto done; // do not block for redrawing
 
     // Wait until frame was presented
     while (p->ctx->expected_flip_count > p->ctx->flip_count) {

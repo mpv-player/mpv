@@ -4,6 +4,11 @@
 #include "dec_sub.h"
 #include "demux/packet.h"
 
+// up to 210 ms overlaps or gaps are removed
+#define SUB_GAP_THRESHOLD 0.210
+// don't change timings if durations are smaller
+#define SUB_GAP_KEEP 0.4
+
 struct sd {
     struct mp_log *log;
     struct MPOpts *opts;
@@ -17,6 +22,8 @@ struct sd {
     char *extradata;
     int extradata_len;
 
+    struct sh_stream *sh;
+
     // Set to !=NULL if the input packets are being converted from another
     // format.
     const char *converted_from;
@@ -24,6 +31,8 @@ struct sd {
     // Video resolution used for subtitle decoding. Doesn't necessarily match
     // the resolution of the VO, nor does it have to be the OSD resolution.
     int sub_video_w, sub_video_h;
+
+    double video_fps;
 
     // Shared renderer for ASS - done to avoid reloading embedded fonts.
     struct ass_library *ass_library;
@@ -52,6 +61,7 @@ struct sd_functions {
     void (*reset)(struct sd *sd);
     void (*uninit)(struct sd *sd);
 
+    bool (*accepts_packet)(struct sd *sd); // implicit default if NULL: true
     void (*fix_events)(struct sd *sd);
     int (*control)(struct sd *sd, enum sd_ctrl cmd, void *arg);
 

@@ -174,6 +174,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     }
 
     desc.plane_bits = planedepth[0];
+    desc.component_full_bits = desc.component_bits;
 
     // Check whether any components overlap other components (per plane).
     // We're cheating/simplifying here: we assume that this happens if a shift
@@ -241,6 +242,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
                           desc.bpp[p] == desc.bpp[0];
         }
         if (same_depth && pd->nb_components == desc.num_planes) {
+            desc.component_full_bits = (desc.component_bits + 7) / 8 * 8;
             if (desc.flags & MP_IMGFLAG_YUV) {
                 desc.flags |= MP_IMGFLAG_YUV_P;
             } else {
@@ -262,7 +264,9 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 
     if (pd->flags & AV_PIX_FMT_FLAG_HWACCEL) {
         desc.flags |= MP_IMGFLAG_HWACCEL;
-        desc.plane_bits = 8; // usually restricted to 8 bit; may change
+        desc.component_bits = 8; // usually restricted to 8 bit; may change
+        desc.component_full_bits = desc.component_bits;
+        desc.plane_bits = desc.component_bits;
     }
 
     if (desc.chroma_xs || desc.chroma_ys)

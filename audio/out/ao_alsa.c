@@ -977,6 +977,20 @@ alsa_error:
     return -1;
 }
 
+static bool is_useless_device(char *name)
+{
+    char *crap[] = {"front", "rear", "center_lfe", "side", "surround21",
+        "surround40", "surround41", "surround50", "surround51", "surround71",
+        "sysdefault", "pulse", "null", "dsnoop", "dmix", "hw", "iec958"};
+    for (int i = 0; i < MP_ARRAY_SIZE(crap); i++) {
+        int l = strlen(crap[i]);
+        if (name && strncmp(name, crap[i], l) == 0 &&
+            (!name[l] || name[l] == ':'))
+            return true;
+    }
+    return false;
+}
+
 static void list_devs(struct ao *ao, struct ao_device_list *list)
 {
     void **hints;
@@ -987,7 +1001,7 @@ static void list_devs(struct ao *ao, struct ao_device_list *list)
         char *name = snd_device_name_get_hint(hints[n], "NAME");
         char *desc = snd_device_name_get_hint(hints[n], "DESC");
         char *io = snd_device_name_get_hint(hints[n], "IOID");
-        if (io && strcmp(io, "Output") == 0) {
+        if (!is_useless_device(name) && (!io || strcmp(io, "Output") == 0)) {
             char desc2[1024];
             snprintf(desc2, sizeof(desc2), "%s", desc ? desc : "");
             for (int i = 0; desc2[i]; i++) {

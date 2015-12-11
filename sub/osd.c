@@ -163,10 +163,10 @@ void osd_set_text(struct osd_state *osd, int obj, const char *text)
     pthread_mutex_unlock(&osd->lock);
 }
 
-void osd_set_sub(struct osd_state *osd, int obj, struct osd_sub_state *substate)
+void osd_set_sub(struct osd_state *osd, int obj, struct dec_sub *dec_sub)
 {
     pthread_mutex_lock(&osd->lock);
-    osd->objs[obj]->sub_state = substate ? *substate : (struct osd_sub_state){0};
+    osd->objs[obj]->sub = dec_sub;
     pthread_mutex_unlock(&osd->lock);
 }
 
@@ -188,7 +188,7 @@ void osd_set_render_subs_in_filter(struct osd_state *osd, bool s)
 void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s)
 {
     pthread_mutex_lock(&osd->lock);
-    struct osd_object *osd_obj = osd->objs[OSDTYPE_PROGBAR];
+    struct osd_object *osd_obj = osd->objs[OSDTYPE_OSD];
     osd_obj->progbar_state.type = s->type;
     osd_obj->progbar_state.value = s->value;
     osd_obj->progbar_state.num_stops = s->num_stops;
@@ -243,14 +243,11 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
     obj->vo_res = res;
 
     if (obj->type == OSDTYPE_SUB || obj->type == OSDTYPE_SUB2) {
-        struct osd_sub_state *sub = &obj->sub_state;
-        if (sub->render_bitmap_subs && sub->dec_sub) {
+        if (obj->sub) {
             double sub_pts = video_pts;
             if (sub_pts != MP_NOPTS_VALUE)
-                sub_pts -= sub->video_offset + opts->sub_delay;
-            sub_get_bitmaps(sub->dec_sub, obj->vo_res, sub_pts, out_imgs);
-        } else {
-            osd_object_get_bitmaps(osd, obj, out_imgs);
+                sub_pts -= opts->sub_delay;
+            sub_get_bitmaps(obj->sub, obj->vo_res, sub_pts, out_imgs);
         }
     } else if (obj->type == OSDTYPE_EXTERNAL2) {
         if (obj->external2 && obj->external2->format) {
@@ -324,8 +321,8 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
         if ((draw_flags & OSD_DRAW_OSD_ONLY) && obj->is_sub)
             continue;
 
-        if (obj->sub_state.dec_sub)
-            sub_lock(obj->sub_state.dec_sub);
+        if (obj->sub)
+            sub_lock(obj->sub);
 
         struct sub_bitmaps imgs;
         render_object(osd, obj, res, video_pts, formats, &imgs);
@@ -338,8 +335,8 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
             }
         }
 
-        if (obj->sub_state.dec_sub)
-            sub_unlock(obj->sub_state.dec_sub);
+        if (obj->sub)
+            sub_unlock(obj->sub);
     }
 
     pthread_mutex_unlock(&osd->lock);

@@ -135,16 +135,25 @@ struct vo_internal {
     bool want_redraw;               // redraw request from VO to player
     bool send_reset;                // send VOCTRL_RESET
     bool paused;
-    bool vsync_timed;               // the VO redraws itself as fast as possible
-                                    // at every vsync
     int queued_events;              // event mask for the user
     int internal_events;            // event mask for us
 
+    int64_t nominal_vsync_interval;
+
     int64_t vsync_interval;
+    int64_t *vsync_samples;
+    int num_vsync_samples;
+    int64_t num_total_vsync_samples;
+    int64_t prev_vsync;
+    int64_t base_vsync;
+    int drop_point;
+    double estimated_vsync_interval;
+    double estimated_vsync_jitter;
+    bool expecting_vsync;
 
     int64_t flip_queue_offset; // queue flip events at most this much in advance
 
-    int64_t missed_count;
+    int64_t delayed_count;
     int64_t drop_count;
     bool dropped_frame;             // the previous frame was dropped
 
@@ -157,11 +166,6 @@ struct vo_internal {
     int req_frames;                 // VO's requested value of num_frames
 
     double display_fps;
-
-    // --- The following fields can be accessed from the VO thread only
-    int64_t vsync_interval_approx;
-    int64_t last_flip;
-    char *window_title;
 };
 
 static void forget_frames(struct vo *vo);
@@ -312,6 +316,143 @@ void vo_destroy(struct vo *vo)
     dealloc_vo(vo);
 }
 
+// Drop timing information on discontinuities like seeking.
+// Always called locked.
+static void reset_vsync_timings(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    in->num_vsync_samples = 0;
+    in->num_total_vsync_samples = 0;
+    in->drop_point = 0;
+    in->estimated_vsync_interval = 0;
+    in->estimated_vsync_jitter = -1;
+    in->base_vsync = 0;
+    in->expecting_vsync = false;
+}
+
+static double vsync_stddef(struct vo *vo, int64_t ref_vsync)
+{
+    struct vo_internal *in = vo->in;
+    double jitter = 0;
+    for (int n = 0; n < in->num_vsync_samples; n++) {
+        double diff = in->vsync_samples[n] - ref_vsync;
+        jitter += diff * diff;
+    }
+    return sqrt(jitter / in->num_vsync_samples);
+}
+
+#define MAX_VSYNC_SAMPLES 200
+
+// Check if we should switch to measured average display FPS if it seems
+// "better" then the system-reported one. (Note that small differences are
+// handled as drift instead.)
+static void check_estimated_display_fps(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+
+    bool use_estimated = false;
+    if (in->num_total_vsync_samples >= MAX_VSYNC_SAMPLES * 2 &&
+        fabs((in->nominal_vsync_interval - in->estimated_vsync_interval))
+            >= 0.01 * in->nominal_vsync_interval &&
+        in->estimated_vsync_interval <= 1e6 / 20.0 &&
+        in->estimated_vsync_interval >= 1e6 / 99.0)
+    {
+        for (int n = 0; n < in->num_vsync_samples; n++) {
+            if (fabs(in->vsync_samples[n] - in->estimated_vsync_interval)
+                >= in->estimated_vsync_interval / 4)
+                goto done;
+        }
+        double mjitter = vsync_stddef(vo, in->estimated_vsync_interval);
+        double njitter = vsync_stddef(vo, in->nominal_vsync_interval);
+        if (mjitter * 1.01 < njitter)
+            use_estimated = true;
+        done: ;
+    }
+    if (use_estimated == (in->vsync_interval == in->nominal_vsync_interval)) {
+        if (use_estimated) {
+            MP_WARN(vo, "Reported display FPS seems incorrect.\n"
+                        "Assuming a value closer to %.3f Hz.\n",
+                        1e6 / in->estimated_vsync_interval);
+        } else {
+            MP_WARN(vo, "Switching back to assuming %.3f Hz.\n",
+                    1e6 / in->nominal_vsync_interval);
+        }
+    }
+    in->vsync_interval = use_estimated ? (int64_t)in->estimated_vsync_interval
+                                       : in->nominal_vsync_interval;
+}
+
+// Attempt to detect vsyncs delayed/skipped by the driver. This tries to deal
+// with strong jitter too, because some drivers have crap vsync timing.
+static void vsync_skip_detection(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+
+    int window = 4;
+    int64_t t_r = in->prev_vsync, t_e = in->base_vsync, diff = 0, desync_early = 0;
+    for (int n = 0; n < in->drop_point; n++) {
+        diff += t_r - t_e;
+        t_r -= in->vsync_samples[n];
+        t_e -= in->vsync_interval;
+        if (n == window + 1)
+            desync_early = diff / window;
+    }
+    int64_t desync = diff / in->num_vsync_samples;
+    if (in->drop_point > window * 2 &&
+        labs(desync - desync_early) >= in->vsync_interval * 3 / 4)
+    {
+        // Assume a drop. An underflow can technically speaking not be a drop
+        // (it's up to the driver what this is supposed to mean), but no reason
+        // to treat it differently.
+        in->base_vsync = in->prev_vsync;
+        in->delayed_count += 1;
+        in->drop_point = 0;
+        MP_STATS(vo, "vo-delayed");
+    }
+    if (in->drop_point > 10)
+        in->base_vsync += desync / 10;  // smooth out drift
+}
+
+// Always called locked.
+static void update_vsync_timing_after_swap(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+
+    int64_t now = mp_time_us();
+
+    if (!in->expecting_vsync) {
+        in->prev_vsync = now; // for normal system-time framedrop
+        reset_vsync_timings(vo);
+        return;
+    }
+
+    if (in->num_vsync_samples >= MAX_VSYNC_SAMPLES)
+        in->num_vsync_samples -= 1;
+    MP_TARRAY_INSERT_AT(in, in->vsync_samples, in->num_vsync_samples, 0,
+                        now - in->prev_vsync);
+    in->drop_point = MPMIN(in->drop_point + 1, in->num_vsync_samples);
+    in->num_total_vsync_samples += 1;
+    if (in->base_vsync) {
+        in->base_vsync += in->vsync_interval;
+    } else {
+        in->base_vsync = now;
+    }
+    in->prev_vsync = now;
+
+    double avg = 0;
+    for (int n = 0; n < in->num_vsync_samples; n++)
+        avg += in->vsync_samples[n];
+    in->estimated_vsync_interval = avg / in->num_vsync_samples;
+    in->estimated_vsync_jitter =
+        vsync_stddef(vo, in->vsync_interval) / in->vsync_interval;
+
+    check_estimated_display_fps(vo);
+    vsync_skip_detection(vo);
+
+    MP_STATS(vo, "value %f jitter", in->estimated_vsync_jitter);
+    MP_STATS(vo, "value %f vsync-diff", in->vsync_samples[0] / 1e6);
+}
+
 // to be called from VO thread only
 static void update_display_fps(struct vo *vo)
 {
@@ -333,12 +474,15 @@ static void update_display_fps(struct vo *vo)
 
         if (in->display_fps != display_fps) {
             in->display_fps = display_fps;
-            MP_VERBOSE(vo, "Assuming %f FPS for framedrop.\n", display_fps);
+            MP_VERBOSE(vo, "Assuming %f FPS for display sync.\n", display_fps);
 
             // make sure to update the player
             in->queued_events |= VO_EVENT_WIN_STATE;
             mp_input_wakeup(vo->input_ctx);
         }
+
+        in->nominal_vsync_interval = in->display_fps > 0 ? 1e6 / in->display_fps : 0;
+        in->vsync_interval = MPMAX(in->nominal_vsync_interval, 1);
     }
     pthread_mutex_unlock(&in->lock);
 }
@@ -383,6 +527,7 @@ static void run_reconfig(void *p)
     talloc_free(in->current_frame);
     in->current_frame = NULL;
     forget_frames(vo);
+    reset_vsync_timings(vo);
     pthread_mutex_unlock(&in->lock);
 
     update_display_fps(vo);
@@ -402,8 +547,6 @@ static void run_control(void *p)
     struct vo *vo = pp[0];
     uint32_t request = *(int *)pp[1];
     void *data = pp[2];
-    if (request == VOCTRL_UPDATE_WINDOW_TITLE) // legacy fallback
-        vo->in->window_title = talloc_strdup(vo, data);
     int ret = vo->driver->control(vo, request, data);
     *(int *)pp[3] = ret;
 }
@@ -423,7 +566,7 @@ static void forget_frames(struct vo *vo)
     in->hasframe = false;
     in->hasframe_rendered = false;
     in->drop_count = 0;
-    in->missed_count = 0;
+    in->delayed_count = 0;
     talloc_free(in->frame_queued);
     in->frame_queued = NULL;
     // don't unref current_frame; we always want to be able to redraw it
@@ -536,7 +679,7 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
         if (next_pts > now)
             r = false;
         if (!in->wakeup_pts || next_pts < in->wakeup_pts) {
-            in->wakeup_pts = in->vsync_timed ? 0 : next_pts;
+            in->wakeup_pts = next_pts;
             wakeup_locked(vo);
         }
     }
@@ -555,7 +698,7 @@ void vo_queue_frame(struct vo *vo, struct vo_frame *frame)
            (!in->current_frame || in->current_frame->num_vsyncs < 1));
     in->hasframe = true;
     in->frame_queued = frame;
-    in->wakeup_pts = (frame->display_synced || in->vsync_timed)
+    in->wakeup_pts = frame->display_synced
                    ? 0 : frame->pts + MPMAX(frame->duration, 0);
     wakeup_locked(vo);
     pthread_mutex_unlock(&in->lock);
@@ -588,18 +731,6 @@ static void wait_until(struct vo *vo, int64_t target)
     pthread_mutex_unlock(&in->lock);
 }
 
-// needs lock
-static int64_t prev_sync(struct vo *vo, int64_t ts)
-{
-    struct vo_internal *in = vo->in;
-
-    int64_t diff = (int64_t)(ts - in->last_flip);
-    int64_t offset = diff % in->vsync_interval;
-    if (offset < 0)
-        offset += in->vsync_interval;
-    return ts - offset;
-}
-
 static bool render_frame(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
@@ -610,16 +741,13 @@ static bool render_frame(struct vo *vo)
 
     pthread_mutex_lock(&in->lock);
 
-    vo->in->vsync_interval = in->display_fps > 0 ? 1e6 / in->display_fps : 0;
-    vo->in->vsync_interval = MPMAX(vo->in->vsync_interval, 1);
-
     if (in->frame_queued) {
         talloc_free(in->current_frame);
         in->current_frame = in->frame_queued;
         in->frame_queued = NULL;
     } else if (in->paused || !in->current_frame || !in->hasframe ||
                (in->current_frame->display_synced && in->current_frame->num_vsyncs < 1) ||
-               (!in->vsync_timed && !in->current_frame->display_synced))
+               !in->current_frame->display_synced)
     {
         goto done;
     }
@@ -632,78 +760,38 @@ static bool render_frame(struct vo *vo)
         frame->duration = -1;
     }
 
+    int64_t now = mp_time_us();
     int64_t pts = frame->pts;
     int64_t duration = frame->duration;
     int64_t end_time = pts + duration;
 
-    // The next time a flip (probably) happens.
-    int64_t prev_vsync = prev_sync(vo, mp_time_us());
-    int64_t next_vsync = prev_vsync + in->vsync_interval;
-
-    frame->vsync_interval = in->vsync_interval;
-
     // Time at which we should flip_page on the VO.
     int64_t target = frame->display_synced ? 0 : pts - in->flip_queue_offset;
 
-    bool prev_dropped_frame = in->dropped_frame;
-
     // "normal" strict drop threshold.
-    in->dropped_frame = duration >= 0 && end_time < next_vsync;
-
-    // Clip has similar (within ~5%) or lower fps than the display.
-    if (duration >= 0 && duration > 0.95 * in->vsync_interval) {
-        // If the clip and display have similar/identical fps, it's possible that
-        // due to the very tight timing, we'll drop frames frequently even if on
-        // average we can keep up - especially if we have timing jitter (inaccurate
-        // clip timestamps, inaccurate timers, vsync block jitter, etc).
-        // So we're allowing to be 1 vsync late to prevent these frequent drops.
-        // However, once we've dropped a frame - "catch up" by using the strict
-        // threshold - which will typically be dropping 2 frames in a row.
-        // On low clip fps, we don't drop anyway and this logic doesn't matter.
-
-        // if we dropped previously - "catch up" by keeping the strict threshold.
-        in->dropped_frame &= prev_dropped_frame;
-
-        // if we haven't dropped - allow 1 frame late (prev_vsync as threshold).
-        in->dropped_frame |= end_time < prev_vsync;
-    }
+    in->dropped_frame = duration >= 0 && end_time < now;
 
     in->dropped_frame &= !frame->display_synced;
     in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP);
     in->dropped_frame &= (vo->global->opts->frame_dropping & 1);
     // Even if we're hopelessly behind, rather degrade to 10 FPS playback,
     // instead of just freezing the display forever.
-    in->dropped_frame &= mp_time_us() - in->last_flip < 100 * 1000;
+    in->dropped_frame &= now - in->prev_vsync < 100 * 1000;
     in->dropped_frame &= in->hasframe_rendered;
-
-    if (in->vsync_timed && !frame->display_synced) {
-        // this is a heuristic that wakes the thread up some
-        // time before the next vsync
-        target = next_vsync - MPMIN(in->vsync_interval / 2, 8e3);
-
-        // We are very late with the frame and using vsync timing: probably
-        // no new frames are coming in. This must be done whether or not
-        // framedrop is enabled. Also, if the frame is to be dropped, even
-        // though it's an interpolated frame (repeat set), exit early.
-        bool late = prev_vsync > pts + duration + in->vsync_interval_approx;
-        if (frame->repeat && ((in->hasframe_rendered && late) || in->dropped_frame))
-        {
-            in->dropped_frame = false;
-            goto done;
-        }
-
-        frame->vsync_offset = next_vsync - pts;
-    }
 
     // Setup parameters for the next time this frame is drawn. ("frame" is the
     // frame currently drawn, while in->current_frame is the potentially next.)
     in->current_frame->repeat = true;
     if (frame->display_synced) {
-        in->current_frame->vsync_offset += in->vsync_interval;
+        in->current_frame->vsync_offset += in->current_frame->vsync_interval;
         in->dropped_frame |= in->current_frame->num_vsyncs < 1;
     }
     if (in->current_frame->num_vsyncs > 0)
         in->current_frame->num_vsyncs -= 1;
+
+    in->expecting_vsync = in->current_frame->display_synced && !in->paused;
+    if (in->expecting_vsync && !in->num_vsync_samples) // first DS frame in a row
+        in->prev_vsync = now;
 
     if (in->dropped_frame) {
         in->drop_count += 1;
@@ -726,17 +814,6 @@ static bool render_frame(struct vo *vo)
 
         vo->driver->flip_page(vo);
 
-        int64_t prev_flip = in->last_flip;
-
-        in->last_flip = -1;
-
-        vo->driver->control(vo, VOCTRL_GET_RECENT_FLIP_TIME, &in->last_flip);
-
-        if (in->last_flip < 0)
-            in->last_flip = mp_time_us();
-
-        in->vsync_interval_approx = in->last_flip - prev_flip;
-
         MP_STATS(vo, "end video");
         MP_STATS(vo, "video_end");
 
@@ -744,9 +821,7 @@ static bool render_frame(struct vo *vo)
         in->dropped_frame = prev_drop_count < vo->in->drop_count;
         in->rendering = false;
 
-        double diff = (in->vsync_interval - in->vsync_interval_approx) / 1e6;
-        if (fabs(diff) < 0.150)
-            MP_STATS(vo, "value %f vsync-diff", diff);
+        update_vsync_timing_after_swap(vo);
     }
 
     if (!in->dropped_frame) {
@@ -870,6 +945,7 @@ void vo_set_paused(struct vo *vo, bool paused)
         in->paused = paused;
         if (in->paused && in->dropped_frame)
             in->request_redraw = true;
+        reset_vsync_timings(vo);
     }
     pthread_mutex_unlock(&in->lock);
     vo_control(vo, paused ? VOCTRL_PAUSE : VOCTRL_RESUME, NULL);
@@ -913,11 +989,13 @@ bool vo_want_redraw(struct vo *vo)
 
 void vo_seek_reset(struct vo *vo)
 {
-    pthread_mutex_lock(&vo->in->lock);
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
     forget_frames(vo);
-    vo->in->send_reset = true;
+    reset_vsync_timings(vo);
+    in->send_reset = true;
     wakeup_locked(vo);
-    pthread_mutex_unlock(&vo->in->lock);
+    pthread_mutex_unlock(&in->lock);
 }
 
 // Return true if there is still a frame being displayed (or queued).
@@ -980,30 +1058,15 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
                          out_src, out_dst, out_osd);
 }
 
-// Return the window title the VO should set. Always returns a null terminated
-// string. The string is valid until frontend code is invoked again. Copy it if
-// you need to keep the string for an extended period of time.
-// Must be called from the VO thread only.
-// Don't use for new code.
-const char *vo_get_window_title(struct vo *vo)
-{
-    if (!vo->in->window_title)
-        vo->in->window_title = talloc_strdup(vo, "");
-    return vo->in->window_title;
-}
-
 // flip_page[_timed] will be called offset_us microseconds too early.
 // (For vo_vdpau, which does its own timing.)
-// Setting vsync_timed to true redraws as fast as possible.
 // num_req_frames set the requested number of requested vo_frame.frames.
 // (For vo_opengl interpolation.)
-void vo_set_queue_params(struct vo *vo, int64_t offset_us, bool vsync_timed,
-                         int num_req_frames)
+void vo_set_queue_params(struct vo *vo, int64_t offset_us, int num_req_frames)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
     in->flip_queue_offset = offset_us;
-    in->vsync_timed = vsync_timed;
     in->req_frames = MPCLAMP(num_req_frames, 1, VO_MAX_REQ_FRAMES);
     pthread_mutex_unlock(&in->lock);
 }
@@ -1026,35 +1089,53 @@ int64_t vo_get_vsync_interval(struct vo *vo)
     return res;
 }
 
-// Get the mp_time_us() time at which the currently rendering frame will end
-// (i.e. time of the last flip call needed to display it).
+// Returns duration of a display refresh in seconds.
+double vo_get_estimated_vsync_interval(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    double res = in->estimated_vsync_interval / 1e6;
+    pthread_mutex_unlock(&in->lock);
+    return res;
+}
+
+double vo_get_estimated_vsync_jitter(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    double res = in->estimated_vsync_jitter;
+    pthread_mutex_unlock(&in->lock);
+    return res;
+}
+
+// Get the time in seconds at after which the currently rendering frame will
+// end. Returns positive values if the frame is yet to be finished, negative
+// values if it already finished.
 // This can only be called while no new frame is queued (after
 // vo_is_ready_for_frame). Returns 0 for non-display synced frames, or if the
 // deadline for continuous display was missed.
-int64_t vo_get_next_frame_start_time(struct vo *vo)
+double vo_get_delay(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
     assert (!in->frame_queued);
     int64_t res = 0;
-    if (in->last_flip && in->vsync_interval > 1 && in->current_frame) {
-        res = in->last_flip;
+    if (in->base_vsync && in->vsync_interval > 1 && in->current_frame) {
+        res = in->base_vsync;
         int extra = !!in->rendering;
         res += (in->current_frame->num_vsyncs + extra) * in->vsync_interval;
         if (!in->current_frame->display_synced)
             res = 0;
-        if (in->current_frame->num_vsyncs < 1 && !in->rendering)
-            res = 0;
     }
     pthread_mutex_unlock(&in->lock);
-    return res;
+    return res ? (res - mp_time_us()) / 1e6 : 0;
 }
 
-int64_t vo_get_missed_count(struct vo *vo)
+int64_t vo_get_delayed_count(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
-    int64_t res = vo->in->missed_count;
+    int64_t res = vo->in->delayed_count;
     pthread_mutex_unlock(&in->lock);
     return res;
 }

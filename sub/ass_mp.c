@@ -40,6 +40,9 @@
 void mp_ass_set_style(ASS_Style *style, double res_y,
                       const struct osd_style_opts *opts)
 {
+    if (!style)
+        return;
+
     if (opts->font) {
         if (!style->FontName || strcmp(style->FontName, opts->font) != 0) {
             free(style->FontName);
@@ -73,42 +76,6 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
     style->Alignment = 1 + (opts->align_x + 1) + (opts->align_y + 2) % 3 * 4;
     style->Blur = opts->blur;
     style->Bold = opts->bold;
-}
-
-// Add default styles, if the track does not have any styles yet.
-// Apply style overrides if the user provides any.
-void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts)
-{
-    if (opts->ass_styles_file && opts->ass_style_override)
-        ass_read_styles(track, opts->ass_styles_file, NULL);
-
-    if (track->n_styles == 0) {
-        if (!track->PlayResY) {
-            track->PlayResY = MP_ASS_FONT_PLAYRESY;
-            track->PlayResX = track->PlayResY * 4 / 3;
-        }
-        track->Kerning = true;
-        int sid = ass_alloc_style(track);
-        track->default_style = sid;
-        ASS_Style *style = track->styles + sid;
-        style->Name = strdup("Default");
-        mp_ass_set_style(style, track->PlayResY, opts->sub_text_style);
-    }
-
-    if (opts->ass_style_override)
-        ass_process_force_style(track);
-}
-
-ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
-{
-    ASS_Track *track = ass_new_track(library);
-
-    track->track_type = TRACK_TYPE_ASS;
-    track->Timer = 100.;
-
-    mp_ass_add_default_styles(track, opts);
-
-    return track;
 }
 
 void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,

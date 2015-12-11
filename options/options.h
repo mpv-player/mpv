@@ -19,6 +19,7 @@ typedef struct mp_vo_opts {
     int fs_black_out_screens;
     char *winname;
     int x11_netwm;
+    int x11_bypass_compositor;
     int native_keyrepeat;
 
     float panscan;
@@ -41,6 +42,8 @@ typedef struct mp_vo_opts {
     float force_monitor_aspect;
     float monitor_pixel_aspect;
     int force_window_position;
+
+    char *mmcss_profile;
 
     // vo_wayland, vo_drm
     struct sws_opts *sws_opts;
@@ -173,6 +176,7 @@ typedef struct MPOpts {
     struct m_rel_time play_start;
     struct m_rel_time play_end;
     struct m_rel_time play_length;
+    int rebase_start_time;
     int play_frames;
     double ab_loop[2];
     double step_sec;
@@ -267,6 +271,7 @@ typedef struct MPOpts {
 
     int hwdec_api;
     char *hwdec_codecs;
+    int videotoolbox_format;
 
     int w32_priority;
 

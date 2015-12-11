@@ -105,7 +105,7 @@ Available video output drivers are:
         Select deinterlacing mode (default: 0). In older versions (as well as
         MPlayer/mplayer2) you could use this option to enable deinterlacing.
         This doesn't work anymore, and deinterlacing is enabled with either
-        the ``D`` key (by default mapped to the command ``cycle deinterlace``),
+        the ``d`` key (by default mapped to the command ``cycle deinterlace``),
         or the ``--deinterlace`` option. Also, to select the default deint mode,
         you should use something like ``--vf-defaults=vdpaupp:deint-mode=temporal``
         instead of this sub-option.
@@ -311,7 +311,10 @@ Available video output drivers are:
         of bad or old hardware.
 
         This mode is forced automatically if needed, and this option is mostly
-        useful for debugging.
+        useful for debugging. It's also enabled automatically if nothing uses
+        features which require FBOs.
+
+        This option might be silently removed in the future.
 
     ``scale=<filter>``
 
@@ -428,6 +431,15 @@ Available video output drivers are:
             Scale parameter (t). Increasing this makes the window wider.
             Defaults to 1.
 
+    ``scaler-lut-size=<4..10>``
+        Set the size of the lookup texture for scaler kernels (default: 6).
+        The actual size of the texture is ``2^N`` for an option value of ``N``.
+        So the lookup texture with the default setting uses 64 samples.
+
+        All weights are bilinearly interpolated from those samples, so
+        increasing the size of lookup table might improve the accuracy of
+        scaler.
+
     ``scaler-resizes-only``
         Disable the scaler if the video image is not resized. In that case,
         ``bilinear`` is used instead whatever is set with ``scale``. Bilinear
@@ -488,6 +500,10 @@ Available video output drivers are:
         Reduce stuttering caused by mismatches in the video fps and display
         refresh rate (also known as judder).
 
+        .. warning:: This requires setting the ``--video-sync`` option to one
+                     of the ``display-`` modes, or it will be silently disabled.
+                     This was not required before mpv 0.14.0.
+
         This essentially attempts to interpolate the missing frames by
         convoluting the video along the temporal axis. The filter used can be
         controlled using the ``tscale`` setting.
@@ -519,7 +535,7 @@ Available video output drivers are:
         The filter used for interpolating the temporal axis (frames). This is
         only used if ``interpolation`` is enabled. The only valid choices
         for ``tscale`` are separable convolution filters (use ``tscale=help``
-        to get a list). The default is ``oversample``.
+        to get a list). The default is ``mitchell``.
 
         Note that the maximum supported filter radius is currently 3, due to
         limitations in the number of video textures that can be loaded
@@ -543,7 +559,8 @@ Available video output drivers are:
 
     ``correct-downscaling``
         When using convolution based filters, extend the filter size
-        when downscaling. Trades quality for reduced downscaling performance.
+        when downscaling. Increases quality, but reduces performance while
+        downscaling.
 
         This will perform slightly sub-optimally for anamorphic video (but still
         better than without it) since it will extend the size to match only the
@@ -610,11 +627,11 @@ Available video output drivers are:
 
         ``ubo``
             Upload these weights via uniform buffer objects. This is the
-            default. (requires OpenGL 3.1)
+            default. (requires OpenGL 3.1 / GLES 3.0)
 
         ``shader``
             Hard code all the weights into the shader source code. (requires
-            OpenGL 3.3)
+            OpenGL 3.3 / GLES 3.0)
 
 
     ``pre-shaders=<files>``, ``post-shaders=<files>``, ``scale-shader=<file>``
@@ -774,6 +791,13 @@ Available video output drivers are:
             Cocoa/OS X
         win
             Win32/WGL
+        angle
+            Direct3D11 through the OpenGL ES translation layer ANGLE. This
+            supports almost everything the ``win`` backend does, except ICC
+            profiles, high bit depth video input, and the ``nnedi3`` prescaler.
+        dxinterop (experimental)
+            Win32, using WGL for rendering and Direct3D 9Ex for presentation.
+            Works on Nvidia and AMD only.
         x11
             X11/GLX
         wayland
@@ -783,15 +807,23 @@ Available video output drivers are:
         x11egl
             X11/EGL
 
-    ``es``
-        Force or prefer GLES2/3 over desktop OpenGL, if supported.
+    ``es=<mode>``
+        Select whether to use GLES:
+
+        yes
+            Try to prefer ES over Desktop GL
+        no
+            Try to prefer desktop GL over ES
+        auto
+            Use the default for each backend (default)
 
     ``fbo-format=<fmt>``
         Selects the internal format of textures used for FBOs. The format can
         influence performance and quality of the video output.
         ``fmt`` can be one of: rgb, rgba, rgb8, rgb10, rgb10_a2, rgb16, rgb16f,
         rgb32f, rgba12, rgba16, rgba16f, rgba32f.
-        Default: rgba16.
+        Default: ``auto``, which maps to rgba16 on desktop GL, and rgb10_a2 on
+        GLES (e.g. ANGLE).
 
     ``gamma=<0.1..2.0>``
         Set a gamma value (default: 1.0). If gamma is adjusted in other ways
@@ -871,7 +903,8 @@ Available video output drivers are:
         Automatically select the ICC display profile currently specified by
         the display settings of the operating system.
 
-        NOTE: Only implemented on OS X and X11
+        NOTE: On Windows, the default profile must be an ICC profile. WCS
+        profiles are not supported.
 
     ``icc-cache-dir=<dirname>``
         Store and load the 3D LUTs created from the ICC profile in this directory.
@@ -951,7 +984,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:correct-downscaling:sigmoid-upscaling:pbo:deband
+        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:correct-downscaling:sigmoid-upscaling:pbo:deband:es=no
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.
@@ -991,7 +1024,7 @@ Available video output drivers are:
 
     ``deint-mode=<mode>``
         Select deinterlacing algorithm. Note that by default deinterlacing is
-        initially always off, and needs to be enabled with the ``D`` key
+        initially always off, and needs to be enabled with the ``d`` key
         (default key binding for ``cycle deinterlace``).
 
         This option doesn't apply if libva supports video post processing (vpp).
@@ -1112,6 +1145,10 @@ Available video output drivers are:
         Whether to render a black background behind the video (default: no).
         Normally it's better to kill the console framebuffer instead, which
         gives better performance.
+
+    ``osd=<yes|no>``
+        Enabled by default. If disabled with ``no``, no OSD layer is created.
+        This also means there will be no subtitles rendered.
 
 ``drm`` (Direct Rendering Manager)
     Video output driver using Kernel Mode Setting / Direct Rendering Manager.

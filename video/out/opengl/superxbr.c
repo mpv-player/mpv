@@ -148,14 +148,14 @@ void pass_superxbr(struct gl_shader_cache *sc, int planes, int tex_num,
         // Optimization: Discard (skip drawing) unused pixels, except those
         // at the edge.
         GLSLH(vec2 dist = tex_size * min(pos, vec2(1.0) - pos);)
-        GLSLH(if (dir.x * dir.y < 0 && dist.x > 1 && dist.y > 1)
+        GLSLH(if (dir.x * dir.y < 0.0 && dist.x > 1.0 && dist.y > 1.0)
                   return 0.0;)
 
-        GLSLH(if (dir.x < 0 || dir.y < 0 || dist.x < 1 || dist.y < 1)
+        GLSLH(if (dir.x < 0.0 || dir.y < 0.0 || dist.x < 1.0 || dist.y < 1.0)
                   return texture(tex, pos - dir / tex_size)[plane] * tex_mul;)
     } else {
-        GLSLH(vec2 dir = fract(pos * tex_size / 2) - 0.5;)
-        GLSLH(if (dir.x * dir.y > 0)
+        GLSLH(vec2 dir = fract(pos * tex_size / 2.0) - 0.5;)
+        GLSLH(if (dir.x * dir.y > 0.0)
                   return texture(tex, pos)[plane] * tex_mul;)
     }
 
@@ -212,14 +212,14 @@ void pass_superxbr(struct gl_shader_cache *sc, int planes, int tex_num,
     /* Smoothly blends the two strongest directions(one in diagonal and the
      * other in vert/horiz direction). */
     GLSLHF("float color =  mix(mix(c1, c2, step(0.0, d_edge)),"
-                              "mix(c3, c4, step(0.0, hv_edge)), 1 - %f);\n",
+                              "mix(c3, c4, step(0.0, hv_edge)), 1.0 - %f);\n",
            conf->edge_strength);
     /* Anti-ringing code. */
     GLSLH(float min_sample = min(min(E, F), min(H, I));
           float max_sample = max(max(E, F), max(H, I));
           float aux = color;
           color = clamp(color, min_sample, max_sample);)
-    GLSLHF("color = mix(aux, color, 1-2.0*abs(%f-0.5));\n", conf->edge_strength);
+    GLSLHF("color = mix(aux, color, 1.0-2.0*abs(%f-0.5));\n", conf->edge_strength);
 
     GLSLH(return color;)
 

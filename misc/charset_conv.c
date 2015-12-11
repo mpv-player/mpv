@@ -259,24 +259,6 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log, bstr buf,
     return res;
 }
 
-// Convert the data in buf to UTF-8. The charset argument can be an iconv
-// codepage, a value returned by mp_charset_conv_guess(), or a special value
-// that triggers autodetection of the charset (e.g. using ENCA).
-// The auto-detection is the only difference to mp_iconv_to_utf8().
-//  buf: same as mp_iconv_to_utf8()
-//  user_cp: iconv codepage, special value, NULL
-//  flags: same as mp_iconv_to_utf8()
-//  returns: same as mp_iconv_to_utf8()
-bstr mp_charset_guess_and_conv_to_utf8(struct mp_log *log, bstr buf,
-                                       const char *user_cp, int flags)
-{
-    void *tmp = talloc_new(NULL);
-    const char *cp = mp_charset_guess(tmp, log, buf, user_cp, flags);
-    bstr res = mp_iconv_to_utf8(log, buf, cp, flags);
-    talloc_free(tmp);
-    return res;
-}
-
 // Use iconv to convert buf to UTF-8.
 // Returns buf.start==NULL on error. Returns buf if cp is NULL, or if there is
 // obviously no conversion required (e.g. if cp is "UTF-8").

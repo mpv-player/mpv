@@ -290,14 +290,14 @@ static void draw_ass(struct mp_draw_sub_cache *cache, struct mp_rect bb,
     struct mp_csp_params cspar = MP_CSP_PARAMS_DEFAULTS;
     mp_csp_set_image_params(&cspar, &temp->params);
     cspar.levels_out = MP_CSP_LEVELS_PC; // RGB (libass.color)
-    cspar.int_bits_in = bits;
-    cspar.int_bits_out = 8;
+    cspar.input_bits = bits;
+    cspar.texture_bits = (bits + 7) / 8 * 8;
 
     struct mp_cmat yuv2rgb, rgb2yuv;
     bool need_conv = temp->fmt.flags & MP_IMGFLAG_YUV;
     if (need_conv) {
-        mp_get_yuv2rgb_coeffs(&cspar, &yuv2rgb);
-        mp_invert_yuv2rgb(&rgb2yuv, &yuv2rgb);
+        mp_get_csp_matrix(&cspar, &yuv2rgb);
+        mp_invert_cmat(&rgb2yuv, &yuv2rgb);
     }
 
     for (int i = 0; i < sbs->num_parts; ++i) {
@@ -312,9 +312,10 @@ static void draw_ass(struct mp_draw_sub_cache *cache, struct mp_rect bb,
         int g = (sb->libass.color >> 16) & 0xFF;
         int b = (sb->libass.color >> 8) & 0xFF;
         int a = 255 - (sb->libass.color & 0xFF);
-        int color_yuv[3] = {r, g, b};
+        int color_yuv[3];
         if (need_conv) {
-            mp_map_int_color(&rgb2yuv, bits, color_yuv);
+            int rgb[3] = {r, g, b};
+            mp_map_fixp_color(&rgb2yuv, 8, rgb, cspar.texture_bits, color_yuv);
         } else {
             color_yuv[0] = g;
             color_yuv[1] = b;

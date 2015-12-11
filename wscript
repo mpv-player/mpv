@@ -10,6 +10,11 @@ from waftools.checks.custom import *
 
 build_options = [
     {
+        'name': '--gpl3',
+        'desc': 'GPL3 license',
+        'default': 'disable',
+        'func': check_true
+    }, {
         'name': '--cplayer',
         'desc': 'mpv CLI player',
         'default': 'enable',
@@ -130,14 +135,13 @@ main_dependencies = [
         'name': 'win32',
         'desc': 'win32',
         'deps_any': [ 'os-win32', 'os-cygwin' ],
-        'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'uuid', 'avrt']),
+        'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'uuid', 'avrt', 'dwmapi']),
     }, {
         'name': '--win32-internal-pthreads',
         'desc': 'internal pthread wrapper for win32 (Vista+)',
         'deps_neg': [ 'posix' ],
         'deps': [ 'win32' ],
         'func': check_true,
-        'default': 'disable',
     }, {
         'name': 'pthreads',
         'desc': 'POSIX threads',
@@ -659,6 +663,22 @@ video_output_features = [
         'func': check_statement('windows.h', 'wglCreateContext(0)',
                                 lib='opengl32')
     } , {
+        'name': '--gl-dxinterop',
+        'desc': 'OpenGL/DirectX Interop Backend',
+        'deps': [ 'gl-win32' ],
+        'groups': [ 'gl' ],
+        'func': compose_checks(
+            check_statement(['GL/gl.h', 'GL/wglext.h'], 'int i = WGL_ACCESS_WRITE_DISCARD_NV'),
+            check_statement('d3d9.h', 'IDirect3D9Ex *d'))
+    } , {
+        'name': '--egl-angle',
+        'desc': 'OpenGL Win32 ANGLE Backend',
+        'deps_any': [ 'os-win32', 'os-cygwin' ],
+        'groups': [ 'gl' ],
+        'func': check_statement(['EGL/egl.h'],
+                                'eglCreateWindowSurface(0, 0, 0, 0)',
+                                lib='EGL')
+    } , {
         'name': '--vdpau',
         'desc': 'VDPAU acceleration',
         'deps': [ 'x11' ],
@@ -682,7 +702,7 @@ video_output_features = [
     }, {
         'name': '--vaapi-wayland',
         'desc': 'VAAPI (Wayland support)',
-        'deps': [ 'vaapi', 'wayland' ],
+        'deps': [ 'vaapi', 'gl-wayland' ],
         'func': check_pkg_config('libva-wayland', '>= 0.36.0'),
 
     }, {
@@ -810,11 +830,6 @@ radio_and_tv_features = [
         'desc': 'libv4l2 support',
         'func': check_pkg_config('libv4l2'),
         'deps': [ 'tv-v4l2' ],
-    }, {
-        'name': '--pvr',
-        'desc': 'Video4Linux2 MPEG PVR interface',
-        'deps': [ 'tv' ],
-        'func': check_cc(fragment=load_fragment('pvr.c')),
     }, {
         'name': '--audio-input',
         'desc': 'audio input support',

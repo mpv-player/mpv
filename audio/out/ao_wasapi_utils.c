@@ -185,36 +185,6 @@ char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr)
              wasapi_explain_err(hr), (uint32_t) hr);
     return buf;
 }
-
-bool wasapi_fill_VistaBlob(wasapi_state *state)
-{
-    if (!state)
-        goto exit_label;
-    state->VistaBlob.hAvrt = LoadLibraryW(L"avrt.dll");
-    if (!state->VistaBlob.hAvrt)
-        goto exit_label;
-
-    state->VistaBlob.pAvSetMmThreadCharacteristicsW =
-        (HANDLE (WINAPI *)(LPCWSTR, LPDWORD))
-        GetProcAddress(state->VistaBlob.hAvrt, "AvSetMmThreadCharacteristicsW");
-    if (!state->VistaBlob.pAvSetMmThreadCharacteristicsW)
-        goto exit_label;
-
-    state->VistaBlob.pAvRevertMmThreadCharacteristics =
-        (WINBOOL (WINAPI *)(HANDLE))
-        GetProcAddress(state->VistaBlob.hAvrt, "AvRevertMmThreadCharacteristics");
-    if (!state->VistaBlob.pAvRevertMmThreadCharacteristics)
-        goto exit_label;
-
-    return true;
-exit_label:
-    if (state->VistaBlob.hAvrt) {
-        FreeLibrary(state->VistaBlob.hAvrt);
-        state->VistaBlob.hAvrt = NULL;
-    }
-    return false;
-}
-
 static void update_waveformat_datarate(WAVEFORMATEXTENSIBLE *wformat)
 {
     WAVEFORMATEX *wf = &wformat->Format;
@@ -399,6 +369,23 @@ exit_label:
     return false;
 }
 
+// This works like try_format_exclusive(), but will try to fallback to the AC3
+// format if the format is a non-AC3 passthrough format. *wformat will be
+// adjusted accordingly.
+static bool try_format_exclusive_with_spdif_fallback(struct ao *ao,
+                                                WAVEFORMATEXTENSIBLE *wformat)
+{
+    if (try_format_exclusive(ao, wformat))
+        return true;
+    int special_format = special_subtype_to_format(&wformat->SubFormat);
+    if (special_format && special_format != AF_FORMAT_S_AC3) {
+        MP_VERBOSE(ao, "Retrying as AC3.\n");
+        wformat->SubFormat = *format_to_subtype(AF_FORMAT_S_AC3);
+        return try_format_exclusive(ao, wformat);
+    }
+    return false;
+}
+
 static bool search_sample_formats(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat,
                                   int samplerate, struct mp_chmap *channels)
 {
@@ -508,7 +495,7 @@ static bool find_formats_exclusive(struct ao *ao, bool do_search)
 
     // Try the requested format as is. If that doesn't work, and the
     // do_search argument is set, do the pcm format search.
-    if (!try_format_exclusive(ao, &wformat) &&
+    if (!try_format_exclusive_with_spdif_fallback(ao, &wformat) &&
         (!do_search || !search_channels(ao, &wformat)))
         return false;
 
@@ -721,9 +708,10 @@ reinit:
     hr = init_session_display(state);
     EXIT_ON_ERROR(hr);
 
-    if (state->VistaBlob.hAvrt) {
-        state->hTask =
-            state->VistaBlob.pAvSetMmThreadCharacteristicsW(L"Pro Audio", &state->taskIndex);
+    state->hTask = AvSetMmThreadCharacteristics(L"Pro Audio", &(DWORD){0});
+    if (!state->hTask) {
+        MP_WARN(state, "Failed to set AV thread to Pro Audio: %s\n",
+                mp_LastError_to_str());
     }
 
     MP_VERBOSE(state, "Format fixed. Using %lld byte buffer block size\n",
@@ -1177,8 +1165,6 @@ void wasapi_thread_uninit(struct ao *ao)
     SAFE_RELEASE(state->pAudioClient,    IAudioClient_Release(state->pAudioClient));
     SAFE_RELEASE(state->pDevice,         IMMDevice_Release(state->pDevice));
     SAFE_RELEASE(state->pEnumerator,     IMMDeviceEnumerator_Release(state->pEnumerator));
-
-    if (state->hTask)
-        state->VistaBlob.pAvRevertMmThreadCharacteristics(state->hTask);
+    SAFE_RELEASE(state->hTask,           AvRevertMmThreadCharacteristics(state->hTask));
     MP_DBG(ao, "Thread uninit done\n");
 }

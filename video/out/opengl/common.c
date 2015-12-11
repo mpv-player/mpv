@@ -154,14 +154,13 @@ static const struct gl_functions gl_functions[] = {
     // GL 2.1+ desktop only (and GLSL 120 shaders)
     {
         .ver_core = 210,
-        .provides = MPGL_CAP_ROW_LENGTH | MPGL_CAP_1D_TEX | MPGL_CAP_3D_TEX,
+        .provides = MPGL_CAP_ROW_LENGTH | MPGL_CAP_1D_TEX,
         .functions = (const struct gl_function[]) {
             DEF_FN(DrawBuffer),
             DEF_FN(GetTexLevelParameteriv),
             DEF_FN(MapBuffer),
             DEF_FN(ReadBuffer),
             DEF_FN(TexImage1D),
-            DEF_FN(TexImage3D),
             DEF_FN(UnmapBuffer),
             {0}
         },
@@ -172,11 +171,28 @@ static const struct gl_functions gl_functions[] = {
         .ver_es_core = 300,
         .functions = (const struct gl_function[]) {
             DEF_FN(BindBufferBase),
+            DEF_FN(BlitFramebuffer),
             DEF_FN(GetStringi),
             // for ES 3.0
-            DEF_FN(GetTexLevelParameteriv),
             DEF_FN(ReadBuffer),
             DEF_FN(UnmapBuffer),
+            {0}
+        },
+    },
+    // For ES 3.1 core
+    {
+        .ver_es_core = 310,
+        .functions = (const struct gl_function[]) {
+            DEF_FN(GetTexLevelParameteriv),
+            {0}
+        },
+    },
+    {
+        .ver_core = 210,
+        .ver_es_core = 300,
+        .provides = MPGL_CAP_3D_TEX,
+        .functions = (const struct gl_function[]) {
+            DEF_FN(TexImage3D),
             {0}
         },
     },
@@ -214,13 +230,6 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(DeleteVertexArrays),
             {0}
         }
-    },
-    // Float textures, extension in GL 2.x, core in GL 3.x core.
-    {
-        .ver_core = 300,
-        .ver_es_core = 300,
-        .extension = "GL_ARB_texture_float",
-        .provides = MPGL_CAP_FLOAT_TEX,
     },
     // GL_RED / GL_RG textures, extension in GL 2.x, core in GL 3.x core.
     {
@@ -280,6 +289,22 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+#if HAVE_GL_DXINTEROP
+    {
+        .extension = "WGL_NV_DX_interop",
+        .provides = MPGL_CAP_DXINTEROP,
+        .functions = (const struct gl_function[]) {
+            DEF_FN_NAME(DXSetResourceShareHandleNV, "wglDXSetResourceShareHandleNV"),
+            DEF_FN_NAME(DXOpenDeviceNV, "wglDXOpenDeviceNV"),
+            DEF_FN_NAME(DXCloseDeviceNV, "wglDXCloseDeviceNV"),
+            DEF_FN_NAME(DXRegisterObjectNV, "wglDXRegisterObjectNV"),
+            DEF_FN_NAME(DXUnregisterObjectNV, "wglDXUnregisterObjectNV"),
+            DEF_FN_NAME(DXLockObjectsNV, "wglDXLockObjectsNV"),
+            DEF_FN_NAME(DXUnlockObjectsNV, "wglDXUnlockObjectsNV"),
+            {0}
+        },
+    },
+#endif
     // Apple Packed YUV Formats
     // For gl_hwdec_vda.c
     // http://www.opengl.org/registry/specs/APPLE/rgb_422.txt
@@ -317,6 +342,7 @@ static const struct gl_functions gl_functions[] = {
     // uniform buffer object extensions, requires OpenGL 3.1.
     {
         .ver_core = 310,
+        .ver_es_core = 300,
         .extension = "GL_ARB_uniform_buffer_object",
         .functions = (const struct gl_function[]) {
             DEF_FN(GetUniformBlockIndex),
@@ -467,7 +493,7 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     } else {
         gl->glsl_version = 110;
         int glsl_major = 0, glsl_minor = 0;
-        if (sscanf(shader, "%d.%d", &glsl_major, &glsl_minor) == 2)
+        if (shader && sscanf(shader, "%d.%d", &glsl_major, &glsl_minor) == 2)
             gl->glsl_version = glsl_major * 100 + glsl_minor;
         // GLSL 400 defines "sample" as keyword - breaks custom shaders.
         gl->glsl_version = MPMIN(gl->glsl_version, 330);
@@ -476,6 +502,14 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     if (is_software_gl(gl)) {
         gl->mpgl_caps |= MPGL_CAP_SW;
         mp_verbose(log, "Detected suspected software renderer.\n");
+    }
+
+    // Detect 16F textures that work with GL_LINEAR filtering.
+    if ((!gl->es && (gl->version >= 300 || check_ext(gl, "GL_ARB_texture_float"))) ||
+        (gl->es && (gl->version >= 310 || check_ext(gl, "GL_OES_texture_half_float_linear"))))
+    {
+        mp_verbose(log, "Filterable half-float textures supported.\n");
+        gl->mpgl_caps |= MPGL_CAP_FLOAT_TEX;
     }
 
     // Provided for simpler handling if no framebuffer support is available.
@@ -503,10 +537,13 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
 
 extern const struct mpgl_driver mpgl_driver_x11;
 extern const struct mpgl_driver mpgl_driver_x11egl;
+extern const struct mpgl_driver mpgl_driver_x11_probe;
 extern const struct mpgl_driver mpgl_driver_drm_egl;
 extern const struct mpgl_driver mpgl_driver_cocoa;
 extern const struct mpgl_driver mpgl_driver_wayland;
 extern const struct mpgl_driver mpgl_driver_w32;
+extern const struct mpgl_driver mpgl_driver_angle;
+extern const struct mpgl_driver mpgl_driver_dxinterop;
 extern const struct mpgl_driver mpgl_driver_rpi;
 
 static const struct mpgl_driver *const backends[] = {
@@ -516,20 +553,29 @@ static const struct mpgl_driver *const backends[] = {
 #if HAVE_GL_COCOA
     &mpgl_driver_cocoa,
 #endif
+#if HAVE_EGL_ANGLE
+    &mpgl_driver_angle,
+#endif
 #if HAVE_GL_WIN32
     &mpgl_driver_w32,
+#endif
+#if HAVE_GL_DXINTEROP
+    &mpgl_driver_dxinterop,
 #endif
 #if HAVE_GL_WAYLAND
     &mpgl_driver_wayland,
 #endif
+#if HAVE_GL_X11
+    &mpgl_driver_x11_probe,
+#endif
 #if HAVE_EGL_X11
     &mpgl_driver_x11egl,
 #endif
-#if HAVE_EGL_DRM
-    &mpgl_driver_drm_egl,
-#endif
 #if HAVE_GL_X11
     &mpgl_driver_x11,
+#endif
+#if HAVE_EGL_DRM
+    &mpgl_driver_drm_egl,
 #endif
 };
 
@@ -596,6 +642,7 @@ static MPGLContext *init_backend(struct vo *vo, const struct mpgl_driver *driver
     MP_VERBOSE(vo, "Initializing OpenGL backend '%s'\n", ctx->driver->name);
     ctx->priv = talloc_zero_size(ctx, ctx->driver->priv_size);
     if (ctx->driver->init(ctx, vo_flags) < 0) {
+        vo->probing = old_probing;
         talloc_free(ctx);
         return NULL;
     }
@@ -604,8 +651,8 @@ static MPGLContext *init_backend(struct vo *vo, const struct mpgl_driver *driver
     if (!ctx->gl->version && !ctx->gl->es)
         goto cleanup;
 
-    if (ctx->gl->es && vo->probing) {
-        MP_INFO(ctx->vo, "Skipping experimental GLES support (use --vo=opengl).\n");
+    if (probing && ctx->gl->es && (vo_flags & VOFLAG_NO_GLES)) {
+        MP_VERBOSE(ctx->vo, "Skipping GLES backend.\n");
         goto cleanup;
     }
 
@@ -637,6 +684,14 @@ MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags)
             ctx = init_backend(vo, backends[n], true, vo_flags);
             if (ctx)
                 break;
+        }
+        // VO forced, but no backend is ok => force the first that works at all
+        if (!ctx && !vo->probing) {
+            for (int n = 0; n < MP_ARRAY_SIZE(backends); n++) {
+                ctx = init_backend(vo, backends[n], false, vo_flags);
+                if (ctx)
+                    break;
+            }
         }
     } else if (index >= 0) {
         ctx = init_backend(vo, backends[index], false, vo_flags);

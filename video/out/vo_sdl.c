@@ -190,6 +190,7 @@ struct priv {
     double osd_pts;
     int mouse_hidden;
     int brightness, contrast;
+    char *window_title;
     Uint32 wakeup_event;
 
     // options
@@ -352,6 +353,9 @@ static bool try_create_renderer(struct vo *vo, int i, const char *driver,
         MP_INFO(vo, "Using %s\n", vc->renderer_info.name);
         vc->renderer_index = i;
     }
+
+    if (vc->window_title)
+        SDL_SetWindowTitle(vc->window, vc->window_title);
 
     return true;
 }
@@ -518,8 +522,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     SDL_DisableScreenSaver();
 
     set_fullscreen(vo);
-
-    SDL_SetWindowTitle(vc->window, vo_get_window_title(vo));
 
     SDL_ShowWindow(vc->window);
 
@@ -1012,8 +1014,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
         SDL_ShowCursor(*(bool *)data);
         return true;
     case VOCTRL_UPDATE_WINDOW_TITLE:
-        if (vc->window)
-            SDL_SetWindowTitle(vc->window, vo_get_window_title(vo));
+        talloc_free(vc->window_title);
+        vc->window_title = talloc_strdup(vc, (char *)data);
+        if (vc->window && vc->window_title)
+            SDL_SetWindowTitle(vc->window, vc->window_title);
         return true;
     }
     return VO_NOTIMPL;

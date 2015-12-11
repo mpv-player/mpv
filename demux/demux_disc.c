@@ -93,17 +93,16 @@ static void add_dvd_streams(demuxer_t *demuxer)
 
             // emulate the extradata
             struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
-            csp.int_bits_in = 8;
-            csp.int_bits_out = 8;
             struct mp_cmat cmatrix;
-            mp_get_yuv2rgb_coeffs(&csp, &cmatrix);
+            mp_get_csp_matrix(&csp, &cmatrix);
 
             char *s = talloc_strdup(sh, "");
             s = talloc_asprintf_append(s, "palette: ");
             for (int i = 0; i < 16; i++) {
                 int color = info.palette[i];
-                int c[3] = {(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff};
-                mp_map_int_color(&cmatrix, 8, c);
+                int y[3] = {(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff};
+                int c[3];
+                mp_map_fixp_color(&cmatrix, 8, y, 8, c);
                 color = (c[2] << 16) | (c[1] << 8) | c[0];
 
                 if (i != 0)

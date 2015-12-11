@@ -21,6 +21,7 @@ enum sd_ctrl {
     SD_CTRL_SUB_STEP,
     SD_CTRL_SET_VIDEO_PARAMS,
     SD_CTRL_GET_RESOLUTION,
+    SD_CTRL_SET_TOP,
 };
 
 struct dec_sub *sub_create(struct mpv_global *global);
@@ -39,7 +40,7 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh);
 bool sub_is_initialized(struct dec_sub *sub);
 
 bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh);
-bool sub_accept_packets_in_advance(struct dec_sub *sub);
+bool sub_accepts_packet_in_advance(struct dec_sub *sub);
 void sub_decode(struct dec_sub *sub, struct demux_packet *packet);
 void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
                      struct sub_bitmaps *res);

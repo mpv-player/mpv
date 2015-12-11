@@ -206,14 +206,15 @@ void reset_video_state(struct MPContext *mpctx)
     mpctx->time_frame = 0;
     mpctx->video_pts = MP_NOPTS_VALUE;
     mpctx->video_next_pts = MP_NOPTS_VALUE;
+    mpctx->num_past_frames = 0;
     mpctx->total_avsync_change = 0;
     mpctx->last_av_difference = 0;
-    mpctx->display_sync_disable_counter = 0;
     mpctx->dropped_frames_total = 0;
     mpctx->dropped_frames = 0;
     mpctx->mistimed_frames_total = 0;
     mpctx->drop_message_shown = 0;
     mpctx->display_sync_drift_dir = 0;
+    mpctx->display_sync_broken = false;
 
     mpctx->video_status = mpctx->d_video ? STATUS_SYNCING : STATUS_EOF;
 }
@@ -288,7 +289,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     }
 
 #if HAVE_ENCODING
-    if (mpctx->encode_lavc_ctx && d_video)
+    if (mpctx->encode_lavc_ctx)
         encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, d_video->fps);
 #endif
 
@@ -390,10 +391,6 @@ static int decode_image(struct MPContext *mpctx)
     struct demux_packet *pkt;
     if (demux_read_packet_async(d_video->header, &pkt) == 0)
         return VD_WAIT;
-    if (pkt && pkt->pts != MP_NOPTS_VALUE)
-        pkt->pts += mpctx->video_offset;
-    if (pkt && pkt->dts != MP_NOPTS_VALUE)
-        pkt->dts += mpctx->video_offset;
     if ((pkt && pkt->pts >= mpctx->hrseek_pts - .005) ||
         d_video->has_broken_packet_pts ||
         !mpctx->opts->hr_seek_framedrop)
@@ -582,9 +579,9 @@ static void handle_new_frame(struct MPContext *mpctx)
             // Assume a discontinuity.
             MP_WARN(mpctx, "Invalid video timestamp: %f -> %f\n",
                     mpctx->video_pts, pts);
-            frame_time = 0;
-            if (mpctx->d_audio)
+            if (mpctx->d_audio && fabs(frame_time) > 1.0)
                 mpctx->audio_status = STATUS_SYNCING;
+            frame_time = 0;
         }
     }
     mpctx->video_next_pts = pts;
@@ -611,9 +608,13 @@ static void shift_frames(struct MPContext *mpctx)
 static int get_req_frames(struct MPContext *mpctx, bool eof)
 {
     // On EOF, drain all frames.
-    // On the first frame, output a new frame as quickly as possible.
-    if (eof || mpctx->video_pts == MP_NOPTS_VALUE)
+    if (eof)
         return 1;
+
+    // On the first frame, output a new frame as quickly as possible.
+    // But display-sync likes to have a correct frame duration always.
+    if (mpctx->video_pts == MP_NOPTS_VALUE)
+        return mpctx->opts->video_sync == VS_DEFAULT ? 1 : 2;
 
     int req = vo_get_num_req_frames(mpctx->video_out);
     return MPCLAMP(req, 2, MP_ARRAY_SIZE(mpctx->next_frames));
@@ -795,76 +796,52 @@ static void init_vo(struct MPContext *mpctx)
     mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }
 
-// Attempt to stabilize frame duration from jittery timestamps. This is mostly
-// needed with semi-broken file formats which round timestamps to ms, or files
-// created from them.
-// We do this to make a stable decision how much to change video playback speed.
-// Otherwise calc_best_speed() could make a different decision every frame, and
-// also audio speed would have to be readjusted all the time.
-// Return -1 if the frame duration seems to be unstable.
-// If require_exact is false, just return the average frame duration on failure.
-double stabilize_frame_duration(struct MPContext *mpctx, bool require_exact)
+double calc_average_frame_duration(struct MPContext *mpctx)
 {
-    if (require_exact && mpctx->broken_fps_header)
-        return -1;
-
-    // Note: the past frame durations are raw and unadjusted.
-    double fd[10];
-    int num = get_past_frame_durations(mpctx, fd, MP_ARRAY_SIZE(fd));
-    if (num < MP_ARRAY_SIZE(fd))
-        return -1;
-
-    bool ok = true;
-    double min = fd[0];
-    double max = fd[0];
-    double total_duration = 0;
-    for (int n = 0; n < num; n++) {
-        double cur = fd[n];
-        if (fabs(cur - fd[num - 1]) > FRAME_DURATION_TOLERANCE)
-            ok = false;
-        min = MPMIN(min, cur);
-        max = MPMAX(max, cur);
-        total_duration += cur;
+    double total = 0;
+    int num = 0;
+    for (int n = 0; n < mpctx->num_past_frames; n++) {
+        double dur = mpctx->past_frames[0].approx_duration;
+        if (dur <= 0)
+            continue;
+        total += dur;
+        num += 1;
     }
+    return num > 0 ? total / num : 0;
+}
 
-    if (max - min > FRAME_DURATION_TOLERANCE || !ok)
-        goto fail;
-
-    // It's not really possible to compute the actual, correct FPS, unless we
-    // e.g. consider a list of potentially correct values, detect cycles, or
-    // use similar guessing methods.
-    // Naively using the average between min and max should give a stable, but
-    // still relatively close value.
-    double modified_duration = (min + max) / 2;
-
-    // Except for the demuxer reported FPS, which might be the correct one.
-    // VFR files could contain segments that don't match.
-    if (mpctx->d_video->fps > 0) {
-        double demux_duration = 1.0 / mpctx->d_video->fps;
-        if (fabs(modified_duration - demux_duration) <= FRAME_DURATION_TOLERANCE)
-            modified_duration = demux_duration;
-    }
-
-    // Verify the estimated stabilized frame duration with the actual time
-    // passed in these frames. If it's wrong (wrong FPS in the header), then
-    // this will deviate a bit.
-    if (fabs(total_duration - modified_duration * num) > FRAME_DURATION_TOLERANCE)
-    {
-        if (require_exact && !mpctx->broken_fps_header) {
-            // The error message is slightly misleading: a framerate header
-            // field is not really needed, as long as the file has an exact
-            // timebase.
-            MP_WARN(mpctx, "File has broken or missing framerate header\n"
-                            "field, or is VFR with broken timestamps.\n");
-            mpctx->broken_fps_header = true;
+// Find a speed factor such that the display FPS is an integer multiple of the
+// effective video FPS. If this is not possible, try to do it for multiples,
+// which still leads to an improved end result.
+// Both parameters are durations in seconds.
+static double calc_best_speed(double vsync, double frame)
+{
+    double ratio = frame / vsync;
+    double best_scale = -1;
+    double best_dev = INFINITY;
+    for (int factor = 1; factor <= 5; factor++) {
+        double scale = ratio * factor / rint(ratio * factor);
+        double dev = fabs(scale - 1);
+        if (dev < best_dev) {
+            best_scale = scale;
+            best_dev = dev;
         }
-        goto fail;
     }
+    return best_scale;
+}
 
-    return modified_duration;
-
-fail:
-    return require_exact ? -1 : total_duration / num;
+static double find_best_speed(struct MPContext *mpctx, double vsync)
+{
+    double total = 0;
+    int num = 0;
+    for (int n = 0; n < mpctx->num_past_frames; n++) {
+        double dur = mpctx->past_frames[n].approx_duration;
+        if (dur <= 0)
+            continue;
+        total += calc_best_speed(vsync, dur / mpctx->opts->playback_speed);
+        num++;
+    }
+    return num > 0 ? total / num : 1;
 }
 
 static bool using_spdif_passthrough(struct MPContext *mpctx)
@@ -874,62 +851,87 @@ static bool using_spdif_passthrough(struct MPContext *mpctx)
     return false;
 }
 
-static void adjust_audio_speed(struct MPContext *mpctx, double vsync)
+// Compute the relative audio speed difference by taking A/V dsync into account.
+static double compute_audio_drift(struct MPContext *mpctx, double vsync)
+{
+    // Least-squares linear regression, using relative real time for x, and
+    // audio desync for y. Assume speed didn't change for the frames we're
+    // looking at for simplicity. This also should actually use the realtime
+    // (minus paused time) for x, but use vsync scheduling points instead.
+    if (mpctx->num_past_frames <= 10)
+        return NAN;
+    int num = mpctx->num_past_frames - 1;
+    double sum_x = 0, sum_y = 0, sum_xy = 0, sum_xx = 0;
+    double x = 0;
+    for (int n = 0; n < num; n++) {
+        struct frame_info *frame = &mpctx->past_frames[n + 1];
+        if (frame->num_vsyncs < 0)
+            return NAN;
+        double y = frame->av_diff;
+        sum_x += x;
+        sum_y += y;
+        sum_xy += x * y;
+        sum_xx += x * x;
+        x -= frame->num_vsyncs * vsync;
+    }
+    return (sum_x * sum_y - num * sum_xy) / (sum_x * sum_x - num * sum_xx);
+}
+
+static void adjust_audio_resample_speed(struct MPContext *mpctx, double vsync)
 {
     struct MPOpts *opts = mpctx->opts;
     int mode = opts->video_sync;
-    double audio_factor = 1.0;
 
-    if (mode == VS_DISP_RESAMPLE && mpctx->audio_status == STATUS_PLAYING) {
-        // Try to smooth out audio timing drifts. This can happen if either
-        // video isn't playing at expected speed, or audio is not playing at
-        // the requested speed. Both are unavoidable.
-        // The audio desync is made up of 2 parts: 1. drift due to rounding
-        // errors and imperfect information, and 2. an offset, due to
-        // unaligned audio/video start, or disruptive events halting audio
-        // or video for a small time.
-        // Instead of trying to be clever, just apply an awfully dumb drift
-        // compensation with a constant factor, which does what we want. In
-        // theory we could calculate the exact drift compensation needed,
-        // but it likely would be wrong anyway, and we'd run into the same
-        // issues again, except with more complex code.
-        // 1 means drifts to positive, -1 means drifts to negative
-        double max_drift = vsync / 2;
-        double av_diff = mpctx->last_av_difference;
-        int new = mpctx->display_sync_drift_dir;
-        if (av_diff * -mpctx->display_sync_drift_dir >= 0)
-            new = 0;
-        if (fabs(av_diff) > max_drift)
-            new = av_diff >= 0 ? 1 : -1;
-        if (mpctx->display_sync_drift_dir != new) {
+    if (mode != VS_DISP_RESAMPLE || mpctx->audio_status != STATUS_PLAYING) {
+        mpctx->speed_factor_a = mpctx->speed_factor_v;
+        return;
+    }
+
+    // Try to smooth out audio timing drifts. This can happen if either
+    // video isn't playing at expected speed, or audio is not playing at
+    // the requested speed. Both are unavoidable.
+    // The audio desync is made up of 2 parts: 1. drift due to rounding
+    // errors and imperfect information, and 2. an offset, due to
+    // unaligned audio/video start, or disruptive events halting audio
+    // or video for a small time.
+    // Instead of trying to be clever, just apply an awfully dumb drift
+    // compensation with a constant factor, which does what we want. In
+    // theory we could calculate the exact drift compensation needed,
+    // but it likely would be wrong anyway, and we'd run into the same
+    // issues again, except with more complex code.
+    // 1 means drifts to positive, -1 means drifts to negative
+    double max_drift = vsync / 2;
+    double av_diff = mpctx->last_av_difference;
+    int new = mpctx->display_sync_drift_dir;
+    if (av_diff * -mpctx->display_sync_drift_dir >= 0)
+        new = 0;
+    if (fabs(av_diff) > max_drift)
+        new = av_diff >= 0 ? 1 : -1;
+
+    bool change = mpctx->display_sync_drift_dir != new;
+    if (new || change) {
+        if (change)
             MP_VERBOSE(mpctx, "Change display sync audio drift: %d\n", new);
-            mpctx->display_sync_drift_dir = new;
-        }
+        mpctx->display_sync_drift_dir = new;
+
         double max_correct = opts->sync_max_audio_change / 100;
-        audio_factor = 1 + max_correct * -mpctx->display_sync_drift_dir;
+        double audio_factor = 1 + max_correct * -mpctx->display_sync_drift_dir;
+
+        if (new == 0) {
+            // If we're resetting, actually try to be clever and pick a speed
+            // which compensates the general drift we're getting.
+            double drift = compute_audio_drift(mpctx, vsync);
+            if (isnormal(drift)) {
+                // other = will be multiplied with audio_factor for final speed
+                double other = mpctx->opts->playback_speed * mpctx->speed_factor_v;
+                audio_factor = (mpctx->audio_speed - drift) / other;
+                MP_VERBOSE(mpctx, "Compensation factor: %f\n", audio_factor);
+            }
+        }
+
+        audio_factor = MPCLAMP(audio_factor, 1 - max_correct, 1 + max_correct);
+        mpctx->speed_factor_a = audio_factor * mpctx->speed_factor_v;
     }
-
-    mpctx->speed_factor_a = audio_factor * mpctx->speed_factor_v;
-
-    MP_STATS(mpctx, "value %f aspeed", mpctx->speed_factor_a - 1);
-}
-
-// Find a speed factor such that the display FPS is an integer multiple of the
-// effective video FPS. If this is not possible, try to do it for multiples,
-// which still leads to an improved end result.
-// Both parameters are durations in seconds.
-static double calc_best_speed(struct MPContext *mpctx, double vsync, double frame)
-{
-    struct MPOpts *opts = mpctx->opts;
-
-    double ratio = frame / vsync;
-    for (int factor = 1; factor <= 5; factor++) {
-        double scale = ratio * factor / floor(ratio * factor + 0.5);
-        if (fabs(scale - 1) > opts->sync_max_video_change / 100)
-            continue; // large deviation, skip
-        return scale; // decent match found
-    }
-    return -1;
 }
 
 // Manipulate frame timing for display sync, or do nothing for normal timing.
@@ -938,7 +940,6 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 {
     struct MPOpts *opts = mpctx->opts;
     struct vo *vo = mpctx->video_out;
-    bool old_display_sync = mpctx->display_sync_active;
     int mode = opts->video_sync;
 
     if (!mpctx->display_sync_active) {
@@ -947,11 +948,9 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     }
 
     mpctx->display_sync_active = false;
-    mpctx->speed_factor_a = 1.0;
-    mpctx->speed_factor_v = 1.0;
 
-    if (!VS_IS_DISP(mode))
-        goto done;
+    if (!VS_IS_DISP(mode) || mpctx->display_sync_broken)
+        return;
     bool resample = mode == VS_DISP_RESAMPLE || mode == VS_DISP_RESAMPLE_VDROP ||
                     mode == VS_DISP_RESAMPLE_NONE;
     bool drop = mode == VS_DISP_VDROP || mode == VS_DISP_RESAMPLE ||
@@ -959,43 +958,29 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     drop &= (opts->frame_dropping & 1);
 
     if (resample && using_spdif_passthrough(mpctx))
-        goto done;
+        return;
 
     double vsync = vo_get_vsync_interval(vo) / 1e6;
     if (vsync <= 0)
-        goto done;
+        return;
 
-    double adjusted_duration = stabilize_frame_duration(mpctx, true);
-    if (adjusted_duration >= 0)
-        adjusted_duration /= opts->playback_speed;
-    if (adjusted_duration <= 0.002 || adjusted_duration > 0.05)
-        goto done;
+    double adjusted_duration = MPMAX(0, mpctx->past_frames[0].approx_duration);
+    adjusted_duration /= opts->playback_speed;
+    if (adjusted_duration > 0.5)
+        return;
 
-    double prev_duration = mpctx->display_sync_frameduration;
-    mpctx->display_sync_frameduration = adjusted_duration;
-    if (adjusted_duration != prev_duration) {
-        mpctx->display_sync_disable_counter = 50;
-        goto done;
-    }
-
-    mpctx->speed_factor_v = calc_best_speed(mpctx, vsync, adjusted_duration);
-    if (mpctx->speed_factor_v <= 0) {
-        mpctx->speed_factor_v = 1.0;
-        goto done;
+    mpctx->speed_factor_v = 1.0;
+    if (mode != VS_DISP_VDROP) {
+        double best = find_best_speed(mpctx, vsync);
+        // If it doesn't work, play at normal speed.
+        if (fabs(best - 1.0) <= opts->sync_max_video_change / 100)
+            mpctx->speed_factor_v = best;
     }
 
     double av_diff = mpctx->last_av_difference;
-    if (fabs(av_diff) > 0.5)
-        goto done;
-
-    // At this point, we decided that we could use display sync for this frame.
-    // But if we switch too often between these modes, keep it disabled. In
-    // fact, we disable it if it just wants to switch between enable/disable
-    // more than once in the last N frames.
-    if (!old_display_sync) {
-        if (mpctx->display_sync_disable_counter > 0)
-            goto done; // keep disabled
-        mpctx->display_sync_disable_counter = 50;
+    if (fabs(av_diff) > 0.5) {
+        mpctx->display_sync_broken = true;
+        return;
     }
 
     // Determine for how many vsyncs a frame should be displayed. This can be
@@ -1004,24 +989,23 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // We use the speed-adjusted (i.e. real) frame duration for this.
     double frame_duration = adjusted_duration / mpctx->speed_factor_v;
     double ratio = (frame_duration + mpctx->display_sync_error) / vsync;
-    int num_vsyncs = MPMAX(floor(ratio + 0.5), 0);
+    int num_vsyncs = MPMAX(lrint(ratio), 0);
     double prev_error = mpctx->display_sync_error;
     mpctx->display_sync_error += frame_duration - num_vsyncs * vsync;
-    frame->vsync_offset = mpctx->display_sync_error * 1e6;
 
-    MP_DBG(mpctx, "s=%f vsyncs=%d dur=%f ratio=%f err=%.20f (%f)\n",
+    MP_DBG(mpctx, "s=%f vsyncs=%d dur=%f ratio=%f err=%.20f (%f/%f)\n",
            mpctx->speed_factor_v, num_vsyncs, adjusted_duration, ratio,
-           mpctx->display_sync_error, mpctx->display_sync_error / vsync);
+           mpctx->display_sync_error, mpctx->display_sync_error / vsync,
+           mpctx->display_sync_error / frame_duration);
 
     MP_STATS(mpctx, "value %f avdiff", av_diff);
 
     // Intended number of additional display frames to drop (<0) or repeat (>0)
     int drop_repeat = 0;
 
-    // If we are too far ahead/behind, attempt to drop/repeat frames. In
-    // particular, don't attempt to change speed for them.
+    // If we are too far ahead/behind, attempt to drop/repeat frames.
     // Tolerate some desync to avoid frame dropping due to jitter.
-    if (drop && fabs(av_diff) >= 0.080 && fabs(av_diff) / vsync >= 2)
+    if (drop && fabs(av_diff) >= 0.020 && fabs(av_diff) / vsync >= 1)
         drop_repeat = -av_diff / vsync; // round towards 0
 
     // We can only drop all frames at most. We can repeat much more frames,
@@ -1032,8 +1016,8 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
 
     // Estimate the video position, so we can calculate a good A/V difference
     // value below. This is used to estimate A/V drift.
-    double time_left = (vo_get_next_frame_start_time(vo) - mp_time_us()) / 1e6;
-    time_left = MPMAX(time_left, 0);
+    double time_left = vo_get_delay(vo);
+
     // We also know that the timing is (necessarily) off, because we have to
     // align frame timings on the vsync boundaries. This is unavoidable, and
     // for the sake of the A/V sync calculations we pretend it's perfect.
@@ -1041,66 +1025,112 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // Likewise, we know sync is off, but is going to be compensated.
     time_left += drop_repeat * vsync;
 
-    if (drop_repeat)
+    if (drop_repeat) {
         mpctx->mistimed_frames_total += 1;
+        MP_STATS(mpctx, "mistimed");
+    }
 
     mpctx->total_avsync_change = 0;
     update_av_diff(mpctx, time_left * opts->playback_speed);
 
-    if (resample)
-        adjust_audio_speed(mpctx, vsync);
+    mpctx->past_frames[0].num_vsyncs = num_vsyncs;
+    mpctx->past_frames[0].av_diff = mpctx->last_av_difference;
+
+    if (resample) {
+        adjust_audio_resample_speed(mpctx, vsync);
+    } else {
+        mpctx->speed_factor_a = 1.0;
+    }
 
     // A bad guess, only needed when reverting to audio sync.
     mpctx->time_frame = time_left;
 
+    frame->vsync_interval = vsync;
+    frame->vsync_offset = -prev_error;
+    frame->ideal_frame_duration = frame_duration;
     frame->num_vsyncs = num_vsyncs;
     frame->display_synced = true;
 
     mpctx->display_sync_active = true;
-
-done:
-
     update_playback_speed(mpctx);
 
-    if (old_display_sync != mpctx->display_sync_active) {
-        MP_VERBOSE(mpctx, "Video sync mode %s.\n",
-                   mpctx->display_sync_active ? "enabled" : "disabled");
-    }
-
-    mpctx->display_sync_disable_counter =
-        MPMAX(0, mpctx->display_sync_disable_counter - 1);
+    MP_STATS(mpctx, "value %f aspeed", mpctx->speed_factor_a - 1);
+    MP_STATS(mpctx, "value %f vspeed", mpctx->speed_factor_v - 1);
 }
 
 static void schedule_frame(struct MPContext *mpctx, struct vo_frame *frame)
 {
     handle_display_sync_frame(mpctx, frame);
 
+    if (mpctx->num_past_frames > 1 &&
+        ((mpctx->past_frames[1].num_vsyncs >= 0) != mpctx->display_sync_active))
+    {
+        MP_VERBOSE(mpctx, "Video sync mode %s.\n",
+                   mpctx->display_sync_active ? "enabled" : "disabled");
+    }
+
     if (!mpctx->display_sync_active) {
+        mpctx->speed_factor_a = 1.0;
+        mpctx->speed_factor_v = 1.0;
+        update_playback_speed(mpctx);
+
         update_av_diff(mpctx, mpctx->time_frame > 0 ?
             mpctx->time_frame * mpctx->video_speed : 0);
     }
 }
 
-// Return the next frame duration as stored in the file.
-// frame=0 means the current frame, 1 the frame after that etc.
-// Can return -1, though usually will return a fallback if frame unavailable.
-static double get_frame_duration(struct MPContext *mpctx, int frame)
+// Determine the mpctx->past_frames[0] frame duration.
+static void calculate_frame_duration(struct MPContext *mpctx)
 {
-    struct MPOpts *opts = mpctx->opts;
-    struct vo *vo = mpctx->video_out;
+    assert(mpctx->num_past_frames >= 1 && mpctx->num_next_frames >= 1);
 
-    double diff = -1;
-    if (frame + 2 <= mpctx->num_next_frames) {
-        double vpts0 = mpctx->next_frames[frame]->pts;
-        double vpts1 = mpctx->next_frames[frame + 1]->pts;
-        if (vpts0 != MP_NOPTS_VALUE && vpts1 != MP_NOPTS_VALUE)
-            diff = vpts1 - vpts0;
+    double demux_duration =
+        mpctx->d_video->fps > 0 ? 1.0 / mpctx->d_video->fps : -1;
+    double duration = -1;
+
+    if (mpctx->num_next_frames >= 2) {
+        double pts0 = mpctx->next_frames[0]->pts;
+        double pts1 = mpctx->next_frames[1]->pts;
+        if (pts0 != MP_NOPTS_VALUE && pts1 != MP_NOPTS_VALUE && pts1 >= pts0)
+            duration = pts1 - pts0;
+    } else {
+        // E.g. last frame on EOF.
+        duration = demux_duration;
     }
-    if (diff < 0 && mpctx->d_video->fps > 0)
-        diff = 1.0 / mpctx->d_video->fps; // fallback to demuxer-reported fps
-    if (opts->untimed || vo->driver->untimed)
-        diff = -1; // disable frame dropping and aspects of frame timing
-    return diff;
+
+    // The following code tries to compensate for rounded Matroska timestamps
+    // by "unrounding" frame durations, or if not possible, approximating them.
+    // These formats usually round on 1ms. (Some muxers do this incorrectly,
+    // and might be off by 2ms or more, and compensate for it later by an
+    // equal rounding error into the opposite direction. Don't try to deal
+    // with them; too much potential damage to timing.)
+    double tolerance = 0.0011;
+
+    double total = 0;
+    int num_dur = 0;
+    for (int n = 1; n < mpctx->num_past_frames; n++) {
+        // Eliminate likely outliers using a really dumb heuristic.
+        double dur = mpctx->past_frames[n].duration;
+        if (dur <= 0 || fabs(dur - duration) >= tolerance)
+            break;
+        total += dur;
+        num_dur += 1;
+    }
+    double approx_duration = num_dur > 0 ? total / num_dur : duration;
+
+    // Try if the demuxer frame rate fits - if so, just take it.
+    if (demux_duration > 0) {
+        // Note that even if each timestamp is within rounding tolerance, it
+        // could literally not add up (e.g. if demuxer FPS is rounded itself).
+        if (fabs(duration - demux_duration) < tolerance &&
+            fabs(total - demux_duration * num_dur) < tolerance)
+        {
+            approx_duration = demux_duration;
+        }
+    }
+
+    mpctx->past_frames[0].duration = duration;
+    mpctx->past_frames[0].approx_duration = approx_duration;
 }
 
 void write_video(struct MPContext *mpctx, double endpts)
@@ -1186,6 +1216,17 @@ void write_video(struct MPContext *mpctx, double endpts)
     }
 
     assert(mpctx->num_next_frames >= 1);
+
+    if (mpctx->num_past_frames >= MAX_NUM_VO_PTS)
+        mpctx->num_past_frames--;
+    MP_TARRAY_INSERT_AT(mpctx, mpctx->past_frames, mpctx->num_past_frames, 0,
+                        (struct frame_info){0});
+    mpctx->past_frames[0] = (struct frame_info){
+        .pts = mpctx->next_frames[0]->pts,
+        .num_vsyncs = -1,
+    };
+    calculate_frame_duration(mpctx);
+
     struct vo_frame dummy = {
         .pts = pts,
         .duration = -1,
@@ -1197,7 +1238,9 @@ void write_video(struct MPContext *mpctx, double endpts)
         dummy.frames[n] = mpctx->next_frames[n];
     struct vo_frame *frame = vo_frame_ref(&dummy);
 
-    double diff = get_frame_duration(mpctx, 0);
+    double diff = mpctx->past_frames[0].approx_duration;
+    if (opts->untimed || vo->driver->untimed)
+        diff = -1; // disable frame dropping and aspects of frame timing
     if (diff >= 0) {
         // expected A/V sync correction is ignored
         diff /= mpctx->video_speed;
@@ -1210,6 +1253,8 @@ void write_video(struct MPContext *mpctx, double endpts)
     mpctx->last_vo_pts = mpctx->video_pts;
     mpctx->playback_pts = mpctx->video_pts;
 
+    shift_frames(mpctx);
+
     schedule_frame(mpctx, frame);
 
     mpctx->osd_force_update = true;
@@ -1217,8 +1262,6 @@ void write_video(struct MPContext *mpctx, double endpts)
     update_subtitles(mpctx);
 
     vo_queue_frame(vo, frame);
-
-    shift_frames(mpctx);
 
     // The frames were shifted down; "initialize" the new first entry.
     if (mpctx->num_next_frames >= 1)

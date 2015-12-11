@@ -80,9 +80,8 @@ struct mp_osd_res {
 
 enum mp_osdtype {
     OSDTYPE_SUB,
-    OSDTYPE_SUB2,
+    OSDTYPE_SUB2, // IDs must be numerically successive
 
-    OSDTYPE_PROGBAR,
     OSDTYPE_OSD,
 
     OSDTYPE_EXTERNAL,
@@ -141,6 +140,7 @@ extern const struct m_sub_options sub_style_conf;
 struct osd_state;
 struct osd_object;
 struct mpv_global;
+struct dec_sub;
 
 struct osd_state *osd_create(struct mpv_global *global);
 void osd_changed(struct osd_state *osd, int new_value);
@@ -150,13 +150,7 @@ void osd_free(struct osd_state *osd);
 bool osd_query_and_reset_want_redraw(struct osd_state *osd);
 
 void osd_set_text(struct osd_state *osd, int obj, const char *text);
-
-struct osd_sub_state {
-    struct dec_sub *dec_sub;
-    double video_offset;
-    bool render_bitmap_subs;
-};
-void osd_set_sub(struct osd_state *osd, int obj, struct osd_sub_state *substate);
+void osd_set_sub(struct osd_state *osd, int obj, struct dec_sub *dec_sub);
 
 bool osd_get_render_subs_in_filter(struct osd_state *osd);
 void osd_set_render_subs_in_filter(struct osd_state *osd, bool s);

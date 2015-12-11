@@ -55,6 +55,7 @@ static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
 };
 
 static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
+                                          struct mpv_global *global,
                                           const struct gl_hwdec_driver *drv,
                                           bool is_auto)
 {
@@ -62,6 +63,7 @@ static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
     *hwdec = (struct gl_hwdec) {
         .driver = drv,
         .log = mp_log_new(hwdec, log, drv->api_name),
+        .global = global,
         .gl = gl,
         .gl_texture_target = GL_TEXTURE_2D,
         .probing = is_auto,
@@ -76,13 +78,13 @@ static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
 }
 
 struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
-                                   const char *api_name)
+                                   struct mpv_global *g, const char *api_name)
 {
     bool is_auto = api_name && strcmp(api_name, "auto") == 0;
     for (int n = 0; mpgl_hwdec_drivers[n]; n++) {
         const struct gl_hwdec_driver *drv = mpgl_hwdec_drivers[n];
         if (is_auto || (api_name && strcmp(drv->api_name, api_name) == 0)) {
-            struct gl_hwdec *r = load_hwdec_driver(log, gl, drv, is_auto);
+            struct gl_hwdec *r = load_hwdec_driver(log, gl, g, drv, is_auto);
             if (r)
                 return r;
         }
@@ -91,9 +93,10 @@ struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
 }
 
 // Like gl_hwdec_load_api(), but use HWDEC_... identifiers.
-struct gl_hwdec *gl_hwdec_load_api_id(struct mp_log *log, GL *gl, int id)
+struct gl_hwdec *gl_hwdec_load_api_id(struct mp_log *log, GL *gl,
+                                      struct mpv_global *g, int id)
 {
-    return gl_hwdec_load_api(log, gl, m_opt_choice_str(mp_hwdec_names, id));
+    return gl_hwdec_load_api(log, gl, g, m_opt_choice_str(mp_hwdec_names, id));
 }
 
 void gl_hwdec_uninit(struct gl_hwdec *hwdec)

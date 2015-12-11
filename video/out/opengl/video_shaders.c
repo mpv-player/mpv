@@ -30,7 +30,7 @@
 #define GLSLH(x) gl_sc_hadd(sc, #x "\n");
 #define GLSLHF(...) gl_sc_haddf(sc, __VA_ARGS__)
 
-// Set up shared/commonly used variables
+// Set up shared/commonly used variables and macros
 void sampler_prelude(struct gl_shader_cache *sc, int tex_num)
 {
     GLSLF("#undef tex\n");
@@ -45,19 +45,21 @@ static void pass_sample_separated_get_weights(struct gl_shader_cache *sc,
 {
     gl_sc_uniform_sampler(sc, "lut", scaler->gl_target,
                           TEXUNIT_SCALERS + scaler->index);
+    // Define a new variable to cache the corrected fcoord.
+    GLSLF("float fcoord_lut = LUT_POS(fcoord, %d.0);\n", scaler->lut_size);
 
     int N = scaler->kernel->size;
     if (N == 2) {
-        GLSL(vec2 c1 = texture(lut, vec2(0.5, fcoord)).RG;)
+        GLSL(vec2 c1 = texture(lut, vec2(0.5, fcoord_lut)).RG;)
         GLSL(float weights[2] = float[](c1.r, c1.g);)
     } else if (N == 6) {
-        GLSL(vec4 c1 = texture(lut, vec2(0.25, fcoord));)
-        GLSL(vec4 c2 = texture(lut, vec2(0.75, fcoord));)
+        GLSL(vec4 c1 = texture(lut, vec2(0.25, fcoord_lut));)
+        GLSL(vec4 c2 = texture(lut, vec2(0.75, fcoord_lut));)
         GLSL(float weights[6] = float[](c1.r, c1.g, c1.b, c2.r, c2.g, c2.b);)
     } else {
         GLSLF("float weights[%d];\n", N);
         for (int n = 0; n < N / 4; n++) {
-            GLSLF("c = texture(lut, vec2(1.0 / %d + %d / float(%d), fcoord));\n",
+            GLSLF("c = texture(lut, vec2(1.0 / %d.0 + %d.0 / %d.0, fcoord_lut));\n",
                     N / 2, n, N / 4);
             GLSLF("weights[%d] = c.r;\n", n * 4 + 0);
             GLSLF("weights[%d] = c.g;\n", n * 4 + 1);
@@ -79,10 +81,10 @@ void pass_sample_separated_gen(struct gl_shader_cache *sc, struct scaler *scaler
     GLSL(vec4 color = vec4(0.0);)
     GLSLF("{\n");
     if (!planar) {
-        GLSLF("vec2 dir = vec2(%d, %d);\n", d_x, d_y);
+        GLSLF("vec2 dir = vec2(%d.0, %d.0);\n", d_x, d_y);
         GLSL(pt *= dir;)
         GLSL(float fcoord = dot(fract(pos * size - vec2(0.5)), dir);)
-        GLSLF("vec2 base = pos - fcoord * pt - pt * vec2(%d);\n", N / 2 - 1);
+        GLSLF("vec2 base = pos - fcoord * pt - pt * vec2(%d.0);\n", N / 2 - 1);
     }
     GLSL(vec4 c;)
     if (use_ar) {
@@ -95,7 +97,7 @@ void pass_sample_separated_gen(struct gl_shader_cache *sc, struct scaler *scaler
         if (planar) {
             GLSLF("c = texture(texture%d, texcoord%d);\n", n, n);
         } else {
-            GLSLF("c = texture(tex, base + pt * vec2(%d));\n", n);
+            GLSLF("c = texture(tex, base + pt * vec2(%d.0));\n", n);
         }
         GLSLF("color += vec4(weights[%d]) * c;\n", n);
         if (use_ar && (n == N/2-1 || n == N/2)) {
@@ -137,19 +139,25 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler)
             // Skip samples definitely outside the radius
             if (dmax >= radius)
                 continue;
-            GLSLF("d = length(vec2(%d, %d) - fcoord)/%f;\n", x, y, radius);
+            GLSLF("d = length(vec2(%d.0, %d.0) - fcoord)/%f;\n", x, y, radius);
             // Check for samples that might be skippable
-            if (dmax >= radius - 1)
+            if (dmax >= radius - M_SQRT2)
                 GLSLF("if (d < 1.0) {\n");
-            GLSL(w = texture1D(lut, d).r;)
+            if (scaler->gl_target == GL_TEXTURE_1D) {
+                GLSLF("w = texture1D(lut, LUT_POS(d, %d.0)).r;\n",
+                      scaler->lut_size);
+            } else {
+                GLSLF("w = texture(lut, vec2(0.5, LUT_POS(d, %d.0))).r;\n",
+                      scaler->lut_size);
+            }
             GLSL(wsum += w;)
-            GLSLF("c = texture(tex, base + pt * vec2(%d, %d));\n", x, y);
+            GLSLF("c = texture(tex, base + pt * vec2(%d.0, %d.0));\n", x, y);
             GLSL(color += vec4(w) * c;)
             if (use_ar && x >= 0 && y >= 0 && x <= 1 && y <= 1) {
                 GLSL(lo = min(lo, c);)
                 GLSL(hi = max(hi, c);)
             }
-            if (dmax >= radius -1)
+            if (dmax >= radius - M_SQRT2)
                 GLSLF("}\n");
         }
     }

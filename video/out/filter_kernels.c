@@ -73,7 +73,6 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
     filter->f.radius *= filter->inv_scale;
     // Polar filters are dependent solely on the radius
     if (filter->polar) {
-        filter->f.radius = fmin(filter->f.radius, 16.0);
         filter->size = 1;
         // Safety precaution to avoid generating a gigantic shader
         if (filter->f.radius > 16.0) {
@@ -140,6 +139,12 @@ static void mp_compute_weights(struct filter_kernel *filter,
 
 // Fill the given array with weights for the range [0.0, 1.0]. The array is
 // interpreted as rectangular array of count * filter->size items.
+//
+// There will be slight sampling error if these weights are used in a OpenGL
+// texture as LUT directly. The sampling point of a texel is located at its
+// center, so out_array[0] will end up at 0.5 / count instead of 0.0.
+// Correct lookup requires a linear coordinate mapping from [0.0, 1.0] to
+// [0.5 / count, 1.0 - 0.5 / count].
 void mp_compute_lut(struct filter_kernel *filter, int count, float *out_array)
 {
     struct filter_window *window = &filter->w;

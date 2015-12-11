@@ -201,7 +201,7 @@ static int create_vdp_mixer(struct mp_vdpau_mixer *mixer,
     struct mp_csp_params cparams = MP_CSP_PARAMS_DEFAULTS;
     mp_csp_set_image_params(&cparams, &mixer->image_params);
     mp_csp_copy_equalizer_values(&cparams, &mixer->video_eq);
-    mp_get_yuv2rgb_coeffs(&cparams, &yuv2rgb);
+    mp_get_csp_matrix(&cparams, &yuv2rgb);
 
     for (int r = 0; r < 3; r++) {
         for (int c = 0; c < 3; c++)

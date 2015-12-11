@@ -48,8 +48,6 @@ extern const demuxer_desc_t demuxer_desc_tv;
 extern const demuxer_desc_t demuxer_desc_mf;
 extern const demuxer_desc_t demuxer_desc_matroska;
 extern const demuxer_desc_t demuxer_desc_lavf;
-extern const demuxer_desc_t demuxer_desc_libass;
-extern const demuxer_desc_t demuxer_desc_subreader;
 extern const demuxer_desc_t demuxer_desc_playlist;
 extern const demuxer_desc_t demuxer_desc_disc;
 extern const demuxer_desc_t demuxer_desc_rar;
@@ -68,9 +66,6 @@ const demuxer_desc_t *const demuxer_list[] = {
 #if HAVE_TV
     &demuxer_desc_tv,
 #endif
-#if HAVE_LIBASS
-    &demuxer_desc_libass,
-#endif
     &demuxer_desc_matroska,
 #if HAVE_LIBARCHIVE
     &demuxer_desc_libarchive,
@@ -79,8 +74,6 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_lavf,
     &demuxer_desc_mf,
     &demuxer_desc_playlist,
-    // Pretty aggressive, so should be last.
-    &demuxer_desc_subreader,
     NULL
 };
 
@@ -128,6 +121,8 @@ struct demux_internal {
     bool refresh_seeks_enabled;
     bool start_refresh_seek;
 
+    double ts_offset;           // timestamp offset to apply everything
+
     // Cached state.
     bool force_cache_update;
     double time_length;
@@ -168,6 +163,8 @@ struct demux_stream {
 #define MP_PTS_MIN(a, b) MPMIN(PTS_OR_DEF(a, b), PTS_OR_DEF(b, a))
 #define MP_PTS_MAX(a, b) MPMAX(PTS_OR_DEF(a, b), PTS_OR_DEF(b, a))
 
+#define MP_ADD_PTS(a, b) ((a) == MP_NOPTS_VALUE ? (a) : ((a) + (b)))
+
 static void demuxer_sort_chapters(demuxer_t *demuxer);
 static void *demux_thread(void *pctx);
 static void update_cache(struct demux_internal *in);
@@ -191,6 +188,14 @@ static void ds_flush(struct demux_stream *ds)
     ds->active = false;
     ds->refreshing = false;
     ds->last_pos = -1;
+}
+
+void demux_set_ts_offset(struct demuxer *demuxer, double offset)
+{
+    struct demux_internal *in = demuxer->in;
+    pthread_mutex_lock(&in->lock);
+    in->ts_offset = offset;
+    pthread_mutex_unlock(&in->lock);
 }
 
 struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
@@ -607,6 +612,9 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     if (pkt->pos >= ds->in->d_user->filepos)
         ds->in->d_user->filepos = pkt->pos;
 
+    pkt->pts = MP_ADD_PTS(pkt->pts, ds->in->ts_offset);
+    pkt->dts = MP_ADD_PTS(pkt->dts, ds->in->ts_offset);
+
     return pkt;
 }
 
@@ -668,7 +676,7 @@ double demux_get_next_pts(struct sh_stream *sh)
         pthread_mutex_lock(&sh->ds->in->lock);
         ds_get_packets(sh->ds);
         if (sh->ds->head)
-            res = sh->ds->head->pts;
+            res = MP_ADD_PTS(sh->ds->head->pts, sh->ds->in->ts_offset);
         pthread_mutex_unlock(&sh->ds->in->lock);
     }
     return res;
@@ -1152,6 +1160,8 @@ int demux_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
     in->seeking = true;
     in->seek_flags = flags;
     in->seek_pts = rel_seek_secs;
+    if ((flags & SEEK_ABSOLUTE) && !(flags & SEEK_FACTOR))
+        in->seek_pts = MP_ADD_PTS(in->seek_pts, -in->ts_offset);
 
     if (!in->threading)
         execute_seek(in);
@@ -1423,6 +1433,8 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
             r->ts_duration = MPMAX(0, r->ts_range[1] - r->ts_range[0]);
         if (!num_packets || in->seeking)
             r->ts_duration = 0;
+        r->ts_range[0] = MP_ADD_PTS(r->ts_range[0], in->ts_offset);
+        r->ts_range[1] = MP_ADD_PTS(r->ts_range[1], in->ts_offset);
         return DEMUXER_CTRL_OK;
     }
     }

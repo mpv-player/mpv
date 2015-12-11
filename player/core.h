@@ -76,9 +76,6 @@ enum seek_precision {
     MPSEEK_VERY_EXACT,
 };
 
-// Comes from the assumption that some formats round timestamps to ms.
-#define FRAME_DURATION_TOLERANCE 0.0011
-
 enum video_sync {
     VS_DEFAULT = 0,
     VS_DISP_RESAMPLE,
@@ -96,6 +93,15 @@ enum video_sync {
                        (x) == VS_DISP_ADROP ||          \
                        (x) == VS_DISP_VDROP ||          \
                        (x) == VS_DISP_NONE)
+
+// Information about past video frames that have been sent to the VO.
+struct frame_info {
+    double pts;
+    double duration;        // PTS difference to next frame
+    double approx_duration; // possibly fixed/smoothed out duration
+    double av_diff;         // A/V diff at time of scheduling
+    int num_vsyncs;         // scheduled vsyncs, if using display-sync
+};
 
 struct track {
     enum stream_type type;
@@ -175,6 +181,7 @@ typedef struct MPContext {
     char *term_osd_subs;
     char *term_osd_contents;
     char *last_window_title;
+    struct voctrl_playback_state vo_playback_state;
 
     int add_osd_seek_info; // bitfield of enum mp_osd_seek_info
     double osd_visible; // for the osd bar only
@@ -219,7 +226,6 @@ typedef struct MPContext {
     int timeline_part;
     struct demux_chapter *chapters;
     int num_chapters;
-    double video_offset;
 
     struct demuxer *demuxer; // can change with timeline
     struct mp_tags *filtered_tags;
@@ -263,13 +269,11 @@ typedef struct MPContext {
     // update_playback_speed() updates them from the other fields.
     double audio_speed, video_speed;
     bool display_sync_active;
-    bool broken_fps_header;
-    double display_sync_frameduration;
+    bool display_sync_broken;
     int display_sync_drift_dir;
     // Timing error (in seconds) due to rounding on vsync boundaries
     double display_sync_error;
     double audio_drop_throttle;
-    int display_sync_disable_counter;
     // Number of mistimed frames.
     int mistimed_frames_total;
     /* Set if audio should be timed to start with video frame after seeking,
@@ -321,6 +325,10 @@ typedef struct MPContext {
     uint64_t vo_pts_history_seek_ts;
     uint64_t backstep_start_seek_ts;
     bool backstep_active;
+    // Past timestamps etc. (stupidly duplicated with vo_pts_history).
+    // The newest frame is at index 0.
+    struct frame_info *past_frames;
+    int num_past_frames;
 
     double next_heartbeat;
     double last_idle_tick;
@@ -423,7 +431,8 @@ void mp_switch_track_n(struct MPContext *mpctx, int order,
 void mp_deselect_track(struct MPContext *mpctx, struct track *track);
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid);
-double timeline_set_from_time(struct MPContext *mpctx, double pts, bool *need_reset);
+bool timeline_switch_to_time(struct MPContext *mpctx, double pts);
+int timeline_get_for_time(struct MPContext *mpctx, double pts);
 void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer);
 bool mp_remove_track(struct MPContext *mpctx, struct track *track);
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
@@ -446,15 +455,14 @@ void mp_print_version(struct mp_log *log, int always);
 void wakeup_playloop(void *ctx);
 
 // misc.c
-double get_start_time(struct MPContext *mpctx);
 double get_main_demux_pts(struct MPContext *mpctx);
-double get_track_video_offset(struct MPContext *mpctx, struct track *track);
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t);
 double get_play_end_pts(struct MPContext *mpctx);
 double get_relative_time(struct MPContext *mpctx);
 void merge_playlist_files(struct playlist *pl);
 float mp_get_cache_percent(struct MPContext *mpctx);
 bool mp_get_cache_idle(struct MPContext *mpctx);
+void update_vo_playback_state(struct MPContext *mpctx);
 void update_window_title(struct MPContext *mpctx, bool force);
 void error_on_track(struct MPContext *mpctx, struct track *track);
 int stream_dump(struct MPContext *mpctx, const char *source_filename);
@@ -468,7 +476,7 @@ void set_osd_bar(struct MPContext *mpctx, int type,
 bool set_osd_msg(struct MPContext *mpctx, int level, int time,
                  const char* fmt, ...) PRINTF_ATTRIBUTE(4,5);
 void set_osd_function(struct MPContext *mpctx, int osd_function);
-void set_osd_subtitle(struct MPContext *mpctx, const char *text);
+void term_osd_set_subs(struct MPContext *mpctx, const char *text);
 void get_current_osd_sym(struct MPContext *mpctx, char *buf, size_t buf_size);
 void set_osd_bar_chapters(struct MPContext *mpctx, int type);
 
@@ -498,7 +506,6 @@ void mp_idle(struct MPContext *mpctx);
 void idle_loop(struct MPContext *mpctx);
 int handle_force_window(struct MPContext *mpctx, bool force);
 void add_frame_pts(struct MPContext *mpctx, double pts);
-int get_past_frame_durations(struct MPContext *mpctx, double *fd, int num);
 void seek_to_last_frame(struct MPContext *mpctx);
 
 // scripting.c
@@ -517,8 +524,6 @@ void uninit_sub_all(struct MPContext *mpctx);
 void update_osd_msg(struct MPContext *mpctx);
 void update_subtitles(struct MPContext *mpctx);
 void uninit_sub_renderer(struct MPContext *mpctx);
-void update_osd_sub_state(struct MPContext *mpctx, int order,
-                          struct osd_sub_state *out_state);
 
 // video.c
 void reset_video_state(struct MPContext *mpctx);
@@ -528,6 +533,6 @@ void write_video(struct MPContext *mpctx, double endpts);
 void mp_force_video_refresh(struct MPContext *mpctx);
 void uninit_video_out(struct MPContext *mpctx);
 void uninit_video_chain(struct MPContext *mpctx);
-double stabilize_frame_duration(struct MPContext *mpctx, bool require_exact);
+double calc_average_frame_duration(struct MPContext *mpctx);
 
 #endif /* MPLAYER_MP_CORE_H */

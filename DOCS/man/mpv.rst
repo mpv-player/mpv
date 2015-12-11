@@ -128,7 +128,7 @@ x and z
     Adjust subtitle delay by +/- 0.1 seconds.
 
 l
-    Set/clear A-B loop points. See ``ab_loop`` command for details.
+    Set/clear A-B loop points. See ``ab-loop`` command for details.
 
 L
     Toggle infinite looping.
@@ -192,23 +192,19 @@ corresponding adjustment, or the software equalizer (``--vf=eq``).)
 7 and 8
     Adjust saturation.
 
-(The following keys are valid only on OS X.)
-
-command + 0
+Alt+0 (and command+0 on OSX)
     Resize video window to half its original size.
-    (On other platforms, you can bind keys to change the ``window-scale``
-    property.)
 
-command + 1
+Alt+1 (and command+1 on OSX)
     Resize video window to its original size.
 
-command + 2
+Alt+2 (and command+2 on OSX)
     Resize video window to double its original size.
 
-command + f
+command + f (OSX only)
     Toggle fullscreen (see also ``--fs``).
 
-command + [ and command + ]
+command + [ and command + ] (OSX only)
     Set video window alpha.
 
 (The following keys are valid if you have a keyboard with multimedia keys.)
@@ -262,7 +258,7 @@ parser puts several options into a single string, and passes them to a
 component at once, instead of using multiple options on the level of the
 command line.
 
-The suboption parser can quote strings with ``"``, ``'``, and ``[...]``.
+The suboption parser can quote strings with ``"`` and ``[...]``.
 Additionally, there is a special form of quoting with ``%n%`` described below.
 
 For example, the ``opengl`` VO can take multiple options:
@@ -414,7 +410,7 @@ Escaping spaces and special characters
 
 This is done like with command line options. The shell is not involved here,
 but option values still need to be quoted as a whole if it contains certain
-characters like spaces. A config entry can be quoted with ``"`` and ``'``,
+characters like spaces. A config entry can be quoted with ``"``,
 as well as with the fixed-length syntax (``%n%``) mentioned before. This is like
 passing the exact contents of the quoted string as command line option. C-style
 escapes are currently _not_ interpreted on this level, although some options do
@@ -566,13 +562,13 @@ listed.
   this will indicate a problem. (``total-avsync-change`` property.)
 - Encoding state in ``{...}``, only shown in encoding mode.
 - Display sync state. If display sync is active (``display-sync-active``
-  property), this shows ``DS: +0.02598%``, where the number is the speed change
-  factor applied to audio to achieve sync to display, expressed in percent
-  deviation from 1.0 (``audio-speed-correction`` property). In sync modes which
-  don't resample, this will always be ``+0.00000%``.
-- Missed frames, e.g. ``Missed: 4``. (``vo-missed-frame-count`` property.) Shows
-  up in display sync mode only. This is incremented each time a frame took
-  longer to display than intended.
+  property), this shows ``DS: 2.500/13``, where the first number is average
+  number of vsyncs per video frame (e.g. 2.5 when playing 24Hz videos on 60Hz
+  screens), which might jitter if the ratio doesn't round off, or there are
+  mistimed frames (``vsync-ratio``), and the second number of estimated number
+  of vsyncs which took too long (``vo-delayed-frame-count`` property). The
+  latter is a heuristic, as it's generally not possible to determine this with
+  certainty.
 - Dropped frames, e.g. ``Dropped: 4``. Shows up only if the count is not 0. Can
   grow if the video framerate is higher than that of the display, or if video
   rendering is too slow. Also can be incremented on "hiccups" and when the video

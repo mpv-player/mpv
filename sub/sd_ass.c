@@ -29,6 +29,7 @@
 #include "options/options.h"
 #include "common/common.h"
 #include "common/msg.h"
+#include "demux/stheader.h"
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "dec_sub.h"
@@ -37,16 +38,44 @@
 
 struct sd_ass_priv {
     struct ass_track *ass_track;
+    struct ass_track *shadow_track; // for --sub-ass=no rendering
     bool is_converted;
+    bool on_top;
     struct sub_bitmap *parts;
     bool flush_on_seek;
     int extend_event;
     char last_text[500];
     struct mp_image_params video_params;
     struct mp_image_params last_params;
+    double sub_speed;
 };
 
 static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts);
+static void fill_plaintext(struct sd *sd, double pts);
+
+// Add default styles, if the track does not have any styles yet.
+// Apply style overrides if the user provides any.
+static void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts)
+{
+    if (opts->ass_styles_file && opts->ass_style_override)
+        ass_read_styles(track, opts->ass_styles_file, NULL);
+
+    if (track->n_styles == 0) {
+        if (!track->PlayResY) {
+            track->PlayResY = MP_ASS_FONT_PLAYRESY;
+            track->PlayResX = track->PlayResY * 4 / 3;
+        }
+        track->Kerning = true;
+        int sid = ass_alloc_style(track);
+        track->default_style = sid;
+        ASS_Style *style = track->styles + sid;
+        style->Name = strdup("Default");
+        mp_ass_set_style(style, track->PlayResY, opts->sub_text_style);
+    }
+
+    if (opts->ass_style_override)
+        ass_process_force_style(track);
+}
 
 static bool supports_format(const char *format)
 {
@@ -76,6 +105,11 @@ static int init(struct sd *sd)
     if (!ctx->is_converted)
         ctx->ass_track->track_type = TRACK_TYPE_ASS;
 
+    ctx->shadow_track = ass_new_track(sd->ass_library);
+    ctx->shadow_track->PlayResX = 384;
+    ctx->shadow_track->PlayResY = 288;
+    mp_ass_add_default_styles(ctx->shadow_track, opts);
+
     if (sd->extradata) {
         ass_process_codec_private(ctx->ass_track, sd->extradata,
                                   sd->extradata_len);
@@ -84,6 +118,19 @@ static int init(struct sd *sd)
     mp_ass_add_default_styles(ctx->ass_track, opts);
 
     pthread_mutex_unlock(sd->ass_lock);
+
+    ctx->sub_speed = 1.0;
+
+    if (sd->video_fps && sd->sh && sd->sh->sub->frame_based > 0) {
+        MP_VERBOSE(sd, "Frame based format, dummy FPS: %f, video FPS: %f\n",
+                   sd->sh->sub->frame_based, sd->video_fps);
+        ctx->sub_speed *= sd->sh->sub->frame_based / sd->video_fps;
+    }
+
+    if (opts->sub_fps && sd->video_fps)
+        ctx->sub_speed *= opts->sub_fps / sd->video_fps;
+
+    ctx->sub_speed *= opts->sub_speed;
 
     return 0;
 }
@@ -147,12 +194,11 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     event->Text = strdup(text);
 }
 
-static void configure_ass(struct sd *sd, struct mp_osd_res *dim)
+static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
+                          bool converted, ASS_Track *track)
 {
-    struct sd_ass_priv *ctx = sd->priv;
     struct MPOpts *opts = sd->opts;
     ASS_Renderer *priv = sd->ass_renderer;
-    ASS_Track *track = ctx->ass_track;
 
     ass_set_frame_size(priv, dim->w, dim->h);
     ass_set_margins(priv, dim->mt, dim->mb, dim->ml, dim->mr);
@@ -166,7 +212,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim)
     bool set_scale_by_window = true;
     bool total_override = false;
     // With forced overrides, apply the --sub-* specific options
-    if (ctx->is_converted || opts->ass_style_override == 3) {
+    if (converted || opts->ass_style_override == 3) {
         set_scale_with_window = opts->sub_scale_with_window;
         set_use_margins = opts->sub_use_margins;
         set_scale_by_window = opts->sub_scale_by_window;
@@ -175,7 +221,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim)
         set_scale_with_window = opts->ass_scale_with_window;
         set_use_margins = opts->ass_use_margins;
     }
-    if (ctx->is_converted || opts->ass_style_override) {
+    if (converted || opts->ass_style_override) {
         set_sub_pos = 100 - opts->sub_pos;
         set_line_spacing = opts->ass_line_spacing;
         set_hinting = opts->ass_hinting;
@@ -203,7 +249,7 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim)
     mp_ass_set_style(&style, 288, opts->sub_text_style);
     ass_set_selective_style_override(priv, &style);
     free(style.FontName);
-    if (ctx->is_converted && track->default_style < track->n_styles) {
+    if (converted && track->default_style < track->n_styles) {
         mp_ass_set_style(track->styles + track->default_style,
                          track->PlayResY, opts->sub_text_style);
     }
@@ -212,11 +258,91 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim)
     ass_set_line_spacing(priv, set_line_spacing);
 }
 
+static bool has_overrides(char *s)
+{
+    if (!s)
+        return false;
+    return strstr(s, "\\pos") || strstr(s, "\\move") || strstr(s, "\\clip") ||
+           strstr(s, "\\iclip") || strstr(s, "\\org") || strstr(s, "\\p");
+}
+
+#define END(ev) ((ev)->Start + (ev)->Duration)
+
+static long long find_timestamp(struct sd *sd, double pts)
+{
+    struct sd_ass_priv *priv = sd->priv;
+    if (pts == MP_NOPTS_VALUE)
+        return 0;
+
+    pts /= priv->sub_speed;
+
+    long long ts = llrint(pts * 1000);
+
+    if (!sd->opts->sub_fix_timing)
+        return ts;
+
+    // Try to fix small gaps and overlaps.
+    ASS_Track *track = priv->ass_track;
+    int threshold = SUB_GAP_THRESHOLD * 1000;
+    int keep = SUB_GAP_KEEP * 1000;
+
+    // Find the "current" event.
+    ASS_Event *ev[2] = {0};
+    int n_ev = 0;
+    for (int n = 0; n < track->n_events; n++) {
+        ASS_Event *event = &track->events[n];
+        if (ts >= event->Start - threshold && ts <= END(event) + threshold) {
+            if (n_ev >= MP_ARRAY_SIZE(ev))
+                return ts; // multiple overlaps - give up (probably complex subs)
+            ev[n_ev++] = event;
+        }
+    }
+
+    if (n_ev != 2)
+        return ts;
+
+    // Simple/minor heuristic against destroying typesetting.
+    if (ev[0]->Style != ev[1]->Style || has_overrides(ev[0]->Text) ||
+        has_overrides(ev[1]->Text))
+        return ts;
+
+    // Sort by start timestamps.
+    if (ev[0]->Start > ev[1]->Start)
+        MPSWAP(ASS_Event*, ev[0], ev[1]);
+
+    // We want to fix partial overlaps only.
+    if (END(ev[0]) >= END(ev[1]))
+        return ts;
+
+    if (ev[0]->Duration < keep || ev[1]->Duration < keep)
+        return ts;
+
+    // Gap between the events -> move ts to show the end of the first event.
+    if (ts >= END(ev[0]) && ts < ev[1]->Start && END(ev[0]) < ev[1]->Start &&
+        END(ev[0]) + threshold >= ev[1]->Start)
+        return END(ev[0]) - 1;
+
+    // Overlap -> move ts to the (exclusive) end of the first event.
+    // Relies on the fact that the ASS_Renderer has no overlap registered, even
+    // if there is one. This happens to work because we never render the
+    // overlapped state, and libass never resolves a collision.
+    if (ts >= ev[1]->Start && ts <= END(ev[0]) && END(ev[0]) > ev[1]->Start &&
+        END(ev[0]) <= ev[1]->Start + threshold)
+        return END(ev[0]);
+
+    return ts;
+}
+
+#undef END
+
 static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
                         struct sub_bitmaps *res)
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct MPOpts *opts = sd->opts;
+    bool no_ass = !opts->ass_enabled || ctx->on_top;
+    bool converted = ctx->is_converted || no_ass;
+    ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
 
     if (pts == MP_NOPTS_VALUE || !sd->ass_renderer)
         return;
@@ -225,8 +351,8 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
 
     ASS_Renderer *renderer = sd->ass_renderer;
     double scale = dim.display_par;
-    if (!ctx->is_converted && (!opts->ass_style_override ||
-                               opts->ass_vsfilter_aspect_compat))
+    if (!converted && (!opts->ass_style_override ||
+                       opts->ass_vsfilter_aspect_compat))
     {
         // Let's use the original video PAR for vsfilter compatibility:
         double par = scale
@@ -235,20 +361,22 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
         if (isnormal(par))
             scale = par;
     }
-    configure_ass(sd, &dim);
+    configure_ass(sd, &dim, converted, track);
     ass_set_pixel_aspect(renderer, scale);
-    if (!ctx->is_converted && (!opts->ass_style_override ||
-                               opts->ass_vsfilter_blur_compat))
+    if (!converted && (!opts->ass_style_override ||
+                       opts->ass_vsfilter_blur_compat))
     {
         ass_set_storage_size(renderer, ctx->video_params.w, ctx->video_params.h);
     } else {
         ass_set_storage_size(renderer, 0, 0);
     }
-    mp_ass_render_frame(renderer, ctx->ass_track, pts * 1000 + .5,
-                        &ctx->parts, res);
+    if (no_ass)
+        fill_plaintext(sd, pts);
+    long long ts = find_timestamp(sd, pts);
+    mp_ass_render_frame(renderer, track, ts, &ctx->parts, res);
     talloc_steal(ctx, ctx->parts);
 
-    if (!ctx->is_converted)
+    if (!converted)
         mangle_colors(sd, res);
 
     pthread_mutex_unlock(sd->ass_lock);
@@ -333,7 +461,7 @@ static char *get_text(struct sd *sd, double pts)
 
     if (pts == MP_NOPTS_VALUE)
         return NULL;
-    long long ipts = pts * 1000 + 0.5;
+    long long ipts = find_timestamp(sd, pts);
 
     struct buf b = {ctx->last_text, sizeof(ctx->last_text) - 1};
 
@@ -358,6 +486,42 @@ static char *get_text(struct sd *sd, double pts)
         b.start[b.len - 1] = '\0';
 
     return ctx->last_text;
+}
+
+static void fill_plaintext(struct sd *sd, double pts)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    ASS_Track *track = ctx->shadow_track;
+
+    ass_flush_events(track);
+
+    char *text = get_text(sd, pts);
+    if (!text)
+        return;
+
+    bstr dst = {0};
+    while (*text) {
+        if (*text == '{')
+            bstr_xappend(NULL, &dst, bstr0("\\"));
+        bstr_xappend(NULL, &dst, (bstr){text, 1});
+        // Break ASS escapes with U+2060 WORD JOINER
+        if (*text == '\\')
+            mp_append_utf8_bstr(NULL, &dst, 0x2060);
+        text++;
+    }
+
+    if (!dst.start || !dst.start[0])
+        return;
+
+    int n = ass_alloc_event(track);
+    ASS_Event *event = track->events + n;
+    event->Start = 0;
+    event->Duration = INT_MAX;
+    event->Style = track->default_style;
+    event->Text = strdup(dst.start);
+
+    if (track->default_style < track->n_styles)
+        track->styles[track->default_style].Alignment = ctx->on_top ? 6 : 2;
 }
 
 static void fix_events(struct sd *sd)
@@ -390,15 +554,19 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     switch (cmd) {
     case SD_CTRL_SUB_STEP: {
         double *a = arg;
-        long long res = ass_step_sub(ctx->ass_track, a[0] * 1000 + 0.5, a[1]);
+        long long ts = llrint(a[0] * (1000.0 / ctx->sub_speed));
+        long long res = ass_step_sub(ctx->ass_track, ts, a[1]);
         if (!res)
             return false;
-        a[0] = res / 1000.0;
+        a[0] = res / (1000.0 / ctx->sub_speed);
         return true;
+    }
     case SD_CTRL_SET_VIDEO_PARAMS:
         ctx->video_params = *(struct mp_image_params *)arg;
         return CONTROL_OK;
-    }
+    case SD_CTRL_SET_TOP:
+        ctx->on_top = *(bool *)arg;
+        return CONTROL_OK;
     default:
         return CONTROL_UNKNOWN;
     }
@@ -499,20 +667,16 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
     struct mp_csp_params vs_params = MP_CSP_PARAMS_DEFAULTS;
     vs_params.colorspace = csp;
     vs_params.levels_in = levels;
-    vs_params.int_bits_in = 8;
-    vs_params.int_bits_out = 8;
     struct mp_cmat vs_yuv2rgb, vs_rgb2yuv;
-    mp_get_yuv2rgb_coeffs(&vs_params, &vs_yuv2rgb);
-    mp_invert_yuv2rgb(&vs_rgb2yuv, &vs_yuv2rgb);
+    mp_get_csp_matrix(&vs_params, &vs_yuv2rgb);
+    mp_invert_cmat(&vs_rgb2yuv, &vs_yuv2rgb);
 
     // Proper conversion to RGB
     struct mp_csp_params rgb_params = MP_CSP_PARAMS_DEFAULTS;
     rgb_params.colorspace = params.colorspace;
     rgb_params.levels_in = params.colorlevels;
-    rgb_params.int_bits_in = 8;
-    rgb_params.int_bits_out = 8;
     struct mp_cmat vs2rgb;
-    mp_get_yuv2rgb_coeffs(&rgb_params, &vs2rgb);
+    mp_get_csp_matrix(&rgb_params, &vs2rgb);
 
     for (int n = 0; n < parts->num_parts; n++) {
         struct sub_bitmap *sb = &parts->parts[n];
@@ -521,9 +685,9 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
         int g = (color >> 16u) & 0xff;
         int b = (color >>  8u) & 0xff;
         int a = 0xff - (color & 0xff);
-        int c[3] = {r, g, b};
-        mp_map_int_color(&vs_rgb2yuv, 8, c);
-        mp_map_int_color(&vs2rgb, 8, c);
-        sb->libass.color = MP_ASS_RGBA(c[0], c[1], c[2], a);
+        int rgb[3] = {r, g, b}, yuv[3];
+        mp_map_fixp_color(&vs_rgb2yuv, 8, rgb, 8, yuv);
+        mp_map_fixp_color(&vs2rgb, 8, yuv, 8, rgb);
+        sb->libass.color = MP_ASS_RGBA(rgb[0], rgb[1], rgb[2], a);
     }
 }

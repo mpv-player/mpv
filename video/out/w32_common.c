@@ -30,6 +30,7 @@
 #include "input/keycodes.h"
 #include "input/input.h"
 #include "input/event.h"
+#include "stream/stream.h"
 #include "common/msg.h"
 #include "common/common.h"
 #include "vo.h"
@@ -63,6 +64,7 @@ struct vo_w32_state {
 
     HMONITOR monitor; // Handle of the current screen
     struct mp_rect screenrc; // Size and virtual position of the current screen
+    char *color_profile; // Path of the current screen's color profile
 
     // last non-fullscreen extends (updated only on fullscreen or on initialization)
     int prev_width;
@@ -105,6 +107,9 @@ struct vo_w32_state {
     int high_surrogate;
 
     ITaskbarList2 *taskbar_list;
+    ITaskbarList3 *taskbar_list3;
+    UINT tbtnCreatedMsg;
+    bool tbtnCreated;
 
     // updates on move/resize/displaychange
     double display_fps;
@@ -603,7 +608,25 @@ static double get_refresh_rate_from_gdi(const wchar_t *device)
     return rv;
 }
 
-static void update_display_fps(struct vo_w32_state *w32)
+static char *get_color_profile(void *ctx, const wchar_t *device)
+{
+    char *name = NULL;
+
+    HDC ic = CreateICW(device, NULL, NULL, NULL);
+    if (!ic)
+        goto done;
+    wchar_t wname[MAX_PATH + 1];
+    if (!GetICMProfileW(ic, &(DWORD){ MAX_PATH }, wname))
+        goto done;
+
+    name = mp_to_utf8(ctx, wname);
+done:
+    if (ic)
+        DeleteDC(ic);
+    return name;
+}
+
+static void update_display_info(struct vo_w32_state *w32)
 {
     HMONITOR monitor = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
     if (w32->monitor == monitor)
@@ -628,12 +651,26 @@ static void update_display_fps(struct vo_w32_state *w32)
         w32->display_fps = freq;
         signal_events(w32, VO_EVENT_WIN_STATE);
     }
+
+    char *color_profile = get_color_profile(w32, mi.szDevice);
+    if ((color_profile == NULL) != (w32->color_profile == NULL) ||
+        (color_profile && strcmp(color_profile, w32->color_profile)))
+    {
+        if (color_profile)
+            MP_VERBOSE(w32, "color-profile: %s\n", color_profile);
+        talloc_free(w32->color_profile);
+        w32->color_profile = color_profile;
+        color_profile = NULL;
+        signal_events(w32, VO_EVENT_ICC_PROFILE_CHANGED);
+    }
+
+    talloc_free(color_profile);
 }
 
-static void force_update_display_fps(struct vo_w32_state *w32)
+static void force_update_display_info(struct vo_w32_state *w32)
 {
     w32->monitor = 0;
-    update_display_fps(w32);
+    update_display_info(w32);
 }
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
@@ -661,7 +698,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         ClientToScreen(w32->window, &p);
         w32->window_x = p.x;
         w32->window_y = p.y;
-        update_display_fps(w32);  // if we moved between monitors
+        update_display_info(w32);  // if we moved between monitors
         MP_VERBOSE(w32, "move window: %d:%d\n", w32->window_x, w32->window_y);
         break;
     }
@@ -677,7 +714,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         // Window may have been minimized or restored
         signal_events(w32, VO_EVENT_WIN_STATE);
 
-        update_display_fps(w32);
+        update_display_info(w32);
         break;
     }
     case WM_SIZING:
@@ -822,8 +859,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         mouse_button |= MP_KEY_STATE_UP;
         break;
     case WM_DISPLAYCHANGE:
-        force_update_display_fps(w32);
+        force_update_display_info(w32);
         break;
+    }
+
+    if (message == w32->tbtnCreatedMsg) {
+        w32->tbtnCreated = true;
+        return 0;
     }
 
     if (mouse_button) {
@@ -951,7 +993,7 @@ static void update_screen_rect(struct vo_w32_state *w32)
 
 static DWORD update_style(struct vo_w32_state *w32, DWORD style)
 {
-    const DWORD NO_FRAME = WS_POPUP;
+    const DWORD NO_FRAME = WS_OVERLAPPED;
     const DWORD FRAME = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
     style &= ~(NO_FRAME | FRAME);
     style |= (w32->opts->border && !w32->current_fs) ? FRAME : NO_FRAME;
@@ -1198,6 +1240,20 @@ static void *gui_thread(void *ptr)
                 w32->taskbar_list = NULL;
             }
         }
+
+        // ITaskbarList3 has methods for status indication on taskbar buttons,
+        // however that interface is only available on Win7/2008 R2 or newer
+        if (SUCCEEDED(CoCreateInstance(&CLSID_TaskbarList, NULL,
+                                       CLSCTX_INPROC_SERVER, &IID_ITaskbarList3,
+                                       (void**)&w32->taskbar_list3)))
+        {
+            if (FAILED(ITaskbarList3_HrInit(w32->taskbar_list3))) {
+                ITaskbarList3_Release(w32->taskbar_list3);
+                w32->taskbar_list3 = NULL;
+            } else {
+                w32->tbtnCreatedMsg = RegisterWindowMessage(L"TaskbarButtonCreated");
+            }
+        }
     } else {
         MP_ERR(w32, "Failed to initialize OLE/COM\n");
     }
@@ -1235,6 +1291,8 @@ done:
     }
     if (w32->taskbar_list)
         ITaskbarList2_Release(w32->taskbar_list);
+    if (w32->taskbar_list3)
+        ITaskbarList3_Release(w32->taskbar_list3);
     if (ole_ok)
         OleUninitialize();
     SetThreadExecutionState(ES_CONTINUOUS);
@@ -1269,7 +1327,11 @@ int vo_w32_init(struct vo *vo)
     // While the UI runs in its own thread, the thread in which this function
     // runs in will be the renderer thread. Apply magic MMCSS cargo-cult,
     // which might stop Windows from throttling clock rate and so on.
-    w32->avrt_handle = AvSetMmThreadCharacteristicsW(L"Playback", &(DWORD){0});
+    if (vo->opts->mmcss_profile[0]) {
+        wchar_t *profile = mp_from_utf8(NULL, vo->opts->mmcss_profile);
+        w32->avrt_handle = AvSetMmThreadCharacteristicsW(profile, &(DWORD){0});
+        talloc_free(profile);
+    }
 
     return 1;
 fail:
@@ -1348,10 +1410,39 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         talloc_free(title);
         return VO_TRUE;
     }
+    case VOCTRL_UPDATE_PLAYBACK_STATE: {
+        struct voctrl_playback_state *pstate =
+            (struct voctrl_playback_state *)arg;
+
+        if (!w32->taskbar_list3 || !w32->tbtnCreated)
+            return VO_TRUE;
+
+        if (!pstate->playing) {
+            ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
+                                           TBPF_NOPROGRESS);
+            return VO_TRUE;
+        }
+
+        ITaskbarList3_SetProgressValue(w32->taskbar_list3, w32->window,
+                                       pstate->percent_pos, 100);
+        ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
+                                       pstate->paused ? TBPF_PAUSED :
+                                                        TBPF_NORMAL);
+        return VO_TRUE;
+    }
     case VOCTRL_GET_DISPLAY_FPS:
-        update_display_fps(w32);
+        update_display_info(w32);
         *(double*) arg = w32->display_fps;
         return VO_TRUE;
+    case VOCTRL_GET_ICC_PROFILE:
+        update_display_info(w32);
+        if (w32->color_profile) {
+            bstr *p = arg;
+            *p = stream_read_file(w32->color_profile, NULL,
+                w32->vo->global, 100000000); // 100 MB
+            return p->len ? VO_TRUE : VO_FALSE;
+        }
+        return VO_FALSE;
     }
     return VO_NOTIMPL;
 }

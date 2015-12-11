@@ -23,8 +23,11 @@
 #ifndef MP_GL_NNEDI3_H
 #define MP_GL_NNEDI3_H
 
+#include "config.h"
 #include "common.h"
 #include "utils.h"
+
+#define HAVE_NNEDI HAVE_GPL3
 
 #define NNEDI3_UPLOAD_UBO 0
 #define NNEDI3_UPLOAD_SHADER 1
