@@ -296,6 +296,8 @@ static void restore_volume(struct mixer *mixer)
 
     const char *prev_driver = mixer->driver;
     mixer->driver = mixer->softvol ? "softvol" : ao_get_name(ao);
+    if (!prev_driver[0])
+        prev_driver = mixer->driver;
 
     // Restore old parameters if volume won't survive reinitialization.
     // But not if volume scale is possibly different.
