@@ -1,3 +1,103 @@
+Release 0.14.0
+==============
+
+Build System Changes
+--------------------
+
+- build: install scalable svg icon as well
+- vo_opengl: require --enable-gpl3 for nnedi
+- win32: enable internal pthreads wrapper by default
+
+
+Features
+--------
+
+New
+~~~
+
+- vo_opengl: add experimental dxinterop backend (renders with OpenGL, displays through Direct3D; broken with Intel drivers)
+- vo_opengl: add initial ANGLE support
+- windows: implement icc-profile-auto
+- windows: support taskbar button progress indicator (issue #2399)
+
+Removed
+~~~~~~~
+
+- Windows XP support
+- demux: remove old subtitle parser (FFmpeg users are unaffected; Libav loses support for some minor formats)
+- demux_libass: remove this demuxer (libavformat takes its place)
+- stream: drop old Linux PVR support
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- command, vo: add estimated-display-fps property
+- command: add vsync-ratio property
+- command: export some per-video-frame information (issue #2444)
+- vo_opengl: make LOOKUP_TEXTURE_SIZE configurable
+- windows: add option to set VO MMCSS profile
+
+
+Changed
+~~~~~~~
+
+- --sub-fix-timing now applies to ASS subtitles as well
+- command: rename vo-missed-frame-count property to vo-delayed-frame-count
+- input.conf: add default bindings for changing window scale (issue #2500)
+- videotoolbox: make decoder format customizable
+- vo_opengl: disable interpolation without display-sync
+- vo_opengl: make tscale=mitchell:tscale-clamp the default
+- vo_rpi: add an option to disable OSD
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- af_lavrresample: clamp float output to range
+- ao: disambiguate default device list entries
+- ao_alsa: filter audio device list
+- ao_alsa: list bidirectional devices too
+- ao_openal: accommodate more sample formats (issue #2494)
+- ao_openal: fix virtual speaker positioning
+- ao_wasapi: only report per-app volume in shared mode
+- ao_wasapi: work around DTS passthrough failure
+- build: make vaapi-wayland depend on gl-wayland (issue #2476)
+- demux: fix seeking in .ts
+- demux_lavf: mark ASS tracks as always UTF-8
+- demux_mkv: fix incremental indexing with single-keyframe files (issue #2498)
+- drm: fix setting up connectors
+- dxva2: reject 10 bit HEVC (issue #2516)
+- player: replace mistimed-frame-count with vsync-ratio on status line
+- sd_ass: fix secondary subtitle mode
+- various display-sync improvements
+- vo_opengl: enable NNEDI3 prescaler on OpenGL ES 3.0
+- vo_opengl: enable colormatrix even for RGB input
+- vo_opengl: fix backend autoprobing, attempt to improve GLX vs. EGL backend detection
+- vo_opengl: fix backend=x11 on Intel
+- vo_opengl: fix issues with some obscure pixel formats (e.g. rgb555)
+- vo_opengl: fix precision loss of fruit dithering matrix
+- vo_opengl: force dumb mode if RG textures are not available
+- vo_opengl: improve boundary check for polar filters
+- vo_opengl: various GLES compatibility improvements
+- vo_opengl: win32: test for exclusive mode
+- vo_opengl_cb: do not block on flipping when redrawing
+- vo_rpi: set aspect ratio
+- win32: fix console output with raw stdio functions
+- windows: try to avoid detection as exclusive fullscreen window (issue #2177)
+- x11: request bypassing compositor (issue #2502)
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API. A complete changelog can be seen by running
+`git log v0.13.0..v0.14.0` in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.13.0...v0.14.0 or
+http://git.srsfckn.biz/mpv/log/?qt=range&q=v0.13.0..v0.14.0
+
+
 Release 0.13.0
 ==============
 
