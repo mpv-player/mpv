@@ -753,7 +753,7 @@ static void init_video(struct gl_video *p)
     mp_image_params_guess_csp(&p->image_params);
 
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
-    if (p->is_yuv && p->image_params.colorspace != MP_CSP_BT_2020_C)
+    if (p->image_params.colorspace != MP_CSP_BT_2020_C)
         eq_caps |= MP_CSP_EQ_CAPS_COLORMATRIX;
     if (p->image_desc.flags & MP_IMGFLAG_XYZ)
         eq_caps |= MP_CSP_EQ_CAPS_BRIGHTNESS;
