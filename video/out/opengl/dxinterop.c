@@ -366,6 +366,8 @@ static void fill_presentparams(MPGLContext *ctx, D3DPRESENT_PARAMETERS *pparams)
 
     *pparams = (D3DPRESENT_PARAMETERS) {
         .Windowed = TRUE,
+        .BackBufferWidth = ctx->vo->dwidth ? ctx->vo->dwidth : 1,
+        .BackBufferHeight = ctx->vo->dheight ? ctx->vo->dheight : 1,
         // The length of the backbuffer queue shouldn't affect latency because
         // swap_buffers() always uses the backbuffer at the head of the queue
         // and presents it immediately. MSDN says there is a performance
@@ -374,8 +376,7 @@ static void fill_presentparams(MPGLContext *ctx, D3DPRESENT_PARAMETERS *pparams)
         // very high CPU usage. Use six to be safe.
         .BackBufferCount = 6,
         .SwapEffect = D3DSWAPEFFECT_FLIPEX,
-        // Automatically get the backbuffer format from the display format. The
-        // size of the backbuffer is automatically determined too.
+        // Automatically get the backbuffer format from the display format
         .BackBufferFormat = D3DFMT_UNKNOWN,
         .PresentationInterval = presentation_interval,
         .hDeviceWindow = vo_w32_hwnd(ctx->vo),
