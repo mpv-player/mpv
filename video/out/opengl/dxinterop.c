@@ -341,14 +341,19 @@ static void d3d_size_dependent_destroy(MPGLContext *ctx)
         gl->DXUnlockObjectsNV(p->device_h, 1, &p->rtarget_h);
         gl->DXUnregisterObjectNV(p->device_h, p->rtarget_h);
     }
+    p->rtarget_h = 0;
     if (p->texture)
         gl->DeleteTextures(1, &p->texture);
+    p->texture = 0;
     if (p->rtarget)
         IDirect3DSurface9_Release(p->rtarget);
+    p->rtarget = NULL;
     if (p->backbuffer)
         IDirect3DSurface9_Release(p->backbuffer);
+    p->backbuffer = NULL;
     if (p->swapchain)
         IDirect3DSwapChain9Ex_Release(p->swapchain);
+    p->swapchain = NULL;
 }
 
 static void fill_presentparams(MPGLContext *ctx, D3DPRESENT_PARAMETERS *pparams)
@@ -500,11 +505,13 @@ static void dxinterop_reset(struct MPGLContext *ctx)
 
     hr = IDirect3DDevice9Ex_ResetEx(p->device, &pparams, NULL);
     if (FAILED(hr)) {
+        p->lost_device = true;
         MP_FATAL(ctx->vo, "Couldn't reset device\n");
         return;
     }
 
     if (d3d_size_dependent_create(ctx) < 0) {
+        p->lost_device = true;
         MP_FATAL(ctx->vo, "Couldn't recreate Direct3D objects after reset\n");
         return;
     }
@@ -584,6 +591,12 @@ static void dxinterop_swap_buffers(MPGLContext *ctx)
     HRESULT hr;
 
     pump_message_loop();
+
+    // If the device is still lost, try to reset it again
+    if (p->lost_device)
+        dxinterop_reset(ctx);
+    if (p->lost_device)
+        return;
 
     if (!gl->DXUnlockObjectsNV(p->device_h, 1, &p->rtarget_h)) {
         MP_FATAL(ctx->vo, "Couldn't unlock rendertarget for present\n");
