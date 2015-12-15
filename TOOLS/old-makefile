@@ -224,7 +224,6 @@ SOURCES = audio/audio.c \
           sub/osd.c \
           sub/sd_lavc.c \
           sub/sd_lavc_conv.c \
-          sub/sd_srt.c \
           ta/ta.c \
           ta/ta_utils.c \
           ta/ta_talloc.c \
