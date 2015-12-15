@@ -109,6 +109,7 @@ struct format_hack {
     bool use_stream_ids : 1;    // export the native stream IDs
     bool fully_read : 1;        // set demuxer.fully_read flag
     bool image_format : 1;      // expected to contain exactly 1 frame
+    bool utf8_subs : 1;         // subtitles are (mostly) guaranteed UTF-8
     // Do not confuse player's position estimation (position is into external
     // segment, with e.g. HLS, player knows about the playlist main file only).
     bool clear_filepos : 1;
@@ -116,6 +117,7 @@ struct format_hack {
 
 #define BLACKLIST(fmt) {fmt, .ignore = true}
 #define TEXTSUB(fmt) {fmt, .fully_read = true}
+#define TEXTSUB_UTF8(fmt) {fmt, .fully_read = true, .utf8_subs = true}
 #define IMAGEFMT(fmt) {fmt, .image_format = true}
 
 static const struct format_hack format_hacks[] = {
@@ -135,10 +137,17 @@ static const struct format_hack format_hacks[] = {
     {"h264", .if_flags = AVFMT_NOTIMESTAMPS },
     {"hevc", .if_flags = AVFMT_NOTIMESTAMPS },
 
-    TEXTSUB("aqtitle"), TEXTSUB("ass"), TEXTSUB("jacosub"), TEXTSUB("microdvd"),
+    TEXTSUB("aqtitle"), TEXTSUB("jacosub"), TEXTSUB("microdvd"),
     TEXTSUB("mpl2"), TEXTSUB("mpsub"), TEXTSUB("pjs"), TEXTSUB("realtext"),
     TEXTSUB("sami"), TEXTSUB("srt"), TEXTSUB("stl"), TEXTSUB("subviewer"),
-    TEXTSUB("subviewer1"), TEXTSUB("vplayer"), TEXTSUB("webvtt"),
+    TEXTSUB("subviewer1"), TEXTSUB("vplayer"),
+
+    TEXTSUB_UTF8("webvtt"),
+    TEXTSUB_UTF8("ass"),
+
+    // Formats which support muxed subtitles, and always use UTF-8 for them.
+    {"mov", .utf8_subs = true},
+    {"mkv", .utf8_subs = true},
 
     // Useless non-sense, sometimes breaks MLP2 subreader.c fallback
     BLACKLIST("tty"),
@@ -613,8 +622,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
             }
         }
 
-        if (matches_avinputformat_name(priv, "ass"))
-            sh_sub->is_utf8 = true;
+        sh_sub->is_utf8 = priv->format_hack.utf8_subs;
 
         break;
     }

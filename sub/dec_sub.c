@@ -34,7 +34,6 @@
 
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;
-extern const struct sd_functions sd_movtext;
 extern const struct sd_functions sd_srt;
 extern const struct sd_functions sd_microdvd;
 extern const struct sd_functions sd_lavf_srt;
@@ -45,7 +44,6 @@ static const struct sd_functions *const sd_list[] = {
     &sd_ass,
 #endif
     &sd_lavc,
-    &sd_movtext,
     &sd_srt,
     &sd_lavf_srt,
     &sd_microdvd,
@@ -391,11 +389,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh)
         talloc_free(pkt);
     }
 
-    // movtext is currently the only subtitle format that has text output,
-    // but binary input. Skip charset conversion (they're UTF-8 anyway).
-    bool binary = sub->sd[0]->driver == &sd_movtext;
-
-    if (opts->sub_cp && !sh->sub->is_utf8 && !binary)
+    if (opts->sub_cp && !sh->sub->is_utf8)
         sub->charset = guess_sub_cp(sub->log, sub, subs, opts->sub_cp);
 
     if (sub->charset && sub->charset[0] && !mp_charset_is_utf8(sub->charset))
