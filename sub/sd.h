@@ -39,10 +39,6 @@ struct sd {
     struct ass_renderer *ass_renderer;
     pthread_mutex_t *ass_lock;
 
-    // If false, try to remove multiple subtitles.
-    // (Only for decoders which have accept_packets_in_advance set.)
-    bool no_remove_duplicates;
-
     // Set by sub converter
     const char *output_codec;
     char *output_extradata;

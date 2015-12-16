@@ -303,8 +303,6 @@ static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
     struct sd *sd = sub_get_last_sd(sub);
     assert(sd);
 
-    sd->no_remove_duplicates = true;
-
     for (int n = 0; n < subs->num_packets; n++)
         decode_chain_recode(sub, subs->packets[n]);
 
@@ -314,8 +312,6 @@ static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
     // but this is obviously unwanted in this case.
     if (sd->driver->fix_events)
         sd->driver->fix_events(sd);
-
-    sd->no_remove_duplicates = false;
 }
 
 static void add_packet(struct packet_list *subs, struct demux_packet *pkt)

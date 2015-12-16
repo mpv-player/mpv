@@ -43,7 +43,6 @@ struct sd_ass_priv {
     bool on_top;
     struct sub_bitmap *parts;
     bool flush_on_seek;
-    int extend_event;
     char last_text[500];
     struct mp_image_params video_params;
     struct mp_image_params last_params;
@@ -79,12 +78,9 @@ static void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts)
 
 static bool supports_format(const char *format)
 {
-    // ass-text is produced by converters and the subreader.c ssa parser; this
-    // format has ASS tags, but doesn't start with any prelude, nor does it
-    // have extradata.
+    // "ssa" is used for the FFmpeg subtitle converter output
     return format && (strcmp(format, "ass") == 0 ||
-                      strcmp(format, "ssa") == 0 ||
-                      strcmp(format, "ass-text") == 0);
+                      strcmp(format, "ssa") == 0);
 }
 
 static int init(struct sd *sd)
@@ -96,7 +92,6 @@ static int init(struct sd *sd)
     struct sd_ass_priv *ctx = talloc_zero(NULL, struct sd_ass_priv);
     sd->priv = ctx;
 
-    ctx->extend_event = -1;
     ctx->is_converted = sd->converted_from != NULL;
 
     pthread_mutex_lock(sd->ass_lock);
@@ -139,59 +134,16 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
-    long long ipts = packet->pts * 1000 + 0.5;
-    long long iduration = packet->duration * 1000 + 0.5;
     if (strcmp(sd->codec, "ass") == 0) {
+        long long ipts = lrint(packet->pts * 1000);
+        long long iduration = lrint(packet->duration * 1000);
         ass_process_chunk(track, packet->buffer, packet->len, ipts, iduration);
         return;
-    } else if (strcmp(sd->codec, "ssa") == 0) {
-        // broken ffmpeg ASS packet format
+    } else {
+        // "ssa" codec ID
         ctx->flush_on_seek = true;
         ass_process_data(track, packet->buffer, packet->len);
-        return;
     }
-
-    // plaintext subs
-    if (packet->pts == MP_NOPTS_VALUE) {
-        MP_WARN(sd, "Subtitle without pts, ignored\n");
-        return;
-    }
-    if (ctx->extend_event >= 0 && ctx->extend_event < track->n_events) {
-        ASS_Event *event = &track->events[ctx->extend_event];
-        if (event->Start <= ipts)
-            event->Duration = ipts - event->Start;
-        ctx->extend_event = -1;
-    }
-
-    unsigned char *text = packet->buffer;
-    if (!sd->no_remove_duplicates) {
-        for (int i = 0; i < track->n_events; i++) {
-            if (track->events[i].Start == ipts
-                && (track->events[i].Duration == iduration)
-                && strcmp(track->events[i].Text, text) == 0)
-                return;   // We've already added this subtitle
-        }
-    }
-    int eid = ass_alloc_event(track);
-    ASS_Event *event = track->events + eid;
-
-    if (packet->duration == 0) {
-        MP_WARN(sd, "Subtitle without duration or "
-                "duration set to 0 at pts %f.\n", packet->pts);
-    }
-    if (packet->duration < 0) {
-        // Assume unknown duration. The FFmpeg API is very unclear about this.
-        MP_WARN(sd, "Assuming subtitle without duration at pts %f\n", packet->pts);
-        // _If_ there's a next subtitle, the duration will be adjusted again.
-        // If not, show it forever.
-        iduration = INT_MAX;
-        ctx->extend_event = eid;
-    }
-
-    event->Start = ipts;
-    event->Duration = iduration;
-    event->Style = track->default_style;
-    event->Text = strdup(text);
 }
 
 static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
@@ -533,10 +485,8 @@ static void fix_events(struct sd *sd)
 static void reset(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
-    if (ctx->flush_on_seek || sd->opts->sub_clear_on_seek) {
+    if (ctx->flush_on_seek || sd->opts->sub_clear_on_seek)
         ass_flush_events(ctx->ass_track);
-        ctx->extend_event = -1;
-    }
     ctx->flush_on_seek = false;
 }
 
