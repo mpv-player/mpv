@@ -13,6 +13,7 @@ enum {
 };
 
 bool mp_charset_is_utf8(const char *user_cp);
+bool mp_charset_is_utf16(const char *user_cp);
 bool mp_charset_requires_guess(const char *user_cp);
 const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log, bstr buf,
                              const char *user_cp, int flags);

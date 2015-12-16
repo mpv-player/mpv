@@ -54,7 +54,7 @@ struct dec_sub {
     struct MPOpts *opts;
     struct sd init_sd;
 
-    const char *charset;
+    struct sh_stream *sh;
 
     struct sd *sd[MAX_NUM_SD];
     int num_sd;
@@ -195,6 +195,8 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh)
 
     pthread_mutex_lock(&sub->lock);
 
+    sub->sh = sh;
+
     if (sh->extradata && !sub->init_sd.extradata)
         sub_set_extradata(sub, sh->extradata, sh->extradata_size);
     struct sd init_sd = sub->init_sd;
@@ -282,8 +284,8 @@ static void decode_chain_recode(struct dec_sub *sub, struct demux_packet *packet
 {
     if (sub->num_sd > 0) {
         struct demux_packet *recoded = NULL;
-        if (sub->charset)
-            recoded = recode_packet(sub->log, packet, sub->charset);
+        if (sub->sh && sub->sh->sub->charset)
+            recoded = recode_packet(sub->log, packet, sub->sh->sub->charset);
         decode_chain(sub->sd, sub->num_sd, recoded ? recoded : packet);
         talloc_free(recoded);
     }
@@ -294,38 +296,6 @@ void sub_decode(struct dec_sub *sub, struct demux_packet *packet)
     pthread_mutex_lock(&sub->lock);
     decode_chain_recode(sub, packet);
     pthread_mutex_unlock(&sub->lock);
-}
-
-static const char *guess_sub_cp(struct mp_log *log, void *talloc_ctx,
-                                struct packet_list *subs, const char *usercp)
-{
-    if (!mp_charset_requires_guess(usercp))
-        return usercp;
-
-    // Concat all subs into a buffer. We can't probably do much better without
-    // having the original data (which we don't, not anymore).
-    int max_size = 2 * 1024 * 1024;
-    const char *sep = "\n\n"; // In utf-16: U+0A0A GURMUKHI LETTER UU
-    int sep_len = strlen(sep);
-    int num_pkt = 0;
-    int size = 0;
-    for (int n = 0; n < subs->num_packets; n++) {
-        struct demux_packet *pkt = subs->packets[n];
-        if (size + pkt->len > max_size)
-            break;
-        size += pkt->len + sep_len;
-        num_pkt++;
-    }
-    bstr text = {talloc_size(NULL, size), 0};
-    for (int n = 0; n < num_pkt; n++) {
-        struct demux_packet *pkt = subs->packets[n];
-        memcpy(text.start + text.len, pkt->buffer, pkt->len);
-        memcpy(text.start + text.len + pkt->len, sep, sep_len);
-        text.len += pkt->len + sep_len;
-    }
-    const char *guess = mp_charset_guess(talloc_ctx, log, text, usercp, 0);
-    talloc_free(text.start);
-    return guess;
 }
 
 static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
@@ -362,7 +332,6 @@ static void add_packet(struct packet_list *subs, struct demux_packet *pkt)
 bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh)
 {
     assert(sh && sh->sub);
-    struct MPOpts *opts = sub->opts;
 
     pthread_mutex_lock(&sub->lock);
 
@@ -382,12 +351,6 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh)
         add_packet(subs, pkt);
         talloc_free(pkt);
     }
-
-    if (opts->sub_cp && !sh->sub->is_utf8)
-        sub->charset = guess_sub_cp(sub->log, sub, subs, opts->sub_cp);
-
-    if (sub->charset && sub->charset[0] && !mp_charset_is_utf8(sub->charset))
-        MP_INFO(sub, "Using subtitle charset: %s\n", sub->charset);
 
     add_sub_list(sub, subs);
 

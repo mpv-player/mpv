@@ -40,6 +40,7 @@
 #include "common/tags.h"
 #include "common/av_common.h"
 #include "misc/bstr.h"
+#include "misc/charset_conv.h"
 
 #include "stream/stream.h"
 #include "demux.h"
@@ -108,16 +109,16 @@ struct format_hack {
     bool no_stream : 1;         // do not wrap struct stream as AVIOContext
     bool use_stream_ids : 1;    // export the native stream IDs
     bool fully_read : 1;        // set demuxer.fully_read flag
+    bool detect_charset : 1;    // format is a small text file, possibly not UTF8
     bool image_format : 1;      // expected to contain exactly 1 frame
-    bool utf8_subs : 1;         // subtitles are (mostly) guaranteed UTF-8
     // Do not confuse player's position estimation (position is into external
     // segment, with e.g. HLS, player knows about the playlist main file only).
     bool clear_filepos : 1;
 };
 
 #define BLACKLIST(fmt) {fmt, .ignore = true}
-#define TEXTSUB(fmt) {fmt, .fully_read = true}
-#define TEXTSUB_UTF8(fmt) {fmt, .fully_read = true, .utf8_subs = true}
+#define TEXTSUB(fmt) {fmt, .fully_read = true, .detect_charset = true}
+#define TEXTSUB_UTF8(fmt) {fmt, .fully_read = true}
 #define IMAGEFMT(fmt) {fmt, .image_format = true}
 
 static const struct format_hack format_hacks[] = {
@@ -145,10 +146,6 @@ static const struct format_hack format_hacks[] = {
     TEXTSUB_UTF8("webvtt"),
     TEXTSUB_UTF8("ass"),
 
-    // Formats which support muxed subtitles, and always use UTF-8 for them.
-    {"mov", .utf8_subs = true},
-    {"mkv", .utf8_subs = true},
-
     // Useless non-sense, sometimes breaks MLP2 subreader.c fallback
     BLACKLIST("tty"),
     // Let's open files with extremely generic extensions (.bin) with a
@@ -174,6 +171,7 @@ typedef struct lavf_priv {
     int cur_program;
     char *mime_type;
     bool merge_track_metadata;
+    char *file_charset;
 } lavf_priv_t;
 
 // At least mp4 has name="mov,mp4,m4a,3gp,3g2,mj2", so we split the name
@@ -260,6 +258,23 @@ static void list_formats(struct demuxer *demuxer)
     AVInputFormat *fmt = NULL;
     while ((fmt = av_iformat_next(fmt)))
         MP_INFO(demuxer, "%15s : %s\n", fmt->name, fmt->long_name);
+}
+
+static void detect_charset(struct demuxer *demuxer)
+{
+    lavf_priv_t *priv = demuxer->priv;
+    char *cp = demuxer->opts->sub_cp;
+    if (mp_charset_requires_guess(cp)) {
+        bstr data = stream_peek(demuxer->stream, STREAM_MAX_BUFFER_SIZE);
+        cp = (char *)mp_charset_guess(priv, demuxer->log, data, cp, 0);
+        MP_VERBOSE(demuxer, "Detected charset: %s\n", cp ? cp : "(unknown)");
+    }
+    if (cp && !mp_charset_is_utf8(cp))
+        MP_INFO(demuxer, "Using subtitle charset: %s\n", cp);
+    // libavformat transparently converts UTF-16 to UTF-8
+    if (mp_charset_is_utf16(priv->file_charset))
+        cp = NULL;
+    priv->file_charset = cp;
 }
 
 static char *remove_prefix(char *s, const char *const *prefixes)
@@ -401,6 +416,9 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     priv->avif_flags = priv->avif->flags | priv->format_hack.if_flags;
 
     demuxer->filetype = priv->avif->name;
+
+    if (priv->format_hack.detect_charset)
+        detect_charset(demuxer);
 
     return 0;
 }
@@ -622,7 +640,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
             }
         }
 
-        sh_sub->is_utf8 = priv->format_hack.utf8_subs;
+        sh_sub->charset = priv->file_charset;
 
         break;
     }

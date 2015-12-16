@@ -52,6 +52,13 @@ bool mp_charset_is_utf8(const char *user_cp)
                        strcasecmp(user_cp, "utf-8") == 0);
 }
 
+bool mp_charset_is_utf16(const char *user_cp)
+{
+    bstr s = bstr0(user_cp);
+    return bstr_case_startswith(s, bstr0("utf16")) ||
+           bstr_case_startswith(s, bstr0("utf-16"));
+}
+
 // Split the string on ':' into components.
 // out_arr is at least max entries long.
 // Return number of out_arr entries filled.
