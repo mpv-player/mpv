@@ -58,7 +58,6 @@ struct sd_functions {
     void (*uninit)(struct sd *sd);
 
     bool (*accepts_packet)(struct sd *sd); // implicit default if NULL: true
-    void (*fix_events)(struct sd *sd);
     int (*control)(struct sd *sd, enum sd_ctrl cmd, void *arg);
 
     // decoder
@@ -71,7 +70,7 @@ struct sd_functions {
 };
 
 void sd_conv_add_packet(struct sd *sd, void *data, int data_len, double pts,
-                        double duration);
+                        double duration, int64_t pos);
 struct demux_packet *sd_conv_def_get_converted(struct sd *sd);
 void sd_conv_def_reset(struct sd *sd);
 void sd_conv_def_uninit(struct sd *sd);

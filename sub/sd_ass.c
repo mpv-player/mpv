@@ -42,11 +42,12 @@ struct sd_ass_priv {
     bool is_converted;
     bool on_top;
     struct sub_bitmap *parts;
-    bool flush_on_seek;
     char last_text[500];
     struct mp_image_params video_params;
     struct mp_image_params last_params;
     double sub_speed;
+    int64_t *seen_packets;
+    int num_seen_packets;
 };
 
 static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts);
@@ -130,19 +131,42 @@ static int init(struct sd *sd)
     return 0;
 }
 
+// Test if the packet with the given file position (used as unique ID) was
+// already consumed. Return false if the packet is new (and add it to the
+// internal list), and return true if it was already seen.
+static bool check_packet_seen(struct sd *sd, int64_t pos)
+{
+    struct sd_ass_priv *priv = sd->priv;
+    int a = 0;
+    int b = priv->num_seen_packets;
+    while (a < b) {
+        int mid = a + (b - a) / 2;
+        int64_t val = priv->seen_packets[mid];
+        if (pos == val)
+            return true;
+        if (pos > val) {
+            a = mid + 1;
+        } else {
+            b = mid;
+        }
+    }
+    MP_TARRAY_INSERT_AT(priv, priv->seen_packets, priv->num_seen_packets, a, pos);
+    return false;
+}
+
 static void decode(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
     if (strcmp(sd->codec, "ass") == 0) {
-        long long ipts = lrint(packet->pts * 1000);
-        long long iduration = lrint(packet->duration * 1000);
-        ass_process_chunk(track, packet->buffer, packet->len, ipts, iduration);
-        return;
+        // Note that for this packet format, libass has an internal mechanism
+        // for discarding duplicate (already seen) packets.
+        ass_process_chunk(track, packet->buffer, packet->len,
+                          lrint(packet->pts * 1000),
+                          lrint(packet->duration * 1000));
     } else {
-        // "ssa" codec ID
-        ctx->flush_on_seek = true;
-        ass_process_data(track, packet->buffer, packet->len);
+        if (!check_packet_seen(sd, packet->pos))
+            ass_process_data(track, packet->buffer, packet->len);
     }
 }
 
@@ -476,18 +500,11 @@ static void fill_plaintext(struct sd *sd, double pts)
         track->styles[track->default_style].Alignment = ctx->on_top ? 6 : 2;
 }
 
-static void fix_events(struct sd *sd)
-{
-    struct sd_ass_priv *ctx = sd->priv;
-    ctx->flush_on_seek = false;
-}
-
 static void reset(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
-    if (ctx->flush_on_seek || sd->opts->sub_clear_on_seek)
+    if (sd->opts->sub_clear_on_seek)
         ass_flush_events(ctx->ass_track);
-    ctx->flush_on_seek = false;
 }
 
 static void uninit(struct sd *sd)
@@ -530,7 +547,6 @@ const struct sd_functions sd_ass = {
     .decode = decode,
     .get_bitmaps = get_bitmaps,
     .get_text = get_text,
-    .fix_events = fix_events,
     .control = control,
     .reset = reset,
     .uninit = uninit,

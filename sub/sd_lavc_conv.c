@@ -250,7 +250,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
             // ASS packet format, in which case pts/duration might be ignored
             // at a later point.
             sd_conv_add_packet(sd, ass_line, strlen(ass_line),
-                               packet->pts, packet->duration);
+                               packet->pts, packet->duration, packet->pos + i);
         }
     }
 

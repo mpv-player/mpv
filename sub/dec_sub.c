@@ -273,6 +273,7 @@ static struct demux_packet *recode_packet(struct mp_log *log,
             .buffer = conv.start,
             .len = conv.len,
             .pts = in->pts,
+            .pos = in->pos,
             .duration = in->duration,
             .avpacket = in->avpacket, // questionable, but gives us sidedata
         };
@@ -305,13 +306,6 @@ static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
 
     for (int n = 0; n < subs->num_packets; n++)
         decode_chain_recode(sub, subs->packets[n]);
-
-    // Hack for broken FFmpeg packet format: make sd_ass keep the subtitle
-    // events on reset(), even if broken FFmpeg ASS packets were received
-    // (from sd_lavc_conv.c). Normally, these events are removed on seek/reset,
-    // but this is obviously unwanted in this case.
-    if (sd->driver->fix_events)
-        sd->driver->fix_events(sd);
 }
 
 static void add_packet(struct packet_list *subs, struct demux_packet *pkt)
@@ -446,7 +440,7 @@ struct sd_conv_buffer {
 };
 
 void sd_conv_add_packet(struct sd *sd, void *data, int data_len, double pts,
-                        double duration)
+                        double duration, int64_t pos)
 {
     if (!sd->sd_conv_buffer)
         sd->sd_conv_buffer = talloc_zero(sd, struct sd_conv_buffer);
@@ -462,6 +456,7 @@ void sd_conv_add_packet(struct sd *sd, void *data, int data_len, double pts,
         .len = data_len,
         .pts = pts,
         .duration = duration,
+        .pos = pos,
     };
     memcpy(pkt->buffer, data, data_len);
     pkt->buffer[data_len] = 0;
