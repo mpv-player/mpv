@@ -150,8 +150,18 @@ static void build_timeline(struct timeline *tl)
 
     add_source(tl, tl->demuxer);
 
-    struct cue_track *tracks = p->f->tracks;
-    size_t track_count = p->f->num_tracks;
+    struct cue_track *tracks = NULL;
+    size_t track_count = 0;
+
+    for (size_t n = 0; n < p->f->num_tracks; n++) {
+        struct cue_track *track = &p->f->tracks[n];
+        if (track->filename) {
+            MP_TARRAY_APPEND(ctx, tracks, track_count, *track);
+        } else {
+            MP_WARN(tl->demuxer, "No file specified for track entry %zd. "
+                    "It will be removed\n", n + 1);
+        }
+    }
 
     if (track_count == 0) {
         MP_ERR(tl, "CUE: no tracks found!\n");
