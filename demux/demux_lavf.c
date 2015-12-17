@@ -119,7 +119,6 @@ struct format_hack {
 #define BLACKLIST(fmt) {fmt, .ignore = true}
 #define TEXTSUB(fmt) {fmt, .fully_read = true, .detect_charset = true}
 #define TEXTSUB_UTF8(fmt) {fmt, .fully_read = true}
-#define IMAGEFMT(fmt) {fmt, .image_format = true}
 
 static const struct format_hack format_hacks[] = {
     // for webradios
@@ -154,7 +153,7 @@ static const struct format_hack format_hacks[] = {
     // Useless, does not work with custom streams.
     BLACKLIST("image2"),
     // Image demuxers ("<name>_pipe" is detected explicitly)
-    IMAGEFMT("image2pipe"),
+    {"image2pipe", .image_format = true},
     {0}
 };
 
@@ -295,11 +294,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     struct MPOpts *opts = demuxer->opts;
     struct demux_lavf_opts *lavfdopts = opts->demux_lavf;
     struct stream *s = demuxer->stream;
-    lavf_priv_t *priv;
-
-    assert(!demuxer->priv);
-    demuxer->priv = talloc_zero(NULL, lavf_priv_t);
-    priv = demuxer->priv;
+    lavf_priv_t *priv = demuxer->priv;
 
     priv->filename = remove_prefix(s->url, prefixes);
 
@@ -733,13 +728,10 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     AVFormatContext *avfc;
     AVDictionaryEntry *t = NULL;
     float analyze_duration = 0;
-    int i;
+    lavf_priv_t *priv = talloc_zero(NULL, lavf_priv_t);
+    demuxer->priv = priv;
 
     if (lavf_check_file(demuxer, check) < 0)
-        return -1;
-
-    lavf_priv_t *priv = demuxer->priv;
-    if (!priv)
         return -1;
 
     avfc = avformat_alloc_context();
@@ -841,7 +833,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     MP_VERBOSE(demuxer, "avformat_find_stream_info() finished after %"PRId64
                " bytes.\n", stream_tell(demuxer->stream));
 
-    for (i = 0; i < avfc->nb_chapters; i++) {
+    for (int i = 0; i < avfc->nb_chapters; i++) {
         AVChapter *c = avfc->chapters[i];
         t = av_dict_get(c->metadata, "title", NULL, 0);
         int index = demuxer_add_chapter(demuxer, t ? t->value : "",
