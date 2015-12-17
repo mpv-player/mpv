@@ -218,3 +218,18 @@ struct cue_file *mp_parse_cue(struct bstr data)
 
     return f;
 }
+
+int mp_check_embedded_cue(struct cue_file *f)
+{
+    char *fn0 = f->tracks[0].filename;
+    for (int n = 1; n < f->num_tracks; n++) {
+        char *fn = f->tracks[n].filename;
+        // both filenames have the same address (including NULL)
+        if (fn0 == fn)
+            continue;
+        // only one filename is NULL, or the strings don't match
+        if (!fn0 || !fn || strcmp(fn0, fn) != 0)
+            return -1;
+    }
+    return 0;
+}

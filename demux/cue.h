@@ -38,5 +38,6 @@ struct cue_track {
 
 bool mp_probe_cue(struct bstr data);
 struct cue_file *mp_parse_cue(struct bstr data);
+int mp_check_embedded_cue(struct cue_file *f);
 
 #endif

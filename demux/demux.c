@@ -926,10 +926,15 @@ static void demux_init_cuesheet(struct demuxer *demuxer)
     if (cue && !demuxer->num_chapters) {
         struct cue_file *f = mp_parse_cue(bstr0(cue));
         if (f) {
-            for (int n = 0; n < f->num_tracks; n++) {
-                struct cue_track *t = &f->tracks[n];
-                int idx = demuxer_add_chapter(demuxer, "", t->start, -1);
-                mp_tags_merge(demuxer->chapters[idx].metadata, t->tags);
+            if (mp_check_embedded_cue(f) < 0) {
+                MP_WARN(demuxer, "Embedded cue sheet references more than one file. "
+                        "Ignoring it.\n");
+            } else {
+                for (int n = 0; n < f->num_tracks; n++) {
+                    struct cue_track *t = &f->tracks[n];
+                    int idx = demuxer_add_chapter(demuxer, "", t->start, -1);
+                    mp_tags_merge(demuxer->chapters[idx].metadata, t->tags);
+                }
             }
         }
         talloc_free(f);
