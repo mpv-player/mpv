@@ -16,17 +16,7 @@ struct sd {
     const struct sd_functions *driver;
     void *priv;
 
-    const char *codec;
-
-    // Extra header data passed from demuxer
-    char *extradata;
-    int extradata_len;
-
     struct sh_stream *sh;
-
-    // Set to !=NULL if the input packets are being converted from another
-    // format.
-    const char *converted_from;
 
     // Video resolution used for subtitle decoding. Doesn't necessarily match
     // the resolution of the VO, nor does it have to be the OSD resolution.
@@ -38,14 +28,6 @@ struct sd {
     struct ass_library *ass_library;
     struct ass_renderer *ass_renderer;
     pthread_mutex_t *ass_lock;
-
-    // Set by sub converter
-    const char *output_codec;
-    char *output_extradata;
-    int output_extradata_len;
-
-    // Internal buffer for sd_conv_* functions
-    struct sd_conv_buffer *sd_conv_buffer;
 };
 
 struct sd_functions {
@@ -60,21 +42,18 @@ struct sd_functions {
     bool (*accepts_packet)(struct sd *sd); // implicit default if NULL: true
     int (*control)(struct sd *sd, enum sd_ctrl cmd, void *arg);
 
-    // decoder
     void (*get_bitmaps)(struct sd *sd, struct mp_osd_res dim, double pts,
                         struct sub_bitmaps *res);
     char *(*get_text)(struct sd *sd, double pts);
-
-    // converter
-    struct demux_packet *(*get_converted)(struct sd *sd);
 };
 
-void sd_conv_add_packet(struct sd *sd, void *data, int data_len, double pts,
-                        double duration, int64_t pos);
-struct demux_packet *sd_conv_def_get_converted(struct sd *sd);
-void sd_conv_def_reset(struct sd *sd);
-void sd_conv_def_uninit(struct sd *sd);
-
-#define SD_MAX_LINE_LEN 1000
+struct lavc_conv;
+bool lavc_conv_supports_format(const char *format);
+struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
+                                   char *extradata, int extradata_len);
+char *lavc_conv_get_extradata(struct lavc_conv *priv);
+char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet);
+void lavc_conv_reset(struct lavc_conv *priv);
+void lavc_conv_uninit(struct lavc_conv *priv);
 
 #endif

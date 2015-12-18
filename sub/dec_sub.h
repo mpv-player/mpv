@@ -31,7 +31,6 @@ void sub_unlock(struct dec_sub *sub);
 
 void sub_set_video_res(struct dec_sub *sub, int w, int h);
 void sub_set_video_fps(struct dec_sub *sub, double fps);
-void sub_set_extradata(struct dec_sub *sub, void *data, int data_len);
 void sub_set_ass_renderer(struct dec_sub *sub, struct ass_library *ass_library,
                           struct ass_renderer *ass_renderer,
                           pthread_mutex_t *ass_lock);
@@ -44,7 +43,6 @@ bool sub_accepts_packet_in_advance(struct dec_sub *sub);
 void sub_decode(struct dec_sub *sub, struct demux_packet *packet);
 void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
                      struct sub_bitmaps *res);
-bool sub_has_get_text(struct dec_sub *sub);
 char *sub_get_text(struct dec_sub *sub, double pts);
 void sub_reset(struct dec_sub *sub);
 

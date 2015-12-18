@@ -32,8 +32,13 @@
 
 #define HAVE_AV_WEBVTT (LIBAVCODEC_VERSION_MICRO >= 100)
 
-struct sd_lavc_priv {
+struct lavc_conv {
+    struct mp_log *log;
     AVCodecContext *avctx;
+    char *codec;
+    char *extradata;
+    AVSubtitle cur;
+    char **cur_list;
 };
 
 static const char *get_lavc_format(const char *format)
@@ -44,7 +49,7 @@ static const char *get_lavc_format(const char *format)
     return format;
 }
 
-static bool supports_format(const char *format)
+bool lavc_conv_supports_format(const char *format)
 {
     format = get_lavc_format(format);
     enum AVCodecID cid = mp_codec_to_av_codec_id(format);
@@ -66,40 +71,43 @@ static void disable_styles(bstr header)
     }
 }
 
-static int init(struct sd *sd)
+struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
+                                   char *extradata, int extradata_len)
 {
-    struct sd_lavc_priv *priv = talloc_zero(NULL, struct sd_lavc_priv);
+    struct lavc_conv *priv = talloc_zero(NULL, struct lavc_conv);
+    priv->log = log;
+    priv->cur_list = talloc_array(priv, char*, 0);
+    priv->codec = talloc_strdup(priv, codec_name);
     AVCodecContext *avctx = NULL;
-    const char *fmt = get_lavc_format(sd->codec);
+    const char *fmt = get_lavc_format(priv->codec);
     AVCodec *codec = avcodec_find_decoder(mp_codec_to_av_codec_id(fmt));
     if (!codec)
         goto error;
     avctx = avcodec_alloc_context3(codec);
     if (!avctx)
         goto error;
-    avctx->extradata_size = sd->extradata_len;
-    avctx->extradata = sd->extradata;
+    avctx->extradata_size = extradata_len;
+    avctx->extradata = talloc_memdup(priv, extradata, extradata_len);
     if (avcodec_open2(avctx, codec, NULL) < 0)
         goto error;
     // Documented as "set by libavcodec", but there is no other way
     avctx->time_base = (AVRational) {1, 1000};
     priv->avctx = avctx;
-    sd->priv = priv;
-    sd->output_codec = "ssa";
-    sd->output_extradata = avctx->subtitle_header;
-    sd->output_extradata_len = avctx->subtitle_header_size;
-    if (sd->output_extradata) {
-        sd->output_extradata = talloc_memdup(sd, sd->output_extradata,
-                                             sd->output_extradata_len);
-        disable_styles((bstr){sd->output_extradata, sd->output_extradata_len});
-    }
-    return 0;
+    priv->extradata = talloc_strndup(priv, avctx->subtitle_header,
+                                     avctx->subtitle_header_size);
+    disable_styles(bstr0(priv->extradata));
+    return priv;
 
  error:
-    MP_FATAL(sd, "Could not open libavcodec subtitle converter\n");
+    MP_FATAL(priv, "Could not open libavcodec subtitle converter\n");
     av_free(avctx);
     talloc_free(priv);
-    return -1;
+    return NULL;
+}
+
+char *lavc_conv_get_extradata(struct lavc_conv *priv)
+{
+    return priv->extradata;
 }
 
 #if HAVE_AV_WEBVTT
@@ -217,71 +225,56 @@ static int parse_webvtt(AVPacket *in, AVPacket *pkt)
 
 #endif
 
-static void decode(struct sd *sd, struct demux_packet *packet)
+// Return a NULL-terminated list of ASS event lines.
+char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet)
 {
-    struct sd_lavc_priv *priv = sd->priv;
     AVCodecContext *avctx = priv->avctx;
-    AVSubtitle sub = {0};
     AVPacket pkt;
     AVPacket parsed_pkt = {0};
     int ret, got_sub;
 
+    avsubtitle_free(&priv->cur);
+    priv->cur_list[0] = NULL;
+
     mp_set_av_packet(&pkt, packet, &avctx->time_base);
 
-    if (sd->codec && strcmp(sd->codec, "webvtt-webm") == 0) {
+    if (strcmp(priv->codec, "webvtt-webm") == 0) {
         if (parse_webvtt(&pkt, &parsed_pkt) < 0) {
-            MP_ERR(sd, "Error parsing subtitle\n");
+            MP_ERR(priv, "Error parsing subtitle\n");
             goto done;
         }
         pkt = parsed_pkt;
     }
 
-    ret = avcodec_decode_subtitle2(avctx, &sub, &got_sub, &pkt);
+    ret = avcodec_decode_subtitle2(avctx, &priv->cur, &got_sub, &pkt);
     if (ret < 0) {
-        MP_ERR(sd, "Error decoding subtitle\n");
+        MP_ERR(priv, "Error decoding subtitle\n");
     } else if (got_sub) {
-        for (int i = 0; i < sub.num_rects; i++) {
-            if (sub.rects[i]->w > 0 && sub.rects[i]->h > 0)
-                MP_WARN(sd, "Ignoring bitmap subtitle.\n");
-            char *ass_line = sub.rects[i]->ass;
+        int num_cur = 0;
+        for (int i = 0; i < priv->cur.num_rects; i++) {
+            if (priv->cur.rects[i]->w > 0 && priv->cur.rects[i]->h > 0)
+                MP_WARN(priv, "Ignoring bitmap subtitle.\n");
+            char *ass_line = priv->cur.rects[i]->ass;
             if (!ass_line)
-                break;
-            // This might contain embedded timestamps, using the "old" ffmpeg
-            // ASS packet format, in which case pts/duration might be ignored
-            // at a later point.
-            sd_conv_add_packet(sd, ass_line, strlen(ass_line),
-                               packet->pts, packet->duration, packet->pos + i);
+                continue;
+            MP_TARRAY_APPEND(priv, priv->cur_list, num_cur, ass_line);
         }
+        MP_TARRAY_APPEND(priv, priv->cur_list, num_cur, NULL);
     }
 
 done:
-    avsubtitle_free(&sub);
     av_packet_unref(&parsed_pkt);
+    return priv->cur_list;
 }
 
-static void reset(struct sd *sd)
+void lavc_conv_reset(struct lavc_conv *priv)
 {
-    struct sd_lavc_priv *priv = sd->priv;
-
     avcodec_flush_buffers(priv->avctx);
-    sd_conv_def_reset(sd);
 }
 
-static void uninit(struct sd *sd)
+void lavc_conv_uninit(struct lavc_conv *priv)
 {
-    struct sd_lavc_priv *priv = sd->priv;
-
     avcodec_close(priv->avctx);
     av_free(priv->avctx);
     talloc_free(priv);
 }
-
-const struct sd_functions sd_lavc_conv = {
-    .name = "lavc_conv",
-    .supports_format = supports_format,
-    .init = init,
-    .decode = decode,
-    .get_converted = sd_conv_def_get_converted,
-    .reset = reset,
-    .uninit = uninit,
-};
