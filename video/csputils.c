@@ -119,6 +119,8 @@ const struct m_opt_choice_alternatives mp_stereo3d_names[] = {
     {"arcc",   10}, // "anaglyph_cyan_red" (Matroska: unclear which mode)
     {"sbs2r",  11}, // "side_by_side_right"
     {"agmc",   12}, // "anaglyph_green_magenta" (Matroska: unclear which mode)
+    {"al",     13}, // "alternating frames left first"
+    {"ar",     14}, // "alternating frames right first"
     {0}
 };
 
