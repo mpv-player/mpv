@@ -221,9 +221,9 @@ SOURCES = audio/audio.c \
           sub/dec_sub.c \
           sub/draw_bmp.c \
           sub/img_convert.c \
+          sub/lavc_conv.c \
           sub/osd.c \
           sub/sd_lavc.c \
-          sub/sd_lavc_conv.c \
           ta/ta.c \
           ta/ta_utils.c \
           ta/ta_talloc.c \

@@ -254,12 +254,12 @@ def build(ctx):
         ( "sub/dec_sub.c" ),
         ( "sub/draw_bmp.c" ),
         ( "sub/img_convert.c" ),
+        ( "sub/lavc_conv.c" ),
         ( "sub/osd.c" ),
         ( "sub/osd_dummy.c",                     "dummy-osd" ),
         ( "sub/osd_libass.c",                    "libass-osd" ),
         ( "sub/sd_ass.c",                        "libass" ),
         ( "sub/sd_lavc.c" ),
-        ( "sub/sd_lavc_conv.c" ),
 
         ## Video
         ( "video/csputils.c" ),
