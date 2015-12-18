@@ -29,7 +29,6 @@ void sub_destroy(struct dec_sub *sub);
 void sub_lock(struct dec_sub *sub);
 void sub_unlock(struct dec_sub *sub);
 
-void sub_set_video_res(struct dec_sub *sub, int w, int h);
 void sub_set_video_fps(struct dec_sub *sub, double fps);
 void sub_set_ass_renderer(struct dec_sub *sub, struct ass_library *ass_library,
                           struct ass_renderer *ass_renderer,

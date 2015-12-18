@@ -258,13 +258,10 @@ static void reinit_subdec(struct MPContext *mpctx, struct track *track,
 
     struct sh_video *sh_video =
         mpctx->d_video ? mpctx->d_video->header->video : NULL;
-    int w = sh_video ? sh_video->disp_w : 0;
-    int h = sh_video ? sh_video->disp_h : 0;
     float fps = sh_video ? sh_video->fps : 25;
 
     init_sub_renderer(mpctx);
 
-    sub_set_video_res(dec_sub, w, h);
     sub_set_video_fps(dec_sub, fps);
     sub_set_ass_renderer(dec_sub, mpctx->ass_library, mpctx->ass_renderer,
                          &mpctx->ass_lock);

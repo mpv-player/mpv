@@ -112,14 +112,6 @@ bool sub_is_initialized(struct dec_sub *sub)
     return r;
 }
 
-void sub_set_video_res(struct dec_sub *sub, int w, int h)
-{
-    pthread_mutex_lock(&sub->lock);
-    sub->init_sd.sub_video_w = w;
-    sub->init_sd.sub_video_h = h;
-    pthread_mutex_unlock(&sub->lock);
-}
-
 void sub_set_video_fps(struct dec_sub *sub, double fps)
 {
     pthread_mutex_lock(&sub->lock);

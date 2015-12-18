@@ -17,11 +17,6 @@ struct sd {
     void *priv;
 
     struct sh_stream *sh;
-
-    // Video resolution used for subtitle decoding. Doesn't necessarily match
-    // the resolution of the VO, nor does it have to be the OSD resolution.
-    int sub_video_w, sub_video_h;
-
     double video_fps;
 
     // Shared renderer for ASS - done to avoid reloading embedded fonts.
