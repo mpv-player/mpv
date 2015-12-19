@@ -447,10 +447,12 @@ Available video output drivers are:
         Note that this option never affects ``cscale``.
 
     ``pbo``
-        Enable use of PBOs. This is slightly faster, but can sometimes lead to
-        sporadic and temporary image corruption (in theory, because reupload
-        is not retried when it fails), and perhaps actually triggers slower
-        paths with drivers that don't support PBOs properly.
+        Enable use of PBOs. On some drivers this can be faster, especially if
+        the source video size is huge (e.g. so called "4K" video). On other
+        drivers it might be slower or cause latency issues.
+
+        In theory, this can sometimes lead to sporadic and temporary image
+        corruption (because reupload is not retried when it fails).
 
     ``dither-depth=<N|no|auto>``
         Set dither target depth to N. Default: no.
@@ -984,7 +986,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:correct-downscaling:sigmoid-upscaling:pbo:deband:es=no
+        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:correct-downscaling:sigmoid-upscaling:deband:es=no
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.

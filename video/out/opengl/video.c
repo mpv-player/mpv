@@ -373,7 +373,6 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
     .blend_subs = 0,
-    .pbo = 1,
     .deband = 1,
     .prescale_passes = 1,
     .prescale_downscaling_threshold = 2.0f,
