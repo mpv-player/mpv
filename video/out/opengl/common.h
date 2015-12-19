@@ -119,9 +119,6 @@ typedef struct MPGLContext {
     struct vo *vo;
     const struct mpgl_driver *driver;
 
-    // Bit size of each component in the created framebuffer. 0 if unknown.
-    int depth_r, depth_g, depth_b;
-
     // For hwdec_vaegl.c.
     const char *native_display_type;
     void *native_display;
@@ -164,6 +161,7 @@ struct GL {
     char *extensions;           // Equivalent to GL_EXTENSIONS
     int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
     bool debug_context;         // use of e.g. GLX_CONTEXT_DEBUG_BIT_ARB
+    int fb_r, fb_g, fb_b;       // frame buffer bit depth (0 if unknown)
 
     void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei);
     void (GLAPIENTRY *Clear)(GLbitfield);

@@ -127,8 +127,8 @@ static bool create_gl_context(struct MPGLContext *ctx, int vo_flags)
     if (vo_flags & VOFLAG_ALPHA)
         CGLSetParameter(p->ctx, kCGLCPSurfaceOpacity, &(GLint){0});
 
-    ctx->depth_r = ctx->depth_g = ctx->depth_b = cgl_color_size(ctx);
     mpgl_load_functions(ctx->gl, (void *)cocoa_glgetaddr, NULL, ctx->vo->log);
+    ctx->gl->fb_r = ctx->gl->fb_g = ctx->gl->fb_b = cgl_color_size(ctx);
 
     CGLReleasePixelFormat(p->pix);
 

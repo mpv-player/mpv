@@ -253,11 +253,6 @@ static int glx_init(struct MPGLContext *ctx, int flags)
         MP_WARN(vo, "Selected GLX FB config has no associated X visual\n");
     }
 
-
-    glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_RED_SIZE, &ctx->depth_r);
-    glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_GREEN_SIZE, &ctx->depth_g);
-    glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_BLUE_SIZE, &ctx->depth_b);
-
     if (!vo_x11_create_vo_window(vo, glx_ctx->vinfo, "gl"))
         goto uninit;
 
@@ -273,6 +268,10 @@ static int glx_init(struct MPGLContext *ctx, int flags)
         ctx->gl->mpgl_caps |= MPGL_CAP_SW;
     if (!success)
         goto uninit;
+
+    glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_RED_SIZE, &ctx->gl->fb_r);
+    glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_GREEN_SIZE, &ctx->gl->fb_g);
+    glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_BLUE_SIZE, &ctx->gl->fb_b);
 
     return 0;
 

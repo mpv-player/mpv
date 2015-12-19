@@ -80,13 +80,6 @@ static bool create_dc(struct MPGLContext *ctx, int flags)
 
     SetPixelFormat(hdc, pf, &pfd);
 
-    int pfmt = GetPixelFormat(hdc);
-    if (DescribePixelFormat(hdc, pfmt, sizeof(PIXELFORMATDESCRIPTOR), &pfd)) {
-        ctx->depth_r = pfd.cRedBits;
-        ctx->depth_g = pfd.cGreenBits;
-        ctx->depth_b = pfd.cBlueBits;
-    }
-
     w32_ctx->hdc = hdc;
     return true;
 }
@@ -220,6 +213,14 @@ static void create_ctx(void *ptr)
     create_context_w32_gl3(ctx);
     if (!w32_ctx->context)
         create_context_w32_old(ctx);
+
+    int pfmt = GetPixelFormat(w32_ctx->hdc);
+    PIXELFORMATDESCRIPTOR pfd;
+    if (DescribePixelFormat(w32_ctx->hdc, pfmt, sizeof(pfd), &pfd)) {
+        ctx->gl->fb_r = pfd.cRedBits;
+        ctx->gl->fb_g = pfd.cGreenBits;
+        ctx->gl->fb_b = pfd.cBlueBits;
+    }
 
     wglMakeCurrent(w32_ctx->hdc, NULL);
 }

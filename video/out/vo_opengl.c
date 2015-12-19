@@ -423,8 +423,6 @@ static int preinit(struct vo *vo)
     if (!p->renderer)
         goto err_out;
     gl_video_set_osd_source(p->renderer, vo->osd);
-    gl_video_set_output_depth(p->renderer, p->glctx->depth_r, p->glctx->depth_g,
-                              p->glctx->depth_b);
     gl_video_set_options(p->renderer, p->renderer_opts);
     gl_video_configure_queue(p->renderer, vo);
 
