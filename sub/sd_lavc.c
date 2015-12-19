@@ -318,11 +318,10 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
 
     double video_par = 0;
     if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE &&
-            opts->stretch_dvd_subs) {
+        opts->stretch_dvd_subs)
+    {
         // For DVD subs, try to keep the subtitle PAR at display PAR.
-        double par =
-              (priv->video_params.d_w / (double)priv->video_params.d_h)
-            / (priv->video_params.w   / (double)priv->video_params.h);
+        double par = priv->video_params.p_w / (double)priv->video_params.p_h;
         if (isnormal(par))
             video_par = par;
     }

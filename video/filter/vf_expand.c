@@ -72,7 +72,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         else if( vf->priv->exp_h<height ) vf->priv->exp_h=height;
     if (vf->priv->aspect) {
         float adjusted_aspect = vf->priv->aspect;
-        adjusted_aspect *= ((double)width/height) / ((double)in->d_w/in->d_h);
+        adjusted_aspect *= (double)in->p_w/in->p_h;
         if (vf->priv->exp_h < vf->priv->exp_w / adjusted_aspect) {
             vf->priv->exp_h = vf->priv->exp_w / adjusted_aspect + 0.5;
         } else {
@@ -95,9 +95,6 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     *out = *in;
     out->w = vf->priv->exp_w;
     out->h = vf->priv->exp_h;
-
-    vf_rescale_dsize(&out->d_w, &out->d_h, width, height,
-                     vf->priv->exp_w, vf->priv->exp_h);
 
     return 0;
 }

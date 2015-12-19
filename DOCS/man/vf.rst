@@ -151,15 +151,15 @@ Available filters are:
         :yes: Enable accurate rounding.
 
 ``dsize[=w:h:aspect-method:r:aspect]``
-    Changes the intended display size/aspect at an arbitrary point in the
+    Changes the intended display aspect at an arbitrary point in the
     filter chain. Aspect can be given as a fraction (4/3) or floating point
-    number (1.33). Alternatively, you may specify the exact display width and
-    height desired. Note that this filter does *not* do any scaling itself; it
+    number (1.33). Note that this filter does *not* do any scaling itself; it
     just affects what later scalers (software or hardware) will do when
     auto-scaling to the correct aspect.
 
     ``<w>,<h>``
-        New display width and height.
+        New aspect ratio given by a display width and height. Unlike older mpv
+        versions or MPlayer, this does not set the display size.
 
         Can also be these special values:
 

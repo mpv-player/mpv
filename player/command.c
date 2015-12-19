@@ -2449,8 +2449,8 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
     if (!p.imgfmt)
         return M_PROPERTY_UNAVAILABLE;
 
-    double dar = p.d_w / (double)p.d_h;
-    double sar = p.w / (double)p.h;
+    int d_w, d_h;
+    mp_image_params_get_dsize(&p, &d_w, &d_h);
 
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p.imgfmt);
     int bpp = 0;
@@ -2465,10 +2465,10 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
                             .unavailable = !(desc.flags & MP_IMGFLAG_PLANAR)},
         {"w",               SUB_PROP_INT(p.w)},
         {"h",               SUB_PROP_INT(p.h)},
-        {"dw",              SUB_PROP_INT(p.d_w)},
-        {"dh",              SUB_PROP_INT(p.d_h)},
-        {"aspect",          SUB_PROP_FLOAT(dar)},
-        {"par",             SUB_PROP_FLOAT(dar / sar)},
+        {"dw",              SUB_PROP_INT(d_w)},
+        {"dh",              SUB_PROP_INT(d_h)},
+        {"aspect",          SUB_PROP_FLOAT(d_w / (double)d_h)},
+        {"par",             SUB_PROP_FLOAT(p.p_w / (double)p.p_h)},
         {"colormatrix",
             SUB_PROP_STR(m_opt_choice_str(mp_csp_names, p.colorspace))},
         {"colorlevels",
@@ -2561,8 +2561,8 @@ static int mp_property_window_scale(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     struct mp_image_params params = get_video_out_params(mpctx);
-    int vid_w = params.d_w;
-    int vid_h = params.d_h;
+    int vid_w, vid_h;
+    mp_image_params_get_dsize(&params, &vid_w, &vid_h);
     if (vid_w < 1 || vid_h < 1)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -2781,8 +2781,10 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
             struct dec_video *d_video = mpctx->d_video;
             struct sh_video *sh_video = d_video->header->video;
             struct mp_image_params *params = &d_video->vfilter->override_params;
-            if (params && params->d_w && params->d_h) {
-                aspect = (float)params->d_w / params->d_h;
+            if (params && params->p_w > 0 && params->p_h > 0) {
+                int d_w, d_h;
+                mp_image_params_get_dsize(params, &d_w, &d_h);
+                aspect = (float)d_w / d_h;
             } else if (sh_video->disp_w && sh_video->disp_h) {
                 aspect = (float)sh_video->disp_w / sh_video->disp_h;
             }

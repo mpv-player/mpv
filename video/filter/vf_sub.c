@@ -52,31 +52,23 @@ struct vf_priv_s {
 static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
                     struct mp_image_params *out)
 {
-    int width = in->w, height = in->h, d_width = in->d_w, d_height = in->d_h;
+    int width = in->w, height = in->h;
 
     vf->priv->outh = height + vf->priv->opt_top_margin +
                      vf->priv->opt_bottom_margin;
     vf->priv->outw = width;
-
-    double dar = (double)d_width / d_height;
-    double sar = (double)width / height;
-
-    vf_rescale_dsize(&d_width, &d_height, width, height,
-                     vf->priv->outw, vf->priv->outh);
 
     vf->priv->dim = (struct mp_osd_res) {
         .w = vf->priv->outw,
         .h = vf->priv->outh,
         .mt = vf->priv->opt_top_margin,
         .mb = vf->priv->opt_bottom_margin,
-        .display_par = sar / dar,
+        .display_par = in->p_w / (double)in->p_h,
     };
 
     *out = *in;
     out->w = vf->priv->outw;
     out->h = vf->priv->outh;
-    out->d_w = d_width;
-    out->d_h = d_height;
     return 0;
 }
 

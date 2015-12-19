@@ -20,6 +20,8 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include <libavutil/rational.h>
+
 #include "common/msg.h"
 #include "common/common.h"
 
@@ -100,12 +102,16 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         out->stereo_out = p->stereo_out;
     if (p->rotate >= 0)
         out->rotate = p->rotate;
+
+    AVRational dsize;
+    mp_image_params_get_dsize(out, &dsize.num, &dsize.den);
     if (p->dw > 0)
-        out->d_w = p->dw;
+        dsize.num = p->dw;
     if (p->dh > 0)
-        out->d_h = p->dh;
+        dsize.den = p->dh;
     if (p->dar > 0)
-        vf_set_dar(&out->d_w, &out->d_h, out->w, out->h, p->dar);
+        dsize = av_d2q(p->dar, INT_MAX);
+    mp_image_params_set_dsize(out, dsize.num, dsize.den);
 
     // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.).
     mp_image_params_guess_csp(out);

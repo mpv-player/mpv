@@ -700,28 +700,3 @@ void vf_destroy(struct vf_chain *c)
     vf_chain_forget_frames(c);
     talloc_free(c);
 }
-
-// When changing the size of an image that had old_w/old_h with
-// DAR *d_width/*d_height to the new size new_w/new_h, adjust
-// *d_width/*d_height such that the new image has the same pixel aspect ratio.
-void vf_rescale_dsize(int *d_width, int *d_height, int old_w, int old_h,
-                      int new_w, int new_h)
-{
-    *d_width  = *d_width  * new_w / old_w;
-    *d_height = *d_height * new_h / old_h;
-}
-
-// Set *d_width/*d_height to display aspect ratio with the givem source size
-void vf_set_dar(int *d_w, int *d_h, int w, int h, double dar)
-{
-    *d_w = w;
-    *d_h = h;
-    if (dar > 0.01) {
-        *d_w = h * dar + 0.5;
-        // we don't like horizontal downscale
-        if (*d_w < w) {
-            *d_w = w;
-            *d_h = w / dar + 0.5;
-        }
-    }
-}

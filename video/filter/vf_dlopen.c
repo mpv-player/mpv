@@ -93,10 +93,11 @@ static void set_imgprop(struct vf_dlopen_picdata *out, const mp_image_t *mpi)
 static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
                     struct mp_image_params *out)
 {
+    mp_image_params_get_dsize(in, &vf->priv->filter.in_d_width,
+                                  &vf->priv->filter.in_d_height);
+
     vf->priv->filter.in_width = in->w;
     vf->priv->filter.in_height = in->h;
-    vf->priv->filter.in_d_width = in->d_w;
-    vf->priv->filter.in_d_height = in->d_h;
     vf->priv->filter.in_fmt = talloc_strdup(vf, mp_imgfmt_to_name(in->imgfmt));
     vf->priv->filter.out_width = vf->priv->filter.in_width;
     vf->priv->filter.out_height = vf->priv->filter.in_height;
@@ -164,8 +165,8 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     *out = *in;
     out->w = vf->priv->out_width;
     out->h = vf->priv->out_height;
-    out->d_w = vf->priv->filter.out_d_width;
-    out->d_h = vf->priv->filter.out_d_height;
+    mp_image_params_set_dsize(out, vf->priv->filter.out_d_width,
+                                   vf->priv->filter.out_d_height);
     out->imgfmt = vf->priv->outfmt;
     return 0;
 }

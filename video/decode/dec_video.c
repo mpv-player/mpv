@@ -15,14 +15,15 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "config.h"
-#include "options/options.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
 
+#include <libavutil/rational.h>
+
+#include "config.h"
+#include "options/options.h"
 #include "common/msg.h"
 
 #include "osdep/timer.h"
@@ -342,7 +343,7 @@ int video_reconfig_filters(struct dec_video *d_video,
 
     // While mp_image_params normally always have to have d_w/d_h set, the
     // decoder signals unknown bitstream aspect ratio with both set to 0.
-    float dec_aspect = p.d_w > 0 && p.d_h > 0 ? p.d_w / (float)p.d_h : 0;
+    float dec_aspect = p.p_w > 0 && p.p_h > 0 ? p.p_w / (float)p.p_h : 0;
     if (d_video->initial_decoder_aspect == 0)
         d_video->initial_decoder_aspect = dec_aspect;
 
@@ -363,22 +364,25 @@ int video_reconfig_filters(struct dec_video *d_video,
         break;
     }
 
-    if (use_container && sh->aspect > 0) {
+    if (use_container && sh->par_w > 0 && sh->par_h) {
         MP_VERBOSE(d_video, "Using container aspect ratio.\n");
-        vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, sh->aspect);
+        p.p_w = sh->par_w;
+        p.p_h = sh->par_h;
     }
 
-    float force_aspect = opts->movie_aspect;
-    if (force_aspect >= 0.0) {
+    if (opts->movie_aspect >= 0) {
         MP_VERBOSE(d_video, "Forcing user-set aspect ratio.\n");
-        vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, force_aspect);
+        if (opts->movie_aspect == 0) {
+            p.p_w = p.p_h = 1;
+        } else {
+            AVRational a = av_d2q(opts->movie_aspect, INT_MAX);
+            mp_image_params_set_dsize(&p, a.num, a.den);
+        }
     }
 
     // Assume square pixels if no aspect ratio is set at all.
-    if (p.d_w <= 0 || p.d_h <= 0) {
-        p.d_w = p.w;
-        p.d_h = p.h;
-    }
+    if (p.p_w <= 0 || p.p_h <= 0)
+        p.p_w = p.p_h = 1;
 
     // Detect colorspace from resolution.
     mp_image_params_guess_csp(&p);

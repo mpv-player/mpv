@@ -48,6 +48,7 @@
 #include "misc/bstr.h"
 #include "stream/stream.h"
 #include "video/csputils.h"
+#include "video/mp_image.h"
 #include "demux.h"
 #include "stheader.h"
 #include "ebml.h"
@@ -1367,10 +1368,14 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v->fps = track->v_frate;
     sh_v->disp_w = track->v_width;
     sh_v->disp_h = track->v_height;
-    uint32_t dw = track->v_dwidth_set ? track->v_dwidth : track->v_width;
-    uint32_t dh = track->v_dheight_set ? track->v_dheight : track->v_height;
-    sh_v->aspect = (dw && dh) ? (double) dw / dh : 0;
-    MP_VERBOSE(demuxer, "Aspect: %f\n", sh_v->aspect);
+
+    int dw = track->v_dwidth_set ? track->v_dwidth : track->v_width;
+    int dh = track->v_dheight_set ? track->v_dheight : track->v_height;
+    struct mp_image_params p = {.w = track->v_width, .h = track->v_height};
+    mp_image_params_set_dsize(&p, dw, dh);
+    sh_v->par_w = p.p_w;
+    sh_v->par_h = p.p_h;
+
     sh_v->stereo_mode = track->stereo_mode;
 
     return 0;

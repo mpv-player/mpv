@@ -343,11 +343,9 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
                        opts->ass_vsfilter_aspect_compat))
     {
         // Let's use the original video PAR for vsfilter compatibility:
-        double par = scale
-            * (ctx->video_params.d_w / (double)ctx->video_params.d_h)
-            / (ctx->video_params.w   / (double)ctx->video_params.h);
+        double par = ctx->video_params.p_w / (double)ctx->video_params.p_h;
         if (isnormal(par))
-            scale = par;
+            scale *= par;
     }
     configure_ass(sd, &dim, converted, track);
     ass_set_pixel_aspect(renderer, scale);

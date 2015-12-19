@@ -308,14 +308,7 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
 
 static void add_subs(struct MPContext *mpctx, struct mp_image *image)
 {
-    double sar = (double)image->w / image->h;
-    double dar = (double)image->params.d_w / image->params.d_h;
-    struct mp_osd_res res = {
-        .w = image->w,
-        .h = image->h,
-        .display_par = sar / dar,
-    };
-
+    struct mp_osd_res res = osd_res_from_image_params(&image->params);
     osd_draw_on_image(mpctx->osd, res, mpctx->video_pts,
                       OSD_DRAW_SUB_ONLY, image);
 }

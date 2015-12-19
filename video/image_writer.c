@@ -291,8 +291,8 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts)
 struct mp_image *convert_image(struct mp_image *image, int destfmt,
                                struct mp_log *log)
 {
-    int d_w = image->params.d_w;
-    int d_h = image->params.d_h;
+    int d_w, d_h;
+    mp_image_params_get_dsize(&image->params, &d_w, &d_h);
     bool is_anamorphic = image->w != d_w || image->h != d_h;
 
     // Caveat: no colorspace/levels conversion done if pixel formats equal

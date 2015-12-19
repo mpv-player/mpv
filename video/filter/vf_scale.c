@@ -76,7 +76,10 @@ static int find_best_out(vf_instance_t *vf, int in_format)
 static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
                     struct mp_image_params *out)
 {
-    int width = in->w, height = in->h, d_width = in->d_w, d_height = in->d_h;
+    int width = in->w, height = in->h;
+    int d_width, d_height;
+    mp_image_params_get_dsize(in, &d_width, &d_height);
+
     unsigned int best = find_best_out(vf, in->imgfmt);
     int round_w = 0, round_h = 0;
 
@@ -154,8 +157,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     *out = *in;
     out->w = vf->priv->w;
     out->h = vf->priv->h;
-    out->d_w = d_width;
-    out->d_h = d_height;
+    mp_image_params_set_dsize(out, d_width, d_height);
     out->imgfmt = best;
 
     // Second-guess what libswscale is going to output and what not.

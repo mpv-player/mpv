@@ -159,8 +159,8 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     struct mp_image_params *dst = &ctx->dst;
 
     // Neutralize unsupported or ignored parameters.
-    src->d_w = dst->d_w = 0;
-    src->d_h = dst->d_h = 0;
+    src->p_w = dst->p_w = 0;
+    src->p_h = dst->p_h = 0;
 
     if (cache_valid(ctx))
         return 0;

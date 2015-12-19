@@ -174,10 +174,4 @@ void vf_add_output_frame(struct vf_instance *vf, struct mp_image *img);
 // default wrappers:
 int vf_next_query_format(struct vf_instance *vf, unsigned int fmt);
 
-// Helpers
-
-void vf_rescale_dsize(int *d_width, int *d_height, int old_w, int old_h,
-                      int new_w, int new_h);
-void vf_set_dar(int *d_width, int *d_height, int w, int h, double dar);
-
 #endif /* MPLAYER_VF_H */

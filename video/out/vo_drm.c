@@ -305,8 +305,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         .imgfmt = IMGFMT,
         .w = w,
         .h = h,
-        .d_w = w,
-        .d_h = h,
+        .p_w = 1,
+        .p_h = 1,
     };
 
     talloc_free(p->cur_frame);

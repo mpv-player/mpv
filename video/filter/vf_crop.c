@@ -42,7 +42,7 @@ static const struct vf_priv_s {
 static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
                     struct mp_image_params *out)
 {
-    int width = in->w, height = in->h, d_width = in->d_w, d_height = in->d_h;
+    int width = in->w, height = in->h;
 
     // calculate the missing parameters:
     if(vf->priv->crop_w<=0 || vf->priv->crop_w>width) vf->priv->crop_w=width;
@@ -63,13 +63,9 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         return -1;
     }
 
-    vf_rescale_dsize(&d_width, &d_height, width, height,
-                     vf->priv->crop_w, vf->priv->crop_h);
     *out = *in;
     out->w = vf->priv->crop_w;
     out->h = vf->priv->crop_h;
-    out->d_w = d_width;
-    out->d_h = d_height;
     return 0;
 }
 

@@ -39,7 +39,9 @@ struct vf_priv_s {
 static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
                     struct mp_image_params *out)
 {
-    int width = in->w, height = in->h, d_width = in->d_w, d_height = in->d_h;
+    int width = in->w, height = in->h;
+    int d_width, d_height;
+    mp_image_params_get_dsize(in, &d_width, &d_height);
     int w = vf->priv->w;
     int h = vf->priv->h;
     if (vf->priv->aspect < 0.001) { // did the user input aspect or w,h params
@@ -75,8 +77,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
         }
     }
     *out = *in;
-    out->d_w = d_width;
-    out->d_h = d_height;
+    mp_image_params_set_dsize(out, d_width, d_height);
     return 0;
 }
 

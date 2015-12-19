@@ -259,8 +259,8 @@ static bool resize(struct vo *vo)
         .imgfmt = fmte->mpfmt,
         .w = p->dst_w,
         .h = p->dst_h,
-        .d_w = p->dst_w,
-        .d_h = p->dst_h,
+        .p_w = 1,
+        .p_h = 1,
     };
     mp_image_params_guess_csp(&p->sws->dst);
 

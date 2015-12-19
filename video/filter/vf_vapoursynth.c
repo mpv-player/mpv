@@ -651,8 +651,6 @@ error:
 static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
                     struct mp_image_params *out)
 {
-    int width = in->w, height = in->h, d_width = in->d_w, d_height = in->d_h;
-
     struct vf_priv_s *p = vf->priv;
 
     p->fmt_in = *in;
@@ -669,18 +667,15 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     }
 
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(in->imgfmt);
-    if (width % desc.align_x || height % desc.align_y) {
+    if (in->w % desc.align_x || in->h % desc.align_y) {
         MP_FATAL(vf, "VapourSynth does not allow unaligned/cropped video sizes.\n");
         destroy_vs(vf);
         return -1;
     }
 
-    vf_rescale_dsize(&d_width, &d_height, width, height, vi->width, vi->height);
     *out = *in;
     out->w = vi->width;
     out->h = vi->height;
-    out->d_w = d_width;
-    out->d_h = d_height;
     return 0;
 }
 

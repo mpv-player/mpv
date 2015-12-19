@@ -27,6 +27,7 @@
 #include <libavutil/mem.h>
 #include <libavutil/common.h>
 #include <libavutil/bswap.h>
+#include <libavutil/rational.h>
 #include <libavcodec/avcodec.h>
 
 #include "talloc.h"
@@ -116,8 +117,9 @@ int mp_image_plane_h(struct mp_image *mpi, int plane)
 void mp_image_set_size(struct mp_image *mpi, int w, int h)
 {
     assert(w >= 0 && h >= 0);
-    mpi->w = mpi->params.w = mpi->params.d_w = w;
-    mpi->h = mpi->params.h = mpi->params.d_h = h;
+    mpi->w = mpi->params.w = w;
+    mpi->h = mpi->params.h = h;
+    mpi->params.p_w = mpi->params.p_h = 1;
 }
 
 void mp_image_set_params(struct mp_image *image,
@@ -385,8 +387,8 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->params.stereo_in = src->params.stereo_in;
     dst->params.stereo_out = src->params.stereo_out;
     if (dst->w == src->w && dst->h == src->h) {
-        dst->params.d_w = src->params.d_w;
-        dst->params.d_h = src->params.d_h;
+        dst->params.p_w = src->params.p_w;
+        dst->params.p_h = src->params.p_h;
     }
     dst->params.primaries = src->params.primaries;
     dst->params.gamma = src->params.gamma;
@@ -477,13 +479,32 @@ void mp_image_vflip(struct mp_image *img)
     }
 }
 
+// Display size derived from image size and pixel aspect ratio.
+void mp_image_params_get_dsize(const struct mp_image_params *p,
+                               int *d_w, int *d_h)
+{
+    *d_w = p->w;
+    *d_h = p->h;
+    if (p->p_w > p->p_h && p->p_h >= 1)
+        *d_w = MPCLAMP(*d_w * (int64_t)p->p_w / p->p_h, 0, INT_MAX);
+    if (p->p_h > p->p_w && p->p_w >= 1)
+        *d_h = MPCLAMP(*d_h * (int64_t)p->p_h / p->p_w, 0, INT_MAX);
+}
+
+void mp_image_params_set_dsize(struct mp_image_params *p, int d_w, int d_h)
+{
+    AVRational ds = av_div_q((AVRational){d_w, d_h}, (AVRational){p->w, p->h});
+    p->p_w = ds.num;
+    p->p_h = ds.den;
+}
+
 char *mp_image_params_to_str_buf(char *b, size_t bs,
                                  const struct mp_image_params *p)
 {
     if (p && p->imgfmt) {
         snprintf(b, bs, "%dx%d", p->w, p->h);
-        if (p->w != p->d_w || p->h != p->d_h)
-            mp_snprintf_cat(b, bs, "->%dx%d", p->d_w, p->d_h);
+        if (p->p_w != p->p_h || !p->p_w)
+            mp_snprintf_cat(b, bs, " [%d:%d]", p->p_w, p->p_h);
         mp_snprintf_cat(b, bs, " %s", mp_imgfmt_to_name(p->imgfmt));
         mp_snprintf_cat(b, bs, " %s/%s",
                         m_opt_choice_str(mp_csp_names, p->colorspace),
@@ -515,7 +536,7 @@ bool mp_image_params_valid(const struct mp_image_params *p)
     if (p->w <= 0 || p->h <= 0 || (p->w + 128LL) * (p->h + 128LL) >= INT_MAX / 8)
         return false;
 
-    if (p->d_w <= 0 || p->d_h <= 0)
+    if (p->p_w <= 0 || p->p_h <= 0)
         return false;
 
     if (p->rotate < 0 || p->rotate >= 360)
@@ -533,7 +554,7 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
 {
     return p1->imgfmt == p2->imgfmt &&
            p1->w == p2->w && p1->h == p2->h &&
-           p1->d_w == p2->d_w && p1->d_h == p2->d_h &&
+           p1->p_w == p2->p_w && p1->p_h == p2->p_h &&
            p1->colorspace == p2->colorspace &&
            p1->colorlevels == p2->colorlevels &&
            p1->primaries == p2->primaries &&
@@ -555,12 +576,6 @@ void mp_image_set_attributes(struct mp_image *image,
     nparams.h = image->h;
     if (nparams.imgfmt != params->imgfmt)
         mp_image_params_guess_csp(&nparams);
-    if (nparams.w != params->w || nparams.h != params->h) {
-        if (nparams.d_w && nparams.d_h) {
-            vf_rescale_dsize(&nparams.d_w, &nparams.d_h,
-                             params->w, params->h, nparams.w, nparams.h);
-        }
-    }
     mp_image_set_params(image, &nparams);
 }
 

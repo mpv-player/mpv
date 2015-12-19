@@ -889,7 +889,7 @@ int handle_force_window(struct MPContext *mpctx, bool force)
         struct mp_image_params p = {
             .imgfmt = config_format,
             .w = w,   .h = h,
-            .d_w = w, .d_h = h,
+            .p_w = 1, .p_h = 1,
         };
         if (vo_reconfig(vo, &p) < 0)
             goto err;

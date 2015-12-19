@@ -37,8 +37,8 @@ static struct mp_image *download_image(struct mp_hwdec_ctx *hwctx,
     VdpStatus vdp_st;
 
     struct mp_image *res = NULL;
-    int w = mpi->params.d_w;
-    int h = mpi->params.d_h;
+    int w, h;
+    mp_image_params_get_dsize(&mpi->params, &w, &h);
 
     // Abuse this lock for our own purposes. It could use its own lock instead.
     pthread_mutex_lock(&ctx->pool_lock);

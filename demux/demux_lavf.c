@@ -589,12 +589,8 @@ static void handle_stream(demuxer_t *demuxer, int i)
         sh_video->fps = fps;
         if (priv->format_hack.image_format)
             sh_video->fps = demuxer->opts->mf_fps;
-        if (st->sample_aspect_ratio.num)
-            sh_video->aspect = codec->width  * st->sample_aspect_ratio.num
-                    / (float)(codec->height * st->sample_aspect_ratio.den);
-        else
-            sh_video->aspect = codec->width  * codec->sample_aspect_ratio.num
-                    / (float)(codec->height * codec->sample_aspect_ratio.den);
+        sh_video->par_w = st->sample_aspect_ratio.num;
+        sh_video->par_h = st->sample_aspect_ratio.den;
 
         uint8_t *sd = av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX, NULL);
         if (sd) {
