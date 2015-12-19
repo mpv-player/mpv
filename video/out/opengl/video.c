@@ -1491,6 +1491,14 @@ static void pass_convert_yuv(struct gl_video *p)
 
     GLSL(color.rgb = mat3(colormatrix) * color.rgb + colormatrix_c;)
 
+    if (!p->use_normalized_range && p->has_alpha) {
+        float tex_mul = 1 / mp_get_csp_mul(p->image_params.colorspace,
+                                           p->image_desc.component_bits,
+                                           p->image_desc.component_full_bits);
+        gl_sc_uniform_f(p->sc, "tex_mul_alpha", tex_mul);
+        GLSL(color.a *= tex_mul_alpha;)
+    }
+
     if (p->image_params.colorspace == MP_CSP_BT_2020_C) {
         // Conversion for C'rcY'cC'bc via the BT.2020 CL system:
         // C'bc = (B'-Y'c) / 1.9404  | C'bc <= 0
@@ -2696,10 +2704,6 @@ static bool init_format(int fmt, struct gl_video *init)
     return false;
 
 supported:
-
-    // Stuff like IMGFMT_420AP10. Untested, most likely insane.
-    if (desc.num_planes == 4 && (desc.component_bits % 8) != 0)
-        return false;
 
     if (desc.component_bits > 8 && desc.component_bits < 16) {
         if (init->texture_16bit_depth < 16)
