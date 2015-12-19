@@ -288,6 +288,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct wasapi_state *state = ao->priv;
     ao_control_vol_t *vol = arg;
+    float volume;
     BOOL mute;
 
     if (state->opt_exclusive) {
@@ -295,22 +296,13 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         switch (cmd) {
         case AOCONTROL_GET_VOLUME:
             IAudioEndpointVolume_GetMasterVolumeLevelScalar(state->pEndpointVolumeProxy,
-                                                            &state->audio_volume);
-            /* check to see if user manually changed volume through mixer;
-               this information is used in exclusive mode for restoring the mixer volume on uninit */
-            if (state->audio_volume != state->previous_volume) {
-                MP_VERBOSE(state, "Mixer difference: %.2g now, expected %.2g\n",
-                           state->audio_volume, state->previous_volume);
-                state->initial_volume = state->audio_volume;
-            }
-
-            vol->left = vol->right = 100.0f * state->audio_volume;
+                                                            &volume);
+            vol->left = vol->right = 100.0f * volume;
             return CONTROL_OK;
         case AOCONTROL_SET_VOLUME:
-            state->audio_volume = vol->left / 100.f;
+            volume = vol->left / 100.f;
             IAudioEndpointVolume_SetMasterVolumeLevelScalar(state->pEndpointVolumeProxy,
-                                                            state->audio_volume, NULL);
-            state->previous_volume = state->audio_volume;
+                                                            volume, NULL);
             return CONTROL_OK;
         case AOCONTROL_GET_MUTE:
             IAudioEndpointVolume_GetMute(state->pEndpointVolumeProxy, &mute);
@@ -328,24 +320,13 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         switch (cmd) {
         case AOCONTROL_GET_VOLUME:
             ISimpleAudioVolume_GetMasterVolume(state->pAudioVolumeProxy,
-                                               &state->audio_volume);
-
-            /* check to see if user manually changed volume through mixer;
-               this information is used in exclusive mode for restoring the mixer volume on uninit */
-            if (state->audio_volume != state->previous_volume) {
-                MP_VERBOSE(state, "Mixer difference: %.2g now, expected %.2g\n",
-                           state->audio_volume, state->previous_volume);
-                state->initial_volume = state->audio_volume;
-            }
-
-            vol->left = vol->right = 100.0f * state->audio_volume;
+                                               &volume);
+            vol->left = vol->right = 100.0f * volume;
             return CONTROL_OK;
         case AOCONTROL_SET_VOLUME:
-            state->audio_volume = vol->left / 100.f;
+            volume = vol->left / 100.f;
             ISimpleAudioVolume_SetMasterVolume(state->pAudioVolumeProxy,
-                                               state->audio_volume, NULL);
-
-            state->previous_volume = state->audio_volume;
+                                               volume, NULL);
             return CONTROL_OK;
         case AOCONTROL_GET_MUTE:
             ISimpleAudioVolume_GetMute(state->pAudioVolumeProxy, &mute);

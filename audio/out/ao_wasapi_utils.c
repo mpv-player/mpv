@@ -1057,8 +1057,7 @@ HRESULT wasapi_thread_init(struct ao *ao)
     struct wasapi_state *state = ao->priv;
     MP_DBG(ao, "Init wasapi thread\n");
     int64_t retry_wait = 1;
-retry:
-    state->initial_volume = -1.0;
+retry: ;
 
     HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
                                   &IID_IMMDeviceEnumerator, (void **)&state->pEnumerator);
@@ -1122,16 +1121,6 @@ retry:
     hr = create_proxies(state);
     EXIT_ON_ERROR(hr);
 
-    MP_DBG(ao, "Read volume levels\n");
-    if (state->opt_exclusive) {
-        IAudioEndpointVolume_GetMasterVolumeLevelScalar(state->pEndpointVolume,
-                                                        &state->initial_volume);
-    } else {
-        ISimpleAudioVolume_GetMasterVolume(state->pAudioVolume,
-                                           &state->initial_volume);
-    }
-    state->previous_volume = state->initial_volume;
-
     wasapi_change_init(ao, false);
 
     MP_DBG(ao, "Init wasapi thread done\n");
@@ -1151,11 +1140,6 @@ void wasapi_thread_uninit(struct ao *ao)
         IAudioClient_Stop(state->pAudioClient);
 
     wasapi_change_uninit(ao);
-
-    if (state->opt_exclusive && state->pEndpointVolume && state->initial_volume > 0 ) {
-        IAudioEndpointVolume_SetMasterVolumeLevelScalar(state->pEndpointVolume,
-                                                        state->initial_volume, NULL);
-    }
     destroy_proxies(state);
 
     SAFE_RELEASE(state->pRenderClient,   IAudioRenderClient_Release(state->pRenderClient));
