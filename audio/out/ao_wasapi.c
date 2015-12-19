@@ -290,55 +290,78 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     ao_control_vol_t *vol = arg;
     BOOL mute;
 
-    switch (cmd) {
-    case AOCONTROL_GET_VOLUME:
-        if (state->opt_exclusive)
+    if (state->opt_exclusive) {
+        // exclusive-specific
+        switch (cmd) {
+        case AOCONTROL_GET_VOLUME:
             IAudioEndpointVolume_GetMasterVolumeLevelScalar(state->pEndpointVolumeProxy,
                                                             &state->audio_volume);
-        else
+            /* check to see if user manually changed volume through mixer;
+               this information is used in exclusive mode for restoring the mixer volume on uninit */
+            if (state->audio_volume != state->previous_volume) {
+                MP_VERBOSE(state, "Mixer difference: %.2g now, expected %.2g\n",
+                           state->audio_volume, state->previous_volume);
+                state->initial_volume = state->audio_volume;
+            }
+
+            vol->left = vol->right = 100.0f * state->audio_volume;
+            return CONTROL_OK;
+        case AOCONTROL_SET_VOLUME:
+            state->audio_volume = vol->left / 100.f;
+            IAudioEndpointVolume_SetMasterVolumeLevelScalar(state->pEndpointVolumeProxy,
+                                                            state->audio_volume, NULL);
+            state->previous_volume = state->audio_volume;
+            return CONTROL_OK;
+        case AOCONTROL_GET_MUTE:
+            IAudioEndpointVolume_GetMute(state->pEndpointVolumeProxy, &mute);
+            *(bool*)arg = mute;
+            return CONTROL_OK;
+        case AOCONTROL_SET_MUTE:
+            mute = *(bool*)arg;
+            IAudioEndpointVolume_SetMute(state->pEndpointVolumeProxy, mute, NULL);
+            return CONTROL_OK;
+        case AOCONTROL_HAS_PER_APP_VOLUME:
+            return CONTROL_FALSE;
+        }
+    } else {
+        // shared-specific
+        switch (cmd) {
+        case AOCONTROL_GET_VOLUME:
             ISimpleAudioVolume_GetMasterVolume(state->pAudioVolumeProxy,
                                                &state->audio_volume);
 
-        /* check to see if user manually changed volume through mixer;
-           this information is used in exclusive mode for restoring the mixer volume on uninit */
-        if (state->audio_volume != state->previous_volume) {
-            MP_VERBOSE(state, "Mixer difference: %.2g now, expected %.2g\n",
-                       state->audio_volume, state->previous_volume);
-            state->initial_volume = state->audio_volume;
-        }
+            /* check to see if user manually changed volume through mixer;
+               this information is used in exclusive mode for restoring the mixer volume on uninit */
+            if (state->audio_volume != state->previous_volume) {
+                MP_VERBOSE(state, "Mixer difference: %.2g now, expected %.2g\n",
+                           state->audio_volume, state->previous_volume);
+                state->initial_volume = state->audio_volume;
+            }
 
-        vol->left = vol->right = 100.0f * state->audio_volume;
-        return CONTROL_OK;
-    case AOCONTROL_SET_VOLUME:
-        state->audio_volume = vol->left / 100.f;
-        if (state->opt_exclusive)
-            IAudioEndpointVolume_SetMasterVolumeLevelScalar(state->pEndpointVolumeProxy,
-                                                            state->audio_volume, NULL);
-        else
+            vol->left = vol->right = 100.0f * state->audio_volume;
+            return CONTROL_OK;
+        case AOCONTROL_SET_VOLUME:
+            state->audio_volume = vol->left / 100.f;
             ISimpleAudioVolume_SetMasterVolume(state->pAudioVolumeProxy,
                                                state->audio_volume, NULL);
 
-        state->previous_volume = state->audio_volume;
-        return CONTROL_OK;
-    case AOCONTROL_GET_MUTE:
-        if (state->opt_exclusive)
-            IAudioEndpointVolume_GetMute(state->pEndpointVolumeProxy, &mute);
-        else
+            state->previous_volume = state->audio_volume;
+            return CONTROL_OK;
+        case AOCONTROL_GET_MUTE:
             ISimpleAudioVolume_GetMute(state->pAudioVolumeProxy, &mute);
-        *(bool*)arg = mute;
-
-        return CONTROL_OK;
-    case AOCONTROL_SET_MUTE:
-        mute = *(bool*)arg;
-        if (state->opt_exclusive)
-            IAudioEndpointVolume_SetMute(state->pEndpointVolumeProxy, mute, NULL);
-        else
+            *(bool*)arg = mute;
+            return CONTROL_OK;
+        case AOCONTROL_SET_MUTE:
+            mute = *(bool*)arg;
             ISimpleAudioVolume_SetMute(state->pAudioVolumeProxy, mute, NULL);
+            return CONTROL_OK;
+        case AOCONTROL_HAS_PER_APP_VOLUME:
+            return CONTROL_TRUE;
+        }
+    }
 
-        return CONTROL_OK;
-    case AOCONTROL_HAS_PER_APP_VOLUME:
-        return state->share_mode == AUDCLNT_SHAREMODE_SHARED ?
-            CONTROL_TRUE : CONTROL_FALSE;
+    // common to exclusive and shared
+    switch (cmd) {
     case AOCONTROL_UPDATE_STREAM_TITLE: {
         MP_VERBOSE(state, "Updating stream title to \"%s\"\n", (char*)arg);
         wchar_t *title = mp_from_utf8(NULL, (char*)arg);
