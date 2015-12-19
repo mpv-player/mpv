@@ -70,7 +70,8 @@ SOURCES-$(ENCODING)             += video/out/vo_lavc.c audio/out/ao_lavc.c \
                                    common/encode_lavc.c
 
 SOURCES-$(GL_X11)               += video/out/x11_common.c video/out/opengl/x11.c
-SOURCES-$(EGL_X11)              += video/out/x11_common.c video/out/opengl/x11egl.c
+SOURCES-$(EGL_X11)              += video/out/x11_common.c video/out/opengl/x11egl.c \
+                                   video/out/opengl/egl_helpers.c
 SOURCES-$(GL_WAYLAND)           += video/out/wayland_common.c \
                                    video/out/opengl/wayland.c
 

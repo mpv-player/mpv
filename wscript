@@ -760,7 +760,12 @@ video_output_features = [
     } , {
         'name': '--gl',
         'desc': 'OpenGL video outputs',
-        'deps_any': [ 'gl-cocoa', 'gl-x11', 'egl-drm', 'gl-win32', 'gl-wayland', 'rpi' ],
+        'deps_any': [ 'gl-cocoa', 'gl-x11', 'egl-x11', 'egl-drm', 'gl-win32', 'gl-wayland', 'rpi' ],
+        'func': check_true
+    }, {
+        'name': 'egl-helpers',
+        'desc': 'EGL helper functions',
+        'deps_any': [ 'egl-x11' ],
         'func': check_true
     }
 ]
