@@ -295,8 +295,10 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         switch (cmd) {
         case AOCONTROL_GET_VOLUME:
         case AOCONTROL_SET_VOLUME:
-            if (!(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_VOLUME))
+            if (!state->pEndpointVolumeProxy ||
+                !(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_VOLUME)) {
                 return CONTROL_FALSE;
+            }
             switch (cmd) {
             case AOCONTROL_GET_VOLUME:
                 IAudioEndpointVolume_GetMasterVolumeLevelScalar(state->pEndpointVolumeProxy,
@@ -314,8 +316,10 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             }
         case AOCONTROL_GET_MUTE:
         case AOCONTROL_SET_MUTE:
-            if (!(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_MUTE))
+            if (!state->pEndpointVolumeProxy ||
+                !(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_MUTE)) {
                 return CONTROL_FALSE;
+            }
             switch (cmd) {
             case AOCONTROL_GET_MUTE:
                 IAudioEndpointVolume_GetMute(state->pEndpointVolumeProxy, &mute);
@@ -333,34 +337,46 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         // shared-specific
         switch (cmd) {
         case AOCONTROL_GET_VOLUME:
-            ISimpleAudioVolume_GetMasterVolume(state->pAudioVolumeProxy,
-                                               &volume);
-            *(ao_control_vol_t *)arg = (ao_control_vol_t){
-                .left  = 100.0f * volume,
-                .right = 100.0f * volume,
-            };
-            return CONTROL_OK;
         case AOCONTROL_SET_VOLUME:
-            volume = ((ao_control_vol_t *)arg)->left / 100.f;
-            ISimpleAudioVolume_SetMasterVolume(state->pAudioVolumeProxy,
-                                               volume, NULL);
-            return CONTROL_OK;
         case AOCONTROL_GET_MUTE:
-            ISimpleAudioVolume_GetMute(state->pAudioVolumeProxy, &mute);
-            *(bool *)arg = mute;
-            return CONTROL_OK;
         case AOCONTROL_SET_MUTE:
-            mute = *(bool *)arg;
-            ISimpleAudioVolume_SetMute(state->pAudioVolumeProxy, mute, NULL);
-            return CONTROL_OK;
         case AOCONTROL_HAS_PER_APP_VOLUME:
-            return CONTROL_TRUE;
+            if (!state->pAudioVolumeProxy)
+                return CONTROL_FALSE;
+            switch(cmd) {
+            case AOCONTROL_GET_VOLUME:
+                ISimpleAudioVolume_GetMasterVolume(state->pAudioVolumeProxy,
+                                                   &volume);
+                *(ao_control_vol_t *)arg = (ao_control_vol_t){
+                    .left  = 100.0f * volume,
+                    .right = 100.0f * volume,
+                };
+                return CONTROL_OK;
+            case AOCONTROL_SET_VOLUME:
+                volume = ((ao_control_vol_t *)arg)->left / 100.f;
+                ISimpleAudioVolume_SetMasterVolume(state->pAudioVolumeProxy,
+                                                   volume, NULL);
+                return CONTROL_OK;
+            case AOCONTROL_GET_MUTE:
+                ISimpleAudioVolume_GetMute(state->pAudioVolumeProxy, &mute);
+                *(bool *)arg = mute;
+                return CONTROL_OK;
+            case AOCONTROL_SET_MUTE:
+                mute = *(bool *)arg;
+                ISimpleAudioVolume_SetMute(state->pAudioVolumeProxy, mute, NULL);
+                return CONTROL_OK;
+            case AOCONTROL_HAS_PER_APP_VOLUME:
+                return CONTROL_TRUE;
+            }
         }
     }
 
     // common to exclusive and shared
     switch (cmd) {
-    case AOCONTROL_UPDATE_STREAM_TITLE: {
+    case AOCONTROL_UPDATE_STREAM_TITLE:
+        if (!state->pSessionControlProxy)
+            return CONTROL_FALSE;
+
         MP_VERBOSE(state, "Updating stream title to \"%s\"\n", (char*)arg);
         wchar_t *title = mp_from_utf8(NULL, (char*)arg);
 
@@ -379,7 +395,6 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         talloc_free(title);
 
         return CONTROL_OK;
-    }
     default:
         return CONTROL_UNKNOWN;
     }
