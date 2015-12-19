@@ -494,19 +494,6 @@ void vf_seek_reset(struct vf_chain *c)
     vf_chain_forget_frames(c);
 }
 
-int vf_next_config(struct vf_instance *vf,
-                   int width, int height, int d_width, int d_height,
-                   unsigned int voflags, unsigned int outfmt)
-{
-    vf->fmt_out = vf->fmt_in;
-    vf->fmt_out.imgfmt = outfmt;
-    vf->fmt_out.w = width;
-    vf->fmt_out.h = height;
-    vf->fmt_out.d_w = d_width;
-    vf->fmt_out.d_h = d_height;
-    return 1;
-}
-
 int vf_next_query_format(struct vf_instance *vf, unsigned int fmt)
 {
     return fmt >= IMGFMT_START && fmt < IMGFMT_END
@@ -581,14 +568,9 @@ static int vf_reconfig_wrapper(struct vf_instance *vf,
     if (!mp_image_params_valid(&vf->fmt_in))
         return -2;
 
-    int r;
-    if (vf->reconfig) {
+    int r = 0;
+    if (vf->reconfig)
         r = vf->reconfig(vf, &vf->fmt_in, &vf->fmt_out);
-    } else if (vf->config) {
-        r = vf->config(vf, p->w, p->h, p->d_w, p->d_h, 0, p->imgfmt) ? 0 : -1;
-    } else {
-        r = 0;
-    }
 
     if (!mp_image_params_equal(&vf->fmt_in, p))
         r = -2;

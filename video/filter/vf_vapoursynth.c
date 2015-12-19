@@ -648,41 +648,40 @@ error:
     return res;
 }
 
-static int config(struct vf_instance *vf, int width, int height,
-                  int d_width, int d_height, unsigned int flags,
-                  unsigned int fmt)
+static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
+                    struct mp_image_params *out)
 {
+    int width = in->w, height = in->h, d_width = in->d_w, d_height = in->d_h;
+
     struct vf_priv_s *p = vf->priv;
 
-    p->fmt_in = (struct mp_image_params){
-        .imgfmt = fmt,
-        .w = width,
-        .h = height,
-        .d_w = d_width,
-        .d_h = d_height,
-    };
+    p->fmt_in = *in;
 
     if (reinit_vs(vf) < 0)
-        return 0;
+        return -1;
 
     const VSVideoInfo *vi = p->vsapi->getVideoInfo(p->out_node);
     fmt = mp_from_vs(vi->format->id);
     if (!fmt) {
         MP_FATAL(vf, "Unsupported output format.\n");
         destroy_vs(vf);
-        return 0;
+        return -1;
     }
 
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(in->imgfmt);
     if (width % desc.align_x || height % desc.align_y) {
         MP_FATAL(vf, "VapourSynth does not allow unaligned/cropped video sizes.\n");
         destroy_vs(vf);
-        return 0;
+        return -1;
     }
 
     vf_rescale_dsize(&d_width, &d_height, width, height, vi->width, vi->height);
-
-    return vf_next_config(vf, vi->width, vi->height, d_width, d_height, flags, fmt);
+    *out = *in;
+    out->w = vi->width;
+    out->h = vi->height;
+    out->d_w = d_width;
+    out->d_h = d_height;
+    return 0;
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)

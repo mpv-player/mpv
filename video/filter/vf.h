@@ -51,11 +51,6 @@ typedef struct vf_instance {
     int (*reconfig)(struct vf_instance *vf, struct mp_image_params *in,
                     struct mp_image_params *out);
 
-    // Legacy variant, use reconfig instead.
-    int (*config)(struct vf_instance *vf,
-                  int width, int height, int d_width, int d_height,
-                  unsigned int flags, unsigned int outfmt);
-
     int (*control)(struct vf_instance *vf, int request, void *data);
     int (*query_format)(struct vf_instance *vf, unsigned int fmt);
 
@@ -177,11 +172,7 @@ bool vf_make_out_image_writeable(struct vf_instance *vf, struct mp_image *img);
 void vf_add_output_frame(struct vf_instance *vf, struct mp_image *img);
 
 // default wrappers:
-int vf_next_config(struct vf_instance *vf,
-                   int width, int height, int d_width, int d_height,
-                   unsigned int flags, unsigned int outfmt);
 int vf_next_query_format(struct vf_instance *vf, unsigned int fmt);
-
 
 // Helpers
 

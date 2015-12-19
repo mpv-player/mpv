@@ -36,10 +36,10 @@ struct vf_priv_s {
     float aspect;
 };
 
-static int config(struct vf_instance *vf,
-    int width, int height, int d_width, int d_height,
-    unsigned int flags, unsigned int outfmt)
+static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
+                    struct mp_image_params *out)
 {
+    int width = in->w, height = in->h, d_width = in->d_w, d_height = in->d_h;
     int w = vf->priv->w;
     int h = vf->priv->h;
     if (vf->priv->aspect < 0.001) { // did the user input aspect or w,h params
@@ -74,12 +74,15 @@ static int config(struct vf_instance *vf,
             d_width = width;
         }
     }
-    return vf_next_config(vf, width, height, d_width, d_height, flags, outfmt);
+    *out = *in;
+    out->d_w = d_width;
+    out->d_h = d_height;
+    return 0;
 }
 
 static int vf_open(vf_instance_t *vf)
 {
-    vf->config = config;
+    vf->reconfig = reconfig;
     return 1;
 }
 

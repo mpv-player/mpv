@@ -383,7 +383,6 @@ static void uninit(struct vf_instance *vf)
 static int vf_open(vf_instance_t *vf)
 {
     vf->reconfig = reconfig;
-    vf->config = NULL;
     vf->filter_ext = filter_ext;
     vf->filter_out = filter_out;
     vf->filter = NULL;
