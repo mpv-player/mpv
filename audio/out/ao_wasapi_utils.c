@@ -1010,9 +1010,9 @@ exit_label:
 }
 
 void wasapi_release_proxies(wasapi_state *state) {
-    SAFE_RELEASE(state->pAudioVolumeProxy,    IUnknown_Release(state->pAudioVolumeProxy));
-    SAFE_RELEASE(state->pEndpointVolumeProxy, IUnknown_Release(state->pEndpointVolumeProxy));
-    SAFE_RELEASE(state->pSessionControlProxy, IUnknown_Release(state->pSessionControlProxy));
+    SAFE_RELEASE(state->pAudioVolumeProxy,    ISimpleAudioVolume_Release(state->pAudioVolumeProxy));
+    SAFE_RELEASE(state->pEndpointVolumeProxy, IAudioEndpointVolume_Release(state->pEndpointVolumeProxy));
+    SAFE_RELEASE(state->pSessionControlProxy, IAudioSessionControl_Release(state->pSessionControlProxy));
 }
 
 static HRESULT create_proxies(struct wasapi_state *state) {
@@ -1038,9 +1038,9 @@ exit_label:
 }
 
 static void destroy_proxies(struct wasapi_state *state) {
-    SAFE_RELEASE(state->sAudioVolume,    IUnknown_Release(state->sAudioVolume));
-    SAFE_RELEASE(state->sEndpointVolume, IUnknown_Release(state->sEndpointVolume));
-    SAFE_RELEASE(state->sSessionControl, IUnknown_Release(state->sSessionControl));
+    SAFE_RELEASE(state->sAudioVolume,    IStream_Release(state->sAudioVolume));
+    SAFE_RELEASE(state->sEndpointVolume, IStream_Release(state->sEndpointVolume));
+    SAFE_RELEASE(state->sSessionControl, IStream_Release(state->sSessionControl));
 }
 
 void wasapi_dispatch(struct ao *ao)
