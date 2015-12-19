@@ -99,7 +99,7 @@ error_out:
     return err;
 }
 
-static bool create_gl_context(struct MPGLContext *ctx)
+static bool create_gl_context(struct MPGLContext *ctx, int vo_flags)
 {
     struct cgl_context *p = ctx->priv;
     CGLError err;
@@ -124,6 +124,9 @@ static bool create_gl_context(struct MPGLContext *ctx)
     vo_cocoa_set_opengl_ctx(ctx->vo, p->ctx);
     CGLSetCurrentContext(p->ctx);
 
+    if (vo_flags & VOFLAG_ALPHA)
+        CGLSetParameter(p->ctx, kCGLCPSurfaceOpacity, &(GLint){0});
+
     ctx->depth_r = ctx->depth_g = ctx->depth_b = cgl_color_size(ctx);
     mpgl_load_functions(ctx->gl, (void *)cocoa_glgetaddr, NULL, ctx->vo->log);
 
@@ -143,7 +146,7 @@ static int cocoa_init(MPGLContext *ctx, int vo_flags)
 {
     vo_cocoa_init(ctx->vo);
 
-    if (!create_gl_context(ctx))
+    if (!create_gl_context(ctx, vo_flags))
         return -1;
 
     ctx->gl->SwapInterval = set_swap_interval;

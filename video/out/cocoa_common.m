@@ -591,6 +591,12 @@ int vo_cocoa_config_window(struct vo *vo)
             cocoa_add_fs_screen_profile_observer(vo);
             cocoa_set_window_title(vo);
             vo_set_level(vo, vo->opts->ontop);
+
+            GLint o;
+            if (!CGLGetParameter(s->cgl_ctx, kCGLCPSurfaceOpacity, &o) && !o) {
+                [s->window setOpaque:NO];
+                [s->window setBackgroundColor:[NSColor clearColor]];
+            }
         }
 
         s->vo_ready = true;
