@@ -438,9 +438,8 @@ Available filters are:
         generating an occasional mismatched frame, but it may also cause an
         excessive number of frames to be dropped during high motion sequences.
         Conversely, setting it to -1 will make ``pullup`` match fields more
-        easily. This may help processing of video where there is slight
-        blurring between the fields, but may also cause there to be interlaced
-        frames in the output.
+        easily. This may help process video with slight blurring between the
+        fields, but may also cause interlaced frames in the output.
 
     ``mp`` (metric plane)
         This option may be set to ``u`` or ``v`` to use a chroma plane instead of the
@@ -473,7 +472,7 @@ Available filters are:
     into ``--vf-defaults`` instead, and enable deinterlacing with ``d`` or
     ``--deinterlace``.
 
-    Also note that the ``d`` key is stupid enough to insert a deinterlacer twice
+    Also, note that the ``d`` key is stupid enough to insert a deinterlacer twice
     when inserting yadif with ``--vf``, so using the above methods is
     recommended.
 
@@ -645,10 +644,11 @@ Available filters are:
     ``buffered-frames``
         Maximum number of decoded video frames that should be buffered before
         the filter (default: 4). This specifies the maximum number of frames
-        the script can requests backwards. E.g. if ``buffered-frames=5``, and
-        the script just requested frame 15, it can still request frame 10, but
-        frame 9 is not available anymore. If it requests frame 30, mpv will
-        decode 15 more frames, and keep only frames 25-30.
+        the script can request in reverse direction.
+        E.g. if ``buffered-frames=5``, and the script just requested frame 15,
+        it can still request frame 10, but frame 9 is not available anymore.
+        If it requests frame 30, mpv will decode 15 more frames, and keep only
+        frames 25-30.
 
         The actual number of buffered frames also depends on the value of the
         ``concurrent-frames`` option. Currently, both option values are
@@ -803,6 +803,6 @@ Available filters are:
 
 ``buffer=<num>``
     Buffer ``<num>`` frames in the filter chain. This filter is probably pretty
-    useless, except for debugging. (Note that this won't help smoothing out
+    useless, except for debugging. (Note that this won't help to smooth out
     latencies with decoding, because the filter will never output a frame if
     the buffer isn't full, except on EOF.)

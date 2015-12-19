@@ -481,7 +481,7 @@ Available video output drivers are:
 
     ``temporal-dither``
         Enable temporal dithering. (Only active if dithering is enabled in
-        general.) This changes between 8 different dithering pattern on each
+        general.) This changes between 8 different dithering patterns on each
         frame by changing the orientation of the tiled dithering matrix.
         Unfortunately, this can lead to flicker on LCD displays, since these
         have a high reaction time.
@@ -492,7 +492,7 @@ Available video output drivers are:
         video frame, 2 on every other frame, etc.
 
     ``debug``
-        Check for OpenGL errors, i.e. call ``glGetError()``. Also request a
+        Check for OpenGL errors, i.e. call ``glGetError()``. Also, request a
         debug OpenGL context (which does nothing with current graphics drivers
         as of this writing).
 
@@ -741,7 +741,7 @@ Available video output drivers are:
 
     ``glfinish``
         Call ``glFinish()`` before and after swapping buffers (default: disabled).
-        Slower, but might help getting better results when doing framedropping.
+        Slower, but might improve results when doing framedropping.
         Can completely ruin performance. The details depend entirely on the
         OpenGL driver.
 
@@ -770,9 +770,9 @@ Available video output drivers are:
         The value ``auto`` will try to determine whether the compositor is
         active, and calls ``DwmFlush`` only if it seems to be.
 
-        This may help getting more consistent frame intervals, especially with
-        high-fps clips - which might also reduce dropped frames. Typically a
-        value of ``windowed`` should be enough since full screen may bypass the
+        This may help to get more consistent frame intervals, especially with
+        high-fps clips - which might also reduce dropped frames. Typically, a
+        value of ``windowed`` should be enough, since full screen may bypass the
         DWM.
 
         Windows only.

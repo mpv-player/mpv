@@ -50,7 +50,7 @@ UP and DOWN
 
 Ctrl+LEFT and Ctrl+RIGHT
     Seek to the previous/next subtitle. Subject to some restrictions and
-    might not work always; see ``sub_seek`` command.
+    might not always work; see ``sub_seek`` command.
 
 [ and ]
     Decrease/increase current playback speed by 10%.
@@ -571,7 +571,7 @@ listed.
   certainty.
 - Dropped frames, e.g. ``Dropped: 4``. Shows up only if the count is not 0. Can
   grow if the video framerate is higher than that of the display, or if video
-  rendering is too slow. Also can be incremented on "hiccups" and when the video
+  rendering is too slow. May also be incremented on "hiccups" and when the video
   frame couldn't be displayed on time. (``vo-drop-frame-count`` property.)
   If the decoder drops frames, the number of decoder-dropped frames is appended
   to the display as well, e.g.: ``Dropped: 4/34``. This happens only if
@@ -602,7 +602,7 @@ PROTOCOLS
     Play a path from  Samba share.
 
 ``bd://[title][/device]`` ``--bluray-device=PATH``
-    Play a Blu-Ray disc. Currently, this does not accept ISO files. Instead,
+    Play a Blu-ray disc. Currently, this does not accept ISO files. Instead,
     you must mount the ISO file as filesystem, and point ``--bluray-device``
     to the mounted directory directly.
 
@@ -728,7 +728,7 @@ EMBEDDING INTO OTHER PROGRAMS (LIBMPV)
 ======================================
 
 mpv can be embedded into other programs as video/audio playback backend. The
-recommended way to to so is using libmpv. See ``libmpv/client.h`` in the mpv
+recommended way to do so is using libmpv. See ``libmpv/client.h`` in the mpv
 source code repository. This provides a C API. Bindings for other languages
 might be available (see wiki).
 
@@ -803,7 +803,7 @@ libdvdcss:
 
         key
            is the default method. libdvdcss will use a set of calculated
-           player keys to try and get the disc key. This can fail if the drive
+           player keys to try to get the disc key. This can fail if the drive
            does not recognize any of the player keys.
 
         disc
@@ -942,8 +942,8 @@ lower priority. Some config files are loaded only once, which means that
 e.g. of 2 ``input.conf`` files located in two config directories, only the
 one from the directory with higher priority will be loaded.
 
-A third config directory with lowest priority is the directory named ``mpv``
-in the same directory as ``mpv.exe``. This used to be the directory with
+A third config directory with the lowest priority is the directory named ``mpv``
+in the same directory as ``mpv.exe``. This used to be the directory with the
 highest priority, but is now discouraged to use and might be removed in the
 future.
 

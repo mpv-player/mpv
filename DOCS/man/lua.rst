@@ -389,7 +389,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 ``mp.get_script_name()``
     Return the name of the current script. The name is usually made of the
     filename of the script, with directory and file extension removed. If
-    there are several script which would have the same name, it's made unique
+    there are several scripts which would have the same name, it's made unique
     by appending a number.
 
     .. admonition:: Example

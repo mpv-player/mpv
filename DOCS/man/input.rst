@@ -418,7 +418,7 @@ List of Input Commands
 
     <reselect> (default)
         Select the default audio and subtitle streams, which typically selects
-        external files with highest preference. (The implementation is not
+        external files with the highest preference. (The implementation is not
         perfect, and could be improved on request.)
 
     <keep-selection>
@@ -782,7 +782,7 @@ Input sections group a set of bindings, and enable or disable them at once.
 In ``input.conf``, each key binding is assigned to an input section, rather
 than actually having explicit text sections.
 
-Also see ``enable_section`` and ``disable_section`` commands.
+See also: ``enable_section`` and ``disable_section`` commands.
 
 Predefined bindings:
 
@@ -961,9 +961,8 @@ Property list
 ``playback-time`` (RW)
     Position in current file in seconds. Unlike ``time-pos``, the time is
     clamped to the range of the file. (Inaccurate file durations etc. could
-    make it go out of range. Also helpful when the user attempts to seek
-    outside of the file, as the seek target time is considered the current
-    position during seeking.)
+    make it go out of range. Useful on attempts to seek outside of the file,
+    as the seek target time is considered the current position during seeking.)
 
 ``chapter`` (RW)
     Current chapter number. The number of the first chapter is 0.
@@ -1109,13 +1108,13 @@ Property list
 
 ``vf-metadata/<filter-label>``
     Metadata added by video filters. Accessed by the filter label,
-    which if not explicitly specified using the ``@filter-label:`` syntax,
+    which, if not explicitly specified using the ``@filter-label:`` syntax,
     will be ``<filter-name>NN``.
 
     Works similar to ``metadata`` property. It allows the same access
     methods (using sub-properties).
 
-    An example of these kind of metadata are the cropping parameters
+    An example of this kind of metadata are the cropping parameters
     added by ``--vf=lavfi=cropdetect``.
 
 ``af-metadata/<filter-label>``
@@ -1142,7 +1141,7 @@ Property list
 
 ``cache-size`` (RW)
     Network cache size in KB. This is similar to ``--cache``. This allows
-    to set the cache size at runtime. Currently, it's not possible to enable
+    setting the cache size at runtime. Currently, it's not possible to enable
     or disable the cache at runtime using this property, just to resize an
     existing cache.
 

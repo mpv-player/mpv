@@ -136,7 +136,9 @@ Playback Control
 
 ``--chapter=<start[-end]>``
     Specify which chapter to start playing at. Optionally specify which
-    chapter to end playing at. Also see ``--start``.
+    chapter to end playing at.
+
+    See also: ``--start``.
 
 ``--playlist-pos=<no|index>``
     Set which file on the internal playlist to start playback with. The index
@@ -321,7 +323,7 @@ Program Behavior
         Files explicitly requested by command line options, like
         ``--include`` or ``--use-filedir-conf``, will still be loaded.
 
-    Also see ``--config-dir``.
+    See also: ``--config-dir``.
 
 ``--list-options``
     Prints all available options.
@@ -558,7 +560,7 @@ Video
 
 ``--display-fps=<fps>``
     Set the display FPS used with the ``--video-sync=display-*`` modes. By
-    default a detected value is used (X11 only, not correct on multi-monitor
+    default, a detected value is used (X11 only, not correct on multi-monitor
     systems). Keep in mind that setting an incorrect value (even if slightly
     incorrect) can ruin video playback.
 
@@ -613,7 +615,7 @@ Video
 
     For ``opengl-cb``, if set, load the interop context as soon as the OpenGL
     context is created. Since ``opengl-cb`` has no on-demand loading, this
-    allows enabling hardware decoding at runtime at all, without having to
+    allows enabling hardware decoding at runtime at all, without having
     to temporarily set the ``hwdec`` option just during OpenGL context
     initialization with ``mpv_opengl_cb_init_gl()``.
 
@@ -675,7 +677,7 @@ Video
     example ``--video-zoom`` does nothing if this option is enabled.)
 
     The video and monitor aspects aspect will be ignored. Aspect correction
-    would require to scale the video in the X or Y direction, but this option
+    would require scaling the video in the X or Y direction, but this option
     disables scaling, disabling all aspect correction.
 
     Note that the scaler algorithm may still be used, even if the video isn't
@@ -820,7 +822,7 @@ Video
     You can get the list of allowed codecs with ``mpv --vd=help``. Remove the
     prefix, e.g. instead of ``lavc:h264`` use ``h264``.
 
-    By default this is set to ``h264,vc1,wmv3,hevc,mpeg2video``. Note that the
+    By default, this is set to ``h264,vc1,wmv3,hevc,mpeg2video``. Note that the
     hardware acceleration special codecs like ``h264_vdpau`` are not relevant
     anymore, and in fact have been removed from Libav in this form.
 
@@ -1027,7 +1029,9 @@ Audio
 
 ``--mute=<auto|yes|no>``
     Set startup audio mute status. ``auto`` (default) will not change the mute
-    status. Also see ``--volume``.
+    status.
+
+    See also: ``--volume``.
 
 ``--softvol=<mode>``
     Control whether to use the volume controls of the audio output driver or
@@ -1152,8 +1156,8 @@ Audio
     point of file change. Default: ``weak``.
 
     :no:    Disable gapless audio.
-    :yes:   The audio device is opened using parameters chosen according to the
-            first file played and is then kept open for gapless playback. This
+    :yes:   The audio device is opened using parameters chosen for the first
+            file played and is then kept open for gapless playback. This
             means that if the first file for example has a low sample rate, then
             the following files may get resampled to the same low sample rate,
             resulting in reduced sound quality. If you play files with different
@@ -1600,10 +1604,10 @@ Subtitles
         ``<rate>`` > video fps speeds the subtitles up for frame-based
         subtitle files and slows them down for time-based ones.
 
-    Also see ``--sub-speed`` option.
+    See also: ``--sub-speed``.
 
 ``--sub-gauss=<0.0-3.0>``
-    Apply Gaussian blur to image subtitles (default: 0). This can help making
+    Apply Gaussian blur to image subtitles (default: 0). This can help to make
     pixelated DVD/Vobsubs look nicer. A value other than 0 also switches to
     software subtitle scaling. Might be slow.
 
@@ -1612,7 +1616,7 @@ Subtitles
         Never applied to text subtitles.
 
 ``--sub-gray``
-    Convert image subtitles to grayscale. Can help making yellow DVD/Vobsubs
+    Convert image subtitles to grayscale. Can help to make yellow DVD/Vobsubs
     look nicer.
 
     .. note::
@@ -1984,8 +1988,8 @@ Window
     always re-enabled when the player is paused.
 
     This is not supported on all video outputs or platforms. Sometimes it is
-    implemented, but does not work (happens often on GNOME). You might be able
-    to to work this around using ``--heartbeat-cmd`` instead.
+    implemented, but does not work (known to happen with GNOME). You might be
+    able to work around this using ``--heartbeat-cmd`` instead.
 
 ``--wid=<ID>``
     This tells mpv to attach to an existing window. If a VO is selected that
@@ -2004,7 +2008,7 @@ Window
     parent, like with X11.
 
     On OSX/Cocoa, the ID is interpreted as ``NSView*``. Pass it as value cast
-    to ``intptr_t``. mpv will creates its own sub-view. Because OSX does not
+    to ``intptr_t``. mpv will create its own sub-view. Because OSX does not
     support window embedding of foreign processes, this works only with libmpv,
     and will crash when used from the command line.
 
@@ -2381,7 +2385,7 @@ Input
 
 ``--input-key-fifo-size=<2-65000>``
     Specify the size of the FIFO that buffers key events (default: 7). If it
-    is too small some events may be lost. The main disadvantage of setting it
+    is too small, some events may be lost. The main disadvantage of setting it
     to a very large value is that if you hold down a key triggering some
     particularly slow command then the player may be unresponsive while it
     processes all the queued commands.
@@ -2448,7 +2452,7 @@ Input
 
     On X11, a sub-window with input enabled grabs all keyboard input as long
     as it is 1. a child of a focused window, and 2. the mouse is inside of
-    the sub-window. The can steal away all keyboard input from the
+    the sub-window. It can steal away all keyboard input from the
     application embedding the mpv window, and on the other hand, the mpv
     window will receive no input if the mouse is outside of the mpv window,
     even though mpv has focus. Modern toolkits work around this weird X11
@@ -2718,7 +2722,7 @@ Screenshot
     Specify the filename template used to save screenshots. The template
     specifies the filename without file extension, and can contain format
     specifiers, which will be substituted when taking a screenshot.
-    By default the template is ``mpv-shot%n``, which results in filenames like
+    By default, the template is ``mpv-shot%n``, which results in filenames like
     ``mpv-shot0012.png`` for example.
 
     The template can start with a relative or absolute path, in order to
@@ -2874,7 +2878,7 @@ Terminal
     Particularly useful on slow terminals or broken ones which do not properly
     handle carriage return (i.e. ``\r``).
 
-    Also see ``--really-quiet`` and ``--msg-level``.
+    See also: ``--really-quiet`` and ``--msg-level``.
 
 ``--really-quiet``
     Display even less output and status messages than with ``--quiet``.
@@ -3007,8 +3011,9 @@ TV
     maximum size of the capture buffer in megabytes (default: dynamical)
 
 ``--tv-norm=<value>``
-    See the console output for a list of all available norms, also see the
-    ``normid`` option below.
+    See the console output for a list of all available norms.
+
+    See also: ``--tv-normid``.
 
 ``--tv-normid=<value> (v4l2 only)``
     Sets the TV norm to the given numeric ID. The TV norm depends on the
@@ -3218,7 +3223,7 @@ Cache
        multiple cache streams, and using the same file for them obviously
        clashes.
 
-    Also see ``--cache-file-size``.
+    See also: ``--cache-file-size``.
 
 ``--cache-file-size=<kBytes>``
     Maximum size of the file created with ``--cache-file``. For read accesses
@@ -3380,7 +3385,7 @@ Miscellaneous
     implement a perfect audio delay measurement. With this value, if large A/V
     sync offsets occur, they will only take about 1 or 2 seconds to settle
     out. This delay in reaction time to sudden A/V offsets should be the only
-    side-effect of turning this option on, for all sound drivers.
+    side effect of turning this option on, for all sound drivers.
 
 ``--video-sync=<audio|...>``
     How the player synchronizes audio and video.

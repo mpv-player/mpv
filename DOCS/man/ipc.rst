@@ -111,7 +111,7 @@ rely on this.
 Commands
 --------
 
-Additionally to  the commands described in `List of Input Commands`_, a few
+In addition to the commands described in `List of Input Commands`_, a few
 extra commands can also be used as part of the protocol:
 
 ``client_name``
@@ -189,7 +189,7 @@ extra commands can also be used as part of the protocol:
 
 ``unobserve_property``
     Undo ``observe_property`` or ``observe_property_string``. This requires the
-    numeric id passed to the observe command as argument.
+    numeric id passed to the observed command as argument.
 
     Example:
 
@@ -228,7 +228,9 @@ extra commands can also be used as part of the protocol:
 
 ``get_version``
     Returns the client API version the C API of the remote mpv instance
-    provides. (Also see ``DOCS/client-api-changes.rst``.)
+    provides.
+
+    See also: ``DOCS/client-api-changes.rst``.
 
 UTF-8
 -----
