@@ -59,9 +59,6 @@ typedef struct wasapi_state {
 
     /* volume control */
     DWORD vol_hw_support;
-    float audio_volume;
-    float previous_volume;
-    float initial_volume;
 
     /* WASAPI handles, owned by audio thread */
     IMMDevice *pDevice;
