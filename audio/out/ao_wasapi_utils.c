@@ -1096,6 +1096,7 @@ retry: ;
     if (hr != S_OK) {
         MP_WARN(ao, "Error querying hardware volume control: %s\n",
                 mp_HRESULT_to_str(hr));
+        state->vol_hw_support = 0;
     }
 
     MP_DBG(ao, "Probing formats\n");
