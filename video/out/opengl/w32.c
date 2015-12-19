@@ -338,7 +338,7 @@ static int w32_control(MPGLContext *ctx, int *events, int request, void *arg)
 }
 
 const struct mpgl_driver mpgl_driver_w32 = {
-    .name           = "w32",
+    .name           = "win",
     .priv_size      = sizeof(struct w32_context),
     .init           = w32_init,
     .reconfig       = w32_reconfig,
