@@ -313,6 +313,7 @@ def build(ctx):
         ( "video/out/filter_kernels.c" ),
         ( "video/out/opengl/cocoa.c",            "gl-cocoa" ),
         ( "video/out/opengl/common.c",           "gl" ),
+        ( "video/out/opengl/context.c",          "gl" ),
         ( "video/out/opengl/egl_helpers.c",      "egl-helpers" ),
         ( "video/out/opengl/rpi.c",              "rpi" ),
         ( "video/out/opengl/hwdec.c",            "gl" ),

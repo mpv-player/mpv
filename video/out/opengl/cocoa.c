@@ -24,7 +24,7 @@
 #include <dlfcn.h>
 #include "video/out/cocoa_common.h"
 #include "osdep/macosx_versions.h"
-#include "common.h"
+#include "context.h"
 
 struct cgl_context {
     CGLPixelFormatObj pix;

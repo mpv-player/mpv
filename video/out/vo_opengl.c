@@ -43,7 +43,7 @@
 #include "video/mp_image.h"
 #include "sub/osd.h"
 
-#include "opengl/common.h"
+#include "opengl/context.h"
 #include "opengl/utils.h"
 #include "opengl/hwdec.h"
 #include "opengl/osd.h"

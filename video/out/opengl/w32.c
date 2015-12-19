@@ -25,7 +25,7 @@
 #include <dwmapi.h>
 #include "video/out/w32_common.h"
 #include "video/out/win32/exclusive_hack.h"
-#include "common.h"
+#include "context.h"
 
 struct w32_context {
     int opt_swapinterval;

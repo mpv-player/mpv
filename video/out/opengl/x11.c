@@ -27,7 +27,7 @@
 #include "header_fixes.h"
 
 #include "video/out/x11_common.h"
-#include "common.h"
+#include "context.h"
 
 struct glx_context {
     XVisualInfo *vinfo;

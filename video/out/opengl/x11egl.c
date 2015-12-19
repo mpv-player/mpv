@@ -28,7 +28,7 @@
 
 #include "common/common.h"
 #include "video/out/x11_common.h"
-#include "common.h"
+#include "context.h"
 #include "egl_helpers.h"
 
 struct priv {

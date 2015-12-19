@@ -25,7 +25,7 @@
 #include <d3d9.h>
 #include <dwmapi.h>
 #include "video/out/w32_common.h"
-#include "common.h"
+#include "context.h"
 
 // For WGL_ACCESS_WRITE_DISCARD_NV, etc.
 #include <GL/wglext.h>

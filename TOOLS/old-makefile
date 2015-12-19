@@ -54,6 +54,7 @@ SOURCES-$(ALSA)                 += audio/out/ao_alsa.c
 SOURCES-$(CACA)                 += video/out/vo_caca.c
 SOURCES-$(SDL2)                 += audio/out/ao_sdl.c video/out/vo_sdl.c
 SOURCES-$(GL)                   += video/out/opengl/common.c \
+                                   video/out/opengl/context.c \
                                    video/out/opengl/osd.c \
                                    video/out/opengl/lcms.c \
                                    video/out/opengl/video.c \
