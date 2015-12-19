@@ -232,9 +232,9 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet)
     AVPacket pkt;
     AVPacket parsed_pkt = {0};
     int ret, got_sub;
+    int num_cur = 0;
 
     avsubtitle_free(&priv->cur);
-    priv->cur_list[0] = NULL;
 
     mp_set_av_packet(&pkt, packet, &avctx->time_base);
 
@@ -250,7 +250,6 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet)
     if (ret < 0) {
         MP_ERR(priv, "Error decoding subtitle\n");
     } else if (got_sub) {
-        int num_cur = 0;
         for (int i = 0; i < priv->cur.num_rects; i++) {
             if (priv->cur.rects[i]->w > 0 && priv->cur.rects[i]->h > 0)
                 MP_WARN(priv, "Ignoring bitmap subtitle.\n");
@@ -259,11 +258,11 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet)
                 continue;
             MP_TARRAY_APPEND(priv, priv->cur_list, num_cur, ass_line);
         }
-        MP_TARRAY_APPEND(priv, priv->cur_list, num_cur, NULL);
     }
 
 done:
     av_packet_unref(&parsed_pkt);
+    MP_TARRAY_APPEND(priv, priv->cur_list, num_cur, NULL);
     return priv->cur_list;
 }
 
