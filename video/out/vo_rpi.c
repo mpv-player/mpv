@@ -40,7 +40,7 @@
 #include "sub/osd.h"
 
 #include "opengl/osd.h"
-#include "opengl/rpi.h"
+#include "opengl/context_rpi.h"
 
 struct priv {
     DISPMANX_DISPLAY_HANDLE_T display;
