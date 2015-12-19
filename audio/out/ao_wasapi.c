@@ -287,7 +287,6 @@ static int init(struct ao *ao)
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct wasapi_state *state = ao->priv;
-    ao_control_vol_t *vol = arg;
     float volume;
     BOOL mute;
 
@@ -297,19 +296,22 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         case AOCONTROL_GET_VOLUME:
             IAudioEndpointVolume_GetMasterVolumeLevelScalar(state->pEndpointVolumeProxy,
                                                             &volume);
-            vol->left = vol->right = 100.0f * volume;
+            *(ao_control_vol_t *)arg = (ao_control_vol_t){
+                .left  = 100.0f * volume,
+                .right = 100.0f * volume,
+            };
             return CONTROL_OK;
         case AOCONTROL_SET_VOLUME:
-            volume = vol->left / 100.f;
+            volume = ((ao_control_vol_t *)arg)->left / 100.f;
             IAudioEndpointVolume_SetMasterVolumeLevelScalar(state->pEndpointVolumeProxy,
                                                             volume, NULL);
             return CONTROL_OK;
         case AOCONTROL_GET_MUTE:
             IAudioEndpointVolume_GetMute(state->pEndpointVolumeProxy, &mute);
-            *(bool*)arg = mute;
+            *(bool *)arg = mute;
             return CONTROL_OK;
         case AOCONTROL_SET_MUTE:
-            mute = *(bool*)arg;
+            mute = *(bool *)arg;
             IAudioEndpointVolume_SetMute(state->pEndpointVolumeProxy, mute, NULL);
             return CONTROL_OK;
         case AOCONTROL_HAS_PER_APP_VOLUME:
@@ -321,19 +323,22 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         case AOCONTROL_GET_VOLUME:
             ISimpleAudioVolume_GetMasterVolume(state->pAudioVolumeProxy,
                                                &volume);
-            vol->left = vol->right = 100.0f * volume;
+            *(ao_control_vol_t *)arg = (ao_control_vol_t){
+                .left  = 100.0f * volume,
+                .right = 100.0f * volume,
+            };
             return CONTROL_OK;
         case AOCONTROL_SET_VOLUME:
-            volume = vol->left / 100.f;
+            volume = ((ao_control_vol_t *)arg)->left / 100.f;
             ISimpleAudioVolume_SetMasterVolume(state->pAudioVolumeProxy,
                                                volume, NULL);
             return CONTROL_OK;
         case AOCONTROL_GET_MUTE:
             ISimpleAudioVolume_GetMute(state->pAudioVolumeProxy, &mute);
-            *(bool*)arg = mute;
+            *(bool *)arg = mute;
             return CONTROL_OK;
         case AOCONTROL_SET_MUTE:
-            mute = *(bool*)arg;
+            mute = *(bool *)arg;
             ISimpleAudioVolume_SetMute(state->pAudioVolumeProxy, mute, NULL);
             return CONTROL_OK;
         case AOCONTROL_HAS_PER_APP_VOLUME:
