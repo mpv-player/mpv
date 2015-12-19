@@ -609,7 +609,7 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params,
                 const struct mp_image_params *override_params)
 {
     int r = 0;
-    vf_chain_forget_frames(c);
+    vf_seek_reset(c);
     for (struct vf_instance *vf = c->first; vf; ) {
         struct vf_instance *next = vf->next;
         if (vf->autoinserted)
