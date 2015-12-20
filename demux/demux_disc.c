@@ -149,9 +149,9 @@ static void add_streams(demuxer_t *demuxer)
             if (stream_control(demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar)
                                 == STREAM_OK)
             {
-                struct mp_image_params f = {.w = sh->video->disp_w * 1728,
-                                            .h = sh->video->disp_h * 1728};
-                mp_image_params_set_dsize(&f, f.w * ar, f.h / ar);
+                struct mp_image_params f = {.w = src->video->disp_w,
+                                            .h = src->video->disp_h};
+                mp_image_params_set_dsize(&f, 1728 * ar, 1728);
                 sh->video->par_w = f.p_w;
                 sh->video->par_h = f.p_h;
             }
