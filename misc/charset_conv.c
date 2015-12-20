@@ -186,6 +186,8 @@ static const char *mp_uchardet(void *talloc_ctx, struct mp_log *log, bstr buf)
             iconv_close(icdsc);
         }
     }
+    if (!res && bstr_validate_utf8(buf) >= 0)
+        res = "utf-8";
     uchardet_delete(det);
     return res;
 }
