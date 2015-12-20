@@ -23,6 +23,7 @@
 #include "common/msg.h"
 
 #include "stream/stream.h"
+#include "video/mp_image.h"
 #include "demux.h"
 #include "stheader.h"
 
@@ -148,8 +149,11 @@ static void add_streams(demuxer_t *demuxer)
             if (stream_control(demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar)
                                 == STREAM_OK)
             {
-                sh->video->par_w = 1728 * ar; // being lazy here
-                sh->video->par_h = 1728 / ar;
+                struct mp_image_params f = {.w = sh->video->disp_w * 1728,
+                                            .h = sh->video->disp_h * 1728};
+                mp_image_params_set_dsize(&f, f.w * ar, f.h / ar);
+                sh->video->par_w = f.p_w;
+                sh->video->par_h = f.p_h;
             }
         }
         if (src->audio)
