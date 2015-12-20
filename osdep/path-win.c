@@ -17,6 +17,7 @@
 
 #include <windows.h>
 #include <shlobj.h>
+#include <initguid.h>
 #include <knownfolders.h>
 #include <pthread.h>
 
