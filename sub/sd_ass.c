@@ -513,8 +513,10 @@ static void fill_plaintext(struct sd *sd, double pts)
 static void reset(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
-    if (sd->opts->sub_clear_on_seek)
+    if (sd->opts->sub_clear_on_seek) {
         ass_flush_events(ctx->ass_track);
+        ctx->num_seen_packets = 0;
+    }
     if (ctx->converter)
         lavc_conv_reset(ctx->converter);
 }
