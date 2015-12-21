@@ -43,7 +43,7 @@ void wasapi_dispatch(struct ao *ao);
 HRESULT wasapi_thread_init(struct ao *ao);
 void wasapi_thread_uninit(struct ao *ao);
 
-HRESULT wasapi_setup_proxies(wasapi_state *state);
+void wasapi_receive_proxies(wasapi_state *state);
 void wasapi_release_proxies(wasapi_state *state);
 
 #endif

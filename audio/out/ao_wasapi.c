@@ -290,7 +290,7 @@ static int init(struct ao *ao)
         return -1;
     }
 
-    wasapi_setup_proxies(state);
+    wasapi_receive_proxies(state);
     MP_DBG(ao, "Init wasapi done\n");
     return 0;
 }
