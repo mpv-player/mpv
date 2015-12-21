@@ -500,7 +500,7 @@ int stream_fill_buffer(stream_t *s)
 }
 
 // Read between 1..buf_size bytes of data, return how much data has been read.
-// Return 0 on EOF, error, of if buf_size was 0.
+// Return 0 on EOF, error, or if buf_size was 0.
 int stream_read_partial(stream_t *s, char *buf, int buf_size)
 {
     assert(s->buf_pos <= s->buf_len);
