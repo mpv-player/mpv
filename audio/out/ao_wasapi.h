@@ -103,7 +103,6 @@ typedef struct wasapi_state {
 
     /* format info */
     WAVEFORMATEXTENSIBLE format;
-    size_t buffer_block_size; /* Size of each block in bytes */
     UINT32 bufferFrameCount; /* wasapi buffer block size, number of frames, frame size at format.nBlockAlign */
 
     change_notify change;

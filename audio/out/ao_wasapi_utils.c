@@ -694,9 +694,6 @@ reinit:
     EXIT_ON_ERROR(hr);
 
     ao->device_buffer = state->bufferFrameCount;
-    state->buffer_block_size = state->format.Format.nChannels *
-                               state->format.Format.wBitsPerSample / 8 *
-                               state->bufferFrameCount;
     bufferDuration =
         (REFERENCE_TIME) ((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
                            state->bufferFrameCount) + 0.5);
@@ -714,9 +711,6 @@ reinit:
         MP_WARN(state, "Failed to set AV thread to Pro Audio: %s\n",
                 mp_LastError_to_str());
     }
-
-    MP_VERBOSE(state, "Format fixed. Using %lld byte buffer block size\n",
-               (long long) state->buffer_block_size);
 
     return S_OK;
 exit_label:
