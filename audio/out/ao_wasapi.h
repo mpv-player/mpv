@@ -73,7 +73,6 @@ typedef struct wasapi_state {
     IAudioClock *pAudioClock;
     atomic_ullong sample_count;  // samples per channel written by GetBuffer
     UINT64 clock_frequency;      // scale for position returned by GetPosition
-    LARGE_INTEGER qpc_frequency; // frequency of Windows' high resolution timer
 
     // WASAPI control (handles owned by audio thread but used by main thread)
     IAudioSessionControl *pSessionControl; // setting the stream title

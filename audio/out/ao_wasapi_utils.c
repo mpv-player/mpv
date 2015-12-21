@@ -589,16 +589,15 @@ static HRESULT init_clock(struct wasapi_state *state) {
                                          &IID_IAudioClock,
                                          (void **)&state->pAudioClock);
     EXIT_ON_ERROR(hr);
+
     hr = IAudioClock_GetFrequency(state->pAudioClock, &state->clock_frequency);
     EXIT_ON_ERROR(hr);
-
-    QueryPerformanceFrequency(&state->qpc_frequency);
-
-    atomic_store(&state->sample_count, 0);
 
     MP_VERBOSE(state,
                "IAudioClock::GetFrequency gave a frequency of %"PRIu64".\n",
                (uint64_t) state->clock_frequency);
+
+    atomic_store(&state->sample_count, 0);
 
     return S_OK;
 exit_label:

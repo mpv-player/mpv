@@ -35,10 +35,9 @@
 
 static HRESULT get_device_delay(struct wasapi_state *state, double *delay) {
     UINT64 sample_count = atomic_load(&state->sample_count);
-    UINT64 position, qpc_position;
-    HRESULT hr;
+    UINT64 position;
 
-    hr = IAudioClock_GetPosition(state->pAudioClock, &position, &qpc_position);
+    HRESULT hr = IAudioClock_GetPosition(state->pAudioClock, &position, NULL);
     // GetPosition succeeded, but the result may be
     // inaccurate due to the length of the call
     // http://msdn.microsoft.com/en-us/library/windows/desktop/dd370889%28v=vs.85%29.aspx
@@ -48,21 +47,10 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay) {
     }
     EXIT_ON_ERROR(hr);
 
-    LARGE_INTEGER qpc_count;
-    QueryPerformanceCounter(&qpc_count);
-    double qpc_diff = (qpc_count.QuadPart * 1e7 / state->qpc_frequency.QuadPart)
-                      - qpc_position;
+    *delay = sample_count / (double)state->format.Format.nSamplesPerSec
+             - (position / (double)state->clock_frequency);
 
-    position += state->clock_frequency * (uint64_t) (qpc_diff / 1e7);
-
-    // convert position to the same base as sample_count
-    position = position * state->format.Format.nSamplesPerSec
-               / state->clock_frequency;
-
-    double diff = sample_count - position;
-    *delay = diff / state->format.Format.nSamplesPerSec;
-
-    MP_TRACE(state, "Device delay: %g samples (%g ms)\n", diff, *delay * 1000);
+    MP_TRACE(state, "Device delay: %g s\n", *delay);
 
     return S_OK;
 exit_label:
@@ -86,9 +74,12 @@ static void thread_feed(struct ao *ao)
         MP_TRACE(ao, "Frame to fill: %"PRIu32". Padding: %"PRIu32"\n",
                  frame_count, padding);
     }
+
     double delay;
     hr = get_device_delay(state, &delay);
     EXIT_ON_ERROR(hr);
+    // add buffer delay
+    delay += frame_count / (double)state->format.Format.nSamplesPerSec;
 
     BYTE *pData;
     hr = IAudioRenderClient_GetBuffer(state->pRenderClient,
@@ -97,9 +88,8 @@ static void thread_feed(struct ao *ao)
 
     BYTE *data[1] = {pData};
 
-    ao_read_data(ao, (void**)data, frame_count, (int64_t) (
-                     mp_time_us() + delay * 1e6 +
-                     frame_count * 1e6 / state->format.Format.nSamplesPerSec));
+    ao_read_data(ao, (void **)data, frame_count,
+                 (int64_t)(mp_time_us() + delay * 1e6 + 0.5));
 
     hr = IAudioRenderClient_ReleaseBuffer(state->pRenderClient,
                                           frame_count, 0);
