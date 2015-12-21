@@ -607,28 +607,33 @@ exit_label:
     return hr;
 }
 
-static HRESULT init_session_display(struct wasapi_state *state) {
-    wchar_t path[MAX_PATH+12] = {0};
-
+static void init_session_display(struct wasapi_state *state) {
     HRESULT hr = IAudioClient_GetService(state->pAudioClient,
                                          &IID_IAudioSessionControl,
                                          (void **)&state->pSessionControl);
     EXIT_ON_ERROR(hr);
 
+    wchar_t path[MAX_PATH+12] = {0};
     GetModuleFileNameW(NULL, path, MAX_PATH);
     lstrcatW(path, L",-IDI_ICON1");
+    hr = IAudioSessionControl_SetIconPath(state->pSessionControl, path, NULL);
+    if (FAILED(hr)) {
+        // don't goto exit_label here since SetDisplayName might still work
+        MP_WARN(state, "Error setting audio session icon: %s\n",
+                mp_HRESULT_to_str(hr));
+    }
 
     hr = IAudioSessionControl_SetDisplayName(state->pSessionControl,
                                              MIXER_DEFAULT_LABEL, NULL);
     EXIT_ON_ERROR(hr);
-    hr = IAudioSessionControl_SetIconPath(state->pSessionControl, path, NULL);
-    EXIT_ON_ERROR(hr);
-
-    return S_OK;
+    return;
 exit_label:
+    // if we got here then the session control is useless - release it
+    SAFE_RELEASE(state->pSessionControl,
+                 IAudioSessionControl_Release(state->pSessionControl));
     MP_WARN(state, "Error setting audio session display name: %s\n",
             mp_HRESULT_to_str(hr));
-    return S_OK; // No reason to abort initialization.
+    return;
 }
 
 static HRESULT fix_format(struct ao *ao)
@@ -719,8 +724,7 @@ reinit:
     hr = init_clock(state);
     EXIT_ON_ERROR(hr);
 
-    hr = init_session_display(state);
-    EXIT_ON_ERROR(hr);
+    init_session_display(state);
 
     state->hTask = AvSetMmThreadCharacteristics(L"Pro Audio", &(DWORD){0});
     if (!state->hTask) {
