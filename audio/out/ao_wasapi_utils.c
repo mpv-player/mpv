@@ -1006,28 +1006,27 @@ exit_label:
     return hr;
 }
 
-HRESULT wasapi_setup_proxies(struct wasapi_state *state) {
-    HRESULT hr;
-
-#define UNMARSHAL(type, to, from) do {                                    \
-    hr = CoGetInterfaceAndReleaseStream((from), &(type), (void **)&(to)); \
-    (from) = NULL;                                                        \
-    EXIT_ON_ERROR(hr);                                                    \
-} while (0)
-
-    UNMARSHAL(IID_ISimpleAudioVolume,   state->pAudioVolumeProxy,
-              state->sAudioVolume);
-    UNMARSHAL(IID_IAudioEndpointVolume, state->pEndpointVolumeProxy,
-              state->sEndpointVolume);
-    UNMARSHAL(IID_IAudioSessionControl, state->pSessionControlProxy,
-              state->sSessionControl);
-
-#undef UNMARSHAL
-
-    return S_OK;
+static void *unmarshal(struct wasapi_state *state, REFIID type, IStream **from)
+{
+    if (!*from)
+        return NULL;
+    void *to_proxy = NULL;
+    HRESULT hr = CoGetInterfaceAndReleaseStream(*from, type, &to_proxy);
+    *from = NULL; // the stream is released even on failure
+    EXIT_ON_ERROR(hr);
+    return to_proxy;
 exit_label:
-    MP_ERR(state, "Error reading COM proxy: %s\n", mp_HRESULT_to_str(hr));
-    return hr;
+    MP_WARN(state, "Error reading COM proxy: %s\n", mp_HRESULT_to_str(hr));
+    return to_proxy;
+}
+
+void wasapi_receive_proxies(struct wasapi_state *state) {
+    state->pAudioVolumeProxy    = unmarshal(state, &IID_ISimpleAudioVolume,
+                                            &state->sAudioVolume);
+    state->pEndpointVolumeProxy = unmarshal(state, &IID_IAudioEndpointVolume,
+                                            &state->sEndpointVolume);
+    state->pSessionControlProxy = unmarshal(state, &IID_IAudioSessionControl,
+                                            &state->sSessionControl);
 }
 
 void wasapi_release_proxies(wasapi_state *state) {
@@ -1039,38 +1038,50 @@ void wasapi_release_proxies(wasapi_state *state) {
                  IAudioSessionControl_Release(state->pSessionControlProxy));
 }
 
-static HRESULT create_proxies(struct wasapi_state *state) {
-    HRESULT hr;
+// Must call CoReleaseMarshalData to decrement marshalled object's reference
+// count.
+#define SAFE_RELEASE_INTERFACE_STREAM(stream) do { \
+        if ((stream) != NULL) {                    \
+            CoReleaseMarshalData((stream));        \
+            IStream_Release((stream));             \
+            (stream) = NULL;                       \
+        }                                          \
+    } while(0)
 
-#define MARSHAL(type, to, from) do {                               \
-    hr = CreateStreamOnHGlobal(NULL, TRUE, &(to));                 \
-    EXIT_ON_ERROR(hr);                                             \
-    hr = CoMarshalInterThreadInterfaceInStream(&(type),            \
-                                               (IUnknown *)(from), \
-                                               &(to));             \
-    EXIT_ON_ERROR(hr);                                             \
-} while (0)
-
-    MARSHAL(IID_ISimpleAudioVolume,   state->sAudioVolume,
-            state->pAudioVolume);
-    MARSHAL(IID_IAudioEndpointVolume, state->sEndpointVolume,
-            state->pEndpointVolume);
-    MARSHAL(IID_IAudioSessionControl, state->sSessionControl,
-            state->pSessionControl);
-
-    return S_OK;
+static IStream *marshal(struct wasapi_state *state,
+                         REFIID type, void *from_obj)
+{
+    if (!from_obj)
+        return NULL;
+    IStream *to;
+    HRESULT hr = CreateStreamOnHGlobal(NULL, TRUE, &to);
+    EXIT_ON_ERROR(hr);
+    hr = CoMarshalInterThreadInterfaceInStream(type, (IUnknown *)from_obj, &to);
+    EXIT_ON_ERROR(hr);
+    return to;
 exit_label:
-    MP_ERR(state, "Error creating COM proxy: %s\n", mp_HRESULT_to_str(hr));
-    return hr;
+    SAFE_RELEASE_INTERFACE_STREAM(to);
+    MP_WARN(state, "Error creating COM proxy stream: %s\n",
+            mp_HRESULT_to_str(hr));
+    return to;
 }
 
-static void destroy_proxies(struct wasapi_state *state) {
-    SAFE_RELEASE(state->sAudioVolume,
-                 IStream_Release(state->sAudioVolume));
-    SAFE_RELEASE(state->sEndpointVolume,
-                 IStream_Release(state->sEndpointVolume));
-    SAFE_RELEASE(state->sSessionControl,
-                 IStream_Release(state->sSessionControl));
+static void create_proxy_streams(struct wasapi_state *state) {
+    state->sAudioVolume    = marshal(state, &IID_ISimpleAudioVolume,
+                                     state->pAudioVolume);
+    state->sEndpointVolume = marshal(state, &IID_IAudioEndpointVolume,
+                                     state->pEndpointVolume);
+    state->sSessionControl = marshal(state, &IID_IAudioSessionControl,
+                                     state->pSessionControl);
+}
+
+static void destroy_proxy_streams(struct wasapi_state *state) {
+    // This is only to handle error conditions.
+    // During normal operation, these will already have been released by
+    // unmarshaling.
+    SAFE_RELEASE_INTERFACE_STREAM(state->sAudioVolume);
+    SAFE_RELEASE_INTERFACE_STREAM(state->sEndpointVolume);
+    SAFE_RELEASE_INTERFACE_STREAM(state->sSessionControl);
 }
 
 void wasapi_dispatch(struct ao *ao)
@@ -1152,8 +1163,7 @@ retry: ;
     EXIT_ON_ERROR(hr);
 
     MP_DBG(ao, "Creating proxies\n");
-    hr = create_proxies(state);
-    EXIT_ON_ERROR(hr);
+    create_proxy_streams(state);
 
     wasapi_change_init(ao, false);
 
@@ -1174,7 +1184,7 @@ void wasapi_thread_uninit(struct ao *ao)
         IAudioClient_Stop(state->pAudioClient);
 
     wasapi_change_uninit(ao);
-    destroy_proxies(state);
+    destroy_proxy_streams(state);
 
     SAFE_RELEASE(state->pRenderClient,   IAudioRenderClient_Release(state->pRenderClient));
     SAFE_RELEASE(state->pAudioClock,     IAudioClock_Release(state->pAudioClock));
