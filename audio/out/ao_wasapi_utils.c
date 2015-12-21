@@ -97,8 +97,8 @@ static const GUID *format_to_subtype(int format)
     return &KSDATAFORMAT_SUBTYPE_PCM;
 }
 
-// "solve" the under-determined inverse of format_to_subtype by
-// assuming the input subtype is "special" (i.e. IEC61937)
+// "solve" the under-determined inverse of format_to_subtype by assuming the
+// input subtype is "special" (i.e. IEC61937)
 static int special_subtype_to_format(const GUID *subtype) {
     for (int i = 0; wasapi_fmt_table[i].format; i++) {
         if (IsEqualGUID(subtype, wasapi_fmt_table[i].subtype))
@@ -123,7 +123,8 @@ char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey)
 {
     buf = mp_GUID_to_str_buf(buf, buf_size, &pkey->fmtid);
     size_t guid_len = strnlen(buf, buf_size);
-    snprintf(buf + guid_len, buf_size - guid_len, ",%"PRIu32, (uint32_t) pkey->pid);
+    snprintf(buf + guid_len, buf_size - guid_len, ",%"PRIu32,
+             (uint32_t) pkey->pid);
     return buf;
 }
 
@@ -204,15 +205,15 @@ static void set_waveformat(WAVEFORMATEXTENSIBLE *wformat,
     wformat->Format.cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX);
 
     wformat->SubFormat                   = *format_to_subtype(format);
-    wformat->Samples.wValidBitsPerSample = valid_bits ? valid_bits : wformat->Format.wBitsPerSample;
+    wformat->Samples.wValidBitsPerSample =
+        valid_bits ? valid_bits : wformat->Format.wBitsPerSample;
     wformat->dwChannelMask               = mp_chmap_to_waveext(channels);
     update_waveformat_datarate(wformat);
 }
 
-// This implicitly transforms all pcm formats to:
-// interleaved / signed (except 8-bit is unsigned) / waveext channel order.
-// "Special" formats should be exempt as they should already
-// satisfy these properties.
+// This implicitly transforms all pcm formats to: interleaved / signed (except
+// 8-bit is unsigned) / waveext channel order.  "Special" formats should be
+// exempt as they should already satisfy these properties.
 static void set_waveformat_with_ao(WAVEFORMATEXTENSIBLE *wformat, struct ao *ao)
 {
     struct mp_chmap channels = ao->channels;
@@ -257,7 +258,8 @@ static int format_from_waveformat(WAVEFORMATEX *wf)
         WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
         if (IsEqualGUID(&wformat->SubFormat, &KSDATAFORMAT_SUBTYPE_PCM)) {
             format = wf->wBitsPerSample == 8 ? AF_FORMAT_U8 : AF_FORMAT_S32;
-        } else if (IsEqualGUID(&wformat->SubFormat, &KSDATAFORMAT_SUBTYPE_IEEE_FLOAT)) {
+        } else if (IsEqualGUID(&wformat->SubFormat,
+                               &KSDATAFORMAT_SUBTYPE_IEEE_FLOAT)) {
             format = AF_FORMAT_FLOAT;
         } else {
             format = special_subtype_to_format(&wformat->SubFormat);
@@ -275,16 +277,17 @@ static int format_from_waveformat(WAVEFORMATEX *wf)
     }
     // https://msdn.microsoft.com/en-us/library/windows/hardware/ff538802%28v=vs.85%29.aspx:
     // Since mpv doesn't have the notion of "valid bits", we just specify a
-    // format with the container size. The least significant, "invalid"
-    // bits will be excess precision ignored by wasapi.
-    // The change_bytes operations should be a no-op for properly
-    // configured "special" formats, otherwise it will return 0.
+    // format with the container size. The least significant, "invalid" bits
+    // will be excess precision ignored by wasapi.  The change_bytes operations
+    // should be a no-op for properly configured "special" formats, otherwise it
+    // will return 0.
     if (wf->wBitsPerSample % 8)
         return 0;
     return af_fmt_change_bytes(format, wf->wBitsPerSample / 8);
 }
 
-static bool chmap_from_waveformat(struct mp_chmap *channels, const WAVEFORMATEX *wf)
+static bool chmap_from_waveformat(struct mp_chmap *channels,
+                                  const WAVEFORMATEX *wf)
 {
     if (wf->wFormatTag == WAVE_FORMAT_EXTENSIBLE) {
         WAVEFORMATEXTENSIBLE *wformat = (WAVEFORMATEXTENSIBLE *)wf;
@@ -312,7 +315,8 @@ static char *waveformat_to_str_buf(char *buf, size_t buf_size, WAVEFORMATEX *wf)
         snprintf(validstr, sizeof(validstr), " (%u valid)", valid_bits);
 
     snprintf(buf, buf_size, "%s %s%s @ %uhz",
-             mp_chmap_to_str(&channels), af_fmt_to_str(format_from_waveformat(wf)),
+             mp_chmap_to_str(&channels),
+             af_fmt_to_str(format_from_waveformat(wf)),
              validstr, (unsigned) wf->nSamplesPerSec);
     return buf;
 }
@@ -327,7 +331,8 @@ static void waveformat_copy(WAVEFORMATEXTENSIBLE* dst, WAVEFORMATEX* src)
     }
 }
 
-static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf, AUDCLNT_SHAREMODE share_mode)
+static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf,
+                          AUDCLNT_SHAREMODE share_mode)
 {
     struct wasapi_state *state = ao->priv;
     int format = format_from_waveformat(wf);
@@ -337,7 +342,8 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf, AUDCLNT_SHAREMODE sha
         return false;
     }
 
-    // Do not touch the ao for passthrough, just assume that we set WAVEFORMATEX correctly.
+    // Do not touch the ao for passthrough, just assume that we set WAVEFORMATEX
+    // correctly.
     if (af_fmt_is_pcm(format)) {
         struct mp_chmap channels;
         if (!chmap_from_waveformat(&channels, wf)) {
@@ -357,7 +363,8 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf, AUDCLNT_SHAREMODE sha
 static bool try_format_exclusive(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
 {
     struct wasapi_state *state = ao->priv;
-    MP_VERBOSE(ao, "Trying %s (exclusive)\n", waveformat_to_str(&wformat->Format));
+    MP_VERBOSE(ao, "Trying %s (exclusive)\n",
+               waveformat_to_str(&wformat->Format));
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 AUDCLNT_SHAREMODE_EXCLUSIVE,
                                                 &wformat->Format, NULL);
@@ -470,7 +477,8 @@ static bool search_channels(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
         if (!wformat->Format.nSamplesPerSec) {
             if (search_samplerates(ao, wformat, &entry)) {
                 mp_chmap_sel_add_map(&chmap_sel, &entry);
-                MP_VERBOSE(ao, "%s is supported\n", waveformat_to_str(&wformat->Format));
+                MP_VERBOSE(ao, "%s is supported\n",
+                           waveformat_to_str(&wformat->Format));
             }
         } else {
             change_waveformat_channels(wformat, &entry);
@@ -494,8 +502,8 @@ static bool find_formats_exclusive(struct ao *ao, bool do_search)
     WAVEFORMATEXTENSIBLE wformat;
     set_waveformat_with_ao(&wformat, ao);
 
-    // Try the requested format as is. If that doesn't work, and the
-    // do_search argument is set, do the pcm format search.
+    // Try the requested format as is. If that doesn't work, and the do_search
+    // argument is set, do the pcm format search.
     if (!try_format_exclusive_with_spdif_fallback(ao, &wformat) &&
         (!do_search || !search_channels(ao, &wformat)))
         return false;
@@ -550,7 +558,8 @@ static bool find_formats_shared(struct ao *ao)
                af_fmt_to_str(ao->format), ao->samplerate);
     return true;
 exit_label:
-    MP_ERR(state, "Error finding shared mode format: %s\n", mp_HRESULT_to_str(hr));
+    MP_ERR(state, "Error finding shared mode format: %s\n",
+           mp_HRESULT_to_str(hr));
     return false;
 }
 
@@ -587,7 +596,8 @@ static HRESULT init_clock(struct wasapi_state *state) {
 
     atomic_store(&state->sample_count, 0);
 
-    MP_VERBOSE(state, "IAudioClock::GetFrequency gave a frequency of %"PRIu64".\n",
+    MP_VERBOSE(state,
+               "IAudioClock::GetFrequency gave a frequency of %"PRIu64".\n",
                (uint64_t) state->clock_frequency);
 
     return S_OK;
@@ -608,7 +618,8 @@ static HRESULT init_session_display(struct wasapi_state *state) {
     GetModuleFileNameW(NULL, path, MAX_PATH);
     lstrcatW(path, L",-IDI_ICON1");
 
-    hr = IAudioSessionControl_SetDisplayName(state->pSessionControl, MIXER_DEFAULT_LABEL, NULL);
+    hr = IAudioSessionControl_SetDisplayName(state->pSessionControl,
+                                             MIXER_DEFAULT_LABEL, NULL);
     EXIT_ON_ERROR(hr);
     hr = IAudioSessionControl_SetIconPath(state->pSessionControl, path, NULL);
     EXIT_ON_ERROR(hr);
@@ -626,15 +637,18 @@ static HRESULT fix_format(struct ao *ao)
 
     REFERENCE_TIME devicePeriod, bufferDuration, bufferPeriod;
     MP_DBG(state, "IAudioClient::GetDevicePeriod\n");
-    HRESULT hr = IAudioClient_GetDevicePeriod(state->pAudioClient,&devicePeriod, NULL);
-    MP_VERBOSE(state, "Device period: %.2g ms\n", (double) devicePeriod / 10000.0 );
+    HRESULT hr = IAudioClient_GetDevicePeriod(state->pAudioClient,&devicePeriod,
+                                              NULL);
+    MP_VERBOSE(state, "Device period: %.2g ms\n",
+               (double) devicePeriod / 10000.0 );
 
-    /* integer multiple of device period close to 50ms */
-    bufferPeriod = bufferDuration = ceil(50.0 * 10000.0 / devicePeriod) * devicePeriod;
+    // integer multiple of device period close to 50ms
+    bufferPeriod = bufferDuration =
+                   ceil(50.0 * 10000.0 / devicePeriod) * devicePeriod;
 
-    /* handle unsupported buffer size */
-    /* hopefully this shouldn't happen because of the above integer device period */
-    /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd370875%28v=vs.85%29.aspx */
+    // handle unsupported buffer size hopefully this shouldn't happen because of
+    // the above integer device period
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/dd370875%28v=vs.85%29.aspx
     int retries=0;
 reinit:
     if (state->share_mode == AUDCLNT_SHAREMODE_SHARED)
@@ -648,20 +662,22 @@ reinit:
                                  bufferPeriod,
                                  &(state->format.Format),
                                  NULL);
-    /* something about buffer sizes on Win7 */
+    // something about buffer sizes on Win7
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
         if (retries > 0) {
             EXIT_ON_ERROR(hr);
         } else {
             retries ++;
         }
-        MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s, used %lld * 100ns\n",
+        MP_VERBOSE(state, "IAudioClient::Initialize negotiation failed with %s,"
+                   "used %lld * 100ns\n",
                    mp_HRESULT_to_str(hr), bufferDuration);
 
-        IAudioClient_GetBufferSize(state->pAudioClient, &state->bufferFrameCount);
-        bufferPeriod = bufferDuration =
-            (REFERENCE_TIME) ((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
-                               state->bufferFrameCount) + 0.5);
+        IAudioClient_GetBufferSize(state->pAudioClient,
+                                   &state->bufferFrameCount);
+        bufferPeriod = bufferDuration = (REFERENCE_TIME) (0.5 +
+            (10000.0 * 1000 / state->format.Format.nSamplesPerSec
+             * state->bufferFrameCount));
 
         IAudioClient_Release(state->pAudioClient);
         state->pAudioClient = NULL;
@@ -694,9 +710,9 @@ reinit:
     EXIT_ON_ERROR(hr);
 
     ao->device_buffer = state->bufferFrameCount;
-    bufferDuration =
-        (REFERENCE_TIME) ((10000.0 * 1000 / state->format.Format.nSamplesPerSec *
-                           state->bufferFrameCount) + 0.5);
+    bufferDuration = (REFERENCE_TIME) (0.5 +
+        (10000.0 * 1000 / state->format.Format.nSamplesPerSec
+         * state->bufferFrameCount));
     MP_VERBOSE(state, "Buffer frame count: %"PRIu32" (%.2g ms)\n",
                state->bufferFrameCount, (double) bufferDuration / 10000.0 );
 
@@ -731,7 +747,8 @@ static char* get_device_id(IMMDevice *pDevice) {
     idstr = mp_to_utf8(NULL, devid);
 
     if (strstr(idstr, "{0.0.0.00000000}.")) {
-        char *stripped = talloc_strdup(NULL, idstr + strlen("{0.0.0.00000000}."));
+        char *stripped =
+            talloc_strdup(NULL, idstr + strlen("{0.0.0.00000000}."));
         talloc_free(idstr);
         idstr = stripped;
     }
@@ -754,7 +771,8 @@ static char* get_device_name(IMMDevice *pDevice) {
     PROPVARIANT devname;
     PropVariantInit(&devname);
 
-    hr = IPropertyStore_GetValue(pProps, &mp_PKEY_Device_FriendlyName, &devname);
+    hr = IPropertyStore_GetValue(pProps, &mp_PKEY_Device_FriendlyName,
+                                 &devname);
     EXIT_ON_ERROR(hr);
 
     namestr = mp_to_utf8(NULL, devname.pwszVal);
@@ -816,8 +834,9 @@ void wasapi_list_devs(struct ao *ao, struct ao_device_list *list)
     IMMDevice *pDevice = NULL;
     char *name = NULL, *id = NULL;
 
-    HRESULT hr = IMMDeviceEnumerator_EnumAudioEndpoints(state->pEnumerator, eRender,
-                                                        DEVICE_STATE_ACTIVE, &pDevices);
+    HRESULT hr =
+        IMMDeviceEnumerator_EnumAudioEndpoints(state->pEnumerator, eRender,
+                                               DEVICE_STATE_ACTIVE, &pDevices);
     EXIT_ON_ERROR(hr);
 
     int count;
@@ -856,12 +875,14 @@ exit_label:
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
 }
 
-static HRESULT load_default_device(struct ao *ao, IMMDeviceEnumerator* pEnumerator,
+static HRESULT load_default_device(struct ao *ao,
+                                   IMMDeviceEnumerator* pEnumerator,
                                    IMMDevice **ppDevice)
 {
-    HRESULT hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
-                                                             eRender, eMultimedia,
-                                                             ppDevice);
+    HRESULT hr =
+        IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
+                                                    eRender, eMultimedia,
+                                                    ppDevice);
     EXIT_ON_ERROR(hr);
 
     char *id = get_device_id(*ppDevice);
@@ -874,7 +895,8 @@ exit_label:
     return hr;
 }
 
-static HRESULT find_and_load_device(struct ao *ao, IMMDeviceEnumerator* pEnumerator,
+static HRESULT find_and_load_device(struct ao *ao,
+                                    IMMDeviceEnumerator* pEnumerator,
                                     IMMDevice **ppDevice, char *search)
 {
     HRESULT hr;
@@ -893,7 +915,8 @@ static HRESULT find_and_load_device(struct ao *ao, IMMDeviceEnumerator* pEnumera
 
     if (devid == NULL) {
         hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
-                                                    DEVICE_STATE_ACTIVE, &pDevices);
+                                                    DEVICE_STATE_ACTIVE,
+                                                    &pDevices);
         EXIT_ON_ERROR(hr);
 
         int count;
@@ -913,7 +936,8 @@ static HRESULT find_and_load_device(struct ao *ao, IMMDeviceEnumerator* pEnumera
         }
     } else {
         hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
-                                                    DEVICE_STATE_ACTIVE|DEVICE_STATE_UNPLUGGED,
+                                                    DEVICE_STATE_ACTIVE
+                                                    | DEVICE_STATE_UNPLUGGED,
                                                     &pDevices);
         EXIT_ON_ERROR(hr);
 
@@ -991,9 +1015,12 @@ HRESULT wasapi_setup_proxies(struct wasapi_state *state) {
     EXIT_ON_ERROR(hr);                                                    \
 } while (0)
 
-    UNMARSHAL(IID_ISimpleAudioVolume,   state->pAudioVolumeProxy,    state->sAudioVolume);
-    UNMARSHAL(IID_IAudioEndpointVolume, state->pEndpointVolumeProxy, state->sEndpointVolume);
-    UNMARSHAL(IID_IAudioSessionControl, state->pSessionControlProxy, state->sSessionControl);
+    UNMARSHAL(IID_ISimpleAudioVolume,   state->pAudioVolumeProxy,
+              state->sAudioVolume);
+    UNMARSHAL(IID_IAudioEndpointVolume, state->pEndpointVolumeProxy,
+              state->sEndpointVolume);
+    UNMARSHAL(IID_IAudioSessionControl, state->pSessionControlProxy,
+              state->sSessionControl);
 
 #undef UNMARSHAL
 
@@ -1004,9 +1031,12 @@ exit_label:
 }
 
 void wasapi_release_proxies(wasapi_state *state) {
-    SAFE_RELEASE(state->pAudioVolumeProxy,    ISimpleAudioVolume_Release(state->pAudioVolumeProxy));
-    SAFE_RELEASE(state->pEndpointVolumeProxy, IAudioEndpointVolume_Release(state->pEndpointVolumeProxy));
-    SAFE_RELEASE(state->pSessionControlProxy, IAudioSessionControl_Release(state->pSessionControlProxy));
+    SAFE_RELEASE(state->pAudioVolumeProxy,
+                 ISimpleAudioVolume_Release(state->pAudioVolumeProxy));
+    SAFE_RELEASE(state->pEndpointVolumeProxy,
+                 IAudioEndpointVolume_Release(state->pEndpointVolumeProxy));
+    SAFE_RELEASE(state->pSessionControlProxy,
+                 IAudioSessionControl_Release(state->pSessionControlProxy));
 }
 
 static HRESULT create_proxies(struct wasapi_state *state) {
@@ -1021,9 +1051,12 @@ static HRESULT create_proxies(struct wasapi_state *state) {
     EXIT_ON_ERROR(hr);                                             \
 } while (0)
 
-    MARSHAL(IID_ISimpleAudioVolume,   state->sAudioVolume,    state->pAudioVolume);
-    MARSHAL(IID_IAudioEndpointVolume, state->sEndpointVolume, state->pEndpointVolume);
-    MARSHAL(IID_IAudioSessionControl, state->sSessionControl, state->pSessionControl);
+    MARSHAL(IID_ISimpleAudioVolume,   state->sAudioVolume,
+            state->pAudioVolume);
+    MARSHAL(IID_IAudioEndpointVolume, state->sEndpointVolume,
+            state->pEndpointVolume);
+    MARSHAL(IID_IAudioSessionControl, state->sSessionControl,
+            state->pSessionControl);
 
     return S_OK;
 exit_label:
@@ -1032,15 +1065,18 @@ exit_label:
 }
 
 static void destroy_proxies(struct wasapi_state *state) {
-    SAFE_RELEASE(state->sAudioVolume,    IStream_Release(state->sAudioVolume));
-    SAFE_RELEASE(state->sEndpointVolume, IStream_Release(state->sEndpointVolume));
-    SAFE_RELEASE(state->sSessionControl, IStream_Release(state->sSessionControl));
+    SAFE_RELEASE(state->sAudioVolume,
+                 IStream_Release(state->sAudioVolume));
+    SAFE_RELEASE(state->sEndpointVolume,
+                 IStream_Release(state->sEndpointVolume));
+    SAFE_RELEASE(state->sSessionControl,
+                 IStream_Release(state->sSessionControl));
 }
 
 void wasapi_dispatch(struct ao *ao)
 {
     MP_DBG(ao, "Dispatch\n");
-    /* dispatch any possible pending messages */
+    // dispatch any possible pending messages
     MSG msg;
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         DispatchMessage(&msg);
@@ -1054,7 +1090,8 @@ HRESULT wasapi_thread_init(struct ao *ao)
 retry: ;
 
     HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                                  &IID_IMMDeviceEnumerator, (void **)&state->pEnumerator);
+                                  &IID_IMMDeviceEnumerator,
+                                  (void **)&state->pEnumerator);
     EXIT_ON_ERROR(hr);
 
     char *device = state->opt_device;
@@ -1065,7 +1102,8 @@ retry: ;
     if (!device || !device[0]) {
         hr = load_default_device(ao, state->pEnumerator, &state->pDevice);
     } else {
-        hr = find_and_load_device(ao, state->pEnumerator, &state->pDevice, device);
+        hr = find_and_load_device(ao, state->pEnumerator, &state->pDevice,
+                                  device);
     }
     EXIT_ON_ERROR(hr);
 
@@ -1075,7 +1113,8 @@ retry: ;
 
     MP_DBG(ao, "Activating pAudioClient interface\n");
     hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
-                                     CLSCTX_ALL, NULL, (void **)&state->pAudioClient);
+                                     CLSCTX_ALL, NULL,
+                                     (void **)&state->pAudioClient);
     EXIT_ON_ERROR(hr);
 
     MP_DBG(ao, "Activating pEndpointVolume interface\n");

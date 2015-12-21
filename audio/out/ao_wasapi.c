@@ -39,8 +39,9 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay) {
     HRESULT hr;
 
     hr = IAudioClock_GetPosition(state->pAudioClock, &position, &qpc_position);
-    /* GetPosition succeeded, but the result may be inaccurate due to the length of the call */
-    /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd370889%28v=vs.85%29.aspx */
+    // GetPosition succeeded, but the result may be
+    // inaccurate due to the length of the call
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/dd370889%28v=vs.85%29.aspx
     if (hr == S_FALSE) {
         MP_DBG(state, "Possibly inaccurate device position.\n");
         hr = S_OK;
@@ -49,12 +50,14 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay) {
 
     LARGE_INTEGER qpc_count;
     QueryPerformanceCounter(&qpc_count);
-    double qpc_diff = (qpc_count.QuadPart * 1e7 / state->qpc_frequency.QuadPart) - qpc_position;
+    double qpc_diff = (qpc_count.QuadPart * 1e7 / state->qpc_frequency.QuadPart)
+                      - qpc_position;
 
     position += state->clock_frequency * (uint64_t) (qpc_diff / 1e7);
 
-    /* convert position to the same base as sample_count */
-    position = position * state->format.Format.nSamplesPerSec / state->clock_frequency;
+    // convert position to the same base as sample_count
+    position = position * state->format.Format.nSamplesPerSec
+               / state->clock_frequency;
 
     double diff = sample_count - position;
     *delay = diff / state->format.Format.nSamplesPerSec;
@@ -80,7 +83,8 @@ static void thread_feed(struct ao *ao)
         EXIT_ON_ERROR(hr);
 
         frame_count -= padding;
-        MP_TRACE(ao, "Frame to fill: %"PRIu32". Padding: %"PRIu32"\n", frame_count, padding);
+        MP_TRACE(ao, "Frame to fill: %"PRIu32". Padding: %"PRIu32"\n",
+                 frame_count, padding);
     }
     double delay;
     hr = get_device_delay(state, &delay);
@@ -124,17 +128,21 @@ static void thread_resume(struct ao *ao)
                mp_HRESULT_to_str(hr));
     }
 
-    /* Fill the buffer before starting, but only if there is no audio queued to play. */
-    /* This prevents overfilling the buffer, which leads to problems in exclusive mode */
+    // Fill the buffer before starting, but only if there is no audio queued to
+    // play.  This prevents overfilling the buffer, which leads to problems in
+    // exclusive mode
     if (padding < (UINT32) state->bufferFrameCount)
         thread_feed(ao);
 
     // start feeding next wakeup if something else hasn't been requested
     int expected = WASAPI_THREAD_RESUME;
-    atomic_compare_exchange_strong(&state->thread_state, &expected, WASAPI_THREAD_FEED);
+    atomic_compare_exchange_strong(&state->thread_state, &expected,
+                                   WASAPI_THREAD_FEED);
     hr = IAudioClient_Start(state->pAudioClient);
-    if (hr != S_OK)
-        MP_ERR(state, "IAudioClient_Start returned %s\n", mp_HRESULT_to_str(hr));
+    if (hr != S_OK) {
+        MP_ERR(state, "IAudioClient_Start returned %s\n",
+               mp_HRESULT_to_str(hr));
+    }
 
     return;
 }
@@ -145,11 +153,11 @@ static void thread_reset(struct ao *ao)
     HRESULT hr;
     MP_DBG(state, "Thread Reset\n");
     hr = IAudioClient_Stop(state->pAudioClient);
-    /* we may get S_FALSE if the stream is already stopped */
+    // we may get S_FALSE if the stream is already stopped
     if (hr != S_OK && hr != S_FALSE)
         MP_ERR(state, "IAudioClient_Stop returned: %s\n", mp_HRESULT_to_str(hr));
 
-    /* we may get S_FALSE if the stream is already reset */
+    // we may get S_FALSE if the stream is already reset
     hr = IAudioClient_Reset(state->pAudioClient);
     if (hr != S_OK && hr != S_FALSE)
         MP_ERR(state, "IAudioClient_Reset returned: %s\n", mp_HRESULT_to_str(hr));
@@ -157,7 +165,8 @@ static void thread_reset(struct ao *ao)
     atomic_store(&state->sample_count, 0);
     // start feeding next wakeup if something else hasn't been requested
     int expected = WASAPI_THREAD_RESET;
-    atomic_compare_exchange_strong(&state->thread_state, &expected, WASAPI_THREAD_FEED);
+    atomic_compare_exchange_strong(&state->thread_state, &expected,
+                                   WASAPI_THREAD_FEED);
     return;
 }
 
@@ -173,11 +182,12 @@ static DWORD __stdcall AudioThread(void *lpParameter)
         goto exit_label;
 
     MP_DBG(ao, "Entering dispatch loop\n");
-    while (true) { /* watch events */
+    while (true) { // watch events
         HANDLE events[] = {state->hWake};
-        switch (MsgWaitForMultipleObjects(MP_ARRAY_SIZE(events), events, FALSE, INFINITE,
+        switch (MsgWaitForMultipleObjects(MP_ARRAY_SIZE(events), events,
+                                          FALSE, INFINITE,
                                           QS_POSTMESSAGE | QS_SENDMESSAGE)) {
-        /* AudioThread wakeup */
+        // AudioThread wakeup
         case WAIT_OBJECT_0:
             switch (atomic_load(&state->thread_state)) {
             case WASAPI_THREAD_FEED:
@@ -198,7 +208,7 @@ static DWORD __stdcall AudioThread(void *lpParameter)
                 goto exit_label;
             }
             break;
-        /* messages to dispatch (COM marshalling) */
+        // messages to dispatch (COM marshalling)
         case (WAIT_OBJECT_0 + MP_ARRAY_SIZE(events)):
             wasapi_dispatch(ao);
             break;
@@ -215,7 +225,8 @@ exit_label:
     return 0;
 }
 
-static void set_thread_state(struct ao *ao, enum wasapi_thread_state thread_state)
+static void set_thread_state(struct ao *ao,
+                             enum wasapi_thread_state thread_state)
 {
     struct wasapi_state *state = ao->priv;
     atomic_store(&state->thread_state, thread_state);
@@ -230,7 +241,7 @@ static void uninit(struct ao *ao)
     if (state->hWake)
         set_thread_state(ao, WASAPI_THREAD_SHUTDOWN);
 
-    /* wait up to 10 seconds */
+    // wait up to 10 seconds
     if (state->hAudioThread &&
         WaitForSingleObject(state->hAudioThread, 10000) == WAIT_TIMEOUT)
     {
@@ -270,7 +281,7 @@ static int init(struct ao *ao)
         return -1;
     }
 
-    WaitForSingleObject(state->hInitDone, INFINITE); /* wait on init complete */
+    WaitForSingleObject(state->hInitDone, INFINITE); // wait on init complete
     SAFE_RELEASE(state->hInitDone,CloseHandle(state->hInitDone));
     if (state->init_ret != S_OK) {
         if (!ao->probing)
@@ -388,23 +399,21 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         if (!state->pSessionControlProxy)
             return CONTROL_FALSE;
 
-        MP_VERBOSE(state, "Updating stream title to \"%s\"\n", (char*)arg);
         wchar_t *title = mp_from_utf8(NULL, (char*)arg);
-
         wchar_t *tmp = NULL;
-
-        /* There is a weird race condition in the IAudioSessionControl itself --
-           it seems that *sometimes* the SetDisplayName does not take effect and it still shows
-           the old title. Use this loop to insist until it works. */
+        // There is a weird race condition in the IAudioSessionControl itself --
+        // it seems that *sometimes* the SetDisplayName does not take effect and
+        // it still shows the old title. Use this loop to insist until it works.
         do {
-            IAudioSessionControl_SetDisplayName(state->pSessionControlProxy, title, NULL);
+            IAudioSessionControl_SetDisplayName(state->pSessionControlProxy,
+                                                title, NULL);
 
             SAFE_RELEASE(tmp, CoTaskMemFree(tmp));
-            IAudioSessionControl_GetDisplayName(state->pSessionControlProxy, &tmp);
+            IAudioSessionControl_GetDisplayName(state->pSessionControlProxy,
+                                                &tmp);
         } while (lstrcmpW(title, tmp));
         SAFE_RELEASE(tmp, CoTaskMemFree(tmp));
         talloc_free(title);
-
         return CONTROL_OK;
     }
 
@@ -427,7 +436,8 @@ static void hotplug_uninit(struct ao *ao)
     MP_DBG(ao, "Hotplug uninit\n");
     struct wasapi_state *state = ao->priv;
     wasapi_change_uninit(ao);
-    SAFE_RELEASE(state->pEnumerator, IMMDeviceEnumerator_Release(state->pEnumerator));
+    SAFE_RELEASE(state->pEnumerator,
+                 IMMDeviceEnumerator_Release(state->pEnumerator));
     CoUninitialize();
 }
 
@@ -438,7 +448,8 @@ static int hotplug_init(struct ao *ao)
     state->log = ao->log;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                                  &IID_IMMDeviceEnumerator, (void **)&state->pEnumerator);
+                                  &IID_IMMDeviceEnumerator,
+                                  (void **)&state->pEnumerator);
     EXIT_ON_ERROR(hr);
     hr = wasapi_change_init(ao, true);
     EXIT_ON_ERROR(hr);
