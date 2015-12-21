@@ -636,6 +636,39 @@ exit_label:
     return;
 }
 
+static void init_volume_control(struct wasapi_state *state)
+{
+    HRESULT hr;
+    if (state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE) {
+        MP_DBG(state, "Activating pEndpointVolume interface\n");
+        hr = IMMDeviceActivator_Activate(state->pDevice,
+                                         &IID_IAudioEndpointVolume,
+                                         CLSCTX_ALL, NULL,
+                                         (void **)&state->pEndpointVolume);
+        EXIT_ON_ERROR(hr);
+
+        MP_DBG(state, "IAudioEndpointVolume::QueryHardwareSupport\n");
+        hr = IAudioEndpointVolume_QueryHardwareSupport(state->pEndpointVolume,
+                                                       &state->vol_hw_support);
+        EXIT_ON_ERROR(hr);
+    } else {
+        MP_DBG(state, "IAudioClient::Initialize pAudioVolume\n");
+        hr = IAudioClient_GetService(state->pAudioClient,
+                                     &IID_ISimpleAudioVolume,
+                                     (void **)&state->pAudioVolume);
+        EXIT_ON_ERROR(hr);
+    }
+    return;
+exit_label:
+    state->vol_hw_support = 0;
+    SAFE_RELEASE(state->pEndpointVolume,
+                 IAudioEndpointVolume_Release(state->pEndpointVolume));
+    SAFE_RELEASE(state->pAudioVolume,
+                 ISimpleAudioVolume_Release(state->pAudioVolume));
+    MP_WARN(state, "Error setting up volume control: %s\n",
+            mp_HRESULT_to_str(hr));
+}
+
 static HRESULT fix_format(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
@@ -699,12 +732,6 @@ reinit:
                                  (void **)&state->pRenderClient);
     EXIT_ON_ERROR(hr);
 
-    MP_DBG(state, "IAudioClient::Initialize pAudioVolume\n");
-    hr = IAudioClient_GetService(state->pAudioClient,
-                                 &IID_ISimpleAudioVolume,
-                                 (void **)&state->pAudioVolume);
-    EXIT_ON_ERROR(hr);
-
     MP_DBG(state, "IAudioClient::Initialize IAudioClient_SetEventHandle\n");
     hr = IAudioClient_SetEventHandle(state->pAudioClient, state->hWake);
     EXIT_ON_ERROR(hr);
@@ -725,6 +752,7 @@ reinit:
     EXIT_ON_ERROR(hr);
 
     init_session_display(state);
+    init_volume_control(state);
 
     state->hTask = AvSetMmThreadCharacteristics(L"Pro Audio", &(DWORD){0});
     if (!state->hTask) {
@@ -1131,21 +1159,6 @@ retry: ;
                                      CLSCTX_ALL, NULL,
                                      (void **)&state->pAudioClient);
     EXIT_ON_ERROR(hr);
-
-    MP_DBG(ao, "Activating pEndpointVolume interface\n");
-    hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioEndpointVolume,
-                                     CLSCTX_ALL, NULL,
-                                     (void **)&state->pEndpointVolume);
-    EXIT_ON_ERROR(hr);
-
-    MP_DBG(ao, "Query hardware volume support\n");
-    hr = IAudioEndpointVolume_QueryHardwareSupport(state->pEndpointVolume,
-                                                   &state->vol_hw_support);
-    if (hr != S_OK) {
-        MP_WARN(ao, "Error querying hardware volume control: %s\n",
-                mp_HRESULT_to_str(hr));
-        state->vol_hw_support = 0;
-    }
 
     MP_DBG(ao, "Probing formats\n");
     if (!find_formats(ao)) {
