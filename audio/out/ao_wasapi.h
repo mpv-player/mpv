@@ -52,58 +52,57 @@ enum wasapi_thread_state {
 
 typedef struct wasapi_state {
     struct mp_log *log;
-    /* Init phase */
-    HRESULT init_ret;
-    HANDLE hInitDone;
-    int share_mode;
 
-    /* volume control */
-    DWORD vol_hw_support;
+    // Thread handles
+    HRESULT init_ret;        // status of init phase
+    HANDLE hInitDone;        // set when init is complete in audio thread
+    HANDLE hAudioThread;     // the audio thread itself
+    HANDLE hWake;            // thread wakeup event
+    atomic_int thread_state; // enum wasapi_thread_state (what to do on wakeup)
 
-    /* WASAPI handles, owned by audio thread */
+    // for setting the audio thread priority
+    HANDLE hTask;
+
+    // WASAPI object handles owned and used by audio thread
     IMMDevice *pDevice;
     IAudioClient *pAudioClient;
     IAudioRenderClient *pRenderClient;
-    ISimpleAudioVolume *pAudioVolume;
-    IAudioEndpointVolume *pEndpointVolume;
-    IAudioSessionControl *pSessionControl;
     IMMDeviceEnumerator *pEnumerator;
 
-    /* thread handles */
-    HANDLE hAudioThread; /* the thread itself */
-    HANDLE hWake; /* thread wakeup event */
-    atomic_int thread_state; /* enum wasapi_thread_state */
-
-    /* for setting the audio thread priority */
-    HANDLE hTask; /* AV thread */
-
-    /* WASAPI proxy handles, for Single-Threaded Apartment communication.
-       One is needed for each audio thread object that's accessed from the main thread. */
-    ISimpleAudioVolume *pAudioVolumeProxy;
-    IAudioEndpointVolume *pEndpointVolumeProxy;
-    IAudioSessionControl *pSessionControlProxy;
-
-    /* Streams used to marshal the proxy objects. The thread owning the actual objects
-       needs to marshal proxy objects into these streams, and the thread that wants the
-       proxies unmarshals them from here. */
-    IStream *sAudioVolume;
-    IStream *sEndpointVolume;
-    IStream *sSessionControl;
-
-    /* WASAPI internal clock information, for estimating delay */
+    // WASAPI internal clock information, for estimating delay
     IAudioClock *pAudioClock;
-    UINT64 clock_frequency; /* scale for the "samples" returned by the clock */
-    atomic_ullong sample_count; /* the amount of samples per channel written to a GetBuffer buffer */
-    LARGE_INTEGER qpc_frequency; /* frequency of windows' high resolution timer */
+    atomic_ullong sample_count;  // samples per channel written by GetBuffer
+    UINT64 clock_frequency;      // scale for position returned by GetPosition
+    LARGE_INTEGER qpc_frequency; // frequency of Windows' high resolution timer
 
-    /* ao options */
+    // WASAPI control (handles owned by audio thread but used by main thread)
+    IAudioSessionControl *pSessionControl; // setting the stream title
+    IAudioEndpointVolume *pEndpointVolume; // exclusive mode volume/mute
+    ISimpleAudioVolume *pAudioVolume;      // shared mode volume/mute
+    DWORD vol_hw_support; // is hardware volume supported for exclusive-mode?
+
+    // Streams used to marshal the proxy objects. The thread owning the actual
+    // objects needs to marshal proxy objects into these streams, and the thread
+    // that wants the proxies unmarshals them from here.
+    IStream *sSessionControl;
+    IStream *sEndpointVolume;
+    IStream *sAudioVolume;
+
+    // WASAPI proxy handles, for Single-Threaded Apartment communication. One is
+    // needed for each audio thread object that's accessed from the main thread.
+    IAudioSessionControl *pSessionControlProxy;
+    IAudioEndpointVolume *pEndpointVolumeProxy;
+    ISimpleAudioVolume *pAudioVolumeProxy;
+
+    // ao options
     int opt_exclusive;
     int opt_list;
     char *opt_device;
 
-    /* format info */
+    // format info
     WAVEFORMATEXTENSIBLE format;
-    UINT32 bufferFrameCount; /* wasapi buffer block size, number of frames, frame size at format.nBlockAlign */
+    AUDCLNT_SHAREMODE share_mode; // AUDCLNT_SHAREMODE_EXCLUSIVE / SHARED
+    UINT32 bufferFrameCount;      // number of frames in buffer
 
     change_notify change;
 } wasapi_state;
