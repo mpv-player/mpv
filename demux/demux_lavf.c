@@ -208,7 +208,10 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
     struct demuxer *demuxer = opaque;
     struct stream *stream = demuxer->stream;
     int64_t current_pos;
-    MP_TRACE(demuxer, "mp_seek(%p, %"PRId64", %d)\n", stream, pos, whence);
+    MP_TRACE(demuxer, "mp_seek(%p, %"PRId64", %s)\n", stream, pos,
+             whence == SEEK_END ? "end" :
+             whence == SEEK_CUR ? "cur" :
+             whence == SEEK_SET ? "set" : "size");
     if (whence == SEEK_END || whence == AVSEEK_SIZE) {
         int64_t end = stream_get_size(stream);
         if (end < 0)
