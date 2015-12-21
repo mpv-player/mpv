@@ -454,16 +454,15 @@ Available filters are:
 
     ``<mode>``
         :frame: Output 1 frame for each frame.
-        :field: Output 1 frame for each field.
+        :field: Output 1 frame for each field (default).
         :frame-nospatial: Like ``frame`` but skips spatial interlacing check.
         :field-nospatial: Like ``field`` but skips spatial interlacing check.
 
     ``<interlaced-only>``
-        :no:  Deinterlace all frames (default).
-        :yes: Only deinterlace frames marked as interlaced (default if this
-              filter is inserted via ``deinterlace`` property).
+        :no:  Deinterlace all frames.
+        :yes: Only deinterlace frames marked as interlaced (default).
 
-    This filter, is automatically inserted when using the ``d`` key (or any
+    This filter is automatically inserted when using the ``d`` key (or any
     other key that toggles the ``deinterlace`` property or when using the
     ``--deinterlace`` switch), assuming the video output does not have native
     deinterlacing support.
