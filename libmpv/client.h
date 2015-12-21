@@ -602,7 +602,7 @@ typedef enum mpv_format {
      * Example for writing:
      *
      *     int flag = 1;
-     *     mpv_set_property(ctx, "property", MPV_FORMAT_STRING, &flag);
+     *     mpv_set_property(ctx, "property", MPV_FORMAT_FLAG, &flag);
      */
     MPV_FORMAT_FLAG             = 3,
     /**
