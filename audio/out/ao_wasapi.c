@@ -18,6 +18,7 @@
  */
 
 #include <stdlib.h>
+#include <math.h>
 #include <inttypes.h>
 #include <process.h>
 #include <initguid.h>
@@ -33,7 +34,15 @@
 #include "osdep/timer.h"
 #include "osdep/io.h"
 
-static HRESULT get_device_delay(struct wasapi_state *state, double *delay) {
+
+static UINT64 uint64_scale(UINT64 x, UINT64 num, UINT64 den)
+{
+    return (x / den) * num
+        + ((x % den) * (num / den))
+        + ((x % den) * (num % den)) / den;
+}
+
+static HRESULT get_device_delay(struct wasapi_state *state, double *delay_us) {
     UINT64 sample_count = atomic_load(&state->sample_count);
     UINT64 position, qpc_position;
     HRESULT hr;
@@ -48,21 +57,24 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay) {
     }
     EXIT_ON_ERROR(hr);
 
-    LARGE_INTEGER qpc_count;
-    QueryPerformanceCounter(&qpc_count);
-    double qpc_diff = (qpc_count.QuadPart * 1e7 / state->qpc_frequency.QuadPart)
-                      - qpc_position;
+    // convert position to number of samples careful to avoid overflow
+    UINT64 sample_position = uint64_scale(position,
+                                          state->format.Format.nSamplesPerSec,
+                                          state->clock_frequency);
+    INT64 diff = sample_count - sample_position;
+    *delay_us = diff * 1e6 / state->format.Format.nSamplesPerSec;
 
-    position += state->clock_frequency * (uint64_t) (qpc_diff / 1e7);
+    // Correct for any delay in IAudioClock_GetPosition above.
+    // This should normally be very small (<1 us), but just in case. . .
+    LARGE_INTEGER qpc;
+    QueryPerformanceCounter(&qpc);
+    // apparently, we're supposed to allow the qpc scale to overflow to be
+    // comparable to qpc_position (100ns units), so don't do anything fancy
+    INT64 qpc_diff = qpc.QuadPart * 10000000 / state->qpc_frequency.QuadPart
+                     - qpc_position;
+    *delay_us -= qpc_diff / 10.0; // convert to us
 
-    // convert position to the same base as sample_count
-    position = position * state->format.Format.nSamplesPerSec
-               / state->clock_frequency;
-
-    double diff = sample_count - position;
-    *delay = diff / state->format.Format.nSamplesPerSec;
-
-    MP_TRACE(state, "Device delay: %g samples (%g ms)\n", diff, *delay * 1000);
+    MP_TRACE(state, "Device delay: %g us\n", *delay_us);
 
     return S_OK;
 exit_label:
@@ -86,9 +98,11 @@ static void thread_feed(struct ao *ao)
         MP_TRACE(ao, "Frame to fill: %"PRIu32". Padding: %"PRIu32"\n",
                  frame_count, padding);
     }
-    double delay;
-    hr = get_device_delay(state, &delay);
+    double delay_us;
+    hr = get_device_delay(state, &delay_us);
     EXIT_ON_ERROR(hr);
+    // add the buffer delay
+    delay_us += frame_count * 1e6 / state->format.Format.nSamplesPerSec;
 
     BYTE *pData;
     hr = IAudioRenderClient_GetBuffer(state->pRenderClient,
@@ -97,10 +111,11 @@ static void thread_feed(struct ao *ao)
 
     BYTE *data[1] = {pData};
 
-    ao_read_data(ao, (void**)data, frame_count, (int64_t) (
-                     mp_time_us() + delay * 1e6 +
-                     frame_count * 1e6 / state->format.Format.nSamplesPerSec));
+    ao_read_data(ao, (void **)data, frame_count,
+                 mp_time_us() + (int64_t)llrint(delay_us));
 
+    // note, we can't use ao_read_data return value here since we already
+    // commited to frame_count above in the GetBuffer call
     hr = IAudioRenderClient_ReleaseBuffer(state->pRenderClient,
                                           frame_count, 0);
     EXIT_ON_ERROR(hr);
