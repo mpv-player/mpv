@@ -29,8 +29,8 @@
 #include "osdep/atomics.h"
 
 typedef struct change_notify {
-    IMMNotificationClient client; /* this must be first in the structure! */
-    LPWSTR monitored; /* Monitored device */
+    IMMNotificationClient client; // this must be first in the structure!
+    LPWSTR monitored; // Monitored device
     bool is_hotplug;
     struct ao *ao;
 } change_notify;
