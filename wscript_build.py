@@ -237,6 +237,7 @@ def build(ctx):
         ( "stream/stream_dvdnav.c",              "dvdnav" ),
         ( "stream/stream_edl.c" ),
         ( "stream/stream_file.c" ),
+        ( "stream/stream_cb.c" ),
         ( "stream/stream_lavf.c" ),
         ( "stream/stream_libarchive.c",          "libarchive" ),
         ( "stream/stream_memory.c" ),
