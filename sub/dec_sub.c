@@ -166,7 +166,8 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh)
     *sd = init_sd;
 
     if (sub_init_decoder(sub, sd) < 0) {
-        sd->driver->uninit(sd);
+        if (sd->driver && sd->driver->uninit)
+            sd->driver->uninit(sd);
         talloc_free(sd);
         MP_ERR(sub, "Could not find subtitle decoder for format '%s'.\n",
                sh->codec ? sh->codec : "<unknown>");
