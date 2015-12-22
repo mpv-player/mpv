@@ -531,7 +531,7 @@ static int dict_get_decimal(AVDictionary *dict, const char *entry, int def)
     return def;
 }
 
-static void handle_stream(demuxer_t *demuxer, int i)
+static void handle_new_stream(demuxer_t *demuxer, int i)
 {
     lavf_priv_t *priv = demuxer->priv;
     AVFormatContext *avfc = priv->avfc;
@@ -691,7 +691,7 @@ static void add_new_streams(demuxer_t *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
     while (priv->num_streams < priv->avfc->nb_streams)
-        handle_stream(demuxer, priv->num_streams);
+        handle_new_stream(demuxer, priv->num_streams);
 }
 
 static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
