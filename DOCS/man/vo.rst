@@ -957,9 +957,11 @@ Available video output drivers are:
                      things like softsubbed ASS signs to match the video colors,
                      but may cause SRT subtitles or similar to look slightly off.
 
-    ``alpha=<blend|yes|no>``
-        Decides what to do if the input has an alpha component (default: blend).
+    ``alpha=<blend-tiles|blend|yes|no>``
+        Decides what to do if the input has an alpha component.
 
+        blend-tiles
+            Blend the frame against a 16x16 gray/white tiles background (default).
         blend
             Blend the frame against a black background.
         yes
