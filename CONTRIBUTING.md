@@ -11,7 +11,7 @@ Asking questions
 ================
 
 Preferably, asking questions should be done via IRC (#mpv on irc.freenode.net),
-but asking questions by opening is also barely tolerated.
+but asking questions by opening a github issue is also barely tolerated.
 
 Sending patches
 ===============
