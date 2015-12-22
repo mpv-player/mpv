@@ -41,6 +41,7 @@
 #include "video/img_format.h"
 #include "video/filter/vf.h"
 #include "video/decode/dec_video.h"
+#include "demux/demux.h"
 #include "demux/stheader.h"
 #include "demux/packet.h"
 #include "video/csputils.h"
@@ -679,6 +680,16 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     update_image_params(vd, ctx->pic, &params);
     vd->codec_pts = mp_pts_from_av(ctx->pic->pkt_pts, NULL);
     vd->codec_dts = mp_pts_from_av(ctx->pic->pkt_dts, NULL);
+
+    AVFrameSideData *sd = NULL;
+    sd = av_frame_get_side_data(ctx->pic, AV_FRAME_DATA_A53_CC);
+    if (sd) {
+        struct demux_packet *cc = new_demux_packet_from(sd->data, sd->size);
+        cc->pts = vd->codec_pts;
+        cc->dts = vd->codec_dts;
+        cc->pos = -1;
+        demuxer_feed_caption(vd->header, cc);
+    }
 
     struct mp_image *mpi = mp_image_from_av_frame(ctx->pic);
     av_frame_unref(ctx->pic);

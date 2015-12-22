@@ -51,6 +51,7 @@ struct sd_ass_priv {
     double sub_speed, video_fps, frame_fps;
     int64_t *seen_packets;
     int num_seen_packets;
+    bool duration_unknown;
 };
 
 static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts);
@@ -176,6 +177,9 @@ static int init(struct sd *sd)
             return -1;
         extradata = lavc_conv_get_extradata(ctx->converter);
         extradata_size = extradata ? strlen(extradata) : 0;
+
+        if (strcmp(sd->codec->codec, "eia_608") == 0)
+            ctx->duration_unknown = 1;
     }
 
     ctx->ass_library = mp_ass_init(sd->global, sd->log);
@@ -239,11 +243,18 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
     if (ctx->converter) {
-        if (!sd->opts->sub_clear_on_seek && check_packet_seen(sd, packet->pos))
+        if (!sd->opts->sub_clear_on_seek && packet->pos >= 0 &&
+            check_packet_seen(sd, packet->pos))
             return;
         char **r = lavc_conv_decode(ctx->converter, packet);
         for (int n = 0; r && r[n]; n++)
             ass_process_data(track, r[n], strlen(r[n]));
+        if (ctx->duration_unknown) {
+            for (int n = 0; n < track->n_events - 1; n++) {
+                track->events[n].Duration = track->events[n + 1].Start -
+                                            track->events[n].Start;
+            }
+        }
     } else {
         // Note that for this packet format, libass has an internal mechanism
         // for discarding duplicate (already seen) packets.
@@ -426,9 +437,12 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     } else {
         ass_set_storage_size(renderer, 0, 0);
     }
+    long long ts = find_timestamp(sd, pts);
+    if (ctx->duration_unknown && pts != MP_NOPTS_VALUE) {
+        mp_ass_flush_old_events(track, ts);
+    }
     if (no_ass)
         fill_plaintext(sd, pts);
-    long long ts = find_timestamp(sd, pts);
     mp_ass_render_frame(renderer, track, ts, &ctx->parts, res);
     talloc_steal(ctx, ctx->parts);
 

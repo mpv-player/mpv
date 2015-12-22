@@ -160,6 +160,10 @@ struct demux_stream {
     int64_t last_pos;
     struct demux_packet *head;
     struct demux_packet *tail;
+
+    // for closed captions (demuxer_feed_caption)
+    struct sh_stream *cc;
+
 };
 
 // Return "a", or if that is NOPTS, return "def".
@@ -358,6 +362,27 @@ const char *stream_type_name(enum stream_type type)
     case STREAM_AUDIO:  return "audio";
     case STREAM_SUB:    return "sub";
     default:            return "unknown";
+    }
+}
+
+void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp)
+{
+    struct demuxer *demuxer = stream->ds->in->d_thread;
+    struct sh_stream *sh = stream->ds->cc;
+
+    if (!sh) {
+        sh = demux_alloc_sh_stream(STREAM_SUB);
+        if (!sh)
+            return;
+        sh->codec->codec = "eia_608";
+        stream->ds->cc = sh;
+        demux_add_sh_stream(demuxer, sh);
+    }
+
+    if (demux_stream_is_selected(sh)) {
+        dp->pts = MP_ADD_PTS(dp->pts, -stream->ds->in->ts_offset);
+        dp->dts = MP_ADD_PTS(dp->dts, -stream->ds->in->ts_offset);
+        demux_add_packet(sh, dp);
     }
 }
 
