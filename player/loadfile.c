@@ -1011,7 +1011,6 @@ static void load_timeline(struct MPContext *mpctx)
 static void play_current_file(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    void *tmp = talloc_new(NULL);
     double playback_start = -1e100;
 
     mp_notify(mpctx, MPV_EVENT_START_FILE, NULL);
@@ -1045,7 +1044,7 @@ static void play_current_file(struct MPContext *mpctx)
         goto terminate_playback;
     mpctx->playing->reserved += 1;
 
-    mpctx->filename = talloc_strdup(tmp, mpctx->playing->filename);
+    mpctx->filename = talloc_strdup(NULL, mpctx->playing->filename);
     mpctx->stream_open_filename = mpctx->filename;
 
     mpctx->add_osd_seek_info &= OSD_SEEK_INFO_EDITION | OSD_SEEK_INFO_CURRENT_FILE;
@@ -1305,6 +1304,7 @@ terminate_playback:
     if (mpctx->playing)
         playlist_entry_unref(mpctx->playing);
     mpctx->playing = NULL;
+    talloc_free(mpctx->filename);
     mpctx->filename = NULL;
     mpctx->stream_open_filename = NULL;
 
@@ -1315,8 +1315,6 @@ terminate_playback:
     } else {
         mpctx->files_played++;
     }
-
-    talloc_free(tmp);
 }
 
 // Determine the next file to play. Note that if this function returns non-NULL,
