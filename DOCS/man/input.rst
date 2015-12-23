@@ -647,14 +647,20 @@ Input Commands that are Possibly Subject to Change
     For completeness, here is how this command works internally. The details
     could change any time. On any matching key event, ``script_message_to``
     or ``script_message`` is called (depending on whether the script name is
-    included), where the first argument is the string ``key-binding``, the
-    second argument is the name of the binding, and the third argument is the
-    key state as string. The key state consists of a number of letters. The
-    first letter is one of ``d`` (key was pressed down), ``u`` (was released),
-    ``r`` (key is still down, and was repeated; only if key repeat is enabled
-    for this binding), ``p`` (key was pressed; happens if up/down can't be
-    tracked). The second letter whether the event originates from the mouse,
-    either ``m`` (mouse button) or ``-`` (something else).
+    included), with the following arguments:
+
+    1. The string ``key-binding``.
+    2. The name of the binding (as established above).
+    3. The key state as string (see below).
+    4. The key name (since mpv 0.15.0).
+
+    The key state consists of 2 letters:
+
+    1. One of ``d`` (key was pressed down), ``u`` (was released), ``r`` (key
+       is still down, and was repeated; only if key repeat is enabled for this
+       binding), ``p`` (key was pressed; happens if up/down can't be tracked).
+    2. Whether the event originates from the mouse, either ``m`` (mouse button)
+       or ``-`` (something else).
 
 ``ab-loop``
     Cycle through A-B loop states. The first command will set the ``A`` point

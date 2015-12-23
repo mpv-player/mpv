@@ -86,6 +86,7 @@ typedef struct mp_cmd {
     double scale;               // for scaling numeric arguments
     const struct mp_cmd_def *def;
     char *sender; // name of the client API user which sent this
+    char *key_name; // string representation of the key binding
 } mp_cmd_t;
 
 struct mp_input_src {
