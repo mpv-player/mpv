@@ -463,10 +463,8 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
     if (ret) {
         ret->input_section = cmd->owner->section;
         ret->key_name = talloc_steal(ret, mp_input_get_key_combo_name(&code, 1));
-        if (mp_msg_test(ictx->log, MSGL_DEBUG)) {
-            MP_DBG(ictx, "key '%s' -> '%s' in '%s'\n",
-                   ret->key_name, cmd->cmd, ret->input_section);
-        }
+        MP_DBG(ictx, "key '%s' -> '%s' in '%s'\n",
+               ret->key_name, cmd->cmd, ret->input_section);
         ret->is_mouse_button = code & MP_KEY_EMIT_ON_UP;
     } else {
         char *key_buf = mp_input_get_key_combo_name(&code, 1);

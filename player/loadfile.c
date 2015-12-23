@@ -212,8 +212,8 @@ void update_demuxer_properties(struct MPContext *mpctx)
 
 static bool need_init_seek(struct demuxer *demux)
 {
-    for (int n = 0; n < demux->num_streams; n++) {
-        struct sh_stream *stream = demux->streams[n];
+    for (int n = 0; n < demux_get_num_stream(demux); n++) {
+        struct sh_stream *stream = demux_get_stream(demux, n);
         // Subtitle streams are not properly interleaved -> force init. seek.
         if (stream->type != STREAM_SUB && demux_stream_is_selected(stream))
             return false;
@@ -250,8 +250,8 @@ static struct sh_stream *select_fallback_stream(struct demuxer *d,
                                                 int index)
 {
     struct sh_stream *best_stream = NULL;
-    for (int n = 0; n < d->num_streams; n++) {
-        struct sh_stream *s = d->streams[n];
+    for (int n = 0; n < demux_get_num_stream(d); n++) {
+        struct sh_stream *s = demux_get_stream(d, n);
         if (s->type == type) {
             best_stream = s;
             if (index == 0)
@@ -396,8 +396,10 @@ static struct track *add_stream_track(struct MPContext *mpctx,
 
 void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
 {
-    for (int n = 0; n < demuxer->num_streams; n++)
-        add_stream_track(mpctx, demuxer, demuxer->streams[n], !!mpctx->timeline);
+    for (int n = 0; n < demux_get_num_stream(demuxer); n++) {
+        add_stream_track(mpctx, demuxer, demux_get_stream(demuxer, n),
+                         !!mpctx->timeline);
+    }
 }
 
 // Result numerically higher => better match. 0 == no match.
@@ -708,8 +710,8 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
         demux_set_ts_offset(demuxer, -demuxer->start_time);
 
     struct track *first = NULL;
-    for (int n = 0; n < demuxer->num_streams; n++) {
-        struct sh_stream *sh = demuxer->streams[n];
+    for (int n = 0; n < demux_get_num_stream(demuxer); n++) {
+        struct sh_stream *sh = demux_get_stream(demuxer, n);
         if (sh->type == filter) {
             struct track *t = add_stream_track(mpctx, demuxer, sh, false);
             t->is_external = true;

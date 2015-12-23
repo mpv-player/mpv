@@ -458,8 +458,9 @@ static void check_track_compatibility(struct timeline *tl)
         if (p->source == mainsrc)
             continue;
 
-        for (int i = 0; i < p->source->num_streams; i++) {
-            struct sh_stream *s = p->source->streams[i];
+        int num_source_streams = demux_get_num_stream(p->source);
+        for (int i = 0; i < num_source_streams; i++) {
+            struct sh_stream *s = demux_get_stream(p->source, i);
             if (s->attached_picture)
                 continue;
 
@@ -473,8 +474,9 @@ static void check_track_compatibility(struct timeline *tl)
             }
         }
 
-        for (int i = 0; i < mainsrc->num_streams; i++) {
-            struct sh_stream *m = mainsrc->streams[i];
+        int num_main_streams = demux_get_num_stream(mainsrc);
+        for (int i = 0; i < num_main_streams; i++) {
+            struct sh_stream *m = demux_get_stream(mainsrc, i);
             if (m->attached_picture)
                 continue;
 

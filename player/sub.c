@@ -146,8 +146,8 @@ void reset_subtitle_state(struct MPContext *mpctx)
 
 void uninit_stream_sub_decoders(struct demuxer *demuxer)
 {
-    for (int i = 0; i < demuxer->num_streams; i++) {
-        struct sh_stream *sh = demuxer->streams[i];
+    for (int i = 0; i < demux_get_num_stream(demuxer); i++) {
+        struct sh_stream *sh = demux_get_stream(demuxer, i);
         if (sh->sub) {
             sub_destroy(sh->sub->dec_sub);
             sh->sub->dec_sub = NULL;

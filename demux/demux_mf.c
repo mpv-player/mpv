@@ -201,7 +201,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer)
                 memcpy(dp->buffer, data.start, data.len);
                 dp->pts = mf->curr_frame / mf->sh->fps;
                 dp->keyframe = true;
-                demux_add_packet(demuxer->streams[0], dp);
+                demux_add_packet(mf->sh, dp);
             }
         }
         talloc_free(data.start);
@@ -316,7 +316,7 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
     mf->curr_frame = 0;
 
     // create a new video stream header
-    struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
+    struct sh_stream *sh = demux_alloc_sh_stream(STREAM_VIDEO);
     sh_video = sh->video;
 
     sh->codec = codec;
