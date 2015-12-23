@@ -546,6 +546,12 @@ Input Commands that are Possibly Subject to Change
         Always bind a key. (The input section that was made active most recently
         wins if there are ambiguities.)
 
+    This command can be used to dispatch arbitrary keys to a script or a client
+    API user. If the input section defines ``script-binding`` commands, it is
+    also possible to get separate events on key up/down, and relatively detailed
+    information about the key state. The special key name ``unmapped`` can be
+    used to match any unmapped key.
+
 ``overlay-add <id> <x> <y> "<file>" <offset> "<fmt>" <w> <h> <stride>``
     Add an OSD overlay sourced from raw data. This might be useful for scripts
     and applications controlling mpv, and which want to display things on top

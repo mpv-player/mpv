@@ -446,7 +446,9 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
         return handle_test(ictx, code);
 
     struct cmd_bind *cmd = find_any_bind_for_key(ictx, force_section, code);
-    if (cmd == NULL) {
+    if (!cmd)
+        cmd = find_any_bind_for_key(ictx, force_section, MP_KEY_UNMAPPED);
+    if (!cmd) {
         if (code == MP_KEY_CLOSE_WIN)
             return mp_input_parse_cmd_strv(ictx->log, (const char*[]){"quit", 0});
         int msgl = MSGL_WARN;
