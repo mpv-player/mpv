@@ -64,7 +64,6 @@ static bool get_sub_area(struct mp_rect bb, struct mp_image *temp,
                          struct sub_bitmap *sb, struct mp_image *out_area,
                          int *out_src_x, int *out_src_y);
 
-#define ACCURATE
 #define CONDITIONAL
 
 static void blend_const16_alpha(void *dst, int dst_stride, uint16_t srcp,
@@ -103,13 +102,8 @@ static void blend_const8_alpha(void *dst, int dst_stride, uint16_t srcp,
             if (!srcap)
                 continue;
 #endif
-#ifdef ACCURATE
             srcap *= srcamul; // now 0..65025
             dst_r[x] = (srcp * srcap + dst_r[x] * (65025 - srcap) + 32512) / 65025;
-#else
-            srcap = (srcap * srcamul + 255) >> 8;
-            dst_r[x] = (srcp * srcap + dst_r[x] * (255 - srcap) + 255) >> 8;
-#endif
         }
     }
 }
@@ -161,11 +155,7 @@ static void blend_src8_alpha(void *dst, int dst_stride, void *src,
             if (!srcap)
                 continue;
 #endif
-#ifdef ACCURATE
             dst_r[x] = (src_r[x] * srcap + dst_r[x] * (255 - srcap) + 127) / 255;
-#else
-            dst_r[x] = (src_r[x] * srcap + dst_r[x] * (255 - srcap) + 255) >> 8;
-#endif
         }
     }
 }
