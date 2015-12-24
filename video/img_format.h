@@ -197,6 +197,7 @@ enum mp_imgfmt {
 
     // Planar RGB (planes are shuffled: plane 0 is G, etc.)
     IMGFMT_GBRP,
+    IMGFMT_GBRAP,
 
     // XYZ colorspace, similar organization to RGB48. Even though it says "12",
     // the components are stored as 16 bit, with lower 4 bits set to 0.

@@ -114,6 +114,7 @@ static void blend_const8_alpha(void *dst, int dst_stride, uint16_t srcp,
     }
 }
 
+// dst = srcp * (srca * srcamul) + dst * (1 - (srca * srcamul))
 static void blend_const_alpha(void *dst, int dst_stride, int srcp,
                               uint8_t *srca, int srca_stride, uint8_t srcamul,
                               int w, int h, int bytes)
@@ -169,6 +170,7 @@ static void blend_src8_alpha(void *dst, int dst_stride, void *src,
     }
 }
 
+// dst = src * srca + dst * (1 - srca)
 static void blend_src_alpha(void *dst, int dst_stride, void *src,
                             int src_stride, uint8_t *srca, int srca_stride,
                             int w, int h, int bytes)
@@ -179,6 +181,30 @@ static void blend_src_alpha(void *dst, int dst_stride, void *src,
     } else if (bytes == 1) {
         blend_src8_alpha(dst, dst_stride, src, src_stride, srca, srca_stride,
                          w, h);
+    }
+}
+
+// dst = src * srcmul + dst * (1 - src * srcmul)
+static void blend_src_dst_mul(void *dst, int dst_stride,
+                              uint8_t *src, int src_stride, uint8_t srcmul,
+                              int w, int h, int dst_bytes)
+{
+    for (int y = 0; y < h; y++) {
+        void *dst_rp = (uint8_t *)dst + dst_stride * y;
+        uint8_t *src_r = (uint8_t *)src + src_stride * y;
+        if (dst_bytes == 2) {
+            uint16_t *dst_r = dst_rp;
+            for (int x = 0; x < w; x++) {
+                uint16_t srcp = src_r[x] * srcmul; // now 0..65025
+                dst_r[x] = (srcp * 65025 + dst_r[x] * (65025 - srcp) + 32512) / 65025;
+            }
+        } else if (dst_bytes == 1) {
+            uint8_t *dst_r = dst_rp;
+            for (int x = 0; x < w; x++) {
+                uint16_t srcp = src_r[x] * srcmul; // now 0..65025
+                dst_r[x] = (srcp * 255 + dst_r[x] * (65025 - srcp) + 32512) / 65025;
+            }
+        }
     }
 }
 
@@ -278,6 +304,10 @@ static void draw_rgba(struct mp_draw_sub_cache *cache, struct mp_rect bb,
             blend_src_alpha(dst.planes[p], dst.stride[p], src, sbi->stride[p],
                             alpha_p, sba->stride[0], dst.w, dst.h, bytes);
         }
+        if (temp->num_planes >= 4) {
+            blend_src_dst_mul(dst.planes[3], dst.stride[3], alpha_p,
+                              sba->stride[0], 255, dst.w, dst.h, bytes);
+        }
 
         part->imgs[i].i = talloc_steal(part, sbi);
         part->imgs[i].a = talloc_steal(part, sba);
@@ -328,6 +358,10 @@ static void draw_ass(struct mp_draw_sub_cache *cache, struct mp_rect bb,
             blend_const_alpha(dst.planes[p], dst.stride[p], color_yuv[p],
                               alpha_p, sb->stride, a, dst.w, dst.h, bytes);
         }
+        if (temp->num_planes >= 4) {
+            blend_src_dst_mul(dst.planes[3], dst.stride[3], alpha_p,
+                              sb->stride, a, dst.w, dst.h, bytes);
+        }
     }
 }
 
@@ -374,7 +408,7 @@ static void get_closest_y444_format(int imgfmt, int *out_format, int *out_bits)
 {
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
     if (desc.flags & MP_IMGFLAG_RGB) {
-        *out_format = IMGFMT_GBRP;
+        *out_format = desc.flags & MP_IMGFLAG_ALPHA ? IMGFMT_GBRAP : IMGFMT_GBRP;
         *out_bits = 8;
         return;
     } else if (desc.flags & MP_IMGFLAG_YUV_P) {
