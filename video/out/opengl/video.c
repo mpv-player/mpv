@@ -1537,7 +1537,7 @@ static void pass_convert_yuv(struct gl_video *p)
         GLSL(color = vec4(color.rgb * color.a, 1.0);)
     } else if (p->opts.alpha_mode == 3) { // blend against tiles
         GLSL(bvec2 tile = lessThan(fract(gl_FragCoord.xy / 32.0), vec2(0.5));)
-        GLSL(vec3 background = vec3(mix(0.75, 1.0, tile.x != tile.y));)
+        GLSL(vec3 background = vec3(tile.x == tile.y ? 1.0 : 0.75);)
         GLSL(color.rgb = color.rgb * color.a + background * (1.0 - color.a);)
     } else if (p->gl->fb_premultiplied) {
         GLSL(color = vec4(color.rgb * color.a, color.a);)
