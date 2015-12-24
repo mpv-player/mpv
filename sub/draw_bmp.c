@@ -66,96 +66,38 @@ static bool get_sub_area(struct mp_rect bb, struct mp_image *temp,
 
 #define CONDITIONAL
 
-static void blend_const16_alpha(void *dst, int dst_stride, uint16_t srcp,
-                                uint8_t *srca, int srca_stride, uint8_t srcamul,
-                                int w, int h)
-{
-    if (!srcamul)
-        return;
-    for (int y = 0; y < h; y++) {
-        uint16_t *dst_r = (uint16_t *)((uint8_t *)dst + dst_stride * y);
-        uint8_t *srca_r = srca + srca_stride * y;
-        for (int x = 0; x < w; x++) {
-            uint32_t srcap = srca_r[x];
-#ifdef CONDITIONAL
-            if (!srcap)
-                continue;
-#endif
-            srcap *= srcamul; // now 0..65025
-            dst_r[x] = (srcp * srcap + dst_r[x] * (65025 - srcap) + 32512) / 65025;
-        }
-    }
-}
-
-static void blend_const8_alpha(void *dst, int dst_stride, uint16_t srcp,
-                               uint8_t *srca, int srca_stride, uint8_t srcamul,
-                               int w, int h)
-{
-    if (!srcamul)
-        return;
-    for (int y = 0; y < h; y++) {
-        uint8_t *dst_r = (uint8_t *)dst + dst_stride * y;
-        uint8_t *srca_r = srca + srca_stride * y;
-        for (int x = 0; x < w; x++) {
-            uint32_t srcap = srca_r[x];
-#ifdef CONDITIONAL
-            if (!srcap)
-                continue;
-#endif
-            srcap *= srcamul; // now 0..65025
-            dst_r[x] = (srcp * srcap + dst_r[x] * (65025 - srcap) + 32512) / 65025;
-        }
-    }
-}
-
 // dst = srcp * (srca * srcamul) + dst * (1 - (srca * srcamul))
 static void blend_const_alpha(void *dst, int dst_stride, int srcp,
                               uint8_t *srca, int srca_stride, uint8_t srcamul,
                               int w, int h, int bytes)
 {
-    if (bytes == 2) {
-        blend_const16_alpha(dst, dst_stride, srcp, srca, srca_stride, srcamul,
-                            w, h);
-    } else if (bytes == 1) {
-        blend_const8_alpha(dst, dst_stride, srcp, srca, srca_stride, srcamul,
-                           w, h);
-    }
-}
-
-static void blend_src16_alpha(void *dst, int dst_stride, void *src,
-                              int src_stride, uint8_t *srca, int srca_stride,
-                              int w, int h)
-{
+    if (!srcamul)
+        return;
     for (int y = 0; y < h; y++) {
-        uint16_t *dst_r = (uint16_t *)((uint8_t *)dst + dst_stride * y);
-        uint16_t *src_r = (uint16_t *)((uint8_t *)src + src_stride * y);
+        void *dst_rp = (uint8_t *)dst + dst_stride * y;
         uint8_t *srca_r = srca + srca_stride * y;
-        for (int x = 0; x < w; x++) {
-            uint32_t srcap = srca_r[x];
+        if (bytes == 2) {
+            uint16_t *dst_r = dst_rp;
+            for (int x = 0; x < w; x++) {
+                uint32_t srcap = srca_r[x];
 #ifdef CONDITIONAL
-            if (!srcap)
-                continue;
+                if (!srcap)
+                    continue;
 #endif
-            dst_r[x] = (src_r[x] * srcap + dst_r[x] * (255 - srcap) + 127) / 255;
-        }
-    }
-}
-
-static void blend_src8_alpha(void *dst, int dst_stride, void *src,
-                             int src_stride, uint8_t *srca, int srca_stride,
-                             int w, int h)
-{
-    for (int y = 0; y < h; y++) {
-        uint8_t *dst_r = (uint8_t *)dst + dst_stride * y;
-        uint8_t *src_r = (uint8_t *)src + src_stride * y;
-        uint8_t *srca_r = srca + srca_stride * y;
-        for (int x = 0; x < w; x++) {
-            uint16_t srcap = srca_r[x];
+                srcap *= srcamul; // now 0..65025
+                dst_r[x] = (srcp * srcap + dst_r[x] * (65025 - srcap) + 32512) / 65025;
+            }
+        } else if (bytes == 1) {
+            uint8_t *dst_r = dst_rp;
+            for (int x = 0; x < w; x++) {
+                uint32_t srcap = srca_r[x];
 #ifdef CONDITIONAL
-            if (!srcap)
-                continue;
+                if (!srcap)
+                    continue;
 #endif
-            dst_r[x] = (src_r[x] * srcap + dst_r[x] * (255 - srcap) + 127) / 255;
+                srcap *= srcamul; // now 0..65025
+                dst_r[x] = (srcp * srcap + dst_r[x] * (65025 - srcap) + 32512) / 65025;
+            }
         }
     }
 }
@@ -165,12 +107,31 @@ static void blend_src_alpha(void *dst, int dst_stride, void *src,
                             int src_stride, uint8_t *srca, int srca_stride,
                             int w, int h, int bytes)
 {
-    if (bytes == 2) {
-        blend_src16_alpha(dst, dst_stride, src, src_stride, srca, srca_stride,
-                          w, h);
-    } else if (bytes == 1) {
-        blend_src8_alpha(dst, dst_stride, src, src_stride, srca, srca_stride,
-                         w, h);
+    for (int y = 0; y < h; y++) {
+        void *dst_rp = (uint8_t *)dst + dst_stride * y;
+        void *src_rp = (uint8_t *)src + src_stride * y;
+        uint8_t *srca_r = srca + srca_stride * y;
+        if (bytes == 2) {
+            uint16_t *dst_r = dst_rp, *src_r = src_rp;
+            for (int x = 0; x < w; x++) {
+                uint32_t srcap = srca_r[x];
+#ifdef CONDITIONAL
+                if (!srcap)
+                    continue;
+#endif
+                dst_r[x] = (src_r[x] * srcap + dst_r[x] * (255 - srcap) + 127) / 255;
+            }
+        } else if (bytes == 1) {
+            uint8_t *dst_r = dst_rp, *src_r = src_rp;
+            for (int x = 0; x < w; x++) {
+                uint16_t srcap = srca_r[x];
+#ifdef CONDITIONAL
+                if (!srcap)
+                    continue;
+#endif
+                dst_r[x] = (src_r[x] * srcap + dst_r[x] * (255 - srcap) + 127) / 255;
+            }
+        }
     }
 }
 
