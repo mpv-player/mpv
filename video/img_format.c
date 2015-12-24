@@ -275,12 +275,12 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     return desc;
 }
 
-// Find a format that is MP_IMGFLAG_YUV_P with the following configuration.
-int mp_imgfmt_find_yuv_planar(int xs, int ys, int planes, int component_bits)
+// Find a format that has the given flags set with the following configuration.
+int mp_imgfmt_find(int xs, int ys, int planes, int component_bits, int flags)
 {
     for (int n = IMGFMT_START + 1; n < IMGFMT_END; n++) {
         struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(n);
-        if (desc.id && (desc.flags & MP_IMGFLAG_YUV_P)) {
+        if (desc.id && ((desc.flags & flags) == flags)) {
             if (desc.num_planes == planes && desc.chroma_xs == xs &&
                 desc.chroma_ys == ys && desc.plane_bits == component_bits &&
                 (desc.flags & MP_IMGFLAG_NE))

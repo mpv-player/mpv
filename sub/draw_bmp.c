@@ -407,21 +407,20 @@ static bool align_bbox_for_swscale(struct mp_image *img, struct mp_rect *rc)
 static void get_closest_y444_format(int imgfmt, int *out_format, int *out_bits)
 {
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
+    int planes = desc.flags & MP_IMGFLAG_ALPHA ? 4 : 3;
+    int bits = desc.component_bits > 8 ? 16 : 8;
     if (desc.flags & MP_IMGFLAG_RGB) {
-        *out_format = desc.flags & MP_IMGFLAG_ALPHA ? IMGFMT_GBRAP : IMGFMT_GBRP;
-        *out_bits = 8;
-        return;
+        *out_format = mp_imgfmt_find(0, 0, planes, bits, MP_IMGFLAG_RGB_P);
+        if (!mp_sws_supported_format(*out_format))
+            *out_format = mp_imgfmt_find(0, 0, planes, 8, MP_IMGFLAG_RGB_P);
     } else if (desc.flags & MP_IMGFLAG_YUV_P) {
-        *out_format = mp_imgfmt_find_yuv_planar(0, 0, desc.num_planes,
-                                                desc.plane_bits);
-        if (*out_format && mp_sws_supported_format(*out_format)) {
-            *out_bits = mp_imgfmt_get_desc(*out_format).plane_bits;
-            return;
-        }
+        *out_format = mp_imgfmt_find(0, 0, planes, bits, MP_IMGFLAG_YUV_P);
+    } else {
+        *out_format = 0;
     }
-    // fallback
-    *out_format = IMGFMT_444P;
-    *out_bits = 8;
+    if (!mp_sws_supported_format(*out_format))
+        *out_format = IMGFMT_444P; // generic fallback
+    *out_bits = mp_imgfmt_get_desc(*out_format).component_bits;
 }
 
 static struct part *get_cache(struct mp_draw_sub_cache *cache,
