@@ -697,7 +697,7 @@ static void vo_x11_classhint(struct vo *vo, Window window, const char *name)
     long pid = getpid();
 
     wmClass.res_name = opts->winname ? opts->winname : (char *)name;
-    wmClass.res_class = "mpv";
+    wmClass.res_class = "Mpv";
     XSetClassHint(x11->display, window, &wmClass);
     XChangeProperty(x11->display, window, XA(x11, _NET_WM_PID), XA_CARDINAL,
                     32, PropModeReplace, (unsigned char *) &pid, 1);
