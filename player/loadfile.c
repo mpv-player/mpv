@@ -336,6 +336,12 @@ bool timeline_switch_to_time(struct MPContext *mpctx, double pts)
                                                        track->type,
                                                        track->user_tid - 1);
             }
+
+            if (track->type == STREAM_SUB && track->stream) {
+                struct dec_sub *dec = track->stream->sub->dec_sub;
+                if (dec)
+                    sub_control(dec, SD_CTRL_CLEAR, NULL);
+            }
         }
     }
 
