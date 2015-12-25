@@ -237,6 +237,7 @@ typedef struct MPOpts {
     int field_dominance;
     char **sub_name;
     char **sub_paths;
+    char **audiofile_paths;
     int sub_auto;
     int audiofile_auto;
     int osd_bar_visible;

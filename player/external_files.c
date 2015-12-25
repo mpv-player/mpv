@@ -226,6 +226,23 @@ static void filter_subidx(struct subfn **slist, int *nsub)
     }
 }
 
+static void load_paths(struct mpv_global *global, struct subfn **slist,
+                       int *nsubs, const char *fname, char **paths,
+                       char *cfg_path)
+{
+    for (int i = 0; paths && paths[i]; i++) {
+        char *path = mp_path_join_bstr(*slist, mp_dirname(fname),
+                                       bstr0(paths[i]));
+        append_dir_subtitles(global, slist, nsubs, bstr0(path), fname, 0);
+    }
+
+    // Load subtitles in ~/.mpv/sub (or similar) limiting sub fuzziness
+    char *mp_subdir = mp_find_config_file(NULL, global, cfg_path);
+    if (mp_subdir)
+        append_dir_subtitles(global, slist, nsubs, bstr0(mp_subdir), fname, 1);
+    talloc_free(mp_subdir);
+}
+
 // Return a list of subtitles and audio files found, sorted by priority.
 // Last element is terminated with a fname==NULL entry.
 struct subfn *find_external_files(struct mpv_global *global, const char *fname)
@@ -237,22 +254,12 @@ struct subfn *find_external_files(struct mpv_global *global, const char *fname)
     // Load subtitles from current media directory
     append_dir_subtitles(global, &slist, &n, mp_dirname(fname), fname, 0);
 
-    if (opts->sub_auto >= 0) {
-        // Load subtitles in dirs specified by sub-paths option
-        if (opts->sub_paths) {
-            for (int i = 0; opts->sub_paths[i]; i++) {
-                char *path = mp_path_join_bstr(slist, mp_dirname(fname),
-                                               bstr0(opts->sub_paths[i]));
-                append_dir_subtitles(global, &slist, &n, bstr0(path), fname, 0);
-            }
-        }
+    // Load subtitles in dirs specified by sub-paths option
+    if (opts->sub_auto >= 0)
+        load_paths(global, &slist, &n, fname, opts->sub_paths, "sub/");
 
-        // Load subtitles in ~/.mpv/sub limiting sub fuzziness
-        char *mp_subdir = mp_find_config_file(NULL, global, "sub/");
-        if (mp_subdir)
-            append_dir_subtitles(global, &slist, &n, bstr0(mp_subdir), fname, 1);
-        talloc_free(mp_subdir);
-    }
+    if (opts->audiofile_auto >= 0)
+        load_paths(global, &slist, &n, fname, opts->audiofile_paths, "audio/");
 
     // Sort by name for filter_subidx()
     qsort(slist, n, sizeof(*slist), compare_sub_filename);

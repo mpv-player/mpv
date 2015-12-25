@@ -1204,7 +1204,11 @@ Audio
     :no:    Don't automatically load external audio files.
     :exact: Load the media filename with audio file extension (default).
     :fuzzy: Load all audio files containing media filename.
-    :all:   Load all audio files in the current directory.
+    :all:   Load all aufio files in the current and ``--audio-file-paths``
+            directories.
+
+``--audio-file-paths=<path1:path2:...>``
+    Equivalent to ``--sub-paths`` option, but for auto-loaded audio files.
 
 ``--audio-client-name=<name>``
     The application name the player reports to the audio API. Can be useful
