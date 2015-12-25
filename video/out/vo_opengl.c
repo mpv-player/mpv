@@ -329,6 +329,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         if (screen) {
             screen->params.primaries = p->renderer_opts->target_prim;
             screen->params.gamma = p->renderer_opts->target_trc;
+            if (p->glctx->flip_v)
+                mp_image_vflip(screen);
         }
         *(struct mp_image **)data = screen;
         return true;
