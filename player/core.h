@@ -365,15 +365,6 @@ typedef struct MPContext {
     int last_chapter_seek;
     double last_chapter_pts;
 
-    /* Subtitle renderer. This is separate, because we want to keep fonts
-     * loaded across ordered chapters, instead of reloading and rescanning
-     * them on each transition. (Both of these objects contain this state.)
-     */
-    pthread_mutex_t ass_lock;
-    struct ass_renderer *ass_renderer;
-    struct ass_library *ass_library;
-    struct mp_log *ass_log;
-
     int last_dvb_step;
 
     bool paused;
@@ -525,7 +516,6 @@ void uninit_sub(struct MPContext *mpctx, int order);
 void uninit_sub_all(struct MPContext *mpctx);
 void update_osd_msg(struct MPContext *mpctx);
 void update_subtitles(struct MPContext *mpctx);
-void uninit_sub_renderer(struct MPContext *mpctx);
 
 // video.c
 void reset_video_state(struct MPContext *mpctx);

@@ -10,19 +10,16 @@
 #define SUB_GAP_KEEP 0.4
 
 struct sd {
+    struct mpv_global *global;
     struct mp_log *log;
     struct MPOpts *opts;
 
     const struct sd_functions *driver;
     void *priv;
 
+    struct demuxer *demuxer;
     struct sh_stream *sh;
     double video_fps;
-
-    // Shared renderer for ASS - done to avoid reloading embedded fonts.
-    struct ass_library *ass_library;
-    struct ass_renderer *ass_renderer;
-    pthread_mutex_t *ass_lock;
 };
 
 struct sd_functions {

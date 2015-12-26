@@ -1254,7 +1254,6 @@ terminate_playback:
     uninit_audio_chain(mpctx);
     uninit_video_chain(mpctx);
     uninit_sub_all(mpctx);
-    uninit_sub_renderer(mpctx);
     uninit_demuxer(mpctx);
     uninit_stream(mpctx);
     if (!opts->gapless_audio && !mpctx->encode_lavc_ctx)

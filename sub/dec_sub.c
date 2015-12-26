@@ -80,6 +80,7 @@ struct dec_sub *sub_create(struct mpv_global *global)
     sub->log = mp_log_new(sub, global->log, "sub");
     sub->opts = global->opts;
     sub->init_sd.opts = sub->opts;
+    sub->init_sd.global = global;
 
     mpthread_mutex_init_recursive(&sub->lock);
 
@@ -119,17 +120,6 @@ void sub_set_video_fps(struct dec_sub *sub, double fps)
     pthread_mutex_unlock(&sub->lock);
 }
 
-void sub_set_ass_renderer(struct dec_sub *sub, struct ass_library *ass_library,
-                          struct ass_renderer *ass_renderer,
-                          pthread_mutex_t *ass_lock)
-{
-    pthread_mutex_lock(&sub->lock);
-    sub->init_sd.ass_library = ass_library;
-    sub->init_sd.ass_renderer = ass_renderer;
-    sub->init_sd.ass_lock = ass_lock;
-    pthread_mutex_unlock(&sub->lock);
-}
-
 static int sub_init_decoder(struct dec_sub *sub, struct sd *sd)
 {
     sd->driver = NULL;
@@ -150,7 +140,7 @@ static int sub_init_decoder(struct dec_sub *sub, struct sd *sd)
     return 0;
 }
 
-void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh)
+void sub_init(struct dec_sub *sub, struct demuxer *demuxer, struct sh_stream *sh)
 {
     assert(!sub->sd);
     assert(sh && sh->sub);
@@ -160,6 +150,7 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh)
     sub->sh = sh;
 
     struct sd init_sd = sub->init_sd;
+    init_sd.demuxer = demuxer;
     init_sd.sh = sh;
 
     struct sd *sd = talloc(NULL, struct sd);

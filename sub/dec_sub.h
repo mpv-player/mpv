@@ -3,10 +3,10 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <pthread.h>
 
 #include "osd.h"
 
+struct demuxer;
 struct sh_stream;
 struct ass_track;
 struct mpv_global;
@@ -30,10 +30,7 @@ void sub_lock(struct dec_sub *sub);
 void sub_unlock(struct dec_sub *sub);
 
 void sub_set_video_fps(struct dec_sub *sub, double fps);
-void sub_set_ass_renderer(struct dec_sub *sub, struct ass_library *ass_library,
-                          struct ass_renderer *ass_renderer,
-                          pthread_mutex_t *ass_lock);
-void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh);
+void sub_init(struct dec_sub *sub, struct demuxer *demuxer, struct sh_stream *sh);
 
 bool sub_is_initialized(struct dec_sub *sub);
 
