@@ -63,6 +63,8 @@ typedef struct wasapi_state {
     // for setting the audio thread priority
     HANDLE hTask;
 
+    // ID of the device to use
+    LPWSTR deviceID;
     // WASAPI object handles owned and used by audio thread
     IMMDevice *pDevice;
     IAudioClient *pAudioClient;
