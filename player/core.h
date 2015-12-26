@@ -139,6 +139,9 @@ struct track {
     // Invariant: !stream || stream->demuxer == demuxer
     struct sh_stream *stream;
 
+    // Current subtitle state (or cached state if selected==false).
+    struct dec_sub *dec_sub;
+
     // For external subtitles, which are read fully on init. Do not attempt
     // to read packets from them.
     bool preloaded;
@@ -517,7 +520,6 @@ void mp_load_scripts(struct MPContext *mpctx);
 
 // sub.c
 void reset_subtitle_state(struct MPContext *mpctx);
-void uninit_stream_sub_decoders(struct demuxer *demuxer);
 void reinit_subs(struct MPContext *mpctx, int order);
 void uninit_sub(struct MPContext *mpctx, int order);
 void uninit_sub_all(struct MPContext *mpctx);

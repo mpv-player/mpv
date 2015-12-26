@@ -72,17 +72,15 @@ static void uninit_demuxer(struct MPContext *mpctx)
     mpctx->chapters = NULL;
     mpctx->num_chapters = 0;
 
-    // per-stream cached subtitle state
-    for (int i = 0; i < mpctx->num_sources; i++)
-        uninit_stream_sub_decoders(mpctx->sources[i]);
-
     // close demuxers for external tracks
     for (int n = mpctx->num_tracks - 1; n >= 0; n--) {
         mpctx->tracks[n]->selected = false;
         mp_remove_track(mpctx, mpctx->tracks[n]);
     }
-    for (int i = 0; i < mpctx->num_tracks; i++)
+    for (int i = 0; i < mpctx->num_tracks; i++) {
+        sub_destroy(mpctx->tracks[i]->dec_sub);
         talloc_free(mpctx->tracks[i]);
+    }
     mpctx->num_tracks = 0;
 
     mpctx->timeline = NULL;
@@ -337,10 +335,15 @@ bool timeline_switch_to_time(struct MPContext *mpctx, double pts)
                                                        track->user_tid - 1);
             }
 
-            if (track->type == STREAM_SUB && track->stream) {
-                struct dec_sub *dec = track->stream->sub->dec_sub;
-                if (dec)
-                    sub_control(dec, SD_CTRL_CLEAR, NULL);
+            if (track->dec_sub) {
+                for (int order = 0; order < 2; order++) {
+                    if (mpctx->d_sub[order] == track->dec_sub) {
+                        mpctx->d_sub[order] = NULL;
+                        osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, NULL);
+                    }
+                }
+                sub_destroy(track->dec_sub);
+                track->dec_sub = NULL;
             }
         }
     }
@@ -654,6 +657,8 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
 
     struct demuxer *d = track->demuxer;
 
+    sub_destroy(track->dec_sub);
+
     int index = 0;
     while (index < mpctx->num_tracks && mpctx->tracks[index] != track)
         index++;
@@ -674,7 +679,6 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
                 break;
             }
         }
-        uninit_stream_sub_decoders(d);
         free_demuxer_and_stream(d);
     }
 

@@ -144,22 +144,11 @@ void reset_subtitle_state(struct MPContext *mpctx)
     reset_subtitles(mpctx, 1);
 }
 
-void uninit_stream_sub_decoders(struct demuxer *demuxer)
-{
-    for (int i = 0; i < demux_get_num_stream(demuxer); i++) {
-        struct sh_stream *sh = demux_get_stream(demuxer, i);
-        if (sh->sub) {
-            sub_destroy(sh->sub->dec_sub);
-            sh->sub->dec_sub = NULL;
-        }
-    }
-}
-
 void uninit_sub(struct MPContext *mpctx, int order)
 {
     if (mpctx->d_sub[order]) {
         reset_subtitles(mpctx, order);
-        mpctx->d_sub[order] = NULL; // Note: not free'd.
+        mpctx->d_sub[order] = NULL; // not destroyed
         osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, NULL);
         reselect_demux_streams(mpctx);
     }
@@ -211,8 +200,6 @@ static void update_subtitle(struct MPContext *mpctx, int order)
         struct sh_stream *sh_stream = track->stream;
         bool interleaved = is_interleaved(mpctx, track);
 
-        assert(sh_stream->sub->dec_sub == dec_sub);
-
         while (1) {
             if (interleaved && !demux_has_packet(sh_stream))
                 break;
@@ -248,10 +235,11 @@ void update_subtitles(struct MPContext *mpctx)
     update_subtitle(mpctx, 1);
 }
 
-static void reinit_subdec(struct MPContext *mpctx, struct track *track,
-                          struct dec_sub *dec_sub)
+static void reinit_subdec(struct MPContext *mpctx, struct track *track)
 {
     struct MPOpts *opts = mpctx->opts;
+
+    struct dec_sub *dec_sub = track->dec_sub;
 
     if (sub_is_initialized(dec_sub))
         return;
@@ -288,13 +276,11 @@ void reinit_subs(struct MPContext *mpctx, int order)
     if (!sh)
         return;
 
-    // The decoder is cached in the stream header in order to make ordered
-    // chapters work better.
-    if (!sh->sub->dec_sub)
-        sh->sub->dec_sub = sub_create(mpctx->global);
-    mpctx->d_sub[order] = sh->sub->dec_sub;
+    if (!track->dec_sub)
+        track->dec_sub = sub_create(mpctx->global);
+    mpctx->d_sub[order] = track->dec_sub;
 
-    reinit_subdec(mpctx, track, sh->sub->dec_sub);
-    osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, sh->sub->dec_sub);
-    sub_control(sh->sub->dec_sub, SD_CTRL_SET_TOP, &(bool){!!order});
+    reinit_subdec(mpctx, track);
+    osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, track->dec_sub);
+    sub_control(track->dec_sub, SD_CTRL_SET_TOP, &(bool){!!order});
 }

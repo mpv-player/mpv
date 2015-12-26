@@ -510,18 +510,13 @@ static void fill_plaintext(struct sd *sd, double pts)
         track->styles[track->default_style].Alignment = ctx->on_top ? 6 : 2;
 }
 
-static void clear(struct sd *sd)
-{
-    struct sd_ass_priv *ctx = sd->priv;
-    ass_flush_events(ctx->ass_track);
-    ctx->num_seen_packets = 0;
-}
-
 static void reset(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
-    if (sd->opts->sub_clear_on_seek)
-        clear(sd);
+    if (sd->opts->sub_clear_on_seek) {
+        ass_flush_events(ctx->ass_track);
+        ctx->num_seen_packets = 0;
+    }
     if (ctx->converter)
         lavc_conv_reset(ctx->converter);
 }
@@ -553,9 +548,6 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
         return CONTROL_OK;
     case SD_CTRL_SET_TOP:
         ctx->on_top = *(bool *)arg;
-        return CONTROL_OK;
-    case SD_CTRL_CLEAR:
-        clear(sd);
         return CONTROL_OK;
     default:
         return CONTROL_UNKNOWN;
