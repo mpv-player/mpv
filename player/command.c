@@ -240,7 +240,7 @@ static char *format_file_size(int64_t size)
 
 static char *format_delay(double time)
 {
-    return talloc_asprintf(NULL, "%d ms", ROUND(time * 1000));
+    return talloc_asprintf(NULL, "%d ms", (int)lrint(time * 1000));
 }
 
 // Property-option bridge. (Maps the property to the option with the same name.)
@@ -791,7 +791,7 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
         int step_all;
         if (action == M_PROPERTY_SWITCH) {
             struct m_property_switch_arg *sarg = arg;
-            step_all = ROUND(sarg->inc);
+            step_all = lrint(sarg->inc);
             // Check threshold for relative backward seeks
             if (mpctx->opts->chapter_seek_threshold >= 0 && step_all < 0) {
                 double current_chapter_start =
@@ -2374,9 +2374,8 @@ static int mp_property_frame_number(void *ctx, struct m_property *prop,
     if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
 
-    int frame_number = ROUND(get_current_pos_ratio(mpctx, false) *
-                             (double)get_frame_count(mpctx));
-    return m_property_int_ro(action, arg, frame_number);
+    return m_property_int_ro(action, arg,
+        lrint(get_current_pos_ratio(mpctx, false) * get_frame_count(mpctx)));
 }
 
 static int mp_property_frame_count(void *ctx, struct m_property *prop,
