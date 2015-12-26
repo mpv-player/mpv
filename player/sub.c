@@ -55,6 +55,7 @@ void uninit_sub(struct MPContext *mpctx, int order)
 {
     if (mpctx->d_sub[order]) {
         reset_subtitles(mpctx, order);
+        sub_select(mpctx->d_sub[order], false);
         mpctx->d_sub[order] = NULL; // not destroyed
         osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, NULL);
         reselect_demux_streams(mpctx);
@@ -183,6 +184,7 @@ void reinit_subs(struct MPContext *mpctx, int order)
         track->dec_sub = sub_create(mpctx->global);
     mpctx->d_sub[order] = track->dec_sub;
 
+    sub_select(track->dec_sub, true);
     reinit_subdec(mpctx, track);
     osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, track->dec_sub);
     sub_control(track->dec_sub, SD_CTRL_SET_TOP, &(bool){!!order});

@@ -29,6 +29,7 @@ struct sd_functions {
     int  (*init)(struct sd *sd);
     void (*decode)(struct sd *sd, struct demux_packet *packet);
     void (*reset)(struct sd *sd);
+    void (*select)(struct sd *sd, bool selected);
     void (*uninit)(struct sd *sd);
 
     bool (*accepts_packet)(struct sd *sd); // implicit default if NULL: true

@@ -301,6 +301,14 @@ void sub_reset(struct dec_sub *sub)
     pthread_mutex_unlock(&sub->lock);
 }
 
+void sub_select(struct dec_sub *sub, bool selected)
+{
+    pthread_mutex_lock(&sub->lock);
+    if (sub->sd && sub->sd->driver->select)
+        sub->sd->driver->select(sub->sd, selected);
+    pthread_mutex_unlock(&sub->lock);
+}
+
 int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
 {
     int r = CONTROL_UNKNOWN;

@@ -41,6 +41,7 @@ void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
                      struct sub_bitmaps *res);
 char *sub_get_text(struct dec_sub *sub, double pts);
 void sub_reset(struct dec_sub *sub);
+void sub_select(struct dec_sub *sub, bool selected);
 
 int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg);
 

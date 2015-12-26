@@ -131,6 +131,22 @@ static bool supports_format(const char *format)
            lavc_conv_supports_format(format);
 }
 
+static void enable_output(struct sd *sd, bool enable)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    if (enable == !!ctx->ass_renderer)
+        return;
+    if (ctx->ass_renderer) {
+        ass_renderer_done(ctx->ass_renderer);
+        ctx->ass_renderer = NULL;
+    } else {
+        ctx->ass_renderer = ass_renderer_init(ctx->ass_library);
+
+        mp_ass_configure_fonts(ctx->ass_renderer, sd->opts->sub_text_style,
+                               sd->global, sd->log);
+    }
+}
+
 static int init(struct sd *sd)
 {
     struct MPOpts *opts = sd->opts;
@@ -156,11 +172,6 @@ static int init(struct sd *sd)
 
     if (opts->ass_style_override)
         ass_set_style_overrides(ctx->ass_library, opts->ass_force_style_list);
-
-    ctx->ass_renderer = ass_renderer_init(ctx->ass_library);
-
-    mp_ass_configure_fonts(ctx->ass_renderer, opts->sub_text_style,
-                           sd->global, sd->log);
 
     ctx->ass_track = ass_new_track(ctx->ass_library);
     if (!ctx->is_converted)
@@ -188,6 +199,8 @@ static int init(struct sd *sd)
         ctx->sub_speed *= opts->sub_fps / sd->video_fps;
 
     ctx->sub_speed *= opts->sub_speed;
+
+    enable_output(sd, true);
 
     return 0;
 }
@@ -384,11 +397,11 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     bool no_ass = !opts->ass_enabled || ctx->on_top;
     bool converted = ctx->is_converted || no_ass;
     ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
+    ASS_Renderer *renderer = ctx->ass_renderer;
 
-    if (pts == MP_NOPTS_VALUE)
+    if (pts == MP_NOPTS_VALUE || !renderer)
         return;
 
-    ASS_Renderer *renderer = ctx->ass_renderer;
     double scale = dim.display_par;
     if (!converted && (!opts->ass_style_override ||
                        opts->ass_vsfilter_aspect_compat))
@@ -577,7 +590,7 @@ static void uninit(struct sd *sd)
     if (ctx->converter)
         lavc_conv_uninit(ctx->converter);
     ass_free_track(ctx->ass_track);
-    ass_renderer_done(ctx->ass_renderer);
+    enable_output(sd, false);
     ass_library_done(ctx->ass_library);
 }
 
@@ -615,6 +628,7 @@ const struct sd_functions sd_ass = {
     .get_text = get_text,
     .control = control,
     .reset = reset,
+    .select = enable_output,
     .uninit = uninit,
 };
 
