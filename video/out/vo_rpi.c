@@ -459,7 +459,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     input->format->es->video.width = MP_ALIGN_UP(params->w, ALIGN_W);
     input->format->es->video.height = MP_ALIGN_UP(params->h, ALIGN_H);
     input->format->es->video.crop = (MMAL_RECT_T){0, 0, params->w, params->h};
-    input->format->es->video.par = (MMAL_RATIONAL_T){params->p_w, params->d_w};
+    input->format->es->video.par = (MMAL_RATIONAL_T){params->p_w, params->p_h};
     input->format->es->video.color_space = map_csp(params->colorspace);
 
     if (mmal_port_format_commit(input))
