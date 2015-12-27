@@ -152,12 +152,12 @@ static void reinit_subdec(struct MPContext *mpctx, struct track *track)
     if (sub_is_initialized(dec_sub))
         return;
 
+    sub_init(dec_sub, track->demuxer, track->stream);
+
     struct sh_video *sh_video =
         mpctx->d_video ? mpctx->d_video->header->video : NULL;
-    float fps = sh_video ? sh_video->fps : 25;
-
-    sub_set_video_fps(dec_sub, fps);
-    sub_init(dec_sub, track->demuxer, track->stream);
+    double fps = sh_video ? sh_video->fps : 25;
+    sub_control(dec_sub, SD_CTRL_SET_VIDEO_DEF_FPS, &fps);
 
     // Don't do this if the file has video/audio streams. Don't do it even
     // if it has only sub streams, because reading packets will change the

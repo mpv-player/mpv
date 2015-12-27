@@ -19,7 +19,6 @@ struct sd {
 
     struct demuxer *demuxer;
     struct sh_stream *sh;
-    double video_fps;
 };
 
 struct sd_functions {

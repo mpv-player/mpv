@@ -48,7 +48,7 @@ struct sd_ass_priv {
     char last_text[500];
     struct mp_image_params video_params;
     struct mp_image_params last_params;
-    double sub_speed;
+    double sub_speed, video_fps, frame_fps;
     int64_t *seen_packets;
     int num_seen_packets;
 };
@@ -147,6 +147,24 @@ static void enable_output(struct sd *sd, bool enable)
     }
 }
 
+static void update_subtitle_speed(struct sd *sd)
+{
+    struct MPOpts *opts = sd->opts;
+    struct sd_ass_priv *ctx = sd->priv;
+    ctx->sub_speed = 1.0;
+
+    if (ctx->video_fps > 0 && ctx->frame_fps > 0) {
+        MP_VERBOSE(sd, "Frame based format, dummy FPS: %f, video FPS: %f\n",
+                   ctx->frame_fps, ctx->video_fps);
+        ctx->sub_speed *= ctx->frame_fps / ctx->video_fps;
+    }
+
+    if (opts->sub_fps && ctx->video_fps)
+        ctx->sub_speed *= opts->sub_fps / ctx->video_fps;
+
+    ctx->sub_speed *= opts->sub_speed;
+}
+
 static int init(struct sd *sd)
 {
     struct MPOpts *opts = sd->opts;
@@ -187,18 +205,8 @@ static int init(struct sd *sd)
 
     mp_ass_add_default_styles(ctx->ass_track, opts);
 
-    ctx->sub_speed = 1.0;
-
-    if (sd->video_fps && sd->sh && sd->sh->sub->frame_based > 0) {
-        MP_VERBOSE(sd, "Frame based format, dummy FPS: %f, video FPS: %f\n",
-                   sd->sh->sub->frame_based, sd->video_fps);
-        ctx->sub_speed *= sd->sh->sub->frame_based / sd->video_fps;
-    }
-
-    if (opts->sub_fps && sd->video_fps)
-        ctx->sub_speed *= opts->sub_fps / sd->video_fps;
-
-    ctx->sub_speed *= opts->sub_speed;
+    ctx->frame_fps = sd->sh->sub->frame_based;
+    update_subtitle_speed(sd);
 
     enable_output(sd, true);
 
@@ -612,6 +620,10 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
         return CONTROL_OK;
     case SD_CTRL_SET_TOP:
         ctx->on_top = *(bool *)arg;
+        return CONTROL_OK;
+    case SD_CTRL_SET_VIDEO_DEF_FPS:
+        ctx->video_fps = *(double *)arg;
+        update_subtitle_speed(sd);
         return CONTROL_OK;
     default:
         return CONTROL_UNKNOWN;

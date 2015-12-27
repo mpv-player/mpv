@@ -8,11 +8,8 @@
 
 struct demuxer;
 struct sh_stream;
-struct ass_track;
 struct mpv_global;
 struct demux_packet;
-struct ass_library;
-struct ass_renderer;
 
 struct dec_sub;
 struct sd;
@@ -22,6 +19,7 @@ enum sd_ctrl {
     SD_CTRL_SET_VIDEO_PARAMS,
     SD_CTRL_GET_RESOLUTION,
     SD_CTRL_SET_TOP,
+    SD_CTRL_SET_VIDEO_DEF_FPS,
 };
 
 struct dec_sub *sub_create(struct mpv_global *global);
@@ -29,7 +27,6 @@ void sub_destroy(struct dec_sub *sub);
 void sub_lock(struct dec_sub *sub);
 void sub_unlock(struct dec_sub *sub);
 
-void sub_set_video_fps(struct dec_sub *sub, double fps);
 void sub_init(struct dec_sub *sub, struct demuxer *demuxer, struct sh_stream *sh);
 
 bool sub_is_initialized(struct dec_sub *sub);

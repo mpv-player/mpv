@@ -113,13 +113,6 @@ bool sub_is_initialized(struct dec_sub *sub)
     return r;
 }
 
-void sub_set_video_fps(struct dec_sub *sub, double fps)
-{
-    pthread_mutex_lock(&sub->lock);
-    sub->init_sd.video_fps = fps;
-    pthread_mutex_unlock(&sub->lock);
-}
-
 static int sub_init_decoder(struct dec_sub *sub, struct sd *sd)
 {
     sd->driver = NULL;
