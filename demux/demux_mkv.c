@@ -202,14 +202,18 @@ typedef struct mkv_demuxer {
 struct demux_mkv_opts {
     int subtitle_preroll;
     double subtitle_preroll_secs;
+    double subtitle_preroll_secs_index;
     int probe_duration;
     int probe_start_time;
 };
 
 const struct m_sub_options demux_mkv_conf = {
     .opts = (const m_option_t[]) {
-        OPT_FLAG("subtitle-preroll", subtitle_preroll, 0),
+        OPT_CHOICE("subtitle-preroll", subtitle_preroll, 0,
+                   ({"no", 0}, {"yes", 1}, {"index", 2})),
         OPT_DOUBLE("subtitle-preroll-secs", subtitle_preroll_secs,
+                   M_OPT_MIN, .min = 0),
+        OPT_DOUBLE("subtitle-preroll-secs-index", subtitle_preroll_secs_index,
                    M_OPT_MIN, .min = 0),
         OPT_CHOICE("probe-video-duration", probe_duration, 0,
                    ({"no", 0}, {"yes", 1}, {"full", 2})),
@@ -218,7 +222,9 @@ const struct m_sub_options demux_mkv_conf = {
     },
     .size = sizeof(struct demux_mkv_opts),
     .defaults = &(const struct demux_mkv_opts){
+        .subtitle_preroll = 2,
         .subtitle_preroll_secs = 1.0,
+        .subtitle_preroll_secs_index = 10.0,
         .probe_start_time = 1,
     },
 };
@@ -2724,6 +2730,8 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
             // Find the cluster with the highest filepos, that has a timestamp
             // still lower than min_tc.
             double secs = opts->demux_mkv->subtitle_preroll_secs;
+            if (mkv_d->index_has_durations)
+                secs = MPMAX(secs, opts->demux_mkv->subtitle_preroll_secs_index);
             uint64_t pre = MPMIN(INT64_MAX, secs * 1e9 / mkv_d->tc_scale);
             uint64_t min_tc = pre < index->timecode ? index->timecode - pre : 0;
             uint64_t prev_target = 0;
@@ -2786,8 +2794,10 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
     int cueflags = (flags & SEEK_BACKWARD) ? FLAG_BACKWARD : 0;
 
     mkv_d->subtitle_preroll = NUM_SUB_PREROLL_PACKETS;
-    if (((flags & SEEK_HR) || demuxer->opts->demux_mkv->subtitle_preroll) &&
-        st_active[STREAM_SUB] && st_active[STREAM_VIDEO])
+    int preroll_opt = demuxer->opts->demux_mkv->subtitle_preroll;
+    if (((flags & SEEK_HR) || preroll_opt == 1 ||
+         (preroll_opt == 2 && mkv_d->index_has_durations))
+        && st_active[STREAM_SUB] && st_active[STREAM_VIDEO])
         cueflags |= FLAG_SUBPREROLL;
 
     // Adjust the target a little bit to catch cases where the target position
