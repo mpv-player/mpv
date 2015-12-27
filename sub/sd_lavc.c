@@ -64,21 +64,6 @@ struct sd_lavc_priv {
     int num_seekpoints;
 };
 
-static bool supports_format(const char *format)
-{
-    enum AVCodecID cid = mp_codec_to_av_codec_id(format);
-    // Supported codecs must be known to decode to paletted bitmaps
-    switch (cid) {
-    case AV_CODEC_ID_DVB_SUBTITLE:
-    case AV_CODEC_ID_HDMV_PGS_SUBTITLE:
-    case AV_CODEC_ID_XSUB:
-    case AV_CODEC_ID_DVD_SUBTITLE:
-        return true;
-    default:
-        return false;
-    }
-}
-
 static void get_resolution(struct sd *sd, int wh[2])
 {
     struct sd_lavc_priv *priv = sd->priv;
@@ -110,8 +95,20 @@ static void get_resolution(struct sd *sd, int wh[2])
 
 static int init(struct sd *sd)
 {
-    struct sd_lavc_priv *priv = talloc_zero(NULL, struct sd_lavc_priv);
     enum AVCodecID cid = mp_codec_to_av_codec_id(sd->sh->codec);
+
+    // Supported codecs must be known to decode to paletted bitmaps
+    switch (cid) {
+    case AV_CODEC_ID_DVB_SUBTITLE:
+    case AV_CODEC_ID_HDMV_PGS_SUBTITLE:
+    case AV_CODEC_ID_XSUB:
+    case AV_CODEC_ID_DVD_SUBTITLE:
+        break;
+    default:
+        return -1;
+    }
+
+    struct sd_lavc_priv *priv = talloc_zero(NULL, struct sd_lavc_priv);
     AVCodecContext *ctx = NULL;
     AVCodec *sub_codec = avcodec_find_decoder(cid);
     if (!sub_codec)
@@ -467,7 +464,6 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
 
 const struct sd_functions sd_lavc = {
     .name = "lavc",
-    .supports_format = supports_format,
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,

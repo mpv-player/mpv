@@ -143,49 +143,53 @@ void update_subtitles(struct MPContext *mpctx)
     update_subtitle(mpctx, 1);
 }
 
-static void reinit_subdec(struct MPContext *mpctx, struct track *track)
+static bool init_subdec(struct MPContext *mpctx, struct track *track)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    struct dec_sub *dec_sub = track->dec_sub;
+    assert(!track->dec_sub);
 
-    if (sub_is_initialized(dec_sub))
-        return;
+    if (!track->demuxer || !track->stream)
+        return false;
 
-    sub_init(dec_sub, track->demuxer, track->stream);
+    track->dec_sub = sub_create(mpctx->global, track->demuxer, track->stream);
+    if (!track->dec_sub)
+        return false;
 
     struct sh_video *sh_video =
         mpctx->d_video ? mpctx->d_video->header->video : NULL;
     double fps = sh_video ? sh_video->fps : 25;
-    sub_control(dec_sub, SD_CTRL_SET_VIDEO_DEF_FPS, &fps);
+    sub_control(track->dec_sub, SD_CTRL_SET_VIDEO_DEF_FPS, &fps);
 
     // Don't do this if the file has video/audio streams. Don't do it even
     // if it has only sub streams, because reading packets will change the
     // demuxer position.
-    if (!track->preloaded && track->is_external && !opts->sub_clear_on_seek) {
+    if (track->is_external && !opts->sub_clear_on_seek) {
         demux_seek(track->demuxer, 0, SEEK_ABSOLUTE);
-        track->preloaded = sub_read_all_packets(dec_sub, track->stream);
+        track->preloaded = sub_read_all_packets(track->dec_sub);
         if (track->preloaded)
             demux_stop_thread(track->demuxer);
     }
+
+    return true;
 }
 
 void reinit_subs(struct MPContext *mpctx, int order)
 {
-    struct track *track = mpctx->current_track[order][STREAM_SUB];
-
     assert(!mpctx->d_sub[order]);
 
-    struct sh_stream *sh = track ? track->stream : NULL;
-    if (!sh)
+    struct track *track = mpctx->current_track[order][STREAM_SUB];
+    if (!track)
         return;
 
-    if (!track->dec_sub)
-        track->dec_sub = sub_create(mpctx->global);
-    mpctx->d_sub[order] = track->dec_sub;
+    if (!track->dec_sub && !init_subdec(mpctx, track)) {
+        error_on_track(mpctx, track);
+        return;
+    }
 
     sub_select(track->dec_sub, true);
-    reinit_subdec(mpctx, track);
     osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, track->dec_sub);
     sub_control(track->dec_sub, SD_CTRL_SET_TOP, &(bool){!!order});
+
+    mpctx->d_sub[order] = track->dec_sub;
 }

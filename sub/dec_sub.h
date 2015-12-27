@@ -22,16 +22,13 @@ enum sd_ctrl {
     SD_CTRL_SET_VIDEO_DEF_FPS,
 };
 
-struct dec_sub *sub_create(struct mpv_global *global);
+struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
+                           struct sh_stream *sh);
 void sub_destroy(struct dec_sub *sub);
 void sub_lock(struct dec_sub *sub);
 void sub_unlock(struct dec_sub *sub);
 
-void sub_init(struct dec_sub *sub, struct demuxer *demuxer, struct sh_stream *sh);
-
-bool sub_is_initialized(struct dec_sub *sub);
-
-bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh);
+bool sub_read_all_packets(struct dec_sub *sub);
 bool sub_accepts_packet_in_advance(struct dec_sub *sub);
 void sub_decode(struct dec_sub *sub, struct demux_packet *packet);
 void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,

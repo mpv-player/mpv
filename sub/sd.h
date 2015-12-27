@@ -24,7 +24,6 @@ struct sd {
 struct sd_functions {
     const char *name;
     bool accept_packets_in_advance;
-    bool (*supports_format)(const char *format);
     int  (*init)(struct sd *sd);
     void (*decode)(struct sd *sd, struct demux_packet *packet);
     void (*reset)(struct sd *sd);
@@ -40,7 +39,6 @@ struct sd_functions {
 };
 
 struct lavc_conv;
-bool lavc_conv_supports_format(const char *format);
 struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
                                    char *extradata, int extradata_len);
 char *lavc_conv_get_extradata(struct lavc_conv *priv);

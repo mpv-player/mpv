@@ -125,12 +125,6 @@ static void add_subtitle_fonts(struct sd *sd)
     }
 }
 
-static bool supports_format(const char *format)
-{
-    return (format && strcmp(format, "ass") == 0) ||
-           lavc_conv_supports_format(format);
-}
-
 static void enable_output(struct sd *sd, bool enable)
 {
     struct sd_ass_priv *ctx = sd->priv;
@@ -633,7 +627,6 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
 const struct sd_functions sd_ass = {
     .name = "ass",
     .accept_packets_in_advance = true,
-    .supports_format = supports_format,
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,
