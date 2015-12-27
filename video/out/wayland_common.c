@@ -1135,7 +1135,7 @@ static int vo_wayland_check_events (struct vo *vo)
 
         if (poll(&fd, 1, 0) > 0) {
             if (fd.revents & POLLERR) {
-                MP_ERR(wl, "error occured on the drag&drop fd\n");
+                MP_ERR(wl, "error occurred on the drag&drop fd\n");
                 close(wl->input.dnd_fd);
                 wl->input.dnd_fd = -1;
             }
