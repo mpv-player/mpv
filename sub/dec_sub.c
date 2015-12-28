@@ -53,12 +53,6 @@ struct dec_sub {
     struct sd *sd;
 };
 
-struct packet_list {
-    struct demux_packet **packets;
-    int num_packets;
-};
-
-
 void sub_lock(struct dec_sub *sub)
 {
     pthread_mutex_lock(&sub->lock);
@@ -129,21 +123,6 @@ void sub_decode(struct dec_sub *sub, struct demux_packet *packet)
     pthread_mutex_unlock(&sub->lock);
 }
 
-static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
-{
-    for (int n = 0; n < subs->num_packets; n++)
-        sub->sd->driver->decode(sub->sd, subs->packets[n]);
-}
-
-static void add_packet(struct packet_list *subs, struct demux_packet *pkt)
-{
-    pkt = demux_copy_packet(pkt);
-    if (pkt) {
-        talloc_steal(subs, pkt);
-        MP_TARRAY_APPEND(subs, subs->packets, subs->num_packets, pkt);
-    }
-}
-
 // Read all packets from the demuxer and decode/add them. Returns false if
 // there are circumstances which makes this not possible.
 bool sub_read_all_packets(struct dec_sub *sub)
@@ -156,20 +135,15 @@ bool sub_read_all_packets(struct dec_sub *sub)
         return false;
     }
 
-    struct packet_list *subs = talloc_zero(NULL, struct packet_list);
-
     for (;;) {
         struct demux_packet *pkt = demux_read_packet(sub->sh);
         if (!pkt)
             break;
-        add_packet(subs, pkt);
+        sub->sd->driver->decode(sub->sd, pkt);
         talloc_free(pkt);
     }
 
-    add_sub_list(sub, subs);
-
     pthread_mutex_unlock(&sub->lock);
-    talloc_free(subs);
     return true;
 }
 
