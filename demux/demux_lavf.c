@@ -171,7 +171,6 @@ typedef struct lavf_priv {
     int cur_program;
     char *mime_type;
     bool merge_track_metadata;
-    char *file_charset;
 } lavf_priv_t;
 
 // At least mp4 has name="mov,mp4,m4a,3gp,3g2,mj2", so we split the name
@@ -266,21 +265,29 @@ static void list_formats(struct demuxer *demuxer)
         MP_INFO(demuxer, "%15s : %s\n", fmt->name, fmt->long_name);
 }
 
-static void detect_charset(struct demuxer *demuxer)
+static void convert_charset(struct demuxer *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
     char *cp = demuxer->opts->sub_cp;
-    if (mp_charset_requires_guess(cp)) {
-        bstr data = stream_peek(priv->stream, STREAM_MAX_BUFFER_SIZE);
-        cp = (char *)mp_charset_guess(priv, demuxer->log, data, cp, 0);
-        MP_VERBOSE(demuxer, "Detected charset: %s\n", cp ? cp : "(unknown)");
+    if (!cp || mp_charset_is_utf8(cp))
+        return;
+    bstr data = stream_read_complete(priv->stream, NULL, 128 * 1024 * 1024);
+    if (!data.start) {
+        MP_WARN(demuxer, "File too big (or error reading) - skip charset probing.\n");
+        return;
     }
+    cp = (char *)mp_charset_guess(priv, demuxer->log, data, cp, 0);
     if (cp && !mp_charset_is_utf8(cp))
         MP_INFO(demuxer, "Using subtitle charset: %s\n", cp);
     // libavformat transparently converts UTF-16 to UTF-8
-    if (mp_charset_is_utf16(priv->file_charset))
-        cp = NULL;
-    priv->file_charset = cp;
+    if (!mp_charset_is_utf16(cp)) {
+        bstr conv = mp_iconv_to_utf8(demuxer->log, data, cp, MP_ICONV_VERBOSE);
+        if (conv.start)
+            priv->stream = open_memory_stream(conv.start, conv.len);
+        if (conv.start != data.start)
+            talloc_free(conv.start);
+    }
+    talloc_free(data.start);
 }
 
 static char *remove_prefix(char *s, const char *const *prefixes)
@@ -420,7 +427,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     demuxer->filetype = priv->avif->name;
 
     if (priv->format_hack.detect_charset)
-        detect_charset(demuxer);
+        convert_charset(demuxer);
 
     return 0;
 }
@@ -631,9 +638,6 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
                     sh_sub->frame_based = 23.976;
             }
         }
-
-        sh_sub->charset = priv->file_charset;
-
         break;
     }
     case AVMEDIA_TYPE_ATTACHMENT: {
@@ -1103,6 +1107,8 @@ static void demux_close_lavf(demuxer_t *demuxer)
             if (priv->streams[n])
                 avcodec_free_context(&priv->streams[n]->lav_headers);
         }
+        if (priv->stream != demuxer->stream)
+            free_stream(priv->stream);
         talloc_free(priv);
         demuxer->priv = NULL;
     }

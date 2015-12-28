@@ -29,7 +29,6 @@
 #include "options/options.h"
 #include "common/global.h"
 #include "common/msg.h"
-#include "misc/charset_conv.h"
 #include "osdep/threads.h"
 
 extern const struct sd_functions sd_ass;
@@ -123,48 +122,17 @@ struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
     return NULL;
 }
 
-static struct demux_packet *recode_packet(struct mp_log *log,
-                                          struct demux_packet *in,
-                                          const char *charset)
-{
-    struct demux_packet *pkt = NULL;
-    bstr in_buf = {in->buffer, in->len};
-    bstr conv = mp_iconv_to_utf8(log, in_buf, charset, MP_ICONV_VERBOSE);
-    if (conv.start && conv.start != in_buf.start) {
-        pkt = talloc_ptrtype(NULL, pkt);
-        talloc_steal(pkt, conv.start);
-        *pkt = (struct demux_packet) {
-            .buffer = conv.start,
-            .len = conv.len,
-            .pts = in->pts,
-            .pos = in->pos,
-            .duration = in->duration,
-            .avpacket = in->avpacket, // questionable, but gives us sidedata
-        };
-    }
-    return pkt;
-}
-
-static void decode_chain_recode(struct dec_sub *sub, struct demux_packet *packet)
-{
-    struct demux_packet *recoded = NULL;
-    if (sub->sh->sub->charset)
-        recoded = recode_packet(sub->log, packet, sub->sh->sub->charset);
-    sub->sd->driver->decode(sub->sd, recoded ? recoded : packet);
-    talloc_free(recoded);
-}
-
 void sub_decode(struct dec_sub *sub, struct demux_packet *packet)
 {
     pthread_mutex_lock(&sub->lock);
-    decode_chain_recode(sub, packet);
+    sub->sd->driver->decode(sub->sd, packet);
     pthread_mutex_unlock(&sub->lock);
 }
 
 static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
 {
     for (int n = 0; n < subs->num_packets; n++)
-        decode_chain_recode(sub, subs->packets[n]);
+        sub->sd->driver->decode(sub->sd, subs->packets[n]);
 }
 
 static void add_packet(struct packet_list *subs, struct demux_packet *pkt)
