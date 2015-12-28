@@ -158,6 +158,7 @@ static const struct format_hack format_hacks[] = {
 };
 
 typedef struct lavf_priv {
+    struct stream *stream;
     char *filename;
     struct format_hack format_hack;
     AVInputFormat *avif;
@@ -193,7 +194,8 @@ static bool matches_avinputformat_name(struct lavf_priv *priv,
 static int mp_read(void *opaque, uint8_t *buf, int size)
 {
     struct demuxer *demuxer = opaque;
-    struct stream *stream = demuxer->stream;
+    lavf_priv_t *priv = demuxer->priv;
+    struct stream *stream = priv->stream;
     int ret;
 
     ret = stream_read(stream, buf, size);
@@ -206,7 +208,8 @@ static int mp_read(void *opaque, uint8_t *buf, int size)
 static int64_t mp_seek(void *opaque, int64_t pos, int whence)
 {
     struct demuxer *demuxer = opaque;
-    struct stream *stream = demuxer->stream;
+    lavf_priv_t *priv = demuxer->priv;
+    struct stream *stream = priv->stream;
     int64_t current_pos;
     MP_TRACE(demuxer, "mp_seek(%p, %"PRId64", %s)\n", stream, pos,
              whence == SEEK_END ? "end" :
@@ -239,7 +242,8 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
 static int64_t mp_read_seek(void *opaque, int stream_idx, int64_t ts, int flags)
 {
     struct demuxer *demuxer = opaque;
-    struct stream *stream = demuxer->stream;
+    lavf_priv_t *priv = demuxer->priv;
+    struct stream *stream = priv->stream;
 
     struct stream_avseek cmd = {
         .stream_index = stream_idx,
@@ -267,7 +271,7 @@ static void detect_charset(struct demuxer *demuxer)
     lavf_priv_t *priv = demuxer->priv;
     char *cp = demuxer->opts->sub_cp;
     if (mp_charset_requires_guess(cp)) {
-        bstr data = stream_peek(demuxer->stream, STREAM_MAX_BUFFER_SIZE);
+        bstr data = stream_peek(priv->stream, STREAM_MAX_BUFFER_SIZE);
         cp = (char *)mp_charset_guess(priv, demuxer->log, data, cp, 0);
         MP_VERBOSE(demuxer, "Detected charset: %s\n", cp ? cp : "(unknown)");
     }
@@ -296,8 +300,8 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 {
     struct MPOpts *opts = demuxer->opts;
     struct demux_lavf_opts *lavfdopts = opts->demux_lavf;
-    struct stream *s = demuxer->stream;
     lavf_priv_t *priv = demuxer->priv;
+    struct stream *s = priv->stream;
 
     priv->filename = remove_prefix(s->url, prefixes);
 
@@ -314,7 +318,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         priv->filename = sep + 1;
     }
 
-    char *mime_type = demuxer->stream->mime_type;
+    char *mime_type = s->mime_type;
     if (!lavfdopts->allow_mimetype || !mime_type)
         mime_type = "";
 
@@ -710,7 +714,8 @@ static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
 static int interrupt_cb(void *ctx)
 {
     struct demuxer *demuxer = ctx;
-    return mp_cancel_test(demuxer->stream->cancel);
+    lavf_priv_t *priv = demuxer->priv;
+    return mp_cancel_test(priv->stream->cancel);
 }
 
 static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
@@ -722,6 +727,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     float analyze_duration = 0;
     lavf_priv_t *priv = talloc_zero(NULL, lavf_priv_t);
     demuxer->priv = priv;
+    priv->stream = demuxer->stream;
 
     if (lavf_check_file(demuxer, check) < 0)
         return -1;
@@ -764,7 +770,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     AVDictionary *dopts = NULL;
 
     if ((priv->avif_flags & AVFMT_NOFILE) ||
-        demuxer->stream->type == STREAMTYPE_AVDEVICE ||
+        priv->stream->type == STREAMTYPE_AVDEVICE ||
         priv->format_hack.no_stream)
     {
         mp_setup_av_network_options(&dopts, demuxer->global, demuxer->log, opts);
@@ -783,7 +789,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         priv->pb->read_seek = mp_read_seek;
         priv->pb->seekable = demuxer->seekable ? AVIO_SEEKABLE_NORMAL : 0;
         avfc->pb = priv->pb;
-        if (stream_control(demuxer->stream, STREAM_CTRL_HAS_AVSEEK, NULL) > 0)
+        if (stream_control(priv->stream, STREAM_CTRL_HAS_AVSEEK, NULL) > 0)
             demuxer->seekable = true;
     }
 
@@ -823,7 +829,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     }
 
     MP_VERBOSE(demuxer, "avformat_find_stream_info() finished after %"PRId64
-               " bytes.\n", stream_tell(demuxer->stream));
+               " bytes.\n", stream_tell(priv->stream));
 
     for (int i = 0; i < avfc->nb_chapters; i++) {
         AVChapter *c = avfc->chapters[i];
@@ -935,7 +941,7 @@ static void demux_seek_lavf(demuxer_t *demuxer, double rel_seek_secs, int flags)
         avsflags = AVSEEK_FLAG_BACKWARD;
 
     if (flags & SEEK_FACTOR) {
-        struct stream *s = demuxer->stream;
+        struct stream *s = priv->stream;
         int64_t end = stream_get_size(s);
         if (end > 0 && demuxer->ts_resets_possible &&
             !(priv->avif_flags & AVFMT_NO_BYTE_SEEK))
@@ -1071,10 +1077,10 @@ redo:
          */
         // avio_flush() is designed for write-only streams, and does the wrong
         // thing when reading. Flush it manually instead.
-        stream_drop_buffers(demuxer->stream);
+        stream_drop_buffers(priv->stream);
         priv->avfc->pb->buf_ptr = priv->avfc->pb->buf_end = priv->avfc->pb->buffer;
-        priv->avfc->pb->pos = stream_tell(demuxer->stream);
-        av_seek_frame(priv->avfc, 0, stream_tell(demuxer->stream),
+        priv->avfc->pb->pos = stream_tell(priv->stream);
+        av_seek_frame(priv->avfc, 0, stream_tell(priv->stream),
                       AVSEEK_FLAG_BYTE);
         return DEMUXER_CTRL_OK;
     default:
