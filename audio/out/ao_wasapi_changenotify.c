@@ -187,7 +187,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnPropertyValueChanged(
     return S_OK;
 }
 
-static CONST_VTBL IMMNotificationClientVtbl sIMMDeviceEnumeratorVtbl_vtbl = {
+static CONST_VTBL IMMNotificationClientVtbl sIMMNotificationClientVtbl = {
     .QueryInterface = sIMMNotificationClient_QueryInterface,
     .AddRef = sIMMNotificationClient_AddRef,
     .Release = sIMMNotificationClient_Release,
@@ -209,7 +209,7 @@ HRESULT wasapi_change_init(struct ao *ao, bool is_hotplug)
     EXIT_ON_ERROR(hr);
 
     // COM voodoo to emulate c++ class
-    change->client.lpVtbl = &sIMMDeviceEnumeratorVtbl_vtbl;
+    change->client.lpVtbl = &sIMMNotificationClientVtbl;
 
     // register the change notification client
     hr = IMMDeviceEnumerator_RegisterEndpointNotificationCallback(
