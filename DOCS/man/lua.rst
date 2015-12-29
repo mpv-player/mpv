@@ -198,7 +198,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     be called (unless the user remapped the key with another binding).
 
     The ``name`` argument should be a short symbolic string. It allows the user
-    to remap the key binding via input.conf using the ``script_message``
+    to remap the key binding via input.conf using the ``script-message``
     command, and the name of the key binding (see below for
     an example). The name should be unique across other bindings in the same
     script - if not, the previous binding with the same name will be
@@ -220,8 +220,8 @@ The ``mp`` module is preloaded, although it can be loaded manually with
             has an ``is_mouse`` entry, which tells whether the event was caused
             by a mouse button.
 
-    Internally, key bindings are dispatched via the ``script_message_to`` or
-    ``script_binding`` input commands and ``mp.register_script_message``.
+    Internally, key bindings are dispatched via the ``script-message-to`` or
+    ``script-binding`` input commands and ``mp.register_script_message``.
 
     Trying to map multiple commands to a key will essentially prefer a random
     binding, while the other bindings are not called. It is guaranteed that
@@ -244,7 +244,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     ::
 
-        y script_binding something
+        y script-binding something
 
 
     This will print the message when the key ``y`` is pressed. (``x`` will
@@ -255,7 +255,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     ::
 
-        y script_binding fooscript.something
+        y script-binding fooscript.something
 
 ``mp.add_forced_key_binding(...)``
     This works almost the same as ``mp.add_key_binding``, but registers the
