@@ -2609,7 +2609,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
             }
             // For the sake of robustness, consider even unknown level 1
             // elements the same as unknown/broken IDs.
-            if (!ebml_is_mkv_level1_id(id) ||
+            if ((!ebml_is_mkv_level1_id(id) && id != EBML_ID_VOID) ||
                 ebml_read_skip(demuxer->log, -1, s) != 0)
             {
                 ebml_resync_cluster(demuxer->log, s);
