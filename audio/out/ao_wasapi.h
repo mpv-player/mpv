@@ -30,6 +30,7 @@
 
 typedef struct change_notify {
     IMMNotificationClient client; // this must be first in the structure!
+    IMMDeviceEnumerator *pEnumerator; // object where client is registered
     LPWSTR monitored; // Monitored device
     bool is_hotplug;
     struct ao *ao;
@@ -69,7 +70,6 @@ typedef struct wasapi_state {
     IMMDevice *pDevice;
     IAudioClient *pAudioClient;
     IAudioRenderClient *pRenderClient;
-    IMMDeviceEnumerator *pEnumerator;
 
     // WASAPI internal clock information, for estimating delay
     IAudioClock *pAudioClock;

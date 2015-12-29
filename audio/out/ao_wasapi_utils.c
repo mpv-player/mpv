@@ -1101,13 +1101,7 @@ HRESULT wasapi_thread_init(struct ao *ao)
     MP_DBG(ao, "Init wasapi thread\n");
     int64_t retry_wait = 1;
 retry: ;
-
-    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                                  &IID_IMMDeviceEnumerator,
-                                  (void **)&state->pEnumerator);
-    EXIT_ON_ERROR(hr);
-
-    hr = find_device(ao);
+    HRESULT hr = find_device(ao);
     EXIT_ON_ERROR(hr);
 
     hr = load_device(ao->log, &state->pDevice, state->deviceID);
@@ -1170,7 +1164,6 @@ void wasapi_thread_uninit(struct ao *ao)
     SAFE_RELEASE(state->pAudioClient,    IAudioClient_Release(state->pAudioClient));
     SAFE_RELEASE(state->pDevice,         IMMDevice_Release(state->pDevice));
     SAFE_RELEASE(state->deviceID,        talloc_free(state->deviceID));
-    SAFE_RELEASE(state->pEnumerator,     IMMDeviceEnumerator_Release(state->pEnumerator));
     SAFE_RELEASE(state->hTask,           AvRevertMmThreadCharacteristics(state->hTask));
     MP_DBG(ao, "Thread uninit done\n");
 }
