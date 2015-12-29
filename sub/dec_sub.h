@@ -29,8 +29,7 @@ void sub_lock(struct dec_sub *sub);
 void sub_unlock(struct dec_sub *sub);
 
 bool sub_read_all_packets(struct dec_sub *sub);
-bool sub_accepts_packet_in_advance(struct dec_sub *sub);
-void sub_decode(struct dec_sub *sub, struct demux_packet *packet);
+bool sub_read_packets(struct dec_sub *sub, double video_pts);
 void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
                      struct sub_bitmaps *res);
 char *sub_get_text(struct dec_sub *sub, double pts);

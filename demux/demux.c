@@ -685,15 +685,33 @@ struct demux_packet *demux_read_packet(struct sh_stream *sh)
     return pkt;
 }
 
+// Sparse packets (Subtitles) interleaved with other non-sparse packets (video,
+// audio) should never be read actively, meaning the demuxer thread does not
+// try to exceed default readahead in order to find a new packet.
+static bool use_lazy_subtitle_reading(struct demux_stream *ds)
+{
+    if (ds->type != STREAM_SUB)
+        return false;
+    for (int n = 0; n < ds->in->num_streams; n++) {
+        struct demux_stream *s = ds->in->streams[n]->ds;
+        if (s->type != STREAM_SUB && s->selected && !s->eof)
+            return true;
+    }
+    return false;
+}
+
 // Poll the demuxer queue, and if there's a packet, return it. Otherwise, just
 // make the demuxer thread read packets for this stream, and if there's at
 // least one packet, call the wakeup callback.
-// Unlike demux_read_packet(), this always enables readahead (which means you
-// must not use it on interleaved subtitle streams).
+// Unlike demux_read_packet(), this always enables readahead (except for
+// interleaved subtitles).
 // Returns:
 //   < 0: EOF was reached, *out_pkt=NULL
 //  == 0: no new packet yet, but maybe later, *out_pkt=NULL
 //   > 0: new packet read, *out_pkt is set
+// Note: when reading interleaved subtitles, the demuxer won't try to forcibly
+// read ahead to get the next subtitle packet (as the next packet could be
+// minutes away). In this situation, this function will just return -1.
 int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
 {
     struct demux_stream *ds = sh ? sh->ds : NULL;
@@ -703,10 +721,14 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
         if (ds->in->threading) {
             pthread_mutex_lock(&ds->in->lock);
             *out_pkt = dequeue_packet(ds);
-            r = *out_pkt ? 1 : ((ds->eof || !ds->selected) ? -1 : 0);
-            ds->active = ds->selected; // enable readahead
-            ds->in->eof = false; // force retry
-            pthread_cond_signal(&ds->in->wakeup); // possibly read more
+            if (use_lazy_subtitle_reading(ds)) {
+                r = *out_pkt ? 1 : -1;
+            } else {
+                r = *out_pkt ? 1 : ((ds->eof || !ds->selected) ? -1 : 0);
+                ds->active = ds->selected; // enable readahead
+                ds->in->eof = false; // force retry
+                pthread_cond_signal(&ds->in->wakeup); // possibly read more
+            }
             pthread_mutex_unlock(&ds->in->lock);
         } else {
             *out_pkt = demux_read_packet(sh);

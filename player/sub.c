@@ -68,32 +68,14 @@ void uninit_sub_all(struct MPContext *mpctx)
     uninit_sub(mpctx, 1);
 }
 
-// When reading subtitles from a demuxer, and we read video or audio from the
-// demuxer, we should not explicitly read subtitle packets. (With external
-// subs, we have to.)
-static bool is_interleaved(struct MPContext *mpctx, struct track *track)
-{
-    if (track->is_external || !track->demuxer)
-        return false;
-
-    struct demuxer *demuxer = track->demuxer;
-    for (int t = 0; t < mpctx->num_tracks; t++) {
-        struct track *other = mpctx->tracks[t];
-        if (other != track && other->selected && other->demuxer == demuxer &&
-            (other->type == STREAM_VIDEO || other->type == STREAM_AUDIO))
-            return true;
-    }
-    return track->demuxer == mpctx->demuxer;
-}
-
-static void update_subtitle(struct MPContext *mpctx, int order)
+static bool update_subtitle(struct MPContext *mpctx, double video_pts, int order)
 {
     struct MPOpts *opts = mpctx->opts;
     struct track *track = mpctx->current_track[order][STREAM_SUB];
     struct dec_sub *dec_sub = mpctx->d_sub[order];
 
-    if (!track || !dec_sub)
-        return;
+    if (!track || !dec_sub || video_pts == MP_NOPTS_VALUE)
+        return true;
 
     if (mpctx->d_video) {
         struct mp_image_params params = mpctx->d_video->vfilter->override_params;
@@ -101,46 +83,26 @@ static void update_subtitle(struct MPContext *mpctx, int order)
             sub_control(dec_sub, SD_CTRL_SET_VIDEO_PARAMS, &params);
     }
 
-    double refpts_s = mpctx->playback_pts;
-    double curpts_s = refpts_s - opts->sub_delay;
+    video_pts -= opts->sub_delay;
 
-    if (!track->preloaded && track->stream) {
-        struct sh_stream *sh_stream = track->stream;
-        bool interleaved = is_interleaved(mpctx, track);
-
-        while (1) {
-            if (interleaved && !demux_has_packet(sh_stream))
-                break;
-            double subpts_s = demux_get_next_pts(sh_stream);
-            if (!demux_has_packet(sh_stream))
-                break;
-            if (subpts_s > curpts_s) {
-                MP_DBG(mpctx, "Sub early: c_pts=%5.3f s_pts=%5.3f\n",
-                       curpts_s, subpts_s);
-                // Often subs can be handled in advance
-                if (!sub_accepts_packet_in_advance(dec_sub))
-                    break;
-                // Try to avoid demuxing whole file at once
-                if (subpts_s > curpts_s + 1 && !interleaved)
-                    break;
-            }
-            struct demux_packet *pkt = demux_read_packet(sh_stream);
-            MP_DBG(mpctx, "Sub: c_pts=%5.3f s_pts=%5.3f duration=%5.3f len=%d\n",
-                   curpts_s, pkt->pts, pkt->duration, pkt->len);
-            sub_decode(dec_sub, pkt);
-            talloc_free(pkt);
-        }
+    if (!track->preloaded) {
+        if (!sub_read_packets(dec_sub, video_pts))
+            return false;
     }
 
     // Handle displaying subtitles on terminal; never done for secondary subs
     if (order == 0 && !mpctx->video_out)
-        term_osd_set_subs(mpctx, sub_get_text(dec_sub, curpts_s));
+        term_osd_set_subs(mpctx, sub_get_text(dec_sub, video_pts));
+
+    return true;
 }
 
-void update_subtitles(struct MPContext *mpctx)
+// Return true if the subtitles for the given PTS are ready; false if the player
+// should wait for new demuxer data, and then should retry.
+bool update_subtitles(struct MPContext *mpctx, double video_pts)
 {
-    update_subtitle(mpctx, 0);
-    update_subtitle(mpctx, 1);
+    return update_subtitle(mpctx, video_pts, 0) &
+           update_subtitle(mpctx, video_pts, 1);
 }
 
 static bool init_subdec(struct MPContext *mpctx, struct track *track)

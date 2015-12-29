@@ -49,6 +49,7 @@ struct dec_sub {
     struct MPOpts *opts;
 
     struct sh_stream *sh;
+    double last_pkt_pts;
 
     struct sd *sd;
 };
@@ -90,6 +91,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
         sub->log = talloc_steal(sub, log),
         sub->opts = global->opts;
         sub->sh = sh;
+        sub->last_pkt_pts = MP_NOPTS_VALUE;
         mpthread_mutex_init_recursive(&sub->lock);
 
         sub->sd = talloc(NULL, struct sd);
@@ -116,20 +118,12 @@ struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
     return NULL;
 }
 
-void sub_decode(struct dec_sub *sub, struct demux_packet *packet)
-{
-    pthread_mutex_lock(&sub->lock);
-    sub->sd->driver->decode(sub->sd, packet);
-    pthread_mutex_unlock(&sub->lock);
-}
-
 // Read all packets from the demuxer and decode/add them. Returns false if
 // there are circumstances which makes this not possible.
 bool sub_read_all_packets(struct dec_sub *sub)
 {
     pthread_mutex_lock(&sub->lock);
 
-    // Converters are assumed to always accept packets in advance
     if (!sub->sd->driver->accept_packets_in_advance) {
         pthread_mutex_unlock(&sub->lock);
         return false;
@@ -147,14 +141,40 @@ bool sub_read_all_packets(struct dec_sub *sub)
     return true;
 }
 
-bool sub_accepts_packet_in_advance(struct dec_sub *sub)
+// Read packets from the demuxer stream passed to sub_create(). Return true if
+// enough packets were read, false if the player should wait until the demuxer
+// signals new packets available (and then should retry).
+bool sub_read_packets(struct dec_sub *sub, double video_pts)
 {
-    bool res = true;
+    bool r = true;
     pthread_mutex_lock(&sub->lock);
-    if (sub->sd->driver->accepts_packet)
-        res &= sub->sd->driver->accepts_packet(sub->sd);
+    while (1) {
+        bool read_more = true;
+        if (sub->sd->driver->accepts_packet)
+            read_more = sub->sd->driver->accepts_packet(sub->sd);
+
+        if (!read_more)
+            break;
+
+        struct demux_packet *pkt;
+        int st = demux_read_packet_async(sub->sh, &pkt);
+        // Note: "wait" (st==0) happens with non-interleaved streams only, and
+        // then we should stop the playloop until a new enough packet has been
+        // seen (or the subtitle decoder's queue is full). This does not happen
+        // for interleaved subtitle streams, which never return "wait" when
+        // reading.
+        if (st <= 0) {
+            r = st < 0 || (sub->last_pkt_pts != MP_NOPTS_VALUE &&
+                           sub->last_pkt_pts >= video_pts);
+            break;
+        }
+
+        sub->sd->driver->decode(sub->sd, pkt);
+        sub->last_pkt_pts = pkt->pts;
+        talloc_free(pkt);
+    }
     pthread_mutex_unlock(&sub->lock);
-    return res;
+    return r;
 }
 
 // You must call sub_lock/sub_unlock if more than 1 thread access sub.
@@ -189,6 +209,7 @@ void sub_reset(struct dec_sub *sub)
     pthread_mutex_lock(&sub->lock);
     if (sub->sd->driver->reset)
         sub->sd->driver->reset(sub->sd);
+    sub->last_pkt_pts = MP_NOPTS_VALUE;
     pthread_mutex_unlock(&sub->lock);
 }
 

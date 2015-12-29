@@ -515,7 +515,7 @@ void reinit_subs(struct MPContext *mpctx, int order);
 void uninit_sub(struct MPContext *mpctx, int order);
 void uninit_sub_all(struct MPContext *mpctx);
 void update_osd_msg(struct MPContext *mpctx);
-void update_subtitles(struct MPContext *mpctx);
+bool update_subtitles(struct MPContext *mpctx, double video_pts);
 
 // video.c
 void reset_video_state(struct MPContext *mpctx);
