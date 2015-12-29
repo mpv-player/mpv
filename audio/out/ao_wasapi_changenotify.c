@@ -226,8 +226,7 @@ HRESULT wasapi_change_init(struct ao *ao, bool is_hotplug)
         MP_DBG(ao, "Monitoring for hotplug events\n");
     } else {
         // Get the device string to compare with the pwstrDeviceId
-        hr = IMMDevice_GetId(state->pDevice, &change->monitored);
-        EXIT_ON_ERROR(hr);
+        change->monitored = state->deviceID;
         MP_VERBOSE(ao, "Monitoring changes in device %S\n", change->monitored);
     }
 
@@ -249,6 +248,5 @@ void wasapi_change_uninit(struct ao *ao)
             change->pEnumerator, (IMMNotificationClient *)change);
     }
 
-    if (change->monitored) CoTaskMemFree(change->monitored);
     SAFE_RELEASE(change->pEnumerator, IMMDeviceEnumerator_Release(change->pEnumerator));
 }
