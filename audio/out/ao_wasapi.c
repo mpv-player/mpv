@@ -455,10 +455,7 @@ static void audio_resume(struct ao *ao)
 static void hotplug_uninit(struct ao *ao)
 {
     MP_DBG(ao, "Hotplug uninit\n");
-    struct wasapi_state *state = ao->priv;
     wasapi_change_uninit(ao);
-    SAFE_RELEASE(state->pEnumerator,
-                 IMMDeviceEnumerator_Release(state->pEnumerator));
     CoUninitialize();
 }
 
@@ -468,11 +465,7 @@ static int hotplug_init(struct ao *ao)
     struct wasapi_state *state = ao->priv;
     state->log = ao->log;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                                  &IID_IMMDeviceEnumerator,
-                                  (void **)&state->pEnumerator);
-    EXIT_ON_ERROR(hr);
-    hr = wasapi_change_init(ao, true);
+    HRESULT hr = wasapi_change_init(ao, true);
     EXIT_ON_ERROR(hr);
 
     return 0;
