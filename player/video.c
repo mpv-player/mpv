@@ -391,15 +391,13 @@ static int decode_image(struct MPContext *mpctx)
     struct demux_packet *pkt;
     if (demux_read_packet_async(d_video->header, &pkt) == 0)
         return VD_WAIT;
-    if ((pkt && pkt->pts >= mpctx->hrseek_pts - .005) ||
-        d_video->has_broken_packet_pts ||
-        !mpctx->opts->hr_seek_framedrop)
-    {
-        mpctx->hrseek_framedrop = false;
-    }
     bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
-    int framedrop_type = hrseek && mpctx->hrseek_framedrop ?
-                         2 : check_framedrop(mpctx);
+    int framedrop_type = check_framedrop(mpctx);
+    if (hrseek && pkt && pkt->pts < mpctx->hrseek_pts - .005 &&
+        !d_video->has_broken_packet_pts && mpctx->opts->hr_seek_framedrop)
+    {
+        framedrop_type = 2;
+    }
     d_video->waiting_decoded_mpi =
         video_decode(d_video, pkt, framedrop_type);
     bool had_packet = !!pkt;
