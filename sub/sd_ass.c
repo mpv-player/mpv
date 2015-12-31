@@ -199,6 +199,10 @@ static int init(struct sd *sd)
 
     mp_ass_add_default_styles(ctx->ass_track, opts);
 
+#if LIBASS_VERSION >= 0x01302000
+    ass_set_check_readorder(ctx->ass_track, sd->opts->sub_clear_on_seek ? 0 : 1);
+#endif
+
     ctx->frame_fps = sd->sh->sub->frame_based;
     update_subtitle_speed(sd);
 
@@ -235,7 +239,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
     if (ctx->converter) {
-        if (check_packet_seen(sd, packet->pos))
+        if (!sd->opts->sub_clear_on_seek && check_packet_seen(sd, packet->pos))
             return;
         char **r = lavc_conv_decode(ctx->converter, packet);
         for (int n = 0; r && r[n]; n++)
