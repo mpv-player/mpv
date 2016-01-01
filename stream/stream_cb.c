@@ -118,8 +118,8 @@ static int open_cb(stream_t *stream)
 
     if (strncmp(stream->url, "cb://", 5) == 0) {
         p->stream_cb_ctx = &global_stream_cb_ctx;
-        if (!p->stream_cb_ctx || !p->stream_cb_ctx->open_fn) {
-            MP_ERR(stream, "Missing callbacks, call mpv_stream_cb_set_open_fn() first.\n");
+        if (!p->stream_cb_ctx || !p->stream_cb_ctx->open_fn || !p->stream_cb_ctx->read_fn) {
+            MP_ERR(stream, "Missing callbacks, call mpv_stream_cb_set_{open,read}_fn() first.\n");
             return STREAM_ERROR;
         }
 
