@@ -60,12 +60,20 @@ extern "C" {
  */
 typedef struct mpv_stream_cb_context mpv_stream_cb_context;
 
-typedef void *(*mpv_stream_cb_open_fn)(char *);
+typedef void *(*mpv_stream_cb_open_fn)(void *, char *);
 typedef int64_t (*mpv_stream_cb_read_fn)(void *, char *, uint64_t);
 typedef int64_t (*mpv_stream_cb_write_fn)(void *, char *, uint64_t);
 typedef int64_t (*mpv_stream_cb_seek_fn)(void *, int64_t, int);
 typedef int64_t (*mpv_stream_cb_size_fn)(void *);
 typedef void (*mpv_stream_cb_close_fn)(void *);
+
+/**
+ * Initialize the stream callback module.
+ *
+ * @param user_data opaque pointer passed into the mpv_stream_cb_open_fn
+ *        callback.
+ */
+void mpv_stream_cb_init(mpv_stream_cb_context *ctx, void *user_data);
 
 /**
  * Set the callbacks that are invoked to manipulate the underlying stream.

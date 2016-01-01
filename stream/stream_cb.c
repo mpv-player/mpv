@@ -18,6 +18,7 @@
 #include "libmpv/stream_cb.h"
 
 struct mpv_stream_cb_context {
+    void *user_data;
     mpv_stream_cb_open_fn open_fn;
     mpv_stream_cb_read_fn read_fn;
     mpv_stream_cb_write_fn write_fn;
@@ -31,6 +32,11 @@ static mpv_stream_cb_context global_stream_cb_ctx;
 struct mpv_stream_cb_context *mp_stream_cb_fetch()
 {
     return &global_stream_cb_ctx;
+}
+
+void mpv_stream_cb_init(mpv_stream_cb_context *ctx, void *user_data)
+{
+    ctx->user_data = user_data;
 }
 
 void mpv_stream_cb_set_callbacks(mpv_stream_cb_context *ctx,
@@ -107,7 +113,7 @@ static int open_cb(stream_t *stream)
             return STREAM_ERROR;
         }
 
-        p->cookie = p->stream_cb_ctx->open_fn(stream->url);
+        p->cookie = p->stream_cb_ctx->open_fn(p->stream_cb_ctx->user_data, stream->url);
     } else {
         return STREAM_ERROR;
     }
