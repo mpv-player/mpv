@@ -264,6 +264,7 @@ struct mpv_global *create_sub_global(struct MPContext *mpctx)
     *new = (struct mpv_global){
         .log = mpctx->global->log,
         .opts = new_config->optstruct,
+        .stream_cb_ctx = mpctx->global->stream_cb_ctx,
     };
     return new;
 }

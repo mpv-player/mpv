@@ -1679,7 +1679,7 @@ void kill_video(struct mp_client_api *client_api)
 
 static mpv_stream_cb_context *stream_cb_get_context(mpv_handle *ctx)
 {
-    return mp_stream_cb_fetch();
+    return mp_stream_cb_fetch(ctx->mpctx->global, ctx->clients);
 }
 
 #include "libmpv/opengl_cb.h"

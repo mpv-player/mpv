@@ -11,6 +11,7 @@
 
 #include "common/common.h"
 #include "common/msg.h"
+#include "common/global.h"
 #include "stream.h"
 #include "options/m_option.h"
 #include "options/path.h"
@@ -26,11 +27,10 @@ struct mpv_stream_cb_context {
     mpv_stream_cb_close_fn close_fn;
 };
 
-static mpv_stream_cb_context global_stream_cb_ctx;
-
-struct mpv_stream_cb_context *mp_stream_cb_fetch()
+struct mpv_stream_cb_context *mp_stream_cb_fetch(struct mpv_global *g,
+                                                 struct mp_client_api *client_api)
 {
-    return &global_stream_cb_ctx;
+    return g->stream_cb_ctx;
 }
 
 void mpv_stream_cb_init(mpv_stream_cb_context *ctx, void *user_data)
@@ -117,7 +117,7 @@ static int open_cb(stream_t *stream)
     stream->type = STREAMTYPE_CB;
 
     if (strncmp(stream->url, "cb://", 5) == 0) {
-        p->stream_cb_ctx = &global_stream_cb_ctx;
+        p->stream_cb_ctx = stream->global->stream_cb_ctx;
         if (!p->stream_cb_ctx || !p->stream_cb_ctx->open_fn || !p->stream_cb_ctx->read_fn) {
             MP_ERR(stream, "Missing callbacks, call mpv_stream_cb_set_{open,read}_fn() first.\n");
             return STREAM_ERROR;
