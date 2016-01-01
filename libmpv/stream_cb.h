@@ -65,7 +65,7 @@ typedef int64_t (*mpv_stream_cb_read_fn)(void *, char *, uint64_t);
 typedef int64_t (*mpv_stream_cb_write_fn)(void *, char *, uint64_t);
 typedef int64_t (*mpv_stream_cb_seek_fn)(void *, int64_t, int);
 typedef int64_t (*mpv_stream_cb_size_fn)(void *);
-typedef int (*mpv_stream_cb_close_fn)(void *);
+typedef void (*mpv_stream_cb_close_fn)(void *);
 
 /**
  * Set the callbacks that are invoked to manipulate the underlying stream.
