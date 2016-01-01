@@ -106,7 +106,8 @@ static int control(stream_t *s, int cmd, void *arg)
 static void s_close(stream_t *s)
 {
     struct priv *p = s->priv;
-    p->stream_cb_ctx->close_fn(p->cookie);
+    if (p->stream_cb_ctx->close_fn)
+        p->stream_cb_ctx->close_fn(p->cookie);
 }
 
 static int open_cb(stream_t *stream)
@@ -118,7 +119,7 @@ static int open_cb(stream_t *stream)
     if (strncmp(stream->url, "cb://", 5) == 0) {
         p->stream_cb_ctx = &global_stream_cb_ctx;
         if (!p->stream_cb_ctx || !p->stream_cb_ctx->open_fn) {
-            MP_ERR(stream, "Missing callbacks, call mpv_stream_cb_set_callbacks() first.\n");
+            MP_ERR(stream, "Missing callbacks, call mpv_stream_cb_set_open_fn() first.\n");
             return STREAM_ERROR;
         }
 
