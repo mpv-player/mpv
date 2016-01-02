@@ -23,6 +23,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
+#include "common/global.h"
 #include "input/input.h"
 #include "input/cmd_list.h"
 #include "misc/ctype.h"
@@ -1679,7 +1680,12 @@ void kill_video(struct mp_client_api *client_api)
 
 static mpv_stream_cb_context *stream_cb_get_context(mpv_handle *ctx)
 {
-    return mp_stream_cb_fetch(ctx->mpctx->global, ctx->clients);
+    mpv_stream_cb_context *cb = ctx->mpctx->global->stream_cb_ctx;
+    if (!cb) {
+        cb = mp_stream_cb_create(ctx->mpctx->global, ctx->clients);
+        ctx->mpctx->global->stream_cb_ctx = cb;
+    }
+    return cb;
 }
 
 #include "libmpv/opengl_cb.h"

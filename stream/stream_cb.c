@@ -27,10 +27,10 @@ struct mpv_stream_cb_context {
     mpv_stream_cb_close_fn close_fn;
 };
 
-struct mpv_stream_cb_context *mp_stream_cb_fetch(struct mpv_global *g,
-                                                 struct mp_client_api *client_api)
+mpv_stream_cb_context *mp_stream_cb_create(struct mpv_global *g,
+                                           struct mp_client_api *client_api)
 {
-    return g->stream_cb_ctx;
+    return talloc_zero(NULL, mpv_stream_cb_context);
 }
 
 void mpv_stream_cb_init(mpv_stream_cb_context *ctx, void *user_data)
