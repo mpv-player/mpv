@@ -345,7 +345,7 @@ const struct gl_video_opts gl_video_opts_def = {
          .clamp = 1, }, // tscale
     },
     .scaler_lut_size = 6,
-    .alpha_mode = 2,
+    .alpha_mode = 3,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
     .prescale_passes = 1,
@@ -369,7 +369,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
          .clamp = 1, }, // tscale
     },
     .scaler_lut_size = 6,
-    .alpha_mode = 2,
+    .alpha_mode = 3,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
     .blend_subs = 0,
@@ -441,7 +441,8 @@ const struct m_sub_options gl_video_conf = {
         OPT_CHOICE("alpha", alpha_mode, 0,
                    ({"no", 0},
                     {"yes", 1},
-                    {"blend", 2})),
+                    {"blend", 2},
+                    {"blend-tiles", 3})),
         OPT_FLAG("rectangle-textures", use_rectangle, 0),
         OPT_COLOR("background", background, 0),
         OPT_FLAG("interpolation", interpolation, 0),
@@ -1532,8 +1533,12 @@ static void pass_convert_yuv(struct gl_video *p)
 
     if (!p->has_alpha || p->opts.alpha_mode == 0) { // none
         GLSL(color.a = 1.0;)
-    } else if (p->opts.alpha_mode == 2) { // blend
+    } else if (p->opts.alpha_mode == 2) { // blend against black
         GLSL(color = vec4(color.rgb * color.a, 1.0);)
+    } else if (p->opts.alpha_mode == 3) { // blend against tiles
+        GLSL(bvec2 tile = lessThan(fract(gl_FragCoord.xy / 32.0), vec2(0.5));)
+        GLSL(vec3 background = vec3(tile.x == tile.y ? 1.0 : 0.75);)
+        GLSL(color.rgb = color.rgb * color.a + background * (1.0 - color.a);)
     } else if (p->gl->fb_premultiplied) {
         GLSL(color = vec4(color.rgb * color.a, color.a);)
     }

@@ -158,6 +158,7 @@ static const struct format_hack format_hacks[] = {
 };
 
 typedef struct lavf_priv {
+    struct stream *stream;
     char *filename;
     struct format_hack format_hack;
     AVInputFormat *avif;
@@ -170,7 +171,6 @@ typedef struct lavf_priv {
     int cur_program;
     char *mime_type;
     bool merge_track_metadata;
-    char *file_charset;
 } lavf_priv_t;
 
 // At least mp4 has name="mov,mp4,m4a,3gp,3g2,mj2", so we split the name
@@ -193,7 +193,8 @@ static bool matches_avinputformat_name(struct lavf_priv *priv,
 static int mp_read(void *opaque, uint8_t *buf, int size)
 {
     struct demuxer *demuxer = opaque;
-    struct stream *stream = demuxer->stream;
+    lavf_priv_t *priv = demuxer->priv;
+    struct stream *stream = priv->stream;
     int ret;
 
     ret = stream_read(stream, buf, size);
@@ -206,7 +207,8 @@ static int mp_read(void *opaque, uint8_t *buf, int size)
 static int64_t mp_seek(void *opaque, int64_t pos, int whence)
 {
     struct demuxer *demuxer = opaque;
-    struct stream *stream = demuxer->stream;
+    lavf_priv_t *priv = demuxer->priv;
+    struct stream *stream = priv->stream;
     int64_t current_pos;
     MP_TRACE(demuxer, "mp_seek(%p, %"PRId64", %s)\n", stream, pos,
              whence == SEEK_END ? "end" :
@@ -239,7 +241,8 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
 static int64_t mp_read_seek(void *opaque, int stream_idx, int64_t ts, int flags)
 {
     struct demuxer *demuxer = opaque;
-    struct stream *stream = demuxer->stream;
+    lavf_priv_t *priv = demuxer->priv;
+    struct stream *stream = priv->stream;
 
     struct stream_avseek cmd = {
         .stream_index = stream_idx,
@@ -262,21 +265,29 @@ static void list_formats(struct demuxer *demuxer)
         MP_INFO(demuxer, "%15s : %s\n", fmt->name, fmt->long_name);
 }
 
-static void detect_charset(struct demuxer *demuxer)
+static void convert_charset(struct demuxer *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
     char *cp = demuxer->opts->sub_cp;
-    if (mp_charset_requires_guess(cp)) {
-        bstr data = stream_peek(demuxer->stream, STREAM_MAX_BUFFER_SIZE);
-        cp = (char *)mp_charset_guess(priv, demuxer->log, data, cp, 0);
-        MP_VERBOSE(demuxer, "Detected charset: %s\n", cp ? cp : "(unknown)");
+    if (!cp || mp_charset_is_utf8(cp))
+        return;
+    bstr data = stream_read_complete(priv->stream, NULL, 128 * 1024 * 1024);
+    if (!data.start) {
+        MP_WARN(demuxer, "File too big (or error reading) - skip charset probing.\n");
+        return;
     }
+    cp = (char *)mp_charset_guess(priv, demuxer->log, data, cp, 0);
     if (cp && !mp_charset_is_utf8(cp))
         MP_INFO(demuxer, "Using subtitle charset: %s\n", cp);
     // libavformat transparently converts UTF-16 to UTF-8
-    if (mp_charset_is_utf16(priv->file_charset))
-        cp = NULL;
-    priv->file_charset = cp;
+    if (!mp_charset_is_utf16(cp)) {
+        bstr conv = mp_iconv_to_utf8(demuxer->log, data, cp, MP_ICONV_VERBOSE);
+        if (conv.start)
+            priv->stream = open_memory_stream(conv.start, conv.len);
+        if (conv.start != data.start)
+            talloc_free(conv.start);
+    }
+    talloc_free(data.start);
 }
 
 static char *remove_prefix(char *s, const char *const *prefixes)
@@ -296,8 +307,8 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 {
     struct MPOpts *opts = demuxer->opts;
     struct demux_lavf_opts *lavfdopts = opts->demux_lavf;
-    struct stream *s = demuxer->stream;
     lavf_priv_t *priv = demuxer->priv;
+    struct stream *s = priv->stream;
 
     priv->filename = remove_prefix(s->url, prefixes);
 
@@ -314,7 +325,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
         priv->filename = sep + 1;
     }
 
-    char *mime_type = demuxer->stream->mime_type;
+    char *mime_type = s->mime_type;
     if (!lavfdopts->allow_mimetype || !mime_type)
         mime_type = "";
 
@@ -416,7 +427,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     demuxer->filetype = priv->avif->name;
 
     if (priv->format_hack.detect_charset)
-        detect_charset(demuxer);
+        convert_charset(demuxer);
 
     return 0;
 }
@@ -531,7 +542,7 @@ static int dict_get_decimal(AVDictionary *dict, const char *entry, int def)
     return def;
 }
 
-static void handle_stream(demuxer_t *demuxer, int i)
+static void handle_new_stream(demuxer_t *demuxer, int i)
 {
     lavf_priv_t *priv = demuxer->priv;
     AVFormatContext *avfc = priv->avfc;
@@ -541,9 +552,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
 
     switch (codec->codec_type) {
     case AVMEDIA_TYPE_AUDIO: {
-        sh = new_sh_stream(demuxer, STREAM_AUDIO);
-        if (!sh)
-            break;
+        sh = demux_alloc_sh_stream(STREAM_AUDIO);
         sh_audio_t *sh_audio = sh->audio;
 
         // probably unneeded
@@ -558,9 +567,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
         break;
     }
     case AVMEDIA_TYPE_VIDEO: {
-        sh = new_sh_stream(demuxer, STREAM_VIDEO);
-        if (!sh)
-            break;
+        sh = demux_alloc_sh_stream(STREAM_VIDEO);
         sh_video_t *sh_video = sh->video;
 
         if (st->disposition & AV_DISPOSITION_ATTACHED_PIC) {
@@ -609,9 +616,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
     }
     case AVMEDIA_TYPE_SUBTITLE: {
         sh_sub_t *sh_sub;
-        sh = new_sh_stream(demuxer, STREAM_SUB);
-        if (!sh)
-            break;
+        sh = demux_alloc_sh_stream(STREAM_SUB);
         sh_sub = sh->sub;
 
         if (codec->extradata_size) {
@@ -633,9 +638,6 @@ static void handle_stream(demuxer_t *demuxer, int i)
                     sh_sub->frame_based = 23.976;
             }
         }
-
-        sh_sub->charset = priv->file_charset;
-
         break;
     }
     case AVMEDIA_TYPE_ATTACHMENT: {
@@ -660,9 +662,8 @@ static void handle_stream(demuxer_t *demuxer, int i)
         sh->codec = mp_codec_from_av_codec_id(codec->codec_id);
         sh->codec_tag = codec->codec_tag;
         sh->lav_headers = avcodec_alloc_context3(NULL);
-        if (!sh->lav_headers)
-            return;
-        mp_copy_lav_codec_headers(sh->lav_headers, codec);
+        if (sh->lav_headers)
+            mp_copy_lav_codec_headers(sh->lav_headers, codec);
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = true;
@@ -680,10 +681,10 @@ static void handle_stream(demuxer_t *demuxer, int i)
         if (!sh->title && sh->hls_bitrate > 0)
             sh->title = talloc_asprintf(sh, "bitrate %d", sh->hls_bitrate);
         sh->missing_timestamps = !!(priv->avif_flags & AVFMT_NOTIMESTAMPS);
+        demux_add_sh_stream(demuxer, sh);
     }
 
     select_tracks(demuxer, i);
-    demux_changed(demuxer, DEMUX_EVENT_STREAMS);
 }
 
 // Add any new streams that might have been added
@@ -691,7 +692,7 @@ static void add_new_streams(demuxer_t *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
     while (priv->num_streams < priv->avfc->nb_streams)
-        handle_stream(demuxer, priv->num_streams);
+        handle_new_stream(demuxer, priv->num_streams);
 }
 
 static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
@@ -717,7 +718,8 @@ static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
 static int interrupt_cb(void *ctx)
 {
     struct demuxer *demuxer = ctx;
-    return mp_cancel_test(demuxer->stream->cancel);
+    lavf_priv_t *priv = demuxer->priv;
+    return mp_cancel_test(priv->stream->cancel);
 }
 
 static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
@@ -729,6 +731,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     float analyze_duration = 0;
     lavf_priv_t *priv = talloc_zero(NULL, lavf_priv_t);
     demuxer->priv = priv;
+    priv->stream = demuxer->stream;
 
     if (lavf_check_file(demuxer, check) < 0)
         return -1;
@@ -771,7 +774,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     AVDictionary *dopts = NULL;
 
     if ((priv->avif_flags & AVFMT_NOFILE) ||
-        demuxer->stream->type == STREAMTYPE_AVDEVICE ||
+        priv->stream->type == STREAMTYPE_AVDEVICE ||
         priv->format_hack.no_stream)
     {
         mp_setup_av_network_options(&dopts, demuxer->global, demuxer->log, opts);
@@ -790,7 +793,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         priv->pb->read_seek = mp_read_seek;
         priv->pb->seekable = demuxer->seekable ? AVIO_SEEKABLE_NORMAL : 0;
         avfc->pb = priv->pb;
-        if (stream_control(demuxer->stream, STREAM_CTRL_HAS_AVSEEK, NULL) > 0)
+        if (stream_control(priv->stream, STREAM_CTRL_HAS_AVSEEK, NULL) > 0)
             demuxer->seekable = true;
     }
 
@@ -830,7 +833,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     }
 
     MP_VERBOSE(demuxer, "avformat_find_stream_info() finished after %"PRId64
-               " bytes.\n", stream_tell(demuxer->stream));
+               " bytes.\n", stream_tell(priv->stream));
 
     for (int i = 0; i < avfc->nb_chapters; i++) {
         AVChapter *c = avfc->chapters[i];
@@ -844,7 +847,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     // Often useful with OGG audio-only files, which have metadata in the audio
     // track metadata instead of the main metadata.
-    if (demuxer->num_streams == 1) {
+    if (demux_get_num_stream(demuxer) == 1) {
         priv->merge_track_metadata = true;
         for (int n = 0; n < priv->num_streams; n++) {
             if (priv->streams[n])
@@ -942,7 +945,7 @@ static void demux_seek_lavf(demuxer_t *demuxer, double rel_seek_secs, int flags)
         avsflags = AVSEEK_FLAG_BACKWARD;
 
     if (flags & SEEK_FACTOR) {
-        struct stream *s = demuxer->stream;
+        struct stream *s = priv->stream;
         int64_t end = stream_get_size(s);
         if (end > 0 && demuxer->ts_resets_possible &&
             !(priv->avif_flags & AVFMT_NO_BYTE_SEEK))
@@ -1078,10 +1081,10 @@ redo:
          */
         // avio_flush() is designed for write-only streams, and does the wrong
         // thing when reading. Flush it manually instead.
-        stream_drop_buffers(demuxer->stream);
+        stream_drop_buffers(priv->stream);
         priv->avfc->pb->buf_ptr = priv->avfc->pb->buf_end = priv->avfc->pb->buffer;
-        priv->avfc->pb->pos = stream_tell(demuxer->stream);
-        av_seek_frame(priv->avfc, 0, stream_tell(demuxer->stream),
+        priv->avfc->pb->pos = stream_tell(priv->stream);
+        av_seek_frame(priv->avfc, 0, stream_tell(priv->stream),
                       AVSEEK_FLAG_BYTE);
         return DEMUXER_CTRL_OK;
     default:
@@ -1104,6 +1107,8 @@ static void demux_close_lavf(demuxer_t *demuxer)
             if (priv->streams[n])
                 avcodec_free_context(&priv->streams[n]->lav_headers);
         }
+        if (priv->stream != demuxer->stream)
+            free_stream(priv->stream);
         talloc_free(priv);
         demuxer->priv = NULL;
     }

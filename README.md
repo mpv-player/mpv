@@ -111,10 +111,6 @@ the separately available build wrapper ([mpv-build][mpv-build]) that first compi
 libraries and libass, and then compiles the player statically linked against
 those.
 
-If you are running Mac OSX and using homebrew we provide [homebrew-mpv][homebrew-mpv], an up
-to date formula that compiles mpv with sensible dependencies and defaults for
-OSX.
-
 If you want to build a Windows binary, you either have to use MSYS2 and MinGW,
 or cross-compile from Linux with MinGW. See [Windows compilation][windows_compilation].
 

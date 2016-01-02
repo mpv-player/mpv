@@ -29,7 +29,7 @@
 #include "options/options.h"
 #include "common/common.h"
 #include "common/msg.h"
-#include "demux/stheader.h"
+#include "demux/demux.h"
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "dec_sub.h"
@@ -37,6 +37,8 @@
 #include "sd.h"
 
 struct sd_ass_priv {
+    struct ass_library *ass_library;
+    struct ass_renderer *ass_renderer;
     struct ass_track *ass_track;
     struct ass_track *shadow_track; // for --sub-ass=no rendering
     bool is_converted;
@@ -46,7 +48,7 @@ struct sd_ass_priv {
     char last_text[500];
     struct mp_image_params video_params;
     struct mp_image_params last_params;
-    double sub_speed;
+    double sub_speed, video_fps, frame_fps;
     int64_t *seen_packets;
     int num_seen_packets;
 };
@@ -78,18 +80,88 @@ static void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts)
         ass_process_force_style(track);
 }
 
-static bool supports_format(const char *format)
+static const char *const font_mimetypes[] = {
+    "application/x-truetype-font",
+    "application/vnd.ms-opentype",
+    "application/x-font-ttf",
+    "application/x-font", // probably incorrect
+    NULL
+};
+
+static const char *const font_exts[] = {".ttf", ".ttc", ".otf", NULL};
+
+static bool attachment_is_font(struct mp_log *log, struct demux_attachment *f)
 {
-    return (format && strcmp(format, "ass") == 0) ||
-           lavc_conv_supports_format(format);
+    if (!f->name || !f->type || !f->data || !f->data_size)
+        return false;
+    for (int n = 0; font_mimetypes[n]; n++) {
+        if (strcmp(font_mimetypes[n], f->type) == 0)
+            return true;
+    }
+    // fallback: match against file extension
+    char *ext = strlen(f->name) > 4 ? f->name + strlen(f->name) - 4 : "";
+    for (int n = 0; font_exts[n]; n++) {
+        if (strcasecmp(ext, font_exts[n]) == 0) {
+            mp_warn(log, "Loading font attachment '%s' with MIME type %s. "
+                    "Assuming this is a broken Matroska file, which was "
+                    "muxed without setting a correct font MIME type.\n",
+                    f->name, f->type);
+            return true;
+        }
+    }
+    return false;
+}
+
+static void add_subtitle_fonts(struct sd *sd)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    struct MPOpts *opts = sd->opts;
+    if (!opts->ass_enabled || !sd->demuxer)
+        return;
+    for (int i = 0; i < sd->demuxer->num_attachments; i++) {
+        struct demux_attachment *f = &sd->demuxer->attachments[i];
+        if (opts->use_embedded_fonts && attachment_is_font(sd->log, f))
+            ass_add_font(ctx->ass_library, f->name, f->data, f->data_size);
+    }
+}
+
+static void enable_output(struct sd *sd, bool enable)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    if (enable == !!ctx->ass_renderer)
+        return;
+    if (ctx->ass_renderer) {
+        ass_renderer_done(ctx->ass_renderer);
+        ctx->ass_renderer = NULL;
+    } else {
+        ctx->ass_renderer = ass_renderer_init(ctx->ass_library);
+
+        mp_ass_configure_fonts(ctx->ass_renderer, sd->opts->sub_text_style,
+                               sd->global, sd->log);
+    }
+}
+
+static void update_subtitle_speed(struct sd *sd)
+{
+    struct MPOpts *opts = sd->opts;
+    struct sd_ass_priv *ctx = sd->priv;
+    ctx->sub_speed = 1.0;
+
+    if (ctx->video_fps > 0 && ctx->frame_fps > 0) {
+        MP_VERBOSE(sd, "Frame based format, dummy FPS: %f, video FPS: %f\n",
+                   ctx->frame_fps, ctx->video_fps);
+        ctx->sub_speed *= ctx->frame_fps / ctx->video_fps;
+    }
+
+    if (opts->sub_fps && ctx->video_fps)
+        ctx->sub_speed *= opts->sub_fps / ctx->video_fps;
+
+    ctx->sub_speed *= opts->sub_speed;
 }
 
 static int init(struct sd *sd)
 {
     struct MPOpts *opts = sd->opts;
-    if (!sd->ass_library || !sd->ass_renderer || !sd->ass_lock)
-        return -1;
-
     struct sd_ass_priv *ctx = talloc_zero(sd, struct sd_ass_priv);
     sd->priv = ctx;
 
@@ -106,13 +178,18 @@ static int init(struct sd *sd)
         extradata_size = extradata ? strlen(extradata) : 0;
     }
 
-    pthread_mutex_lock(sd->ass_lock);
+    ctx->ass_library = mp_ass_init(sd->global, sd->log);
 
-    ctx->ass_track = ass_new_track(sd->ass_library);
+    add_subtitle_fonts(sd);
+
+    if (opts->ass_style_override)
+        ass_set_style_overrides(ctx->ass_library, opts->ass_force_style_list);
+
+    ctx->ass_track = ass_new_track(ctx->ass_library);
     if (!ctx->is_converted)
         ctx->ass_track->track_type = TRACK_TYPE_ASS;
 
-    ctx->shadow_track = ass_new_track(sd->ass_library);
+    ctx->shadow_track = ass_new_track(ctx->ass_library);
     ctx->shadow_track->PlayResX = 384;
     ctx->shadow_track->PlayResY = 288;
     mp_ass_add_default_styles(ctx->shadow_track, opts);
@@ -122,20 +199,14 @@ static int init(struct sd *sd)
 
     mp_ass_add_default_styles(ctx->ass_track, opts);
 
-    pthread_mutex_unlock(sd->ass_lock);
+#if LIBASS_VERSION >= 0x01302000
+    ass_set_check_readorder(ctx->ass_track, sd->opts->sub_clear_on_seek ? 0 : 1);
+#endif
 
-    ctx->sub_speed = 1.0;
+    ctx->frame_fps = sd->sh->sub->frame_based;
+    update_subtitle_speed(sd);
 
-    if (sd->video_fps && sd->sh && sd->sh->sub->frame_based > 0) {
-        MP_VERBOSE(sd, "Frame based format, dummy FPS: %f, video FPS: %f\n",
-                   sd->sh->sub->frame_based, sd->video_fps);
-        ctx->sub_speed *= sd->sh->sub->frame_based / sd->video_fps;
-    }
-
-    if (opts->sub_fps && sd->video_fps)
-        ctx->sub_speed *= opts->sub_fps / sd->video_fps;
-
-    ctx->sub_speed *= opts->sub_speed;
+    enable_output(sd, true);
 
     return 0;
 }
@@ -168,7 +239,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
     if (ctx->converter) {
-        if (check_packet_seen(sd, packet->pos))
+        if (!sd->opts->sub_clear_on_seek && check_packet_seen(sd, packet->pos))
             return;
         char **r = lavc_conv_decode(ctx->converter, packet);
         for (int n = 0; r && r[n]; n++)
@@ -186,7 +257,8 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
                           bool converted, ASS_Track *track)
 {
     struct MPOpts *opts = sd->opts;
-    ASS_Renderer *priv = sd->ass_renderer;
+    struct sd_ass_priv *ctx = sd->priv;
+    ASS_Renderer *priv = ctx->ass_renderer;
 
     ass_set_frame_size(priv, dim->w, dim->h);
     ass_set_margins(priv, dim->mt, dim->mb, dim->ml, dim->mr);
@@ -331,13 +403,11 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     bool no_ass = !opts->ass_enabled || ctx->on_top;
     bool converted = ctx->is_converted || no_ass;
     ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
+    ASS_Renderer *renderer = ctx->ass_renderer;
 
-    if (pts == MP_NOPTS_VALUE || !sd->ass_renderer)
+    if (pts == MP_NOPTS_VALUE || !renderer)
         return;
 
-    pthread_mutex_lock(sd->ass_lock);
-
-    ASS_Renderer *renderer = sd->ass_renderer;
     double scale = dim.display_par;
     if (!converted && (!opts->ass_style_override ||
                        opts->ass_vsfilter_aspect_compat))
@@ -364,8 +434,6 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
 
     if (!converted)
         mangle_colors(sd, res);
-
-    pthread_mutex_unlock(sd->ass_lock);
 }
 
 struct buf {
@@ -528,6 +596,8 @@ static void uninit(struct sd *sd)
     if (ctx->converter)
         lavc_conv_uninit(ctx->converter);
     ass_free_track(ctx->ass_track);
+    enable_output(sd, false);
+    ass_library_done(ctx->ass_library);
 }
 
 static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
@@ -549,6 +619,10 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     case SD_CTRL_SET_TOP:
         ctx->on_top = *(bool *)arg;
         return CONTROL_OK;
+    case SD_CTRL_SET_VIDEO_DEF_FPS:
+        ctx->video_fps = *(double *)arg;
+        update_subtitle_speed(sd);
+        return CONTROL_OK;
     default:
         return CONTROL_UNKNOWN;
     }
@@ -557,13 +631,13 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
 const struct sd_functions sd_ass = {
     .name = "ass",
     .accept_packets_in_advance = true,
-    .supports_format = supports_format,
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,
     .get_text = get_text,
     .control = control,
     .reset = reset,
+    .select = enable_output,
     .uninit = uninit,
 };
 

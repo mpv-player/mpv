@@ -10,28 +10,24 @@
 #define SUB_GAP_KEEP 0.4
 
 struct sd {
+    struct mpv_global *global;
     struct mp_log *log;
     struct MPOpts *opts;
 
     const struct sd_functions *driver;
     void *priv;
 
+    struct demuxer *demuxer;
     struct sh_stream *sh;
-    double video_fps;
-
-    // Shared renderer for ASS - done to avoid reloading embedded fonts.
-    struct ass_library *ass_library;
-    struct ass_renderer *ass_renderer;
-    pthread_mutex_t *ass_lock;
 };
 
 struct sd_functions {
     const char *name;
     bool accept_packets_in_advance;
-    bool (*supports_format)(const char *format);
     int  (*init)(struct sd *sd);
     void (*decode)(struct sd *sd, struct demux_packet *packet);
     void (*reset)(struct sd *sd);
+    void (*select)(struct sd *sd, bool selected);
     void (*uninit)(struct sd *sd);
 
     bool (*accepts_packet)(struct sd *sd); // implicit default if NULL: true
@@ -43,7 +39,6 @@ struct sd_functions {
 };
 
 struct lavc_conv;
-bool lavc_conv_supports_format(const char *format);
 struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
                                    char *extradata, int extradata_len);
 char *lavc_conv_get_extradata(struct lavc_conv *priv);

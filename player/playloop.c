@@ -1036,7 +1036,8 @@ void run_playloop(struct MPContext *mpctx)
     handle_dummy_ticks(mpctx);
 
     update_osd_msg(mpctx);
-    update_subtitles(mpctx);
+    if (!mpctx->video_out)
+        update_subtitles(mpctx, mpctx->playback_pts);
 
     handle_segment_switch(mpctx, end_is_new_segment);
 

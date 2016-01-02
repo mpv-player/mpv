@@ -131,13 +131,16 @@ struct track {
     // If the track's stream changes with the timeline (ordered chapters).
     bool under_timeline;
 
-    // Does not change with under_timeline, but it useless for most purposes.
+    // Does not change with under_timeline, but is useless for most purposes.
     struct sh_stream *original_stream;
 
     // Value can change if under_timeline==true.
     struct demuxer *demuxer;
     // Invariant: !stream || stream->demuxer == demuxer
     struct sh_stream *stream;
+
+    // Current subtitle state (or cached state if selected==false).
+    struct dec_sub *dec_sub;
 
     // For external subtitles, which are read fully on init. Do not attempt
     // to read packets from them.
@@ -362,15 +365,6 @@ typedef struct MPContext {
     int last_chapter_seek;
     double last_chapter_pts;
 
-    /* Subtitle renderer. This is separate, because we want to keep fonts
-     * loaded across ordered chapters, instead of reloading and rescanning
-     * them on each transition. (Both of these objects contain this state.)
-     */
-    pthread_mutex_t ass_lock;
-    struct ass_renderer *ass_renderer;
-    struct ass_library *ass_library;
-    struct mp_log *ass_log;
-
     int last_dvb_step;
 
     bool paused;
@@ -517,13 +511,11 @@ void mp_load_scripts(struct MPContext *mpctx);
 
 // sub.c
 void reset_subtitle_state(struct MPContext *mpctx);
-void uninit_stream_sub_decoders(struct demuxer *demuxer);
 void reinit_subs(struct MPContext *mpctx, int order);
 void uninit_sub(struct MPContext *mpctx, int order);
 void uninit_sub_all(struct MPContext *mpctx);
 void update_osd_msg(struct MPContext *mpctx);
-void update_subtitles(struct MPContext *mpctx);
-void uninit_sub_renderer(struct MPContext *mpctx);
+bool update_subtitles(struct MPContext *mpctx, double video_pts);
 
 // video.c
 void reset_video_state(struct MPContext *mpctx);

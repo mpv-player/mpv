@@ -111,7 +111,13 @@ int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
 }
 
 #if HAVE_C11_TLS
-static _Thread_local MPGLContext *current_context;
+#define MP_TLS _Thread_local
+#elif defined(__GNU__)
+#define MP_TLS __thread
+#endif
+
+#ifdef MP_TLS
+static MP_TLS MPGLContext *current_context;
 
 static void * GLAPIENTRY get_native_display(const char *name)
 {

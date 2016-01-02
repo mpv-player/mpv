@@ -391,15 +391,13 @@ static int decode_image(struct MPContext *mpctx)
     struct demux_packet *pkt;
     if (demux_read_packet_async(d_video->header, &pkt) == 0)
         return VD_WAIT;
-    if ((pkt && pkt->pts >= mpctx->hrseek_pts - .005) ||
-        d_video->has_broken_packet_pts ||
-        !mpctx->opts->hr_seek_framedrop)
-    {
-        mpctx->hrseek_framedrop = false;
-    }
     bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
-    int framedrop_type = hrseek && mpctx->hrseek_framedrop ?
-                         2 : check_framedrop(mpctx);
+    int framedrop_type = check_framedrop(mpctx);
+    if (hrseek && pkt && pkt->pts < mpctx->hrseek_pts - .005 &&
+        !d_video->has_broken_packet_pts && mpctx->opts->hr_seek_framedrop)
+    {
+        framedrop_type = 2;
+    }
     d_video->waiting_decoded_mpi =
         video_decode(d_video, pkt, framedrop_type);
     bool had_packet = !!pkt;
@@ -1206,6 +1204,11 @@ void write_video(struct MPContext *mpctx, double endpts)
     mpctx->time_frame -= get_relative_time(mpctx);
     update_avsync_before_frame(mpctx);
 
+    if (!update_subtitles(mpctx, mpctx->next_frames[0]->pts)) {
+        MP_WARN(mpctx, "subt wait\n");
+        return;
+    }
+
     double time_frame = MPMAX(mpctx->time_frame, -1);
     int64_t pts = mp_time_us() + (int64_t)(time_frame * 1e6);
 
@@ -1262,7 +1265,6 @@ void write_video(struct MPContext *mpctx, double endpts)
 
     mpctx->osd_force_update = true;
     update_osd_msg(mpctx);
-    update_subtitles(mpctx);
 
     vo_queue_frame(vo, frame);
 

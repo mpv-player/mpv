@@ -202,14 +202,18 @@ typedef struct mkv_demuxer {
 struct demux_mkv_opts {
     int subtitle_preroll;
     double subtitle_preroll_secs;
+    double subtitle_preroll_secs_index;
     int probe_duration;
     int probe_start_time;
 };
 
 const struct m_sub_options demux_mkv_conf = {
     .opts = (const m_option_t[]) {
-        OPT_FLAG("subtitle-preroll", subtitle_preroll, 0),
+        OPT_CHOICE("subtitle-preroll", subtitle_preroll, 0,
+                   ({"no", 0}, {"yes", 1}, {"index", 2})),
         OPT_DOUBLE("subtitle-preroll-secs", subtitle_preroll_secs,
+                   M_OPT_MIN, .min = 0),
+        OPT_DOUBLE("subtitle-preroll-secs-index", subtitle_preroll_secs_index,
                    M_OPT_MIN, .min = 0),
         OPT_CHOICE("probe-video-duration", probe_duration, 0,
                    ({"no", 0}, {"yes", 1}, {"full", 2})),
@@ -218,7 +222,9 @@ const struct m_sub_options demux_mkv_conf = {
     },
     .size = sizeof(struct demux_mkv_opts),
     .defaults = &(const struct demux_mkv_opts){
+        .subtitle_preroll = 2,
         .subtitle_preroll_secs = 1.0,
+        .subtitle_preroll_secs_index = 10.0,
         .probe_start_time = 1,
     },
 };
@@ -1193,9 +1199,7 @@ static void add_coverart(struct demuxer *demuxer)
         const char *codec = mp_map_mimetype_to_video_codec(att->type);
         if (!codec)
             continue;
-        struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
-        if (!sh)
-            break;
+        struct sh_stream *sh = demux_alloc_sh_stream(STREAM_VIDEO);
         sh->demuxer_id = -1 - sh->index; // don't clash with mkv IDs
         sh->codec = codec;
         sh->attached_picture = new_demux_packet_from(att->data, att->data_size);
@@ -1205,6 +1209,7 @@ static void add_coverart(struct demuxer *demuxer)
             sh->attached_picture->keyframe = true;
         }
         sh->title = att->name;
+        demux_add_sh_stream(demuxer, sh);
     }
 }
 
@@ -1266,9 +1271,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
 {
     unsigned char *extradata = NULL;
     unsigned int extradata_size = 0;
-    struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
-    if (!sh)
-        return 1;
+    struct sh_stream *sh = demux_alloc_sh_stream(STREAM_VIDEO);
     init_track(demuxer, track, sh);
     sh_video_t *sh_v = sh->video;
 
@@ -1277,7 +1280,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     if (!strcmp(track->codec_id, "V_MS/VFW/FOURCC")) { /* AVI compatibility mode */
         // The private_data contains a BITMAPINFOHEADER struct
         if (track->private_data == NULL || track->private_size < 40)
-            return 1;
+            goto done;
 
         unsigned char *h = track->private_data;
         if (track->v_width == 0)
@@ -1355,7 +1358,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
 
     if (extradata_size > 0x1000000) {
         MP_WARN(demuxer, "Invalid CodecPrivate\n");
-        return 1;
+        goto done;
     }
 
     sh->extradata = talloc_memdup(sh_v, extradata, extradata_size);
@@ -1377,6 +1380,9 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v->par_h = p.p_h;
 
     sh_v->stereo_mode = track->stereo_mode;
+
+done:
+    demux_add_sh_stream(demuxer, sh);
 
     return 0;
 }
@@ -1469,9 +1475,7 @@ static const char *const mkv_audio_tags[][2] = {
 
 static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 {
-    struct sh_stream *sh = new_sh_stream(demuxer, STREAM_AUDIO);
-    if (!sh)
-        return 1;
+    struct sh_stream *sh = demux_alloc_sh_stream(STREAM_AUDIO);
     init_track(demuxer, track, sh);
     sh_audio_t *sh_a = sh->audio;
 
@@ -1680,12 +1684,15 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     sh->extradata = extradata;
     sh->extradata_size = extradata_len;
 
+    demux_add_sh_stream(demuxer, sh);
+
     return 0;
 
  error:
     MP_WARN(demuxer, "Unknown/unsupported audio "
             "codec ID '%s' for track %u or missing/faulty\n"
             "private codec data.\n", track->codec_id, track->tnum);
+    demux_add_sh_stream(demuxer, sh); // add it anyway
     return 1;
 }
 
@@ -1717,9 +1724,7 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
     if (track->private_size > 0x10000000)
         return 1;
 
-    struct sh_stream *sh = new_sh_stream(demuxer, STREAM_SUB);
-    if (!sh)
-        return 1;
+    struct sh_stream *sh = demux_alloc_sh_stream(STREAM_SUB);
     init_track(demuxer, track, sh);
 
     sh->codec = subtitle_type;
@@ -1733,6 +1738,8 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
     }
     sh->extradata = track->private_data;
     sh->extradata_size = track->private_size;
+
+    demux_add_sh_stream(demuxer, sh);
 
     if (!subtitle_type)
         MP_ERR(demuxer, "Subtitle type '%s' is not supported.\n", track->codec_id);
@@ -2602,7 +2609,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
             }
             // For the sake of robustness, consider even unknown level 1
             // elements the same as unknown/broken IDs.
-            if (!ebml_is_mkv_level1_id(id) ||
+            if ((!ebml_is_mkv_level1_id(id) && id != EBML_ID_VOID) ||
                 ebml_read_skip(demuxer->log, -1, s) != 0)
             {
                 ebml_resync_cluster(demuxer->log, s);
@@ -2723,6 +2730,8 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
             // Find the cluster with the highest filepos, that has a timestamp
             // still lower than min_tc.
             double secs = opts->demux_mkv->subtitle_preroll_secs;
+            if (mkv_d->index_has_durations)
+                secs = MPMAX(secs, opts->demux_mkv->subtitle_preroll_secs_index);
             uint64_t pre = MPMIN(INT64_MAX, secs * 1e9 / mkv_d->tc_scale);
             uint64_t min_tc = pre < index->timecode ? index->timecode - pre : 0;
             uint64_t prev_target = 0;
@@ -2785,8 +2794,10 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
     int cueflags = (flags & SEEK_BACKWARD) ? FLAG_BACKWARD : 0;
 
     mkv_d->subtitle_preroll = NUM_SUB_PREROLL_PACKETS;
-    if (((flags & SEEK_HR) || demuxer->opts->demux_mkv->subtitle_preroll) &&
-        st_active[STREAM_SUB] && st_active[STREAM_VIDEO])
+    int preroll_opt = demuxer->opts->demux_mkv->subtitle_preroll;
+    if (((flags & SEEK_HR) || preroll_opt == 1 ||
+         (preroll_opt == 2 && mkv_d->index_has_durations))
+        && st_active[STREAM_SUB] && st_active[STREAM_VIDEO])
         cueflags |= FLAG_SUBPREROLL;
 
     // Adjust the target a little bit to catch cases where the target position

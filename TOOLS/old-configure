@@ -973,6 +973,7 @@ cat > $TMPC << EOF
 #define HAVE_EGL_ANGLE 0
 #define HAVE_GPL3 1
 #define HAVE_WIN32 0
+#define HAVE_GL_DXINTEROP 0
 
 #ifdef __OpenBSD__
 #define DEFAULT_CDROM_DEVICE "/dev/rcd0c"

@@ -32,8 +32,6 @@
 #define MP_CONCAT_(a, b) a ## b
 #define MP_CONCAT(a, b) MP_CONCAT_(a, b)
 
-#define ROUND(x) ((int)((x) < 0 ? (x) - 0.5 : (x) + 0.5))
-
 #define MPMAX(a, b) ((a) > (b) ? (a) : (b))
 #define MPMIN(a, b) ((a) > (b) ? (b) : (a))
 #define MPCLAMP(a, min, max) (((a) < (min)) ? (min) : (((a) > (max)) ? (max) : (a)))

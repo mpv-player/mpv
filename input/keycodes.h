@@ -200,6 +200,9 @@
 #define MP_KEY_IS_MOUSE(code) \
     (MP_KEY_IS_MOUSE_CLICK(code) || MP_KEY_IS_MOUSE_MOVE(code))
 
+// No input source should generate this.
+#define MP_KEY_UNMAPPED (MP_KEY_INTERN+4)
+
 // Emit a command even on key-up (normally key-up is ignored). This means by
 // default they binding will be triggered on key-up instead of key-down.
 // This is a fixed part of the keycode, not a modifier than can change.

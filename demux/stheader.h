@@ -93,8 +93,6 @@ typedef struct sh_video {
 typedef struct sh_sub {
     double frame_based;         // timestamps are frame-based (and this is the
                                 // fallback framerate used for timestamps)
-    char *charset;              // assumed 8 bit subtitle charset (can be NULL)
-    struct dec_sub *dec_sub;    // decoder context
 } sh_sub_t;
 
 #endif /* MPLAYER_STHEADER_H */

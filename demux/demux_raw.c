@@ -117,6 +117,7 @@ const struct m_sub_options demux_rawvideo_conf = {
 };
 
 struct priv {
+    struct sh_stream *sh;
     int frame_size;
     int read_frames;
     double frame_rate;
@@ -125,14 +126,12 @@ struct priv {
 static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
 {
     struct demux_rawaudio_opts *opts = demuxer->opts->demux_rawaudio;
-    struct sh_stream *sh;
-    sh_audio_t *sh_audio;
 
     if (check != DEMUX_CHECK_REQUEST && check != DEMUX_CHECK_FORCE)
         return -1;
 
-    sh = new_sh_stream(demuxer, STREAM_AUDIO);
-    sh_audio = sh->audio;
+    struct sh_stream *sh = demux_alloc_sh_stream(STREAM_AUDIO);
+    struct sh_audio *sh_audio = sh->audio;
     sh_audio->channels = opts->channels;
     sh_audio->force_channels = true;
     sh_audio->samplerate = opts->samplerate;
@@ -142,9 +141,12 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
     mp_set_pcm_codec(sh, f & 1, f & 2, f >> 3, f & 4);
     int samplesize = ((f >> 3) + 7) / 8;
 
+    demux_add_sh_stream(demuxer, sh);
+
     struct priv *p = talloc_ptrtype(demuxer, p);
     demuxer->priv = p;
     *p = (struct priv) {
+        .sh = sh,
         .frame_size = samplesize * sh_audio->channels.num,
         .frame_rate = sh_audio->samplerate,
         .read_frames = sh_audio->samplerate / 8,
@@ -156,8 +158,6 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
 static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
 {
     struct demux_rawvideo_opts *opts = demuxer->opts->demux_rawvideo;
-    struct sh_stream *sh;
-    sh_video_t *sh_video;
 
     if (check != DEMUX_CHECK_REQUEST && check != DEMUX_CHECK_FORCE)
         return -1;
@@ -219,17 +219,19 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
         imgsize = width * height * bpp / 8;
     }
 
-    sh = new_sh_stream(demuxer, STREAM_VIDEO);
-    sh_video = sh->video;
+    struct sh_stream *sh = demux_alloc_sh_stream(STREAM_VIDEO);
+    struct sh_video *sh_video = sh->video;
     sh->codec = decoder;
     sh->codec_tag = imgfmt;
     sh_video->fps = opts->fps;
     sh_video->disp_w = width;
     sh_video->disp_h = height;
+    demux_add_sh_stream(demuxer, sh);
 
     struct priv *p = talloc_ptrtype(demuxer, p);
     demuxer->priv = p;
     *p = (struct priv) {
+        .sh = sh,
         .frame_size = imgsize,
         .frame_rate = sh_video->fps,
         .read_frames = 1,
@@ -256,7 +258,7 @@ static int raw_fill_buffer(demuxer_t *demuxer)
 
     int len = stream_read(demuxer->stream, dp->buffer, dp->len);
     demux_packet_shorten(dp, len);
-    demux_add_packet(demuxer->streams[0], dp);
+    demux_add_packet(p->sh, dp);
 
     return 1;
 }

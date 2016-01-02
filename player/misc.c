@@ -106,8 +106,8 @@ double get_main_demux_pts(struct MPContext *mpctx)
 {
     double main_new_pos = MP_NOPTS_VALUE;
     if (mpctx->demuxer) {
-        for (int n = 0; n < mpctx->demuxer->num_streams; n++) {
-            struct sh_stream *stream = mpctx->demuxer->streams[n];
+        for (int n = 0; n < demux_get_num_stream(mpctx->demuxer); n++) {
+            struct sh_stream *stream = demux_get_stream(mpctx->demuxer, n);
             if (main_new_pos == MP_NOPTS_VALUE && stream->type != STREAM_SUB)
                 main_new_pos = demux_get_next_pts(stream);
         }

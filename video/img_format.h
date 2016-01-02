@@ -67,7 +67,8 @@
 #define MP_IMGFLAG_HWACCEL 0x10000
 // Set if the chroma resolution is lower than luma resolution. Unset for non-YUV.
 #define MP_IMGFLAG_SUBSAMPLED 0x20000
-// Like MP_IMGFLAG_YUV_P, but RGB. The planes are organized as in IMGFMT_GBRP.
+// Like MP_IMGFLAG_YUV_P, but RGB. This can be e.g. AV_PIX_FMT_GBRP. The planes
+// are always shuffled (G - B - R [- A]).
 #define MP_IMGFLAG_RGB_P 0x40000
 
 // Exactly one of these bits is set in mp_imgfmt_desc.flags
@@ -195,9 +196,6 @@ enum mp_imgfmt {
     // 256 entries, with each entry encoded like in IMGFMT_BGR32.
     IMGFMT_PAL8,
 
-    // Planar RGB (planes are shuffled: plane 0 is G, etc.)
-    IMGFMT_GBRP,
-
     // XYZ colorspace, similar organization to RGB48. Even though it says "12",
     // the components are stored as 16 bit, with lower 4 bits set to 0.
     IMGFMT_XYZ12,
@@ -245,7 +243,7 @@ char **mp_imgfmt_name_list(void);
 
 #define vo_format_name mp_imgfmt_to_name
 
-int mp_imgfmt_find_yuv_planar(int xs, int ys, int planes, int component_bits);
+int mp_imgfmt_find(int xs, int ys, int planes, int component_bits, int flags);
 
 int mp_imgfmt_select_best(int dst1, int dst2, int src);
 

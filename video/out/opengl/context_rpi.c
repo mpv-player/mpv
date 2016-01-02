@@ -27,7 +27,7 @@
 #include "video/out/x11_common.h"
 #include "context.h"
 
-#include "rpi.h"
+#include "context_rpi.h"
 
 static void *get_proc_address(const GLubyte *name)
 {
