@@ -697,7 +697,7 @@ Video
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
-``--video-rotate=<0-360|no>``
+``--video-rotate=<0-359|no>``
     Rotate the video clockwise, in degrees. Currently supports 90° steps only.
     If ``no`` is given, the video is never rotated, even if the file has
     rotation metadata. (The rotation value is added to the rotation metadata,
