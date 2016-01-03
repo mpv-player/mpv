@@ -2,6 +2,8 @@ Reporting bugs
 ==============
 
 - State your platform and mpv version.
+- Make sure you're actually using the latest mpv release. Linux distributions
+  in particular love redistributing ancient and unmaintained mpv releases.
 - Attach a log file made with ``-v`` or ``--log-file=output.txt``.
 - Avoid attaching text files packed in archive files (zip/rar/...), unless
   explicitly asked so. There are better means, such as using http://sprunge.us
