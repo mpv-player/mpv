@@ -1200,6 +1200,9 @@ reopen_file:
 
     MP_VERBOSE(mpctx, "Starting playback...\n");
 
+    mpctx->playback_initialized = true;
+    mp_notify(mpctx, MPV_EVENT_FILE_LOADED, NULL);
+
     if (mpctx->max_frames == 0) {
         if (!mpctx->stop_play)
             mpctx->stop_play = PT_NEXT_ENTRY;
@@ -1224,9 +1227,6 @@ reopen_file:
 
     if (mpctx->opts->pause)
         pause_player(mpctx);
-
-    mpctx->playback_initialized = true;
-    mp_notify(mpctx, MPV_EVENT_FILE_LOADED, NULL);
 
     playback_start = mp_time_sec();
     mpctx->error_playing = 0;
