@@ -617,6 +617,7 @@ static void uninit_rendering(struct gl_video *p)
     p->dither_texture = 0;
 
     gl->DeleteBuffers(1, &p->nnedi3_weights_buffer);
+    p->nnedi3_weights_buffer = 0;
 
     fbotex_uninit(&p->chroma_merge_fbo);
     fbotex_uninit(&p->chroma_deband_fbo);
