@@ -962,8 +962,8 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     }
 
     // Additional helpers.
-    ADD(frag, "#define LUT_POS(x, lut_size) \\\n");
-    ADD(frag, "    mix(0.5 / (lut_size), 1.0 - 0.5 / (lut_size), (x))\n");
+    ADD(frag, "#define LUT_POS(x, lut_size)"
+              " mix(0.5 / (lut_size), 1.0 - 0.5 / (lut_size), (x))\n");
 
     // custom shader header
     if (sc->header_text[0]) {
