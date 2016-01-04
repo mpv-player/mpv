@@ -3525,3 +3525,14 @@ Miscellaneous
     Force the contents of the ``media-title`` property to this value. Useful
     for scripts which want to set a title, without overriding the user's
     setting in ``--title``.
+
+
+.. _VIDEO OUTPUT DRIVERS: vo.rst
+.. _VIDEO FILTERS: vf.rst
+.. _AUDIO OUTPUT DRIVERS: ao.rst
+.. _AUDIO FILTERS: af.rst
+.. _Property Expansion: input.rst#property-expansion
+.. _INPUT.CONF: input.rst
+.. _JSON IPC: ipc.rst
+.. _PSEUDO GUI MODE: mpv.rst#pseudo-gui-mode
+.. _ENVIRONMENT VARIABLES: mpv.rst#environment-variables
