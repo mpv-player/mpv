@@ -810,3 +810,11 @@ guarantee a stable interface.
     See `Hooks`_ for currently existing hooks and what they do - only the hook
     list is interesting; handling hook execution is done by the Lua script
     function automatically.
+
+
+.. _List of Input Commands: input.rst#list-of-input-commands
+.. _Input Command Prefixes: input.rst#input-command-prefixes
+.. _Property Expansion: input.rst#property-expansion
+.. _Properties: input.rst#properties
+.. _Events: #events
+.. _List of events: #list-of-events
