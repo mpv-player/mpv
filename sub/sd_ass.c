@@ -564,7 +564,7 @@ static void fill_plaintext(struct sd *sd, double pts)
         text++;
     }
 
-    if (!dst.start || !dst.start[0])
+    if (!dst.start)
         return;
 
     int n = ass_alloc_event(track);
@@ -576,6 +576,8 @@ static void fill_plaintext(struct sd *sd, double pts)
 
     if (track->default_style < track->n_styles)
         track->styles[track->default_style].Alignment = ctx->on_top ? 6 : 2;
+
+    talloc_free(dst.start);
 }
 
 static void reset(struct sd *sd)
@@ -596,6 +598,7 @@ static void uninit(struct sd *sd)
     if (ctx->converter)
         lavc_conv_uninit(ctx->converter);
     ass_free_track(ctx->ass_track);
+    ass_free_track(ctx->shadow_track);
     enable_output(sd, false);
     ass_library_done(ctx->ass_library);
 }
