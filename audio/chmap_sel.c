@@ -274,18 +274,24 @@ static bool mp_chmap_is_better(struct mp_chmap *req, struct mp_chmap *old,
     if (new_lost_r != old_lost_r)
         return new_lost_r < old_lost_r;
 
-    int old_lost = mp_chmap_diffn(req, old);
-    int new_lost = mp_chmap_diffn(req, new);
-
-    // If the situation is equal with replaced speakers, but one of them loses
-    // less if no replacements are performed, pick the better one, even if it
-    // means an upmix. This prefers exact supersets over inexact equivalents.
-    if (new_lost != old_lost)
-        return new_lost < old_lost;
-
     struct mp_chmap old_p = *old, new_p = *new;
     mp_chmap_remove_na(&old_p);
     mp_chmap_remove_na(&new_p);
+
+    // If the situation is equal with replaced speakers, but the replacement is
+    // perfect for only one of them, let the better one win. This prefers
+    // inexact equivalents over exact supersets.
+    bool perfect_r_new = !new_lost_r && new_p.num <= old_p.num;
+    bool perfect_r_old = !old_lost_r && old_p.num <= new_p.num;
+    if (perfect_r_new != perfect_r_old)
+        return perfect_r_new;
+
+    int old_lost = mp_chmap_diffn(req, old);
+    int new_lost = mp_chmap_diffn(req, new);
+    // If the situation is equal with replaced speakers, pick the better one,
+    // even if it means an upmix.
+    if (new_lost != old_lost)
+        return new_lost < old_lost;
 
     // Some kind of upmix. If it's perfect, prefer the smaller one. Even if not,
     // both have equal loss, so also prefer the smaller one.

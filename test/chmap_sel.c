@@ -52,6 +52,10 @@ static void test_mp_chmap_sel_fallback_use_replacements(void **state) {
     test_sel("5.1", "7.1(rear)", LAYOUTS("7.1(rear)"));
 }
 
+static void test_mp_chmap_sel_fallback_inexact_equivalent(void **state) {
+    test_sel("5.1(side)", "5.1", LAYOUTS("5.1", "7.1"));
+}
+
 static void test_mp_chmap_sel_fallback_works_on_alsa_chmaps(void **state) {
     test_sel("5.1", "7.1(alsa)", LAYOUTS("7.1(alsa)"));
 }
@@ -89,11 +93,11 @@ static void test_mp_chmap_sel_fallback_reject_unknown(void **state) {
 
 static void test_mp_chmap_sel_fallback_more_replacements(void **state) {
     test_sel("quad", "quad(side)", LAYOUTS("quad(side)", "stereo"));
-    test_sel("quad", "7.0", LAYOUTS("quad(side)", "7.0"));
-    test_sel("quad", "7.0", LAYOUTS("7.0", "quad(side)"));
+    test_sel("quad", "quad(side)", LAYOUTS("quad(side)", "7.0"));
+    test_sel("quad", "quad(side)", LAYOUTS("7.0", "quad(side)"));
     test_sel("quad", "7.1(wide-side)", LAYOUTS("7.1(wide-side)", "stereo"));
     test_sel("quad", "7.1(wide-side)", LAYOUTS("stereo", "7.1(wide-side)"));
-    test_sel("quad", "fl-fr-fc-bl-br",
+    test_sel("quad", "fl-fr-sl-sr",
              LAYOUTS("fl-fr-fc-bl-br", "fl-fr-sl-sr"));
     test_sel("quad", "fl-fr-bl-br-na-na-na-na",
              LAYOUTS("fl-fr-bl-br-na-na-na-na", "quad(side)", "stereo"));
@@ -118,6 +122,7 @@ int main(void) {
         cmocka_unit_test(test_mp_chmap_sel_fallback_prefer_compatible),
         cmocka_unit_test(test_mp_chmap_sel_fallback_prefer_closest_upmix),
         cmocka_unit_test(test_mp_chmap_sel_fallback_use_replacements),
+        cmocka_unit_test(test_mp_chmap_sel_fallback_inexact_equivalent),
         cmocka_unit_test(test_mp_chmap_sel_fallback_works_on_alsa_chmaps),
         cmocka_unit_test(test_mp_chmap_sel_fallback_mono_to_stereo),
         cmocka_unit_test(test_mp_chmap_sel_fallback_stereo_to_stereo),
