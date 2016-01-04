@@ -30,6 +30,7 @@
 
 typedef struct change_notify {
     IMMNotificationClient client; // this must be first in the structure!
+    IMMDeviceEnumerator *pEnumerator; // object where client is registered
     LPWSTR monitored; // Monitored device
     bool is_hotplug;
     struct ao *ao;
@@ -63,11 +64,12 @@ typedef struct wasapi_state {
     // for setting the audio thread priority
     HANDLE hTask;
 
+    // ID of the device to use
+    LPWSTR deviceID;
     // WASAPI object handles owned and used by audio thread
     IMMDevice *pDevice;
     IAudioClient *pAudioClient;
     IAudioRenderClient *pRenderClient;
-    IMMDeviceEnumerator *pEnumerator;
 
     // WASAPI internal clock information, for estimating delay
     IAudioClock *pAudioClock;

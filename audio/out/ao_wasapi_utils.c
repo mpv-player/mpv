@@ -766,276 +766,240 @@ exit_label:
     return hr;
 }
 
-static char* get_device_id(IMMDevice *pDevice) {
-    if (!pDevice)
-        return NULL;
+struct wasapi_device_desc {
+    LPWSTR deviceID;
+    char *id;
+    char *name;
+};
 
-    LPWSTR devid = NULL;
-    char *idstr = NULL;
+struct wasapi_device_list {
+    struct wasapi_device_desc *devices;
+    struct wasapi_device_desc *default_device;
+    int num_devices;
+};
 
-    HRESULT hr = IMMDevice_GetId(pDevice, &devid);
-    EXIT_ON_ERROR(hr);
-
-    idstr = mp_to_utf8(NULL, devid);
-
-    if (strstr(idstr, "{0.0.0.00000000}.")) {
-        char *stripped =
-            talloc_strdup(NULL, idstr + strlen("{0.0.0.00000000}."));
-        talloc_free(idstr);
-        idstr = stripped;
-    }
-
-exit_label:
-    SAFE_RELEASE(devid, CoTaskMemFree(devid));
-    return idstr;
-}
-
-static char* get_device_name(IMMDevice *pDevice) {
-    if (!pDevice)
-        return NULL;
-
-    IPropertyStore *pProps = NULL;
+static char* get_device_name(struct mp_log *l,
+                             void *talloc_ctx, IMMDevice *pDevice)
+{
     char *namestr = NULL;
+    IPropertyStore *pProps = NULL;
+    PROPVARIANT devname;
+    PropVariantInit(&devname);
 
     HRESULT hr = IMMDevice_OpenPropertyStore(pDevice, STGM_READ, &pProps);
     EXIT_ON_ERROR(hr);
-
-    PROPVARIANT devname;
-    PropVariantInit(&devname);
 
     hr = IPropertyStore_GetValue(pProps, &mp_PKEY_Device_FriendlyName,
                                  &devname);
     EXIT_ON_ERROR(hr);
 
-    namestr = mp_to_utf8(NULL, devname.pwszVal);
+    namestr = mp_to_utf8(talloc_ctx, devname.pwszVal);
 
 exit_label:
+    if (FAILED(hr))
+        mp_warn(l, "Failed getting device name: %s\n", mp_HRESULT_to_str(hr));
     PropVariantClear(&devname);
     SAFE_RELEASE(pProps, IPropertyStore_Release(pProps));
-    return namestr;
+    return namestr ? namestr : talloc_strdup(talloc_ctx, "");
 }
 
-static char* get_device_desc(IMMDevice *pDevice) {
-    if (!pDevice)
-        return NULL;
+static struct wasapi_device_desc get_device_desc(struct mp_log *l,
+                                                 void *talloc_ctx,
+                                                 IMMDevice *pDevice)
+{
+    struct wasapi_device_desc d = {0};
+    LPWSTR deviceID;
+    HRESULT hr = IMMDevice_GetId(pDevice, &deviceID);
+    if (FAILED(hr)) {
+        mp_warn(l, "Failed getting device id: %s\n", mp_HRESULT_to_str(hr));
+        return d;
+    }
+    d.deviceID = talloc_memdup(talloc_ctx, deviceID,
+                               (wcslen(deviceID) + 1) * sizeof(wchar_t));
+    SAFE_RELEASE(deviceID, CoTaskMemFree(deviceID));
 
-    IPropertyStore *pProps = NULL;
-    char *desc = NULL;
+    char *full_id = mp_to_utf8(NULL, d.deviceID);
+    bstr id = bstr0(full_id);
+    bstr_eatstart0(&id, "{0.0.0.00000000}.");
+    d.id = bstrdup0(talloc_ctx, id);
+    talloc_free(full_id);
 
-    HRESULT hr = IMMDevice_OpenPropertyStore(pDevice, STGM_READ, &pProps);
+    d.name = get_device_name(l, talloc_ctx, pDevice);
+    return d;
+}
+
+static LPWSTR get_default_deviceID(struct mp_log *l,
+                                   IMMDeviceEnumerator *pEnumerator)
+{
+    LPWSTR deviceID = NULL;
+    IMMDevice *pDevice = NULL;
+    HRESULT hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
+                                                             eRender,
+                                                             eMultimedia,
+                                                             &pDevice);
     EXIT_ON_ERROR(hr);
 
-    PROPVARIANT devdesc;
-    PropVariantInit(&devdesc);
-
-    hr = IPropertyStore_GetValue(pProps, &mp_PKEY_Device_DeviceDesc, &devdesc);
+    hr = IMMDevice_GetId(pDevice, &deviceID);
     EXIT_ON_ERROR(hr);
-
-    desc = mp_to_utf8(NULL, devdesc.pwszVal);
 
 exit_label:
-    PropVariantClear(&devdesc);
-    SAFE_RELEASE(pProps, IPropertyStore_Release(pProps));
-    return desc;
-}
-
-// frees *idstr
-static int device_id_match(char *idstr, char *candidate) {
-    if (idstr == NULL || candidate == NULL)
-        return 0;
-
-    int found = 0;
-#define FOUND(x) do { found = (x); goto end; } while(0)
-    if (strcmp(idstr, candidate) == 0)
-        FOUND(1);
-    if (strstr(idstr, "{0.0.0.00000000}.")) {
-        char *start = idstr + strlen("{0.0.0.00000000}.");
-        if (strcmp(start, candidate) == 0)
-            FOUND(1);
+    if (FAILED(hr)) {
+        mp_warn(l, "Error getting default device id: %s\n",
+                mp_HRESULT_to_str(hr));
     }
-#undef FOUND
-end:
-    talloc_free(idstr);
-    return found;
+    SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
+    return deviceID;
 }
 
-void wasapi_list_devs(struct ao *ao, struct ao_device_list *list)
+static struct wasapi_device_list *get_device_list(struct mp_log *l)
 {
-    struct wasapi_state *state = ao->priv;
-    IMMDeviceCollection *pDevices = NULL;
-    IMMDevice *pDevice = NULL;
-    char *name = NULL, *id = NULL;
+    struct wasapi_device_list *list = talloc_zero(NULL, struct wasapi_device_list);
+    LPWSTR default_deviceID = NULL;
 
-    HRESULT hr =
-        IMMDeviceEnumerator_EnumAudioEndpoints(state->pEnumerator, eRender,
-                                               DEVICE_STATE_ACTIVE, &pDevices);
+    IMMDeviceEnumerator *pEnumerator = NULL;
+    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+                                  &IID_IMMDeviceEnumerator,
+                                  (void **)&pEnumerator);
+    EXIT_ON_ERROR(hr);
+
+    default_deviceID = get_default_deviceID(l, pEnumerator);
+
+    IMMDeviceCollection *pDevices = NULL;
+    hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
+                                                DEVICE_STATE_ACTIVE,
+                                                &pDevices);
     EXIT_ON_ERROR(hr);
 
     int count;
     hr = IMMDeviceCollection_GetCount(pDevices, &count);
     EXIT_ON_ERROR(hr);
-    if (count > 0)
-        MP_VERBOSE(ao, "Output devices:\n");
 
     for (int i = 0; i < count; i++) {
+        IMMDevice *pDevice = NULL;
         hr = IMMDeviceCollection_Item(pDevices, i, &pDevice);
-        EXIT_ON_ERROR(hr);
-
-        name = get_device_name(pDevice);
-        id = get_device_id(pDevice);
-        if (!id) {
-            hr = E_FAIL;
-            EXIT_ON_ERROR(hr);
+        if (FAILED(hr)) {
+            mp_warn(l, "Failed to get device #%d: %s\n",
+                    i, mp_HRESULT_to_str(hr));
+            continue;
         }
-        char *safe_name = name ? name : "";
-        ao_device_list_add(list, ao, &(struct ao_device_desc){id, safe_name});
-
-        MP_VERBOSE(ao, "#%d, GUID: \'%s\', name: \'%s\'\n", i, id, safe_name);
-
-        talloc_free(name);
-        talloc_free(id);
+        struct wasapi_device_desc d = get_device_desc(l, list, pDevice);
         SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
+        if (d.deviceID) {
+            MP_TARRAY_APPEND(list, list->devices, list->num_devices, d);
+            if (default_deviceID && wcscmp(d.deviceID, default_deviceID) == 0)
+                list->default_device = &list->devices[list->num_devices-1];
+        }
+    }
+
+exit_label:
+    if (FAILED(hr)) {
+        mp_err(l, "Error getting device list: %s\n", mp_HRESULT_to_str(hr));
+        SAFE_RELEASE(list, talloc_free(list));
     }
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
-
-    return;
-exit_label:
-    MP_ERR(ao, "Error enumerating devices: %s\n", mp_HRESULT_to_str(hr));
-    talloc_free(name);
-    talloc_free(id);
-    SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
-    SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
+    SAFE_RELEASE(default_deviceID, CoTaskMemFree(default_deviceID));
+    SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
+    return list;
 }
 
-static HRESULT load_default_device(struct ao *ao,
-                                   IMMDeviceEnumerator* pEnumerator,
-                                   IMMDevice **ppDevice)
+void wasapi_list_devs(struct ao *ao, struct ao_device_list *list)
 {
-    HRESULT hr =
-        IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
-                                                    eRender, eMultimedia,
-                                                    ppDevice);
+    struct wasapi_device_list *list_priv = get_device_list(ao->log);
+    if (!list_priv)
+        return;
+    for (int i = 0; i < list_priv->num_devices; i++) {
+        struct wasapi_device_desc *d = &list_priv->devices[i];
+        ao_device_list_add(list, ao, &(struct ao_device_desc){d->id, d->name});
+    }
+    talloc_free(list_priv);
+}
+
+static void select_device(struct wasapi_state *state,
+                          struct wasapi_device_desc *d)
+{
+    MP_VERBOSE(state, "Selecting device %s (%s)\n", d->id, d->name);
+    state->deviceID = talloc_memdup(NULL, d->deviceID,
+                                    (wcslen(d->deviceID) + 1) * sizeof(wchar_t));
+    return;
+}
+
+static HRESULT load_device(struct mp_log *l,
+                           IMMDevice **ppDevice, LPWSTR deviceID)
+{
+    IMMDeviceEnumerator *pEnumerator = NULL;
+    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+                                  &IID_IMMDeviceEnumerator,
+                                  (void **)&pEnumerator);
     EXIT_ON_ERROR(hr);
 
-    char *id = get_device_id(*ppDevice);
-    MP_VERBOSE(ao, "Default device ID: %s\n", id);
-    talloc_free(id);
+    hr = IMMDeviceEnumerator_GetDevice(pEnumerator, deviceID, ppDevice);
+    EXIT_ON_ERROR(hr);
 
-    return S_OK;
 exit_label:
-    MP_ERR(ao , "Error loading default device: %s\n", mp_HRESULT_to_str(hr));
+    if (FAILED(hr))
+        mp_err(l, "Error loading selected device: %s\n", mp_HRESULT_to_str(hr));
+    SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
     return hr;
 }
 
-static HRESULT find_and_load_device(struct ao *ao,
-                                    IMMDeviceEnumerator* pEnumerator,
-                                    IMMDevice **ppDevice, char *search)
+static HRESULT find_device(struct ao *ao)
 {
-    HRESULT hr;
-    IMMDeviceCollection *pDevices = NULL;
-    IMMDevice *pTempDevice = NULL;
-    LPWSTR deviceID = NULL;
+    MP_DBG(ao, "Find device\n");
+    struct wasapi_state *state = ao->priv;
+    struct wasapi_device_list *list = get_device_list(ao->log);
+    if (!list)
+        goto exit_label;
 
-    char *end;
-    int devno = strtol(search, &end, 10);
+    bstr device = bstr_strip(bstr0(state->opt_device));
+    if (!device.len)
+        device = bstr_strip(bstr0(ao->device));
 
-    char *devid = NULL;
-    if (end == search || *end)
-        devid = search;
-
-    int search_err = 0;
-
-    if (devid == NULL) {
-        hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
-                                                    DEVICE_STATE_ACTIVE,
-                                                    &pDevices);
-        EXIT_ON_ERROR(hr);
-
-        int count;
-        IMMDeviceCollection_GetCount(pDevices, &count);
-
-        if (devno >= count) {
-            MP_ERR(ao, "No device #%d\n", devno);
+    if (!device.len) {
+        if (list->default_device) {
+            MP_VERBOSE(ao, "No device specified. Selecting default.\n");
+            select_device(state, list->default_device);
         } else {
-            MP_VERBOSE(ao, "Finding device #%d\n", devno);
-            hr = IMMDeviceCollection_Item(pDevices, devno, &pTempDevice);
-            EXIT_ON_ERROR(hr);
-
-            hr = IMMDevice_GetId(pTempDevice, &deviceID);
-            EXIT_ON_ERROR(hr);
-
-            MP_VERBOSE(ao, "Found device #%d\n", devno);
+            MP_ERR(ao, "No device specified and could not determine default.\n");
         }
-    } else {
-        hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
-                                                    DEVICE_STATE_ACTIVE
-                                                    | DEVICE_STATE_UNPLUGGED,
-                                                    &pDevices);
-        EXIT_ON_ERROR(hr);
-
-        int count;
-        IMMDeviceCollection_GetCount(pDevices, &count);
-
-        MP_VERBOSE(ao, "Finding device %s\n", devid);
-
-        IMMDevice *prevDevice = NULL;
-
-        for (int i = 0; i < count; i++) {
-            hr = IMMDeviceCollection_Item(pDevices, i, &pTempDevice);
-            EXIT_ON_ERROR(hr);
-
-            if (device_id_match(get_device_id(pTempDevice), devid)) {
-                hr = IMMDevice_GetId(pTempDevice, &deviceID);
-                EXIT_ON_ERROR(hr);
-                break;
-            }
-            char *desc = get_device_desc(pTempDevice);
-            if (strstr(desc, devid)) {
-                if (deviceID) {
-                    char *name;
-                    if (!search_err) {
-                        MP_ERR(ao, "Multiple matching devices found\n");
-                        name = get_device_name(prevDevice);
-                        MP_ERR(ao, "%s\n", name);
-                        talloc_free(name);
-                        search_err = 1;
-                    }
-                    name = get_device_name(pTempDevice);
-                    MP_ERR(ao, "%s\n", name);
-                    talloc_free(name);
-                }
-                hr = IMMDevice_GetId(pTempDevice, &deviceID);
-                prevDevice = pTempDevice;
-            }
-            talloc_free(desc);
-
-            SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
-        }
-
-        if (deviceID == NULL)
-            MP_ERR(ao, "Could not find device %s\n", devid);
+        goto exit_label;
     }
 
-    SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
-    SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
+    // try selecting by number
+    bstr rest;
+    long long devno = bstrtoll(device, &rest, 10);
+    if (!rest.len && devno < list->num_devices) {
+        MP_VERBOSE(ao, "Selecting device by number: %lld\n", devno);
+        select_device(state, &list->devices[devno]);
+        goto exit_label;
+    }
 
-    if (deviceID == NULL || search_err) {
-        hr = E_NOTFOUND;
-    } else {
-        MP_VERBOSE(ao, "Loading device %S\n", deviceID);
+    // select by id or name
+    bstr_eatstart0(&device, "{0.0.0.00000000}.");
+    for (int i = 0; i < list->num_devices; i++) {
+        struct wasapi_device_desc *d = &list->devices[i];
+        bstr id = bstr_strip(bstr0(d->id));
+        if (bstrcmp(device, id) == 0) {
+            MP_VERBOSE(ao, "Selecting device by id: %.*s\n", BSTR_P(device));
+            select_device(state, d);
+            goto exit_label;
+        }
 
-        hr = IMMDeviceEnumerator_GetDevice(pEnumerator, deviceID, ppDevice);
-
-        if (FAILED(hr))
-            MP_ERR(ao, "Could not load requested device\n");
+        bstr name = bstr_strip(bstr0(d->name));
+        if (bstrcmp(device, name) == 0) {
+            if (!state->deviceID) {
+                MP_VERBOSE(ao, "Selecting device by name: %.*s\n", BSTR_P(device));
+                select_device(state, d);
+            } else {
+                MP_WARN(ao, "Multiple devices matched %.*s."
+                        "Ignoring device %s (%s).\n",
+                        BSTR_P(device), d->id, d->name);
+            }
+        }
     }
 
 exit_label:
-    SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
-    SAFE_RELEASE(pDevices,    IMMDeviceCollection_Release(pDevices));
-
-    CoTaskMemFree(deviceID);
-    return hr;
+    talloc_free(list);
+    return state->deviceID ? S_OK : E_FAIL;
 }
 
 static void *unmarshal(struct wasapi_state *state, REFIID type, IStream **from)
@@ -1131,28 +1095,11 @@ HRESULT wasapi_thread_init(struct ao *ao)
     MP_DBG(ao, "Init wasapi thread\n");
     int64_t retry_wait = 1;
 retry: ;
-
-    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                                  &IID_IMMDeviceEnumerator,
-                                  (void **)&state->pEnumerator);
+    HRESULT hr = find_device(ao);
     EXIT_ON_ERROR(hr);
 
-    char *device = state->opt_device;
-    if (!device || !device[0])
-        device = ao->device;
-
-
-    if (!device || !device[0]) {
-        hr = load_default_device(ao, state->pEnumerator, &state->pDevice);
-    } else {
-        hr = find_and_load_device(ao, state->pEnumerator, &state->pDevice,
-                                  device);
-    }
+    hr = load_device(ao->log, &state->pDevice, state->deviceID);
     EXIT_ON_ERROR(hr);
-
-    char *name = get_device_name(state->pDevice);
-    MP_VERBOSE(ao, "Device loaded: %s\n", name);
-    talloc_free(name);
 
     MP_DBG(ao, "Activating pAudioClient interface\n");
     hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
@@ -1210,7 +1157,7 @@ void wasapi_thread_uninit(struct ao *ao)
     SAFE_RELEASE(state->pSessionControl, IAudioSessionControl_Release(state->pSessionControl));
     SAFE_RELEASE(state->pAudioClient,    IAudioClient_Release(state->pAudioClient));
     SAFE_RELEASE(state->pDevice,         IMMDevice_Release(state->pDevice));
-    SAFE_RELEASE(state->pEnumerator,     IMMDeviceEnumerator_Release(state->pEnumerator));
+    SAFE_RELEASE(state->deviceID,        talloc_free(state->deviceID));
     SAFE_RELEASE(state->hTask,           AvRevertMmThreadCharacteristics(state->hTask));
     MP_DBG(ao, "Thread uninit done\n");
 }

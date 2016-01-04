@@ -187,7 +187,7 @@ static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_OnPropertyValueChanged(
     return S_OK;
 }
 
-static CONST_VTBL IMMNotificationClientVtbl sIMMDeviceEnumeratorVtbl_vtbl = {
+static CONST_VTBL IMMNotificationClientVtbl sIMMNotificationClientVtbl = {
     .QueryInterface = sIMMNotificationClient_QueryInterface,
     .AddRef = sIMMNotificationClient_AddRef,
     .Release = sIMMNotificationClient_Release,
@@ -203,13 +203,17 @@ HRESULT wasapi_change_init(struct ao *ao, bool is_hotplug)
 {
     struct wasapi_state *state = ao->priv;
     struct change_notify *change = &state->change;
-    HRESULT hr;
+    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+                                  &IID_IMMDeviceEnumerator,
+                                  (void **)&change->pEnumerator);
+    EXIT_ON_ERROR(hr);
+
     // COM voodoo to emulate c++ class
-    change->client.lpVtbl = &sIMMDeviceEnumeratorVtbl_vtbl;
+    change->client.lpVtbl = &sIMMNotificationClientVtbl;
 
     // register the change notification client
     hr = IMMDeviceEnumerator_RegisterEndpointNotificationCallback(
-        state->pEnumerator, (IMMNotificationClient *)change);
+        change->pEnumerator, (IMMNotificationClient *)change);
     EXIT_ON_ERROR(hr);
 
     // so the callbacks can access the ao
@@ -222,8 +226,7 @@ HRESULT wasapi_change_init(struct ao *ao, bool is_hotplug)
         MP_DBG(ao, "Monitoring for hotplug events\n");
     } else {
         // Get the device string to compare with the pwstrDeviceId
-        hr = IMMDevice_GetId(state->pDevice, &change->monitored);
-        EXIT_ON_ERROR(hr);
+        change->monitored = state->deviceID;
         MP_VERBOSE(ao, "Monitoring changes in device %S\n", change->monitored);
     }
 
@@ -240,10 +243,10 @@ void wasapi_change_uninit(struct ao *ao)
     struct wasapi_state *state = ao->priv;
     struct change_notify *change = &state->change;
 
-    if (state->pEnumerator && change->client.lpVtbl) {
+    if (change->pEnumerator && change->client.lpVtbl) {
         IMMDeviceEnumerator_UnregisterEndpointNotificationCallback(
-            state->pEnumerator, (IMMNotificationClient *)change);
+            change->pEnumerator, (IMMNotificationClient *)change);
     }
 
-    if (change->monitored) CoTaskMemFree(change->monitored);
+    SAFE_RELEASE(change->pEnumerator, IMMDeviceEnumerator_Release(change->pEnumerator));
 }
