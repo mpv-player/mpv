@@ -140,10 +140,9 @@ static const struct format_hack format_hacks[] = {
     TEXTSUB("aqtitle"), TEXTSUB("jacosub"), TEXTSUB("microdvd"),
     TEXTSUB("mpl2"), TEXTSUB("mpsub"), TEXTSUB("pjs"), TEXTSUB("realtext"),
     TEXTSUB("sami"), TEXTSUB("srt"), TEXTSUB("stl"), TEXTSUB("subviewer"),
-    TEXTSUB("subviewer1"), TEXTSUB("vplayer"),
+    TEXTSUB("subviewer1"), TEXTSUB("vplayer"), TEXTSUB("ass"),
 
     TEXTSUB_UTF8("webvtt"),
-    TEXTSUB_UTF8("ass"),
 
     // Useless non-sense, sometimes breaks MLP2 subreader.c fallback
     BLACKLIST("tty"),
