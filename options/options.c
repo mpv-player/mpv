@@ -271,7 +271,7 @@ const m_option_t mp_opts[] = {
 
     // force video/audio rate:
     OPT_DOUBLE("fps", force_fps, CONF_MIN, .min = 0),
-    OPT_INTRANGE("audio-samplerate", force_srate, 0, 1000, 8*48000),
+    OPT_INTRANGE("audio-samplerate", force_srate, 0, 1000, 16*48000),
     OPT_CHMAP("audio-channels", audio_output_channels, CONF_MIN, .min = 0),
     OPT_AUDIOFORMAT("audio-format", audio_output_format, 0),
     OPT_DOUBLE("speed", playback_speed, M_OPT_RANGE | M_OPT_FIXED,
