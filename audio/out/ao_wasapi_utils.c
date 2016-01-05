@@ -1123,8 +1123,6 @@ retry: ;
     MP_DBG(ao, "Creating proxies\n");
     create_proxy_streams(state);
 
-    wasapi_change_init(ao, false);
-
     MP_DBG(ao, "Init wasapi thread done\n");
     return S_OK;
 exit_label:
@@ -1141,7 +1139,6 @@ void wasapi_thread_uninit(struct ao *ao)
     if (state->pAudioClient)
         IAudioClient_Stop(state->pAudioClient);
 
-    wasapi_change_uninit(ao);
     destroy_proxy_streams(state);
 
     SAFE_RELEASE(state->pRenderClient,   IAudioRenderClient_Release(state->pRenderClient));
