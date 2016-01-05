@@ -286,7 +286,8 @@ static int init(struct ao *ao)
     struct wasapi_state *state = ao->priv;
     state->log = ao->log;
 
-    if (!find_device(ao)) {
+    state->deviceID = find_deviceID(ao);
+    if (!state->deviceID) {
         uninit(ao);
         return -1;
     }

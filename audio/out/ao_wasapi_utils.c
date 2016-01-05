@@ -904,16 +904,6 @@ exit_label:
     destroy_enumerator(enumerator);
 }
 
-static void select_device(struct wasapi_state *state, struct device_desc *d)
-{
-    if (!d)
-        return;
-    MP_VERBOSE(state, "Selecting device \'%s\' (%s)\n", d->id, d->name);
-    state->deviceID = talloc_memdup(NULL, d->deviceID,
-                                    (wcslen(d->deviceID) + 1) * sizeof(wchar_t));
-    return;
-}
-
 static HRESULT load_device(struct mp_log *l,
                            IMMDevice **ppDevice, LPWSTR deviceID)
 {
@@ -933,8 +923,18 @@ exit_label:
     return hr;
 }
 
-bool find_device(struct ao *ao)
+static LPWSTR select_device(struct mp_log *l, struct device_desc *d)
 {
+    if (!d)
+        return NULL;
+    mp_verbose(l, "Selecting device \'%s\' (%s)\n", d->id, d->name);
+    return talloc_memdup(NULL, d->deviceID,
+                         (wcslen(d->deviceID) + 1) * sizeof(wchar_t));
+}
+
+LPWSTR find_deviceID(struct ao *ao)
+{
+    LPWSTR deviceID = NULL;
     struct wasapi_state *state = ao->priv;
     bstr device = bstr_strip(bstr0(state->opt_device));
     if (!device.len)
@@ -950,7 +950,7 @@ bool find_device(struct ao *ao)
     if (!device.len) {
         MP_VERBOSE(ao, "No device specified. Selecting default.\n");
         d = default_device_desc(enumerator);
-        select_device(state, d);
+        deviceID = select_device(ao->log, d);
         goto exit_label;
     }
 
@@ -960,7 +960,7 @@ bool find_device(struct ao *ao)
     if (!rest.len && 0 <= devno && devno < enumerator->count) {
         MP_VERBOSE(ao, "Selecting device by number: #%lld\n", devno);
         d = device_desc_for_num(enumerator, devno);
-        select_device(state, d);
+        deviceID = select_device(ao->log, d);
         goto exit_label;
     }
 
@@ -973,14 +973,14 @@ bool find_device(struct ao *ao)
 
         if (bstrcmp(device, bstr_strip(bstr0(d->id))) == 0) {
             MP_VERBOSE(ao, "Selecting device by id: \'%.*s\'\n", BSTR_P(device));
-            select_device(state, d);
+            deviceID = select_device(ao->log, d);
             goto exit_label;
         }
 
         if (bstrcmp(device, bstr_strip(bstr0(d->name))) == 0) {
             if (!state->deviceID) {
                 MP_VERBOSE(ao, "Selecting device by name: \'%.*s\'\n", BSTR_P(device));
-                select_device(state, d);
+                deviceID = select_device(ao->log, d);
             } else {
                 MP_WARN(ao, "Multiple devices matched \'%.*s\'."
                         "Ignoring device \'%s\' (%s).\n",
@@ -990,13 +990,13 @@ bool find_device(struct ao *ao)
         SAFE_RELEASE(d, talloc_free(d));
     }
 
-    if (!state->deviceID)
+    if (!deviceID)
         MP_ERR(ao, "Failed to find device \'%.*s\'\n", BSTR_P(device));
 
 exit_label:
     talloc_free(d);
     destroy_enumerator(enumerator);
-    return !!state->deviceID;
+    return deviceID;
 }
 
 static void *unmarshal(struct wasapi_state *state, REFIID type, IStream **from)
