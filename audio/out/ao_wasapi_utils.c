@@ -933,7 +933,7 @@ exit_label:
     return hr;
 }
 
-static HRESULT find_device(struct ao *ao)
+bool find_device(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
     bstr device = bstr_strip(bstr0(state->opt_device));
@@ -996,7 +996,7 @@ static HRESULT find_device(struct ao *ao)
 exit_label:
     talloc_free(d);
     destroy_enumerator(enumerator);
-    return state->deviceID ? S_OK : E_FAIL;
+    return !!state->deviceID;
 }
 
 static void *unmarshal(struct wasapi_state *state, REFIID type, IStream **from)
@@ -1092,10 +1092,7 @@ HRESULT wasapi_thread_init(struct ao *ao)
     MP_DBG(ao, "Init wasapi thread\n");
     int64_t retry_wait = 1;
 retry: ;
-    HRESULT hr = find_device(ao);
-    EXIT_ON_ERROR(hr);
-
-    hr = load_device(ao->log, &state->pDevice, state->deviceID);
+    HRESULT hr = load_device(ao->log, &state->pDevice, state->deviceID);
     EXIT_ON_ERROR(hr);
 
     MP_DBG(ao, "Activating pAudioClient interface\n");
@@ -1154,7 +1151,6 @@ void wasapi_thread_uninit(struct ao *ao)
     SAFE_RELEASE(state->pSessionControl, IAudioSessionControl_Release(state->pSessionControl));
     SAFE_RELEASE(state->pAudioClient,    IAudioClient_Release(state->pAudioClient));
     SAFE_RELEASE(state->pDevice,         IMMDevice_Release(state->pDevice));
-    SAFE_RELEASE(state->deviceID,        talloc_free(state->deviceID));
     SAFE_RELEASE(state->hTask,           AvRevertMmThreadCharacteristics(state->hTask));
     MP_DBG(ao, "Thread uninit done\n");
 }

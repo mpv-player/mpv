@@ -273,7 +273,7 @@ static void uninit(struct ao *ao)
     SAFE_RELEASE(state->hInitDone,   CloseHandle(state->hInitDone));
     SAFE_RELEASE(state->hWake,       CloseHandle(state->hWake));
     SAFE_RELEASE(state->hAudioThread,CloseHandle(state->hAudioThread));
-
+    talloc_free(state->deviceID);
     CoUninitialize();
     MP_DBG(ao, "Uninit wasapi done\n");
 }
@@ -285,6 +285,11 @@ static int init(struct ao *ao)
 
     struct wasapi_state *state = ao->priv;
     state->log = ao->log;
+
+    if (!find_device(ao)) {
+        uninit(ao);
+        return -1;
+    }
 
     state->hInitDone = CreateEventW(NULL, FALSE, FALSE, NULL);
     state->hWake     = CreateEventW(NULL, FALSE, FALSE, NULL);
