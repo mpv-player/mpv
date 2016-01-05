@@ -171,6 +171,12 @@ static void resize(struct vo *vo)
 
     vo_get_src_dst_rects(vo, &src, &dst, &p->osd_res);
 
+    int rotate[] = {MMAL_DISPLAY_ROT0,
+                    MMAL_DISPLAY_ROT90,
+                    MMAL_DISPLAY_ROT180,
+                    MMAL_DISPLAY_ROT270};
+
+
     int src_w = src.x1 - src.x0, src_h = src.y1 - src.y0,
         dst_w = dst.x1 - dst.x0, dst_h = dst.y1 - dst.y0;
     int p_x, p_y;
@@ -184,10 +190,16 @@ static void resize(struct vo *vo)
         .display_num = p->display_nr,
         .pixel_x = p_x,
         .pixel_y = p_y,
+        .transform = rotate[vo->params ? vo->params->rotate / 90 : 0],
         .set = MMAL_DISPLAY_SET_SRC_RECT | MMAL_DISPLAY_SET_DEST_RECT |
                MMAL_DISPLAY_SET_LAYER | MMAL_DISPLAY_SET_NUM |
-               MMAL_DISPLAY_SET_PIXEL,
+               MMAL_DISPLAY_SET_PIXEL | MMAL_DISPLAY_SET_TRANSFORM,
     };
+
+    if (vo->params && (vo->params->rotate % 180) == 90) {
+        MPSWAP(int, dr.src_rect.x, dr.src_rect.y);
+        MPSWAP(int, dr.src_rect.width, dr.src_rect.height);
+    }
 
     if (mmal_port_parameter_set(input, &dr.hdr))
         MP_WARN(vo, "could not set video rectangle\n");
@@ -677,6 +689,7 @@ static const struct m_option options[] = {
 const struct vo_driver video_out_rpi = {
     .description = "Raspberry Pi (MMAL)",
     .name = "rpi",
+    .caps = VO_CAP_ROTATE90,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,
