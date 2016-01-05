@@ -173,6 +173,8 @@ static void resize(struct vo *vo)
 
     int src_w = src.x1 - src.x0, src_h = src.y1 - src.y0,
         dst_w = dst.x1 - dst.x0, dst_h = dst.y1 - dst.y0;
+    int p_x, p_y;
+    av_reduce(&p_x, &p_y, dst_w * src_h, src_w * dst_h, 16000);
     MMAL_DISPLAYREGION_T dr = {
         .hdr = { .id = MMAL_PARAMETER_DISPLAYREGION,
                  .size = sizeof(MMAL_DISPLAYREGION_T), },
@@ -180,8 +182,8 @@ static void resize(struct vo *vo)
         .dest_rect = { .x = dst.x0, .y = dst.y0, .width = dst_w, .height = dst_h },
         .layer = p->video_layer,
         .display_num = p->display_nr,
-        .pixel_x = dst_w * src_h,
-        .pixel_y = src_w * dst_h,
+        .pixel_x = p_x,
+        .pixel_y = p_y,
         .set = MMAL_DISPLAY_SET_SRC_RECT | MMAL_DISPLAY_SET_DEST_RECT |
                MMAL_DISPLAY_SET_LAYER | MMAL_DISPLAY_SET_NUM |
                MMAL_DISPLAY_SET_PIXEL,
