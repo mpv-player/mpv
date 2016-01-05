@@ -17,23 +17,14 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
 #include <math.h>
 #include <inttypes.h>
-#include <process.h>
-#include <initguid.h>
-#include <audioclient.h>
-#include <endpointvolume.h>
-#include <mmdeviceapi.h>
-#include <avrt.h>
 #include <libavutil/mathematics.h>
 
-#include "audio/out/ao_wasapi.h"
-#include "audio/out/ao_wasapi_utils.h"
-
-#include "audio/format.h"
+#include "options/m_option.h"
 #include "osdep/timer.h"
 #include "osdep/io.h"
+#include "ao_wasapi.h"
 
 // naive av_rescale for unsigned
 static UINT64 uint64_scale(UINT64 x, UINT64 num, UINT64 den)

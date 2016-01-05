@@ -18,21 +18,18 @@
  */
 
 #include <math.h>
-#include <libavutil/common.h>
+#include <wchar.h>
 #include <windows.h>
+#include <initguid.h>
 #include <errors.h>
 #include <ksguid.h>
 #include <ksmedia.h>
-#include <audioclient.h>
-#include <endpointvolume.h>
-#include <mmdeviceapi.h>
 #include <avrt.h>
 
-#include "audio/out/ao_wasapi_utils.h"
-
 #include "audio/format.h"
-#include "osdep/io.h"
 #include "osdep/timer.h"
+#include "osdep/io.h"
+#include "ao_wasapi.h"
 
 #define MIXER_DEFAULT_LABEL L"mpv - video player"
 

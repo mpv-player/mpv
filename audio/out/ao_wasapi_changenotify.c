@@ -17,15 +17,9 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <initguid.h>
-#include <audioclient.h>
-#include <endpointvolume.h>
-#include <mmdeviceapi.h>
 #include <wchar.h>
-#include <stdlib.h>
 
 #include "ao_wasapi.h"
-#include "ao_wasapi_utils.h"
 
 static HRESULT STDMETHODCALLTYPE sIMMNotificationClient_QueryInterface(
     IMMNotificationClient* This, REFIID riid, void **ppvObject)
