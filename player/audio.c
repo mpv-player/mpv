@@ -361,9 +361,10 @@ double written_audio_pts(struct MPContext *mpctx)
     if (a_pts == MP_NOPTS_VALUE)
         return MP_NOPTS_VALUE;
 
-    // d_audio->pts is the timestamp of the latest input packet with
-    // known pts that the decoder has decoded. d_audio->pts_bytes is
-    // the amount of bytes the decoder has written after that timestamp.
+    // d_audio->pts is the timestamp of the first sample of the latest frame
+    // the with a known pts that the decoder has returned. d_audio->pts_offset
+    // is the amount of samples the decoder has returned after that timestamp
+    // (includes the frame size).
     a_pts += d_audio->pts_offset / (double)in_format.rate;
 
     // Now a_pts hopefully holds the pts for end of audio from decoder.
