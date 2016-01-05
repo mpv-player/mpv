@@ -431,8 +431,13 @@ static int init(struct ao *ao)
         goto unlock_and_fail;
 
     if (!set_format(ao, format)) {
-        MP_ERR(ao, "Invalid audio format\n");
-        goto unlock_and_fail;
+        ao->channels = (struct mp_chmap) MP_CHMAP_INIT_STEREO;
+        ao->samplerate = 48000;
+        ao->format = AF_FORMAT_FLOAT;
+        if (!set_format(ao, format)) {
+            MP_ERR(ao, "Invalid audio format\n");
+            goto unlock_and_fail;
+        }
     }
 
     if (!(priv->stream = pa_stream_new_extended(priv->context, "audio stream",
