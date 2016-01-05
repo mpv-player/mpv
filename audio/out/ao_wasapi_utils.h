@@ -35,8 +35,6 @@ char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr);
 #define mp_HRESULT_to_str(hr) mp_HRESULT_to_str_buf((char[60]){0}, 60, (hr))
 #define mp_LastError_to_str() mp_HRESULT_to_str(HRESULT_FROM_WIN32(GetLastError()))
 
-bool wasapi_fill_VistaBlob(wasapi_state *state);
-
 void wasapi_list_devs(struct ao *ao, struct ao_device_list *list);
 LPWSTR find_deviceID(struct ao *ao);
 
