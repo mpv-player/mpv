@@ -798,14 +798,13 @@ exit_label:
 
 static struct device_desc *get_device_desc(struct mp_log *l, IMMDevice *pDevice)
 {
-    struct device_desc *d = talloc_zero(NULL, struct device_desc);
     LPWSTR deviceID;
     HRESULT hr = IMMDevice_GetId(pDevice, &deviceID);
     if (FAILED(hr)) {
         mp_err(l, "Failed getting device id: %s\n", mp_HRESULT_to_str(hr));
-        talloc_free(d);
         return NULL;
     }
+    struct device_desc *d = talloc_zero(NULL, struct device_desc);
     d->deviceID = talloc_memdup(d, deviceID,
                                 (wcslen(deviceID) + 1) * sizeof(wchar_t));
     SAFE_RELEASE(deviceID, CoTaskMemFree(deviceID));
