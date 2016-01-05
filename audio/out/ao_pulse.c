@@ -406,7 +406,7 @@ static bool set_format(struct ao *ao, pa_format_info *format)
     pa_format_info_set_channels(format, ao->channels.num);
     pa_format_info_set_channel_map(format, &map);
 
-    return pa_format_info_valid(format);
+    return ao->samplerate < PA_RATE_MAX && pa_format_info_valid(format);
 }
 
 static int init(struct ao *ao)
