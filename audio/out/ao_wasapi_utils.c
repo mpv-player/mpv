@@ -906,6 +906,8 @@ exit_label:
 
 static void select_device(struct wasapi_state *state, struct device_desc *d)
 {
+    if (!d)
+        return;
     MP_VERBOSE(state, "Selecting device \'%s\' (%s)\n", d->id, d->name);
     state->deviceID = talloc_memdup(NULL, d->deviceID,
                                     (wcslen(d->deviceID) + 1) * sizeof(wchar_t));
@@ -946,13 +948,9 @@ static HRESULT find_device(struct ao *ao)
         goto exit_label;
 
     if (!device.len) {
+        MP_VERBOSE(ao, "No device specified. Selecting default.\n");
         d = default_device_desc(enumerator);
-        if (d) {
-            MP_VERBOSE(ao, "No device specified. Selecting default\n");
-            select_device(state, d);
-        } else {
-            MP_ERR(ao, "Failed to get default device.\n");
-        }
+        select_device(state, d);
         goto exit_label;
     }
 
@@ -960,13 +958,9 @@ static HRESULT find_device(struct ao *ao)
     bstr rest;
     long long devno = bstrtoll(device, &rest, 10);
     if (!rest.len && 0 <= devno && devno < enumerator->count) {
+        MP_VERBOSE(ao, "Selecting device by number: #%lld\n", devno);
         d = device_desc_for_num(enumerator, devno);
-        if (d) {
-            MP_VERBOSE(ao, "Selecting device by number: #%lld\n", devno);
-            select_device(state, d);
-        } else {
-            MP_ERR(ao, "Failed to get device #%lld.\n", devno);
-        }
+        select_device(state, d);
         goto exit_label;
     }
 
@@ -974,10 +968,8 @@ static HRESULT find_device(struct ao *ao)
     bstr_eatstart0(&device, "{0.0.0.00000000}.");
     for (int i = 0; i < enumerator->count; i++) {
         d = device_desc_for_num(enumerator, i);
-        if (!d) {
-            MP_ERR(ao, "Failed to get device #%d.\n", i);
+        if (!d)
             goto exit_label;
-        }
 
         if (bstrcmp(device, bstr_strip(bstr0(d->id))) == 0) {
             MP_VERBOSE(ao, "Selecting device by id: \'%.*s\'\n", BSTR_P(device));
