@@ -36,6 +36,11 @@ struct playlist_entry {
 
     char *title;
 
+    // If the user plays a playlist, then the playlist's URL will be appended
+    // as redirect to each entry. (Same for directories etc.)
+    char **redirects;
+    int num_redirects;
+
     // Set to true if playback didn't seem to work, or if the file could be
     // played only for a very short time. This is used to make playlist
     // navigation just work in case the user has unplayable files in the
@@ -88,6 +93,7 @@ void playlist_add_file(struct playlist *pl, const char *filename);
 void playlist_shuffle(struct playlist *pl);
 struct playlist_entry *playlist_get_next(struct playlist *pl, int direction);
 void playlist_add_base_path(struct playlist *pl, bstr base_path);
+void playlist_add_redirect(struct playlist *pl, const char *redirected_from);
 void playlist_transfer_entries(struct playlist *pl, struct playlist *source_pl);
 void playlist_append_entries(struct playlist *pl, struct playlist *source_pl);
 

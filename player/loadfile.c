@@ -836,6 +836,8 @@ static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl)
     if (pl->first) {
         prepare_playlist(mpctx, pl);
         struct playlist_entry *new = pl->current;
+        if (mpctx->playlist->current)
+            playlist_add_redirect(pl, mpctx->playlist->current->filename);
         playlist_transfer_entries(mpctx->playlist, pl);
         // current entry is replaced
         if (mpctx->playlist->current)

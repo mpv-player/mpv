@@ -206,6 +206,18 @@ void playlist_add_base_path(struct playlist *pl, bstr base_path)
     }
 }
 
+// Add redirected_from as new redirect entry to each item in pl.
+void playlist_add_redirect(struct playlist *pl, const char *redirected_from)
+{
+    for (struct playlist_entry *e = pl->first; e; e = e->next) {
+        if (e->num_redirects >= 10) // arbitrary limit for sanity
+            break;
+        char *s = talloc_strdup(e, redirected_from);
+        if (s)
+            MP_TARRAY_APPEND(e, e->redirects, e->num_redirects, s);
+    }
+}
+
 // Move all entries from source_pl to pl, appending them after the current entry
 // of pl. source_pl will be empty, and all entries have changed ownership to pl.
 void playlist_transfer_entries(struct playlist *pl, struct playlist *source_pl)
