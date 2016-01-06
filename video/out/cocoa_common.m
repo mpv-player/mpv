@@ -374,21 +374,22 @@ static void vo_cocoa_update_screen_fps(struct vo *vo)
     NSDictionary* sinfo = [screen deviceDescription];
     NSNumber* sid = [sinfo objectForKey:@"NSScreenNumber"];
     CGDirectDisplayID did = [sid longValue];
-    CGDisplayModeRef mode = CGDisplayCopyDisplayMode(did);
-    s->screen_fps = CGDisplayModeGetRefreshRate(mode);
-    CGDisplayModeRelease(mode);
 
-    if (s->screen_fps == 0.0) {
+    CVDisplayLinkRef link;
+    CVDisplayLinkCreateWithCGDisplay(did, &link);
+    s->screen_fps = CVDisplayLinkGetActualOutputVideoRefreshPeriod(link);
+
+    if (s->screen_fps == 0) {
         // Fallback to using Nominal refresh rate from DisplayLink,
         // CVDisplayLinkGet *Actual* OutputVideoRefreshPeriod seems to
-        // return 0 as well if CG returns 0
-        CVDisplayLinkRef link;
-        CVDisplayLinkCreateWithCGDisplay(did, &link);
+        // return 0 on some Apple devices. Use the nominal refresh period
+        // instead.
         const CVTime t = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(link);
         if (!(t.flags & kCVTimeIsIndefinite))
             s->screen_fps = (t.timeScale / (double) t.timeValue);
-        CVDisplayLinkRelease(link);
     }
+
+    CVDisplayLinkRelease(link);
 
     flag_events(vo, VO_EVENT_WIN_STATE);
 }
