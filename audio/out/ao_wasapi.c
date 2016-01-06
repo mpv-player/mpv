@@ -441,7 +441,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         return CONTROL_OK;
     }
 
-    return state->opt_exclusive ?
+    return state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE ?
         control_exclusive(ao, cmd, arg) : control_shared(ao, cmd, arg);
 }
 
