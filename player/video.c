@@ -1205,7 +1205,7 @@ void write_video(struct MPContext *mpctx, double endpts)
     update_avsync_before_frame(mpctx);
 
     if (!update_subtitles(mpctx, mpctx->next_frames[0]->pts)) {
-        MP_WARN(mpctx, "subt wait\n");
+        MP_VERBOSE(mpctx, "Video frame delayed due waiting on subtitles.\n");
         return;
     }
 
