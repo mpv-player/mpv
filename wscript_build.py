@@ -134,7 +134,6 @@ def build(ctx):
         ( "audio/out/ao_coreaudio_exclusive.c",  "coreaudio" ),
         ( "audio/out/ao_coreaudio_properties.c", "coreaudio" ),
         ( "audio/out/ao_coreaudio_utils.c",      "coreaudio" ),
-        ( "audio/out/ao_dsound.c",               "dsound" ),
         ( "audio/out/ao_jack.c",                 "jack" ),
         ( "audio/out/ao_lavc.c",                 "encoding" ),
         ( "audio/out/ao_null.c" ),

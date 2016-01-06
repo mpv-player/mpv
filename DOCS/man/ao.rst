@@ -20,10 +20,8 @@ normal driver parameters.
 
     See ``--ao=help`` for a list of compiled-in audio output drivers. The
     driver ``--ao=alsa`` is preferred. ``--ao=pulse`` is preferred on systems
-    where PulseAudio is used. On Windows, ``--ao=wasapi`` is preferred,
-    though it might cause trouble sometimes, in which case ``--ao=dsound``
-    should be used. On BSD systems, ``--ao=oss`` or `--ao=sndio`` may work
-    (the latter being experimental). On OS X systems, use ``--ao=coreaudio``.
+    where PulseAudio is used. On BSD systems, ``--ao=oss`` or ``--ao=sndio``
+    may work (the latter being experimental).
 
 .. admonition:: Examples
 
@@ -206,18 +204,6 @@ Available audio output drivers are:
 
         If you have stuttering video when using pulse, try to enable this
         option. (Or try to update PulseAudio.)
-
-``dsound`` (Windows only)
-    DirectX DirectSound audio output driver
-
-    .. note:: This driver is for compatibility with old systems.
-
-    ``device=<devicenum>``
-        Sets the device number to use. Playing a file with ``-v`` will show a
-        list of available devices.
-
-    ``buffersize=<ms>``
-        DirectSound buffer size in milliseconds (default: 200).
 
 ``sdl``
     SDL 1.2+ audio output driver. Should work on any platform supported by SDL

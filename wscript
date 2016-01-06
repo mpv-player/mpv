@@ -560,10 +560,6 @@ audio_output_features = [
             fragment=load_fragment('coreaudio.c'),
             framework_name=['CoreFoundation', 'CoreAudio', 'AudioUnit', 'AudioToolbox'])
     }, {
-        'name': '--dsound',
-        'desc': 'DirectSound audio output',
-        'func': check_cc(header_name='dsound.h'),
-    }, {
         'name': '--wasapi',
         'desc': 'WASAPI audio output',
         'deps': ['win32', 'atomics'],
