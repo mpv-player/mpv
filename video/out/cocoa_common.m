@@ -51,6 +51,8 @@
 
 static int vo_cocoa_fullscreen(struct vo *vo);
 static void cocoa_rm_fs_screen_profile_observer(struct vo_cocoa_state *s);
+static void cocoa_add_screen_reconfiguration_observer(struct vo *vo);
+static void cocoa_rm_screen_reconfiguration_observer(struct vo *vo);
 
 struct vo_cocoa_state {
     // --- The following members can be accessed only by the main thread (i.e.
@@ -267,6 +269,7 @@ void vo_cocoa_init(struct vo *vo)
     pthread_cond_init(&s->wakeup, NULL);
     vo->cocoa = s;
     cocoa_init_light_sensor(vo);
+    cocoa_add_screen_reconfiguration_observer(vo);
     if (!s->embedded) {
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         set_application_icon(NSApp);
@@ -306,6 +309,7 @@ void vo_cocoa_uninit(struct vo *vo)
         enable_power_management(s);
         cocoa_uninit_light_sensor(s);
         cocoa_rm_fs_screen_profile_observer(s);
+        cocoa_rm_screen_reconfiguration_observer(vo);
 
         [s->nsgl_ctx release];
         CGLReleaseContext(s->cgl_ctx);
@@ -551,6 +555,28 @@ static void cocoa_add_fs_screen_profile_observer(struct vo *vo)
                     object:s->fs_screen
                      queue:nil
                 usingBlock:nblock];
+}
+
+static void cocoa_screen_reconfiguration_observer(
+    CGDirectDisplayID display, CGDisplayChangeSummaryFlags flags, void *ctx)
+{
+    if (flags & kCGDisplaySetModeFlag) {
+        struct vo *vo = ctx;
+        MP_WARN(vo, "detected display mode change, updating screen info\n");
+        vo_cocoa_update_screen_info(vo, NULL);
+    }
+}
+
+static void cocoa_add_screen_reconfiguration_observer(struct vo *vo)
+{
+    CGDisplayRegisterReconfigurationCallback(
+        cocoa_screen_reconfiguration_observer, vo);
+}
+
+static void cocoa_rm_screen_reconfiguration_observer(struct vo *vo)
+{
+    CGDisplayRemoveReconfigurationCallback(
+        cocoa_screen_reconfiguration_observer, vo);
 }
 
 void vo_cocoa_set_opengl_ctx(struct vo *vo, CGLContextObj ctx)
