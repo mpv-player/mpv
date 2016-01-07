@@ -1265,6 +1265,7 @@ terminate_playback:
 
     if (mpctx->stop_play == PT_RELOAD_FILE) {
         mpctx->stop_play = KEEP_PLAYING;
+        mp_cancel_reset(mpctx->playback_abort);
         goto reopen_file;
     }
 
