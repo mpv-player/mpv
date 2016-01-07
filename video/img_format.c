@@ -148,6 +148,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     int planedepth[4] = {0};
     int el_size = (pd->flags & AV_PIX_FMT_FLAG_BITSTREAM) ? 1 : 8;
     bool need_endian = false; // single component is spread over >1 bytes
+    int shift = -1; // shift for all components, or -1 if not uniform
     for (int c = 0; c < pd->nb_components; c++) {
         AVComponentDescriptor d = pd->comp[c];
 #if HAVE_AV_NEW_PIXDESC
@@ -166,6 +167,10 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
             desc.component_bits = depth;
         if (depth != desc.component_bits)
             desc.component_bits = 0;
+        if (c == 0)
+            shift = d.shift;
+        if (shift != d.shift)
+            shift = -1;
     }
 
     for (int p = 0; p < 4; p++) {
@@ -234,7 +239,8 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 
     if ((desc.flags & (MP_IMGFLAG_YUV | MP_IMGFLAG_RGB))
         && (desc.flags & MP_IMGFLAG_BYTE_ALIGNED)
-        && !(pd->flags & AV_PIX_FMT_FLAG_PAL))
+        && !(pd->flags & AV_PIX_FMT_FLAG_PAL)
+        && shift >= 0)
     {
         bool same_depth = true;
         for (int p = 0; p < desc.num_planes; p++) {
@@ -242,7 +248,8 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
                           desc.bpp[p] == desc.bpp[0];
         }
         if (same_depth && pd->nb_components == desc.num_planes) {
-            desc.component_full_bits = (desc.component_bits + 7) / 8 * 8;
+            desc.component_bits += shift;
+            desc.component_full_bits = (desc.component_bits + shift + 7) / 8 * 8;
             if (desc.flags & MP_IMGFLAG_YUV) {
                 desc.flags |= MP_IMGFLAG_YUV_P;
             } else {
