@@ -289,7 +289,7 @@ static double spline64(params *p, double x)
 
 static double gaussian(params *p, double x)
 {
-    return exp(-2.0 * x * x) * sqrt(2.0 / M_PI);
+    return exp(-2.0 * x * x / p->params[0]);
 }
 
 static double sinc(params *p, double x)
@@ -326,7 +326,7 @@ const struct filter_window mp_filter_windows[] = {
     {"welch",          1,   welch},
     {"kaiser",         1,   kaiser,   .params = {6.33, NAN} },
     {"blackman",       1,   blackman, .params = {0.16, NAN} },
-    {"gaussian",       2,   gaussian},
+    {"gaussian",       2,   gaussian, .params = {1.00, NAN} },
     {"sinc",           1,   sinc},
     {"jinc",           1.2196698912665045, jinc},
     {"sphinx",         1.4302966531242027, sphinx},
