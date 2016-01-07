@@ -1880,9 +1880,7 @@ static void pass_render_frame_dumb(struct gl_video *p, int fbo)
     gl_transform_rect(transform, &p->pass_tex[3].src);
 
     GLSL(vec4 color = texture(texture0, texcoord0);)
-    if (p->image_params.imgfmt == IMGFMT_NV12 ||
-        p->image_params.imgfmt == IMGFMT_NV21)
-    {
+    if (p->image_desc.flags & MP_IMGFLAG_YUV_NV) {
         GLSL(color.gb = texture(texture1, texcoord1).RG;)
     } else if (p->plane_count >= 3) {
         GLSL(color.g = texture(texture1, texcoord1).r;)
@@ -2659,12 +2657,15 @@ static bool init_format(int fmt, struct gl_video *init)
     }
 
     // YUV/half-packed
-    if (fmt == IMGFMT_NV12 || fmt == IMGFMT_NV21) {
-        plane_format[0] = find_tex_format(gl, 1, 1);
-        plane_format[1] = find_tex_format(gl, 1, 2);
-        if (fmt == IMGFMT_NV21)
-            snprintf(init->color_swizzle, sizeof(init->color_swizzle), "rbga");
-        goto supported;
+    if (desc.flags & MP_IMGFLAG_YUV_NV) {
+        int bits = desc.component_bits;
+        if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
+            plane_format[0] = find_tex_format(gl, (bits + 7) / 8, 1);
+            plane_format[1] = find_tex_format(gl, (bits + 7) / 8, 2);
+            if (desc.flags & MP_IMGFLAG_YUV_NV_SWAP)
+                snprintf(init->color_swizzle, sizeof(init->color_swizzle), "rbga");
+            goto supported;
+        }
     }
 
     // XYZ (same organization as RGB packed, but requires conversion matrix)
