@@ -265,7 +265,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         {
 
             desc.flags |= MP_IMGFLAG_YUV_NV;
-            if (pd->comp[1].offset > pd->comp[2].offset)
+            if (fmt == AV_PIX_FMT_NV21)
                 desc.flags |= MP_IMGFLAG_YUV_NV_SWAP;
         }
         if (desc.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_RGB_P | MP_IMGFLAG_YUV_NV))
