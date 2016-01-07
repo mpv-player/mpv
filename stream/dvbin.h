@@ -95,12 +95,10 @@ typedef struct {
 
 typedef struct dvb_params {
     struct mp_log *log;
-    int fd;
     int card;
     int fe_fd;
-    int sec_fd;
-    int demux_fd[3], demux_fds[DMX_FILTER_SIZE], demux_fds_cnt;
     int dvr_fd;
+    int demux_fd[3], demux_fds[DMX_FILTER_SIZE], demux_fds_cnt;
 
     dvb_config_t *config;
     dvb_channels_list *list;

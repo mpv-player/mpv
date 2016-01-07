@@ -604,7 +604,7 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
 
     tries = priv->retry + 1;
 
-    fd = priv->fd;
+    fd = priv->dvr_fd;
     while (pos < size) {
         pfds[0].fd = fd;
         pfds[0].events = POLLIN | POLLPRI;
@@ -693,7 +693,6 @@ int dvb_set_channel(stream_t *stream, int card, int n)
     priv->list = new_list;
     priv->retry = 5;
     new_list->current = n;
-    priv->fd = priv->dvr_fd;
     MP_VERBOSE(stream, "DVB_SET_CHANNEL: new channel name=%s, card: %d, "
                "channel %d\n", channel->name, card, n);
 
@@ -799,7 +798,7 @@ static void dvbin_close(stream_t *stream)
     close(priv->dvr_fd);
 
     close(priv->fe_fd);
-    priv->fe_fd = priv->sec_fd = priv->dvr_fd = -1;
+    priv->fe_fd = priv->dvr_fd = -1;
 
     priv->is_on = 0;
     dvb_free_config(priv->config);
@@ -859,7 +858,7 @@ static int dvb_open(stream_t *stream)
     char *progname;
     int tuner_type = 0, i;
 
-    priv->fe_fd = priv->sec_fd = priv->dvr_fd = -1;
+    priv->fe_fd = priv->dvr_fd = -1;
     priv->config = dvb_get_config(stream);
     if (priv->config == NULL) {
         MP_ERR(stream, "DVB CONFIGURATION IS EMPTY, exit\n");
