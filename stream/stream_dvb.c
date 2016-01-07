@@ -61,6 +61,8 @@
 
 #define OPT_BASE_STRUCT struct dvb_params
 
+static dvb_state_t* global_dvb_state = NULL;
+
 /// URL definition
 static const m_option_t stream_params[] = {
     OPT_STRING("prog", cfg_prog, 0),
@@ -777,22 +779,43 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
     case STREAM_CTRL_DVB_SET_CHANNEL: {
         int *iarg = arg;
         r = dvb_set_channel(s, iarg[1], iarg[0]);
-        return r ? STREAM_OK : STREAM_ERROR;
+        if (r) {
+          // Stream will be pulled down after channel switch,
+          // persist state.
+          dvb_priv_t *priv  = (dvb_priv_t *) s->priv;
+          dvb_state_t* state = priv->state;
+          state->switching_channel = true;
+          return STREAM_OK;
+        }
+        return STREAM_ERROR;
     }
     case STREAM_CTRL_DVB_STEP_CHANNEL:
         r = dvb_step_channel(s, *(int *)arg);
-        return r ? STREAM_OK : STREAM_ERROR;
+        if (r) {
+          // Stream will be pulled down after channel switch,
+          // persist state.
+          dvb_priv_t *priv  = (dvb_priv_t *) s->priv;
+          dvb_state_t* state = priv->state;
+          state->switching_channel = true;
+          return STREAM_OK;
+        }
+        return STREAM_ERROR;
     }
     return STREAM_UNSUPPORTED;
 }
 
 static void dvbin_close(stream_t *stream)
 {
-    int i;
     dvb_priv_t *priv  = (dvb_priv_t *) stream->priv;
     dvb_state_t* state = priv->state;
 
-    for (i = state->demux_fds_cnt - 1; i >= 0; i--) {
+    if (state->switching_channel && state->is_on) {
+      // Prevent state destruction, reset channel-switch. 
+      state->switching_channel = false;
+      return;
+    }
+    
+    for (int i = state->demux_fds_cnt - 1; i >= 0; i--) {
         state->demux_fds_cnt--;
         MP_VERBOSE(stream, "DVBIN_CLOSE, close(%d), fd=%d, COUNT=%d\n", i,
                    state->demux_fds[i], state->demux_fds_cnt);
@@ -805,6 +828,7 @@ static void dvbin_close(stream_t *stream)
 
     state->is_on = 0;
     dvb_free_state(state);
+    global_dvb_state = NULL;
 }
 
 static int dvb_streaming_start(stream_t *stream, int tuner_type, char *progname)
@@ -854,7 +878,7 @@ static int dvb_streaming_start(stream_t *stream, int tuner_type, char *progname)
 
 static int dvb_open(stream_t *stream)
 {
-    // I don't force  the file format bacause, although it's almost always TS,
+    // I don't force  the file format because, although it's almost always TS,
     // there are some providers that stream an IP multicast with M$ Mpeg4 inside
     dvb_priv_t *priv = stream->priv;
     priv->log = stream->log;
@@ -869,46 +893,51 @@ static int dvb_open(stream_t *stream)
         return STREAM_ERROR;
     }
 
-    state->card = -1;
-    for (i = 0; i < state->count; i++) {
-        if (state->cards[i].devno + 1 == p->cfg_card) {
-            state->card = i;
-            break;
-        }
+    if (state->is_on != 1) {
+      // State could be already initialized, for example, we just did a channel switch. 
+      // The following setup only has to be done once. 
+
+      state->card = -1;
+      for (i = 0; i < state->count; i++) {
+          if (state->cards[i].devno + 1 == p->cfg_card) {
+              state->card = i;
+              break;
+          }
+      }
+
+      if (state->card == -1) {
+          MP_ERR(stream, "NO CONFIGURATION FOUND FOR CARD N. %d, exit\n",
+                 p->cfg_card);
+          return STREAM_ERROR;
+      }
+      state->timeout = p->cfg_timeout;
+
+      tuner_type = state->cards[state->card].type;
+
+      if (tuner_type == 0) {
+          MP_VERBOSE(stream,
+                     "OPEN_DVB: UNKNOWN OR UNDETECTABLE TUNER TYPE, EXIT\n");
+          return STREAM_ERROR;
+      }
+
+      state->tuner_type = tuner_type;
+
+      MP_VERBOSE(stream, "OPEN_DVB: prog=%s, card=%d, type=%d\n",
+                 p->cfg_prog, state->card + 1, state->tuner_type);
+
+      state->list = state->cards[state->card].list;
+
+      if ((!strcmp(p->cfg_prog, "")) && (state->list != NULL)) {
+          progname = state->list->channels[0].name;
+      } else {
+          progname = p->cfg_prog;
+      }
+
+
+      if (!dvb_streaming_start(stream, tuner_type, progname))
+          return STREAM_ERROR;
     }
-
-    if (state->card == -1) {
-        MP_ERR(stream, "NO CONFIGURATION FOUND FOR CARD N. %d, exit\n",
-               p->cfg_card);
-        return STREAM_ERROR;
-    }
-    state->timeout = p->cfg_timeout;
-
-    tuner_type = state->cards[state->card].type;
-
-    if (tuner_type == 0) {
-        MP_VERBOSE(stream,
-                   "OPEN_DVB: UNKNOWN OR UNDETECTABLE TUNER TYPE, EXIT\n");
-        return STREAM_ERROR;
-    }
-
-    state->tuner_type = tuner_type;
-
-    MP_VERBOSE(stream, "OPEN_DVB: prog=%s, card=%d, type=%d\n",
-               p->cfg_prog, state->card + 1, state->tuner_type);
-
-    state->list = state->cards[state->card].list;
-
-    if ((!strcmp(p->cfg_prog, "")) && (state->list != NULL)) {
-        progname = state->list->channels[0].name;
-    } else {
-        progname = p->cfg_prog;
-    }
-
-
-    if (!dvb_streaming_start(stream, tuner_type, progname))
-        return STREAM_ERROR;
-
+    
     stream->type = STREAMTYPE_DVB;
     stream->fill_buffer = dvb_streaming_read;
     stream->close = dvbin_close;
@@ -924,6 +953,9 @@ static int dvb_open(stream_t *stream)
 #define MAX_CARDS 4
 dvb_state_t *dvb_get_state(stream_t *stream)
 {
+    if (global_dvb_state != NULL) {
+      return global_dvb_state;
+    }
     struct mp_log *log = stream->log;
     struct mpv_global *global = stream->global;
     dvb_priv_t *priv = stream->priv;
@@ -938,6 +970,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
         return NULL;
     
     state->count = 0;
+    state->switching_channel = false;
     state->cards = NULL;
     state->fe_fd = state->dvr_fd = -1;
     for (int i = 0; i < MAX_CARDS; i++) {
@@ -1027,6 +1060,8 @@ dvb_state_t *dvb_get_state(stream_t *stream)
         free(state);
         state = NULL;
     }
+
+    global_dvb_state = state;
 
     return state;
 }

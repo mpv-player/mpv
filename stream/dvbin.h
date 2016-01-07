@@ -102,6 +102,7 @@ typedef struct {
     int retry;
     int timeout;
     int last_freq;
+    bool switching_channel;
 } dvb_state_t;
 
 typedef struct dvb_params {
