@@ -370,7 +370,7 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
                            (sat_no / 4) % 2 ? SEC_MINI_B : SEC_MINI_A);
 }
 
-static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec,
+static int tune_it(dvb_priv_t *priv, int fd_frontend, 
                    unsigned int freq, unsigned int srate, char pol, int tone,
                    bool is_dvb_s2, int stream_id,
                    fe_spectral_inversion_t specInv, unsigned int diseqc,
@@ -386,8 +386,8 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec,
     struct dvb_frontend_parameters feparams;
     struct dvb_frontend_info fe_info;
 
-    MP_VERBOSE(priv, "TUNE_IT, fd_frontend %d, fd_sec %d\nfreq %lu, srate %lu, "
-               "pol %c, tone %i, diseqc %u\n", fd_frontend, fd_sec,
+    MP_VERBOSE(priv, "TUNE_IT, fd_frontend %d, freq %lu, srate %lu, "
+               "pol %c, tone %i, diseqc %u\n", fd_frontend, 
                (long unsigned int)freq, (long unsigned int)srate, pol,
                tone, diseqc);
 
@@ -548,7 +548,7 @@ int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc,
 {
     MP_INFO(priv, "dvb_tune Freq: %lu\n", (long unsigned int) freq);
 
-    int ris = tune_it(priv, priv->fe_fd, priv->sec_fd, freq, srate, pol, tone,
+    int ris = tune_it(priv, priv->fe_fd, freq, srate, pol, tone,
                       is_dvb_s2, stream_id, specInv, diseqc, modulation,
                       HP_CodeRate, TransmissionMode, guardInterval,
                       bandWidth, LP_CodeRate, hier, timeout);
