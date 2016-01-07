@@ -184,11 +184,14 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     // Check whether any components overlap other components (per plane).
     // We're cheating/simplifying here: we assume that this happens if a shift
     // is set - which is wrong in general (could be needed for padding, instead
-    // of overlapping bits of another component). Needed for rgb444le/be.
+    // of overlapping bits of another component - use the "< 8" test to exclude
+    // "normal" formats which use this for padding, like p010).
+    // Needed for rgb444le/be.
     bool component_byte_overlap = false;
     for (int c = 0; c < pd->nb_components; c++) {
         AVComponentDescriptor d = pd->comp[c];
-        component_byte_overlap |= d.shift > 0 && planedepth[d.plane] > 8;
+        component_byte_overlap |= d.shift > 0 && planedepth[d.plane] > 8 &&
+                                  desc.component_bits < 8;
     }
 
     // If every component sits in its own byte, or all components are within
@@ -240,6 +243,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     if ((desc.flags & (MP_IMGFLAG_YUV | MP_IMGFLAG_RGB))
         && (desc.flags & MP_IMGFLAG_BYTE_ALIGNED)
         && !(pd->flags & AV_PIX_FMT_FLAG_PAL)
+        && !component_byte_overlap
         && shift >= 0)
     {
         bool same_depth = true;
@@ -248,13 +252,26 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
                           desc.bpp[p] == desc.bpp[0];
         }
         if (same_depth && pd->nb_components == desc.num_planes) {
-            desc.component_bits += shift;
-            desc.component_full_bits = (desc.component_bits + shift + 7) / 8 * 8;
             if (desc.flags & MP_IMGFLAG_YUV) {
                 desc.flags |= MP_IMGFLAG_YUV_P;
             } else {
                 desc.flags |= MP_IMGFLAG_RGB_P;
             }
+        }
+        if (pd->nb_components == 3 && desc.num_planes == 2 &&
+            planedepth[1] == planedepth[0] * 2 &&
+            desc.bpp[1] == desc.bpp[0] * 2 &&
+            (desc.flags & MP_IMGFLAG_YUV))
+        {
+
+            desc.flags |= MP_IMGFLAG_YUV_NV;
+            if (pd->comp[1].offset > pd->comp[2].offset)
+                desc.flags |= MP_IMGFLAG_YUV_NV_SWAP;
+        }
+        if (desc.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_RGB_P | MP_IMGFLAG_YUV_NV))
+        {
+            desc.component_bits += shift;
+            desc.component_full_bits = (desc.component_bits + shift + 7) / 8 * 8;
         }
     }
 
@@ -340,6 +357,8 @@ int main(int argc, char **argv)
         FLAG(MP_IMGFLAG_ALPHA, "a")
         FLAG(MP_IMGFLAG_PLANAR, "P")
         FLAG(MP_IMGFLAG_YUV_P, "YUVP")
+        FLAG(MP_IMGFLAG_YUV_NV, "NV")
+        FLAG(MP_IMGFLAG_YUV_NV_SWAP, "NVSWAP")
         FLAG(MP_IMGFLAG_YUV, "yuv")
         FLAG(MP_IMGFLAG_RGB, "rgb")
         FLAG(MP_IMGFLAG_XYZ, "xyz")
@@ -351,6 +370,9 @@ int main(int argc, char **argv)
         printf("  planes=%d, chroma=%d:%d align=%d:%d bits=%d cbits=%d\n",
                d.num_planes, d.chroma_xs, d.chroma_ys, d.align_x, d.align_y,
                d.plane_bits, d.component_bits);
+        printf("  planes=%d, chroma=%d:%d align=%d:%d bits=%d cbits=%d cfbits=%d\n",
+               d.num_planes, d.chroma_xs, d.chroma_ys, d.align_x, d.align_y,
+               d.plane_bits, d.component_bits, d.component_full_bits);
         printf("  {");
         for (int n = 0; n < MP_MAX_PLANES; n++)
             printf("%d/%d/[%d:%d] ", d.bytes[n], d.bpp[n], d.xs[n], d.ys[n]);

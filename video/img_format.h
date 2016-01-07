@@ -70,6 +70,10 @@
 // Like MP_IMGFLAG_YUV_P, but RGB. This can be e.g. AV_PIX_FMT_GBRP. The planes
 // are always shuffled (G - B - R [- A]).
 #define MP_IMGFLAG_RGB_P 0x40000
+// Semi-planar YUV formats, like AV_PIX_FMT_NV12.
+// The flag MP_IMGFLAG_YUV_NV_SWAP is set for AV_PIX_FMT_NV21.
+#define MP_IMGFLAG_YUV_NV 0x80000
+#define MP_IMGFLAG_YUV_NV_SWAP 0x100000
 
 // Exactly one of these bits is set in mp_imgfmt_desc.flags
 #define MP_IMGFLAG_COLOR_CLASS_MASK \
