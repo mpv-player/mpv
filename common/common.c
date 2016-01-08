@@ -148,7 +148,7 @@ void mp_append_utf8_bstr(void *talloc_ctx, struct bstr *buf, uint32_t codepoint)
     bstr_xappend(talloc_ctx, buf, (bstr){data, output - data});
 }
 
-// Parse a C-style escape beginning at code, and append the result to *str
+// Parse a C/JSON-style escape beginning at code, and append the result to *str
 // using talloc. The input string (*code) must point to the first character
 // after the initial '\', and after parsing *code is set to the first character
 // after the current escape.
@@ -161,6 +161,7 @@ static bool mp_parse_escape(void *talloc_ctx, bstr *dst, bstr *code)
     switch (code->start[0]) {
     case '"':  replace = '"';  break;
     case '\\': replace = '\\'; break;
+    case '/':  replace = '/'; break;
     case 'b':  replace = '\b'; break;
     case 'f':  replace = '\f'; break;
     case 'n':  replace = '\n'; break;
