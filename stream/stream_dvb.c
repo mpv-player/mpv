@@ -40,6 +40,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <pthread.h>
 
 #include <libavutil/avstring.h>
 
@@ -63,6 +64,7 @@
 #define OPT_BASE_STRUCT struct dvb_params
 
 static dvb_state_t* global_dvb_state = NULL;
+static pthread_mutex_t global_dvb_state_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /// URL definition
 static const m_option_t stream_params[] = {
@@ -820,9 +822,13 @@ static void dvbin_close(stream_t *stream)
 {
     dvb_priv_t *priv  = (dvb_priv_t *) stream->priv;
     dvb_state_t* state = priv->state;
+
     if (state->switching_channel && state->is_on) {
       // Prevent state destruction, reset channel-switch. 
       state->switching_channel = false;
+      pthread_mutex_lock(&global_dvb_state_lock);
+      global_dvb_state->stream_used = false;
+      pthread_mutex_unlock(&global_dvb_state_lock);
       return;
     }
     
@@ -838,8 +844,11 @@ static void dvbin_close(stream_t *stream)
     state->fe_fd = state->dvr_fd = -1;
 
     state->is_on = 0;
+    
+    pthread_mutex_lock(&global_dvb_state_lock);
     dvb_free_state(state);
     global_dvb_state = NULL;
+    pthread_mutex_unlock(&global_dvb_state_lock);
 }
 
 static int dvb_streaming_start(stream_t *stream, int tuner_type, char *progname)
@@ -897,7 +906,17 @@ static int dvb_open(stream_t *stream)
     char *progname;
     int tuner_type = 0, i;
 
+    pthread_mutex_lock(&global_dvb_state_lock);
+    if (global_dvb_state && global_dvb_state->stream_used) {
+      MP_ERR(stream, "DVB stream already in use, only one DVB stream can exist at a time!");
+      pthread_mutex_unlock(&global_dvb_state_lock);
+      return STREAM_ERROR;
+    }
+
     dvb_state_t* state = dvb_get_state(stream);
+    state->stream_used = true;
+    pthread_mutex_unlock(&global_dvb_state_lock);
+    
     priv->state = state;
     if (state == NULL) {
         MP_ERR(stream, "DVB CONFIGURATION IS EMPTY, exit\n");
@@ -982,6 +1001,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
     
     state->count = 0;
     state->switching_channel = false;
+    state->stream_used = true;
     state->cards = NULL;
     state->fe_fd = state->dvr_fd = -1;
     for (int i = 0; i < MAX_CARDS; i++) {
@@ -1073,7 +1093,6 @@ dvb_state_t *dvb_get_state(stream_t *stream)
     }
 
     global_dvb_state = state;
-
     return state;
 }
 

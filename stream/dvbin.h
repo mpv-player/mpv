@@ -103,6 +103,7 @@ typedef struct {
     int timeout;
     int last_freq;
     bool switching_channel;
+    bool stream_used;
 } dvb_state_t;
 
 typedef struct dvb_params {
