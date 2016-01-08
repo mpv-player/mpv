@@ -529,6 +529,10 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
         MP_VERBOSE(vd, " %s", av_get_pix_fmt_name(fmt[i]));
     MP_VERBOSE(vd, "\n");
 
+    const char *profile = avcodec_profile_name(avctx->codec_id, avctx->profile);
+    MP_VERBOSE(vd, "Codec profile: %s (0x%x)\n", profile ? profile : "unknown",
+               avctx->profile);
+
     assert(ctx->hwdec);
 
     ctx->hwdec_request_reinit |= ctx->hwdec_failed;
