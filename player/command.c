@@ -3008,6 +3008,14 @@ static int mp_property_dvb_channel_name(void *ctx, struct m_property *prop,
         if (r == M_PROPERTY_OK && !mpctx->stop_play)
             mpctx->stop_play = PT_RELOAD_FILE;
         return r;
+    case M_PROPERTY_SWITCH: {
+        struct m_property_switch_arg *sa = arg;
+        int dir = sa->inc >= 0 ? 1 : -1;
+        r = prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_STEP_CHANNEL, &dir);
+        if (r == M_PROPERTY_OK && !mpctx->stop_play)
+            mpctx->stop_play = PT_RELOAD_FILE;
+        return r;
+    }
     case M_PROPERTY_GET: {
         return prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_GET_CHANNEL_NAME, arg);
     }
