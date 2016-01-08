@@ -477,6 +477,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavcodec/avcodec.h',
                                 'AVSubtitleRect r = {.linesize={0}}',
                                 use='libav'),
+    }, {
+        'name': 'avcodec-profile-name',
+        'desc': 'libavcodec avcodec_profile_name()',
+        'func': check_statement('libavcodec/avcodec.h',
+                                'avcodec_profile_name(0,0)',
+                                use='libav'),
     },
 ]
 
