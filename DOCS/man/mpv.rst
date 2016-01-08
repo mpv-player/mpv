@@ -222,7 +222,10 @@ PREVIOUS and NEXT
 support.)
 
 h and k
-    Select previous/next channel.
+    Select previous/next tv-channel.
+
+H and K
+    Select previous/next dvb-channel.
 
 Mouse Control
 -------------

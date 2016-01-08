@@ -1542,6 +1542,15 @@ Property list
 ``program`` (W)
     Switch TS program (write-only).
 
+``dvb-channel`` (W)
+    Pair of integers: card,channel of current DVB stream.
+    Can be switched to switch to another channel on the same card. 
+
+``dvb-channel-name`` (RW)
+    Name of current DVB program.
+    On write, a channel-switch to the named channel on the same
+    card is performed. Can also be used for channel switching. 
+
 ``sid`` (RW)
     Current subtitle track (similar to ``--sid``).
 
