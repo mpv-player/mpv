@@ -792,6 +792,31 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
         }
         return STREAM_ERROR;
     }
+    case STREAM_CTRL_DVB_SET_CHANNEL_NAME: {
+        char *progname = *((char**)arg);
+        dvb_priv_t *priv  = (dvb_priv_t *) s->priv;
+        dvb_state_t* state = priv->state;
+        int new_channel = -1;
+        for (int i=0; i < state->list->NUM_CHANNELS; ++i) {
+          if (!strcmp(state->list->channels[i].name, progname)) {
+            new_channel = i;
+            break;
+          }
+        }
+        if (new_channel == -1) {
+          MP_ERR(s, "Program '%s' not found for card %d!\n",
+                 progname, state->card);
+          return STREAM_ERROR;
+        }
+        r = dvb_set_channel(s, state->card, new_channel);
+        if (r) {
+          // Stream will be pulled down after channel switch,
+          // persist state.
+          state->switching_channel = true;
+          return STREAM_OK;
+        }
+        return STREAM_ERROR;
+    }
     case STREAM_CTRL_DVB_STEP_CHANNEL: {
         r = dvb_step_channel(s, *(int *)arg);
         if (r) {
@@ -804,6 +829,14 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
         }
         return STREAM_ERROR;
     }
+    case STREAM_CTRL_DVB_GET_CHANNEL_NAME: {
+      dvb_priv_t *priv  = (dvb_priv_t *) s->priv;
+      dvb_state_t* state = priv->state;
+      int current_channel = state->list->current;
+      char* progname = state->list->channels[current_channel].name;
+      *(char **)arg = talloc_strdup(NULL, progname);
+      return STREAM_OK;
+    }
     case STREAM_CTRL_GET_METADATA: {
       struct mp_tags* metadata = talloc_zero(NULL, struct mp_tags);
       dvb_priv_t *priv  = (dvb_priv_t *) s->priv;
@@ -812,7 +845,7 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
       char* progname = state->list->channels[current_channel].name;
       mp_tags_set_str(metadata, "title", progname);
       *(struct mp_tags **)arg = metadata;
-      return 1;
+      return STREAM_OK;
     }
     }
     return STREAM_UNSUPPORTED;
