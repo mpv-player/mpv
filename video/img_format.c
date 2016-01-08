@@ -271,7 +271,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         if (desc.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_RGB_P | MP_IMGFLAG_YUV_NV))
         {
             desc.component_bits += shift;
-            desc.component_full_bits = (desc.component_bits + shift + 7) / 8 * 8;
+            desc.component_full_bits = (desc.component_bits + 7) / 8 * 8;
         }
     }
 
