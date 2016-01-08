@@ -47,6 +47,7 @@
 #include "misc/ctype.h"
 
 #include "stream.h"
+#include "common/tags.h"
 #include "options/m_config.h"
 #include "options/m_option.h"
 #include "options/options.h"
@@ -789,7 +790,7 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
         }
         return STREAM_ERROR;
     }
-    case STREAM_CTRL_DVB_STEP_CHANNEL:
+    case STREAM_CTRL_DVB_STEP_CHANNEL: {
         r = dvb_step_channel(s, *(int *)arg);
         if (r) {
           // Stream will be pulled down after channel switch,
@@ -801,6 +802,17 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
         }
         return STREAM_ERROR;
     }
+    case STREAM_CTRL_GET_METADATA: {
+      struct mp_tags* metadata = talloc_zero(NULL, struct mp_tags);
+      dvb_priv_t *priv  = (dvb_priv_t *) s->priv;
+      dvb_state_t* state = priv->state;
+      int current_channel = state->list->current;
+      char* progname = state->list->channels[current_channel].name;
+      mp_tags_set_str(metadata, "title", progname);
+      *(struct mp_tags **)arg = metadata;
+      return 1;
+    }
+    }
     return STREAM_UNSUPPORTED;
 }
 
@@ -808,7 +820,6 @@ static void dvbin_close(stream_t *stream)
 {
     dvb_priv_t *priv  = (dvb_priv_t *) stream->priv;
     dvb_state_t* state = priv->state;
-
     if (state->switching_channel && state->is_on) {
       // Prevent state destruction, reset channel-switch. 
       state->switching_channel = false;
