@@ -2980,7 +2980,6 @@ static int mp_property_dvb_channel(void *ctx, struct m_property *prop,
     int r;
     switch (action) {
     case M_PROPERTY_SET:
-        mpctx->last_dvb_step = 1;
         r = prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_SET_CHANNEL, arg);
         if (r == M_PROPERTY_OK && !mpctx->stop_play)
             mpctx->stop_play = PT_RELOAD_FILE;
@@ -2988,7 +2987,6 @@ static int mp_property_dvb_channel(void *ctx, struct m_property *prop,
     case M_PROPERTY_SWITCH: {
         struct m_property_switch_arg *sa = arg;
         int dir = sa->inc >= 0 ? 1 : -1;
-        mpctx->last_dvb_step = dir;
         r = prop_stream_ctrl(mpctx, STREAM_CTRL_DVB_STEP_CHANNEL, &dir);
         if (r == M_PROPERTY_OK && !mpctx->stop_play)
             mpctx->stop_play = PT_RELOAD_FILE;

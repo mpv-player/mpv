@@ -365,8 +365,6 @@ typedef struct MPContext {
     int last_chapter_seek;
     double last_chapter_pts;
 
-    int last_dvb_step;
-
     bool paused;
     // step this many frames, then pause
     int step_frames;
