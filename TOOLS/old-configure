@@ -525,6 +525,39 @@ if test "$_iconv" != yes ; then
     die "Unable to find iconv which should be part of standard compilation environment. Aborting. If you really mean to compile without iconv support use --disable-iconv."
 fi
 
+echocheck "Linux fstatfs()"
+cat > $TMPC << EOF
+#include <sys/vfs.h>
+int main(int argc, char *argv[]) {
+  struct statfs st;
+  st.f_fstype;
+  return 0;
+}
+EOF
+compile_check $TMPC
+_linux_fstatfs=$(defretval)
+check_yes_no $_linux_fstatfs LINUX_FSTATFS
+echores "$_linux_fstatfs"
+
+if test $_linux_fstatfs = yes; then
+  _bsd_fstatfs=no
+else
+  echocheck "BSD fstatfs()"
+  cat > $TMPC << EOF
+#include <sys/param.h>
+#include <sys/mount.h>
+int main(int argc, char *argv[]) {
+  struct statfs st;
+  st.f_fstypename;
+  return 0;
+}
+EOF
+  compile_check $TMPC
+  _bsd_fstatfs=$(defretval)
+  echores "$_bsd_fstatfs"
+fi
+check_yes_no $_bsd_fstatfs BSD_FSTATFS
+
 _soundcard_header=sys/soundcard.h
 _check_snd=yes
 check_statement_libs "sys/soundcard.h" auto SYS_SOUNDCARD_H sys/soundcard.h
@@ -939,8 +972,6 @@ cat > $TMPC << EOF
 
 /* we didn't bother to add actual config checks for this, or they are
    for platforms not supported by this configure script */
-#define HAVE_BSD_FSTATFS 0
-#define HAVE_LINUX_FSTATFS 1
 #define HAVE_GL_COCOA 0
 #define HAVE_COCOA 0
 #define HAVE_COCOA_APPLICATION 0
