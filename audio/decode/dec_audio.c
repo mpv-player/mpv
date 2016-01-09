@@ -177,11 +177,21 @@ static int decode_new_frame(struct dec_audio *da)
                     da->pts += da->pts_offset / (double)da->waiting->rate;
                     da->pts_offset = 0;
                 }
+                double newpts = da->waiting->pts;
                 // Keep the interpolated timestamp if it doesn't deviate more
                 // than 1 ms from the real one. (MKV rounded timestamps.)
                 if (da->pts == MP_NOPTS_VALUE || da->pts_offset != 0 ||
-                    fabs(da->pts - da->waiting->pts) > 0.001)
+                    fabs(da->pts - newpts) > 0.001)
                 {
+                    // Attempt to detect jumps in PTS. Even for the lowest
+                    // sample rates and with worst container rounded timestamp,
+                    // this should be a margin more than enough.
+                    if (da->pts != MP_NOPTS_VALUE && fabs(newpts - da->pts) > 0.1)
+                    {
+                        MP_WARN(da, "Invalid audio PTS: %f -> %f\n",
+                                da->pts, newpts);
+                        da->pts_reset = true;
+                    }
                     da->pts = da->waiting->pts;
                     da->pts_offset = 0;
                 }
@@ -274,6 +284,7 @@ void audio_reset_decoding(struct dec_audio *d_audio)
     af_seek_reset(d_audio->afilter);
     d_audio->pts = MP_NOPTS_VALUE;
     d_audio->pts_offset = 0;
+    d_audio->pts_reset = false;
     if (d_audio->waiting) {
         talloc_free(d_audio->waiting);
         d_audio->waiting = NULL;

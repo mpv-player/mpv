@@ -487,11 +487,12 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
 
     double ptsdiff = written_pts - sync_pts;
     // Missing timestamp, or PTS reset, or just broken.
-    if (written_pts == MP_NOPTS_VALUE || fabs(ptsdiff) > 3600) {
+    if (written_pts == MP_NOPTS_VALUE) {
         MP_WARN(mpctx, "Failed audio resync.\n");
         mpctx->audio_status = STATUS_FILLING;
         return true;
     }
+    ptsdiff = MPCLAMP(ptsdiff, -3600, 3600);
 
     int align = af_format_sample_alignment(out_format.format);
     *skip = (int)(-ptsdiff * play_samplerate) / align * align;
@@ -542,6 +543,13 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         reinit_audio_chain(mpctx);
         mpctx->sleeptime = 0;
         return; // try again next iteration
+    }
+
+    if (mpctx->d_video && d_audio->pts_reset) {
+        MP_VERBOSE(mpctx, "Reset playback due to audio timestamp reset.\n");
+        reset_playback_state(mpctx);
+        mpctx->sleeptime = 0;
+        return;
     }
 
     struct mp_audio out_format = {0};
