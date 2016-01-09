@@ -533,6 +533,7 @@ check_statement_libs "soundcard.h" $_check_snd SOUNDCARD_H soundcard.h
 test $(defretval) = yes && _soundcard_header=soundcard.h
 
 check_statement_libs "sys/videoio.h" auto SYS_VIDEOIO_H sys/videoio.h
+test $(defretval) = yes && _tv_v4l2=yes
 
 _termios_ok=no
 check_statement_libs "termios.h" $_termios TERMIOS_H termios.h
