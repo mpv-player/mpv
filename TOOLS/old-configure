@@ -520,6 +520,9 @@ if test "$_atomic" = no && test "$_sync" = no && test "$_stdatomic" = no ; then
 fi
 define_yes_no $_any_atomic HAVE_ATOMICS
 
+check_statement_libs "C11 thread-local storage" auto C11_TLS stddef.h \
+    'static _Thread_local int x = 0'
+
 check_compile "SSE4 intrinsics" auto SSE4_INSTRINSIC waftools/fragments/sse.c
 
 check_compile "iconv" $_iconv ICONV waftools/fragments/iconv.c " " "-liconv" "-liconv $_ld_dl"
@@ -1011,7 +1014,6 @@ cat > $TMPC << EOF
 #define HAVE_EGL_DRM 0
 #define HAVE_VIDEOTOOLBOX_HWACCEL 0
 #define HAVE_VIDEOTOOLBOX_GL 0
-#define HAVE_C11_TLS 1
 #define HAVE_EGL_ANGLE 0
 #define HAVE_WIN32 0
 #define HAVE_GL_DXINTEROP 0
