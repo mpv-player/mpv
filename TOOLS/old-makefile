@@ -415,6 +415,9 @@ install-mpv-man:  install-mpv-man-en
 
 install-mpv-man-en: DOCS/man/mpv.1
 	if test ! -d $(MANDIR)/man1 ; then $(INSTALL) -d $(MANDIR)/man1 ; fi
+ifeq ($(shell uname -s), OpenBSD)
+	sed -Ei 's,(/dev/cdrom|/dev/dvd),/dev/rcd0c,g' DOCS/man/mpv.1
+endif
 	$(INSTALL) -m 644 DOCS/man/mpv.1 $(MANDIR)/man1/
 
 ICONSIZES = 16x16 32x32 64x64
