@@ -37,6 +37,12 @@ mpv_set_property
 mpv_set_property_async
 mpv_set_property_string
 mpv_set_wakeup_callback
+mpv_stream_cb_init
+mpv_stream_cb_set_open_fn
+mpv_stream_cb_set_read_fn
+mpv_stream_cb_set_seek_fn
+mpv_stream_cb_set_size_fn
+mpv_stream_cb_set_close_fn
 mpv_suspend
 mpv_terminate_destroy
 mpv_unobserve_property

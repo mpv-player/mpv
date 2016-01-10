@@ -1592,7 +1592,14 @@ typedef enum mpv_sub_api {
      * Will return NULL if unavailable (if OpenGL support was not compiled in).
      * See opengl_cb.h for details.
      */
-    MPV_SUB_API_OPENGL_CB = 1
+    MPV_SUB_API_OPENGL_CB = 1,
+    /**
+     * For passing a custom stream implementation into mpv.
+     * mpv_get_sub_api(MPV_SUB_API_STREAM_CB) returns mpv_stream_cb_context*.
+     * This context can be used with mpv_stream_cb_* functions.
+     * See stream_cb.h for details.
+     */
+    MPV_SUB_API_STREAM_CB
 } mpv_sub_api;
 
 /**

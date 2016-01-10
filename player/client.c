@@ -23,6 +23,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
+#include "common/global.h"
 #include "input/input.h"
 #include "input/cmd_list.h"
 #include "misc/ctype.h"
@@ -1675,6 +1676,18 @@ void kill_video(struct mp_client_api *client_api)
     mp_dispatch_unlock(mpctx->dispatch);
 }
 
+#include "libmpv/stream_cb.h"
+
+static mpv_stream_cb_context *stream_cb_get_context(mpv_handle *ctx)
+{
+    mpv_stream_cb_context *cb = ctx->mpctx->global->stream_cb_ctx;
+    if (!cb) {
+        cb = mp_stream_cb_create(ctx->mpctx->global, ctx->clients);
+        ctx->mpctx->global->stream_cb_ctx = cb;
+    }
+    return cb;
+}
+
 #include "libmpv/opengl_cb.h"
 
 #if HAVE_GL
@@ -1729,6 +1742,9 @@ void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api)
     void *res = NULL;
     lock_core(ctx);
     switch (sub_api) {
+    case MPV_SUB_API_STREAM_CB:
+        res = stream_cb_get_context(ctx);
+        break;
     case MPV_SUB_API_OPENGL_CB:
         res = opengl_cb_get_context(ctx);
         break;

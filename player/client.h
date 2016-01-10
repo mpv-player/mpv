@@ -45,4 +45,9 @@ struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
                                                struct mp_client_api *client_api);
 void kill_video(struct mp_client_api *client_api);
 
+// stream_cb.c
+struct mpv_stream_cb_context;
+struct mpv_stream_cb_context *mp_stream_cb_create(struct mpv_global *g,
+                                                  struct mp_client_api *client_api);
+
 #endif
