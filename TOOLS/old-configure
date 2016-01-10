@@ -193,7 +193,7 @@ options_state_machine() {
     opt_yes_no _libavresample "libavresample (preferred over libswresample)"
     opt_yes_no _libswresample "libswresample"
     opt_yes_no _caca        "CACA  video output"
-    opt_yes_no _sdl2        "SDL2 video and audio outputs" no
+    opt_yes_no _sdl2        "SDL2 video and audio outputs"
     opt_yes_no _xv          "Xv video output"
     opt_yes_no _vdpau       "VDPAU acceleration"
     opt_yes_no _vaapi       "VAAPI acceleration"
