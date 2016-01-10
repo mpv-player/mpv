@@ -193,7 +193,7 @@ options_state_machine() {
     opt_yes_no _libavresample "libavresample (preferred over libswresample)"
     opt_yes_no _libswresample "libswresample"
     opt_yes_no _caca        "CACA  video output"
-    opt_yes_no _sdl2        "SDL2 video and audio outputs" no
+    opt_yes_no _sdl2        "SDL2 video and audio outputs"
     opt_yes_no _xv          "Xv video output"
     opt_yes_no _vdpau       "VDPAU acceleration"
     opt_yes_no _vaapi       "VAAPI acceleration"
@@ -215,6 +215,7 @@ options_state_machine() {
     opt_yes_no _vapoursynth_lazy "VapourSynth filter bridge (Lua)"
     opt_yes_no _libarchive  "libarchive"
     opt_yes_no _encoding    "encoding functionality" yes
+    opt_yes_no _gpl3        "GPL3-licensed code paths" yes
     opt_yes_no _build_man   "building manpage"
 }
 
@@ -519,11 +520,49 @@ if test "$_atomic" = no && test "$_sync" = no && test "$_stdatomic" = no ; then
 fi
 define_yes_no $_any_atomic HAVE_ATOMICS
 
+check_statement_libs "C11 thread-local storage" auto C11_TLS stddef.h \
+    'static _Thread_local int x = 0'
+
+check_compile "SSE4 intrinsics" auto SSE4_INSTRINSIC waftools/fragments/sse.c
+
 check_compile "iconv" $_iconv ICONV waftools/fragments/iconv.c " " "-liconv" "-liconv $_ld_dl"
 _iconv=$(defretval)
 if test "$_iconv" != yes ; then
     die "Unable to find iconv which should be part of standard compilation environment. Aborting. If you really mean to compile without iconv support use --disable-iconv."
 fi
+
+echocheck "Linux fstatfs()"
+cat > $TMPC << EOF
+#include <sys/vfs.h>
+int main(int argc, char *argv[]) {
+  struct statfs st;
+  st.f_fstype;
+  return 0;
+}
+EOF
+compile_check $TMPC
+_linux_fstatfs=$(defretval)
+check_yes_no $_linux_fstatfs LINUX_FSTATFS
+echores "$_linux_fstatfs"
+
+if test $_linux_fstatfs = yes; then
+  _bsd_fstatfs=no
+else
+  echocheck "BSD fstatfs()"
+  cat > $TMPC << EOF
+#include <sys/param.h>
+#include <sys/mount.h>
+int main(int argc, char *argv[]) {
+  struct statfs st;
+  st.f_fstypename;
+  return 0;
+}
+EOF
+  compile_check $TMPC
+  _bsd_fstatfs=$(defretval)
+  echores "$_bsd_fstatfs"
+fi
+check_yes_no $_bsd_fstatfs BSD_FSTATFS
 
 _soundcard_header=sys/soundcard.h
 _check_snd=yes
@@ -533,6 +572,7 @@ check_statement_libs "soundcard.h" $_check_snd SOUNDCARD_H soundcard.h
 test $(defretval) = yes && _soundcard_header=soundcard.h
 
 check_statement_libs "sys/videoio.h" auto SYS_VIDEOIO_H sys/videoio.h
+test $(defretval) = yes && _tv_v4l2=yes
 
 _termios_ok=no
 check_statement_libs "termios.h" $_termios TERMIOS_H termios.h
@@ -821,6 +861,12 @@ api_statement_check \
     libavcodec/avcodec.h \
     'AVSubtitleRect r = {.linesize={0}}'
 
+api_statement_check \
+    "libavcodec avcodec_profile_name()" \
+    HAVE_AVCODEC_PROFILE_NAME \
+    libavcodec/avcodec.h \
+    'avcodec_profile_name(0,0)'
+
 check_pkg_config "libavfilter" $_libavfilter LIBAVFILTER 'libavfilter >= 5.0.0'
 
 check_pkg_config "libavdevice" $_libavdevice LIBAVDEVICE 'libavdevice >= 55.0.0'
@@ -876,6 +922,8 @@ check_trivial "VapourSynth core" $_vapoursynth_core VAPOURSYNTH_CORE
 check_pkg_config "libarchive support" $_libarchive LIBARCHIVE 'libarchive >= 3.0.0'
 
 check_trivial "encoding" $_encoding ENCODING
+
+check_yes_no $_gpl3 GPL3
 
 # needs dlopen on unix
 _dlopen="$_dl"
@@ -938,8 +986,6 @@ cat > $TMPC << EOF
 
 /* we didn't bother to add actual config checks for this, or they are
    for platforms not supported by this configure script */
-#define HAVE_BSD_FSTATFS 0
-#define HAVE_LINUX_FSTATFS 1
 #define HAVE_GL_COCOA 0
 #define HAVE_COCOA 0
 #define HAVE_COCOA_APPLICATION 0
@@ -968,13 +1014,9 @@ cat > $TMPC << EOF
 #define HAVE_EGL_DRM 0
 #define HAVE_VIDEOTOOLBOX_HWACCEL 0
 #define HAVE_VIDEOTOOLBOX_GL 0
-#define HAVE_SSE4_INTRINSICS 1
-#define HAVE_C11_TLS 1
 #define HAVE_EGL_ANGLE 0
-#define HAVE_GPL3 1
 #define HAVE_WIN32 0
 #define HAVE_GL_DXINTEROP 0
-#define HAVE_AVCODEC_PROFILE_NAME 1
 
 #ifdef __OpenBSD__
 #define DEFAULT_CDROM_DEVICE "/dev/rcd0c"

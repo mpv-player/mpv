@@ -113,6 +113,7 @@ SOURCES-$(VAPOURSYNTH_CORE)     += video/filter/vf_vapoursynth.c
 SOURCES-$(LIBARCHIVE)           += demux/demux_libarchive.c \
                                    stream/stream_libarchive.c
 SOURCES-$(DLOPEN)               += video/filter/vf_dlopen.c
+SOURCES-$(SSE4_INTRINSICS)      += video/gpu_memcpy.c
 
 SOURCES = audio/audio.c \
           audio/audio_buffer.c \
@@ -231,7 +232,6 @@ SOURCES = audio/audio.c \
           ta/ta_talloc.c \
           video/csputils.c \
           video/fmt-conversion.c \
-          video/gpu_memcpy.c \
           video/image_writer.c \
           video/img_format.c \
           video/mp_image.c \
@@ -415,6 +415,9 @@ install-mpv-man:  install-mpv-man-en
 
 install-mpv-man-en: DOCS/man/mpv.1
 	if test ! -d $(MANDIR)/man1 ; then $(INSTALL) -d $(MANDIR)/man1 ; fi
+ifeq ($(shell uname -s), OpenBSD)
+	sed -Ei 's,(/dev/cdrom|/dev/dvd),/dev/rcd0c,g' DOCS/man/mpv.1
+endif
 	$(INSTALL) -m 644 DOCS/man/mpv.1 $(MANDIR)/man1/
 
 ICONSIZES = 16x16 32x32 64x64
