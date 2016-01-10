@@ -858,6 +858,12 @@ api_statement_check \
     libavcodec/avcodec.h \
     'AVSubtitleRect r = {.linesize={0}}'
 
+api_statement_check \
+    "libavcodec avcodec_profile_name()" \
+    HAVE_AVCODEC_PROFILE_NAME \
+    libavcodec/avcodec.h \
+    'avcodec_profile_name(0,0)'
+
 check_pkg_config "libavfilter" $_libavfilter LIBAVFILTER 'libavfilter >= 5.0.0'
 
 check_pkg_config "libavdevice" $_libavdevice LIBAVDEVICE 'libavdevice >= 55.0.0'
@@ -1009,7 +1015,6 @@ cat > $TMPC << EOF
 #define HAVE_EGL_ANGLE 0
 #define HAVE_WIN32 0
 #define HAVE_GL_DXINTEROP 0
-#define HAVE_AVCODEC_PROFILE_NAME 1
 
 #ifdef __OpenBSD__
 #define DEFAULT_CDROM_DEVICE "/dev/rcd0c"
