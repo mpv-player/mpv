@@ -283,12 +283,12 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     int mpfmt = va_fourcc_to_imgfmt(va_image->format.fourcc);
     if (mpfmt != IMGFMT_NV12 && mpfmt != IMGFMT_420P) {
         MP_FATAL(p, "unsupported VA image format %s\n",
-                 VA_STR_FOURCC(va_image->format.fourcc));
+                 mp_tag_str(va_image->format.fourcc));
         goto err;
     }
 
     if (!hw->converted_imgfmt) {
-        MP_VERBOSE(p, "format: %s %s\n", VA_STR_FOURCC(va_image->format.fourcc),
+        MP_VERBOSE(p, "format: %s %s\n", mp_tag_str(va_image->format.fourcc),
                    mp_imgfmt_to_name(mpfmt));
         hw->converted_imgfmt = mpfmt;
     }

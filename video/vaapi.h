@@ -23,9 +23,6 @@
 #include <pthread.h>
 #include <va/va.h>
 
-#define VA_STR_FOURCC(fcc) \
-    (const char[]){(fcc), (fcc) >> 8u, (fcc) >> 16u, (fcc) >> 24u, 0}
-
 #include "mp_image.h"
 #include "hwdec.h"
 

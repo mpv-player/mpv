@@ -615,7 +615,7 @@ static int preinit(struct vo *vo)
 
     for (int i = 0; i < p->va_num_subpic_formats; i++) {
         MP_VERBOSE(vo, "  %s, flags 0x%x\n",
-                   VA_STR_FOURCC(p->va_subpic_formats[i].fourcc),
+                   mp_tag_str(p->va_subpic_formats[i].fourcc),
                    p->va_subpic_flags[i]);
         if (p->va_subpic_formats[i].fourcc == OSD_VA_FORMAT) {
             p->osd_format = p->va_subpic_formats[i];

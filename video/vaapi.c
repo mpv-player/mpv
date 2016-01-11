@@ -104,7 +104,7 @@ static void va_get_formats(struct mp_vaapi_ctx *ctx)
         return;
     MP_VERBOSE(ctx, "%d image formats available:\n", formats->num);
     for (int i = 0; i < formats->num; i++)
-        MP_VERBOSE(ctx, "  %s\n", VA_STR_FOURCC(formats->entries[i].fourcc));
+        MP_VERBOSE(ctx, "  %s\n", mp_tag_str(formats->entries[i].fourcc));
     ctx->image_formats = formats;
 }
 
