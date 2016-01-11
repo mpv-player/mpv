@@ -444,7 +444,7 @@ def build(ctx):
             features     = "c cprogram",
             install_path = ctx.env.BINDIR
         )
-        for f in ['example.conf', 'input.conf', 'mplayer-input.conf', \
+        for f in ['mpv.conf', 'input.conf', 'mplayer-input.conf', \
                   'restore-old-bindings.conf']:
             ctx.install_as(os.path.join(ctx.env.DOCDIR, f),
                            os.path.join('etc/', f))
