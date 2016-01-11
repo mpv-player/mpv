@@ -29,7 +29,7 @@
 
 #include "config.h"
 #include "options/options.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "common/msg.h"
 #include "common/global.h"
 #include "osdep/threads.h"

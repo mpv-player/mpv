@@ -31,7 +31,7 @@
 #include "common/common.h"
 #include "audio/format.h"
 #include "audio/fmt-conversion.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "ao.h"
 #include "internal.h"
 #include "common/msg.h"

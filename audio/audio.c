@@ -24,7 +24,7 @@
 #include <libavutil/frame.h>
 #include <libavutil/version.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "common/common.h"
 #include "fmt-conversion.h"
 #include "audio.h"

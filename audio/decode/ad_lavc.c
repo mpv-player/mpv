@@ -26,7 +26,7 @@
 #include <libavutil/common.h>
 #include <libavutil/intreadwrite.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "config.h"
 #include "common/av_common.h"

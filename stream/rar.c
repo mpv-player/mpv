@@ -31,7 +31,7 @@
 
 #include <libavutil/intreadwrite.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "common/common.h"
 #include "stream.h"
 #include "rar.h"

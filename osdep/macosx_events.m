@@ -25,7 +25,7 @@
 #import <IOKit/hidsystem/ev_keymap.h>
 #import <Cocoa/Cocoa.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "input/event.h"
 #include "input/input.h"
 #include "input/keycodes.h"

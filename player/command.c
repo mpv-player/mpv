@@ -30,7 +30,7 @@
 #include <libavutil/common.h>
 
 #include "config.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "client.h"
 #include "common/msg.h"
 #include "common/msg_control.h"

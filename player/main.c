@@ -25,7 +25,7 @@
 #include <signal.h>
 
 #include "config.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "misc/dispatch.h"
 #include "osdep/io.h"

@@ -48,7 +48,7 @@
 #include "options/m_config.h"
 #include "options/m_option.h"
 #include "options/path.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "options/options.h"
 #include "misc/bstr.h"
 #include "stream/stream.h"

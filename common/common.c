@@ -21,7 +21,7 @@
 #include <libavutil/common.h>
 #include <libavutil/error.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "misc/bstr.h"
 #include "misc/ctype.h"
 #include "common/common.h"

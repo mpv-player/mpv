@@ -45,7 +45,7 @@
 #include "win_state.h"
 
 #include "input/input.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "common/msg.h"
 

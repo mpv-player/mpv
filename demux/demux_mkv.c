@@ -41,7 +41,7 @@
 #include <zlib.h>
 #endif
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "common/av_common.h"
 #include "options/options.h"
 #include "options/m_option.h"

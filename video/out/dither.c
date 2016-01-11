@@ -35,7 +35,7 @@
 
 #include <libavutil/lfg.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "dither.h"
 
 #define MAX_SIZEB 8

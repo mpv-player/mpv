@@ -25,7 +25,7 @@
 
 #include "config.h"
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "common/msg.h"
 #include "common/av_common.h"
 #include "demux/stheader.h"

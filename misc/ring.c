@@ -20,7 +20,7 @@
 #include <inttypes.h>
 #include <libavutil/common.h>
 #include <assert.h>
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "osdep/atomics.h"
 #include "ring.h"
 

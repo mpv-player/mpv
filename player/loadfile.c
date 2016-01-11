@@ -24,7 +24,7 @@
 #include <libavutil/avutil.h>
 
 #include "config.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "osdep/io.h"
 #include "osdep/terminal.h"

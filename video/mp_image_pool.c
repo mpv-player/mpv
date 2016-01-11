@@ -24,7 +24,7 @@
 
 #include <libavutil/buffer.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "common/common.h"
 #include "video/mp_image.h"

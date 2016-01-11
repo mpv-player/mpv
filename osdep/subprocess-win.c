@@ -23,7 +23,7 @@
 #include "osdep/io.h"
 #include "osdep/atomics.h"
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "common/common.h"
 #include "stream/stream.h"
 #include "misc/bstr.h"

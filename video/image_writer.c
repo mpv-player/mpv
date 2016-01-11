@@ -32,7 +32,7 @@
 #include "osdep/io.h"
 
 #include "image_writer.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/fmt-conversion.h"

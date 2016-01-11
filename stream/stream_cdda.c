@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "stream.h"
 #include "options/m_option.h"

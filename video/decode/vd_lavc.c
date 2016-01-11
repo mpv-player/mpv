@@ -27,7 +27,7 @@
 #include <libavutil/intreadwrite.h>
 #include <libavutil/pixdesc.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "config.h"
 #include "common/msg.h"
 #include "options/options.h"

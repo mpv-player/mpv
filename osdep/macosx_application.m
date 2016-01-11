@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 #include <pthread.h>
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "common/msg.h"
 #include "input/input.h"

@@ -25,7 +25,7 @@
 
 #include <libavutil/common.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "bitmap_packer.h"
 #include "common/common.h"
 #include "sub/dec_sub.h"
