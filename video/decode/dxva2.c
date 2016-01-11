@@ -33,6 +33,7 @@
 #include "lavc.h"
 #include "common/common.h"
 #include "common/av_common.h"
+#include "osdep/windows_utils.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image_pool.h"
 #include "video/hwdec.h"
@@ -64,30 +65,35 @@ typedef HRESULT WINAPI pCreateDeviceManager9(UINT *, IDirect3DDeviceManager9 **)
 
 typedef struct dxva2_mode {
   const GUID     *guid;
+  const char     *name;
   enum AVCodecID codec;
 } dxva2_mode;
 
+#define MODE(id) &MP_CONCAT(DXVA2_Mode, id), # id
+
 static const dxva2_mode dxva2_modes[] = {
     /* MPEG-2 */
-    { &DXVA2_ModeMPEG2_VLD,      AV_CODEC_ID_MPEG2VIDEO },
-    { &DXVA2_ModeMPEG2and1_VLD,  AV_CODEC_ID_MPEG2VIDEO },
+    { MODE(MPEG2_VLD),      AV_CODEC_ID_MPEG2VIDEO },
+    { MODE(MPEG2and1_VLD),  AV_CODEC_ID_MPEG2VIDEO },
 
     /* H.264 */
-    { &DXVA2_ModeH264_F,         AV_CODEC_ID_H264 },
-    { &DXVA2_ModeH264_E,         AV_CODEC_ID_H264 },
+    { MODE(H264_F),         AV_CODEC_ID_H264 },
+    { MODE(H264_E),         AV_CODEC_ID_H264 },
     /* Intel specific H.264 mode */
-    { &DXVADDI_Intel_ModeH264_E, AV_CODEC_ID_H264 },
+    { &DXVADDI_Intel_ModeH264_E, "Intel_ModeH264_E", AV_CODEC_ID_H264 },
 
     /* VC-1 / WMV3 */
-    { &DXVA2_ModeVC1_D2010,      AV_CODEC_ID_VC1  },
-    { &DXVA2_ModeVC1_D2010,      AV_CODEC_ID_WMV3 },
-    { &DXVA2_ModeVC1_D,          AV_CODEC_ID_VC1  },
-    { &DXVA2_ModeVC1_D,          AV_CODEC_ID_WMV3 },
+    { MODE(VC1_D2010),      AV_CODEC_ID_VC1  },
+    { MODE(VC1_D2010),      AV_CODEC_ID_WMV3 },
+    { MODE(VC1_D),          AV_CODEC_ID_VC1  },
+    { MODE(VC1_D),          AV_CODEC_ID_WMV3 },
 
-    { &DXVA2_ModeHEVC_VLD_Main,  AV_CODEC_ID_HEVC },
+    { MODE(HEVC_VLD_Main),  AV_CODEC_ID_HEVC },
 
-    { NULL,                      0 },
+    { NULL,                 0 },
 };
+
+#undef MODE
 
 typedef struct surface_info {
     int used;
@@ -485,6 +491,30 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
         goto fail;
     }
 
+    // dump all decoder info
+    MP_VERBOSE(ctx, "%d decoder devices:\n", (int)guid_count);
+    for (j = 0; j < guid_count; j++) {
+        GUID *guid = &guid_list[j];
+
+        const char *name = "<unknown>";
+        for (i = 0; dxva2_modes[i].guid; i++) {
+            if (IsEqualGUID(dxva2_modes[i].guid, guid))
+                name = dxva2_modes[i].name;
+        }
+
+        D3DFORMAT *target_list = NULL;
+        unsigned target_count = 0;
+        hr = IDirectXVideoDecoderService_GetDecoderRenderTargets(ctx->decoder_service, guid, &target_count, &target_list);
+        if (FAILED(hr))
+            continue;
+        char fmts[256] = {0};
+        for (i = 0; i < target_count; i++)
+            mp_snprintf_cat(fmts, sizeof(fmts), " %s", mp_tag_str(target_list[i]));
+        CoTaskMemFree(target_list);
+        MP_VERBOSE(ctx, "%s %s %s\n", mp_GUID_to_str(guid), name, fmts);
+    }
+
+    // find a suitable decoder
     for (i = 0; dxva2_modes[i].guid; i++) {
         D3DFORMAT *target_list = NULL;
         unsigned target_count = 0;
