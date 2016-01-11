@@ -872,6 +872,8 @@ _INSTALL_DIRS_LIST = [
     ('mandir',  '${DATADIR}/man',     'man pages '),
     ('docdir',  '${DATADIR}/doc/mpv', 'documentation files'),
     ('zshdir',  '${DATADIR}/zsh/site-functions', 'zsh completion functions'),
+
+    ('confloaddir', '${CONFDIR}', 'configuration files load directory'),
 ]
 
 def options(opt):
