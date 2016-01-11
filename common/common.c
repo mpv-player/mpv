@@ -23,6 +23,7 @@
 
 #include "talloc.h"
 #include "misc/bstr.h"
+#include "misc/ctype.h"
 #include "common/common.h"
 
 #define appendf(ptr, ...) \
@@ -256,5 +257,21 @@ char *mp_strerror_buf(char *buf, size_t buf_size, int errnum)
 {
     // This handles the nasty details of calling the right function for us.
     av_strerror(AVERROR(errnum), buf, buf_size);
+    return buf;
+}
+
+char *mp_tag_str_buf(char *buf, size_t buf_size, uint32_t tag)
+{
+    if (buf_size < 1)
+        return buf;
+    buf[0] = '\0';
+    for (int n = 0; n < 4; n++) {
+        uint8_t val = (tag >> (n * 8)) & 0xFF;
+        if (mp_isalnum(val) || val == '_' || val == ' ') {
+            mp_snprintf_cat(buf, buf_size, "%c", val);
+        } else {
+            mp_snprintf_cat(buf, buf_size, "[%d]", val);
+        }
+    }
     return buf;
 }
