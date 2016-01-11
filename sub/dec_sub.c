@@ -165,7 +165,7 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
         // reading.
         if (st <= 0) {
             r = st < 0 || (sub->last_pkt_pts != MP_NOPTS_VALUE &&
-                           sub->last_pkt_pts >= video_pts);
+                           sub->last_pkt_pts > video_pts);
             break;
         }
 
