@@ -260,9 +260,9 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     for (int t = 0; t < mpctx->num_tracks; t++) {
         struct track *track = mpctx->tracks[t];
         if (track->selected && track->is_external && track->demuxer) {
-            double main_new_pos = seek.amount;
+            double main_new_pos = demuxer_amount;
             if (seek.type != MPSEEK_ABSOLUTE)
-                main_new_pos = get_main_demux_pts(mpctx);
+                main_new_pos = target_time;
             demux_seek(track->demuxer, main_new_pos, SEEK_ABSOLUTE | SEEK_BACKWARD);
         }
     }

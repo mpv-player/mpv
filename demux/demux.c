@@ -738,22 +738,6 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
     return r;
 }
 
-// Return the pts of the next packet that demux_read_packet() would return.
-// Might block. Sometimes used to force a packet read, without removing any
-// packets from the queue.
-double demux_get_next_pts(struct sh_stream *sh)
-{
-    double res = MP_NOPTS_VALUE;
-    if (sh) {
-        pthread_mutex_lock(&sh->ds->in->lock);
-        ds_get_packets(sh->ds);
-        if (sh->ds->head)
-            res = MP_ADD_PTS(sh->ds->head->pts, sh->ds->in->ts_offset);
-        pthread_mutex_unlock(&sh->ds->in->lock);
-    }
-    return res;
-}
-
 // Return whether a packet is queued. Never blocks, never forces any reads.
 bool demux_has_packet(struct sh_stream *sh)
 {

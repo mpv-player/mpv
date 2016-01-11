@@ -235,9 +235,10 @@ void reselect_demux_streams(struct MPContext *mpctx)
                 need_init_seek(track->demuxer);
             demuxer_select_track(track->demuxer, track->stream, track->selected);
             if (need_init) {
-                double pts = get_main_demux_pts(mpctx);
-                if (pts != MP_NOPTS_VALUE)
-                    demux_seek(track->demuxer, pts, SEEK_ABSOLUTE);
+                double pts = get_current_time(mpctx);
+                if (pts == MP_NOPTS_VALUE)
+                    pts = 0;
+                demux_seek(track->demuxer, pts, SEEK_ABSOLUTE);
             }
         }
     }
