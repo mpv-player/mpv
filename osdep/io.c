@@ -23,7 +23,7 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "config.h"
 #include "osdep/io.h"

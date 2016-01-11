@@ -34,7 +34,7 @@
 #include "misc/bstr.h"
 #include "options/options.h"
 #include "common/msg.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "wayland_common.h"
 

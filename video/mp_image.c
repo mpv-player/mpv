@@ -30,7 +30,7 @@
 #include <libavutil/rational.h>
 #include <libavcodec/avcodec.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "img_format.h"
 #include "mp_image.h"

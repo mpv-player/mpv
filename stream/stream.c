@@ -29,7 +29,7 @@
 #include "osdep/atomics.h"
 #include "osdep/io.h"
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "config.h"
 

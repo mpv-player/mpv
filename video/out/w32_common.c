@@ -43,7 +43,7 @@
 #include "osdep/atomics.h"
 #include "misc/dispatch.h"
 #include "misc/rendezvous.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 static const wchar_t classname[] = L"mpv";
 

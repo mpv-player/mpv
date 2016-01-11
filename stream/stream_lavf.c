@@ -30,7 +30,7 @@
 #include "cookies.h"
 
 #include "misc/bstr.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #define OPT_BASE_STRUCT struct stream_lavf_params
 struct stream_lavf_params {

@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "config.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "osd.h"
 
 const char *const osd_ass_0 = "";

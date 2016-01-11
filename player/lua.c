@@ -30,7 +30,7 @@
 
 #include "osdep/io.h"
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "common/common.h"
 #include "options/m_property.h"

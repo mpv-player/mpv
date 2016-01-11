@@ -30,7 +30,7 @@
 
 #include "libmpv/client.h"
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "m_config.h"
 #include "options/m_option.h"

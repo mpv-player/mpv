@@ -19,7 +19,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "osdep/io.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 static wchar_t *talloc_wcsdup(void *ctx, const wchar_t *wcs)
 {

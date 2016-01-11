@@ -28,7 +28,7 @@
 #include <poll.h>
 #endif
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "config.h"
 #include "osdep/timer.h"

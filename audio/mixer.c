@@ -27,7 +27,7 @@
 #include "audio/filter/af.h"
 #include "common/global.h"
 #include "common/msg.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "mixer.h"
 
 struct mixer {

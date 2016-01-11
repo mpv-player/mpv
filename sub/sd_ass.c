@@ -24,7 +24,7 @@
 #include <libavutil/common.h>
 #include <ass/ass.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "options/options.h"
 #include "common/common.h"

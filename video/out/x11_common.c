@@ -29,7 +29,7 @@
 #include "input/input.h"
 #include "input/event.h"
 #include "x11_common.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include <string.h>
 #include <unistd.h>

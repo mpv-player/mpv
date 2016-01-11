@@ -24,7 +24,7 @@
 
 #include "osdep/io.h"
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "common/msg.h"
 #include "options/options.h"
 #include "options/path.h"
