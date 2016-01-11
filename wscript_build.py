@@ -392,6 +392,7 @@ def build(ctx):
         ( "osdep/glob-win.c",                    "glob-win32-replacement" ),
         ( "osdep/w32_keyboard.c",                "os-win32" ),
         ( "osdep/w32_keyboard.c",                "os-cygwin" ),
+        ( "osdep/windows_utils.c",               "win32" ),
         ( "osdep/mpv.rc",                        "win32-executable" ),
         ( "osdep/win32/pthread.c",               "win32-internal-pthreads"),
 
