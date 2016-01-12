@@ -499,7 +499,8 @@ static void select_tracks(struct demuxer *demuxer, int start)
     }
 }
 
-static void export_replaygain(demuxer_t *demuxer, sh_audio_t *sh, AVStream *st)
+static void export_replaygain(demuxer_t *demuxer, struct mp_codec_params *c,
+                              AVStream *st)
 {
     for (int i = 0; i < st->nb_side_data; i++) {
         AVReplayGain *av_rgain;
@@ -524,7 +525,7 @@ static void export_replaygain(demuxer_t *demuxer, sh_audio_t *sh, AVStream *st)
         rgain->album_peak = (av_rgain->album_peak != 0.0) ?
             av_rgain->album_peak / 100000.0f : 1.0;
 
-        sh->replaygain_data = rgain;
+        c->replaygain_data = rgain;
     }
 }
 
@@ -552,22 +553,20 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
     switch (codec->codec_type) {
     case AVMEDIA_TYPE_AUDIO: {
         sh = demux_alloc_sh_stream(STREAM_AUDIO);
-        sh_audio_t *sh_audio = sh->audio;
 
         // probably unneeded
-        mp_chmap_set_unknown(&sh_audio->channels, codec->channels);
+        mp_chmap_set_unknown(&sh->codec->channels, codec->channels);
         if (codec->channel_layout)
-            mp_chmap_from_lavc(&sh_audio->channels, codec->channel_layout);
-        sh_audio->samplerate = codec->sample_rate;
-        sh_audio->bitrate = codec->bit_rate;
+            mp_chmap_from_lavc(&sh->codec->channels, codec->channel_layout);
+        sh->codec->samplerate = codec->sample_rate;
+        sh->codec->bitrate = codec->bit_rate;
 
-        export_replaygain(demuxer, sh_audio, st);
+        export_replaygain(demuxer, sh->codec, st);
 
         break;
     }
     case AVMEDIA_TYPE_VIDEO: {
         sh = demux_alloc_sh_stream(STREAM_VIDEO);
-        sh_video_t *sh_video = sh->video;
 
         if (st->disposition & AV_DISPOSITION_ATTACHED_PIC) {
             sh->attached_picture = new_demux_packet_from(st->attached_pic.data,
@@ -579,8 +578,8 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             }
         }
 
-        sh_video->disp_w = codec->width;
-        sh_video->disp_h = codec->height;
+        sh->codec->disp_w = codec->width;
+        sh->codec->disp_h = codec->height;
         /* Try to make up some frame rate value, even if it's not reliable.
          * FPS information is needed to support subtitle formats which base
          * timing on frame numbers.
@@ -595,33 +594,31 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             fps = 1.0 / FFMAX(av_q2d(st->time_base),
                               av_q2d(st->codec->time_base) *
                               st->codec->ticks_per_frame);
-        sh_video->fps = fps;
+        sh->codec->fps = fps;
         if (priv->format_hack.image_format)
-            sh_video->fps = demuxer->opts->mf_fps;
-        sh_video->par_w = st->sample_aspect_ratio.num;
-        sh_video->par_h = st->sample_aspect_ratio.den;
+            sh->codec->fps = demuxer->opts->mf_fps;
+        sh->codec->par_w = st->sample_aspect_ratio.num;
+        sh->codec->par_h = st->sample_aspect_ratio.den;
 
         uint8_t *sd = av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX, NULL);
         if (sd) {
             double r = av_display_rotation_get((uint32_t *)sd);
             if (!isnan(r))
-                sh_video->rotate = (((int)(-r) % 360) + 360) % 360;
+                sh->codec->rotate = (((int)(-r) % 360) + 360) % 360;
         }
 
         // This also applies to vfw-muxed mkv, but we can't detect these easily.
-        sh_video->avi_dts = matches_avinputformat_name(priv, "avi");
+        sh->codec->avi_dts = matches_avinputformat_name(priv, "avi");
 
         break;
     }
     case AVMEDIA_TYPE_SUBTITLE: {
-        sh_sub_t *sh_sub;
         sh = demux_alloc_sh_stream(STREAM_SUB);
-        sh_sub = sh->sub;
 
         if (codec->extradata_size) {
-            sh->extradata = talloc_size(sh, codec->extradata_size);
-            memcpy(sh->extradata, codec->extradata, codec->extradata_size);
-            sh->extradata_size = codec->extradata_size;
+            sh->codec->extradata = talloc_size(sh, codec->extradata_size);
+            memcpy(sh->codec->extradata, codec->extradata, codec->extradata_size);
+            sh->codec->extradata_size = codec->extradata_size;
         }
 
         if (matches_avinputformat_name(priv, "microdvd")) {
@@ -629,12 +626,12 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             if (av_opt_get_q(avfc, "subfps", AV_OPT_SEARCH_CHILDREN, &r) >= 0) {
                 // File headers don't have a FPS set.
                 if (r.num < 1 || r.den < 1)
-                    sh_sub->frame_based = av_q2d(av_inv_q(codec->time_base));
+                    sh->codec->frame_based = av_q2d(av_inv_q(codec->time_base));
             } else {
                 // Older libavformat versions. If the FPS matches the microdvd
                 // reader's default, assume it uses frame based timing.
                 if (codec->time_base.num == 125 && codec->time_base.den == 2997)
-                    sh_sub->frame_based = 23.976;
+                    sh->codec->frame_based = 23.976;
             }
         }
         break;
@@ -658,11 +655,11 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
 
     if (sh) {
         sh->ff_index = st->index;
-        sh->codec = mp_codec_from_av_codec_id(codec->codec_id);
-        sh->codec_tag = codec->codec_tag;
-        sh->lav_headers = avcodec_alloc_context3(NULL);
-        if (sh->lav_headers)
-            mp_copy_lav_codec_headers(sh->lav_headers, codec);
+        sh->codec->codec = mp_codec_from_av_codec_id(codec->codec_id);
+        sh->codec->codec_tag = codec->codec_tag;
+        sh->codec->lav_headers = avcodec_alloc_context3(NULL);
+        if (sh->codec->lav_headers)
+            mp_copy_lav_codec_headers(sh->codec->lav_headers, codec);
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = true;
@@ -1104,7 +1101,7 @@ static void demux_close_lavf(demuxer_t *demuxer)
         av_freep(&priv->pb);
         for (int n = 0; n < priv->num_streams; n++) {
             if (priv->streams[n])
-                avcodec_free_context(&priv->streams[n]->lav_headers);
+                avcodec_free_context(&priv->streams[n]->codec->lav_headers);
         }
         if (priv->stream != demuxer->stream)
             free_stream(priv->stream);

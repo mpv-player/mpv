@@ -20,8 +20,6 @@
 static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
 {
     tvi_handle_t *tvh;
-    sh_video_t *sh_video;
-    sh_audio_t *sh_audio = NULL;
     const tvi_functions_t *funcs;
 
     if (check > DEMUX_CHECK_REQUEST || demuxer->stream->type != STREAMTYPE_TV)
@@ -51,30 +49,29 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
     demuxer->priv=tvh;
 
     struct sh_stream *sh_v = demux_alloc_sh_stream(STREAM_VIDEO);
-    sh_video = sh_v->video;
 
     /* get IMAGE FORMAT */
     int fourcc;
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_FORMAT, &fourcc);
     if (fourcc == MP_FOURCC_MJPEG) {
-        sh_v->codec = "mjpeg";
+        sh_v->codec->codec = "mjpeg";
     } else {
-        sh_v->codec = "rawvideo";
-        sh_v->codec_tag = fourcc;
+        sh_v->codec->codec = "rawvideo";
+        sh_v->codec->codec_tag = fourcc;
     }
 
     /* set FPS and FRAMETIME */
 
-    if(!sh_video->fps)
+    if(!sh_v->codec->fps)
     {
         float tmp;
         if (funcs->control(tvh->priv, TVI_CONTROL_VID_GET_FPS, &tmp) != TVI_CONTROL_TRUE)
-             sh_video->fps = 25.0f; /* on PAL */
-        else sh_video->fps = tmp;
+             sh_v->codec->fps = 25.0f; /* on PAL */
+        else sh_v->codec->fps = tmp;
     }
 
     if (tvh->tv_param->fps != -1.0f)
-        sh_video->fps = tvh->tv_param->fps;
+        sh_v->codec->fps = tvh->tv_param->fps;
 
     /* If playback only mode, go to immediate mode, fail silently */
     if(tvh->tv_param->immediate == 1)
@@ -84,10 +81,10 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
         }
 
     /* set width */
-    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &sh_video->disp_w);
+    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &sh_v->codec->disp_w);
 
     /* set height */
-    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &sh_video->disp_h);
+    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &sh_v->codec->disp_h);
 
     demux_add_sh_stream(demuxer, sh_v);
 
@@ -118,22 +115,21 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
         }
 
         struct sh_stream *sh_a = demux_alloc_sh_stream(STREAM_AUDIO);
-        sh_audio = sh_a->audio;
 
         funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_SAMPLERATE,
-                   &sh_audio->samplerate);
-        int nchannels = sh_audio->channels.num;
+                   &sh_a->codec->samplerate);
+        int nchannels = sh_a->codec->channels.num;
         funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_CHANNELS,
                    &nchannels);
-        mp_chmap_from_channels(&sh_audio->channels, nchannels);
+        mp_chmap_from_channels(&sh_a->codec->channels, nchannels);
 
         // s16ne
-        mp_set_pcm_codec(sh_a, true, false, 16, BYTE_ORDER == BIG_ENDIAN);
+        mp_set_pcm_codec(sh_a->codec, true, false, 16, BYTE_ORDER == BIG_ENDIAN);
 
         demux_add_sh_stream(demuxer, sh_a);
 
         MP_VERBOSE(tvh, "  TV audio: %d channels, %d bits, %d Hz\n",
-                   nchannels, 16, sh_audio->samplerate);
+                   nchannels, 16, sh_a->codec->samplerate);
     }
 no_audio:
 

@@ -165,12 +165,12 @@ static int init(struct sd *sd)
     struct sd_ass_priv *ctx = talloc_zero(sd, struct sd_ass_priv);
     sd->priv = ctx;
 
-    char *extradata = sd->sh->extradata;
-    int extradata_size = sd->sh->extradata_size;
+    char *extradata = sd->codec->extradata;
+    int extradata_size = sd->codec->extradata_size;
 
-    if (strcmp(sd->sh->codec, "ass") != 0) {
+    if (strcmp(sd->codec->codec, "ass") != 0) {
         ctx->is_converted = true;
-        ctx->converter = lavc_conv_create(sd->log, sd->sh->codec, extradata,
+        ctx->converter = lavc_conv_create(sd->log, sd->codec->codec, extradata,
                                           extradata_size);
         if (!ctx->converter)
             return -1;
@@ -203,7 +203,7 @@ static int init(struct sd *sd)
     ass_set_check_readorder(ctx->ass_track, sd->opts->sub_clear_on_seek ? 0 : 1);
 #endif
 
-    ctx->frame_fps = sd->sh->sub->frame_based;
+    ctx->frame_fps = sd->codec->frame_based;
     update_subtitle_speed(sd);
 
     enable_output(sd, true);

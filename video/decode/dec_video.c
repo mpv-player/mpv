@@ -168,7 +168,7 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
 
     struct mp_decoder_entry *decoder = NULL;
     struct mp_decoder_list *list =
-        mp_select_video_decoders(d_video->header->codec, video_decoders);
+        mp_select_video_decoders(d_video->header->codec->codec, video_decoders);
 
     mp_print_decoders(d_video->log, MSGL_V, "Codec list:", list);
 
@@ -196,7 +196,7 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
         MP_VERBOSE(d_video, "Selected video codec: %s\n", d_video->decoder_desc);
     } else {
         MP_ERR(d_video, "Failed to initialize a video decoder for codec '%s'.\n",
-               d_video->header->codec ? d_video->header->codec : "<unknown>");
+               d_video->header->codec->codec);
     }
 
     if (d_video->header->missing_timestamps) {
@@ -242,7 +242,7 @@ struct mp_image *video_decode(struct dec_video *d_video,
                               int drop_frame)
 {
     struct MPOpts *opts = d_video->opts;
-    bool avi_pts = d_video->header->video->avi_dts && opts->correct_pts;
+    bool avi_pts = d_video->header->codec->avi_dts && opts->correct_pts;
 
     struct demux_packet packet_copy;
     if (packet && packet->dts == MP_NOPTS_VALUE) {
@@ -264,7 +264,7 @@ struct mp_image *video_decode(struct dec_video *d_video,
     double prev_codec_pts = d_video->codec_pts;
     double prev_codec_dts = d_video->codec_dts;
 
-    if (d_video->header->video->avi_dts)
+    if (d_video->header->codec->avi_dts)
         drop_frame = 0;
 
     MP_STATS(d_video, "start decode video");
@@ -339,7 +339,7 @@ int video_reconfig_filters(struct dec_video *d_video,
 {
     struct MPOpts *opts = d_video->opts;
     struct mp_image_params p = *params;
-    struct sh_video *sh = d_video->header->video;
+    struct mp_codec_params *c = d_video->header->codec;
 
     // While mp_image_params normally always have to have d_w/d_h set, the
     // decoder signals unknown bitstream aspect ratio with both set to 0.
@@ -364,10 +364,10 @@ int video_reconfig_filters(struct dec_video *d_video,
         break;
     }
 
-    if (use_container && sh->par_w > 0 && sh->par_h) {
+    if (use_container && c->par_w > 0 && c->par_h) {
         MP_VERBOSE(d_video, "Using container aspect ratio.\n");
-        p.p_w = sh->par_w;
-        p.p_h = sh->par_h;
+        p.p_w = c->par_w;
+        p.p_h = c->par_h;
     }
 
     if (opts->movie_aspect >= 0) {

@@ -81,7 +81,7 @@ void sub_destroy(struct dec_sub *sub)
 struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
                            struct sh_stream *sh)
 {
-    assert(demuxer && sh && sh->sub);
+    assert(demuxer && sh && sh->type == STREAM_SUB);
 
     struct mp_log *log = mp_log_new(NULL, global->log, "sub");
 
@@ -101,7 +101,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
             .opts = sub->opts,
             .driver = driver,
             .demuxer = demuxer,
-            .sh = sh,
+            .codec = sh->codec,
         };
 
         if (sh->codec && sub->sd->driver->init(sub->sd) >= 0)
@@ -113,7 +113,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
     }
 
     mp_err(log, "Could not find subtitle decoder for format '%s'.\n",
-           sh->codec ? sh->codec : "<unknown>");
+           sh->codec->codec);
     talloc_free(log);
     return NULL;
 }

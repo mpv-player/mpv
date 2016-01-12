@@ -95,7 +95,7 @@ static void get_resolution(struct sd *sd, int wh[2])
 
 static int init(struct sd *sd)
 {
-    enum AVCodecID cid = mp_codec_to_av_codec_id(sd->sh->codec);
+    enum AVCodecID cid = mp_codec_to_av_codec_id(sd->codec->codec);
 
     // Supported codecs must be known to decode to paletted bitmaps
     switch (cid) {
@@ -116,7 +116,7 @@ static int init(struct sd *sd)
     ctx = avcodec_alloc_context3(sub_codec);
     if (!ctx)
         goto error;
-    mp_lavc_set_extradata(ctx, sd->sh->extradata, sd->sh->extradata_size);
+    mp_lavc_set_extradata(ctx, sd->codec->extradata, sd->codec->extradata_size);
     if (avcodec_open2(ctx, sub_codec, NULL) < 0)
         goto error;
     priv->avctx = ctx;

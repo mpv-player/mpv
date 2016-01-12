@@ -277,10 +277,10 @@ int reinit_video_chain(struct MPContext *mpctx)
     d_video->log = mp_log_new(d_video, mpctx->log, "!vd");
     d_video->opts = mpctx->opts;
     d_video->header = sh;
-    d_video->fps = sh->video->fps;
+    d_video->fps = sh->codec->fps;
     d_video->vo = mpctx->video_out;
 
-    MP_VERBOSE(d_video, "Container reported FPS: %f\n", sh->video->fps);
+    MP_VERBOSE(d_video, "Container reported FPS: %f\n", sh->codec->fps);
 
     if (opts->force_fps) {
         d_video->fps = opts->force_fps;

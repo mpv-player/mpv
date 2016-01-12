@@ -165,7 +165,7 @@ static void demux_seek_mf(demuxer_t *demuxer, double rel_seek_secs, int flags)
     if (flags & SEEK_FACTOR)
         newpos += rel_seek_secs * (mf->nr_of_files - 1);
     else
-        newpos += rel_seek_secs * mf->sh->video->fps;
+        newpos += rel_seek_secs * mf->sh->codec->fps;
     if (newpos < 0)
         newpos = 0;
     if (newpos >= mf->nr_of_files)
@@ -199,7 +199,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer)
             demux_packet_t *dp = new_demux_packet(data.len);
             if (dp) {
                 memcpy(dp->buffer, data.start, data.len);
-                dp->pts = mf->curr_frame / mf->sh->video->fps;
+                dp->pts = mf->curr_frame / mf->sh->codec->fps;
                 dp->keyframe = true;
                 demux_add_packet(mf->sh, dp);
             }
@@ -291,7 +291,6 @@ static const char *probe_format(mf_t *mf, char *type, enum demux_check check)
 
 static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
 {
-    sh_video_t *sh_video = NULL;
     mf_t *mf;
 
     if (strncmp(demuxer->stream->url, "mf://", 5) == 0 &&
@@ -317,12 +316,12 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
 
     // create a new video stream header
     struct sh_stream *sh = demux_alloc_sh_stream(STREAM_VIDEO);
-    sh_video = sh->video;
+    struct mp_codec_params *c = sh->codec;
 
-    sh->codec = codec;
-    sh_video->disp_w = 0;
-    sh_video->disp_h = 0;
-    sh_video->fps = demuxer->opts->mf_fps;
+    c->codec = codec;
+    c->disp_w = 0;
+    c->disp_h = 0;
+    c->fps = demuxer->opts->mf_fps;
 
     demux_add_sh_stream(demuxer, sh);
 
@@ -346,7 +345,7 @@ static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg)
 
     switch (cmd) {
     case DEMUXER_CTRL_GET_TIME_LENGTH:
-        *((double *)arg) = (double)mf->nr_of_files / mf->sh->video->fps;
+        *((double *)arg) = (double)mf->nr_of_files / mf->sh->codec->fps;
         return DEMUXER_CTRL_OK;
 
     default:

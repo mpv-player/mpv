@@ -118,9 +118,9 @@ static bool init_subdec(struct MPContext *mpctx, struct track *track)
     if (!track->dec_sub)
         return false;
 
-    struct sh_video *sh_video =
-        mpctx->d_video ? mpctx->d_video->header->video : NULL;
-    double fps = sh_video ? sh_video->fps : 25;
+    struct mp_codec_params *v_c =
+        mpctx->d_video ? mpctx->d_video->header->codec : NULL;
+    double fps = v_c ? v_c->fps : 25;
     sub_control(track->dec_sub, SD_CTRL_SET_VIDEO_DEF_FPS, &fps);
 
     // Don't do this if the file has video/audio streams. Don't do it even

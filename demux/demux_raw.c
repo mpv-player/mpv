@@ -131,14 +131,14 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
         return -1;
 
     struct sh_stream *sh = demux_alloc_sh_stream(STREAM_AUDIO);
-    struct sh_audio *sh_audio = sh->audio;
-    sh_audio->channels = opts->channels;
-    sh_audio->force_channels = true;
-    sh_audio->samplerate = opts->samplerate;
+    struct mp_codec_params *c = sh->codec;
+    c->channels = opts->channels;
+    c->force_channels = true;
+    c->samplerate = opts->samplerate;
 
     int f = opts->aformat;
-    // See PCM():        sign   float  bits    endian
-    mp_set_pcm_codec(sh, f & 1, f & 2, f >> 3, f & 4);
+    // See PCM():               sign   float  bits    endian
+    mp_set_pcm_codec(sh->codec, f & 1, f & 2, f >> 3, f & 4);
     int samplesize = ((f >> 3) + 7) / 8;
 
     demux_add_sh_stream(demuxer, sh);
@@ -147,9 +147,9 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
     demuxer->priv = p;
     *p = (struct priv) {
         .sh = sh,
-        .frame_size = samplesize * sh_audio->channels.num,
-        .frame_rate = sh_audio->samplerate,
-        .read_frames = sh_audio->samplerate / 8,
+        .frame_size = samplesize * c->channels.num,
+        .frame_rate = c->samplerate,
+        .read_frames = c->samplerate / 8,
     };
 
     return 0;
@@ -220,12 +220,12 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
     }
 
     struct sh_stream *sh = demux_alloc_sh_stream(STREAM_VIDEO);
-    struct sh_video *sh_video = sh->video;
-    sh->codec = decoder;
-    sh->codec_tag = imgfmt;
-    sh_video->fps = opts->fps;
-    sh_video->disp_w = width;
-    sh_video->disp_h = height;
+    struct mp_codec_params *c = sh->codec;
+    c->codec = decoder;
+    c->codec_tag = imgfmt;
+    c->fps = opts->fps;
+    c->disp_w = width;
+    c->disp_h = height;
     demux_add_sh_stream(demuxer, sh);
 
     struct priv *p = talloc_ptrtype(demuxer, p);
@@ -233,7 +233,7 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
     *p = (struct priv) {
         .sh = sh,
         .frame_size = imgsize,
-        .frame_rate = sh_video->fps,
+        .frame_rate = c->fps,
         .read_frames = 1,
     };
 

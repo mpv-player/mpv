@@ -485,7 +485,7 @@ static void check_track_compatibility(struct timeline *tl)
             if (s) {
                 // There are actually many more things that in theory have to
                 // match (though mpv's implementation doesn't care).
-                if (s->codec && m->codec && strcmp(s->codec, m->codec) != 0)
+                if (strcmp(s->codec->codec, m->codec->codec) != 0)
                     MP_WARN(tl, "Timeline segments have mismatching codec.\n");
             } else {
                 MP_WARN(tl, "Source %s lacks %s stream with TID=%d, which "

@@ -214,13 +214,9 @@ struct sh_stream *demux_alloc_sh_stream(enum stream_type type)
         .index = -1,
         .ff_index = -1,     // may be overwritten by demuxer
         .demuxer_id = -1,   // ... same
+        .codec = talloc_zero(sh, struct mp_codec_params),
     };
-    switch (sh->type) {
-    case STREAM_VIDEO: sh->video = talloc_zero(sh, struct sh_video); break;
-    case STREAM_AUDIO: sh->audio = talloc_zero(sh, struct sh_audio); break;
-    case STREAM_SUB:   sh->sub = talloc_zero(sh, struct sh_sub); break;
-    }
-
+    sh->codec->type = type;
     return sh;
 }
 
@@ -240,6 +236,9 @@ void demux_add_sh_stream(struct demuxer *demuxer, struct sh_stream *sh)
         .type = sh->type,
         .selected = in->autoselect,
     };
+
+    if (!sh->codec->codec)
+        sh->codec->codec = "";
 
     sh->index = in->num_streams;
     if (sh->ff_index < 0)
@@ -855,11 +854,11 @@ static void apply_replaygain(demuxer_t *demuxer, struct replaygain_data *rg)
     struct demux_internal *in = demuxer->in;
     for (int n = 0; n < in->num_streams; n++) {
         struct sh_stream *sh = in->streams[n];
-        if (sh->audio && !sh->audio->replaygain_data) {
+        if (sh->type == STREAM_AUDIO && !sh->codec->replaygain_data) {
             MP_VERBOSE(demuxer, "Replaygain: Track=%f/%f Album=%f/%f\n",
                        rg->track_gain, rg->track_peak,
                        rg->album_gain, rg->album_peak);
-            sh->audio->replaygain_data = talloc_memdup(in, rg, sizeof(*rg));
+            sh->codec->replaygain_data = talloc_memdup(in, rg, sizeof(*rg));
         }
     }
 }

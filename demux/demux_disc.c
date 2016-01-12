@@ -84,7 +84,7 @@ static void add_dvd_streams(demuxer_t *demuxer)
         for (int n = 0; n < MPMIN(32, info.num_subs); n++) {
             struct sh_stream *sh = demux_alloc_sh_stream(STREAM_SUB);
             sh->demuxer_id = n + 0x20;
-            sh->codec = "dvd_subtitle";
+            sh->codec->codec = "dvd_subtitle";
             get_disc_lang(stream, sh);
             // p->streams _must_ match with p->slave->streams, so we can't add
             // it yet - it has to be done when the real stream appears, which
@@ -111,8 +111,8 @@ static void add_dvd_streams(demuxer_t *demuxer)
             }
             s = talloc_asprintf_append(s, "\n");
 
-            sh->extradata = s;
-            sh->extradata_size = strlen(s);
+            sh->codec->extradata = s;
+            sh->codec->extradata_size = strlen(s);
 
             demux_add_sh_stream(demuxer, sh);
         }
@@ -125,7 +125,7 @@ static void add_streams(demuxer_t *demuxer)
 
     for (int n = p->num_streams; n < demux_get_num_stream(p->slave); n++) {
         struct sh_stream *src = demux_get_stream(p->slave, n);
-        if (src->sub) {
+        if (src->type == STREAM_SUB) {
             struct sh_stream *sub = NULL;
             if (src->demuxer_id >= 0x20 && src->demuxer_id <= 0x3F)
                 sub = p->dvd_subs[src->demuxer_id - 0x20];
@@ -139,24 +139,20 @@ static void add_streams(demuxer_t *demuxer)
         assert(p->num_streams == n); // directly mapped
         MP_TARRAY_APPEND(p, p->streams, p->num_streams, sh);
         // Copy all stream fields that might be relevant
-        sh->codec = talloc_strdup(sh, src->codec);
-        sh->codec_tag = src->codec_tag;
-        sh->lav_headers = src->lav_headers;
+        *sh->codec = *src->codec;
         sh->demuxer_id = src->demuxer_id;
-        if (src->video) {
+        if (src->type == STREAM_VIDEO) {
             double ar;
             if (stream_control(demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar)
                                 == STREAM_OK)
             {
-                struct mp_image_params f = {.w = src->video->disp_w,
-                                            .h = src->video->disp_h};
+                struct mp_image_params f = {.w = src->codec->disp_w,
+                                            .h = src->codec->disp_h};
                 mp_image_params_set_dsize(&f, 1728 * ar, 1728);
-                sh->video->par_w = f.p_w;
-                sh->video->par_h = f.p_h;
+                sh->codec->par_w = f.p_w;
+                sh->codec->par_h = f.p_h;
             }
         }
-        if (src->audio)
-            sh->audio = src->audio;
         get_disc_lang(demuxer->stream, sh);
         demux_add_sh_stream(demuxer, sh);
     }

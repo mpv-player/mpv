@@ -18,7 +18,7 @@ struct sd {
     void *priv;
 
     struct demuxer *demuxer;
-    struct sh_stream *sh;
+    struct mp_codec_params *codec;
 };
 
 struct sd_functions {

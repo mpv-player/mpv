@@ -37,23 +37,8 @@ struct sh_stream {
     int demuxer_id;
     // FFmpeg stream index (AVFormatContext.streams[index]), or equivalent.
     int ff_index;
-    // One of these is non-NULL, the others are NULL, depending on the stream
-    // type.
-    struct sh_audio *audio;
-    struct sh_video *video;
-    struct sh_sub *sub;
 
-    // E.g. "h264" (usually corresponds to AVCodecDescriptor.name)
-    const char *codec;
-
-    // Usually a FourCC, exact meaning depends on codec.
-    unsigned int codec_tag;
-
-    unsigned char *extradata;   // codec specific per-stream header
-    int extradata_size;
-
-    // Codec specific header data (set by demux_lavf.c only)
-    struct AVCodecContext *lav_headers;
+    struct mp_codec_params *codec;
 
     char *title;
     char *lang;                 // language code
@@ -70,29 +55,43 @@ struct sh_stream {
     struct demux_stream *ds;
 };
 
-typedef struct sh_audio {
+struct mp_codec_params {
+    enum stream_type type;
+
+    // E.g. "h264" (usually corresponds to AVCodecDescriptor.name)
+    const char *codec;
+
+    // Usually a FourCC, exact meaning depends on codec.
+    unsigned int codec_tag;
+
+    unsigned char *extradata;   // codec specific per-stream header
+    int extradata_size;
+
+    // Codec specific header data (set by demux_lavf.c only)
+    struct AVCodecContext *lav_headers;
+
+    // STREAM_AUDIO
     int samplerate;
     struct mp_chmap channels;
     bool force_channels;
     int bitrate; // compressed bits/sec
     int block_align;
-    int bits_per_coded_sample;
     struct replaygain_data *replaygain_data;
-} sh_audio_t;
 
-typedef struct sh_video {
+    // STREAM_VIDEO
     bool avi_dts;         // use DTS timing; first frame and DTS is 0
     float fps;            // frames per second (set only if constant fps)
     int par_w, par_h;     // pixel aspect ratio (0 if unknown/square)
-    int bits_per_coded_sample;
     int disp_w, disp_h;   // display size
     int rotate;           // intended display rotation, in degrees, [0, 359]
     int stereo_mode;      // mp_stereo3d_mode (0 if none/unknown)
-} sh_video_t;
 
-typedef struct sh_sub {
-    double frame_based;         // timestamps are frame-based (and this is the
-                                // fallback framerate used for timestamps)
-} sh_sub_t;
+    // STREAM_VIDEO + STREAM_AUDIO
+    int bits_per_coded_sample;
+
+    // STREAM_SUB
+    double frame_based;   // timestamps are frame-based (and this is the
+                          // fallback framerate used for timestamps)
+};
 
 #endif /* MPLAYER_STHEADER_H */

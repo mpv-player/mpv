@@ -352,6 +352,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     struct vd_lavc_params *lavc_param = vd->opts->vd_lavc_params;
     bool mp_rawvideo = false;
     struct sh_stream *sh = vd->header;
+    struct mp_codec_params *c = sh->codec;
 
     assert(!ctx->avctx);
 
@@ -414,23 +415,23 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     // Do this after the above avopt handling in case it changes values
     ctx->skip_frame = avctx->skip_frame;
 
-    avctx->codec_tag = sh->codec_tag;
-    avctx->coded_width  = sh->video->disp_w;
-    avctx->coded_height = sh->video->disp_h;
-    avctx->bits_per_coded_sample = sh->video->bits_per_coded_sample;
+    avctx->codec_tag = c->codec_tag;
+    avctx->coded_width  = c->disp_w;
+    avctx->coded_height = c->disp_h;
+    avctx->bits_per_coded_sample = c->bits_per_coded_sample;
 
-    mp_lavc_set_extradata(avctx, sh->extradata, sh->extradata_size);
+    mp_lavc_set_extradata(avctx, c->extradata, c->extradata_size);
 
     if (mp_rawvideo) {
-        avctx->pix_fmt = imgfmt2pixfmt(sh->codec_tag);
+        avctx->pix_fmt = imgfmt2pixfmt(c->codec_tag);
         avctx->codec_tag = 0;
-        if (avctx->pix_fmt == AV_PIX_FMT_NONE && sh->codec_tag)
+        if (avctx->pix_fmt == AV_PIX_FMT_NONE && c->codec_tag)
             MP_ERR(vd, "Image format %s not supported by lavc.\n",
-                   mp_imgfmt_to_name(sh->codec_tag));
+                   mp_imgfmt_to_name(c->codec_tag));
     }
 
-    if (sh->lav_headers)
-        mp_copy_lav_codec_headers(avctx, sh->lav_headers);
+    if (c->lav_headers)
+        mp_copy_lav_codec_headers(avctx, c->lav_headers);
 
     /* open it */
     if (avcodec_open2(avctx, lavc_codec, NULL) < 0)
@@ -506,8 +507,8 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
         .gamma = avcol_trc_to_mp_csp_trc(ctx->avctx->color_trc),
         .chroma_location =
             avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
-        .rotate = vd->header->video->rotate,
-        .stereo_in = vd->header->video->stereo_mode,
+        .rotate = vd->header->codec->rotate,
+        .stereo_in = vd->header->codec->stereo_mode,
     };
 
     if (opts->video_rotate < 0) {

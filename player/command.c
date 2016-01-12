@@ -1713,7 +1713,7 @@ static int mp_property_audio_codec_name(void *ctx, struct m_property *prop,
                                         int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    const char *c = mpctx->d_audio ? mpctx->d_audio->header->codec : NULL;
+    const char *c = mpctx->d_audio ? mpctx->d_audio->header->codec->codec : NULL;
     return m_property_strdup_ro(action, arg, c);
 }
 
@@ -1930,8 +1930,7 @@ static int property_switch_track_ff(void *ctx, struct m_property *prop,
 
 static int track_channels(struct track *track)
 {
-    return track->stream && track->stream->audio
-        ? track->stream->audio->channels.num : 0;
+    return track->stream ? track->stream->codec->channels.num : 0;
 }
 
 static int get_track_entry(int item, int action, void *arg, void *ctx)
@@ -1939,7 +1938,7 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     struct MPContext *mpctx = ctx;
     struct track *track = mpctx->tracks[item];
 
-    const char *codec = track->stream ? track->stream->codec : NULL;
+    const char *codec = track->stream ? track->stream->codec->codec : NULL;
 
     struct m_sub_property props[] = {
         {"id",          SUB_PROP_INT(track->user_tid)},
@@ -2431,7 +2430,7 @@ static int mp_property_video_format(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    const char *c = mpctx->d_video ? mpctx->d_video->header->codec : NULL;
+    const char *c = mpctx->d_video ? mpctx->d_video->header->codec->codec : NULL;
     return m_property_strdup_ro(action, arg, c);
 }
 
@@ -2512,15 +2511,15 @@ static int mp_property_vd_imgparams(void *ctx, struct m_property *prop,
     struct dec_video *vd = mpctx->d_video;
     if (!vd)
         return M_PROPERTY_UNAVAILABLE;
-    struct sh_video *sh = vd->header->video;
+    struct mp_codec_params *c = vd->header->codec;
     if (vd->vfilter->override_params.imgfmt) {
         return property_imgparams(vd->vfilter->override_params, action, arg);
-    } else if (sh->disp_w && sh->disp_h) {
+    } else if (c->disp_w && c->disp_h) {
         // Simplistic fallback for stupid scripts querying "width"/"height"
         // before the first frame is decoded.
         struct m_sub_property props[] = {
-            {"w", SUB_PROP_INT(sh->disp_w)},
-            {"h", SUB_PROP_INT(sh->disp_h)},
+            {"w", SUB_PROP_INT(c->disp_w)},
+            {"h", SUB_PROP_INT(c->disp_h)},
             {0}
         };
         return m_property_read_sub(props, action, arg);
@@ -2779,14 +2778,14 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
         float aspect = mpctx->opts->movie_aspect;
         if (mpctx->d_video && aspect <= 0) {
             struct dec_video *d_video = mpctx->d_video;
-            struct sh_video *sh_video = d_video->header->video;
+            struct mp_codec_params *c = d_video->header->codec;
             struct mp_image_params *params = &d_video->vfilter->override_params;
             if (params && params->p_w > 0 && params->p_h > 0) {
                 int d_w, d_h;
                 mp_image_params_get_dsize(params, &d_w, &d_h);
                 aspect = (float)d_w / d_h;
-            } else if (sh_video->disp_w && sh_video->disp_h) {
-                aspect = (float)sh_video->disp_w / sh_video->disp_h;
+            } else if (c->disp_w && c->disp_h) {
+                aspect = (float)c->disp_w / c->disp_h;
             }
         }
         *(float *)arg = aspect;
