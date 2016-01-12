@@ -275,18 +275,19 @@ static void convert_charset(struct demuxer *demuxer)
         MP_WARN(demuxer, "File too big (or error reading) - skip charset probing.\n");
         return;
     }
+    void *alloc = data.start;
     cp = (char *)mp_charset_guess(priv, demuxer->log, data, cp, 0);
     if (cp && !mp_charset_is_utf8(cp))
         MP_INFO(demuxer, "Using subtitle charset: %s\n", cp);
     // libavformat transparently converts UTF-16 to UTF-8
-    if (!mp_charset_is_utf16(cp)) {
+    if (!mp_charset_is_utf16(cp) && !mp_charset_is_utf8(cp)) {
         bstr conv = mp_iconv_to_utf8(demuxer->log, data, cp, MP_ICONV_VERBOSE);
         if (conv.start)
-            priv->stream = open_memory_stream(conv.start, conv.len);
-        if (conv.start != data.start)
-            talloc_free(conv.start);
+            data = conv;
     }
-    talloc_free(data.start);
+    if (data.start)
+        priv->stream = open_memory_stream(data.start, data.len);
+    talloc_free(alloc);
 }
 
 static char *remove_prefix(char *s, const char *const *prefixes)
