@@ -66,6 +66,7 @@ enum seek_type {
     MPSEEK_RELATIVE,
     MPSEEK_ABSOLUTE,
     MPSEEK_FACTOR,
+    MPSEEK_BACKSTEP,
 };
 
 enum seek_precision {
@@ -259,9 +260,10 @@ typedef struct MPContext {
 
     struct vo *video_out;
     // next_frame[0] is the next frame, next_frame[1] the one after that.
-    struct mp_image *next_frames[VO_MAX_REQ_FRAMES];
+    // The +1 is for adding 1 additional frame in backstep mode.
+    struct mp_image *next_frames[VO_MAX_REQ_FRAMES + 1];
     int num_next_frames;
-    struct mp_image *saved_frame;   // for hrseek_lastframe
+    struct mp_image *saved_frame;   // for hrseek_lastframe and hrseek_backstep
 
     enum playback_status video_status, audio_status;
     bool restart_complete;
@@ -285,6 +287,7 @@ typedef struct MPContext {
     bool hrseek_active;     // skip all data until hrseek_pts
     bool hrseek_framedrop;  // allow decoder to drop frames before hrseek_pts
     bool hrseek_lastframe;  // drop everything until last frame reached
+    bool hrseek_backstep;   // go to frame before seek target
     double hrseek_pts;
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
@@ -320,15 +323,7 @@ typedef struct MPContext {
 
     int last_chapter;
 
-    // History of video frames timestamps that were queued in the VO
-    // This includes even skipped frames during hr-seek
-    double vo_pts_history_pts[MAX_NUM_VO_PTS];
-    // Whether the PTS at vo_pts_history[n] is after a seek reset
-    uint64_t vo_pts_history_seek[MAX_NUM_VO_PTS];
-    uint64_t vo_pts_history_seek_ts;
-    uint64_t backstep_start_seek_ts;
-    bool backstep_active;
-    // Past timestamps etc. (stupidly duplicated with vo_pts_history).
+    // Past timestamps etc.
     // The newest frame is at index 0.
     struct frame_info *past_frames;
     int num_past_frames;

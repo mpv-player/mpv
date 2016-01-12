@@ -310,7 +310,6 @@ int reinit_video_chain(struct MPContext *mpctx)
     vo_set_paused(mpctx->video_out, mpctx->paused);
 
     mpctx->sync_audio_to_video = !sh->attached_picture;
-    mpctx->vo_pts_history_seek_ts++;
 
     // If we switch on video again, ensure audio position matches up.
     if (mpctx->d_audio)
@@ -603,7 +602,7 @@ static int get_req_frames(struct MPContext *mpctx, bool eof)
         return mpctx->opts->video_sync == VS_DEFAULT ? 1 : 2;
 
     int req = vo_get_num_req_frames(mpctx->video_out);
-    return MPCLAMP(req, 2, MP_ARRAY_SIZE(mpctx->next_frames));
+    return MPCLAMP(req, 2, MP_ARRAY_SIZE(mpctx->next_frames) - 1);
 }
 
 // Whether it's fine to call add_new_frame() now.
@@ -615,7 +614,7 @@ static bool needs_new_frame(struct MPContext *mpctx)
 // Queue a frame to mpctx->next_frames[]. Call only if needs_new_frame() signals ok.
 static void add_new_frame(struct MPContext *mpctx, struct mp_image *frame)
 {
-    assert(needs_new_frame(mpctx));
+    assert(mpctx->num_next_frames < MP_ARRAY_SIZE(mpctx->next_frames));
     assert(frame);
     mpctx->next_frames[mpctx->num_next_frames++] = frame;
     if (mpctx->num_next_frames == 1)
@@ -662,9 +661,6 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
             return r; // error
         struct mp_image *img = vf_read_output_frame(mpctx->d_video->vfilter);
         if (img) {
-            // Always add these; they make backstepping after seeking faster.
-            add_frame_pts(mpctx, img->pts);
-
             if (endpts != MP_NOPTS_VALUE && img->pts >= endpts) {
                 r = VD_EOF;
             } else if (mpctx->max_frames == 0) {
@@ -672,8 +668,19 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
             } else if (hrseek && mpctx->hrseek_lastframe) {
                 mp_image_setrefp(&mpctx->saved_frame, img);
             } else if (hrseek && img->pts < mpctx->hrseek_pts - .005) {
-                /* just skip */
+                /* just skip - but save if backstep active */
+                if (mpctx->hrseek_backstep)
+                    mp_image_setrefp(&mpctx->saved_frame, img);
             } else {
+                if (mpctx->hrseek_backstep) {
+                    if (mpctx->saved_frame) {
+                        add_new_frame(mpctx, mpctx->saved_frame);
+                        mpctx->saved_frame = NULL;
+                    } else {
+                        MP_WARN(mpctx, "Backstep failed.\n");
+                    }
+                    mpctx->hrseek_backstep = false;
+                }
                 add_new_frame(mpctx, img);
                 img = NULL;
             }
