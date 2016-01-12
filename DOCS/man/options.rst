@@ -3374,6 +3374,8 @@ DVB
     on a single transponder, or to work around issues in the ``channels.conf``.
     It is also recommended to use this for channels which switch PIDs
     on-the-fly, e.g. for regional news.
+    Switching between the programs is possible by cycling the program
+    property.
 
     Default: ``no``
 
