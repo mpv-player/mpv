@@ -394,7 +394,7 @@ static int decode_image(struct MPContext *mpctx)
     bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
     int framedrop_type = check_framedrop(mpctx);
     if (hrseek && pkt && pkt->pts < mpctx->hrseek_pts - .005 &&
-        !d_video->has_broken_packet_pts && mpctx->opts->hr_seek_framedrop)
+        !d_video->has_broken_packet_pts && mpctx->hrseek_framedrop)
     {
         framedrop_type = 2;
     }

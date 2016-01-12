@@ -293,7 +293,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     // seeking past the chapter is handled elsewhere.
     if (hr_seek || mpctx->timeline) {
         mpctx->hrseek_active = true;
-        mpctx->hrseek_framedrop = !hr_seek_very_exact;
+        mpctx->hrseek_framedrop = !hr_seek_very_exact && opts->hr_seek_framedrop;
         mpctx->hrseek_pts = hr_seek ? seek.amount
                                  : mpctx->timeline[mpctx->timeline_part].start;
 
