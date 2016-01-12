@@ -1245,6 +1245,14 @@ Audio
 Subtitles
 ---------
 
+.. note::
+
+    Changing styling and position does not work with all subtitles. Image-based
+    subtitles (DVD, Bluray/PGS, DVB) can not changed for fundamental reasons.
+    Subtitles in ASS format are normally not changed intentionally, but
+    overriding them can be controlled with ``--ass-style-override``.
+
+
 ``--no-sub``
     Do not select any subtitle when the file is loaded.
 
