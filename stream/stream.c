@@ -914,7 +914,7 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
     int total_read = 0;
     int padding = 1;
     char *buf = NULL;
-    int64_t size = stream_get_size(s);
+    int64_t size = stream_get_size(s) - stream_tell(s);
     if (size > max_size)
         return (struct bstr){NULL, 0};
     if (size > 0)
