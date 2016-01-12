@@ -40,7 +40,7 @@ class G:
     events = {}
     start = None
     markers = ["o", "s", "t", "d"]
-    curveno = 0
+    curveno = {}
 
 def find_marker():
     if len(G.markers) == 0:
@@ -65,6 +65,10 @@ def get_event(event, evtype):
             return e
         G.events[event] = e
     return G.events[event]
+
+colors = [(0.0, 0.5, 0.0), (0.0, 0.0, 1.0), (0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (0.75, 0.75, 0), (0.0, 0.75, 0.75), (0.75, 0, 0.75)]
+def mkColor(t):
+    return pg.mkColor(int(t[0] * 255), int(t[1] * 255), int(t[2] * 255))
 
 SCALE = 1e6 # microseconds to seconds
 
@@ -152,8 +156,10 @@ for e in G.sevents:
         args['symbol'] = e.marker
         args['pen'] = None
     else:
-        args['pen'] = pg.mkPen(pg.intColor(G.curveno), width=0)
-        G.curveno += 1
+        if not cur in G.curveno:
+            G.curveno[cur] = 0
+        args['pen'] = pg.mkPen(mkColor(colors[G.curveno[cur] % len(colors)]), width=0)
+        G.curveno[cur] += 1
     n = cur.plot([x for x,y in e.vals], [y for x,y in e.vals], **args)
 
 QtGui.QApplication.instance().exec_()
