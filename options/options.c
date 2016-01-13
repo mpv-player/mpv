@@ -825,7 +825,7 @@ const struct MPOpts mp_default_opts = {
 
     .display_tags = (char **)(const char*[]){
         "Artist", "Album", "Album_Artist", "Comment", "Composer", "Genre",
-        "Performer", "Title", "Track", "icy-title",
+        "Performer", "Title", "Track", "icy-title", "service_name",
         NULL
     },
 };
