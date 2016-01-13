@@ -68,6 +68,7 @@ void video_reset_decoding(struct dec_video *d_video)
     d_video->decoded_pts = MP_NOPTS_VALUE;
     d_video->codec_pts = MP_NOPTS_VALUE;
     d_video->codec_dts = MP_NOPTS_VALUE;
+    d_video->last_format = d_video->fixed_format = (struct mp_image_params){0};
 }
 
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg)
@@ -209,6 +210,65 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
     return !!d_video->vd_driver;
 }
 
+static void fix_image_params(struct dec_video *d_video,
+                             struct mp_image_params *params)
+{
+    struct MPOpts *opts = d_video->opts;
+    struct mp_image_params p = *params;
+    struct mp_codec_params *c = d_video->header->codec;
+
+    MP_VERBOSE(d_video, "Decoder format: %s\n", mp_image_params_to_str(params));
+
+    // While mp_image_params normally always have to have d_w/d_h set, the
+    // decoder signals unknown bitstream aspect ratio with both set to 0.
+    float dec_aspect = p.p_w > 0 && p.p_h > 0 ? p.p_w / (float)p.p_h : 0;
+    if (d_video->initial_decoder_aspect == 0)
+        d_video->initial_decoder_aspect = dec_aspect;
+
+    bool use_container = true;
+    switch (opts->aspect_method) {
+    case 0:
+        // We normally prefer the container aspect, unless the decoder aspect
+        // changes at least once.
+        if (dec_aspect > 0 && d_video->initial_decoder_aspect != dec_aspect) {
+            MP_VERBOSE(d_video, "Using bitstream aspect ratio.\n");
+            // Even if the aspect switches back, don't use container aspect again.
+            d_video->initial_decoder_aspect = -1;
+            use_container = false;
+        }
+        break;
+    case 1:
+        use_container = false;
+        break;
+    }
+
+    if (use_container && c->par_w > 0 && c->par_h) {
+        MP_VERBOSE(d_video, "Using container aspect ratio.\n");
+        p.p_w = c->par_w;
+        p.p_h = c->par_h;
+    }
+
+    if (opts->movie_aspect >= 0) {
+        MP_VERBOSE(d_video, "Forcing user-set aspect ratio.\n");
+        if (opts->movie_aspect == 0) {
+            p.p_w = p.p_h = 1;
+        } else {
+            AVRational a = av_d2q(opts->movie_aspect, INT_MAX);
+            mp_image_params_set_dsize(&p, a.num, a.den);
+        }
+    }
+
+    // Assume square pixels if no aspect ratio is set at all.
+    if (p.p_w <= 0 || p.p_h <= 0)
+        p.p_w = p.p_h = 1;
+
+    // Detect colorspace from resolution.
+    mp_image_params_guess_csp(&p);
+
+    d_video->last_format = *params;
+    d_video->fixed_format = p;
+}
+
 static void add_avi_pts(struct dec_video *d_video, double pts)
 {
     if (pts != MP_NOPTS_VALUE) {
@@ -329,70 +389,14 @@ struct mp_image *video_decode(struct dec_video *d_video,
     if (d_video->num_codec_pts_problems || pkt_pts == MP_NOPTS_VALUE)
         d_video->has_broken_packet_pts = 1;
 
+    if (!mp_image_params_equal(&d_video->last_format, &mpi->params))
+        fix_image_params(d_video, &mpi->params);
+
+    mpi->params = d_video->fixed_format;
+
     mpi->pts = pts;
     d_video->decoded_pts = pts;
     return mpi;
-}
-
-int video_reconfig_filters(struct dec_video *d_video,
-                           const struct mp_image_params *params)
-{
-    struct MPOpts *opts = d_video->opts;
-    struct mp_image_params p = *params;
-    struct mp_codec_params *c = d_video->header->codec;
-
-    // While mp_image_params normally always have to have d_w/d_h set, the
-    // decoder signals unknown bitstream aspect ratio with both set to 0.
-    float dec_aspect = p.p_w > 0 && p.p_h > 0 ? p.p_w / (float)p.p_h : 0;
-    if (d_video->initial_decoder_aspect == 0)
-        d_video->initial_decoder_aspect = dec_aspect;
-
-    bool use_container = true;
-    switch (opts->aspect_method) {
-    case 0:
-        // We normally prefer the container aspect, unless the decoder aspect
-        // changes at least once.
-        if (dec_aspect > 0 && d_video->initial_decoder_aspect != dec_aspect) {
-            MP_VERBOSE(d_video, "Using bitstream aspect ratio.\n");
-            // Even if the aspect switches back, don't use container aspect again.
-            d_video->initial_decoder_aspect = -1;
-            use_container = false;
-        }
-        break;
-    case 1:
-        use_container = false;
-        break;
-    }
-
-    if (use_container && c->par_w > 0 && c->par_h) {
-        MP_VERBOSE(d_video, "Using container aspect ratio.\n");
-        p.p_w = c->par_w;
-        p.p_h = c->par_h;
-    }
-
-    if (opts->movie_aspect >= 0) {
-        MP_VERBOSE(d_video, "Forcing user-set aspect ratio.\n");
-        if (opts->movie_aspect == 0) {
-            p.p_w = p.p_h = 1;
-        } else {
-            AVRational a = av_d2q(opts->movie_aspect, INT_MAX);
-            mp_image_params_set_dsize(&p, a.num, a.den);
-        }
-    }
-
-    // Assume square pixels if no aspect ratio is set at all.
-    if (p.p_w <= 0 || p.p_h <= 0)
-        p.p_w = p.p_h = 1;
-
-    // Detect colorspace from resolution.
-    mp_image_params_guess_csp(&p);
-
-    if (vf_reconfig(d_video->vfilter, params, &p) < 0) {
-        MP_FATAL(d_video, "Cannot initialize video filters.\n");
-        return -1;
-    }
-
-    return 0;
 }
 
 // Send a VCTRL, or if it doesn't work, translate it to a VOCTRL and try the VO.

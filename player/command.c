@@ -2512,8 +2512,8 @@ static int mp_property_vd_imgparams(void *ctx, struct m_property *prop,
     if (!vd)
         return M_PROPERTY_UNAVAILABLE;
     struct mp_codec_params *c = vd->header->codec;
-    if (vd->vfilter->override_params.imgfmt) {
-        return property_imgparams(vd->vfilter->override_params, action, arg);
+    if (vd->vfilter->input_params.imgfmt) {
+        return property_imgparams(vd->vfilter->input_params, action, arg);
     } else if (c->disp_w && c->disp_h) {
         // Simplistic fallback for stupid scripts querying "width"/"height"
         // before the first frame is decoded.
@@ -2779,7 +2779,7 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
         if (mpctx->d_video && aspect <= 0) {
             struct dec_video *d_video = mpctx->d_video;
             struct mp_codec_params *c = d_video->header->codec;
-            struct mp_image_params *params = &d_video->vfilter->override_params;
+            struct mp_image_params *params = &d_video->vfilter->input_params;
             if (params && params->p_w > 0 && params->p_h > 0) {
                 int d_w, d_h;
                 mp_image_params_get_dsize(params, &d_w, &d_h);

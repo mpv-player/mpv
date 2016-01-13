@@ -84,10 +84,10 @@ static int try_filter(struct MPContext *mpctx, struct mp_image_params params,
 
     vf->label = talloc_strdup(vf, label);
 
-    if (video_reconfig_filters(d_video, &params) < 0) {
+    if (vf_reconfig(d_video->vfilter, &params) < 0) {
         vf_remove_filter(d_video->vfilter, vf);
         // restore
-        video_reconfig_filters(d_video, &params);
+        vf_reconfig(d_video->vfilter, &params);
         return -1;
     }
     return 0;
@@ -107,7 +107,7 @@ static void filter_reconfig(struct MPContext *mpctx,
 
     set_allowed_vo_formats(d_video->vfilter, mpctx->video_out);
 
-    if (video_reconfig_filters(d_video, &params) < 0) {
+    if (vf_reconfig(d_video->vfilter, &params) < 0) {
         // Most video filters don't work with hardware decoding, so this
         // might be the reason why filter reconfig failed.
         if (!probe_only &&
@@ -119,6 +119,8 @@ static void filter_reconfig(struct MPContext *mpctx,
             mp_image_unrefp(&d_video->waiting_decoded_mpi);
             d_video->decoder_output = (struct mp_image_params){0};
             MP_VERBOSE(mpctx, "hwdec falback due to filters.\n");
+        } else {
+            MP_FATAL(mpctx, "Cannot initialize video filters.\n");
         }
         return;
     }

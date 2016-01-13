@@ -211,13 +211,8 @@ void vf_print_filter_chain(struct vf_chain *c, int msglevel,
     if (!mp_msg_test(c->log, msglevel))
         return;
 
-    char b[128] = {0};
-
-    mp_snprintf_cat(b, sizeof(b), "%s", mp_image_params_to_str(&c->input_params));
-    mp_msg(c->log, msglevel, "  [vd] %s\n", b);
-
     for (vf_instance_t *f = c->first; f; f = f->next) {
-        b[0] = '\0';
+        char b[128] = {0};
         mp_snprintf_cat(b, sizeof(b), "  [%s] ", f->info->name);
         mp_snprintf_cat(b, sizeof(b), "%s", mp_image_params_to_str(&f->fmt_out));
         if (f->autoinserted)
@@ -392,7 +387,6 @@ int vf_filter_frame(struct vf_chain *c, struct mp_image *img)
         return -1;
     }
     assert(mp_image_params_equal(&img->params, &c->input_params));
-    vf_fix_img_params(img, &c->override_params);
     return vf_do_filter(c->first, img);
 }
 
@@ -585,10 +579,7 @@ static int vf_reconfig_wrapper(struct vf_instance *vf,
     return r;
 }
 
-// override_params is used to forcibly change the parameters of input images,
-// while params has to match the input images exactly.
-int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params,
-                const struct mp_image_params *override_params)
+int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
 {
     int r = 0;
     vf_seek_reset(c);
@@ -599,9 +590,8 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params,
         vf = next;
     }
     c->input_params = *params;
-    c->first->fmt_in = *override_params;
-    c->override_params = *override_params;
-    struct mp_image_params cur = c->override_params;
+    c->first->fmt_in = *params;
+    struct mp_image_params cur = *params;
 
     uint8_t unused[IMGFMT_END - IMGFMT_START];
     update_formats(c, c->first, unused);
@@ -621,10 +611,8 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params,
         MP_ERR(c, "Image formats incompatible or invalid.\n");
     mp_msg(c->log, loglevel, "Video filter chain:\n");
     vf_print_filter_chain(c, loglevel, failing);
-    if (r < 0) {
-        c->input_params = c->override_params = c->output_params =
-            (struct mp_image_params){0};
-    }
+    if (r < 0)
+        c->input_params = c->output_params = (struct mp_image_params){0};
     return r;
 }
 

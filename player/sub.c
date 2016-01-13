@@ -78,7 +78,7 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts, int order
         return true;
 
     if (mpctx->d_video) {
-        struct mp_image_params params = mpctx->d_video->vfilter->override_params;
+        struct mp_image_params params = mpctx->d_video->vfilter->input_params;
         if (params.imgfmt)
             sub_control(dec_sub, SD_CTRL_SET_VIDEO_PARAMS, &params);
     }

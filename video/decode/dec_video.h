@@ -69,6 +69,8 @@ struct dec_video {
     double decoded_pts;
 
     float fps;            // FPS from demuxer or from user override
+
+    struct mp_image_params last_format, fixed_format;
     float initial_decoder_aspect;
 
     // State used only by player/video.c
@@ -89,9 +91,6 @@ int video_get_colors(struct dec_video *d_video, const char *item, int *value);
 int video_set_colors(struct dec_video *d_video, const char *item, int value);
 void video_reset_decoding(struct dec_video *d_video);
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg);
-
-int video_reconfig_filters(struct dec_video *d_video,
-                           const struct mp_image_params *params);
 
 int video_vf_vo_control(struct dec_video *d_video, int vf_cmd, void *data);
 
