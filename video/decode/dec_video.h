@@ -87,11 +87,7 @@ struct mp_image *video_decode(struct dec_video *d_video,
                               struct demux_packet *packet,
                               int drop_frame);
 
-int video_get_colors(struct dec_video *d_video, const char *item, int *value);
-int video_set_colors(struct dec_video *d_video, const char *item, int value);
-void video_reset_decoding(struct dec_video *d_video);
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg);
-
-int video_vf_vo_control(struct dec_video *d_video, int vf_cmd, void *data);
+void video_reset_decoding(struct dec_video *d_video);
 
 #endif /* MPLAYER_DEC_VIDEO_H */

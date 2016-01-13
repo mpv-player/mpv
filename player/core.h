@@ -512,6 +512,9 @@ void update_osd_msg(struct MPContext *mpctx);
 bool update_subtitles(struct MPContext *mpctx, double video_pts);
 
 // video.c
+int video_get_colors(struct dec_video *d_video, const char *item, int *value);
+int video_set_colors(struct dec_video *d_video, const char *item, int value);
+int video_vf_vo_control(struct dec_video *d_video, int vf_cmd, void *data);
 void reset_video_state(struct MPContext *mpctx);
 int reinit_video_chain(struct MPContext *mpctx);
 int reinit_video_filters(struct MPContext *mpctx);
