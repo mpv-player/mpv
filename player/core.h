@@ -148,6 +148,14 @@ struct track {
     bool preloaded;
 };
 
+// Summarizes video filtering and output.
+struct vo_chain {
+    struct mp_log *log;
+
+    struct vf_chain *vf;
+    struct vo *vo;
+};
+
 /* Note that playback can be paused, stopped, etc. at any time. While paused,
  * playback restart is still active, because you want seeking to work even
  * if paused.
@@ -257,6 +265,8 @@ typedef struct MPContext {
     struct ao *ao;
     struct mp_audio *ao_decoder_fmt; // for weak gapless audio check
     struct mp_audio_buffer *ao_buffer;  // queued audio; passed to ao_play() later
+
+    struct vo_chain *vo_chain;
 
     struct vo *video_out;
     // next_frame[0] is the next frame, next_frame[1] the one after that.
@@ -511,9 +521,9 @@ void update_osd_msg(struct MPContext *mpctx);
 bool update_subtitles(struct MPContext *mpctx, double video_pts);
 
 // video.c
-int video_get_colors(struct dec_video *d_video, const char *item, int *value);
-int video_set_colors(struct dec_video *d_video, const char *item, int value);
-int video_vf_vo_control(struct dec_video *d_video, int vf_cmd, void *data);
+int video_get_colors(struct vo_chain *vo_c, const char *item, int *value);
+int video_set_colors(struct vo_chain *vo_c, const char *item, int value);
+int video_vf_vo_control(struct vo_chain *vo_c, int vf_cmd, void *data);
 void reset_video_state(struct MPContext *mpctx);
 int reinit_video_chain(struct MPContext *mpctx);
 int reinit_video_filters(struct MPContext *mpctx);

@@ -68,97 +68,91 @@ static const char av_desync_help_text[] =
 
 static bool decode_coverart(struct dec_video *d_video);
 
-int video_set_colors(struct dec_video *d_video, const char *item, int value)
+int video_set_colors(struct vo_chain *vo_c, const char *item, int value)
 {
     vf_equalizer_t data;
 
     data.item = item;
     data.value = value;
 
-    MP_VERBOSE(d_video, "set video colors %s=%d \n", item, value);
-    if (d_video->vfilter) {
-        int ret = video_vf_vo_control(d_video, VFCTRL_SET_EQUALIZER, &data);
-        if (ret == CONTROL_TRUE)
-            return 1;
-    }
-    MP_VERBOSE(d_video, "Video attribute '%s' is not supported by selected vo.\n",
+    MP_VERBOSE(vo_c, "set video colors %s=%d \n", item, value);
+    if (video_vf_vo_control(vo_c, VFCTRL_SET_EQUALIZER, &data) == CONTROL_TRUE)
+        return 1;
+    MP_VERBOSE(vo_c, "Video attribute '%s' is not supported by selected vo.\n",
                item);
     return 0;
 }
 
-int video_get_colors(struct dec_video *d_video, const char *item, int *value)
+int video_get_colors(struct vo_chain *vo_c, const char *item, int *value)
 {
     vf_equalizer_t data;
 
     data.item = item;
 
-    MP_VERBOSE(d_video, "get video colors %s \n", item);
-    if (d_video->vfilter) {
-        int ret = video_vf_vo_control(d_video, VFCTRL_GET_EQUALIZER, &data);
-        if (ret == CONTROL_TRUE) {
-            *value = data.value;
-            return 1;
-        }
+    MP_VERBOSE(vo_c, "get video colors %s \n", item);
+    if (video_vf_vo_control(vo_c, VFCTRL_GET_EQUALIZER, &data) == CONTROL_TRUE) {
+        *value = data.value;
+        return 1;
     }
     return 0;
 }
 
 // Send a VCTRL, or if it doesn't work, translate it to a VOCTRL and try the VO.
-int video_vf_vo_control(struct dec_video *d_video, int vf_cmd, void *data)
+int video_vf_vo_control(struct vo_chain *vo_c, int vf_cmd, void *data)
 {
-    if (d_video->vfilter && d_video->vfilter->initialized > 0) {
-        int r = vf_control_any(d_video->vfilter, vf_cmd, data);
+    if (vo_c->vf->initialized > 0) {
+        int r = vf_control_any(vo_c->vf, vf_cmd, data);
         if (r != CONTROL_UNKNOWN)
             return r;
     }
 
     switch (vf_cmd) {
     case VFCTRL_GET_DEINTERLACE:
-        return vo_control(d_video->vo, VOCTRL_GET_DEINTERLACE, data) == VO_TRUE;
+        return vo_control(vo_c->vo, VOCTRL_GET_DEINTERLACE, data) == VO_TRUE;
     case VFCTRL_SET_DEINTERLACE:
-        return vo_control(d_video->vo, VOCTRL_SET_DEINTERLACE, data) == VO_TRUE;
+        return vo_control(vo_c->vo, VOCTRL_SET_DEINTERLACE, data) == VO_TRUE;
     case VFCTRL_SET_EQUALIZER: {
         vf_equalizer_t *eq = data;
-        if (!d_video->vo->config_ok)
+        if (!vo_c->vo->config_ok)
             return CONTROL_FALSE;                       // vo not configured?
         struct voctrl_set_equalizer_args param = {
             eq->item, eq->value
         };
-        return vo_control(d_video->vo, VOCTRL_SET_EQUALIZER, &param) == VO_TRUE;
+        return vo_control(vo_c->vo, VOCTRL_SET_EQUALIZER, &param) == VO_TRUE;
     }
     case VFCTRL_GET_EQUALIZER: {
         vf_equalizer_t *eq = data;
-        if (!d_video->vo->config_ok)
+        if (!vo_c->vo->config_ok)
             return CONTROL_FALSE;                       // vo not configured?
         struct voctrl_get_equalizer_args param = {
             eq->item, &eq->value
         };
-        return vo_control(d_video->vo, VOCTRL_GET_EQUALIZER, &param) == VO_TRUE;
+        return vo_control(vo_c->vo, VOCTRL_GET_EQUALIZER, &param) == VO_TRUE;
     }
     }
     return CONTROL_UNKNOWN;
 }
 
-static void set_allowed_vo_formats(struct vf_chain *c, struct vo *vo)
+static void set_allowed_vo_formats(struct vo_chain *vo_c)
 {
-    vo_query_formats(vo, c->allowed_output_formats);
+    vo_query_formats(vo_c->vo, vo_c->vf->allowed_output_formats);
 }
 
 static int try_filter(struct MPContext *mpctx, struct mp_image_params params,
                       char *name, char *label, char **args)
 {
-    struct dec_video *d_video = mpctx->d_video;
+    struct vo_chain *vo_c = mpctx->vo_chain;
 
-    struct vf_instance *vf = vf_append_filter(d_video->vfilter, name, args);
+    struct vf_instance *vf = vf_append_filter(vo_c->vf, name, args);
     if (!vf)
         return -1;
 
     vf->label = talloc_strdup(vf, label);
 
-    if (vf_reconfig(d_video->vfilter, &params) < 0) {
-        vf_remove_filter(d_video->vfilter, vf);
+    if (vf_reconfig(vo_c->vf, &params) < 0) {
+        vf_remove_filter(vo_c->vf, vf);
         // restore
-        vf_reconfig(d_video->vfilter, &params);
+        vf_reconfig(vo_c->vf, &params);
         return -1;
     }
     return 0;
@@ -171,14 +165,15 @@ static void filter_reconfig(struct MPContext *mpctx,
                             bool probe_only)
 {
     struct dec_video *d_video = mpctx->d_video;
+    struct vo_chain *vo_c = mpctx->vo_chain;
 
     struct mp_image_params params = d_video->decoder_output;
 
     mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 
-    set_allowed_vo_formats(d_video->vfilter, mpctx->video_out);
+    set_allowed_vo_formats(vo_c);
 
-    if (vf_reconfig(d_video->vfilter, &params) < 0) {
+    if (vf_reconfig(vo_c->vf, &params) < 0) {
         // Most video filters don't work with hardware decoding, so this
         // might be the reason why filter reconfig failed.
         if (!probe_only &&
@@ -186,7 +181,7 @@ static void filter_reconfig(struct MPContext *mpctx,
         {
             // Fallback active; decoder will return software format next
             // time. Don't abort video decoding.
-            d_video->vfilter->initialized = 0;
+            vo_c->vf->initialized = 0;
             mp_image_unrefp(&d_video->waiting_decoded_mpi);
             d_video->decoder_output = (struct mp_image_params){0};
             MP_VERBOSE(mpctx, "hwdec falback due to filters.\n");
@@ -196,7 +191,7 @@ static void filter_reconfig(struct MPContext *mpctx,
         return;
     }
 
-    if (d_video->vfilter->initialized < 1)
+    if (vo_c->vf->initialized < 1)
         return;
 
     if (params.rotate && (params.rotate % 90 == 0)) {
@@ -227,48 +222,56 @@ static void recreate_video_filters(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     struct dec_video *d_video = mpctx->d_video;
-    assert(d_video);
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    assert(d_video && vo_c);
 
-    vf_destroy(d_video->vfilter);
-    d_video->vfilter = vf_new(mpctx->global);
-    d_video->vfilter->hwdec = d_video->hwdec_info;
-    d_video->vfilter->wakeup_callback = wakeup_playloop;
-    d_video->vfilter->wakeup_callback_ctx = mpctx;
-    d_video->vfilter->container_fps = d_video->fps;
-    vo_control(mpctx->video_out, VOCTRL_GET_DISPLAY_FPS,
-        &d_video->vfilter->display_fps);
+    vf_destroy(vo_c->vf);
+    vo_c->vf = vf_new(mpctx->global);
+    vo_c->vf->hwdec = d_video->hwdec_info;
+    vo_c->vf->wakeup_callback = wakeup_playloop;
+    vo_c->vf->wakeup_callback_ctx = mpctx;
+    vo_c->vf->container_fps = d_video->fps;
+    vo_control(vo_c->vo, VOCTRL_GET_DISPLAY_FPS, &vo_c->vf->display_fps);
 
-    vf_append_filter_list(d_video->vfilter, opts->vf_settings);
+    vf_append_filter_list(vo_c->vf, opts->vf_settings);
 
     // for vf_sub
     osd_set_render_subs_in_filter(mpctx->osd,
-        vf_control_any(d_video->vfilter, VFCTRL_INIT_OSD, mpctx->osd) > 0);
+        vf_control_any(vo_c->vf, VFCTRL_INIT_OSD, mpctx->osd) > 0);
 
-    set_allowed_vo_formats(d_video->vfilter, mpctx->video_out);
+    set_allowed_vo_formats(vo_c);
 }
 
 int reinit_video_filters(struct MPContext *mpctx)
 {
     struct dec_video *d_video = mpctx->d_video;
+    struct vo_chain *vo_c = mpctx->vo_chain;
 
     if (!d_video)
         return 0;
-    bool need_reconfig = d_video->vfilter->initialized != 0;
+    bool need_reconfig = vo_c->vf->initialized != 0;
 
     recreate_video_filters(mpctx);
 
     if (need_reconfig)
         filter_reconfig(mpctx, true);
 
-    return d_video->vfilter->initialized;
+    return vo_c->vf->initialized;
+}
+
+static void vo_chain_reset_state(struct vo_chain *vo_c)
+{
+    if (vo_c->vf->initialized == 1)
+        vf_seek_reset(vo_c->vf);
+    vo_seek_reset(vo_c->vo);
 }
 
 void reset_video_state(struct MPContext *mpctx)
 {
     if (mpctx->d_video)
         video_reset_decoding(mpctx->d_video);
-    if (mpctx->video_out)
-        vo_seek_reset(mpctx->video_out);
+    if (mpctx->vo_chain)
+        vo_chain_reset_state(mpctx->vo_chain);
 
     for (int n = 0; n < mpctx->num_next_frames; n++)
         mp_image_unrefp(&mpctx->next_frames[n]);
@@ -302,10 +305,19 @@ void uninit_video_out(struct MPContext *mpctx)
     mpctx->video_out = NULL;
 }
 
+static void vo_chain_uninit(struct vo_chain *vo_c)
+{
+    if (vo_c)
+        vf_destroy(vo_c->vf);
+    talloc_free(vo_c);
+}
+
 void uninit_video_chain(struct MPContext *mpctx)
 {
     if (mpctx->d_video) {
         reset_video_state(mpctx);
+        vo_chain_uninit(mpctx->vo_chain);
+        mpctx->vo_chain = NULL;
         video_uninit(mpctx->d_video);
         mpctx->d_video = NULL;
         mpctx->video_status = STATUS_EOF;
@@ -320,6 +332,7 @@ int reinit_video_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     assert(!mpctx->d_video);
+    assert(!mpctx->vo_chain);
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
     struct sh_stream *sh = track ? track->stream : NULL;
     if (!sh)
@@ -351,7 +364,10 @@ int reinit_video_chain(struct MPContext *mpctx)
     d_video->opts = mpctx->opts;
     d_video->header = sh;
     d_video->fps = sh->codec->fps;
-    d_video->vo = mpctx->video_out;
+
+    mpctx->vo_chain = talloc_zero(NULL, struct vo_chain);
+    mpctx->vo_chain->log = d_video->log;
+    mpctx->vo_chain->vo = mpctx->video_out;
 
     MP_VERBOSE(d_video, "Container reported FPS: %f\n", sh->codec->fps);
 
@@ -508,7 +524,7 @@ static void init_filter_params(struct MPContext *mpctx)
 static int video_filter(struct MPContext *mpctx, bool eof)
 {
     struct dec_video *d_video = mpctx->d_video;
-    struct vf_chain *vf = d_video->vfilter;
+    struct vf_chain *vf = mpctx->vo_chain->vf;
 
     if (vf->initialized < 0)
         return VD_ERROR;
@@ -578,8 +594,7 @@ static int video_decode_and_filter(struct MPContext *mpctx)
 
 static int video_feed_async_filter(struct MPContext *mpctx)
 {
-    struct dec_video *d_video = mpctx->d_video;
-    struct vf_chain *vf = d_video->vfilter;
+    struct vf_chain *vf = mpctx->vo_chain->vf;
 
     if (vf->initialized < 0)
         return VD_ERROR;
@@ -714,7 +729,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
             return VD_NEW_FRAME;
         int r = video_decode_and_filter(mpctx);
         video_filter(mpctx, true); // force EOF filtering (avoid decoding more)
-        mpctx->next_frames[0] = vf_read_output_frame(mpctx->d_video->vfilter);
+        mpctx->next_frames[0] = vf_read_output_frame(mpctx->vo_chain->vf);
         if (mpctx->next_frames[0]) {
             mpctx->next_frames[0]->pts = MP_NOPTS_VALUE;
             mpctx->num_next_frames = 1;
@@ -732,7 +747,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
         r = video_decode_and_filter(mpctx);
         if (r < 0)
             return r; // error
-        struct mp_image *img = vf_read_output_frame(mpctx->d_video->vfilter);
+        struct mp_image *img = vf_read_output_frame(mpctx->vo_chain->vf);
         if (img) {
             if (endpts != MP_NOPTS_VALUE && img->pts >= endpts) {
                 r = VD_EOF;
@@ -845,19 +860,19 @@ static void update_av_diff(struct MPContext *mpctx, double offset)
 static void init_vo(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct dec_video *d_video = mpctx->d_video;
+    struct vo_chain *vo_c = mpctx->vo_chain;
 
     if (opts->gamma_gamma != 1000)
-        video_set_colors(d_video, "gamma", opts->gamma_gamma);
+        video_set_colors(vo_c, "gamma", opts->gamma_gamma);
     if (opts->gamma_brightness != 1000)
-        video_set_colors(d_video, "brightness", opts->gamma_brightness);
+        video_set_colors(vo_c, "brightness", opts->gamma_brightness);
     if (opts->gamma_contrast != 1000)
-        video_set_colors(d_video, "contrast", opts->gamma_contrast);
+        video_set_colors(vo_c, "contrast", opts->gamma_contrast);
     if (opts->gamma_saturation != 1000)
-        video_set_colors(d_video, "saturation", opts->gamma_saturation);
+        video_set_colors(vo_c, "saturation", opts->gamma_saturation);
     if (opts->gamma_hue != 1000)
-        video_set_colors(d_video, "hue", opts->gamma_hue);
-    video_set_colors(d_video, "output-levels", opts->video_output_levels);
+        video_set_colors(vo_c, "hue", opts->gamma_hue);
+    video_set_colors(vo_c, "output-levels", opts->video_output_levels);
 
     mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 }

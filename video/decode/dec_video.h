@@ -31,8 +31,6 @@ struct dec_video {
     struct mp_log *log;
     struct mpv_global *global;
     struct MPOpts *opts;
-    struct vf_chain *vfilter;  // video filter chain
-    struct vo *vo;  // (still) needed by video_set/get_colors
     const struct vd_functions *vd_driver;
     struct mp_hwdec_info *hwdec_info; // video output hwdec handles
     struct sh_stream *header;

@@ -38,7 +38,6 @@
 
 #include "demux/stheader.h"
 #include "video/decode/vd.h"
-#include "video/filter/vf.h"
 
 #include "video/decode/dec_video.h"
 
@@ -59,8 +58,6 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
 void video_reset_decoding(struct dec_video *d_video)
 {
     video_vd_control(d_video, VDCTRL_RESET, NULL);
-    if (d_video->vfilter && d_video->vfilter->initialized == 1)
-        vf_seek_reset(d_video->vfilter);
     mp_image_unrefp(&d_video->waiting_decoded_mpi);
     d_video->num_buffered_pts = 0;
     d_video->last_pts = MP_NOPTS_VALUE;
@@ -87,7 +84,6 @@ void video_uninit(struct dec_video *d_video)
         MP_VERBOSE(d_video, "Uninit video.\n");
         d_video->vd_driver->uninit(d_video);
     }
-    vf_destroy(d_video->vfilter);
     talloc_free(d_video);
 }
 

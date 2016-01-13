@@ -1234,9 +1234,9 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
         struct mp_tags metadata = {0};
         int res = CONTROL_UNKNOWN;
         if (strcmp(type, "vf") == 0) {
-            if (!(mpctx->d_video && mpctx->d_video->vfilter))
+            if (!mpctx->vo_chain)
                 return M_PROPERTY_UNAVAILABLE;
-            struct vf_chain *vf = mpctx->d_video->vfilter;
+            struct vf_chain *vf = mpctx->vo_chain->vf;
             res = vf_control_by_label(vf, VFCTRL_GET_METADATA, &metadata, key);
         } else if (strcmp(type, "af") == 0) {
             if (!(mpctx->d_audio && mpctx->d_audio->afilter))
@@ -2181,10 +2181,10 @@ static bool probe_deint_filter(struct MPContext *mpctx, const char *filt)
 
 static bool check_output_format(struct MPContext *mpctx, int imgfmt)
 {
-    struct dec_video *vd = mpctx->d_video;
-    if (!vd)
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    if (!vo_c)
         return false;
-    return vd->vfilter->allowed_output_formats[imgfmt - IMGFMT_START];
+    return vo_c->vf->allowed_output_formats[imgfmt - IMGFMT_START];
 }
 
 static int probe_deint_filters(struct MPContext *mpctx)
@@ -2214,13 +2214,13 @@ static int probe_deint_filters(struct MPContext *mpctx)
 
 static int get_deinterlacing(struct MPContext *mpctx)
 {
-    struct dec_video *vd = mpctx->d_video;
+    struct vo_chain *vo_c = mpctx->vo_chain;
     int enabled = 0;
-    if (video_vf_vo_control(vd, VFCTRL_GET_DEINTERLACE, &enabled) != CONTROL_OK)
+    if (video_vf_vo_control(vo_c, VFCTRL_GET_DEINTERLACE, &enabled) != CONTROL_OK)
         enabled = -1;
     if (enabled < 0) {
         // vf_lavfi doesn't support VFCTRL_GET_DEINTERLACE
-        if (vf_find_by_label(vd->vfilter, VF_DEINTERLACE_LABEL))
+        if (vf_find_by_label(vo_c->vf, VF_DEINTERLACE_LABEL))
             enabled = 1;
     }
     return enabled;
@@ -2233,14 +2233,14 @@ void remove_deint_filter(struct MPContext *mpctx)
 
 void set_deinterlacing(struct MPContext *mpctx, bool enable)
 {
-    struct dec_video *vd = mpctx->d_video;
-    if (vf_find_by_label(vd->vfilter, VF_DEINTERLACE_LABEL)) {
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    if (vf_find_by_label(vo_c->vf, VF_DEINTERLACE_LABEL)) {
         if (!enable)
             remove_deint_filter(mpctx);
     } else {
         if ((get_deinterlacing(mpctx) > 0) != enable) {
             int arg = enable;
-            if (video_vf_vo_control(vd, VFCTRL_SET_DEINTERLACE, &arg) != CONTROL_OK)
+            if (video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &arg) != CONTROL_OK)
                 probe_deint_filters(mpctx);
         }
     }
@@ -2251,7 +2251,7 @@ static int mp_property_deinterlace(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->d_video || !mpctx->d_video->vfilter)
+    if (!mpctx->vo_chain)
         return mp_property_generic_option(mpctx, prop, action, arg);
     switch (action) {
     case M_PROPERTY_GET:
@@ -2403,17 +2403,17 @@ static int mp_property_video_color(void *ctx, struct m_property *prop,
 {
     const char *name = prop->priv ? prop->priv : prop->name;
     MPContext *mpctx = ctx;
-    if (!mpctx->d_video)
+    if (!mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
     case M_PROPERTY_SET: {
-        if (video_set_colors(mpctx->d_video, name, *(int *) arg) <= 0)
+        if (video_set_colors(mpctx->vo_chain, name, *(int *) arg) <= 0)
             return M_PROPERTY_UNAVAILABLE;
         break;
     }
     case M_PROPERTY_GET:
-        if (video_get_colors(mpctx->d_video, name, (int *)arg) <= 0)
+        if (video_get_colors(mpctx->vo_chain, name, (int *)arg) <= 0)
             return M_PROPERTY_UNAVAILABLE;
         // Write new value to option variable
         mp_property_generic_option(mpctx, prop, M_PROPERTY_SET, arg);
@@ -2491,11 +2491,10 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
 
 static struct mp_image_params get_video_out_params(struct MPContext *mpctx)
 {
-    if (!mpctx->d_video || !mpctx->d_video->vfilter ||
-        mpctx->d_video->vfilter->initialized < 1)
+    if (!mpctx->vo_chain || mpctx->vo_chain->vf->initialized < 1)
         return (struct mp_image_params){0};
 
-    return mpctx->d_video->vfilter->output_params;
+    return mpctx->vo_chain->vf->output_params;
 }
 
 static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
@@ -2508,12 +2507,12 @@ static int mp_property_vd_imgparams(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct dec_video *vd = mpctx->d_video;
-    if (!vd)
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    if (!vo_c && !mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
-    struct mp_codec_params *c = vd->header->codec;
-    if (vd->vfilter->input_params.imgfmt) {
-        return property_imgparams(vd->vfilter->input_params, action, arg);
+    struct mp_codec_params *c = mpctx->d_video->header->codec;
+    if (vo_c->vf->input_params.imgfmt) {
+        return property_imgparams(vo_c->vf->input_params, action, arg);
     } else if (c->disp_w && c->disp_h) {
         // Simplistic fallback for stupid scripts querying "width"/"height"
         // before the first frame is decoded.
@@ -2776,10 +2775,10 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
     }
     case M_PROPERTY_GET: {
         float aspect = mpctx->opts->movie_aspect;
-        if (mpctx->d_video && aspect <= 0) {
+        if (mpctx->d_video && mpctx->vo_chain && aspect <= 0) {
             struct dec_video *d_video = mpctx->d_video;
             struct mp_codec_params *c = d_video->header->codec;
-            struct mp_image_params *params = &d_video->vfilter->input_params;
+            struct mp_image_params *params = &mpctx->vo_chain->vf->input_params;
             if (params && params->p_w > 0 && params->p_h > 0) {
                 int d_w, d_h;
                 mp_image_params_get_dsize(params, &d_w, &d_h);
