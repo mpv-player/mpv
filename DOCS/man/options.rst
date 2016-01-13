@@ -3370,12 +3370,15 @@ DVB
 
 ``--dvbin-full-transponder=<yes|no>``
     Apply no filters on program PIDs, only tune to frequency and pass full
-    transponder to demuxer. This is useful to record multiple programs
-    on a single transponder, or to work around issues in the ``channels.conf``.
+    transponder to demuxer.
+    The player frontend selects the streams from the full TS in this case,
+    so the program which is shown initially may not match the chosen channel.
+    Switching between the programs is possible by cycling the ``program``
+    property.
+    This is useful to record multiple programs on a single transponder,
+    or to work around issues in the ``channels.conf``.
     It is also recommended to use this for channels which switch PIDs
     on-the-fly, e.g. for regional news.
-    Switching between the programs is possible by cycling the program
-    property.
 
     Default: ``no``
 
