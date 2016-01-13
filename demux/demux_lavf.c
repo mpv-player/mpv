@@ -1062,6 +1062,12 @@ redo:
             goto redo;
         }
         priv->cur_program = prog->progid = program->id;
+
+        mp_tags_copy_from_av_dictionary(demuxer->metadata, priv->avfc->programs[p]->metadata);
+        update_metadata(demuxer, NULL);
+        // Enforce metadata update even if no explicit METADATA_UPDATED since we switched program.
+        demux_changed(demuxer, DEMUX_EVENT_METADATA);
+
         return DEMUXER_CTRL_OK;
     }
     case DEMUXER_CTRL_RESYNC:
