@@ -391,6 +391,9 @@ static int mp_property_media_title(void *ctx, struct m_property *prop,
     if (name && name[0])
         return m_property_strdup_ro(action, arg, name);
     if (mpctx->master_demuxer) {
+        name = mp_tags_get_str(mpctx->master_demuxer->metadata, "service_name");
+        if (name && name[0])
+            return m_property_strdup_ro(action, arg, name);
         name = mp_tags_get_str(mpctx->master_demuxer->metadata, "title");
         if (name && name[0])
             return m_property_strdup_ro(action, arg, name);
