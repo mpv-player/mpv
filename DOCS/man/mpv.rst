@@ -922,7 +922,7 @@ locations are different. They are generally located under ``%APPDATA%/mpv/``.
 For example, the path to mpv.conf is ``%APPDATA%/mpv/mpv.conf``, which maps to
 a system and user-specific path, for example
 
-    ``C:\users\USERNAME\Application Data\mpv\mpv.conf``
+    ``C:\users\USERNAME\AppData\Roaming\mpv\mpv.conf``
 
 You can find the exact path by running ``echo %APPDATA%\mpv\mpv.conf`` in cmd.exe.
 
