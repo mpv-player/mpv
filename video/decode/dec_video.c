@@ -359,3 +359,8 @@ struct mp_image *video_decode(struct dec_video *d_video,
     d_video->decoded_pts = pts;
     return mpi;
 }
+
+void video_reset_aspect(struct dec_video *d_video)
+{
+    d_video->last_format = (struct mp_image_params){0};
+}

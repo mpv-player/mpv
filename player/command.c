@@ -2771,7 +2771,7 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
     case M_PROPERTY_SET: {
         mpctx->opts->movie_aspect = *(float *)arg;
         if (mpctx->d_video) {
-            reinit_video_filters(mpctx);
+            video_reset_aspect(mpctx->d_video);
             mp_force_video_refresh(mpctx);
         }
         return M_PROPERTY_OK;

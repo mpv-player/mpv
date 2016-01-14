@@ -87,5 +87,6 @@ struct mp_image *video_decode(struct dec_video *d_video,
 
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg);
 void video_reset_decoding(struct dec_video *d_video);
+void video_reset_aspect(struct dec_video *d_video);
 
 #endif /* MPLAYER_DEC_VIDEO_H */
