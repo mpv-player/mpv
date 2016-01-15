@@ -138,11 +138,9 @@ static void set_allowed_vo_formats(struct vo_chain *vo_c)
     vo_query_formats(vo_c->vo, vo_c->vf->allowed_output_formats);
 }
 
-static int try_filter(struct MPContext *mpctx, struct mp_image_params params,
+static int try_filter(struct vo_chain *vo_c, struct mp_image_params params,
                       char *name, char *label, char **args)
 {
-    struct vo_chain *vo_c = mpctx->vo_chain;
-
     struct vf_instance *vf = vf_append_filter(vo_c->vf, name, args);
     if (!vf)
         return -1;
@@ -159,49 +157,22 @@ static int try_filter(struct MPContext *mpctx, struct mp_image_params params,
 }
 
 // Reconfigure the filter chain according to decoder output.
-// probe_only: don't force fallback to software when doing hw decoding, and
-//             the filter chain couldn't be configured
-static void filter_reconfig(struct MPContext *mpctx,
-                            bool probe_only)
+static void filter_reconfig(struct vo_chain *vo_c,
+                            struct mp_image_params params)
 {
-    struct dec_video *d_video = mpctx->d_video;
-    struct vo_chain *vo_c = mpctx->vo_chain;
-
-    struct mp_image_params params = d_video->decoder_output;
-
-    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
-
     set_allowed_vo_formats(vo_c);
 
-    if (vf_reconfig(vo_c->vf, &params) < 0) {
-        // Most video filters don't work with hardware decoding, so this
-        // might be the reason why filter reconfig failed.
-        if (!probe_only &&
-            video_vd_control(d_video, VDCTRL_FORCE_HWDEC_FALLBACK, NULL) == CONTROL_OK)
-        {
-            // Fallback active; decoder will return software format next
-            // time. Don't abort video decoding.
-            vo_c->vf->initialized = 0;
-            mp_image_unrefp(&d_video->waiting_decoded_mpi);
-            d_video->decoder_output = (struct mp_image_params){0};
-            MP_VERBOSE(mpctx, "hwdec falback due to filters.\n");
-        } else {
-            MP_FATAL(mpctx, "Cannot initialize video filters.\n");
-        }
-        return;
-    }
-
-    if (vo_c->vf->initialized < 1)
+    if (vf_reconfig(vo_c->vf, &params) < 0)
         return;
 
     if (params.rotate && (params.rotate % 90 == 0)) {
-        if (!(mpctx->video_out->driver->caps & VO_CAP_ROTATE90)) {
+        if (!(vo_c->vo->driver->caps & VO_CAP_ROTATE90)) {
             // Try to insert a rotation filter.
             char *args[] = {"angle", "auto", NULL};
-            if (try_filter(mpctx, params, "rotate", "autorotate", args) >= 0) {
+            if (try_filter(vo_c, params, "rotate", "autorotate", args) >= 0) {
                 params.rotate = 0;
             } else {
-                MP_ERR(mpctx, "Can't insert rotation filter.\n");
+                MP_ERR(vo_c, "Can't insert rotation filter.\n");
             }
         }
     }
@@ -212,8 +183,8 @@ static void filter_reconfig(struct MPContext *mpctx,
         char *to = (char *)MP_STEREO3D_NAME(params.stereo_out);
         if (to) {
             char *args[] = {"in", "auto", "out", to, NULL, NULL};
-            if (try_filter(mpctx, params, "stereo3d", "stereo3d", args) < 0)
-                MP_ERR(mpctx, "Can't insert 3D conversion filter.\n");
+            if (try_filter(vo_c, params, "stereo3d", "stereo3d", args) < 0)
+                MP_ERR(vo_c, "Can't insert 3D conversion filter.\n");
         }
     }
 }
@@ -254,7 +225,9 @@ int reinit_video_filters(struct MPContext *mpctx)
     recreate_video_filters(mpctx);
 
     if (need_reconfig)
-        filter_reconfig(mpctx, true);
+        filter_reconfig(vo_c, d_video->decoder_output);
+
+    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 
     return vo_c->vf->initialized;
 }
@@ -545,11 +518,27 @@ static int video_filter(struct MPContext *mpctx, bool eof)
             return VD_PROGRESS;
 
         // The filter chain is drained; execute the filter format change.
-        filter_reconfig(mpctx, false);
-        if (vf->initialized == 0)
-            return VD_PROGRESS; // hw decoding fallback; try again
-        if (vf->initialized < 1)
+        filter_reconfig(mpctx->vo_chain, d_video->decoder_output);
+
+        mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
+
+        // Most video filters don't work with hardware decoding, so this
+        // might be the reason why filter reconfig failed.
+        if (vf->initialized < 0 &&
+            video_vd_control(d_video, VDCTRL_FORCE_HWDEC_FALLBACK, NULL) == CONTROL_OK)
+        {
+            // Fallback active; decoder will return software format next
+            // time. Don't abort video decoding.
+            vf->initialized = 0;
+            mp_image_unrefp(&d_video->waiting_decoded_mpi);
+            d_video->decoder_output = (struct mp_image_params){0};
+            MP_VERBOSE(mpctx, "hwdec falback due to filters.\n");
+            return VD_PROGRESS; // try again
+        }
+        if (vf->initialized < 1) {
+            MP_FATAL(mpctx, "Cannot initialize video filters.\n");
             return VD_ERROR;
+        }
         init_filter_params(mpctx);
         return VD_RECONFIG;
     }
