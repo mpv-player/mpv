@@ -250,6 +250,7 @@ struct mpv_global *create_sub_global(struct MPContext *mpctx)
     *new = (struct mpv_global){
         .log = mpctx->global->log,
         .opts = new_config->optstruct,
+        .client_api = mpctx->clients,
     };
     return new;
 }
