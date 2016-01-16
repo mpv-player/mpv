@@ -39,6 +39,7 @@
 #include "stream/stream.h"
 #include "sub/osd.h"
 
+#include "video/decode/dec_video.h"
 #include "video/out/vo.h"
 
 #include "core.h"
@@ -242,10 +243,11 @@ static void print_status(struct MPContext *mpctx)
                 talloc_free(r);
             }
             int64_t c = vo_get_drop_count(mpctx->video_out);
-            if (c > 0 || mpctx->dropped_frames_total > 0) {
+            int dropped_frames = mpctx->d_video->dropped_frames;
+            if (c > 0 || dropped_frames > 0) {
                 saddf(&line, " Dropped: %"PRId64, c);
-                if (mpctx->dropped_frames_total)
-                    saddf(&line, "/%d", mpctx->dropped_frames_total);
+                if (dropped_frames)
+                    saddf(&line, "/%d", dropped_frames);
             }
         }
     }

@@ -27,6 +27,7 @@
 #include "options/options.h"
 #include "sub/osd.h"
 #include "demux/timeline.h"
+#include "video/mp_image.h"
 #include "video/out/vo.h"
 
 // definitions used internally by the core player code
@@ -154,6 +155,12 @@ struct vo_chain {
 
     struct vf_chain *vf;
     struct vo *vo;
+
+    // 1-element input frame queue.
+    struct mp_image *input_mpi;
+
+    // Last known input_mpi format (so vf can be reinitialized any time).
+    struct mp_image_params input_format;
 };
 
 /* Note that playback can be paused, stopped, etc. at any time. While paused,
@@ -308,10 +315,8 @@ typedef struct MPContext {
     // How much video timing has been changed to make it match the audio
     // timeline. Used for status line information only.
     double total_avsync_change;
-    // Total number of dropped frames that were dropped by decoder.
-    int dropped_frames_total;
-    // Number of frames dropped in a row.
-    int dropped_frames;
+    // Used to compute the number of frames dropped in a row.
+    int dropped_frames_start;
     // A-V sync difference when last frame was displayed. Kept to display
     // the same value if the status line is updated at a time where no new
     // video frame is shown.

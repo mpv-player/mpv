@@ -29,6 +29,7 @@
 #include "osdep/timer.h"
 
 #include "stream/stream.h"
+#include "demux/demux.h"
 #include "demux/packet.h"
 
 #include "common/codecs.h"
@@ -55,17 +56,19 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
     NULL
 };
 
-void video_reset_decoding(struct dec_video *d_video)
+void video_reset(struct dec_video *d_video)
 {
     video_vd_control(d_video, VDCTRL_RESET, NULL);
-    mp_image_unrefp(&d_video->waiting_decoded_mpi);
     d_video->num_buffered_pts = 0;
-    d_video->last_pts = MP_NOPTS_VALUE;
     d_video->first_packet_pdts = MP_NOPTS_VALUE;
+    d_video->start_pts = MP_NOPTS_VALUE;
     d_video->decoded_pts = MP_NOPTS_VALUE;
     d_video->codec_pts = MP_NOPTS_VALUE;
     d_video->codec_dts = MP_NOPTS_VALUE;
     d_video->last_format = d_video->fixed_format = (struct mp_image_params){0};
+    d_video->dropped_frames = 0;
+    d_video->current_state = VIDEO_SKIP;
+    mp_image_unrefp(&d_video->current_mpi);
 }
 
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg)
@@ -78,7 +81,7 @@ int video_vd_control(struct dec_video *d_video, int cmd, void *arg)
 
 void video_uninit(struct dec_video *d_video)
 {
-    mp_image_unrefp(&d_video->waiting_decoded_mpi);
+    mp_image_unrefp(&d_video->current_mpi);
     mp_image_unrefp(&d_video->cover_art_mpi);
     if (d_video->vd_driver) {
         MP_VERBOSE(d_video, "Uninit video.\n");
@@ -125,7 +128,7 @@ static const struct vd_functions *find_driver(const char *name)
 bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
 {
     assert(!d_video->vd_driver);
-    video_reset_decoding(d_video);
+    video_reset(d_video);
     d_video->has_broken_packet_pts = -10; // needs 10 packets to reach decision
 
     struct mp_decoder_entry *decoder = NULL;
@@ -258,9 +261,9 @@ static double retrieve_avi_pts(struct dec_video *d_video, double codec_pts)
     return MP_NOPTS_VALUE;
 }
 
-struct mp_image *video_decode(struct dec_video *d_video,
-                              struct demux_packet *packet,
-                              int drop_frame)
+static struct mp_image *decode_packet(struct dec_video *d_video,
+                                      struct demux_packet *packet,
+                                      int drop_frame)
 {
     struct MPOpts *opts = d_video->opts;
     bool avi_pts = d_video->header->codec->avi_dts && opts->correct_pts;
@@ -363,4 +366,82 @@ struct mp_image *video_decode(struct dec_video *d_video,
 void video_reset_aspect(struct dec_video *d_video)
 {
     d_video->last_format = (struct mp_image_params){0};
+}
+
+void video_set_framedrop(struct dec_video *d_video, bool enabled)
+{
+    d_video->framedrop_enabled = enabled;
+}
+
+// Frames before the start timestamp can be dropped. (Used for hr-seek.)
+void video_set_start(struct dec_video *d_video, double start_pts)
+{
+    d_video->start_pts = start_pts;
+}
+
+void video_work(struct dec_video *d_video)
+{
+    if (d_video->current_mpi)
+        return;
+
+    if (d_video->header->attached_picture) {
+        if (d_video->current_state == VIDEO_SKIP && !d_video->cover_art_mpi) {
+            d_video->cover_art_mpi =
+                decode_packet(d_video, d_video->header->attached_picture, 0);
+            // Might need flush.
+            if (!d_video->cover_art_mpi)
+                d_video->cover_art_mpi = decode_packet(d_video, NULL, 0);
+            d_video->current_state = VIDEO_OK;
+        }
+        if (d_video->current_state == VIDEO_OK)
+            d_video->current_mpi = mp_image_new_ref(d_video->cover_art_mpi);
+        // (VIDEO_OK is returned the first time, when current_mpi is sill set)
+        d_video->current_state = VIDEO_EOF;
+        return;
+    }
+
+    struct demux_packet *pkt;
+    if (demux_read_packet_async(d_video->header, &pkt) == 0) {
+        d_video->current_state = VIDEO_WAIT;
+        return;
+    }
+
+    int framedrop_type = d_video->framedrop_enabled ? 1 : 0;
+    if (d_video->start_pts != MP_NOPTS_VALUE && pkt &&
+        pkt->pts < d_video->start_pts - .005 &&
+        !d_video->has_broken_packet_pts)
+    {
+        framedrop_type = 2;
+    }
+    d_video->current_mpi = decode_packet(d_video, pkt, framedrop_type);
+    bool had_packet = !!pkt;
+    talloc_free(pkt);
+
+    d_video->current_state = VIDEO_OK;
+    if (!d_video->current_mpi) {
+        d_video->current_state = VIDEO_EOF;
+        if (had_packet) {
+            if (framedrop_type == 1)
+                d_video->dropped_frames += 1;
+            d_video->current_state = VIDEO_SKIP;
+        }
+    }
+}
+
+// Fetch an image decoded with video_work(). Returns one of:
+//  VIDEO_OK:   *out_mpi is set to a new image
+//  VIDEO_WAIT: waiting for demuxer; will receive a wakeup signal
+//  VIDEO_EOF:  end of file, no more frames to be expected
+//  VIDEO_SKIP: dropped frame or something similar
+int video_get_frame(struct dec_video *d_video, struct mp_image **out_mpi)
+{
+    *out_mpi = NULL;
+    if (d_video->current_mpi) {
+        *out_mpi = d_video->current_mpi;
+        d_video->current_mpi = NULL;
+        return VIDEO_OK;
+    }
+    if (d_video->current_state == VIDEO_OK)
+        return VIDEO_SKIP;
+    return d_video->current_state;
 }
