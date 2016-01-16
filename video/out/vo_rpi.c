@@ -36,6 +36,7 @@
 #include "common/msg.h"
 #include "options/m_config.h"
 #include "vo.h"
+#include "win_state.h"
 #include "video/mp_image.h"
 #include "sub/osd.h"
 
@@ -48,6 +49,7 @@ struct priv {
     DISPMANX_ELEMENT_HANDLE_T osd_overlay;
     DISPMANX_UPDATE_HANDLE_T update;
     uint32_t w, h;
+    uint32_t x, y;
     double display_fps;
 
     double osd_pts;
@@ -156,7 +158,7 @@ static void update_osd(struct vo *vo)
         }
         gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
         gl_sc_gen_shader_and_reset(p->sc);
-        mpgl_osd_draw_part(p->osd, p->w, -p->h, n);
+        mpgl_osd_draw_part(p->osd, p->osd_res.w, -p->osd_res.h, n);
     }
 
     MP_STATS(vo, "stop rpi_osd");
@@ -185,15 +187,18 @@ static void resize(struct vo *vo)
         .hdr = { .id = MMAL_PARAMETER_DISPLAYREGION,
                  .size = sizeof(MMAL_DISPLAYREGION_T), },
         .src_rect = { .x = src.x0, .y = src.y0, .width = src_w, .height = src_h },
-        .dest_rect = { .x = dst.x0, .y = dst.y0, .width = dst_w, .height = dst_h },
+        .dest_rect = { .x = dst.x0 + p->x, .y = dst.y0 + p->y,
+                       .width = dst_w, .height = dst_h },
         .layer = p->video_layer,
         .display_num = p->display_nr,
         .pixel_x = p_x,
         .pixel_y = p_y,
         .transform = rotate[vo->params ? vo->params->rotate / 90 : 0],
+        .fullscreen = vo->opts->fullscreen,
         .set = MMAL_DISPLAY_SET_SRC_RECT | MMAL_DISPLAY_SET_DEST_RECT |
                MMAL_DISPLAY_SET_LAYER | MMAL_DISPLAY_SET_NUM |
-               MMAL_DISPLAY_SET_PIXEL | MMAL_DISPLAY_SET_TRANSFORM,
+               MMAL_DISPLAY_SET_PIXEL | MMAL_DISPLAY_SET_TRANSFORM |
+               MMAL_DISPLAY_SET_FULLSCREEN,
     };
 
     if (vo->params && (vo->params->rotate % 180) == 90) {
@@ -242,8 +247,15 @@ static int update_display_size(struct vo *vo)
 
     MP_VERBOSE(vo, "Display size: %dx%d\n", p->w, p->h);
 
+    return 0;
+}
+
+static int create_overlays(struct vo *vo)
+{
+    struct priv *p = vo->priv;
     destroy_overlays(vo);
 
+    if (vo->opts->fullscreen) {
     // Use the whole screen.
     VC_RECT_T dst = {.width = p->w, .height = p->h};
     VC_RECT_T src = {.width = 1 << 16, .height = 1 << 16};
@@ -263,9 +275,13 @@ static int update_display_size(struct vo *vo)
             return -1;
         }
     }
+    }
 
     if (p->enable_osd) {
-        alpha = (VC_DISPMANX_ALPHA_T){
+        VC_RECT_T dst = {.x = p->x, .y = p->y,
+                         .width = p->osd_res.w, .height = p->osd_res.h};
+        VC_RECT_T src = {.width = p->osd_res.w << 16, .height = p->osd_res.h << 16};
+        VC_DISPMANX_ALPHA_T alpha = {
             .flags = DISPMANX_FLAGS_ALPHA_FROM_SOURCE,
             .opacity = 0xFF,
         };
@@ -279,7 +295,9 @@ static int update_display_size(struct vo *vo)
             return -1;
         }
 
-        if (mp_egl_rpi_init(&p->egl, p->osd_overlay, p->w, p->h) < 0) {
+        if (mp_egl_rpi_init(&p->egl, p->osd_overlay,
+                            p->osd_res.w, p->osd_res.h) < 0)
+        {
             MP_FATAL(vo, "EGL/GLES initialization for OSD renderer failed.\n");
             return -1;
         }
@@ -310,6 +328,33 @@ static int update_display_size(struct vo *vo)
 
     vc_dispmanx_update_submit_sync(p->update);
     p->update = vc_dispmanx_update_start(10);
+
+    return 0;
+}
+
+static int set_geometry(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+
+    if (vo->opts->fullscreen) {
+        vo->dwidth = p->w;
+        vo->dheight = p->h;
+        p->x = p->y = 0;
+    } else {
+        struct vo_win_geometry geo;
+        struct mp_rect screenrc = {0, 0, p->w, p->h};
+
+        vo_calc_window_geometry(vo, &screenrc, &geo);
+        vo_apply_window_geometry(vo, &geo);
+
+        p->x = geo.win.x0;
+        p->y = geo.win.y0;
+    }
+
+    resize(vo);
+
+    if (create_overlays(vo) < 0)
+        return -1;
 
     return 0;
 }
@@ -464,9 +509,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     MMAL_PORT_T *input = p->renderer->input[0];
     bool opaque = params->imgfmt == IMGFMT_MMAL;
 
-    vo->dwidth = p->w;
-    vo->dheight = p->h;
-
     disable_renderer(vo);
 
     input->format->encoding = opaque ? MMAL_ENCODING_OPAQUE : MMAL_ENCODING_I420;
@@ -498,7 +540,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         }
     }
 
-    resize(vo);
+    if (set_geometry(vo) < 0)
+        return -1;
 
     p->renderer_enabled = true;
 
@@ -552,6 +595,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct priv *p = vo->priv;
 
     switch (request) {
+    case VOCTRL_FULLSCREEN:
+        vo->opts->fullscreen = !vo->opts->fullscreen;
+        if (p->renderer_enabled)
+            set_geometry(vo);
+        vo->want_redraw = true;
+        return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
@@ -571,7 +620,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
             atomic_store(&p->update_display, false);
             update_display_size(vo);
             if (p->renderer_enabled)
-                resize(vo);
+                set_geometry(vo);
         }
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_FPS:
