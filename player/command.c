@@ -2776,6 +2776,13 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
         }
         return M_PROPERTY_OK;
     }
+    case M_PROPERTY_PRINT: {
+        if (mpctx->opts->movie_aspect <= 0) {
+            *(char **)arg = talloc_strdup(NULL, "(original)");
+            return M_PROPERTY_OK;
+        }
+        break;
+    }
     case M_PROPERTY_GET: {
         float aspect = mpctx->opts->movie_aspect;
         if (mpctx->d_video && mpctx->vo_chain && aspect <= 0) {
