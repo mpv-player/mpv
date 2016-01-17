@@ -202,7 +202,7 @@ static bool write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     while (cinfo.next_scanline < cinfo.image_height) {
         JSAMPROW row_pointer[1];
         row_pointer[0] = image->planes[0] +
-                         cinfo.next_scanline * image->stride[0];
+                         (ptrdiff_t)cinfo.next_scanline * image->stride[0];
         jpeg_write_scanlines(&cinfo, row_pointer,1);
     }
 
