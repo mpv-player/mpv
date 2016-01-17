@@ -239,8 +239,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     if (timeline_switch_to_time(mpctx, seek.amount)) {
         reinit_video_chain(mpctx);
         reinit_audio_chain(mpctx);
-        reinit_subs(mpctx, 0);
-        reinit_subs(mpctx, 1);
+        reinit_sub_all(mpctx);
     }
 
     int demuxer_style = 0;

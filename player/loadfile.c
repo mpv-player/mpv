@@ -60,8 +60,7 @@
 
 static void uninit_demuxer(struct MPContext *mpctx)
 {
-    assert(!mpctx->d_video && !mpctx->d_audio &&
-           !mpctx->d_sub[0] && !mpctx->d_sub[1]);
+    assert(!mpctx->d_video && !mpctx->d_audio);
     for (int r = 0; r < NUM_PTRACKS; r++) {
         for (int t = 0; t < STREAM_TYPE_COUNT; t++)
             mpctx->current_track[r][t] = NULL;
@@ -78,7 +77,7 @@ static void uninit_demuxer(struct MPContext *mpctx)
         mp_remove_track(mpctx, mpctx->tracks[n]);
     }
     for (int i = 0; i < mpctx->num_tracks; i++) {
-        sub_destroy(mpctx->tracks[i]->dec_sub);
+        sub_destroy(mpctx->tracks[i]->d_sub);
         talloc_free(mpctx->tracks[i]);
     }
     mpctx->num_tracks = 0;
@@ -336,15 +335,14 @@ bool timeline_switch_to_time(struct MPContext *mpctx, double pts)
                                                        track->user_tid - 1);
             }
 
-            if (track->dec_sub) {
+            if (track->d_sub) {
                 for (int order = 0; order < 2; order++) {
-                    if (mpctx->d_sub[order] == track->dec_sub) {
-                        mpctx->d_sub[order] = NULL;
+                    struct track *cur = mpctx->current_track[order][STREAM_SUB];
+                    if (cur && cur->d_sub == track->d_sub)
                         osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, NULL);
-                    }
                 }
-                sub_destroy(track->dec_sub);
-                track->dec_sub = NULL;
+                sub_destroy(track->d_sub);
+                track->d_sub = NULL;
             }
         }
     }
@@ -579,13 +577,10 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
             clear_audio_output_buffers(mpctx);
             uninit_audio_chain(mpctx);
             uninit_audio_out(mpctx);
-        } else if (type == STREAM_SUB) {
-            uninit_sub(mpctx, 0);
         }
-    } else if (order == 1) {
-        if (type == STREAM_SUB)
-            uninit_sub(mpctx, 1);
     }
+    if (type == STREAM_SUB)
+        uninit_sub(mpctx, current);
 
     if (current)
         current->selected = false;
@@ -609,7 +604,7 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
     } else if (type == STREAM_AUDIO && order == 0) {
         reinit_audio_chain(mpctx);
     } else if (type == STREAM_SUB && order >= 0 && order <= 2) {
-        reinit_subs(mpctx, order);
+        reinit_sub(mpctx, track);
     }
 
     mp_notify(mpctx, MPV_EVENT_TRACK_SWITCHED, NULL);
@@ -658,7 +653,7 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
 
     struct demuxer *d = track->demuxer;
 
-    sub_destroy(track->dec_sub);
+    sub_destroy(track->d_sub);
 
     int index = 0;
     while (index < mpctx->num_tracks && mpctx->tracks[index] != track)
@@ -1095,8 +1090,6 @@ reopen_file:
     assert(mpctx->demuxer == NULL);
     assert(mpctx->d_audio == NULL);
     assert(mpctx->d_video == NULL);
-    assert(mpctx->d_sub[0] == NULL);
-    assert(mpctx->d_sub[1] == NULL);
 
     if (process_open_hooks(mpctx) < 0)
         goto terminate_playback;
@@ -1197,8 +1190,7 @@ reopen_file:
 
     reinit_video_chain(mpctx);
     reinit_audio_chain(mpctx);
-    reinit_subs(mpctx, 0);
-    reinit_subs(mpctx, 1);
+    reinit_sub_all(mpctx);
 
     MP_VERBOSE(mpctx, "Starting playback...\n");
 

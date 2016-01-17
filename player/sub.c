@@ -38,43 +38,58 @@
 
 #include "core.h"
 
-static void reset_subtitles(struct MPContext *mpctx, int order)
+// 0: primary sub, 1: secondary sub, -1: not selected
+static int get_order(struct MPContext *mpctx, struct track *track)
 {
-    if (mpctx->d_sub[order])
-        sub_reset(mpctx->d_sub[order]);
+    for (int n = 0; n < NUM_PTRACKS; n++) {
+        if (mpctx->current_track[n][STREAM_SUB] == track)
+            return n;
+    }
+    return -1;
+}
+
+static void reset_subtitles(struct MPContext *mpctx, struct track *track)
+{
+    if (track->d_sub)
+        sub_reset(track->d_sub);
     term_osd_set_subs(mpctx, NULL);
 }
 
 void reset_subtitle_state(struct MPContext *mpctx)
 {
-    reset_subtitles(mpctx, 0);
-    reset_subtitles(mpctx, 1);
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct dec_sub *d_sub = mpctx->tracks[n]->d_sub;
+        if (d_sub)
+            sub_reset(d_sub);
+    }
+    term_osd_set_subs(mpctx, NULL);
 }
 
-void uninit_sub(struct MPContext *mpctx, int order)
+void uninit_sub(struct MPContext *mpctx, struct track *track)
 {
-    if (mpctx->d_sub[order]) {
-        reset_subtitles(mpctx, order);
-        sub_select(mpctx->d_sub[order], false);
-        mpctx->d_sub[order] = NULL; // not destroyed
-        osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, NULL);
+    if (track && track->d_sub) {
+        reset_subtitles(mpctx, track);
+        sub_select(track->d_sub, false);
+        int order = get_order(mpctx, track);
+        if (order >= 0 && order <= 1)
+            osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, NULL);
         reselect_demux_streams(mpctx);
     }
 }
 
 void uninit_sub_all(struct MPContext *mpctx)
 {
-    uninit_sub(mpctx, 0);
-    uninit_sub(mpctx, 1);
+    for (int n = 0; n < mpctx->num_tracks; n++)
+        uninit_sub(mpctx, mpctx->tracks[n]);
 }
 
-static bool update_subtitle(struct MPContext *mpctx, double video_pts, int order)
+static bool update_subtitle(struct MPContext *mpctx, double video_pts,
+                            struct track *track)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct track *track = mpctx->current_track[order][STREAM_SUB];
-    struct dec_sub *dec_sub = mpctx->d_sub[order];
+    struct dec_sub *dec_sub = track ? track->d_sub : NULL;
 
-    if (!track || !dec_sub || video_pts == MP_NOPTS_VALUE)
+    if (!dec_sub || video_pts == MP_NOPTS_VALUE)
         return true;
 
     if (mpctx->vo_chain) {
@@ -91,7 +106,7 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts, int order
     }
 
     // Handle displaying subtitles on terminal; never done for secondary subs
-    if (order == 0 && !mpctx->video_out)
+    if (mpctx->current_track[0][STREAM_SUB] == track && !mpctx->video_out)
         term_osd_set_subs(mpctx, sub_get_text(dec_sub, video_pts));
 
     return true;
@@ -101,34 +116,36 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts, int order
 // should wait for new demuxer data, and then should retry.
 bool update_subtitles(struct MPContext *mpctx, double video_pts)
 {
-    return update_subtitle(mpctx, video_pts, 0) &
-           update_subtitle(mpctx, video_pts, 1);
+    bool ok = true;
+    for (int n = 0; n < NUM_PTRACKS; n++)
+        ok &= update_subtitle(mpctx, video_pts, mpctx->current_track[n][STREAM_SUB]);
+    return ok;
 }
 
 static bool init_subdec(struct MPContext *mpctx, struct track *track)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    assert(!track->dec_sub);
+    assert(!track->d_sub);
 
     if (!track->demuxer || !track->stream)
         return false;
 
-    track->dec_sub = sub_create(mpctx->global, track->demuxer, track->stream);
-    if (!track->dec_sub)
+    track->d_sub = sub_create(mpctx->global, track->demuxer, track->stream);
+    if (!track->d_sub)
         return false;
 
     struct mp_codec_params *v_c =
         mpctx->d_video ? mpctx->d_video->header->codec : NULL;
     double fps = v_c ? v_c->fps : 25;
-    sub_control(track->dec_sub, SD_CTRL_SET_VIDEO_DEF_FPS, &fps);
+    sub_control(track->d_sub, SD_CTRL_SET_VIDEO_DEF_FPS, &fps);
 
     // Don't do this if the file has video/audio streams. Don't do it even
     // if it has only sub streams, because reading packets will change the
     // demuxer position.
     if (track->is_external && !opts->sub_clear_on_seek) {
         demux_seek(track->demuxer, 0, SEEK_ABSOLUTE);
-        track->preloaded = sub_read_all_packets(track->dec_sub);
+        track->preloaded = sub_read_all_packets(track->d_sub);
         if (track->preloaded)
             demux_stop_thread(track->demuxer);
     }
@@ -136,22 +153,25 @@ static bool init_subdec(struct MPContext *mpctx, struct track *track)
     return true;
 }
 
-void reinit_subs(struct MPContext *mpctx, int order)
+void reinit_sub(struct MPContext *mpctx, struct track *track)
 {
-    assert(!mpctx->d_sub[order]);
-
-    struct track *track = mpctx->current_track[order][STREAM_SUB];
-    if (!track)
+    if (!track || !track->stream || track->stream->type != STREAM_SUB)
         return;
 
-    if (!track->dec_sub && !init_subdec(mpctx, track)) {
+    if (!track->d_sub && !init_subdec(mpctx, track)) {
         error_on_track(mpctx, track);
         return;
     }
 
-    sub_select(track->dec_sub, true);
-    osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, track->dec_sub);
-    sub_control(track->dec_sub, SD_CTRL_SET_TOP, &(bool){!!order});
+    sub_select(track->d_sub, true);
+    int order = get_order(mpctx, track);
+    if (order >= 0 && order <= 1)
+        osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, track->d_sub);
+    sub_control(track->d_sub, SD_CTRL_SET_TOP, &(bool){!!order});
+}
 
-    mpctx->d_sub[order] = track->dec_sub;
+void reinit_sub_all(struct MPContext *mpctx)
+{
+    for (int n = 0; n < NUM_PTRACKS; n++)
+        reinit_sub(mpctx, mpctx->current_track[n][STREAM_SUB]);
 }

@@ -4564,7 +4564,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     case MP_CMD_SUB_SEEK: {
         if (!mpctx->playback_initialized)
             return -1;
-        struct dec_sub *sub = mpctx->d_sub[0];
+        struct track *track = mpctx->current_track[0][STREAM_SUB];
+        struct dec_sub *sub = track ? track->d_sub : NULL;
         double refpts = get_current_time(mpctx);
         if (sub && refpts != MP_NOPTS_VALUE) {
             double a[2];

@@ -142,7 +142,7 @@ struct track {
     struct sh_stream *stream;
 
     // Current subtitle state (or cached state if selected==false).
-    struct dec_sub *dec_sub;
+    struct dec_sub *d_sub;
 
     // For external subtitles, which are read fully on init. Do not attempt
     // to read packets from them.
@@ -261,7 +261,6 @@ typedef struct MPContext {
 
     struct dec_video *d_video;
     struct dec_audio *d_audio;
-    struct dec_sub *d_sub[2];
 
     // Uses: accessing metadata (consider ordered chapters case, where the main
     // demuxer defines metadata), or special purpose demuxers like TV.
@@ -517,8 +516,9 @@ void mp_load_scripts(struct MPContext *mpctx);
 
 // sub.c
 void reset_subtitle_state(struct MPContext *mpctx);
-void reinit_subs(struct MPContext *mpctx, int order);
-void uninit_sub(struct MPContext *mpctx, int order);
+void reinit_sub(struct MPContext *mpctx, struct track *track);
+void reinit_sub_all(struct MPContext *mpctx);
+void uninit_sub(struct MPContext *mpctx, struct track *track);
 void uninit_sub_all(struct MPContext *mpctx);
 void update_osd_msg(struct MPContext *mpctx);
 bool update_subtitles(struct MPContext *mpctx, double video_pts);
