@@ -60,7 +60,6 @@
 
 static void uninit_demuxer(struct MPContext *mpctx)
 {
-    assert(!mpctx->d_video && !mpctx->d_audio);
     for (int r = 0; r < NUM_PTRACKS; r++) {
         for (int t = 0; t < STREAM_TYPE_COUNT; t++)
             mpctx->current_track[r][t] = NULL;
@@ -1088,8 +1087,6 @@ reopen_file:
 
     assert(mpctx->stream == NULL);
     assert(mpctx->demuxer == NULL);
-    assert(mpctx->d_audio == NULL);
-    assert(mpctx->d_video == NULL);
 
     if (process_open_hooks(mpctx) < 0)
         goto terminate_playback;

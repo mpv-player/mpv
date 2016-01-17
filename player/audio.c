@@ -468,7 +468,7 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     if (written_pts == MP_NOPTS_VALUE && !mp_audio_buffer_samples(mpctx->ao_buffer))
         return false; // no audio read yet
 
-    bool sync_to_video = mpctx->d_video && mpctx->sync_audio_to_video &&
+    bool sync_to_video = mpctx->vo_chain && mpctx->sync_audio_to_video &&
                          mpctx->video_status != STATUS_EOF;
 
     double sync_pts = MP_NOPTS_VALUE;
@@ -545,7 +545,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         return; // try again next iteration
     }
 
-    if (mpctx->d_video && d_audio->pts_reset) {
+    if (mpctx->vo_chain && d_audio->pts_reset) {
         MP_VERBOSE(mpctx, "Reset playback due to audio timestamp reset.\n");
         reset_playback_state(mpctx);
         mpctx->sleeptime = 0;

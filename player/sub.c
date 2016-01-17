@@ -135,8 +135,9 @@ static bool init_subdec(struct MPContext *mpctx, struct track *track)
     if (!track->d_sub)
         return false;
 
+    struct track *vtrack = mpctx->current_track[0][STREAM_VIDEO];
     struct mp_codec_params *v_c =
-        mpctx->d_video ? mpctx->d_video->header->codec : NULL;
+        vtrack && vtrack->stream ? vtrack->stream->codec : NULL;
     double fps = v_c ? v_c->fps : 25;
     sub_control(track->d_sub, SD_CTRL_SET_VIDEO_DEF_FPS, &fps);
 

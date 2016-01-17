@@ -345,8 +345,8 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
         }
     }
 
-    if (image && mpctx->d_video && mpctx->d_video->hwdec_info) {
-        struct mp_hwdec_ctx *ctx = mpctx->d_video->hwdec_info->hwctx;
+    if (image && mpctx->vo_chain && mpctx->vo_chain->hwdec_info) {
+        struct mp_hwdec_ctx *ctx = mpctx->vo_chain->hwdec_info->hwctx;
         struct mp_image *nimage = NULL;
         if (ctx && ctx->download_image && (image->fmt.flags & MP_IMGFLAG_HWACCEL))
             nimage = ctx->download_image(ctx, image, NULL);

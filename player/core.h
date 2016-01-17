@@ -144,6 +144,9 @@ struct track {
     // Current subtitle state (or cached state if selected==false).
     struct dec_sub *d_sub;
 
+    // Current video decoding state (NULL if selected==false)
+    struct dec_video *d_video;
+
     // For external subtitles, which are read fully on init. Do not attempt
     // to read packets from them.
     bool preloaded;
@@ -153,6 +156,9 @@ struct track {
 struct vo_chain {
     struct mp_log *log;
 
+    struct mp_hwdec_info *hwdec_info;
+    double container_fps;
+
     struct vf_chain *vf;
     struct vo *vo;
 
@@ -161,6 +167,8 @@ struct vo_chain {
 
     // Last known input_mpi format (so vf can be reinitialized any time).
     struct mp_image_params input_format;
+
+    struct dec_video *video_src;
 };
 
 /* Note that playback can be paused, stopped, etc. at any time. While paused,
@@ -259,7 +267,6 @@ typedef struct MPContext {
     // Currently, this is used for the secondary subtitle track only.
     struct track *current_track[NUM_PTRACKS][STREAM_TYPE_COUNT];
 
-    struct dec_video *d_video;
     struct dec_audio *d_audio;
 
     // Uses: accessing metadata (consider ordered chapters case, where the main

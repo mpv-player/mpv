@@ -536,7 +536,7 @@ static int mp_property_avsync(void *ctx, struct m_property *prop,
                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->d_audio || !mpctx->d_video)
+    if (!mpctx->d_audio || !mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_PRINT) {
         *(char **)arg = talloc_asprintf(NULL, "%7.3f", mpctx->last_av_difference);
@@ -549,7 +549,7 @@ static int mp_property_total_avsync_change(void *ctx, struct m_property *prop,
                                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->d_audio || !mpctx->d_video)
+    if (!mpctx->d_audio || !mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
     if (mpctx->total_avsync_change == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
@@ -560,17 +560,17 @@ static int mp_property_drop_frame_cnt(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
-     if (!mpctx->d_video)
+     if (!mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_int_ro(action, arg, mpctx->d_video->dropped_frames);
+    return m_property_int_ro(action, arg, mpctx->vo_chain->video_src->dropped_frames);
 }
 
 static int mp_property_mistimed_frame_count(void *ctx, struct m_property *prop,
                                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->d_video || !mpctx->display_sync_active)
+    if (!mpctx->vo_chain || !mpctx->display_sync_active)
         return M_PROPERTY_UNAVAILABLE;
 
     return m_property_int_ro(action, arg, mpctx->mistimed_frames_total);
@@ -580,7 +580,7 @@ static int mp_property_vsync_ratio(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->d_video || !mpctx->display_sync_active)
+    if (!mpctx->vo_chain || !mpctx->display_sync_active)
         return M_PROPERTY_UNAVAILABLE;
 
     int vsyncs = 0, frames = 0;
@@ -602,7 +602,7 @@ static int mp_property_vo_drop_frame_count(void *ctx, struct m_property *prop,
                                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->d_video)
+    if (!mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
 
     return m_property_int_ro(action, arg, vo_get_drop_count(mpctx->video_out));
@@ -612,7 +612,7 @@ static int mp_property_vo_delayed_frame_count(void *ctx, struct m_property *prop
                                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->d_video)
+    if (!mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
 
     return m_property_int_ro(action, arg, vo_get_delayed_count(mpctx->video_out));
@@ -1696,7 +1696,7 @@ static int mp_property_audio_delay(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!(mpctx->d_audio && mpctx->d_video))
+    if (!(mpctx->d_audio && mpctx->vo_chain))
         return M_PROPERTY_UNAVAILABLE;
     float delay = mpctx->opts->audio_delay;
     switch (action) {
@@ -2101,8 +2101,9 @@ static int mp_property_hwdec(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
     MPContext *mpctx = ctx;
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+    struct dec_video *vd = track ? track->d_video : NULL;
     struct MPOpts *opts = mpctx->opts;
-    struct dec_video *vd = mpctx->d_video;
 
     if (action == M_PROPERTY_SET) {
         int new = *(int *)arg;
@@ -2133,7 +2134,8 @@ static int mp_property_hwdec_active(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct dec_video *vd = mpctx->d_video;
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+    struct dec_video *vd = track ? track->d_video : NULL;
     bool active = false;
     if (vd) {
         int current = 0;
@@ -2147,7 +2149,8 @@ static int mp_property_detected_hwdec(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct dec_video *vd = mpctx->d_video;
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+    struct dec_video *vd = track ? track->d_video : NULL;
 
     switch (action) {
     case M_PROPERTY_GET_TYPE: {
@@ -2358,11 +2361,11 @@ static int get_frame_count(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
-        return 0;
-    if (!mpctx->d_video)
-        return 0;
+        return -1;
+    if (!mpctx->vo_chain)
+        return -1;
     double len = get_time_length(mpctx);
-    double fps = mpctx->d_video->fps;
+    double fps = mpctx->vo_chain->container_fps;
     if (len < 0 || fps <= 0)
         return 0;
 
@@ -2373,32 +2376,23 @@ static int mp_property_frame_number(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->d_video)
+    int frames = get_frame_count(mpctx);
+    if (frames < 0)
         return M_PROPERTY_UNAVAILABLE;
 
     return m_property_int_ro(action, arg,
-        lrint(get_current_pos_ratio(mpctx, false) * get_frame_count(mpctx)));
+        lrint(get_current_pos_ratio(mpctx, false) * frames));
 }
 
 static int mp_property_frame_count(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-
-    if (!mpctx->d_video)
+    int frames = get_frame_count(mpctx);
+    if (frames < 0)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_int_ro(action, arg, get_frame_count(mpctx));
-}
-
-static int mp_property_framedrop(void *ctx, struct m_property *prop,
-                                 int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (!mpctx->d_video)
-        return M_PROPERTY_UNAVAILABLE;
-
-    return mp_property_generic_option(mpctx, prop, action, arg);
+    return m_property_int_ro(action, arg, frames);
 }
 
 static int mp_property_video_color(void *ctx, struct m_property *prop,
@@ -2433,7 +2427,8 @@ static int mp_property_video_format(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    const char *c = mpctx->d_video ? mpctx->d_video->header->codec->codec : NULL;
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+    const char *c = track && track->stream ? track->stream->codec->codec : NULL;
     return m_property_strdup_ro(action, arg, c);
 }
 
@@ -2442,7 +2437,8 @@ static int mp_property_video_codec(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    const char *c = mpctx->d_video ? mpctx->d_video->decoder_desc : NULL;
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+    const char *c = track->d_video ? track->d_video->decoder_desc : NULL;
     return m_property_strdup_ro(action, arg, c);
 }
 
@@ -2511,12 +2507,14 @@ static int mp_property_vd_imgparams(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct vo_chain *vo_c = mpctx->vo_chain;
-    if (!vo_c && !mpctx->d_video)
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+    if (!vo_c || !track)
         return M_PROPERTY_UNAVAILABLE;
-    struct mp_codec_params *c = mpctx->d_video->header->codec;
+    struct mp_codec_params *c =
+        track && track->stream ? track->stream->codec : NULL;
     if (vo_c->vf->input_params.imgfmt) {
         return property_imgparams(vo_c->vf->input_params, action, arg);
-    } else if (c->disp_w && c->disp_h) {
+    } else if (c && c->disp_w && c->disp_h) {
         // Simplistic fallback for stupid scripts querying "width"/"height"
         // before the first frame is decoded.
         struct m_sub_property props[] = {
@@ -2744,7 +2742,7 @@ static int mp_property_fps(void *ctx, struct m_property *prop,
                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    float fps = mpctx->d_video ? mpctx->d_video->fps : 0;
+    float fps = mpctx->vo_chain ? mpctx->vo_chain->container_fps : 0;
     if (fps < 0.1 || !isfinite(fps))
         return M_PROPERTY_UNAVAILABLE;;
     return m_property_float_ro(action, arg, fps);
@@ -2754,7 +2752,7 @@ static int mp_property_vf_fps(void *ctx, struct m_property *prop,
                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->d_video)
+    if (!mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
     double avg = calc_average_frame_duration(mpctx);
     if (avg <= 0)
@@ -2770,8 +2768,9 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
     switch (action) {
     case M_PROPERTY_SET: {
         mpctx->opts->movie_aspect = *(float *)arg;
-        if (mpctx->d_video) {
-            video_reset_aspect(mpctx->d_video);
+        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+        if (track && track->d_video) {
+            video_reset_aspect(track->d_video);
             mp_force_video_refresh(mpctx);
         }
         return M_PROPERTY_OK;
@@ -2785,8 +2784,9 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
     }
     case M_PROPERTY_GET: {
         float aspect = mpctx->opts->movie_aspect;
-        if (mpctx->d_video && mpctx->vo_chain && aspect <= 0) {
-            struct dec_video *d_video = mpctx->d_video;
+        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+        if (track && track->d_video && mpctx->vo_chain && aspect <= 0) {
+            struct dec_video *d_video = track->d_video;
             struct mp_codec_params *c = d_video->header->codec;
             struct mp_image_params *params = &mpctx->vo_chain->vf->input_params;
             if (params && params->p_w > 0 && params->p_h > 0) {
@@ -3575,7 +3575,7 @@ static const struct m_property mp_properties[] = {
     {"ontop", mp_property_ontop},
     {"border", mp_property_border},
     {"on-all-workspaces", mp_property_all_workspaces},
-    {"framedrop", mp_property_framedrop},
+    {"framedrop", mp_property_generic_option},
     {"gamma", mp_property_video_color},
     {"brightness", mp_property_video_color},
     {"contrast", mp_property_video_color},

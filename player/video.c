@@ -193,16 +193,15 @@ static void filter_reconfig(struct vo_chain *vo_c)
 static void recreate_video_filters(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct dec_video *d_video = mpctx->d_video;
     struct vo_chain *vo_c = mpctx->vo_chain;
-    assert(d_video && vo_c);
+    assert(vo_c);
 
     vf_destroy(vo_c->vf);
     vo_c->vf = vf_new(mpctx->global);
-    vo_c->vf->hwdec = d_video->hwdec_info;
+    vo_c->vf->hwdec = vo_c->hwdec_info;
     vo_c->vf->wakeup_callback = wakeup_playloop;
     vo_c->vf->wakeup_callback_ctx = mpctx;
-    vo_c->vf->container_fps = d_video->fps;
+    vo_c->vf->container_fps = vo_c->container_fps;
     vo_control(vo_c->vo, VOCTRL_GET_DISPLAY_FPS, &vo_c->vf->display_fps);
 
     vf_append_filter_list(vo_c->vf, opts->vf_settings);
@@ -216,10 +215,9 @@ static void recreate_video_filters(struct MPContext *mpctx)
 
 int reinit_video_filters(struct MPContext *mpctx)
 {
-    struct dec_video *d_video = mpctx->d_video;
     struct vo_chain *vo_c = mpctx->vo_chain;
 
-    if (!d_video)
+    if (!vo_c)
         return 0;
     bool need_reconfig = vo_c->vf->initialized != 0;
 
@@ -243,10 +241,10 @@ static void vo_chain_reset_state(struct vo_chain *vo_c)
 
 void reset_video_state(struct MPContext *mpctx)
 {
-    if (mpctx->d_video)
-        video_reset(mpctx->d_video);
-    if (mpctx->vo_chain)
+    if (mpctx->vo_chain) {
+        video_reset(mpctx->vo_chain->video_src);
         vo_chain_reset_state(mpctx->vo_chain);
+    }
 
     for (int n = 0; n < mpctx->num_next_frames; n++)
         mp_image_unrefp(&mpctx->next_frames[n]);
@@ -266,7 +264,7 @@ void reset_video_state(struct MPContext *mpctx)
     mpctx->display_sync_drift_dir = 0;
     mpctx->display_sync_broken = false;
 
-    mpctx->video_status = mpctx->d_video ? STATUS_SYNCING : STATUS_EOF;
+    mpctx->video_status = mpctx->vo_chain ? STATUS_SYNCING : STATUS_EOF;
 }
 
 void uninit_video_out(struct MPContext *mpctx)
@@ -282,20 +280,21 @@ void uninit_video_out(struct MPContext *mpctx)
 static void vo_chain_uninit(struct vo_chain *vo_c)
 {
     mp_image_unrefp(&vo_c->input_mpi);
-    if (vo_c)
+    if (vo_c) {
         vf_destroy(vo_c->vf);
+        if (vo_c->video_src)
+            video_uninit(vo_c->video_src);
+    }
     talloc_free(vo_c);
     // this does not free the VO
 }
 
 void uninit_video_chain(struct MPContext *mpctx)
 {
-    if (mpctx->d_video) {
+    if (mpctx->vo_chain) {
         reset_video_state(mpctx);
         vo_chain_uninit(mpctx->vo_chain);
         mpctx->vo_chain = NULL;
-        video_uninit(mpctx->d_video);
-        mpctx->d_video = NULL;
         mpctx->video_status = STATUS_EOF;
         mpctx->sync_audio_to_video = false;
         reselect_demux_streams(mpctx);
@@ -307,7 +306,6 @@ void uninit_video_chain(struct MPContext *mpctx)
 int reinit_video_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    assert(!mpctx->d_video);
     assert(!mpctx->vo_chain);
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
     struct sh_stream *sh = track ? track->stream : NULL;
@@ -333,17 +331,21 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     update_window_title(mpctx, true);
 
-    struct dec_video *d_video = talloc_zero(NULL, struct dec_video);
-    mpctx->d_video = d_video;
+    struct vo_chain *vo_c = talloc_zero(NULL, struct vo_chain);
+    mpctx->vo_chain = vo_c;
+    vo_c->log = mpctx->log;
+    vo_c->vo = mpctx->video_out;
+
+    vo_control(vo_c->vo, VOCTRL_GET_HWDEC_INFO, &vo_c->hwdec_info);
+
+    track->d_video = talloc_zero(NULL, struct dec_video);
+    struct dec_video *d_video = track->d_video;
     d_video->global = mpctx->global;
     d_video->log = mp_log_new(d_video, mpctx->log, "!vd");
     d_video->opts = mpctx->opts;
     d_video->header = sh;
     d_video->fps = sh->codec->fps;
-
-    mpctx->vo_chain = talloc_zero(NULL, struct vo_chain);
-    mpctx->vo_chain->log = d_video->log;
-    mpctx->vo_chain->vo = mpctx->video_out;
+    d_video->hwdec_info = vo_c->hwdec_info;
 
     MP_VERBOSE(d_video, "Container reported FPS: %f\n", sh->codec->fps);
 
@@ -353,12 +355,13 @@ int reinit_video_chain(struct MPContext *mpctx)
         MP_INFO(mpctx, "Use --no-correct-pts to force FPS based timing.\n");
     }
 
+    vo_c->container_fps = d_video->fps;
+    vo_c->video_src = d_video;
+
 #if HAVE_ENCODING
     if (mpctx->encode_lavc_ctx)
         encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, d_video->fps);
 #endif
-
-    vo_control(mpctx->video_out, VOCTRL_GET_HWDEC_INFO, &d_video->hwdec_info);
 
     recreate_video_filters(mpctx);
 
@@ -366,10 +369,10 @@ int reinit_video_chain(struct MPContext *mpctx)
         goto err_out;
 
     bool saver_state = opts->pause || !opts->stop_screensaver;
-    vo_control(mpctx->video_out, saver_state ? VOCTRL_RESTORE_SCREENSAVER
-                                             : VOCTRL_KILL_SCREENSAVER, NULL);
+    vo_control(vo_c->vo, saver_state ? VOCTRL_RESTORE_SCREENSAVER
+                                     : VOCTRL_KILL_SCREENSAVER, NULL);
 
-    vo_set_paused(mpctx->video_out, mpctx->paused);
+    vo_set_paused(vo_c->vo, mpctx->paused);
 
     mpctx->sync_audio_to_video = !sh->attached_picture;
 
@@ -410,19 +413,19 @@ void mp_force_video_refresh(struct MPContext *mpctx)
     }
 }
 
-static bool check_framedrop(struct MPContext *mpctx)
+static bool check_framedrop(struct MPContext *mpctx, struct vo_chain *vo_c)
 {
     struct MPOpts *opts = mpctx->opts;
     // check for frame-drop:
     if (mpctx->video_status == STATUS_PLAYING && !mpctx->paused &&
         mpctx->audio_status == STATUS_PLAYING && !ao_untimed(mpctx->ao))
     {
-        float fps = mpctx->d_video->fps;
+        float fps = vo_c->container_fps;
         double frame_time = fps > 0 ? 1.0 / fps : 0;
         // we should avoid dropping too many frames in sequence unless we
         // are too late. and we allow 100ms A-V delay here:
         int dropped_frames =
-            mpctx->d_video->dropped_frames - mpctx->dropped_frames_start;
+            vo_c->video_src->dropped_frames - mpctx->dropped_frames_start;
         if (mpctx->last_av_difference - 0.100 > dropped_frames * frame_time)
             return !!(opts->frame_dropping & 2);
     }
@@ -433,14 +436,14 @@ static bool check_framedrop(struct MPContext *mpctx)
 // returns VD_* code
 static int decode_image(struct MPContext *mpctx)
 {
-    struct dec_video *d_video = mpctx->d_video;
     struct vo_chain *vo_c = mpctx->vo_chain;
+    struct dec_video *d_video = vo_c->video_src;
 
     bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING &&
                   mpctx->hrseek_framedrop;
     video_set_start(d_video, hrseek ? mpctx->hrseek_pts : MP_NOPTS_VALUE);
 
-    video_set_framedrop(d_video, check_framedrop(mpctx));
+    video_set_framedrop(d_video, check_framedrop(mpctx, vo_c));
 
     video_work(d_video);
 
@@ -504,7 +507,7 @@ static int video_filter(struct MPContext *mpctx, bool eof)
         // Most video filters don't work with hardware decoding, so this
         // might be the reason why filter reconfig failed.
         if (vf->initialized < 0 &&
-            video_vd_control(mpctx->d_video, VDCTRL_FORCE_HWDEC_FALLBACK, NULL)
+            video_vd_control(vo_c->video_src, VDCTRL_FORCE_HWDEC_FALLBACK, NULL)
                 == CONTROL_OK)
         {
             // Fallback active; decoder will return software format next
@@ -630,7 +633,7 @@ static void handle_new_frame(struct MPContext *mpctx)
         mpctx->time_frame += frame_time / mpctx->video_speed;
         adjust_sync(mpctx, pts, frame_time);
     }
-    mpctx->dropped_frames_start = mpctx->d_video->dropped_frames;
+    mpctx->dropped_frames_start = mpctx->vo_chain->video_src->dropped_frames;
     MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
 }
 
@@ -689,7 +692,8 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
 {
     bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
 
-    if (mpctx->d_video->header->attached_picture) {
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+    if (track && track->stream && track->stream->attached_picture) {
         if (vo_has_frame(mpctx->video_out))
             return VD_EOF;
         hrseek = false;
@@ -1123,8 +1127,8 @@ static void calculate_frame_duration(struct MPContext *mpctx)
 {
     assert(mpctx->num_past_frames >= 1 && mpctx->num_next_frames >= 1);
 
-    double demux_duration =
-        mpctx->d_video->fps > 0 ? 1.0 / mpctx->d_video->fps : -1;
+    double demux_duration = mpctx->vo_chain->container_fps > 0
+                            ? 1.0 / mpctx->vo_chain->container_fps : -1;
     double duration = -1;
 
     if (mpctx->num_next_frames >= 2) {
@@ -1175,10 +1179,10 @@ static void calculate_frame_duration(struct MPContext *mpctx)
 void write_video(struct MPContext *mpctx, double endpts)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct vo *vo = mpctx->video_out;
 
-    if (!mpctx->d_video)
+    if (!mpctx->vo_chain)
         return;
+    struct vo *vo = mpctx->vo_chain->vo;
 
     // Actual playback starts when both audio and video are ready.
     if (mpctx->video_status == STATUS_READY)

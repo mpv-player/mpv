@@ -127,7 +127,7 @@ end:
 
 void add_step_frame(struct MPContext *mpctx, int dir)
 {
-    if (!mpctx->d_video)
+    if (!mpctx->vo_chain)
         return;
     if (dir > 0) {
         mpctx->step_frames += 1;
@@ -525,7 +525,7 @@ static void handle_osd_redraw(struct MPContext *mpctx)
             return;
     }
     // Don't redraw immediately during a seek (makes it significantly slower).
-    if (mpctx->d_video && mp_time_sec() - mpctx->start_timestamp < 0.1) {
+    if (mpctx->vo_chain && mp_time_sec() - mpctx->start_timestamp < 0.1) {
         mpctx->sleeptime = MPMIN(mpctx->sleeptime, 0.1);
         return;
     }
@@ -707,7 +707,7 @@ static void handle_loop_file(struct MPContext *mpctx)
 
 void seek_to_last_frame(struct MPContext *mpctx)
 {
-    if (!mpctx->d_video)
+    if (!mpctx->vo_chain)
         return;
     if (mpctx->hrseek_lastframe) // exit if we already tried this
         return;
@@ -737,7 +737,7 @@ static void handle_keep_open(struct MPContext *mpctx)
         opts->loop_times == 1)
     {
         mpctx->stop_play = KEEP_PLAYING;
-        if (mpctx->d_video) {
+        if (mpctx->vo_chain) {
             if (!vo_has_frame(mpctx->video_out)) // EOF not reached normally
                 seek_to_last_frame(mpctx);
             mpctx->playback_pts = mpctx->last_vo_pts;
@@ -765,7 +765,7 @@ static void handle_chapter_change(struct MPContext *mpctx)
 int handle_force_window(struct MPContext *mpctx, bool force)
 {
     // Don't interfere with real video playback
-    if (mpctx->d_video)
+    if (mpctx->vo_chain)
         return 0;
 
     // True if we're either in idle mode, or loading of the file has finished.
@@ -897,7 +897,7 @@ static void handle_segment_switch(struct MPContext *mpctx, bool end_is_new_segme
      * and video streams to "disabled" at runtime. Handle this by waiting
      * rather than immediately stopping playback due to EOF.
      */
-    if ((mpctx->d_audio || mpctx->d_video) && !prevent_eof &&
+    if ((mpctx->d_audio || mpctx->vo_chain) && !prevent_eof &&
         mpctx->audio_status == STATUS_EOF &&
         mpctx->video_status == STATUS_EOF)
     {
