@@ -187,7 +187,8 @@ static void resize(struct vo *vo)
         .hdr = { .id = MMAL_PARAMETER_DISPLAYREGION,
                  .size = sizeof(MMAL_DISPLAYREGION_T), },
         .src_rect = { .x = src.x0, .y = src.y0, .width = src_w, .height = src_h },
-        .dest_rect = { .x = p->x, .y = p->y, .width = dst_w, .height = dst_h },
+        .dest_rect = { .x = dst.x0 + p->x, .y = dst.y0 + p->y,
+                       .width = dst_w, .height = dst_h },
         .layer = p->video_layer,
         .display_num = p->display_nr,
         .pixel_x = p_x,
@@ -295,7 +296,8 @@ static int create_overlays(struct vo *vo)
         }
 
         if (mp_egl_rpi_init(&p->egl, p->osd_overlay,
-                            p->osd_res.w, p->osd_res.h) < 0) {
+                            p->osd_res.w, p->osd_res.h) < 0)
+        {
             MP_FATAL(vo, "EGL/GLES initialization for OSD renderer failed.\n");
             return -1;
         }
