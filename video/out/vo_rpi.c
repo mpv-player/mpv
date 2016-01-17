@@ -356,7 +356,7 @@ static int set_geometry(struct vo *vo)
     if (create_overlays(vo) < 0)
         return -1;
 
-    return 0
+    return 0;
 }
 
 static void wait_next_vsync(struct vo *vo)
