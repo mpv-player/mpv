@@ -40,38 +40,93 @@
 #include "dvb_tune.h"
 #include "common/msg.h"
 
-int dvb_get_tuner_type(int fe_fd, struct mp_log *log)
+int dvb_get_tuner_types(int fe_fd, struct mp_log *log, int** tuner_types)
 {
+#ifdef DVB_USE_S2API
+    /* S2API is the DVB API new since 2.6.28. 
+       It allows to query frontends with multiple delivery systems. */
+    struct dtv_property p[] = {{ .cmd = DTV_ENUM_DELSYS }};
+    struct dtv_properties cmdseq = {.num = 1, .props = p};
+    mp_verbose(log, "Querying tuner type via DVBv5 API for frontend FD %d\n",
+               fe_fd);
+    if ((ioctl(fe_fd, FE_GET_PROPERTY, &cmdseq)) < -0) {
+      mp_err(log, "FE_GET_PROPERTY error: %d, FD: %d\n\n", errno, fe_fd);
+      return 0;
+    }
+    int num_tuner_types = p[0].u.buffer.len;
+    mp_verbose(log, "Number of supported delivery systems: %d\n", num_tuner_types);
+    if (num_tuner_types == 0) {
+      mp_err(log, "Frontend FD %d returned no delivery systems!", fe_fd);
+      return 0;
+    }
+    (*tuner_types) = talloc_array(NULL, int, num_tuner_types);
+    int supported_tuners = 0;
+    for(;p[0].u.buffer.len > 0; p[0].u.buffer.len--) {
+      fe_delivery_system_t delsys = p[0].u.buffer.data[p[0].u.buffer.len - 1];
+      /* Second level standards like like DVB-T2, DVB-S2 not treated here - 
+         Cards can usually either only do S/T/C or both levels. 
+         DVB-T2 probably needs more implementation details, 
+         DVB-S2 is treated in the DVB-S branch already. */
+      switch (delsys) {
+      case SYS_DVBT:
+        mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-T\n");
+        (*tuner_types)[supported_tuners++] = TUNER_TER;
+        break;
+      case SYS_DVBC_ANNEX_AC:
+        mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-C\n");
+        (*tuner_types)[supported_tuners++] = TUNER_CBL;
+        break;
+      case SYS_DVBS:
+        mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-S\n");
+        (*tuner_types)[supported_tuners++] = TUNER_SAT;
+        break;
+#ifdef DVB_ATSC
+      case SYS_ATSC:
+        mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-ATSC\n");
+        (*tuner_types)[supported_tuners++] = TUNER_ATSC;
+        break;
+#endif
+      default:
+        mp_err(log, "UNKNOWN TUNER TYPE\n");
+      }
+    }
+    return supported_tuners;
+#else
     struct dvb_frontend_info fe_info;
     int res = ioctl(fe_fd, FE_GET_INFO, &fe_info);
     if (res < 0) {
         mp_err(log, "FE_GET_INFO error: %d, FD: %d\n\n", errno, fe_fd);
         return 0;
     }
-
+  
     switch (fe_info.type) {
     case FE_OFDM:
         mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-T\n");
-        return TUNER_TER;
-
+        *tuner_types = talloc_array(NULL, int, 1);
+        (*tuner_types)[0] = TUNER_TER;
+        return 1;
     case FE_QPSK:
         mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-S\n");
-        return TUNER_SAT;
-
+        *tuner_types = talloc_array(NULL, int, 1);
+        (*tuner_types)[0] = TUNER_SAT;
+        return 1;
     case FE_QAM:
         mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-C\n");
-        return TUNER_CBL;
-
+        *tuner_types = talloc_array(NULL, int, 1);
+        (*tuner_types)[0] = TUNER_CBL;
+        return 1;
 #ifdef DVB_ATSC
     case FE_ATSC:
         mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-ATSC\n");
-        return TUNER_ATSC;
+        *tuner_types = talloc_array(NULL, int, 1);
+        (*tuner_types)[0] = TUNER_ATSC;
+        return 1;
 #endif
     default:
         mp_err(log, "UNKNOWN TUNER TYPE\n");
         return 0;
     }
-
+#endif
 }
 
 int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
