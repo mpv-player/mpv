@@ -282,6 +282,8 @@ static void convert_charset(struct demuxer *demuxer)
     // libavformat transparently converts UTF-16 to UTF-8
     if (!mp_charset_is_utf16(cp) && !mp_charset_is_utf8(cp)) {
         bstr conv = mp_iconv_to_utf8(demuxer->log, data, cp, MP_ICONV_VERBOSE);
+        if (conv.start && conv.start != data.start)
+            talloc_steal(alloc, conv.start);
         if (conv.start)
             data = conv;
     }

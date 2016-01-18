@@ -78,7 +78,10 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
     if (!avctx)
         goto error;
     avctx->extradata_size = extradata_len;
-    avctx->extradata = talloc_memdup(priv, extradata, extradata_len);
+    avctx->extradata = av_malloc(extradata_len);
+    if (!avctx->extradata)
+        goto error;
+    memcpy(avctx->extradata, extradata, extradata_len);
     if (avcodec_open2(avctx, codec, NULL) < 0)
         goto error;
     // Documented as "set by libavcodec", but there is no other way
@@ -264,7 +267,7 @@ void lavc_conv_reset(struct lavc_conv *priv)
 
 void lavc_conv_uninit(struct lavc_conv *priv)
 {
-    avcodec_close(priv->avctx);
-    av_free(priv->avctx);
+    avsubtitle_free(&priv->cur);
+    avcodec_free_context(&priv->avctx);
     talloc_free(priv);
 }
