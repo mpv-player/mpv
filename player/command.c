@@ -2438,7 +2438,7 @@ static int mp_property_video_codec(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    const char *c = track->d_video ? track->d_video->decoder_desc : NULL;
+    const char *c = track && track->d_video ? track->d_video->decoder_desc : NULL;
     return m_property_strdup_ro(action, arg, c);
 }
 
