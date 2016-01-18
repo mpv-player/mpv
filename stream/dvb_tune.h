@@ -23,7 +23,7 @@
 
 struct mp_log;
 
-int dvb_get_tuner_type(int fe_fd, struct mp_log *log);
+int dvb_get_tuner_types(int fe_fd, struct mp_log *log, int** tuner_types);
 int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt);
 int dvb_fix_demuxes(dvb_priv_t *priv, int cnt);
 int dvb_set_ts_filt(dvb_priv_t *priv, int fd, uint16_t pid, dmx_pes_type_t pestype);
