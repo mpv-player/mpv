@@ -1273,19 +1273,21 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
 {
     struct demux_internal *in = demuxer->in;
     pthread_mutex_lock(&in->lock);
-    bool update = false;
     // don't flush buffers if stream is already selected / unselected
     if (stream->ds->selected != selected) {
         stream->ds->selected = selected;
         stream->ds->active = false;
         ds_flush(stream->ds);
-        if (selected && in->refresh_seeks_enabled && in->threading)
-            in->start_refresh_seek = true;
-        update = true;
+        in->tracks_switched = true;
+        if (in->threading) {
+            if (selected && in->refresh_seeks_enabled)
+                in->start_refresh_seek = true;
+            pthread_cond_signal(&in->wakeup);
+        } else {
+            execute_trackswitch(in);
+        }
     }
     pthread_mutex_unlock(&in->lock);
-    if (update)
-        demux_control(demuxer, DEMUXER_CTRL_SWITCHED_TRACKS, NULL);
 }
 
 void demux_set_stream_autoselect(struct demuxer *demuxer, bool autoselect)
@@ -1456,10 +1458,6 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         c->res = r;
         return DEMUXER_CTRL_OK;
     }
-    case DEMUXER_CTRL_SWITCHED_TRACKS:
-        in->tracks_switched = true;
-        pthread_cond_signal(&in->wakeup);
-        return DEMUXER_CTRL_OK;
     case DEMUXER_CTRL_GET_BITRATE_STATS: {
         double *rates = arg;
         for (int n = 0; n < STREAM_TYPE_COUNT; n++)
