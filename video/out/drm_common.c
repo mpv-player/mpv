@@ -128,7 +128,7 @@ static bool setup_crtc(struct kms *kms, const drmModeRes *res)
                 continue;
 
             kms->encoder = encoder;
-            kms->crtc_id = encoder->crtc_id;
+            kms->crtc_id = res->crtcs[j];
             return true;
         }
 
