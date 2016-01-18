@@ -560,9 +560,13 @@ Video
 
 ``--display-fps=<fps>``
     Set the display FPS used with the ``--video-sync=display-*`` modes. By
-    default, a detected value is used (X11 only, not correct on multi-monitor
-    systems). Keep in mind that setting an incorrect value (even if slightly
-    incorrect) can ruin video playback.
+    default, a detected value is used. Keep in mind that setting an incorrect
+    value (even if slightly incorrect) can ruin video playback. On multi-monitor
+    systems, there is a chance that the detected value is from the wrong
+    monitor.
+
+    Set this option only if you have reason to believe the automatically
+    determined value is wrong.
 
 ``--hwdec=<api>``
     Specify the hardware video decoding API that should be used if possible.
