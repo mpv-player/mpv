@@ -667,23 +667,6 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     return pkt;
 }
 
-// Read a packet from the given stream. The returned packet belongs to the
-// caller, who has to free it with talloc_free(). Might block. Returns NULL
-// on EOF.
-struct demux_packet *demux_read_packet(struct sh_stream *sh)
-{
-    struct demux_stream *ds = sh ? sh->ds : NULL;
-    struct demux_packet *pkt = NULL;
-    if (ds) {
-        pthread_mutex_lock(&ds->in->lock);
-        ds_get_packets(ds);
-        pkt = dequeue_packet(ds);
-        pthread_cond_signal(&ds->in->wakeup); // possibly read more
-        pthread_mutex_unlock(&ds->in->lock);
-    }
-    return pkt;
-}
-
 // Sparse packets (Subtitles) interleaved with other non-sparse packets (video,
 // audio) should never be read actively, meaning the demuxer thread does not
 // try to exceed default readahead in order to find a new packet.
@@ -697,6 +680,24 @@ static bool use_lazy_subtitle_reading(struct demux_stream *ds)
             return true;
     }
     return false;
+}
+
+// Read a packet from the given stream. The returned packet belongs to the
+// caller, who has to free it with talloc_free(). Might block. Returns NULL
+// on EOF.
+struct demux_packet *demux_read_packet(struct sh_stream *sh)
+{
+    struct demux_stream *ds = sh ? sh->ds : NULL;
+    struct demux_packet *pkt = NULL;
+    if (ds) {
+        pthread_mutex_lock(&ds->in->lock);
+        if (!use_lazy_subtitle_reading(ds))
+            ds_get_packets(ds);
+        pkt = dequeue_packet(ds);
+        pthread_cond_signal(&ds->in->wakeup); // possibly read more
+        pthread_mutex_unlock(&ds->in->lock);
+    }
+    return pkt;
 }
 
 // Poll the demuxer queue, and if there's a packet, return it. Otherwise, just
