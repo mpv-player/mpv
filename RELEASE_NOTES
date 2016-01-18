@@ -1,3 +1,81 @@
+Release 0.15.0
+==============
+
+Build System Changes
+--------------------
+
+- OS X bundle: remove git sha from the Info.plist version (issue #2677)
+- add "lua51" ("51obsd") to list of possible lua names
+- add option to customize config files system path (issue #2704)
+
+
+Features
+--------
+
+New
+~~~
+
+- vo_opengl: implement support for transparent video display on OS X (alpha=yes suboption)
+- vo_opengl: use a checkerboard pattern as background for transparent video by default
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- add --audio-file-paths (issue #2632)
+- player, stream_dvb: implement dvb-channel-name property, add switch binding
+
+
+Changed
+~~~~~~~
+
+- vf_stereo3d: add alternating modes
+- vo_opengl: disable pbo by default for opengl-hq due to driver problems
+- vf_yadif: change defaults (issue #2539)
+- command: change heuristic for files with 1 chapter (issue #2550)
+- demux_mkv: adjust subtitle preroll defaults
+- exclude 360 from --video-rotate range (issue #2647)
+- osd: make osd-width/height properties watchable
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- ao_pulse: check for sample rate bounds, attempt fallback (issue #2654)
+- ao_wasapi: remove volume "restore" on exit
+- demux_cue: better error resilience
+- mixer: fix volume initialization with --af=volume
+- mpv.desktop: add audio/mp4 mime type
+- player: detect audio PTS jumps, make video PTS heuristic less aggressive
+- player: make watch later/resume work when "playing" directories
+- player: reset playback abort when reloading a file (issue #2568)
+- recognize frame sequenced 3D Matroska video
+- stream_dvb: fix channel switching
+- vaapi: add VP9 profile (requires VA-API 0.38.1 or newer)
+- vo_opengl: dxinterop: prevent crash after lost device
+- vo_opengl: enable brightness/contrast controls for RGB
+- vo_opengl: fix operation on GLES 2.0
+- vo_opengl: fix operation on GLSL versions earlier than 1.30
+- vo_opengl: flip screenshot image if backend uses flipped rendering (issue #2635)
+- vo_opengl: reset nnedi3 weights properly (issue #2661)
+- vo_rpi: handle rotation
+- vo_rpi: work around firmware oddness leading to incorrect video rect
+- windows: fix fd://
+- ytdl: Include Referer header as well
+- TOOLS/zsh.pl: add .opus extension in zsh completions
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API. A complete changelog can be seen by running
+`git log v0.14.0..v0.15.0` in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.14.0...v0.15.0 or
+http://git.srsfckn.biz/mpv/log/?qt=range&q=v0.14.0..v0.15.0
+
+
+
 Release 0.14.0
 ==============
 
