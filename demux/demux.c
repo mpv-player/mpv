@@ -558,10 +558,17 @@ static void execute_trackswitch(struct demux_internal *in)
 {
     in->tracks_switched = false;
 
+    bool any_selected = false;
+    for (int n = 0; n < in->num_streams; n++)
+        any_selected |= in->streams[n]->ds->selected;
+
     pthread_mutex_unlock(&in->lock);
 
     if (in->d_thread->desc->control)
         in->d_thread->desc->control(in->d_thread, DEMUXER_CTRL_SWITCHED_TRACKS, 0);
+
+    stream_control(in->d_thread->stream, STREAM_CTRL_SET_READAHEAD,
+                   &(int){any_selected});
 
     pthread_mutex_lock(&in->lock);
 
@@ -1077,6 +1084,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         demux_init_cache(demuxer);
         demux_changed(in->d_thread, DEMUX_EVENT_ALL);
         demux_update(demuxer);
+        stream_control(demuxer->stream, STREAM_CTRL_SET_READAHEAD, &(int){false});
         return demuxer;
     }
 

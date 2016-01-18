@@ -312,7 +312,10 @@ bool timeline_switch_to_time(struct MPContext *mpctx, double pts)
 
     if (mpctx->demuxer) {
         demux_stop_thread(mpctx->demuxer);
-        demux_flush(mpctx->demuxer);
+        for (int i = 0; i < demux_get_num_stream(mpctx->demuxer); i++) {
+            struct sh_stream *sh = demux_get_stream(mpctx->demuxer, i);
+            demuxer_select_track(mpctx->demuxer, sh, false);
+        }
     }
 
     mpctx->demuxer = n->source;
