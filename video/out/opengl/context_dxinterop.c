@@ -25,7 +25,7 @@
 #include <d3d9.h>
 #include <dwmapi.h>
 #include "video/out/w32_common.h"
-#include "common.h"
+#include "context.h"
 
 // For WGL_ACCESS_WRITE_DISCARD_NV, etc.
 #include <GL/wglext.h>
@@ -275,17 +275,17 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
     // work is needed.
     switch (bb_desc.Format) {
     case D3DFMT_X1R5G5B5: case D3DFMT_A1R5G5B5:
-        ctx->depth_r = ctx->depth_g = ctx->depth_b = 5;
+        ctx->gl->fb_r = ctx->gl->fb_g = ctx->gl->fb_b = 5;
         break;
     case D3DFMT_R5G6B5:
-        ctx->depth_r = 5; ctx->depth_g = 6; ctx->depth_b = 5;
+        ctx->gl->fb_r = 5; ctx->gl->fb_g = 6; ctx->gl->fb_b = 5;
         break;
     case D3DFMT_R8G8B8: case D3DFMT_A8R8G8B8: case D3DFMT_X8R8G8B8:
     case D3DFMT_A8B8G8R8: case D3DFMT_X8B8G8R8: default:
-        ctx->depth_r = ctx->depth_g = ctx->depth_b = 8;
+        ctx->gl->fb_r = ctx->gl->fb_g = ctx->gl->fb_b = 8;
         break;
     case D3DFMT_A2R10G10B10: case D3DFMT_A2B10G10R10:
-        ctx->depth_r = ctx->depth_g = ctx->depth_b = 10;
+        ctx->gl->fb_r = ctx->gl->fb_g = ctx->gl->fb_b = 10;
         break;
     }
 
@@ -341,14 +341,19 @@ static void d3d_size_dependent_destroy(MPGLContext *ctx)
         gl->DXUnlockObjectsNV(p->device_h, 1, &p->rtarget_h);
         gl->DXUnregisterObjectNV(p->device_h, p->rtarget_h);
     }
+    p->rtarget_h = 0;
     if (p->texture)
         gl->DeleteTextures(1, &p->texture);
+    p->texture = 0;
     if (p->rtarget)
         IDirect3DSurface9_Release(p->rtarget);
+    p->rtarget = NULL;
     if (p->backbuffer)
         IDirect3DSurface9_Release(p->backbuffer);
+    p->backbuffer = NULL;
     if (p->swapchain)
         IDirect3DSwapChain9Ex_Release(p->swapchain);
+    p->swapchain = NULL;
 }
 
 static void fill_presentparams(MPGLContext *ctx, D3DPRESENT_PARAMETERS *pparams)
@@ -366,6 +371,8 @@ static void fill_presentparams(MPGLContext *ctx, D3DPRESENT_PARAMETERS *pparams)
 
     *pparams = (D3DPRESENT_PARAMETERS) {
         .Windowed = TRUE,
+        .BackBufferWidth = ctx->vo->dwidth ? ctx->vo->dwidth : 1,
+        .BackBufferHeight = ctx->vo->dheight ? ctx->vo->dheight : 1,
         // The length of the backbuffer queue shouldn't affect latency because
         // swap_buffers() always uses the backbuffer at the head of the queue
         // and presents it immediately. MSDN says there is a performance
@@ -374,8 +381,7 @@ static void fill_presentparams(MPGLContext *ctx, D3DPRESENT_PARAMETERS *pparams)
         // very high CPU usage. Use six to be safe.
         .BackBufferCount = 6,
         .SwapEffect = D3DSWAPEFFECT_FLIPEX,
-        // Automatically get the backbuffer format from the display format. The
-        // size of the backbuffer is automatically determined too.
+        // Automatically get the backbuffer format from the display format
         .BackBufferFormat = D3DFMT_UNKNOWN,
         .PresentationInterval = presentation_interval,
         .hDeviceWindow = vo_w32_hwnd(ctx->vo),
@@ -499,11 +505,13 @@ static void dxinterop_reset(struct MPGLContext *ctx)
 
     hr = IDirect3DDevice9Ex_ResetEx(p->device, &pparams, NULL);
     if (FAILED(hr)) {
+        p->lost_device = true;
         MP_FATAL(ctx->vo, "Couldn't reset device\n");
         return;
     }
 
     if (d3d_size_dependent_create(ctx) < 0) {
+        p->lost_device = true;
         MP_FATAL(ctx->vo, "Couldn't recreate Direct3D objects after reset\n");
         return;
     }
@@ -583,6 +591,12 @@ static void dxinterop_swap_buffers(MPGLContext *ctx)
     HRESULT hr;
 
     pump_message_loop();
+
+    // If the device is still lost, try to reset it again
+    if (p->lost_device)
+        dxinterop_reset(ctx);
+    if (p->lost_device)
+        return;
 
     if (!gl->DXUnlockObjectsNV(p->device_h, 1, &p->rtarget_h)) {
         MP_FATAL(ctx->vo, "Couldn't unlock rendertarget for present\n");

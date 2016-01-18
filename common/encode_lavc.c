@@ -29,7 +29,7 @@
 #include "options/options.h"
 #include "osdep/timer.h"
 #include "video/out/vo.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "stream/stream.h"
 
 #define OPT_BASE_STRUCT struct encode_opts

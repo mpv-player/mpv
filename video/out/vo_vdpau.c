@@ -39,7 +39,7 @@
 #include "video/hwdec.h"
 #include "common/msg.h"
 #include "options/options.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "vo.h"
 #include "x11_common.h"
 #include "video/csputils.h"

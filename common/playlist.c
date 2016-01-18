@@ -21,7 +21,7 @@
 #include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "options/path.h"
 
 #include "demux/demux.h"
@@ -203,6 +203,18 @@ void playlist_add_base_path(struct playlist *pl, bstr base_path)
             talloc_free(e->filename);
             e->filename = new_file;
         }
+    }
+}
+
+// Add redirected_from as new redirect entry to each item in pl.
+void playlist_add_redirect(struct playlist *pl, const char *redirected_from)
+{
+    for (struct playlist_entry *e = pl->first; e; e = e->next) {
+        if (e->num_redirects >= 10) // arbitrary limit for sanity
+            break;
+        char *s = talloc_strdup(e, redirected_from);
+        if (s)
+            MP_TARRAY_APPEND(e, e->redirects, e->num_redirects, s);
     }
 }
 

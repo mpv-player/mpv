@@ -27,7 +27,7 @@
 #include "header_fixes.h"
 
 #include "video/out/x11_common.h"
-#include "common.h"
+#include "context.h"
 
 struct glx_context {
     XVisualInfo *vinfo;
@@ -173,8 +173,8 @@ static GLXFBConfig select_fb_config(struct vo *vo, const int *attribs, int flags
             // a depth of 24, even if the pixels are padded to 32 bit. If the
             // depth is higher than 24, the remaining bits must be alpha.
             // Note: vinfo->bits_per_rgb appears to be useless (is always 8).
-            unsigned long mask = v->depth == 32 ?
-                (unsigned long)-1 : (1 << (unsigned long)v->depth) - 1;
+            unsigned long mask = v->depth == sizeof(unsigned long) * 8 ?
+                (unsigned long)-1 : (1UL << v->depth) - 1;
             if (mask & ~(v->red_mask | v->green_mask | v->blue_mask)) {
                 fbconfig = fbc[n];
                 break;
@@ -253,11 +253,6 @@ static int glx_init(struct MPGLContext *ctx, int flags)
         MP_WARN(vo, "Selected GLX FB config has no associated X visual\n");
     }
 
-
-    glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_RED_SIZE, &ctx->depth_r);
-    glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_GREEN_SIZE, &ctx->depth_g);
-    glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_BLUE_SIZE, &ctx->depth_b);
-
     if (!vo_x11_create_vo_window(vo, glx_ctx->vinfo, "gl"))
         goto uninit;
 
@@ -273,6 +268,11 @@ static int glx_init(struct MPGLContext *ctx, int flags)
         ctx->gl->mpgl_caps |= MPGL_CAP_SW;
     if (!success)
         goto uninit;
+
+    glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_RED_SIZE, &ctx->gl->fb_r);
+    glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_GREEN_SIZE, &ctx->gl->fb_g);
+    glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_BLUE_SIZE, &ctx->gl->fb_b);
+    ctx->gl->fb_premultiplied = true;
 
     return 0;
 

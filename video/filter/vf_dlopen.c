@@ -90,29 +90,29 @@ static void set_imgprop(struct vf_dlopen_picdata *out, const mp_image_t *mpi)
     }
 }
 
-static int config(struct vf_instance *vf,
-                  int width, int height, int d_width, int d_height,
-                  unsigned int flags, unsigned int fmt)
+static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
+                    struct mp_image_params *out)
 {
-    vf->priv->filter.in_width = width;
-    vf->priv->filter.in_height = height;
-    vf->priv->filter.in_d_width = d_width;
-    vf->priv->filter.in_d_height = d_height;
-    vf->priv->filter.in_fmt = talloc_strdup(vf, mp_imgfmt_to_name(fmt));
-    vf->priv->filter.out_width = width;
-    vf->priv->filter.out_height = height;
-    vf->priv->filter.out_d_width = d_width;
-    vf->priv->filter.out_d_height = d_height;
+    mp_image_params_get_dsize(in, &vf->priv->filter.in_d_width,
+                                  &vf->priv->filter.in_d_height);
+
+    vf->priv->filter.in_width = in->w;
+    vf->priv->filter.in_height = in->h;
+    vf->priv->filter.in_fmt = talloc_strdup(vf, mp_imgfmt_to_name(in->imgfmt));
+    vf->priv->filter.out_width = vf->priv->filter.in_width;
+    vf->priv->filter.out_height = vf->priv->filter.in_height;
+    vf->priv->filter.out_d_width = vf->priv->filter.in_d_width;
+    vf->priv->filter.out_d_height = vf->priv->filter.in_d_height;
     vf->priv->filter.out_fmt = NULL;
     vf->priv->filter.out_cnt = 1;
 
     if (!vf->priv->filter.in_fmt) {
         MP_ERR(vf, "invalid input/output format\n");
-        return 0;
+        return -1;
     }
     if (vf->priv->filter.config && vf->priv->filter.config(&vf->priv->filter) < 0) {
         MP_ERR(vf, "filter config failed\n");
-        return 0;
+        return -1;
     }
 
     // copy away stuff to sanity island
@@ -137,18 +137,18 @@ static int config(struct vf_instance *vf,
                 }
             }
         } else
-            vf->priv->outfmt = fmt;
+            vf->priv->outfmt = in->imgfmt;
         vf->priv->filter.out_fmt =
             talloc_strdup(vf, mp_imgfmt_to_name(vf->priv->outfmt));
     }
 
     if (!vf->priv->outfmt) {
         MP_ERR(vf, "filter config wants an unsupported output format\n");
-        return 0;
+        return -1;
     }
     if (!vf->priv->out_cnt || vf->priv->out_cnt > FILTER_MAX_OUTCNT) {
         MP_ERR(vf, "filter config wants to yield zero or too many output frames\n");
-        return 0;
+        return -1;
     }
 
     for (int i = 0; i < vf->priv->out_cnt; ++i) {
@@ -157,16 +157,18 @@ static int config(struct vf_instance *vf,
             mp_image_alloc(vf->priv->outfmt,
                            vf->priv->out_width, vf->priv->out_height);
         if (!vf->priv->outpic[i])
-            return 0; // OOM
+            return -1; // OOM
         talloc_steal(vf, vf->priv->outpic[i]);
         set_imgprop(&vf->priv->filter.outpic[i], vf->priv->outpic[i]);
     }
 
-    return vf_next_config(vf, vf->priv->out_width,
-                          vf->priv->out_height,
-                          vf->priv->filter.out_d_width,
-                          vf->priv->filter.out_d_height,
-                          flags, vf->priv->outfmt);
+    *out = *in;
+    out->w = vf->priv->out_width;
+    out->h = vf->priv->out_height;
+    mp_image_params_set_dsize(out, vf->priv->filter.out_d_width,
+                                   vf->priv->filter.out_d_height);
+    out->imgfmt = vf->priv->outfmt;
+    return 0;
 }
 
 static void uninit(struct vf_instance *vf)
@@ -307,7 +309,7 @@ static int vf_open(vf_instance_t *vf)
 
     vf->filter_ext = filter;
     vf->query_format = query_format;
-    vf->config = config;
+    vf->reconfig = reconfig;
     vf->uninit = uninit;
 
     return 1;

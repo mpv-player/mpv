@@ -55,6 +55,11 @@ build_options = [
         'desc': 'manpage generation',
         'func': check_ctx_vars('RST2MAN')
     }, {
+        'name': '--html-build',
+        'desc': 'html manual generation',
+        'func': check_ctx_vars('RST2HTML'),
+        'default': 'disable',
+    }, {
         'name': '--pdf-build',
         'desc': 'pdf manual generation',
         'func': check_ctx_vars('RST2PDF'),
@@ -198,12 +203,6 @@ iconv support use --disable-iconv.",
         'desc': 'w32/dos paths',
         'deps_any': [ 'os-win32', 'os-cygwin' ],
         'func': check_true
-    }, {
-        'name': '--waio',
-        'desc': 'libwaio for win32',
-        'deps': [ 'os-win32', 'mingw' ],
-        'func': check_libs(['waio'],
-                    check_statement('waio/waio.h', 'waio_alloc(0, 0, 0, 0)')),
     }, {
         'name': '--termios',
         'desc': 'termios',
@@ -478,6 +477,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavcodec/avcodec.h',
                                 'AVSubtitleRect r = {.linesize={0}}',
                                 use='libav'),
+    }, {
+        'name': 'avcodec-profile-name',
+        'desc': 'libavcodec avcodec_profile_name()',
+        'func': check_statement('libavcodec/avcodec.h',
+                                'avcodec_profile_name(0,0)',
+                                use='libav'),
     },
 ]
 
@@ -560,10 +565,6 @@ audio_output_features = [
         'func': check_cc(
             fragment=load_fragment('coreaudio.c'),
             framework_name=['CoreFoundation', 'CoreAudio', 'AudioUnit', 'AudioToolbox'])
-    }, {
-        'name': '--dsound',
-        'desc': 'DirectSound audio output',
-        'func': check_cc(header_name='dsound.h'),
     }, {
         'name': '--wasapi',
         'desc': 'WASAPI audio output',
@@ -718,7 +719,6 @@ video_output_features = [
     }, {
         'name': 'vaapi-egl',
         'desc': 'VAAPI EGL',
-        'deps': [ 'c11-tls' ], # indirectly
         'deps_any': [ 'vaapi-x-egl', 'vaapi-wayland' ],
         'func': check_true,
     }, {
@@ -760,7 +760,12 @@ video_output_features = [
     } , {
         'name': '--gl',
         'desc': 'OpenGL video outputs',
-        'deps_any': [ 'gl-cocoa', 'gl-x11', 'egl-drm', 'gl-win32', 'gl-wayland', 'rpi' ],
+        'deps_any': [ 'gl-cocoa', 'gl-x11', 'egl-x11', 'egl-drm', 'gl-win32', 'gl-wayland', 'rpi' ],
+        'func': check_true
+    }, {
+        'name': 'egl-helpers',
+        'desc': 'EGL helper functions',
+        'deps_any': [ 'egl-x11' ],
         'func': check_true
     }
 ]
@@ -867,6 +872,8 @@ _INSTALL_DIRS_LIST = [
     ('mandir',  '${DATADIR}/man',     'man pages '),
     ('docdir',  '${DATADIR}/doc/mpv', 'documentation files'),
     ('zshdir',  '${DATADIR}/zsh/site-functions', 'zsh completion functions'),
+
+    ('confloaddir', '${CONFDIR}', 'configuration files load directory'),
 ]
 
 def options(opt):
@@ -926,6 +933,7 @@ def configure(ctx):
     ctx.find_program(pkg_config,  var='PKG_CONFIG')
     ctx.find_program(ar,          var='AR')
     ctx.find_program('perl',      var='BIN_PERL')
+    ctx.find_program('rst2html',  var='RST2HTML',  mandatory=False)
     ctx.find_program('rst2man',   var='RST2MAN',   mandatory=False)
     ctx.find_program('rst2pdf',   var='RST2PDF',   mandatory=False)
     ctx.find_program(windres,     var='WINDRES',   mandatory=False)

@@ -28,10 +28,12 @@
 
 #include "osdep/timer.h"
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "options/options.h"
 #include "common/global.h"
 #include "common/msg.h"
+#include "player/client.h"
+#include "player/command.h"
 #include "osd.h"
 #include "osd_state.h"
 #include "dec_sub.h"
@@ -238,9 +240,12 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
 
     *out_imgs = (struct sub_bitmaps) {0};
 
-    if (!osd_res_equals(res, obj->vo_res))
+    if (!osd_res_equals(res, obj->vo_res)) {
+        obj->vo_res = res;
         obj->force_redraw = true;
-    obj->vo_res = res;
+        mp_client_broadcast_event(mp_client_api_get_core(osd->global->client_api),
+                                  MP_EVENT_WIN_RESIZE, NULL);
+    }
 
     if (obj->type == OSDTYPE_SUB || obj->type == OSDTYPE_SUB2) {
         if (obj->sub) {
@@ -388,13 +393,10 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
 // ratio if the image does not have a 1:1 pixel aspect ratio.
 struct mp_osd_res osd_res_from_image_params(const struct mp_image_params *p)
 {
-    double sar = (double)p->w / p->h;
-    double dar = (double)p->d_w / p->d_h;
-
     return (struct mp_osd_res) {
         .w = p->w,
         .h = p->h,
-        .display_par = sar / dar,
+        .display_par = p->p_h / (double)p->p_w,
     };
 }
 

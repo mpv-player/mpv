@@ -106,7 +106,7 @@ enum mp_stereo3d_mode {
     MP_STEREO3D_AB2L = 3,
     MP_STEREO3D_SBS2R = 11,
     /* no explicit enum entries for most valid values */
-    MP_STEREO3D_COUNT = 13, // 12 is last valid mode
+    MP_STEREO3D_COUNT = 15, // 14 is last valid mode
 };
 
 extern const struct m_opt_choice_alternatives mp_stereo3d_names[];

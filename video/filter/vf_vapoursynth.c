@@ -141,14 +141,8 @@ static void copy_mp_to_vs_frame_props_map(struct vf_priv_s *p, VSMap *map,
                                           struct mp_image *img)
 {
     struct mp_image_params *params = &img->params;
-    if (params->d_w > 0 && params->d_h > 0) {
-        AVRational dar = {params->d_w, params->d_h};
-        AVRational asp = {params->w, params->h};
-        AVRational par = av_div_q(dar, asp);
-
-        p->vsapi->propSetInt(map, "_SARNum", par.num, 0);
-        p->vsapi->propSetInt(map, "_SARDen", par.den, 0);
-    }
+    p->vsapi->propSetInt(map, "_SARNum", params->p_w, 0);
+    p->vsapi->propSetInt(map, "_SARDen", params->p_h, 0);
     if (params->colorlevels) {
         p->vsapi->propSetInt(map, "_ColorRange",
                 params->colorlevels == MP_CSP_LEVELS_TV, 0);
@@ -614,8 +608,11 @@ static int reinit_vs(struct vf_instance *vf)
     if (p->vsapi->propSetNode(vars, "video_in", p->in_node, 0))
         goto error;
 
-    p->vsapi->propSetInt(vars, "video_in_dw", p->fmt_in.d_w, 0);
-    p->vsapi->propSetInt(vars, "video_in_dh", p->fmt_in.d_h, 0);
+    int d_w, d_h;
+    mp_image_params_get_dsize(&p->fmt_in, &d_w, &d_h);
+
+    p->vsapi->propSetInt(vars, "video_in_dw", d_w, 0);
+    p->vsapi->propSetInt(vars, "video_in_dh", d_h, 0);
     p->vsapi->propSetFloat(vars, "container_fps", vf->chain->container_fps, 0);
     p->vsapi->propSetFloat(vars, "display_fps", vf->chain->display_fps, 0);
 
@@ -648,41 +645,35 @@ error:
     return res;
 }
 
-static int config(struct vf_instance *vf, int width, int height,
-                  int d_width, int d_height, unsigned int flags,
-                  unsigned int fmt)
+static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
+                    struct mp_image_params *out)
 {
     struct vf_priv_s *p = vf->priv;
 
-    p->fmt_in = (struct mp_image_params){
-        .imgfmt = fmt,
-        .w = width,
-        .h = height,
-        .d_w = d_width,
-        .d_h = d_height,
-    };
+    *out = *in;
+    p->fmt_in = *in;
 
     if (reinit_vs(vf) < 0)
-        return 0;
+        return -1;
 
     const VSVideoInfo *vi = p->vsapi->getVideoInfo(p->out_node);
-    fmt = mp_from_vs(vi->format->id);
-    if (!fmt) {
+    out->w = vi->width;
+    out->h = vi->height;
+    out->imgfmt = mp_from_vs(vi->format->id);
+    if (!out->imgfmt) {
         MP_FATAL(vf, "Unsupported output format.\n");
         destroy_vs(vf);
-        return 0;
+        return -1;
     }
 
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
-    if (width % desc.align_x || height % desc.align_y) {
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(in->imgfmt);
+    if (in->w % desc.align_x || in->h % desc.align_y) {
         MP_FATAL(vf, "VapourSynth does not allow unaligned/cropped video sizes.\n");
         destroy_vs(vf);
-        return 0;
+        return -1;
     }
 
-    vf_rescale_dsize(&d_width, &d_height, width, height, vi->width, vi->height);
-
-    return vf_next_config(vf, vi->width, vi->height, d_width, d_height, flags, fmt);
+    return 0;
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
@@ -726,8 +717,7 @@ static int vf_open(vf_instance_t *vf)
 
     pthread_mutex_init(&p->lock, NULL);
     pthread_cond_init(&p->wakeup, NULL);
-    vf->reconfig = NULL;
-    vf->config = config;
+    vf->reconfig = reconfig;
     vf->filter_ext = filter_ext;
     vf->filter_out = filter_out;
     vf->needs_input = needs_input;

@@ -21,7 +21,7 @@
 #include <libavutil/mem.h>
 #include <libavutil/common.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "common/common.h"
 #include "img_convert.h"

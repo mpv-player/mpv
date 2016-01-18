@@ -25,7 +25,7 @@
 #include <libavutil/md5.h>
 
 #include "config.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "osdep/io.h"
 
@@ -273,11 +273,35 @@ static bool needs_config_quoting(const char *s)
     return false;
 }
 
+static void write_filename(struct MPContext *mpctx, FILE *file, char *filename)
+{
+    if (mpctx->opts->write_filename_in_watch_later_config) {
+        char write_name[1024] = {0};
+        for (int n = 0; filename[n] && n < sizeof(write_name) - 1; n++)
+            write_name[n] = (unsigned char)filename[n] < 32 ? '_' : filename[n];
+        fprintf(file, "# %s\n", write_name);
+    }
+}
+
+static void write_redirect(struct MPContext *mpctx, char *path)
+{
+    char *conffile = mp_get_playback_resume_config_filename(mpctx, path);
+    if (conffile) {
+        FILE *file = fopen(conffile, "wb");
+        if (file) {
+            fprintf(file, "# redirect entry\n");
+            write_filename(mpctx, file, path);
+            fclose(file);
+        }
+        talloc_free(conffile);
+    }
+}
+
 void mp_write_watch_later_conf(struct MPContext *mpctx)
 {
-    char *filename = mpctx->filename;
+    struct playlist_entry *cur = mpctx->playing;
     char *conffile = NULL;
-    if (!filename)
+    if (!cur)
         goto exit;
 
     struct demuxer *demux = mpctx->demuxer;
@@ -288,7 +312,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
 
     mp_mk_config_dir(mpctx->global, MP_WATCH_LATER_CONF);
 
-    conffile = mp_get_playback_resume_config_filename(mpctx, filename);
+    conffile = mp_get_playback_resume_config_filename(mpctx, cur->filename);
     if (!conffile)
         goto exit;
 
@@ -297,12 +321,9 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     FILE *file = fopen(conffile, "wb");
     if (!file)
         goto exit;
-    if (mpctx->opts->write_filename_in_watch_later_config) {
-        char write_name[1024] = {0};
-        for (int n = 0; filename[n] && n < sizeof(write_name) - 1; n++)
-            write_name[n] = (unsigned char)filename[n] < 32 ? '_' : filename[n];
-        fprintf(file, "# %s\n", write_name);
-    }
+
+    write_filename(mpctx, file, cur->filename);
+
     double pos = get_current_time(mpctx);
     if (pos != MP_NOPTS_VALUE)
         fprintf(file, "start=%f\n", pos);
@@ -327,6 +348,37 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         talloc_free(val);
     }
     fclose(file);
+
+    // This allows us to recursively resume directories etc., whose entries are
+    // expanded the first time it's "played". For example, if "/a/b/c.mkv" is
+    // the current entry, then we want to resume this file if the user does
+    // "mpv /a". This would expand to the directory entries in "/a", and if
+    // "/a/a.mkv" is not the first entry, this would be played.
+    // Here, we write resume entries for "/a" and "/a/b".
+    // (Unfortunately, this will leave stray resume files on resume, because
+    // obviously it resumes only from one of those paths.)
+    for (int n = 0; n < cur->num_redirects; n++)
+        write_redirect(mpctx, cur->redirects[n]);
+    // And at last, for local directories, we write an entry for each path
+    // prefix, so the user can resume from an arbitrary directory. This starts
+    // with the first redirect (all other redirects are further prefixes).
+    if (cur->num_redirects) {
+        char *path = cur->redirects[0];
+        char tmp[4096];
+        if (!mp_is_url(bstr0(path)) && strlen(path) < sizeof(tmp)) {
+            snprintf(tmp, sizeof(tmp), "%s", path);
+            for (;;) {
+                bstr dir = mp_dirname(tmp);
+                if (dir.len == strlen(tmp) || !dir.len || bstr_equals0(dir, "."))
+                    break;
+
+                tmp[dir.len] = '\0';
+                if (strlen(tmp) >= 2) // keep "/"
+                    mp_path_strip_trailing_separator(tmp);
+                write_redirect(mpctx, tmp);
+            }
+        }
+    }
 
 exit:
     talloc_free(conffile);

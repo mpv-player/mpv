@@ -35,7 +35,7 @@
 #include "osdep/io.h"
 
 #include "config.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "common/common.h"
 #include "common/msg.h"
 

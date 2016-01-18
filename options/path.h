@@ -65,6 +65,8 @@ char *mp_splitext(const char *path, bstr *root);
  */
 struct bstr mp_dirname(const char *path);
 
+void mp_path_strip_trailing_separator(char *path);
+
 /* Join two path components and return a newly allocated string
  * for the result. '/' is inserted between the components if needed.
  * If p2 is an absolute path then the value of p1 is ignored.

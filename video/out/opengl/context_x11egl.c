@@ -28,7 +28,8 @@
 
 #include "common/common.h"
 #include "video/out/x11_common.h"
-#include "common.h"
+#include "context.h"
+#include "egl_helpers.h"
 
 struct priv {
     EGLDisplay egl_display;
@@ -156,6 +157,7 @@ static int mpegl_init(struct MPGLContext *ctx, int flags)
 
     void *(*gpa)(const GLubyte*) = (void *(*)(const GLubyte*))eglGetProcAddress;
     mpgl_load_functions(ctx->gl, gpa, egl_exts, vo->log);
+    mp_egl_get_depth(ctx->gl, config);
 
     ctx->native_display_type = "x11";
     ctx->native_display = vo->x11->display;

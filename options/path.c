@@ -39,7 +39,7 @@
 #include "common/msg.h"
 #include "options/options.h"
 #include "options/path.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "osdep/io.h"
 #include "osdep/path.h"
 
@@ -211,6 +211,21 @@ struct bstr mp_dirname(const char *path)
     if (ret.len == 0)
         return bstr0(".");
     return ret;
+}
+
+
+#if HAVE_DOS_PATHS
+static const char mp_path_separators[] = "\\/";
+#else
+static const char mp_path_separators[] = "/";
+#endif
+
+// Mutates path and removes a trailing '/' (or '\' on Windows)
+void mp_path_strip_trailing_separator(char *path)
+{
+    size_t len = strlen(path);
+    if (len > 0 && strchr(mp_path_separators, path[len - 1]))
+        path[len - 1] = '\0';
 }
 
 char *mp_splitext(const char *path, bstr *root)

@@ -23,7 +23,7 @@
 #include "osdep/io.h"
 #include "osdep/atomics.h"
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "common/common.h"
 #include "stream/stream.h"
 #include "misc/bstr.h"
@@ -118,7 +118,8 @@ static int create_overlapped_pipe(HANDLE *read, HANDLE *write)
     // overlapped pipes, so instead, use a named pipe with a unique name
     *read = CreateNamedPipeW(buf, PIPE_ACCESS_INBOUND |
         FILE_FLAG_FIRST_PIPE_INSTANCE | FILE_FLAG_OVERLAPPED,
-        PIPE_TYPE_BYTE | PIPE_WAIT, 1, 0, 4096, 0, NULL);
+        PIPE_TYPE_BYTE | PIPE_WAIT | PIPE_REJECT_REMOTE_CLIENTS,
+        1, 0, 4096, 0, NULL);
     if (*read == INVALID_HANDLE_VALUE)
         goto error;
 
@@ -137,15 +138,7 @@ error:
 static void delete_handle_list(void *p)
 {
     LPPROC_THREAD_ATTRIBUTE_LIST list = p;
-    VOID (WINAPI *pDeleteProcThreadAttributeList)(LPPROC_THREAD_ATTRIBUTE_LIST);
-
-    HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
-    pDeleteProcThreadAttributeList =
-        (VOID (WINAPI*)(LPPROC_THREAD_ATTRIBUTE_LIST))
-        GetProcAddress(kernel32, "DeleteProcThreadAttributeList");
-
-    if (pDeleteProcThreadAttributeList)
-        pDeleteProcThreadAttributeList(list);
+    DeleteProcThreadAttributeList(list);
 }
 
 // Create a PROC_THREAD_ATTRIBUTE_LIST that specifies exactly which handles are
@@ -153,38 +146,21 @@ static void delete_handle_list(void *p)
 static LPPROC_THREAD_ATTRIBUTE_LIST create_handle_list(void *ctx,
                                                        HANDLE *handles, int num)
 {
-    WINBOOL (WINAPI *pInitializeProcThreadAttributeList)(
-            LPPROC_THREAD_ATTRIBUTE_LIST, DWORD, DWORD, PSIZE_T);
-    WINBOOL (WINAPI *pUpdateProcThreadAttribute)(LPPROC_THREAD_ATTRIBUTE_LIST,
-            DWORD, DWORD_PTR, PVOID, SIZE_T, PVOID, PSIZE_T);
-
-    // Load Windows Vista functions, if available
-    HMODULE kernel32 = GetModuleHandleW(L"kernel32.dll");
-    pInitializeProcThreadAttributeList =
-        (WINBOOL (WINAPI*)(LPPROC_THREAD_ATTRIBUTE_LIST, DWORD, DWORD, PSIZE_T))
-        GetProcAddress(kernel32, "InitializeProcThreadAttributeList");
-    pUpdateProcThreadAttribute =
-        (WINBOOL (WINAPI*)(LPPROC_THREAD_ATTRIBUTE_LIST, DWORD, DWORD_PTR,
-                           PVOID, SIZE_T, PVOID, PSIZE_T))
-        GetProcAddress(kernel32, "UpdateProcThreadAttribute");
-    if (!pInitializeProcThreadAttributeList || !pUpdateProcThreadAttribute)
-        return NULL;
-
     // Get required attribute list size
     SIZE_T size = 0;
-    if (!pInitializeProcThreadAttributeList(NULL, 1, 0, &size)) {
+    if (!InitializeProcThreadAttributeList(NULL, 1, 0, &size)) {
         if (GetLastError() != ERROR_INSUFFICIENT_BUFFER)
             return NULL;
     }
 
     // Allocate attribute list
     LPPROC_THREAD_ATTRIBUTE_LIST list = talloc_size(ctx, size);
-    if (!pInitializeProcThreadAttributeList(list, 1, 0, &size))
+    if (!InitializeProcThreadAttributeList(list, 1, 0, &size))
         goto error;
     talloc_set_destructor(list, delete_handle_list);
 
-    if (!pUpdateProcThreadAttribute(list, 0, PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
-                                    handles, num * sizeof(HANDLE), NULL, NULL))
+    if (!UpdateProcThreadAttribute(list, 0, PROC_THREAD_ATTRIBUTE_HANDLE_LIST,
+                                   handles, num * sizeof(HANDLE), NULL, NULL))
         goto error;
 
     return list;
@@ -265,7 +241,7 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
     // Convert the args array to a UTF-16 Windows command-line string
     wchar_t *cmdline = write_cmdline(tmp, args);
 
-    DWORD flags = CREATE_UNICODE_ENVIRONMENT;
+    DWORD flags = CREATE_UNICODE_ENVIRONMENT | EXTENDED_STARTUPINFO_PRESENT;
     PROCESS_INFORMATION pi = {0};
     STARTUPINFOEXW si = {
         .StartupInfo = {
@@ -283,11 +259,6 @@ int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
         .lpAttributeList = create_handle_list(tmp,
                 (HANDLE[]){ pipes[0].write, pipes[1].write }, 2),
     };
-
-    // PROC_THREAD_ATTRIBUTE_LISTs are only supported in Vista and up. If not
-    // supported, create_handle_list will return NULL.
-    if (si.lpAttributeList)
-        flags |= EXTENDED_STARTUPINFO_PRESENT;
 
     // If we have a console, the subprocess will automatically attach to it so
     // it can receive Ctrl+C events. If we don't have a console, prevent the

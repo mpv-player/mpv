@@ -17,49 +17,61 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
+#include <math.h>
 #include <inttypes.h>
-#include <process.h>
-#include <initguid.h>
-#include <audioclient.h>
-#include <endpointvolume.h>
-#include <mmdeviceapi.h>
-#include <avrt.h>
+#include <libavutil/mathematics.h>
 
-#include "audio/out/ao_wasapi.h"
-#include "audio/out/ao_wasapi_utils.h"
-
-#include "audio/format.h"
+#include "options/m_option.h"
 #include "osdep/timer.h"
 #include "osdep/io.h"
+#include "ao_wasapi.h"
 
-static HRESULT get_device_delay(struct wasapi_state *state, double *delay) {
+// naive av_rescale for unsigned
+static UINT64 uint64_scale(UINT64 x, UINT64 num, UINT64 den)
+{
+    return (x / den) * num
+        + ((x % den) * (num / den))
+        + ((x % den) * (num % den)) / den;
+}
+
+static HRESULT get_device_delay(struct wasapi_state *state, double *delay_us) {
     UINT64 sample_count = atomic_load(&state->sample_count);
     UINT64 position, qpc_position;
     HRESULT hr;
 
     hr = IAudioClock_GetPosition(state->pAudioClock, &position, &qpc_position);
-    /* GetPosition succeeded, but the result may be inaccurate due to the length of the call */
-    /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd370889%28v=vs.85%29.aspx */
+    // GetPosition succeeded, but the result may be
+    // inaccurate due to the length of the call
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/dd370889%28v=vs.85%29.aspx
     if (hr == S_FALSE) {
-        MP_DBG(state, "Possibly inaccurate device position.\n");
+        MP_VERBOSE(state, "Possibly inaccurate device position.\n");
         hr = S_OK;
     }
     EXIT_ON_ERROR(hr);
 
-    LARGE_INTEGER qpc_count;
-    QueryPerformanceCounter(&qpc_count);
-    double qpc_diff = (qpc_count.QuadPart * 1e7 / state->qpc_frequency.QuadPart) - qpc_position;
+    // convert position to number of samples careful to avoid overflow
+    UINT64 sample_position = uint64_scale(position,
+                                          state->format.Format.nSamplesPerSec,
+                                          state->clock_frequency);
+    INT64 diff = sample_count - sample_position;
+    *delay_us = diff * 1e6 / state->format.Format.nSamplesPerSec;
 
-    position += state->clock_frequency * (uint64_t) (qpc_diff / 1e7);
+    // Correct for any delay in IAudioClock_GetPosition above.
+    // This should normally be very small (<1 us), but just in case. . .
+    LARGE_INTEGER qpc;
+    QueryPerformanceCounter(&qpc);
+    INT64 qpc_diff = av_rescale(qpc.QuadPart, 10000000, state->qpc_frequency.QuadPart)
+                     - qpc_position;
+    // ignore the above calculation if it yeilds more than 10 seconds (due to
+    // possible overflow inside IAudioClock_GetPosition)
+    if (qpc_diff < 10 * 10000000) {
+        *delay_us -= qpc_diff / 10.0; // convert to us
+    } else {
+        MP_VERBOSE(state, "Insane qpc delay correction of %g seconds. "
+                   "Ignoring it.\n", qpc_diff / 10000000.0);
+    }
 
-    /* convert position to the same base as sample_count */
-    position = position * state->format.Format.nSamplesPerSec / state->clock_frequency;
-
-    double diff = sample_count - position;
-    *delay = diff / state->format.Format.nSamplesPerSec;
-
-    MP_TRACE(state, "Device delay: %g samples (%g ms)\n", diff, *delay * 1000);
+    MP_TRACE(state, "Device delay: %g us\n", *delay_us);
 
     return S_OK;
 exit_label:
@@ -80,11 +92,14 @@ static void thread_feed(struct ao *ao)
         EXIT_ON_ERROR(hr);
 
         frame_count -= padding;
-        MP_TRACE(ao, "Frame to fill: %"PRIu32". Padding: %"PRIu32"\n", frame_count, padding);
+        MP_TRACE(ao, "Frame to fill: %"PRIu32". Padding: %"PRIu32"\n",
+                 frame_count, padding);
     }
-    double delay;
-    hr = get_device_delay(state, &delay);
+    double delay_us;
+    hr = get_device_delay(state, &delay_us);
     EXIT_ON_ERROR(hr);
+    // add the buffer delay
+    delay_us += frame_count * 1e6 / state->format.Format.nSamplesPerSec;
 
     BYTE *pData;
     hr = IAudioRenderClient_GetBuffer(state->pRenderClient,
@@ -93,10 +108,11 @@ static void thread_feed(struct ao *ao)
 
     BYTE *data[1] = {pData};
 
-    ao_read_data(ao, (void**)data, frame_count, (int64_t) (
-                     mp_time_us() + delay * 1e6 +
-                     frame_count * 1e6 / state->format.Format.nSamplesPerSec));
+    ao_read_data(ao, (void **)data, frame_count,
+                 mp_time_us() + (int64_t)llrint(delay_us));
 
+    // note, we can't use ao_read_data return value here since we already
+    // commited to frame_count above in the GetBuffer call
     hr = IAudioRenderClient_ReleaseBuffer(state->pRenderClient,
                                           frame_count, 0);
     EXIT_ON_ERROR(hr);
@@ -124,17 +140,21 @@ static void thread_resume(struct ao *ao)
                mp_HRESULT_to_str(hr));
     }
 
-    /* Fill the buffer before starting, but only if there is no audio queued to play. */
-    /* This prevents overfilling the buffer, which leads to problems in exclusive mode */
+    // Fill the buffer before starting, but only if there is no audio queued to
+    // play.  This prevents overfilling the buffer, which leads to problems in
+    // exclusive mode
     if (padding < (UINT32) state->bufferFrameCount)
         thread_feed(ao);
 
     // start feeding next wakeup if something else hasn't been requested
     int expected = WASAPI_THREAD_RESUME;
-    atomic_compare_exchange_strong(&state->thread_state, &expected, WASAPI_THREAD_FEED);
+    atomic_compare_exchange_strong(&state->thread_state, &expected,
+                                   WASAPI_THREAD_FEED);
     hr = IAudioClient_Start(state->pAudioClient);
-    if (hr != S_OK)
-        MP_ERR(state, "IAudioClient_Start returned %s\n", mp_HRESULT_to_str(hr));
+    if (hr != S_OK) {
+        MP_ERR(state, "IAudioClient_Start returned %s\n",
+               mp_HRESULT_to_str(hr));
+    }
 
     return;
 }
@@ -145,11 +165,11 @@ static void thread_reset(struct ao *ao)
     HRESULT hr;
     MP_DBG(state, "Thread Reset\n");
     hr = IAudioClient_Stop(state->pAudioClient);
-    /* we may get S_FALSE if the stream is already stopped */
+    // we may get S_FALSE if the stream is already stopped
     if (hr != S_OK && hr != S_FALSE)
         MP_ERR(state, "IAudioClient_Stop returned: %s\n", mp_HRESULT_to_str(hr));
 
-    /* we may get S_FALSE if the stream is already reset */
+    // we may get S_FALSE if the stream is already reset
     hr = IAudioClient_Reset(state->pAudioClient);
     if (hr != S_OK && hr != S_FALSE)
         MP_ERR(state, "IAudioClient_Reset returned: %s\n", mp_HRESULT_to_str(hr));
@@ -157,7 +177,8 @@ static void thread_reset(struct ao *ao)
     atomic_store(&state->sample_count, 0);
     // start feeding next wakeup if something else hasn't been requested
     int expected = WASAPI_THREAD_RESET;
-    atomic_compare_exchange_strong(&state->thread_state, &expected, WASAPI_THREAD_FEED);
+    atomic_compare_exchange_strong(&state->thread_state, &expected,
+                                   WASAPI_THREAD_FEED);
     return;
 }
 
@@ -173,11 +194,12 @@ static DWORD __stdcall AudioThread(void *lpParameter)
         goto exit_label;
 
     MP_DBG(ao, "Entering dispatch loop\n");
-    while (true) { /* watch events */
+    while (true) { // watch events
         HANDLE events[] = {state->hWake};
-        switch (MsgWaitForMultipleObjects(MP_ARRAY_SIZE(events), events, FALSE, INFINITE,
+        switch (MsgWaitForMultipleObjects(MP_ARRAY_SIZE(events), events,
+                                          FALSE, INFINITE,
                                           QS_POSTMESSAGE | QS_SENDMESSAGE)) {
-        /* AudioThread wakeup */
+        // AudioThread wakeup
         case WAIT_OBJECT_0:
             switch (atomic_load(&state->thread_state)) {
             case WASAPI_THREAD_FEED:
@@ -198,7 +220,7 @@ static DWORD __stdcall AudioThread(void *lpParameter)
                 goto exit_label;
             }
             break;
-        /* messages to dispatch (COM marshalling) */
+        // messages to dispatch (COM marshalling)
         case (WAIT_OBJECT_0 + MP_ARRAY_SIZE(events)):
             wasapi_dispatch(ao);
             break;
@@ -215,7 +237,8 @@ exit_label:
     return 0;
 }
 
-static void set_thread_state(struct ao *ao, enum wasapi_thread_state thread_state)
+static void set_thread_state(struct ao *ao,
+                             enum wasapi_thread_state thread_state)
 {
     struct wasapi_state *state = ao->priv;
     atomic_store(&state->thread_state, thread_state);
@@ -230,7 +253,7 @@ static void uninit(struct ao *ao)
     if (state->hWake)
         set_thread_state(ao, WASAPI_THREAD_SHUTDOWN);
 
-    /* wait up to 10 seconds */
+    // wait up to 10 seconds
     if (state->hAudioThread &&
         WaitForSingleObject(state->hAudioThread, 10000) == WAIT_TIMEOUT)
     {
@@ -241,6 +264,10 @@ static void uninit(struct ao *ao)
     SAFE_RELEASE(state->hInitDone,   CloseHandle(state->hInitDone));
     SAFE_RELEASE(state->hWake,       CloseHandle(state->hWake));
     SAFE_RELEASE(state->hAudioThread,CloseHandle(state->hAudioThread));
+
+    wasapi_change_uninit(ao);
+
+    talloc_free(state->deviceID);
 
     CoUninitialize();
     MP_DBG(ao, "Uninit wasapi done\n");
@@ -253,6 +280,14 @@ static int init(struct ao *ao)
 
     struct wasapi_state *state = ao->priv;
     state->log = ao->log;
+
+    state->deviceID = find_deviceID(ao);
+    if (!state->deviceID) {
+        uninit(ao);
+        return -1;
+    }
+
+    wasapi_change_init(ao, false);
 
     state->hInitDone = CreateEventW(NULL, FALSE, FALSE, NULL);
     state->hWake     = CreateEventW(NULL, FALSE, FALSE, NULL);
@@ -270,7 +305,7 @@ static int init(struct ao *ao)
         return -1;
     }
 
-    WaitForSingleObject(state->hInitDone, INFINITE); /* wait on init complete */
+    WaitForSingleObject(state->hInitDone, INFINITE); // wait on init complete
     SAFE_RELEASE(state->hInitDone,CloseHandle(state->hInitDone));
     if (state->init_ret != S_OK) {
         if (!ao->probing)
@@ -279,89 +314,135 @@ static int init(struct ao *ao)
         return -1;
     }
 
-    wasapi_setup_proxies(state);
+    wasapi_receive_proxies(state);
     MP_DBG(ao, "Init wasapi done\n");
     return 0;
+}
+
+static int control_exclusive(struct ao *ao, enum aocontrol cmd, void *arg)
+{
+    struct wasapi_state *state = ao->priv;
+
+    switch (cmd) {
+    case AOCONTROL_GET_VOLUME:
+    case AOCONTROL_SET_VOLUME:
+        if (!state->pEndpointVolumeProxy ||
+            !(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_VOLUME)) {
+            return CONTROL_FALSE;
+        }
+
+        float volume;
+        switch (cmd) {
+        case AOCONTROL_GET_VOLUME:
+            IAudioEndpointVolume_GetMasterVolumeLevelScalar(
+                state->pEndpointVolumeProxy,
+                &volume);
+            *(ao_control_vol_t *)arg = (ao_control_vol_t){
+                .left  = 100.0f * volume,
+                .right = 100.0f * volume,
+            };
+            return CONTROL_OK;
+        case AOCONTROL_SET_VOLUME:
+            volume = ((ao_control_vol_t *)arg)->left / 100.f;
+            IAudioEndpointVolume_SetMasterVolumeLevelScalar(
+                state->pEndpointVolumeProxy,
+                volume, NULL);
+            return CONTROL_OK;
+        }
+    case AOCONTROL_GET_MUTE:
+    case AOCONTROL_SET_MUTE:
+        if (!state->pEndpointVolumeProxy ||
+            !(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_MUTE)) {
+            return CONTROL_FALSE;
+        }
+
+        BOOL mute;
+        switch (cmd) {
+        case AOCONTROL_GET_MUTE:
+            IAudioEndpointVolume_GetMute(state->pEndpointVolumeProxy,
+                                         &mute);
+            *(bool *)arg = mute;
+            return CONTROL_OK;
+        case AOCONTROL_SET_MUTE:
+            mute = *(bool *)arg;
+            IAudioEndpointVolume_SetMute(state->pEndpointVolumeProxy,
+                                         mute, NULL);
+            return CONTROL_OK;
+        }
+    case AOCONTROL_HAS_PER_APP_VOLUME:
+        return CONTROL_FALSE;
+    default:
+        return CONTROL_UNKNOWN;
+    }
+}
+
+static int control_shared(struct ao *ao, enum aocontrol cmd, void *arg)
+{
+    struct wasapi_state *state = ao->priv;
+    if (!state->pAudioVolumeProxy)
+        return CONTROL_UNKNOWN;
+
+    float volume;
+    BOOL mute;
+    switch(cmd) {
+    case AOCONTROL_GET_VOLUME:
+        ISimpleAudioVolume_GetMasterVolume(state->pAudioVolumeProxy,
+                                           &volume);
+        *(ao_control_vol_t *)arg = (ao_control_vol_t){
+            .left  = 100.0f * volume,
+            .right = 100.0f * volume,
+        };
+        return CONTROL_OK;
+    case AOCONTROL_SET_VOLUME:
+        volume = ((ao_control_vol_t *)arg)->left / 100.f;
+        ISimpleAudioVolume_SetMasterVolume(state->pAudioVolumeProxy,
+                                           volume, NULL);
+        return CONTROL_OK;
+    case AOCONTROL_GET_MUTE:
+        ISimpleAudioVolume_GetMute(state->pAudioVolumeProxy, &mute);
+        *(bool *)arg = mute;
+        return CONTROL_OK;
+    case AOCONTROL_SET_MUTE:
+        mute = *(bool *)arg;
+        ISimpleAudioVolume_SetMute(state->pAudioVolumeProxy, mute, NULL);
+        return CONTROL_OK;
+    case AOCONTROL_HAS_PER_APP_VOLUME:
+        return CONTROL_TRUE;
+    default:
+        return CONTROL_UNKNOWN;
+    }
 }
 
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct wasapi_state *state = ao->priv;
-    ao_control_vol_t *vol = arg;
-    BOOL mute;
 
+    // common to exclusive and shared
     switch (cmd) {
-    case AOCONTROL_GET_VOLUME:
-        if (state->opt_exclusive)
-            IAudioEndpointVolume_GetMasterVolumeLevelScalar(state->pEndpointVolumeProxy,
-                                                            &state->audio_volume);
-        else
-            ISimpleAudioVolume_GetMasterVolume(state->pAudioVolumeProxy,
-                                               &state->audio_volume);
+    case AOCONTROL_UPDATE_STREAM_TITLE:
+        if (!state->pSessionControlProxy)
+            return CONTROL_FALSE;
 
-        /* check to see if user manually changed volume through mixer;
-           this information is used in exclusive mode for restoring the mixer volume on uninit */
-        if (state->audio_volume != state->previous_volume) {
-            MP_VERBOSE(state, "Mixer difference: %.2g now, expected %.2g\n",
-                       state->audio_volume, state->previous_volume);
-            state->initial_volume = state->audio_volume;
-        }
-
-        vol->left = vol->right = 100.0f * state->audio_volume;
-        return CONTROL_OK;
-    case AOCONTROL_SET_VOLUME:
-        state->audio_volume = vol->left / 100.f;
-        if (state->opt_exclusive)
-            IAudioEndpointVolume_SetMasterVolumeLevelScalar(state->pEndpointVolumeProxy,
-                                                            state->audio_volume, NULL);
-        else
-            ISimpleAudioVolume_SetMasterVolume(state->pAudioVolumeProxy,
-                                               state->audio_volume, NULL);
-
-        state->previous_volume = state->audio_volume;
-        return CONTROL_OK;
-    case AOCONTROL_GET_MUTE:
-        if (state->opt_exclusive)
-            IAudioEndpointVolume_GetMute(state->pEndpointVolumeProxy, &mute);
-        else
-            ISimpleAudioVolume_GetMute(state->pAudioVolumeProxy, &mute);
-        *(bool*)arg = mute;
-
-        return CONTROL_OK;
-    case AOCONTROL_SET_MUTE:
-        mute = *(bool*)arg;
-        if (state->opt_exclusive)
-            IAudioEndpointVolume_SetMute(state->pEndpointVolumeProxy, mute, NULL);
-        else
-            ISimpleAudioVolume_SetMute(state->pAudioVolumeProxy, mute, NULL);
-
-        return CONTROL_OK;
-    case AOCONTROL_HAS_PER_APP_VOLUME:
-        return state->share_mode == AUDCLNT_SHAREMODE_SHARED ?
-            CONTROL_TRUE : CONTROL_FALSE;
-    case AOCONTROL_UPDATE_STREAM_TITLE: {
-        MP_VERBOSE(state, "Updating stream title to \"%s\"\n", (char*)arg);
         wchar_t *title = mp_from_utf8(NULL, (char*)arg);
-
         wchar_t *tmp = NULL;
-
-        /* There is a weird race condition in the IAudioSessionControl itself --
-           it seems that *sometimes* the SetDisplayName does not take effect and it still shows
-           the old title. Use this loop to insist until it works. */
+        // There is a weird race condition in the IAudioSessionControl itself --
+        // it seems that *sometimes* the SetDisplayName does not take effect and
+        // it still shows the old title. Use this loop to insist until it works.
         do {
-            IAudioSessionControl_SetDisplayName(state->pSessionControlProxy, title, NULL);
+            IAudioSessionControl_SetDisplayName(state->pSessionControlProxy,
+                                                title, NULL);
 
             SAFE_RELEASE(tmp, CoTaskMemFree(tmp));
-            IAudioSessionControl_GetDisplayName(state->pSessionControlProxy, &tmp);
+            IAudioSessionControl_GetDisplayName(state->pSessionControlProxy,
+                                                &tmp);
         } while (lstrcmpW(title, tmp));
         SAFE_RELEASE(tmp, CoTaskMemFree(tmp));
         talloc_free(title);
-
         return CONTROL_OK;
     }
-    default:
-        return CONTROL_UNKNOWN;
-    }
+
+    return state->opt_exclusive ?
+        control_exclusive(ao, cmd, arg) : control_shared(ao, cmd, arg);
 }
 
 static void audio_reset(struct ao *ao)
@@ -377,9 +458,7 @@ static void audio_resume(struct ao *ao)
 static void hotplug_uninit(struct ao *ao)
 {
     MP_DBG(ao, "Hotplug uninit\n");
-    struct wasapi_state *state = ao->priv;
     wasapi_change_uninit(ao);
-    SAFE_RELEASE(state->pEnumerator, IMMDeviceEnumerator_Release(state->pEnumerator));
     CoUninitialize();
 }
 
@@ -389,10 +468,7 @@ static int hotplug_init(struct ao *ao)
     struct wasapi_state *state = ao->priv;
     state->log = ao->log;
     CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
-    HRESULT hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                                  &IID_IMMDeviceEnumerator, (void **)&state->pEnumerator);
-    EXIT_ON_ERROR(hr);
-    hr = wasapi_change_init(ao, true);
+    HRESULT hr = wasapi_change_init(ao, true);
     EXIT_ON_ERROR(hr);
 
     return 0;

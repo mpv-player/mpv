@@ -7,6 +7,7 @@
 struct mpv_global {
     struct MPOpts *opts;
     struct mp_log *log;
+    struct mp_client_api *client_api;
 };
 
 #endif

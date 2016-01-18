@@ -23,6 +23,7 @@
 #include "common/msg.h"
 
 #include "stream/stream.h"
+#include "video/mp_image.h"
 #include "demux.h"
 #include "stheader.h"
 
@@ -53,9 +54,10 @@ struct priv {
 static void reselect_streams(demuxer_t *demuxer)
 {
     struct priv *p = demuxer->priv;
-    for (int n = 0; n < MPMIN(p->slave->num_streams, p->num_streams); n++) {
+    int num_slave = demux_get_num_stream(p->slave);
+    for (int n = 0; n < MPMIN(num_slave, p->num_streams); n++) {
         if (p->streams[n]) {
-            demuxer_select_track(p->slave, p->slave->streams[n],
+            demuxer_select_track(p->slave, demux_get_stream(p->slave, n),
                 demux_stream_is_selected(p->streams[n]));
         }
     }
@@ -80,11 +82,9 @@ static void add_dvd_streams(demuxer_t *demuxer)
     struct stream_dvd_info_req info;
     if (stream_control(stream, STREAM_CTRL_GET_DVD_INFO, &info) > 0) {
         for (int n = 0; n < MPMIN(32, info.num_subs); n++) {
-            struct sh_stream *sh = new_sh_stream(demuxer, STREAM_SUB);
-            if (!sh)
-                break;
+            struct sh_stream *sh = demux_alloc_sh_stream(STREAM_SUB);
             sh->demuxer_id = n + 0x20;
-            sh->codec = "dvd_subtitle";
+            sh->codec->codec = "dvd_subtitle";
             get_disc_lang(stream, sh);
             // p->streams _must_ match with p->slave->streams, so we can't add
             // it yet - it has to be done when the real stream appears, which
@@ -111,8 +111,10 @@ static void add_dvd_streams(demuxer_t *demuxer)
             }
             s = talloc_asprintf_append(s, "\n");
 
-            sh->extradata = s;
-            sh->extradata_size = strlen(s);
+            sh->codec->extradata = s;
+            sh->codec->extradata_size = strlen(s);
+
+            demux_add_sh_stream(demuxer, sh);
         }
     }
 }
@@ -121,9 +123,9 @@ static void add_streams(demuxer_t *demuxer)
 {
     struct priv *p = demuxer->priv;
 
-    for (int n = p->num_streams; n < p->slave->num_streams; n++) {
-        struct sh_stream *src = p->slave->streams[n];
-        if (src->sub) {
+    for (int n = p->num_streams; n < demux_get_num_stream(p->slave); n++) {
+        struct sh_stream *src = demux_get_stream(p->slave, n);
+        if (src->type == STREAM_SUB) {
             struct sh_stream *sub = NULL;
             if (src->demuxer_id >= 0x20 && src->demuxer_id <= 0x3F)
                 sub = p->dvd_subs[src->demuxer_id - 0x20];
@@ -133,25 +135,26 @@ static void add_streams(demuxer_t *demuxer)
                 continue;
             }
         }
-        struct sh_stream *sh = new_sh_stream(demuxer, src->type);
-        if (!sh)
-            break;
+        struct sh_stream *sh = demux_alloc_sh_stream(src->type);
         assert(p->num_streams == n); // directly mapped
         MP_TARRAY_APPEND(p, p->streams, p->num_streams, sh);
         // Copy all stream fields that might be relevant
-        sh->codec = talloc_strdup(sh, src->codec);
-        sh->codec_tag = src->codec_tag;
-        sh->lav_headers = src->lav_headers;
+        *sh->codec = *src->codec;
         sh->demuxer_id = src->demuxer_id;
-        if (src->video) {
+        if (src->type == STREAM_VIDEO) {
             double ar;
             if (stream_control(demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar)
                                 == STREAM_OK)
-                sh->video->aspect = ar;
+            {
+                struct mp_image_params f = {.w = src->codec->disp_w,
+                                            .h = src->codec->disp_h};
+                mp_image_params_set_dsize(&f, 1728 * ar, 1728);
+                sh->codec->par_w = f.p_w;
+                sh->codec->par_h = f.p_h;
+            }
         }
-        if (src->audio)
-            sh->audio = src->audio;
         get_disc_lang(demuxer->stream, sh);
+        demux_add_sh_stream(demuxer, sh);
     }
     reselect_streams(demuxer);
 }

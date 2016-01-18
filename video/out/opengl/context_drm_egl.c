@@ -34,7 +34,7 @@
 #include <EGL/eglext.h>
 #include <GL/gl.h>
 
-#include "common.h"
+#include "context.h"
 #include "common/common.h"
 #include "video/out/drm_common.h"
 

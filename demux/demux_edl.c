@@ -23,7 +23,7 @@
 #include <inttypes.h>
 #include <math.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "demux.h"
 #include "timeline.h"

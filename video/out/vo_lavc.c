@@ -26,7 +26,7 @@
 #include "options/options.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "vo.h"
 
 #include "common/encode_lavc.h"
@@ -93,8 +93,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *vc = vo->priv;
     enum AVPixelFormat pix_fmt = imgfmt2pixfmt(params->imgfmt);
-    AVRational display_aspect_ratio, image_aspect_ratio;
-    AVRational aspect;
+    AVRational aspect = {params->p_w, params->p_h};
     uint32_t width = params->w;
     uint32_t height = params->h;
 
@@ -102,12 +101,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
         return -1;
 
     pthread_mutex_lock(&vo->encode_lavc_ctx->lock);
-
-    display_aspect_ratio.num = params->d_w;
-    display_aspect_ratio.den = params->d_h;
-    image_aspect_ratio.num = width;
-    image_aspect_ratio.den = height;
-    aspect = av_div_q(display_aspect_ratio, image_aspect_ratio);
 
     if (vc->stream) {
         /* NOTE:

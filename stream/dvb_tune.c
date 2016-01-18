@@ -79,32 +79,34 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
     int i;
     char frontend_dev[32], dvr_dev[32], demux_dev[32];
 
+    dvb_state_t* state = priv->state;
+    
     sprintf(frontend_dev, "/dev/dvb/adapter%d/frontend0", n);
     sprintf(dvr_dev, "/dev/dvb/adapter%d/dvr0", n);
     sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", n);
-    priv->fe_fd = open(frontend_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
-    if (priv->fe_fd < 0) {
+    state->fe_fd = open(frontend_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
+    if (state->fe_fd < 0) {
         MP_ERR(priv, "ERROR OPENING FRONTEND DEVICE %s: ERRNO %d\n",
                frontend_dev, errno);
         return 0;
     }
-    priv->demux_fds_cnt = 0;
+    state->demux_fds_cnt = 0;
     MP_VERBOSE(priv, "DVB_OPEN_DEVICES(%d)\n", demux_cnt);
     for (i = 0; i < demux_cnt; i++) {
-        priv->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
-        if (priv->demux_fds[i] < 0) {
+        state->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
+        if (state->demux_fds[i] < 0) {
             MP_ERR(priv, "ERROR OPENING DEMUX 0: %d\n", errno);
             return 0;
         } else {
             MP_VERBOSE(priv, "OPEN(%d), file %s: FD=%d, CNT=%d\n", i, demux_dev,
-                       priv->demux_fds[i], priv->demux_fds_cnt);
-            priv->demux_fds_cnt++;
+                       state->demux_fds[i], state->demux_fds_cnt);
+            state->demux_fds_cnt++;
         }
     }
 
 
-    priv->dvr_fd = open(dvr_dev, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
-    if (priv->dvr_fd < 0) {
+    state->dvr_fd = open(dvr_dev, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+    if (state->dvr_fd < 0) {
         MP_ERR(priv, "ERROR OPENING DVR DEVICE %s: %d\n", dvr_dev, errno);
         return 0;
     }
@@ -117,25 +119,27 @@ int dvb_fix_demuxes(dvb_priv_t *priv, int cnt)
 {
     int i;
     char demux_dev[32];
+    
+    dvb_state_t* state = priv->state;
 
-    sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", priv->card);
-    MP_VERBOSE(priv, "FIX %d -> %d\n", priv->demux_fds_cnt, cnt);
-    if (priv->demux_fds_cnt >= cnt) {
-        for (i = priv->demux_fds_cnt - 1; i >= cnt; i--) {
-            MP_VERBOSE(priv, "FIX, CLOSE fd(%d): %d\n", i, priv->demux_fds[i]);
-            close(priv->demux_fds[i]);
+    sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", state->card);
+    MP_VERBOSE(priv, "FIX %d -> %d\n", state->demux_fds_cnt, cnt);
+    if (state->demux_fds_cnt >= cnt) {
+        for (i = state->demux_fds_cnt - 1; i >= cnt; i--) {
+            MP_VERBOSE(priv, "FIX, CLOSE fd(%d): %d\n", i, state->demux_fds[i]);
+            close(state->demux_fds[i]);
         }
-        priv->demux_fds_cnt = cnt;
-    } else if (priv->demux_fds_cnt < cnt) {
-        for (i = priv->demux_fds_cnt; i < cnt; i++) {
-            priv->demux_fds[i] = open(demux_dev,
+        state->demux_fds_cnt = cnt;
+    } else if (state->demux_fds_cnt < cnt) {
+        for (i = state->demux_fds_cnt; i < cnt; i++) {
+            state->demux_fds[i] = open(demux_dev,
                                       O_RDWR | O_NONBLOCK | O_CLOEXEC);
-            MP_VERBOSE(priv, "FIX, OPEN fd(%d): %d\n", i, priv->demux_fds[i]);
-            if (priv->demux_fds[i] < 0) {
+            MP_VERBOSE(priv, "FIX, OPEN fd(%d): %d\n", i, state->demux_fds[i]);
+            if (state->demux_fds[i] < 0) {
                 MP_ERR(priv, "ERROR OPENING DEMUX 0: %d\n", errno);
                 return 0;
             } else
-                priv->demux_fds_cnt++;
+                state->demux_fds_cnt++;
         }
     }
 
@@ -370,7 +374,7 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
                            (sat_no / 4) % 2 ? SEC_MINI_B : SEC_MINI_A);
 }
 
-static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec,
+static int tune_it(dvb_priv_t *priv, int fd_frontend, 
                    unsigned int freq, unsigned int srate, char pol, int tone,
                    bool is_dvb_s2, int stream_id,
                    fe_spectral_inversion_t specInv, unsigned int diseqc,
@@ -386,8 +390,8 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, int fd_sec,
     struct dvb_frontend_parameters feparams;
     struct dvb_frontend_info fe_info;
 
-    MP_VERBOSE(priv, "TUNE_IT, fd_frontend %d, fd_sec %d\nfreq %lu, srate %lu, "
-               "pol %c, tone %i, diseqc %u\n", fd_frontend, fd_sec,
+    MP_VERBOSE(priv, "TUNE_IT, fd_frontend %d, freq %lu, srate %lu, "
+               "pol %c, tone %i, diseqc %u\n", fd_frontend, 
                (long unsigned int)freq, (long unsigned int)srate, pol,
                tone, diseqc);
 
@@ -548,7 +552,9 @@ int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc,
 {
     MP_INFO(priv, "dvb_tune Freq: %lu\n", (long unsigned int) freq);
 
-    int ris = tune_it(priv, priv->fe_fd, priv->sec_fd, freq, srate, pol, tone,
+    dvb_state_t* state = priv->state;
+
+    int ris = tune_it(priv, state->fe_fd, freq, srate, pol, tone,
                       is_dvb_s2, stream_id, specInv, diseqc, modulation,
                       HP_CodeRate, TransmissionMode, guardInterval,
                       bandWidth, LP_CodeRate, hier, timeout);

@@ -17,6 +17,8 @@
 
 #include <windows.h>
 #include <shlobj.h>
+#include <initguid.h>
+#include <knownfolders.h>
 #include <pthread.h>
 
 #include "osdep/path.h"
@@ -52,20 +54,21 @@ static char *mp_get_win_exe_subdir(void *ta_ctx, const char *name)
     return talloc_asprintf(ta_ctx, "%s/%s", mp_get_win_exe_dir(ta_ctx), name);
 }
 
-static char *mp_get_win_shell_dir(void *talloc_ctx, int folder)
+static char *mp_get_win_shell_dir(void *talloc_ctx, REFKNOWNFOLDERID folder)
 {
-    wchar_t w_appdir[MAX_PATH + 1] = {0};
+    wchar_t *w_appdir = NULL;
 
-    if (SHGetFolderPathW(NULL, folder|CSIDL_FLAG_CREATE, NULL,
-        SHGFP_TYPE_CURRENT, w_appdir) != S_OK)
+    if (FAILED(SHGetKnownFolderPath(folder, KF_FLAG_CREATE, NULL, &w_appdir)))
         return NULL;
 
-    return mp_to_utf8(talloc_ctx, w_appdir);
+    char *appdir = mp_to_utf8(talloc_ctx, w_appdir);
+    CoTaskMemFree(w_appdir);
+    return appdir;
 }
 
 static char *mp_get_win_app_dir(void *talloc_ctx)
 {
-    char *path = mp_get_win_shell_dir(talloc_ctx, CSIDL_APPDATA);
+    char *path = mp_get_win_shell_dir(talloc_ctx, &FOLDERID_RoamingAppData);
     return path ? mp_path_join(talloc_ctx, path, "mpv") : NULL;
 }
 
@@ -95,6 +98,6 @@ const char *mp_get_platform_path_win(void *talloc_ctx, const char *type)
             return mp_get_win_exe_subdir(talloc_ctx, "mpv");
     }
     if (strcmp(type, "desktop") == 0)
-        return mp_get_win_shell_dir(talloc_ctx, CSIDL_DESKTOPDIRECTORY);
+        return mp_get_win_shell_dir(talloc_ctx, &FOLDERID_Desktop);
     return NULL;
 }

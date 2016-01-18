@@ -82,12 +82,12 @@ void vo_calc_window_geometry(struct vo *vo, const struct mp_rect *screen,
     // The case of calling this function even though no video was configured
     // yet (i.e. vo->params==NULL) happens when vo_opengl creates a hidden
     // window in order to create an OpenGL context.
-    struct mp_image_params params = { .d_w = 320, .d_h = 200 };
+    struct mp_image_params params = { .w = 320, .h = 200 };
     if (vo->params)
         params = *vo->params;
 
-    int d_w = params.d_w;
-    int d_h = params.d_h;
+    int d_w, d_h;
+    mp_image_params_get_dsize(&params, &d_w, &d_h);
     if ((vo->driver->caps & VO_CAP_ROTATE90) && params.rotate % 180 == 90)
         MPSWAP(int, d_w, d_h);
     d_w = MPCLAMP(d_w * opts->window_scale, 1, 16000);

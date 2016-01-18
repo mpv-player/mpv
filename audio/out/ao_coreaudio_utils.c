@@ -136,36 +136,11 @@ coreaudio_error:
     return err;
 }
 
-char *fourcc_repr_buf(char *buf, size_t buf_size, uint32_t code)
-{
-    // Extract FourCC letters from the uint32_t and finde out if it's a valid
-    // code that is made of letters.
-    unsigned char fcc[4] = {
-        (code >> 24) & 0xFF,
-        (code >> 16) & 0xFF,
-        (code >> 8)  & 0xFF,
-        code         & 0xFF,
-    };
-
-    bool valid_fourcc = true;
-    for (int i = 0; i < 4; i++) {
-        if (fcc[i] < 32 || fcc[i] >= 128)
-            valid_fourcc = false;
-    }
-
-    if (valid_fourcc)
-        snprintf(buf, buf_size, "'%c%c%c%c'", fcc[0], fcc[1], fcc[2], fcc[3]);
-    else
-        snprintf(buf, buf_size, "%u", (unsigned int)code);
-
-    return buf;
-}
-
 bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message)
 {
     if (code == noErr) return true;
 
-    mp_msg(ao->log, level, "%s (%s)\n", message, fourcc_repr(code));
+    mp_msg(ao->log, level, "%s (%s)\n", message, mp_tag_str(code));
 
     return false;
 }
@@ -258,7 +233,7 @@ void ca_print_asbd(struct ao *ao, const char *description,
                    const AudioStreamBasicDescription *asbd)
 {
     uint32_t flags  = asbd->mFormatFlags;
-    char *format    = fourcc_repr(asbd->mFormatID);
+    char *format    = mp_tag_str(asbd->mFormatID);
     int mpfmt       = ca_asbd_to_mp_format(asbd);
 
     MP_VERBOSE(ao,
@@ -470,7 +445,7 @@ int64_t ca_get_device_latency_us(struct ao *ao, AudioDeviceID device)
         if (err == noErr) {
             latency_frames += temp;
             MP_VERBOSE(ao, "Latency property %s: %d frames\n",
-                       fourcc_repr(latency_properties[n]), (int)temp);
+                       mp_tag_str(latency_properties[n]), (int)temp);
         }
     }
 

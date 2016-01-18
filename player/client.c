@@ -21,6 +21,7 @@
 #include <assert.h>
 
 #include "common/common.h"
+#include "common/global.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "input/input.h"
@@ -137,6 +138,7 @@ void mp_clients_init(struct MPContext *mpctx)
     *mpctx->clients = (struct mp_client_api) {
         .mpctx = mpctx,
     };
+    mpctx->global->client_api = mpctx->clients;
     pthread_mutex_init(&mpctx->clients->lock, NULL);
 }
 
@@ -262,6 +264,11 @@ struct mp_log *mp_client_get_log(struct mpv_handle *ctx)
 struct MPContext *mp_client_get_core(struct mpv_handle *ctx)
 {
     return ctx->mpctx;
+}
+
+struct MPContext *mp_client_api_get_core(struct mp_client_api *api)
+{
+    return api->mpctx;
 }
 
 static void wakeup_client(struct mpv_handle *ctx)

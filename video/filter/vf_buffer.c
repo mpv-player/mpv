@@ -3,7 +3,7 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "options/m_option.h"
 
@@ -25,14 +25,6 @@ static void flush(struct vf_instance *vf)
     for (int n = 0; n < vf->priv->num_queued; n++)
         mp_image_unrefp(&vf->priv->queued[n]);
     vf->priv->num_queued = 0;
-}
-
-static int config(struct vf_instance *vf,
-                  int width, int height, int d_width, int d_height,
-                  unsigned int flags, unsigned int outfmt)
-{
-    flush(vf);
-    return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
 static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
@@ -73,7 +65,6 @@ static void uninit(vf_instance_t *vf)
 
 static int vf_open(vf_instance_t *vf)
 {
-    vf->config = config;
     vf->filter_ext = filter_ext;
     vf->control = control;
     vf->uninit = uninit;

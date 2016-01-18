@@ -90,25 +90,26 @@ typedef struct {
 typedef struct {
     int count;
     dvb_card_config_t *cards;
-    void *priv;
-} dvb_config_t;
 
-typedef struct dvb_params {
-    struct mp_log *log;
-    int fd;
     int card;
     int fe_fd;
-    int sec_fd;
-    int demux_fd[3], demux_fds[DMX_FILTER_SIZE], demux_fds_cnt;
     int dvr_fd;
+    int demux_fd[3], demux_fds[DMX_FILTER_SIZE], demux_fds_cnt;
 
-    dvb_config_t *config;
     dvb_channels_list *list;
     int tuner_type;
     int is_on;
     int retry;
     int timeout;
     int last_freq;
+    bool switching_channel;
+    bool stream_used;
+} dvb_state_t;
+
+typedef struct dvb_params {
+    struct mp_log *log;
+
+    dvb_state_t *state;
 
     char *cfg_prog;
     int cfg_card;
@@ -125,7 +126,7 @@ typedef struct dvb_params {
 
 int dvb_step_channel(stream_t *, int);
 int dvb_set_channel(stream_t *, int, int);
-dvb_config_t *dvb_get_config(stream_t *);
-void dvb_free_config(dvb_config_t *config);
+dvb_state_t *dvb_get_state(stream_t *);
+void dvb_free_state(dvb_state_t *);
 
 #endif /* MPLAYER_DVBIN_H */

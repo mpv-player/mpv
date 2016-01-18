@@ -29,7 +29,7 @@
 #include "input/input.h"
 #include "input/event.h"
 #include "x11_common.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include <string.h>
 #include <unistd.h>
@@ -497,8 +497,8 @@ static void *screensaver_thread(void *arg)
         char *args[] = {"xdg-screensaver", "reset", NULL};
         int status = mp_subprocess(args, NULL, NULL, NULL, NULL, &(char*){0});
         if (status) {
-            MP_WARN(x11, "Disabling screensaver failed (%d). Make sure the "
-                    "xdg-screensaver script is installed.\n", status);
+            MP_VERBOSE(x11, "Disabling screensaver failed (%d). Make sure the "
+                            "xdg-screensaver script is installed.\n", status);
             break;
         }
     }

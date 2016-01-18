@@ -27,7 +27,7 @@
 #include <libavutil/intreadwrite.h>
 #include <libavutil/pixdesc.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "config.h"
 #include "common/msg.h"
 #include "options/options.h"
@@ -352,6 +352,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     struct vd_lavc_params *lavc_param = vd->opts->vd_lavc_params;
     bool mp_rawvideo = false;
     struct sh_stream *sh = vd->header;
+    struct mp_codec_params *c = sh->codec;
 
     assert(!ctx->avctx);
 
@@ -414,23 +415,23 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     // Do this after the above avopt handling in case it changes values
     ctx->skip_frame = avctx->skip_frame;
 
-    avctx->codec_tag = sh->codec_tag;
-    avctx->coded_width  = sh->video->disp_w;
-    avctx->coded_height = sh->video->disp_h;
-    avctx->bits_per_coded_sample = sh->video->bits_per_coded_sample;
+    avctx->codec_tag = c->codec_tag;
+    avctx->coded_width  = c->disp_w;
+    avctx->coded_height = c->disp_h;
+    avctx->bits_per_coded_sample = c->bits_per_coded_sample;
 
-    mp_lavc_set_extradata(avctx, sh->extradata, sh->extradata_size);
+    mp_lavc_set_extradata(avctx, c->extradata, c->extradata_size);
 
     if (mp_rawvideo) {
-        avctx->pix_fmt = imgfmt2pixfmt(sh->codec_tag);
+        avctx->pix_fmt = imgfmt2pixfmt(c->codec_tag);
         avctx->codec_tag = 0;
-        if (avctx->pix_fmt == AV_PIX_FMT_NONE && sh->codec_tag)
+        if (avctx->pix_fmt == AV_PIX_FMT_NONE && c->codec_tag)
             MP_ERR(vd, "Image format %s not supported by lavc.\n",
-                   mp_imgfmt_to_name(sh->codec_tag));
+                   mp_imgfmt_to_name(c->codec_tag));
     }
 
-    if (sh->lav_headers)
-        mp_copy_lav_codec_headers(avctx, sh->lav_headers);
+    if (c->lav_headers)
+        mp_copy_lav_codec_headers(avctx, c->lav_headers);
 
     /* open it */
     if (avcodec_open2(avctx, lavc_codec, NULL) < 0)
@@ -484,7 +485,6 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
     struct MPOpts *opts = ctx->opts;
     int width = frame->width;
     int height = frame->height;
-    float aspect = av_q2d(frame->sample_aspect_ratio) * width / height;
     int pix_fmt = frame->format;
 
     if (pix_fmt != ctx->pix_fmt) {
@@ -499,20 +499,17 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
         .imgfmt = ctx->best_csp,
         .w = width,
         .h = height,
-        .d_w = 0,
-        .d_h = 0,
+        .p_w = frame->sample_aspect_ratio.num,
+        .p_h = frame->sample_aspect_ratio.den,
         .colorspace = avcol_spc_to_mp_csp(ctx->avctx->colorspace),
         .colorlevels = avcol_range_to_mp_csp_levels(ctx->avctx->color_range),
         .primaries = avcol_pri_to_mp_csp_prim(ctx->avctx->color_primaries),
         .gamma = avcol_trc_to_mp_csp_trc(ctx->avctx->color_trc),
         .chroma_location =
             avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
-        .rotate = vd->header->video->rotate,
-        .stereo_in = vd->header->video->stereo_mode,
+        .rotate = vd->header->codec->rotate,
+        .stereo_in = vd->header->codec->stereo_mode,
     };
-
-    if (aspect > 0)
-        vf_set_dar(&out_params->d_w, &out_params->d_h, width, height, aspect);
 
     if (opts->video_rotate < 0) {
         out_params->rotate = 0;
@@ -532,6 +529,12 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++)
         MP_VERBOSE(vd, " %s", av_get_pix_fmt_name(fmt[i]));
     MP_VERBOSE(vd, "\n");
+
+#if HAVE_AVCODEC_PROFILE_NAME
+    const char *profile = avcodec_profile_name(avctx->codec_id, avctx->profile);
+    MP_VERBOSE(vd, "Codec profile: %s (0x%x)\n", profile ? profile : "unknown",
+               avctx->profile);
+#endif
 
     assert(ctx->hwdec);
 

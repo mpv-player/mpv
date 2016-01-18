@@ -63,6 +63,8 @@ typedef enum stereo_code {
     INTERLEAVE_ROWS_LR, //row-interleave (left eye has top row)
     INTERLEAVE_ROWS_RL, //row-interleave (right eye has top row)
     STEREO_AUTO,        //use video metadata info (for input)
+    ALTERNATING_LR,     //alternating frames (left first)
+    ALTERNATING_RL,     //alternating frames (right first)
     STEREO_CODE_COUNT   //no value set - TODO: needs autodetection
 } stereo_code;
 
@@ -125,6 +127,8 @@ const struct m_opt_choice_alternatives stereo_code_names[] = {
     {"interleave_rows_left_first",         INTERLEAVE_ROWS_LR},
     {"irr",                                INTERLEAVE_ROWS_RL},
     {"interleave_rows_right_first",        INTERLEAVE_ROWS_RL},
+    {"al",                               ALTERNATING_LR},
+    {"ar",                               ALTERNATING_RL},
     // convenience alias for MP_STEREO3D_MONO
     {"mono",                             MONO_L},
     // for filter auto-insertion

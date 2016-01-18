@@ -30,7 +30,7 @@
 #include "cookies.h"
 
 #include "misc/bstr.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #define OPT_BASE_STRUCT struct stream_lavf_params
 struct stream_lavf_params {
@@ -169,9 +169,9 @@ void mp_setup_av_network_options(AVDictionary **dict, struct mpv_global *global,
     if (opts->network_tls_ca_file)
         av_dict_set(dict, "ca_file", opts->network_tls_ca_file, 0);
     if (opts->network_tls_cert_file)
-	av_dict_set(dict, "cert_file", opts->network_tls_cert_file, 0);
+        av_dict_set(dict, "cert_file", opts->network_tls_cert_file, 0);
     if (opts->network_tls_key_file)
-	av_dict_set(dict, "key_file", opts->network_tls_key_file, 0);
+        av_dict_set(dict, "key_file", opts->network_tls_key_file, 0);
     char *cust_headers = talloc_strdup(temp, "");
     if (opts->network_referrer) {
         cust_headers = talloc_asprintf_append(cust_headers, "Referer: %s\r\n",

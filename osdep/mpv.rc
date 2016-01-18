@@ -34,7 +34,7 @@ FILETYPE VFT_APP
             VALUE "CompanyName", "mpv\000"
             VALUE "FileDescription", "mpv\000"
             VALUE "FileVersion",VERSION
-            VALUE "LegalCopyright", " (C) 2000-2015 mpv/mplayer2/MPlayer\000"
+            VALUE "LegalCopyright", " (C) 2000-2016 mpv/mplayer2/MPlayer\000"
             //VALUE "LegalTrademarks"," \000";
             VALUE "OriginalFilename", "mpv.exe\000"
             VALUE "ProductName", "mpv\000"

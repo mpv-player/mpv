@@ -75,79 +75,6 @@ enum {
 
 #define MPGL_VER_P(ver) MPGL_VER_GET_MAJOR(ver), MPGL_VER_GET_MINOR(ver)
 
-enum {
-    VOFLAG_GLES         = 1 << 0,       // Hint to create a GLES2 context
-    VOFLAG_NO_GLES      = 1 << 1,       // Hint to create a desktop GL context
-    VOFLAG_GL_DEBUG     = 1 << 2,       // Hint to request debug OpenGL context
-    VOFLAG_ALPHA        = 1 << 3,       // Hint to request alpha framebuffer
-    VOFLAG_SW           = 1 << 4,       // Hint to accept a software GL renderer
-};
-
-struct MPGLContext;
-
-// A windowing backend (like X11, win32, ...), which provides OpenGL rendering.
-struct mpgl_driver {
-    const char *name;
-
-    // Size of the struct allocated for MPGLContext.priv
-    int priv_size;
-
-    // Init the GL context and possibly the underlying VO backend.
-    // The created context should be compatible to GL 3.2 core profile, but
-    // some other GL versions are supported as well (e.g. GL 2.1 or GLES 2).
-    // Return 0 on success, negative value (-1) on error.
-    int (*init)(struct MPGLContext *ctx, int vo_flags);
-
-    // Resize the window, or create a new window if there isn't one yet.
-    // Currently, there is an unfortunate interaction with ctx->vo, and
-    // display size etc. are determined by it.
-    // Return 0 on success, negative value (-1) on error.
-    int (*reconfig)(struct MPGLContext *ctx);
-
-    // Present the frame.
-    void (*swap_buffers)(struct MPGLContext *ctx);
-
-    // This behaves exactly like vo_driver.control().
-    int (*control)(struct MPGLContext *ctx, int *events, int request, void *arg);
-
-    // Destroy the GL context and possibly the underlying VO backend.
-    void (*uninit)(struct MPGLContext *ctx);
-};
-
-typedef struct MPGLContext {
-    GL *gl;
-    struct vo *vo;
-    const struct mpgl_driver *driver;
-
-    // Bit size of each component in the created framebuffer. 0 if unknown.
-    int depth_r, depth_g, depth_b;
-
-    // For hwdec_vaegl.c.
-    const char *native_display_type;
-    void *native_display;
-
-    // Windows-specific hack. See vo_opengl dwmflush suboption.
-    int dwm_flush_opt;
-
-    // Flip the rendered image vertically. This is useful for dxinterop.
-    bool flip_v;
-
-    // For free use by the mpgl_driver.
-    void *priv;
-} MPGLContext;
-
-MPGLContext *mpgl_init(struct vo *vo, const char *backend_name, int vo_flags);
-void mpgl_uninit(MPGLContext *ctx);
-int mpgl_reconfig_window(struct MPGLContext *ctx);
-int mpgl_control(struct MPGLContext *ctx, int *events, int request, void *arg);
-void mpgl_swap_buffers(struct MPGLContext *ctx);
-
-int mpgl_find_backend(const char *name);
-
-struct m_option;
-int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
-                              struct bstr name, struct bstr param);
-
 void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                          const char *ext2, struct mp_log *log);
 void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
@@ -164,6 +91,8 @@ struct GL {
     char *extensions;           // Equivalent to GL_EXTENSIONS
     int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
     bool debug_context;         // use of e.g. GLX_CONTEXT_DEBUG_BIT_ARB
+    int fb_r, fb_g, fb_b;       // frame buffer bit depth (0 if unknown)
+    bool fb_premultiplied;      // assumption about FB alpha compositor usage
 
     void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei);
     void (GLAPIENTRY *Clear)(GLbitfield);

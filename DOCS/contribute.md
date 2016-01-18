@@ -14,9 +14,11 @@ Sending patches
   ``git format-patch``. diffs posted as pastebins (especially if the http link
   returns HTML) just cause extra work for everyone, because they lack commit
   message and authorship information.
-- When creating pull requests, be sure to test your changes. If you didn't, please
-  say so in the pull request message. 
-
+- All new code must be LGPLv2.1+ licensed, or come with the implicit agreement
+  that it will be relicensed to LGPLv2.1+ later (see ``Copyright`` in the
+  repository root directory).
+- When creating pull requests, be sure to test your changes. If you didn't,
+  please say so in the pull request message.
 - Write informative commit messages. Use present tense to describe the
   situation with the patch applied, and past tense for the situation before
   the change.
@@ -27,8 +29,8 @@ Sending patches
 
   For example, you fixed a crash in af_volume.c:
 
-  Bad: ``fixed the bug (wtf?)``
-  Good: ``af_volume: fix crash due to null pointer access``
+  - Bad: ``fixed the bug (wtf?)``
+  - Good: ``af_volume: fix crash due to null pointer access``
 
   Having a prefix gives context, and is especially useful when trying to find
   a specific change by looking at the history, or when running ``git blame``.
@@ -53,10 +55,10 @@ Sending patches
   something like reformatting a whole file, and hiding an actual functional
   change in the same commit.
 - If you add a new command line option, document it in options.rst. If you
-  add a new input property, document it in input.rst.
-- All new code must be LGPLv2.1+ licensed, or come with the implicit agreement
-  that it will be relicensed to LGPLv2.1+ later (see ``Copyright`` in the
-  repository root directory).
+  add a new input property, document it in input.rst. Changes to the user
+  interface (options, properties, commands) should be documented in
+  interface-changes.rst. Changes to libmpv should be documented in
+  client-api-changes.rst.
 
 Code formatting
 ---------------

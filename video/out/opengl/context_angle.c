@@ -26,7 +26,7 @@
 
 #include "common/common.h"
 #include "video/out/w32_common.h"
-#include "common.h"
+#include "context.h"
 
 struct priv {
     EGLDisplay egl_display;

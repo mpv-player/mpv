@@ -262,9 +262,6 @@ static int open_f(stream_t *stream)
             MP_INFO(stream, "Writing to stdout...\n");
             p->fd = 1;
         }
-#ifdef __MINGW32__
-        setmode(p->fd, O_BINARY);
-#endif
         p->close = false;
     } else {
         mode_t openmode = S_IRUSR | S_IWUSR;
@@ -297,6 +294,10 @@ static int open_f(stream_t *stream)
         }
         p->close = true;
     }
+
+#ifdef __MINGW32__
+    setmode(p->fd, O_BINARY);
+#endif
 
     off_t len = lseek(p->fd, 0, SEEK_END);
     lseek(p->fd, 0, SEEK_SET);

@@ -27,7 +27,7 @@
 #include "audio/filter/af.h"
 #include "common/global.h"
 #include "common/msg.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "mixer.h"
 
 struct mixer {
@@ -120,8 +120,11 @@ void mixer_getvolume(struct mixer *mixer, float *l, float *r)
     *r = mixer->vol_r;
 }
 
-static void setvolume_internal(struct mixer *mixer, float l, float r)
+static void setvolume_internal(struct mixer *mixer)
 {
+    float l = mixer->vol_l, r = mixer->vol_r;
+    if (mixer->emulate_mute && mixer->muted)
+        l = r = 0;
     if (!mixer->softvol) {
         MP_DBG(mixer, "Setting volume on AO.\n");
         struct ao_control_vol vol = {.left = l, .right = r};
@@ -147,8 +150,8 @@ void mixer_setvolume(struct mixer *mixer, float l, float r)
     float max = mixer_getmaxvolume(mixer);
     mixer->vol_l = MPCLAMP(l, 0, max);
     mixer->vol_r = MPCLAMP(r, 0, max);
-    if (mixer->ao && !(mixer->emulate_mute && mixer->muted))
-        setvolume_internal(mixer, mixer->vol_l, mixer->vol_r);
+    if (mixer->ao)
+        setvolume_internal(mixer);
 }
 
 void mixer_getbothvolume(struct mixer *mixer, float *b)
@@ -167,7 +170,7 @@ void mixer_setmute(struct mixer *mixer, bool mute)
         mixer->muted = mute;
         mixer->muted_by_us = mute;
         if (mixer->emulate_mute) {
-            setvolume_internal(mixer, mixer->vol_l*!mute, mixer->vol_r*!mute);
+            setvolume_internal(mixer);
         } else {
             ao_control(mixer->ao, AOCONTROL_SET_MUTE, &mute);
         }
@@ -293,6 +296,8 @@ static void restore_volume(struct mixer *mixer)
 
     const char *prev_driver = mixer->driver;
     mixer->driver = mixer->softvol ? "softvol" : ao_get_name(ao);
+    if (!prev_driver[0])
+        prev_driver = mixer->driver;
 
     // Restore old parameters if volume won't survive reinitialization.
     // But not if volume scale is possibly different.

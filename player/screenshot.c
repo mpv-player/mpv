@@ -23,7 +23,7 @@
 
 #include "osdep/io.h"
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "screenshot.h"
 #include "core.h"
 #include "command.h"
@@ -308,14 +308,7 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
 
 static void add_subs(struct MPContext *mpctx, struct mp_image *image)
 {
-    double sar = (double)image->w / image->h;
-    double dar = (double)image->params.d_w / image->params.d_h;
-    struct mp_osd_res res = {
-        .w = image->w,
-        .h = image->h,
-        .display_par = sar / dar,
-    };
-
+    struct mp_osd_res res = osd_res_from_image_params(&image->params);
     osd_draw_on_image(mpctx->osd, res, mpctx->video_pts,
                       OSD_DRAW_SUB_ONLY, image);
 }
@@ -352,8 +345,8 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
         }
     }
 
-    if (image && mpctx->d_video && mpctx->d_video->hwdec_info) {
-        struct mp_hwdec_ctx *ctx = mpctx->d_video->hwdec_info->hwctx;
+    if (image && mpctx->vo_chain && mpctx->vo_chain->hwdec_info) {
+        struct mp_hwdec_ctx *ctx = mpctx->vo_chain->hwdec_info->hwctx;
         struct mp_image *nimage = NULL;
         if (ctx && ctx->download_image && (image->fmt.flags & MP_IMGFLAG_HWACCEL))
             nimage = ctx->download_image(ctx, image, NULL);

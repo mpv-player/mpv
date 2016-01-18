@@ -30,7 +30,7 @@
 
 #include <libavutil/intfloat.h>
 #include <libavutil/common.h>
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "ebml.h"
 #include "stream/stream.h"
 #include "common/msg.h"

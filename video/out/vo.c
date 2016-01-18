@@ -28,7 +28,7 @@
 #include <poll.h>
 #endif
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "config.h"
 #include "osdep/timer.h"
@@ -508,8 +508,7 @@ static void run_reconfig(void *p)
 
     struct vo_internal *in = vo->in;
 
-    vo->dwidth = params->d_w;
-    vo->dheight = params->d_h;
+    mp_image_params_get_dsize(params, &vo->dwidth, &vo->dheight);
 
     talloc_free(vo->params);
     vo->params = talloc_memdup(vo, params, sizeof(*params));

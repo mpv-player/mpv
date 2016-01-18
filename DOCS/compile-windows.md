@@ -68,7 +68,7 @@ echo "MXE_TARGETS := i686-w64-mingw32.static" >> settings.mk
 # Build required packages. The following provide a minimum required to build
 # a reasonable mpv binary (though not an absolute minimum).
 
-make gcc ffmpeg libass jpeg pthreads lua
+make gcc ffmpeg libass jpeg lua
 
 # Add MXE binaries to $PATH
 export PATH=/opt/mxe/usr/bin/:$PATH
@@ -172,41 +172,4 @@ mv -f /mingw64/bin/pkgconfig/mpv.pc /mingw64/lib/pkgconfig/
 mv -f /mingw64/bin/libmpv.dll.a /mingw64/lib/
 sed -i 's_/mingw64/bin_/mingw64/lib_' /mingw64/lib/pkgconfig/mpv.pc
 rmdir /mingw64/bin/pkgconfig
-```
-
-Additional dependencies
-=======================
-
-pthreads
---------
-
-mpv will use a pthreads wrapper by default. Either pthreads-win32 or
-winpthreads should work. The latter is packaged with most MinGW-w64
-environments, including MSYS2, so it shouldn't be a problem. If you don't have
-a pthreads wrapper or you want to build mpv without one, configure with:
-
-```bash
-./waf configure --enable-win32-internal-pthreads
-```
-
-libwaio
--------
-
-If you want to use ``--input-file``, you need libwaio. It's available from
-git://midipix.org/waio
-
-To compile libwaio in MSYS2, run:
-
-```bash
-git clone git://midipix.org/waio && cd waio
-
-# 32-bit build, run from mingw32_shell.bat
-./build-mingw-nt32 lib-static CC=gcc AR=ar
-cp -r include/waio /mingw32/include
-cp lib32/libwaio.a /mingw32/lib
-
-# 64-bit build, run from mingw64_shell.bat
-./build-mingw-nt64 lib-static CC=gcc AR=ar
-cp -r include/waio /mingw64/include
-cp lib64/libwaio.a /mingw64/lib
 ```

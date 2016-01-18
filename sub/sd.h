@@ -10,76 +10,40 @@
 #define SUB_GAP_KEEP 0.4
 
 struct sd {
+    struct mpv_global *global;
     struct mp_log *log;
     struct MPOpts *opts;
 
     const struct sd_functions *driver;
     void *priv;
 
-    const char *codec;
-
-    // Extra header data passed from demuxer
-    char *extradata;
-    int extradata_len;
-
-    struct sh_stream *sh;
-
-    // Set to !=NULL if the input packets are being converted from another
-    // format.
-    const char *converted_from;
-
-    // Video resolution used for subtitle decoding. Doesn't necessarily match
-    // the resolution of the VO, nor does it have to be the OSD resolution.
-    int sub_video_w, sub_video_h;
-
-    double video_fps;
-
-    // Shared renderer for ASS - done to avoid reloading embedded fonts.
-    struct ass_library *ass_library;
-    struct ass_renderer *ass_renderer;
-    pthread_mutex_t *ass_lock;
-
-    // If false, try to remove multiple subtitles.
-    // (Only for decoders which have accept_packets_in_advance set.)
-    bool no_remove_duplicates;
-
-    // Set by sub converter
-    const char *output_codec;
-    char *output_extradata;
-    int output_extradata_len;
-
-    // Internal buffer for sd_conv_* functions
-    struct sd_conv_buffer *sd_conv_buffer;
+    struct demuxer *demuxer;
+    struct mp_codec_params *codec;
 };
 
 struct sd_functions {
     const char *name;
     bool accept_packets_in_advance;
-    bool (*supports_format)(const char *format);
     int  (*init)(struct sd *sd);
     void (*decode)(struct sd *sd, struct demux_packet *packet);
     void (*reset)(struct sd *sd);
+    void (*select)(struct sd *sd, bool selected);
     void (*uninit)(struct sd *sd);
 
     bool (*accepts_packet)(struct sd *sd); // implicit default if NULL: true
-    void (*fix_events)(struct sd *sd);
     int (*control)(struct sd *sd, enum sd_ctrl cmd, void *arg);
 
-    // decoder
     void (*get_bitmaps)(struct sd *sd, struct mp_osd_res dim, double pts,
                         struct sub_bitmaps *res);
     char *(*get_text)(struct sd *sd, double pts);
-
-    // converter
-    struct demux_packet *(*get_converted)(struct sd *sd);
 };
 
-void sd_conv_add_packet(struct sd *sd, void *data, int data_len, double pts,
-                        double duration);
-struct demux_packet *sd_conv_def_get_converted(struct sd *sd);
-void sd_conv_def_reset(struct sd *sd);
-void sd_conv_def_uninit(struct sd *sd);
-
-#define SD_MAX_LINE_LEN 1000
+struct lavc_conv;
+struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
+                                   char *extradata, int extradata_len);
+char *lavc_conv_get_extradata(struct lavc_conv *priv);
+char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet);
+void lavc_conv_reset(struct lavc_conv *priv);
+void lavc_conv_uninit(struct lavc_conv *priv);
 
 #endif

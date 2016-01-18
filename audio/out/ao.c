@@ -20,7 +20,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "config.h"
 #include "ao.h"
@@ -45,7 +45,6 @@ extern const struct ao_driver audio_out_jack;
 extern const struct ao_driver audio_out_openal;
 extern const struct ao_driver audio_out_null;
 extern const struct ao_driver audio_out_alsa;
-extern const struct ao_driver audio_out_dsound;
 extern const struct ao_driver audio_out_wasapi;
 extern const struct ao_driver audio_out_pcm;
 extern const struct ao_driver audio_out_lavc;
@@ -64,9 +63,6 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #endif
 #if HAVE_WASAPI
     &audio_out_wasapi,
-#endif
-#if HAVE_DSOUND
-    &audio_out_dsound,
 #endif
 #if HAVE_OSS_AUDIO
     &audio_out_oss,

@@ -27,9 +27,12 @@ local function set_http_headers(http_headers)
     if useragent and not option_was_set("user-agent") then
         mp.set_property("file-local-options/user-agent", useragent)
     end
-    local cookies = http_headers["Cookie"]
-    if cookies then
-        headers[#headers + 1] = "Cookie: " .. cookies
+    local additional_fields = {"Cookie", "Referer"}
+    for idx, item in pairs(additional_fields) do
+        local field_value = http_headers[item]
+        if field_value then
+            headers[#headers + 1] = item .. ": " .. field_value
+        end
     end
     if #headers > 0 and not option_was_set("http-header-fields") then
         mp.set_property_native("file-local-options/http-header-fields", headers)

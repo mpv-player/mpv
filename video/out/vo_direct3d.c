@@ -29,7 +29,7 @@
 #include "config.h"
 #include "options/options.h"
 #include "options/m_option.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "vo.h"
 #include "video/csputils.h"
 #include "video/mp_image.h"

@@ -45,12 +45,14 @@
 #include "win_state.h"
 
 #include "input/input.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "common/msg.h"
 
 static int vo_cocoa_fullscreen(struct vo *vo);
 static void cocoa_rm_fs_screen_profile_observer(struct vo_cocoa_state *s);
+static void cocoa_add_screen_reconfiguration_observer(struct vo *vo);
+static void cocoa_rm_screen_reconfiguration_observer(struct vo *vo);
 
 struct vo_cocoa_state {
     // --- The following members can be accessed only by the main thread (i.e.
@@ -267,6 +269,7 @@ void vo_cocoa_init(struct vo *vo)
     pthread_cond_init(&s->wakeup, NULL);
     vo->cocoa = s;
     cocoa_init_light_sensor(vo);
+    cocoa_add_screen_reconfiguration_observer(vo);
     if (!s->embedded) {
         [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
         set_application_icon(NSApp);
@@ -306,6 +309,7 @@ void vo_cocoa_uninit(struct vo *vo)
         enable_power_management(s);
         cocoa_uninit_light_sensor(s);
         cocoa_rm_fs_screen_profile_observer(s);
+        cocoa_rm_screen_reconfiguration_observer(vo);
 
         [s->nsgl_ctx release];
         CGLReleaseContext(s->cgl_ctx);
@@ -370,21 +374,22 @@ static void vo_cocoa_update_screen_fps(struct vo *vo)
     NSDictionary* sinfo = [screen deviceDescription];
     NSNumber* sid = [sinfo objectForKey:@"NSScreenNumber"];
     CGDirectDisplayID did = [sid longValue];
-    CGDisplayModeRef mode = CGDisplayCopyDisplayMode(did);
-    s->screen_fps = CGDisplayModeGetRefreshRate(mode);
-    CGDisplayModeRelease(mode);
 
-    if (s->screen_fps == 0.0) {
+    CVDisplayLinkRef link;
+    CVDisplayLinkCreateWithCGDisplay(did, &link);
+    s->screen_fps = CVDisplayLinkGetActualOutputVideoRefreshPeriod(link);
+
+    if (s->screen_fps == 0) {
         // Fallback to using Nominal refresh rate from DisplayLink,
         // CVDisplayLinkGet *Actual* OutputVideoRefreshPeriod seems to
-        // return 0 as well if CG returns 0
-        CVDisplayLinkRef link;
-        CVDisplayLinkCreateWithCGDisplay(did, &link);
+        // return 0 on some Apple devices. Use the nominal refresh period
+        // instead.
         const CVTime t = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(link);
         if (!(t.flags & kCVTimeIsIndefinite))
             s->screen_fps = (t.timeScale / (double) t.timeValue);
-        CVDisplayLinkRelease(link);
     }
+
+    CVDisplayLinkRelease(link);
 
     flag_events(vo, VO_EVENT_WIN_STATE);
 }
@@ -553,6 +558,28 @@ static void cocoa_add_fs_screen_profile_observer(struct vo *vo)
                 usingBlock:nblock];
 }
 
+static void cocoa_screen_reconfiguration_observer(
+    CGDirectDisplayID display, CGDisplayChangeSummaryFlags flags, void *ctx)
+{
+    if (flags & kCGDisplaySetModeFlag) {
+        struct vo *vo = ctx;
+        MP_WARN(vo, "detected display mode change, updating screen info\n");
+        vo_cocoa_update_screen_info(vo, NULL);
+    }
+}
+
+static void cocoa_add_screen_reconfiguration_observer(struct vo *vo)
+{
+    CGDisplayRegisterReconfigurationCallback(
+        cocoa_screen_reconfiguration_observer, vo);
+}
+
+static void cocoa_rm_screen_reconfiguration_observer(struct vo *vo)
+{
+    CGDisplayRemoveReconfigurationCallback(
+        cocoa_screen_reconfiguration_observer, vo);
+}
+
 void vo_cocoa_set_opengl_ctx(struct vo *vo, CGLContextObj ctx)
 {
     struct vo_cocoa_state *s = vo->cocoa;
@@ -591,6 +618,12 @@ int vo_cocoa_config_window(struct vo *vo)
             cocoa_add_fs_screen_profile_observer(vo);
             cocoa_set_window_title(vo);
             vo_set_level(vo, vo->opts->ontop);
+
+            GLint o;
+            if (!CGLGetParameter(s->cgl_ctx, kCGLCPSurfaceOpacity, &o) && !o) {
+                [s->window setOpaque:NO];
+                [s->window setBackgroundColor:[NSColor clearColor]];
+            }
         }
 
         s->vo_ready = true;

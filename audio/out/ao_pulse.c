@@ -376,22 +376,8 @@ fail:
     return -1;
 }
 
-static int init(struct ao *ao)
+static bool set_format(struct ao *ao, pa_format_info *format)
 {
-    struct pa_channel_map map;
-    pa_proplist *proplist = NULL;
-    pa_format_info *format = NULL;
-    struct priv *priv = ao->priv;
-    char *sink = priv->cfg_sink && priv->cfg_sink[0] ? priv->cfg_sink : ao->device;
-
-    if (pa_init_boilerplate(ao) < 0)
-        return -1;
-
-    pa_threaded_mainloop_lock(priv->mainloop);
-
-    if (!(format = pa_format_info_new()))
-        goto unlock_and_fail;
-
     ao->format = af_fmt_from_planar(ao->format);
 
     format->encoding = map_digital_format(ao->format);
@@ -411,8 +397,29 @@ static int init(struct ao *ao)
         pa_format_info_set_sample_format(format, fmt_map->pa_format);
     }
 
+    struct pa_channel_map map;
+
     if (!select_chmap(ao, &map))
-        goto unlock_and_fail;
+        return false;
+
+    pa_format_info_set_rate(format, ao->samplerate);
+    pa_format_info_set_channels(format, ao->channels.num);
+    pa_format_info_set_channel_map(format, &map);
+
+    return ao->samplerate < PA_RATE_MAX && pa_format_info_valid(format);
+}
+
+static int init(struct ao *ao)
+{
+    pa_proplist *proplist = NULL;
+    pa_format_info *format = NULL;
+    struct priv *priv = ao->priv;
+    char *sink = priv->cfg_sink && priv->cfg_sink[0] ? priv->cfg_sink : ao->device;
+
+    if (pa_init_boilerplate(ao) < 0)
+        return -1;
+
+    pa_threaded_mainloop_lock(priv->mainloop);
 
     if (!(proplist = pa_proplist_new())) {
         MP_ERR(ao, "Failed to allocate proplist\n");
@@ -420,13 +427,17 @@ static int init(struct ao *ao)
     }
     (void)pa_proplist_sets(proplist, PA_PROP_MEDIA_ICON_NAME, ao->client_name);
 
-    pa_format_info_set_rate(format, ao->samplerate);
-    pa_format_info_set_channels(format, ao->channels.num);
-    pa_format_info_set_channel_map(format, &map);
-
-    if (!pa_format_info_valid(format)) {
-        MP_ERR(ao, "Invalid audio format\n");
+    if (!(format = pa_format_info_new()))
         goto unlock_and_fail;
+
+    if (!set_format(ao, format)) {
+        ao->channels = (struct mp_chmap) MP_CHMAP_INIT_STEREO;
+        ao->samplerate = 48000;
+        ao->format = AF_FORMAT_FLOAT;
+        if (!set_format(ao, format)) {
+            MP_ERR(ao, "Invalid audio format\n");
+            goto unlock_and_fail;
+        }
     }
 
     if (!(priv->stream = pa_stream_new_extended(priv->context, "audio stream",

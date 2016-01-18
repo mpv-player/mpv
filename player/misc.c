@@ -21,7 +21,7 @@
 #include <assert.h>
 
 #include "config.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "osdep/io.h"
 #include "osdep/timer.h"
@@ -99,20 +99,6 @@ double get_play_end_pts(struct MPContext *mpctx)
             end = cend;
     }
     return end;
-}
-
-// Time used to seek external tracks to.
-double get_main_demux_pts(struct MPContext *mpctx)
-{
-    double main_new_pos = MP_NOPTS_VALUE;
-    if (mpctx->demuxer) {
-        for (int n = 0; n < mpctx->demuxer->num_streams; n++) {
-            struct sh_stream *stream = mpctx->demuxer->streams[n];
-            if (main_new_pos == MP_NOPTS_VALUE && stream->type != STREAM_SUB)
-                main_new_pos = demux_get_next_pts(stream);
-        }
-    }
-    return main_new_pos;
 }
 
 float mp_get_cache_percent(struct MPContext *mpctx)
@@ -264,6 +250,7 @@ struct mpv_global *create_sub_global(struct MPContext *mpctx)
     *new = (struct mpv_global){
         .log = mpctx->global->log,
         .opts = new_config->optstruct,
+        .client_api = mpctx->clients,
     };
     return new;
 }

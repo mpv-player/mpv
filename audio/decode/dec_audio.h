@@ -45,6 +45,8 @@ struct dec_audio {
     double pts;
     // number of samples output by decoder after last known pts
     int pts_offset;
+    // set every time a jump in timestamps is encountered
+    bool pts_reset;
     // For free use by the ad_driver
     void *priv;
 };

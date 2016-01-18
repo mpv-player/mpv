@@ -33,7 +33,7 @@
 
 #include "config.h"
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "common/common.h"
 #include "misc/bstr.h"
 #include "common/msg.h"
@@ -43,7 +43,7 @@
 #include "video/mp_image.h"
 #include "sub/osd.h"
 
-#include "opengl/common.h"
+#include "opengl/context.h"
 #include "opengl/utils.h"
 #include "opengl/hwdec.h"
 #include "opengl/osd.h"
@@ -329,6 +329,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         if (screen) {
             screen->params.primaries = p->renderer_opts->target_prim;
             screen->params.gamma = p->renderer_opts->target_trc;
+            if (p->glctx->flip_v)
+                mp_image_vflip(screen);
         }
         *(struct mp_image **)data = screen;
         return true;
@@ -423,8 +425,6 @@ static int preinit(struct vo *vo)
     if (!p->renderer)
         goto err_out;
     gl_video_set_osd_source(p->renderer, vo->osd);
-    gl_video_set_output_depth(p->renderer, p->glctx->depth_r, p->glctx->depth_g,
-                              p->glctx->depth_b);
     gl_video_set_options(p->renderer, p->renderer_opts);
     gl_video_configure_queue(p->renderer, vo);
 

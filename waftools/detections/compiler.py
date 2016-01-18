@@ -51,6 +51,8 @@ def __add_clang_flags__(ctx):
 def __add_mswin_flags__(ctx):
     ctx.env.CFLAGS += ['-D_WIN32_WINNT=0x0601', '-DUNICODE', '-DCOBJMACROS',
                        '-U__STRICT_ANSI__']
+    ctx.env.LAST_LINKFLAGS += ['-Wl,--major-os-version=6,--minor-os-version=0',
+                 '-Wl,--major-subsystem-version=6,--minor-subsystem-version=0']
 
 def __add_mingw_flags__(ctx):
     __add_mswin_flags__(ctx)

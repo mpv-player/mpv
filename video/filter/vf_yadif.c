@@ -78,5 +78,9 @@ const vf_info_t vf_info_yadif = {
     .name = "yadif",
     .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &(const struct vf_priv_s){
+        .mode = 1,
+        .interlaced_only = 1,
+    },
     .options = vf_opts_fields,
 };

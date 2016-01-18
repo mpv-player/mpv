@@ -24,12 +24,12 @@
 #include <libavutil/common.h>
 #include <ass/ass.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "options/options.h"
 #include "common/common.h"
 #include "common/msg.h"
-#include "demux/stheader.h"
+#include "demux/demux.h"
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "dec_sub.h"
@@ -37,17 +37,20 @@
 #include "sd.h"
 
 struct sd_ass_priv {
+    struct ass_library *ass_library;
+    struct ass_renderer *ass_renderer;
     struct ass_track *ass_track;
     struct ass_track *shadow_track; // for --sub-ass=no rendering
     bool is_converted;
+    struct lavc_conv *converter;
     bool on_top;
     struct sub_bitmap *parts;
-    bool flush_on_seek;
-    int extend_event;
     char last_text[500];
     struct mp_image_params video_params;
     struct mp_image_params last_params;
-    double sub_speed;
+    double sub_speed, video_fps, frame_fps;
+    int64_t *seen_packets;
+    int num_seen_packets;
 };
 
 static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts);
@@ -77,128 +80,185 @@ static void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts)
         ass_process_force_style(track);
 }
 
-static bool supports_format(const char *format)
+static const char *const font_mimetypes[] = {
+    "application/x-truetype-font",
+    "application/vnd.ms-opentype",
+    "application/x-font-ttf",
+    "application/x-font", // probably incorrect
+    NULL
+};
+
+static const char *const font_exts[] = {".ttf", ".ttc", ".otf", NULL};
+
+static bool attachment_is_font(struct mp_log *log, struct demux_attachment *f)
 {
-    // ass-text is produced by converters and the subreader.c ssa parser; this
-    // format has ASS tags, but doesn't start with any prelude, nor does it
-    // have extradata.
-    return format && (strcmp(format, "ass") == 0 ||
-                      strcmp(format, "ssa") == 0 ||
-                      strcmp(format, "ass-text") == 0);
+    if (!f->name || !f->type || !f->data || !f->data_size)
+        return false;
+    for (int n = 0; font_mimetypes[n]; n++) {
+        if (strcmp(font_mimetypes[n], f->type) == 0)
+            return true;
+    }
+    // fallback: match against file extension
+    char *ext = strlen(f->name) > 4 ? f->name + strlen(f->name) - 4 : "";
+    for (int n = 0; font_exts[n]; n++) {
+        if (strcasecmp(ext, font_exts[n]) == 0) {
+            mp_warn(log, "Loading font attachment '%s' with MIME type %s. "
+                    "Assuming this is a broken Matroska file, which was "
+                    "muxed without setting a correct font MIME type.\n",
+                    f->name, f->type);
+            return true;
+        }
+    }
+    return false;
+}
+
+static void add_subtitle_fonts(struct sd *sd)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    struct MPOpts *opts = sd->opts;
+    if (!opts->ass_enabled || !sd->demuxer)
+        return;
+    for (int i = 0; i < sd->demuxer->num_attachments; i++) {
+        struct demux_attachment *f = &sd->demuxer->attachments[i];
+        if (opts->use_embedded_fonts && attachment_is_font(sd->log, f))
+            ass_add_font(ctx->ass_library, f->name, f->data, f->data_size);
+    }
+}
+
+static void enable_output(struct sd *sd, bool enable)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    if (enable == !!ctx->ass_renderer)
+        return;
+    if (ctx->ass_renderer) {
+        ass_renderer_done(ctx->ass_renderer);
+        ctx->ass_renderer = NULL;
+    } else {
+        ctx->ass_renderer = ass_renderer_init(ctx->ass_library);
+
+        mp_ass_configure_fonts(ctx->ass_renderer, sd->opts->sub_text_style,
+                               sd->global, sd->log);
+    }
+}
+
+static void update_subtitle_speed(struct sd *sd)
+{
+    struct MPOpts *opts = sd->opts;
+    struct sd_ass_priv *ctx = sd->priv;
+    ctx->sub_speed = 1.0;
+
+    if (ctx->video_fps > 0 && ctx->frame_fps > 0) {
+        MP_VERBOSE(sd, "Frame based format, dummy FPS: %f, video FPS: %f\n",
+                   ctx->frame_fps, ctx->video_fps);
+        ctx->sub_speed *= ctx->frame_fps / ctx->video_fps;
+    }
+
+    if (opts->sub_fps && ctx->video_fps)
+        ctx->sub_speed *= opts->sub_fps / ctx->video_fps;
+
+    ctx->sub_speed *= opts->sub_speed;
 }
 
 static int init(struct sd *sd)
 {
     struct MPOpts *opts = sd->opts;
-    if (!sd->ass_library || !sd->ass_renderer || !sd->ass_lock || !sd->codec)
-        return -1;
-
-    struct sd_ass_priv *ctx = talloc_zero(NULL, struct sd_ass_priv);
+    struct sd_ass_priv *ctx = talloc_zero(sd, struct sd_ass_priv);
     sd->priv = ctx;
 
-    ctx->extend_event = -1;
-    ctx->is_converted = sd->converted_from != NULL;
+    char *extradata = sd->codec->extradata;
+    int extradata_size = sd->codec->extradata_size;
 
-    pthread_mutex_lock(sd->ass_lock);
+    if (strcmp(sd->codec->codec, "ass") != 0) {
+        ctx->is_converted = true;
+        ctx->converter = lavc_conv_create(sd->log, sd->codec->codec, extradata,
+                                          extradata_size);
+        if (!ctx->converter)
+            return -1;
+        extradata = lavc_conv_get_extradata(ctx->converter);
+        extradata_size = extradata ? strlen(extradata) : 0;
+    }
 
-    ctx->ass_track = ass_new_track(sd->ass_library);
+    ctx->ass_library = mp_ass_init(sd->global, sd->log);
+
+    add_subtitle_fonts(sd);
+
+    if (opts->ass_style_override)
+        ass_set_style_overrides(ctx->ass_library, opts->ass_force_style_list);
+
+    ctx->ass_track = ass_new_track(ctx->ass_library);
     if (!ctx->is_converted)
         ctx->ass_track->track_type = TRACK_TYPE_ASS;
 
-    ctx->shadow_track = ass_new_track(sd->ass_library);
+    ctx->shadow_track = ass_new_track(ctx->ass_library);
     ctx->shadow_track->PlayResX = 384;
     ctx->shadow_track->PlayResY = 288;
     mp_ass_add_default_styles(ctx->shadow_track, opts);
 
-    if (sd->extradata) {
-        ass_process_codec_private(ctx->ass_track, sd->extradata,
-                                  sd->extradata_len);
-    }
+    if (extradata)
+        ass_process_codec_private(ctx->ass_track, extradata, extradata_size);
 
     mp_ass_add_default_styles(ctx->ass_track, opts);
 
-    pthread_mutex_unlock(sd->ass_lock);
+#if LIBASS_VERSION >= 0x01302000
+    ass_set_check_readorder(ctx->ass_track, sd->opts->sub_clear_on_seek ? 0 : 1);
+#endif
 
-    ctx->sub_speed = 1.0;
+    ctx->frame_fps = sd->codec->frame_based;
+    update_subtitle_speed(sd);
 
-    if (sd->video_fps && sd->sh && sd->sh->sub->frame_based > 0) {
-        MP_VERBOSE(sd, "Frame based format, dummy FPS: %f, video FPS: %f\n",
-                   sd->sh->sub->frame_based, sd->video_fps);
-        ctx->sub_speed *= sd->sh->sub->frame_based / sd->video_fps;
-    }
-
-    if (opts->sub_fps && sd->video_fps)
-        ctx->sub_speed *= opts->sub_fps / sd->video_fps;
-
-    ctx->sub_speed *= opts->sub_speed;
+    enable_output(sd, true);
 
     return 0;
+}
+
+// Test if the packet with the given file position (used as unique ID) was
+// already consumed. Return false if the packet is new (and add it to the
+// internal list), and return true if it was already seen.
+static bool check_packet_seen(struct sd *sd, int64_t pos)
+{
+    struct sd_ass_priv *priv = sd->priv;
+    int a = 0;
+    int b = priv->num_seen_packets;
+    while (a < b) {
+        int mid = a + (b - a) / 2;
+        int64_t val = priv->seen_packets[mid];
+        if (pos == val)
+            return true;
+        if (pos > val) {
+            a = mid + 1;
+        } else {
+            b = mid;
+        }
+    }
+    MP_TARRAY_INSERT_AT(priv, priv->seen_packets, priv->num_seen_packets, a, pos);
+    return false;
 }
 
 static void decode(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
-    long long ipts = packet->pts * 1000 + 0.5;
-    long long iduration = packet->duration * 1000 + 0.5;
-    if (strcmp(sd->codec, "ass") == 0) {
-        ass_process_chunk(track, packet->buffer, packet->len, ipts, iduration);
-        return;
-    } else if (strcmp(sd->codec, "ssa") == 0) {
-        // broken ffmpeg ASS packet format
-        ctx->flush_on_seek = true;
-        ass_process_data(track, packet->buffer, packet->len);
-        return;
+    if (ctx->converter) {
+        if (!sd->opts->sub_clear_on_seek && check_packet_seen(sd, packet->pos))
+            return;
+        char **r = lavc_conv_decode(ctx->converter, packet);
+        for (int n = 0; r && r[n]; n++)
+            ass_process_data(track, r[n], strlen(r[n]));
+    } else {
+        // Note that for this packet format, libass has an internal mechanism
+        // for discarding duplicate (already seen) packets.
+        ass_process_chunk(track, packet->buffer, packet->len,
+                          lrint(packet->pts * 1000),
+                          lrint(packet->duration * 1000));
     }
-
-    // plaintext subs
-    if (packet->pts == MP_NOPTS_VALUE) {
-        MP_WARN(sd, "Subtitle without pts, ignored\n");
-        return;
-    }
-    if (ctx->extend_event >= 0 && ctx->extend_event < track->n_events) {
-        ASS_Event *event = &track->events[ctx->extend_event];
-        if (event->Start <= ipts)
-            event->Duration = ipts - event->Start;
-        ctx->extend_event = -1;
-    }
-
-    unsigned char *text = packet->buffer;
-    if (!sd->no_remove_duplicates) {
-        for (int i = 0; i < track->n_events; i++) {
-            if (track->events[i].Start == ipts
-                && (track->events[i].Duration == iduration)
-                && strcmp(track->events[i].Text, text) == 0)
-                return;   // We've already added this subtitle
-        }
-    }
-    int eid = ass_alloc_event(track);
-    ASS_Event *event = track->events + eid;
-
-    if (packet->duration == 0) {
-        MP_WARN(sd, "Subtitle without duration or "
-                "duration set to 0 at pts %f.\n", packet->pts);
-    }
-    if (packet->duration < 0) {
-        // Assume unknown duration. The FFmpeg API is very unclear about this.
-        MP_WARN(sd, "Assuming subtitle without duration at pts %f\n", packet->pts);
-        // _If_ there's a next subtitle, the duration will be adjusted again.
-        // If not, show it forever.
-        iduration = INT_MAX;
-        ctx->extend_event = eid;
-    }
-
-    event->Start = ipts;
-    event->Duration = iduration;
-    event->Style = track->default_style;
-    event->Text = strdup(text);
 }
 
 static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
                           bool converted, ASS_Track *track)
 {
     struct MPOpts *opts = sd->opts;
-    ASS_Renderer *priv = sd->ass_renderer;
+    struct sd_ass_priv *ctx = sd->priv;
+    ASS_Renderer *priv = ctx->ass_renderer;
 
     ass_set_frame_size(priv, dim->w, dim->h);
     ass_set_margins(priv, dim->mt, dim->mb, dim->ml, dim->mr);
@@ -343,23 +403,19 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     bool no_ass = !opts->ass_enabled || ctx->on_top;
     bool converted = ctx->is_converted || no_ass;
     ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
+    ASS_Renderer *renderer = ctx->ass_renderer;
 
-    if (pts == MP_NOPTS_VALUE || !sd->ass_renderer)
+    if (pts == MP_NOPTS_VALUE || !renderer)
         return;
 
-    pthread_mutex_lock(sd->ass_lock);
-
-    ASS_Renderer *renderer = sd->ass_renderer;
     double scale = dim.display_par;
     if (!converted && (!opts->ass_style_override ||
                        opts->ass_vsfilter_aspect_compat))
     {
         // Let's use the original video PAR for vsfilter compatibility:
-        double par = scale
-            * (ctx->video_params.d_w / (double)ctx->video_params.d_h)
-            / (ctx->video_params.w   / (double)ctx->video_params.h);
+        double par = ctx->video_params.p_w / (double)ctx->video_params.p_h;
         if (isnormal(par))
-            scale = par;
+            scale *= par;
     }
     configure_ass(sd, &dim, converted, track);
     ass_set_pixel_aspect(renderer, scale);
@@ -378,8 +434,6 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
 
     if (!converted)
         mangle_colors(sd, res);
-
-    pthread_mutex_unlock(sd->ass_lock);
 }
 
 struct buf {
@@ -510,7 +564,7 @@ static void fill_plaintext(struct sd *sd, double pts)
         text++;
     }
 
-    if (!dst.start || !dst.start[0])
+    if (!dst.start)
         return;
 
     int n = ass_alloc_event(track);
@@ -522,30 +576,31 @@ static void fill_plaintext(struct sd *sd, double pts)
 
     if (track->default_style < track->n_styles)
         track->styles[track->default_style].Alignment = ctx->on_top ? 6 : 2;
-}
 
-static void fix_events(struct sd *sd)
-{
-    struct sd_ass_priv *ctx = sd->priv;
-    ctx->flush_on_seek = false;
+    talloc_free(dst.start);
 }
 
 static void reset(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
-    if (ctx->flush_on_seek || sd->opts->sub_clear_on_seek) {
+    if (sd->opts->sub_clear_on_seek) {
         ass_flush_events(ctx->ass_track);
-        ctx->extend_event = -1;
+        ctx->num_seen_packets = 0;
     }
-    ctx->flush_on_seek = false;
+    if (ctx->converter)
+        lavc_conv_reset(ctx->converter);
 }
 
 static void uninit(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
 
+    if (ctx->converter)
+        lavc_conv_uninit(ctx->converter);
     ass_free_track(ctx->ass_track);
-    talloc_free(ctx);
+    ass_free_track(ctx->shadow_track);
+    enable_output(sd, false);
+    ass_library_done(ctx->ass_library);
 }
 
 static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
@@ -567,6 +622,10 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     case SD_CTRL_SET_TOP:
         ctx->on_top = *(bool *)arg;
         return CONTROL_OK;
+    case SD_CTRL_SET_VIDEO_DEF_FPS:
+        ctx->video_fps = *(double *)arg;
+        update_subtitle_speed(sd);
+        return CONTROL_OK;
     default:
         return CONTROL_UNKNOWN;
     }
@@ -575,14 +634,13 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
 const struct sd_functions sd_ass = {
     .name = "ass",
     .accept_packets_in_advance = true,
-    .supports_format = supports_format,
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,
     .get_text = get_text,
-    .fix_events = fix_events,
     .control = control,
     .reset = reset,
+    .select = enable_output,
     .uninit = uninit,
 };
 

@@ -23,7 +23,7 @@
 #include <assert.h>
 
 #include "config.h"
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "common/msg.h"
 #include "common/encode.h"
@@ -218,7 +218,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->d_audio->header = sh;
         mpctx->d_audio->pool = mp_audio_pool_create(mpctx->d_audio);
         mpctx->d_audio->afilter = af_new(mpctx->global);
-        mpctx->d_audio->afilter->replaygain_data = sh->audio->replaygain_data;
+        mpctx->d_audio->afilter->replaygain_data = sh->codec->replaygain_data;
         mpctx->d_audio->spdif_passthrough = true;
         mpctx->ao_buffer = mp_audio_buffer_create(NULL);
         if (!audio_init_best_codec(mpctx->d_audio))
@@ -361,9 +361,10 @@ double written_audio_pts(struct MPContext *mpctx)
     if (a_pts == MP_NOPTS_VALUE)
         return MP_NOPTS_VALUE;
 
-    // d_audio->pts is the timestamp of the latest input packet with
-    // known pts that the decoder has decoded. d_audio->pts_bytes is
-    // the amount of bytes the decoder has written after that timestamp.
+    // d_audio->pts is the timestamp of the first sample of the latest frame
+    // the with a known pts that the decoder has returned. d_audio->pts_offset
+    // is the amount of samples the decoder has returned after that timestamp
+    // (includes the frame size).
     a_pts += d_audio->pts_offset / (double)in_format.rate;
 
     // Now a_pts hopefully holds the pts for end of audio from decoder.
@@ -467,7 +468,7 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     if (written_pts == MP_NOPTS_VALUE && !mp_audio_buffer_samples(mpctx->ao_buffer))
         return false; // no audio read yet
 
-    bool sync_to_video = mpctx->d_video && mpctx->sync_audio_to_video &&
+    bool sync_to_video = mpctx->vo_chain && mpctx->sync_audio_to_video &&
                          mpctx->video_status != STATUS_EOF;
 
     double sync_pts = MP_NOPTS_VALUE;
@@ -486,11 +487,12 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
 
     double ptsdiff = written_pts - sync_pts;
     // Missing timestamp, or PTS reset, or just broken.
-    if (written_pts == MP_NOPTS_VALUE || fabs(ptsdiff) > 3600) {
+    if (written_pts == MP_NOPTS_VALUE) {
         MP_WARN(mpctx, "Failed audio resync.\n");
         mpctx->audio_status = STATUS_FILLING;
         return true;
     }
+    ptsdiff = MPCLAMP(ptsdiff, -3600, 3600);
 
     int align = af_format_sample_alignment(out_format.format);
     *skip = (int)(-ptsdiff * play_samplerate) / align * align;
@@ -541,6 +543,13 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         reinit_audio_chain(mpctx);
         mpctx->sleeptime = 0;
         return; // try again next iteration
+    }
+
+    if (mpctx->vo_chain && d_audio->pts_reset) {
+        MP_VERBOSE(mpctx, "Reset playback due to audio timestamp reset.\n");
+        reset_playback_state(mpctx);
+        mpctx->sleeptime = 0;
+        return;
     }
 
     struct mp_audio out_format = {0};

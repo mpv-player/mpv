@@ -50,7 +50,7 @@ UP and DOWN
 
 Ctrl+LEFT and Ctrl+RIGHT
     Seek to the previous/next subtitle. Subject to some restrictions and
-    might not work always; see ``sub_seek`` command.
+    might not always work; see ``sub_seek`` command.
 
 [ and ]
     Decrease/increase current playback speed by 10%.
@@ -222,7 +222,10 @@ PREVIOUS and NEXT
 support.)
 
 h and k
-    Select previous/next channel.
+    Select previous/next tv-channel.
+
+H and K
+    Select previous/next dvb-channel.
 
 Mouse Control
 -------------
@@ -520,8 +523,9 @@ TAKING SCREENSHOTS
 
 Screenshots of the currently played file can be taken using the 'screenshot'
 input mode command, which is by default bound to the ``s`` key. Files named
-``shotNNNN.jpg`` will be saved in the working directory, using the first
-available number - no files will be overwritten.
+``mpv-shotNNNN.jpg`` will be saved in the working directory, using the first
+available number - no files will be overwritten. In pseudo-GUI mode, the
+screenshot will be saved somewhere else. See `PSEUDO GUI MODE`_.
 
 A screenshot will usually contain the unscaled video contents at the end of the
 video filter chain and subtitles. By default, ``S`` takes screenshots without
@@ -571,7 +575,7 @@ listed.
   certainty.
 - Dropped frames, e.g. ``Dropped: 4``. Shows up only if the count is not 0. Can
   grow if the video framerate is higher than that of the display, or if video
-  rendering is too slow. Also can be incremented on "hiccups" and when the video
+  rendering is too slow. May also be incremented on "hiccups" and when the video
   frame couldn't be displayed on time. (``vo-drop-frame-count`` property.)
   If the decoder drops frames, the number of decoder-dropped frames is appended
   to the display as well, e.g.: ``Dropped: 4/34``. This happens only if
@@ -602,7 +606,7 @@ PROTOCOLS
     Play a path from  Samba share.
 
 ``bd://[title][/device]`` ``--bluray-device=PATH``
-    Play a Blu-Ray disc. Currently, this does not accept ISO files. Instead,
+    Play a Blu-ray disc. Currently, this does not accept ISO files. Instead,
     you must mount the ISO file as filesystem, and point ``--bluray-device``
     to the mounted directory directly.
 
@@ -654,9 +658,8 @@ PROTOCOLS
     absolute path.
 
 ``fd://123``
-    Read data from the given UNIX FD (for example 123). This is similar to
-    piping data to stdin via ``-``, but can use an arbitrary file descriptor.
-    Will not work correctly on MS Windows.
+    Read data from the given file descriptor (for example 123). This is similar
+    to piping data to stdin via ``-``, but can use an arbitrary file descriptor.
 
 ``edl://[edl specification as in edl-mpv.rst]``
     Stitch together parts of multiple files and play them.
@@ -728,7 +731,7 @@ EMBEDDING INTO OTHER PROGRAMS (LIBMPV)
 ======================================
 
 mpv can be embedded into other programs as video/audio playback backend. The
-recommended way to to so is using libmpv. See ``libmpv/client.h`` in the mpv
+recommended way to do so is using libmpv. See ``libmpv/client.h`` in the mpv
 source code repository. This provides a C API. Bindings for other languages
 might be available (see wiki).
 
@@ -803,7 +806,7 @@ libdvdcss:
 
         key
            is the default method. libdvdcss will use a set of calculated
-           player keys to try and get the disc key. This can fail if the drive
+           player keys to try to get the disc key. This can fail if the drive
            does not recognize any of the player keys.
 
         disc
@@ -919,7 +922,7 @@ locations are different. They are generally located under ``%APPDATA%/mpv/``.
 For example, the path to mpv.conf is ``%APPDATA%/mpv/mpv.conf``, which maps to
 a system and user-specific path, for example
 
-    ``C:\users\USERNAME\Application Data\mpv\mpv.conf``
+    ``C:\users\USERNAME\AppData\Roaming\mpv\mpv.conf``
 
 You can find the exact path by running ``echo %APPDATA%\mpv\mpv.conf`` in cmd.exe.
 
@@ -942,8 +945,8 @@ lower priority. Some config files are loaded only once, which means that
 e.g. of 2 ``input.conf`` files located in two config directories, only the
 one from the directory with higher priority will be loaded.
 
-A third config directory with lowest priority is the directory named ``mpv``
-in the same directory as ``mpv.exe``. This used to be the directory with
+A third config directory with the lowest priority is the directory named ``mpv``
+in the same directory as ``mpv.exe``. This used to be the directory with the
 highest priority, but is now discouraged to use and might be removed in the
 future.
 

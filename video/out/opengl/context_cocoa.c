@@ -24,7 +24,7 @@
 #include <dlfcn.h>
 #include "video/out/cocoa_common.h"
 #include "osdep/macosx_versions.h"
-#include "common.h"
+#include "context.h"
 
 struct cgl_context {
     CGLPixelFormatObj pix;
@@ -99,7 +99,7 @@ error_out:
     return err;
 }
 
-static bool create_gl_context(struct MPGLContext *ctx)
+static bool create_gl_context(struct MPGLContext *ctx, int vo_flags)
 {
     struct cgl_context *p = ctx->priv;
     CGLError err;
@@ -124,8 +124,12 @@ static bool create_gl_context(struct MPGLContext *ctx)
     vo_cocoa_set_opengl_ctx(ctx->vo, p->ctx);
     CGLSetCurrentContext(p->ctx);
 
-    ctx->depth_r = ctx->depth_g = ctx->depth_b = cgl_color_size(ctx);
+    if (vo_flags & VOFLAG_ALPHA)
+        CGLSetParameter(p->ctx, kCGLCPSurfaceOpacity, &(GLint){0});
+
     mpgl_load_functions(ctx->gl, (void *)cocoa_glgetaddr, NULL, ctx->vo->log);
+    ctx->gl->fb_r = ctx->gl->fb_g = ctx->gl->fb_b = cgl_color_size(ctx);
+    ctx->gl->fb_premultiplied = true;
 
     CGLReleasePixelFormat(p->pix);
 
@@ -143,7 +147,7 @@ static int cocoa_init(MPGLContext *ctx, int vo_flags)
 {
     vo_cocoa_init(ctx->vo);
 
-    if (!create_gl_context(ctx))
+    if (!create_gl_context(ctx, vo_flags))
         return -1;
 
     ctx->gl->SwapInterval = set_swap_interval;

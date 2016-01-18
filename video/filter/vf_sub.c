@@ -49,30 +49,27 @@ struct vf_priv_s {
     struct mp_osd_res dim;
 };
 
-static int config(struct vf_instance *vf,
-                  int width, int height, int d_width, int d_height,
-                  unsigned int flags, unsigned int outfmt)
+static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
+                    struct mp_image_params *out)
 {
+    int width = in->w, height = in->h;
+
     vf->priv->outh = height + vf->priv->opt_top_margin +
                      vf->priv->opt_bottom_margin;
     vf->priv->outw = width;
-
-    double dar = (double)d_width / d_height;
-    double sar = (double)width / height;
-
-    vf_rescale_dsize(&d_width, &d_height, width, height,
-                     vf->priv->outw, vf->priv->outh);
 
     vf->priv->dim = (struct mp_osd_res) {
         .w = vf->priv->outw,
         .h = vf->priv->outh,
         .mt = vf->priv->opt_top_margin,
         .mb = vf->priv->opt_bottom_margin,
-        .display_par = sar / dar,
+        .display_par = in->p_w / (double)in->p_h,
     };
 
-    return vf_next_config(vf, vf->priv->outw, vf->priv->outh, d_width,
-                          d_height, flags, outfmt);
+    *out = *in;
+    out->w = vf->priv->outw;
+    out->h = vf->priv->outh;
+    return 0;
 }
 
 static void prepare_image(struct vf_instance *vf, struct mp_image *dmpi,
@@ -130,7 +127,7 @@ static int control(vf_instance_t *vf, int request, void *data)
 
 static int vf_open(vf_instance_t *vf)
 {
-    vf->config = config;
+    vf->reconfig = reconfig;
     vf->query_format = query_format;
     vf->control   = control;
     vf->filter    = filter;

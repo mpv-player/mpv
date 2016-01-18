@@ -40,7 +40,7 @@
 #include "sub/osd.h"
 
 #include "opengl/osd.h"
-#include "opengl/rpi.h"
+#include "opengl/context_rpi.h"
 
 struct priv {
     DISPMANX_DISPLAY_HANDLE_T display;
@@ -171,8 +171,16 @@ static void resize(struct vo *vo)
 
     vo_get_src_dst_rects(vo, &src, &dst, &p->osd_res);
 
+    int rotate[] = {MMAL_DISPLAY_ROT0,
+                    MMAL_DISPLAY_ROT90,
+                    MMAL_DISPLAY_ROT180,
+                    MMAL_DISPLAY_ROT270};
+
+
     int src_w = src.x1 - src.x0, src_h = src.y1 - src.y0,
         dst_w = dst.x1 - dst.x0, dst_h = dst.y1 - dst.y0;
+    int p_x, p_y;
+    av_reduce(&p_x, &p_y, dst_w * src_h, src_w * dst_h, 16000);
     MMAL_DISPLAYREGION_T dr = {
         .hdr = { .id = MMAL_PARAMETER_DISPLAYREGION,
                  .size = sizeof(MMAL_DISPLAYREGION_T), },
@@ -180,12 +188,18 @@ static void resize(struct vo *vo)
         .dest_rect = { .x = dst.x0, .y = dst.y0, .width = dst_w, .height = dst_h },
         .layer = p->video_layer,
         .display_num = p->display_nr,
-        .pixel_x = dst_w * src_h,
-        .pixel_y = src_w * dst_h,
+        .pixel_x = p_x,
+        .pixel_y = p_y,
+        .transform = rotate[vo->params ? vo->params->rotate / 90 : 0],
         .set = MMAL_DISPLAY_SET_SRC_RECT | MMAL_DISPLAY_SET_DEST_RECT |
                MMAL_DISPLAY_SET_LAYER | MMAL_DISPLAY_SET_NUM |
-               MMAL_DISPLAY_SET_PIXEL,
+               MMAL_DISPLAY_SET_PIXEL | MMAL_DISPLAY_SET_TRANSFORM,
     };
+
+    if (vo->params && (vo->params->rotate % 180) == 90) {
+        MPSWAP(int, dr.src_rect.x, dr.src_rect.y);
+        MPSWAP(int, dr.src_rect.width, dr.src_rect.height);
+    }
 
     if (mmal_port_parameter_set(input, &dr.hdr))
         MP_WARN(vo, "could not set video rectangle\n");
@@ -455,15 +469,11 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 
     disable_renderer(vo);
 
-    AVRational dr = {params->d_w, params->d_h};
-    AVRational ir = {params->w, params->h};
-    AVRational par = av_div_q(dr, ir);
-
     input->format->encoding = opaque ? MMAL_ENCODING_OPAQUE : MMAL_ENCODING_I420;
     input->format->es->video.width = MP_ALIGN_UP(params->w, ALIGN_W);
     input->format->es->video.height = MP_ALIGN_UP(params->h, ALIGN_H);
     input->format->es->video.crop = (MMAL_RECT_T){0, 0, params->w, params->h};
-    input->format->es->video.par = (MMAL_RATIONAL_T){par.num, par.den};
+    input->format->es->video.par = (MMAL_RATIONAL_T){params->p_w, params->p_h};
     input->format->es->video.color_space = map_csp(params->colorspace);
 
     if (mmal_port_format_commit(input))
@@ -679,6 +689,7 @@ static const struct m_option options[] = {
 const struct vo_driver video_out_rpi = {
     .description = "Raspberry Pi (MMAL)",
     .name = "rpi",
+    .caps = VO_CAP_ROTATE90,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,

@@ -113,7 +113,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 // rest of the user-provided buffer with silence.
 // This basically assumes that the audio device doesn't care about underruns.
 // If this is called in paused mode, it will always return 0.
-// The caller should set out_time_us to the expected delay the last sample
+// The caller should set out_time_us to the expected delay until the last sample
 // reaches the speakers, in microseconds, using mp_time_us() as reference.
 int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
 {

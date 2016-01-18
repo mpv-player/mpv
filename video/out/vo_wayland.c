@@ -299,8 +299,8 @@ static bool resize(struct priv *p)
         .imgfmt = p->video_format->mp_format,
         .w = p->dst_w,
         .h = p->dst_h,
-        .d_w = p->dst_w,
-        .d_h = p->dst_h,
+        .p_w = 1,
+        .p_h = 1,
     };
 
     mp_image_params_guess_csp(&p->sws->dst);

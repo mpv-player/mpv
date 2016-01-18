@@ -184,8 +184,7 @@ static size_t read_buffer(struct priv *s, unsigned char *dst,
 }
 
 // Runs in the cache thread.
-// Returns true if reading was attempted, and the mutex was shortly unlocked.
-static bool cache_fill(struct priv *s)
+static void cache_fill(struct priv *s)
 {
     int64_t read = s->read_filepos;
     int len = 0;
@@ -236,7 +235,7 @@ static bool cache_fill(struct priv *s)
     if (space < FILL_LIMIT) {
         s->idle = true;
         s->reads++; // don't stuck main thread
-        return false;
+        return;
     }
 
     // limit to end of buffer (without wrapping)
@@ -278,8 +277,6 @@ done:
     }
 
     pthread_cond_signal(&s->wakeup);
-
-    return true;
 }
 
 // This is called both during init and at runtime.
@@ -421,6 +418,7 @@ static bool control_needs_flush(int stream_ctrl)
     case STREAM_CTRL_SET_CURRENT_TITLE:
     case STREAM_CTRL_RECONNECT:
     case STREAM_CTRL_DVB_SET_CHANNEL:
+    case STREAM_CTRL_DVB_SET_CHANNEL_NAME:
     case STREAM_CTRL_DVB_STEP_CHANNEL:
         return true;
     }

@@ -22,7 +22,7 @@
 
 #include <string.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "config.h"
 

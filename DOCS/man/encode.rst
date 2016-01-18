@@ -93,8 +93,8 @@ You can encode files from one format/codec to another using this facility.
         Completely empties the options list.
 
 ``--oafirst``
-    Force the audio stream to become the first stream in the output. By default
-    the order is unspecified.
+    Force the audio stream to become the first stream in the output.
+    By default, the order is unspecified.
 
 ``--ovc=<codec>``
     Specifies the output video codec. This can be a comma separated list of
@@ -134,8 +134,8 @@ You can encode files from one format/codec to another using this facility.
         Completely empties the options list.
 
 ``--ovfirst``
-    Force the video stream to become the first stream in the output. By default
-    the order is unspecified.
+    Force the video stream to become the first stream in the output.
+    By default, the order is unspecified.
 
 ``--ocopyts``
     Copies input pts to the output video (not supported by some output

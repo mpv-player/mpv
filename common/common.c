@@ -21,8 +21,9 @@
 #include <libavutil/common.h>
 #include <libavutil/error.h>
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "misc/bstr.h"
+#include "misc/ctype.h"
 #include "common/common.h"
 
 #define appendf(ptr, ...) \
@@ -148,7 +149,7 @@ void mp_append_utf8_bstr(void *talloc_ctx, struct bstr *buf, uint32_t codepoint)
     bstr_xappend(talloc_ctx, buf, (bstr){data, output - data});
 }
 
-// Parse a C-style escape beginning at code, and append the result to *str
+// Parse a C/JSON-style escape beginning at code, and append the result to *str
 // using talloc. The input string (*code) must point to the first character
 // after the initial '\', and after parsing *code is set to the first character
 // after the current escape.
@@ -161,6 +162,7 @@ static bool mp_parse_escape(void *talloc_ctx, bstr *dst, bstr *code)
     switch (code->start[0]) {
     case '"':  replace = '"';  break;
     case '\\': replace = '\\'; break;
+    case '/':  replace = '/'; break;
     case 'b':  replace = '\b'; break;
     case 'f':  replace = '\f'; break;
     case 'n':  replace = '\n'; break;
@@ -255,5 +257,21 @@ char *mp_strerror_buf(char *buf, size_t buf_size, int errnum)
 {
     // This handles the nasty details of calling the right function for us.
     av_strerror(AVERROR(errnum), buf, buf_size);
+    return buf;
+}
+
+char *mp_tag_str_buf(char *buf, size_t buf_size, uint32_t tag)
+{
+    if (buf_size < 1)
+        return buf;
+    buf[0] = '\0';
+    for (int n = 0; n < 4; n++) {
+        uint8_t val = (tag >> (n * 8)) & 0xFF;
+        if (mp_isalnum(val) || val == '_' || val == ' ') {
+            mp_snprintf_cat(buf, buf_size, "%c", val);
+        } else {
+            mp_snprintf_cat(buf, buf_size, "[%d]", val);
+        }
+    }
     return buf;
 }

@@ -447,10 +447,12 @@ Available video output drivers are:
         Note that this option never affects ``cscale``.
 
     ``pbo``
-        Enable use of PBOs. This is slightly faster, but can sometimes lead to
-        sporadic and temporary image corruption (in theory, because reupload
-        is not retried when it fails), and perhaps actually triggers slower
-        paths with drivers that don't support PBOs properly.
+        Enable use of PBOs. On some drivers this can be faster, especially if
+        the source video size is huge (e.g. so called "4K" video). On other
+        drivers it might be slower or cause latency issues.
+
+        In theory, this can sometimes lead to sporadic and temporary image
+        corruption (because reupload is not retried when it fails).
 
     ``dither-depth=<N|no|auto>``
         Set dither target depth to N. Default: no.
@@ -481,7 +483,7 @@ Available video output drivers are:
 
     ``temporal-dither``
         Enable temporal dithering. (Only active if dithering is enabled in
-        general.) This changes between 8 different dithering pattern on each
+        general.) This changes between 8 different dithering patterns on each
         frame by changing the orientation of the tiled dithering matrix.
         Unfortunately, this can lead to flicker on LCD displays, since these
         have a high reaction time.
@@ -492,7 +494,7 @@ Available video output drivers are:
         video frame, 2 on every other frame, etc.
 
     ``debug``
-        Check for OpenGL errors, i.e. call ``glGetError()``. Also request a
+        Check for OpenGL errors, i.e. call ``glGetError()``. Also, request a
         debug OpenGL context (which does nothing with current graphics drivers
         as of this writing).
 
@@ -741,7 +743,7 @@ Available video output drivers are:
 
     ``glfinish``
         Call ``glFinish()`` before and after swapping buffers (default: disabled).
-        Slower, but might help getting better results when doing framedropping.
+        Slower, but might improve results when doing framedropping.
         Can completely ruin performance. The details depend entirely on the
         OpenGL driver.
 
@@ -770,9 +772,9 @@ Available video output drivers are:
         The value ``auto`` will try to determine whether the compositor is
         active, and calls ``DwmFlush`` only if it seems to be.
 
-        This may help getting more consistent frame intervals, especially with
-        high-fps clips - which might also reduce dropped frames. Typically a
-        value of ``windowed`` should be enough since full screen may bypass the
+        This may help to get more consistent frame intervals, especially with
+        high-fps clips - which might also reduce dropped frames. Typically, a
+        value of ``windowed`` should be enough, since full screen may bypass the
         DWM.
 
         Windows only.
@@ -955,9 +957,11 @@ Available video output drivers are:
                      things like softsubbed ASS signs to match the video colors,
                      but may cause SRT subtitles or similar to look slightly off.
 
-    ``alpha=<blend|yes|no>``
-        Decides what to do if the input has an alpha component (default: blend).
+    ``alpha=<blend-tiles|blend|yes|no>``
+        Decides what to do if the input has an alpha component.
 
+        blend-tiles
+            Blend the frame against a 16x16 gray/white tiles background (default).
         blend
             Blend the frame against a black background.
         yes
@@ -984,7 +988,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:correct-downscaling:sigmoid-upscaling:pbo:deband:es=no
+        --vo=opengl:scale=spline36:cscale=spline36:dscale=mitchell:dither-depth=auto:correct-downscaling:sigmoid-upscaling:deband:es=no
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.

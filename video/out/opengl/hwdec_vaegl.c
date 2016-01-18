@@ -1,20 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * Parts based on the MPlayer VA-API patch (see vo_vaapi.c).
- *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stddef.h>
@@ -285,12 +283,12 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     int mpfmt = va_fourcc_to_imgfmt(va_image->format.fourcc);
     if (mpfmt != IMGFMT_NV12 && mpfmt != IMGFMT_420P) {
         MP_FATAL(p, "unsupported VA image format %s\n",
-                 VA_STR_FOURCC(va_image->format.fourcc));
+                 mp_tag_str(va_image->format.fourcc));
         goto err;
     }
 
     if (!hw->converted_imgfmt) {
-        MP_VERBOSE(p, "format: %s %s\n", VA_STR_FOURCC(va_image->format.fourcc),
+        MP_VERBOSE(p, "format: %s %s\n", mp_tag_str(va_image->format.fourcc),
                    mp_imgfmt_to_name(mpfmt));
         hw->converted_imgfmt = mpfmt;
     }

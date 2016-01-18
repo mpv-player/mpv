@@ -25,9 +25,10 @@
 
 #include "config.h"
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 #include "common/msg.h"
 #include "common/av_common.h"
+#include "demux/stheader.h"
 #include "options/options.h"
 #include "video/mp_image.h"
 #include "sd.h"
@@ -63,21 +64,6 @@ struct sd_lavc_priv {
     int num_seekpoints;
 };
 
-static bool supports_format(const char *format)
-{
-    enum AVCodecID cid = mp_codec_to_av_codec_id(format);
-    // Supported codecs must be known to decode to paletted bitmaps
-    switch (cid) {
-    case AV_CODEC_ID_DVB_SUBTITLE:
-    case AV_CODEC_ID_HDMV_PGS_SUBTITLE:
-    case AV_CODEC_ID_XSUB:
-    case AV_CODEC_ID_DVD_SUBTITLE:
-        return true;
-    default:
-        return false;
-    }
-}
-
 static void get_resolution(struct sd *sd, int wh[2])
 {
     struct sd_lavc_priv *priv = sd->priv;
@@ -109,8 +95,20 @@ static void get_resolution(struct sd *sd, int wh[2])
 
 static int init(struct sd *sd)
 {
+    enum AVCodecID cid = mp_codec_to_av_codec_id(sd->codec->codec);
+
+    // Supported codecs must be known to decode to paletted bitmaps
+    switch (cid) {
+    case AV_CODEC_ID_DVB_SUBTITLE:
+    case AV_CODEC_ID_HDMV_PGS_SUBTITLE:
+    case AV_CODEC_ID_XSUB:
+    case AV_CODEC_ID_DVD_SUBTITLE:
+        break;
+    default:
+        return -1;
+    }
+
     struct sd_lavc_priv *priv = talloc_zero(NULL, struct sd_lavc_priv);
-    enum AVCodecID cid = mp_codec_to_av_codec_id(sd->codec);
     AVCodecContext *ctx = NULL;
     AVCodec *sub_codec = avcodec_find_decoder(cid);
     if (!sub_codec)
@@ -118,7 +116,7 @@ static int init(struct sd *sd)
     ctx = avcodec_alloc_context3(sub_codec);
     if (!ctx)
         goto error;
-    mp_lavc_set_extradata(ctx, sd->extradata, sd->extradata_len);
+    mp_lavc_set_extradata(ctx, sd->codec->extradata, sd->codec->extradata_size);
     if (avcodec_open2(ctx, sub_codec, NULL) < 0)
         goto error;
     priv->avctx = ctx;
@@ -317,11 +315,10 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
 
     double video_par = 0;
     if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE &&
-            opts->stretch_dvd_subs) {
+        opts->stretch_dvd_subs)
+    {
         // For DVD subs, try to keep the subtitle PAR at display PAR.
-        double par =
-              (priv->video_params.d_w / (double)priv->video_params.d_h)
-            / (priv->video_params.w   / (double)priv->video_params.h);
+        double par = priv->video_params.p_w / (double)priv->video_params.p_h;
         if (isnormal(par))
             video_par = par;
     }
@@ -467,7 +464,6 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
 
 const struct sd_functions sd_lavc = {
     .name = "lavc",
-    .supports_format = supports_format,
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,

@@ -27,6 +27,7 @@
 #include "options/options.h"
 #include "sub/osd.h"
 #include "demux/timeline.h"
+#include "video/mp_image.h"
 #include "video/out/vo.h"
 
 // definitions used internally by the core player code
@@ -66,6 +67,7 @@ enum seek_type {
     MPSEEK_RELATIVE,
     MPSEEK_ABSOLUTE,
     MPSEEK_FACTOR,
+    MPSEEK_BACKSTEP,
 };
 
 enum seek_precision {
@@ -131,7 +133,7 @@ struct track {
     // If the track's stream changes with the timeline (ordered chapters).
     bool under_timeline;
 
-    // Does not change with under_timeline, but it useless for most purposes.
+    // Does not change with under_timeline, but is useless for most purposes.
     struct sh_stream *original_stream;
 
     // Value can change if under_timeline==true.
@@ -139,9 +141,34 @@ struct track {
     // Invariant: !stream || stream->demuxer == demuxer
     struct sh_stream *stream;
 
+    // Current subtitle state (or cached state if selected==false).
+    struct dec_sub *d_sub;
+
+    // Current video decoding state (NULL if selected==false)
+    struct dec_video *d_video;
+
     // For external subtitles, which are read fully on init. Do not attempt
     // to read packets from them.
     bool preloaded;
+};
+
+// Summarizes video filtering and output.
+struct vo_chain {
+    struct mp_log *log;
+
+    struct mp_hwdec_info *hwdec_info;
+    double container_fps;
+
+    struct vf_chain *vf;
+    struct vo *vo;
+
+    // 1-element input frame queue.
+    struct mp_image *input_mpi;
+
+    // Last known input_mpi format (so vf can be reinitialized any time).
+    struct mp_image_params input_format;
+
+    struct dec_video *video_src;
 };
 
 /* Note that playback can be paused, stopped, etc. at any time. While paused,
@@ -240,9 +267,7 @@ typedef struct MPContext {
     // Currently, this is used for the secondary subtitle track only.
     struct track *current_track[NUM_PTRACKS][STREAM_TYPE_COUNT];
 
-    struct dec_video *d_video;
     struct dec_audio *d_audio;
-    struct dec_sub *d_sub[2];
 
     // Uses: accessing metadata (consider ordered chapters case, where the main
     // demuxer defines metadata), or special purpose demuxers like TV.
@@ -254,11 +279,14 @@ typedef struct MPContext {
     struct mp_audio *ao_decoder_fmt; // for weak gapless audio check
     struct mp_audio_buffer *ao_buffer;  // queued audio; passed to ao_play() later
 
+    struct vo_chain *vo_chain;
+
     struct vo *video_out;
     // next_frame[0] is the next frame, next_frame[1] the one after that.
-    struct mp_image *next_frames[VO_MAX_REQ_FRAMES];
+    // The +1 is for adding 1 additional frame in backstep mode.
+    struct mp_image *next_frames[VO_MAX_REQ_FRAMES + 1];
     int num_next_frames;
-    struct mp_image *saved_frame;   // for hrseek_lastframe
+    struct mp_image *saved_frame;   // for hrseek_lastframe and hrseek_backstep
 
     enum playback_status video_status, audio_status;
     bool restart_complete;
@@ -282,6 +310,7 @@ typedef struct MPContext {
     bool hrseek_active;     // skip all data until hrseek_pts
     bool hrseek_framedrop;  // allow decoder to drop frames before hrseek_pts
     bool hrseek_lastframe;  // drop everything until last frame reached
+    bool hrseek_backstep;   // go to frame before seek target
     double hrseek_pts;
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
@@ -292,10 +321,8 @@ typedef struct MPContext {
     // How much video timing has been changed to make it match the audio
     // timeline. Used for status line information only.
     double total_avsync_change;
-    // Total number of dropped frames that were dropped by decoder.
-    int dropped_frames_total;
-    // Number of frames dropped in a row.
-    int dropped_frames;
+    // Used to compute the number of frames dropped in a row.
+    int dropped_frames_start;
     // A-V sync difference when last frame was displayed. Kept to display
     // the same value if the status line is updated at a time where no new
     // video frame is shown.
@@ -317,15 +344,7 @@ typedef struct MPContext {
 
     int last_chapter;
 
-    // History of video frames timestamps that were queued in the VO
-    // This includes even skipped frames during hr-seek
-    double vo_pts_history_pts[MAX_NUM_VO_PTS];
-    // Whether the PTS at vo_pts_history[n] is after a seek reset
-    uint64_t vo_pts_history_seek[MAX_NUM_VO_PTS];
-    uint64_t vo_pts_history_seek_ts;
-    uint64_t backstep_start_seek_ts;
-    bool backstep_active;
-    // Past timestamps etc. (stupidly duplicated with vo_pts_history).
+    // Past timestamps etc.
     // The newest frame is at index 0.
     struct frame_info *past_frames;
     int num_past_frames;
@@ -361,17 +380,6 @@ typedef struct MPContext {
      * boundaries of that chapter due to an inaccurate seek. */
     int last_chapter_seek;
     double last_chapter_pts;
-
-    /* Subtitle renderer. This is separate, because we want to keep fonts
-     * loaded across ordered chapters, instead of reloading and rescanning
-     * them on each transition. (Both of these objects contain this state.)
-     */
-    pthread_mutex_t ass_lock;
-    struct ass_renderer *ass_renderer;
-    struct ass_library *ass_library;
-    struct mp_log *ass_log;
-
-    int last_dvb_step;
 
     bool paused;
     // step this many frames, then pause
@@ -455,7 +463,6 @@ void mp_print_version(struct mp_log *log, int always);
 void wakeup_playloop(void *ctx);
 
 // misc.c
-double get_main_demux_pts(struct MPContext *mpctx);
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t);
 double get_play_end_pts(struct MPContext *mpctx);
 double get_relative_time(struct MPContext *mpctx);
@@ -505,7 +512,6 @@ void run_playloop(struct MPContext *mpctx);
 void mp_idle(struct MPContext *mpctx);
 void idle_loop(struct MPContext *mpctx);
 int handle_force_window(struct MPContext *mpctx, bool force);
-void add_frame_pts(struct MPContext *mpctx, double pts);
 void seek_to_last_frame(struct MPContext *mpctx);
 
 // scripting.c
@@ -517,15 +523,17 @@ void mp_load_scripts(struct MPContext *mpctx);
 
 // sub.c
 void reset_subtitle_state(struct MPContext *mpctx);
-void uninit_stream_sub_decoders(struct demuxer *demuxer);
-void reinit_subs(struct MPContext *mpctx, int order);
-void uninit_sub(struct MPContext *mpctx, int order);
+void reinit_sub(struct MPContext *mpctx, struct track *track);
+void reinit_sub_all(struct MPContext *mpctx);
+void uninit_sub(struct MPContext *mpctx, struct track *track);
 void uninit_sub_all(struct MPContext *mpctx);
 void update_osd_msg(struct MPContext *mpctx);
-void update_subtitles(struct MPContext *mpctx);
-void uninit_sub_renderer(struct MPContext *mpctx);
+bool update_subtitles(struct MPContext *mpctx, double video_pts);
 
 // video.c
+int video_get_colors(struct vo_chain *vo_c, const char *item, int *value);
+int video_set_colors(struct vo_chain *vo_c, const char *item, int value);
+int video_vf_vo_control(struct vo_chain *vo_c, int vf_cmd, void *data);
 void reset_video_state(struct MPContext *mpctx);
 int reinit_video_chain(struct MPContext *mpctx);
 int reinit_video_filters(struct MPContext *mpctx);

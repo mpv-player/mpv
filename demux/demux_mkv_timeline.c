@@ -29,7 +29,7 @@
 
 #include "osdep/io.h"
 
-#include "talloc.h"
+#include "mpv_talloc.h"
 
 #include "common/msg.h"
 #include "common/global.h"
@@ -458,8 +458,9 @@ static void check_track_compatibility(struct timeline *tl)
         if (p->source == mainsrc)
             continue;
 
-        for (int i = 0; i < p->source->num_streams; i++) {
-            struct sh_stream *s = p->source->streams[i];
+        int num_source_streams = demux_get_num_stream(p->source);
+        for (int i = 0; i < num_source_streams; i++) {
+            struct sh_stream *s = demux_get_stream(p->source, i);
             if (s->attached_picture)
                 continue;
 
@@ -473,8 +474,9 @@ static void check_track_compatibility(struct timeline *tl)
             }
         }
 
-        for (int i = 0; i < mainsrc->num_streams; i++) {
-            struct sh_stream *m = mainsrc->streams[i];
+        int num_main_streams = demux_get_num_stream(mainsrc);
+        for (int i = 0; i < num_main_streams; i++) {
+            struct sh_stream *m = demux_get_stream(mainsrc, i);
             if (m->attached_picture)
                 continue;
 
@@ -483,7 +485,7 @@ static void check_track_compatibility(struct timeline *tl)
             if (s) {
                 // There are actually many more things that in theory have to
                 // match (though mpv's implementation doesn't care).
-                if (s->codec && m->codec && strcmp(s->codec, m->codec) != 0)
+                if (strcmp(s->codec->codec, m->codec->codec) != 0)
                     MP_WARN(tl, "Timeline segments have mismatching codec.\n");
             } else {
                 MP_WARN(tl, "Source %s lacks %s stream with TID=%d, which "
