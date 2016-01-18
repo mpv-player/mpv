@@ -160,7 +160,6 @@ struct demuxer_params {
     struct matroska_segment_uid *matroska_wanted_uids;
     int matroska_wanted_segment;
     bool *matroska_was_valid;
-    bool expect_subtitle;
     // -- demux_open_url() only
     int stream_flags;
     bool allow_capture;

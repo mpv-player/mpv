@@ -693,9 +693,7 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
     if (strncmp(disp_filename, "memory://", 9) == 0)
         disp_filename = "memory://"; // avoid noise
 
-    struct demuxer_params params = {
-        .expect_subtitle = filter == STREAM_SUB,
-    };
+    struct demuxer_params params = {0};
 
     switch (filter) {
     case STREAM_SUB:
