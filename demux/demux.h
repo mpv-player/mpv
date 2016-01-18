@@ -272,8 +272,6 @@ void demux_set_ts_offset(struct demuxer *demuxer, double offset);
 
 int demux_control(struct demuxer *demuxer, int cmd, void *arg);
 
-void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
-                          struct sh_stream *stream);
 void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
                           bool selected);
 void demux_set_stream_autoselect(struct demuxer *demuxer, bool autoselect);

@@ -1256,19 +1256,6 @@ struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
     return NULL;
 }
 
-void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
-                          struct sh_stream *stream)
-{
-    assert(!stream || stream->type == type);
-
-    int num = demux_get_num_stream(demuxer);
-    for (int n = 0; n < num; n++) {
-        struct sh_stream *cur = demux_get_stream(demuxer, n);
-        if (cur->type == type)
-            demuxer_select_track(demuxer, cur, cur == stream);
-    }
-}
-
 void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
                           bool selected)
 {
