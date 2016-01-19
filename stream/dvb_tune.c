@@ -69,25 +69,29 @@ int dvb_get_tuner_types(int fe_fd, struct mp_log *log, int** tuner_types)
          DVB-S2 is treated in the DVB-S branch already. */
       switch (delsys) {
       case SYS_DVBT:
-        mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-T\n");
+        mp_verbose(log, "Tuner type seems to be DVB-T\n");
         (*tuner_types)[supported_tuners++] = TUNER_TER;
         break;
       case SYS_DVBC_ANNEX_AC:
-        mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-C\n");
+        mp_verbose(log, "Tuner type seems to be DVB-C\n");
         (*tuner_types)[supported_tuners++] = TUNER_CBL;
         break;
       case SYS_DVBS:
-        mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-S\n");
+        mp_verbose(log, "Tuner type seems to be DVB-S\n");
         (*tuner_types)[supported_tuners++] = TUNER_SAT;
         break;
 #ifdef DVB_ATSC
       case SYS_ATSC:
-        mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-ATSC\n");
+        mp_verbose(log, "Tuner type seems to be DVB-ATSC\n");
         (*tuner_types)[supported_tuners++] = TUNER_ATSC;
         break;
 #endif
+      case SYS_DVBS2:
+        // We actually handle that in the DVB-S branch, ok to ignore here.
+        mp_verbose(log, "Tuner supports DVB-S2\n");
+        break;
       default:
-        mp_err(log, "UNKNOWN TUNER TYPE\n");
+        mp_err(log, "Unhandled tuner type: %d\n", delsys);
       }
     }
     return supported_tuners;
@@ -101,29 +105,29 @@ int dvb_get_tuner_types(int fe_fd, struct mp_log *log, int** tuner_types)
   
     switch (fe_info.type) {
     case FE_OFDM:
-        mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-T\n");
+        mp_verbose(log, "Tuner type seems to be DVB-T\n");
         *tuner_types = talloc_array(NULL, int, 1);
         (*tuner_types)[0] = TUNER_TER;
         return 1;
     case FE_QPSK:
-        mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-S\n");
+        mp_verbose(log, "Tuner type seems to be DVB-S\n");
         *tuner_types = talloc_array(NULL, int, 1);
         (*tuner_types)[0] = TUNER_SAT;
         return 1;
     case FE_QAM:
-        mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-C\n");
+        mp_verbose(log, "Tuner type seems to be DVB-C\n");
         *tuner_types = talloc_array(NULL, int, 1);
         (*tuner_types)[0] = TUNER_CBL;
         return 1;
 #ifdef DVB_ATSC
     case FE_ATSC:
-        mp_verbose(log, "TUNER TYPE SEEMS TO BE DVB-ATSC\n");
+        mp_verbose(log, "Tuner type seems to be DVB-ATSC\n");
         *tuner_types = talloc_array(NULL, int, 1);
         (*tuner_types)[0] = TUNER_ATSC;
         return 1;
 #endif
     default:
-        mp_err(log, "UNKNOWN TUNER TYPE\n");
+        mp_err(log, "Unknown tuner type: %d\n", fe_info.type);
         return 0;
     }
 #endif
