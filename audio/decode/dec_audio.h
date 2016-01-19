@@ -35,11 +35,8 @@ struct dec_audio {
     struct sh_stream *header;
     struct af_stream *afilter;
     char *decoder_desc;
-    int init_retries;
     struct mp_audio decode_format;
     struct mp_audio *waiting;   // used on format-change
-    // set by decoder
-    int bitrate;                // input bitrate, can change with VBR sources
     // last known pts value in output from decoder
     double pts;
     // number of samples output by decoder after last known pts
