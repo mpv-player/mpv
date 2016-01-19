@@ -41,6 +41,7 @@ struct spdifContext {
     bool             need_close;
     bool             use_dts_hd;
     struct mp_audio  fmt;
+    struct mp_audio_pool *pool;
 };
 
 static int write_packet(void *p, uint8_t *buf, int buf_size)
@@ -79,6 +80,7 @@ static int init(struct dec_audio *da, const char *decoder)
     da->priv = spdif_ctx;
     spdif_ctx->log = da->log;
     spdif_ctx->use_dts_hd = da->opts->dtshd;
+    spdif_ctx->pool = mp_audio_pool_create(spdif_ctx);
 
     if (strcmp(decoder, "dts-hd") == 0) {
         decoder = "dts";
@@ -269,7 +271,7 @@ static int decode_packet(struct dec_audio *da, struct mp_audio **out)
         return AD_ERR;
 
     int samples = spdif_ctx->out_buffer_len / spdif_ctx->fmt.sstride;
-    *out = mp_audio_pool_get(da->pool, &spdif_ctx->fmt, samples);
+    *out = mp_audio_pool_get(spdif_ctx->pool, &spdif_ctx->fmt, samples);
     if (!*out)
         return AD_ERR;
 

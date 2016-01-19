@@ -216,7 +216,6 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->d_audio->global = mpctx->global;
         mpctx->d_audio->opts = opts;
         mpctx->d_audio->header = sh;
-        mpctx->d_audio->pool = mp_audio_pool_create(mpctx->d_audio);
         mpctx->d_audio->afilter = af_new(mpctx->global);
         mpctx->d_audio->afilter->replaygain_data = sh->codec->replaygain_data;
         mpctx->d_audio->spdif_passthrough = true;

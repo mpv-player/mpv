@@ -36,7 +36,6 @@ struct dec_audio {
     struct af_stream *afilter;
     char *decoder_desc;
     int init_retries;
-    struct mp_audio_pool *pool;
     struct mp_audio decode_format;
     struct mp_audio *waiting;   // used on format-change
     // set by decoder
