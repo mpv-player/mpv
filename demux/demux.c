@@ -1300,9 +1300,9 @@ void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
         stream->ds->active = false;
         ds_flush(stream->ds);
         in->tracks_switched = true;
+        if (selected && in->refresh_seeks_enabled)
+            in->start_refresh_seek = true;
         if (in->threading) {
-            if (selected && in->refresh_seeks_enabled)
-                in->start_refresh_seek = true;
             pthread_cond_signal(&in->wakeup);
         } else {
             execute_trackswitch(in);
