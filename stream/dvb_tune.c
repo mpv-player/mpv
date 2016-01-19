@@ -442,8 +442,10 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend,
                    int timeout)
 {
     int hi_lo = 0, dfd;
+
+    dvb_state_t* state = priv->state;
+
     struct dvb_frontend_parameters feparams;
-    struct dvb_frontend_info fe_info;
 
     MP_VERBOSE(priv, "TUNE_IT, fd_frontend %d, freq %lu, srate %lu, "
                "pol %c, tone %i, diseqc %u\n", fd_frontend, 
@@ -451,12 +453,8 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend,
                tone, diseqc);
 
     memset(&feparams, 0, sizeof(feparams));
-    if (ioctl(fd_frontend, FE_GET_INFO, &fe_info) < 0) {
-        MP_FATAL(priv, "FE_GET_INFO FAILED\n");
-        return -1;
-    }
 
-    MP_VERBOSE(priv, "Using DVB card \"%s\"\n", fe_info.name);
+    MP_VERBOSE(priv, "Using DVB card \"%s\"\n", state->cards[state->card].name);
 
     {
         /* discard stale QPSK events */
@@ -467,8 +465,8 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend,
         }
     }
 
-    switch (fe_info.type) {
-    case FE_OFDM:
+    switch (state->tuner_type) {
+    case TUNER_TER:
         if (freq < 1000000)
             freq *= 1000UL;
         feparams.frequency = freq;
@@ -487,7 +485,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend,
             return -1;
         }
         break;
-    case FE_QPSK:
+    case TUNER_SAT:
         // DVB-S
         if (freq > 2200000) {
             // this must be an absolute frequency
@@ -565,7 +563,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend,
         }
 #endif
         break;
-    case FE_QAM:
+    case TUNER_CBL:
         feparams.frequency = freq;
         feparams.inversion = specInv;
         feparams.u.qam.symbol_rate = srate;
@@ -578,7 +576,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend,
         }
         break;
 #ifdef DVB_ATSC
-    case FE_ATSC:
+    case TUNER_ATSC:
         feparams.frequency = freq;
         feparams.u.vsb.modulation = modulation;
         MP_VERBOSE(priv, "tuning ATSC to %d, modulation=%d\n", freq, modulation);
