@@ -73,6 +73,14 @@ void mp_process_input(struct MPContext *mpctx)
     }
 }
 
+double get_relative_time(struct MPContext *mpctx)
+{
+    int64_t new_time = mp_time_us();
+    int64_t delta = new_time - mpctx->last_time;
+    mpctx->last_time = new_time;
+    return delta * 0.000001;
+}
+
 void pause_player(struct MPContext *mpctx)
 {
     mpctx->opts->pause = 1;

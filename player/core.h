@@ -465,7 +465,6 @@ void wakeup_playloop(void *ctx);
 // misc.c
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t);
 double get_play_end_pts(struct MPContext *mpctx);
-double get_relative_time(struct MPContext *mpctx);
 void merge_playlist_files(struct playlist *pl);
 float mp_get_cache_percent(struct MPContext *mpctx);
 bool mp_get_cache_idle(struct MPContext *mpctx);
@@ -490,6 +489,7 @@ void set_osd_bar_chapters(struct MPContext *mpctx, int type);
 // playloop.c
 void mp_wait_events(struct MPContext *mpctx, double sleeptime);
 void mp_process_input(struct MPContext *mpctx);
+double get_relative_time(struct MPContext *mpctx);
 void reset_playback_state(struct MPContext *mpctx);
 void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);

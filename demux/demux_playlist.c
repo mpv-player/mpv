@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdlib.h>
@@ -169,23 +169,6 @@ static int parse_ref_init(struct pl_parser *p)
     return 0;
 }
 
-static int parse_mov_rtsptext(struct pl_parser *p)
-{
-    bstr line = pl_get_line(p);
-    if (!bstr_eatstart(&line, bstr0("RTSPtext")))
-        return -1;
-    if (p->probing)
-        return 0;
-    line = bstr_strip(line);
-    do {
-        if (bstr_case_startswith(line, bstr0("rtsp://"))) {
-            pl_add(p, line);
-            return 0;
-        }
-    } while (!pl_eof(p) && (line = bstr_strip(pl_get_line(p))).len);
-    return -1;
-}
-
 static int parse_pls(struct pl_parser *p)
 {
     bstr line = {0};
@@ -285,7 +268,6 @@ static const struct pl_format formats[] = {
     {"m3u", parse_m3u,
      MIME_TYPES("audio/mpegurl", "audio/x-mpegurl", "application/x-mpegurl")},
     {"ini", parse_ref_init},
-    {"mov", parse_mov_rtsptext},
     {"pls", parse_pls,
      MIME_TYPES("audio/x-scpls")},
     {"txt", parse_txt},
