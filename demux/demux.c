@@ -372,18 +372,18 @@ void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp)
 
     if (!sh) {
         sh = demux_alloc_sh_stream(STREAM_SUB);
-        if (!sh)
+        if (!sh) {
+            talloc_free(dp);
             return;
+        }
         sh->codec->codec = "eia_608";
         stream->ds->cc = sh;
         demux_add_sh_stream(demuxer, sh);
     }
 
-    if (demux_stream_is_selected(sh)) {
-        dp->pts = MP_ADD_PTS(dp->pts, -stream->ds->in->ts_offset);
-        dp->dts = MP_ADD_PTS(dp->dts, -stream->ds->in->ts_offset);
-        demux_add_packet(sh, dp);
-    }
+    dp->pts = MP_ADD_PTS(dp->pts, -stream->ds->in->ts_offset);
+    dp->dts = MP_ADD_PTS(dp->dts, -stream->ds->in->ts_offset);
+    demux_add_packet(sh, dp);
 }
 
 void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
