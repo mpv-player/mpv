@@ -48,6 +48,8 @@ struct dec_audio {
     bool pts_reset;
     // For free use by the ad_driver
     void *priv;
+    // Strictly internal to dec_audio.c
+    struct demux_packet *packet;
 };
 
 enum {

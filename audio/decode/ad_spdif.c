@@ -242,15 +242,12 @@ fail:
     return -1;
 }
 
-static int decode_packet(struct dec_audio *da, struct mp_audio **out)
+static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
+                         struct mp_audio **out)
 {
     struct spdifContext *spdif_ctx = da->priv;
 
     spdif_ctx->out_buffer_len  = 0;
-
-    struct demux_packet *mpkt;
-    if (demux_read_packet_async(da->header, &mpkt) == 0)
-        return AD_WAIT;
 
     if (!mpkt)
         return AD_EOF;
@@ -259,13 +256,13 @@ static int decode_packet(struct dec_audio *da, struct mp_audio **out)
 
     AVPacket pkt;
     mp_set_av_packet(&pkt, mpkt, NULL);
+    mpkt->len = 0; // will be fully consumed
     pkt.pts = pkt.dts = 0;
     if (!spdif_ctx->lavf_ctx) {
         if (init_filter(da, &pkt) < 0)
             return AD_ERR;
     }
     int ret = av_write_frame(spdif_ctx->lavf_ctx, &pkt);
-    talloc_free(mpkt);
     avio_flush(spdif_ctx->lavf_ctx->pb);
     if (ret < 0)
         return AD_ERR;

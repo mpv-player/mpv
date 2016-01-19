@@ -42,7 +42,6 @@ struct priv {
     AVFrame *avframe;
     struct mp_audio frame;
     bool force_channel_map;
-    struct demux_packet *packet;
     uint32_t skip_samples;
 };
 
@@ -165,26 +164,17 @@ static int control(struct dec_audio *da, int cmd, void *arg)
     switch (cmd) {
     case ADCTRL_RESET:
         avcodec_flush_buffers(ctx->avctx);
-        talloc_free(ctx->packet);
-        ctx->packet = NULL;
         ctx->skip_samples = 0;
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
 }
 
-static int decode_packet(struct dec_audio *da, struct mp_audio **out)
+static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
+                         struct mp_audio **out)
 {
     struct priv *priv = da->priv;
     AVCodecContext *avctx = priv->avctx;
-
-    struct demux_packet *mpkt = priv->packet;
-    if (!mpkt) {
-        if (demux_read_packet_async(da->header, &mpkt) == 0)
-            return AD_WAIT;
-    }
-
-    priv->packet = talloc_steal(priv, mpkt);
 
     int in_len = mpkt ? mpkt->len : 0;
 
@@ -203,13 +193,11 @@ static int decode_packet(struct dec_audio *da, struct mp_audio **out)
             mpkt->len    -= ret;
             mpkt->pts = MP_NOPTS_VALUE; // don't reset PTS next time
         }
-        if (mpkt->len == 0 || ret < 0) {
-            talloc_free(mpkt);
-            priv->packet = NULL;
-        }
         // LATM may need many packets to find mux info
-        if (ret == AVERROR(EAGAIN))
+        if (ret == AVERROR(EAGAIN)) {
+            mpkt->len = 0;
             return AD_OK;
+        }
     }
     if (ret < 0) {
         MP_ERR(da, "Error decoding audio.\n");

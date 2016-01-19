@@ -161,13 +161,23 @@ void audio_uninit(struct dec_audio *d_audio)
     uninit_decoder(d_audio);
     af_destroy(d_audio->afilter);
     talloc_free(d_audio->waiting);
+    talloc_free(d_audio->packet);
     talloc_free(d_audio);
 }
 
 static int decode_new_frame(struct dec_audio *da)
 {
     while (!da->waiting) {
-        int ret = da->ad_driver->decode_packet(da, &da->waiting);
+        if (!da->packet) {
+            if (demux_read_packet_async(da->header, &da->packet) == 0)
+                return AD_WAIT;
+        }
+
+        int ret = da->ad_driver->decode_packet(da, da->packet, &da->waiting);
+        if (ret < 0 || (da->packet && da->packet->len == 0)) {
+            talloc_free(da->packet);
+            da->packet = NULL;
+        }
         if (ret < 0)
             return ret;
 
@@ -285,8 +295,8 @@ void audio_reset_decoding(struct dec_audio *d_audio)
     d_audio->pts = MP_NOPTS_VALUE;
     d_audio->pts_offset = 0;
     d_audio->pts_reset = false;
-    if (d_audio->waiting) {
-        talloc_free(d_audio->waiting);
-        d_audio->waiting = NULL;
-    }
+    talloc_free(d_audio->waiting);
+    d_audio->waiting = NULL;
+    talloc_free(d_audio->packet);
+    d_audio->packet = NULL;
 }
