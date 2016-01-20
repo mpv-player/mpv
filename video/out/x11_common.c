@@ -364,7 +364,7 @@ static void xrandr_read(struct vo_x11_state *x11)
                        RRCrtcChangeNotifyMask | RROutputChangeNotifyMask);
     }
 
-    XRRScreenResources *r = XRRGetScreenResources(x11->display, x11->rootwin);
+    XRRScreenResources *r = XRRGetScreenResourcesCurrent(x11->display, x11->rootwin);
     if (!r) {
         MP_VERBOSE(x11, "Xrandr doesn't work.\n");
         return;
