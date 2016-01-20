@@ -191,7 +191,8 @@ static int init_filter(struct dec_audio *da, AVPacket *pkt)
         break;
     case AV_CODEC_ID_DTS: {
         bool is_hd = profile == FF_PROFILE_DTS_HD_HRA ||
-                     profile == FF_PROFILE_DTS_HD_MA;
+                     profile == FF_PROFILE_DTS_HD_MA ||
+                     profile == FF_PROFILE_UNKNOWN;
         if (spdif_ctx->use_dts_hd && is_hd) {
             av_dict_set(&format_opts, "dtshd_rate", "768000", 0); // 4*192000
             sample_format               = AF_FORMAT_S_DTSHD;
