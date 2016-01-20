@@ -109,7 +109,7 @@ static const struct va_native_display disp_x11 = {
 #endif
 
 #define HAS_HEVC VA_CHECK_VERSION(0, 38, 0)
-#define HAS_VP9 VA_CHECK_VERSION(0, 38, 1)
+#define HAS_VP9 (VA_CHECK_VERSION(0, 38, 1) && defined(FF_PROFILE_VP9_0))
 
 #define PE(av_codec_id, ff_profile, vdp_profile)                \
     {AV_CODEC_ID_ ## av_codec_id, FF_PROFILE_ ## ff_profile,    \
