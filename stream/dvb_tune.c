@@ -102,7 +102,9 @@ int dvb_get_tuner_types(int fe_fd, struct mp_log *log, int** tuner_types)
         mp_err(log, "FE_GET_INFO error: %d, FD: %d\n\n", errno, fe_fd);
         return 0;
     }
-  
+
+    mp_verbose(log, "Queried tuner type of device named '%s', FD: %d\n",
+               fe_info.name, fe_fd);
     switch (fe_info.type) {
     case FE_OFDM:
         mp_verbose(log, "Tuner type seems to be DVB-T\n");
