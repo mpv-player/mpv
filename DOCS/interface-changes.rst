@@ -19,6 +19,9 @@ Interface changes
 
 ::
 
+ --- mpv 0.16.0 ---
+    - change --audio-channels default to stereo (use --audio-channels=auto to
+      get the old default)
  --- mpv 0.15.0 ---
     - change "yadif" video filter defaults
  --- mpv 0.14.0 ---

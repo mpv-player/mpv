@@ -1093,8 +1093,8 @@ Audio
         This and enabling passthrough via ``--ad`` are deprecated in favor of
         using ``--audio-spdif=dts-hd``.
 
-``--audio-channels=<number|layout>``
-    Request a channel layout for audio output (default: auto). This  will ask
+``--audio-channels=<auto|number|layout>``
+    Request a channel layout for audio output (default: stereo). This  will ask
     the AO to open a device with the given channel layout. It's up to the AO
     to accept this layout, or to pick a fallback or to error out if the
     requested layout is not supported.
@@ -1107,9 +1107,10 @@ Audio
     lists speaker names, which can be used to express arbitrary channel
     layouts (e.g. ``fl-fr-lfe`` is 2.1).
 
-    The default is ``--audio-channels=auto``, which tries to play audio using
-    the input file's channel layout. (Or more precisely, the output of the
-    audio filter chain.) (``empty`` is an accepted obsolete alias for ``auto``.)
+    ``--audio-channels=auto`` tries to play audio using the input file's
+    channel layout. There is no guarantee that the audio API handles this
+    correctly. See the HDMI warning below.
+    (``empty`` is an accepted obsolete alias for ``auto``.)
 
     This will also request the channel layout from the decoder. If the decoder
     does not support the layout, it will fall back to its native channel layout.
