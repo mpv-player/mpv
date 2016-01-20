@@ -470,7 +470,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend,
     }
 
     switch (state->tuner_type) {
-    case TUNER_TER:
+    case TUNER_TER: {
         if (freq < 1000000)
             freq *= 1000UL;
         feparams.frequency = freq;
@@ -488,8 +488,9 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend,
             MP_ERR(priv, "ERROR tuning channel\n");
             return -1;
         }
-        break;
-    case TUNER_SAT:
+    }
+    break;
+    case TUNER_SAT: {
         // DVB-S
         if (freq > 2200000) {
             // this must be an absolute frequency
@@ -566,8 +567,35 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend,
             return -1;
         }
 #endif
-        break;
-    case TUNER_CBL:
+    }
+    break;
+    case TUNER_CBL: {
+#ifdef DVB_USE_S2API
+        /* S2API is the DVB API new since 2.6.28.
+         * It is also needed for devices supporting multiple delivery systems, 
+         * commonly DVB-C + DVB-T are supported here. 
+         */
+        fe_delivery_system_t delsys = SYS_DVBC_ANNEX_AC;
+        struct dtv_property p[] = {
+            { .cmd = DTV_DELIVERY_SYSTEM, .u.data = delsys },
+            { .cmd = DTV_FREQUENCY, .u.data = freq },
+            { .cmd = DTV_INVERSION, .u.data = specInv },
+            { .cmd = DTV_MODULATION, .u.data = modulation },
+            { .cmd = DTV_SYMBOL_RATE, .u.data = srate },
+            { .cmd = DTV_INNER_FEC, .u.data = HP_CodeRate },
+            { .cmd = DTV_TUNE },
+        };
+        struct dtv_properties cmdseq = {
+            .num = sizeof(p) / sizeof(p[0]),
+            .props = p
+        };
+        MP_VERBOSE(priv, "tuning DVB-C to %d, srate=%d using DVBv5 API...\n",
+                   freq, srate);
+        if ((ioctl(fd_frontend, FE_SET_PROPERTY, &cmdseq)) == -1) {
+            MP_ERR(priv, "ERROR tuning channel\n");
+            return -1;
+        }
+#else
         feparams.frequency = freq;
         feparams.inversion = specInv;
         feparams.u.qam.symbol_rate = srate;
@@ -578,9 +606,11 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend,
             MP_ERR(priv, "ERROR tuning channel\n");
             return -1;
         }
-        break;
+#endif
+    }
+    break;
 #ifdef DVB_ATSC
-    case TUNER_ATSC:
+    case TUNER_ATSC: {
         feparams.frequency = freq;
         feparams.u.vsb.modulation = modulation;
         MP_VERBOSE(priv, "tuning ATSC to %d, modulation=%d\n", freq, modulation);
@@ -588,7 +618,8 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend,
             MP_ERR(priv, "ERROR tuning channel\n");
             return -1;
         }
-        break;
+    }
+    break;
 #endif
     default:
         MP_VERBOSE(priv, "Unknown FE type. Aborting\n");
