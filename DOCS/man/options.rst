@@ -1129,6 +1129,16 @@ Audio
         channel layout, random things can happen, such as dropping the
         additional channels, or adding noise.
 
+``--audio-normalize-downmix=<yes|no>``
+    Enable/disable normalization if surround audio is downmixed to stereo
+    (default: no). If this is disabled, downmix can cause clipping. If it's
+    enabled, the output might be too silent. It depends on the source audio.
+
+    Technically, this changes the ``normalize`` suboption of the
+    ``lavrresample`` audio filter, which performs the downmixing.
+
+    If downmix happens outside of mpv for some reason, this has no effect.
+
 ``--audio-display=<no|attachment>``
     Setting this option to ``attachment`` (default) will display image
     attachments (e.g. album cover art) when playing audio files. It will

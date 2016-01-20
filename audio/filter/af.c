@@ -166,6 +166,7 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
         .info = desc.p,
         .data = talloc_zero(af, struct mp_audio),
         .log = mp_log_new(af, s->log, name),
+        .opts = s->opts,
         .replaygain_data = s->replaygain_data,
         .out_pool = mp_audio_pool_create(af),
     };

@@ -225,6 +225,7 @@ typedef struct MPOpts {
 
     struct mp_chmap audio_output_channels;
     int audio_output_format;
+    int audio_normalize;
     int force_srate;
     int dtshd;
     double playback_speed;
