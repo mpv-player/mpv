@@ -353,6 +353,9 @@ static int drm_egl_init(struct MPGLContext *ctx, int flags)
     void *(*gpa)(const GLubyte*) = (void *(*)(const GLubyte*))eglGetProcAddress;
     mpgl_load_functions(ctx->gl, gpa, egl_exts, ctx->vo->log);
 
+    ctx->native_display_type = "drm";
+    ctx->native_display = (void *)(intptr_t)p->kms->fd;
+
     // required by gbm_surface_lock_front_buffer
     eglSwapBuffers(p->egl.display, p->egl.surface);
 

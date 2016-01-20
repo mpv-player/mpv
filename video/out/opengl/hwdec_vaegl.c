@@ -65,6 +65,19 @@ static VADisplay *create_wayland_va_display(GL *gl)
 }
 #endif
 
+#if HAVE_VAAPI_DRM
+#include <va/va_drm.h>
+
+static VADisplay *create_drm_va_display(GL *gl)
+{
+    int drm_fd = (intptr_t)gl->MPGetNativeDisplay("drm");
+    // Note: yes, drm_fd==0 could be valid - but it's rare and doesn't fit with
+    //       our slightly crappy way of passing it through, so consider 0 not
+    //       valid.
+    return drm_fd ? vaGetDisplayDRM(drm_fd) : NULL;
+}
+#endif
+
 static VADisplay *create_native_va_display(GL *gl)
 {
     if (!gl->MPGetNativeDisplay)
@@ -77,6 +90,11 @@ static VADisplay *create_native_va_display(GL *gl)
 #endif
 #if HAVE_VAAPI_WAYLAND
     display = create_wayland_va_display(gl);
+    if (display)
+        return display;
+#endif
+#if HAVE_VAAPI_DRM
+    display = create_drm_va_display(gl);
     if (display)
         return display;
 #endif
