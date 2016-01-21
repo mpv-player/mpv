@@ -182,6 +182,7 @@ struct ao_chain {
 
     struct af_stream *af;
     struct ao *ao;
+    struct mp_audio_buffer *ao_buffer;
 
     // 1-element input frame queue.
     struct mp_audio *input_frame;
@@ -296,7 +297,6 @@ typedef struct MPContext {
     struct mixer *mixer;
     struct ao *ao;
     struct mp_audio *ao_decoder_fmt; // for weak gapless audio check
-    struct mp_audio_buffer *ao_buffer;  // queued audio; passed to ao_play() later
     struct ao_chain *ao_chain;
 
     struct vo_chain *vo_chain;
