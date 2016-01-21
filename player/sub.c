@@ -100,6 +100,14 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
 
     video_pts -= opts->sub_delay;
 
+    if (!track->preloaded && track->demuxer->fully_read && !opts->sub_clear_on_seek)
+    {
+        // Assume fully_read implies no interleaved audio/video streams.
+        // (Reading packets will change the demuxer position.)
+        demux_seek(track->demuxer, 0, SEEK_ABSOLUTE);
+        track->preloaded = sub_read_all_packets(track->d_sub);
+    }
+
     if (!track->preloaded) {
         if (!sub_read_packets(dec_sub, video_pts))
             return false;
@@ -124,8 +132,6 @@ bool update_subtitles(struct MPContext *mpctx, double video_pts)
 
 static bool init_subdec(struct MPContext *mpctx, struct track *track)
 {
-    struct MPOpts *opts = mpctx->opts;
-
     assert(!track->d_sub);
 
     if (!track->demuxer || !track->stream)
@@ -140,16 +146,6 @@ static bool init_subdec(struct MPContext *mpctx, struct track *track)
         vtrack && vtrack->stream ? vtrack->stream->codec : NULL;
     double fps = v_c ? v_c->fps : 25;
     sub_control(track->d_sub, SD_CTRL_SET_VIDEO_DEF_FPS, &fps);
-
-    // Don't do this if the file has video/audio streams. Don't do it even
-    // if it has only sub streams, because reading packets will change the
-    // demuxer position.
-    if (track->is_external && !opts->sub_clear_on_seek) {
-        demux_seek(track->demuxer, 0, SEEK_ABSOLUTE);
-        track->preloaded = sub_read_all_packets(track->d_sub);
-        if (track->preloaded)
-            demux_stop_thread(track->demuxer);
-    }
 
     return true;
 }
