@@ -1142,8 +1142,9 @@ static void calculate_frame_duration(struct MPContext *mpctx)
         if (pts0 != MP_NOPTS_VALUE && pts1 != MP_NOPTS_VALUE && pts1 >= pts0)
             duration = pts1 - pts0;
     } else {
-        // E.g. last frame on EOF.
-        duration = demux_duration;
+        // E.g. last frame on EOF. Only use it if it's significant.
+        if (demux_duration >= 0.1)
+            duration = demux_duration;
     }
 
     // The following code tries to compensate for rounded Matroska timestamps
@@ -1207,8 +1208,11 @@ void write_video(struct MPContext *mpctx, double endpts)
 
     if (r == VD_EOF) {
         int prev_state = mpctx->video_status;
-        mpctx->video_status =
-            vo_still_displaying(vo) ? STATUS_DRAINING : STATUS_EOF;
+        mpctx->video_status = STATUS_EOF;
+        if (mpctx->num_past_frames > 0 && mpctx->past_frames[0].duration > 0) {
+            if (vo_still_displaying(vo))
+                mpctx->video_status = STATUS_DRAINING;
+        }
         mpctx->delay = 0;
         mpctx->last_av_difference = 0;
         MP_DBG(mpctx, "video EOF (status=%d)\n", mpctx->video_status);
