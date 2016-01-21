@@ -94,11 +94,6 @@ void video_set_start(struct dec_video *d_video, double start_pts);
 #define VIDEO_SKIP -2
 int video_get_frame(struct dec_video *d_video, struct mp_image **out_mpi);
 
-struct demux_packet;
-struct mp_image *video_decode(struct dec_video *d_video,
-                              struct demux_packet *packet,
-                              int drop_frame);
-
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg);
 void video_reset(struct dec_video *d_video);
 void video_reset_aspect(struct dec_video *d_video);

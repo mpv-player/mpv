@@ -280,11 +280,7 @@ void uninit_video_out(struct MPContext *mpctx)
 static void vo_chain_uninit(struct vo_chain *vo_c)
 {
     mp_image_unrefp(&vo_c->input_mpi);
-    if (vo_c) {
-        vf_destroy(vo_c->vf);
-        if (vo_c->video_src)
-            video_uninit(vo_c->video_src);
-    }
+    vf_destroy(vo_c->vf);
     talloc_free(vo_c);
     // this does not free the VO
 }
@@ -292,7 +288,16 @@ static void vo_chain_uninit(struct vo_chain *vo_c)
 void uninit_video_chain(struct MPContext *mpctx)
 {
     if (mpctx->vo_chain) {
+        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+        assert(track);
+        assert(track->d_video == mpctx->vo_chain->video_src);
+
         reset_video_state(mpctx);
+
+        video_uninit(track->d_video);
+        track->d_video = NULL;
+        mpctx->vo_chain->video_src = NULL;
+
         vo_chain_uninit(mpctx->vo_chain);
         mpctx->vo_chain = NULL;
         mpctx->video_status = STATUS_EOF;
