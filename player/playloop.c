@@ -97,7 +97,7 @@ void pause_player(struct MPContext *mpctx)
     mpctx->osd_force_update = true;
     mpctx->paused_for_cache = false;
 
-    if (mpctx->ao && mpctx->d_audio)
+    if (mpctx->ao && mpctx->ao_chain)
         ao_pause(mpctx->ao);
     if (mpctx->video_out)
         vo_set_paused(mpctx->video_out, true);
@@ -122,7 +122,7 @@ void unpause_player(struct MPContext *mpctx)
     mpctx->osd_function = 0;
     mpctx->osd_force_update = true;
 
-    if (mpctx->ao && mpctx->d_audio)
+    if (mpctx->ao && mpctx->ao_chain)
         ao_resume(mpctx->ao);
     if (mpctx->video_out)
         vo_set_paused(mpctx->video_out, false);
@@ -905,7 +905,7 @@ static void handle_segment_switch(struct MPContext *mpctx, bool end_is_new_segme
      * and video streams to "disabled" at runtime. Handle this by waiting
      * rather than immediately stopping playback due to EOF.
      */
-    if ((mpctx->d_audio || mpctx->vo_chain) && !prevent_eof &&
+    if ((mpctx->ao_chain || mpctx->vo_chain) && !prevent_eof &&
         mpctx->audio_status == STATUS_EOF &&
         mpctx->video_status == STATUS_EOF)
     {

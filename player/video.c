@@ -377,7 +377,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     mpctx->sync_audio_to_video = !sh->attached_picture;
 
     // If we switch on video again, ensure audio position matches up.
-    if (mpctx->d_audio)
+    if (mpctx->ao_chain)
         mpctx->audio_status = STATUS_SYNCING;
 
     reset_video_state(mpctx);

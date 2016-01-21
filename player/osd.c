@@ -195,7 +195,7 @@ static void print_status(struct MPContext *mpctx)
         saddf(&line, "(Paused) ");
     }
 
-    if (mpctx->d_audio)
+    if (mpctx->ao_chain)
         saddf(&line, "A");
     if (mpctx->vo_chain)
         saddf(&line, "V");
@@ -217,7 +217,7 @@ static void print_status(struct MPContext *mpctx)
         saddf(&line, " x%4.2f", opts->playback_speed);
 
     // A-V sync
-    if (mpctx->d_audio && mpctx->vo_chain && mpctx->sync_audio_to_video) {
+    if (mpctx->ao_chain && mpctx->vo_chain && mpctx->sync_audio_to_video) {
         saddf(&line, " A-V:%7.3f", mpctx->last_av_difference);
         if (fabs(mpctx->total_avsync_change) > 0.05)
             saddf(&line, " ct:%7.3f", mpctx->total_avsync_change);

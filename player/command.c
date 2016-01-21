@@ -536,7 +536,7 @@ static int mp_property_avsync(void *ctx, struct m_property *prop,
                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->d_audio || !mpctx->vo_chain)
+    if (!mpctx->ao_chain || !mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_PRINT) {
         *(char **)arg = talloc_asprintf(NULL, "%7.3f", mpctx->last_av_difference);
@@ -549,7 +549,7 @@ static int mp_property_total_avsync_change(void *ctx, struct m_property *prop,
                                            int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->d_audio || !mpctx->vo_chain)
+    if (!mpctx->ao_chain || !mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
     if (mpctx->total_avsync_change == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
@@ -1696,7 +1696,7 @@ static int mp_property_audio_delay(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!(mpctx->d_audio && mpctx->vo_chain))
+    if (!(mpctx->ao_chain && mpctx->vo_chain))
         return M_PROPERTY_UNAVAILABLE;
     float delay = mpctx->opts->audio_delay;
     switch (action) {
@@ -1716,7 +1716,8 @@ static int mp_property_audio_codec_name(void *ctx, struct m_property *prop,
                                         int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    const char *c = mpctx->d_audio ? mpctx->d_audio->header->codec->codec : NULL;
+    struct track *track = mpctx->current_track[0][STREAM_AUDIO];
+    const char *c = track && track->stream ? track->stream->codec->codec : NULL;
     return m_property_strdup_ro(action, arg, c);
 }
 
@@ -1725,7 +1726,8 @@ static int mp_property_audio_codec(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    const char *c = mpctx->d_audio ? mpctx->d_audio->decoder_desc : NULL;
+    struct track *track = mpctx->current_track[0][STREAM_AUDIO];
+    const char *c = track && track->d_audio ? track->d_audio->decoder_desc : NULL;
     return m_property_strdup_ro(action, arg, c);
 }
 
