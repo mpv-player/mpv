@@ -78,27 +78,32 @@ static VADisplay *create_drm_va_display(GL *gl)
 }
 #endif
 
+struct va_create_native {
+    VADisplay *(*create)(GL *gl);
+};
+
+static const struct va_create_native create_native_cbs[] = {
+#if HAVE_VAAPI_X11
+    {create_x11_va_display},
+#endif
+#if HAVE_VAAPI_WAYLAND
+    {create_wayland_va_display},
+#endif
+#if HAVE_VAAPI_DRM
+    {create_drm_va_display},
+#endif
+};
+
 static VADisplay *create_native_va_display(GL *gl)
 {
     if (!gl->MPGetNativeDisplay)
         return NULL;
-    VADisplay *display = NULL;
-#if HAVE_VAAPI_X11
-    display = create_x11_va_display(gl);
-    if (display)
-        return display;
-#endif
-#if HAVE_VAAPI_WAYLAND
-    display = create_wayland_va_display(gl);
-    if (display)
-        return display;
-#endif
-#if HAVE_VAAPI_DRM
-    display = create_drm_va_display(gl);
-    if (display)
-        return display;
-#endif
-    return display;
+    for (int n = 0; n < MP_ARRAY_SIZE(create_native_cbs); n++) {
+        VADisplay *display = create_native_cbs[n].create(gl);
+        if (display)
+            return display;
+    }
+    return NULL;
 }
 
 struct priv {
