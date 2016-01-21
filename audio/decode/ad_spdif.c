@@ -251,7 +251,7 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     spdif_ctx->out_buffer_len  = 0;
 
     if (!mpkt)
-        return AD_EOF;
+        return 0;
 
     double pts = mpkt->pts;
 
@@ -261,17 +261,17 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     pkt.pts = pkt.dts = 0;
     if (!spdif_ctx->lavf_ctx) {
         if (init_filter(da, &pkt) < 0)
-            return AD_ERR;
+            return -1;
     }
     int ret = av_write_frame(spdif_ctx->lavf_ctx, &pkt);
     avio_flush(spdif_ctx->lavf_ctx->pb);
     if (ret < 0)
-        return AD_ERR;
+        return -1;
 
     int samples = spdif_ctx->out_buffer_len / spdif_ctx->fmt.sstride;
     *out = mp_audio_pool_get(spdif_ctx->pool, &spdif_ctx->fmt, samples);
     if (!*out)
-        return AD_ERR;
+        return -1;
 
     memcpy((*out)->planes[0], spdif_ctx->out_buffer, spdif_ctx->out_buffer_len);
     (*out)->pts = pts;

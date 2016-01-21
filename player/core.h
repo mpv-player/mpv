@@ -27,6 +27,7 @@
 #include "options/options.h"
 #include "sub/osd.h"
 #include "demux/timeline.h"
+#include "audio/audio.h"
 #include "video/mp_image.h"
 #include "video/out/vo.h"
 
@@ -171,6 +172,25 @@ struct vo_chain {
     struct dec_video *video_src;
 };
 
+// Like vo_chain, for audio.
+struct ao_chain {
+    struct mp_log *log;
+
+    double pts; // timestamp of first sample output by decoder
+    bool spdif_passthrough, spdif_failed;
+
+    struct af_stream *af;
+    struct ao *ao;
+
+    // 1-element input frame queue.
+    struct mp_audio *input_frame;
+
+    // Last known input_mpi format (so vf can be reinitialized any time).
+    struct mp_audio input_format;
+
+    struct dec_audio *audio_src;
+};
+
 /* Note that playback can be paused, stopped, etc. at any time. While paused,
  * playback restart is still active, because you want seeking to work even
  * if paused.
@@ -278,6 +298,7 @@ typedef struct MPContext {
     struct ao *ao;
     struct mp_audio *ao_decoder_fmt; // for weak gapless audio check
     struct mp_audio_buffer *ao_buffer;  // queued audio; passed to ao_play() later
+    struct ao_chain *ao_chain;
 
     struct vo_chain *vo_chain;
 

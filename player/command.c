@@ -1242,9 +1242,9 @@ static int mp_property_filter_metadata(void *ctx, struct m_property *prop,
             struct vf_chain *vf = mpctx->vo_chain->vf;
             res = vf_control_by_label(vf, VFCTRL_GET_METADATA, &metadata, key);
         } else if (strcmp(type, "af") == 0) {
-            if (!(mpctx->d_audio && mpctx->d_audio->afilter))
+            if (!(mpctx->ao_chain && mpctx->ao_chain->af))
                 return M_PROPERTY_UNAVAILABLE;
-            struct af_stream *af = mpctx->d_audio->afilter;
+            struct af_stream *af = mpctx->ao_chain->af;
             res = af_control_by_label(af, AF_CONTROL_GET_METADATA, &metadata, key);
         }
         switch (res) {
@@ -1751,8 +1751,8 @@ static int mp_property_audio_params(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct mp_audio fmt = {0};
-    if (mpctx->d_audio)
-        fmt = mpctx->d_audio->decode_format;
+    if (mpctx->ao_chain)
+        fmt = mpctx->ao_chain->input_format;
     return property_audiofmt(fmt, action, arg);
 }
 

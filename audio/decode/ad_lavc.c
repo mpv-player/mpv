@@ -196,21 +196,21 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
         // LATM may need many packets to find mux info
         if (ret == AVERROR(EAGAIN)) {
             mpkt->len = 0;
-            return AD_OK;
+            return 0;
         }
     }
     if (ret < 0) {
         MP_ERR(da, "Error decoding audio.\n");
-        return AD_ERR;
+        return -1;
     }
     if (!got_frame)
-        return mpkt ? AD_OK : AD_EOF;
+        return 0;
 
     double out_pts = mp_pts_from_av(priv->avframe->pkt_pts, NULL);
 
     struct mp_audio *mpframe = mp_audio_from_avframe(priv->avframe);
     if (!mpframe)
-        return AD_ERR;
+        return -1;
 
     struct mp_chmap lavc_chmap = mpframe->channels;
     if (lavc_chmap.num != avctx->channels)

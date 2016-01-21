@@ -61,8 +61,6 @@ static void uninit_decoder(struct dec_audio *d_audio)
     d_audio->ad_driver = NULL;
     talloc_free(d_audio->priv);
     d_audio->priv = NULL;
-    d_audio->afilter->initialized = -1;
-    d_audio->decode_format = (struct mp_audio){0};
 }
 
 static int init_audio_codec(struct dec_audio *d_audio, const char *decoder)
@@ -93,7 +91,7 @@ static struct mp_decoder_list *audio_select_decoders(struct dec_audio *d_audio)
     struct mp_decoder_list *list = audio_decoder_list();
     struct mp_decoder_list *new =
         mp_select_decoders(list, codec, opts->audio_decoders);
-    if (d_audio->spdif_passthrough) {
+    if (d_audio->try_spdif) {
         struct mp_decoder_list *spdif =
             mp_select_decoder_list(list, codec, "spdif", opts->audio_spdif);
         mp_append_decoders(spdif, new);
@@ -159,144 +157,101 @@ void audio_uninit(struct dec_audio *d_audio)
         return;
     MP_VERBOSE(d_audio, "Uninit audio filters...\n");
     uninit_decoder(d_audio);
-    af_destroy(d_audio->afilter);
-    talloc_free(d_audio->waiting);
+    talloc_free(d_audio->current_frame);
     talloc_free(d_audio->packet);
     talloc_free(d_audio);
-}
-
-static int decode_new_frame(struct dec_audio *da)
-{
-    while (!da->waiting) {
-        if (!da->packet) {
-            if (demux_read_packet_async(da->header, &da->packet) == 0)
-                return AD_WAIT;
-        }
-
-        int ret = da->ad_driver->decode_packet(da, da->packet, &da->waiting);
-        if (ret < 0 || (da->packet && da->packet->len == 0)) {
-            talloc_free(da->packet);
-            da->packet = NULL;
-        }
-        if (ret < 0)
-            return ret;
-
-        if (da->waiting) {
-            if (da->waiting->pts != MP_NOPTS_VALUE) {
-                if (da->pts != MP_NOPTS_VALUE) {
-                    da->pts += da->pts_offset / (double)da->waiting->rate;
-                    da->pts_offset = 0;
-                }
-                double newpts = da->waiting->pts;
-                // Keep the interpolated timestamp if it doesn't deviate more
-                // than 1 ms from the real one. (MKV rounded timestamps.)
-                if (da->pts == MP_NOPTS_VALUE || da->pts_offset != 0 ||
-                    fabs(da->pts - newpts) > 0.001)
-                {
-                    // Attempt to detect jumps in PTS. Even for the lowest
-                    // sample rates and with worst container rounded timestamp,
-                    // this should be a margin more than enough.
-                    if (da->pts != MP_NOPTS_VALUE && fabs(newpts - da->pts) > 0.1)
-                    {
-                        MP_WARN(da, "Invalid audio PTS: %f -> %f\n",
-                                da->pts, newpts);
-                        da->pts_reset = true;
-                    }
-                    da->pts = da->waiting->pts;
-                    da->pts_offset = 0;
-                }
-            }
-            da->pts_offset += da->waiting->samples;
-            da->decode_format = *da->waiting;
-            mp_audio_set_null_data(&da->decode_format);
-        }
-
-        if (da->pts == MP_NOPTS_VALUE && da->header->missing_timestamps)
-            da->pts = 0;
-    }
-    return mp_audio_config_valid(da->waiting) ? AD_OK : AD_ERR;
-}
-
-/* Decode packets until we know the audio format. Then reinit the buffer.
- * Returns AD_OK on success, negative AD_* code otherwise.
- * Also returns AD_OK if already initialized (and does nothing).
- */
-int initial_audio_decode(struct dec_audio *da)
-{
-    return decode_new_frame(da);
-}
-
-static bool copy_output(struct af_stream *afs, struct mp_audio_buffer *outbuf,
-                        int minsamples, bool eof)
-{
-    while (mp_audio_buffer_samples(outbuf) < minsamples) {
-        if (af_output_frame(afs, eof) < 0)
-            return true; // error, stop doing stuff
-        struct mp_audio *mpa = af_read_output_frame(afs);
-        if (!mpa)
-            return false; // out of data
-        mp_audio_buffer_append(outbuf, mpa);
-        talloc_free(mpa);
-    }
-    return true;
-}
-
-/* Try to get at least minsamples decoded+filtered samples in outbuf
- * (total length including possible existing data).
- * Return 0 on success, or negative AD_* error code.
- * In the former case outbuf has at least minsamples buffered on return.
- * In case of EOF/error it might or might not be. */
-int audio_decode(struct dec_audio *da, struct mp_audio_buffer *outbuf,
-                 int minsamples)
-{
-    struct af_stream *afs = da->afilter;
-    if (afs->initialized < 1)
-        return AD_ERR;
-
-    MP_STATS(da, "start audio");
-
-    int res;
-    while (1) {
-        res = 0;
-
-        if (copy_output(afs, outbuf, minsamples, false))
-            break;
-
-        res = decode_new_frame(da);
-        if (res < 0) {
-            // drain filters first (especially for true EOF case)
-            copy_output(afs, outbuf, minsamples, true);
-            break;
-        }
-
-        // On format change, make sure to drain the filter chain.
-        if (!mp_audio_config_equals(&afs->input, da->waiting)) {
-            copy_output(afs, outbuf, minsamples, true);
-            res = AD_NEW_FMT;
-            break;
-        }
-
-        struct mp_audio *mpa = da->waiting;
-        da->waiting = NULL;
-        if (af_filter_frame(afs, mpa) < 0)
-            return AD_ERR;
-    }
-
-    MP_STATS(da, "end audio");
-
-    return res;
 }
 
 void audio_reset_decoding(struct dec_audio *d_audio)
 {
     if (d_audio->ad_driver)
         d_audio->ad_driver->control(d_audio, ADCTRL_RESET, NULL);
-    af_seek_reset(d_audio->afilter);
     d_audio->pts = MP_NOPTS_VALUE;
-    d_audio->pts_offset = 0;
     d_audio->pts_reset = false;
-    talloc_free(d_audio->waiting);
-    d_audio->waiting = NULL;
+    talloc_free(d_audio->current_frame);
+    d_audio->current_frame = NULL;
     talloc_free(d_audio->packet);
     d_audio->packet = NULL;
+}
+
+static void fix_audio_pts(struct dec_audio *da)
+{
+    if (!da->current_frame)
+        return;
+
+    if (da->current_frame->pts != MP_NOPTS_VALUE) {
+        double newpts = da->current_frame->pts;
+        // Keep the interpolated timestamp if it doesn't deviate more
+        // than 1 ms from the real one. (MKV rounded timestamps.)
+        if (da->pts == MP_NOPTS_VALUE || fabs(da->pts - newpts) > 0.001) {
+            // Attempt to detect jumps in PTS. Even for the lowest
+            // sample rates and with worst container rounded timestamp,
+            // this should be a margin more than enough.
+            if (da->pts != MP_NOPTS_VALUE && fabs(newpts - da->pts) > 0.1) {
+                MP_WARN(da, "Invalid audio PTS: %f -> %f\n",
+                        da->pts, newpts);
+                da->pts_reset = true;
+            }
+            da->pts = da->current_frame->pts;
+        }
+    }
+
+    if (da->pts == MP_NOPTS_VALUE && da->header->missing_timestamps)
+        da->pts = 0;
+
+    da->current_frame->pts = da->pts;
+
+    if (da->pts != MP_NOPTS_VALUE)
+        da->pts += da->current_frame->samples / (double)da->current_frame->rate;
+}
+
+void audio_work(struct dec_audio *da)
+{
+    if (da->current_frame)
+        return;
+
+    if (!da->packet && demux_read_packet_async(da->header, &da->packet) == 0) {
+        da->current_state = AUDIO_WAIT;
+        return;
+    }
+
+    bool had_packet = !!da->packet;
+
+    int ret = da->ad_driver->decode_packet(da, da->packet, &da->current_frame);
+    if (ret < 0 || (da->packet && da->packet->len == 0)) {
+        talloc_free(da->packet);
+        da->packet = NULL;
+    }
+
+    if (da->current_frame && !mp_audio_config_valid(da->current_frame)) {
+        talloc_free(da->current_frame);
+        da->current_frame = NULL;
+    }
+
+    da->current_state = AUDIO_OK;
+    if (!da->current_frame) {
+        da->current_state = AUDIO_EOF;
+        if (had_packet)
+            da->current_state = AUDIO_SKIP;
+    }
+
+    fix_audio_pts(da);
+}
+
+// Fetch an audio frame decoded with audio_work(). Returns one of:
+//  AUDIO_OK:   *out_frame is set to a new image
+//  AUDIO_WAIT: waiting for demuxer; will receive a wakeup signal
+//  AUDIO_EOF:  end of file, no more frames to be expected
+//  AUDIO_SKIP: dropped frame or something similar
+int audio_get_frame(struct dec_audio *da, struct mp_audio **out_frame)
+{
+    *out_frame = NULL;
+    if (da->current_frame) {
+        *out_frame = da->current_frame;
+        da->current_frame = NULL;
+        return AUDIO_OK;
+    }
+    if (da->current_state == AUDIO_OK)
+        return AUDIO_SKIP;
+    return da->current_state;
 }

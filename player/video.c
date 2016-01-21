@@ -889,8 +889,8 @@ static double find_best_speed(struct MPContext *mpctx, double vsync)
 
 static bool using_spdif_passthrough(struct MPContext *mpctx)
 {
-    if (mpctx->d_audio && mpctx->d_audio->afilter)
-        return !af_fmt_is_pcm(mpctx->d_audio->afilter->input.format);
+    if (mpctx->ao_chain)
+        return !af_fmt_is_pcm(mpctx->ao_chain->input_format.format);
     return false;
 }
 
