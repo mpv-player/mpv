@@ -180,6 +180,7 @@ const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_DROP_BUFFERS, "drop-buffers", },
 
   { MP_CMD_AF, "af", { ARG_STRING, ARG_STRING } },
+  { MP_CMD_AF_COMMAND, "af-command", { ARG_STRING, ARG_STRING, ARG_STRING } },
   { MP_CMD_AO_RELOAD, "ao-reload", },
 
   { MP_CMD_VF, "vf", { ARG_STRING, ARG_STRING } },

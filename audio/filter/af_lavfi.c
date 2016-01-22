@@ -222,6 +222,14 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
     }
+    case AF_CONTROL_COMMAND: {
+        if (!p->graph)
+            break;
+        char **args = arg;
+        return avfilter_graph_send_command(p->graph, "all",
+                                           args[0], args[1], &(char){0}, 0, 0)
+                >= 0 ? CONTROL_OK : CONTROL_ERROR;
+    }
     case AF_CONTROL_GET_METADATA:
         if (p->metadata) {
             *(struct mp_tags *)arg = *p->metadata;
