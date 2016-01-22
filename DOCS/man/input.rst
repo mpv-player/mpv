@@ -700,8 +700,11 @@ Input Commands that are Possibly Subject to Change
     specific. Currently, this only works with the ``lavfi`` filter - see
     the libavfilter documentation for which commands a filter supports.
 
+    Note that the ``<label>`` is a mpv filter label, not a libavfilter filter
+    name.
+
 ``af-command "<label>" "<cmd>" "<args>"``
-    Same as ``vf-command``, but for video filters.
+    Same as ``vf-command``, but for audio filters.
 
 Undocumented commands: ``tv-last-channel`` (TV/DVB only),
 ``ao-reload`` (experimental/internal).
