@@ -56,6 +56,7 @@
 #if LIBAVFILTER_VERSION_MICRO < 100
 #define graph_parse(graph, filters, inputs, outputs, log_ctx) \
     avfilter_graph_parse(graph, filters, inputs, outputs, log_ctx)
+#define avfilter_graph_send_command(a, b, c, d, e, f, g) -1
 #else
 #define graph_parse(graph, filters, inputs, outputs, log_ctx) \
     avfilter_graph_parse_ptr(graph, filters, &(inputs), &(outputs), log_ctx)
