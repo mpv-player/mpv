@@ -210,8 +210,12 @@ static int create(struct gl_hwdec *hw)
     if (!eglGetCurrentDisplay())
         return -1;
 
-    if (!strstr(gl->extensions, "EXT_image_dma_buf_import") ||
-        !strstr(gl->extensions, "EGL_KHR_image_base") ||
+    const char *exts = eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);
+    if (!exts)
+        return -1;
+
+    if (!strstr(exts, "EXT_image_dma_buf_import") ||
+        !strstr(exts, "EGL_KHR_image_base") ||
         !strstr(gl->extensions, "GL_OES_EGL_image") ||
         !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
         return -1;
