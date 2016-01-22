@@ -857,14 +857,14 @@ static void dvbin_close(stream_t *stream)
     dvb_state_t* state = priv->state;
 
     if (state->switching_channel && state->is_on) {
-      // Prevent state destruction, reset channel-switch. 
+      // Prevent state destruction, reset channel-switch.
       state->switching_channel = false;
       pthread_mutex_lock(&global_dvb_state_lock);
       global_dvb_state->stream_used = false;
       pthread_mutex_unlock(&global_dvb_state_lock);
       return;
     }
-    
+
     for (int i = state->demux_fds_cnt - 1; i >= 0; i--) {
         state->demux_fds_cnt--;
         MP_VERBOSE(stream, "DVBIN_CLOSE, close(%d), fd=%d, COUNT=%d\n", i,
@@ -877,7 +877,7 @@ static void dvbin_close(stream_t *stream)
     state->fe_fd = state->dvr_fd = -1;
 
     state->is_on = 0;
-    
+
     pthread_mutex_lock(&global_dvb_state_lock);
     dvb_free_state(state);
     global_dvb_state = NULL;
@@ -949,7 +949,7 @@ static int dvb_open(stream_t *stream)
     dvb_state_t* state = dvb_get_state(stream);
     state->stream_used = true;
     pthread_mutex_unlock(&global_dvb_state_lock);
-    
+
     priv->state = state;
     if (state == NULL) {
         MP_ERR(stream, "DVB CONFIGURATION IS EMPTY, exit\n");
@@ -957,8 +957,8 @@ static int dvb_open(stream_t *stream)
     }
 
     if (state->is_on != 1) {
-      // State could be already initialized, for example, we just did a channel switch. 
-      // The following setup only has to be done once. 
+      // State could be already initialized, for example, we just did a channel switch.
+      // The following setup only has to be done once.
 
       state->card = -1;
       for (i = 0; i < state->count; i++) {
@@ -1000,7 +1000,7 @@ static int dvb_open(stream_t *stream)
       if (!dvb_streaming_start(stream, tuner_type, progname))
           return STREAM_ERROR;
     }
-    
+
     stream->type = STREAMTYPE_DVB;
     stream->fill_buffer = dvb_streaming_read;
     stream->close = dvbin_close;
@@ -1031,7 +1031,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
     state = malloc(sizeof(dvb_state_t));
     if (state == NULL)
         return NULL;
-    
+
     state->count = 0;
     state->switching_channel = false;
     state->stream_used = true;

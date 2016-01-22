@@ -43,7 +43,7 @@
 int dvb_get_tuner_types(int fe_fd, struct mp_log *log, int** tuner_types)
 {
 #ifdef DVB_USE_S2API
-    /* S2API is the DVB API new since 2.6.28. 
+    /* S2API is the DVB API new since 2.6.28.
        It allows to query frontends with multiple delivery systems. */
     struct dtv_property p[] = {{ .cmd = DTV_ENUM_DELSYS }};
     struct dtv_properties cmdseq = {.num = 1, .props = p};
@@ -63,9 +63,9 @@ int dvb_get_tuner_types(int fe_fd, struct mp_log *log, int** tuner_types)
     int supported_tuners = 0;
     for(;p[0].u.buffer.len > 0; p[0].u.buffer.len--) {
       fe_delivery_system_t delsys = p[0].u.buffer.data[p[0].u.buffer.len - 1];
-      /* Second level standards like like DVB-T2, DVB-S2 not treated here - 
-         Cards can usually either only do S/T/C or both levels. 
-         DVB-T2 probably needs more implementation details, 
+      /* Second level standards like like DVB-T2, DVB-S2 not treated here -
+         Cards can usually either only do S/T/C or both levels.
+         DVB-T2 probably needs more implementation details,
          DVB-S2 is treated in the DVB-S branch already. */
       switch (delsys) {
       case SYS_DVBT:
@@ -141,7 +141,7 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
     char frontend_dev[32], dvr_dev[32], demux_dev[32];
 
     dvb_state_t* state = priv->state;
-    
+
     sprintf(frontend_dev, "/dev/dvb/adapter%d/frontend0", n);
     sprintf(dvr_dev, "/dev/dvb/adapter%d/dvr0", n);
     sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", n);
@@ -180,7 +180,7 @@ int dvb_fix_demuxes(dvb_priv_t *priv, int cnt)
 {
     int i;
     char demux_dev[32];
-    
+
     dvb_state_t* state = priv->state;
 
     sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", state->card);
@@ -435,7 +435,7 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
                            (sat_no / 4) % 2 ? SEC_MINI_B : SEC_MINI_A);
 }
 
-static int tune_it(dvb_priv_t *priv, int fd_frontend, 
+static int tune_it(dvb_priv_t *priv, int fd_frontend,
                    unsigned int freq, unsigned int srate, char pol, int tone,
                    bool is_dvb_s2, int stream_id,
                    fe_spectral_inversion_t specInv, unsigned int diseqc,
@@ -454,7 +454,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend,
     struct dvb_frontend_parameters feparams;
 
     MP_VERBOSE(priv, "TUNE_IT, fd_frontend %d, freq %lu, srate %lu, "
-               "pol %c, tone %i, diseqc %u\n", fd_frontend, 
+               "pol %c, tone %i, diseqc %u\n", fd_frontend,
                (long unsigned int)freq, (long unsigned int)srate, pol,
                tone, diseqc);
 
@@ -574,8 +574,8 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend,
     case TUNER_CBL: {
 #ifdef DVB_USE_S2API
         /* S2API is the DVB API new since 2.6.28.
-         * It is also needed for devices supporting multiple delivery systems, 
-         * commonly DVB-C + DVB-T are supported here. 
+         * It is also needed for devices supporting multiple delivery systems,
+         * commonly DVB-C + DVB-T are supported here.
          */
         fe_delivery_system_t delsys = SYS_DVBC_ANNEX_AC;
         struct dtv_property p[] = {
