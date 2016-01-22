@@ -873,6 +873,11 @@ LPWSTR find_deviceID(struct ao *ao)
     if (!enumerator)
         goto exit_label;
 
+    if (!enumerator->count) {
+        MP_ERR(ao, "There are no playback devices available\n");
+        goto exit_label;
+    }
+
     if (!device.len) {
         MP_VERBOSE(ao, "No device specified. Selecting default.\n");
         d = default_device_desc(enumerator);
