@@ -909,7 +909,7 @@ LPWSTR find_deviceID(struct ao *ao)
         }
 
         if (bstrcmp(device, bstr_strip(bstr0(d->name))) == 0) {
-            if (!state->deviceID) {
+            if (!deviceID) {
                 MP_VERBOSE(ao, "Selecting device by name: \'%.*s\'\n", BSTR_P(device));
                 deviceID = select_device(ao->log, d);
             } else {
