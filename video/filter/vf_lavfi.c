@@ -335,6 +335,14 @@ static int control(vf_instance_t *vf, int request, void *data)
     case VFCTRL_SEEK_RESET:
         reset(vf);
         return CONTROL_OK;
+    case VFCTRL_COMMAND: {
+        if (!vf->priv->graph)
+            break;
+        char **args = data;
+        return avfilter_graph_send_command(vf->priv->graph, "all",
+                                           args[0], args[1], &(char){0}, 0, 0)
+                >= 0 ? CONTROL_OK : CONTROL_ERROR;
+    }
     case VFCTRL_GET_METADATA:
         if (vf->priv && vf->priv->metadata) {
             *(struct mp_tags *)data = *vf->priv->metadata;

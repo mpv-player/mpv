@@ -694,6 +694,12 @@ Input Commands that are Possibly Subject to Change
     field is of type MPV_FORMAT_BYTE_ARRAY with the actual image data. The image
     is freed as soon as the result node is freed.
 
+``vf-command "<label>" "<cmd>" "<args>"``
+    Send a command to the filter with the given ``<label>``. Use ``all`` to send
+    it to all filters at once. The command and argument string is filter
+    specific. Currently, this only works with the ``lavfi`` filter - see
+    the libavfilter documentation for which commands a filter supports.
+
 Undocumented commands: ``tv-last-channel`` (TV/DVB only),
 ``ao-reload`` (experimental/internal).
 

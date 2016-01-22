@@ -4931,6 +4931,12 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         return edit_filters_osd(mpctx, STREAM_VIDEO, cmd->args[0].v.s,
                                 cmd->args[1].v.s, msg_osd);
 
+    case MP_CMD_VF_COMMAND:
+        if (!mpctx->vo_chain)
+            return -1;
+        return vf_send_command(mpctx->vo_chain->vf, cmd->args[0].v.s,
+                               cmd->args[1].v.s, cmd->args[2].v.s);
+
     case MP_CMD_SCRIPT_BINDING: {
         mpv_event_client_message event = {0};
         char *name = cmd->args[0].v.s;

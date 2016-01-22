@@ -163,6 +163,17 @@ static void vf_control_all(struct vf_chain *c, int cmd, void *arg)
     }
 }
 
+int vf_send_command(struct vf_chain *c, char *label, char *cmd, char *arg)
+{
+    char *args[2] = {cmd, arg};
+    if (strcmp(label, "all") == 0) {
+        vf_control_all(c, VFCTRL_COMMAND, args);
+        return 0;
+    } else {
+        return vf_control_by_label(c, VFCTRL_COMMAND, args, bstr0(label));
+    }
+}
+
 static void vf_fix_img_params(struct mp_image *img, struct mp_image_params *p)
 {
     // Filters must absolutely set these correctly.
