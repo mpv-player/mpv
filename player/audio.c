@@ -201,6 +201,7 @@ void uninit_audio_out(struct MPContext *mpctx)
 static void ao_chain_uninit(struct ao_chain *ao_c)
 {
     af_destroy(ao_c->af);
+    talloc_free(ao_c->input_frame);
     talloc_free(ao_c->ao_buffer);
     talloc_free(ao_c);
 }
