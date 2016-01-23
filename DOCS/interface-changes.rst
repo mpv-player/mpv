@@ -1,7 +1,7 @@
 Introduction
 ============
 
-mpv provides access to its internal via the following means:
+mpv provides access to its internals via the following means:
 
 - options
 - commands
