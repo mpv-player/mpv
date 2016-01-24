@@ -947,14 +947,15 @@ static int dvb_open(stream_t *stream)
     }
 
     dvb_state_t* state = dvb_get_state(stream);
-    state->stream_used = true;
-    pthread_mutex_unlock(&global_dvb_state_lock);
 
     priv->state = state;
     if (state == NULL) {
         MP_ERR(stream, "DVB CONFIGURATION IS EMPTY, exit\n");
+        pthread_mutex_unlock(&global_dvb_state_lock);
         return STREAM_ERROR;
     }
+    state->stream_used = true;
+    pthread_mutex_unlock(&global_dvb_state_lock);
 
     if (state->is_on != 1) {
       // State could be already initialized, for example, we just did a channel switch.
