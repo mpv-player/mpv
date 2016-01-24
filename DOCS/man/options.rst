@@ -539,7 +539,7 @@ Video
         filters all frames, but doesn't render them on the VO. It tries to query
         the display FPS (X11 only, not correct on multi-monitor systems), or
         assumes infinite display FPS if that fails. Drops are indicated in
-        the terminal status line as ``D:`` field. If the decoder is too slow,
+        the terminal status line as ``Dropped:`` field. If the decoder is too slow,
         in theory all frames would have to be dropped (because all frames are
         too late) - to avoid this, frame dropping stops if the effective
         framerate is below 10 FPS.
