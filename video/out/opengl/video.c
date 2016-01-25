@@ -337,6 +337,7 @@ const struct gl_video_opts gl_video_opts_def = {
         {{"mitchell",   .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .clamp = 1, }, // tscale
     },
+    .scaler_resizes_only = 1,
     .scaler_lut_size = 6,
     .alpha_mode = 3,
     .background = {0, 0, 0, 255},
@@ -361,6 +362,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
         {{"mitchell",   .params={NAN, NAN}}, {.params = {NAN, NAN}},
          .clamp = 1, }, // tscale
     },
+    .scaler_resizes_only = 1,
     .scaler_lut_size = 6,
     .alpha_mode = 3,
     .background = {0, 0, 0, 255},

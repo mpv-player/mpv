@@ -27,6 +27,7 @@ Interface changes
       the old default)
     - VO opengl custom shaders must now use "sample_pixel" as function name,
       instead of "sample"
+    - change VO opengl scaler-resizes-only default to enabled
  --- mpv 0.15.0 ---
     - change "yadif" video filter defaults
  --- mpv 0.14.0 ---

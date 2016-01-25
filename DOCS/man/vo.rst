@@ -444,7 +444,7 @@ Available video output drivers are:
         Disable the scaler if the video image is not resized. In that case,
         ``bilinear`` is used instead whatever is set with ``scale``. Bilinear
         will reproduce the source image perfectly if no scaling is performed.
-        Note that this option never affects ``cscale``.
+        Enabled by default. Note that this option never affects ``cscale``.
 
     ``pbo``
         Enable use of PBOs. On some drivers this can be faster, especially if
