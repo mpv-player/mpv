@@ -25,6 +25,8 @@ Interface changes
     - add --audio-normalize-downmix
     - change the default downmix behavior (--audio-normalize-downmix=yes to get
       the old default)
+    - VO opengl custom shaders must now use "sample_pixel" as function name,
+      instead of "sample"
  --- mpv 0.15.0 ---
     - change "yadif" video filter defaults
  --- mpv 0.14.0 ---

@@ -220,6 +220,7 @@ struct gl_video {
     bool hwdec_active;
 
     bool dsi_warned;
+    bool custom_shader_fn_warned;
 };
 
 struct fmt_entry {
@@ -943,6 +944,19 @@ static void load_shader(struct gl_video *p, const char *body)
                                                         p->texture_h});
 }
 
+static const char *get_custom_shader_fn(struct gl_video *p, const char *body)
+{
+    if (!p->gl->es && strstr(body, "sample") && !strstr(body, "sample_pixel")) {
+        if (!p->custom_shader_fn_warned) {
+            MP_WARN(p, "sample() is deprecated in custom shaders. "
+                       "Use sample_pixel()\n");
+            p->custom_shader_fn_warned = true;
+        }
+        return "sample";
+    }
+    return "sample_pixel";
+}
+
 // Applies an arbitrary number of shaders in sequence, using the given pair
 // of FBOs as intermediate buffers. Returns whether any shaders were applied.
 static bool apply_shaders(struct gl_video *p, char **shaders,
@@ -958,9 +972,10 @@ static bool apply_shaders(struct gl_video *p, char **shaders,
             continue;
         finish_pass_fbo(p, &textures[tex], w, h, tex_num, 0);
         load_shader(p, body);
+        const char *fn_name = get_custom_shader_fn(p, body);
         GLSLF("// custom shader\n");
-        GLSLF("vec4 color = sample(texture%d, texcoord%d, texture_size%d);\n",
-              tex_num, tex_num, tex_num);
+        GLSLF("vec4 color = %s(texture%d, texcoord%d, texture_size%d);\n",
+              fn_name, tex_num, tex_num, tex_num);
         tex = (tex+1) % 2;
         success = true;
     }
@@ -1153,8 +1168,9 @@ static void pass_sample(struct gl_video *p, int src_tex, struct scaler *scaler,
         const char *body = load_cached_file(p, p->opts.scale_shader);
         if (body) {
             load_shader(p, body);
+            const char *fn_name = get_custom_shader_fn(p, body);
             GLSLF("// custom scale-shader\n");
-            GLSL(vec4 color = sample(tex, pos, size);)
+            GLSLF("vec4 color = %s(tex, pos, size);\n", fn_name);
         } else {
             p->opts.scale_shader = NULL;
         }

@@ -657,7 +657,11 @@ Available video output drivers are:
 
         These files must define a function with the following signature::
 
-            vec4 sample(sampler2D tex, vec2 pos, vec2 tex_size)
+            vec4 sample_pixel(sampler2D tex, vec2 pos, vec2 tex_size)
+
+        (If there is no string ``sample_pixel`` in the shader script, it will
+        use ``sample`` instead. This is a compatibility hack for older shader
+        scripts, and is deprecated.)
 
         The meanings of the parameters are as follows:
 
