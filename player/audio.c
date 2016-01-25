@@ -346,12 +346,14 @@ void reinit_audio_chain(struct MPContext *mpctx)
         if (!mpctx->ao) {
             // If spdif was used, try to fallback to PCM.
             if (spdif_fallback) {
+                MP_VERBOSE(mpctx, "Falling back to PCM output.\n");
                 ao_c->spdif_passthrough = false;
                 ao_c->spdif_failed = true;
                 ao_c->audio_src->try_spdif = false;
                 if (!audio_init_best_codec(ao_c->audio_src))
                     goto init_error;
                 reset_audio_state(mpctx);
+                ao_c->input_format = (struct mp_audio){0};
                 reinit_audio_chain(mpctx);
                 return;
             }
