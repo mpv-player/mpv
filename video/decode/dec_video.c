@@ -310,18 +310,20 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
     }
 
     // Note: the PTS is reordered, but the DTS is not. Both should be monotonic.
-    double pts = d_video->codec_pts;
-    double dts = d_video->codec_dts;
+    double pts = mpi->pts;
+    double dts = mpi->dts;
 
     if (pts == MP_NOPTS_VALUE) {
         d_video->codec_pts = prev_codec_pts;
     } else if (pts < prev_codec_pts) {
+        d_video->codec_pts = mpi->pts;
         d_video->num_codec_pts_problems++;
     }
 
     if (dts == MP_NOPTS_VALUE) {
         d_video->codec_dts = prev_codec_dts;
     } else if (dts <= prev_codec_dts) {
+        d_video->codec_dts = mpi->dts;
         d_video->num_codec_dts_problems++;
     }
 

@@ -45,6 +45,8 @@ struct dec_video {
 
     void *priv; // for free use by vd_driver
 
+    // Strictly internal (dec_video.c).
+
     // Last PTS from decoder (set with each vd_driver->decode() call)
     double codec_pts;
     int num_codec_pts_problems;
@@ -56,8 +58,6 @@ struct dec_video {
     // PTS sorting (needed for AVI-style timestamps)
     double buffered_pts[128];
     int num_buffered_pts;
-
-    // Strictly internal (dec_video.c).
 
     // PTS or DTS of packet first read
     double first_packet_pdts;

@@ -676,11 +676,6 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
 
     ctx->hwdec_fail_count = 0;
 
-    struct mp_image_params params;
-    update_image_params(vd, ctx->pic, &params);
-    vd->codec_pts = mp_pts_from_av(ctx->pic->pkt_pts, NULL);
-    vd->codec_dts = mp_pts_from_av(ctx->pic->pkt_dts, NULL);
-
     AVFrameSideData *sd = NULL;
     sd = av_frame_get_side_data(ctx->pic, AV_FRAME_DATA_A53_CC);
     if (sd) {
@@ -692,11 +687,19 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     }
 
     struct mp_image *mpi = mp_image_from_av_frame(ctx->pic);
-    av_frame_unref(ctx->pic);
-    if (!mpi)
+    if (!mpi) {
+        av_frame_unref(ctx->pic);
         return;
+    }
     assert(mpi->planes[0] || mpi->planes[3]);
+    mpi->pts = mp_pts_from_av(ctx->pic->pkt_pts, NULL);
+    mpi->dts = mp_pts_from_av(ctx->pic->pkt_dts, NULL);
+
+    struct mp_image_params params;
+    update_image_params(vd, ctx->pic, &params);
     mp_image_set_params(mpi, &params);
+
+    av_frame_unref(ctx->pic);
 
     if (ctx->hwdec && ctx->hwdec->process_image)
         mpi = ctx->hwdec->process_image(ctx, mpi);
