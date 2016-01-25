@@ -9,6 +9,8 @@
 #include "video/mp_image.h"
 #include "video/hwdec.h"
 
+#define HWDEC_DELAY_QUEUE_COUNT 2
+
 typedef struct lavc_ctx {
     struct mp_log *log;
     struct MPOpts *opts;
@@ -22,6 +24,10 @@ typedef struct lavc_ctx {
     const char *software_fallback_decoder;
     bool hwdec_failed;
     bool hwdec_notified;
+
+    struct mp_image **delay_queue;
+    int num_delay_queue;
+    int max_delay_queue;
 
     // From VO
     struct mp_hwdec_info *hwdec_info;
