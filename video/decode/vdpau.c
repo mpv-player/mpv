@@ -79,9 +79,7 @@ static int init(struct lavc_ctx *ctx)
     };
     ctx->hwdec_priv = p;
 
-    if (mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter) < 1)
-        return -1;
-
+    mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter);
     return 0;
 }
 
