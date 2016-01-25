@@ -28,6 +28,7 @@ Interface changes
     - VO opengl custom shaders must now use "sample_pixel" as function name,
       instead of "sample"
     - change VO opengl scaler-resizes-only default to enabled
+    - add VO opengl "tscale-interpolates-only" suboption
  --- mpv 0.15.0 ---
     - change "yadif" video filter defaults
  --- mpv 0.14.0 ---

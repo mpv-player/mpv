@@ -338,6 +338,7 @@ const struct gl_video_opts gl_video_opts_def = {
          .clamp = 1, }, // tscale
     },
     .scaler_resizes_only = 1,
+    .tscale_interpolates_only = 1,
     .scaler_lut_size = 6,
     .alpha_mode = 3,
     .background = {0, 0, 0, 255},
@@ -363,6 +364,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
          .clamp = 1, }, // tscale
     },
     .scaler_resizes_only = 1,
+    .tscale_interpolates_only = 1,
     .scaler_lut_size = 6,
     .alpha_mode = 3,
     .background = {0, 0, 0, 255},
@@ -406,6 +408,7 @@ const struct m_sub_options gl_video_conf = {
         SCALER_OPTS("tscale", 3),
         OPT_INTRANGE("scaler-lut-size", scaler_lut_size, 0, 4, 10),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
+        OPT_FLAG("tscale-interpolates-only", tscale_interpolates_only, 0),
         OPT_FLAG("linear-scaling", linear_scaling, 0),
         OPT_FLAG("correct-downscaling", correct_downscaling, 0),
         OPT_FLAG("sigmoid-upscaling", sigmoid_upscaling, 0),
@@ -2182,8 +2185,11 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
     if (has_frame) {
         gl_sc_set_vao(p->sc, &p->vao);
 
+        bool same_rate = !(frame->repeat || frame->num_vsyncs > 1);
+
         if (p->opts.interpolation && frame->display_synced &&
-            (p->frames_drawn || !frame->still))
+            (p->frames_drawn || !frame->still) &&
+            (!same_rate || !p->opts.tscale_interpolates_only))
         {
             gl_video_interpolate_frame(p, frame, fbo);
         } else {

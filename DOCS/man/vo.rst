@@ -549,6 +549,10 @@ Available video output drivers are:
         manifest themselves as short flashes or fringes of black, mostly
         around moving edges) in exchange for potentially adding more blur.
 
+    ``tscale-interpolates-only=<yes|no>``
+        If set, then don't perform interpolation if the playback rate matches
+        the the display refresh rate (default: yes).
+
     ``dscale-radius``, ``cscale-radius``, ``tscale-radius``, etc.
         Set filter parameters for ``dscale``, ``cscale`` and ``tscale``,
         respectively.
