@@ -1337,6 +1337,8 @@ static bool pass_prescale_luma(struct gl_video *p, float tex_mul,
 // sample from video textures, set "color" variable to yuv value
 static void pass_read_video(struct gl_video *p)
 {
+    p->use_normalized_range = false;
+
     struct gl_transform chromafix;
     pass_set_image_textures(p, &p->image, &chromafix);
 
@@ -1363,7 +1365,6 @@ static void pass_read_video(struct gl_video *p)
         int c_h = p->pass_tex[1].src.y1 - p->pass_tex[1].src.y0;
         const struct scaler_config *cscale = &p->opts.scaler[2];
 
-        bool merged = false;
         if (p->plane_count > 2) {
             // For simplicity and performance, we merge the chroma planes
             // into a single texture before scaling or debanding, so the shader
@@ -1379,12 +1380,11 @@ static void pass_read_video(struct gl_video *p)
             assert(c_h == p->pass_tex[2].src.y1 - p->pass_tex[2].src.y0);
             finish_pass_fbo(p, &p->chroma_merge_fbo, c_w, c_h, 1, 0);
             p->use_normalized_range = true;
-            merged = true;
         }
 
         if (p->opts.deband) {
             pass_sample_deband(p->sc, p->opts.deband_opts, 1, p->gl_target,
-                               merged ? 1.0 : tex_mul,
+                               p->use_normalized_range ? 1.0 : tex_mul,
                                p->texture_w, p->texture_h, &p->lfg);
             GLSL(color.zw = vec2(0.0, 1.0);) // skip unused
             finish_pass_fbo(p, &p->chroma_deband_fbo, c_w, c_h, 1, 0);
