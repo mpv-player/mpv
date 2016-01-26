@@ -399,4 +399,5 @@ void mixer_uninit_audio(struct mixer *mixer)
     }
     mixer->ao = NULL;
     mixer->af = NULL;
+    mixer->softvol = false;
 }
