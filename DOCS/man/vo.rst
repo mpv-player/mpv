@@ -832,8 +832,8 @@ Available video output drivers are:
         influence performance and quality of the video output.
         ``fmt`` can be one of: rgb, rgba, rgb8, rgb10, rgb10_a2, rgb16, rgb16f,
         rgb32f, rgba12, rgba16, rgba16f, rgba32f.
-        Default: ``auto``, which maps to rgba16 on desktop GL, and rgb10_a2 on
-        GLES (e.g. ANGLE).
+        Default: ``auto``, which maps to rgba16 on desktop GL, and rgba16f or
+        rgb10_a2 on GLES (e.g. ANGLE).
 
     ``gamma=<0.1..2.0>``
         Set a gamma value (default: 1.0). If gamma is adjusted in other ways

@@ -2421,8 +2421,11 @@ static void check_gl_features(struct gl_video *p)
     bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
 
     if (have_fbo) {
-        if (!p->opts.fbo_format)
-            p->opts.fbo_format = gl->es ? GL_RGB10_A2 : GL_RGBA16;
+        if (!p->opts.fbo_format) {
+            p->opts.fbo_format = GL_RGBA16;
+            if (gl->es)
+                p->opts.fbo_format = have_float_tex ? GL_RGBA16F : GL_RGB10_A2;
+        }
         have_fbo = test_fbo(p);
     }
 
