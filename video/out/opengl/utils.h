@@ -126,6 +126,7 @@ void gl_sc_hadd(struct gl_shader_cache *sc, const char *text);
 void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...);
 void gl_sc_uniform_sampler(struct gl_shader_cache *sc, char *name, GLenum target,
                            int unit);
+void gl_sc_uniform_sampler_ui(struct gl_shader_cache *sc, char *name, int unit);
 void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, GLfloat f);
 void gl_sc_uniform_i(struct gl_shader_cache *sc, char *name, GLint f);
 void gl_sc_uniform_vec2(struct gl_shader_cache *sc, char *name, GLfloat f[2]);
