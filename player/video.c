@@ -726,6 +726,11 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
                 /* just skip - but save if backstep active */
                 if (mpctx->hrseek_backstep)
                     mp_image_setrefp(&mpctx->saved_frame, img);
+            } else if (mpctx->video_status == STATUS_SYNCING &&
+                       mpctx->playback_pts != MP_NOPTS_VALUE &&
+                       img->pts < mpctx->playback_pts)
+            {
+                /* skip after stream-switching */
             } else {
                 if (hrseek && mpctx->hrseek_backstep) {
                     if (mpctx->saved_frame) {
