@@ -1375,7 +1375,7 @@ static bool pass_prescale_luma(struct gl_video *p, float tex_mul,
 
 // The input textures are in an integer format (non-fixed-point), like R16UI.
 // Convert it to float in an extra pass.
-static void pass_integer_conversion(struct gl_video *p)
+static void pass_integer_conversion(struct gl_video *p, bool *chroma_merging)
 {
     double tex_mul = 1 / mp_get_csp_mul(p->image_params.colorspace,
                                         p->image_desc.component_bits,
@@ -1387,12 +1387,20 @@ static void pass_integer_conversion(struct gl_video *p)
     assert(sizeof(pass_tex) == sizeof(p->pass_tex));
     memcpy(pass_tex, p->pass_tex, sizeof(pass_tex));
 
+    *chroma_merging = p->plane_count == 3;
+
     for (int n = 0; n < TEXUNIT_VIDEO_NUM; n++) {
         if (!p->pass_tex[n].gl_tex)
+            continue;
+        if (*chroma_merging && n == 2)
             continue;
         GLSLF("// integer conversion plane %d\n", n);
         GLSLF("uvec4 icolor = texture(texture%d, texcoord%d);\n", n, n);
         GLSLF("vec4 color = vec4(icolor) * tex_mul;\n");
+        if (*chroma_merging && n == 1) {
+            GLSLF("uvec4 icolor2 = texture(texture2, texcoord2);\n");
+            GLSLF("color.g = vec4(icolor2).r * tex_mul;\n");
+        }
         gl_sc_uniform_f(p->sc, "tex_mul", tex_mul);
         int c_w = p->pass_tex[n].src.x1 - p->pass_tex[n].src.x0;
         int c_h = p->pass_tex[n].src.y1 - p->pass_tex[n].src.y0;
@@ -1412,8 +1420,10 @@ static void pass_read_video(struct gl_video *p)
     struct gl_transform chromafix;
     pass_set_image_textures(p, &p->image, &chromafix);
 
+    bool chroma_merged = false;
+
     if (p->use_integer_conversion)
-        pass_integer_conversion(p);
+        pass_integer_conversion(p, &chroma_merged);
 
     float tex_mul = 1 / mp_get_csp_mul(p->image_params.colorspace,
                                        p->image_desc.component_bits,
@@ -1440,7 +1450,7 @@ static void pass_read_video(struct gl_video *p)
         int c_h = p->pass_tex[1].src.y1 - p->pass_tex[1].src.y0;
         const struct scaler_config *cscale = &p->opts.scaler[2];
 
-        if (p->plane_count > 2) {
+        if (p->plane_count > 2 && !chroma_merged) {
             // For simplicity and performance, we merge the chroma planes
             // into a single texture before scaling or debanding, so the shader
             // doesn't need to run multiple times.
