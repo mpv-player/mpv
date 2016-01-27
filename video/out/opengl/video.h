@@ -83,7 +83,6 @@ struct gl_video_opts {
     float sigmoid_center;
     float sigmoid_slope;
     int scaler_resizes_only;
-    int tscale_interpolates_only;
     int pbo;
     int dither_depth;
     int dither_algo;
@@ -95,6 +94,7 @@ struct gl_video_opts {
     int use_rectangle;
     struct m_color background;
     int interpolation;
+    float interpolation_threshold;
     int blend_subs;
     char *scale_shader;
     char **pre_shaders;

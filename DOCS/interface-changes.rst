@@ -28,7 +28,9 @@ Interface changes
     - VO opengl custom shaders must now use "sample_pixel" as function name,
       instead of "sample"
     - change VO opengl scaler-resizes-only default to enabled
-    - add VO opengl "tscale-interpolates-only" suboption
+    - add VO opengl "interpolation-threshold" suboption (introduces new default
+      behavior, which can change e.g. ``--video-sync=display-vdrop`` to the
+      worse, but is usually what you want)
     - make "volume" and "mute" properties changeable even if no audio output is
       active (this gives not-ideal behavior if --softvol=no is used)
     - add "volume-max" and "mixer-active" properties

@@ -549,9 +549,19 @@ Available video output drivers are:
         manifest themselves as short flashes or fringes of black, mostly
         around moving edges) in exchange for potentially adding more blur.
 
-    ``tscale-interpolates-only=<yes|no>``
-        If set, then don't perform interpolation if the playback rate matches
-        the display refresh rate (default: yes).
+    ``interpolation-threshold=<0..1,-1>``
+        Threshold below which frame ratio interpolation gets disabled (default:
+        ``0.0001``). This is calculated as ``abs(disphz/vfps - 1) < threshold``,
+        where ``vfps`` is the speed-adjusted display FPS, and ``disphz`` the
+        display refresh rate.
+
+        The default is intended to almost always enable interpolation if the
+        playback rate is even slightly different from the display refresh rate.
+        But note that if you use e.g. ``--video-sync=display-vdrop``, small
+        deviations in the rate can disable interpolation and introduce a
+        discontinuity every other minute.
+
+        Set this to ``-1`` to disable this logic.
 
     ``dscale-radius``, ``cscale-radius``, ``tscale-radius``, etc.
         Set filter parameters for ``dscale``, ``cscale`` and ``tscale``,
