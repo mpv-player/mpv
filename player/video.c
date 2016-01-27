@@ -698,7 +698,8 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
     bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
 
     struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    if (track && track->stream && track->stream->attached_picture) {
+    bool is_coverart = track && track->stream && track->stream->attached_picture;
+    if (is_coverart) {
         if (vo_has_frame(mpctx->video_out))
             return VD_EOF;
         hrseek = false;
@@ -728,7 +729,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
                     mp_image_setrefp(&mpctx->saved_frame, img);
             } else if (mpctx->video_status == STATUS_SYNCING &&
                        mpctx->playback_pts != MP_NOPTS_VALUE &&
-                       img->pts < mpctx->playback_pts)
+                       img->pts < mpctx->playback_pts && !is_coverart)
             {
                 /* skip after stream-switching */
             } else {
