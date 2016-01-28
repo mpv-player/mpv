@@ -670,6 +670,15 @@ void gl_sc_uniform_sampler(struct gl_shader_cache *sc, char *name, GLenum target
     u->v.i[0] = unit;
 }
 
+void gl_sc_uniform_sampler_ui(struct gl_shader_cache *sc, char *name, int unit)
+{
+    struct sc_uniform *u = find_uniform(sc, name);
+    u->type = UT_i;
+    u->size = 1;
+    u->glsl_type = sc->gl->es ? "highp usampler2D" : "usampler2D";
+    u->v.i[0] = unit;
+}
+
 void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, GLfloat f)
 {
     struct sc_uniform *u = find_uniform(sc, name);

@@ -391,6 +391,10 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
             avctx->get_buffer2 = get_buffer2_hwdec;
         if (ctx->hwdec->init(ctx) < 0)
             goto error;
+        // This can increase efficiency by not blocking on the hardware
+        // pipeline by reading back immediately after decoding.
+        if (ctx->hwdec->process_image)
+            ctx->max_delay_queue = HWDEC_DELAY_QUEUE_COUNT;
     } else {
         mp_set_avcodec_threads(vd->log, avctx, lavc_param->threads);
     }
@@ -454,6 +458,17 @@ static void reset_avctx(struct dec_video *vd)
     ctx->flushing = false;
 }
 
+static void flush_all(struct dec_video *vd)
+{
+    vd_ffmpeg_ctx *ctx = vd->priv;
+
+    for (int n = 0; n < ctx->num_delay_queue; n++)
+        talloc_free(ctx->delay_queue[n]);
+    ctx->num_delay_queue = 0;
+
+    reset_avctx(vd);
+}
+
 static void uninit_avctx(struct dec_video *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
@@ -474,9 +489,11 @@ static void uninit_avctx(struct dec_video *vd)
 
     av_frame_free(&ctx->pic);
 
-    ctx->flushing = false;
+    flush_all(vd);
+
     ctx->hwdec_failed = false;
     ctx->hwdec_fail_count = 0;
+    ctx->max_delay_queue = 0;
 }
 
 static void update_image_params(struct dec_video *vd, AVFrame *frame,
@@ -618,6 +635,22 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
     return 0;
 }
 
+static struct mp_image *read_output(struct dec_video *vd)
+{
+    vd_ffmpeg_ctx *ctx = vd->priv;
+
+    if (!ctx->num_delay_queue)
+        return NULL;
+
+    struct mp_image *res = ctx->delay_queue[0];
+    MP_TARRAY_REMOVE_AT(ctx->delay_queue, ctx->num_delay_queue, 0);
+
+    if (ctx->hwdec && ctx->hwdec->process_image)
+        res = ctx->hwdec->process_image(ctx, res);
+
+    return mp_img_swap_to_native(res);
+}
+
 static void decode(struct dec_video *vd, struct demux_packet *packet,
                    int flags, struct mp_image **out_image)
 {
@@ -671,15 +704,13 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     }
 
     // Skipped frame, or delayed output due to multithreaded decoding.
-    if (!got_picture)
+    if (!got_picture) {
+        if (!packet)
+            *out_image = read_output(vd);
         return;
+    }
 
     ctx->hwdec_fail_count = 0;
-
-    struct mp_image_params params;
-    update_image_params(vd, ctx->pic, &params);
-    vd->codec_pts = mp_pts_from_av(ctx->pic->pkt_pts, NULL);
-    vd->codec_dts = mp_pts_from_av(ctx->pic->pkt_dts, NULL);
 
     AVFrameSideData *sd = NULL;
     sd = av_frame_get_side_data(ctx->pic, AV_FRAME_DATA_A53_CC);
@@ -692,16 +723,23 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     }
 
     struct mp_image *mpi = mp_image_from_av_frame(ctx->pic);
-    av_frame_unref(ctx->pic);
-    if (!mpi)
+    if (!mpi) {
+        av_frame_unref(ctx->pic);
         return;
+    }
     assert(mpi->planes[0] || mpi->planes[3]);
+    mpi->pts = mp_pts_from_av(ctx->pic->pkt_pts, NULL);
+    mpi->dts = mp_pts_from_av(ctx->pic->pkt_dts, NULL);
+
+    struct mp_image_params params;
+    update_image_params(vd, ctx->pic, &params);
     mp_image_set_params(mpi, &params);
 
-    if (ctx->hwdec && ctx->hwdec->process_image)
-        mpi = ctx->hwdec->process_image(ctx, mpi);
+    av_frame_unref(ctx->pic);
 
-    *out_image = mp_img_swap_to_native(mpi);
+    MP_TARRAY_APPEND(ctx, ctx->delay_queue, ctx->num_delay_queue, mpi);
+    if (ctx->num_delay_queue > ctx->max_delay_queue)
+        *out_image = read_output(vd);
 }
 
 static struct mp_image *decode_with_fallback(struct dec_video *vd,
@@ -737,7 +775,7 @@ static int control(struct dec_video *vd, int cmd, void *arg)
     vd_ffmpeg_ctx *ctx = vd->priv;
     switch (cmd) {
     case VDCTRL_RESET:
-        reset_avctx(vd);
+        flush_all(vd);
         return CONTROL_TRUE;
     case VDCTRL_QUERY_UNSEEN_FRAMES: {
         AVCodecContext *avctx = ctx->avctx;

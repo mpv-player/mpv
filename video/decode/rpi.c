@@ -21,6 +21,8 @@
 static const char *const codecs[][2] = {
     {"h264",        "h264_mmal"},
     {"mpeg2video",  "mpeg2_mmal"},
+    {"mpeg4",       "mpeg4_mmal"},
+    {"vc1",         "vc1_mmal"},
     {0}
 };
 

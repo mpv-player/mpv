@@ -1538,13 +1538,18 @@ static int mp_property_partially_seekable(void *ctx, struct m_property *prop,
     return m_property_flag_ro(action, arg, mpctx->demuxer->partially_seekable);
 }
 
+static int mp_property_mixer_active(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return m_property_flag_ro(action, arg, mixer_audio_initialized(mpctx->mixer));
+}
+
 /// Volume (RW)
 static int mp_property_volume(void *ctx, struct m_property *prop,
                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mixer_audio_initialized(mpctx->mixer))
-        return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_GET:
         mixer_getbothvolume(mpctx->mixer, arg);
@@ -1578,13 +1583,18 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_volume_max(void *ctx, struct m_property *prop,
+                                  int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    return m_property_float_ro(action, arg, mixer_getmaxvolume(mpctx->mixer));
+}
+
 /// Mute (RW)
 static int mp_property_mute(void *ctx, struct m_property *prop,
                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mixer_audio_initialized(mpctx->mixer))
-        return M_PROPERTY_ERROR;
     switch (action) {
     case M_PROPERTY_SET:
         mixer_setmute(mpctx->mixer, *(int *) arg);
@@ -3553,7 +3563,9 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_ALIAS("playlist-count", "playlist/count"),
 
     // Audio
+    {"mixer-active", mp_property_mixer_active},
     {"volume", mp_property_volume},
+    {"volume-max", mp_property_volume_max},
     {"mute", mp_property_mute},
     {"audio-delay", mp_property_audio_delay},
     {"audio-codec-name", mp_property_audio_codec_name},
@@ -3734,7 +3746,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute", "balance",
       "volume-restore-data", "current-ao", "audio-codec-name", "audio-params",
-      "audio-out-params"),
+      "audio-out-params", "volume-max", "mixer-active"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle", "eof-reached"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking", "core-idle", "eof-reached"),
     E(MPV_EVENT_METADATA_UPDATE, "metadata", "filtered-metadata", "media-title"),

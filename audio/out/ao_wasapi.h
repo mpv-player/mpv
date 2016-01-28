@@ -119,7 +119,8 @@ char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey);
 #define mp_PKEY_to_str(pkey) mp_PKEY_to_str_buf((char[42]){0}, 42, (pkey))
 
 void wasapi_list_devs(struct ao *ao, struct ao_device_list *list);
-LPWSTR find_deviceID(struct ao *ao);
+bstr wasapi_get_specified_device_string(struct ao *ao);
+LPWSTR wasapi_find_deviceID(struct ao *ao);
 
 void wasapi_dispatch(struct ao *ao);
 HRESULT wasapi_thread_init(struct ao *ao);

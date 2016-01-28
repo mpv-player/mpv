@@ -44,7 +44,7 @@
  * Note that redundant additional surfaces also might allow for some
  * buffering (i.e. not trying to reuse a surface while it's busy).
  */
-#define ADDTIONAL_SURFACES 6
+#define ADDTIONAL_SURFACES MPMAX(6, HWDEC_DELAY_QUEUE_COUNT)
 
 // Some upper bound.
 #define MAX_SURFACES 25

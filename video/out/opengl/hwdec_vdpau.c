@@ -137,7 +137,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     assert(params->imgfmt == hw->driver->imgfmt);
     p->image_params = *params;
 
-    if (mp_vdpau_handle_preemption(p->ctx, &p->preemption_counter) < 1)
+    if (mp_vdpau_handle_preemption(p->ctx, &p->preemption_counter) < 0)
         return -1;
 
     gl->VDPAUInitNV(BRAINDEATH(p->ctx->vdp_device), p->ctx->get_proc_address);

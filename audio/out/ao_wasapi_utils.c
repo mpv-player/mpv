@@ -858,14 +858,19 @@ static LPWSTR select_device(struct mp_log *l, struct device_desc *d)
                          (wcslen(d->deviceID) + 1) * sizeof(wchar_t));
 }
 
-LPWSTR find_deviceID(struct ao *ao)
+bstr wasapi_get_specified_device_string(struct ao *ao)
 {
-    LPWSTR deviceID = NULL;
     struct wasapi_state *state = ao->priv;
     bstr device = bstr_strip(bstr0(state->opt_device));
     if (!device.len)
         device = bstr_strip(bstr0(ao->device));
+    return device;
+}
 
+LPWSTR wasapi_find_deviceID(struct ao *ao)
+{
+    LPWSTR deviceID = NULL;
+    bstr device = wasapi_get_specified_device_string(ao);
     MP_DBG(ao, "Find device \'%.*s\'\n", BSTR_P(device));
 
     struct device_desc *d = NULL;
@@ -909,7 +914,7 @@ LPWSTR find_deviceID(struct ao *ao)
         }
 
         if (bstrcmp(device, bstr_strip(bstr0(d->name))) == 0) {
-            if (!state->deviceID) {
+            if (!deviceID) {
                 MP_VERBOSE(ao, "Selecting device by name: \'%.*s\'\n", BSTR_P(device));
                 deviceID = select_device(ao->log, d);
             } else {
