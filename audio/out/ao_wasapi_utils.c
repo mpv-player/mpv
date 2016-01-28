@@ -867,7 +867,7 @@ bstr wasapi_get_specified_device_string(struct ao *ao)
     return device;
 }
 
-LPWSTR find_deviceID(struct ao *ao)
+LPWSTR wasapi_find_deviceID(struct ao *ao)
 {
     LPWSTR deviceID = NULL;
     bstr device = wasapi_get_specified_device_string(ao);
