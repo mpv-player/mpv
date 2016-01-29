@@ -266,32 +266,15 @@ static int filter_frame(struct af_instance *af, struct mp_audio *data)
     if (!p->graph)
         goto error;
 
-    AVFilterLink *l_in = p->in->outputs[0];
-
     if (data) {
-        frame = av_frame_alloc();
+        frame = mp_audio_to_avframe_and_unref(data);
+        data = NULL;
         if (!frame)
             goto error;
 
-        frame->nb_samples = data->samples;
-        frame->format = l_in->format;
-
         // Timebase is 1/sample_rate
         frame->pts = p->samples_in;
-
-        frame->channel_layout = l_in->channel_layout;
-        frame->sample_rate = l_in->sample_rate;
-#if LIBAVFILTER_VERSION_MICRO >= 100
-        // FFmpeg being a stupid POS
-        frame->channels = l_in->channels;
-#endif
-
-        frame->extended_data = frame->data;
-        for (int n = 0; n < data->num_planes; n++)
-            frame->data[n] = data->planes[n];
-        frame->linesize[0] = frame->nb_samples * data->sstride;
-
-        p->samples_in += data->samples;
+        p->samples_in += frame->nb_samples;
     }
 
     if (av_buffersrc_add_frame(p->in, frame) < 0)

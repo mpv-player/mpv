@@ -78,6 +78,7 @@ int mp_audio_make_writeable(struct mp_audio *data);
 
 struct AVFrame;
 struct mp_audio *mp_audio_from_avframe(struct AVFrame *avframe);
+struct AVFrame *mp_audio_to_avframe_and_unref(struct mp_audio *frame);
 
 struct mp_audio_pool;
 struct mp_audio_pool *mp_audio_pool_create(void *ta_parent);

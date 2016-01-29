@@ -350,6 +350,78 @@ fail:
     return NULL;
 }
 
+// Returns NULL on failure. The input is always unreffed.
+struct AVFrame *mp_audio_to_avframe_and_unref(struct mp_audio *frame)
+{
+    struct AVFrame *avframe = av_frame_alloc();
+    if (!avframe)
+        goto fail;
+
+    avframe->nb_samples = frame->samples;
+    avframe->format = af_to_avformat(frame->format);
+    if (avframe->format == AV_SAMPLE_FMT_NONE)
+        goto fail;
+
+    avframe->channel_layout = mp_chmap_to_lavc(&frame->channels);
+    if (!avframe->channel_layout)
+        goto fail;
+#if LIBAVUTIL_VERSION_MICRO >= 100
+    // FFmpeg being a stupid POS (but I respect it)
+    avframe->channels = frame->channels.num;
+#endif
+    avframe->sample_rate = frame->rate;
+
+    if (frame->num_planes > AV_NUM_DATA_POINTERS) {
+        avframe->extended_data =
+            av_mallocz_array(frame->num_planes, sizeof(avframe->extended_data[0]));
+        int extbufs = frame->num_planes - AV_NUM_DATA_POINTERS;
+        avframe->extended_buf =
+            av_mallocz_array(extbufs, sizeof(avframe->extended_buf[0]));
+        if (!avframe->extended_data || !avframe->extended_buf)
+            goto fail;
+        avframe->nb_extended_buf = extbufs;
+    }
+
+    for (int p = 0; p < frame->num_planes; p++)
+        avframe->extended_data[p] = frame->planes[p];
+    avframe->linesize[0] = frame->samples * frame->sstride;
+
+    for (int p = 0; p < AV_NUM_DATA_POINTERS; p++)
+        avframe->data[p] = avframe->extended_data[p];
+
+    for (int p = 0; p < frame->num_planes; p++) {
+        if (!frame->allocated[p])
+            break;
+        AVBufferRef *nref = av_buffer_ref(frame->allocated[p]);
+        if (!nref)
+            goto fail;
+        if (p < AV_NUM_DATA_POINTERS) {
+            avframe->buf[p] = nref;
+        } else {
+            avframe->extended_buf[p - AV_NUM_DATA_POINTERS] = nref;
+        }
+    }
+
+    // Force refcounted frame.
+    if (!avframe->buf[0]) {
+        AVFrame *tmp = av_frame_alloc();
+        if (!tmp)
+            goto fail;
+        if (av_frame_ref(tmp, avframe) < 0)
+            goto fail;
+        av_frame_free(&avframe);
+        avframe = tmp;
+    }
+
+    talloc_free(frame);
+    return avframe;
+
+fail:
+    av_frame_free(&avframe);
+    talloc_free(frame);
+    return NULL;
+}
+
 struct mp_audio_pool {
     AVBufferPool *avpool;
     int element_size;
