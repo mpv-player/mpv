@@ -351,8 +351,6 @@ typedef struct MPContext {
      * (or at least queued to be flipped by VO) */
     double video_pts;
     double last_seek_pts;
-    // Mostly unused; for proper audio resync on speed changes.
-    double video_next_pts;
     // As video_pts, but is not reset when seeking away. (For the very short
     // period of time until a new frame is decoded and shown.)
     double last_vo_pts;

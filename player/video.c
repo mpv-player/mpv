@@ -254,7 +254,6 @@ void reset_video_state(struct MPContext *mpctx)
     mpctx->delay = 0;
     mpctx->time_frame = 0;
     mpctx->video_pts = MP_NOPTS_VALUE;
-    mpctx->video_next_pts = MP_NOPTS_VALUE;
     mpctx->num_past_frames = 0;
     mpctx->total_avsync_change = 0;
     mpctx->last_av_difference = 0;
@@ -632,7 +631,6 @@ static void handle_new_frame(struct MPContext *mpctx)
             frame_time = 0;
         }
     }
-    mpctx->video_next_pts = pts;
     mpctx->delay -= frame_time;
     if (mpctx->video_status >= STATUS_PLAYING) {
         mpctx->time_frame += frame_time / mpctx->video_speed;

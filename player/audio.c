@@ -512,8 +512,8 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     if (sync_to_video) {
         if (mpctx->video_status < STATUS_READY)
             return false; // wait until we know a video PTS
-        if (mpctx->video_next_pts != MP_NOPTS_VALUE)
-            sync_pts = mpctx->video_next_pts - opts->audio_delay;
+        if (mpctx->video_pts != MP_NOPTS_VALUE)
+            sync_pts = mpctx->video_pts - opts->audio_delay;
     } else if (mpctx->hrseek_active) {
         sync_pts = mpctx->hrseek_pts;
     }
