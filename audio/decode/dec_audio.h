@@ -36,9 +36,6 @@ struct dec_audio {
 
     bool try_spdif;
 
-    // set every time a jump in timestamps is encountered
-    bool pts_reset;
-
     // For free use by the ad_driver
     void *priv;
 

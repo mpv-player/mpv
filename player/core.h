@@ -179,6 +179,7 @@ struct ao_chain {
 
     double pts; // timestamp of first sample output by decoder
     bool spdif_passthrough, spdif_failed;
+    bool pts_reset;
 
     struct af_stream *af;
     struct ao *ao;

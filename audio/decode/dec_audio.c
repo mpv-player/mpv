@@ -167,7 +167,6 @@ void audio_reset_decoding(struct dec_audio *d_audio)
     if (d_audio->ad_driver)
         d_audio->ad_driver->control(d_audio, ADCTRL_RESET, NULL);
     d_audio->pts = MP_NOPTS_VALUE;
-    d_audio->pts_reset = false;
     talloc_free(d_audio->current_frame);
     d_audio->current_frame = NULL;
     talloc_free(d_audio->packet);
@@ -183,17 +182,8 @@ static void fix_audio_pts(struct dec_audio *da)
         double newpts = da->current_frame->pts;
         // Keep the interpolated timestamp if it doesn't deviate more
         // than 1 ms from the real one. (MKV rounded timestamps.)
-        if (da->pts == MP_NOPTS_VALUE || fabs(da->pts - newpts) > 0.001) {
-            // Attempt to detect jumps in PTS. Even for the lowest
-            // sample rates and with worst container rounded timestamp,
-            // this should be a margin more than enough.
-            if (da->pts != MP_NOPTS_VALUE && fabs(newpts - da->pts) > 0.1) {
-                MP_WARN(da, "Invalid audio PTS: %f -> %f\n",
-                        da->pts, newpts);
-                da->pts_reset = true;
-            }
+        if (da->pts == MP_NOPTS_VALUE || fabs(da->pts - newpts) > 0.001)
             da->pts = da->current_frame->pts;
-        }
     }
 
     if (da->pts == MP_NOPTS_VALUE && da->header->missing_timestamps)

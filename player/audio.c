@@ -166,6 +166,7 @@ void update_playback_speed(struct MPContext *mpctx)
 static void ao_chain_reset_state(struct ao_chain *ao_c)
 {
     ao_c->pts = MP_NOPTS_VALUE;
+    ao_c->pts_reset = false;
     talloc_free(ao_c->input_frame);
     ao_c->input_frame = NULL;
     af_seek_reset(ao_c->af);
@@ -611,7 +612,19 @@ static int filter_audio(struct ao_chain *ao_c, struct mp_audio_buffer *outbuf,
 
         struct mp_audio *mpa = ao_c->input_frame;
         ao_c->input_frame = NULL;
-        ao_c->pts = mpa->pts + mpa->samples / (double)mpa->rate;
+        if (mpa->pts == MP_NOPTS_VALUE) {
+            ao_c->pts = MP_NOPTS_VALUE;
+        } else {
+            // Attempt to detect jumps in PTS. Even for the lowest sample rates
+            // and with worst container rounded timestamp, this should be a
+            // margin more than enough.
+            if (ao_c->pts != MP_NOPTS_VALUE && fabs(mpa->pts - ao_c->pts) > 0.1) {
+                MP_WARN(ao_c, "Invalid audio PTS: %f -> %f\n",
+                        ao_c->pts, mpa->pts);
+                ao_c->pts_reset = true;
+            }
+            ao_c->pts = mpa->pts + mpa->samples / (double)mpa->rate;
+        }
         if (af_filter_frame(afs, mpa) < 0)
             return AD_ERR;
     }
@@ -660,7 +673,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         return; // try again next iteration
     }
 
-    if (mpctx->vo_chain && ao_c->audio_src->pts_reset) {
+    if (mpctx->vo_chain && ao_c->pts_reset) {
         MP_VERBOSE(mpctx, "Reset playback due to audio timestamp reset.\n");
         reset_playback_state(mpctx);
         mpctx->sleeptime = 0;
