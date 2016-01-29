@@ -277,15 +277,13 @@ static void uninit(struct dec_video *vd)
 static bool force_fallback(struct dec_video *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
-    if (!ctx->software_fallback_decoder)
+    if (!ctx->hwdec)
         return false;
 
     uninit_avctx(vd);
     int lev = ctx->hwdec_notified ? MSGL_WARN : MSGL_V;
     mp_msg(vd->log, lev, "Falling back to software decoding.\n");
-    const char *decoder = ctx->software_fallback_decoder;
-    ctx->software_fallback_decoder = NULL;
-    init_avctx(vd, decoder, NULL);
+    init_avctx(vd, ctx->decoder, NULL);
     return true;
 }
 
@@ -295,6 +293,7 @@ static int init(struct dec_video *vd, const char *decoder)
     ctx = vd->priv = talloc_zero(NULL, vd_ffmpeg_ctx);
     ctx->log = vd->log;
     ctx->opts = vd->opts;
+    ctx->decoder = talloc_strdup(ctx, decoder);
 
     if (bstr_endswith0(bstr0(decoder), "_vdpau")) {
         MP_WARN(vd, "VDPAU decoder '%s' was requested. "
@@ -326,7 +325,6 @@ static int init(struct dec_video *vd, const char *decoder)
     }
 
     if (hwdec) {
-        ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
         if (hwdec->get_codec)
             decoder = hwdec->get_codec(ctx, decoder);
         MP_VERBOSE(vd, "Trying hardware decoding.\n");
@@ -791,10 +789,7 @@ static int control(struct dec_video *vd, int cmd, void *arg)
         return CONTROL_TRUE;
     }
     case VDCTRL_GET_HWDEC: {
-        int hwdec = ctx->hwdec ? ctx->hwdec->type : 0;
-        if (!ctx->software_fallback_decoder)
-            hwdec = 0;
-        *(int *)arg = hwdec;
+        *(int *)arg = ctx->hwdec ? ctx->hwdec->type : 0;
         return CONTROL_TRUE;
     }
     case VDCTRL_FORCE_HWDEC_FALLBACK:

@@ -21,7 +21,7 @@ typedef struct lavc_ctx {
     int best_csp;
     enum AVDiscard skip_frame;
     bool flushing;
-    const char *software_fallback_decoder;
+    const char *decoder;
     bool hwdec_failed;
     bool hwdec_notified;
 
