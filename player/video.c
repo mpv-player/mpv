@@ -237,14 +237,15 @@ static void vo_chain_reset_state(struct vo_chain *vo_c)
     if (vo_c->vf->initialized == 1)
         vf_seek_reset(vo_c->vf);
     vo_seek_reset(vo_c->vo);
+
+    if (vo_c->video_src)
+        video_reset(vo_c->video_src);
 }
 
 void reset_video_state(struct MPContext *mpctx)
 {
-    if (mpctx->vo_chain) {
-        video_reset(mpctx->vo_chain->video_src);
+    if (mpctx->vo_chain)
         vo_chain_reset_state(mpctx->vo_chain);
-    }
 
     for (int n = 0; n < mpctx->num_next_frames; n++)
         mp_image_unrefp(&mpctx->next_frames[n]);
@@ -422,7 +423,8 @@ static bool check_framedrop(struct MPContext *mpctx, struct vo_chain *vo_c)
     struct MPOpts *opts = mpctx->opts;
     // check for frame-drop:
     if (mpctx->video_status == STATUS_PLAYING && !mpctx->paused &&
-        mpctx->audio_status == STATUS_PLAYING && !ao_untimed(mpctx->ao))
+        mpctx->audio_status == STATUS_PLAYING && !ao_untimed(mpctx->ao) &&
+        vo_c->video_src)
     {
         float fps = vo_c->container_fps;
         double frame_time = fps > 0 ? 1.0 / fps : 0;
@@ -453,8 +455,6 @@ static int decode_image(struct MPContext *mpctx)
 
     assert(!vo_c->input_mpi);
     int st = video_get_frame(d_video, &vo_c->input_mpi);
-    if (vo_c->input_mpi)
-        vo_c->input_format = vo_c->input_mpi->params;
     switch (st) {
     case VIDEO_WAIT:    return VD_WAIT;
     case VIDEO_EOF:     return VD_EOF;
@@ -510,7 +510,7 @@ static int video_filter(struct MPContext *mpctx, bool eof)
 
         // Most video filters don't work with hardware decoding, so this
         // might be the reason why filter reconfig failed.
-        if (vf->initialized < 0 &&
+        if (vf->initialized < 0 && vo_c->video_src &&
             video_vd_control(vo_c->video_src, VDCTRL_FORCE_HWDEC_FALLBACK, NULL)
                 == CONTROL_OK)
         {
@@ -558,6 +558,8 @@ static int video_decode_and_filter(struct MPContext *mpctx)
         if (r == VD_WAIT)
             return r;
     }
+    if (vo_c->input_mpi)
+        vo_c->input_format = vo_c->input_mpi->params;
 
     bool eof = !vo_c->input_mpi && (r == VD_EOF || r < 0);
     r = video_filter(mpctx, eof);
@@ -636,7 +638,9 @@ static void handle_new_frame(struct MPContext *mpctx)
         mpctx->time_frame += frame_time / mpctx->video_speed;
         adjust_sync(mpctx, pts, frame_time);
     }
-    mpctx->dropped_frames_start = mpctx->vo_chain->video_src->dropped_frames;
+    struct dec_video *d_video = mpctx->vo_chain->video_src;
+    if (d_video)
+        mpctx->dropped_frames_start = d_video->dropped_frames;
     MP_TRACE(mpctx, "frametime=%5.3f\n", frame_time);
 }
 

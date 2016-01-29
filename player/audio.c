@@ -171,14 +171,15 @@ static void ao_chain_reset_state(struct ao_chain *ao_c)
     ao_c->input_frame = NULL;
     af_seek_reset(ao_c->af);
     mp_audio_buffer_clear(ao_c->ao_buffer);
+
+    if (ao_c->audio_src)
+        audio_reset_decoding(ao_c->audio_src);
 }
 
 void reset_audio_state(struct MPContext *mpctx)
 {
-    if (mpctx->ao_chain) {
-        audio_reset_decoding(mpctx->ao_chain->audio_src);
+    if (mpctx->ao_chain)
         ao_chain_reset_state(mpctx->ao_chain);
-    }
     mpctx->audio_status = mpctx->ao_chain ? STATUS_SYNCING : STATUS_EOF;
     mpctx->delay = 0;
     mpctx->audio_drop_throttle = 0;
@@ -237,6 +238,9 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     struct ao_chain *ao_c = mpctx->ao_chain;
     assert(ao_c);
     struct af_stream *afs = ao_c->af;
+
+    if (ao_c->input_frame)
+        mp_audio_copy_config(&ao_c->input_format, ao_c->input_frame);
 
     struct mp_audio in_format = ao_c->input_format;
 
@@ -307,7 +311,7 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
 
         if (!mpctx->ao) {
             // If spdif was used, try to fallback to PCM.
-            if (spdif_fallback) {
+            if (spdif_fallback && ao_c->audio_src) {
                 MP_VERBOSE(mpctx, "Falling back to PCM output.\n");
                 ao_c->spdif_passthrough = false;
                 ao_c->spdif_failed = true;
@@ -578,9 +582,6 @@ static int decode_new_frame(struct ao_chain *ao_c)
         audio_work(ao_c->audio_src);
         res = audio_get_frame(ao_c->audio_src, &ao_c->input_frame);
     }
-
-    if (ao_c->input_frame)
-        mp_audio_copy_config(&ao_c->input_format, ao_c->input_frame);
 
     switch (res) {
     case AUDIO_OK:      return AD_OK;
