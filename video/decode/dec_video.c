@@ -285,9 +285,6 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
     if (avi_pts)
         add_avi_pts(d_video, pkt_pdts);
 
-    double prev_codec_pts = d_video->codec_pts;
-    double prev_codec_dts = d_video->codec_dts;
-
     if (d_video->header->codec->avi_dts)
         drop_frame = 0;
 
@@ -313,18 +310,16 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
     double pts = mpi->pts;
     double dts = mpi->dts;
 
-    if (pts == MP_NOPTS_VALUE) {
-        d_video->codec_pts = prev_codec_pts;
-    } else if (pts < prev_codec_pts) {
+    if (pts != MP_NOPTS_VALUE) {
+        if (pts < d_video->codec_pts)
+            d_video->num_codec_pts_problems++;
         d_video->codec_pts = mpi->pts;
-        d_video->num_codec_pts_problems++;
     }
 
-    if (dts == MP_NOPTS_VALUE) {
-        d_video->codec_dts = prev_codec_dts;
-    } else if (dts <= prev_codec_dts) {
+    if (dts != MP_NOPTS_VALUE) {
+        if (dts <= d_video->codec_dts)
+            d_video->num_codec_dts_problems++;
         d_video->codec_dts = mpi->dts;
-        d_video->num_codec_dts_problems++;
     }
 
     // If PTS is unset, or non-monotonic, fall back to DTS.
