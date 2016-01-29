@@ -287,24 +287,12 @@ static bool force_fallback(struct dec_video *vd)
     return true;
 }
 
-static int init(struct dec_video *vd, const char *decoder)
+static void reinit(struct dec_video *vd)
 {
-    vd_ffmpeg_ctx *ctx;
-    ctx = vd->priv = talloc_zero(NULL, vd_ffmpeg_ctx);
-    ctx->log = vd->log;
-    ctx->opts = vd->opts;
-    ctx->decoder = talloc_strdup(ctx, decoder);
+    vd_ffmpeg_ctx *ctx = vd->priv;
+    const char *decoder = ctx->decoder;
 
-    if (bstr_endswith0(bstr0(decoder), "_vdpau")) {
-        MP_WARN(vd, "VDPAU decoder '%s' was requested. "
-                "This way of enabling hardware\ndecoding is not supported "
-                "anymore. Use --hwdec=vdpau instead.\nThe --hwdec-codec=... "
-                "option can be used to restrict which codecs are\nenabled, "
-                "otherwise all hardware decoding is tried for all codecs.\n",
-                decoder);
-        uninit(vd);
-        return 0;
-    }
+    uninit_avctx(vd);
 
     struct vd_lavc_hwdec *hwdec = NULL;
 
@@ -333,14 +321,35 @@ static int init(struct dec_video *vd, const char *decoder)
     }
 
     init_avctx(vd, decoder, hwdec);
-    if (!ctx->avctx) {
+    if (!ctx->avctx)
         force_fallback(vd);
-        if (!ctx->avctx) {
-            uninit(vd);
-            return 0;
-        }
+}
+
+static int init(struct dec_video *vd, const char *decoder)
+{
+    vd_ffmpeg_ctx *ctx;
+    ctx = vd->priv = talloc_zero(NULL, vd_ffmpeg_ctx);
+    ctx->log = vd->log;
+    ctx->opts = vd->opts;
+    ctx->decoder = talloc_strdup(ctx, decoder);
+
+    if (bstr_endswith0(bstr0(decoder), "_vdpau")) {
+        MP_WARN(vd, "VDPAU decoder '%s' was requested. "
+                "This way of enabling hardware\ndecoding is not supported "
+                "anymore. Use --hwdec=vdpau instead.\nThe --hwdec-codec=... "
+                "option can be used to restrict which codecs are\nenabled, "
+                "otherwise all hardware decoding is tried for all codecs.\n",
+                decoder);
+        uninit(vd);
+        return 0;
     }
 
+    reinit(vd);
+
+    if (!ctx->avctx) {
+        uninit(vd);
+        return 0;
+    }
     return 1;
 }
 
@@ -796,6 +805,9 @@ static int control(struct dec_video *vd, int cmd, void *arg)
         if (force_fallback(vd))
             return ctx->avctx ? CONTROL_OK : CONTROL_ERROR;
         return CONTROL_FALSE;
+    case VDCTRL_REINIT:
+        reinit(vd);
+        return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
 }

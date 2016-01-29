@@ -2131,9 +2131,8 @@ static int mp_property_hwdec(void *ctx, struct m_property *prop,
         int current = -2;
         video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
         if (current != opts->hwdec_api) {
+            video_vd_control(vd, VDCTRL_REINIT, NULL);
             double last_pts = mpctx->last_vo_pts;
-            uninit_video_chain(mpctx);
-            reinit_video_chain(mpctx);
             if (last_pts != MP_NOPTS_VALUE)
                 queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, MPSEEK_EXACT, true);
         }
