@@ -22,6 +22,7 @@
 
 #include <libavutil/buffer.h>
 #include <libavutil/frame.h>
+#include <libavutil/mem.h>
 #include <libavutil/version.h>
 
 #include "mpv_talloc.h"
