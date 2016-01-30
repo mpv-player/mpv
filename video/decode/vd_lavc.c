@@ -481,6 +481,9 @@ static void uninit_avctx(struct dec_video *vd)
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
 
+    flush_all(vd);
+    av_frame_free(&ctx->pic);
+
     if (avctx) {
         if (avctx->codec && avcodec_close(avctx) < 0)
             MP_ERR(vd, "Could not close codec.\n");
@@ -493,10 +496,6 @@ static void uninit_avctx(struct dec_video *vd)
     ctx->hwdec = NULL;
 
     av_freep(&ctx->avctx);
-
-    av_frame_free(&ctx->pic);
-
-    flush_all(vd);
 
     ctx->hwdec_failed = false;
     ctx->hwdec_fail_count = 0;
