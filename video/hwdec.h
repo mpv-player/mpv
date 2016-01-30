@@ -13,8 +13,9 @@ enum hwdec_type {
     HWDEC_VIDEOTOOLBOX = 3,
     HWDEC_VAAPI = 4,
     HWDEC_VAAPI_COPY = 5,
-    HWDEC_DXVA2_COPY = 6,
-    HWDEC_RPI = 7,
+    HWDEC_DXVA2 = 6,
+    HWDEC_DXVA2_COPY = 7,
+    HWDEC_RPI = 8,
 };
 
 // hwdec_type names (options.c)

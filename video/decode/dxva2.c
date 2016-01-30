@@ -296,9 +296,11 @@ static int dxva2_init(struct lavc_ctx *s)
     s->hwdec_priv = ctx;
 
     ctx->log = mp_log_new(s, s->log, "dxva2");
-    ctx->sw_pool = talloc_steal(ctx, mp_image_pool_new(17));
 
-    mp_check_gpu_memcpy(ctx->log, NULL);
+    if (s->hwdec->type == HWDEC_DXVA2_COPY) {
+        mp_check_gpu_memcpy(ctx->log, NULL);
+        ctx->sw_pool = talloc_steal(ctx, mp_image_pool_new(17));
+    }
 
     ctx->deviceHandle = INVALID_HANDLE_VALUE;
 
@@ -632,6 +634,16 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
     }
     return HWDEC_ERR_NO_CODEC;
 }
+
+const struct vd_lavc_hwdec mp_vd_lavc_dxva2 = {
+    .type = HWDEC_DXVA2,
+    .image_format = IMGFMT_DXVA2,
+    .probe = probe,
+    .init = dxva2_init,
+    .uninit = dxva2_uninit,
+    .init_decoder = dxva2_init_decoder,
+    .allocate_image = dxva2_allocate_image,
+};
 
 const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy = {
     .type = HWDEC_DXVA2_COPY,
