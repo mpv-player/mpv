@@ -1069,7 +1069,9 @@ int vo_x11_check_events(struct vo *vo)
             vo_x11_dnd_handle_selection(vo, &Event.xselection);
             break;
         case PropertyNotify:
-            if (Event.xproperty.atom == XA(x11, _NET_FRAME_EXTENTS)) {
+            if (Event.xproperty.atom == XA(x11, _NET_FRAME_EXTENTS) ||
+                Event.xproperty.atom == XA(x11, WM_STATE))
+            {
                 if (!x11->pseudo_mapped && !x11->parent) {
                     MP_VERBOSE(x11, "not waiting for MapNotify\n");
                     x11->pseudo_mapped = true;
