@@ -772,6 +772,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         mp_audio_buffer_skip(ao_c->ao_buffer, MPMIN(skip, max));
         // If something is left, we definitely reached the target time.
         end_sync |= sync_known && skip < max;
+        working |= skip > 0;
     } else if (skip < 0) {
         if (-skip > playsize) { // heuristic against making the buffer too large
             ao_reset(mpctx->ao); // some AOs repeat data on underflow
