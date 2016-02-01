@@ -979,7 +979,7 @@ Audio
 
         There is not much reason to use this. HDMI supports uncompressed
         multichannel PCM, and mpv supports lossless DTS-HD decoding via
-        FFmpeg's libdcadec wrapper.
+        FFmpeg's new DCA decoder (based on libdcadec).
 
 ``--ad=<[+|-]family1:(*|decoder1),[+|-]family2:(*|decoder2),...[-]>``
     Specify a priority list of audio decoders to be used, according to their
