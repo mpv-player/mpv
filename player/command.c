@@ -1831,11 +1831,7 @@ static struct track* track_next(struct MPContext *mpctx, int order,
         struct track *cur = mpctx->tracks[n];
         // One track can be selected only one time - pretend already selected
         // tracks don't exist.
-        for (int r = 0; r < NUM_PTRACKS; r++) {
-            if (r != order && mpctx->current_track[r][type] == cur)
-                cur = NULL;
-        }
-        if (!cur)
+        if (cur->selected)
             continue;
         if (cur->type == type) {
             if (cur == track) {
@@ -2518,9 +2514,9 @@ static int mp_property_vd_imgparams(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct vo_chain *vo_c = mpctx->vo_chain;
-    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    if (!vo_c || !track)
+    if (!vo_c)
         return M_PROPERTY_UNAVAILABLE;
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
     struct mp_codec_params *c =
         track && track->stream ? track->stream->codec : NULL;
     if (vo_c->vf->input_params.imgfmt) {

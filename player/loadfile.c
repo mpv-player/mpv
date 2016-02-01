@@ -1158,13 +1158,6 @@ reopen_file:
 
     enable_demux_thread(mpctx);
 
-    if (mpctx->current_track[0][STREAM_VIDEO] &&
-        mpctx->current_track[0][STREAM_VIDEO]->attached_picture)
-    {
-        MP_INFO(mpctx,
-            "Displaying attached picture. Use --no-audio-display to prevent this.\n");
-    }
-
 #if HAVE_ENCODING
     if (mpctx->encode_lavc_ctx && mpctx->current_track[0][STREAM_VIDEO])
         encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_VIDEO);
@@ -1176,19 +1169,22 @@ reopen_file:
     }
 #endif
 
-    if (!mpctx->current_track[0][STREAM_VIDEO] &&
-        !mpctx->current_track[0][STREAM_AUDIO])
-    {
-        MP_FATAL(mpctx, "No video or audio streams selected.\n");
-        mpctx->error_playing = MPV_ERROR_NOTHING_TO_PLAY;
-        goto terminate_playback;
-    }
-
     update_playback_speed(mpctx);
 
     reinit_video_chain(mpctx);
     reinit_audio_chain(mpctx);
     reinit_sub_all(mpctx);
+
+    if (!mpctx->vo_chain && !mpctx->ao_chain) {
+        MP_FATAL(mpctx, "No video or audio streams selected.\n");
+        mpctx->error_playing = MPV_ERROR_NOTHING_TO_PLAY;
+        goto terminate_playback;
+    }
+
+    if (mpctx->vo_chain && mpctx->vo_chain->is_coverart) {
+        MP_INFO(mpctx,
+            "Displaying attached picture. Use --no-audio-display to prevent this.\n");
+    }
 
     MP_VERBOSE(mpctx, "Starting playback...\n");
 
