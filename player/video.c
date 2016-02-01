@@ -456,8 +456,8 @@ static int decode_image(struct MPContext *mpctx)
     assert(!vo_c->input_mpi);
     int st = video_get_frame(d_video, &vo_c->input_mpi);
     switch (st) {
-    case VIDEO_WAIT:    return VD_WAIT;
-    case VIDEO_EOF:     return VD_EOF;
+    case DATA_WAIT:     return VD_WAIT;
+    case DATA_EOF:      return VD_EOF;
     default:            return VD_PROGRESS;
     }
 }

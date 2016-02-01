@@ -577,16 +577,16 @@ static int decode_new_frame(struct ao_chain *ao_c)
     if (ao_c->input_frame)
         return AD_OK;
 
-    int res = AUDIO_SKIP;
-    while (res == AUDIO_SKIP) {
+    int res = DATA_AGAIN;
+    while (res == DATA_AGAIN) {
         audio_work(ao_c->audio_src);
         res = audio_get_frame(ao_c->audio_src, &ao_c->input_frame);
     }
 
     switch (res) {
-    case AUDIO_OK:      return AD_OK;
-    case AUDIO_WAIT:    return AD_WAIT;
-    case AUDIO_EOF:     return AD_EOF;
+    case DATA_OK:       return AD_OK;
+    case DATA_WAIT:     return AD_WAIT;
+    case DATA_EOF:      return AD_EOF;
     default:            abort();
     }
 }

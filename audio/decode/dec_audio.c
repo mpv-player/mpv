@@ -201,7 +201,7 @@ void audio_work(struct dec_audio *da)
         return;
 
     if (!da->packet && demux_read_packet_async(da->header, &da->packet) == 0) {
-        da->current_state = AUDIO_WAIT;
+        da->current_state = DATA_WAIT;
         return;
     }
 
@@ -218,30 +218,30 @@ void audio_work(struct dec_audio *da)
         da->current_frame = NULL;
     }
 
-    da->current_state = AUDIO_OK;
+    da->current_state = DATA_OK;
     if (!da->current_frame) {
-        da->current_state = AUDIO_EOF;
+        da->current_state = DATA_EOF;
         if (had_packet)
-            da->current_state = AUDIO_SKIP;
+            da->current_state = DATA_AGAIN;
     }
 
     fix_audio_pts(da);
 }
 
 // Fetch an audio frame decoded with audio_work(). Returns one of:
-//  AUDIO_OK:   *out_frame is set to a new image
-//  AUDIO_WAIT: waiting for demuxer; will receive a wakeup signal
-//  AUDIO_EOF:  end of file, no more frames to be expected
-//  AUDIO_SKIP: dropped frame or something similar
+//  DATA_OK:    *out_frame is set to a new image
+//  DATA_WAIT:  waiting for demuxer; will receive a wakeup signal
+//  DATA_EOF:   end of file, no more frames to be expected
+//  DATA_AGAIN: dropped frame or something similar
 int audio_get_frame(struct dec_audio *da, struct mp_audio **out_frame)
 {
     *out_frame = NULL;
     if (da->current_frame) {
         *out_frame = da->current_frame;
         da->current_frame = NULL;
-        return AUDIO_OK;
+        return DATA_OK;
     }
-    if (da->current_state == AUDIO_OK)
-        return AUDIO_SKIP;
+    if (da->current_state == DATA_OK)
+        return DATA_AGAIN;
     return da->current_state;
 }

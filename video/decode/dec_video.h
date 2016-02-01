@@ -84,15 +84,10 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders);
 void video_uninit(struct dec_video *d_video);
 
 void video_work(struct dec_video *d_video);
+int video_get_frame(struct dec_video *d_video, struct mp_image **out_mpi);
 
 void video_set_framedrop(struct dec_video *d_video, bool enabled);
 void video_set_start(struct dec_video *d_video, double start_pts);
-
-#define VIDEO_OK 1
-#define VIDEO_WAIT 0
-#define VIDEO_EOF -1
-#define VIDEO_SKIP -2
-int video_get_frame(struct dec_video *d_video, struct mp_image **out_mpi);
 
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg);
 void video_reset(struct dec_video *d_video);

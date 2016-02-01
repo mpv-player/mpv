@@ -57,6 +57,13 @@ enum stream_type {
     STREAM_TYPE_COUNT,
 };
 
+enum {
+    DATA_OK     = 1,
+    DATA_WAIT   = 0,
+    DATA_AGAIN  = -1,
+    DATA_EOF    = -2,
+};
+
 extern const char *const mpv_version;
 extern const char *const mpv_builddate;
 
