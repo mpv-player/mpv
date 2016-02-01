@@ -30,7 +30,6 @@
 /waf-*
 /waf3-*
 /build
-/.waf*
 /.lock-waf_*
 
 /old_build
