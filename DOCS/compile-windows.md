@@ -79,11 +79,10 @@ export PATH=/opt/mxe/usr/bin/:$PATH
 cd ..
 git clone https://github.com/mpv-player/mpv.git
 cd mpv
-python ./bootstrap.py
-DEST_OS=win32 TARGET=i686-w64-mingw32.static ./waf configure
+DEST_OS=win32 TARGET=i686-w64-mingw32.static python waf configure
 # Or, if 64 bit version,
-# DEST_OS=win32 TARGET=x86_64-w64-mingw32.static ./waf configure
-./waf build
+# DEST_OS=win32 TARGET=x86_64-w64-mingw32.static python waf configure
+python waf build
 ```
 
 Native compilation with MSYS2
