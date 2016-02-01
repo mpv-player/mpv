@@ -301,7 +301,6 @@ void uninit_video_chain(struct MPContext *mpctx)
         vo_chain_uninit(mpctx->vo_chain);
         mpctx->vo_chain = NULL;
         mpctx->video_status = STATUS_EOF;
-        mpctx->sync_audio_to_video = false;
         reselect_demux_streams(mpctx);
         remove_deint_filter(mpctx);
         mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
@@ -361,6 +360,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     }
 
     vo_c->container_fps = d_video->fps;
+    vo_c->is_coverart = !!sh->attached_picture;
     vo_c->video_src = d_video;
 
 #if HAVE_ENCODING
@@ -378,8 +378,6 @@ int reinit_video_chain(struct MPContext *mpctx)
                                      : VOCTRL_KILL_SCREENSAVER, NULL);
 
     vo_set_paused(vo_c->vo, mpctx->paused);
-
-    mpctx->sync_audio_to_video = !sh->attached_picture;
 
     // If we switch on video again, ensure audio position matches up.
     if (mpctx->ao_chain)
@@ -697,11 +695,10 @@ static bool have_new_frame(struct MPContext *mpctx, bool eof)
 // returns VD_* code
 static int video_output_image(struct MPContext *mpctx, double endpts)
 {
+    struct vo_chain *vo_c = mpctx->vo_chain;
     bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
 
-    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    bool is_coverart = track && track->stream && track->stream->attached_picture;
-    if (is_coverart) {
+    if (vo_c->is_coverart) {
         if (vo_has_frame(mpctx->video_out))
             return VD_EOF;
         hrseek = false;
@@ -717,7 +714,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
         r = video_decode_and_filter(mpctx);
         if (r < 0)
             return r; // error
-        struct mp_image *img = vf_read_output_frame(mpctx->vo_chain->vf);
+        struct mp_image *img = vf_read_output_frame(vo_c->vf);
         if (img) {
             if (endpts != MP_NOPTS_VALUE && img->pts >= endpts) {
                 r = VD_EOF;
@@ -731,7 +728,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
                     mp_image_setrefp(&mpctx->saved_frame, img);
             } else if (mpctx->video_status == STATUS_SYNCING &&
                        mpctx->playback_pts != MP_NOPTS_VALUE &&
-                       img->pts < mpctx->playback_pts && !is_coverart)
+                       img->pts < mpctx->playback_pts && !vo_c->is_coverart)
             {
                 /* skip after stream-switching */
             } else {
@@ -769,7 +766,7 @@ static void update_avsync_before_frame(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     struct vo *vo = mpctx->video_out;
 
-    if (!mpctx->sync_audio_to_video || mpctx->video_status < STATUS_READY) {
+    if (mpctx->vo_chain->is_coverart || mpctx->video_status < STATUS_READY) {
         mpctx->time_frame = 0;
     } else if (mpctx->display_sync_active || opts->video_sync == VS_NONE) {
         // don't touch the timing
@@ -1345,7 +1342,7 @@ void write_video(struct MPContext *mpctx, double endpts)
 
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
 
-    if (!mpctx->sync_audio_to_video)
+    if (mpctx->vo_chain->is_coverart)
         mpctx->video_status = STATUS_EOF;
 
     if (mpctx->video_status != STATUS_EOF) {

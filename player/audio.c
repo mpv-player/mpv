@@ -525,7 +525,7 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
         !mp_audio_buffer_samples(mpctx->ao_chain->ao_buffer))
         return false; // no audio read yet
 
-    bool sync_to_video = mpctx->vo_chain && mpctx->sync_audio_to_video &&
+    bool sync_to_video = mpctx->vo_chain && !mpctx->vo_chain->is_coverart &&
                          mpctx->video_status != STATUS_EOF;
 
     double sync_pts = MP_NOPTS_VALUE;
@@ -815,8 +815,8 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 
     // Even if we're done decoding and syncing, let video start first - this is
     // required, because sending audio to the AO already starts playback.
-    if (mpctx->audio_status == STATUS_FILLING && mpctx->sync_audio_to_video &&
-        mpctx->video_status <= STATUS_READY)
+    if (mpctx->audio_status == STATUS_FILLING && mpctx->vo_chain &&
+        !mpctx->vo_chain->is_coverart && mpctx->video_status <= STATUS_READY)
     {
         mpctx->audio_status = STATUS_READY;
         return;

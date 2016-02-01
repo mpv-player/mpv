@@ -171,6 +171,10 @@ struct vo_chain {
     struct mp_image_params input_format;
 
     struct dec_video *video_src;
+
+    // - video consists of a single picture, which should be shown only once
+    // - do not sync audio to video in any way
+    bool is_coverart;
 };
 
 // Like vo_chain, for audio.
@@ -325,9 +329,6 @@ typedef struct MPContext {
     double audio_drop_throttle;
     // Number of mistimed frames.
     int mistimed_frames_total;
-    /* Set if audio should be timed to start with video frame after seeking,
-     * not set when e.g. playing cover art */
-    bool sync_audio_to_video;
     bool hrseek_active;     // skip all data until hrseek_pts
     bool hrseek_framedrop;  // allow decoder to drop frames before hrseek_pts
     bool hrseek_lastframe;  // drop everything until last frame reached
