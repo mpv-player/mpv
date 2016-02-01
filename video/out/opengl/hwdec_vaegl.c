@@ -401,7 +401,8 @@ static bool test_format(struct gl_hwdec *hw)
 }
 
 const struct gl_hwdec_driver gl_hwdec_vaegl = {
-    .api_name = "vaapi",
+    .name = "vaapi-egl",
+    .api = HWDEC_VAAPI,
     .imgfmt = IMGFMT_VAAPI,
     .create = create,
     .reinit = reinit,

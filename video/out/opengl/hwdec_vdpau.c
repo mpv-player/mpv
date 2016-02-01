@@ -200,7 +200,8 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
 }
 
 const struct gl_hwdec_driver gl_hwdec_vdpau = {
-    .api_name = "vdpau",
+    .name = "vdpau-glx",
+    .api = HWDEC_VDPAU,
     .imgfmt = IMGFMT_VDPAU,
     .create = create,
     .reinit = reinit,

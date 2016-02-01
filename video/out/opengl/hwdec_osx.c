@@ -237,7 +237,8 @@ static void destroy(struct gl_hwdec *hw)
 }
 
 const struct gl_hwdec_driver gl_hwdec_videotoolbox = {
-    .api_name = "videotoolbox",
+    .name = "videotoolbox",
+    .api = HWDEC_VIDEOTOOLBOX,
     .imgfmt = IMGFMT_VIDEOTOOLBOX,
     .create = create,
     .reinit = reinit,

@@ -27,8 +27,10 @@ struct gl_hwdec {
 };
 
 struct gl_hwdec_driver {
-    // Same name as used by mp_hwdec_info->load_api()
-    const char *api_name;
+    // Name of the interop backend. This is used for logging only.
+    const char *name;
+    // Used to explicitly request a specific API.
+    enum hwdec_type api;
     // The hardware surface IMGFMT_ that must be passed to map_image later.
     int imgfmt;
     // Create the hwdec device. It must fill in hw->info, if applicable.
