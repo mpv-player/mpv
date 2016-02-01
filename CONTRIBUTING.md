@@ -9,6 +9,8 @@ Reporting bugs
   explicitly asked so. There are better means, such as using http://sprunge.us
 - If you think this is file specific, upload a sample file and link it.
 - Don't report multiple unrelated/barely related bugs in one issue.
+- If you don't get a reply after days, be sure to post a new message to the
+  issue - it could have been overlooked or forgotten.
 - Read: https://mpv.io/bug-reports/
 
 Asking questions
