@@ -2772,10 +2772,27 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
+
+    float aspect = mpctx->opts->movie_aspect;
+    if (mpctx->vo_chain && aspect <= 0) {
+        struct mp_image_params *params = &mpctx->vo_chain->vf->input_params;
+        if (params && params->p_w > 0 && params->p_h > 0) {
+            int d_w, d_h;
+            mp_image_params_get_dsize(params, &d_w, &d_h);
+            aspect = (float)d_w / d_h;
+        }
+    }
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+    if (track && track->d_video && aspect <= 0) {
+        struct dec_video *d_video = track->d_video;
+        struct mp_codec_params *c = d_video->header->codec;
+        if (c->disp_w && c->disp_h)
+            aspect = (float)c->disp_w / c->disp_h;
+    }
+
     switch (action) {
     case M_PROPERTY_SET: {
         mpctx->opts->movie_aspect = *(float *)arg;
-        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
         if (track && track->d_video) {
             video_reset_aspect(track->d_video);
             mp_force_video_refresh(mpctx);
@@ -2784,26 +2801,12 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
     }
     case M_PROPERTY_PRINT: {
         if (mpctx->opts->movie_aspect <= 0) {
-            *(char **)arg = talloc_strdup(NULL, "(original)");
+            *(char **)arg = talloc_asprintf(NULL, "%.3f (original)", aspect);
             return M_PROPERTY_OK;
         }
         break;
     }
     case M_PROPERTY_GET: {
-        float aspect = mpctx->opts->movie_aspect;
-        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-        if (track && track->d_video && mpctx->vo_chain && aspect <= 0) {
-            struct dec_video *d_video = track->d_video;
-            struct mp_codec_params *c = d_video->header->codec;
-            struct mp_image_params *params = &mpctx->vo_chain->vf->input_params;
-            if (params && params->p_w > 0 && params->p_h > 0) {
-                int d_w, d_h;
-                mp_image_params_get_dsize(params, &d_w, &d_h);
-                aspect = (float)d_w / d_h;
-            } else if (c->disp_w && c->disp_h) {
-                aspect = (float)c->disp_w / c->disp_h;
-            }
-        }
         *(float *)arg = aspect;
         return M_PROPERTY_OK;
     }
