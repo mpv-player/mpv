@@ -72,6 +72,11 @@ function find_and_add_entries()
         return EXTENSIONS[string.lower(ext)]
     end)
     table.sort(files, function (a, b)
+        local len = string.len(a) - string.len(b)
+        if len ~= 0 then -- case for ordering filename ending with such as X.Y.Z
+            local ext = string.len(get_extension(a)) + 1
+            return string.sub(a, 1, -ext) < string.sub(b, 1, -ext)
+        end
         return string.lower(a) < string.lower(b)
     end)
 
