@@ -19,7 +19,6 @@ typedef struct lavc_ctx {
     struct vd_lavc_hwdec *hwdec;
     AVRational codec_timebase;
     enum AVPixelFormat pix_fmt;
-    int best_csp;
     enum AVDiscard skip_frame;
     bool flushing;
     const char *decoder;

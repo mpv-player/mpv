@@ -511,22 +511,11 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
     struct MPOpts *opts = ctx->opts;
-    int width = frame->width;
-    int height = frame->height;
-    int pix_fmt = frame->format;
-
-    if (pix_fmt != ctx->pix_fmt) {
-        ctx->pix_fmt = pix_fmt;
-        ctx->best_csp = pixfmt2imgfmt(pix_fmt);
-        if (!ctx->best_csp)
-            MP_ERR(vd, "lavc pixel format %s not supported.\n",
-                   av_get_pix_fmt_name(pix_fmt));
-    }
 
     *out_params = (struct mp_image_params) {
-        .imgfmt = ctx->best_csp,
-        .w = width,
-        .h = height,
+        .imgfmt = pixfmt2imgfmt(frame->format),
+        .w = frame->width,
+        .h = frame->height,
         .p_w = frame->sample_aspect_ratio.num,
         .p_h = frame->sample_aspect_ratio.den,
         .colorspace = avcol_spc_to_mp_csp(ctx->avctx->colorspace),
