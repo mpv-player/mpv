@@ -375,6 +375,10 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
 
     ctx->hwdec_info = vd->hwdec_info;
 
+    ctx->codec_timebase = (AVRational){0};
+    if (strstr(decoder, "_mmal"))
+        ctx->codec_timebase = (AVRational){1, 1000000};
+
     ctx->pix_fmt = AV_PIX_FMT_NONE;
     ctx->hwdec = hwdec;
     ctx->hwdec_fmt = 0;
@@ -665,6 +669,7 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
     struct vd_lavc_params *opts = ctx->opts->vd_lavc_params;
+    AVRational *tb = ctx->codec_timebase.num ? &ctx->codec_timebase : NULL;
     AVPacket pkt;
 
     if (!avctx)
@@ -678,7 +683,7 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         avctx->skip_frame = ctx->skip_frame;
     }
 
-    mp_set_av_packet(&pkt, packet, NULL);
+    mp_set_av_packet(&pkt, packet, tb);
     ctx->flushing |= !pkt.data;
 
     // Reset decoder if hw state got reset, or new data comes during flushing.
@@ -734,8 +739,8 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         return;
     }
     assert(mpi->planes[0] || mpi->planes[3]);
-    mpi->pts = mp_pts_from_av(ctx->pic->pkt_pts, NULL);
-    mpi->dts = mp_pts_from_av(ctx->pic->pkt_dts, NULL);
+    mpi->pts = mp_pts_from_av(ctx->pic->pkt_pts, tb);
+    mpi->dts = mp_pts_from_av(ctx->pic->pkt_dts, tb);
 
     struct mp_image_params params;
     update_image_params(vd, ctx->pic, &params);
