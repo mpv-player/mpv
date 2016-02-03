@@ -1820,23 +1820,18 @@ static int mp_property_balance(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static struct track* track_next(struct MPContext *mpctx, int order,
-                                enum stream_type type, int direction,
-                                struct track *track)
+static struct track* track_next(struct MPContext *mpctx, enum stream_type type,
+                                int direction, struct track *track)
 {
     assert(direction == -1 || direction == +1);
     struct track *prev = NULL, *next = NULL;
     bool seen = track == NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *cur = mpctx->tracks[n];
-        // One track can be selected only one time - pretend already selected
-        // tracks don't exist.
-        if (cur->selected)
-            continue;
         if (cur->type == type) {
             if (cur == track) {
                 seen = true;
-            } else {
+            } else if (!cur->selected) {
                 if (seen && !next) {
                     next = cur;
                 }
@@ -1885,7 +1880,7 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
             return M_PROPERTY_ERROR;
         struct m_property_switch_arg *sarg = arg;
         mp_switch_track_n(mpctx, order, type,
-            track_next(mpctx, order, type, sarg->inc >= 0 ? +1 : -1, track),
+            track_next(mpctx, type, sarg->inc >= 0 ? +1 : -1, track),
             FLAG_MARK_SELECTION);
         print_track_list(mpctx, "Track switched:");
         return M_PROPERTY_OK;
