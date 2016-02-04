@@ -4588,7 +4588,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                     // frame which actually shows the sub first (because video
                     // frame PTS and sub PTS rarely match exactly). Add some
                     // rounding for the mess of it.
-                    a[0] += 0.01 * (a[1] > 0 ? 1 : -1);
+                    a[0] += 0.01 * (a[1] >= 0 ? 1 : -1);
                     mark_seek(mpctx);
                     queue_seek(mpctx, MPSEEK_RELATIVE, a[0], MPSEEK_EXACT, false);
                     set_osd_function(mpctx, (a[0] > 0) ? OSD_FFW : OSD_REW);
