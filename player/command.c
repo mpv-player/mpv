@@ -5046,7 +5046,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         const int x = cmd->args[0].v.i, y = cmd->args[1].v.i;
         int button = cmd->args[2].v.i;
         if (button == -1) {// no button
-            mp_input_set_mouse_pos(mpctx->input, x, y);
+            mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
             break;
         }
         if (button < 0 || button >= 20) {// invalid button
@@ -5055,8 +5055,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         }
         const bool dbc = cmd->args[3].v.i;
         button += dbc ? MP_MOUSE_BASE_DBL : MP_MOUSE_BASE;
-        mp_input_set_mouse_pos(mpctx->input, x, y);
-        mp_input_put_key(mpctx->input, button);
+        mp_input_set_mouse_pos_artificial(mpctx->input, x, y);
+        mp_input_put_key_artificial(mpctx->input, button);
         break;
     }
 
@@ -5071,21 +5071,21 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (cmd->id == MP_CMD_KEYDOWN)
             code |= MP_KEY_STATE_DOWN;
 
-        mp_input_put_key(mpctx->input, code);
+        mp_input_put_key_artificial(mpctx->input, code);
         break;
     }
 
     case MP_CMD_KEYUP: {
         const char *key_name = cmd->args[0].v.s;
         if (key_name[0] == '\0') {
-            mp_input_put_key(mpctx->input, MP_INPUT_RELEASE_ALL);
+            mp_input_put_key_artificial(mpctx->input, MP_INPUT_RELEASE_ALL);
         } else {
             int code = mp_input_get_key_from_name(key_name);
             if (code < 0) {
                 MP_ERR(mpctx, "%s is not a valid input name.\n", key_name);
                 return -1;
             }
-            mp_input_put_key(mpctx->input, code | MP_KEY_STATE_UP);
+            mp_input_put_key_artificial(mpctx->input, code | MP_KEY_STATE_UP);
         }
         break;
     }

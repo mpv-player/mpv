@@ -34,6 +34,8 @@ Interface changes
     - make "volume" and "mute" properties changeable even if no audio output is
       active (this gives not-ideal behavior if --softvol=no is used)
     - add "volume-max" and "mixer-active" properties
+    - ignore --input-cursor option for events injected by input commands like
+      "mouse", "keydown", etc.
  --- mpv 0.15.0 ---
     - change "yadif" video filter defaults
  --- mpv 0.14.0 ---
