@@ -180,8 +180,8 @@ bool af_lavrresample_test_conversion(int src_format, int dst_format)
 }
 
 static struct mp_chmap fudge_pairs[][2] = {
-    {MP_CHMAP2(FLC, FRC), MP_CHMAP2(SL,  SR)},
-    {MP_CHMAP2(SL,  SR),  MP_CHMAP2(FLC, FRC)},
+    {MP_CHMAP2(BL,  BR),  MP_CHMAP2(SL,  SR)},
+    {MP_CHMAP2(SL,  SR),  MP_CHMAP2(BL,  BR)},
     {MP_CHMAP2(SDL, SDR), MP_CHMAP2(SL,  SR)},
     {MP_CHMAP2(SL,  SR),  MP_CHMAP2(SDL, SDR)},
 };
