@@ -294,9 +294,13 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
 
     MP_STATS(d_video, "end decode video");
 
+    // Error, discarded frame, dropped frame, or initial codec delay.
     if (!mpi || drop_frame) {
+        // If we already had output, this must be a dropped frame.
+        if (d_video->decoded_pts != MP_NOPTS_VALUE && d_video->num_buffered_pts)
+            d_video->num_buffered_pts--;
         talloc_free(mpi);
-        return NULL;            // error / skipped frame
+        return NULL;
     }
 
     if (opts->field_dominance == 0) {
