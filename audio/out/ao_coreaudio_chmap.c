@@ -133,6 +133,29 @@ coreaudio_error:
     return NULL;
 }
 
+
+#define CHMAP(n, ...) &(struct mp_chmap) MP_CONCAT(MP_CHMAP, n) (__VA_ARGS__)
+
+// Replace each channel in a with b (a->num == b->num)
+static void replace_submap(struct mp_chmap *dst, struct mp_chmap *a,
+                           struct mp_chmap *b)
+{
+    struct mp_chmap t = *dst;
+    if (!mp_chmap_is_valid(&t) || mp_chmap_diffn(a, &t) != 0)
+        return;
+    assert(a->num == b->num);
+    for (int n = 0; n < t.num; n++) {
+        for (int i = 0; i < a->num; i++) {
+            if (t.speaker[n] == a->speaker[i]) {
+                t.speaker[n] = b->speaker[i];
+                break;
+            }
+        }
+    }
+    if (mp_chmap_is_valid(&t))
+        *dst = t;
+}
+
 static bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
                                   struct mp_chmap *chmap)
 {
@@ -162,6 +185,10 @@ static bool ca_layout_to_mp_chmap(struct ao *ao, AudioChannelLayout *layout,
         }
         chmap->speaker[n] = speaker;
     }
+
+    // Remap weird 7.1(rear) layouts correctly.
+    replace_submap(chmap, CHMAP(6, FL, FR, BL, BR, SDL, SDR),
+                          CHMAP(6, FL, FR, SL, SR, BL,  BR));
 
     talloc_free(talloc_ctx);
     MP_VERBOSE(ao, "mp chmap: %s\n", mp_chmap_to_str(chmap));
