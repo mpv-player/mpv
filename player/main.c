@@ -97,6 +97,11 @@ const char mp_help_text[] =
 "\n";
 
 static const char def_config[] =
+#if HAVE_RPI
+    "hwdec=rpi\n"
+    "fullscreen=yes\n"
+#endif
+    "\n"
     "[pseudo-gui]\n"
     "terminal=no\n"
     "force-window=yes\n"

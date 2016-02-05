@@ -820,10 +820,6 @@ const struct MPOpts mp_default_opts = {
 
     .mf_fps = 1.0,
 
-#if HAVE_RPI
-    .hwdec_api = -1,
-#endif
-
     .display_tags = (char **)(const char*[]){
         "Artist", "Album", "Album_Artist", "Comment", "Composer", "Genre",
         "Performer", "Title", "Track", "icy-title", "service_name",
