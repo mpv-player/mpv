@@ -564,6 +564,17 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
     if (track == current)
         return;
 
+    if (current && current->sink) {
+        MP_ERR(mpctx, "Can't disable input to complex filter.\n");
+        return;
+    }
+    if ((type == STREAM_VIDEO && mpctx->vo_chain && !mpctx->vo_chain->track) ||
+        (type == STREAM_AUDIO && mpctx->ao_chain && !mpctx->ao_chain->track))
+    {
+        MP_ERR(mpctx, "Can't switch away from complex filter output.\n");
+        return;
+    }
+
     if (track && track->selected) {
         // Track has been selected in a different order parameter.
         MP_ERR(mpctx, "Track %d is already selected.\n", track->user_tid);
@@ -1016,6 +1027,115 @@ static void load_timeline(struct MPContext *mpctx)
     print_timeline(mpctx);
 }
 
+static void init_complex_filters(struct MPContext *mpctx)
+{
+    assert(!mpctx->lavfi);
+
+    char *graph = mpctx->opts->lavfi_complex;
+
+    if (!graph || !graph[0])
+        return;
+
+    if (mpctx->tl) {
+        MP_ERR(mpctx, "complex filters not supported with timeline\n");
+        return;
+    }
+
+    mpctx->lavfi = lavfi_create(mpctx->log, graph);
+    if (!mpctx->lavfi)
+        return;
+
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *track = mpctx->tracks[n];
+
+        char label[32];
+        char prefix;
+        switch (track->type) {
+        case STREAM_VIDEO: prefix = 'v'; break;
+        case STREAM_AUDIO: prefix = 'a'; break;
+        default: continue;
+        }
+        snprintf(label, sizeof(label), "%cid%d", prefix, track->user_tid);
+
+        struct lavfi_pad *pad = lavfi_find_pad(mpctx->lavfi, label);
+        if (!pad)
+            continue;
+        if (lavfi_pad_type(pad) != track->type)
+            continue;
+        if (lavfi_pad_direction(pad) != LAVFI_IN)
+            continue;
+        if (lavfi_get_connected(pad))
+            continue;
+
+        track->sink = pad;
+        lavfi_set_connected(pad, true);
+        track->selected = true;
+    }
+
+    struct lavfi_pad *pad = lavfi_find_pad(mpctx->lavfi, "vo");
+    if (pad && lavfi_pad_type(pad) == STREAM_VIDEO &&
+        lavfi_pad_direction(pad) == LAVFI_OUT)
+    {
+        lavfi_set_connected(pad, true);
+        reinit_video_chain_src(mpctx, pad);
+    }
+
+    pad = lavfi_find_pad(mpctx->lavfi, "ao");
+    if (pad && lavfi_pad_type(pad) == STREAM_AUDIO &&
+        lavfi_pad_direction(pad) == LAVFI_OUT)
+    {
+        lavfi_set_connected(pad, true);
+        reinit_audio_chain_src(mpctx, pad);
+    }
+}
+
+static bool init_complex_filter_decoders(struct MPContext *mpctx)
+{
+    if (!mpctx->lavfi)
+        return true;
+
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *track = mpctx->tracks[n];
+        if (track->sink && track->type == STREAM_VIDEO) {
+            if (!init_video_decoder(mpctx, track))
+                return false;
+        }
+        if (track->sink && track->type == STREAM_AUDIO) {
+            if (!init_audio_decoder(mpctx, track))
+                return false;
+        }
+    }
+
+    return true;
+}
+
+static void uninit_complex_filters(struct MPContext *mpctx)
+{
+    if (!mpctx->lavfi)
+        return;
+
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *track = mpctx->tracks[n];
+
+        if (track->d_video && !track->vo_c) {
+            video_uninit(track->d_video);
+            track->d_video = NULL;
+        }
+        if (track->d_audio && !track->ao_c) {
+            audio_uninit(track->d_audio);
+            track->d_audio = NULL;
+        }
+    }
+
+    if (mpctx->vo_chain && mpctx->vo_chain->filter_src)
+        uninit_video_chain(mpctx);
+    if (mpctx->ao_chain && mpctx->ao_chain->filter_src)
+        uninit_audio_chain(mpctx);
+
+    lavfi_destroy(mpctx->lavfi);
+    mpctx->lavfi = NULL;
+}
+
 // Start playing the current playlist entry.
 // Handle initialization and deinitialization.
 static void play_current_file(struct MPContext *mpctx)
@@ -1133,10 +1253,18 @@ reopen_file:
 
     check_previous_track_selection(mpctx);
 
+    init_complex_filters(mpctx);
+
     assert(NUM_PTRACKS == 2); // opts->stream_id is hardcoded to 2
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
-        for (int i = 0; i < NUM_PTRACKS; i++)
-            mpctx->current_track[i][t] = select_default_track(mpctx, i, t);
+        for (int i = 0; i < NUM_PTRACKS; i++) {
+            struct track *sel = NULL;
+            bool taken = (t == STREAM_VIDEO && mpctx->vo_chain) ||
+                         (t == STREAM_AUDIO && mpctx->ao_chain);
+            if (!taken)
+                sel = select_default_track(mpctx, i, t);
+            mpctx->current_track[i][t] = sel;
+        }
     }
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int i = 0; i < NUM_PTRACKS; i++) {
@@ -1170,6 +1298,9 @@ reopen_file:
 #endif
 
     update_playback_speed(mpctx);
+
+    if (!init_complex_filter_decoders(mpctx))
+        goto terminate_playback;
 
     reinit_video_chain(mpctx);
     reinit_audio_chain(mpctx);
@@ -1239,6 +1370,7 @@ terminate_playback:
     mp_cancel_trigger(mpctx->playback_abort);
 
     // time to uninit all, except global stuff:
+    uninit_complex_filters(mpctx);
     uninit_audio_chain(mpctx);
     uninit_video_chain(mpctx);
     uninit_sub_all(mpctx);

@@ -279,6 +279,18 @@ void uninit_video_out(struct MPContext *mpctx)
 
 static void vo_chain_uninit(struct vo_chain *vo_c)
 {
+    struct track *track = vo_c->track;
+    if (track) {
+        assert(track->vo_c == vo_c);
+        track->vo_c = NULL;
+        assert(track->d_video == vo_c->video_src);
+        track->d_video = NULL;
+        video_uninit(vo_c->video_src);
+    }
+
+    if (vo_c->filter_src)
+        lavfi_set_connected(vo_c->filter_src, false);
+
     mp_image_unrefp(&vo_c->input_mpi);
     vf_destroy(vo_c->vf);
     talloc_free(vo_c);
@@ -288,18 +300,10 @@ static void vo_chain_uninit(struct vo_chain *vo_c)
 void uninit_video_chain(struct MPContext *mpctx)
 {
     if (mpctx->vo_chain) {
-        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-        assert(track);
-        assert(track->d_video == mpctx->vo_chain->video_src);
-
         reset_video_state(mpctx);
-
-        video_uninit(track->d_video);
-        track->d_video = NULL;
-        mpctx->vo_chain->video_src = NULL;
-
         vo_chain_uninit(mpctx->vo_chain);
         mpctx->vo_chain = NULL;
+
         mpctx->video_status = STATUS_EOF;
         reselect_demux_streams(mpctx);
         remove_deint_filter(mpctx);
@@ -337,6 +341,9 @@ int init_video_decoder(struct MPContext *mpctx, struct track *track)
     return 1;
 
 err_out:
+    if (track->sink)
+        lavfi_set_connected(track->sink, false);
+    track->sink = NULL;
     video_uninit(track->d_video);
     track->d_video = NULL;
     error_on_track(mpctx, track);
@@ -345,12 +352,23 @@ err_out:
 
 int reinit_video_chain(struct MPContext *mpctx)
 {
+    return reinit_video_chain_src(mpctx, NULL);
+}
+
+int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
+{
     struct MPOpts *opts = mpctx->opts;
+    struct track *track = NULL;
+    struct sh_stream *sh = NULL;
+    if (!src) {
+        track = mpctx->current_track[0][STREAM_VIDEO];
+        if (!track)
+            return 0;
+        sh = track ? track->stream : NULL;
+        if (!sh)
+            goto no_video;
+    }
     assert(!mpctx->vo_chain);
-    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    struct sh_stream *sh = track ? track->stream : NULL;
-    if (!sh)
-        goto no_video;
 
     if (!mpctx->video_out) {
         struct vo_extra ex = {
@@ -378,12 +396,20 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     vo_control(vo_c->vo, VOCTRL_GET_HWDEC_INFO, &vo_c->hwdec_info);
 
-    if (!init_video_decoder(mpctx, track))
-        goto err_out;
+    vo_c->filter_src = src;
+    if (!vo_c->filter_src) {
+        vo_c->track = track;
+        track->vo_c = vo_c;
+        if (!init_video_decoder(mpctx, track))
+            goto err_out;
 
-    vo_c->video_src = track->d_video;
-    vo_c->container_fps = vo_c->video_src->fps;
-    vo_c->is_coverart = !!sh->attached_picture;
+        vo_c->video_src = track->d_video;
+        vo_c->container_fps = vo_c->video_src->fps;
+        vo_c->is_coverart = !!sh->attached_picture;
+
+        track->vo_c = vo_c;
+        vo_c->track = track;
+    }
 
 #if HAVE_ENCODING
     if (mpctx->encode_lavc_ctx)
@@ -460,22 +486,30 @@ static bool check_framedrop(struct MPContext *mpctx, struct vo_chain *vo_c)
 static int decode_image(struct MPContext *mpctx)
 {
     struct vo_chain *vo_c = mpctx->vo_chain;
-    struct dec_video *d_video = vo_c->video_src;
+    if (vo_c->input_mpi)
+        return VD_PROGRESS;
 
-    bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING &&
-                  mpctx->hrseek_framedrop;
-    video_set_start(d_video, hrseek ? mpctx->hrseek_pts : MP_NOPTS_VALUE);
+    int res = DATA_EOF;
+    if (vo_c->filter_src) {
+        res = lavfi_request_frame_v(vo_c->filter_src, &vo_c->input_mpi);
+    } else if (vo_c->video_src) {
+        struct dec_video *d_video = vo_c->video_src;
+        bool hrseek = mpctx->hrseek_active && mpctx->hrseek_framedrop &&
+                      mpctx->video_status == STATUS_SYNCING;
+        video_set_start(d_video, hrseek ? mpctx->hrseek_pts : MP_NOPTS_VALUE);
 
-    video_set_framedrop(d_video, check_framedrop(mpctx, vo_c));
+        video_set_framedrop(d_video, check_framedrop(mpctx, vo_c));
 
-    video_work(d_video);
+        video_work(d_video);
+        res = video_get_frame(d_video, &vo_c->input_mpi);
+    }
 
-    assert(!vo_c->input_mpi);
-    int st = video_get_frame(d_video, &vo_c->input_mpi);
-    switch (st) {
+    switch (res) {
     case DATA_WAIT:     return VD_WAIT;
+    case DATA_OK:
+    case DATA_AGAIN:    return VD_PROGRESS;
     case DATA_EOF:      return VD_EOF;
-    default:            return VD_PROGRESS;
+    default:            abort();
     }
 }
 

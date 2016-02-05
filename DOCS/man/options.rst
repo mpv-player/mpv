@@ -1396,7 +1396,7 @@ Subtitles
     .. admonition:: Warning
 
         Enabling hinting can lead to mispositioned text (in situations it's
-        supposed to match up with video background), or reduce the smoothness
+        supposed to match up video background), or reduce the smoothness
         of animations with some badly authored ASS scripts. It is recommended
         to not use this option, unless really needed.
 
@@ -3553,3 +3553,45 @@ Miscellaneous
     Force the contents of the ``media-title`` property to this value. Useful
     for scripts which want to set a title, without overriding the user's
     setting in ``--title``.
+
+``--lavfi-complex=<string>``
+    Set a "complex" libavfilter filter, which means a single filter graph can
+    take input from multiple source audio and video tracks. The graph can result
+    in a single audio or video output (or both).
+
+    Currently, the filter graph labels are used to select the participating
+    input tracks and audio/video output. The following rules apply:
+
+    - A label of the form ``aidN`` selects audio track N as input (e.g.
+      ``aid1``).
+    - A label of the form ``vidN`` selects video track N as input.
+    - A label named ``ao`` will be connected to the audio input.
+    - A label named ``vo`` will be connected to the video output.
+
+    Each label can be used only once. If you want to use e.g. an audio stream
+    for multiple filters, you need to use the ``asplit`` filter. Multiple
+    video or audio outputs are not possible, but you can use filters to merge
+    them into one.
+
+    The complex filter can not be changed yet during playback. It's also not
+    possible to change the tracks connected to the filter at runtime. Other
+    tracks, as long as they're not connected to the filter, and the
+    corresponding output is not connected to the filter, can still be freely
+    changed.
+
+    .. admonition:: Examples
+
+        - ``--lavfi-complex='[aid1] asplit [ao] [t] ; [t] aphasemeter [vo]'``
+          Play audio track 1, and visualize it as video using the ``aphasemeter``
+          filter.
+        - ``--lavfi-complex='[vid1] [vid2] vstack [vo]'``
+          Stack video track 1 and 2 and play them at the same time. Note that
+          both tracks need to have the same width, or filter initialization
+          will fail (you can add ``scale`` filters before the ``vstack`` filter
+          to fix the size).
+        - ``--lavfi-complex='[aid1] asplit [ao] [t] ; [t] aphasemeter [t2] ; [vid1] [t2] overlay [vo]'``
+          Play audio track 1, and overlay its visualization over video track 1.
+
+    See the Ffmpeg libavfilter documentation for details on the filter.
+
+

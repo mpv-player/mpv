@@ -49,6 +49,7 @@ enum {
     AD_EOF = -2,
     AD_NEW_FMT = -3,
     AD_WAIT = -4,
+    AD_NO_PROGRESS = -5,
 };
 
 // Use pitch correction only for speed adjustments by the user, not minor sync
@@ -204,6 +205,18 @@ void uninit_audio_out(struct MPContext *mpctx)
 
 static void ao_chain_uninit(struct ao_chain *ao_c)
 {
+    struct track *track = ao_c->track;
+    if (track) {
+        assert(track->ao_c == ao_c);
+        track->ao_c = NULL;
+        assert(track->d_audio == ao_c->audio_src);
+        track->d_audio = NULL;
+        audio_uninit(ao_c->audio_src);
+    }
+
+    if (ao_c->filter_src)
+        lavfi_set_connected(ao_c->filter_src, false);
+
     af_destroy(ao_c->af);
     talloc_free(ao_c->input_frame);
     talloc_free(ao_c->ao_buffer);
@@ -213,18 +226,10 @@ static void ao_chain_uninit(struct ao_chain *ao_c)
 void uninit_audio_chain(struct MPContext *mpctx)
 {
     if (mpctx->ao_chain) {
-        struct track *track = mpctx->current_track[0][STREAM_AUDIO];
-        assert(track);
-        assert(track->d_audio == mpctx->ao_chain->audio_src);
-
         mixer_uninit_audio(mpctx->mixer);
-
-        audio_uninit(track->d_audio);
-        track->d_audio = NULL;
-        mpctx->ao_chain->audio_src = NULL;
-
         ao_chain_uninit(mpctx->ao_chain);
         mpctx->ao_chain = NULL;
+
         mpctx->audio_status = STATUS_EOF;
         reselect_demux_streams(mpctx);
 
@@ -379,6 +384,9 @@ int init_audio_decoder(struct MPContext *mpctx, struct track *track)
     return 1;
 
 init_error:
+    if (track->sink)
+        lavfi_set_connected(track->sink, false);
+    track->sink = NULL;
     audio_uninit(track->d_audio);
     track->d_audio = NULL;
     error_on_track(mpctx, track);
@@ -387,14 +395,24 @@ init_error:
 
 void reinit_audio_chain(struct MPContext *mpctx)
 {
-    assert(!mpctx->ao_chain);
+    reinit_audio_chain_src(mpctx, NULL);
+}
 
-    struct track *track = mpctx->current_track[0][STREAM_AUDIO];
-    struct sh_stream *sh = track ? track->stream : NULL;
-    if (!sh) {
-        uninit_audio_out(mpctx);
-        goto no_audio;
+void reinit_audio_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
+{
+    struct track *track = NULL;
+    struct sh_stream *sh = NULL;
+    if (!src) {
+        track = mpctx->current_track[0][STREAM_AUDIO];
+        if (!track)
+            return;
+        sh = track ? track->stream : NULL;
+        if (!sh) {
+            uninit_audio_out(mpctx);
+            goto no_audio;
+        }
     }
+    assert(!mpctx->ao_chain);
 
     mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
 
@@ -402,16 +420,21 @@ void reinit_audio_chain(struct MPContext *mpctx)
     mpctx->ao_chain = ao_c;
     ao_c->log = mpctx->log;
     ao_c->af = af_new(mpctx->global);
-    ao_c->af->replaygain_data = sh->codec->replaygain_data;
+    if (sh)
+        ao_c->af->replaygain_data = sh->codec->replaygain_data;
     ao_c->spdif_passthrough = true;
     ao_c->pts = MP_NOPTS_VALUE;
     ao_c->ao_buffer = mp_audio_buffer_create(NULL);
     ao_c->ao = mpctx->ao;
 
-    if (!init_audio_decoder(mpctx, track))
-        goto init_error;
-
-    ao_c->audio_src = track->d_audio;
+    ao_c->filter_src = src;
+    if (!ao_c->filter_src) {
+        ao_c->track = track;
+        track->ao_c = ao_c;
+        if (!init_audio_decoder(mpctx, track))
+            goto init_error;
+        ao_c->audio_src = track->d_audio;
+    }
 
     reset_audio_state(mpctx);
 
@@ -597,8 +620,10 @@ static int decode_new_frame(struct ao_chain *ao_c)
     if (ao_c->input_frame)
         return AD_OK;
 
-    int res = DATA_AGAIN;
-    while (res == DATA_AGAIN) {
+    int res = DATA_EOF;
+    if (ao_c->filter_src) {
+        res = lavfi_request_frame_a(ao_c->filter_src, &ao_c->input_frame);
+    } else if (ao_c->audio_src) {
         audio_work(ao_c->audio_src);
         res = audio_get_frame(ao_c->audio_src, &ao_c->input_frame);
     }
@@ -606,6 +631,7 @@ static int decode_new_frame(struct ao_chain *ao_c)
     switch (res) {
     case DATA_OK:       return AD_OK;
     case DATA_WAIT:     return AD_WAIT;
+    case DATA_AGAIN:    return AD_NO_PROGRESS;
     case DATA_EOF:      return AD_EOF;
     default:            abort();
     }
@@ -633,6 +659,8 @@ static int filter_audio(struct ao_chain *ao_c, struct mp_audio_buffer *outbuf,
             break;
 
         res = decode_new_frame(ao_c);
+        if (res == AD_NO_PROGRESS)
+            break;
         if (res < 0) {
             // drain filters first (especially for true EOF case)
             copy_output(afs, outbuf, minsamples, true);
@@ -764,6 +792,10 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         status = filter_audio(mpctx->ao_chain, ao_c->ao_buffer, playsize);
         if (status == AD_WAIT)
             return;
+        if (status == AD_NO_PROGRESS) {
+            mpctx->sleeptime = 0;
+            return;
+        }
         if (status == AD_NEW_FMT) {
             /* The format change isn't handled too gracefully. A more precise
              * implementation would require draining buffered old-format audio
