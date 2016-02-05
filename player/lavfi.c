@@ -464,8 +464,10 @@ static void feed_input_pads(struct lavfi *c)
         pad->input_needed = false;
         pad->input_eof |= !pad->connected;
 
+#if LIBAVFILTER_VERSION_MICRO >= 100
         if (!av_buffersrc_get_nb_failed_requests(pad->buffer))
             continue;
+#endif
 
         if (c->draining_recover_eof || c->draining_new_format)
             continue;
