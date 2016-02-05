@@ -242,6 +242,7 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     struct ao_chain *ao_c = mpctx->ao_chain;
     assert(ao_c);
+    struct track *track = ao_c->track;
     struct af_stream *afs = ao_c->af;
 
     if (ao_c->input_frame)
@@ -358,9 +359,7 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
 init_error:
     uninit_audio_chain(mpctx);
     uninit_audio_out(mpctx);
-    struct track *track = mpctx->current_track[0][STREAM_AUDIO];
-    if (track)
-        error_on_track(mpctx, track);
+    error_on_track(mpctx, track);
 }
 
 int init_audio_decoder(struct MPContext *mpctx, struct track *track)
@@ -451,8 +450,7 @@ init_error:
     uninit_audio_chain(mpctx);
     uninit_audio_out(mpctx);
 no_audio:
-    if (track)
-        error_on_track(mpctx, track);
+    error_on_track(mpctx, track);
 }
 
 // Return pts value corresponding to the end point of audio written to the
@@ -717,7 +715,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
                 d_audio->try_spdif = true;
                 if (!audio_init_best_codec(d_audio)) {
                     MP_ERR(mpctx, "Error reinitializing audio.\n");
-                    error_on_track(mpctx, mpctx->current_track[0][STREAM_AUDIO]);
+                    error_on_track(mpctx, ao_c->track);
                     return;
                 }
             }
