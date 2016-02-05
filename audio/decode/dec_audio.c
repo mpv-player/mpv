@@ -155,10 +155,7 @@ void audio_uninit(struct dec_audio *d_audio)
 {
     if (!d_audio)
         return;
-    MP_VERBOSE(d_audio, "Uninit audio filters...\n");
     uninit_decoder(d_audio);
-    talloc_free(d_audio->current_frame);
-    talloc_free(d_audio->packet);
     talloc_free(d_audio);
 }
 
