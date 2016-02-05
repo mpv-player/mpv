@@ -358,6 +358,33 @@ init_error:
         error_on_track(mpctx, track);
 }
 
+int init_audio_decoder(struct MPContext *mpctx, struct track *track)
+{
+    assert(!track->d_audio);
+    if (!track->stream)
+        goto init_error;
+
+    track->d_audio = talloc_zero(NULL, struct dec_audio);
+    struct dec_audio *d_audio = track->d_audio;
+    d_audio->log = mp_log_new(d_audio, mpctx->log, "!ad");
+    d_audio->global = mpctx->global;
+    d_audio->opts = mpctx->opts;
+    d_audio->header = track->stream;
+
+    d_audio->try_spdif = true;
+
+    if (!audio_init_best_codec(d_audio))
+        goto init_error;
+
+    return 1;
+
+init_error:
+    audio_uninit(track->d_audio);
+    track->d_audio = NULL;
+    error_on_track(mpctx, track);
+    return 0;
+}
+
 void reinit_audio_chain(struct MPContext *mpctx)
 {
     assert(!mpctx->ao_chain);
@@ -378,21 +405,14 @@ void reinit_audio_chain(struct MPContext *mpctx)
     ao_c->af->replaygain_data = sh->codec->replaygain_data;
     ao_c->spdif_passthrough = true;
     ao_c->pts = MP_NOPTS_VALUE;
+    ao_c->ao_buffer = mp_audio_buffer_create(NULL);
     ao_c->ao = mpctx->ao;
 
-    struct dec_audio *d_audio = talloc_zero(NULL, struct dec_audio);
-    d_audio->log = mp_log_new(d_audio, mpctx->log, "!ad");
-    d_audio->global = mpctx->global;
-    d_audio->opts = mpctx->opts;
-    d_audio->header = sh;
-
-    track->d_audio = d_audio;
-    ao_c->audio_src = d_audio;
-
-    d_audio->try_spdif = ao_c->spdif_passthrough;
-    ao_c->ao_buffer = mp_audio_buffer_create(NULL);
-    if (!audio_init_best_codec(d_audio))
+    if (!init_audio_decoder(mpctx, track))
         goto init_error;
+
+    ao_c->audio_src = track->d_audio;
+
     reset_audio_state(mpctx);
 
     if (mpctx->ao) {

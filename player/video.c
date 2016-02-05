@@ -307,6 +307,42 @@ void uninit_video_chain(struct MPContext *mpctx)
     }
 }
 
+int init_video_decoder(struct MPContext *mpctx, struct track *track)
+{
+    assert(!track->d_video);
+    if (!track->stream)
+        goto err_out;
+
+    track->d_video = talloc_zero(NULL, struct dec_video);
+    struct dec_video *d_video = track->d_video;
+    d_video->global = mpctx->global;
+    d_video->log = mp_log_new(d_video, mpctx->log, "!vd");
+    d_video->opts = mpctx->opts;
+    d_video->header = track->stream;
+    d_video->fps = d_video->header->codec->fps;
+    if (mpctx->vo_chain)
+        d_video->hwdec_info = mpctx->vo_chain->hwdec_info;
+
+    MP_VERBOSE(d_video, "Container reported FPS: %f\n", d_video->fps);
+
+    if (d_video->opts->force_fps) {
+        d_video->fps = d_video->opts->force_fps;
+        MP_INFO(mpctx, "FPS forced to %5.3f.\n", d_video->fps);
+        MP_INFO(mpctx, "Use --no-correct-pts to force FPS based timing.\n");
+    }
+
+    if (!video_init_best_codec(d_video, d_video->opts->video_decoders))
+        goto err_out;
+
+    return 1;
+
+err_out:
+    video_uninit(track->d_video);
+    track->d_video = NULL;
+    error_on_track(mpctx, track);
+    return 0;
+}
+
 int reinit_video_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -342,36 +378,19 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     vo_control(vo_c->vo, VOCTRL_GET_HWDEC_INFO, &vo_c->hwdec_info);
 
-    track->d_video = talloc_zero(NULL, struct dec_video);
-    struct dec_video *d_video = track->d_video;
-    d_video->global = mpctx->global;
-    d_video->log = mp_log_new(d_video, mpctx->log, "!vd");
-    d_video->opts = mpctx->opts;
-    d_video->header = sh;
-    d_video->fps = sh->codec->fps;
-    d_video->hwdec_info = vo_c->hwdec_info;
+    if (!init_video_decoder(mpctx, track))
+        goto err_out;
 
-    MP_VERBOSE(d_video, "Container reported FPS: %f\n", sh->codec->fps);
-
-    if (opts->force_fps) {
-        d_video->fps = opts->force_fps;
-        MP_INFO(mpctx, "FPS forced to %5.3f.\n", d_video->fps);
-        MP_INFO(mpctx, "Use --no-correct-pts to force FPS based timing.\n");
-    }
-
-    vo_c->container_fps = d_video->fps;
+    vo_c->video_src = track->d_video;
+    vo_c->container_fps = vo_c->video_src->fps;
     vo_c->is_coverart = !!sh->attached_picture;
-    vo_c->video_src = d_video;
 
 #if HAVE_ENCODING
     if (mpctx->encode_lavc_ctx)
-        encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, d_video->fps);
+        encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, vo_c->container_fps);
 #endif
 
     recreate_video_filters(mpctx);
-
-    if (!video_init_best_codec(d_video, opts->video_decoders))
-        goto err_out;
 
     bool saver_state = opts->pause || !opts->stop_screensaver;
     vo_control(vo_c->vo, saver_state ? VOCTRL_RESTORE_SCREENSAVER

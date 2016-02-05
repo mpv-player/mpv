@@ -429,6 +429,7 @@ typedef struct MPContext {
 // audio.c
 void reset_audio_state(struct MPContext *mpctx);
 void reinit_audio_chain(struct MPContext *mpctx);
+int init_audio_decoder(struct MPContext *mpctx, struct track *track);
 int reinit_audio_filters(struct MPContext *mpctx);
 double playing_audio_pts(struct MPContext *mpctx);
 void fill_audio_out_buffers(struct MPContext *mpctx, double endpts);
@@ -555,6 +556,7 @@ int video_get_colors(struct vo_chain *vo_c, const char *item, int *value);
 int video_set_colors(struct vo_chain *vo_c, const char *item, int value);
 int video_vf_vo_control(struct vo_chain *vo_c, int vf_cmd, void *data);
 void reset_video_state(struct MPContext *mpctx);
+int init_video_decoder(struct MPContext *mpctx, struct track *track);
 int reinit_video_chain(struct MPContext *mpctx);
 int reinit_video_filters(struct MPContext *mpctx);
 void write_video(struct MPContext *mpctx, double endpts);
