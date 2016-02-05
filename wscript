@@ -422,9 +422,10 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'req':  True,
         'fmsg': 'No resampler found. Install libavresample or libswresample (FFmpeg).'
     }, {
-        'name': '--libavfilter',
+        'name': 'libavfilter',
         'desc': 'libavfilter',
         'func': check_pkg_config('libavfilter', '>= 5.0.0'),
+        'req':  True,
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',

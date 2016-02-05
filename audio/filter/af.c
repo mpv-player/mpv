@@ -59,9 +59,7 @@ static const struct af_info *const filter_list[] = {
     &af_info_rubberband,
 #endif
     &af_info_scaletempo,
-#if HAVE_LIBAVFILTER
     &af_info_lavfi,
-#endif
     NULL
 };
 

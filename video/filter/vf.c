@@ -71,7 +71,6 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_noformat,
     &vf_info_flip,
 
-#if HAVE_LIBAVFILTER
     &vf_info_mirror,
     &vf_info_lavfi,
     &vf_info_rotate,
@@ -79,7 +78,6 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_pullup,
     &vf_info_yadif,
     &vf_info_stereo3d,
-#endif
 
     &vf_info_eq,
     &vf_info_dsize,
