@@ -190,17 +190,16 @@ static bool mp_parse_escape(void *talloc_ctx, bstr *dst, bstr *code)
         uint32_t c = bstrtoll(num, &num, 16);
         if (num.len)
             return false;
-        if (c >= 0xd800 && c <= 0xdfff) {
+        if (c >= 0xd800 && c <= 0xdbff) {
             if (code->len < 5 + 6 // udddd + \udddd
                 || code->start[5] != '\\' || code->start[6] != 'u')
                 return false;
             *code = bstr_cut(*code, 5 + 1);
-            num = bstr_splice(*code, 1, 5);
-            uint32_t c16[2] = { c, bstrtoll(num, &num, 16) };
-            if (num.len)
+            bstr num2 = bstr_splice(*code, 1, 5);
+            uint32_t c2 = bstrtoll(num2, &num2, 16);
+            if (num2.len || c2 < 0xdc00 || c2 > 0xdfff)
                 return false;
-            int i = 0;
-            GET_UTF16(c, c16[i++], return false;);
+            c = ((c - 0xd800) << 10) + 0x10000 + (c2 - 0xdc00);
         }
         mp_append_utf8_bstr(talloc_ctx, dst, c);
         *code = bstr_cut(*code, 5);
