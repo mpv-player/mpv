@@ -187,9 +187,21 @@ static bool mp_parse_escape(void *talloc_ctx, bstr *dst, bstr *code)
     }
     if (code->start[0] == 'u' && code->len >= 5) {
         bstr num = bstr_splice(*code, 1, 5);
-        int c = bstrtoll(num, &num, 16);
+        uint32_t c = bstrtoll(num, &num, 16);
         if (num.len)
             return false;
+        if (c >= 0xd800 && c <= 0xdfff) {
+            if (code->len < 5 + 6 // udddd + \udddd
+                || code->start[5] != '\\' || code->start[6] != 'u')
+                return false;
+            *code = bstr_cut(*code, 5 + 1);
+            num = bstr_splice(*code, 1, 5);
+            uint32_t c16[2] = { c, bstrtoll(num, &num, 16) };
+            if (num.len)
+                return false;
+            int i = 0;
+            GET_UTF16(c, c16[i++], return false;);
+        }
         mp_append_utf8_bstr(talloc_ctx, dst, c);
         *code = bstr_cut(*code, 5);
         return true;
