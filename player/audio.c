@@ -732,6 +732,10 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         int r = decode_new_frame(mpctx->ao_chain);
         if (r == AD_WAIT)
             return; // continue later when new data is available
+        if (r == AD_EOF) {
+            mpctx->audio_status = STATUS_EOF;
+            return;
+        }
         reinit_audio_filters_and_output(mpctx);
         mpctx->sleeptime = 0;
         return; // try again next iteration
