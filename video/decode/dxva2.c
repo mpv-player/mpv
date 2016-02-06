@@ -60,7 +60,7 @@ DEFINE_GUID(DXVA2_ModeVC1_D,          0x1b81beA3, 0xa0c7,0x11d3,0xb9,0x84,0x00,0
 DEFINE_GUID(DXVA2_ModeVC1_D2010,      0x1b81beA4, 0xa0c7,0x11d3,0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5);
 DEFINE_GUID(DXVA2_ModeHEVC_VLD_Main,  0x5b11d51b, 0x2f4c,0x4452,0xbc,0xc3,0x09,0xf2,0xa1,0x16,0x0c,0xc0);
 DEFINE_GUID(DXVA2_NoEncrypt,          0x1b81beD0, 0xa0c7,0x11d3,0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5);
-DEFINE_GUID(GUID_NULL,                0x00000000, 0x0000,0x0000,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00);
+DEFINE_GUID(DXVA2_NULL,               0x00000000, 0x0000,0x0000,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00);
 
 typedef IDirect3D9* WINAPI pDirect3DCreate9(UINT);
 typedef HRESULT WINAPI pCreateDeviceManager9(UINT *, IDirect3DDeviceManager9 **);
@@ -479,7 +479,7 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
     struct dxva_context *dxva_ctx = s->avctx->hwaccel_context;
     GUID *guid_list = NULL;
     unsigned guid_count = 0, i, j;
-    GUID device_guid = GUID_NULL;
+    GUID device_guid = DXVA2_NULL;
     D3DFORMAT target_format = 0;
     DXVA2_VideoDesc desc = { 0 };
     DXVA2_ConfigPictureDecode config;
@@ -550,7 +550,7 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
     }
     CoTaskMemFree(guid_list);
 
-    if (IsEqualGUID(&device_guid, &GUID_NULL)) {
+    if (IsEqualGUID(&device_guid, &DXVA2_NULL)) {
         MP_ERR(ctx, "No decoder device for codec found\n");
         goto fail;
     }
