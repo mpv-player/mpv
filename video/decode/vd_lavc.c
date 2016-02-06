@@ -457,11 +457,6 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
 
 error:
     MP_ERR(vd, "Could not open codec.\n");
-    // Free it here to avoid attempting to flush+close.
-    if (ctx->avctx) {
-        av_freep(&ctx->avctx->extradata);
-        av_freep(&ctx->avctx);
-    }
     uninit_avctx(vd);
 }
 
@@ -469,7 +464,7 @@ static void reset_avctx(struct dec_video *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
-    if (ctx->avctx)
+    if (ctx->avctx && avcodec_is_open(ctx->avctx))
         avcodec_flush_buffers(ctx->avctx);
     ctx->flushing = false;
 }
@@ -495,14 +490,14 @@ static void uninit_avctx(struct dec_video *vd)
     if (ctx->avctx) {
         if (avcodec_close(ctx->avctx) < 0)
             MP_ERR(vd, "Could not close codec.\n");
-
         av_freep(&ctx->avctx->extradata);
-        av_freep(&ctx->avctx);
     }
 
     if (ctx->hwdec && ctx->hwdec->uninit)
         ctx->hwdec->uninit(ctx);
     ctx->hwdec = NULL;
+
+    av_freep(&ctx->avctx);
 
     ctx->hwdec_failed = false;
     ctx->hwdec_fail_count = 0;
