@@ -497,12 +497,13 @@ static void uninit_avctx(struct dec_video *vd)
             MP_ERR(vd, "Could not close codec.\n");
 
         av_freep(&ctx->avctx->extradata);
-        av_freep(&ctx->avctx);
     }
 
     if (ctx->hwdec && ctx->hwdec->uninit)
         ctx->hwdec->uninit(ctx);
     ctx->hwdec = NULL;
+
+    av_freep(&ctx->avctx);
 
     ctx->hwdec_failed = false;
     ctx->hwdec_fail_count = 0;
