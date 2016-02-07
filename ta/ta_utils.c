@@ -15,6 +15,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#include "osdep/strnlen.h"
 
 #define TA_NO_WRAPPERS
 #include "ta.h"

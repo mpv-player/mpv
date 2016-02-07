@@ -29,6 +29,7 @@
 #include "audio/format.h"
 #include "osdep/timer.h"
 #include "osdep/io.h"
+#include "osdep/strnlen.h"
 #include "ao_wasapi.h"
 
 #define MIXER_DEFAULT_LABEL L"mpv - video player"
