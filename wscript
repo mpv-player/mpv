@@ -227,7 +227,6 @@ iconv support use --disable-iconv.",
         'desc': 'posix_spawnp() or MinGW',
         'func': check_true,
         'deps_any': ['posix-spawn', 'mingw'],
-        'req': True,
     }, {
         'name': 'glob',
         'desc': 'glob()',
