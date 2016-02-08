@@ -3589,6 +3589,8 @@ Miscellaneous
         - ``--lavfi-complex='[aid1] asplit [ao] [t] ; [t] aphasemeter [vo]'``
           Play audio track 1, and visualize it as video using the ``aphasemeter``
           filter.
+        - ``--lavfi-complex='[aid1] [aid2] amix [ao]'``
+          Play audio track 1 and 2 at the same time.
         - ``--lavfi-complex='[vid1] [vid2] vstack [vo]'``
           Stack video track 1 and 2 and play them at the same time. Note that
           both tracks need to have the same width, or filter initialization
