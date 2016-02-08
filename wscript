@@ -767,13 +767,28 @@ video_output_features = [
             check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
         ),
     }, {
-        'name': '--plain-gl',
-        'desc': 'OpenGL without platform-specific code (e.g. for libmpv)',
-        'deps_any': [ 'libmpv-shared', 'libmpv-static' ],
+        'name': '--desktop-gl',
+        'desc': 'Desktop OpengGL support',
         'func': compose_checks(
             check_statement('GL/gl.h', '(void)GL_RGB32F'),     # arbitrary OpenGL 3.0 symbol
             check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
         ),
+    } , {
+        'name': '--android-gl',
+        'desc': 'Android OpenGL ES support',
+        'deps': ['android'],
+        'func': check_statement('GLES3/gl3.h', '(void)GL_RGB32F'),  # arbitrary OpenGL ES 3.0 symbol
+    } , {
+        'name': '--any-gl',
+        'desc': 'Any OpenGL (ES) support',
+        'deps_any': ['desktop-gl', 'android-gl'],
+        'func': check_true
+    } , {
+        'name': '--plain-gl',
+        'desc': 'OpenGL without platform-specific code (e.g. for libmpv)',
+        'deps': ['any-gl'],
+        'deps_any': [ 'libmpv-shared', 'libmpv-static' ],
+        'func': check_true,
     } , {
         'name': '--gl',
         'desc': 'OpenGL video outputs',
