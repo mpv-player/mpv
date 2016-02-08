@@ -3554,6 +3554,11 @@ Miscellaneous
     for scripts which want to set a title, without overriding the user's
     setting in ``--title``.
 
+``--external-file=<filename>``
+    Add all tracks from the given file. Unlike ``--sub-file`` and
+    ``--audio-file``, this includes all tracks, and does not cause default
+    stream selection over the "proper" file.
+
 ``--lavfi-complex=<string>``
     Set a "complex" libavfilter filter, which means a single filter graph can
     take input from multiple source audio and video tracks. The graph can result

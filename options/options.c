@@ -336,6 +336,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING_APPEND_LIST("sub-file", sub_name, M_OPT_FILE),
     OPT_PATHLIST("sub-paths", sub_paths, 0),
     OPT_PATHLIST("audio-file-paths", audiofile_paths, 0),
+    OPT_STRING_APPEND_LIST("external-file", external_files, M_OPT_FILE),
     OPT_STRING("sub-codepage", sub_cp, 0),
     OPT_FLOAT("sub-delay", sub_delay, 0),
     OPT_FLOAT("sub-fps", sub_fps, 0),

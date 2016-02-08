@@ -696,6 +696,8 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     return true;
 }
 
+// Add the given file as additional track. Only tracks of type "filter" are
+// included; pass STREAM_TYPE_COUNT to disable filtering.
 struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
                                    enum stream_type filter)
 {
@@ -729,12 +731,14 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
     struct track *first = NULL;
     for (int n = 0; n < demux_get_num_stream(demuxer); n++) {
         struct sh_stream *sh = demux_get_stream(demuxer, n);
-        if (sh->type == filter) {
+        if (filter == STREAM_TYPE_COUNT || sh->type == filter) {
             struct track *t = add_stream_track(mpctx, demuxer, sh, false);
             t->is_external = true;
             t->title = talloc_strdup(t, mp_basename(disp_filename));
             t->external_filename = talloc_strdup(t, filename);
             first = t;
+            // --external-file special semantics
+            t->no_default = filter == STREAM_TYPE_COUNT;
         }
     }
     if (!first) {
@@ -753,18 +757,11 @@ err_out:
     return false;
 }
 
-static void open_audiofiles_from_options(struct MPContext *mpctx)
+static void open_external_files(struct MPContext *mpctx, char **files,
+                                enum stream_type filter)
 {
-    struct MPOpts *opts = mpctx->opts;
-    for (int n = 0; opts->audio_files && opts->audio_files[n]; n++)
-        mp_add_external_file(mpctx, opts->audio_files[n], STREAM_AUDIO);
-}
-
-static void open_subtitles_from_options(struct MPContext *mpctx)
-{
-    struct MPOpts *opts = mpctx->opts;
-    for (int i = 0; opts->sub_name && opts->sub_name[i] != NULL; i++)
-        mp_add_external_file(mpctx, opts->sub_name[i], STREAM_SUB);
+    for (int n = 0; files && files[n]; n++)
+        mp_add_external_file(mpctx, files[n], filter);
 }
 
 void autoload_external_files(struct MPContext *mpctx)
@@ -1247,8 +1244,9 @@ reopen_file:
     mpctx->timeline_part = mpctx->num_timeline_parts;
     timeline_switch_to_time(mpctx, 0);
 
-    open_subtitles_from_options(mpctx);
-    open_audiofiles_from_options(mpctx);
+    open_external_files(mpctx, opts->audio_files, STREAM_AUDIO);
+    open_external_files(mpctx, opts->sub_name, STREAM_SUB);
+    open_external_files(mpctx, opts->external_files, STREAM_TYPE_COUNT);
     autoload_external_files(mpctx);
 
     check_previous_track_selection(mpctx);
