@@ -36,6 +36,8 @@
 #include <OpenGL/gl.h>
 #include <OpenGL/gl3.h>
 #include <OpenGL/glext.h>
+#elif HAVE_ANDROID_GL
+#include <GLES3/gl3.h>
 #else
 #include <GL/gl.h>
 #include <GL/glext.h>
