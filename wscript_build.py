@@ -491,17 +491,24 @@ def build(ctx):
                 features += "cshlib syms"
             else:
                 features += "cstlib"
-            ctx(
-                target       = "mpv",
-                source       = ctx.filtered_sources(sources),
-                use          = ctx.dependencies_use(),
-                includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
-                                ctx.dependencies_includes(),
-                features     = features,
-                export_symbols_def = "libmpv/mpv.def",
-                install_path = ctx.env.LIBDIR,
-                vnum         = libversion,
-            )
+
+            libmpv_kwargs = {
+                "target": "mpv",
+                "source":   ctx.filtered_sources(sources),
+                "use":      ctx.dependencies_use(),
+                "includes": [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
+                             ctx.dependencies_includes(),
+                "features": features,
+                "export_symbols_def": "libmpv/mpv.def",
+                "install_path": ctx.env.LIBDIR,
+            }
+
+            if not ctx.dependency_satisfied('android'):
+                # for all other configurations we want SONAME to be used
+                libmpv_kwargs["vnum"] = libversion
+
+            ctx(**libmpv_kwargs)
+
         if build_shared:
             _build_libmpv(True)
         if build_static:
