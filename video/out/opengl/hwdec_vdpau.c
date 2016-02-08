@@ -37,6 +37,7 @@ struct priv {
     uint64_t preemption_counter;
     struct mp_image_params image_params;
     GLuint gl_texture;
+    bool vdpgl_initialized;
     GLvdpauSurfaceNV vdpgl_surface;
     VdpOutputSurface vdp_surface;
     struct mp_vdpau_mixer *mixer;
@@ -78,13 +79,12 @@ static void destroy_objects(struct gl_hwdec *hw)
 
     glCheckError(gl, hw->log, "Before uninitializing OpenGL interop");
 
-    gl->VDPAUFiniNV();
+    if (p->vdpgl_initialized)
+        gl->VDPAUFiniNV();
 
-    // If the GL/vdpau state is not initialized, above calls raises an error.
-    while (1) {
-        if (gl->GetError() == GL_NO_ERROR)
-            break;
-    }
+    p->vdpgl_initialized = false;
+
+    glCheckError(gl, hw->log, "After uninitializing OpenGL interop");
 }
 
 static void destroy(struct gl_hwdec *hw)
@@ -141,6 +141,8 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
         return -1;
 
     gl->VDPAUInitNV(BRAINDEATH(p->ctx->vdp_device), p->ctx->get_proc_address);
+
+    p->vdpgl_initialized = true;
 
     vdp_st = vdp->output_surface_create(p->ctx->vdp_device,
                                         VDP_RGBA_FORMAT_B8G8R8A8,
