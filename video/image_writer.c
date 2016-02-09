@@ -22,6 +22,7 @@
 
 #include <libavcodec/avcodec.h>
 #include <libavutil/mem.h>
+#include <libavutil/opt.h>
 
 #include "config.h"
 
@@ -111,7 +112,8 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
     }
     if (ctx->writer->lavc_codec == AV_CODEC_ID_PNG) {
         avctx->compression_level = ctx->opts->png_compression;
-        avctx->prediction_method = ctx->opts->png_filter;
+        av_opt_set_int(avctx, "pred", ctx->opts->png_filter,
+                       AV_OPT_SEARCH_CHILDREN);
     }
 
     if (avcodec_open2(avctx, codec, NULL) < 0) {
