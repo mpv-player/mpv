@@ -81,6 +81,8 @@ int video_vd_control(struct dec_video *d_video, int cmd, void *arg)
 
 void video_uninit(struct dec_video *d_video)
 {
+    if (!d_video)
+        return;
     mp_image_unrefp(&d_video->current_mpi);
     mp_image_unrefp(&d_video->cover_art_mpi);
     if (d_video->vd_driver) {

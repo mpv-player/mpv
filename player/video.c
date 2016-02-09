@@ -395,6 +395,7 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
     mpctx->vo_chain = vo_c;
     vo_c->log = mpctx->log;
     vo_c->vo = mpctx->video_out;
+    vo_c->vf = vf_new(mpctx->global);
 
     vo_control(vo_c->vo, VOCTRL_GET_HWDEC_INFO, &vo_c->hwdec_info);
 
