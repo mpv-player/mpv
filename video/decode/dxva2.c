@@ -40,7 +40,7 @@
 #include "video/hwdec.h"
 #include "video/d3d.h"
 
-#define ADDTIONAL_SURFACES HWDEC_DELAY_QUEUE_COUNT
+#define ADDITIONAL_SURFACES (4 + HWDEC_DELAY_QUEUE_COUNT)
 
 // A minor evil.
 #ifndef FF_DXVA2_WORKAROUND_INTEL_CLEARVIDEO
@@ -575,14 +575,7 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
     else
         surface_alignment = 16;
 
-    /* 4 base work surfaces */
-    ctx->num_surfaces = 4 + ADDTIONAL_SURFACES;
-
-    /* add surfaces based on number of possible refs */
-    if (codec_id == AV_CODEC_ID_H264 || codec_id == AV_CODEC_ID_HEVC)
-        ctx->num_surfaces += 16;
-    else
-        ctx->num_surfaces += 2;
+    ctx->num_surfaces = hwdec_get_max_refs(s) + ADDITIONAL_SURFACES;
 
     ctx->surfaces      = av_mallocz(ctx->num_surfaces * sizeof(*ctx->surfaces));
     ctx->surface_infos = av_mallocz(ctx->num_surfaces * sizeof(*ctx->surface_infos));
