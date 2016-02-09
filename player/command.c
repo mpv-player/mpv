@@ -4044,9 +4044,6 @@ static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
         reinit_filters(mpctx, mediatype);
     }
 
-    if (mediatype == STREAM_VIDEO)
-        mp_force_video_refresh(mpctx);
-
     return success ? 0 : -1;
 }
 

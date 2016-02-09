@@ -226,6 +226,8 @@ int reinit_video_filters(struct MPContext *mpctx)
     if (need_reconfig)
         filter_reconfig(vo_c);
 
+    mp_force_video_refresh(mpctx);
+
     mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 
     return vo_c->vf->initialized;
