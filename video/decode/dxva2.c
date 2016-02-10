@@ -116,7 +116,6 @@ typedef struct DXVA2Context {
     IDirectXVideoDecoderService *decoder_service;
     IDirectXVideoDecoder        *decoder;
 
-    GUID                        decoder_guid;
     DXVA2_ConfigPictureDecode   decoder_config;
 
     LPDIRECT3DSURFACE9          *surfaces;
@@ -125,8 +124,6 @@ typedef struct DXVA2Context {
     uint64_t                    surface_age;
 
     struct mp_image_pool       *sw_pool;
-
-    struct dxva_context         *av_dxva_ctx;
 } DXVA2Context;
 
 typedef struct DXVA2SurfaceWrapper {
@@ -605,7 +602,6 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
         goto fail;
     }
 
-    ctx->decoder_guid   = device_guid;
     ctx->decoder_config = config;
 
     dxva_ctx->cfg           = &ctx->decoder_config;
@@ -613,7 +609,7 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
     dxva_ctx->surface       = ctx->surfaces;
     dxva_ctx->surface_count = ctx->num_surfaces;
 
-    if (IsEqualGUID(&ctx->decoder_guid, &DXVADDI_Intel_ModeH264_E))
+    if (IsEqualGUID(&device_guid, &DXVADDI_Intel_ModeH264_E))
         dxva_ctx->workaround |= FF_DXVA2_WORKAROUND_INTEL_CLEARVIDEO;
 
     return 0;
