@@ -142,6 +142,7 @@ function add_video(s)
     append_property(s, sec, "video-params/pixelformat", {prefix="Pixel format:"})
     append_property(s, sec, "video-params/colormatrix", {prefix="Colormatrix:"})
     append_property(s, sec, "video-params/primaries", {prefix="Primaries:"})
+    append_property(s, sec, "video-params/gamma", {prefix="Gamma:"})
     append_property(s, sec, "video-params/colorlevels", {prefix="Levels:"})
     append_property(s, sec, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
 end
