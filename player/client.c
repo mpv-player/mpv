@@ -458,7 +458,7 @@ void mpv_terminate_destroy(mpv_handle *ctx)
 static bool check_locale(void)
 {
     char *name = setlocale(LC_NUMERIC, NULL);
-    return strcmp(name, "C") == 0;
+    return !name || strcmp(name, "C") == 0;
 }
 
 mpv_handle *mpv_create(void)
