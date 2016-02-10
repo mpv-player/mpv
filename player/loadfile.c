@@ -1024,23 +1024,26 @@ static void load_timeline(struct MPContext *mpctx)
     print_timeline(mpctx);
 }
 
-static void init_complex_filters(struct MPContext *mpctx)
+static bool init_complex_filters(struct MPContext *mpctx)
 {
     assert(!mpctx->lavfi);
 
     char *graph = mpctx->opts->lavfi_complex;
 
     if (!graph || !graph[0])
-        return;
+        return true;
 
     if (mpctx->tl) {
         MP_ERR(mpctx, "complex filters not supported with timeline\n");
-        return;
+        return false;
     }
 
     mpctx->lavfi = lavfi_create(mpctx->log, graph);
     if (!mpctx->lavfi)
-        return;
+        return false;
+
+    if (lavfi_has_failed(mpctx->lavfi))
+        return false;
 
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
@@ -1084,6 +1087,8 @@ static void init_complex_filters(struct MPContext *mpctx)
         lavfi_set_connected(pad, true);
         reinit_audio_chain_src(mpctx, pad);
     }
+
+    return true;
 }
 
 static bool init_complex_filter_decoders(struct MPContext *mpctx)
@@ -1251,7 +1256,8 @@ reopen_file:
 
     check_previous_track_selection(mpctx);
 
-    init_complex_filters(mpctx);
+    if (!init_complex_filters(mpctx))
+        goto terminate_playback;
 
     assert(NUM_PTRACKS == 2); // opts->stream_id is hardcoded to 2
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
