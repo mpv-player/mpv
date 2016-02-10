@@ -121,7 +121,8 @@ static void add_pad(struct lavfi *c, enum lavfi_direction dir, AVFilterInOut *it
     }
 
     if (!item->name) {
-        MP_FATAL(c, "what the shit\n");
+        MP_FATAL(c, "filter pad without name label\n");
+        c->failed = true;
         return;
     }
 
@@ -130,6 +131,7 @@ static void add_pad(struct lavfi *c, enum lavfi_direction dir, AVFilterInOut *it
         // Graph recreation case: reassociate an existing pad.
         if (p->dir != dir || p->type != type) {
             MP_FATAL(c, "pad '%s' changed type or direction\n", item->name);
+            c->failed = true;
             return;
         }
     } else {
