@@ -694,7 +694,7 @@ video_output_features = [
         'name': '--vaapi',
         'desc': 'VAAPI acceleration',
         'deps': [ 'libdl' ],
-        'deps_any': [ 'x11', 'wayland' ],
+        'deps_any': [ 'x11', 'wayland', 'egl-drm' ],
         'func': check_pkg_config('libva', '>= 0.36.0'),
     }, {
         'name': '--vaapi-x11',
