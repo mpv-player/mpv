@@ -1079,8 +1079,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     in->d_user->metadata = talloc_zero(in->d_user, struct mp_tags);
     in->d_buffer->metadata = talloc_zero(in->d_buffer, struct mp_tags);
 
-    mp_verbose(log, "Trying demuxer: %s (force-level: %s)\n",
-               desc->name, d_level(check));
+    mp_dbg(log, "Trying demuxer: %s (force-level: %s)\n",
+           desc->name, d_level(check));
 
     if (stream->seekable) // not for DVD/BD/DVB in particular
         stream_seek(stream, 0);
@@ -1153,6 +1153,7 @@ struct demuxer *demux_open(struct stream *stream, struct demuxer_params *params,
     // Test demuxers from first to last, one pass for each check_levels[] entry
     for (int pass = 0; check_levels[pass] != -1; pass++) {
         enum demux_check level = check_levels[pass];
+        mp_verbose(log, "Trying demuxers for level=%s.\n", d_level(level));
         for (int n = 0; demuxer_list[n]; n++) {
             const struct demuxer_desc *desc = demuxer_list[n];
             if (!check_desc || desc == check_desc) {
