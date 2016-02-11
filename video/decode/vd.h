@@ -42,10 +42,10 @@ extern const vd_functions_t *const mpcodecs_vd_drivers[];
 
 enum vd_ctrl {
     VDCTRL_RESET = 1, // reset decode state after seeking
-    VDCTRL_QUERY_UNSEEN_FRAMES, // current decoder lag
     VDCTRL_FORCE_HWDEC_FALLBACK, // force software decoding fallback
     VDCTRL_GET_HWDEC,
     VDCTRL_REINIT,
+    VDCTRL_GET_BFRAMES,
 };
 
 #endif /* MPLAYER_VD_H */

@@ -59,7 +59,6 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
 void video_reset(struct dec_video *d_video)
 {
     video_vd_control(d_video, VDCTRL_RESET, NULL);
-    d_video->num_buffered_pts = 0;
     d_video->first_packet_pdts = MP_NOPTS_VALUE;
     d_video->start_pts = MP_NOPTS_VALUE;
     d_video->decoded_pts = MP_NOPTS_VALUE;
@@ -235,34 +234,6 @@ static void fix_image_params(struct dec_video *d_video,
     d_video->fixed_format = p;
 }
 
-static void add_avi_pts(struct dec_video *d_video, double pts)
-{
-    if (pts != MP_NOPTS_VALUE) {
-        int delay = -1;
-        video_vd_control(d_video, VDCTRL_QUERY_UNSEEN_FRAMES, &delay);
-        if (delay >= 0 && delay < d_video->num_buffered_pts)
-            d_video->num_buffered_pts = delay;
-        if (d_video->num_buffered_pts == MP_ARRAY_SIZE(d_video->buffered_pts)) {
-            MP_ERR(d_video, "Too many buffered pts\n");
-        } else {
-            for (int i = d_video->num_buffered_pts; i > 0; i--)
-                d_video->buffered_pts[i] = d_video->buffered_pts[i - 1];
-            d_video->buffered_pts[0] = pts;
-            d_video->num_buffered_pts++;
-        }
-    }
-}
-
-static double retrieve_avi_pts(struct dec_video *d_video, double codec_pts)
-{
-    if (d_video->num_buffered_pts) {
-        d_video->num_buffered_pts--;
-        return d_video->buffered_pts[d_video->num_buffered_pts];
-    }
-    MP_ERR(d_video, "No pts value from demuxer to use for frame!\n");
-    return MP_NOPTS_VALUE;
-}
-
 static struct mp_image *decode_packet(struct dec_video *d_video,
                                       struct demux_packet *packet,
                                       int drop_frame)
@@ -271,7 +242,7 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
     bool avi_pts = d_video->header->codec->avi_dts && opts->correct_pts;
 
     struct demux_packet packet_copy;
-    if (packet && packet->dts == MP_NOPTS_VALUE) {
+    if (packet && packet->dts == MP_NOPTS_VALUE && !avi_pts) {
         packet_copy = *packet;
         packet = &packet_copy;
         packet->dts = packet->pts;
@@ -284,12 +255,6 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
     if (pkt_pdts != MP_NOPTS_VALUE && d_video->first_packet_pdts == MP_NOPTS_VALUE)
         d_video->first_packet_pdts = pkt_pdts;
 
-    if (avi_pts)
-        add_avi_pts(d_video, pkt_pdts);
-
-    if (d_video->header->codec->avi_dts)
-        drop_frame = 0;
-
     MP_STATS(d_video, "start decode video");
 
     struct mp_image *mpi = d_video->vd_driver->decode(d_video, packet, drop_frame);
@@ -298,9 +263,6 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
 
     // Error, discarded frame, dropped frame, or initial codec delay.
     if (!mpi || drop_frame) {
-        // If we already had output, this must be a dropped frame.
-        if (d_video->decoded_pts != MP_NOPTS_VALUE && d_video->num_buffered_pts)
-            d_video->num_buffered_pts--;
         talloc_free(mpi);
         return NULL;
     }
@@ -333,10 +295,6 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
          pts == MP_NOPTS_VALUE) && dts != MP_NOPTS_VALUE)
         pts = dts;
 
-    // Alternative PTS determination methods
-    if (avi_pts)
-        pts = retrieve_avi_pts(d_video, pts);
-
     if (!opts->correct_pts || pts == MP_NOPTS_VALUE) {
         if (opts->correct_pts && !d_video->header->missing_timestamps)
             MP_WARN(d_video, "No video PTS! Making something up.\n");
@@ -363,6 +321,14 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
 
     mpi->pts = pts;
     d_video->decoded_pts = pts;
+
+    // Compensate for incorrectly using mpeg-style DTS for avi timestamps.
+    if (avi_pts && mpi->pts != MP_NOPTS_VALUE && d_video->fps > 0) {
+        int delay = -1;
+        video_vd_control(d_video, VDCTRL_GET_BFRAMES, &delay);
+        mpi->pts -= MPMAX(delay, 0) / d_video->fps;
+    }
+
     return mpi;
 }
 
