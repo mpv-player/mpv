@@ -19,7 +19,7 @@ local o = {
 
     -- Text style
     font = "Source Sans Pro",
-    font_size = 11,
+    font_size = 10,
     font_color = "FFFFFF",
     border_size = 1.0,
     border_color = "262626",
