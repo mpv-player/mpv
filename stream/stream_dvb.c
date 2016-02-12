@@ -758,11 +758,6 @@ int dvb_step_channel(stream_t *stream, int dir)
 
     MP_VERBOSE(stream, "DVB_STEP_CHANNEL dir %d\n", dir);
 
-    if (priv == NULL) {
-        MP_ERR(stream, "dvb_step_channel: NULL priv_ptr, quit\n");
-        return 0;
-    }
-
     list = state->list;
     if (list == NULL) {
         MP_ERR(stream, "dvb_step_channel: NULL list_ptr, quit\n");
