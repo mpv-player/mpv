@@ -1101,6 +1101,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
           if (tmp == NULL) {
             mp_err(log, "DVB_CONFIG, can't realloc %d bytes, skipping\n",
                    size);
+            free(list);
             continue;
           }
           cards = tmp;
@@ -1108,6 +1109,8 @@ dvb_state_t *dvb_get_state(stream_t *stream)
           name = malloc(20);
           if (name == NULL) {
             mp_err(log, "DVB_CONFIG, can't realloc 20 bytes, skipping\n");
+            free(list);
+            free(tmp);
             continue;
           }
 
