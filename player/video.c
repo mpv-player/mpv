@@ -366,7 +366,7 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
         track = mpctx->current_track[0][STREAM_VIDEO];
         if (!track)
             return 0;
-        sh = track ? track->stream : NULL;
+        sh = track->stream;
         if (!sh)
             goto no_video;
     }
