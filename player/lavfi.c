@@ -429,6 +429,17 @@ error:
     return false;
 }
 
+static void dump_graph(struct lavfi *c)
+{
+#if LIBAVFILTER_VERSION_MICRO >= 100
+    MP_VERBOSE(c, "Filter graph:\n");
+    char *s = avfilter_graph_dump(c->graph, NULL);
+    if (s)
+        MP_VERBOSE(c, "%s\n", s);
+    av_free(s);
+#endif
+}
+
 // Initialize the graph if all inputs have formats set. If it's already
 // initialized, or can't be initialized yet, do nothing.
 static void init_graph(struct lavfi *c)
@@ -451,6 +462,8 @@ static void init_graph(struct lavfi *c)
         }
 
         c->initialized = true;
+
+        dump_graph(c);
     }
 }
 
