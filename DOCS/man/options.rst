@@ -3584,6 +3584,9 @@ Miscellaneous
     corresponding output is not connected to the filter, can still be freely
     changed.
 
+    Note that the normal filter chains (``--af``, ``--vf``) are applied between
+    the complex graphs (e.g. ``ao`` label) and the actual output.
+
     .. admonition:: Examples
 
         - ``--lavfi-complex='[aid1] asplit [ao] [t] ; [t] aphasemeter [vo]'``
