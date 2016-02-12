@@ -177,7 +177,7 @@ struct gl_video {
     struct fbotex output_fbo;
     struct fbotex deband_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
-    struct fbotex integer_conv_fbo[4];
+    struct fbotex integer_conv_fbo[TEXUNIT_VIDEO_NUM];
 
     // these are duplicated so we can keep rendering back and forth between
     // them to support an unlimited number of shader passes per step
