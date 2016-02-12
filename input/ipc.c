@@ -740,7 +740,7 @@ static void *ipc_thread(void *p)
     int rc;
 
     int ipc_fd;
-    struct sockaddr_un ipc_un;
+    struct sockaddr_un ipc_un = {0};
 
     struct mp_ipc_ctx *arg = p;
 
