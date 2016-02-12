@@ -430,7 +430,7 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
 
     mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
 
-    struct ao_chain *ao_c = ao_c = talloc_zero(NULL, struct ao_chain);
+    struct ao_chain *ao_c = talloc_zero(NULL, struct ao_chain);
     mpctx->ao_chain = ao_c;
     ao_c->log = mpctx->log;
     ao_c->af = af_new(mpctx->global);
