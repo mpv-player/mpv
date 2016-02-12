@@ -104,7 +104,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
             .codec = sh->codec,
         };
 
-        if (sh->codec && sub->sd->driver->init(sub->sd) >= 0)
+        if (sub->sd->driver->init(sub->sd) >= 0)
             return sub;
 
         ta_set_parent(log, NULL);
