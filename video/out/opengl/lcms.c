@@ -44,6 +44,8 @@ struct gl_lcms {
     size_t icc_size;
     char *icc_path;
     bool changed;
+    enum mp_csp_prim prev_prim;
+    enum mp_csp_trc prev_trc;
 
     struct mp_log *log;
     struct mpv_global *global;
@@ -166,16 +168,88 @@ void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr *profile)
     p->icc_size = profile->len;
 }
 
-// Return and _reset_ whether the lookul table has changed since the last call.
-// If it has changed, gl_lcms_get_lut3d() should be called.
-bool gl_lcms_has_changed(struct gl_lcms *p)
+// Return and _reset_ whether the profile or config has changed since the last
+// call. If it has changed, gl_lcms_get_lut3d() should be called.
+bool gl_lcms_has_changed(struct gl_lcms *p, enum mp_csp_prim prim,
+                         enum mp_csp_trc trc)
 {
-    bool change = p->changed;
+    bool change = p->changed || p->prev_prim != prim || p->prev_trc != trc;
     p->changed = false;
+    p->prev_prim = prim;
+    p->prev_trc = trc;
     return change;
 }
 
-bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d)
+static cmsHPROFILE get_vid_profile(cmsContext cms, cmsHPROFILE disp_profile,
+                                   enum mp_csp_prim prim, enum mp_csp_trc trc)
+{
+    // The input profile for the transformation is dependent on the video
+    // primaries and transfer characteristics
+    struct mp_csp_primaries csp = mp_get_csp_primaries(prim);
+    cmsCIExyY wp_xyY = {csp.white.x, csp.white.y, 1.0};
+    cmsCIExyYTRIPLE prim_xyY = {
+        .Red   = {csp.red.x,   csp.red.y,   1.0},
+        .Green = {csp.green.x, csp.green.y, 1.0},
+        .Blue  = {csp.blue.x,  csp.blue.y,  1.0},
+    };
+
+    cmsToneCurve *tonecurve = NULL;
+    switch (trc) {
+    case MP_CSP_TRC_LINEAR:  tonecurve = cmsBuildGamma(cms, 1.0); break;
+    case MP_CSP_TRC_GAMMA18: tonecurve = cmsBuildGamma(cms, 1.8); break;
+    case MP_CSP_TRC_GAMMA22: tonecurve = cmsBuildGamma(cms, 2.2); break;
+    case MP_CSP_TRC_GAMMA28: tonecurve = cmsBuildGamma(cms, 2.8); break;
+
+    case MP_CSP_TRC_SRGB:
+        // Values copied from Little-CMS
+        tonecurve = cmsBuildParametricToneCurve(cms, 4,
+                (double[5]){2.40, 1/1.055, 0.055/1.055, 1/12.92, 0.04045});
+        break;
+
+    case MP_CSP_TRC_PRO_PHOTO:
+        tonecurve = cmsBuildParametricToneCurve(cms, 4,
+                (double[5]){1.8, 1.0, 0.0, 1/16.0, 0.03125});
+        break;
+
+    case MP_CSP_TRC_BT_1886: {
+        // To build an appropriate BT.1886 transformation we need access to
+        // the display's black point, so we use the reverse mappings
+        cmsHPROFILE xyz_profile = cmsCreateXYZProfileTHR(cms);
+        cmsHTRANSFORM rgb2xyz = cmsCreateTransformTHR(cms,
+                disp_profile, TYPE_RGB_16, xyz_profile, TYPE_XYZ_DBL,
+                INTENT_RELATIVE_COLORIMETRIC, 0);
+        cmsCloseProfile(xyz_profile);
+        if (!rgb2xyz)
+            return false;
+
+        uint64_t black[3] = {0};
+        cmsCIEXYZ disp_black;
+        cmsDoTransform(rgb2xyz, black, &disp_black, 1);
+
+        // Build the parametric BT.1886 transfer curve
+        const double gamma = 2.40;
+        double binv = pow(disp_black.Y, 1.0/gamma);
+        tonecurve = cmsBuildParametricToneCurve(cms, 6,
+                (double[4]){gamma, 1.0 - binv, binv, 0.0});
+        break;
+    }
+
+    default:
+        abort();
+    }
+
+    if (!tonecurve)
+        return false;
+
+    cmsHPROFILE *vid_profile = cmsCreateRGBProfileTHR(cms, &wp_xyY, &prim_xyY,
+                (cmsToneCurve*[3]){tonecurve, tonecurve, tonecurve});
+    cmsFreeToneCurve(tonecurve);
+
+    return vid_profile;
+}
+
+bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
+                       enum mp_csp_prim prim, enum mp_csp_trc trc)
 {
     int s_r, s_g, s_b;
     bool result = false;
@@ -197,8 +271,8 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d)
         // because we may change the parameter in the future or make it
         // customizable, same for the primaries.
         char *cache_info = talloc_asprintf(tmp,
-                "ver=1.1, intent=%d, size=%dx%dx%d, gamma=2.4, prim=bt2020\n",
-                p->opts.intent, s_r, s_g, s_b);
+                "ver=1.2, intent=%d, size=%dx%dx%d, prim=%d, trc=%d\n",
+                p->opts.intent, s_r, s_g, s_b, prim, trc);
 
         uint8_t hash[32];
         struct AVSHA *sha = av_sha_alloc();
@@ -242,23 +316,12 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d)
     if (!profile)
         goto error_exit;
 
-    // We always generate the 3DLUT against BT.2020, and transform into this
-    // space inside the shader if the source differs.
-    struct mp_csp_primaries csp = mp_get_csp_primaries(MP_CSP_PRIM_BT_2020);
+    cmsHPROFILE vid_profile = get_vid_profile(cms, profile, prim, trc);
+    if (!vid_profile) {
+        cmsCloseProfile(profile);
+        goto error_exit;
+    }
 
-    cmsCIExyY wp = {csp.white.x, csp.white.y, 1.0};
-    cmsCIExyYTRIPLE prim = {
-        .Red   = {csp.red.x,   csp.red.y,   1.0},
-        .Green = {csp.green.x, csp.green.y, 1.0},
-        .Blue  = {csp.blue.x,  csp.blue.y,  1.0},
-    };
-
-    // 2.4 is arbitrarily used as a gamma compression factor for the 3DLUT,
-    // reducing artifacts due to rounding errors on wide gamut profiles
-    cmsToneCurve *tonecurve = cmsBuildGamma(cms, 2.4);
-    cmsHPROFILE vid_profile = cmsCreateRGBProfileTHR(cms, &wp, &prim,
-                        (cmsToneCurve*[3]){tonecurve, tonecurve, tonecurve});
-    cmsFreeToneCurve(tonecurve);
     cmsHTRANSFORM trafo = cmsCreateTransformTHR(cms, vid_profile, TYPE_RGB_16,
                                                 profile, TYPE_RGB_16,
                                                 p->opts.intent,
@@ -333,7 +396,17 @@ struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
 
 void gl_lcms_set_options(struct gl_lcms *p, struct mp_icc_opts *opts) { }
 void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr *profile) { }
-bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **x) { return false; }
-bool gl_lcms_has_changed(struct gl_lcms *p) { return false; }
+
+bool gl_lcms_has_changed(struct gl_lcms *p, enum mp_csp_prim prim,
+                         enum mp_csp_trc trc)
+{
+    return false;
+}
+
+bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
+                       enum mp_csp_prim prim, enum mp_csp_trc trc)
+{
+    return false;
+}
 
 #endif
