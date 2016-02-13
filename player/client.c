@@ -833,8 +833,10 @@ static bool conv_node_to_format(void *dst, mpv_format dst_fmt, mpv_node *src)
         return true;
     }
     if (dst_fmt == MPV_FORMAT_INT64 && src->format == MPV_FORMAT_DOUBLE) {
-        if (src->u.double_ >= INT64_MIN && src->u.double_ <= INT64_MAX)
+        if (src->u.double_ >= INT64_MIN && src->u.double_ <= INT64_MAX) {
             *(int64_t *)dst = src->u.double_;
+            return true;
+        }
     }
     return false;
 }
