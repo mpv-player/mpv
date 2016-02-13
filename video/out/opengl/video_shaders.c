@@ -250,7 +250,8 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
                              lessThan(vec3(0.04045), color.rgb));)
         break;
     case MP_CSP_TRC_BT_1886:
-        GLSL(color.rgb = pow(color.rgb, vec3(1.961));)
+        // We don't have an actual black point, so we assume a perfect display
+        GLSL(color.rgb = pow(color.rgb, vec3(2.4));)
         break;
     case MP_CSP_TRC_GAMMA18:
         GLSL(color.rgb = pow(color.rgb, vec3(1.8));)
@@ -284,7 +285,7 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
                              lessThanEqual(vec3(0.0031308), color.rgb));)
         break;
     case MP_CSP_TRC_BT_1886:
-        GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.961));)
+        GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.4));)
         break;
     case MP_CSP_TRC_GAMMA18:
         GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.8));)

@@ -148,6 +148,7 @@ struct gl_video {
     struct mpv_global *global;
     struct mp_log *log;
     struct gl_video_opts opts;
+    struct gl_lcms *cms;
     bool gl_debug;
 
     int texture_16bit_depth;    // actual bits available in 16 bit textures
@@ -693,21 +694,31 @@ static void uninit_rendering(struct gl_video *p)
     gl_video_reset_surfaces(p);
 }
 
-void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d)
+void gl_video_update_profile(struct gl_video *p)
+{
+    if (p->use_lut_3d)
+        return;
+
+    p->use_lut_3d = true;
+    check_gl_features(p);
+
+    reinit_rendering(p);
+}
+
+static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
+                               enum mp_csp_trc trc)
 {
     GL *gl = p->gl;
 
-    if (!lut3d) {
-        if (p->use_lut_3d) {
-            p->use_lut_3d = false;
-            reinit_rendering(p);
-        }
-        return;
-    }
+    if (!p->cms || !p->use_lut_3d)
+        return false;
 
-    if (!(gl->mpgl_caps & MPGL_CAP_3D_TEX) || gl->es) {
-        MP_ERR(p, "16 bit fixed point 3D textures not available.\n");
-        return;
+    if (!gl_lcms_has_changed(p->cms, prim, trc))
+        return true;
+
+    struct lut3d *lut3d = NULL;
+    if (!gl_lcms_get_lut3d(p->cms, &lut3d, prim, trc) || !lut3d) {
+        return false;
     }
 
     if (!p->lut_3d_texture)
@@ -724,12 +735,9 @@ void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d)
     gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     gl->ActiveTexture(GL_TEXTURE0);
 
-    p->use_lut_3d = true;
-    check_gl_features(p);
-
     debug_check_gl(p, "after 3d lut creation");
 
-    reinit_rendering(p);
+    return true;
 }
 
 // Fill an img_tex struct from an FBO + some metadata
@@ -1868,10 +1876,16 @@ static void pass_colormanage(struct gl_video *p, enum mp_csp_prim prim_src,
     enum mp_csp_prim prim_dst = p->opts.target_prim;
 
     if (p->use_lut_3d) {
-        // The 3DLUT is hard-coded against BT.2020's gamut during creation, and
-        // we never want to adjust its output (so treat it as linear)
-        prim_dst = MP_CSP_PRIM_BT_2020;
-        trc_dst = MP_CSP_TRC_LINEAR;
+        // The 3DLUT is always generated against the original source space
+        enum mp_csp_prim prim_orig = p->image_params.primaries;
+        enum mp_csp_trc trc_orig = p->image_params.gamma;
+
+        if (gl_video_get_lut3d(p, prim_orig, trc_orig)) {
+            prim_dst = prim_orig;
+            trc_dst = trc_orig;
+        } else {
+            p->use_lut_3d = false;
+        }
     }
 
     if (prim_dst == MP_CSP_PRIM_AUTO)
@@ -1885,10 +1899,10 @@ static void pass_colormanage(struct gl_video *p, enum mp_csp_prim prim_src,
             trc_dst = MP_CSP_TRC_GAMMA22;
     }
 
-    bool need_cms = prim_src != prim_dst || p->use_lut_3d;
-    bool need_gamma = trc_src != trc_dst || need_cms;
+    bool need_gamma = trc_src != trc_dst || prim_src != prim_dst;
     if (need_gamma)
         pass_linearize(p->sc, trc_src);
+
     // Adapt to the right colorspace if necessary
     if (prim_src != prim_dst) {
         struct mp_csp_primaries csp_src = mp_get_csp_primaries(prim_src),
@@ -1898,16 +1912,14 @@ static void pass_colormanage(struct gl_video *p, enum mp_csp_prim prim_src,
         gl_sc_uniform_mat3(p->sc, "cms_matrix", true, &m[0][0]);
         GLSL(color.rgb = cms_matrix * color.rgb;)
     }
-    if (p->use_lut_3d) {
-        gl_sc_uniform_sampler(p->sc, "lut_3d", GL_TEXTURE_3D, TEXUNIT_3DLUT);
-        // For the 3DLUT we are arbitrarily using 2.4 as input gamma to reduce
-        // the severity of quantization errors.
-        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
-        GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.4));)
-        GLSL(color.rgb = texture3D(lut_3d, color.rgb).rgb;)
-    }
+
     if (need_gamma)
         pass_delinearize(p->sc, trc_dst);
+
+    if (p->use_lut_3d) {
+        gl_sc_uniform_sampler(p->sc, "lut_3d", GL_TEXTURE_3D, TEXUNIT_3DLUT);
+        GLSL(color.rgb = texture3D(lut_3d, color.rgb).rgb;)
+    }
 }
 
 static void pass_dither(struct gl_video *p)
@@ -2681,7 +2693,7 @@ static void check_gl_features(struct gl_video *p)
 
     // GLES3 doesn't provide filtered 16 bit integer textures
     // GLES2 doesn't even provide 3D textures
-    if (p->use_lut_3d && !(have_3d_tex && have_float_tex)) {
+    if (p->use_lut_3d && (!have_3d_tex || gl->es)) {
         p->use_lut_3d = false;
         MP_WARN(p, "Disabling color management (GLES unsupported).\n");
     }
@@ -3001,7 +3013,8 @@ void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd)
     recreate_osd(p);
 }
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g,
+                               struct gl_lcms *cms)
 {
     if (gl->version < 210 && gl->es < 200) {
         mp_err(log, "At least OpenGL 2.1 or OpenGL ES 2.0 required.\n");
@@ -3013,6 +3026,7 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
         .gl = gl,
         .global = g,
         .log = log,
+        .cms = cms,
         .opts = gl_video_opts_def,
         .gl_target = GL_TEXTURE_2D,
         .texture_16bit_depth = 16,

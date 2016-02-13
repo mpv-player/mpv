@@ -24,6 +24,7 @@
 #include "sub/osd.h"
 #include "common.h"
 #include "utils.h"
+#include "lcms.h"
 #include "video/out/filter_kernels.h"
 
 // Texture units 0-5 are used by the video, and for free use by the passes
@@ -125,14 +126,15 @@ extern const struct gl_video_opts gl_video_opts_def;
 struct gl_video;
 struct vo_frame;
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g);
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g,
+                               struct gl_lcms *cms);
 void gl_video_uninit(struct gl_video *p);
 void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd);
 void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts);
 bool gl_video_check_format(struct gl_video *p, int mp_format);
 void gl_video_config(struct gl_video *p, struct mp_image_params *params);
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b);
-void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d);
+void gl_video_update_profile(struct gl_video *p);
 void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo);
 void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
                      struct mp_rect *src, struct mp_rect *dst,
