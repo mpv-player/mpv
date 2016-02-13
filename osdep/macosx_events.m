@@ -451,7 +451,8 @@ void cocoa_set_input_context(struct input_ctx *input_context)
     else
         chars = [event charactersIgnoringModifiers];
 
-    int key = convert_key([event keyCode], *[chars UTF8String]);
+    struct bstr t = bstr0([chars UTF8String]);
+    int key = convert_key([event keyCode], bstr_decode_utf8(t, &t));
 
     if (key > -1)
         [self handleMPKey:key withMask:[self keyModifierMask:event]];
