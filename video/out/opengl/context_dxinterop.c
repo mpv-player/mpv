@@ -529,6 +529,19 @@ static int GLAPIENTRY dxinterop_swap_interval(int interval)
     return 1;
 }
 
+static void * GLAPIENTRY dxinterop_get_native_display(const char *name)
+{
+    if (!current_ctx)
+        return NULL;
+    struct priv *p = current_ctx->priv;
+
+    if (name && p->device && strcmp("IDirect3DDevice9", name) == 0) {
+        IDirect3DDevice9_AddRef(p->device);
+        return p->device;
+    }
+    return NULL;
+}
+
 static int dxinterop_init(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
@@ -551,6 +564,8 @@ static int dxinterop_init(struct MPGLContext *ctx, int flags)
     gl->BindFramebuffer = dxinterop_bind_framebuffer;
 
     gl->SwapInterval = dxinterop_swap_interval;
+
+    gl->MPGetNativeDisplay = dxinterop_get_native_display;
 
     if (d3d_create(ctx) < 0)
         goto fail;
