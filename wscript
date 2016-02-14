@@ -556,6 +556,10 @@ audio_output_features = [
         'func': check_pkg_config('openal', '>= 1.13'),
         'default': 'disable'
     }, {
+        'name': '--opensles',
+        'desc': 'OpenSL ES audio output',
+        'func': check_statement('SLES/OpenSLES.h', 'slCreateEngine', lib="OpenSLES"),
+    }, {
         'name': '--alsa',
         'desc': 'ALSA audio output',
         'func': check_pkg_config('alsa', '>= 1.0.18'),
