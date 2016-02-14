@@ -580,6 +580,9 @@ static int dxinterop_init(struct MPGLContext *ctx, int flags)
 
     DwmEnableMMCSS(TRUE);
 
+    ctx->native_display_type = "IDirect3DDevice9Ex";
+    ctx->native_display = p->device;
+
     return 0;
 fail:
     dxinterop_uninit(ctx);

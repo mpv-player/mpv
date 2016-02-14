@@ -337,6 +337,7 @@ def build(ctx):
         ( "video/out/opengl/egl_helpers.c",      "egl-helpers" ),
         ( "video/out/opengl/hwdec.c",            "gl" ),
         ( "video/out/opengl/hwdec_dxva2.c",      "gl-win32" ),
+        ( "video/out/opengl/hwdec_dxva2gldx.c",  "dxva2-dxinterop" ),
         ( "video/out/opengl/hwdec_vaegl.c",      "vaapi-egl" ),
         ( "video/out/opengl/hwdec_vaglx.c",      "vaapi-glx" ),
         ( "video/out/opengl/hwdec_osx.c",        "videotoolbox-gl" ),
