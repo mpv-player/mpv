@@ -1484,6 +1484,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 
     unsigned char *extradata = track->private_data;
     unsigned int extradata_len = track->private_size;
+    uint64_t chmask = 0;
 
     if (!track->a_osfreq)
         track->a_osfreq = track->a_sfreq;
@@ -1516,6 +1517,9 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         extradata_len = track->private_size - 18;
         sh_a->bits_per_coded_sample = track->a_bps;
         mp_set_codec_from_tag(sh_a);
+        // WAVEFORMATEXTENSIBLE.dwChannelMask
+        if (sh_a->codec_tag == 0xfffe && extradata_len >= 6)
+            chmask = AV_RL32(extradata + 2);
     } else if (!strcmp(track->codec_id, "A_PCM/INT/LIT")) {
         bool sign = sh_a->bits_per_coded_sample > 8;
         mp_set_pcm_codec(sh_a, sign, false, sh_a->bits_per_coded_sample, false);
@@ -1635,7 +1639,9 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     if (!sh_a->codec)
         goto error;
 
-    mp_chmap_set_unknown(&sh_a->channels, track->a_channels);
+    mp_chmap_from_waveext(&sh_a->channels, chmask);
+    if (sh_a->channels.num != track->a_channels)
+        mp_chmap_set_unknown(&sh_a->channels, track->a_channels);
 
     const char *codec = sh_a->codec;
     if (!strcmp(codec, "mp3") || !strcmp(codec, "truehd")) {
