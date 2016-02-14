@@ -1607,6 +1607,9 @@ end
 
 
 function show_osc()
+    -- show when disabled can happen (e.g. mouse_move) due to async/delayed unbinding
+    if not state.enabled then return end
+
     msg.debug("show_osc")
     --remember last time of invocation (mouse move)
     state.showtime = mp.get_time()
@@ -1616,12 +1619,17 @@ function show_osc()
     if (user_opts.fadeduration > 0) then
         state.anitype = nil
     end
-
 end
 
 function hide_osc()
     msg.debug("hide_osc")
-    if (user_opts.fadeduration > 0) then
+    if not state.enabled then
+        -- typically hide happens at render() from tick(), but now tick() is
+        -- no-op and won't render again to remove the osc, so do that manually.
+        state.osc_visible = false
+        timer_stop()
+        render() -- state.osc_visible == false -> remove the osc from screen
+    elseif (user_opts.fadeduration > 0) then
         if not(state.osc_visible == false) then
             state.anitype = "out"
             control_timer()
@@ -1958,9 +1966,8 @@ function enable_osc(enable)
     state.enabled = enable
     if enable then
         do_enable_keybindings()
-        show_osc()
     else
-        hide_osc()
+        hide_osc() -- acts immediately when state.enabled == false
         if state.showhide_enabled then
             mp.disable_key_bindings("showhide")
         end
