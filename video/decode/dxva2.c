@@ -59,6 +59,7 @@ DEFINE_GUID(DXVADDI_Intel_ModeH264_E, 0x604F8E68, 0x4951,0x4C54,0x88,0xFE,0xAB,0
 DEFINE_GUID(DXVA2_ModeVC1_D,          0x1b81beA3, 0xa0c7,0x11d3,0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5);
 DEFINE_GUID(DXVA2_ModeVC1_D2010,      0x1b81beA4, 0xa0c7,0x11d3,0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5);
 DEFINE_GUID(DXVA2_ModeHEVC_VLD_Main,  0x5b11d51b, 0x2f4c,0x4452,0xbc,0xc3,0x09,0xf2,0xa1,0x16,0x0c,0xc0);
+DEFINE_GUID(DXVA2_ModeHEVC_VLD_Main10,0x107af0e0, 0xef1a,0x4d19,0xab,0xa8,0x67,0xa1,0x63,0x07,0x3d,0x13);
 DEFINE_GUID(DXVA2_NoEncrypt,          0x1b81beD0, 0xa0c7,0x11d3,0xb9,0x84,0x00,0xc0,0x4f,0x2e,0x73,0xc5);
 
 typedef IDirect3D9* WINAPI pDirect3DCreate9(UINT);
@@ -68,6 +69,7 @@ typedef struct dxva2_mode {
   const GUID     *guid;
   const char     *name;
   enum AVCodecID codec;
+  int            depth; // defaults to 8
 } dxva2_mode;
 
 #define MODE(id) &MP_CONCAT(DXVA2_Mode, id), # id
@@ -90,6 +92,7 @@ static const dxva2_mode dxva2_modes[] = {
     { MODE(VC1_D),          AV_CODEC_ID_WMV3 },
 
     { MODE(HEVC_VLD_Main),  AV_CODEC_ID_HEVC },
+    { MODE(HEVC_VLD_Main10),AV_CODEC_ID_HEVC, .depth = 10},
 
     { NULL,                 0 },
 };
@@ -117,6 +120,7 @@ typedef struct DXVA2Context {
     struct dxva2_decoder        *decoder;
 
     struct mp_image_pool        *sw_pool;
+    int                         mp_format;
 } DXVA2Context;
 
 static void dxva2_uninit(struct lavc_ctx *s)
@@ -167,7 +171,7 @@ static void copy_nv12(struct mp_image *dest, uint8_t *src_bits,
                       unsigned src_pitch, unsigned surf_height)
 {
     struct mp_image buf = {0};
-    mp_image_setfmt(&buf, IMGFMT_NV12);
+    mp_image_setfmt(&buf, dest->imgfmt);
     mp_image_set_size(&buf, dest->w, dest->h);
 
     buf.planes[0] = src_bits;
@@ -191,8 +195,9 @@ static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
     if (surfaceDesc.Width < img->w || surfaceDesc.Height < img->h)
         return img;
 
-    struct mp_image *sw_img =
-        mp_image_pool_get(ctx->sw_pool, IMGFMT_NV12, surfaceDesc.Width, surfaceDesc.Height);
+    struct mp_image *sw_img = mp_image_pool_get(ctx->sw_pool, ctx->mp_format,
+                                                surfaceDesc.Width,
+                                                surfaceDesc.Height);
 
     if (!sw_img)
         return img;
@@ -447,6 +452,7 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
         D3DFORMAT *target_list = NULL;
         unsigned target_count = 0;
         const dxva2_mode *mode = &dxva2_modes[i];
+        int depth = mode->depth;
         if (mode->codec != codec_id)
             continue;
 
@@ -457,19 +463,38 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
         if (j == guid_count)
             continue;
 
+        if (codec_id == AV_CODEC_ID_HEVC) {
+            if ((mode->depth > 8) != (s->avctx->profile == FF_PROFILE_HEVC_MAIN_10))
+                continue;
+        }
+
         hr = IDirectXVideoDecoderService_GetDecoderRenderTargets(ctx->decoder_service, mode->guid, &target_count, &target_list);
         if (FAILED(hr)) {
             continue;
         }
         for (j = 0; j < target_count; j++) {
             const D3DFORMAT format = target_list[j];
-            if (format == MKTAG('N','V','1','2')) {
-                target_format = format;
-                break;
+            if (depth <= 8) {
+                if (format == MKTAG('N','V','1','2')) {
+                    ctx->mp_format = IMGFMT_NV12;
+                    target_format = format;
+                }
+            } else {
+                if (format == MKTAG('P','0','1','0') ||
+                    format == MKTAG('P','0','1','6'))
+                {
+                    // There is no FFmpeg format that is like NV12 and supports
+                    // 16 bit per component, but vo_opengl will use the lower
+                    // bits in P010 anyway.
+                    ctx->mp_format = pixfmt2imgfmt(AV_PIX_FMT_P010);
+                    target_format = format;
+                }
             }
+            if (target_format)
+                break;
         }
         CoTaskMemFree(target_list);
-        if (target_format) {
+        if (target_format && ctx->mp_format) {
             device_guid = *mode->guid;
             break;
         }
@@ -564,7 +589,9 @@ static int dxva2_init_decoder(struct lavc_ctx *s, int w, int h)
         MP_ERR(ctx, "Unsupported H.264 profile for DXVA2 HWAccel: %d\n", profile);
         return -1;
     }
-    if (codec == AV_CODEC_ID_HEVC && profile != FF_PROFILE_HEVC_MAIN) {
+    if (codec == AV_CODEC_ID_HEVC && profile != FF_PROFILE_HEVC_MAIN &&
+                                     profile != FF_PROFILE_HEVC_MAIN_10)
+    {
         MP_ERR(ctx, "Unsupported H.265 profile for DXVA2 HWAccel: %d\n", profile);
         return -1;
     }
