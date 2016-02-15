@@ -25,10 +25,8 @@ struct mp_image;
 struct mp_image_pool;
 
 LPDIRECT3DSURFACE9 d3d9_surface_in_mp_image(struct mp_image *mpi);
-void dxva2_img_ref_decoder(struct mp_image *mpi, IDirectXVideoDecoder *decoder);
 
-void dxva2_pool_set_allocator(struct mp_image_pool *pool,
-                              IDirectXVideoDecoderService *decoder_service,
-                              D3DFORMAT target_format, int surface_alignment);
+struct mp_image *dxva2_new_ref(IDirectXVideoDecoder *decoder,
+                               LPDIRECT3DSURFACE9 d3d9_surface, int w, int h);
 
 #endif
