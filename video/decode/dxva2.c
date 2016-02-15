@@ -99,11 +99,6 @@ static const dxva2_mode dxva2_modes[] = {
 
 #undef MODE
 
-struct dxva2_decoder {
-    DXVA2_ConfigPictureDecode config;
-    IDirectXVideoDecoder      *decoder;
-    struct mp_image_pool      *pool;
-};
 
 typedef struct DXVA2Context {
     struct mp_log *log;
@@ -117,7 +112,7 @@ typedef struct DXVA2Context {
     IDirect3DDevice9            *d3d9device;
     IDirect3DDeviceManager9     *d3d9devmgr;
     IDirectXVideoDecoderService *decoder_service;
-    struct dxva2_decoder        *decoder;
+    struct mp_image_pool        *decoder_pool;
 
     struct mp_image_pool        *sw_pool;
     int                         mp_format;
@@ -129,7 +124,7 @@ static void dxva2_uninit(struct lavc_ctx *s)
     if (!ctx)
         return;
 
-    talloc_free(ctx->decoder);
+    talloc_free(ctx->decoder_pool);
 
     if (ctx->decoder_service)
         IDirectXVideoDecoderService_Release(ctx->decoder_service);
@@ -161,7 +156,7 @@ static struct mp_image *dxva2_allocate_image(struct lavc_ctx *s, int w, int h)
 {
     DXVA2Context *ctx = s->hwdec_priv;
 
-    struct mp_image *img = mp_image_pool_get(ctx->decoder->pool, IMGFMT_DXVA2, w, h);
+    struct mp_image *img = mp_image_pool_get(ctx->decoder_pool, IMGFMT_DXVA2, w, h);
     if (!img)
         MP_ERR(ctx, "Failed to allocate additional DXVA2 surface.\n");
     return img;
@@ -398,6 +393,11 @@ static void dxva2_destroy_decoder(void *arg)
     struct dxva2_decoder *decoder = arg;
     if (decoder->decoder)
         IDirectXVideoDecoder_Release(decoder->decoder);
+
+    if (decoder->surfaces) {
+        for (int i = 0; i < decoder->num_surfaces; i++)
+            IDirect3DSurface9_Release(decoder->surfaces[i]);
+    }
 }
 
 static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
@@ -413,9 +413,7 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
     DXVA2_VideoDesc desc = { 0 };
     HRESULT hr;
     struct dxva2_decoder *decoder;
-    int surface_alignment, num_surfaces;
-    struct mp_image **imgs;
-    LPDIRECT3DSURFACE9 *surfaces;
+    struct mp_image_pool *pool;
     int ret = -1;
 
     hr = IDirectXVideoDecoderService_GetDecoderDeviceGuids(ctx->decoder_service, &guid_count, &guid_list);
@@ -520,57 +518,64 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
     /* decoding MPEG-2 requires additional alignment on some Intel GPUs,
        but it causes issues for H.264 on certain AMD GPUs..... */
     if (codec_id == AV_CODEC_ID_MPEG2VIDEO)
-        surface_alignment = 32;
+        decoder->align = 32;
     /* the HEVC DXVA2 spec asks for 128 pixel aligned surfaces to ensure
        all coding features have enough room to work with */
     else if  (codec_id == AV_CODEC_ID_HEVC)
-        surface_alignment = 128;
+        decoder->align = 128;
     else
-        surface_alignment = 16;
+        decoder->align = 16;
 
-    num_surfaces = hwdec_get_max_refs(s) + ADDITIONAL_SURFACES;
+    decoder->w_align = FFALIGN(w, decoder->align);
+    decoder->h_align = FFALIGN(h, decoder->align);
 
-    decoder->pool = talloc_steal(decoder, mp_image_pool_new(num_surfaces));
-    dxva2_pool_set_allocator(decoder->pool, ctx->decoder_service,
-                             target_format, surface_alignment);
-
-    // Preallocate images from the pool so the surfaces can be used to create
-    // the decoder and passed to ffmpeg in the dxva_ctx. The mp_images
-    // themselves will be freed (returned to the pool) along with the temporary
-    // talloc context on exit from this function.
-    imgs     = talloc_array(tmp,            struct mp_image *, num_surfaces);
-    surfaces = talloc_array(decoder->pool, LPDIRECT3DSURFACE9, num_surfaces);
-    for (i = 0; i < num_surfaces; i++) {
-        imgs[i] = talloc_steal(
-            imgs, mp_image_pool_get(decoder->pool, IMGFMT_DXVA2, w, h));
-        surfaces[i] = d3d9_surface_in_mp_image(imgs[i]);
+    decoder->num_surfaces = hwdec_get_max_refs(s) + ADDITIONAL_SURFACES;
+    decoder->surfaces = talloc_array(decoder, LPDIRECT3DSURFACE9,
+                                     decoder->num_surfaces);
+    hr = IDirectXVideoDecoderService_CreateSurface(
+        ctx->decoder_service,
+        decoder->w_align, decoder->h_align, decoder->num_surfaces - 1,
+        target_format, D3DPOOL_DEFAULT, 0, DXVA2_VideoDecoderRenderTarget,
+        decoder->surfaces, NULL);
+    if (FAILED(hr)) {
+        MP_ERR(ctx, "Failed to create %d video surfaces\n",
+               decoder->num_surfaces);
+        goto fail;
     }
 
-    hr = IDirectXVideoDecoderService_CreateVideoDecoder(ctx->decoder_service, &device_guid,
-                                                        &desc, &decoder->config, surfaces,
-                                                        num_surfaces, &decoder->decoder);
-
+    hr = IDirectXVideoDecoderService_CreateVideoDecoder(
+        ctx->decoder_service, &device_guid, &desc, &decoder->config,
+        decoder->surfaces, decoder->num_surfaces, &decoder->decoder);
     if (FAILED(hr)) {
         MP_ERR(ctx, "Failed to create DXVA2 video decoder\n");
         goto fail;
     }
 
-    // According to ffmpeg_dxva2.c, the surfaces must not outlive the
-    // IDirectXVideoDecoder they were used to create. This adds a reference for
-    // each one of them, which is released on final mp_image destruction.
-    for (i = 0; i < num_surfaces; i++)
-        dxva2_img_ref_decoder(imgs[i], decoder->decoder);
+    pool = talloc_steal(tmp, mp_image_pool_new(decoder->num_surfaces));
+    talloc_steal(pool, decoder);
+    mp_image_pool_set_allocator(pool, dxva2_alloc_img, decoder);
+    mp_image_pool_set_lru(pool);
+
+    // The decoder will be expecting to use all of the surfaces in lru order, so
+    // we must force the pool to actually allocate mp_images for all of them,
+    // otherwise it will just keep reusing the same few.
+    for (i = 0; i < decoder->num_surfaces; i++) {
+        if (!talloc_steal(tmp, mp_image_pool_get(pool, IMGFMT_DXVA2, w, h))) {
+            MP_ERR(ctx, "Failed preallocating pool images\n");
+            goto fail;
+        }
+    }
 
     // Pass required information on to ffmpeg.
     dxva_ctx->cfg           = &decoder->config;
     dxva_ctx->decoder       = decoder->decoder;
-    dxva_ctx->surface       = surfaces;
-    dxva_ctx->surface_count = num_surfaces;
+    dxva_ctx->surface       = decoder->surfaces;
+    dxva_ctx->surface_count = decoder->num_surfaces;
 
     if (IsEqualGUID(&device_guid, &DXVADDI_Intel_ModeH264_E))
         dxva_ctx->workaround |= FF_DXVA2_WORKAROUND_INTEL_CLEARVIDEO;
 
-    ctx->decoder = talloc_steal(NULL, decoder);
+    ctx->decoder_pool = talloc_steal(NULL, pool);
     ret = 0;
 fail:
     talloc_free(tmp);
@@ -596,8 +601,8 @@ static int dxva2_init_decoder(struct lavc_ctx *s, int w, int h)
         return -1;
     }
 
-    talloc_free(ctx->decoder);
-    ctx->decoder = NULL;
+    talloc_free(ctx->decoder_pool);
+    ctx->decoder_pool = NULL;
 
     if (dxva2_create_decoder(s, w, h, codec, profile) < 0) {
         MP_ERR(ctx, "Error creating the DXVA2 decoder\n");
