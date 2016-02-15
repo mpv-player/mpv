@@ -46,7 +46,11 @@ struct dec_sub {
     pthread_mutex_t lock;
 
     struct mp_log *log;
+    struct mpv_global *global;
     struct MPOpts *opts;
+
+    struct demuxer *demuxer;
+    struct mp_codec_params *codec;
 
     struct sh_stream *sh;
     double last_pkt_pts;
@@ -75,6 +79,31 @@ void sub_destroy(struct dec_sub *sub)
     talloc_free(sub);
 }
 
+static struct sd *init_decoder(struct dec_sub *sub)
+{
+    for (int n = 0; sd_list[n]; n++) {
+        const struct sd_functions *driver = sd_list[n];
+        struct sd *sd = talloc(NULL, struct sd);
+        *sd = (struct sd){
+            .global = sub->global,
+            .log = mp_log_new(sd, sub->log, driver->name),
+            .opts = sub->opts,
+            .driver = driver,
+            .demuxer = sub->demuxer,
+            .codec = sub->codec,
+        };
+
+        if (sd->driver->init(sd) >= 0)
+            return sd;
+
+        talloc_free(sd);
+    }
+
+    MP_ERR(sub, "Could not find subtitle decoder for format '%s'.\n",
+           sub->codec->codec);
+    return NULL;
+}
+
 // Thread-safety of the returned object: all functions are thread-safe,
 // except sub_get_bitmaps() and sub_get_text(). Decoder backends (sd_*)
 // do not need to acquire locks.
@@ -83,38 +112,23 @@ struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
 {
     assert(demuxer && sh && sh->type == STREAM_SUB);
 
-    struct mp_log *log = mp_log_new(NULL, global->log, "sub");
+    struct dec_sub *sub = talloc(NULL, struct dec_sub);
+    *sub = (struct dec_sub){
+        .log = mp_log_new(sub, global->log, "sub"),
+        .global = global,
+        .opts = global->opts,
+        .sh = sh,
+        .codec = sh->codec,
+        .demuxer = demuxer,
+        .last_pkt_pts = MP_NOPTS_VALUE,
+    };
+    mpthread_mutex_init_recursive(&sub->lock);
 
-    for (int n = 0; sd_list[n]; n++) {
-        const struct sd_functions *driver = sd_list[n];
-        struct dec_sub *sub = talloc_zero(NULL, struct dec_sub);
-        sub->log = talloc_steal(sub, log),
-        sub->opts = global->opts;
-        sub->sh = sh;
-        sub->last_pkt_pts = MP_NOPTS_VALUE;
-        mpthread_mutex_init_recursive(&sub->lock);
+    sub->sd = init_decoder(sub);
+    if (sub->sd)
+        return sub;
 
-        sub->sd = talloc(NULL, struct sd);
-        *sub->sd = (struct sd){
-            .global = global,
-            .log = mp_log_new(sub->sd, sub->log, driver->name),
-            .opts = sub->opts,
-            .driver = driver,
-            .demuxer = demuxer,
-            .codec = sh->codec,
-        };
-
-        if (sub->sd->driver->init(sub->sd) >= 0)
-            return sub;
-
-        ta_set_parent(log, NULL);
-        talloc_free(sub->sd);
-        talloc_free(sub);
-    }
-
-    mp_err(log, "Could not find subtitle decoder for format '%s'.\n",
-           sh->codec->codec);
-    talloc_free(log);
+    talloc_free(sub);
     return NULL;
 }
 
