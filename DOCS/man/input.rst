@@ -765,6 +765,17 @@ The following hooks are currently defined:
     ``file-local-options/<option name>``. The player will wait until all
     hooks are run.
 
+``on_preloaded``
+    Called after a file has been opened, and before tracks are selected and
+    decoders are created. This has some usefulness if an API users wants
+    to select tracks manually, based on the set of available tracks. It's
+    also useful to initialize ``--lavfi-complex`` in a specific way by API,
+    without having to "probe" the available streams at first.
+
+    Note that this does not yet apply default track selection. Which operations
+    exactly can be done and not be done, and what information is available and
+    what is not yet available yet, is all subject to change.
+
 ``on_unload``
     Run before closing a file, and before actually uninitializing
     everything. It's not possible to resume playback in this state.

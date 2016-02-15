@@ -871,6 +871,19 @@ static int process_open_hooks(struct MPContext *mpctx)
     return 0;
 }
 
+static int process_preloaded_hooks(struct MPContext *mpctx)
+{
+    mp_hook_run(mpctx, NULL, "on_preloaded");
+
+    while (!mp_hook_test_completion(mpctx, "on_preloaded")) {
+        mp_idle(mpctx);
+        if (mpctx->stop_play)
+            return -1;
+    }
+
+    return 0;
+}
+
 static void process_unload_hooks(struct MPContext *mpctx)
 {
     mp_hook_run(mpctx, NULL, "on_unload");
@@ -1255,6 +1268,9 @@ reopen_file:
     autoload_external_files(mpctx);
 
     check_previous_track_selection(mpctx);
+
+    if (process_preloaded_hooks(mpctx))
+        goto terminate_playback;
 
     if (!init_complex_filters(mpctx))
         goto terminate_playback;
