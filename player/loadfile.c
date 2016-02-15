@@ -1321,6 +1321,9 @@ reopen_file:
             "Displaying attached picture. Use --no-audio-display to prevent this.\n");
     }
 
+    if (!mpctx->vo_chain)
+        handle_force_window(mpctx, true);
+
     MP_VERBOSE(mpctx, "Starting playback...\n");
 
     mpctx->playback_initialized = true;
