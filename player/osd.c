@@ -467,13 +467,11 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
                      "Chapter: %s", chapter);
         talloc_free(chapter);
     }
-    if ((mpctx->add_osd_seek_info & OSD_SEEK_INFO_EDITION)
-        && mpctx->master_demuxer)
-    {
+    if ((mpctx->add_osd_seek_info & OSD_SEEK_INFO_EDITION) && mpctx->demuxer) {
         set_osd_msg(mpctx, 1, mpctx->opts->osd_duration,
                      "Playing edition %d of %d.",
-                     mpctx->master_demuxer->edition + 1,
-                     mpctx->master_demuxer->num_editions);
+                     mpctx->demuxer->edition + 1,
+                     mpctx->demuxer->num_editions);
     }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_CURRENT_FILE) {
         if (mpctx->filename) {

@@ -390,14 +390,14 @@ static int mp_property_media_title(void *ctx, struct m_property *prop,
         name = mpctx->opts->media_title;
     if (name && name[0])
         return m_property_strdup_ro(action, arg, name);
-    if (mpctx->master_demuxer) {
-        name = mp_tags_get_str(mpctx->master_demuxer->metadata, "service_name");
+    if (mpctx->demuxer) {
+        name = mp_tags_get_str(mpctx->demuxer->metadata, "service_name");
         if (name && name[0])
             return m_property_strdup_ro(action, arg, name);
-        name = mp_tags_get_str(mpctx->master_demuxer->metadata, "title");
+        name = mp_tags_get_str(mpctx->demuxer->metadata, "title");
         if (name && name[0])
             return m_property_strdup_ro(action, arg, name);
-        name = mp_tags_get_str(mpctx->master_demuxer->metadata, "icy-title");
+        name = mp_tags_get_str(mpctx->demuxer->metadata, "icy-title");
         if (name && name[0])
             return m_property_strdup_ro(action, arg, name);
     }
@@ -439,7 +439,7 @@ static int mp_property_demuxer(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->master_demuxer;
+    struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_strdup_ro(action, arg, demuxer->desc->name);
@@ -449,7 +449,7 @@ static int mp_property_file_format(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->master_demuxer;
+    struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
     const char *name = demuxer->filetype ? demuxer->filetype : demuxer->desc->name;
@@ -734,7 +734,7 @@ static int mp_property_disc_title(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct demuxer *d = mpctx->master_demuxer;
+    struct demuxer *d = mpctx->demuxer;
     if (!d)
         return M_PROPERTY_UNAVAILABLE;
     unsigned int title = -1;
@@ -887,7 +887,7 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct MPOpts *opts = mpctx->opts;
-    struct demuxer *demuxer = mpctx->master_demuxer;
+    struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
     if (demuxer->num_editions <= 0)
@@ -926,7 +926,7 @@ static int get_edition_entry(int item, int action, void *arg, void *ctx)
 {
     struct MPContext *mpctx = ctx;
 
-    struct demuxer *demuxer = mpctx->master_demuxer;
+    struct demuxer *demuxer = mpctx->demuxer;
     struct demux_edition *ed = &demuxer->editions[item];
 
     char *title = mp_tags_get_str(ed->metadata, "title");
@@ -946,7 +946,7 @@ static int property_list_editions(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->master_demuxer;
+    struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -987,7 +987,7 @@ static int mp_property_disc_titles(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->master_demuxer;
+    struct demuxer *demuxer = mpctx->demuxer;
     unsigned int num_titles;
     if (!demuxer || demux_stream_control(demuxer, STREAM_CTRL_GET_NUM_TITLES,
                                          &num_titles) < 1)
@@ -998,7 +998,7 @@ static int mp_property_disc_titles(void *ctx, struct m_property *prop,
 static int get_disc_title_entry(int item, int action, void *arg, void *ctx)
 {
     struct MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->master_demuxer;
+    struct demuxer *demuxer = mpctx->demuxer;
 
     double len = item;
     if (demux_stream_control(demuxer, STREAM_CTRL_GET_TITLE_LENGTH, &len) < 1)
@@ -1018,7 +1018,7 @@ static int mp_property_list_disc_titles(void *ctx, struct m_property *prop,
                                         int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->master_demuxer;
+    struct demuxer *demuxer = mpctx->demuxer;
     unsigned int num_titles;
     if (!demuxer || demux_stream_control(demuxer, STREAM_CTRL_GET_NUM_TITLES,
                                          &num_titles) < 1)
@@ -1042,7 +1042,7 @@ static int mp_property_editions(void *ctx, struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->master_demuxer;
+    struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
     if (demuxer->num_editions <= 0)
@@ -1055,7 +1055,7 @@ static int mp_property_angle(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->master_demuxer;
+    struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -1196,7 +1196,7 @@ static int mp_property_metadata(void *ctx, struct m_property *prop,
                                 int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct demuxer *demuxer = mpctx->master_demuxer;
+    struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
@@ -2016,7 +2016,7 @@ static int property_list_tracks(void *ctx, struct m_property *prop,
             res = talloc_asprintf_append(res, "\n");
         }
 
-        struct demuxer *demuxer = mpctx->master_demuxer;
+        struct demuxer *demuxer = mpctx->demuxer;
         if (demuxer && demuxer->num_editions > 1)
             res = talloc_asprintf_append(res, "\nEdition: %d of %d\n",
                                         demuxer->edition + 1,
@@ -2061,7 +2061,7 @@ static int mp_property_program(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     demux_program_t prog;
 
-    struct demuxer *demuxer = mpctx->master_demuxer;
+    struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
 

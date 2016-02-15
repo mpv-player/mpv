@@ -181,11 +181,9 @@ void reset_playback_state(struct MPContext *mpctx)
 }
 
 // return -1 if seek failed (non-seekable stream?), 0 otherwise
-static int mp_seek(MPContext *mpctx, struct seek_params seek,
-                   bool timeline_fallthrough)
+static int mp_seek(MPContext *mpctx, struct seek_params seek)
 {
     struct MPOpts *opts = mpctx->opts;
-    int prev_step = mpctx->step_frames;
 
     if (!mpctx->demuxer)
         return -1;
@@ -254,11 +252,6 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     hr_seek &= seek.type == MPSEEK_ABSOLUTE; // otherwise, no target PTS known
 
     double demuxer_amount = seek.amount;
-    if (timeline_switch_to_time(mpctx, seek.amount)) {
-        reinit_video_chain(mpctx);
-        reinit_audio_chain(mpctx);
-        reinit_sub_all(mpctx);
-    }
 
     int demuxer_style = 0;
     switch (seek.type) {
@@ -292,30 +285,24 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         }
     }
 
-    if (!timeline_fallthrough)
-        clear_audio_output_buffers(mpctx);
+    clear_audio_output_buffers(mpctx);
 
     reset_playback_state(mpctx);
-
-    if (timeline_fallthrough)
-        mpctx->step_frames = prev_step;
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */
     mpctx->last_seek_pts = target_time;
 
-    // The hr_seek==false case is for skipping frames with PTS before the
-    // current timeline chapter start. It's not really known where the demuxer
+    // It's not really known where the demuxer
     // level seek will end up, so the hrseek mechanism is abused to skip all
     // frames before chapter start by setting hrseek_pts to the chapter start.
     // It does nothing when the seek is inside of the current chapter, and
     // seeking past the chapter is handled elsewhere.
-    if (hr_seek || mpctx->timeline) {
+    if (hr_seek) {
         mpctx->hrseek_active = true;
         mpctx->hrseek_framedrop = !hr_seek_very_exact && opts->hr_seek_framedrop;
         mpctx->hrseek_backstep = backstep;
-        mpctx->hrseek_pts = hr_seek ? seek.amount
-                                 : mpctx->timeline[mpctx->timeline_part].start;
+        mpctx->hrseek_pts = seek.amount;
 
         MP_VERBOSE(mpctx, "hr-seek, skipping to %f%s%s\n", mpctx->hrseek_pts,
                    mpctx->hrseek_framedrop ? "" : " (no framedrop)",
@@ -382,7 +369,7 @@ void execute_queued_seek(struct MPContext *mpctx)
         if (!mpctx->seek.immediate && mpctx->video_status < STATUS_READY &&
             mp_time_sec() - mpctx->start_timestamp < 0.3)
             return;
-        mp_seek(mpctx, mpctx->seek, false);
+        mp_seek(mpctx, mpctx->seek);
         mpctx->seek = (struct seek_params){0};
     }
 }
@@ -393,9 +380,6 @@ double get_time_length(struct MPContext *mpctx)
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return -1;
-
-    if (mpctx->timeline)
-        return mpctx->timeline[mpctx->num_timeline_parts].start;
 
     double len = demuxer_get_time_length(demuxer);
     if (len >= 0)
@@ -739,7 +723,7 @@ void seek_to_last_frame(struct MPContext *mpctx)
                    .type = MPSEEK_ABSOLUTE,
                    .amount = end,
                    .exact = MPSEEK_VERY_EXACT,
-                   }, false);
+                   });
     // Make it exact: stop seek only if last frame was reached.
     if (mpctx->hrseek_active) {
         mpctx->hrseek_pts = 1e99; // "infinite"
@@ -902,9 +886,7 @@ static void handle_playback_restart(struct MPContext *mpctx, double endpts)
     }
 }
 
-// Determines whether the end of the current segment is reached, and switch to
-// the next one if required. Also handles regular playback end.
-static void handle_segment_switch(struct MPContext *mpctx, bool end_is_new_segment)
+static void handle_eof(struct MPContext *mpctx)
 {
     /* Don't quit while paused and we're displaying the last video frame. On the
      * other hand, if we don't have a video frame, then the user probably seeked
@@ -917,18 +899,10 @@ static void handle_segment_switch(struct MPContext *mpctx, bool end_is_new_segme
      */
     if ((mpctx->ao_chain || mpctx->vo_chain) && !prevent_eof &&
         mpctx->audio_status == STATUS_EOF &&
-        mpctx->video_status == STATUS_EOF)
+        mpctx->video_status == STATUS_EOF &&
+        !mpctx->stop_play)
     {
-        int new_part = mpctx->timeline_part + 1;
-        if (end_is_new_segment && new_part < mpctx->num_timeline_parts) {
-            mp_seek(mpctx, (struct seek_params){
-                           .type = MPSEEK_ABSOLUTE,
-                           .amount = mpctx->timeline[new_part].start
-                           }, true);
-        } else {
-            if (!mpctx->stop_play)
-                mpctx->stop_play = AT_END_OF_FILE;
-        }
+        mpctx->stop_play = AT_END_OF_FILE;
     }
 }
 
@@ -969,7 +943,6 @@ static void handle_complex_filter_decoders(struct MPContext *mpctx)
 void run_playloop(struct MPContext *mpctx)
 {
     double endpts = get_play_end_pts(mpctx);
-    bool end_is_new_segment = false;
 
 #if HAVE_ENCODING
     if (encode_lavc_didfail(mpctx->encode_lavc_ctx)) {
@@ -979,14 +952,6 @@ void run_playloop(struct MPContext *mpctx)
 #endif
 
     update_demuxer_properties(mpctx);
-
-    if (mpctx->timeline) {
-        double end = mpctx->timeline[mpctx->timeline_part + 1].start;
-        if (endpts == MP_NOPTS_VALUE || end < endpts) {
-            end_is_new_segment = true;
-            endpts = end;
-        }
-    }
 
     handle_complex_filter_decoders(mpctx);
 
@@ -1021,7 +986,7 @@ void run_playloop(struct MPContext *mpctx)
     if (!mpctx->video_out)
         update_subtitles(mpctx, mpctx->playback_pts);
 
-    handle_segment_switch(mpctx, end_is_new_segment);
+    handle_eof(mpctx);
 
     handle_loop_file(mpctx);
 

@@ -26,7 +26,6 @@
 #include "common/common.h"
 #include "options/options.h"
 #include "sub/osd.h"
-#include "demux/timeline.h"
 #include "audio/audio.h"
 #include "video/mp_image.h"
 #include "video/out/vo.h"
@@ -133,13 +132,6 @@ struct track {
     char *external_filename;
     bool auto_loaded;
 
-    // If the track's stream changes with the timeline (ordered chapters).
-    bool under_timeline;
-
-    // Does not change with under_timeline, but is useless for most purposes.
-    struct sh_stream *original_stream;
-
-    // Value can change if under_timeline==true.
     struct demuxer *demuxer;
     // Invariant: !stream || stream->demuxer == demuxer
     struct sh_stream *stream;
@@ -285,14 +277,10 @@ typedef struct MPContext {
     struct demuxer **sources; // all open demuxers
     int num_sources;
 
-    struct timeline *tl;
-    struct timeline_part *timeline;
-    int num_timeline_parts;
-    int timeline_part;
     struct demux_chapter *chapters;
     int num_chapters;
 
-    struct demuxer *demuxer; // can change with timeline
+    struct demuxer *demuxer;
     struct mp_tags *filtered_tags;
 
     struct track **tracks;
@@ -306,11 +294,6 @@ typedef struct MPContext {
     struct track *current_track[NUM_PTRACKS][STREAM_TYPE_COUNT];
 
     struct lavfi *lavfi;
-
-    // Uses: accessing metadata (consider ordered chapters case, where the main
-    // demuxer defines metadata), or special purpose demuxers like TV.
-    struct demuxer *master_demuxer;
-    struct demuxer *track_layout;   // complication for ordered chapters
 
     struct mixer *mixer;
     struct ao *ao;
@@ -475,8 +458,6 @@ void mp_switch_track_n(struct MPContext *mpctx, int order,
 void mp_deselect_track(struct MPContext *mpctx, struct track *track);
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid);
-bool timeline_switch_to_time(struct MPContext *mpctx, double pts);
-int timeline_get_for_time(struct MPContext *mpctx, double pts);
 void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer);
 bool mp_remove_track(struct MPContext *mpctx, struct track *track);
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
