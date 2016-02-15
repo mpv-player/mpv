@@ -77,8 +77,7 @@ static int init(struct dec_audio *da, const char *decoder)
     struct ad_lavc_params *opts = mpopts->ad_lavc_params;
     AVCodecContext *lavc_context;
     AVCodec *lavc_codec;
-    struct sh_stream *sh = da->header;
-    struct mp_codec_params *c = sh->codec;
+    struct mp_codec_params *c = da->codec;
 
     struct priv *ctx = talloc_zero(NULL, struct priv);
     da->priv = ctx;
@@ -216,8 +215,8 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     if (lavc_chmap.num != avctx->channels)
         mp_chmap_from_channels(&lavc_chmap, avctx->channels);
     if (priv->force_channel_map) {
-        if (lavc_chmap.num == da->header->codec->channels.num)
-            lavc_chmap = da->header->codec->channels;
+        if (lavc_chmap.num == da->codec->channels.num)
+            lavc_chmap = da->codec->channels;
     }
     mp_audio_set_channels(mpframe, &lavc_chmap);
 

@@ -359,8 +359,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     vd_ffmpeg_ctx *ctx = vd->priv;
     struct vd_lavc_params *lavc_param = vd->opts->vd_lavc_params;
     bool mp_rawvideo = false;
-    struct sh_stream *sh = vd->header;
-    struct mp_codec_params *c = sh->codec;
+    struct mp_codec_params *c = vd->codec;
 
     assert(!ctx->avctx);
 
@@ -522,8 +521,8 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
         .gamma = avcol_trc_to_mp_csp_trc(ctx->avctx->color_trc),
         .chroma_location =
             avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
-        .rotate = vd->header->codec->rotate,
-        .stereo_in = vd->header->codec->stereo_mode,
+        .rotate = vd->codec->rotate,
+        .stereo_in = vd->codec->stereo_mode,
     };
 
     if (opts->video_rotate < 0) {

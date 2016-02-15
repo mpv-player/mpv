@@ -389,6 +389,7 @@ int init_audio_decoder(struct MPContext *mpctx, struct track *track)
     d_audio->global = mpctx->global;
     d_audio->opts = mpctx->opts;
     d_audio->header = track->stream;
+    d_audio->codec = track->stream->codec;
 
     d_audio->try_spdif = true;
 

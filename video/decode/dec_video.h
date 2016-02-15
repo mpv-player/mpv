@@ -34,6 +34,7 @@ struct dec_video {
     const struct vd_functions *vd_driver;
     struct mp_hwdec_info *hwdec_info; // video output hwdec handles
     struct sh_stream *header;
+    struct mp_codec_params *codec;
 
     char *decoder_desc;
 

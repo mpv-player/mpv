@@ -136,7 +136,7 @@ bool video_init_best_codec(struct dec_video *d_video)
 
     struct mp_decoder_entry *decoder = NULL;
     struct mp_decoder_list *list =
-        mp_select_video_decoders(d_video->header->codec->codec, opts->video_decoders);
+        mp_select_video_decoders(d_video->codec->codec, opts->video_decoders);
 
     mp_print_decoders(d_video->log, MSGL_V, "Codec list:", list);
 
@@ -164,7 +164,7 @@ bool video_init_best_codec(struct dec_video *d_video)
         MP_VERBOSE(d_video, "Selected video codec: %s\n", d_video->decoder_desc);
     } else {
         MP_ERR(d_video, "Failed to initialize a video decoder for codec '%s'.\n",
-               d_video->header->codec->codec);
+               d_video->codec->codec);
     }
 
     if (d_video->header->missing_timestamps) {
@@ -182,7 +182,7 @@ static void fix_image_params(struct dec_video *d_video,
 {
     struct MPOpts *opts = d_video->opts;
     struct mp_image_params p = *params;
-    struct mp_codec_params *c = d_video->header->codec;
+    struct mp_codec_params *c = d_video->codec;
 
     MP_VERBOSE(d_video, "Decoder format: %s\n", mp_image_params_to_str(params));
 
@@ -241,7 +241,7 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
                                       int drop_frame)
 {
     struct MPOpts *opts = d_video->opts;
-    bool avi_pts = d_video->header->codec->avi_dts && opts->correct_pts;
+    bool avi_pts = d_video->codec->avi_dts && opts->correct_pts;
 
     struct demux_packet packet_copy;
     if (packet && packet->dts == MP_NOPTS_VALUE && !avi_pts) {

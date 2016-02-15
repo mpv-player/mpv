@@ -32,6 +32,7 @@ struct dec_audio {
     struct mpv_global *global;
     const struct ad_functions *ad_driver;
     struct sh_stream *header;
+    struct mp_codec_params *codec;
     char *decoder_desc;
 
     bool try_spdif;

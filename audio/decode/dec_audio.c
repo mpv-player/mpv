@@ -86,7 +86,7 @@ struct mp_decoder_list *audio_decoder_list(void)
 static struct mp_decoder_list *audio_select_decoders(struct dec_audio *d_audio)
 {
     struct MPOpts *opts = d_audio->opts;
-    const char *codec = d_audio->header->codec->codec;
+    const char *codec = d_audio->codec->codec;
 
     struct mp_decoder_list *list = audio_decoder_list();
     struct mp_decoder_list *new =
@@ -144,7 +144,7 @@ int audio_init_best_codec(struct dec_audio *d_audio)
         MP_VERBOSE(d_audio, "Selected audio codec: %s\n", d_audio->decoder_desc);
     } else {
         MP_ERR(d_audio, "Failed to initialize an audio decoder for codec '%s'.\n",
-               d_audio->header->codec->codec);
+               d_audio->codec->codec);
     }
 
     talloc_free(list);
