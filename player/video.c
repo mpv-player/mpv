@@ -337,7 +337,7 @@ int init_video_decoder(struct MPContext *mpctx, struct track *track)
         MP_INFO(mpctx, "Use --no-correct-pts to force FPS based timing.\n");
     }
 
-    if (!video_init_best_codec(d_video, d_video->opts->video_decoders))
+    if (!video_init_best_codec(d_video))
         goto err_out;
 
     return 1;

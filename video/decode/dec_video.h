@@ -76,7 +76,7 @@ struct dec_video {
 
 struct mp_decoder_list *video_decoder_list(void);
 
-bool video_init_best_codec(struct dec_video *d_video, char* video_decoders);
+bool video_init_best_codec(struct dec_video *d_video);
 void video_uninit(struct dec_video *d_video);
 
 void video_work(struct dec_video *d_video);

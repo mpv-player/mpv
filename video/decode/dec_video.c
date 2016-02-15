@@ -126,15 +126,17 @@ static const struct vd_functions *find_driver(const char *name)
     return NULL;
 }
 
-bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
+bool video_init_best_codec(struct dec_video *d_video)
 {
+    struct MPOpts *opts = d_video->opts;
+
     assert(!d_video->vd_driver);
     video_reset(d_video);
     d_video->has_broken_packet_pts = -10; // needs 10 packets to reach decision
 
     struct mp_decoder_entry *decoder = NULL;
     struct mp_decoder_list *list =
-        mp_select_video_decoders(d_video->header->codec->codec, video_decoders);
+        mp_select_video_decoders(d_video->header->codec->codec, opts->video_decoders);
 
     mp_print_decoders(d_video->log, MSGL_V, "Codec list:", list);
 
