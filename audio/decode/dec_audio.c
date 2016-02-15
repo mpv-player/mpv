@@ -168,6 +168,9 @@ void audio_reset_decoding(struct dec_audio *d_audio)
     d_audio->current_frame = NULL;
     talloc_free(d_audio->packet);
     d_audio->packet = NULL;
+    talloc_free(d_audio->new_segment);
+    d_audio->new_segment = NULL;
+    d_audio->start = d_audio->end = MP_NOPTS_VALUE;
 }
 
 static void fix_audio_pts(struct dec_audio *da)
@@ -192,6 +195,38 @@ static void fix_audio_pts(struct dec_audio *da)
         da->pts += da->current_frame->samples / (double)da->current_frame->rate;
 }
 
+static bool clip_frame(struct mp_audio *f, double start, double end)
+{
+    if (f->pts == MP_NOPTS_VALUE)
+        return false;
+    double f_end = f->pts + f->samples / (double)f->rate;
+    bool ended = false;
+    if (end != MP_NOPTS_VALUE) {
+        if (f_end >= end) {
+            if (f->pts >= end) {
+                f->samples = 0;
+                ended = true;
+            } else {
+                int new = (end - f->pts) * f->rate;
+                f->samples = MPCLAMP(new, 0, f->samples);
+            }
+        }
+    }
+    if (start != MP_NOPTS_VALUE) {
+        if (f->pts < start) {
+            if (f_end <= start) {
+                f->samples = 0;
+            } else {
+                int skip = (start - f->pts) * f->rate;
+                skip = MPCLAMP(skip, 0, f->samples);
+                mp_audio_skip_samples(f, skip);
+                f->pts += skip / (double)f->rate;
+            }
+        }
+    }
+    return ended;
+}
+
 void audio_work(struct dec_audio *da)
 {
     if (da->current_frame)
@@ -202,7 +237,13 @@ void audio_work(struct dec_audio *da)
         return;
     }
 
-    bool had_packet = !!da->packet;
+    if (da->packet && da->packet->new_segment) {
+        assert(!da->new_segment);
+        da->new_segment = da->packet;
+        da->packet = NULL;
+    }
+
+    bool had_packet = da->packet || da->new_segment;
 
     int ret = da->ad_driver->decode_packet(da, da->packet, &da->current_frame);
     if (ret < 0 || (da->packet && da->packet->len == 0)) {
@@ -223,6 +264,37 @@ void audio_work(struct dec_audio *da)
     }
 
     fix_audio_pts(da);
+
+    bool segment_end = true;
+
+    if (da->current_frame) {
+        segment_end = clip_frame(da->current_frame, da->start, da->end);
+        if (da->current_frame->samples == 0) {
+            talloc_free(da->current_frame);
+            da->current_frame = NULL;
+        }
+    }
+
+    // If there's a new segment, start it as soon as we're drained/finished.
+    if (segment_end && da->new_segment) {
+        struct demux_packet *new_segment = da->new_segment;
+        da->new_segment = NULL;
+
+        // Could avoid decoder reinit; would still need flush.
+        da->codec = new_segment->codec;
+        if (da->ad_driver)
+            da->ad_driver->uninit(da);
+        da->ad_driver = NULL;
+        audio_init_best_codec(da);
+
+        da->start = new_segment->start;
+        da->end = new_segment->end;
+
+        new_segment->new_segment = false;
+
+        da->packet = new_segment;
+        da->current_state = DATA_AGAIN;
+    }
 }
 
 // Fetch an audio frame decoded with audio_work(). Returns one of:

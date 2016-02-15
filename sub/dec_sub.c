@@ -50,12 +50,17 @@ struct dec_sub {
     struct MPOpts *opts;
 
     struct demuxer *demuxer;
-    struct mp_codec_params *codec;
 
     struct sh_stream *sh;
     double last_pkt_pts;
 
+    struct mp_codec_params *codec;
+    double start, end;
+
+    double last_vo_pts;
     struct sd *sd;
+
+    struct demux_packet *new_segment;
 };
 
 void sub_lock(struct dec_sub *sub)
@@ -121,6 +126,9 @@ struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
         .codec = sh->codec,
         .demuxer = demuxer,
         .last_pkt_pts = MP_NOPTS_VALUE,
+        .last_vo_pts = MP_NOPTS_VALUE,
+        .start = MP_NOPTS_VALUE,
+        .end = MP_NOPTS_VALUE,
     };
     mpthread_mutex_init_recursive(&sub->lock);
 
@@ -130,6 +138,31 @@ struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
 
     talloc_free(sub);
     return NULL;
+}
+
+// Called locked.
+static void update_segment(struct dec_sub *sub)
+{
+    if (sub->new_segment && sub->last_vo_pts != MP_NOPTS_VALUE &&
+        sub->last_vo_pts >= sub->new_segment->start)
+    {
+        sub->codec = sub->new_segment->codec;
+        sub->start = sub->new_segment->start;
+        sub->end = sub->new_segment->end;
+        struct sd *new = init_decoder(sub);
+        if (new) {
+            sub->sd->driver->uninit(sub->sd);
+            talloc_free(sub->sd);
+            sub->sd = new;
+        } else {
+            // We'll just keep the current decoder, and feed it possibly
+            // invalid data (not our fault if it crashes or something).
+            MP_ERR(sub, "Can't change to new codec.\n");
+        }
+        sub->sd->driver->decode(sub->sd, sub->new_segment);
+        talloc_free(sub->new_segment);
+        sub->new_segment = NULL;
+    }
 }
 
 // Read all packets from the demuxer and decode/add them. Returns false if
@@ -170,6 +203,9 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
         if (!read_more)
             break;
 
+        if (sub->new_segment)
+            break;
+
         struct demux_packet *pkt;
         int st = demux_read_packet_async(sub->sh, &pkt);
         // Note: "wait" (st==0) happens with non-interleaved streams only, and
@@ -183,8 +219,16 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
             break;
         }
 
-        sub->sd->driver->decode(sub->sd, pkt);
         sub->last_pkt_pts = pkt->pts;
+
+        if (pkt->new_segment) {
+            sub->new_segment = pkt;
+            // Note that this can be delayed to a much later point in time.
+            update_segment(sub);
+            break;
+        }
+
+        sub->sd->driver->decode(sub->sd, pkt);
         talloc_free(pkt);
     }
     pthread_mutex_unlock(&sub->lock);
@@ -199,6 +243,9 @@ void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
 {
     struct MPOpts *opts = sub->opts;
 
+    sub->last_vo_pts = pts;
+    update_segment(sub);
+
     *res = (struct sub_bitmaps) {0};
     if (opts->sub_visibility && sub->sd->driver->get_bitmaps)
         sub->sd->driver->get_bitmaps(sub->sd, dim, pts, res);
@@ -212,6 +259,10 @@ char *sub_get_text(struct dec_sub *sub, double pts)
     pthread_mutex_lock(&sub->lock);
     struct MPOpts *opts = sub->opts;
     char *text = NULL;
+
+    sub->last_vo_pts = pts;
+    update_segment(sub);
+
     if (opts->sub_visibility && sub->sd->driver->get_text)
         text = sub->sd->driver->get_text(sub->sd, pts);
     pthread_mutex_unlock(&sub->lock);
@@ -224,6 +275,10 @@ void sub_reset(struct dec_sub *sub)
     if (sub->sd->driver->reset)
         sub->sd->driver->reset(sub->sd);
     sub->last_pkt_pts = MP_NOPTS_VALUE;
+    sub->start = sub->end = MP_NOPTS_VALUE;
+    sub->last_vo_pts = MP_NOPTS_VALUE;
+    talloc_free(sub->new_segment);
+    sub->new_segment = NULL;
     pthread_mutex_unlock(&sub->lock);
 }
 

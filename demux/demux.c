@@ -36,6 +36,7 @@
 
 #include "stream/stream.h"
 #include "demux.h"
+#include "timeline.h"
 #include "stheader.h"
 #include "cue.h"
 
@@ -52,6 +53,7 @@ extern const demuxer_desc_t demuxer_desc_playlist;
 extern const demuxer_desc_t demuxer_desc_disc;
 extern const demuxer_desc_t demuxer_desc_rar;
 extern const demuxer_desc_t demuxer_desc_libarchive;
+extern const demuxer_desc_t demuxer_desc_timeline;
 
 /* Please do not add any new demuxers here. If you want to implement a new
  * demuxer, add it to libavformat, except for wrappers around external
@@ -782,7 +784,7 @@ bool demux_has_packet(struct sh_stream *sh)
     return has_packet;
 }
 
-// Read and return any packet we find.
+// Read and return any packet we find. NULL means EOF.
 struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
 {
     struct demux_internal *in = demuxer->in;
@@ -1082,7 +1084,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     mp_dbg(log, "Trying demuxer: %s (force-level: %s)\n",
            desc->name, d_level(check));
 
-    if (stream->seekable) // not for DVD/BD/DVB in particular
+    // not for DVD/BD/DVB in particular
+    if (stream->seekable && (!params || !params->timeline))
         stream_seek(stream, 0);
 
     // Peek this much data to avoid that stream_read() run by some demuxers
@@ -1110,6 +1113,16 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         demux_changed(in->d_thread, DEMUX_EVENT_ALL);
         demux_update(demuxer);
         stream_control(demuxer->stream, STREAM_CTRL_SET_READAHEAD, &(int){false});
+        struct timeline *tl = timeline_load(global, log, demuxer);
+        if (tl) {
+            struct demuxer_params params2 = {0};
+            params2.timeline = tl;
+            struct demuxer *sub = open_given_type(global, log,
+                                                  &demuxer_desc_timeline, stream,
+                                                  &params2, DEMUX_CHECK_FORCE);
+            if (sub)
+                return sub;
+        }
         return demuxer;
     }
 

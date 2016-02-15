@@ -35,6 +35,11 @@ typedef struct demux_packet {
     int64_t pos;        // position in source file byte stream
     int stream;         // source stream index
 
+    // segmentation (ordered chapters, EDL)
+    struct mp_codec_params *codec;
+    double start, end;
+    bool new_segment;
+
     // private
     struct demux_packet *next;
     struct AVPacket *avpacket;   // keep the buffer allocation and sidedata

@@ -43,7 +43,9 @@ struct dec_audio {
     // Strictly internal (dec_audio.c).
 
     double pts; // endpts of previous frame
+    double start, end;
     struct demux_packet *packet;
+    struct demux_packet *new_segment;
     struct mp_audio *current_frame;
     int current_state;
 };

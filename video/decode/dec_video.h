@@ -69,6 +69,9 @@ struct dec_video {
     float initial_decoder_aspect;
 
     double start_pts;
+    double start, end;
+    struct demux_packet *new_segment;
+    struct demux_packet *packet;
     bool framedrop_enabled;
     struct mp_image *cover_art_mpi;
     struct mp_image *current_mpi;
