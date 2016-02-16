@@ -74,12 +74,15 @@ struct mp_image *dxva2_new_ref(IDirectXVideoDecoder *decoder,
     surface->decoder = decoder;
     IDirectXVideoDecoder_AddRef(surface->decoder);
 
-    struct mp_image mpi = {0};
-    mp_image_setfmt(&mpi, IMGFMT_DXVA2);
-    mp_image_set_size(&mpi, w, h);
-    mpi.planes[3] = (void *)surface->surface;
+    struct mp_image *mpi = mp_image_new_custom_ref(&(struct mp_image){0},
+                                                   surface, dxva2_release_img);
+    if (!mpi)
+        goto fail;
 
-    return mp_image_new_custom_ref(&mpi, surface, dxva2_release_img);
+    mp_image_setfmt(mpi, IMGFMT_DXVA2);
+    mp_image_set_size(mpi, w, h);
+    mpi->planes[3] = (void *)surface->surface;
+    return mpi;
 fail:
     dxva2_release_img(surface);
     return NULL;
