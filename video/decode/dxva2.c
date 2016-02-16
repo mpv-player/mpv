@@ -207,7 +207,8 @@ static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
 
     hr = IDirect3DSurface9_LockRect(surface, &LockedRect, NULL, D3DLOCK_READONLY);
     if (FAILED(hr)) {
-        MP_ERR(ctx, "Unable to lock DXVA2 surface\n");
+        MP_ERR(ctx, "Unable to lock DXVA2 surface: %s\n",
+               mp_HRESULT_to_str(hr));
         talloc_free(sw_img);
         return img;
     }
@@ -271,7 +272,8 @@ static int create_device(struct lavc_ctx *s)
                                  D3DCREATE_SOFTWARE_VERTEXPROCESSING | D3DCREATE_MULTITHREADED | D3DCREATE_FPU_PRESERVE,
                                  &d3dpp, &ctx->d3d9device);
     if (FAILED(hr)) {
-        MP_ERR(ctx, "Failed to create Direct3D device\n");
+        MP_ERR(ctx, "Failed to create Direct3D device: %s\n",
+               mp_HRESULT_to_str(hr));
         goto fail;
     }
 
@@ -317,25 +319,29 @@ static int dxva2_init(struct lavc_ctx *s)
 
     hr = createDeviceManager(&resetToken, &ctx->d3d9devmgr);
     if (FAILED(hr)) {
-        MP_ERR(ctx, "Failed to create Direct3D device manager\n");
+        MP_ERR(ctx, "Failed to create Direct3D device manager: %s\n",
+               mp_HRESULT_to_str(hr));
         goto fail;
     }
 
     hr = IDirect3DDeviceManager9_ResetDevice(ctx->d3d9devmgr, ctx->d3d9device, resetToken);
     if (FAILED(hr)) {
-        MP_ERR(ctx, "Failed to bind Direct3D device to device manager\n");
+        MP_ERR(ctx, "Failed to bind Direct3D device to device manager: %s\n",
+               mp_HRESULT_to_str(hr));
         goto fail;
     }
 
     hr = IDirect3DDeviceManager9_OpenDeviceHandle(ctx->d3d9devmgr, &ctx->deviceHandle);
     if (FAILED(hr)) {
-        MP_ERR(ctx, "Failed to open device handle\n");
+        MP_ERR(ctx, "Failed to open device handle: %s\n",
+               mp_HRESULT_to_str(hr));
         goto fail;
     }
 
     hr = IDirect3DDeviceManager9_GetVideoService(ctx->d3d9devmgr, ctx->deviceHandle, &IID_IDirectXVideoDecoderService, (void **)&ctx->decoder_service);
     if (FAILED(hr)) {
-        MP_ERR(ctx, "Failed to create IDirectXVideoDecoderService\n");
+        MP_ERR(ctx, "Failed to create IDirectXVideoDecoderService: %s\n",
+               mp_HRESULT_to_str(hr));
         goto fail;
     }
 
@@ -364,7 +370,8 @@ static int dxva2_get_decoder_configuration(struct lavc_ctx *s,
 
     hr = IDirectXVideoDecoderService_GetDecoderConfigurations(ctx->decoder_service, device_guid, desc, NULL, &cfg_count, &cfg_list);
     if (FAILED(hr)) {
-        MP_ERR(ctx, "Unable to retrieve decoder configurations\n");
+        MP_ERR(ctx, "Unable to retrieve decoder configurations: %s\n",
+               mp_HRESULT_to_str(hr));
         return -1;
     }
 
@@ -426,7 +433,8 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
 
     hr = IDirectXVideoDecoderService_GetDecoderDeviceGuids(ctx->decoder_service, &guid_count, &guid_list);
     if (FAILED(hr)) {
-        MP_ERR(ctx, "Failed to retrieve decoder device GUIDs\n");
+        MP_ERR(ctx, "Failed to retrieve decoder device GUIDs: %s\n",
+               mp_HRESULT_to_str(hr));
         goto fail;
     }
 
@@ -543,8 +551,8 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
         decoder->num_surfaces - 1, target_format, D3DPOOL_DEFAULT, 0,
         DXVA2_VideoDecoderRenderTarget, decoder->surfaces, NULL);
     if (FAILED(hr)) {
-        MP_ERR(ctx, "Failed to create %d video surfaces\n",
-               decoder->num_surfaces);
+        MP_ERR(ctx, "Failed to create %d video surfaces: %s\n",
+               decoder->num_surfaces, mp_HRESULT_to_str(hr));
         goto fail;
     }
 
@@ -552,7 +560,8 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
         ctx->decoder_service, &device_guid, &desc, &decoder->config,
         decoder->surfaces, decoder->num_surfaces, &decoder->decoder);
     if (FAILED(hr)) {
-        MP_ERR(ctx, "Failed to create DXVA2 video decoder\n");
+        MP_ERR(ctx, "Failed to create DXVA2 video decoder: %s\n",
+               mp_HRESULT_to_str(hr));
         goto fail;
     }
     decoder->pool = talloc_steal(decoder, mp_image_pool_new(decoder->num_surfaces));
