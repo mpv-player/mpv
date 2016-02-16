@@ -163,7 +163,8 @@ static struct mp_image *dxva2_allocate_image(struct lavc_ctx *s, int w, int h)
 {
     DXVA2Context *ctx = s->hwdec_priv;
 
-    struct mp_image *img = mp_image_pool_get(ctx->decoder->pool, IMGFMT_DXVA2, w, h);
+    struct mp_image *img = mp_image_pool_get_no_alloc(ctx->decoder->pool,
+                                                      IMGFMT_DXVA2, w, h);
     if (!img)
         MP_ERR(ctx, "Failed to allocate additional DXVA2 surface.\n");
     return img;
