@@ -25,8 +25,6 @@
 #include "timeline.h"
 #include "stheader.h"
 
-static void reselect_streams(struct demuxer *demuxer);
-
 struct segment {
     int index;
     double start, end;
@@ -68,6 +66,30 @@ struct priv {
 
     double seek_pts;
 };
+
+static void reselect_streams(struct demuxer *demuxer)
+{
+    struct priv *p = demuxer->priv;
+
+    for (int n = 0; n < p->num_streams; n++) {
+        struct virtual_stream *vs = &p->streams[n];
+        vs->selected = demux_stream_is_selected(vs->sh);
+    }
+
+    for (int n = 0; n < p->num_segments; n++) {
+        struct segment *seg = p->segments[n];
+        for (int i = 0; i < seg->num_stream_map; i++) {
+            struct sh_stream *sh = demux_get_stream(seg->d, i);
+            bool selected = false;
+            if (seg->stream_map[i] >= 0)
+                selected = p->streams[seg->stream_map[i]].selected;
+            // This stops demuxer readahead for inactive segments.
+            if (!p->current || seg->d != p->current->d)
+                selected = false;
+            demuxer_select_track(seg->d, sh, selected);
+        }
+    }
+}
 
 static void switch_segment(struct demuxer *demuxer, struct segment *new,
                            double start_pts, int flags)
@@ -347,30 +369,6 @@ static void d_close(struct demuxer *demuxer)
     struct demuxer *master = p->tl->demuxer;
     timeline_destroy(p->tl);
     free_demuxer(master);
-}
-
-static void reselect_streams(struct demuxer *demuxer)
-{
-    struct priv *p = demuxer->priv;
-
-    for (int n = 0; n < p->num_streams; n++) {
-        struct virtual_stream *vs = &p->streams[n];
-        vs->selected = demux_stream_is_selected(vs->sh);
-    }
-
-    for (int n = 0; n < p->num_segments; n++) {
-        struct segment *seg = p->segments[n];
-        for (int i = 0; i < seg->num_stream_map; i++) {
-            struct sh_stream *sh = demux_get_stream(seg->d, i);
-            bool selected = false;
-            if (seg->stream_map[i] >= 0)
-                selected = p->streams[seg->stream_map[i]].selected;
-            // This stops demuxer readahead for inactive segments.
-            if (!p->current || seg->d != p->current->d)
-                selected = false;
-            demuxer_select_track(seg->d, sh, selected);
-        }
-    }
 }
 
 static int d_control(struct demuxer *demuxer, int cmd, void *arg)
