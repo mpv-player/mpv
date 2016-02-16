@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <assert.h>
@@ -37,17 +37,7 @@ LPDIRECT3DSURFACE9 d3d9_surface_in_mp_image(struct mp_image *mpi)
         (LPDIRECT3DSURFACE9)mpi->planes[3] : NULL;
 }
 
-void dxva2_img_ref_decoder(struct mp_image *mpi, IDirectXVideoDecoder *decoder)
-{
-    assert(mpi->imgfmt == IMGFMT_DXVA2);
-    struct dxva2_surface *surface = (struct dxva2_surface *)mpi->planes[0];
-    if (surface->decoder)
-        IDirectXVideoDecoder_Release(surface->decoder);
-    surface->decoder = decoder;
-    IDirectXVideoDecoder_AddRef(surface->decoder);
-}
-
-static void dxva2_pool_release_img(void *arg)
+static void dxva2_release_img(void *arg)
 {
     struct dxva2_surface *surface = arg;
     if (surface->surface)
@@ -65,15 +55,10 @@ static void dxva2_pool_release_img(void *arg)
     talloc_free(surface);
 }
 
-struct pool_alloc_ctx {
-    IDirectXVideoDecoderService *decoder_service;
-    D3DFORMAT target_format;
-    int surface_alignment;
-};
-
-static struct mp_image *dxva2_pool_alloc_img(void *arg, int fmt, int w, int h)
+struct mp_image *dxva2_new_ref(IDirectXVideoDecoder *decoder,
+                               LPDIRECT3DSURFACE9 d3d9_surface, int w, int h)
 {
-    if (fmt != IMGFMT_DXVA2)
+    if (!decoder || !d3d9_surface)
         return NULL;
     struct dxva2_surface *surface = talloc_zero(NULL, struct dxva2_surface);
 
@@ -84,39 +69,21 @@ static struct mp_image *dxva2_pool_alloc_img(void *arg, int fmt, int w, int h)
     if (!surface->d3dlib || !surface->dxva2lib)
         goto fail;
 
-    struct pool_alloc_ctx *alloc_ctx = arg;
-    HRESULT hr = IDirectXVideoDecoderService_CreateSurface(
-        alloc_ctx->decoder_service,
-        FFALIGN(w, alloc_ctx->surface_alignment),
-        FFALIGN(h, alloc_ctx->surface_alignment),
-        0, alloc_ctx->target_format, D3DPOOL_DEFAULT, 0,
-        DXVA2_VideoDecoderRenderTarget,
-        &surface->surface, NULL);
-    if (FAILED(hr))
+    surface->surface = d3d9_surface;
+    IDirect3DSurface9_AddRef(surface->surface);
+    surface->decoder = decoder;
+    IDirectXVideoDecoder_AddRef(surface->decoder);
+
+    struct mp_image *mpi = mp_image_new_custom_ref(&(struct mp_image){0},
+                                                   surface, dxva2_release_img);
+    if (!mpi)
         goto fail;
 
-    struct mp_image mpi = {0};
-    mp_image_setfmt(&mpi, IMGFMT_DXVA2);
-    mp_image_set_size(&mpi, w, h);
-    mpi.planes[0] = (void *)surface;
-    mpi.planes[3] = (void *)surface->surface;
-
-    return mp_image_new_custom_ref(&mpi, surface, dxva2_pool_release_img);
+    mp_image_setfmt(mpi, IMGFMT_DXVA2);
+    mp_image_set_size(mpi, w, h);
+    mpi->planes[3] = (void *)surface->surface;
+    return mpi;
 fail:
-    dxva2_pool_release_img(surface);
+    dxva2_release_img(surface);
     return NULL;
-}
-
-void dxva2_pool_set_allocator(struct mp_image_pool *pool,
-                              IDirectXVideoDecoderService *decoder_service,
-                              D3DFORMAT target_format, int surface_alignment)
-{
-    struct pool_alloc_ctx *alloc_ctx = talloc_ptrtype(pool, alloc_ctx);
-    *alloc_ctx =  (struct pool_alloc_ctx){
-        decoder_service   = decoder_service,
-        target_format     = target_format,
-        surface_alignment = surface_alignment
-    };
-    mp_image_pool_set_allocator(pool, dxva2_pool_alloc_img, alloc_ctx);
-    mp_image_pool_set_lru(pool);
 }
