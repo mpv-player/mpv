@@ -25,6 +25,8 @@
 #include "timeline.h"
 #include "stheader.h"
 
+static void reselect_streams(struct demuxer *demuxer);
+
 struct segment {
     int index;
     double start, end;
@@ -81,6 +83,7 @@ static void switch_segment(struct demuxer *demuxer, struct segment *new,
     MP_VERBOSE(demuxer, "switch to segment %d\n", new->index);
 
     p->current = new;
+    reselect_streams(demuxer);
     demux_set_ts_offset(new->d, new->start - new->d_start);
     demux_seek(new->d, start_pts, flags | SEEK_ABSOLUTE);
 
@@ -333,6 +336,8 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     demuxer->seekable = true;
     demuxer->partially_seekable = true;
 
+    reselect_streams(demuxer);
+
     return 0;
 }
 
@@ -360,6 +365,9 @@ static void reselect_streams(struct demuxer *demuxer)
             bool selected = false;
             if (seg->stream_map[i] >= 0)
                 selected = p->streams[seg->stream_map[i]].selected;
+            // This stops demuxer readahead for inactive segments.
+            if (!p->current || seg->d != p->current->d)
+                selected = false;
             demuxer_select_track(seg->d, sh, selected);
         }
     }
