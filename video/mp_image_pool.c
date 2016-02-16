@@ -164,6 +164,14 @@ struct mp_image *mp_image_pool_get_no_alloc(struct mp_image_pool *pool, int fmt,
     return ref;
 }
 
+void mp_image_pool_add(struct mp_image_pool *pool, struct mp_image *new)
+{
+    struct image_flags *it = talloc_ptrtype(new, it);
+    *it = (struct image_flags) { .pool_alive = true };
+    new->priv = it;
+    MP_TARRAY_APPEND(pool, pool->images, pool->num_images, new);
+}
+
 // Return a new image of given format/size. The only difference to
 // mp_image_alloc() is that there is a transparent mechanism to recycle image
 // data allocations through this pool.
@@ -186,10 +194,7 @@ struct mp_image *mp_image_pool_get(struct mp_image_pool *pool, int fmt,
         }
         if (!new)
             return NULL;
-        struct image_flags *it = talloc_ptrtype(new, it);
-        *it = (struct image_flags) { .pool_alive = true };
-        new->priv = it;
-        MP_TARRAY_APPEND(pool, pool->images, pool->num_images, new);
+        mp_image_pool_add(pool, new);
         new = mp_image_pool_get_no_alloc(pool, fmt, w, h);
     }
     return new;
