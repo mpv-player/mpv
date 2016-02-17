@@ -36,7 +36,7 @@ static int create(struct gl_hwdec *hw)
     p->ctx.hwctx.type = HWDEC_DXVA2_COPY;
     p->ctx.hwctx.d3d_ctx = &p->ctx;
 
-    MP_VERBOSE(hw, "Using libmpv supplied device %p.\n", p->ctx.d3d9_device);
+    MP_VERBOSE(hw, "Using context supplied device %p.\n", p->ctx.d3d9_device);
 
     hw->hwctx = &p->ctx.hwctx;
     hw->converted_imgfmt = 0;
