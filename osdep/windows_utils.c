@@ -124,9 +124,29 @@ static char *hresult_to_str(const HRESULT hr)
 #undef E
 }
 
+static char *fmtmsg_buf(char *buf, size_t buf_size, DWORD errorID)
+{
+    DWORD n = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM |
+                             FORMAT_MESSAGE_IGNORE_INSERTS,
+                             NULL, errorID, 0, buf, buf_size, NULL);
+    if (!n && GetLastError() == ERROR_MORE_DATA) {
+        snprintf(buf, buf_size,
+                 "<Insufficient buffer size (%zd) for error message>",
+                 buf_size);
+    } else {
+        if (n > 0 && buf[n-1] == '\n')
+            buf[n-1] = '\0';
+        if (n > 1 && buf[n-2] == '\r')
+            buf[n-2] = '\0';
+    }
+    return buf;
+}
+#define fmtmsg(hr) fmtmsg_buf((char[243]){0}, 243, (hr))
+
 char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr)
 {
-    snprintf(buf, buf_size, "%s (0x%"PRIx32")",
-             hresult_to_str(hr), (uint32_t) hr);
+    char* msg = fmtmsg(hr);
+    msg = msg[0] ? msg : hresult_to_str(hr);
+    snprintf(buf, buf_size, "%s (0x%"PRIx32")", msg, (uint32_t)hr);
     return buf;
 }
