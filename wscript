@@ -681,11 +681,6 @@ video_output_features = [
                                 'eglCreateWindowSurface(0, 0, 0, 0)',
                                 lib='EGL')
     } , {
-        'name': '--dxva2-dxinterop',
-        'desc': 'DXVA2/OpenGL/DirectX Interop',
-        'deps': [ 'gl-dxinterop' ],
-        'func': check_true,
-    } , {
         'name': '--vdpau',
         'desc': 'VDPAU acceleration',
         'deps': [ 'x11' ],

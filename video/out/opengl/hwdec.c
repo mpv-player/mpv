@@ -44,10 +44,10 @@ static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
 #if HAVE_VIDEOTOOLBOX_GL
     &gl_hwdec_videotoolbox,
 #endif
-#if HAVE_DXVA2_DXINTEROP
+#if HAVE_DXVA2_HWACCEL
+#if HAVE_GL_DXINTEROP
     &gl_hwdec_dxva2gldx,
 #endif
-#if HAVE_DXVA2_HWACCEL
     &gl_hwdec_dxva2,
 #endif
     NULL
