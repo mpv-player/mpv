@@ -494,13 +494,14 @@ static int dxva2_create_decoder(struct lavc_ctx *s, int w, int h,
                     target_format = format;
                 }
             } else {
-                if (format == MKTAG('P','0','1','0') ||
-                    format == MKTAG('P','0','1','6'))
+                int p010 = mp_imgfmt_find(1, 1, 2, 10, MP_IMGFLAG_YUV_NV);
+                if (p010 && (format == MKTAG('P','0','1','0') ||
+                             format == MKTAG('P','0','1','6')))
                 {
                     // There is no FFmpeg format that is like NV12 and supports
                     // 16 bit per component, but vo_opengl will use the lower
                     // bits in P010 anyway.
-                    ctx->mp_format = pixfmt2imgfmt(AV_PIX_FMT_P010);
+                    ctx->mp_format = p010;
                     target_format = format;
                 }
             }
