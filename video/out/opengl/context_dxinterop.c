@@ -19,6 +19,7 @@
 #include <initguid.h>
 #include <d3d9.h>
 #include <dwmapi.h>
+#include "osdep/windows_utils.h"
 #include "video/out/w32_common.h"
 #include "context.h"
 
@@ -124,14 +125,17 @@ static int os_ctx_create(struct MPGLContext *ctx)
     };
     int pf = ChoosePixelFormat(p->os_dc, &pfd);
     if (!pf) {
-        MP_FATAL(ctx->vo, "Couldn't choose pixelformat for offscreen rendering\n");
+        MP_FATAL(ctx->vo,
+                 "Couldn't choose pixelformat for offscreen rendering: %s\n",
+                 mp_LastError_to_str());
         goto fail;
     }
     SetPixelFormat(p->os_dc, pf, &pfd);
 
     legacy_context = wglCreateContext(p->os_dc);
     if (!legacy_context || !wglMakeCurrent(p->os_dc, legacy_context)) {
-        MP_FATAL(ctx->vo, "Couldn't create GL context for offscreen rendering\n");
+        MP_FATAL(ctx->vo, "Couldn't create OpenGL context for offscreen rendering: %s\n",
+                 mp_LastError_to_str());
         goto fail;
     }
 
@@ -173,7 +177,9 @@ static int os_ctx_create(struct MPGLContext *ctx)
         p->os_ctx = wglCreateContextAttribsARB(p->os_dc, 0, attribs);
     }
     if (!p->os_ctx) {
-        MP_FATAL(ctx->vo, "Couldn't create GL 3.x context for offscreen rendering\n");
+        MP_FATAL(ctx->vo,
+                 "Couldn't create OpenGL 3.x context for offscreen rendering: %s\n",
+                 mp_LastError_to_str());
         goto fail;
     }
 
@@ -182,7 +188,9 @@ static int os_ctx_create(struct MPGLContext *ctx)
     legacy_context = NULL;
 
     if (!wglMakeCurrent(p->os_dc, p->os_ctx)) {
-        MP_FATAL(ctx->vo, "Couldn't create GL 3.x context for offscreen rendering\n");
+        MP_FATAL(ctx->vo,
+                 "Couldn't activate OpenGL 3.x context for offscreen rendering: %s\n",
+                 mp_LastError_to_str());
         goto fail;
     }
 
@@ -236,7 +244,7 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
     IDirect3DSwapChain9 *sw9;
     hr = IDirect3DDevice9Ex_GetSwapChain(p->device, 0, &sw9);
     if (FAILED(hr)) {
-        MP_FATAL(ctx->vo, "Couldn't get swap chain\n");
+        MP_ERR(ctx->vo, "Couldn't get swap chain: %s\n", mp_HRESULT_to_str(hr));
         return -1;
     }
 
@@ -244,7 +252,8 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
         (void**)&p->swapchain);
     if (FAILED(hr)) {
         IDirect3DSwapChain9_Release(sw9);
-        MP_FATAL(ctx->vo, "Couldn't get swap chain\n");
+        MP_ERR(ctx->vo, "Obtained swap chain is not IDirect3DSwapChain9Ex: %s\n",
+               mp_HRESULT_to_str(hr));
         return -1;
     }
     IDirect3DSwapChain9_Release(sw9);
@@ -252,7 +261,7 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
     hr = IDirect3DSwapChain9Ex_GetBackBuffer(p->swapchain, 0,
         D3DBACKBUFFER_TYPE_MONO, &p->backbuffer);
     if (FAILED(hr)) {
-        MP_FATAL(ctx->vo, "Couldn't get backbuffer\n");
+        MP_ERR(ctx->vo, "Couldn't get backbuffer: %s\n", mp_HRESULT_to_str(hr));
         return -1;
     }
 
@@ -291,7 +300,7 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
         bb_desc.Height, bb_desc.Format, D3DMULTISAMPLE_NONE, 0, FALSE,
         &p->rtarget, &share_handle);
     if (FAILED(hr)) {
-        MP_FATAL(ctx->vo, "Couldn't create rendertarget\n");
+        MP_ERR(ctx->vo, "Couldn't create rendertarget: %s\n", mp_HRESULT_to_str(hr));
         return -1;
     }
 
@@ -308,15 +317,16 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
     p->rtarget_h = gl->DXRegisterObjectNV(p->device_h, p->rtarget, p->texture,
         GL_TEXTURE_2D, WGL_ACCESS_WRITE_DISCARD_NV);
     if (!p->rtarget_h) {
-        MP_FATAL(ctx->vo, "Couldn't share rendertarget with GL: 0x%08x\n",
-            (unsigned)GetLastError());
+        MP_ERR(ctx->vo, "Couldn't share rendertarget with OpenGL: %s\n",
+               mp_LastError_to_str());
         return -1;
     }
 
     // Lock the rendertarget for use from OpenGL. This will only be unlocked in
     // swap_buffers() when it is blitted to the real Direct3D backbuffer.
     if (!gl->DXLockObjectsNV(p->device_h, 1, &p->rtarget_h)) {
-        MP_FATAL(ctx->vo, "Couldn't lock rendertarget\n");
+        MP_ERR(ctx->vo, "Couldn't lock rendertarget: %s\n",
+               mp_LastError_to_str());
         return -1;
     }
 
@@ -391,7 +401,8 @@ static int d3d_create(MPGLContext *ctx)
 
     p->d3d9_dll = LoadLibraryW(L"d3d9.dll");
     if (!p->d3d9_dll) {
-        MP_FATAL(ctx->vo, "\"d3d9.dll\" not found\n");
+        MP_FATAL(ctx->vo, "Failed to load \"d3d9.dll\": %s\n",
+                 mp_LastError_to_str());
         return -1;
     }
 
@@ -406,7 +417,8 @@ static int d3d_create(MPGLContext *ctx)
 
     hr = p->Direct3DCreate9Ex(D3D_SDK_VERSION, &p->d3d9ex);
     if (FAILED(hr)) {
-        MP_FATAL(ctx->vo, "Couldn't create Direct3D9Ex\n");
+        MP_FATAL(ctx->vo, "Couldn't create Direct3D9Ex: %s\n",
+                 mp_HRESULT_to_str(hr));
         return -1;
     }
 
@@ -420,7 +432,7 @@ static int d3d_create(MPGLContext *ctx)
         D3DCREATE_NOWINDOWCHANGES,
         &pparams, NULL, &p->device);
     if (FAILED(hr)) {
-        MP_FATAL(ctx->vo, "Couldn't create device\n");
+        MP_FATAL(ctx->vo, "Couldn't create device: %s\n", mp_HRESULT_to_str(hr));
         return -1;
     }
 
@@ -430,7 +442,8 @@ static int d3d_create(MPGLContext *ctx)
     // Register the Direct3D device with WGL_NV_dx_interop
     p->device_h = gl->DXOpenDeviceNV(p->device);
     if (!p->device_h) {
-        MP_FATAL(ctx->vo, "Couldn't open Direct3D from GL\n");
+        MP_FATAL(ctx->vo, "Couldn't open Direct3D device from OpenGL: %s\n",
+                 mp_LastError_to_str());
         return -1;
     }
 
@@ -501,13 +514,13 @@ static void dxinterop_reset(struct MPGLContext *ctx)
     hr = IDirect3DDevice9Ex_ResetEx(p->device, &pparams, NULL);
     if (FAILED(hr)) {
         p->lost_device = true;
-        MP_FATAL(ctx->vo, "Couldn't reset device\n");
+        MP_ERR(ctx->vo, "Couldn't reset device: %s\n", mp_HRESULT_to_str(hr));
         return;
     }
 
     if (d3d_size_dependent_create(ctx) < 0) {
         p->lost_device = true;
-        MP_FATAL(ctx->vo, "Couldn't recreate Direct3D objects after reset\n");
+        MP_ERR(ctx->vo, "Couldn't recreate Direct3D objects after reset\n");
         return;
     }
 
@@ -594,7 +607,8 @@ static void dxinterop_swap_buffers(MPGLContext *ctx)
         return;
 
     if (!gl->DXUnlockObjectsNV(p->device_h, 1, &p->rtarget_h)) {
-        MP_FATAL(ctx->vo, "Couldn't unlock rendertarget for present\n");
+        MP_ERR(ctx->vo, "Couldn't unlock rendertarget for present: %s\n",
+               mp_LastError_to_str());
         return;
     }
 
@@ -602,12 +616,14 @@ static void dxinterop_swap_buffers(MPGLContext *ctx)
     hr = IDirect3DDevice9Ex_StretchRect(p->device, p->rtarget, NULL,
                                         p->backbuffer, NULL, D3DTEXF_NONE);
     if (FAILED(hr)) {
-        MP_FATAL(ctx->vo, "Couldn't stretchrect for present\n");
+        MP_ERR(ctx->vo, "Couldn't stretchrect for present: %s\n",
+               mp_HRESULT_to_str(hr));
         return;
     }
 
     if (!gl->DXLockObjectsNV(p->device_h, 1, &p->rtarget_h)) {
-        MP_FATAL(ctx->vo, "Couldn't lock rendertarget after stretchrect\n");
+        MP_ERR(ctx->vo, "Couldn't lock rendertarget after stretchrect: %s\n",
+               mp_LastError_to_str());
         return;
     }
 
@@ -621,7 +637,7 @@ static void dxinterop_swap_buffers(MPGLContext *ctx)
         break;
     default:
         if (FAILED(hr))
-            MP_FATAL(ctx->vo, "Couldn't present! 0x%08x\n", (unsigned)hr);
+            MP_ERR(ctx->vo, "Failed to present: %s\n", mp_HRESULT_to_str(hr));
     }
 }
 
