@@ -1189,8 +1189,6 @@ reopen_file:
         if (start != MP_NOPTS_VALUE)
             startpos = start;
     }
-    if (startpos == MP_NOPTS_VALUE)
-        startpos = 0;
     if (startpos != MP_NOPTS_VALUE) {
         queue_seek(mpctx, MPSEEK_ABSOLUTE, startpos, 0, true);
         execute_queued_seek(mpctx);
