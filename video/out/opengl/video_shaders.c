@@ -366,7 +366,8 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
         GLSLH(float dist = rand(h) * range;     h = permute(h);)
         GLSLH(float dir  = rand(h) * 6.2831853; h = permute(h);)
 
-        GLSLHF("vec2 pt = dist / vec2(%f, %f);\n", img_w, img_h);
+        bool r = tex_target == GL_TEXTURE_RECTANGLE;
+        GLSLHF("vec2 pt = dist / vec2(%f, %f);\n", r ? 1 : img_w, r ? 1 : img_h);
         GLSLH(vec2 o = vec2(cos(dir), sin(dir));)
 
         // Sample at quarter-turn intervals around the source pixel
