@@ -34,10 +34,9 @@ struct priv {
     IDirect3DDevice9Ex *device;
     HANDLE device_h;
 
-    IDirect3DSurface9 *surface;
-    HANDLE surface_h;
+    IDirect3DSurface9 *rtarget;
+    HANDLE rtarget_h;
     GLuint texture;
-    HANDLE texture_h;
 };
 
 static void destroy_objects(struct gl_hwdec *hw)
@@ -45,28 +44,28 @@ static void destroy_objects(struct gl_hwdec *hw)
     struct priv *p = hw->priv;
     GL *gl = hw->gl;
 
-    if (p->texture_h && p->device_h) {
-        if (!gl->DXUnlockObjectsNV(p->device_h, 1, &p->texture_h)) {
+    if (p->rtarget_h && p->device_h) {
+        if (!gl->DXUnlockObjectsNV(p->device_h, 1, &p->rtarget_h)) {
             MP_ERR(hw, "Failed unlocking texture for access by OpenGL: %s\n",
                    mp_LastError_to_str());
         }
     }
 
-    if (p->texture_h) {
-        if (!gl->DXUnregisterObjectNV(p->device_h, p->texture_h)) {
+    if (p->rtarget_h) {
+        if (!gl->DXUnregisterObjectNV(p->device_h, p->rtarget_h)) {
             MP_ERR(hw, "Failed to unregister Direct3D surface with OpenGL: %s\n",
                    mp_LastError_to_str());
         } else {
-            p->texture_h = 0;
+            p->rtarget_h = 0;
         }
     }
 
     gl->DeleteTextures(1, &p->texture);
     p->texture = 0;
 
-    if (p->surface) {
-        IDirect3DSurface9_Release(p->surface);
-        p->surface = NULL;
+    if (p->rtarget) {
+        IDirect3DSurface9_Release(p->rtarget);
+        p->rtarget = NULL;
     }
 }
 
@@ -129,19 +128,20 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 
     assert(params->imgfmt == hw->driver->imgfmt);
 
-    hr = IDirect3DDevice9Ex_CreateOffscreenPlainSurface(
+    HANDLE share_handle = NULL;
+    hr = IDirect3DDevice9Ex_CreateRenderTarget(
         p->device,
         params->w, params->h,
-        SHARED_SURFACE_D3DFMT, D3DPOOL_DEFAULT,
-        &p->surface, &p->surface_h);
+        SHARED_SURFACE_D3DFMT, D3DMULTISAMPLE_NONE, 0, FALSE,
+        &p->rtarget, &share_handle);
     if (FAILED(hr)) {
         MP_ERR(hw, "Failed creating offscreen Direct3D surface: %s\n",
                mp_HRESULT_to_str(hr));
         goto fail;
     }
 
-    if (p->surface_h &&
-        !gl->DXSetResourceShareHandleNV(p->surface, p->surface_h)) {
+    if (share_handle &&
+        !gl->DXSetResourceShareHandleNV(p->rtarget, share_handle)) {
         MP_ERR(hw, "Failed setting Direct3D/OpenGL share handle for surface: %s\n",
                mp_LastError_to_str());
         goto fail;
@@ -155,16 +155,16 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    p->texture_h = gl->DXRegisterObjectNV(p->device_h, p->surface, p->texture,
+    p->rtarget_h = gl->DXRegisterObjectNV(p->device_h, p->rtarget, p->texture,
                                           GL_TEXTURE_2D,
                                           WGL_ACCESS_READ_ONLY_NV);
-    if (!p->texture_h) {
+    if (!p->rtarget_h) {
         MP_ERR(hw, "Failed to register Direct3D surface with OpenGL: %s\n",
                mp_LastError_to_str());
         goto fail;
     }
 
-    if (!gl->DXLockObjectsNV(p->device_h, 1, &p->texture_h)) {
+    if (!gl->DXLockObjectsNV(p->device_h, 1, &p->rtarget_h)) {
         MP_ERR(hw, "Failed locking texture for access by OpenGL %s\n",
                mp_LastError_to_str());
         goto fail;
@@ -184,7 +184,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     struct priv *p = hw->priv;
     HRESULT hr;
 
-    if (!gl->DXUnlockObjectsNV(p->device_h, 1, &p->texture_h)) {
+    if (!gl->DXUnlockObjectsNV(p->device_h, 1, &p->rtarget_h)) {
         MP_ERR(hw, "Failed unlocking texture for access by OpenGL: %s\n",
                mp_LastError_to_str());
         return -1;
@@ -194,14 +194,14 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     RECT rc = {0, 0, hw_image->w, hw_image->h};
     hr = IDirect3DDevice9Ex_StretchRect(p->device,
                                         hw_surface, &rc,
-                                        p->surface, &rc,
+                                        p->rtarget, &rc,
                                         D3DTEXF_NONE);
     if (FAILED(hr)) {
         MP_ERR(hw, "Direct3D RGB conversion failed: %s", mp_HRESULT_to_str(hr));
         return -1;
     }
 
-    if (!gl->DXLockObjectsNV(p->device_h, 1, &p->texture_h)) {
+    if (!gl->DXLockObjectsNV(p->device_h, 1, &p->rtarget_h)) {
         MP_ERR(hw, "Failed locking texture for access by OpenGL: %s\n",
                mp_LastError_to_str());
         return -1;
