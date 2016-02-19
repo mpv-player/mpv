@@ -626,7 +626,12 @@ static int dxva2_init_decoder(struct lavc_ctx *s, int w, int h)
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
                  const char *decoder)
 {
-    hwdec_request_api(info, "dxva2"); // we can do without too
+    hwdec_request_api(info, "dxva2");
+    // dxva2-copy can do without external context; dxva2 requires it.
+    if (hwdec->type != HWDEC_DXVA2_COPY) {
+        if (!info || !info->hwctx || !info->hwctx->d3d_ctx)
+            return HWDEC_ERR_NO_CTX;
+    }
     for (int i = 0; dxva2_modes[i].guid; i++) {
         const dxva2_mode *mode = &dxva2_modes[i];
         if (mp_codec_to_av_codec_id(decoder) == mode->codec)
