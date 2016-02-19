@@ -248,17 +248,9 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
                                       int drop_frame)
 {
     struct MPOpts *opts = d_video->opts;
-    bool avi_pts = d_video->codec->avi_dts && opts->correct_pts;
 
     if (!d_video->vd_driver)
         return NULL;
-
-    struct demux_packet packet_copy;
-    if (packet && packet->dts == MP_NOPTS_VALUE && !avi_pts) {
-        packet_copy = *packet;
-        packet = &packet_copy;
-        packet->dts = packet->pts;
-    }
 
     double pkt_pts = packet ? packet->pts : MP_NOPTS_VALUE;
     double pkt_dts = packet ? packet->dts : MP_NOPTS_VALUE;
@@ -338,7 +330,9 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
     d_video->decoded_pts = pts;
 
     // Compensate for incorrectly using mpeg-style DTS for avi timestamps.
-    if (avi_pts && mpi->pts != MP_NOPTS_VALUE && d_video->fps > 0) {
+    if (d_video->codec->avi_dts && opts->correct_pts &&
+        mpi->pts != MP_NOPTS_VALUE && d_video->fps > 0)
+    {
         int delay = -1;
         video_vd_control(d_video, VDCTRL_GET_BFRAMES, &delay);
         mpi->pts -= MPMAX(delay, 0) / d_video->fps;
@@ -389,6 +383,11 @@ void video_work(struct dec_video *d_video)
     {
         d_video->current_state = DATA_WAIT;
         return;
+    }
+
+    if (d_video->packet) {
+        if (d_video->packet->dts == MP_NOPTS_VALUE && !d_video->codec->avi_dts)
+            d_video->packet->dts = d_video->packet->pts;
     }
 
     if (d_video->packet && d_video->packet->new_segment) {
