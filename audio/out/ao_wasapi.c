@@ -69,7 +69,11 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay_us) {
                    "Ignoring it.\n", qpc_diff / 10000000.0);
     }
 
-    MP_TRACE(state, "Device delay: %g us\n", *delay_us);
+    if (sample_count > 0 && *delay_us <= 0) {
+        MP_WARN(state, "Under-run: Device delay: %g us\n", *delay_us);
+    } else {
+        MP_TRACE(state, "Device delay: %g us\n", *delay_us);
+    }
 
     return S_OK;
 exit_label:
@@ -77,22 +81,39 @@ exit_label:
     return hr;
 }
 
-static void thread_feed(struct ao *ao)
+static bool thread_feed(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
     HRESULT hr;
 
     UINT32 frame_count = state->bufferFrameCount;
-
+    UINT32 padding;
+    hr = IAudioClient_GetCurrentPadding(state->pAudioClient, &padding);
+    EXIT_ON_ERROR(hr);
+    bool refill = false;
     if (state->share_mode == AUDCLNT_SHAREMODE_SHARED) {
-        UINT32 padding = 0;
-        hr = IAudioClient_GetCurrentPadding(state->pAudioClient, &padding);
-        EXIT_ON_ERROR(hr);
-
+        // Return if there's nothing to do.
+        if (frame_count <= padding)
+            return false;
+        // In shared mode, there is only one buffer of size bufferFrameCount.
+        // We must therefore take care not to overwrite the samples that have
+        // yet to play.
         frame_count -= padding;
-        MP_TRACE(ao, "Frame to fill: %"PRIu32". Padding: %"PRIu32"\n",
-                 frame_count, padding);
+    } else if (padding >= 2 * frame_count) {
+        // In exclusive mode, we exchange entire buffers of size
+        // bufferFrameCount with the device. If there are already two such
+        // full buffers waiting to play, there is no work to do.
+        return false;
+    } else if (padding < frame_count) {
+        // If there is not at least one full buffer of audio queued to play in
+        // exclusive mode, call this function again immediately to try and catch
+        // up and avoid a cascade of under-runs. WASAPI doesn't seem to be smart
+        // enough to send more feed events when it gets behind.
+        refill = true;
     }
+    MP_TRACE(ao, "Frame to fill: %"PRIu32". Padding: %"PRIu32"\n",
+             frame_count, padding);
+
     double delay_us;
     hr = get_device_delay(state, &delay_us);
     EXIT_ON_ERROR(hr);
@@ -117,12 +138,12 @@ static void thread_feed(struct ao *ao)
 
     atomic_fetch_add(&state->sample_count, frame_count);
 
-    return;
+    return refill;
 exit_label:
     MP_ERR(state, "Error feeding audio: %s\n", mp_HRESULT_to_str(hr));
     MP_VERBOSE(ao, "Requesting ao reload\n");
     ao_request_reload(ao);
-    return;
+    return false;
 }
 
 static void thread_resume(struct ao *ao)
@@ -131,18 +152,7 @@ static void thread_resume(struct ao *ao)
     HRESULT hr;
 
     MP_DBG(state, "Thread Resume\n");
-    UINT32 padding = 0;
-    hr = IAudioClient_GetCurrentPadding(state->pAudioClient, &padding);
-    if (FAILED(hr)) {
-        MP_ERR(state, "IAudioClient_GetCurrentPadding returned %s\n",
-               mp_HRESULT_to_str(hr));
-    }
-
-    // Fill the buffer before starting, but only if there is no audio queued to
-    // play.  This prevents overfilling the buffer, which leads to problems in
-    // exclusive mode
-    if (padding < (UINT32) state->bufferFrameCount)
-        thread_feed(ao);
+    thread_feed(ao);
 
     // start feeding next wakeup if something else hasn't been requested
     int expected = WASAPI_THREAD_RESUME;
@@ -199,7 +209,9 @@ static DWORD __stdcall AudioThread(void *lpParameter)
         case WAIT_OBJECT_0:
             switch (atomic_load(&state->thread_state)) {
             case WASAPI_THREAD_FEED:
-                thread_feed(ao);
+                // fill twice on under-full buffer (see comment in thread_feed)
+                if (thread_feed(ao) && thread_feed(ao))
+                    MP_ERR(ao, "Unable to fill buffer fast enough\n");
                 break;
             case WASAPI_THREAD_RESET:
                 thread_reset(ao);
