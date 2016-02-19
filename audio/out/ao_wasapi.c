@@ -40,14 +40,12 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay_us) {
     HRESULT hr;
 
     hr = IAudioClock_GetPosition(state->pAudioClock, &position, &qpc_position);
+    EXIT_ON_ERROR(hr);
     // GetPosition succeeded, but the result may be
     // inaccurate due to the length of the call
     // http://msdn.microsoft.com/en-us/library/windows/desktop/dd370889%28v=vs.85%29.aspx
-    if (hr == S_FALSE) {
+    if (hr == S_FALSE)
         MP_VERBOSE(state, "Possibly inaccurate device position.\n");
-        hr = S_OK;
-    }
-    EXIT_ON_ERROR(hr);
 
     // convert position to number of samples careful to avoid overflow
     UINT64 sample_position = uint64_scale(position,
@@ -135,7 +133,7 @@ static void thread_resume(struct ao *ao)
     MP_DBG(state, "Thread Resume\n");
     UINT32 padding = 0;
     hr = IAudioClient_GetCurrentPadding(state->pAudioClient, &padding);
-    if (hr != S_OK) {
+    if (FAILED(hr)) {
         MP_ERR(state, "IAudioClient_GetCurrentPadding returned %s\n",
                mp_HRESULT_to_str(hr));
     }
@@ -151,7 +149,7 @@ static void thread_resume(struct ao *ao)
     atomic_compare_exchange_strong(&state->thread_state, &expected,
                                    WASAPI_THREAD_FEED);
     hr = IAudioClient_Start(state->pAudioClient);
-    if (hr != S_OK) {
+    if (FAILED(hr)) {
         MP_ERR(state, "IAudioClient_Start returned %s\n",
                mp_HRESULT_to_str(hr));
     }
@@ -165,13 +163,11 @@ static void thread_reset(struct ao *ao)
     HRESULT hr;
     MP_DBG(state, "Thread Reset\n");
     hr = IAudioClient_Stop(state->pAudioClient);
-    // we may get S_FALSE if the stream is already stopped
-    if (hr != S_OK && hr != S_FALSE)
+    if (FAILED(hr))
         MP_ERR(state, "IAudioClient_Stop returned: %s\n", mp_HRESULT_to_str(hr));
 
-    // we may get S_FALSE if the stream is already reset
     hr = IAudioClient_Reset(state->pAudioClient);
-    if (hr != S_OK && hr != S_FALSE)
+    if (FAILED(hr))
         MP_ERR(state, "IAudioClient_Reset returned: %s\n", mp_HRESULT_to_str(hr));
 
     atomic_store(&state->sample_count, 0);
@@ -190,7 +186,7 @@ static DWORD __stdcall AudioThread(void *lpParameter)
 
     state->init_ret = wasapi_thread_init(ao);
     SetEvent(state->hInitDone);
-    if (state->init_ret != S_OK)
+    if (FAILED(state->init_ret))
         goto exit_label;
 
     MP_DBG(ao, "Entering dispatch loop\n");
@@ -307,7 +303,7 @@ static int init(struct ao *ao)
 
     WaitForSingleObject(state->hInitDone, INFINITE); // wait on init complete
     SAFE_RELEASE(state->hInitDone,CloseHandle(state->hInitDone));
-    if (state->init_ret != S_OK) {
+    if (FAILED(state->init_ret)) {
         if (!ao->probing)
             MP_ERR(ao, "Received failure from audio thread\n");
         uninit(ao);

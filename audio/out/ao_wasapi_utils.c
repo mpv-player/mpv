@@ -298,7 +298,7 @@ static bool try_format_exclusive(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
     if (hr != AUDCLNT_E_UNSUPPORTED_FORMAT)
         EXIT_ON_ERROR(hr);
 
-    return hr == S_OK;
+    return SUCCEEDED(hr);
 exit_label:
     MP_ERR(state, "Error testing exclusive format: %s\n", mp_HRESULT_to_str(hr));
     return false;
