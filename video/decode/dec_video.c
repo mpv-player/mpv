@@ -263,6 +263,9 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
     double pkt_pts = packet ? packet->pts : MP_NOPTS_VALUE;
     double pkt_dts = packet ? packet->dts : MP_NOPTS_VALUE;
 
+    if (pkt_pts == MP_NOPTS_VALUE)
+        d_video->has_broken_packet_pts = 1;
+
     double pkt_pdts = pkt_pts == MP_NOPTS_VALUE ? pkt_dts : pkt_pts;
     if (pkt_pdts != MP_NOPTS_VALUE && d_video->first_packet_pdts == MP_NOPTS_VALUE)
         d_video->first_packet_pdts = pkt_pdts;
@@ -302,6 +305,11 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
         d_video->codec_dts = mpi->dts;
     }
 
+    if (d_video->has_broken_packet_pts < 0)
+        d_video->has_broken_packet_pts++;
+    if (d_video->num_codec_pts_problems)
+        d_video->has_broken_packet_pts = 1;
+
     // If PTS is unset, or non-monotonic, fall back to DTS.
     if ((d_video->num_codec_pts_problems > d_video->num_codec_dts_problems ||
          pts == MP_NOPTS_VALUE) && dts != MP_NOPTS_VALUE)
@@ -320,11 +328,6 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
             pts += frame_time;
         }
     }
-
-    if (d_video->has_broken_packet_pts < 0)
-        d_video->has_broken_packet_pts++;
-    if (d_video->num_codec_pts_problems || pkt_pts == MP_NOPTS_VALUE)
-        d_video->has_broken_packet_pts = 1;
 
     if (!mp_image_params_equal(&d_video->last_format, &mpi->params))
         fix_image_params(d_video, &mpi->params);
