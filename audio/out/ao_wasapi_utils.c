@@ -607,18 +607,20 @@ static HRESULT fix_format(struct ao *ao)
     MP_VERBOSE(state, "Device period: %.2g ms\n",
                (double) devicePeriod / 10000.0 );
 
-    // integer multiple of device period close to 50ms
-    bufferPeriod = bufferDuration =
-                   ceil(50.0 * 10000.0 / devicePeriod) * devicePeriod;
+    if (state->share_mode == AUDCLNT_SHAREMODE_SHARED) {
+        // for shared mode, use integer multiple of device period close to 50ms
+        bufferDuration = devicePeriod * ceil(50.0 * 10000.0 / devicePeriod);
+        bufferPeriod   = 0;
+    } else {
+        // in exclusive mode, these should all be the same
+        bufferPeriod = bufferDuration = devicePeriod;
+    }
 
     // handle unsupported buffer size hopefully this shouldn't happen because of
     // the above integer device period
     // http://msdn.microsoft.com/en-us/library/windows/desktop/dd370875%28v=vs.85%29.aspx
     int retries=0;
 reinit:
-    if (state->share_mode == AUDCLNT_SHAREMODE_SHARED)
-        bufferPeriod = 0;
-
     MP_DBG(state, "IAudioClient::Initialize\n");
     hr = IAudioClient_Initialize(state->pAudioClient,
                                  state->share_mode,
@@ -640,9 +642,12 @@ reinit:
 
         IAudioClient_GetBufferSize(state->pAudioClient,
                                    &state->bufferFrameCount);
-        bufferPeriod = bufferDuration = (REFERENCE_TIME) (0.5 +
+        bufferDuration = (REFERENCE_TIME) (0.5 +
             (10000.0 * 1000 / state->format.Format.nSamplesPerSec
              * state->bufferFrameCount));
+        if (state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE)
+            bufferPeriod = bufferDuration;
+
 
         IAudioClient_Release(state->pAudioClient);
         state->pAudioClient = NULL;
