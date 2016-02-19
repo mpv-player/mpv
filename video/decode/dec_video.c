@@ -412,8 +412,10 @@ void video_work(struct dec_video *d_video)
         framedrop_type = 2;
     }
     d_video->current_mpi = decode_packet(d_video, d_video->packet, framedrop_type);
-    talloc_free(d_video->packet); // always fully consumed
-    d_video->packet = NULL;
+    if (d_video->packet && d_video->packet->len == 0) {
+        talloc_free(d_video->packet);
+        d_video->packet = NULL;
+    }
 
     d_video->current_state = DATA_OK;
     if (!d_video->current_mpi) {

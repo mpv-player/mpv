@@ -702,6 +702,11 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         return;
     }
 
+    if (packet) {
+        // always fully consumed
+        packet->len = 0;
+    }
+
     // Skipped frame, or delayed output due to multithreaded decoding.
     if (!got_picture) {
         if (!packet)
