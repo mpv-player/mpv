@@ -243,10 +243,14 @@ void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
 {
     struct MPOpts *opts = sub->opts;
 
+    *res = (struct sub_bitmaps) {0};
+
     sub->last_vo_pts = pts;
     update_segment(sub);
 
-    *res = (struct sub_bitmaps) {0};
+    if (sub->end != MP_NOPTS_VALUE && pts >= sub->end)
+        return;
+
     if (opts->sub_visibility && sub->sd->driver->get_bitmaps)
         sub->sd->driver->get_bitmaps(sub->sd, dim, pts, res);
 }
