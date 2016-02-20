@@ -600,7 +600,7 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
     vd_ffmpeg_ctx *ctx = vd->priv;
 
     int imgfmt = pixfmt2imgfmt(pic->format);
-    if (!IMGFMT_IS_HWACCEL(imgfmt) || !ctx->hwdec)
+    if (!ctx->hwdec || ctx->hwdec_fmt != imgfmt)
         ctx->hwdec_failed = true;
 
     /* Hardware decoding failed, and we will trigger a proper fallback later
