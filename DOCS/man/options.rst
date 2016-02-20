@@ -394,8 +394,7 @@ Program Behavior
 
 ``--merge-files``
     Pretend that all files passed to mpv are concatenated into a single, big
-    file. This uses timeline/EDL support internally. Note that this won't work
-    for ordered chapter files.
+    file. This uses timeline/EDL support internally.
 
 ``--no-resume-playback``
     Do not restore playback position from the ``watch_later`` configuration

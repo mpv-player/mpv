@@ -698,6 +698,9 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     pkt->pts = MP_ADD_PTS(pkt->pts, ds->in->ts_offset);
     pkt->dts = MP_ADD_PTS(pkt->dts, ds->in->ts_offset);
 
+    pkt->start = MP_ADD_PTS(pkt->start, ds->in->ts_offset);
+    pkt->end = MP_ADD_PTS(pkt->end, ds->in->ts_offset);
+
     return pkt;
 }
 

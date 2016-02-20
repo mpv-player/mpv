@@ -225,7 +225,7 @@ static int d_fill_buffer(struct demuxer *demuxer)
         }
     }
 
-    pkt->new_segment = vs->new_segment;
+    pkt->new_segment |= vs->new_segment;
     vs->new_segment = false;
 
     demux_add_packet(vs->sh, pkt);
