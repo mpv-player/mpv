@@ -3601,6 +3601,6 @@ Miscellaneous
         - ``--lavfi-complex='[aid1] asplit [ao] [t] ; [t] aphasemeter [t2] ; [vid1] [t2] overlay [vo]'``
           Play audio track 1, and overlay its visualization over video track 1.
 
-    See the Ffmpeg libavfilter documentation for details on the filter.
+    See the FFmpeg libavfilter documentation for details on the filter.
 
 
