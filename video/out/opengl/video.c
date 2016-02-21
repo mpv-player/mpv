@@ -984,8 +984,8 @@ static void load_shader(struct gl_video *p, const char *body)
     gl_sc_hadd(p->sc, body);
     gl_sc_uniform_f(p->sc, "random", (double)av_lfg_get(&p->lfg) / UINT32_MAX);
     gl_sc_uniform_f(p->sc, "frame", p->frames_uploaded);
-    gl_sc_uniform_vec2(p->sc, "image_size", (GLfloat[]){p->texture_w,
-                                                        p->texture_h});
+    gl_sc_uniform_vec2(p->sc, "image_size", (GLfloat[]){p->image_params.w,
+                                                        p->image_params.h});
 }
 
 static const char *get_custom_shader_fn(struct gl_video *p, const char *body)
