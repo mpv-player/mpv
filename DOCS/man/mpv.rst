@@ -37,6 +37,10 @@ LIRC support - configure remotes as input devices instead).
 
 See the ``--input-`` options for ways to customize it.
 
+The following listings are not necessarily complete. See ``etc/input.conf`` for
+a list of default bindings. User ``input.conf`` files and Lua scripts can
+define additional key bindings.
+
 Keyboard Control
 ----------------
 
