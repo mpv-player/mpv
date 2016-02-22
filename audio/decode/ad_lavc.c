@@ -43,6 +43,7 @@ struct priv {
     struct mp_audio frame;
     bool force_channel_map;
     uint32_t skip_samples;
+    double next_pts;
 };
 
 static void uninit(struct dec_audio *da);
@@ -138,6 +139,8 @@ static int init(struct dec_audio *da, const char *decoder)
         return 0;
     }
 
+    ctx->next_pts = MP_NOPTS_VALUE;
+
     return 1;
 }
 
@@ -164,6 +167,7 @@ static int control(struct dec_audio *da, int cmd, void *arg)
     case ADCTRL_RESET:
         avcodec_flush_buffers(ctx->avctx);
         ctx->skip_samples = 0;
+        ctx->next_pts = MP_NOPTS_VALUE;
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
@@ -221,6 +225,11 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     mp_audio_set_channels(mpframe, &lavc_chmap);
 
     mpframe->pts = out_pts;
+
+    if (mpframe->pts == MP_NOPTS_VALUE)
+        mpframe->pts = priv->next_pts;
+    if (mpframe->pts != MP_NOPTS_VALUE)
+        priv->next_pts = mpframe->pts + mpframe->samples / (double)mpframe->rate;
 
 #if HAVE_AVFRAME_SKIP_SAMPLES
     AVFrameSideData *sd =
