@@ -170,6 +170,7 @@ typedef struct lavf_priv {
     int cur_program;
     char *mime_type;
     bool merge_track_metadata;
+    double seek_delay;
 } lavf_priv_t;
 
 // At least mp4 has name="mov,mp4,m4a,3gp,3g2,mj2", so we split the name
@@ -564,6 +565,11 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->codec->samplerate = codec->sample_rate;
         sh->codec->bitrate = codec->bit_rate;
 
+        double delay = 0;
+        if (codec->sample_rate > 0)
+            delay = codec->delay / (double)codec->sample_rate;
+        priv->seek_delay = MPMAX(priv->seek_delay, delay);
+
         export_replaygain(demuxer, sh->codec, st);
 
         break;
@@ -957,6 +963,8 @@ static void demux_seek_lavf(demuxer_t *demuxer, double rel_seek_secs, int flags)
             priv->last_pts = rel_seek_secs * priv->avfc->duration;
         }
     } else {
+        if (flags & SEEK_BACKWARD)
+            rel_seek_secs -= priv->seek_delay;
         priv->last_pts += rel_seek_secs * AV_TIME_BASE;
     }
 
