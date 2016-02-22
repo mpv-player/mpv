@@ -231,24 +231,27 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     if (mpframe->pts != MP_NOPTS_VALUE)
         priv->next_pts = mpframe->pts + mpframe->samples / (double)mpframe->rate;
 
+    uint32_t pad = 0;
+
 #if HAVE_AVFRAME_SKIP_SAMPLES
     AVFrameSideData *sd =
         av_frame_get_side_data(priv->avframe, AV_FRAME_DATA_SKIP_SAMPLES);
     if (sd && sd->size >= 10) {
         char *d = sd->data;
         priv->skip_samples += AV_RL32(d + 0);
-        uint32_t pad = AV_RL32(d + 4);
-        uint32_t skip = MPMIN(priv->skip_samples, mpframe->samples);
-        if (skip) {
-            mp_audio_skip_samples(mpframe, skip);
-            if (mpframe->pts != MP_NOPTS_VALUE)
-                mpframe->pts += skip / (double)mpframe->rate;
-            priv->skip_samples -= skip;
-        }
-        if (pad <= mpframe->samples)
-            mpframe->samples -= pad;
+        pad = AV_RL32(d + 4);
     }
 #endif
+
+    uint32_t skip = MPMIN(priv->skip_samples, mpframe->samples);
+    if (skip) {
+        mp_audio_skip_samples(mpframe, skip);
+        if (mpframe->pts != MP_NOPTS_VALUE)
+            mpframe->pts += skip / (double)mpframe->rate;
+        priv->skip_samples -= skip;
+    }
+    if (pad <= mpframe->samples)
+        mpframe->samples -= pad;
 
     *out = mpframe;
 
