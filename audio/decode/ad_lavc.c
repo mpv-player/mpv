@@ -42,7 +42,7 @@ struct priv {
     AVFrame *avframe;
     struct mp_audio frame;
     bool force_channel_map;
-    uint32_t skip_samples;
+    uint32_t skip_samples, trim_samples;
     double next_pts;
 };
 
@@ -167,6 +167,7 @@ static int control(struct dec_audio *da, int cmd, void *arg)
     case ADCTRL_RESET:
         avcodec_flush_buffers(ctx->avctx);
         ctx->skip_samples = 0;
+        ctx->trim_samples = 0;
         ctx->next_pts = MP_NOPTS_VALUE;
         return CONTROL_TRUE;
     }
@@ -231,15 +232,13 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     if (mpframe->pts != MP_NOPTS_VALUE)
         priv->next_pts = mpframe->pts + mpframe->samples / (double)mpframe->rate;
 
-    uint32_t pad = 0;
-
 #if HAVE_AVFRAME_SKIP_SAMPLES
     AVFrameSideData *sd =
         av_frame_get_side_data(priv->avframe, AV_FRAME_DATA_SKIP_SAMPLES);
     if (sd && sd->size >= 10) {
         char *d = sd->data;
         priv->skip_samples += AV_RL32(d + 0);
-        pad = AV_RL32(d + 4);
+        priv->trim_samples += AV_RL32(d + 4);
     }
 #endif
 
@@ -250,8 +249,11 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
             mpframe->pts += skip / (double)mpframe->rate;
         priv->skip_samples -= skip;
     }
-    if (pad <= mpframe->samples)
-        mpframe->samples -= pad;
+    uint32_t trim = MPMIN(priv->trim_samples, mpframe->samples);
+    if (trim) {
+        mpframe->samples -= trim;
+        priv->trim_samples -= trim;
+    }
 
     *out = mpframe;
 
