@@ -252,6 +252,9 @@ void mp_audio_skip_samples(struct mp_audio *data, int samples)
         data->planes[n] = (uint8_t *)data->planes[n] + samples * data->sstride;
 
     data->samples -= samples;
+
+    if (data->pts != MP_NOPTS_VALUE)
+        data->pts += samples / (double)data->rate;
 }
 
 // Clip the given frame to the given timestamp range. Adjusts the frame size
@@ -280,7 +283,6 @@ void mp_audio_clip_timestamps(struct mp_audio *f, double start, double end)
                 int skip = (start - f->pts) * f->rate;
                 skip = MPCLAMP(skip, 0, f->samples);
                 mp_audio_skip_samples(f, skip);
-                f->pts += skip / (double)f->rate;
             }
         }
     }

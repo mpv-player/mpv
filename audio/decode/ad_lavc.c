@@ -254,8 +254,6 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     uint32_t skip = MPMIN(priv->skip_samples, mpframe->samples);
     if (skip) {
         mp_audio_skip_samples(mpframe, skip);
-        if (mpframe->pts != MP_NOPTS_VALUE)
-            mpframe->pts += skip / (double)mpframe->rate;
         priv->skip_samples -= skip;
     }
     uint32_t trim = MPMIN(priv->trim_samples, mpframe->samples);
