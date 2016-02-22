@@ -43,6 +43,7 @@ struct priv {
     struct mp_audio frame;
     bool force_channel_map;
     uint32_t skip_samples, trim_samples;
+    bool preroll_done;
     double next_pts;
 };
 
@@ -168,6 +169,7 @@ static int control(struct dec_audio *da, int cmd, void *arg)
         avcodec_flush_buffers(ctx->avctx);
         ctx->skip_samples = 0;
         ctx->trim_samples = 0;
+        ctx->preroll_done = false;
         ctx->next_pts = MP_NOPTS_VALUE;
         return CONTROL_TRUE;
     }
@@ -241,6 +243,13 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
         priv->trim_samples += AV_RL32(d + 4);
     }
 #endif
+
+    if (!priv->preroll_done) {
+        // Skip only if this isn't already handled by AV_FRAME_DATA_SKIP_SAMPLES.
+        if (!priv->skip_samples)
+            priv->skip_samples = avctx->delay;
+        priv->preroll_done = true;
+    }
 
     uint32_t skip = MPMIN(priv->skip_samples, mpframe->samples);
     if (skip) {
