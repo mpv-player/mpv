@@ -1679,7 +1679,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         AV_WL32(data + 10, track->a_osfreq);
         // Bogus: last frame won't be played.
         AV_WL32(data + 14, 0);
-    } else if (strcmp(codec, "opus")) {
+    } else if (!strcmp(codec, "opus")) {
         // Hardcode the rate libavcodec's opus decoder outputs, so that
         // AV_PKT_DATA_SKIP_SAMPLES actually works. The Matroska header only
         // has an arbitrary "input" samplerate, while libavcodec is fixed to
@@ -2467,7 +2467,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
             if (i == 0)
                 dp->duration = block_duration / 1e9;
             if (stream->type == STREAM_AUDIO) {
-                unsigned int srate = track->a_sfreq;
+                unsigned int srate = stream->codec->samplerate;
                 demux_packet_set_padding(dp,
                     mkv_d->a_skip_preroll ? track->codec_delay * srate : 0,
                     block_info->discardpadding / 1e9 * srate);
