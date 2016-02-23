@@ -273,8 +273,6 @@ typedef struct MPContext {
     // Current file statistics
     int64_t shown_vframes, shown_aframes;
 
-    struct stream *stream; // stream that was initially opened
-
     struct demux_chapter *chapters;
     int num_chapters;
 

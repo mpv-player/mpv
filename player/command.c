@@ -350,7 +350,7 @@ static int mp_property_stream_open_filename(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_SET: {
-        if (mpctx->stream)
+        if (mpctx->demuxer)
             return M_PROPERTY_ERROR;
         mpctx->stream_open_filename =
             talloc_strdup(mpctx->stream_open_filename, *(char **)arg);

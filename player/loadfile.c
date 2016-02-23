@@ -83,12 +83,6 @@ static void uninit_demuxer(struct MPContext *mpctx)
     mpctx->demuxer = NULL;
 }
 
-static void uninit_stream(struct MPContext *mpctx)
-{
-    free_stream(mpctx->stream);
-    mpctx->stream = NULL;
-}
-
 #define APPEND(s, ...) mp_snprintf_cat(s, sizeof(s), __VA_ARGS__)
 
 static void print_stream(struct MPContext *mpctx, struct track *t)
@@ -1047,7 +1041,6 @@ static void play_current_file(struct MPContext *mpctx)
 
 reopen_file:
 
-    assert(mpctx->stream == NULL);
     assert(mpctx->demuxer == NULL);
 
     if (process_open_hooks(mpctx) < 0)
@@ -1215,7 +1208,6 @@ terminate_playback:
     uninit_video_chain(mpctx);
     uninit_sub_all(mpctx);
     uninit_demuxer(mpctx);
-    uninit_stream(mpctx);
     if (!opts->gapless_audio && !mpctx->encode_lavc_ctx)
         uninit_audio_out(mpctx);
 
