@@ -1020,7 +1020,7 @@ static bool apply_shaders(struct gl_video *p, char **shaders,
         load_shader(p, body);
         const char *fn_name = get_custom_shader_fn(p, body);
         GLSLF("// custom shader\n");
-        GLSLF("vec4 color = %s(texture%d, texcoord%d, texture_size%d);\n",
+        GLSLF("color = %s(texture%d, texcoord%d, texture_size%d);\n",
               fn_name, tex_num, tex_num, tex_num);
         tex = (tex+1) % 2;
         success = true;
@@ -1188,7 +1188,7 @@ static void pass_sample_separated(struct gl_video *p, int src_tex,
 // The src rectangle is implicit in p->pass_tex + transform.
 // The dst rectangle is implicit by what the caller will do next, but w and h
 // must still be what is going to be used (to dimension FBOs correctly).
-// This will declare "vec4 color;", which contains the scaled contents.
+// This will write the scaled contents to the vec4 "color".
 // The scaler unit is initialized by this function; in order to avoid cache
 // thrashing, the scaler unit should usually use the same parameters.
 static void pass_sample(struct gl_video *p, int src_tex, struct scaler *scaler,
@@ -1205,7 +1205,7 @@ static void pass_sample(struct gl_video *p, int src_tex, struct scaler *scaler,
     // Dispatch the scaler. They're all wildly different.
     const char *name = scaler->conf.kernel.name;
     if (strcmp(name, "bilinear") == 0) {
-        GLSL(vec4 color = texture(tex, pos);)
+        GLSL(color = texture(tex, pos);)
     } else if (strcmp(name, "bicubic_fast") == 0) {
         pass_sample_bicubic_fast(p->sc);
     } else if (strcmp(name, "oversample") == 0) {
@@ -1216,7 +1216,7 @@ static void pass_sample(struct gl_video *p, int src_tex, struct scaler *scaler,
             load_shader(p, body);
             const char *fn_name = get_custom_shader_fn(p, body);
             GLSLF("// custom scale-shader\n");
-            GLSLF("vec4 color = %s(tex, pos, size);\n", fn_name);
+            GLSLF("color = %s(tex, pos, size);\n", fn_name);
         } else {
             p->opts.scale_shader = NULL;
         }
@@ -1398,7 +1398,7 @@ static void pass_integer_conversion(struct gl_video *p, bool *chroma_merging)
             continue;
         GLSLF("// integer conversion plane %d\n", n);
         GLSLF("uvec4 icolor = texture(texture%d, texcoord%d);\n", n, n);
-        GLSLF("vec4 color = vec4(icolor) * tex_mul;\n");
+        GLSLF("color = vec4(icolor) * tex_mul;\n");
         if (*chroma_merging && n == 1) {
             GLSLF("uvec4 icolor2 = texture(texture2, texcoord2);\n");
             GLSLF("color.g = vec4(icolor2).r * tex_mul;\n");
@@ -1443,7 +1443,6 @@ static void pass_read_video(struct gl_video *p)
     const int scale_factor_x = prescaled ? (int)offset.m[0][0] : 1;
     const int scale_factor_y = prescaled ? (int)offset.m[1][1] : 1;
 
-    bool color_defined = false;
     if (p->plane_count > 1) {
         // Chroma processing (merging -> debanding -> scaling)
         struct src_tex luma = p->pass_tex[0];
@@ -1457,9 +1456,9 @@ static void pass_read_video(struct gl_video *p)
             // into a single texture before scaling or debanding, so the shader
             // doesn't need to run multiple times.
             GLSLF("// chroma merging\n");
-            GLSL(vec4 color = vec4(texture(texture1, texcoord1).x,
-                                   texture(texture2, texcoord2).x,
-                                   0.0, 1.0);)
+            GLSL(color = vec4(texture(texture1, texcoord1).x,
+                              texture(texture2, texcoord2).x,
+                              0.0, 1.0);)
             // We also pull up to the full dynamic range of the texture to avoid
             // heavy clipping when using low-bit-depth FBOs
             GLSLF("color.xy *= %f;\n", tex_mul);
@@ -1485,7 +1484,6 @@ static void pass_read_video(struct gl_video *p)
                         p->texture_w * scale_factor_x,
                         p->texture_h * scale_factor_y, chromafix);
             GLSL(vec2 chroma = color.xy;)
-            color_defined = true; // pass_sample defines vec4 color
         } else {
             GLSL(vec2 chroma = texture(texture1, texcoord1).xy;)
         }
@@ -1494,28 +1492,17 @@ static void pass_read_video(struct gl_video *p)
         p->pass_tex[3] = alpha;
     }
 
-    // As an unfortunate side-effect of re-using the vec4 color constant in
-    // both the luma and chroma stages, vec4 color may or may not be defined
-    // at this point. If it's missing, define it since the code from here on
-    // relies on it.
-    if (!color_defined)
-        GLSL(vec4 color;)
-
-    // Sample the main (luma/RGB) plane. This is inside a sub-block to avoid
-    // colliding with the vec4 color that may be left over from the chroma
-    // stuff
-    GLSL(vec4 main;)
-    GLSLF("{\n");
+    // Sample the main (luma/RGB) plane.
     if (!prescaled && p->opts.deband) {
         pass_sample_deband(p->sc, p->opts.deband_opts, 0, p->pass_tex[0].gl_target,
                            tex_mul, p->texture_w, p->texture_h, &p->lfg);
         p->use_normalized_range = true;
     } else {
         if (!prescaled) {
-            GLSL(vec4 color = texture(texture0, texcoord0);)
+            GLSL(color = texture(texture0, texcoord0);)
         } else {
             // just use bilinear for non-essential planes.
-            GLSLF("vec4 color = texture(texture0, "
+            GLSLF("color = texture(texture0, "
                        "texcoord0 + vec2(%f,%f) / texture_size0);\n",
                   -offset.t[0] / scale_factor_x,
                   -offset.t[1] / scale_factor_y);
@@ -1523,11 +1510,8 @@ static void pass_read_video(struct gl_video *p)
         if (p->use_normalized_range)
             GLSLF("color *= %f;\n", tex_mul);
     }
-    GLSL(main = color;)
-    GLSLF("}\n");
 
     // Set up the right combination of planes
-    GLSL(color = main;)
     if (prescaled) {
         // Restore texture4 and merge it into the main texture.
         p->pass_tex[4] = prescaled_tex;
@@ -1934,12 +1918,12 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
         switch (fmt) {
         case SUBBITMAP_RGBA: {
             GLSLF("// OSD (RGBA)\n");
-            GLSL(vec4 color = texture(osdtex, texcoord).bgra;)
+            GLSL(color = texture(osdtex, texcoord).bgra;)
             break;
         }
         case SUBBITMAP_LIBASS: {
             GLSLF("// OSD (libass)\n");
-            GLSL(vec4 color =
+            GLSL(color =
                 vec4(ass_color.rgb, ass_color.a * texture(osdtex, texcoord).r);)
             break;
         }
@@ -1979,7 +1963,7 @@ static void pass_render_frame_dumb(struct gl_video *p, int fbo)
     }
     gl_transform_rect(transform, &p->pass_tex[3].src);
 
-    GLSL(vec4 color = texture(texture0, texcoord0);)
+    GLSL(color = texture(texture0, texcoord0);)
     if (p->image_desc.flags & MP_IMGFLAG_YUV_NV) {
         GLSL(color.gb = texture(texture1, texcoord1).RG;)
     } else if (p->plane_count >= 3) {
@@ -2025,7 +2009,7 @@ static void pass_render_frame(struct gl_video *p)
                         p->texture_w, p->texture_h, 0, 0);
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
                       p->texture_w, p->texture_h, p->blend_subs_fbo.fbo, false);
-        GLSL(vec4 color = texture(texture0, texcoord0);)
+        GLSL(color = texture(texture0, texcoord0);)
     }
 
     apply_shaders(p, p->opts.pre_shaders, &p->pre_fbo[0], 0,
@@ -2060,7 +2044,7 @@ static void pass_render_frame(struct gl_video *p)
                         FBOTEX_FUZZY);
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
                       p->texture_w, p->texture_h, p->blend_subs_fbo.fbo, false);
-        GLSL(vec4 color = texture(texture0, texcoord0);)
+        GLSL(color = texture(texture0, texcoord0);)
         if (p->use_linear)
             pass_linearize(p->sc, p->image_params.gamma);
     }
@@ -2198,7 +2182,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     if (!valid || t->still) {
         // surface_now is guaranteed to be valid, so we can safely use it.
         pass_load_fbotex(p, &p->surfaces[surface_now].fbotex, vp_w, vp_h, 0);
-        GLSL(vec4 color = texture(texture0, texcoord0);)
+        GLSL(color = texture(texture0, texcoord0);)
         p->is_interpolated = false;
     } else {
         double mix = t->vsync_offset / t->ideal_frame_duration;
@@ -2228,9 +2212,9 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             mix = mix >= 1 - threshold ? 1 : mix;
             mix = 1 - mix;
             gl_sc_uniform_f(p->sc, "inter_coeff", mix);
-            GLSL(vec4 color = mix(texture(texture0, texcoord0),
-                                  texture(texture1, texcoord1),
-                                  inter_coeff);)
+            GLSL(color = mix(texture(texture0, texcoord0),
+                             texture(texture1, texcoord1),
+                             inter_coeff);)
         } else {
             gl_sc_uniform_f(p->sc, "fcoord", mix);
             pass_sample_separated_gen(p->sc, tscale, 0, 0);
