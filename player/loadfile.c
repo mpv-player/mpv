@@ -232,20 +232,11 @@ static void wakeup_demux(void *pctx)
     mp_input_wakeup(mpctx->input);
 }
 
-static void enable_demux_thread(struct MPContext *mpctx)
+static void enable_demux_thread(struct MPContext *mpctx, struct demuxer *demux)
 {
-    if (mpctx->demuxer && mpctx->opts->demuxer_thread) {
-        demux_set_wakeup_cb(mpctx->demuxer, wakeup_demux, mpctx);
-        demux_start_thread(mpctx->demuxer);
-        for (int n = 0; n < mpctx->num_tracks; n++) {
-            struct track *track = mpctx->tracks[n];
-            if (track->is_external && track->stream && !track->preloaded &&
-                !track->demuxer->fully_read)
-            {
-                demux_set_wakeup_cb(track->demuxer, wakeup_demux, mpctx);
-                demux_start_thread(track->demuxer);
-            }
-        }
+    if (mpctx->opts->demuxer_thread && !demux->fully_read) {
+        demux_set_wakeup_cb(demux, wakeup_demux, mpctx);
+        demux_start_thread(demux);
     }
 }
 
@@ -602,6 +593,7 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
         demux_open_url(filename, &params, mpctx->playback_abort, mpctx->global);
     if (!demuxer)
         goto err_out;
+    enable_demux_thread(mpctx, demuxer);
 
     if (filter != STREAM_SUB && opts->rebase_start_time)
         demux_set_ts_offset(demuxer, -demuxer->start_time);
@@ -625,8 +617,6 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
         goto err_out;
     }
 
-    if (mpctx->playback_initialized)
-        enable_demux_thread(mpctx);
     return first;
 
 err_out:
@@ -855,6 +845,7 @@ static void open_demux_reentrant(struct MPContext *mpctx)
     if (args.demux) {
         talloc_steal(args.demux, args.global);
         mpctx->demuxer = args.demux;
+        enable_demux_thread(mpctx, mpctx->demuxer);
     } else {
         mpctx->error_playing = args.err;
         talloc_free(args.global);
@@ -1116,8 +1107,6 @@ reopen_file:
     reselect_demux_streams(mpctx);
 
     update_demuxer_properties(mpctx);
-
-    enable_demux_thread(mpctx);
 
 #if HAVE_ENCODING
     if (mpctx->encode_lavc_ctx && mpctx->current_track[0][STREAM_VIDEO])
