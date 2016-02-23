@@ -1164,7 +1164,6 @@ reopen_file:
         queue_seek(mpctx, MPSEEK_ABSOLUTE, startpos, 0, true);
         execute_queued_seek(mpctx);
     }
-    get_relative_time(mpctx); // reset current delta
 
     if (mpctx->opts->pause)
         pause_player(mpctx);
