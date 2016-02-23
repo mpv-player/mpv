@@ -976,8 +976,9 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
         ADD(frag, "// body\n");
     }
     ADD(frag, "void main() {\n");
-    ADD(frag, "%s", sc->text);
     // we require _all_ frag shaders to write to a "vec4 color"
+    ADD(frag, "vec4 color;\n");
+    ADD(frag, "%s", sc->text);
     if (gl->glsl_version >= 130) {
         ADD(frag, "out_color = color;\n");
     } else {
