@@ -81,10 +81,6 @@ static void uninit_demuxer(struct MPContext *mpctx)
 
     free_demuxer_and_stream(mpctx->demuxer);
     mpctx->demuxer = NULL;
-
-    talloc_free(mpctx->sources);
-    mpctx->sources = NULL;
-    mpctx->num_sources = 0;
 }
 
 static void uninit_stream(struct MPContext *mpctx)
@@ -576,15 +572,8 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     for (int n = mpctx->num_tracks - 1; n >= 0 && !in_use; n--)
         in_use |= mpctx->tracks[n]->demuxer == d;
 
-    if (!in_use) {
-        for (int n = 0; n < mpctx->num_sources; n++) {
-            if (mpctx->sources[n] == d) {
-                MP_TARRAY_REMOVE_AT(mpctx->sources, mpctx->num_sources, n);
-                break;
-            }
-        }
+    if (!in_use)
         free_demuxer_and_stream(d);
-    }
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 
@@ -642,7 +631,6 @@ struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
         goto err_out;
     }
 
-    MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, demuxer);
     if (mpctx->playback_initialized)
         enable_demux_thread(mpctx);
     return first;
@@ -684,8 +672,9 @@ void autoload_external_files(struct MPContext *mpctx)
     for (int i = 0; list && list[i].fname; i++) {
         char *filename = list[i].fname;
         char *lang = list[i].lang;
-        for (int n = 0; n < mpctx->num_sources; n++) {
-            if (strcmp(mpctx->sources[n]->stream->url, filename) == 0)
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            struct track *t = mpctx->tracks[n];
+            if (t->demuxer && strcmp(t->demuxer->stream->url, filename) == 0)
                 goto skip;
         }
         if (list[i].type == STREAM_SUB && !sc[STREAM_VIDEO] && !sc[STREAM_AUDIO])

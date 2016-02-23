@@ -274,8 +274,6 @@ typedef struct MPContext {
     int64_t shown_vframes, shown_aframes;
 
     struct stream *stream; // stream that was initially opened
-    struct demuxer **sources; // all open demuxers
-    int num_sources;
 
     struct demux_chapter *chapters;
     int num_chapters;
