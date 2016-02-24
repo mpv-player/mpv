@@ -220,7 +220,7 @@ void pass_superxbr(struct gl_shader_cache *sc, int planes, int tex_num,
 
     GLSLHF("}");  // superxbr()
 
-    GLSL(vec4 color = vec4(1.0);)
+    GLSL(color = vec4(1.0);)
 
     for (int i = 0; i < planes; i++) {
         GLSLF("color[%d] = superxbr(texture%d, texcoord%d, texture_size%d, %d, %f);\n",

@@ -144,12 +144,12 @@ static void update_osd(struct vo *vo)
         switch (fmt) {
         case SUBBITMAP_RGBA: {
             GLSLF("// OSD (RGBA)\n");
-            GLSL(vec4 color = texture(osdtex, texcoord).bgra;)
+            GLSL(color = texture(osdtex, texcoord).bgra;)
             break;
         }
         case SUBBITMAP_LIBASS: {
             GLSLF("// OSD (libass)\n");
-            GLSL(vec4 color =
+            GLSL(color =
                 vec4(ass_color.rgb, ass_color.a * texture(osdtex, texcoord).r);)
             break;
         }
