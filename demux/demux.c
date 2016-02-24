@@ -490,7 +490,12 @@ static bool read_packet(struct demux_internal *in)
         }
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
-            ds->eof |= !ds->head;
+            bool eof = !ds->head;
+            if (eof && !ds->eof) {
+                if (in->wakeup_cb)
+                    in->wakeup_cb(in->wakeup_cb_ctx);
+            }
+            ds->eof |= eof;
         }
         pthread_cond_signal(&in->wakeup);
         return false;
