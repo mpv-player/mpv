@@ -766,13 +766,19 @@ static void handle_chapter_change(struct MPContext *mpctx)
 // no way to know if this has already been done or not).
 int handle_force_window(struct MPContext *mpctx, bool force)
 {
-    // Don't interfere with real video playback
-    if (mpctx->vo_chain)
-        return 0;
-
     // True if we're either in idle mode, or loading of the file has finished.
     // It's also set via force in some stages during file loading.
     bool act = !mpctx->playing || mpctx->playback_initialized || force;
+
+    // On the other hand, if a video track is selected, but no video is ever
+    // decoded on it, then create the window.
+    bool stalled_video = mpctx->playback_initialized && mpctx->restart_complete &&
+                         mpctx->video_status == STATUS_EOF && mpctx->vo_chain &&
+                         !vo_has_frame(mpctx->video_out);
+
+    // Don't interfere with real video playback
+    if (mpctx->vo_chain && !stalled_video)
+        return 0;
 
     if (!mpctx->opts->force_vo) {
         if (act)
