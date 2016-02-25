@@ -16,6 +16,7 @@ enum hwdec_type {
     HWDEC_DXVA2 = 6,
     HWDEC_DXVA2_COPY = 7,
     HWDEC_RPI = 8,
+    HWDEC_MEDIACODEC = 9,
 };
 
 // hwdec_type names (options.c)
