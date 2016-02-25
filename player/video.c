@@ -307,7 +307,7 @@ void uninit_video_chain(struct MPContext *mpctx)
         mpctx->vo_chain = NULL;
 
         mpctx->video_status = STATUS_EOF;
-        reselect_demux_streams(mpctx);
+
         remove_deint_filter(mpctx);
         mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
     }

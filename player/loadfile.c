@@ -189,38 +189,27 @@ void update_demuxer_properties(struct MPContext *mpctx)
     demuxer->events = 0;
 }
 
-static bool need_init_seek(struct demuxer *demux)
+// Enables or disables the stream for the given track, according to
+// track->selected.
+void reselect_demux_stream(struct MPContext *mpctx, struct track *track)
 {
-    for (int n = 0; n < demux_get_num_stream(demux); n++) {
-        struct sh_stream *stream = demux_get_stream(demux, n);
-        // Subtitle streams are not properly interleaved -> force init. seek.
-        if (stream->type != STREAM_SUB && demux_stream_is_selected(stream))
-            return false;
-    }
-    return true;
-}
-
-// Enable needed streams, disable others.
-// Note that switching all tracks at once (instead when initializing something)
-// can be important, because reading from a demuxer stream (e.g. during init)
-// will implicitly discard interleaved packets from unselected streams.
-// Also initializes position for external streams.
-void reselect_demux_streams(struct MPContext *mpctx)
-{
-    // Note: we assume that all demuxer streams are covered by the track list.
-    for (int t = 0; t < mpctx->num_tracks; t++) {
-        struct track *track = mpctx->tracks[t];
-        if (track->demuxer && track->stream) {
-            bool need_init = track->selected &&
-                mpctx->demuxer != track->demuxer &&
-                need_init_seek(track->demuxer);
-            demuxer_select_track(track->demuxer, track->stream, track->selected);
-            if (need_init) {
-                double pts = get_current_time(mpctx);
-                if (pts == MP_NOPTS_VALUE)
-                    pts = 0;
-                demux_seek(track->demuxer, pts, SEEK_ABSOLUTE);
-            }
+    if (!track->stream)
+        return;
+    demuxer_select_track(track->demuxer, track->stream, track->selected);
+    // External files may need an explicit seek to the correct position, if
+    // they were not implicitly advanced during playback.
+    if (track->selected && track->demuxer != mpctx->demuxer) {
+        bool position_ok = false;
+        for (int n = 0; n < demux_get_num_stream(track->demuxer); n++) {
+            struct sh_stream *stream = demux_get_stream(track->demuxer, n);
+            if (stream != track->stream && stream->type != STREAM_SUB)
+                position_ok |= demux_stream_is_selected(stream);
+        }
+        if (!position_ok) {
+            double pts = get_current_time(mpctx);
+            if (pts == MP_NOPTS_VALUE)
+                pts = 0;
+            demux_seek(track->demuxer, pts, SEEK_ABSOLUTE);
         }
     }
 }
@@ -473,20 +462,20 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
     if (type == STREAM_SUB)
         uninit_sub(mpctx, current);
 
-    if (current)
+    if (current) {
         current->selected = false;
+        reselect_demux_stream(mpctx, current);
+    }
 
     if (track && track->demuxer == mpctx->demuxer)
         demux_set_enable_refresh_seeks(mpctx->demuxer, true);
 
-    reselect_demux_streams(mpctx);
-
     mpctx->current_track[order][type] = track;
 
-    if (track)
+    if (track) {
         track->selected = true;
-
-    reselect_demux_streams(mpctx);
+        reselect_demux_stream(mpctx, track);
+    }
 
     demux_set_enable_refresh_seeks(mpctx->demuxer, false);
 
@@ -1104,7 +1093,9 @@ reopen_file:
             }
         }
     }
-    reselect_demux_streams(mpctx);
+
+    for (int n = 0; n < mpctx->num_tracks; n++)
+        reselect_demux_stream(mpctx, mpctx->tracks[n]);
 
     update_demuxer_properties(mpctx);
 

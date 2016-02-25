@@ -73,7 +73,6 @@ void uninit_sub(struct MPContext *mpctx, struct track *track)
         int order = get_order(mpctx, track);
         if (order >= 0 && order <= 1)
             osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, NULL);
-        reselect_demux_streams(mpctx);
     }
 }
 

@@ -246,7 +246,6 @@ void uninit_audio_chain(struct MPContext *mpctx)
         mpctx->ao_chain = NULL;
 
         mpctx->audio_status = STATUS_EOF;
-        reselect_demux_streams(mpctx);
 
         mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
     }
