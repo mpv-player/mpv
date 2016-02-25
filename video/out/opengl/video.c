@@ -870,8 +870,10 @@ static void pass_prepare_src_tex(struct gl_video *p)
 
         char texture_name[32];
         char texture_size[32];
+        char pixel_size[32];
         snprintf(texture_name, sizeof(texture_name), "texture%d", n);
         snprintf(texture_size, sizeof(texture_size), "texture_size%d", n);
+        snprintf(pixel_size, sizeof(pixel_size), "pixel_size%d", n);
 
         if (s->use_integer) {
             gl_sc_uniform_sampler_ui(sc, texture_name, n);
@@ -884,6 +886,8 @@ static void pass_prepare_src_tex(struct gl_video *p)
             f[1] = s->h;
         }
         gl_sc_uniform_vec2(sc, texture_size, f);
+        gl_sc_uniform_vec2(sc, pixel_size, (GLfloat[]){1.0f / f[0],
+                                                       1.0f / f[1]});
 
         gl->ActiveTexture(GL_TEXTURE0 + n);
         gl->BindTexture(s->gl_target, s->gl_tex);
@@ -1351,7 +1355,7 @@ static bool pass_prescale_luma(struct gl_video *p, float tex_mul,
     if (p->opts.deband) {
         // apply debanding before upscaling.
         pass_sample_deband(p->sc, p->opts.deband_opts, 0, p->pass_tex[0].gl_target,
-                           tex_mul, p->texture_w, p->texture_h, &p->lfg);
+                           tex_mul, &p->lfg);
         finish_pass_fbo(p, &p->deband_fbo, p->texture_w,
                         p->texture_h, 0, 0);
         tex_backup[0] = p->pass_tex[0];
@@ -1470,8 +1474,7 @@ static void pass_read_video(struct gl_video *p)
 
         if (p->opts.deband) {
             pass_sample_deband(p->sc, p->opts.deband_opts, 1, p->pass_tex[1].gl_target,
-                               p->use_normalized_range ? 1.0 : tex_mul,
-                               p->texture_w, p->texture_h, &p->lfg);
+                               p->use_normalized_range ? 1.0 : tex_mul, &p->lfg);
             GLSL(color.zw = vec2(0.0, 1.0);) // skip unused
             finish_pass_fbo(p, &p->chroma_deband_fbo, c_w, c_h, 1, 0);
             p->use_normalized_range = true;
@@ -1495,7 +1498,7 @@ static void pass_read_video(struct gl_video *p)
     // Sample the main (luma/RGB) plane.
     if (!prescaled && p->opts.deband) {
         pass_sample_deband(p->sc, p->opts.deband_opts, 0, p->pass_tex[0].gl_target,
-                           tex_mul, p->texture_w, p->texture_h, &p->lfg);
+                           tex_mul, &p->lfg);
         p->use_normalized_range = true;
     } else {
         if (!prescaled) {
@@ -1503,7 +1506,7 @@ static void pass_read_video(struct gl_video *p)
         } else {
             // just use bilinear for non-essential planes.
             GLSLF("color = texture(texture0, "
-                       "texcoord0 + vec2(%f,%f) / texture_size0);\n",
+                       "texcoord0 + vec2(%f,%f) * pixel_size0);\n",
                   -offset.t[0] / scale_factor_x,
                   -offset.t[1] / scale_factor_y);
         }
@@ -1531,7 +1534,7 @@ static void pass_read_video(struct gl_video *p)
             GLSL(color.a = texture(texture3, texcoord3).r;)
         } else {
             GLSLF("color.a = texture(texture3, "
-                      "texcoord3 + vec2(%f,%f) / texture_size3).r;",
+                      "texcoord3 + vec2(%f,%f) * pixel_size3).r;",
                   -offset.t[0] / scale_factor_x,
                   -offset.t[1] / scale_factor_y);
         }

@@ -39,8 +39,7 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc);
 void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc);
 
 void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
-                        int tex_num, GLenum tex_target, float tex_mul,
-                        float img_w, float img_h, AVLFG *lfg);
+                        int tex_num, GLenum tex_target, float tex_mul, AVLFG *lfg);
 
 void pass_sample_unsharp(struct gl_shader_cache *sc, float param);
 
