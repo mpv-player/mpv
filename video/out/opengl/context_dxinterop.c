@@ -16,6 +16,7 @@
  */
 
 #include <windows.h>
+#include <versionhelpers.h>
 #include <initguid.h>
 #include <d3d9.h>
 #include <dwmapi.h>
@@ -385,7 +386,7 @@ static void fill_presentparams(MPGLContext *ctx, D3DPRESENT_PARAMETERS *pparams)
         // true, at least on Nvidia, where less than four backbuffers causes
         // very high CPU usage. Use six to be safe.
         .BackBufferCount = 6,
-        .SwapEffect = D3DSWAPEFFECT_FLIPEX,
+        .SwapEffect = IsWindows7OrGreater() ? D3DSWAPEFFECT_FLIPEX : D3DSWAPEFFECT_FLIP,
         // Automatically get the backbuffer format from the display format
         .BackBufferFormat = D3DFMT_UNKNOWN,
         .PresentationInterval = presentation_interval,
