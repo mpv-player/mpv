@@ -774,14 +774,14 @@ int handle_force_window(struct MPContext *mpctx, bool force)
     // decoded on it, then create the window.
     bool stalled_video = mpctx->playback_initialized && mpctx->restart_complete &&
                          mpctx->video_status == STATUS_EOF && mpctx->vo_chain &&
-                         !vo_has_frame(mpctx->video_out);
+                         !mpctx->video_out->config_ok;
 
     // Don't interfere with real video playback
     if (mpctx->vo_chain && !stalled_video)
         return 0;
 
     if (!mpctx->opts->force_vo) {
-        if (act)
+        if (act && !mpctx->vo_chain)
             uninit_video_out(mpctx);
         return 0;
     }
