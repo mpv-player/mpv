@@ -32,7 +32,7 @@ void sampler_prelude(struct gl_shader_cache *sc, int tex_num)
     GLSLF("#define tex texture%d\n", tex_num);
     GLSLF("vec2 pos = texcoord%d;\n", tex_num);
     GLSLF("vec2 size = texture_size%d;\n", tex_num);
-    GLSLF("vec2 pt = vec2(1.0) / size;\n");
+    GLSLF("vec2 pt = pixel_size%d;\n", tex_num);
 }
 
 static void pass_sample_separated_get_weights(struct gl_shader_cache *sc,
@@ -348,8 +348,7 @@ const struct m_sub_options deband_conf = {
 
 // Stochastically sample a debanded result from a given texture
 void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
-                        int tex_num, GLenum tex_target, float tex_mul,
-                        float img_w, float img_h, AVLFG *lfg)
+                        int tex_num, GLenum tex_target, float tex_mul, AVLFG *lfg)
 {
     // Set up common variables and initialize the PRNG
     GLSLF("// debanding (tex %d)\n", tex_num);
@@ -359,14 +358,13 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
 
     // Helper: Compute a stochastic approximation of the avg color around a
     // pixel
-    GLSLHF("vec4 average(%s tex, vec2 pos, float range, inout float h) {",
+    GLSLHF("vec4 average(%s tex, vec2 pos, vec2 pt, float range, inout float h) {",
            mp_sampler_type(tex_target));
         // Compute a random rangle and distance
         GLSLH(float dist = rand(h) * range;     h = permute(h);)
         GLSLH(float dir  = rand(h) * 6.2831853; h = permute(h);)
 
-        bool r = tex_target == GL_TEXTURE_RECTANGLE;
-        GLSLHF("vec2 pt = dist / vec2(%f, %f);\n", r ? 1 : img_w, r ? 1 : img_h);
+        GLSLHF("pt *= dist;\n");
         GLSLH(vec2 o = vec2(cos(dir), sin(dir));)
 
         // Sample at quarter-turn intervals around the source pixel
@@ -386,7 +384,7 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
     for (int i = 1; i <= opts->iterations; i++) {
         // Sample the average pixel and use it instead of the original if
         // the difference is below the given threshold
-        GLSLF("avg = average(tex, pos, %f, h);\n", i * opts->range);
+        GLSLF("avg = average(tex, pos, pt, %f, h);\n", i * opts->range);
         GLSL(diff = abs(color - avg);)
         GLSLF("color = mix(avg, color, greaterThan(diff, vec4(%f)));\n",
               opts->threshold / (i * 16384.0));
