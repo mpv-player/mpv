@@ -89,6 +89,7 @@ const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"dxva2",       HWDEC_DXVA2},
     {"dxva2-copy",  HWDEC_DXVA2_COPY},
     {"rpi",         HWDEC_RPI},
+    {"mediacodec",  HWDEC_MEDIACODEC},
     {0}
 };
 
