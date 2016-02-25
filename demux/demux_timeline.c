@@ -358,6 +358,8 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     demuxer->seekable = true;
     demuxer->partially_seekable = true;
 
+    demuxer->filetype = meta->filetype ? meta->filetype : meta->desc->name;
+
     reselect_streams(demuxer);
 
     return 0;
@@ -389,7 +391,7 @@ static int d_control(struct demuxer *demuxer, int cmd, void *arg)
 
 const demuxer_desc_t demuxer_desc_timeline = {
     .name = "timeline",
-    .desc = "timeline segment merging wrapper",
+    .desc = "timeline segments",
     .fill_buffer = d_fill_buffer,
     .open = d_open,
     .close = d_close,
