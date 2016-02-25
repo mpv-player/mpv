@@ -60,7 +60,7 @@ static HRESULT get_device_delay(struct wasapi_state *state, double *delay_us) {
     QueryPerformanceCounter(&qpc);
     INT64 qpc_diff = av_rescale(qpc.QuadPart, 10000000, state->qpc_frequency.QuadPart)
                      - qpc_position;
-    // ignore the above calculation if it yeilds more than 10 seconds (due to
+    // ignore the above calculation if it yields more than 10 seconds (due to
     // possible overflow inside IAudioClock_GetPosition)
     if (qpc_diff < 10 * 10000000) {
         *delay_us -= qpc_diff / 10.0; // convert to us
