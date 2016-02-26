@@ -287,7 +287,7 @@ static int init(struct ao *ao)
     state->hInitDone = CreateEventW(NULL, FALSE, FALSE, NULL);
     state->hWake     = CreateEventW(NULL, FALSE, FALSE, NULL);
     if (!state->hInitDone || !state->hWake) {
-        MP_ERR(ao, "Error creating events\n");
+        MP_FATAL(ao, "Error creating events\n");
         uninit(ao);
         return -1;
     }
@@ -298,7 +298,7 @@ static int init(struct ao *ao)
     state->init_ret = E_FAIL;
     state->hAudioThread = CreateThread(NULL, 0, &AudioThread, ao, 0, NULL);
     if (!state->hAudioThread) {
-        MP_ERR(ao, "Failed to create audio thread\n");
+        MP_FATAL(ao, "Failed to create audio thread\n");
         uninit(ao);
         return -1;
     }
@@ -307,7 +307,7 @@ static int init(struct ao *ao)
     SAFE_RELEASE(state->hInitDone,CloseHandle(state->hInitDone));
     if (FAILED(state->init_ret)) {
         if (!ao->probing)
-            MP_ERR(ao, "Received failure from audio thread\n");
+            MP_FATAL(ao, "Received failure from audio thread\n");
         uninit(ao);
         return -1;
     }
@@ -481,7 +481,7 @@ static int hotplug_init(struct ao *ao)
 
     return 0;
     exit_label:
-    MP_ERR(state, "Error setting up audio hotplug: %s\n", mp_HRESULT_to_str(hr));
+    MP_FATAL(state, "Error setting up audio hotplug: %s\n", mp_HRESULT_to_str(hr));
     hotplug_uninit(ao);
     return -1;
 }

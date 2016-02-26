@@ -978,7 +978,7 @@ retry: ;
     MP_DBG(ao, "Init wasapi thread done\n");
     return S_OK;
 exit_label:
-    MP_ERR(state, "Error setting up audio thread: %s\n", mp_HRESULT_to_str(hr));
+    MP_FATAL(state, "Error setting up audio thread: %s\n", mp_HRESULT_to_str(hr));
     return hr;
 }
 
