@@ -155,17 +155,11 @@ static void thread_resume(struct ao *ao)
     MP_DBG(state, "Thread Resume\n");
     thread_feed(ao);
 
-    // start feeding next wakeup if something else hasn't been requested
-    int expected = WASAPI_THREAD_RESUME;
-    atomic_compare_exchange_strong(&state->thread_state, &expected,
-                                   WASAPI_THREAD_FEED);
     hr = IAudioClient_Start(state->pAudioClient);
     if (FAILED(hr)) {
         MP_ERR(state, "IAudioClient_Start returned %s\n",
                mp_HRESULT_to_str(hr));
     }
-
-    return;
 }
 
 static void thread_reset(struct ao *ao)
@@ -182,11 +176,6 @@ static void thread_reset(struct ao *ao)
         MP_ERR(state, "IAudioClient_Reset returned: %s\n", mp_HRESULT_to_str(hr));
 
     atomic_store(&state->sample_count, 0);
-    // start feeding next wakeup if something else hasn't been requested
-    int expected = WASAPI_THREAD_RESET;
-    atomic_compare_exchange_strong(&state->thread_state, &expected,
-                                   WASAPI_THREAD_FEED);
-    return;
 }
 
 static void thread_wakeup(void *ptr)
@@ -242,6 +231,9 @@ static DWORD __stdcall AudioThread(void *lpParameter)
         default:
             MP_ERR(ao, "Unhandled thread state: %d\n", thread_state);
         }
+        // the default is to feed unless something else is requested
+        atomic_compare_exchange_strong(&state->thread_state, &thread_state,
+                                       WASAPI_THREAD_FEED);
     }
 exit_label:
     wasapi_thread_uninit(ao);
