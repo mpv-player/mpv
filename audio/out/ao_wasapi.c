@@ -319,54 +319,50 @@ static int init(struct ao *ao)
 static int thread_control_exclusive(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct wasapi_state *state = ao->priv;
+    if (!state->pEndpointVolume)
+        return CONTROL_UNKNOWN;
 
     switch (cmd) {
     case AOCONTROL_GET_VOLUME:
     case AOCONTROL_SET_VOLUME:
-        if (!state->pEndpointVolume ||
-            !(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_VOLUME)) {
+        if (!(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_VOLUME))
             return CONTROL_FALSE;
-        }
-
-        float volume;
-        switch (cmd) {
-        case AOCONTROL_GET_VOLUME:
-            IAudioEndpointVolume_GetMasterVolumeLevelScalar(
-                state->pEndpointVolume, &volume);
-            *(ao_control_vol_t *)arg = (ao_control_vol_t){
-                .left  = 100.0f * volume,
-                .right = 100.0f * volume,
-            };
-            return CONTROL_OK;
-        case AOCONTROL_SET_VOLUME:
-            volume = ((ao_control_vol_t *)arg)->left / 100.f;
-            IAudioEndpointVolume_SetMasterVolumeLevelScalar(
-                state->pEndpointVolume, volume, NULL);
-            return CONTROL_OK;
-        }
+        break;
     case AOCONTROL_GET_MUTE:
     case AOCONTROL_SET_MUTE:
-        if (!state->pEndpointVolume ||
-            !(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_MUTE)) {
+        if (!(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_MUTE))
             return CONTROL_FALSE;
-        }
-
-        BOOL mute;
-        switch (cmd) {
-        case AOCONTROL_GET_MUTE:
-            IAudioEndpointVolume_GetMute(state->pEndpointVolume, &mute);
-            *(bool *)arg = mute;
-            return CONTROL_OK;
-        case AOCONTROL_SET_MUTE:
-            mute = *(bool *)arg;
-            IAudioEndpointVolume_SetMute(state->pEndpointVolume, mute, NULL);
-            return CONTROL_OK;
-        }
+        break;
     case AOCONTROL_HAS_PER_APP_VOLUME:
         return CONTROL_FALSE;
-    default:
-        return CONTROL_UNKNOWN;
     }
+
+    float volume;
+    BOOL mute;
+    switch (cmd) {
+    case AOCONTROL_GET_VOLUME:
+        IAudioEndpointVolume_GetMasterVolumeLevelScalar(
+            state->pEndpointVolume, &volume);
+        *(ao_control_vol_t *)arg = (ao_control_vol_t){
+            .left  = 100.0f * volume,
+            .right = 100.0f * volume,
+        };
+        return CONTROL_OK;
+    case AOCONTROL_SET_VOLUME:
+        volume = ((ao_control_vol_t *)arg)->left / 100.f;
+        IAudioEndpointVolume_SetMasterVolumeLevelScalar(
+            state->pEndpointVolume, volume, NULL);
+        return CONTROL_OK;
+    case AOCONTROL_GET_MUTE:
+        IAudioEndpointVolume_GetMute(state->pEndpointVolume, &mute);
+        *(bool *)arg = mute;
+        return CONTROL_OK;
+    case AOCONTROL_SET_MUTE:
+        mute = *(bool *)arg;
+        IAudioEndpointVolume_SetMute(state->pEndpointVolume, mute, NULL);
+        return CONTROL_OK;
+    }
+    return CONTROL_UNKNOWN;
 }
 
 static int thread_control_shared(struct ao *ao, enum aocontrol cmd, void *arg)
@@ -399,9 +395,8 @@ static int thread_control_shared(struct ao *ao, enum aocontrol cmd, void *arg)
         return CONTROL_OK;
     case AOCONTROL_HAS_PER_APP_VOLUME:
         return CONTROL_TRUE;
-    default:
-        return CONTROL_UNKNOWN;
     }
+    return CONTROL_UNKNOWN;
 }
 
 static int thread_control(struct ao *ao, enum aocontrol cmd, void *arg)
