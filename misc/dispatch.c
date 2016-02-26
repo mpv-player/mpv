@@ -62,10 +62,15 @@ static void queue_dtor(void *p)
     pthread_mutex_destroy(&queue->exclusive_lock);
 }
 
-// A dispatch queue lets other threads runs callbacks in a target thread.
-// The target thread is the thread which created the queue and which calls
-// mp_dispatch_queue_process().
-// Free the dispatch queue with talloc_free(). (It must be empty.)
+// A dispatch queue lets other threads run callbacks in a target thread.
+// The target thread is the thread which calls mp_dispatch_queue_process().
+// Free the dispatch queue with talloc_free(). At the time of destruction,
+// the queue must be empty. The easiest way to guarantee this is to
+// terminate all potential senders, then call mp_dispatch_run() with a
+// function that e.g. makes the target thread exit, then pthread_join() the
+// target thread, and finally destroy the queue. Another way is calling
+// mp_dispatch_queue_process() after terminating all potential senders, and
+// then destroying the queue.
 struct mp_dispatch_queue *mp_dispatch_create(void *ta_parent)
 {
     struct mp_dispatch_queue *queue = talloc_ptrtype(ta_parent, queue);
