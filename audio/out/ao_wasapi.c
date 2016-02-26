@@ -24,6 +24,7 @@
 #include "options/m_option.h"
 #include "osdep/timer.h"
 #include "osdep/io.h"
+#include "misc/dispatch.h"
 #include "ao_wasapi.h"
 
 // naive av_rescale for unsigned
@@ -188,6 +189,21 @@ static void thread_reset(struct ao *ao)
     return;
 }
 
+static void thread_wakeup(void *ptr)
+{
+    struct ao *ao = ptr;
+    struct wasapi_state *state = ao->priv;
+    SetEvent(state->hWake);
+}
+
+static void set_thread_state(struct ao *ao,
+                             enum wasapi_thread_state thread_state)
+{
+    struct wasapi_state *state = ao->priv;
+    atomic_store(&state->thread_state, thread_state);
+    thread_wakeup(ao);
+}
+
 static DWORD __stdcall AudioThread(void *lpParameter)
 {
     struct ao *ao = lpParameter;
@@ -200,41 +216,31 @@ static DWORD __stdcall AudioThread(void *lpParameter)
         goto exit_label;
 
     MP_DBG(ao, "Entering dispatch loop\n");
-    while (true) { // watch events
-        HANDLE events[] = {state->hWake};
-        switch (MsgWaitForMultipleObjects(MP_ARRAY_SIZE(events), events,
-                                          FALSE, INFINITE,
-                                          QS_POSTMESSAGE | QS_SENDMESSAGE)) {
-        // AudioThread wakeup
-        case WAIT_OBJECT_0:
-            switch (atomic_load(&state->thread_state)) {
-            case WASAPI_THREAD_FEED:
-                // fill twice on under-full buffer (see comment in thread_feed)
-                if (thread_feed(ao) && thread_feed(ao))
-                    MP_ERR(ao, "Unable to fill buffer fast enough\n");
-                break;
-            case WASAPI_THREAD_RESET:
-                thread_reset(ao);
-                break;
-            case WASAPI_THREAD_RESUME:
-                thread_reset(ao);
-                thread_resume(ao);
-                break;
-            case WASAPI_THREAD_SHUTDOWN:
-                thread_reset(ao);
-                goto exit_label;
-            default:
-                MP_ERR(ao, "Unhandled thread state\n");
-                goto exit_label;
-            }
+    while (true) {
+        if (WaitForSingleObject(state->hWake, INFINITE) != WAIT_OBJECT_0)
+            MP_ERR(ao, "Unexpected return value from WaitForSingleObject\n");
+
+        mp_dispatch_queue_process(state->dispatch, 0);
+
+        int thread_state = atomic_load(&state->thread_state);
+        switch (thread_state) {
+        case WASAPI_THREAD_FEED:
+            // fill twice on under-full buffer (see comment in thread_feed)
+            if (thread_feed(ao) && thread_feed(ao))
+                MP_ERR(ao, "Unable to fill buffer fast enough\n");
             break;
-        // messages to dispatch (COM marshalling)
-        case (WAIT_OBJECT_0 + MP_ARRAY_SIZE(events)):
-            wasapi_dispatch(ao);
+        case WASAPI_THREAD_RESET:
+            thread_reset(ao);
             break;
-        default:
-            MP_ERR(ao, "Unhandled thread event\n");
+        case WASAPI_THREAD_RESUME:
+            thread_reset(ao);
+            thread_resume(ao);
+            break;
+        case WASAPI_THREAD_SHUTDOWN:
+            thread_reset(ao);
             goto exit_label;
+        default:
+            MP_ERR(ao, "Unhandled thread state: %d\n", thread_state);
         }
     }
 exit_label:
@@ -245,19 +251,10 @@ exit_label:
     return 0;
 }
 
-static void set_thread_state(struct ao *ao,
-                             enum wasapi_thread_state thread_state)
-{
-    struct wasapi_state *state = ao->priv;
-    atomic_store(&state->thread_state, thread_state);
-    SetEvent(state->hWake);
-}
-
 static void uninit(struct ao *ao)
 {
     MP_DBG(ao, "Uninit wasapi\n");
     struct wasapi_state *state = ao->priv;
-    wasapi_release_proxies(state);
     if (state->hWake)
         set_thread_state(ao, WASAPI_THREAD_SHUTDOWN);
 
@@ -305,6 +302,9 @@ static int init(struct ao *ao)
         return -1;
     }
 
+    state->dispatch = mp_dispatch_create(state);
+    mp_dispatch_set_wakeup_fn(state->dispatch, thread_wakeup, ao);
+
     state->init_ret = E_FAIL;
     state->hAudioThread = CreateThread(NULL, 0, &AudioThread, ao, 0, NULL);
     if (!state->hAudioThread) {
@@ -322,19 +322,18 @@ static int init(struct ao *ao)
         return -1;
     }
 
-    wasapi_receive_proxies(state);
     MP_DBG(ao, "Init wasapi done\n");
     return 0;
 }
 
-static int control_exclusive(struct ao *ao, enum aocontrol cmd, void *arg)
+static int thread_control_exclusive(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct wasapi_state *state = ao->priv;
 
     switch (cmd) {
     case AOCONTROL_GET_VOLUME:
     case AOCONTROL_SET_VOLUME:
-        if (!state->pEndpointVolumeProxy ||
+        if (!state->pEndpointVolume ||
             !(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_VOLUME)) {
             return CONTROL_FALSE;
         }
@@ -343,8 +342,7 @@ static int control_exclusive(struct ao *ao, enum aocontrol cmd, void *arg)
         switch (cmd) {
         case AOCONTROL_GET_VOLUME:
             IAudioEndpointVolume_GetMasterVolumeLevelScalar(
-                state->pEndpointVolumeProxy,
-                &volume);
+                state->pEndpointVolume, &volume);
             *(ao_control_vol_t *)arg = (ao_control_vol_t){
                 .left  = 100.0f * volume,
                 .right = 100.0f * volume,
@@ -353,13 +351,12 @@ static int control_exclusive(struct ao *ao, enum aocontrol cmd, void *arg)
         case AOCONTROL_SET_VOLUME:
             volume = ((ao_control_vol_t *)arg)->left / 100.f;
             IAudioEndpointVolume_SetMasterVolumeLevelScalar(
-                state->pEndpointVolumeProxy,
-                volume, NULL);
+                state->pEndpointVolume, volume, NULL);
             return CONTROL_OK;
         }
     case AOCONTROL_GET_MUTE:
     case AOCONTROL_SET_MUTE:
-        if (!state->pEndpointVolumeProxy ||
+        if (!state->pEndpointVolume ||
             !(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_MUTE)) {
             return CONTROL_FALSE;
         }
@@ -367,14 +364,12 @@ static int control_exclusive(struct ao *ao, enum aocontrol cmd, void *arg)
         BOOL mute;
         switch (cmd) {
         case AOCONTROL_GET_MUTE:
-            IAudioEndpointVolume_GetMute(state->pEndpointVolumeProxy,
-                                         &mute);
+            IAudioEndpointVolume_GetMute(state->pEndpointVolume, &mute);
             *(bool *)arg = mute;
             return CONTROL_OK;
         case AOCONTROL_SET_MUTE:
             mute = *(bool *)arg;
-            IAudioEndpointVolume_SetMute(state->pEndpointVolumeProxy,
-                                         mute, NULL);
+            IAudioEndpointVolume_SetMute(state->pEndpointVolume, mute, NULL);
             return CONTROL_OK;
         }
     case AOCONTROL_HAS_PER_APP_VOLUME:
@@ -384,18 +379,17 @@ static int control_exclusive(struct ao *ao, enum aocontrol cmd, void *arg)
     }
 }
 
-static int control_shared(struct ao *ao, enum aocontrol cmd, void *arg)
+static int thread_control_shared(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct wasapi_state *state = ao->priv;
-    if (!state->pAudioVolumeProxy)
+    if (!state->pAudioVolume)
         return CONTROL_UNKNOWN;
 
     float volume;
     BOOL mute;
     switch(cmd) {
     case AOCONTROL_GET_VOLUME:
-        ISimpleAudioVolume_GetMasterVolume(state->pAudioVolumeProxy,
-                                           &volume);
+        ISimpleAudioVolume_GetMasterVolume(state->pAudioVolume, &volume);
         *(ao_control_vol_t *)arg = (ao_control_vol_t){
             .left  = 100.0f * volume,
             .right = 100.0f * volume,
@@ -403,16 +397,15 @@ static int control_shared(struct ao *ao, enum aocontrol cmd, void *arg)
         return CONTROL_OK;
     case AOCONTROL_SET_VOLUME:
         volume = ((ao_control_vol_t *)arg)->left / 100.f;
-        ISimpleAudioVolume_SetMasterVolume(state->pAudioVolumeProxy,
-                                           volume, NULL);
+        ISimpleAudioVolume_SetMasterVolume(state->pAudioVolume, volume, NULL);
         return CONTROL_OK;
     case AOCONTROL_GET_MUTE:
-        ISimpleAudioVolume_GetMute(state->pAudioVolumeProxy, &mute);
+        ISimpleAudioVolume_GetMute(state->pAudioVolume, &mute);
         *(bool *)arg = mute;
         return CONTROL_OK;
     case AOCONTROL_SET_MUTE:
         mute = *(bool *)arg;
-        ISimpleAudioVolume_SetMute(state->pAudioVolumeProxy, mute, NULL);
+        ISimpleAudioVolume_SetMute(state->pAudioVolume, mute, NULL);
         return CONTROL_OK;
     case AOCONTROL_HAS_PER_APP_VOLUME:
         return CONTROL_TRUE;
@@ -421,14 +414,14 @@ static int control_shared(struct ao *ao, enum aocontrol cmd, void *arg)
     }
 }
 
-static int control(struct ao *ao, enum aocontrol cmd, void *arg)
+static int thread_control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct wasapi_state *state = ao->priv;
 
     // common to exclusive and shared
     switch (cmd) {
     case AOCONTROL_UPDATE_STREAM_TITLE:
-        if (!state->pSessionControlProxy)
+        if (!state->pSessionControl)
             return CONTROL_FALSE;
 
         wchar_t *title = mp_from_utf8(NULL, (char*)arg);
@@ -437,12 +430,10 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         // it seems that *sometimes* the SetDisplayName does not take effect and
         // it still shows the old title. Use this loop to insist until it works.
         do {
-            IAudioSessionControl_SetDisplayName(state->pSessionControlProxy,
-                                                title, NULL);
+            IAudioSessionControl_SetDisplayName(state->pSessionControl, title, NULL);
 
             SAFE_RELEASE(tmp, CoTaskMemFree(tmp));
-            IAudioSessionControl_GetDisplayName(state->pSessionControlProxy,
-                                                &tmp);
+            IAudioSessionControl_GetDisplayName(state->pSessionControl, &tmp);
         } while (lstrcmpW(title, tmp));
         SAFE_RELEASE(tmp, CoTaskMemFree(tmp));
         talloc_free(title);
@@ -450,7 +441,26 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     }
 
     return state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE ?
-        control_exclusive(ao, cmd, arg) : control_shared(ao, cmd, arg);
+        thread_control_exclusive(ao, cmd, arg) :
+        thread_control_shared(ao, cmd, arg);
+}
+
+static void run_control(void *p)
+{
+    void **pp = p;
+    struct ao *ao      = pp[0];
+    enum aocontrol cmd = *(enum aocontrol *)pp[1];
+    void *arg          = pp[2];
+    *(int *)pp[3]      = thread_control(ao, cmd, arg);
+}
+
+static int control(struct ao *ao, enum aocontrol cmd, void *arg)
+{
+    struct wasapi_state *state = ao->priv;
+    int ret;
+    void *p[] = {ao, &cmd, arg, &ret};
+    mp_dispatch_run(state->dispatch, run_control, p);
+    return ret;
 }
 
 static void audio_reset(struct ao *ao)

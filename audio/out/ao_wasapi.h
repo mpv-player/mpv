@@ -66,6 +66,7 @@ typedef struct wasapi_state {
     HANDLE hAudioThread;     // the audio thread itself
     HANDLE hWake;            // thread wakeup event
     atomic_int thread_state; // enum wasapi_thread_state (what to do on wakeup)
+    struct mp_dispatch_queue *dispatch; // for volume/mute/session display
 
     // for setting the audio thread priority
     HANDLE hTask;
@@ -83,24 +84,11 @@ typedef struct wasapi_state {
     UINT64 clock_frequency;      // scale for position returned by GetPosition
     LARGE_INTEGER qpc_frequency; // frequency of Windows' high resolution timer
 
-    // WASAPI control (handles owned by audio thread but used by main thread)
+    // WASAPI control
     IAudioSessionControl *pSessionControl; // setting the stream title
     IAudioEndpointVolume *pEndpointVolume; // exclusive mode volume/mute
     ISimpleAudioVolume *pAudioVolume;      // shared mode volume/mute
     DWORD vol_hw_support; // is hardware volume supported for exclusive-mode?
-
-    // Streams used to marshal the proxy objects. The thread owning the actual
-    // objects needs to marshal proxy objects into these streams, and the thread
-    // that wants the proxies unmarshals them from here.
-    IStream *sSessionControl;
-    IStream *sEndpointVolume;
-    IStream *sAudioVolume;
-
-    // WASAPI proxy handles, for Single-Threaded Apartment communication. One is
-    // needed for each audio thread object that's accessed from the main thread.
-    IAudioSessionControl *pSessionControlProxy;
-    IAudioEndpointVolume *pEndpointVolumeProxy;
-    ISimpleAudioVolume *pAudioVolumeProxy;
 
     // ao options
     int opt_exclusive;
