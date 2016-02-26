@@ -248,12 +248,11 @@ static void uninit(struct ao *ao)
     if (state->hWake)
         set_thread_state(ao, WASAPI_THREAD_SHUTDOWN);
 
-    // wait up to 10 seconds
     if (state->hAudioThread &&
-        WaitForSingleObject(state->hAudioThread, 10000) == WAIT_TIMEOUT)
+        WaitForSingleObject(state->hAudioThread, INFINITE) != WAIT_OBJECT_0)
     {
-        MP_ERR(ao, "Audio loop thread refuses to abort\n");
-        return;
+        MP_ERR(ao, "Unexpected return value from WaitForSingleObject "
+               "while waiting for audio thread to terminate\n");
     }
 
     SAFE_RELEASE(state->hInitDone,   CloseHandle(state->hInitDone));
