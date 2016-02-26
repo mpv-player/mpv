@@ -147,21 +147,6 @@ exit_label:
     return false;
 }
 
-static void thread_resume(struct ao *ao)
-{
-    struct wasapi_state *state = ao->priv;
-    HRESULT hr;
-
-    MP_DBG(state, "Thread Resume\n");
-    thread_feed(ao);
-
-    hr = IAudioClient_Start(state->pAudioClient);
-    if (FAILED(hr)) {
-        MP_ERR(state, "IAudioClient_Start returned %s\n",
-               mp_HRESULT_to_str(hr));
-    }
-}
-
 static void thread_reset(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
@@ -176,6 +161,20 @@ static void thread_reset(struct ao *ao)
         MP_ERR(state, "IAudioClient_Reset returned: %s\n", mp_HRESULT_to_str(hr));
 
     atomic_store(&state->sample_count, 0);
+}
+
+static void thread_resume(struct ao *ao)
+{
+    struct wasapi_state *state = ao->priv;
+    MP_DBG(state, "Thread Resume\n");
+    thread_reset(ao);
+    thread_feed(ao);
+
+    HRESULT hr = IAudioClient_Start(state->pAudioClient);
+    if (FAILED(hr)) {
+        MP_ERR(state, "IAudioClient_Start returned %s\n",
+               mp_HRESULT_to_str(hr));
+    }
 }
 
 static void thread_wakeup(void *ptr)
@@ -222,7 +221,6 @@ static DWORD __stdcall AudioThread(void *lpParameter)
             thread_reset(ao);
             break;
         case WASAPI_THREAD_RESUME:
-            thread_reset(ao);
             thread_resume(ao);
             break;
         case WASAPI_THREAD_SHUTDOWN:
