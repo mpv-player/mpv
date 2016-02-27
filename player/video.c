@@ -749,7 +749,7 @@ static bool have_new_frame(struct MPContext *mpctx, bool eof)
 
 // Fill mpctx->next_frames[] with a newly filtered or decoded image.
 // returns VD_* code
-static int video_output_image(struct MPContext *mpctx, double endpts)
+static int video_output_image(struct MPContext *mpctx)
 {
     struct vo_chain *vo_c = mpctx->vo_chain;
     bool hrseek = mpctx->hrseek_active && mpctx->video_status == STATUS_SYNCING;
@@ -772,6 +772,7 @@ static int video_output_image(struct MPContext *mpctx, double endpts)
             return r; // error
         struct mp_image *img = vf_read_output_frame(vo_c->vf);
         if (img) {
+            double endpts = get_play_end_pts(mpctx);
             if (endpts != MP_NOPTS_VALUE && img->pts >= endpts) {
                 r = VD_EOF;
             } else if (mpctx->max_frames == 0) {
@@ -1243,7 +1244,7 @@ static void calculate_frame_duration(struct MPContext *mpctx)
     mpctx->past_frames[0].approx_duration = approx_duration;
 }
 
-void write_video(struct MPContext *mpctx, double endpts)
+void write_video(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
@@ -1259,7 +1260,7 @@ void write_video(struct MPContext *mpctx, double endpts)
     if (mpctx->paused && mpctx->video_status >= STATUS_READY)
         return;
 
-    int r = video_output_image(mpctx, endpts);
+    int r = video_output_image(mpctx);
     MP_TRACE(mpctx, "video_output_image: %d\n", r);
 
     if (r < 0)

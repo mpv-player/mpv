@@ -713,7 +713,7 @@ static int filter_audio(struct ao_chain *ao_c, struct mp_audio_buffer *outbuf,
     return res;
 }
 
-void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
+void fill_audio_out_buffers(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     struct ao_chain *ao_c = mpctx->ao_chain;
@@ -895,6 +895,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     bool partial_fill = false;
     int playflags = 0;
 
+    double endpts = get_play_end_pts(mpctx);
     if (endpts != MP_NOPTS_VALUE) {
         double samples = (endpts - written_audio_pts(mpctx) - opts->audio_delay)
                          * play_samplerate;

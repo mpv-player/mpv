@@ -293,11 +293,6 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek)
      * seeks etc until a new video frame has been decoded */
     mpctx->last_seek_pts = target_time;
 
-    // It's not really known where the demuxer
-    // level seek will end up, so the hrseek mechanism is abused to skip all
-    // frames before chapter start by setting hrseek_pts to the chapter start.
-    // It does nothing when the seek is inside of the current chapter, and
-    // seeking past the chapter is handled elsewhere.
     if (hr_seek) {
         mpctx->hrseek_active = true;
         mpctx->hrseek_framedrop = !hr_seek_very_exact && opts->hr_seek_framedrop;
@@ -850,7 +845,7 @@ static void handle_dummy_ticks(struct MPContext *mpctx)
 
 // We always make sure audio and video buffers are filled before actually
 // starting playback. This code handles starting them at the same time.
-static void handle_playback_restart(struct MPContext *mpctx, double endpts)
+static void handle_playback_restart(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
@@ -865,7 +860,7 @@ static void handle_playback_restart(struct MPContext *mpctx, double endpts)
     }
 
     if (mpctx->audio_status == STATUS_READY)
-        fill_audio_out_buffers(mpctx, endpts); // actually play prepared buffer
+        fill_audio_out_buffers(mpctx); // actually play prepared buffer
 
     if (!mpctx->restart_complete) {
         mpctx->hrseek_active = false;
@@ -948,8 +943,6 @@ static void handle_complex_filter_decoders(struct MPContext *mpctx)
 
 void run_playloop(struct MPContext *mpctx)
 {
-    double endpts = get_play_end_pts(mpctx);
-
 #if HAVE_ENCODING
     if (encode_lavc_didfail(mpctx->encode_lavc_ctx)) {
         mpctx->stop_play = PT_QUIT;
@@ -966,8 +959,8 @@ void run_playloop(struct MPContext *mpctx)
     handle_heartbeat_cmd(mpctx);
     handle_command_updates(mpctx);
 
-    fill_audio_out_buffers(mpctx, endpts);
-    write_video(mpctx, endpts);
+    fill_audio_out_buffers(mpctx);
+    write_video(mpctx);
 
     if (mpctx->lavfi) {
         if (lavfi_process(mpctx->lavfi))
@@ -976,7 +969,7 @@ void run_playloop(struct MPContext *mpctx)
             mpctx->stop_play = AT_END_OF_FILE;
     }
 
-    handle_playback_restart(mpctx, endpts);
+    handle_playback_restart(mpctx);
 
     // Use the audio timestamp if no video, or video is enabled, but has ended.
     if (mpctx->video_status == STATUS_EOF &&
