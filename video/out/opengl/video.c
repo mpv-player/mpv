@@ -522,6 +522,7 @@ static void get_scale_factors(struct gl_video *p, double xy[2]);
 
 #define GLSL(x) gl_sc_add(p->sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
+#define GLSLHF(...) gl_sc_haddf(p->sc, __VA_ARGS__)
 
 // Return a fixed point texture format with given characteristics.
 static const struct fmt_entry *find_tex_format(GL *gl, int bytes_per_comp,
@@ -990,8 +991,6 @@ static void load_shader(struct gl_video *p, const char *body)
     gl_sc_uniform_f(p->sc, "frame", p->frames_uploaded);
     gl_sc_uniform_vec2(p->sc, "image_size", (GLfloat[]){p->image_params.w,
                                                         p->image_params.h});
-    gl_sc_uniform_vec2(p->sc, "pixel_size", (GLfloat[]){1.0f / p->texture_w,
-                                                        1.0f / p->texture_h});
 }
 
 static const char *get_custom_shader_fn(struct gl_video *p, const char *body)
@@ -1021,6 +1020,7 @@ static bool apply_shaders(struct gl_video *p, char **shaders,
         if (!body)
             continue;
         finish_pass_fbo(p, &textures[tex], w, h, tex_num, 0);
+        GLSLHF("#define pixel_size pixel_size%d\n", tex_num);
         load_shader(p, body);
         const char *fn_name = get_custom_shader_fn(p, body);
         GLSLF("// custom shader\n");
