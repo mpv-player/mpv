@@ -26,4 +26,19 @@ char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr);
 #define mp_HRESULT_to_str(hr) mp_HRESULT_to_str_buf((char[256]){0}, 256, (hr))
 #define mp_LastError_to_str() mp_HRESULT_to_str(HRESULT_FROM_WIN32(GetLastError()))
 
+// copied from mingw-w64-x86_64-headers-git 5.0.0.4621.a7e64f9-1 in msys2
+FORCEINLINE BOOL IsWindowsVersionOrGreater(WORD major, WORD minor, WORD servpack)
+{
+    OSVERSIONINFOEXW vi = {sizeof(vi),major,minor,0,0,{0},servpack};
+    return VerifyVersionInfoW(&vi, VER_MAJORVERSION|VER_MINORVERSION|VER_SERVICEPACKMAJOR,
+        VerSetConditionMask(VerSetConditionMask(VerSetConditionMask(0,
+            VER_MAJORVERSION,VER_GREATER_EQUAL),
+            VER_MINORVERSION,VER_GREATER_EQUAL),
+            VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL));
+}
+
+FORCEINLINE BOOL IsWindows7OrGreater(void) {
+    return IsWindowsVersionOrGreater(HIBYTE(_WIN32_WINNT_WIN7), LOBYTE(_WIN32_WINNT_WIN7), 0);
+}
+
 #endif
