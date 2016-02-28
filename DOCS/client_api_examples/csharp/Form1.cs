@@ -290,12 +290,7 @@ namespace mpv
         {
             Pause();
             SetTime(0);
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            SetTime(1);
-        }
+        }      
 
         private void buttonLoadVideo_Click(object sender, EventArgs e)
         {
