@@ -242,8 +242,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek)
 
     // Prefer doing absolute seeks, unless not possible.
     if ((seek.type == MPSEEK_FACTOR && !mpctx->demuxer->ts_resets_possible &&
-         target_time != MP_NOPTS_VALUE) ||
-        (seek.type == MPSEEK_RELATIVE && (!mpctx->demuxer->rel_seeks || hr_seek)))
+         target_time != MP_NOPTS_VALUE) || seek.type == MPSEEK_RELATIVE)
     {
         seek.type = MPSEEK_ABSOLUTE;
         seek.amount = target_time;
@@ -253,15 +252,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek)
 
     double demuxer_amount = seek.amount;
 
-    int demuxer_style = 0;
-    switch (seek.type) {
-    case MPSEEK_FACTOR:
-        demuxer_style |= SEEK_ABSOLUTE | SEEK_FACTOR;
-        break;
-    case MPSEEK_ABSOLUTE:
-        demuxer_style |= SEEK_ABSOLUTE;
-        break;
-    }
+    int demuxer_style = seek.type == MPSEEK_FACTOR ? SEEK_FACTOR : 0;
     if (hr_seek || direction < 0) {
         demuxer_style |= SEEK_BACKWARD;
     } else if (direction > 0) {
@@ -281,7 +272,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek)
             double main_new_pos = demuxer_amount;
             if (seek.type != MPSEEK_ABSOLUTE)
                 main_new_pos = target_time;
-            demux_seek(track->demuxer, main_new_pos, SEEK_ABSOLUTE | SEEK_BACKWARD);
+            demux_seek(track->demuxer, main_new_pos, 0);
         }
     }
 

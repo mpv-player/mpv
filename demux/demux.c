@@ -580,8 +580,7 @@ static void start_refreshing(struct demux_internal *in)
     pthread_mutex_unlock(&in->lock);
 
     // Seek back to player's current position, with a small offset added.
-    in->d_thread->desc->seek(in->d_thread, start_ts - 1.0,
-                             SEEK_ABSOLUTE | SEEK_BACKWARD | SEEK_HR);
+    in->d_thread->desc->seek(in->d_thread, start_ts - 1.0, SEEK_BACKWARD | SEEK_HR);
 
     pthread_mutex_lock(&in->lock);
 }
@@ -947,7 +946,6 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         dst->partially_seekable = src->partially_seekable;
         dst->filetype = src->filetype;
         dst->ts_resets_possible = src->ts_resets_possible;
-        dst->rel_seeks = src->rel_seeks;
         dst->allow_refresh_seeks = src->allow_refresh_seeks;
         dst->fully_read = src->fully_read;
         dst->start_time = src->start_time;
@@ -1240,7 +1238,7 @@ void demux_flush(demuxer_t *demuxer)
     pthread_mutex_unlock(&demuxer->in->lock);
 }
 
-int demux_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
+int demux_seek(demuxer_t *demuxer, double seek_pts, int flags)
 {
     struct demux_internal *in = demuxer->in;
     assert(demuxer == in->d_user);
@@ -1250,32 +1248,22 @@ int demux_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
         return 0;
     }
 
-    if ((flags & SEEK_FACTOR) && !(flags & SEEK_ABSOLUTE)) {
-        MP_WARN(demuxer, "Invalid seek flags.\n");
-        return 0;
-    }
-
-    if (rel_seek_secs == MP_NOPTS_VALUE && (flags & SEEK_ABSOLUTE))
+    if (seek_pts == MP_NOPTS_VALUE)
         return 0;
 
-    if (!(flags & (SEEK_BACKWARD | SEEK_FORWARD))) {
-        if (flags & SEEK_ABSOLUTE || rel_seek_secs < 0) {
-            flags |= SEEK_BACKWARD;
-        } else {
-            flags |= SEEK_FORWARD;
-        }
-    }
+    if (!(flags & SEEK_FORWARD))
+        flags |= SEEK_BACKWARD;
 
     pthread_mutex_lock(&in->lock);
 
-    MP_VERBOSE(in, "queuing seek to %f%s\n", rel_seek_secs,
+    MP_VERBOSE(in, "queuing seek to %f%s\n", seek_pts,
                in->seeking ? " (cascade)" : "");
 
     flush_locked(demuxer);
     in->seeking = true;
     in->seek_flags = flags;
-    in->seek_pts = rel_seek_secs;
-    if ((flags & SEEK_ABSOLUTE) && !(flags & SEEK_FACTOR))
+    in->seek_pts = seek_pts;
+    if (!(flags & SEEK_FACTOR))
         in->seek_pts = MP_ADD_PTS(in->seek_pts, -in->ts_offset);
 
     if (!in->threading)

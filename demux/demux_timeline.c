@@ -63,8 +63,6 @@ struct priv {
     // Total number of packets received past end of segment. Used
     // to be clever about determining when to switch segments.
     int eos_packets;
-
-    double seek_pts;
 };
 
 static void reselect_streams(struct demuxer *demuxer)
@@ -107,7 +105,7 @@ static void switch_segment(struct demuxer *demuxer, struct segment *new,
     p->current = new;
     reselect_streams(demuxer);
     demux_set_ts_offset(new->d, new->start - new->d_start);
-    demux_seek(new->d, start_pts, flags | SEEK_ABSOLUTE);
+    demux_seek(new->d, start_pts, flags);
 
     for (int n = 0; n < p->num_streams; n++) {
         struct virtual_stream *vs = &p->streams[n];
@@ -118,19 +116,11 @@ static void switch_segment(struct demuxer *demuxer, struct segment *new,
     p->eos_packets = 0;
 }
 
-static void d_seek(struct demuxer *demuxer, double rel_seek_secs, int flags)
+static void d_seek(struct demuxer *demuxer, double seek_pts, int flags)
 {
     struct priv *p = demuxer->priv;
 
-    double pts = p->seek_pts;
-    if (flags & SEEK_ABSOLUTE)
-        pts = 0.0f;
-
-    if (flags & SEEK_FACTOR) {
-        pts += p->duration * rel_seek_secs;
-    } else {
-        pts += rel_seek_secs;
-    }
+    double pts = seek_pts * ((flags & SEEK_FACTOR) ? p->duration : 1);
 
     flags &= SEEK_FORWARD | SEEK_BACKWARD | SEEK_HR;
 
@@ -144,8 +134,6 @@ static void d_seek(struct demuxer *demuxer, double rel_seek_secs, int flags)
 
     p->current = NULL; // force seek
     switch_segment(demuxer, new, pts, flags);
-
-    p->seek_pts = pts;
 }
 
 static int d_fill_buffer(struct demuxer *demuxer)

@@ -209,7 +209,7 @@ void reselect_demux_stream(struct MPContext *mpctx, struct track *track)
             double pts = get_current_time(mpctx);
             if (pts == MP_NOPTS_VALUE)
                 pts = 0;
-            demux_seek(track->demuxer, pts, SEEK_ABSOLUTE);
+            demux_seek(track->demuxer, pts, 0);
         }
     }
 }

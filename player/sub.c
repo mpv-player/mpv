@@ -103,7 +103,7 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
     {
         // Assume fully_read implies no interleaved audio/video streams.
         // (Reading packets will change the demuxer position.)
-        demux_seek(track->demuxer, 0, SEEK_ABSOLUTE);
+        demux_seek(track->demuxer, 0, 0);
         track->preloaded = sub_read_all_packets(track->d_sub);
     }
 

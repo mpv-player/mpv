@@ -163,7 +163,7 @@ struct block_info {
 typedef struct mkv_demuxer {
     int64_t segment_start, segment_end;
 
-    double duration, last_pts;
+    double duration;
 
     mkv_track_t **tracks;
     int num_tracks;
@@ -2441,7 +2441,6 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
 
     if (use_this_block) {
         uint64_t filepos = block_info->filepos;
-        mkv_d->last_pts = current_pts;
 
         for (int i = 0; i < laces; i++) {
             bstr block = bstr_splice(data, 0, lace_size[i]);
@@ -2459,7 +2458,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
              * values being the same). Also, don't use it for extra
              * packets resulting from parsing. */
             if (i == 0 || track->default_duration)
-                dp->pts = mkv_d->last_pts + i * track->default_duration;
+                dp->pts = current_pts + i * track->default_duration;
             if (stream->codec->avi_dts)
                 MPSWAP(double, dp->pts, dp->dts);
             if (i == 0)
@@ -2784,7 +2783,7 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
     return index;
 }
 
-static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
+static void demux_mkv_seek(demuxer_t *demuxer, double seek_pts, int flags)
 {
     mkv_demuxer_t *mkv_d = demuxer->priv;
     int64_t old_pos = stream_tell(demuxer->stream);
@@ -2814,15 +2813,13 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
 
     // Adjust the target a little bit to catch cases where the target position
     // specifies a keyframe with high, but not perfect, precision.
-    rel_seek_secs += flags & SEEK_FORWARD ? -0.005 : 0.005;
+    seek_pts += flags & SEEK_FORWARD ? -0.005 : 0.005;
 
     if (!(flags & SEEK_FACTOR)) {       /* time in secs */
         mkv_index_t *index = NULL;
 
-        if (!(flags & SEEK_ABSOLUTE))   /* relative seek */
-            rel_seek_secs += mkv_d->last_pts;
-        rel_seek_secs = FFMAX(rel_seek_secs, 0);
-        int64_t target_timecode = rel_seek_secs * 1e9 + 0.5;
+        seek_pts = FFMAX(seek_pts, 0);
+        int64_t target_timecode = seek_pts * 1e9 + 0.5;
 
         if (create_index_until(demuxer, target_timecode) >= 0) {
             int seek_id = st_active[STREAM_VIDEO] ? v_tnum : a_tnum;
@@ -2846,7 +2843,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
         read_deferred_cues(demuxer);
 
         int64_t size = stream_get_size(s);
-        int64_t target_filepos = size * MPCLAMP(rel_seek_secs, 0, 1);
+        int64_t target_filepos = size * MPCLAMP(seek_pts, 0, 1);
 
         mkv_index_t *index = NULL;
         if (mkv_d->index_complete) {

@@ -263,17 +263,15 @@ static int raw_fill_buffer(demuxer_t *demuxer)
     return 1;
 }
 
-static void raw_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
+static void raw_seek(demuxer_t *demuxer, double seek_pts, int flags)
 {
     struct priv *p = demuxer->priv;
     stream_t *s = demuxer->stream;
     int64_t end = 0;
     stream_control(s, STREAM_CTRL_GET_SIZE, &end);
-    int64_t pos = (flags & SEEK_ABSOLUTE) ? 0 : stream_tell(s);
+    int64_t pos = seek_pts * p->frame_rate * p->frame_size;
     if (flags & SEEK_FACTOR)
-        pos += end * rel_seek_secs;
-    else
-        pos += rel_seek_secs * p->frame_rate * p->frame_size;
+        pos = end * seek_pts;
     if (pos < 0)
         pos = 0;
     if (end && pos > end)

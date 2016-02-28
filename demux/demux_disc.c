@@ -42,7 +42,6 @@ struct priv {
     double base_time;   // playback display start time of current segment
     double base_dts;    // packet DTS that maps to base_time
     double last_dts;    // DTS of previously demuxed packet
-    double seek_pts;
     bool seek_reinit;   // needs reinit after seek
 };
 
@@ -159,35 +158,27 @@ static void add_streams(demuxer_t *demuxer)
     reselect_streams(demuxer);
 }
 
-static void d_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
+static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
 {
     struct priv *p = demuxer->priv;
 
     if (demuxer->stream->uncached_type == STREAMTYPE_CDDA) {
-        demux_seek(p->slave, rel_seek_secs, flags);
+        demux_seek(p->slave, seek_pts, flags);
         return;
     }
-
-    double pts = p->seek_pts;
-    if (flags & SEEK_ABSOLUTE)
-        pts = 0.0f;
-    double base_pts = pts; // to what pts is relative
 
     if (flags & SEEK_FACTOR) {
         double tmp = 0;
         stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &tmp);
-        pts += tmp * rel_seek_secs;
-    } else {
-        pts += rel_seek_secs;
+        seek_pts *= tmp;
     }
 
-    MP_VERBOSE(demuxer, "seek to: %f\n", pts);
+    MP_VERBOSE(demuxer, "seek to: %f\n", seek_pts);
 
-    double seek_arg[] = {pts, base_pts, flags};
+    double seek_arg[] = {seek_pts, flags};
     stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_TIME, seek_arg);
     demux_control(p->slave, DEMUXER_CTRL_RESYNC, NULL);
 
-    p->seek_pts = pts;
     p->seek_reinit = true;
 }
 
@@ -268,9 +259,6 @@ static int d_fill_buffer(demuxer_t *demuxer)
 
     MP_TRACE(demuxer, "opts: %d %f %f\n", sh->type, pkt->pts, pkt->dts);
 
-    if (pkt->pts != MP_NOPTS_VALUE)
-        p->seek_pts = pkt->pts;
-
     demux_add_packet(sh, pkt);
     return 1;
 }
@@ -328,8 +316,6 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
 
         // Can be seekable even if the stream isn't.
         demuxer->seekable = true;
-
-        demuxer->rel_seeks = true;
     }
 
     add_dvd_streams(demuxer);
