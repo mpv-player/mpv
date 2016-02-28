@@ -77,7 +77,7 @@ namespace mpv
             return null;
         }
 
-        private void LoadMvpDynamic()
+        private void LoadMpvDynamic()
         {
             _libMpvDll = LoadLibrary("mpv-1.dll");
             _mpvCreate = (MpvCreate)GetDllType(typeof(MpvCreate), "mpv_create");
@@ -182,7 +182,7 @@ namespace mpv
             if (_mpvHandle != IntPtr.Zero)
                 _mpvTerminateDestroy(_mpvHandle);
 
-            LoadMvpDynamic();
+            LoadMpvDynamic();
             if (_libMpvDll == IntPtr.Zero)
                 return;
 
@@ -192,7 +192,7 @@ namespace mpv
 
             _mpvInitialize.Invoke(_mpvHandle);
 
-            _mpvSetOptionString(_mpvHandle, Encoding.UTF8.GetBytes("vo\0"), Encoding.UTF8.GetBytes("direct3d\0")); 
+            _mpvSetOptionString(_mpvHandle, Encoding.UTF8.GetBytes("vo\0"), Encoding.UTF8.GetBytes("direct3d_shaders\0")); 
             _mpvSetOptionString(_mpvHandle, Encoding.UTF8.GetBytes("keep-open\0"), Encoding.UTF8.GetBytes("always\0")); 
 
             int mpvFormatInt64 = 4;
