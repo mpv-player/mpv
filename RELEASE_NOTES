@@ -1,3 +1,112 @@
+Release 0.16.0
+==============
+
+This release changes the license of some non-MPlayer source files to LGPL 2.1 or later.
+
+
+Build System Changes
+--------------------
+
+- build: enable vaapi under drm-only as well (issue #2808)
+- build: enable vo_opengl_cb if GL headers are present
+- build: make libavfilter mandatory
+- build: make posix_spawn optional
+- wscript: don’t install the encoding profiles with encoding disabled
+
+
+Features
+--------
+
+New
+~~~
+
+- Initial Android support
+- ao: initial OpenSL ES support
+- dxva2: support HEVC Main 10
+- osc: add always-on mode and unify visibility mode (always/never/auto)
+- player: add complex filter graph support
+- rpi: add mpeg-4, vc-1 decoding support
+- stream_dvb: support frontends with multiple delivery systems (e.g. DVB-C/DVB-T combo cards)
+- vo_opengl: 10 bit support with ANGLE
+- vo_opengl: add KMS/DRM VAAPI hardware decoding interop
+- vo_opengl: dxinterop: add dxva2 passthrough
+- vo_rpi: add geometry handling (--geometry, --autofit, fullscreen switching, etc.)
+- vo_x11: add 16bpp support
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- --lavfi-complex option for complex filter graphs
+- audio: change downmix behavior, add --audio-normalize-downmix
+- command: add vf-command and af-command commands
+- player: add --external-file option
+- vo_opengl: add interpolation-threshold sub-option
+
+
+Changed
+~~~~~~~
+
+- audio: change --audio-channels default back to stereo
+- audio: remove default preference for libdcadec (decoder was merged with FFmpeg)
+- command: always allow setting volume/mute properties
+- command: show original aspect in video-aspect property too
+- input: ignore --input-cursor for events injected by input commands (issue #2750)
+- options: set fs=yes by default on RPI, and change RPI defaults handling
+- sub: implement "sub-seek 0" (issue #2791)
+- vo_opengl: default scaler-resizes-only sub-option to yes
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- OS X/cocoa: fix charcode retrieving for accented characters
+- TOOLS/lua/ao-null-reload.lua: send ao-reload on audio-device-list change (issue #2738)
+- TOOLS/lua/autoload.lua: remove the extension prior to sort
+- Windows: fix dropping URIs (issue #2782)
+- af_lavrresample: prevent channels from being dropped, e.g. when going 7.1 -> 7.1(wide) and similar cases
+- ao_coreaudio: fix 7.1(rear) channel mapping
+- ao_openal: wipe out global context on init error (PR #2719)
+- ao_wasapi: avoid under-run cascade in exclusive mode
+- ao_wasapi: set buffer size to device period in exclusive mode
+- audio: fix spdif PCM fallback
+- build: add special openbsd case for iconv check (issue #2710)
+- command: fix NULL pointer deref in "video-codec" property (issue #2729)
+- command: fix track cycling logic (issue #2784)
+- demux: disable stream cache if no tracks are selected (issue #2692)
+- demux_mkv: add hack to fix opus gapless behavior
+- demux_mkv: support channel layout in VfW muxed PCM (issue #2820)
+- osc: fix runtime enable_osc(true/false)
+- player: fix initial audio sync in certain cases (issue #2770)
+- player: honor --force-window if video is selected, but inactive
+- player: never show "DS: (unavailable)"
+- player: restore old/correct --force-window behavior (issue #2825)
+- player: rewrite timeline/ordered chapter support
+- vaapi: fix compilation on older FFmpeg/Libav (issue #2737)
+- vdpau: force driver to report preemption early
+- video: don't wait for last video frame in the normal case (issue #2745)
+- video: fix coverart switching
+- video: slightly improve video stream switching
+- vo_opengl: add precision qualifier to usampler2D on ANGLE (issue #2761)
+- vo_opengl: default to rgba16f FBOs on ANGLE
+- vo_opengl: don't use normalized coords for debanding rectangle textures (issue #2831)
+- vo_opengl: dxinterop: fix compatibility issue with Vista
+- vo_opengl: pass the correct target to deband functions with Apple hwdec interop
+- vo_opengl: rename custom shader entrypoint from sample to sample_pixel (issue #2733)
+- x11: get *current* XRandR screen configuration instead of polling for new screens, too
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API. A complete changelog can be seen by running
+`git log v0.15.0..v0.16.0` in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.15.0...v0.16.0 or
+http://git.srsfckn.biz/mpv/log/?qt=range&q=v0.15.0..v0.16.0
+
+
+
 Release 0.15.0
 ==============
 
