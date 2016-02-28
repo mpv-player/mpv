@@ -604,7 +604,8 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
     mp_input_queue_cmd(ictx, cmd);
 }
 
-static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
+static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
+                              bool force_mouse)
 {
     struct input_opts *opts = ictx->opts;
 
@@ -615,7 +616,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
         release_down_cmd(ictx, false);
         return;
     }
-    if (!opts->enable_mouse_movements && MP_KEY_IS_MOUSE(unmod))
+    if (!opts->enable_mouse_movements && MP_KEY_IS_MOUSE(unmod) && !force_mouse)
         return;
     if (unmod == MP_KEY_MOUSE_LEAVE || unmod == MP_KEY_MOUSE_ENTER) {
         update_mouse_section(ictx);
@@ -643,7 +644,14 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
 void mp_input_put_key(struct input_ctx *ictx, int code)
 {
     input_lock(ictx);
-    mp_input_feed_key(ictx, code, 1);
+    mp_input_feed_key(ictx, code, 1, false);
+    input_unlock(ictx);
+}
+
+void mp_input_put_key_artificial(struct input_ctx *ictx, int code)
+{
+    input_lock(ictx);
+    mp_input_feed_key(ictx, code, 1, true);
     input_unlock(ictx);
 }
 
@@ -662,7 +670,7 @@ void mp_input_put_axis(struct input_ctx *ictx, int direction, double value)
     if (value == 0.0)
         return;
     input_lock(ictx);
-    mp_input_feed_key(ictx, direction, value);
+    mp_input_feed_key(ictx, direction, value, false);
     input_unlock(ictx);
 }
 
@@ -699,11 +707,17 @@ bool mp_input_vo_keyboard_enabled(struct input_ctx *ictx)
 void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
 {
     input_lock(ictx);
+    if (ictx->opts->enable_mouse_movements)
+        mp_input_set_mouse_pos_artificial(ictx, x, y);
+    input_unlock(ictx);
+}
+
+void mp_input_set_mouse_pos_artificial(struct input_ctx *ictx, int x, int y)
+{
+    input_lock(ictx);
     MP_DBG(ictx, "mouse move %d/%d\n", x, y);
 
-    if ((ictx->mouse_vo_x == x && ictx->mouse_vo_y == y) ||
-        !ictx->opts->enable_mouse_movements)
-    {
+    if (ictx->mouse_vo_x == x && ictx->mouse_vo_y == y) {
         input_unlock(ictx);
         return;
     }

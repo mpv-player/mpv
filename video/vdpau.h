@@ -59,6 +59,7 @@ struct mp_vdpau_ctx {
     uint64_t preemption_counter;        // incremented after _restoring_
     bool preemption_user_notified;
     double last_preemption_retry_fail;
+    VdpOutputSurface preemption_obj;    // dummy for reliable preempt. check
 
     // Surface pool
     pthread_mutex_t pool_lock;

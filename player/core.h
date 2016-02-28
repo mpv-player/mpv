@@ -26,9 +26,11 @@
 #include "common/common.h"
 #include "options/options.h"
 #include "sub/osd.h"
-#include "demux/timeline.h"
+#include "audio/audio.h"
 #include "video/mp_image.h"
 #include "video/out/vo.h"
+
+#include "lavfi.h"
 
 // definitions used internally by the core player code
 
@@ -130,13 +132,6 @@ struct track {
     char *external_filename;
     bool auto_loaded;
 
-    // If the track's stream changes with the timeline (ordered chapters).
-    bool under_timeline;
-
-    // Does not change with under_timeline, but is useless for most purposes.
-    struct sh_stream *original_stream;
-
-    // Value can change if under_timeline==true.
     struct demuxer *demuxer;
     // Invariant: !stream || stream->demuxer == demuxer
     struct sh_stream *stream;
@@ -144,8 +139,14 @@ struct track {
     // Current subtitle state (or cached state if selected==false).
     struct dec_sub *d_sub;
 
-    // Current video decoding state (NULL if selected==false)
+    // Current decoding state (NULL if selected==false)
     struct dec_video *d_video;
+    struct dec_audio *d_audio;
+
+    // Where the decoded result goes to (one of them is not NULL if active)
+    struct vo_chain *vo_c;
+    struct ao_chain *ao_c;
+    struct lavfi_pad *sink;
 
     // For external subtitles, which are read fully on init. Do not attempt
     // to read packets from them.
@@ -168,7 +169,36 @@ struct vo_chain {
     // Last known input_mpi format (so vf can be reinitialized any time).
     struct mp_image_params input_format;
 
+    struct track *track;
+    struct lavfi_pad *filter_src;
     struct dec_video *video_src;
+
+    // - video consists of a single picture, which should be shown only once
+    // - do not sync audio to video in any way
+    bool is_coverart;
+};
+
+// Like vo_chain, for audio.
+struct ao_chain {
+    struct mp_log *log;
+
+    double pts; // timestamp of first sample output by decoder
+    bool spdif_passthrough, spdif_failed;
+    bool pts_reset;
+
+    struct af_stream *af;
+    struct ao *ao;
+    struct mp_audio_buffer *ao_buffer;
+
+    // 1-element input frame queue.
+    struct mp_audio *input_frame;
+
+    // Last known input_mpi format (so vf can be reinitialized any time).
+    struct mp_audio input_format;
+
+    struct track *track;
+    struct lavfi_pad *filter_src;
+    struct dec_audio *audio_src;
 };
 
 /* Note that playback can be paused, stopped, etc. at any time. While paused,
@@ -243,18 +273,10 @@ typedef struct MPContext {
     // Current file statistics
     int64_t shown_vframes, shown_aframes;
 
-    struct stream *stream; // stream that was initially opened
-    struct demuxer **sources; // all open demuxers
-    int num_sources;
-
-    struct timeline *tl;
-    struct timeline_part *timeline;
-    int num_timeline_parts;
-    int timeline_part;
     struct demux_chapter *chapters;
     int num_chapters;
 
-    struct demuxer *demuxer; // can change with timeline
+    struct demuxer *demuxer;
     struct mp_tags *filtered_tags;
 
     struct track **tracks;
@@ -267,17 +289,12 @@ typedef struct MPContext {
     // Currently, this is used for the secondary subtitle track only.
     struct track *current_track[NUM_PTRACKS][STREAM_TYPE_COUNT];
 
-    struct dec_audio *d_audio;
-
-    // Uses: accessing metadata (consider ordered chapters case, where the main
-    // demuxer defines metadata), or special purpose demuxers like TV.
-    struct demuxer *master_demuxer;
-    struct demuxer *track_layout;   // complication for ordered chapters
+    struct lavfi *lavfi;
 
     struct mixer *mixer;
     struct ao *ao;
     struct mp_audio *ao_decoder_fmt; // for weak gapless audio check
-    struct mp_audio_buffer *ao_buffer;  // queued audio; passed to ao_play() later
+    struct ao_chain *ao_chain;
 
     struct vo_chain *vo_chain;
 
@@ -304,9 +321,6 @@ typedef struct MPContext {
     double audio_drop_throttle;
     // Number of mistimed frames.
     int mistimed_frames_total;
-    /* Set if audio should be timed to start with video frame after seeking,
-     * not set when e.g. playing cover art */
-    bool sync_audio_to_video;
     bool hrseek_active;     // skip all data until hrseek_pts
     bool hrseek_framedrop;  // allow decoder to drop frames before hrseek_pts
     bool hrseek_lastframe;  // drop everything until last frame reached
@@ -331,8 +345,6 @@ typedef struct MPContext {
      * (or at least queued to be flipped by VO) */
     double video_pts;
     double last_seek_pts;
-    // Mostly unused; for proper audio resync on speed changes.
-    double video_next_pts;
     // As video_pts, but is not reset when seeking away. (For the very short
     // period of time until a new frame is decoded and shown.)
     double last_vo_pts;
@@ -409,14 +421,17 @@ typedef struct MPContext {
 // audio.c
 void reset_audio_state(struct MPContext *mpctx);
 void reinit_audio_chain(struct MPContext *mpctx);
+int init_audio_decoder(struct MPContext *mpctx, struct track *track);
 int reinit_audio_filters(struct MPContext *mpctx);
 double playing_audio_pts(struct MPContext *mpctx);
-void fill_audio_out_buffers(struct MPContext *mpctx, double endpts);
+void fill_audio_out_buffers(struct MPContext *mpctx);
 double written_audio_pts(struct MPContext *mpctx);
 void clear_audio_output_buffers(struct MPContext *mpctx);
 void update_playback_speed(struct MPContext *mpctx);
 void uninit_audio_out(struct MPContext *mpctx);
 void uninit_audio_chain(struct MPContext *mpctx);
+int init_audio_decoder(struct MPContext *mpctx, struct track *track);
+void reinit_audio_chain_src(struct MPContext *mpctx, struct lavfi_pad *src);
 
 // configfiles.c
 void mp_parse_cfgfiles(struct MPContext *mpctx);
@@ -439,8 +454,6 @@ void mp_switch_track_n(struct MPContext *mpctx, int order,
 void mp_deselect_track(struct MPContext *mpctx, struct track *track);
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid);
-bool timeline_switch_to_time(struct MPContext *mpctx, double pts);
-int timeline_get_for_time(struct MPContext *mpctx, double pts);
 void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer);
 bool mp_remove_track(struct MPContext *mpctx, struct track *track);
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
@@ -449,7 +462,7 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
 void mp_play_files(struct MPContext *mpctx);
 void update_demuxer_properties(struct MPContext *mpctx);
 void print_track_list(struct MPContext *mpctx, const char *msg);
-void reselect_demux_streams(struct MPContext *mpctx);
+void reselect_demux_stream(struct MPContext *mpctx, struct track *track);
 void prepare_playlist(struct MPContext *mpctx, struct playlist *pl);
 void autoload_external_files(struct MPContext *mpctx);
 struct track *select_default_track(struct MPContext *mpctx, int order,
@@ -465,7 +478,6 @@ void wakeup_playloop(void *ctx);
 // misc.c
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t);
 double get_play_end_pts(struct MPContext *mpctx);
-double get_relative_time(struct MPContext *mpctx);
 void merge_playlist_files(struct playlist *pl);
 float mp_get_cache_percent(struct MPContext *mpctx);
 bool mp_get_cache_idle(struct MPContext *mpctx);
@@ -490,6 +502,7 @@ void set_osd_bar_chapters(struct MPContext *mpctx, int type);
 // playloop.c
 void mp_wait_events(struct MPContext *mpctx, double sleeptime);
 void mp_process_input(struct MPContext *mpctx);
+double get_relative_time(struct MPContext *mpctx);
 void reset_playback_state(struct MPContext *mpctx);
 void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);
@@ -535,12 +548,15 @@ int video_get_colors(struct vo_chain *vo_c, const char *item, int *value);
 int video_set_colors(struct vo_chain *vo_c, const char *item, int value);
 int video_vf_vo_control(struct vo_chain *vo_c, int vf_cmd, void *data);
 void reset_video_state(struct MPContext *mpctx);
+int init_video_decoder(struct MPContext *mpctx, struct track *track);
 int reinit_video_chain(struct MPContext *mpctx);
+int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src);
 int reinit_video_filters(struct MPContext *mpctx);
-void write_video(struct MPContext *mpctx, double endpts);
+void write_video(struct MPContext *mpctx);
 void mp_force_video_refresh(struct MPContext *mpctx);
 void uninit_video_out(struct MPContext *mpctx);
 void uninit_video_chain(struct MPContext *mpctx);
 double calc_average_frame_duration(struct MPContext *mpctx);
+int init_video_decoder(struct MPContext *mpctx, struct track *track);
 
 #endif /* MPLAYER_MP_CORE_H */

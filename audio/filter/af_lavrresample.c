@@ -179,6 +179,37 @@ bool af_lavrresample_test_conversion(int src_format, int dst_format)
            check_output_conversion(dst_format) != AV_SAMPLE_FMT_NONE;
 }
 
+static struct mp_chmap fudge_pairs[][2] = {
+    {MP_CHMAP2(BL,  BR),  MP_CHMAP2(SL,  SR)},
+    {MP_CHMAP2(SL,  SR),  MP_CHMAP2(BL,  BR)},
+    {MP_CHMAP2(SDL, SDR), MP_CHMAP2(SL,  SR)},
+    {MP_CHMAP2(SL,  SR),  MP_CHMAP2(SDL, SDR)},
+};
+
+// Modify out_layout and return the new value. The intention is reducing the
+// loss libswresample's rematrixing will cause by exchanging similar, but
+// strictly speaking incompatible channel pairs. For example, 7.1 should be
+// changed to 7.1(wide) without dropping the SL/SR channels. (We still leave
+// it to libswresample to create the remix matrix.)
+static uint64_t fudge_layout_conversion(struct af_instance *af,
+                                        uint64_t in, uint64_t out)
+{
+    for (int n = 0; n < MP_ARRAY_SIZE(fudge_pairs); n++) {
+        uint64_t a = mp_chmap_to_lavc(&fudge_pairs[n][0]);
+        uint64_t b = mp_chmap_to_lavc(&fudge_pairs[n][1]);
+        if ((in & a) == a && (in & b) == 0 &&
+            (out & a) == 0 && (out & b) == b)
+        {
+            out = (out & ~b) | a;
+
+            MP_VERBOSE(af, "Fudge: %s -> %s\n",
+                       mp_chmap_to_str(&fudge_pairs[n][0]),
+                       mp_chmap_to_str(&fudge_pairs[n][1]));
+        }
+    }
+    return out;
+}
+
 // mp_chmap_get_reorder() performs:
 //  to->speaker[n] = from->speaker[src[n]]
 // but libavresample does:
@@ -230,10 +261,13 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
 
     av_opt_set_double(s->avrctx, "cutoff",          s->opts.cutoff, 0);
 
+    int normalize = s->opts.normalize;
+    if (normalize < 0)
+        normalize = af->opts->audio_normalize;
 #if HAVE_LIBSWRESAMPLE
-    av_opt_set_double(s->avrctx, "rematrix_maxval", s->opts.normalize ? 1 : 1000, 0);
+    av_opt_set_double(s->avrctx, "rematrix_maxval", normalize ? 1 : 1000, 0);
 #else
-    av_opt_set_int(s->avrctx, "normalize_mix_level", s->opts.normalize, 0);
+    av_opt_set_int(s->avrctx, "normalize_mix_level", !!normalize, 0);
 #endif
 
     if (mp_set_avopts(af->log, s->avrctx, s->avopts) < 0)
@@ -296,6 +330,8 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     s->pool_fmt = s->avrctx_fmt;
     if (map_out.num > out_lavc.num)
         mp_audio_set_channels(&s->pool_fmt, &map_out);
+
+    out_ch_layout = fudge_layout_conversion(af, in_ch_layout, out_ch_layout);
 
     // Real conversion; output is input to avrctx_out.
     av_opt_set_int(s->avrctx, "in_channel_layout",  in_ch_layout, 0);
@@ -583,7 +619,7 @@ const struct af_info af_info_lavrresample = {
             .filter_size = 16,
             .cutoff      = 0.0,
             .phase_shift = 10,
-            .normalize   = 1,
+            .normalize   = -1,
         },
         .playback_speed = 1.0,
         .allow_detach = 1,
@@ -594,7 +630,8 @@ const struct af_info af_info_lavrresample = {
         OPT_FLAG("linear", opts.linear, 0),
         OPT_DOUBLE("cutoff", opts.cutoff, M_OPT_RANGE, .min = 0, .max = 1),
         OPT_FLAG("detach", allow_detach, 0),
-        OPT_FLAG("normalize", opts.normalize, 0),
+        OPT_CHOICE("normalize", opts.normalize, 0,
+                   ({"no", 0}, {"yes", 1}, {"auto", -1})),
         OPT_KEYVALUELIST("o", avopts, 0),
         {0}
     },

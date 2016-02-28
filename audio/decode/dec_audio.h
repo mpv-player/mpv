@@ -30,41 +30,33 @@ struct dec_audio {
     struct mp_log *log;
     struct MPOpts *opts;
     struct mpv_global *global;
-    bool spdif_passthrough, spdif_failed;
     const struct ad_functions *ad_driver;
     struct sh_stream *header;
-    struct af_stream *afilter;
+    struct mp_codec_params *codec;
     char *decoder_desc;
-    int init_retries;
-    struct mp_audio_pool *pool;
-    struct mp_audio decode_format;
-    struct mp_audio *waiting;   // used on format-change
-    // set by decoder
-    int bitrate;                // input bitrate, can change with VBR sources
-    // last known pts value in output from decoder
-    double pts;
-    // number of samples output by decoder after last known pts
-    int pts_offset;
-    // set every time a jump in timestamps is encountered
-    bool pts_reset;
+
+    bool try_spdif;
+
     // For free use by the ad_driver
     void *priv;
-};
 
-enum {
-    AD_OK = 0,
-    AD_ERR = -1,
-    AD_EOF = -2,
-    AD_NEW_FMT = -3,
-    AD_WAIT = -4,
+    // Strictly internal (dec_audio.c).
+
+    double pts; // endpts of previous frame
+    double start, end;
+    struct demux_packet *packet;
+    struct demux_packet *new_segment;
+    struct mp_audio *current_frame;
+    int current_state;
 };
 
 struct mp_decoder_list *audio_decoder_list(void);
 int audio_init_best_codec(struct dec_audio *d_audio);
-int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
-                 int minsamples);
-int initial_audio_decode(struct dec_audio *d_audio);
-void audio_reset_decoding(struct dec_audio *d_audio);
 void audio_uninit(struct dec_audio *d_audio);
+
+void audio_work(struct dec_audio *d_audio);
+int audio_get_frame(struct dec_audio *d_audio, struct mp_audio **out_frame);
+
+void audio_reset_decoding(struct dec_audio *d_audio);
 
 #endif /* MPLAYER_DEC_AUDIO_H */

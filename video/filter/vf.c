@@ -71,7 +71,6 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_noformat,
     &vf_info_flip,
 
-#if HAVE_LIBAVFILTER
     &vf_info_mirror,
     &vf_info_lavfi,
     &vf_info_rotate,
@@ -79,7 +78,6 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_pullup,
     &vf_info_yadif,
     &vf_info_stereo3d,
-#endif
 
     &vf_info_eq,
     &vf_info_dsize,
@@ -160,6 +158,17 @@ static void vf_control_all(struct vf_chain *c, int cmd, void *arg)
     for (struct vf_instance *cur = c->first; cur; cur = cur->next) {
         if (cur->control)
             cur->control(cur, cmd, arg);
+    }
+}
+
+int vf_send_command(struct vf_chain *c, char *label, char *cmd, char *arg)
+{
+    char *args[2] = {cmd, arg};
+    if (strcmp(label, "all") == 0) {
+        vf_control_all(c, VFCTRL_COMMAND, args);
+        return 0;
+    } else {
+        return vf_control_by_label(c, VFCTRL_COMMAND, args, bstr0(label));
     }
 }
 

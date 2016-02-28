@@ -236,6 +236,7 @@ static int init(struct ao *ao)
     return 0;
 
 err_out:
+    ao_data = NULL;
     return -1;
 }
 

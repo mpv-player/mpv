@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdlib.h>
@@ -46,12 +46,21 @@ struct dec_sub {
     pthread_mutex_t lock;
 
     struct mp_log *log;
+    struct mpv_global *global;
     struct MPOpts *opts;
+
+    struct demuxer *demuxer;
 
     struct sh_stream *sh;
     double last_pkt_pts;
 
+    struct mp_codec_params *codec;
+    double start, end;
+
+    double last_vo_pts;
     struct sd *sd;
+
+    struct demux_packet *new_segment;
 };
 
 void sub_lock(struct dec_sub *sub)
@@ -75,6 +84,31 @@ void sub_destroy(struct dec_sub *sub)
     talloc_free(sub);
 }
 
+static struct sd *init_decoder(struct dec_sub *sub)
+{
+    for (int n = 0; sd_list[n]; n++) {
+        const struct sd_functions *driver = sd_list[n];
+        struct sd *sd = talloc(NULL, struct sd);
+        *sd = (struct sd){
+            .global = sub->global,
+            .log = mp_log_new(sd, sub->log, driver->name),
+            .opts = sub->opts,
+            .driver = driver,
+            .demuxer = sub->demuxer,
+            .codec = sub->codec,
+        };
+
+        if (sd->driver->init(sd) >= 0)
+            return sd;
+
+        talloc_free(sd);
+    }
+
+    MP_ERR(sub, "Could not find subtitle decoder for format '%s'.\n",
+           sub->codec->codec);
+    return NULL;
+}
+
 // Thread-safety of the returned object: all functions are thread-safe,
 // except sub_get_bitmaps() and sub_get_text(). Decoder backends (sd_*)
 // do not need to acquire locks.
@@ -83,39 +117,52 @@ struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
 {
     assert(demuxer && sh && sh->type == STREAM_SUB);
 
-    struct mp_log *log = mp_log_new(NULL, global->log, "sub");
+    struct dec_sub *sub = talloc(NULL, struct dec_sub);
+    *sub = (struct dec_sub){
+        .log = mp_log_new(sub, global->log, "sub"),
+        .global = global,
+        .opts = global->opts,
+        .sh = sh,
+        .codec = sh->codec,
+        .demuxer = demuxer,
+        .last_pkt_pts = MP_NOPTS_VALUE,
+        .last_vo_pts = MP_NOPTS_VALUE,
+        .start = MP_NOPTS_VALUE,
+        .end = MP_NOPTS_VALUE,
+    };
+    mpthread_mutex_init_recursive(&sub->lock);
 
-    for (int n = 0; sd_list[n]; n++) {
-        const struct sd_functions *driver = sd_list[n];
-        struct dec_sub *sub = talloc_zero(NULL, struct dec_sub);
-        sub->log = talloc_steal(sub, log),
-        sub->opts = global->opts;
-        sub->sh = sh;
-        sub->last_pkt_pts = MP_NOPTS_VALUE;
-        mpthread_mutex_init_recursive(&sub->lock);
+    sub->sd = init_decoder(sub);
+    if (sub->sd)
+        return sub;
 
-        sub->sd = talloc(NULL, struct sd);
-        *sub->sd = (struct sd){
-            .global = global,
-            .log = mp_log_new(sub->sd, sub->log, driver->name),
-            .opts = sub->opts,
-            .driver = driver,
-            .demuxer = demuxer,
-            .codec = sh->codec,
-        };
-
-        if (sh->codec && sub->sd->driver->init(sub->sd) >= 0)
-            return sub;
-
-        ta_set_parent(log, NULL);
-        talloc_free(sub->sd);
-        talloc_free(sub);
-    }
-
-    mp_err(log, "Could not find subtitle decoder for format '%s'.\n",
-           sh->codec->codec);
-    talloc_free(log);
+    talloc_free(sub);
     return NULL;
+}
+
+// Called locked.
+static void update_segment(struct dec_sub *sub)
+{
+    if (sub->new_segment && sub->last_vo_pts != MP_NOPTS_VALUE &&
+        sub->last_vo_pts >= sub->new_segment->start)
+    {
+        sub->codec = sub->new_segment->codec;
+        sub->start = sub->new_segment->start;
+        sub->end = sub->new_segment->end;
+        struct sd *new = init_decoder(sub);
+        if (new) {
+            sub->sd->driver->uninit(sub->sd);
+            talloc_free(sub->sd);
+            sub->sd = new;
+        } else {
+            // We'll just keep the current decoder, and feed it possibly
+            // invalid data (not our fault if it crashes or something).
+            MP_ERR(sub, "Can't change to new codec.\n");
+        }
+        sub->sd->driver->decode(sub->sd, sub->new_segment);
+        talloc_free(sub->new_segment);
+        sub->new_segment = NULL;
+    }
 }
 
 // Read all packets from the demuxer and decode/add them. Returns false if
@@ -156,6 +203,9 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
         if (!read_more)
             break;
 
+        if (sub->new_segment)
+            break;
+
         struct demux_packet *pkt;
         int st = demux_read_packet_async(sub->sh, &pkt);
         // Note: "wait" (st==0) happens with non-interleaved streams only, and
@@ -169,8 +219,16 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
             break;
         }
 
-        sub->sd->driver->decode(sub->sd, pkt);
         sub->last_pkt_pts = pkt->pts;
+
+        if (pkt->new_segment) {
+            sub->new_segment = pkt;
+            // Note that this can be delayed to a much later point in time.
+            update_segment(sub);
+            break;
+        }
+
+        sub->sd->driver->decode(sub->sd, pkt);
         talloc_free(pkt);
     }
     pthread_mutex_unlock(&sub->lock);
@@ -186,6 +244,13 @@ void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
     struct MPOpts *opts = sub->opts;
 
     *res = (struct sub_bitmaps) {0};
+
+    sub->last_vo_pts = pts;
+    update_segment(sub);
+
+    if (sub->end != MP_NOPTS_VALUE && pts >= sub->end)
+        return;
+
     if (opts->sub_visibility && sub->sd->driver->get_bitmaps)
         sub->sd->driver->get_bitmaps(sub->sd, dim, pts, res);
 }
@@ -198,6 +263,10 @@ char *sub_get_text(struct dec_sub *sub, double pts)
     pthread_mutex_lock(&sub->lock);
     struct MPOpts *opts = sub->opts;
     char *text = NULL;
+
+    sub->last_vo_pts = pts;
+    update_segment(sub);
+
     if (opts->sub_visibility && sub->sd->driver->get_text)
         text = sub->sd->driver->get_text(sub->sd, pts);
     pthread_mutex_unlock(&sub->lock);
@@ -210,6 +279,10 @@ void sub_reset(struct dec_sub *sub)
     if (sub->sd->driver->reset)
         sub->sd->driver->reset(sub->sd);
     sub->last_pkt_pts = MP_NOPTS_VALUE;
+    sub->start = sub->end = MP_NOPTS_VALUE;
+    sub->last_vo_pts = MP_NOPTS_VALUE;
+    talloc_free(sub->new_segment);
+    sub->new_segment = NULL;
     pthread_mutex_unlock(&sub->lock);
 }
 

@@ -3,18 +3,18 @@
  *
  * Original author: Jonathan Yong <10walls@gmail.com>
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <math.h>
@@ -29,6 +29,7 @@
 #include "audio/format.h"
 #include "osdep/timer.h"
 #include "osdep/io.h"
+#include "osdep/strnlen.h"
 #include "ao_wasapi.h"
 
 #define MIXER_DEFAULT_LABEL L"mpv - video player"
@@ -297,7 +298,7 @@ static bool try_format_exclusive(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
     if (hr != AUDCLNT_E_UNSUPPORTED_FORMAT)
         EXIT_ON_ERROR(hr);
 
-    return hr == S_OK;
+    return SUCCEEDED(hr);
 exit_label:
     MP_ERR(state, "Error testing exclusive format: %s\n", mp_HRESULT_to_str(hr));
     return false;
@@ -606,18 +607,20 @@ static HRESULT fix_format(struct ao *ao)
     MP_VERBOSE(state, "Device period: %.2g ms\n",
                (double) devicePeriod / 10000.0 );
 
-    // integer multiple of device period close to 50ms
-    bufferPeriod = bufferDuration =
-                   ceil(50.0 * 10000.0 / devicePeriod) * devicePeriod;
+    if (state->share_mode == AUDCLNT_SHAREMODE_SHARED) {
+        // for shared mode, use integer multiple of device period close to 50ms
+        bufferDuration = devicePeriod * ceil(50.0 * 10000.0 / devicePeriod);
+        bufferPeriod   = 0;
+    } else {
+        // in exclusive mode, these should all be the same
+        bufferPeriod = bufferDuration = devicePeriod;
+    }
 
     // handle unsupported buffer size hopefully this shouldn't happen because of
     // the above integer device period
     // http://msdn.microsoft.com/en-us/library/windows/desktop/dd370875%28v=vs.85%29.aspx
     int retries=0;
 reinit:
-    if (state->share_mode == AUDCLNT_SHAREMODE_SHARED)
-        bufferPeriod = 0;
-
     MP_DBG(state, "IAudioClient::Initialize\n");
     hr = IAudioClient_Initialize(state->pAudioClient,
                                  state->share_mode,
@@ -639,9 +642,12 @@ reinit:
 
         IAudioClient_GetBufferSize(state->pAudioClient,
                                    &state->bufferFrameCount);
-        bufferPeriod = bufferDuration = (REFERENCE_TIME) (0.5 +
+        bufferDuration = (REFERENCE_TIME) (0.5 +
             (10000.0 * 1000 / state->format.Format.nSamplesPerSec
              * state->bufferFrameCount));
+        if (state->share_mode == AUDCLNT_SHAREMODE_EXCLUSIVE)
+            bufferPeriod = bufferDuration;
+
 
         IAudioClient_Release(state->pAudioClient);
         state->pAudioClient = NULL;
@@ -749,7 +755,7 @@ struct enumerator {
     struct mp_log *log;
     IMMDeviceEnumerator *pEnumerator;
     IMMDeviceCollection *pDevices;
-    int count;
+    UINT count;
 };
 
 static void destroy_enumerator(struct enumerator *e)
@@ -784,7 +790,7 @@ exit_label:
     return NULL;
 }
 
-static struct device_desc *device_desc_for_num(struct enumerator *e, int i)
+static struct device_desc *device_desc_for_num(struct enumerator *e, UINT i)
 {
     IMMDevice *pDevice = NULL;
     HRESULT hr = IMMDeviceCollection_Item(e->pDevices, i, &pDevice);
@@ -818,7 +824,7 @@ void wasapi_list_devs(struct ao *ao, struct ao_device_list *list)
     if (!enumerator)
         return;
 
-    for (int i = 0; i < enumerator->count; i++) {
+    for (UINT i = 0; i < enumerator->count; i++) {
         struct device_desc *d = device_desc_for_num(enumerator, i);
         if (!d)
             goto exit_label;
@@ -858,20 +864,30 @@ static LPWSTR select_device(struct mp_log *l, struct device_desc *d)
                          (wcslen(d->deviceID) + 1) * sizeof(wchar_t));
 }
 
-LPWSTR find_deviceID(struct ao *ao)
+bstr wasapi_get_specified_device_string(struct ao *ao)
 {
-    LPWSTR deviceID = NULL;
     struct wasapi_state *state = ao->priv;
     bstr device = bstr_strip(bstr0(state->opt_device));
     if (!device.len)
         device = bstr_strip(bstr0(ao->device));
+    return device;
+}
 
+LPWSTR wasapi_find_deviceID(struct ao *ao)
+{
+    LPWSTR deviceID = NULL;
+    bstr device = wasapi_get_specified_device_string(ao);
     MP_DBG(ao, "Find device \'%.*s\'\n", BSTR_P(device));
 
     struct device_desc *d = NULL;
     struct enumerator *enumerator = create_enumerator(ao->log);
     if (!enumerator)
         goto exit_label;
+
+    if (!enumerator->count) {
+        MP_ERR(ao, "There are no playback devices available\n");
+        goto exit_label;
+    }
 
     if (!device.len) {
         MP_VERBOSE(ao, "No device specified. Selecting default.\n");
@@ -883,7 +899,7 @@ LPWSTR find_deviceID(struct ao *ao)
     // try selecting by number
     bstr rest;
     long long devno = bstrtoll(device, &rest, 10);
-    if (!rest.len && 0 <= devno && devno < enumerator->count) {
+    if (!rest.len && 0 <= devno && devno < (long long)enumerator->count) {
         MP_VERBOSE(ao, "Selecting device by number: #%lld\n", devno);
         d = device_desc_for_num(enumerator, devno);
         deviceID = select_device(ao->log, d);
@@ -892,7 +908,7 @@ LPWSTR find_deviceID(struct ao *ao)
 
     // select by id or name
     bstr_eatstart0(&device, "{0.0.0.00000000}.");
-    for (int i = 0; i < enumerator->count; i++) {
+    for (UINT i = 0; i < enumerator->count; i++) {
         d = device_desc_for_num(enumerator, i);
         if (!d)
             goto exit_label;
@@ -904,7 +920,7 @@ LPWSTR find_deviceID(struct ao *ao)
         }
 
         if (bstrcmp(device, bstr_strip(bstr0(d->name))) == 0) {
-            if (!state->deviceID) {
+            if (!deviceID) {
                 MP_VERBOSE(ao, "Selecting device by name: \'%.*s\'\n", BSTR_P(device));
                 deviceID = select_device(ao->log, d);
             } else {
@@ -923,93 +939,6 @@ exit_label:
     talloc_free(d);
     destroy_enumerator(enumerator);
     return deviceID;
-}
-
-static void *unmarshal(struct wasapi_state *state, REFIID type, IStream **from)
-{
-    if (!*from)
-        return NULL;
-    void *to_proxy = NULL;
-    HRESULT hr = CoGetInterfaceAndReleaseStream(*from, type, &to_proxy);
-    *from = NULL; // the stream is released even on failure
-    EXIT_ON_ERROR(hr);
-    return to_proxy;
-exit_label:
-    MP_WARN(state, "Error reading COM proxy: %s\n", mp_HRESULT_to_str(hr));
-    return to_proxy;
-}
-
-void wasapi_receive_proxies(struct wasapi_state *state) {
-    state->pAudioVolumeProxy    = unmarshal(state, &IID_ISimpleAudioVolume,
-                                            &state->sAudioVolume);
-    state->pEndpointVolumeProxy = unmarshal(state, &IID_IAudioEndpointVolume,
-                                            &state->sEndpointVolume);
-    state->pSessionControlProxy = unmarshal(state, &IID_IAudioSessionControl,
-                                            &state->sSessionControl);
-}
-
-void wasapi_release_proxies(wasapi_state *state) {
-    SAFE_RELEASE(state->pAudioVolumeProxy,
-                 ISimpleAudioVolume_Release(state->pAudioVolumeProxy));
-    SAFE_RELEASE(state->pEndpointVolumeProxy,
-                 IAudioEndpointVolume_Release(state->pEndpointVolumeProxy));
-    SAFE_RELEASE(state->pSessionControlProxy,
-                 IAudioSessionControl_Release(state->pSessionControlProxy));
-}
-
-// Must call CoReleaseMarshalData to decrement marshalled object's reference
-// count.
-#define SAFE_RELEASE_INTERFACE_STREAM(stream) do { \
-        if ((stream) != NULL) {                    \
-            CoReleaseMarshalData((stream));        \
-            IStream_Release((stream));             \
-            (stream) = NULL;                       \
-        }                                          \
-    } while(0)
-
-static IStream *marshal(struct wasapi_state *state,
-                         REFIID type, void *from_obj)
-{
-    if (!from_obj)
-        return NULL;
-    IStream *to;
-    HRESULT hr = CreateStreamOnHGlobal(NULL, TRUE, &to);
-    EXIT_ON_ERROR(hr);
-    hr = CoMarshalInterThreadInterfaceInStream(type, (IUnknown *)from_obj, &to);
-    EXIT_ON_ERROR(hr);
-    return to;
-exit_label:
-    SAFE_RELEASE_INTERFACE_STREAM(to);
-    MP_WARN(state, "Error creating COM proxy stream: %s\n",
-            mp_HRESULT_to_str(hr));
-    return to;
-}
-
-static void create_proxy_streams(struct wasapi_state *state) {
-    state->sAudioVolume    = marshal(state, &IID_ISimpleAudioVolume,
-                                     state->pAudioVolume);
-    state->sEndpointVolume = marshal(state, &IID_IAudioEndpointVolume,
-                                     state->pEndpointVolume);
-    state->sSessionControl = marshal(state, &IID_IAudioSessionControl,
-                                     state->pSessionControl);
-}
-
-static void destroy_proxy_streams(struct wasapi_state *state) {
-    // This is only to handle error conditions.
-    // During normal operation, these will already have been released by
-    // unmarshaling.
-    SAFE_RELEASE_INTERFACE_STREAM(state->sAudioVolume);
-    SAFE_RELEASE_INTERFACE_STREAM(state->sEndpointVolume);
-    SAFE_RELEASE_INTERFACE_STREAM(state->sSessionControl);
-}
-
-void wasapi_dispatch(struct ao *ao)
-{
-    MP_DBG(ao, "Dispatch\n");
-    // dispatch any possible pending messages
-    MSG msg;
-    while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-        DispatchMessage(&msg);
 }
 
 HRESULT wasapi_thread_init(struct ao *ao)
@@ -1046,13 +975,10 @@ retry: ;
     }
     EXIT_ON_ERROR(hr);
 
-    MP_DBG(ao, "Creating proxies\n");
-    create_proxy_streams(state);
-
     MP_DBG(ao, "Init wasapi thread done\n");
     return S_OK;
 exit_label:
-    MP_ERR(state, "Error setting up audio thread: %s\n", mp_HRESULT_to_str(hr));
+    MP_FATAL(state, "Error setting up audio thread: %s\n", mp_HRESULT_to_str(hr));
     return hr;
 }
 
@@ -1060,12 +986,9 @@ void wasapi_thread_uninit(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
     MP_DBG(ao, "Thread shutdown\n");
-    wasapi_dispatch(ao);
 
     if (state->pAudioClient)
         IAudioClient_Stop(state->pAudioClient);
-
-    destroy_proxy_streams(state);
 
     SAFE_RELEASE(state->pRenderClient,   IAudioRenderClient_Release(state->pRenderClient));
     SAFE_RELEASE(state->pAudioClock,     IAudioClock_Release(state->pAudioClock));

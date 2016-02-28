@@ -44,6 +44,7 @@ struct mpv_global;
 struct mp_osd_res;
 struct osd_style_opts;
 
+void mp_ass_flush_old_events(ASS_Track *track, long long ts);
 void mp_ass_set_style(ASS_Style *style, double res_y,
                       const struct osd_style_opts *opts);
 

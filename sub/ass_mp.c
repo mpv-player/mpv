@@ -163,3 +163,17 @@ ASS_Library *mp_ass_init(struct mpv_global *global, struct mp_log *log)
     talloc_free(path);
     return priv;
 }
+
+void mp_ass_flush_old_events(ASS_Track *track, long long ts)
+{
+    int n = 0;
+    for (; n < track->n_events; n++) {
+        if ((track->events[n].Start + track->events[n].Duration) >= ts)
+            break;
+        ass_free_event(track, n);
+        track->n_events--;
+    }
+    for (int i = 0; n > 0 && i < track->n_events; i++) {
+        track->events[i] = track->events[i+n];
+    }
+}

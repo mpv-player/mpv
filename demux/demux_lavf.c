@@ -164,12 +164,12 @@ typedef struct lavf_priv {
     int avif_flags;
     AVFormatContext *avfc;
     AVIOContext *pb;
-    int64_t last_pts;
     struct sh_stream **streams; // NULL for unknown streams
     int num_streams;
     int cur_program;
     char *mime_type;
     bool merge_track_metadata;
+    double seek_delay;
 } lavf_priv_t;
 
 // At least mp4 has name="mov,mp4,m4a,3gp,3g2,mj2", so we split the name
@@ -282,6 +282,8 @@ static void convert_charset(struct demuxer *demuxer)
     // libavformat transparently converts UTF-16 to UTF-8
     if (!mp_charset_is_utf16(cp) && !mp_charset_is_utf8(cp)) {
         bstr conv = mp_iconv_to_utf8(demuxer->log, data, cp, MP_ICONV_VERBOSE);
+        if (conv.start && conv.start != data.start)
+            talloc_steal(alloc, conv.start);
         if (conv.start)
             data = conv;
     }
@@ -561,6 +563,11 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             mp_chmap_from_lavc(&sh->codec->channels, codec->channel_layout);
         sh->codec->samplerate = codec->sample_rate;
         sh->codec->bitrate = codec->bit_rate;
+
+        double delay = 0;
+        if (codec->sample_rate > 0)
+            delay = codec->delay / (double)codec->sample_rate;
+        priv->seek_delay = MPMAX(priv->seek_delay, delay);
 
         export_replaygain(demuxer, sh->codec, st);
 
@@ -912,11 +919,6 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
 #endif
     dp->pos = pkt->pos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
-    if (dp->pts != MP_NOPTS_VALUE) {
-        priv->last_pts = dp->pts * AV_TIME_BASE;
-    } else if (dp->dts != MP_NOPTS_VALUE) {
-        priv->last_pts = dp->dts * AV_TIME_BASE;
-    }
     av_packet_unref(pkt);
 
     if (priv->format_hack.clear_filepos)
@@ -926,19 +928,13 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     return 1;
 }
 
-static void demux_seek_lavf(demuxer_t *demuxer, double rel_seek_secs, int flags)
+static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
 {
     lavf_priv_t *priv = demuxer->priv;
     int avsflags = 0;
+    int64_t seek_pts_av = 0;
 
-    if (flags & SEEK_ABSOLUTE)
-        priv->last_pts = 0;
-    else if (rel_seek_secs < 0)
-        avsflags = AVSEEK_FLAG_BACKWARD;
-
-    if (flags & SEEK_FORWARD)
-        avsflags = 0;
-    else if (flags & SEEK_BACKWARD)
+    if (flags & SEEK_BACKWARD)
         avsflags = AVSEEK_FLAG_BACKWARD;
 
     if (flags & SEEK_FACTOR) {
@@ -948,26 +944,28 @@ static void demux_seek_lavf(demuxer_t *demuxer, double rel_seek_secs, int flags)
             !(priv->avif_flags & AVFMT_NO_BYTE_SEEK))
         {
             avsflags |= AVSEEK_FLAG_BYTE;
-            priv->last_pts = end * rel_seek_secs;
+            seek_pts_av = end * seek_pts;
         } else if (priv->avfc->duration != 0 &&
                    priv->avfc->duration != AV_NOPTS_VALUE)
         {
-            priv->last_pts = rel_seek_secs * priv->avfc->duration;
+            seek_pts_av = seek_pts * priv->avfc->duration;
         }
     } else {
-        priv->last_pts += rel_seek_secs * AV_TIME_BASE;
+        if (flags & SEEK_BACKWARD)
+            seek_pts -= priv->seek_delay;
+        seek_pts_av = seek_pts * AV_TIME_BASE;
     }
 
     int r;
     if (!priv->avfc->iformat->read_seek2) {
         // Normal seeking.
-        r = av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags);
+        r = av_seek_frame(priv->avfc, -1, seek_pts_av, avsflags);
         if (r < 0 && (avsflags & AVSEEK_FLAG_BACKWARD)) {
             // When seeking before the beginning of the file, and seeking fails,
             // try again without the backwards flag to make it seek to the
             // beginning.
             avsflags &= ~AVSEEK_FLAG_BACKWARD;
-            r = av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags);
+            r = av_seek_frame(priv->avfc, -1, seek_pts_av, avsflags);
         }
     } else {
         // av_seek_frame() won't work. Use "new" seeking API. We don't use this
@@ -975,11 +973,11 @@ static void demux_seek_lavf(demuxer_t *demuxer, double rel_seek_secs, int flags)
         // Set max_ts==ts, so that demuxing starts from an earlier position in
         // the worst case.
         r = avformat_seek_file(priv->avfc, -1, INT64_MIN,
-                               priv->last_pts, priv->last_pts, avsflags);
+                               seek_pts_av, seek_pts_av, avsflags);
         // Similar issue as in the normal seeking codepath.
         if (r < 0) {
             r = avformat_seek_file(priv->avfc, -1, INT64_MIN,
-                                   priv->last_pts, INT64_MAX, avsflags);
+                                   seek_pts_av, INT64_MAX, avsflags);
         }
     }
     if (r < 0) {

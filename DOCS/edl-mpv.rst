@@ -31,9 +31,8 @@ estimated remaining duration of the source file is used.
 
 Note::
 
-    mpv can't use ordered chapter files in EDL entries. Usage of relative or
-    absolute paths as well as any protocol prefixes is prevented for security
-    reasons.
+    Usage of relative or absolute paths as well as any protocol prefixes may be
+    prevented for security reasons.
 
 
 Syntax of mpv EDL files

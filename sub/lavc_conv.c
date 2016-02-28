@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdlib.h>
@@ -21,6 +21,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/intreadwrite.h>
 #include <libavutil/common.h>
+#include <libavutil/opt.h>
 
 #include "config.h"
 
@@ -70,6 +71,7 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
     priv->cur_list = talloc_array(priv, char*, 0);
     priv->codec = talloc_strdup(priv, codec_name);
     AVCodecContext *avctx = NULL;
+    AVDictionary *opts = NULL;
     const char *fmt = get_lavc_format(priv->codec);
     AVCodec *codec = avcodec_find_decoder(mp_codec_to_av_codec_id(fmt));
     if (!codec)
@@ -78,9 +80,15 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
     if (!avctx)
         goto error;
     avctx->extradata_size = extradata_len;
-    avctx->extradata = talloc_memdup(priv, extradata, extradata_len);
-    if (avcodec_open2(avctx, codec, NULL) < 0)
+    avctx->extradata = av_malloc(extradata_len);
+    if (!avctx->extradata)
         goto error;
+    memcpy(avctx->extradata, extradata, extradata_len);
+    if (strcmp(codec_name, "eia_608") == 0)
+        av_dict_set(&opts, "real_time", "1", 0);
+    if (avcodec_open2(avctx, codec, &opts) < 0)
+        goto error;
+    av_dict_free(&opts);
     // Documented as "set by libavcodec", but there is no other way
     avctx->time_base = (AVRational) {1, 1000};
     priv->avctx = avctx;
@@ -91,6 +99,7 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
 
  error:
     MP_FATAL(priv, "Could not open libavcodec subtitle converter\n");
+    av_dict_free(&opts);
     av_free(avctx);
     talloc_free(priv);
     return NULL;
@@ -264,7 +273,7 @@ void lavc_conv_reset(struct lavc_conv *priv)
 
 void lavc_conv_uninit(struct lavc_conv *priv)
 {
-    avcodec_close(priv->avctx);
-    av_free(priv->avctx);
+    avsubtitle_free(&priv->cur);
+    avcodec_free_context(&priv->avctx);
     talloc_free(priv);
 }

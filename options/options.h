@@ -186,6 +186,7 @@ typedef struct MPOpts {
     int ignore_path_in_watch_later_config;
     int pause;
     int keep_open;
+    char *lavfi_complex;
     int stream_id[2][STREAM_TYPE_COUNT];
     int stream_id_ff[STREAM_TYPE_COUNT];
     char **stream_lang[STREAM_TYPE_COUNT];
@@ -225,6 +226,7 @@ typedef struct MPOpts {
 
     struct mp_chmap audio_output_channels;
     int audio_output_format;
+    int audio_normalize;
     int force_srate;
     int dtshd;
     double playback_speed;
@@ -238,6 +240,7 @@ typedef struct MPOpts {
     char **sub_name;
     char **sub_paths;
     char **audiofile_paths;
+    char **external_files;
     int sub_auto;
     int audiofile_auto;
     int osd_bar_visible;

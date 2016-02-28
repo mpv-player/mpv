@@ -332,8 +332,7 @@ static int control(stream_t *stream, int cmd, void *arg)
     case STREAM_CTRL_SEEK_TO_TIME: {
         double *args = arg;
         double d = args[0]; // absolute target timestamp
-        double r = args[1]; // if not SEEK_ABSOLUTE, the base time for d
-        int flags = args[2]; // from SEEK_* flags (demux.h)
+        int flags = args[1]; // from SEEK_* flags (demux.h)
         if (flags & SEEK_HR)
             d -= 10; // fudge offset; it's a hack, because fuck libdvd*
         int64_t tm = (int64_t)(d * 90000);
@@ -344,37 +343,9 @@ static int control(stream_t *stream, int cmd, void *arg)
         uint32_t pos, len;
         if (dvdnav_get_position(dvdnav, &pos, &len) != DVDNAV_STATUS_OK)
             break;
-        // The following is convoluted, because we have to translate between
-        // dvdnav's block/CBR-based seeking bullshit, and the player's
-        // timestamp-based high-level machinery.
-        if (!(flags & SEEK_ABSOLUTE) && !(flags & SEEK_HR) && priv->duration > 0)
-        {
-            int dir = (flags & SEEK_BACKWARD) ? -1 : 1;
-            // The user is making a relative seek (translated to absolute),
-            // and we try not to get the user stuck on "boundaries". So try
-            // to do block based seeks, which should workaround libdvdnav's
-            // terrible CBR-based seeking.
-            d -= r; // relative seek amount in seconds
-            d = d / (priv->duration / 1000.0) * len; // d is now in blocks
-            d += pos; // absolute target in blocks
-            if (dir > 0)
-                d = MPMAX(d, pos + 1.0);
-            if (dir < 0)
-                d = MPMIN(d, pos - 1.0);
-            d += 0.5; // round
-            uint32_t target = MPCLAMP(d, 0, len);
-            MP_VERBOSE(stream, "seek from block %lu to %lu, dir=%d\n",
-                       (unsigned long)pos, (unsigned long)target, dir);
-            if (dvdnav_sector_search(dvdnav, target, SEEK_SET) != DVDNAV_STATUS_OK)
-                break;
-        } else {
-            // "old" method, should be good enough for large seeks. Used for
-            // hr-seeks (with fudge offset), because I fear that block-based
-            // seeking might be off too far for large jumps.
-            MP_VERBOSE(stream, "seek to PTS %f (%"PRId64")\n", d, tm);
-            if (dvdnav_time_search(dvdnav, tm) != DVDNAV_STATUS_OK)
-                break;
-        }
+        MP_VERBOSE(stream, "seek to PTS %f (%"PRId64")\n", d, tm);
+        if (dvdnav_time_search(dvdnav, tm) != DVDNAV_STATUS_OK)
+            break;
         stream_drop_buffers(stream);
         d = dvdnav_get_current_time(dvdnav) / 90000.0f;
         MP_VERBOSE(stream, "landed at: %f\n", d);

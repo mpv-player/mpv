@@ -2,23 +2,18 @@
  * This file is part of mpv.
  * Parts based on MPlayer code by Reimar Döffinger.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
- *
- * You can alternatively redistribute this file and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MP_GL_UTILS_
@@ -131,6 +126,7 @@ void gl_sc_hadd(struct gl_shader_cache *sc, const char *text);
 void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...);
 void gl_sc_uniform_sampler(struct gl_shader_cache *sc, char *name, GLenum target,
                            int unit);
+void gl_sc_uniform_sampler_ui(struct gl_shader_cache *sc, char *name, int unit);
 void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, GLfloat f);
 void gl_sc_uniform_i(struct gl_shader_cache *sc, char *name, GLint f);
 void gl_sc_uniform_vec2(struct gl_shader_cache *sc, char *name, GLfloat f[2]);

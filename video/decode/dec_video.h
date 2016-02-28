@@ -34,6 +34,7 @@ struct dec_video {
     const struct vd_functions *vd_driver;
     struct mp_hwdec_info *hwdec_info; // video output hwdec handles
     struct sh_stream *header;
+    struct mp_codec_params *codec;
 
     char *decoder_desc;
 
@@ -45,6 +46,8 @@ struct dec_video {
 
     void *priv; // for free use by vd_driver
 
+    // Strictly internal (dec_video.c).
+
     // Last PTS from decoder (set with each vd_driver->decode() call)
     double codec_pts;
     int num_codec_pts_problems;
@@ -52,12 +55,6 @@ struct dec_video {
     // Last packet DTS from decoder (passed through from source packets)
     double codec_dts;
     int num_codec_dts_problems;
-
-    // PTS sorting (needed for AVI-style timestamps)
-    double buffered_pts[128];
-    int num_buffered_pts;
-
-    // Strictly internal (dec_video.c).
 
     // PTS or DTS of packet first read
     double first_packet_pdts;
@@ -72,6 +69,9 @@ struct dec_video {
     float initial_decoder_aspect;
 
     double start_pts;
+    double start, end;
+    struct demux_packet *new_segment;
+    struct demux_packet *packet;
     bool framedrop_enabled;
     struct mp_image *cover_art_mpi;
     struct mp_image *current_mpi;
@@ -80,24 +80,14 @@ struct dec_video {
 
 struct mp_decoder_list *video_decoder_list(void);
 
-bool video_init_best_codec(struct dec_video *d_video, char* video_decoders);
+bool video_init_best_codec(struct dec_video *d_video);
 void video_uninit(struct dec_video *d_video);
 
 void video_work(struct dec_video *d_video);
+int video_get_frame(struct dec_video *d_video, struct mp_image **out_mpi);
 
 void video_set_framedrop(struct dec_video *d_video, bool enabled);
 void video_set_start(struct dec_video *d_video, double start_pts);
-
-#define VIDEO_OK 1
-#define VIDEO_WAIT 0
-#define VIDEO_EOF -1
-#define VIDEO_SKIP -2
-int video_get_frame(struct dec_video *d_video, struct mp_image **out_mpi);
-
-struct demux_packet;
-struct mp_image *video_decode(struct dec_video *d_video,
-                              struct demux_packet *packet,
-                              int drop_frame);
 
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg);
 void video_reset(struct dec_video *d_video);

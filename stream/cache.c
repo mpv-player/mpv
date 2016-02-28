@@ -96,7 +96,10 @@ struct priv {
     bool idle;              // cache thread has stopped reading
     int64_t reads;          // number of actual read attempts performed
 
+    bool enable_readahead;  // actively read beyond read() position
     int64_t read_filepos;   // client read position (mirrors cache->pos)
+    int64_t read_min;       // file position until which the thread should
+                            // read even if readahead is disabled
 
     int64_t eof_pos;
 
@@ -206,6 +209,11 @@ static void cache_fill(struct priv *s)
         stream_seek(s->stream, s->max_filepos);
         if (stream_tell(s->stream) != s->max_filepos)
             goto done;
+    }
+
+    if (!s->enable_readahead && s->read_min <= s->max_filepos) {
+        s->idle = true;
+        return;
     }
 
     if (mp_cancel_test(s->cache->cancel))
@@ -372,6 +380,10 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
     case STREAM_CTRL_GET_CACHE_IDLE:
         *(int *)arg = s->idle;
         return STREAM_OK;
+    case STREAM_CTRL_SET_READAHEAD:
+        s->enable_readahead = *(int *)arg;
+        pthread_cond_signal(&s->wakeup);
+        return STREAM_OK;
     case STREAM_CTRL_GET_TIME_LENGTH:
         *(double *)arg = s->stream_time_length;
         return s->stream_time_length ? STREAM_OK : STREAM_UNSUPPORTED;
@@ -447,6 +459,7 @@ static void cache_execute_control(struct priv *s)
     } else if (pos_changed || (ok && control_needs_flush(s->control))) {
         MP_VERBOSE(s, "Dropping cache due to control()\n");
         s->read_filepos = stream_tell(s->stream);
+        s->read_min = s->read_filepos;
         s->control_flush = true;
         cache_drop_contents(s);
     }
@@ -503,6 +516,7 @@ static int cache_fill_buffer(struct stream *cache, char *buffer, int max_len)
         double retry_time = 0;
         int64_t retry = s->reads - 1; // try at least 1 read on EOF
         while (1) {
+            s->read_min = s->read_filepos + max_len + 64 * 1024;
             readb = read_buffer(s, buffer, max_len, s->read_filepos);
             s->read_filepos += readb;
             if (readb > 0)
@@ -541,7 +555,7 @@ static int cache_seek(stream_t *cache, int64_t pos)
         MP_ERR(s, "Attempting to seek before cached data in unseekable stream.\n");
         r = 0;
     } else {
-        cache->pos = s->read_filepos = pos;
+        cache->pos = s->read_filepos = s->read_min = pos;
         s->eof = false; // so that cache_read() will actually wait for new data
         pthread_cond_signal(&s->wakeup);
     }
@@ -616,6 +630,7 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
     struct priv *s = talloc_zero(NULL, struct priv);
     s->log = cache->log;
     s->eof_pos = -1;
+    s->enable_readahead = true;
 
     cache_drop_contents(s);
 

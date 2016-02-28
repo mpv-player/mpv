@@ -46,7 +46,11 @@ def check_iconv(ctx, dependency_identifier):
     iconv_program = load_fragment('iconv.c')
     libdliconv = " ".join(ctx.env.LIB_LIBDL + ['iconv'])
     libs       = ['iconv', libdliconv]
-    checkfn = check_cc(fragment=iconv_program)
+    args       = {'fragment': iconv_program}
+    if ctx.env.DEST_OS == 'openbsd':
+        args['cflags'] = '-I/usr/local/include'
+        args['linkflags'] = '-L/usr/local/lib'
+    checkfn = check_cc(**args)
     return check_libs(libs, checkfn)(ctx, dependency_identifier)
 
 def check_lua(ctx, dependency_identifier):

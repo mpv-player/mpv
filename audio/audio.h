@@ -72,12 +72,14 @@ void mp_audio_copy(struct mp_audio *dst, int dst_offset,
                    struct mp_audio *src, int src_offset, int length);
 void mp_audio_copy_attributes(struct mp_audio *dst, struct mp_audio *src);
 void mp_audio_skip_samples(struct mp_audio *data, int samples);
+void mp_audio_clip_timestamps(struct mp_audio *f, double start, double end);
 
 bool mp_audio_is_writeable(struct mp_audio *data);
 int mp_audio_make_writeable(struct mp_audio *data);
 
 struct AVFrame;
 struct mp_audio *mp_audio_from_avframe(struct AVFrame *avframe);
+struct AVFrame *mp_audio_to_avframe_and_unref(struct mp_audio *frame);
 
 struct mp_audio_pool;
 struct mp_audio_pool *mp_audio_pool_create(void *ta_parent);

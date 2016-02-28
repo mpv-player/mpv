@@ -383,6 +383,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->pict_type = src->pict_type;
     dst->fields = src->fields;
     dst->pts = src->pts;
+    dst->dts = src->dts;
     dst->params.rotate = src->params.rotate;
     dst->params.stereo_in = src->params.stereo_in;
     dst->params.stereo_out = src->params.stereo_out;
@@ -486,9 +487,9 @@ void mp_image_params_get_dsize(const struct mp_image_params *p,
     *d_w = p->w;
     *d_h = p->h;
     if (p->p_w > p->p_h && p->p_h >= 1)
-        *d_w = MPCLAMP(*d_w * (int64_t)p->p_w / p->p_h, 0, INT_MAX);
+        *d_w = MPCLAMP(*d_w * (int64_t)p->p_w / p->p_h, 1, INT_MAX);
     if (p->p_h > p->p_w && p->p_w >= 1)
-        *d_h = MPCLAMP(*d_h * (int64_t)p->p_h / p->p_w, 0, INT_MAX);
+        *d_h = MPCLAMP(*d_h * (int64_t)p->p_h / p->p_w, 1, INT_MAX);
 }
 
 void mp_image_params_set_dsize(struct mp_image_params *p, int d_w, int d_h)

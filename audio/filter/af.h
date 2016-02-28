@@ -53,6 +53,7 @@ struct af_info {
 struct af_instance {
     const struct af_info *info;
     struct mp_log *log;
+    struct MPOpts *opts;
     struct replaygain_data *replaygain_data;
     int (*control)(struct af_instance *af, int cmd, void *arg);
     void (*uninit)(struct af_instance *af);
@@ -123,6 +124,7 @@ enum af_control {
     AF_CONTROL_SET_PLAYBACK_SPEED,
     AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE,
     AF_CONTROL_GET_METADATA,
+    AF_CONTROL_COMMAND,
 };
 
 // Argument for AF_CONTROL_SET_PAN_LEVEL
@@ -143,6 +145,7 @@ struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg);
 void af_control_all(struct af_stream *s, int cmd, void *arg);
 int af_control_by_label(struct af_stream *s, int cmd, void *arg, bstr label);
 void af_seek_reset(struct af_stream *s);
+int af_send_command(struct af_stream *s, char *label, char *cmd, char *arg);
 
 void af_add_output_frame(struct af_instance *af, struct mp_audio *frame);
 int af_filter_frame(struct af_stream *s, struct mp_audio *frame);

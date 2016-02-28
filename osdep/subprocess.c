@@ -1,21 +1,23 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <pthread.h>
+
+#include "config.h"
 
 #include "common/common.h"
 #include "common/msg.h"
@@ -55,3 +57,13 @@ void mp_subprocess_detached(struct mp_log *log, char **args)
     if (pthread_create(&thread, NULL, run_subprocess, p))
         talloc_free(p);
 }
+
+#if !HAVE_SUBPROCESS
+int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
+                  subprocess_read_cb on_stdout, subprocess_read_cb on_stderr,
+                  char **error)
+{
+    *error = "unsupported";
+    return -1;
+}
+#endif

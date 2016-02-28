@@ -1,18 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "config.h"
@@ -164,6 +164,14 @@ struct mp_image *mp_image_pool_get_no_alloc(struct mp_image_pool *pool, int fmt,
     return ref;
 }
 
+void mp_image_pool_add(struct mp_image_pool *pool, struct mp_image *new)
+{
+    struct image_flags *it = talloc_ptrtype(new, it);
+    *it = (struct image_flags) { .pool_alive = true };
+    new->priv = it;
+    MP_TARRAY_APPEND(pool, pool->images, pool->num_images, new);
+}
+
 // Return a new image of given format/size. The only difference to
 // mp_image_alloc() is that there is a transparent mechanism to recycle image
 // data allocations through this pool.
@@ -186,10 +194,7 @@ struct mp_image *mp_image_pool_get(struct mp_image_pool *pool, int fmt,
         }
         if (!new)
             return NULL;
-        struct image_flags *it = talloc_ptrtype(new, it);
-        *it = (struct image_flags) { .pool_alive = true };
-        new->priv = it;
-        MP_TARRAY_APPEND(pool, pool->images, pool->num_images, new);
+        mp_image_pool_add(pool, new);
         new = mp_image_pool_get_no_alloc(pool, fmt, w, h);
     }
     return new;

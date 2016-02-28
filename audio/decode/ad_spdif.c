@@ -41,6 +41,7 @@ struct spdifContext {
     bool             need_close;
     bool             use_dts_hd;
     struct mp_audio  fmt;
+    struct mp_audio_pool *pool;
 };
 
 static int write_packet(void *p, uint8_t *buf, int buf_size)
@@ -79,6 +80,7 @@ static int init(struct dec_audio *da, const char *decoder)
     da->priv = spdif_ctx;
     spdif_ctx->log = da->log;
     spdif_ctx->use_dts_hd = da->opts->dtshd;
+    spdif_ctx->pool = mp_audio_pool_create(spdif_ctx);
 
     if (strcmp(decoder, "dts-hd") == 0) {
         decoder = "dts";
@@ -189,7 +191,8 @@ static int init_filter(struct dec_audio *da, AVPacket *pkt)
         break;
     case AV_CODEC_ID_DTS: {
         bool is_hd = profile == FF_PROFILE_DTS_HD_HRA ||
-                     profile == FF_PROFILE_DTS_HD_MA;
+                     profile == FF_PROFILE_DTS_HD_MA ||
+                     profile == FF_PROFILE_UNKNOWN;
         if (spdif_ctx->use_dts_hd && is_hd) {
             av_dict_set(&format_opts, "dtshd_rate", "768000", 0); // 4*192000
             sample_format               = AF_FORMAT_S_DTSHD;
@@ -240,38 +243,35 @@ fail:
     return -1;
 }
 
-static int decode_packet(struct dec_audio *da, struct mp_audio **out)
+static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
+                         struct mp_audio **out)
 {
     struct spdifContext *spdif_ctx = da->priv;
 
     spdif_ctx->out_buffer_len  = 0;
 
-    struct demux_packet *mpkt;
-    if (demux_read_packet_async(da->header, &mpkt) == 0)
-        return AD_WAIT;
-
     if (!mpkt)
-        return AD_EOF;
+        return 0;
 
     double pts = mpkt->pts;
 
     AVPacket pkt;
     mp_set_av_packet(&pkt, mpkt, NULL);
+    mpkt->len = 0; // will be fully consumed
     pkt.pts = pkt.dts = 0;
     if (!spdif_ctx->lavf_ctx) {
         if (init_filter(da, &pkt) < 0)
-            return AD_ERR;
+            return -1;
     }
     int ret = av_write_frame(spdif_ctx->lavf_ctx, &pkt);
-    talloc_free(mpkt);
     avio_flush(spdif_ctx->lavf_ctx->pb);
     if (ret < 0)
-        return AD_ERR;
+        return -1;
 
     int samples = spdif_ctx->out_buffer_len / spdif_ctx->fmt.sstride;
-    *out = mp_audio_pool_get(da->pool, &spdif_ctx->fmt, samples);
+    *out = mp_audio_pool_get(spdif_ctx->pool, &spdif_ctx->fmt, samples);
     if (!*out)
-        return AD_ERR;
+        return -1;
 
     memcpy((*out)->planes[0], spdif_ctx->out_buffer, spdif_ctx->out_buffer_len);
     (*out)->pts = pts;

@@ -49,6 +49,8 @@ struct demux_packet *new_demux_packet_from_avpacket(struct AVPacket *avpkt)
         .dts = MP_NOPTS_VALUE,
         .duration = -1,
         .pos = -1,
+        .start = MP_NOPTS_VALUE,
+        .end = MP_NOPTS_VALUE,
         .stream = -1,
         .avpacket = talloc_zero(dp, AVPacket),
     };
@@ -106,6 +108,9 @@ void demux_packet_copy_attribs(struct demux_packet *dst, struct demux_packet *sr
     dst->dts = src->dts;
     dst->duration = src->duration;
     dst->pos = src->pos;
+    dst->start = src->start;
+    dst->end = src->end;
+    dst->new_segment = src->new_segment;
     dst->keyframe = src->keyframe;
     dst->stream = src->stream;
 }

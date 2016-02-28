@@ -694,6 +694,18 @@ Input Commands that are Possibly Subject to Change
     field is of type MPV_FORMAT_BYTE_ARRAY with the actual image data. The image
     is freed as soon as the result node is freed.
 
+``vf-command "<label>" "<cmd>" "<args>"``
+    Send a command to the filter with the given ``<label>``. Use ``all`` to send
+    it to all filters at once. The command and argument string is filter
+    specific. Currently, this only works with the ``lavfi`` filter - see
+    the libavfilter documentation for which commands a filter supports.
+
+    Note that the ``<label>`` is a mpv filter label, not a libavfilter filter
+    name.
+
+``af-command "<label>" "<cmd>" "<args>"``
+    Same as ``vf-command``, but for audio filters.
+
 Undocumented commands: ``tv-last-channel`` (TV/DVB only),
 ``ao-reload`` (experimental/internal).
 
@@ -752,6 +764,17 @@ The following hooks are currently defined:
     you could set per-file options with by setting the property
     ``file-local-options/<option name>``. The player will wait until all
     hooks are run.
+
+``on_preloaded``
+    Called after a file has been opened, and before tracks are selected and
+    decoders are created. This has some usefulness if an API users wants
+    to select tracks manually, based on the set of available tracks. It's
+    also useful to initialize ``--lavfi-complex`` in a specific way by API,
+    without having to "probe" the available streams at first.
+
+    Note that this does not yet apply default track selection. Which operations
+    exactly can be done and not be done, and what information is available and
+    what is not yet available yet, is all subject to change.
 
 ``on_unload``
     Run before closing a file, and before actually uninitializing
@@ -1212,11 +1235,30 @@ Property list
 ``hr-seek`` (RW)
     See ``--hr-seek``.
 
+``mixer-active``
+    Return ``yes`` if the audio mixer is active, ``no`` otherwise. This has
+    implications for ``--softvol=no`` mode: if the mixer is active, changing
+    ``volume`` doesn't actually change anything on the system mixer. If the
+    ``--volume`` or ``--mute`` option are used, these might not be applied
+    property until the mixer becomes active either. (The options, if set, will
+    just overwrite the mixer state at audio initialization.)
+
+    While the behavior with ``mixer-active==yes`` is relatively well-defined,
+    the ``no`` case will provide possibly wrong or insignificant values.
+
+    Note that an active mixer does not necessarily imply active audio output,
+    although this is implied in the current implementation.
+
 ``volume`` (RW)
-    Current volume (see ``--volume`` for details).
+    Current volume (see ``--volume`` for details). Also see ``mixer-active``
+    property.
+
+``volume-max``
+    Current maximum value the volume property can be set to. (This may depend
+    on the ``--softvol-max`` option.)
 
 ``mute`` (RW)
-    Current mute status (``yes``/``no``).
+    Current mute status (``yes``/``no``). Also see ``mixer-active`` property.
 
 ``audio-delay`` (RW)
     See ``--audio-delay``.

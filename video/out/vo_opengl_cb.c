@@ -129,8 +129,6 @@ struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
     pthread_mutex_init(&ctx->lock, NULL);
     pthread_cond_init(&ctx->wakeup, NULL);
 
-    ctx->gl = talloc_zero(ctx, GL);
-
     ctx->global = g;
     ctx->log = mp_log_new(ctx, g->log, "opengl-cb");
     ctx->client_api = client_api;
@@ -173,6 +171,8 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
 {
     if (ctx->renderer)
         return MPV_ERROR_INVALID_PARAMETER;
+
+    ctx->gl = talloc_zero(ctx, GL);
 
     mpgl_load_functions2(ctx->gl, get_proc_address, get_proc_address_ctx,
                          exts, ctx->log);
@@ -355,7 +355,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     assert(!p->ctx->next_frame);
     p->ctx->next_frame = vo_frame_ref(frame);
     p->ctx->expected_flip_count = p->ctx->flip_count + 1;
-    p->ctx->redrawing = frame ? frame->redraw : false;
+    p->ctx->redrawing = frame->redraw || !frame->current;
     update(p);
     pthread_mutex_unlock(&p->ctx->lock);
 }

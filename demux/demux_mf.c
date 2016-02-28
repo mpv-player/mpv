@@ -108,6 +108,7 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct mp_log *log, char *filenam
 
     char *fname = talloc_size(mf, strlen(filename) + 32);
 
+#if HAVE_GLOB || HAVE_GLOB_WIN32_REPLACEMENT
     if (!strchr(filename, '%')) {
         strcpy(fname, filename);
         if (!strchr(filename, '*'))
@@ -130,6 +131,7 @@ static mf_t *open_mf_pattern(void *talloc_ctx, struct mp_log *log, char *filenam
         globfree(&gg);
         goto exit_mf;
     }
+#endif
 
     mp_info(log, "search expr: %s\n", filename);
 
@@ -157,15 +159,12 @@ static mf_t *open_mf_single(void *talloc_ctx, struct mp_log *log, char *filename
     return mf;
 }
 
-static void demux_seek_mf(demuxer_t *demuxer, double rel_seek_secs, int flags)
+static void demux_seek_mf(demuxer_t *demuxer, double seek_pts, int flags)
 {
     mf_t *mf = demuxer->priv;
-    int newpos = (flags & SEEK_ABSOLUTE) ? 0 : mf->curr_frame - 1;
-
+    int newpos = seek_pts * mf->sh->codec->fps;
     if (flags & SEEK_FACTOR)
-        newpos += rel_seek_secs * (mf->nr_of_files - 1);
-    else
-        newpos += rel_seek_secs * mf->sh->codec->fps;
+        newpos = seek_pts * (mf->nr_of_files - 1);
     if (newpos < 0)
         newpos = 0;
     if (newpos >= mf->nr_of_files)

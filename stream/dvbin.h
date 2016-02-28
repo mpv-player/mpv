@@ -28,9 +28,10 @@
  * Version 5 is also called S2API, it adds support for tuning to S2 channels
  * and is extensible for future delivery systems. Old API is deprecated.
  * StreamID-implementation only supported since API >=5.2.
+ * At least DTV_ENUM_DELSYS requires 5.5.
  */
 
-#if (DVB_API_VERSION == 5 && DVB_API_VERSION_MINOR >= 2)
+#if (DVB_API_VERSION == 5 && DVB_API_VERSION_MINOR >= 5)
 #define DVB_USE_S2API 1
 
 // This had a different name until API 5.8.

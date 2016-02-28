@@ -272,8 +272,9 @@ static HRESULT STDMETHODCALLTYPE DropTarget_Drop(IDropTarget* This,
     } else if (pDataObj->lpVtbl->GetData(pDataObj,
                                          &fmtetc_url, &medium) == S_OK) {
         // get the URL encoded in US-ASCII
-        char* url = (char*)GlobalLock(medium.hGlobal);
-        if (url != NULL) {
+        wchar_t* wurl = GlobalLock(medium.hGlobal);
+        if (wurl != NULL) {
+            char *url = mp_to_utf8(NULL, wurl);
             if (mp_event_drop_mime_data(t->w32->input_ctx, "text/uri-list",
                                         bstr0(url), action) > 0) {
                 MP_VERBOSE(t->w32, "received dropped URL: %s\n", url);
@@ -281,6 +282,7 @@ static HRESULT STDMETHODCALLTYPE DropTarget_Drop(IDropTarget* This,
                 MP_ERR(t->w32, "error getting dropped URL\n");
             }
 
+            talloc_free(url);
             GlobalUnlock(medium.hGlobal);
         }
 
@@ -1224,7 +1226,7 @@ static void *gui_thread(void *ptr)
     if (SUCCEEDED(OleInitialize(NULL))) {
         ole_ok = true;
 
-        fmtetc_url.cfFormat = (CLIPFORMAT)RegisterClipboardFormat(TEXT("UniformResourceLocator"));
+        fmtetc_url.cfFormat = (CLIPFORMAT)RegisterClipboardFormat(TEXT("UniformResourceLocatorW"));
         DropTarget* dropTarget = talloc(NULL, DropTarget);
         DropTarget_Init(dropTarget, w32);
         RegisterDragDrop(w32->window, &dropTarget->iface);

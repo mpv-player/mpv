@@ -1,23 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
- *
- * You can alternatively redistribute this file and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "superxbr.h"
@@ -99,7 +94,7 @@ void pass_superxbr(struct gl_shader_cache *sc, int planes, int tex_num,
         GLSLHF("#define weight1 (%f*1.29633/10.0)\n", conf->sharpness);
         GLSLHF("#define weight2 (%f*1.75068/10.0/2.0)\n", conf->sharpness);
 
-        GLSLH(#define Get(x, y) (texture(tex, pos + (vec2(x, y) - vec2(0.25, 0.25)) / tex_size)[plane] * tex_mul))
+        GLSLH(#define Get(x, y) (texture(tex, pos + (vec2(x, y) - vec2(0.25, 0.25)) * pixel_size)[plane] * tex_mul))
     } else {
         *transform = (struct gl_transform){{{1.0,0.0}, {0.0,1.0}}, {0.0,0.0}};
 
@@ -113,7 +108,7 @@ void pass_superxbr(struct gl_shader_cache *sc, int planes, int tex_num,
         GLSLHF("#define weight1 (%f*1.75068/10.0)\n", conf->sharpness);
         GLSLHF("#define weight2 (%f*1.29633/10.0/2.0)\n", conf->sharpness);
 
-        GLSLH(#define Get(x, y) (texture(tex, pos + (vec2((x) + (y) - 1, (y) - (x))) / tex_size)[plane] * tex_mul))
+        GLSLH(#define Get(x, y) (texture(tex, pos + (vec2((x) + (y) - 1, (y) - (x))) * pixel_size)[plane] * tex_mul))
     }
     GLSLH(float df(float A, float B)
           {
@@ -140,7 +135,7 @@ void pass_superxbr(struct gl_shader_cache *sc, int planes, int tex_num,
                       wp3*(df(i1,e2)+df(i3,e4)+df(e1,i2)+df(e3,i4)));
           })
 
-    GLSLHF("float superxbr(sampler2D tex, vec2 pos, vec2 tex_size, int plane, float tex_mul) {\n");
+    GLSLHF("float superxbr(sampler2D tex, vec2 pos, vec2 tex_size, vec2 pixel_size, int plane, float tex_mul) {\n");
 
     if (step == 0) {
         GLSLH(vec2 dir = fract(pos * tex_size) - 0.5;)
@@ -152,7 +147,7 @@ void pass_superxbr(struct gl_shader_cache *sc, int planes, int tex_num,
                   return 0.0;)
 
         GLSLH(if (dir.x < 0.0 || dir.y < 0.0 || dist.x < 1.0 || dist.y < 1.0)
-                  return texture(tex, pos - dir / tex_size)[plane] * tex_mul;)
+                  return texture(tex, pos - dir * pixel_size)[plane] * tex_mul;)
     } else {
         GLSLH(vec2 dir = fract(pos * tex_size / 2.0) - 0.5;)
         GLSLH(if (dir.x * dir.y > 0.0)
@@ -225,10 +220,10 @@ void pass_superxbr(struct gl_shader_cache *sc, int planes, int tex_num,
 
     GLSLHF("}");  // superxbr()
 
-    GLSL(vec4 color = vec4(1.0);)
+    GLSL(color = vec4(1.0);)
 
     for (int i = 0; i < planes; i++) {
-        GLSLF("color[%d] = superxbr(texture%d, texcoord%d, texture_size%d, %d, %f);\n",
-              i, tex_num, tex_num, tex_num, i, tex_mul);
+        GLSLF("color[%d] = superxbr(texture%d, texcoord%d, texture_size%d, pixel_size%d, %d, %f);\n",
+              i, tex_num, tex_num, tex_num, tex_num, i, tex_mul);
     }
 }

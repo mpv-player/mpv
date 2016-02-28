@@ -20,7 +20,8 @@ local user_opts = {
     boxalpha = 80,              -- alpha of the background box,
                                 -- 0 (opaque) to 255 (fully transparent)
     hidetimeout = 500,          -- duration in ms until the OSC hides if no
-                                -- mouse movement, negative value = disabled
+                                -- mouse movement. enforced non-negative for the
+                                -- user, but internally negative is "always-on".
     fadeduration = 200,         -- duration of fade out in ms, 0 = no fade
     deadzonesize = 0,           -- size of deadzone
     minmousemove = 3,           -- minimum amount of pixels the mouse has to
@@ -32,10 +33,18 @@ local user_opts = {
     seekbarstyle = "slider",    -- slider (diamond marker) or bar (fill)
     timetotal = false,          -- display total time instead of remaining time?
     timems = false,             -- display timecodes with milliseconds?
+    visibility = "auto",        -- only used at init to set visibility_mode(...)
 }
 
+-- read_options may modify hidetimeout, so save the original default value in
+-- case the user set hidetimeout < 0 and we need the default instead.
+local hidetimeout_def = user_opts.hidetimeout
 -- read options from config and command-line
 opt.read_options(user_opts, "osc")
+if user_opts.hidetimeout < 0 then
+    user_opts.hidetimeout = hidetimeout_def
+    msg.warn("hidetimeout cannot be negative. Using " .. user_opts.hidetimeout)
+end
 
 local osc_param = { -- calculated by osc_init()
     playresy = 0,                           -- canvas size Y
@@ -1607,6 +1616,9 @@ end
 
 
 function show_osc()
+    -- show when disabled can happen (e.g. mouse_move) due to async/delayed unbinding
+    if not state.enabled then return end
+
     msg.debug("show_osc")
     --remember last time of invocation (mouse move)
     state.showtime = mp.get_time()
@@ -1616,12 +1628,17 @@ function show_osc()
     if (user_opts.fadeduration > 0) then
         state.anitype = nil
     end
-
 end
 
 function hide_osc()
     msg.debug("hide_osc")
-    if (user_opts.fadeduration > 0) then
+    if not state.enabled then
+        -- typically hide happens at render() from tick(), but now tick() is
+        -- no-op and won't render again to remove the osc, so do that manually.
+        state.osc_visible = false
+        timer_stop()
+        render() -- state.osc_visible == false -> remove the osc from screen
+    elseif (user_opts.fadeduration > 0) then
         if not(state.osc_visible == false) then
             state.anitype = "out"
             control_timer()
@@ -1688,7 +1705,9 @@ end
 
 
 function mouse_leave()
-    hide_osc()
+    if user_opts.hidetimeout >= 0 then
+        hide_osc()
+    end
     -- reset mouse position
     state.last_mouseX, state.last_mouseY = nil, nil
 end
@@ -1958,9 +1977,8 @@ function enable_osc(enable)
     state.enabled = enable
     if enable then
         do_enable_keybindings()
-        show_osc()
     else
-        hide_osc()
+        hide_osc() -- acts immediately when state.enabled == false
         if state.showhide_enabled then
             mp.disable_key_bindings("showhide")
         end
@@ -1973,9 +1991,6 @@ validate_user_opts()
 mp.register_event("start-file", request_init)
 mp.register_event("tracks-changed", request_init)
 mp.observe_property("playlist", nil, request_init)
-
-mp.register_script_message("enable-osc", function() enable_osc(true) end)
-mp.register_script_message("disable-osc", function() enable_osc(false) end)
 
 mp.register_script_message("osc-message", show_message)
 
@@ -2018,6 +2033,53 @@ mp.set_key_bindings({
     {"mouse_btn0_dbl",          "ignore"},
     {"shift+mouse_btn0_dbl",    "ignore"},
     {"mouse_btn2_dbl",          "ignore"},
-    {"del",                     function() enable_osc(false) end}
 }, "input", "force")
 mp.enable_key_bindings("input")
+
+
+user_opts.hidetimeout_orig = user_opts.hidetimeout
+
+function always_on(val)
+    if val then
+        user_opts.hidetimeout = -1 -- disable autohide
+        if state.enabled then show_osc() end
+    else
+        user_opts.hidetimeout = user_opts.hidetimeout_orig
+        if state.enabled then hide_osc() end
+    end
+end
+
+-- mode can be auto/always/never/cycle
+-- the modes only affect internal variables and not stored on its own.
+function visibility_mode(mode, no_osd)
+    if mode == "cycle" then
+        if not state.enabled then
+            mode = "auto"
+        elseif user_opts.hidetimeout >= 0 then
+            mode = "always"
+        else
+            mode = "never"
+        end
+    end
+
+    if mode == "auto" then
+        always_on(false)
+        enable_osc(true)
+    elseif mode == "always" then
+        enable_osc(true)
+        always_on(true)
+    elseif mode == "never" then
+        enable_osc(false)
+    else
+        msg.warn("Ignoring unknown visibility mode '" .. mode .. "'")
+        return
+    end
+
+    if not no_osd and tonumber(mp.get_property("osd-level")) >= 1 then
+        mp.osd_message("OSC visibility: " .. mode)
+    end
+end
+
+visibility_mode(user_opts.visibility, true)
+mp.register_script_message("osc-visibility", visibility_mode)
+mp.add_key_binding("del", function() visibility_mode("cycle") end)

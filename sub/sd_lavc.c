@@ -398,15 +398,15 @@ static double step_sub(struct sd *sd, double now, int movement)
     struct sd_lavc_priv *priv = sd->priv;
     int best = -1;
     double target = now;
-    int direction = movement > 0 ? 1 : -1;
+    int direction = (movement > 0 ? 1 : -1) * !!movement;
 
-    if (movement == 0 || priv->num_seekpoints == 0)
+    if (priv->num_seekpoints == 0)
         return MP_NOPTS_VALUE;
 
     qsort(priv->seekpoints, priv->num_seekpoints, sizeof(priv->seekpoints[0]),
           compare_seekpoint);
 
-    while (movement) {
+    do {
         int closest = -1;
         double closest_time = 0;
         for (int i = 0; i < priv->num_seekpoints; i++) {
@@ -420,9 +420,16 @@ static double step_sub(struct sd *sd, double now, int movement)
                         closest_time = end;
                     }
                 }
-            } else {
+            } else if (direction > 0) {
                 if (start > target) {
                     if (closest < 0 || start < closest_time) {
+                        closest = i;
+                        closest_time = start;
+                    }
+                }
+            } else {
+                if (start < target) {
+                    if (closest < 0 || start >= closest_time) {
                         closest = i;
                         closest_time = start;
                     }
@@ -434,7 +441,7 @@ static double step_sub(struct sd *sd, double now, int movement)
         target = closest_time + direction;
         best = closest;
         movement -= direction;
-    }
+    } while (movement);
 
     return best < 0 ? 0 : priv->seekpoints[best].pts - now;
 }

@@ -42,8 +42,9 @@ struct priv {
     AVFrame *avframe;
     struct mp_audio frame;
     bool force_channel_map;
-    struct demux_packet *packet;
-    uint32_t skip_samples;
+    uint32_t skip_samples, trim_samples;
+    bool preroll_done;
+    double next_pts;
 };
 
 static void uninit(struct dec_audio *da);
@@ -60,7 +61,7 @@ const struct m_sub_options ad_lavc_conf = {
     .opts = (const m_option_t[]) {
         OPT_FLOATRANGE("ac3drc", ac3drc, 0, 0, 6),
         OPT_FLAG("downmix", downmix, 0),
-        OPT_INTRANGE("threads", threads, 0, 1, 16),
+        OPT_INTRANGE("threads", threads, 0, 0, 16),
         OPT_KEYVALUELIST("o", avopts, 0),
         {0}
     },
@@ -78,8 +79,7 @@ static int init(struct dec_audio *da, const char *decoder)
     struct ad_lavc_params *opts = mpopts->ad_lavc_params;
     AVCodecContext *lavc_context;
     AVCodec *lavc_codec;
-    struct sh_stream *sh = da->header;
-    struct mp_codec_params *c = sh->codec;
+    struct mp_codec_params *c = da->codec;
 
     struct priv *ctx = talloc_zero(NULL, struct priv);
     da->priv = ctx;
@@ -140,6 +140,8 @@ static int init(struct dec_audio *da, const char *decoder)
         return 0;
     }
 
+    ctx->next_pts = MP_NOPTS_VALUE;
+
     return 1;
 }
 
@@ -165,26 +167,20 @@ static int control(struct dec_audio *da, int cmd, void *arg)
     switch (cmd) {
     case ADCTRL_RESET:
         avcodec_flush_buffers(ctx->avctx);
-        talloc_free(ctx->packet);
-        ctx->packet = NULL;
         ctx->skip_samples = 0;
+        ctx->trim_samples = 0;
+        ctx->preroll_done = false;
+        ctx->next_pts = MP_NOPTS_VALUE;
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
 }
 
-static int decode_packet(struct dec_audio *da, struct mp_audio **out)
+static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
+                         struct mp_audio **out)
 {
     struct priv *priv = da->priv;
     AVCodecContext *avctx = priv->avctx;
-
-    struct demux_packet *mpkt = priv->packet;
-    if (!mpkt) {
-        if (demux_read_packet_async(da->header, &mpkt) == 0)
-            return AD_WAIT;
-    }
-
-    priv->packet = talloc_steal(priv, mpkt);
 
     int in_len = mpkt ? mpkt->len : 0;
 
@@ -203,37 +199,40 @@ static int decode_packet(struct dec_audio *da, struct mp_audio **out)
             mpkt->len    -= ret;
             mpkt->pts = MP_NOPTS_VALUE; // don't reset PTS next time
         }
-        if (mpkt->len == 0 || ret < 0) {
-            talloc_free(mpkt);
-            priv->packet = NULL;
-        }
         // LATM may need many packets to find mux info
-        if (ret == AVERROR(EAGAIN))
-            return AD_OK;
+        if (ret == AVERROR(EAGAIN)) {
+            mpkt->len = 0;
+            return 0;
+        }
     }
     if (ret < 0) {
         MP_ERR(da, "Error decoding audio.\n");
-        return AD_ERR;
+        return -1;
     }
     if (!got_frame)
-        return mpkt ? AD_OK : AD_EOF;
+        return 0;
 
     double out_pts = mp_pts_from_av(priv->avframe->pkt_pts, NULL);
 
     struct mp_audio *mpframe = mp_audio_from_avframe(priv->avframe);
     if (!mpframe)
-        return AD_ERR;
+        return -1;
 
     struct mp_chmap lavc_chmap = mpframe->channels;
     if (lavc_chmap.num != avctx->channels)
         mp_chmap_from_channels(&lavc_chmap, avctx->channels);
     if (priv->force_channel_map) {
-        if (lavc_chmap.num == da->header->codec->channels.num)
-            lavc_chmap = da->header->codec->channels;
+        if (lavc_chmap.num == da->codec->channels.num)
+            lavc_chmap = da->codec->channels;
     }
     mp_audio_set_channels(mpframe, &lavc_chmap);
 
     mpframe->pts = out_pts;
+
+    if (mpframe->pts == MP_NOPTS_VALUE)
+        mpframe->pts = priv->next_pts;
+    if (mpframe->pts != MP_NOPTS_VALUE)
+        priv->next_pts = mpframe->pts + mpframe->samples / (double)mpframe->rate;
 
 #if HAVE_AVFRAME_SKIP_SAMPLES
     AVFrameSideData *sd =
@@ -241,18 +240,27 @@ static int decode_packet(struct dec_audio *da, struct mp_audio **out)
     if (sd && sd->size >= 10) {
         char *d = sd->data;
         priv->skip_samples += AV_RL32(d + 0);
-        uint32_t pad = AV_RL32(d + 4);
-        uint32_t skip = MPMIN(priv->skip_samples, mpframe->samples);
-        if (skip) {
-            mp_audio_skip_samples(mpframe, skip);
-            if (mpframe->pts != MP_NOPTS_VALUE)
-                mpframe->pts += skip / (double)mpframe->rate;
-            priv->skip_samples -= skip;
-        }
-        if (pad <= mpframe->samples)
-            mpframe->samples -= pad;
+        priv->trim_samples += AV_RL32(d + 4);
     }
 #endif
+
+    if (!priv->preroll_done) {
+        // Skip only if this isn't already handled by AV_FRAME_DATA_SKIP_SAMPLES.
+        if (!priv->skip_samples)
+            priv->skip_samples = avctx->delay;
+        priv->preroll_done = true;
+    }
+
+    uint32_t skip = MPMIN(priv->skip_samples, mpframe->samples);
+    if (skip) {
+        mp_audio_skip_samples(mpframe, skip);
+        priv->skip_samples -= skip;
+    }
+    uint32_t trim = MPMIN(priv->trim_samples, mpframe->samples);
+    if (trim) {
+        mpframe->samples -= trim;
+        priv->trim_samples -= trim;
+    }
 
     *out = mpframe;
 

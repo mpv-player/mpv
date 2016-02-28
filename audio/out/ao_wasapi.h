@@ -3,18 +3,18 @@
  *
  * Original author: Jonathan Yong <10walls@gmail.com>
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef MP_AO_WASAPI_H_
@@ -66,6 +66,7 @@ typedef struct wasapi_state {
     HANDLE hAudioThread;     // the audio thread itself
     HANDLE hWake;            // thread wakeup event
     atomic_int thread_state; // enum wasapi_thread_state (what to do on wakeup)
+    struct mp_dispatch_queue *dispatch; // for volume/mute/session display
 
     // for setting the audio thread priority
     HANDLE hTask;
@@ -83,24 +84,11 @@ typedef struct wasapi_state {
     UINT64 clock_frequency;      // scale for position returned by GetPosition
     LARGE_INTEGER qpc_frequency; // frequency of Windows' high resolution timer
 
-    // WASAPI control (handles owned by audio thread but used by main thread)
+    // WASAPI control
     IAudioSessionControl *pSessionControl; // setting the stream title
     IAudioEndpointVolume *pEndpointVolume; // exclusive mode volume/mute
     ISimpleAudioVolume *pAudioVolume;      // shared mode volume/mute
     DWORD vol_hw_support; // is hardware volume supported for exclusive-mode?
-
-    // Streams used to marshal the proxy objects. The thread owning the actual
-    // objects needs to marshal proxy objects into these streams, and the thread
-    // that wants the proxies unmarshals them from here.
-    IStream *sSessionControl;
-    IStream *sEndpointVolume;
-    IStream *sAudioVolume;
-
-    // WASAPI proxy handles, for Single-Threaded Apartment communication. One is
-    // needed for each audio thread object that's accessed from the main thread.
-    IAudioSessionControl *pSessionControlProxy;
-    IAudioEndpointVolume *pEndpointVolumeProxy;
-    ISimpleAudioVolume *pAudioVolumeProxy;
 
     // ao options
     int opt_exclusive;
@@ -119,7 +107,8 @@ char *mp_PKEY_to_str_buf(char *buf, size_t buf_size, const PROPERTYKEY *pkey);
 #define mp_PKEY_to_str(pkey) mp_PKEY_to_str_buf((char[42]){0}, 42, (pkey))
 
 void wasapi_list_devs(struct ao *ao, struct ao_device_list *list);
-LPWSTR find_deviceID(struct ao *ao);
+bstr wasapi_get_specified_device_string(struct ao *ao);
+LPWSTR wasapi_find_deviceID(struct ao *ao);
 
 void wasapi_dispatch(struct ao *ao);
 HRESULT wasapi_thread_init(struct ao *ao);

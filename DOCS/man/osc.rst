@@ -130,7 +130,7 @@ these keys. In case of collision, the function needs to be bound to a
 different key. See the `Script Commands`_ section.
 
 =============   ================================================
-del             Hide the OSC permanently until mpv is restarted.
+del             Cycles visibility between never / auto (mouse-move) / always
 =============   ================================================
 
 Configuration
@@ -206,8 +206,8 @@ Configurable Options
 
 ``hidetimeout``
     | Default: 500
-    | Duration in ms until the OSC hides if no mouse movement, negative value
-      disables auto-hide
+    | Duration in ms until the OSC hides if no mouse movement, must not be
+      negative
 
 ``fadeduration``
     | Default: 200
@@ -243,28 +243,29 @@ Configurable Options
     | Default: no
     | Display timecodes with milliseconds
 
+``visibility``
+    | Default: auto (auto hide/show on mouse move)
+    | Also supports ``never`` and ``always``
+
 Script Commands
 ~~~~~~~~~~~~~~~
 
 The OSC script listens to certain script commands. These commands can bound
 in ``input.conf``, or sent by other scripts.
 
-``enable-osc``
-    Undoes ``disable-osc`` or the effect of the ``del`` key.
-
-``disable-osc``
-    Hide the OSC permanently. This is also what the ``del`` key does.
-
 ``osc-message``
     Show a message on screen using the OSC. First argument is the message,
     second the duration in seconds.
 
+``osc-visibility``
+    Controls visibility mode ``never`` / ``auto`` (on mouse move) / ``always``
+    and also ``cycle`` to cycle between the modes
 
 Example
 
 You could put this into ``input.conf`` to hide the OSC with the ``a`` key and
-to unhide it with ``b``::
+to set auto mode (the default) with ``b``::
 
-    a script_message disable-osc
-    b script_message enable-osc
+    a script_message osc-visibility never
+    b script_message osc-visibility auto
 

@@ -36,13 +36,10 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
+#include <libavfilter/avfilter.h>
 
 #if HAVE_LIBAVDEVICE
 #include <libavdevice/avdevice.h>
-#endif
-
-#if HAVE_LIBAVFILTER
-#include <libavfilter/avfilter.h>
 #endif
 
 #if HAVE_LIBAVRESAMPLE
@@ -161,10 +158,8 @@ void init_libav(struct mpv_global *global)
     avcodec_register_all();
     av_register_all();
     avformat_network_init();
-
-#if HAVE_LIBAVFILTER
     avfilter_register_all();
-#endif
+
 #if HAVE_LIBAVDEVICE
     avdevice_register_all();
 #endif
@@ -196,9 +191,7 @@ void print_libav_versions(struct mp_log *log, int v)
         {"libavcodec",    LIBAVCODEC_VERSION_INT,    avcodec_version()},
         {"libavformat",   LIBAVFORMAT_VERSION_INT,   avformat_version()},
         {"libswscale",    LIBSWSCALE_VERSION_INT,    swscale_version()},
-#if HAVE_LIBAVFILTER
         {"libavfilter",   LIBAVFILTER_VERSION_INT,   avfilter_version()},
-#endif
 #if HAVE_LIBAVRESAMPLE
         {"libavresample", LIBAVRESAMPLE_VERSION_INT, avresample_version()},
 #endif

@@ -25,15 +25,24 @@
 // Holds one packet/frame/whatever
 typedef struct demux_packet {
     int len;
+    unsigned char *buffer;
+
     double pts;
     double dts;
     double duration;
-    int64_t pos; // position in source file byte stream
-    unsigned char *buffer;
     bool keyframe;
-    int stream; // source stream index
+
+    int64_t pos;        // position in source file byte stream
+    int stream;         // source stream index
+
+    // segmentation (ordered chapters, EDL)
+    struct mp_codec_params *codec;
+    double start, end;
+    bool new_segment;
+
+    // private
     struct demux_packet *next;
-    struct AVPacket *avpacket;   // keep the buffer allocation
+    struct AVPacket *avpacket;   // keep the buffer allocation and sidedata
 } demux_packet_t;
 
 struct demux_packet *new_demux_packet(size_t len);

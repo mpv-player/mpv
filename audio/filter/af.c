@@ -59,9 +59,7 @@ static const struct af_info *const filter_list[] = {
     &af_info_rubberband,
 #endif
     &af_info_scaletempo,
-#if HAVE_LIBAVFILTER
     &af_info_lavfi,
-#endif
     NULL
 };
 
@@ -166,6 +164,7 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
         .info = desc.p,
         .data = talloc_zero(af, struct mp_audio),
         .log = mp_log_new(af, s->log, name),
+        .opts = s->opts,
         .replaygain_data = s->replaygain_data,
         .out_pool = mp_audio_pool_create(af),
     };
@@ -692,6 +691,17 @@ int af_control_by_label(struct af_stream *s, int cmd, void *arg, bstr label)
         return cur->control ? cur->control(cur, cmd, arg) : CONTROL_NA;
     } else {
         return CONTROL_UNKNOWN;
+    }
+}
+
+int af_send_command(struct af_stream *s, char *label, char *cmd, char *arg)
+{
+    char *args[2] = {cmd, arg};
+    if (strcmp(label, "all") == 0) {
+        af_control_all(s, AF_CONTROL_COMMAND, args);
+        return 0;
+    } else {
+        return af_control_by_label(s, AF_CONTROL_COMMAND, args, bstr0(label));
     }
 }
 

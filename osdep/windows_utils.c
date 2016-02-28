@@ -21,6 +21,7 @@
 #include <windows.h>
 #include <errors.h>
 #include <audioclient.h>
+#include <d3d9.h>
 
 #include "windows_utils.h"
 
@@ -83,15 +84,69 @@ static char *hresult_to_str(const HRESULT hr)
     E(AUDCLNT_S_BUFFER_EMPTY)
     E(AUDCLNT_S_THREAD_ALREADY_REGISTERED)
     E(AUDCLNT_S_POSITION_STALLED)
+    E(D3DERR_WRONGTEXTUREFORMAT)
+    E(D3DERR_UNSUPPORTEDCOLOROPERATION)
+    E(D3DERR_UNSUPPORTEDCOLORARG)
+    E(D3DERR_UNSUPPORTEDALPHAOPERATION)
+    E(D3DERR_UNSUPPORTEDALPHAARG)
+    E(D3DERR_TOOMANYOPERATIONS)
+    E(D3DERR_CONFLICTINGTEXTUREFILTER)
+    E(D3DERR_UNSUPPORTEDFACTORVALUE)
+    E(D3DERR_CONFLICTINGRENDERSTATE)
+    E(D3DERR_UNSUPPORTEDTEXTUREFILTER)
+    E(D3DERR_CONFLICTINGTEXTUREPALETTE)
+    E(D3DERR_DRIVERINTERNALERROR)
+    E(D3DERR_NOTFOUND)
+    E(D3DERR_MOREDATA)
+    E(D3DERR_DEVICELOST)
+    E(D3DERR_DEVICENOTRESET)
+    E(D3DERR_NOTAVAILABLE)
+    E(D3DERR_OUTOFVIDEOMEMORY)
+    E(D3DERR_INVALIDDEVICE)
+    E(D3DERR_INVALIDCALL)
+    E(D3DERR_DRIVERINVALIDCALL)
+    E(D3DERR_WASSTILLDRAWING)
+    E(D3DOK_NOAUTOGEN)
+    E(D3DERR_DEVICEREMOVED)
+    E(D3DERR_DEVICEHUNG)
+    E(S_NOT_RESIDENT)
+    E(S_RESIDENT_IN_SHARED_MEMORY)
+    E(S_PRESENT_MODE_CHANGED)
+    E(S_PRESENT_OCCLUDED)
+    E(D3DERR_UNSUPPORTEDOVERLAY)
+    E(D3DERR_UNSUPPORTEDOVERLAYFORMAT)
+    E(D3DERR_CANNOTPROTECTCONTENT)
+    E(D3DERR_UNSUPPORTEDCRYPTO)
+    E(D3DERR_PRESENT_STATISTICS_DISJOINT)
     default:
         return "<Unknown>";
     }
 #undef E
 }
 
+static char *fmtmsg_buf(char *buf, size_t buf_size, DWORD errorID)
+{
+    DWORD n = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM |
+                             FORMAT_MESSAGE_IGNORE_INSERTS,
+                             NULL, errorID, 0, buf, buf_size, NULL);
+    if (!n && GetLastError() == ERROR_MORE_DATA) {
+        snprintf(buf, buf_size,
+                 "<Insufficient buffer size (%zd) for error message>",
+                 buf_size);
+    } else {
+        if (n > 0 && buf[n-1] == '\n')
+            buf[n-1] = '\0';
+        if (n > 1 && buf[n-2] == '\r')
+            buf[n-2] = '\0';
+    }
+    return buf;
+}
+#define fmtmsg(hr) fmtmsg_buf((char[243]){0}, 243, (hr))
+
 char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr)
 {
-    snprintf(buf, buf_size, "%s (0x%"PRIx32")",
-             hresult_to_str(hr), (uint32_t) hr);
+    char* msg = fmtmsg(hr);
+    msg = msg[0] ? msg : hresult_to_str(hr);
+    snprintf(buf, buf_size, "%s (0x%"PRIx32")", msg, (uint32_t)hr);
     return buf;
 }

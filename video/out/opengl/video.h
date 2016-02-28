@@ -94,6 +94,7 @@ struct gl_video_opts {
     int use_rectangle;
     struct m_color background;
     int interpolation;
+    float interpolation_threshold;
     int blend_subs;
     char *scale_shader;
     char **pre_shaders;

@@ -758,11 +758,6 @@ int dvb_step_channel(stream_t *stream, int dir)
 
     MP_VERBOSE(stream, "DVB_STEP_CHANNEL dir %d\n", dir);
 
-    if (priv == NULL) {
-        MP_ERR(stream, "dvb_step_channel: NULL priv_ptr, quit\n");
-        return 0;
-    }
-
     list = state->list;
     if (list == NULL) {
         MP_ERR(stream, "dvb_step_channel: NULL list_ptr, quit\n");
@@ -857,14 +852,14 @@ static void dvbin_close(stream_t *stream)
     dvb_state_t* state = priv->state;
 
     if (state->switching_channel && state->is_on) {
-      // Prevent state destruction, reset channel-switch. 
+      // Prevent state destruction, reset channel-switch.
       state->switching_channel = false;
       pthread_mutex_lock(&global_dvb_state_lock);
       global_dvb_state->stream_used = false;
       pthread_mutex_unlock(&global_dvb_state_lock);
       return;
     }
-    
+
     for (int i = state->demux_fds_cnt - 1; i >= 0; i--) {
         state->demux_fds_cnt--;
         MP_VERBOSE(stream, "DVBIN_CLOSE, close(%d), fd=%d, COUNT=%d\n", i,
@@ -877,7 +872,7 @@ static void dvbin_close(stream_t *stream)
     state->fe_fd = state->dvr_fd = -1;
 
     state->is_on = 0;
-    
+
     pthread_mutex_lock(&global_dvb_state_lock);
     dvb_free_state(state);
     global_dvb_state = NULL;
@@ -947,18 +942,19 @@ static int dvb_open(stream_t *stream)
     }
 
     dvb_state_t* state = dvb_get_state(stream);
-    state->stream_used = true;
-    pthread_mutex_unlock(&global_dvb_state_lock);
-    
+
     priv->state = state;
     if (state == NULL) {
         MP_ERR(stream, "DVB CONFIGURATION IS EMPTY, exit\n");
+        pthread_mutex_unlock(&global_dvb_state_lock);
         return STREAM_ERROR;
     }
+    state->stream_used = true;
+    pthread_mutex_unlock(&global_dvb_state_lock);
 
     if (state->is_on != 1) {
-      // State could be already initialized, for example, we just did a channel switch. 
-      // The following setup only has to be done once. 
+      // State could be already initialized, for example, we just did a channel switch.
+      // The following setup only has to be done once.
 
       state->card = -1;
       for (i = 0; i < state->count; i++) {
@@ -1000,7 +996,7 @@ static int dvb_open(stream_t *stream)
       if (!dvb_streaming_start(stream, tuner_type, progname))
           return STREAM_ERROR;
     }
-    
+
     stream->type = STREAMTYPE_DVB;
     stream->fill_buffer = dvb_streaming_read;
     stream->close = dvbin_close;
@@ -1031,7 +1027,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
     state = malloc(sizeof(dvb_state_t));
     if (state == NULL)
         return NULL;
-    
+
     state->count = 0;
     state->switching_channel = false;
     state->stream_used = true;
@@ -1046,78 +1042,89 @@ dvb_state_t *dvb_get_state(stream_t *stream)
             continue;
         }
 
-        type = dvb_get_tuner_type(fd, log);
+        mp_verbose(log, "Opened device %s, FD: %d\n", filename, fd);
+        int* tuner_types = NULL;
+        int num_tuner_types = dvb_get_tuner_types(fd, log, &tuner_types);
         close(fd);
-        if (type != TUNER_SAT && type != TUNER_TER && type != TUNER_CBL &&
-            type != TUNER_ATSC) {
+        mp_verbose(log, "Frontend device %s offers %d supported delivery systems.\n",
+                   filename, num_tuner_types);
+        for (int num_tuner_type=0; num_tuner_type<num_tuner_types; num_tuner_type++) {
+          type = tuner_types[num_tuner_type];
+          if (type != TUNER_SAT && type != TUNER_TER && type != TUNER_CBL &&
+              type != TUNER_ATSC) {
             mp_verbose(log, "DVB_CONFIG, can't detect tuner type of "
                        "card %d, skipping\n", i);
             continue;
-        }
+          }
 
-        void *talloc_ctx = talloc_new(NULL);
-        char *conf_file = NULL;
-        if (priv->cfg_file && priv->cfg_file[0])
+          void *talloc_ctx = talloc_new(NULL);
+          char *conf_file = NULL;
+          if (priv->cfg_file && priv->cfg_file[0])
             conf_file = priv->cfg_file;
-        else {
+          else {
             switch (type) {
             case TUNER_TER:
-                conf_file = mp_find_config_file(talloc_ctx, global,
-                                                "channels.conf.ter");
-                break;
+              conf_file = mp_find_config_file(talloc_ctx, global,
+                                              "channels.conf.ter");
+              break;
             case TUNER_CBL:
-                conf_file = mp_find_config_file(talloc_ctx, global,
-                                                "channels.conf.cbl");
-                break;
+              conf_file = mp_find_config_file(talloc_ctx, global,
+                                              "channels.conf.cbl");
+              break;
             case TUNER_SAT:
-                conf_file = mp_find_config_file(talloc_ctx, global,
-                                                "channels.conf.sat");
-                break;
+              conf_file = mp_find_config_file(talloc_ctx, global,
+                                              "channels.conf.sat");
+              break;
             case TUNER_ATSC:
-                conf_file = mp_find_config_file(talloc_ctx, global,
-                                                "channels.conf.atsc");
-                break;
+              conf_file = mp_find_config_file(talloc_ctx, global,
+                                              "channels.conf.atsc");
+              break;
             }
             if (conf_file) {
-                mp_verbose(log, "Ignoring other channels.conf files.\n");
+              mp_verbose(log, "Ignoring other channels.conf files.\n");
             } else {
-                conf_file = mp_find_config_file(talloc_ctx, global,
-                                                "channels.conf");
+              conf_file = mp_find_config_file(talloc_ctx, global,
+                                              "channels.conf");
             }
-        }
+          }
 
-        list = dvb_get_channels(log, priv->cfg_full_transponder, conf_file,
-                                type);
-        talloc_free(talloc_ctx);
+          list = dvb_get_channels(log, priv->cfg_full_transponder, conf_file,
+                                  type);
+          talloc_free(talloc_ctx);
 
-        if (list == NULL)
+          if (list == NULL)
             continue;
 
-        size = sizeof(dvb_card_config_t) * (state->count + 1);
-        tmp = realloc(state->cards, size);
+          size = sizeof(dvb_card_config_t) * (state->count + 1);
+          tmp = realloc(state->cards, size);
 
-        if (tmp == NULL) {
-            fprintf(stderr, "DVB_CONFIG, can't realloc %d bytes, skipping\n",
-                    size);
+          if (tmp == NULL) {
+            mp_err(log, "DVB_CONFIG, can't realloc %d bytes, skipping\n",
+                   size);
+            free(list);
             continue;
-        }
-        cards = tmp;
+          }
+          cards = tmp;
 
-        name = malloc(20);
-        if (name == NULL) {
-            fprintf(stderr, "DVB_CONFIG, can't realloc 20 bytes, skipping\n");
+          name = malloc(20);
+          if (name == NULL) {
+            mp_err(log, "DVB_CONFIG, can't realloc 20 bytes, skipping\n");
+            free(list);
+            free(tmp);
             continue;
-        }
+          }
 
-        state->cards = cards;
-        state->cards[state->count].devno = i;
-        state->cards[state->count].list = list;
-        state->cards[state->count].type = type;
-        snprintf(name, 20, "DVB-%c card n. %d",
-                 type == TUNER_TER ? 'T' : (type == TUNER_CBL ? 'C' : 'S'),
-                 state->count + 1);
-        state->cards[state->count].name = name;
-        state->count++;
+          state->cards = cards;
+          state->cards[state->count].devno = i;
+          state->cards[state->count].list = list;
+          state->cards[state->count].type = type;
+          snprintf(name, 20, "DVB-%c card n. %d",
+                   type == TUNER_TER ? 'T' : (type == TUNER_CBL ? 'C' : 'S'),
+                   state->count + 1);
+          state->cards[state->count].name = name;
+          state->count++;
+        }
+        talloc_free(tuner_types);
     }
 
     if (state->count == 0) {

@@ -120,7 +120,7 @@ def build(ctx):
         ( "audio/filter/af_equalizer.c" ),
         ( "audio/filter/af_format.c" ),
         ( "audio/filter/af_lavcac3enc.c" ),
-        ( "audio/filter/af_lavfi.c",             "libavfilter" ),
+        ( "audio/filter/af_lavfi.c" ),
         ( "audio/filter/af_lavrresample.c" ),
         ( "audio/filter/af_pan.c" ),
         ( "audio/filter/af_rubberband.c",        "rubberband" ),
@@ -138,6 +138,7 @@ def build(ctx):
         ( "audio/out/ao_lavc.c",                 "encoding" ),
         ( "audio/out/ao_null.c" ),
         ( "audio/out/ao_openal.c",               "openal" ),
+        ( "audio/out/ao_opensles.c",             "opensles" ),
         ( "audio/out/ao_oss.c",                  "oss-audio" ),
         ( "audio/out/ao_pcm.c" ),
         ( "audio/out/ao_pulse.c",                "pulse" ),
@@ -177,6 +178,7 @@ def build(ctx):
         ( "demux/demux_playlist.c" ),
         ( "demux/demux_raw.c" ),
         ( "demux/demux_rar.c" ),
+        ( "demux/demux_timeline.c" ),
         ( "demux/demux_tv.c",                    "tv" ),
         ( "demux/ebml.c" ),
         ( "demux/packet.c" ),
@@ -217,6 +219,7 @@ def build(ctx):
         ( "player/loadfile.c" ),
         ( "player/main.c" ),
         ( "player/misc.c" ),
+        ( "player/lavfi.c" ),
         ( "player/lua.c",                        "lua" ),
         ( "player/osd.c" ),
         ( "player/playloop.c" ),
@@ -279,6 +282,7 @@ def build(ctx):
         ( "video/mp_image.c" ),
         ( "video/mp_image_pool.c" ),
         ( "video/sws_utils.c" ),
+        ( "video/dxva2.c",                       "dxva2-hwaccel" ),
         ( "video/vaapi.c",                       "vaapi" ),
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),
@@ -298,20 +302,20 @@ def build(ctx):
         ( "video/filter/vf_expand.c" ),
         ( "video/filter/vf_flip.c" ),
         ( "video/filter/vf_format.c" ),
-        ( "video/filter/vf_gradfun.c",           "libavfilter"),
-        ( "video/filter/vf_lavfi.c",             "libavfilter"),
-        ( "video/filter/vf_mirror.c",            "libavfilter"),
+        ( "video/filter/vf_gradfun.c" ),
+        ( "video/filter/vf_lavfi.c" ),
+        ( "video/filter/vf_mirror.c" ),
         ( "video/filter/vf_noformat.c" ),
-        ( "video/filter/vf_pullup.c",            "libavfilter"),
-        ( "video/filter/vf_rotate.c",            "libavfilter"),
+        ( "video/filter/vf_pullup.c" ),
+        ( "video/filter/vf_rotate.c" ),
         ( "video/filter/vf_scale.c" ),
-        ( "video/filter/vf_stereo3d.c",          "libavfilter"),
+        ( "video/filter/vf_stereo3d.c" ),
         ( "video/filter/vf_sub.c" ),
         ( "video/filter/vf_vapoursynth.c",       "vapoursynth-core" ),
         ( "video/filter/vf_vavpp.c",             "vaapi"),
         ( "video/filter/vf_vdpaupp.c",           "vdpau" ),
         ( "video/filter/vf_vdpaurb.c",           "vdpau" ),
-        ( "video/filter/vf_yadif.c",             "libavfilter"),
+        ( "video/filter/vf_yadif.c" ),
         ( "video/out/aspect.c" ),
         ( "video/out/bitmap_packer.c" ),
         ( "video/out/cocoa/video_view.m",        "cocoa" ),
@@ -334,6 +338,7 @@ def build(ctx):
         ( "video/out/opengl/egl_helpers.c",      "egl-helpers" ),
         ( "video/out/opengl/hwdec.c",            "gl" ),
         ( "video/out/opengl/hwdec_dxva2.c",      "gl-win32" ),
+        ( "video/out/opengl/hwdec_dxva2gldx.c",  "gl-dxinterop" ),
         ( "video/out/opengl/hwdec_vaegl.c",      "vaapi-egl" ),
         ( "video/out/opengl/hwdec_vaglx.c",      "vaapi-glx" ),
         ( "video/out/opengl/hwdec_osx.c",        "videotoolbox-gl" ),
@@ -395,6 +400,7 @@ def build(ctx):
         ( "osdep/windows_utils.c",               "win32" ),
         ( "osdep/mpv.rc",                        "win32-executable" ),
         ( "osdep/win32/pthread.c",               "win32-internal-pthreads"),
+        ( "osdep/android/strnlen.c",             "android"),
 
         ## tree_allocator
         "ta/ta.c", "ta/ta_talloc.c", "ta/ta_utils.c"
@@ -489,17 +495,24 @@ def build(ctx):
                 features += "cshlib syms"
             else:
                 features += "cstlib"
-            ctx(
-                target       = "mpv",
-                source       = ctx.filtered_sources(sources),
-                use          = ctx.dependencies_use(),
-                includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
-                                ctx.dependencies_includes(),
-                features     = features,
-                export_symbols_def = "libmpv/mpv.def",
-                install_path = ctx.env.LIBDIR,
-                vnum         = libversion,
-            )
+
+            libmpv_kwargs = {
+                "target": "mpv",
+                "source":   ctx.filtered_sources(sources),
+                "use":      ctx.dependencies_use(),
+                "includes": [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
+                             ctx.dependencies_includes(),
+                "features": features,
+                "export_symbols_def": "libmpv/mpv.def",
+                "install_path": ctx.env.LIBDIR,
+            }
+
+            if not ctx.dependency_satisfied('android'):
+                # for all other configurations we want SONAME to be used
+                libmpv_kwargs["vnum"] = libversion
+
+            ctx(**libmpv_kwargs)
+
         if build_shared:
             _build_libmpv(True)
         if build_static:
@@ -561,7 +574,8 @@ def build(ctx):
             ctx.env.DATADIR + '/applications',
             ['etc/mpv.desktop'] )
 
-        ctx.install_files(ctx.env.CONFDIR, ['etc/encoding-profiles.conf'] )
+        if ctx.dependency_satisfied('encoding'):
+            ctx.install_files(ctx.env.CONFDIR, ['etc/encoding-profiles.conf'] )
 
         for size in '16x16 32x32 64x64'.split():
             ctx.install_as(

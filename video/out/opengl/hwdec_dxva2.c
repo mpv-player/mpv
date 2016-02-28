@@ -55,7 +55,8 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
 }
 
 const struct gl_hwdec_driver gl_hwdec_dxva2 = {
-    .api_name = "dxva2",
+    .name = "dxva2-dummy",
+    .api = HWDEC_DXVA2_COPY,
     .imgfmt = -1,
     .create = create,
     .reinit = reinit,

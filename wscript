@@ -422,9 +422,10 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'req':  True,
         'fmsg': 'No resampler found. Install libavresample or libswresample (FFmpeg).'
     }, {
-        'name': '--libavfilter',
+        'name': 'libavfilter',
         'desc': 'libavfilter',
         'func': check_pkg_config('libavfilter', '>= 5.0.0'),
+        'req':  True,
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
@@ -554,6 +555,10 @@ audio_output_features = [
         'desc': 'OpenAL audio output',
         'func': check_pkg_config('openal', '>= 1.13'),
         'default': 'disable'
+    }, {
+        'name': '--opensles',
+        'desc': 'OpenSL ES audio output',
+        'func': check_statement('SLES/OpenSLES.h', 'slCreateEngine', lib="OpenSLES"),
     }, {
         'name': '--alsa',
         'desc': 'ALSA audio output',
@@ -693,7 +698,7 @@ video_output_features = [
         'name': '--vaapi',
         'desc': 'VAAPI acceleration',
         'deps': [ 'libdl' ],
-        'deps_any': [ 'x11', 'wayland' ],
+        'deps_any': [ 'x11', 'wayland', 'egl-drm' ],
         'func': check_pkg_config('libva', '>= 0.36.0'),
     }, {
         'name': '--vaapi-x11',
@@ -705,7 +710,11 @@ video_output_features = [
         'desc': 'VAAPI (Wayland support)',
         'deps': [ 'vaapi', 'gl-wayland' ],
         'func': check_pkg_config('libva-wayland', '>= 0.36.0'),
-
+    }, {
+        'name': '--vaapi-drm',
+        'desc': 'VAAPI (DRM/EGL support)',
+        'deps': [ 'vaapi', 'egl-drm' ],
+        'func': check_pkg_config('libva-drm', '>= 0.36.0'),
     }, {
         'name': '--vaapi-glx',
         'desc': 'VAAPI GLX',
@@ -736,6 +745,10 @@ video_output_features = [
         'deps': [ 'win32' ],
         'func': check_cc(header_name='d3d9.h'),
     }, {
+        'name': '--android',
+        'desc': 'Android support',
+        'func': check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
+    }, {
         # We need MMAL/bcm_host/dispmanx APIs. Also, most RPI distros require
         # every project to hardcode the paths to the include directories. Also,
         # these headers are so broken that they spam tons of warnings by merely
@@ -757,10 +770,34 @@ video_output_features = [
             check_statement('GL/gl.h', '(void)GL_RGB32F'),     # arbitrary OpenGL 3.0 symbol
             check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
         ),
+    }, {
+        'name': '--desktop-gl',
+        'desc': 'Desktop OpengGL support',
+        'func': compose_checks(
+            check_statement('GL/gl.h', '(void)GL_RGB32F'),     # arbitrary OpenGL 3.0 symbol
+            check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
+        ),
+    } , {
+        'name': '--android-gl',
+        'desc': 'Android OpenGL ES support',
+        'deps': ['android'],
+        'func': check_statement('GLES3/gl3.h', '(void)GL_RGB32F'),  # arbitrary OpenGL ES 3.0 symbol
+    } , {
+        'name': '--any-gl',
+        'desc': 'Any OpenGL (ES) support',
+        'deps_any': ['desktop-gl', 'android-gl'],
+        'func': check_true
+    } , {
+        'name': '--plain-gl',
+        'desc': 'OpenGL without platform-specific code (e.g. for libmpv)',
+        'deps': ['any-gl'],
+        'deps_any': [ 'libmpv-shared', 'libmpv-static' ],
+        'func': check_true,
     } , {
         'name': '--gl',
         'desc': 'OpenGL video outputs',
-        'deps_any': [ 'gl-cocoa', 'gl-x11', 'egl-x11', 'egl-drm', 'gl-win32', 'gl-wayland', 'rpi' ],
+        'deps_any': [ 'gl-cocoa', 'gl-x11', 'egl-x11', 'egl-drm',
+                      'gl-win32', 'gl-wayland', 'rpi', 'plain-gl' ],
         'func': check_true
     }, {
         'name': 'egl-helpers',
@@ -907,7 +944,7 @@ def options(opt):
     group.add_option('--lua',
         type    = 'string',
         dest    = 'LUA_VER',
-        help    = "select Lua package which should be autodetected. Choices: 51 51deb 51fbsd 52 52deb 52arch 52fbsd luajit")
+        help    = "select Lua package which should be autodetected. Choices: 51 51deb 51obsd 51fbsd 52 52deb 52arch 52fbsd luajit")
 
 @conf
 def is_optimization(ctx):

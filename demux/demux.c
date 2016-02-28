@@ -36,6 +36,7 @@
 
 #include "stream/stream.h"
 #include "demux.h"
+#include "timeline.h"
 #include "stheader.h"
 #include "cue.h"
 
@@ -52,6 +53,7 @@ extern const demuxer_desc_t demuxer_desc_playlist;
 extern const demuxer_desc_t demuxer_desc_disc;
 extern const demuxer_desc_t demuxer_desc_rar;
 extern const demuxer_desc_t demuxer_desc_libarchive;
+extern const demuxer_desc_t demuxer_desc_timeline;
 
 /* Please do not add any new demuxers here. If you want to implement a new
  * demuxer, add it to libavformat, except for wrappers around external
@@ -160,6 +162,10 @@ struct demux_stream {
     int64_t last_pos;
     struct demux_packet *head;
     struct demux_packet *tail;
+
+    // for closed captions (demuxer_feed_caption)
+    struct sh_stream *cc;
+
 };
 
 // Return "a", or if that is NOPTS, return "def".
@@ -361,6 +367,27 @@ const char *stream_type_name(enum stream_type type)
     }
 }
 
+void demuxer_feed_caption(struct sh_stream *stream, demux_packet_t *dp)
+{
+    struct demuxer *demuxer = stream->ds->in->d_thread;
+    struct sh_stream *sh = stream->ds->cc;
+
+    if (!sh) {
+        sh = demux_alloc_sh_stream(STREAM_SUB);
+        if (!sh) {
+            talloc_free(dp);
+            return;
+        }
+        sh->codec->codec = "eia_608";
+        stream->ds->cc = sh;
+        demux_add_sh_stream(demuxer, sh);
+    }
+
+    dp->pts = MP_ADD_PTS(dp->pts, -stream->ds->in->ts_offset);
+    dp->dts = MP_ADD_PTS(dp->dts, -stream->ds->in->ts_offset);
+    demux_add_packet(sh, dp);
+}
+
 void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
 {
     struct demux_stream *ds = stream ? stream->ds : NULL;
@@ -463,7 +490,12 @@ static bool read_packet(struct demux_internal *in)
         }
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
-            ds->eof |= !ds->head;
+            bool eof = !ds->head;
+            if (eof && !ds->eof) {
+                if (in->wakeup_cb)
+                    in->wakeup_cb(in->wakeup_cb_ctx);
+            }
+            ds->eof |= eof;
         }
         pthread_cond_signal(&in->wakeup);
         return false;
@@ -548,8 +580,7 @@ static void start_refreshing(struct demux_internal *in)
     pthread_mutex_unlock(&in->lock);
 
     // Seek back to player's current position, with a small offset added.
-    in->d_thread->desc->seek(in->d_thread, start_ts - 1.0,
-                             SEEK_ABSOLUTE | SEEK_BACKWARD | SEEK_HR);
+    in->d_thread->desc->seek(in->d_thread, start_ts - 1.0, SEEK_BACKWARD | SEEK_HR);
 
     pthread_mutex_lock(&in->lock);
 }
@@ -558,10 +589,17 @@ static void execute_trackswitch(struct demux_internal *in)
 {
     in->tracks_switched = false;
 
+    bool any_selected = false;
+    for (int n = 0; n < in->num_streams; n++)
+        any_selected |= in->streams[n]->ds->selected;
+
     pthread_mutex_unlock(&in->lock);
 
     if (in->d_thread->desc->control)
         in->d_thread->desc->control(in->d_thread, DEMUXER_CTRL_SWITCHED_TRACKS, 0);
+
+    stream_control(in->d_thread->stream, STREAM_CTRL_SET_READAHEAD,
+                   &(int){any_selected});
 
     pthread_mutex_lock(&in->lock);
 
@@ -664,23 +702,9 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     pkt->pts = MP_ADD_PTS(pkt->pts, ds->in->ts_offset);
     pkt->dts = MP_ADD_PTS(pkt->dts, ds->in->ts_offset);
 
-    return pkt;
-}
+    pkt->start = MP_ADD_PTS(pkt->start, ds->in->ts_offset);
+    pkt->end = MP_ADD_PTS(pkt->end, ds->in->ts_offset);
 
-// Read a packet from the given stream. The returned packet belongs to the
-// caller, who has to free it with talloc_free(). Might block. Returns NULL
-// on EOF.
-struct demux_packet *demux_read_packet(struct sh_stream *sh)
-{
-    struct demux_stream *ds = sh ? sh->ds : NULL;
-    struct demux_packet *pkt = NULL;
-    if (ds) {
-        pthread_mutex_lock(&ds->in->lock);
-        ds_get_packets(ds);
-        pkt = dequeue_packet(ds);
-        pthread_cond_signal(&ds->in->wakeup); // possibly read more
-        pthread_mutex_unlock(&ds->in->lock);
-    }
     return pkt;
 }
 
@@ -697,6 +721,24 @@ static bool use_lazy_subtitle_reading(struct demux_stream *ds)
             return true;
     }
     return false;
+}
+
+// Read a packet from the given stream. The returned packet belongs to the
+// caller, who has to free it with talloc_free(). Might block. Returns NULL
+// on EOF.
+struct demux_packet *demux_read_packet(struct sh_stream *sh)
+{
+    struct demux_stream *ds = sh ? sh->ds : NULL;
+    struct demux_packet *pkt = NULL;
+    if (ds) {
+        pthread_mutex_lock(&ds->in->lock);
+        if (!use_lazy_subtitle_reading(ds))
+            ds_get_packets(ds);
+        pkt = dequeue_packet(ds);
+        pthread_cond_signal(&ds->in->wakeup); // possibly read more
+        pthread_mutex_unlock(&ds->in->lock);
+    }
+    return pkt;
 }
 
 // Poll the demuxer queue, and if there's a packet, return it. Otherwise, just
@@ -749,7 +791,7 @@ bool demux_has_packet(struct sh_stream *sh)
     return has_packet;
 }
 
-// Read and return any packet we find.
+// Read and return any packet we find. NULL means EOF.
 struct demux_packet *demux_read_any_packet(struct demuxer *demuxer)
 {
     struct demux_internal *in = demuxer->in;
@@ -904,7 +946,6 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         dst->partially_seekable = src->partially_seekable;
         dst->filetype = src->filetype;
         dst->ts_resets_possible = src->ts_resets_possible;
-        dst->rel_seeks = src->rel_seeks;
         dst->allow_refresh_seeks = src->allow_refresh_seeks;
         dst->fully_read = src->fully_read;
         dst->start_time = src->start_time;
@@ -1046,10 +1087,11 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     in->d_user->metadata = talloc_zero(in->d_user, struct mp_tags);
     in->d_buffer->metadata = talloc_zero(in->d_buffer, struct mp_tags);
 
-    mp_verbose(log, "Trying demuxer: %s (force-level: %s)\n",
-               desc->name, d_level(check));
+    mp_dbg(log, "Trying demuxer: %s (force-level: %s)\n",
+           desc->name, d_level(check));
 
-    if (stream->seekable) // not for DVD/BD/DVB in particular
+    // not for DVD/BD/DVB in particular
+    if (stream->seekable && (!params || !params->timeline))
         stream_seek(stream, 0);
 
     // Peek this much data to avoid that stream_read() run by some demuxers
@@ -1076,6 +1118,17 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         demux_init_cache(demuxer);
         demux_changed(in->d_thread, DEMUX_EVENT_ALL);
         demux_update(demuxer);
+        stream_control(demuxer->stream, STREAM_CTRL_SET_READAHEAD, &(int){false});
+        struct timeline *tl = timeline_load(global, log, demuxer);
+        if (tl) {
+            struct demuxer_params params2 = {0};
+            params2.timeline = tl;
+            struct demuxer *sub = open_given_type(global, log,
+                                                  &demuxer_desc_timeline, stream,
+                                                  &params2, DEMUX_CHECK_FORCE);
+            if (sub)
+                return sub;
+        }
         return demuxer;
     }
 
@@ -1119,6 +1172,7 @@ struct demuxer *demux_open(struct stream *stream, struct demuxer_params *params,
     // Test demuxers from first to last, one pass for each check_levels[] entry
     for (int pass = 0; check_levels[pass] != -1; pass++) {
         enum demux_check level = check_levels[pass];
+        mp_verbose(log, "Trying demuxers for level=%s.\n", d_level(level));
         for (int n = 0; demuxer_list[n]; n++) {
             const struct demuxer_desc *desc = demuxer_list[n];
             if (!check_desc || desc == check_desc) {
@@ -1184,7 +1238,7 @@ void demux_flush(demuxer_t *demuxer)
     pthread_mutex_unlock(&demuxer->in->lock);
 }
 
-int demux_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
+int demux_seek(demuxer_t *demuxer, double seek_pts, int flags)
 {
     struct demux_internal *in = demuxer->in;
     assert(demuxer == in->d_user);
@@ -1194,32 +1248,22 @@ int demux_seek(demuxer_t *demuxer, double rel_seek_secs, int flags)
         return 0;
     }
 
-    if ((flags & SEEK_FACTOR) && !(flags & SEEK_ABSOLUTE)) {
-        MP_WARN(demuxer, "Invalid seek flags.\n");
-        return 0;
-    }
-
-    if (rel_seek_secs == MP_NOPTS_VALUE && (flags & SEEK_ABSOLUTE))
+    if (seek_pts == MP_NOPTS_VALUE)
         return 0;
 
-    if (!(flags & (SEEK_BACKWARD | SEEK_FORWARD))) {
-        if (flags & SEEK_ABSOLUTE || rel_seek_secs < 0) {
-            flags |= SEEK_BACKWARD;
-        } else {
-            flags |= SEEK_FORWARD;
-        }
-    }
+    if (!(flags & SEEK_FORWARD))
+        flags |= SEEK_BACKWARD;
 
     pthread_mutex_lock(&in->lock);
 
-    MP_VERBOSE(in, "queuing seek to %f%s\n", rel_seek_secs,
+    MP_VERBOSE(in, "queuing seek to %f%s\n", seek_pts,
                in->seeking ? " (cascade)" : "");
 
     flush_locked(demuxer);
     in->seeking = true;
     in->seek_flags = flags;
-    in->seek_pts = rel_seek_secs;
-    if ((flags & SEEK_ABSOLUTE) && !(flags & SEEK_FACTOR))
+    in->seek_pts = seek_pts;
+    if (!(flags & SEEK_FACTOR))
         in->seek_pts = MP_ADD_PTS(in->seek_pts, -in->ts_offset);
 
     if (!in->threading)
@@ -1255,37 +1299,26 @@ struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
     return NULL;
 }
 
-void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
-                          struct sh_stream *stream)
-{
-    assert(!stream || stream->type == type);
-
-    int num = demux_get_num_stream(demuxer);
-    for (int n = 0; n < num; n++) {
-        struct sh_stream *cur = demux_get_stream(demuxer, n);
-        if (cur->type == type)
-            demuxer_select_track(demuxer, cur, cur == stream);
-    }
-}
-
 void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
                           bool selected)
 {
     struct demux_internal *in = demuxer->in;
     pthread_mutex_lock(&in->lock);
-    bool update = false;
     // don't flush buffers if stream is already selected / unselected
     if (stream->ds->selected != selected) {
         stream->ds->selected = selected;
         stream->ds->active = false;
         ds_flush(stream->ds);
-        if (selected && in->refresh_seeks_enabled && in->threading)
+        in->tracks_switched = true;
+        if (selected && in->refresh_seeks_enabled)
             in->start_refresh_seek = true;
-        update = true;
+        if (in->threading) {
+            pthread_cond_signal(&in->wakeup);
+        } else {
+            execute_trackswitch(in);
+        }
     }
     pthread_mutex_unlock(&in->lock);
-    if (update)
-        demux_control(demuxer, DEMUXER_CTRL_SWITCHED_TRACKS, NULL);
 }
 
 void demux_set_stream_autoselect(struct demuxer *demuxer, bool autoselect)
@@ -1456,10 +1489,6 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         c->res = r;
         return DEMUXER_CTRL_OK;
     }
-    case DEMUXER_CTRL_SWITCHED_TRACKS:
-        in->tracks_switched = true;
-        pthread_cond_signal(&in->wakeup);
-        return DEMUXER_CTRL_OK;
     case DEMUXER_CTRL_GET_BITRATE_STATS: {
         double *rates = arg;
         for (int n = 0; n < STREAM_TYPE_COUNT; n++)

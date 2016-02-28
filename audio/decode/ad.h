@@ -35,7 +35,8 @@ struct ad_functions {
     int (*init)(struct dec_audio *da, const char *decoder);
     void (*uninit)(struct dec_audio *da);
     int (*control)(struct dec_audio *da, int cmd, void *arg);
-    int (*decode_packet)(struct dec_audio *da, struct mp_audio **out);
+    int (*decode_packet)(struct dec_audio *da, struct demux_packet *pkt,
+                         struct mp_audio **out);
 };
 
 enum ad_ctrl {

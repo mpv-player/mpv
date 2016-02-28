@@ -3,18 +3,18 @@
  *
  * Filter graph creation code taken from Libav avplay.c (LGPL 2.1 or later)
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -56,6 +56,7 @@
 #if LIBAVFILTER_VERSION_MICRO < 100
 #define graph_parse(graph, filters, inputs, outputs, log_ctx) \
     avfilter_graph_parse(graph, filters, inputs, outputs, log_ctx)
+#define avfilter_graph_send_command(a, b, c, d, e, f, g) -1
 #else
 #define graph_parse(graph, filters, inputs, outputs, log_ctx) \
     avfilter_graph_parse_ptr(graph, filters, &(inputs), &(outputs), log_ctx)
@@ -335,6 +336,14 @@ static int control(vf_instance_t *vf, int request, void *data)
     case VFCTRL_SEEK_RESET:
         reset(vf);
         return CONTROL_OK;
+    case VFCTRL_COMMAND: {
+        if (!vf->priv->graph)
+            break;
+        char **args = data;
+        return avfilter_graph_send_command(vf->priv->graph, "all",
+                                           args[0], args[1], &(char){0}, 0, 0)
+                >= 0 ? CONTROL_OK : CONTROL_ERROR;
+    }
     case VFCTRL_GET_METADATA:
         if (vf->priv && vf->priv->metadata) {
             *(struct mp_tags *)data = *vf->priv->metadata;

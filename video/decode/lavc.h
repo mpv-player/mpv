@@ -9,19 +9,25 @@
 #include "video/mp_image.h"
 #include "video/hwdec.h"
 
+#define HWDEC_DELAY_QUEUE_COUNT 2
+
 typedef struct lavc_ctx {
     struct mp_log *log;
     struct MPOpts *opts;
     AVCodecContext *avctx;
     AVFrame *pic;
     struct vd_lavc_hwdec *hwdec;
+    AVRational codec_timebase;
     enum AVPixelFormat pix_fmt;
-    int best_csp;
     enum AVDiscard skip_frame;
     bool flushing;
-    const char *software_fallback_decoder;
+    const char *decoder;
     bool hwdec_failed;
     bool hwdec_notified;
+
+    struct mp_image **delay_queue;
+    int num_delay_queue;
+    int max_delay_queue;
 
     // From VO
     struct mp_hwdec_info *hwdec_info;

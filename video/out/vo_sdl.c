@@ -5,18 +5,18 @@
  *
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -68,11 +68,7 @@ const struct formatmap_entry formats[] = {
     {SDL_PIXELFORMAT_BGR24, IMGFMT_BGR24, 0},
     {SDL_PIXELFORMAT_RGB888, IMGFMT_RGB24, 0},
     {SDL_PIXELFORMAT_BGR888, IMGFMT_BGR24, 0},
-    {SDL_PIXELFORMAT_RGB565, IMGFMT_BGR565, 0},
     {SDL_PIXELFORMAT_BGR565, IMGFMT_RGB565, 0},
-    {SDL_PIXELFORMAT_RGB555, IMGFMT_BGR555, 0},
-    {SDL_PIXELFORMAT_BGR555, IMGFMT_RGB555, 0},
-    {SDL_PIXELFORMAT_RGB444, IMGFMT_BGR444, 0}
 #else
     {SDL_PIXELFORMAT_RGBX8888, IMGFMT_ABGR, 0}, // has no alpha -> bad for OSD
     {SDL_PIXELFORMAT_BGRX8888, IMGFMT_ARGB, 0}, // has no alpha -> bad for OSD
@@ -85,10 +81,6 @@ const struct formatmap_entry formats[] = {
     {SDL_PIXELFORMAT_RGB888, IMGFMT_BGR24, 0},
     {SDL_PIXELFORMAT_BGR888, IMGFMT_RGB24, 0},
     {SDL_PIXELFORMAT_RGB565, IMGFMT_RGB565, 0},
-    {SDL_PIXELFORMAT_BGR565, IMGFMT_RGB565, 0},
-    {SDL_PIXELFORMAT_RGB555, IMGFMT_RGB555, 0},
-    {SDL_PIXELFORMAT_BGR555, IMGFMT_BGR555, 0},
-    {SDL_PIXELFORMAT_RGB444, IMGFMT_RGB444, 0}
 #endif
 };
 

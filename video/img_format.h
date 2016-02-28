@@ -178,23 +178,8 @@ enum mp_imgfmt {
     IMGFMT_RGB0_START = IMGFMT_0RGB,
     IMGFMT_RGB0_END = IMGFMT_RGB0,
 
-    // Accessed with bit-shifts (components ordered from MSB to LSB)
-    IMGFMT_BGR8,                // r3 g3 b2
-    IMGFMT_RGB8,
-    IMGFMT_BGR4_BYTE,           // r1 g2 b1 with 1 pixel per byte
-    IMGFMT_RGB4_BYTE,
-    IMGFMT_BGR4,                // r1 g2 b1, bit-packed
-    IMGFMT_RGB4,
-    IMGFMT_MONO,                // 1 bit per pixel, bit-packed
-    IMGFMT_MONO_W,              // like IMGFMT_MONO, but inverted (white pixels)
-
     // Accessed with bit-shifts after endian-swapping the uint16_t pixel
-    IMGFMT_RGB444,              // 4r 4g 4b 4a  (MSB to LSB)
-    IMGFMT_RGB555,              // 5r 5g 5b 1a
-    IMGFMT_RGB565,              // 5r 6g 5b
-    IMGFMT_BGR444,              // 4b 4r 4g 4a
-    IMGFMT_BGR555,              // 5b 5g 5r 1a
-    IMGFMT_BGR565,              // 5b 6g 5r
+    IMGFMT_RGB565,              // 5r 6g 5b (MSB to LSB)
 
     // The first plane has 1 byte per pixel. The second plane is a palette with
     // 256 entries, with each entry encoded like in IMGFMT_BGR32.

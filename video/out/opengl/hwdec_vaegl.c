@@ -65,22 +65,45 @@ static VADisplay *create_wayland_va_display(GL *gl)
 }
 #endif
 
+#if HAVE_VAAPI_DRM
+#include <va/va_drm.h>
+
+static VADisplay *create_drm_va_display(GL *gl)
+{
+    int drm_fd = (intptr_t)gl->MPGetNativeDisplay("drm");
+    // Note: yes, drm_fd==0 could be valid - but it's rare and doesn't fit with
+    //       our slightly crappy way of passing it through, so consider 0 not
+    //       valid.
+    return drm_fd ? vaGetDisplayDRM(drm_fd) : NULL;
+}
+#endif
+
+struct va_create_native {
+    VADisplay *(*create)(GL *gl);
+};
+
+static const struct va_create_native create_native_cbs[] = {
+#if HAVE_VAAPI_X11
+    {create_x11_va_display},
+#endif
+#if HAVE_VAAPI_WAYLAND
+    {create_wayland_va_display},
+#endif
+#if HAVE_VAAPI_DRM
+    {create_drm_va_display},
+#endif
+};
+
 static VADisplay *create_native_va_display(GL *gl)
 {
     if (!gl->MPGetNativeDisplay)
         return NULL;
-    VADisplay *display = NULL;
-#if HAVE_VAAPI_X11
-    display = create_x11_va_display(gl);
-    if (display)
-        return display;
-#endif
-#if HAVE_VAAPI_WAYLAND
-    display = create_wayland_va_display(gl);
-    if (display)
-        return display;
-#endif
-    return display;
+    for (int n = 0; n < MP_ARRAY_SIZE(create_native_cbs); n++) {
+        VADisplay *display = create_native_cbs[n].create(gl);
+        if (display)
+            return display;
+    }
+    return NULL;
 }
 
 struct priv {
@@ -187,8 +210,12 @@ static int create(struct gl_hwdec *hw)
     if (!eglGetCurrentDisplay())
         return -1;
 
-    if (!strstr(gl->extensions, "EXT_image_dma_buf_import") ||
-        !strstr(gl->extensions, "EGL_KHR_image_base") ||
+    const char *exts = eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);
+    if (!exts)
+        return -1;
+
+    if (!strstr(exts, "EXT_image_dma_buf_import") ||
+        !strstr(exts, "EGL_KHR_image_base") ||
         !strstr(gl->extensions, "GL_OES_EGL_image") ||
         !(gl->mpgl_caps & MPGL_CAP_TEX_RG))
         return -1;
@@ -374,7 +401,8 @@ static bool test_format(struct gl_hwdec *hw)
 }
 
 const struct gl_hwdec_driver gl_hwdec_vaegl = {
-    .api_name = "vaapi",
+    .name = "vaapi-egl",
+    .api = HWDEC_VAAPI,
     .imgfmt = IMGFMT_VAAPI,
     .create = create,
     .reinit = reinit,

@@ -92,10 +92,12 @@ enum mp_command_type {
 
     /// Audio Filter commands
     MP_CMD_AF,
+    MP_CMD_AF_COMMAND,
     MP_CMD_AO_RELOAD,
 
     /// Video filter commands
     MP_CMD_VF,
+    MP_CMD_VF_COMMAND,
 
     /// Video output commands
     MP_CMD_VO_CMDLINE,

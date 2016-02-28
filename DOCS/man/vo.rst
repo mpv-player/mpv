@@ -444,7 +444,7 @@ Available video output drivers are:
         Disable the scaler if the video image is not resized. In that case,
         ``bilinear`` is used instead whatever is set with ``scale``. Bilinear
         will reproduce the source image perfectly if no scaling is performed.
-        Note that this option never affects ``cscale``.
+        Enabled by default. Note that this option never affects ``cscale``.
 
     ``pbo``
         Enable use of PBOs. On some drivers this can be faster, especially if
@@ -548,6 +548,20 @@ Available video output drivers are:
         excessive ringing artifacts in the temporal domain (which typically
         manifest themselves as short flashes or fringes of black, mostly
         around moving edges) in exchange for potentially adding more blur.
+
+    ``interpolation-threshold=<0..1,-1>``
+        Threshold below which frame ratio interpolation gets disabled (default:
+        ``0.0001``). This is calculated as ``abs(disphz/vfps - 1) < threshold``,
+        where ``vfps`` is the speed-adjusted display FPS, and ``disphz`` the
+        display refresh rate.
+
+        The default is intended to almost always enable interpolation if the
+        playback rate is even slightly different from the display refresh rate.
+        But note that if you use e.g. ``--video-sync=display-vdrop``, small
+        deviations in the rate can disable interpolation and introduce a
+        discontinuity every other minute.
+
+        Set this to ``-1`` to disable this logic.
 
     ``dscale-radius``, ``cscale-radius``, ``tscale-radius``, etc.
         Set filter parameters for ``dscale``, ``cscale`` and ``tscale``,
@@ -657,7 +671,11 @@ Available video output drivers are:
 
         These files must define a function with the following signature::
 
-            vec4 sample(sampler2D tex, vec2 pos, vec2 tex_size)
+            vec4 sample_pixel(sampler2D tex, vec2 pos, vec2 tex_size)
+
+        (If there is no string ``sample_pixel`` in the shader script, it will
+        use ``sample`` instead. This is a compatibility hack for older shader
+        scripts, and is deprecated.)
 
         The meanings of the parameters are as follows:
 
@@ -796,7 +814,7 @@ Available video output drivers are:
         angle
             Direct3D11 through the OpenGL ES translation layer ANGLE. This
             supports almost everything the ``win`` backend does, except ICC
-            profiles, high bit depth video input, and the ``nnedi3`` prescaler.
+            profiles, and the ``nnedi3`` prescaler.
         dxinterop (experimental)
             Win32, using WGL for rendering and Direct3D 9Ex for presentation.
             Works on Nvidia and AMD only.
@@ -824,8 +842,8 @@ Available video output drivers are:
         influence performance and quality of the video output.
         ``fmt`` can be one of: rgb, rgba, rgb8, rgb10, rgb10_a2, rgb16, rgb16f,
         rgb32f, rgba12, rgba16, rgba16f, rgba32f.
-        Default: ``auto``, which maps to rgba16 on desktop GL, and rgb10_a2 on
-        GLES (e.g. ANGLE).
+        Default: ``auto``, which maps to rgba16 on desktop GL, and rgba16f or
+        rgb10_a2 on GLES (e.g. ANGLE).
 
     ``gamma=<0.1..2.0>``
         Set a gamma value (default: 1.0). If gamma is adjusted in other ways

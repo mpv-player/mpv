@@ -1,23 +1,18 @@
 /*
  * This file is part of mpv.
  *
- * mpv is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * mpv is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
  *
  * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with mpv.  If not, see <http://www.gnu.org/licenses/>.
- *
- * You can alternatively redistribute this file and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  *
  * The shader portions may have been derived from existing LGPLv3 shaders
  * (see below), possibly making this file effectively LGPLv3.
@@ -136,23 +131,23 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
         GLSLH(#pragma optionNV(fastprecision on))
     }
 
-    GLSLHF("float nnedi3(sampler2D tex, vec2 pos, vec2 tex_size, int plane, float tex_mul) {\n");
+    GLSLHF("float nnedi3(sampler2D tex, vec2 pos, vec2 tex_size, vec2 pixel_size, int plane, float tex_mul) {\n");
 
     if (step == 0) {
         *transform = (struct gl_transform){{{1.0,0.0}, {0.0,2.0}}, {0.0,-0.5}};
 
         GLSLH(if (fract(pos.y * tex_size.y) < 0.5)
-                  return texture(tex, pos + vec2(0, 0.25) / tex_size)[plane] * tex_mul;)
+                  return texture(tex, pos + vec2(0, 0.25) * pixel_size)[plane] * tex_mul;)
         GLSLHF("#define GET(i, j) "
-               "(texture(tex, pos+vec2((i)-(%f),(j)-(%f)+0.25)/tex_size)[plane]*tex_mul)\n",
+               "(texture(tex, pos+vec2((i)-(%f),(j)-(%f)+0.25) * pixel_size)[plane]*tex_mul)\n",
                width / 2.0 - 1, (height - 1) / 2.0);
     } else {
         *transform = (struct gl_transform){{{2.0,0.0}, {0.0,1.0}}, {-0.5,0.0}};
 
         GLSLH(if (fract(pos.x * tex_size.x) < 0.5)
-                  return texture(tex, pos + vec2(0.25, 0) / tex_size)[plane] * tex_mul;)
+                  return texture(tex, pos + vec2(0.25, 0) * pixel_size)[plane] * tex_mul;)
         GLSLHF("#define GET(i, j) "
-               "(texture(tex, pos+vec2((j)-(%f)+0.25,(i)-(%f))/tex_size)[plane]*tex_mul)\n",
+               "(texture(tex, pos+vec2((j)-(%f)+0.25,(i)-(%f)) * pixel_size)[plane]*tex_mul)\n",
                (height - 1) / 2.0, width / 2.0 - 1);
     }
 
@@ -231,11 +226,11 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
 
     GLSLHF("}\n"); // nnedi3
 
-    GLSL(vec4 color = vec4(1.0);)
+    GLSL(color = vec4(1.0);)
 
     for (int i = 0; i < planes; i++) {
-        GLSLF("color[%d] = nnedi3(texture%d, texcoord%d, texture_size%d, %d, %f);\n",
-              i, tex_num, tex_num, tex_num, i, tex_mul);
+        GLSLF("color[%d] = nnedi3(texture%d, texcoord%d, texture_size%d, pixel_size%d, %d, %f);\n",
+              i, tex_num, tex_num, tex_num, tex_num, i, tex_mul);
     }
 }
 
