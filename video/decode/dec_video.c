@@ -432,7 +432,9 @@ void video_work(struct dec_video *d_video)
     if (d_video->current_mpi && d_video->current_mpi->pts != MP_NOPTS_VALUE) {
         double vpts = d_video->current_mpi->pts;
         segment_ended = d_video->end != MP_NOPTS_VALUE && vpts >= d_video->end;
-        if ((start_pts != MP_NOPTS_VALUE && vpts < start_pts) || segment_ended) {
+        if ((d_video->start != MP_NOPTS_VALUE && vpts < d_video->start)
+            || segment_ended)
+        {
             talloc_free(d_video->current_mpi);
             d_video->current_mpi = NULL;
         }
