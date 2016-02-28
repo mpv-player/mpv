@@ -185,7 +185,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    if (!mpctx->demuxer)
+    if (!mpctx->demuxer || seek.type == MPSEEK_NONE || seek.amount == MP_NOPTS_VALUE)
         return -1;
 
     if (!mpctx->demuxer->seekable) {
@@ -193,107 +193,98 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek)
         return -1;
     }
 
-    if (mpctx->stop_play == AT_END_OF_FILE)
-        mpctx->stop_play = KEEP_PLAYING;
-
-    double hr_seek_offset = opts->hr_seek_demuxer_offset;
     bool hr_seek_very_exact = seek.exact == MPSEEK_VERY_EXACT;
-    // Always try to compensate for possibly bad demuxers in "special"
-    // situations where we need more robustness from the hr-seek code, even
-    // if the user doesn't use --hr-seek-demuxer-offset.
-    // The value is arbitrary, but should be "good enough" in most situations.
-    if (hr_seek_very_exact)
-        hr_seek_offset = MPMAX(hr_seek_offset, 0.5); // arbitrary
-
-    double target_time = MP_NOPTS_VALUE;
-    int direction = 0;
-    bool backstep = false;
+    double current_time = get_current_time(mpctx);
+    if (current_time == MP_NOPTS_VALUE)
+        current_time = 0;
+    double seek_pts = MP_NOPTS_VALUE;
+    int demux_flags = 0;
 
     switch (seek.type) {
     case MPSEEK_ABSOLUTE:
-        target_time = seek.amount;
+        seek_pts = seek.amount;
         break;
     case MPSEEK_BACKSTEP:
-        seek.type = MPSEEK_ABSOLUTE;
-        seek.amount = get_current_time(mpctx);
-        if (seek.amount == MP_NOPTS_VALUE)
-            seek.amount = 0;
-        target_time = seek.amount;
-        backstep = true;
+        seek_pts = current_time;
+        hr_seek_very_exact = true;
         break;
     case MPSEEK_RELATIVE:
-        direction = seek.amount > 0 ? 1 : -1;
-        double cur = get_current_time(mpctx);
-        target_time = seek.amount + (cur == MP_NOPTS_VALUE ? 0 : cur);
+        demux_flags = seek.amount > 0 ? SEEK_FORWARD : SEEK_BACKWARD;
+        seek_pts = current_time + seek.amount;
         break;
     case MPSEEK_FACTOR: ;
         double len = get_time_length(mpctx);
         if (len >= 0)
-            target_time = seek.amount * len;
+            seek_pts = seek.amount * len;
+        demux_flags = seek_pts > current_time ? SEEK_FORWARD : SEEK_BACKWARD;
         break;
+    default: abort();
     }
 
-    bool hr_seek = opts->correct_pts && seek.exact != MPSEEK_KEYFRAME;
-    hr_seek &= (opts->hr_seek == 0 && seek.type == MPSEEK_ABSOLUTE) ||
-               opts->hr_seek > 0 || seek.exact >= MPSEEK_EXACT;
+    double demux_pts = seek_pts;
+
+    bool hr_seek = opts->correct_pts && seek.exact != MPSEEK_KEYFRAME &&
+                 ((opts->hr_seek == 0 && seek.type == MPSEEK_ABSOLUTE) ||
+                  opts->hr_seek > 0 || seek.exact >= MPSEEK_EXACT) &&
+                 seek_pts != MP_NOPTS_VALUE;
+
     if (seek.type == MPSEEK_FACTOR || seek.amount < 0 ||
         (seek.type == MPSEEK_ABSOLUTE && seek.amount < mpctx->last_chapter_pts))
         mpctx->last_chapter_seek = -2;
 
-    // Prefer doing absolute seeks, unless not possible.
-    if ((seek.type == MPSEEK_FACTOR && !mpctx->demuxer->ts_resets_possible &&
-         target_time != MP_NOPTS_VALUE) || seek.type == MPSEEK_RELATIVE)
+    // Under certain circumstances, prefer SEEK_FACTOR.
+    if (seek.type == MPSEEK_FACTOR && !hr_seek &&
+        (mpctx->demuxer->ts_resets_possible || seek_pts == MP_NOPTS_VALUE))
     {
-        seek.type = MPSEEK_ABSOLUTE;
-        seek.amount = target_time;
+        demux_pts = seek.amount;
+        demux_flags |= SEEK_FACTOR;
     }
 
-    hr_seek &= seek.type == MPSEEK_ABSOLUTE; // otherwise, no target PTS known
-
-    double demuxer_amount = seek.amount;
-
-    int demuxer_style = seek.type == MPSEEK_FACTOR ? SEEK_FACTOR : 0;
-    if (hr_seek || direction < 0) {
-        demuxer_style |= SEEK_BACKWARD;
-    } else if (direction > 0) {
-        demuxer_style |= SEEK_FORWARD;
+    if (hr_seek) {
+        double hr_seek_offset = opts->hr_seek_demuxer_offset;
+        // Always try to compensate for possibly bad demuxers in "special"
+        // situations where we need more robustness from the hr-seek code, even
+        // if the user doesn't use --hr-seek-demuxer-offset.
+        // The value is arbitrary, but should be "good enough" in most situations.
+        if (hr_seek_very_exact)
+            hr_seek_offset = MPMAX(hr_seek_offset, 0.5); // arbitrary
+        demux_pts -= hr_seek_offset;
+        demux_flags = (demux_flags | SEEK_HR | SEEK_BACKWARD) & ~SEEK_FORWARD;
     }
-    if (hr_seek)
-        demuxer_style |= SEEK_HR;
 
-    if (hr_seek)
-        demuxer_amount -= hr_seek_offset;
-    demux_seek(mpctx->demuxer, demuxer_amount, demuxer_style);
+    demux_seek(mpctx->demuxer, demux_pts, demux_flags);
 
     // Seek external, extra files too:
     for (int t = 0; t < mpctx->num_tracks; t++) {
         struct track *track = mpctx->tracks[t];
         if (track->selected && track->is_external && track->demuxer) {
-            double main_new_pos = demuxer_amount;
-            if (seek.type != MPSEEK_ABSOLUTE)
-                main_new_pos = target_time;
+            double main_new_pos = demux_pts;
+            if (demux_flags & SEEK_FACTOR)
+                main_new_pos = seek_pts;
             demux_seek(track->demuxer, main_new_pos, 0);
         }
     }
 
     clear_audio_output_buffers(mpctx);
-
     reset_playback_state(mpctx);
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */
-    mpctx->last_seek_pts = target_time;
+    mpctx->last_seek_pts = seek_pts;
 
     if (hr_seek) {
         mpctx->hrseek_active = true;
         mpctx->hrseek_framedrop = !hr_seek_very_exact && opts->hr_seek_framedrop;
-        mpctx->hrseek_backstep = backstep;
-        mpctx->hrseek_pts = seek.amount;
+        mpctx->hrseek_backstep = seek.type == MPSEEK_BACKSTEP;
+        mpctx->hrseek_pts = seek_pts;
 
         MP_VERBOSE(mpctx, "hr-seek, skipping to %f%s%s\n", mpctx->hrseek_pts,
                    mpctx->hrseek_framedrop ? "" : " (no framedrop)",
                    mpctx->hrseek_backstep ? " (backstep)" : "");
     }
+
+    if (mpctx->stop_play == AT_END_OF_FILE)
+        mpctx->stop_play = KEEP_PLAYING;
 
     mpctx->start_timestamp = mp_time_sec();
     mpctx->sleeptime = 0;
