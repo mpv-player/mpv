@@ -1988,6 +1988,38 @@ Property list
     In some cases, the protocol will not actually be supported (consider
     ``https`` if ffmpeg is not compiled with TLS support).
 
+``decoder-list``
+    List of decoders supported. This lists decoders which can be passed to
+    ``--vd`` and ``--ad``.
+
+    ``family``
+        Decoder driver. Usually ``lavc`` for libavcodec.
+
+    ``codec``
+        Canonical codec name, which identifies the format the decoder can
+        handle.
+
+    ``decoder``
+        The name of the decoder itself. Often, this is the same as ``codec``.
+        Sometimes it can be different. It is used to distinguish multiple
+        decoders for the same codec.
+
+    ``description``
+        Human readable description of the decoder and codec.
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (for each decoder entry)
+                "family"        MPV_FORMAT_STRING
+                "codec"         MPV_FORMAT_STRING
+                "decoder"       MPV_FORMAT_STRING
+                "description"   MPV_FORMAT_STRING
+
 ``mpv-version``
     Return the mpv version/copyright string. Depending on how the binary was
     built, it might contain either a release version, or just a git hash.

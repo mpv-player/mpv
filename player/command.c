@@ -32,6 +32,7 @@
 #include "config.h"
 #include "mpv_talloc.h"
 #include "client.h"
+#include "common/codecs.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "command.h"
@@ -3290,6 +3291,36 @@ static int mp_property_protocols(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int get_decoder_entry(int item, int action, void *arg, void *ctx)
+{
+    struct mp_decoder_list *codecs = ctx;
+    struct mp_decoder_entry *c = &codecs->entries[item];
+
+    struct m_sub_property props[] = {
+        {"family",      SUB_PROP_STR(c->family)},
+        {"codec",       SUB_PROP_STR(c->codec)},
+        {"decoder",     SUB_PROP_STR(c->decoder)},
+        {"description", SUB_PROP_STR(c->desc)},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
+static int mp_property_decoders(void *ctx, struct m_property *prop,
+                                int action, void *arg)
+{
+    struct mp_decoder_list *codecs = talloc_zero(NULL, struct mp_decoder_list);
+    struct mp_decoder_list *v = talloc_steal(codecs, video_decoder_list());
+    struct mp_decoder_list *a = talloc_steal(codecs, audio_decoder_list());
+    mp_append_decoders(codecs, v);
+    mp_append_decoders(codecs, a);
+    int r = m_property_read_list(action, arg, codecs->num_entries,
+                                 get_decoder_entry, codecs);
+    talloc_free(codecs);
+    return r;
+}
+
 static int mp_property_version(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
@@ -3707,6 +3738,7 @@ static const struct m_property mp_properties[] = {
     {"working-directory", mp_property_cwd},
 
     {"protocol-list", mp_property_protocols},
+    {"decoder-list", mp_property_decoders},
 
     {"mpv-version", mp_property_version},
     {"mpv-configuration", mp_property_configuration},
