@@ -2028,6 +2028,13 @@ Property list
     Return the configuration arguments which were passed to the build system
     (typically the way ``./waf configure ...`` was invoked).
 
+``ffmpeg-version``
+    Return the contents of the ``av_version_info()`` API call. This is a string
+    which identifies the build in some way, either through a release version
+    number, or a git hash. This applies to Libav as well (the property is
+    still named the same.) This property is unavailable if mpv is linked against
+    older FFmpeg and Libav versions.
+
 ``options/<name>`` (RW)
     Read-only access to value of option ``--<name>``. Most options can be
     changed at runtime by writing to this property. Note that many options

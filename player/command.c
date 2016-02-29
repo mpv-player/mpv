@@ -3333,6 +3333,16 @@ static int mp_property_configuration(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, CONFIGURATION);
 }
 
+static int mp_property_ffmpeg(void *ctx, struct m_property *prop,
+                               int action, void *arg)
+{
+#if HAVE_AV_VERSION_INFO
+    return m_property_strdup_ro(action, arg, av_version_info());
+#else
+    return M_PROPERTY_UNAVAILABLE;
+#endif
+}
+
 static int mp_property_alias(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
@@ -3742,6 +3752,7 @@ static const struct m_property mp_properties[] = {
 
     {"mpv-version", mp_property_version},
     {"mpv-configuration", mp_property_configuration},
+    {"ffmpeg-version", mp_property_ffmpeg},
 
     {"options", mp_property_options},
     {"file-local-options", mp_property_local_options},
