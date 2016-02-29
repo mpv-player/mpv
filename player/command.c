@@ -1944,7 +1944,14 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     struct MPContext *mpctx = ctx;
     struct track *track = mpctx->tracks[item];
 
-    const char *codec = track->stream ? track->stream->codec->codec : NULL;
+    struct mp_codec_params p =
+        track->stream ? *track->stream->codec : (struct mp_codec_params){0};
+
+    const char *decoder_desc = NULL;
+    if (track->d_video)
+        decoder_desc = track->d_video->decoder_desc;
+    if (track->d_audio)
+        decoder_desc = track->d_audio->decoder_desc;
 
     struct m_sub_property props[] = {
         {"id",          SUB_PROP_INT(track->user_tid)},
@@ -1965,9 +1972,20 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         {"selected",    SUB_PROP_FLAG(track->selected)},
         {"external-filename", SUB_PROP_STR(track->external_filename),
                         .unavailable = !track->external_filename},
-        {"codec",       SUB_PROP_STR(codec),
-                        .unavailable = !codec},
         {"ff-index",    SUB_PROP_INT(track->ff_index)},
+        {"decoder-desc", SUB_PROP_STR(decoder_desc),
+                        .unavailable = !decoder_desc},
+        {"codec",       SUB_PROP_STR(p.codec),
+                        .unavailable = !p.codec},
+        {"demux-w",     SUB_PROP_INT(p.disp_w), .unavailable = !p.disp_w},
+        {"demux-h",     SUB_PROP_INT(p.disp_h), .unavailable = !p.disp_h},
+        {"demux-channel-count", SUB_PROP_INT(p.channels.num),
+                        .unavailable = !p.channels.num},
+        {"demux-channels", SUB_PROP_STR(mp_chmap_to_str(&p.channels)),
+                        .unavailable = !p.channels.num},
+        {"demux-samplerate", SUB_PROP_INT(p.samplerate),
+                        .unavailable = !p.samplerate},
+        {"demux-fps",   SUB_PROP_DOUBLE(p.fps), .unavailable = p.fps <= 0},
         {0}
     };
 

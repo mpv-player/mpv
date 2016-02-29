@@ -1707,10 +1707,6 @@ Property list
     ``track-list/N/lang``
         Track language as identified by the file. Not always available.
 
-    ``track-list/N/audio-channels``
-        For audio tracks, the number of audio channels in the audio stream.
-        Not always accurate (depends on container hints). Not always available.
-
     ``track-list/N/albumart``
         ``yes`` if this is a video track that consists of a single picture,
         ``no`` or unavailable otherwise. This is used for video tracks that are
@@ -1746,6 +1742,29 @@ Property list
         match even if the default (builtin) demuxer is used, but there is
         no hard guarantee.
 
+    ``track-list/N/decoder-desc``
+        If this track is being decoded, the human-readable decoder name,
+
+    ``track-list/N/demux-w``, ``track-list/N/demux-h``
+        Video size hint as indicated by the container. (Not always accurate.)
+
+    ``track-list/N/demux-channel-count``
+        Number of audio channels as indicated by the container. (Not always
+        accurate - in particular, the track could be decoded as a different
+        number of channels.)
+
+    ``track-list/N/demux-channels``
+        Channel layout as indicated by the container. (Not always accurate.)
+
+    ``track-list/N/demux-samplerate``
+        Audio sample rate as indicated by the container. (Not always accurate.)
+
+    ``track-list/N/demux-fps``
+        Video FPS as indicated by the container. (Not always accurate.)
+
+    ``track-list/N/audio-channels`` (deprecated)
+        Deprecated alias for ``track-list/N/demux-channel-count``.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -1759,13 +1778,20 @@ Property list
                 "src-id"            MPV_FORMAT_INT64
                 "title"             MPV_FORMAT_STRING
                 "lang"              MPV_FORMAT_STRING
-                "audio-channels"    MPV_FORMAT_INT64
                 "albumart"          MPV_FORMAT_FLAG
                 "default"           MPV_FORMAT_FLAG
                 "forced"            MPV_FORMAT_FLAG
                 "external"          MPV_FORMAT_FLAG
                 "external-filename" MPV_FORMAT_STRING
                 "codec"             MPV_FORMAT_STRING
+                "decoder-desc"      MPV_FORMAT_STRING
+                "demux-w"           MPV_FORMAT_INT64
+                "demux-h"           MPV_FORMAT_INT64
+                "demux-channel-count" MPV_FORMAT_INT64
+                "demux-channels"    MPV_FORMAT_STRING
+                "demux-samplerate"  MPV_FORMAT_INT64
+                "demux-fps"         MPV_FORMAT_DOUBLE
+                "audio-channels"    MPV_FORMAT_INT64
 
 ``chapter-list``
     List of chapters, current entry marked. Currently, the raw property value

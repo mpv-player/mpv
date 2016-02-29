@@ -19,6 +19,9 @@ Interface changes
 
 ::
 
+ --- mpv 0.17.0 ---
+    - deprecate "track-list/N/audio-channels" property (use
+      "track-list/N/demux-channel-count" instead)
  --- mpv 0.16.0 ---
     - change --audio-channels default to stereo (use --audio-channels=auto to
       get the old default)
