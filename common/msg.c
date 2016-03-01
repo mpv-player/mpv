@@ -41,9 +41,6 @@
 #include "msg.h"
 #include "msg_control.h"
 
-/* maximum message length of mp_msg */
-#define MSGSIZE_MAX 6144
-
 struct mp_log_root {
     struct mpv_global *global;
     // --- protected by mp_msg_lock
@@ -67,7 +64,7 @@ struct mp_log_root {
      * synchronized mp_log tree.) */
     atomic_ulong reload_counter;
     // --- protected by mp_msg_lock
-    char buffer[MSGSIZE_MAX];
+    char *buffer;
 };
 
 struct mp_log {
@@ -337,17 +334,27 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 
     pthread_mutex_lock(&mp_msg_lock);
 
-    char tmp[MSGSIZE_MAX];
+    // MSGL_STATUS and MSGL_STATS use their own buffer; this prevents clashes
+    // with mp_msg() users which do not properly send complete lines only.
+    char tmp[256];
     bool use_tmp = lev == MSGL_STATUS || lev == MSGL_STATS;
 
     struct mp_log_root *root = log->root;
     char *text = use_tmp ? tmp : root->buffer;
     int len = use_tmp ? 0 : strlen(text);
+    int max_len = use_tmp ? sizeof(tmp) : talloc_get_size(text);
 
-    if (vsnprintf(text + len, MSGSIZE_MAX - len, format, va) < 0)
-        snprintf(text + len, MSGSIZE_MAX - len, "[fprintf error]\n");
-    text[MSGSIZE_MAX - 2] = '\n';
-    text[MSGSIZE_MAX - 1] = 0;
+    va_list t;
+    va_copy(t, va);
+    int res = vsnprintf(text + len, max_len - len, format, t);
+    if (res >= 0 && res >= max_len - len && !use_tmp) {
+        root->buffer = talloc_realloc(root, root->buffer, char, res + len + 1);
+        text = root->buffer;
+        max_len = talloc_get_size(text);
+        res = vsnprintf(text + len, max_len - len, format, va);
+    }
+    if (res < 0)
+        text = "[fprintf error]\n";
 
     if (lev == MSGL_STATS) {
         dump_stats(log, lev, text);
@@ -376,7 +383,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
         if (lev == MSGL_STATUS) {
             if (text[0]) {
                 len = strlen(text);
-                if (len < MSGSIZE_MAX - 1) {
+                if (len < max_len - 1) {
                     text[len] = root->termosd ? '\r' : '\n';
                     text[len + 1] = '\0';
                 }
@@ -441,6 +448,7 @@ void mp_msg_init(struct mpv_global *global)
     *root = (struct mp_log_root){
         .global = global,
         .reload_counter = ATOMIC_VAR_INIT(1),
+        .buffer = talloc_strdup(root, ""),
     };
 
     struct mp_log dummy = { .root = root };
