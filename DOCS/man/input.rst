@@ -1999,7 +1999,7 @@ Property list
         Canonical codec name, which identifies the format the decoder can
         handle.
 
-    ``decoder``
+    ``driver``
         The name of the decoder itself. Often, this is the same as ``codec``.
         Sometimes it can be different. It is used to distinguish multiple
         decoders for the same codec.
@@ -2017,8 +2017,13 @@ Property list
             MPV_FORMAT_NODE_MAP (for each decoder entry)
                 "family"        MPV_FORMAT_STRING
                 "codec"         MPV_FORMAT_STRING
-                "decoder"       MPV_FORMAT_STRING
+                "driver"        MPV_FORMAT_STRING
                 "description"   MPV_FORMAT_STRING
+
+``encoder-list``
+    List of libavcodec encoders. This has the same format as ``decoder-list``.
+    The encoder names (``driver`` entries) can be passed to ``--ovc`` and
+    ``--oac`` (without the ``lavc:`` prefix required by ``--vd`` and ``--ad``).
 
 ``mpv-version``
     Return the mpv version/copyright string. Depending on how the binary was

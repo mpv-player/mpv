@@ -158,6 +158,21 @@ void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)
     }
 }
 
+// (Abuses the decoder list data structures.)
+void mp_add_lavc_encoders(struct mp_decoder_list *list)
+{
+    AVCodec *cur = NULL;
+    for (;;) {
+        cur = av_codec_next(cur);
+        if (!cur)
+            break;
+        if (av_codec_is_encoder(cur)) {
+            mp_add_decoder(list, "lavc", mp_codec_from_av_codec_id(cur->id),
+                           cur->name, cur->long_name);
+        }
+    }
+}
+
 int mp_codec_to_av_codec_id(const char *codec)
 {
     int id = AV_CODEC_ID_NONE;

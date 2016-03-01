@@ -36,6 +36,7 @@ int64_t mp_pts_to_av(double mp_pts, AVRational *tb);
 double mp_pts_from_av(int64_t av_pts, AVRational *tb);
 void mp_set_avcodec_threads(struct mp_log *l, AVCodecContext *avctx, int threads);
 void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type);
+void mp_add_lavc_encoders(struct mp_decoder_list *list);
 int mp_codec_to_av_codec_id(const char *codec);
 const char *mp_codec_from_av_codec_id(int codec_id);
 void mp_set_avdict(struct AVDictionary **dict, char **kv);
