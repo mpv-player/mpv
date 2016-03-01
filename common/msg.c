@@ -236,7 +236,8 @@ static bool test_terminal_level(struct mp_log *log, int lev)
            !(lev == MSGL_STATUS && terminal_in_background());
 }
 
-static void print_terminal_line(struct mp_log *log, int lev, char *text)
+static void print_terminal_line(struct mp_log *log, int lev,
+                                char *text,  char *trail)
 {
     if (!test_terminal_level(log, lev))
         return;
@@ -265,7 +266,7 @@ static void print_terminal_line(struct mp_log *log, int lev, char *text)
         }
     }
 
-    fprintf(stream, "%s", text);
+    fprintf(stream, "%s%s", text, trail);
 
     if (root->color)
         set_term_color(stream, -1);
@@ -373,7 +374,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
             char *next = &end[1];
             char saved = next[0];
             next[0] = '\0';
-            print_terminal_line(log, lev, text);
+            print_terminal_line(log, lev, text, "");
             write_log_file(log, lev, text);
             write_msg_to_buffers(log, lev, text);
             next[0] = saved;
@@ -381,14 +382,8 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
         }
 
         if (lev == MSGL_STATUS) {
-            if (text[0]) {
-                len = strlen(text);
-                if (len < max_len - 1) {
-                    text[len] = root->termosd ? '\r' : '\n';
-                    text[len + 1] = '\0';
-                }
-                print_terminal_line(log, lev, text);
-            }
+            if (text[0])
+                print_terminal_line(log, lev, text, root->termosd ? "\r" : "\n");
         } else {
             int leftover = strlen(text);
             memmove(root->buffer, text, leftover + 1);
