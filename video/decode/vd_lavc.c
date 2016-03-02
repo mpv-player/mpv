@@ -335,17 +335,6 @@ static int init(struct dec_video *vd, const char *decoder)
     ctx->opts = vd->opts;
     ctx->decoder = talloc_strdup(ctx, decoder);
 
-    if (bstr_endswith0(bstr0(decoder), "_vdpau")) {
-        MP_WARN(vd, "VDPAU decoder '%s' was requested. "
-                "This way of enabling hardware\ndecoding is not supported "
-                "anymore. Use --hwdec=vdpau instead.\nThe --hwdec-codec=... "
-                "option can be used to restrict which codecs are\nenabled, "
-                "otherwise all hardware decoding is tried for all codecs.\n",
-                decoder);
-        uninit(vd);
-        return 0;
-    }
-
     reinit(vd);
 
     if (!ctx->avctx) {

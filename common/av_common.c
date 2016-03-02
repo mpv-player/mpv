@@ -144,6 +144,11 @@ void mp_set_avcodec_threads(struct mp_log *l, AVCodecContext *avctx, int threads
     avctx->thread_count = threads;
 }
 
+static bool is_crap(AVCodec *codec)
+{
+    return !!strstr(codec->name, "_vdpau");
+}
+
 void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)
 {
     AVCodec *cur = NULL;
@@ -151,7 +156,7 @@ void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)
         cur = av_codec_next(cur);
         if (!cur)
             break;
-        if (av_codec_is_decoder(cur) && cur->type == type) {
+        if (av_codec_is_decoder(cur) && cur->type == type && !is_crap(cur)) {
             mp_add_decoder(list, "lavc", mp_codec_from_av_codec_id(cur->id),
                            cur->name, cur->long_name);
         }
