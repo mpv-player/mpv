@@ -1641,7 +1641,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 
     mp_chmap_from_waveext(&sh_a->channels, chmask);
     if (sh_a->channels.num != track->a_channels)
-        mp_chmap_from_channels(&sh_a->channels, track->a_channels);
+        mp_chmap_set_unknown(&sh_a->channels, track->a_channels);
 
     const char *codec = sh_a->codec;
     if (!strcmp(codec, "mp3") || !strcmp(codec, "truehd")) {
