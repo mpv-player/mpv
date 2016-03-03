@@ -344,7 +344,7 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     print_timeline(demuxer);
 
     demuxer->seekable = true;
-    demuxer->partially_seekable = true;
+    demuxer->partially_seekable = false;
 
     demuxer->filetype = meta->filetype ? meta->filetype : meta->desc->name;
 

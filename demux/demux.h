@@ -174,7 +174,7 @@ typedef struct demuxer {
     int64_t filepos;  // input stream current pos.
     char *filename;  // same as stream->url
     bool seekable;
-    bool partially_seekable; // implies seekable=true
+    bool partially_seekable; // true if _maybe_ seekable; implies seekable=true
     double start_time;
     // File format allows PTS resets (even if the current file is without)
     bool ts_resets_possible;
