@@ -577,8 +577,8 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh = demux_alloc_sh_stream(STREAM_VIDEO);
 
         if (st->disposition & AV_DISPOSITION_ATTACHED_PIC) {
-            sh->attached_picture = new_demux_packet_from(st->attached_pic.data,
-                                                         st->attached_pic.size);
+            sh->attached_picture =
+                new_demux_packet_from_avpacket(&st->attached_pic);
             if (sh->attached_picture) {
                 sh->attached_picture->pts = 0;
                 talloc_steal(sh, sh->attached_picture);
