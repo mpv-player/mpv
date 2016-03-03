@@ -17,7 +17,7 @@ struct sd {
     const struct sd_functions *driver;
     void *priv;
 
-    struct demuxer *demuxer;
+    struct attachment_list *attachments;
     struct mp_codec_params *codec;
 };
 

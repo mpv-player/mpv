@@ -6,7 +6,6 @@
 
 #include "osd.h"
 
-struct demuxer;
 struct sh_stream;
 struct mpv_global;
 struct demux_packet;
@@ -22,8 +21,13 @@ enum sd_ctrl {
     SD_CTRL_SET_VIDEO_DEF_FPS,
 };
 
-struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
-                           struct sh_stream *sh);
+struct attachment_list {
+    struct demux_attachment *entries;
+    int num_entries;
+};
+
+struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
+                           struct attachment_list *attachments);
 void sub_destroy(struct dec_sub *sub);
 void sub_lock(struct dec_sub *sub);
 void sub_unlock(struct dec_sub *sub);

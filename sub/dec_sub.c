@@ -49,7 +49,7 @@ struct dec_sub {
     struct mpv_global *global;
     struct MPOpts *opts;
 
-    struct demuxer *demuxer;
+    struct attachment_list *attachments;
 
     struct sh_stream *sh;
     double last_pkt_pts;
@@ -94,7 +94,7 @@ static struct sd *init_decoder(struct dec_sub *sub)
             .log = mp_log_new(sd, sub->log, driver->name),
             .opts = sub->opts,
             .driver = driver,
-            .demuxer = sub->demuxer,
+            .attachments = sub->attachments,
             .codec = sub->codec,
         };
 
@@ -112,10 +112,12 @@ static struct sd *init_decoder(struct dec_sub *sub)
 // Thread-safety of the returned object: all functions are thread-safe,
 // except sub_get_bitmaps() and sub_get_text(). Decoder backends (sd_*)
 // do not need to acquire locks.
-struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
-                           struct sh_stream *sh)
+// Ownership of attachments goes to the caller, and is released with
+// talloc_free() (even on failure).
+struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
+                           struct attachment_list *attachments)
 {
-    assert(demuxer && sh && sh->type == STREAM_SUB);
+    assert(sh && sh->type == STREAM_SUB);
 
     struct dec_sub *sub = talloc(NULL, struct dec_sub);
     *sub = (struct dec_sub){
@@ -124,7 +126,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
         .opts = global->opts,
         .sh = sh,
         .codec = sh->codec,
-        .demuxer = demuxer,
+        .attachments = talloc_steal(sub, attachments),
         .last_pkt_pts = MP_NOPTS_VALUE,
         .last_vo_pts = MP_NOPTS_VALUE,
         .start = MP_NOPTS_VALUE,

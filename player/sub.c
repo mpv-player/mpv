@@ -129,6 +129,29 @@ bool update_subtitles(struct MPContext *mpctx, double video_pts)
     return ok;
 }
 
+static struct attachment_list *get_all_attachments(struct MPContext *mpctx)
+{
+    struct attachment_list *list = talloc_zero(NULL, struct attachment_list);
+    struct demuxer *prev_demuxer = NULL;
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *t = mpctx->tracks[n];
+        if (!t->demuxer || prev_demuxer == t->demuxer)
+            continue;
+        prev_demuxer = t->demuxer;
+        for (int i = 0; i < t->demuxer->num_attachments; i++) {
+            struct demux_attachment *att = &t->demuxer->attachments[i];
+            struct demux_attachment copy = {
+                .name = talloc_strdup(list, att->name),
+                .type = talloc_strdup(list, att->type),
+                .data = talloc_memdup(list, att->data, att->data_size),
+                .data_size = att->data_size,
+            };
+            MP_TARRAY_APPEND(list, list->entries, list->num_entries, copy);
+        }
+    }
+    return list;
+}
+
 static bool init_subdec(struct MPContext *mpctx, struct track *track)
 {
     assert(!track->d_sub);
@@ -136,7 +159,8 @@ static bool init_subdec(struct MPContext *mpctx, struct track *track)
     if (!track->demuxer || !track->stream)
         return false;
 
-    track->d_sub = sub_create(mpctx->global, track->demuxer, track->stream);
+    track->d_sub = sub_create(mpctx->global, track->stream,
+                              get_all_attachments(mpctx));
     if (!track->d_sub)
         return false;
 
