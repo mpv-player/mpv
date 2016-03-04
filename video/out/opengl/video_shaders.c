@@ -348,10 +348,9 @@ const struct m_sub_options deband_conf = {
 
 // Stochastically sample a debanded result from a given texture
 void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
-                        int tex_num, GLenum tex_target, float tex_mul, AVLFG *lfg)
+                        int tex_num, float tex_mul, GLenum tex_target, AVLFG *lfg)
 {
     // Set up common variables and initialize the PRNG
-    GLSLF("// debanding (tex %d)\n", tex_num);
     GLSLF("{\n");
     sampler_prelude(sc, tex_num);
     prng_init(sc, lfg);
