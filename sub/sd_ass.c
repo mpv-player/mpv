@@ -238,6 +238,8 @@ static bool check_packet_seen(struct sd *sd, int64_t pos)
     return false;
 }
 
+#define UNKNOWN_DURATION (INT_MAX / 1000)
+
 static void decode(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_ass_priv *ctx = sd->priv;
@@ -246,13 +248,22 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         if (!sd->opts->sub_clear_on_seek && packet->pos >= 0 &&
             check_packet_seen(sd, packet->pos))
             return;
+        if (packet->duration < 0) {
+            if (!ctx->duration_unknown) {
+                MP_WARN(sd, "Subtitle with unknown duration.\n");
+                ctx->duration_unknown = true;
+            }
+            packet->duration = UNKNOWN_DURATION;
+        }
         char **r = lavc_conv_decode(ctx->converter, packet);
         for (int n = 0; r && r[n]; n++)
             ass_process_data(track, r[n], strlen(r[n]));
         if (ctx->duration_unknown) {
             for (int n = 0; n < track->n_events - 1; n++) {
-                track->events[n].Duration = track->events[n + 1].Start -
-                                            track->events[n].Start;
+                if (track->events[n].Duration == UNKNOWN_DURATION * 1000) {
+                    track->events[n].Duration = track->events[n + 1].Start -
+                                                track->events[n].Start;
+                }
             }
         }
     } else {
@@ -440,6 +451,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     long long ts = find_timestamp(sd, pts);
     if (ctx->duration_unknown && pts != MP_NOPTS_VALUE) {
         mp_ass_flush_old_events(track, ts);
+        ctx->num_seen_packets = 0;
     }
     if (no_ass)
         fill_plaintext(sd, pts);
