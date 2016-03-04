@@ -152,7 +152,7 @@ typedef struct mkv_index {
 
 struct block_info {
     uint64_t duration, discardpadding;
-    bool simple, keyframe;
+    bool simple, keyframe, duration_known;
     int64_t timecode;
     mkv_track_t *track;
     bstr data;
@@ -2461,7 +2461,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                 dp->pts = current_pts + i * track->default_duration;
             if (stream->codec->avi_dts)
                 MPSWAP(double, dp->pts, dp->dts);
-            if (i == 0)
+            if (i == 0 && block_info->duration_known)
                 dp->duration = block_duration / 1e9;
             if (stream->type == STREAM_AUDIO) {
                 unsigned int srate = stream->codec->samplerate;
@@ -2504,6 +2504,7 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
             if (block->duration == EBML_UINT_INVALID)
                 goto error;
             block->duration *= mkv_d->tc_scale;
+            block->duration_known = true;
             break;
 
         case MATROSKA_ID_DISCARDPADDING:
