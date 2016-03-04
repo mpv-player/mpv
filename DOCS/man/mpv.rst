@@ -708,7 +708,9 @@ PROTOCOLS
     Stitch together parts of multiple files and play them.
 
 ``null://``
-    Simulate an empty file.
+    Simulate an empty file. If opened for writing, it will discard all data.
+    The ``null`` demuxer will specifically pass autoprobing if this protocol
+    is used (while it's not automatically invoked for empty files).
 
 ``memory://data``
     Use the ``data`` part as source data.

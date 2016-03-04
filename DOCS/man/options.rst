@@ -3603,6 +3603,8 @@ Miscellaneous
         - ``--lavfi-complex='[aid1] asplit [t1] [ao] ; [t1] showvolume [t2] ; [vid1] [t2] overlay [vo]'``
           Play audio track 1, and overlay the measured volume for each speaker
           over video track 1.
+        - ``null:// --lavfi-complex='life [vo]'``
+          Conways' Life Game.
 
     See the FFmpeg libavfilter documentation for details on the filter.
 

@@ -175,6 +175,7 @@ def build(ctx):
         ( "demux/demux_mf.c" ),
         ( "demux/demux_mkv.c" ),
         ( "demux/demux_mkv_timeline.c" ),
+        ( "demux/demux_null.c" ),
         ( "demux/demux_playlist.c" ),
         ( "demux/demux_raw.c" ),
         ( "demux/demux_rar.c" ),

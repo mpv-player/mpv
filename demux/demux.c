@@ -53,6 +53,7 @@ extern const demuxer_desc_t demuxer_desc_playlist;
 extern const demuxer_desc_t demuxer_desc_disc;
 extern const demuxer_desc_t demuxer_desc_rar;
 extern const demuxer_desc_t demuxer_desc_libarchive;
+extern const demuxer_desc_t demuxer_desc_null;
 extern const demuxer_desc_t demuxer_desc_timeline;
 
 /* Please do not add any new demuxers here. If you want to implement a new
@@ -76,6 +77,7 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_lavf,
     &demuxer_desc_mf,
     &demuxer_desc_playlist,
+    &demuxer_desc_null,
     NULL
 };
 
