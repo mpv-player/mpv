@@ -112,8 +112,8 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
     const int offset = nnedi3_weight_offsets[conf->window * 4 + conf->neurons];
     const uint32_t *weights = (const int*)(nnedi3_weights + offset * 4);
 
-    GLSLF("// nnedi3 (tex %d, step %d, neurons %d, window %dx%d, mode %d)\n",
-          tex_num, step + 1, neurons, width, height, conf->upload);
+    GLSLF("// nnedi3 (step %d, neurons %d, window %dx%d, mode %d)\n",
+          step, neurons, width, height, conf->upload);
 
     // This is required since each row will be encoded into vec4s
     assert(width % 4 == 0);
