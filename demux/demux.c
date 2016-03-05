@@ -681,11 +681,11 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     if (ts != MP_NOPTS_VALUE)
         ds->base_ts = ts;
 
-    if (pkt->keyframe) {
+    if (pkt->keyframe && ts != MP_NOPTS_VALUE) {
         // Update bitrate - only at keyframe points, because we use the
         // (possibly) reordered packet timestamps instead of realtime.
         double d = ts - ds->last_br_ts;
-        if (ts == MP_NOPTS_VALUE || ds->last_br_ts == MP_NOPTS_VALUE || d < 0) {
+        if (ds->last_br_ts == MP_NOPTS_VALUE || d < 0) {
             ds->bitrate = -1;
             ds->last_br_ts = ts;
             ds->last_br_bytes = 0;
