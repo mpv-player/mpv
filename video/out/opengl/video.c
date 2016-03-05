@@ -222,6 +222,7 @@ struct gl_video {
     int pass_tex_num;
     int texture_w, texture_h;
     struct gl_transform texture_offset; // texture transform without rotation
+    int components;
     bool use_linear;
     float user_gamma;
 
@@ -1038,6 +1039,12 @@ static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
                        &(struct mp_rect){0, 0, w, h}, 0);
 }
 
+static void skip_unused(struct gl_video *p, int num_components)
+{
+    for (int i = num_components; i < 4; i++)
+        GLSLF("color.%c = %f;\n", "rgba"[i], i < 3 ? 0.0 : 1.0);
+}
+
 static void uninit_scaler(struct gl_video *p, struct scaler *scaler)
 {
     GL *gl = p->gl;
@@ -1085,7 +1092,7 @@ static bool apply_shaders(struct gl_video *p, char **shaders, int w, int h,
             continue;
         finish_pass_fbo(p, &textures[tex], w, h, 0);
         int id = pass_bind(p, img_tex_fbo(&textures[tex], identity_trans,
-                                          PLANE_RGB, 4));
+                                          PLANE_RGB, p->components));
         GLSLHF("#define pixel_size pixel_size%d\n", id);
         load_shader(p, body);
         const char *fn_name = get_custom_shader_fn(p, body);
@@ -1311,8 +1318,7 @@ static void pass_sample(struct gl_video *p, struct img_tex tex,
         GLSLF("color *= %f;\n", tex.multiplier);
 
     // Micro-optimization: Avoid scaling unneeded channels
-    if (!p->has_alpha || p->opts.alpha_mode != 1)
-        GLSL(color.a = 1.0;)
+    skip_unused(p, tex.components);
 }
 
 // Get the number of passes for prescaler, with given display size.
@@ -1385,15 +1391,16 @@ static void pass_prescale_luma(struct gl_video *p, struct img_tex *tex,
     for (int step = 0; step < num_steps; step++) {
         struct gl_transform step_transform = {{{0}}};
         int id = pass_bind(p, *tex);
+        int planes = tex->components;
 
         switch(p->opts.prescale_luma) {
         case 1:
-            pass_superxbr(p->sc, tex->components, id, step, tex->multiplier,
+            pass_superxbr(p->sc, planes, id, step, tex->multiplier,
                           p->opts.superxbr_opts, &step_transform);
             break;
         case 2:
             upload_nnedi3_weights(p);
-            pass_nnedi3(p->gl, p->sc, tex->components, id, step, tex->multiplier,
+            pass_nnedi3(p->gl, p->sc, planes, id, step, tex->multiplier,
                         p->opts.nnedi3_opts, &step_transform);
             break;
         default:
@@ -1403,6 +1410,7 @@ static void pass_prescale_luma(struct gl_video *p, struct img_tex *tex,
         int new_w = tex->w * (int)step_transform.m[0][0],
             new_h = tex->h * (int)step_transform.m[1][1];
 
+        skip_unused(p, planes);
         finish_pass_fbo(p, &fbo[step], new_w, new_h, 0);
         *tex = img_tex_fbo(&fbo[step], identity_trans, tex->type, tex->components);
 
@@ -1559,11 +1567,7 @@ static void pass_read_video(struct gl_video *p)
             int id = pass_bind(p, tex[n]);
             pass_sample_deband(p->sc, p->opts.deband_opts, id, tex[n].multiplier,
                                p->gl_target, &p->lfg);
-
-            // Optimization: Skip (clear) unused planes
-            for (int i = tex[n].components; i < 4; i++)
-                GLSLF("color.%c = %f;\n", "xyzw"[i], i == 3 ? 1.0 : 0.0);
-
+            skip_unused(p, tex[n].components);
             finish_pass_fbo(p, &p->deband_fbo[n], tex[n].w, tex[n].h, 0);
             tex[n] = img_tex_fbo(&p->deband_fbo[n], identity_trans,
                                  tex[n].type, tex[n].components);
@@ -1634,13 +1638,14 @@ static void pass_read_video(struct gl_video *p)
     p->texture_w = dst_w;
     p->texture_h = dst_h;
     p->texture_offset = tex_trans;
+    p->components = coord;
 }
 
 // Utility function that simply binds an FBO and reads from it, without any
 // transformations. Returns the ID of the texture unit it was bound to
 static int pass_read_fbo(struct gl_video *p, struct fbotex *fbo)
 {
-    struct img_tex tex = img_tex_fbo(fbo, identity_trans, PLANE_RGB, 4);
+    struct img_tex tex = img_tex_fbo(fbo, identity_trans, PLANE_RGB, p->components);
     copy_img_tex(p, &(int){0}, tex);
 
     return pass_bind(p, tex);
@@ -1712,6 +1717,7 @@ static void pass_convert_yuv(struct gl_video *p)
                              lessThanEqual(vec3(0.0181), color.rgb));)
     }
 
+    p->components = 3;
     if (!p->has_alpha || p->opts.alpha_mode == 0) { // none
         GLSL(color.a = 1.0;)
     } else if (p->opts.alpha_mode == 2) { // blend against black
@@ -1720,8 +1726,10 @@ static void pass_convert_yuv(struct gl_video *p)
         GLSL(bvec2 tile = lessThan(fract(gl_FragCoord.xy / 32.0), vec2(0.5));)
         GLSL(vec3 background = vec3(tile.x == tile.y ? 1.0 : 0.75);)
         GLSL(color.rgb = color.rgb * color.a + background * (1.0 - color.a);)
-    } else if (p->gl->fb_premultiplied) {
-        GLSL(color = vec4(color.rgb * color.a, color.a);)
+    } else { // alpha present in image
+        p->components = 4;
+        if (p->gl->fb_premultiplied)
+            GLSL(color = vec4(color.rgb * color.a, color.a);)
     }
 }
 
@@ -1825,8 +1833,9 @@ static void pass_scale_main(struct gl_video *p)
 
     GLSLF("// main scaling\n");
     finish_pass_fbo(p, &p->indirect_fbo, p->texture_w, p->texture_h, 0);
-    pass_sample(p, img_tex_fbo(&p->indirect_fbo, transform, PLANE_RGB, 4),
-                scaler, &scaler_conf, scale_factor, vp_w, vp_h);
+    struct img_tex src = img_tex_fbo(&p->indirect_fbo, transform,
+                                     PLANE_RGB, p->components);
+    pass_sample(p, src, scaler, &scaler_conf, scale_factor, vp_w, vp_h);
 
     // Changes the texture size to display size after main scaler.
     p->texture_w = vp_w;
@@ -2070,6 +2079,7 @@ static void pass_render_frame(struct gl_video *p)
     p->texture_w = p->image_params.w;
     p->texture_h = p->image_params.h;
     p->texture_offset = identity_trans;
+    p->components = 0;
 
     if (p->dumb_mode)
         return;
@@ -2306,7 +2316,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
         for (int i = 0; i < size; i++) {
             struct img_tex img =
                 img_tex_fbo(&p->surfaces[fbosurface_wrap(surface_bse+i)].fbotex,
-                            identity_trans, PLANE_RGB, 4);
+                            identity_trans, PLANE_RGB, p->components);
             // Since the code in pass_sample_separated currently assumes
             // the textures are bound in-order and starting at 0, we just
             // assert to make sure this is the case (which it should always be)
