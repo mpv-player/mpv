@@ -207,8 +207,8 @@ struct gl_video {
     bool is_interpolated;
     bool output_fbo_valid;
 
-    // state for luma (0), luma-down(1), chroma (2) and temporal (3) scalers
-    struct scaler scaler[4];
+    // state for configured scalers
+    struct scaler scaler[SCALER_COUNT];
 
     struct mp_csp_equalizer video_eq;
 
@@ -433,10 +433,10 @@ const struct m_sub_options gl_video_conf = {
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
         OPT_CHOICE_C("target-trc", target_trc, 0, mp_csp_trc_names),
         OPT_FLAG("pbo", pbo, 0),
-        SCALER_OPTS("scale",  0),
-        SCALER_OPTS("dscale", 1),
-        SCALER_OPTS("cscale", 2),
-        SCALER_OPTS("tscale", 3),
+        SCALER_OPTS("scale",  SCALER_SCALE),
+        SCALER_OPTS("dscale", SCALER_DSCALE),
+        SCALER_OPTS("cscale", SCALER_CSCALE),
+        SCALER_OPTS("tscale", SCALER_TSCALE),
         OPT_INTRANGE("scaler-lut-size", scaler_lut_size, 0, 4, 10),
         OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("linear-scaling", linear_scaling, 0),
@@ -654,7 +654,7 @@ static void uninit_rendering(struct gl_video *p)
 {
     GL *gl = p->gl;
 
-    for (int n = 0; n < 4; n++)
+    for (int n = 0; n < SCALER_COUNT; n++)
         uninit_scaler(p, &p->scaler[n]);
 
     gl->DeleteTextures(1, &p->dither_texture);
@@ -1476,11 +1476,11 @@ static void pass_read_video(struct gl_video *p)
         case PLANE_RGB:
         case PLANE_LUMA:
         case PLANE_XYZ:
-            scaler_id[i] = 0; // scale
+            scaler_id[i] = SCALER_SCALE;
             break;
 
         case PLANE_CHROMA:
-            scaler_id[i] = 2; // cscale
+            scaler_id[i] = SCALER_CSCALE;
             break;
 
         case PLANE_ALPHA: // always use bilinear for alpha
@@ -1775,17 +1775,17 @@ static void pass_scale_main(struct gl_video *p)
     bool upscaling = !downscaling && (xy[0] > 1.0 || xy[1] > 1.0);
     double scale_factor = 1.0;
 
-    struct scaler *scaler = &p->scaler[0];
-    struct scaler_config scaler_conf = p->opts.scaler[0];
+    struct scaler *scaler = &p->scaler[SCALER_SCALE];
+    struct scaler_config scaler_conf = p->opts.scaler[SCALER_SCALE];
     if (p->opts.scaler_resizes_only && !downscaling && !upscaling) {
         scaler_conf.kernel.name = "bilinear";
         // bilinear is going to be used, just remove all sub-pixel offsets.
         p->texture_offset.t[0] = (int)p->texture_offset.t[0];
         p->texture_offset.t[1] = (int)p->texture_offset.t[1];
     }
-    if (downscaling && p->opts.scaler[1].kernel.name) {
-        scaler_conf = p->opts.scaler[1];
-        scaler = &p->scaler[1];
+    if (downscaling && p->opts.scaler[SCALER_DSCALE].kernel.name) {
+        scaler_conf = p->opts.scaler[SCALER_DSCALE];
+        scaler = &p->scaler[SCALER_DSCALE];
     }
 
     // When requesting correct-downscaling and the clip is anamorphic, and
@@ -2194,8 +2194,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     // look like this: _ A [B] C D _
     // A is surface_bse, B is surface_now, C is surface_now+1 and D is
     // surface_end.
-    struct scaler *tscale = &p->scaler[3];
-    reinit_scaler(p, tscale, &p->opts.scaler[3], 1, tscale_sizes);
+    struct scaler *tscale = &p->scaler[SCALER_TSCALE];
+    reinit_scaler(p, tscale, &p->opts.scaler[SCALER_TSCALE], 1, tscale_sizes);
     bool oversample = strcmp(tscale->conf.kernel.name, "oversample") == 0;
     int size;
 
@@ -2558,11 +2558,13 @@ static bool check_dumb_mode(struct gl_video *p)
         o->correct_downscaling || o->sigmoid_upscaling || o->interpolation ||
         o->blend_subs || o->deband || o->unsharp || o->prescale)
         return false;
-    // check scale, dscale, cscale (tscale is already implicitly excluded above)
-    for (int i = 0; i < 3; i++) {
-        const char *name = o->scaler[i].kernel.name;
-        if (name && strcmp(name, "bilinear") != 0)
-            return false;
+    // check remaining scalers (tscale is already implicitly excluded above)
+    for (int i = 0; i < SCALER_COUNT; i++) {
+        if (i != SCALER_TSCALE) {
+            const char *name = o->scaler[i].kernel.name;
+            if (name && strcmp(name, "bilinear") != 0)
+                return false;
+        }
     }
     if (o->pre_shaders && o->pre_shaders[0])
         return false;
@@ -2618,13 +2620,9 @@ static void check_gl_features(struct gl_video *p)
             .use_rectangle = p->opts.use_rectangle,
             .background = p->opts.background,
             .dither_algo = -1,
-            .scaler = {
-                gl_video_opts_def.scaler[0],
-                gl_video_opts_def.scaler[1],
-                gl_video_opts_def.scaler[2],
-                gl_video_opts_def.scaler[3],
-            },
         };
+        for (int n = 0; n < SCALER_COUNT; n++)
+            new_opts.scaler[n] = gl_video_opts_def.scaler[n];
         assign_options(&p->opts, &new_opts);
         p->opts.deband_opts = m_config_alloc_struct(NULL, &deband_conf);
         return;
@@ -2635,7 +2633,7 @@ static void check_gl_features(struct gl_video *p)
     // because they will be slow (not critically slow, but still slower).
     // Without FP textures, we must always disable them.
     // I don't know if luminance alpha float textures exist, so disregard them.
-    for (int n = 0; n < 4; n++) {
+    for (int n = 0; n < SCALER_COUNT; n++) {
         const struct filter_kernel *kernel =
             mp_find_filter_kernel(p->opts.scaler[n].kernel.name);
         if (kernel) {
@@ -2986,9 +2984,10 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
         .opts = gl_video_opts_def,
         .gl_target = GL_TEXTURE_2D,
         .texture_16bit_depth = 16,
-        .scaler = {{.index = 0}, {.index = 1}, {.index = 2}, {.index = 3}},
         .sc = gl_sc_create(gl, log),
     };
+    for (int n = 0; n < SCALER_COUNT; n++)
+        p->scaler[n] = (struct scaler){.index = n};
     gl_video_set_debug(p, true);
     init_gl(p);
     recreate_osd(p);
@@ -3051,9 +3050,10 @@ static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
                                                 src->nnedi3_opts);
     }
 
-    for (int n = 0; n < 4; n++) {
+    for (int n = 0; n < SCALER_COUNT; n++) {
         dst->scaler[n].kernel.name =
-            (char *)handle_scaler_opt(dst->scaler[n].kernel.name, n == 3);
+            (char *)handle_scaler_opt(dst->scaler[n].kernel.name,
+                                      n == SCALER_TSCALE);
     }
 
     dst->scale_shader = talloc_strdup(NULL, dst->scale_shader);
@@ -3085,10 +3085,10 @@ void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
     // the radius, the earlier we need to queue frames.
     if (p->opts.interpolation) {
         const struct filter_kernel *kernel =
-            mp_find_filter_kernel(p->opts.scaler[3].kernel.name);
+            mp_find_filter_kernel(p->opts.scaler[SCALER_TSCALE].kernel.name);
         if (kernel) {
             double radius = kernel->f.radius;
-            radius = radius > 0 ? radius : p->opts.scaler[3].radius;
+            radius = radius > 0 ? radius : p->opts.scaler[SCALER_TSCALE].radius;
             queue_size += 1 + ceil(radius);
         } else {
             // Oversample case
