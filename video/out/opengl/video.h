@@ -31,7 +31,7 @@
 
 // Other texture units are reserved for specific purposes
 #define TEXUNIT_SCALERS  TEXUNIT_VIDEO_NUM
-#define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+4)
+#define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+SCALER_COUNT)
 #define TEXUNIT_DITHER   (TEXUNIT_3DLUT+1)
 
 struct lut3d {
@@ -69,6 +69,14 @@ struct scaler {
     struct filter_kernel kernel_storage;
 };
 
+enum scaler_unit {
+    SCALER_SCALE,  // luma/video
+    SCALER_DSCALE, // luma-video downscaling
+    SCALER_CSCALE, // chroma upscaling
+    SCALER_TSCALE, // temporal scaling (interpolation)
+    SCALER_COUNT
+};
+
 struct gl_video_opts {
     int dumb_mode;
     struct scaler_config scaler[4];
@@ -102,11 +110,6 @@ struct gl_video_opts {
     int deband;
     struct deband_opts *deband_opts;
     float unsharp;
-    int prescale;
-    int prescale_passes;
-    float prescale_downscaling_threshold;
-    struct superxbr_opts *superxbr_opts;
-    struct nnedi3_opts *nnedi3_opts;
 };
 
 extern const struct m_sub_options gl_video_conf;
