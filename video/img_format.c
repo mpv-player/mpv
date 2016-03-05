@@ -171,6 +171,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
             shift = d.shift;
         if (shift != d.shift)
             shift = -1;
+        desc.components[d.plane] += 1;
     }
 
     for (int p = 0; p < 4; p++) {

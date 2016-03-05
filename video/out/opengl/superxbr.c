@@ -76,7 +76,7 @@ void pass_superxbr(struct gl_shader_cache *sc, int planes, int tex_num,
                    struct gl_transform *transform)
 {
     assert(0 <= step && step < 2);
-    GLSLF("// superxbr (tex %d, step %d)\n", tex_num, step + 1);
+    GLSLF("// superxbr (step %d)\n", step);
 
     if (!conf)
         conf = &superxbr_opts_def;

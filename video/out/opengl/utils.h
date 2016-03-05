@@ -71,7 +71,8 @@ struct fbotex {
     GLuint texture;
     GLenum iformat;
     GLenum tex_filter;
-    int w, h;   // size of .texture
+    int rw, rh; // real (texture) size
+    int lw, lh; // logical (configured) size
 };
 
 bool fbotex_init(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
@@ -88,6 +89,11 @@ void fbotex_set_filter(struct fbotex *fbo, GLenum gl_filter);
 struct gl_transform {
     float m[2][2];
     float t[2];
+};
+
+static const struct gl_transform identity_trans = {
+    .m = {{1.0, 0.0}, {0.0, 1.0}},
+    .t = {0.0, 0.0},
 };
 
 void gl_transform_ortho(struct gl_transform *t, float x0, float x1,
@@ -110,6 +116,18 @@ static inline void gl_transform_rect(struct gl_transform t, struct mp_rect_f *r)
 {
     gl_transform_vec(t, &r->x0, &r->y0);
     gl_transform_vec(t, &r->x1, &r->y1);
+}
+
+static inline bool gl_transform_eq(struct gl_transform a, struct gl_transform b)
+{
+    for (int x = 0; x < 2; x++) {
+        for (int y = 0; y < 2; y++) {
+            if (a.m[x][y] != b.m[x][y])
+                return false;
+        }
+    }
+
+    return a.t[0] == b.t[0] && a.t[1] == b.t[1];
 }
 
 void gl_transform_trans(struct gl_transform t, struct gl_transform *x);
