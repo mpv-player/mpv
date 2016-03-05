@@ -485,7 +485,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("deband", deband, 0),
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
         OPT_FLOAT("sharpen", unsharp, 0),
-        OPT_CHOICE("prescale", prescale, 0,
+        OPT_CHOICE("prescale-luma", prescale_luma, 0,
                    ({"none", 0},
                     {"superxbr", 1}
 #if HAVE_NNEDI
@@ -520,6 +520,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_REPLACED("smoothmotion-threshold", "tscale-param1"),
         OPT_REPLACED("scale-down", "dscale"),
         OPT_REPLACED("fancy-downscaling", "correct-downscaling"),
+        OPT_REPLACED("prescale", "prescale-luma"),
 
         {0}
     },
@@ -1317,7 +1318,7 @@ static void pass_sample(struct gl_video *p, struct img_tex tex,
 // Get the number of passes for prescaler, with given display size.
 static int get_prescale_passes(struct gl_video *p, struct img_tex tex[4])
 {
-    if (!p->opts.prescale)
+    if (!p->opts.prescale_luma)
         return 0;
 
     // Return 0 if no luma planes exist
@@ -1374,9 +1375,9 @@ static void upload_nnedi3_weights(struct gl_video *p)
 
 // Applies a single pass of the prescaler, and accumulates the offset in
 // pass_transform.
-static void pass_prescale(struct gl_video *p, struct img_tex *tex,
-                          struct gl_transform *pass_transform,
-                          struct fbotex fbo[MAX_PRESCALE_STEPS])
+static void pass_prescale_luma(struct gl_video *p, struct img_tex *tex,
+                               struct gl_transform *pass_transform,
+                               struct fbotex fbo[MAX_PRESCALE_STEPS])
 {
     // Happens to be the same for superxbr and nnedi3.
     const int num_steps = 2;
@@ -1385,7 +1386,7 @@ static void pass_prescale(struct gl_video *p, struct img_tex *tex,
         struct gl_transform step_transform = {{{0}}};
         int id = pass_bind(p, *tex);
 
-        switch(p->opts.prescale) {
+        switch(p->opts.prescale_luma) {
         case 1:
             pass_superxbr(p->sc, tex->components, id, step, tex->multiplier,
                           p->opts.superxbr_opts, &step_transform);
@@ -1574,8 +1575,8 @@ static void pass_read_video(struct gl_video *p)
         // Plane still needs prescaling passes
         if (needs_prescale[n]) {
             GLSLF("// prescaling plane %d (%d left)\n", n, needs_prescale[n]);
-            pass_prescale(p, &tex[n], &tex_trans,
-                          p->prescale_fbo[needs_prescale[n]-1]);
+            pass_prescale_luma(p, &tex[n], &tex_trans,
+                               p->prescale_fbo[needs_prescale[n]-1]);
             needs_prescale[n]--;
 
             // We can skip scaling if we arrived at our target res
@@ -2556,7 +2557,7 @@ static bool check_dumb_mode(struct gl_video *p)
         return true;
     if (o->target_prim || o->target_trc || o->linear_scaling ||
         o->correct_downscaling || o->sigmoid_upscaling || o->interpolation ||
-        o->blend_subs || o->deband || o->unsharp || o->prescale)
+        o->blend_subs || o->deband || o->unsharp || o->prescale_luma)
         return false;
     // check remaining scalers (tscale is already implicitly excluded above)
     for (int i = 0; i < SCALER_COUNT; i++) {
@@ -2674,13 +2675,13 @@ static void check_gl_features(struct gl_video *p)
         MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
     }
 
-    if (p->opts.prescale == 2) {
+    if (p->opts.prescale_luma == 2) {
         if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_UBO) {
             // Check features for uniform buffer objects.
             if (!gl->BindBufferBase || !gl->GetUniformBlockIndex) {
                 MP_WARN(p, "Disabling NNEDI3 (%s required).\n",
                         gl->es ? "OpenGL ES 3.0" : "OpenGL 3.1");
-                p->opts.prescale = 0;
+                p->opts.prescale_luma = 0;
             }
         } else if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_SHADER) {
             // Check features for hard coding approach.
@@ -2689,7 +2690,7 @@ static void check_gl_features(struct gl_video *p)
             {
                 MP_WARN(p, "Disabling NNEDI3 (%s required).\n",
                         gl->es ? "OpenGL ES 3.0" : "OpenGL 3.3");
-                p->opts.prescale = 0;
+                p->opts.prescale_luma = 0;
             }
         }
     }

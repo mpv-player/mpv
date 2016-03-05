@@ -582,12 +582,10 @@ Available video output drivers are:
         better than without it) since it will extend the size to match only the
         milder of the scale factors between the axes.
 
-    ``prescale=<filter>``
-        This option provides non-convolution-based filters for upscaling. These
-        filters resize the video to multiple of the original size (all currently
-        supported prescalers can only perform image doubling in a single pass).
-        Generally another convolution based filter (the main scaler) will be
-        applied after prescaler to match the target display size.
+    ``prescale-luma=<filter>``
+        Apply additional pre-scaling (image doubling) on the luma plane
+        (if present). As the name implies, these will run before the main
+        upscaling pass.
 
         ``none``
             Disable all prescalers. This is the default.
@@ -604,10 +602,6 @@ Available video output drivers are:
 
             Extremely slow and requires a recent mid or high end graphics card
             to work smoothly (as of 2015).
-
-        Note that all the filters above are designed (or implemented) to process
-        luma plane only and probably won't work as intended for video in RGB
-        format.
 
     ``prescale-passes=<1..5>``
         The number of passes to apply the prescaler (defaults to be 1). Setting
