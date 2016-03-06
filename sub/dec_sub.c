@@ -53,6 +53,7 @@ struct dec_sub {
 
     struct sh_stream *sh;
     double last_pkt_pts;
+    bool preload_attempted;
 
     struct mp_codec_params *codec;
     double start, end;
@@ -96,6 +97,7 @@ static struct sd *init_decoder(struct dec_sub *sub)
             .driver = driver,
             .attachments = sub->attachments,
             .codec = sub->codec,
+            .preload_ok = true,
         };
 
         if (sd->driver->init(sd) >= 0)
@@ -167,16 +169,20 @@ static void update_segment(struct dec_sub *sub)
     }
 }
 
-// Read all packets from the demuxer and decode/add them. Returns false if
-// there are circumstances which makes this not possible.
-bool sub_read_all_packets(struct dec_sub *sub)
+bool sub_can_preload(struct dec_sub *sub)
+{
+    bool r;
+    pthread_mutex_lock(&sub->lock);
+    r = sub->sd->driver->accept_packets_in_advance && !sub->preload_attempted;
+    pthread_mutex_unlock(&sub->lock);
+    return r;
+}
+
+void sub_preload(struct dec_sub *sub)
 {
     pthread_mutex_lock(&sub->lock);
 
-    if (!sub->sd->driver->accept_packets_in_advance) {
-        pthread_mutex_unlock(&sub->lock);
-        return false;
-    }
+    sub->preload_attempted = true;
 
     for (;;) {
         struct demux_packet *pkt = demux_read_packet(sub->sh);
@@ -187,7 +193,6 @@ bool sub_read_all_packets(struct dec_sub *sub)
     }
 
     pthread_mutex_unlock(&sub->lock);
-    return true;
 }
 
 // Read packets from the demuxer stream passed to sub_create(). Return true if
@@ -230,7 +235,9 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
             break;
         }
 
-        sub->sd->driver->decode(sub->sd, pkt);
+        if (!(sub->preload_attempted && sub->sd->preload_ok))
+            sub->sd->driver->decode(sub->sd, pkt);
+
         talloc_free(pkt);
     }
     pthread_mutex_unlock(&sub->lock);

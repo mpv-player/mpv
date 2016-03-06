@@ -99,18 +99,15 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
 
     video_pts -= opts->sub_delay;
 
-    if (!track->preloaded && track->demuxer->fully_read && !opts->sub_clear_on_seek)
-    {
+    if (track->demuxer->fully_read && sub_can_preload(dec_sub)) {
         // Assume fully_read implies no interleaved audio/video streams.
         // (Reading packets will change the demuxer position.)
         demux_seek(track->demuxer, 0, 0);
-        track->preloaded = sub_read_all_packets(track->d_sub);
+        sub_preload(dec_sub);
     }
 
-    if (!track->preloaded) {
-        if (!sub_read_packets(dec_sub, video_pts))
-            return false;
-    }
+    if (!sub_read_packets(dec_sub, video_pts))
+        return false;
 
     // Handle displaying subtitles on terminal; never done for secondary subs
     if (mpctx->current_track[0][STREAM_SUB] == track && !mpctx->video_out)

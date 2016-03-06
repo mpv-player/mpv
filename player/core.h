@@ -147,10 +147,6 @@ struct track {
     struct vo_chain *vo_c;
     struct ao_chain *ao_c;
     struct lavfi_pad *sink;
-
-    // For external subtitles, which are read fully on init. Do not attempt
-    // to read packets from them.
-    bool preloaded;
 };
 
 // Summarizes video filtering and output.

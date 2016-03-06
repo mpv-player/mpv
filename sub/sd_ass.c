@@ -452,6 +452,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     if (ctx->duration_unknown && pts != MP_NOPTS_VALUE) {
         mp_ass_flush_old_events(track, ts);
         ctx->num_seen_packets = 0;
+        sd->preload_ok = false;
     }
     if (no_ass)
         fill_plaintext(sd, pts);
@@ -612,6 +613,7 @@ static void reset(struct sd *sd)
     if (sd->opts->sub_clear_on_seek || ctx->duration_unknown) {
         ass_flush_events(ctx->ass_track);
         ctx->num_seen_packets = 0;
+        sd->preload_ok = false;
     }
     if (ctx->converter)
         lavc_conv_reset(ctx->converter);
