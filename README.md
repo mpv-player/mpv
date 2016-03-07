@@ -123,20 +123,23 @@ of both FFmpeg and Libav. But FFmpeg is preferred, and some mpv features work
 with FFmpeg only (subtitle formats in particular).
 
 
+## Preferred FFmpeg version
+
+
+Using the latest FFmpeg release (or FFmpeg git master) is strongly recommended.
+Older versions are unsupported, even if the build system still happens to
+accept them. The main reason mpv still builds with older FFmpeg versions is to
+evade arguing with people (users, distros) who insist on using older FFmpeg
+versions for no rational reason.
+
 ## Release cycle
 
+Every other month, an arbitrary git snapshot is made, and is assigned
+a 0.X.0 version number. No further maintenance is done.
 
-Every few months, a new release is cut off of the master branch and is assigned
-a 0.X.0 version number.
-
-As part of the maintenance process, minor releases are made, which are assigned
-0.X.Y version numbers. Minor releases contain bug fixes only. They never merge
-the master branch, and no features are added to it. Only the latest release is
-maintained.
-
-The goal of releases is to provide stability and an unchanged base for the sake
-of Linux distributions. If you want the newest features, just use the master
-branch, which is stable most of the time, except sometimes, when it's not.
+The goal of releases is to make Linux distributions happy. Linux distributions
+are also expected to apply their own patches in case of bugs and security
+issues.
 
 Releases other than the latest release are unsupported and unmaintained.
 
