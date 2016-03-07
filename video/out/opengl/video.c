@@ -1395,7 +1395,8 @@ static void pass_prescale_luma(struct gl_video *p, struct img_tex *tex,
 
         switch(p->opts.prescale_luma) {
         case 1:
-            pass_superxbr(p->sc, planes, id, step, tex->multiplier,
+            assert(planes == 1);
+            pass_superxbr(p->sc, id, step, tex->multiplier,
                           p->opts.superxbr_opts, &step_transform);
             break;
         case 2:
