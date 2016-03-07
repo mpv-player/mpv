@@ -477,13 +477,3 @@ void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
                         &obj->parts_cache, out_imgs);
     talloc_steal(obj, obj->parts_cache);
 }
-
-void osd_object_get_resolution(struct osd_state *osd, int obj,
-                               int *out_w, int *out_h)
-{
-    pthread_mutex_lock(&osd->lock);
-    struct osd_object *osd_obj = osd->objs[obj];
-    *out_w = osd_obj->osd_track ? osd_obj->osd_track->PlayResX : 0;
-    *out_h = osd_obj->osd_track ? osd_obj->osd_track->PlayResY : 0;
-    pthread_mutex_unlock(&osd->lock);
-}

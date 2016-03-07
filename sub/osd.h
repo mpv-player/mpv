@@ -190,9 +190,6 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
 struct mp_image_params;
 struct mp_osd_res osd_res_from_image_params(const struct mp_image_params *p);
 
-void osd_object_get_scale_factor(struct osd_state *osd, int obj,
-                                 double *sw, double *sh);
-
 struct mp_osd_res osd_get_vo_res(struct osd_state *osd, int obj);
 
 void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
@@ -210,9 +207,5 @@ void osd_destroy_backend(struct osd_state *osd);
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function);
 extern const char *const osd_ass_0;
 extern const char *const osd_ass_1;
-
-// defined in backend, but locks if required
-void osd_object_get_resolution(struct osd_state *osd, int obj,
-                               int *out_w, int *out_h);
 
 #endif /* MPLAYER_SUB_H */
