@@ -82,24 +82,24 @@ struct step_params {
 const struct step_params params[3] = {
     {   .dstr = 0.129633,
         .ostr = 0.175068,
-        .d1 = {{1, 2, 1},
-               {2, 4, 2},
-               {1, 2, 1}},
-        .d2 = {{-1, -1},
-               {-1, -1}},
+        .d1 = {{0, 1, 0},
+               {1, 2, 1},
+               {0, 1, 0}},
+        .d2 = {{-1,  0},
+               { 0, -1}},
 
         .o1 = {1, 2, 1},
-        .o2 = {-1, -1},
+        .o2 = { 0,  0},
     }, {
         .dstr = 0.175068,
         .ostr = 0.129633,
-        .d1 = {{0, 2, 0},
-               {2, 0, 2},
-               {0, 2, 0}},
+        .d1 = {{0, 1, 0},
+               {1, 4, 1},
+               {0, 1, 0}},
         .d2 = {{ 0,  0},
                { 0,  0}},
 
-        .o1 = {2, 0, 2},
+        .o1 = {1, 4, 1},
         .o2 = { 0,  0},
     }
 };
@@ -182,8 +182,7 @@ static void superxbr_step_h(struct gl_shader_cache *sc,
     // Anti-ringing using center square
     GLSLH(float lo = min(min( i(1,1), i(2,1) ), min( i(1,2), i(2,2) ));)
     GLSLH(float hi = max(max( i(1,1), i(2,1) ), max( i(1,2), i(2,2) ));)
-    GLSLHF("res = mix(res, clamp(res, lo, hi), 1.0-2.0*abs(%f-0.5));\n",
-           conf->edge_strength);
+    GLSLH(res = clamp(res, lo, hi);)
 
     GLSLHF("} // step\n");
 }
