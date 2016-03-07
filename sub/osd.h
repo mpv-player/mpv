@@ -193,9 +193,6 @@ struct mp_osd_res osd_res_from_image_params(const struct mp_image_params *p);
 void osd_object_get_scale_factor(struct osd_state *osd, int obj,
                                  double *sw, double *sh);
 
-void osd_coords_to_video(struct osd_state *osd, int frame_w, int frame_h,
-                         int *x, int *y);
-
 struct mp_osd_res osd_get_vo_res(struct osd_state *osd, int obj);
 
 void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
