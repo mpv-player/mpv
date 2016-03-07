@@ -31,7 +31,7 @@ struct superxbr_opts {
 
 const struct superxbr_opts superxbr_opts_def = {
     .sharpness = 1.0f,
-    .edge_strength = 1.0f,
+    .edge_strength = 0.6f,
 };
 
 #define OPT_BASE_STRUCT struct superxbr_opts
