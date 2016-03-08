@@ -34,11 +34,8 @@ namespace mpv
         /// </summary>
         private void InitializeComponent()
         {
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.buttonLoad = new System.Windows.Forms.Button();
             this.textBoxVideoSampleFileName = new System.Windows.Forms.TextBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.buttonPlayPause = new System.Windows.Forms.Button();
             this.buttonStop = new System.Windows.Forms.Button();
             this.buttonLoadVideo = new System.Windows.Forms.Button();
@@ -46,63 +43,32 @@ namespace mpv
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
-            // textBox1
-            // 
-            this.textBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBox1.Location = new System.Drawing.Point(13, 36);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(530, 317);
-            this.textBox1.TabIndex = 0;
-            // 
-            // buttonLoad
-            // 
-            this.buttonLoad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.buttonLoad.Location = new System.Drawing.Point(13, 359);
-            this.buttonLoad.Name = "buttonLoad";
-            this.buttonLoad.Size = new System.Drawing.Size(146, 23);
-            this.buttonLoad.TabIndex = 3;
-            this.buttonLoad.Text = "Load";
-            this.buttonLoad.UseVisualStyleBackColor = true;
-            this.buttonLoad.Click += new System.EventHandler(this.buttonPlay_Click);
-            // 
             // textBoxVideoSampleFileName
             // 
-            this.textBoxVideoSampleFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.textBoxVideoSampleFileName.Location = new System.Drawing.Point(166, 362);
+            this.textBoxVideoSampleFileName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxVideoSampleFileName.Location = new System.Drawing.Point(13, 379);
             this.textBoxVideoSampleFileName.Name = "textBoxVideoSampleFileName";
-            this.textBoxVideoSampleFileName.Size = new System.Drawing.Size(323, 20);
+            this.textBoxVideoSampleFileName.Size = new System.Drawing.Size(514, 20);
             this.textBoxVideoSampleFileName.TabIndex = 4;
-            this.textBoxVideoSampleFileName.Text = "sample.mp4";
             // 
             // pictureBox1
             // 
             this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.pictureBox1.Location = new System.Drawing.Point(560, 36);
+            this.pictureBox1.Location = new System.Drawing.Point(13, 12);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(388, 290);
+            this.pictureBox1.Size = new System.Drawing.Size(514, 333);
             this.pictureBox1.TabIndex = 5;
             this.pictureBox1.TabStop = false;
             // 
-            // label1
-            // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(560, 369);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(35, 13);
-            this.label1.TabIndex = 6;
-            this.label1.Text = "label1";
-            // 
             // buttonPlayPause
             // 
-            this.buttonPlayPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.buttonPlayPause.Location = new System.Drawing.Point(561, 332);
+            this.buttonPlayPause.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonPlayPause.Location = new System.Drawing.Point(305, 351);
             this.buttonPlayPause.Name = "buttonPlayPause";
-            this.buttonPlayPause.Size = new System.Drawing.Size(95, 23);
+            this.buttonPlayPause.Size = new System.Drawing.Size(108, 23);
             this.buttonPlayPause.TabIndex = 7;
             this.buttonPlayPause.Text = "Play/pause";
             this.buttonPlayPause.UseVisualStyleBackColor = true;
@@ -110,10 +76,10 @@ namespace mpv
             // 
             // buttonStop
             // 
-            this.buttonStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.buttonStop.Location = new System.Drawing.Point(665, 332);
+            this.buttonStop.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonStop.Location = new System.Drawing.Point(419, 351);
             this.buttonStop.Name = "buttonStop";
-            this.buttonStop.Size = new System.Drawing.Size(95, 23);
+            this.buttonStop.Size = new System.Drawing.Size(108, 23);
             this.buttonStop.TabIndex = 8;
             this.buttonStop.Text = "Stop";
             this.buttonStop.UseVisualStyleBackColor = true;
@@ -122,11 +88,11 @@ namespace mpv
             // buttonLoadVideo
             // 
             this.buttonLoadVideo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.buttonLoadVideo.Location = new System.Drawing.Point(496, 359);
+            this.buttonLoadVideo.Location = new System.Drawing.Point(12, 351);
             this.buttonLoadVideo.Name = "buttonLoadVideo";
-            this.buttonLoadVideo.Size = new System.Drawing.Size(47, 23);
+            this.buttonLoadVideo.Size = new System.Drawing.Size(108, 23);
             this.buttonLoadVideo.TabIndex = 10;
-            this.buttonLoadVideo.Text = "...";
+            this.buttonLoadVideo.Text = "Open video file...";
             this.buttonLoadVideo.UseVisualStyleBackColor = true;
             this.buttonLoadVideo.Click += new System.EventHandler(this.buttonLoadVideo_Click);
             // 
@@ -138,18 +104,16 @@ namespace mpv
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(960, 394);
+            this.ClientSize = new System.Drawing.Size(534, 411);
             this.Controls.Add(this.buttonLoadVideo);
             this.Controls.Add(this.buttonStop);
             this.Controls.Add(this.buttonPlayPause);
-            this.Controls.Add(this.label1);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.textBoxVideoSampleFileName);
-            this.Controls.Add(this.buttonLoad);
-            this.Controls.Add(this.textBox1);
             this.KeyPreview = true;
+            this.MinimumSize = new System.Drawing.Size(550, 450);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "mpv player";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
@@ -158,12 +122,8 @@ namespace mpv
         }
 
         #endregion
-
-        private TextBox textBox1;
-        private Button buttonLoad;
         private TextBox textBoxVideoSampleFileName;
         private PictureBox pictureBox1;
-        private Label label1;
         private Button buttonPlayPause;
         private Button buttonStop;
         private Button buttonLoadVideo;
