@@ -79,12 +79,21 @@ static void destroy_ass_renderer(struct ass_state *ass)
     ass->log = NULL;
 }
 
+static void destroy_external(struct osd_external *ext)
+{
+    talloc_free(ext->text);
+    destroy_ass_renderer(&ext->ass);
+}
+
 void osd_destroy_backend(struct osd_state *osd)
 {
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = osd->objs[n];
         destroy_ass_renderer(&obj->ass);
         talloc_free(obj->parts_cache.parts);
+        for (int i = 0; i < obj->num_externals; i++)
+            destroy_external(&obj->externals[i]);
+        obj->num_externals = 0;
     }
 }
 
@@ -431,44 +440,76 @@ static void update_osd(struct osd_state *osd, struct osd_object *obj)
     update_progbar(osd, obj);
 }
 
-static void update_external(struct osd_state *osd, struct osd_object *obj)
+static void update_external(struct osd_state *osd, struct osd_object *obj,
+                            struct osd_external *ext)
 {
-    bstr t = bstr0(obj->text);
+    bstr t = bstr0(ext->text);
     if (!t.len)
         return;
-    create_ass_track(osd, obj, &obj->ass, obj->external_res_x,
-                     obj->external_res_y);
+    create_ass_track(osd, obj, &ext->ass, ext->res_x, ext->res_y);
 
-    clear_ass(&obj->ass);
+    clear_ass(&ext->ass);
 
-    int resy = obj->ass.track->PlayResY;
-    mp_ass_set_style(get_style(&obj->ass, "OSD"), resy, osd->opts->osd_style);
+    int resy = ext->ass.track->PlayResY;
+    mp_ass_set_style(get_style(&ext->ass, "OSD"), resy, osd->opts->osd_style);
 
     // Some scripts will reference this style name with \r tags.
     const struct osd_style_opts *def = osd_style_conf.defaults;
-    mp_ass_set_style(get_style(&obj->ass, "Default"), resy, def);
+    mp_ass_set_style(get_style(&ext->ass, "Default"), resy, def);
 
     while (t.len) {
         bstr line;
         bstr_split_tok(t, "\n", &line, &t);
         if (line.len) {
             char *tmp = bstrdup0(NULL, line);
-            add_osd_ass_event(obj->ass.track, "OSD", tmp);
+            add_osd_ass_event(ext->ass.track, "OSD", tmp);
             talloc_free(tmp);
         }
     }
 }
 
-static void update_object(struct osd_state *osd, struct osd_object *obj)
+void osd_set_external(struct osd_state *osd, void *id, int res_x, int res_y,
+                      char *text)
 {
-    switch (obj->type) {
-    case OSDTYPE_OSD:
-        update_osd(osd, obj);
-        break;
-    case OSDTYPE_EXTERNAL:
-        update_external(osd, obj);
-        break;
+    pthread_mutex_lock(&osd->lock);
+    struct osd_object *obj = osd->objs[OSDTYPE_EXTERNAL];
+    struct osd_external *entry = 0;
+    for (int n = 0; n < obj->num_externals; n++) {
+        if (obj->externals[n].id == id) {
+            entry = &obj->externals[n];
+            break;
+        }
     }
+    if (!entry && !text)
+        goto done;
+
+    if (!entry) {
+        struct osd_external new = { .id = id };
+        MP_TARRAY_APPEND(obj, obj->externals, obj->num_externals, new);
+        entry = &obj->externals[obj->num_externals - 1];
+    }
+
+    if (!text) {
+        int index = entry - &obj->externals[0];
+        destroy_external(entry);
+        MP_TARRAY_REMOVE_AT(obj->externals, obj->num_externals, index);
+        goto done;
+    }
+
+    if (!entry->text || strcmp(entry->text, text) != 0 ||
+        entry->res_x != res_x || entry->res_y != res_y)
+    {
+        talloc_free(entry->text);
+        entry->text = talloc_strdup(NULL, text);
+        entry->res_x = res_x;
+        entry->res_y = res_y;
+        update_external(osd, obj, entry);
+        obj->parts_cache.change_id = 1;
+        osd_changed_unlocked(osd, obj->type);
+    }
+
+done:
+    pthread_mutex_unlock(&osd->lock);
 }
 
 static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
@@ -485,10 +526,12 @@ static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
                             struct sub_bitmaps *out_imgs)
 {
-    if (obj->force_redraw)
-        update_object(osd, obj);
+    if (obj->force_redraw && obj->type == OSDTYPE_OSD)
+        update_osd(osd, obj);
 
     append_ass(&obj->ass, &obj->vo_res, &obj->parts_cache);
+    for (int n = 0; n < obj->num_externals; n++)
+        append_ass(&obj->externals[n].ass, &obj->vo_res, &obj->parts_cache);
 
     *out_imgs = obj->parts_cache;
 

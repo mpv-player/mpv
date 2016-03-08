@@ -145,7 +145,7 @@ void osd_free(struct osd_state *osd)
     talloc_free(osd);
 }
 
-static void osd_changed_unlocked(struct osd_state *osd, int obj)
+void osd_changed_unlocked(struct osd_state *osd, int obj)
 {
     osd->objs[obj]->force_redraw = true;
     osd->want_redraw = true;
@@ -198,23 +198,6 @@ void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s)
     memcpy(osd_obj->progbar_state.stops, s->stops,
            sizeof(osd_obj->progbar_state.stops[0]) * s->num_stops);
     osd_changed_unlocked(osd, osd_obj->type);
-    pthread_mutex_unlock(&osd->lock);
-}
-
-void osd_set_external(struct osd_state *osd, int res_x, int res_y, char *text)
-{
-    pthread_mutex_lock(&osd->lock);
-    struct osd_object *osd_obj = osd->objs[OSDTYPE_EXTERNAL];
-    if (strcmp(osd_obj->text, text) != 0 ||
-        osd_obj->external_res_x != res_x ||
-        osd_obj->external_res_y != res_y)
-    {
-        talloc_free(osd_obj->text);
-        osd_obj->text = talloc_strdup(osd_obj, text);
-        osd_obj->external_res_x = res_x;
-        osd_obj->external_res_y = res_y;
-        osd_changed_unlocked(osd, osd_obj->type);
-    }
     pthread_mutex_unlock(&osd->lock);
 }
 

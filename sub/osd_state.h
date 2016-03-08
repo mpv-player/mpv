@@ -20,7 +20,7 @@ struct osd_object {
 
     bool force_redraw;
 
-    // OSDTYPE_SUB/OSDTYPE_SUB2/OSDTYPE_OSD/OSDTYPE_EXTERNAL
+    // OSDTYPE_OSD
     char *text;
 
     // OSDTYPE_OSD
@@ -30,7 +30,8 @@ struct osd_object {
     struct dec_sub *sub;
 
     // OSDTYPE_EXTERNAL
-    int external_res_x, external_res_y;
+    struct osd_external *externals;
+    int num_externals;
 
     // OSDTYPE_EXTERNAL2
     struct sub_bitmaps *external2;
@@ -45,6 +46,13 @@ struct osd_object {
 
     // Internally used by osd_libass.c
     struct sub_bitmaps parts_cache;
+    struct ass_state ass;
+};
+
+struct osd_external {
+    void *id;
+    char *text;
+    int res_x, res_y;
     struct ass_state ass;
 };
 
@@ -63,5 +71,7 @@ struct osd_state {
 
     struct mp_draw_sub_cache *draw_cache;
 };
+
+void osd_changed_unlocked(struct osd_state *osd, int obj);
 
 #endif

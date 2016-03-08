@@ -391,6 +391,7 @@ static int load_lua(struct mpv_handle *client, const char *fname)
     r = 0;
 
 error_out:
+    osd_set_external(ctx->mpctx->osd, client, 0, 0, NULL); // remove overlay
     mp_resume_all(client);
     if (ctx->state)
         lua_close(ctx->state);
@@ -963,14 +964,14 @@ static int script_command_native(lua_State *L)
 
 static int script_set_osd_ass(lua_State *L)
 {
-    struct MPContext *mpctx = get_mpctx(L);
+    struct script_ctx *ctx = get_ctx(L);
     int res_x = luaL_checkinteger(L, 1);
     int res_y = luaL_checkinteger(L, 2);
     const char *text = luaL_checkstring(L, 3);
     if (!text[0])
         text = " "; // force external OSD initialization
-    osd_set_external(mpctx->osd, res_x, res_y, (char *)text);
-    mp_input_wakeup(mpctx->input);
+    osd_set_external(ctx->mpctx->osd, ctx->client, res_x, res_y, (char *)text);
+    mp_input_wakeup(ctx->mpctx->input);
     return 0;
 }
 
