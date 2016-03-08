@@ -598,8 +598,12 @@ Video
     forcing it with ``--vo=opengl:backend=x11``, but the vaapi/GLX interop is
     said to be slower than ``vaapi-copy``.
 
+    Most video filters will not work with hardware decoding as they are
+    primarily implemented on the CPU. Some exceptions are ``vdpaupp``,
+    ``vdpaurb`` and ``vavpp``. See `VIDEO FILTERS`_ for more details.
+
     The ``vaapi-copy`` and ``dxva2-copy`` modes allow you to use hardware
-    decoding with any VO or backend. Because these copy the decoded
+    decoding with any VO, backend or filter. Because these copy the decoded
     video back to system RAM, they're likely less efficient than the ``vaapi``
     or ``dxva2`` modes respectivley.
 
