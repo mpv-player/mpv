@@ -77,6 +77,7 @@ void osd_destroy_backend(struct osd_state *osd)
         if (obj->osd_ass_library)
             ass_library_done(obj->osd_ass_library);
         obj->osd_ass_library = NULL;
+        talloc_free(obj->parts_cache.parts);
     }
 }
 
@@ -467,13 +468,15 @@ void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
     if (obj->force_redraw)
         update_object(osd, obj);
 
-    *out_imgs = (struct sub_bitmaps) {0};
     if (!obj->osd_track)
         return;
 
+    obj->parts_cache.change_id = 0;
+    obj->parts_cache.num_parts = 0;
+
     ass_set_frame_size(obj->osd_render, obj->vo_res.w, obj->vo_res.h);
     ass_set_aspect_ratio(obj->osd_render, obj->vo_res.display_par, 1.0);
-    mp_ass_render_frame(obj->osd_render, obj->osd_track, 0,
-                        &obj->parts_cache, out_imgs);
-    talloc_steal(obj, obj->parts_cache);
+    mp_ass_render_frame(obj->osd_render, obj->osd_track, 0, &obj->parts_cache);
+
+    *out_imgs = obj->parts_cache;
 }

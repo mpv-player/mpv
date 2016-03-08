@@ -37,7 +37,7 @@ struct osd_object {
     struct mp_osd_res vo_res;
 
     // Internally used by osd_libass.c
-    struct sub_bitmap *parts_cache;
+    struct sub_bitmaps parts_cache;
     struct ass_track *osd_track;
     struct ass_renderer *osd_render;
     struct ass_library *osd_ass_library;
