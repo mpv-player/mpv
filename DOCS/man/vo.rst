@@ -811,7 +811,8 @@ Available video output drivers are:
             profiles, and the ``nnedi3`` prescaler.
         dxinterop (experimental)
             Win32, using WGL for rendering and Direct3D 9Ex for presentation.
-            Works on Nvidia and AMD only.
+            Works on Nvidia and AMD. Newer Intel chips with the latest drivers
+            may also work.
         x11
             X11/GLX
         wayland
