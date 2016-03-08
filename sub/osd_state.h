@@ -7,6 +7,13 @@
 
 #define OSD_CONV_CACHE_MAX 4
 
+struct ass_state {
+    struct mp_log *log;
+    struct ass_track *track;
+    struct ass_renderer *render;
+    struct ass_library *library;
+};
+
 struct osd_object {
     int type; // OSDTYPE_*
     bool is_sub;
@@ -38,9 +45,7 @@ struct osd_object {
 
     // Internally used by osd_libass.c
     struct sub_bitmaps parts_cache;
-    struct ass_track *osd_track;
-    struct ass_renderer *osd_render;
-    struct ass_library *osd_ass_library;
+    struct ass_state ass;
 };
 
 struct osd_state {

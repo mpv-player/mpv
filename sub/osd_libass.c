@@ -45,50 +45,57 @@ void osd_init_backend(struct osd_state *osd)
 {
 }
 
-static void create_ass_renderer(struct osd_state *osd, struct osd_object *obj)
+static void create_ass_renderer(struct osd_state *osd, struct ass_state *ass)
 {
-    if (obj->osd_render)
+    if (ass->render)
         return;
 
-    struct mp_log *ass_log = mp_log_new(obj, osd->log, "libass");
-    obj->osd_ass_library = mp_ass_init(osd->global, ass_log);
-    ass_add_font(obj->osd_ass_library, "mpv-osd-symbols", (void *)osd_font_pfb,
+    ass->log = mp_log_new(NULL, osd->log, "libass");
+    ass->library = mp_ass_init(osd->global, ass->log);
+    ass_add_font(ass->library, "mpv-osd-symbols", (void *)osd_font_pfb,
                  sizeof(osd_font_pfb) - 1);
 
-    obj->osd_render = ass_renderer_init(obj->osd_ass_library);
-    if (!obj->osd_render)
+    ass->render = ass_renderer_init(ass->library);
+    if (!ass->render)
         abort();
 
-    mp_ass_configure_fonts(obj->osd_render, osd->opts->osd_style,
-                           osd->global, ass_log);
-    ass_set_aspect_ratio(obj->osd_render, 1.0, 1.0);
+    mp_ass_configure_fonts(ass->render, osd->opts->osd_style,
+                           osd->global, ass->log);
+    ass_set_aspect_ratio(ass->render, 1.0, 1.0);
+}
+
+static void destroy_ass_renderer(struct ass_state *ass)
+{
+    if (ass->track)
+        ass_free_track(ass->track);
+    ass->track = NULL;
+    if (ass->render)
+        ass_renderer_done(ass->render);
+    ass->render = NULL;
+    if (ass->library)
+        ass_library_done(ass->library);
+    ass->library = NULL;
+    talloc_free(ass->log);
+    ass->log = NULL;
 }
 
 void osd_destroy_backend(struct osd_state *osd)
 {
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = osd->objs[n];
-        if (obj->osd_track)
-            ass_free_track(obj->osd_track);
-        obj->osd_track = NULL;
-        if (obj->osd_render)
-            ass_renderer_done(obj->osd_render);
-        obj->osd_render = NULL;
-        if (obj->osd_ass_library)
-            ass_library_done(obj->osd_ass_library);
-        obj->osd_ass_library = NULL;
+        destroy_ass_renderer(&obj->ass);
         talloc_free(obj->parts_cache.parts);
     }
 }
 
 static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
-                             int res_x, int res_y)
+                             struct ass_state *ass, int res_x, int res_y)
 {
-    create_ass_renderer(osd, obj);
+    create_ass_renderer(osd, ass);
 
-    ASS_Track *track = obj->osd_track;
+    ASS_Track *track = ass->track;
     if (!track)
-        track = ass_new_track(obj->osd_ass_library);
+        track = ass_new_track(ass->library);
 
     int old_res_x = track->PlayResX;
     int old_res_y = track->PlayResY;
@@ -106,9 +113,9 @@ static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
     // Force libass to clear its internal cache - it doesn't check for
     // PlayRes changes itself.
     if (old_res_x != track->PlayResX || old_res_y != track->PlayResY)
-        ass_set_frame_size(obj->osd_render, 1, 1);
+        ass_set_frame_size(ass->render, 1, 1);
 
-    obj->osd_track = track;
+    ass->track = track;
 }
 
 static int find_style(ASS_Track *track, const char *name, int def)
@@ -121,10 +128,9 @@ static int find_style(ASS_Track *track, const char *name, int def)
 }
 
 // Find a given style, or add it if it's missing.
-static ASS_Style *get_style(struct osd_state *osd, struct osd_object *obj,
-                            char *name)
+static ASS_Style *get_style(struct ass_state *ass, char *name)
 {
-    ASS_Track *track = obj->osd_track;
+    ASS_Track *track = ass->track;
     if (!track)
         return NULL;
 
@@ -155,10 +161,10 @@ static ASS_Event *add_osd_ass_event(ASS_Track *track, const char *style,
     return event;
 }
 
-static void clear_obj(struct osd_object *obj)
+static void clear_ass(struct ass_state *ass)
 {
-    if (obj->osd_track)
-        ass_flush_events(obj->osd_track);
+    if (ass->track)
+        ass_flush_events(ass->track);
 }
 
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function)
@@ -215,18 +221,18 @@ static void update_osd_text(struct osd_state *osd, struct osd_object *obj)
     if (!obj->text[0])
         return;
 
-    create_ass_track(osd, obj, 0, 0);
+    create_ass_track(osd, obj, &obj->ass, 0, 0);
 
     struct osd_style_opts font = *opts->osd_style;
     font.font_size *= opts->osd_scale;
 
-    double playresy = obj->osd_track->PlayResY;
+    double playresy = obj->ass.track->PlayResY;
     // Compensate for libass and mp_ass_set_style scaling the font etc.
     if (!opts->osd_scale_by_window)
         playresy *= 720.0 / obj->vo_res.h;
 
-    mp_ass_set_style(get_style(osd, obj, "OSD"), playresy, &font);
-    add_osd_ass_event_escaped(obj->osd_track, "OSD", obj->text);
+    mp_ass_set_style(get_style(&obj->ass, "OSD"), playresy, &font);
+    add_osd_ass_event_escaped(obj->ass.track, "OSD", obj->text);
 }
 
 // align: -1 .. +1
@@ -309,10 +315,10 @@ static void get_osd_bar_box(struct osd_state *osd, struct osd_object *obj,
 {
     struct MPOpts *opts = osd->opts;
 
-    create_ass_track(osd, obj, 0, 0);
-    ASS_Track *track = obj->osd_track;
+    create_ass_track(osd, obj, &obj->ass, 0, 0);
+    ASS_Track *track = obj->ass.track;
 
-    ASS_Style *style = get_style(osd, obj, "progbar");
+    ASS_Style *style = get_style(&obj->ass, "progbar");
     if (!style) {
         *o_x = *o_y = *o_w = *o_h = *o_border = 0;
         return;
@@ -348,6 +354,8 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     float px, py, width, height, border;
     get_osd_bar_box(osd, obj, &px, &py, &width, &height, &border);
 
+    ASS_Track *track = obj->ass.track;
+
     float sx = px - border * 2 - height / 4; // includes additional spacing
     float sy = py + height / 2;
 
@@ -363,7 +371,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
         bstr_xappend(NULL, &buf, bstr0("{\\r}"));
     }
 
-    add_osd_ass_event(obj->osd_track, "progbar", buf.start);
+    add_osd_ass_event(track, "progbar", buf.start);
     talloc_free(buf.start);
 
     struct ass_draw *d = &(struct ass_draw) { .scale = 4 };
@@ -373,7 +381,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     float pos = obj->progbar_state.value * width - border / 2;
     ass_draw_rect_cw(d, 0, 0, pos, height);
     ass_draw_stop(d);
-    add_osd_ass_event(obj->osd_track, "progbar", d->text);
+    add_osd_ass_event(track, "progbar", d->text);
     ass_draw_reset(d);
 
     // position marker
@@ -383,7 +391,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     ass_draw_move_to(d, pos + border / 2, 0);
     ass_draw_line_to(d, pos + border / 2, height);
     ass_draw_stop(d);
-    add_osd_ass_event(obj->osd_track, "progbar", d->text);
+    add_osd_ass_event(track, "progbar", d->text);
     ass_draw_reset(d);
 
     d->text = talloc_asprintf_append(d->text, "{\\pos(%f,%f)}", px, py);
@@ -412,39 +420,40 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     }
 
     ass_draw_stop(d);
-    add_osd_ass_event(obj->osd_track, "progbar", d->text);
+    add_osd_ass_event(track, "progbar", d->text);
     ass_draw_reset(d);
 }
 
 static void update_osd(struct osd_state *osd, struct osd_object *obj)
 {
-    clear_obj(obj);
+    clear_ass(&obj->ass);
     update_osd_text(osd, obj);
     update_progbar(osd, obj);
 }
 
 static void update_external(struct osd_state *osd, struct osd_object *obj)
 {
-    clear_obj(obj);
-
     bstr t = bstr0(obj->text);
     if (!t.len)
         return;
-    create_ass_track(osd, obj, obj->external_res_x, obj->external_res_y);
+    create_ass_track(osd, obj, &obj->ass, obj->external_res_x,
+                     obj->external_res_y);
 
-    int resy = obj->osd_track->PlayResY;
-    mp_ass_set_style(get_style(osd, obj, "OSD"), resy, osd->opts->osd_style);
+    clear_ass(&obj->ass);
+
+    int resy = obj->ass.track->PlayResY;
+    mp_ass_set_style(get_style(&obj->ass, "OSD"), resy, osd->opts->osd_style);
 
     // Some scripts will reference this style name with \r tags.
     const struct osd_style_opts *def = osd_style_conf.defaults;
-    mp_ass_set_style(get_style(osd, obj, "Default"), resy, def);
+    mp_ass_set_style(get_style(&obj->ass, "Default"), resy, def);
 
     while (t.len) {
         bstr line;
         bstr_split_tok(t, "\n", &line, &t);
         if (line.len) {
             char *tmp = bstrdup0(NULL, line);
-            add_osd_ass_event(obj->osd_track, "OSD", tmp);
+            add_osd_ass_event(obj->ass.track, "OSD", tmp);
             talloc_free(tmp);
         }
     }
@@ -462,21 +471,27 @@ static void update_object(struct osd_state *osd, struct osd_object *obj)
     }
 }
 
+static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
+                       struct sub_bitmaps *imgs)
+{
+    if (!ass->render || !ass->track)
+        return;
+
+    ass_set_frame_size(ass->render, res->w, res->h);
+    ass_set_aspect_ratio(ass->render, res->display_par, 1.0);
+    mp_ass_render_frame(ass->render, ass->track, 0, imgs);
+}
+
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
                             struct sub_bitmaps *out_imgs)
 {
     if (obj->force_redraw)
         update_object(osd, obj);
 
-    if (!obj->osd_track)
-        return;
+    append_ass(&obj->ass, &obj->vo_res, &obj->parts_cache);
+
+    *out_imgs = obj->parts_cache;
 
     obj->parts_cache.change_id = 0;
     obj->parts_cache.num_parts = 0;
-
-    ass_set_frame_size(obj->osd_render, obj->vo_res.w, obj->vo_res.h);
-    ass_set_aspect_ratio(obj->osd_render, obj->vo_res.display_par, 1.0);
-    mp_ass_render_frame(obj->osd_render, obj->osd_track, 0, &obj->parts_cache);
-
-    *out_imgs = obj->parts_cache;
 }
