@@ -3614,5 +3614,3 @@ Miscellaneous
           Conways' Life Game.
 
     See the FFmpeg libavfilter documentation for details on the filter.
-
-
