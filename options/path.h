@@ -86,4 +86,6 @@ bstr mp_split_proto(bstr path, bstr *out_url);
 void mp_mkdirp(const char *dir);
 void mp_mk_config_dir(struct mpv_global *global, char *subdir);
 
+char* mp_unix_path_to_win(void *talloc_ctx,struct mpv_global *global,const char *path);
+
 #endif /* MPLAYER_PATH_H */

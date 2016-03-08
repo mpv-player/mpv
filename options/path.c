@@ -187,6 +187,23 @@ char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
     return res;
 }
 
+char* mp_unix_path_to_win(void *talloc_ctx,struct mpv_global *global,const char *path)
+{
+    if (!path)
+        return NULL;
+    char *res = talloc_strdup(talloc_ctx, path);
+
+    if(res[0]=='/')
+    {
+        res[0] = res[1];
+        res[1] = ':';
+        for(int i=2;i<strlen(res);i++)
+            if(res[i]=='/') res[i]='\\';
+    }
+    MP_VERBOSE(global, "windows path: '%s' -> '%s'\n", path, res);
+    return res;
+}
+
 char *mp_basename(const char *path)
 {
     char *s;

@@ -703,6 +703,7 @@ static void uninit(struct vf_instance *vf)
     pthread_cond_destroy(&p->wakeup);
     pthread_mutex_destroy(&p->lock);
 }
+
 static int vf_open(vf_instance_t *vf)
 {
     struct vf_priv_s *p = vf->priv;
@@ -713,7 +714,11 @@ static int vf_open(vf_instance_t *vf)
         return 0;
     }
     talloc_steal(vf, p->cfg_file);
+#ifndef _WIN32
     p->cfg_file = mp_get_user_path(vf, vf->chain->global, p->cfg_file);
+#else
+    p->cfg_file = mp_unix_path_to_win(vf, vf->chain->global, p->cfg_file);
+#endif
 
     pthread_mutex_init(&p->lock, NULL);
     pthread_cond_init(&p->wakeup, NULL);
