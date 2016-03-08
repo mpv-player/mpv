@@ -78,17 +78,8 @@ struct mp_osd_res {
     double display_par;
 };
 
-enum mp_osdtype {
-    OSDTYPE_SUB,
-    OSDTYPE_SUB2, // IDs must be numerically successive
-
-    OSDTYPE_OSD,
-
-    OSDTYPE_EXTERNAL,
-    OSDTYPE_EXTERNAL2,
-
-    MAX_OSD_PARTS
-};
+// 0 <= sub_bitmaps.render_index < MAX_OSD_PARTS
+#define MAX_OSD_PARTS 5
 
 // Start of OSD symbols in osd_font.pfb
 #define OSD_CODEPOINTS 0xE000
@@ -149,8 +140,8 @@ void osd_free(struct osd_state *osd);
 
 bool osd_query_and_reset_want_redraw(struct osd_state *osd);
 
-void osd_set_text(struct osd_state *osd, int obj, const char *text);
-void osd_set_sub(struct osd_state *osd, int obj, struct dec_sub *dec_sub);
+void osd_set_text(struct osd_state *osd, const char *text);
+void osd_set_sub(struct osd_state *osd, int index, struct dec_sub *dec_sub);
 
 bool osd_get_render_subs_in_filter(struct osd_state *osd);
 void osd_set_render_subs_in_filter(struct osd_state *osd, bool s);
@@ -188,7 +179,7 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
 struct mp_image_params;
 struct mp_osd_res osd_res_from_image_params(const struct mp_image_params *p);
 
-struct mp_osd_res osd_get_vo_res(struct osd_state *osd, int obj);
+struct mp_osd_res osd_get_vo_res(struct osd_state *osd);
 
 void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
                          struct mp_osd_res res, double compensate_par);

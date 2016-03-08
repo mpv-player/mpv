@@ -71,8 +71,7 @@ void uninit_sub(struct MPContext *mpctx, struct track *track)
         reset_subtitles(mpctx, track);
         sub_select(track->d_sub, false);
         int order = get_order(mpctx, track);
-        if (order >= 0 && order <= 1)
-            osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, NULL);
+        osd_set_sub(mpctx->osd, order, NULL);
     }
 }
 
@@ -182,8 +181,7 @@ void reinit_sub(struct MPContext *mpctx, struct track *track)
 
     sub_select(track->d_sub, true);
     int order = get_order(mpctx, track);
-    if (order >= 0 && order <= 1)
-        osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, track->d_sub);
+    osd_set_sub(mpctx->osd, order, track->d_sub);
     sub_control(track->d_sub, SD_CTRL_SET_TOP, &(bool){!!order});
 }
 

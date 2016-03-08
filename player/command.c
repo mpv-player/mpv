@@ -2719,7 +2719,7 @@ static int mp_property_osd_w(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_OSD);
+    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd);
     return m_property_int_ro(action, arg, vo_res.w);
 }
 
@@ -2727,7 +2727,7 @@ static int mp_property_osd_h(void *ctx, struct m_property *prop,
                              int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_OSD);
+    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd);
     return m_property_int_ro(action, arg, vo_res.h);
 }
 
@@ -2735,7 +2735,7 @@ static int mp_property_osd_par(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_OSD);
+    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd);
     return m_property_double_ro(action, arg, vo_res.display_par);
 }
 

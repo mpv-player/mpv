@@ -978,7 +978,7 @@ static int script_set_osd_ass(lua_State *L)
 static int script_get_osd_size(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
-    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_EXTERNAL);
+    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd);
     double aspect = 1.0 * vo_res.w / MPMAX(vo_res.h, 1) /
                     (vo_res.display_par ? vo_res.display_par : 1);
     lua_pushnumber(L, vo_res.w);
@@ -990,7 +990,7 @@ static int script_get_osd_size(lua_State *L)
 static int script_get_osd_margins(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
-    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd, OSDTYPE_EXTERNAL);
+    struct mp_osd_res vo_res = osd_get_vo_res(mpctx->osd);
     lua_pushnumber(L, vo_res.ml);
     lua_pushnumber(L, vo_res.mt);
     lua_pushnumber(L, vo_res.mr);

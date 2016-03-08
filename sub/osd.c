@@ -109,6 +109,8 @@ static bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b)
 
 struct osd_state *osd_create(struct mpv_global *global)
 {
+    assert(MAX_OSD_PARTS >= OSDTYPE_COUNT);
+
     struct osd_state *osd = talloc_zero(NULL, struct osd_state);
     *osd = (struct osd_state) {
         .opts = global->opts,
@@ -151,24 +153,25 @@ void osd_changed_unlocked(struct osd_state *osd, int obj)
     osd->want_redraw = true;
 }
 
-void osd_set_text(struct osd_state *osd, int obj, const char *text)
+void osd_set_text(struct osd_state *osd, const char *text)
 {
     pthread_mutex_lock(&osd->lock);
-    struct osd_object *osd_obj = osd->objs[obj];
+    struct osd_object *osd_obj = osd->objs[OSDTYPE_OSD];
     if (!text)
         text = "";
     if (strcmp(osd_obj->text, text) != 0) {
         talloc_free(osd_obj->text);
         osd_obj->text = talloc_strdup(osd_obj, text);
-        osd_changed_unlocked(osd, obj);
+        osd_changed_unlocked(osd, osd_obj->type);
     }
     pthread_mutex_unlock(&osd->lock);
 }
 
-void osd_set_sub(struct osd_state *osd, int obj, struct dec_sub *dec_sub)
+void osd_set_sub(struct osd_state *osd, int index, struct dec_sub *dec_sub)
 {
     pthread_mutex_lock(&osd->lock);
-    osd->objs[obj]->sub = dec_sub;
+    if (index >= 0 && index < 2)
+        osd->objs[OSDTYPE_SUB + index]->sub = dec_sub;
     pthread_mutex_unlock(&osd->lock);
 }
 
@@ -405,10 +408,11 @@ bool osd_query_and_reset_want_redraw(struct osd_state *osd)
     return r;
 }
 
-struct mp_osd_res osd_get_vo_res(struct osd_state *osd, int obj)
+struct mp_osd_res osd_get_vo_res(struct osd_state *osd)
 {
     pthread_mutex_lock(&osd->lock);
-    struct mp_osd_res res = osd->objs[obj]->vo_res;
+    // Any OSDTYPE is fine; but it mustn't be a subtitle one (can have lower res.)
+    struct mp_osd_res res = osd->objs[OSDTYPE_OSD]->vo_res;
     pthread_mutex_unlock(&osd->lock);
     return res;
 }

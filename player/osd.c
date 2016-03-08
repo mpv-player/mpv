@@ -561,6 +561,6 @@ void update_osd_msg(struct MPContext *mpctx)
         text = talloc_asprintf_append(text, "%s%s", text ? "\n" : "",
                                       mpctx->osd_msg_text);
     }
-    osd_set_text(osd, OSDTYPE_OSD, text);
+    osd_set_text(osd, text);
     talloc_free(text);
 }
