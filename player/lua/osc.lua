@@ -117,7 +117,7 @@ end
 
 function set_virt_mouse_area(x0, y0, x1, y1, name)
     local sx, sy = get_virt_scale_factor()
-    mp.set_mouse_area(x0 * sx, y0 * sy, x1 * sx, y1 * sy)
+    mp.set_mouse_area(x0 / sx, y0 / sy, x1 / sx, y1 / sy, name)
 end
 
 function scale_value(x0, x1, y0, y1, val)
