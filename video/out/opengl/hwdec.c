@@ -28,6 +28,7 @@ extern const struct gl_hwdec_driver gl_hwdec_vaegl;
 extern const struct gl_hwdec_driver gl_hwdec_vaglx;
 extern const struct gl_hwdec_driver gl_hwdec_videotoolbox;
 extern const struct gl_hwdec_driver gl_hwdec_vdpau;
+extern const struct gl_hwdec_driver gl_hwdec_dxva2egl;
 extern const struct gl_hwdec_driver gl_hwdec_dxva2gldx;
 extern const struct gl_hwdec_driver gl_hwdec_dxva2;
 
@@ -45,6 +46,9 @@ static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
     &gl_hwdec_videotoolbox,
 #endif
 #if HAVE_DXVA2_HWACCEL
+#if HAVE_EGL_ANGLE
+    &gl_hwdec_dxva2egl,
+#endif
 #if HAVE_GL_DXINTEROP
     &gl_hwdec_dxva2gldx,
 #endif
