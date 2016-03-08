@@ -183,10 +183,8 @@ static void shutdown_clients(struct MPContext *mpctx)
 
 void mp_destroy(struct MPContext *mpctx)
 {
-#if !defined(__MINGW32__)
     mp_uninit_ipc(mpctx->ipc_ctx);
     mpctx->ipc_ctx = NULL;
-#endif
 
     shutdown_clients(mpctx);
 
@@ -472,9 +470,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     if (opts->force_vo == 2 && handle_force_window(mpctx, false) < 0)
         return -1;
 
-#if !defined(__MINGW32__)
     mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
-#endif
 
 #ifdef _WIN32
     if (opts->w32_priority > 0)

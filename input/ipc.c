@@ -15,16 +15,22 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef __MINGW32__
+#include <winsock2.h>
+#endif
+
 #include <pthread.h>
 #include <assert.h>
 #include <errno.h>
 #include <unistd.h>
 
+#ifndef __MINGW32__
 #include <poll.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/un.h>
+#endif
 
 #include "config.h"
 
@@ -53,7 +59,11 @@ struct mp_ipc_ctx {
     const char *path;
 
     pthread_t thread;
+#ifndef __MINGW32__
     int death_pipe[2];
+#else
+    bool die;
+#endif
 };
 
 struct client_arg {
@@ -61,7 +71,11 @@ struct client_arg {
     struct mpv_handle *client;
 
     char *client_name;
+#ifndef  __MINGW32__
     int client_fd;
+#else
+    SOCKET client_fd;
+#endif
     bool close_client_fd;
 
     bool writable;
@@ -538,38 +552,58 @@ static void *client_thread(void *p)
 
     mpthread_set_name(arg->client_name);
 
+#ifndef __MINGW32__
     int pipe_fd = mpv_get_wakeup_pipe(arg->client);
     if (pipe_fd < 0) {
         MP_ERR(arg, "Could not get wakeup pipe\n");
         goto done;
     }
-
+#endif
     MP_VERBOSE(arg, "Client connected\n");
 
-    struct pollfd fds[2] = {
+
+    struct pollfd fds[] = {
+#ifndef __MINGW32__
         {.events = POLLIN, .fd = pipe_fd},
+#endif
         {.events = POLLIN, .fd = arg->client_fd},
     };
 
+#ifndef __MINGW32__
     fcntl(arg->client_fd, F_SETFL, fcntl(arg->client_fd, F_GETFL, 0) | O_NONBLOCK);
+#else
+    u_long mode=1;
+    ioctlsocket(arg->client_fd,FIONBIO,&mode);
+#endif
     mpv_suspend(arg->client);
 
     while (1) {
+#ifndef __MINGW32__
         rc = poll(fds, 2, 0);
+#else
+        rc = WSAPoll(fds,1,0);
+#endif
         if (rc == 0) {
             mpv_resume(arg->client);
+#ifndef __MINGW32__
             rc = poll(fds, 2, -1);
+#else
+            rc = WSAPoll(fds,1, 5);
+#endif
             mpv_suspend(arg->client);
         }
         if (rc < 0) {
             MP_ERR(arg, "Poll error\n");
+#ifdef __MINGW32__
+            goto done;
+#endif
             continue;
         }
-
+#ifndef __MINGW32__
         if (fds[0].revents & POLLIN) {
             char discard[100];
             read(pipe_fd, discard, sizeof(discard));
-
+#endif
             while (1) {
                 mpv_event *event = mpv_wait_event(arg->client, 0);
 
@@ -595,13 +629,20 @@ static void *client_thread(void *p)
                     goto done;
                 }
             }
+#ifndef __MINGW32__
         }
 
         if (fds[1].revents & (POLLIN | POLLHUP)) {
+#else
+        if(rc==0) continue;
+
+        if (fds[0].revents & (POLLRDNORM | POLLHUP)) {
+#endif
             while (1) {
                 char buf[128];
                 bstr append = { buf, 0 };
 
+#ifndef __MINGW32__
                 ssize_t bytes = read(arg->client_fd, buf, sizeof(buf));
                 if (bytes < 0) {
                     if (errno == EAGAIN)
@@ -610,6 +651,16 @@ static void *client_thread(void *p)
                     MP_ERR(arg, "Read error (%s)\n", mp_strerror(errno));
                     goto done;
                 }
+#else
+                int bytes = recv(arg->client_fd, buf, sizeof(buf), 0);
+                if (bytes < 0) {
+                    if(WSAGetLastError() ==  WSAEWOULDBLOCK)
+                        break;
+
+                    MP_ERR(arg, "Recv error (%d)\n", WSAGetLastError());
+                    goto done;
+                }
+#endif
 
                 if (bytes == 0) {
                     MP_VERBOSE(arg, "Client disconnected\n");
@@ -740,15 +791,22 @@ static void *ipc_thread(void *p)
     int rc;
 
     int ipc_fd;
+#ifndef __MINGW32__
     struct sockaddr_un ipc_un = {0};
-
+#else
+    struct sockaddr_in ipc_in;
+#endif
     struct mp_ipc_ctx *arg = p;
 
     mpthread_set_name("ipc socket listener");
 
     MP_VERBOSE(arg, "Starting IPC master\n");
 
+#ifndef __MINGW32__
     ipc_fd = socket(AF_UNIX, SOCK_STREAM, 0);
+#else
+    ipc_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+#endif
     if (ipc_fd < 0) {
         MP_ERR(arg, "Could not create IPC socket\n");
         goto done;
@@ -758,6 +816,7 @@ static void *ipc_thread(void *p)
     fchmod(ipc_fd, 0600);
 #endif
 
+#ifndef __MINGW32__
     size_t path_len = strlen(arg->path);
     if (path_len >= sizeof(ipc_un.sun_path) - 1) {
         MP_ERR(arg, "Could not create IPC socket\n");
@@ -765,7 +824,7 @@ static void *ipc_thread(void *p)
     }
 
     ipc_un.sun_family = AF_UNIX,
-    strncpy(ipc_un.sun_path, arg->path, sizeof(ipc_un.sun_path));
+            strncpy(ipc_un.sun_path, arg->path, sizeof(ipc_un.sun_path));
 
     unlink(ipc_un.sun_path);
 
@@ -780,6 +839,20 @@ static void *ipc_thread(void *p)
         MP_ERR(arg, "Could not bind IPC socket\n");
         goto done;
     }
+#else
+    ipc_in.sin_family = AF_INET;
+    ipc_in.sin_addr.s_addr = inet_addr("127.0.0.1");
+    unsigned int port = strtoul(arg->path,0,10);
+    ipc_in.sin_port = htons(port);
+
+    rc = -1;
+    if(port>0 && port<65535)
+        rc = bind(ipc_fd, (struct sockaddr *) &ipc_in, sizeof(ipc_in));
+    if (rc < 0) {
+        MP_ERR(arg, "Could not bind IPC socket on port %d\n",port);
+        goto done;
+    }
+#endif
 
     rc = listen(ipc_fd, 10);
     if (rc < 0) {
@@ -788,23 +861,35 @@ static void *ipc_thread(void *p)
     }
 
     int client_num = 0;
-
-    struct pollfd fds[2] = {
+    struct pollfd fds[] = {
+#ifndef __MINGW32__
         {.events = POLLIN, .fd = arg->death_pipe[0]},
+#endif
         {.events = POLLIN, .fd = ipc_fd},
     };
-
     while (1) {
+#ifndef __MINGW32__
         rc = poll(fds, 2, -1);
+#else
+        if(arg->die)
+            goto done;
+
+        rc = WSAPoll(fds, 1, 5);
+        if(rc == 0) continue;
+#endif
         if (rc < 0) {
             MP_ERR(arg, "Poll error\n");
             continue;
         }
 
+#ifndef __MINGW32__
         if (fds[0].revents & POLLIN)
             goto done;
 
         if (fds[1].revents & POLLIN) {
+#else
+        if (fds[0].revents & POLLRDNORM) {
+#endif
             int client_fd = accept(ipc_fd, NULL, NULL);
             if (client_fd < 0) {
                 MP_ERR(arg, "Could not accept IPC client\n");
@@ -832,7 +917,11 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
         .log        = mp_log_new(arg, global->log, "ipc"),
         .client_api = client_api,
         .path       = mp_get_user_path(arg, global, opts->ipc_path),
+#ifndef __MINGW32__
         .death_pipe = {-1, -1},
+#else
+        .die = false,
+#endif
     };
     char *input_file = mp_get_user_path(arg, global, opts->input_file);
 
@@ -842,8 +931,13 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
     if (!opts->ipc_path || !*opts->ipc_path)
         goto out;
 
+#ifndef __MINGW32__
     if (mp_make_wakeup_pipe(arg->death_pipe) < 0)
         goto out;
+#else
+    WSADATA wsaData;
+    WSAStartup(MAKEWORD(2, 2), &wsaData);
+#endif
 
     if (pthread_create(&arg->thread, NULL, ipc_thread, arg))
         goto out;
@@ -851,8 +945,10 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
     return arg;
 
 out:
+#ifndef __MINGW32__
     close(arg->death_pipe[0]);
     close(arg->death_pipe[1]);
+#endif
     talloc_free(arg);
     return NULL;
 }
@@ -861,11 +957,17 @@ void mp_uninit_ipc(struct mp_ipc_ctx *arg)
 {
     if (!arg)
         return;
-
+#ifndef __MINGW32__
     write(arg->death_pipe[1], &(char){0}, 1);
-    pthread_join(arg->thread, NULL);
+#else
+    arg->die = true;
+#endif
 
+    pthread_join(arg->thread, NULL);    
+
+#ifndef __MINGW32__
     close(arg->death_pipe[0]);
     close(arg->death_pipe[1]);
+#endif
     talloc_free(arg);
 }
