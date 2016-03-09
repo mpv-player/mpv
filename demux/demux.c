@@ -1533,20 +1533,22 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
     return DEMUXER_CTRL_DONTKNOW;
 }
 
-int demux_control(demuxer_t *demuxer, int cmd, void *arg)
+struct demux_control_args {
+    struct demuxer *demuxer;
+    int cmd;
+    void *arg;
+    int *r;
+};
+
+static void thread_demux_control(void *p)
 {
+    struct demux_control_args *args = p;
+    struct demuxer *demuxer = args->demuxer;
+    int cmd = args->cmd;
+    void *arg = args->arg;
     struct demux_internal *in = demuxer->in;
-
-    if (in->threading) {
-        pthread_mutex_lock(&in->lock);
-        int cr = cached_demux_control(in, cmd, arg);
-        pthread_mutex_unlock(&in->lock);
-        if (cr != DEMUXER_CTRL_DONTKNOW)
-            return cr;
-    }
-
     int r = DEMUXER_CTRL_NOTIMPL;
-    demux_pause(demuxer);
+
     if (cmd == DEMUXER_CTRL_STREAM_CTRL) {
         struct demux_ctrl_stream_ctrl *c = arg;
         if (in->threading)
@@ -1561,7 +1563,26 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
         if (demuxer->desc->control)
             r = demuxer->desc->control(demuxer->in->d_thread, cmd, arg);
     }
-    demux_unpause(demuxer);
+
+    *args->r = r;
+}
+
+int demux_control(demuxer_t *demuxer, int cmd, void *arg)
+{
+    struct demux_internal *in = demuxer->in;
+
+    if (in->threading) {
+        pthread_mutex_lock(&in->lock);
+        int cr = cached_demux_control(in, cmd, arg);
+        pthread_mutex_unlock(&in->lock);
+        if (cr != DEMUXER_CTRL_DONTKNOW)
+            return cr;
+    }
+
+    int r = 0;
+    struct demux_control_args args = {demuxer, cmd, arg, &r};
+    demux_run_on_thread(demuxer, thread_demux_control, &args);
+
     return r;
 }
 
@@ -1575,7 +1596,7 @@ int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg)
 // Make the demuxer thread stop doing anything.
 // demux_unpause() wakes up the thread again.
 // Can be nested with other calls, but trying to read packets may deadlock.
-void demux_pause(demuxer_t *demuxer)
+static void demux_pause(demuxer_t *demuxer)
 {
     struct demux_internal *in = demuxer->in;
     assert(demuxer == in->d_user);
@@ -1593,7 +1614,7 @@ void demux_pause(demuxer_t *demuxer)
     pthread_mutex_unlock(&in->lock);
 }
 
-void demux_unpause(demuxer_t *demuxer)
+static void demux_unpause(demuxer_t *demuxer)
 {
     struct demux_internal *in = demuxer->in;
     assert(demuxer == in->d_user);
@@ -1606,6 +1627,13 @@ void demux_unpause(demuxer_t *demuxer)
     in->thread_request_pause--;
     pthread_cond_signal(&in->wakeup);
     pthread_mutex_unlock(&in->lock);
+}
+
+void demux_run_on_thread(struct demuxer *demuxer, void (*fn)(void *), void *ctx)
+{
+    demux_pause(demuxer);
+    fn(ctx);
+    demux_unpause(demuxer);
 }
 
 bool demux_cancel_test(struct demuxer *demuxer)
