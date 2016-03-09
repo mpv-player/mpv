@@ -921,8 +921,9 @@ Property list
     useless. It looks like this can be different from ``path`` only when
     using e.g. ordered chapters.)
 
-``stream-pos`` (RW)
-    Raw byte position in source stream.
+``stream-pos``
+    Raw byte position in source stream. Technically, this returns the position
+    of the most recent packet passed to a decoder.
 
 ``stream-end``
     Raw end position in bytes in source stream.

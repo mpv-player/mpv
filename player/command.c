@@ -458,24 +458,14 @@ static int mp_property_file_format(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, name);
 }
 
-/// Position in the stream (RW)
 static int mp_property_stream_pos(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
     struct demuxer *demuxer = mpctx->demuxer;
-    if (!demuxer)
+    if (!demuxer || demuxer->filepos < 0)
         return M_PROPERTY_UNAVAILABLE;
-    demux_pause(demuxer);
-    int r;
-    if (action == M_PROPERTY_SET) {
-        stream_seek(demuxer->stream, *(int64_t *) arg);
-        r = M_PROPERTY_OK;
-    } else {
-        r = m_property_int64_ro(action, arg, stream_tell(demuxer->stream));
-    }
-    demux_unpause(demuxer);
-    return r;
+    return m_property_int64_ro(action, arg, demuxer->filepos);
 }
 
 /// Stream end offset (RO)
