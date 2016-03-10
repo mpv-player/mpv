@@ -63,7 +63,8 @@ extern "C" {
  *      * http://mpv.io/manual/master/#list-of-input-commands
  *      * http://mpv.io/manual/master/#properties
  *
- * You can also look at the examples in DOCS/client_api_examples/.
+ * You can also look at the examples here:
+ *      * https://github.com/mpv-player/mpv-examples/tree/master/libmpv
  *
  * Event loop
  * ----------
