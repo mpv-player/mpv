@@ -526,29 +526,28 @@ enum uniform_type {
     UT_buffer,
 };
 
+union uniform_val {
+    GLfloat f[9];
+    GLint i[4];
+    struct {
+        char* text;
+        GLint binding;
+    } buffer;
+};
+
 struct sc_uniform {
     char *name;
     enum uniform_type type;
     const char *glsl_type;
     int size;
     GLint loc;
-    union {
-        GLfloat f[9];
-        GLint i[4];
-        struct {
-            char* text;
-            GLint binding;
-        } buffer;
-    } v;
+    union uniform_val v;
 };
 
 struct sc_entry {
     GLuint gl_shader;
     GLint uniform_locs[SC_UNIFORM_ENTRIES];
-    union {
-        GLfloat f[9];
-        GLint i[4];
-    } cached_v[SC_UNIFORM_ENTRIES];
+    union uniform_val cached_v[SC_UNIFORM_ENTRIES];
     // the following fields define the shader's contents
     char *key; // vertex+frag shader (mangled)
     struct gl_vao *vao;
