@@ -545,6 +545,10 @@ struct sc_uniform {
 struct sc_entry {
     GLuint gl_shader;
     GLint uniform_locs[SC_UNIFORM_ENTRIES];
+    union {
+        GLfloat f[9];
+        GLint i[4];
+    } cached_v[SC_UNIFORM_ENTRIES];
     // the following fields define the shader's contents
     char *key; // vertex+frag shader (mangled)
     struct gl_vao *vao;
@@ -798,34 +802,45 @@ static const char *vao_glsl_type(const struct gl_vao_entry *e)
 }
 
 // Assumes program is current (gl->UseProgram(program)).
-static void update_uniform(GL *gl, GLuint program, struct sc_uniform *u, GLint loc)
+static void update_uniform(GL *gl, struct sc_entry *e, struct sc_uniform *u, int n)
 {
     if (u->type == UT_buffer) {
-        GLuint idx = gl->GetUniformBlockIndex(program, u->name);
-        gl->UniformBlockBinding(program, idx, u->v.buffer.binding);
+        GLuint idx = gl->GetUniformBlockIndex(e->gl_shader, u->name);
+        gl->UniformBlockBinding(e->gl_shader, idx, u->v.buffer.binding);
         return;
     }
+    GLint loc = e->uniform_locs[n];
     if (loc < 0)
         return;
     switch (u->type) {
     case UT_i:
         assert(u->size == 1);
-        gl->Uniform1i(loc, u->v.i[0]);
+        if (memcmp(e->cached_v[n].i, u->v.i, sizeof(u->v.i)) != 0) {
+            memcpy(e->cached_v[n].i, u->v.i, sizeof(u->v.i));
+            gl->Uniform1i(loc, u->v.i[0]);
+        }
         break;
     case UT_f:
-        switch (u->size) {
-        case 1: gl->Uniform1f(loc, u->v.f[0]); break;
-        case 2: gl->Uniform2f(loc, u->v.f[0], u->v.f[1]); break;
-        case 3: gl->Uniform3f(loc, u->v.f[0], u->v.f[1], u->v.f[2]); break;
-        case 4: gl->Uniform4f(loc, u->v.f[0], u->v.f[1], u->v.f[2], u->v.f[3]); break;
-        default: abort();
+        if (memcmp(e->cached_v[n].f, u->v.f, sizeof(u->v.f)) != 0) {
+            memcpy(e->cached_v[n].f, u->v.f, sizeof(u->v.f));
+            switch (u->size) {
+            case 1: gl->Uniform1f(loc, u->v.f[0]); break;
+            case 2: gl->Uniform2f(loc, u->v.f[0], u->v.f[1]); break;
+            case 3: gl->Uniform3f(loc, u->v.f[0], u->v.f[1], u->v.f[2]); break;
+            case 4: gl->Uniform4f(loc, u->v.f[0], u->v.f[1], u->v.f[2],
+                                  u->v.f[3]); break;
+            default: abort();
+            }
         }
         break;
     case UT_m:
-        switch (u->size) {
-        case 2: gl->UniformMatrix2fv(loc, 1, GL_FALSE, &u->v.f[0]); break;
-        case 3: gl->UniformMatrix3fv(loc, 1, GL_FALSE, &u->v.f[0]); break;
-        default: abort();
+        if (memcmp(e->cached_v[n].f, u->v.f, sizeof(u->v.f)) != 0) {
+            memcpy(e->cached_v[n].f, u->v.f, sizeof(u->v.f));
+            switch (u->size) {
+            case 2: gl->UniformMatrix2fv(loc, 1, GL_FALSE, &u->v.f[0]); break;
+            case 3: gl->UniformMatrix3fv(loc, 1, GL_FALSE, &u->v.f[0]); break;
+            default: abort();
+            }
         }
         break;
     default:
@@ -1019,12 +1034,8 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
 
     gl->UseProgram(entry->gl_shader);
 
-    // For now we set the uniforms every time. This is probably bad, and we
-    // should switch to caching them.
-    for (int n = 0; n < sc->num_uniforms; n++) {
-        update_uniform(gl, entry->gl_shader, &sc->uniforms[n],
-                       entry->uniform_locs[n]);
-    }
+    for (int n = 0; n < sc->num_uniforms; n++)
+        update_uniform(gl, entry, &sc->uniforms[n], n);
 
     talloc_free(tmp);
 
