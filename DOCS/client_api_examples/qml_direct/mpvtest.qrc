@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/mpvtest">
-        <file>main.qml</file>
-    </qresource>
-</RCC>
