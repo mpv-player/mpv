@@ -132,6 +132,11 @@ accept them. The main reason mpv still builds with older FFmpeg versions is to
 evade arguing with people (users, distros) who insist on using older FFmpeg
 versions for no rational reason.
 
+If you want to use a stable FFmpeg release, use the latest release, which has
+most likely the best maintenance out of all stable releases. Older releases
+are for distros, and at best receive basic changes like fixing critical security
+issues or build fixes, and at worst are completely abandoned.
+
 ## Release cycle
 
 Every other month, an arbitrary git snapshot is made, and is assigned
