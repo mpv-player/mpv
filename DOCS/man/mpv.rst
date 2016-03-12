@@ -797,9 +797,6 @@ behavior of mpv.
     If set, XDG-style system configuration directories are used. Otherwise,
     the UNIX convention (``PREFIX/etc/mpv/``) is used.
 
-``TERM``
-    Used to determine terminal type.
-
 ``MPV_HOME``
     Directory where mpv looks for user settings. Overrides ``HOME``, and mpv
     will try to load the config file as ``$MPV_HOME/mpv.conf``.
@@ -810,8 +807,7 @@ behavior of mpv.
     of ``--v`` options passed to the command line.
 
 ``MPV_LEAK_REPORT``
-    If set to ``1``, enable internal talloc leak reporting. Note that this can
-    cause trouble with multithreading, so only developers should use this.
+    If set to ``1``, enable internal talloc leak reporting.
 
 ``LADSPA_PATH``
     Specifies the search path for LADSPA plugins. If it is unset, fully
