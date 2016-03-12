@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include <pthread.h>
+#include <unistd.h>
 
 #include "options/path.h"
 #include "path.h"
@@ -58,8 +59,15 @@ const char *mp_get_platform_path_unix(void *talloc_ctx, const char *type)
         return mpv_home;
     if (strcmp(type, "old_home") == 0)
         return old_home;
-    if (strcmp(type, "global") == 0)
-        return MPV_CONFDIR;
+    if (strcmp(type, "global") == 0) {
+        // Global can be the /etc/ directory if it exists, or alternatively
+        // use a stateless /usr/share/mpv for the vendor configuration file
+        if (access(MPV_CONFDIR, F_OK) == 0) {
+            return MPV_CONFDIR;
+        } else {
+            return MPV_SYSTEMCONFDIR;
+        }
+    }
     if (strcmp(type, "desktop") == 0)
         return getenv("HOME");
     return NULL;

@@ -28,6 +28,7 @@ def __add_mpv_defines__(ctx):
     from sys import argv
     ctx.define("CONFIGURATION", " ".join(argv))
     ctx.define("MPV_CONFDIR", ctx.env.CONFLOADDIR)
+    ctx.define("MPV_SYSTEMCONFDIR", ctx.env.DATADIR + '/mpv')
     ctx.define("FULLCONFIG", __escape_c_string(__get_features_string__(ctx)))
 
 def configure(ctx):
