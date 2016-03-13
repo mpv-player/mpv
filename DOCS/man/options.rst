@@ -457,6 +457,34 @@ Program Behavior
 
         May be dangerous if playing from untrusted media.
 
+``--svtplay-dl``, ``--no-svtplay-dl``
+    Enable the svtplay-dl hook-script. It will look at the input URL, and will
+    play the media located on the website. This works with many streaming sites,
+    not just the one that the script is named after. This requires a recent
+    version of svtplay-dl to be installed on the system. (Enabled by default,
+    except when the client API / libmpv is used.)
+
+    If the script can't do anything with an URL, it will do nothing.
+
+``--svtplay-dl-quality=...``
+    Video quality. The possible values are specific to the website of the video,
+    for a given URL the available formats can be found with the command
+    ``svtplay-dl --list-quality URL``. See svtplay-dl's documentation for
+    further information.
+    (Default: svtplay-dl defaults to downloading the best quality.)
+
+``--svtplay-dl-raw-options=<key>=<value>[,<key>=<value>[,...]]``
+    Pass arbitrary options to svtplay-dl. Parameter and argument should be
+    passed as a key-value pair. Options without argument must include ``=``.
+
+    There is no sanity checking so it's possible to break things (i.e. passing
+    invalid parameters to svtplay-dl).
+
+    .. admonition:: Example
+
+        ``--svtplay-raw-options=username=user,password=pass``
+        ``--svtplay-raw-options=live``
+
 ``--ytdl``, ``--no-ytdl``
     Enable the youtube-dl hook-script. It will look at the input URL, and will
     play the video located on the website. This works with many streaming sites,
