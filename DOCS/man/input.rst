@@ -1238,10 +1238,10 @@ Property list
 
 ``mixer-active``
     Return ``yes`` if the audio mixer is active, ``no`` otherwise. This has
-    implications for ``--softvol=no`` mode: if the mixer is active, changing
+    implications for ``--softvol=no`` mode: if the mixer is inactive, changing
     ``volume`` doesn't actually change anything on the system mixer. If the
     ``--volume`` or ``--mute`` option are used, these might not be applied
-    property until the mixer becomes active either. (The options, if set, will
+    properly until the mixer becomes active either. (The options, if set, will
     just overwrite the mixer state at audio initialization.)
 
     While the behavior with ``mixer-active==yes`` is relatively well-defined,
