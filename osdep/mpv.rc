@@ -18,7 +18,6 @@
  */
 
 #include <winver.h>
-#include "version.h"
 
 1 VERSIONINFO
 FILEVERSION 2,0,0,0
@@ -26,26 +25,6 @@ PRODUCTVERSION 2,0,0,0
 FILEOS VOS__WINDOWS32
 FILETYPE VFT_APP
 {
-    BLOCK "StringFileInfo"
-    {
-        BLOCK "000004b0" // LANG_NEUTRAL,UNICODE_CP
-        {
-            VALUE "Comments","mpv is distributed under the terms of the GNU General Public License Version 2 or later.\000"
-            VALUE "CompanyName", "mpv\000"
-            VALUE "FileDescription", "mpv\000"
-            VALUE "FileVersion",VERSION
-            VALUE "LegalCopyright", " (C) 2000-2016 mpv/mplayer2/MPlayer\000"
-            //VALUE "LegalTrademarks"," \000";
-            VALUE "OriginalFilename", "mpv.exe\000"
-            VALUE "ProductName", "mpv\000"
-            VALUE "ProductVersion",VERSION
-            //VALUE "SpecialBuild","\000"
-        }
-    }
-    BLOCK "VarFileInfo"
-    {
-        VALUE "Translation",0,0x04b0
-    }
 }
 
 IDI_ICON1 ICON DISCARDABLE  "etc/mpv-icon.ico"
