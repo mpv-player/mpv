@@ -543,6 +543,20 @@ static int GLAPIENTRY dxinterop_swap_interval(int interval)
     return 1;
 }
 
+static void * GLAPIENTRY dxinterop_get_native_display(const char *name)
+{
+    if (!current_ctx || !name)
+        return NULL;
+    struct priv *p = current_ctx->priv;
+
+    if (p->device && strcmp("IDirect3DDevice9Ex", name) == 0) {
+        return p->device;
+    } else if (p->device_h && strcmp("dxinterop_device_HANDLE", name) == 0) {
+        return p->device_h;
+    }
+    return NULL;
+}
+
 static int dxinterop_init(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
@@ -566,6 +580,8 @@ static int dxinterop_init(struct MPGLContext *ctx, int flags)
 
     gl->SwapInterval = dxinterop_swap_interval;
 
+    gl->MPGetNativeDisplay = dxinterop_get_native_display;
+
     if (d3d_create(ctx) < 0)
         goto fail;
     if (d3d_size_dependent_create(ctx) < 0)
@@ -580,9 +596,6 @@ static int dxinterop_init(struct MPGLContext *ctx, int flags)
     ctx->flip_v = true;
 
     DwmEnableMMCSS(TRUE);
-
-    ctx->native_display_type = "IDirect3DDevice9Ex";
-    ctx->native_display = p->device;
 
     return 0;
 fail:
