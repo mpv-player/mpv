@@ -4827,6 +4827,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             struct track *t = find_track_with_url(mpctx, type, cmd->args[0].v.s);
             if (t) {
                 mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
+                if (mpctx->playback_initialized)
+                    print_track_list(mpctx, "Track switched:");
                 return 0;
             }
         }
