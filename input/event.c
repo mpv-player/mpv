@@ -82,5 +82,12 @@ int mp_event_get_mime_type_score(struct input_ctx *ictx, const char *mime_type)
     // X11 and Wayland file list format.
     if (strcmp(mime_type, "text/uri-list") == 0)
         return 10;
+    // Just text; treat it the same for convenience.
+    if (strcmp(mime_type, "text/plain;charset=utf-8") == 0)
+        return 5;
+    if (strcmp(mime_type, "text/plain") == 0)
+        return 4;
+    if (strcmp(mime_type, "text") == 0)
+        return 0;
     return -1;
 }
