@@ -146,6 +146,22 @@ static void vo_x11_move_resize(struct vo *vo, bool move, bool resize,
 #define RC_W(rc) ((rc).x1 - (rc).x0)
 #define RC_H(rc) ((rc).y1 - (rc).y0)
 
+static char *x11_atom_name_buf(struct vo_x11_state *x11, Atom atom,
+                               char *buf, size_t buf_size)
+{
+    buf[0] = '\0';
+
+    char *new_name = XGetAtomName(x11->display, atom);
+    if (new_name) {
+        snprintf(buf, buf_size, "%s", new_name);
+        XFree(new_name);
+    }
+
+    return buf;
+}
+
+#define x11_atom_name(x11, atom) x11_atom_name_buf(x11, atom, (char[80]){0}, 80)
+
 // format = 8 (unsigned char), 16 (short), 32 (long, even on LP64 systems)
 // *out_nitems = returned number of items of requested format
 static void *x11_get_property(struct vo_x11_state *x11, Window w, Atom property,
@@ -757,13 +773,43 @@ static void vo_x11_dnd_init_window(struct vo *vo)
                     32, PropModeReplace, (unsigned char *)&version, 1);
 }
 
+// The Atom does not always map to a mime type, but often.
+static char *x11_dnd_mime_type_buf(struct vo_x11_state *x11, Atom atom,
+                                   char *buf, size_t buf_size)
+{
+    if (atom == XInternAtom(x11->display, "UTF8_STRING", False))
+        return "text";
+    return x11_atom_name_buf(x11, atom, buf, buf_size);
+}
+
+#define x11_dnd_mime_type(x11, atom) \
+    x11_dnd_mime_type_buf(x11, atom, (char[80]){0}, 80)
+
+static bool dnd_format_is_better(struct vo_x11_state *x11, Atom cur, Atom new)
+{
+    int new_score = mp_event_get_mime_type_score(x11->input_ctx,
+                                                 x11_dnd_mime_type(x11, new));
+    int cur_score = -1;
+    if (cur) {
+        cur_score = mp_event_get_mime_type_score(x11->input_ctx,
+                                                 x11_dnd_mime_type(x11, cur));
+    }
+    return new_score >= 0 && new_score > cur_score;
+}
+
 static void dnd_select_format(struct vo_x11_state *x11, Atom *args, int items)
 {
+    x11->dnd_requested_format = 0;
+
     for (int n = 0; n < items; n++) {
+        MP_VERBOSE(x11, "DnD type: '%s'\n", x11_atom_name(x11, args[n]));
         // There are other types; possibly not worth supporting.
-        if (args[n] == XInternAtom(x11->display, "text/uri-list", False))
+        if (dnd_format_is_better(x11, x11->dnd_requested_format, args[n]))
             x11->dnd_requested_format = args[n];
     }
+
+    MP_VERBOSE(x11, "Selected DnD type: %s\n", x11->dnd_requested_format ?
+                    x11_atom_name(x11, x11->dnd_requested_format) : "(none)");
 }
 
 static void dnd_reset(struct vo *vo)
@@ -849,8 +895,12 @@ static void vo_x11_dnd_handle_selection(struct vo *vo, XSelectionEvent *se)
                 x11->dnd_requested_action == XA(x11, XdndActionCopy) ?
                 DND_REPLACE : DND_APPEND;
 
+            char *mime_type = x11_dnd_mime_type(x11, x11->dnd_requested_format);
+            MP_VERBOSE(x11, "Dropping type: %s (%s)\n",
+                       x11_atom_name(x11, x11->dnd_requested_format), mime_type);
+
             // No idea if this is guaranteed to be \0-padded, so use bstr.
-            success = mp_event_drop_mime_data(x11->input_ctx, "text/uri-list",
+            success = mp_event_drop_mime_data(x11->input_ctx, mime_type,
                                               (bstr){prop, nitems}, action) > 0;
             XFree(prop);
         }
