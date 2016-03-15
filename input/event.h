@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef MP_INPUT_EVENT_H_
+#define MP_INPUT_EVENT_H_
 
 #include "misc/bstr.h"
 
@@ -37,3 +39,5 @@ int mp_event_drop_mime_data(struct input_ctx *ictx, const char *mime_type,
 // whether a type is preferred (higher integer score), or supported (scores
 // below 0 indicate unsupported types).
 int mp_event_get_mime_type_score(struct input_ctx *ictx, const char *mime_type);
+
+#endif
