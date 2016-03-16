@@ -2112,7 +2112,8 @@ static void pass_render_frame(struct gl_video *p)
 
     if (p->opts.unsharp != 0.0) {
         finish_pass_fbo(p, &p->unsharp_fbo, p->texture_w, p->texture_h, 0);
-        pass_sample_unsharp(p->sc, p->opts.unsharp);
+        int id = pass_read_fbo(p, &p->unsharp_fbo);
+        pass_sample_unsharp(p->sc, id, p->opts.unsharp);
     }
 
     pass_scale_main(p);

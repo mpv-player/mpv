@@ -398,10 +398,10 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
     GLSLF("}\n");
 }
 
-void pass_sample_unsharp(struct gl_shader_cache *sc, float param)
+void pass_sample_unsharp(struct gl_shader_cache *sc, int tex_num, float param)
 {
     GLSLF("// unsharp\n");
-    sampler_prelude(sc, 0);
+    sampler_prelude(sc, tex_num);
 
     GLSLF("{\n");
     GLSL(vec2 st1 = pt * 1.2;)
