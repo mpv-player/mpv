@@ -202,9 +202,7 @@ static int create(struct gl_hwdec *hw)
         goto fail;
     }
 
-    hw->converted_imgfmt = p->alpha ? IMGFMT_RGBA : IMGFMT_RGB0;
-    MP_VERBOSE(hw, "Using image format %s\n",
-               mp_imgfmt_to_name(hw->converted_imgfmt));
+    hw->converted_imgfmt = IMGFMT_RGB0;
 
     p->ctx.d3d9_device = (IDirect3DDevice9 *)p->device9ex;
     p->ctx.hwctx.type = HWDEC_DXVA2;
