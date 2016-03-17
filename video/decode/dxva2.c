@@ -629,7 +629,8 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
     hwdec_request_api(info, "dxva2");
     // dxva2-copy can do without external context; dxva2 requires it.
     if (hwdec->type != HWDEC_DXVA2_COPY) {
-        if (!info || !info->hwctx || !info->hwctx->d3d_ctx)
+        if (!info || !info->hwctx || !info->hwctx->d3d_ctx ||
+            info->hwctx->type == HWDEC_DXVA2_COPY)
             return HWDEC_ERR_NO_CTX;
     }
     for (int i = 0; dxva2_modes[i].guid; i++) {
