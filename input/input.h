@@ -257,4 +257,13 @@ struct mp_ipc_ctx *mp_init_ipc(struct mp_client_api *client_api,
                                struct mpv_global *global);
 void mp_uninit_ipc(struct mp_ipc_ctx *ctx);
 
+// Serialize the given mpv_event structure to JSON. Returns an allocated string.
+struct mpv_event;
+char *mp_json_encode_event(struct mpv_event *event);
+
+// Given the raw IPC input buffer "buf", remove the first newline-separated
+// command, execute it and return the result (if any) as an allocated string.
+struct mpv_handle;
+char *mp_ipc_consume_next_command(struct mpv_handle *client, void *ctx, bstr *buf);
+
 #endif /* MPLAYER_INPUT_H */

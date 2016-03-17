@@ -190,7 +190,9 @@ def build(ctx):
         ( "input/cmd_parse.c" ),
         ( "input/event.c" ),
         ( "input/input.c" ),
-        ( "input/ipc.c",                         "!mingw" ),
+        ( "input/ipc.c" ),
+        ( "input/ipc-unix.c",                    "!mingw" ),
+        ( "input/ipc-win.c",                     "mingw" ),
         ( "input/keycodes.c" ),
         ( "input/pipe-win32.c",                  "mingw" ),
 
