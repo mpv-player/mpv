@@ -364,17 +364,9 @@ static bool search_samplerates(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat,
         }
     }
 
-    for (int i = 0; supported[i]; i++) {
-        // first choose the lowest integer multiple of the sample rate
-        if (!(supported[i] % ao->samplerate)) {
-            change_waveformat_samplerate(wformat, supported[i]);
-            return true;
-        }
-    }
-
-    // then choose the highest supported (if any)
-    if (n) {
-        change_waveformat_samplerate(wformat, supported[n-1]);
+    int samplerate = af_select_best_samplerate(ao->samplerate, supported);
+    if (samplerate > 0) {
+        change_waveformat_samplerate(wformat, samplerate);
         return true;
     }
 
