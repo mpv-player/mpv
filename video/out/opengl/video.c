@@ -127,6 +127,7 @@ struct img_tex {
     int tex_w, tex_h;
     int w, h;
     struct gl_transform transform;
+    bool texture_la; // it's a GL_LUMINANCE_ALPHA texture (access with .ra not .rg)
 };
 
 struct fbosurface {
@@ -826,6 +827,7 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
             .h = t->h,
             .transform = type == PLANE_CHROMA ? chroma : identity_trans,
             .components = p->image_desc.components[n],
+            .texture_la = t->gl_format == GL_LUMINANCE_ALPHA,
         };
     }
 }
@@ -1428,9 +1430,14 @@ static void copy_img_tex(struct gl_video *p, int *offset, struct img_tex img)
     assert(*offset + count <= 4);
 
     int id = pass_bind(p, img);
-    const char *src = "wzyx" + (4 - count);
-    const char *dst = (const char*[4]){"wzyx", "wzy", "wz", "w"}[*offset]
-                      + (4 - *offset - count);
+    char src[5] = {0};
+    char dst[5] = {0};
+    const char *tex_fmt = img.texture_la ? "ragg" : "rgba";
+    const char *dst_fmt = "rgba";
+    for (int i = 0; i < count; i++) {
+        src[i] = tex_fmt[i];
+        dst[i] = dst_fmt[*offset + i];
+    }
 
     if (img.use_integer) {
         uint64_t tex_max = 1ull << p->image_desc.component_full_bits;
@@ -1438,7 +1445,7 @@ static void copy_img_tex(struct gl_video *p, int *offset, struct img_tex img)
     }
 
     GLSLF("color.%s = %f * vec4(texture(texture%d, texcoord%d)).%s;\n",
-            dst, img.multiplier, id, id, src);
+          dst, img.multiplier, id, id, src);
 
     *offset += count;
 }
