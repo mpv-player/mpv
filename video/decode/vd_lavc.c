@@ -683,6 +683,8 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
             if (ctx->hwdec_fail_count >= opts->software_fallback)
                 ctx->hwdec_failed = true;
         }
+        if (!ctx->hwdec_failed && packet)
+            packet->len = 0; // skip failed packet
         return;
     }
 
