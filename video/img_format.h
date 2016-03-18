@@ -195,7 +195,8 @@ enum mp_imgfmt {
     IMGFMT_VDPAU,           // VdpVideoSurface
     IMGFMT_VDPAU_OUTPUT,    // VdpOutputSurface
     IMGFMT_VAAPI,
-    IMGFMT_DXVA2,           // IDirect3DSurface9 (NV12)
+    IMGFMT_D3D11VA,         // ID3D11VideoDecoderOutputView (NV12/P010/P016)
+    IMGFMT_DXVA2,           // IDirect3DSurface9 (NV12/P010/P016)
     IMGFMT_MMAL,            // MMAL_BUFFER_HEADER_T
     IMGFMT_VIDEOTOOLBOX,    // CVPixelBufferRef
 

@@ -846,9 +846,19 @@ hwaccel_features = [
         'deps': [ 'win32' ],
         'func': check_headers('libavcodec/dxva2.h', use='libav'),
     }, {
+        'name': '--d3d11va-hwaccel',
+        'desc': 'libavcodec D3D11VA hwaccel',
+        'deps': [ 'win32' ],
+        'func': check_headers('libavcodec/d3d11va.h', use='libav'),
+    }, {
+        'name': 'd3d-hwaccel',
+        'desc': 'Direct3D hwaccel',
+        'deps_any': [ 'dxva2-hwaccel', 'd3d11va-hwaccel' ],
+        'func': check_true
+    }, {
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',
-        'deps_any': [ 'dxva2-hwaccel', 'vaapi-hwaccel' ],
+        'deps_any': [ 'd3d-hwaccel', 'vaapi-hwaccel' ],
         'func': check_cc(fragment=load_fragment('sse.c')),
     }
 ]

@@ -583,6 +583,7 @@ Video
     :dxva2: requires ``--vo=opengl:backend=angle`` or
         ``--vo=opengl:backend=dxinterop`` (Windows only)
     :dxva2-copy: copies video back to system RAM (Windows only)
+    :d3d11va-copy: experimental (Windows only)
     :rpi:       requires ``--vo=rpi`` (Raspberry Pi only - default if available)
 
     ``auto`` tries to automatically enable hardware decoding using the first
