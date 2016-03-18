@@ -581,7 +581,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
 
     OPT_STRING("input-file", input_file, M_OPT_FILE | M_OPT_GLOBAL),
-    OPT_STRING("input-unix-socket", ipc_path, M_OPT_FILE),
+    OPT_STRING("input-ipc-server", ipc_path, M_OPT_FILE),
 
     OPT_SUBSTRUCT("screenshot", screenshot_image_opts, image_writer_conf, 0),
     OPT_STRING("screenshot-template", screenshot_template, 0),
@@ -676,6 +676,7 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("dtshd", "ad-spdif-dtshd"),
     OPT_REPLACED("ass-use-margins", "sub-use-margins"),
     OPT_REPLACED("media-title", "force-media-title"),
+    OPT_REPLACED("input-unix-socket", "input-ipc-server"),
 
     {0}
 };
