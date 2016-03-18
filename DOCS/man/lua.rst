@@ -412,7 +412,7 @@ are useful only in special situations.
     from displaying the next video frame, so that you don't get blocked when
     trying to access the player.
 
-    This is automatically called by the event handler.
+    Before mpv 0.17.0, this was automatically called by the event handler.
 
 ``mp.resume()``
     Undo one ``mp.suspend()`` call. ``mp.suspend()`` increments an internal
@@ -422,10 +422,6 @@ are useful only in special situations.
 ``mp.resume_all()``
     This resets the internal suspend counter and resumes the player. (It's
     like calling ``mp.resume()`` until the player is actually resumed.)
-
-    You might want to call this if you're about to do something that takes a
-    long time, but doesn't really need access to the player (like a network
-    operation). Note that you still can access the player at any time.
 
 ``mp.get_wakeup_pipe()``
     Calls ``mpv_get_wakeup_pipe()`` and returns the read end of the wakeup
@@ -448,8 +444,6 @@ are useful only in special situations.
     emptied. It's strongly recommended to use ``mp.get_next_timeout()`` and
     ``mp.get_wakeup_pipe()`` if you're interested in properly working
     notification of new events and working timers.
-
-    This function calls ``mp.suspend()`` and ``mp.resume_all()`` on its own.
 
 ``mp.enable_messages(level)``
     Set the minimum log level of which mpv message output to receive. These

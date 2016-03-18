@@ -438,7 +438,7 @@ local function call_event_handlers(e)
     end
 end
 
-mp.use_suspend = true
+mp.use_suspend = false
 
 function mp.dispatch_events(allow_wait)
     local more_events = true
