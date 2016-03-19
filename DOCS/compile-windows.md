@@ -156,14 +156,14 @@ Finally, compile and install mpv. Binaries will be installed to
 
 ```bash
 # For a 32-bit build, use --prefix=/mingw32 instead
-./waf configure CC=gcc --check-c-compiler=gcc --prefix=/mingw64
+./waf configure CC=gcc.exe --check-c-compiler=gcc --prefix=/mingw64
 ./waf install
 ```
 
 Or, compile and install both libmpv and mpv:
 
 ```bash
-./waf configure CC=gcc --check-c-compiler=gcc --enable-libmpv-shared --prefix=/mingw64
+./waf configure CC=gcc.exe --check-c-compiler=gcc --enable-libmpv-shared --prefix=/mingw64
 ./waf install
 
 # waf installs libmpv to the wrong directory, so fix it up
