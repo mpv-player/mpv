@@ -129,7 +129,7 @@ Installing mpv dependencies
 
 ```bash
 # Install MSYS2 build dependencies and a MinGW-w64 compiler
-pacman -S git pkg-config python3 mingw-w64-x86_64-gcc
+pacman -S git mingw-w64-x86_64-pkg-config python mingw-w64-x86_64-gcc
 
 # Install the most important MinGW-w64 dependencies. libass, libbluray and
 # lcms2 are also pulled in as dependencies of ffmpeg.
