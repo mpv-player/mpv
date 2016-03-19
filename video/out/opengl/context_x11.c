@@ -125,10 +125,8 @@ static bool create_context_x11_gl3(struct MPGLContext *ctx, int vo_flags,
                                                     glx_ctx->fbc, 0, True,
                                                     context_attribs);
     vo_x11_silence_xlib(-1);
-    if (!context) {
-        MP_VERBOSE(vo, "Could not create GL3 context. Retrying with legacy context.\n");
+    if (!context)
         return false;
-    }
 
     // set context
     if (!glXMakeCurrent(vo->x11->display, vo->x11->window, context)) {
@@ -253,9 +251,18 @@ static int glx_init(struct MPGLContext *ctx, int flags)
 
     bool success = false;
     if (!(flags & VOFLAG_GLES)) {
-        success = create_context_x11_gl3(ctx, flags, 300, false);
-        if (!success)
-            success = create_context_x11_old(ctx);
+        for (int n = 0; mpgl_preferred_gl_versions[n]; n++) {
+            int version = mpgl_preferred_gl_versions[n];
+            MP_VERBOSE(vo, "Creating OpenGL %d.%d context...\n",
+                       MPGL_VER_P(version));
+            if (version >= 300) {
+                success = create_context_x11_gl3(ctx, flags, version, false);
+            } else {
+                success = create_context_x11_old(ctx);
+            }
+            if (success)
+                break;
+        }
     }
     if (!success) // try ES
         success = create_context_x11_gl3(ctx, flags, 200, true);

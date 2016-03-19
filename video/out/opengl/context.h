@@ -34,6 +34,8 @@ enum {
     VOFLAG_SW           = 1 << 4,       // Hint to accept a software GL renderer
 };
 
+extern const int mpgl_preferred_gl_versions[];
+
 struct MPGLContext;
 
 // A windowing backend (like X11, win32, ...), which provides OpenGL rendering.

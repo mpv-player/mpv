@@ -78,6 +78,17 @@ static const struct mpgl_driver *const backends[] = {
 #endif
 };
 
+// 0-terminated list of desktop GL versions a backend should try to
+// initialize. The first entry is the most preferred version.
+const int mpgl_preferred_gl_versions[] = {
+    330,
+    320,
+    310,
+    300,
+    210,
+    0
+};
+
 int mpgl_find_backend(const char *name)
 {
     if (name == NULL || strcmp(name, "auto") == 0)
