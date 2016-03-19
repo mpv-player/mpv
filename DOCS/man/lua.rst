@@ -255,7 +255,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
 
     ::
 
-        y script-binding fooscript.something
+        y script-binding fooscript/something
 
 ``mp.add_forced_key_binding(...)``
     This works almost the same as ``mp.add_key_binding``, but registers the
