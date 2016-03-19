@@ -887,6 +887,8 @@ Available video output drivers are:
             ProPhoto RGB (ROMM)
         cie1931
             CIE 1931 RGB (not to be confused with CIE XYZ)
+        dci-p3
+            DCI-P3 (Digital Cinema Colorspace), SMPTE RP431-2
 
     ``target-trc=<value>``
         Specifies the transfer characteristics (gamma) of the display. Video
