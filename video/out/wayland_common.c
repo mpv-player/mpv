@@ -141,11 +141,6 @@ static void ssurface_handle_configure(void *data,
 {
     struct vo_wayland_state *wl = data;
     schedule_resize(wl, edges, width, height);
-
-    // check for every resize if the window is in fullscreen mode and reset the
-    // mode accordingly, this prevents gnome from resizing mpvs fullscreen
-    // window to a smaller size
-    vo_wayland_fullscreen(wl->vo);
 }
 
 static void ssurface_handle_popup_done(void *data,
@@ -1056,6 +1051,7 @@ static void vo_wayland_ontop (struct vo *vo)
     MP_DBG(wl, "going ontop\n");
     vo->opts->ontop = 1;
     window_set_toplevel(wl);
+    schedule_resize(wl, 0, wl->window.width, wl->window.height);
 }
 
 static void vo_wayland_fullscreen (struct vo *vo)
@@ -1080,6 +1076,7 @@ static void vo_wayland_fullscreen (struct vo *vo)
         MP_DBG(wl, "leaving fullscreen\n");
         wl->window.is_fullscreen = false;
         window_set_toplevel(wl);
+        schedule_resize(wl, 0, wl->window.p_width, wl->window.p_height);
     }
 }
 
@@ -1227,6 +1224,9 @@ static void vo_wayland_update_screeninfo(struct vo *vo, struct mp_rect *screenrc
             screenrc->y1 = wl->display.current_output->height;
         }
     }
+
+    wl->window.fs_width = screenrc->x1;
+    wl->window.fs_height = screenrc->y1;
 }
 
 int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
@@ -1301,7 +1301,6 @@ bool vo_wayland_config (struct vo *vo)
 
     wl->window.width = vo->dwidth;
     wl->window.height = vo->dheight;
-
     vo_wayland_fullscreen(vo);
 
     return true;
