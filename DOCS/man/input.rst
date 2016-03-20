@@ -1195,6 +1195,11 @@ Property list
 ``cache-used`` (R)
     Total used cache size in KB.
 
+``cache-speed`` (R)
+    Current I/O read speed between the cache and the lower layer (like network).
+    This is a float (using ``MPV_FORMAT_DOUBLE`` in the client API) and gives
+    the value bytes per seconds over a 1 second window.
+
 ``cache-idle`` (R)
     Returns ``yes`` if the cache is idle, which means the cache is filled as
     much as possible, and is currently not reading more data.

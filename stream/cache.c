@@ -95,6 +95,9 @@ struct priv {
 
     bool idle;              // cache thread has stopped reading
     int64_t reads;          // number of actual read attempts performed
+    int64_t speed_start;    // start time (us) for calculating download speed
+    int64_t speed_amount;   // bytes read since speed_start
+    double speed;
 
     bool enable_readahead;  // actively read beyond read() position
     int64_t read_filepos;   // client read position (mirrors cache->pos)
@@ -152,6 +155,16 @@ static void cache_drop_contents(struct priv *s)
     s->start_pts = MP_NOPTS_VALUE;
 }
 
+static void update_speed(struct priv *s)
+{
+    int64_t now = mp_time_us();
+    s->speed = 0;
+    if (s->speed_start && s->speed_start < now)
+        s->speed = s->speed_amount * 1e6 / (now - s->speed_start);
+    s->speed_amount = 0;
+    s->speed_start = now;
+}
+
 // Copy at most dst_size from the cache at the given absolute file position pos.
 // Return number of bytes that could actually be read.
 // Does not advance the file position, or change anything else.
@@ -190,6 +203,7 @@ static size_t read_buffer(struct priv *s, unsigned char *dst,
 static void cache_fill(struct priv *s)
 {
     int64_t read = s->read_filepos;
+    bool read_attempted = false;
     int len = 0;
 
     // drop cache contents only if seeking backward or too much fwd.
@@ -211,13 +225,16 @@ static void cache_fill(struct priv *s)
             goto done;
     }
 
-    if (!s->enable_readahead && s->read_min <= s->max_filepos) {
-        s->idle = true;
-        return;
-    }
+    if (!s->enable_readahead && s->read_min <= s->max_filepos)
+        goto done;
 
     if (mp_cancel_test(s->cache->cancel))
         goto done;
+
+    if (!s->speed_start) {
+        s->speed_start = mp_time_us();
+        s->speed_amount = 0;
+    }
 
     // number of buffer bytes which should be preserved in backwards direction
     int64_t back = MPCLAMP(read - s->min_filepos, 0, s->back_size);
@@ -240,11 +257,8 @@ static void cache_fill(struct priv *s)
     if (pos >= s->buffer_size)
         pos -= s->buffer_size; // wrap-around
 
-    if (space < FILL_LIMIT) {
-        s->idle = true;
-        s->reads++; // don't stuck main thread
-        return;
-    }
+    if (space < FILL_LIMIT)
+        goto done;
 
     // limit to end of buffer (without wrapping)
     if (pos + space >= s->buffer_size)
@@ -274,15 +288,30 @@ static void cache_fill(struct priv *s)
     s->max_filepos += len;
     if (pos + len == s->buffer_size)
         s->offset += s->buffer_size; // wrap...
+    s->speed_amount += len;
 
-done:
+    read_attempted = true;
+
+done: ;
+
+    bool prev_eof = s->eof;
     s->eof = len <= 0;
-    s->idle = s->eof;
-    s->reads++;
-    if (s->eof) {
+    if (!prev_eof && s->eof) {
         s->eof_pos = stream_tell(s->stream);
-        MP_TRACE(s, "EOF reached.\n");
+        s->speed_start = 0;
+        MP_VERBOSE(s, "EOF reached.\n");
     }
+    s->idle = s->eof || !read_attempted;
+    s->reads++;
+
+    if (s->idle) {
+        update_speed(s);
+        s->speed_start = 0;
+    }
+
+    int64_t now = mp_time_us();
+    if (s->speed_start && s->speed_start + 1000000 <= now)
+        update_speed(s);
 
     pthread_cond_signal(&s->wakeup);
 }
@@ -335,6 +364,7 @@ static int resize_cache(struct priv *s, int64_t size)
     s->buffer_size = buffer_size;
     s->buffer = buffer;
     s->idle = false;
+    s->speed_start = 0;
     s->eof = false;
 
     //make sure that we won't wait from cache_fill
@@ -379,6 +409,9 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
         return STREAM_OK;
     case STREAM_CTRL_GET_CACHE_IDLE:
         *(int *)arg = s->idle;
+        return STREAM_OK;
+    case STREAM_CTRL_GET_CACHE_SPEED:
+        *(double *)arg = s->speed;
         return STREAM_OK;
     case STREAM_CTRL_SET_READAHEAD:
         s->enable_readahead = *(int *)arg;
