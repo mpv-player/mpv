@@ -169,11 +169,9 @@ void playlist_shuffle(struct playlist *pl)
         arr[n] = pl->first;
         playlist_unlink(pl, pl->first);
     }
-    for (int n = 0; n < count; n++) {
-        int other = (int)((double)(count) * rand() / (RAND_MAX + 1.0));
-        struct playlist_entry *tmp = arr[n];
-        arr[n] = arr[other];
-        arr[other] = tmp;
+    for (int n = 0; n < count - 1; n++) {
+        int j = (int)((double)(count - n) * rand() / (RAND_MAX + 1.0));
+        MPSWAP(struct playlist_entry *, arr[n], arr[n + j]);
     }
     for (int n = 0; n < count; n++)
         playlist_add(pl, arr[n]);
