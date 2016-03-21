@@ -212,6 +212,33 @@ void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs)
     pthread_mutex_unlock(&osd->lock);
 }
 
+static void check_obj_resize(struct osd_state *osd, struct mp_osd_res res,
+                             struct osd_object *obj)
+{
+    if (!osd_res_equals(res, obj->vo_res)) {
+        obj->vo_res = res;
+        obj->force_redraw = true;
+        mp_client_broadcast_event(mp_client_api_get_core(osd->global->client_api),
+                                  MP_EVENT_WIN_RESIZE, NULL);
+    }
+}
+
+// Optional. Can be called for faster reaction of OSD-generating scripts like
+// osc.lua. This can achieve that the resize happens first, so that the OSD is
+// generated at the correct resolution the first time the resized frame is
+// rendered. Since the OSD doesn't (and can't) wait for the script, this
+// increases the time in which the script can react, and also gets rid of the
+// unavoidable redraw delay (though it will still be racy).
+// Unnecessary for anything else.
+void osd_resize(struct osd_state *osd, struct mp_osd_res res)
+{
+    pthread_mutex_lock(&osd->lock);
+    int types[] = {OSDTYPE_OSD, OSDTYPE_EXTERNAL, OSDTYPE_EXTERNAL2, -1};
+    for (int n = 0; types[n] >= 0; n++)
+        check_obj_resize(osd, res, osd->objs[types[n]]);
+    pthread_mutex_unlock(&osd->lock);
+}
+
 static void render_object(struct osd_state *osd, struct osd_object *obj,
                           struct mp_osd_res res, double video_pts,
                           const bool sub_formats[SUBBITMAP_COUNT],
@@ -226,12 +253,7 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
 
     *out_imgs = (struct sub_bitmaps) {0};
 
-    if (!osd_res_equals(res, obj->vo_res)) {
-        obj->vo_res = res;
-        obj->force_redraw = true;
-        mp_client_broadcast_event(mp_client_api_get_core(osd->global->client_api),
-                                  MP_EVENT_WIN_RESIZE, NULL);
-    }
+    check_obj_resize(osd, res, obj);
 
     if (obj->type == OSDTYPE_SUB || obj->type == OSDTYPE_SUB2) {
         if (obj->sub) {

@@ -176,6 +176,8 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
                          double video_pts, int draw_flags,
                          struct mp_image_pool *pool, struct mp_image *dest);
 
+void osd_resize(struct osd_state *osd, struct mp_osd_res res);
+
 struct mp_image_params;
 struct mp_osd_res osd_res_from_image_params(const struct mp_image_params *p);
 
