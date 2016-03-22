@@ -1197,8 +1197,8 @@ Property list
 
 ``cache-speed`` (R)
     Current I/O read speed between the cache and the lower layer (like network).
-    This is a float (using ``MPV_FORMAT_DOUBLE`` in the client API) and gives
-    the value bytes per seconds over a 1 second window.
+    This gives the number bytes per seconds over a 1 second window (using
+    the type ``MPV_FORMAT_INT64`` for the client API).
 
 ``cache-idle`` (R)
     Returns ``yes`` if the cache is idle, which means the cache is filled as

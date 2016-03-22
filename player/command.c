@@ -1437,12 +1437,17 @@ static int mp_property_cache_speed(void *ctx, struct m_property *prop,
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
-    double speed = -1;
-    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_SPEED, &speed);
-    if (speed < 0)
+    double f_speed = -1;
+    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_SPEED, &f_speed);
+    if (f_speed < 0)
         return M_PROPERTY_UNAVAILABLE;
+    int64_t speed = llrint(f_speed);
 
-    return m_property_double_ro(action, arg, speed);
+    if (action == M_PROPERTY_PRINT) {
+        *(char **)arg = talloc_strdup_append(format_file_size(speed), "/s");
+        return M_PROPERTY_OK;
+    }
+    return m_property_int64_ro(action, arg, speed);
 }
 
 static int mp_property_cache_idle(void *ctx, struct m_property *prop,
