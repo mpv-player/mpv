@@ -2113,6 +2113,7 @@ static void pass_render_frame(struct gl_video *p)
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
                       p->texture_w, p->texture_h, p->blend_subs_fbo.fbo, false);
         GLSL(color = texture(texture0, texcoord0);)
+        pass_read_fbo(p, &p->blend_subs_fbo);
     }
 
     apply_shaders(p, p->opts.pre_shaders, p->texture_w, p->texture_h, p->pre_fbo);
