@@ -2440,7 +2440,7 @@ Input
 ``--input-file=<filename>``
     Read commands from the given file. Mostly useful with a FIFO. Since
     mpv 0.7.0 also understands JSON commands (see `JSON IPC`_), but you can't
-    get replies or events. Use ``--input-unix-socket`` for something
+    get replies or events. Use ``--input-ipc-server`` for something
     bi-directional. On MS Windows, JSON commands are not available.
 
     This can also specify a direct file descriptor with ``fd://N`` (UNIX only).
@@ -2460,12 +2460,18 @@ Input
     or intend to read from stdin later on via the loadfile or loadlist slave
     commands.
 
-``--input-unix-socket=<filename>``
+``--input-ipc-server=<filename>``
     Enable the IPC support and create the listening socket at the given path.
 
-    See `JSON IPC`_ for details.
+    On Linux and Unix, the given path is a regular filesystem path. On Windows,
+    named pipes are used, so the path refers to the pipe namespace
+    (``\\.\pipe\<name>``). If the ``\\.\pipe\`` prefix is missing, mpv will add
+    it automatically before creating the pipe, so
+    ``--input-ipc-server=/tmp/mpv-socket`` and
+    ``--input-ipc-server=\\.\pipe\tmp\mpv-socket`` are equivalent for IPC on
+    Windows.
 
-    Not available on MS Windows.
+    See `JSON IPC`_ for details.
 
 ``--input-appleremote=<yes|no>``
     (OS X only)
