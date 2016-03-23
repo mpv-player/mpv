@@ -2450,7 +2450,8 @@ void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
 
     gl_video_reset_surfaces(p);
 
-    mpgl_osd_resize(p->osd, p->osd_rect, p->image_params.stereo_out);
+    if (p->osd)
+        mpgl_osd_resize(p->osd, p->osd_rect, p->image_params.stereo_out);
 }
 
 static bool unmap_image(struct gl_video *p, struct mp_image *mpi)
