@@ -558,9 +558,9 @@ struct gl_shader_cache {
     struct mp_log *log;
 
     // this is modified during use (gl_sc_add() etc.)
-    char *prelude_text;
-    char *header_text;
-    char *text;
+    bstr prelude_text;
+    bstr header_text;
+    bstr text;
     struct gl_vao *vao;
 
     struct sc_entry entries[SC_ENTRIES];
@@ -576,18 +576,15 @@ struct gl_shader_cache *gl_sc_create(GL *gl, struct mp_log *log)
     *sc = (struct gl_shader_cache){
         .gl = gl,
         .log = log,
-        .prelude_text = talloc_strdup(sc, ""),
-        .header_text = talloc_strdup(sc, ""),
-        .text = talloc_strdup(sc, ""),
     };
     return sc;
 }
 
 void gl_sc_reset(struct gl_shader_cache *sc)
 {
-    sc->prelude_text[0] = '\0';
-    sc->header_text[0] = '\0';
-    sc->text[0] = '\0';
+    sc->prelude_text.len = 0;
+    sc->header_text.len = 0;
+    sc->text.len = 0;
     for (int n = 0; n < sc->num_uniforms; n++) {
         talloc_free(sc->uniforms[n].name);
         if (sc->uniforms[n].type == UT_buffer)
@@ -617,33 +614,34 @@ void gl_sc_destroy(struct gl_shader_cache *sc)
 
 void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name)
 {
-    sc->prelude_text = talloc_asprintf_append(sc->prelude_text,
-                                              "#extension %s : enable\n", name);
+    bstr_xappend_asprintf(sc, &sc->prelude_text, "#extension %s : enable\n", name);
 }
+
+#define bstr_xappend0(sc, b, s) bstr_xappend(sc, b, bstr0(s))
 
 void gl_sc_add(struct gl_shader_cache *sc, const char *text)
 {
-    sc->text = talloc_strdup_append(sc->text, text);
+    bstr_xappend0(sc, &sc->text, text);
 }
 
 void gl_sc_addf(struct gl_shader_cache *sc, const char *textf, ...)
 {
     va_list ap;
     va_start(ap, textf);
-    ta_xvasprintf_append(&sc->text, textf, ap);
+    bstr_xappend_vasprintf(sc, &sc->text, textf, ap);
     va_end(ap);
 }
 
 void gl_sc_hadd(struct gl_shader_cache *sc, const char *text)
 {
-    sc->header_text = talloc_strdup_append(sc->header_text, text);
+    bstr_xappend0(sc, &sc->header_text, text);
 }
 
 void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...)
 {
     va_list ap;
     va_start(ap, textf);
-    ta_xvasprintf_append(&sc->header_text, textf, ap);
+    bstr_xappend_vasprintf(sc, &sc->header_text, textf, ap);
     va_end(ap);
 }
 
@@ -901,12 +899,13 @@ static GLuint create_program(struct gl_shader_cache *sc, const char *vertex,
 {
     GL *gl = sc->gl;
     MP_VERBOSE(sc, "recompiling a shader program:\n");
-    if (sc->header_text[0]) {
+    if (sc->header_text.len) {
         MP_VERBOSE(sc, "header:\n");
-        mp_log_source(sc->log, MSGL_V, sc->header_text);
+        mp_log_source(sc->log, MSGL_V, sc->header_text.start);
         MP_VERBOSE(sc, "body:\n");
     }
-    mp_log_source(sc->log, MSGL_V, sc->text);
+    if (sc->text.len)
+        mp_log_source(sc->log, MSGL_V, sc->text.start);
     GLuint prog = gl->CreateProgram();
     compile_attach_shader(sc, prog, GL_VERTEX_SHADER, vertex);
     compile_attach_shader(sc, prog, GL_FRAGMENT_SHADER, frag);
@@ -940,7 +939,7 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
                                    gl->es >= 300 ? " es" : "");
     if (gl->es)
         ADD(header, "precision mediump float;\n");
-    ADD(header, "%s", sc->prelude_text);
+    ADD(header, "%.*s", BSTR_P(sc->prelude_text));
     char *vert_in = gl->glsl_version >= 130 ? "in" : "attribute";
     char *vert_out = gl->glsl_version >= 130 ? "out" : "varying";
     char *frag_in = gl->glsl_version >= 130 ? "in" : "varying";
@@ -992,15 +991,15 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
               " mix(0.5 / (lut_size), 1.0 - 0.5 / (lut_size), (x))\n");
 
     // custom shader header
-    if (sc->header_text[0]) {
+    if (sc->header_text.len) {
         ADD(frag, "// header\n");
-        ADD(frag, "%s\n", sc->header_text);
+        ADD(frag, "%.*s\n", BSTR_P(sc->header_text));
         ADD(frag, "// body\n");
     }
     ADD(frag, "void main() {\n");
     // we require _all_ frag shaders to write to a "vec4 color"
     ADD(frag, "vec4 color = vec4(0.0, 0.0, 0.0, 1.0);\n");
-    ADD(frag, "%s", sc->text);
+    ADD(frag, "%.*s", BSTR_P(sc->text));
     if (gl->glsl_version >= 130) {
         ADD(frag, "out_color = color;\n");
     } else {
