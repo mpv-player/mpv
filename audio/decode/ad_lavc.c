@@ -192,6 +192,19 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
 
     int got_frame = 0;
     av_frame_unref(priv->avframe);
+
+#if HAVE_AVCODEC_NEW_CODEC_API
+    int ret = avcodec_send_packet(avctx, &pkt);
+    if (ret >= 0 || ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+        if (ret >= 0 && mpkt)
+            mpkt->len = 0;
+        ret = avcodec_receive_frame(avctx, priv->avframe);
+        if (ret >= 0)
+            got_frame = 1;
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+            ret = 0;
+    }
+#else
     int ret = avcodec_decode_audio4(avctx, priv->avframe, &got_frame, &pkt);
     if (mpkt) {
         // At least "shorten" decodes sub-frames, instead of the whole packet.
@@ -208,6 +221,7 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
             return 0;
         }
     }
+#endif
     if (ret < 0) {
         MP_ERR(da, "Error decoding audio.\n");
         return -1;

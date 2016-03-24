@@ -484,6 +484,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavcodec/avcodec.h',
                                 'avcodec_profile_name(0,0)',
                                 use='libav'),
+    }, {
+        'name': 'avcodec-new-codec-api',
+        'desc': 'new libavcodec decode/encode API',
+        'func': check_statement('libavcodec/avcodec.h',
+                                'avcodec_send_packet(0,0)',
+                                use='libav'),
     },
 ]
 

@@ -646,6 +646,7 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
     struct vd_lavc_params *opts = ctx->opts->vd_lavc_params;
+    bool consumed = false;
     AVPacket pkt;
 
     if (!avctx)
@@ -667,7 +668,23 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         reset_avctx(vd);
 
     hwdec_lock(ctx);
+#if HAVE_AVCODEC_NEW_CODEC_API
+    ret = avcodec_send_packet(avctx, packet ? &pkt : NULL);
+    if (ret >= 0 || ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+        if (ret >= 0)
+            consumed = true;
+        ret = avcodec_receive_frame(avctx, ctx->pic);
+        if (ret >= 0)
+            got_picture = 1;
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+            ret = 0;
+    } else {
+        consumed = true;
+    }
+#else
     ret = avcodec_decode_video2(avctx, ctx->pic, &got_picture, &pkt);
+    consumed = true;
+#endif
     hwdec_unlock(ctx);
 
     // Reset decoder if it was fully flushed. Caller might send more flush
@@ -692,10 +709,8 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         return;
     }
 
-    if (packet) {
-        // always fully consumed
+    if (packet && consumed)
         packet->len = 0;
-    }
 
     // Skipped frame, or delayed output due to multithreaded decoding.
     if (!got_picture) {
