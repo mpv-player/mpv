@@ -548,8 +548,8 @@ struct sc_entry {
     GLuint gl_shader;
     GLint uniform_locs[SC_UNIFORM_ENTRIES];
     union uniform_val cached_v[SC_UNIFORM_ENTRIES];
-    // the following fields define the shader's contents
-    char *key; // vertex+frag shader (mangled)
+    bstr frag;
+    bstr vert;
     struct gl_vao *vao;
 };
 
@@ -568,6 +568,9 @@ struct gl_shader_cache {
 
     struct sc_uniform uniforms[SC_UNIFORM_ENTRIES];
     int num_uniforms;
+
+    // temporary buffers (avoids frequent reallocations)
+    bstr tmp[5];
 };
 
 struct gl_shader_cache *gl_sc_create(GL *gl, struct mp_log *log)
@@ -598,7 +601,8 @@ static void sc_flush_cache(struct gl_shader_cache *sc)
     for (int n = 0; n < sc->num_entries; n++) {
         struct sc_entry *e = &sc->entries[n];
         sc->gl->DeleteProgram(e->gl_shader);
-        talloc_free(e->key);
+        talloc_free(e->vert.start);
+        talloc_free(e->frag.start);
     }
     sc->num_entries = 0;
 }
@@ -918,7 +922,8 @@ static GLuint create_program(struct gl_shader_cache *sc, const char *vertex,
     return prog;
 }
 
-#define ADD(x, ...) (x) = talloc_asprintf_append(x, __VA_ARGS__)
+#define ADD(x, ...) bstr_xappend_asprintf(sc, (x), __VA_ARGS__)
+#define ADD_BSTR(x, s) bstr_xappend(sc, (x), (s))
 
 // 1. Generate vertex and fragment shaders from the fragment shader text added
 //    with gl_sc_add(). The generated shader program is cached (based on the
@@ -930,25 +935,29 @@ static GLuint create_program(struct gl_shader_cache *sc, const char *vertex,
 void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
 {
     GL *gl = sc->gl;
-    void *tmp = talloc_new(NULL);
 
     assert(sc->vao);
 
+    for (int n = 0; n < MP_ARRAY_SIZE(sc->tmp); n++)
+        sc->tmp[n].len = 0;
+
     // set up shader text (header + uniforms + body)
-    char *header = talloc_asprintf(tmp, "#version %d%s\n", gl->glsl_version,
-                                   gl->es >= 300 ? " es" : "");
+    bstr *header = &sc->tmp[0];
+    ADD(header, "#version %d%s\n", gl->glsl_version, gl->es >= 300 ? " es" : "");
     if (gl->es)
         ADD(header, "precision mediump float;\n");
-    ADD(header, "%.*s", BSTR_P(sc->prelude_text));
+    ADD_BSTR(header, sc->prelude_text);
     char *vert_in = gl->glsl_version >= 130 ? "in" : "attribute";
     char *vert_out = gl->glsl_version >= 130 ? "out" : "varying";
     char *frag_in = gl->glsl_version >= 130 ? "in" : "varying";
 
     // vertex shader: we don't use the vertex shader, so just setup a dummy,
     // which passes through the vertex array attributes.
-    char *vert_head = talloc_strdup(tmp, header);
-    char *vert_body = talloc_strdup(tmp, "void main() {\n");
-    char *frag_vaos = talloc_strdup(tmp, "");
+    bstr *vert_head = &sc->tmp[1];
+    ADD_BSTR(vert_head, *header);
+    bstr *vert_body = &sc->tmp[2];
+    ADD(vert_body, "void main() {\n");
+    bstr *frag_vaos = &sc->tmp[3];
     for (int n = 0; sc->vao->entries[n].name; n++) {
         const struct gl_vao_entry *e = &sc->vao->entries[n];
         const char *glsl_type = vao_glsl_type(e);
@@ -965,10 +974,12 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
         }
     }
     ADD(vert_body, "}\n");
-    char *vert = talloc_asprintf(tmp, "%s%s", vert_head, vert_body);
+    bstr *vert = vert_head;
+    ADD_BSTR(vert, *vert_body);
 
     // fragment shader; still requires adding used uniforms and VAO elements
-    char *frag = talloc_strdup(tmp, header);
+    bstr *frag = &sc->tmp[4];
+    ADD_BSTR(frag, *header);
     ADD(frag, "#define RG %s\n", gl->mpgl_caps & MPGL_CAP_TEX_RG ? "rg" : "ra");
     if (gl->glsl_version >= 130) {
         ADD(frag, "#define texture1D texture\n");
@@ -977,7 +988,7 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     } else {
         ADD(frag, "#define texture texture2D\n");
     }
-    ADD(frag, "%s", frag_vaos);
+    ADD_BSTR(frag, *frag_vaos);
     for (int n = 0; n < sc->num_uniforms; n++) {
         struct sc_uniform *u = &sc->uniforms[n];
         if (u->type == UT_buffer)
@@ -993,13 +1004,13 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     // custom shader header
     if (sc->header_text.len) {
         ADD(frag, "// header\n");
-        ADD(frag, "%.*s\n", BSTR_P(sc->header_text));
+        ADD_BSTR(frag, sc->header_text);
         ADD(frag, "// body\n");
     }
     ADD(frag, "void main() {\n");
     // we require _all_ frag shaders to write to a "vec4 color"
     ADD(frag, "vec4 color = vec4(0.0, 0.0, 0.0, 1.0);\n");
-    ADD(frag, "%.*s", BSTR_P(sc->text));
+    ADD_BSTR(frag, sc->text);
     if (gl->glsl_version >= 130) {
         ADD(frag, "out_color = color;\n");
     } else {
@@ -1007,11 +1018,11 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     }
     ADD(frag, "}\n");
 
-    char *key = talloc_asprintf(tmp, "%s%s", vert, frag);
     struct sc_entry *entry = NULL;
     for (int n = 0; n < sc->num_entries; n++) {
-        if (strcmp(key, sc->entries[n].key) == 0) {
-            entry = &sc->entries[n];
+        struct sc_entry *cur = &sc->entries[n];
+        if (bstr_equals(cur->frag, *frag) && bstr_equals(cur->vert, *vert)) {
+            entry = cur;
             break;
         }
     }
@@ -1019,11 +1030,14 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
         if (sc->num_entries == SC_ENTRIES)
             sc_flush_cache(sc);
         entry = &sc->entries[sc->num_entries++];
-        *entry = (struct sc_entry){.key = talloc_strdup(NULL, key)};
+        *entry = (struct sc_entry){
+            .vert = bstrdup(NULL, *vert),
+            .frag = bstrdup(NULL, *frag),
+        };
     }
     // build vertex shader from vao and cache the locations of the uniform variables
     if (!entry->gl_shader) {
-        entry->gl_shader = create_program(sc, vert, frag);
+        entry->gl_shader = create_program(sc, vert->start, frag->start);
         for (int n = 0; n < sc->num_uniforms; n++) {
             entry->uniform_locs[n] = gl->GetUniformLocation(entry->gl_shader,
                                                          sc->uniforms[n].name);
@@ -1034,8 +1048,6 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
 
     for (int n = 0; n < sc->num_uniforms; n++)
         update_uniform(gl, entry, &sc->uniforms[n], n);
-
-    talloc_free(tmp);
 
     gl_sc_reset(sc);
 }
