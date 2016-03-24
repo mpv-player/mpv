@@ -45,6 +45,7 @@ struct priv {
     uint32_t skip_samples, trim_samples;
     bool preroll_done;
     double next_pts;
+    AVRational codec_timebase;
 };
 
 static void uninit(struct dec_audio *da);
@@ -83,6 +84,8 @@ static int init(struct dec_audio *da, const char *decoder)
 
     struct priv *ctx = talloc_zero(NULL, struct priv);
     da->priv = ctx;
+
+    ctx->codec_timebase = (AVRational){0};
 
     ctx->force_channel_map = c->force_channels;
 
@@ -185,7 +188,7 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     int in_len = mpkt ? mpkt->len : 0;
 
     AVPacket pkt;
-    mp_set_av_packet(&pkt, mpkt, NULL);
+    mp_set_av_packet(&pkt, mpkt, &priv->codec_timebase);
 
     int got_frame = 0;
     av_frame_unref(priv->avframe);
@@ -212,7 +215,7 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     if (!got_frame)
         return 0;
 
-    double out_pts = mp_pts_from_av(priv->avframe->pkt_pts, NULL);
+    double out_pts = mp_pts_from_av(priv->avframe->pkt_pts, &priv->codec_timebase);
 
     struct mp_audio *mpframe = mp_audio_from_avframe(priv->avframe);
     if (!mpframe)
