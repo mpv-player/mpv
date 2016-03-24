@@ -25,6 +25,8 @@ Interface changes
     - remove write access to "stream-pos", and change semantics for read access
     - Lua scripts now don't suspend mpv by default while script code is run
     - add "cache-speed" property
+    - rename --input-unix-socket to --input-ipc-server, and make it work on
+      Windows too
  --- mpv 0.16.0 ---
     - change --audio-channels default to stereo (use --audio-channels=auto to
       get the old default)
