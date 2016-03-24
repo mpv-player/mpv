@@ -991,10 +991,11 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     ADD_BSTR(frag, *frag_vaos);
     for (int n = 0; n < sc->num_uniforms; n++) {
         struct sc_uniform *u = &sc->uniforms[n];
-        if (u->type == UT_buffer)
+        if (u->type == UT_buffer) {
             ADD(frag, "uniform %s { %s };\n", u->name, u->v.buffer.text);
-        else
+        } else {
             ADD(frag, "uniform %s %s;\n", u->glsl_type, u->name);
+        }
     }
 
     // Additional helpers.
@@ -1040,7 +1041,7 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
         entry->gl_shader = create_program(sc, vert->start, frag->start);
         for (int n = 0; n < sc->num_uniforms; n++) {
             entry->uniform_locs[n] = gl->GetUniformLocation(entry->gl_shader,
-                                                         sc->uniforms[n].name);
+                                                            sc->uniforms[n].name);
         }
     }
 
