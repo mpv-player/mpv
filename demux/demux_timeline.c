@@ -96,7 +96,7 @@ static void switch_segment(struct demuxer *demuxer, struct segment *new,
     bool new_segment = p->current != new;
 
     if (!(flags & (SEEK_FORWARD | SEEK_BACKWARD)))
-        flags |= SEEK_BACKWARD;
+        flags |= SEEK_BACKWARD | SEEK_HR;
 
     MP_VERBOSE(demuxer, "switch to segment %d\n", new->index);
 
