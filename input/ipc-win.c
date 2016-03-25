@@ -16,6 +16,7 @@
  */
 
 #include <windows.h>
+#include <sddl.h>
 
 #include "config.h"
 
@@ -49,6 +50,88 @@ struct client_arg {
     bool writable;
     OVERLAPPED write_ol;
 };
+
+// Get a string SID representing the current user. Must be freed by LocalFree.
+static char *get_user_sid(void)
+{
+    char *ssid = NULL;
+    TOKEN_USER *info = NULL;
+    HANDLE t;
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &t))
+        goto done;
+
+    DWORD info_len;
+    if (!GetTokenInformation(t, TokenUser, NULL, 0, &info_len) &&
+        GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+        goto done;
+
+    info = talloc_size(NULL, info_len);
+    if (!GetTokenInformation(t, TokenUser, info, info_len, &info_len))
+        goto done;
+    if (!info->User.Sid)
+        goto done;
+
+    ConvertSidToStringSidA(info->User.Sid, &ssid);
+done:
+    if (t)
+        CloseHandle(t);
+    talloc_free(info);
+    return ssid;
+}
+
+// Get a string SID for the process integrity level. Must be freed by LocalFree.
+static char *get_integrity_sid(void)
+{
+    char *ssid = NULL;
+    TOKEN_MANDATORY_LABEL *info = NULL;
+    HANDLE t;
+    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &t))
+        goto done;
+
+    DWORD info_len;
+    if (!GetTokenInformation(t, TokenIntegrityLevel, NULL, 0, &info_len) &&
+        GetLastError() != ERROR_INSUFFICIENT_BUFFER)
+        goto done;
+
+    info = talloc_size(NULL, info_len);
+    if (!GetTokenInformation(t, TokenIntegrityLevel, info, info_len, &info_len))
+        goto done;
+    if (!info->Label.Sid)
+        goto done;
+
+    ConvertSidToStringSidA(info->Label.Sid, &ssid);
+done:
+    if (t)
+        CloseHandle(t);
+    talloc_free(info);
+    return ssid;
+}
+
+// Create a security descriptor that only grants access to processes running
+// under the current user at the current integrity level or higher
+static PSECURITY_DESCRIPTOR create_restricted_sd(void)
+{
+    char *user_sid = get_user_sid();
+    char *integrity_sid = get_integrity_sid();
+    if (!user_sid || !integrity_sid)
+        return NULL;
+
+    char *sddl = talloc_asprintf(NULL,
+        "O:%s"                 // Set the owner to user_sid
+        "D:(A;;GRGW;;;%s)"     // Grant GENERIC_{READ,WRITE} access to user_sid
+        "S:(ML;;NRNWNX;;;%s)", // Disallow read, write and execute permissions
+                               // to integrity levels below integrity_sid
+        user_sid, user_sid, integrity_sid);
+    LocalFree(user_sid);
+    LocalFree(integrity_sid);
+
+    PSECURITY_DESCRIPTOR sd = NULL;
+    ConvertStringSecurityDescriptorToSecurityDescriptorA(sddl, SDDL_REVISION_1,
+        &sd, NULL);
+    talloc_free(sddl);
+
+    return sd;
+}
 
 static void wakeup_cb(void *d)
 {
@@ -275,6 +358,15 @@ static void *ipc_thread(void *p)
     mpthread_set_name("ipc named pipe listener");
     MP_VERBOSE(arg, "Starting IPC master\n");
 
+    SECURITY_ATTRIBUTES sa = {
+        .nLength = sizeof sa,
+        .lpSecurityDescriptor = create_restricted_sd(),
+    };
+    if (!sa.lpSecurityDescriptor) {
+        MP_ERR(arg, "Couldn't create security descriptor");
+        goto done;
+    }
+
     OVERLAPPED ol = { .hEvent = CreateEventW(NULL, TRUE, TRUE, NULL) };
     if (!ol.hEvent) {
         MP_ERR(arg, "Couldn't create event");
@@ -282,7 +374,7 @@ static void *ipc_thread(void *p)
     }
 
     server = CreateNamedPipeW(arg->path, mode | FILE_FLAG_FIRST_PIPE_INSTANCE,
-        state, PIPE_UNLIMITED_INSTANCES, bufsiz, bufsiz, 0, NULL);
+        state, PIPE_UNLIMITED_INSTANCES, bufsiz, bufsiz, 0, &sa);
     if (server == INVALID_HANDLE_VALUE) {
         MP_ERR(arg, "Couldn't create first pipe instance: %s\n",
             mp_LastError_to_str());
@@ -333,7 +425,7 @@ static void *ipc_thread(void *p)
         // closes the handle and there are no active instances of the pipe
         client = server;
         server = CreateNamedPipeW(arg->path, mode, state,
-            PIPE_UNLIMITED_INSTANCES, bufsiz, bufsiz, 0, NULL);
+            PIPE_UNLIMITED_INSTANCES, bufsiz, bufsiz, 0, &sa);
         if (server == INVALID_HANDLE_VALUE) {
             MP_ERR(arg, "Couldn't create additional pipe instance: %s\n",
                 mp_LastError_to_str());
@@ -345,6 +437,8 @@ static void *ipc_thread(void *p)
     }
 
 done:
+    if (sa.lpSecurityDescriptor)
+        LocalFree(sa.lpSecurityDescriptor);
     if (client != INVALID_HANDLE_VALUE)
         CloseHandle(client);
     if (server != INVALID_HANDLE_VALUE)
