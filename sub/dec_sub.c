@@ -150,6 +150,9 @@ static void update_segment(struct dec_sub *sub)
     if (sub->new_segment && sub->last_vo_pts != MP_NOPTS_VALUE &&
         sub->last_vo_pts >= sub->new_segment->start)
     {
+        MP_VERBOSE(sub, "Switch segment: %f at %f\n", sub->new_segment->start,
+                   sub->last_vo_pts);
+
         sub->codec = sub->new_segment->codec;
         sub->start = sub->new_segment->start;
         sub->end = sub->new_segment->end;
@@ -209,6 +212,11 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
 
         if (!read_more)
             break;
+
+        if (sub->new_segment && sub->new_segment->start < video_pts) {
+            sub->last_vo_pts = video_pts;
+            update_segment(sub);
+        }
 
         if (sub->new_segment)
             break;
