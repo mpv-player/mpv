@@ -192,7 +192,8 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     Register callback to be run on a key binding. The binding will be mapped to
     the given ``key``, which is a string describing the physical key. This uses
     the same key names as in input.conf, and also allows combinations
-    (e.g. ``ctrl+a``).
+    (e.g. ``ctrl+a``). If the key is empty or ``nil``, no physical key is
+    registered, but the user still can create own bindings (see below).
 
     After calling this function, key presses will cause the function ``fn`` to
     be called (unless the user remapped the key with another binding).
