@@ -777,8 +777,8 @@ video_output_features = [
             check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
         ),
     }, {
-        'name': '--desktop-gl',
-        'desc': 'Desktop OpengGL support',
+        'name': '--standard-gl',
+        'desc': 'Desktop standard OpengGL support',
         'func': compose_checks(
             check_statement('GL/gl.h', '(void)GL_RGB32F'),     # arbitrary OpenGL 3.0 symbol
             check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
@@ -791,7 +791,7 @@ video_output_features = [
     } , {
         'name': '--any-gl',
         'desc': 'Any OpenGL (ES) support',
-        'deps_any': ['desktop-gl', 'android-gl'],
+        'deps_any': ['standard-gl', 'android-gl', 'cocoa'],
         'func': check_true
     } , {
         'name': '--plain-gl',
