@@ -625,7 +625,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale,
     }
     double now = mp_time_sec();
     // ignore system-doubleclick if we generate these events ourselves
-    if (opts->doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))
+    if (!force_mouse && opts->doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))
         return;
     interpret_key(ictx, code, scale);
     if (code & MP_KEY_STATE_DOWN) {
