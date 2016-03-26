@@ -1027,7 +1027,7 @@ reopen_file:
         goto terminate_playback;
 
     if (opts->stream_dump && opts->stream_dump[0]) {
-        if (stream_dump(mpctx, mpctx->stream_open_filename) < 0)
+        if (stream_dump(mpctx, mpctx->stream_open_filename) >= 0)
             mpctx->error_playing = 1;
         goto terminate_playback;
     }
