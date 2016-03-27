@@ -28,13 +28,13 @@ struct dxva2_surface {
     HMODULE dxva2lib;
 
     IDirectXVideoDecoder *decoder;
-    LPDIRECT3DSURFACE9   surface;
+    IDirect3DSurface9    *surface;
 };
 
-LPDIRECT3DSURFACE9 d3d9_surface_in_mp_image(struct mp_image *mpi)
+IDirect3DSurface9 *d3d9_surface_in_mp_image(struct mp_image *mpi)
 {
     return mpi && mpi->imgfmt == IMGFMT_DXVA2 ?
-        (LPDIRECT3DSURFACE9)mpi->planes[3] : NULL;
+        (IDirect3DSurface9 *)mpi->planes[3] : NULL;
 }
 
 static void dxva2_release_img(void *arg)
@@ -56,7 +56,7 @@ static void dxva2_release_img(void *arg)
 }
 
 struct mp_image *dxva2_new_ref(IDirectXVideoDecoder *decoder,
-                               LPDIRECT3DSURFACE9 d3d9_surface, int w, int h)
+                               IDirect3DSurface9 *d3d9_surface, int w, int h)
 {
     if (!decoder || !d3d9_surface)
         return NULL;
