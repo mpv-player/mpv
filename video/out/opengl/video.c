@@ -1574,7 +1574,7 @@ static void pass_read_video(struct gl_video *p)
 
             int id = pass_bind(p, tex[n]);
             pass_sample_deband(p->sc, p->opts.deband_opts, id, tex[n].multiplier,
-                               p->gl_target, &p->lfg);
+                               tex[n].gl_target, &p->lfg);
             skip_unused(p, tex[n].components);
             finish_pass_fbo(p, &p->deband_fbo[n], tex[n].w, tex[n].h, 0);
             tex[n] = img_tex_fbo(&p->deband_fbo[n], identity_trans,
