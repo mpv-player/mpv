@@ -15,8 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <assert.h>
-
 #include "common/av_common.h"
 #include "dxva2.h"
 #include "mp_image.h"
@@ -77,7 +75,7 @@ struct mp_image *dxva2_new_ref(IDirectXVideoDecoder *decoder,
     struct mp_image *mpi = mp_image_new_custom_ref(&(struct mp_image){0},
                                                    surface, dxva2_release_img);
     if (!mpi)
-        goto fail;
+        abort();
 
     mp_image_setfmt(mpi, IMGFMT_DXVA2);
     mp_image_set_size(mpi, w, h);
