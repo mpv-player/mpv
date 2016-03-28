@@ -1851,6 +1851,9 @@ Property list
 ``video-rotate`` (RW)
     See ``--video-rotate`` option.
 
+``video-stereo-mode`` (RW)
+    See ``--video-stereo-mode`` option.
+
 ``seekable``
     Return whether it's generally possible to seek in the current file.
 

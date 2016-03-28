@@ -3737,6 +3737,7 @@ static const struct m_property mp_properties[] = {
     {"af", mp_property_af},
 
     {"video-rotate", video_simple_refresh_property},
+    {"video-stereo-mode", video_simple_refresh_property},
 
     {"ab-loop-a", mp_property_ab_loop},
     {"ab-loop-b", mp_property_ab_loop},
