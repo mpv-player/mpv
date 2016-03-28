@@ -480,11 +480,11 @@ void gl_transform_ortho(struct gl_transform *t, float x0, float x1,
 // process. In other words: post-composes t onto x
 void gl_transform_trans(struct gl_transform t, struct gl_transform *x)
 {
-    float x00 = x->m[0][0], x01 = x->m[0][1], x10 = x->m[1][0], x11 = x->m[1][1];
-    x->m[0][0] = t.m[0][0] * x00 + t.m[0][1] * x10;
-    x->m[1][0] = t.m[1][0] * x00 + t.m[1][1] * x10;
-    x->m[0][1] = t.m[0][0] * x01 + t.m[0][1] * x11;
-    x->m[1][1] = t.m[1][0] * x01 + t.m[1][1] * x11;
+    struct gl_transform xt = *x;
+    x->m[0][0] = t.m[0][0] * xt.m[0][0] + t.m[0][1] * xt.m[1][0];
+    x->m[1][0] = t.m[1][0] * xt.m[0][0] + t.m[1][1] * xt.m[1][0];
+    x->m[0][1] = t.m[0][0] * xt.m[0][1] + t.m[0][1] * xt.m[1][1];
+    x->m[1][1] = t.m[1][0] * xt.m[0][1] + t.m[1][1] * xt.m[1][1];
     gl_transform_vec(t, &x->t[0], &x->t[1]);
 }
 
