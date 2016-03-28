@@ -166,6 +166,16 @@ static void filter_reconfig(struct vo_chain *vo_c)
     if (vf_reconfig(vo_c->vf, &params) < 0)
         return;
 
+    char *filters[] = {"autorotate", "autostereo3d", NULL};
+    for (int n = 0; filters[n]; n++) {
+        struct vf_instance *vf = vf_find_by_label(vo_c->vf, filters[n]);
+        if (vf) {
+            vf_remove_filter(vo_c->vf, vf);
+            if (vf_reconfig(vo_c->vf, &params) < 0)
+                return;
+        }
+    }
+
     if (params.rotate && (params.rotate % 90 == 0)) {
         if (!(vo_c->vo->driver->caps & VO_CAP_ROTATE90)) {
             // Try to insert a rotation filter.
@@ -184,7 +194,7 @@ static void filter_reconfig(struct vo_chain *vo_c)
         char *to = (char *)MP_STEREO3D_NAME(params.stereo_out);
         if (to) {
             char *args[] = {"in", "auto", "out", to, NULL, NULL};
-            if (try_filter(vo_c, params, "stereo3d", "stereo3d", args) < 0)
+            if (try_filter(vo_c, params, "stereo3d", "autostereo3d", args) < 0)
                 MP_ERR(vo_c, "Can't insert 3D conversion filter.\n");
         }
     }
