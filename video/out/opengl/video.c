@@ -962,9 +962,8 @@ static void pass_prepare_src_tex(struct gl_video *p)
     gl->ActiveTexture(GL_TEXTURE0);
 }
 
-// flags = bits 0-1: rotate, bit 2: flip vertically
 static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
-                             const struct mp_rect *dst, int flags)
+                             const struct mp_rect *dst)
 {
     struct vertex va[4] = {0};
 
@@ -984,26 +983,13 @@ static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
             struct img_tex *s = &p->pass_tex[i];
             if (!s->gl_tex)
                 continue;
-            struct mp_rect_f src_rect = {0, 0, s->w, s->h};
-            gl_transform_rect(s->transform, &src_rect);
-            float tx[2] = {src_rect.x0, src_rect.x1};
-            float ty[2] = {src_rect.y0, src_rect.y1};
-            if (flags & 4)
-                MPSWAP(float, ty[0], ty[1]);
+            float tx = (n / 2) * s->w;
+            float ty = (n % 2) * s->h;
+            gl_transform_vec(s->transform, &tx, &ty);
             bool rect = s->gl_target == GL_TEXTURE_RECTANGLE;
-            v->texcoord[i].x = tx[n / 2] / (rect ? 1 : s->tex_w);
-            v->texcoord[i].y = ty[n % 2] / (rect ? 1 : s->tex_h);
+            v->texcoord[i].x = tx / (rect ? 1 : s->tex_w);
+            v->texcoord[i].y = ty / (rect ? 1 : s->tex_h);
         }
-    }
-
-    int rot = flags & 3;
-    while (rot--) {
-        static const int perm[4] = {1, 3, 0, 2};
-        struct vertex vb[4];
-        memcpy(vb, va, sizeof(vb));
-        for (int n = 0; n < 4; n++)
-            memcpy(va[n].texcoord, vb[perm[n]].texcoord,
-                   sizeof(struct vertex_pt[TEXUNIT_VIDEO_NUM]));
     }
 
     p->gl->Viewport(0, 0, vp_w, abs(vp_h));
@@ -1014,13 +1000,13 @@ static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
 
 // flags: see render_pass_quad
 static void finish_pass_direct(struct gl_video *p, GLint fbo, int vp_w, int vp_h,
-                               const struct mp_rect *dst, int flags)
+                               const struct mp_rect *dst)
 {
     GL *gl = p->gl;
     pass_prepare_src_tex(p);
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
     gl_sc_gen_shader_and_reset(p->sc);
-    render_pass_quad(p, vp_w, vp_h, dst, flags);
+    render_pass_quad(p, vp_w, vp_h, dst);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
     memset(&p->pass_tex, 0, sizeof(p->pass_tex));
     p->pass_tex_num = 0;
@@ -1038,7 +1024,7 @@ static void finish_pass_fbo(struct gl_video *p, struct fbotex *dst_fbo,
     fbotex_change(dst_fbo, p->gl, p->log, w, h, p->opts.fbo_format, flags);
 
     finish_pass_direct(p, dst_fbo->fbo, dst_fbo->rw, dst_fbo->rh,
-                       &(struct mp_rect){0, 0, w, h}, 0);
+                       &(struct mp_rect){0, 0, w, h});
 }
 
 static void skip_unused(struct gl_video *p, int num_components)
@@ -1051,6 +1037,7 @@ static void uninit_scaler(struct gl_video *p, struct scaler *scaler)
 {
     GL *gl = p->gl;
     fbotex_uninit(&scaler->sep_fbo);
+    fbotex_uninit(&scaler->sep_rot_fbo);
     gl->DeleteTextures(1, &scaler->gl_lut);
     scaler->gl_lut = 0;
     scaler->kernel = NULL;
@@ -1243,6 +1230,19 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
 static void pass_sample_separated(struct gl_video *p, struct img_tex src,
                                   struct scaler *scaler, int w, int h)
 {
+    // Remove rotation, because it's "too hard" to deal with it.
+    // Note: this is very stupid and could be transparently handled as part
+    // of the first scale pass or so. But for now prefer the simpler solution,
+    // because applying rotation is very rare.
+    if (p->image_params.rotate != 0 || p->image.image_flipped) {
+        GLSLF("// rotate\n");
+        sampler_prelude(p->sc, pass_bind(p, src));
+        GLSL(color = texture(tex, pos);)
+        finish_pass_fbo(p, &scaler->sep_rot_fbo, src.w, src.h, 0);
+        src = img_tex_fbo(&scaler->sep_rot_fbo, identity_trans, PLANE_RGB,
+                          src.components);
+    }
+
     // Separate the transformation into x and y components, per pass
     struct gl_transform t_x = {
         .m = {{src.transform.m[0][0], 0.0}, {src.transform.m[1][0], 1.0}},
@@ -1743,36 +1743,41 @@ static void pass_convert_yuv(struct gl_video *p)
 
 static void get_scale_factors(struct gl_video *p, double xy[2])
 {
-    xy[0] = (p->dst_rect.x1 - p->dst_rect.x0) /
-            (double)(p->src_rect.x1 - p->src_rect.x0);
-    xy[1] = (p->dst_rect.y1 - p->dst_rect.y0) /
-            (double)(p->src_rect.y1 - p->src_rect.y0);
+    double target_w = p->src_rect.x1 - p->src_rect.x0;
+    double target_h = p->src_rect.y1 - p->src_rect.y0;
+    if (p->image_params.rotate % 180 == 90)
+        MPSWAP(double, target_w, target_h);
+    xy[0] = (p->dst_rect.x1 - p->dst_rect.x0) / target_w;
+    xy[1] = (p->dst_rect.y1 - p->dst_rect.y0) / target_h;
 }
 
 // Compute the cropped and rotated transformation of the video source rectangle.
-// vp_w and vp_h are set to the _destination_ video size.
-static void compute_src_transform(struct gl_video *p, struct gl_transform *tr,
-                                  int *vp_w, int *vp_h)
+static void compute_src_transform(struct gl_video *p, struct gl_transform *tr)
 {
     float sx = (p->src_rect.x1 - p->src_rect.x0) / (float)p->texture_w,
           sy = (p->src_rect.y1 - p->src_rect.y0) / (float)p->texture_h,
           ox = p->src_rect.x0,
           oy = p->src_rect.y0;
-    struct gl_transform transform = {{{sx,0.0}, {0.0,sy}}, {ox,oy}};
+    struct gl_transform transform = {{{sx, 0}, {0, sy}}, {ox, oy}};
+
+    int a = p->image_params.rotate % 90 ? 0 : p->image_params.rotate / 90;
+    int sin90[4] = {0, 1, 0, -1}; // just to avoid rounding issues etc.
+    int cos90[4] = {1, 0, -1, 0};
+    struct gl_transform rot = {{{cos90[a], -sin90[a]}, {sin90[a], cos90[a]}}};
+    gl_transform_trans(rot, &transform);
+
+    // basically, recenter to keep the whole image in view
+    float b[2] = {1, 1};
+    gl_transform_vec(rot, &b[0], &b[1]);
+    transform.t[0] += b[0] < 0 ? p->texture_w : 0;
+    transform.t[1] += b[1] < 0 ? p->texture_h : 0;
+
+    if (p->image.image_flipped) {
+        struct gl_transform flip = {{{1, 0}, {0, -1}}, {0, p->texture_h}};
+        gl_transform_trans(flip, &transform);
+    }
 
     gl_transform_trans(p->texture_offset, &transform);
-
-    int xc = 0, yc = 1;
-    *vp_w = p->dst_rect.x1 - p->dst_rect.x0,
-    *vp_h = p->dst_rect.y1 - p->dst_rect.y0;
-
-    if ((p->image_params.rotate % 180) == 90) {
-        MPSWAP(float, transform.m[0][xc], transform.m[0][yc]);
-        MPSWAP(float, transform.m[1][xc], transform.m[1][yc]);
-        MPSWAP(float, transform.t[0], transform.t[1]);
-        MPSWAP(int, xc, yc);
-        MPSWAP(int, *vp_w, *vp_h);
-    }
 
     *tr = transform;
 }
@@ -1835,9 +1840,10 @@ static void pass_scale_main(struct gl_video *p)
                 sig_center, sig_scale, sig_offset, sig_slope);
     }
 
+    int vp_w = p->dst_rect.x1 - p->dst_rect.x0;
+    int vp_h = p->dst_rect.y1 - p->dst_rect.y0;
     struct gl_transform transform;
-    int vp_w, vp_h;
-    compute_src_transform(p, &transform, &vp_w, &vp_h);
+    compute_src_transform(p, &transform);
 
     GLSLF("// main scaling\n");
     finish_pass_fbo(p, &p->indirect_fbo, p->texture_w, p->texture_h, 0);
@@ -2062,8 +2068,7 @@ static void pass_render_frame_dumb(struct gl_video *p, int fbo)
     pass_get_img_tex(p, &p->image, tex);
 
     struct gl_transform transform;
-    int vp_w, vp_h;
-    compute_src_transform(p, &transform, &vp_w, &vp_h);
+    compute_src_transform(p, &transform);
 
     struct gl_transform tchroma = transform;
     tchroma.t[0] /= 1 << p->image_desc.chroma_xs;
@@ -2170,9 +2175,7 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
     pass_colormanage(p, p->image_params.primaries,
                      p->use_linear ? MP_CSP_TRC_LINEAR : p->image_params.gamma);
     pass_dither(p);
-    int flags = (p->image_params.rotate % 90 ? 0 : p->image_params.rotate / 90)
-              | (p->image.image_flipped ? 4 : 0);
-    finish_pass_direct(p, fbo, p->vp_w, p->vp_h, &p->dst_rect, flags);
+    finish_pass_direct(p, fbo, p->vp_w, p->vp_h, &p->dst_rect);
 }
 
 // Draws an interpolate frame to fbo, based on the frame timing in t

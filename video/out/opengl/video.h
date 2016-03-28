@@ -62,6 +62,7 @@ struct scaler {
     GLuint gl_lut;
     GLenum gl_target;
     struct fbotex sep_fbo;
+    struct fbotex sep_rot_fbo;
     bool insufficient;
     int lut_size;
 
