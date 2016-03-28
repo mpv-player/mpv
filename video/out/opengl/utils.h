@@ -87,6 +87,9 @@ void fbotex_set_filter(struct fbotex *fbo, GLenum gl_filter);
 
 // A 3x2 matrix, with the translation part separate.
 struct gl_transform {
+    // row-major, e.g. in mathematical notation:
+    //  | m[0][0] m[0][1] |
+    //  | m[1][0] m[1][1] |
     float m[2][2];
     float t[2];
 };
@@ -104,8 +107,8 @@ void gl_transform_ortho(struct gl_transform *t, float x0, float x1,
 static inline void gl_transform_vec(struct gl_transform t, float *x, float *y)
 {
     float vx = *x, vy = *y;
-    *x = vx * t.m[0][0] + vy * t.m[1][0] + t.t[0];
-    *y = vx * t.m[0][1] + vy * t.m[1][1] + t.t[1];
+    *x = vx * t.m[0][0] + vy * t.m[0][1] + t.t[0];
+    *y = vx * t.m[1][0] + vy * t.m[1][1] + t.t[1];
 }
 
 struct mp_rect_f {
