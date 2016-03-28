@@ -506,13 +506,8 @@ static void GLAPIENTRY gl_debug_cb(GLenum source, GLenum type, GLuint id,
 
 void gl_set_debug_logger(GL *gl, struct mp_log *log)
 {
-    if (gl->DebugMessageCallback) {
-        if (log) {
-            gl->DebugMessageCallback(gl_debug_cb, log);
-        } else {
-            gl->DebugMessageCallback(NULL, NULL);
-        }
-    }
+    if (gl->DebugMessageCallback)
+        gl->DebugMessageCallback(log ? gl_debug_cb : NULL, log);
 }
 
 #define SC_ENTRIES 32
