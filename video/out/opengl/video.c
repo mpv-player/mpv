@@ -966,7 +966,7 @@ static void pass_prepare_src_tex(struct gl_video *p)
 static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
                              const struct mp_rect *dst, int flags)
 {
-    struct vertex va[4];
+    struct vertex va[4] = {0};
 
     struct gl_transform t;
     gl_transform_ortho(&t, 0, vp_w, 0, vp_h);
