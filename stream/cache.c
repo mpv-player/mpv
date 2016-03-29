@@ -296,7 +296,8 @@ static void cache_fill(struct priv *s)
 done: ;
 
     bool prev_eof = s->eof;
-    s->eof = len <= 0;
+    if (read_attempted)
+        s->eof = len <= 0;
     if (!prev_eof && s->eof) {
         s->eof_pos = stream_tell(s->stream);
         s->speed_start = 0;
