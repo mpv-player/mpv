@@ -137,10 +137,8 @@ struct demux_internal {
     bool force_cache_update;
     double time_length;
     struct mp_tags *stream_metadata;
+    struct stream_cache_info stream_cache_info;
     int64_t stream_size;
-    int64_t stream_cache_size;
-    int64_t stream_cache_fill;
-    int stream_cache_idle;
     // Updated during init only.
     char *stream_base_filename;
 };
@@ -1407,9 +1405,7 @@ static void update_cache(struct demux_internal *in)
     // Don't lock while querying the stream.
     double time_length = -1;
     struct mp_tags *stream_metadata = NULL;
-    int64_t stream_cache_size = -1;
-    int64_t stream_cache_fill = -1;
-    int stream_cache_idle = -1;
+    struct stream_cache_info stream_cache_info = {.size = -1};
 
     if (demuxer->desc->control) {
         demuxer->desc->control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,
@@ -1418,16 +1414,12 @@ static void update_cache(struct demux_internal *in)
 
     int64_t stream_size = stream_get_size(stream);
     stream_control(stream, STREAM_CTRL_GET_METADATA, &stream_metadata);
-    stream_control(stream, STREAM_CTRL_GET_CACHE_SIZE, &stream_cache_size);
-    stream_control(stream, STREAM_CTRL_GET_CACHE_FILL, &stream_cache_fill);
-    stream_control(stream, STREAM_CTRL_GET_CACHE_IDLE, &stream_cache_idle);
+    stream_control(stream, STREAM_CTRL_GET_CACHE_INFO, &stream_cache_info);
 
     pthread_mutex_lock(&in->lock);
     in->time_length = time_length;
     in->stream_size = stream_size;
-    in->stream_cache_size = stream_cache_size;
-    in->stream_cache_fill = stream_cache_fill;
-    in->stream_cache_idle = stream_cache_idle;
+    in->stream_cache_info = stream_cache_info;
     if (stream_metadata) {
         talloc_free(in->stream_metadata);
         in->stream_metadata = talloc_steal(in, stream_metadata);
@@ -1440,26 +1432,16 @@ static void update_cache(struct demux_internal *in)
 static int cached_stream_control(struct demux_internal *in, int cmd, void *arg)
 {
     // If the cache is active, wake up the thread to possibly update cache state.
-    if (in->stream_cache_size >= 0) {
+    if (in->stream_cache_info.size >= 0) {
         in->force_cache_update = true;
         pthread_cond_signal(&in->wakeup);
     }
 
     switch (cmd) {
-    case STREAM_CTRL_GET_CACHE_SIZE:
-        if (in->stream_cache_size < 0)
+    case STREAM_CTRL_GET_CACHE_INFO:
+        if (in->stream_cache_info.size < 0)
             return STREAM_UNSUPPORTED;
-        *(int64_t *)arg = in->stream_cache_size;
-        return STREAM_OK;
-    case STREAM_CTRL_GET_CACHE_FILL:
-        if (in->stream_cache_fill < 0)
-            return STREAM_UNSUPPORTED;
-        *(int64_t *)arg = in->stream_cache_fill;
-        return STREAM_OK;
-    case STREAM_CTRL_GET_CACHE_IDLE:
-        if (in->stream_cache_idle < 0)
-            return STREAM_UNSUPPORTED;
-        *(int *)arg = in->stream_cache_idle;
+        *(struct stream_cache_info *)arg = in->stream_cache_info;
         return STREAM_OK;
     case STREAM_CTRL_GET_SIZE:
         if (in->stream_size < 0)

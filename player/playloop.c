@@ -522,8 +522,9 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     if (!mpctx->demuxer)
         return;
 
-    int idle = -1;
-    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_IDLE, &idle);
+    struct stream_cache_info info = {0};
+    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
+    int idle = info.size > 0 ? info.idle : -1;
 
     struct demux_ctrl_reader_state s = {.idle = true, .ts_duration = -1};
     demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);

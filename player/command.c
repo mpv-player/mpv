@@ -1370,11 +1370,11 @@ static int mp_property_cache_size(void *ctx, struct m_property *prop,
     switch (action) {
     case M_PROPERTY_GET:
     case M_PROPERTY_PRINT: {
-        int64_t size = -1;
-        demux_stream_control(demuxer, STREAM_CTRL_GET_CACHE_SIZE, &size);
-        if (size <= 0)
+        struct stream_cache_info info = {0};
+        demux_stream_control(demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
+        if (info.size <= 0)
             break;
-        return property_int_kb_size(size / 1024, action, arg);
+        return property_int_kb_size(info.size / 1024, action, arg);
     }
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){
@@ -1403,11 +1403,11 @@ static int mp_property_cache_used(void *ctx, struct m_property *prop,
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
-    int64_t size = -1;
-    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_FILL, &size);
-    if (size < 0)
+    struct stream_cache_info info = {0};
+    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
+    if (info.size <= 0)
         return M_PROPERTY_UNAVAILABLE;
-    return property_int_kb_size(size / 1024, action, arg);
+    return property_int_kb_size(info.fill / 1024, action, arg);
 }
 
 static int mp_property_cache_free(void *ctx, struct m_property *prop,
@@ -1417,17 +1417,12 @@ static int mp_property_cache_free(void *ctx, struct m_property *prop,
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
-    int64_t size_used = -1;
-    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_FILL, &size_used);
-    if (size_used < 0)
+    struct stream_cache_info info = {0};
+    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
+    if (info.size <= 0)
         return M_PROPERTY_UNAVAILABLE;
 
-    int64_t size = -1;
-    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_SIZE, &size);
-    if (size <= 0)
-        return M_PROPERTY_UNAVAILABLE;
-
-    return property_int_kb_size((size - size_used) / 1024, action, arg);
+    return property_int_kb_size((info.size - info.fill) / 1024, action, arg);
 }
 
 static int mp_property_cache_speed(void *ctx, struct m_property *prop,
@@ -1437,29 +1432,28 @@ static int mp_property_cache_speed(void *ctx, struct m_property *prop,
     if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
 
-    double f_speed = -1;
-    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_SPEED, &f_speed);
-    if (f_speed < 0)
+    struct stream_cache_info info = {0};
+    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
+    if (info.size <= 0)
         return M_PROPERTY_UNAVAILABLE;
-    int64_t speed = llrint(f_speed);
 
     if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = talloc_strdup_append(format_file_size(speed), "/s");
+        *(char **)arg = talloc_strdup_append(format_file_size(info.speed), "/s");
         return M_PROPERTY_OK;
     }
-    return m_property_int64_ro(action, arg, speed);
+    return m_property_int64_ro(action, arg, info.speed);
 }
 
 static int mp_property_cache_idle(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    int idle = -1;
+    struct stream_cache_info info = {0};
     if (mpctx->demuxer)
-        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_IDLE, &idle);
-    if (idle < 0)
+        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
+    if (info.size <= 0)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_flag_ro(action, arg, !!idle);
+    return m_property_flag_ro(action, arg, info.idle);
 }
 
 static int mp_property_demuxer_cache_duration(void *ctx, struct m_property *prop,

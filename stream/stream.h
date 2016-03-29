@@ -67,11 +67,8 @@ enum stream_ctrl {
     STREAM_CTRL_GET_SIZE = 1,
 
     // Cache
-    STREAM_CTRL_GET_CACHE_SIZE,
+    STREAM_CTRL_GET_CACHE_INFO,
     STREAM_CTRL_SET_CACHE_SIZE,
-    STREAM_CTRL_GET_CACHE_FILL,
-    STREAM_CTRL_GET_CACHE_IDLE,
-    STREAM_CTRL_GET_CACHE_SPEED,
     STREAM_CTRL_SET_READAHEAD,
 
     // stream_memory.c
@@ -120,6 +117,14 @@ enum stream_ctrl {
     STREAM_CTRL_GET_LANG,
     STREAM_CTRL_GET_CURRENT_TITLE,
     STREAM_CTRL_SET_CURRENT_TITLE,
+};
+
+// for STREAM_CTRL_GET_CACHE_INFO
+struct stream_cache_info {
+    int64_t size;
+    int64_t fill;
+    bool idle;
+    int64_t speed;
 };
 
 struct stream_lang_req {

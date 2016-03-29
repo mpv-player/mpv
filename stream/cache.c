@@ -42,6 +42,7 @@
 #include <assert.h>
 #include <pthread.h>
 #include <time.h>
+#include <math.h>
 #include <sys/time.h>
 
 #include <libavutil/common.h>
@@ -401,17 +402,13 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
 {
     struct priv *s = cache->priv;
     switch (cmd) {
-    case STREAM_CTRL_GET_CACHE_SIZE:
-        *(int64_t *)arg = s->buffer_size - s->back_size;
-        return STREAM_OK;
-    case STREAM_CTRL_GET_CACHE_FILL:
-        *(int64_t *)arg = s->max_filepos - s->read_filepos;
-        return STREAM_OK;
-    case STREAM_CTRL_GET_CACHE_IDLE:
-        *(int *)arg = s->idle;
-        return STREAM_OK;
-    case STREAM_CTRL_GET_CACHE_SPEED:
-        *(double *)arg = s->speed;
+    case STREAM_CTRL_GET_CACHE_INFO:
+        *(struct stream_cache_info *)arg = (struct stream_cache_info) {
+            .size = s->buffer_size - s->back_size,
+            .fill = s->max_filepos - s->read_filepos,
+            .idle = s->idle,
+            .speed = llrint(s->speed),
+        };
         return STREAM_OK;
     case STREAM_CTRL_SET_READAHEAD:
         s->enable_readahead = *(int *)arg;
@@ -712,17 +709,15 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
     for (;;) {
         if (mp_cancel_test(cache->cancel))
             return -1;
-        int64_t fill;
-        int idle;
-        if (stream_control(s->cache, STREAM_CTRL_GET_CACHE_FILL, &fill) < 0)
-            break;
-        if (stream_control(s->cache, STREAM_CTRL_GET_CACHE_IDLE, &idle) < 0)
+        struct stream_cache_info info;
+        if (stream_control(s->cache, STREAM_CTRL_GET_CACHE_INFO, &info) < 0)
             break;
         MP_INFO(s, "\rCache fill: %5.2f%% "
-                "(%" PRId64 " bytes)   ", 100.0 * fill / s->buffer_size, fill);
-        if (fill >= min)
+                "(%" PRId64 " bytes)   ", 100.0 * info.fill / s->buffer_size,
+                info.fill);
+        if (info.fill >= min)
             break;
-        if (idle)
+        if (info.idle)
             break;    // file is smaller than prefill size
         // Wake up if the cache is done reading some data (or on timeout/abort)
         pthread_mutex_lock(&s->mutex);
