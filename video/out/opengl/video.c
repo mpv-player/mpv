@@ -1736,8 +1736,7 @@ static void pass_convert_yuv(struct gl_video *p)
         GLSL(color.rgb = color.rgb * color.a + background * (1.0 - color.a);)
     } else { // alpha present in image
         p->components = 4;
-        if (p->gl->fb_premultiplied)
-            GLSL(color = vec4(color.rgb * color.a, color.a);)
+        GLSL(color = vec4(color.rgb * color.a, color.a);)
     }
 }
 

@@ -124,7 +124,6 @@ static bool create_gl_context(struct MPGLContext *ctx, int vo_flags)
 
     mpgl_load_functions(ctx->gl, (void *)cocoa_glgetaddr, NULL, ctx->vo->log);
     ctx->gl->fb_r = ctx->gl->fb_g = ctx->gl->fb_b = cgl_color_size(ctx);
-    ctx->gl->fb_premultiplied = true;
 
     CGLReleasePixelFormat(p->pix);
 

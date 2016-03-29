@@ -274,7 +274,6 @@ static int glx_init(struct MPGLContext *ctx, int flags)
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_RED_SIZE, &ctx->gl->fb_r);
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_GREEN_SIZE, &ctx->gl->fb_g);
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_BLUE_SIZE, &ctx->gl->fb_b);
-    ctx->gl->fb_premultiplied = true;
 
     return 0;
 
