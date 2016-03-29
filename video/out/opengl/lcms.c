@@ -193,44 +193,49 @@ static cmsHPROFILE get_vid_profile(cmsContext cms, cmsHPROFILE disp_profile,
         .Blue  = {csp.blue.x,  csp.blue.y,  1.0},
     };
 
-    cmsToneCurve *tonecurve = NULL;
+    cmsToneCurve *tonecurve[3] = {0};
     switch (trc) {
-    case MP_CSP_TRC_LINEAR:  tonecurve = cmsBuildGamma(cms, 1.0); break;
-    case MP_CSP_TRC_GAMMA18: tonecurve = cmsBuildGamma(cms, 1.8); break;
-    case MP_CSP_TRC_GAMMA22: tonecurve = cmsBuildGamma(cms, 2.2); break;
-    case MP_CSP_TRC_GAMMA28: tonecurve = cmsBuildGamma(cms, 2.8); break;
+    case MP_CSP_TRC_LINEAR:  tonecurve[0] = cmsBuildGamma(cms, 1.0); break;
+    case MP_CSP_TRC_GAMMA18: tonecurve[0] = cmsBuildGamma(cms, 1.8); break;
+    case MP_CSP_TRC_GAMMA22: tonecurve[0] = cmsBuildGamma(cms, 2.2); break;
+    case MP_CSP_TRC_GAMMA28: tonecurve[0] = cmsBuildGamma(cms, 2.8); break;
 
     case MP_CSP_TRC_SRGB:
         // Values copied from Little-CMS
-        tonecurve = cmsBuildParametricToneCurve(cms, 4,
+        tonecurve[0] = cmsBuildParametricToneCurve(cms, 4,
                 (double[5]){2.40, 1/1.055, 0.055/1.055, 1/12.92, 0.04045});
         break;
 
     case MP_CSP_TRC_PRO_PHOTO:
-        tonecurve = cmsBuildParametricToneCurve(cms, 4,
+        tonecurve[0] = cmsBuildParametricToneCurve(cms, 4,
                 (double[5]){1.8, 1.0, 0.0, 1/16.0, 0.03125});
         break;
 
     case MP_CSP_TRC_BT_1886: {
         // To build an appropriate BT.1886 transformation we need access to
         // the display's black point, so we use the reverse mappings
-        cmsHPROFILE xyz_profile = cmsCreateXYZProfileTHR(cms);
-        cmsHTRANSFORM rgb2xyz = cmsCreateTransformTHR(cms,
-                disp_profile, TYPE_RGB_16, xyz_profile, TYPE_XYZ_DBL,
+        cmsToneCurve *linear = cmsBuildGamma(cms, 1.0);
+        cmsHPROFILE rev_profile = cmsCreateRGBProfileTHR(cms, &wp_xyY, &prim_xyY,
+                (cmsToneCurve*[3]){linear, linear, linear});
+        cmsHTRANSFORM disp2src = cmsCreateTransformTHR(cms,
+                disp_profile, TYPE_RGB_16, rev_profile, TYPE_RGB_DBL,
                 INTENT_RELATIVE_COLORIMETRIC, 0);
-        cmsCloseProfile(xyz_profile);
-        if (!rgb2xyz)
+        cmsFreeToneCurve(linear);
+        cmsCloseProfile(rev_profile);
+        if (!disp2src)
             return false;
 
-        uint64_t black[3] = {0};
-        cmsCIEXYZ disp_black;
-        cmsDoTransform(rgb2xyz, black, &disp_black, 1);
+        uint64_t disp_black[3] = {0};
+        double src_black[3];
+        cmsDoTransform(disp2src, disp_black, src_black, 1);
 
-        // Build the parametric BT.1886 transfer curve
-        const double gamma = 2.40;
-        double binv = pow(disp_black.Y, 1.0/gamma);
-        tonecurve = cmsBuildParametricToneCurve(cms, 6,
-                (double[4]){gamma, 1.0 - binv, binv, 0.0});
+        // Build the parametric BT.1886 transfer curve, one per channel
+        for (int i = 0; i < 3; i++) {
+            const double gamma = 2.40;
+            double binv = pow(src_black[i], 1.0/gamma);
+            tonecurve[i] = cmsBuildParametricToneCurve(cms, 6,
+                    (double[4]){gamma, 1.0 - binv, binv, 0.0});
+        }
         break;
     }
 
@@ -238,12 +243,18 @@ static cmsHPROFILE get_vid_profile(cmsContext cms, cmsHPROFILE disp_profile,
         abort();
     }
 
-    if (!tonecurve)
+    if (!tonecurve[0])
         return false;
 
+    if (!tonecurve[1]) tonecurve[1] = tonecurve[0];
+    if (!tonecurve[2]) tonecurve[2] = tonecurve[0];
+
     cmsHPROFILE *vid_profile = cmsCreateRGBProfileTHR(cms, &wp_xyY, &prim_xyY,
-                (cmsToneCurve*[3]){tonecurve, tonecurve, tonecurve});
-    cmsFreeToneCurve(tonecurve);
+                                                      tonecurve);
+
+    if (tonecurve[2] != tonecurve[0]) cmsFreeToneCurve(tonecurve[2]);
+    if (tonecurve[1] != tonecurve[0]) cmsFreeToneCurve(tonecurve[1]);
+    cmsFreeToneCurve(tonecurve[0]);
 
     return vid_profile;
 }
@@ -271,7 +282,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
         // because we may change the parameter in the future or make it
         // customizable, same for the primaries.
         char *cache_info = talloc_asprintf(tmp,
-                "ver=1.2, intent=%d, size=%dx%dx%d, prim=%d, trc=%d\n",
+                "ver=1.3, intent=%d, size=%dx%dx%d, prim=%d, trc=%d\n",
                 p->opts.intent, s_r, s_g, s_b, prim, trc);
 
         uint8_t hash[32];
