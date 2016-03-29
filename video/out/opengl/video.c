@@ -1763,7 +1763,7 @@ static void compute_src_transform(struct gl_video *p, struct gl_transform *tr)
     int a = p->image_params.rotate % 90 ? 0 : p->image_params.rotate / 90;
     int sin90[4] = {0, 1, 0, -1}; // just to avoid rounding issues etc.
     int cos90[4] = {1, 0, -1, 0};
-    struct gl_transform rot = {{{cos90[a], -sin90[a]}, {sin90[a], cos90[a]}}};
+    struct gl_transform rot = {{{cos90[a], sin90[a]}, {-sin90[a], cos90[a]}}};
     gl_transform_trans(rot, &transform);
 
     // basically, recenter to keep the whole image in view
