@@ -1730,10 +1730,6 @@ static void pass_convert_yuv(struct gl_video *p)
         GLSL(color.a = 1.0;)
     } else if (p->opts.alpha_mode == 2) { // blend against black
         GLSL(color = vec4(color.rgb * color.a, 1.0);)
-    } else if (p->opts.alpha_mode == 3) { // blend against tiles
-        GLSL(bvec2 tile = lessThan(fract(gl_FragCoord.xy / 32.0), vec2(0.5));)
-        GLSL(vec3 background = vec3(tile.x == tile.y ? 1.0 : 0.75);)
-        GLSL(color.rgb = color.rgb * color.a + background * (1.0 - color.a);)
     } else { // alpha present in image
         p->components = 4;
         GLSL(color = vec4(color.rgb * color.a, color.a);)
@@ -2171,8 +2167,18 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
         GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
+
     pass_colormanage(p, p->image_params.primaries,
                      p->use_linear ? MP_CSP_TRC_LINEAR : p->image_params.gamma);
+
+    // Draw checkerboard pattern to indicate transparency
+    if (p->has_alpha && p->opts.alpha_mode == 3) {
+        GLSLF("// transparency checkerboard\n");
+        GLSL(bvec2 tile = lessThan(fract(gl_FragCoord.xy / 32.0), vec2(0.5));)
+        GLSL(vec3 background = vec3(tile.x == tile.y ? 1.0 : 0.75);)
+        GLSL(color.rgb = mix(background, color.rgb, color.a);)
+    }
+
     pass_dither(p);
     finish_pass_direct(p, fbo, p->vp_w, p->vp_h, &p->dst_rect);
 }
