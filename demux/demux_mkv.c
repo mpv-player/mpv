@@ -1687,9 +1687,11 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         sh_a->samplerate = 48000;
     }
 
-    // This field tends to be broken, and our decoder can interpolate the
-    // missing timestamps anyway.
-    track->default_duration = 0;
+    // Some files have broken default DefaultDuration set, which will lead to
+    // audio packets with incorrect timestamps. This follows FFmpeg commit
+    // 6158a3b, sample see FFmpeg ticket 2508.
+    if (sh_a->samplerate == 8000 && strcmp(codec, "ac3") == 0)
+        track->default_duration = 0;
 
     sh_a->extradata = extradata;
     sh_a->extradata_size = extradata_len;
