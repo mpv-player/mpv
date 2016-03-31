@@ -325,6 +325,7 @@ iconv support use --disable-iconv.",
     } , {
         'name' : '--encoding',
         'desc' : 'Encoding',
+        'default': 'disable',
         'func': check_true,
     }, {
         'name': '--libbluray',
