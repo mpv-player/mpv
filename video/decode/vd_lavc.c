@@ -444,8 +444,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
                    mp_imgfmt_to_name(c->codec_tag));
     }
 
-    if (c->lav_headers)
-        mp_copy_lav_codec_headers(avctx, c->lav_headers);
+    mp_set_lav_codec_headers(avctx, c);
 
     /* open it */
     if (avcodec_open2(avctx, lavc_codec, NULL) < 0)

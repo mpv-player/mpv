@@ -131,8 +131,7 @@ static int init(struct dec_audio *da, const char *decoder)
     // demux_mkv
     mp_lavc_set_extradata(lavc_context, c->extradata, c->extradata_size);
 
-    if (c->lav_headers)
-        mp_copy_lav_codec_headers(lavc_context, c->lav_headers);
+    mp_set_lav_codec_headers(lavc_context, c);
 
     mp_set_avcodec_threads(da->log, lavc_context, opts->threads);
 

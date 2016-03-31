@@ -171,7 +171,11 @@ static int init_filter(struct dec_audio *da, AVPacket *pkt)
     if (!stream)
         goto fail;
 
+#if HAVE_AVCODEC_HAS_CODECPAR
+    stream->codecpar->codec_id = spdif_ctx->codec_id;
+#else
     stream->codec->codec_id = spdif_ctx->codec_id;
+#endif
 
     AVDictionary *format_opts = NULL;
 

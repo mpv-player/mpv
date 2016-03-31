@@ -550,8 +550,14 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
     lavf_priv_t *priv = demuxer->priv;
     AVFormatContext *avfc = priv->avfc;
     AVStream *st = avfc->streams[i];
-    AVCodecContext *codec = st->codec;
     struct sh_stream *sh = NULL;
+#if HAVE_AVCODEC_HAS_CODECPAR
+    AVCodecParameters *codec = st->codecpar;
+    int lavc_delay = codec->initial_padding;
+#else
+    AVCodecContext *codec = st->codec;
+    int lavc_delay = codec->delay;
+#endif
 
     switch (codec->codec_type) {
     case AVMEDIA_TYPE_AUDIO: {
@@ -566,7 +572,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
 
         double delay = 0;
         if (codec->sample_rate > 0)
-            delay = codec->delay / (double)codec->sample_rate;
+            delay = lavc_delay / (double)codec->sample_rate;
         priv->seek_delay = MPMAX(priv->seek_delay, delay);
 
         export_replaygain(demuxer, sh->codec, st);
@@ -647,9 +653,17 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->ff_index = st->index;
         sh->codec->codec = mp_codec_from_av_codec_id(codec->codec_id);
         sh->codec->codec_tag = codec->codec_tag;
+#if HAVE_AVCODEC_HAS_CODECPAR
+        sh->codec->lav_codecpar = avcodec_parameters_alloc();
+        if (sh->codec->lav_codecpar)
+            avcodec_parameters_copy(sh->codec->lav_codecpar, codec);
+#else
+        sh->codec->codec = mp_codec_from_av_codec_id(codec->codec_id);
+        sh->codec->codec_tag = codec->codec_tag;
         sh->codec->lav_headers = avcodec_alloc_context3(NULL);
         if (sh->codec->lav_headers)
             mp_copy_lav_codec_headers(sh->codec->lav_headers, codec);
+#endif
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = true;
