@@ -621,12 +621,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             if (av_opt_get_q(avfc, "subfps", AV_OPT_SEARCH_CHILDREN, &r) >= 0) {
                 // File headers don't have a FPS set.
                 if (r.num < 1 || r.den < 1)
-                    sh->codec->frame_based = av_q2d(av_inv_q(codec->time_base));
-            } else {
-                // Older libavformat versions. If the FPS matches the microdvd
-                // reader's default, assume it uses frame based timing.
-                if (codec->time_base.num == 125 && codec->time_base.den == 2997)
-                    sh->codec->frame_based = 23.976;
+                    sh->codec->frame_based = 23.976; // default timebase
             }
         }
         break;
