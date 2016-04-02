@@ -284,7 +284,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     priv->current_pts = pts;
 
     struct sub *current = NULL;
-    for (int n = MAX_QUEUE - 1; n >= 0; n--) {
+    for (int n = 0; n < MAX_QUEUE; n++) {
         struct sub *sub = &priv->subs[n];
         if (!sub->valid)
             continue;
