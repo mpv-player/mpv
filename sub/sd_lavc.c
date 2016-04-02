@@ -166,7 +166,9 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     AVSubtitle sub;
     AVPacket pkt;
 
-    // libavformat sets duration==0, even if the duration is unknown.
+    // libavformat sets duration==0, even if the duration is unknown. Some files
+    // also have actually subtitle packets with duration explicitly set to 0
+    // (yes, at least some of such mkv files were muxed by libavformat).
     // Assume there are no bitmap subs that actually use duration==0 for
     // hidden subtitle events.
     if (duration == 0)
