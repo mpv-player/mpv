@@ -54,6 +54,7 @@ struct seekpoint {
 
 struct sd_lavc_priv {
     AVCodecContext *avctx;
+    AVRational pkt_timebase;
     struct sub subs[MAX_QUEUE]; // most recent event first
     struct sub_bitmap *outbitmaps;
     int64_t displayed_id;
@@ -117,6 +118,22 @@ static int init(struct sd *sd)
     if (!ctx)
         goto error;
     mp_lavc_set_extradata(ctx, sd->codec->extradata, sd->codec->extradata_size);
+    if (cid == AV_CODEC_ID_HDMV_PGS_SUBTITLE) {
+        // We don't always want to set this, because the ridiculously shitty
+        // libavcodec API will mess with certain fields (end_display_time)
+        // when setting it. On the other hand, PGS in particular needs PTS
+        // mangling. While the PGS decoder doesn't modify the timestamps (just
+        // reorder it), the ridiculously shitty libavcodec wants a timebase
+        // anyway and for no good reason. It always sets end_display_time to
+        // UINT32_MAX (which is a broken and undocumented way to say "unknown"),
+        // which coincidentally won't be overridden by the ridiculously shitty
+        // pkt_timebase code. also, Libav doesn't have the pkt_timebase field,
+        // because Libav tends to avoid _adding_ ridiculously shitty APIs.
+#if LIBAVCODEC_VERSION_MICRO >= 100
+        priv->pkt_timebase = (AVRational){1, AV_TIME_BASE};
+        ctx->pkt_timebase = priv->pkt_timebase;
+#endif
+    }
     if (avcodec_open2(ctx, sub_codec, NULL) < 0)
         goto error;
     priv->avctx = ctx;
@@ -177,13 +194,14 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     if (pts == MP_NOPTS_VALUE)
         MP_WARN(sd, "Subtitle with unknown start time.\n");
 
-    av_init_packet(&pkt);
-    pkt.data = packet->buffer;
-    pkt.size = packet->len;
+    mp_set_av_packet(&pkt, packet, &priv->pkt_timebase);
     int got_sub;
     int res = avcodec_decode_subtitle2(ctx, &sub, &got_sub, &pkt);
     if (res < 0 || !got_sub)
         return;
+
+    if (sub.pts != AV_NOPTS_VALUE)
+        pts = sub.pts / (double)AV_TIME_BASE;
 
     if (pts != MP_NOPTS_VALUE) {
         if (sub.end_display_time > sub.start_display_time &&
