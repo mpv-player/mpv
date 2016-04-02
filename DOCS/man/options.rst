@@ -2967,6 +2967,22 @@ Terminal
         :debug:     debug messages
         :trace:     very noisy debug messages
 
+    .. admonition:: Example
+
+        ::
+
+            mpv --msg-level=ao/sndio=no
+
+        Completely silences the output of ao_sndio, which uses the log
+        prefix ``[ao/sndio]``.
+
+        ::
+
+            mpv --msg-level=all=warn,ao/alsa=error
+
+        Only show warnings or worse, and let the ao_alsa output show errors
+        only.
+
 ``--term-osd, --no-term-osd``, ``--term-osd=force``
     Display OSD messages on the console when no video output is available.
     Enabled by default.
