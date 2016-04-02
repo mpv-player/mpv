@@ -7,4 +7,6 @@
 #include <linux/dvb/frontend.h>
 #include <linux/dvb/video.h>
 #include <linux/dvb/audio.h>
+#include <linux/dvb/version.h>
+fe_bandwidth_t t;
 int main(void) {return 0;}
