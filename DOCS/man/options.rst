@@ -606,7 +606,7 @@ Video
     The ``vaapi-copy`` and ``dxva2-copy`` modes allow you to use hardware
     decoding with any VO, backend or filter. Because these copy the decoded
     video back to system RAM, they're likely less efficient than the ``vaapi``
-    or ``dxva2`` modes respectivley.
+    or ``dxva2`` modes respectively.
 
     .. note::
 
