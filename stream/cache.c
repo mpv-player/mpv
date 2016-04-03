@@ -136,7 +136,7 @@ static void cache_wakeup_and_wait(struct priv *s, double *retry_time)
 {
     double start = mp_time_sec();
     if (*retry_time >= CACHE_WAIT_TIME) {
-        MP_WARN(s, "Cache is not responding - slow/stuck network connection?\n");
+        MP_VERBOSE(s, "Cache is not responding - slow/stuck network connection?\n");
         *retry_time = -1; // do not warn again for this call
     }
 
