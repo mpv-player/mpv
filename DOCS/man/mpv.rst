@@ -54,7 +54,7 @@ UP and DOWN
 
 Ctrl+LEFT and Ctrl+RIGHT
     Seek to the previous/next subtitle. Subject to some restrictions and
-    might not always work; see ``sub_seek`` command.
+    might not always work; see ``sub-seek`` command.
 
 [ and ]
     Decrease/increase current playback speed by 10%.
