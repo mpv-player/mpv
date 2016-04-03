@@ -17,6 +17,7 @@
 
 /* Stuff for correct aspect scaling. */
 #include "aspect.h"
+#include "math.h"
 #include "vo.h"
 #include "common/msg.h"
 #include "options/options.h"
@@ -84,7 +85,7 @@ static void src_dst_split_scaling(int src_size, int dst_size,
         zoom = 0.0;
     }
 
-    scaled_src_size += zoom * scaled_src_size;
+    scaled_src_size *= powf(2, zoom);
     align = (align + 1) / 2;
 
     *src_start = 0;

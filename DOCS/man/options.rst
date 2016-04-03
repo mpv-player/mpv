@@ -732,12 +732,10 @@ Video
     appear in files, but can't be handled properly by mpv.
 
 ``--video-zoom=<value>``
-    Adjust the video display scale factor by the given value. The unit is in
-    fractions of the (scaled) window video size.
-
-    For example, given a 1280x720 video shown in a 1280x720 window,
-    ``--video-zoom=-0.1`` would make the video by 128 pixels smaller in
-    X direction, and 72 pixels in Y direction.
+    Adjust the video display scale factor by the given value. The parameter is
+    given log 2. For example, ``--video-zoom=0`` is unscaled,
+    ``--video-zoom=1`` is twice the size, ``--video-zoom=-2`` is one fourth of
+    the size, and so on.
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
