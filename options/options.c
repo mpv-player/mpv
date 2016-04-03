@@ -709,7 +709,7 @@ const struct MPOpts mp_default_opts = {
         .border = 1,
         .WinID = -1,
         .window_scale = 1.0,
-        .x11_bypass_compositor = 1,
+        .x11_bypass_compositor = 0,
         .mmcss_profile = "Playback",
     },
     .allow_win_drag = 1,

@@ -2072,8 +2072,8 @@ Window
     This option might be removed in the future.
 
 ``--x11-bypass-compositor=<yes|no>``
-    If set to ``yes`` (default), then ask the compositor to unredirect the
-    mpv window. This uses the ``_NET_WM_BYPASS_COMPOSITOR`` hint.
+    If set to ``yes``, then ask the compositor to unredirect the mpv window
+    (default: no). This uses the ``_NET_WM_BYPASS_COMPOSITOR`` hint.
 
 
 Disc Devices
