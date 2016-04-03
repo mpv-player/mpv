@@ -27,6 +27,7 @@ Interface changes
     - add "cache-speed" property
     - rename --input-unix-socket to --input-ipc-server, and make it work on
       Windows too
+    - change the exact behavior of the "video-zoom" property
  --- mpv 0.16.0 ---
     - change --audio-channels default to stereo (use --audio-channels=auto to
       get the old default)
