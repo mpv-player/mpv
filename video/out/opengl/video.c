@@ -1412,7 +1412,7 @@ static void pass_prescale_luma(struct gl_video *p, struct img_tex *tex,
         case 2:
             upload_nnedi3_weights(p);
             pass_nnedi3(p->gl, p->sc, planes, id, step, tex->multiplier,
-                        p->opts.nnedi3_opts, &step_transform);
+                        p->opts.nnedi3_opts, &step_transform, tex->gl_target);
             break;
         default:
             abort();
