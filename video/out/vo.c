@@ -150,6 +150,7 @@ struct vo_internal {
     double estimated_vsync_interval;
     double estimated_vsync_jitter;
     bool expecting_vsync;
+    int64_t num_successive_vsyncs;
 
     int64_t flip_queue_offset; // queue flip events at most this much in advance
 
@@ -247,6 +248,7 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     *vo->in = (struct vo_internal) {
         .dispatch = mp_dispatch_create(vo),
         .req_frames = 1,
+        .estimated_vsync_jitter = -1,
     };
     mp_make_wakeup_pipe(vo->in->wakeup_pipe);
     mp_dispatch_set_wakeup_fn(vo->in->dispatch, dispatch_wakeup_cb, vo);
@@ -321,13 +323,10 @@ void vo_destroy(struct vo *vo)
 static void reset_vsync_timings(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
-    in->num_vsync_samples = 0;
-    in->num_total_vsync_samples = 0;
     in->drop_point = 0;
-    in->estimated_vsync_interval = 0;
-    in->estimated_vsync_jitter = -1;
     in->base_vsync = 0;
     in->expecting_vsync = false;
+    in->num_successive_vsyncs = 0;
 }
 
 static double vsync_stddef(struct vo *vo, int64_t ref_vsync)
@@ -419,17 +418,23 @@ static void update_vsync_timing_after_swap(struct vo *vo)
     struct vo_internal *in = vo->in;
 
     int64_t now = mp_time_us();
+    int64_t prev_vsync = in->prev_vsync;
+
+    in->prev_vsync = now;
 
     if (!in->expecting_vsync) {
-        in->prev_vsync = now; // for normal system-time framedrop
         reset_vsync_timings(vo);
         return;
     }
 
+    in->num_successive_vsyncs++;
+    if (in->num_successive_vsyncs <= 2)
+        return;
+
     if (in->num_vsync_samples >= MAX_VSYNC_SAMPLES)
         in->num_vsync_samples -= 1;
     MP_TARRAY_INSERT_AT(in, in->vsync_samples, in->num_vsync_samples, 0,
-                        now - in->prev_vsync);
+                        now - prev_vsync);
     in->drop_point = MPMIN(in->drop_point + 1, in->num_vsync_samples);
     in->num_total_vsync_samples += 1;
     if (in->base_vsync) {
@@ -437,7 +442,6 @@ static void update_vsync_timing_after_swap(struct vo *vo)
     } else {
         in->base_vsync = now;
     }
-    in->prev_vsync = now;
 
     double avg = 0;
     for (int n = 0; n < in->num_vsync_samples; n++)
@@ -788,9 +792,10 @@ static bool render_frame(struct vo *vo)
     if (in->current_frame->num_vsyncs > 0)
         in->current_frame->num_vsyncs -= 1;
 
-    in->expecting_vsync = in->current_frame->display_synced && !in->paused;
-    if (in->expecting_vsync && !in->num_vsync_samples) // first DS frame in a row
+    bool use_vsync = in->current_frame->display_synced && !in->paused;
+    if (use_vsync && !in->expecting_vsync) // first DS frame in a row
         in->prev_vsync = now;
+    in->expecting_vsync = use_vsync;
 
     if (in->dropped_frame) {
         in->drop_count += 1;
