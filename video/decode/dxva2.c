@@ -485,7 +485,7 @@ fail:
 }
 
 static int dxva2_probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
-                       const char *decoder)
+                       const char *codec)
 {
     hwdec_request_api(info, "dxva2");
     // dxva2-copy can do without external context; dxva2 requires it.
@@ -494,7 +494,7 @@ static int dxva2_probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
             info->hwctx->type == HWDEC_DXVA2_COPY)
             return HWDEC_ERR_NO_CTX;
     }
-    return d3d_probe_codec(decoder);
+    return d3d_probe_codec(codec);
 }
 
 const struct vd_lavc_hwdec mp_vd_lavc_dxva2 = {

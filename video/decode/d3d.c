@@ -97,9 +97,9 @@ static const struct d3dva_mode d3dva_modes[] = {
 #undef MODE
 #undef MODE2
 
-int d3d_probe_codec(const char *decoder)
+int d3d_probe_codec(const char *codec)
 {
-    enum AVCodecID codec = mp_codec_to_av_codec_id(decoder);
+    enum AVCodecID codec = mp_codec_to_av_codec_id(codec);
     for (int i = 0; i < MP_ARRAY_SIZE(d3dva_modes); i++) {
         const struct d3dva_mode *mode = &d3dva_modes[i];
         if (mode->codec == codec)

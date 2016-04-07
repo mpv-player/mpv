@@ -214,12 +214,12 @@ const struct hwdec_profile_entry *hwdec_find_profile(
 }
 
 // Check codec support, without checking the profile.
-bool hwdec_check_codec_support(const char *decoder,
+bool hwdec_check_codec_support(const char *codec,
                                const struct hwdec_profile_entry *table)
 {
-    enum AVCodecID codec = mp_codec_to_av_codec_id(decoder);
+    enum AVCodecID codecid = mp_codec_to_av_codec_id(codec);
     for (int n = 0; table[n].av_codec; n++) {
-        if (table[n].av_codec == codec)
+        if (table[n].av_codec == codecid)
             return true;
     }
     return false;
@@ -240,17 +240,17 @@ void hwdec_request_api(struct mp_hwdec_info *info, const char *api_name)
 }
 
 static int hwdec_probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
-                       const char *decoder)
+                       const char *codec)
 {
     int r = 0;
     if (hwdec->probe)
-        r = hwdec->probe(hwdec, info, decoder);
+        r = hwdec->probe(hwdec, info, codec);
     return r;
 }
 
 static struct vd_lavc_hwdec *probe_hwdec(struct dec_video *vd, bool autoprobe,
                                          enum hwdec_type api,
-                                         const char *decoder)
+                                         const char *codec)
 {
     MP_VERBOSE(vd, "Probing '%s'...\n", m_opt_choice_str(mp_hwdec_names, api));
     struct vd_lavc_hwdec *hwdec = find_hwcodec(api);
@@ -258,7 +258,7 @@ static struct vd_lavc_hwdec *probe_hwdec(struct dec_video *vd, bool autoprobe,
         MP_VERBOSE(vd, "Requested hardware decoder not compiled.\n");
         return NULL;
     }
-    int r = hwdec_probe(hwdec, vd->hwdec_info, decoder);
+    int r = hwdec_probe(hwdec, vd->hwdec_info, codec);
     if (r == HWDEC_ERR_EMULATED) {
         if (autoprobe)
             return NULL;
@@ -269,8 +269,8 @@ static struct vd_lavc_hwdec *probe_hwdec(struct dec_video *vd, bool autoprobe,
     if (r >= 0) {
         return hwdec;
     } else if (r == HWDEC_ERR_NO_CODEC) {
-        MP_VERBOSE(vd, "Hardware decoder '%s' not found in libavcodec.\n",
-                   decoder);
+        MP_VERBOSE(vd, "Hardware decoder for '%s' with the given API not found "
+                       "in libavcodec.\n", codec);
     } else if (r == HWDEC_ERR_NO_CTX && !autoprobe) {
         MP_WARN(vd, "VO does not support requested hardware decoder, or "
                 "loading it failed.\n");
@@ -301,25 +301,26 @@ static void reinit(struct dec_video *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
     const char *decoder = ctx->decoder;
+    const char *codec = vd->codec->codec;
 
     uninit_avctx(vd);
 
     struct vd_lavc_hwdec *hwdec = NULL;
 
-    if (hwdec_codec_allowed(vd, decoder)) {
+    if (hwdec_codec_allowed(vd, codec)) {
         if (vd->opts->hwdec_api == HWDEC_AUTO) {
             for (int n = 0; hwdec_list[n]; n++) {
-                hwdec = probe_hwdec(vd, true, hwdec_list[n]->type, decoder);
+                hwdec = probe_hwdec(vd, true, hwdec_list[n]->type, codec);
                 if (hwdec)
                     break;
             }
         } else if (vd->opts->hwdec_api != HWDEC_NONE) {
-            hwdec = probe_hwdec(vd, false, vd->opts->hwdec_api, decoder);
+            hwdec = probe_hwdec(vd, false, vd->opts->hwdec_api, codec);
         }
     } else {
         MP_VERBOSE(vd, "Not trying to use hardware decoding: codec %s is not "
                    "on whitelist, or does not support hardware acceleration.\n",
-                   decoder);
+                   codec);
     }
 
     if (hwdec) {

@@ -50,7 +50,7 @@ struct vd_lavc_hwdec {
     // get_format callback.
     int image_format;
     int (*probe)(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
-                 const char *decoder);
+                 const char *codec);
     int (*init)(struct lavc_ctx *ctx);
     int (*init_decoder)(struct lavc_ctx *ctx, int w, int h);
     void (*uninit)(struct lavc_ctx *ctx);
@@ -80,7 +80,7 @@ struct hwdec_profile_entry {
 
 const struct hwdec_profile_entry *hwdec_find_profile(
     struct lavc_ctx *ctx, const struct hwdec_profile_entry *table);
-bool hwdec_check_codec_support(const char *decoder,
+bool hwdec_check_codec_support(const char *codec,
                                const struct hwdec_profile_entry *table);
 int hwdec_get_max_refs(struct lavc_ctx *ctx);
 

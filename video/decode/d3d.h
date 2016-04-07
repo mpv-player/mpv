@@ -30,7 +30,7 @@ struct d3d_decoder_fmt {
     DWORD dxfmt_decoded; // D3DFORMAT or DXGI_FORMAT
 };
 
-int d3d_probe_codec(const char *decode);
+int d3d_probe_codec(const char *codec);
 struct d3d_decoder_fmt d3d_select_decoder_mode(
     struct lavc_ctx *s, const GUID *device_guids, UINT n_guids,
     DWORD (*get_dxfmt_cb)(struct lavc_ctx *s, const GUID *guid, int depth));

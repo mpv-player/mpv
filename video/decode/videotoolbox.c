@@ -28,12 +28,12 @@
 
 
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
-                 const char *decoder)
+                 const char *codec)
 {
     hwdec_request_api(info, "videotoolbox");
     if (!info || !info->hwctx || info->hwctx->type != HWDEC_VIDEOTOOLBOX)
         return HWDEC_ERR_NO_CTX;
-    switch (mp_codec_to_av_codec_id(decoder)) {
+    switch (mp_codec_to_av_codec_id(codec)) {
     case AV_CODEC_ID_H264:
     case AV_CODEC_ID_H263:
     case AV_CODEC_ID_MPEG1VIDEO:
