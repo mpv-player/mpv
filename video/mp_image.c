@@ -507,6 +507,8 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
         if (p->p_w != p->p_h || !p->p_w)
             mp_snprintf_cat(b, bs, " [%d:%d]", p->p_w, p->p_h);
         mp_snprintf_cat(b, bs, " %s", mp_imgfmt_to_name(p->imgfmt));
+        if (p->hw_subfmt)
+            mp_snprintf_cat(b, bs, "[%llu]", (unsigned long long)(p->hw_subfmt));
         mp_snprintf_cat(b, bs, " %s/%s",
                         m_opt_choice_str(mp_csp_names, p->colorspace),
                         m_opt_choice_str(mp_csp_levels_names, p->colorlevels));
@@ -547,6 +549,9 @@ bool mp_image_params_valid(const struct mp_image_params *p)
     if (!desc.id)
         return false;
 
+    if (p->hw_subfmt && !(desc.flags & MP_IMGFLAG_HWACCEL))
+        return false;
+
     return true;
 }
 
@@ -554,6 +559,7 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
                            const struct mp_image_params *p2)
 {
     return p1->imgfmt == p2->imgfmt &&
+           p1->hw_subfmt == p2->hw_subfmt &&
            p1->w == p2->w && p1->h == p2->h &&
            p1->p_w == p2->p_w && p1->p_h == p2->p_h &&
            p1->colorspace == p2->colorspace &&
