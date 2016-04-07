@@ -101,16 +101,15 @@ static struct mp_image *download_image(struct mp_hwdec_ctx *ctx,
     if (hw_image->imgfmt != IMGFMT_VIDEOTOOLBOX)
         return NULL;
 
+    struct mp_image *image = NULL;
     CVPixelBufferRef pbuf = (CVPixelBufferRef)hw_image->planes[3];
-    CVPixelBufferLockBaseAddress(pbuf, 0);
+    CVPixelBufferLockBaseAddress(pbuf, kCVPixelBufferLock_ReadOnly);
     size_t width  = CVPixelBufferGetWidth(pbuf);
     size_t height = CVPixelBufferGetHeight(pbuf);
     uint32_t cvpixfmt = CVPixelBufferGetPixelFormatType(pbuf);
     struct vt_format *f = vt_get_gl_format(cvpixfmt);
-    if (!f) {
-        CVPixelBufferUnlockBaseAddress(pbuf, 0);
-        return NULL;
-    }
+    if (!f)
+        goto unlock;
 
     struct mp_image img = {0};
     mp_image_setfmt(&img, f->imgfmt);
@@ -125,8 +124,10 @@ static struct mp_image *download_image(struct mp_hwdec_ctx *ctx,
 
     mp_image_copy_attributes(&img, hw_image);
 
-    struct mp_image *image = mp_image_pool_new_copy(swpool, &img);
-    CVPixelBufferUnlockBaseAddress(pbuf, 0);
+    image = mp_image_pool_new_copy(swpool, &img);
+
+unlock:
+    CVPixelBufferUnlockBaseAddress(pbuf, kCVPixelBufferLock_ReadOnly);
 
     return image;
 }
