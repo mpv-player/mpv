@@ -146,14 +146,21 @@ static bool check_hwdec(struct gl_hwdec *hw)
     return true;
 }
 
+static uint32_t get_vt_fmt(struct mp_hwdec_ctx *ctx)
+{
+    struct gl_hwdec *hw = ctx->priv;
+    struct vt_format *f =
+        vt_get_gl_format_from_imgfmt(hw->global->opts->videotoolbox_format);
+    return f ? f->cvpixfmt : (uint32_t)-1;
+}
+
 static int create(struct gl_hwdec *hw)
 {
     if (!check_hwdec(hw))
         return -1;
 
     struct priv *p = talloc_zero(hw, struct priv);
-    struct vt_format *f =
-        vt_get_gl_format_from_imgfmt(hw->global->opts->videotoolbox_format);
+    struct vt_format *f = vt_get_gl_format_from_imgfmt(IMGFMT_NV12);
     if (!f)
         return -1;
 
@@ -162,17 +169,26 @@ static int create(struct gl_hwdec *hw)
     hw->hwctx = &p->hwctx;
     hw->hwctx->download_image = download_image;
     hw->hwctx->type = HWDEC_VIDEOTOOLBOX;
-    hw->hwctx->priv = (void *)(uintptr_t)f->cvpixfmt;
+    hw->hwctx->get_vt_fmt = get_vt_fmt;
 
     hw->gl_texture_target = GL_TEXTURE_RECTANGLE;
     hw->gl->GenTextures(MP_MAX_PLANES, p->gl_planes);
 
+    hw->hwctx->priv = hw;
     return 0;
 }
 
 static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 {
     assert(params->imgfmt == hw->driver->imgfmt);
+
+    struct vt_format *f = vt_get_gl_format(params->hw_subfmt);
+    if (!f) {
+        MP_ERR(hw, "Unsupported CVPixelBuffer format.\n");
+        return -1;
+    }
+
+    hw->converted_imgfmt = f->imgfmt;
     return 0;
 }
 

@@ -32,6 +32,7 @@ struct mp_hwdec_ctx {
     struct mp_vdpau_ctx *vdpau_ctx;
     struct mp_vaapi_ctx *vaapi_ctx;
     struct mp_d3d_ctx *d3d_ctx;
+    uint32_t (*get_vt_fmt)(struct mp_hwdec_ctx *ctx);
 
     // Optional.
     // Allocates a software image from the pool, downloads the hw image from
