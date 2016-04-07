@@ -401,10 +401,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
             avctx->get_buffer2 = get_buffer2_hwdec;
         if (ctx->hwdec->init(ctx) < 0)
             goto error;
-        // This can increase efficiency by not blocking on the hardware
-        // pipeline by reading back immediately after decoding.
-        if (ctx->hwdec->process_image)
-            ctx->max_delay_queue = HWDEC_DELAY_QUEUE_COUNT;
+        ctx->max_delay_queue = ctx->hwdec->delay_queue;
     } else {
         mp_set_avcodec_threads(vd->log, avctx, lavc_param->threads);
     }

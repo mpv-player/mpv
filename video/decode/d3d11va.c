@@ -495,4 +495,5 @@ const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy = {
     .init_decoder   = d3d11va_init_decoder,
     .allocate_image = d3d11va_allocate_image,
     .process_image  = d3d11va_retrieve_image,
+    .delay_queue    = HWDEC_DELAY_QUEUE_COUNT,
 };

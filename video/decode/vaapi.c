@@ -508,4 +508,5 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
     .init_decoder = init_decoder,
     .allocate_image = allocate_image,
     .process_image = copy_image,
+    .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
 };

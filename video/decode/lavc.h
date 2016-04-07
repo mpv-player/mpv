@@ -49,6 +49,11 @@ struct vd_lavc_hwdec {
     // If not-0: the IMGFMT_ format that should be accepted in the libavcodec
     // get_format callback.
     int image_format;
+    // Setting this will queue the given number of frames before calling
+    // process_image() or returning them to the renderer. This can increase
+    // efficiency by not blocking on the hardware pipeline by reading back
+    // immediately after decoding.
+    int delay_queue;
     int (*probe)(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
                  const char *codec);
     int (*init)(struct lavc_ctx *ctx);

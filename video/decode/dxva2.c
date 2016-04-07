@@ -516,4 +516,5 @@ const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy = {
     .init_decoder   = dxva2_init_decoder,
     .allocate_image = dxva2_allocate_image,
     .process_image  = dxva2_retrieve_image,
+    .delay_queue    = HWDEC_DELAY_QUEUE_COUNT,
 };
