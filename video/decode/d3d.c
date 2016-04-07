@@ -99,10 +99,10 @@ static const struct d3dva_mode d3dva_modes[] = {
 
 int d3d_probe_codec(const char *codec)
 {
-    enum AVCodecID codec = mp_codec_to_av_codec_id(codec);
+    enum AVCodecID codecid = mp_codec_to_av_codec_id(codec);
     for (int i = 0; i < MP_ARRAY_SIZE(d3dva_modes); i++) {
         const struct d3dva_mode *mode = &d3dva_modes[i];
-        if (mode->codec == codec)
+        if (mode->codec == codecid)
             return 0;
     }
     return HWDEC_ERR_NO_CODEC;
