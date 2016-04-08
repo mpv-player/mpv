@@ -77,8 +77,8 @@ typeset -A opt_args
 
 # By default, don't complete URLs unless no files match
 local -a tag_order
-zstyle -a ":completion:*:*:$service:*" tag-order tag_order || \
-  zstyle  ":completion:*:*:$service:*" tag-order '!urls'
+zstyle -a ":completion:*:*:\$service:*" tag-order tag_order || \
+  zstyle  ":completion:*:*:\$service:*" tag-order '!urls'
 
 local rc=1
 
