@@ -3677,6 +3677,7 @@ static const struct m_property mp_properties[] = {
     {"video-output-levels", mp_property_video_color,
      .priv = (void *)"output-levels"},
     {"panscan", panscan_property_helper},
+    {"keepaspect", panscan_property_helper},
     {"video-zoom", panscan_property_helper},
     {"video-align-x", panscan_property_helper},
     {"video-align-y", panscan_property_helper},
