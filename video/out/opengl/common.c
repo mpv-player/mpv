@@ -369,8 +369,10 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
 
     int major = 0, minor = 0;
     const char *version_string = gl->GetString(GL_VERSION);
-    if (!version_string)
+    if (!version_string) {
+        mp_fatal(log, "glGetString(GL_VERSION) returned NULL.\n");
         goto error;
+    }
     mp_verbose(log, "GL_VERSION='%s'\n",  version_string);
     if (strncmp(version_string, "OpenGL ES ", 10) == 0) {
         version_string += 10;
