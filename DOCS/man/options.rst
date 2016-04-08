@@ -2625,6 +2625,9 @@ OSD
 ``--osd-bold=<yes|no>``, ``--sub-text-bold=<yes|no>``
     Format text on bold.
 
+``--osd-italic=<yes|no>``, ``--sub-text-italic=<yes|no>``
+    Format text on italic.
+
 ``--osd-border-color=<color>``, ``--sub-text-border-color=<color>``
     See ``--osd-color``. Color used for the OSD/sub font border.
 

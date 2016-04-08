@@ -77,6 +77,7 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
     style->Alignment = 1 + (opts->align_x + 1) + (opts->align_y + 2) % 3 * 4;
     style->Blur = opts->blur;
     style->Bold = opts->bold;
+    style->Italic = opts->italic;
 }
 
 void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,
