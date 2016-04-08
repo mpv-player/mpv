@@ -124,9 +124,10 @@ struct img_tex {
     GLuint gl_tex;
     GLenum gl_target;
     bool use_integer;
-    int tex_w, tex_h;
-    int w, h;
-    struct gl_transform transform;
+    int tex_w, tex_h; // source texture size
+    int w, h; // logical size (with pre_transform applied)
+    struct gl_transform pre_transform; // source texture space
+    struct gl_transform transform; // rendering transformation
     bool texture_la; // it's a GL_LUMINANCE_ALPHA texture (access with .ra not .rg)
 };
 
@@ -537,7 +538,7 @@ static void check_gl_features(struct gl_video *p);
 static bool init_format(int fmt, struct gl_video *init);
 static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
 static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src);
-static void get_scale_factors(struct gl_video *p, double xy[2]);
+static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[2]);
 
 #define GLSL(x) gl_sc_add(p->sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
@@ -755,6 +756,7 @@ static struct img_tex img_tex_fbo(struct fbotex *fbo, struct gl_transform t,
         .tex_h = fbo->rh,
         .w = fbo->lw,
         .h = fbo->lh,
+        .pre_transform = identity_trans,
         .transform = t,
         .components = components,
     };
@@ -767,6 +769,31 @@ static int pass_bind(struct gl_video *p, struct img_tex tex)
     assert(p->pass_tex_num < TEXUNIT_VIDEO_NUM);
     p->pass_tex[p->pass_tex_num] = tex;
     return p->pass_tex_num++;
+}
+
+// Rotation by 90° and flipping.
+static void get_plane_source_transform(struct gl_video *p, int w, int h,
+                                       struct gl_transform *out_tr)
+{
+    struct gl_transform tr = identity_trans;
+    int a = p->image_params.rotate % 90 ? 0 : p->image_params.rotate / 90;
+    int sin90[4] = {0, 1, 0, -1}; // just to avoid rounding issues etc.
+    int cos90[4] = {1, 0, -1, 0};
+    struct gl_transform rot = {{{cos90[a], sin90[a]}, {-sin90[a], cos90[a]}}};
+    gl_transform_trans(rot, &tr);
+
+    // basically, recenter to keep the whole image in view
+    float b[2] = {1, 1};
+    gl_transform_vec(rot, &b[0], &b[1]);
+    tr.t[0] += b[0] < 0 ? w : 0;
+    tr.t[1] += b[1] < 0 ? h : 0;
+
+    if (p->image.image_flipped) {
+        struct gl_transform flip = {{{1, 0}, {0, -1}}, {0, h}};
+        gl_transform_trans(flip, &tr);
+    }
+
+    *out_tr = tr;
 }
 
 // Places a video_image's image textures + associated metadata into tex[]. The
@@ -837,6 +864,9 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
             .components = p->image_desc.components[n],
             .texture_la = t->gl_format == GL_LUMINANCE_ALPHA,
         };
+        get_plane_source_transform(p, t->w, t->h, &tex[n].pre_transform);
+        if (p->image_params.rotate % 180 == 90)
+            MPSWAP(int, tex[n].w, tex[n].h);
     }
 }
 
@@ -991,9 +1021,11 @@ static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
             struct img_tex *s = &p->pass_tex[i];
             if (!s->gl_tex)
                 continue;
+            struct gl_transform tr = s->transform;
+            gl_transform_trans(s->pre_transform, &tr);
             float tx = (n / 2) * s->w;
             float ty = (n % 2) * s->h;
-            gl_transform_vec(s->transform, &tx, &ty);
+            gl_transform_vec(tr, &tx, &ty);
             bool rect = s->gl_target == GL_TEXTURE_RECTANGLE;
             v->texcoord[i].x = tx / (rect ? 1 : s->tex_w);
             v->texcoord[i].y = ty / (rect ? 1 : s->tex_h);
@@ -1045,7 +1077,6 @@ static void uninit_scaler(struct gl_video *p, struct scaler *scaler)
 {
     GL *gl = p->gl;
     fbotex_uninit(&scaler->sep_fbo);
-    fbotex_uninit(&scaler->sep_rot_fbo);
     gl->DeleteTextures(1, &scaler->gl_lut);
     scaler->gl_lut = 0;
     scaler->kernel = NULL;
@@ -1238,19 +1269,6 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
 static void pass_sample_separated(struct gl_video *p, struct img_tex src,
                                   struct scaler *scaler, int w, int h)
 {
-    // Remove rotation, because it's "too hard" to deal with it.
-    // Note: this is very stupid and could be transparently handled as part
-    // of the first scale pass or so. But for now prefer the simpler solution,
-    // because applying rotation is very rare.
-    if (p->image_params.rotate != 0 || p->image.image_flipped) {
-        GLSLF("// rotate\n");
-        sampler_prelude(p->sc, pass_bind(p, src));
-        GLSL(color = texture(tex, pos);)
-        finish_pass_fbo(p, &scaler->sep_rot_fbo, src.w, src.h, 0);
-        src = img_tex_fbo(&scaler->sep_rot_fbo, identity_trans, PLANE_RGB,
-                          src.components);
-    }
-
     // Separate the transformation into x and y components, per pass
     struct gl_transform t_x = {
         .m = {{src.transform.m[0][0], 0.0}, {src.transform.m[1][0], 1.0}},
@@ -1351,7 +1369,7 @@ static int get_prescale_passes(struct gl_video *p, struct img_tex tex[4])
         return p->opts.prescale_passes;
 
     double scale_factors[2];
-    get_scale_factors(p, scale_factors);
+    get_scale_factors(p, true, scale_factors);
 
     int passes = 0;
     for (; passes < p->opts.prescale_passes; passes ++) {
@@ -1744,17 +1762,17 @@ static void pass_convert_yuv(struct gl_video *p)
     }
 }
 
-static void get_scale_factors(struct gl_video *p, double xy[2])
+static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[2])
 {
     double target_w = p->src_rect.x1 - p->src_rect.x0;
     double target_h = p->src_rect.y1 - p->src_rect.y0;
-    if (p->image_params.rotate % 180 == 90)
+    if (transpose_rot && p->image_params.rotate % 180 == 90)
         MPSWAP(double, target_w, target_h);
     xy[0] = (p->dst_rect.x1 - p->dst_rect.x0) / target_w;
     xy[1] = (p->dst_rect.y1 - p->dst_rect.y0) / target_h;
 }
 
-// Compute the cropped and rotated transformation of the video source rectangle.
+// Cropping.
 static void compute_src_transform(struct gl_video *p, struct gl_transform *tr)
 {
     float sx = (p->src_rect.x1 - p->src_rect.x0) / (float)p->texture_w,
@@ -1762,23 +1780,6 @@ static void compute_src_transform(struct gl_video *p, struct gl_transform *tr)
           ox = p->src_rect.x0,
           oy = p->src_rect.y0;
     struct gl_transform transform = {{{sx, 0}, {0, sy}}, {ox, oy}};
-
-    int a = p->image_params.rotate % 90 ? 0 : p->image_params.rotate / 90;
-    int sin90[4] = {0, 1, 0, -1}; // just to avoid rounding issues etc.
-    int cos90[4] = {1, 0, -1, 0};
-    struct gl_transform rot = {{{cos90[a], sin90[a]}, {-sin90[a], cos90[a]}}};
-    gl_transform_trans(rot, &transform);
-
-    // basically, recenter to keep the whole image in view
-    float b[2] = {1, 1};
-    gl_transform_vec(rot, &b[0], &b[1]);
-    transform.t[0] += b[0] < 0 ? p->texture_w : 0;
-    transform.t[1] += b[1] < 0 ? p->texture_h : 0;
-
-    if (p->image.image_flipped) {
-        struct gl_transform flip = {{{1, 0}, {0, -1}}, {0, p->texture_h}};
-        gl_transform_trans(flip, &transform);
-    }
 
     gl_transform_trans(p->texture_offset, &transform);
 
@@ -1790,7 +1791,7 @@ static void pass_scale_main(struct gl_video *p)
 {
     // Figure out the main scaler.
     double xy[2];
-    get_scale_factors(p, xy);
+    get_scale_factors(p, true, xy);
 
     // actual scale factor should be divided by the scale factor of prescaling.
     xy[0] /= p->texture_offset.m[0][0];
@@ -2101,6 +2102,9 @@ static void pass_render_frame(struct gl_video *p)
     p->texture_offset = identity_trans;
     p->components = 0;
 
+    if (p->image_params.rotate % 180 == 90)
+        MPSWAP(int, p->texture_w, p->texture_h);
+
     if (p->dumb_mode)
         return;
 
@@ -2115,7 +2119,7 @@ static void pass_render_frame(struct gl_video *p)
 
     if (p->osd && p->opts.blend_subs == 2) {
         double scale[2];
-        get_scale_factors(p, scale);
+        get_scale_factors(p, false, scale);
         struct mp_osd_res rect = {
             .w = p->texture_w, .h = p->texture_h,
             .display_par = scale[1] / scale[0], // counter compensate scaling
@@ -2149,7 +2153,7 @@ static void pass_render_frame(struct gl_video *p)
         };
         // Adjust margins for scale
         double scale[2];
-        get_scale_factors(p, scale);
+        get_scale_factors(p, true, scale);
         rect.ml *= scale[0]; rect.mr *= scale[0];
         rect.mt *= scale[1]; rect.mb *= scale[1];
         // We should always blend subtitles in non-linear light
