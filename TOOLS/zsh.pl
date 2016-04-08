@@ -69,10 +69,16 @@ chomp $profile_comp;
 my $tmpl = <<"EOS";
 #compdef mpv
 
-# mpv zsh completion
+# For customization, see:
+#  https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
 
 local curcontext="\$curcontext" state state_descr line
 typeset -A opt_args
+
+# By default, don't complete URLs unless no files match
+local -a tag_order
+zstyle -a ":completion:*:*:$service:*" tag-order tag_order || \
+  zstyle  ":completion:*:*:$service:*" tag-order '!urls'
 
 local rc=1
 
