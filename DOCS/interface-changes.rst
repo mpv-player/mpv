@@ -28,6 +28,8 @@ Interface changes
     - rename --input-unix-socket to --input-ipc-server, and make it work on
       Windows too
     - change the exact behavior of the "video-zoom" property
+    - --video-unscaled no longer disables --video-zoom and --video-aspect
+      To force the old behavior, set --video-zoom=0 and --video-aspect=0
  --- mpv 0.16.0 ---
     - change --audio-channels default to stereo (use --audio-channels=auto to
       get the old default)
