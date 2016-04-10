@@ -27,7 +27,7 @@
 #include "sub/osd.h"
 
 static void aspect_calc_panscan(struct mp_vo_opts *opts,
-                                int w, int h, int d_w, int d_h,
+                                int w, int h, int d_w, int d_h, bool unscaled,
                                 int window_w, int window_h, double monitor_par,
                                 int *out_w, int *out_h)
 {
@@ -44,10 +44,16 @@ static void aspect_calc_panscan(struct mp_vo_opts *opts,
     int vo_panscan_area = window_h - fheight;
     double f_w = fwidth / (double)fheight;
     double f_h = 1;
-    if (!vo_panscan_area) {
+    if (vo_panscan_area == 0) {
         vo_panscan_area = window_w - fwidth;
         f_w = 1;
         f_h = fheight / (double)fwidth;
+    }
+
+    if (unscaled) {
+        fwidth = w * monitor_par;
+        fheight = h;
+        vo_panscan_area = 0;
     }
 
     *out_w = fwidth + vo_panscan_area * opts->panscan * f_w;
@@ -66,17 +72,12 @@ static void clamp_size(int size, int *start, int *end)
 }
 
 static void src_dst_split_scaling(int src_size, int dst_size,
-                                  int scaled_src_size, bool unscaled,
+                                  int scaled_src_size,
                                   float zoom, float align, float pan,
                                   int *src_start, int *src_end,
                                   int *dst_start, int *dst_end,
                                   int *osd_margin_a, int *osd_margin_b)
 {
-    if (unscaled) {
-        scaled_src_size = src_size;
-        zoom = 0.0;
-    }
-
     scaled_src_size *= powf(2, zoom);
     align = (align + 1) / 2;
 
@@ -101,17 +102,6 @@ static void src_dst_split_scaling(int src_size, int dst_size,
         int border = (*dst_end - dst_size) * s_src / s_dst;
         *src_end -= border;
         *dst_end = dst_size;
-    }
-
-    if (unscaled) {
-        // Force unscaled by reducing the range for src or dst
-        int src_s = *src_end - *src_start;
-        int dst_s = *dst_end - *dst_start;
-        if (src_s > dst_s) {
-            *src_end = *src_start + dst_s;
-        } else if (src_s < dst_s) {
-            *dst_end = *dst_start + src_s;
-        }
     }
 
     // For sanity: avoid bothering VOs with corner cases
@@ -145,14 +135,14 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
     };
     if (opts->keepaspect) {
         int scaled_width, scaled_height;
-        aspect_calc_panscan(opts, src_w, src_h, src_dw, src_dh,
+        aspect_calc_panscan(opts, src_w, src_h, src_dw, src_dh, opts->unscaled,
                             window_w, window_h, monitor_par,
                             &scaled_width, &scaled_height);
-        src_dst_split_scaling(src_w, window_w, scaled_width, opts->unscaled,
+        src_dst_split_scaling(src_w, window_w, scaled_width,
                               opts->zoom, opts->align_x, opts->pan_x,
                               &src.x0, &src.x1, &dst.x0, &dst.x1,
                               &osd.ml, &osd.mr);
-        src_dst_split_scaling(src_h, window_h, scaled_height, opts->unscaled,
+        src_dst_split_scaling(src_h, window_h, scaled_height,
                               opts->zoom, opts->align_y, opts->pan_y,
                               &src.y0, &src.y1, &dst.y0, &dst.y1,
                               &osd.mt, &osd.mb);

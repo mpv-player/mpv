@@ -684,15 +684,12 @@ Video
 ``--video-unscaled``
     Disable scaling of the video. If the window is larger than the video,
     black bars are added. Otherwise, the video is cropped. The video still
-    can be influenced by the other ``--video-...`` options. (But not all; for
-    example ``--video-zoom`` does nothing if this option is enabled.)
-
-    The video and monitor aspects aspect will be ignored. Aspect correction
-    would require scaling the video in the X or Y direction, but this option
-    disables scaling, disabling all aspect correction.
+    can be influenced by the other ``--video-...`` options.
 
     Note that the scaler algorithm may still be used, even if the video isn't
-    scaled. For example, this can influence chroma conversion.
+    scaled. For example, this can influence chroma conversion. The video will
+    also still be scaled in one dimension if the source uses non-square pixels
+    (e.g. anamorphic widescreen DVDs).
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
