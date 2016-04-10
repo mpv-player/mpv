@@ -26,28 +26,20 @@
 #include "vo.h"
 #include "sub/osd.h"
 
-static void aspect_calc_panscan(struct mp_log *log, struct mp_vo_opts *opts,
+static void aspect_calc_panscan(struct mp_vo_opts *opts,
                                 int w, int h, int d_w, int d_h,
                                 int window_w, int window_h, double monitor_par,
                                 int *out_w, int *out_h)
 {
-    mp_dbg(log, "aspect(0) fitin: %dx%d monitor_par: %.2f\n",
-           window_w, window_h, monitor_par);
     int fwidth = window_w;
     int fheight = (float)window_w / d_w * d_h / monitor_par;
-    mp_dbg(log, "aspect(1) wh: %dx%d (org: %dx%d)\n",
-           fwidth, fheight, d_w, d_h);
     if (fheight > window_h || fheight < h) {
         int tmpw = (float)window_h / d_h * d_w * monitor_par;
         if (tmpw <= window_w) {
             fheight = window_h;
             fwidth = tmpw;
-        } else if (fheight > window_h) {
-            mp_warn(log, "No suitable new aspect found!\n");
         }
     }
-    mp_dbg(log, "aspect(2) wh: %dx%d (org: %dx%d)\n",
-           fwidth, fheight, d_w, d_h);
 
     int vo_panscan_area = window_h - fheight;
     double f_w = fwidth / (double)fheight;
@@ -153,7 +145,7 @@ void mp_get_src_dst_rects(struct mp_log *log, struct mp_vo_opts *opts,
     };
     if (opts->keepaspect) {
         int scaled_width, scaled_height;
-        aspect_calc_panscan(log, opts, src_w, src_h, src_dw, src_dh,
+        aspect_calc_panscan(opts, src_w, src_h, src_dw, src_dh,
                             window_w, window_h, monitor_par,
                             &scaled_width, &scaled_height);
         src_dst_split_scaling(src_w, window_w, scaled_width, opts->unscaled,
