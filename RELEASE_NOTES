@@ -1,3 +1,94 @@
+Release 0.17.0
+==============
+
+Note: The client API examples have moved to https://github.com/mpv-player/mpv-examples
+
+Build System Changes
+--------------------
+
+- install symbolic SVG icon
+- build: allow plain-gl build on OSX (#2980)
+- build: disable encoding mode by default (uses deprecated FFmpeg APIs)
+
+
+Features
+--------
+
+New
+~~~
+
+- csputils: add DCI-P3 colorspace
+- d3d11va hwdec
+- demux: add null demuxer
+- ipc: add Windows implementation with named pipes
+- mediacodec decoder hwdec wrapper
+- vo_opengl: add dxva2 interop to angle backend
+- vo_opengl: generate 3DLUT against source and use full BT.1886 (#2815)
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- command: add cache-speed property
+- command: add keepaspect property
+- command: add video-stereo-mode property (#2994)
+- command: export canonical ffmpeg version identifier (ffmpeg-version)
+- command: export lists of all codecs (decoder-list and encoder-list)
+- osd: add italic font for osd (#3031)
+
+
+Changed
+~~~~~~~
+
+- aspect: make video-zoom logarithmic (#3004)
+- command: export more information under track-list
+- ipc: rename --input-unix-socket to --input-ipc-server
+- vo_opengl: decrease default superxbr-edge-strength
+- vo_opengl: rename prescale to prescale-luma
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- TOOLS/zsh.pl: don't complete URLs by default unless no files match (#2892)
+- ad_lavc, vd_lavc: support new Libav decoding API
+- cache: disable useless "Cache is not responding" warning (#3019)
+- demux: delay bitrate calculation on packets with unknown timestamps (#2903)
+- demux_timeline: set correct seekable flags (#2898)
+- input: accept plain text for drag and drop (#2945)
+- input: do not force double-click emulation for artificial commands (#2899)
+- lavc_conv: fix Libav srt subtitles (#2888)
+- player: add missing audio reconfig events (#2929, #2920)
+- player: add wv to list of external audio file extensions
+- player: fix --stream-dump exit code (#2848)
+- player: fix breakage when combining 3D and rotate auto-filters
+- playlist: improve shuffle algorithm (better uniformity)
+- sub: interpret "text" subtitles as srt
+- vo_opengl, osd: allow osc.lua to react faster on resizes
+- vo_opengl: GLX: try to create 3.3 core profile context (#2938)
+- vo_opengl: draw transparency checkerboard after upscaling
+- vo_opengl: fix operation without GL_ARB_texture_rg
+- vo_opengl: improve superxbr algorithm
+- vo_opengl: only open one OpenGL/DX interop handle when using dxva2 (fixes interop with AMD drivers)
+- wayland: don't set fs mode on every configure (#2817)
+- x11: do not set _NET_WM_BYPASS_COMPOSITOR by default (#2997)
+- ytdl_hook: handle optional format_note
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API, and DOCS/interface-changes.rst for a history
+of changes to other user-visible interfaces.
+
+A complete changelog can be seen by running `git log v0.16.0..v0.17.0`
+in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.16.0...v0.17.0 or
+http://git.srsfckn.biz/mpv/log/?qt=range&q=v0.16.0..v0.17.0
+
+
+
 Release 0.16.0
 ==============
 
