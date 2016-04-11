@@ -304,14 +304,6 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *in)
     struct vf_priv_s *p = vf->priv;
 
     if (in) {
-        int rt_format = in->imgfmt == IMGFMT_VAAPI ? va_surface_rt_format(in)
-                                                   : VA_RT_FORMAT_YUV420;
-        if (!p->pool || p->current_rt_format != rt_format) {
-            talloc_free(p->pool);
-            p->pool = mp_image_pool_new(20);
-            va_pool_set_allocator(p->pool, p->va, rt_format);
-            p->current_rt_format = rt_format;
-        }
         if (in->imgfmt != IMGFMT_VAAPI) {
             struct mp_image *tmp = upload(vf, in);
             talloc_free(in);
@@ -350,10 +342,25 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
 {
     struct vf_priv_s *p = vf->priv;
 
-    p->params = *in;
-    *out = *in;
-    out->imgfmt = IMGFMT_VAAPI;
     flush_frames(vf);
+    talloc_free(p->pool);
+    p->pool = NULL;
+
+    p->params = *in;
+
+    p->current_rt_format = VA_RT_FORMAT_YUV420;
+    p->pool = mp_image_pool_new(20);
+    va_pool_set_allocator(p->pool, p->va, p->current_rt_format);
+
+    struct mp_image *probe = mp_image_pool_get(p->pool, IMGFMT_VAAPI, in->w, in->h);
+    if (!probe)
+        return -1;
+    va_surface_init_subformat(probe);
+    *out = *in;
+    out->imgfmt = probe->params.imgfmt;
+    out->hw_subfmt = probe->params.hw_subfmt;
+    talloc_free(probe);
+
     return 0;
 }
 

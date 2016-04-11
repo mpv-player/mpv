@@ -69,6 +69,8 @@ struct mp_image *va_surface_download(struct mp_image *src,
 int va_surface_alloc_imgfmt(struct mp_image *img, int imgfmt);
 int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src);
 
+void va_surface_init_subformat(struct mp_image *mpi);
+
 bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx);
 
 #endif

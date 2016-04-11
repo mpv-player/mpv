@@ -340,6 +340,12 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int w, int h)
     return img;
 }
 
+static struct mp_image *update_format(struct lavc_ctx *ctx, struct mp_image *img)
+{
+    va_surface_init_subformat(img);
+    return img;
+}
+
 static void destroy_va_dummy_ctx(struct priv *p)
 {
     va_destroy(p->ctx);
@@ -497,6 +503,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .allocate_image = allocate_image,
     .lock = intel_shit_lock,
     .unlock = intel_crap_unlock,
+    .process_image = update_format,
 };
 
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {

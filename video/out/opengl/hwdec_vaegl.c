@@ -172,30 +172,6 @@ static void destroy(struct gl_hwdec *hw)
     va_destroy(p->ctx);
 }
 
-// Create an empty dummy VPP. This works around a weird bug that affects the
-// VA surface format, as it is reported by vaDeriveImage(). Before a VPP
-// context or a decoder context is created, the surface format will be reported
-// as YV12. Surfaces created after context creation will report NV12 (even
-// though surface creation does not take a context as argument!). Existing
-// surfaces will change their format from YV12 to NV12 as soon as the decoder
-// renders to them! Because we want know the surface format in advance (to
-// simplify our renderer configuration logic), we hope that this hack gives
-// us reasonable behavior.
-// See: https://bugs.freedesktop.org/show_bug.cgi?id=79848
-static void insane_hack(struct gl_hwdec *hw)
-{
-    struct priv *p = hw->priv;
-    VAConfigID config;
-    if (vaCreateConfig(p->display, VAProfileNone, VAEntrypointVideoProc,
-                       NULL, 0, &config) == VA_STATUS_SUCCESS)
-    {
-        // We want to keep this until the VADisplay is destroyed. It will
-        // implicitly free the context.
-        VAContextID context;
-        vaCreateContext(p->display, config, 0, 0, 0, NULL, 0, &context);
-    }
-}
-
 static int create(struct gl_hwdec *hw)
 {
     GL *gl = hw->gl;
@@ -248,7 +224,6 @@ static int create(struct gl_hwdec *hw)
 
     MP_VERBOSE(p, "using VAAPI EGL interop\n");
 
-    insane_hack(hw);
     if (!test_format(hw)) {
         destroy(hw);
         return -1;
@@ -277,6 +252,18 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
     gl->BindTexture(GL_TEXTURE_2D, 0);
+
+    hw->converted_imgfmt = va_fourcc_to_imgfmt(params->hw_subfmt);
+    if (hw->converted_imgfmt != IMGFMT_NV12 &&
+        hw->converted_imgfmt != IMGFMT_420P)
+    {
+        MP_FATAL(p, "unsupported VA image format %s\n",
+                 mp_tag_str(params->hw_subfmt));
+        return -1;
+    }
+
+    MP_VERBOSE(p, "format: %s %s\n", mp_tag_str(params->hw_subfmt),
+               mp_imgfmt_to_name(hw->converted_imgfmt));
 
     return 0;
 }
@@ -308,18 +295,6 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
         goto err;
 
     int mpfmt = va_fourcc_to_imgfmt(va_image->format.fourcc);
-    if (mpfmt != IMGFMT_NV12 && mpfmt != IMGFMT_420P) {
-        MP_FATAL(p, "unsupported VA image format %s\n",
-                 mp_tag_str(va_image->format.fourcc));
-        goto err;
-    }
-
-    if (!hw->converted_imgfmt) {
-        MP_VERBOSE(p, "format: %s %s\n", mp_tag_str(va_image->format.fourcc),
-                   mp_imgfmt_to_name(mpfmt));
-        hw->converted_imgfmt = mpfmt;
-    }
-
     if (hw->converted_imgfmt != mpfmt) {
         MP_FATAL(p, "mid-stream hwdec format change (%s -> %s) not supported\n",
                  mp_imgfmt_to_name(hw->converted_imgfmt), mp_imgfmt_to_name(mpfmt));
@@ -387,6 +362,7 @@ static bool test_format(struct gl_hwdec *hw)
     va_pool_set_allocator(alloc, p->ctx, VA_RT_FORMAT_YUV420);
     struct mp_image *surface = mp_image_pool_get(alloc, IMGFMT_VAAPI, 64, 64);
     if (surface) {
+        va_surface_init_subformat(surface);
         struct mp_image_params params = surface->params;
         if (reinit(hw, &params) >= 0) {
             GLuint textures[4];
