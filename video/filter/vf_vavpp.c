@@ -303,14 +303,12 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *in)
 {
     struct vf_priv_s *p = vf->priv;
 
-    if (in) {
-        if (in->imgfmt != IMGFMT_VAAPI) {
-            struct mp_image *tmp = upload(vf, in);
-            talloc_free(in);
-            in = tmp;
-            if (!in)
-                return -1;
-        }
+    if (in && in->imgfmt != IMGFMT_VAAPI) {
+        struct mp_image *tmp = upload(vf, in);
+        talloc_free(in);
+        in = tmp;
+        if (!in)
+            return -1;
     }
 
     if (in) {
