@@ -550,8 +550,14 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
     lavf_priv_t *priv = demuxer->priv;
     AVFormatContext *avfc = priv->avfc;
     AVStream *st = avfc->streams[i];
-    AVCodecContext *codec = st->codec;
     struct sh_stream *sh = NULL;
+#if HAVE_AVCODEC_HAS_CODECPAR
+    AVCodecParameters *codec = st->codecpar;
+    int lavc_delay = codec->initial_padding;
+#else
+    AVCodecContext *codec = st->codec;
+    int lavc_delay = codec->delay;
+#endif
 
     switch (codec->codec_type) {
     case AVMEDIA_TYPE_AUDIO: {
@@ -566,7 +572,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
 
         double delay = 0;
         if (codec->sample_rate > 0)
-            delay = codec->delay / (double)codec->sample_rate;
+            delay = lavc_delay / (double)codec->sample_rate;
         priv->seek_delay = MPMAX(priv->seek_delay, delay);
 
         export_replaygain(demuxer, sh->codec, st);
@@ -577,8 +583,8 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh = demux_alloc_sh_stream(STREAM_VIDEO);
 
         if (st->disposition & AV_DISPOSITION_ATTACHED_PIC) {
-            sh->attached_picture = new_demux_packet_from(st->attached_pic.data,
-                                                         st->attached_pic.size);
+            sh->attached_picture =
+                new_demux_packet_from_avpacket(&st->attached_pic);
             if (sh->attached_picture) {
                 sh->attached_picture->pts = 0;
                 talloc_steal(sh, sh->attached_picture);
@@ -588,21 +594,8 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
 
         sh->codec->disp_w = codec->width;
         sh->codec->disp_h = codec->height;
-        /* Try to make up some frame rate value, even if it's not reliable.
-         * FPS information is needed to support subtitle formats which base
-         * timing on frame numbers.
-         * Libavformat seems to report no "reliable" FPS value for AVI files,
-         * while they are typically constant enough FPS that the value this
-         * heuristic makes up works with subtitles in practice.
-         */
-        double fps;
         if (st->avg_frame_rate.num)
-            fps = av_q2d(st->avg_frame_rate);
-        else
-            fps = 1.0 / FFMAX(av_q2d(st->time_base),
-                              av_q2d(st->codec->time_base) *
-                              st->codec->ticks_per_frame);
-        sh->codec->fps = fps;
+            sh->codec->fps = av_q2d(st->avg_frame_rate);
         if (priv->format_hack.image_format)
             sh->codec->fps = demuxer->opts->mf_fps;
         sh->codec->par_w = st->sample_aspect_ratio.num;
@@ -634,12 +627,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             if (av_opt_get_q(avfc, "subfps", AV_OPT_SEARCH_CHILDREN, &r) >= 0) {
                 // File headers don't have a FPS set.
                 if (r.num < 1 || r.den < 1)
-                    sh->codec->frame_based = av_q2d(av_inv_q(codec->time_base));
-            } else {
-                // Older libavformat versions. If the FPS matches the microdvd
-                // reader's default, assume it uses frame based timing.
-                if (codec->time_base.num == 125 && codec->time_base.den == 2997)
-                    sh->codec->frame_based = 23.976;
+                    sh->codec->frame_based = 23.976; // default timebase
             }
         }
         break;
@@ -665,9 +653,17 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->ff_index = st->index;
         sh->codec->codec = mp_codec_from_av_codec_id(codec->codec_id);
         sh->codec->codec_tag = codec->codec_tag;
+#if HAVE_AVCODEC_HAS_CODECPAR
+        sh->codec->lav_codecpar = avcodec_parameters_alloc();
+        if (sh->codec->lav_codecpar)
+            avcodec_parameters_copy(sh->codec->lav_codecpar, codec);
+#else
+        sh->codec->codec = mp_codec_from_av_codec_id(codec->codec_id);
+        sh->codec->codec_tag = codec->codec_tag;
         sh->codec->lav_headers = avcodec_alloc_context3(NULL);
         if (sh->codec->lav_headers)
             mp_copy_lav_codec_headers(sh->codec->lav_headers, codec);
+#endif
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = true;

@@ -364,16 +364,16 @@ void video_work(struct dec_video *d_video)
 
     if (d_video->header->attached_picture) {
         if (d_video->current_state == DATA_AGAIN && !d_video->cover_art_mpi) {
-            d_video->cover_art_mpi =
-                decode_packet(d_video, d_video->header->attached_picture, 0);
+            struct demux_packet *packet =
+                demux_copy_packet(d_video->header->attached_picture);
+            d_video->cover_art_mpi = decode_packet(d_video, packet, 0);
             // Might need flush.
             if (!d_video->cover_art_mpi)
                 d_video->cover_art_mpi = decode_packet(d_video, NULL, 0);
-            d_video->current_state = DATA_OK;
+            talloc_free(packet);
         }
-        if (d_video->current_state == DATA_OK)
+        if (d_video->current_state != DATA_EOF)
             d_video->current_mpi = mp_image_new_ref(d_video->cover_art_mpi);
-        // (DATA_OK is returned the first time, when current_mpi is sill set)
         d_video->current_state = DATA_EOF;
         return;
     }

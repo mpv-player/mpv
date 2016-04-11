@@ -93,12 +93,10 @@ static void switch_segment(struct demuxer *demuxer, struct segment *new,
                            double start_pts, int flags)
 {
     struct priv *p = demuxer->priv;
-
-    if (p->current == new)
-        return;
+    bool new_segment = p->current != new;
 
     if (!(flags & (SEEK_FORWARD | SEEK_BACKWARD)))
-        flags |= SEEK_BACKWARD;
+        flags |= SEEK_BACKWARD | SEEK_HR;
 
     MP_VERBOSE(demuxer, "switch to segment %d\n", new->index);
 
@@ -109,7 +107,8 @@ static void switch_segment(struct demuxer *demuxer, struct segment *new,
 
     for (int n = 0; n < p->num_streams; n++) {
         struct virtual_stream *vs = &p->streams[n];
-        vs->new_segment = true;
+        if (new_segment)
+            vs->new_segment = true;
         vs->eos_packets = 0;
     }
 
@@ -132,7 +131,6 @@ static void d_seek(struct demuxer *demuxer, double seek_pts, int flags)
         }
     }
 
-    p->current = NULL; // force seek
     switch_segment(demuxer, new, pts, flags);
 }
 
@@ -344,7 +342,7 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     print_timeline(demuxer);
 
     demuxer->seekable = true;
-    demuxer->partially_seekable = true;
+    demuxer->partially_seekable = false;
 
     demuxer->filetype = meta->filetype ? meta->filetype : meta->desc->name;
 

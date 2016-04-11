@@ -25,9 +25,12 @@
 #include <libavutil/cpu.h>
 #include <libavcodec/avcodec.h>
 
+#include "config.h"
+
 #include "common/common.h"
 #include "common/msg.h"
 #include "demux/packet.h"
+#include "demux/stheader.h"
 #include "av_common.h"
 #include "codecs.h"
 
@@ -66,6 +69,19 @@ void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st)
     avctx->channel_layout           = st->channel_layout;
     avctx->bits_per_coded_sample    = st->bits_per_coded_sample;
     avctx->has_b_frames             = st->has_b_frames;
+}
+
+// This only copies ffmpeg-native codec parameters. Parameters produced by
+// other demuxers must be handled manually.
+void mp_set_lav_codec_headers(AVCodecContext *avctx, struct mp_codec_params *c)
+{
+#if HAVE_AVCODEC_HAS_CODECPAR
+    if (c->lav_codecpar)
+        avcodec_parameters_to_context(avctx, c->lav_codecpar);
+#else
+    if (c->lav_headers)
+        mp_copy_lav_codec_headers(avctx, c->lav_headers);
+#endif
 }
 
 // We merely pass-through our PTS/DTS as an int64_t; libavcodec won't use it.
@@ -144,6 +160,11 @@ void mp_set_avcodec_threads(struct mp_log *l, AVCodecContext *avctx, int threads
     avctx->thread_count = threads;
 }
 
+static bool is_crap(AVCodec *codec)
+{
+    return !!strstr(codec->name, "_vdpau");
+}
+
 void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)
 {
     AVCodec *cur = NULL;
@@ -151,7 +172,22 @@ void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)
         cur = av_codec_next(cur);
         if (!cur)
             break;
-        if (av_codec_is_decoder(cur) && cur->type == type) {
+        if (av_codec_is_decoder(cur) && cur->type == type && !is_crap(cur)) {
+            mp_add_decoder(list, "lavc", mp_codec_from_av_codec_id(cur->id),
+                           cur->name, cur->long_name);
+        }
+    }
+}
+
+// (Abuses the decoder list data structures.)
+void mp_add_lavc_encoders(struct mp_decoder_list *list)
+{
+    AVCodec *cur = NULL;
+    for (;;) {
+        cur = av_codec_next(cur);
+        if (!cur)
+            break;
+        if (av_codec_is_encoder(cur)) {
             mp_add_decoder(list, "lavc", mp_codec_from_av_codec_id(cur->id),
                            cur->name, cur->long_name);
         }

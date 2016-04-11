@@ -43,6 +43,7 @@ struct xrandr_display {
 
 struct vo_x11_state {
     struct mp_log *log;
+    struct input_ctx *input_ctx;
     Display *display;
     Window window;
     Window rootwin;

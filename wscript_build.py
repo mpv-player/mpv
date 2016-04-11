@@ -175,6 +175,7 @@ def build(ctx):
         ( "demux/demux_mf.c" ),
         ( "demux/demux_mkv.c" ),
         ( "demux/demux_mkv_timeline.c" ),
+        ( "demux/demux_null.c" ),
         ( "demux/demux_playlist.c" ),
         ( "demux/demux_raw.c" ),
         ( "demux/demux_rar.c" ),
@@ -189,7 +190,9 @@ def build(ctx):
         ( "input/cmd_parse.c" ),
         ( "input/event.c" ),
         ( "input/input.c" ),
-        ( "input/ipc.c",                         "!mingw" ),
+        ( "input/ipc.c" ),
+        ( "input/ipc-unix.c",                    "!mingw" ),
+        ( "input/ipc-win.c",                     "mingw" ),
         ( "input/keycodes.c" ),
         ( "input/pipe-win32.c",                  "mingw" ),
 
@@ -283,16 +286,20 @@ def build(ctx):
         ( "video/mp_image_pool.c" ),
         ( "video/sws_utils.c" ),
         ( "video/dxva2.c",                       "dxva2-hwaccel" ),
+        ( "video/d3d11va.c",                     "d3d11va-hwaccel" ),
         ( "video/vaapi.c",                       "vaapi" ),
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),
         ( "video/decode/dec_video.c"),
         ( "video/decode/dxva2.c",                "dxva2-hwaccel" ),
+        ( "video/decode/d3d11va.c",              "d3d11va-hwaccel" ),
+        ( "video/decode/d3d.c",                  "d3d-hwaccel" ),
         ( "video/decode/rpi.c",                  "rpi" ),
         ( "video/decode/vaapi.c",                "vaapi-hwaccel" ),
         ( "video/decode/vd_lavc.c" ),
         ( "video/decode/videotoolbox.c",         "videotoolbox-hwaccel" ),
         ( "video/decode/vdpau.c",                "vdpau-hwaccel" ),
+        ( "video/decode/mediacodec.c",           "android" ),
         ( "video/filter/vf.c" ),
         ( "video/filter/vf_buffer.c" ),
         ( "video/filter/vf_crop.c" ),
@@ -339,6 +346,7 @@ def build(ctx):
         ( "video/out/opengl/hwdec.c",            "gl" ),
         ( "video/out/opengl/hwdec_dxva2.c",      "gl-win32" ),
         ( "video/out/opengl/hwdec_dxva2gldx.c",  "gl-dxinterop" ),
+        ( "video/out/opengl/hwdec_dxva2egl.c",   "egl-angle" ),
         ( "video/out/opengl/hwdec_vaegl.c",      "vaapi-egl" ),
         ( "video/out/opengl/hwdec_vaglx.c",      "vaapi-glx" ),
         ( "video/out/opengl/hwdec_osx.c",        "videotoolbox-gl" ),
@@ -484,9 +492,9 @@ def build(ctx):
         if build_shared:
             waftoolsdir = os.path.join(os.path.dirname(__file__), "waftools")
             ctx.load("syms", tooldir=waftoolsdir)
-        vre = '^#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION\((.*), (.*)\)$'
+        vre = '#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION\((.*), (.*)\)'
         libmpv_header = ctx.path.find_node("libmpv/client.h").read()
-        major, minor = re.search(vre, libmpv_header, re.M).groups()
+        major, minor = re.search(vre, libmpv_header).groups()
         libversion = major + '.' + minor + '.0'
 
         def _build_libmpv(shared):
@@ -585,3 +593,7 @@ def build(ctx):
         ctx.install_as(
                 ctx.env.DATADIR + '/icons/hicolor/scalable/apps/mpv.svg',
                 'etc/mpv-gradient.svg')
+
+        ctx.install_files(
+            ctx.env.DATADIR + '/icons/hicolor/symbolic/apps',
+            ['etc/mpv-symbolic.svg'])

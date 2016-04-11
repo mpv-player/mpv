@@ -55,7 +55,7 @@ ASS_Library *mp_ass_init(struct mpv_global *global, struct mp_log *log);
 struct sub_bitmap;
 struct sub_bitmaps;
 void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
-                         struct sub_bitmap **parts, struct sub_bitmaps *res);
+                         struct sub_bitmaps *res);
 
 #endif                          /* HAVE_LIBASS */
 #endif                          /* MPLAYER_ASS_MP_H */

@@ -136,8 +136,7 @@ static void set_allowed_vo_formats(struct vo_chain *vo_c)
     vo_query_formats(vo_c->vo, vo_c->vf->allowed_output_formats);
 }
 
-static int try_filter(struct vo_chain *vo_c, struct mp_image_params params,
-                      char *name, char *label, char **args)
+static int try_filter(struct vo_chain *vo_c, char *name, char *label, char **args)
 {
     struct vf_instance *vf = vf_append_filter(vo_c->vf, name, args);
     if (!vf)
@@ -145,10 +144,10 @@ static int try_filter(struct vo_chain *vo_c, struct mp_image_params params,
 
     vf->label = talloc_strdup(vf, label);
 
-    if (vf_reconfig(vo_c->vf, &params) < 0) {
+    if (vf_reconfig(vo_c->vf, &vo_c->input_format) < 0) {
         vf_remove_filter(vo_c->vf, vf);
         // restore
-        vf_reconfig(vo_c->vf, &params);
+        vf_reconfig(vo_c->vf, &vo_c->input_format);
         return -1;
     }
     return 0;
@@ -166,15 +165,22 @@ static void filter_reconfig(struct vo_chain *vo_c)
     if (vf_reconfig(vo_c->vf, &params) < 0)
         return;
 
+    char *filters[] = {"autorotate", "autostereo3d", NULL};
+    for (int n = 0; filters[n]; n++) {
+        struct vf_instance *vf = vf_find_by_label(vo_c->vf, filters[n]);
+        if (vf) {
+            vf_remove_filter(vo_c->vf, vf);
+            if (vf_reconfig(vo_c->vf, &params) < 0)
+                return;
+        }
+    }
+
     if (params.rotate && (params.rotate % 90 == 0)) {
         if (!(vo_c->vo->driver->caps & VO_CAP_ROTATE90)) {
             // Try to insert a rotation filter.
             char *args[] = {"angle", "auto", NULL};
-            if (try_filter(vo_c, params, "rotate", "autorotate", args) >= 0) {
-                params.rotate = 0;
-            } else {
+            if (try_filter(vo_c, "rotate", "autorotate", args) < 0)
                 MP_ERR(vo_c, "Can't insert rotation filter.\n");
-            }
         }
     }
 
@@ -184,7 +190,7 @@ static void filter_reconfig(struct vo_chain *vo_c)
         char *to = (char *)MP_STEREO3D_NAME(params.stereo_out);
         if (to) {
             char *args[] = {"in", "auto", "out", to, NULL, NULL};
-            if (try_filter(vo_c, params, "stereo3d", "stereo3d", args) < 0)
+            if (try_filter(vo_c, "stereo3d", "autostereo3d", args) < 0)
                 MP_ERR(vo_c, "Can't insert 3D conversion filter.\n");
         }
     }

@@ -401,15 +401,21 @@ void bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt,
     int size;
     va_list copy;
     va_copy(copy, ap);
+    size_t avail = talloc_get_size(s->start) - s->len;
+    char *dest = s->start ? s->start + s->len : NULL;
     char c;
-    size = vsnprintf(&c, 1, fmt, copy);
+    if (avail < 1)
+        dest = &c;
+    size = vsnprintf(dest, MPMAX(avail, 1), fmt, copy);
     va_end(copy);
 
     if (size < 0)
         abort();
 
-    resize_append(talloc_ctx, s, size + 1);
-    vsnprintf(s->start + s->len, size + 1, fmt, ap);
+    if (avail < 1 || size + 1 > avail) {
+        resize_append(talloc_ctx, s, size + 1);
+        vsnprintf(s->start + s->len, size + 1, fmt, ap);
+    }
     s->len += size;
 }
 

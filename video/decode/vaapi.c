@@ -431,12 +431,12 @@ static int init(struct lavc_ctx *ctx)
 }
 
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
-                 const char *decoder)
+                 const char *codec)
 {
     hwdec_request_api(info, "vaapi");
     if (!info || !info->hwctx || !info->hwctx->vaapi_ctx)
         return HWDEC_ERR_NO_CTX;
-    if (!hwdec_check_codec_support(decoder, profiles))
+    if (!hwdec_check_codec_support(codec, profiles))
         return HWDEC_ERR_NO_CODEC;
     if (va_guess_if_emulated(info->hwctx->vaapi_ctx))
         return HWDEC_ERR_EMULATED;
@@ -444,14 +444,14 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
 }
 
 static int probe_copy(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
-                      const char *decoder)
+                      const char *codec)
 {
     struct priv dummy = {mp_null_log};
     if (!create_va_dummy_ctx(&dummy))
         return HWDEC_ERR_NO_CTX;
     bool emulated = va_guess_if_emulated(dummy.ctx);
     destroy_va_dummy_ctx(&dummy);
-    if (!hwdec_check_codec_support(decoder, profiles))
+    if (!hwdec_check_codec_support(codec, profiles))
         return HWDEC_ERR_NO_CODEC;
     if (emulated)
         return HWDEC_ERR_EMULATED;
@@ -508,4 +508,5 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
     .init_decoder = init_decoder,
     .allocate_image = allocate_image,
     .process_image = copy_image,
+    .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
 };

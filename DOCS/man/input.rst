@@ -921,8 +921,9 @@ Property list
     useless. It looks like this can be different from ``path`` only when
     using e.g. ordered chapters.)
 
-``stream-pos`` (RW)
-    Raw byte position in source stream.
+``stream-pos``
+    Raw byte position in source stream. Technically, this returns the position
+    of the most recent packet passed to a decoder.
 
 ``stream-end``
     Raw end position in bytes in source stream.
@@ -1194,6 +1195,11 @@ Property list
 ``cache-used`` (R)
     Total used cache size in KB.
 
+``cache-speed`` (R)
+    Current I/O read speed between the cache and the lower layer (like network).
+    This gives the number bytes per seconds over a 1 second window (using
+    the type ``MPV_FORMAT_INT64`` for the client API).
+
 ``cache-idle`` (R)
     Returns ``yes`` if the cache is idle, which means the cache is filled as
     much as possible, and is currently not reading more data.
@@ -1237,10 +1243,10 @@ Property list
 
 ``mixer-active``
     Return ``yes`` if the audio mixer is active, ``no`` otherwise. This has
-    implications for ``--softvol=no`` mode: if the mixer is active, changing
+    implications for ``--softvol=no`` mode: if the mixer is inactive, changing
     ``volume`` doesn't actually change anything on the system mixer. If the
     ``--volume`` or ``--mute`` option are used, these might not be applied
-    property until the mixer becomes active either. (The options, if set, will
+    properly until the mixer becomes active either. (The options, if set, will
     just overwrite the mixer state at audio initialization.)
 
     While the behavior with ``mixer-active==yes`` is relatively well-defined,
@@ -1707,10 +1713,6 @@ Property list
     ``track-list/N/lang``
         Track language as identified by the file. Not always available.
 
-    ``track-list/N/audio-channels``
-        For audio tracks, the number of audio channels in the audio stream.
-        Not always accurate (depends on container hints). Not always available.
-
     ``track-list/N/albumart``
         ``yes`` if this is a video track that consists of a single picture,
         ``no`` or unavailable otherwise. This is used for video tracks that are
@@ -1746,6 +1748,29 @@ Property list
         match even if the default (builtin) demuxer is used, but there is
         no hard guarantee.
 
+    ``track-list/N/decoder-desc``
+        If this track is being decoded, the human-readable decoder name,
+
+    ``track-list/N/demux-w``, ``track-list/N/demux-h``
+        Video size hint as indicated by the container. (Not always accurate.)
+
+    ``track-list/N/demux-channel-count``
+        Number of audio channels as indicated by the container. (Not always
+        accurate - in particular, the track could be decoded as a different
+        number of channels.)
+
+    ``track-list/N/demux-channels``
+        Channel layout as indicated by the container. (Not always accurate.)
+
+    ``track-list/N/demux-samplerate``
+        Audio sample rate as indicated by the container. (Not always accurate.)
+
+    ``track-list/N/demux-fps``
+        Video FPS as indicated by the container. (Not always accurate.)
+
+    ``track-list/N/audio-channels`` (deprecated)
+        Deprecated alias for ``track-list/N/demux-channel-count``.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -1759,13 +1784,20 @@ Property list
                 "src-id"            MPV_FORMAT_INT64
                 "title"             MPV_FORMAT_STRING
                 "lang"              MPV_FORMAT_STRING
-                "audio-channels"    MPV_FORMAT_INT64
                 "albumart"          MPV_FORMAT_FLAG
                 "default"           MPV_FORMAT_FLAG
                 "forced"            MPV_FORMAT_FLAG
                 "external"          MPV_FORMAT_FLAG
                 "external-filename" MPV_FORMAT_STRING
                 "codec"             MPV_FORMAT_STRING
+                "decoder-desc"      MPV_FORMAT_STRING
+                "demux-w"           MPV_FORMAT_INT64
+                "demux-h"           MPV_FORMAT_INT64
+                "demux-channel-count" MPV_FORMAT_INT64
+                "demux-channels"    MPV_FORMAT_STRING
+                "demux-samplerate"  MPV_FORMAT_INT64
+                "demux-fps"         MPV_FORMAT_DOUBLE
+                "audio-channels"    MPV_FORMAT_INT64
 
 ``chapter-list``
     List of chapters, current entry marked. Currently, the raw property value
@@ -1818,6 +1850,9 @@ Property list
 
 ``video-rotate`` (RW)
     See ``--video-rotate`` option.
+
+``video-stereo-mode`` (RW)
+    See ``--video-stereo-mode`` option.
 
 ``seekable``
     Return whether it's generally possible to seek in the current file.
@@ -1962,6 +1997,43 @@ Property list
     In some cases, the protocol will not actually be supported (consider
     ``https`` if ffmpeg is not compiled with TLS support).
 
+``decoder-list``
+    List of decoders supported. This lists decoders which can be passed to
+    ``--vd`` and ``--ad``.
+
+    ``family``
+        Decoder driver. Usually ``lavc`` for libavcodec.
+
+    ``codec``
+        Canonical codec name, which identifies the format the decoder can
+        handle.
+
+    ``driver``
+        The name of the decoder itself. Often, this is the same as ``codec``.
+        Sometimes it can be different. It is used to distinguish multiple
+        decoders for the same codec.
+
+    ``description``
+        Human readable description of the decoder and codec.
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_ARRAY
+            MPV_FORMAT_NODE_MAP (for each decoder entry)
+                "family"        MPV_FORMAT_STRING
+                "codec"         MPV_FORMAT_STRING
+                "driver"        MPV_FORMAT_STRING
+                "description"   MPV_FORMAT_STRING
+
+``encoder-list``
+    List of libavcodec encoders. This has the same format as ``decoder-list``.
+    The encoder names (``driver`` entries) can be passed to ``--ovc`` and
+    ``--oac`` (without the ``lavc:`` prefix required by ``--vd`` and ``--ad``).
+
 ``mpv-version``
     Return the mpv version/copyright string. Depending on how the binary was
     built, it might contain either a release version, or just a git hash.
@@ -1969,6 +2041,13 @@ Property list
 ``mpv-configuration``
     Return the configuration arguments which were passed to the build system
     (typically the way ``./waf configure ...`` was invoked).
+
+``ffmpeg-version``
+    Return the contents of the ``av_version_info()`` API call. This is a string
+    which identifies the build in some way, either through a release version
+    number, or a git hash. This applies to Libav as well (the property is
+    still named the same.) This property is unavailable if mpv is linked against
+    older FFmpeg and Libav versions.
 
 ``options/<name>`` (RW)
     Read-only access to value of option ``--<name>``. Most options can be

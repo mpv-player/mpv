@@ -24,9 +24,9 @@
 struct mp_image;
 struct mp_image_pool;
 
-LPDIRECT3DSURFACE9 d3d9_surface_in_mp_image(struct mp_image *mpi);
+IDirect3DSurface9 *d3d9_surface_in_mp_image(struct mp_image *mpi);
 
 struct mp_image *dxva2_new_ref(IDirectXVideoDecoder *decoder,
-                               LPDIRECT3DSURFACE9 d3d9_surface, int w, int h);
+                               IDirect3DSurface9 *d3d9_surface, int w, int h);
 
 #endif

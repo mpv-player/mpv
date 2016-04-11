@@ -44,7 +44,7 @@ struct sd_ass_priv {
     bool is_converted;
     struct lavc_conv *converter;
     bool on_top;
-    struct sub_bitmap *parts;
+    struct sub_bitmaps part_cache;
     char last_text[500];
     struct mp_image_params video_params;
     struct mp_image_params last_params;
@@ -117,10 +117,10 @@ static void add_subtitle_fonts(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct MPOpts *opts = sd->opts;
-    if (!opts->ass_enabled || !sd->demuxer)
+    if (!opts->ass_enabled || !sd->attachments)
         return;
-    for (int i = 0; i < sd->demuxer->num_attachments; i++) {
-        struct demux_attachment *f = &sd->demuxer->attachments[i];
+    for (int i = 0; i < sd->attachments->num_entries; i++) {
+        struct demux_attachment *f = &sd->attachments->entries[i];
         if (opts->use_embedded_fonts && attachment_is_font(sd->log, f))
             ass_add_font(ctx->ass_library, f->name, f->data, f->data_size);
     }
@@ -238,6 +238,8 @@ static bool check_packet_seen(struct sd *sd, int64_t pos)
     return false;
 }
 
+#define UNKNOWN_DURATION (INT_MAX / 1000)
+
 static void decode(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_ass_priv *ctx = sd->priv;
@@ -246,13 +248,22 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         if (!sd->opts->sub_clear_on_seek && packet->pos >= 0 &&
             check_packet_seen(sd, packet->pos))
             return;
+        if (packet->duration < 0) {
+            if (!ctx->duration_unknown) {
+                MP_WARN(sd, "Subtitle with unknown duration.\n");
+                ctx->duration_unknown = true;
+            }
+            packet->duration = UNKNOWN_DURATION;
+        }
         char **r = lavc_conv_decode(ctx->converter, packet);
         for (int n = 0; r && r[n]; n++)
             ass_process_data(track, r[n], strlen(r[n]));
         if (ctx->duration_unknown) {
             for (int n = 0; n < track->n_events - 1; n++) {
-                track->events[n].Duration = track->events[n + 1].Start -
-                                            track->events[n].Start;
+                if (track->events[n].Duration == UNKNOWN_DURATION * 1000) {
+                    track->events[n].Duration = track->events[n + 1].Start -
+                                                track->events[n].Start;
+                }
             }
         }
     } else {
@@ -440,14 +451,22 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     long long ts = find_timestamp(sd, pts);
     if (ctx->duration_unknown && pts != MP_NOPTS_VALUE) {
         mp_ass_flush_old_events(track, ts);
+        ctx->num_seen_packets = 0;
+        sd->preload_ok = false;
     }
+
     if (no_ass)
         fill_plaintext(sd, pts);
-    mp_ass_render_frame(renderer, track, ts, &ctx->parts, res);
-    talloc_steal(ctx, ctx->parts);
+
+    ctx->part_cache.change_id = 0;
+    ctx->part_cache.num_parts = 0;
+    mp_ass_render_frame(renderer, track, ts, &ctx->part_cache);
+    talloc_steal(ctx, ctx->part_cache.parts);
 
     if (!converted)
-        mangle_colors(sd, res);
+        mangle_colors(sd, &ctx->part_cache);
+
+    *res = ctx->part_cache;
 }
 
 struct buf {
@@ -597,9 +616,10 @@ static void fill_plaintext(struct sd *sd, double pts)
 static void reset(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
-    if (sd->opts->sub_clear_on_seek) {
+    if (sd->opts->sub_clear_on_seek || ctx->duration_unknown) {
         ass_flush_events(ctx->ass_track);
         ctx->num_seen_packets = 0;
+        sd->preload_ok = false;
     }
     if (ctx->converter)
         lavc_conv_reset(ctx->converter);

@@ -15,8 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <assert.h>
-
 #include "common/av_common.h"
 #include "dxva2.h"
 #include "mp_image.h"
@@ -28,13 +26,13 @@ struct dxva2_surface {
     HMODULE dxva2lib;
 
     IDirectXVideoDecoder *decoder;
-    LPDIRECT3DSURFACE9   surface;
+    IDirect3DSurface9    *surface;
 };
 
-LPDIRECT3DSURFACE9 d3d9_surface_in_mp_image(struct mp_image *mpi)
+IDirect3DSurface9 *d3d9_surface_in_mp_image(struct mp_image *mpi)
 {
     return mpi && mpi->imgfmt == IMGFMT_DXVA2 ?
-        (LPDIRECT3DSURFACE9)mpi->planes[3] : NULL;
+        (IDirect3DSurface9 *)mpi->planes[3] : NULL;
 }
 
 static void dxva2_release_img(void *arg)
@@ -56,7 +54,7 @@ static void dxva2_release_img(void *arg)
 }
 
 struct mp_image *dxva2_new_ref(IDirectXVideoDecoder *decoder,
-                               LPDIRECT3DSURFACE9 d3d9_surface, int w, int h)
+                               IDirect3DSurface9 *d3d9_surface, int w, int h)
 {
     if (!decoder || !d3d9_surface)
         return NULL;
@@ -77,7 +75,7 @@ struct mp_image *dxva2_new_ref(IDirectXVideoDecoder *decoder,
     struct mp_image *mpi = mp_image_new_custom_ref(&(struct mp_image){0},
                                                    surface, dxva2_release_img);
     if (!mpi)
-        goto fail;
+        abort();
 
     mp_image_setfmt(mpi, IMGFMT_DXVA2);
     mp_image_set_size(mpi, w, h);

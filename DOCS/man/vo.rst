@@ -582,12 +582,10 @@ Available video output drivers are:
         better than without it) since it will extend the size to match only the
         milder of the scale factors between the axes.
 
-    ``prescale=<filter>``
-        This option provides non-convolution-based filters for upscaling. These
-        filters resize the video to multiple of the original size (all currently
-        supported prescalers can only perform image doubling in a single pass).
-        Generally another convolution based filter (the main scaler) will be
-        applied after prescaler to match the target display size.
+    ``prescale-luma=<filter>``
+        Apply additional pre-scaling (image doubling) on the luma plane
+        (if present). As the name implies, these will run before the main
+        upscaling pass.
 
         ``none``
             Disable all prescalers. This is the default.
@@ -604,10 +602,6 @@ Available video output drivers are:
 
             Extremely slow and requires a recent mid or high end graphics card
             to work smoothly (as of 2015).
-
-        Note that all the filters above are designed (or implemented) to process
-        luma plane only and probably won't work as intended for video in RGB
-        format.
 
     ``prescale-passes=<1..5>``
         The number of passes to apply the prescaler (defaults to be 1). Setting
@@ -817,7 +811,8 @@ Available video output drivers are:
             profiles, and the ``nnedi3`` prescaler.
         dxinterop (experimental)
             Win32, using WGL for rendering and Direct3D 9Ex for presentation.
-            Works on Nvidia and AMD only.
+            Works on Nvidia and AMD. Newer Intel chips with the latest drivers
+            may also work.
         x11
             X11/GLX
         wayland
@@ -892,6 +887,8 @@ Available video output drivers are:
             ProPhoto RGB (ROMM)
         cie1931
             CIE 1931 RGB (not to be confused with CIE XYZ)
+        dci-p3
+            DCI-P3 (Digital Cinema Colorspace), SMPTE RP431-2
 
     ``target-trc=<value>``
         Specifies the transfer characteristics (gamma) of the display. Video

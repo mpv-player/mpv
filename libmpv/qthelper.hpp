@@ -202,9 +202,9 @@ private:
                     if (list->values)
                         free_node(&list->values[n]);
                 }
+                delete[] list->keys;
+                delete[] list->values;
             }
-            delete[] list->keys;
-            delete[] list->values;
             delete list;
             break;
         }

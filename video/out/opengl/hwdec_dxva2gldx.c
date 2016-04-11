@@ -72,12 +72,7 @@ static void destroy_objects(struct gl_hwdec *hw)
 static void destroy(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
-    GL *gl = hw->gl;
     destroy_objects(hw);
-
-    if (!gl->DXCloseDeviceNV(p->device_h))
-        MP_ERR(hw, "Failed to close Direct3D device in OpenGL %s\n",
-               mp_LastError_to_str());
 
     if (p->device)
         IDirect3DDevice9Ex_Release(p->device);
@@ -94,18 +89,18 @@ static int create(struct gl_hwdec *hw)
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
 
+    // AMD drivers won't open multiple dxinterop HANDLES on the same D3D device,
+    // so we request the one already in use by context_dxinterop
+    p->device_h = gl->MPGetNativeDisplay("dxinterop_device_HANDLE");
+    if (!p->device_h)
+        return -1;
+
+    // But we also still need the actual D3D device
     p->device = gl->MPGetNativeDisplay("IDirect3DDevice9Ex");
     if (!p->device)
         return -1;
     IDirect3DDevice9Ex_AddRef(p->device);
     p->ctx.d3d9_device = (IDirect3DDevice9 *)p->device;
-
-    p->device_h = gl->DXOpenDeviceNV(p->device);
-    if (!p->device_h) {
-        MP_ERR(hw, "Failed to open Direct3D device in OpenGL: %s\n",
-               mp_LastError_to_str());
-        goto fail;
-    }
 
     p->ctx.hwctx.type = HWDEC_DXVA2;
     p->ctx.hwctx.d3d_ctx = &p->ctx;
@@ -113,9 +108,6 @@ static int create(struct gl_hwdec *hw)
     hw->hwctx = &p->ctx.hwctx;
     hw->converted_imgfmt = SHARED_SURFACE_MPFMT;
     return 0;
-fail:
-    destroy(hw);
-    return -1;
 }
 
 static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)

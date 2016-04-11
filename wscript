@@ -325,6 +325,7 @@ iconv support use --disable-iconv.",
     } , {
         'name' : '--encoding',
         'desc' : 'Encoding',
+        'default': 'disable',
         'func': check_true,
     }, {
         'name': '--libbluray',
@@ -483,6 +484,18 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'desc': 'libavcodec avcodec_profile_name()',
         'func': check_statement('libavcodec/avcodec.h',
                                 'avcodec_profile_name(0,0)',
+                                use='libav'),
+    }, {
+        'name': 'avcodec-new-codec-api',
+        'desc': 'libavcodec decode/encode API',
+        'func': check_statement('libavcodec/avcodec.h',
+                                'avcodec_send_packet(0,0)',
+                                use='libav'),
+    }, {
+        'name': 'avcodec-has-codecpar',
+        'desc': 'libavcodec AVCodecParameters API',
+        'func': check_statement('libavformat/avformat.h',
+                                '(void)offsetof(AVStream, codecpar)',
                                 use='libav'),
     },
 ]
@@ -771,8 +784,8 @@ video_output_features = [
             check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
         ),
     }, {
-        'name': '--desktop-gl',
-        'desc': 'Desktop OpengGL support',
+        'name': '--standard-gl',
+        'desc': 'Desktop standard OpengGL support',
         'func': compose_checks(
             check_statement('GL/gl.h', '(void)GL_RGB32F'),     # arbitrary OpenGL 3.0 symbol
             check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
@@ -785,7 +798,7 @@ video_output_features = [
     } , {
         'name': '--any-gl',
         'desc': 'Any OpenGL (ES) support',
-        'deps_any': ['desktop-gl', 'android-gl'],
+        'deps_any': ['standard-gl', 'android-gl', 'cocoa'],
         'func': check_true
     } , {
         'name': '--plain-gl',
@@ -840,9 +853,19 @@ hwaccel_features = [
         'deps': [ 'win32' ],
         'func': check_headers('libavcodec/dxva2.h', use='libav'),
     }, {
+        'name': '--d3d11va-hwaccel',
+        'desc': 'libavcodec D3D11VA hwaccel',
+        'deps': [ 'win32' ],
+        'func': check_headers('libavcodec/d3d11va.h', use='libav'),
+    }, {
+        'name': 'd3d-hwaccel',
+        'desc': 'Direct3D hwaccel',
+        'deps_any': [ 'dxva2-hwaccel', 'd3d11va-hwaccel' ],
+        'func': check_true
+    }, {
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',
-        'deps_any': [ 'dxva2-hwaccel', 'vaapi-hwaccel' ],
+        'deps_any': [ 'd3d-hwaccel', 'vaapi-hwaccel' ],
         'func': check_cc(fragment=load_fragment('sse.c')),
     }
 ]

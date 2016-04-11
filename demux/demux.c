@@ -53,6 +53,7 @@ extern const demuxer_desc_t demuxer_desc_playlist;
 extern const demuxer_desc_t demuxer_desc_disc;
 extern const demuxer_desc_t demuxer_desc_rar;
 extern const demuxer_desc_t demuxer_desc_libarchive;
+extern const demuxer_desc_t demuxer_desc_null;
 extern const demuxer_desc_t demuxer_desc_timeline;
 
 /* Please do not add any new demuxers here. If you want to implement a new
@@ -76,6 +77,7 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_lavf,
     &demuxer_desc_mf,
     &demuxer_desc_playlist,
+    &demuxer_desc_null,
     NULL
 };
 
@@ -91,15 +93,13 @@ struct demux_internal {
     struct demuxer *d_buffer;   // protected by lock; used to sync d_user/thread
 
     // The lock protects the packet queues (struct demux_stream), d_buffer,
-    // and some minor fields like thread_paused.
+    // and the fields below.
     pthread_mutex_t lock;
     pthread_cond_t wakeup;
     pthread_t thread;
 
     // -- All the following fields are protected by lock.
 
-    bool thread_paused;
-    int thread_request_pause;   // counter, if >0, make demuxer thread pause
     bool thread_terminate;
     bool threading;
     void (*wakeup_cb)(void *ctx);
@@ -130,14 +130,15 @@ struct demux_internal {
 
     double ts_offset;           // timestamp offset to apply everything
 
+    void (*run_fn)(void *);     // if non-NULL, function queued to be run on
+    void *run_fn_arg;           // the thread as run_fn(run_fn_arg)
+
     // Cached state.
     bool force_cache_update;
     double time_length;
     struct mp_tags *stream_metadata;
+    struct stream_cache_info stream_cache_info;
     int64_t stream_size;
-    int64_t stream_cache_size;
-    int64_t stream_cache_fill;
-    int stream_cache_idle;
     // Updated during init only.
     char *stream_base_filename;
 };
@@ -631,10 +632,10 @@ static void *demux_thread(void *pctx)
     mpthread_set_name("demux");
     pthread_mutex_lock(&in->lock);
     while (!in->thread_terminate) {
-        in->thread_paused = in->thread_request_pause > 0;
-        if (in->thread_paused) {
+        if (in->run_fn) {
+            in->run_fn(in->run_fn_arg);
+            in->run_fn = NULL;
             pthread_cond_signal(&in->wakeup);
-            pthread_cond_wait(&in->wakeup, &in->lock);
             continue;
         }
         if (in->tracks_switched) {
@@ -679,11 +680,11 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     if (ts != MP_NOPTS_VALUE)
         ds->base_ts = ts;
 
-    if (pkt->keyframe) {
+    if (pkt->keyframe && ts != MP_NOPTS_VALUE) {
         // Update bitrate - only at keyframe points, because we use the
         // (possibly) reordered packet timestamps instead of realtime.
         double d = ts - ds->last_br_ts;
-        if (ts == MP_NOPTS_VALUE || ds->last_br_ts == MP_NOPTS_VALUE || d < 0) {
+        if (ds->last_br_ts == MP_NOPTS_VALUE || d < 0) {
             ds->bitrate = -1;
             ds->last_br_ts = ts;
             ds->last_br_bytes = 0;
@@ -1404,9 +1405,7 @@ static void update_cache(struct demux_internal *in)
     // Don't lock while querying the stream.
     double time_length = -1;
     struct mp_tags *stream_metadata = NULL;
-    int64_t stream_cache_size = -1;
-    int64_t stream_cache_fill = -1;
-    int stream_cache_idle = -1;
+    struct stream_cache_info stream_cache_info = {.size = -1};
 
     if (demuxer->desc->control) {
         demuxer->desc->control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,
@@ -1415,16 +1414,12 @@ static void update_cache(struct demux_internal *in)
 
     int64_t stream_size = stream_get_size(stream);
     stream_control(stream, STREAM_CTRL_GET_METADATA, &stream_metadata);
-    stream_control(stream, STREAM_CTRL_GET_CACHE_SIZE, &stream_cache_size);
-    stream_control(stream, STREAM_CTRL_GET_CACHE_FILL, &stream_cache_fill);
-    stream_control(stream, STREAM_CTRL_GET_CACHE_IDLE, &stream_cache_idle);
+    stream_control(stream, STREAM_CTRL_GET_CACHE_INFO, &stream_cache_info);
 
     pthread_mutex_lock(&in->lock);
     in->time_length = time_length;
     in->stream_size = stream_size;
-    in->stream_cache_size = stream_cache_size;
-    in->stream_cache_fill = stream_cache_fill;
-    in->stream_cache_idle = stream_cache_idle;
+    in->stream_cache_info = stream_cache_info;
     if (stream_metadata) {
         talloc_free(in->stream_metadata);
         in->stream_metadata = talloc_steal(in, stream_metadata);
@@ -1437,26 +1432,16 @@ static void update_cache(struct demux_internal *in)
 static int cached_stream_control(struct demux_internal *in, int cmd, void *arg)
 {
     // If the cache is active, wake up the thread to possibly update cache state.
-    if (in->stream_cache_size >= 0) {
+    if (in->stream_cache_info.size >= 0) {
         in->force_cache_update = true;
         pthread_cond_signal(&in->wakeup);
     }
 
     switch (cmd) {
-    case STREAM_CTRL_GET_CACHE_SIZE:
-        if (in->stream_cache_size < 0)
+    case STREAM_CTRL_GET_CACHE_INFO:
+        if (in->stream_cache_info.size < 0)
             return STREAM_UNSUPPORTED;
-        *(int64_t *)arg = in->stream_cache_size;
-        return STREAM_OK;
-    case STREAM_CTRL_GET_CACHE_FILL:
-        if (in->stream_cache_fill < 0)
-            return STREAM_UNSUPPORTED;
-        *(int64_t *)arg = in->stream_cache_fill;
-        return STREAM_OK;
-    case STREAM_CTRL_GET_CACHE_IDLE:
-        if (in->stream_cache_idle < 0)
-            return STREAM_UNSUPPORTED;
-        *(int *)arg = in->stream_cache_idle;
+        *(struct stream_cache_info *)arg = in->stream_cache_info;
         return STREAM_OK;
     case STREAM_CTRL_GET_SIZE:
         if (in->stream_size < 0)
@@ -1531,20 +1516,22 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
     return DEMUXER_CTRL_DONTKNOW;
 }
 
-int demux_control(demuxer_t *demuxer, int cmd, void *arg)
+struct demux_control_args {
+    struct demuxer *demuxer;
+    int cmd;
+    void *arg;
+    int *r;
+};
+
+static void thread_demux_control(void *p)
 {
+    struct demux_control_args *args = p;
+    struct demuxer *demuxer = args->demuxer;
+    int cmd = args->cmd;
+    void *arg = args->arg;
     struct demux_internal *in = demuxer->in;
-
-    if (in->threading) {
-        pthread_mutex_lock(&in->lock);
-        int cr = cached_demux_control(in, cmd, arg);
-        pthread_mutex_unlock(&in->lock);
-        if (cr != DEMUXER_CTRL_DONTKNOW)
-            return cr;
-    }
-
     int r = DEMUXER_CTRL_NOTIMPL;
-    demux_pause(demuxer);
+
     if (cmd == DEMUXER_CTRL_STREAM_CTRL) {
         struct demux_ctrl_stream_ctrl *c = arg;
         if (in->threading)
@@ -1559,7 +1546,26 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
         if (demuxer->desc->control)
             r = demuxer->desc->control(demuxer->in->d_thread, cmd, arg);
     }
-    demux_unpause(demuxer);
+
+    *args->r = r;
+}
+
+int demux_control(demuxer_t *demuxer, int cmd, void *arg)
+{
+    struct demux_internal *in = demuxer->in;
+
+    if (in->threading) {
+        pthread_mutex_lock(&in->lock);
+        int cr = cached_demux_control(in, cmd, arg);
+        pthread_mutex_unlock(&in->lock);
+        if (cr != DEMUXER_CTRL_DONTKNOW)
+            return cr;
+    }
+
+    int r = 0;
+    struct demux_control_args args = {demuxer, cmd, arg, &r};
+    demux_run_on_thread(demuxer, thread_demux_control, &args);
+
     return r;
 }
 
@@ -1570,40 +1576,25 @@ int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg)
     return c.res;
 }
 
-// Make the demuxer thread stop doing anything.
-// demux_unpause() wakes up the thread again.
-// Can be nested with other calls, but trying to read packets may deadlock.
-void demux_pause(demuxer_t *demuxer)
+void demux_run_on_thread(struct demuxer *demuxer, void (*fn)(void *), void *ctx)
 {
     struct demux_internal *in = demuxer->in;
     assert(demuxer == in->d_user);
 
-    if (!in->threading)
-        return;
-
-    MP_VERBOSE(in, "pause demux thread\n");
-
-    pthread_mutex_lock(&in->lock);
-    in->thread_request_pause++;
-    pthread_cond_signal(&in->wakeup);
-    while (!in->thread_paused)
-        pthread_cond_wait(&in->wakeup, &in->lock);
-    pthread_mutex_unlock(&in->lock);
-}
-
-void demux_unpause(demuxer_t *demuxer)
-{
-    struct demux_internal *in = demuxer->in;
-    assert(demuxer == in->d_user);
-
-    if (!in->threading)
-        return;
-
-    pthread_mutex_lock(&in->lock);
-    assert(in->thread_request_pause > 0);
-    in->thread_request_pause--;
-    pthread_cond_signal(&in->wakeup);
-    pthread_mutex_unlock(&in->lock);
+    if (in->threading) {
+        MP_VERBOSE(in, "blocking on demuxer thread\n");
+        pthread_mutex_lock(&in->lock);
+        while (in->run_fn)
+            pthread_cond_wait(&in->wakeup, &in->lock);
+        in->run_fn = fn;
+        in->run_fn_arg = ctx;
+        pthread_cond_signal(&in->wakeup);
+        while (in->run_fn)
+            pthread_cond_wait(&in->wakeup, &in->lock);
+        pthread_mutex_unlock(&in->lock);
+    } else {
+        fn(ctx);
+    }
 }
 
 bool demux_cancel_test(struct demuxer *demuxer)

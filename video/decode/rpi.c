@@ -50,9 +50,9 @@ static int init(struct lavc_ctx *ctx)
 }
 
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
-                 const char *decoder)
+                 const char *codec)
 {
-    return map_codec(decoder) ? 0 : HWDEC_ERR_NO_CODEC;
+    return map_codec(codec) ? 0 : HWDEC_ERR_NO_CODEC;
 }
 
 static const char *get_codec(struct lavc_ctx *ctx, const char *codec)

@@ -71,8 +71,7 @@ void uninit_sub(struct MPContext *mpctx, struct track *track)
         reset_subtitles(mpctx, track);
         sub_select(track->d_sub, false);
         int order = get_order(mpctx, track);
-        if (order >= 0 && order <= 1)
-            osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, NULL);
+        osd_set_sub(mpctx->osd, order, NULL);
     }
 }
 
@@ -99,18 +98,15 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
 
     video_pts -= opts->sub_delay;
 
-    if (!track->preloaded && track->demuxer->fully_read && !opts->sub_clear_on_seek)
-    {
+    if (track->demuxer->fully_read && sub_can_preload(dec_sub)) {
         // Assume fully_read implies no interleaved audio/video streams.
         // (Reading packets will change the demuxer position.)
         demux_seek(track->demuxer, 0, 0);
-        track->preloaded = sub_read_all_packets(track->d_sub);
+        sub_preload(dec_sub);
     }
 
-    if (!track->preloaded) {
-        if (!sub_read_packets(dec_sub, video_pts))
-            return false;
-    }
+    if (!sub_read_packets(dec_sub, video_pts))
+        return false;
 
     // Handle displaying subtitles on terminal; never done for secondary subs
     if (mpctx->current_track[0][STREAM_SUB] == track && !mpctx->video_out)
@@ -129,6 +125,29 @@ bool update_subtitles(struct MPContext *mpctx, double video_pts)
     return ok;
 }
 
+static struct attachment_list *get_all_attachments(struct MPContext *mpctx)
+{
+    struct attachment_list *list = talloc_zero(NULL, struct attachment_list);
+    struct demuxer *prev_demuxer = NULL;
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *t = mpctx->tracks[n];
+        if (!t->demuxer || prev_demuxer == t->demuxer)
+            continue;
+        prev_demuxer = t->demuxer;
+        for (int i = 0; i < t->demuxer->num_attachments; i++) {
+            struct demux_attachment *att = &t->demuxer->attachments[i];
+            struct demux_attachment copy = {
+                .name = talloc_strdup(list, att->name),
+                .type = talloc_strdup(list, att->type),
+                .data = talloc_memdup(list, att->data, att->data_size),
+                .data_size = att->data_size,
+            };
+            MP_TARRAY_APPEND(list, list->entries, list->num_entries, copy);
+        }
+    }
+    return list;
+}
+
 static bool init_subdec(struct MPContext *mpctx, struct track *track)
 {
     assert(!track->d_sub);
@@ -136,7 +155,8 @@ static bool init_subdec(struct MPContext *mpctx, struct track *track)
     if (!track->demuxer || !track->stream)
         return false;
 
-    track->d_sub = sub_create(mpctx->global, track->demuxer, track->stream);
+    track->d_sub = sub_create(mpctx->global, track->stream,
+                              get_all_attachments(mpctx));
     if (!track->d_sub)
         return false;
 
@@ -161,8 +181,7 @@ void reinit_sub(struct MPContext *mpctx, struct track *track)
 
     sub_select(track->d_sub, true);
     int order = get_order(mpctx, track);
-    if (order >= 0 && order <= 1)
-        osd_set_sub(mpctx->osd, OSDTYPE_SUB + order, track->d_sub);
+    osd_set_sub(mpctx->osd, order, track->d_sub);
     sub_control(track->d_sub, SD_CTRL_SET_TOP, &(bool){!!order});
 }
 

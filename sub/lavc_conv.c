@@ -47,6 +47,9 @@ static const char *get_lavc_format(const char *format)
     // For the hack involving parse_webvtt().
     if (format && strcmp(format, "webvtt-webm") == 0)
         format = "webvtt";
+    // Most text subtitles are srt/html style anyway.
+    if (format && strcmp(format, "text") == 0)
+        format = "subrip";
     return format;
 }
 
@@ -79,11 +82,8 @@ struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
     avctx = avcodec_alloc_context3(codec);
     if (!avctx)
         goto error;
-    avctx->extradata_size = extradata_len;
-    avctx->extradata = av_malloc(extradata_len);
-    if (!avctx->extradata)
+    if (mp_lavc_set_extradata(avctx, extradata, extradata_len) < 0)
         goto error;
-    memcpy(avctx->extradata, extradata, extradata_len);
     if (strcmp(codec_name, "eia_608") == 0)
         av_dict_set(&opts, "real_time", "1", 0);
     if (avcodec_open2(avctx, codec, &opts) < 0)

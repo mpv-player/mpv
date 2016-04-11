@@ -367,7 +367,7 @@ static void uninit(struct ao *ao)
     CHECK_CA_WARN("failed to remove device render callback");
 
     if (!ca_change_physical_format_sync(ao, p->stream, p->original_asbd))
-        MP_WARN(ao, "can't revert to original device format");
+        MP_WARN(ao, "can't revert to original device format\n");
 
     err = ca_enable_mixing(ao, p->device, p->changed_mixing);
     CHECK_CA_WARN("can't re-enable mixing");

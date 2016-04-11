@@ -68,7 +68,9 @@ struct mp_codec_params {
     int extradata_size;
 
     // Codec specific header data (set by demux_lavf.c only)
+    // Which one is in use depends on HAVE_AVCODEC_HAS_CODECPAR.
     struct AVCodecContext *lav_headers;
+    struct AVCodecParameters *lav_codecpar;
 
     // STREAM_AUDIO
     int samplerate;

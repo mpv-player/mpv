@@ -1,10 +1,10 @@
 JSON IPC
 ========
 
-mpv can be controlled by external programs using the JSON-based IPC protocol. It
-can be enabled by specifying the path to a unix socket using the option
-``--input-unix-socket``. Clients can connect to this socket and send commands to
-the player or receive events from it.
+mpv can be controlled by external programs using the JSON-based IPC protocol.
+It can be enabled by specifying the path to a unix socket or a named pipe using
+the option ``--input-ipc-server``. Clients can connect to this socket and send
+commands to the player or receive events from it.
 
 .. warning::
 
@@ -17,12 +17,12 @@ the player or receive events from it.
 Socat example
 -------------
 
-You can use the ``socat`` tool to send commands (and receive reply) from the
+You can use the ``socat`` tool to send commands (and receive replies) from the
 shell. Assuming mpv was started with:
 
 ::
 
-    mpv file.mkv --input-unix-socket=/tmp/mpvsocket
+    mpv file.mkv --input-ipc-server=/tmp/mpvsocket
 
 Then you can control it using socat:
 
@@ -45,6 +45,31 @@ It's also possible to send input.conf style text-only commands:
 
 But you won't get a reply over the socket. (This particular command shows the
 playback time on the player's OSD.)
+
+Command Prompt example
+----------------------
+
+Unfortunately, it's not as easy to test the IPC protocol on Windows, since
+Windows ports of socat (in Cygwin and MSYS2) don't understand named pipes. In
+the absence of a simple tool to send and receive from bidirectional pipes, the
+``echo`` command can be used to send commands, but not receive replies from the
+command prompt.
+
+Assuming mpv was started with:
+
+::
+
+    mpv file.mkv --input-ipc-server=\\.\pipe\mpvsocket
+
+You can send commands from a command prompt:
+
+::
+
+    echo show_text ${playback-time} >\\.\pipe\mpvsocket
+
+To be able to simultaneously read and write from the IPC pipe, like on Linux,
+it's necessary to write an external program that uses overlapped file I/O (or
+some wrapper like .NET's NamedPipeClientStream.)
 
 Protocol
 --------
@@ -102,7 +127,7 @@ break character (``\n``).
 
 If the first character (after skipping whitespace) is not ``{``, the command
 will be interpreted as non-JSON text command, as they are used in input.conf
-(or ``mpv_command_string()`` in the client API). Additionally, line starting
+(or ``mpv_command_string()`` in the client API). Additionally, lines starting
 with ``#`` and empty lines are ignored.
 
 Currently, embedded 0 bytes terminate the current line, but you should not

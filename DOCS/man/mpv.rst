@@ -54,7 +54,7 @@ UP and DOWN
 
 Ctrl+LEFT and Ctrl+RIGHT
     Seek to the previous/next subtitle. Subject to some restrictions and
-    might not always work; see ``sub_seek`` command.
+    might not always work; see ``sub-seek`` command.
 
 [ and ]
     Decrease/increase current playback speed by 10%.
@@ -708,7 +708,9 @@ PROTOCOLS
     Stitch together parts of multiple files and play them.
 
 ``null://``
-    Simulate an empty file.
+    Simulate an empty file. If opened for writing, it will discard all data.
+    The ``null`` demuxer will specifically pass autoprobing if this protocol
+    is used (while it's not automatically invoked for empty files).
 
 ``memory://data``
     Use the ``data`` part as source data.
@@ -795,9 +797,6 @@ behavior of mpv.
     If set, XDG-style system configuration directories are used. Otherwise,
     the UNIX convention (``PREFIX/etc/mpv/``) is used.
 
-``TERM``
-    Used to determine terminal type.
-
 ``MPV_HOME``
     Directory where mpv looks for user settings. Overrides ``HOME``, and mpv
     will try to load the config file as ``$MPV_HOME/mpv.conf``.
@@ -808,8 +807,7 @@ behavior of mpv.
     of ``--v`` options passed to the command line.
 
 ``MPV_LEAK_REPORT``
-    If set to ``1``, enable internal talloc leak reporting. Note that this can
-    cause trouble with multithreading, so only developers should use this.
+    If set to ``1``, enable internal talloc leak reporting.
 
 ``LADSPA_PATH``
     Specifies the search path for LADSPA plugins. If it is unset, fully

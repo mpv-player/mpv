@@ -134,6 +134,8 @@ static int recreate_audio_filters(struct MPContext *mpctx)
 
     mixer_reinit_audio(mpctx->mixer, mpctx->ao, afs);
 
+    mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
+
     return 0;
 
 fail:
@@ -367,6 +369,8 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
         goto init_error;
 
     update_playback_speed(mpctx);
+
+    mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
 
     return;
 

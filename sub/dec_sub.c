@@ -49,10 +49,11 @@ struct dec_sub {
     struct mpv_global *global;
     struct MPOpts *opts;
 
-    struct demuxer *demuxer;
+    struct attachment_list *attachments;
 
     struct sh_stream *sh;
     double last_pkt_pts;
+    bool preload_attempted;
 
     struct mp_codec_params *codec;
     double start, end;
@@ -94,8 +95,9 @@ static struct sd *init_decoder(struct dec_sub *sub)
             .log = mp_log_new(sd, sub->log, driver->name),
             .opts = sub->opts,
             .driver = driver,
-            .demuxer = sub->demuxer,
+            .attachments = sub->attachments,
             .codec = sub->codec,
+            .preload_ok = true,
         };
 
         if (sd->driver->init(sd) >= 0)
@@ -112,10 +114,12 @@ static struct sd *init_decoder(struct dec_sub *sub)
 // Thread-safety of the returned object: all functions are thread-safe,
 // except sub_get_bitmaps() and sub_get_text(). Decoder backends (sd_*)
 // do not need to acquire locks.
-struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
-                           struct sh_stream *sh)
+// Ownership of attachments goes to the caller, and is released with
+// talloc_free() (even on failure).
+struct dec_sub *sub_create(struct mpv_global *global, struct sh_stream *sh,
+                           struct attachment_list *attachments)
 {
-    assert(demuxer && sh && sh->type == STREAM_SUB);
+    assert(sh && sh->type == STREAM_SUB);
 
     struct dec_sub *sub = talloc(NULL, struct dec_sub);
     *sub = (struct dec_sub){
@@ -124,7 +128,7 @@ struct dec_sub *sub_create(struct mpv_global *global, struct demuxer *demuxer,
         .opts = global->opts,
         .sh = sh,
         .codec = sh->codec,
-        .demuxer = demuxer,
+        .attachments = talloc_steal(sub, attachments),
         .last_pkt_pts = MP_NOPTS_VALUE,
         .last_vo_pts = MP_NOPTS_VALUE,
         .start = MP_NOPTS_VALUE,
@@ -146,6 +150,9 @@ static void update_segment(struct dec_sub *sub)
     if (sub->new_segment && sub->last_vo_pts != MP_NOPTS_VALUE &&
         sub->last_vo_pts >= sub->new_segment->start)
     {
+        MP_VERBOSE(sub, "Switch segment: %f at %f\n", sub->new_segment->start,
+                   sub->last_vo_pts);
+
         sub->codec = sub->new_segment->codec;
         sub->start = sub->new_segment->start;
         sub->end = sub->new_segment->end;
@@ -165,16 +172,20 @@ static void update_segment(struct dec_sub *sub)
     }
 }
 
-// Read all packets from the demuxer and decode/add them. Returns false if
-// there are circumstances which makes this not possible.
-bool sub_read_all_packets(struct dec_sub *sub)
+bool sub_can_preload(struct dec_sub *sub)
+{
+    bool r;
+    pthread_mutex_lock(&sub->lock);
+    r = sub->sd->driver->accept_packets_in_advance && !sub->preload_attempted;
+    pthread_mutex_unlock(&sub->lock);
+    return r;
+}
+
+void sub_preload(struct dec_sub *sub)
 {
     pthread_mutex_lock(&sub->lock);
 
-    if (!sub->sd->driver->accept_packets_in_advance) {
-        pthread_mutex_unlock(&sub->lock);
-        return false;
-    }
+    sub->preload_attempted = true;
 
     for (;;) {
         struct demux_packet *pkt = demux_read_packet(sub->sh);
@@ -185,7 +196,6 @@ bool sub_read_all_packets(struct dec_sub *sub)
     }
 
     pthread_mutex_unlock(&sub->lock);
-    return true;
 }
 
 // Read packets from the demuxer stream passed to sub_create(). Return true if
@@ -202,6 +212,11 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
 
         if (!read_more)
             break;
+
+        if (sub->new_segment && sub->new_segment->start < video_pts) {
+            sub->last_vo_pts = video_pts;
+            update_segment(sub);
+        }
 
         if (sub->new_segment)
             break;
@@ -228,7 +243,9 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
             break;
         }
 
-        sub->sd->driver->decode(sub->sd, pkt);
+        if (!(sub->preload_attempted && sub->sd->preload_ok))
+            sub->sd->driver->decode(sub->sd, pkt);
+
         talloc_free(pkt);
     }
     pthread_mutex_unlock(&sub->lock);
@@ -242,8 +259,6 @@ void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
                      struct sub_bitmaps *res)
 {
     struct MPOpts *opts = sub->opts;
-
-    *res = (struct sub_bitmaps) {0};
 
     sub->last_vo_pts = pts;
     update_segment(sub);

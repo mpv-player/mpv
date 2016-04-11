@@ -88,7 +88,9 @@ const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"vaapi-copy",  HWDEC_VAAPI_COPY},
     {"dxva2",       HWDEC_DXVA2},
     {"dxva2-copy",  HWDEC_DXVA2_COPY},
+    {"d3d11va-copy",HWDEC_D3D11VA_COPY},
     {"rpi",         HWDEC_RPI},
+    {"mediacodec",  HWDEC_MEDIACODEC},
     {0}
 };
 
@@ -581,7 +583,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
 
     OPT_STRING("input-file", input_file, M_OPT_FILE | M_OPT_GLOBAL),
-    OPT_STRING("input-unix-socket", ipc_path, M_OPT_FILE),
+    OPT_STRING("input-ipc-server", ipc_path, M_OPT_FILE),
 
     OPT_SUBSTRUCT("screenshot", screenshot_image_opts, image_writer_conf, 0),
     OPT_STRING("screenshot-template", screenshot_template, 0),
@@ -676,6 +678,7 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("dtshd", "ad-spdif-dtshd"),
     OPT_REPLACED("ass-use-margins", "sub-use-margins"),
     OPT_REPLACED("media-title", "force-media-title"),
+    OPT_REPLACED("input-unix-socket", "input-ipc-server"),
 
     {0}
 };
@@ -706,7 +709,7 @@ const struct MPOpts mp_default_opts = {
         .border = 1,
         .WinID = -1,
         .window_scale = 1.0,
-        .x11_bypass_compositor = 1,
+        .x11_bypass_compositor = 0,
         .mmcss_profile = "Playback",
     },
     .allow_win_drag = 1,

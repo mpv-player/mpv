@@ -7,13 +7,32 @@
 
 #define OSD_CONV_CACHE_MAX 4
 
+enum mp_osdtype {
+    OSDTYPE_SUB,
+    OSDTYPE_SUB2, // IDs must be numerically successive
+
+    OSDTYPE_OSD,
+
+    OSDTYPE_EXTERNAL,
+    OSDTYPE_EXTERNAL2,
+
+    OSDTYPE_COUNT
+};
+
+struct ass_state {
+    struct mp_log *log;
+    struct ass_track *track;
+    struct ass_renderer *render;
+    struct ass_library *library;
+};
+
 struct osd_object {
     int type; // OSDTYPE_*
     bool is_sub;
 
     bool force_redraw;
 
-    // OSDTYPE_SUB/OSDTYPE_SUB2/OSDTYPE_OSD/OSDTYPE_EXTERNAL
+    // OSDTYPE_OSD
     char *text;
 
     // OSDTYPE_OSD
@@ -23,7 +42,8 @@ struct osd_object {
     struct dec_sub *sub;
 
     // OSDTYPE_EXTERNAL
-    int external_res_x, external_res_y;
+    struct osd_external *externals;
+    int num_externals;
 
     // OSDTYPE_EXTERNAL2
     struct sub_bitmaps *external2;
@@ -37,10 +57,15 @@ struct osd_object {
     struct mp_osd_res vo_res;
 
     // Internally used by osd_libass.c
-    struct sub_bitmap *parts_cache;
-    struct ass_track *osd_track;
-    struct ass_renderer *osd_render;
-    struct ass_library *osd_ass_library;
+    struct sub_bitmaps parts_cache;
+    struct ass_state ass;
+};
+
+struct osd_external {
+    void *id;
+    char *text;
+    int res_x, res_y;
+    struct ass_state ass;
 };
 
 struct osd_state {
@@ -58,5 +83,7 @@ struct osd_state {
 
     struct mp_draw_sub_cache *draw_cache;
 };
+
+void osd_changed_unlocked(struct osd_state *osd, int obj);
 
 #endif

@@ -152,7 +152,7 @@ typedef struct mkv_index {
 
 struct block_info {
     uint64_t duration, discardpadding;
-    bool simple, keyframe;
+    bool simple, keyframe, duration_known;
     int64_t timecode;
     mkv_track_t *track;
     bstr data;
@@ -1687,9 +1687,11 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         sh_a->samplerate = 48000;
     }
 
-    // This field tends to be broken, and our decoder can interpolate the
-    // missing timestamps anyway.
-    track->default_duration = 0;
+    // Some files have broken default DefaultDuration set, which will lead to
+    // audio packets with incorrect timestamps. This follows FFmpeg commit
+    // 6158a3b, sample see FFmpeg ticket 2508.
+    if (sh_a->samplerate == 8000 && strcmp(codec, "ac3") == 0)
+        track->default_duration = 0;
 
     sh_a->extradata = extradata;
     sh_a->extradata_size = extradata_len;
@@ -2461,7 +2463,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                 dp->pts = current_pts + i * track->default_duration;
             if (stream->codec->avi_dts)
                 MPSWAP(double, dp->pts, dp->dts);
-            if (i == 0)
+            if (i == 0 && block_info->duration_known)
                 dp->duration = block_duration / 1e9;
             if (stream->type == STREAM_AUDIO) {
                 unsigned int srate = stream->codec->samplerate;
@@ -2504,6 +2506,7 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
             if (block->duration == EBML_UINT_INVALID)
                 goto error;
             block->duration *= mkv_d->tc_scale;
+            block->duration_known = true;
             break;
 
         case MATROSKA_ID_DISCARDPADDING:

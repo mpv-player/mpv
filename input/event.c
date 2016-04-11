@@ -56,8 +56,8 @@ void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files,
 int mp_event_drop_mime_data(struct input_ctx *ictx, const char *mime_type,
                             bstr data, enum mp_dnd_action action)
 {
-    // X11 and Wayland file list format.
-    if (strcmp(mime_type, "text/uri-list") == 0) {
+    // (text lists are the only format supported right now)
+    if (mp_event_get_mime_type_score(ictx, mime_type) >= 0) {
         void *tmp = talloc_new(NULL);
         int num_files = 0;
         char **files = NULL;
@@ -75,4 +75,19 @@ int mp_event_drop_mime_data(struct input_ctx *ictx, const char *mime_type,
     } else {
         return -1;
     }
+}
+
+int mp_event_get_mime_type_score(struct input_ctx *ictx, const char *mime_type)
+{
+    // X11 and Wayland file list format.
+    if (strcmp(mime_type, "text/uri-list") == 0)
+        return 10;
+    // Just text; treat it the same for convenience.
+    if (strcmp(mime_type, "text/plain;charset=utf-8") == 0)
+        return 5;
+    if (strcmp(mime_type, "text/plain") == 0)
+        return 4;
+    if (strcmp(mime_type, "text") == 0)
+        return 0;
+    return -1;
 }

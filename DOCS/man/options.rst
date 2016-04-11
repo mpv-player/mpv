@@ -580,7 +580,10 @@ Video
     :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
     :videotoolbox: requires ``--vo=opengl`` (OS X 10.8 and up only)
+    :dxva2: requires ``--vo=opengl:backend=angle`` or
+        ``--vo=opengl:backend=dxinterop`` (Windows only)
     :dxva2-copy: copies video back to system RAM (Windows only)
+    :d3d11va-copy: experimental (Windows only)
     :rpi:       requires ``--vo=rpi`` (Raspberry Pi only - default if available)
 
     ``auto`` tries to automatically enable hardware decoding using the first
@@ -596,9 +599,14 @@ Video
     forcing it with ``--vo=opengl:backend=x11``, but the vaapi/GLX interop is
     said to be slower than ``vaapi-copy``.
 
-    The ``vaapi-copy`` mode allows you to use vaapi with any VO. Because
-    this copies the decoded video back to system RAM, it's likely less efficient
-    than the ``vaapi`` mode.
+    Most video filters will not work with hardware decoding as they are
+    primarily implemented on the CPU. Some exceptions are ``vdpaupp``,
+    ``vdpaurb`` and ``vavpp``. See `VIDEO FILTERS`_ for more details.
+
+    The ``vaapi-copy`` and ``dxva2-copy`` modes allow you to use hardware
+    decoding with any VO, backend or filter. Because these copy the decoded
+    video back to system RAM, they're likely less efficient than the ``vaapi``
+    or ``dxva2`` modes respectively.
 
     .. note::
 
@@ -676,15 +684,12 @@ Video
 ``--video-unscaled``
     Disable scaling of the video. If the window is larger than the video,
     black bars are added. Otherwise, the video is cropped. The video still
-    can be influenced by the other ``--video-...`` options. (But not all; for
-    example ``--video-zoom`` does nothing if this option is enabled.)
-
-    The video and monitor aspects aspect will be ignored. Aspect correction
-    would require scaling the video in the X or Y direction, but this option
-    disables scaling, disabling all aspect correction.
+    can be influenced by the other ``--video-...`` options.
 
     Note that the scaler algorithm may still be used, even if the video isn't
-    scaled. For example, this can influence chroma conversion.
+    scaled. For example, this can influence chroma conversion. The video will
+    also still be scaled in one dimension if the source uses non-square pixels
+    (e.g. anamorphic widescreen DVDs).
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
@@ -724,12 +729,10 @@ Video
     appear in files, but can't be handled properly by mpv.
 
 ``--video-zoom=<value>``
-    Adjust the video display scale factor by the given value. The unit is in
-    fractions of the (scaled) window video size.
-
-    For example, given a 1280x720 video shown in a 1280x720 window,
-    ``--video-zoom=-0.1`` would make the video by 128 pixels smaller in
-    X direction, and 72 pixels in Y direction.
+    Adjust the video display scale factor by the given value. The parameter is
+    given log 2. For example, ``--video-zoom=0`` is unscaled,
+    ``--video-zoom=1`` is twice the size, ``--video-zoom=-2`` is one fourth of
+    the size, and so on.
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
@@ -2066,8 +2069,8 @@ Window
     This option might be removed in the future.
 
 ``--x11-bypass-compositor=<yes|no>``
-    If set to ``yes`` (default), then ask the compositor to unredirect the
-    mpv window. This uses the ``_NET_WM_BYPASS_COMPOSITOR`` hint.
+    If set to ``yes``, then ask the compositor to unredirect the mpv window
+    (default: no). This uses the ``_NET_WM_BYPASS_COMPOSITOR`` hint.
 
 
 Disc Devices
@@ -2433,7 +2436,7 @@ Input
 ``--input-file=<filename>``
     Read commands from the given file. Mostly useful with a FIFO. Since
     mpv 0.7.0 also understands JSON commands (see `JSON IPC`_), but you can't
-    get replies or events. Use ``--input-unix-socket`` for something
+    get replies or events. Use ``--input-ipc-server`` for something
     bi-directional. On MS Windows, JSON commands are not available.
 
     This can also specify a direct file descriptor with ``fd://N`` (UNIX only).
@@ -2453,12 +2456,18 @@ Input
     or intend to read from stdin later on via the loadfile or loadlist slave
     commands.
 
-``--input-unix-socket=<filename>``
+``--input-ipc-server=<filename>``
     Enable the IPC support and create the listening socket at the given path.
 
-    See `JSON IPC`_ for details.
+    On Linux and Unix, the given path is a regular filesystem path. On Windows,
+    named pipes are used, so the path refers to the pipe namespace
+    (``\\.\pipe\<name>``). If the ``\\.\pipe\`` prefix is missing, mpv will add
+    it automatically before creating the pipe, so
+    ``--input-ipc-server=/tmp/mpv-socket`` and
+    ``--input-ipc-server=\\.\pipe\tmp\mpv-socket`` are equivalent for IPC on
+    Windows.
 
-    Not available on MS Windows.
+    See `JSON IPC`_ for details.
 
 ``--input-appleremote=<yes|no>``
     (OS X only)
@@ -2612,6 +2621,9 @@ OSD
 
 ``--osd-bold=<yes|no>``, ``--sub-text-bold=<yes|no>``
     Format text on bold.
+
+``--osd-italic=<yes|no>``, ``--sub-text-italic=<yes|no>``
+    Format text on italic.
 
 ``--osd-border-color=<color>``, ``--sub-text-border-color=<color>``
     See ``--osd-color``. Color used for the OSD/sub font border.
@@ -2952,6 +2964,22 @@ Terminal
         :v:         verbose messages
         :debug:     debug messages
         :trace:     very noisy debug messages
+
+    .. admonition:: Example
+
+        ::
+
+            mpv --msg-level=ao/sndio=no
+
+        Completely silences the output of ao_sndio, which uses the log
+        prefix ``[ao/sndio]``.
+
+        ::
+
+            mpv --msg-level=all=warn,ao/alsa=error
+
+        Only show warnings or worse, and let the ao_alsa output show errors
+        only.
 
 ``--term-osd, --no-term-osd``, ``--term-osd=force``
     Display OSD messages on the console when no video output is available.
@@ -3603,7 +3631,7 @@ Miscellaneous
         - ``--lavfi-complex='[aid1] asplit [t1] [ao] ; [t1] showvolume [t2] ; [vid1] [t2] overlay [vo]'``
           Play audio track 1, and overlay the measured volume for each speaker
           over video track 1.
+        - ``null:// --lavfi-complex='life [vo]'``
+          Conways' Life Game.
 
     See the FFmpeg libavfilter documentation for details on the filter.
-
-

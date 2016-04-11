@@ -31,7 +31,7 @@ struct superxbr_opts {
 
 const struct superxbr_opts superxbr_opts_def = {
     .sharpness = 1.0f,
-    .edge_strength = 1.0f,
+    .edge_strength = 0.6f,
 };
 
 #define OPT_BASE_STRUCT struct superxbr_opts
@@ -71,73 +71,144 @@ const struct m_sub_options superxbr_conf = {
 
 */
 
-void pass_superxbr(struct gl_shader_cache *sc, int planes, int tex_num,
-                   int step, float tex_mul, const struct superxbr_opts *conf,
+struct step_params {
+    const float dstr, ostr; // sharpness strength modifiers
+    const int d1[3][3]; // 1-distance diagonal mask
+    const int d2[2][2]; // 2-distance diagonal mask
+    const int o1[3]; // 1-distance orthogonal mask
+    const int o2[3]; // 2-distance orthogonal mask
+};
+
+const struct step_params params[3] = {
+    {   .dstr = 0.129633,
+        .ostr = 0.175068,
+        .d1 = {{0, 1, 0},
+               {1, 2, 1},
+               {0, 1, 0}},
+        .d2 = {{-1,  0},
+               { 0, -1}},
+
+        .o1 = {1, 2, 1},
+        .o2 = { 0,  0},
+    }, {
+        .dstr = 0.175068,
+        .ostr = 0.129633,
+        .d1 = {{0, 1, 0},
+               {1, 4, 1},
+               {0, 1, 0}},
+        .d2 = {{ 0,  0},
+               { 0,  0}},
+
+        .o1 = {1, 4, 1},
+        .o2 = { 0,  0},
+    }
+};
+
+// Compute a single step of the superxbr process, assuming the input can be
+// sampled using i(x,y). Dumps its output into 'res'
+static void superxbr_step_h(struct gl_shader_cache *sc,
+                            const struct superxbr_opts *conf,
+                            const struct step_params *mask)
+{
+    GLSLHF("{ // step\n");
+
+    // Convolute along the diagonal and orthogonal lines
+    GLSLH(vec4 d1 = vec4( i(0,0), i(1,1), i(2,2), i(3,3) );)
+    GLSLH(vec4 d2 = vec4( i(0,3), i(1,2), i(2,1), i(3,0) );)
+    GLSLH(vec4 h1 = vec4( i(0,1), i(1,1), i(2,1), i(3,1) );)
+    GLSLH(vec4 h2 = vec4( i(0,2), i(1,2), i(2,2), i(3,2) );)
+    GLSLH(vec4 v1 = vec4( i(1,0), i(1,1), i(1,2), i(1,3) );)
+    GLSLH(vec4 v2 = vec4( i(2,0), i(2,1), i(2,2), i(2,3) );)
+
+    GLSLHF("float dw = %f;\n", conf->sharpness * mask->dstr);
+    GLSLHF("float ow = %f;\n", conf->sharpness * mask->ostr);
+    GLSLH(vec4 dk = vec4(-dw, dw+0.5, dw+0.5, -dw);) // diagonal kernel
+    GLSLH(vec4 ok = vec4(-ow, ow+0.5, ow+0.5, -ow);) // ortho kernel
+
+    // Convoluted results
+    GLSLH(float d1c = dot(d1, dk);)
+    GLSLH(float d2c = dot(d2, dk);)
+    GLSLH(float vc = dot(v1+v2, ok)/2.0;)
+    GLSLH(float hc = dot(h1+h2, ok)/2.0;)
+
+    // Compute diagonal edge strength using diagonal mask
+    GLSLH(float d_edge = 0;)
+    for (int x = 0; x < 3; x++) {
+        for (int y = 0; y < 3; y++) {
+            if (mask->d1[x][y]) {
+                // 1-distance diagonal neighbours
+                GLSLHF("d_edge += %d * abs(i(%d,%d) - i(%d,%d));\n",
+                       mask->d1[x][y], x+1, y, x, y+1);
+                GLSLHF("d_edge -= %d * abs(i(%d,%d) - i(%d,%d));\n",
+                       mask->d1[x][y], 3-y, x+1, 3-(y+1), x); // rotated
+            }
+            if (x < 2 && y < 2 && mask->d2[x][y]) {
+                // 2-distance diagonal neighbours
+                GLSLHF("d_edge += %d * abs(i(%d,%d) - i(%d,%d));\n",
+                       mask->d2[x][y], x+2, y, x, y+2);
+                GLSLHF("d_edge -= %d * abs(i(%d,%d) - i(%d,%d));\n",
+                       mask->d2[x][y], 3-y, x+2, 3-(y+2), x); // rotated
+            }
+        }
+    }
+
+    // Compute orthogonal edge strength using orthogonal mask
+    GLSLH(float o_edge = 0;)
+    for (int x = 1; x < 3; x++) {
+        for (int y = 0; y < 3; y++) {
+            if (mask->o1[y]) {
+                // 1-distance neighbours
+                GLSLHF("o_edge += %d * abs(i(%d,%d) - i(%d,%d));\n",
+                       mask->o1[y], x, y, x, y+1); // vertical
+                GLSLHF("o_edge -= %d * abs(i(%d,%d) - i(%d,%d));\n",
+                       mask->o1[y], y, x, y+1, x); // horizontal
+            }
+            if (y < 2 && mask->o2[y]) {
+                // 2-distance neighbours
+                GLSLHF("o_edge += %d * abs(i(%d,%d) - i(%d,%d));\n",
+                       mask->o2[y], x, y, x, y+2); // vertical
+                GLSLHF("o_edge -= %d * abs(i(%d,%d) - i(%d,%d));\n",
+                       mask->o2[x], y, x, y+2, x); // horizontal
+            }
+        }
+    }
+
+    // Pick the two best directions and mix them together
+    GLSLHF("float str = smoothstep(0.0, %f + 1e-6, abs(tex_mul*d_edge));\n",
+           conf->edge_strength);
+    GLSLH(res = mix(mix(d2c, d1c, step(0.0, d_edge)), \
+                    mix(hc,   vc, step(0.0, o_edge)), 1.0 - str);)
+
+    // Anti-ringing using center square
+    GLSLH(float lo = min(min( i(1,1), i(2,1) ), min( i(1,2), i(2,2) ));)
+    GLSLH(float hi = max(max( i(1,1), i(2,1) ), max( i(1,2), i(2,2) ));)
+    GLSLH(res = clamp(res, lo, hi);)
+
+    GLSLHF("} // step\n");
+}
+
+void pass_superxbr(struct gl_shader_cache *sc, int id, int step, float tex_mul,
+                   const struct superxbr_opts *conf,
                    struct gl_transform *transform)
 {
-    assert(0 <= step && step < 2);
-    GLSLF("// superxbr (tex %d, step %d)\n", tex_num, step + 1);
-
     if (!conf)
         conf = &superxbr_opts_def;
 
+    assert(0 <= step && step < 2);
+    GLSLF("// superxbr (step %d)\n", step);
+    GLSLHF("#define tex texture%d\n", id);
+    GLSLHF("#define tex_size texture_size%d\n", id);
+    GLSLHF("#define tex_mul %f\n", tex_mul);
+    GLSLHF("#define pt pixel_size%d\n", id);
+
+    // We use a sub-function in the header so we can return early
+    GLSLHF("float superxbr(vec2 pos) {\n");
+    GLSLH(float i[4*4];)
+    GLSLH(float res;)
+    GLSLH(#define i(x,y) i[(x)*4+(y)])
+
     if (step == 0) {
         *transform = (struct gl_transform){{{2.0,0.0}, {0.0,2.0}}, {-0.5,-0.5}};
-
-        GLSLH(#define wp1  2.0)
-        GLSLH(#define wp2  1.0)
-        GLSLH(#define wp3 -1.0)
-        GLSLH(#define wp4  4.0)
-        GLSLH(#define wp5 -1.0)
-        GLSLH(#define wp6  1.0)
-
-        GLSLHF("#define weight1 (%f*1.29633/10.0)\n", conf->sharpness);
-        GLSLHF("#define weight2 (%f*1.75068/10.0/2.0)\n", conf->sharpness);
-
-        GLSLH(#define Get(x, y) (texture(tex, pos + (vec2(x, y) - vec2(0.25, 0.25)) * pixel_size)[plane] * tex_mul))
-    } else {
-        *transform = (struct gl_transform){{{1.0,0.0}, {0.0,1.0}}, {0.0,0.0}};
-
-        GLSLH(#define wp1  2.0)
-        GLSLH(#define wp2  0.0)
-        GLSLH(#define wp3  0.0)
-        GLSLH(#define wp4  0.0)
-        GLSLH(#define wp5  0.0)
-        GLSLH(#define wp6  0.0)
-
-        GLSLHF("#define weight1 (%f*1.75068/10.0)\n", conf->sharpness);
-        GLSLHF("#define weight2 (%f*1.29633/10.0/2.0)\n", conf->sharpness);
-
-        GLSLH(#define Get(x, y) (texture(tex, pos + (vec2((x) + (y) - 1, (y) - (x))) * pixel_size)[plane] * tex_mul))
-    }
-    GLSLH(float df(float A, float B)
-          {
-              return abs(A-B);
-          })
-
-    GLSLH(float d_wd(float b0, float b1, float c0, float c1, float c2,
-                     float d0, float d1, float d2, float d3, float e1,
-                     float e2, float e3, float f2, float f3)
-          {
-              return (wp1*(df(c1,c2) + df(c1,c0) + df(e2,e1) + df(e2,e3)) +
-                      wp2*(df(d2,d3) + df(d0,d1)) +
-                      wp3*(df(d1,d3) + df(d0,d2)) +
-                      wp4*df(d1,d2) +
-                      wp5*(df(c0,c2) + df(e1,e3)) +
-                      wp6*(df(b0,b1) + df(f2,f3)));
-          })
-
-    GLSLH(float hv_wd(float i1, float i2, float i3, float i4,
-                      float e1, float e2, float e3, float e4)
-          {
-              return (wp4*(df(i1,i2)+df(i3,i4)) +
-                      wp1*(df(i1,e1)+df(i2,e2)+df(i3,e3)+df(i4,e4)) +
-                      wp3*(df(i1,e2)+df(i3,e4)+df(e1,i2)+df(e3,i4)));
-          })
-
-    GLSLHF("float superxbr(sampler2D tex, vec2 pos, vec2 tex_size, vec2 pixel_size, int plane, float tex_mul) {\n");
-
-    if (step == 0) {
         GLSLH(vec2 dir = fract(pos * tex_size) - 0.5;)
 
         // Optimization: Discard (skip drawing) unused pixels, except those
@@ -147,83 +218,27 @@ void pass_superxbr(struct gl_shader_cache *sc, int planes, int tex_num,
                   return 0.0;)
 
         GLSLH(if (dir.x < 0.0 || dir.y < 0.0 || dist.x < 1.0 || dist.y < 1.0)
-                  return texture(tex, pos - dir * pixel_size)[plane] * tex_mul;)
+                  return texture(tex, pos - pt * dir).x;)
+
+        // Load the input samples
+        GLSLH(for (int x = 0; x < 4; x++))
+        GLSLH(for (int y = 0; y < 4; y++))
+        GLSLH(i(x,y) = texture(tex, pos + pt * vec2(x-1.25, y-1.25)).x;)
     } else {
+        *transform = (struct gl_transform){{{1.0,0.0}, {0.0,1.0}}, {0.0,0.0}};
+
         GLSLH(vec2 dir = fract(pos * tex_size / 2.0) - 0.5;)
         GLSLH(if (dir.x * dir.y > 0.0)
-                  return texture(tex, pos)[plane] * tex_mul;)
+                  return texture(tex, pos).x;)
+
+        GLSLH(for (int x = 0; x < 4; x++))
+        GLSLH(for (int y = 0; y < 4; y++))
+        GLSLH(i(x,y) = texture(tex, pos + pt * vec2(x+y-3, y-x)).x;)
     }
 
-    GLSLH(float P0 = Get(-1,-1);
-          float P1 = Get( 2,-1);
-          float P2 = Get(-1, 2);
-          float P3 = Get( 2, 2);
+    superxbr_step_h(sc, conf, &params[step]);
+    GLSLH(return res;)
+    GLSLHF("}\n");
 
-          float  B = Get( 0,-1);
-          float  C = Get( 1,-1);
-          float  D = Get(-1, 0);
-          float  E = Get( 0, 0);
-          float  F = Get( 1, 0);
-          float  G = Get(-1, 1);
-          float  H = Get( 0, 1);
-          float  I = Get( 1, 1);
-
-          float F4 = Get(2, 0);
-          float I4 = Get(2, 1);
-          float H5 = Get(0, 2);
-          float I5 = Get(1, 2);)
-
-/*
-                                  P1
-         |P0|B |C |P1|         C     F4          |a0|b1|c2|d3|
-         |D |E |F |F4|      B     F     I4       |b0|c1|d2|e3|   |e1|i1|i2|e2|
-         |G |H |I |I4|   P0    E  A  I     P3    |c0|d1|e2|f3|   |e3|i3|i4|e4|
-         |P2|H5|I5|P3|      D     H     I5       |d0|e1|f2|g3|
-                               G     H5
-                                  P2
-*/
-
-    /* Calc edgeness in diagonal directions. */
-    GLSLH(float d_edge = (d_wd( D, B, G, E, C, P2, H, F, P1, H5, I, F4, I5, I4 ) -
-                          d_wd( C, F4, B, F, I4, P0, E, I, P3, D, H, I5, G, H5 ));)
-
-    /* Calc edgeness in horizontal/vertical directions. */
-    GLSLH(float hv_edge = (hv_wd(F, I, E, H, C, I5, B, H5) -
-                           hv_wd(E, F, H, I, D, F4, G, I4));)
-
-    /* Filter weights. Two taps only. */
-    GLSLH(vec4 w1 = vec4(-weight1, weight1+0.5, weight1+0.5, -weight1);
-          vec4 w2 = vec4(-weight2, weight2+0.25, weight2+0.25, -weight2);)
-
-    /* Filtering and normalization in four direction generating four colors. */
-    GLSLH(float c1 = dot(vec4(P2, H, F, P1), w1);
-          float c2 = dot(vec4(P0, E, I, P3), w1);
-          float c3 = dot(vec4( D+G, E+H, F+I, F4+I4), w2);
-          float c4 = dot(vec4( C+B, F+E, I+H, I5+H5), w2);)
-
-    GLSLHF("float limits = %f + 0.000001;\n", conf->edge_strength);
-    GLSLH(float edge_strength = smoothstep(0.0, limits, abs(d_edge));)
-
-    /* Smoothly blends the two strongest directions(one in diagonal and the
-     * other in vert/horiz direction). */
-    GLSLHF("float color =  mix(mix(c1, c2, step(0.0, d_edge)),"
-                              "mix(c3, c4, step(0.0, hv_edge)), 1.0 - %f);\n",
-           conf->edge_strength);
-    /* Anti-ringing code. */
-    GLSLH(float min_sample = min(min(E, F), min(H, I));
-          float max_sample = max(max(E, F), max(H, I));
-          float aux = color;
-          color = clamp(color, min_sample, max_sample);)
-    GLSLHF("color = mix(aux, color, 1.0-2.0*abs(%f-0.5));\n", conf->edge_strength);
-
-    GLSLH(return color;)
-
-    GLSLHF("}");  // superxbr()
-
-    GLSL(color = vec4(1.0);)
-
-    for (int i = 0; i < planes; i++) {
-        GLSLF("color[%d] = superxbr(texture%d, texcoord%d, texture_size%d, pixel_size%d, %d, %f);\n",
-              i, tex_num, tex_num, tex_num, tex_num, i, tex_mul);
-    }
+    GLSLF("color.x = tex_mul * superxbr(texcoord%d);\n", id);
 }

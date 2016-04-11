@@ -31,6 +31,7 @@
 #include "common/common.h"
 #include "common/global.h"
 #include "misc/ring.h"
+#include "misc/bstr.h"
 #include "options/options.h"
 #include "osdep/terminal.h"
 #include "osdep/io.h"
@@ -40,9 +41,6 @@
 
 #include "msg.h"
 #include "msg_control.h"
-
-/* maximum message length of mp_msg */
-#define MSGSIZE_MAX 6144
 
 struct mp_log_root {
     struct mpv_global *global;
@@ -67,7 +65,7 @@ struct mp_log_root {
      * synchronized mp_log tree.) */
     atomic_ulong reload_counter;
     // --- protected by mp_msg_lock
-    char buffer[MSGSIZE_MAX];
+    bstr buffer;
 };
 
 struct mp_log {
@@ -77,6 +75,7 @@ struct mp_log {
     int level;                  // minimum log level for any outputs
     int terminal_level;         // minimum log level for terminal output
     atomic_ulong reload_counter;
+    char *partial;
 };
 
 struct mp_log_buffer {
@@ -239,7 +238,8 @@ static bool test_terminal_level(struct mp_log *log, int lev)
            !(lev == MSGL_STATUS && terminal_in_background());
 }
 
-static void print_terminal_line(struct mp_log *log, int lev, char *text)
+static void print_terminal_line(struct mp_log *log, int lev,
+                                char *text,  char *trail)
 {
     if (!test_terminal_level(log, lev))
         return;
@@ -268,7 +268,7 @@ static void print_terminal_line(struct mp_log *log, int lev, char *text)
         }
     }
 
-    fprintf(stream, "%s", text);
+    fprintf(stream, "%s%s", text, trail);
 
     if (root->color)
         set_term_color(stream, -1);
@@ -337,17 +337,17 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
 
     pthread_mutex_lock(&mp_msg_lock);
 
-    char tmp[MSGSIZE_MAX];
-    bool use_tmp = lev == MSGL_STATUS || lev == MSGL_STATS;
-
     struct mp_log_root *root = log->root;
-    char *text = use_tmp ? tmp : root->buffer;
-    int len = use_tmp ? 0 : strlen(text);
 
-    if (vsnprintf(text + len, MSGSIZE_MAX - len, format, va) < 0)
-        snprintf(text + len, MSGSIZE_MAX - len, "[fprintf error]\n");
-    text[MSGSIZE_MAX - 2] = '\n';
-    text[MSGSIZE_MAX - 1] = 0;
+    root->buffer.len = 0;
+
+    if (log->partial[0])
+        bstr_xappend_asprintf(root, &root->buffer, "%s", log->partial);
+    log->partial[0] = '\0';
+
+    bstr_xappend_vasprintf(root, &root->buffer, format, va);
+
+    char *text = root->buffer.start;
 
     if (lev == MSGL_STATS) {
         dump_stats(log, lev, text);
@@ -366,7 +366,7 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
             char *next = &end[1];
             char saved = next[0];
             next[0] = '\0';
-            print_terminal_line(log, lev, text);
+            print_terminal_line(log, lev, text, "");
             write_log_file(log, lev, text);
             write_msg_to_buffers(log, lev, text);
             next[0] = saved;
@@ -374,21 +374,25 @@ void mp_msg_va(struct mp_log *log, int lev, const char *format, va_list va)
         }
 
         if (lev == MSGL_STATUS) {
-            if (text[0]) {
-                len = strlen(text);
-                if (len < MSGSIZE_MAX - 1) {
-                    text[len] = root->termosd ? '\r' : '\n';
-                    text[len + 1] = '\0';
-                }
-                print_terminal_line(log, lev, text);
-            }
-        } else {
-            int leftover = strlen(text);
-            memmove(root->buffer, text, leftover + 1);
+            if (text[0])
+                print_terminal_line(log, lev, text, root->termosd ? "\r" : "\n");
+        } else if (text[0]) {
+            int size = strlen(text) + 1;
+            if (talloc_get_size(log->partial) < size)
+                log->partial = talloc_realloc(NULL, log->partial, char, size);
+            memcpy(log->partial, text, size);
         }
     }
 
     pthread_mutex_unlock(&mp_msg_lock);
+}
+
+static void destroy_log(void *ptr)
+{
+    struct mp_log *log = ptr;
+    // This is not managed via talloc itself, because mp_msg calls must be
+    // thread-safe, while talloc is not thread-safe.
+    talloc_free(log->partial);
 }
 
 // Create a new log context, which uses talloc_ctx as talloc parent, and parent
@@ -407,7 +411,9 @@ struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
     struct mp_log *log = talloc_zero(talloc_ctx, struct mp_log);
     if (!parent->root)
         return log; // same as null_log
+    talloc_set_destructor(log, destroy_log);
     log->root = parent->root;
+    log->partial = talloc_strdup(NULL, "");
     if (name) {
         if (name[0] == '!') {
             name = &name[1];

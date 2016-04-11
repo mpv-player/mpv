@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef MP_INPUT_EVENT_H_
+#define MP_INPUT_EVENT_H_
 
 #include "misc/bstr.h"
 
@@ -32,3 +34,10 @@ void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files,
 // Returns <0 on error, ==0 if data was ok but empty, >0 on success.
 int mp_event_drop_mime_data(struct input_ctx *ictx, const char *mime_type,
                             bstr data, enum mp_dnd_action append);
+
+// Many drag & drop APIs support multiple mime types, and this function returns
+// whether a type is preferred (higher integer score), or supported (scores
+// below 0 indicate unsupported types).
+int mp_event_get_mime_type_score(struct input_ctx *ictx, const char *mime_type);
+
+#endif

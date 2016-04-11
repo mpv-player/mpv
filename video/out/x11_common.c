@@ -146,6 +146,22 @@ static void vo_x11_move_resize(struct vo *vo, bool move, bool resize,
 #define RC_W(rc) ((rc).x1 - (rc).x0)
 #define RC_H(rc) ((rc).y1 - (rc).y0)
 
+static char *x11_atom_name_buf(struct vo_x11_state *x11, Atom atom,
+                               char *buf, size_t buf_size)
+{
+    buf[0] = '\0';
+
+    char *new_name = XGetAtomName(x11->display, atom);
+    if (new_name) {
+        snprintf(buf, buf_size, "%s", new_name);
+        XFree(new_name);
+    }
+
+    return buf;
+}
+
+#define x11_atom_name(x11, atom) x11_atom_name_buf(x11, atom, (char[80]){0}, 80)
+
 // format = 8 (unsigned char), 16 (short), 32 (long, even on LP64 systems)
 // *out_nitems = returned number of items of requested format
 static void *x11_get_property(struct vo_x11_state *x11, Window w, Atom property,
@@ -518,6 +534,7 @@ int vo_x11_init(struct vo *vo)
     struct vo_x11_state *x11 = talloc_ptrtype(NULL, x11);
     *x11 = (struct vo_x11_state){
         .log = mp_log_new(x11, vo->log, "x11"),
+        .input_ctx = vo->input_ctx,
         .screensaver_enabled = true,
         .xrandr_event = -1,
     };
@@ -709,7 +726,7 @@ void vo_x11_uninit(struct vo *vo)
     if (!x11)
         return;
 
-    mp_input_put_key(vo->input_ctx, MP_INPUT_RELEASE_ALL);
+    mp_input_put_key(x11->input_ctx, MP_INPUT_RELEASE_ALL);
 
     set_screensaver(x11, true);
 
@@ -756,13 +773,43 @@ static void vo_x11_dnd_init_window(struct vo *vo)
                     32, PropModeReplace, (unsigned char *)&version, 1);
 }
 
+// The Atom does not always map to a mime type, but often.
+static char *x11_dnd_mime_type_buf(struct vo_x11_state *x11, Atom atom,
+                                   char *buf, size_t buf_size)
+{
+    if (atom == XInternAtom(x11->display, "UTF8_STRING", False))
+        return "text";
+    return x11_atom_name_buf(x11, atom, buf, buf_size);
+}
+
+#define x11_dnd_mime_type(x11, atom) \
+    x11_dnd_mime_type_buf(x11, atom, (char[80]){0}, 80)
+
+static bool dnd_format_is_better(struct vo_x11_state *x11, Atom cur, Atom new)
+{
+    int new_score = mp_event_get_mime_type_score(x11->input_ctx,
+                                                 x11_dnd_mime_type(x11, new));
+    int cur_score = -1;
+    if (cur) {
+        cur_score = mp_event_get_mime_type_score(x11->input_ctx,
+                                                 x11_dnd_mime_type(x11, cur));
+    }
+    return new_score >= 0 && new_score > cur_score;
+}
+
 static void dnd_select_format(struct vo_x11_state *x11, Atom *args, int items)
 {
+    x11->dnd_requested_format = 0;
+
     for (int n = 0; n < items; n++) {
+        MP_VERBOSE(x11, "DnD type: '%s'\n", x11_atom_name(x11, args[n]));
         // There are other types; possibly not worth supporting.
-        if (args[n] == XInternAtom(x11->display, "text/uri-list", False))
+        if (dnd_format_is_better(x11, x11->dnd_requested_format, args[n]))
             x11->dnd_requested_format = args[n];
     }
+
+    MP_VERBOSE(x11, "Selected DnD type: %s\n", x11->dnd_requested_format ?
+                    x11_atom_name(x11, x11->dnd_requested_format) : "(none)");
 }
 
 static void dnd_reset(struct vo *vo)
@@ -848,8 +895,12 @@ static void vo_x11_dnd_handle_selection(struct vo *vo, XSelectionEvent *se)
                 x11->dnd_requested_action == XA(x11, XdndActionCopy) ?
                 DND_REPLACE : DND_APPEND;
 
+            char *mime_type = x11_dnd_mime_type(x11, x11->dnd_requested_format);
+            MP_VERBOSE(x11, "Dropping type: %s (%s)\n",
+                       x11_atom_name(x11, x11->dnd_requested_format), mime_type);
+
             // No idea if this is guaranteed to be \0-padded, so use bstr.
-            success = mp_event_drop_mime_data(vo->input_ctx, "text/uri-list",
+            success = mp_event_drop_mime_data(x11->input_ctx, mime_type,
                                               (bstr){prop, nitems}, action) > 0;
             XFree(prop);
         }
@@ -976,17 +1027,17 @@ int vo_x11_check_events(struct vo *vo)
                                             sizeof(buf), &keySym, &status);
                 int mpkey = vo_x11_lookupkey(keySym);
                 if (mpkey) {
-                    mp_input_put_key(vo->input_ctx, mpkey | modifiers);
+                    mp_input_put_key(x11->input_ctx, mpkey | modifiers);
                 } else if (status == XLookupChars || status == XLookupBoth) {
                     struct bstr t = { buf, len };
-                    mp_input_put_key_utf8(vo->input_ctx, modifiers, t);
+                    mp_input_put_key_utf8(x11->input_ctx, modifiers, t);
                 }
             } else {
                 XLookupString(&Event.xkey, buf, sizeof(buf), &keySym,
                               &x11->compose_status);
                 int mpkey = vo_x11_lookupkey(keySym);
                 if (mpkey)
-                    mp_input_put_key(vo->input_ctx, mpkey | modifiers);
+                    mp_input_put_key(x11->input_ctx, mpkey | modifiers);
             }
             break;
         }
@@ -996,16 +1047,16 @@ int vo_x11_check_events(struct vo *vo)
         case KeyRelease:
         {
             if (x11->no_autorepeat)
-                mp_input_put_key(vo->input_ctx, MP_INPUT_RELEASE_ALL);
+                mp_input_put_key(x11->input_ctx, MP_INPUT_RELEASE_ALL);
             x11->win_drag_button1_down = false;
             break;
         }
         case MotionNotify:
             if (x11->win_drag_button1_down && !x11->fs &&
-                !mp_input_test_dragging(vo->input_ctx, Event.xmotion.x,
-                                                       Event.xmotion.y))
+                !mp_input_test_dragging(x11->input_ctx, Event.xmotion.x,
+                                                        Event.xmotion.y))
             {
-                mp_input_put_key(vo->input_ctx, MP_INPUT_RELEASE_ALL);
+                mp_input_put_key(x11->input_ctx, MP_INPUT_RELEASE_ALL);
                 XUngrabPointer(x11->display, CurrentTime);
 
                 long params[5] = {
@@ -1016,8 +1067,8 @@ int vo_x11_check_events(struct vo *vo)
                 };
                 x11_send_ewmh_msg(x11, "_NET_WM_MOVERESIZE", params);
             } else {
-                mp_input_set_mouse_pos(vo->input_ctx, Event.xmotion.x,
-                                                      Event.xmotion.y);
+                mp_input_set_mouse_pos(x11->input_ctx, Event.xmotion.x,
+                                                       Event.xmotion.y);
             }
             x11->win_drag_button1_down = false;
             break;
@@ -1025,17 +1076,17 @@ int vo_x11_check_events(struct vo *vo)
             if (Event.xcrossing.mode != NotifyNormal)
                 break;
             x11->win_drag_button1_down = false;
-            mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
+            mp_input_put_key(x11->input_ctx, MP_KEY_MOUSE_LEAVE);
             break;
         case EnterNotify:
             if (Event.xcrossing.mode != NotifyNormal)
                 break;
-            mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_ENTER);
+            mp_input_put_key(x11->input_ctx, MP_KEY_MOUSE_ENTER);
             break;
         case ButtonPress:
             if (Event.xbutton.button == 1)
                 x11->win_drag_button1_down = true;
-            mp_input_put_key(vo->input_ctx,
+            mp_input_put_key(x11->input_ctx,
                              (MP_MOUSE_BTN0 + Event.xbutton.button - 1) |
                              get_mods(Event.xbutton.state) | MP_KEY_STATE_DOWN);
             long msg[4] = {XEMBED_REQUEST_FOCUS};
@@ -1044,7 +1095,7 @@ int vo_x11_check_events(struct vo *vo)
         case ButtonRelease:
             if (Event.xbutton.button == 1)
                 x11->win_drag_button1_down = false;
-            mp_input_put_key(vo->input_ctx,
+            mp_input_put_key(x11->input_ctx,
                              (MP_MOUSE_BTN0 + Event.xbutton.button - 1) |
                              get_mods(Event.xbutton.state) | MP_KEY_STATE_UP);
             break;
@@ -1055,13 +1106,13 @@ int vo_x11_check_events(struct vo *vo)
             break;
         case DestroyNotify:
             MP_WARN(x11, "Our window was destroyed, exiting\n");
-            mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
+            mp_input_put_key(x11->input_ctx, MP_KEY_CLOSE_WIN);
             x11->window = 0;
             break;
         case ClientMessage:
             if (Event.xclient.message_type == XA(x11, WM_PROTOCOLS) &&
                 Event.xclient.data.l[0] == XA(x11, WM_DELETE_WINDOW))
-                mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
+                mp_input_put_key(x11->input_ctx, MP_KEY_CLOSE_WIN);
             vo_x11_dnd_handle_message(vo, &Event.xclient);
             vo_x11_xembed_handle_message(vo, &Event.xclient);
             break;
@@ -1437,9 +1488,9 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
     // map window
     int events = StructureNotifyMask | ExposureMask | PropertyChangeMask |
                  LeaveWindowMask | EnterWindowMask;
-    if (mp_input_mouse_enabled(vo->input_ctx))
+    if (mp_input_mouse_enabled(x11->input_ctx))
         events |= PointerMotionMask | ButtonPressMask | ButtonReleaseMask;
-    if (mp_input_vo_keyboard_enabled(vo->input_ctx))
+    if (mp_input_vo_keyboard_enabled(x11->input_ctx))
         events |= KeyPressMask | KeyReleaseMask;
     vo_x11_selectinput_witherr(vo, x11->display, x11->window, events);
     XMapWindow(x11->display, x11->window);

@@ -28,12 +28,12 @@
 
 
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
-                 const char *decoder)
+                 const char *codec)
 {
     hwdec_request_api(info, "videotoolbox");
-    if (!info || !info->hwctx || info->hwctx->type != HWDEC_VIDEOTOOLBOX)
+    if (!info || !info->hwctx || !info->hwctx->get_vt_fmt)
         return HWDEC_ERR_NO_CTX;
-    switch (mp_codec_to_av_codec_id(decoder)) {
+    switch (mp_codec_to_av_codec_id(codec)) {
     case AV_CODEC_ID_H264:
     case AV_CODEC_ID_H263:
     case AV_CODEC_ID_MPEG1VIDEO:
@@ -88,9 +88,11 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
     av_videotoolbox_default_free(ctx->avctx);
 
     AVVideotoolboxContext *vtctx = av_videotoolbox_alloc_context();
-    vtctx->cv_pix_fmt_type = (uintptr_t)ctx->hwdec_info->hwctx->priv;
-    int err = av_videotoolbox_default_init2(ctx->avctx, vtctx);
 
+    struct mp_hwdec_ctx *hwctx = ctx->hwdec_info->hwctx;
+    vtctx->cv_pix_fmt_type = hwctx->get_vt_fmt(hwctx);
+
+    int err = av_videotoolbox_default_init2(ctx->avctx, vtctx);
     if (err < 0) {
         print_videotoolbox_error(ctx->log, MSGL_ERR, "failed to init videotoolbox decoder", err);
         return -1;
@@ -105,6 +107,15 @@ static void uninit(struct lavc_ctx *ctx)
         av_videotoolbox_default_free(ctx->avctx);
 }
 
+static struct mp_image *process_image(struct lavc_ctx *ctx, struct mp_image *img)
+{
+    if (img->imgfmt == IMGFMT_VIDEOTOOLBOX) {
+        CVPixelBufferRef pbuf = (CVPixelBufferRef)img->planes[3];
+        img->params.hw_subfmt = CVPixelBufferGetPixelFormatType(pbuf);
+    }
+    return img;
+}
+
 const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox = {
     .type = HWDEC_VIDEOTOOLBOX,
     .image_format = IMGFMT_VIDEOTOOLBOX,
@@ -112,4 +123,5 @@ const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox = {
     .init = init,
     .uninit = uninit,
     .init_decoder = init_decoder,
+    .process_image = process_image,
 };

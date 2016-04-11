@@ -24,6 +24,7 @@
 #include "sub/osd.h"
 #include "common.h"
 #include "utils.h"
+#include "lcms.h"
 #include "video/out/filter_kernels.h"
 
 // Texture units 0-5 are used by the video, and for free use by the passes
@@ -31,7 +32,7 @@
 
 // Other texture units are reserved for specific purposes
 #define TEXUNIT_SCALERS  TEXUNIT_VIDEO_NUM
-#define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+4)
+#define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+SCALER_COUNT)
 #define TEXUNIT_DITHER   (TEXUNIT_3DLUT+1)
 
 struct lut3d {
@@ -69,6 +70,14 @@ struct scaler {
     struct filter_kernel kernel_storage;
 };
 
+enum scaler_unit {
+    SCALER_SCALE,  // luma/video
+    SCALER_DSCALE, // luma-video downscaling
+    SCALER_CSCALE, // chroma upscaling
+    SCALER_TSCALE, // temporal scaling (interpolation)
+    SCALER_COUNT
+};
+
 struct gl_video_opts {
     int dumb_mode;
     struct scaler_config scaler[4];
@@ -102,7 +111,7 @@ struct gl_video_opts {
     int deband;
     struct deband_opts *deband_opts;
     float unsharp;
-    int prescale;
+    int prescale_luma;
     int prescale_passes;
     float prescale_downscaling_threshold;
     struct superxbr_opts *superxbr_opts;
@@ -116,14 +125,15 @@ extern const struct gl_video_opts gl_video_opts_def;
 struct gl_video;
 struct vo_frame;
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g);
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g,
+                               struct gl_lcms *cms);
 void gl_video_uninit(struct gl_video *p);
 void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd);
 void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts);
 bool gl_video_check_format(struct gl_video *p, int mp_format);
 void gl_video_config(struct gl_video *p, struct mp_image_params *params);
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b);
-void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d);
+void gl_video_update_profile(struct gl_video *p);
 void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo);
 void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
                      struct mp_rect *src, struct mp_rect *dst,

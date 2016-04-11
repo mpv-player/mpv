@@ -174,7 +174,7 @@ typedef struct demuxer {
     int64_t filepos;  // input stream current pos.
     char *filename;  // same as stream->url
     bool seekable;
-    bool partially_seekable; // implies seekable=true
+    bool partially_seekable; // true if _maybe_ seekable; implies seekable=true
     double start_time;
     // File format allows PTS resets (even if the current file is without)
     bool ts_resets_possible;
@@ -285,8 +285,7 @@ double demuxer_get_time_length(struct demuxer *demuxer);
 
 int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg);
 
-void demux_pause(demuxer_t *demuxer);
-void demux_unpause(demuxer_t *demuxer);
+void demux_run_on_thread(struct demuxer *demuxer, void (*fn)(void *), void *ctx);
 
 void demux_changed(demuxer_t *demuxer, int events);
 void demux_update(demuxer_t *demuxer);

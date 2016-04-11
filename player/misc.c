@@ -95,23 +95,20 @@ double get_play_end_pts(struct MPContext *mpctx)
 
 float mp_get_cache_percent(struct MPContext *mpctx)
 {
-    if (mpctx->demuxer) {
-        int64_t size = -1;
-        int64_t fill = -1;
-        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_SIZE, &size);
-        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_FILL, &fill);
-        if (size > 0 && fill >= 0)
-            return fill / (size / 100.0);
-    }
+    struct stream_cache_info info = {0};
+    if (mpctx->demuxer)
+        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
+    if (info.size > 0 && info.fill >= 0)
+        return info.fill / (info.size / 100.0);
     return -1;
 }
 
 bool mp_get_cache_idle(struct MPContext *mpctx)
 {
-    int idle = 0;
+    struct stream_cache_info info = {0};
     if (mpctx->demuxer)
-        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_IDLE, &idle);
-    return idle;
+        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
+    return info.idle;
 }
 
 void update_vo_playback_state(struct MPContext *mpctx)

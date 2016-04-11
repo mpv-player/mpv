@@ -245,6 +245,37 @@ void af_get_best_sample_formats(int src_format, int out_formats[AF_FORMAT_COUNT]
     out_formats[num] = 0;
 }
 
+// Return the best match to src_samplerate from the list provided in the array
+// *available, which must be terminated by 0, or itself NULL. If *available is
+// empty or NULL, return a negative value. Exact match to src_samplerate is
+// most preferred, followed by the lowest integer multiple, followed by the
+// maximum of *available.
+int af_select_best_samplerate(int src_samplerate, const int *available)
+{
+    if (!available)
+        return -1;
+
+    int min_mult_rate = INT_MAX;
+    int max_rate      = INT_MIN;
+    for (int i = 0; available[i]; i++) {
+        if (available[i] == src_samplerate)
+            return available[i];
+
+        if (!(available[i] % src_samplerate))
+            min_mult_rate = MPMIN(min_mult_rate, available[i]);
+
+        max_rate = MPMAX(max_rate, available[i]);
+    }
+
+    if (min_mult_rate < INT_MAX)
+        return min_mult_rate;
+
+    if (max_rate > INT_MIN)
+        return max_rate;
+
+    return -1;
+}
+
 // Return the number of samples that make up one frame in this format.
 // You get the byte size by multiplying them with sample size and channel count.
 int af_format_sample_alignment(int format)

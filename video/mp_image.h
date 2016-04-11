@@ -39,6 +39,8 @@
 // usually copy the whole struct, so that fields added later will be preserved.
 struct mp_image_params {
     enum mp_imgfmt imgfmt;      // pixel format
+    uint64_t hw_subfmt;         // underlying format for some hwaccel pixfmts
+                                // (will use the HW API's format identifiers)
     int w, h;                   // image dimensions
     int p_w, p_h;               // define pixel aspect ratio (never 0/0)
     enum mp_csp colorspace;

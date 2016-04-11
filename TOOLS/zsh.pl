@@ -69,10 +69,16 @@ chomp $profile_comp;
 my $tmpl = <<"EOS";
 #compdef mpv
 
-# mpv zsh completion
+# For customization, see:
+#  https://github.com/mpv-player/mpv/wiki/Zsh-completion-customization
 
 local curcontext="\$curcontext" state state_descr line
 typeset -A opt_args
+
+# By default, don't complete URLs unless no files match
+local -a tag_order
+zstyle -a ":completion:*:*:\$service:*" tag-order tag_order || \
+  zstyle  ":completion:*:*:\$service:*" tag-order '!urls'
 
 local rc=1
 
@@ -120,7 +126,7 @@ $profile_comp
     _tags files urls
     while _tags; do
       _requested files expl 'media file' _files -g \\
-        "*.(#i)(asf|asx|avi|flac|flv|m1v|m2p|m2v|m4v|mjpg|mka|mkv|mov|mp3|mp4|mpe|mpeg|mpg|ogg|ogm|ogv|opus|qt|rm|ts|vob|wav|webm|wma|wmv)(-.)" && rc=0
+        "*.(#i)(asf|asx|avi|flac|flv|m1v|m2p|m2v|m4v|mjpg|mka|mkv|mov|mp3|mp4|mpe|mpeg|mpg|ogg|ogm|ogv|opus|qt|rm|ts|vob|wav|webm|wma|wmv|wv)(-.)" && rc=0
       if _requested urls; then
         while _next_label urls expl URL; do
           _urls "\$expl[@]" && rc=0

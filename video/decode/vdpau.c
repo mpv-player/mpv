@@ -84,7 +84,7 @@ static int init(struct lavc_ctx *ctx)
 }
 
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
-                 const char *decoder)
+                 const char *codec)
 {
     hwdec_request_api(info, "vdpau");
     if (!info || !info->hwctx || !info->hwctx->vdpau_ctx)

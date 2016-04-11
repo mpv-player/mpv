@@ -217,7 +217,7 @@ static void call_request_hwdec_api(struct mp_hwdec_info *info,
     vo_control(vo, VOCTRL_LOAD_HWDEC_API, (void *)api_name);
 }
 
-static bool get_and_update_icc_profile(struct gl_priv *p, int *events)
+static void get_and_update_icc_profile(struct gl_priv *p, int *events)
 {
     bool has_profile = p->icc_opts->profile && p->icc_opts->profile[0];
     if (p->icc_opts->profile_auto && !has_profile) {
@@ -233,17 +233,12 @@ static bool get_and_update_icc_profile(struct gl_priv *p, int *events)
             }
 
             gl_lcms_set_memory_profile(p->cms, &icc);
+            has_profile = true;
         }
     }
 
-    struct lut3d *lut3d = NULL;
-    if (!gl_lcms_has_changed(p->cms))
-        return true;
-    if (gl_lcms_get_lut3d(p->cms, &lut3d) && !lut3d)
-        return false;
-    gl_video_set_lut3d(p->renderer, lut3d);
-    talloc_free(lut3d);
-    return true;
+    if (has_profile)
+        gl_video_update_profile(p->renderer);
 }
 
 static void get_and_update_ambient_lighting(struct gl_priv *p, int *events)
@@ -416,19 +411,18 @@ static int preinit(struct vo *vo)
         MP_VERBOSE(vo, "swap_control extension missing.\n");
     }
 
-    p->renderer = gl_video_init(p->gl, vo->log, vo->global);
+    p->cms = gl_lcms_init(p, vo->log, vo->global);
+    if (!p->cms)
+        goto err_out;
+    p->renderer = gl_video_init(p->gl, vo->log, vo->global, p->cms);
     if (!p->renderer)
         goto err_out;
     gl_video_set_osd_source(p->renderer, vo->osd);
     gl_video_set_options(p->renderer, p->renderer_opts);
     gl_video_configure_queue(p->renderer, vo);
 
-    p->cms = gl_lcms_init(p, vo->log, vo->global);
-    if (!p->cms)
-        goto err_out;
     gl_lcms_set_options(p->cms, p->icc_opts);
-    if (!get_and_update_icc_profile(p, &(int){0}))
-        goto err_out;
+    get_and_update_icc_profile(p, &(int){0});
 
     p->hwdec_info.load_api = call_request_hwdec_api;
     p->hwdec_info.load_api_ctx = vo;

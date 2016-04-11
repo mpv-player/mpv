@@ -250,7 +250,8 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
                              lessThan(vec3(0.04045), color.rgb));)
         break;
     case MP_CSP_TRC_BT_1886:
-        GLSL(color.rgb = pow(color.rgb, vec3(1.961));)
+        // We don't have an actual black point, so we assume a perfect display
+        GLSL(color.rgb = pow(color.rgb, vec3(2.4));)
         break;
     case MP_CSP_TRC_GAMMA18:
         GLSL(color.rgb = pow(color.rgb, vec3(1.8));)
@@ -284,7 +285,7 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
                              lessThanEqual(vec3(0.0031308), color.rgb));)
         break;
     case MP_CSP_TRC_BT_1886:
-        GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.961));)
+        GLSL(color.rgb = pow(color.rgb, vec3(1.0/2.4));)
         break;
     case MP_CSP_TRC_GAMMA18:
         GLSL(color.rgb = pow(color.rgb, vec3(1.0/1.8));)
@@ -348,10 +349,9 @@ const struct m_sub_options deband_conf = {
 
 // Stochastically sample a debanded result from a given texture
 void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
-                        int tex_num, GLenum tex_target, float tex_mul, AVLFG *lfg)
+                        int tex_num, float tex_mul, GLenum tex_target, AVLFG *lfg)
 {
     // Set up common variables and initialize the PRNG
-    GLSLF("// debanding (tex %d)\n", tex_num);
     GLSLF("{\n");
     sampler_prelude(sc, tex_num);
     prng_init(sc, lfg);
@@ -399,10 +399,10 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
     GLSLF("}\n");
 }
 
-void pass_sample_unsharp(struct gl_shader_cache *sc, float param)
+void pass_sample_unsharp(struct gl_shader_cache *sc, int tex_num, float param)
 {
     GLSLF("// unsharp\n");
-    sampler_prelude(sc, 0);
+    sampler_prelude(sc, tex_num);
 
     GLSLF("{\n");
     GLSL(vec2 st1 = pt * 1.2;)

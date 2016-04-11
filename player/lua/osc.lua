@@ -99,6 +99,27 @@ local state = {
 -- Helperfunctions
 --
 
+-- scale factor for translating between real and virtual ASS coordinates
+function get_virt_scale_factor()
+    local w, h = mp.get_osd_size()
+    if w <= 0 or h <= 0 then
+        return 0, 0
+    end
+    return osc_param.playresx / w, osc_param.playresy / h
+end
+
+-- return mouse position in virtual ASS coordinates (playresx/y)
+function get_virt_mouse_pos()
+    local sx, sy = get_virt_scale_factor()
+    local x, y = mp.get_mouse_pos()
+    return x * sx, y * sy
+end
+
+function set_virt_mouse_area(x0, y0, x1, y1, name)
+    local sx, sy = get_virt_scale_factor()
+    mp.set_mouse_area(x0 / sx, y0 / sy, x1 / sx, y1 / sy, name)
+end
+
 function scale_value(x0, x1, y0, y1, val)
     local m = (y1 - y0) / (x1 - x0)
     local b = y0 - (m * x0)
@@ -141,7 +162,7 @@ function mouse_hit(element)
 end
 
 function mouse_hit_coords(bX1, bY1, bX2, bY2)
-    local mX, mY = mp.get_mouse_pos()
+    local mX, mY = get_virt_mouse_pos()
     return (mX >= bX1 and mX <= bX2 and mY >= bY1 and mY <= bY2)
 end
 
@@ -182,7 +203,7 @@ end
 
 -- get value at current mouse position
 function get_slider_value(element)
-    return get_slider_value_at(element, mp.get_mouse_pos())
+    return get_slider_value_at(element, get_virt_mouse_pos())
 end
 
 function countone(val)
@@ -589,7 +610,7 @@ function render_elements(master_ass)
                     end
 
                     elem_ass:new_event()
-                    elem_ass:pos(mp.get_mouse_pos(), ty)
+                    elem_ass:pos(get_virt_mouse_pos(), ty)
                     elem_ass:an(an)
                     elem_ass:append(slider_lo.tooltip_style)
                     elem_ass:append(tooltiplabel)
@@ -1298,7 +1319,7 @@ function osc_init()
 
     -- set canvas resolution according to display aspect and scaling setting
     local baseResY = 720
-    local display_w, display_h, display_aspect = mp.get_screen_size()
+    local display_w, display_h, display_aspect = mp.get_osd_size()
     local scale = 1
 
     if (mp.get_property("video") == "no") then -- dummy/forced window
@@ -1718,8 +1739,8 @@ end
 
 function render()
     msg.debug("rendering")
-    local current_screen_sizeX, current_screen_sizeY, aspect = mp.get_screen_size()
-    local mouseX, mouseY = mp.get_mouse_pos()
+    local current_screen_sizeX, current_screen_sizeY, aspect = mp.get_osd_size()
+    local mouseX, mouseY = get_virt_mouse_pos()
     local now = mp.get_time()
 
     -- check if display changed, if so request reinit
@@ -1782,7 +1803,7 @@ function render()
 
     --mouse show/hide area
     for k,cords in pairs(osc_param.areas["showhide"]) do
-        mp.set_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "showhide")
+        set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "showhide")
     end
     do_enable_keybindings()
 
@@ -1791,7 +1812,7 @@ function render()
 
     for _,cords in ipairs(osc_param.areas["input"]) do
         if state.osc_visible then -- activate only when OSC is actually visible
-            mp.set_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "input")
+            set_virt_mouse_area(cords.x1, cords.y1, cords.x2, cords.y2, "input")
         end
         if state.osc_visible ~= state.input_enabled then
             if state.osc_visible then
@@ -1887,7 +1908,7 @@ function process_event(source, what)
         state.mouse_down_counter = 0
 
     elseif source == "mouse_move" then
-        local mouseX, mouseY = mp.get_mouse_pos()
+        local mouseX, mouseY = get_virt_mouse_pos()
         if (user_opts.minmousemove == 0) or
             (not ((state.last_mouseX == nil) or (state.last_mouseY == nil)) and
                 ((math.abs(mouseX - state.last_mouseX) >= user_opts.minmousemove)

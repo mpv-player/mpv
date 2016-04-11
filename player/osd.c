@@ -257,9 +257,9 @@ static void print_status(struct MPContext *mpctx)
     }
 
     if (mpctx->demuxer) {
-        int64_t fill = -1;
-        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_FILL, &fill);
-        if (fill >= 0) {
+        struct stream_cache_info info = {0};
+        demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
+        if (info.size > 0) {
             saddf(&line, " Cache: ");
 
             struct demux_ctrl_reader_state s = {.ts_duration = -1};
@@ -270,10 +270,10 @@ static void print_status(struct MPContext *mpctx)
             } else {
                 saddf(&line, "%2ds", (int)s.ts_duration);
             }
-            if (fill >= 1024 * 1024) {
-                saddf(&line, "+%lldMB", (long long)(fill / 1024 / 1024));
+            if (info.fill >= 1024 * 1024) {
+                saddf(&line, "+%lldMB", (long long)(info.fill / 1024 / 1024));
             } else {
-                saddf(&line, "+%lldKB", (long long)(fill / 1024));
+                saddf(&line, "+%lldKB", (long long)(info.fill / 1024));
             }
         }
     }
@@ -561,6 +561,6 @@ void update_osd_msg(struct MPContext *mpctx)
         text = talloc_asprintf_append(text, "%s%s", text ? "\n" : "",
                                       mpctx->osd_msg_text);
     }
-    osd_set_text(osd, OSDTYPE_OSD, text);
+    osd_set_text(osd, text);
     talloc_free(text);
 }

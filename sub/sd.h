@@ -17,8 +17,12 @@ struct sd {
     const struct sd_functions *driver;
     void *priv;
 
-    struct demuxer *demuxer;
+    struct attachment_list *attachments;
     struct mp_codec_params *codec;
+
+    // Set to false as soon as the decoder discards old subtitle events.
+    // (only needed if sd_functions.accept_packets_in_advance == false)
+    bool preload_ok;
 };
 
 struct sd_functions {

@@ -14,6 +14,7 @@ void mpgl_osd_set_options(struct mpgl_osd *ctx, bool pbo);
 
 void mpgl_osd_generate(struct mpgl_osd *ctx, struct mp_osd_res res, double pts,
                        int stereo_mode, int draw_flags);
+void mpgl_osd_resize(struct mpgl_osd *ctx, struct mp_osd_res res, int stereo_mode);
 enum sub_bitmap_format mpgl_osd_get_part_format(struct mpgl_osd *ctx, int index);
 struct gl_vao *mpgl_osd_get_vao(struct mpgl_osd *ctx);
 void mpgl_osd_draw_part(struct mpgl_osd *ctx, int vp_w, int vp_h, int index);

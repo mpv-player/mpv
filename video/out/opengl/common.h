@@ -89,7 +89,6 @@ struct GL {
     int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
     bool debug_context;         // use of e.g. GLX_CONTEXT_DEBUG_BIT_ARB
     int fb_r, fb_g, fb_b;       // frame buffer bit depth (0 if unknown)
-    bool fb_premultiplied;      // assumption about FB alpha compositor usage
 
     void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei);
     void (GLAPIENTRY *Clear)(GLbitfield);

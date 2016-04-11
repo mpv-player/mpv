@@ -104,22 +104,21 @@ Installing MSYS2
    It doesn't matter whether the i686 or the x86_64 version is used. Both can
    build 32-bit and 64-bit binaries when running on a 64-bit version of Windows.
 
-2. Add ``C:\msys64\mingw64\bin`` to your ``%PATH%``. mpv will depend on several
-   DLLs in this folder.
+2. Start a MinGW-w64 shell (``mingw64_shell.bat``). Note that this is different
+   from the MSYS2 shell that is started from the final installation dialog.
 
-3. Start a MinGW-w64 shell (``mingw64_shell.bat``). For a 32-bit build, use
-   ``mingw32_shell.bat``.
+   For a 32-bit build, use ``mingw32_shell.bat``.
 
 Updating MSYS2
 --------------
 
-To prevent errors during post-install, ``msys2-runtime`` and ``pacman`` must be
-updated first.
+To prevent errors during post-install, the MSYS2 core runtime must be updated
+separately.
 
 ```bash
-# Check for updates to msys2-runtime and pacman. If there were updates, restart
-# MSYS2 before continuing.
-pacman -Sy --needed msys2-runtime pacman
+# Check for core updates. If instructed, close the shell window and reopen it
+# before continuing.
+update-core
 
 # Update everything else
 pacman -Su
@@ -130,14 +129,14 @@ Installing mpv dependencies
 
 ```bash
 # Install MSYS2 build dependencies and a MinGW-w64 compiler
-pacman -S git pkg-config python3 mingw-w64-x86_64-gcc
+pacman -S git mingw-w64-x86_64-pkg-config python mingw-w64-x86_64-gcc
 
 # Install the most important MinGW-w64 dependencies. libass, libbluray and
 # lcms2 are also pulled in as dependencies of ffmpeg.
 pacman -S mingw-w64-x86_64-ffmpeg mingw-w64-x86_64-libjpeg-turbo mingw-w64-x86_64-lua51
 
 # Install additional (optional) dependencies
-pacman -S mingw-w64-x86_64-libdvdnav mingw-w64-x86_64-libguess
+pacman -S mingw-w64-x86_64-libdvdnav mingw-w64-x86_64-libguess mingw-w64-x86_64-angleproject-git
 ```
 
 For a 32-bit build, install ``mingw-w64-i686-*`` packages instead.
@@ -157,14 +156,14 @@ Finally, compile and install mpv. Binaries will be installed to
 
 ```bash
 # For a 32-bit build, use --prefix=/mingw32 instead
-./waf configure CC=gcc --prefix=/mingw64
+./waf configure CC=gcc.exe --check-c-compiler=gcc --prefix=/mingw64
 ./waf install
 ```
 
 Or, compile and install both libmpv and mpv:
 
 ```bash
-./waf configure CC=gcc --enable-libmpv-shared --prefix=/mingw64
+./waf configure CC=gcc.exe --check-c-compiler=gcc --enable-libmpv-shared --prefix=/mingw64
 ./waf install
 
 # waf installs libmpv to the wrong directory, so fix it up
@@ -173,3 +172,29 @@ mv -f /mingw64/bin/libmpv.dll.a /mingw64/lib/
 sed -i 's_/mingw64/bin_/mingw64/lib_' /mingw64/lib/pkgconfig/mpv.pc
 rmdir /mingw64/bin/pkgconfig
 ```
+
+Running mpv
+-----------
+
+If you want to run mpv from the MinGW-w64 shell, you will find the experience
+much more pleasant if you use the ``winpty`` utility
+
+```bash
+pacman -S winpty
+winpty mpv.com ToS-4k-1920.mov
+```
+
+If you want to move / copy ``mpv.exe`` and ``mpv.com`` to somewhere other than
+``/mingw64/bin/`` for use outside the MinGW-w64 shell, they will still depend on
+DLLs in that folder. The simplest solution is to add ``C:\msys64\mingw64\bin``
+to the windows system ``%PATH%``. Beware though that this can cause problems or
+confusion in Cygwin if that is also installed on the machine.
+
+Use of the ANGLE OpenGL backend requires a copy of ``d3dcompiler_43.dll`` (yes,
+exactly 43) in the path or in the same folder as mpv. It must be of the same
+architecture (x86_64 / i686) as the mpv you compiled. You can find a copy in the
+official mpv builds:
+
+https://mpv.srsfckn.biz/mpv-x86_64-20160118.7z
+
+https://mpv.srsfckn.biz/mpv-i686-20160118.7z

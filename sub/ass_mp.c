@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include <ass/ass.h>
 #include <ass/ass_types.h>
@@ -76,6 +77,7 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
     style->Alignment = 1 + (opts->align_x + 1) + (opts->align_y + 2) % 3 * 4;
     style->Blur = opts->blur;
     style->Bold = opts->bold;
+    style->Italic = opts->italic;
 }
 
 void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,
@@ -96,16 +98,15 @@ void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,
 }
 
 void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
-                         struct sub_bitmap **parts, struct sub_bitmaps *res)
+                         struct sub_bitmaps *res)
 {
     int changed;
     ASS_Image *imgs = ass_render_frame(renderer, track, time, &changed);
     if (changed)
         res->change_id++;
+    assert(res->format == 0 || res->format == SUBBITMAP_LIBASS);
     res->format = SUBBITMAP_LIBASS;
 
-    res->parts = *parts;
-    res->num_parts = 0;
     int num_parts_alloc = MP_TALLOC_AVAIL(res->parts);
     for (struct ass_image *img = imgs; img; img = img->next) {
         if (img->w == 0 || img->h == 0)
@@ -125,7 +126,6 @@ void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
         p->y = img->dst_y;
         res->num_parts++;
     }
-    *parts = res->parts;
 }
 
 static const int map_ass_level[] = {

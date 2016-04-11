@@ -45,6 +45,7 @@ struct priv {
     uint32_t skip_samples, trim_samples;
     bool preroll_done;
     double next_pts;
+    AVRational codec_timebase;
 };
 
 static void uninit(struct dec_audio *da);
@@ -83,6 +84,8 @@ static int init(struct dec_audio *da, const char *decoder)
 
     struct priv *ctx = talloc_zero(NULL, struct priv);
     da->priv = ctx;
+
+    ctx->codec_timebase = (AVRational){0};
 
     ctx->force_channel_map = c->force_channels;
 
@@ -128,8 +131,7 @@ static int init(struct dec_audio *da, const char *decoder)
     // demux_mkv
     mp_lavc_set_extradata(lavc_context, c->extradata, c->extradata_size);
 
-    if (c->lav_headers)
-        mp_copy_lav_codec_headers(lavc_context, c->lav_headers);
+    mp_set_lav_codec_headers(lavc_context, c);
 
     mp_set_avcodec_threads(da->log, lavc_context, opts->threads);
 
@@ -185,10 +187,23 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     int in_len = mpkt ? mpkt->len : 0;
 
     AVPacket pkt;
-    mp_set_av_packet(&pkt, mpkt, NULL);
+    mp_set_av_packet(&pkt, mpkt, &priv->codec_timebase);
 
     int got_frame = 0;
     av_frame_unref(priv->avframe);
+
+#if HAVE_AVCODEC_NEW_CODEC_API
+    int ret = avcodec_send_packet(avctx, &pkt);
+    if (ret >= 0 || ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+        if (ret >= 0 && mpkt)
+            mpkt->len = 0;
+        ret = avcodec_receive_frame(avctx, priv->avframe);
+        if (ret >= 0)
+            got_frame = 1;
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+            ret = 0;
+    }
+#else
     int ret = avcodec_decode_audio4(avctx, priv->avframe, &got_frame, &pkt);
     if (mpkt) {
         // At least "shorten" decodes sub-frames, instead of the whole packet.
@@ -205,6 +220,7 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
             return 0;
         }
     }
+#endif
     if (ret < 0) {
         MP_ERR(da, "Error decoding audio.\n");
         return -1;
@@ -212,7 +228,7 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     if (!got_frame)
         return 0;
 
-    double out_pts = mp_pts_from_av(priv->avframe->pkt_pts, NULL);
+    double out_pts = mp_pts_from_av(priv->avframe->pkt_pts, &priv->codec_timebase);
 
     struct mp_audio *mpframe = mp_audio_from_avframe(priv->avframe);
     if (!mpframe)

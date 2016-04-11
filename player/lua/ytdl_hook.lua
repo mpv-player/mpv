@@ -207,7 +207,7 @@ mp.add_hook("on_load", 10, function ()
 
                 -- audio url
                 mp.commandv("audio-add", json["requested_formats"][2].url,
-                    "select", json["requested_formats"][2]["format_note"])
+                    "select", json["requested_formats"][2]["format_note"] or "")
 
             elseif not (json.url == nil) then
                 -- normal video

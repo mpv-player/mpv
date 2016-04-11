@@ -98,7 +98,7 @@ const float* get_nnedi3_weights(const struct nnedi3_opts *conf, int *size)
 
 void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
                  int step, float tex_mul, const struct nnedi3_opts *conf,
-                 struct gl_transform *transform)
+                 struct gl_transform *transform, GLenum tex_target)
 {
     assert(0 <= step && step < 2);
 
@@ -112,8 +112,8 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
     const int offset = nnedi3_weight_offsets[conf->window * 4 + conf->neurons];
     const uint32_t *weights = (const int*)(nnedi3_weights + offset * 4);
 
-    GLSLF("// nnedi3 (tex %d, step %d, neurons %d, window %dx%d, mode %d)\n",
-          tex_num, step + 1, neurons, width, height, conf->upload);
+    GLSLF("// nnedi3 (step %d, neurons %d, window %dx%d, mode %d)\n",
+          step, neurons, width, height, conf->upload);
 
     // This is required since each row will be encoded into vec4s
     assert(width % 4 == 0);
@@ -131,7 +131,7 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
         GLSLH(#pragma optionNV(fastprecision on))
     }
 
-    GLSLHF("float nnedi3(sampler2D tex, vec2 pos, vec2 tex_size, vec2 pixel_size, int plane, float tex_mul) {\n");
+    GLSLHF("float nnedi3(%s tex, vec2 pos, vec2 tex_size, vec2 pixel_size, int plane, float tex_mul) {\n", mp_sampler_type(tex_target));
 
     if (step == 0) {
         *transform = (struct gl_transform){{{1.0,0.0}, {0.0,2.0}}, {0.0,-0.5}};
@@ -246,7 +246,7 @@ const float* get_nnedi3_weights(const struct nnedi3_opts *conf, int *size)
 
 void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
                  int step, float tex_mul, const struct nnedi3_opts *conf,
-                 struct gl_transform *transform)
+                 struct gl_transform *transform, GLenum tex_target)
 {
 }
 

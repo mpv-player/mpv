@@ -63,6 +63,7 @@ enum mp_csp_prim {
     MP_CSP_PRIM_ADOBE,
     MP_CSP_PRIM_PRO_PHOTO,
     MP_CSP_PRIM_CIE_1931,
+    MP_CSP_PRIM_DCI_P3,
     MP_CSP_PRIM_COUNT
 };
 
