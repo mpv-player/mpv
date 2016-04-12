@@ -208,31 +208,15 @@ void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
     GLSLF("{\n");
     GLSL(vec2 pos = pos + vec2(0.5) * pt;) // round to nearest
     GLSL(vec2 fcoord = fract(pos * size - vec2(0.5));)
-    // We only need to sample from the four corner pixels since we're using
-    // nearest neighbour and can compute the exact transition point
-    GLSL(vec2 baseNW = pos - fcoord * pt;)
-    GLSL(vec2 baseNE = baseNW + vec2(pt.x, 0.0);)
-    GLSL(vec2 baseSW = baseNW + vec2(0.0, pt.y);)
-    GLSL(vec2 baseSE = baseNW + pt;)
     // Determine the mixing coefficient vector
     gl_sc_uniform_vec2(sc, "output_size", (float[2]){w, h});
-    GLSL(vec2 coeff = vec2((baseSE - pos) * output_size);)
-    GLSL(coeff = clamp(coeff, 0.0, 1.0);)
+    GLSL(vec2 coeff = fcoord * output_size/size;)
     float threshold = scaler->conf.kernel.params[0];
-    if (threshold > 0) { // also rules out NAN
-        GLSLF("coeff = mix(coeff, vec2(0.0), "
-              "lessThanEqual(coeff, vec2(%f)));\n", threshold);
-        GLSLF("coeff = mix(coeff, vec2(1.0), "
-              "greaterThanEqual(coeff, vec2(%f)));\n", 1.0 - threshold);
-    }
+    threshold = isnan(threshold) ? 0.0 : threshold;
+    GLSLF("coeff = (coeff - %f) / %f;\n", threshold, 1.0 - 2 * threshold);
+    GLSL(coeff = clamp(coeff, 0.0, 1.0);)
     // Compute the right blend of colors
-    GLSL(vec4 left = mix(texture(tex, baseSW),
-                         texture(tex, baseNW),
-                         coeff.y);)
-    GLSL(vec4 right = mix(texture(tex, baseSE),
-                          texture(tex, baseNE),
-                          coeff.y);)
-    GLSL(color = mix(right, left, coeff.x);)
+    GLSL(color = texture(tex, pos + pt * (coeff - fcoord));)
     GLSLF("}\n");
 }
 
