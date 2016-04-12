@@ -773,8 +773,9 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     if (cues.n_cue_point <= 3) // probably too sparse and will just break seeking
         goto done;
 
-    // Discard incremental index.
-    mkv_d->num_indexes = 0;
+    // Discard incremental index. (Keep the first entry, which must be the
+    // start of the file - helps with files that miss the first index entry.)
+    mkv_d->num_indexes = MPMIN(1, mkv_d->num_indexes);
     mkv_d->index_has_durations = false;
 
     for (int i = 0; i < cues.n_cue_point; i++) {
@@ -2963,8 +2964,10 @@ static void probe_first_timestamp(struct demuxer *demuxer)
         return;
 
     struct block_info block;
-    if (read_next_block(demuxer, &block) > 0)
+    if (read_next_block(demuxer, &block) > 0) {
+        index_block(demuxer, &block);
         mkv_d->tmp_block = block;
+    }
 
     demuxer->start_time = mkv_d->cluster_tc / 1e9;
 
