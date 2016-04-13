@@ -2287,10 +2287,18 @@ static int parse_chmap(struct mp_log *log, const m_option_t *opt,
     return 1;
 }
 
+static char *print_chmap(const m_option_t *opt, const void *val)
+{
+    const struct mp_chmap *chmap = val;
+    return talloc_strdup(NULL, mp_chmap_to_str(chmap));
+}
+
+
 const m_option_type_t m_option_type_chmap = {
     .name  = "Audio channels or channel map",
     .size  = sizeof(struct mp_chmap),
     .parse = parse_chmap,
+    .print = print_chmap,
     .copy  = copy_opt,
 };
 
