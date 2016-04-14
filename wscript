@@ -496,6 +496,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavformat/avformat.h',
                                 '(void)offsetof(AVStream, codecpar)',
                                 use='libav'),
+    }, {
+        'name': 'avutil-has-hwcontext',
+        'desc': 'libavutil AVHWFramesContext API',
+        'func': check_statement('libavutil/frame.h',
+                                '(void)offsetof(AVFrame, hw_frames_ctx)',
+                                use='libav'),
     },
 ]
 
