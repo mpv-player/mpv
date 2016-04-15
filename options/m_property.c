@@ -105,7 +105,7 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
     }
     case M_PROPERTY_SET_STRING: {
         struct mpv_node node = { .format = MPV_FORMAT_STRING, .u.string = arg };
-        return do_action(prop_list, name, M_PROPERTY_SET_NODE, &node, ctx);
+        return m_property_do(log, prop_list, name, M_PROPERTY_SET_NODE, &node, ctx);
     }
     case M_PROPERTY_SWITCH: {
         if (!log)
