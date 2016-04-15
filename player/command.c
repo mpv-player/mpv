@@ -2324,12 +2324,9 @@ static int panscan_property_helper(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->video_out
-        || vo_control(mpctx->video_out, VOCTRL_GET_PANSCAN, NULL) != VO_TRUE)
-        return M_PROPERTY_UNAVAILABLE;
 
     int r = mp_property_generic_option(mpctx, prop, action, arg);
-    if (action == M_PROPERTY_SET)
+    if (mpctx->video_out && action == M_PROPERTY_SET)
         vo_control(mpctx->video_out, VOCTRL_SET_PANSCAN, NULL);
     return r;
 }
