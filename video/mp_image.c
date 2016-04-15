@@ -94,6 +94,7 @@ static void mp_image_destructor(void *ptr)
     mp_image_t *mpi = ptr;
     for (int p = 0; p < MP_MAX_PLANES; p++)
         av_buffer_unref(&mpi->bufs[p]);
+    av_buffer_unref(&mpi->hwctx);
 }
 
 int mp_chroma_div_up(int size, int shift)
@@ -174,6 +175,9 @@ void mp_image_steal_data(struct mp_image *dst, struct mp_image *src)
         dst->bufs[p] = src->bufs[p];
         src->bufs[p] = NULL;
     }
+    av_buffer_unref(&dst->hwctx);
+    dst->hwctx = src->hwctx;
+    src->hwctx = NULL;
     talloc_free(src);
 }
 
@@ -198,6 +202,11 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
             if (!new->bufs[p])
                 fail = true;
         }
+    }
+    if (new->hwctx) {
+        new->hwctx = av_buffer_ref(new->hwctx);
+        if (!new->hwctx)
+            fail = true;
     }
 
     if (!fail)
@@ -232,6 +241,7 @@ struct mp_image *mp_image_new_dummy_ref(struct mp_image *img)
     *new = *img;
     for (int p = 0; p < MP_MAX_PLANES; p++)
         new->bufs[p] = NULL;
+    new->hwctx = NULL;
     return new;
 }
 
@@ -720,6 +730,9 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame)
     mp_image_copy_fields_from_av_frame(&t, av_frame);
     for (int p = 0; p < MP_MAX_PLANES; p++)
         t.bufs[p] = av_frame->buf[p];
+#if HAVE_AVUTIL_HAS_HWCONTEXT
+    t.hwctx = av_frame->hw_frames_ctx;
+#endif
     return mp_image_new_ref(&t);
 }
 
@@ -730,13 +743,12 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame)
 // On failure, img is only unreffed.
 struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
 {
-    struct mp_image *new_ref = mp_image_new_ref(img); // ensure it's refcounted
+    struct mp_image *new_ref = mp_image_new_ref(img);
     talloc_free(img);
-    if (!new_ref)
-        return NULL;
     AVFrame *frame = av_frame_alloc();
-    if (!frame) {
+    if (!frame || !new_ref) {
         talloc_free(new_ref);
+        av_frame_free(&frame);
         return NULL;
     }
     mp_image_copy_fields_to_av_frame(frame, new_ref);
@@ -744,6 +756,10 @@ struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
         frame->buf[p] = new_ref->bufs[p];
         new_ref->bufs[p] = NULL;
     }
+#if HAVE_AVUTIL_HAS_HWCONTEXT
+    frame->hw_frames_ctx = new_ref->hwctx;
+#endif
+    new_ref->hwctx = NULL;
     talloc_free(new_ref);
     return frame;
 }

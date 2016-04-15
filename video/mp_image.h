@@ -100,6 +100,8 @@ typedef struct mp_image {
     // All mp_* functions manage this automatically; do not mess with it.
     // (See also AVFrame.buf.)
     struct AVBufferRef *bufs[MP_MAX_PLANES];
+    // Points to AVHWFramesContext* (same as AVFrame.hw_frames_ctx)
+    struct AVBufferRef *hwctx;
 } mp_image_t;
 
 int mp_chroma_div_up(int size, int shift);
