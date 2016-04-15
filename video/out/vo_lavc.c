@@ -418,8 +418,7 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
                 frame->pts = av_rescale_q(vc->lastipts + skipframes,
                                           vc->worst_time_base, avc->time_base);
 
-                frame->pict_type = AV_PICTURE_TYPE_NONE;
-                    // keep this at avcodec_get_frame_defaults default
+                frame->pict_type = 0; // keep this at unknown/undefined
 
                 frame->quality = avc->global_quality;
 
