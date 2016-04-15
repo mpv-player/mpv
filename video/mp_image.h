@@ -159,6 +159,7 @@ void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
 void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
                                       struct mp_image *src);
 struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame);
+struct AVFrame *mp_image_to_av_frame(struct mp_image *img);
 struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img);
 
 void memcpy_pic(void *dst, const void *src, int bytesPerLine, int height,

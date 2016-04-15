@@ -729,14 +729,9 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame)
 }
 
 // Convert the mp_image reference to a AVFrame reference.
-// Warning: img is unreferenced (i.e. free'd). This is asymmetric to
-//          mp_image_from_av_frame(). It was done as some sort of optimization,
-//          but now these semantics are pointless.
-// On failure, img is only unreffed.
-struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
+struct AVFrame *mp_image_to_av_frame(struct mp_image *img)
 {
     struct mp_image *new_ref = mp_image_new_ref(img);
-    talloc_free(img);
     AVFrame *frame = av_frame_alloc();
     if (!frame || !new_ref) {
         talloc_free(new_ref);
@@ -751,6 +746,14 @@ struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
 #endif
     *new_ref = (struct mp_image){0};
     talloc_free(new_ref);
+    return frame;
+}
+
+// Same as mp_image_to_av_frame(), but unref img. (It does so even on failure.)
+struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
+{
+    AVFrame *frame = mp_image_to_av_frame(img);
+    talloc_free(img);
     return frame;
 }
 
