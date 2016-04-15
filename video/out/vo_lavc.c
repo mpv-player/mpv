@@ -421,15 +421,15 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
                 skipframes = 0;
 
             if (thisduration > skipframes) {
-                AVFrame *frame = av_frame_alloc();
+                AVFrame *frame = mp_image_to_av_frame(vc->lastimg);
+                if (!frame)
+                    abort();
 
                 // this is a nop, unless the worst time base is the STREAM time base
                 frame->pts = av_rescale_q(vc->lastipts + skipframes,
                                           vc->worst_time_base, avc->time_base);
 
-                enum AVPictureType savetype = frame->pict_type;
-                mp_image_copy_fields_to_av_frame(frame, vc->lastimg);
-                frame->pict_type = savetype;
+                frame->pict_type = AV_PICTURE_TYPE_NONE;
                     // keep this at avcodec_get_frame_defaults default
 
                 frame->quality = avc->global_quality;
