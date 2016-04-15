@@ -32,6 +32,15 @@ API changes
 
 ::
 
+ --- mpv 0.17.1 ---
+ 1.21   - mpv_set_property() changes behavior with MPV_FORMAT_NODE. Before this
+          change it rejected mpv_nodes with format==MPV_FORMAT_STRING if the
+          property was not a string or did not have special mechanisms in place
+          the function failed. Now it always invokes the option string parser,
+          and mpv_node with a basic data type works exactly as if the function
+          is invoked with that type directly. This new behavior is equivalent
+          to mpv_set_option().
+          This also affects the mp.set_property_native() Lua function.
  --- mpv 0.12.0 ---
  1.20   - deprecate "GL_MP_D3D_interfaces"/"glMPGetD3DInterface", and introduce
           "GL_MP_MPGetNativeDisplay"/"glMPGetNativeDisplay" (this is a

@@ -1071,43 +1071,27 @@ static void setproperty_fn(void *arg)
     struct setproperty_request *req = arg;
     const struct m_option *type = get_mp_type(req->format);
 
-    int err;
-    switch (req->format) {
-    case MPV_FORMAT_STRING: {
-        // Go through explicit string conversion. M_PROPERTY_SET_NODE doesn't
-        // do this, because it tries to be somewhat type-strict. But the client
-        // needs a way to set everything by string.
-        char *s = *(char **)req->data;
-        MP_VERBOSE(req->mpctx, "Set property string: %s='%s'\n", req->name, s);
-        err = mp_property_do(req->name, M_PROPERTY_SET_STRING, s, req->mpctx);
-        break;
-    }
-    case MPV_FORMAT_NODE:
-    case MPV_FORMAT_FLAG:
-    case MPV_FORMAT_INT64:
-    case MPV_FORMAT_DOUBLE: {
-        struct mpv_node node;
-        if (req->format == MPV_FORMAT_NODE) {
-            node = *(struct mpv_node *)req->data;
-        } else {
-            // These are basically emulated via mpv_node.
-            node.format = req->format;
-            memcpy(&node.u, req->data, type->type->size);
-        }
-        if (mp_msg_test(req->mpctx->log, MSGL_V)) {
-            struct m_option ot = {.type = &m_option_type_node};
-            char *t = m_option_print(&ot, &node);
-            MP_VERBOSE(req->mpctx, "Set property: %s=%s\n", req->name, t ? t : "?");
-            talloc_free(t);
-        }
-        err = mp_property_do(req->name, M_PROPERTY_SET_NODE, &node, req->mpctx);
-        break;
-    }
-    default:
-        abort();
+    struct mpv_node *node;
+    struct mpv_node tmp;
+    if (req->format == MPV_FORMAT_NODE) {
+        node = req->data;
+    } else {
+        tmp.format = req->format;
+        memcpy(&tmp.u, req->data, type->type->size);
+        node = &tmp;
     }
 
+    int err = mp_property_do(req->name, M_PROPERTY_SET_NODE, node, req->mpctx);
+
     req->status = translate_property_error(err);
+
+    if (mp_msg_test(req->mpctx->log, MSGL_V)) {
+        struct m_option ot = {.type = &m_option_type_node};
+        char *t = m_option_print(&ot, node);
+        MP_VERBOSE(req->mpctx, "Set property: %s=%s -> %d\n",
+                   req->name, t ? t : "?", err);
+        talloc_free(t);
+    }
 
     if (req->reply_ctx) {
         status_reply(req->reply_ctx, MPV_EVENT_SET_PROPERTY_REPLY,
