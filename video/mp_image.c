@@ -164,20 +164,12 @@ void mp_image_steal_data(struct mp_image *dst, struct mp_image *src)
     assert(dst->imgfmt == src->imgfmt && dst->w == src->w && dst->h == src->h);
     assert(dst->bufs[0] && src->bufs[0]);
 
-    for (int p = 0; p < MP_MAX_PLANES; p++) {
-        dst->planes[p] = src->planes[p];
-        dst->stride[p] = src->stride[p];
-    }
-    mp_image_copy_attributes(dst, src);
+    mp_image_destructor(dst); // unref old
+    talloc_free_children(dst);
 
-    for (int p = 0; p < MP_MAX_PLANES; p++) {
-        av_buffer_unref(&dst->bufs[p]);
-        dst->bufs[p] = src->bufs[p];
-        src->bufs[p] = NULL;
-    }
-    av_buffer_unref(&dst->hwctx);
-    dst->hwctx = src->hwctx;
-    src->hwctx = NULL;
+    *dst = *src;
+
+    *src = (struct mp_image){0};
     talloc_free(src);
 }
 
@@ -752,14 +744,12 @@ struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
         return NULL;
     }
     mp_image_copy_fields_to_av_frame(frame, new_ref);
-    for (int p = 0; p < MP_MAX_PLANES; p++) {
+    for (int p = 0; p < MP_MAX_PLANES; p++)
         frame->buf[p] = new_ref->bufs[p];
-        new_ref->bufs[p] = NULL;
-    }
 #if HAVE_AVUTIL_HAS_HWCONTEXT
     frame->hw_frames_ctx = new_ref->hwctx;
 #endif
-    new_ref->hwctx = NULL;
+    *new_ref = (struct mp_image){0};
     talloc_free(new_ref);
     return frame;
 }
