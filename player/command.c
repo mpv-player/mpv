@@ -3904,6 +3904,23 @@ int mp_property_do(const char *name, int action, void *val,
     int r = m_property_do(ctx->log, mp_properties, name, action, val, ctx);
     if (r == M_PROPERTY_OK && is_property_set(action, val))
         mp_notify_property(ctx, (char *)name);
+    if (mp_msg_test(ctx->log, MSGL_V) && is_property_set(action, val)) {
+        struct m_option ot = {0};
+        void *data = val;
+        switch (action) {
+        case M_PROPERTY_SET_NODE:
+            ot.type = &m_option_type_node;
+            break;
+        case M_PROPERTY_SET_STRING:
+            ot.type = &m_option_type_string;
+            data = &val;
+            break;
+        }
+        char *t = ot.type ? m_option_print(&ot, data) : NULL;
+        MP_VERBOSE(ctx, "Set property: %s%s%s -> %d\n",
+                   name, t ? "=" : "", t ? t : "", r);
+        talloc_free(t);
+    }
     return r;
 }
 

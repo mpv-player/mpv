@@ -1085,14 +1085,6 @@ static void setproperty_fn(void *arg)
 
     req->status = translate_property_error(err);
 
-    if (mp_msg_test(req->mpctx->log, MSGL_V)) {
-        struct m_option ot = {.type = &m_option_type_node};
-        char *t = m_option_print(&ot, node);
-        MP_VERBOSE(req->mpctx, "Set property: %s=%s -> %d\n",
-                   req->name, t ? t : "?", err);
-        talloc_free(t);
-    }
-
     if (req->reply_ctx) {
         status_reply(req->reply_ctx, MPV_EVENT_SET_PROPERTY_REPLY,
                      req->userdata, req->status);
