@@ -154,10 +154,6 @@ void mp_image_set_attributes(struct mp_image *image,
                              const struct mp_image_params *params);
 
 struct AVFrame;
-void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
-                                        struct AVFrame *src);
-void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
-                                      struct mp_image *src);
 struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame);
 struct AVFrame *mp_image_to_av_frame(struct mp_image *img);
 struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img);
