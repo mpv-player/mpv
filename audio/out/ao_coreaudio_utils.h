@@ -65,7 +65,6 @@ bool ca_asbd_is_better(AudioStreamBasicDescription *req,
 int64_t ca_frames_to_us(struct ao *ao, uint32_t frames);
 int64_t ca_get_latency(const AudioTimeStamp *ts);
 
-bool ca_device_supports_compressed(struct ao *ao, AudioDeviceID device);
 bool ca_stream_supports_compressed(struct ao *ao, AudioStreamID stream);
 OSStatus ca_lock_device(AudioDeviceID device, pid_t *pid);
 OSStatus ca_unlock_device(AudioDeviceID device, pid_t *pid);

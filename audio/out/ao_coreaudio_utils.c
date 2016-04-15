@@ -334,30 +334,6 @@ coreaudio_error:
     return false;
 }
 
-bool ca_device_supports_compressed(struct ao *ao, AudioDeviceID device)
-{
-    AudioStreamID *streams = NULL;
-    size_t n_streams;
-
-    /* Retrieve all the output streams. */
-    OSStatus err =
-        CA_GET_ARY_O(device, kAudioDevicePropertyStreams, &streams, &n_streams);
-
-    CHECK_CA_ERROR("could not get number of streams.");
-
-    for (int i = 0; i < n_streams; i++) {
-        if (ca_stream_supports_compressed(ao, streams[i])) {
-            talloc_free(streams);
-            return true;
-        }
-    }
-
-    talloc_free(streams);
-
-coreaudio_error:
-    return false;
-}
-
 OSStatus ca_lock_device(AudioDeviceID device, pid_t *pid)
 {
     *pid = getpid();
