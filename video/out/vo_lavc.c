@@ -250,30 +250,19 @@ static void write_packet(struct vo *vo, int size, AVPacket *packet)
 static int encode_video(struct vo *vo, AVFrame *frame, AVPacket *packet)
 {
     struct priv *vc = vo->priv;
-    if (encode_lavc_oformat_flags(vo->encode_lavc_ctx) & AVFMT_RAWPICTURE) {
-        if (!frame)
-            return 0;
-        memcpy(vc->buffer, frame, sizeof(AVPicture));
-        MP_DBG(vo, "got pts %f\n",
+    int got_packet = 0;
+    int status = avcodec_encode_video2(vc->codec, packet,
+                                        frame, &got_packet);
+    int size = (status < 0) ? status : got_packet ? packet->size : 0;
+
+    if (frame)
+        MP_DBG(vo, "got pts %f; out size: %d\n",
                frame->pts * (double) vc->codec->time_base.num /
-                            (double) vc->codec->time_base.den);
-        packet->size = sizeof(AVPicture);
-        return packet->size;
-    } else {
-        int got_packet = 0;
-        int status = avcodec_encode_video2(vc->codec, packet,
-                                           frame, &got_packet);
-        int size = (status < 0) ? status : got_packet ? packet->size : 0;
+               (double) vc->codec->time_base.den, size);
 
-        if (frame)
-            MP_DBG(vo, "got pts %f; out size: %d\n",
-                   frame->pts * (double) vc->codec->time_base.num /
-                   (double) vc->codec->time_base.den, size);
-
-        if (got_packet)
-            encode_lavc_write_stats(vo->encode_lavc_ctx, vc->codec);
-        return size;
-    }
+    if (got_packet)
+        encode_lavc_write_stats(vo->encode_lavc_ctx, vc->codec);
+    return size;
 }
 
 static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
