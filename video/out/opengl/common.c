@@ -348,11 +348,9 @@ static const struct gl_functions gl_functions[] = {
 
 // Fill the GL struct with function pointers and extensions from the current
 // GL context. Called by the backend.
-// getProcAddress: function to resolve function names, may be NULL
+// get_fn: function to resolve function names
 // ext2: an extra extension string
 // log: used to output messages
-// Note: if you create a CONTEXT_FORWARD_COMPATIBLE_BIT_ARB with OpenGL 3.0,
-//       you must append "GL_ARB_compatibility" to ext2.
 void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
                           void *fn_ctx, const char *ext2, struct mp_log *log)
 {
