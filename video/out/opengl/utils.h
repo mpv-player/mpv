@@ -20,6 +20,7 @@
 #define MP_GL_UTILS_
 
 #include "common.h"
+#include "math.h"
 
 struct mp_log;
 
@@ -113,6 +114,13 @@ static inline void gl_transform_vec(struct gl_transform t, float *x, float *y)
 struct mp_rect_f {
     float x0, y0, x1, y1;
 };
+
+// Semantic equality (fuzzy comparison)
+static inline bool mp_rect_f_seq(struct mp_rect_f a, struct mp_rect_f b)
+{
+    return fabs(a.x0 - b.x0) < 1e-6 && fabs(a.x1 - b.x1) < 1e-6 &&
+           fabs(a.y0 - b.y0) < 1e-6 && fabs(a.y1 - b.y1) < 1e-6;
+}
 
 static inline void gl_transform_rect(struct gl_transform t, struct mp_rect_f *r)
 {
