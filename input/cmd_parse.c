@@ -273,7 +273,6 @@ static struct mp_cmd *parse_cmd_str(struct mp_log *log, void *tmp,
             break;
         if (pctx_read_token(ctx, &cur_token) < 0)
             goto error;
-        break;
     }
 
     if (!find_cmd(ctx->log, cmd, cur_token))
