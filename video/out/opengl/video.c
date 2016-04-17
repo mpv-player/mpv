@@ -1711,9 +1711,12 @@ static void pass_scale_main(struct gl_video *p)
     struct scaler_config scaler_conf = p->opts.scaler[SCALER_SCALE];
     if (p->opts.scaler_resizes_only && !downscaling && !upscaling) {
         scaler_conf.kernel.name = "bilinear";
-        // bilinear is going to be used, just remove all sub-pixel offsets.
-        p->texture_offset.t[0] = (int)p->texture_offset.t[0];
-        p->texture_offset.t[1] = (int)p->texture_offset.t[1];
+        // For scaler-resizes-only, we round the texture offset to
+        // the nearest round value in order to prevent ugly blurriness
+        // (in exchange for slightly shifting the image by up to half a
+        // subpixel)
+        p->texture_offset.t[0] = roundf(p->texture_offset.t[0]);
+        p->texture_offset.t[1] = roundf(p->texture_offset.t[1]);
     }
     if (downscaling && p->opts.scaler[SCALER_DSCALE].kernel.name) {
         scaler_conf = p->opts.scaler[SCALER_DSCALE];
