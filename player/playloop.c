@@ -978,6 +978,9 @@ void run_playloop(struct MPContext *mpctx)
 
     handle_sstep(mpctx);
 
+    if (mpctx->stop_play == AT_END_OF_FILE && mpctx->seek.type)
+        mpctx->stop_play = KEEP_PLAYING;
+
     if (mpctx->stop_play)
         return;
 

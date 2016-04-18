@@ -19,6 +19,9 @@ Interface changes
 
 ::
 
+ --- mpv 0.17.1 ---
+    - now ab-loops are active even if the "ab-loop-b" property is unset ("no"),
+      in which case the end of the file is used as B loop point
  --- mpv 0.17.0 ---
     - deprecate "track-list/N/audio-channels" property (use
       "track-list/N/demux-channel-count" instead)
