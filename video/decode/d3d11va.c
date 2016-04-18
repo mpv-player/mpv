@@ -160,10 +160,14 @@ static void dump_decoder_info(struct lavc_ctx *s, const GUID *guid)
 
 static DWORD get_dxfmt_cb(struct lavc_ctx *s, const GUID *guid, int depth)
 {
+    struct priv *p = s->hwdec_priv;
     for (int i = 0; i < MP_ARRAY_SIZE(d3d11_formats); i++) {
         const struct d3d11_format *format = &d3d11_formats[i];
         if (depth <= format->depth &&
             d3d11_format_supported(s, guid, format)) {
+            MP_VERBOSE(p, "Selecting %s %s\n",
+                       d3d_decoder_guid_to_desc(guid),
+                       format->name);
             return format->format;
         }
     }

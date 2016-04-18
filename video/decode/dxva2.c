@@ -170,6 +170,9 @@ static DWORD get_dxfmt_cb(struct lavc_ctx *s, const GUID *guid, int depth)
         for (UINT j = 0; j < n_formats; j++) {
             if (formats[i] == d3d9_fmt->format) {
                 ret = formats[i];
+                MP_VERBOSE(p, "Selecting %s %s\n",
+                           d3d_decoder_guid_to_desc(guid),
+                           mp_tag_str(ret));
                 goto done;
             }
         }
