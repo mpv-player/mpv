@@ -76,8 +76,8 @@ static const struct d3dva_mode d3dva_modes[] = {
 
     // H.264
     {MODE2(H264_F),                        AV_CODEC_ID_H264, PROF_H264_HIGH},
-    {MODE (Intel_H264_NoFGT_ClearVideo),   AV_CODEC_ID_H264, PROF_H264_HIGH},
     {MODE2(H264_E),                        AV_CODEC_ID_H264, PROF_H264_HIGH},
+    {MODE (Intel_H264_NoFGT_ClearVideo),   AV_CODEC_ID_H264, PROF_H264_HIGH},
     {MODE (ModeH264_VLD_WithFMOASO_NoFGT), AV_CODEC_ID_H264, PROF_H264_HIGH},
     {MODE (ModeH264_VLD_NoFGT_Flash),      AV_CODEC_ID_H264, PROF_H264_HIGH},
 
