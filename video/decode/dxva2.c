@@ -133,7 +133,7 @@ static void dump_decoder_info(struct lavc_ctx *s,
         HRESULT hr = IDirectXVideoDecoderService_GetDecoderRenderTargets(
             p->decoder_service, guid, &n_formats, &formats);
         if (FAILED(hr)) {
-            MP_ERR(p, "Failed to get render targets for decoder %s:%s",
+            MP_ERR(p, "Failed to get render targets for decoder %s:%s\n",
                    description, mp_HRESULT_to_str(hr));
         }
 
