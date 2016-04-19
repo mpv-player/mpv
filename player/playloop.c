@@ -518,6 +518,7 @@ static void handle_osd_redraw(struct MPContext *mpctx)
 
 static void handle_pause_on_low_cache(struct MPContext *mpctx)
 {
+    bool force_update = false;
     struct MPOpts *opts = mpctx->opts;
     if (!mpctx->demuxer)
         return;
@@ -528,6 +529,8 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
 
     struct demux_ctrl_reader_state s = {.idle = true, .ts_duration = -1};
     demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
+
+    int cache_buffer = 100;
 
     if (mpctx->restart_complete && idle != -1) {
         if (mpctx->paused && mpctx->paused_for_cache) {
@@ -543,7 +546,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
                 mpctx->paused_for_cache = false;
                 if (!opts->pause)
                     unpause_player(mpctx);
-                mp_notify(mpctx, MP_EVENT_CACHE_UPDATE, NULL);
+                force_update = true;
             }
             mpctx->sleeptime = MPMIN(mpctx->sleeptime, 0.2);
         } else {
@@ -553,10 +556,14 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
                 mpctx->paused_for_cache = true;
                 opts->pause = prev_paused_user;
                 mpctx->cache_stop_time = mp_time_sec();
-                mp_notify(mpctx, MP_EVENT_CACHE_UPDATE, NULL);
+                force_update = true;
             }
         }
         mpctx->cache_wait_time = MPCLAMP(mpctx->cache_wait_time, 1, 10);
+        if (mpctx->paused_for_cache) {
+            cache_buffer =
+                100 * MPCLAMP(s.ts_duration / mpctx->cache_wait_time, 0, 0.99);
+        }
     }
 
     // Also update cache properties.
@@ -569,28 +576,36 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
         double now = mp_time_sec();
         if (mpctx->next_cache_update <= now) {
             mpctx->next_cache_update = busy ? now + 0.25 : 0;
-            mp_notify(mpctx, MP_EVENT_CACHE_UPDATE, NULL);
+            force_update = true;
         }
         if (mpctx->next_cache_update > 0) {
             mpctx->sleeptime =
                 MPMIN(mpctx->sleeptime, mpctx->next_cache_update - now);
         }
     }
+
+    if (mpctx->cache_buffer != cache_buffer) {
+        if (mpctx->cache_buffer >= 0 &&
+            (mpctx->cache_buffer == 100) != (cache_buffer == 100))
+        {
+            if (cache_buffer < 100) {
+                MP_VERBOSE(mpctx, "Enter buffering.\n");
+            } else {
+                double t = mp_time_sec() - mpctx->cache_stop_time;
+                MP_VERBOSE(mpctx, "End buffering (waited %f secs).\n", t);
+            }
+        }
+        mpctx->cache_buffer = cache_buffer;
+        force_update = true;
+    }
+
+    if (force_update)
+        mp_notify(mpctx, MP_EVENT_CACHE_UPDATE, NULL);
 }
 
-double get_cache_buffering_percentage(struct MPContext *mpctx)
+int get_cache_buffering_percentage(struct MPContext *mpctx)
 {
-    if (mpctx->demuxer && mpctx->paused_for_cache && mpctx->cache_wait_time > 0) {
-        struct demux_ctrl_reader_state s = {.idle = true, .ts_duration = -1};
-        demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
-        if (s.ts_duration < 0)
-            s.ts_duration = 0;
-
-        return MPCLAMP(s.ts_duration / mpctx->cache_wait_time, 0.0, 1.0);
-    }
-    if (mpctx->demuxer && !mpctx->paused_for_cache)
-        return 1.0;
-    return -1;
+    return mpctx->demuxer ? mpctx->cache_buffer : -1;
 }
 
 static void handle_heartbeat_cmd(struct MPContext *mpctx)

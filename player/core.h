@@ -398,6 +398,7 @@ typedef struct MPContext {
 
     bool paused_for_cache;
     double cache_stop_time, cache_wait_time;
+    int cache_buffer;
 
     // Set after showing warning about decoding being too slow for realtime
     // playback rate. Used to avoid showing it multiple times.
@@ -515,7 +516,7 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter);
 char *chapter_name(struct MPContext *mpctx, int chapter);
 double chapter_start_time(struct MPContext *mpctx, int chapter);
 int get_chapter_count(struct MPContext *mpctx);
-double get_cache_buffering_percentage(struct MPContext *mpctx);
+int get_cache_buffering_percentage(struct MPContext *mpctx);
 void execute_queued_seek(struct MPContext *mpctx);
 void run_playloop(struct MPContext *mpctx);
 void mp_idle(struct MPContext *mpctx);

@@ -1518,10 +1518,10 @@ static int mp_property_cache_buffering(void *ctx, struct m_property *prop,
                                        int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    double state = get_cache_buffering_percentage(mpctx);
+    int state = get_cache_buffering_percentage(mpctx);
     if (state < 0)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_int_ro(action, arg, state * 100);
+    return m_property_int_ro(action, arg, state);
 }
 
 static int mp_property_clock(void *ctx, struct m_property *prop,
