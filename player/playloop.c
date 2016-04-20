@@ -523,16 +523,15 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     if (!mpctx->demuxer)
         return;
 
-    struct stream_cache_info info = {0};
-    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
-    int idle = info.size > 0 ? info.idle : -1;
+    struct stream_cache_info c = {.idle = true};
+    demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &c);
 
     struct demux_ctrl_reader_state s = {.idle = true, .ts_duration = -1};
     demux_control(mpctx->demuxer, DEMUXER_CTRL_GET_READER_STATE, &s);
 
     int cache_buffer = 100;
 
-    if (mpctx->restart_complete && idle != -1) {
+    if (mpctx->restart_complete && c.size > 0) {
         if (mpctx->paused && mpctx->paused_for_cache) {
             if (!opts->cache_pausing || s.ts_duration >= mpctx->cache_wait_time
                 || s.idle)
@@ -567,11 +566,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     }
 
     // Also update cache properties.
-    bool busy = idle == 0;
-    if (!s.idle) {
-        busy |= idle != -1;
-        busy |= mp_client_event_is_registered(mpctx, MP_EVENT_CACHE_UPDATE);
-    }
+    bool busy = !s.idle || !c.idle;
     if (busy || mpctx->next_cache_update > 0) {
         double now = mp_time_sec();
         if (mpctx->next_cache_update <= now) {
