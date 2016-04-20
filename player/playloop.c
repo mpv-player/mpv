@@ -523,6 +523,8 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     if (!mpctx->demuxer)
         return;
 
+    double now = mp_time_sec();
+
     struct stream_cache_info c = {.idle = true};
     demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &c);
 
@@ -536,7 +538,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
             if (!opts->cache_pausing || s.ts_duration >= mpctx->cache_wait_time
                 || s.idle)
             {
-                double elapsed_time = mp_time_sec() - mpctx->cache_stop_time;
+                double elapsed_time = now - mpctx->cache_stop_time;
                 if (elapsed_time > mpctx->cache_wait_time) {
                     mpctx->cache_wait_time *= 1.5 + 0.1;
                 } else {
@@ -554,7 +556,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
                 pause_player(mpctx);
                 mpctx->paused_for_cache = true;
                 opts->pause = prev_paused_user;
-                mpctx->cache_stop_time = mp_time_sec();
+                mpctx->cache_stop_time = now;
                 force_update = true;
             }
         }
@@ -568,7 +570,6 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     // Also update cache properties.
     bool busy = !s.idle || !c.idle;
     if (busy || mpctx->next_cache_update > 0) {
-        double now = mp_time_sec();
         if (mpctx->next_cache_update <= now) {
             mpctx->next_cache_update = busy ? now + 0.25 : 0;
             force_update = true;
@@ -586,7 +587,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
             if (cache_buffer < 100) {
                 MP_VERBOSE(mpctx, "Enter buffering.\n");
             } else {
-                double t = mp_time_sec() - mpctx->cache_stop_time;
+                double t = now - mpctx->cache_stop_time;
                 MP_VERBOSE(mpctx, "End buffering (waited %f secs).\n", t);
             }
         }
