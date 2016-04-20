@@ -116,9 +116,16 @@ static int determine_codec_profile(struct dec_audio *da, AVPacket *pkt)
         goto done;
     }
 
+#if HAVE_AVCODEC_NEW_CODEC_API
+    if (avcodec_send_packet(ctx, pkt) < 0)
+        goto done;
+    if (avcodec_receive_frame(ctx, frame) < 0)
+        goto done;
+#else
     int got_frame = 0;
     if (avcodec_decode_audio4(ctx, frame, &got_frame, pkt) < 1 || !got_frame)
         goto done;
+#endif
 
     profile = ctx->profile;
 
