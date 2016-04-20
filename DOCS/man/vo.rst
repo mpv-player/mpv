@@ -700,6 +700,119 @@ Available video output drivers are:
                 return vec4(1.0 - color.rgb, color.a);
             }
 
+    ``user-shaders=<files>``
+        Custom GLSL hooks. These are similar to ``post-shaders`` etc., but more
+        flexible: They can be injected at almost arbitrary points in the
+        rendering pipeline, and access all previous intermediate textures.
+
+        The general syntax of a user shader looks like this::
+
+            //!METADATA ARGS...
+            //!METADATA ARGS...
+
+            vec4 hook() {
+               ...
+               return something;
+            }
+
+            //!METADATA ARGS...
+            //!METADATA ARGS...
+
+            ...
+
+        Each block of metadata, along with the non-metadata lines after it,
+        defines a single pass. Each pass can set the following metadata:
+
+        HOOK <name> (required)
+            The texture which to hook into. May occur multiple times within a
+            metadata block, up to a predetermined limit. See below for a list
+            of hookable textures.
+
+        BIND <name>
+            Loads a texture and makes it available to the pass, and sets up
+            macros to enable accessing it. See below for a list of set macros.
+            By default, no textures are bound. The special name HOOKED can be
+            used to refer to the texture that triggered this pass.
+
+        SAVE <name>
+            Gives the name of the texture to save the result of this pass
+            into. By default, this is set to the special name HOOKED which has
+            the effect of overwriting the hooked texture.
+
+        TRANSFORM sx sy ox oy
+            Specifies how this pass intends to transform the hooked texture.
+            ``sx``/``sy`` refer to a linear scale factor, and ``ox``/``oy``
+            refer to a constant pixel shift that the shader will introduce. The
+            default values are 1 1 0 0 which leave the texture size unchanged.
+
+        COMPONENTS n
+            Specifies how many components of this pass's output are relevant
+            and should be stored in the texture, up to 4 (rgba). By default,
+            this value is equal to the number of components in HOOKED.
+
+        Each bound texture (via ``BIND``) will make available the following
+        definitions to that shader pass, where NAME is the name of the bound
+        texture:
+
+        sampler NAME
+            The bound texture itself.
+        vec2 NAME_pos
+            The local texture coordinate of that texture, range [0,1].
+        vec2 NAME_size
+            The (rotated) size in pixels of the texture.
+        vec2 NAME_pt
+            The (unrotated) size of a single pixel, range [0,1].
+
+        In addition, the global uniforms described in ``post-shaders`` are
+        also available.
+
+        Internally, vo_opengl may generate any number of the following
+        textures. Whenever a texture is rendered and saved by vo_opengl, all of
+        the passes that have hooked into it will run, in the order they were
+        added by the user. This is a list of the legal hook points:
+
+        RGB, LUMA, CHROMA, ALPHA, XYZ (resizable)
+            Source planes (raw). Which of these fire depends on the image
+            format of the source.
+
+        CHROMA_SCALED, ALPHA_SCALED (fixed)
+            Source planes (upscaled). These only fire on subsampled content.
+
+        NATIVE (resizable)
+            The combined image, in the source colorspace, before conversion
+            to RGB.
+
+        MAINPRESUB (resizable)
+            The image, after conversion to RGB, but before
+            ``blend-subtitles=video`` is applied.
+
+        MAIN (resizable)
+            The main image, after conversion to RGB but before upscaling.
+
+        LINEAR (fixed)
+            Linear light image, before scaling. This only fires when
+            ``linear-scaling`` is in effect.
+
+        SIGMOID (fixed)
+            Sigmoidized light, before scaling. This only fires when
+            ``sigmoid-upscaling`` is in effect.
+
+        PREKERNEL (fixed)
+            The image immediately before the scaler kernel runs.
+
+        POSTKERNEL (fixed)
+            The image immediately after the scaler kernel runs.
+
+        SCALED (fixed)
+            The final upscaled image, before color management.
+
+        OUTPUT (fixed)
+            The final output image, after color management but before
+            dithering and drawing to screen.
+
+        Only the textures labelled with (resizable) may be transformed by
+        the pass. For all others, the TRANSFORM must be 1 1 0 0 (default).
+
     ``deband``
         Enable the debanding algorithm. This greatly reduces the amount of
         visible banding, blocking and other quantization artifacts, at the

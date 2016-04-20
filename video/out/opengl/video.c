@@ -40,6 +40,7 @@
 #include "superxbr.h"
 #include "nnedi3.h"
 #include "video_shaders.h"
+#include "user_shaders.h"
 #include "video/out/filter_kernels.h"
 #include "video/out/aspect.h"
 #include "video/out/bitmap_packer.h"
@@ -152,6 +153,7 @@ struct tex_hook {
     void *priv; // this can be set to whatever the hook wants
     void (*hook)(struct gl_video *p, struct img_tex tex, // generates GLSL
                  struct gl_transform *trans, void *priv);
+    void (*free)(struct tex_hook *hook);
 };
 
 struct fbosurface {
@@ -163,7 +165,7 @@ struct fbosurface {
 
 struct cached_file {
     char *path;
-    char *body;
+    struct bstr body;
 };
 
 struct gl_video {
@@ -424,6 +426,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_STRING("scale-shader", scale_shader, 0),
         OPT_STRINGLIST("pre-shaders", pre_shaders, 0),
         OPT_STRINGLIST("post-shaders", post_shaders, 0),
+        OPT_STRINGLIST("user-shaders", user_shaders, 0),
         OPT_FLAG("deband", deband, 0),
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
         OPT_FLOAT("sharpen", unsharp, 0),
@@ -483,10 +486,10 @@ static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
 #define GLSLHF(...) gl_sc_haddf(p->sc, __VA_ARGS__)
 
-static const char *load_cached_file(struct gl_video *p, const char *path)
+static struct bstr load_cached_file(struct gl_video *p, const char *path)
 {
     if (!path || !path[0])
-        return NULL;
+        return (struct bstr){0};
     for (int n = 0; n < p->num_files; n++) {
         if (strcmp(p->files[n].path, path) == 0)
             return p->files[n].body;
@@ -496,7 +499,7 @@ static const char *load_cached_file(struct gl_video *p, const char *path)
         // empty cache when it overflows
         for (int n = 0; n < p->num_files; n++) {
             talloc_free(p->files[n].path);
-            talloc_free(p->files[n].body);
+            talloc_free(p->files[n].body.start);
         }
         p->num_files = 0;
     }
@@ -505,11 +508,11 @@ static const char *load_cached_file(struct gl_video *p, const char *path)
         struct cached_file *new = &p->files[p->num_files++];
         *new = (struct cached_file) {
             .path = talloc_strdup(p, path),
-            .body = s.start
+            .body = s,
         };
         return new->body;
     }
-    return NULL;
+    return (struct bstr){0};
 }
 
 static void debug_check_gl(struct gl_video *p, const char *msg)
@@ -537,6 +540,16 @@ static void gl_video_reset_surfaces(struct gl_video *p)
     p->output_fbo_valid = false;
 }
 
+static void gl_video_reset_hooks(struct gl_video *p)
+{
+    for (int i = 0; i < p->tex_hook_num; i++) {
+        if (p->tex_hooks[i].free)
+            p->tex_hooks[i].free(&p->tex_hooks[i]);
+    }
+
+    p->tex_hook_num = 0;
+}
+
 static inline int fbosurface_wrap(int id)
 {
     id = id % FBOSURFACES_MAX;
@@ -553,6 +566,7 @@ static void recreate_osd(struct gl_video *p)
     }
 }
 
+static void gl_video_setup_hooks(struct gl_video *p);
 static void reinit_rendering(struct gl_video *p)
 {
     MP_VERBOSE(p, "Reinit rendering.\n");
@@ -562,6 +576,8 @@ static void reinit_rendering(struct gl_video *p)
     uninit_rendering(p);
 
     recreate_osd(p);
+
+    gl_video_setup_hooks(p);
 }
 
 static void uninit_rendering(struct gl_video *p)
@@ -596,6 +612,7 @@ static void uninit_rendering(struct gl_video *p)
         fbotex_uninit(&p->hook_fbos[n]);
 
     gl_video_reset_surfaces(p);
+    gl_video_reset_hooks(p);
 }
 
 void gl_video_update_profile(struct gl_video *p)
@@ -1167,19 +1184,26 @@ static void pass_opt_hook_point(struct gl_video *p, const char *name,
     if (!name)
         return;
 
-    int i;
-    for (i = 0; i < p->tex_hook_num; i++) {
-        if (strcmp(p->tex_hooks[i].hook_tex, name) == 0)
-            break;
+    for (int i = 0; i < p->tex_hook_num; i++) {
+        struct tex_hook *hook = &p->tex_hooks[i];
+
+        if (strcmp(hook->hook_tex, name) == 0)
+            goto found;
+
+        for (int b = 0; b < TEXUNIT_VIDEO_NUM; b++) {
+            if (hook->bind_tex[b] && strcmp(hook->bind_tex[b], name) == 0)
+                goto found;
+        }
     }
 
-    if (i == p->tex_hook_num)
-        return;
+    // Nothing uses this texture, don't bother storing it
+    return;
 
+found:
     assert(p->hook_fbo_num < MAX_SAVED_TEXTURES);
     struct fbotex *fbo = &p->hook_fbos[p->hook_fbo_num++];
-
     finish_pass_fbo(p, fbo, p->texture_w, p->texture_h, 0);
+
     struct img_tex img = img_tex_fbo(fbo, PLANE_RGB, p->components);
     img = pass_hook(p, name, img, tex_trans);
     copy_img_tex(p, &(int){0}, img);
@@ -1188,9 +1212,9 @@ static void pass_opt_hook_point(struct gl_video *p, const char *name,
     p->components = img.components;
 }
 
-static void load_shader(struct gl_video *p, const char *body)
+static void load_shader(struct gl_video *p, struct bstr body)
 {
-    gl_sc_hadd(p->sc, body);
+    gl_sc_hadd_bstr(p->sc, body);
     gl_sc_uniform_f(p->sc, "random", (double)av_lfg_get(&p->lfg) / UINT32_MAX);
     gl_sc_uniform_f(p->sc, "frame", p->frames_uploaded);
     gl_sc_uniform_vec2(p->sc, "image_size", (GLfloat[]){p->image_params.w,
@@ -1400,10 +1424,10 @@ static void pass_sample(struct gl_video *p, struct img_tex tex,
     } else if (strcmp(name, "oversample") == 0) {
         pass_sample_oversample(p->sc, scaler, w, h);
     } else if (strcmp(name, "custom") == 0) {
-        const char *body = load_cached_file(p, p->opts.scale_shader);
-        if (body) {
+        struct bstr body = load_cached_file(p, p->opts.scale_shader);
+        if (body.start) {
             load_shader(p, body);
-            const char *fn_name = get_custom_shader_fn(p, body);
+            const char *fn_name = get_custom_shader_fn(p, body.start);
             GLSLF("// custom scale-shader\n");
             GLSLF("color = %s(tex, pos, size);\n", fn_name);
         } else {
@@ -1581,45 +1605,95 @@ static void unsharp_hook(struct gl_video *p, struct img_tex tex,
     pass_sample_unsharp(p->sc, p->opts.unsharp);
 }
 
-static void user_shader_hook(struct gl_video *p, struct img_tex tex,
-                             struct gl_transform *trans, void *priv)
+static void user_hook_old(struct gl_video *p, struct img_tex tex,
+                          struct gl_transform *trans, void *priv)
 {
     const char *body = priv;
     assert(body);
 
     GLSLHF("#define pixel_size HOOKED_pt\n");
-    load_shader(p, body);
+    load_shader(p, bstr0(body));
     const char *fn_name = get_custom_shader_fn(p, body);
     GLSLF("// custom shader\n");
     GLSLF("color = %s(HOOKED, HOOKED_pos, HOOKED_size);\n", fn_name);
 }
 
-static void pass_hook_user_shaders(struct gl_video *p, const char *name,
-                                   char **shaders)
+static void user_hook(struct gl_video *p, struct img_tex tex,
+                      struct gl_transform *trans, void *priv)
+{
+    struct gl_user_shader *shader = priv;
+    assert(shader);
+
+    load_shader(p, shader->pass_body);
+    GLSLF("// custom hook\n");
+    GLSLF("color = hook();\n");
+
+    *trans = shader->transform;
+}
+
+static void user_hook_free(struct tex_hook *hook)
+{
+    talloc_free((void *)hook->hook_tex);
+    talloc_free((void *)hook->save_tex);
+    for (int i = 0; i < TEXUNIT_VIDEO_NUM; i++)
+        talloc_free((void *)hook->bind_tex[i]);
+    talloc_free(hook->priv);
+}
+
+static void pass_hook_user_shaders_old(struct gl_video *p, const char *name,
+                                       char **shaders)
 {
     assert(name);
     if (!shaders)
         return;
 
     for (int n = 0; shaders[n] != NULL; n++) {
-        const char *body = load_cached_file(p, shaders[n]);
+        const char *body = load_cached_file(p, shaders[n]).start;
         if (body) {
             pass_add_hook(p, (struct tex_hook) {
                 .hook_tex = name,
                 .bind_tex = {"HOOKED"},
-                .hook = user_shader_hook,
+                .hook = user_hook_old,
                 .priv = (void *)body,
             });
         }
     }
 }
 
-static void pass_setup_hooks(struct gl_video *p)
+static void pass_hook_user_shaders(struct gl_video *p, char **shaders)
 {
-    // Reset any existing hooks
-    p->tex_hook_num = 0;
-    memset(&p->tex_hooks, 0, sizeof(p->tex_hooks));
+    if (!shaders)
+        return;
 
+    for (int n = 0; shaders[n] != NULL; n++) {
+        struct bstr file = load_cached_file(p, shaders[n]);
+        struct gl_user_shader out;
+        while (parse_user_shader_pass(p->log, &file, &out)) {
+            struct tex_hook hook = {
+                .components = out.components,
+                .hook = user_hook,
+                .free = user_hook_free,
+            };
+
+            for (int i = 0; i < SHADER_MAX_HOOKS; i++) {
+                hook.hook_tex = bstrdup0(p, out.hook_tex[i]);
+                if (!hook.hook_tex)
+                    continue;
+
+                struct gl_user_shader *out_copy = talloc_ptrtype(p, out_copy);
+                *out_copy = out;
+                hook.priv = out_copy;
+                for (int o = 0; o < SHADER_MAX_BINDS; o++)
+                    hook.bind_tex[o] = bstrdup0(p, out.bind_tex[o]);
+                hook.save_tex = bstrdup0(p, out.save_tex),
+                pass_add_hook(p, hook);
+            }
+        }
+    }
+}
+
+static void gl_video_setup_hooks(struct gl_video *p)
+{
     if (p->opts.deband) {
         pass_add_hooks(p, (struct tex_hook) {.hook = deband_hook},
                        HOOKS("LUMA", "CHROMA", "RGB", "XYZ"));
@@ -1642,8 +1716,9 @@ static void pass_setup_hooks(struct gl_video *p)
         });
     }
 
-    pass_hook_user_shaders(p, "MAIN", p->opts.pre_shaders);
-    pass_hook_user_shaders(p, "SCALED", p->opts.post_shaders);
+    pass_hook_user_shaders_old(p, "MAIN", p->opts.pre_shaders);
+    pass_hook_user_shaders_old(p, "SCALED", p->opts.post_shaders);
+    pass_hook_user_shaders(p, p->opts.user_shaders);
 }
 
 // sample from video textures, set "color" variable to yuv value
@@ -2278,8 +2353,6 @@ static void pass_render_frame(struct gl_video *p)
     if (p->dumb_mode)
         return;
 
-    pass_setup_hooks(p);
-
     p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling;
     pass_read_video(p);
     pass_opt_hook_point(p, "NATIVE", &p->texture_offset);
@@ -2805,6 +2878,8 @@ static bool check_dumb_mode(struct gl_video *p)
         return false;
     if (o->post_shaders && o->post_shaders[0])
         return false;
+    if (o->user_shaders && o->user_shaders[0])
+        return false;
     if (p->use_lut_3d)
         return false;
     return true;
@@ -3275,6 +3350,7 @@ static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
     talloc_free(dst->scale_shader);
     talloc_free(dst->pre_shaders);
     talloc_free(dst->post_shaders);
+    talloc_free(dst->user_shaders);
     talloc_free(dst->deband_opts);
     talloc_free(dst->superxbr_opts);
     talloc_free(dst->nnedi3_opts);
@@ -3303,6 +3379,7 @@ static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
     dst->scale_shader = talloc_strdup(NULL, dst->scale_shader);
     dst->pre_shaders = dup_str_array(NULL, dst->pre_shaders);
     dst->post_shaders = dup_str_array(NULL, dst->post_shaders);
+    dst->user_shaders = dup_str_array(NULL, dst->user_shaders);
 }
 
 // Set the options, and possibly update the filter chain too.

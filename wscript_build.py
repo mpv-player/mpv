@@ -356,6 +356,7 @@ def build(ctx):
         ( "video/out/opengl/nnedi3.c",           "gl" ),
         ( "video/out/opengl/osd.c",              "gl" ),
         ( "video/out/opengl/superxbr.c",         "gl" ),
+        ( "video/out/opengl/user_shaders.c",     "gl" ),
         ( "video/out/opengl/utils.c",            "gl" ),
         ( "video/out/opengl/video.c",            "gl" ),
         ( "video/out/opengl/video_shaders.c",    "gl" ),

@@ -565,6 +565,11 @@ void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...)
     va_end(ap);
 }
 
+void gl_sc_hadd_bstr(struct gl_shader_cache *sc, struct bstr text)
+{
+    bstr_xappend(sc, &sc->header_text, text);
+}
+
 static struct sc_uniform *find_uniform(struct gl_shader_cache *sc,
                                        const char *name)
 {
