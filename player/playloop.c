@@ -877,6 +877,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
             }
         }
         mpctx->playing_msg_shown = true;
+        mpctx->sleeptime = 0;
         MP_VERBOSE(mpctx, "playback restart complete\n");
     }
 }
