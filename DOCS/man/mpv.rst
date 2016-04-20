@@ -715,6 +715,9 @@ PROTOCOLS
 ``memory://data``
     Use the ``data`` part as source data.
 
+``hex://data``
+    Like ``memory://``, but the string is interpreted as hexdump.
+
 PSEUDO GUI MODE
 ===============
 
