@@ -5245,16 +5245,20 @@ void handle_ab_loop(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
 
     double now = mpctx->restart_complete ? mpctx->playback_pts : MP_NOPTS_VALUE;
-    if (now != MP_NOPTS_VALUE && opts->ab_loop[0] != MP_NOPTS_VALUE) {
+    if (now != MP_NOPTS_VALUE && (opts->ab_loop[0] != MP_NOPTS_VALUE ||
+                                  opts->ab_loop[1] != MP_NOPTS_VALUE))
+    {
+        double start = opts->ab_loop[0];
+        if (start == MP_NOPTS_VALUE)
+            start = 0;
         double end = opts->ab_loop[1];
         if (end == MP_NOPTS_VALUE)
             end = INFINITY;
-        if (ctx->prev_pts >= opts->ab_loop[0] &&
-            ctx->prev_pts < end &&
+        if (ctx->prev_pts >= start && ctx->prev_pts < end &&
             (now >= end || mpctx->stop_play == AT_END_OF_FILE))
         {
             mark_seek(mpctx);
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->ab_loop[0],
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, start,
                        MPSEEK_EXACT, false);
         }
     }

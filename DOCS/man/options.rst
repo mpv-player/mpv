@@ -261,8 +261,13 @@ Playback Control
 ``--ab-loop-a=<time>``, ``--ab-loop-b=<time>``
     Set loop points. If playback passes the ``b`` timestamp, it will seek to
     the ``a`` timestamp. Seeking past the ``b`` point doesn't loop (this is
-    intentional). The loop-points can be adjusted at runtime with the
-    corresponding properties. See also ``ab_loop`` command.
+    intentional).
+
+    If both options are set to ``no``, looping is disabled. Otherwise, the
+    start/end of the file is used if one of the options is set to ``no``.
+
+    The loop-points can be adjusted at runtime with the corresponding
+    properties. See also ``ab-loop`` command.
 
 ``--ordered-chapters``, ``--no-ordered-chapters``
     Enabled by default.

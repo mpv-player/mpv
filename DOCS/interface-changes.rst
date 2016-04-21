@@ -20,8 +20,9 @@ Interface changes
 ::
 
  --- mpv 0.17.1 ---
-    - now ab-loops are active even if the "ab-loop-b" property is unset ("no"),
-      in which case the end of the file is used as B loop point
+    - now ab-loops are active even if one of the "ab-loop-a"/"-b" properties is
+      unset ("no"), in which case the start of the file is used if the A loop
+      point is unsert, and the end of the file for an unset B loop point
  --- mpv 0.17.0 ---
     - deprecate "track-list/N/audio-channels" property (use
       "track-list/N/demux-channel-count" instead)

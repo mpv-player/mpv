@@ -1081,9 +1081,8 @@ Property list
                 "default"           MPV_FORMAT_FLAG
 
 ``ab-loop-a``, ``ab-loop-b`` (RW)
-    Set/get A-B loop points. See corresponding options and ``ab-loop`` command.
-    The special value ``no`` on ``ab-loop-a`` disables looping, while setting
-    ``ab-loop-b`` to ``no`` loops when the end of the file is reached.
+    Set/get A-B loop points. See corresponding options and ``ab-loop`` command
+    for details.
 
 ``angle`` (RW)
     Current DVD angle.
