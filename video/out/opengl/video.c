@@ -2809,17 +2809,18 @@ void gl_video_uninit(struct gl_video *p)
 
 void gl_video_set_gl_state(struct gl_video *p)
 {
+    // This resets certain important state to defaults.
+    gl_video_unset_gl_state(p);
+}
+
+void gl_video_unset_gl_state(struct gl_video *p)
+{
     GL *gl = p->gl;
 
     gl->ActiveTexture(GL_TEXTURE0);
     if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH)
         gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
-}
-
-void gl_video_unset_gl_state(struct gl_video *p)
-{
-    /* nop */
 }
 
 void gl_video_reset(struct gl_video *p)
