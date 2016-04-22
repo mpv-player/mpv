@@ -370,7 +370,7 @@ void set_osd_bar_chapters(struct MPContext *mpctx, int type)
             MP_TARRAY_APPEND(mpctx, mpctx->osd_progbar.stops,
                         mpctx->osd_progbar.num_stops, opts->ab_loop[1] / len);
         }
-        if (mpctx->osd_progbar.stops == 0) {
+        if (mpctx->osd_progbar.num_stops == 0) {
             int num = get_chapter_count(mpctx);
             for (int n = 0; n < num; n++) {
                 double time = chapter_start_time(mpctx, n);
