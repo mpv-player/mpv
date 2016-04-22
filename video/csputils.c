@@ -580,8 +580,7 @@ double mp_get_csp_mul(enum mp_csp csp, int input_bits, int texture_bits)
 }
 
 /* Fill in the Y, U, V vectors of a yuv-to-rgb conversion matrix
- * based on the given luma weights of the R, G and B components (lr, lg, lb).
- * lr+lg+lb is assumed to equal 1.
+ * based on the given primaries of the RGB color space
  * This function is meant for colorspaces satisfying the following
  * conditions (which are true for common YUV colorspaces):
  * - The mapping from input [Y, U, V] to output [R, G, B] is linear.
@@ -596,12 +595,17 @@ double mp_get_csp_mul(enum mp_csp csp, int input_bits, int texture_bits)
  *   conversion function will cover the set R=[0...1],G=[0...1],B=[0...1]
  *   (the resulting matrix can be converted for other input/output ranges
  *   outside this function).
- * Under these conditions the given parameters lr, lg, lb uniquely
- * determine the mapping of Y, U, V to R, G, B.
+ * Under these conditions the given primaries for the color space
+ * uniquely determine the mapping of Y, U, V to R, G, B.
  */
-static void luma_coeffs(struct mp_cmat *mat, float lr, float lg, float lb)
+static void linear_yuv_coeffs(struct mp_cmat *mat, enum mp_csp_prim csp)
 {
+    // Luma (Y) coefficients are the Y column of the RGB->XYZ matrix
+    float xyz[3][3];
+    mp_get_rgb2xyz_matrix(mp_get_csp_primaries(csp), xyz);
+    float lr = xyz[1][0], lg = xyz[1][1], lb = xyz[1][2];
     assert(fabs(lr+lg+lb - 1) < 1e-6);
+
     *mat = (struct mp_cmat) {
         { {1, 0,                    2 * (1-lr)          },
           {1, -2 * (1-lb) * lb/lg, -2 * (1-lr) * lr/lg  },
@@ -621,10 +625,10 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
         levels_in = MP_CSP_LEVELS_TV;
 
     switch (colorspace) {
-    case MP_CSP_BT_601:     luma_coeffs(m, 0.299,  0.587,  0.114 ); break;
-    case MP_CSP_BT_709:     luma_coeffs(m, 0.2126, 0.7152, 0.0722); break;
-    case MP_CSP_SMPTE_240M: luma_coeffs(m, 0.2122, 0.7013, 0.0865); break;
-    case MP_CSP_BT_2020_NC: luma_coeffs(m, 0.2627, 0.6780, 0.0593); break;
+    case MP_CSP_SMPTE_240M: linear_yuv_coeffs(m, MP_CSP_PRIM_BT_601_525); break;
+    case MP_CSP_BT_601:     linear_yuv_coeffs(m, MP_CSP_PRIM_BT_470M);    break;
+    case MP_CSP_BT_709:     linear_yuv_coeffs(m, MP_CSP_PRIM_BT_709);     break;
+    case MP_CSP_BT_2020_NC: linear_yuv_coeffs(m, MP_CSP_PRIM_BT_2020);    break;
     case MP_CSP_BT_2020_C: {
         // Note: This outputs into the [-0.5,0.5] range for chroma information.
         // If this clips on any VO, a constant 0.5 coefficient can be added
