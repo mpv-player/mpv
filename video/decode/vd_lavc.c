@@ -284,17 +284,14 @@ static void uninit(struct dec_video *vd)
     talloc_free(vd->priv);
 }
 
-static bool force_fallback(struct dec_video *vd)
+static void force_fallback(struct dec_video *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
-    if (!ctx->hwdec)
-        return false;
 
     uninit_avctx(vd);
     int lev = ctx->hwdec_notified ? MSGL_WARN : MSGL_V;
     mp_msg(vd->log, lev, "Falling back to software decoding.\n");
     init_avctx(vd, ctx->decoder, NULL);
-    return true;
 }
 
 static void reinit(struct dec_video *vd)
@@ -332,7 +329,7 @@ static void reinit(struct dec_video *vd)
     }
 
     init_avctx(vd, decoder, hwdec);
-    if (!ctx->avctx)
+    if (!ctx->avctx && hwdec)
         force_fallback(vd);
 }
 
@@ -767,7 +764,8 @@ static struct mp_image *decode_with_fallback(struct dec_video *vd,
     decode(vd, packet, flags, &mpi);
     if (ctx->hwdec_failed) {
         // Failed hardware decoding? Try again in software.
-        if (force_fallback(vd) && ctx->avctx)
+        force_fallback(vd);
+        if (ctx->avctx)
             decode(vd, packet, flags, &mpi);
     }
 
@@ -805,8 +803,10 @@ static int control(struct dec_video *vd, int cmd, void *arg)
         return CONTROL_TRUE;
     }
     case VDCTRL_FORCE_HWDEC_FALLBACK:
-        if (force_fallback(vd))
+        if (ctx->hwdec) {
+            force_fallback(vd);
             return ctx->avctx ? CONTROL_OK : CONTROL_ERROR;
+        }
         return CONTROL_FALSE;
     case VDCTRL_REINIT:
         reinit(vd);
