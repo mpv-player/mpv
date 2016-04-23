@@ -504,7 +504,8 @@ static void handle_osd_redraw(struct MPContext *mpctx)
             return;
     }
     // Don't redraw immediately during a seek (makes it significantly slower).
-    if (mpctx->vo_chain && mp_time_sec() - mpctx->start_timestamp < 0.1) {
+    bool use_video = mpctx->vo_chain && !mpctx->vo_chain->is_coverart;
+    if (use_video && mp_time_sec() - mpctx->start_timestamp < 0.1) {
         mpctx->sleeptime = MPMIN(mpctx->sleeptime, 0.1);
         return;
     }
