@@ -1380,7 +1380,6 @@ void write_video(struct MPContext *mpctx)
 
     mpctx->video_pts = mpctx->next_frames[0]->pts;
     mpctx->last_vo_pts = mpctx->video_pts;
-    mpctx->playback_pts = mpctx->video_pts;
 
     shift_frames(mpctx);
 

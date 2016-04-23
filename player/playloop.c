@@ -958,6 +958,17 @@ void run_playloop(struct MPContext *mpctx)
     fill_audio_out_buffers(mpctx);
     write_video(mpctx);
 
+    if (mpctx->vo_chain && !mpctx->vo_chain->is_coverart &&
+        mpctx->video_status >= STATUS_PLAYING &&
+        mpctx->video_status < STATUS_EOF)
+    {
+        mpctx->playback_pts = mpctx->video_pts;
+    } else if (mpctx->audio_status >= STATUS_PLAYING &&
+               mpctx->audio_status < STATUS_EOF)
+    {
+        mpctx->playback_pts = playing_audio_pts(mpctx);
+    }
+
     if (mpctx->lavfi) {
         if (lavfi_process(mpctx->lavfi))
             mpctx->sleeptime = 0;
@@ -966,14 +977,6 @@ void run_playloop(struct MPContext *mpctx)
     }
 
     handle_playback_restart(mpctx);
-
-    // Use the audio timestamp if no video, or video is enabled, but has ended.
-    if (mpctx->video_status == STATUS_EOF &&
-        mpctx->audio_status >= STATUS_PLAYING &&
-        mpctx->audio_status < STATUS_EOF)
-    {
-        mpctx->playback_pts = playing_audio_pts(mpctx);
-    }
 
     handle_dummy_ticks(mpctx);
 
