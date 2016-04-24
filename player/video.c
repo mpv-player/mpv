@@ -685,7 +685,7 @@ static void handle_new_frame(struct MPContext *mpctx)
     double pts = mpctx->next_frames[0]->pts;
     if (mpctx->video_pts != MP_NOPTS_VALUE) {
         frame_time = pts - mpctx->video_pts;
-        double tolerance = 15;
+        double tolerance = mpctx->demuxer->ts_resets_possible ? 5 : 1e4;
         if (frame_time <= 0 || frame_time >= tolerance) {
             // Assume a discontinuity.
             MP_WARN(mpctx, "Invalid video timestamp: %f -> %f\n",
