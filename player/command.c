@@ -2581,6 +2581,7 @@ static int mp_property_video_frame_info(void *ctx, struct m_property *prop,
         {0}
     };
 
+    talloc_free(f);
     return m_property_read_sub(props, action, arg);
 }
 
