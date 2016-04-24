@@ -1130,6 +1130,10 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     drop_repeat = MPCLAMP(drop_repeat, -num_vsyncs, num_vsyncs * 10);
     num_vsyncs += drop_repeat;
 
+    // Always show the first frame.
+    if (mpctx->num_past_frames <= 1 && num_vsyncs < 1)
+        num_vsyncs = 1;
+
     // Estimate the video position, so we can calculate a good A/V difference
     // value below. This is used to estimate A/V drift.
     double time_left = vo_get_delay(vo);
