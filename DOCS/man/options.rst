@@ -1890,7 +1890,7 @@ Window
             Make the window width 70% of the screen size, keeping aspect ratio.
         ``1000``
             Set the window width to 1000 pixels, keeping aspect ratio.
-        ``70%:60%``
+        ``70%x60%``
             Make the window as large as possible, without being wider than 70%
             of the screen width, or higher than 60% of the screen height.
 
