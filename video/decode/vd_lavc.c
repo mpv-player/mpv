@@ -137,7 +137,6 @@ static const struct vd_lavc_hwdec mp_vd_lavc_rpi = {
 static const struct vd_lavc_hwdec mp_vd_lavc_mediacodec = {
     .type = HWDEC_MEDIACODEC,
     .lavc_suffix = "_mediacodec",
-    .image_format = IMGFMT_NV12,
 };
 
 static const struct vd_lavc_hwdec *const hwdec_list[] = {
@@ -464,8 +463,9 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
         goto error;
 
     if (ctx->hwdec) {
-        avctx->thread_count    = 1;
-        avctx->get_format      = get_format_hwdec;
+        avctx->thread_count = 1;
+        if (ctx->hwdec->image_format)
+            avctx->get_format = get_format_hwdec;
         if (ctx->hwdec->allocate_image)
             avctx->get_buffer2 = get_buffer2_hwdec;
         if (ctx->hwdec->init && ctx->hwdec->init(ctx) < 0)
@@ -620,31 +620,29 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
     ctx->hwdec_request_reinit |= ctx->hwdec_failed;
     ctx->hwdec_failed = false;
 
-    if (ctx->hwdec->image_format) {
-        for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
-            if (ctx->hwdec->image_format == pixfmt2imgfmt(fmt[i])) {
-                // There could be more reasons for a change, and it's possible
-                // that we miss some. (Might also depend on the hwaccel type.)
-                bool change =
-                    ctx->hwdec_w != avctx->coded_width ||
-                    ctx->hwdec_h != avctx->coded_height ||
-                    ctx->hwdec_fmt != ctx->hwdec->image_format ||
-                    ctx->hwdec_profile != avctx->profile ||
-                    ctx->hwdec_request_reinit;
-                ctx->hwdec_w = avctx->coded_width;
-                ctx->hwdec_h = avctx->coded_height;
-                ctx->hwdec_fmt = ctx->hwdec->image_format;
-                ctx->hwdec_profile = avctx->profile;
-                ctx->hwdec_request_reinit = false;
-                if (change && ctx->hwdec->init_decoder) {
-                    if (ctx->hwdec->init_decoder(ctx, ctx->hwdec_w, ctx->hwdec_h) < 0)
-                    {
-                        ctx->hwdec_fmt = 0;
-                        break;
-                    }
+    for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
+        if (ctx->hwdec->image_format == pixfmt2imgfmt(fmt[i])) {
+            // There could be more reasons for a change, and it's possible
+            // that we miss some. (Might also depend on the hwaccel type.)
+            bool change =
+                ctx->hwdec_w != avctx->coded_width ||
+                ctx->hwdec_h != avctx->coded_height ||
+                ctx->hwdec_fmt != ctx->hwdec->image_format ||
+                ctx->hwdec_profile != avctx->profile ||
+                ctx->hwdec_request_reinit;
+            ctx->hwdec_w = avctx->coded_width;
+            ctx->hwdec_h = avctx->coded_height;
+            ctx->hwdec_fmt = ctx->hwdec->image_format;
+            ctx->hwdec_profile = avctx->profile;
+            ctx->hwdec_request_reinit = false;
+            if (change && ctx->hwdec->init_decoder) {
+                if (ctx->hwdec->init_decoder(ctx, ctx->hwdec_w, ctx->hwdec_h) < 0)
+                {
+                    ctx->hwdec_fmt = 0;
+                    break;
                 }
-                return fmt[i];
             }
+            return fmt[i];
         }
     }
 
