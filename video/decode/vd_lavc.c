@@ -127,8 +127,18 @@ extern const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy;
 extern const struct vd_lavc_hwdec mp_vd_lavc_dxva2;
 extern const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy;
 extern const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy;
-extern const struct vd_lavc_hwdec mp_vd_lavc_rpi;
-extern const struct vd_lavc_hwdec mp_vd_lavc_mediacodec;
+
+static const struct vd_lavc_hwdec mp_vd_lavc_rpi = {
+    .type = HWDEC_RPI,
+    .lavc_suffix = "_mmal",
+    .image_format = IMGFMT_MMAL,
+};
+
+static const struct vd_lavc_hwdec mp_vd_lavc_mediacodec = {
+    .type = HWDEC_MEDIACODEC,
+    .lavc_suffix = "_mediacodec",
+    .image_format = IMGFMT_NV12,
+};
 
 static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #if HAVE_RPI
