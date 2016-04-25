@@ -268,8 +268,7 @@ static struct mp_image *create_ref(struct mp_vdpau_ctx *ctx, int index)
     struct surface_ref *ref = talloc_ptrtype(NULL, ref);
     *ref = (struct surface_ref){ctx, index};
     struct mp_image *res =
-        mp_image_new_custom_ref(&(struct mp_image){0}, ref,
-                                release_decoder_surface);
+        mp_image_new_custom_ref(NULL, ref, release_decoder_surface);
     if (res) {
         mp_image_setfmt(res, e->rgb ? IMGFMT_VDPAU_OUTPUT : IMGFMT_VDPAU);
         mp_image_set_size(res, e->w, e->h);

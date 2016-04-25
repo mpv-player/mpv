@@ -435,8 +435,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         }
         mmal_buffer_header_reset(buffer);
 
-        struct mp_image *new_ref = mp_image_new_custom_ref(&(struct mp_image){0},
-                                                           buffer,
+        struct mp_image *new_ref = mp_image_new_custom_ref(NULL, buffer,
                                                            free_mmal_buffer);
         if (!new_ref) {
             mmal_buffer_header_release(buffer);

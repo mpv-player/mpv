@@ -69,8 +69,8 @@ struct mp_image *d3d11va_new_ref(ID3D11VideoDecoderOutputView *view,
     ID3D11VideoDecoderOutputView_GetResource(
         surface->surface, (ID3D11Resource **)&surface->texture);
 
-    struct mp_image *mpi = mp_image_new_custom_ref(
-        &(struct mp_image){0}, surface, d3d11va_release_img);
+    struct mp_image *mpi =
+        mp_image_new_custom_ref(NULL, surface, d3d11va_release_img);
     if (!mpi)
         abort();
 

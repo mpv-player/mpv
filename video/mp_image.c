@@ -230,7 +230,7 @@ struct mp_image *mp_image_new_dummy_ref(struct mp_image *img)
 {
     struct mp_image *new = talloc_ptrtype(NULL, new);
     talloc_set_destructor(new, mp_image_destructor);
-    *new = *img;
+    *new = img ? *img : (struct mp_image){0};
     for (int p = 0; p < MP_MAX_PLANES; p++)
         new->bufs[p] = NULL;
     new->hwctx = NULL;

@@ -72,8 +72,8 @@ struct mp_image *dxva2_new_ref(IDirectXVideoDecoder *decoder,
     surface->decoder = decoder;
     IDirectXVideoDecoder_AddRef(surface->decoder);
 
-    struct mp_image *mpi = mp_image_new_custom_ref(&(struct mp_image){0},
-                                                   surface, dxva2_release_img);
+    struct mp_image *mpi =
+        mp_image_new_custom_ref(NULL, surface, dxva2_release_img);
     if (!mpi)
         abort();
 
