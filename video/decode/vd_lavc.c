@@ -637,7 +637,7 @@ static struct mp_image *read_output(struct dec_video *vd)
     if (ctx->hwdec && ctx->hwdec->process_image)
         res = ctx->hwdec->process_image(ctx, res);
 
-    return mp_img_swap_to_native(res);
+    return res ? mp_img_swap_to_native(res) : NULL;
 }
 
 static void decode(struct dec_video *vd, struct demux_packet *packet,
