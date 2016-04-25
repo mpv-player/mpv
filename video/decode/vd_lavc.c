@@ -233,6 +233,40 @@ int hwdec_get_max_refs(struct lavc_ctx *ctx)
     return 2;
 }
 
+// This is intended to return the name of a decoder for a given wrapper API.
+// Decoder wrappers are usually added to libavcodec with a specific suffix.
+// For example the mmal h264 decoder is named h264_mmal.
+// This API would e.g. return h264_mmal for
+// hwdec_find_decoder("h264", "_mmal").
+// Just concatenating the two names will not always work due to inconsistencies
+// (e.g. "mpeg2video" vs. "mpeg2").
+const char *hwdec_find_decoder(const char *codec, const char *suffix)
+{
+    enum AVCodecID codec_id = mp_codec_to_av_codec_id(codec);
+    if (codec_id == AV_CODEC_ID_NONE)
+        return NULL;
+    AVCodec *cur = NULL;
+    for (;;) {
+        cur = av_codec_next(cur);
+        if (!cur)
+            break;
+        if (cur->id == codec_id && av_codec_is_decoder(cur) &&
+            bstr_endswith0(bstr0(cur->name), suffix))
+            return cur->name;
+    }
+    return NULL;
+}
+
+// Parallel to hwdec_find_decoder(): return whether a hwdec can use the given
+// decoder. This can't be answered accurately; it works for wrapper decoders
+// only (like mmal), and for real hwaccels this will always return false.
+static bool hwdec_is_wrapper(struct vd_lavc_hwdec *hwdec, const char *decoder)
+{
+    if (!hwdec->lavc_suffix)
+        return false;
+    return bstr_endswith0(bstr0(decoder), hwdec->lavc_suffix);
+}
+
 void hwdec_request_api(struct mp_hwdec_info *info, const char *api_name)
 {
     if (info && info->load_api)
@@ -245,6 +279,10 @@ static int hwdec_probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
     int r = 0;
     if (hwdec->probe)
         r = hwdec->probe(hwdec, info, codec);
+    if (r >= 0) {
+        if (hwdec->lavc_suffix && !hwdec_find_decoder(codec, hwdec->lavc_suffix))
+            return HWDEC_ERR_NO_CODEC;
+    }
     return r;
 }
 
@@ -306,10 +344,29 @@ static void reinit(struct dec_video *vd)
 
     if (hwdec_codec_allowed(vd, codec)) {
         if (vd->opts->hwdec_api == HWDEC_AUTO) {
+            // If a specific decoder is forced, we should try a hwdec method
+            // that works with it, instead of simply failing later at runtime.
+            // This is good for avoiding trying "normal" hwaccels on wrapper
+            // decoders (like vaapi on a mmal decoder). Since libavcodec doesn't
+            // tell us which decoder supports which hwaccel methods without
+            // actually running it, do it by detecting such wrapper decoders.
+            // On the other hand, e.g. "--hwdec=rpi" should always force the
+            // wrapper decoder, so be careful not to break this case.
+            bool might_be_wrapper = false;
+            for (int n = 0; hwdec_list[n]; n++) {
+                struct vd_lavc_hwdec *other = (void *)hwdec_list[n];
+                if (hwdec_is_wrapper(other, decoder))
+                    might_be_wrapper = true;
+            }
             for (int n = 0; hwdec_list[n]; n++) {
                 hwdec = probe_hwdec(vd, true, hwdec_list[n]->type, codec);
-                if (hwdec)
+                if (hwdec) {
+                    if (might_be_wrapper && !hwdec_is_wrapper(hwdec, decoder)) {
+                        MP_VERBOSE(vd, "This hwaccel is not compatible.\n");
+                        continue;
+                    }
                     break;
+                }
             }
         } else if (vd->opts->hwdec_api != HWDEC_NONE) {
             hwdec = probe_hwdec(vd, false, vd->opts->hwdec_api, codec);
@@ -323,6 +380,8 @@ static void reinit(struct dec_video *vd)
     if (hwdec) {
         if (hwdec->get_codec)
             decoder = hwdec->get_codec(ctx, decoder);
+        if (hwdec->lavc_suffix)
+            decoder = hwdec_find_decoder(codec, hwdec->lavc_suffix);
         MP_VERBOSE(vd, "Trying hardware decoding.\n");
     } else {
         MP_VERBOSE(vd, "Using software decoding.\n");

@@ -69,6 +69,10 @@ struct vd_lavc_hwdec {
     void (*unlock)(struct lavc_ctx *ctx);
     // Optional; if a special hardware decoder is needed (instead of "hwaccel").
     const char *(*get_codec)(struct lavc_ctx *ctx, const char *codec);
+    // Suffix for libavcodec decoder. If non-NULL, get_codec() is overridden
+    // with hwdec_find_decoder.
+    // Intuitively, this will force the corresponding wrapper decoder.
+    const char *lavc_suffix;
 };
 
 enum {
@@ -88,5 +92,7 @@ const struct hwdec_profile_entry *hwdec_find_profile(
 bool hwdec_check_codec_support(const char *codec,
                                const struct hwdec_profile_entry *table);
 int hwdec_get_max_refs(struct lavc_ctx *ctx);
+
+const char *hwdec_find_decoder(const char *codec, const char *suffix);
 
 #endif
