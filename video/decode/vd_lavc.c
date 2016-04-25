@@ -458,7 +458,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
         avctx->get_format      = get_format_hwdec;
         if (ctx->hwdec->allocate_image)
             avctx->get_buffer2 = get_buffer2_hwdec;
-        if (ctx->hwdec->init(ctx) < 0)
+        if (ctx->hwdec->init && ctx->hwdec->init(ctx) < 0)
             goto error;
         ctx->max_delay_queue = ctx->hwdec->delay_queue;
     } else {
@@ -626,7 +626,7 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                 ctx->hwdec_fmt = ctx->hwdec->image_format;
                 ctx->hwdec_profile = avctx->profile;
                 ctx->hwdec_request_reinit = false;
-                if (change) {
+                if (change && ctx->hwdec->init_decoder) {
                     if (ctx->hwdec->init_decoder(ctx, ctx->hwdec_w, ctx->hwdec_h) < 0)
                     {
                         ctx->hwdec_fmt = 0;
