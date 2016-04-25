@@ -478,14 +478,8 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     avctx->flags |= lavc_param->bitexact ? CODEC_FLAG_BITEXACT : 0;
     avctx->flags2 |= lavc_param->fast ? CODEC_FLAG2_FAST : 0;
 
-    if (lavc_param->show_all) {
-#ifdef CODEC_FLAG2_SHOW_ALL
-        avctx->flags2 |= CODEC_FLAG2_SHOW_ALL; // ffmpeg only?
-#endif
-#ifdef CODEC_FLAG_OUTPUT_CORRUPT
-        avctx->flags |= CODEC_FLAG_OUTPUT_CORRUPT; // added with Libav 10
-#endif
-    }
+    if (lavc_param->show_all)
+        avctx->flags |= CODEC_FLAG_OUTPUT_CORRUPT;
 
     avctx->skip_loop_filter = lavc_param->skip_loop_filter;
     avctx->skip_idct = lavc_param->skip_idct;
