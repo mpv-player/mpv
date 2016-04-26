@@ -68,8 +68,8 @@ struct priv {
     // for RAM input
     MMAL_POOL_T *swpool;
 
-    pthread_mutex_t vsync_mutex;
-    pthread_cond_t vsync_cond;
+    pthread_mutex_t display_mutex;
+    pthread_cond_t display_cond;
     int64_t vsync_counter;
     bool reload_display;
 
@@ -363,14 +363,14 @@ static int set_geometry(struct vo *vo)
 static void wait_next_vsync(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    pthread_mutex_lock(&p->vsync_mutex);
+    pthread_mutex_lock(&p->display_mutex);
     struct timespec end = mp_rel_time_to_timespec(0.050);
     int64_t old = p->vsync_counter;
     while (old == p->vsync_counter && !p->reload_display) {
-        if (pthread_cond_timedwait(&p->vsync_cond, &p->vsync_mutex, &end))
+        if (pthread_cond_timedwait(&p->display_cond, &p->display_mutex, &end))
             break;
     }
-    pthread_mutex_unlock(&p->vsync_mutex);
+    pthread_mutex_unlock(&p->display_mutex);
 }
 
 static void flip_page(struct vo *vo)
@@ -632,10 +632,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
         *(struct mp_image **)data = take_screenshot(vo);
         return VO_TRUE;
     case VOCTRL_CHECK_EVENTS: {
-        pthread_mutex_lock(&p->vsync_mutex);
+        pthread_mutex_lock(&p->display_mutex);
         bool reload_required = p->reload_display;
         p->reload_display = false;
-        pthread_mutex_unlock(&p->vsync_mutex);
+        pthread_mutex_unlock(&p->display_mutex);
         if (reload_required)
             recreate_renderer(vo);
         return VO_TRUE;
@@ -653,10 +653,10 @@ static void tv_callback(void *callback_data, uint32_t reason, uint32_t param1,
 {
     struct vo *vo = callback_data;
     struct priv *p = vo->priv;
-    pthread_mutex_lock(&p->vsync_mutex);
+    pthread_mutex_lock(&p->display_mutex);
     p->reload_display = true;
-    pthread_cond_signal(&p->vsync_cond);
-    pthread_mutex_unlock(&p->vsync_mutex);
+    pthread_cond_signal(&p->display_cond);
+    pthread_mutex_unlock(&p->display_mutex);
     vo_wakeup(vo);
 }
 
@@ -664,10 +664,10 @@ static void vsync_callback(DISPMANX_UPDATE_HANDLE_T u, void *arg)
 {
     struct vo *vo = arg;
     struct priv *p = vo->priv;
-    pthread_mutex_lock(&p->vsync_mutex);
+    pthread_mutex_lock(&p->display_mutex);
     p->vsync_counter += 1;
-    pthread_cond_signal(&p->vsync_cond);
-    pthread_mutex_unlock(&p->vsync_mutex);
+    pthread_cond_signal(&p->display_cond);
+    pthread_mutex_unlock(&p->display_mutex);
 }
 
 static void destroy_dispmanx(struct vo *vo)
@@ -734,8 +734,8 @@ static void uninit(struct vo *vo)
 
     mmal_vc_deinit();
 
-    pthread_cond_destroy(&p->vsync_cond);
-    pthread_mutex_destroy(&p->vsync_mutex);
+    pthread_cond_destroy(&p->display_cond);
+    pthread_mutex_destroy(&p->display_mutex);
 }
 
 static int preinit(struct vo *vo)
@@ -755,8 +755,8 @@ static int preinit(struct vo *vo)
         return -1;
     }
 
-    pthread_mutex_init(&p->vsync_mutex, NULL);
-    pthread_cond_init(&p->vsync_cond, NULL);
+    pthread_mutex_init(&p->display_mutex, NULL);
+    pthread_cond_init(&p->display_cond, NULL);
 
     if (recreate_dispmanx(vo) < 0)
         goto fail;
