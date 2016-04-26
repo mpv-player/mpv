@@ -33,6 +33,7 @@
 #include "common/common.h"
 #include "common/msg.h"
 #include "options/m_config.h"
+#include "osdep/timer.h"
 #include "vo.h"
 #include "win_state.h"
 #include "video/mp_image.h"
@@ -363,9 +364,12 @@ static void wait_next_vsync(struct vo *vo)
 {
     struct priv *p = vo->priv;
     pthread_mutex_lock(&p->vsync_mutex);
+    struct timespec end = mp_rel_time_to_timespec(0.050);
     int64_t old = p->vsync_counter;
-    while (old == p->vsync_counter && !p->reload_display)
-        pthread_cond_wait(&p->vsync_cond, &p->vsync_mutex);
+    while (old == p->vsync_counter && !p->reload_display) {
+        if (pthread_cond_timedwait(&p->vsync_cond, &p->vsync_mutex, &end))
+            break;
+    }
     pthread_mutex_unlock(&p->vsync_mutex);
 }
 
