@@ -399,6 +399,7 @@ const m_option_t mp_opts[] = {
                ({"no", 0}, {"yes", 1}, {"immediate", 2})),
     OPT_FLAG("ontop", vo.ontop, M_OPT_FIXED),
     OPT_FLAG("border", vo.border, M_OPT_FIXED),
+    OPT_FLAG("fit-border", vo.fit_border, M_OPT_FIXED),
     OPT_FLAG("on-all-workspaces", vo.all_workspaces, M_OPT_FIXED),
 
     OPT_FLAG("window-dragging", allow_win_drag, CONF_GLOBAL),
@@ -708,6 +709,7 @@ const struct MPOpts mp_default_opts = {
         .keepaspect = 1,
         .keepaspect_window = 1,
         .border = 1,
+        .fit_border = 1,
         .WinID = -1,
         .window_scale = 1.0,
         .x11_bypass_compositor = 0,
