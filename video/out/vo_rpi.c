@@ -255,16 +255,15 @@ static int create_overlays(struct vo *vo)
     struct priv *p = vo->priv;
     destroy_overlays(vo);
 
-    if (vo->opts->fullscreen) {
-    // Use the whole screen.
-    VC_RECT_T dst = {.width = p->w, .height = p->h};
-    VC_RECT_T src = {.width = 1 << 16, .height = 1 << 16};
-    VC_DISPMANX_ALPHA_T alpha = {
-        .flags = DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS,
-        .opacity = 0xFF,
-    };
+    if (vo->opts->fullscreen && p->background) {
+        // Use the whole screen.
+        VC_RECT_T dst = {.width = p->w, .height = p->h};
+        VC_RECT_T src = {.width = 1 << 16, .height = 1 << 16};
+        VC_DISPMANX_ALPHA_T alpha = {
+            .flags = DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS,
+            .opacity = 0xFF,
+        };
 
-    if (p->background) {
         p->window = vc_dispmanx_element_add(p->update, p->display,
                                             p->background_layer,
                                             &dst, 0, &src,
@@ -274,7 +273,6 @@ static int create_overlays(struct vo *vo)
             MP_FATAL(vo, "Could not add DISPMANX element.\n");
             return -1;
         }
-    }
     }
 
     if (p->enable_osd) {
