@@ -1069,13 +1069,13 @@ static void reinit_window_state(struct vo_w32_state *w32)
     add_window_borders(w32->window, &r);
 
     if (!w32->current_fs &&
-        ((r.right - r.left) >= screen_w || (r.bottom - r.top) >= screen_h))
+        ((r.right - r.left) > screen_w || (r.bottom - r.top) > screen_h))
     {
         MP_VERBOSE(w32, "requested window size larger than the screen\n");
         // Use the aspect of the client area, not the full window size.
         // Basically, try to compute the maximum window size.
-        long n_w = screen_w - (r.right - cr.right) - (cr.left - r.left) - 1;
-        long n_h = screen_h - (r.bottom - cr.bottom) - (cr.top - r.top) - 1;
+        long n_w = screen_w - (r.right - cr.right) - (cr.left - r.left);
+        long n_h = screen_h - (r.bottom - cr.bottom) - (cr.top - r.top);
         // Letterbox
         double asp = (cr.right - cr.left) / (double)(cr.bottom - cr.top);
         double s_asp = n_w / (double)n_h;
