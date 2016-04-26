@@ -762,7 +762,9 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         MP_WARN(vd, "Error while decoding frame!\n");
         if (ctx->hwdec) {
             ctx->hwdec_fail_count += 1;
-            if (ctx->hwdec_fail_count >= opts->software_fallback)
+            // The FFmpeg VT hwaccel is buggy and can crash after 1 broken frame.
+            bool vt = ctx->hwdec && ctx->hwdec->type == HWDEC_VIDEOTOOLBOX;
+            if (ctx->hwdec_fail_count >= opts->software_fallback || vt)
                 ctx->hwdec_failed = true;
         }
         if (!ctx->hwdec_failed && packet)
