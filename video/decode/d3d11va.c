@@ -26,6 +26,7 @@
 #include "video/hwdec.h"
 
 #include "video/d3d11va.h"
+#include "video/d3d.h"
 #include "d3d.h"
 
 #define ADDITIONAL_SURFACES (4 + HWDEC_DELAY_QUEUE_COUNT)
@@ -449,8 +450,22 @@ static int d3d11va_init(struct lavc_ctx *s)
         p->sw_pool = talloc_steal(p, mp_image_pool_new(17));
     }
 
-    if (!create_device(s, FALSE))
+    if (s->hwdec_info && s->hwdec_info->hwctx && s->hwdec_info->hwctx->d3d_ctx)
+        p->device = s->hwdec_info->hwctx->d3d_ctx->d3d11_device;
+
+    if (p->device) {
+        ID3D11Device_AddRef(p->device);
+        ID3D11Device_GetImmediateContext(p->device, &p->device_ctx);
+        if (!p->device_ctx)
+            goto fail;
+        MP_VERBOSE(p, "Using VO-supplied device %p.\n", p->device);
+    } else if (s->hwdec->type == HWDEC_D3D11VA) {
+        MP_ERR(p, "No Direct3D device provided for native d3d11 decoding\n");
         goto fail;
+    } else {
+        if (!create_device(s, FALSE))
+            goto fail;
+    }
 
     hr = ID3D11DeviceContext_QueryInterface(p->device_ctx,
                                             &IID_ID3D11VideoContext,
@@ -487,8 +502,24 @@ static int d3d11va_probe(struct vd_lavc_hwdec *hwdec,
                          const char *codec)
 {
     hwdec_request_api(info, "d3d11va");
+    // d3d11va-copy can do without external context; dxva2 requires it.
+    if (hwdec->type != HWDEC_D3D11VA_COPY) {
+        if (!info || !info->hwctx || !info->hwctx->d3d_ctx ||
+            !info->hwctx->d3d_ctx->d3d11_device)
+            return HWDEC_ERR_NO_CTX;
+    }
     return d3d_probe_codec(codec);
 }
+
+const struct vd_lavc_hwdec mp_vd_lavc_d3d11va = {
+    .type           = HWDEC_D3D11VA,
+    .image_format   = IMGFMT_D3D11VA,
+    .probe          = d3d11va_probe,
+    .init           = d3d11va_init,
+    .uninit         = d3d11va_uninit,
+    .init_decoder   = d3d11va_init_decoder,
+    .allocate_image = d3d11va_allocate_image,
+};
 
 const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy = {
     .type           = HWDEC_D3D11VA_COPY,

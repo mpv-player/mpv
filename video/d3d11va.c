@@ -21,6 +21,7 @@
 struct d3d11va_surface {
     HMODULE d3d11_dll;
     ID3D11Texture2D              *texture;
+    int                          subindex;
     ID3D11VideoDecoderOutputView *surface;
 };
 
@@ -36,6 +37,14 @@ ID3D11Texture2D *d3d11_texture_in_mp_image(struct mp_image *mpi)
         return NULL;
     struct d3d11va_surface *surface = (void *)mpi->planes[0];
     return surface->texture;
+}
+
+int d3d11_subindex_in_mp_image(struct mp_image *mpi)
+{
+    if (!mpi || mpi->imgfmt != IMGFMT_D3D11VA)
+        return -1;
+    struct d3d11va_surface *surface = (void *)mpi->planes[0];
+    return surface->subindex;
 }
 
 static void d3d11va_release_img(void *arg)
@@ -68,6 +77,10 @@ struct mp_image *d3d11va_new_ref(ID3D11VideoDecoderOutputView *view,
     ID3D11VideoDecoderOutputView_AddRef(surface->surface);
     ID3D11VideoDecoderOutputView_GetResource(
         surface->surface, (ID3D11Resource **)&surface->texture);
+
+    D3D11_VIDEO_DECODER_OUTPUT_VIEW_DESC surface_desc;
+    ID3D11VideoDecoderOutputView_GetDesc(surface->surface, &surface_desc);
+    surface->subindex = surface_desc.Texture2D.ArraySlice;
 
     struct mp_image *mpi =
         mp_image_new_custom_ref(NULL, surface, d3d11va_release_img);

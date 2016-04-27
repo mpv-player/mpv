@@ -24,6 +24,7 @@ struct mp_image;
 
 ID3D11VideoDecoderOutputView *d3d11_surface_in_mp_image(struct mp_image *mpi);
 ID3D11Texture2D              *d3d11_texture_in_mp_image(struct mp_image *mpi);
+int                          d3d11_subindex_in_mp_image(struct mp_image *mpi);
 struct mp_image *d3d11va_new_ref(ID3D11VideoDecoderOutputView *view,
                                  int w, int h);
 

@@ -494,7 +494,8 @@ static int dxva2_probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
     // dxva2-copy can do without external context; dxva2 requires it.
     if (hwdec->type != HWDEC_DXVA2_COPY) {
         if (!info || !info->hwctx || !info->hwctx->d3d_ctx ||
-            info->hwctx->type == HWDEC_DXVA2_COPY)
+            info->hwctx->type == HWDEC_DXVA2_COPY ||
+            !info->hwctx->d3d_ctx->d3d9_device)
             return HWDEC_ERR_NO_CTX;
     }
     return d3d_probe_codec(codec);
