@@ -329,6 +329,17 @@ static int create_video_proc(struct gl_hwdec *hw, struct mp_image_params *params
                                                                  p->video_proc,
                                                                  0, FALSE);
 
+    if ((params->colorspace != MP_CSP_BT_601 &&
+         params->colorspace != MP_CSP_BT_709) ||
+        params->colorlevels != MP_CSP_LEVELS_TV)
+    {
+        MP_WARN(hw, "Unsupported video colorspace (%s/%s). Consider disabling "
+                "hardware decoding, or using --hwdec=d3d11va-copy to get "
+                "correct output.\n",
+                m_opt_choice_str(mp_csp_names, params->colorspace),
+                m_opt_choice_str(mp_csp_levels_names, params->colorlevels));
+    }
+
     D3D11_VIDEO_PROCESSOR_COLOR_SPACE csp = {
         .YCbCr_Matrix = params->colorspace != MP_CSP_BT_601,
     };
