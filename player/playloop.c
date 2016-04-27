@@ -141,7 +141,7 @@ void add_step_frame(struct MPContext *mpctx, int dir)
         mpctx->step_frames += 1;
         unpause_player(mpctx);
     } else if (dir < 0) {
-        if (!mpctx->hrseek_backstep || !mpctx->hrseek_active) {
+        if (!mpctx->hrseek_active) {
             queue_seek(mpctx, MPSEEK_BACKSTEP, 0, MPSEEK_VERY_EXACT, true);
             pause_player(mpctx);
         }
