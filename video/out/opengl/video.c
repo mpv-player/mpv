@@ -2542,6 +2542,8 @@ static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         bool ok = p->hwdec->driver->map_image(p->hwdec, vimg->mpi, imgtex) >= 0;
         for (int n = 0; n < p->plane_count; n++)
             vimg->planes[n].gl_texture = ok ? imgtex[n] : -1;
+        if (!ok)
+            MP_FATAL(p, "Mapping hardware decoded surface failed.\n");
         return;
     }
 
