@@ -7,17 +7,17 @@ struct mp_image_pool;
 
 // keep in sync with --hwdec option (see mp_hwdec_names)
 enum hwdec_type {
-    HWDEC_AUTO = -1,
     HWDEC_NONE = 0,
-    HWDEC_VDPAU = 1,
-    HWDEC_VIDEOTOOLBOX = 3,
-    HWDEC_VAAPI = 4,
-    HWDEC_VAAPI_COPY = 5,
-    HWDEC_DXVA2 = 6,
-    HWDEC_DXVA2_COPY = 7,
-    HWDEC_D3D11VA_COPY = 8,
-    HWDEC_RPI = 9,
-    HWDEC_MEDIACODEC = 10,
+    HWDEC_AUTO,
+    HWDEC_VDPAU,
+    HWDEC_VIDEOTOOLBOX,
+    HWDEC_VAAPI,
+    HWDEC_VAAPI_COPY,
+    HWDEC_DXVA2,
+    HWDEC_DXVA2_COPY,
+    HWDEC_D3D11VA_COPY,
+    HWDEC_RPI,
+    HWDEC_MEDIACODEC,
 };
 
 // hwdec_type names (options.c)
