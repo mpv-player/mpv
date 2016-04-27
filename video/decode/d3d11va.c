@@ -25,7 +25,6 @@
 #include "video/mp_image_pool.h"
 #include "video/hwdec.h"
 
-#include "video/d3d11va.h"
 #include "video/d3d.h"
 #include "d3d.h"
 
@@ -51,6 +50,66 @@ struct priv {
     struct mp_image_pool   *sw_pool;
 };
 
+struct d3d11va_surface {
+    HMODULE d3d11_dll;
+    ID3D11Texture2D              *texture;
+    int                          subindex;
+    ID3D11VideoDecoderOutputView *surface;
+};
+
+static void d3d11va_release_img(void *arg)
+{
+    struct d3d11va_surface *surface = arg;
+    if (surface->surface)
+        ID3D11VideoDecoderOutputView_Release(surface->surface);
+
+    if (surface->texture)
+        ID3D11Texture2D_Release(surface->texture);
+
+    if (surface->d3d11_dll)
+        FreeLibrary(surface->d3d11_dll);
+
+    talloc_free(surface);
+}
+
+static struct mp_image *d3d11va_new_ref(ID3D11VideoDecoderOutputView *view,
+                                        int w, int h)
+{
+    if (!view)
+        return NULL;
+    struct d3d11va_surface *surface = talloc_zero(NULL, struct d3d11va_surface);
+
+    surface->d3d11_dll = LoadLibrary(L"d3d11.dll");
+    if (!surface->d3d11_dll)
+        goto fail;
+
+    surface->surface = view;
+    ID3D11VideoDecoderOutputView_AddRef(surface->surface);
+    ID3D11VideoDecoderOutputView_GetResource(
+        surface->surface, (ID3D11Resource **)&surface->texture);
+
+    D3D11_VIDEO_DECODER_OUTPUT_VIEW_DESC surface_desc;
+    ID3D11VideoDecoderOutputView_GetDesc(surface->surface, &surface_desc);
+    surface->subindex = surface_desc.Texture2D.ArraySlice;
+
+    struct mp_image *mpi =
+        mp_image_new_custom_ref(NULL, surface, d3d11va_release_img);
+    if (!mpi)
+        abort();
+
+    mp_image_setfmt(mpi, IMGFMT_D3D11VA);
+    mp_image_set_size(mpi, w, h);
+    mpi->planes[0] = NULL;
+    mpi->planes[1] = (void *)surface->texture;
+    mpi->planes[2] = (void *)(intptr_t)surface->subindex;
+    mpi->planes[3] = (void *)surface->surface;
+
+    return mpi;
+fail:
+    d3d11va_release_img(surface);
+    return NULL;
+}
+
 static struct mp_image *d3d11va_allocate_image(struct lavc_ctx *s, int w, int h)
 {
     struct priv *p = s->hwdec_priv;
@@ -67,10 +126,14 @@ static struct mp_image *d3d11va_retrieve_image(struct lavc_ctx *s,
     HRESULT hr;
     struct priv *p = s->hwdec_priv;
     ID3D11Texture2D              *staging = p->decoder->staging;
-    ID3D11Texture2D              *texture = d3d11_texture_in_mp_image(img);
-    ID3D11VideoDecoderOutputView *surface = d3d11_surface_in_mp_image(img);
 
-    if (!texture || !surface) {
+    if (img->imgfmt != IMGFMT_D3D11VA)
+        return img;
+
+    ID3D11Texture2D *texture = (void *)img->planes[1];
+    int subindex = (intptr_t)img->planes[2];
+
+    if (!texture) {
         MP_ERR(p, "Failed to get Direct3D texture and surface from mp_image\n");
         return img;
     }
@@ -83,12 +146,10 @@ static struct mp_image *d3d11va_retrieve_image(struct lavc_ctx *s,
     }
 
     // copy to the staging texture
-    D3D11_VIDEO_DECODER_OUTPUT_VIEW_DESC surface_desc;
-    ID3D11VideoDecoderOutputView_GetDesc(surface, &surface_desc);
     ID3D11DeviceContext_CopySubresourceRegion(
         p->device_ctx,
         (ID3D11Resource *)staging, 0, 0, 0, 0,
-        (ID3D11Resource *)texture, surface_desc.Texture2D.ArraySlice, NULL);
+        (ID3D11Resource *)texture, subindex, NULL);
 
     struct mp_image *sw_img = mp_image_pool_get(p->sw_pool,
                                                 p->decoder->mpfmt_decoded,

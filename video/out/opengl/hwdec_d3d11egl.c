@@ -17,6 +17,8 @@
 
 #include <assert.h>
 #include <windows.h>
+#include <d3d11.h>
+
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
@@ -24,7 +26,6 @@
 #include "osdep/timer.h"
 #include "osdep/windows_utils.h"
 #include "hwdec.h"
-#include "video/d3d11va.h"
 #include "video/d3d.h"
 #include "video/hwdec.h"
 
@@ -352,8 +353,8 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     if (!p->gl_texture)
         return -1;
 
-    ID3D11Texture2D *d3d_tex = d3d11_texture_in_mp_image(hw_image);
-    int d3d_subindex = d3d11_subindex_in_mp_image(hw_image);
+    ID3D11Texture2D *d3d_tex = (void *)hw_image->planes[1];
+    int d3d_subindex = (intptr_t)hw_image->planes[2];
     if (!d3d_tex)
         return -1;
 
