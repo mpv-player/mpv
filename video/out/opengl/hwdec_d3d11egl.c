@@ -270,6 +270,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    eglBindTexImage(p->egl_display, p->egl_surface, EGL_BACK_BUFFER);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
     return 0;
@@ -357,7 +358,6 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
                      GLuint *out_textures)
 {
     struct priv *p = hw->priv;
-    GL *gl = hw->gl;
     HRESULT hr;
     ID3D11VideoProcessorInputView *in_view = NULL;
 
@@ -405,10 +405,6 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
         MP_ERR(hw, "VideoProcessorBlt failed.\n");
         return -1;
     }
-
-    gl->BindTexture(GL_TEXTURE_2D, p->gl_texture);
-    eglBindTexImage(p->egl_display, p->egl_surface, EGL_BACK_BUFFER);
-    gl->BindTexture(GL_TEXTURE_2D, 0);
 
     out_textures[0] = p->gl_texture;
     return 0;
