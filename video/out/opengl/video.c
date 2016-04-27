@@ -261,10 +261,10 @@ static const struct fmt_entry mp_to_gl_formats[] = {
 };
 
 static const struct fmt_entry gl_byte_formats[] = {
-    {0, GL_RED,     GL_RED,     GL_UNSIGNED_BYTE},      // 1 x 8
-    {0, GL_RG,      GL_RG,      GL_UNSIGNED_BYTE},      // 2 x 8
-    {0, GL_RGB,     GL_RGB,     GL_UNSIGNED_BYTE},      // 3 x 8
-    {0, GL_RGBA,    GL_RGBA,    GL_UNSIGNED_BYTE},      // 4 x 8
+    {0, GL_R8,      GL_RED,     GL_UNSIGNED_BYTE},      // 1 x 8
+    {0, GL_RG8,     GL_RG,      GL_UNSIGNED_BYTE},      // 2 x 8
+    {0, GL_RGB8,    GL_RGB,     GL_UNSIGNED_BYTE},      // 3 x 8
+    {0, GL_RGBA8,   GL_RGBA,    GL_UNSIGNED_BYTE},      // 4 x 8
     {0, GL_R16,     GL_RED,     GL_UNSIGNED_SHORT},     // 1 x 16
     {0, GL_RG16,    GL_RG,      GL_UNSIGNED_SHORT},     // 2 x 16
     {0, GL_RGB16,   GL_RGB,     GL_UNSIGNED_SHORT},     // 3 x 16
@@ -307,10 +307,10 @@ static const struct fmt_entry gl_byte_formats_gles2[] = {
 };
 
 static const struct fmt_entry gl_byte_formats_legacy[] = {
-    {0, GL_LUMINANCE,           GL_LUMINANCE,       GL_UNSIGNED_BYTE}, // 1 x 8
-    {0, GL_LUMINANCE_ALPHA,     GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE}, // 2 x 8
-    {0, GL_RGB,                 GL_RGB,             GL_UNSIGNED_BYTE}, // 3 x 8
-    {0, GL_RGBA,                GL_RGBA,            GL_UNSIGNED_BYTE}, // 4 x 8
+    {0, GL_LUMINANCE8,          GL_LUMINANCE,       GL_UNSIGNED_BYTE}, // 1 x 8
+    {0, GL_LUMINANCE8_ALPHA8,   GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE}, // 2 x 8
+    {0, GL_RGB8,                GL_RGB,             GL_UNSIGNED_BYTE}, // 3 x 8
+    {0, GL_RGBA8,               GL_RGBA,            GL_UNSIGNED_BYTE}, // 4 x 8
     {0, GL_LUMINANCE16,         GL_LUMINANCE,       GL_UNSIGNED_SHORT},// 1 x 16
     {0, GL_LUMINANCE16_ALPHA16, GL_LUMINANCE_ALPHA, GL_UNSIGNED_SHORT},// 2 x 16
     {0, GL_RGB16,               GL_RGB,             GL_UNSIGNED_SHORT},// 3 x 16
