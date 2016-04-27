@@ -226,6 +226,12 @@ static const struct gl_functions gl_functions[] = {
         .extension = "GL_ARB_texture_rg",
         .provides = MPGL_CAP_TEX_RG,
     },
+    // GL_R16 etc.
+    {
+        .ver_core = 300,
+        .extension = "GL_EXT_texture_norm16",
+        .provides = MPGL_CAP_EXT16,
+    },
     {
         .ver_core = 320,
         .extension = "GL_ARB_sync",

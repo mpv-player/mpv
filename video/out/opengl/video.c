@@ -260,6 +260,7 @@ static const struct fmt_entry mp_to_gl_formats[] = {
     {0},
 };
 
+// These are used for desktop GL 3+, and GLES 3+ with GL_EXT_texture_norm16.
 static const struct fmt_entry gl_byte_formats[] = {
     {0, GL_R8,      GL_RED,     GL_UNSIGNED_BYTE},      // 1 x 8
     {0, GL_RG8,     GL_RG,      GL_UNSIGNED_BYTE},      // 2 x 8
@@ -551,10 +552,8 @@ static const struct fmt_entry *find_tex_format(GL *gl, int bytes_per_comp,
     assert(bytes_per_comp == 1 || bytes_per_comp == 2);
     assert(n_channels >= 1 && n_channels <= 4);
     const struct fmt_entry *fmts = gl_byte_formats;
-    if (gl->es >= 300) {
-        fmts = gl_byte_formats_gles3;
-    } else if (gl->es) {
-        fmts = gl_byte_formats_gles2;
+    if (gl->es && !(gl->mpgl_caps & MPGL_CAP_EXT16)) {
+        fmts = gl->es >= 300 ? gl_byte_formats_gles3 : gl_byte_formats_gles2;
     } else if (!(gl->mpgl_caps & MPGL_CAP_TEX_RG)) {
         fmts = gl_byte_formats_legacy;
     }
@@ -1959,7 +1958,7 @@ static void pass_dither(struct gl_video *p)
             const struct fmt_entry *fmt = find_tex_format(gl, 2, 1);
             tex_size = size;
             // Prefer R16 texture since they provide higher precision.
-            if (fmt->internal_format) {
+            if (fmt->internal_format && !gl->es) {
                 tex_iformat = fmt->internal_format;
                 tex_format = fmt->format;
             } else {
@@ -2637,7 +2636,7 @@ static void check_gl_features(struct gl_video *p)
     if (have_fbo) {
         if (!p->opts.fbo_format) {
             p->opts.fbo_format = GL_RGBA16;
-            if (gl->es)
+            if (gl->es && !(gl->mpgl_caps & MPGL_CAP_EXT16))
                 p->opts.fbo_format = have_float_tex ? GL_RGBA16F : GL_RGB10_A2;
         }
         have_fbo = test_fbo(p);

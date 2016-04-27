@@ -61,6 +61,7 @@ enum {
     MPGL_CAP_3D_TEX             = (1 << 15),
     MPGL_CAP_DEBUG              = (1 << 16),
     MPGL_CAP_DXINTEROP          = (1 << 17),    // WGL_NV_DX_interop
+    MPGL_CAP_EXT16              = (1 << 18),    // GL_EXT_texture_norm16
     MPGL_CAP_SW                 = (1 << 30),    // indirect or sw renderer
 };
 
