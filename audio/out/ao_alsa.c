@@ -58,6 +58,8 @@ struct priv {
     snd_pcm_uframes_t buffersize;
     snd_pcm_uframes_t outburst;
 
+    snd_output_t *output;
+
     char *cfg_device;
     char *cfg_mixer_device;
     char *cfg_mixer_name;
@@ -477,6 +479,22 @@ static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels
 
 #endif /* else HAVE_CHMAP_API */
 
+static void dump_hw_params(struct ao *ao, int msglevel, const char *msg,
+                           snd_pcm_hw_params_t *hw_params)
+{
+    struct priv *p = ao->priv;
+    int err;
+
+    err = snd_pcm_hw_params_dump(hw_params, p->output);
+    CHECK_ALSA_WARN("Dump hwparams error");
+
+    char *tmp = NULL;
+    size_t tmp_s = snd_output_buffer_string(p->output, &tmp);
+    if (tmp)
+        mp_msg(ao->log, msglevel, "%s---\n%.*s---\n", msg, (int)tmp_s, tmp);
+    snd_output_flush(p->output);
+}
+
 static int map_iec958_srate(int srate)
 {
     switch (srate) {
@@ -563,6 +581,10 @@ static void uninit(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
+    if (p->output)
+        snd_output_close(p->output);
+    p->output = NULL;
+
     if (p->alsa) {
         int err;
 
@@ -577,7 +599,12 @@ alsa_error: ;
 static int init_device(struct ao *ao)
 {
     struct priv *p = ao->priv;
+    char *tmp;
+    size_t tmp_s;
     int err;
+
+    err = snd_output_buffer_open(&p->output);
+    CHECK_ALSA_ERROR("Unable to create output buffer");
 
     const char *device = "default";
     if (ao->device)
@@ -588,6 +615,13 @@ static int init_device(struct ao *ao)
     err = try_open_device(ao, device);
     CHECK_ALSA_ERROR("Playback open error");
 
+    err = snd_pcm_dump(p->alsa, p->output);
+    CHECK_ALSA_WARN("Dump PCM error");
+    tmp_s = snd_output_buffer_string(p->output, &tmp);
+    if (tmp)
+        MP_DBG(ao, "PCM setup:\n---\n%.*s---\n", (int)tmp_s, tmp);
+    snd_output_flush(p->output);
+
     err = snd_pcm_nonblock(p->alsa, 0);
     CHECK_ALSA_WARN("Unable to set blocking mode");
 
@@ -597,12 +631,15 @@ static int init_device(struct ao *ao)
     err = snd_pcm_hw_params_any(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to get initial parameters");
 
+    dump_hw_params(ao, MSGL_DEBUG, "Start HW params:\n", alsa_hwparams);
+
     // Some ALSA drivers have broken delay reporting, so disable the ALSA
     // resampling plugin by default.
     if (!p->cfg_resample) {
         err = snd_pcm_hw_params_set_rate_resample(p->alsa, alsa_hwparams, 0);
         CHECK_ALSA_ERROR("Unable to disable resampling");
     }
+    dump_hw_params(ao, MSGL_DEBUG, "HW params after rate:\n", alsa_hwparams);
 
     snd_pcm_access_t access = af_fmt_is_planar(ao->format)
                                     ? SND_PCM_ACCESS_RW_NONINTERLEAVED
@@ -614,6 +651,7 @@ static int init_device(struct ao *ao)
         err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
     }
     CHECK_ALSA_ERROR("Unable to set access type");
+    dump_hw_params(ao, MSGL_DEBUG, "HW params after access:\n", alsa_hwparams);
 
     bool found_format = false;
     int try_formats[AF_FORMAT_COUNT];
@@ -637,6 +675,7 @@ static int init_device(struct ao *ao)
 
     err = snd_pcm_hw_params_set_format(p->alsa, alsa_hwparams, p->alsa_fmt);
     CHECK_ALSA_ERROR("Unable to set format");
+    dump_hw_params(ao, MSGL_DEBUG, "HW params after format:\n", alsa_hwparams);
 
     struct mp_chmap dev_chmap = ao->channels;
     if (af_fmt_is_spdif(ao->format) || p->cfg_ignore_chmap) {
@@ -656,6 +695,7 @@ static int init_device(struct ao *ao)
     err = snd_pcm_hw_params_set_channels_near
             (p->alsa, alsa_hwparams, &num_channels);
     CHECK_ALSA_ERROR("Unable to set channels");
+    dump_hw_params(ao, MSGL_DEBUG, "HW params after channels:\n", alsa_hwparams);
 
     if (num_channels > MP_NUM_CHANNELS) {
         MP_FATAL(ao, "Too many audio channels (%d).\n", num_channels);
@@ -665,6 +705,7 @@ static int init_device(struct ao *ao)
     err = snd_pcm_hw_params_set_rate_near
             (p->alsa, alsa_hwparams, &ao->samplerate, NULL);
     CHECK_ALSA_ERROR("Unable to set samplerate-2");
+    dump_hw_params(ao, MSGL_DEBUG, "HW params after rate-2:\n", alsa_hwparams);
 
     snd_pcm_hw_params_t *hwparams_backup;
     snd_pcm_hw_params_alloca(&hwparams_backup);
@@ -681,6 +722,8 @@ static int init_device(struct ao *ao)
     }
     if (err < 0)
         snd_pcm_hw_params_copy(alsa_hwparams, hwparams_backup);
+
+    dump_hw_params(ao, MSGL_V, "Final HW params:\n", alsa_hwparams);
 
     /* finally install hardware parameters */
     err = snd_pcm_hw_params(p->alsa, alsa_hwparams);
