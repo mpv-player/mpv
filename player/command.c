@@ -3220,11 +3220,8 @@ static int mp_property_ab_loop(void *ctx, struct m_property *prop,
     int r = mp_property_generic_option(mpctx, prop, action, arg);
     if (r > 0 && action == M_PROPERTY_SET) {
         if (strcmp(prop->name, "ab-loop-b") == 0) {
-            double now = mpctx->playback_pts;
-            if (now != MP_NOPTS_VALUE && opts->ab_loop[0] != MP_NOPTS_VALUE &&
-                opts->ab_loop[1] != MP_NOPTS_VALUE && now >= opts->ab_loop[1])
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->ab_loop[0],
-                           MPSEEK_EXACT, false);
+            struct command_ctx *cctx = mpctx->command_ctx;
+            cctx->prev_pts = opts->ab_loop[0];
         }
         // Update if visible
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
@@ -5244,6 +5241,9 @@ void handle_ab_loop(struct MPContext *mpctx)
 {
     struct command_ctx *ctx = mpctx->command_ctx;
     struct MPOpts *opts = mpctx->opts;
+
+    if (opts->pause)
+        return;
 
     double now = mpctx->restart_complete ? mpctx->playback_pts : MP_NOPTS_VALUE;
     if (now != MP_NOPTS_VALUE && (opts->ab_loop[0] != MP_NOPTS_VALUE ||
