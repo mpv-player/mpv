@@ -360,7 +360,7 @@
     if ([[pboard types] containsObject:NSURLPboardType]) {
         NSArray *pbitems = [pboard readObjectsForClasses:@[[NSURL class]]
                             options:@{}];
-        NSMutableArray* ar = [[NSMutableArray alloc] init];
+        NSMutableArray* ar = [[[NSMutableArray alloc] init] autorelease];
         for (NSURL* url in pbitems) {
             [ar addObject:[url absoluteString]];
         }
