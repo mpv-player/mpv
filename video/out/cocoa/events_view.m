@@ -362,7 +362,7 @@
                             options:@{}];
         NSMutableArray* ar = [[[NSMutableArray alloc] init] autorelease];
         for (NSURL* url in pbitems) {
-            [ar addObject:[url absoluteString]];
+            [ar addObject:[url path]];
         }
         [self.adapter handleFilesArray:ar];
         return YES;
