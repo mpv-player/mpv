@@ -251,14 +251,14 @@ static int d3d11va_init_decoder(struct lavc_ctx *s, int w, int h)
         d3d_select_decoder_mode(s, device_guids, n_guids,
                                 d3d11_formats, MP_ARRAY_SIZE(d3d11_formats),
                                 d3d11_format_supported);
-    if (fmt.mpfmt_decoded == IMGFMT_NONE) {
+    if (!fmt.format) {
         MP_ERR(p, "Failed to find a suitable decoder\n");
         goto done;
     }
 
     struct d3d11va_decoder *decoder = talloc_zero(tmp, struct d3d11va_decoder);
     talloc_set_destructor(decoder, d3d11va_destroy_decoder);
-    decoder->mpfmt_decoded = fmt.mpfmt_decoded;
+    decoder->mpfmt_decoded = fmt.format->mpfmt;
 
     int n_surfaces = hwdec_get_max_refs(s) + ADDITIONAL_SURFACES;
     int w_align = w, h_align = h;
@@ -269,7 +269,7 @@ static int d3d11va_init_decoder(struct lavc_ctx *s, int w, int h)
         .Width            = w_align,
         .Height           = h_align,
         .MipLevels        = 1,
-        .Format           = fmt.dxfmt_decoded,
+        .Format           = fmt.format->dxfmt,
         .SampleDesc.Count = 1,
         .MiscFlags        = 0,
         .ArraySize        = n_surfaces,
@@ -336,7 +336,7 @@ static int d3d11va_init_decoder(struct lavc_ctx *s, int w, int h)
         .Guid         = *fmt.guid,
         .SampleWidth  = w,
         .SampleHeight = h,
-        .OutputFormat = fmt.dxfmt_decoded,
+        .OutputFormat = fmt.format->dxfmt,
     };
     UINT n_cfg;
     hr = ID3D11VideoDevice_GetVideoDecoderConfigCount(p->video_dev,

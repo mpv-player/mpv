@@ -33,8 +33,7 @@ struct d3d_decoded_format {
 
 struct d3d_decoder_fmt {
     const GUID *guid;
-    int   mpfmt_decoded;
-    DWORD dxfmt_decoded; // D3DFORMAT or DXGI_FORMAT
+    const struct d3d_decoded_format *format;
 };
 
 int d3d_probe_codec(const char *codec);

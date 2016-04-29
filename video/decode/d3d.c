@@ -137,9 +137,8 @@ struct d3d_decoder_fmt d3d_select_decoder_mode(
                         const struct d3d_decoded_format *fmt))
 {
     struct d3d_decoder_fmt fmt = {
-        .guid          = &GUID_NULL,
-        .mpfmt_decoded = IMGFMT_NONE,
-        .dxfmt_decoded = 0,
+        .guid   = &GUID_NULL,
+        .format = NULL,
     };
 
     // this has the right bit-depth, but is unfortunately not the native format
@@ -168,9 +167,8 @@ struct d3d_decoder_fmt d3d_select_decoder_mode(
                         MP_VERBOSE(s, "%d\n", (int)format->dxfmt);
                     }
 
-                    fmt.guid          = mode->guid;
-                    fmt.mpfmt_decoded = format->mpfmt;
-                    fmt.dxfmt_decoded = format->dxfmt;
+                    fmt.guid   = mode->guid;
+                    fmt.format = format;
                     return fmt;
                 }
             }

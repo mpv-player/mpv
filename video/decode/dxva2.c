@@ -197,12 +197,12 @@ static int dxva2_init_decoder(struct lavc_ctx *s, int w, int h)
                                 d3d9_formats, MP_ARRAY_SIZE(d3d9_formats),
                                 dxva2_format_supported);
     CoTaskMemFree(device_guids);
-    if (fmt.mpfmt_decoded == IMGFMT_NONE) {
+    if (!fmt.format) {
         MP_ERR(p, "Failed to find a suitable decoder\n");
         goto done;
     }
 
-    p->mpfmt_decoded = fmt.mpfmt_decoded;
+    p->mpfmt_decoded = fmt.format->mpfmt;
     struct mp_image_pool *decoder_pool =
         talloc_steal(tmp, mp_image_pool_new(n_surfaces));
     DXVA2_ConfigPictureDecode *decoder_config =
@@ -213,7 +213,7 @@ static int dxva2_init_decoder(struct lavc_ctx *s, int w, int h)
     DXVA2_VideoDesc video_desc ={
         .SampleWidth  = w,
         .SampleHeight = h,
-        .Format       = fmt.dxfmt_decoded,
+        .Format       = fmt.format->dxfmt,
     };
     UINT                     n_configs  = 0;
     DXVA2_ConfigPictureDecode *configs = NULL;
@@ -246,7 +246,7 @@ static int dxva2_init_decoder(struct lavc_ctx *s, int w, int h)
     hr = IDirectXVideoDecoderService_CreateSurface(
         p->decoder_service,
         w_align, h_align,
-        n_surfaces - 1, fmt.dxfmt_decoded, D3DPOOL_DEFAULT, 0,
+        n_surfaces - 1, fmt.format->dxfmt, D3DPOOL_DEFAULT, 0,
         DXVA2_VideoDecoderRenderTarget, surfaces, NULL);
     if (FAILED(hr)) {
         MP_ERR(p, "Failed to create %d video surfaces: %s\n",
