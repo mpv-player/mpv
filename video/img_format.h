@@ -157,6 +157,9 @@ enum mp_imgfmt {
     IMGFMT_NV12,
     IMGFMT_NV21,
 
+    // Like IMGFMT_NV12, but with 16 bits per component
+    IMGFMT_P010,
+
     // RGB/BGR Formats
 
     // Byte accessed (low address to high address)

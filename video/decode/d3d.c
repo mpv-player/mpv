@@ -146,8 +146,7 @@ struct d3d_decoder_fmt d3d_select_decoder_mode(
         return fmt;
 
     int depth = IMGFMT_RGB_DEPTH(sw_img_fmt);
-    int p010  = mp_imgfmt_find(1, 1, 2, 10, MP_IMGFLAG_YUV_NV);
-    int mpfmt_decoded = depth <= 8 ? IMGFMT_NV12 : p010;
+    int mpfmt_decoded = depth <= 8 ? IMGFMT_NV12 : IMGFMT_P010;
 
     for (int i = 0; i < MP_ARRAY_SIZE(d3dva_modes); i++) {
         const struct d3dva_mode *mode = &d3dva_modes[i];
