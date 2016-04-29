@@ -108,15 +108,10 @@ static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
     return sw_img;
 }
 
-struct d3d9_format {
-    D3DFORMAT format;
-    int       depth;
-};
-
-static const struct d3d9_format d3d9_formats[] = {
-    {MKTAG('N','V','1','2'),  8},
-    {MKTAG('P','0','1','0'), 10},
-    {MKTAG('P','0','1','6'), 16},
+static const struct d3d_decoded_format d3d9_formats[] = {
+    {MKTAG('N','V','1','2'), "NV12", 8,  IMGFMT_NV12},
+    {MKTAG('P','0','1','0'), "P010", 10, IMGFMT_P010},
+    {MKTAG('P','0','1','6'), "P016", 16, IMGFMT_P010},
 };
 
 static void dump_decoder_info(struct lavc_ctx *s,
@@ -148,9 +143,10 @@ static void dump_decoder_info(struct lavc_ctx *s,
     }
 }
 
-static DWORD get_dxfmt_cb(struct lavc_ctx *s, const GUID *guid, int depth)
+static bool dxva2_format_supported(struct lavc_ctx *s, const GUID *guid,
+                                   const struct d3d_decoded_format *format)
 {
-    DWORD ret = 0;
+    bool ret = false;
     struct priv *p = s->hwdec_priv;
     D3DFORMAT *formats = NULL;
     UINT     n_formats = 0;
@@ -162,22 +158,12 @@ static DWORD get_dxfmt_cb(struct lavc_ctx *s, const GUID *guid, int depth)
         return 0;
     }
 
-    for (int i = 0; i < MP_ARRAY_SIZE(d3d9_formats); i++) {
-        const struct d3d9_format *d3d9_fmt = &d3d9_formats[i];
-        if (d3d9_fmt->depth < depth)
-            continue;
-
-        for (UINT j = 0; j < n_formats; j++) {
-            if (formats[i] == d3d9_fmt->format) {
-                ret = formats[i];
-                MP_VERBOSE(p, "Selecting %s %s\n",
-                           d3d_decoder_guid_to_desc(guid),
-                           mp_tag_str(ret));
-                goto done;
-            }
-        }
+    for (int i = 0; i < n_formats; i++) {
+        ret = formats[i] == format->dxfmt;
+        if (ret)
+            break;
     }
-done:
+
     CoTaskMemFree(formats);
     return ret;
 }
@@ -207,7 +193,9 @@ static int dxva2_init_decoder(struct lavc_ctx *s, int w, int h)
     dump_decoder_info(s, device_guids, n_guids);
 
     struct d3d_decoder_fmt fmt =
-        d3d_select_decoder_mode(s, device_guids, n_guids, get_dxfmt_cb);
+        d3d_select_decoder_mode(s, device_guids, n_guids,
+                                d3d9_formats, MP_ARRAY_SIZE(d3d9_formats),
+                                dxva2_format_supported);
     CoTaskMemFree(device_guids);
     if (fmt.mpfmt_decoded == IMGFMT_NONE) {
         MP_ERR(p, "Failed to find a suitable decoder\n");

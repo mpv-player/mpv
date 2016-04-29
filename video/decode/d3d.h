@@ -24,6 +24,13 @@
 struct mp_image;
 struct lavc_ctx;
 
+struct d3d_decoded_format {
+    DWORD       dxfmt;  // D3DFORMAT or DXGI_FORMAT
+    const char *name;   // informational string repr. of dxfmt_decoded
+    int         depth;  // significant bits (not full size)
+    int         mpfmt;  // IMGFMT_ with compatible memory layout and semantics
+};
+
 struct d3d_decoder_fmt {
     const GUID *guid;
     int   mpfmt_decoded;
@@ -31,9 +38,12 @@ struct d3d_decoder_fmt {
 };
 
 int d3d_probe_codec(const char *codec);
+
 struct d3d_decoder_fmt d3d_select_decoder_mode(
     struct lavc_ctx *s, const GUID *device_guids, UINT n_guids,
-    DWORD (*get_dxfmt_cb)(struct lavc_ctx *s, const GUID *guid, int depth));
+    const struct d3d_decoded_format *formats, int n_formats,
+    bool (*test_fmt_cb)(struct lavc_ctx *s, const GUID *guid,
+                        const struct d3d_decoded_format *fmt));
 
 char *d3d_decoder_guid_to_desc_buf(char *buf, size_t buf_size,
                                    const GUID *mode_guid);

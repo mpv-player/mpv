@@ -132,7 +132,9 @@ static bool mode_supported(const struct d3dva_mode *mode,
 
 struct d3d_decoder_fmt d3d_select_decoder_mode(
     struct lavc_ctx *s, const GUID *device_guids, UINT n_guids,
-    DWORD (*get_dxfmt_cb)(struct lavc_ctx *s, const GUID *guid, int depth))
+    const struct d3d_decoded_format *formats, int n_formats,
+    bool (*test_fmt_cb)(struct lavc_ctx *s, const GUID *guid,
+                        const struct d3d_decoded_format *fmt))
 {
     struct d3d_decoder_fmt fmt = {
         .guid          = &GUID_NULL,
@@ -146,7 +148,6 @@ struct d3d_decoder_fmt d3d_select_decoder_mode(
         return fmt;
 
     int depth = IMGFMT_RGB_DEPTH(sw_img_fmt);
-    int mpfmt_decoded = depth <= 8 ? IMGFMT_NV12 : IMGFMT_P010;
 
     for (int i = 0; i < MP_ARRAY_SIZE(d3dva_modes); i++) {
         const struct d3dva_mode *mode = &d3dva_modes[i];
@@ -154,12 +155,24 @@ struct d3d_decoder_fmt d3d_select_decoder_mode(
             profile_compatible(mode, s->avctx->profile) &&
             mode_supported(mode, device_guids, n_guids)) {
 
-            DWORD dxfmt_decoded = get_dxfmt_cb(s, mode->guid, depth);
-            if (dxfmt_decoded) {
-                fmt.guid          = mode->guid;
-                fmt.mpfmt_decoded = mpfmt_decoded;
-                fmt.dxfmt_decoded = dxfmt_decoded;
-                return fmt;
+            for (int n = 0; n < n_formats; n++) {
+                const struct d3d_decoded_format *format = &formats[n];
+
+                if (depth <= format->depth && test_fmt_cb(s, mode->guid, format))
+                {
+                    MP_VERBOSE(s, "Selecting %s ",
+                               d3d_decoder_guid_to_desc(mode->guid));
+                    if (format->dxfmt >= (1 << 16)) {
+                        MP_VERBOSE(s, "%s\n", mp_tag_str(format->dxfmt));
+                    } else {
+                        MP_VERBOSE(s, "%d\n", (int)format->dxfmt);
+                    }
+
+                    fmt.guid          = mode->guid;
+                    fmt.mpfmt_decoded = format->mpfmt;
+                    fmt.dxfmt_decoded = format->dxfmt;
+                    return fmt;
+                }
             }
         }
     }

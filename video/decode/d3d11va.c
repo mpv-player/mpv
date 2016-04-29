@@ -179,27 +179,21 @@ static struct mp_image *d3d11va_retrieve_image(struct lavc_ctx *s,
     return sw_img;
 }
 
-struct d3d11_format {
-    DXGI_FORMAT format;
-    const char *name;
-    int         depth;
-};
-
 #define DFMT(name) MP_CONCAT(DXGI_FORMAT_, name), # name
-static const struct d3d11_format d3d11_formats[] = {
-    {DFMT(NV12),  8},
-    {DFMT(P010), 10},
-    {DFMT(P016), 16},
+static const struct d3d_decoded_format d3d11_formats[] = {
+    {DFMT(NV12),  8, IMGFMT_NV12},
+    {DFMT(P010), 10, IMGFMT_P010},
+    {DFMT(P016), 16, IMGFMT_P010},
 };
 #undef DFMT
 
-static BOOL d3d11_format_supported(struct lavc_ctx *s, const GUID *guid,
-                                   const struct d3d11_format *format)
+static bool d3d11_format_supported(struct lavc_ctx *s, const GUID *guid,
+                                   const struct d3d_decoded_format *format)
 {
     struct priv *p = s->hwdec_priv;
     BOOL is_supported = FALSE;
     HRESULT hr = ID3D11VideoDevice_CheckVideoDecoderFormat(
-        p->video_dev, guid, format->format, &is_supported);
+        p->video_dev, guid, format->dxfmt, &is_supported);
     if (FAILED(hr)) {
         MP_ERR(p, "Check decoder output format %s for decoder %s: %s\n",
                format->name, d3d_decoder_guid_to_desc(guid),
@@ -213,27 +207,11 @@ static void dump_decoder_info(struct lavc_ctx *s, const GUID *guid)
     struct priv *p = s->hwdec_priv;
     char fmts[256] = {0};
     for (int i = 0; i < MP_ARRAY_SIZE(d3d11_formats); i++) {
-        const struct d3d11_format *format = &d3d11_formats[i];
+        const struct d3d_decoded_format *format = &d3d11_formats[i];
         if (d3d11_format_supported(s, guid, format))
             mp_snprintf_cat(fmts, sizeof(fmts), " %s", format->name);
     }
     MP_VERBOSE(p, "%s %s\n", d3d_decoder_guid_to_desc(guid), fmts);
-}
-
-static DWORD get_dxfmt_cb(struct lavc_ctx *s, const GUID *guid, int depth)
-{
-    struct priv *p = s->hwdec_priv;
-    for (int i = 0; i < MP_ARRAY_SIZE(d3d11_formats); i++) {
-        const struct d3d11_format *format = &d3d11_formats[i];
-        if (depth <= format->depth &&
-            d3d11_format_supported(s, guid, format)) {
-            MP_VERBOSE(p, "Selecting %s %s\n",
-                       d3d_decoder_guid_to_desc(guid),
-                       format->name);
-            return format->format;
-        }
-    }
-    return 0;
 }
 
 static void d3d11va_destroy_decoder(void *arg)
@@ -270,7 +248,9 @@ static int d3d11va_init_decoder(struct lavc_ctx *s, int w, int h)
     }
 
     struct d3d_decoder_fmt fmt =
-        d3d_select_decoder_mode(s, device_guids, n_guids, get_dxfmt_cb);
+        d3d_select_decoder_mode(s, device_guids, n_guids,
+                                d3d11_formats, MP_ARRAY_SIZE(d3d11_formats),
+                                d3d11_format_supported);
     if (fmt.mpfmt_decoded == IMGFMT_NONE) {
         MP_ERR(p, "Failed to find a suitable decoder\n");
         goto done;
