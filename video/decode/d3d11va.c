@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <initguid.h>
 #include <libavcodec/d3d11va.h>
 
 #include "lavc.h"

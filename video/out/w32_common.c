@@ -15,13 +15,13 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <initguid.h>
 #include <stdio.h>
 #include <limits.h>
 #include <pthread.h>
 #include <assert.h>
 #include <windows.h>
 #include <windowsx.h>
-#include <initguid.h>
 #include <ole2.h>
 #include <shobjidl.h>
 #include <avrt.h>
