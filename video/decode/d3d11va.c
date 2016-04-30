@@ -232,6 +232,7 @@ static int d3d11va_init_decoder(struct lavc_ctx *s, int w, int h)
     struct priv *p = s->hwdec_priv;
     TA_FREEP(&p->decoder);
 
+    ID3D11Texture2D *texture = NULL;
     void *tmp = talloc_new(NULL);
 
     UINT n_guids = ID3D11VideoDevice_GetVideoDecoderProfileCount(p->video_dev);
@@ -264,7 +265,6 @@ static int d3d11va_init_decoder(struct lavc_ctx *s, int w, int h)
     int w_align = w, h_align = h;
     d3d_surface_align(s, &w_align, &h_align);
 
-    ID3D11Texture2D *texture = NULL;
     D3D11_TEXTURE2D_DESC tex_desc = {
         .Width            = w_align,
         .Height           = h_align,
