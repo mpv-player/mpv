@@ -23,6 +23,8 @@ Interface changes
     - now ab-loops are active even if one of the "ab-loop-a"/"-b" properties is
       unset ("no"), in which case the start of the file is used if the A loop
       point is unsert, and the end of the file for an unset B loop point
+    - deprecate --sub-ass=no option by --ass-style-override=strip
+      (also needs --embeddedfonts=no)
  --- mpv 0.17.0 ---
     - deprecate "track-list/N/audio-channels" property (use
       "track-list/N/demux-channel-count" instead)

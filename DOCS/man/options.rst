@@ -1429,7 +1429,7 @@ Subtitles
 
         Using this option may lead to incorrect subtitle rendering.
 
-``--ass-style-override=<yes|no|force>``
+``--ass-style-override=<yes|no|force|signfs|strip>``
     Control whether user style overrides should be applied.
 
     :yes:   Apply all the ``--ass-*`` style override options. Changing the default
@@ -1439,6 +1439,8 @@ Subtitles
     :no:    Render subtitles as forced by subtitle scripts.
     :force: Try to force the font style as defined by the ``--sub-text-*``
             options. Can break rendering easily.
+    :strip: Radically strip all ASS tags and styles from the subtitle. This
+            is equivalent to the old ``--no-ass`` / ``--no-sub-ass`` options.
 
 ``--ass-force-margins``
     Enables placing toptitles and subtitles in black borders when they are
@@ -1535,6 +1537,13 @@ Subtitles
 ``--sub-ass``, ``--no-sub-ass``
     Render ASS subtitles natively (enabled by default).
 
+    .. note::
+
+        This has been deprecated by ``--ass-style-override=strip``. You also
+        may need ``--embeddedfonts=no`` to get the same behavior. Also,
+        using ``--ass-style-override=force`` should give better results
+        without breaking subtitles too much.
+
     If ``--no-sub-ass`` is specified, all tags and style declarations are
     stripped and ignored on display. The subtitle renderer uses the font style
     as specified by the ``--sub-text-`` options instead.
@@ -1544,10 +1553,6 @@ Subtitles
         Using ``--no-sub-ass`` may lead to incorrect or completely broken
         rendering of ASS/SSA subtitles. It can sometimes be useful to forcibly
         override the styling of ASS subtitles, but should be avoided in general.
-
-    .. note::
-
-        Try using ``--ass-style-override=force`` instead.
 
 ``--sub-auto=<no|exact|fuzzy|all>``, ``--no-sub-auto``
     Load additional subtitle files matching the video filename. The parameter

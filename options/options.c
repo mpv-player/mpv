@@ -374,7 +374,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("ass-shaper", ass_shaper, 0,
                ({"simple", 0}, {"complex", 1})),
     OPT_CHOICE("ass-style-override", ass_style_override, 0,
-               ({"no", 0}, {"yes", 1}, {"force", 3}, {"signfs", 4})),
+               ({"no", 0}, {"yes", 1}, {"force", 3}, {"signfs", 4}, {"strip", 5})),
     OPT_FLAG("sub-scale-by-window", sub_scale_by_window, 0),
     OPT_FLAG("sub-scale-with-window", sub_scale_with_window, 0),
     OPT_FLAG("ass-scale-with-window", ass_scale_with_window, 0),
