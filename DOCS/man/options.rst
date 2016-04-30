@@ -3541,7 +3541,7 @@ Miscellaneous
     frame dropping due to the audio "overshooting" and skipping multiple video
     frames before the sync logic can react.
 
-``--video-sync-adrop-size=<value``
+``--video-sync-adrop-size=<value>``
     For the ``--video-sync=display-adrop`` mode. This mode duplicates/drops
     audio data to keep audio in sync with video. To avoid audio artifacts on
     jitter (which would add/remove samples all the time), this is done in
