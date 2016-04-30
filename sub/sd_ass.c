@@ -117,11 +117,11 @@ static void add_subtitle_fonts(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct MPOpts *opts = sd->opts;
-    if (!opts->ass_enabled || !sd->attachments)
+    if (!opts->ass_enabled || !opts->use_embedded_fonts || !sd->attachments)
         return;
     for (int i = 0; i < sd->attachments->num_entries; i++) {
         struct demux_attachment *f = &sd->attachments->entries[i];
-        if (opts->use_embedded_fonts && attachment_is_font(sd->log, f))
+        if (attachment_is_font(sd->log, f))
             ass_add_font(ctx->ass_library, f->name, f->data, f->data_size);
     }
 }
