@@ -816,7 +816,11 @@ video_output_features = [
         'desc': 'OpenGL video outputs',
         'deps_any': [ 'gl-cocoa', 'gl-x11', 'egl-x11', 'egl-drm',
                       'gl-win32', 'gl-wayland', 'rpi', 'plain-gl' ],
-        'func': check_true
+        'func': check_true,
+        'req': True,
+        'fmsg': "Unable to find OpenGL header files for video output. " +
+                "Aborting. If you really mean to compile without OpenGL " +
+                "video outputs use --disable-gl."
     }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
