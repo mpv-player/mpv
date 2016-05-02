@@ -460,7 +460,8 @@ const m_option_t mp_opts[] = {
 #if HAVE_X11
     OPT_CHOICE("x11-netwm", vo.x11_netwm, 0,
                ({"auto", 0}, {"no", -1}, {"yes", 1})),
-    OPT_FLAG("x11-bypass-compositor", vo.x11_bypass_compositor, 0),
+    OPT_CHOICE("x11-bypass-compositor", vo.x11_bypass_compositor, 0,
+               ({"no", 0}, {"yes", 1}, {"fs-only", 2})),
 #endif
 #if HAVE_WIN32
     OPT_STRING("vo-mmcss-profile", vo.mmcss_profile, M_OPT_FIXED),
@@ -712,7 +713,7 @@ const struct MPOpts mp_default_opts = {
         .fit_border = 1,
         .WinID = -1,
         .window_scale = 1.0,
-        .x11_bypass_compositor = 0,
+        .x11_bypass_compositor = 2,
         .mmcss_profile = "Playback",
     },
     .allow_win_drag = 1,

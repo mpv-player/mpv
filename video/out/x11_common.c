@@ -950,6 +950,21 @@ static int get_mods(unsigned int state)
     return modifiers;
 }
 
+static void vo_x11_update_composition_hint(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    long hint = 0;
+    switch (vo->opts->x11_bypass_compositor) {
+    case 0: hint = 0; break; // leave default
+    case 1: hint = 1; break; // always bypass
+    case 2: hint = x11->fs ? 1 : 0; break; // bypass in FS
+    }
+
+    XChangeProperty(x11->display, x11->window, XA(x11,_NET_WM_BYPASS_COMPOSITOR),
+                    XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&hint, 1);
+}
+
 static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -986,6 +1001,8 @@ static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
 
             x11->size_changed_during_fs = false;
             x11->pos_changed_during_fs = false;
+
+            vo_x11_update_composition_hint(vo);
         }
     }
 }
@@ -1437,12 +1454,7 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
     }
 
     if (!x11->parent) {
-        if (vo->opts->x11_bypass_compositor) {
-            long v = 1; // request disabling compositor
-            XChangeProperty(x11->display, x11->window,
-                XA(x11,_NET_WM_BYPASS_COMPOSITOR), XA_CARDINAL, 32,
-                PropModeReplace, (unsigned char *)&v, 1);
-        }
+        vo_x11_update_composition_hint(vo);
         vo_x11_set_wm_icon(x11);
         vo_x11_update_window_title(vo);
         vo_x11_dnd_init_window(vo);
@@ -1484,6 +1496,8 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
         XChangeProperty(x11->display, x11->window, XA(x11, _NET_WM_DESKTOP),
                         XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&v, 1);
     }
+
+    vo_x11_update_composition_hint(vo);
 
     // map window
     int events = StructureNotifyMask | ExposureMask | PropertyChangeMask |
@@ -1731,6 +1745,8 @@ static void vo_x11_fullscreen(struct vo *vo)
 
     x11->size_changed_during_fs = false;
     x11->pos_changed_during_fs = false;
+
+    vo_x11_update_composition_hint(vo);
 }
 
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
