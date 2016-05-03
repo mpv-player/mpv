@@ -107,6 +107,12 @@ enum mp_osd_font_codepoints {
     OSD_PB_1 = 0x13,
 };
 
+
+// Never valid UTF-8, so we expect it's free for use.
+// Specially interpreted by osd_libass.c, in order to allow/escape ASS tags.
+#define OSD_ASS_0 "\xFD"
+#define OSD_ASS_1 "\xFE"
+
 struct osd_style_opts {
     char *font;
     float font_size;
@@ -200,7 +206,5 @@ void osd_set_external(struct osd_state *osd, void *id, int res_x, int res_y,
 
 // doesn't need locking
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function);
-extern const char *const osd_ass_0;
-extern const char *const osd_ass_1;
 
 #endif /* MPLAYER_SUB_H */

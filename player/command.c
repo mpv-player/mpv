@@ -2764,8 +2764,8 @@ static int mp_property_osd_ass(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     struct m_sub_property props[] = {
-        {"0",   SUB_PROP_STR(osd_ass_0)},
-        {"1",   SUB_PROP_STR(osd_ass_1)},
+        {"0",   SUB_PROP_STR(OSD_ASS_0)},
+        {"1",   SUB_PROP_STR(OSD_ASS_1)},
         {0}
     };
     return m_property_read_sub(props, action, arg);
