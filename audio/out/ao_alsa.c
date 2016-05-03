@@ -723,11 +723,12 @@ static int init_device(struct ao *ao)
     if (err < 0)
         snd_pcm_hw_params_copy(alsa_hwparams, hwparams_backup);
 
-    dump_hw_params(ao, MSGL_V, "Final HW params:\n", alsa_hwparams);
+    dump_hw_params(ao, MSGL_V, "Going to set final HW params:\n", alsa_hwparams);
 
     /* finally install hardware parameters */
     err = snd_pcm_hw_params(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to set hw-parameters");
+    dump_hw_params(ao, MSGL_DEBUG, "Final HW params:\n", alsa_hwparams);
 
     if (set_chmap(ao, &dev_chmap, num_channels) < 0)
         goto alsa_error;
