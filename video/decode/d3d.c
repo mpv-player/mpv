@@ -48,7 +48,6 @@ DEFINE_GUID(DXVA2_ModeVP9_VLD_Profile0,         0x463707f8, 0xa1d0, 0x4585, 0x87
 
 DEFINE_GUID(DXVA2_NoEncrypt,                    0x1b81beD0, 0xa0c7, 0x11d3, 0xb9, 0x84, 0x00, 0xc0, 0x4f, 0x2e, 0x73, 0xc5);
 
-static const int PROF_MPEG2_SIMPLE[] = {FF_PROFILE_MPEG2_SIMPLE, 0};
 static const int PROF_MPEG2_MAIN[]   = {FF_PROFILE_MPEG2_SIMPLE,
                                         FF_PROFILE_MPEG2_MAIN, 0};
 static const int PROF_H264_HIGH[]    = {FF_PROFILE_H264_CONSTRAINED_BASELINE,
@@ -70,7 +69,7 @@ struct d3dva_mode {
 // Prefered modes must come first
 static const struct d3dva_mode d3dva_modes[] = {
     // MPEG-1/2
-    {MODE2(MPEG2_VLD),        AV_CODEC_ID_MPEG2VIDEO, PROF_MPEG2_SIMPLE},
+    {MODE2(MPEG2_VLD),        AV_CODEC_ID_MPEG2VIDEO, PROF_MPEG2_MAIN},
     {MODE2(MPEG2and1_VLD),    AV_CODEC_ID_MPEG2VIDEO, PROF_MPEG2_MAIN},
     {MODE2(MPEG2and1_VLD),    AV_CODEC_ID_MPEG1VIDEO},
 
