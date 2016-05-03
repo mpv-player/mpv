@@ -81,6 +81,7 @@ const struct m_sub_options mp_icc_conf = {
         OPT_FLAG("icc-profile-auto", profile_auto, 0),
         OPT_STRING("icc-cache-dir", cache_dir, 0),
         OPT_INT("icc-intent", intent, 0),
+        OPT_INTRANGE("icc-contrast", contrast, 0, 0, 100000),
         OPT_STRING_VALIDATE("3dlut-size", size_str, 0, validate_3dlut_size_opt),
 
         OPT_REMOVED("icc-cache", "see icc-cache-dir"),
@@ -181,7 +182,8 @@ bool gl_lcms_has_changed(struct gl_lcms *p, enum mp_csp_prim prim,
     return change;
 }
 
-static cmsHPROFILE get_vid_profile(cmsContext cms, cmsHPROFILE disp_profile,
+static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
+                                   cmsHPROFILE disp_profile,
                                    enum mp_csp_prim prim, enum mp_csp_trc trc)
 {
     // The input profile for the transformation is dependent on the video
@@ -214,21 +216,47 @@ static cmsHPROFILE get_vid_profile(cmsContext cms, cmsHPROFILE disp_profile,
 
     case MP_CSP_TRC_BT_1886: {
         // To build an appropriate BT.1886 transformation we need access to
-        // the display's black point, so we use the reverse mappings
+        // the display's black point, so we LittleCMS' detection function.
+        // Relative colorimetric is used since we want to approximate the
+        // BT.1886 to the target device's actual black point even in e.g.
+        // perceptual mode
+        const int intent = MP_INTENT_RELATIVE_COLORIMETRIC;
+        cmsCIEXYZ bp_XYZ;
+        if (!cmsDetectBlackPoint(&bp_XYZ, disp_profile, intent, 0))
+            return false;
+
+        // Map this XYZ value back into the (linear) source space
         cmsToneCurve *linear = cmsBuildGamma(cms, 1.0);
         cmsHPROFILE rev_profile = cmsCreateRGBProfileTHR(cms, &wp_xyY, &prim_xyY,
                 (cmsToneCurve*[3]){linear, linear, linear});
-        cmsHTRANSFORM disp2src = cmsCreateTransformTHR(cms,
-                disp_profile, TYPE_RGB_16, rev_profile, TYPE_RGB_DBL,
-                INTENT_RELATIVE_COLORIMETRIC, 0);
+        cmsHPROFILE xyz_profile = cmsCreateXYZProfile();
+        cmsHTRANSFORM xyz2src = cmsCreateTransformTHR(cms,
+                xyz_profile, TYPE_XYZ_DBL, rev_profile, TYPE_RGB_DBL,
+                intent, 0);
         cmsFreeToneCurve(linear);
         cmsCloseProfile(rev_profile);
-        if (!disp2src)
+        cmsCloseProfile(xyz_profile);
+        if (!xyz2src)
             return false;
 
-        uint64_t disp_black[3] = {0};
         double src_black[3];
-        cmsDoTransform(disp2src, disp_black, src_black, 1);
+        cmsDoTransform(xyz2src, &bp_XYZ, src_black, 1);
+        cmsDeleteTransform(xyz2src);
+
+        // Contrast limiting
+        if (p->opts.contrast > 0) {
+            for (int i = 0; i < 3; i++)
+                src_black[i] = MPMAX(src_black[i], 1.0 / p->opts.contrast);
+        }
+
+        // Built-in contrast failsafe
+        double contrast = 3.0 / (src_black[0] + src_black[1] + src_black[2]);
+        if (contrast > 100000) {
+            MP_WARN(p, "ICC profile detected contrast very high (>100000),"
+                    " falling back to contrast 1000 for sanity. Set the"
+                    " icc-contrast option to silence this warning.\n");
+            src_black[0] = src_black[1] = src_black[2] = 1.0 / 1000;
+        }
 
         // Build the parametric BT.1886 transfer curve, one per channel
         for (int i = 0; i < 3; i++) {
@@ -283,8 +311,9 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
         // because we may change the parameter in the future or make it
         // customizable, same for the primaries.
         char *cache_info = talloc_asprintf(tmp,
-                "ver=1.3, intent=%d, size=%dx%dx%d, prim=%d, trc=%d\n",
-                p->opts.intent, s_r, s_g, s_b, prim, trc);
+                "ver=1.3, intent=%d, size=%dx%dx%d, prim=%d, trc=%d, "
+                "contrast=%d\n",
+                p->opts.intent, s_r, s_g, s_b, prim, trc, p->opts.contrast);
 
         uint8_t hash[32];
         struct AVSHA *sha = av_sha_alloc();
@@ -328,7 +357,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     if (!profile)
         goto error_exit;
 
-    cmsHPROFILE vid_profile = get_vid_profile(cms, profile, prim, trc);
+    cmsHPROFILE vid_profile = get_vid_profile(p, cms, profile, prim, trc);
     if (!vid_profile) {
         cmsCloseProfile(profile);
         goto error_exit;
@@ -337,7 +366,8 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     cmsHTRANSFORM trafo = cmsCreateTransformTHR(cms, vid_profile, TYPE_RGB_16,
                                                 profile, TYPE_RGB_16,
                                                 p->opts.intent,
-                                                cmsFLAGS_HIGHRESPRECALC);
+                                                cmsFLAGS_HIGHRESPRECALC |
+                                                cmsFLAGS_BLACKPOINTCOMPENSATION);
     cmsCloseProfile(profile);
     cmsCloseProfile(vid_profile);
 
