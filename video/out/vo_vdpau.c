@@ -448,7 +448,6 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
 
     forget_frames(vo, false);
     vc->black_pixel = VDP_INVALID_HANDLE;
-    vc->video_mixer->video_mixer = VDP_INVALID_HANDLE;
     vc->flip_queue = VDP_INVALID_HANDLE;
     vc->flip_target = VDP_INVALID_HANDLE;
     for (int i = 0; i < MAX_OUTPUT_SURFACES; i++)

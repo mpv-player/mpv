@@ -49,7 +49,6 @@ static void mark_vdpau_objects_uninitialized(struct gl_hwdec *hw)
     struct priv *p = hw->priv;
 
     p->vdp_surface = VDP_INVALID_HANDLE;
-    p->mixer->video_mixer = VDP_INVALID_HANDLE;
     p->mapped = false;
 }
 
