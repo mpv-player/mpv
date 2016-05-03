@@ -335,7 +335,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     }
 
     // check cache
-    if (cache_file) {
+    if (cache_file && stat(cache_file, &(struct stat){0}) == 0) {
         MP_VERBOSE(p, "Opening 3D LUT cache in file '%s'.\n", cache_file);
         struct bstr cachedata = stream_read_file(cache_file, tmp, p->global,
                                                  1000000000); // 1 GB
