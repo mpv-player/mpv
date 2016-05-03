@@ -112,6 +112,13 @@ struct hook_handler {
     bool active;    // hook is currently in progress (only 1 at a time for now)
 };
 
+// U+279C HEAVY ROUND-TIPPED RIGHTWARDS ARROW
+#define ARROW "\342\236\234"
+#define ARROW_SP ARROW " "
+
+const char list_current[] = OSD_ASS_0 ARROW_SP OSD_ASS_1;
+const char list_normal[] = OSD_ASS_0 "{\\alpha&HFF}" ARROW_SP "{\\r}" OSD_ASS_1;
+
 static int edit_filters(struct MPContext *mpctx, struct mp_log *log,
                         enum stream_type mediatype,
                         const char *cmd, const char *arg);
@@ -870,10 +877,8 @@ static int mp_property_list_chapters(void *ctx, struct m_property *prop,
             char* time = mp_format_time(t, false);
             res = talloc_asprintf_append(res, "%s", time);
             talloc_free(time);
-            char *m1 = "> ", *m2 = " <";
-            if (n != cur)
-                m1 = m2 = "";
-            res = talloc_asprintf_append(res, "   %s%s%s\n", m1, name, m2);
+            const char *m = n == cur ? list_current : list_normal;
+            res = talloc_asprintf_append(res, "   %s%s\n", m, name);
             talloc_free(name);
         }
 
@@ -964,16 +969,13 @@ static int property_list_editions(void *ctx, struct m_property *prop,
         for (int n = 0; n < num_editions; n++) {
             struct demux_edition *ed = &editions[n];
 
-            if (n == current)
-                res = talloc_asprintf_append(res, "> ");
+            res = talloc_strdup_append(res, n == current ? list_current
+                                                         : list_normal);
             res = talloc_asprintf_append(res, "%d: ", n);
             char *title = mp_tags_get_str(ed->metadata, "title");
             if (!title)
                 title = "unnamed";
-            res = talloc_asprintf_append(res, "'%s' ", title);
-            if (n == current)
-                res = talloc_asprintf_append(res, "<");
-            res = talloc_asprintf_append(res, "\n");
+            res = talloc_asprintf_append(res, "'%s'\n", title);
         }
 
         *(char **)arg = res;
@@ -2033,8 +2035,8 @@ static int property_list_tracks(void *ctx, struct m_property *prop,
 
                 res = talloc_asprintf_append(res, "%s: ",
                                              track_type_name(track->type));
-                if (track->selected)
-                    res = talloc_asprintf_append(res, "> ");
+                res = talloc_strdup_append(res,
+                                track->selected ? list_current : list_normal);
                 res = talloc_asprintf_append(res, "(%d) ", track->user_tid);
                 if (track->title)
                     res = talloc_asprintf_append(res, "'%s' ", track->title);
@@ -2042,8 +2044,6 @@ static int property_list_tracks(void *ctx, struct m_property *prop,
                     res = talloc_asprintf_append(res, "(%s) ", track->lang);
                 if (track->is_external)
                     res = talloc_asprintf_append(res, "(external) ");
-                if (track->selected)
-                    res = talloc_asprintf_append(res, "<");
                 res = talloc_asprintf_append(res, "\n");
             }
 
@@ -3145,11 +3145,9 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
                 if (s[0])
                     p = s;
             }
-            if (mpctx->playlist->current == e) {
-                res = talloc_asprintf_append(res, "> %s <\n", p);
-            } else {
-                res = talloc_asprintf_append(res, "%s\n", p);
-            }
+            const char *m = mpctx->playlist->current == e ?
+                            list_current : list_normal;
+            res = talloc_asprintf_append(res, "%s%s\n", m, p);
         }
 
         *(char **)arg = res;
