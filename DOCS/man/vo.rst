@@ -951,6 +951,13 @@ Available video output drivers are:
         Default is 128x256x64.
         Sizes must be a power of two, and 512 at most.
 
+    ``icc-contrast=<0-100000>``
+        Specifies an upper limit on the target device's contrast ratio.
+        This is detected automatically from the profile if possible, but for
+        some profiles it might be missing, causing the contrast to be assumed
+        as infinite. As a result, video may appear darker than intended. This
+        only affects BT.1886 content. The default of 0 means no limit.
+
     ``blend-subtitles=<yes|video|no>``
         Blend subtitles directly onto upscaled video frames, before
         interpolation and/or color management (default: no). Enabling this

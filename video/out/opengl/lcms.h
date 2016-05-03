@@ -13,6 +13,7 @@ struct mp_icc_opts {
     char *cache_dir;
     char *size_str;
     int intent;
+    int contrast;
 };
 
 struct lut3d;
