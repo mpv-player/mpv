@@ -672,6 +672,8 @@ static int choice_set(const m_option_t *opt, void *dst, struct mpv_node *src)
         src_str = buf;
     } else if (src->format == MPV_FORMAT_STRING) {
         src_str = src->u.string;
+    } else if (src->format == MPV_FORMAT_FLAG) {
+        src_str = src->u.flag ? "yes" : "no";
     }
     if (!src_str)
         return M_OPT_UNKNOWN;
@@ -713,8 +715,19 @@ static int choice_get(const m_option_t *opt, void *ta_parent,
             alt = NULL;
     }
     if (alt) {
-        dst->format = MPV_FORMAT_STRING;
-        dst->u.string = talloc_strdup(ta_parent, alt->name);
+        int b = -1;
+        if (strcmp(alt->name, "yes") == 0) {
+            b = 1;
+        } else if (strcmp(alt->name, "no") == 0) {
+            b = 0;
+        }
+        if (b >= 0) {
+            dst->format = MPV_FORMAT_FLAG;
+            dst->u.flag = b;
+        } else {
+            dst->format = MPV_FORMAT_STRING;
+            dst->u.string = talloc_strdup(ta_parent, alt->name);
+        }
     } else {
         dst->format = MPV_FORMAT_INT64;
         dst->u.int64 = ival;

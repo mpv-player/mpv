@@ -28,6 +28,10 @@ Interface changes
     - add "hwdec-interop" and "hwdec-current" properties
     - deprecated "hwdec-active" and "hwdec-detected" properties (to be removed
       in mpv 0.19.0)
+    - choice option/property values that are "yes" or "no" will now be returned
+      as booleans when using the mpv_node functions in the client API, the
+      "native" property accessors in Lua, and the JSON API. They can be set as
+      such as well.
  --- mpv 0.17.0 ---
     - deprecate "track-list/N/audio-channels" property (use
       "track-list/N/demux-channel-count" instead)
