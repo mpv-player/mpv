@@ -25,6 +25,9 @@ Interface changes
       point is unsert, and the end of the file for an unset B loop point
     - deprecate --sub-ass=no option by --ass-style-override=strip
       (also needs --embeddedfonts=no)
+    - add "hwdec-interop" and "hwdec-current" properties
+    - deprecated "hwdec-active" and "hwdec-detected" properties (to be removed
+      in mpv 0.19.0)
  --- mpv 0.17.0 ---
     - deprecate "track-list/N/audio-channels" property (use
       "track-list/N/demux-channel-count" instead)

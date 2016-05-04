@@ -27,7 +27,7 @@ struct gl_hwdec {
 };
 
 struct gl_hwdec_driver {
-    // Name of the interop backend. This is used for logging only.
+    // Name of the interop backend. This is used for informational purposes only.
     const char *name;
     // Used to explicitly request a specific API.
     enum hwdec_type api;

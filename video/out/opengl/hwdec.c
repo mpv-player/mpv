@@ -79,6 +79,8 @@ static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
         mp_verbose(log, "Loading failed.\n");
         return NULL;
     }
+    if (hwdec->hwctx && !hwdec->hwctx->driver_name)
+        hwdec->hwctx->driver_name = hwdec->driver->name;
     return hwdec;
 }
 

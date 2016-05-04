@@ -26,6 +26,7 @@ extern const struct m_opt_choice_alternatives mp_hwdec_names[];
 
 struct mp_hwdec_ctx {
     enum hwdec_type type;
+    const char *driver_name; // NULL if unknown/not loaded
 
     void *priv; // for free use by hwdec implementation
 

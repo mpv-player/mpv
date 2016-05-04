@@ -1385,14 +1385,39 @@ Property list
     properties to see whether this was successful.
 
     Unlike in mpv 0.9.x and before, this does not return the currently active
-    hardware decoder.
+    hardware decoder. Since mpv 0.17.1, ``hwdec-current`` is available for
+    this purpose.
+
+``hwdec-current``
+    Return the current hardware decoding in use. If decoding is active, return
+    one of the values used by the ``hwdec`` option/property. ``no`` indicates
+    software decoding. If no decoder is loaded, the property is unavailable.
+
+``hwdec-interop``
+    This returns the currently loaded hardware decoding/output interop driver.
+    This is known only once the VO has opened (and possibly later). With some
+    VOs (like ``opengl``), this might be never known in advance, but only when
+    the decoder attempted to create the hw decoder successfully. (Using
+    ``--hwdec-preload`` can load it eagerly.) If there are multiple drivers
+    loaded, they will be separated by ``,``.
+
+    If no VO is active or no interop driver is known, this property is
+    unavailable.
+
+    This does not necessarily use the same values as ``hwdec``. There can be
+    multiple interop drivers for the same hardware decoder, depending on
+    platform and VO.
 
 ``hwdec-active``
+    Deprecated. To be removed in mpv 0.19.0. Use ``hwdec-current`` instead.
+
     Return ``yes`` or ``no``, depending on whether any type of hardware decoding
     is actually in use.
 
 ``hwdec-detected``
-    If software decoding is active, this returns the hardware decoder in use.
+    Deprecated. To be removed in mpv 0.19.0.
+
+    If hardware decoding is active, this returns the hardware decoder in use.
     Otherwise, it returns either ``no``, or if applicable, the currently loaded
     hardware decoding API. This is known only once the VO has opened (and
     possibly later). With some VOs (like ``opengl``), this is never known in

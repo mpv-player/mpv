@@ -2166,6 +2166,51 @@ static int mp_property_hwdec(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
+static int mp_property_hwdec_current(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+    struct dec_video *vd = track ? track->d_video : NULL;
+
+    if (!vd)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_GET_TYPE: {
+        // Abuse another hwdec option to resolve the value names
+        struct m_property dummy = {.name = "hwdec"};
+        return mp_property_generic_option(mpctx, &dummy, action, arg);
+    }
+    case M_PROPERTY_GET: {
+        int current = HWDEC_NONE;
+        video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
+        if (current == HWDEC_AUTO)
+            current = HWDEC_NONE;
+        *(int *)arg = current;
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_hwdec_interop(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->video_out)
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct mp_hwdec_info *hwdec_info = NULL;
+    vo_control(mpctx->video_out, VOCTRL_GET_HWDEC_INFO, &hwdec_info);
+    struct mp_hwdec_ctx *hwctx = hwdec_info ? hwdec_info->hwctx : NULL;
+    const char *name = hwctx ? hwctx->driver_name : NULL;
+    if (!name && hwctx && hwctx->type != HWDEC_NONE && hwctx->type != HWDEC_AUTO)
+        name = m_opt_choice_str(mp_hwdec_names, hwctx->type);
+
+    return m_property_strdup_ro(action, arg, name);
+}
+
 static int mp_property_hwdec_active(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
@@ -3696,6 +3741,8 @@ static const struct m_property mp_properties[] = {
     {"program", mp_property_program},
     {"hwdec", mp_property_hwdec},
     {"hwdec-active", mp_property_hwdec_active},
+    {"hwdec-current", mp_property_hwdec_current},
+    {"hwdec-interop", mp_property_hwdec_interop},
     {"hwdec-detected", mp_property_detected_hwdec},
 
     {"estimated-frame-count", mp_property_frame_count},
