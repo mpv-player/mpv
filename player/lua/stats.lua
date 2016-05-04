@@ -107,10 +107,15 @@ function add_video(s)
     end
 
     if append_property(s, sec, "video-codec", {prefix="Video:", nl="", indent=""}) then
-        append_property(s, sec, "hwdec-active",
+        if not append_property(s, sec, "hwdec-current",
+                        {prefix="(hwdec:", nl="", indent=" ",
+                         no_prefix_markup=true, suffix=")"},
+                        {no=true, [""]=true}) then
+            append_property(s, sec, "hwdec-active",
                         {prefix="(hwdec)", nl="", indent=" ",
                          no_prefix_markup=true, no_value=true},
                         {no=true})
+        end
     end
     append_property(s, sec, "avsync", {prefix="A-V:"})
     if append_property(s, sec, "drop-frame-count", {prefix="Dropped:"}) then
