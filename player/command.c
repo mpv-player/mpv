@@ -113,8 +113,8 @@ struct hook_handler {
 };
 
 // U+279C HEAVY ROUND-TIPPED RIGHTWARDS ARROW
-#define ARROW "\342\236\234"
-#define ARROW_SP ARROW " "
+// U+00A0 NO-BREAK SPACE
+#define ARROW_SP "\342\236\234\302\240"
 
 const char list_current[] = OSD_ASS_0 ARROW_SP OSD_ASS_1;
 const char list_normal[] = OSD_ASS_0 "{\\alpha&HFF}" ARROW_SP "{\\r}" OSD_ASS_1;
