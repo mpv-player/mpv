@@ -2364,6 +2364,25 @@ static int mp_property_fullscreen(void *ctx, struct m_property *prop,
     return r;
 }
 
+#ifdef _WIN32
+/// Show playback progress in Windows 7+ taskbar (RW)
+static int mp_property_taskbar_progress(void *ctx, struct m_property *prop,
+                             int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (action == M_PROPERTY_SET) {
+        int desired = !!*(int *) arg;
+        if (mpctx->opts->vo.taskbar_progress == desired)
+            return M_PROPERTY_OK;
+        mpctx->opts->vo.taskbar_progress = desired;
+        if (mpctx->video_out)
+            update_vo_playback_state( mpctx );
+        return M_PROPERTY_OK;
+    }
+    return mp_property_generic_option(mpctx, prop, action, arg);
+}
+#endif
+
 /// Window always on top (RW)
 static int mp_property_ontop(void *ctx, struct m_property *prop,
                              int action, void *arg)
@@ -3658,6 +3677,9 @@ static const struct m_property mp_properties[] = {
     {"fullscreen", mp_property_fullscreen},
     {"deinterlace", mp_property_deinterlace},
     {"field-dominance", mp_property_generic_option},
+#ifdef _WIN32
+    {"taskbar-progress", mp_property_taskbar_progress},
+#endif
     {"ontop", mp_property_ontop},
     {"border", mp_property_border},
     {"on-all-workspaces", mp_property_all_workspaces},
@@ -3989,6 +4011,7 @@ static const struct property_osd_display {
     { "balance", "Balance", .osd_progbar = OSD_BALANCE },
     // video
     { "panscan", "Panscan", .osd_progbar = OSD_PANSCAN },
+    { "taskbar-progress", "Progress in taskbar" },
     { "ontop", "Stay on top" },
     { "border", "Border" },
     { "framedrop", "Framedrop" },
