@@ -183,7 +183,7 @@ static int create(struct gl_hwdec *hw)
 
     if (hw->hwctx)
         return -1;
-    if (!eglGetCurrentDisplay())
+    if (!eglGetCurrentContext())
         return -1;
 
     const char *exts = eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);

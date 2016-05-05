@@ -99,6 +99,9 @@ static int create(struct gl_hwdec *hw)
     if (!egl_display)
         return -1;
 
+    if (!eglGetCurrentContext())
+        return -1;
+
     const char *exts = eglQueryString(egl_display, EGL_EXTENSIONS);
     if (!exts ||
         !strstr(exts, "EGL_ANGLE_d3d_share_handle_client_buffer")) {
