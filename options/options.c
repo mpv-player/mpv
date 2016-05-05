@@ -397,9 +397,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("audio-fallback-to-null", ao_null_fallback, 0),
     OPT_CHOICE("force-window", force_vo, 0,
                ({"no", 0}, {"yes", 1}, {"immediate", 2})),
-#ifdef _WIN32
     OPT_FLAG("taskbar-progress", vo.taskbar_progress, 0),
-#endif
     OPT_FLAG("ontop", vo.ontop, M_OPT_FIXED),
     OPT_FLAG("border", vo.border, M_OPT_FIXED),
     OPT_FLAG("fit-border", vo.fit_border, M_OPT_FIXED),
