@@ -1349,6 +1349,9 @@ Property list
 ``colormatrix-primaries`` (R)
     See ``colormatrix``.
 
+``taskbar-progress`` (RW)
+    See ``--taskbar-progress``.
+
 ``ontop`` (RW)
     See ``--ontop``.
 

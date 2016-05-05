@@ -132,6 +132,7 @@ struct voctrl_get_equalizer_args {
 
 // VOCTRL_UPDATE_PLAYBACK_STATE
 struct voctrl_playback_state {
+    bool taskbar_progress;
     bool playing;
     bool paused;
     int percent_pos;

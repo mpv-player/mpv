@@ -1794,6 +1794,12 @@ Window
         mode can be used to create the window always on program start, but this
         may cause other issues.
 
+``--taskbar-progress``, ``--no-taskbar-progress``
+    (Windows only)
+    Enable/disable playback progress rendering in taskbar (Windows 7 and above).
+    
+    Enabled by default.
+
 ``--ontop``
     Makes the player window stay on top of other windows.
 

@@ -1435,7 +1435,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         if (!w32->taskbar_list3 || !w32->tbtnCreated)
             return VO_TRUE;
 
-        if (!pstate->playing) {
+        if (!pstate->playing || !pstate->taskbar_progress) {
             ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
                                            TBPF_NOPROGRESS);
             return VO_TRUE;
