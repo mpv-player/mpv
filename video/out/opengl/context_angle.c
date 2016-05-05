@@ -23,6 +23,12 @@
 #include "video/out/w32_common.h"
 #include "context.h"
 
+#ifndef EGL_OPTIMAL_SURFACE_ORIENTATION_ANGLE
+#define EGL_OPTIMAL_SURFACE_ORIENTATION_ANGLE 0x33A7
+#define EGL_SURFACE_ORIENTATION_ANGLE 0x33A8
+#define EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE 0x0002
+#endif
+
 struct priv {
     EGLDisplay egl_display;
     EGLContext egl_context;
@@ -154,8 +160,24 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     if (!config)
         goto fail;
 
+    EGLint *window_attribs = NULL;
+    EGLint window_attribs_flip[] = {
+        EGL_SURFACE_ORIENTATION_ANGLE, EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE,
+        EGL_NONE
+    };
+    EGLint flip_val;
+    if (eglGetConfigAttrib(p->egl_display, config,
+                           EGL_OPTIMAL_SURFACE_ORIENTATION_ANGLE, &flip_val))
+    {
+        if (flip_val == EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE) {
+            window_attribs = window_attribs_flip;
+            ctx->flip_v = true;
+            MP_VERBOSE(vo, "Rendering flipped.\n");
+        }
+    }
+
     p->egl_surface = eglCreateWindowSurface(p->egl_display, config,
-                                            vo_w32_hwnd(vo), NULL);
+                                            vo_w32_hwnd(vo), window_attribs);
     if (p->egl_surface == EGL_NO_SURFACE) {
         MP_FATAL(ctx->vo, "Could not create EGL surface!\n");
         goto fail;
