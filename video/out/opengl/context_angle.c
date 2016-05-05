@@ -39,6 +39,8 @@ static void angle_uninit(MPGLContext *ctx)
         eglDestroyContext(p->egl_display, p->egl_context);
     }
     p->egl_context = EGL_NO_CONTEXT;
+    if (p->egl_display)
+        eglTerminate(p->egl_display);
     vo_w32_uninit(ctx->vo);
 }
 
