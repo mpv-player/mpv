@@ -461,7 +461,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("x11-netwm", vo.x11_netwm, 0,
                ({"auto", 0}, {"no", -1}, {"yes", 1})),
     OPT_CHOICE("x11-bypass-compositor", vo.x11_bypass_compositor, 0,
-               ({"no", 0}, {"yes", 1}, {"fs-only", 2})),
+               ({"no", 0}, {"yes", 1}, {"fs-only", 2}, {"always", 3})),
 #endif
 #if HAVE_WIN32
     OPT_STRING("vo-mmcss-profile", vo.mmcss_profile, M_OPT_FIXED),

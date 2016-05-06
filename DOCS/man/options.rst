@@ -2085,9 +2085,14 @@ Window
 
     This option might be removed in the future.
 
-``--x11-bypass-compositor=<yes|no>``
+``--x11-bypass-compositor=<yes|no|fs-only|always>``
     If set to ``yes``, then ask the compositor to unredirect the mpv window
-    (default: no). This uses the ``_NET_WM_BYPASS_COMPOSITOR`` hint.
+    (default: ``fs-only``). This uses the ``_NET_WM_BYPASS_COMPOSITOR`` hint.
+
+    ``fs-only`` asks the window manager to disable the compositor only in
+    fullscreen mode,
+
+    ``always`` asks the window manager to always enable the compositor.
 
 
 Disc Devices

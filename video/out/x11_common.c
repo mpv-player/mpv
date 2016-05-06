@@ -959,6 +959,7 @@ static void vo_x11_update_composition_hint(struct vo *vo)
     case 0: hint = 0; break; // leave default
     case 1: hint = 1; break; // always bypass
     case 2: hint = x11->fs ? 1 : 0; break; // bypass in FS
+    case 3: hint = 2; break; // always enable
     }
 
     XChangeProperty(x11->display, x11->window, XA(x11,_NET_WM_BYPASS_COMPOSITOR),
