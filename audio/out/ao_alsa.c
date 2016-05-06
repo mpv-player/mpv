@@ -538,7 +538,7 @@ static char *append_params(void *ta_parent, const char *device, const char *p)
     abort();
 }
 
-static int try_open_device(struct ao *ao, const char *device)
+static int try_open_device(struct ao *ao, const char *device, int mode)
 {
     struct priv *p = ao->priv;
     int err;
@@ -552,7 +552,7 @@ static int try_open_device(struct ao *ao, const char *device)
                         map_iec958_srate(ao->samplerate));
         const char *ac3_device = append_params(tmp, device, params);
         MP_VERBOSE(ao, "opening device '%s' => '%s'\n", device, ac3_device);
-        err = snd_pcm_open(&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, 0);
+        err = snd_pcm_open(&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, mode);
         if (err < 0) {
             // Some spdif-capable devices do not accept the AES0 parameter,
             // and instead require the iec958 pseudo-device (they will play
@@ -565,13 +565,13 @@ static int try_open_device(struct ao *ao, const char *device)
                 MP_VERBOSE(ao, "got error %d; opening iec fallback device '%s'\n",
                            err, ac3_device);
                 err = snd_pcm_open
-                            (&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, 0);
+                          (&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, mode);
             }
         }
         talloc_free(tmp);
     } else {
         MP_VERBOSE(ao, "opening device '%s'\n", device);
-        err = snd_pcm_open(&p->alsa, device, SND_PCM_STREAM_PLAYBACK, 0);
+        err = snd_pcm_open(&p->alsa, device, SND_PCM_STREAM_PLAYBACK, mode);
     }
 
     return err;
@@ -596,9 +596,12 @@ static void uninit(struct ao *ao)
 alsa_error: ;
 }
 
-static int init_device(struct ao *ao)
+#define INIT_DEVICE_ERR_GENERIC -1
+#define INIT_DEVICE_ERR_HWPARAMS -2
+static int init_device(struct ao *ao, int mode)
 {
     struct priv *p = ao->priv;
+    int ret = INIT_DEVICE_ERR_GENERIC;
     char *tmp;
     size_t tmp_s;
     int err;
@@ -612,7 +615,7 @@ static int init_device(struct ao *ao)
     if (p->cfg_device && p->cfg_device[0])
         device = p->cfg_device;
 
-    err = try_open_device(ao, device);
+    err = try_open_device(ao, device, mode);
     CHECK_ALSA_ERROR("Playback open error");
 
     err = snd_pcm_dump(p->alsa, p->output);
@@ -727,7 +730,9 @@ static int init_device(struct ao *ao)
 
     /* finally install hardware parameters */
     err = snd_pcm_hw_params(p->alsa, alsa_hwparams);
+    ret = INIT_DEVICE_ERR_HWPARAMS;
     CHECK_ALSA_ERROR("Unable to set hw-parameters");
+    ret = INIT_DEVICE_ERR_GENERIC;
     dump_hw_params(ao, MSGL_DEBUG, "Final HW params:\n", alsa_hwparams);
 
     if (set_chmap(ao, &dev_chmap, num_channels) < 0)
@@ -784,7 +789,7 @@ static int init_device(struct ao *ao)
 
 alsa_error:
     uninit(ao);
-    return -1;
+    return ret;
 }
 
 static int init(struct ao *ao)
@@ -795,7 +800,18 @@ static int init(struct ao *ao)
 
     MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());
 
-    int r = init_device(ao);
+    int mode = 0;
+    int r = init_device(ao, mode);
+    if (r == INIT_DEVICE_ERR_HWPARAMS) {
+        // With some drivers, ALSA appears to be unable to set valid hwparams,
+        // but they work if at least SND_PCM_NO_AUTO_FORMAT is set. Also, it
+        // appears you can set this flag only on opening a device, thus there
+        // is the need to retry opening the device.
+        MP_WARN(ao, "Attempting to work around even more ALSA bugs...\n");
+        mode |= SND_PCM_NO_AUTO_CHANNELS | SND_PCM_NO_AUTO_FORMAT |
+                SND_PCM_NO_AUTO_RESAMPLE;
+        r = init_device(ao, mode);
+    }
 
     // Sometimes, ALSA will advertise certain chmaps, but it's not possible to
     // set them. This can happen with dmix: as of alsa 1.0.29, dmix can do
@@ -817,7 +833,7 @@ static int init(struct ao *ao)
             MP_VERBOSE(ao, "Working around braindead dmix multichannel behavior.\n");
             uninit(ao);
             ao->channels = without_na;
-            r = init_device(ao);
+            r = init_device(ao, mode);
         }
     }
 
