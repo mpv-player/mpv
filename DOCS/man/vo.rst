@@ -855,6 +855,10 @@ Available video output drivers are:
         0.8
             Pitch black room
 
+        NOTE: Typical movie content (Blu-ray etc.) already contains a gamma
+        drop of about 0.8, so specifying it here as well will result in even
+        even darker image than intended!
+
     ``gamma-auto``
         Automatically corrects the gamma value depending on ambient lighting
         conditions (adding a gamma boost for dark rooms).
@@ -865,8 +869,9 @@ Available video output drivers are:
         NOTE: Only implemented on OS X.
 
     ``target-prim=<value>``
-        Specifies the primaries of the display. Video colors will be adapted
-        to this colorspace if necessary. Valid values are:
+        Specifies the primaries of the display. Video colors will be adapted to
+        this colorspace when ICC color management is not being used. Valid
+        values are:
 
         auto
             Disable any adaptation (default)
@@ -893,12 +898,13 @@ Available video output drivers are:
 
     ``target-trc=<value>``
         Specifies the transfer characteristics (gamma) of the display. Video
-        colors will be adjusted to this curve. Valid values are:
+        colors will be adjusted to this curve when ICC color management is
+        not being used. Valid values are:
 
         auto
             Disable any adaptation (default)
         bt.1886
-            ITU-R BT.1886 curve, without the brightness drop (approx. 1.961)
+            ITU-R BT.1886 curve (assuming infinite contrast)
         srgb
             IEC 61966-2-4 (sRGB)
         linear
@@ -913,7 +919,7 @@ Available video output drivers are:
             ProPhoto RGB (ROMM)
 
     ``icc-profile=<file>``
-        Load an ICC profile and use it to transform linear RGB to screen output.
+        Load an ICC profile and use it to transform video RGB to screen output.
         Needs LittleCMS 2 support compiled in. This option overrides the
         ``target-prim``, ``target-trc`` and ``icc-profile-auto`` options.
 
