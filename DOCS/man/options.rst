@@ -3614,7 +3614,7 @@ Miscellaneous
     - A label of the form ``aidN`` selects audio track N as input (e.g.
       ``aid1``).
     - A label of the form ``vidN`` selects video track N as input.
-    - A label named ``ao`` will be connected to the audio input.
+    - A label named ``ao`` will be connected to the audio output.
     - A label named ``vo`` will be connected to the video output.
 
     Each label can be used only once. If you want to use e.g. an audio stream
@@ -3651,4 +3651,5 @@ Miscellaneous
         - ``null:// --lavfi-complex='life [vo]'``
           Conways' Life Game.
 
-    See the FFmpeg libavfilter documentation for details on the filter.
+    See the FFmpeg libavfilter documentation for details on the available
+    filters.
