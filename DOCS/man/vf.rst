@@ -303,7 +303,7 @@ Available filters are:
        Available gamma functions are:
 
        :auto:         automatic selection (default)
-       :bt.1886:      ITU-R BT.1886 (approximation of BT.601/BT.709/BT.2020 curve)
+       :bt.1886:      ITU-R BT.1886 (EOTF corresponding to BT.601/BT.709/BT.2020)
        :srgb:         IEC 61966-2-4 (sRGB)
        :linear:       Linear light
        :gamma1.8:     Pure power curve (gamma 1.8)
