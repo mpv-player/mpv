@@ -1462,6 +1462,7 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis,
         vo_x11_set_wm_icon(x11);
         vo_x11_update_window_title(vo);
         vo_x11_dnd_init_window(vo);
+        vo_x11_set_property_utf8(vo, XA(x11, _GTK_THEME_VARIANT), "dark");
     }
     vo_x11_xembed_update(x11, 0);
 }
