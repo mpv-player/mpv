@@ -1989,7 +1989,7 @@ Window
 
     .. admonition:: Example for GNOME screensaver
 
-        ``mpv --heartbeat-cmd="gnome-screensaver-command -p" file``
+        ``mpv --heartbeat-cmd="gnome-screensaver-command --deactivate" file``
 
 
 ``--heartbeat-interval=<sec>``
