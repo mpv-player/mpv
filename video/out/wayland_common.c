@@ -739,7 +739,6 @@ static void schedule_resize(struct vo_wayland_state *wl,
 {
     int32_t minimum_size = 150;
     int32_t x, y;
-    float temp_aspect = width / (float) MPMAX(height, 1);
     float win_aspect = wl->window.aspect;
     if (win_aspect <= 0)
         win_aspect = 1;
@@ -769,12 +768,6 @@ static void schedule_resize(struct vo_wayland_state *wl,
         case WL_SHELL_SURFACE_RESIZE_BOTTOM_LEFT:
         case WL_SHELL_SURFACE_RESIZE_BOTTOM_RIGHT:
             height = (1 / win_aspect) * width;
-            break;
-        default:
-            if (wl->window.aspect < temp_aspect)
-                width = wl->window.aspect * height;
-            else
-                height = (1 / win_aspect) * width;
             break;
     }
 
