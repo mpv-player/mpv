@@ -280,6 +280,9 @@ static void vo_set_cursor_hidden(struct vo *vo, bool cursor_hidden)
 static int x11_errorhandler(Display *display, XErrorEvent *event)
 {
     struct mp_log *log = x11_error_output;
+    if (!log)
+        return 0;
+
     char msg[60];
     XGetErrorText(display, event->error_code, (char *) &msg, sizeof(msg));
 
@@ -746,8 +749,8 @@ void vo_x11_uninit(struct vo *vo)
     if (x11->xim)
         XCloseIM(x11->xim);
     if (x11->display) {
-        x11_error_output = NULL;
         XSetErrorHandler(NULL);
+        x11_error_output = NULL;
         XCloseDisplay(x11->display);
     }
 
