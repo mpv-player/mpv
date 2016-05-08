@@ -2090,7 +2090,10 @@ Window
     (default: ``fs-only``). This uses the ``_NET_WM_BYPASS_COMPOSITOR`` hint.
 
     ``fs-only`` asks the window manager to disable the compositor only in
-    fullscreen mode,
+    fullscreen mode.
+
+    ``no`` sets ``_NET_WM_BYPASS_COMPOSITOR`` to 0, which is the default value
+    as declared by the EWMH specification, i.e. no change is done.
 
     ``never`` asks the window manager to never disable the compositor.
 
