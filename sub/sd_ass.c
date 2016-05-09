@@ -270,8 +270,8 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         // Note that for this packet format, libass has an internal mechanism
         // for discarding duplicate (already seen) packets.
         ass_process_chunk(track, packet->buffer, packet->len,
-                          lrint(packet->pts * 1000),
-                          lrint(packet->duration * 1000));
+                          llrint(packet->pts * 1000),
+                          llrint(packet->duration * 1000));
     }
 }
 
