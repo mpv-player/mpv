@@ -343,7 +343,7 @@ void execute_queued_seek(struct MPContext *mpctx)
         /* If the user seeks continuously (keeps arrow key down)
          * try to finish showing a frame from one location before doing
          * another seek (which could lead to unchanging display). */
-        if (!mpctx->seek.immediate && mpctx->video_status < STATUS_READY &&
+        if (!mpctx->seek.immediate && mpctx->video_status < STATUS_PLAYING &&
             mp_time_sec() - mpctx->start_timestamp < 0.3)
             return;
         mp_seek(mpctx, mpctx->seek);
@@ -838,6 +838,21 @@ static void handle_dummy_ticks(struct MPContext *mpctx)
     }
 }
 
+// Update current playback time.
+static void handle_playback_time(struct MPContext *mpctx)
+{
+    if (mpctx->vo_chain && !mpctx->vo_chain->is_coverart &&
+        mpctx->video_status >= STATUS_PLAYING &&
+        mpctx->video_status < STATUS_EOF)
+    {
+        mpctx->playback_pts = mpctx->video_pts;
+    } else if (mpctx->audio_status >= STATUS_PLAYING &&
+               mpctx->audio_status < STATUS_EOF)
+    {
+        mpctx->playback_pts = playing_audio_pts(mpctx);
+    }
+}
+
 // We always make sure audio and video buffers are filled before actually
 // starting playback. This code handles starting them at the same time.
 static void handle_playback_restart(struct MPContext *mpctx)
@@ -854,8 +869,17 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mpctx->sleeptime = 0;
     }
 
-    if (mpctx->audio_status == STATUS_READY)
+    if (mpctx->audio_status == STATUS_READY) {
+        // If a new seek is queued while the current one finishes, don't
+        // actually play the audio, but resume seeking immediately.
+        if (mpctx->seek.type && mpctx->video_status == STATUS_PLAYING) {
+            handle_playback_time(mpctx);
+            execute_queued_seek(mpctx);
+            return;
+        }
+
         fill_audio_out_buffers(mpctx); // actually play prepared buffer
+    }
 
     if (!mpctx->restart_complete) {
         mpctx->hrseek_active = false;
@@ -955,20 +979,6 @@ void run_playloop(struct MPContext *mpctx)
     handle_heartbeat_cmd(mpctx);
     handle_command_updates(mpctx);
 
-    fill_audio_out_buffers(mpctx);
-    write_video(mpctx);
-
-    if (mpctx->vo_chain && !mpctx->vo_chain->is_coverart &&
-        mpctx->video_status >= STATUS_PLAYING &&
-        mpctx->video_status < STATUS_EOF)
-    {
-        mpctx->playback_pts = mpctx->video_pts;
-    } else if (mpctx->audio_status >= STATUS_PLAYING &&
-               mpctx->audio_status < STATUS_EOF)
-    {
-        mpctx->playback_pts = playing_audio_pts(mpctx);
-    }
-
     if (mpctx->lavfi) {
         if (lavfi_process(mpctx->lavfi))
             mpctx->sleeptime = 0;
@@ -976,7 +986,12 @@ void run_playloop(struct MPContext *mpctx)
             mpctx->stop_play = AT_END_OF_FILE;
     }
 
+    fill_audio_out_buffers(mpctx);
+    write_video(mpctx);
+
     handle_playback_restart(mpctx);
+
+    handle_playback_time(mpctx);
 
     handle_dummy_ticks(mpctx);
 
