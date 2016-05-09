@@ -634,10 +634,10 @@ Input Commands that are Possibly Subject to Change
     Send a message to all clients, and pass it the following list of arguments.
     What this message means, how many arguments it takes, and what the arguments
     mean is fully up to the receiver and the sender. Every client receives the
-    message, so be careful about name clashes (or use ``script_message_to``).
+    message, so be careful about name clashes (or use ``script-message-to``).
 
 ``script-message-to "<target>" "<arg1>" "<arg2>" ...``
-    Same as ``script_message``, but send it only to the client named
+    Same as ``script-message``, but send it only to the client named
     ``<target>``. Each client (scripts etc.) has a unique name. For example,
     Lua scripts can get their name via ``mp.get_script_name()``.
 
@@ -651,8 +651,8 @@ Input Commands that are Possibly Subject to Change
     separator, e.g. ``script_binding scriptname/bindingname``.
 
     For completeness, here is how this command works internally. The details
-    could change any time. On any matching key event, ``script_message_to``
-    or ``script_message`` is called (depending on whether the script name is
+    could change any time. On any matching key event, ``script-message-to``
+    or ``script-message`` is called (depending on whether the script name is
     included), with the following arguments:
 
     1. The string ``key-binding``.
