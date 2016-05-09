@@ -61,9 +61,8 @@ enum mp_voctrl {
     VOCTRL_SET_EQUALIZER,               // struct voctrl_set_equalizer_args*
     VOCTRL_GET_EQUALIZER,               // struct voctrl_get_equalizer_args*
 
-    /* for hardware decoding */
-    VOCTRL_GET_HWDEC_INFO,              // struct mp_hwdec_info**
-    VOCTRL_LOAD_HWDEC_API,              // private to vo_opengl
+    /* private to vo_opengl */
+    VOCTRL_LOAD_HWDEC_API,
 
     // Redraw the image previously passed to draw_image() (basically, repeat
     // the previous draw_image call). If this is handled, the OSD should also
@@ -297,6 +296,7 @@ struct vo {
     struct vo_w32_state *w32;
     struct vo_cocoa_state *cocoa;
     struct vo_wayland_state *wayland;
+    struct mp_hwdec_devices *hwdec_devs;
     struct input_ctx *input_ctx;
     struct osd_state *osd;
     struct encode_lavc_context *encode_lavc_ctx;

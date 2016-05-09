@@ -26,7 +26,6 @@
 #include "video/mp_image_pool.h"
 #include "video/hwdec.h"
 
-#include "video/d3d.h"
 #include "d3d.h"
 
 #define ADDITIONAL_SURFACES (4 + HWDEC_DELAY_QUEUE_COUNT)
@@ -492,9 +491,7 @@ static int d3d11va_init(struct lavc_ctx *s)
         p->sw_pool = talloc_steal(p, mp_image_pool_new(17));
     }
 
-    if (s->hwdec_info && s->hwdec_info->hwctx && s->hwdec_info->hwctx->d3d_ctx)
-        p->device = s->hwdec_info->hwctx->d3d_ctx->d3d11_device;
-
+    p->device = hwdec_devices_load(s->hwdec_devs, s->hwdec->type);
     if (p->device) {
         ID3D11Device_AddRef(p->device);
         ID3D11Device_GetImmediateContext(p->device, &p->device_ctx);
@@ -539,15 +536,12 @@ fail:
     return -1;
 }
 
-static int d3d11va_probe(struct vd_lavc_hwdec *hwdec,
-                         struct mp_hwdec_info *info,
+static int d3d11va_probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                          const char *codec)
 {
-    hwdec_request_api(info, "d3d11va");
     // d3d11va-copy can do without external context; dxva2 requires it.
     if (hwdec->type != HWDEC_D3D11VA_COPY) {
-        if (!info || !info->hwctx || !info->hwctx->d3d_ctx ||
-            !info->hwctx->d3d_ctx->d3d11_device)
+        if (!hwdec_devices_load(ctx->hwdec_devs, HWDEC_D3D11VA))
             return HWDEC_ERR_NO_CTX;
     }
     return d3d_probe_codec(codec);

@@ -223,10 +223,7 @@ static int vf_open(vf_instance_t *vf)
     vf->control = control;
     vf->uninit = uninit;
 
-    if (!vf->hwdec)
-        return 0;
-    hwdec_request_api(vf->hwdec, "vdpau");
-    p->ctx = vf->hwdec->hwctx ? vf->hwdec->hwctx->vdpau_ctx : NULL;
+    p->ctx = hwdec_devices_load(vf->hwdec_devs, HWDEC_VDPAU);
     if (!p->ctx)
         return 0;
 

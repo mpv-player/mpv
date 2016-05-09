@@ -169,6 +169,8 @@ static void destroy(struct gl_hwdec *hw)
     struct priv *p = hw->priv;
     unref_image(hw);
     destroy_textures(hw);
+    if (p->ctx)
+        hwdec_devices_remove(hw->devs, &p->ctx->hwctx);
     va_destroy(p->ctx);
 }
 
@@ -181,8 +183,6 @@ static int create(struct gl_hwdec *hw)
     p->current_image.buf = p->current_image.image_id = VA_INVALID_ID;
     p->log = hw->log;
 
-    if (hw->hwctx)
-        return -1;
     if (!eglGetCurrentContext())
         return -1;
 
@@ -229,7 +229,8 @@ static int create(struct gl_hwdec *hw)
         return -1;
     }
 
-    hw->hwctx = &p->ctx->hwctx;
+    p->ctx->hwctx.driver_name = hw->driver->name;
+    hwdec_devices_add(hw->devs, &p->ctx->hwctx);
     return 0;
 }
 

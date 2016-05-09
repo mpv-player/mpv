@@ -15,13 +15,13 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <d3d9.h>
 #include <assert.h>
 
 #include "common/common.h"
 #include "osdep/windows_utils.h"
 #include "hwdec.h"
 #include "video/hwdec.h"
-#include "video/d3d.h"
 #include "video/dxva2.h"
 
 // for  WGL_ACCESS_READ_ONLY_NV
@@ -30,7 +30,7 @@
 #define SHARED_SURFACE_D3DFMT D3DFMT_X8R8G8B8
 #define SHARED_SURFACE_MPFMT  IMGFMT_RGB0
 struct priv {
-    struct mp_d3d_ctx ctx;
+    struct mp_hwdec_ctx hwctx;
     IDirect3DDevice9Ex *device;
     HANDLE device_h;
 
@@ -74,6 +74,8 @@ static void destroy(struct gl_hwdec *hw)
     struct priv *p = hw->priv;
     destroy_objects(hw);
 
+    hwdec_devices_remove(hw->devs, &p->hwctx);
+
     if (p->device)
         IDirect3DDevice9Ex_Release(p->device);
 }
@@ -81,10 +83,8 @@ static void destroy(struct gl_hwdec *hw)
 static int create(struct gl_hwdec *hw)
 {
     GL *gl = hw->gl;
-    if (hw->hwctx || !gl->MPGetNativeDisplay ||
-        !(gl->mpgl_caps & MPGL_CAP_DXINTEROP)) {
+    if (!gl->MPGetNativeDisplay || !(gl->mpgl_caps & MPGL_CAP_DXINTEROP))
         return -1;
-    }
 
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
@@ -100,12 +100,14 @@ static int create(struct gl_hwdec *hw)
     if (!p->device)
         return -1;
     IDirect3DDevice9Ex_AddRef(p->device);
-    p->ctx.d3d9_device = (IDirect3DDevice9 *)p->device;
 
-    p->ctx.hwctx.type = HWDEC_DXVA2;
-    p->ctx.hwctx.d3d_ctx = &p->ctx;
+    p->hwctx = (struct mp_hwdec_ctx){
+        .type = HWDEC_DXVA2,
+        .driver_name = hw->driver->name,
+        .ctx = (IDirect3DDevice9 *)p->device,
+    };
+    hwdec_devices_add(hw->devs, &p->hwctx);
 
-    hw->hwctx = &p->ctx.hwctx;
     hw->converted_imgfmt = SHARED_SURFACE_MPFMT;
     return 0;
 }

@@ -43,9 +43,11 @@ struct vt_format {
 };
 
 struct priv {
+    struct mp_hwdec_ctx hwctx;
+    struct mp_vt_ctx vtctx;
+
     CVPixelBufferRef pbuf;
     GLuint gl_planes[MP_MAX_PLANES];
-    struct mp_hwdec_ctx hwctx;
 };
 
 static struct vt_format vt_formats[] = {
@@ -147,9 +149,9 @@ static bool check_hwdec(struct gl_hwdec *hw)
     return true;
 }
 
-static uint32_t get_vt_fmt(struct mp_hwdec_ctx *ctx)
+static uint32_t get_vt_fmt(struct mp_vt_ctx *vtctx)
 {
-    struct gl_hwdec *hw = ctx->priv;
+    struct gl_hwdec *hw = vtctx->priv;
     struct vt_format *f =
         vt_get_gl_format_from_imgfmt(hw->global->opts->videotoolbox_format);
     return f ? f->cvpixfmt : (uint32_t)-1;
@@ -167,15 +169,21 @@ static int create(struct gl_hwdec *hw)
 
     hw->priv = p;
     hw->converted_imgfmt = f->imgfmt;
-    hw->hwctx = &p->hwctx;
-    hw->hwctx->download_image = download_image;
-    hw->hwctx->type = HWDEC_VIDEOTOOLBOX;
-    hw->hwctx->get_vt_fmt = get_vt_fmt;
 
     hw->gl_texture_target = GL_TEXTURE_RECTANGLE;
     hw->gl->GenTextures(MP_MAX_PLANES, p->gl_planes);
 
-    hw->hwctx->priv = hw;
+    p->vtctx = (struct mp_vt_ctx){
+        .priv = hw,
+        .get_vt_fmt = get_vt_fmt,
+    };
+    p->hwctx = (struct mp_hwdec_ctx){
+        .type = HWDEC_VIDEOTOOLBOX,
+        .download_image = download_image,
+        .ctx = &p->vtctx,
+    };
+    hwdec_devices_add(hw->devs, &p->hwctx);
+
     return 0;
 }
 
@@ -251,6 +259,8 @@ static void destroy(struct gl_hwdec *hw)
 
     CVPixelBufferRelease(p->pbuf);
     gl->DeleteTextures(MP_MAX_PLANES, p->gl_planes);
+
+    hwdec_devices_remove(hw->devs, &p->hwctx);
 }
 
 const struct gl_hwdec_driver gl_hwdec_videotoolbox = {

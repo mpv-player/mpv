@@ -282,6 +282,7 @@ def build(ctx):
         ( "video/gpu_memcpy.c",                  "sse4-intrinsics" ),
         ( "video/image_writer.c" ),
         ( "video/img_format.c" ),
+        ( "video/hwdec.c" ),
         ( "video/mp_image.c" ),
         ( "video/mp_image_pool.c" ),
         ( "video/sws_utils.c" ),

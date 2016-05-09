@@ -153,7 +153,7 @@ struct track {
 struct vo_chain {
     struct mp_log *log;
 
-    struct mp_hwdec_info *hwdec_info;
+    struct mp_hwdec_devices *hwdec_devs;
     double container_fps;
 
     struct vf_chain *vf;

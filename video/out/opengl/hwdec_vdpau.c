@@ -92,14 +92,14 @@ static void destroy(struct gl_hwdec *hw)
 
     destroy_objects(hw);
     mp_vdpau_mixer_destroy(p->mixer);
+    if (p->ctx)
+        hwdec_devices_remove(hw->devs, &p->ctx->hwctx);
     mp_vdpau_destroy(p->ctx);
 }
 
 static int create(struct gl_hwdec *hw)
 {
     GL *gl = hw->gl;
-    if (hw->hwctx)
-        return -1;
     Display *x11disp = glXGetCurrentDisplay();
     if (!x11disp)
         return -1;
@@ -119,7 +119,8 @@ static int create(struct gl_hwdec *hw)
         destroy(hw);
         return -1;
     }
-    hw->hwctx = &p->ctx->hwctx;
+    p->ctx->hwctx.driver_name = hw->driver->name;
+    hwdec_devices_add(hw->devs, &p->ctx->hwctx);
     hw->converted_imgfmt = IMGFMT_RGB0;
     return 0;
 }

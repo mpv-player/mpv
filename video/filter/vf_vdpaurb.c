@@ -101,14 +101,9 @@ static int vf_open(vf_instance_t *vf)
     vf->reconfig = reconfig;
     vf->query_format = query_format;
 
-    if (!vf->hwdec) {
+    p->ctx = hwdec_devices_load(vf->hwdec_devs, HWDEC_VDPAU);
+    if (!p->ctx)
         return 0;
-    }
-    hwdec_request_api(vf->hwdec, "vdpau");
-    p->ctx = vf->hwdec->hwctx ? vf->hwdec->hwctx->vdpau_ctx : NULL;
-    if (!p->ctx) {
-        return 0;
-    }
 
     return 1;
 }

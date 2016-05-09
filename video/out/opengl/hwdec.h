@@ -4,14 +4,12 @@
 #include "common.h"
 #include "video/hwdec.h"
 
-struct mp_hwdec_info;
-
 struct gl_hwdec {
     const struct gl_hwdec_driver *driver;
     struct mp_log *log;
     struct mpv_global *global;
     GL *gl;
-    struct mp_hwdec_ctx *hwctx;
+    struct mp_hwdec_devices *devs;
     // For free use by hwdec driver
     void *priv;
     // For working around the vdpau vs. vaapi mess.
@@ -33,7 +31,7 @@ struct gl_hwdec_driver {
     enum hwdec_type api;
     // The hardware surface IMGFMT_ that must be passed to map_image later.
     int imgfmt;
-    // Create the hwdec device. It must fill in hw->info, if applicable.
+    // Create the hwdec device. It must add it to hw->devs, if applicable.
     // This also must set hw->converted_imgfmt.
     int (*create)(struct gl_hwdec *hw);
     // Prepare for rendering video. (E.g. create textures.)
@@ -49,9 +47,9 @@ struct gl_hwdec_driver {
 };
 
 struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
-                                   struct mpv_global *g, const char *api_name);
-struct gl_hwdec *gl_hwdec_load_api_id(struct mp_log *log, GL *gl,
-                                      struct mpv_global *g, int id);
+                                   struct mpv_global *g,
+                                   struct mp_hwdec_devices *devs,
+                                   enum hwdec_type api);
 
 void gl_hwdec_uninit(struct gl_hwdec *hwdec);
 

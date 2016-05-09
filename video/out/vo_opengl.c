@@ -59,7 +59,6 @@ struct gl_priv {
     struct gl_lcms *cms;
 
     struct gl_hwdec *hwdec;
-    struct mp_hwdec_info hwdec_info;
 
     // Options
     struct gl_video_opts *renderer_opts;
@@ -196,25 +195,23 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
-static void request_hwdec_api(struct gl_priv *p, const char *api_name)
+static void request_hwdec_api(struct vo *vo, void *api)
 {
+    struct gl_priv *p = vo->priv;
+
     if (p->hwdec)
         return;
 
-    p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, p->vo->global, api_name);
+    p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, p->vo->global,
+                                 vo->hwdec_devs, (intptr_t)api);
     gl_video_set_hwdec(p->renderer, p->hwdec);
-    if (p->hwdec)
-        p->hwdec_info.hwctx = p->hwdec->hwctx;
 }
 
-static void call_request_hwdec_api(struct mp_hwdec_info *info,
-                                   const char *api_name)
+static void call_request_hwdec_api(void *ctx, enum hwdec_type type)
 {
-    struct vo *vo = info->load_api_ctx;
-    assert(&((struct gl_priv *)vo->priv)->hwdec_info == info);
     // Roundabout way to run hwdec loading on the VO thread.
     // Redirects to request_hwdec_api().
-    vo_control(vo, VOCTRL_LOAD_HWDEC_API, (void *)api_name);
+    vo_control(ctx, VOCTRL_LOAD_HWDEC_API, (void *)(intptr_t)type);
 }
 
 static void get_and_update_icc_profile(struct gl_priv *p, int *events)
@@ -325,13 +322,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         *(struct mp_image **)data = screen;
         return true;
     }
-    case VOCTRL_GET_HWDEC_INFO: {
-        struct mp_hwdec_info **arg = data;
-        *arg = &p->hwdec_info;
-        return true;
-    }
     case VOCTRL_LOAD_HWDEC_API:
-        request_hwdec_api(p, data);
+        request_hwdec_api(vo, data);
         return true;
     case VOCTRL_SET_COMMAND_LINE: {
         char *arg = data;
@@ -373,6 +365,8 @@ static void uninit(struct vo *vo)
 
     gl_video_uninit(p->renderer);
     gl_hwdec_uninit(p->hwdec);
+    hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
+    hwdec_devices_destroy(vo->hwdec_devs);
     mpgl_uninit(p->glctx);
 }
 
@@ -424,17 +418,17 @@ static int preinit(struct vo *vo)
     gl_lcms_set_options(p->cms, p->icc_opts);
     get_and_update_icc_profile(p, &(int){0});
 
-    p->hwdec_info.load_api = call_request_hwdec_api;
-    p->hwdec_info.load_api_ctx = vo;
+    vo->hwdec_devs = hwdec_devices_create();
+
+    hwdec_devices_set_loader(vo->hwdec_devs, call_request_hwdec_api, vo);
 
     int hwdec = vo->opts->hwdec_preload_api;
     if (hwdec == HWDEC_NONE)
         hwdec = vo->global->opts->hwdec_api;
     if (hwdec != HWDEC_NONE) {
-        p->hwdec = gl_hwdec_load_api_id(p->vo->log, p->gl, vo->global, hwdec);
+        p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, vo->global,
+                                     vo->hwdec_devs, hwdec);
         gl_video_set_hwdec(p->renderer, p->hwdec);
-        if (p->hwdec)
-            p->hwdec_info.hwctx = p->hwdec->hwctx;
     }
 
     return 0;

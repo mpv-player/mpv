@@ -2198,14 +2198,14 @@ static int mp_property_hwdec_interop(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->video_out)
+    if (!mpctx->video_out || !mpctx->video_out->hwdec_devs)
         return M_PROPERTY_UNAVAILABLE;
 
-    struct mp_hwdec_info *hwdec_info = NULL;
-    vo_control(mpctx->video_out, VOCTRL_GET_HWDEC_INFO, &hwdec_info);
-    struct mp_hwdec_ctx *hwctx = hwdec_info ? hwdec_info->hwctx : NULL;
+    struct mp_hwdec_ctx *hwctx =
+        hwdec_devices_get_first(mpctx->video_out->hwdec_devs);
+
     const char *name = hwctx ? hwctx->driver_name : NULL;
-    if (!name && hwctx && hwctx->type != HWDEC_NONE && hwctx->type != HWDEC_AUTO)
+    if (!name && hwctx)
         name = m_opt_choice_str(mp_hwdec_names, hwctx->type);
 
     return m_property_strdup_ro(action, arg, name);
@@ -2244,8 +2244,11 @@ static int mp_property_detected_hwdec(void *ctx, struct m_property *prop,
         if (vd)
             video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
 
-        if (current <= 0 && vd && vd->hwdec_info && vd->hwdec_info->hwctx)
-            current = vd->hwdec_info->hwctx->type;
+        if (current <= 0 && vd && vd->hwdec_devs) {
+            struct mp_hwdec_ctx *hwctx = hwdec_devices_get_first(vd->hwdec_devs);
+            if (hwctx)
+                current = hwctx->type;
+        }
 
         // In case of the "-copy" ones, which are "detected" every time the
         // decoder is opened, return "no" if no decoding is active.

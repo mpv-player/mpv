@@ -89,13 +89,16 @@ struct mpv_opengl_cb_context {
     struct vo *active;
     int hwdec_api;
 
+    // --- This is only mutable while initialized=false, during which nothing
+    //     except the OpenGL context manager is allowed to access it.
+    struct mp_hwdec_devices *hwdec_devs;
+
     // --- All of these can only be accessed from the thread where the host
     //     application's OpenGL context is current - i.e. only while the
     //     host application is calling certain mpv_opengl_cb_* APIs.
     GL *gl;
     struct gl_video *renderer;
     struct gl_hwdec *hwdec;
-    struct mp_hwdec_info hwdec_info; // it's also semi-immutable after init
 };
 
 static void update(struct vo_priv *p);
@@ -180,11 +183,10 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
     if (!ctx->renderer)
         return MPV_ERROR_UNSUPPORTED;
 
-    ctx->hwdec = gl_hwdec_load_api_id(ctx->log, ctx->gl, ctx->global,
-                                      ctx->hwdec_api);
+    ctx->hwdec_devs = hwdec_devices_create();
+    ctx->hwdec = gl_hwdec_load_api(ctx->log, ctx->gl, ctx->global,
+                                   ctx->hwdec_devs, ctx->hwdec_api);
     gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
-    if (ctx->hwdec)
-        ctx->hwdec_info.hwctx = ctx->hwdec->hwctx;
 
     pthread_mutex_lock(&ctx->lock);
     // We don't know the exact caps yet - use a known superset
@@ -222,6 +224,8 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
     ctx->renderer = NULL;
     gl_hwdec_uninit(ctx->hwdec);
     ctx->hwdec = NULL;
+    hwdec_devices_destroy(ctx->hwdec_devs);
+    ctx->hwdec_devs = NULL;
     talloc_free(ctx->gl);
     ctx->gl = NULL;
     talloc_free(ctx->new_opts_cfg);
@@ -514,11 +518,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         char *arg = data;
         return reparse_cmdline(p, arg);
     }
-    case VOCTRL_GET_HWDEC_INFO: {
-        struct mp_hwdec_info **arg = data;
-        *arg = p->ctx ? &p->ctx->hwdec_info : NULL;
-        return true;
-    }
     }
 
     return VO_NOTIMPL;
@@ -560,6 +559,8 @@ static int preinit(struct vo *vo)
     memset(p->ctx->eq.values, 0, sizeof(p->ctx->eq.values));
     p->ctx->eq_changed = true;
     pthread_mutex_unlock(&p->ctx->lock);
+
+    vo->hwdec_devs = p->ctx->hwdec_devs;
 
     return 0;
 }

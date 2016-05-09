@@ -27,11 +27,10 @@
 #include "osdep/timer.h"
 #include "osdep/windows_utils.h"
 #include "hwdec.h"
-#include "video/d3d.h"
 #include "video/hwdec.h"
 
 struct priv {
-    struct mp_d3d_ctx ctx;
+    struct mp_hwdec_ctx hwctx;
 
     ID3D11Device *d3d11_device;
     ID3D11VideoDevice *video_dev;
@@ -94,6 +93,8 @@ static void destroy(struct gl_hwdec *hw)
 
     destroy_objects(hw);
 
+    hwdec_devices_remove(hw->devs, &p->hwctx);
+
     if (p->video_ctx)
         ID3D11VideoContext_Release(p->video_ctx);
     p->video_ctx = NULL;
@@ -109,9 +110,6 @@ static void destroy(struct gl_hwdec *hw)
 
 static int create(struct gl_hwdec *hw)
 {
-    if (hw->hwctx)
-        return -1;
-
     EGLDisplay egl_display = eglGetCurrentDisplay();
     if (!egl_display)
         return -1;
@@ -199,11 +197,13 @@ static int create(struct gl_hwdec *hw)
 
     hw->converted_imgfmt = IMGFMT_RGB0;
 
-    p->ctx.d3d11_device = p->d3d11_device;
-    p->ctx.hwctx.type = HWDEC_D3D11VA;
-    p->ctx.hwctx.d3d_ctx = &p->ctx;
+    p->hwctx = (struct mp_hwdec_ctx){
+        .type = HWDEC_D3D11VA,
+        .driver_name = hw->driver->name,
+        .ctx = p->d3d11_device,
+    };
+    hwdec_devices_add(hw->devs, &p->hwctx);
 
-    hw->hwctx = &p->ctx.hwctx;
     return 0;
 fail:
     destroy(hw);

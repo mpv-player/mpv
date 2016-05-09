@@ -43,6 +43,7 @@
 #include "options/m_config.h"
 #include "common/msg.h"
 #include "common/global.h"
+#include "video/hwdec.h"
 #include "video/mp_image.h"
 #include "sub/osd.h"
 #include "osdep/io.h"

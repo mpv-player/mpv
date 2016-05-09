@@ -204,7 +204,7 @@ static void recreate_video_filters(struct MPContext *mpctx)
 
     vf_destroy(vo_c->vf);
     vo_c->vf = vf_new(mpctx->global);
-    vo_c->vf->hwdec = vo_c->hwdec_info;
+    vo_c->vf->hwdec_devs = vo_c->hwdec_devs;
     vo_c->vf->wakeup_callback = wakeup_playloop;
     vo_c->vf->wakeup_callback_ctx = mpctx;
     vo_c->vf->container_fps = vo_c->container_fps;
@@ -334,7 +334,7 @@ int init_video_decoder(struct MPContext *mpctx, struct track *track)
     d_video->codec = track->stream->codec;
     d_video->fps = d_video->header->codec->fps;
     if (mpctx->vo_chain)
-        d_video->hwdec_info = mpctx->vo_chain->hwdec_info;
+        d_video->hwdec_devs = mpctx->vo_chain->hwdec_devs;
 
     MP_VERBOSE(d_video, "Container reported FPS: %f\n", d_video->fps);
 
@@ -404,7 +404,7 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
     vo_c->vo = mpctx->video_out;
     vo_c->vf = vf_new(mpctx->global);
 
-    vo_control(vo_c->vo, VOCTRL_GET_HWDEC_INFO, &vo_c->hwdec_info);
+    vo_c->hwdec_devs = vo_c->vo->hwdec_devs;
 
     vo_c->filter_src = src;
     if (!vo_c->filter_src) {

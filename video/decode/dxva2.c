@@ -32,7 +32,6 @@
 #include "video/mp_image_pool.h"
 #include "video/hwdec.h"
 
-#include "video/d3d.h"
 #include "video/dxva2.h"
 #include "d3d.h"
 
@@ -406,9 +405,7 @@ static int dxva2_init(struct lavc_ctx *s)
         p->sw_pool = talloc_steal(p, mp_image_pool_new(17));
     }
 
-    if (s->hwdec_info && s->hwdec_info->hwctx && s->hwdec_info->hwctx->d3d_ctx)
-        p->device = s->hwdec_info->hwctx->d3d_ctx->d3d9_device;
-
+    p->device = hwdec_devices_load(s->hwdec_devs, s->hwdec->type);
     if (p->device) {
         IDirect3D9_AddRef(p->device);
         MP_VERBOSE(p, "Using VO-supplied device %p.\n", p->device);
@@ -477,16 +474,15 @@ fail:
     return -1;
 }
 
-static int dxva2_probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+static int dxva2_probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                        const char *codec)
 {
-    hwdec_request_api(info, "dxva2");
     // dxva2-copy can do without external context; dxva2 requires it.
-    if (hwdec->type != HWDEC_DXVA2_COPY) {
-        if (!info || !info->hwctx || !info->hwctx->d3d_ctx ||
-            info->hwctx->type == HWDEC_DXVA2_COPY ||
-            !info->hwctx->d3d_ctx->d3d9_device)
+    if (hwdec->type == HWDEC_DXVA2) {
+        if (!hwdec_devices_load(ctx->hwdec_devs, HWDEC_DXVA2))
             return HWDEC_ERR_NO_CTX;
+    } else {
+        hwdec_devices_load(ctx->hwdec_devs, HWDEC_DXVA2_COPY);
     }
     return d3d_probe_codec(codec);
 }

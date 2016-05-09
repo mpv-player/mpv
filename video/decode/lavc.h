@@ -30,7 +30,7 @@ typedef struct lavc_ctx {
     int max_delay_queue;
 
     // From VO
-    struct mp_hwdec_info *hwdec_info;
+    struct mp_hwdec_devices *hwdec_devs;
 
     // For free use by hwdec implementation
     void *hwdec_priv;
@@ -54,7 +54,7 @@ struct vd_lavc_hwdec {
     // efficiency by not blocking on the hardware pipeline by reading back
     // immediately after decoding.
     int delay_queue;
-    int (*probe)(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+    int (*probe)(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                  const char *codec);
     int (*init)(struct lavc_ctx *ctx);
     int (*init_decoder)(struct lavc_ctx *ctx, int w, int h);

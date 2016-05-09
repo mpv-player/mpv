@@ -357,7 +357,7 @@ static void destroy_va_dummy_ctx(struct priv *p)
 
 // Creates a "private" VADisplay, disconnected from the VO. We just create a
 // new X connection, because that's simpler. (We could also pass the X
-// connection along with struct mp_hwdec_info, if we wanted.)
+// connection along with struct mp_hwdec_devices, if we wanted.)
 static bool create_va_dummy_ctx(struct priv *p)
 {
     for (int n = 0; native_displays[n]; n++) {
@@ -399,21 +399,23 @@ static void uninit(struct lavc_ctx *ctx)
     ctx->hwdec_priv = NULL;
 }
 
-static int init_with_vactx(struct lavc_ctx *ctx, struct mp_vaapi_ctx *vactx)
+static int init(struct lavc_ctx *ctx, bool direct)
 {
     struct priv *p = talloc_ptrtype(NULL, p);
     *p = (struct priv) {
         .log = mp_log_new(p, ctx->log, "vaapi"),
-        .ctx = vactx,
         .va_context = &p->va_context_storage,
         .rt_format = VA_RT_FORMAT_YUV420
     };
 
-    if (!p->ctx)
+    if (direct) {
+        p->ctx = hwdec_devices_get(ctx->hwdec_devs, HWDEC_VAAPI)->ctx;
+    } else {
         create_va_dummy_ctx(p);
-    if (!p->ctx) {
-        talloc_free(p);
-        return -1;
+        if (!p->ctx) {
+            talloc_free(p);
+            return -1;
+        }
     }
 
     p->display = p->ctx->display;
@@ -431,25 +433,22 @@ static int init_with_vactx(struct lavc_ctx *ctx, struct mp_vaapi_ctx *vactx)
     return 0;
 }
 
-static int init(struct lavc_ctx *ctx)
+static int init_direct(struct lavc_ctx *ctx)
 {
-    return init_with_vactx(ctx, ctx->hwdec_info->hwctx->vaapi_ctx);
+    return init(ctx, true);
 }
 
-static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                  const char *codec)
 {
-    hwdec_request_api(info, "vaapi");
-    if (!info || !info->hwctx || !info->hwctx->vaapi_ctx)
+    if (!hwdec_devices_load(ctx->hwdec_devs, HWDEC_VAAPI))
         return HWDEC_ERR_NO_CTX;
     if (!hwdec_check_codec_support(codec, profiles))
         return HWDEC_ERR_NO_CODEC;
-    if (va_guess_if_emulated(info->hwctx->vaapi_ctx))
-        return HWDEC_ERR_EMULATED;
     return 0;
 }
 
-static int probe_copy(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+static int probe_copy(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                       const char *codec)
 {
     struct priv dummy = {mp_null_log};
@@ -466,7 +465,7 @@ static int probe_copy(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
 
 static int init_copy(struct lavc_ctx *ctx)
 {
-    return init_with_vactx(ctx, NULL);
+    return init(ctx, false);
 }
 
 static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *img)
@@ -497,7 +496,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .type = HWDEC_VAAPI,
     .image_format = IMGFMT_VAAPI,
     .probe = probe,
-    .init = init,
+    .init = init_direct,
     .uninit = uninit,
     .init_decoder = init_decoder,
     .allocate_image = allocate_image,

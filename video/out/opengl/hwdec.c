@@ -61,6 +61,7 @@ static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
 
 static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
                                           struct mpv_global *global,
+                                          struct mp_hwdec_devices *devs,
                                           const struct gl_hwdec_driver *drv,
                                           bool is_auto)
 {
@@ -70,6 +71,7 @@ static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
         .log = mp_log_new(hwdec, log, drv->name),
         .global = global,
         .gl = gl,
+        .devs = devs,
         .gl_texture_target = GL_TEXTURE_2D,
         .probing = is_auto,
     };
@@ -79,37 +81,24 @@ static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
         mp_verbose(log, "Loading failed.\n");
         return NULL;
     }
-    if (hwdec->hwctx && !hwdec->hwctx->driver_name)
-        hwdec->hwctx->driver_name = hwdec->driver->name;
     return hwdec;
 }
 
-struct gl_hwdec *gl_hwdec_load_api_id(struct mp_log *log, GL *gl,
-                                      struct mpv_global *g, int id)
+struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
+                                   struct mpv_global *g,
+                                   struct mp_hwdec_devices *devs,
+                                   enum hwdec_type api)
 {
-    bool is_auto = id == HWDEC_AUTO;
+    bool is_auto = api == HWDEC_AUTO;
     for (int n = 0; mpgl_hwdec_drivers[n]; n++) {
         const struct gl_hwdec_driver *drv = mpgl_hwdec_drivers[n];
-        if (is_auto || id == drv->api) {
-            struct gl_hwdec *r = load_hwdec_driver(log, gl, g, drv, is_auto);
+        if (is_auto || api == drv->api) {
+            struct gl_hwdec *r = load_hwdec_driver(log, gl, g, devs, drv, is_auto);
             if (r)
                 return r;
         }
     }
     return NULL;
-}
-
-// Like gl_hwdec_load_api_id(), but use option names.
-struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
-                                   struct mpv_global *g, const char *api_name)
-{
-    int id = HWDEC_NONE;
-    for (const struct m_opt_choice_alternatives *c = mp_hwdec_names; c->name; c++)
-    {
-        if (strcmp(c->name, api_name) == 0)
-            id = c->value;
-    }
-    return gl_hwdec_load_api_id(log, gl, g, id);
 }
 
 void gl_hwdec_uninit(struct gl_hwdec *hwdec)

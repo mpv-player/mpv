@@ -32,7 +32,10 @@ static struct mp_image *download_image(struct mp_hwdec_ctx *hwctx,
                                        struct mp_image *mpi,
                                        struct mp_image_pool *swpool)
 {
-    struct mp_vdpau_ctx *ctx = hwctx->vdpau_ctx;
+    if (mpi->imgfmt != IMGFMT_VDPAU && mpi->imgfmt != IMGFMT_VDPAU_OUTPUT)
+        return NULL;
+
+    struct mp_vdpau_ctx *ctx = hwctx->ctx;
     struct vdp_functions *vdp = &ctx->vdp;
     VdpStatus vdp_st;
 
@@ -395,8 +398,7 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
         .preemption_counter = 1,
         .hwctx = {
             .type = HWDEC_VDPAU,
-            .priv = ctx,
-            .vdpau_ctx = ctx,
+            .ctx = ctx,
             .download_image = download_image,
         },
         .getimg_surface = VDP_INVALID_HANDLE,

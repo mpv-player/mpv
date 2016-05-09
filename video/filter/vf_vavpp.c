@@ -481,19 +481,17 @@ static bool initialize(struct vf_instance *vf)
 
 static int vf_open(vf_instance_t *vf)
 {
+    struct vf_priv_s *p = vf->priv;
+
     vf->reconfig = reconfig;
     vf->filter_ext = filter_ext;
     vf->query_format = query_format;
     vf->uninit = uninit;
     vf->control = control;
 
-    struct vf_priv_s *p = vf->priv;
-    if (!vf->hwdec)
-        return false;
-    hwdec_request_api(vf->hwdec, "vaapi");
-    p->va = vf->hwdec->hwctx ? vf->hwdec->hwctx->vaapi_ctx : NULL;
-    if (!p->va || !p->va->display)
-        return false;
+    p->va = hwdec_devices_load(vf->hwdec_devs, HWDEC_VAAPI);
+    if (!p->va)
+        return 0;
     p->display = p->va->display;
     if (initialize(vf))
         return true;

@@ -280,18 +280,13 @@ static bool hwdec_is_wrapper(struct vd_lavc_hwdec *hwdec, const char *decoder)
     return bstr_endswith0(bstr0(decoder), hwdec->lavc_suffix);
 }
 
-void hwdec_request_api(struct mp_hwdec_info *info, const char *api_name)
-{
-    if (info && info->load_api)
-        info->load_api(info, api_name);
-}
-
-static int hwdec_probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+static int hwdec_probe(struct dec_video *vd, struct vd_lavc_hwdec *hwdec,
                        const char *codec)
 {
+    vd_ffmpeg_ctx *ctx = vd->priv;
     int r = 0;
     if (hwdec->probe)
-        r = hwdec->probe(hwdec, info, codec);
+        r = hwdec->probe(ctx, hwdec, codec);
     if (r >= 0) {
         if (hwdec->lavc_suffix && !hwdec_find_decoder(codec, hwdec->lavc_suffix))
             return HWDEC_ERR_NO_CODEC;
@@ -309,7 +304,7 @@ static struct vd_lavc_hwdec *probe_hwdec(struct dec_video *vd, bool autoprobe,
         MP_VERBOSE(vd, "Requested hardware decoder not compiled.\n");
         return NULL;
     }
-    int r = hwdec_probe(hwdec, vd->hwdec_info, codec);
+    int r = hwdec_probe(vd, hwdec, codec);
     if (r == HWDEC_ERR_EMULATED) {
         if (autoprobe)
             return NULL;
@@ -412,6 +407,7 @@ static int init(struct dec_video *vd, const char *decoder)
     ctx->log = vd->log;
     ctx->opts = vd->opts;
     ctx->decoder = talloc_strdup(ctx, decoder);
+    ctx->hwdec_devs = vd->hwdec_devs;
 
     reinit(vd);
 
@@ -440,8 +436,6 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     AVCodec *lavc_codec = avcodec_find_decoder_by_name(decoder);
     if (!lavc_codec)
         return;
-
-    ctx->hwdec_info = vd->hwdec_info;
 
     ctx->codec_timebase = (AVRational){0};
     if (strstr(decoder, "_mmal") || strstr(decoder, "_mediacodec"))

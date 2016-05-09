@@ -17,6 +17,8 @@
 
 #include <assert.h>
 #include <windows.h>
+#include <d3d9.h>
+
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
@@ -25,11 +27,10 @@
 #include "osdep/windows_utils.h"
 #include "hwdec.h"
 #include "video/dxva2.h"
-#include "video/d3d.h"
 #include "video/hwdec.h"
 
 struct priv {
-    struct mp_d3d_ctx ctx;
+    struct mp_hwdec_ctx hwctx;
 
     HMODULE             d3d9_dll;
     IDirect3D9Ex       *d3d9ex;
@@ -77,6 +78,8 @@ static void destroy(struct gl_hwdec *hw)
 
     destroy_textures(hw);
 
+    hwdec_devices_remove(hw->devs, &p->hwctx);
+
     if (p->query9)
         IDirect3DQuery9_Release(p->query9);
 
@@ -92,9 +95,6 @@ static void destroy(struct gl_hwdec *hw)
 
 static int create(struct gl_hwdec *hw)
 {
-    if (hw->hwctx)
-        return -1;
-
     EGLDisplay egl_display = eglGetCurrentDisplay();
     if (!egl_display)
         return -1;
@@ -207,11 +207,13 @@ static int create(struct gl_hwdec *hw)
 
     hw->converted_imgfmt = IMGFMT_RGB0;
 
-    p->ctx.d3d9_device = (IDirect3DDevice9 *)p->device9ex;
-    p->ctx.hwctx.type = HWDEC_DXVA2;
-    p->ctx.hwctx.d3d_ctx = &p->ctx;
+    p->hwctx = (struct mp_hwdec_ctx){
+        .type = HWDEC_DXVA2,
+        .driver_name = hw->driver->name,
+        .ctx = (IDirect3DDevice9 *)p->device9ex,
+    };
+    hwdec_devices_add(hw->devs, &p->hwctx);
 
-    hw->hwctx = &p->ctx.hwctx;
     return 0;
 fail:
     destroy(hw);

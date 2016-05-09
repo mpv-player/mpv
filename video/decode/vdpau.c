@@ -75,7 +75,7 @@ static int init(struct lavc_ctx *ctx)
     struct priv *p = talloc_ptrtype(NULL, p);
     *p = (struct priv) {
         .log = mp_log_new(p, ctx->log, "vdpau"),
-        .mpvdp = ctx->hwdec_info->hwctx->vdpau_ctx,
+        .mpvdp = hwdec_devices_get(ctx->hwdec_devs, HWDEC_VDPAU)->ctx,
     };
     ctx->hwdec_priv = p;
 
@@ -83,14 +83,11 @@ static int init(struct lavc_ctx *ctx)
     return 0;
 }
 
-static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                  const char *codec)
 {
-    hwdec_request_api(info, "vdpau");
-    if (!info || !info->hwctx || !info->hwctx->vdpau_ctx)
+    if (!hwdec_devices_load(ctx->hwdec_devs, HWDEC_VDPAU))
         return HWDEC_ERR_NO_CTX;
-    if (mp_vdpau_guess_if_emulated(info->hwctx->vdpau_ctx))
-        return HWDEC_ERR_EMULATED;
     return 0;
 }
 
