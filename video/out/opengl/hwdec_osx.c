@@ -246,6 +246,8 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
             .tex_w = IOSurfaceGetWidthOfPlane(surface, i),
             .tex_h = IOSurfaceGetHeightOfPlane(surface, i),
         };
+        snprintf(out_frame->planes[i].swizzle, sizeof(out_frame->planes[i].swizzle),
+                 "%s", f->gl[i].swizzle);
     }
 
     return 0;

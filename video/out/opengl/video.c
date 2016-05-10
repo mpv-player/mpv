@@ -2571,6 +2571,8 @@ static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
                     .gl_target = plane->gl_target,
                     .gl_texture = plane->gl_texture,
                 };
+                snprintf(vimg->planes[n].swizzle, sizeof(vimg->planes[n].swizzle),
+                         "%s", plane->swizzle);
             }
         } else {
             MP_FATAL(p, "Mapping hardware decoded surface failed.\n");
