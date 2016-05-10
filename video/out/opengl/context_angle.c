@@ -33,6 +33,7 @@ struct priv {
     EGLDisplay egl_display;
     EGLContext egl_context;
     EGLSurface egl_surface;
+    bool use_es2;
 };
 
 static void angle_uninit(MPGLContext *ctx)
@@ -183,7 +184,7 @@ static int angle_init(struct MPGLContext *ctx, int flags)
         goto fail;
     }
 
-    if (!create_context_egl(ctx, config, 3) &&
+    if (!(!p->use_es2 && create_context_egl(ctx, config, 3)) &&
         !create_context_egl(ctx, config, 2))
     {
         MP_FATAL(ctx->vo, "Could not create EGL context!\n");
@@ -197,6 +198,17 @@ static int angle_init(struct MPGLContext *ctx, int flags)
 fail:
     angle_uninit(ctx);
     return -1;
+}
+
+static int angle_init_es2(struct MPGLContext *ctx, int flags)
+{
+    struct priv *p = ctx->priv;
+    p->use_es2 = true;
+    if (ctx->vo->probing) {
+        MP_VERBOSE(ctx->vo, "Not using this by default.\n");
+        return -1;
+    }
+    return angle_init(ctx, flags);
 }
 
 static int angle_reconfig(struct MPGLContext *ctx)
@@ -220,6 +232,16 @@ const struct mpgl_driver mpgl_driver_angle = {
     .name           = "angle",
     .priv_size      = sizeof(struct priv),
     .init           = angle_init,
+    .reconfig       = angle_reconfig,
+    .swap_buffers   = angle_swap_buffers,
+    .control        = angle_control,
+    .uninit         = angle_uninit,
+};
+
+const struct mpgl_driver mpgl_driver_angle_es2 = {
+    .name           = "angle-es2",
+    .priv_size      = sizeof(struct priv),
+    .init           = angle_init_es2,
     .reconfig       = angle_reconfig,
     .swap_buffers   = angle_swap_buffers,
     .control        = angle_control,
