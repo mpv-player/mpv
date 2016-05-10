@@ -664,6 +664,7 @@ const char* mp_sampler_type(GLenum texture_target)
     case GL_TEXTURE_1D:         return "sampler1D";
     case GL_TEXTURE_2D:         return "sampler2D";
     case GL_TEXTURE_RECTANGLE:  return "sampler2DRect";
+    case GL_TEXTURE_EXTERNAL_OES: return "samplerExternalOES";
     case GL_TEXTURE_3D:         return "sampler3D";
     default: abort();
     }

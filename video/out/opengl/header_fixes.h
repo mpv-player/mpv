@@ -88,6 +88,11 @@
 #define GL_UNSIGNED_SHORT_8_8_REV_APPLE 0x85BB
 #endif
 
+// GL_OES_EGL_image_external, GL_NV_EGL_stream_consumer_external
+#ifndef GL_TEXTURE_EXTERNAL_OES
+#define GL_TEXTURE_EXTERNAL_OES 0x8D65
+#endif
+
 #undef MP_GET_GL_WORKAROUNDS
 
 #endif // MP_GET_GL_WORKAROUNDS

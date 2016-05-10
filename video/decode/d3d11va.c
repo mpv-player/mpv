@@ -187,6 +187,29 @@ static const struct d3d_decoded_format d3d11_formats[] = {
 };
 #undef DFMT
 
+// Update hw_subfmt to the underlying format. Needed because AVFrame does not
+// have such an attribute, so it can't be passed through, and is updated here
+// instead. (But in the future, AVHWFramesContext could be used.)
+static struct mp_image *d3d11va_update_image_attribs(struct lavc_ctx *s,
+                                                     struct mp_image *img)
+{
+    ID3D11Texture2D *texture = (void *)img->planes[1];
+
+    if (!texture)
+        return img;
+
+    D3D11_TEXTURE2D_DESC texture_desc;
+    ID3D11Texture2D_GetDesc(texture, &texture_desc);
+    for (int n = 0; n < MP_ARRAY_SIZE(d3d11_formats); n++) {
+        if (d3d11_formats[n].dxfmt == texture_desc.Format) {
+            img->params.hw_subfmt = d3d11_formats[n].mpfmt;
+            break;
+        }
+    }
+
+    return img;
+}
+
 static bool d3d11_format_supported(struct lavc_ctx *s, const GUID *guid,
                                    const struct d3d_decoded_format *format)
 {
@@ -274,7 +297,7 @@ static int d3d11va_init_decoder(struct lavc_ctx *s, int w, int h)
         .MiscFlags        = 0,
         .ArraySize        = n_surfaces,
         .Usage            = D3D11_USAGE_DEFAULT,
-        .BindFlags        = D3D11_BIND_DECODER,
+        .BindFlags        = D3D11_BIND_DECODER | D3D11_BIND_SHADER_RESOURCE,
         .CPUAccessFlags   = 0,
     };
     hr = ID3D11Device_CreateTexture2D(p->device, &tex_desc, NULL, &texture);
@@ -555,6 +578,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_d3d11va = {
     .uninit         = d3d11va_uninit,
     .init_decoder   = d3d11va_init_decoder,
     .allocate_image = d3d11va_allocate_image,
+    .process_image  = d3d11va_update_image_attribs,
 };
 
 const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy = {
