@@ -2908,9 +2908,9 @@ static void init_image_desc(struct gl_video *p, int fmt)
 
 // test_only=true checks if the format is supported
 // test_only=false also initializes some rendering parameters accordingly
-static bool init_format(struct gl_video *priv, int fmt, bool test_only)
+static bool init_format(struct gl_video *p, int fmt, bool test_only)
 {
-    struct GL *gl = priv->gl;
+    struct GL *gl = p->gl;
 
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
     if (!desc.id)
@@ -2927,8 +2927,8 @@ static bool init_format(struct gl_video *priv, int fmt, bool test_only)
         int bits = desc.component_bits;
         if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
             plane_format[0] = find_plane_format(gl, (bits + 7) / 8, 1);
-            for (int p = 1; p < desc.num_planes; p++)
-                plane_format[p] = plane_format[0];
+            for (int n = 1; n < desc.num_planes; n++)
+                plane_format[n] = plane_format[0];
             // RGB/planar
             if (desc.flags & MP_IMGFLAG_RGB_P)
                 snprintf(color_swizzle, sizeof(color_swizzle), "brga");
@@ -2973,7 +2973,7 @@ static bool init_format(struct gl_video *priv, int fmt, bool test_only)
     }
 
     // Packed YUV Apple formats
-    if (priv->gl->mpgl_caps & MPGL_CAP_APPLE_RGB_422) {
+    if (p->gl->mpgl_caps & MPGL_CAP_APPLE_RGB_422) {
         for (const struct fmt_entry *e = gl_apple_formats; e->mp_format; e++) {
             if (e->mp_format == fmt) {
                 snprintf(color_swizzle, sizeof(color_swizzle), "gbra");
@@ -2989,28 +2989,28 @@ static bool init_format(struct gl_video *priv, int fmt, bool test_only)
 supported:
 
     if (desc.component_bits > 8 && desc.component_bits < 16) {
-        if (priv->texture_16bit_depth < 16)
+        if (p->texture_16bit_depth < 16)
             return false;
     }
 
     int use_integer = -1;
-    for (int p = 0; p < desc.num_planes; p++) {
-        if (!plane_format[p]->format)
+    for (int n = 0; n < desc.num_planes; n++) {
+        if (!plane_format[n]->format)
             return false;
-        int use_int_plane = !!is_integer_format(plane_format[p]);
+        int use_int_plane = !!is_integer_format(plane_format[n]);
         if (use_integer < 0)
             use_integer = use_int_plane;
         if (use_integer != use_int_plane)
             return false; // mixed planes not supported
     }
 
-    if (use_integer && priv->forced_dumb_mode)
+    if (use_integer && p->forced_dumb_mode)
         return false;
 
     if (!test_only) {
-        for (int p = 0; p < desc.num_planes; p++) {
-            struct texplane *plane = &priv->image.planes[p];
-            const struct fmt_entry *format = plane_format[p];
+        for (int n = 0; n < desc.num_planes; n++) {
+            struct texplane *plane = &p->image.planes[n];
+            const struct fmt_entry *format = plane_format[n];
             assert(format);
             plane->gl_format = format->format;
             plane->gl_internal_format = format->internal_format;
@@ -3020,11 +3020,10 @@ supported:
                 snprintf(plane->swizzle, sizeof(plane->swizzle), "raaa");
         }
 
-        init_image_desc(priv, fmt);
+        init_image_desc(p, fmt);
 
-        priv->use_integer_conversion = use_integer;
-        snprintf(priv->color_swizzle, sizeof(priv->color_swizzle), "%s",
-                 color_swizzle);
+        p->use_integer_conversion = use_integer;
+        snprintf(p->color_swizzle, sizeof(p->color_swizzle), "%s", color_swizzle);
     }
 
     return true;
