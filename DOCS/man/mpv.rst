@@ -320,10 +320,21 @@ example, paths starting with ``-`` will be interpreted as options. Likewise,
 if a path contains the sequence ``://``, the string before that might be
 interpreted as protocol prefix, even though ``://`` can be part of a legal
 UNIX path. To avoid problems with arbitrary paths, you should be sure that
-absolute paths passed to mpv start with ``/``, and relative paths with ``./``.
+absolute paths passed to mpv start with ``/``, and prefix relative paths with
+``./``.
+
+Using the ``file://`` pseudo-protocol is discouraged, because it involves
+strange URL unescaping rules.
 
 The name ``-`` itself is interpreted as stdin, and will cause mpv to disable
 console controls. (Which makes it suitable for playing data piped to stdin.)
+
+The special argument ``--`` can be used to stop mpv from interpreting the
+following arguments as options.
+
+when using the client API, you should strictly avoid using ``mpv_command_string``
+for invoking the ``loadfile`` command, and instead prefer e.g. ``mpv_command``
+to avoid the need for filename escaping.
 
 For paths passed to suboptions, the situation is further complicated by the
 need to escape special characters. To work this around, the path can be
