@@ -72,7 +72,6 @@ static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
         .global = global,
         .gl = gl,
         .devs = devs,
-        .gl_texture_target = GL_TEXTURE_2D,
         .probing = is_auto,
     };
     mp_verbose(log, "Loading hwdec driver '%s'\n", drv->name);

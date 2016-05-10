@@ -114,7 +114,7 @@ struct priv {
     EGLImageKHR images[4];
     VAImage current_image;
     bool buffer_acquired;
-    struct mp_image *current_ref;
+    int current_mpfmt;
 
     EGLImageKHR (EGLAPIENTRY *CreateImageKHR)(EGLDisplay, EGLContext,
                                               EGLenum, EGLClientBuffer,
@@ -125,7 +125,7 @@ struct priv {
 
 static bool test_format(struct gl_hwdec *hw);
 
-static void unref_image(struct gl_hwdec *hw)
+static void unmap_frame(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
     VAStatus status;
@@ -149,8 +149,6 @@ static void unref_image(struct gl_hwdec *hw)
         p->current_image.image_id = VA_INVALID_ID;
     }
 
-    mp_image_unrefp(&p->current_ref);
-
     va_unlock(p->ctx);
 }
 
@@ -167,7 +165,7 @@ static void destroy_textures(struct gl_hwdec *hw)
 static void destroy(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
-    unref_image(hw);
+    unmap_frame(hw);
     destroy_textures(hw);
     if (p->ctx)
         hwdec_devices_remove(hw->devs, &p->ctx->hwctx);
@@ -242,8 +240,6 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     // Recreate them to get rid of all previous image data (possibly).
     destroy_textures(hw);
 
-    assert(params->imgfmt == hw->driver->imgfmt);
-
     gl->GenTextures(4, p->gl_textures);
     for (int n = 0; n < 4; n++) {
         gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
@@ -254,9 +250,9 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     }
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    hw->converted_imgfmt = va_fourcc_to_imgfmt(params->hw_subfmt);
-    if (hw->converted_imgfmt != IMGFMT_NV12 &&
-        hw->converted_imgfmt != IMGFMT_420P)
+    p->current_mpfmt = va_fourcc_to_imgfmt(params->hw_subfmt);
+    if (p->current_mpfmt != IMGFMT_NV12 &&
+        p->current_mpfmt != IMGFMT_420P)
     {
         MP_FATAL(p, "unsupported VA image format %s\n",
                  mp_tag_str(params->hw_subfmt));
@@ -264,7 +260,9 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     }
 
     MP_VERBOSE(p, "format: %s %s\n", mp_tag_str(params->hw_subfmt),
-               mp_imgfmt_to_name(hw->converted_imgfmt));
+               mp_imgfmt_to_name(p->current_mpfmt));
+
+    params->imgfmt = p->current_mpfmt;
 
     return 0;
 }
@@ -277,17 +275,15 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     attribs[num_attribs] = EGL_NONE;                    \
     } while(0)
 
-static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     GLuint *out_textures)
+static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
+                     struct gl_hwdec_frame *out_frame)
 {
     struct priv *p = hw->priv;
     GL *gl = hw->gl;
     VAStatus status;
     VAImage *va_image = &p->current_image;
 
-    unref_image(hw);
-
-    mp_image_setrefp(&p->current_ref, hw_image);
+    unmap_frame(hw);
 
     va_lock(p->ctx);
 
@@ -296,9 +292,9 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
         goto err;
 
     int mpfmt = va_fourcc_to_imgfmt(va_image->format.fourcc);
-    if (hw->converted_imgfmt != mpfmt) {
+    if (p->current_mpfmt != mpfmt) {
         MP_FATAL(p, "mid-stream hwdec format change (%s -> %s) not supported\n",
-                 mp_imgfmt_to_name(hw->converted_imgfmt), mp_imgfmt_to_name(mpfmt));
+                 mp_imgfmt_to_name(p->current_mpfmt), mp_imgfmt_to_name(mpfmt));
         goto err;
     }
 
@@ -337,12 +333,17 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
         gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
         p->EGLImageTargetTexture2DOES(GL_TEXTURE_2D, p->images[n]);
 
-        out_textures[n] = p->gl_textures[n];
+        out_frame->planes[n] = (struct gl_hwdec_plane){
+            .gl_texture = p->gl_textures[n],
+            .gl_target = GL_TEXTURE_2D,
+            .tex_w = mp_image_plane_w(&layout, n),
+            .tex_h = mp_image_plane_h(&layout, n),
+        };
     }
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
     if (va_image->format.fourcc == VA_FOURCC_YV12)
-        MPSWAP(GLuint, out_textures[1], out_textures[2]);
+        MPSWAP(struct gl_hwdec_plane, out_frame->planes[1], out_frame->planes[2]);
 
     va_unlock(p->ctx);
     return 0;
@@ -350,7 +351,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
 err:
     va_unlock(p->ctx);
     MP_FATAL(p, "mapping VAAPI EGL image failed\n");
-    unref_image(hw);
+    unmap_frame(hw);
     return -1;
 }
 
@@ -366,10 +367,10 @@ static bool test_format(struct gl_hwdec *hw)
         va_surface_init_subformat(surface);
         struct mp_image_params params = surface->params;
         if (reinit(hw, &params) >= 0) {
-            GLuint textures[4];
-            ok = map_image(hw, surface, textures) >= 0;
+            struct gl_hwdec_frame frame = {0};
+            ok = map_frame(hw, surface, &frame) >= 0;
         }
-        unref_image(hw);
+        unmap_frame(hw);
     }
     talloc_free(surface);
     talloc_free(alloc);
@@ -383,6 +384,7 @@ const struct gl_hwdec_driver gl_hwdec_vaegl = {
     .imgfmt = IMGFMT_VAAPI,
     .create = create,
     .reinit = reinit,
-    .map_image = map_image,
+    .map_frame = map_frame,
+    .unmap = unmap_frame,
     .destroy = destroy,
 };

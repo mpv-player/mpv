@@ -121,7 +121,6 @@ static int create(struct gl_hwdec *hw)
     }
     p->ctx->hwctx.driver_name = hw->driver->name;
     hwdec_devices_add(hw->devs, &p->ctx->hwctx);
-    hw->converted_imgfmt = IMGFMT_RGB0;
     return 0;
 }
 
@@ -167,16 +166,16 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 
     glCheckError(gl, hw->log, "After initializing vdpau OpenGL interop");
 
+    params->imgfmt = IMGFMT_RGB0;
+
     return 0;
 }
 
-static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     GLuint *out_textures)
+static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
+                     struct gl_hwdec_frame *out_frame)
 {
     struct priv *p = hw->priv;
     GL *gl = hw->gl;
-
-    assert(hw_image && hw_image->imgfmt == IMGFMT_VDPAU);
 
     int pe = mp_vdpau_handle_preemption(p->ctx, &p->preemption_counter);
     if (pe < 1) {
@@ -190,15 +189,31 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     if (!p->vdpgl_surface)
         return -1;
 
-    if (p->mapped)
-        gl->VDPAUUnmapSurfacesNV(1, &p->vdpgl_surface);
-
     mp_vdpau_mixer_render(p->mixer, NULL, p->vdp_surface, NULL, hw_image, NULL);
 
     gl->VDPAUMapSurfacesNV(1, &p->vdpgl_surface);
     p->mapped = true;
-    out_textures[0] = p->gl_texture;
+    *out_frame = (struct gl_hwdec_frame){
+        .planes = {
+            {
+                .gl_texture = p->gl_texture,
+                .gl_target = GL_TEXTURE_2D,
+                .tex_w = p->image_params.w,
+                .tex_h = p->image_params.h,
+            },
+        },
+    };
     return 0;
+}
+
+static void unmap(struct gl_hwdec *hw)
+{
+    struct priv *p = hw->priv;
+    GL *gl = hw->gl;
+
+    if (p->mapped)
+        gl->VDPAUUnmapSurfacesNV(1, &p->vdpgl_surface);
+    p->mapped = false;
 }
 
 const struct gl_hwdec_driver gl_hwdec_vdpau = {
@@ -207,6 +222,7 @@ const struct gl_hwdec_driver gl_hwdec_vdpau = {
     .imgfmt = IMGFMT_VDPAU,
     .create = create,
     .reinit = reinit,
-    .map_image = map_image,
+    .map_frame = map_frame,
+    .unmap = unmap,
     .destroy = destroy,
 };

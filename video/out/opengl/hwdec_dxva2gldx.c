@@ -107,8 +107,6 @@ static int create(struct gl_hwdec *hw)
         .ctx = (IDirect3DDevice9 *)p->device,
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
-
-    hw->converted_imgfmt = SHARED_SURFACE_MPFMT;
     return 0;
 }
 
@@ -119,8 +117,6 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     HRESULT hr;
 
     destroy_objects(hw);
-
-    assert(params->imgfmt == hw->driver->imgfmt);
 
     HANDLE share_handle = NULL;
     hr = IDirect3DDevice9Ex_CreateRenderTarget(
@@ -164,14 +160,16 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
         goto fail;
     }
 
+    params->imgfmt = SHARED_SURFACE_MPFMT;
+
     return 0;
 fail:
     destroy_objects(hw);
     return -1;
 }
 
-static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     GLuint *out_textures)
+static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
+                     struct gl_hwdec_frame *out_frame)
 {
     assert(hw_image && hw_image->imgfmt == hw->driver->imgfmt);
     GL *gl = hw->gl;
@@ -201,7 +199,16 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
         return -1;
     }
 
-    out_textures[0] = p->texture;
+    *out_frame = (struct gl_hwdec_frame){
+        .planes = {
+            {
+                .gl_texture = p->texture,
+                .gl_target = GL_TEXTURE_2D,
+                .tex_w = hw_image->w,
+                .tex_h = hw_image->h,
+            },
+        },
+    };
     return 0;
 }
 
@@ -211,6 +218,6 @@ const struct gl_hwdec_driver gl_hwdec_dxva2gldx = {
     .imgfmt = IMGFMT_DXVA2,
     .create = create,
     .reinit = reinit,
-    .map_image = map_image,
+    .map_frame = map_frame,
     .destroy = destroy,
 };

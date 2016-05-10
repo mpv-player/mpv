@@ -195,8 +195,6 @@ static int create(struct gl_hwdec *hw)
         goto fail;
     }
 
-    hw->converted_imgfmt = IMGFMT_RGB0;
-
     p->hwctx = (struct mp_hwdec_ctx){
         .type = HWDEC_D3D11VA,
         .driver_name = hw->driver->name,
@@ -217,8 +215,6 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     HRESULT hr;
 
     destroy_objects(hw);
-
-    assert(params->imgfmt == hw->driver->imgfmt);
 
     D3D11_TEXTURE2D_DESC texdesc = {
         .Width = params->w,
@@ -277,6 +273,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     eglBindTexImage(p->egl_display, p->egl_surface, EGL_BACK_BUFFER);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
+    params->imgfmt = IMGFMT_RGB0;
     return 0;
 fail:
     destroy_objects(hw);
@@ -358,8 +355,8 @@ fail:
     return -1;
 }
 
-static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     GLuint *out_textures)
+static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
+                     struct gl_hwdec_frame *out_frame)
 {
     struct priv *p = hw->priv;
     HRESULT hr;
@@ -410,7 +407,16 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
         return -1;
     }
 
-    out_textures[0] = p->gl_texture;
+    *out_frame = (struct gl_hwdec_frame){
+        .planes = {
+            {
+                .gl_texture = p->gl_texture,
+                .gl_target = GL_TEXTURE_2D,
+                .tex_w = hw_image->w,
+                .tex_h = hw_image->h,
+            },
+        },
+    };
     return 0;
 }
 
@@ -420,6 +426,6 @@ const struct gl_hwdec_driver gl_hwdec_d3d11egl = {
     .imgfmt = IMGFMT_D3D11VA,
     .create = create,
     .reinit = reinit,
-    .map_image = map_image,
+    .map_frame = map_frame,
     .destroy = destroy,
 };

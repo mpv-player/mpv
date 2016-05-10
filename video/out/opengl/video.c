@@ -91,6 +91,7 @@ static const struct gl_vao_entry vertex_vao[] = {
 
 struct texplane {
     int w, h;
+    int tex_w, tex_h;
     GLint gl_internal_format;
     GLenum gl_target;
     bool use_integer;
@@ -98,12 +99,14 @@ struct texplane {
     GLenum gl_type;
     GLuint gl_texture;
     int gl_buffer;
+    char swizzle[5];
 };
 
 struct video_image {
     struct texplane planes[4];
     bool image_flipped;
     struct mp_image *mpi;       // original input image
+    bool hwdec_mapped;
 };
 
 enum plane_type {
@@ -128,7 +131,7 @@ struct img_tex {
     int w, h; // logical size (with pre_transform applied)
     struct gl_transform pre_transform; // source texture space
     struct gl_transform transform; // rendering transformation
-    bool texture_la; // it's a GL_LUMINANCE_ALPHA texture (access with .ra not .rg)
+    char swizzle[5];
 };
 
 struct fbosurface {
@@ -155,8 +158,6 @@ struct gl_video {
     int texture_16bit_depth;    // actual bits available in 16 bit textures
 
     struct gl_shader_cache *sc;
-
-    GLenum gl_target; // texture target (GL_TEXTURE_2D, ...) for video and FBOs
 
     struct gl_vao vao;
 
@@ -536,7 +537,8 @@ const struct m_sub_options gl_video_conf = {
 static void uninit_rendering(struct gl_video *p);
 static void uninit_scaler(struct gl_video *p, struct scaler *scaler);
 static void check_gl_features(struct gl_video *p);
-static bool init_format(int fmt, struct gl_video *init);
+static bool init_format(struct gl_video *p, int fmt, bool test_only);
+static void init_image_desc(struct gl_video *p, int fmt);
 static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
 static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src);
 static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[2]);
@@ -855,14 +857,14 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
             .gl_target = t->gl_target,
             .multiplier = tex_mul,
             .use_integer = t->use_integer,
-            .tex_w = t->w,
-            .tex_h = t->h,
+            .tex_w = t->tex_w,
+            .tex_h = t->tex_h,
             .w = t->w,
             .h = t->h,
             .transform = type == PLANE_CHROMA ? chroma : identity_trans,
             .components = p->image_desc.components[n],
-            .texture_la = t->gl_format == GL_LUMINANCE_ALPHA,
         };
+        snprintf(tex[n].swizzle, sizeof(tex[n].swizzle), "%s", t->swizzle);
         get_plane_source_transform(p, t->w, t->h, &tex[n].pre_transform);
         if (p->image_params.rotate % 180 == 90)
             MPSWAP(int, tex[n].w, tex[n].h);
@@ -873,17 +875,15 @@ static void init_video(struct gl_video *p)
 {
     GL *gl = p->gl;
 
-    init_format(p->image_params.imgfmt, p);
-    p->gl_target = p->opts.use_rectangle ? GL_TEXTURE_RECTANGLE : GL_TEXTURE_2D;
-
     check_gl_features(p);
 
-    if (p->hwdec_active) {
+    if (p->hwdec && p->hwdec->driver->imgfmt == p->image_params.imgfmt) {
         if (p->hwdec->driver->reinit(p->hwdec, &p->image_params) < 0)
             MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
-        init_format(p->image_params.imgfmt, p);
-        p->image_params.imgfmt = p->image_desc.id;
-        p->gl_target = p->hwdec->gl_texture_target;
+        init_image_desc(p, p->image_params.imgfmt);
+        p->hwdec_active = true;
+    } else {
+        init_format(p, p->image_params.imgfmt, false);
     }
 
     mp_image_params_guess_csp(&p->image_params);
@@ -899,42 +899,59 @@ static void init_video(struct gl_video *p)
 
     debug_check_gl(p, "before video texture creation");
 
-    struct video_image *vimg = &p->image;
+    if (!p->hwdec_active) {
+        struct video_image *vimg = &p->image;
 
-    struct mp_image layout = {0};
-    mp_image_set_params(&layout, &p->image_params);
+        GLenum gl_target =
+            p->opts.use_rectangle ? GL_TEXTURE_RECTANGLE : GL_TEXTURE_2D;
 
-    for (int n = 0; n < p->plane_count; n++) {
-        struct texplane *plane = &vimg->planes[n];
+        struct mp_image layout = {0};
+        mp_image_set_params(&layout, &p->image_params);
 
-        plane->gl_target = p->gl_target;
+        for (int n = 0; n < p->plane_count; n++) {
+            struct texplane *plane = &vimg->planes[n];
 
-        plane->w = mp_image_plane_w(&layout, n);
-        plane->h = mp_image_plane_h(&layout, n);
+            plane->gl_target = gl_target;
 
-        if (!p->hwdec_active) {
+            plane->w = plane->tex_w = mp_image_plane_w(&layout, n);
+            plane->h = plane->tex_h = mp_image_plane_h(&layout, n);
+
             gl->ActiveTexture(GL_TEXTURE0 + n);
             gl->GenTextures(1, &plane->gl_texture);
-            gl->BindTexture(p->gl_target, plane->gl_texture);
+            gl->BindTexture(gl_target, plane->gl_texture);
 
-            gl->TexImage2D(p->gl_target, 0, plane->gl_internal_format,
+            gl->TexImage2D(gl_target, 0, plane->gl_internal_format,
                            plane->w, plane->h, 0,
                            plane->gl_format, plane->gl_type, NULL);
 
             int filter = plane->use_integer ? GL_NEAREST : GL_LINEAR;
-            gl->TexParameteri(p->gl_target, GL_TEXTURE_MIN_FILTER, filter);
-            gl->TexParameteri(p->gl_target, GL_TEXTURE_MAG_FILTER, filter);
-            gl->TexParameteri(p->gl_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            gl->TexParameteri(p->gl_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        }
+            gl->TexParameteri(gl_target, GL_TEXTURE_MIN_FILTER, filter);
+            gl->TexParameteri(gl_target, GL_TEXTURE_MAG_FILTER, filter);
+            gl->TexParameteri(gl_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            gl->TexParameteri(gl_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        MP_VERBOSE(p, "Texture for plane %d: %dx%d\n", n, plane->w, plane->h);
+            MP_VERBOSE(p, "Texture for plane %d: %dx%d\n", n, plane->w, plane->h);
+        }
+        gl->ActiveTexture(GL_TEXTURE0);
     }
-    gl->ActiveTexture(GL_TEXTURE0);
 
     debug_check_gl(p, "after video texture creation");
 
     reinit_rendering(p);
+}
+
+static void unref_current_image(struct gl_video *p)
+{
+    struct video_image *vimg = &p->image;
+
+    if (vimg->hwdec_mapped) {
+        assert(p->hwdec_active);
+        if (p->hwdec->driver->unmap)
+            p->hwdec->driver->unmap(p->hwdec);
+        memset(vimg->planes, 0, sizeof(vimg->planes));
+        vimg->hwdec_mapped = false;
+    }
+    mp_image_unrefp(&vimg->mpi);
 }
 
 static void uninit_video(struct gl_video *p)
@@ -945,21 +962,21 @@ static void uninit_video(struct gl_video *p)
 
     struct video_image *vimg = &p->image;
 
+    unref_current_image(p);
+
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
 
-        if (!p->hwdec_active)
-            gl->DeleteTextures(1, &plane->gl_texture);
-        plane->gl_texture = 0;
+        gl->DeleteTextures(1, &plane->gl_texture);
         gl->DeleteBuffers(1, &plane->gl_buffer);
-        plane->gl_buffer = 0;
     }
-    mp_image_unrefp(&vimg->mpi);
+    *vimg = (struct video_image){0};
 
     // Invalidate image_params to ensure that gl_video_config() will call
     // init_video() on uninitialized gl_video.
     p->real_image_params = (struct mp_image_params){0};
     p->image_params = p->real_image_params;
+    p->hwdec_active = false;
 }
 
 static void pass_prepare_src_tex(struct gl_video *p)
@@ -1457,7 +1474,7 @@ static void copy_img_tex(struct gl_video *p, int *offset, struct img_tex img)
     int id = pass_bind(p, img);
     char src[5] = {0};
     char dst[5] = {0};
-    const char *tex_fmt = img.texture_la ? "ragg" : "rgba";
+    const char *tex_fmt = img.swizzle[0] ? img.swizzle : "rgba";
     const char *dst_fmt = "rgba";
     for (int i = 0; i < count; i++) {
         src[i] = tex_fmt[i];
@@ -2531,18 +2548,34 @@ static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     if (!mpi)
         abort();
 
-    talloc_free(vimg->mpi);
+    unref_current_image(p);
+
     vimg->mpi = mpi;
     p->osd_pts = mpi->pts;
     p->frames_uploaded++;
 
     if (p->hwdec_active) {
-        GLuint imgtex[4] = {0};
-        bool ok = p->hwdec->driver->map_image(p->hwdec, vimg->mpi, imgtex) >= 0;
-        for (int n = 0; n < p->plane_count; n++)
-            vimg->planes[n].gl_texture = ok ? imgtex[n] : -1;
-        if (!ok)
+        struct gl_hwdec_frame gl_frame = {0};
+        bool ok = p->hwdec->driver->map_frame(p->hwdec, vimg->mpi, &gl_frame) >= 0;
+        vimg->hwdec_mapped = true;
+        if (ok) {
+            struct mp_image layout = {0};
+            mp_image_set_params(&layout, &p->image_params);
+            for (int n = 0; n < p->plane_count; n++) {
+                struct gl_hwdec_plane *plane = &gl_frame.planes[n];
+                vimg->planes[n] = (struct texplane){
+                    .w = mp_image_plane_w(&layout, n),
+                    .h = mp_image_plane_h(&layout, n),
+                    .tex_w = plane->tex_w,
+                    .tex_h = plane->tex_h,
+                    .gl_target = plane->gl_target,
+                    .gl_texture = plane->gl_texture,
+                };
+            }
+        } else {
             MP_FATAL(p, "Mapping hardware decoded surface failed.\n");
+            unref_current_image(p);
+        }
         return;
     }
 
@@ -2860,15 +2893,24 @@ static const struct fmt_entry *find_plane_format(GL *gl, int bytes_per_comp,
     return &gl_ui_byte_formats_gles3[n_channels - 1 + (bytes_per_comp - 1) * 4];
 }
 
-static bool init_format(int fmt, struct gl_video *init)
+static void init_image_desc(struct gl_video *p, int fmt)
 {
-    struct GL *gl = init->gl;
+    p->image_desc = mp_imgfmt_get_desc(fmt);
 
-    init->hwdec_active = false;
-    if (init->hwdec && init->hwdec->driver->imgfmt == fmt) {
-        fmt = init->hwdec->converted_imgfmt;
-        init->hwdec_active = true;
-    }
+    p->plane_count = p->image_desc.num_planes;
+    p->is_yuv = p->image_desc.flags & MP_IMGFLAG_YUV;
+    p->has_alpha = p->image_desc.flags & MP_IMGFLAG_ALPHA;
+    p->use_integer_conversion = false;
+    p->color_swizzle[0] = '\0';
+    p->is_packed_yuv = fmt == IMGFMT_UYVY || fmt == IMGFMT_YUYV;
+    p->hwdec_active = false;
+}
+
+// test_only=true checks if the format is supported
+// test_only=false also initializes some rendering parameters accordingly
+static bool init_format(struct gl_video *priv, int fmt, bool test_only)
+{
+    struct GL *gl = priv->gl;
 
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
     if (!desc.id)
@@ -2878,21 +2920,18 @@ static bool init_format(int fmt, struct gl_video *init)
         return false;
 
     const struct fmt_entry *plane_format[4] = {0};
-
-    init->color_swizzle[0] = '\0';
-    init->has_alpha = false;
+    char color_swizzle[5] = "";
 
     // YUV/planar formats
     if (desc.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_RGB_P)) {
         int bits = desc.component_bits;
         if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
-            init->has_alpha = desc.num_planes > 3;
             plane_format[0] = find_plane_format(gl, (bits + 7) / 8, 1);
             for (int p = 1; p < desc.num_planes; p++)
                 plane_format[p] = plane_format[0];
             // RGB/planar
             if (desc.flags & MP_IMGFLAG_RGB_P)
-                snprintf(init->color_swizzle, sizeof(init->color_swizzle), "brga");
+                snprintf(color_swizzle, sizeof(color_swizzle), "brga");
             goto supported;
         }
     }
@@ -2904,7 +2943,7 @@ static bool init_format(int fmt, struct gl_video *init)
             plane_format[0] = find_plane_format(gl, (bits + 7) / 8, 1);
             plane_format[1] = find_plane_format(gl, (bits + 7) / 8, 2);
             if (desc.flags & MP_IMGFLAG_YUV_NV_SWAP)
-                snprintf(init->color_swizzle, sizeof(init->color_swizzle), "rbga");
+                snprintf(color_swizzle, sizeof(color_swizzle), "rbga");
             goto supported;
         }
     }
@@ -2928,19 +2967,16 @@ static bool init_format(int fmt, struct gl_video *init)
         if (e->fmt == fmt) {
             int n_comp = desc.bytes[0] / e->component_size;
             plane_format[0] = find_tex_format(gl, e->component_size, n_comp);
-            packed_fmt_swizzle(init->color_swizzle, plane_format[0], e);
-            init->has_alpha = e->components[3] != 0;
+            packed_fmt_swizzle(color_swizzle, plane_format[0], e);
             goto supported;
         }
     }
 
     // Packed YUV Apple formats
-    if (init->gl->mpgl_caps & MPGL_CAP_APPLE_RGB_422) {
+    if (priv->gl->mpgl_caps & MPGL_CAP_APPLE_RGB_422) {
         for (const struct fmt_entry *e = gl_apple_formats; e->mp_format; e++) {
             if (e->mp_format == fmt) {
-                init->is_packed_yuv = true;
-                snprintf(init->color_swizzle, sizeof(init->color_swizzle),
-                         "gbra");
+                snprintf(color_swizzle, sizeof(color_swizzle), "gbra");
                 plane_format[0] = e;
                 goto supported;
             }
@@ -2953,7 +2989,7 @@ static bool init_format(int fmt, struct gl_video *init)
 supported:
 
     if (desc.component_bits > 8 && desc.component_bits < 16) {
-        if (init->texture_16bit_depth < 16)
+        if (priv->texture_16bit_depth < 16)
             return false;
     }
 
@@ -2967,32 +3003,40 @@ supported:
         if (use_integer != use_int_plane)
             return false; // mixed planes not supported
     }
-    init->use_integer_conversion = use_integer;
 
-    if (init->use_integer_conversion && init->forced_dumb_mode)
+    if (use_integer && priv->forced_dumb_mode)
         return false;
 
-    for (int p = 0; p < desc.num_planes; p++) {
-        struct texplane *plane = &init->image.planes[p];
-        const struct fmt_entry *format = plane_format[p];
-        assert(format);
-        plane->gl_format = format->format;
-        plane->gl_internal_format = format->internal_format;
-        plane->gl_type = format->type;
-        plane->use_integer = init->use_integer_conversion;
-    }
+    if (!test_only) {
+        for (int p = 0; p < desc.num_planes; p++) {
+            struct texplane *plane = &priv->image.planes[p];
+            const struct fmt_entry *format = plane_format[p];
+            assert(format);
+            plane->gl_format = format->format;
+            plane->gl_internal_format = format->internal_format;
+            plane->gl_type = format->type;
+            plane->use_integer = use_integer;
+            if (plane->gl_format == GL_LUMINANCE_ALPHA)
+                snprintf(plane->swizzle, sizeof(plane->swizzle), "raaa");
+        }
 
-    init->is_yuv = desc.flags & MP_IMGFLAG_YUV;
-    init->plane_count = desc.num_planes;
-    init->image_desc = desc;
+        init_image_desc(priv, fmt);
+
+        priv->use_integer_conversion = use_integer;
+        snprintf(priv->color_swizzle, sizeof(priv->color_swizzle), "%s",
+                 color_swizzle);
+    }
 
     return true;
 }
 
 bool gl_video_check_format(struct gl_video *p, int mp_format)
 {
-    struct gl_video tmp = *p;
-    return init_format(mp_format, &tmp);
+    if (init_format(p, mp_format, true))
+        return true;
+    if (p->hwdec && p->hwdec->driver->imgfmt == mp_format)
+        return true;
+    return false;
 }
 
 void gl_video_config(struct gl_video *p, struct mp_image_params *params)
@@ -3033,7 +3077,6 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g,
         .log = log,
         .cms = cms,
         .opts = gl_video_opts_def,
-        .gl_target = GL_TEXTURE_2D,
         .texture_16bit_depth = 16,
         .sc = gl_sc_create(gl, log),
     };
@@ -3241,5 +3284,5 @@ void gl_video_set_ambient_lux(struct gl_video *p, int lux)
 void gl_video_set_hwdec(struct gl_video *p, struct gl_hwdec *hwdec)
 {
     p->hwdec = hwdec;
-    mp_image_unrefp(&p->image.mpi);
+    unref_current_image(p);
 }

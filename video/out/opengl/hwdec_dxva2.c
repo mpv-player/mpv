@@ -43,8 +43,6 @@ static int create(struct gl_hwdec *hw)
         .ctx = d3d,
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
-
-    hw->converted_imgfmt = 0;
     return 0;
 }
 
@@ -53,8 +51,8 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     return -1;
 }
 
-static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     GLuint *out_textures)
+static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
+                     struct gl_hwdec_frame *out_frame)
 {
     return -1;
 }
@@ -65,6 +63,6 @@ const struct gl_hwdec_driver gl_hwdec_dxva2 = {
     .imgfmt = -1,
     .create = create,
     .reinit = reinit,
-    .map_image = map_image,
+    .map_frame = map_frame,
     .destroy = destroy,
 };
