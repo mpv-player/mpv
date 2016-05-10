@@ -384,6 +384,8 @@ static int open_cdda(stream_t *st)
     st->control = control;
     st->close = close_cdda;
 
+    st->streaming = true;
+
     st->type = STREAMTYPE_CDDA;
     st->demuxer = "+disc";
 
