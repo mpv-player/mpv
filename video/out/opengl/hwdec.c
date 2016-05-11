@@ -46,7 +46,7 @@ static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
 #if HAVE_VIDEOTOOLBOX_GL
     &gl_hwdec_videotoolbox,
 #endif
-#if HAVE_DXVA2_HWACCEL
+#if HAVE_D3D_HWACCEL
 #if HAVE_EGL_ANGLE
     &gl_hwdec_d3d11egl,
     &gl_hwdec_dxva2egl,
