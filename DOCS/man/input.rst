@@ -1815,9 +1815,11 @@ Property list
                 "albumart"          MPV_FORMAT_FLAG
                 "default"           MPV_FORMAT_FLAG
                 "forced"            MPV_FORMAT_FLAG
+                "selected"          MPV_FORMAT_FLAG
                 "external"          MPV_FORMAT_FLAG
                 "external-filename" MPV_FORMAT_STRING
                 "codec"             MPV_FORMAT_STRING
+                "ff-index"          MPV_FORMAT_INT64
                 "decoder-desc"      MPV_FORMAT_STRING
                 "demux-w"           MPV_FORMAT_INT64
                 "demux-h"           MPV_FORMAT_INT64
