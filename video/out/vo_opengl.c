@@ -365,8 +365,10 @@ static void uninit(struct vo *vo)
 
     gl_video_uninit(p->renderer);
     gl_hwdec_uninit(p->hwdec);
-    hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
-    hwdec_devices_destroy(vo->hwdec_devs);
+    if (vo->hwdec_devs) {
+        hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
+        hwdec_devices_destroy(vo->hwdec_devs);
+    }
     mpgl_uninit(p->glctx);
 }
 
