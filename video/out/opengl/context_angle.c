@@ -19,6 +19,8 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#include "angle_dynamic.h"
+
 #include "common/common.h"
 #include "video/out/w32_common.h"
 #include "context.h"
@@ -108,6 +110,11 @@ static int angle_init(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
+
+    if (!angle_load()) {
+        MP_VERBOSE(vo, "Failed to load LIBEGL.DLL\n");
+        goto fail;
+    }
 
     if (!vo_w32_init(vo))
         goto fail;

@@ -23,6 +23,8 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#include "angle_dynamic.h"
+
 #include "common/common.h"
 #include "osdep/timer.h"
 #include "osdep/windows_utils.h"
@@ -147,6 +149,9 @@ static void destroy(struct gl_hwdec *hw)
 
 static int create(struct gl_hwdec *hw)
 {
+    if (!angle_load())
+        return -1;
+
     EGLDisplay egl_display = eglGetCurrentDisplay();
     if (!egl_display)
         return -1;

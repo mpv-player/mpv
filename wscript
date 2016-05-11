@@ -699,9 +699,8 @@ video_output_features = [
         'desc': 'OpenGL Win32 ANGLE Backend',
         'deps_any': [ 'os-win32', 'os-cygwin' ],
         'groups': [ 'gl' ],
-        'func': check_statement(['EGL/egl.h'],
-                                'eglCreateWindowSurface(0, 0, 0, 0)',
-                                lib='EGL')
+        'func': check_statement(['EGL/egl.h', 'EGL/eglext.h'],
+                                'int x = EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE')
     } , {
         'name': '--vdpau',
         'desc': 'VDPAU acceleration',
