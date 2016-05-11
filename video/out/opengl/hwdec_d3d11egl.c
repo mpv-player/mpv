@@ -160,16 +160,10 @@ static int create(struct gl_hwdec *hw)
         return -1;
 
     const char *exts = eglQueryString(egl_display, EGL_EXTENSIONS);
-    if (!exts || !strstr(exts, "EGL_ANGLE_d3d_share_handle_client_buffer") ||
-        !strstr(exts, "EGL_EXT_device_query"))
+    if (!exts || !strstr(exts, "EGL_ANGLE_d3d_share_handle_client_buffer"))
         return -1;
 
-    PFNEGLQUERYDISPLAYATTRIBEXTPROC p_eglQueryDisplayAttribEXT =
-        (void *)eglGetProcAddress("eglQueryDisplayAttribEXT");
-    PFNEGLQUERYDEVICEATTRIBEXTPROC p_eglQueryDeviceAttribEXT =
-        (void *)eglGetProcAddress("eglQueryDeviceAttribEXT");
-    if (!p_eglQueryDisplayAttribEXT || !p_eglQueryDeviceAttribEXT)
-        return -1;
+    bool use_native_device = !!strstr(exts, "EGL_EXT_device_query");
 
     HRESULT hr;
     struct priv *p = talloc_zero(hw, struct priv);
@@ -181,7 +175,7 @@ static int create(struct gl_hwdec *hw)
     // Note that as long as GL_OES_EGL_image_external_essl3 is not available,
     // this won't work in ES 3.x mode due to missing GLSL mechanisms.
     if (strstr(exts, "EGL_ANGLE_stream_producer_d3d_texture_nv12") &&
-        hw->gl->es == 200)
+        use_native_device && hw->gl->es == 200)
     {
         MP_VERBOSE(hw, "Loading EGL_ANGLE_stream_producer_d3d_texture_nv12\n");
 
@@ -209,21 +203,50 @@ static int create(struct gl_hwdec *hw)
         }
     }
 
-    EGLAttrib device = 0;
-    if (!p_eglQueryDisplayAttribEXT(egl_display, EGL_DEVICE_EXT, &device))
-        goto fail;
-    EGLAttrib d3d_device = 0;
-    if (!p_eglQueryDeviceAttribEXT((EGLDeviceEXT)device, EGL_D3D11_DEVICE_ANGLE,
-                                   &d3d_device))
-    {
-        MP_ERR(hw, "Could not get EGL_D3D11_DEVICE_ANGLE from ANGLE.\n");
-        goto fail;
-    }
+    if (use_native_device) {
+        PFNEGLQUERYDISPLAYATTRIBEXTPROC p_eglQueryDisplayAttribEXT =
+            (void *)eglGetProcAddress("eglQueryDisplayAttribEXT");
+        PFNEGLQUERYDEVICEATTRIBEXTPROC p_eglQueryDeviceAttribEXT =
+            (void *)eglGetProcAddress("eglQueryDeviceAttribEXT");
+        if (!p_eglQueryDisplayAttribEXT || !p_eglQueryDeviceAttribEXT)
+            goto fail;
 
-    p->d3d11_device = (ID3D11Device *)d3d_device;
-    if (!p->d3d11_device)
-        goto fail;
-    ID3D11Device_AddRef(p->d3d11_device);
+        EGLAttrib device = 0;
+        if (!p_eglQueryDisplayAttribEXT(egl_display, EGL_DEVICE_EXT, &device))
+            goto fail;
+        EGLAttrib d3d_device = 0;
+        if (!p_eglQueryDeviceAttribEXT((EGLDeviceEXT)device,
+                                       EGL_D3D11_DEVICE_ANGLE, &d3d_device))
+        {
+            MP_ERR(hw, "Could not get EGL_D3D11_DEVICE_ANGLE from ANGLE.\n");
+            goto fail;
+        }
+
+        p->d3d11_device = (ID3D11Device *)d3d_device;
+        if (!p->d3d11_device)
+            goto fail;
+        ID3D11Device_AddRef(p->d3d11_device);
+    } else {
+        HANDLE d3d11_dll = GetModuleHandleW(L"d3d11.dll");
+        if (!d3d11_dll) {
+            MP_ERR(hw, "Failed to load D3D11 library\n");
+            goto fail;
+        }
+
+        PFN_D3D11_CREATE_DEVICE CreateDevice =
+            (void *)GetProcAddress(d3d11_dll, "D3D11CreateDevice");
+        if (!CreateDevice)
+            goto fail;
+
+        hr = CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL,
+                          D3D11_CREATE_DEVICE_VIDEO_SUPPORT, NULL, 0,
+                          D3D11_SDK_VERSION, &p->d3d11_device, NULL, NULL);
+        if (FAILED(hr)) {
+            MP_ERR(hw, "Failed to create D3D11 Device: %s\n",
+                mp_HRESULT_to_str(hr));
+            goto fail;
+        }
+    }
 
     ID3D10Multithread *multithread;
     hr = ID3D11Device_QueryInterface(p->d3d11_device, &IID_ID3D10Multithread,
