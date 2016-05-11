@@ -2185,8 +2185,6 @@ static int mp_property_hwdec_current(void *ctx, struct m_property *prop,
     case M_PROPERTY_GET: {
         int current = HWDEC_NONE;
         video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
-        if (current == HWDEC_AUTO)
-            current = HWDEC_NONE;
         *(int *)arg = current;
         return M_PROPERTY_OK;
     }

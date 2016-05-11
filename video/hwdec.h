@@ -9,6 +9,7 @@ struct mp_image_pool;
 enum hwdec_type {
     HWDEC_NONE = 0,
     HWDEC_AUTO,
+    HWDEC_AUTO_COPY,
     HWDEC_VDPAU,
     HWDEC_VIDEOTOOLBOX,
     HWDEC_VAAPI,
@@ -21,11 +22,13 @@ enum hwdec_type {
     HWDEC_MEDIACODEC,
 };
 
+#define HWDEC_IS_AUTO(x) ((x) == HWDEC_AUTO || (x) == HWDEC_AUTO_COPY)
+
 // hwdec_type names (options.c)
 extern const struct m_opt_choice_alternatives mp_hwdec_names[];
 
 struct mp_hwdec_ctx {
-    enum hwdec_type type; // (never HWDEC_NONE or HWDEC_AUTO)
+    enum hwdec_type type; // (never HWDEC_NONE or HWDEC_IS_AUTO)
     const char *driver_name; // NULL if unknown/not loaded
 
     // This is never NULL. Its meaning depends on the .type field:

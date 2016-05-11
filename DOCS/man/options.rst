@@ -581,6 +581,7 @@ Video
 
     :no:        always use software decoding (default)
     :auto:      see below
+    :auto-copy: see below
     :vdpau:     requires ``--vo=vdpau`` or ``--vo=opengl`` (Linux only)
     :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
@@ -599,6 +600,13 @@ Video
     never be enabled. Also note that if the first found method doesn't actually
     work, it will always fall back to software decoding, instead of trying the
     next method (might matter on some Linux systems).
+
+    ``auto-copy`` selects only modes that copy the video data back to system
+    memory after decoding. Currently, this selects only one of the following
+    modes: ``vaapi-copy``, ``dxva2-copy``, ``d3d11va-copy``, ``mediacodec``.
+    If none of these work, hardware decoding is disabled. This mode is always
+    guaranteed to incur no additional loss compared to software decoding, and
+    will allow CPU processing with video filters.
 
     The ``vaapi`` mode, if used with ``--vo=opengl``, requires Mesa 11 and most
     likely works with Intel GPUs only. It also requires the opengl EGL backend

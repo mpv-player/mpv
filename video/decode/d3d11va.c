@@ -583,6 +583,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_d3d11va = {
 
 const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy = {
     .type           = HWDEC_D3D11VA_COPY,
+    .copying        = true,
     .image_format   = IMGFMT_D3D11VA,
     .probe          = d3d11va_probe,
     .init           = d3d11va_init,

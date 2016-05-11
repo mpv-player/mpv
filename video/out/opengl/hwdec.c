@@ -88,7 +88,7 @@ struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
                                    struct mp_hwdec_devices *devs,
                                    enum hwdec_type api)
 {
-    bool is_auto = api == HWDEC_AUTO;
+    bool is_auto = HWDEC_IS_AUTO(api);
     for (int n = 0; mpgl_hwdec_drivers[n]; n++) {
         const struct gl_hwdec_driver *drv = mpgl_hwdec_drivers[n];
         if (is_auto || api == drv->api) {

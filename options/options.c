@@ -82,6 +82,7 @@ extern const struct m_obj_list ao_obj_list;
 const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"no",          HWDEC_NONE},
     {"auto",        HWDEC_AUTO},
+    {"auto-copy",   HWDEC_AUTO_COPY},
     {"vdpau",       HWDEC_VDPAU},
     {"videotoolbox",HWDEC_VIDEOTOOLBOX},
     {"vaapi",       HWDEC_VAAPI},

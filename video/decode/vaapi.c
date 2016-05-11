@@ -507,6 +507,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
 
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
     .type = HWDEC_VAAPI_COPY,
+    .copying = true,
     .image_format = IMGFMT_VAAPI,
     .probe = probe_copy,
     .init = init_copy,

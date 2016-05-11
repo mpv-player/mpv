@@ -138,6 +138,7 @@ static const struct vd_lavc_hwdec mp_vd_lavc_rpi = {
 static const struct vd_lavc_hwdec mp_vd_lavc_mediacodec = {
     .type = HWDEC_MEDIACODEC,
     .lavc_suffix = "_mediacodec",
+    .copying = true,
 };
 
 static const struct vd_lavc_hwdec *const hwdec_list[] = {
@@ -347,7 +348,8 @@ static void reinit(struct dec_video *vd)
     struct vd_lavc_hwdec *hwdec = NULL;
 
     if (hwdec_codec_allowed(vd, codec)) {
-        if (vd->opts->hwdec_api == HWDEC_AUTO) {
+        int api = vd->opts->hwdec_api;
+        if (HWDEC_IS_AUTO(api)) {
             // If a specific decoder is forced, we should try a hwdec method
             // that works with it, instead of simply failing later at runtime.
             // This is good for avoiding trying "normal" hwaccels on wrapper
@@ -369,11 +371,15 @@ static void reinit(struct dec_video *vd)
                         MP_VERBOSE(vd, "This hwaccel is not compatible.\n");
                         continue;
                     }
+                    if (api == HWDEC_AUTO_COPY && !hwdec->copying) {
+                        MP_VERBOSE(vd, "Not using this for auto-copy mode.\n");
+                        continue;
+                    }
                     break;
                 }
             }
-        } else if (vd->opts->hwdec_api != HWDEC_NONE) {
-            hwdec = probe_hwdec(vd, false, vd->opts->hwdec_api, codec);
+        } else if (api != HWDEC_NONE) {
+            hwdec = probe_hwdec(vd, false, api, codec);
         }
     } else {
         MP_VERBOSE(vd, "Not trying to use hardware decoding: codec %s is not "

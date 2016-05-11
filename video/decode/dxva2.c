@@ -499,6 +499,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_dxva2 = {
 
 const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy = {
     .type           = HWDEC_DXVA2_COPY,
+    .copying        = true,
     .image_format   = IMGFMT_DXVA2,
     .probe          = dxva2_probe,
     .init           = dxva2_init,
