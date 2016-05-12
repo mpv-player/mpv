@@ -2553,7 +2553,7 @@ static void check_gl_features(struct gl_video *p)
     GL *gl = p->gl;
     bool have_float_tex = !!gl_find_float16_format(gl, 1);
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
-    bool have_mix = gl->glsl_version >= 130;
+    bool have_mglsl = gl->glsl_version >= 130; // modern GLSL (1st class arrays etc.)
     bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
 
     if (!p->opts.fbo_format) {
@@ -2609,6 +2609,8 @@ static void check_gl_features(struct gl_video *p)
             char *reason = NULL;
             if (!have_float_tex)
                 reason = "(float tex. missing)";
+            if (!have_mglsl)
+                reason = "(GLSL version too old)";
             if (reason) {
                 p->opts.scaler[n].kernel.name = "bilinear";
                 MP_WARN(p, "Disabling scaler #%d %s.\n", n, reason);
@@ -2629,18 +2631,18 @@ static void check_gl_features(struct gl_video *p)
                   p->opts.target_trc != MP_CSP_TRC_AUTO || p->use_lut_3d;
 
     // mix() is needed for some gamma functions
-    if (!have_mix && (p->opts.linear_scaling || p->opts.sigmoid_upscaling)) {
+    if (!have_mglsl && (p->opts.linear_scaling || p->opts.sigmoid_upscaling)) {
         p->opts.linear_scaling = false;
         p->opts.sigmoid_upscaling = false;
         MP_WARN(p, "Disabling linear/sigmoid scaling (GLSL version too old).\n");
     }
-    if (!have_mix && use_cms) {
+    if (!have_mglsl && use_cms) {
         p->opts.target_prim = MP_CSP_PRIM_AUTO;
         p->opts.target_trc = MP_CSP_TRC_AUTO;
         p->use_lut_3d = false;
         MP_WARN(p, "Disabling color management (GLSL version too old).\n");
     }
-    if (!have_mix && p->opts.deband) {
+    if (!have_mglsl && p->opts.deband) {
         p->opts.deband = 0;
         MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
     }
