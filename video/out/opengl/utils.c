@@ -485,6 +485,8 @@ struct gl_shader_cache {
     struct sc_uniform uniforms[SC_UNIFORM_ENTRIES];
     int num_uniforms;
 
+    bool error_state; // true if an error occurred
+
     // temporary buffers (avoids frequent reallocations)
     bstr tmp[5];
 };
@@ -530,6 +532,16 @@ void gl_sc_destroy(struct gl_shader_cache *sc)
     gl_sc_reset(sc);
     sc_flush_cache(sc);
     talloc_free(sc);
+}
+
+bool gl_sc_error_state(struct gl_shader_cache *sc)
+{
+    return sc->error_state;
+}
+
+void gl_sc_reset_error(struct gl_shader_cache *sc)
+{
+    sc->error_state = false;
 }
 
 void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name)
@@ -810,6 +822,9 @@ static void compile_attach_shader(struct gl_shader_cache *sc, GLuint program,
 
     gl->AttachShader(program, shader);
     gl->DeleteShader(shader);
+
+    if (!status)
+        sc->error_state = true;
 }
 
 static void link_shader(struct gl_shader_cache *sc, GLuint program)
@@ -828,6 +843,9 @@ static void link_shader(struct gl_shader_cache *sc, GLuint program)
         MP_MSG(sc, pri, "shader link log (status=%d): %s\n", status, logstr);
         talloc_free(logstr);
     }
+
+    if (!status)
+        sc->error_state = true;
 }
 
 static GLuint create_program(struct gl_shader_cache *sc, const char *vertex,

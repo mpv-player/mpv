@@ -613,6 +613,8 @@ static void uninit_rendering(struct gl_video *p)
 
     gl_video_reset_surfaces(p);
     gl_video_reset_hooks(p);
+
+    gl_sc_reset_error(p->sc);
 }
 
 void gl_video_update_profile(struct gl_video *p)
@@ -2500,6 +2502,8 @@ static void pass_render_frame(struct gl_video *p)
 
 static void pass_draw_to_screen(struct gl_video *p, int fbo)
 {
+    GL *gl = p->gl;
+
     if (p->dumb_mode)
         pass_render_frame_dumb(p, fbo);
 
@@ -2525,6 +2529,13 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
 
     pass_dither(p);
     finish_pass_direct(p, fbo, p->vp_w, p->vp_h, &p->dst_rect);
+
+    if (gl_sc_error_state(p->sc)) {
+        // Make the screen solid blue to make it visually clear that an
+        // error has occurred
+        gl->ClearColor(0.0, 0.05, 0.5, 1.0);
+        gl->Clear(GL_COLOR_BUFFER_BIT);
+    }
 }
 
 // Draws an interpolate frame to fbo, based on the frame timing in t

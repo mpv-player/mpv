@@ -148,6 +148,8 @@ struct gl_shader_cache;
 
 struct gl_shader_cache *gl_sc_create(GL *gl, struct mp_log *log);
 void gl_sc_destroy(struct gl_shader_cache *sc);
+bool gl_sc_error_state(struct gl_shader_cache *sc);
+void gl_sc_reset_error(struct gl_shader_cache *sc);
 void gl_sc_add(struct gl_shader_cache *sc, const char *text);
 void gl_sc_addf(struct gl_shader_cache *sc, const char *textf, ...);
 void gl_sc_hadd(struct gl_shader_cache *sc, const char *text);
