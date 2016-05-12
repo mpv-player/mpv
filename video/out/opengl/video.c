@@ -2500,14 +2500,13 @@ static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
-static bool test_fbo(struct gl_video *p)
+static bool test_fbo(struct gl_video *p, GLint format)
 {
     GL *gl = p->gl;
     bool success = false;
-    MP_VERBOSE(p, "Testing user-set FBO format (0x%x)\n",
-                   (unsigned)p->opts.fbo_format);
+    MP_VERBOSE(p, "Testing FBO format 0x%x\n", (unsigned)format);
     struct fbotex fbo = {0};
-    if (fbotex_init(&fbo, p->gl, p->log, 16, 16, p->opts.fbo_format)) {
+    if (fbotex_init(&fbo, p->gl, p->log, 16, 16, format)) {
         gl->BindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
         gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
         success = true;
@@ -2556,12 +2555,21 @@ static void check_gl_features(struct gl_video *p)
     bool have_mglsl = gl->glsl_version >= 130; // modern GLSL (1st class arrays etc.)
     bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
 
-    if (!p->opts.fbo_format) {
-        p->opts.fbo_format = GL_RGBA16;
-        if (gl->es && !(gl->mpgl_caps & MPGL_CAP_EXT16))
-            p->opts.fbo_format = have_float_tex ? GL_RGBA16F : GL_RGB10_A2;
+    const GLint auto_fbo_fmts[] = {GL_RGBA16, GL_RGBA16F, GL_RGB10_A2,
+                                   GL_RGBA8, 0};
+    GLint user_fbo_fmts[] = {p->opts.fbo_format, 0};
+    const GLint *fbo_fmts = user_fbo_fmts[0] ? user_fbo_fmts : auto_fbo_fmts;
+    bool have_fbo = false;
+    for (int n = 0; fbo_fmts[n]; n++) {
+        GLint fmt = fbo_fmts[n];
+        const struct gl_format *f = gl_find_internal_format(gl, fmt);
+        if (f && (f->flags & F_CF) == F_CF && test_fbo(p, fmt)) {
+            MP_VERBOSE(p, "Using FBO format 0x%x.\n", (unsigned)fmt);
+            have_fbo = true;
+            p->opts.fbo_format = fmt;
+            break;
+        }
     }
-    bool have_fbo = test_fbo(p);
 
     if (gl->es && p->opts.pbo) {
         p->opts.pbo = 0;
