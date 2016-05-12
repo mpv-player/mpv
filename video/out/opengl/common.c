@@ -344,6 +344,13 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    {
+        .extension = "GL_ANGLE_translated_shader_source",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(GetTranslatedShaderSourceANGLE),
+            {0}
+        },
+    },
 };
 
 #undef FN_OFFS

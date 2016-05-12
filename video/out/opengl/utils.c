@@ -871,6 +871,16 @@ static void compile_attach_shader(struct gl_shader_cache *sc, GLuint program,
                typestr, status, logstr);
         talloc_free(logstr);
     }
+    if (gl->GetTranslatedShaderSourceANGLE && mp_msg_test(sc->log, MSGL_DEBUG)) {
+        GLint len = 0;
+        gl->GetShaderiv(shader, GL_TRANSLATED_SHADER_SOURCE_LENGTH_ANGLE, &len);
+        if (len > 0) {
+            GLchar *sstr = talloc_zero_size(NULL, len + 1);
+            gl->GetTranslatedShaderSourceANGLE(shader, len, NULL, sstr);
+            MP_DBG(sc, "Translated shader:\n");
+            mp_log_source(sc->log, MSGL_DEBUG, sstr);
+        }
+    }
 
     gl->AttachShader(program, shader);
     gl->DeleteShader(shader);

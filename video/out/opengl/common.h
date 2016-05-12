@@ -212,6 +212,9 @@ struct GL {
     GLuint (GLAPIENTRY *GetUniformBlockIndex)(GLuint, const GLchar *);
     void (GLAPIENTRY *UniformBlockBinding)(GLuint, GLuint, GLuint);
 
+    void (GLAPIENTRY *GetTranslatedShaderSourceANGLE)(GLuint, GLsizei,
+                                                      GLsizei*, GLchar* source);
+
     void (GLAPIENTRY *DebugMessageCallback)(MP_GLDEBUGPROC callback,
                                             const void *userParam);
 
