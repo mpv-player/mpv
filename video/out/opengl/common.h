@@ -53,7 +53,6 @@ enum {
     MPGL_CAP_ROW_LENGTH         = (1 << 4),     // GL_[UN]PACK_ROW_LENGTH
     MPGL_CAP_FB                 = (1 << 5),
     MPGL_CAP_VAO                = (1 << 6),
-    MPGL_CAP_FLOAT_TEX          = (1 << 9),
     MPGL_CAP_TEX_RG             = (1 << 10),    // GL_ARB_texture_rg / GL 3.x
     MPGL_CAP_VDPAU              = (1 << 11),    // GL_NV_vdpau_interop
     MPGL_CAP_APPLE_RGB_422      = (1 << 12),    // GL_APPLE_rgb_422
@@ -62,6 +61,10 @@ enum {
     MPGL_CAP_DEBUG              = (1 << 16),
     MPGL_CAP_DXINTEROP          = (1 << 17),    // WGL_NV_DX_interop
     MPGL_CAP_EXT16              = (1 << 18),    // GL_EXT_texture_norm16
+    MPGL_CAP_ARB_FLOAT          = (1 << 19),    // GL_ARB_texture_float
+    MPGL_CAP_EXT_CR_HFLOAT      = (1 << 20),    // GL_EXT_color_buffer_half_float
+    MPGL_CAP_OES_HFLOAT_LIN     = (1 << 21),    // GL_OES_texture_half_float_linear
+
     MPGL_CAP_SW                 = (1 << 30),    // indirect or sw renderer
 };
 

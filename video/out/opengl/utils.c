@@ -24,6 +24,7 @@
 #include <assert.h>
 
 #include "common/common.h"
+#include "formats.h"
 #include "utils.h"
 
 // GLU has this as gluErrorString (we don't use GLU, as it is legacy-OpenGL)
@@ -50,52 +51,6 @@ void glCheckError(GL *gl, struct mp_log *log, const char *info)
     }
 }
 
-// return the number of bytes per pixel for the given format
-// does not handle all possible variants, just those used by mpv
-int glFmt2bpp(GLenum format, GLenum type)
-{
-    int component_size = 0;
-    switch (type) {
-    case GL_UNSIGNED_BYTE_3_3_2:
-    case GL_UNSIGNED_BYTE_2_3_3_REV:
-        return 1;
-    case GL_UNSIGNED_SHORT_5_5_5_1:
-    case GL_UNSIGNED_SHORT_1_5_5_5_REV:
-    case GL_UNSIGNED_SHORT_5_6_5:
-    case GL_UNSIGNED_SHORT_5_6_5_REV:
-        return 2;
-    case GL_UNSIGNED_BYTE:
-        component_size = 1;
-        break;
-    case GL_UNSIGNED_SHORT:
-        component_size = 2;
-        break;
-    }
-    switch (format) {
-    case GL_LUMINANCE:
-    case GL_ALPHA:
-        return component_size;
-    case GL_RGB_422_APPLE:
-        return 2;
-    case GL_RGB:
-    case GL_BGR:
-    case GL_RGB_INTEGER:
-        return 3 * component_size;
-    case GL_RGBA:
-    case GL_BGRA:
-    case GL_RGBA_INTEGER:
-        return 4 * component_size;
-    case GL_RED:
-    case GL_RED_INTEGER:
-        return component_size;
-    case GL_RG:
-    case GL_LUMINANCE_ALPHA:
-    case GL_RG_INTEGER:
-        return 2 * component_size;
-    }
-    abort(); // unknown
-}
-
 static int get_alignment(int stride)
 {
     if (stride % 8 == 0)
@@ -117,9 +72,10 @@ void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
                  const void *dataptr, int stride,
                  int x, int y, int w, int h, int slice)
 {
+    int bpp = gl_bytes_per_pixel(format, type);
     const uint8_t *data = dataptr;
     int y_max = y + h;
-    if (w <= 0 || h <= 0)
+    if (w <= 0 || h <= 0 || !bpp)
         return;
     if (slice <= 0)
         slice = h;
@@ -131,9 +87,9 @@ void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
     bool use_rowlength = slice > 1 && (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH);
     if (use_rowlength) {
         // this is not always correct, but should work for MPlayer
-        gl->PixelStorei(GL_UNPACK_ROW_LENGTH, stride / glFmt2bpp(format, type));
+        gl->PixelStorei(GL_UNPACK_ROW_LENGTH, stride / bpp);
     } else {
-        if (stride != glFmt2bpp(format, type) * w)
+        if (stride != bpp * w)
             slice = 1; // very inefficient, but at least it works
     }
     for (; y + slice <= y_max; y += slice) {
@@ -153,10 +109,10 @@ void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
 void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
                 int x, int y, int w, int h, uint8_t val, void **scratch)
 {
-    int bpp = glFmt2bpp(format, type);
+    int bpp = gl_bytes_per_pixel(format, type);
     int stride = w * bpp;
     int size = h * stride;
-    if (size < 1)
+    if (size < 1 || !bpp)
         return;
     void *data = scratch ? *scratch : NULL;
     if (talloc_get_size(data) < size)
@@ -307,32 +263,6 @@ void gl_vao_draw_data(struct gl_vao *vao, GLenum prim, void *ptr, size_t num)
     gl_vao_unbind(vao);
 }
 
-struct gl_format {
-    GLenum format;
-    GLenum type;
-    GLint internal_format;
-};
-
-static const struct gl_format gl_formats[] = {
-    // GLES 3.0
-    {GL_RGB,    GL_UNSIGNED_BYTE,               GL_RGB},
-    {GL_RGBA,   GL_UNSIGNED_BYTE,               GL_RGBA},
-    {GL_RGB,    GL_UNSIGNED_BYTE,               GL_RGB8},
-    {GL_RGBA,   GL_UNSIGNED_BYTE,               GL_RGBA8},
-    {GL_RGB,    GL_UNSIGNED_SHORT,              GL_RGB16},
-    {GL_RGBA,   GL_UNSIGNED_INT_2_10_10_10_REV, GL_RGB10_A2},
-    // not texture filterable in GLES 3.0
-    {GL_RGB,    GL_FLOAT,                       GL_RGB16F},
-    {GL_RGBA,   GL_FLOAT,                       GL_RGBA16F},
-    {GL_RGB,    GL_FLOAT,                       GL_RGB32F},
-    {GL_RGBA,   GL_FLOAT,                       GL_RGBA32F},
-    // Desktop GL
-    {GL_RGB,    GL_UNSIGNED_SHORT,              GL_RGB10},
-    {GL_RGBA,   GL_UNSIGNED_SHORT,              GL_RGBA12},
-    {GL_RGBA,   GL_UNSIGNED_SHORT,              GL_RGBA16},
-    {0}
-};
-
 // Create a texture and a FBO using the texture as color attachments.
 //  iformat: texture internal format
 // Returns success.
@@ -373,19 +303,16 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
     if (flags & FBOTEX_FUZZY_H)
         h = MP_ALIGN_UP(h, 256);
 
-    GLenum filter = fbo->tex_filter;
+    mp_verbose(log, "Create FBO: %dx%d (%dx%d)\n", lw, lh, w, h);
 
-    struct gl_format format = {
-        .format = GL_RGBA,
-        .type = GL_UNSIGNED_BYTE,
-        .internal_format = iformat,
-    };
-    for (int n = 0; gl_formats[n].format; n++) {
-        if (gl_formats[n].internal_format == format.internal_format) {
-            format = gl_formats[n];
-            break;
-        }
+    const struct gl_format *format = gl_find_internal_format(gl, iformat);
+    if (!format || (format->flags & F_CF) != F_CF) {
+        mp_verbose(log, "Format 0x%x not supported.\n", (unsigned)iformat);
+        return false;
     }
+    assert(gl->mpgl_caps & MPGL_CAP_FB);
+
+    GLenum filter = fbo->tex_filter;
 
     *fbo = (struct fbotex) {
         .gl = gl,
@@ -396,17 +323,11 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
         .iformat = iformat,
     };
 
-    mp_verbose(log, "Create FBO: %dx%d -> %dx%d\n", fbo->lw, fbo->lh,
-                                                    fbo->rw, fbo->rh);
-
-    if (!(gl->mpgl_caps & MPGL_CAP_FB))
-        return false;
-
     gl->GenFramebuffers(1, &fbo->fbo);
     gl->GenTextures(1, &fbo->texture);
     gl->BindTexture(GL_TEXTURE_2D, fbo->texture);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, format.internal_format, fbo->rw, fbo->rh, 0,
-                   format.format, format.type, NULL);
+    gl->TexImage2D(GL_TEXTURE_2D, 0, format->internal_format, fbo->rw, fbo->rh, 0,
+                   format->format, format->type, NULL);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     gl->BindTexture(GL_TEXTURE_2D, 0);

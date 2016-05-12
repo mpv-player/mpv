@@ -72,6 +72,8 @@ struct gl_functions {
     int provides;               // bitfield of MPGL_CAP_* constants
     int ver_core;               // introduced as required function
     int ver_es_core;            // introduced as required GL ES function
+    int ver_exclude;            // not applicable to versions >= ver_exclude
+    int ver_es_exclude;         // same for GLES
     const struct gl_function *functions;
 };
 
@@ -228,9 +230,28 @@ static const struct gl_functions gl_functions[] = {
     },
     // GL_R16 etc.
     {
-        .ver_core = 300,
         .extension = "GL_EXT_texture_norm16",
         .provides = MPGL_CAP_EXT16,
+        .ver_exclude = 1, // never in desktop GL
+    },
+    // Float texture support for GL 2.x
+    {
+        .extension = "GL_ARB_texture_float",
+        .provides = MPGL_CAP_ARB_FLOAT,
+        .ver_exclude = 300,
+        .ver_es_exclude = 1,
+    },
+    // 16 bit float textures filterable with GL_LINEAR in GLES
+    {
+        .extension = "GL_OES_texture_half_float_linear",
+        .provides = MPGL_CAP_OES_HFLOAT_LIN,
+        .ver_exclude = 1,
+    },
+    // 16 bit float textures that can be rendered to in GLES
+    {
+        .extension = "GL_EXT_color_buffer_half_float",
+        .provides = MPGL_CAP_EXT_CR_HFLOAT,
+        .ver_exclude = 1,
     },
     {
         .ver_core = 320,
@@ -439,6 +460,13 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         // NOTE: Function entrypoints can exist, even if they do not work.
         //       We must always check extension strings and versions.
 
+        if (gl->version && section->ver_exclude &&
+            gl->version >= section->ver_exclude)
+            continue;
+        if (gl->es && section->ver_es_exclude &&
+            gl->es >= section->ver_es_exclude)
+            continue;
+
         bool exists = false, must_exist = false;
         if (ver_core)
             must_exist = version >= ver_core;
@@ -503,14 +531,6 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     if (is_software_gl(gl)) {
         gl->mpgl_caps |= MPGL_CAP_SW;
         mp_verbose(log, "Detected suspected software renderer.\n");
-    }
-
-    // Detect 16F textures that work with GL_LINEAR filtering.
-    if ((!gl->es && (gl->version >= 300 || check_ext(gl, "GL_ARB_texture_float"))) ||
-        (gl->es && (gl->version >= 310 || check_ext(gl, "GL_OES_texture_half_float_linear"))))
-    {
-        mp_verbose(log, "Filterable half-float textures supported.\n");
-        gl->mpgl_caps |= MPGL_CAP_FLOAT_TEX;
     }
 
     // Provided for simpler handling if no framebuffer support is available.

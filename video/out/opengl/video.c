@@ -31,6 +31,7 @@
 #include "common/global.h"
 #include "options/options.h"
 #include "common.h"
+#include "formats.h"
 #include "utils.h"
 #include "hwdec.h"
 #include "osd.h"
@@ -248,90 +249,6 @@ struct gl_video {
     bool custom_shader_fn_warned;
 };
 
-struct fmt_entry {
-    int mp_format;
-    GLint internal_format;
-    GLenum format;
-    GLenum type;
-};
-
-// Very special formats, for which OpenGL happens to have direct support
-static const struct fmt_entry mp_to_gl_formats[] = {
-    {IMGFMT_RGB565,  GL_RGB,   GL_RGB,  GL_UNSIGNED_SHORT_5_6_5},
-    {0},
-};
-
-// These are used for desktop GL 3+, and GLES 3+ with GL_EXT_texture_norm16.
-static const struct fmt_entry gl_byte_formats[] = {
-    {0, GL_R8,      GL_RED,     GL_UNSIGNED_BYTE},      // 1 x 8
-    {0, GL_RG8,     GL_RG,      GL_UNSIGNED_BYTE},      // 2 x 8
-    {0, GL_RGB8,    GL_RGB,     GL_UNSIGNED_BYTE},      // 3 x 8
-    {0, GL_RGBA8,   GL_RGBA,    GL_UNSIGNED_BYTE},      // 4 x 8
-    {0, GL_R16,     GL_RED,     GL_UNSIGNED_SHORT},     // 1 x 16
-    {0, GL_RG16,    GL_RG,      GL_UNSIGNED_SHORT},     // 2 x 16
-    {0, GL_RGB16,   GL_RGB,     GL_UNSIGNED_SHORT},     // 3 x 16
-    {0, GL_RGBA16,  GL_RGBA,    GL_UNSIGNED_SHORT},     // 4 x 16
-};
-
-static const struct fmt_entry gl_byte_formats_gles3[] = {
-    {0, GL_R8,       GL_RED,    GL_UNSIGNED_BYTE},      // 1 x 8
-    {0, GL_RG8,      GL_RG,     GL_UNSIGNED_BYTE},      // 2 x 8
-    {0, GL_RGB8,     GL_RGB,    GL_UNSIGNED_BYTE},      // 3 x 8
-    {0, GL_RGBA8,    GL_RGBA,   GL_UNSIGNED_BYTE},      // 4 x 8
-    // There are no filterable texture formats that can be uploaded as
-    // GL_UNSIGNED_SHORT, so apparently we're out of luck.
-    {0, 0,           0,         0},                     // 1 x 16
-    {0, 0,           0,         0},                     // 2 x 16
-    {0, 0,           0,         0},                     // 3 x 16
-    {0, 0,           0,         0},                     // 4 x 16
-};
-
-static const struct fmt_entry gl_ui_byte_formats_gles3[] = {
-    {0, GL_R8UI,      GL_RED_INTEGER,   GL_UNSIGNED_BYTE},  // 1 x 8
-    {0, GL_RG8UI,     GL_RG_INTEGER,    GL_UNSIGNED_BYTE},  // 2 x 8
-    {0, GL_RGB8UI,    GL_RGB_INTEGER,   GL_UNSIGNED_BYTE},  // 3 x 8
-    {0, GL_RGBA8UI,   GL_RGBA_INTEGER,  GL_UNSIGNED_BYTE},  // 4 x 8
-    {0, GL_R16UI,     GL_RED_INTEGER,   GL_UNSIGNED_SHORT}, // 1 x 16
-    {0, GL_RG16UI,    GL_RG_INTEGER,    GL_UNSIGNED_SHORT}, // 2 x 16
-    {0, GL_RGB16UI,   GL_RGB_INTEGER,   GL_UNSIGNED_SHORT}, // 3 x 16
-    {0, GL_RGBA16UI,  GL_RGBA_INTEGER,  GL_UNSIGNED_SHORT}, // 4 x 16
-};
-
-static const struct fmt_entry gl_byte_formats_gles2[] = {
-    {0, GL_LUMINANCE,           GL_LUMINANCE,       GL_UNSIGNED_BYTE}, // 1 x 8
-    {0, GL_LUMINANCE_ALPHA,     GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE}, // 2 x 8
-    {0, GL_RGB,                 GL_RGB,             GL_UNSIGNED_BYTE}, // 3 x 8
-    {0, GL_RGBA,                GL_RGBA,            GL_UNSIGNED_BYTE}, // 4 x 8
-    {0, 0,                      0,                  0},                // 1 x 16
-    {0, 0,                      0,                  0},                // 2 x 16
-    {0, 0,                      0,                  0},                // 3 x 16
-    {0, 0,                      0,                  0},                // 4 x 16
-};
-
-static const struct fmt_entry gl_byte_formats_legacy[] = {
-    {0, GL_LUMINANCE8,          GL_LUMINANCE,       GL_UNSIGNED_BYTE}, // 1 x 8
-    {0, GL_LUMINANCE8_ALPHA8,   GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE}, // 2 x 8
-    {0, GL_RGB8,                GL_RGB,             GL_UNSIGNED_BYTE}, // 3 x 8
-    {0, GL_RGBA8,               GL_RGBA,            GL_UNSIGNED_BYTE}, // 4 x 8
-    {0, GL_LUMINANCE16,         GL_LUMINANCE,       GL_UNSIGNED_SHORT},// 1 x 16
-    {0, GL_LUMINANCE16_ALPHA16, GL_LUMINANCE_ALPHA, GL_UNSIGNED_SHORT},// 2 x 16
-    {0, GL_RGB16,               GL_RGB,             GL_UNSIGNED_SHORT},// 3 x 16
-    {0, GL_RGBA16,              GL_RGBA,            GL_UNSIGNED_SHORT},// 4 x 16
-};
-
-static const struct fmt_entry gl_float16_formats[] = {
-    {0, GL_R16F,    GL_RED,     GL_FLOAT},              // 1 x f
-    {0, GL_RG16F,   GL_RG,      GL_FLOAT},              // 2 x f
-    {0, GL_RGB16F,  GL_RGB,     GL_FLOAT},              // 3 x f
-    {0, GL_RGBA16F, GL_RGBA,    GL_FLOAT},              // 4 x f
-};
-
-static const struct fmt_entry gl_apple_formats[] = {
-    {IMGFMT_UYVY, GL_RGB, GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE},
-    {IMGFMT_YUYV, GL_RGB, GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_REV_APPLE},
-    {0}
-};
-
 struct packed_fmt_entry {
     int fmt;
     int8_t component_size;
@@ -546,34 +463,6 @@ static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[
 #define GLSL(x) gl_sc_add(p->sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
 #define GLSLHF(...) gl_sc_haddf(p->sc, __VA_ARGS__)
-
-// Return a fixed point texture format with given characteristics.
-static const struct fmt_entry *find_tex_format(GL *gl, int bytes_per_comp,
-                                               int n_channels)
-{
-    assert(bytes_per_comp == 1 || bytes_per_comp == 2);
-    assert(n_channels >= 1 && n_channels <= 4);
-    const struct fmt_entry *fmts = gl_byte_formats;
-    if (gl->es && !(gl->mpgl_caps & MPGL_CAP_EXT16)) {
-        fmts = gl->es >= 300 ? gl_byte_formats_gles3 : gl_byte_formats_gles2;
-    } else if (!(gl->mpgl_caps & MPGL_CAP_TEX_RG)) {
-        fmts = gl_byte_formats_legacy;
-    }
-    return &fmts[n_channels - 1 + (bytes_per_comp - 1) * 4];
-}
-
-static bool is_integer_format(const struct fmt_entry *fmt)
-{
-    // Tests only the formats which we actually declare somewhere.
-    switch (fmt->format) {
-    case GL_RED_INTEGER:
-    case GL_RG_INTEGER:
-    case GL_RGB_INTEGER:
-    case GL_RGBA_INTEGER:
-        return true;
-    }
-    return false;
-}
 
 static const char *load_cached_file(struct gl_video *p, const char *path)
 {
@@ -1246,7 +1135,7 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
     }
     int width = size / elems_per_pixel;
     assert(size == width * elems_per_pixel);
-    const struct fmt_entry *fmt = &gl_float16_formats[elems_per_pixel - 1];
+    const struct gl_format *fmt = gl_find_float16_format(gl, elems_per_pixel);
     GLenum target = scaler->gl_target;
 
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_SCALERS + scaler->index);
@@ -1957,8 +1846,8 @@ static void pass_dither(struct gl_video *p)
 
         int tex_size;
         void *tex_data;
-        GLint tex_iformat;
-        GLint tex_format;
+        GLint tex_iformat = 0;
+        GLint tex_format = 0;
         GLenum tex_type;
         unsigned char temp[256];
 
@@ -1973,15 +1862,14 @@ static void pass_dither(struct gl_video *p)
                 p->last_dither_matrix_size = size;
             }
 
-            const struct fmt_entry *fmt = find_tex_format(gl, 2, 1);
-            tex_size = size;
             // Prefer R16 texture since they provide higher precision.
-            if (fmt->internal_format && !gl->es) {
+            const struct gl_format *fmt = gl_find_unorm_format(gl, 2, 1);
+            if (!fmt || gl->es)
+                fmt = gl_find_float16_format(gl, 1);
+            tex_size = size;
+            if (fmt) {
                 tex_iformat = fmt->internal_format;
                 tex_format = fmt->format;
-            } else {
-                tex_iformat = gl_float16_formats[0].internal_format;
-                tex_format = gl_float16_formats[0].format;
             }
             tex_type = GL_FLOAT;
             tex_data = p->last_dither_matrix;
@@ -1989,7 +1877,7 @@ static void pass_dither(struct gl_video *p)
             assert(sizeof(temp) >= 8 * 8);
             mp_make_ordered_dither_matrix(temp, 8);
 
-            const struct fmt_entry *fmt = find_tex_format(gl, 1, 1);
+            const struct gl_format *fmt = gl_find_unorm_format(gl, 1, 1);
             tex_size = 8;
             tex_iformat = fmt->internal_format;
             tex_format = fmt->format;
@@ -2004,7 +1892,7 @@ static void pass_dither(struct gl_video *p)
         gl->BindTexture(GL_TEXTURE_2D, p->dither_texture);
         gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
         gl->TexImage2D(GL_TEXTURE_2D, 0, tex_iformat, tex_size, tex_size, 0,
-                    tex_format, tex_type, tex_data);
+                       tex_format, tex_type, tex_data);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -2663,20 +2551,17 @@ static bool check_dumb_mode(struct gl_video *p)
 static void check_gl_features(struct gl_video *p)
 {
     GL *gl = p->gl;
-    bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
-    bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
+    bool have_float_tex = !!gl_find_float16_format(gl, 1);
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mix = gl->glsl_version >= 130;
     bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
 
-    if (have_fbo) {
-        if (!p->opts.fbo_format) {
-            p->opts.fbo_format = GL_RGBA16;
-            if (gl->es && !(gl->mpgl_caps & MPGL_CAP_EXT16))
-                p->opts.fbo_format = have_float_tex ? GL_RGBA16F : GL_RGB10_A2;
-        }
-        have_fbo = test_fbo(p);
+    if (!p->opts.fbo_format) {
+        p->opts.fbo_format = GL_RGBA16;
+        if (gl->es && !(gl->mpgl_caps & MPGL_CAP_EXT16))
+            p->opts.fbo_format = have_float_tex ? GL_RGBA16F : GL_RGB10_A2;
     }
+    bool have_fbo = test_fbo(p);
 
     if (gl->es && p->opts.pbo) {
         p->opts.pbo = 0;
@@ -2798,8 +2683,8 @@ static void init_gl(struct gl_video *p)
 
     // Test whether we can use 10 bit. Hope that testing a single format/channel
     // is good enough (instead of testing all 1-4 channels variants etc.).
-    const struct fmt_entry *fmt = find_tex_format(gl, 2, 1);
-    if (gl->GetTexLevelParameteriv && fmt->format) {
+    const struct gl_format *fmt = gl_find_unorm_format(gl, 2, 1);
+    if (gl->GetTexLevelParameteriv && fmt) {
         GLuint tex;
         gl->GenTextures(1, &tex);
         gl->BindTexture(GL_TEXTURE_2D, tex);
@@ -2873,7 +2758,7 @@ bool gl_video_showing_interpolated_frame(struct gl_video *p)
 }
 
 // dest = src.<w> (always using 4 components)
-static void packed_fmt_swizzle(char w[5], const struct fmt_entry *texfmt,
+static void packed_fmt_swizzle(char w[5], const struct gl_format *texfmt,
                                const struct packed_fmt_entry *fmt)
 {
     const char *comp = "rgba";
@@ -2887,15 +2772,15 @@ static void packed_fmt_swizzle(char w[5], const struct fmt_entry *texfmt,
     w[4] = '\0';
 }
 
-// Like find_tex_format(), but takes bits (not bytes), and but if no fixed point
-// format is available, return an unsigned integer format.
-static const struct fmt_entry *find_plane_format(GL *gl, int bytes_per_comp,
+// Like gl_find_unorm_format(), but takes bits (not bytes), and but if no fixed
+// point format is available, return an unsigned integer format.
+static const struct gl_format *find_plane_format(GL *gl, int bytes_per_comp,
                                                  int n_channels)
 {
-    const struct fmt_entry *e = find_tex_format(gl, bytes_per_comp, n_channels);
-    if (e->format || gl->es < 300)
-        return e;
-    return &gl_ui_byte_formats_gles3[n_channels - 1 + (bytes_per_comp - 1) * 4];
+    const struct gl_format *f = gl_find_unorm_format(gl, bytes_per_comp, n_channels);
+    if (f)
+        return f;
+    return gl_find_uint_format(gl, bytes_per_comp, n_channels);
 }
 
 static void init_image_desc(struct gl_video *p, int fmt)
@@ -2924,7 +2809,7 @@ static bool init_format(struct gl_video *p, int fmt, bool test_only)
     if (desc.num_planes > 4)
         return false;
 
-    const struct fmt_entry *plane_format[4] = {0};
+    const struct gl_format *plane_format[4] = {0};
     char color_swizzle[5] = "";
 
     // YUV/planar formats
@@ -2955,37 +2840,27 @@ static bool init_format(struct gl_video *p, int fmt, bool test_only)
 
     // XYZ (same organization as RGB packed, but requires conversion matrix)
     if (fmt == IMGFMT_XYZ12) {
-        plane_format[0] = find_tex_format(gl, 2, 3);
+        plane_format[0] = gl_find_unorm_format(gl, 2, 3);
         goto supported;
-    }
-
-    // Packed RGB special formats
-    for (const struct fmt_entry *e = mp_to_gl_formats; e->mp_format; e++) {
-        if (!gl->es && e->mp_format == fmt) {
-            plane_format[0] = e;
-            goto supported;
-        }
     }
 
     // Packed RGB(A) formats
     for (const struct packed_fmt_entry *e = mp_packed_formats; e->fmt; e++) {
         if (e->fmt == fmt) {
             int n_comp = desc.bytes[0] / e->component_size;
-            plane_format[0] = find_tex_format(gl, e->component_size, n_comp);
+            plane_format[0] = gl_find_unorm_format(gl, e->component_size, n_comp);
             packed_fmt_swizzle(color_swizzle, plane_format[0], e);
             goto supported;
         }
     }
 
-    // Packed YUV Apple formats
-    if (p->gl->mpgl_caps & MPGL_CAP_APPLE_RGB_422) {
-        for (const struct fmt_entry *e = gl_apple_formats; e->mp_format; e++) {
-            if (e->mp_format == fmt) {
-                snprintf(color_swizzle, sizeof(color_swizzle), "gbra");
-                plane_format[0] = e;
-                goto supported;
-            }
-        }
+    // Special formats for which OpenGL happens to have direct support.
+    plane_format[0] = gl_find_special_format(gl, fmt);
+    if (plane_format[0]) {
+        // Packed YUV Apple formats color permutation
+        if (plane_format[0]->format == GL_RGB_422_APPLE)
+            snprintf(color_swizzle, sizeof(color_swizzle), "gbra");
+        goto supported;
     }
 
     // Unsupported format
@@ -3000,9 +2875,9 @@ supported:
 
     int use_integer = -1;
     for (int n = 0; n < desc.num_planes; n++) {
-        if (!plane_format[n]->format)
+        if (!plane_format[n])
             return false;
-        int use_int_plane = !!is_integer_format(plane_format[n]);
+        int use_int_plane = !!gl_integer_format_to_base(plane_format[n]->format);
         if (use_integer < 0)
             use_integer = use_int_plane;
         if (use_integer != use_int_plane)
@@ -3015,7 +2890,7 @@ supported:
     if (!test_only) {
         for (int n = 0; n < desc.num_planes; n++) {
             struct texplane *plane = &p->image.planes[n];
-            const struct fmt_entry *format = plane_format[n];
+            const struct gl_format *format = plane_format[n];
             assert(format);
             plane->gl_format = format->format;
             plane->gl_internal_format = format->internal_format;

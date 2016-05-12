@@ -21,14 +21,9 @@
 
 #include "video/out/bitmap_packer.h"
 
+#include "formats.h"
 #include "utils.h"
 #include "osd.h"
-
-struct osd_fmt_entry {
-    GLint internal_format;
-    GLint format;
-    GLenum type;
-};
 
 // glBlendFuncSeparate() arguments
 static const int blend_factors[SUBBITMAP_COUNT][4] = {
@@ -36,21 +31,6 @@ static const int blend_factors[SUBBITMAP_COUNT][4] = {
                           GL_ONE,       GL_ONE_MINUS_SRC_ALPHA},
     [SUBBITMAP_RGBA] =   {GL_ONE,       GL_ONE_MINUS_SRC_ALPHA,
                           GL_ONE,       GL_ONE_MINUS_SRC_ALPHA},
-};
-
-static const struct osd_fmt_entry osd_to_gl3_formats[SUBBITMAP_COUNT] = {
-    [SUBBITMAP_LIBASS] = {GL_RED,   GL_RED,   GL_UNSIGNED_BYTE},
-    [SUBBITMAP_RGBA] =   {GL_RGBA,  GL_RGBA,  GL_UNSIGNED_BYTE},
-};
-
-static const struct osd_fmt_entry osd_to_gles3_formats[SUBBITMAP_COUNT] = {
-    [SUBBITMAP_LIBASS] = {GL_R8,    GL_RED,   GL_UNSIGNED_BYTE},
-    [SUBBITMAP_RGBA] =   {GL_RGBA8, GL_RGBA,  GL_UNSIGNED_BYTE},
-};
-
-static const struct osd_fmt_entry osd_to_gl2_formats[SUBBITMAP_COUNT] = {
-    [SUBBITMAP_LIBASS] = {GL_LUMINANCE, GL_LUMINANCE,   GL_UNSIGNED_BYTE},
-    [SUBBITMAP_RGBA] =   {GL_RGBA,      GL_RGBA,        GL_UNSIGNED_BYTE},
 };
 
 struct vertex {
@@ -86,7 +66,7 @@ struct mpgl_osd {
     bool use_pbo;
     bool scaled;
     struct mpgl_osd_part *parts[MAX_OSD_PARTS];
-    const struct osd_fmt_entry *fmt_table;
+    const struct gl_format *fmt_table[SUBBITMAP_COUNT];
     bool formats[SUBBITMAP_COUNT];
     struct gl_vao vao;
     int64_t change_counter;
@@ -106,15 +86,11 @@ struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd
         .log = log,
         .osd = osd,
         .gl = gl,
-        .fmt_table = osd_to_gl3_formats,
         .scratch = talloc_zero_size(ctx, 1),
     };
 
-    if (gl->es >= 300) {
-        ctx->fmt_table = osd_to_gles3_formats;
-    } else if (!(gl->mpgl_caps & MPGL_CAP_TEX_RG)) {
-        ctx->fmt_table = osd_to_gl2_formats;
-    }
+    ctx->fmt_table[SUBBITMAP_LIBASS] = gl_find_unorm_format(gl, 1, 1);
+    ctx->fmt_table[SUBBITMAP_RGBA]   = gl_find_unorm_format(gl, 1, 4);
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct mpgl_osd_part *p = talloc_ptrtype(ctx, p);
@@ -128,7 +104,7 @@ struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd
     }
 
     for (int n = 0; n < SUBBITMAP_COUNT; n++)
-        ctx->formats[n] = ctx->fmt_table[n].type != 0;
+        ctx->formats[n] = !!ctx->fmt_table[n];
 
     gl_vao_init(&ctx->vao, gl, sizeof(struct vertex), vertex_vao);
 
@@ -163,8 +139,8 @@ static bool upload_pbo(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
 {
     GL *gl = ctx->gl;
     bool success = true;
-    struct osd_fmt_entry fmt = ctx->fmt_table[imgs->format];
-    int pix_stride = glFmt2bpp(fmt.format, fmt.type);
+    const struct gl_format *fmt = ctx->fmt_table[imgs->format];
+    int pix_stride = gl_bytes_per_pixel(fmt->format, fmt->type);
 
     if (!osd->buffer) {
         gl->GenBuffers(1, &osd->buffer);
@@ -185,7 +161,7 @@ static bool upload_pbo(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
         packer_copy_subbitmaps(osd->packer, imgs, data, pix_stride, stride);
         if (!gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER))
             success = false;
-        glUploadTex(gl, GL_TEXTURE_2D, fmt.format, fmt.type, NULL, stride,
+        glUploadTex(gl, GL_TEXTURE_2D, fmt->format, fmt->type, NULL, stride,
                     bb[0].x, bb[0].y, bb[1].x - bb[0].x, bb[1].y - bb[0].y, 0);
     }
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -201,11 +177,11 @@ static bool upload_pbo(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
 static void upload_tex(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
                        struct sub_bitmaps *imgs)
 {
-    struct osd_fmt_entry fmt = ctx->fmt_table[imgs->format];
+    const struct gl_format *fmt = ctx->fmt_table[imgs->format];
     if (osd->packer->padding) {
         struct pos bb[2];
         packer_get_bb(osd->packer, bb);
-        glClearTex(ctx->gl, GL_TEXTURE_2D, fmt.format, fmt.type,
+        glClearTex(ctx->gl, GL_TEXTURE_2D, fmt->format, fmt->type,
                    bb[0].x, bb[0].y, bb[1].x - bb[0].y, bb[1].y - bb[0].y,
                    0, &ctx->scratch);
     }
@@ -213,7 +189,7 @@ static void upload_tex(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
         struct sub_bitmap *s = &imgs->parts[n];
         struct pos p = osd->packer->result[n];
 
-        glUploadTex(ctx->gl, GL_TEXTURE_2D, fmt.format, fmt.type,
+        glUploadTex(ctx->gl, GL_TEXTURE_2D, fmt->format, fmt->type,
                     s->bitmap, s->stride, p.x, p.y, s->w, s->h, 0);
     }
 }
@@ -232,8 +208,8 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
         return false;
     }
 
-    struct osd_fmt_entry fmt = ctx->fmt_table[imgs->format];
-    assert(fmt.type != 0);
+    const struct gl_format *fmt = ctx->fmt_table[imgs->format];
+    assert(fmt);
 
     if (!osd->texture)
         gl->GenTextures(1, &osd->texture);
@@ -247,8 +223,8 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
         osd->w = FFMAX(32, osd->packer->w);
         osd->h = FFMAX(32, osd->packer->h);
 
-        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt.internal_format, osd->w, osd->h,
-                       0, fmt.format, fmt.type, NULL);
+        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, osd->w, osd->h,
+                       0, fmt->format, fmt->type, NULL);
 
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
