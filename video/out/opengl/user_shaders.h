@@ -24,13 +24,40 @@
 #define SHADER_API 1
 #define SHADER_MAX_HOOKS 16
 #define SHADER_MAX_BINDS 6
+#define MAX_SZEXP_SIZE 32
+
+enum szexp_op {
+    SZEXP_OP_ADD,
+    SZEXP_OP_SUB,
+    SZEXP_OP_MUL,
+    SZEXP_OP_DIV,
+};
+
+enum szexp_tag {
+    SZEXP_END = 0, // End of an RPN expression
+    SZEXP_CONST, // Push a constant value onto the stack
+    SZEXP_VAR_W, // Get the width/height of a named texture (variable)
+    SZEXP_VAR_H,
+    SZEXP_OP2, // Pop two elements and push the result of a dyadic operation
+} tag;
+
+struct szexp {
+    enum szexp_tag tag;
+    union {
+        float cval;
+        struct bstr varname;
+        enum szexp_op op;
+    } val;
+};
 
 struct gl_user_shader {
     struct bstr hook_tex[SHADER_MAX_HOOKS];
     struct bstr bind_tex[SHADER_MAX_BINDS];
     struct bstr save_tex;
     struct bstr pass_body;
-    struct gl_transform transform;
+    struct gl_transform offset;
+    struct szexp width[MAX_SZEXP_SIZE];
+    struct szexp height[MAX_SZEXP_SIZE];
     int components;
 };
 

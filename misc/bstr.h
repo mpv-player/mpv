@@ -116,10 +116,15 @@ int bstr_validate_utf8(struct bstr s);
 // talloc, with talloc_ctx as parent.
 struct bstr bstr_sanitize_utf8_latin1(void *talloc_ctx, struct bstr s);
 
-// Return the text before the next line break, and return it. Change *rest to
-// point to the text following this line break. (rest can be NULL.)
-// Line break characters are not stripped.
-struct bstr bstr_getline(struct bstr str, struct bstr *rest);
+// Return the text before the occurance of a character, and return it. Change
+// *rest to point to the text following this character. (rest can be NULL.)
+struct bstr bstr_splitchar(struct bstr str, struct bstr *rest, const char c);
+
+// Like bstr_splitchar. Trailing newlines are not stripped.
+static inline struct bstr bstr_getline(struct bstr str, struct bstr *rest)
+{
+    return bstr_splitchar(str, rest, '\n');
+}
 
 // Strip one trailing line break. This is intended for use with bstr_getline,
 // and will remove the trailing \n or \r\n sequence.
@@ -131,8 +136,10 @@ void bstr_xappend_asprintf(void *talloc_ctx, bstr *s, const char *fmt, ...)
 void bstr_xappend_vasprintf(void *talloc_ctx, bstr *s, const char *fmt, va_list va)
     PRINTF_ATTRIBUTE(3, 0);
 
-// If s starts with prefix, return true and return the rest of the string in s.
+// If s starts/ends with prefix, return true and return the rest of the string
+// in s.
 bool bstr_eatstart(struct bstr *s, struct bstr prefix);
+bool bstr_eatend(struct bstr *s, struct bstr prefix);
 
 bool bstr_case_startswith(struct bstr s, struct bstr prefix);
 bool bstr_case_endswith(struct bstr s, struct bstr suffix);
@@ -200,9 +207,14 @@ static inline int bstr_find0(struct bstr haystack, const char *needle)
     return bstr_find(haystack, bstr0(needle));
 }
 
-static inline int bstr_eatstart0(struct bstr *s, const char *prefix)
+static inline bool bstr_eatstart0(struct bstr *s, const char *prefix)
 {
     return bstr_eatstart(s, bstr0(prefix));
+}
+
+static inline bool bstr_eatend0(struct bstr *s, const char *prefix)
+{
+    return bstr_eatend(s, bstr0(prefix));
 }
 
 // create a pair (not single value!) for "%.*s" printf syntax

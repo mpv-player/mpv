@@ -215,9 +215,9 @@ struct bstr *bstr_splitlines(void *talloc_ctx, struct bstr str)
     return r;
 }
 
-struct bstr bstr_getline(struct bstr str, struct bstr *rest)
+struct bstr bstr_splitchar(struct bstr str, struct bstr *rest, const char c)
 {
-    int pos = bstrchr(str, '\n');
+    int pos = bstrchr(str, c);
     if (pos < 0)
         pos = str.len;
     if (rest)
@@ -240,6 +240,14 @@ bool bstr_eatstart(struct bstr *s, struct bstr prefix)
     if (!bstr_startswith(*s, prefix))
         return false;
     *s = bstr_cut(*s, prefix.len);
+    return true;
+}
+
+bool bstr_eatend(struct bstr *s, struct bstr prefix)
+{
+    if (!bstr_endswith(*s, prefix))
+        return false;
+    s->len -= prefix.len;
     return true;
 }
 

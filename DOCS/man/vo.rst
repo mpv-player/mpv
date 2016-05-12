@@ -739,11 +739,20 @@ Available video output drivers are:
             into. By default, this is set to the special name HOOKED which has
             the effect of overwriting the hooked texture.
 
-        TRANSFORM sx sy ox oy
-            Specifies how this pass intends to transform the hooked texture.
-            ``sx``/``sy`` refer to a linear scale factor, and ``ox``/``oy``
-            refer to a constant pixel shift that the shader will introduce. The
-            default values are 1 1 0 0 which leave the texture size unchanged.
+        WIDTH <szexpr>, HEIGHT <szexpr>
+            Specifies the size of the resulting texture for this pass.
+            ``szexpr`` refers to an expression in RPN (reverse polish
+            notation), using the operators + - * /, floating point literals,
+            and references to existing texture sizes such as MAIN.width or
+            CHROMA.height. By default, these are set to HOOKED.w and HOOKED.h,
+            respectively.
+
+        OFFSET ox oy
+            Indicates a pixel shift (offset) introduced by this pass. These
+            pixel offsets will be accumulated and corrected during the
+            next scaling pass (``cscale`` or ``scale``). The default values
+            are 0 0 which correspond to no shift. Note that offsets are ignored
+            when not overwriting the hooked texture.
 
         COMPONENTS n
             Specifies how many components of this pass's output are relevant
@@ -810,8 +819,9 @@ Available video output drivers are:
             The final output image, after color management but before
             dithering and drawing to screen.
 
-        Only the textures labelled with (resizable) may be transformed by
-        the pass. For all others, the TRANSFORM must be 1 1 0 0 (default).
+        Only the textures labelled with ``resizable`` may be transformed by the
+        pass. When overwriting a texture marked ``fixed``, the WIDTH, HEIGHT
+        and OFFSET must be left at their default values.
 
     ``deband``
         Enable the debanding algorithm. This greatly reduces the amount of
