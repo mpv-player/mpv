@@ -2727,6 +2727,8 @@ static void check_gl_features(struct gl_video *p)
             if (reason) {
                 p->opts.scaler[n].kernel.name = "bilinear";
                 MP_WARN(p, "Disabling scaler #%d %s.\n", n, reason);
+                if (n == SCALER_TSCALE)
+                    p->opts.interpolation = 0;
             }
         }
     }
