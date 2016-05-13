@@ -200,6 +200,10 @@ static int angle_init(struct MPGLContext *ctx, int flags)
 
     mpgl_load_functions(ctx->gl, get_proc_address, NULL, vo->log);
 
+    const char *exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
+    if (exts)
+        MP_DBG(ctx->vo, "EGL extensions: %s\n", exts);
+
     return 0;
 
 fail:
