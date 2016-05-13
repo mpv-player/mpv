@@ -2768,17 +2768,10 @@ bool gl_video_showing_interpolated_frame(struct gl_video *p)
 }
 
 // dest = src.<w> (always using 4 components)
-static void packed_fmt_swizzle(char w[5], const struct gl_format *texfmt,
-                               const struct packed_fmt_entry *fmt)
+static void packed_fmt_swizzle(char w[5], const struct packed_fmt_entry *fmt)
 {
-    const char *comp = "rgba";
-
-    // Normally, we work with GL_RG
-    if (texfmt && texfmt->internal_format == GL_LUMINANCE_ALPHA)
-        comp = "ragb";
-
     for (int c = 0; c < 4; c++)
-        w[c] = comp[MPMAX(fmt->components[c] - 1, 0)];
+        w[c] = "rgba"[MPMAX(fmt->components[c] - 1, 0)];
     w[4] = '\0';
 }
 
@@ -2859,7 +2852,7 @@ static bool init_format(struct gl_video *p, int fmt, bool test_only)
         if (e->fmt == fmt) {
             int n_comp = desc.bytes[0] / e->component_size;
             plane_format[0] = gl_find_unorm_format(gl, e->component_size, n_comp);
-            packed_fmt_swizzle(color_swizzle, plane_format[0], e);
+            packed_fmt_swizzle(color_swizzle, e);
             goto supported;
         }
     }
