@@ -2814,6 +2814,7 @@ static bool init_format(struct gl_video *p, int fmt, bool test_only)
 
     const struct gl_format *plane_format[4] = {0};
     char color_swizzle[5] = "";
+    const struct packed_fmt_entry *packed_format = {0};
 
     // YUV/planar formats
     if (desc.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_RGB_P)) {
@@ -2852,7 +2853,7 @@ static bool init_format(struct gl_video *p, int fmt, bool test_only)
         if (e->fmt == fmt) {
             int n_comp = desc.bytes[0] / e->component_size;
             plane_format[0] = gl_find_unorm_format(gl, e->component_size, n_comp);
-            packed_fmt_swizzle(color_swizzle, e);
+            packed_format = e;
             goto supported;
         }
     }
@@ -2899,8 +2900,11 @@ supported:
             plane->gl_internal_format = format->internal_format;
             plane->gl_type = format->type;
             plane->use_integer = use_integer;
+            snprintf(plane->swizzle, sizeof(plane->swizzle), "rgba");
+            if (packed_format)
+                packed_fmt_swizzle(plane->swizzle, packed_format);
             if (plane->gl_format == GL_LUMINANCE_ALPHA)
-                snprintf(plane->swizzle, sizeof(plane->swizzle), "raaa");
+                MPSWAP(char, plane->swizzle[1], plane->swizzle[3]);
         }
 
         init_image_desc(p, fmt);
