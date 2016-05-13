@@ -2782,15 +2782,15 @@ static void packed_fmt_swizzle(char w[5], const struct gl_format *texfmt,
     w[4] = '\0';
 }
 
-// Like gl_find_unorm_format(), but takes bits (not bytes), and but if no fixed
+// Like gl_find_unorm_format(), but takes bits (not bytes), and if no fixed
 // point format is available, return an unsigned integer format.
-static const struct gl_format *find_plane_format(GL *gl, int bytes_per_comp,
-                                                 int n_channels)
+static const struct gl_format *find_plane_format(GL *gl, int bits, int n_channels)
 {
-    const struct gl_format *f = gl_find_unorm_format(gl, bytes_per_comp, n_channels);
+    int bytes = (bits + 7) / 8;
+    const struct gl_format *f = gl_find_unorm_format(gl, bytes, n_channels);
     if (f)
         return f;
-    return gl_find_uint_format(gl, bytes_per_comp, n_channels);
+    return gl_find_uint_format(gl, bytes, n_channels);
 }
 
 static void init_image_desc(struct gl_video *p, int fmt)
@@ -2826,7 +2826,7 @@ static bool init_format(struct gl_video *p, int fmt, bool test_only)
     if (desc.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_RGB_P)) {
         int bits = desc.component_bits;
         if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
-            plane_format[0] = find_plane_format(gl, (bits + 7) / 8, 1);
+            plane_format[0] = find_plane_format(gl, bits, 1);
             for (int n = 1; n < desc.num_planes; n++)
                 plane_format[n] = plane_format[0];
             // RGB/planar
@@ -2840,8 +2840,8 @@ static bool init_format(struct gl_video *p, int fmt, bool test_only)
     if (desc.flags & MP_IMGFLAG_YUV_NV) {
         int bits = desc.component_bits;
         if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
-            plane_format[0] = find_plane_format(gl, (bits + 7) / 8, 1);
-            plane_format[1] = find_plane_format(gl, (bits + 7) / 8, 2);
+            plane_format[0] = find_plane_format(gl, bits, 1);
+            plane_format[1] = find_plane_format(gl, bits, 2);
             if (desc.flags & MP_IMGFLAG_YUV_NV_SWAP)
                 snprintf(color_swizzle, sizeof(color_swizzle), "rbga");
             goto supported;
