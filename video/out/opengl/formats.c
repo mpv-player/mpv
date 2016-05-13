@@ -35,10 +35,10 @@ const struct gl_format gl_formats[] = {
     {GL_RGBA16,              GL_RGBA,            T_U16, F_TF | F_GL2},
 
     // ES2 legacy
-    {GL_LUMINANCE,           GL_LUMINANCE,       T_U8,  F_CF | F_ES2},
-    {GL_LUMINANCE_ALPHA,     GL_LUMINANCE_ALPHA, T_U8,  F_CF | F_ES2},
-    {GL_RGB,                 GL_RGB,             T_U8,  F_CF | F_ES2},
-    {GL_RGBA,                GL_RGBA,            T_U8,  F_CF | F_ES2},
+    {GL_LUMINANCE,           GL_LUMINANCE,       T_U8,  F_TF | F_ES2},
+    {GL_LUMINANCE_ALPHA,     GL_LUMINANCE_ALPHA, T_U8,  F_TF | F_ES2},
+    {GL_RGB,                 GL_RGB,             T_U8,  F_TF | F_ES2},
+    {GL_RGBA,                GL_RGBA,            T_U8,  F_TF | F_ES2},
 
     // Non-normalized integer formats.
     // Follows ES 3.0 as to which are color-renderable.
