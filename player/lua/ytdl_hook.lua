@@ -253,7 +253,7 @@ mp.add_hook("on_load", 10, function ()
             end
 
             -- for rtmp
-            if not (json.play_path == nil) then
+            if (json.protocol == "rtmp") then
                 local rtmp_prop = append_rtmp_prop(nil,
                     "rtmp_tcurl", streamurl)
                 rtmp_prop = append_rtmp_prop(rtmp_prop,
