@@ -350,6 +350,10 @@ The ``mp`` module is preloaded, although it can be loaded manually with
             with ``add_timeout()``), this starts the timer from the beginning,
             using the initially configured timeout.
 
+        ``is_enabled()``
+            Whether the timer is currently enabled or was previously disabled
+            (e.g. by ``stop()`` or ``kill()``).
+
         ``timeout`` (RW)
             This field contains the current timeout period. This value is not
             updated as time progresses. It's only used to calculate when the
