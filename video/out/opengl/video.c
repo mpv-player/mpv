@@ -217,7 +217,6 @@ struct gl_video {
     struct fbotex blend_subs_fbo;
     struct fbotex output_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
-    struct fbotex prescale_fbo[MAX_PRESCALE_PASSES];
 
     int surface_idx;
     int surface_now;
@@ -602,9 +601,6 @@ static void uninit_rendering(struct gl_video *p)
     fbotex_uninit(&p->indirect_fbo);
     fbotex_uninit(&p->blend_subs_fbo);
 
-    for (int pass = 0; pass < MAX_PRESCALE_PASSES; pass++)
-        fbotex_uninit(&p->prescale_fbo[pass]);
-
     for (int n = 0; n < FBOSURFACES_MAX; n++)
         fbotex_uninit(&p->surfaces[n].fbotex);
 
@@ -910,9 +906,11 @@ static void pass_prepare_src_tex(struct gl_video *p)
 
         char texture_name[32];
         char texture_size[32];
+        char texture_rot[32];
         char pixel_size[32];
         snprintf(texture_name, sizeof(texture_name), "texture%d", n);
         snprintf(texture_size, sizeof(texture_size), "texture_size%d", n);
+        snprintf(texture_rot, sizeof(texture_rot), "texture_rot%d", n);
         snprintf(pixel_size, sizeof(pixel_size), "pixel_size%d", n);
 
         if (s->use_integer) {
@@ -926,6 +924,7 @@ static void pass_prepare_src_tex(struct gl_video *p)
             f[1] = s->tex_h;
         }
         gl_sc_uniform_vec2(sc, texture_size, f);
+        gl_sc_uniform_mat2(sc, texture_rot, true, (float *)s->transform.m);
         gl_sc_uniform_vec2(sc, pixel_size, (GLfloat[]){1.0f / f[0],
                                                        1.0f / f[1]});
 
@@ -1045,12 +1044,29 @@ static void uninit_scaler(struct gl_video *p, struct scaler *scaler)
     scaler->initialized = false;
 }
 
-static void hook_prelude(struct gl_video *p, const char *name, int id)
+static void hook_prelude(struct gl_video *p, const char *name, int id,
+                         struct img_tex tex)
 {
-    GLSLHF("#define %s texture%d\n", name, id);
+    GLSLHF("#define %s_raw texture%d\n", name, id);
     GLSLHF("#define %s_pos texcoord%d\n", name, id);
     GLSLHF("#define %s_size texture_size%d\n", name, id);
+    GLSLHF("#define %s_rot texture_rot%d\n", name, id);
     GLSLHF("#define %s_pt pixel_size%d\n", name, id);
+
+    // Set up the sampling functions
+    GLSLHF("#define %s_tex(pos) (%f * vec4(texture(%s_raw, pos)).%s)\n",
+           name, tex.multiplier, name, tex.swizzle[0] ? tex.swizzle : "rgba");
+
+    // Since the extra matrix multiplication impacts performance,
+    // skip it unless the texture was actually rotated
+    if (gl_transform_eq(tex.transform, identity_trans)) {
+        GLSLHF("#define %s_texOff(off) %s_tex(%s_pos + %s_pt * vec2(off))\n",
+               name, name, name, name);
+    } else {
+        GLSLHF("#define %s_texOff(off) "
+                   "%s_tex(%s_pos + %s_rot * vec2(off)/%s_size)\n",
+               name, name, name, name, name);
+    }
 }
 
 static bool saved_tex_find(struct gl_video *p, const char *name,
@@ -1116,8 +1132,8 @@ static struct img_tex pass_hook(struct gl_video *p, const char *name,
             // This is a special name that means "currently hooked texture"
             if (strcmp(bind_name, "HOOKED") == 0) {
                 int id = pass_bind(p, tex);
-                hook_prelude(p, "HOOKED", id);
-                hook_prelude(p, name, id);
+                hook_prelude(p, "HOOKED", id, tex);
+                hook_prelude(p, name, id, tex);
                 continue;
             }
 
@@ -1130,7 +1146,7 @@ static struct img_tex pass_hook(struct gl_video *p, const char *name,
                 return tex;
             }
 
-            hook_prelude(p, bind_name, pass_bind(p, bind_tex));
+            hook_prelude(p, bind_name, pass_bind(p, bind_tex), bind_tex);
         }
 
         // Run the actual hook. This generates a series of GLSL shader
@@ -1502,33 +1518,6 @@ static void upload_nnedi3_weights(struct gl_video *p)
     }
 }
 
-// Applies a single pass of the prescaler, and accumulates the offset in
-// pass_transform.
-static void pass_prescale_luma_step(struct gl_video *p, struct img_tex tex,
-                                    struct gl_transform *step_transform,
-                                    int step)
-{
-    int id = pass_bind(p, tex);
-    int planes = tex.components;
-
-    switch(p->opts.prescale_luma) {
-    case 1:
-        assert(planes == 1);
-        pass_superxbr(p->sc, id, step, tex.multiplier,
-                      p->opts.superxbr_opts, step_transform);
-        break;
-    case 2:
-        upload_nnedi3_weights(p);
-        pass_nnedi3(p->gl, p->sc, planes, id, step, tex.multiplier,
-                    p->opts.nnedi3_opts, step_transform, tex.gl_target);
-        break;
-    default:
-        abort();
-    }
-
-    skip_unused(p, planes);
-}
-
 // Returns true if two img_texs are semantically equivalent (same metadata)
 static bool img_tex_equiv(struct img_tex a, struct img_tex b)
 {
@@ -1569,33 +1558,22 @@ static void pass_add_hooks(struct gl_video *p, struct tex_hook hook,
 static void deband_hook(struct gl_video *p, struct img_tex tex,
                         struct gl_transform *trans, void *priv)
 {
-    // We could use the hook binding mechanism here but the existing code
-    // already assumes we just know an ID so just do this for simplicity
-    int id = pass_bind(p, tex);
-    pass_sample_deband(p->sc, p->opts.deband_opts, id, tex.multiplier,
-                       tex.gl_target, &p->lfg);
-    skip_unused(p, tex.components);
+    pass_sample_deband(p->sc, p->opts.deband_opts, &p->lfg);
 }
 
-static void prescale_hook(struct gl_video *p, struct img_tex tex,
+static void superxbr_hook(struct gl_video *p, struct img_tex tex,
                           struct gl_transform *trans, void *priv)
 {
-    struct gl_transform step_trans = identity_trans;
-    pass_prescale_luma_step(p, tex, &step_trans, 0);
-    gl_transform_trans(step_trans, trans);
+    int step = (uintptr_t)priv;
+    pass_superxbr(p->sc, step, p->opts.superxbr_opts, trans);
+}
 
-    // We render out an FBO *inside* this hook, which is normally quite
-    // unusual but here it allows us to work around the lack of real closures.
-    // Unfortunately it means we need to duplicate some work to compute the
-    // new FBO size
-    struct fbotex *fbo = priv;
-    int w = tex.w * (int)step_trans.m[0][0],
-        h = tex.h * (int)step_trans.m[1][1];
-    finish_pass_fbo(p, fbo, w, h, 0);
-    tex = img_tex_fbo(fbo, tex.type, tex.components);
-
-    pass_prescale_luma_step(p, tex, &step_trans, 1);
-    gl_transform_trans(step_trans, trans);
+static void nnedi3_hook(struct gl_video *p, struct img_tex tex,
+                        struct gl_transform *trans, void *priv)
+{
+    int step = (uintptr_t)priv;
+    upload_nnedi3_weights(p);
+    pass_nnedi3(p->gl, p->sc, step, p->opts.nnedi3_opts, trans);
 }
 
 static void unsharp_hook(struct gl_video *p, struct img_tex tex,
@@ -1617,7 +1595,7 @@ static void user_hook_old(struct gl_video *p, struct img_tex tex,
     load_shader(p, bstr0(body));
     const char *fn_name = get_custom_shader_fn(p, body);
     GLSLF("// custom shader\n");
-    GLSLF("color = %s(HOOKED, HOOKED_pos, HOOKED_size);\n", fn_name);
+    GLSLF("color = %s(HOOKED_raw, HOOKED_pos, HOOKED_size);\n", fn_name);
 }
 
 // Returns 1.0 on failure to at least create a legal FBO
@@ -1784,17 +1762,36 @@ static void pass_hook_user_shaders(struct gl_video *p, char **shaders)
 static void gl_video_setup_hooks(struct gl_video *p)
 {
     if (p->opts.deband) {
-        pass_add_hooks(p, (struct tex_hook) {.hook = deband_hook},
+        pass_add_hooks(p, (struct tex_hook) {.hook = deband_hook,
+                                             .bind_tex = {"HOOKED"}},
                        HOOKS("LUMA", "CHROMA", "RGB", "XYZ"));
     }
 
     int prescale_passes = get_prescale_passes(p);
-    for (int i = 0; i < prescale_passes; i++) {
-        pass_add_hook(p, (struct tex_hook) {
-            .hook_tex = "LUMA",
-            .hook = prescale_hook,
-            .priv = &p->prescale_fbo[i],
-        });
+    if (p->opts.prescale_luma == 1) { // superxbr
+        for (int i = 0; i < prescale_passes; i++) {
+            for (int step = 0; step < 2; step++) {
+                pass_add_hook(p, (struct tex_hook) {
+                    .hook_tex = "LUMA",
+                    .bind_tex = {"HOOKED"},
+                    .hook = superxbr_hook,
+                    .priv = (void *)(uintptr_t)step,
+                });
+            }
+        }
+    }
+
+    if (p->opts.prescale_luma == 2) { // nnedi3
+        for (int i = 0; i < prescale_passes; i++) {
+            for (int step = 0; step < 2; step++) {
+                pass_add_hook(p, (struct tex_hook) {
+                    .hook_tex = "LUMA",
+                    .bind_tex = {"HOOKED"},
+                    .hook = nnedi3_hook,
+                    .priv = (void *)(uintptr_t)step,
+                });
+            }
+        }
     }
 
     if (p->opts.unsharp != 0.0) {

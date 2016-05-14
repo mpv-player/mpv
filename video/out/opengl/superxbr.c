@@ -174,7 +174,7 @@ static void superxbr_step_h(struct gl_shader_cache *sc,
     }
 
     // Pick the two best directions and mix them together
-    GLSLHF("float str = smoothstep(0.0, %f + 1e-6, abs(tex_mul*d_edge));\n",
+    GLSLHF("float str = smoothstep(0.0, %f + 1e-6, abs(d_edge));\n",
            conf->edge_strength);
     GLSLH(res = mix(mix(d2c, d1c, step(0.0, d_edge)), \
                     mix(hc,   vc, step(0.0, o_edge)), 1.0 - str);)
@@ -187,7 +187,7 @@ static void superxbr_step_h(struct gl_shader_cache *sc,
     GLSLHF("} // step\n");
 }
 
-void pass_superxbr(struct gl_shader_cache *sc, int id, int step, float tex_mul,
+void pass_superxbr(struct gl_shader_cache *sc, int step,
                    const struct superxbr_opts *conf,
                    struct gl_transform *transform)
 {
@@ -196,49 +196,48 @@ void pass_superxbr(struct gl_shader_cache *sc, int id, int step, float tex_mul,
 
     assert(0 <= step && step < 2);
     GLSLF("// superxbr (step %d)\n", step);
-    GLSLHF("#define tex texture%d\n", id);
-    GLSLHF("#define tex_size texture_size%d\n", id);
-    GLSLHF("#define tex_mul %f\n", tex_mul);
-    GLSLHF("#define pt pixel_size%d\n", id);
 
     // We use a sub-function in the header so we can return early
-    GLSLHF("float superxbr(vec2 pos) {\n");
+    GLSLHF("float superxbr() {\n");
     GLSLH(float i[4*4];)
     GLSLH(float res;)
     GLSLH(#define i(x,y) i[(x)*4+(y)])
 
     if (step == 0) {
         *transform = (struct gl_transform){{{2.0,0.0}, {0.0,2.0}}, {-0.5,-0.5}};
-        GLSLH(vec2 dir = fract(pos * tex_size) - 0.5;)
+        GLSLH(vec2 dir = fract(HOOKED_pos * HOOKED_size) - 0.5;)
+        GLSLH(dir = transpose(HOOKED_rot) * dir;)
 
         // Optimization: Discard (skip drawing) unused pixels, except those
         // at the edge.
-        GLSLH(vec2 dist = tex_size * min(pos, vec2(1.0) - pos);)
+        GLSLH(vec2 dist = HOOKED_size * min(HOOKED_pos, vec2(1.0) - HOOKED_pos);)
         GLSLH(if (dir.x * dir.y < 0.0 && dist.x > 1.0 && dist.y > 1.0)
                   return 0.0;)
 
         GLSLH(if (dir.x < 0.0 || dir.y < 0.0 || dist.x < 1.0 || dist.y < 1.0)
-                  return texture(tex, pos - pt * dir).x;)
+                  return HOOKED_texOff(-dir).x;)
 
         // Load the input samples
         GLSLH(for (int x = 0; x < 4; x++))
         GLSLH(for (int y = 0; y < 4; y++))
-        GLSLH(i(x,y) = texture(tex, pos + pt * vec2(x-1.25, y-1.25)).x;)
+        GLSLH(i(x,y) = HOOKED_texOff(vec2(x-1.25, y-1.25)).x;)
     } else {
         *transform = (struct gl_transform){{{1.0,0.0}, {0.0,1.0}}, {0.0,0.0}};
 
-        GLSLH(vec2 dir = fract(pos * tex_size / 2.0) - 0.5;)
+        // This is the second pass, so it will never be rotated
+        GLSLH(vec2 dir = fract(HOOKED_pos * HOOKED_size / 2.0) - 0.5;)
+
         GLSLH(if (dir.x * dir.y > 0.0)
-                  return texture(tex, pos).x;)
+                  return HOOKED_texOff(0).x;)
 
         GLSLH(for (int x = 0; x < 4; x++))
         GLSLH(for (int y = 0; y < 4; y++))
-        GLSLH(i(x,y) = texture(tex, pos + pt * vec2(x+y-3, y-x)).x;)
+        GLSLH(i(x,y) = HOOKED_texOff(vec2(x+y-3, y-x)).x;)
     }
 
     superxbr_step_h(sc, conf, &params[step]);
     GLSLH(return res;)
     GLSLHF("}\n");
 
-    GLSLF("color.x = tex_mul * superxbr(texcoord%d);\n", id);
+    GLSL(color.x = superxbr();)
 }

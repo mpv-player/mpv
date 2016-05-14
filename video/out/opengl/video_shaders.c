@@ -290,7 +290,7 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 
 // Wide usage friendly PRNG, shamelessly stolen from a GLSL tricks forum post.
 // Obtain random numbers by calling rand(h), followed by h = permute(h) to
-// update the state.
+// update the state. Assumes the texture was hooked.
 static void prng_init(struct gl_shader_cache *sc, AVLFG *lfg)
 {
     GLSLH(float mod289(float x)  { return x - floor(x / 289.0) * 289.0; })
@@ -298,7 +298,7 @@ static void prng_init(struct gl_shader_cache *sc, AVLFG *lfg)
     GLSLH(float rand(float x)    { return fract(x / 41.0); })
 
     // Initialize the PRNG by hashing the position + a random uniform
-    GLSL(vec3 _m = vec3(pos, random) + vec3(1.0);)
+    GLSL(vec3 _m = vec3(HOOKED_pos, random) + vec3(1.0);)
     GLSL(float h = permute(permute(permute(_m.x)+_m.y)+_m.z);)
     gl_sc_uniform_f(sc, "random", (double)av_lfg_get(lfg) / UINT32_MAX);
 }
@@ -331,44 +331,40 @@ const struct m_sub_options deband_conf = {
     .defaults = &deband_opts_def,
 };
 
-// Stochastically sample a debanded result from a given texture
+// Stochastically sample a debanded result from a hooked texture.
 void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
-                        int tex_num, float tex_mul, GLenum tex_target, AVLFG *lfg)
+                        AVLFG *lfg)
 {
-    // Set up common variables and initialize the PRNG
+    // Initialize the PRNG
     GLSLF("{\n");
-    sampler_prelude(sc, tex_num);
     prng_init(sc, lfg);
 
     // Helper: Compute a stochastic approximation of the avg color around a
     // pixel
-    GLSLHF("vec4 average(%s tex, vec2 pos, vec2 pt, float range, inout float h) {",
-           mp_sampler_type(tex_target));
+    GLSLHF("vec4 average(float range, inout float h) {\n");
         // Compute a random rangle and distance
         GLSLH(float dist = rand(h) * range;     h = permute(h);)
         GLSLH(float dir  = rand(h) * 6.2831853; h = permute(h);)
-
-        GLSLHF("pt *= dist;\n");
-        GLSLH(vec2 o = vec2(cos(dir), sin(dir));)
+        GLSLH(vec2 o = dist * vec2(cos(dir), sin(dir));)
 
         // Sample at quarter-turn intervals around the source pixel
         GLSLH(vec4 ref[4];)
-        GLSLH(ref[0] = texture(tex, pos + pt * vec2( o.x,  o.y));)
-        GLSLH(ref[1] = texture(tex, pos + pt * vec2(-o.y,  o.x));)
-        GLSLH(ref[2] = texture(tex, pos + pt * vec2(-o.x, -o.y));)
-        GLSLH(ref[3] = texture(tex, pos + pt * vec2( o.y, -o.x));)
+        GLSLH(ref[0] = HOOKED_texOff(vec2( o.x,  o.y));)
+        GLSLH(ref[1] = HOOKED_texOff(vec2(-o.y,  o.x));)
+        GLSLH(ref[2] = HOOKED_texOff(vec2(-o.x, -o.y));)
+        GLSLH(ref[3] = HOOKED_texOff(vec2( o.y, -o.x));)
 
         // Return the (normalized) average
-        GLSLHF("return %f * (ref[0] + ref[1] + ref[2] + ref[3])/4.0;\n", tex_mul);
-    GLSLH(})
+        GLSLH(return (ref[0] + ref[1] + ref[2] + ref[3])/4.0;)
+    GLSLHF("}\n");
 
     // Sample the source pixel
-    GLSLF("color = %f * texture(tex, pos);\n", tex_mul);
+    GLSL(color = HOOKED_tex(HOOKED_pos);)
     GLSLF("vec4 avg, diff;\n");
     for (int i = 1; i <= opts->iterations; i++) {
         // Sample the average pixel and use it instead of the original if
         // the difference is below the given threshold
-        GLSLF("avg = average(tex, pos, pt, %f, h);\n", i * opts->range);
+        GLSLF("avg = average(%f, h);\n", i * opts->range);
         GLSL(diff = abs(color - avg);)
         GLSLF("color = mix(avg, color, greaterThan(diff, vec4(%f)));\n",
               opts->threshold / (i * 16384.0));
@@ -383,20 +379,21 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
     GLSLF("}\n");
 }
 
+// Assumes the texture was hooked
 void pass_sample_unsharp(struct gl_shader_cache *sc, float param) {
     GLSLF("// unsharp\n");
     GLSLF("{\n");
-    GLSL(vec2 st1 = pt * 1.2;)
-    GLSL(vec4 p = texture(tex, pos);)
-    GLSL(vec4 sum1 = texture(tex, pos + st1 * vec2(+1, +1))
-                   + texture(tex, pos + st1 * vec2(+1, -1))
-                   + texture(tex, pos + st1 * vec2(-1, +1))
-                   + texture(tex, pos + st1 * vec2(-1, -1));)
-    GLSL(vec2 st2 = pt * 1.5;)
-    GLSL(vec4 sum2 = texture(tex, pos + st2 * vec2(+1,  0))
-                   + texture(tex, pos + st2 * vec2( 0, +1))
-                   + texture(tex, pos + st2 * vec2(-1,  0))
-                   + texture(tex, pos + st2 * vec2( 0, -1));)
+    GLSL(float st1 = 1.2;)
+    GLSL(vec4 p = HOOKED_tex(HOOKED_pos);)
+    GLSL(vec4 sum1 = HOOKED_texOff(st1 * vec2(+1, +1))
+                   + HOOKED_texOff(st1 * vec2(+1, -1))
+                   + HOOKED_texOff(st1 * vec2(-1, +1))
+                   + HOOKED_texOff(st1 * vec2(-1, -1));)
+    GLSL(float st2 = 1.5;)
+    GLSL(vec4 sum2 = HOOKED_texOff(st2 * vec2(+1,  0))
+                   + HOOKED_texOff(st2 * vec2( 0, +1))
+                   + HOOKED_texOff(st2 * vec2(-1,  0))
+                   + HOOKED_texOff(st2 * vec2( 0, -1));)
     GLSL(vec4 t = p * 0.859375 + sum2 * -0.1171875 + sum1 * -0.09765625;)
     GLSLF("color = p + t * %f;\n", param);
     GLSLF("}\n");

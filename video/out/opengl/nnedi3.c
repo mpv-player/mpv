@@ -96,9 +96,9 @@ const float* get_nnedi3_weights(const struct nnedi3_opts *conf, int *size)
     return (const float*)(nnedi3_weights + offset * 4);
 }
 
-void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
-                 int step, float tex_mul, const struct nnedi3_opts *conf,
-                 struct gl_transform *transform, GLenum tex_target)
+void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int step,
+                 const struct nnedi3_opts *conf,
+                 struct gl_transform *transform)
 {
     assert(0 <= step && step < 2);
 
@@ -131,23 +131,23 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
         GLSLH(#pragma optionNV(fastprecision on))
     }
 
-    GLSLHF("float nnedi3(%s tex, vec2 pos, vec2 tex_size, vec2 pixel_size, int plane, float tex_mul) {\n", mp_sampler_type(tex_target));
+    GLSLHF("float nnedi3() {\n");
 
     if (step == 0) {
         *transform = (struct gl_transform){{{1.0,0.0}, {0.0,2.0}}, {0.0,-0.5}};
 
-        GLSLH(if (fract(pos.y * tex_size.y) < 0.5)
-                  return texture(tex, pos + vec2(0, 0.25) * pixel_size)[plane] * tex_mul;)
+        GLSLH(if ((transpose(HOOKED_rot) * fract(HOOKED_pos * HOOKED_size)).y < 0.5)
+                  return HOOKED_texOff(vec2(0, 0.25)).x;)
         GLSLHF("#define GET(i, j) "
-               "(texture(tex, pos+vec2((i)-(%f),(j)-(%f)+0.25) * pixel_size)[plane]*tex_mul)\n",
+               "HOOKED_texOff(vec2((i)-(%f),(j)-(%f)+0.25)).x\n",
                width / 2.0 - 1, (height - 1) / 2.0);
     } else {
         *transform = (struct gl_transform){{{2.0,0.0}, {0.0,1.0}}, {-0.5,0.0}};
 
-        GLSLH(if (fract(pos.x * tex_size.x) < 0.5)
-                  return texture(tex, pos + vec2(0.25, 0) * pixel_size)[plane] * tex_mul;)
+        GLSLH(if (fract(HOOKED_pos.x * HOOKED_size.x) < 0.5)
+                  return HOOKED_texOff(vec2(0.25, 0)).x;)
         GLSLHF("#define GET(i, j) "
-               "(texture(tex, pos+vec2((j)-(%f)+0.25,(i)-(%f)) * pixel_size)[plane]*tex_mul)\n",
+               "HOOKED_texOff(vec2((j)-(%f)+0.25,(i)-(%f))).x\n",
                (height - 1) / 2.0, width / 2.0 - 1);
     }
 
@@ -226,12 +226,7 @@ void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
 
     GLSLHF("}\n"); // nnedi3
 
-    GLSL(color = vec4(1.0);)
-
-    for (int i = 0; i < planes; i++) {
-        GLSLF("color[%d] = nnedi3(texture%d, texcoord%d, texture_size%d, pixel_size%d, %d, %f);\n",
-              i, tex_num, tex_num, tex_num, tex_num, i, tex_mul);
-    }
+    GLSL(color.x = nnedi3();)
 }
 
 #else
@@ -244,9 +239,9 @@ const float* get_nnedi3_weights(const struct nnedi3_opts *conf, int *size)
     return NULL;
 }
 
-void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
-                 int step, float tex_mul, const struct nnedi3_opts *conf,
-                 struct gl_transform *transform, GLenum tex_target)
+void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int step,
+                 const struct nnedi3_opts *conf,
+                 struct gl_transform *transform)
 {
 }
 

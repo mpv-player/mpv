@@ -24,7 +24,7 @@
 extern const struct superxbr_opts superxbr_opts_def;
 extern const struct m_sub_options superxbr_conf;
 
-void pass_superxbr(struct gl_shader_cache *sc, int id, int step, float tex_mul,
+void pass_superxbr(struct gl_shader_cache *sc, int step,
                    const struct superxbr_opts *conf,
                    struct gl_transform *transform);
 

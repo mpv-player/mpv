@@ -763,14 +763,26 @@ Available video output drivers are:
         definitions to that shader pass, where NAME is the name of the bound
         texture:
 
-        sampler NAME
-            The bound texture itself.
+        vec4 NAME_tex(vec2 pos)
+            The sampling function to use to access the texture at a certain
+            spot (in texture coordinate space, range [0,1]). This takes care
+            of any necessary normalization conversions.
+        vec4 NAME_texOff(vec2 offset)
+            Sample the texture at a certain offset in pixels. This works like
+            NAME_tex but additionally takes care of necessary rotations, so
+            that sampling at e.g. vec2(-1,0) is always one pixel to the left.
         vec2 NAME_pos
             The local texture coordinate of that texture, range [0,1].
         vec2 NAME_size
             The (rotated) size in pixels of the texture.
+        mat2 NAME_rot
+            The rotation matrix associated with this texture. (Rotates
+            pixel space to texture coordinates)
         vec2 NAME_pt
             The (unrotated) size of a single pixel, range [0,1].
+        sampler NAME_raw
+            The raw bound texture itself. The use of this should be
+            avoided unless absolutely necessary.
 
         In addition, the global uniforms described in ``post-shaders`` are
         also available.

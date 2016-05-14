@@ -38,8 +38,8 @@ extern const struct m_sub_options nnedi3_conf;
 
 const float* get_nnedi3_weights(const struct nnedi3_opts *conf, int *size);
 
-void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int planes, int tex_num,
-                 int step, float tex_mul, const struct nnedi3_opts *conf,
-                 struct gl_transform *transform, GLenum tex_target);
+void pass_nnedi3(GL *gl, struct gl_shader_cache *sc, int step,
+                 const struct nnedi3_opts *conf,
+                 struct gl_transform *transform);
 
 #endif
