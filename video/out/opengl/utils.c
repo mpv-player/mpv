@@ -907,7 +907,6 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     // fragment shader; still requires adding used uniforms and VAO elements
     bstr *frag = &sc->tmp[4];
     ADD_BSTR(frag, *header);
-    ADD(frag, "#define RG %s\n", gl->mpgl_caps & MPGL_CAP_TEX_RG ? "rg" : "ra");
     if (gl->glsl_version >= 130) {
         ADD(frag, "#define texture1D texture\n");
         ADD(frag, "#define texture3D texture\n");

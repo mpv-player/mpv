@@ -45,7 +45,7 @@ static void pass_sample_separated_get_weights(struct gl_shader_cache *sc,
 
     int N = scaler->kernel->size;
     if (N == 2) {
-        GLSL(vec2 c1 = texture(lut, vec2(0.5, fcoord_lut)).RG;)
+        GLSL(vec2 c1 = texture(lut, vec2(0.5, fcoord_lut)).rg;)
         GLSL(float weights[2] = float[](c1.r, c1.g);)
     } else if (N == 6) {
         GLSL(vec4 c1 = texture(lut, vec2(0.25, fcoord_lut));)
@@ -187,8 +187,8 @@ void pass_sample_bicubic_fast(struct gl_shader_cache *sc)
     bicubic_calcweights(sc, "parmx", "fcoord.x");
     bicubic_calcweights(sc, "parmy", "fcoord.y");
     GLSL(vec4 cdelta;)
-    GLSL(cdelta.xz = parmx.RG * vec2(-pt.x, pt.x);)
-    GLSL(cdelta.yw = parmy.RG * vec2(-pt.y, pt.y);)
+    GLSL(cdelta.xz = parmx.rg * vec2(-pt.x, pt.x);)
+    GLSL(cdelta.yw = parmy.rg * vec2(-pt.y, pt.y);)
     // first y-interpolation
     GLSL(vec4 ar = texture(tex, pos + cdelta.xy);)
     GLSL(vec4 ag = texture(tex, pos + cdelta.xw);)
