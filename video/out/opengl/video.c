@@ -2506,15 +2506,15 @@ static void pass_render_frame(struct gl_video *p)
         rect.ml *= scale[0]; rect.mr *= scale[0];
         rect.mt *= scale[1]; rect.mb *= scale[1];
         // We should always blend subtitles in non-linear light
-        if (p->use_linear)
+        if (p->use_linear) {
             pass_delinearize(p->sc, p->image_params.gamma);
+            p->use_linear = false;
+        }
         finish_pass_fbo(p, &p->blend_subs_fbo, p->texture_w, p->texture_h,
                         FBOTEX_FUZZY);
         pass_draw_osd(p, OSD_DRAW_SUB_ONLY, vpts, rect,
                       p->texture_w, p->texture_h, p->blend_subs_fbo.fbo, false);
         pass_read_fbo(p, &p->blend_subs_fbo);
-        if (p->use_linear)
-            pass_linearize(p->sc, p->image_params.gamma);
     }
 
     pass_opt_hook_point(p, "SCALED", NULL);
