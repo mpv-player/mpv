@@ -204,6 +204,11 @@ Available video output drivers are:
     .. note:: This driver is for compatibility with systems that don't provide
               proper OpenGL drivers.
 
+    ``sharpen=<value>``
+        If set to a value other than 0, enable an unsharp masking filter.
+        Positive values will sharpen the image (but add more ringing and
+        aliasing). Negative values will blur the image.
+
     ``prefer-stretchrect``
         Use ``IDirect3DDevice9::StretchRect`` over other methods if possible.
 
