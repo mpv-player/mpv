@@ -320,6 +320,7 @@ const struct gl_video_opts gl_video_opts_def = {
     .gamma = 1.0f,
     .prescale_passes = 1,
     .prescale_downscaling_threshold = 2.0f,
+    .target_brightness = 250,
 };
 
 const struct gl_video_opts gl_video_opts_hq_def = {
@@ -348,6 +349,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .deband = 1,
     .prescale_passes = 1,
     .prescale_downscaling_threshold = 2.0f,
+    .target_brightness = 250,
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
@@ -376,6 +378,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("gamma-auto", gamma_auto, 0),
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
         OPT_CHOICE_C("target-trc", target_trc, 0, mp_csp_trc_names),
+        OPT_INTRANGE("target-brightness", target_brightness, 0, 1, 100000),
         OPT_FLAG("pbo", pbo, 0),
         SCALER_OPTS("scale",  SCALER_SCALE),
         SCALER_OPTS("dscale", SCALER_DSCALE),
@@ -2202,7 +2205,8 @@ static void pass_scale_main(struct gl_video *p)
 
 // Adapts the colors from the given color space to the display device's native
 // gamut.
-static void pass_colormanage(struct gl_video *p, enum mp_csp_prim prim_src,
+static void pass_colormanage(struct gl_video *p, bool display_scaled,
+                             enum mp_csp_prim prim_src,
                              enum mp_csp_trc trc_src)
 {
     GLSLF("// color management\n");
@@ -2213,6 +2217,13 @@ static void pass_colormanage(struct gl_video *p, enum mp_csp_prim prim_src,
         // The 3DLUT is always generated against the original source space
         enum mp_csp_prim prim_orig = p->image_params.primaries;
         enum mp_csp_trc trc_orig = p->image_params.gamma;
+
+        // One exception: SMPTE ST.2084 is not implemented by LittleCMS
+        // for technical limitation reasons, so we use a gamma 2.2 input curve
+        // here instead. We could pick any value we want here, the difference
+        // is just coding efficiency.
+        if (trc_orig == MP_CSP_TRC_SMPTE_ST2084)
+            trc_orig = MP_CSP_TRC_GAMMA22;
 
         if (gl_video_get_lut3d(p, prim_orig, trc_orig)) {
             prim_dst = prim_orig;
@@ -2236,6 +2247,15 @@ static void pass_colormanage(struct gl_video *p, enum mp_csp_prim prim_src,
     bool need_gamma = trc_src != trc_dst || prim_src != prim_dst;
     if (need_gamma)
         pass_linearize(p->sc, trc_src);
+
+    // For HDR, the assumption of reference brightness = display brightness
+    // is discontinued. Instead, we have to rescale the brightness to match
+    // the display (and clip out-of-range values)
+    if (p->image_params.gamma == MP_CSP_TRC_SMPTE_ST2084 && !display_scaled) {
+        int reference_brightness = 10000; // As per SMPTE ST.2084
+        GLSLF("color.rgb = clamp(%f * color.rgb, 0.0, 1.0);\n",
+              (float)reference_brightness / p->opts.target_brightness);
+    }
 
     // Adapt to the right colorspace if necessary
     if (prim_src != prim_dst) {
@@ -2391,7 +2411,7 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
         }
         // Subtitle color management, they're assumed to be sRGB by default
         if (cms)
-            pass_colormanage(p, MP_CSP_PRIM_BT_709, MP_CSP_TRC_SRGB);
+            pass_colormanage(p, true, MP_CSP_PRIM_BT_709, MP_CSP_TRC_SRGB);
         gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
         gl_sc_gen_shader_and_reset(p->sc);
         mpgl_osd_draw_part(p->osd, vp_w, vp_h, n);
@@ -2514,7 +2534,7 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
         GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
 
-    pass_colormanage(p, p->image_params.primaries,
+    pass_colormanage(p, false, p->image_params.primaries,
                      p->use_linear ? MP_CSP_TRC_LINEAR : p->image_params.gamma);
 
     // Draw checkerboard pattern to indicate transparency

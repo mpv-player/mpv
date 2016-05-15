@@ -111,6 +111,7 @@ struct gl_video_opts {
     int gamma_auto;
     int target_prim;
     int target_trc;
+    int target_brightness;
     int linear_scaling;
     int correct_downscaling;
     int sigmoid_upscaling;

@@ -310,6 +310,7 @@ Available filters are:
        :gamma2.2:     Pure power curve (gamma 2.2)
        :gamma2.8:     Pure power curve (gamma 2.8)
        :prophoto:     ProPhoto RGB (ROMM) curve
+       :st2084:       SMPTE ST2084 (HDR) curve
 
     ``<stereo-in>``
         Set the stereo mode the video is assumed to be encoded in. Takes the

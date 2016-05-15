@@ -1052,6 +1052,14 @@ Available video output drivers are:
             Pure power curve (gamma 2.8), also used for BT.470-BG
         prophoto
             ProPhoto RGB (ROMM)
+        st2084
+            SMPTE ST2084 (HDR) curve, PQ OETF
+
+    ``target-brightness=<1..100000>``
+        Specifies the display's approximate brightness in cd/m^2. When playing
+        HDR content, video colors will be scaled and clipped to this
+        brightness. The default of 250 cd/m^2 corresponds to a typical consumer
+        display.
 
     ``icc-profile=<file>``
         Load an ICC profile and use it to transform video RGB to screen output.

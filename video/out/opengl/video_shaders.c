@@ -220,6 +220,13 @@ void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
     GLSLF("}\n");
 }
 
+// Common constants for SMPTE ST.2084 (HDR)
+static const float HDR_M1 = 2610./4096 * 1./4,
+                   HDR_M2 = 2523./4096 * 128,
+                   HDR_C1 = 3424./4096,
+                   HDR_C2 = 2413./4096 * 32,
+                   HDR_C3 = 2392./4096 * 32;
+
 // Linearize (expand), given a TRC as input
 void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 {
@@ -251,6 +258,15 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
                              pow(color.rgb, vec3(1.8)),
                              lessThan(vec3(0.03125), color.rgb));)
         break;
+    case MP_CSP_TRC_SMPTE_ST2084:
+        GLSLF("color.rgb = pow(color.rgb, vec3(1.0/%f));\n", HDR_M2);
+        GLSLF("color.rgb = max(color.rgb - vec3(%f), vec3(0.0)) \n"
+              "             / (vec3(%f) - vec3(%f) * color.rgb);\n",
+              HDR_C1, HDR_C2, HDR_C3);
+        GLSLF("color.rgb = pow(color.rgb, vec3(1.0/%f));\n", HDR_M1);
+        break;
+    default:
+        abort();
     }
 }
 
@@ -285,6 +301,15 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
                              pow(color.rgb, vec3(1.0/1.8)),
                              lessThanEqual(vec3(0.001953), color.rgb));)
         break;
+    case MP_CSP_TRC_SMPTE_ST2084:
+        GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", HDR_M1);
+        GLSLF("color.rgb = (vec3(%f) + vec3(%f) * color.rgb) \n"
+              "             / (vec3(1.0) + vec3(%f) * color.rgb);\n",
+              HDR_C1, HDR_C2, HDR_C3);
+        GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", HDR_M2);
+        break;
+    default:
+        abort();
     }
 }
 
