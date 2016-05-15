@@ -72,7 +72,9 @@ struct va_native_display {
     void (*destroy)(struct priv *p);
 };
 
+#if HAVE_VAAPI_X11
 static const struct va_native_display disp_x11;
+#endif
 
 static const struct va_native_display *const native_displays[] = {
 #if HAVE_VAAPI_X11
