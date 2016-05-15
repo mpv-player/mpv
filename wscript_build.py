@@ -72,7 +72,7 @@ def build(ctx):
         target = "video/out/opengl/nnedi3_weights.inc")
 
     lua_files = ["defaults.lua", "assdraw.lua", "options.lua", "osc.lua",
-                 "ytdl_hook.lua"]
+                 "ytdl_hook.lua", "svtplay_dl_hook.lua"]
     for fn in lua_files:
         fn = "player/lua/" + fn
         ctx.file2string(source = fn, target = os.path.splitext(fn)[0] + ".inc")

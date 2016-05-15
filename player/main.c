@@ -115,6 +115,7 @@ static const char def_config[] =
     "input-terminal=no\n"
     "osc=no\n"
     "ytdl=no\n"
+    "svtplay-dl=no\n"
     "input-default-bindings=no\n"
     "input-vo-keyboard=no\n"
     "input-lirc=no\n"

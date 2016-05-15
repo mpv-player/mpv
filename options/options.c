@@ -147,6 +147,9 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("ytdl", lua_load_ytdl, CONF_GLOBAL),
     OPT_STRING("ytdl-format", lua_ytdl_format, CONF_GLOBAL),
     OPT_KEYVALUELIST("ytdl-raw-options", lua_ytdl_raw_options, CONF_GLOBAL),
+    OPT_FLAG("svtplay-dl", lua_load_svtplay_dl, CONF_GLOBAL),
+    OPT_STRING("svtplay-dl-quality", lua_svtplay_dl_quality, CONF_GLOBAL),
+    OPT_KEYVALUELIST("svtplay-dl-raw-options", lua_svtplay_dl_raw_options, CONF_GLOBAL),
     OPT_FLAG("load-scripts", auto_load_scripts, CONF_GLOBAL),
 #endif
 
@@ -746,6 +749,9 @@ const struct MPOpts mp_default_opts = {
     .lua_load_ytdl = 1,
     .lua_ytdl_format = NULL,
     .lua_ytdl_raw_options = NULL,
+    .lua_load_svtplay_dl = 1,
+    .lua_svtplay_dl_quality = NULL,
+    .lua_svtplay_dl_raw_options = NULL,
 #endif
     .auto_load_scripts = 1,
     .loop_times = 1,

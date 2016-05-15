@@ -182,6 +182,8 @@ void mp_load_scripts(struct MPContext *mpctx)
         mp_load_script(mpctx, "@osc.lua");
     if (mpctx->opts->lua_load_ytdl)
         mp_load_script(mpctx, "@ytdl_hook.lua");
+    if (mpctx->opts->lua_load_svtplay_dl)
+        mp_load_script(mpctx, "@svtplay_dl_hook.lua");
     char **files = mpctx->opts->script_files;
     for (int n = 0; files && files[n]; n++) {
         if (files[n][0])
