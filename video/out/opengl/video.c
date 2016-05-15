@@ -298,6 +298,7 @@ static const struct packed_fmt_entry mp_packed_formats[] = {
 };
 
 const struct gl_video_opts gl_video_opts_def = {
+    .dither_algo = DITHER_FRUIT,
     .dither_depth = -1,
     .dither_size = 6,
     .temporal_dither_period = 1,
@@ -314,7 +315,7 @@ const struct gl_video_opts gl_video_opts_def = {
     .scaler_resizes_only = 1,
     .scaler_lut_size = 6,
     .interpolation_threshold = 0.0001,
-    .alpha_mode = 3,
+    .alpha_mode = ALPHA_BLEND_TILES,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
     .prescale_passes = 1,
@@ -322,6 +323,7 @@ const struct gl_video_opts gl_video_opts_def = {
 };
 
 const struct gl_video_opts gl_video_opts_hq_def = {
+    .dither_algo = DITHER_FRUIT,
     .dither_depth = 0,
     .dither_size = 6,
     .temporal_dither_period = 1,
@@ -340,10 +342,9 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .scaler_resizes_only = 1,
     .scaler_lut_size = 6,
     .interpolation_threshold = 0.0001,
-    .alpha_mode = 3,
+    .alpha_mode = ALPHA_BLEND_TILES,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
-    .blend_subs = 0,
     .deband = 1,
     .prescale_passes = 1,
     .prescale_downscaling_threshold = 2.0f,
@@ -405,23 +406,25 @@ const struct m_sub_options gl_video_conf = {
         OPT_CHOICE_OR_INT("dither-depth", dither_depth, 0, -1, 16,
                           ({"no", -1}, {"auto", 0})),
         OPT_CHOICE("dither", dither_algo, 0,
-                   ({"fruit", 0}, {"ordered", 1}, {"no", -1})),
+                   ({"fruit", DITHER_FRUIT},
+                    {"ordered", DITHER_ORDERED},
+                    {"no", DITHER_NONE})),
         OPT_INTRANGE("dither-size-fruit", dither_size, 0, 2, 8),
         OPT_FLAG("temporal-dither", temporal_dither, 0),
         OPT_INTRANGE("temporal-dither-period", temporal_dither_period, 0, 1, 128),
         OPT_CHOICE("alpha", alpha_mode, 0,
-                   ({"no", 0},
-                    {"yes", 1},
-                    {"blend", 2},
-                    {"blend-tiles", 3})),
+                   ({"no", ALPHA_NO},
+                    {"yes", ALPHA_YES},
+                    {"blend", ALPHA_BLEND},
+                    {"blend-tiles", ALPHA_BLEND_TILES})),
         OPT_FLAG("rectangle-textures", use_rectangle, 0),
         OPT_COLOR("background", background, 0),
         OPT_FLAG("interpolation", interpolation, 0),
         OPT_FLOAT("interpolation-threshold", interpolation_threshold, 0),
         OPT_CHOICE("blend-subtitles", blend_subs, 0,
-                   ({"no", 0},
-                    {"yes", 1},
-                    {"video", 2})),
+                   ({"no", BLEND_SUBS_NO},
+                    {"yes", BLEND_SUBS_YES},
+                    {"video", BLEND_SUBS_VIDEO})),
         OPT_STRING("scale-shader", scale_shader, 0),
         OPT_STRINGLIST("pre-shaders", pre_shaders, 0),
         OPT_STRINGLIST("post-shaders", post_shaders, 0),
@@ -430,10 +433,10 @@ const struct m_sub_options gl_video_conf = {
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
         OPT_FLOAT("sharpen", unsharp, 0),
         OPT_CHOICE("prescale-luma", prescale_luma, 0,
-                   ({"none", 0},
-                    {"superxbr", 1}
+                   ({"none", PRESCALE_NONE},
+                    {"superxbr", PRESCALE_SUPERXBR}
 #if HAVE_NNEDI
-                    , {"nnedi3", 2}
+                    , {"nnedi3", PRESCALE_NNEDI3}
 #endif
                     )),
         OPT_INTRANGE("prescale-passes",
@@ -1472,7 +1475,7 @@ static void pass_sample(struct gl_video *p, struct img_tex tex,
 // Get the number of passes for prescaler, with given display size.
 static int get_prescale_passes(struct gl_video *p)
 {
-    if (!p->opts.prescale_luma)
+    if (p->opts.prescale_luma == PRESCALE_NONE)
         return 0;
 
     // The downscaling threshold check is turned off.
@@ -1768,7 +1771,7 @@ static void gl_video_setup_hooks(struct gl_video *p)
     }
 
     int prescale_passes = get_prescale_passes(p);
-    if (p->opts.prescale_luma == 1) { // superxbr
+    if (p->opts.prescale_luma == PRESCALE_SUPERXBR) {
         for (int i = 0; i < prescale_passes; i++) {
             for (int step = 0; step < 2; step++) {
                 pass_add_hook(p, (struct tex_hook) {
@@ -1781,7 +1784,7 @@ static void gl_video_setup_hooks(struct gl_video *p)
         }
     }
 
-    if (p->opts.prescale_luma == 2) { // nnedi3
+    if (p->opts.prescale_luma == PRESCALE_NNEDI3) {
         for (int i = 0; i < prescale_passes; i++) {
             for (int step = 0; step < 2; step++) {
                 pass_add_hook(p, (struct tex_hook) {
@@ -2072,9 +2075,9 @@ static void pass_convert_yuv(struct gl_video *p)
     }
 
     p->components = 3;
-    if (!p->has_alpha || p->opts.alpha_mode == 0) { // none
+    if (!p->has_alpha || p->opts.alpha_mode == ALPHA_NO) {
         GLSL(color.a = 1.0;)
-    } else if (p->opts.alpha_mode == 2) { // blend against black
+    } else if (p->opts.alpha_mode == ALPHA_BLEND) {
         GLSL(color = vec4(color.rgb * color.a, 1.0);)
     } else { // alpha present in image
         p->components = 4;
@@ -2262,7 +2265,7 @@ static void pass_dither(struct gl_video *p)
     if (p->opts.dither_depth > 0)
         dst_depth = p->opts.dither_depth;
 
-    if (p->opts.dither_depth < 0 || p->opts.dither_algo < 0)
+    if (p->opts.dither_depth < 0 || p->opts.dither_algo == DITHER_NONE)
         return;
 
     if (!p->dither_texture) {
@@ -2275,7 +2278,7 @@ static void pass_dither(struct gl_video *p)
         GLenum tex_type;
         unsigned char temp[256];
 
-        if (p->opts.dither_algo == 0) {
+        if (p->opts.dither_algo == DITHER_FRUIT) {
             int sizeb = p->opts.dither_size;
             int size = 1 << sizeb;
 
@@ -2450,7 +2453,7 @@ static void pass_render_frame(struct gl_video *p)
     if (vpts == MP_NOPTS_VALUE)
         vpts = p->osd_pts;
 
-    if (p->osd && p->opts.blend_subs == 2) {
+    if (p->osd && p->opts.blend_subs == BLEND_SUBS_VIDEO) {
         double scale[2];
         get_scale_factors(p, false, scale);
         struct mp_osd_res rect = {
@@ -2469,7 +2472,7 @@ static void pass_render_frame(struct gl_video *p)
 
     int vp_w = p->dst_rect.x1 - p->dst_rect.x0,
         vp_h = p->dst_rect.y1 - p->dst_rect.y0;
-    if (p->osd && p->opts.blend_subs == 1) {
+    if (p->osd && p->opts.blend_subs == BLEND_SUBS_YES) {
         // Recreate the real video size from the src/dst rects
         struct mp_osd_res rect = {
             .w = vp_w, .h = vp_h,
@@ -2515,7 +2518,7 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
                      p->use_linear ? MP_CSP_TRC_LINEAR : p->image_params.gamma);
 
     // Draw checkerboard pattern to indicate transparency
-    if (p->has_alpha && p->opts.alpha_mode == 3) {
+    if (p->has_alpha && p->opts.alpha_mode == ALPHA_BLEND_TILES) {
         GLSLF("// transparency checkerboard\n");
         GLSL(bvec2 tile = lessThan(fract(gl_FragCoord.xy / 32.0), vec2(0.5));)
         GLSL(vec3 background = vec3(tile.x == tile.y ? 1.0 : 0.75);)
@@ -3030,7 +3033,7 @@ static void check_gl_features(struct gl_video *p)
             .alpha_mode = p->opts.alpha_mode,
             .use_rectangle = p->opts.use_rectangle,
             .background = p->opts.background,
-            .dither_algo = -1,
+            .dither_algo = DITHER_NONE,
         };
         for (int n = 0; n < SCALER_COUNT; n++)
             new_opts.scaler[n] = gl_video_opts_def.scaler[n];
@@ -3089,13 +3092,13 @@ static void check_gl_features(struct gl_video *p)
         MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
     }
 
-    if (p->opts.prescale_luma == 2) {
+    if (p->opts.prescale_luma == PRESCALE_NNEDI3) {
         if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_UBO) {
             // Check features for uniform buffer objects.
             if (!gl->BindBufferBase || !gl->GetUniformBlockIndex) {
                 MP_WARN(p, "Disabling NNEDI3 (%s required).\n",
                         gl->es ? "OpenGL ES 3.0" : "OpenGL 3.1");
-                p->opts.prescale_luma = 0;
+                p->opts.prescale_luma = PRESCALE_NONE;
             }
         } else if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_SHADER) {
             // Check features for hard coding approach.
@@ -3104,7 +3107,7 @@ static void check_gl_features(struct gl_video *p)
             {
                 MP_WARN(p, "Disabling NNEDI3 (%s required).\n",
                         gl->es ? "OpenGL ES 3.0" : "OpenGL 3.3");
-                p->opts.prescale_luma = 0;
+                p->opts.prescale_luma = PRESCALE_NONE;
             }
         }
     }

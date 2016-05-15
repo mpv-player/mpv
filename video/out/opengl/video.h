@@ -78,6 +78,31 @@ enum scaler_unit {
     SCALER_COUNT
 };
 
+enum dither_algo {
+    DITHER_NONE = 0,
+    DITHER_FRUIT,
+    DITHER_ORDERED,
+};
+
+enum alpha_mode {
+    ALPHA_NO = 0,
+    ALPHA_YES,
+    ALPHA_BLEND,
+    ALPHA_BLEND_TILES,
+};
+
+enum blend_subs_mode {
+    BLEND_SUBS_NO = 0,
+    BLEND_SUBS_YES,
+    BLEND_SUBS_VIDEO,
+};
+
+enum prescalers {
+    PRESCALE_NONE = 0,
+    PRESCALE_SUPERXBR,
+    PRESCALE_NNEDI3,
+};
+
 struct gl_video_opts {
     int dumb_mode;
     struct scaler_config scaler[4];
