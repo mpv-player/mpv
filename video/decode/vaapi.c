@@ -72,15 +72,6 @@ struct va_native_display {
     void (*destroy)(struct priv *p);
 };
 
-static const struct va_native_display disp_x11;
-
-static const struct va_native_display *const native_displays[] = {
-#if HAVE_VAAPI_X11
-    &disp_x11,
-#endif
-    NULL
-};
-
 #if HAVE_VAAPI_X11
 #include <X11/Xlib.h>
 #include <va/va_x11.h>
@@ -107,6 +98,13 @@ static const struct va_native_display disp_x11 = {
     .destroy = x11_destroy,
 };
 #endif
+
+static const struct va_native_display *const native_displays[] = {
+#if HAVE_VAAPI_X11
+    &disp_x11,
+#endif
+    NULL
+};
 
 #define HAS_HEVC VA_CHECK_VERSION(0, 38, 0)
 #define HAS_VP9 (VA_CHECK_VERSION(0, 38, 1) && defined(FF_PROFILE_VP9_0))
