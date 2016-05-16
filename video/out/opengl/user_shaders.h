@@ -39,7 +39,7 @@ enum szexp_tag {
     SZEXP_VAR_W, // Get the width/height of a named texture (variable)
     SZEXP_VAR_H,
     SZEXP_OP2, // Pop two elements and push the result of a dyadic operation
-} tag;
+};
 
 struct szexp {
     enum szexp_tag tag;
