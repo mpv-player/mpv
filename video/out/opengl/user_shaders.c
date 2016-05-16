@@ -154,9 +154,7 @@ bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
         }
 
         // Unknown command type
-        char *str = bstrto0(NULL, line);
-        mp_err(log, "Unrecognized command '%s'!\n", str);
-        talloc_free(str);
+        mp_err(log, "Unrecognized command '%.*s'!\n", BSTR_P(line));
         return false;
     }
 
