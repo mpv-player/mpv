@@ -259,7 +259,7 @@ struct gl_video {
     int last_dither_matrix_size;
     float *last_dither_matrix;
 
-    struct cached_file files[10];
+    struct cached_file *files;
     int num_files;
 
     struct gl_hwdec *hwdec;
@@ -508,22 +508,14 @@ static struct bstr load_cached_file(struct gl_video *p, const char *path)
             return p->files[n].body;
     }
     // not found -> load it
-    if (p->num_files == MP_ARRAY_SIZE(p->files)) {
-        // empty cache when it overflows
-        for (int n = 0; n < p->num_files; n++) {
-            talloc_free(p->files[n].path);
-            talloc_free(p->files[n].body.start);
-        }
-        p->num_files = 0;
-    }
     struct bstr s = stream_read_file(path, p, p->global, 100000); // 100 kB
     if (s.len) {
-        struct cached_file *new = &p->files[p->num_files++];
-        *new = (struct cached_file) {
+        struct cached_file new = {
             .path = talloc_strdup(p, path),
             .body = s,
         };
-        return new->body;
+        MP_TARRAY_APPEND(p, p->files, p->num_files, new);
+        return new.body;
     }
     return (struct bstr){0};
 }
