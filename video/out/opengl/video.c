@@ -3063,6 +3063,9 @@ static void check_gl_features(struct gl_video *p)
             .use_rectangle = p->opts.use_rectangle,
             .background = p->opts.background,
             .dither_algo = DITHER_NONE,
+            .target_brightness = p->opts.target_brightness,
+            .hdr_tone_mapping = p->opts.hdr_tone_mapping,
+            .tone_mapping_param = p->opts.tone_mapping_param,
         };
         for (int n = 0; n < SCALER_COUNT; n++)
             new_opts.scaler[n] = gl_video_opts_def.scaler[n];
