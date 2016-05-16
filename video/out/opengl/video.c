@@ -2259,7 +2259,9 @@ static void pass_colormanage(struct gl_video *p, bool display_scaled,
     // For HDR, the assumption of reference brightness = display brightness
     // is discontinued. Instead, we have to tone map the brightness to
     // the display using some algorithm.
-    if (p->image_params.gamma == MP_CSP_TRC_SMPTE_ST2084 && !display_scaled) {
+    if (p->image_params.gamma == MP_CSP_TRC_SMPTE_ST2084 &&
+        trc_dst != MP_CSP_TRC_SMPTE_ST2084 && !display_scaled)
+    {
         GLSLF("// HDR tone mapping\n");
         int reference_brightness = 10000; // As per SMPTE ST.2084
         pass_tone_map(p->sc, reference_brightness, p->opts.target_brightness,
