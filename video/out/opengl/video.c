@@ -1546,6 +1546,9 @@ static void pass_add_hook(struct gl_video *p, struct tex_hook hook)
         p->tex_hooks[p->tex_hook_num++] = hook;
     } else {
         MP_ERR(p, "Too many hooks! Limit is %d.\n", MAX_TEXTURE_HOOKS);
+
+        if (hook.free)
+            hook.free(&hook);
     }
 }
 
