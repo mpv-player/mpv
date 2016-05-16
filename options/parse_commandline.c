@@ -84,12 +84,16 @@ static int split_opt_silent(struct parse_state *p)
 
     bool need_param = m_config_option_requires_param(p->config, p->arg) > 0;
 
+    bool need_arg = p->arg.len == 0;
+
     if (ambiguous && need_param) {
         if (!p->argv[0])
             return M_OPT_MISSING_PARAM;
         p->param = bstr0(p->argv[0]);
         p->argv++;
     }
+    if (need_arg)
+        return M_OPT_INVALID;
 
     return 0;
 }
