@@ -705,6 +705,10 @@ Available video output drivers are:
         flexible: They can be injected at almost arbitrary points in the
         rendering pipeline, and access all previous intermediate textures.
 
+        .. admonition:: Warning
+
+            The syntax is not stable yet and may change any time.
+
         The general syntax of a user shader looks like this::
 
             //!METADATA ARGS...
