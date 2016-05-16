@@ -502,7 +502,13 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavutil/frame.h',
                                 '(void)offsetof(AVFrame, hw_frames_ctx)',
                                 use='libav'),
-    },
+    }, {
+        'name': 'avutil-st2084',
+        'desc': 'libavutil AVCOL_TRC_SMPTEST2084',
+        'func': check_statement('libavutil/pixfmt.h',
+                                'AVCOL_TRC_SMPTEST2084',
+                                use='libav'),
+    }
 ]
 
 audio_output_features = [

@@ -171,6 +171,9 @@ enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc)
     case AVCOL_TRC_LINEAR:       return MP_CSP_TRC_LINEAR;
     case AVCOL_TRC_GAMMA22:      return MP_CSP_TRC_GAMMA22;
     case AVCOL_TRC_GAMMA28:      return MP_CSP_TRC_GAMMA28;
+#if HAVE_AVUTIL_ST2084
+    case AVCOL_TRC_SMPTEST2084:  return MP_CSP_TRC_SMPTE_ST2084;
+#endif
     default:                     return MP_CSP_TRC_AUTO;
     }
 }
@@ -214,12 +217,15 @@ int mp_csp_trc_to_avcol_trc(enum mp_csp_trc trc)
 {
     switch (trc) {
     // We just call it BT.1886 since we're decoding, but it's still BT.709
-    case MP_CSP_TRC_BT_1886:     return AVCOL_TRC_BT709;
-    case MP_CSP_TRC_SRGB:        return AVCOL_TRC_IEC61966_2_1;
-    case MP_CSP_TRC_LINEAR:      return AVCOL_TRC_LINEAR;
-    case MP_CSP_TRC_GAMMA22:     return AVCOL_TRC_GAMMA22;
-    case MP_CSP_TRC_GAMMA28:     return AVCOL_TRC_GAMMA28;
-    default:                     return AVCOL_TRC_UNSPECIFIED;
+    case MP_CSP_TRC_BT_1886:      return AVCOL_TRC_BT709;
+    case MP_CSP_TRC_SRGB:         return AVCOL_TRC_IEC61966_2_1;
+    case MP_CSP_TRC_LINEAR:       return AVCOL_TRC_LINEAR;
+    case MP_CSP_TRC_GAMMA22:      return AVCOL_TRC_GAMMA22;
+    case MP_CSP_TRC_GAMMA28:      return AVCOL_TRC_GAMMA28;
+#if HAVE_AVUTIL_ST2084
+    case MP_CSP_TRC_SMPTE_ST2084: return AVCOL_TRC_SMPTEST2084;
+#endif
+    default:                      return AVCOL_TRC_UNSPECIFIED;
     }
 }
 
