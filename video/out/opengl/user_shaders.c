@@ -15,8 +15,9 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <ctype.h>
+
 #include "user_shaders.h"
-#include "ctype.h"
 
 static bool parse_rpn_szexpr(struct bstr line, struct szexp out[MAX_SZEXP_SIZE])
 {
