@@ -146,9 +146,9 @@ struct saved_tex {
 // A texture hook. This is some operation that transforms a named texture as
 // soon as it's generated
 struct tex_hook {
-    const char *hook_tex;
-    const char *save_tex;
-    const char *bind_tex[TEXUNIT_VIDEO_NUM];
+    char *hook_tex;
+    char *save_tex;
+    char *bind_tex[TEXUNIT_VIDEO_NUM];
     int components; // how many components are relevant (0 = same as input)
     void *priv; // this can be set to whatever the hook wants
     void (*hook)(struct gl_video *p, struct img_tex tex, // generates GLSL
@@ -1554,9 +1554,9 @@ static void pass_add_hook(struct gl_video *p, struct tex_hook hook)
 
 // Adds a hook multiple times, one per name. The last name must be NULL to
 // signal the end of the argument list.
-#define HOOKS(...) ((const char*[]){__VA_ARGS__, NULL})
+#define HOOKS(...) ((char*[]){__VA_ARGS__, NULL})
 static void pass_add_hooks(struct gl_video *p, struct tex_hook hook,
-                           const char **names)
+                           char **names)
 {
     for (int i = 0; names[i] != NULL; i++) {
         hook.hook_tex = names[i];
@@ -1709,14 +1709,14 @@ static void user_hook(struct gl_video *p, struct img_tex tex,
 
 static void user_hook_free(struct tex_hook *hook)
 {
-    talloc_free((void *)hook->hook_tex);
-    talloc_free((void *)hook->save_tex);
+    talloc_free(hook->hook_tex);
+    talloc_free(hook->save_tex);
     for (int i = 0; i < TEXUNIT_VIDEO_NUM; i++)
-        talloc_free((void *)hook->bind_tex[i]);
+        talloc_free(hook->bind_tex[i]);
     talloc_free(hook->priv);
 }
 
-static void pass_hook_user_shaders_old(struct gl_video *p, const char *name,
+static void pass_hook_user_shaders_old(struct gl_video *p, char *name,
                                        char **shaders)
 {
     assert(name);
@@ -1724,13 +1724,13 @@ static void pass_hook_user_shaders_old(struct gl_video *p, const char *name,
         return;
 
     for (int n = 0; shaders[n] != NULL; n++) {
-        const char *body = load_cached_file(p, shaders[n]).start;
+        char *body = load_cached_file(p, shaders[n]).start;
         if (body) {
             pass_add_hook(p, (struct tex_hook) {
                 .hook_tex = name,
                 .bind_tex = {"HOOKED"},
                 .hook = user_hook_old,
-                .priv = (void *)body,
+                .priv = body,
             });
         }
     }
