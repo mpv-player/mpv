@@ -1670,9 +1670,7 @@ static float eval_szexpr(struct gl_video *p, struct img_tex tex,
                 }
             }
 
-            char *errname = bstrto0(NULL, name);
-            MP_WARN(p, "Texture %s not found in RPN expression!\n", errname);
-            talloc_free(errname);
+            MP_WARN(p, "Texture %.*s not found in RPN expression!\n", BSTR_P(name));
             return 1.0;
 
 found_tex:
