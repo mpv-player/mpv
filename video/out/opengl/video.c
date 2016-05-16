@@ -2240,10 +2240,15 @@ static void pass_colormanage(struct gl_video *p, bool display_scaled,
         prim_dst = prim_src;
     if (trc_dst == MP_CSP_TRC_AUTO) {
         trc_dst = trc_src;
-        // Avoid outputting linear light at all costs
+        // Avoid outputting linear light at all costs. First try
+        // falling back to the image gamma (e.g. in the case that the input
+        // was linear light due to linear-scaling)
         if (trc_dst == MP_CSP_TRC_LINEAR)
             trc_dst = p->image_params.gamma;
-        if (trc_dst == MP_CSP_TRC_LINEAR)
+
+        // Failing that, pick gamma 2.2 as a reasonable default. This is also
+        // picked as a default for outputting HDR content
+        if (trc_dst == MP_CSP_TRC_LINEAR || trc_dst == MP_CSP_TRC_SMPTE_ST2084)
             trc_dst = MP_CSP_TRC_GAMMA22;
     }
 
