@@ -142,13 +142,13 @@ void mp_compute_lut(struct filter_kernel *filter, int count, float *out_array)
     if (filter->polar) {
         // Compute a 1D array indexed by radius
         for (int x = 0; x < count; x++) {
-            double r = x * filter->f.radius / (count - 1);
+            double r = (x + 0.5) * filter->f.radius / count;
             out_array[x] = sample_filter(filter, window, r);
         }
     } else {
         // Compute a 2D array indexed by subpixel position
         for (int n = 0; n < count; n++) {
-            mp_compute_weights(filter, window,  n / (double)(count - 1),
+            mp_compute_weights(filter, window,  (n + 0.5) / (double)count,
                                out_array + filter->size * n);
         }
     }
