@@ -1190,6 +1190,20 @@ static void thread_disable_ime(void)
     FreeLibrary(imm32);
 }
 
+static void thread_disable_ime(void)
+{
+    // Disables the IME for windows on this thread. imm32.dll must be loaded
+    // dynamically to account for machines without East Asian language support.
+    HMODULE imm32 = LoadLibraryW(L"imm32.dll");
+    if (!imm32)
+        return;
+    BOOL (WINAPI *pImmDisableIME)(DWORD) = (BOOL (WINAPI*)(DWORD))
+        GetProcAddress(imm32, "ImmDisableIME");
+    if (pImmDisableIME)
+        pImmDisableIME(0);
+    FreeLibrary(imm32);
+}
+
 static void *gui_thread(void *ptr)
 {
     struct vo_w32_state *w32 = ptr;
