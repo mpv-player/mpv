@@ -177,7 +177,7 @@ static void bicubic_calcweights(struct gl_shader_cache *sc, const char *t, const
     GLSLF("%s = %s * %s + vec4(0, 0, -0.5, 0.5);\n", t, t, s);
     GLSLF("%s = %s * %s + vec4(-0.6666, 0, 0.8333, 0.1666);\n", t, t, s);
     GLSLF("%s.xy *= vec2(1, 1) / vec2(%s.z, %s.w);\n", t, t, t);
-    GLSLF("%s.xy += vec2(1 + %s, 1 - %s);\n", t, s, s);
+    GLSLF("%s.xy += vec2(1.0 + %s, 1.0 - %s);\n", t, s, s);
 }
 
 void pass_sample_bicubic_fast(struct gl_shader_cache *sc)
