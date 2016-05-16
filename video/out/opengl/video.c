@@ -1633,7 +1633,9 @@ static float eval_szexpr(struct gl_video *p, struct img_tex tex,
             }
 
             // Pop the operands in reverse order
-            float op2 = stack[--idx], op1 = stack[--idx], res = 0.0;
+            float op2 = stack[--idx];
+            float op1 = stack[--idx];
+            float res = 0.0;
             switch (expr[i].val.op) {
             case SZEXP_OP_ADD: res = op1 + op2; break;
             case SZEXP_OP_SUB: res = op1 - op2; break;
