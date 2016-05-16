@@ -321,6 +321,7 @@ const struct gl_video_opts gl_video_opts_def = {
     .prescale_passes = 1,
     .prescale_downscaling_threshold = 2.0f,
     .target_brightness = 250,
+    .tone_mapping_param = NAN,
 };
 
 const struct gl_video_opts gl_video_opts_hq_def = {
@@ -350,6 +351,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .prescale_passes = 1,
     .prescale_downscaling_threshold = 2.0f,
     .target_brightness = 250,
+    .tone_mapping_param = NAN,
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
@@ -379,6 +381,12 @@ const struct m_sub_options gl_video_conf = {
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
         OPT_CHOICE_C("target-trc", target_trc, 0, mp_csp_trc_names),
         OPT_INTRANGE("target-brightness", target_brightness, 0, 1, 100000),
+        OPT_CHOICE("hdr-tone-mapping", hdr_tone_mapping, 0,
+                   ({"clip",   TONE_MAPPING_CLIP},
+                    {"simple", TONE_MAPPING_SIMPLE},
+                    {"gamma",  TONE_MAPPING_GAMMA},
+                    {"linear", TONE_MAPPING_LINEAR})),
+        OPT_FLOAT("tone-mapping-param", tone_mapping_param, 0),
         OPT_FLAG("pbo", pbo, 0),
         SCALER_OPTS("scale",  SCALER_SCALE),
         SCALER_OPTS("dscale", SCALER_DSCALE),
@@ -2249,12 +2257,13 @@ static void pass_colormanage(struct gl_video *p, bool display_scaled,
         pass_linearize(p->sc, trc_src);
 
     // For HDR, the assumption of reference brightness = display brightness
-    // is discontinued. Instead, we have to rescale the brightness to match
-    // the display (and clip out-of-range values)
+    // is discontinued. Instead, we have to tone map the brightness to
+    // the display using some algorithm.
     if (p->image_params.gamma == MP_CSP_TRC_SMPTE_ST2084 && !display_scaled) {
+        GLSLF("// HDR tone mapping\n");
         int reference_brightness = 10000; // As per SMPTE ST.2084
-        GLSLF("color.rgb = clamp(%f * color.rgb, 0.0, 1.0);\n",
-              (float)reference_brightness / p->opts.target_brightness);
+        pass_tone_map(p->sc, reference_brightness, p->opts.target_brightness,
+                      p->opts.hdr_tone_mapping, p->opts.tone_mapping_param);
     }
 
     // Adapt to the right colorspace if necessary

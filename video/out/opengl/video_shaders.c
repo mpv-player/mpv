@@ -313,6 +313,46 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
     }
 }
 
+// Tone map from one brightness to another
+void pass_tone_map(struct gl_shader_cache *sc, float peak_src, float peak_dst,
+                   enum tone_mapping algo, float param)
+{
+    // First we renormalize to the output range
+    float scale = peak_src / peak_dst;
+    GLSLF("color.rgb *= vec3(%f);\n", scale);
+
+    // Then we use some algorithm to map back to [0,1]
+    switch (algo) {
+    case TONE_MAPPING_CLIP:
+        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
+        break;
+
+    case TONE_MAPPING_SIMPLE: {
+        float contrast = isnan(param) ? 0.5 : param,
+              offset = (1.0 - contrast) / contrast;
+        GLSLF("color.rgb = color.rgb / (color.rgb + vec3(%f));\n", offset);
+        GLSLF("color.rgb *= vec3(%f);\n", (scale + offset) / scale);
+        break;
+    }
+
+    case TONE_MAPPING_GAMMA: {
+        float gamma = isnan(param) ? 1.8 : param;
+        GLSLF("color.rgb = pow(color.rgb / vec3(%f), vec3(%f));\n",
+              scale, 1.0/gamma);
+        break;
+    }
+
+    case TONE_MAPPING_LINEAR: {
+        float coeff = isnan(param) ? 1.0 : param;
+        GLSLF("color.rgb = vec3(%f) * color.rgb;\n", coeff / scale);
+        break;
+    }
+
+    default:
+        abort();
+    }
+}
+
 // Wide usage friendly PRNG, shamelessly stolen from a GLSL tricks forum post.
 // Obtain random numbers by calling rand(h), followed by h = permute(h) to
 // update the state. Assumes the texture was hooked.

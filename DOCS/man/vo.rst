@@ -1057,9 +1057,38 @@ Available video output drivers are:
 
     ``target-brightness=<1..100000>``
         Specifies the display's approximate brightness in cd/m^2. When playing
-        HDR content, video colors will be scaled and clipped to this
-        brightness. The default of 250 cd/m^2 corresponds to a typical consumer
-        display.
+        HDR content, video colors will be tone mapped to this target brightness
+        using the algorithm specified by ``hdr-tone-mapping``. The default of
+        250 cd/m^2 corresponds to a typical consumer display.
+
+    ``hdr-tone-mapping=<value>``
+        Specifies the algorithm used for tone-mapping HDR images onto the
+        target display. Valid values are:
+
+        clip
+            Hard-clip any out-of-range values (default)
+        simple
+            Very simple continuous curve. Preserves dynamic range and peak but
+            uses nonlinear contrast.
+        gamma
+            Fits a logarithmic transfer between the tone curves.
+        linear
+            Linearly stretches the entire reference gamut to (a linear multiple
+            of) the display.
+
+    ``tone-mapping-param=<value>``
+        Set tone mapping parameters. Ignored if the tone mapping algorithm is
+        not tunable. This affects the following tone mapping algorithms:
+
+        simple
+            Specifies the local contrast coefficient at the display peak.
+            Defaults to 0.5, which means that in-gamut values will be about
+            half as bright as when clipping.
+        gamma
+            Specifies the exponent of the function. Defaults to 1.8.
+        linear
+            Specifies the scale factor to use while stretching. Defaults to
+            1.0.
 
     ``icc-profile=<file>``
         Load an ICC profile and use it to transform video RGB to screen output.

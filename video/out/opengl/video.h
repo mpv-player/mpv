@@ -103,6 +103,13 @@ enum prescalers {
     PRESCALE_NNEDI3,
 };
 
+enum tone_mapping {
+    TONE_MAPPING_CLIP,
+    TONE_MAPPING_SIMPLE,
+    TONE_MAPPING_GAMMA,
+    TONE_MAPPING_LINEAR,
+};
+
 struct gl_video_opts {
     int dumb_mode;
     struct scaler_config scaler[4];
@@ -112,6 +119,8 @@ struct gl_video_opts {
     int target_prim;
     int target_trc;
     int target_brightness;
+    int hdr_tone_mapping;
+    float tone_mapping_param;
     int linear_scaling;
     int correct_downscaling;
     int sigmoid_upscaling;
