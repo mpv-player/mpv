@@ -106,14 +106,21 @@ static int parse_m3u(struct pl_parser *p)
         if (p->check_level == DEMUX_CHECK_UNSAFE) {
             char *ext = mp_splitext(p->real_stream->url, NULL);
             bstr data = stream_peek(p->real_stream, PROBE_SIZE);
-            if (ext && !strcmp(ext, "m3u") && data.len > 10 && maybe_text(data))
-                goto ok;
+            if (ext && data.len > 10 && maybe_text(data)) {
+                const char *exts[] = {"m3u", "m3u8", NULL};
+                for (int n = 0; exts[n]; n++) {
+                    if (strcasecmp(ext, exts[n]) == 0)
+                        goto ok;
+                }
+            }
         }
         return -1;
     }
+
 ok:
     if (p->probing)
         return 0;
+
     char *title = NULL;
     while (line.len || !pl_eof(p)) {
         if (bstr_eatstart0(&line, "#EXTINF:")) {
