@@ -431,8 +431,8 @@ void gl_set_debug_logger(GL *gl, struct mp_log *log)
         gl->DebugMessageCallback(log ? gl_debug_cb : NULL, log);
 }
 
-#define SC_ENTRIES 32
-#define SC_UNIFORM_ENTRIES 20
+#define SC_ENTRIES 48
+#define SC_UNIFORM_ENTRIES 64
 
 enum uniform_type {
     UT_invalid,
