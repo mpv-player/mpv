@@ -460,10 +460,14 @@ struct sc_uniform {
     union uniform_val v;
 };
 
+struct sc_cached_uniform {
+    GLint loc;
+    union uniform_val v;
+};
+
 struct sc_entry {
     GLuint gl_shader;
-    GLint uniform_locs[SC_UNIFORM_ENTRIES];
-    union uniform_val cached_v[SC_UNIFORM_ENTRIES];
+    struct sc_cached_uniform uniforms[SC_UNIFORM_ENTRIES];
     bstr frag;
     bstr vert;
     struct gl_vao *vao;
@@ -744,20 +748,21 @@ static void update_uniform(GL *gl, struct sc_entry *e, struct sc_uniform *u, int
         gl->UniformBlockBinding(e->gl_shader, idx, u->v.buffer.binding);
         return;
     }
-    GLint loc = e->uniform_locs[n];
+    struct sc_cached_uniform *un = &e->uniforms[n];
+    GLint loc = un->loc;
     if (loc < 0)
         return;
     switch (u->type) {
     case UT_i:
         assert(u->size == 1);
-        if (memcmp(e->cached_v[n].i, u->v.i, sizeof(u->v.i)) != 0) {
-            memcpy(e->cached_v[n].i, u->v.i, sizeof(u->v.i));
+        if (memcmp(un->v.i, u->v.i, sizeof(u->v.i)) != 0) {
+            memcpy(un->v.i, u->v.i, sizeof(u->v.i));
             gl->Uniform1i(loc, u->v.i[0]);
         }
         break;
     case UT_f:
-        if (memcmp(e->cached_v[n].f, u->v.f, sizeof(u->v.f)) != 0) {
-            memcpy(e->cached_v[n].f, u->v.f, sizeof(u->v.f));
+        if (memcmp(un->v.f, u->v.f, sizeof(u->v.f)) != 0) {
+            memcpy(un->v.f, u->v.f, sizeof(u->v.f));
             switch (u->size) {
             case 1: gl->Uniform1f(loc, u->v.f[0]); break;
             case 2: gl->Uniform2f(loc, u->v.f[0], u->v.f[1]); break;
@@ -769,8 +774,8 @@ static void update_uniform(GL *gl, struct sc_entry *e, struct sc_uniform *u, int
         }
         break;
     case UT_m:
-        if (memcmp(e->cached_v[n].f, u->v.f, sizeof(u->v.f)) != 0) {
-            memcpy(e->cached_v[n].f, u->v.f, sizeof(u->v.f));
+        if (memcmp(un->v.f, u->v.f, sizeof(u->v.f)) != 0) {
+            memcpy(un->v.f, u->v.f, sizeof(u->v.f));
             switch (u->size) {
             case 2: gl->UniformMatrix2fv(loc, 1, GL_FALSE, &u->v.f[0]); break;
             case 3: gl->UniformMatrix3fv(loc, 1, GL_FALSE, &u->v.f[0]); break;
@@ -989,7 +994,7 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     if (!entry->gl_shader) {
         entry->gl_shader = create_program(sc, vert->start, frag->start);
         for (int n = 0; n < sc->num_uniforms; n++) {
-            entry->uniform_locs[n] = gl->GetUniformLocation(entry->gl_shader,
+            entry->uniforms[n].loc = gl->GetUniformLocation(entry->gl_shader,
                                                             sc->uniforms[n].name);
         }
     }
