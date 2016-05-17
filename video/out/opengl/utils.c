@@ -431,8 +431,8 @@ void gl_set_debug_logger(GL *gl, struct mp_log *log)
         gl->DebugMessageCallback(log ? gl_debug_cb : NULL, log);
 }
 
-#define SC_ENTRIES 48
-#define SC_UNIFORM_ENTRIES 64
+// Force cache flush if more than this number of shaders is created.
+#define SC_MAX_ENTRIES 48
 
 enum uniform_type {
     UT_invalid,
@@ -467,7 +467,8 @@ struct sc_cached_uniform {
 
 struct sc_entry {
     GLuint gl_shader;
-    struct sc_cached_uniform uniforms[SC_UNIFORM_ENTRIES];
+    struct sc_cached_uniform *uniforms;
+    int num_uniforms;
     bstr frag;
     bstr vert;
     struct gl_vao *vao;
@@ -483,10 +484,10 @@ struct gl_shader_cache {
     bstr text;
     struct gl_vao *vao;
 
-    struct sc_entry entries[SC_ENTRIES];
+    struct sc_entry *entries;
     int num_entries;
 
-    struct sc_uniform uniforms[SC_UNIFORM_ENTRIES];
+    struct sc_uniform *uniforms;
     int num_uniforms;
 
     bool error_state; // true if an error occurred
@@ -520,11 +521,14 @@ void gl_sc_reset(struct gl_shader_cache *sc)
 
 static void sc_flush_cache(struct gl_shader_cache *sc)
 {
+    MP_VERBOSE(sc, "flushing shader cache\n");
+
     for (int n = 0; n < sc->num_entries; n++) {
         struct sc_entry *e = &sc->entries[n];
         sc->gl->DeleteProgram(e->gl_shader);
         talloc_free(e->vert.start);
         talloc_free(e->frag.start);
+        talloc_free(e->uniforms);
     }
     sc->num_entries = 0;
 }
@@ -594,10 +598,12 @@ static struct sc_uniform *find_uniform(struct gl_shader_cache *sc,
             return &sc->uniforms[n];
     }
     // not found -> add it
-    assert(sc->num_uniforms < SC_UNIFORM_ENTRIES); // just don't have too many
-    struct sc_uniform *new = &sc->uniforms[sc->num_uniforms++];
-    *new = (struct sc_uniform) { .loc = -1, .name = talloc_strdup(NULL, name) };
-    return new;
+    struct sc_uniform new = {
+        .loc = -1,
+        .name = talloc_strdup(NULL, name),
+    };
+    MP_TARRAY_APPEND(sc, sc->uniforms, sc->num_uniforms, new);
+    return &sc->uniforms[sc->num_uniforms - 1];
 }
 
 const char* mp_sampler_type(GLenum texture_target)
@@ -982,8 +988,9 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
         }
     }
     if (!entry) {
-        if (sc->num_entries == SC_ENTRIES)
+        if (sc->num_entries == SC_MAX_ENTRIES)
             sc_flush_cache(sc);
+        MP_TARRAY_GROW(sc, sc->entries, sc->num_entries);
         entry = &sc->entries[sc->num_entries++];
         *entry = (struct sc_entry){
             .vert = bstrdup(NULL, *vert),
@@ -994,12 +1001,17 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     if (!entry->gl_shader) {
         entry->gl_shader = create_program(sc, vert->start, frag->start);
         for (int n = 0; n < sc->num_uniforms; n++) {
-            entry->uniforms[n].loc = gl->GetUniformLocation(entry->gl_shader,
-                                                            sc->uniforms[n].name);
+            struct sc_cached_uniform un = {
+                .loc = gl->GetUniformLocation(entry->gl_shader,
+                                              sc->uniforms[n].name),
+            };
+            MP_TARRAY_APPEND(sc, entry->uniforms, entry->num_uniforms, un);
         }
     }
 
     gl->UseProgram(entry->gl_shader);
+
+    assert(sc->num_uniforms == entry->num_uniforms);
 
     for (int n = 0; n < sc->num_uniforms; n++)
         update_uniform(gl, entry, &sc->uniforms[n], n);
