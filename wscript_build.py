@@ -286,7 +286,6 @@ def build(ctx):
         ( "video/mp_image.c" ),
         ( "video/mp_image_pool.c" ),
         ( "video/sws_utils.c" ),
-        ( "video/dxva2.c",                       "d3d-hwaccel" ),
         ( "video/vaapi.c",                       "vaapi" ),
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),

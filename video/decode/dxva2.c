@@ -32,7 +32,6 @@
 #include "video/mp_image_pool.h"
 #include "video/hwdec.h"
 
-#include "video/dxva2.h"
 #include "d3d.h"
 
 #define ADDITIONAL_SURFACES (4 + HWDEC_DELAY_QUEUE_COUNT)
@@ -53,6 +52,66 @@ struct priv {
     int                          mpfmt_decoded;
 };
 
+struct dxva2_surface {
+    HMODULE d3dlib;
+    HMODULE dxva2lib;
+
+    IDirectXVideoDecoder *decoder;
+    IDirect3DSurface9    *surface;
+};
+
+static void dxva2_release_img(void *arg)
+{
+    struct dxva2_surface *surface = arg;
+    if (surface->surface)
+        IDirect3DSurface9_Release(surface->surface);
+
+    if (surface->decoder)
+        IDirectXVideoDecoder_Release(surface->decoder);
+
+    if (surface->dxva2lib)
+        FreeLibrary(surface->dxva2lib);
+
+    if (surface->d3dlib)
+        FreeLibrary(surface->d3dlib);
+
+    talloc_free(surface);
+}
+
+static struct mp_image *dxva2_new_ref(IDirectXVideoDecoder *decoder,
+                                      IDirect3DSurface9 *d3d9_surface,
+                                      int w, int h)
+{
+    if (!decoder || !d3d9_surface)
+        return NULL;
+    struct dxva2_surface *surface = talloc_zero(NULL, struct dxva2_surface);
+
+    // Add additional references to the libraries which might otherwise be freed
+    // before the surface, which is observed to lead to bad behaviour
+    surface->d3dlib   = LoadLibrary(L"d3d9.dll");
+    surface->dxva2lib = LoadLibrary(L"dxva2.dll");
+    if (!surface->d3dlib || !surface->dxva2lib)
+        goto fail;
+
+    surface->surface = d3d9_surface;
+    IDirect3DSurface9_AddRef(surface->surface);
+    surface->decoder = decoder;
+    IDirectXVideoDecoder_AddRef(surface->decoder);
+
+    struct mp_image *mpi =
+        mp_image_new_custom_ref(NULL, surface, dxva2_release_img);
+    if (!mpi)
+        abort();
+
+    mp_image_setfmt(mpi, IMGFMT_DXVA2);
+    mp_image_set_size(mpi, w, h);
+    mpi->planes[3] = (void *)surface->surface;
+    return mpi;
+fail:
+    dxva2_release_img(surface);
+    return NULL;
+}
+
 static struct mp_image *dxva2_allocate_image(struct lavc_ctx *s, int w, int h)
 {
     struct priv *p = s->hwdec_priv;
@@ -68,7 +127,8 @@ static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
 {
     HRESULT hr;
     struct priv *p = s->hwdec_priv;
-    IDirect3DSurface9 *surface = d3d9_surface_in_mp_image(img);
+    IDirect3DSurface9 *surface = img->imgfmt == IMGFMT_DXVA2 ?
+        (IDirect3DSurface9 *)img->planes[3] : NULL;
 
     if (!surface) {
         MP_ERR(p, "Failed to get Direct3D surface from mp_image\n");
