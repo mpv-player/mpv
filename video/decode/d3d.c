@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <pthread.h>
+
 #include <libavcodec/avcodec.h>
 
 #include "lavc.h"
@@ -95,6 +97,22 @@ static const struct d3dva_mode d3dva_modes[] = {
 };
 #undef MODE
 #undef MODE2
+
+HMODULE d3d11_dll, d3d9_dll, dxva2_dll;
+
+static pthread_once_t d3d_load_once = PTHREAD_ONCE_INIT;
+
+static void d3d_do_load(void)
+{
+    d3d11_dll = LoadLibrary(L"d3d11.dll");
+    d3d9_dll  = LoadLibrary(L"d3d9.dll");
+    dxva2_dll = LoadLibrary(L"dxva2.dll");
+}
+
+void d3d_load_dlls(void)
+{
+    pthread_once(&d3d_load_once, d3d_do_load);
+}
 
 int d3d_probe_codec(const char *codec)
 {

@@ -40,7 +40,6 @@ struct d3d11va_decoder {
 struct priv {
     struct mp_log *log;
 
-    HMODULE                 d3d11_dll;
     ID3D11Device           *device;
     ID3D11DeviceContext    *device_ctx;
     ID3D11VideoDevice      *video_dev;
@@ -51,7 +50,6 @@ struct priv {
 };
 
 struct d3d11va_surface {
-    HMODULE d3d11_dll;
     ID3D11Texture2D              *texture;
     int                          subindex;
     ID3D11VideoDecoderOutputView *surface;
@@ -66,9 +64,6 @@ static void d3d11va_release_img(void *arg)
     if (surface->texture)
         ID3D11Texture2D_Release(surface->texture);
 
-    if (surface->d3d11_dll)
-        FreeLibrary(surface->d3d11_dll);
-
     talloc_free(surface);
 }
 
@@ -78,10 +73,6 @@ static struct mp_image *d3d11va_new_ref(ID3D11VideoDecoderOutputView *view,
     if (!view)
         return NULL;
     struct d3d11va_surface *surface = talloc_zero(NULL, struct d3d11va_surface);
-
-    surface->d3d11_dll = LoadLibrary(L"d3d11.dll");
-    if (!surface->d3d11_dll)
-        goto fail;
 
     surface->surface = view;
     ID3D11VideoDecoderOutputView_AddRef(surface->surface);
@@ -105,9 +96,6 @@ static struct mp_image *d3d11va_new_ref(ID3D11VideoDecoderOutputView *view,
     mpi->planes[3] = (void *)surface->surface;
 
     return mpi;
-fail:
-    d3d11va_release_img(surface);
-    return NULL;
 }
 
 static struct mp_image *d3d11va_allocate_image(struct lavc_ctx *s, int w, int h)
@@ -434,9 +422,6 @@ static void destroy_device(struct lavc_ctx *s)
 
     if (p->device_ctx)
         ID3D11DeviceContext_Release(p->device_ctx);
-
-    if (p->d3d11_dll)
-        FreeLibrary(p->d3d11_dll);
 }
 
 static bool create_device(struct lavc_ctx *s, BOOL thread_safe)
@@ -444,14 +429,14 @@ static bool create_device(struct lavc_ctx *s, BOOL thread_safe)
     HRESULT hr;
     struct priv *p = s->hwdec_priv;
 
-    p->d3d11_dll = LoadLibrary(L"d3d11.dll");
-    if (!p->d3d11_dll) {
+    d3d_load_dlls();
+    if (!d3d11_dll) {
         MP_ERR(p, "Failed to load D3D11 library\n");
         return false;
     }
 
     PFN_D3D11_CREATE_DEVICE CreateDevice =
-        (void *)GetProcAddress(p->d3d11_dll, "D3D11CreateDevice");
+        (void *)GetProcAddress(d3d11_dll, "D3D11CreateDevice");
     if (!CreateDevice) {
         MP_ERR(p, "Failed to get D3D11CreateDevice symbol from DLL: %s\n",
                mp_LastError_to_str());

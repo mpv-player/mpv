@@ -36,6 +36,12 @@ struct d3d_decoder_fmt {
     const struct d3d_decoded_format *format;
 };
 
+// Must call d3d_load_dlls() before accessing. Once this is done, the DLLs
+// remain loaded forever.
+extern HMODULE d3d11_dll, d3d9_dll, dxva2_dll;
+
+void d3d_load_dlls(void);
+
 int d3d_probe_codec(const char *codec);
 
 struct d3d_decoder_fmt d3d_select_decoder_mode(

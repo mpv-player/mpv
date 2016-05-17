@@ -39,8 +39,6 @@
 struct priv {
     struct mp_log *log;
 
-    HMODULE                      d3d9_dll;
-    HMODULE                      dxva2_dll;
     IDirect3D9                  *d3d9;
     IDirect3DDevice9            *device;
     HANDLE                       device_handle;
@@ -53,9 +51,6 @@ struct priv {
 };
 
 struct dxva2_surface {
-    HMODULE d3dlib;
-    HMODULE dxva2lib;
-
     IDirectXVideoDecoder *decoder;
     IDirect3DSurface9    *surface;
 };
@@ -69,12 +64,6 @@ static void dxva2_release_img(void *arg)
     if (surface->decoder)
         IDirectXVideoDecoder_Release(surface->decoder);
 
-    if (surface->dxva2lib)
-        FreeLibrary(surface->dxva2lib);
-
-    if (surface->d3dlib)
-        FreeLibrary(surface->d3dlib);
-
     talloc_free(surface);
 }
 
@@ -85,13 +74,6 @@ static struct mp_image *dxva2_new_ref(IDirectXVideoDecoder *decoder,
     if (!decoder || !d3d9_surface)
         return NULL;
     struct dxva2_surface *surface = talloc_zero(NULL, struct dxva2_surface);
-
-    // Add additional references to the libraries which might otherwise be freed
-    // before the surface, which is observed to lead to bad behaviour
-    surface->d3dlib   = LoadLibrary(L"d3d9.dll");
-    surface->dxva2lib = LoadLibrary(L"dxva2.dll");
-    if (!surface->d3dlib || !surface->dxva2lib)
-        goto fail;
 
     surface->surface = d3d9_surface;
     IDirect3DSurface9_AddRef(surface->surface);
@@ -368,25 +350,20 @@ static void destroy_device(struct lavc_ctx *s)
 
     if (p->d3d9)
         IDirect3D9_Release(p->d3d9);
-
-    if (p->d3d9_dll)
-        FreeLibrary(p->d3d9_dll);
-
-    if (p->dxva2_dll)
-        FreeLibrary(p->dxva2_dll);
 }
 
 static bool create_device(struct lavc_ctx *s)
 {
     struct priv *p = s->hwdec_priv;
-    p->d3d9_dll = LoadLibrary(L"d3d9.dll");
-    if (!p->d3d9_dll) {
+
+    d3d_load_dlls();
+    if (!d3d9_dll) {
         MP_ERR(p, "Failed to load D3D9 library\n");
         return false;
     }
 
     IDirect3D9* (WINAPI *Direct3DCreate9)(UINT) =
-        (void *)GetProcAddress(p->d3d9_dll, "Direct3DCreate9");
+        (void *)GetProcAddress(d3d9_dll, "Direct3DCreate9");
     if (!Direct3DCreate9) {
         MP_ERR(p, "Failed to locate Direct3DCreate9\n");
         return false;
@@ -477,15 +454,14 @@ static int dxva2_init(struct lavc_ctx *s)
             goto fail;
     }
 
-    p->dxva2_dll = LoadLibrary(L"dxva2.dll");
-    if (!p->dxva2_dll) {
+    d3d_load_dlls();
+    if (!dxva2_dll) {
         MP_ERR(p, "Failed to load DXVA2 library\n");
         goto fail;
     }
 
     HRESULT (WINAPI *CreateDeviceManager9)(UINT *, IDirect3DDeviceManager9 **) =
-        (void *)GetProcAddress(p->dxva2_dll,
-                               "DXVA2CreateDirect3DDeviceManager9");
+        (void *)GetProcAddress(dxva2_dll, "DXVA2CreateDirect3DDeviceManager9");
     if (!CreateDeviceManager9) {
         MP_ERR(p, "Failed to locate DXVA2CreateDirect3DDeviceManager9\n");
         goto fail;
