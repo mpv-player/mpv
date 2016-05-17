@@ -749,11 +749,6 @@ static const char *vao_glsl_type(const struct gl_vao_entry *e)
 // Assumes program is current (gl->UseProgram(program)).
 static void update_uniform(GL *gl, struct sc_entry *e, struct sc_uniform *u, int n)
 {
-    if (u->type == UT_buffer) {
-        GLuint idx = gl->GetUniformBlockIndex(e->gl_shader, u->name);
-        gl->UniformBlockBinding(e->gl_shader, idx, u->v.buffer.binding);
-        return;
-    }
     struct sc_cached_uniform *un = &e->uniforms[n];
     GLint loc = un->loc;
     if (loc < 0)
@@ -789,6 +784,11 @@ static void update_uniform(GL *gl, struct sc_entry *e, struct sc_uniform *u, int
             }
         }
         break;
+    case UT_buffer: {
+        GLuint idx = gl->GetUniformBlockIndex(e->gl_shader, u->name);
+        gl->UniformBlockBinding(e->gl_shader, idx, u->v.buffer.binding);
+        break;
+    }
     default:
         abort();
     }
