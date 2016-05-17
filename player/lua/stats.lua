@@ -13,8 +13,13 @@ local options = require 'mp.options'
 
 -- Options
 local o = {
-    ass_formatting = true,
+    -- Default key bindings
+    key_oneshot = "i",
+    key_toggle = "I",
+
     duration = 3,
+    redraw_delay = 2,           -- acts as duration in the toggling case
+    ass_formatting = true,
     debug = false,
 
     -- Text style
@@ -50,7 +55,7 @@ local o = {
 options.read_options(o)
 
 
-function main()
+function main(duration)
     local stats = {
         header = "",
         file = "",
@@ -77,7 +82,7 @@ function main()
     add_video(stats)
     add_audio(stats)
 
-    mp.osd_message(join_stats(stats), o.duration)
+    mp.osd_message(join_stats(stats), duration or o.duration)
 end
 
 
@@ -280,4 +285,24 @@ function b(t)
     return o.b1 .. t .. o.b0
 end
 
-mp.add_key_binding("i", mp.get_script_name(), main, {repeatable=true})
+
+local timer = mp.add_periodic_timer(o.redraw_delay - 0.1, function() main(o.redraw_delay) end)
+timer:kill()
+
+function periodic_main()
+    if timer:is_enabled() then
+        timer:kill()
+        mp.osd_message("", 0)
+    else
+        timer:resume()
+        main(o.redraw_delay)
+    end
+end
+
+
+mp.add_key_binding(o.key_oneshot, "display_stats", main, {repeatable=true})
+if pcall(function() timer:is_enabled() end) then
+    mp.add_key_binding(o.key_toggle, "display_stats_toggle", periodic_main, {repeatable=false})
+else
+    print("To use continious display of stats please upgrade mpv")
+end
