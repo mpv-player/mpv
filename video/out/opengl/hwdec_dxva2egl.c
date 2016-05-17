@@ -28,7 +28,6 @@
 #include "osdep/timer.h"
 #include "osdep/windows_utils.h"
 #include "hwdec.h"
-#include "video/dxva2.h"
 #include "video/hwdec.h"
 
 struct priv {
@@ -292,7 +291,7 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
 
     HRESULT hr;
     RECT rc = {0, 0, hw_image->w, hw_image->h};
-    IDirect3DSurface9* hw_surface = d3d9_surface_in_mp_image(hw_image);
+    IDirect3DSurface9* hw_surface = (IDirect3DSurface9 *)hw_image->planes[3];
     hr = IDirect3DDevice9Ex_StretchRect(p->device9ex,
                                         hw_surface, &rc,
                                         p->surface9, &rc,

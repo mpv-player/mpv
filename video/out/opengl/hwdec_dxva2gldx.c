@@ -22,7 +22,6 @@
 #include "osdep/windows_utils.h"
 #include "hwdec.h"
 #include "video/hwdec.h"
-#include "video/dxva2.h"
 
 // for  WGL_ACCESS_READ_ONLY_NV
 #include <GL/wglext.h>
@@ -182,7 +181,7 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
         return -1;
     }
 
-    IDirect3DSurface9* hw_surface = d3d9_surface_in_mp_image(hw_image);
+    IDirect3DSurface9* hw_surface = (IDirect3DSurface9 *)hw_image->planes[3];
     RECT rc = {0, 0, hw_image->w, hw_image->h};
     hr = IDirect3DDevice9Ex_StretchRect(p->device,
                                         hw_surface, &rc,
