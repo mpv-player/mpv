@@ -494,6 +494,7 @@ static void init_image_desc(struct gl_video *p, int fmt);
 static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
 static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src);
 static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[2]);
+static void gl_video_setup_hooks(struct gl_video *p);
 
 #define GLSL(x) gl_sc_add(p->sc, #x "\n");
 #define GLSLF(...) gl_sc_addf(p->sc, __VA_ARGS__)
@@ -561,7 +562,7 @@ static inline int fbosurface_wrap(int id)
     return id < 0 ? id + FBOSURFACES_MAX : id;
 }
 
-static void recreate_osd(struct gl_video *p)
+static void reinit_osd(struct gl_video *p)
 {
     mpgl_osd_destroy(p->osd);
     p->osd = NULL;
@@ -569,20 +570,6 @@ static void recreate_osd(struct gl_video *p)
         p->osd = mpgl_osd_init(p->gl, p->log, p->osd_state);
         mpgl_osd_set_options(p->osd, p->opts.pbo);
     }
-}
-
-static void gl_video_setup_hooks(struct gl_video *p);
-static void reinit_rendering(struct gl_video *p)
-{
-    MP_VERBOSE(p, "Reinit rendering.\n");
-
-    debug_check_gl(p, "before scaler initialization");
-
-    uninit_rendering(p);
-
-    recreate_osd(p);
-
-    gl_video_setup_hooks(p);
 }
 
 static void uninit_rendering(struct gl_video *p)
@@ -626,8 +613,6 @@ void gl_video_update_profile(struct gl_video *p)
 
     p->use_lut_3d = true;
     check_gl_features(p);
-
-    reinit_rendering(p);
 }
 
 static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
@@ -858,7 +843,7 @@ static void init_video(struct gl_video *p)
 
     debug_check_gl(p, "after video texture creation");
 
-    reinit_rendering(p);
+    gl_video_setup_hooks(p);
 }
 
 static void unref_current_image(struct gl_video *p)
@@ -1770,6 +1755,8 @@ static void pass_hook_user_shaders(struct gl_video *p, char **shaders)
 
 static void gl_video_setup_hooks(struct gl_video *p)
 {
+    gl_video_reset_hooks(p);
+
     if (p->opts.deband) {
         pass_add_hooks(p, (struct tex_hook) {.hook = deband_hook,
                                              .bind_tex = {"HOOKED"}},
@@ -2843,6 +2830,7 @@ void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
     p->vp_h = vp_h;
 
     gl_video_reset_surfaces(p);
+    gl_video_setup_hooks(p);
 
     if (p->osd)
         mpgl_osd_resize(p->osd, p->osd_rect, p->image_params.stereo_out);
@@ -3416,7 +3404,7 @@ void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd)
     mpgl_osd_destroy(p->osd);
     p->osd = NULL;
     p->osd_state = osd;
-    recreate_osd(p);
+    reinit_osd(p);
 }
 
 struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g,
@@ -3441,7 +3429,6 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g,
         p->scaler[n] = (struct scaler){.index = n};
     gl_video_set_debug(p, true);
     init_gl(p);
-    recreate_osd(p);
     return p;
 }
 
@@ -3522,6 +3509,8 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
 
     check_gl_features(p);
     uninit_rendering(p);
+    gl_video_setup_hooks(p);
+    reinit_osd(p);
 
     if (p->opts.interpolation && !p->global->opts->video_sync && !p->dsi_warned) {
         MP_WARN(p, "Interpolation now requires enabling display-sync mode.\n"
