@@ -304,5 +304,7 @@ mp.add_key_binding(o.key_oneshot, "display_stats", print_stats, {repeatable=true
 if pcall(function() timer:is_enabled() end) then
     mp.add_key_binding(o.key_toggle, "display_stats_toggle", toggle_stats, {repeatable=false})
 else
-    print("To use continious display of stats please upgrade mpv")
+    local txt = "Please upgrade mpv to toggle stats"
+    mp.add_key_binding(o.key_toggle, "display_stats_toggle",
+                       function() print(txt) ; mp.osd_message(txt) end, {repeatable=false})
 end
