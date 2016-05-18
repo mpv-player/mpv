@@ -64,7 +64,6 @@ struct mpgl_osd {
     struct osd_state *osd;
     GL *gl;
     bool use_pbo;
-    bool scaled;
     struct mpgl_osd_part *parts[MAX_OSD_PARTS];
     const struct gl_format *fmt_table[SUBBITMAP_COUNT];
     bool formats[SUBBITMAP_COUNT];
@@ -200,7 +199,7 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
     GL *gl = ctx->gl;
 
     // assume 2x2 filter on scaling
-    osd->packer->padding = ctx->scaled || imgs->scaled;
+    osd->packer->padding = imgs->scaled;
     int r = packer_pack_from_subbitmaps(osd->packer, imgs);
     if (r < 0) {
         MP_ERR(ctx, "OSD bitmaps do not fit on a surface with the maximum "
