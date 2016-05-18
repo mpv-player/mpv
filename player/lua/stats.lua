@@ -55,7 +55,7 @@ local o = {
 options.read_options(o)
 
 
-function main(duration)
+function print_stats(duration)
     local stats = {
         header = "",
         file = "",
@@ -286,23 +286,23 @@ function b(t)
 end
 
 
-local timer = mp.add_periodic_timer(o.redraw_delay - 0.1, function() main(o.redraw_delay) end)
+local timer = mp.add_periodic_timer(o.redraw_delay - 0.1, function() print_stats(o.redraw_delay) end)
 timer:kill()
 
-function periodic_main()
+function toggle_stats()
     if timer:is_enabled() then
         timer:kill()
         mp.osd_message("", 0)
     else
         timer:resume()
-        main(o.redraw_delay)
+        print_stats(o.redraw_delay)
     end
 end
 
 
-mp.add_key_binding(o.key_oneshot, "display_stats", main, {repeatable=true})
+mp.add_key_binding(o.key_oneshot, "display_stats", print_stats, {repeatable=true})
 if pcall(function() timer:is_enabled() end) then
-    mp.add_key_binding(o.key_toggle, "display_stats_toggle", periodic_main, {repeatable=false})
+    mp.add_key_binding(o.key_toggle, "display_stats_toggle", toggle_stats, {repeatable=false})
 else
     print("To use continious display of stats please upgrade mpv")
 end
