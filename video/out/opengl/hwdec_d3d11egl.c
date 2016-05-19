@@ -201,6 +201,11 @@ static int create(struct gl_hwdec *hw)
             MP_ERR(hw, "Failed to load some EGLStream functions.\n");
             goto fail;
         }
+
+        static const char *es2_exts[] = {"GL_NV_EGL_stream_consumer_external", 0};
+        static const char *es3_exts[] = {"GL_NV_EGL_stream_consumer_external",
+                                         "GL_OES_EGL_image_external_essl3", 0};
+        hw->glsl_extensions = hw->gl->es == 200 ? es2_exts : es3_exts;
     }
 
     if (use_native_device) {

@@ -10,6 +10,8 @@ struct gl_hwdec {
     struct mpv_global *global;
     GL *gl;
     struct mp_hwdec_devices *devs;
+    // GLSL extensions required to sample textures from this.
+    const char **glsl_extensions;
     // For free use by hwdec driver
     void *priv;
     // For working around the vdpau vs. vaapi mess.

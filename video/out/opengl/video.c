@@ -784,6 +784,9 @@ static void init_video(struct gl_video *p)
         if (p->hwdec->driver->reinit(p->hwdec, &p->image_params) < 0)
             MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
         init_image_desc(p, p->image_params.imgfmt);
+        const char **exts = p->hwdec->glsl_extensions;
+        for (int n = 0; exts && exts[n]; n++)
+            gl_sc_enable_extension(p->sc, (char *)exts[n]);
         p->hwdec_active = true;
     } else {
         init_format(p, p->image_params.imgfmt, false);
