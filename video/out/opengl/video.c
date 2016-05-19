@@ -267,6 +267,7 @@ struct gl_video {
 
     bool dsi_warned;
     bool custom_shader_fn_warned;
+    bool broken_frame; // temporary error state
 };
 
 struct packed_fmt_entry {
@@ -491,7 +492,7 @@ static void uninit_scaler(struct gl_video *p, struct scaler *scaler);
 static void check_gl_features(struct gl_video *p);
 static bool init_format(struct gl_video *p, int fmt, bool test_only);
 static void init_image_desc(struct gl_video *p, int fmt);
-static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
+static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
 static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src);
 static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[2]);
 static void gl_video_setup_hooks(struct gl_video *p);
@@ -2523,8 +2524,6 @@ static void pass_render_frame(struct gl_video *p)
 
 static void pass_draw_to_screen(struct gl_video *p, int fbo)
 {
-    GL *gl = p->gl;
-
     if (p->dumb_mode)
         pass_render_frame_dumb(p, fbo);
 
@@ -2550,13 +2549,6 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
 
     pass_dither(p);
     finish_pass_direct(p, fbo, p->vp_w, p->vp_h, &p->dst_rect);
-
-    if (gl_sc_error_state(p->sc)) {
-        // Make the screen solid blue to make it visually clear that an
-        // error has occurred
-        gl->ClearColor(0.0, 0.05, 0.5, 1.0);
-        gl->Clear(GL_COLOR_BUFFER_BIT);
-    }
 }
 
 // Draws an interpolate frame to fbo, based on the frame timing in t
@@ -2575,7 +2567,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     // First of all, figure out if we have a frame availble at all, and draw
     // it manually + reset the queue if not
     if (p->surfaces[p->surface_now].pts == MP_NOPTS_VALUE) {
-        gl_video_upload_image(p, t->current);
+        if (!gl_video_upload_image(p, t->current))
+            return;
         pass_render_frame(p);
         finish_pass_fbo(p, &p->surfaces[p->surface_now].fbotex,
                         vp_w, vp_h, FBOTEX_FUZZY);
@@ -2634,7 +2627,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             continue;
 
         if (f->pts > p->surfaces[p->surface_idx].pts) {
-            gl_video_upload_image(p, f);
+            if (!gl_video_upload_image(p, f))
+                return;
             pass_render_frame(p);
             finish_pass_fbo(p, &p->surfaces[surface_dst].fbotex,
                             vp_w, vp_h, FBOTEX_FUZZY);
@@ -2733,6 +2727,8 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
 
+    p->broken_frame = false;
+
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     bool has_frame = frame->current || vimg->mpi;
@@ -2763,7 +2759,8 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
             if (is_new || !p->output_fbo_valid) {
                 p->output_fbo_valid = false;
 
-                gl_video_upload_image(p, frame->current);
+                if (!gl_video_upload_image(p, frame->current))
+                    goto done;
                 pass_render_frame(p);
 
                 // For the non-interplation case, we draw to a single "cache"
@@ -2799,6 +2796,8 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
         }
     }
 
+done:
+
     debug_check_gl(p, "after video rendering");
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -2808,8 +2807,15 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
                       p->osd_pts, p->osd_rect, p->vp_w, p->vp_h, fbo, true);
         debug_check_gl(p, "after OSD rendering");
     }
-
     gl->UseProgram(0);
+
+    if (gl_sc_error_state(p->sc) || p->broken_frame) {
+        // Make the screen solid blue to make it visually clear that an
+        // error has occurred
+        gl->ClearColor(0.0, 0.05, 0.5, 1.0);
+        gl->Clear(GL_COLOR_BUFFER_BIT);
+    }
+
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // The playloop calls this last before waiting some time until it decides
@@ -2885,16 +2891,17 @@ static bool map_image(struct gl_video *p, struct mp_image *mpi)
     return true;
 }
 
-static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
+// Returns false on failure.
+static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
 {
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
 
+    unref_current_image(p);
+
     mpi = mp_image_new_ref(mpi);
     if (!mpi)
-        abort();
-
-    unref_current_image(p);
+        goto error;
 
     vimg->mpi = mpi;
     p->osd_pts = mpi->pts;
@@ -2922,9 +2929,9 @@ static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
             }
         } else {
             MP_FATAL(p, "Mapping hardware decoded surface failed.\n");
-            unref_current_image(p);
+            goto error;
         }
-        return;
+        return true;
     }
 
     assert(mpi->num_planes == p->plane_count);
@@ -2955,6 +2962,13 @@ static void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     gl->ActiveTexture(GL_TEXTURE0);
     if (pbo)
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+    return true;
+
+error:
+    unref_current_image(p);
+    p->broken_frame = true;
+    return false;
 }
 
 static bool test_fbo(struct gl_video *p, GLint format)
