@@ -478,7 +478,11 @@ struct gl_shader_cache {
     GL *gl;
     struct mp_log *log;
 
-    // this is modified during use (gl_sc_add() etc.)
+    // permanent
+    char **exts;
+    int num_exts;
+
+    // this is modified during use (gl_sc_add() etc.) and reset for each shader
     bstr prelude_text;
     bstr header_text;
     bstr text;
@@ -554,7 +558,11 @@ void gl_sc_reset_error(struct gl_shader_cache *sc)
 
 void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name)
 {
-    bstr_xappend_asprintf(sc, &sc->prelude_text, "#extension %s : enable\n", name);
+    for (int n = 0; n < sc->num_exts; n++) {
+        if (strcmp(sc->exts[n], name) == 0)
+            return;
+    }
+    MP_TARRAY_APPEND(sc, sc->exts, sc->num_exts, talloc_strdup(sc, name));
 }
 
 #define bstr_xappend0(sc, b, s) bstr_xappend(sc, b, bstr0(s))
@@ -905,6 +913,8 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     // set up shader text (header + uniforms + body)
     bstr *header = &sc->tmp[0];
     ADD(header, "#version %d%s\n", gl->glsl_version, gl->es >= 300 ? " es" : "");
+    for (int n = 0; n < sc->num_exts; n++)
+        ADD(header, "#extension %s : enable\n", sc->exts[n]);
     if (gl->es)
         ADD(header, "precision mediump float;\n");
     ADD_BSTR(header, sc->prelude_text);
