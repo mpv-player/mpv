@@ -172,10 +172,10 @@ static int create(struct gl_hwdec *hw)
     p->egl_display = egl_display;
 
     // Optional EGLStream stuff for working without video processor.
-    // Note that as long as GL_OES_EGL_image_external_essl3 is not available,
-    // this won't work in ES 3.x mode due to missing GLSL mechanisms.
     if (strstr(exts, "EGL_ANGLE_stream_producer_d3d_texture_nv12") &&
-        use_native_device && hw->gl->es == 200)
+        use_native_device &&
+        (strstr(hw->gl->extensions, "GL_OES_EGL_image_external_essl3") ||
+         hw->gl->es == 200))
     {
         MP_VERBOSE(hw, "Loading EGL_ANGLE_stream_producer_d3d_texture_nv12\n");
 
