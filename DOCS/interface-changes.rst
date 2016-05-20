@@ -32,6 +32,8 @@ Interface changes
       as booleans when using the mpv_node functions in the client API, the
       "native" property accessors in Lua, and the JSON API. They can be set as
       such as well.
+    - the VO opengl fbo-format sub-option does not accept "rgb" or "rgba"
+      anymore
  --- mpv 0.17.0 ---
     - deprecate "track-list/N/audio-channels" property (use
       "track-list/N/demux-channel-count" instead)

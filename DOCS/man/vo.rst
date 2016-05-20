@@ -974,7 +974,7 @@ Available video output drivers are:
     ``fbo-format=<fmt>``
         Selects the internal format of textures used for FBOs. The format can
         influence performance and quality of the video output.
-        ``fmt`` can be one of: rgb, rgba, rgb8, rgb10, rgb10_a2, rgb16, rgb16f,
+        ``fmt`` can be one of: rgb8, rgb10, rgb10_a2, rgb16, rgb16f,
         rgb32f, rgba12, rgba16, rgba16f, rgba32f.
         Default: ``auto``, which maps to rgba16 on desktop GL, and rgba16f or
         rgb10_a2 on GLES (e.g. ANGLE), unless GL_EXT_texture_norm16 is
