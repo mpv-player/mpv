@@ -677,7 +677,10 @@ video_output_features = [
         'desc': 'OpenGL DRM EGL Backend',
         'deps': [ 'drm', 'gbm' ],
         'groups': [ 'gl' ],
-        'func': check_pkg_config('egl', 'gl'),
+        'func': compose_checks(
+            check_pkg_config('egl'),
+            check_pkg_config_cflags('gl')
+        )
     } , {
         'name': '--gl-wayland',
         'desc': 'OpenGL Wayland Backend',
