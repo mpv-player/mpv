@@ -1103,17 +1103,20 @@ static void reinit_window_state(struct vo_w32_state *w32)
         // Save new size
         w32->dw = n_w;
         w32->dh = n_h;
+        // Get old window center
+        long o_cx = r.left + (r.right - r.left) / 2;
+        long o_cy = r.top + (r.bottom - r.top) / 2;
         // Add window borders to the new window size
         r = (RECT){.right = n_w, .bottom = n_h};
         add_window_borders(w32->window, &r);
         // Get top and left border size for client area position calculation
         long b_top = -r.top;
         long b_left = -r.left;
-        // Center the final window
+        // Center the final window around the old window center
         n_w = r.right - r.left;
         n_h = r.bottom - r.top;
-        r.left = w32->screenrc.x0 + screen_w / 2 - n_w / 2;
-        r.top = w32->screenrc.y0 + screen_h / 2 - n_h / 2;
+        r.left = o_cx - n_w / 2;
+        r.top = o_cy - n_h / 2;
         r.right = r.left + n_w;
         r.bottom = r.top + n_h;
         // Save new client area position
