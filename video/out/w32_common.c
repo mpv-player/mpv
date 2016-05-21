@@ -1100,8 +1100,15 @@ static void reinit_window_state(struct vo_w32_state *w32)
         } else {
             n_w = n_h * asp;
         }
+        // Save new size
+        w32->dw = n_w;
+        w32->dh = n_h;
+        // Add window borders to the new window size
         r = (RECT){.right = n_w, .bottom = n_h};
         add_window_borders(w32->window, &r);
+        // Get top and left border size for client area position calculation
+        long b_top = -r.top;
+        long b_left = -r.left;
         // Center the final window
         n_w = r.right - r.left;
         n_h = r.bottom - r.top;
@@ -1109,6 +1116,9 @@ static void reinit_window_state(struct vo_w32_state *w32)
         r.top = w32->screenrc.y0 + screen_h / 2 - n_h / 2;
         r.right = r.left + n_w;
         r.bottom = r.top + n_h;
+        // Save new client area position
+        w32->window_x = r.left + b_left;
+        w32->window_y = r.top + b_top;
     }
 
     MP_VERBOSE(w32, "reset window bounds: %d:%d:%d:%d\n",
