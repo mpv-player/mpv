@@ -2610,6 +2610,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
     find_next_cluster:
         mkv_d->cluster_end = 0;
         for (;;) {
+            stream_peek(s, 4); // guarantee we can undo ebml_read_id() below
             mkv_d->cluster_start = stream_tell(s);
             uint32_t id = ebml_read_id(s);
             if (id == MATROSKA_ID_CLUSTER)
@@ -2628,6 +2629,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
             if ((!ebml_is_mkv_level1_id(id) && id != EBML_ID_VOID) ||
                 ebml_read_skip(demuxer->log, -1, s) != 0)
             {
+                stream_seek(s, mkv_d->cluster_start);
                 ebml_resync_cluster(demuxer->log, s);
             }
         }
