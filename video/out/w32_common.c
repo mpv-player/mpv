@@ -1403,9 +1403,13 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         if (!w32->window_bounds_initialized)
             return VO_FALSE;
         if (w32->current_fs) {
+            w32->prev_x += w32->prev_width / 2 - s[0] / 2;
+            w32->prev_y += w32->prev_height / 2 - s[1] / 2;
             w32->prev_width = s[0];
             w32->prev_height = s[1];
         } else {
+            w32->window_x += w32->dw / 2 - s[0] / 2;
+            w32->window_y += w32->dh / 2 - s[1] / 2;
             w32->dw = s[0];
             w32->dh = s[1];
         }
