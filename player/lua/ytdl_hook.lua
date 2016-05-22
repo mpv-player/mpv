@@ -159,7 +159,11 @@ mp.add_hook("on_load", 10, function ()
 
                 local playlist = "edl://"
                 for i, entry in pairs(json.entries) do
-                    playlist = playlist .. edl_escape(entry.url) .. ";"
+                    playlist = playlist .. edl_escape(entry.url)
+                    if not (entry.duration == nil) then
+                        playlist = playlist..",start=0,length="..entry.duration
+                    end
+                    playlist = playlist .. ";"
                 end
 
                 msg.debug("EDL: " .. playlist)
@@ -173,6 +177,21 @@ mp.add_hook("on_load", 10, function ()
                 if not (json.title == nil) then
                     mp.set_property("file-local-options/force-media-title",
                         json.title)
+                end
+
+                if not (json.entries[1].requested_subtitles == nil) then
+                    for j, req in pairs(json.entries[1].requested_subtitles) do
+                        local subfile = "edl://"
+                        for i, entry in pairs(json.entries) do
+                            subfile = subfile..edl_escape(entry.requested_subtitles[j].url)
+                            if not (entry.duration == nil) then
+                                subfile = subfile..",start=0,length="..entry.duration
+                            end
+                            subfile = subfile .. ";"
+                        end
+                        msg.debug(j.." sub EDL: "..subfile)
+                        mp.commandv("sub-add", subfile, "auto", req.ext, j)
+                    end
                 end
 
             else
