@@ -103,31 +103,6 @@ void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 }
 
-// Like glUploadTex, but upload a byte array with all elements set to val.
-// If scratch is not NULL, points to a resizeable talloc memory block than can
-// be freely used by the function (for avoiding temporary memory allocations).
-void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
-                int x, int y, int w, int h, uint8_t val, void **scratch)
-{
-    int bpp = gl_bytes_per_pixel(format, type);
-    int stride = w * bpp;
-    int size = h * stride;
-    if (size < 1 || !bpp)
-        return;
-    void *data = scratch ? *scratch : NULL;
-    if (talloc_get_size(data) < size)
-        data = talloc_realloc(NULL, data, char *, size);
-    memset(data, val, size);
-    gl->PixelStorei(GL_UNPACK_ALIGNMENT, get_alignment(stride));
-    gl->TexSubImage2D(target, 0, x, y, w, h, format, type, data);
-    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
-    if (scratch) {
-        *scratch = data;
-    } else {
-        talloc_free(data);
-    }
-}
-
 mp_image_t *glGetWindowScreenshot(GL *gl)
 {
     if (gl->es)

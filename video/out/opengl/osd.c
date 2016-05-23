@@ -57,6 +57,7 @@ struct mpgl_osd_part {
     struct sub_bitmap *subparts;
     struct vertex *vertices;
     struct bitmap_packer *packer;
+    void *upload;
 };
 
 struct mpgl_osd {
@@ -124,6 +125,7 @@ void mpgl_osd_destroy(struct mpgl_osd *ctx)
         gl->DeleteTextures(1, &p->texture);
         if (gl->DeleteBuffers)
             gl->DeleteBuffers(1, &p->buffer);
+        talloc_free(p->upload);
     }
     talloc_free(ctx);
 }
@@ -133,8 +135,8 @@ void mpgl_osd_set_options(struct mpgl_osd *ctx, bool pbo)
     ctx->use_pbo = pbo;
 }
 
-static bool upload_pbo(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
-                       struct sub_bitmaps *imgs)
+static bool upload(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
+                   struct sub_bitmaps *imgs, bool pbo)
 {
     GL *gl = ctx->gl;
     bool success = true;
@@ -142,56 +144,56 @@ static bool upload_pbo(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
     size_t pix_stride = gl_bytes_per_pixel(fmt->format, fmt->type);
     size_t buffer_size = pix_stride * osd->h * osd->w;
 
-    if (!osd->buffer) {
-        gl->GenBuffers(1, &osd->buffer);
+    char *data = NULL;
+    void *texdata = NULL;
+
+    if (pbo) {
+        if (!osd->buffer) {
+            gl->GenBuffers(1, &osd->buffer);
+            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, osd->buffer);
+            gl->BufferData(GL_PIXEL_UNPACK_BUFFER, buffer_size, NULL,
+                           GL_DYNAMIC_COPY);
+        }
+
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, osd->buffer);
-        gl->BufferData(GL_PIXEL_UNPACK_BUFFER, buffer_size, NULL, GL_DYNAMIC_COPY);
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    }
-
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, osd->buffer);
-    char *data = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, buffer_size,
-                                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-    if (!data) {
-        success = false;
-    } else {
-        struct pos bb[2];
-        packer_get_bb(osd->packer, bb);
-        size_t stride = osd->w * pix_stride;
-        packer_copy_subbitmaps(osd->packer, imgs, data, pix_stride, stride);
-        if (!gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER))
+        data = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, buffer_size,
+                                  GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+        if (!data) {
             success = false;
-        glUploadTex(gl, GL_TEXTURE_2D, fmt->format, fmt->type, NULL, stride,
-                    bb[0].x, bb[0].y, bb[1].x - bb[0].x, bb[1].y - bb[0].y, 0);
+            goto done;
+        }
+    } else {
+        if (!osd->upload)
+            osd->upload = talloc_size(NULL, buffer_size);
+        data = osd->upload;
+        texdata = data;
     }
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
+    struct pos bb[2];
+    packer_get_bb(osd->packer, bb);
+    size_t stride = osd->w * pix_stride;
+    packer_copy_subbitmaps(osd->packer, imgs, data, pix_stride, stride);
+
+    if (pbo) {
+        if (!gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER)) {
+            success = false;
+            goto done;
+        }
+    }
+
+    glUploadTex(gl, GL_TEXTURE_2D, fmt->format, fmt->type, texdata, stride,
+                bb[0].x, bb[0].y, bb[1].x - bb[0].x, bb[1].y - bb[0].y, 0);
+
+    if (pbo)
+        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+done:
     if (!success) {
         MP_FATAL(ctx, "Error: can't upload subtitles! "
                  "Remove the 'pbo' suboption.\n");
     }
 
     return success;
-}
-
-static void upload_tex(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
-                       struct sub_bitmaps *imgs)
-{
-    const struct gl_format *fmt = ctx->fmt_table[imgs->format];
-    if (osd->packer->padding) {
-        struct pos bb[2];
-        packer_get_bb(osd->packer, bb);
-        glClearTex(ctx->gl, GL_TEXTURE_2D, fmt->format, fmt->type,
-                   bb[0].x, bb[0].y, bb[1].x - bb[0].y, bb[1].y - bb[0].y,
-                   0, &ctx->scratch);
-    }
-    for (int n = 0; n < osd->packer->count; n++) {
-        struct sub_bitmap *s = &imgs->parts[n];
-        struct pos p = osd->packer->result[n];
-
-        glUploadTex(ctx->gl, GL_TEXTURE_2D, fmt->format, fmt->type,
-                    s->bitmap, s->stride, p.x, p.y, s->w, s->h, 0);
-    }
 }
 
 static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
@@ -234,13 +236,16 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
         if (gl->DeleteBuffers)
             gl->DeleteBuffers(1, &osd->buffer);
         osd->buffer = 0;
+
+        talloc_free(osd->upload);
+        osd->upload = NULL;
     }
 
     bool uploaded = false;
     if (ctx->use_pbo)
-        uploaded = upload_pbo(ctx, osd, imgs);
+        uploaded = upload(ctx, osd, imgs, true);
     if (!uploaded)
-        upload_tex(ctx, osd, imgs);
+        upload(ctx, osd, imgs, false);
 
     gl->BindTexture(GL_TEXTURE_2D, 0);
 

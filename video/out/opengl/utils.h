@@ -29,8 +29,6 @@ void glCheckError(GL *gl, struct mp_log *log, const char *info);
 void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
                  const void *dataptr, int stride,
                  int x, int y, int w, int h, int slice);
-void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
-                int x, int y, int w, int h, uint8_t val, void **scratch);
 
 mp_image_t *glGetWindowScreenshot(GL *gl);
 
