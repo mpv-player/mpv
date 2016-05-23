@@ -126,7 +126,8 @@ struct GL {
     void (GLAPIENTRY *DeleteBuffers)(GLsizei, const GLuint *);
     void (GLAPIENTRY *BindBuffer)(GLenum, GLuint);
     void (GLAPIENTRY *BindBufferBase)(GLenum, GLuint, GLuint);
-    GLvoid * (GLAPIENTRY * MapBuffer)(GLenum, GLenum);
+    GLvoid * (GLAPIENTRY *MapBufferRange)(GLenum, GLintptr, GLsizeiptr,
+                                          GLbitfield);
     GLboolean (GLAPIENTRY *UnmapBuffer)(GLenum);
     void (GLAPIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
     void (GLAPIENTRY *ActiveTexture)(GLenum);

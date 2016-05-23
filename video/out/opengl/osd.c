@@ -139,18 +139,19 @@ static bool upload_pbo(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
     GL *gl = ctx->gl;
     bool success = true;
     const struct gl_format *fmt = ctx->fmt_table[imgs->format];
-    int pix_stride = gl_bytes_per_pixel(fmt->format, fmt->type);
+    size_t pix_stride = gl_bytes_per_pixel(fmt->format, fmt->type);
+    size_t buffer_size = pix_stride * osd->h * osd->w;
 
     if (!osd->buffer) {
         gl->GenBuffers(1, &osd->buffer);
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, osd->buffer);
-        gl->BufferData(GL_PIXEL_UNPACK_BUFFER, osd->w * osd->h * pix_stride,
-                        NULL, GL_DYNAMIC_COPY);
+        gl->BufferData(GL_PIXEL_UNPACK_BUFFER, buffer_size, NULL, GL_DYNAMIC_COPY);
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     }
 
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, osd->buffer);
-    char *data = gl->MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+    char *data = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, buffer_size,
+                                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
     if (!data) {
         success = false;
     } else {

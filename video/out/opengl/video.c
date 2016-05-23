@@ -2870,15 +2870,17 @@ static bool map_image(struct gl_video *p, struct mp_image *mpi)
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
         mpi->stride[n] = mp_image_plane_w(mpi, n) * p->image_desc.bytes[n];
+        size_t buffer_size = mp_image_plane_h(mpi, n) * mpi->stride[n];
         if (!plane->gl_buffer) {
             gl->GenBuffers(1, &plane->gl_buffer);
             gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
-            size_t buffer_size = mp_image_plane_h(mpi, n) * mpi->stride[n];
             gl->BufferData(GL_PIXEL_UNPACK_BUFFER, buffer_size,
                            NULL, GL_DYNAMIC_DRAW);
         }
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
-        mpi->planes[n] = gl->MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+        mpi->planes[n] = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0,
+                                            buffer_size, GL_MAP_WRITE_BIT |
+                                                GL_MAP_INVALIDATE_BUFFER_BIT);
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         if (!mpi->planes[n]) {
             unmap_image(p, mpi);
@@ -3042,9 +3044,9 @@ static void check_gl_features(struct gl_video *p)
         }
     }
 
-    if (gl->es && p->opts.pbo) {
+    if (!gl->MapBufferRange && p->opts.pbo) {
         p->opts.pbo = 0;
-        MP_WARN(p, "Disabling PBOs (GLES unsupported).\n");
+        MP_WARN(p, "Disabling PBOs (GL2.1/GLES2 unsupported).\n");
     }
 
     p->forced_dumb_mode = p->opts.dumb_mode || !have_fbo || !have_texrg;

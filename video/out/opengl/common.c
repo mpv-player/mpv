@@ -147,10 +147,19 @@ static const struct gl_functions gl_functions[] = {
         .provides = MPGL_CAP_ROW_LENGTH | MPGL_CAP_1D_TEX,
         .functions = (const struct gl_function[]) {
             DEF_FN(GetTexLevelParameteriv),
-            DEF_FN(MapBuffer),
             DEF_FN(ReadBuffer),
             DEF_FN(TexImage1D),
             DEF_FN(UnmapBuffer),
+            {0}
+        },
+    },
+    // GL 2.1 has this as extension only.
+    {
+        .ver_exclude = 300,
+        .ver_es_exclude = 300,
+        .extension = "GL_ARB_map_buffer_range",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(MapBufferRange),
             {0}
         },
     },
@@ -162,6 +171,7 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(BindBufferBase),
             DEF_FN(BlitFramebuffer),
             DEF_FN(GetStringi),
+            DEF_FN(MapBufferRange),
             // for ES 3.0
             DEF_FN(ReadBuffer),
             DEF_FN(UnmapBuffer),
