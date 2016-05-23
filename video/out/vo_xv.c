@@ -577,6 +577,15 @@ static bool allocate_xvimage(struct vo *vo, int foo)
             return false;
         XSync(x11->display, False);
     }
+
+    if ((ctx->xvimage[foo]->width != aligned_w) ||
+        (ctx->xvimage[foo]->height != ctx->image_height)) {
+        MP_ERR(vo, "Got XvImage with incorrect size: %ux%u (expected %ux%u)\n",
+               ctx->xvimage[foo]->width, ctx->xvimage[foo]->height,
+               aligned_w, ctx->image_height);
+        return false;
+    }
+
     struct mp_image img = get_xv_buffer(vo, foo);
     img.w = aligned_w;
     mp_image_clear(&img, 0, 0, img.w, img.h);
