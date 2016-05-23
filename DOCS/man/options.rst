@@ -629,6 +629,42 @@ Video
         codecs. See ``--hwdec-codecs`` to enable hardware decoding for more
         codecs.
 
+    .. admonition:: Quality reduction with hardware decoding
+
+        Normally, hardware decoding does not reduce video quality (at least for
+        the codecs h264 and HEVC). However, due to restrictions in video output
+        APIs, there can be some loss, or blatantly incorrect results.
+
+        In some cases, RGB conversion is forced, which means the RGB conversion
+        is performed by the hardware decoding API, instead of the OpenGL code
+        used by ``--vo=opengl``. This means certain obscure colorspaces may
+        not display correctly, and not certain filtering (such as debanding)
+        can not be applied in an ideal way.
+
+        ``vdpau`` forces RGB conversion. Currently, it does not treat certain
+        colorspaces like BT.2020 correctly. This is mostly a mpv-specific
+        restriction. This does not apply if the ``vdpauprb`` filter is used.
+
+        ``vaapi`` is safe if the ``vaapi-egl`` backend is indicated in the logs.
+        If ``vaapi-glx`` is indicated, and the video colorspace is either BT.601
+        or BT.709, a forced but correct RGB conversion is performed. Otherwise,
+        the result will be incorrect.
+
+        ``d3d11va`` is usually safe. If the ``EGL_KHR_stream path`` is indicated
+        in the logs, it is lossless and full OpenGL filtering is done. If
+        ``ID3D11VideoProcessor path`` is indicated, and the video colorspace is
+        either BT.601 or BT.709, a forced but correct RGB conversion is
+        performed. Otherwise, the result will be incorrect.
+
+        ``dxva2`` is not safe. It uses either BT.601 or BT.709 for forced RGB
+        conversion, and which colorspace is used is driver-dependent. This can
+        give incorrect results even with completely ordinary video sources.
+
+        All other methods, in particular the copy-back methods (like
+        ``dxva2-copy`` etc.) are either fully safe, or not worse than software
+        decoding. In particular, ``auto-copy`` will only select safe modes
+        (although potentially slower than other methods).
+
 ``--hwdec-preload=<api>``
     This is useful for the ``opengl`` and ``opengl-cb`` VOs for creating the
     hardware decoding OpenGL interop context, but without actually enabling
