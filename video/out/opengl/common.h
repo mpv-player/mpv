@@ -63,7 +63,6 @@ enum {
     MPGL_CAP_EXT16              = (1 << 18),    // GL_EXT_texture_norm16
     MPGL_CAP_ARB_FLOAT          = (1 << 19),    // GL_ARB_texture_float
     MPGL_CAP_EXT_CR_HFLOAT      = (1 << 20),    // GL_EXT_color_buffer_half_float
-    MPGL_CAP_OES_HFLOAT_LIN     = (1 << 21),    // GL_OES_texture_half_float_linear
 
     MPGL_CAP_SW                 = (1 << 30),    // indirect or sw renderer
 };

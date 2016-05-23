@@ -256,17 +256,12 @@ static const struct gl_functions gl_functions[] = {
         .ver_exclude = 300,
         .ver_es_exclude = 1,
     },
-    // 16 bit float textures filterable with GL_LINEAR in GLES
-    {
-        .extension = "GL_OES_texture_half_float_linear",
-        .provides = MPGL_CAP_OES_HFLOAT_LIN,
-        .ver_exclude = 1,
-    },
     // 16 bit float textures that can be rendered to in GLES
     {
         .extension = "GL_EXT_color_buffer_half_float",
         .provides = MPGL_CAP_EXT_CR_HFLOAT,
         .ver_exclude = 1,
+        .ver_es_exclude = 320,
     },
     {
         .ver_core = 320,

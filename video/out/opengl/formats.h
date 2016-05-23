@@ -23,8 +23,7 @@ enum {
     F_ES3       = 1 << 3, // ES3.0 or later
     F_ES32      = 1 << 4, // ES3.2 or later
     F_EXT16     = 1 << 5, // ES with GL_EXT_texture_norm16
-    F_EXTF16    = 1 << 6, // GL_OES_texture_half_float_linear +
-                          // GL_EXT_color_buffer_half_float
+    F_EXTF16    = 1 << 6, // GL_EXT_color_buffer_half_float
     F_GL2F      = 1 << 7, // GL2.1-only with texture_rg + texture_float + FBOs
     F_APPL      = 1 << 8, // GL_APPLE_rgb_422
 

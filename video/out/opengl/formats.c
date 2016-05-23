@@ -116,9 +116,7 @@ int gl_format_feature_flags(GL *gl)
          | (gl->es >= 320 ? F_ES32 : 0)
          | (gl->mpgl_caps & MPGL_CAP_EXT16 ? F_EXT16 : 0)
          | ((gl->es >= 300 &&
-            (gl->mpgl_caps & MPGL_CAP_TEX_RG) &&
-            (gl->mpgl_caps & MPGL_CAP_EXT_CR_HFLOAT) &&
-            (gl->mpgl_caps & MPGL_CAP_OES_HFLOAT_LIN)) ? F_EXTF16 : 0)
+            (gl->mpgl_caps & MPGL_CAP_EXT_CR_HFLOAT)) ? F_EXTF16 : 0)
          | ((gl->version == 210 &&
             (gl->mpgl_caps & MPGL_CAP_ARB_FLOAT) &&
             (gl->mpgl_caps & MPGL_CAP_TEX_RG) &&
