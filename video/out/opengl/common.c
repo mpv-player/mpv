@@ -146,7 +146,6 @@ static const struct gl_functions gl_functions[] = {
         .ver_core = 210,
         .provides = MPGL_CAP_ROW_LENGTH | MPGL_CAP_1D_TEX,
         .functions = (const struct gl_function[]) {
-            DEF_FN(DrawBuffer),
             DEF_FN(GetTexLevelParameteriv),
             DEF_FN(MapBuffer),
             DEF_FN(ReadBuffer),

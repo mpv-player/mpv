@@ -102,7 +102,6 @@ struct GL {
     void (GLAPIENTRY *Enable)(GLenum);
     void (GLAPIENTRY *Disable)(GLenum);
     const GLubyte *(GLAPIENTRY * GetString)(GLenum);
-    void (GLAPIENTRY *DrawBuffer)(GLenum);
     void (GLAPIENTRY *BlendFuncSeparate)(GLenum, GLenum, GLenum, GLenum);
     void (GLAPIENTRY *Flush)(void);
     void (GLAPIENTRY *Finish)(void);
