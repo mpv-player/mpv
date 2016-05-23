@@ -22,7 +22,7 @@ Interface changes
  --- mpv 0.17.1 ---
     - now ab-loops are active even if one of the "ab-loop-a"/"-b" properties is
       unset ("no"), in which case the start of the file is used if the A loop
-      point is unsert, and the end of the file for an unset B loop point
+      point is unset, and the end of the file for an unset B loop point
     - deprecate --sub-ass=no option by --ass-style-override=strip
       (also needs --embeddedfonts=no)
     - add "hwdec-interop" and "hwdec-current" properties
