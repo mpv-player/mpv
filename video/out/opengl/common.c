@@ -269,6 +269,14 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    {
+        .ver_core = 430,
+        .ver_es_core = 300,
+        .functions = (const struct gl_function[]) {
+            DEF_FN(InvalidateFramebuffer),
+            {0}
+        },
+    },
     // Swap control, always an OS specific extension
     // The OSX code loads this manually.
     {

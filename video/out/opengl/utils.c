@@ -293,6 +293,7 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
     if (fbo->rw == cw && fbo->rh == ch && fbo->iformat == iformat) {
         fbo->lw = w;
         fbo->lh = h;
+        fbotex_invalidate(fbo);
         return true;
     }
 
@@ -376,6 +377,20 @@ void fbotex_uninit(struct fbotex *fbo)
         gl->DeleteTextures(1, &fbo->texture);
         *fbo = (struct fbotex) {0};
     }
+}
+
+// Mark framebuffer contents as unneeded.
+void fbotex_invalidate(struct fbotex *fbo)
+{
+    GL *gl = fbo->gl;
+
+    if (!fbo->fbo || !gl->InvalidateFramebuffer)
+        return;
+
+    gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
+    gl->InvalidateFramebuffer(GL_FRAMEBUFFER, 1,
+                              (GLenum[]){GL_COLOR_ATTACHMENT0});
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 // Standard parallel 2D projection, except y1 < y0 means that the coordinate

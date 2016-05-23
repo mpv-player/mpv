@@ -84,6 +84,7 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
 #define FBOTEX_FUZZY_H 2
 #define FBOTEX_FUZZY (FBOTEX_FUZZY_W | FBOTEX_FUZZY_H)
 void fbotex_set_filter(struct fbotex *fbo, GLenum gl_filter);
+void fbotex_invalidate(struct fbotex *fbo);
 
 // A 3x2 matrix, with the translation part separate.
 struct gl_transform {
