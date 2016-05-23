@@ -181,8 +181,8 @@ static bool upload(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
         }
     }
 
-    glUploadTex(gl, GL_TEXTURE_2D, fmt->format, fmt->type, texdata, stride,
-                bb[0].x, bb[0].y, bb[1].x - bb[0].x, bb[1].y - bb[0].y, 0);
+    gl_upload_tex(gl, GL_TEXTURE_2D, fmt->format, fmt->type, texdata, stride,
+                  bb[0].x, bb[0].y, bb[1].x - bb[0].x, bb[1].y - bb[0].y);
 
     if (pbo)
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);

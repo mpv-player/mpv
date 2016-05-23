@@ -67,25 +67,22 @@ static int get_alignment(int stride)
 //  format, type: texture parameters
 //  dataptr, stride: image data
 //  x, y, width, height: part of the image to upload
-//  slice: height of an upload slice, 0 for all at once
-void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
-                 const void *dataptr, int stride,
-                 int x, int y, int w, int h, int slice)
+void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
+                   const void *dataptr, int stride,
+                   int x, int y, int w, int h)
 {
     int bpp = gl_bytes_per_pixel(format, type);
     const uint8_t *data = dataptr;
     int y_max = y + h;
     if (w <= 0 || h <= 0 || !bpp)
         return;
-    if (slice <= 0)
-        slice = h;
     if (stride < 0) {
         data += (h - 1) * stride;
         stride = -stride;
     }
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, get_alignment(stride));
-    bool use_rowlength = slice > 1 && (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH);
-    if (use_rowlength) {
+    int slice = h;
+    if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH) {
         // this is not always correct, but should work for MPlayer
         gl->PixelStorei(GL_UNPACK_ROW_LENGTH, stride / bpp);
     } else {
@@ -98,7 +95,7 @@ void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
     }
     if (y < y_max)
         gl->TexSubImage2D(target, 0, x, y, w, y_max - y, format, type, data);
-    if (use_rowlength)
+    if (gl->mpgl_caps & MPGL_CAP_ROW_LENGTH)
         gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 }

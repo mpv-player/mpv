@@ -2956,8 +2956,8 @@ static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
             gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
         gl->ActiveTexture(GL_TEXTURE0 + n);
         gl->BindTexture(plane->gl_target, plane->gl_texture);
-        glUploadTex(gl, plane->gl_target, plane->gl_format, plane->gl_type,
-                    mpi->planes[n], mpi->stride[n], 0, 0, plane->w, plane->h, 0);
+        gl_upload_tex(gl, plane->gl_target, plane->gl_format, plane->gl_type,
+                      mpi->planes[n], mpi->stride[n], 0, 0, plane->w, plane->h);
     }
     gl->ActiveTexture(GL_TEXTURE0);
     if (pbo)

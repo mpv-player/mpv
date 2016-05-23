@@ -26,9 +26,9 @@ struct mp_log;
 
 void glCheckError(GL *gl, struct mp_log *log, const char *info);
 
-void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
-                 const void *dataptr, int stride,
-                 int x, int y, int w, int h, int slice);
+void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
+                   const void *dataptr, int stride,
+                   int x, int y, int w, int h);
 
 mp_image_t *glGetWindowScreenshot(GL *gl);
 
