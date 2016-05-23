@@ -656,9 +656,12 @@ Video
         either BT.601 or BT.709, a forced but correct RGB conversion is
         performed. Otherwise, the result will be incorrect.
 
-        ``dxva2`` is not safe. It uses either BT.601 or BT.709 for forced RGB
-        conversion, and which colorspace is used is driver-dependent. This can
-        give incorrect results even with completely ordinary video sources.
+        ``dxva2`` is not safe. It appears to always use BT.601 for forced RGB
+        conversion, but actual behavior depends on the GPU drivers. Some drivers
+        appear to convert to limited range RGB, which gives a faded appearance.
+        In addition to driver-specific behavior, global system settings might
+        affect this additionally. This can give incorrect results even with
+        completely ordinary video sources.
 
         All other methods, in particular the copy-back methods (like
         ``dxva2-copy`` etc.) are either fully safe, or not worse than software
