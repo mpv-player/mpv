@@ -24,13 +24,13 @@
 
 struct mp_log;
 
-void glCheckError(GL *gl, struct mp_log *log, const char *info);
+void gl_check_error(GL *gl, struct mp_log *log, const char *info);
 
 void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
                    const void *dataptr, int stride,
                    int x, int y, int w, int h);
 
-mp_image_t *glGetWindowScreenshot(GL *gl);
+mp_image_t *gl_read_window_contents(GL *gl);
 
 const char* mp_sampler_type(GLenum texture_target);
 

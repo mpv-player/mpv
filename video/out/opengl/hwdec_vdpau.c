@@ -76,14 +76,14 @@ static void destroy_objects(struct gl_hwdec *hw)
     }
     p->vdp_surface = VDP_INVALID_HANDLE;
 
-    glCheckError(gl, hw->log, "Before uninitializing OpenGL interop");
+    gl_check_error(gl, hw->log, "Before uninitializing OpenGL interop");
 
     if (p->vdpgl_initialized)
         gl->VDPAUFiniNV();
 
     p->vdpgl_initialized = false;
 
-    glCheckError(gl, hw->log, "After uninitializing OpenGL interop");
+    gl_check_error(gl, hw->log, "After uninitializing OpenGL interop");
 }
 
 static void destroy(struct gl_hwdec *hw)
@@ -164,7 +164,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 
     gl->VDPAUSurfaceAccessNV(p->vdpgl_surface, GL_READ_ONLY);
 
-    glCheckError(gl, hw->log, "After initializing vdpau OpenGL interop");
+    gl_check_error(gl, hw->log, "After initializing vdpau OpenGL interop");
 
     params->imgfmt = IMGFMT_RGB0;
 

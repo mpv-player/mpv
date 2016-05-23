@@ -40,7 +40,7 @@ static const char *gl_error_to_string(GLenum error)
     }
 }
 
-void glCheckError(GL *gl, struct mp_log *log, const char *info)
+void gl_check_error(GL *gl, struct mp_log *log, const char *info)
 {
     for (;;) {
         GLenum error = gl->GetError();
@@ -100,7 +100,7 @@ void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 }
 
-mp_image_t *glGetWindowScreenshot(GL *gl)
+mp_image_t *gl_read_window_contents(GL *gl)
 {
     if (gl->es)
         return NULL; // ES can't read from front buffer
@@ -307,7 +307,7 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
 
     fbotex_set_filter(fbo, filter ? filter : GL_LINEAR);
 
-    glCheckError(gl, log, "after creating framebuffer texture");
+    gl_check_error(gl, log, "after creating framebuffer texture");
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo->fbo);
     gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
@@ -322,7 +322,7 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glCheckError(gl, log, "after creating framebuffer");
+    gl_check_error(gl, log, "after creating framebuffer");
 
     return res;
 }

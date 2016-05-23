@@ -523,7 +523,7 @@ static struct bstr load_cached_file(struct gl_video *p, const char *path)
 static void debug_check_gl(struct gl_video *p, const char *msg)
 {
     if (p->gl_debug)
-        glCheckError(p->gl, p->log, msg);
+        gl_check_error(p->gl, p->log, msg);
 }
 
 void gl_video_set_debug(struct gl_video *p, bool enable)
@@ -2983,7 +2983,7 @@ static bool test_fbo(struct gl_video *p, GLint format)
         success = true;
     }
     fbotex_uninit(&fbo);
-    glCheckError(gl, p->log, "FBO test");
+    gl_check_error(gl, p->log, "FBO test");
     return success;
 }
 
