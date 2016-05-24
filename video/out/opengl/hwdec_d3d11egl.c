@@ -39,6 +39,7 @@ struct priv {
     struct mp_hwdec_ctx hwctx;
 
     ID3D11Device *d3d11_device;
+    ID3D11DeviceContext *device_ctx;
     ID3D11VideoDevice *video_dev;
     ID3D11VideoContext *video_ctx;
 
@@ -141,6 +142,10 @@ static void destroy(struct gl_hwdec *hw)
     if (p->video_dev)
         ID3D11VideoDevice_Release(p->video_dev);
     p->video_dev = NULL;
+
+    if (p->device_ctx)
+        ID3D11DeviceContext_Release(p->device_ctx);
+    p->device_ctx = NULL;
 
     if (p->d3d11_device)
         ID3D11Device_Release(p->d3d11_device);
@@ -270,13 +275,11 @@ static int create(struct gl_hwdec *hw)
     if (FAILED(hr))
         goto fail;
 
-    ID3D11DeviceContext *device_ctx;
-    ID3D11Device_GetImmediateContext(p->d3d11_device, &device_ctx);
-    if (!device_ctx)
+    ID3D11Device_GetImmediateContext(p->d3d11_device, &p->device_ctx);
+    if (!p->device_ctx)
         goto fail;
-    hr = ID3D11DeviceContext_QueryInterface(device_ctx, &IID_ID3D11VideoContext,
+    hr = ID3D11DeviceContext_QueryInterface(p->device_ctx, &IID_ID3D11VideoContext,
                                             (void **)&p->video_ctx);
-    ID3D11DeviceContext_Release(device_ctx);
     if (FAILED(hr))
         goto fail;
 
@@ -575,6 +578,11 @@ static int map_frame_video_proc(struct gl_hwdec *hw, ID3D11Texture2D *d3d_tex,
         MP_ERR(hw, "VideoProcessorBlt failed.\n");
         return -1;
     }
+
+    // Make sure the texture is updated correctly on the shared context.
+    // I'm not sure if this is needed if the shared context is the same
+    // context. (ANGLE API does not allow not using sharing.)
+    ID3D11DeviceContext_Flush(p->device_ctx);
 
     *out_frame = (struct gl_hwdec_frame){
         .planes = {
