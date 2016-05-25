@@ -150,10 +150,12 @@ static inline int get_deint_field(struct vf_priv_s *p, int i,
     return !!(mpi->fields & MP_IMGFIELD_TOP_FIRST) ^ i ? VA_TOP_FIELD : VA_BOTTOM_FIELD;
 }
 
-static struct mp_image *render(struct vf_instance *vf, struct mp_image *in,
-                               unsigned int flags)
+static struct mp_image *render(struct vf_instance *vf, unsigned int flags)
 {
     struct vf_priv_s *p = vf->priv;
+
+    struct mp_image *in = mp_refqueue_get(p->queue, 0);
+
     VASurfaceID in_id = va_surface_id(in);
     if (!p->pipe.filters || in_id == VA_INVALID_ID)
         return NULL;
@@ -250,7 +252,7 @@ static void output_frames(struct vf_instance *vf)
         vf_add_output_frame(vf, mp_image_new_ref(in));
         return;
     }
-    struct mp_image *out1 = render(vf, in, field | csp);
+    struct mp_image *out1 = render(vf, field | csp);
     if (!out1) { // cannot render
         vf_add_output_frame(vf, mp_image_new_ref(in));
         return;
@@ -263,7 +265,7 @@ static void output_frames(struct vf_instance *vf)
     double next_pts = mp_refqueue_get_field_pts(p->queue, 1);
     if (next_pts == MP_NOPTS_VALUE) // no pts, skip it
         return;
-    struct mp_image *out2 = render(vf, in, get_deint_field(p, 1, in) | csp);
+    struct mp_image *out2 = render(vf, get_deint_field(p, 1, in) | csp);
     if (!out2) // cannot render
         return;
     mp_image_copy_attributes(out2, in);
