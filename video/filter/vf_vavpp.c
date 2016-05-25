@@ -23,6 +23,7 @@
 #include "config.h"
 #include "options/options.h"
 #include "vf.h"
+#include "refqueue.h"
 #include "video/vaapi.h"
 #include "video/hwdec.h"
 #include "video/mp_image_pool.h"
@@ -39,13 +40,6 @@ struct surface_refs {
     VASurfaceID *surfaces;
     int num_surfaces;
 };
-
-static void add_surface(void *ta_ctx, struct surface_refs *refs, struct mp_image *s)
-{
-    VASurfaceID id = va_surface_id(s);
-    if (id != VA_INVALID_ID)
-        MP_TARRAY_APPEND(ta_ctx, refs->surfaces, refs->num_surfaces, id);
-}
 
 struct pipeline {
     VABufferID *filters;
@@ -71,16 +65,7 @@ struct vf_priv_s {
     struct mp_image_pool *pool;
     int current_rt_format;
 
-    int needed_future_frames;
-    int needed_past_frames;
-
-    // Queue of input frames, used to determine past/current/future frames.
-    // queue[0] is the newest frame, queue[num_queue - 1] the oldest.
-    struct mp_image **queue;
-    int num_queue;
-    // queue[current_pos] is the current frame, unless current_pos is not a
-    // valid index.
-    int current_pos;
+    struct mp_refqueue *queue;
 };
 
 static const struct vf_priv_s vf_priv_default = {
@@ -89,6 +74,18 @@ static const struct vf_priv_s vf_priv_default = {
     .deint_type = 2,
     .interlaced_only = 1,
 };
+
+static void add_surfaces(struct vf_priv_s *p, struct surface_refs *refs, int dir)
+{
+    for (int n = 0; ; n++) {
+        struct mp_image *s = mp_refqueue_get(p->queue, (1 + n) * dir);
+        if (!s)
+            break;
+        VASurfaceID id = va_surface_id(s);
+        if (id != VA_INVALID_ID)
+            MP_TARRAY_APPEND(p, refs->surfaces, refs->num_surfaces, id);
+    }
+}
 
 // The array items must match with the "deint" suboption values.
 static const int deint_algorithm[] = {
@@ -103,10 +100,7 @@ static const int deint_algorithm[] = {
 static void flush_frames(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
-    for (int n = 0; n < p->num_queue; n++)
-        talloc_free(p->queue[n]);
-    p->num_queue = 0;
-    p->current_pos = -1;
+    mp_refqueue_flush(p->queue);
 }
 
 static bool update_pipeline(struct vf_instance *vf, bool deint)
@@ -139,8 +133,8 @@ static bool update_pipeline(struct vf_instance *vf, bool deint)
     p->pipe.num_filters = num_filters;
     p->pipe.num_input_colors = caps.num_input_color_standards;
     p->pipe.num_output_colors = caps.num_output_color_standards;
-    p->needed_future_frames = caps.num_forward_references;
-    p->needed_past_frames = caps.num_backward_references;
+    mp_refqueue_set_refs(p->queue, caps.num_backward_references,
+                                   caps.num_forward_references);
     return true;
 }
 
@@ -211,19 +205,11 @@ static struct mp_image *render(struct vf_instance *vf, struct mp_image *in,
     param->filters = p->pipe.filters;
     param->num_filters = p->pipe.num_filters;
 
-    for (int n = 0; n < p->needed_future_frames; n++) {
-        int idx = p->current_pos - 1 - n;
-        if (idx >= 0 && idx < p->num_queue)
-            add_surface(p, &p->pipe.forward, p->queue[idx]);
-    }
+    add_surfaces(p, &p->pipe.forward, 1);
     param->forward_references = p->pipe.forward.surfaces;
     param->num_forward_references = p->pipe.forward.num_surfaces;
 
-    for (int n = 0; n < p->needed_past_frames; n++) {
-        int idx = p->current_pos + 1 + n;
-        if (idx >= 0 && idx < p->num_queue)
-            add_surface(p, &p->pipe.backward, p->queue[idx]);
-    }
+    add_surfaces(p, &p->pipe.backward, -1);
     param->backward_references = p->pipe.backward.surfaces;
     param->num_backward_references = p->pipe.backward.num_surfaces;
 
@@ -248,9 +234,7 @@ static void output_frames(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
 
-    struct mp_image *in = p->queue[p->current_pos];
-    double prev_pts = p->current_pos + 1 < p->num_queue
-        ? p->queue[p->current_pos + 1]->pts : MP_NOPTS_VALUE;
+    struct mp_image *in = mp_refqueue_get(p->queue, 0);
 
     bool deint = p->do_deint && p->deint_type > 0;
     if (!update_pipeline(vf, deint) || !p->pipe.filters) { // no filtering
@@ -273,14 +257,14 @@ static void output_frames(struct vf_instance *vf)
     // first-field only
     if (field == VA_FRAME_PICTURE || (p->do_deint && p->deint_type < 2))
         return;
-    double add = (in->pts - prev_pts) * 0.5;
-    if (prev_pts == MP_NOPTS_VALUE || add <= 0.0 || add > 0.5) // no pts, skip it
+    double next_pts = mp_refqueue_get_field_pts(p->queue, 1);
+    if (next_pts == MP_NOPTS_VALUE) // no pts, skip it
         return;
     struct mp_image *out2 = render(vf, in, get_deint_field(p, 1, in) | csp);
     if (!out2) // cannot render
         return;
     mp_image_copy_attributes(out2, in);
-    out2->pts = in->pts + add;
+    out2->pts = next_pts;
     vf_add_output_frame(vf, out2);
     return;
 }
@@ -311,27 +295,13 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *in)
             return -1;
     }
 
-    if (in) {
-        MP_TARRAY_INSERT_AT(p, p->queue, p->num_queue, 0, in);
-        p->current_pos++;
-        assert(p->num_queue != 1 || p->current_pos == 0);
-    }
+    mp_refqueue_add_input(p->queue, in);
 
-    // Discard unneeded past frames.
-    // Note that we keep at least 1 past frame (for PTS calculations).
-    while (p->num_queue - (p->current_pos + 1) > MPMAX(p->needed_past_frames, 1)) {
-        assert(p->num_queue > 0);
-        talloc_free(p->queue[p->num_queue - 1]);
-        p->num_queue--;
-    }
-
-    if (p->current_pos < p->needed_future_frames && in)
-        return 0; // wait until future frames have been filled
-
-    if (p->current_pos >= 0 && p->current_pos < p->num_queue) {
+    if (mp_refqueue_has_output(p->queue)) {
         output_frames(vf);
-        p->current_pos--;
+        mp_refqueue_next(p->queue);
     }
+
     return 0;
 }
 
@@ -373,6 +343,7 @@ static void uninit(struct vf_instance *vf)
         vaDestroyConfig(p->display, p->config);
     talloc_free(p->pool);
     flush_frames(vf);
+    mp_refqueue_free(p->queue);
 }
 
 static int query_format(struct vf_instance *vf, unsigned int imgfmt)
@@ -488,6 +459,8 @@ static int vf_open(vf_instance_t *vf)
     vf->query_format = query_format;
     vf->uninit = uninit;
     vf->control = control;
+
+    p->queue = mp_refqueue_alloc();
 
     p->va = hwdec_devices_load(vf->hwdec_devs, HWDEC_VAAPI);
     if (!p->va)

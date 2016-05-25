@@ -297,6 +297,7 @@ def build(ctx):
         ( "video/decode/vd_lavc.c" ),
         ( "video/decode/videotoolbox.c",         "videotoolbox-hwaccel" ),
         ( "video/decode/vdpau.c",                "vdpau-hwaccel" ),
+        ( "video/filter/refqueue.c" ),
         ( "video/filter/vf.c" ),
         ( "video/filter/vf_buffer.c" ),
         ( "video/filter/vf_crop.c" ),
