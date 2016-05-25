@@ -27,7 +27,6 @@ struct mp_refqueue {
     int needed_future_frames;
 
     bool eof;
-    double past_pts;
 
     // Queue of input frames, used to determine past/current/future frames.
     // queue[0] is the newest frame, queue[num_queue - 1] the oldest.
@@ -54,7 +53,7 @@ void mp_refqueue_set_refs(struct mp_refqueue *q, int past, int future)
 {
     assert(past >= 0 && future >= 0);
     q->needed_past_frames = past;
-    q->needed_future_frames = future;
+    q->needed_future_frames = MPMAX(future, 1); // at least 1 for determining PTS
 }
 
 // Discard all state.
@@ -65,7 +64,6 @@ void mp_refqueue_flush(struct mp_refqueue *q)
     q->num_queue = 0;
     q->pos = -1;
     q->eof = false;
-    q->past_pts = MP_NOPTS_VALUE;
 }
 
 // Add a new frame to the queue. (Call mp_refqueue_next() to advance the
@@ -100,8 +98,6 @@ void mp_refqueue_next(struct mp_refqueue *q)
 {
     if (!mp_refqueue_has_output(q))
         return;
-
-    q->past_pts = q->queue[q->pos]->pts;
 
     q->pos--;
 
@@ -141,10 +137,14 @@ double mp_refqueue_get_field_pts(struct mp_refqueue *q, int field)
     if (field == 0 || pts == MP_NOPTS_VALUE)
         return pts;
 
-    if (q->past_pts == MP_NOPTS_VALUE)
+    if (q->pos == 0)
         return MP_NOPTS_VALUE;
 
-    double frametime = pts - q->past_pts;
+    double next_pts = q->queue[q->pos - 1]->pts;
+    if (next_pts == MP_NOPTS_VALUE)
+        return MP_NOPTS_VALUE;
+
+    double frametime = next_pts - pts;
     if (frametime <= 0.0 || frametime >= 1.0)
         return MP_NOPTS_VALUE;
 
