@@ -25,7 +25,9 @@
 struct mp_refqueue {
     int needed_past_frames;
     int needed_future_frames;
+    int flags;
 
+    bool second_field; // current frame has to output a second field yet
     bool eof;
 
     // Queue of input frames, used to determine past/current/future frames.
@@ -56,6 +58,50 @@ void mp_refqueue_set_refs(struct mp_refqueue *q, int past, int future)
     q->needed_future_frames = MPMAX(future, 1); // at least 1 for determining PTS
 }
 
+// MP_MODE_* flags
+void mp_refqueue_set_mode(struct mp_refqueue *q, int flags)
+{
+    q->flags = flags;
+}
+
+// Whether the current frame should be deinterlaced.
+bool mp_refqueue_should_deint(struct mp_refqueue *q)
+{
+    if (!mp_refqueue_has_output(q))
+        return false;
+
+    return (q->queue[q->pos]->fields & MP_IMGFIELD_INTERLACED) ||
+           !(q->flags & MP_MODE_INTERLACED_ONLY);
+}
+
+// Whether the current output frame is marked as interlaced.
+bool mp_refqueue_is_interlaced(struct mp_refqueue *q)
+{
+    if (!mp_refqueue_has_output(q))
+        return false;
+
+    return q->queue[q->pos]->fields & MP_IMGFIELD_INTERLACED;
+}
+
+// Whether the current output frame (field) is the top field, bottom field
+// otherwise. (Assumes the caller forces deinterlacing.)
+bool mp_refqueue_is_top_field(struct mp_refqueue *q)
+{
+    if (!mp_refqueue_has_output(q))
+        return false;
+
+    return !!(q->queue[q->pos]->fields & MP_IMGFIELD_TOP_FIRST) ^ q->second_field;
+}
+
+// Whether top-field-first mode is enabled.
+bool mp_refqueue_top_field_first(struct mp_refqueue *q)
+{
+    if (!mp_refqueue_has_output(q))
+        return false;
+
+    return q->queue[q->pos]->fields & MP_IMGFIELD_TOP_FIRST;
+}
+
 // Discard all state.
 void mp_refqueue_flush(struct mp_refqueue *q)
 {
@@ -63,6 +109,7 @@ void mp_refqueue_flush(struct mp_refqueue *q)
         talloc_free(q->queue[n]);
     q->num_queue = 0;
     q->pos = -1;
+    q->second_field = false;
     q->eof = false;
 }
 
@@ -93,13 +140,54 @@ bool mp_refqueue_has_output(struct mp_refqueue *q)
     return q->pos >= 0 && !mp_refqueue_need_input(q);
 }
 
-// Advance current frame by 1 (or 2 fields if interlaced).
+static bool output_next_field(struct mp_refqueue *q)
+{
+    if (q->second_field)
+        return false;
+    if (!(q->flags & MP_MODE_OUTPUT_FIELDS))
+        return false;
+    if (!(q->queue[q->pos]->fields & MP_IMGFIELD_INTERLACED) &&
+        (q->flags & MP_MODE_INTERLACED_ONLY))
+        return false;
+
+    assert(q->pos >= 0);
+
+    // If there's no (reasonable) timestamp, also skip the field.
+    if (q->pos == 0)
+        return false;
+
+    double pts = q->queue[q->pos]->pts;
+    double next_pts = q->queue[q->pos - 1]->pts;
+    if (pts == MP_NOPTS_VALUE || next_pts == MP_NOPTS_VALUE)
+        return false;
+
+    double frametime = next_pts - pts;
+    if (frametime <= 0.0 || frametime >= 1.0)
+        return false;
+
+    q->queue[q->pos]->pts = pts + frametime / 2;
+    q->second_field = true;
+    return true;
+}
+
+// Advance current field, depending on interlace flags.
+void mp_refqueue_next_field(struct mp_refqueue *q)
+{
+    if (!mp_refqueue_has_output(q))
+        return;
+
+    if (!output_next_field(q))
+        mp_refqueue_next(q);
+}
+
+// Advance to next input frame (skips fields even in field output mode).
 void mp_refqueue_next(struct mp_refqueue *q)
 {
     if (!mp_refqueue_has_output(q))
         return;
 
     q->pos--;
+    q->second_field = false;
 
     assert(q->pos >= -1 && q->pos < q->num_queue);
 
@@ -123,31 +211,3 @@ struct mp_image *mp_refqueue_get(struct mp_refqueue *q, int pos)
     int i = q->pos - pos;
     return i >= 0 && i < q->num_queue ? q->queue[i] : NULL;
 }
-
-// Get the pts of field 0/1 (0 being the first to output).
-double mp_refqueue_get_field_pts(struct mp_refqueue *q, int field)
-{
-    assert(field == 0 || field == 1);
-
-    if (q->pos < 0)
-        return MP_NOPTS_VALUE;
-
-    double pts = q->queue[q->pos]->pts;
-
-    if (field == 0 || pts == MP_NOPTS_VALUE)
-        return pts;
-
-    if (q->pos == 0)
-        return MP_NOPTS_VALUE;
-
-    double next_pts = q->queue[q->pos - 1]->pts;
-    if (next_pts == MP_NOPTS_VALUE)
-        return MP_NOPTS_VALUE;
-
-    double frametime = next_pts - pts;
-    if (frametime <= 0.0 || frametime >= 1.0)
-        return MP_NOPTS_VALUE;
-
-    return pts + frametime / 2;
-}
-

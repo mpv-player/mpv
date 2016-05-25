@@ -136,39 +136,45 @@ static void update_pipeline(struct vf_instance *vf)
     p->pipe.num_output_colors = caps.num_output_color_standards;
     mp_refqueue_set_refs(p->queue, caps.num_backward_references,
                                    caps.num_forward_references);
+    mp_refqueue_set_mode(p->queue,
+        (p->deint_type >= 2 ? MP_MODE_OUTPUT_FIELDS : 0) |
+        (p->interlaced_only ? MP_MODE_INTERLACED_ONLY : 0));
     return;
 
 nodeint:
     mp_refqueue_set_refs(p->queue, 0, 0);
+    mp_refqueue_set_mode(p->queue, 0);
 }
 
-static inline int get_deint_field(struct vf_priv_s *p, int i,
-                                  struct mp_image *mpi)
-{
-    if (!p->do_deint || !(mpi->fields & MP_IMGFIELD_INTERLACED))
-        return VA_FRAME_PICTURE;
-    return !!(mpi->fields & MP_IMGFIELD_TOP_FIRST) ^ i ? VA_TOP_FIELD : VA_BOTTOM_FIELD;
-}
-
-static struct mp_image *render(struct vf_instance *vf, unsigned int flags)
+static struct mp_image *render(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
 
     struct mp_image *in = mp_refqueue_get(p->queue, 0);
+    struct mp_image *img = NULL;
+    bool need_end_picture = false;
+    bool success = false;
 
     VASurfaceID in_id = va_surface_id(in);
     if (!p->pipe.filters || in_id == VA_INVALID_ID)
-        return NULL;
+        goto cleanup;
 
     int r_w, r_h;
     va_surface_get_uncropped_size(in, &r_w, &r_h);
-    struct mp_image *img = mp_image_pool_get(p->pool, IMGFMT_VAAPI, r_w, r_h);
+    img = mp_image_pool_get(p->pool, IMGFMT_VAAPI, r_w, r_h);
     if (!img)
-        return NULL;
+        goto cleanup;
     mp_image_set_size(img, in->w, in->h);
+    mp_image_copy_attributes(img, in);
 
-    bool need_end_picture = false;
-    bool success = false;
+    unsigned int flags = va_get_colorspace_flag(p->params.colorspace);
+    if (!mp_refqueue_is_interlaced(p->queue)) {
+        flags |= VA_FRAME_PICTURE;
+    } else if (mp_refqueue_is_top_field(p->queue)) {
+        flags |= VA_TOP_FIELD;
+    } else {
+        flags |= VA_BOTTOM_FIELD;
+    }
 
     VASurfaceID id = va_surface_id(img);
     if (id == VA_INVALID_ID)
@@ -194,7 +200,7 @@ static struct mp_image *render(struct vf_instance *vf, unsigned int flags)
         goto cleanup;
 
     filter_params->flags = flags & VA_TOP_FIELD ? 0 : VA_DEINTERLACING_BOTTOM_FIELD;
-    if (!(in->fields & MP_IMGFIELD_TOP_FIRST))
+    if (!mp_refqueue_top_field_first(p->queue))
         filter_params->flags |= VA_DEINTERLACING_BOTTOM_FIELD_FIRST;
 
     vaUnmapBuffer(p->display, *(p->pipe.filters));
@@ -236,44 +242,6 @@ cleanup:
     return NULL;
 }
 
-static void output_frames(struct vf_instance *vf)
-{
-    struct vf_priv_s *p = vf->priv;
-
-    struct mp_image *in = mp_refqueue_get(p->queue, 0);
-
-    if (!p->pipe.num_filters) { // no filtering
-        vf_add_output_frame(vf, mp_image_new_ref(in));
-        return;
-    }
-    unsigned int csp = va_get_colorspace_flag(p->params.colorspace);
-    unsigned int field = get_deint_field(p, 0, in);
-    if (field == VA_FRAME_PICTURE && p->interlaced_only) {
-        vf_add_output_frame(vf, mp_image_new_ref(in));
-        return;
-    }
-    struct mp_image *out1 = render(vf, field | csp);
-    if (!out1) { // cannot render
-        vf_add_output_frame(vf, mp_image_new_ref(in));
-        return;
-    }
-    mp_image_copy_attributes(out1, in);
-    vf_add_output_frame(vf, out1);
-    // first-field only
-    if (field == VA_FRAME_PICTURE || (p->do_deint && p->deint_type < 2))
-        return;
-    double next_pts = mp_refqueue_get_field_pts(p->queue, 1);
-    if (next_pts == MP_NOPTS_VALUE) // no pts, skip it
-        return;
-    struct mp_image *out2 = render(vf, get_deint_field(p, 1, in) | csp);
-    if (!out2) // cannot render
-        return;
-    mp_image_copy_attributes(out2, in);
-    out2->pts = next_pts;
-    vf_add_output_frame(vf, out2);
-    return;
-}
-
 static struct mp_image *upload(struct vf_instance *vf, struct mp_image *in)
 {
     struct vf_priv_s *p = vf->priv;
@@ -303,12 +271,29 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *in)
     }
 
     mp_refqueue_add_input(p->queue, in);
+    return 0;
+}
 
-    if (mp_refqueue_has_output(p->queue)) {
-        output_frames(vf);
+static int filter_out(struct vf_instance *vf)
+{
+    struct vf_priv_s *p = vf->priv;
+
+    if (!mp_refqueue_has_output(p->queue))
+        return 0;
+
+    // no filtering
+    if (!p->pipe.num_filters || !mp_refqueue_should_deint(p->queue)) {
+        struct mp_image *in = mp_refqueue_get(p->queue, 0);
+        vf_add_output_frame(vf, mp_image_new_ref(in));
         mp_refqueue_next(p->queue);
+        return 0;
     }
 
+    struct mp_image *out = render(vf);
+    mp_refqueue_next_field(p->queue);
+    if (!out)
+        return -1; // cannot render
+    vf_add_output_frame(vf, out);
     return 0;
 }
 
@@ -463,6 +448,7 @@ static int vf_open(vf_instance_t *vf)
 
     vf->reconfig = reconfig;
     vf->filter_ext = filter_ext;
+    vf->filter_out = filter_out;
     vf->query_format = query_format;
     vf->uninit = uninit;
     vf->control = control;
