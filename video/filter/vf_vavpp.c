@@ -103,39 +103,43 @@ static void flush_frames(struct vf_instance *vf)
     mp_refqueue_flush(p->queue);
 }
 
-static bool update_pipeline(struct vf_instance *vf, bool deint)
+static void update_pipeline(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
     VABufferID *filters = p->buffers;
     int num_filters = p->num_buffers;
-    if (p->deint_type && !deint) {
+    if (p->deint_type && !p->do_deint) {
         filters++;
         num_filters--;
     }
     if (filters == p->pipe.filters && num_filters == p->pipe.num_filters)
-        return true;
+        return; /* cached state is correct */
     p->pipe.forward.num_surfaces = p->pipe.backward.num_surfaces = 0;
     p->pipe.num_input_colors = p->pipe.num_output_colors = 0;
     p->pipe.num_filters = 0;
     p->pipe.filters = NULL;
     if (!num_filters)
-        return false;
-    VAProcPipelineCaps caps;
-    caps.input_color_standards = p->pipe.input_colors;
-    caps.output_color_standards = p->pipe.output_colors;
-    caps.num_input_color_standards = VAProcColorStandardCount;
-    caps.num_output_color_standards = VAProcColorStandardCount;
+        goto nodeint;
+    VAProcPipelineCaps caps = {
+        .input_color_standards = p->pipe.input_colors,
+        .output_color_standards = p->pipe.output_colors,
+        .num_input_color_standards = VAProcColorStandardCount,
+        .num_output_color_standards = VAProcColorStandardCount,
+    };
     VAStatus status = vaQueryVideoProcPipelineCaps(p->display, p->context,
                                                    filters, num_filters, &caps);
     if (!check_error(vf, status, "vaQueryVideoProcPipelineCaps()"))
-        return false;
+        goto nodeint;
     p->pipe.filters = filters;
     p->pipe.num_filters = num_filters;
     p->pipe.num_input_colors = caps.num_input_color_standards;
     p->pipe.num_output_colors = caps.num_output_color_standards;
     mp_refqueue_set_refs(p->queue, caps.num_backward_references,
                                    caps.num_forward_references);
-    return true;
+    return;
+
+nodeint:
+    mp_refqueue_set_refs(p->queue, 0, 0);
 }
 
 static inline int get_deint_field(struct vf_priv_s *p, int i,
@@ -236,8 +240,7 @@ static void output_frames(struct vf_instance *vf)
 
     struct mp_image *in = mp_refqueue_get(p->queue, 0);
 
-    bool deint = p->do_deint && p->deint_type > 0;
-    if (!update_pipeline(vf, deint) || !p->pipe.filters) { // no filtering
+    if (!p->pipe.num_filters) { // no filtering
         vf_add_output_frame(vf, mp_image_new_ref(in));
         return;
     }
@@ -286,6 +289,8 @@ static struct mp_image *upload(struct vf_instance *vf, struct mp_image *in)
 static int filter_ext(struct vf_instance *vf, struct mp_image *in)
 {
     struct vf_priv_s *p = vf->priv;
+
+    update_pipeline(vf);
 
     if (in && in->imgfmt != IMGFMT_VAAPI) {
         struct mp_image *tmp = upload(vf, in);
