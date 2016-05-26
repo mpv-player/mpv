@@ -1674,6 +1674,9 @@ Property list
     Current position on playlist. The first entry is on position 0. Writing
     to the property will restart playback at the written entry.
 
+``playlist-pos-1`` (RW)
+    Same as ``playlist-pos``, but 1-based.
+
 ``playlist-count``
     Number of total playlist entries.
 

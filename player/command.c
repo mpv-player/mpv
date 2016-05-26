@@ -3136,8 +3136,8 @@ static int mp_property_dvb_channel_name(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_playlist_pos(void *ctx, struct m_property *prop,
-                                    int action, void *arg)
+static int mp_property_playlist_pos_x(void *ctx, struct m_property *prop,
+                                      int action, void *arg, int base)
 {
     MPContext *mpctx = ctx;
     struct playlist *pl = mpctx->playlist;
@@ -3149,11 +3149,12 @@ static int mp_property_playlist_pos(void *ctx, struct m_property *prop,
         int pos = playlist_entry_to_index(pl, pl->current);
         if (pos < 0)
             return M_PROPERTY_UNAVAILABLE;
-        *(int *)arg = pos;
+        *(int *)arg = pos + base;
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET: {
-        struct playlist_entry *e = playlist_entry_from_index(pl, *(int *)arg);
+        int pos = *(int *)arg - base;
+        struct playlist_entry *e = playlist_entry_from_index(pl, pos);
         if (!e)
             return M_PROPERTY_ERROR;
         mp_set_playlist_entry(mpctx, e);
@@ -3163,14 +3164,26 @@ static int mp_property_playlist_pos(void *ctx, struct m_property *prop,
         struct m_option opt = {
             .type = CONF_TYPE_INT,
             .flags = CONF_RANGE,
-            .min = 0,
-            .max = playlist_entry_count(pl) - 1,
+            .min = base,
+            .max = playlist_entry_count(pl) - 1 + base,
         };
         *(struct m_option *)arg = opt;
         return M_PROPERTY_OK;
     }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_playlist_pos(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    return mp_property_playlist_pos_x(ctx, prop, action, arg, 0);
+}
+
+static int mp_property_playlist_pos_1(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
+{
+    return mp_property_playlist_pos_x(ctx, prop, action, arg, 1);
 }
 
 static int get_playlist_entry(int item, int action, void *arg, void *ctx)
@@ -3695,6 +3708,7 @@ static const struct m_property mp_properties[] = {
 
     {"playlist", mp_property_playlist},
     {"playlist-pos", mp_property_playlist_pos},
+    {"playlist-pos-1", mp_property_playlist_pos_1},
     M_PROPERTY_ALIAS("playlist-count", "playlist/count"),
 
     // Audio
