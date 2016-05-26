@@ -132,42 +132,42 @@ static void superxbr_step_h(struct gl_shader_cache *sc,
     GLSLH(float hc = dot(h1+h2, ok)/2.0;)
 
     // Compute diagonal edge strength using diagonal mask
-    GLSLH(float d_edge = 0;)
+    GLSLH(float d_edge = 0.0;)
     for (int x = 0; x < 3; x++) {
         for (int y = 0; y < 3; y++) {
             if (mask->d1[x][y]) {
                 // 1-distance diagonal neighbours
-                GLSLHF("d_edge += %d * abs(i(%d,%d) - i(%d,%d));\n",
+                GLSLHF("d_edge += %d.0 * abs(i(%d,%d) - i(%d,%d));\n",
                        mask->d1[x][y], x+1, y, x, y+1);
-                GLSLHF("d_edge -= %d * abs(i(%d,%d) - i(%d,%d));\n",
+                GLSLHF("d_edge -= %d.0 * abs(i(%d,%d) - i(%d,%d));\n",
                        mask->d1[x][y], 3-y, x+1, 3-(y+1), x); // rotated
             }
             if (x < 2 && y < 2 && mask->d2[x][y]) {
                 // 2-distance diagonal neighbours
-                GLSLHF("d_edge += %d * abs(i(%d,%d) - i(%d,%d));\n",
+                GLSLHF("d_edge += %d.0 * abs(i(%d,%d) - i(%d,%d));\n",
                        mask->d2[x][y], x+2, y, x, y+2);
-                GLSLHF("d_edge -= %d * abs(i(%d,%d) - i(%d,%d));\n",
+                GLSLHF("d_edge -= %d.0 * abs(i(%d,%d) - i(%d,%d));\n",
                        mask->d2[x][y], 3-y, x+2, 3-(y+2), x); // rotated
             }
         }
     }
 
     // Compute orthogonal edge strength using orthogonal mask
-    GLSLH(float o_edge = 0;)
+    GLSLH(float o_edge = 0.0;)
     for (int x = 1; x < 3; x++) {
         for (int y = 0; y < 3; y++) {
             if (mask->o1[y]) {
                 // 1-distance neighbours
-                GLSLHF("o_edge += %d * abs(i(%d,%d) - i(%d,%d));\n",
+                GLSLHF("o_edge += %d.0 * abs(i(%d,%d) - i(%d,%d));\n",
                        mask->o1[y], x, y, x, y+1); // vertical
-                GLSLHF("o_edge -= %d * abs(i(%d,%d) - i(%d,%d));\n",
+                GLSLHF("o_edge -= %d.0 * abs(i(%d,%d) - i(%d,%d));\n",
                        mask->o1[y], y, x, y+1, x); // horizontal
             }
             if (y < 2 && mask->o2[y]) {
                 // 2-distance neighbours
-                GLSLHF("o_edge += %d * abs(i(%d,%d) - i(%d,%d));\n",
+                GLSLHF("o_edge += %d.0 * abs(i(%d,%d) - i(%d,%d));\n",
                        mask->o2[y], x, y, x, y+2); // vertical
-                GLSLHF("o_edge -= %d * abs(i(%d,%d) - i(%d,%d));\n",
+                GLSLHF("o_edge -= %d.0 * abs(i(%d,%d) - i(%d,%d));\n",
                        mask->o2[x], y, x, y+2, x); // horizontal
             }
         }
@@ -220,7 +220,7 @@ void pass_superxbr(struct gl_shader_cache *sc, int step,
         // Load the input samples
         GLSLH(for (int x = 0; x < 4; x++))
         GLSLH(for (int y = 0; y < 4; y++))
-        GLSLH(i(x,y) = HOOKED_texOff(vec2(x-1.25, y-1.25)).x;)
+        GLSLH(i(x,y) = HOOKED_texOff(vec2(float(x)-1.25, float(y)-1.25)).x;)
     } else {
         *transform = (struct gl_transform){{{1.0,0.0}, {0.0,1.0}}, {0.0,0.0}};
 
