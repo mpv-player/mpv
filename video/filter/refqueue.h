@@ -20,8 +20,9 @@ void mp_refqueue_next_field(struct mp_refqueue *q);
 struct mp_image *mp_refqueue_get(struct mp_refqueue *q, int pos);
 
 enum {
-    MP_MODE_OUTPUT_FIELDS = (1 << 0),   // output fields separately
-    MP_MODE_INTERLACED_ONLY = (1 << 1), // only deinterlace marked frames
+    MP_MODE_DEINT = (1 << 0),           // deinterlacing enabled
+    MP_MODE_OUTPUT_FIELDS = (1 << 1),   // output fields separately
+    MP_MODE_INTERLACED_ONLY = (1 << 2), // only deinterlace marked frames
 };
 
 void mp_refqueue_set_mode(struct mp_refqueue *q, int flags);
@@ -29,5 +30,6 @@ bool mp_refqueue_should_deint(struct mp_refqueue *q);
 bool mp_refqueue_is_interlaced(struct mp_refqueue *q);
 bool mp_refqueue_is_top_field(struct mp_refqueue *q);
 bool mp_refqueue_top_field_first(struct mp_refqueue *q);
+struct mp_image *mp_refqueue_get_field(struct mp_refqueue *q, int pos);
 
 #endif

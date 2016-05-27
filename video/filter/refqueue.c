@@ -67,7 +67,7 @@ void mp_refqueue_set_mode(struct mp_refqueue *q, int flags)
 // Whether the current frame should be deinterlaced.
 bool mp_refqueue_should_deint(struct mp_refqueue *q)
 {
-    if (!mp_refqueue_has_output(q))
+    if (!mp_refqueue_has_output(q) || !(q->flags & MP_MODE_DEINT))
         return false;
 
     return (q->queue[q->pos]->fields & MP_IMGFIELD_INTERLACED) ||
@@ -146,8 +146,7 @@ static bool output_next_field(struct mp_refqueue *q)
         return false;
     if (!(q->flags & MP_MODE_OUTPUT_FIELDS))
         return false;
-    if (!(q->queue[q->pos]->fields & MP_IMGFIELD_INTERLACED) &&
-        (q->flags & MP_MODE_INTERLACED_ONLY))
+    if (!mp_refqueue_should_deint(q))
         return false;
 
     assert(q->pos >= 0);
@@ -210,4 +209,16 @@ struct mp_image *mp_refqueue_get(struct mp_refqueue *q, int pos)
 {
     int i = q->pos - pos;
     return i >= 0 && i < q->num_queue ? q->queue[i] : NULL;
+}
+
+// Same as mp_refqueue_get(), but return the frame which contains a field
+// relative to the current field's position.
+struct mp_image *mp_refqueue_get_field(struct mp_refqueue *q, int pos)
+{
+    // If the current field is the second field (conceptually), then pos=1
+    // needs to get the next frame. Similarly, pos=-1 needs to get the current
+    // frame, so round towards negative infinity.
+    int round = mp_refqueue_top_field_first(q) != mp_refqueue_is_top_field(q);
+    int frame = (pos < 0 ? pos - (1 - round) : pos + round) / 2;
+    return mp_refqueue_get(q, frame);
 }

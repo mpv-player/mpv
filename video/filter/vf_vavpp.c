@@ -137,6 +137,7 @@ static void update_pipeline(struct vf_instance *vf)
     mp_refqueue_set_refs(p->queue, caps.num_backward_references,
                                    caps.num_forward_references);
     mp_refqueue_set_mode(p->queue,
+        (p->do_deint ? MP_MODE_DEINT : 0) |
         (p->deint_type >= 2 ? MP_MODE_OUTPUT_FIELDS : 0) |
         (p->interlaced_only ? MP_MODE_INTERLACED_ONLY : 0));
     return;
