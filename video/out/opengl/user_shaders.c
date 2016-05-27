@@ -82,6 +82,14 @@ bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
     int hook_idx = 0;
     int bind_idx = 0;
 
+    // Skip all garbage (e.g. comments) before the first header
+    int pos = bstr_find(*body, bstr0("//!"));
+    if (pos < 0) {
+        mp_warn(log, "Shader appears to contain no passes!\n");
+        return false;
+    }
+    *body = bstr_cut(*body, pos);
+
     // First parse all the headers
     while (true) {
         struct bstr rest;
