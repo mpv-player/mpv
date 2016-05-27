@@ -902,8 +902,12 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     ADD(header, "#version %d%s\n", gl->glsl_version, gl->es >= 300 ? " es" : "");
     for (int n = 0; n < sc->num_exts; n++)
         ADD(header, "#extension %s : enable\n", sc->exts[n]);
-    if (gl->es)
+    if (gl->es) {
         ADD(header, "precision mediump float;\n");
+        ADD(header, "precision mediump sampler2D;\n");
+        if (gl->mpgl_caps & MPGL_CAP_3D_TEX)
+            ADD(header, "precision mediump sampler3D;\n");
+    }
     ADD_BSTR(header, sc->prelude_text);
     char *vert_in = gl->glsl_version >= 130 ? "in" : "attribute";
     char *vert_out = gl->glsl_version >= 130 ? "out" : "varying";

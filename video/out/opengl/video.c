@@ -3027,6 +3027,7 @@ static void check_gl_features(struct gl_video *p)
     bool have_3d_tex = gl->mpgl_caps & MPGL_CAP_3D_TEX;
     bool have_mglsl = gl->glsl_version >= 130; // modern GLSL (1st class arrays etc.)
     bool have_texrg = gl->mpgl_caps & MPGL_CAP_TEX_RG;
+    bool have_tex16 = !gl->es || (gl->mpgl_caps & MPGL_CAP_EXT16);
 
     const GLint auto_fbo_fmts[] = {GL_RGBA16, GL_RGBA16F, GL_RGB10_A2,
                                    GL_RGBA8, 0};
@@ -3106,9 +3107,9 @@ static void check_gl_features(struct gl_video *p)
 
     // GLES3 doesn't provide filtered 16 bit integer textures
     // GLES2 doesn't even provide 3D textures
-    if (p->use_lut_3d && (!have_3d_tex || gl->es)) {
+    if (p->use_lut_3d && (!have_3d_tex || !have_tex16)) {
         p->use_lut_3d = false;
-        MP_WARN(p, "Disabling color management (GLES unsupported).\n");
+        MP_WARN(p, "Disabling color management (no RGB16 3D textures).\n");
     }
 
     int use_cms = p->opts.target_prim != MP_CSP_PRIM_AUTO ||
