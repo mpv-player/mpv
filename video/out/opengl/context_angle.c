@@ -158,6 +158,10 @@ static int angle_init(struct MPGLContext *ctx, int flags)
         goto fail;
     }
 
+    const char *exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
+    if (exts)
+        MP_DBG(ctx->vo, "EGL extensions: %s\n", exts);
+
     eglBindAPI(EGL_OPENGL_ES_API);
     if (eglGetError() != EGL_SUCCESS) {
         MP_FATAL(vo, "Couldn't bind GLES API\n");
@@ -168,24 +172,37 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     if (!config)
         goto fail;
 
+    int window_attribs_len = 0;
     EGLint *window_attribs = NULL;
-    EGLint window_attribs_flip[] = {
-        EGL_SURFACE_ORIENTATION_ANGLE, EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE,
-        EGL_NONE
-    };
+
     EGLint flip_val;
     if (eglGetConfigAttrib(p->egl_display, config,
                            EGL_OPTIMAL_SURFACE_ORIENTATION_ANGLE, &flip_val))
     {
         if (flip_val == EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE) {
-            window_attribs = window_attribs_flip;
+            MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len,
+                EGL_SURFACE_ORIENTATION_ANGLE);
+            MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len,
+                EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE);
             ctx->flip_v = true;
             MP_VERBOSE(vo, "Rendering flipped.\n");
         }
     }
 
+    // EGL_DIRECT_COMPOSITION_ANGLE enables the use of flip-mode present, which
+    // avoids a copy of the video image and lowers vsync jitter, though the
+    // extension is only present on Windows 8 and up.
+    if (strstr(exts, "EGL_ANGLE_direct_composition")) {
+        MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len,
+            EGL_DIRECT_COMPOSITION_ANGLE);
+        MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len, EGL_TRUE);
+        MP_VERBOSE(vo, "Using DirectComposition.\n");
+    }
+
+    MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len, EGL_NONE);
     p->egl_surface = eglCreateWindowSurface(p->egl_display, config,
                                             vo_w32_hwnd(vo), window_attribs);
+    talloc_free(window_attribs);
     if (p->egl_surface == EGL_NO_SURFACE) {
         MP_FATAL(ctx->vo, "Could not create EGL surface!\n");
         goto fail;
@@ -199,11 +216,6 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     }
 
     mpgl_load_functions(ctx->gl, get_proc_address, NULL, vo->log);
-
-    const char *exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
-    if (exts)
-        MP_DBG(ctx->vo, "EGL extensions: %s\n", exts);
-
     return 0;
 
 fail:
