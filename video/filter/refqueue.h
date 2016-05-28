@@ -30,6 +30,7 @@ bool mp_refqueue_should_deint(struct mp_refqueue *q);
 bool mp_refqueue_is_interlaced(struct mp_refqueue *q);
 bool mp_refqueue_is_top_field(struct mp_refqueue *q);
 bool mp_refqueue_top_field_first(struct mp_refqueue *q);
+bool mp_refqueue_is_second_field(struct mp_refqueue *q);
 struct mp_image *mp_refqueue_get_field(struct mp_refqueue *q, int pos);
 
 #endif

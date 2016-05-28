@@ -222,3 +222,8 @@ struct mp_image *mp_refqueue_get_field(struct mp_refqueue *q, int pos)
     int frame = (pos < 0 ? pos - (1 - round) : pos + round) / 2;
     return mp_refqueue_get(q, frame);
 }
+
+bool mp_refqueue_is_second_field(struct mp_refqueue *q)
+{
+    return mp_refqueue_has_output(q) && q->second_field;
+}

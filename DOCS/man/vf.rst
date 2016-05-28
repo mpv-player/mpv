@@ -801,6 +801,15 @@ Available filters are:
     This filter must be specified before ``vdpaupp`` in the filter chain if
     ``vdpaupp`` is used.
 
+``d3d11vpp``
+    Direct3D 11 video post processing. Currently requires D3D11 hardware
+    decoding for use.
+
+    ``deint=<yes|no>``
+        Whether deinterlacing is enabled (default: no).
+    ``interlaced-only=<yes|no>``
+        If ``yes`` (default), only deinterlace frames marked as interlaced.
+
 ``buffer=<num>``
     Buffer ``<num>`` frames in the filter chain. This filter is probably pretty
     useless, except for debugging. (Note that this won't help to smooth out

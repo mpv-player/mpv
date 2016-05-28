@@ -61,6 +61,7 @@ extern const vf_info_t vf_info_vapoursynth_lazy;
 extern const vf_info_t vf_info_vdpaupp;
 extern const vf_info_t vf_info_vdpaurb;
 extern const vf_info_t vf_info_buffer;
+extern const vf_info_t vf_info_d3d11vpp;
 
 // list of available filters:
 static const vf_info_t *const filter_list[] = {
@@ -98,6 +99,9 @@ static const vf_info_t *const filter_list[] = {
 #if HAVE_VDPAU
     &vf_info_vdpaupp,
     &vf_info_vdpaurb,
+#endif
+#if HAVE_D3D_HWACCEL
+    &vf_info_d3d11vpp,
 #endif
     NULL
 };
