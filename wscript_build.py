@@ -483,11 +483,12 @@ def build(ctx):
     if ctx.dependency_satisfied('test'):
         for test in ctx.path.ant_glob("test/*.c"):
             ctx(
-                target   = os.path.splitext(test.srcpath())[0],
-                source   = test.srcpath(),
-                use      = ctx.dependencies_use() + ['objects'],
-                includes = _all_includes(ctx),
-                features = "c cprogram",
+                target       = os.path.splitext(test.srcpath())[0],
+                source       = test.srcpath(),
+                use          = ctx.dependencies_use() + ['objects'],
+                includes     = _all_includes(ctx),
+                features     = "c cprogram",
+                install_path = None,
             )
 
     build_shared = ctx.dependency_satisfied('libmpv-shared')
