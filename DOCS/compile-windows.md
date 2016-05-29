@@ -104,10 +104,10 @@ Installing MSYS2
    It doesn't matter whether the i686 or the x86_64 version is used. Both can
    build 32-bit and 64-bit binaries when running on a 64-bit version of Windows.
 
-2. Start a MinGW-w64 shell (``mingw64_shell.bat``). Note that this is different
+2. Start a MinGW-w64 shell (``mingw64.exe``). Note that this is different
    from the MSYS2 shell that is started from the final installation dialog.
 
-   For a 32-bit build, use ``mingw32_shell.bat``.
+   For a 32-bit build, use ``mingw32.exe``.
 
 Updating MSYS2
 --------------
@@ -118,7 +118,7 @@ separately.
 ```bash
 # Check for core updates. If instructed, close the shell window and reopen it
 # before continuing.
-update-core
+pacman -Syu
 
 # Update everything else
 pacman -Su
