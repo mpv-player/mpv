@@ -153,8 +153,9 @@ mp.add_hook("on_load", 10, function ()
 
 
             -- some funky guessing to detect multi-arc videos
-            if  not (json.entries[1]["webpage_url"] == nil)
-                and (json.entries[1]["webpage_url"] == json["webpage_url"]) then
+            if (not (json.entries[1]["_type"] == "url_transparent")) and
+                (not (json.entries[1]["webpage_url"] == nil)
+                and (json.entries[1]["webpage_url"] == json["webpage_url"])) then
                 msg.verbose("multi-arc video detected, building EDL")
 
                 local playlist = "edl://"
@@ -205,7 +206,8 @@ mp.add_hook("on_load", 10, function ()
                     -- directly to the file in that case, which we don't
                     -- want so get the webpage URL instead, which is what
                     -- we want
-                    if not (entry["webpage_url"] == nil) then
+                    if not (json.entries[1]["_type"] == "url_transparent")
+                        and not (entry["webpage_url"] == nil) then
                         site = entry["webpage_url"]
                     end
 
