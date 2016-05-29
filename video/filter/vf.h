@@ -37,6 +37,7 @@ typedef struct vf_info {
     const void *priv_defaults;
     const struct m_option *options;
     void (*print_help)(struct mp_log *log);
+    bool (*test_conversion)(int in, int out);
 } vf_info_t;
 
 typedef struct vf_instance {

@@ -518,7 +518,23 @@ static void query_formats(uint8_t *fmts, struct vf_instance *vf)
 
 static bool is_conv_filter(struct vf_instance *vf)
 {
-    return vf && strcmp(vf->info->name, "scale") == 0;
+    return vf && (strcmp(vf->info->name, "scale") == 0 || vf->autoinserted);
+}
+
+static const char *find_conv_filter(uint8_t *fmts_out)
+{
+    for (int n = 0; filter_list[n]; n++) {
+        if (filter_list[n]->test_conversion) {
+            for (int a = IMGFMT_START; a < IMGFMT_END; a++) {
+                for (int b = IMGFMT_START; b < IMGFMT_END; b++) {
+                    if (fmts_out[b - IMGFMT_START] &&
+                        filter_list[n]->test_conversion(a, b))
+                        return filter_list[n]->name;
+                }
+            }
+        }
+    }
+    return "scale";
 }
 
 static void update_formats(struct vf_chain *c, struct vf_instance *vf,
@@ -539,7 +555,8 @@ static void update_formats(struct vf_chain *c, struct vf_instance *vf,
         // filters after vf work, but vf can't output any format the filters
         // after it accept), try to insert a conversion filter.
         MP_INFO(c, "Using conversion filter.\n");
-        struct vf_instance *conv = vf_open(c, "scale", NULL);
+        const char *filter = find_conv_filter(vf->last_outfmts);
+        struct vf_instance *conv = vf_open(c, filter, NULL);
         if (conv) {
             conv->autoinserted = true;
             conv->next = vf->next;

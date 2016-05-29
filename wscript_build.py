@@ -346,6 +346,7 @@ def build(ctx):
         ( "video/out/opengl/formats.c",          "gl" ),
         ( "video/out/opengl/hwdec.c",            "gl" ),
         ( "video/out/opengl/hwdec_d3d11egl.c",   "egl-angle" ),
+        ( "video/out/opengl/hwdec_d3d11eglrgb.c","egl-angle" ),
         ( "video/out/opengl/hwdec_dxva2.c",      "gl-win32" ),
         ( "video/out/opengl/hwdec_dxva2gldx.c",  "gl-dxinterop" ),
         ( "video/out/opengl/hwdec_dxva2egl.c",   "egl-angle" ),

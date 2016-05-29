@@ -2295,7 +2295,8 @@ static int probe_deint_filters(struct MPContext *mpctx)
     if (check_output_format(mpctx, IMGFMT_VAAPI) &&
         probe_deint_filter(mpctx, "vavpp"))
         return 0;
-    if (check_output_format(mpctx, IMGFMT_D3D11VA) &&
+    if ((check_output_format(mpctx, IMGFMT_D3D11VA) ||
+         check_output_format(mpctx, IMGFMT_D3D11NV12)) &&
         probe_deint_filter(mpctx, "d3d11vpp"))
         return 0;
     if (probe_deint_filter(mpctx, "yadif"))

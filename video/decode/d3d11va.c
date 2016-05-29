@@ -195,6 +195,9 @@ static struct mp_image *d3d11va_update_image_attribs(struct lavc_ctx *s,
         }
     }
 
+    if (img->params.hw_subfmt == IMGFMT_NV12)
+        mp_image_setfmt(img, IMGFMT_D3D11NV12);
+
     return img;
 }
 

@@ -42,7 +42,13 @@ struct vf_priv_s {
     ID3D11VideoProcessorEnumerator *vp_enum;
     D3D11_VIDEO_FRAME_FORMAT d3d_frame_format;
 
-    struct mp_image_params params;
+    DXGI_FORMAT out_format;
+    bool out_shared;
+    bool out_rgb;
+
+    bool require_filtering;
+
+    struct mp_image_params params, out_params;
     int c_w, c_h;
 
     struct mp_image_pool *pool;
@@ -53,12 +59,6 @@ struct vf_priv_s {
     int interlaced_only;
 };
 
-struct d3d11va_surface {
-    ID3D11Texture2D              *texture;
-    int                          subindex;
-    ID3D11VideoDecoderOutputView *surface;
-};
-
 static void release_tex(void *arg)
 {
     ID3D11Texture2D *texture = arg;
@@ -66,24 +66,25 @@ static void release_tex(void *arg)
     ID3D11Texture2D_Release(texture);
 }
 
-static struct mp_image *alloc_surface(ID3D11Device *dev, DXGI_FORMAT format,
-                                      int hw_subfmt, int w, int h, bool shared)
+static struct mp_image *alloc_pool(void *pctx, int fmt, int w, int h)
 {
+    struct vf_instance *vf = pctx;
+    struct vf_priv_s *p = vf->priv;
     HRESULT hr;
 
     ID3D11Texture2D *texture = NULL;
     D3D11_TEXTURE2D_DESC texdesc = {
         .Width = w,
         .Height = h,
-        .Format = format,
+        .Format = p->out_format,
         .MipLevels = 1,
         .ArraySize = 1,
         .SampleDesc = { .Count = 1 },
         .Usage = D3D11_USAGE_DEFAULT,
         .BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
-        .MiscFlags = shared ? D3D11_RESOURCE_MISC_SHARED : 0,
+        .MiscFlags = p->out_shared ? D3D11_RESOURCE_MISC_SHARED : 0,
     };
-    hr = ID3D11Device_CreateTexture2D(dev, &texdesc, NULL, &texture);
+    hr = ID3D11Device_CreateTexture2D(p->vo_dev, &texdesc, NULL, &texture);
     if (FAILED(hr))
         return NULL;
 
@@ -91,22 +92,14 @@ static struct mp_image *alloc_surface(ID3D11Device *dev, DXGI_FORMAT format,
     if (!mpi)
         abort();
 
-    mp_image_setfmt(mpi, IMGFMT_D3D11VA);
+    mp_image_setfmt(mpi, p->out_params.imgfmt);
     mp_image_set_size(mpi, w, h);
-    mpi->params.hw_subfmt = hw_subfmt;
+    mpi->params.hw_subfmt = p->out_params.hw_subfmt;
 
     mpi->planes[1] = (void *)texture;
     mpi->planes[2] = (void *)(intptr_t)0;
 
     return mpi;
-}
-
-static struct mp_image *alloc_pool_nv12(void *pctx, int fmt, int w, int h)
-{
-    ID3D11Device *dev = pctx;
-    assert(fmt == IMGFMT_D3D11VA);
-
-    return alloc_surface(dev, DXGI_FORMAT_NV12, IMGFMT_NV12, w, h, false);
 }
 
 static void flush_frames(struct vf_instance *vf)
@@ -149,7 +142,6 @@ static int recreate_video_proc(struct vf_instance *vf)
 
     destroy_video_proc(vf);
 
-    // Note: we skip any deinterlacing considerations for now.
     D3D11_VIDEO_PROCESSOR_CONTENT_DESC vpdesc = {
         .InputFrameFormat = p->d3d_frame_format,
         .InputWidth = p->c_w,
@@ -221,9 +213,21 @@ static int recreate_video_proc(struct vf_instance *vf)
     ID3D11VideoContext_VideoProcessorSetStreamColorSpace(p->video_ctx,
                                                          p->video_proc,
                                                          0, &csp);
-    ID3D11VideoContext_VideoProcessorSetOutputColorSpace(p->video_ctx,
-                                                         p->video_proc,
-                                                         &csp);
+    if (p->out_rgb) {
+        if (p->params.colorspace != MP_CSP_BT_601 &&
+            p->params.colorspace != MP_CSP_BT_709)
+        {
+            MP_WARN(vf, "Unsupported video colorspace (%s/%s). Consider "
+                    "disabling hardware decoding, or using "
+                    "--hwdec=d3d11va-copy to get correct output.\n",
+                    m_opt_choice_str(mp_csp_names, p->params.colorspace),
+                    m_opt_choice_str(mp_csp_levels_names, p->params.colorlevels));
+        }
+    } else {
+        ID3D11VideoContext_VideoProcessorSetOutputColorSpace(p->video_ctx,
+                                                             p->video_proc,
+                                                             &csp);
+    }
 
     return 0;
 fail:
@@ -239,7 +243,7 @@ static int render(struct vf_instance *vf)
     ID3D11VideoProcessorInputView *in_view = NULL;
     ID3D11VideoProcessorOutputView *out_view = NULL;
     struct mp_image *in = NULL, *out = NULL;
-    out = mp_image_pool_get(p->pool, IMGFMT_D3D11VA, p->params.w, p->params.h);
+    out = mp_image_pool_get(p->pool, p->out_params.imgfmt, p->params.w, p->params.h);
     if (!out)
         goto cleanup;
 
@@ -323,6 +327,10 @@ static int render(struct vf_instance *vf)
         goto cleanup;
     }
 
+    // Make sure the texture is updated correctly on the shared context.
+    // (I'm not sure if this is correct, though it won't harm.)
+    ID3D11DeviceContext_Flush(p->device_ctx);
+
     res = 0;
 cleanup:
     if (in_view)
@@ -338,7 +346,6 @@ cleanup:
     return res;
 }
 
-
 static int filter_out(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
@@ -347,7 +354,7 @@ static int filter_out(struct vf_instance *vf)
         return 0;
 
     // no filtering
-    if (!mp_refqueue_should_deint(p->queue)) {
+    if (!mp_refqueue_should_deint(p->queue) && !p->require_filtering) {
         struct mp_image *in = mp_refqueue_get(p->queue, 0);
         vf_add_output_frame(vf, mp_image_new_ref(in));
         mp_refqueue_next(p->queue);
@@ -368,15 +375,33 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
 
     destroy_video_proc(vf);
 
+    *out = *in;
+
+    if (vf_next_query_format(vf, IMGFMT_D3D11VA) ||
+        vf_next_query_format(vf, IMGFMT_D3D11NV12))
+    {
+        out->imgfmt = vf_next_query_format(vf, IMGFMT_D3D11VA)
+                    ? IMGFMT_D3D11VA : IMGFMT_D3D11NV12;
+        out->hw_subfmt = IMGFMT_NV12;
+        p->out_format = DXGI_FORMAT_NV12;
+        p->out_shared = false;
+        p->out_rgb = false;
+    } else {
+        out->imgfmt = IMGFMT_D3D11RGB;
+        out->hw_subfmt = IMGFMT_RGB0;
+        p->out_format = DXGI_FORMAT_B8G8R8A8_UNORM;
+        p->out_shared = true;
+        p->out_rgb = true;
+    }
+
+    p->require_filtering = in->hw_subfmt != out->hw_subfmt;
+
     p->params = *in;
+    p->out_params = *out;
 
     p->pool = mp_image_pool_new(20);
-    mp_image_pool_set_allocator(p->pool, alloc_pool_nv12, p->vo_dev);
+    mp_image_pool_set_allocator(p->pool, alloc_pool, vf);
     mp_image_pool_set_lru(p->pool);
-
-    *out = *in;
-    out->imgfmt = IMGFMT_D3D11VA;
-    out->hw_subfmt = IMGFMT_NV12;
 
     return 0;
 }
@@ -406,9 +431,25 @@ static void uninit(struct vf_instance *vf)
 
 static int query_format(struct vf_instance *vf, unsigned int imgfmt)
 {
-    if (imgfmt == IMGFMT_D3D11VA)
-        return vf_next_query_format(vf, IMGFMT_D3D11VA);
+    if (imgfmt == IMGFMT_D3D11VA ||
+        imgfmt == IMGFMT_D3D11NV12 ||
+        imgfmt == IMGFMT_D3D11RGB)
+    {
+        return vf_next_query_format(vf, IMGFMT_D3D11VA) ||
+               vf_next_query_format(vf, IMGFMT_D3D11NV12) ||
+               vf_next_query_format(vf, IMGFMT_D3D11RGB);
+    }
     return 0;
+}
+
+static bool test_conversion(int in, int out)
+{
+    return (in == IMGFMT_D3D11VA ||
+            in == IMGFMT_D3D11NV12 ||
+            in == IMGFMT_D3D11RGB) &&
+           (out == IMGFMT_D3D11VA ||
+            out == IMGFMT_D3D11NV12 ||
+            out == IMGFMT_D3D11RGB);
 }
 
 static int control(struct vf_instance *vf, int request, void* data)
@@ -480,6 +521,7 @@ static const m_option_t vf_opts_fields[] = {
 const vf_info_t vf_info_d3d11vpp = {
     .description = "D3D11 Video Post-Process Filter",
     .name = "d3d11vpp",
+    .test_conversion = test_conversion,
     .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
     .priv_defaults = &(const struct vf_priv_s) {
