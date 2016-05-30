@@ -1071,9 +1071,9 @@ Available video output drivers are:
 
         clip
             Hard-clip any out-of-range values (default)
-        simple
-            Very simple continuous curve. Preserves dynamic range and peak but
-            uses nonlinear contrast.
+        reinhard
+            Reinhard tone mapping algorithm. Very simple continuous curve.
+            Preserves dynamic range and peak but uses nonlinear contrast.
         gamma
             Fits a logarithmic transfer between the tone curves.
         linear
@@ -1084,7 +1084,7 @@ Available video output drivers are:
         Set tone mapping parameters. Ignored if the tone mapping algorithm is
         not tunable. This affects the following tone mapping algorithms:
 
-        simple
+        reinhard
             Specifies the local contrast coefficient at the display peak.
             Defaults to 0.5, which means that in-gamut values will be about
             half as bright as when clipping.

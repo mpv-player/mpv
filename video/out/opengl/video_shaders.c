@@ -327,7 +327,7 @@ void pass_tone_map(struct gl_shader_cache *sc, float peak_src, float peak_dst,
         GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         break;
 
-    case TONE_MAPPING_SIMPLE: {
+    case TONE_MAPPING_REINHARD: {
         float contrast = isnan(param) ? 0.5 : param,
               offset = (1.0 - contrast) / contrast;
         GLSLF("color.rgb = color.rgb / (color.rgb + vec3(%f));\n", offset);
