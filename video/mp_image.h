@@ -47,6 +47,7 @@ struct mp_image_params {
     enum mp_csp_levels colorlevels;
     enum mp_csp_prim primaries;
     enum mp_csp_trc gamma;
+    float peak; // 0 = auto/unknown
     enum mp_chroma_location chroma_location;
     // The image should be rotated clockwise (0-359 degrees).
     int rotate;

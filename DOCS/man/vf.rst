@@ -312,6 +312,14 @@ Available filters are:
        :prophoto:     ProPhoto RGB (ROMM) curve
        :st2084:       SMPTE ST2084 (HDR) curve
 
+    ``<peak>``
+        Reference peak illumination for the video file. This is mostly
+        interesting for HDR, but it can also be used tone map SDR content
+        to a darker or brighter exposure.
+
+        The default of 0.0 will default to the display's reference brightness
+        for SDR and the source's reference brightness for HDR.
+
     ``<stereo-in>``
         Set the stereo mode the video is assumed to be encoded in. Takes the
         same values as the ``--video-stereo-mode`` option.

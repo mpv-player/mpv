@@ -1061,9 +1061,10 @@ Available video output drivers are:
 
     ``target-brightness=<1..100000>``
         Specifies the display's approximate brightness in cd/m^2. When playing
-        HDR content, video colors will be tone mapped to this target brightness
-        using the algorithm specified by ``hdr-tone-mapping``. The default of
-        250 cd/m^2 corresponds to a typical consumer display.
+        HDR content on a SDR display (or SDR content on an HDR display), video
+        colors will be tone mapped to this target brightness using the
+        algorithm specified by ``hdr-tone-mapping``. The default of 250 cd/m^2
+        corresponds to a typical consumer display.
 
     ``hdr-tone-mapping=<value>``
         Specifies the algorithm used for tone-mapping HDR images onto the

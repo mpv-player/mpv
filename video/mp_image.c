@@ -568,6 +568,7 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            p1->colorlevels == p2->colorlevels &&
            p1->primaries == p2->primaries &&
            p1->gamma == p2->gamma &&
+           p1->peak == p2->peak &&
            p1->chroma_location == p2->chroma_location &&
            p1->rotate == p2->rotate &&
            p1->stereo_in == p2->stereo_in &&
@@ -661,6 +662,12 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         params->colorlevels = MP_CSP_LEVELS_AUTO;
         params->primaries = MP_CSP_PRIM_AUTO;
         params->gamma = MP_CSP_TRC_AUTO;
+    }
+
+    // Guess the reference peak (independent of the colorspace)
+    if (params->gamma == MP_CSP_TRC_SMPTE_ST2084) {
+        if (!params->peak)
+            params->peak = 10000; // As per the spec
     }
 }
 

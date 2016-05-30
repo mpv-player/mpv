@@ -38,7 +38,7 @@ void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
 void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc);
 void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc);
 
-void pass_tone_map(struct gl_shader_cache *sc, float peak_src, float peak_dst,
+void pass_tone_map(struct gl_shader_cache *sc, float peak,
                    enum tone_mapping algo, float param);
 
 void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
