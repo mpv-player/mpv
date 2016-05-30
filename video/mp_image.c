@@ -671,7 +671,9 @@ static void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
 {
     mp_image_setfmt(dst, pixfmt2imgfmt(src->format));
     mp_image_set_size(dst, src->width, src->height);
-    dst->params.p_w = dst->params.p_h = 1;
+
+    dst->params.p_w = src->sample_aspect_ratio.num;
+    dst->params.p_h = src->sample_aspect_ratio.den;
 
     for (int i = 0; i < 4; i++) {
         dst->planes[i] = src->data[i];
@@ -697,6 +699,9 @@ static void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
     dst->format = imgfmt2pixfmt(src->imgfmt);
     dst->width = src->w;
     dst->height = src->h;
+
+    dst->sample_aspect_ratio.num = src->params.p_w;
+    dst->sample_aspect_ratio.den = src->params.p_h;
 
     for (int i = 0; i < 4; i++) {
         dst->data[i] = src->planes[i];
