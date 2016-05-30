@@ -1145,6 +1145,7 @@ static void gui_thread_reconfig(void *ptr)
     vo_apply_window_geometry(vo, &geo);
 
     bool reset_size = w32->o_dwidth != vo->dwidth || w32->o_dheight != vo->dheight;
+    bool pos_init = false;
 
     w32->o_dwidth = vo->dwidth;
     w32->o_dheight = vo->dheight;
@@ -1161,6 +1162,7 @@ static void gui_thread_reconfig(void *ptr)
         } else {
             w32->window_bounds_initialized = true;
             reset_size = true;
+            pos_init = true;
             w32->window_x = w32->prev_x = geo.win.x0;
             w32->window_y = w32->prev_y = geo.win.y0;
         }
@@ -1176,6 +1178,12 @@ static void gui_thread_reconfig(void *ptr)
         vo->dheight = r.bottom;
     }
 
+    // Recenter window around old position on new video size 
+    // excluding the case when initial positon handled by win_state.
+    if (!pos_init) {
+        w32->window_x += w32->dw / 2 - vo->dwidth / 2;
+        w32->window_y += w32->dh / 2 - vo->dheight / 2;
+    }
     w32->dw = vo->dwidth;
     w32->dh = vo->dheight;
 
