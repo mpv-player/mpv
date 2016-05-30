@@ -18,6 +18,8 @@
 #include <windows.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#include <d3d11.h>
+#include <dxgi.h>
 
 #include "angle_dynamic.h"
 
@@ -99,6 +101,74 @@ static bool create_context_egl(MPGLContext *ctx, EGLConfig config, int version)
                    p->egl_context);
 
     return true;
+}
+
+static void d3d_init(struct MPGLContext *ctx)
+{
+    HRESULT hr;
+    struct priv *p = ctx->priv;
+    struct vo *vo = ctx->vo;
+    IDXGIDevice *dxgi_dev = NULL;
+    IDXGIAdapter *dxgi_adapter = NULL;
+    IDXGIFactory *dxgi_factory = NULL;
+
+    PFNEGLQUERYDISPLAYATTRIBEXTPROC eglQueryDisplayAttribEXT =
+        (PFNEGLQUERYDISPLAYATTRIBEXTPROC)eglGetProcAddress("eglQueryDisplayAttribEXT");
+    PFNEGLQUERYDEVICEATTRIBEXTPROC eglQueryDeviceAttribEXT =
+        (PFNEGLQUERYDEVICEATTRIBEXTPROC)eglGetProcAddress("eglQueryDeviceAttribEXT");
+    if (!eglQueryDisplayAttribEXT || !eglQueryDeviceAttribEXT) {
+        MP_VERBOSE(vo, "Missing EGL_EXT_device_query\n");
+        goto done;
+    }
+
+    EGLAttrib dev_attr;
+    if (!eglQueryDisplayAttribEXT(p->egl_display, EGL_DEVICE_EXT, &dev_attr)) {
+        MP_VERBOSE(vo, "Missing EGL_EXT_device_query\n");
+        goto done;
+    }
+
+    // If ANGLE is in D3D11 mode, get the underlying ID3D11Device
+    EGLDeviceEXT dev = (EGLDeviceEXT)dev_attr;
+    EGLAttrib d3d11_dev_attr;
+    if (eglQueryDeviceAttribEXT(dev, EGL_D3D11_DEVICE_ANGLE, &d3d11_dev_attr)) {
+        ID3D11Device *d3d11_dev = (ID3D11Device*)d3d11_dev_attr;
+
+        hr = ID3D11Device_QueryInterface(d3d11_dev, &IID_IDXGIDevice,
+            (void**)&dxgi_dev);
+        if (FAILED(hr)) {
+            MP_ERR(vo, "Device is not a IDXGIDevice\n");
+            goto done;
+        }
+
+        hr = IDXGIDevice_GetAdapter(dxgi_dev, &dxgi_adapter);
+        if (FAILED(hr)) {
+            MP_ERR(vo, "Couldn't get IDXGIAdapter\n");
+            goto done;
+        }
+
+        hr = IDXGIAdapter_GetParent(dxgi_adapter, &IID_IDXGIFactory,
+            (void**)&dxgi_factory);
+        if (FAILED(hr)) {
+            MP_ERR(vo, "Couldn't get IDXGIFactory\n");
+            goto done;
+        }
+
+        // Prevent DXGI from making changes to the VO window, otherwise in
+        // non-DirectComposition mode it will hook the Alt+Enter keystroke and
+        // make it trigger an ugly transition to exclusive fullscreen mode
+        // instead of running the user-set command.
+        IDXGIFactory_MakeWindowAssociation(dxgi_factory, vo_w32_hwnd(vo),
+            DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER |
+            DXGI_MWA_NO_PRINT_SCREEN);
+    }
+
+done:
+    if (dxgi_dev)
+        IDXGIDevice_Release(dxgi_dev);
+    if (dxgi_adapter)
+        IDXGIAdapter_Release(dxgi_adapter);
+    if (dxgi_factory)
+        IDXGIFactory_Release(dxgi_factory);
 }
 
 static void *get_proc_address(const GLubyte *proc_name)
@@ -214,6 +284,9 @@ static int angle_init(struct MPGLContext *ctx, int flags)
         MP_FATAL(ctx->vo, "Could not create EGL context!\n");
         goto fail;
     }
+
+    // Configure the underlying Direct3D device
+    d3d_init(ctx);
 
     mpgl_load_functions(ctx->gl, get_proc_address, NULL, vo->log);
     return 0;
