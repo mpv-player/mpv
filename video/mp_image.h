@@ -42,7 +42,7 @@ struct mp_image_params {
     uint64_t hw_subfmt;         // underlying format for some hwaccel pixfmts
                                 // (will use the HW API's format identifiers)
     int w, h;                   // image dimensions
-    int p_w, p_h;               // define pixel aspect ratio (never 0/0)
+    int p_w, p_h;               // define pixel aspect ratio (undefined: 0/0)
     enum mp_csp colorspace;
     enum mp_csp_levels colorlevels;
     enum mp_csp_prim primaries;

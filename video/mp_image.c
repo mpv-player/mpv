@@ -87,7 +87,6 @@ void mp_image_setfmt(struct mp_image *mpi, int out_fmt)
     mpi->fmt = fmt;
     mpi->imgfmt = fmt.id;
     mpi->num_planes = fmt.num_planes;
-    mp_image_set_size(mpi, mpi->w, mpi->h);
     mpi->params = params;
 }
 
@@ -122,7 +121,6 @@ void mp_image_set_size(struct mp_image *mpi, int w, int h)
     assert(w >= 0 && h >= 0);
     mpi->w = mpi->params.w = w;
     mpi->h = mpi->params.h = h;
-    mpi->params.p_w = mpi->params.p_h = 1;
 }
 
 void mp_image_set_params(struct mp_image *image,
@@ -543,7 +541,7 @@ bool mp_image_params_valid(const struct mp_image_params *p)
     if (p->w <= 0 || p->h <= 0 || (p->w + 128LL) * (p->h + 128LL) >= INT_MAX / 8)
         return false;
 
-    if (p->p_w <= 0 || p->p_h <= 0)
+    if (p->p_w < 0 || p->p_h < 0)
         return false;
 
     if (p->rotate < 0 || p->rotate >= 360)
@@ -673,6 +671,7 @@ static void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
 {
     mp_image_setfmt(dst, pixfmt2imgfmt(src->format));
     mp_image_set_size(dst, src->width, src->height);
+    dst->params.p_w = dst->params.p_h = 1;
 
     for (int i = 0; i < 4; i++) {
         dst->planes[i] = src->data[i];
