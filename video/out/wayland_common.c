@@ -224,6 +224,8 @@ static void surface_handle_enter(void *data,
             break;
         }
     }
+
+    wl->window.events |= VO_EVENT_WIN_STATE;
 }
 
 static void surface_handle_leave(void *data,
@@ -805,7 +807,7 @@ static void schedule_resize(struct vo_wayland_state *wl,
     wl->window.sh_height = height;
     wl->window.sh_x = x;
     wl->window.sh_y = y;
-    wl->window.events |= VO_EVENT_RESIZE;
+    wl->window.events |= VO_EVENT_WIN_STATE | VO_EVENT_RESIZE;
     wl->vo->dwidth = width;
     wl->vo->dheight = height;
 }
@@ -1037,10 +1039,10 @@ int vo_wayland_init (struct vo *vo)
                        "\tmodel: %s\n"
                        "\tw: %d, h: %d\n"
                        "\tscale: %d\n"
-                       "\tHz: %d\n",
+                       "\tHz: %f\n",
                        o->make, o->model,
                        o->width, o->height, o->scale,
-                       o->refresh_rate / 1000);
+                       o->refresh_rate / 1000.0f);
     }
 
     vo->event_fd = wl->display.display_fd;
@@ -1290,7 +1292,7 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
             break;
 
         // refresh rate is stored in milli-Hertz (mHz)
-        double fps = wl->display.current_output->refresh_rate / 1000;
+        double fps = wl->display.current_output->refresh_rate / 1000.0f;
         *(double*) arg = fps;
         return VO_TRUE;
     }
