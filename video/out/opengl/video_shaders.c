@@ -335,6 +335,17 @@ void pass_tone_map(struct gl_shader_cache *sc, float peak_src, float peak_dst,
         break;
     }
 
+    case TONE_MAPPING_HABLE: {
+        float A = 0.15, B = 0.50, C = 0.10, D = 0.20, E = 0.02, F = 0.30;
+        GLSLHF("vec3 hable(vec3 x) {\n");
+        GLSLHF("return ((x * (%f*x + %f)+%f)/(x * (%f*x + %f) + %f)) - %f;\n",
+               A, C*B, D*E, A, B, D*F, E/F);
+        GLSLHF("}\n");
+
+        GLSLF("color.rgb = hable(color.rgb) / hable(vec3(%f));\n", scale);
+        break;
+    }
+
     case TONE_MAPPING_GAMMA: {
         float gamma = isnan(param) ? 1.8 : param;
         GLSLF("color.rgb = pow(color.rgb / vec3(%f), vec3(%f));\n",
