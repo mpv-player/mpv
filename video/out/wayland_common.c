@@ -189,9 +189,22 @@ static void output_handle_mode(void *data,
     output->refresh_rate = refresh;
 }
 
+static void output_handle_done(void* data, struct wl_output *wl_output)
+{
+}
+
+static void output_handle_scale(void* data, struct wl_output *wl_output,
+                                int32_t factor)
+{
+    struct vo_wayland_output *output = data;
+    output->scale = factor;
+}
+
 static const struct wl_output_listener output_listener = {
     output_handle_geometry,
-    output_handle_mode
+    output_handle_mode,
+    output_handle_done,
+    output_handle_scale
 };
 
 
@@ -401,11 +414,15 @@ static void pointer_handle_motion(void *data,
                                   wl_fixed_t sx_w,
                                   wl_fixed_t sy_w)
 {
+    int32_t scale = 1;
     struct vo_wayland_state *wl = data;
 
+    if (wl->display.current_output)
+        scale = wl->display.current_output->scale;
+
     wl->cursor.pointer = pointer;
-    wl->window.mouse_x = wl_fixed_to_int(sx_w);
-    wl->window.mouse_y = wl_fixed_to_int(sy_w);
+    wl->window.mouse_x = scale*wl_fixed_to_int(sx_w);
+    wl->window.mouse_y = scale*wl_fixed_to_int(sy_w);
 
     mp_input_set_mouse_pos(wl->vo->input_ctx, wl->window.mouse_x,
                                               wl->window.mouse_y);
@@ -606,7 +623,8 @@ static void registry_handle_global (void *data,
     if (strcmp(interface, "wl_compositor") == 0) {
 
         wl->display.compositor = wl_registry_bind(reg, id,
-                                                  &wl_compositor_interface, 1);
+                                                  &wl_compositor_interface,
+                                                  MPMIN(3, version));
     }
 
     else if (strcmp(interface, "wl_shell") == 0) {
@@ -625,7 +643,9 @@ static void registry_handle_global (void *data,
             talloc_zero(wl, struct vo_wayland_output);
 
         output->id = id;
-        output->output = wl_registry_bind(reg, id, &wl_output_interface, 1);
+        output->scale = 1;
+        output->output = wl_registry_bind(reg, id, &wl_output_interface,
+                                          MPMIN(2, version));
 
         wl_output_add_listener(output->output, &output_listener, output);
         wl_list_insert(&wl->display.output_list, &output->link);
@@ -1016,9 +1036,10 @@ int vo_wayland_init (struct vo *vo)
                        "\tvendor: %s\n"
                        "\tmodel: %s\n"
                        "\tw: %d, h: %d\n"
+                       "\tscale: %d\n"
                        "\tHz: %d\n",
                        o->make, o->model,
-                       o->width, o->height,
+                       o->width, o->height, o->scale,
                        o->refresh_rate / 1000);
     }
 
