@@ -1071,13 +1071,14 @@ Available video output drivers are:
         target display. Valid values are:
 
         clip
-            Hard-clip any out-of-range values (default)
+            Hard-clip any out-of-range values.
         reinhard
             Reinhard tone mapping algorithm. Very simple continuous curve.
             Preserves dynamic range and peak but uses nonlinear contrast.
         hable
-            Similar to ``reinhard`` but preserves dark contrast better (slightly
-            sigmoidal). Developed by John Hable for use in video games.
+            Similar to ``reinhard`` but preserves dark contrast better
+            (slightly sigmoidal). Developed by John Hable for use in video
+            games. (default)
         gamma
             Fits a logarithmic transfer between the tone curves.
         linear

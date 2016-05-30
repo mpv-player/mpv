@@ -322,6 +322,7 @@ const struct gl_video_opts gl_video_opts_def = {
     .prescale_passes = 1,
     .prescale_downscaling_threshold = 2.0f,
     .target_brightness = 250,
+    .hdr_tone_mapping = TONE_MAPPING_HABLE,
     .tone_mapping_param = NAN,
 };
 
@@ -352,6 +353,7 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .prescale_passes = 1,
     .prescale_downscaling_threshold = 2.0f,
     .target_brightness = 250,
+    .hdr_tone_mapping = TONE_MAPPING_HABLE,
     .tone_mapping_param = NAN,
 };
 
