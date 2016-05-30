@@ -106,6 +106,7 @@ enum prescalers {
 enum tone_mapping {
     TONE_MAPPING_CLIP,
     TONE_MAPPING_REINHARD,
+    TONE_MAPPING_HABLE,
     TONE_MAPPING_GAMMA,
     TONE_MAPPING_LINEAR,
 };

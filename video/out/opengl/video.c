@@ -385,6 +385,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_CHOICE("hdr-tone-mapping", hdr_tone_mapping, 0,
                    ({"clip",     TONE_MAPPING_CLIP},
                     {"reinhard", TONE_MAPPING_REINHARD},
+                    {"hable",    TONE_MAPPING_HABLE},
                     {"gamma",    TONE_MAPPING_GAMMA},
                     {"linear",   TONE_MAPPING_LINEAR})),
         OPT_FLOAT("tone-mapping-param", tone_mapping_param, 0),

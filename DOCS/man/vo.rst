@@ -1074,6 +1074,9 @@ Available video output drivers are:
         reinhard
             Reinhard tone mapping algorithm. Very simple continuous curve.
             Preserves dynamic range and peak but uses nonlinear contrast.
+        hable
+            Similar to ``reinhard`` but preserves dark contrast better (slightly
+            sigmoidal). Developed by John Hable for use in video games.
         gamma
             Fits a logarithmic transfer between the tone curves.
         linear
