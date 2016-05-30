@@ -521,13 +521,13 @@ static bool is_conv_filter(struct vf_instance *vf)
     return vf && (strcmp(vf->info->name, "scale") == 0 || vf->autoinserted);
 }
 
-static const char *find_conv_filter(uint8_t *fmts_out)
+static const char *find_conv_filter(uint8_t *fmts_in, uint8_t *fmts_out)
 {
     for (int n = 0; filter_list[n]; n++) {
         if (filter_list[n]->test_conversion) {
             for (int a = IMGFMT_START; a < IMGFMT_END; a++) {
                 for (int b = IMGFMT_START; b < IMGFMT_END; b++) {
-                    if (fmts_out[b - IMGFMT_START] &&
+                    if (fmts_in[a - IMGFMT_START] && fmts_out[b - IMGFMT_START] &&
                         filter_list[n]->test_conversion(a, b))
                         return filter_list[n]->name;
                 }
@@ -555,7 +555,17 @@ static void update_formats(struct vf_chain *c, struct vf_instance *vf,
         // filters after vf work, but vf can't output any format the filters
         // after it accept), try to insert a conversion filter.
         MP_INFO(c, "Using conversion filter.\n");
-        const char *filter = find_conv_filter(vf->last_outfmts);
+        // Determine which output formats the filter _could_ accept. For this
+        // to work after the conversion filter is inserted, it is assumed that
+        // conversion filters have a single set of in/output formats that can
+        // be converted to each other.
+        uint8_t out_formats[IMGFMT_END - IMGFMT_START];
+        for (int n = IMGFMT_START; n < IMGFMT_END; n++) {
+            out_formats[n - IMGFMT_START] = vf->last_outfmts[n - IMGFMT_START];
+            vf->last_outfmts[n - IMGFMT_START] = 1;
+        }
+        query_formats(fmts, vf);
+        const char *filter = find_conv_filter(fmts, out_formats);
         struct vf_instance *conv = vf_open(c, filter, NULL);
         if (conv) {
             conv->autoinserted = true;
