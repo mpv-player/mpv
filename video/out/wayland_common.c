@@ -540,7 +540,7 @@ static void data_device_handle_data_offer(void *data,
 {
     struct vo_wayland_state *wl = data;
     if (wl->input.offer) {
-        MP_ERR(wl, "There is already a dnd entry point.\n");
+        MP_DBG(wl, "There is already a dnd entry point.\n");
         wl_data_offer_destroy(wl->input.offer);
     }
 
