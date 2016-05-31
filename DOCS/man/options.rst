@@ -650,11 +650,9 @@ Video
         or BT.709, a forced but correct RGB conversion is performed. Otherwise,
         the result will be incorrect.
 
-        ``d3d11va`` is usually safe. If the ``EGL_KHR_stream path`` is indicated
-        in the logs, it is lossless and full OpenGL filtering is done. If
-        ``ID3D11VideoProcessor path`` is indicated, and the video colorspace is
-        either BT.601 or BT.709, a forced but correct RGB conversion is
-        performed. Otherwise, the result will be incorrect.
+        ``d3d11va`` is usually safe (if used with ANGLE builds that support
+        ``EGL_KHR_stream path`` - otherwise, it converts to RGB), except that
+        10 bit input (HEVC main 10 profiles) will be rounded down to 8 bits.
 
         ``dxva2`` is not safe. It appears to always use BT.601 for forced RGB
         conversion, but actual behavior depends on the GPU drivers. Some drivers
