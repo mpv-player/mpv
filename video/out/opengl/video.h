@@ -35,11 +35,6 @@
 #define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+SCALER_COUNT)
 #define TEXUNIT_DITHER   (TEXUNIT_3DLUT+1)
 
-struct lut3d {
-    uint16_t *data;
-    int size[3];
-};
-
 struct scaler_fun {
     char *name;
     float params[2];

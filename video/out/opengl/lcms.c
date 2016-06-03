@@ -28,8 +28,7 @@
 #include "common/msg.h"
 #include "options/m_option.h"
 #include "options/path.h"
-
-#include "video.h"
+#include "video/csputils.h"
 #include "lcms.h"
 
 #include "osdep/io.h"

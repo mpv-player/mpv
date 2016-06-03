@@ -16,7 +16,11 @@ struct mp_icc_opts {
     int contrast;
 };
 
-struct lut3d;
+struct lut3d {
+    uint16_t *data;
+    int size[3];
+};
+
 struct mp_log;
 struct mpv_global;
 struct gl_lcms;
