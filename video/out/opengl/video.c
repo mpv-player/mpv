@@ -649,6 +649,8 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
 
     debug_check_gl(p, "after 3d lut creation");
 
+    talloc_free(lut3d);
+
     return true;
 }
 
