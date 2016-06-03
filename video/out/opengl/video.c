@@ -458,6 +458,7 @@ const struct m_sub_options gl_video_conf = {
                        prescale_downscaling_threshold, 0, 0.0, 32.0),
         OPT_SUBSTRUCT("superxbr", superxbr_opts, superxbr_conf, 0),
         OPT_SUBSTRUCT("nnedi3", nnedi3_opts, nnedi3_conf, 0),
+        OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
@@ -608,13 +609,22 @@ static void uninit_rendering(struct gl_video *p)
     gl_sc_reset_error(p->sc);
 }
 
-void gl_video_update_profile(struct gl_video *p)
+// Warning: profile.start must point to a ta allocation, and the function
+//          takes over ownership.
+void gl_video_set_icc_profile(struct gl_video *p, bstr icc_data)
 {
+    gl_lcms_set_memory_profile(p->cms, &icc_data);
+
     if (p->use_lut_3d)
         return;
 
     p->use_lut_3d = true;
     check_gl_features(p);
+}
+
+bool gl_video_icc_auto_enabled(struct gl_video *p)
+{
+    return p->opts.icc_opts ? p->opts.icc_opts->profile_auto : false;
 }
 
 static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
@@ -3450,8 +3460,7 @@ void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd)
     reinit_osd(p);
 }
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g,
-                               struct gl_lcms *cms)
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
 {
     if (gl->version < 210 && gl->es < 200) {
         mp_err(log, "At least OpenGL 2.1 or OpenGL ES 2.0 required.\n");
@@ -3463,7 +3472,7 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g,
         .gl = gl,
         .global = g,
         .log = log,
-        .cms = cms,
+        .cms = gl_lcms_init(p, log, g),
         .opts = gl_video_opts_def,
         .texture_16bit_depth = 16,
         .sc = gl_sc_create(gl, log),
@@ -3516,6 +3525,7 @@ static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
     talloc_free(dst->deband_opts);
     talloc_free(dst->superxbr_opts);
     talloc_free(dst->nnedi3_opts);
+    talloc_free(dst->icc_opts);
 
     *dst = *src;
 
@@ -3529,7 +3539,12 @@ static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
 
     if (src->nnedi3_opts) {
         dst->nnedi3_opts = m_sub_options_copy(NULL, &nnedi3_conf,
-                                                src->nnedi3_opts);
+                                              src->nnedi3_opts);
+    }
+
+    if (src->icc_opts) {
+        dst->icc_opts = m_sub_options_copy(NULL, &mp_icc_conf,
+                                           src->icc_opts);
     }
 
     for (int n = 0; n < SCALER_COUNT; n++) {
@@ -3549,6 +3564,12 @@ static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
 void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
 {
     assign_options(&p->opts, opts);
+
+    if (p->opts.icc_opts) {
+        gl_lcms_set_options(p->cms, p->opts.icc_opts);
+        if (p->opts.icc_opts->profile && p->opts.icc_opts->profile[0])
+            p->use_lut_3d = true;
+    }
 
     check_gl_features(p);
     uninit_rendering(p);

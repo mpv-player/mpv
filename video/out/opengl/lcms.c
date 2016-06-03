@@ -145,7 +145,7 @@ void gl_lcms_set_options(struct gl_lcms *p, struct mp_icc_opts *opts)
 //          takes over ownership.
 void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr *profile)
 {
-    if (!p->opts.profile_auto) {
+    if (!p->opts.profile_auto || (p->icc_path && p->icc_path[0])) {
         talloc_free(profile->start);
         return;
     }

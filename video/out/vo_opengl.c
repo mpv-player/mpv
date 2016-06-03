@@ -45,7 +45,6 @@
 #include "filter_kernels.h"
 #include "video/hwdec.h"
 #include "opengl/video.h"
-#include "opengl/lcms.h"
 
 #define NUM_VSYNC_FENCES 10
 
@@ -56,13 +55,11 @@ struct gl_priv {
     GL *gl;
 
     struct gl_video *renderer;
-    struct gl_lcms *cms;
 
     struct gl_hwdec *hwdec;
 
     // Options
     struct gl_video_opts *renderer_opts;
-    struct mp_icc_opts *icc_opts;
     int use_glFinish;
     int waitvsync;
     int use_gl_debug;
@@ -216,8 +213,7 @@ static void call_request_hwdec_api(void *ctx, enum hwdec_type type)
 
 static void get_and_update_icc_profile(struct gl_priv *p, int *events)
 {
-    bool has_profile = p->icc_opts->profile && p->icc_opts->profile[0];
-    if (p->icc_opts->profile_auto && !has_profile) {
+    if (gl_video_icc_auto_enabled(p->renderer)) {
         MP_VERBOSE(p, "Querying ICC profile...\n");
         bstr icc = bstr0(NULL);
         int r = mpgl_control(p->glctx, events, VOCTRL_GET_ICC_PROFILE, &icc);
@@ -229,13 +225,9 @@ static void get_and_update_icc_profile(struct gl_priv *p, int *events)
                 MP_ERR(p, "icc-profile-auto not implemented on this platform.\n");
             }
 
-            gl_lcms_set_memory_profile(p->cms, &icc);
-            has_profile = true;
+            gl_video_set_icc_profile(p->renderer, icc);
         }
     }
-
-    if (has_profile)
-        gl_video_update_profile(p->renderer);
 }
 
 static void get_and_update_ambient_lighting(struct gl_priv *p, int *events)
@@ -407,17 +399,13 @@ static int preinit(struct vo *vo)
         MP_VERBOSE(vo, "swap_control extension missing.\n");
     }
 
-    p->cms = gl_lcms_init(p, vo->log, vo->global);
-    if (!p->cms)
-        goto err_out;
-    p->renderer = gl_video_init(p->gl, vo->log, vo->global, p->cms);
+    p->renderer = gl_video_init(p->gl, vo->log, vo->global);
     if (!p->renderer)
         goto err_out;
     gl_video_set_osd_source(p->renderer, vo->osd);
     gl_video_set_options(p->renderer, p->renderer_opts);
     gl_video_configure_queue(p->renderer, vo);
 
-    gl_lcms_set_options(p->cms, p->icc_opts);
     get_and_update_icc_profile(p, &(int){0});
 
     vo->hwdec_devs = hwdec_devices_create();
@@ -455,7 +443,6 @@ static const struct m_option options[] = {
     OPT_INTRANGE("vsync-fences", opt_vsync_fences, 0, 0, NUM_VSYNC_FENCES),
 
     OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
-    OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
     {0},
 };
 
