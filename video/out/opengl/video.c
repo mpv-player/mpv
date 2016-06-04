@@ -632,7 +632,7 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
 {
     GL *gl = p->gl;
 
-    if (!p->cms || !p->use_lut_3d)
+    if (!p->use_lut_3d)
         return false;
 
     if (!gl_lcms_has_changed(p->cms, prim, trc))
