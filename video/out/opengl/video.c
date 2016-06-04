@@ -174,6 +174,7 @@ struct gl_video {
     struct mpv_global *global;
     struct mp_log *log;
     struct gl_video_opts opts;
+    struct gl_video_opts *opts_alloc;
     struct gl_lcms *cms;
     bool gl_debug;
 
@@ -495,7 +496,8 @@ static void check_gl_features(struct gl_video *p);
 static bool init_format(struct gl_video *p, int fmt, bool test_only);
 static void init_image_desc(struct gl_video *p, int fmt);
 static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
-static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src);
+static void set_options(struct gl_video *p, struct gl_video_opts *src);
+static const char *handle_scaler_opt(const char *name, bool tscale);
 static void reinit_from_options(struct gl_video *p);
 static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[2]);
 static void gl_video_setup_hooks(struct gl_video *p);
@@ -1299,6 +1301,9 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
     uninit_scaler(p, scaler);
 
     scaler->conf = *conf;
+    bool is_tscale = scaler->index == SCALER_TSCALE;
+    scaler->conf.kernel.name = (char *)handle_scaler_opt(conf->kernel.name, is_tscale);
+    scaler->conf.window.name = (char *)handle_scaler_opt(conf->window.name, is_tscale);
     scaler->scale_factor = scale_factor;
     scaler->insufficient = false;
     scaler->initialized = true;
@@ -3107,8 +3112,7 @@ static void check_gl_features(struct gl_video *p)
         };
         for (int n = 0; n < SCALER_COUNT; n++)
             new_opts.scaler[n] = gl_video_opts_def.scaler[n];
-        assign_options(&p->opts, &new_opts);
-        p->opts.deband_opts = m_config_alloc_struct(NULL, &deband_conf);
+        set_options(p, &new_opts);
         return;
     }
     p->dumb_mode = false;
@@ -3127,6 +3131,7 @@ static void check_gl_features(struct gl_video *p)
             if (!have_mglsl)
                 reason = "(GLSL version too old)";
             if (reason) {
+                // p->opts is a copy of p->opts_alloc => we can just mess with it.
                 p->opts.scaler[n].kernel.name = "bilinear";
                 MP_WARN(p, "Disabling scaler #%d %s.\n", n, reason);
                 if (n == SCALER_TSCALE)
@@ -3244,7 +3249,6 @@ void gl_video_uninit(struct gl_video *p)
 
     gl_set_debug_logger(gl, NULL);
 
-    assign_options(&p->opts, &(struct gl_video_opts){0});
     talloc_free(p);
 }
 
@@ -3468,10 +3472,10 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
         .global = g,
         .log = log,
         .cms = gl_lcms_init(p, log, g),
-        .opts = gl_video_opts_def,
         .texture_16bit_depth = 16,
         .sc = gl_sc_create(gl, log),
     };
+    set_options(p, NULL);
     for (int n = 0; n < SCALER_COUNT; n++)
         p->scaler[n] = (struct scaler){.index = n};
     gl_video_set_debug(p, true);
@@ -3498,68 +3502,18 @@ static const char *handle_scaler_opt(const char *name, bool tscale)
     return NULL;
 }
 
-static char **dup_str_array(void *parent, char **src)
+static void set_options(struct gl_video *p, struct gl_video_opts *src)
 {
-    if (!src)
-        return NULL;
-
-    char **res = talloc_new(parent);
-    int num = 0;
-    for (int n = 0; src && src[n]; n++)
-        MP_TARRAY_APPEND(res, res, num, talloc_strdup(res, src[n]));
-    MP_TARRAY_APPEND(res, res, num, NULL);
-    return res;
-}
-
-static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src)
-{
-    talloc_free(dst->scale_shader);
-    talloc_free(dst->pre_shaders);
-    talloc_free(dst->post_shaders);
-    talloc_free(dst->user_shaders);
-    talloc_free(dst->deband_opts);
-    talloc_free(dst->superxbr_opts);
-    talloc_free(dst->nnedi3_opts);
-    talloc_free(dst->icc_opts);
-
-    *dst = *src;
-
-    if (src->deband_opts)
-        dst->deband_opts = m_sub_options_copy(NULL, &deband_conf, src->deband_opts);
-
-    if (src->superxbr_opts) {
-        dst->superxbr_opts = m_sub_options_copy(NULL, &superxbr_conf,
-                                                src->superxbr_opts);
-    }
-
-    if (src->nnedi3_opts) {
-        dst->nnedi3_opts = m_sub_options_copy(NULL, &nnedi3_conf,
-                                              src->nnedi3_opts);
-    }
-
-    if (src->icc_opts) {
-        dst->icc_opts = m_sub_options_copy(NULL, &mp_icc_conf,
-                                           src->icc_opts);
-    }
-
-    for (int n = 0; n < SCALER_COUNT; n++) {
-        dst->scaler[n].kernel.name =
-            (char *)handle_scaler_opt(dst->scaler[n].kernel.name,
-                                      n == SCALER_TSCALE);
-    }
-
-    dst->scale_shader = talloc_strdup(NULL, dst->scale_shader);
-    dst->pre_shaders = dup_str_array(NULL, dst->pre_shaders);
-    dst->post_shaders = dup_str_array(NULL, dst->post_shaders);
-    dst->user_shaders = dup_str_array(NULL, dst->user_shaders);
+    talloc_free(p->opts_alloc);
+    p->opts_alloc = m_sub_options_copy(p, &gl_video_conf, src);
+    p->opts = *p->opts_alloc;
 }
 
 // Set the options, and possibly update the filter chain too.
 // Note: assumes all options are valid and verified by the option parser.
 void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
 {
-    assign_options(&p->opts, opts);
-
+    set_options(p, opts);
     reinit_from_options(p);
 }
 
@@ -3567,10 +3521,8 @@ static void reinit_from_options(struct gl_video *p)
 {
     p->use_lut_3d = false;
 
-    if (p->opts.icc_opts) {
-        gl_lcms_set_options(p->cms, p->opts.icc_opts);
-        p->use_lut_3d = gl_lcms_has_profile(p->cms);
-    }
+    gl_lcms_set_options(p->cms, p->opts.icc_opts);
+    p->use_lut_3d = gl_lcms_has_profile(p->cms);
 
     check_gl_features(p);
     uninit_rendering(p);
