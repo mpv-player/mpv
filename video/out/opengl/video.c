@@ -613,7 +613,7 @@ static void uninit_rendering(struct gl_video *p)
 //          takes over ownership.
 void gl_video_set_icc_profile(struct gl_video *p, bstr icc_data)
 {
-    gl_lcms_set_memory_profile(p->cms, &icc_data);
+    gl_lcms_set_memory_profile(p->cms, icc_data);
 
     if (p->use_lut_3d)
         return;

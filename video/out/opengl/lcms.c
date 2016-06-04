@@ -143,18 +143,18 @@ void gl_lcms_set_options(struct gl_lcms *p, struct mp_icc_opts *opts)
 
 // Warning: profile.start must point to a ta allocation, and the function
 //          takes over ownership.
-void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr *profile)
+void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr profile)
 {
     if (!p->opts.profile_auto || (p->icc_path && p->icc_path[0])) {
-        talloc_free(profile->start);
+        talloc_free(profile.start);
         return;
     }
 
-    if (!p->icc_path && p->icc_data && profile->start &&
-        profile->len == p->icc_size &&
-        memcmp(profile->start, p->icc_data, p->icc_size) == 0)
+    if (!p->icc_path && p->icc_data && profile.start &&
+        profile.len == p->icc_size &&
+        memcmp(profile.start, p->icc_data, p->icc_size) == 0)
     {
-        talloc_free(profile->start);
+        talloc_free(profile.start);
         return;
     }
 
@@ -165,8 +165,8 @@ void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr *profile)
 
     talloc_free(p->icc_data);
 
-    p->icc_data = talloc_steal(p, profile->start);
-    p->icc_size = profile->len;
+    p->icc_data = talloc_steal(p, profile.start);
+    p->icc_size = profile.len;
 }
 
 // Return and _reset_ whether the profile or config has changed since the last
@@ -436,7 +436,7 @@ struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
 }
 
 void gl_lcms_set_options(struct gl_lcms *p, struct mp_icc_opts *opts) { }
-void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr *profile) { }
+void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr profile) { }
 
 bool gl_lcms_has_changed(struct gl_lcms *p, enum mp_csp_prim prim,
                          enum mp_csp_trc trc)
