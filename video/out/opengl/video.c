@@ -496,6 +496,7 @@ static bool init_format(struct gl_video *p, int fmt, bool test_only);
 static void init_image_desc(struct gl_video *p, int fmt);
 static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
 static void assign_options(struct gl_video_opts *dst, struct gl_video_opts *src);
+static void reinit_from_options(struct gl_video *p);
 static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[2]);
 static void gl_video_setup_hooks(struct gl_video *p);
 
@@ -613,13 +614,8 @@ static void uninit_rendering(struct gl_video *p)
 //          takes over ownership.
 void gl_video_set_icc_profile(struct gl_video *p, bstr icc_data)
 {
-    gl_lcms_set_memory_profile(p->cms, icc_data);
-
-    if (p->use_lut_3d)
-        return;
-
-    p->use_lut_3d = true;
-    check_gl_features(p);
+    if (gl_lcms_set_memory_profile(p->cms, icc_data))
+        reinit_from_options(p);
 }
 
 bool gl_video_icc_auto_enabled(struct gl_video *p)
@@ -635,11 +631,12 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
     if (!p->use_lut_3d)
         return false;
 
-    if (!gl_lcms_has_changed(p->cms, prim, trc))
+    if (p->lut_3d_texture && !gl_lcms_has_changed(p->cms, prim, trc))
         return true;
 
     struct lut3d *lut3d = NULL;
     if (!gl_lcms_get_lut3d(p->cms, &lut3d, prim, trc) || !lut3d) {
+        p->use_lut_3d = false;
         return false;
     }
 
@@ -2236,8 +2233,6 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
         if (gl_video_get_lut3d(p, prim_orig, trc_orig)) {
             prim_dst = prim_orig;
             trc_dst = trc_orig;
-        } else {
-            p->use_lut_3d = false;
         }
     }
 
@@ -3565,10 +3560,16 @@ void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
 {
     assign_options(&p->opts, opts);
 
+    reinit_from_options(p);
+}
+
+static void reinit_from_options(struct gl_video *p)
+{
+    p->use_lut_3d = false;
+
     if (p->opts.icc_opts) {
         gl_lcms_set_options(p->cms, p->opts.icc_opts);
-        if (p->opts.icc_opts->profile && p->opts.icc_opts->profile[0])
-            p->use_lut_3d = true;
+        p->use_lut_3d = gl_lcms_has_profile(p->cms);
     }
 
     check_gl_features(p);

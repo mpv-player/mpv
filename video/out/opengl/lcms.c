@@ -26,6 +26,7 @@
 #include "common/common.h"
 #include "misc/bstr.h"
 #include "common/msg.h"
+#include "options/m_config.h"
 #include "options/m_option.h"
 #include "options/path.h"
 #include "video/csputils.h"
@@ -42,14 +43,14 @@
 struct gl_lcms {
     void *icc_data;
     size_t icc_size;
-    char *icc_path;
+    bool using_memory_profile;
     bool changed;
     enum mp_csp_prim prev_prim;
     enum mp_csp_trc prev_trc;
 
     struct mp_log *log;
     struct mpv_global *global;
-    struct mp_icc_opts opts;
+    struct mp_icc_opts *opts;
 };
 
 static bool parse_3dlut_size(const char *arg, int *p1, int *p2, int *p3)
@@ -100,25 +101,28 @@ static void lcms2_error_handler(cmsContext ctx, cmsUInt32Number code,
     MP_ERR(p, "lcms2: %s\n", msg);
 }
 
-static bool load_profile(struct gl_lcms *p)
+static void load_profile(struct gl_lcms *p)
 {
-    if (p->icc_data && p->icc_size)
-        return true;
+    talloc_free(p->icc_data);
+    p->icc_data = NULL;
+    p->icc_size = 0;
+    p->using_memory_profile = false;
 
-    if (!p->icc_path)
-        return false;
+    if (!p->opts->profile || !p->opts->profile[0])
+        return;
 
-    char *fname = mp_get_user_path(NULL, p->global, p->icc_path);
+    char *fname = mp_get_user_path(NULL, p->global, p->opts->profile);
     MP_VERBOSE(p, "Opening ICC profile '%s'\n", fname);
     struct bstr iccdata = stream_read_file(fname, p, p->global,
                                            100000000); // 100 MB
     talloc_free(fname);
     if (!iccdata.len)
-        return false;
+        return;
+
+    talloc_free(p->icc_data);
 
     p->icc_data = iccdata.start;
     p->icc_size = iccdata.len;
-    return true;
 }
 
 struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
@@ -129,44 +133,55 @@ struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
         .global = global,
         .log = log,
         .changed = true,
+        .opts = m_sub_options_copy(p, &mp_icc_conf, mp_icc_conf.defaults),
     };
     return p;
 }
 
 void gl_lcms_set_options(struct gl_lcms *p, struct mp_icc_opts *opts)
 {
-    p->opts = *opts;
-    p->icc_path = talloc_strdup(p, p->opts.profile);
-    load_profile(p);
+    struct mp_icc_opts *old_opts = p->opts;
+    p->opts = m_sub_options_copy(p, &mp_icc_conf, opts);
+
+    if ((p->using_memory_profile && !p->opts->profile_auto) ||
+        !bstr_equals(bstr0(p->opts->profile), bstr0(old_opts->profile)))
+    {
+        load_profile(p);
+    }
+
     p->changed = true; // probably
+
+    talloc_free(old_opts);
 }
 
 // Warning: profile.start must point to a ta allocation, and the function
 //          takes over ownership.
-void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr profile)
+// Returns whether the internal profile was changed.
+bool gl_lcms_set_memory_profile(struct gl_lcms *p, bstr profile)
 {
-    if (!p->opts.profile_auto || (p->icc_path && p->icc_path[0])) {
+    if (!p->opts->profile_auto || (p->opts->profile && p->opts->profile[0])) {
         talloc_free(profile.start);
-        return;
+        return false;
     }
 
-    if (!p->icc_path && p->icc_data && profile.start &&
+    if (p->using_memory_profile &&
+        p->icc_data && profile.start &&
         profile.len == p->icc_size &&
         memcmp(profile.start, p->icc_data, p->icc_size) == 0)
     {
         talloc_free(profile.start);
-        return;
+        return false;
     }
 
     p->changed = true;
-
-    talloc_free(p->icc_path);
-    p->icc_path = NULL;
+    p->using_memory_profile = true;
 
     talloc_free(p->icc_data);
 
     p->icc_data = talloc_steal(p, profile.start);
     p->icc_size = profile.len;
+
+    return true;
 }
 
 // Return and _reset_ whether the profile or config has changed since the last
@@ -179,6 +194,13 @@ bool gl_lcms_has_changed(struct gl_lcms *p, enum mp_csp_prim prim,
     p->prev_prim = prim;
     p->prev_trc = trc;
     return change;
+}
+
+// Whether a profile is set. (gl_lcms_get_lut3d() is expected to return a lut,
+// but it could still fail due to runtime errors, such as invalid icc data.)
+bool gl_lcms_has_profile(struct gl_lcms *p)
+{
+    return p->icc_size > 0;
 }
 
 static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
@@ -243,9 +265,9 @@ static cmsHPROFILE get_vid_profile(struct gl_lcms *p, cmsContext cms,
         cmsDeleteTransform(xyz2src);
 
         // Contrast limiting
-        if (p->opts.contrast > 0) {
+        if (p->opts->contrast > 0) {
             for (int i = 0; i < 3; i++)
-                src_black[i] = MPMAX(src_black[i], 1.0 / p->opts.contrast);
+                src_black[i] = MPMAX(src_black[i], 1.0 / p->opts->contrast);
         }
 
         // Built-in contrast failsafe
@@ -293,10 +315,10 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     int s_r, s_g, s_b;
     bool result = false;
 
-    if (!parse_3dlut_size(p->opts.size_str, &s_r, &s_g, &s_b))
+    if (!parse_3dlut_size(p->opts->size_str, &s_r, &s_g, &s_b))
         return false;
 
-    if (!p->icc_data && !p->icc_path)
+    if (!gl_lcms_has_profile(p))
         return false;
 
     void *tmp = talloc_new(NULL);
@@ -305,14 +327,14 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
     cmsContext cms = NULL;
 
     char *cache_file = NULL;
-    if (p->opts.cache_dir && p->opts.cache_dir[0]) {
+    if (p->opts->cache_dir && p->opts->cache_dir[0]) {
         // Gamma is included in the header to help uniquely identify it,
         // because we may change the parameter in the future or make it
         // customizable, same for the primaries.
         char *cache_info = talloc_asprintf(tmp,
                 "ver=1.3, intent=%d, size=%dx%dx%d, prim=%d, trc=%d, "
                 "contrast=%d\n",
-                p->opts.intent, s_r, s_g, s_b, prim, trc, p->opts.contrast);
+                p->opts->intent, s_r, s_g, s_b, prim, trc, p->opts->contrast);
 
         uint8_t hash[32];
         struct AVSHA *sha = av_sha_alloc();
@@ -324,7 +346,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
         av_sha_final(sha, hash);
         av_free(sha);
 
-        char *cache_dir = mp_get_user_path(tmp, p->global, p->opts.cache_dir);
+        char *cache_dir = mp_get_user_path(tmp, p->global, p->opts->cache_dir);
         cache_file = talloc_strdup(tmp, "");
         for (int i = 0; i < sizeof(hash); i++)
             cache_file = talloc_asprintf_append(cache_file, "%02X", hash[i]);
@@ -364,7 +386,7 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
 
     cmsHTRANSFORM trafo = cmsCreateTransformTHR(cms, vid_profile, TYPE_RGB_16,
                                                 profile, TYPE_RGB_16,
-                                                p->opts.intent,
+                                                p->opts->intent,
                                                 cmsFLAGS_HIGHRESPRECALC |
                                                 cmsFLAGS_BLACKPOINTCOMPENSATION);
     cmsCloseProfile(profile);
@@ -436,10 +458,15 @@ struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
 }
 
 void gl_lcms_set_options(struct gl_lcms *p, struct mp_icc_opts *opts) { }
-void gl_lcms_set_memory_profile(struct gl_lcms *p, bstr profile) { }
+bool gl_lcms_set_memory_profile(struct gl_lcms *p, bstr profile) {return false;}
 
 bool gl_lcms_has_changed(struct gl_lcms *p, enum mp_csp_prim prim,
                          enum mp_csp_trc trc)
+{
+    return false;
+}
+
+bool gl_lcms_has_profile(struct gl_lcms *p)
 {
     return false;
 }
