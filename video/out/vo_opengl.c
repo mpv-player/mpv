@@ -58,6 +58,8 @@ struct gl_priv {
 
     struct gl_hwdec *hwdec;
 
+    int events;
+
     // Options
     struct gl_video_opts *renderer_opts;
     int use_glFinish;
@@ -211,12 +213,12 @@ static void call_request_hwdec_api(void *ctx, enum hwdec_type type)
     vo_control(ctx, VOCTRL_LOAD_HWDEC_API, (void *)(intptr_t)type);
 }
 
-static void get_and_update_icc_profile(struct gl_priv *p, int *events)
+static void get_and_update_icc_profile(struct gl_priv *p)
 {
     if (gl_video_icc_auto_enabled(p->renderer)) {
         MP_VERBOSE(p, "Querying ICC profile...\n");
         bstr icc = bstr0(NULL);
-        int r = mpgl_control(p->glctx, events, VOCTRL_GET_ICC_PROFILE, &icc);
+        int r = mpgl_control(p->glctx, &p->events, VOCTRL_GET_ICC_PROFILE, &icc);
 
         if (r != VO_NOTAVAIL) {
             if (r == VO_FALSE) {
@@ -230,10 +232,10 @@ static void get_and_update_icc_profile(struct gl_priv *p, int *events)
     }
 }
 
-static void get_and_update_ambient_lighting(struct gl_priv *p, int *events)
+static void get_and_update_ambient_lighting(struct gl_priv *p)
 {
     int lux;
-    int r = mpgl_control(p->glctx, events, VOCTRL_GET_AMBIENT_LUX, &lux);
+    int r = mpgl_control(p->glctx, &p->events, VOCTRL_GET_AMBIENT_LUX, &lux);
     if (r == VO_TRUE) {
         gl_video_set_ambient_lux(p->renderer, lux);
     }
@@ -268,6 +270,7 @@ static bool reparse_cmdline(struct gl_priv *p, char *args)
 
     if (r >= 0) {
         gl_video_set_options(p->renderer, opts->renderer_opts);
+        get_and_update_icc_profile(p);
         gl_video_configure_queue(p->renderer, p->vo);
         p->vo->want_redraw = true;
     }
@@ -335,13 +338,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
     int events = 0;
     int r = mpgl_control(p->glctx, &events, request, data);
     if (events & VO_EVENT_ICC_PROFILE_CHANGED) {
-        get_and_update_icc_profile(p, &events);
+        get_and_update_icc_profile(p);
         vo->want_redraw = true;
     }
     if (events & VO_EVENT_AMBIENT_LIGHTING_CHANGED) {
-        get_and_update_ambient_lighting(p, &events);
+        get_and_update_ambient_lighting(p);
         vo->want_redraw = true;
     }
+    events |= p->events;
+    p->events = 0;
     if (events & VO_EVENT_RESIZE)
         resize(p);
     if (events & VO_EVENT_EXPOSE)
@@ -406,7 +411,7 @@ static int preinit(struct vo *vo)
     gl_video_set_options(p->renderer, p->renderer_opts);
     gl_video_configure_queue(p->renderer, vo);
 
-    get_and_update_icc_profile(p, &(int){0});
+    get_and_update_icc_profile(p);
 
     vo->hwdec_devs = hwdec_devices_create();
 
