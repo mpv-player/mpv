@@ -91,7 +91,9 @@ function add_file(s)
     s[sec] = ""
 
     append_property(s, sec, "filename", {prefix="File:", nl="", indent=""})
-    append_property(s, sec, "metadata/title", {prefix="Title:"})
+    if not (mp.get_property_osd("filename") == mp.get_property_osd("media-title")) then
+        append_property(s, sec, "media-title", {prefix="Title:"})
+    end
     append_property(s, sec, "chapter", {prefix="Chapter:"})
     if append_property(s, sec, "cache-used", {prefix="Cache:"}) then
         append_property(s, sec, "demuxer-cache-duration",
