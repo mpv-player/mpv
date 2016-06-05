@@ -46,6 +46,11 @@ API changes
         - reading a choice property as MPV_FORMAT_NODE will now return a
           MPV_FORMAT_FLAG value if the choice is "yes" (true) or "no" (false)
           This implicitly affects Lua and JSON IPC interfaces as well.
+        - big changes to vo-cmdline on vo_opengl and vo_opengl_hq (but not
+          vo_opengl_cb): options are now normally not reset, but applied on top
+          of the current options. The special undocumented value "-" still
+          works, but now resets all options to before any vo-cmdline command
+          has been called.
  --- mpv 0.12.0 ---
  1.20   - deprecate "GL_MP_D3D_interfaces"/"glMPGetD3DInterface", and introduce
           "GL_MP_MPGetNativeDisplay"/"glMPGetNativeDisplay" (this is a

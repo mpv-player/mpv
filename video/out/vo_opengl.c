@@ -60,6 +60,8 @@ struct gl_priv {
 
     int events;
 
+    void *original_opts;
+
     // Options
     struct gl_video_opts *renderer_opts;
     int use_glFinish;
@@ -245,37 +247,31 @@ static void get_and_update_ambient_lighting(struct gl_priv *p)
     }
 }
 
-static bool reparse_cmdline(struct gl_priv *p, char *args)
+static const struct m_option options[];
+
+static const struct m_sub_options opengl_conf = {
+    .opts = options,
+    .size = sizeof(struct gl_priv),
+};
+
+static bool reparse_cmdline(struct vo *vo, char *args)
 {
-    struct m_config *cfg = NULL;
-    struct gl_priv *opts = NULL;
+    struct gl_priv *p = vo->priv;
     int r = 0;
 
-    // list of options which can be changed at runtime
-#define OPT_BASE_STRUCT struct gl_priv
-    static const struct m_option change_otps[] = {
-        OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
-        {0}
-    };
-#undef OPT_BASE_STRUCT
+    struct gl_priv *opts = p;
 
     if (strcmp(args, "-") == 0) {
-        opts = p;
+        opts = p->original_opts;
     } else {
-        const struct gl_priv *vodef = p->vo->driver->priv_defaults;
-        cfg = m_config_new(NULL, p->vo->log, sizeof(*opts), vodef, change_otps);
-        opts = cfg->optstruct;
-        r = m_config_parse_suboptions(cfg, "opengl", args);
+        r = m_config_parse_suboptions(vo->config, "opengl", args);
     }
 
-    if (r >= 0) {
-        gl_video_set_options(p->renderer, opts->renderer_opts);
-        get_and_update_icc_profile(p);
-        gl_video_configure_queue(p->renderer, p->vo);
-        p->vo->want_redraw = true;
-    }
+    gl_video_set_options(p->renderer, opts->renderer_opts);
+    get_and_update_icc_profile(p);
+    gl_video_configure_queue(p->renderer, p->vo);
+    p->vo->want_redraw = true;
 
-    talloc_free(cfg);
     return r >= 0;
 }
 
@@ -322,7 +318,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     case VOCTRL_SET_COMMAND_LINE: {
         char *arg = data;
-        return reparse_cmdline(p, arg);
+        return reparse_cmdline(vo, arg);
     }
     case VOCTRL_RESET:
         gl_video_reset(p->renderer);
@@ -425,6 +421,8 @@ static int preinit(struct vo *vo)
                                      vo->hwdec_devs, hwdec);
         gl_video_set_hwdec(p->renderer, p->hwdec);
     }
+
+    p->original_opts = m_sub_options_copy(p, &opengl_conf, p);
 
     return 0;
 

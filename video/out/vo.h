@@ -303,6 +303,7 @@ struct vo {
     struct vo_internal *in;
     struct mp_vo_opts *opts;
     struct vo_extra extra;
+    struct m_config *config;
 
     // --- The following fields are generally only changed during initialization.
 
