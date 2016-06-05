@@ -278,6 +278,8 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
             ctx->gl->debug_context = opts->use_gl_debug;
             gl_video_set_debug(ctx->renderer, opts->use_gl_debug);
         }
+        if (gl_video_icc_auto_enabled(ctx->renderer))
+            MP_ERR(ctx, "icc-profile-auto is not available with opengl-cb\n");
     }
     ctx->reconfigured = false;
     ctx->update_new_opts = false;
