@@ -196,6 +196,10 @@ struct gl_video {
 
     GLuint nnedi3_weights_buffer;
 
+    struct gl_timer *upload_timer;
+    struct gl_timer *render_timer;
+    struct gl_timer *present_timer;
+
     struct mp_image_params real_image_params;   // configured format
     struct mp_image_params image_params;        // texture format (mind hwdec case)
     struct mp_imgfmt_desc image_desc;
@@ -2497,6 +2501,11 @@ static void pass_render_frame(struct gl_video *p)
     if (p->dumb_mode)
         return;
 
+    // start the render timer here. it will continue to the end of this
+    // function, to render the time needed to draw (excluding screen
+    // presentation)
+    gl_timer_start(p->render_timer);
+
     p->use_linear = p->opts.linear_scaling || p->opts.sigmoid_upscaling;
     pass_read_video(p);
     pass_opt_hook_point(p, "NATIVE", &p->texture_offset);
@@ -2553,10 +2562,14 @@ static void pass_render_frame(struct gl_video *p)
     }
 
     pass_opt_hook_point(p, "SCALED", NULL);
+
+    gl_timer_stop(p->render_timer);
 }
 
 static void pass_draw_to_screen(struct gl_video *p, int fbo)
 {
+    gl_timer_start(p->present_timer);
+
     if (p->dumb_mode)
         pass_render_frame_dumb(p, fbo);
 
@@ -2582,6 +2595,8 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
 
     pass_dither(p);
     finish_pass_direct(p, fbo, p->vp_w, p->vp_h, &p->dst_rect);
+
+    gl_timer_stop(p->present_timer);
 }
 
 // Draws an interpolate frame to fbo, based on the frame timing in t
@@ -2754,6 +2769,16 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     p->frames_drawn += 1;
 }
 
+static void timer_dbg(struct gl_video *p, const char *name, struct gl_timer *t)
+{
+    if (gl_timer_sample_count(t) > 0) {
+        MP_DBG(p, "%s time: last %dus avg %dus peak %dus\n", name,
+               (int)gl_timer_last_us(t),
+               (int)gl_timer_avg_us(t),
+               (int)gl_timer_peak_us(t));
+    }
+}
+
 // (fbo==0 makes BindFramebuffer select the screen backbuffer)
 void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
 {
@@ -2857,6 +2882,11 @@ done:
     gl->Flush();
 
     p->frames_rendered++;
+
+    // Report performance metrics
+    timer_dbg(p, "upload", p->upload_timer);
+    timer_dbg(p, "render", p->render_timer);
+    timer_dbg(p, "present", p->present_timer);
 }
 
 // vp_w/vp_h is the implicit size of the target framebuffer.
@@ -2971,6 +3001,8 @@ static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
 
     assert(mpi->num_planes == p->plane_count);
 
+    gl_timer_start(p->upload_timer);
+
     mp_image_t pbo_mpi = *mpi;
     bool pbo = map_image(p, &pbo_mpi);
     if (pbo) {
@@ -2997,6 +3029,8 @@ static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     gl->ActiveTexture(GL_TEXTURE0);
     if (pbo)
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+    gl_timer_stop(p->upload_timer);
 
     return true;
 
@@ -3227,6 +3261,10 @@ static void init_gl(struct gl_video *p)
         gl->DeleteTextures(1, &tex);
     }
 
+    p->upload_timer = gl_timer_create(p->gl);
+    p->render_timer = gl_timer_create(p->gl);
+    p->present_timer = gl_timer_create(p->gl);
+
     debug_check_gl(p, "after init_gl");
 }
 
@@ -3244,6 +3282,10 @@ void gl_video_uninit(struct gl_video *p)
     gl_vao_uninit(&p->vao);
 
     gl->DeleteTextures(1, &p->lut_3d_texture);
+
+    gl_timer_free(p->upload_timer);
+    gl_timer_free(p->render_timer);
+    gl_timer_free(p->present_timer);
 
     mpgl_osd_destroy(p->osd);
 
