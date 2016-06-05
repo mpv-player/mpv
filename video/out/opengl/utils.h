@@ -172,4 +172,16 @@ void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name);
 void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc);
 void gl_sc_reset(struct gl_shader_cache *sc);
 
+struct gl_timer;
+
+struct gl_timer *gl_timer_create(GL *gl);
+void gl_timer_free(struct gl_timer *timer);
+void gl_timer_start(struct gl_timer *timer);
+void gl_timer_stop(struct gl_timer *timer);
+
+int gl_timer_sample_count(struct gl_timer *timer);
+uint64_t gl_timer_last_us(struct gl_timer *timer);
+uint64_t gl_timer_avg_us(struct gl_timer *timer);
+uint64_t gl_timer_peak_us(struct gl_timer *timer);
+
 #endif

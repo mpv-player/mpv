@@ -1019,3 +1019,129 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
 
     gl_sc_reset(sc);
 }
+
+// Maximum number of simultaneous query objects to keep around. Reducing this
+// number might cause rendering to block until the result of a previous query is
+// available
+#define QUERY_OBJECT_NUM 8
+
+// How many samples to keep around, for the sake of average and peak
+// calculations. This corresponds to a few seconds (exact time variable)
+#define QUERY_SAMPLE_SIZE 256
+
+struct gl_timer {
+    GL *gl;
+    GLuint query[QUERY_OBJECT_NUM];
+    int query_idx;
+
+    GLuint64 samples[QUERY_SAMPLE_SIZE];
+    int sample_idx;
+    int sample_count;
+
+    uint64_t avg_sum;
+    uint64_t peak;
+};
+
+int gl_timer_sample_count(struct gl_timer *timer)
+{
+    return timer->sample_count;
+}
+
+uint64_t gl_timer_last_us(struct gl_timer *timer)
+{
+    return timer->samples[(timer->sample_idx - 1) % QUERY_SAMPLE_SIZE] / 1000;
+}
+
+uint64_t gl_timer_avg_us(struct gl_timer *timer)
+{
+    if (timer->sample_count <= 0)
+        return 0;
+
+    return timer->avg_sum / timer->sample_count / 1000;
+}
+
+uint64_t gl_timer_peak_us(struct gl_timer *timer)
+{
+    return timer->peak / 1000;
+}
+
+struct gl_timer *gl_timer_create(GL *gl)
+{
+    struct gl_timer *timer = talloc_ptrtype(NULL, timer);
+    *timer = (struct gl_timer){ .gl = gl };
+
+    if (gl->GenQueries)
+        gl->GenQueries(QUERY_OBJECT_NUM, timer->query);
+
+    return timer;
+}
+
+void gl_timer_free(struct gl_timer *timer)
+{
+    if (!timer)
+        return;
+
+    GL *gl = timer->gl;
+    if (gl && gl->DeleteQueries) {
+        // this is a no-op on already uninitialized queries
+        gl->DeleteQueries(QUERY_OBJECT_NUM, timer->query);
+    }
+
+    talloc_free(timer);
+}
+
+static void gl_timer_record(struct gl_timer *timer, GLuint64 new)
+{
+    // Input res into the buffer and grab the previous value
+    GLuint64 old = timer->samples[timer->sample_idx];
+    timer->samples[timer->sample_idx++] = new;
+    timer->sample_idx %= QUERY_SAMPLE_SIZE;
+
+    // Update average and sum
+    timer->avg_sum = timer->avg_sum + new - old;
+    timer->sample_count = MPMIN(timer->sample_count + 1, QUERY_SAMPLE_SIZE);
+
+    // Update peak if necessary
+    if (new >= timer->peak) {
+        timer->peak = new;
+    } else if (timer->peak == old) {
+        // It's possible that the last peak was the value we just removed,
+        // if so we need to scan for the new peak
+        uint64_t peak = new;
+        for (int i = 0; i < QUERY_SAMPLE_SIZE; i++)
+            peak = MPMAX(peak, timer->samples[i]);
+        timer->peak = peak;
+    }
+}
+
+// If no free query is available, this can block. Shouldn't ever happen in
+// practice, though. (If it does, consider increasing QUERY_OBJECT_NUM)
+// IMPORTANT: only one gl_timer object may ever be active at a single time.
+// The caling code *MUST* ensure this
+void gl_timer_start(struct gl_timer *timer)
+{
+    GL *gl = timer->gl;
+    if (!gl->BeginQuery)
+        return;
+
+    // Get the next query object
+    GLuint id = timer->query[timer->query_idx++];
+    timer->query_idx %= QUERY_OBJECT_NUM;
+
+    // If this query object already holds a result, we need to get and
+    // record it first
+    if (gl->IsQuery(id)) {
+        GLuint64 elapsed;
+        gl->GetQueryObjectui64v(id, GL_QUERY_RESULT, &elapsed);
+        gl_timer_record(timer, elapsed);
+    }
+
+    gl->BeginQuery(GL_TIME_ELAPSED, id);
+}
+
+void gl_timer_stop(struct gl_timer *timer)
+{
+    GL *gl = timer->gl;
+    if (gl->EndQuery)
+        gl->EndQuery(GL_TIME_ELAPSED);
+}

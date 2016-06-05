@@ -186,6 +186,17 @@ struct GL {
     GLenum (GLAPIENTRY *ClientWaitSync)(GLsync, GLbitfield, GLuint64);
     void (GLAPIENTRY *DeleteSync)(GLsync sync);
 
+    void (GLAPIENTRY *GenQueries)(GLsizei, GLuint *);
+    void (GLAPIENTRY *DeleteQueries)(GLsizei, const GLuint *);
+    void (GLAPIENTRY *BeginQuery)(GLenum,  GLuint);
+    void (GLAPIENTRY *EndQuery)(GLenum);
+    void (GLAPIENTRY *QueryCounter)(GLuint, GLenum);
+    GLboolean (GLAPIENTRY *IsQuery)(GLuint);
+    void (GLAPIENTRY *GetQueryObjectiv)(GLuint, GLenum, GLint *);
+    void (GLAPIENTRY *GetQueryObjecti64v)(GLuint, GLenum, GLint64 *);
+    void (GLAPIENTRY *GetQueryObjectuiv)(GLuint, GLenum, GLuint *);
+    void (GLAPIENTRY *GetQueryObjectui64v)(GLuint, GLenum, GLuint64 *);
+
     void (GLAPIENTRY *VDPAUInitNV)(const GLvoid *, const GLvoid *);
     void (GLAPIENTRY *VDPAUFiniNV)(void);
     GLvdpauSurfaceNV (GLAPIENTRY *VDPAURegisterOutputSurfaceNV)
