@@ -77,6 +77,8 @@ enum mp_voctrl {
     VOCTRL_UPDATE_WINDOW_TITLE,         // char*
     VOCTRL_UPDATE_PLAYBACK_STATE,       // struct voctrl_playback_state*
 
+    VOCTRL_PERFORMANCE_DATA,            // struct voctrl_performance_data*
+
     VOCTRL_SET_CURSOR_VISIBILITY,       // bool*
 
     VOCTRL_KILL_SCREENSAVER,
@@ -135,6 +137,16 @@ struct voctrl_playback_state {
     bool playing;
     bool paused;
     int percent_pos;
+};
+
+// VOCTRL_PERFORMANCE_DATA
+struct voctrl_performance_entry {
+    // Times are in microseconds
+    uint64_t last, avg, peak;
+};
+
+struct voctrl_performance_data {
+    struct voctrl_performance_entry upload, render, present;
 };
 
 enum {
