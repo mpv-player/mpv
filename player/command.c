@@ -2381,6 +2381,39 @@ static int panscan_property_helper(void *ctx, struct m_property *prop,
     return r;
 }
 
+// Properties retrieved through VOCTRL_PERFORMANCE_DATA
+static int perfdata_property_helper(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->video_out)
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct voctrl_performance_data data = {0};
+    if (vo_control(mpctx->video_out, VOCTRL_PERFORMANCE_DATA, &data) <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+
+    // Figure out the right field based on the name. This string
+    // match should never fail (based on the hard-coded property names)
+    struct bstr name = bstr0(prop->name), prefix, field;
+    bstr_split_tok(name, "-", &prefix, &name);
+    bstr_split_tok(name, "-", &name, &field);
+
+    // No need to have a failure case or fallthrough since these checks are all
+    // mutually exclusive and will never fail (based on the hard-coded names)
+    struct voctrl_performance_entry e = {0};
+    if (bstrcmp0(prefix, "upload")  == 0) e = data.upload;
+    if (bstrcmp0(prefix, "render")  == 0) e = data.render;
+    if (bstrcmp0(prefix, "present") == 0) e = data.present;
+
+    uint64_t val = 0;
+    if (bstrcmp0(field, "last") == 0) val = e.last;
+    if (bstrcmp0(field, "avg")  == 0) val = e.avg;
+    if (bstrcmp0(field, "peak") == 0) val = e.peak;
+
+    return m_property_int64_ro(action, arg, val);
+}
+
 /// Helper to set vo flags.
 /** \ingroup PropertyImplHelper
  */
@@ -3784,6 +3817,16 @@ static const struct m_property mp_properties[] = {
 
     {"estimated-frame-count", mp_property_frame_count},
     {"estimated-frame-number", mp_property_frame_number},
+
+    {"upload-time-last", perfdata_property_helper},
+    {"upload-time-avg", perfdata_property_helper},
+    {"upload-time-peak", perfdata_property_helper},
+    {"render-time-last", perfdata_property_helper},
+    {"render-time-avg", perfdata_property_helper},
+    {"render-time-peak", perfdata_property_helper},
+    {"present-time-last", perfdata_property_helper},
+    {"present-time-avg", perfdata_property_helper},
+    {"present-time-peak", perfdata_property_helper},
 
     {"osd-width", mp_property_osd_w},
     {"osd-height", mp_property_osd_h},

@@ -894,6 +894,30 @@ Property list
     .. note:: This is only an estimate. (It's computed from two unreliable
               quantities: fps and possibly rounded timestamps.)
 
+``render-time-last``
+    Time needed to render the last frame in microseconds. Not implemented by
+    all VOs.
+
+``render-time-avg``
+    Average of ``render-time-last`` over the last few frames. (The exact
+    averaging time is variable, but it should generally be a few seconds)
+
+``render-time-peak``
+    Peak (maximum) of ``render-time-last`` over the last few frames.
+
+``present-time-last``, ``present-time-avg``, ``present-time-peak``
+    Analogous to ``render-time-last`` etc. but measures the time needed to
+    draw a rendered frame to the screen. Not implemented by all VOs.
+
+    (This is separate from ``render-time-last`` because VOs may interpolate,
+    deinterlace or otherwise mix multiple source frames into a single output
+    frame)
+
+``upload-time-last``, ``upload-time-avg``, ``upload-time-peak``
+    Analogous to ``render-time-last`` etc. but measures the time needed to
+    upload a frame from system memory to a GPU texture. Not implemented by all
+    VOs.
+
 ``path``
     Full path of the currently played file. Usually this is exactly the same
     string you pass on the mpv command line or the ``loadfile`` command, even

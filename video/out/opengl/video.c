@@ -2908,6 +2908,24 @@ void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
         mpgl_osd_resize(p->osd, p->osd_rect, p->image_params.stereo_out);
 }
 
+static struct voctrl_performance_entry gl_video_perfentry(struct gl_timer *t)
+{
+    return (struct voctrl_performance_entry) {
+        .last = gl_timer_last_us(t),
+        .avg  = gl_timer_avg_us(t),
+        .peak = gl_timer_peak_us(t),
+    };
+}
+
+struct voctrl_performance_data gl_video_perfdata(struct gl_video *p)
+{
+    return (struct voctrl_performance_data) {
+        .upload = gl_video_perfentry(p->upload_timer),
+        .render = gl_video_perfentry(p->render_timer),
+        .present = gl_video_perfentry(p->present_timer),
+    };
+}
+
 static bool unmap_image(struct gl_video *p, struct mp_image *mpi)
 {
     GL *gl = p->gl;
