@@ -89,9 +89,6 @@ static struct mp_image *dxva2_new_ref(IDirectXVideoDecoder *decoder,
     mp_image_set_size(mpi, w, h);
     mpi->planes[3] = (void *)surface->surface;
     return mpi;
-fail:
-    dxva2_release_img(surface);
-    return NULL;
 }
 
 static struct mp_image *dxva2_allocate_image(struct lavc_ctx *s, int w, int h)
