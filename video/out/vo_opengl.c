@@ -329,6 +329,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
             vo_wakeup(vo);
         }
         return true;
+    case VOCTRL_PERFORMANCE_DATA:
+        *(struct voctrl_performance_data *)data = gl_video_perfdata(p->renderer);
+        return true;
     }
 
     int events = 0;

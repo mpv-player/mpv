@@ -274,6 +274,23 @@ static const struct gl_functions gl_functions[] = {
         },
     },
     {
+        .ver_core = 330,
+        .extension = "GL_ARB_timer_query",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(GenQueries),
+            DEF_FN(DeleteQueries),
+            DEF_FN(BeginQuery),
+            DEF_FN(EndQuery),
+            DEF_FN(QueryCounter),
+            DEF_FN(IsQuery),
+            DEF_FN(GetQueryObjectiv),
+            DEF_FN(GetQueryObjecti64v),
+            DEF_FN(GetQueryObjectuiv),
+            DEF_FN(GetQueryObjectui64v),
+            {0}
+        },
+    },
+    {
         .ver_core = 430,
         .ver_es_core = 300,
         .functions = (const struct gl_function[]) {
