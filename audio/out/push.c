@@ -489,7 +489,7 @@ int ao_wait_poll(struct ao *ao, struct pollfd *fds, int num_fds,
         // flush the wakeup pipe contents - might "drown" some wakeups, but
         // that's ok for our use-case
         char buf[100];
-        read(p->wakeup_pipe[0], buf, sizeof(buf));
+        (void)read(p->wakeup_pipe[0], buf, sizeof(buf));
     }
     return (r >= 0 || r == -EINTR) ? wakeup : -1;
 }
@@ -499,7 +499,7 @@ void ao_wakeup_poll(struct ao *ao)
     assert(ao->api == &ao_api_push);
     struct ao_push_state *p = ao->api_priv;
 
-    write(p->wakeup_pipe[1], &(char){0}, 1);
+    (void)write(p->wakeup_pipe[1], &(char){0}, 1);
 }
 
 #endif

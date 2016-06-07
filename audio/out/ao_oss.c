@@ -462,7 +462,7 @@ static int init(struct ao *ao)
         p->buffersize = 0;
         memset(data, 0, p->outburst);
         while (p->buffersize < 0x40000 && device_writable(ao) > 0) {
-            write(p->audio_fd, data, p->outburst);
+            (void)write(p->audio_fd, data, p->outburst);
             p->buffersize += p->outburst;
         }
         free(data);

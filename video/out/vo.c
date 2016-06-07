@@ -596,14 +596,14 @@ static void wait_event_fd(struct vo *vo, int64_t until_time)
 
     if (fds[1].revents & POLLIN) {
         char buf[100];
-        read(in->wakeup_pipe[0], buf, sizeof(buf)); // flush
+        (void)read(in->wakeup_pipe[0], buf, sizeof(buf)); // flush
     }
 }
 static void wakeup_event_fd(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
 
-    write(in->wakeup_pipe[1], &(char){0}, 1);
+    (void)write(in->wakeup_pipe[1], &(char){0}, 1);
 }
 #else
 static void wait_event_fd(struct vo *vo, int64_t until_time){}
