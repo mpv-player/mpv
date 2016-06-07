@@ -275,7 +275,7 @@ static void enable_kx(bool enable)
     // shouldn't be relied on here either.
     if (isatty(STDOUT_FILENO)) {
         char *cmd = enable ? "\033=" : "\033>";
-        write(STDOUT_FILENO, cmd, strlen(cmd));
+        (void)write(STDOUT_FILENO, cmd, strlen(cmd));
     }
 }
 
@@ -378,7 +378,7 @@ static void quit_request_sighandler(int signum)
 {
     do_deactivate_getch2();
 
-    write(death_pipe[1], &(char){0}, 1);
+    (void)write(death_pipe[1], &(char){0}, 1);
 }
 
 static void *terminal_thread(void *ptr)
@@ -450,7 +450,7 @@ void terminal_uninit(void)
     do_deactivate_getch2();
 
     if (input_ctx) {
-        write(death_pipe[1], &(char){0}, 1);
+        (void)write(death_pipe[1], &(char){0}, 1);
         pthread_join(input_thread, NULL);
         close(death_pipe[0]);
         close(death_pipe[1]);

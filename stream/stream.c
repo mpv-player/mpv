@@ -978,7 +978,7 @@ struct mp_cancel *mp_cancel_new(void *talloc_ctx)
 void mp_cancel_trigger(struct mp_cancel *c)
 {
     atomic_store(&c->triggered, true);
-    write(c->wakeup_pipe[1], &(char){0}, 1);
+    (void)write(c->wakeup_pipe[1], &(char){0}, 1);
 }
 
 // Restore original state. (Allows reusing a mp_cancel.)

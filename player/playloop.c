@@ -612,7 +612,7 @@ static void handle_heartbeat_cmd(struct MPContext *mpctx)
         double now = mp_time_sec();
         if (mpctx->next_heartbeat <= now) {
             mpctx->next_heartbeat = now + opts->heartbeat_interval;
-            system(opts->heartbeat_cmd);
+            (void)system(opts->heartbeat_cmd);
         }
         mpctx->sleeptime = MPMIN(mpctx->sleeptime, mpctx->next_heartbeat - now);
     }

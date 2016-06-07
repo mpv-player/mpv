@@ -41,7 +41,9 @@ def __add_generic_flags__(ctx):
 def __add_gcc_flags__(ctx):
     ctx.env.CFLAGS += ["-Wall", "-Wundef", "-Wmissing-prototypes", "-Wshadow",
                        "-Wno-switch", "-Wparentheses", "-Wpointer-arith",
-                       "-Wno-pointer-sign"]
+                       "-Wno-pointer-sign",
+                       # GCC bug 66425
+                       "-Wno-unused-result"]
 
 def __add_clang_flags__(ctx):
     ctx.env.CFLAGS += ["-Wno-logical-op-parentheses", "-fcolor-diagnostics",

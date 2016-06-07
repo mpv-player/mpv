@@ -280,7 +280,7 @@ static void wakeup_client(struct mpv_handle *ctx)
         if (ctx->wakeup_cb)
             ctx->wakeup_cb(ctx->wakeup_cb_ctx);
         if (ctx->wakeup_pipe[0] != -1)
-            write(ctx->wakeup_pipe[1], &(char){0}, 1);
+            (void)write(ctx->wakeup_pipe[1], &(char){0}, 1);
     }
     pthread_mutex_unlock(&ctx->wakeup_lock);
 }
@@ -1559,7 +1559,7 @@ int mpv_get_wakeup_pipe(mpv_handle *ctx)
     pthread_mutex_lock(&ctx->wakeup_lock);
     if (ctx->wakeup_pipe[0] == -1) {
         if (mp_make_wakeup_pipe(ctx->wakeup_pipe) >= 0)
-            write(ctx->wakeup_pipe[1], &(char){0}, 1);
+            (void)write(ctx->wakeup_pipe[1], &(char){0}, 1);
     }
     int fd = ctx->wakeup_pipe[0];
     pthread_mutex_unlock(&ctx->wakeup_lock);
