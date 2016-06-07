@@ -1129,6 +1129,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                                                   &params2, DEMUX_CHECK_FORCE);
             if (sub)
                 return sub;
+            timeline_destroy(tl);
         }
         return demuxer;
     }
