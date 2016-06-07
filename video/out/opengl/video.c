@@ -2245,8 +2245,19 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
         }
     }
 
-    if (prim_dst == MP_CSP_PRIM_AUTO)
+    // When auto-guessing the output color params, just pick the source color
+    // params to preserve the authentic "look and feel" of wrong/naive players.
+    // Some exceptions apply to source spaces that even hardcore technoluddites
+    // would probably not enjoy viewing unaltered
+    if (prim_dst == MP_CSP_PRIM_AUTO) {
         prim_dst = prim_src;
+
+        // Avoid outputting very wide gamut content automatically, since the
+        // majority target audience has standard gamut displays
+        if (prim_dst == MP_CSP_PRIM_BT_2020 || prim_dst == MP_CSP_PRIM_PRO_PHOTO)
+            prim_dst = MP_CSP_PRIM_BT_709;
+    }
+
     if (trc_dst == MP_CSP_TRC_AUTO) {
         trc_dst = trc_src;
         // Avoid outputting linear light at all costs. First try
@@ -2260,6 +2271,7 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
         if (trc_dst == MP_CSP_TRC_LINEAR || trc_dst == MP_CSP_TRC_SMPTE_ST2084)
             trc_dst = MP_CSP_TRC_GAMMA22;
     }
+
     if (!peak_src) {
         // If the source has no information known, it's display-referred
         // (and should be treated relative to the specified desired peak_dst)
