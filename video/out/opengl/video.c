@@ -2991,8 +2991,11 @@ static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     p->frames_uploaded++;
 
     if (p->hwdec_active) {
+        // Hardware decoding
         struct gl_hwdec_frame gl_frame = {0};
+        gl_timer_start(p->upload_timer);
         bool ok = p->hwdec->driver->map_frame(p->hwdec, vimg->mpi, &gl_frame) >= 0;
+        gl_timer_stop(p->upload_timer);
         vimg->hwdec_mapped = true;
         if (ok) {
             struct mp_image layout = {0};
@@ -3017,6 +3020,7 @@ static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         return true;
     }
 
+    // Software decoding
     assert(mpi->num_planes == p->plane_count);
 
     gl_timer_start(p->upload_timer);
