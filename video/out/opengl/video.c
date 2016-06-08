@@ -154,6 +154,7 @@ struct tex_hook {
     void (*hook)(struct gl_video *p, struct img_tex tex, // generates GLSL
                  struct gl_transform *trans, void *priv);
     void (*free)(struct tex_hook *hook);
+    bool (*cond)(struct gl_video *p, struct img_tex tex, void *priv);
 };
 
 struct fbosurface {
@@ -1132,6 +1133,12 @@ static struct img_tex pass_hook(struct gl_video *p, const char *name,
         if (strcmp(hook->hook_tex, name) != 0)
             continue;
 
+        // Check the hook's condition
+        if (hook->cond && !hook->cond(p, tex, hook->priv)) {
+            MP_DBG(p, "Skipping hook on %s due to condition.\n", name);
+            continue;
+        }
+
         // Bind all necessary textures and add them to the prelude
         for (int t = 0; t < TEXUNIT_VIDEO_NUM; t++) {
             const char *bind_name = hook->bind_tex[t];
@@ -1149,12 +1156,11 @@ static struct img_tex pass_hook(struct gl_video *p, const char *name,
             }
 
             if (!saved_tex_find(p, bind_name, &bind_tex)) {
-                // Clean up texture bindings and just return as-is, stop
-                // all further processing of this hook
-                MP_ERR(p, "Failed running hook for %s: No saved texture named"
-                       " %s!\n", name, bind_name);
+                // Clean up texture bindings and move on to the next hook
+                MP_DBG(p, "Skipping hook on %s due to no texture named %s.\n",
+                       name, bind_name);
                 p->pass_tex_num -= t;
-                return tex;
+                goto next_hook;
             }
 
             hook_prelude(p, bind_name, pass_bind(p, bind_tex), bind_tex);
@@ -1197,6 +1203,8 @@ static struct img_tex pass_hook(struct gl_video *p, const char *name,
         }
 
         saved_tex_store(p, store_name, saved_tex);
+
+next_hook: ;
     }
 
     return tex;
@@ -1615,9 +1623,10 @@ static void user_hook_old(struct gl_video *p, struct img_tex tex,
     GLSLF("color = %s(HOOKED_raw, HOOKED_pos, HOOKED_size);\n", fn_name);
 }
 
-// Returns 1.0 on failure to at least create a legal FBO
-static float eval_szexpr(struct gl_video *p, struct img_tex tex,
-                         struct szexp expr[MAX_SZEXP_SIZE])
+// Returns whether successful. 'result' is left untouched on failure
+static bool eval_szexpr(struct gl_video *p, struct img_tex tex,
+                        struct szexp expr[MAX_SZEXP_SIZE],
+                        float *result)
 {
     float stack[MAX_SZEXP_SIZE] = {0};
     int idx = 0; // points to next element to push
@@ -1634,10 +1643,22 @@ static float eval_szexpr(struct gl_video *p, struct img_tex tex,
             stack[idx++] = expr[i].val.cval;
             continue;
 
+        case SZEXP_OP1:
+            if (idx < 1) {
+                MP_WARN(p, "Stack underflow in RPN expression!\n");
+                return false;
+            }
+
+            switch (expr[i].val.op) {
+            case SZEXP_OP_NOT: stack[idx-1] = !stack[idx-1]; break;
+            default: abort();
+            }
+            continue;
+
         case SZEXP_OP2:
             if (idx < 2) {
                 MP_WARN(p, "Stack underflow in RPN expression!\n");
-                return 1.0;
+                return false;
             }
 
             // Pop the operands in reverse order
@@ -1649,12 +1670,14 @@ static float eval_szexpr(struct gl_video *p, struct img_tex tex,
             case SZEXP_OP_SUB: res = op1 - op2; break;
             case SZEXP_OP_MUL: res = op1 * op2; break;
             case SZEXP_OP_DIV: res = op1 / op2; break;
+            case SZEXP_OP_GT:  res = op1 > op2; break;
+            case SZEXP_OP_LT:  res = op1 < op2; break;
             default: abort();
             }
 
-            if (isnan(res)) {
+            if (!isfinite(res)) {
                 MP_WARN(p, "Illegal operation in RPN expression!\n");
-                return 1.0;
+                return false;
             }
 
             stack[idx++] = res;
@@ -1679,7 +1702,7 @@ static float eval_szexpr(struct gl_video *p, struct img_tex tex,
             }
 
             MP_WARN(p, "Texture %.*s not found in RPN expression!\n", BSTR_P(name));
-            return 1.0;
+            return false;
 
 found_tex:
             stack[idx++] = (expr[i].tag == SZEXP_VAR_W) ? var_tex.w : var_tex.h;
@@ -1692,10 +1715,21 @@ done:
     // Return the single stack element
     if (idx != 1) {
         MP_WARN(p, "Malformed stack after RPN expression!\n");
-        return 1.0;
+        return false;
     }
 
-    return stack[0];
+    *result = stack[0];
+    return true;
+}
+
+static bool user_hook_cond(struct gl_video *p, struct img_tex tex, void *priv)
+{
+    struct gl_user_shader *shader = priv;
+    assert(shader);
+
+    float res = false;
+    eval_szexpr(p, tex, shader->cond, &res);
+    return res;
 }
 
 static void user_hook(struct gl_video *p, struct img_tex tex,
@@ -1708,8 +1742,12 @@ static void user_hook(struct gl_video *p, struct img_tex tex,
     GLSLF("// custom hook\n");
     GLSLF("color = hook();\n");
 
-    float w = eval_szexpr(p, tex, shader->width);
-    float h = eval_szexpr(p, tex, shader->height);
+    // Make sure we at least create a legal FBO on failure, since it's better
+    // to do this and display an error message than just crash OpenGL
+    float w = 1.0, h = 1.0;
+
+    eval_szexpr(p, tex, shader->width, &w);
+    eval_szexpr(p, tex, shader->height, &h);
 
     *trans = (struct gl_transform){{{w / tex.w, 0}, {0, h / tex.h}}};
     gl_transform_trans(shader->offset, trans);
@@ -1757,6 +1795,7 @@ static void pass_hook_user_shaders(struct gl_video *p, char **shaders)
                 .components = out.components,
                 .hook = user_hook,
                 .free = user_hook_free,
+                .cond = user_hook_cond,
             };
 
             for (int i = 0; i < SHADER_MAX_HOOKS; i++) {

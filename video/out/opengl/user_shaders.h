@@ -31,6 +31,9 @@ enum szexp_op {
     SZEXP_OP_SUB,
     SZEXP_OP_MUL,
     SZEXP_OP_DIV,
+    SZEXP_OP_NOT,
+    SZEXP_OP_GT,
+    SZEXP_OP_LT,
 };
 
 enum szexp_tag {
@@ -39,6 +42,7 @@ enum szexp_tag {
     SZEXP_VAR_W, // Get the width/height of a named texture (variable)
     SZEXP_VAR_H,
     SZEXP_OP2, // Pop two elements and push the result of a dyadic operation
+    SZEXP_OP1, // Pop one element and push the result of a monadic operation
 };
 
 struct szexp {
@@ -58,6 +62,7 @@ struct gl_user_shader {
     struct gl_transform offset;
     struct szexp width[MAX_SZEXP_SIZE];
     struct szexp height[MAX_SZEXP_SIZE];
+    struct szexp cond[MAX_SZEXP_SIZE];
     int components;
 };
 

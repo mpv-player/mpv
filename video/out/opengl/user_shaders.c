@@ -50,6 +50,9 @@ static bool parse_rpn_szexpr(struct bstr line, struct szexp out[MAX_SZEXP_SIZE])
         case '-': exp->tag = SZEXP_OP2; exp->val.op = SZEXP_OP_SUB; continue;
         case '*': exp->tag = SZEXP_OP2; exp->val.op = SZEXP_OP_MUL; continue;
         case '/': exp->tag = SZEXP_OP2; exp->val.op = SZEXP_OP_DIV; continue;
+        case '!': exp->tag = SZEXP_OP1; exp->val.op = SZEXP_OP_NOT; continue;
+        case '>': exp->tag = SZEXP_OP2; exp->val.op = SZEXP_OP_GT;  continue;
+        case '<': exp->tag = SZEXP_OP2; exp->val.op = SZEXP_OP_LT;  continue;
         }
 
         if (isdigit(word.start[0])) {
@@ -77,6 +80,7 @@ bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
         .offset = identity_trans,
         .width = {{ SZEXP_VAR_W, { .varname = bstr0("HOOKED") }}},
         .height = {{ SZEXP_VAR_H, { .varname = bstr0("HOOKED") }}},
+        .cond = {{ SZEXP_CONST, { .cval = 1.0 }}},
     };
 
     int hook_idx = 0;
@@ -149,6 +153,14 @@ bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
         if (bstr_eatstart0(&line, "HEIGHT")) {
             if (!parse_rpn_szexpr(line, out->height)) {
                 mp_err(log, "Error while parsing HEIGHT!\n");
+                return false;
+            }
+            continue;
+        }
+
+        if (bstr_eatstart0(&line, "WHEN")) {
+            if (!parse_rpn_szexpr(line, out->cond)) {
+                mp_err(log, "Error while parsing WHEN!\n");
                 return false;
             }
             continue;
