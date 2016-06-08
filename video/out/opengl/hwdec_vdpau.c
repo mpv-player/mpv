@@ -44,6 +44,16 @@ struct priv {
     bool mapped;
 };
 
+static void unmap(struct gl_hwdec *hw)
+{
+    struct priv *p = hw->priv;
+    GL *gl = hw->gl;
+
+    if (p->mapped)
+        gl->VDPAUUnmapSurfacesNV(1, &p->vdpgl_surface);
+    p->mapped = false;
+}
+
 static void mark_vdpau_objects_uninitialized(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
@@ -59,9 +69,7 @@ static void destroy_objects(struct gl_hwdec *hw)
     struct vdp_functions *vdp = &p->ctx->vdp;
     VdpStatus vdp_st;
 
-    if (p->mapped)
-        gl->VDPAUUnmapSurfacesNV(1, &p->vdpgl_surface);
-    p->mapped = false;
+    unmap(hw);
 
     if (p->vdpgl_surface)
         gl->VDPAUUnregisterSurfaceNV(p->vdpgl_surface);
@@ -204,16 +212,6 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
         },
     };
     return 0;
-}
-
-static void unmap(struct gl_hwdec *hw)
-{
-    struct priv *p = hw->priv;
-    GL *gl = hw->gl;
-
-    if (p->mapped)
-        gl->VDPAUUnmapSurfacesNV(1, &p->vdpgl_surface);
-    p->mapped = false;
 }
 
 const struct gl_hwdec_driver gl_hwdec_vdpau = {
