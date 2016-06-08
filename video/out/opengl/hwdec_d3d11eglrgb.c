@@ -125,7 +125,8 @@ static int create(struct gl_hwdec *hw)
 
     HANDLE d3d11_dll = GetModuleHandleW(L"d3d11.dll");
     if (!d3d11_dll) {
-        MP_ERR(hw, "Failed to load D3D11 library\n");
+        if (!hw->probing)
+            MP_ERR(hw, "Failed to load D3D11 library\n");
         goto fail;
     }
 
@@ -138,8 +139,9 @@ static int create(struct gl_hwdec *hw)
                       D3D11_CREATE_DEVICE_VIDEO_SUPPORT, NULL, 0,
                       D3D11_SDK_VERSION, &p->d3d11_device, NULL, NULL);
     if (FAILED(hr)) {
-        MP_ERR(hw, "Failed to create D3D11 Device: %s\n",
-            mp_HRESULT_to_str(hr));
+        int lev = hw->probing ? MSGL_V : MSGL_ERR;
+        mp_msg(hw->log, lev, "Failed to create D3D11 Device: %s\n",
+               mp_HRESULT_to_str(hr));
         goto fail;
     }
 
