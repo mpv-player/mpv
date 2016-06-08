@@ -177,7 +177,6 @@ static int create(struct gl_hwdec *hw)
     hr = ID3D11Device_QueryInterface(p->d3d11_device, &IID_ID3D10Multithread,
                                      (void **)&multithread);
     if (FAILED(hr)) {
-        ID3D10Multithread_Release(multithread);
         MP_ERR(hw, "Failed to get Multithread interface: %s\n",
                mp_HRESULT_to_str(hr));
         goto fail;
