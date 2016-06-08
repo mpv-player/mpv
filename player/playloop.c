@@ -180,18 +180,17 @@ void reset_playback_state(struct MPContext *mpctx)
 #endif
 }
 
-// return -1 if seek failed (non-seekable stream?), 0 otherwise
-static int mp_seek(MPContext *mpctx, struct seek_params seek)
+static void mp_seek(MPContext *mpctx, struct seek_params seek)
 {
     struct MPOpts *opts = mpctx->opts;
 
     if (!mpctx->demuxer || seek.type == MPSEEK_NONE || seek.amount == MP_NOPTS_VALUE)
-        return -1;
+        return;
 
     if (!mpctx->demuxer->seekable) {
         MP_ERR(mpctx, "Cannot seek in this file.\n");
         MP_ERR(mpctx, "You can forcibly enable it with '--force-seeking=yes'.\n");
-        return -1;
+        return;
     }
 
     bool hr_seek_very_exact = seek.exact == MPSEEK_VERY_EXACT;
@@ -292,8 +291,6 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek)
 
     mp_notify(mpctx, MPV_EVENT_SEEK, NULL);
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
-
-    return 0;
 }
 
 // This combines consecutive seek requests.
