@@ -746,10 +746,17 @@ Available video output drivers are:
         WIDTH <szexpr>, HEIGHT <szexpr>
             Specifies the size of the resulting texture for this pass.
             ``szexpr`` refers to an expression in RPN (reverse polish
-            notation), using the operators + - * /, floating point literals,
-            and references to existing texture sizes such as MAIN.width or
-            CHROMA.height. By default, these are set to HOOKED.w and HOOKED.h,
-            respectively.
+            notation), using the operators + - * / > < !, floating point
+            literals, and references to existing texture sizes such as
+            MAIN.width or CHROMA.height. By default, these are set to HOOKED.w
+            and HOOKED.h, respectively.
+
+        WHEN <szexpr>
+            Specifies a condition that needs to be true (non-zero) for the
+            shader stage to be evaluated. If it fails, it will silently be
+            omitted. (Note that a shader stage like this which has a dependency
+            on an optional hook point can still cause that hook point to be
+            saved, which has some minor overhead)
 
         OFFSET ox oy
             Indicates a pixel shift (offset) introduced by this pass. These
