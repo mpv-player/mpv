@@ -2791,7 +2791,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
                 {
                     fbotex_change(&p->output_fbo, p->gl, p->log,
                                   p->vp_w, abs(p->vp_h),
-                                  p->opts.fbo_format, 0);
+                                  p->opts.fbo_format, FBOTEX_FUZZY);
                     dest_fbo = p->output_fbo.fbo;
                     p->output_fbo_valid = true;
                 }
