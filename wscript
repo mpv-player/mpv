@@ -389,6 +389,14 @@ iconv support use --disable-iconv.",
     }
 ]
 
+ffmpeg_pkg_config_checks = [
+    'libavutil',   '>= 55.17.103',
+    'libavcodec',  '>= 57.24.102',
+    'libavformat', '>= 57.25.100',
+    'libswscale',  '>= 4.0.100'
+]
+ffmpeg_versions_string = "FFmpeg 3.0.2"
+
 libav_pkg_config_checks = [
     'libavutil',   '>= 54.02.0',
     'libavcodec',  '>= 56.1.0',
@@ -397,14 +405,27 @@ libav_pkg_config_checks = [
 ]
 libav_versions_string = "FFmpeg 2.4 or Libav 11"
 
-libav_dependencies = [
+ffmpeg_dependencies = [
     {
-        'name': 'libav',
-        'desc': 'libav/ffmpeg',
+        'name': 'recent-ffmpeg',
+        'desc': 'recent ffmpeg',
+        'func': check_pkg_config(*ffmpeg_pkg_config_checks),
+    }, {
+        'name': '--unsupported-ffmpeg',
+        'desc': 'old libav/ffmpeg',
         'func': check_pkg_config(*libav_pkg_config_checks),
+        'default': 'disable',
+    }, {
+        'name': 'ffmpeg',
+        'desc': 'ffmpeg',
+        'deps_any': [ 'recent-ffmpeg', 'unsupported-ffmpeg' ],
+        'func': check_true,
         'req': True,
         'fmsg': "Unable to find development files for some of the required \
-FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_string)
+FFmpeg/Libav libraries. Only {0} or newer is supported.\nIf you wish to build \
+mpv with older versions (at least {1}), use --enable-unsupported-ffmpeg.\n\
+This is NOT SUPPORTED, and some player features will not work correctly. \
+Aborting.".format(ffmpeg_versions_string, libav_versions_string),
     }, {
         'name': '--libswresample',
         'desc': 'libswresample',
@@ -435,79 +456,79 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'desc': 'libavcodec avcodec_enum_to_chroma_pos API',
         'func': check_statement('libavcodec/avcodec.h', """int x, y;
             avcodec_enum_to_chroma_pos(&x, &y, AVCHROMA_LOC_UNSPECIFIED)""",
-            use='libav')
+            use='ffmpeg')
     }, {
         'name': 'avframe-metadata',
         'desc': 'libavutil AVFrame metadata',
         'func': check_statement('libavutil/frame.h',
                                 'av_frame_get_metadata(NULL)',
-                                use='libav')
+                                use='ffmpeg')
     }, {
         'name': 'avframe-skip-samples',
         'desc': 'libavutil AVFrame skip samples metadata',
         'func': check_statement('libavutil/frame.h',
                                 'enum AVFrameSideDataType type = AV_FRAME_DATA_SKIP_SAMPLES',
-                                use='libav')
+                                use='ffmpeg')
     }, {
         'name': 'av-pix-fmt-mmal',
         'desc': 'libavutil AV_PIX_FMT_MMAL',
         'func': check_statement('libavutil/pixfmt.h',
                                 'int x = AV_PIX_FMT_MMAL',
-                                use='libav'),
+                                use='ffmpeg'),
     }, {
         'name': 'av-version-info',
         'desc': 'libavtuil av_version_info()',
         'func': check_statement('libavutil/avutil.h',
                                 'const char *x = av_version_info()',
-                                use='libav'),
+                                use='ffmpeg'),
     }, {
         'name': 'av-new-pixdesc',
         'desc': 'libavutil new pixdesc fields',
         'func': check_statement('libavutil/pixdesc.h',
                                 'AVComponentDescriptor d; int x = d.depth',
-                                use='libav'),
+                                use='ffmpeg'),
     }, {
         'name': 'av-avpacket-int64-duration',
         'desc': 'libavcodec 64 bit AVPacket.duration',
         'func': check_statement('libavcodec/avcodec.h',
                                 'int x[(int)sizeof(((AVPacket){0}).duration) - 7]',
-                                use='libav'),
+                                use='ffmpeg'),
     }, {
         'name': 'av-subtitle-nopict',
         'desc': 'libavcodec AVSubtitleRect AVPicture removal',
         'func': check_statement('libavcodec/avcodec.h',
                                 'AVSubtitleRect r = {.linesize={0}}',
-                                use='libav'),
+                                use='ffmpeg'),
     }, {
         'name': 'avcodec-profile-name',
         'desc': 'libavcodec avcodec_profile_name()',
         'func': check_statement('libavcodec/avcodec.h',
                                 'avcodec_profile_name(0,0)',
-                                use='libav'),
+                                use='ffmpeg'),
     }, {
         'name': 'avcodec-new-codec-api',
         'desc': 'libavcodec decode/encode API',
         'func': check_statement('libavcodec/avcodec.h',
                                 'avcodec_send_packet(0,0)',
-                                use='libav'),
+                                use='ffmpeg'),
     }, {
         'name': 'avcodec-has-codecpar',
         'desc': 'libavcodec AVCodecParameters API',
         'func': check_statement('libavformat/avformat.h',
                                 '(void)offsetof(AVStream, codecpar)',
-                                use='libav'),
+                                use='ffmpeg'),
     }, {
         'name': 'avutil-has-hwcontext',
         'desc': 'libavutil AVHWFramesContext API',
         'func': check_statement('libavutil/frame.h',
                                 '(void)offsetof(AVFrame, hw_frames_ctx)',
-                                use='libav'),
+                                use='ffmpeg'),
     }, {
         'name': 'avutil-st2084',
         'desc': 'libavutil AVCOL_TRC_SMPTEST2084',
         'func': check_statement('libavutil/pixfmt.h',
                                 'AVCOL_TRC_SMPTEST2084',
-                                use='libav'),
+                                use='ffmpeg'),
     }
 ]
 
@@ -842,7 +863,7 @@ hwaccel_features = [
         'name': '--vaapi-hwaccel',
         'desc': 'libavcodec VAAPI hwaccel',
         'deps': [ 'vaapi' ],
-        'func': check_headers('libavcodec/vaapi.h', use='libav'),
+        'func': check_headers('libavcodec/vaapi.h', use='ffmpeg'),
     }, {
         'name': '--videotoolbox-hwaccel',
         'desc': 'libavcodec videotoolbox hwaccel',
@@ -851,7 +872,7 @@ hwaccel_features = [
             check_statement('libavcodec/videotoolbox.h',
                             'av_videotoolbox_alloc_context()',
                             framework='IOSurface',
-                            use='libav')),
+                            use='ffmpeg')),
     } , {
         'name': '--videotoolbox-gl',
         'desc': 'Videotoolbox with OpenGL',
@@ -863,14 +884,14 @@ hwaccel_features = [
         'deps': [ 'vdpau' ],
         'func': check_statement('libavcodec/vdpau.h',
                                 'av_vdpau_bind_context(0,0,0,AV_HWACCEL_FLAG_ALLOW_HIGH_DEPTH)',
-                                use='libav'),
+                                use='ffmpeg'),
     }, {
         'name': '--d3d-hwaccel',
         'desc': 'libavcodec DXVA2 and D3D11VA hwaccel',
         'deps': [ 'win32' ],
         'func': compose_checks(
-                    check_headers('libavcodec/dxva2.h',  use='libav'),
-                    check_headers('libavcodec/d3d11va.h',  use='libav')),
+                    check_headers('libavcodec/dxva2.h',  use='ffmpeg'),
+                    check_headers('libavcodec/d3d11va.h',  use='ffmpeg')),
     }, {
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',
@@ -964,7 +985,7 @@ def options(opt):
         help    = 'variant name for saving configuration and build results')
 
     opt.parse_features('build and install options', build_options)
-    optional_features = main_dependencies + libav_dependencies
+    optional_features = main_dependencies + ffmpeg_dependencies
     opt.parse_features('optional features', optional_features)
     opt.parse_features('audio outputs',     audio_output_features)
     opt.parse_features('video outputs',     video_output_features)
@@ -1025,7 +1046,7 @@ def configure(ctx):
     ctx.parse_dependencies(main_dependencies)
     ctx.parse_dependencies(audio_output_features)
     ctx.parse_dependencies(video_output_features)
-    ctx.parse_dependencies(libav_dependencies)
+    ctx.parse_dependencies(ffmpeg_dependencies)
     ctx.parse_dependencies(hwaccel_features)
     ctx.parse_dependencies(radio_and_tv_features)
 
