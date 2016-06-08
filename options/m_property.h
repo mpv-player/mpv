@@ -184,6 +184,8 @@ struct m_sub_property {
 // Convenience macros which can be used as part of a sub_property entry.
 #define SUB_PROP_INT(i) \
     .type = {.type = CONF_TYPE_INT}, .value = {.int_ = (i)}
+#define SUB_PROP_INT64(i) \
+    .type = {.type = CONF_TYPE_INT64}, .value = {.int64 = (i)}
 #define SUB_PROP_STR(s) \
     .type = {.type = CONF_TYPE_STRING}, .value = {.string = (char *)(s)}
 #define SUB_PROP_FLOAT(f) \

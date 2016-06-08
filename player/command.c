@@ -2381,39 +2381,6 @@ static int panscan_property_helper(void *ctx, struct m_property *prop,
     return r;
 }
 
-// Properties retrieved through VOCTRL_PERFORMANCE_DATA
-static int perfdata_property_helper(void *ctx, struct m_property *prop,
-                                    int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (!mpctx->video_out)
-        return M_PROPERTY_UNAVAILABLE;
-
-    struct voctrl_performance_data data = {0};
-    if (vo_control(mpctx->video_out, VOCTRL_PERFORMANCE_DATA, &data) <= 0)
-        return M_PROPERTY_UNAVAILABLE;
-
-    // Figure out the right field based on the name. This string
-    // match should never fail (based on the hard-coded property names)
-    struct bstr name = bstr0(prop->name), prefix, field;
-    bstr_split_tok(name, "-", &prefix, &name);
-    bstr_split_tok(name, "-", &name, &field);
-
-    // No need to have a failure case or fallthrough since these checks are all
-    // mutually exclusive and will never fail (based on the hard-coded names)
-    struct voctrl_performance_entry e = {0};
-    if (bstrcmp0(prefix, "upload")  == 0) e = data.upload;
-    if (bstrcmp0(prefix, "render")  == 0) e = data.render;
-    if (bstrcmp0(prefix, "present") == 0) e = data.present;
-
-    uint64_t val = 0;
-    if (bstrcmp0(field, "last") == 0) val = e.last;
-    if (bstrcmp0(field, "avg")  == 0) val = e.avg;
-    if (bstrcmp0(field, "peak") == 0) val = e.peak;
-
-    return m_property_int64_ro(action, arg, val);
-}
-
 /// Helper to set vo flags.
 /** \ingroup PropertyImplHelper
  */
@@ -2818,6 +2785,39 @@ static int mp_property_vo_configured(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     return m_property_flag_ro(action, arg,
                         mpctx->video_out && mpctx->video_out->config_ok);
+}
+
+static int mp_property_vo_performance(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->video_out)
+        return M_PROPERTY_UNAVAILABLE;
+
+    // Return the type right away if requested, to avoid having to
+    // go through a completely unnecessary VOCTRL
+    if (action == M_PROPERTY_GET_TYPE) {
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+    }
+
+    struct voctrl_performance_data data = {0};
+    if (vo_control(mpctx->video_out, VOCTRL_PERFORMANCE_DATA, &data) <= 0)
+        return M_PROPERTY_UNAVAILABLE;
+
+#define SUB_PROP_PERFDATA(N) \
+    {#N "-last", SUB_PROP_INT64(data.N.last)}, \
+    {#N "-avg",  SUB_PROP_INT64(data.N.avg)},  \
+    {#N "-peak", SUB_PROP_INT64(data.N.peak)}
+
+    struct m_sub_property props[] = {
+        SUB_PROP_PERFDATA(upload),
+        SUB_PROP_PERFDATA(render),
+        SUB_PROP_PERFDATA(present),
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
 }
 
 static int mp_property_vo(void *ctx, struct m_property *p, int action, void *arg)
@@ -3803,6 +3803,7 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_ALIAS("height", "video-params/h"),
     {"window-scale", mp_property_window_scale},
     {"vo-configured", mp_property_vo_configured},
+    {"vo-performance", mp_property_vo_performance},
     {"current-vo", mp_property_vo},
     {"fps", mp_property_fps},
     {"estimated-vf-fps", mp_property_vf_fps},
@@ -3817,16 +3818,6 @@ static const struct m_property mp_properties[] = {
 
     {"estimated-frame-count", mp_property_frame_count},
     {"estimated-frame-number", mp_property_frame_number},
-
-    {"upload-time-last", perfdata_property_helper},
-    {"upload-time-avg", perfdata_property_helper},
-    {"upload-time-peak", perfdata_property_helper},
-    {"render-time-last", perfdata_property_helper},
-    {"render-time-avg", perfdata_property_helper},
-    {"render-time-peak", perfdata_property_helper},
-    {"present-time-last", perfdata_property_helper},
-    {"present-time-avg", perfdata_property_helper},
-    {"present-time-peak", perfdata_property_helper},
 
     {"osd-width", mp_property_osd_w},
     {"osd-height", mp_property_osd_h},
