@@ -154,7 +154,7 @@ function add_video(s)
     end
     append_property(s, sec, "window-scale", {prefix="Window Scale:"})
     append_property(s, sec, "video-params/aspect", {prefix="Aspect Ratio:"})
-    append_property(s, sec, "video-params/pixelformat", {prefix="Pixel format:"})
+    append_property(s, sec, "video-params/pixelformat", {prefix="Pixel Format:"})
     append_property(s, sec, "video-params/colormatrix", {prefix="Colormatrix:"})
     append_property(s, sec, "video-params/primaries", {prefix="Primaries:"})
     append_property(s, sec, "video-params/gamma", {prefix="Gamma:"})
