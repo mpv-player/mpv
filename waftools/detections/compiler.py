@@ -82,4 +82,3 @@ def __apply_map__(ctx, fnmap):
 def configure(ctx):
     __add_generic_flags__(ctx)
     __apply_map__(ctx, __compiler_map__)
-
