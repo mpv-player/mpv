@@ -189,7 +189,8 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek)
         return -1;
 
     if (!mpctx->demuxer->seekable) {
-        MP_ERR(mpctx, "Can't seek in this file.\n");
+        MP_ERR(mpctx, "Cannot seek in this file.\n");
+        MP_ERR(mpctx, "You can forcibly enable it with '--force-seeking=yes'.\n");
         return -1;
     }
 
