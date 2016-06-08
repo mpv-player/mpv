@@ -287,6 +287,8 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
 
     GLenum filter = fbo->tex_filter;
 
+    fbotex_uninit(fbo);
+
     *fbo = (struct fbotex) {
         .gl = gl,
         .rw = w,
