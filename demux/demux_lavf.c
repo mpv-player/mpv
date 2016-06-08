@@ -795,6 +795,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         avfc->pb = priv->pb;
         if (stream_control(priv->stream, STREAM_CTRL_HAS_AVSEEK, NULL) > 0)
             demuxer->seekable = true;
+        demuxer->seekable |= priv->format_hack.fully_read;
     }
 
     if (matches_avinputformat_name(priv, "rtsp")) {
