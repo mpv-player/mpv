@@ -331,6 +331,7 @@ def build(ctx):
         ( "video/out/dither.c" ),
         ( "video/out/filter_kernels.c" ),
         ( "video/out/opengl/angle_dynamic.c",    "egl-angle" ),
+        ( "video/out/opengl/angle_common.c",     "egl-angle" ),
         ( "video/out/opengl/common.c",           "gl" ),
         ( "video/out/opengl/context.c",          "gl" ),
         ( "video/out/opengl/context_angle.c",    "egl-angle" ),

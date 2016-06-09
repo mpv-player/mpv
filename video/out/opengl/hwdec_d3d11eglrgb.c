@@ -23,6 +23,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#include "angle_common.h"
 #include "angle_dynamic.h"
 
 #include "common/common.h"
@@ -153,6 +154,11 @@ static int create(struct gl_hwdec *hw)
     }
     ID3D10Multithread_SetMultithreadProtected(multithread, TRUE);
     ID3D10Multithread_Release(multithread);
+
+    if (!d3d11_check_decoding(p->d3d11_device)) {
+        MP_VERBOSE(hw, "D3D11 video decoding not supported on this system.\n");
+        goto fail;
+    }
 
     hr = ID3D11Device_QueryInterface(p->d3d11_device, &IID_ID3D11VideoDevice,
                                      (void **)&p->video_dev);
