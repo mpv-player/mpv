@@ -40,15 +40,10 @@ struct priv {
     struct mp_hwdec_ctx hwctx;
 
     ID3D11Device *d3d11_device;
-    ID3D11DeviceContext *device_ctx;
-    ID3D11VideoDevice *video_dev;
-    ID3D11VideoContext *video_ctx;
 
     EGLDisplay egl_display;
     EGLConfig  egl_config;
     EGLSurface egl_surface;
-
-    ID3D11Texture2D *texture;
 
     GLuint gl_texture;
 };
@@ -81,18 +76,6 @@ static void destroy(struct gl_hwdec *hw)
     destroy_objects(hw);
 
     hwdec_devices_remove(hw->devs, &p->hwctx);
-
-    if (p->video_ctx)
-        ID3D11VideoContext_Release(p->video_ctx);
-    p->video_ctx = NULL;
-
-    if (p->video_dev)
-        ID3D11VideoDevice_Release(p->video_dev);
-    p->video_dev = NULL;
-
-    if (p->device_ctx)
-        ID3D11DeviceContext_Release(p->device_ctx);
-    p->device_ctx = NULL;
 
     if (p->d3d11_device)
         ID3D11Device_Release(p->d3d11_device);
@@ -159,19 +142,6 @@ static int create(struct gl_hwdec *hw)
         MP_VERBOSE(hw, "D3D11 video decoding not supported on this system.\n");
         goto fail;
     }
-
-    hr = ID3D11Device_QueryInterface(p->d3d11_device, &IID_ID3D11VideoDevice,
-                                     (void **)&p->video_dev);
-    if (FAILED(hr))
-        goto fail;
-
-    ID3D11Device_GetImmediateContext(p->d3d11_device, &p->device_ctx);
-    if (!p->device_ctx)
-        goto fail;
-    hr = ID3D11DeviceContext_QueryInterface(p->device_ctx, &IID_ID3D11VideoContext,
-                                            (void **)&p->video_ctx);
-    if (FAILED(hr))
-        goto fail;
 
     EGLint attrs[] = {
         EGL_BUFFER_SIZE, 32,
