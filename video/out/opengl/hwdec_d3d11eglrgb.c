@@ -48,9 +48,6 @@ struct priv {
     EGLSurface egl_surface;
 
     ID3D11Texture2D *texture;
-    ID3D11VideoProcessor *video_proc;
-    ID3D11VideoProcessorEnumerator *vp_enum;
-    ID3D11VideoProcessorOutputView *out_view;
 
     GLuint gl_texture;
 };
