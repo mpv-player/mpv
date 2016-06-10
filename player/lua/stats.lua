@@ -18,13 +18,20 @@ local o = {
     key_toggle = "I",
 
     duration = 3,
-    redraw_delay = 2,           -- acts as duration in the toggling case
+    redraw_delay = 1,           -- acts as duration in the toggling case
     ass_formatting = true,
     debug = false,
 
+    plot_render = true,
+    plot_present = true,
+    plot_upload = true,
+    plot_bg_border_color = "0000FF",
+    plot_bg_color = "262626",
+    plot_color = "FFFFFF",
+
     -- Text style
     font = "Source Sans Pro",
-    font_size = 10,
+    font_size = 9,
     font_color = "FFFFFF",
     border_size = 1.0,
     border_color = "262626",
@@ -55,7 +62,12 @@ local o = {
 options.read_options(o)
 
 
+local timer = mp.add_periodic_timer(o.redraw_delay, function() print_stats(o.redraw_delay + 1) end)
+timer:kill()
+
+
 function print_stats(duration)
+    --local start = mp.get_time()
     local stats = {
         header = "",
         file = "",
@@ -83,6 +95,7 @@ function print_stats(duration)
     add_audio(stats)
 
     mp.osd_message(join_stats(stats), duration or o.duration)
+    --print("main: " .. mp.get_time() - start)
 end
 
 
@@ -148,6 +161,9 @@ function add_video(s)
         append_property(s, sec, "audio-speed-correction",
                         {prefix="/", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
+
+    append_perfdata(s, sec)
+
     if append_property(s, sec, "video-params/w", {prefix="Native Resolution:"}) then
         append_property(s, sec, "video-params/h",
                         {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
@@ -178,14 +194,18 @@ end
 
 
 function add_header(s)
+    s.header = text_style()
+end
+
+
+function text_style()
     if not o.ass_formatting then
-        s.header = ""
-        return
+        return ""
     end
     if o.custom_header and o.custom_header ~= "" then
-        s.header = set_ASS(true) .. o.custom_header
+        return set_ASS(true) .. o.custom_header
     else
-        s.header = string.format("%s{\\fs%d}{\\fn%s}{\\bord%f}{\\3c&H%s&}{\\1c&H%s&}" ..
+        return string.format("%s{\\fs%d}{\\fn%s}{\\bord%f}{\\3c&H%s&}{\\1c&H%s&}" ..
                                  "{\\alpha&H%s&}{\\xshad%f}{\\yshad%f}{\\4c&H%s&}",
                         set_ASS(true), o.font_size, o.font, o.border_size,
                         o.border_color, o.font_color, o.alpha, o.shadow_x_offset,
@@ -229,6 +249,76 @@ function append_property(s, sec, prop, attr, excluded)
     s[sec] = string.format("%s%s%s%s%s%s%s", s[sec], attr.nl, attr.indent,
                            attr.prefix, attr.prefix_sep, no_ASS(ret), attr.suffix)
     return true
+end
+
+
+
+--local pmax = {1, 1, 1}
+local plast = {{}, {}, {}}
+local ppos = 0
+local plen = 60
+
+function record_perfdata()
+    --local start = mp.get_time()
+    local vo_p = mp.get_property_native("vo-performance")
+    ppos = (ppos % plen) + 1
+    plast[1][ppos] = vo_p["render-last"]
+    plast[2][ppos] = vo_p["present-last"]
+    plast[3][ppos] = vo_p["upload-last"]
+    --pmax[1] = math.max(pmax[1], plast[1][ppos])
+    --pmax[2] = math.max(pmax[2], plast[2][ppos])
+    --pmax[3] = math.max(pmax[3], plast[3][ppos])
+    --print("rec: " .. mp.get_time() - start)
+    return vo_p
+end
+
+
+function generate_graph(values)
+    local format = string.format
+    local pmax = 1
+    for e = 1, plen do
+        if values[e] and values[e] > pmax then
+            pmax = values[e]
+        end
+    end
+
+    local x_tics = 1
+    local x_max = (plen - 1) * x_tics
+    local y_offset = o.border_size
+    local y_max = o.font_size / 1.5
+    local x = 0
+
+    function scale(n)
+        return y_max * n / pmax * 0.8
+    end
+
+    local i = ppos
+    local s = {string.format("m 0 0 n %f %f l ", x, y_max - scale(values[i]))}
+    i = ((i - 2) % plen) + 1
+
+    while i ~= ppos do
+        if values[i] then
+            x = x - x_tics
+            s[#s+1] = format("%f %f ", x, y_max - scale(values[i]))
+        end
+        i = ((i - 2) % plen) + 1
+    end
+
+    s[#s+1] = format("%f %f %f %f", x, y_max, 0, y_max)
+
+    local bg_box = format("{\\bord0.5}{\\3c&H%s}{\\1c&H%s}m 0 %f l %f %f %f 0 0 0", o.plot_bg_border_color, o.plot_bg_color, y_max, x_max, y_max, x_max)
+    return format("\\h\\h\\h{\\r}{\\pbo%f}{\\shad0}{\\alpha&H00}{\\p1}%s{\\p0}{\\bord0}{\\1c&H%s}{\\p1}%s{\\p0}{\\r}%s", y_offset, bg_box, o.plot_color, table.concat(s), text_style())
+end
+
+
+function append_perfdata(s, sec)
+    local vo_p = timer:is_enabled() and mp.get_property_native("vo-performance") or record_perfdata()
+
+    s[sec] = string.format("%s%s%s%s%s%s / %s / %s %s", s[sec], o.nl, o.indent, b("Render Time:"), o.prefix_sep, no_ASS(vo_p["render-last"]), no_ASS(vo_p["render-avg"]), no_ASS(vo_p["render-peak"]), (o.plot_render and generate_graph(plast[1]) or ""))
+
+    s[sec] = string.format("%s%s%s%s%s%s / %s / %s %s", s[sec], o.nl, o.indent, b("Present Time:"), o.prefix_sep, no_ASS(vo_p["present-last"]), no_ASS(vo_p["present-avg"]), no_ASS(vo_p["present-peak"]), (o.plot_present and generate_graph(plast[2]) or ""))
+
+    s[sec] = string.format("%s%s%s%s%s%s / %s / %s %s", s[sec], o.nl, o.indent, b("Upload Time:"), o.prefix_sep, no_ASS(vo_p["upload-last"]), no_ASS(vo_p["upload-avg"]), no_ASS(vo_p["upload-peak"]), (o.plot_upload and generate_graph(plast[3]) or ""))
 end
 
 
@@ -288,14 +378,18 @@ function b(t)
 end
 
 
-local timer = mp.add_periodic_timer(o.redraw_delay, function() print_stats(o.redraw_delay + 1) end)
-timer:kill()
-
 function toggle_stats()
     if timer:is_enabled() then
+        if o.plot_render or o.plot_present or o.plot_upload then
+            mp.unregister_event(record_perfdata)
+        end
         timer:kill()
         mp.osd_message("", 0)
     else
+        if o.plot_render or o.plot_present or o.plot_upload then
+            record_perfdata()
+            mp.register_event("tick", record_perfdata)
+        end
         timer:resume()
         print_stats(o.redraw_delay + 1)
     end
