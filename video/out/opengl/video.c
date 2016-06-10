@@ -37,7 +37,6 @@
 #include "hwdec.h"
 #include "osd.h"
 #include "stream/stream.h"
-#include "superxbr.h"
 #include "video_shaders.h"
 #include "user_shaders.h"
 #include "video/out/filter_kernels.h"
@@ -45,9 +44,6 @@
 #include "video/out/bitmap_packer.h"
 #include "video/out/dither.h"
 #include "video/out/vo.h"
-
-// Maximal number of passes that prescaler can be applied.
-#define MAX_PRESCALE_PASSES 5
 
 // Maximal number of saved textures (for user script purposes)
 #define MAX_TEXTURE_HOOKS 16
@@ -323,8 +319,6 @@ const struct gl_video_opts gl_video_opts_def = {
     .alpha_mode = ALPHA_BLEND_TILES,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
-    .prescale_passes = 1,
-    .prescale_downscaling_threshold = 2.0f,
     .target_brightness = 250,
     .hdr_tone_mapping = TONE_MAPPING_HABLE,
     .tone_mapping_param = NAN,
@@ -354,8 +348,6 @@ const struct gl_video_opts gl_video_opts_hq_def = {
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
     .deband = 1,
-    .prescale_passes = 1,
-    .prescale_downscaling_threshold = 2.0f,
     .target_brightness = 250,
     .hdr_tone_mapping = TONE_MAPPING_HABLE,
     .tone_mapping_param = NAN,
@@ -449,15 +441,6 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("deband", deband, 0),
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
         OPT_FLOAT("sharpen", unsharp, 0),
-        OPT_CHOICE("prescale-luma", prescale_luma, 0,
-                   ({"none", PRESCALE_NONE},
-                    {"superxbr", PRESCALE_SUPERXBR}
-                    )),
-        OPT_INTRANGE("prescale-passes",
-                     prescale_passes, 0, 1, MAX_PRESCALE_PASSES),
-        OPT_FLOATRANGE("prescale-downscaling-threshold",
-                       prescale_downscaling_threshold, 0, 0.0, 32.0),
-        OPT_SUBSTRUCT("superxbr", superxbr_opts, superxbr_conf, 0),
         OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
@@ -466,6 +449,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_REMOVED("indirect", "this is set automatically whenever sane"),
         OPT_REMOVED("srgb", "use target-prim=bt709:target-trc=srgb instead"),
         OPT_REMOVED("source-shader", "use :deband to enable debanding"),
+        OPT_REMOVED("prescale-luma", "use user shaders for prescaling"),
 
         OPT_REPLACED("lscale", "scale"),
         OPT_REPLACED("lscale-down", "scale-down"),
@@ -481,7 +465,6 @@ const struct m_sub_options gl_video_conf = {
         OPT_REPLACED("smoothmotion-threshold", "tscale-param1"),
         OPT_REPLACED("scale-down", "dscale"),
         OPT_REPLACED("fancy-downscaling", "correct-downscaling"),
-        OPT_REPLACED("prescale", "prescale-luma"),
 
         {0}
     },
@@ -1482,34 +1465,6 @@ static void pass_sample(struct gl_video *p, struct img_tex tex,
     skip_unused(p, tex.components);
 }
 
-// Get the number of passes for prescaler, with given display size.
-static int get_prescale_passes(struct gl_video *p)
-{
-    if (p->opts.prescale_luma == PRESCALE_NONE)
-        return 0;
-
-    // The downscaling threshold check is turned off.
-    if (p->opts.prescale_downscaling_threshold < 1.0f)
-        return p->opts.prescale_passes;
-
-    double scale_factors[2];
-    get_scale_factors(p, true, scale_factors);
-
-    int passes = 0;
-    for (; passes < p->opts.prescale_passes; passes ++) {
-        // The scale factor happens to be the same for superxbr and nnedi3.
-        scale_factors[0] /= 2;
-        scale_factors[1] /= 2;
-
-        if (1.0f / scale_factors[0] > p->opts.prescale_downscaling_threshold)
-            break;
-        if (1.0f / scale_factors[1] > p->opts.prescale_downscaling_threshold)
-            break;
-    }
-
-    return passes;
-}
-
 // Returns true if two img_texs are semantically equivalent (same metadata)
 static bool img_tex_equiv(struct img_tex a, struct img_tex b)
 {
@@ -1554,13 +1509,6 @@ static void deband_hook(struct gl_video *p, struct img_tex tex,
                         struct gl_transform *trans, void *priv)
 {
     pass_sample_deband(p->sc, p->opts.deband_opts, &p->lfg);
-}
-
-static void superxbr_hook(struct gl_video *p, struct img_tex tex,
-                          struct gl_transform *trans, void *priv)
-{
-    int step = (uintptr_t)priv;
-    pass_superxbr(p->sc, step, p->opts.superxbr_opts, trans);
 }
 
 static void unsharp_hook(struct gl_video *p, struct img_tex tex,
@@ -1794,20 +1742,6 @@ static void gl_video_setup_hooks(struct gl_video *p)
         pass_add_hooks(p, (struct tex_hook) {.hook = deband_hook,
                                              .bind_tex = {"HOOKED"}},
                        HOOKS("LUMA", "CHROMA", "RGB", "XYZ"));
-    }
-
-    int prescale_passes = get_prescale_passes(p);
-    if (p->opts.prescale_luma == PRESCALE_SUPERXBR) {
-        for (int i = 0; i < prescale_passes; i++) {
-            for (int step = 0; step < 2; step++) {
-                pass_add_hook(p, (struct tex_hook) {
-                    .hook_tex = "LUMA",
-                    .bind_tex = {"HOOKED"},
-                    .hook = superxbr_hook,
-                    .priv = (void *)(uintptr_t)step,
-                });
-            }
-        }
     }
 
     if (p->opts.unsharp != 0.0) {
@@ -3098,7 +3032,7 @@ static bool check_dumb_mode(struct gl_video *p)
         return true;
     if (o->target_prim || o->target_trc || o->linear_scaling ||
         o->correct_downscaling || o->sigmoid_upscaling || o->interpolation ||
-        o->blend_subs || o->deband || o->unsharp || o->prescale_luma)
+        o->blend_subs || o->deband || o->unsharp)
         return false;
     // check remaining scalers (tscale is already implicitly excluded above)
     for (int i = 0; i < SCALER_COUNT; i++) {

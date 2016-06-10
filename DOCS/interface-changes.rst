@@ -34,6 +34,7 @@ Interface changes
       such as well.
     - the VO opengl fbo-format sub-option does not accept "rgb" or "rgba"
       anymore
+    - all VO opengl prescalers have been removed (replaced by user scripts)
  --- mpv 0.17.0 ---
     - deprecate "track-list/N/audio-channels" property (use
       "track-list/N/demux-channel-count" instead)

@@ -92,11 +92,6 @@ enum blend_subs_mode {
     BLEND_SUBS_VIDEO,
 };
 
-enum prescalers {
-    PRESCALE_NONE = 0,
-    PRESCALE_SUPERXBR,
-};
-
 enum tone_mapping {
     TONE_MAPPING_CLIP,
     TONE_MAPPING_REINHARD,
@@ -142,10 +137,6 @@ struct gl_video_opts {
     int deband;
     struct deband_opts *deband_opts;
     float unsharp;
-    int prescale_luma;
-    int prescale_passes;
-    float prescale_downscaling_threshold;
-    struct superxbr_opts *superxbr_opts;
     struct mp_icc_opts *icc_opts;
 };
 
