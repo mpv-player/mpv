@@ -520,7 +520,7 @@ static struct bstr load_cached_file(struct gl_video *p, const char *path)
             return p->files[n].body;
     }
     // not found -> load it
-    struct bstr s = stream_read_file(path, p, p->global, 100000); // 100 kB
+    struct bstr s = stream_read_file(path, p, p->global, 1024000); // 1024 kB
     if (s.len) {
         struct cached_file new = {
             .path = talloc_strdup(p, path),
