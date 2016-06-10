@@ -27,6 +27,9 @@
 // For WGL_ACCESS_WRITE_DISCARD_NV, etc.
 #include <GL/wglext.h>
 
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+#define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
+
 // mingw-w64 header typo?
 #ifndef IDirect3DSwapChain9Ex_GetBackBuffer
 #define IDirect3DSwapChain9Ex_GetBackBuffer IDirect3DSwapChain9EX_GetBackBuffer
@@ -99,7 +102,7 @@ static int os_ctx_create(struct MPGLContext *ctx)
         .cbSize = sizeof(WNDCLASSEXW),
         .style = CS_OWNDC,
         .lpfnWndProc = DefWindowProc,
-        .hInstance = GetModuleHandleW(NULL),
+        .hInstance = HINST_THISCOMPONENT,
         .lpszClassName = os_wnd_class,
     });
 
@@ -107,7 +110,7 @@ static int os_ctx_create(struct MPGLContext *ctx)
     // possible to use the VO window, but MSDN recommends against drawing to
     // the same window with flip mode present and other APIs, so play it safe.
     p->os_wnd = CreateWindowExW(0, os_wnd_class, os_wnd_class, 0, 0, 0, 200,
-        200, NULL, NULL, GetModuleHandleW(NULL), NULL);
+        200, NULL, NULL, HINST_THISCOMPONENT, NULL);
     p->os_dc = GetDC(p->os_wnd);
     if (!p->os_dc) {
         MP_FATAL(ctx->vo, "Couldn't create window for offscreen rendering\n");

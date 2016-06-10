@@ -45,6 +45,9 @@
 #include "misc/rendezvous.h"
 #include "mpv_talloc.h"
 
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+#define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
+
 static const wchar_t classname[] = L"mpv";
 
 static __thread struct vo_w32_state *w32_thread_context;
@@ -1178,7 +1181,7 @@ static void gui_thread_reconfig(void *ptr)
         vo->dheight = r.bottom;
     }
 
-    // Recenter window around old position on new video size 
+    // Recenter window around old position on new video size
     // excluding the case when initial positon handled by win_state.
     if (!pos_init) {
         w32->window_x += w32->dw / 2 - vo->dwidth / 2;
@@ -1221,14 +1224,12 @@ static void *gui_thread(void *ptr)
 
     thread_disable_ime();
 
-    HINSTANCE hInstance = GetModuleHandleW(NULL);
-
     WNDCLASSEXW wcex = {
         .cbSize = sizeof wcex,
         .style = CS_HREDRAW | CS_VREDRAW,
         .lpfnWndProc = WndProc,
-        .hInstance = hInstance,
-        .hIcon = LoadIconW(hInstance, L"IDI_ICON1"),
+        .hInstance = HINST_THISCOMPONENT,
+        .hIcon = LoadIconW(HINST_THISCOMPONENT, L"IDI_ICON1"),
         .hCursor = LoadCursor(NULL, IDC_ARROW),
         .lpszClassName = classname,
     };
@@ -1246,13 +1247,13 @@ static void *gui_thread(void *ptr)
                                       classname,
                                       WS_CHILD | WS_VISIBLE,
                                       0, 0, r.right, r.bottom,
-                                      w32->parent, 0, hInstance, NULL);
+                                      w32->parent, 0, HINST_THISCOMPONENT, NULL);
     } else {
         w32->window = CreateWindowExW(0, classname,
                                       classname,
                                       update_style(w32, 0),
                                       CW_USEDEFAULT, SW_HIDE, 100, 100,
-                                      0, 0, hInstance, NULL);
+                                      0, 0, HINST_THISCOMPONENT, NULL);
     }
 
     if (!w32->window) {
