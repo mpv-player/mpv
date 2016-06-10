@@ -428,16 +428,11 @@ enum uniform_type {
     UT_i,
     UT_f,
     UT_m,
-    UT_buffer,
 };
 
 union uniform_val {
     GLfloat f[9];
     GLint i[4];
-    struct {
-        char* text;
-        GLint binding;
-    } buffer;
 };
 
 struct sc_uniform {
@@ -504,11 +499,8 @@ void gl_sc_reset(struct gl_shader_cache *sc)
     sc->prelude_text.len = 0;
     sc->header_text.len = 0;
     sc->text.len = 0;
-    for (int n = 0; n < sc->num_uniforms; n++) {
+    for (int n = 0; n < sc->num_uniforms; n++)
         talloc_free(sc->uniforms[n].name);
-        if (sc->uniforms[n].type == UT_buffer)
-            talloc_free(sc->uniforms[n].v.buffer.text);
-    }
     sc->num_uniforms = 0;
 }
 
@@ -711,15 +703,6 @@ void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
         transpose3x3(&u->v.f[0]);
 }
 
-void gl_sc_uniform_buffer(struct gl_shader_cache *sc, char *name,
-                          const char *text, int binding)
-{
-    struct sc_uniform *u = find_uniform(sc, name);
-    u->type = UT_buffer;
-    u->v.buffer.text = talloc_strdup(sc, text);
-    u->v.buffer.binding = binding;
-}
-
 // This will call glBindAttribLocation() on the shader before it's linked
 // (OpenGL requires this to happen before linking). Basically, it associates
 // the input variable names with the fields in the vao.
@@ -781,11 +764,6 @@ static void update_uniform(GL *gl, struct sc_entry *e, struct sc_uniform *u, int
             }
         }
         break;
-    case UT_buffer: {
-        GLuint idx = gl->GetUniformBlockIndex(e->gl_shader, u->name);
-        gl->UniformBlockBinding(e->gl_shader, idx, u->v.buffer.binding);
-        break;
-    }
     default:
         abort();
     }
@@ -954,11 +932,7 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     ADD_BSTR(frag, *frag_vaos);
     for (int n = 0; n < sc->num_uniforms; n++) {
         struct sc_uniform *u = &sc->uniforms[n];
-        if (u->type == UT_buffer) {
-            ADD(frag, "uniform %s { %s };\n", u->name, u->v.buffer.text);
-        } else {
-            ADD(frag, "uniform %s %s;\n", u->glsl_type, u->name);
-        }
+        ADD(frag, "uniform %s %s;\n", u->glsl_type, u->name);
     }
 
     // Additional helpers.

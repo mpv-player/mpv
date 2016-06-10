@@ -406,17 +406,6 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
-    // uniform buffer object extensions, requires OpenGL 3.1.
-    {
-        .ver_core = 310,
-        .ver_es_core = 300,
-        .extension = "GL_ARB_uniform_buffer_object",
-        .functions = (const struct gl_function[]) {
-            DEF_FN(GetUniformBlockIndex),
-            DEF_FN(UniformBlockBinding),
-            {0}
-        },
-    },
     {
         .extension = "GL_ANGLE_translated_shader_source",
         .functions = (const struct gl_function[]) {

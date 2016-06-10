@@ -226,9 +226,6 @@ struct GL {
     GLint (GLAPIENTRY *GetVideoSync)(GLuint *);
     GLint (GLAPIENTRY *WaitVideoSync)(GLint, GLint, unsigned int *);
 
-    GLuint (GLAPIENTRY *GetUniformBlockIndex)(GLuint, const GLchar *);
-    void (GLAPIENTRY *UniformBlockBinding)(GLuint, GLuint, GLuint);
-
     void (GLAPIENTRY *GetTranslatedShaderSourceANGLE)(GLuint, GLsizei,
                                                       GLsizei*, GLchar* source);
 
