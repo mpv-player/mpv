@@ -21,6 +21,11 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
+#ifndef EGL_VERSION_1_5
+#define EGL_CONTEXT_OPENGL_PROFILE_MASK         0x30FD
+#define EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT     0x00000001
+#endif
+
 #include "common/common.h"
 #include "video/out/x11_common.h"
 #include "context.h"
@@ -79,8 +84,14 @@ static bool create_context_egl(MPGLContext *ctx, EGLConfig config,
     EGLint context_attributes[] = {
         // aka EGL_CONTEXT_MAJOR_VERSION_KHR
         EGL_CONTEXT_CLIENT_VERSION, es ? 2 : 3,
+        EGL_NONE, EGL_NONE,
         EGL_NONE
     };
+
+    if (!es) {
+        context_attributes[2] = EGL_CONTEXT_OPENGL_PROFILE_MASK;
+        context_attributes[3] = EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT;
+    }
 
     p->egl_surface = eglCreateWindowSurface(p->egl_display, config, window, NULL);
 
