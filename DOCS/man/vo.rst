@@ -582,38 +582,6 @@ Available video output drivers are:
         better than without it) since it will extend the size to match only the
         milder of the scale factors between the axes.
 
-    ``prescale-luma=<filter>``
-        Apply additional pre-scaling (image doubling) on the luma plane
-        (if present). As the name implies, these will run before the main
-        upscaling pass.
-
-        ``none``
-            Disable all prescalers. This is the default.
-
-        ``superxbr``
-            A relatively fast prescaler originally developed for pixel art.
-
-            Some parameters can be tuned with ``superxbr-sharpness`` and
-            ``superxbr-edge-strength`` options.
-
-    ``prescale-passes=<1..5>``
-        The number of passes to apply the prescaler (defaults to be 1). Setting
-        it to 2 will perform a 4x upscaling.
-
-    ``prescale-downscaling-threshold=<0..32>``
-        This option prevents "overkill" use of prescalers, which can be caused
-        by misconfiguration, or user trying to play a video with much larger
-        size. With this option, user can specify the maximal allowed downscaling
-        ratio in both dimension. To satisfy it, the number of passes for
-        prescaler will be reduced, and if necessary prescaler could also be
-        disabled.
-
-        The default value is 2.0, and should be able to prevent most seemingly
-        unreasonable use of prescalers. Most user would probably want to set it
-        to a smaller value between 1.0 and 1.5 for better performance.
-
-        A value less than 1.0 will disable the check.
-
     ``pre-shaders=<files>``, ``post-shaders=<files>``, ``scale-shader=<file>``
         Custom GLSL fragment shaders.
 
