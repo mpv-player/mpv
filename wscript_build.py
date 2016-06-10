@@ -67,10 +67,6 @@ def build(ctx):
         source = "sub/osd_font.otf",
         target = "sub/osd_font.h")
 
-    ctx.file2string(
-        source = "video/out/opengl/nnedi3_weights.bin",
-        target = "video/out/opengl/nnedi3_weights.inc")
-
     lua_files = ["defaults.lua", "assdraw.lua", "options.lua", "osc.lua",
                  "ytdl_hook.lua"]
     for fn in lua_files:
@@ -356,7 +352,6 @@ def build(ctx):
         ( "video/out/opengl/hwdec_osx.c",        "videotoolbox-gl" ),
         ( "video/out/opengl/hwdec_vdpau.c",      "vdpau-gl-x11" ),
         ( "video/out/opengl/lcms.c",             "gl" ),
-        ( "video/out/opengl/nnedi3.c",           "gl" ),
         ( "video/out/opengl/osd.c",              "gl" ),
         ( "video/out/opengl/superxbr.c",         "gl" ),
         ( "video/out/opengl/user_shaders.c",     "gl" ),

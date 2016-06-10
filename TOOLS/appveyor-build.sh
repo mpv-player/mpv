@@ -12,7 +12,6 @@ export PYTHON=/usr/bin/python3
     --check-c-compiler=gcc \
     --disable-cdda \
     --enable-egl-angle \
-    --enable-gpl3 \
     --enable-jpeg \
     --enable-lcms2 \
     --enable-libarchive \
