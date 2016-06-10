@@ -95,7 +95,6 @@ enum blend_subs_mode {
 enum prescalers {
     PRESCALE_NONE = 0,
     PRESCALE_SUPERXBR,
-    PRESCALE_NNEDI3,
 };
 
 enum tone_mapping {
@@ -147,7 +146,6 @@ struct gl_video_opts {
     int prescale_passes;
     float prescale_downscaling_threshold;
     struct superxbr_opts *superxbr_opts;
-    struct nnedi3_opts *nnedi3_opts;
     struct mp_icc_opts *icc_opts;
 };
 

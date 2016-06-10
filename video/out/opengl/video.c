@@ -38,7 +38,6 @@
 #include "osd.h"
 #include "stream/stream.h"
 #include "superxbr.h"
-#include "nnedi3.h"
 #include "video_shaders.h"
 #include "user_shaders.h"
 #include "video/out/filter_kernels.h"
@@ -195,8 +194,6 @@ struct gl_video {
 
     GLuint dither_texture;
     int dither_size;
-
-    GLuint nnedi3_weights_buffer;
 
     struct gl_timer *upload_timer;
     struct gl_timer *render_timer;
@@ -455,16 +452,12 @@ const struct m_sub_options gl_video_conf = {
         OPT_CHOICE("prescale-luma", prescale_luma, 0,
                    ({"none", PRESCALE_NONE},
                     {"superxbr", PRESCALE_SUPERXBR}
-#if HAVE_NNEDI
-                    , {"nnedi3", PRESCALE_NNEDI3}
-#endif
                     )),
         OPT_INTRANGE("prescale-passes",
                      prescale_passes, 0, 1, MAX_PRESCALE_PASSES),
         OPT_FLOATRANGE("prescale-downscaling-threshold",
                        prescale_downscaling_threshold, 0, 0.0, 32.0),
         OPT_SUBSTRUCT("superxbr", superxbr_opts, superxbr_conf, 0),
-        OPT_SUBSTRUCT("nnedi3", nnedi3_opts, nnedi3_conf, 0),
         OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
@@ -593,9 +586,6 @@ static void uninit_rendering(struct gl_video *p)
 
     gl->DeleteTextures(1, &p->dither_texture);
     p->dither_texture = 0;
-
-    gl->DeleteBuffers(1, &p->nnedi3_weights_buffer);
-    p->nnedi3_weights_buffer = 0;
 
     for (int n = 0; n < 4; n++) {
         fbotex_uninit(&p->merge_fbo[n]);
@@ -1520,27 +1510,6 @@ static int get_prescale_passes(struct gl_video *p)
     return passes;
 }
 
-// Upload the NNEDI3 UBO weights only if needed
-static void upload_nnedi3_weights(struct gl_video *p)
-{
-    GL *gl = p->gl;
-
-    if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_UBO &&
-        !p->nnedi3_weights_buffer)
-    {
-        gl->GenBuffers(1, &p->nnedi3_weights_buffer);
-        gl->BindBufferBase(GL_UNIFORM_BUFFER, 0, p->nnedi3_weights_buffer);
-
-        int size;
-        const float *weights = get_nnedi3_weights(p->opts.nnedi3_opts, &size);
-
-        MP_VERBOSE(p, "Uploading NNEDI3 weights via UBO (size=%d)\n", size);
-
-        // We don't know the endianness of GPU, just assume it's LE
-        gl->BufferData(GL_UNIFORM_BUFFER, size, weights, GL_STATIC_DRAW);
-    }
-}
-
 // Returns true if two img_texs are semantically equivalent (same metadata)
 static bool img_tex_equiv(struct img_tex a, struct img_tex b)
 {
@@ -1592,14 +1561,6 @@ static void superxbr_hook(struct gl_video *p, struct img_tex tex,
 {
     int step = (uintptr_t)priv;
     pass_superxbr(p->sc, step, p->opts.superxbr_opts, trans);
-}
-
-static void nnedi3_hook(struct gl_video *p, struct img_tex tex,
-                        struct gl_transform *trans, void *priv)
-{
-    int step = (uintptr_t)priv;
-    upload_nnedi3_weights(p);
-    pass_nnedi3(p->gl, p->sc, step, p->opts.nnedi3_opts, trans);
 }
 
 static void unsharp_hook(struct gl_video *p, struct img_tex tex,
@@ -1843,19 +1804,6 @@ static void gl_video_setup_hooks(struct gl_video *p)
                     .hook_tex = "LUMA",
                     .bind_tex = {"HOOKED"},
                     .hook = superxbr_hook,
-                    .priv = (void *)(uintptr_t)step,
-                });
-            }
-        }
-    }
-
-    if (p->opts.prescale_luma == PRESCALE_NNEDI3) {
-        for (int i = 0; i < prescale_passes; i++) {
-            for (int step = 0; step < 2; step++) {
-                pass_add_hook(p, (struct tex_hook) {
-                    .hook_tex = "LUMA",
-                    .bind_tex = {"HOOKED"},
-                    .hook = nnedi3_hook,
                     .priv = (void *)(uintptr_t)step,
                 });
             }
@@ -3282,26 +3230,6 @@ static void check_gl_features(struct gl_video *p)
     if (!have_mglsl && p->opts.deband) {
         p->opts.deband = 0;
         MP_WARN(p, "Disabling debanding (GLSL version too old).\n");
-    }
-
-    if (p->opts.prescale_luma == PRESCALE_NNEDI3) {
-        if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_UBO) {
-            // Check features for uniform buffer objects.
-            if (!gl->BindBufferBase || !gl->GetUniformBlockIndex) {
-                MP_WARN(p, "Disabling NNEDI3 (%s required).\n",
-                        gl->es ? "OpenGL ES 3.0" : "OpenGL 3.1");
-                p->opts.prescale_luma = PRESCALE_NONE;
-            }
-        } else if (p->opts.nnedi3_opts->upload == NNEDI3_UPLOAD_SHADER) {
-            // Check features for hard coding approach.
-            if ((!gl->es && gl->glsl_version < 330) ||
-                (gl->es && gl->glsl_version < 300))
-            {
-                MP_WARN(p, "Disabling NNEDI3 (%s required).\n",
-                        gl->es ? "OpenGL ES 3.0" : "OpenGL 3.3");
-                p->opts.prescale_luma = PRESCALE_NONE;
-            }
-        }
     }
 }
 
