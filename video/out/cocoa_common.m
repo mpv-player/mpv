@@ -370,13 +370,14 @@ static void vo_cocoa_update_screens_pointers(struct vo *vo)
 static void vo_cocoa_update_screen_fps(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    NSScreen *screen = vo->opts->fullscreen ? s->fs_screen : s->current_screen;
-    NSDictionary* sinfo = [screen deviceDescription];
-    NSNumber* sid = [sinfo objectForKey:@"NSScreenNumber"];
-    CGDirectDisplayID did = [sid longValue];
 
     CVDisplayLinkRef link;
-    CVDisplayLinkCreateWithCGDisplay(did, &link);
+    CVDisplayLinkCreateWithActiveCGDisplays(&link);
+    CVDisplayLinkStart(link);
+
+    CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(
+        link, s->cgl_ctx, CGLGetPixelFormat(s->cgl_ctx));
+
     s->screen_fps = CVDisplayLinkGetActualOutputVideoRefreshPeriod(link);
 
     if (s->screen_fps == 0) {
