@@ -409,11 +409,13 @@ ffmpeg_dependencies = [
     {
         'name': 'recent-ffmpeg',
         'desc': 'recent ffmpeg',
-        'func': check_pkg_config(*ffmpeg_pkg_config_checks),
+        'func': check_pkg_config(
+            *ffmpeg_pkg_config_checks, uselib_store = 'ffmpeg'),
     }, {
         'name': '--unsupported-ffmpeg',
         'desc': 'old libav/ffmpeg',
-        'func': check_pkg_config(*libav_pkg_config_checks),
+        'func': check_pkg_config(
+            *libav_pkg_config_checks, uselib_store = 'ffmpeg'),
         'default': 'disable',
     }, {
         'name': 'ffmpeg',
