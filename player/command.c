@@ -5397,6 +5397,9 @@ void handle_command_updates(struct MPContext *mpctx)
 
 void mp_notify(struct MPContext *mpctx, int event, void *arg)
 {
+    // The OSD can implicitly reference some properties.
+    mpctx->osd_idle_update = true;
+
     command_event(mpctx, event, arg);
 
     mp_client_broadcast_event(mpctx, event, arg);

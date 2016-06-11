@@ -492,6 +492,10 @@ void update_osd_msg(struct MPContext *mpctx)
     double now = mp_time_sec();
 
     if (!mpctx->osd_force_update) {
+        // Assume nothing is going on at all.
+        if (!mpctx->osd_idle_update)
+            return;
+
         double delay = 0.050; // update the OSD at most this often
         double diff = now - mpctx->osd_last_update;
         if (diff < delay) {
@@ -500,6 +504,7 @@ void update_osd_msg(struct MPContext *mpctx)
         }
     }
     mpctx->osd_force_update = false;
+    mpctx->osd_idle_update = false;
     mpctx->osd_last_update = now;
 
     if (mpctx->osd_visible) {

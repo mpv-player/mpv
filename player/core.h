@@ -243,7 +243,7 @@ typedef struct MPContext {
     double osd_msg_visible;
     double osd_msg_next_duration;
     double osd_last_update;
-    bool osd_force_update;
+    bool osd_force_update, osd_idle_update;
     char *osd_msg_text;
     bool osd_show_pos;
     struct osd_progbar_state osd_progbar;
