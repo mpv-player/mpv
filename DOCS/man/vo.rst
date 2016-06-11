@@ -747,9 +747,9 @@ Available video output drivers are:
             Specifies the size of the resulting texture for this pass.
             ``szexpr`` refers to an expression in RPN (reverse polish
             notation), using the operators + - * / > < !, floating point
-            literals, and references to existing texture sizes such as
-            MAIN.width or CHROMA.height. By default, these are set to HOOKED.w
-            and HOOKED.h, respectively.
+            literals, and references to sizes of existing texture and OUTPUT
+            (such as MAIN.width or CHROMA.height). By default, these are set to
+            HOOKED.w and HOOKED.h, respectively.
 
         WHEN <szexpr>
             Specifies a condition that needs to be true (non-zero) for the

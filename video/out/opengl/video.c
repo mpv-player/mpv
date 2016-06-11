@@ -1688,6 +1688,15 @@ static bool eval_szexpr(struct gl_video *p, struct img_tex tex,
             struct bstr name = expr[i].val.varname;
             struct img_tex var_tex;
 
+            // The size of OUTPUT is determined. It could be useful for certain
+            // user shaders to skip passes.
+            if (bstr_equals0(name, "OUTPUT")) {
+                int vp_w = p->dst_rect.x1 - p->dst_rect.x0;
+                int vp_h = p->dst_rect.y1 - p->dst_rect.y0;
+                stack[idx++] = (expr[i].tag == SZEXP_VAR_W) ? vp_w : vp_h;
+                continue;
+            }
+
             // HOOKED is a special case
             if (bstr_equals0(name, "HOOKED")) {
                 var_tex = tex;
