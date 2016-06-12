@@ -292,11 +292,12 @@ static void ao_play_data(struct ao *ao)
     // If we just filled the AO completely (r == space), don't refill for a
     // while. Prevents wakeup feedback with byte-granular AOs.
     int needed = unlocked_get_space(ao);
-    bool more = needed >= (r == space ? ao->device_buffer / 4 : 1) && !stuck;
+    bool more = needed >= (r == space ? ao->device_buffer / 4 : 1) && !stuck &&
+                !(flags & AOPLAY_FINAL_CHUNK);
     if (more)
         mp_input_wakeup(ao->input_ctx); // request more data
-    MP_TRACE(ao, "in=%d flags=%d space=%d r=%d wa=%d needed=%d more=%d\n",
-             max, flags, space, r, p->wait_on_ao, needed, more);
+    MP_TRACE(ao, "in=%d flags=%d space=%d r=%d wa/pl=%d/%d needed=%d more=%d\n",
+             max, flags, space, r, p->wait_on_ao, p->still_playing, needed, more);
 }
 
 static void *playthread(void *arg)
