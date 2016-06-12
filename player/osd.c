@@ -511,6 +511,7 @@ void update_osd_msg(struct MPContext *mpctx)
         double sleep = mpctx->osd_visible - now;
         if (sleep > 0) {
             mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleep);
+            mpctx->osd_idle_update = true;
         } else {
             mpctx->osd_visible = 0;
             mpctx->osd_progbar.type = -1; // disable
@@ -522,6 +523,7 @@ void update_osd_msg(struct MPContext *mpctx)
         double sleep = mpctx->osd_function_visible - now;
         if (sleep > 0) {
             mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleep);
+            mpctx->osd_idle_update = true;
         } else {
             mpctx->osd_function_visible = 0;
             mpctx->osd_function = 0;
@@ -539,6 +541,7 @@ void update_osd_msg(struct MPContext *mpctx)
         double sleep = mpctx->osd_msg_visible - now;
         if (sleep > 0) {
             mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleep);
+            mpctx->osd_idle_update = true;
         } else {
             talloc_free(mpctx->osd_msg_text);
             mpctx->osd_msg_text = NULL;
