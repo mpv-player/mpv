@@ -142,6 +142,7 @@ static void resume(struct ao *ao)
 static void drain(struct ao *ao)
 {
     struct ao_push_state *p = ao->api_priv;
+    double maxbuffer = ao->buffer / (double)ao->samplerate + 1;
 
     MP_VERBOSE(ao, "draining...\n");
 
@@ -151,14 +152,23 @@ static void drain(struct ao *ao)
 
     p->final_chunk = true;
     wakeup_playthread(ao);
-    while (p->still_playing && mp_audio_buffer_samples(p->buffer) > 0)
-        pthread_cond_wait(&p->wakeup, &p->lock);
+
+    // Wait until everything is done. Since the audio API (especially ALSA)
+    // can't be trusted to do this right, and we're hard-blocking here, apply
+    // an upper bound timeout.
+    struct timespec until = mp_rel_time_to_timespec(maxbuffer);
+    while (p->still_playing && mp_audio_buffer_samples(p->buffer) > 0) {
+        if (pthread_cond_timedwait(&p->wakeup, &p->lock, &until)) {
+            MP_WARN(ao, "Draining is taking too long, aborting.\n");
+            goto done;
+        }
+    }
 
     if (ao->driver->drain) {
         ao->driver->drain(ao);
     } else {
         double time = unlocked_get_delay(ao);
-        mp_sleep_us(MPMIN(time, ao->buffer / (double)ao->samplerate + 1) * 1e6);
+        mp_sleep_us(MPMIN(time, maxbuffer) * 1e6);
     }
 
 done:
