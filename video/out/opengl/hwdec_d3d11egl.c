@@ -114,7 +114,8 @@ static int create(struct gl_hwdec *hw)
         !strstr(exts, "EGL_ANGLE_stream_producer_d3d_texture_nv12") ||
         !(strstr(hw->gl->extensions, "GL_OES_EGL_image_external_essl3") ||
           hw->gl->es == 200) ||
-        !strstr(exts, "EGL_EXT_device_query"))
+        !strstr(exts, "EGL_EXT_device_query") ||
+        !(hw->gl->mpgl_caps & MPGL_CAP_TEX_RG))
         return -1;
 
     HRESULT hr;
@@ -309,7 +310,6 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
                 .gl_target = GL_TEXTURE_EXTERNAL_OES,
                 .tex_w = texdesc.Width / 2,
                 .tex_h = texdesc.Height / 2,
-                .swizzle = "rgba", // even in ES2 mode (no LUMINANCE_ALPHA)
             },
         },
     };
