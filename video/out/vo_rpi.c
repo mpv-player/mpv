@@ -729,6 +729,9 @@ static void uninit(struct vo *vo)
 
     destroy_dispmanx(vo);
 
+    if (p->update)
+        vc_dispmanx_update_submit_sync(p->update);
+
     if (p->renderer)
         mmal_component_release(p->renderer);
 
