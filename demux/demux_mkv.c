@@ -1720,6 +1720,7 @@ static const char *const mkv_sub_tag[][2] = {
     { "S_HDMV/PGS",         "hdmv_pgs_subtitle"},
     { "D_WEBVTT/SUBTITLES", "webvtt-webm"},
     { "D_WEBVTT/CAPTIONS",  "webvtt-webm"},
+    { "S_TEXT/WEBVTT",      "webvtt"},
     { "S_DVBSUB",           "dvb_subtitle"},
     {0}
 };
