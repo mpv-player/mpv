@@ -91,7 +91,6 @@ struct GL {
     char *extensions;           // Equivalent to GL_EXTENSIONS
     int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
     bool debug_context;         // use of e.g. GLX_CONTEXT_DEBUG_BIT_ARB
-    int fb_r, fb_g, fb_b;       // frame buffer bit depth (0 if unknown)
 
     void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei);
     void (GLAPIENTRY *Clear)(GLbitfield);
@@ -169,6 +168,8 @@ struct GL {
                                             GLint);
     void (GLAPIENTRY *BlitFramebuffer)(GLint, GLint, GLint, GLint, GLint, GLint,
                                        GLint, GLint, GLbitfield, GLenum);
+    void (GLAPIENTRY *GetFramebufferAttachmentParameteriv)(GLenum, GLenum,
+                                                           GLenum, GLint *);
 
     void (GLAPIENTRY *Uniform1f)(GLint, GLfloat);
     void (GLAPIENTRY *Uniform2f)(GLint, GLfloat, GLfloat);

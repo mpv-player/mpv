@@ -180,6 +180,7 @@ struct gl_video {
     bool gl_debug;
 
     int texture_16bit_depth;    // actual bits available in 16 bit textures
+    int fb_depth;               // actual bits available in GL main framebuffer
 
     struct gl_shader_cache *sc;
 
@@ -2377,7 +2378,7 @@ static void pass_dither(struct gl_video *p)
     GL *gl = p->gl;
 
     // Assume 8 bits per component if unknown.
-    int dst_depth = gl->fb_g ? gl->fb_g : 8;
+    int dst_depth = p->fb_depth;
     if (p->opts.dither_depth > 0)
         dst_depth = p->opts.dither_depth;
 
@@ -3310,9 +3311,6 @@ static void init_gl(struct gl_video *p)
 
     debug_check_gl(p, "before init_gl");
 
-    MP_VERBOSE(p, "Reported display depth: R=%d, G=%d, B=%d\n",
-               gl->fb_r, gl->fb_g, gl->fb_b);
-
     gl->Disable(GL_DITHER);
 
     gl_vao_init(&p->vao, gl, sizeof(struct vertex), vertex_vao);
@@ -3341,6 +3339,22 @@ static void init_gl(struct gl_video *p)
             p->texture_16bit_depth = param;
         }
         gl->DeleteTextures(1, &tex);
+    }
+
+    if ((gl->es >= 300 || gl->version) && (gl->mpgl_caps & MPGL_CAP_FB)) {
+        GLint depth_r = -1, depth_g = -1, depth_b = -1;
+
+        gl->GetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK,
+                            GL_FRAMEBUFFER_ATTACHMENT_RED_SIZE, &depth_r);
+        gl->GetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK,
+                            GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &depth_g);
+        gl->GetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_BACK,
+                            GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &depth_b);
+
+        MP_VERBOSE(p, "Reported display depth: R=%d, G=%d, B=%d\n",
+                   depth_r, depth_g, depth_b);
+
+        p->fb_depth = depth_g > 0 ? depth_g : 8;
     }
 
     p->upload_timer = gl_timer_create(p->gl);

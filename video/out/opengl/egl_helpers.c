@@ -18,13 +18,3 @@
 #include "egl_helpers.h"
 #include "common.h"
 
-void mp_egl_get_depth(struct GL *gl, EGLConfig fbc)
-{
-    EGLint tokens[] = {EGL_RED_SIZE, EGL_GREEN_SIZE, EGL_BLUE_SIZE};
-    int *ptrs[] =     {&gl->fb_r,    &gl->fb_g,      &gl->fb_b};
-    for (int n = 0; n < MP_ARRAY_SIZE(tokens); n++) {
-        EGLint depth = 0;
-        if (eglGetConfigAttrib(eglGetCurrentDisplay(), fbc, tokens[n], &depth))
-            *ptrs[n] = depth;
-    }
-}

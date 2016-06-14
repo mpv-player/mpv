@@ -163,7 +163,6 @@ static int mpegl_init(struct MPGLContext *ctx, int flags)
 
     void *(*gpa)(const GLubyte*) = (void *(*)(const GLubyte*))eglGetProcAddress;
     mpgl_load_functions(ctx->gl, gpa, egl_exts, vo->log);
-    mp_egl_get_depth(ctx->gl, config);
 
     ctx->native_display_type = "x11";
     ctx->native_display = vo->x11->display;

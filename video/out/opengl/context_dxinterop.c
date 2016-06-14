@@ -278,25 +278,6 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
     MP_VERBOSE(ctx->vo, "DX_interop backbuffer format: %u\n",
         (unsigned)bb_desc.Format);
 
-    // Note: This backend has only been tested on an 8-bit display. It's
-    // unknown whether this code is enough to support other formats or if more
-    // work is needed.
-    switch (bb_desc.Format) {
-    case D3DFMT_X1R5G5B5: case D3DFMT_A1R5G5B5:
-        ctx->gl->fb_r = ctx->gl->fb_g = ctx->gl->fb_b = 5;
-        break;
-    case D3DFMT_R5G6B5:
-        ctx->gl->fb_r = 5; ctx->gl->fb_g = 6; ctx->gl->fb_b = 5;
-        break;
-    case D3DFMT_R8G8B8: case D3DFMT_A8R8G8B8: case D3DFMT_X8R8G8B8:
-    case D3DFMT_A8B8G8R8: case D3DFMT_X8B8G8R8: default:
-        ctx->gl->fb_r = ctx->gl->fb_g = ctx->gl->fb_b = 8;
-        break;
-    case D3DFMT_A2R10G10B10: case D3DFMT_A2B10G10R10:
-        ctx->gl->fb_r = ctx->gl->fb_g = ctx->gl->fb_b = 10;
-        break;
-    }
-
     // Create a rendertarget with the same format as the backbuffer for
     // rendering from OpenGL
     HANDLE share_handle = NULL;

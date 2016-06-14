@@ -214,6 +214,7 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(DeleteFramebuffers),
             DEF_FN(CheckFramebufferStatus),
             DEF_FN(FramebufferTexture2D),
+            DEF_FN(GetFramebufferAttachmentParameteriv),
             {0}
         },
     },
