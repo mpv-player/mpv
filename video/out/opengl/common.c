@@ -292,6 +292,22 @@ static const struct gl_functions gl_functions[] = {
         },
     },
     {
+        .extension = "GL_EXT_disjoint_timer_query",
+        .functions = (const struct gl_function[]) {
+            DEF_FN_NAME(GenQueries, "glGenQueriesEXT"),
+            DEF_FN_NAME(DeleteQueries, "glDeleteQueriesEXT"),
+            DEF_FN_NAME(BeginQuery, "glBeginQueryEXT"),
+            DEF_FN_NAME(EndQuery, "glEndQueryEXT"),
+            DEF_FN_NAME(QueryCounter, "glQueryCounterEXT"),
+            DEF_FN_NAME(IsQuery, "glIsQueryEXT"),
+            DEF_FN_NAME(GetQueryObjectiv, "glGetQueryObjectivEXT"),
+            DEF_FN_NAME(GetQueryObjecti64v, "glGetQueryObjecti64vEXT"),
+            DEF_FN_NAME(GetQueryObjectuiv, "glGetQueryObjectuivEXT"),
+            DEF_FN_NAME(GetQueryObjectui64v, "glGetQueryObjectui64vEXT"),
+            {0}
+        },
+    },
+    {
         .ver_core = 430,
         .ver_es_core = 300,
         .functions = (const struct gl_function[]) {
