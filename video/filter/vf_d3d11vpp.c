@@ -179,11 +179,10 @@ static int recreate_video_proc(struct vf_instance *vf)
     }
 
     if (rindex < 0) {
-        MP_ERR(vf, "No video processor found.\n");
-        goto fail;
+        MP_WARN(vf, "No video deinterlacing processor found.\n");
+        rindex = 0;
     }
 
-    // Assume RateConversionIndex==0 always works fine for us.
     hr = ID3D11VideoDevice_CreateVideoProcessor(p->video_dev, p->vp_enum, rindex,
                                                 &p->video_proc);
     if (FAILED(hr)) {
