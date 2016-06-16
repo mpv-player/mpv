@@ -159,6 +159,9 @@ static int recreate_video_proc(struct vf_instance *vf)
     if (FAILED(hr))
         goto fail;
 
+    MP_VERBOSE(vf, "Found %d rate conversion caps.\n",
+               (int)caps.RateConversionCapsCount);
+
     int rindex = -1;
     for (int n = 0; n < caps.RateConversionCapsCount; n++) {
         D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS rcaps;
@@ -166,10 +169,12 @@ static int recreate_video_proc(struct vf_instance *vf)
                 (p->vp_enum, n, &rcaps);
         if (FAILED(hr))
             goto fail;
+        MP_VERBOSE(vf, "  - %d: 0x%08x\n", n, (unsigned)rcaps.ProcessorCaps);
         if (rcaps.ProcessorCaps & D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB)
         {
-            rindex = n;
-            break;
+            MP_VERBOSE(vf, "       (matching)\n");
+            if (rindex < 0)
+                rindex = n;
         }
     }
 
