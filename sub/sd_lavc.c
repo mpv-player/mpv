@@ -176,6 +176,49 @@ static void alloc_sub(struct sd_lavc_priv *priv)
     priv->subs[0].id = priv->new_id++;
 }
 
+// Initialize sub from sub->avsub.
+static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
+{
+    struct MPOpts *opts = sd->opts;
+    struct sd_lavc_priv *priv = sd->priv;
+    AVSubtitle *avsub = &sub->avsub;
+
+    MP_TARRAY_GROW(priv, sub->inbitmaps, avsub->num_rects);
+    MP_TARRAY_GROW(priv, sub->imgs, avsub->num_rects);
+
+    for (int i = 0; i < avsub->num_rects; i++) {
+        struct AVSubtitleRect *r = avsub->rects[i];
+        struct sub_bitmap *b = &sub->inbitmaps[sub->count];
+        struct osd_bmp_indexed *img = &sub->imgs[sub->count];
+        if (r->type != SUBTITLE_BITMAP) {
+            MP_ERR(sd, "unsupported subtitle type from libavcodec\n");
+            continue;
+        }
+        if (!(r->flags & AV_SUBTITLE_FLAG_FORCED) && opts->forced_subs_only)
+            continue;
+        if (r->w <= 0 || r->h <= 0)
+            continue;
+#if HAVE_AV_SUBTITLE_NOPICT
+        uint8_t **data = r->data;
+        int *linesize = r->linesize;
+#else
+        uint8_t **data = r->pict.data;
+        int *linesize = r->pict.linesize;
+#endif
+        img->bitmap = data[0];
+        assert(r->nb_colors > 0);
+        assert(r->nb_colors * 4 <= sizeof(img->palette));
+        memcpy(img->palette, data[1], r->nb_colors * 4);
+        b->bitmap = img;
+        b->stride = linesize[0];
+        b->w = r->w;
+        b->h = r->h;
+        b->x = r->x;
+        b->y = r->y;
+        sub->count++;
+    }
+}
+
 static void decode(struct sd *sd, struct demux_packet *packet)
 {
     struct MPOpts *opts = sd->opts;
@@ -250,40 +293,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     current->endpts = endpts;
     current->avsub = sub;
 
-    MP_TARRAY_GROW(priv, current->inbitmaps, sub.num_rects);
-    MP_TARRAY_GROW(priv, current->imgs, sub.num_rects);
-
-    for (int i = 0; i < sub.num_rects; i++) {
-        struct AVSubtitleRect *r = sub.rects[i];
-        struct sub_bitmap *b = &current->inbitmaps[current->count];
-        struct osd_bmp_indexed *img = &current->imgs[current->count];
-        if (r->type != SUBTITLE_BITMAP) {
-            MP_ERR(sd, "unsupported subtitle type from libavcodec\n");
-            continue;
-        }
-        if (!(r->flags & AV_SUBTITLE_FLAG_FORCED) && opts->forced_subs_only)
-            continue;
-        if (r->w <= 0 || r->h <= 0)
-            continue;
-#if HAVE_AV_SUBTITLE_NOPICT
-        uint8_t **data = r->data;
-        int *linesize = r->linesize;
-#else
-        uint8_t **data = r->pict.data;
-        int *linesize = r->pict.linesize;
-#endif
-        img->bitmap = data[0];
-        assert(r->nb_colors > 0);
-        assert(r->nb_colors * 4 <= sizeof(img->palette));
-        memcpy(img->palette, data[1], r->nb_colors * 4);
-        b->bitmap = img;
-        b->stride = linesize[0];
-        b->w = r->w;
-        b->h = r->h;
-        b->x = r->x;
-        b->y = r->y;
-        current->count++;
-    }
+    read_sub_bitmaps(sd, current);
 
     if (pts != MP_NOPTS_VALUE) {
         for (int n = 0; n < priv->num_seekpoints; n++) {
