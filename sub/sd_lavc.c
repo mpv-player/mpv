@@ -32,6 +32,7 @@
 #include "options/options.h"
 #include "video/mp_image.h"
 #include "video/out/bitmap_packer.h"
+#include "img_convert.h"
 #include "sd.h"
 #include "dec_sub.h"
 
@@ -209,8 +210,14 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
 
     packer_set_size(priv->packer, avsub->num_rects);
 
+    // If we blur, we want a transparent region around the bitmap data to
+    // avoid "cut off" artifacts on the borders.
+    bool apply_blur = opts->sub_gauss != 0.0f;
+    int extend = apply_blur ? 5 : 0;
     // Assume consumers may use bilinear scaling on it (2x2 filter)
-    priv->packer->padding = 1;
+    int padding = 1 + extend;
+
+    priv->packer->padding = padding;
 
     for (int i = 0; i < avsub->num_rects; i++) {
         struct AVSubtitleRect *r = avsub->rects[i];
@@ -278,11 +285,12 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         memcpy(pal, data[1], r->nb_colors * 4);
         convert_pal(pal, 256, opts->sub_gray);
 
-        int padding = priv->packer->padding;
-        for (int y = 0; y < b->h + padding; y++) {
+        for (int y = -padding; y < b->h + padding; y++) {
             uint32_t *out = (uint32_t*)((char*)b->bitmap + y * b->stride);
             int start = 0;
-            if (y < b->h) {
+            for (int x = -padding; x < 0; x++)
+                out[x] = 0;
+            if (y >= 0 && y < b->h) {
                 uint8_t *in = data[0] + y * linesize[0];
                 for (int x = 0; x < b->w; x++)
                     *out++ = pal[*in++];
@@ -291,6 +299,15 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
             for (int x = start; x < b->w + padding; x++)
                 *out++ = 0;
         }
+
+        b->bitmap = (char*)b->bitmap - extend * b->stride - extend * 4;
+        b->x -= extend;
+        b->y -= extend;
+        b->w += extend * 2;
+        b->h += extend * 2;
+
+        if (apply_blur)
+            mp_blur_rgba_sub_bitmap(b, opts->sub_gauss);
     }
 }
 

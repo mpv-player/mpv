@@ -41,52 +41,25 @@ struct osd_conv_cache *osd_conv_cache_new(void)
     return talloc_zero(NULL, struct osd_conv_cache);
 }
 
-bool osd_conv_blur_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
-                        double gblur)
+void mp_blur_rgba_sub_bitmap(struct sub_bitmap *d, double gblur)
 {
-    struct sub_bitmaps src = *imgs;
-    if (src.format != SUBBITMAP_RGBA)
-        return false;
+    struct mp_image *tmp1 = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
+    struct mp_image *tmp2 = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
+    if (tmp1 && tmp2) { // on OOM, skip region
+        struct mp_image s = {0};
+        mp_image_setfmt(&s, IMGFMT_BGRA);
+        mp_image_set_size(&s, d->w, d->h);
+        s.stride[0] = d->stride;
+        s.planes[0] = d->bitmap;
 
-    talloc_free(c->parts);
-    imgs->parts = c->parts = talloc_array(c, struct sub_bitmap, src.num_parts);
+        mp_image_copy(tmp1, &s);
 
-    for (int n = 0; n < src.num_parts; n++) {
-        struct sub_bitmap *d = &imgs->parts[n];
-        struct sub_bitmap *s = &src.parts[n];
+        mp_image_sw_blur_scale(tmp2, tmp1, gblur);
 
-        // add a transparent padding border to reduce artifacts
-        int pad = 5;
-        struct mp_image *temp = mp_image_alloc(IMGFMT_BGRA, s->w + pad * 2,
-                                                            s->h + pad * 2);
-        if (!temp)
-            continue; // on OOM, skip region
-        memset_pic(temp->planes[0], 0, temp->w * 4, temp->h, temp->stride[0]);
-        uint8_t *p0 = temp->planes[0] + pad * 4 + pad * temp->stride[0];
-        memcpy_pic(p0, s->bitmap, s->w * 4, s->h, temp->stride[0], s->stride);
-
-        double sx = (double)s->dw / s->w;
-        double sy = (double)s->dh / s->h;
-
-        d->x = s->x - pad * sx;
-        d->y = s->y - pad * sy;
-        d->w = d->dw = s->dw + pad * 2 * sx;
-        d->h = d->dh = s->dh + pad * 2 * sy;
-        struct mp_image *image = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
-        talloc_steal(c->parts, image);
-        if (image) {
-            d->stride = image->stride[0];
-            d->bitmap = image->planes[0];
-
-            mp_image_sw_blur_scale(image, temp, gblur);
-        } else {
-            // on OOM, skip region
-            *d = *s;
-        }
-
-        talloc_free(temp);
+        mp_image_copy(&s, tmp2);
     }
-    return true;
+    talloc_free(tmp1);
+    talloc_free(tmp2);
 }
 
 // If RGBA parts need scaling, scale them.

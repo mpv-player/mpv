@@ -295,10 +295,6 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
 
     bool cached = false; // do we have a copy of all the image data?
 
-    if (out_imgs->format == SUBBITMAP_RGBA && opts->sub_gauss != 0.0f)
-        cached |= osd_conv_blur_rgba(obj->cache[2], out_imgs, opts->sub_gauss);
-
-    // Do this conversion last to not trigger gauss blurring for ASS
     if (formats[SUBBITMAP_RGBA] && out_imgs->format == SUBBITMAP_LIBASS)
         cached |= osd_conv_ass_to_rgba(obj->cache[3], out_imgs);
 
