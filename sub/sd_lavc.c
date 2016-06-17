@@ -44,6 +44,7 @@ struct sub {
     struct sub_bitmap *inbitmaps;
     int count;
     struct mp_image *data;
+    int src_w, src_h;
     double pts;
     double endpts;
     int64_t id;
@@ -178,6 +179,8 @@ static void alloc_sub(struct sd_lavc_priv *priv)
     // clear only some fields; the memory allocs can be reused
     priv->subs[0].valid = false;
     priv->subs[0].count = 0;
+    priv->subs[0].src_w = 0;
+    priv->subs[0].src_h = 0;
     priv->subs[0].id = priv->new_id++;
 }
 
@@ -278,6 +281,9 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         b->y = r->y;
         b->stride = sub->data->stride[0];
         b->bitmap = sub->data->planes[0] + pos.y * b->stride + pos.x * 4;
+
+        sub->src_w = FFMAX(sub->src_w, b->x + b->w);
+        sub->src_h = FFMAX(sub->src_h, b->h + b->h);
 
         assert(r->nb_colors > 0);
         assert(r->nb_colors <= 256);
@@ -454,14 +460,9 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
         d.ml = d.mr = d.mt = d.mb = 0;
     int insize[2];
     get_resolution(sd, insize);
-    for (int n = 0; n < res->num_parts; n++) {
-        struct sub_bitmap *p = &res->parts[n];
-        if ((p->x + p->w > insize[0] || p->y + p->h > insize[1]) &&
-            priv->video_params.w > insize[0] && priv->video_params.h > insize[1])
-        {
-            insize[0] = priv->video_params.w;
-            insize[1] = priv->video_params.h;
-        }
+    if (current->src_w > insize[0] || current->src_h > insize[1]) {
+        insize[0] = priv->video_params.w;
+        insize[1] = priv->video_params.h;
     }
     osd_rescale_bitmaps(res, insize[0], insize[1], d, video_par);
 }
