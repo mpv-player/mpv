@@ -56,6 +56,11 @@
     [self.adapter setNeedsResize];
 }
 
+- (void)windowDidChangeScreen:(NSNotification *)notification
+{
+    [self.adapter windowDidChangeScreen:notification];
+}
+
 - (void)windowDidChangeScreenProfile:(NSNotification *)notification
 {
     [self.adapter didChangeWindowedScreenProfile:[self screen]];
