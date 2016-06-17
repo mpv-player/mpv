@@ -295,12 +295,6 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
 
     bool cached = false; // do we have a copy of all the image data?
 
-    if (out_imgs->format == SUBBITMAP_INDEXED && opts->sub_gray)
-        cached |= osd_conv_idx_to_gray(obj->cache[0], out_imgs);
-
-    if (formats[SUBBITMAP_RGBA] && out_imgs->format == SUBBITMAP_INDEXED)
-        cached |= osd_conv_idx_to_rgba(obj->cache[1], out_imgs);
-
     if (out_imgs->format == SUBBITMAP_RGBA && opts->sub_gauss != 0.0f)
         cached |= osd_conv_blur_rgba(obj->cache[2], out_imgs, opts->sub_gauss);
 

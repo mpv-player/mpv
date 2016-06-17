@@ -31,6 +31,7 @@
 #include "demux/stheader.h"
 #include "options/options.h"
 #include "video/mp_image.h"
+#include "video/out/bitmap_packer.h"
 #include "sd.h"
 #include "dec_sub.h"
 
@@ -39,9 +40,9 @@
 struct sub {
     bool valid;
     AVSubtitle avsub;
-    int count;
     struct sub_bitmap *inbitmaps;
-    struct osd_bmp_indexed *imgs;
+    int count;
+    struct mp_image *data;
     double pts;
     double endpts;
     int64_t id;
@@ -63,6 +64,7 @@ struct sd_lavc_priv {
     double current_pts;
     struct seekpoint *seekpoints;
     int num_seekpoints;
+    struct bitmap_packer *packer;
 };
 
 static void get_resolution(struct sd *sd, int wh[2])
@@ -144,6 +146,8 @@ static int init(struct sd *sd)
     sd->priv = priv;
     priv->displayed_id = -1;
     priv->current_pts = MP_NOPTS_VALUE;
+    priv->packer = talloc_zero(priv, struct bitmap_packer);
+    priv->packer->w_max = priv->packer->h_max = PACKER_MAX_WH;
     return 0;
 
  error:
@@ -176,6 +180,24 @@ static void alloc_sub(struct sd_lavc_priv *priv)
     priv->subs[0].id = priv->new_id++;
 }
 
+static void convert_pal(uint32_t *colors, size_t count, bool gray)
+{
+    for (int n = 0; n < count; n++) {
+        uint32_t c = colors[n];
+        int b = c & 0xFF;
+        int g = (c >> 8) & 0xFF;
+        int r = (c >> 16) & 0xFF;
+        int a = (c >> 24) & 0xFF;
+        if (gray)
+            r = g = b = (r + g + b) / 3;
+        // from straight to pre-multiplied alpha
+        b = b * a / 255;
+        g = g * a / 255;
+        r = r * a / 255;
+        colors[n] = b | (g << 8) | (r << 16) | (a << 24);
+    }
+}
+
 // Initialize sub from sub->avsub.
 static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
 {
@@ -184,12 +206,16 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
     AVSubtitle *avsub = &sub->avsub;
 
     MP_TARRAY_GROW(priv, sub->inbitmaps, avsub->num_rects);
-    MP_TARRAY_GROW(priv, sub->imgs, avsub->num_rects);
+
+    packer_set_size(priv->packer, avsub->num_rects);
+
+    // Assume consumers may use bilinear scaling on it (2x2 filter)
+    priv->packer->padding = 1;
 
     for (int i = 0; i < avsub->num_rects; i++) {
         struct AVSubtitleRect *r = avsub->rects[i];
         struct sub_bitmap *b = &sub->inbitmaps[sub->count];
-        struct osd_bmp_indexed *img = &sub->imgs[sub->count];
+
         if (r->type != SUBTITLE_BITMAP) {
             MP_ERR(sd, "unsupported subtitle type from libavcodec\n");
             continue;
@@ -198,6 +224,40 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
             continue;
         if (r->w <= 0 || r->h <= 0)
             continue;
+
+        b->bitmap = r; // save for later (dumb hack to avoid more complexity)
+
+        priv->packer->in[sub->count] = (struct pos){r->w, r->h};
+        sub->count++;
+    }
+
+    priv->packer->count = sub->count;
+
+    if (packer_pack(priv->packer) < 0) {
+        MP_ERR(sd, "Unable to pack subtitle bitmaps.\n");
+        sub->count = 0;
+    }
+
+    if (!sub->count)
+        return;
+
+    struct pos bb[2];
+    packer_get_bb(priv->packer, bb);
+
+    if (!sub->data || sub->data->w < bb[1].x || sub->data->h < bb[1].y) {
+        talloc_free(sub->data);
+        sub->data = mp_image_alloc(IMGFMT_BGRA, priv->packer->w, priv->packer->h);
+        if (!sub->data) {
+            sub->count = 0;
+            return;
+        }
+        talloc_steal(priv, sub->data);
+    }
+
+    for (int i = 0; i < sub->count; i++) {
+        struct sub_bitmap *b = &sub->inbitmaps[i];
+        struct pos pos = priv->packer->result[i];
+        struct AVSubtitleRect *r = b->bitmap;
 #if HAVE_AV_SUBTITLE_NOPICT
         uint8_t **data = r->data;
         int *linesize = r->linesize;
@@ -205,17 +265,32 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         uint8_t **data = r->pict.data;
         int *linesize = r->pict.linesize;
 #endif
-        img->bitmap = data[0];
-        assert(r->nb_colors > 0);
-        assert(r->nb_colors * 4 <= sizeof(img->palette));
-        memcpy(img->palette, data[1], r->nb_colors * 4);
-        b->bitmap = img;
-        b->stride = linesize[0];
         b->w = r->w;
         b->h = r->h;
         b->x = r->x;
         b->y = r->y;
-        sub->count++;
+        b->stride = sub->data->stride[0];
+        b->bitmap = sub->data->planes[0] + pos.y * b->stride + pos.x * 4;
+
+        assert(r->nb_colors > 0);
+        assert(r->nb_colors <= 256);
+        uint32_t pal[256] = {0};
+        memcpy(pal, data[1], r->nb_colors * 4);
+        convert_pal(pal, 256, opts->sub_gray);
+
+        int padding = priv->packer->padding;
+        for (int y = 0; y < b->h + padding; y++) {
+            uint32_t *out = (uint32_t*)((char*)b->bitmap + y * b->stride);
+            int start = 0;
+            if (y < b->h) {
+                uint8_t *in = data[0] + y * linesize[0];
+                for (int x = 0; x < b->w; x++)
+                    *out++ = pal[*in++];
+                start = b->w;
+            }
+            for (int x = start; x < b->w + padding; x++)
+                *out++ = 0;
+        }
     }
 }
 
@@ -345,7 +420,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     if (priv->displayed_id != current->id)
         res->change_id++;
     priv->displayed_id = current->id;
-    res->format = SUBBITMAP_INDEXED;
+    res->format = SUBBITMAP_RGBA;
 
     double video_par = 0;
     if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE &&

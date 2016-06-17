@@ -23,8 +23,9 @@ struct bitmap_packer {
     int asize;
 };
 
-struct ass_image;
 struct sub_bitmaps;
+
+#define PACKER_MAX_WH 65536
 
 // Clear all internal state. Leave the following fields: w_max, h_max
 void packer_reset(struct bitmap_packer *packer);
