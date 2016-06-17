@@ -80,6 +80,7 @@ bool osd_scale_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
 
     talloc_free(c->parts);
     imgs->parts = c->parts = talloc_array(c, struct sub_bitmap, src.num_parts);
+    imgs->packed = NULL;
 
     // Note: we scale all parts, since most likely all need scaling anyway, and
     //       to get a proper copy of all data in the imgs list.
@@ -158,6 +159,7 @@ bool osd_conv_ass_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
     imgs->format = SUBBITMAP_RGBA;
     imgs->parts = c->part;
     imgs->num_parts = num_bb;
+    imgs->packed = NULL;
 
     size_t newsize = 0;
     for (int n = 0; n < num_bb; n++) {

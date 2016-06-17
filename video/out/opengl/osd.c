@@ -17,6 +17,8 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <limits.h>
+
 #include <libavutil/common.h>
 
 #include "video/out/bitmap_packer.h"
@@ -64,6 +66,7 @@ struct mpgl_osd {
     struct mp_log *log;
     struct osd_state *osd;
     GL *gl;
+    GLint max_tex_wh;
     bool use_pbo;
     struct mpgl_osd_part *parts[MAX_OSD_PARTS];
     const struct gl_format *fmt_table[SUBBITMAP_COUNT];
@@ -78,9 +81,6 @@ struct mpgl_osd {
 
 struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd)
 {
-    GLint max_texture_size;
-    gl->GetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
-
     struct mpgl_osd *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (struct mpgl_osd) {
         .log = log,
@@ -89,6 +89,8 @@ struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd
         .scratch = talloc_zero_size(ctx, 1),
     };
 
+    gl->GetIntegerv(GL_MAX_TEXTURE_SIZE, &ctx->max_tex_wh);
+
     ctx->fmt_table[SUBBITMAP_LIBASS] = gl_find_unorm_format(gl, 1, 1);
     ctx->fmt_table[SUBBITMAP_RGBA]   = gl_find_unorm_format(gl, 1, 4);
 
@@ -96,8 +98,8 @@ struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd
         struct mpgl_osd_part *p = talloc_ptrtype(ctx, p);
         *p = (struct mpgl_osd_part) {
             .packer = talloc_struct(p, struct bitmap_packer, {
-                .w_max = max_texture_size,
-                .h_max = max_texture_size,
+                .w_max = ctx->max_tex_wh,
+                .h_max = ctx->max_tex_wh,
             }),
         };
         ctx->parts[n] = p;
@@ -163,16 +165,36 @@ static bool upload(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
             goto done;
         }
     } else {
-        if (!osd->upload)
-            osd->upload = talloc_size(NULL, buffer_size);
-        data = osd->upload;
-        texdata = data;
+        if (!imgs->packed) {
+            if (!osd->upload)
+                osd->upload = talloc_size(NULL, buffer_size);
+            data = osd->upload;
+            texdata = data;
+        }
     }
 
-    struct pos bb[2];
-    packer_get_bb(osd->packer, bb);
-    size_t stride = osd->w * pix_stride;
-    packer_copy_subbitmaps(osd->packer, imgs, data, pix_stride, stride);
+    int copy_w = 0;
+    int copy_h = 0;
+    size_t stride = 0;
+    if (imgs->packed) {
+        copy_w = imgs->packed_w;
+        copy_h = imgs->packed_h;
+        stride = imgs->packed->stride[0];
+        texdata = imgs->packed->planes[0];
+        if (pbo) {
+            memcpy_pic(data, texdata, pix_stride * copy_w,  copy_h,
+                       osd->w * pix_stride, stride);
+            stride = osd->w * pix_stride;
+            texdata = NULL;
+        }
+    } else {
+        struct pos bb[2];
+        packer_get_bb(osd->packer, bb);
+        copy_w = bb[1].x;
+        copy_h = bb[1].y;
+        stride = osd->w * pix_stride;
+        packer_copy_subbitmaps(osd->packer, imgs, data, pix_stride, stride);
+    }
 
     if (pbo) {
         if (!gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER)) {
@@ -182,7 +204,7 @@ static bool upload(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
     }
 
     gl_upload_tex(gl, GL_TEXTURE_2D, fmt->format, fmt->type, texdata, stride,
-                  bb[0].x, bb[0].y, bb[1].x - bb[0].x, bb[1].y - bb[0].y);
+                  0, 0, copy_w, copy_h);
 
     if (pbo)
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -196,17 +218,42 @@ done:
     return success;
 }
 
+static int next_pow2(int v)
+{
+    for (int x = 0; x < 30; x++) {
+        if ((1 << x) >= v)
+            return 1 << x;
+    }
+    return INT_MAX;
+}
+
 static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
                        struct sub_bitmaps *imgs)
 {
     GL *gl = ctx->gl;
 
-    // assume 2x2 filter on scaling
-    osd->packer->padding = imgs->scaled;
-    int r = packer_pack_from_subbitmaps(osd->packer, imgs);
-    if (r < 0) {
+    int req_w = 0;
+    int req_h = 0;
+
+    if (imgs->packed) {
+        req_w = next_pow2(imgs->packed_w);
+        req_h = next_pow2(imgs->packed_h);
+    } else {
+        // assume 2x2 filter on scaling
+        osd->packer->padding = imgs->scaled;
+        int r = packer_pack_from_subbitmaps(osd->packer, imgs);
+        if (r < 0) {
+            MP_ERR(ctx, "OSD bitmaps do not fit on a surface with the maximum "
+                "supported size %dx%d.\n", osd->packer->w_max, osd->packer->h_max);
+            return false;
+        }
+        req_w = osd->packer->w;
+        req_h = osd->packer->h;
+    }
+
+    if (req_w > ctx->max_tex_wh || req_h > ctx->max_tex_wh) {
         MP_ERR(ctx, "OSD bitmaps do not fit on a surface with the maximum "
-               "supported size %dx%d.\n", osd->packer->w_max, osd->packer->h_max);
+                "supported size %dx%d.\n", ctx->max_tex_wh, ctx->max_tex_wh);
         return false;
     }
 
@@ -218,12 +265,10 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
 
     gl->BindTexture(GL_TEXTURE_2D, osd->texture);
 
-    if (osd->packer->w > osd->w || osd->packer->h > osd->h
-        || osd->format != imgs->format)
-    {
+    if (req_w > osd->w || req_h > osd->h || osd->format != imgs->format) {
         osd->format = imgs->format;
-        osd->w = FFMAX(32, osd->packer->w);
-        osd->h = FFMAX(32, osd->packer->h);
+        osd->w = FFMAX(32, req_w);
+        osd->h = FFMAX(32, req_h);
 
         gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format, osd->w, osd->h,
                        0, fmt->format, fmt->type, NULL);
@@ -261,18 +306,26 @@ static void gen_osd_cb(void *pctx, struct sub_bitmaps *imgs)
 
     struct mpgl_osd_part *osd = ctx->parts[imgs->render_index];
 
+    bool ok = true;
     if (imgs->change_id != osd->change_id) {
         if (!upload_osd(ctx, osd, imgs))
-            osd->packer->count = 0;
+            ok = false;
 
         osd->change_id = imgs->change_id;
         ctx->change_counter += 1;
     }
-    osd->num_subparts = osd->packer->count;
+    osd->num_subparts = ok ? imgs->num_parts : 0;
 
     MP_TARRAY_GROW(osd, osd->subparts, osd->num_subparts);
     memcpy(osd->subparts, imgs->parts,
            osd->num_subparts * sizeof(osd->subparts[0]));
+
+    if (!imgs->packed) {
+        for (int n = 0; n < osd->num_subparts; n++) {
+            osd->subparts[n].src_x = osd->packer->result[n].x;
+            osd->subparts[n].src_y = osd->packer->result[n].y;
+        }
+    }
 }
 
 static void write_quad(struct vertex *va, struct gl_transform t,
@@ -300,7 +353,6 @@ static int generate_verts(struct mpgl_osd_part *part, struct gl_transform t)
 
     for (int n = 0; n < part->num_subparts; n++) {
         struct sub_bitmap *b = &part->subparts[n];
-        struct pos pos = part->packer->result[n];
         struct vertex *va = part->vertices;
 
         // NOTE: the blend color is used with SUBBITMAP_LIBASS only, so it
@@ -311,7 +363,7 @@ static int generate_verts(struct mpgl_osd_part *part, struct gl_transform t)
 
         write_quad(&va[n * 6], t,
                    b->x, b->y, b->x + b->dw, b->y + b->dh,
-                   pos.x, pos.y, pos.x + b->w, pos.y + b->h,
+                   b->src_x, b->src_y, b->src_x + b->w, b->src_y + b->h,
                    part->w, part->h, color);
     }
 

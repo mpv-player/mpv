@@ -42,6 +42,11 @@ struct sub_bitmap {
     int x, y;
     int dw, dh;
 
+    // If the containing struct sub_bitmaps has the packed field set, then this
+    // is the position within the source. (Strictly speaking this is redundant
+    // with the bitmap pointer.)
+    int src_x, src_y;
+
     struct {
         uint32_t color;
     } libass;
@@ -59,6 +64,17 @@ struct sub_bitmaps {
 
     struct sub_bitmap *parts;
     int num_parts;
+
+    // Packed representation of the bitmap data. If non-NULL, then the
+    // parts[].bitmap pointer points into the image data here (and stride will
+    // correspond to packed->stride[0]).
+    //  SUBBITMAP_RGBA: IMGFMT_BGRA (exact match)
+    // Other formats have this set to NULL.
+    struct mp_image *packed;
+
+    // Bounding box for the packed image. All parts will be within the bounding
+    // box. (The origin of the box is at (0,0).)
+    int packed_w, packed_h;
 
     int change_id;  // Incremented on each change
 };

@@ -44,6 +44,7 @@ struct sub {
     struct sub_bitmap *inbitmaps;
     int count;
     struct mp_image *data;
+    int bound_w, bound_h;
     int src_w, src_h;
     double pts;
     double endpts;
@@ -254,7 +255,10 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
     struct pos bb[2];
     packer_get_bb(priv->packer, bb);
 
-    if (!sub->data || sub->data->w < bb[1].x || sub->data->h < bb[1].y) {
+    sub->bound_w = bb[1].x;
+    sub->bound_h = bb[1].y;
+
+    if (!sub->data || sub->data->w < sub->bound_w || sub->data->h < sub->bound_h) {
         talloc_free(sub->data);
         sub->data = mp_image_alloc(IMGFMT_BGRA, priv->packer->w, priv->packer->h);
         if (!sub->data) {
@@ -279,6 +283,8 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         b->h = r->h;
         b->x = r->x;
         b->y = r->y;
+        b->src_x = pos.x;
+        b->src_y = pos.y;
         b->stride = sub->data->stride[0];
         b->bitmap = sub->data->planes[0] + pos.y * b->stride + pos.x * 4;
 
@@ -307,6 +313,8 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         }
 
         b->bitmap = (char*)b->bitmap - extend * b->stride - extend * 4;
+        b->src_x -= extend;
+        b->src_y -= extend;
         b->x -= extend;
         b->y -= extend;
         b->w += extend * 2;
@@ -443,6 +451,9 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     if (priv->displayed_id != current->id)
         res->change_id++;
     priv->displayed_id = current->id;
+    res->packed = current->data;
+    res->packed_w = current->bound_w;
+    res->packed_h = current->bound_h;
     res->format = SUBBITMAP_RGBA;
 
     double video_par = 0;
