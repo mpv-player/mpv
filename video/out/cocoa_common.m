@@ -374,13 +374,16 @@ static void vo_cocoa_update_screen_fps(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
+    NSScreen *screen = vo->opts->fullscreen ? s->fs_screen : s->current_screen;
+    NSDictionary* sinfo = [screen deviceDescription];
+    NSNumber* sid = [sinfo objectForKey:@"NSScreenNumber"];
+    CGDirectDisplayID did = [sid longValue];
+
     CVDisplayLinkRef link;
-    CVDisplayLinkCreateWithActiveCGDisplays(&link);
+    CVDisplayLinkCreateWithCGDisplay(did, &link);
     CVDisplayLinkSetOutputCallback(link, &displayLinkCallback, NULL);
     CVDisplayLinkStart(link);
-
-    CVDisplayLinkSetCurrentCGDisplayFromOpenGLContext(
-        link, s->cgl_ctx, CGLGetPixelFormat(s->cgl_ctx));
+    CVDisplayLinkSetCurrentCGDisplay(link, did);
 
     double display_period = CVDisplayLinkGetActualOutputVideoRefreshPeriod(link);
 
@@ -945,6 +948,11 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 - (void)handleFilesArray:(NSArray *)files
 {
     [[EventsResponder sharedInstance] handleFilesArray:files];
+}
+
+- (void)windowDidChangeScreen:(NSNotification *)notification
+{
+    vo_cocoa_update_screen_info(self.vout, NULL);
 }
 
 - (void)didChangeWindowedScreenProfile:(NSScreen *)screen
