@@ -46,10 +46,7 @@ void packer_reset(struct bitmap_packer *packer)
 void packer_get_bb(struct bitmap_packer *packer, struct pos out_bb[2])
 {
     out_bb[0] = (struct pos) {0};
-    out_bb[1] = (struct pos) {
-        FFMIN(packer->used_width + packer->padding, packer->w),
-        FFMIN(packer->used_height + packer->padding, packer->h),
-    };
+    out_bb[1] = (struct pos) {packer->used_width, packer->used_height};
 }
 
 #define HEIGHT_SORT_BITS 4
@@ -138,8 +135,12 @@ int packer_pack(struct bitmap_packer *packer)
     struct pos *in = packer->in;
     int xmax = 0, ymax = 0;
     for (int i = 0; i < packer->count; i++) {
-        if (in[i].x <= packer->padding || in[i].y <= packer->padding)
+        if (in[i].x <= 0 || in[i].y <= 0) {
             in[i] = (struct pos){0, 0};
+        } else {
+            in[i].x += packer->padding * 2;
+            in[i].y += packer->padding * 2;
+        }
         if (in[i].x < 0 || in [i].x > 65535 || in[i].y < 0 || in[i].y > 65535) {
             fprintf(stderr, "Invalid OSD / subtitle bitmap size\n");
             abort();
@@ -147,8 +148,6 @@ int packer_pack(struct bitmap_packer *packer)
         xmax = FFMAX(xmax, in[i].x);
         ymax = FFMAX(ymax, in[i].y);
     }
-    xmax = FFMAX(0, xmax - packer->padding);
-    ymax = FFMAX(0, ymax - packer->padding);
     if (xmax > packer->w)
         packer->w = 1 << (av_log2(xmax - 1) + 1);
     if (ymax > packer->h)
@@ -156,15 +155,19 @@ int packer_pack(struct bitmap_packer *packer)
     while (1) {
         int used_width = 0;
         int y = pack_rectangles(in, packer->result, packer->count,
-                                packer->w + packer->padding,
-                                packer->h + packer->padding,
+                                packer->w, packer->h,
                                 packer->scratch, &used_width);
         if (y >= 0) {
-            // No padding at edges
             packer->used_width = FFMIN(used_width, packer->w);
             packer->used_height = FFMIN(y, packer->h);
             assert(packer->w == 0 || IS_POWER_OF_2(packer->w));
             assert(packer->h == 0 || IS_POWER_OF_2(packer->h));
+            if (packer->padding) {
+                for (int i = 0; i < packer->count; i++) {
+                    packer->result[i].x += packer->padding;
+                    packer->result[i].y += packer->padding;
+                }
+            }
             return packer->w != w_orig || packer->h != h_orig;
         }
         if (packer->w <= packer->h && packer->w != packer->w_max)
@@ -201,9 +204,8 @@ int packer_pack_from_subbitmaps(struct bitmap_packer *packer,
     if (b->format == SUBBITMAP_EMPTY)
         return 0;
     packer_set_size(packer, b->num_parts);
-    int a = packer->padding;
     for (int i = 0; i < b->num_parts; i++)
-        packer->in[i] = (struct pos){b->parts[i].w + a, b->parts[i].h + a};
+        packer->in[i] = (struct pos){b->parts[i].w, b->parts[i].h};
     return packer_pack(packer);
 }
 
