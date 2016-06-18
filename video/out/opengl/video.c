@@ -3342,7 +3342,12 @@ static void init_gl(struct gl_video *p)
     }
 
     if ((gl->es >= 300 || gl->version) && (gl->mpgl_caps & MPGL_CAP_FB)) {
+        gl->BindFramebuffer(GL_FRAMEBUFFER, gl->main_fb);
+
         GLenum obj = gl->version ? GL_BACK_LEFT : GL_BACK;
+        if (gl->main_fb)
+            obj = GL_COLOR_ATTACHMENT0;
+
         GLint depth_r = -1, depth_g = -1, depth_b = -1;
 
         gl->GetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, obj,
@@ -3356,6 +3361,8 @@ static void init_gl(struct gl_video *p)
                    depth_r, depth_g, depth_b);
 
         p->fb_depth = depth_g > 0 ? depth_g : 8;
+
+        gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
     p->upload_timer = gl_timer_create(p->gl);

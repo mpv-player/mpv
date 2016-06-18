@@ -130,7 +130,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             p->vsync_fences[p->num_vsync_fences++] = fence;
     }
 
-    gl_video_render_frame(p->renderer, frame, 0);
+    gl_video_render_frame(p->renderer, frame, gl->main_fb);
 
     if (p->use_glFinish)
         gl->Finish();

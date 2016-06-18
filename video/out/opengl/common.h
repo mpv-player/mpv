@@ -91,6 +91,7 @@ struct GL {
     char *extensions;           // Equivalent to GL_EXTENSIONS
     int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
     bool debug_context;         // use of e.g. GLX_CONTEXT_DEBUG_BIT_ARB
+    GLuint main_fb;             // framebuffer to render to (normally 0)
 
     void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei);
     void (GLAPIENTRY *Clear)(GLbitfield);
