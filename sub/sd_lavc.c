@@ -289,7 +289,7 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         b->y = r->y;
 
         // Choose such that the extended start position is aligned.
-        pos.x = MP_ALIGN_UP(pos.x - extend, align * 4) + extend;
+        pos.x = MP_ALIGN_UP(pos.x - extend, align) + extend;
 
         b->src_x = pos.x;
         b->src_y = pos.y;
