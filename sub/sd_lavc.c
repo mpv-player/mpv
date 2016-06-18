@@ -223,6 +223,10 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
 
     priv->packer->padding = padding;
 
+    // For the sake of libswscale, which in some cases takes sub-rects as
+    // source images, and wants 16 byte start pointer and stride alignment.
+    int align = 4;
+
     for (int i = 0; i < avsub->num_rects; i++) {
         struct AVSubtitleRect *r = avsub->rects[i];
         struct sub_bitmap *b = &sub->inbitmaps[sub->count];
@@ -238,7 +242,7 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
 
         b->bitmap = r; // save for later (dumb hack to avoid more complexity)
 
-        priv->packer->in[sub->count] = (struct pos){r->w, r->h};
+        priv->packer->in[sub->count] = (struct pos){r->w + (align - 1), r->h};
         sub->count++;
     }
 
@@ -283,6 +287,10 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         b->h = r->h;
         b->x = r->x;
         b->y = r->y;
+
+        // Choose such that the extended start position is aligned.
+        pos.x = MP_ALIGN_UP(pos.x - extend, align * 4) + extend;
+
         b->src_x = pos.x;
         b->src_y = pos.y;
         b->stride = sub->data->stride[0];

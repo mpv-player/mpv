@@ -44,8 +44,7 @@ struct osd_conv_cache *osd_conv_cache_new(void)
 void mp_blur_rgba_sub_bitmap(struct sub_bitmap *d, double gblur)
 {
     struct mp_image *tmp1 = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
-    struct mp_image *tmp2 = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
-    if (tmp1 && tmp2) { // on OOM, skip region
+    if (tmp1) { // on OOM, skip region
         struct mp_image s = {0};
         mp_image_setfmt(&s, IMGFMT_BGRA);
         mp_image_set_size(&s, d->w, d->h);
@@ -54,12 +53,9 @@ void mp_blur_rgba_sub_bitmap(struct sub_bitmap *d, double gblur)
 
         mp_image_copy(tmp1, &s);
 
-        mp_image_sw_blur_scale(tmp2, tmp1, gblur);
-
-        mp_image_copy(&s, tmp2);
+        mp_image_sw_blur_scale(&s, tmp1, gblur);
     }
     talloc_free(tmp1);
-    talloc_free(tmp2);
 }
 
 // If RGBA parts need scaling, scale them.
