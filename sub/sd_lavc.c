@@ -150,7 +150,6 @@ static int init(struct sd *sd)
     priv->displayed_id = -1;
     priv->current_pts = MP_NOPTS_VALUE;
     priv->packer = talloc_zero(priv, struct bitmap_packer);
-    priv->packer->w_max = priv->packer->h_max = PACKER_MAX_WH;
     return 0;
 
  error:

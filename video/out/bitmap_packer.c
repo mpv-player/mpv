@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
+#include <limits.h>
 
 #include <libavutil/common.h>
 
@@ -170,10 +171,12 @@ int packer_pack(struct bitmap_packer *packer)
             }
             return packer->w != w_orig || packer->h != h_orig;
         }
-        if (packer->w <= packer->h && packer->w != packer->w_max)
-            packer->w = FFMIN(packer->w * 2, packer->w_max);
-        else if (packer->h != packer->h_max)
-            packer->h = FFMIN(packer->h * 2, packer->h_max);
+        int w_max = packer->w_max > 0 ? packer->w_max : INT_MAX;
+        int h_max = packer->h_max > 0 ? packer->h_max : INT_MAX;
+        if (packer->w <= packer->h && packer->w != w_max)
+            packer->w = FFMIN(packer->w * 2, w_max);
+        else if (packer->h != h_max)
+            packer->h = FFMIN(packer->h * 2, h_max);
         else {
             packer->w = w_orig;
             packer->h = h_orig;
