@@ -54,21 +54,14 @@ struct priv {
     HGLRC os_ctx;
 
     // OpenGL resources
-    GLuint framebuffer;
     GLuint texture;
 
-    // Is the shared framebuffer currently bound?
-    bool fb_bound;
-    // Is the shared texture currently attached?
-    bool tex_attached;
     // Did we lose the device?
     bool lost_device;
 
     // Requested and current parameters
     int requested_swapinterval;
     int width, height, swapinterval;
-
-    void (GLAPIENTRY *real_gl_bind_framebuffer)(GLenum, GLuint);
 };
 
 static __thread struct MPGLContext *current_ctx;
@@ -227,18 +220,6 @@ static void os_ctx_destroy(MPGLContext *ctx)
         DestroyWindow(p->os_wnd);
 }
 
-static void try_attach_texture(MPGLContext *ctx)
-{
-    struct priv *p = ctx->priv;
-    struct GL *gl = ctx->gl;
-
-    if (p->fb_bound && !p->tex_attached) {
-        gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-            GL_TEXTURE_2D, p->texture, 0);
-        p->tex_attached = true;
-    }
-}
-
 static int d3d_size_dependent_create(MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
@@ -296,7 +277,6 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
 
     // Create the OpenGL-side texture
     gl->GenTextures(1, &p->texture);
-    p->tex_attached = false;
 
     // Now share the rendertarget with OpenGL as a texture
     p->rtarget_h = gl->DXRegisterObjectNV(p->device_h, p->rtarget, p->texture,
@@ -315,9 +295,10 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
         return -1;
     }
 
-    // Only attach the shared texture if the shared framebuffer is bound. If
-    // it's not, the texture will be attached when glBindFramebuffer is called.
-    try_attach_texture(ctx);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, gl->main_fb);
+    gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D, p->texture, 0);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
     return 0;
 }
@@ -460,27 +441,6 @@ static void dxinterop_uninit(MPGLContext *ctx)
     pump_message_loop();
 }
 
-static GLAPIENTRY void dxinterop_bind_framebuffer(GLenum target,
-    GLuint framebuffer)
-{
-    if (!current_ctx)
-        return;
-    struct priv *p = current_ctx->priv;
-
-    // Keep track of whether the shared framebuffer is bound
-    if (target == GL_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER)
-        p->fb_bound = (framebuffer == 0);
-
-    // Pretend the shared framebuffer is the primary framebuffer
-    if (framebuffer == 0)
-        framebuffer = p->framebuffer;
-
-    p->real_gl_bind_framebuffer(target, framebuffer);
-
-    // Attach the shared texture if it is not attached already
-    try_attach_texture(current_ctx);
-}
-
 static void dxinterop_reset(struct MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
@@ -554,25 +514,16 @@ static int dxinterop_init(struct MPGLContext *ctx, int flags)
         goto fail;
 
     // Create the shared framebuffer
-    gl->GenFramebuffers(1, &p->framebuffer);
+    gl->GenFramebuffers(1, &gl->main_fb);
 
-    // Hook glBindFramebuffer to return the shared framebuffer instead of the
-    // primary one
     current_ctx = ctx;
-    p->real_gl_bind_framebuffer = gl->BindFramebuffer;
-    gl->BindFramebuffer = dxinterop_bind_framebuffer;
-
     gl->SwapInterval = dxinterop_swap_interval;
-
     gl->MPGetNativeDisplay = dxinterop_get_native_display;
 
     if (d3d_create(ctx) < 0)
         goto fail;
     if (d3d_size_dependent_create(ctx) < 0)
         goto fail;
-
-    // Bind the shared framebuffer. This will also attach the shared texture.
-    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // The OpenGL and Direct3D coordinate systems are flipped vertically
     // relative to each other. Flip the video during rendering so it can be
