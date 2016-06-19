@@ -641,9 +641,12 @@ Video
         not display correctly, and not certain filtering (such as debanding)
         can not be applied in an ideal way.
 
-        ``vdpau`` forces RGB conversion. Currently, it does not treat certain
-        colorspaces like BT.2020 correctly. This is mostly a mpv-specific
-        restriction. This does not apply if the ``vdpauprb`` filter is used.
+        ``vdpau`` is usually safe. If deinterlacing enabled (or the ``vdpaupp``
+        video filter is active in general), it forces RGB conversion. The latter
+        currently does not treat certain colorspaces like BT.2020 correctly
+        (which is mostly a mpv-specific restriction). If the ``vdpauprb``
+        retrieves image data without RGB conversion, but does not work with
+        postprocessing.
 
         ``vaapi`` is safe if the ``vaapi-egl`` backend is indicated in the logs.
         If ``vaapi-glx`` is indicated, and the video colorspace is either BT.601

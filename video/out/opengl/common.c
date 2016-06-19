@@ -349,6 +349,7 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(VDPAUInitNV),
             DEF_FN(VDPAUFiniNV),
             DEF_FN(VDPAURegisterOutputSurfaceNV),
+            DEF_FN(VDPAURegisterVideoSurfaceNV),
             DEF_FN(VDPAUUnregisterSurfaceNV),
             DEF_FN(VDPAUSurfaceAccessNV),
             DEF_FN(VDPAUMapSurfacesNV),

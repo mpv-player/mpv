@@ -217,6 +217,7 @@ struct gl_video {
     struct fbotex blend_subs_fbo;
     struct fbotex output_fbo;
     struct fbosurface surfaces[FBOSURFACES_MAX];
+    struct fbotex vdpau_deinterleave_fbo[2];
 
     int surface_idx;
     int surface_now;
@@ -584,6 +585,9 @@ static void uninit_rendering(struct gl_video *p)
 
     for (int n = 0; n < MAX_SAVED_TEXTURES; n++)
         fbotex_uninit(&p->hook_fbos[n]);
+
+    for (int n = 0; n < 2; n++)
+        fbotex_uninit(&p->vdpau_deinterleave_fbo[n]);
 
     gl_video_reset_surfaces(p);
     gl_video_reset_hooks(p);
@@ -957,7 +961,6 @@ static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
     debug_check_gl(p, "after rendering");
 }
 
-// flags: see render_pass_quad
 static void finish_pass_direct(struct gl_video *p, GLint fbo, int vp_w, int vp_h,
                                const struct mp_rect *dst)
 {
@@ -2917,6 +2920,49 @@ static bool map_image(struct gl_video *p, struct mp_image *mpi)
     return true;
 }
 
+// This assumes nv12, with textures set to GL_NEAREST filtering.
+static void reinterleave_vdpau(struct gl_video *p, struct gl_hwdec_frame *frame)
+{
+    struct gl_hwdec_frame res = {0};
+    for (int n = 0; n < 2; n++) {
+        struct fbotex *fbo = &p->vdpau_deinterleave_fbo[n];
+        // This is an array of the 2 to-merge planes.
+        struct gl_hwdec_plane *src = &frame->planes[n * 2];
+        int w = src[0].tex_w;
+        int h = src[0].tex_h;
+        int ids[2];
+        for (int t = 0; t < 2; t++) {
+            ids[t] = pass_bind(p, (struct img_tex){
+                .gl_tex = src[t].gl_texture,
+                .gl_target = src[t].gl_target,
+                .multiplier = 1.0,
+                .transform = identity_trans,
+                .tex_w = w,
+                .tex_h = h,
+                .w = w,
+                .h = h,
+            });
+        }
+
+        GLSLF("color = fract(gl_FragCoord.y / 2) < 0.5\n");
+        GLSLF("      ? texture(texture%d, texcoord%d)\n", ids[0], ids[0]);
+        GLSLF("      : texture(texture%d, texcoord%d);", ids[1], ids[1]);
+
+        fbotex_change(fbo, p->gl, p->log, w, h * 2, n == 0 ? GL_R8 : GL_RG8, 0);
+
+        finish_pass_direct(p, fbo->fbo, fbo->rw, fbo->rh,
+                           &(struct mp_rect){0, 0, w, h * 2});
+
+        res.planes[n] = (struct gl_hwdec_plane){
+            .gl_texture = fbo->texture,
+            .gl_target = GL_TEXTURE_2D,
+            .tex_w = w,
+            .tex_h = h * 2,
+        };
+    }
+    *frame = res;
+}
+
 // Returns false on failure.
 static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
 {
@@ -2943,6 +2989,8 @@ static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         if (ok) {
             struct mp_image layout = {0};
             mp_image_set_params(&layout, &p->image_params);
+            if (gl_frame.vdpau_fields)
+                reinterleave_vdpau(p, &gl_frame);
             for (int n = 0; n < p->plane_count; n++) {
                 struct gl_hwdec_plane *plane = &gl_frame.planes[n];
                 vimg->planes[n] = (struct texplane){

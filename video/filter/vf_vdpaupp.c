@@ -132,6 +132,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     mp_refqueue_flush(p->queue);
     *out = *in;
     out->imgfmt = IMGFMT_VDPAU;
+    out->hw_subfmt = 0;
     return 0;
 }
 

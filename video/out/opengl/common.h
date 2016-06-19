@@ -203,6 +203,8 @@ struct GL {
     void (GLAPIENTRY *VDPAUFiniNV)(void);
     GLvdpauSurfaceNV (GLAPIENTRY *VDPAURegisterOutputSurfaceNV)
         (GLvoid *, GLenum, GLsizei, const GLuint *);
+    GLvdpauSurfaceNV (GLAPIENTRY *VDPAURegisterVideoSurfaceNV)
+        (GLvoid *, GLenum, GLsizei, const GLuint *);
     void (GLAPIENTRY *VDPAUUnregisterSurfaceNV)(GLvdpauSurfaceNV);
     void (GLAPIENTRY *VDPAUSurfaceAccessNV)(GLvdpauSurfaceNV, GLenum);
     void (GLAPIENTRY *VDPAUMapSurfacesNV)(GLsizei, const GLvdpauSurfaceNV *);
