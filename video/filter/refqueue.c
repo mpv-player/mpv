@@ -47,6 +47,7 @@ struct mp_refqueue *mp_refqueue_alloc(void)
 
 void mp_refqueue_free(struct mp_refqueue *q)
 {
+    mp_refqueue_flush(q);
     talloc_free(q);
 }
 
