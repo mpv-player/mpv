@@ -83,6 +83,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     *out = *in;
     if (in->imgfmt == IMGFMT_VDPAU) {
         out->imgfmt = IMGFMT_NV12;
+        out->hw_subfmt = 0;
     }
     return 0;
 }
