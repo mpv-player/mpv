@@ -94,11 +94,8 @@
 
 // GL_ARB_timer_query and EXT_disjoint_timer_query
 #ifndef GL_TIME_ELAPSED
-#ifdef GL_TIME_ELAPSED_EXT
-#define GL_TIME_ELAPSED GL_TIME_ELAPSED_EXT
-#else
+// Same as GL_TIME_ELAPSED_EXT
 #define GL_TIME_ELAPSED 0x88BF
-#endif
 #endif
 
 // GL_OES_EGL_image_external, GL_NV_EGL_stream_consumer_external
