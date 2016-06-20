@@ -3950,7 +3950,10 @@ static const char *const *const mp_event_property_change[] = {
       "demuxer-cache-duration", "demuxer-cache-idle", "paused-for-cache",
       "demuxer-cache-time", "cache-buffering-state", "cache-speed"),
     E(MP_EVENT_WIN_RESIZE, "window-scale", "osd-width", "osd-height", "osd-par"),
-    E(MP_EVENT_WIN_STATE, "window-minimized", "display-names", "display-fps", "fullscreen"),
+    E(MP_EVENT_WIN_STATE, "window-minimized", "display-names", "display-fps",
+      "fullscreen"),
+    E(MP_EVENT_CHANGE_PLAYLIST, "playlist", "playlist-pos", "playlist-pos-1",
+      "playlist-count", "playlist/count"),
 };
 #undef E
 
@@ -4869,7 +4872,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                 mp_write_watch_later_conf(mpctx);
             mp_set_playlist_entry(mpctx, entry);
         }
-        mp_notify_property(mpctx, "playlist");
+        mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
         break;
     }
 
@@ -4888,7 +4891,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             if (!append && mpctx->playlist->first)
                 mp_set_playlist_entry(mpctx, new ? new : mpctx->playlist->first);
 
-            mp_notify_property(mpctx, "playlist");
+            mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
         } else {
             MP_ERR(mpctx, "Unable to load playlist %s.\n", filename);
             return -1;
@@ -4909,7 +4912,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             }
             playlist_remove(mpctx->playlist, e);
         }
-        mp_notify_property(mpctx, "playlist");
+        mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
         break;
     }
 
@@ -4924,7 +4927,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (mpctx->playlist->current == e && !mpctx->stop_play)
             mpctx->stop_play = PT_CURRENT_ENTRY;
         playlist_remove(mpctx->playlist, e);
-        mp_notify_property(mpctx, "playlist");
+        mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
         break;
     }
 
@@ -4936,7 +4939,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (!e1)
             return -1;
         playlist_move(mpctx->playlist, e1, e2);
-        mp_notify_property(mpctx, "playlist");
+        mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
         break;
     }
 
