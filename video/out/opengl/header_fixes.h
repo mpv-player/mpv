@@ -62,6 +62,10 @@
 #define GL_DEBUG_SEVERITY_NOTIFICATION    0x826B
 #endif
 
+#ifndef GL_BACK_LEFT
+#define GL_BACK_LEFT                      0x0402
+#endif
+
 #if HAVE_ANDROID_GL
 #define GL_UNSIGNED_BYTE_3_3_2            0x8032
 #define GL_UNSIGNED_BYTE_2_3_3_REV        0x8362
