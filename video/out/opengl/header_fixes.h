@@ -88,6 +88,12 @@
 #define GL_UNSIGNED_SHORT_8_8_REV_APPLE 0x85BB
 #endif
 
+// GL_ARB_timer_query and EXT_disjoint_timer_query
+#ifndef GL_TIME_ELAPSED
+// Same as GL_TIME_ELAPSED_EXT
+#define GL_TIME_ELAPSED 0x88BF
+#endif
+
 // GL_OES_EGL_image_external, GL_NV_EGL_stream_consumer_external
 #ifndef GL_TEXTURE_EXTERNAL_OES
 #define GL_TEXTURE_EXTERNAL_OES 0x8D65
