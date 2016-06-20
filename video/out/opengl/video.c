@@ -845,7 +845,8 @@ static void init_video(struct gl_video *p)
     gl_video_setup_hooks(p);
 }
 
-static void unref_current_image(struct gl_video *p)
+// Release any texture mappings associated with the current frame.
+static void unmap_current_image(struct gl_video *p)
 {
     struct video_image *vimg = &p->image;
 
@@ -856,7 +857,12 @@ static void unref_current_image(struct gl_video *p)
         memset(vimg->planes, 0, sizeof(vimg->planes));
         vimg->hwdec_mapped = false;
     }
-    mp_image_unrefp(&vimg->mpi);
+}
+
+static void unref_current_image(struct gl_video *p)
+{
+    unmap_current_image(p);
+    mp_image_unrefp(&p->image.mpi);
 }
 
 static void uninit_video(struct gl_video *p)
@@ -2801,6 +2807,8 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
     }
 
 done:
+
+    unmap_current_image(p);
 
     debug_check_gl(p, "after video rendering");
 
