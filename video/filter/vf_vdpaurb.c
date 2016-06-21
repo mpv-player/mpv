@@ -35,10 +35,7 @@ struct vf_priv_s {
 
 static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 {
-    VdpStatus vdp_st;
     struct vf_priv_s *p = vf->priv;
-    struct mp_vdpau_ctx *ctx = p->ctx;
-    struct vdp_functions *vdp = &ctx->vdp;
 
     if (!mpi) {
         return 0;
@@ -56,21 +53,14 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
         return -1;
     }
 
-    struct mp_image *out = vf_alloc_out_image(vf);
-    if (!out) {
+    struct mp_hwdec_ctx *hwctx = &p->ctx->hwctx;
+
+    struct mp_image *out = hwctx->download_image(hwctx, mpi, vf->out_pool);
+    if (!out || out->imgfmt != IMGFMT_NV12) {
         mp_image_unrefp(&mpi);
+        mp_image_unrefp(&out);
         return -1;
     }
-    mp_image_copy_attributes(out, mpi);
-
-    VdpVideoSurface surface = (uintptr_t)mpi->planes[3];
-    assert(surface > 0);
-
-    vdp_st = vdp->video_surface_get_bits_y_cb_cr(surface,
-                                                 VDP_YCBCR_FORMAT_NV12,
-                                                 (void * const *)out->planes,
-                                                 out->stride);
-    CHECK_VDP_WARNING(vf, "Error when calling vdp_output_surface_get_bits_y_cb_cr");
 
     vf_add_output_frame(vf, out);
     mp_image_unrefp(&mpi);
