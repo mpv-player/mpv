@@ -3186,9 +3186,10 @@ static void check_gl_features(struct gl_video *p)
             if (!have_mglsl)
                 reason = "(GLSL version too old)";
             if (reason) {
+                MP_WARN(p, "Disabling scaler #%d %s %s.\n", n,
+                        p->opts.scaler[n].kernel.name, reason);
                 // p->opts is a copy of p->opts_alloc => we can just mess with it.
                 p->opts.scaler[n].kernel.name = "bilinear";
-                MP_WARN(p, "Disabling scaler #%d %s.\n", n, reason);
                 if (n == SCALER_TSCALE)
                     p->opts.interpolation = 0;
             }
