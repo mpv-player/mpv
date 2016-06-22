@@ -421,7 +421,6 @@ static void vo_cocoa_update_screen_info(struct vo *vo, struct mp_rect *out_rc)
         return;
 
     vo_cocoa_update_screens_pointers(vo);
-    vo_cocoa_update_screen_fps(vo);
 
     if (out_rc) {
         NSRect r = [s->current_screen frame];
@@ -584,6 +583,7 @@ static void cocoa_screen_reconfiguration_observer(
         struct vo *vo = ctx;
         MP_WARN(vo, "detected display mode change, updating screen info\n");
         vo_cocoa_update_screen_info(vo, NULL);
+        vo_cocoa_update_screen_fps(vo);
     }
 }
 
@@ -614,6 +614,7 @@ int vo_cocoa_config_window(struct vo *vo)
     run_on_main_thread(vo, ^{
         struct mp_rect screenrc;
         vo_cocoa_update_screen_info(vo, &screenrc);
+        vo_cocoa_update_screen_fps(vo);
 
         struct vo_win_geometry geo;
         vo_calc_window_geometry(vo, &screenrc, &geo);
@@ -953,6 +954,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 - (void)windowDidChangeScreen:(NSNotification *)notification
 {
     vo_cocoa_update_screen_info(self.vout, NULL);
+    vo_cocoa_update_screen_fps(self.vout);
 }
 
 - (void)didChangeWindowedScreenProfile:(NSScreen *)screen
