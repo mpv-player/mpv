@@ -529,13 +529,15 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
             void *ptr = get_fn(fn_ctx, fn->name);
             if (!ptr) {
                 all_loaded = false;
-                mp_warn(log, "Required function '%s' not "
-                        "found for %s OpenGL %d.%d.\n", fn->name,
-                        section->extension ? section->extension : "builtin",
-                        MPGL_VER_GET_MAJOR(ver_core),
-                        MPGL_VER_GET_MINOR(ver_core));
-                if (must_exist)
+                if (must_exist) {
+                    mp_err(log, "GL %d.%d function %s not found.\n",
+                           MPGL_VER_GET_MAJOR(ver_core),
+                           MPGL_VER_GET_MINOR(ver_core), fn->name);
                     goto error;
+                } else {
+                    mp_warn(log, "Function %s from extension %s not found.\n",
+                            fn->name, section->extension);
+                }
                 break;
             }
             assert(i < MAX_FN_COUNT);
