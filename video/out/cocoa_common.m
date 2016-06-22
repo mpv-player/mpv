@@ -90,8 +90,6 @@ struct vo_cocoa_state {
     uint32_t old_dwidth;
     uint32_t old_dheight;
 
-    NSData *icc_wnd_profile;
-    NSData *icc_fs_profile;
     id   fs_icc_changed_ns_observer;
 
     pthread_mutex_t lock;
