@@ -29,7 +29,6 @@
 #include <libavutil/intreadwrite.h>
 #include <libavutil/common.h>
 #include <libavutil/bswap.h>
-#include <libavutil/error.h>
 #include <libavutil/mem.h>
 
 #include "config.h"
@@ -293,7 +292,7 @@ static int filter_out(struct af_instance *af)
         if (lavc_ret == AVERROR(EAGAIN))
             break;
         if (lavc_ret < 0) {
-            MP_FATAL(af, "Encode failed (%s).\n", av_err2str(lavc_ret));
+            MP_FATAL(af, "Encode failed.\n");
             goto done;
         }
         s->input->samples = 0;
