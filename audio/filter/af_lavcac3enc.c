@@ -29,7 +29,10 @@
 #include <libavutil/intreadwrite.h>
 #include <libavutil/common.h>
 #include <libavutil/bswap.h>
+#include <libavutil/error.h>
 #include <libavutil/mem.h>
+
+#include "config.h"
 
 #include "common/common.h"
 #include "af.h"
@@ -231,11 +234,32 @@ static bool fill_buffer(struct af_instance *af)
     return s->input->samples >= s->in_samples;
 }
 
-static int filter_out(struct af_instance *af)
+// Return <0 on error, 0 on need more input, 1 on success (and *frame set).
+// To actually advance the read pointer, set s->input->samples=0 afterwards.
+static int read_input_frame(struct af_instance *af, AVFrame *frame)
 {
     af_ac3enc_t *s = af->priv;
     if (!fill_buffer(af))
         return 0; // need more input
+
+    frame->nb_samples = s->in_samples;
+    frame->format = s->lavc_actx->sample_fmt;
+    frame->channel_layout = s->lavc_actx->channel_layout;
+#if LIBAVUTIL_VERSION_MICRO >= 100
+    frame->channels = s->lavc_actx->channels;
+#endif
+    assert(s->input->num_planes <= AV_NUM_DATA_POINTERS);
+    frame->extended_data = frame->data;
+    for (int n = 0; n < s->input->num_planes; n++)
+        frame->data[n] = s->input->planes[n];
+    frame->linesize[0] = s->input->samples * s->input->sstride;
+
+    return 1;
+}
+
+static int filter_out(struct af_instance *af)
+{
+    af_ac3enc_t *s = af->priv;
 
     AVFrame *frame = av_frame_alloc();
     if (!frame) {
@@ -244,18 +268,41 @@ static int filter_out(struct af_instance *af)
     }
     int err = -1;
 
-    frame->nb_samples = s->in_samples;
-    frame->format = s->lavc_actx->sample_fmt;
-    frame->channel_layout = s->lavc_actx->channel_layout;
-    assert(s->input->num_planes <= AV_NUM_DATA_POINTERS);
-    frame->extended_data = frame->data;
-    for (int n = 0; n < s->input->num_planes; n++)
-        frame->data[n] = s->input->planes[n];
-    frame->linesize[0] = s->input->samples * s->input->sstride;
-
     AVPacket pkt = {0};
     av_init_packet(&pkt);
 
+#if HAVE_AVCODEC_NEW_CODEC_API
+    // Send input as long as it wants.
+    while (1) {
+        err = read_input_frame(af, frame);
+        if (err < 0)
+            goto done;
+        if (err == 0)
+            break;
+        err = -1;
+        int lavc_ret = avcodec_send_frame(s->lavc_actx, frame);
+        // On EAGAIN, we're supposed to read remaining output.
+        if (lavc_ret == AVERROR(EAGAIN))
+            break;
+        if (lavc_ret < 0) {
+            MP_FATAL(af, "Encode failed (%s).\n", av_err2str(lavc_ret));
+            goto done;
+        }
+        s->input->samples = 0;
+    }
+    int lavc_ret = avcodec_receive_packet(s->lavc_actx, &pkt);
+    if (lavc_ret == AVERROR(EAGAIN)) {
+        // Need to buffer more input.
+        err = 0;
+        goto done;
+    }
+#else
+    err = read_input_frame(af, frame);
+    if (err < 0)
+        goto done;
+    if (err == 0)
+        goto done;
+    err = -1;
     int ok;
     int lavc_ret = avcodec_encode_audio2(s->lavc_actx, &pkt, frame, &ok);
     av_frame_free(&frame);
@@ -264,9 +311,10 @@ static int filter_out(struct af_instance *af)
         MP_FATAL(af, "Encode failed.\n");
         goto done;
     }
+#endif
 
     MP_DBG(af, "avcodec_encode_audio got %d, pending %d.\n",
-            pkt.size, s->pending->samples);
+           pkt.size, s->pending->samples);
 
     struct mp_audio *out =
         mp_audio_pool_get(af->out_pool, af->data, s->out_samples);
