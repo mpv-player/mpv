@@ -106,8 +106,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         talloc_free(s->pending);
         s->pending = NULL;
 
-        MP_DBG(af, "af_lavcac3enc reinit: %d, %d, %d.\n",
-               in->nch, in->rate, s->in_samples);
+        MP_DBG(af, "reinit: %d, %d, %d.\n", in->nch, in->rate, s->in_samples);
 
         int bit_rate = s->bit_rate ? s->bit_rate : default_bit_rate[in->nch];
 
@@ -129,8 +128,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
             }
         }
         if (s->lavc_actx->frame_size != AC3_FRAME_SIZE) {
-            MP_ERR(af, "lavcac3enc: unexpected ac3 "
-                   "encoder frame size %d\n", s->lavc_actx->frame_size);
+            MP_ERR(af, "unexpected ac3 encoder frame size %d\n",
+                   s->lavc_actx->frame_size);
             return AF_ERROR;
         }
         return AF_OK;
@@ -311,8 +310,7 @@ static int af_open(struct af_instance* af){
                "support expected sample formats!\n");
         return AF_ERROR;
     }
-    MP_VERBOSE(af, "[af_lavcac3enc]: in sample format: %s\n",
-           af_fmt_to_str(s->in_sampleformat));
+    MP_VERBOSE(af, "in sample format: %s\n", af_fmt_to_str(s->in_sampleformat));
 
     s->input = talloc_zero(s, struct mp_audio);
 
@@ -325,9 +323,9 @@ static int af_open(struct af_instance* af){
             }
         }
         if (i >= 19) {
-            MP_WARN(af, "af_lavcac3enc unable set unsupported "
-                    "bitrate %d, use default bitrate (check manpage to see "
-                    "supported bitrates).\n", s->cfg_bit_rate);
+            MP_WARN(af, "unable set unsupported bitrate %d, use default "
+                    "bitrate (check manpage to see supported bitrates).\n",
+                    s->cfg_bit_rate);
         }
     }
 
