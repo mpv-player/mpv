@@ -629,6 +629,9 @@ Available video output drivers are:
             never resets (regardless of seeks).
         vec2 image_size
             The size in pixels of the input image.
+        vec2 target_size
+            The size in pixels of the visible part of the scaled (and possibly
+            cropped) image.
 
         For example, a shader that inverts the colors could look like this::
 

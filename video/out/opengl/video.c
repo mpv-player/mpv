@@ -1239,6 +1239,9 @@ static void load_shader(struct gl_video *p, struct bstr body)
     gl_sc_uniform_f(p->sc, "frame", p->frames_uploaded);
     gl_sc_uniform_vec2(p->sc, "image_size", (GLfloat[]){p->image_params.w,
                                                         p->image_params.h});
+    gl_sc_uniform_vec2(p->sc, "target_size",
+                       (GLfloat[]){p->dst_rect.x1 - p->dst_rect.x0,
+                                   p->dst_rect.y1 - p->dst_rect.y0});
 }
 
 static const char *get_custom_shader_fn(struct gl_video *p, const char *body)
