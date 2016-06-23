@@ -319,14 +319,15 @@ static int af_open(struct af_instance* af){
     if (s->cfg_bit_rate) {
         int i;
         for (i = 0; i < 19; i++) {
-            if (ac3_bitrate_tab[i] == s->cfg_bit_rate)
+            if (ac3_bitrate_tab[i] == s->cfg_bit_rate) {
+                s->bit_rate = ac3_bitrate_tab[i] * 1000;
                 break;
+            }
         }
         if (i >= 19) {
             MP_WARN(af, "af_lavcac3enc unable set unsupported "
                     "bitrate %d, use default bitrate (check manpage to see "
                     "supported bitrates).\n", s->cfg_bit_rate);
-            s->cfg_bit_rate = 0;
         }
     }
 
