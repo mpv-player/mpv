@@ -3691,6 +3691,16 @@ Miscellaneous
     corresponding output is not connected to the filter, can still be freely
     changed.
 
+    The complex filter can be enabled conditionally based on number
+    of tracks using syntax ``vmin:vmax:amin:amax:pmin:pmax: filter_graph``.
+    ``vmin`` and ``vmax`` are minimum/maximum number of video tracks without
+    attached pictures. ``amin`` and ``amax`` are minimum/maximum number of audio
+    tracks. ``pmin`` and ``pmax`` are minimum/maximum number of attached
+    pictures.
+
+    The complex filter can be specified multiple times. In that case, the last
+    filter is preferred. But conditional rules still apply.
+
     Note that the normal filter chains (``--af``, ``--vf``) are applied between
     the complex graphs (e.g. ``ao`` label) and the actual output.
 
@@ -3713,6 +3723,14 @@ Miscellaneous
           over video track 1.
         - ``null:// --lavfi-complex='life [vo]'``
           Conways' Life Game.
+        - ``--lavfi-complex='0:0:1:1:0:0: [aid1] asplit [a0], showcqt [vo]'``
+          Play audio track 1 and visualize when no video/attached picture
+          tracks exist.
+        - ``--lavfi-complex='0:0:1:1:1:1: [aid1] asplit [a0], showcqt [t]; [t] [vid1] overlay [vo]'``
+          Play audio track 1 and overlay attached picture over its
+          visualization when no video tracks exist. When combined with
+          previous example, conditionally overlay attached picture when
+          it exists.
 
     See the FFmpeg libavfilter documentation for details on the available
     filters.

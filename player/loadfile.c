@@ -846,7 +846,46 @@ static bool init_complex_filters(struct MPContext *mpctx)
 {
     assert(!mpctx->lavfi);
 
-    char *graph = mpctx->opts->lavfi_complex;
+    char *graph = NULL;
+    int num_audio_tracks = 0, num_video_tracks = 0, num_attached_pictures = 0;
+    int num_lavfi_complex;
+
+    if (!mpctx->opts->lavfi_complex)
+        return true;
+
+    for (num_lavfi_complex = 0; mpctx->opts->lavfi_complex[num_lavfi_complex];
+         num_lavfi_complex++)
+         /* empty */;
+
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        switch (mpctx->tracks[n]->type) {
+        case STREAM_VIDEO:
+            if (mpctx->tracks[n]->attached_picture)
+                num_attached_pictures++;
+            else
+                num_video_tracks++;
+            break;
+        case STREAM_AUDIO: num_audio_tracks++; break;
+        }
+    }
+
+    // last option is preferred
+    for (int n = num_lavfi_complex - 1; n >= 0; n--) {
+        int v_min, v_max, a_min, a_max, p_min, p_max, step = 0;
+
+        if (sscanf(mpctx->opts->lavfi_complex[n], " %d : %d : %d : %d : %d : %d :%n",
+            &v_min, &v_max, &a_min, &a_max, &p_min, &p_max, &step) != 6 || !step) {
+            graph = mpctx->opts->lavfi_complex[n];
+            break;
+        }
+
+        if (num_video_tracks >= v_min && num_video_tracks <= v_max &&
+            num_audio_tracks >= a_min && num_audio_tracks <= a_max &&
+            num_attached_pictures >= p_min && num_attached_pictures <= p_max) {
+            graph = mpctx->opts->lavfi_complex[n] + step;
+            break;
+        }
+    }
 
     if (!graph || !graph[0])
         return true;
