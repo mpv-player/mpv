@@ -34,6 +34,7 @@
 #include "common/common.h"
 #include "af.h"
 #include "audio/audio_buffer.h"
+#include "audio/chmap_sel.h"
 #include "audio/fmt-conversion.h"
 
 
@@ -54,12 +55,48 @@ typedef struct af_ac3enc_s {
     struct mp_audio *pending;   // unconsumed input data
     int in_samples;     // samples of input per AC3 frame
     int out_samples;    // upper bound on encoded output per AC3 frame
-    int in_sampleformat;
 
     int cfg_add_iec61937_header;
     int cfg_bit_rate;
     int cfg_min_channel_num;
 } af_ac3enc_t;
+
+// fmt carries the input format. Change it to the best next-possible format
+// the encoder likely accepts.
+static void select_encode_format(AVCodecContext *c, struct mp_audio *fmt)
+{
+    int formats[AF_FORMAT_COUNT];
+    af_get_best_sample_formats(fmt->format, formats);
+
+    for (int n = 0; formats[n]; n++) {
+        const enum AVSampleFormat *lf = c->codec->sample_fmts;
+        for (int i = 0; lf && lf[i] != AV_SAMPLE_FMT_NONE; i++) {
+            int mpfmt = af_from_avformat(lf[i]);
+            if (mpfmt && mpfmt == formats[n]) {
+                mp_audio_set_format(fmt, mpfmt);
+                goto done_fmt;
+            }
+        }
+    }
+done_fmt: ;
+
+    int rate =
+        af_select_best_samplerate(fmt->rate, c->codec->supported_samplerates);
+    if (rate > 0)
+        fmt->rate = rate;
+
+    struct mp_chmap_sel sel = {0};
+    const uint64_t *lch = c->codec->channel_layouts;
+    for (int n = 0; lch && lch[n]; n++) {
+        struct mp_chmap chmap = {0};
+        mp_chmap_from_lavc(&chmap, lch[n]);
+        mp_chmap_sel_add_map(&sel, &chmap);
+    }
+    struct mp_chmap res = fmt->channels;
+    mp_chmap_sel_adjust(&sel, &res);
+    if (!mp_chmap_is_empty(&res))
+        mp_audio_set_channels(fmt, &res);
+}
 
 // Initialization and runtime control
 static int control(struct af_instance *af, int cmd, void *arg)
@@ -76,23 +113,17 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (!af_fmt_is_pcm(in->format) || in->nch < s->cfg_min_channel_num)
             return AF_DETACH;
 
-        mp_audio_set_format(in, s->in_sampleformat);
+        // At least currently, the AC3 encoder doesn't export sample rates.
+        in->rate = 48000;
+        select_encode_format(s->lavc_actx, in);
 
-        if (in->rate != 48000 && in->rate != 44100 && in->rate != 32000)
-            in->rate = 48000;
         af->data->rate = in->rate;
-
-        mp_chmap_reorder_to_lavc(&in->channels);
-        if (in->nch > AC3_MAX_CHANNELS)
-            mp_audio_set_num_channels(in, AC3_MAX_CHANNELS);
-
         mp_audio_set_format(af->data, AF_FORMAT_S_AC3);
         mp_audio_set_num_channels(af->data, 2);
 
         if (!mp_audio_config_equals(in, &orig_in))
             return AF_FALSE;
 
-        s->in_samples = AC3_FRAME_SIZE;
         if (s->cfg_add_iec61937_header) {
             s->out_samples = AC3_FRAME_SIZE;
         } else {
@@ -100,8 +131,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
         }
 
         mp_audio_copy_config(s->input, in);
-        mp_audio_realloc(s->input, s->in_samples);
-        s->input->samples = 0;
 
         talloc_free(s->pending);
         s->pending = NULL;
@@ -117,6 +146,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
             avcodec_close(s->lavc_actx);
 
             // Put sample parameters
+            s->lavc_actx->sample_fmt = af_to_avformat(in->format);
             s->lavc_actx->channels = in->nch;
             s->lavc_actx->channel_layout = mp_chmap_to_lavc(&in->channels);
             s->lavc_actx->sample_rate = in->rate;
@@ -126,12 +156,15 @@ static int control(struct af_instance *af, int cmd, void *arg)
                 MP_ERR(af, "Couldn't open codec %s, br=%d.\n", "ac3", bit_rate);
                 return AF_ERROR;
             }
+
+            if (s->lavc_actx->frame_size < 1) {
+                MP_ERR(af, "encoder didn't specify input frame size\n");
+                return AF_ERROR;
+            }
         }
-        if (s->lavc_actx->frame_size != AC3_FRAME_SIZE) {
-            MP_ERR(af, "unexpected ac3 encoder frame size %d\n",
-                   s->lavc_actx->frame_size);
-            return AF_ERROR;
-        }
+        s->in_samples = s->lavc_actx->frame_size;
+        mp_audio_realloc(s->input, s->in_samples);
+        s->input->samples = 0;
         return AF_OK;
     }
     }
@@ -297,20 +330,15 @@ static int af_open(struct af_instance* af){
         MP_ERR(af, "Audio LAVC, couldn't allocate context!\n");
         return AF_ERROR;
     }
-    const enum AVSampleFormat *fmts = s->lavc_acodec->sample_fmts;
-    for (int i = 0; fmts[i] != AV_SAMPLE_FMT_NONE; i++) {
-        s->in_sampleformat = af_from_avformat(fmts[i]);
-        if (s->in_sampleformat) {
-            s->lavc_actx->sample_fmt = fmts[i];
-            break;
-        }
-    }
-    if (!s->in_sampleformat) {
-        MP_ERR(af, "Audio LAVC, encoder doesn't "
-               "support expected sample formats!\n");
+    // For this one, we require the decoder to expert lists of all supported
+    // parameters. (Not all decoders do that, but the ones we're interested
+    // in do.)
+    if (!s->lavc_acodec->sample_fmts ||
+        !s->lavc_acodec->channel_layouts)
+    {
+        MP_ERR(af, "Audio encoder doesn't list supported parameters.\n");
         return AF_ERROR;
     }
-    MP_VERBOSE(af, "in sample format: %s\n", af_fmt_to_str(s->in_sampleformat));
 
     s->input = talloc_zero(s, struct mp_audio);
 
