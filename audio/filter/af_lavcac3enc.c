@@ -170,6 +170,13 @@ static int control(struct af_instance *af, int cmd, void *arg)
         s->input->samples = 0;
         return AF_OK;
     }
+    case AF_CONTROL_RESET:
+        if (avcodec_is_open(s->lavc_actx))
+            avcodec_flush_buffers(s->lavc_actx);
+        talloc_free(s->pending);
+        s->pending = NULL;
+        s->input->samples = 0;
+        return AF_OK;
     }
     return AF_UNKNOWN;
 }
