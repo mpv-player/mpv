@@ -62,6 +62,7 @@ typedef struct af_ac3enc_s {
     int cfg_add_iec61937_header;
     int cfg_bit_rate;
     int cfg_min_channel_num;
+    char *cfg_encoder;
 } af_ac3enc_t;
 
 // fmt carries the input format. Change it to the best next-possible format
@@ -374,9 +375,9 @@ static int af_open(struct af_instance* af){
     af->filter_frame = filter_frame;
     af->filter_out = filter_out;
 
-    s->lavc_acodec = avcodec_find_encoder_by_name("ac3");
+    s->lavc_acodec = avcodec_find_encoder_by_name(s->cfg_encoder);
     if (!s->lavc_acodec) {
-        MP_ERR(af, "Audio LAVC, couldn't find encoder for codec %s.\n", "ac3");
+        MP_ERR(af, "Couldn't find encoder %s.\n", s->cfg_encoder);
         return AF_ERROR;
     }
 
@@ -426,12 +427,14 @@ const struct af_info af_info_lavcac3enc = {
         .cfg_add_iec61937_header = 1,
         .cfg_bit_rate = 640,
         .cfg_min_channel_num = 3,
+        .cfg_encoder = "ac3",
     },
     .options = (const struct m_option[]) {
         OPT_FLAG("tospdif", cfg_add_iec61937_header, 0),
         OPT_CHOICE_OR_INT("bitrate", cfg_bit_rate, 0, 32, 640,
                           ({"auto", 0}, {"default", 0})),
         OPT_INTRANGE("minch", cfg_min_channel_num, 0, 2, 6),
+        OPT_STRING("encoder", cfg_encoder, 0),
         {0}
     },
 };
