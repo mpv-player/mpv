@@ -394,7 +394,7 @@ struct m_option {
 
 // Dynamic data type.
 /** This flag indicates that the data is dynamically allocated (m_option::p
- *  points to a pointer). It enables a little hack in the \ref Config wich
+ *  points to a pointer). It enables a little hack in the \ref Config which
  *  replaces the initial value of such variables with a dynamic copy in case
  *  the initial value is statically allocated (pretty common with strings).
  */

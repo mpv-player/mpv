@@ -1182,7 +1182,7 @@ static void gui_thread_reconfig(void *ptr)
     }
 
     // Recenter window around old position on new video size
-    // excluding the case when initial positon handled by win_state.
+    // excluding the case when initial position handled by win_state.
     if (!pos_init) {
         w32->window_x += w32->dw / 2 - vo->dwidth / 2;
         w32->window_y += w32->dh / 2 - vo->dheight / 2;

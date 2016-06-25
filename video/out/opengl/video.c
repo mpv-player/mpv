@@ -2564,7 +2564,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     if (t->still)
         gl_video_reset_surfaces(p);
 
-    // First of all, figure out if we have a frame availble at all, and draw
+    // First of all, figure out if we have a frame available at all, and draw
     // it manually + reset the queue if not
     if (p->surfaces[p->surface_now].pts == MP_NOPTS_VALUE) {
         if (!gl_video_upload_image(p, t->current))
