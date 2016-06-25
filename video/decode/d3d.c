@@ -68,7 +68,7 @@ struct d3dva_mode {
 
 #define MODE2(id) &MP_CONCAT(DXVA2_Mode, id), # id
 #define  MODE(id) &MP_CONCAT(DXVA_,      id), # id
-// Prefered modes must come first
+// Preferred modes must come first
 static const struct d3dva_mode d3dva_modes[] = {
     // MPEG-1/2
     {MODE2(MPEG2_VLD),        AV_CODEC_ID_MPEG2VIDEO, PROF_MPEG2_MAIN},

@@ -123,7 +123,7 @@ options/options.h, options/options.c
     parser-mpcmd.c, and uses the option table in options.c.
 
 input/input.c:
-    This translates keyboard input comming from VOs and other sources (such
+    This translates keyboard input coming from VOs and other sources (such
     as remote control devices like Apple IR or client API commands) to the
     key bindings listed in the user's (or the builtin) input.conf and turns
     them into items of type struct mp_cmd. These commands are queued, and read

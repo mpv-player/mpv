@@ -822,7 +822,7 @@ static bool resize_d3d(d3d_priv *priv)
     MP_VERBOSE(priv, "resize_d3d %dx%d called.\n",
                priv->vo->dwidth, priv->vo->dheight);
 
-    /* Make sure that backbuffer is large enough to accomodate the new
+    /* Make sure that backbuffer is large enough to accommodate the new
        viewport dimensions. Grow it if necessary. */
 
     bool backbuf_resize = priv->vo->dwidth > priv->cur_backbuf_width ||
