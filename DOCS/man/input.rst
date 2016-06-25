@@ -1388,7 +1388,7 @@ Property list
     properties to see whether this was successful.
 
     Unlike in mpv 0.9.x and before, this does not return the currently active
-    hardware decoder. Since mpv 0.17.1, ``hwdec-current`` is available for
+    hardware decoder. Since mpv 0.18.0, ``hwdec-current`` is available for
     this purpose.
 
 ``hwdec-current``
@@ -1412,13 +1412,13 @@ Property list
     platform and VO.
 
 ``hwdec-active``
-    Deprecated. To be removed in mpv 0.19.0. Use ``hwdec-current`` instead.
+    Deprecated. To be removed in mpv 0.20.0. Use ``hwdec-current`` instead.
 
     Return ``yes`` or ``no``, depending on whether any type of hardware decoding
     is actually in use.
 
 ``hwdec-detected``
-    Deprecated. To be removed in mpv 0.19.0.
+    Deprecated. To be removed in mpv 0.20.0.
 
     If hardware decoding is active, this returns the hardware decoder in use.
     Otherwise, it returns either ``no``, or if applicable, the currently loaded

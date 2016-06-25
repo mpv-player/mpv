@@ -32,7 +32,7 @@ API changes
 
 ::
 
- --- mpv 0.17.1 ---
+ --- mpv 0.18.0 ---
  1.21   - mpv_set_property() changes behavior with MPV_FORMAT_NODE. Before this
           change it rejected mpv_nodes with format==MPV_FORMAT_STRING if the
           property was not a string or did not have special mechanisms in place
