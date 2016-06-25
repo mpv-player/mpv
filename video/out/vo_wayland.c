@@ -249,10 +249,15 @@ static bool resize(struct priv *p)
     if (!p->video_bufpool.back_buffer || SHM_BUFFER_IS_BUSY(p->video_bufpool.back_buffer))
         return false; // skip resizing if we can't guarantee pixel perfectness!
 
+    int32_t scale = 1;
     int32_t x = wl->window.sh_x;
     int32_t y = wl->window.sh_y;
-    wl->vo->dwidth = wl->window.sh_width;
-    wl->vo->dheight = wl->window.sh_height;
+
+    if (wl->display.current_output)
+        scale = wl->display.current_output->scale;
+
+    wl->vo->dwidth = scale*wl->window.sh_width;
+    wl->vo->dheight = scale*wl->window.sh_height;
 
     vo_get_src_dst_rects(p->vo, &p->src, &p->dst, &p->osd);
     p->src_w = p->src.x1 - p->src.x0;
@@ -273,6 +278,7 @@ static bool resize(struct priv *p)
     if (y != 0)
         y = wl->window.height - p->dst_h;
 
+    wl_surface_set_buffer_scale(wl->window.video_surface, scale);
     mp_sws_set_from_cmdline(p->sws, p->vo->opts->sws_opts);
     p->sws->src = p->in_format;
     p->sws->dst = (struct mp_image_params) {
@@ -301,7 +307,7 @@ static bool resize(struct priv *p)
     if (!p->enable_alpha) {
         struct wl_region *opaque =
             wl_compositor_create_region(wl->display.compositor);
-        wl_region_add(opaque, 0, 0, p->dst_w, p->dst_h);
+        wl_region_add(opaque, 0, 0, p->dst_w/scale, p->dst_h/scale);
         wl_surface_set_opaque_region(wl->window.video_surface, opaque);
         wl_region_destroy(opaque);
     }
@@ -464,7 +470,11 @@ static const bool osd_formats[SUBBITMAP_COUNT] = {
 
 static void draw_osd(struct vo *vo)
 {
+    int32_t scale = 1;
     struct priv *p = vo->priv;
+
+    if (p->wl && p->wl->display.current_output)
+        scale = p->wl->display.current_output->scale;
 
     // detach all buffers and attach all needed buffers in osd_draw
     // only the most recent attach & commit is applied once the parent surface
@@ -472,6 +482,7 @@ static void draw_osd(struct vo *vo)
     for (int i = 0; i < MAX_OSD_PARTS; ++i) {
         struct wl_surface *s = p->osd_surfaces[i];
         wl_surface_attach(s, NULL, 0, 0);
+        wl_surface_set_buffer_scale(s, scale);
         wl_surface_damage(s, 0, 0, p->dst_w, p->dst_h);
         wl_surface_commit(s);
     }

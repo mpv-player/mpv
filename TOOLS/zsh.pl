@@ -36,7 +36,8 @@ chomp $vf_str;
 
 $protos_str = join(' ', @protos);
 
-my $profile_comp = <<'EOS';
+my $runtime_completions = <<'EOS';
+  profile|show-profile)
     local -a profiles
     local current
     for current in "${(@f)$($words[1] --profile=help)}"; do
@@ -63,8 +64,25 @@ my $profile_comp = <<'EOS';
       profiles=($profiles 'help[list profiles]')
       _values -s , 'profile(s)' $profiles && rc=0
     fi
+  ;;
+
+  audio-device)
+    local -a audio_devices
+    local current
+    for current in "${(@f)$($words[1] --audio-device=help)}"; do
+      current=${current//\*/\\\*}
+      current=${current//\:/\\\:}
+      current=${current//\[/\\\[}
+      current=${current//\]/\\\]}
+      if [[ $current =~ '  '\'([^\']*)\'' \('(.*)'\)' ]]; then
+        audio_devices=($audio_devices "$match[1][$match[2]]")
+      fi
+    done
+    audio_devices=($audio_devices 'help[list audio devices]')
+    _values 'audio device' $audio_devices && rc=0
+  ;;
 EOS
-chomp $profile_comp;
+chomp $runtime_completions;
 
 my $tmpl = <<"EOS";
 #compdef mpv
@@ -111,9 +129,7 @@ $vf_str
     && rc=0
   ;;
 
-  profile|show-profile)
-$profile_comp
-  ;;
+$runtime_completions
 
   files)
     compset -P '*,'
@@ -126,7 +142,7 @@ $profile_comp
     _tags files urls
     while _tags; do
       _requested files expl 'media file' _files -g \\
-        "*.(#i)(asf|asx|avi|flac|flv|m1v|m2p|m2v|m4v|mjpg|mka|mkv|mov|mp3|mp4|mpe|mpeg|mpg|ogg|ogm|ogv|opus|qt|rm|ts|vob|wav|webm|wma|wmv|wv)(-.)" && rc=0
+        "*.(#i)(asf|asx|avi|f4v|flac|flv|m1v|m2p|m2v|m4v|mjpg|mka|mkv|mov|mp3|mp4|mpe|mpeg|mpg|ogg|ogm|ogv|opus|qt|rm|ts|vob|wav|webm|wma|wmv|wv)(-.)" && rc=0
       if _requested urls; then
         while _next_label urls expl URL; do
           _urls "\$expl[@]" && rc=0
@@ -189,7 +205,7 @@ sub parse_main_opts {
                 }
             } elsif ($line =~ /\[file\]/) {
                 $entry .= '->files';
-            } elsif ($name =~ /^--(ao|vo|af|vf|profile|show-profile)$/) {
+            } elsif ($name =~ /^--(ao|vo|af|vf|profile|show-profile|audio-device)$/) {
                 $entry .= "->$1";
             }
             push @list, $entry;

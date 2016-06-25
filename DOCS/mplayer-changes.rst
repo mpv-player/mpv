@@ -79,7 +79,8 @@ Video
   using most of FFmpeg's filters, which improve greatly on the old MPlayer
   filters in features, performance, and correctness.
 * More correct color reproduction (color matrix generation), including support
-  for BT.2020 (Ultra HD) and linear XYZ (Digital Cinema) inputs.
+  for BT.2020 (Ultra HD). linear XYZ (Digital Cinema) and SMPTE ST2084 (HDR)
+  inputs.
 * Support for color managed displays, via ICC profiles.
 * High-quality image resamplers (see the ``opengl`` ``scale`` suboption).
 * Support for scaling in (sigmoidized) linear light.

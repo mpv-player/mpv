@@ -10,11 +10,6 @@ from waftools.checks.custom import *
 
 build_options = [
     {
-        'name': '--gpl3',
-        'desc': 'GPL3 license',
-        'default': 'disable',
-        'func': check_true
-    }, {
         'name': '--cplayer',
         'desc': 'mpv CLI player',
         'default': 'enable',
@@ -140,7 +135,7 @@ main_dependencies = [
         'name': 'win32',
         'desc': 'win32',
         'deps_any': [ 'os-win32', 'os-cygwin' ],
-        'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'uuid', 'avrt', 'dwmapi']),
+        'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'avrt', 'dwmapi']),
     }, {
         'name': '--win32-internal-pthreads',
         'desc': 'internal pthread wrapper for win32 (Vista+)',
@@ -325,7 +320,6 @@ iconv support use --disable-iconv.",
     } , {
         'name' : '--encoding',
         'desc' : 'Encoding',
-        'default': 'disable',
         'func': check_true,
     }, {
         'name': '--libbluray',
@@ -497,7 +491,19 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavformat/avformat.h',
                                 '(void)offsetof(AVStream, codecpar)',
                                 use='libav'),
-    },
+    }, {
+        'name': 'avutil-has-hwcontext',
+        'desc': 'libavutil AVHWFramesContext API',
+        'func': check_statement('libavutil/frame.h',
+                                '(void)offsetof(AVFrame, hw_frames_ctx)',
+                                use='libav'),
+    }, {
+        'name': 'avutil-st2084',
+        'desc': 'libavutil AVCOL_TRC_SMPTEST2084',
+        'func': check_statement('libavutil/pixfmt.h',
+                                'AVCOL_TRC_SMPTEST2084',
+                                use='libav'),
+    }
 ]
 
 audio_output_features = [
@@ -666,7 +672,10 @@ video_output_features = [
         'desc': 'OpenGL DRM EGL Backend',
         'deps': [ 'drm', 'gbm' ],
         'groups': [ 'gl' ],
-        'func': check_pkg_config('egl', 'gl'),
+        'func': compose_checks(
+            check_pkg_config('egl'),
+            check_pkg_config_cflags('gl')
+        )
     } , {
         'name': '--gl-wayland',
         'desc': 'OpenGL Wayland Backend',
@@ -694,9 +703,8 @@ video_output_features = [
         'desc': 'OpenGL Win32 ANGLE Backend',
         'deps_any': [ 'os-win32', 'os-cygwin' ],
         'groups': [ 'gl' ],
-        'func': check_statement(['EGL/egl.h'],
-                                'eglCreateWindowSurface(0, 0, 0, 0)',
-                                lib='EGL')
+        'func': check_statement(['EGL/egl.h', 'EGL/eglext.h'],
+                                'int x = EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE')
     } , {
         'name': '--vdpau',
         'desc': 'VDPAU acceleration',
@@ -811,7 +819,11 @@ video_output_features = [
         'desc': 'OpenGL video outputs',
         'deps_any': [ 'gl-cocoa', 'gl-x11', 'egl-x11', 'egl-drm',
                       'gl-win32', 'gl-wayland', 'rpi', 'plain-gl' ],
-        'func': check_true
+        'func': check_true,
+        'req': True,
+        'fmsg': "Unable to find OpenGL header files for video output. " +
+                "Aborting. If you really mean to compile without OpenGL " +
+                "video outputs use --disable-gl."
     }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
@@ -848,20 +860,12 @@ hwaccel_features = [
                                 'av_vdpau_bind_context(0,0,0,AV_HWACCEL_FLAG_ALLOW_HIGH_DEPTH)',
                                 use='libav'),
     }, {
-        'name': '--dxva2-hwaccel',
-        'desc': 'libavcodec DXVA2 hwaccel',
+        'name': '--d3d-hwaccel',
+        'desc': 'libavcodec DXVA2 and D3D11VA hwaccel',
         'deps': [ 'win32' ],
-        'func': check_headers('libavcodec/dxva2.h', use='libav'),
-    }, {
-        'name': '--d3d11va-hwaccel',
-        'desc': 'libavcodec D3D11VA hwaccel',
-        'deps': [ 'win32' ],
-        'func': check_headers('libavcodec/d3d11va.h', use='libav'),
-    }, {
-        'name': 'd3d-hwaccel',
-        'desc': 'Direct3D hwaccel',
-        'deps_any': [ 'dxva2-hwaccel', 'd3d11va-hwaccel' ],
-        'func': check_true
+        'func': compose_checks(
+                    check_headers('libavcodec/dxva2.h',  use='libav'),
+                    check_headers('libavcodec/d3d11va.h',  use='libav')),
     }, {
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',

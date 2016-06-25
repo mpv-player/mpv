@@ -634,10 +634,10 @@ Input Commands that are Possibly Subject to Change
     Send a message to all clients, and pass it the following list of arguments.
     What this message means, how many arguments it takes, and what the arguments
     mean is fully up to the receiver and the sender. Every client receives the
-    message, so be careful about name clashes (or use ``script_message_to``).
+    message, so be careful about name clashes (or use ``script-message-to``).
 
 ``script-message-to "<target>" "<arg1>" "<arg2>" ...``
-    Same as ``script_message``, but send it only to the client named
+    Same as ``script-message``, but send it only to the client named
     ``<target>``. Each client (scripts etc.) has a unique name. For example,
     Lua scripts can get their name via ``mp.get_script_name()``.
 
@@ -651,8 +651,8 @@ Input Commands that are Possibly Subject to Change
     separator, e.g. ``script_binding scriptname/bindingname``.
 
     For completeness, here is how this command works internally. The details
-    could change any time. On any matching key event, ``script_message_to``
-    or ``script_message`` is called (depending on whether the script name is
+    could change any time. On any matching key event, ``script-message-to``
+    or ``script-message`` is called (depending on whether the script name is
     included), with the following arguments:
 
     1. The string ``key-binding``.
@@ -1081,8 +1081,8 @@ Property list
                 "default"           MPV_FORMAT_FLAG
 
 ``ab-loop-a``, ``ab-loop-b`` (RW)
-    Set/get A-B loop points. See corresponding options and ``ab_loop`` command.
-    The special value ``no`` on either of these properties disables looping.
+    Set/get A-B loop points. See corresponding options and ``ab-loop`` command
+    for details.
 
 ``angle`` (RW)
     Current DVD angle.
@@ -1349,6 +1349,9 @@ Property list
 ``colormatrix-primaries`` (R)
     See ``colormatrix``.
 
+``taskbar-progress`` (RW)
+    See ``--taskbar-progress``.
+
 ``ontop`` (RW)
     See ``--ontop``.
 
@@ -1385,14 +1388,39 @@ Property list
     properties to see whether this was successful.
 
     Unlike in mpv 0.9.x and before, this does not return the currently active
-    hardware decoder.
+    hardware decoder. Since mpv 0.17.1, ``hwdec-current`` is available for
+    this purpose.
+
+``hwdec-current``
+    Return the current hardware decoding in use. If decoding is active, return
+    one of the values used by the ``hwdec`` option/property. ``no`` indicates
+    software decoding. If no decoder is loaded, the property is unavailable.
+
+``hwdec-interop``
+    This returns the currently loaded hardware decoding/output interop driver.
+    This is known only once the VO has opened (and possibly later). With some
+    VOs (like ``opengl``), this might be never known in advance, but only when
+    the decoder attempted to create the hw decoder successfully. (Using
+    ``--hwdec-preload`` can load it eagerly.) If there are multiple drivers
+    loaded, they will be separated by ``,``.
+
+    If no VO is active or no interop driver is known, this property is
+    unavailable.
+
+    This does not necessarily use the same values as ``hwdec``. There can be
+    multiple interop drivers for the same hardware decoder, depending on
+    platform and VO.
 
 ``hwdec-active``
+    Deprecated. To be removed in mpv 0.19.0. Use ``hwdec-current`` instead.
+
     Return ``yes`` or ``no``, depending on whether any type of hardware decoding
     is actually in use.
 
 ``hwdec-detected``
-    If software decoding is active, this returns the hardware decoder in use.
+    Deprecated. To be removed in mpv 0.19.0.
+
+    If hardware decoding is active, this returns the hardware decoder in use.
     Otherwise, it returns either ``no``, or if applicable, the currently loaded
     hardware decoding API. This is known only once the VO has opened (and
     possibly later). With some VOs (like ``opengl``), this is never known in
@@ -1646,6 +1674,9 @@ Property list
     Current position on playlist. The first entry is on position 0. Writing
     to the property will restart playback at the written entry.
 
+``playlist-pos-1`` (RW)
+    Same as ``playlist-pos``, but 1-based.
+
 ``playlist-count``
     Number of total playlist entries.
 
@@ -1787,9 +1818,11 @@ Property list
                 "albumart"          MPV_FORMAT_FLAG
                 "default"           MPV_FORMAT_FLAG
                 "forced"            MPV_FORMAT_FLAG
+                "selected"          MPV_FORMAT_FLAG
                 "external"          MPV_FORMAT_FLAG
                 "external-filename" MPV_FORMAT_STRING
                 "codec"             MPV_FORMAT_STRING
+                "ff-index"          MPV_FORMAT_INT64
                 "decoder-desc"      MPV_FORMAT_STRING
                 "demux-w"           MPV_FORMAT_INT64
                 "demux-h"           MPV_FORMAT_INT64
@@ -1903,6 +1936,44 @@ Property list
     Return whether the VO is configured right now. Usually this corresponds to
     whether the video window is visible. If the ``--force-window`` option is
     used, this is usually always returns ``yes``.
+
+``vo-performance``
+    Some video output performance metrics. Not implemented by all VOs. This has
+    a number of sup-properties, of the form ``vo-performance/<metric>-<value>``,
+    all of them in milliseconds.
+
+    ``<metric>`` refers to one of:
+
+    ``upload``
+        Time needed to make the frame available to the GPU (if necessary).
+    ``render``
+        Time needed to perform all necessary video postprocessing and rendering
+        passes (if necessary).
+    ``present``
+        Time needed to present a rendered frame on-screen.
+
+    When a step is unnecessary or skipped, it will have the value 0.
+
+    ``<value>`` refers to one of:
+
+    ``last``
+        Last measured value.
+    ``avg``
+        Average over a fixed number of past samples. (The exact timeframe
+        varies, but it should generally be a handful of seconds)
+    ``peak``
+        The peak (highest value) within this averaging range.
+
+    When querying the property with the client API using ``MPV_FORMAT_NODE``,
+    or with Lua ``mp.get_property_native``, this will return a mpv_node with
+    the following contents:
+
+    ::
+
+        MPV_FORMAT_NODE_MAP
+            "<metric>-<value>"  MPV_FORMAT_INT64
+
+    (One entry for each ``<metric>`` and ``<value>`` combination)
 
 ``video-bitrate``, ``audio-bitrate``, ``sub-bitrate``
     Bitrate values calculated on the packet level. This works by dividing the

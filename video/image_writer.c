@@ -136,9 +136,21 @@ static bool write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp
         pic->color_primaries = mp_csp_prim_to_avcol_pri(image->params.primaries);
         pic->color_trc = mp_csp_trc_to_avcol_trc(image->params.gamma);
     }
+
+#if HAVE_AVCODEC_NEW_CODEC_API
+    int ret = avcodec_send_frame(avctx, pic);
+    if (ret < 0)
+        goto error_exit;
+    avcodec_send_frame(avctx, NULL); // send EOF
+    ret = avcodec_receive_packet(avctx, &pkt);
+    if (ret < 0)
+        goto error_exit;
+    got_output = 1;
+#else
     int ret = avcodec_encode_video2(avctx, &pkt, pic, &got_output);
     if (ret < 0)
         goto error_exit;
+#endif
 
     fwrite(pkt.data, pkt.size, 1, fp);
 

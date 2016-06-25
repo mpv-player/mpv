@@ -27,6 +27,9 @@
 // For WGL_ACCESS_WRITE_DISCARD_NV, etc.
 #include <GL/wglext.h>
 
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+#define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
+
 // mingw-w64 header typo?
 #ifndef IDirect3DSwapChain9Ex_GetBackBuffer
 #define IDirect3DSwapChain9Ex_GetBackBuffer IDirect3DSwapChain9EX_GetBackBuffer
@@ -51,21 +54,14 @@ struct priv {
     HGLRC os_ctx;
 
     // OpenGL resources
-    GLuint framebuffer;
     GLuint texture;
 
-    // Is the shared framebuffer currently bound?
-    bool fb_bound;
-    // Is the shared texture currently attached?
-    bool tex_attached;
     // Did we lose the device?
     bool lost_device;
 
     // Requested and current parameters
     int requested_swapinterval;
     int width, height, swapinterval;
-
-    void (GLAPIENTRY *real_gl_bind_framebuffer)(GLenum, GLuint);
 };
 
 static __thread struct MPGLContext *current_ctx;
@@ -99,7 +95,7 @@ static int os_ctx_create(struct MPGLContext *ctx)
         .cbSize = sizeof(WNDCLASSEXW),
         .style = CS_OWNDC,
         .lpfnWndProc = DefWindowProc,
-        .hInstance = GetModuleHandleW(NULL),
+        .hInstance = HINST_THISCOMPONENT,
         .lpszClassName = os_wnd_class,
     });
 
@@ -107,7 +103,7 @@ static int os_ctx_create(struct MPGLContext *ctx)
     // possible to use the VO window, but MSDN recommends against drawing to
     // the same window with flip mode present and other APIs, so play it safe.
     p->os_wnd = CreateWindowExW(0, os_wnd_class, os_wnd_class, 0, 0, 0, 200,
-        200, NULL, NULL, GetModuleHandleW(NULL), NULL);
+        200, NULL, NULL, HINST_THISCOMPONENT, NULL);
     p->os_dc = GetDC(p->os_wnd);
     if (!p->os_dc) {
         MP_FATAL(ctx->vo, "Couldn't create window for offscreen rendering\n");
@@ -224,18 +220,6 @@ static void os_ctx_destroy(MPGLContext *ctx)
         DestroyWindow(p->os_wnd);
 }
 
-static void try_attach_texture(MPGLContext *ctx)
-{
-    struct priv *p = ctx->priv;
-    struct GL *gl = ctx->gl;
-
-    if (p->fb_bound && !p->tex_attached) {
-        gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-            GL_TEXTURE_2D, p->texture, 0);
-        p->tex_attached = true;
-    }
-}
-
 static int d3d_size_dependent_create(MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
@@ -275,25 +259,6 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
     MP_VERBOSE(ctx->vo, "DX_interop backbuffer format: %u\n",
         (unsigned)bb_desc.Format);
 
-    // Note: This backend has only been tested on an 8-bit display. It's
-    // unknown whether this code is enough to support other formats or if more
-    // work is needed.
-    switch (bb_desc.Format) {
-    case D3DFMT_X1R5G5B5: case D3DFMT_A1R5G5B5:
-        ctx->gl->fb_r = ctx->gl->fb_g = ctx->gl->fb_b = 5;
-        break;
-    case D3DFMT_R5G6B5:
-        ctx->gl->fb_r = 5; ctx->gl->fb_g = 6; ctx->gl->fb_b = 5;
-        break;
-    case D3DFMT_R8G8B8: case D3DFMT_A8R8G8B8: case D3DFMT_X8R8G8B8:
-    case D3DFMT_A8B8G8R8: case D3DFMT_X8B8G8R8: default:
-        ctx->gl->fb_r = ctx->gl->fb_g = ctx->gl->fb_b = 8;
-        break;
-    case D3DFMT_A2R10G10B10: case D3DFMT_A2B10G10R10:
-        ctx->gl->fb_r = ctx->gl->fb_g = ctx->gl->fb_b = 10;
-        break;
-    }
-
     // Create a rendertarget with the same format as the backbuffer for
     // rendering from OpenGL
     HANDLE share_handle = NULL;
@@ -312,7 +277,6 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
 
     // Create the OpenGL-side texture
     gl->GenTextures(1, &p->texture);
-    p->tex_attached = false;
 
     // Now share the rendertarget with OpenGL as a texture
     p->rtarget_h = gl->DXRegisterObjectNV(p->device_h, p->rtarget, p->texture,
@@ -331,9 +295,10 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
         return -1;
     }
 
-    // Only attach the shared texture if the shared framebuffer is bound. If
-    // it's not, the texture will be attached when glBindFramebuffer is called.
-    try_attach_texture(ctx);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, gl->main_fb);
+    gl->FramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D, p->texture, 0);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
     return 0;
 }
@@ -476,27 +441,6 @@ static void dxinterop_uninit(MPGLContext *ctx)
     pump_message_loop();
 }
 
-static GLAPIENTRY void dxinterop_bind_framebuffer(GLenum target,
-    GLuint framebuffer)
-{
-    if (!current_ctx)
-        return;
-    struct priv *p = current_ctx->priv;
-
-    // Keep track of whether the shared framebuffer is bound
-    if (target == GL_FRAMEBUFFER || target == GL_DRAW_FRAMEBUFFER)
-        p->fb_bound = (framebuffer == 0);
-
-    // Pretend the shared framebuffer is the primary framebuffer
-    if (framebuffer == 0)
-        framebuffer = p->framebuffer;
-
-    p->real_gl_bind_framebuffer(target, framebuffer);
-
-    // Attach the shared texture if it is not attached already
-    try_attach_texture(current_ctx);
-}
-
 static void dxinterop_reset(struct MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
@@ -570,25 +514,16 @@ static int dxinterop_init(struct MPGLContext *ctx, int flags)
         goto fail;
 
     // Create the shared framebuffer
-    gl->GenFramebuffers(1, &p->framebuffer);
+    gl->GenFramebuffers(1, &gl->main_fb);
 
-    // Hook glBindFramebuffer to return the shared framebuffer instead of the
-    // primary one
     current_ctx = ctx;
-    p->real_gl_bind_framebuffer = gl->BindFramebuffer;
-    gl->BindFramebuffer = dxinterop_bind_framebuffer;
-
     gl->SwapInterval = dxinterop_swap_interval;
-
     gl->MPGetNativeDisplay = dxinterop_get_native_display;
 
     if (d3d_create(ctx) < 0)
         goto fail;
     if (d3d_size_dependent_create(ctx) < 0)
         goto fail;
-
-    // Bind the shared framebuffer. This will also attach the shared texture.
-    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // The OpenGL and Direct3D coordinate systems are flipped vertically
     // relative to each other. Flip the video during rendering so it can be

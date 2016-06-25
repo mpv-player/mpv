@@ -49,6 +49,9 @@
 
 #include "common/msg.h"
 
+static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now, 
+                                    const CVTimeStamp* outputTime, CVOptionFlags flagsIn, 
+                                    CVOptionFlags* flagsOut, void* displayLinkContext);
 static int vo_cocoa_fullscreen(struct vo *vo);
 static void cocoa_rm_fs_screen_profile_observer(struct vo_cocoa_state *s);
 static void cocoa_add_screen_reconfiguration_observer(struct vo *vo);
@@ -370,6 +373,7 @@ static void vo_cocoa_update_screens_pointers(struct vo *vo)
 static void vo_cocoa_update_screen_fps(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
+
     NSScreen *screen = vo->opts->fullscreen ? s->fs_screen : s->current_screen;
     NSDictionary* sinfo = [screen deviceDescription];
     NSNumber* sid = [sinfo objectForKey:@"NSScreenNumber"];
@@ -377,21 +381,36 @@ static void vo_cocoa_update_screen_fps(struct vo *vo)
 
     CVDisplayLinkRef link;
     CVDisplayLinkCreateWithCGDisplay(did, &link);
-    s->screen_fps = CVDisplayLinkGetActualOutputVideoRefreshPeriod(link);
+    CVDisplayLinkSetOutputCallback(link, &displayLinkCallback, NULL);
+    CVDisplayLinkStart(link);
+    CVDisplayLinkSetCurrentCGDisplay(link, did);
 
-    if (s->screen_fps == 0) {
+    double display_period = CVDisplayLinkGetActualOutputVideoRefreshPeriod(link);
+
+    if (display_period > 0) {
+        s->screen_fps = 1/display_period;
+    } else {
         // Fallback to using Nominal refresh rate from DisplayLink,
         // CVDisplayLinkGet *Actual* OutputVideoRefreshPeriod seems to
         // return 0 on some Apple devices. Use the nominal refresh period
         // instead.
         const CVTime t = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(link);
-        if (!(t.flags & kCVTimeIsIndefinite))
+        if (!(t.flags & kCVTimeIsIndefinite)) {
             s->screen_fps = (t.timeScale / (double) t.timeValue);
+            MP_VERBOSE(vo, "Falling back to %f for display sync.\n", s->screen_fps);
+        }
     }
 
     CVDisplayLinkRelease(link);
 
     flag_events(vo, VO_EVENT_WIN_STATE);
+}
+
+static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now,
+                                    const CVTimeStamp* outputTime, CVOptionFlags flagsIn,
+                                    CVOptionFlags* flagsOut, void* displayLinkContext)
+{
+    return kCVReturnSuccess;
 }
 
 static void vo_cocoa_update_screen_info(struct vo *vo, struct mp_rect *out_rc)
@@ -929,6 +948,11 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 - (void)handleFilesArray:(NSArray *)files
 {
     [[EventsResponder sharedInstance] handleFilesArray:files];
+}
+
+- (void)windowDidChangeScreen:(NSNotification *)notification
+{
+    vo_cocoa_update_screen_info(self.vout, NULL);
 }
 
 - (void)didChangeWindowedScreenProfile:(NSScreen *)screen

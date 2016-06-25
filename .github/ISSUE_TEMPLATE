@@ -1,0 +1,14 @@
+### mpv version and platform
+
+If you're not using git master or the latest release, update.
+
+### Reproduction steps
+
+### Expected behavior
+
+### Actual behavior
+
+### Log files
+
+Make a log file made with -v or --log-file=output.txt, paste it to sprunge.us,
+and replace this text with a link to it.

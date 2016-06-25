@@ -15,13 +15,13 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <initguid.h>
 #include <stdio.h>
 #include <limits.h>
 #include <pthread.h>
 #include <assert.h>
 #include <windows.h>
 #include <windowsx.h>
-#include <initguid.h>
 #include <ole2.h>
 #include <shobjidl.h>
 #include <avrt.h>
@@ -44,6 +44,9 @@
 #include "misc/dispatch.h"
 #include "misc/rendezvous.h"
 #include "mpv_talloc.h"
+
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+#define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
 
 static const wchar_t classname[] = L"mpv";
 
@@ -1067,15 +1070,31 @@ static void reinit_window_state(struct vo_w32_state *w32)
 
     RECT cr = r;
     add_window_borders(w32->window, &r);
+    // Check on client area size instead of window size on --fit-border=no
+    long o_w;
+    long o_h;
+    if( w32->opts->fit_border ) {
+        o_w = r.right - r.left;
+        o_h = r.bottom - r.top;
+    } else {
+        o_w = cr.right - cr.left;
+        o_h = cr.bottom - cr.top;
+    }
 
-    if (!w32->current_fs &&
-        ((r.right - r.left) >= screen_w || (r.bottom - r.top) >= screen_h))
+    if ( !w32->current_fs && ( o_w > screen_w || o_h > screen_h ) )
     {
         MP_VERBOSE(w32, "requested window size larger than the screen\n");
         // Use the aspect of the client area, not the full window size.
         // Basically, try to compute the maximum window size.
-        long n_w = screen_w - (r.right - cr.right) - (cr.left - r.left) - 1;
-        long n_h = screen_h - (r.bottom - cr.bottom) - (cr.top - r.top) - 1;
+        long n_w;
+        long n_h;
+        if( w32->opts->fit_border ) {
+            n_w = screen_w - (r.right - cr.right) - (cr.left - r.left);
+            n_h = screen_h - (r.bottom - cr.bottom) - (cr.top - r.top);
+        } else {
+            n_w = screen_w;
+            n_h = screen_h;
+        }
         // Letterbox
         double asp = (cr.right - cr.left) / (double)(cr.bottom - cr.top);
         double s_asp = n_w / (double)n_h;
@@ -1084,15 +1103,28 @@ static void reinit_window_state(struct vo_w32_state *w32)
         } else {
             n_w = n_h * asp;
         }
+        // Save new size
+        w32->dw = n_w;
+        w32->dh = n_h;
+        // Get old window center
+        long o_cx = r.left + (r.right - r.left) / 2;
+        long o_cy = r.top + (r.bottom - r.top) / 2;
+        // Add window borders to the new window size
         r = (RECT){.right = n_w, .bottom = n_h};
         add_window_borders(w32->window, &r);
-        // Center the final window
+        // Get top and left border size for client area position calculation
+        long b_top = -r.top;
+        long b_left = -r.left;
+        // Center the final window around the old window center
         n_w = r.right - r.left;
         n_h = r.bottom - r.top;
-        r.left = w32->screenrc.x0 + screen_w / 2 - n_w / 2;
-        r.top = w32->screenrc.y0 + screen_h / 2 - n_h / 2;
+        r.left = o_cx - n_w / 2;
+        r.top = o_cy - n_h / 2;
         r.right = r.left + n_w;
         r.bottom = r.top + n_h;
+        // Save new client area position
+        w32->window_x = r.left + b_left;
+        w32->window_y = r.top + b_top;
     }
 
     MP_VERBOSE(w32, "reset window bounds: %d:%d:%d:%d\n",
@@ -1116,6 +1148,7 @@ static void gui_thread_reconfig(void *ptr)
     vo_apply_window_geometry(vo, &geo);
 
     bool reset_size = w32->o_dwidth != vo->dwidth || w32->o_dheight != vo->dheight;
+    bool pos_init = false;
 
     w32->o_dwidth = vo->dwidth;
     w32->o_dheight = vo->dheight;
@@ -1132,6 +1165,7 @@ static void gui_thread_reconfig(void *ptr)
         } else {
             w32->window_bounds_initialized = true;
             reset_size = true;
+            pos_init = true;
             w32->window_x = w32->prev_x = geo.win.x0;
             w32->window_y = w32->prev_y = geo.win.y0;
         }
@@ -1147,6 +1181,12 @@ static void gui_thread_reconfig(void *ptr)
         vo->dheight = r.bottom;
     }
 
+    // Recenter window around old position on new video size
+    // excluding the case when initial positon handled by win_state.
+    if (!pos_init) {
+        w32->window_x += w32->dw / 2 - vo->dwidth / 2;
+        w32->window_y += w32->dh / 2 - vo->dheight / 2;
+    }
     w32->dw = vo->dwidth;
     w32->dh = vo->dheight;
 
@@ -1184,14 +1224,12 @@ static void *gui_thread(void *ptr)
 
     thread_disable_ime();
 
-    HINSTANCE hInstance = GetModuleHandleW(NULL);
-
     WNDCLASSEXW wcex = {
         .cbSize = sizeof wcex,
         .style = CS_HREDRAW | CS_VREDRAW,
         .lpfnWndProc = WndProc,
-        .hInstance = hInstance,
-        .hIcon = LoadIconW(hInstance, L"IDI_ICON1"),
+        .hInstance = HINST_THISCOMPONENT,
+        .hIcon = LoadIconW(HINST_THISCOMPONENT, L"IDI_ICON1"),
         .hCursor = LoadCursor(NULL, IDC_ARROW),
         .lpszClassName = classname,
     };
@@ -1209,13 +1247,13 @@ static void *gui_thread(void *ptr)
                                       classname,
                                       WS_CHILD | WS_VISIBLE,
                                       0, 0, r.right, r.bottom,
-                                      w32->parent, 0, hInstance, NULL);
+                                      w32->parent, 0, HINST_THISCOMPONENT, NULL);
     } else {
         w32->window = CreateWindowExW(0, classname,
                                       classname,
                                       update_style(w32, 0),
                                       CW_USEDEFAULT, SW_HIDE, 100, 100,
-                                      0, 0, hInstance, NULL);
+                                      0, 0, HINST_THISCOMPONENT, NULL);
     }
 
     if (!w32->window) {
@@ -1374,9 +1412,13 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         if (!w32->window_bounds_initialized)
             return VO_FALSE;
         if (w32->current_fs) {
+            w32->prev_x += w32->prev_width / 2 - s[0] / 2;
+            w32->prev_y += w32->prev_height / 2 - s[1] / 2;
             w32->prev_width = s[0];
             w32->prev_height = s[1];
         } else {
+            w32->window_x += w32->dw / 2 - s[0] / 2;
+            w32->window_y += w32->dh / 2 - s[1] / 2;
             w32->dw = s[0];
             w32->dh = s[1];
         }
@@ -1419,7 +1461,7 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         if (!w32->taskbar_list3 || !w32->tbtnCreated)
             return VO_TRUE;
 
-        if (!pstate->playing) {
+        if (!pstate->playing || !pstate->taskbar_progress) {
             ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
                                            TBPF_NOPROGRESS);
             return VO_TRUE;

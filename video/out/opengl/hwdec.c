@@ -29,6 +29,8 @@ extern const struct gl_hwdec_driver gl_hwdec_vaglx;
 extern const struct gl_hwdec_driver gl_hwdec_videotoolbox;
 extern const struct gl_hwdec_driver gl_hwdec_vdpau;
 extern const struct gl_hwdec_driver gl_hwdec_dxva2egl;
+extern const struct gl_hwdec_driver gl_hwdec_d3d11egl;
+extern const struct gl_hwdec_driver gl_hwdec_d3d11eglrgb;
 extern const struct gl_hwdec_driver gl_hwdec_dxva2gldx;
 extern const struct gl_hwdec_driver gl_hwdec_dxva2;
 
@@ -45,8 +47,10 @@ static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
 #if HAVE_VIDEOTOOLBOX_GL
     &gl_hwdec_videotoolbox,
 #endif
-#if HAVE_DXVA2_HWACCEL
+#if HAVE_D3D_HWACCEL
 #if HAVE_EGL_ANGLE
+    &gl_hwdec_d3d11egl,
+    &gl_hwdec_d3d11eglrgb,
     &gl_hwdec_dxva2egl,
 #endif
 #if HAVE_GL_DXINTEROP
@@ -59,6 +63,7 @@ static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
 
 static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
                                           struct mpv_global *global,
+                                          struct mp_hwdec_devices *devs,
                                           const struct gl_hwdec_driver *drv,
                                           bool is_auto)
 {
@@ -68,7 +73,7 @@ static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
         .log = mp_log_new(hwdec, log, drv->name),
         .global = global,
         .gl = gl,
-        .gl_texture_target = GL_TEXTURE_2D,
+        .devs = devs,
         .probing = is_auto,
     };
     mp_verbose(log, "Loading hwdec driver '%s'\n", drv->name);
@@ -80,32 +85,21 @@ static struct gl_hwdec *load_hwdec_driver(struct mp_log *log, GL *gl,
     return hwdec;
 }
 
-struct gl_hwdec *gl_hwdec_load_api_id(struct mp_log *log, GL *gl,
-                                      struct mpv_global *g, int id)
+struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
+                                   struct mpv_global *g,
+                                   struct mp_hwdec_devices *devs,
+                                   enum hwdec_type api)
 {
-    bool is_auto = id == HWDEC_AUTO;
+    bool is_auto = HWDEC_IS_AUTO(api);
     for (int n = 0; mpgl_hwdec_drivers[n]; n++) {
         const struct gl_hwdec_driver *drv = mpgl_hwdec_drivers[n];
-        if (is_auto || id == drv->api) {
-            struct gl_hwdec *r = load_hwdec_driver(log, gl, g, drv, is_auto);
+        if (is_auto || api == drv->api) {
+            struct gl_hwdec *r = load_hwdec_driver(log, gl, g, devs, drv, is_auto);
             if (r)
                 return r;
         }
     }
     return NULL;
-}
-
-// Like gl_hwdec_load_api_id(), but use option names.
-struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
-                                   struct mpv_global *g, const char *api_name)
-{
-    int id = HWDEC_NONE;
-    for (const struct m_opt_choice_alternatives *c = mp_hwdec_names; c->name; c++)
-    {
-        if (strcmp(c->name, api_name) == 0)
-            id = c->value;
-    }
-    return gl_hwdec_load_api_id(log, gl, g, id);
 }
 
 void gl_hwdec_uninit(struct gl_hwdec *hwdec)

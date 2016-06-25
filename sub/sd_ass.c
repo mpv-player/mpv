@@ -117,11 +117,11 @@ static void add_subtitle_fonts(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct MPOpts *opts = sd->opts;
-    if (!opts->ass_enabled || !sd->attachments)
+    if (!opts->ass_enabled || !opts->use_embedded_fonts || !sd->attachments)
         return;
     for (int i = 0; i < sd->attachments->num_entries; i++) {
         struct demux_attachment *f = &sd->attachments->entries[i];
-        if (opts->use_embedded_fonts && attachment_is_font(sd->log, f))
+        if (attachment_is_font(sd->log, f))
             ass_add_font(ctx->ass_library, f->name, f->data, f->data_size);
     }
 }
@@ -270,8 +270,8 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         // Note that for this packet format, libass has an internal mechanism
         // for discarding duplicate (already seen) packets.
         ass_process_chunk(track, packet->buffer, packet->len,
-                          lrint(packet->pts * 1000),
-                          lrint(packet->duration * 1000));
+                          llrint(packet->pts * 1000),
+                          llrint(packet->duration * 1000));
     }
 }
 
@@ -422,7 +422,8 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct MPOpts *opts = sd->opts;
-    bool no_ass = !opts->ass_enabled || ctx->on_top;
+    bool no_ass = !opts->ass_enabled || ctx->on_top ||
+                  opts->ass_style_override == 5;
     bool converted = ctx->is_converted || no_ass;
     ASS_Track *track = no_ass ? ctx->shadow_track : ctx->ass_track;
     ASS_Renderer *renderer = ctx->ass_renderer;

@@ -15,6 +15,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <pthread.h>
+
 #include <libavcodec/avcodec.h>
 
 #include "lavc.h"
@@ -48,7 +50,6 @@ DEFINE_GUID(DXVA2_ModeVP9_VLD_Profile0,         0x463707f8, 0xa1d0, 0x4585, 0x87
 
 DEFINE_GUID(DXVA2_NoEncrypt,                    0x1b81beD0, 0xa0c7, 0x11d3, 0xb9, 0x84, 0x00, 0xc0, 0x4f, 0x2e, 0x73, 0xc5);
 
-static const int PROF_MPEG2_SIMPLE[] = {FF_PROFILE_MPEG2_SIMPLE, 0};
 static const int PROF_MPEG2_MAIN[]   = {FF_PROFILE_MPEG2_SIMPLE,
                                         FF_PROFILE_MPEG2_MAIN, 0};
 static const int PROF_H264_HIGH[]    = {FF_PROFILE_H264_CONSTRAINED_BASELINE,
@@ -70,14 +71,14 @@ struct d3dva_mode {
 // Prefered modes must come first
 static const struct d3dva_mode d3dva_modes[] = {
     // MPEG-1/2
-    {MODE2(MPEG2_VLD),        AV_CODEC_ID_MPEG2VIDEO, PROF_MPEG2_SIMPLE},
+    {MODE2(MPEG2_VLD),        AV_CODEC_ID_MPEG2VIDEO, PROF_MPEG2_MAIN},
     {MODE2(MPEG2and1_VLD),    AV_CODEC_ID_MPEG2VIDEO, PROF_MPEG2_MAIN},
     {MODE2(MPEG2and1_VLD),    AV_CODEC_ID_MPEG1VIDEO},
 
     // H.264
     {MODE2(H264_F),                        AV_CODEC_ID_H264, PROF_H264_HIGH},
-    {MODE (Intel_H264_NoFGT_ClearVideo),   AV_CODEC_ID_H264, PROF_H264_HIGH},
     {MODE2(H264_E),                        AV_CODEC_ID_H264, PROF_H264_HIGH},
+    {MODE (Intel_H264_NoFGT_ClearVideo),   AV_CODEC_ID_H264, PROF_H264_HIGH},
     {MODE (ModeH264_VLD_WithFMOASO_NoFGT), AV_CODEC_ID_H264, PROF_H264_HIGH},
     {MODE (ModeH264_VLD_NoFGT_Flash),      AV_CODEC_ID_H264, PROF_H264_HIGH},
 
@@ -96,6 +97,22 @@ static const struct d3dva_mode d3dva_modes[] = {
 };
 #undef MODE
 #undef MODE2
+
+HMODULE d3d11_dll, d3d9_dll, dxva2_dll;
+
+static pthread_once_t d3d_load_once = PTHREAD_ONCE_INIT;
+
+static void d3d_do_load(void)
+{
+    d3d11_dll = LoadLibrary(L"d3d11.dll");
+    d3d9_dll  = LoadLibrary(L"d3d9.dll");
+    dxva2_dll = LoadLibrary(L"dxva2.dll");
+}
+
+void d3d_load_dlls(void)
+{
+    pthread_once(&d3d_load_once, d3d_do_load);
+}
 
 int d3d_probe_codec(const char *codec)
 {
@@ -132,12 +149,13 @@ static bool mode_supported(const struct d3dva_mode *mode,
 
 struct d3d_decoder_fmt d3d_select_decoder_mode(
     struct lavc_ctx *s, const GUID *device_guids, UINT n_guids,
-    DWORD (*get_dxfmt_cb)(struct lavc_ctx *s, const GUID *guid, int depth))
+    const struct d3d_decoded_format *formats, int n_formats,
+    bool (*test_fmt_cb)(struct lavc_ctx *s, const GUID *guid,
+                        const struct d3d_decoded_format *fmt))
 {
     struct d3d_decoder_fmt fmt = {
-        .guid          = &GUID_NULL,
-        .mpfmt_decoded = IMGFMT_NONE,
-        .dxfmt_decoded = 0,
+        .guid   = &GUID_NULL,
+        .format = NULL,
     };
 
     // this has the right bit-depth, but is unfortunately not the native format
@@ -146,8 +164,6 @@ struct d3d_decoder_fmt d3d_select_decoder_mode(
         return fmt;
 
     int depth = IMGFMT_RGB_DEPTH(sw_img_fmt);
-    int p010  = mp_imgfmt_find(1, 1, 2, 10, MP_IMGFLAG_YUV_NV);
-    int mpfmt_decoded = depth <= 8 ? IMGFMT_NV12 : p010;
 
     for (int i = 0; i < MP_ARRAY_SIZE(d3dva_modes); i++) {
         const struct d3dva_mode *mode = &d3dva_modes[i];
@@ -155,12 +171,23 @@ struct d3d_decoder_fmt d3d_select_decoder_mode(
             profile_compatible(mode, s->avctx->profile) &&
             mode_supported(mode, device_guids, n_guids)) {
 
-            DWORD dxfmt_decoded = get_dxfmt_cb(s, mode->guid, depth);
-            if (dxfmt_decoded) {
-                fmt.guid          = mode->guid;
-                fmt.mpfmt_decoded = mpfmt_decoded;
-                fmt.dxfmt_decoded = dxfmt_decoded;
-                return fmt;
+            for (int n = 0; n < n_formats; n++) {
+                const struct d3d_decoded_format *format = &formats[n];
+
+                if (depth <= format->depth && test_fmt_cb(s, mode->guid, format))
+                {
+                    MP_VERBOSE(s, "Selecting %s ",
+                               d3d_decoder_guid_to_desc(mode->guid));
+                    if (format->dxfmt >= (1 << 16)) {
+                        MP_VERBOSE(s, "%s\n", mp_tag_str(format->dxfmt));
+                    } else {
+                        MP_VERBOSE(s, "%d\n", (int)format->dxfmt);
+                    }
+
+                    fmt.guid   = mode->guid;
+                    fmt.format = format;
+                    return fmt;
+                }
             }
         }
     }

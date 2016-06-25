@@ -71,7 +71,6 @@ struct vdpctx {
     struct vdp_functions              *vdp;
     VdpDevice                          vdp_device;
     uint64_t                           preemption_counter;
-    struct mp_hwdec_info               hwdec_info;
 
     struct m_color                     colorkey;
 
@@ -448,7 +447,6 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
 
     forget_frames(vo, false);
     vc->black_pixel = VDP_INVALID_HANDLE;
-    vc->video_mixer->video_mixer = VDP_INVALID_HANDLE;
     vc->flip_queue = VDP_INVALID_HANDLE;
     vc->flip_target = VDP_INVALID_HANDLE;
     for (int i = 0; i < MAX_OUTPUT_SURFACES; i++)
@@ -1029,6 +1027,9 @@ static void uninit(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
 
+    hwdec_devices_remove(vo->hwdec_devs, &vc->mpvdp->hwctx);
+    hwdec_devices_destroy(vo->hwdec_devs);
+
     /* Destroy all vdpau objects */
     mp_vdpau_mixer_destroy(vc->video_mixer);
     destroy_vdpau_objects(vo);
@@ -1054,7 +1055,8 @@ static int preinit(struct vo *vo)
         return -1;
     }
 
-    vc->hwdec_info.hwctx = &vc->mpvdp->hwctx;
+    vo->hwdec_devs = hwdec_devices_create();
+    hwdec_devices_add(vo->hwdec_devs, &vc->mpvdp->hwctx);
 
     vc->video_mixer = mp_vdpau_mixer_create(vc->mpvdp, vo->log);
 
@@ -1118,11 +1120,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     check_preemption(vo);
 
     switch (request) {
-    case VOCTRL_GET_HWDEC_INFO: {
-        struct mp_hwdec_info **arg = data;
-        *arg = &vc->hwdec_info;
-        return true;
-    }
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:

@@ -30,6 +30,7 @@ struct mp_vdpau_mixer_frame {
 struct mp_vdpau_mixer {
     struct mp_log *log;
     struct mp_vdpau_ctx *ctx;
+    uint64_t preemption_counter;
     bool initialized;
 
     struct mp_image_params image_params;

@@ -46,7 +46,6 @@ struct priv {
 static const int fmtmap[][2] = {
     { AF_FORMAT_U8, SL_PCMSAMPLEFORMAT_FIXED_8 },
     { AF_FORMAT_S16, SL_PCMSAMPLEFORMAT_FIXED_16 },
-    { AF_FORMAT_S32, SL_PCMSAMPLEFORMAT_FIXED_32 },
     { 0 }
 };
 

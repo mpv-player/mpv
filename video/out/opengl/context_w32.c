@@ -209,14 +209,6 @@ static void create_ctx(void *ptr)
     if (!w32_ctx->context)
         create_context_w32_old(ctx);
 
-    int pfmt = GetPixelFormat(w32_ctx->hdc);
-    PIXELFORMATDESCRIPTOR pfd;
-    if (DescribePixelFormat(w32_ctx->hdc, pfmt, sizeof(pfd), &pfd)) {
-        ctx->gl->fb_r = pfd.cRedBits;
-        ctx->gl->fb_g = pfd.cGreenBits;
-        ctx->gl->fb_b = pfd.cBlueBits;
-    }
-
     wglMakeCurrent(w32_ctx->hdc, NULL);
 }
 

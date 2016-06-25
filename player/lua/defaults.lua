@@ -275,6 +275,10 @@ function timer_mt.resume(t)
     end
 end
 
+function timer_mt.is_enabled(t)
+    return timers[t] ~= nil
+end
+
 -- Return the timer that expires next.
 local function get_next_timer()
     local best = nil

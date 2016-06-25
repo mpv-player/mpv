@@ -12,9 +12,6 @@ the code to LGPLv2.1+ at a later point without asking the contributor. (This
 is a safeguard for making potential relicensing of the project to LGPLv2.1+
 easier.) Using a more liberal license compatible to LGPLv2.1+ is also ok.
 
-Some GPLv3 or LGPLv3 code in mpv can be enabled by building with --enable-gpl3,
-and in this case, the resulting binaries must be distributed under GPLv3.
-
 For information about authors and contributors, consult the git log, which
 contains the complete SVN and CVS history as well.
 

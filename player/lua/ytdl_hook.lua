@@ -153,13 +153,18 @@ mp.add_hook("on_load", 10, function ()
 
 
             -- some funky guessing to detect multi-arc videos
-            if  not (json.entries[1]["webpage_url"] == nil)
-                and (json.entries[1]["webpage_url"] == json["webpage_url"]) then
+            if (not (json.entries[1]["_type"] == "url_transparent")) and
+                (not (json.entries[1]["webpage_url"] == nil)
+                and (json.entries[1]["webpage_url"] == json["webpage_url"])) then
                 msg.verbose("multi-arc video detected, building EDL")
 
                 local playlist = "edl://"
                 for i, entry in pairs(json.entries) do
-                    playlist = playlist .. edl_escape(entry.url) .. ";"
+                    playlist = playlist .. edl_escape(entry.url)
+                    if not (entry.duration == nil) then
+                        playlist = playlist..",start=0,length="..entry.duration
+                    end
+                    playlist = playlist .. ";"
                 end
 
                 msg.debug("EDL: " .. playlist)
@@ -175,6 +180,21 @@ mp.add_hook("on_load", 10, function ()
                         json.title)
                 end
 
+                if not (json.entries[1].requested_subtitles == nil) then
+                    for j, req in pairs(json.entries[1].requested_subtitles) do
+                        local subfile = "edl://"
+                        for i, entry in pairs(json.entries) do
+                            subfile = subfile..edl_escape(entry.requested_subtitles[j].url)
+                            if not (entry.duration == nil) then
+                                subfile = subfile..",start=0,length="..entry.duration
+                            end
+                            subfile = subfile .. ";"
+                        end
+                        msg.debug(j.." sub EDL: "..subfile)
+                        mp.commandv("sub-add", subfile, "auto", req.ext, j)
+                    end
+                end
+
             else
 
                 local playlist = "#EXTM3U\n"
@@ -186,7 +206,8 @@ mp.add_hook("on_load", 10, function ()
                     -- directly to the file in that case, which we don't
                     -- want so get the webpage URL instead, which is what
                     -- we want
-                    if not (entry["webpage_url"] == nil) then
+                    if not (json.entries[1]["_type"] == "url_transparent")
+                        and not (entry["webpage_url"] == nil) then
                         site = entry["webpage_url"]
                     end
 
@@ -253,7 +274,7 @@ mp.add_hook("on_load", 10, function ()
             end
 
             -- for rtmp
-            if not (json.play_path == nil) then
+            if (json.protocol == "rtmp") then
                 local rtmp_prop = append_rtmp_prop(nil,
                     "rtmp_tcurl", streamurl)
                 rtmp_prop = append_rtmp_prop(rtmp_prop,

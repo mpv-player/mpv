@@ -189,9 +189,22 @@ static void output_handle_mode(void *data,
     output->refresh_rate = refresh;
 }
 
+static void output_handle_done(void* data, struct wl_output *wl_output)
+{
+}
+
+static void output_handle_scale(void* data, struct wl_output *wl_output,
+                                int32_t factor)
+{
+    struct vo_wayland_output *output = data;
+    output->scale = factor;
+}
+
 static const struct wl_output_listener output_listener = {
     output_handle_geometry,
-    output_handle_mode
+    output_handle_mode,
+    output_handle_done,
+    output_handle_scale
 };
 
 
@@ -211,6 +224,8 @@ static void surface_handle_enter(void *data,
             break;
         }
     }
+
+    wl->window.events |= VO_EVENT_WIN_STATE;
 }
 
 static void surface_handle_leave(void *data,
@@ -401,11 +416,15 @@ static void pointer_handle_motion(void *data,
                                   wl_fixed_t sx_w,
                                   wl_fixed_t sy_w)
 {
+    int32_t scale = 1;
     struct vo_wayland_state *wl = data;
 
+    if (wl->display.current_output)
+        scale = wl->display.current_output->scale;
+
     wl->cursor.pointer = pointer;
-    wl->window.mouse_x = wl_fixed_to_int(sx_w);
-    wl->window.mouse_y = wl_fixed_to_int(sy_w);
+    wl->window.mouse_x = scale*wl_fixed_to_int(sx_w);
+    wl->window.mouse_y = scale*wl_fixed_to_int(sy_w);
 
     mp_input_set_mouse_pos(wl->vo->input_ctx, wl->window.mouse_x,
                                               wl->window.mouse_y);
@@ -521,7 +540,7 @@ static void data_device_handle_data_offer(void *data,
 {
     struct vo_wayland_state *wl = data;
     if (wl->input.offer) {
-        MP_ERR(wl, "There is already a dnd entry point.\n");
+        MP_DBG(wl, "There is already a dnd entry point.\n");
         wl_data_offer_destroy(wl->input.offer);
     }
 
@@ -606,7 +625,8 @@ static void registry_handle_global (void *data,
     if (strcmp(interface, "wl_compositor") == 0) {
 
         wl->display.compositor = wl_registry_bind(reg, id,
-                                                  &wl_compositor_interface, 1);
+                                                  &wl_compositor_interface,
+                                                  MPMIN(3, version));
     }
 
     else if (strcmp(interface, "wl_shell") == 0) {
@@ -625,7 +645,9 @@ static void registry_handle_global (void *data,
             talloc_zero(wl, struct vo_wayland_output);
 
         output->id = id;
-        output->output = wl_registry_bind(reg, id, &wl_output_interface, 1);
+        output->scale = 1;
+        output->output = wl_registry_bind(reg, id, &wl_output_interface,
+                                          MPMIN(2, version));
 
         wl_output_add_listener(output->output, &output_listener, output);
         wl_list_insert(&wl->display.output_list, &output->link);
@@ -739,7 +761,6 @@ static void schedule_resize(struct vo_wayland_state *wl,
 {
     int32_t minimum_size = 150;
     int32_t x, y;
-    float temp_aspect = width / (float) MPMAX(height, 1);
     float win_aspect = wl->window.aspect;
     if (win_aspect <= 0)
         win_aspect = 1;
@@ -770,12 +791,6 @@ static void schedule_resize(struct vo_wayland_state *wl,
         case WL_SHELL_SURFACE_RESIZE_BOTTOM_RIGHT:
             height = (1 / win_aspect) * width;
             break;
-        default:
-            if (wl->window.aspect < temp_aspect)
-                width = wl->window.aspect * height;
-            else
-                height = (1 / win_aspect) * width;
-            break;
     }
 
     if (edges & WL_SHELL_SURFACE_RESIZE_LEFT)
@@ -792,7 +807,7 @@ static void schedule_resize(struct vo_wayland_state *wl,
     wl->window.sh_height = height;
     wl->window.sh_x = x;
     wl->window.sh_y = y;
-    wl->window.events |= VO_EVENT_RESIZE;
+    wl->window.events |= VO_EVENT_WIN_STATE | VO_EVENT_RESIZE;
     wl->vo->dwidth = width;
     wl->vo->dheight = height;
 }
@@ -1023,10 +1038,11 @@ int vo_wayland_init (struct vo *vo)
                        "\tvendor: %s\n"
                        "\tmodel: %s\n"
                        "\tw: %d, h: %d\n"
-                       "\tHz: %d\n",
+                       "\tscale: %d\n"
+                       "\tHz: %f\n",
                        o->make, o->model,
-                       o->width, o->height,
-                       o->refresh_rate / 1000);
+                       o->width, o->height, o->scale,
+                       o->refresh_rate / 1000.0f);
     }
 
     vo->event_fd = wl->display.display_fd;
@@ -1276,7 +1292,7 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
             break;
 
         // refresh rate is stored in milli-Hertz (mHz)
-        double fps = wl->display.current_output->refresh_rate / 1000;
+        double fps = wl->display.current_output->refresh_rate / 1000.0f;
         *(double*) arg = fps;
         return VO_TRUE;
     }

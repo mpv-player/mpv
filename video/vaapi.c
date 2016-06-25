@@ -128,8 +128,7 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
         .display = display,
         .hwctx = {
             .type = HWDEC_VAAPI,
-            .priv = res,
-            .vaapi_ctx = res,
+            .ctx = res,
             .download_image = ctx_download_image,
         },
     };
@@ -485,6 +484,38 @@ struct mp_image *va_surface_download(struct mp_image *src,
 
     MP_ERR(ctx, "failed to get surface data.\n");
     return NULL;
+}
+
+// Set the hw_subfmt from the surface's real format. Because of this bug:
+//      https://bugs.freedesktop.org/show_bug.cgi?id=79848
+// it should be assumed that the real format is only known after an arbitrary
+// vaCreateContext() call has been made, or even better, after the surface
+// has been rendered to.
+// If the hw_subfmt is already set, this is a NOP.
+void va_surface_init_subformat(struct mp_image *mpi)
+{
+    VAStatus status;
+    if (mpi->params.hw_subfmt)
+        return;
+    struct va_surface *p = va_surface_in_mp_image(mpi);
+    if (!p)
+        return;
+
+    VAImage va_image = { .image_id = VA_INVALID_ID };
+
+    va_lock(p->ctx);
+
+    status = vaDeriveImage(p->display, va_surface_id(mpi), &va_image);
+    if (status != VA_STATUS_SUCCESS)
+        goto err;
+
+    mpi->params.hw_subfmt = va_image.format.fourcc;
+
+    status = vaDestroyImage(p->display, va_image.image_id);
+    CHECK_VA_STATUS(p->ctx, "vaDestroyImage()");
+
+err:
+    va_unlock(p->ctx);
 }
 
 struct pool_alloc_ctx {

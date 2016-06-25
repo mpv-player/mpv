@@ -350,6 +350,10 @@ The ``mp`` module is preloaded, although it can be loaded manually with
             with ``add_timeout()``), this starts the timer from the beginning,
             using the initially configured timeout.
 
+        ``is_enabled()``
+            Whether the timer is currently enabled or was previously disabled
+            (e.g. by ``stop()`` or ``kill()``).
+
         ``timeout`` (RW)
             This field contains the current timeout period. This value is not
             updated as time progresses. It's only used to calculate when the
@@ -454,9 +458,9 @@ are useful only in special situations.
     The level is a string, see ``msg.log`` for allowed log levels.
 
 ``mp.register_script_message(name, fn)``
-    This is a helper to dispatch ``script_message`` or ``script_message_to``
-    invocations to Lua functions. ``fn`` is called if ``script_message`` or
-    ``script_message_to`` (with this script as destination) is run
+    This is a helper to dispatch ``script-message`` or ``script-message-to``
+    invocations to Lua functions. ``fn`` is called if ``script-message`` or
+    ``script-message-to`` (with this script as destination) is run
     with ``name`` as first parameter. The other parameters are passed to ``fn``.
     If a message with the given name is already registered, it's overwritten.
 

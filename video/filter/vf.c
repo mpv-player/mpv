@@ -61,6 +61,7 @@ extern const vf_info_t vf_info_vapoursynth_lazy;
 extern const vf_info_t vf_info_vdpaupp;
 extern const vf_info_t vf_info_vdpaurb;
 extern const vf_info_t vf_info_buffer;
+extern const vf_info_t vf_info_d3d11vpp;
 
 // list of available filters:
 static const vf_info_t *const filter_list[] = {
@@ -98,6 +99,9 @@ static const vf_info_t *const filter_list[] = {
 #if HAVE_VDPAU
     &vf_info_vdpaupp,
     &vf_info_vdpaurb,
+#endif
+#if HAVE_D3D_HWACCEL
+    &vf_info_d3d11vpp,
 #endif
     NULL
 };
@@ -244,7 +248,7 @@ static struct vf_instance *vf_open(struct vf_chain *c, const char *name,
     *vf = (vf_instance_t) {
         .info = desc.p,
         .log = mp_log_new(vf, c->log, name),
-        .hwdec = c->hwdec,
+        .hwdec_devs = c->hwdec_devs,
         .query_format = vf_default_query_format,
         .out_pool = talloc_steal(vf, mp_image_pool_new(16)),
         .chain = c,
@@ -514,7 +518,23 @@ static void query_formats(uint8_t *fmts, struct vf_instance *vf)
 
 static bool is_conv_filter(struct vf_instance *vf)
 {
-    return vf && strcmp(vf->info->name, "scale") == 0;
+    return vf && (strcmp(vf->info->name, "scale") == 0 || vf->autoinserted);
+}
+
+static const char *find_conv_filter(uint8_t *fmts_in, uint8_t *fmts_out)
+{
+    for (int n = 0; filter_list[n]; n++) {
+        if (filter_list[n]->test_conversion) {
+            for (int a = IMGFMT_START; a < IMGFMT_END; a++) {
+                for (int b = IMGFMT_START; b < IMGFMT_END; b++) {
+                    if (fmts_in[a - IMGFMT_START] && fmts_out[b - IMGFMT_START] &&
+                        filter_list[n]->test_conversion(a, b))
+                        return filter_list[n]->name;
+                }
+            }
+        }
+    }
+    return "scale";
 }
 
 static void update_formats(struct vf_chain *c, struct vf_instance *vf,
@@ -535,7 +555,18 @@ static void update_formats(struct vf_chain *c, struct vf_instance *vf,
         // filters after vf work, but vf can't output any format the filters
         // after it accept), try to insert a conversion filter.
         MP_INFO(c, "Using conversion filter.\n");
-        struct vf_instance *conv = vf_open(c, "scale", NULL);
+        // Determine which output formats the filter _could_ accept. For this
+        // to work after the conversion filter is inserted, it is assumed that
+        // conversion filters have a single set of in/output formats that can
+        // be converted to each other.
+        uint8_t out_formats[IMGFMT_END - IMGFMT_START];
+        for (int n = IMGFMT_START; n < IMGFMT_END; n++) {
+            out_formats[n - IMGFMT_START] = vf->last_outfmts[n - IMGFMT_START];
+            vf->last_outfmts[n - IMGFMT_START] = 1;
+        }
+        query_formats(fmts, vf);
+        const char *filter = find_conv_filter(fmts, out_formats);
+        struct vf_instance *conv = vf_open(c, filter, NULL);
         if (conv) {
             conv->autoinserted = true;
             conv->next = vf->next;

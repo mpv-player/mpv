@@ -261,8 +261,13 @@ Playback Control
 ``--ab-loop-a=<time>``, ``--ab-loop-b=<time>``
     Set loop points. If playback passes the ``b`` timestamp, it will seek to
     the ``a`` timestamp. Seeking past the ``b`` point doesn't loop (this is
-    intentional). The loop-points can be adjusted at runtime with the
-    corresponding properties. See also ``ab_loop`` command.
+    intentional).
+
+    If both options are set to ``no``, looping is disabled. Otherwise, the
+    start/end of the file is used if one of the options is set to ``no``.
+
+    The loop-points can be adjusted at runtime with the corresponding
+    properties. See also ``ab-loop`` command.
 
 ``--ordered-chapters``, ``--no-ordered-chapters``
     Enabled by default.
@@ -576,6 +581,7 @@ Video
 
     :no:        always use software decoding (default)
     :auto:      see below
+    :auto-copy: see below
     :vdpau:     requires ``--vo=vdpau`` or ``--vo=opengl`` (Linux only)
     :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
@@ -583,7 +589,9 @@ Video
     :dxva2: requires ``--vo=opengl:backend=angle`` or
         ``--vo=opengl:backend=dxinterop`` (Windows only)
     :dxva2-copy: copies video back to system RAM (Windows only)
-    :d3d11va-copy: experimental (Windows only)
+    :d3d11va: requires ``--vo=opengl:backend=angle`` (Windows only)
+    :d3d11va-copy: copies video back to system RAM (Windows only)
+    :mediacodec: copies video back to system RAM (Android only)
     :rpi:       requires ``--vo=rpi`` (Raspberry Pi only - default if available)
 
     ``auto`` tries to automatically enable hardware decoding using the first
@@ -592,6 +600,13 @@ Video
     never be enabled. Also note that if the first found method doesn't actually
     work, it will always fall back to software decoding, instead of trying the
     next method (might matter on some Linux systems).
+
+    ``auto-copy`` selects only modes that copy the video data back to system
+    memory after decoding. Currently, this selects only one of the following
+    modes: ``vaapi-copy``, ``dxva2-copy``, ``d3d11va-copy``, ``mediacodec``.
+    If none of these work, hardware decoding is disabled. This mode is always
+    guaranteed to incur no additional loss compared to software decoding, and
+    will allow CPU processing with video filters.
 
     The ``vaapi`` mode, if used with ``--vo=opengl``, requires Mesa 11 and most
     likely works with Intel GPUs only. It also requires the opengl EGL backend
@@ -613,6 +628,46 @@ Video
         When using this switch, hardware decoding is still only done for some
         codecs. See ``--hwdec-codecs`` to enable hardware decoding for more
         codecs.
+
+    .. admonition:: Quality reduction with hardware decoding
+
+        Normally, hardware decoding does not reduce video quality (at least for
+        the codecs h264 and HEVC). However, due to restrictions in video output
+        APIs, there can be some loss, or blatantly incorrect results.
+
+        In some cases, RGB conversion is forced, which means the RGB conversion
+        is performed by the hardware decoding API, instead of the OpenGL code
+        used by ``--vo=opengl``. This means certain obscure colorspaces may
+        not display correctly, and not certain filtering (such as debanding)
+        can not be applied in an ideal way.
+
+        ``vdpau`` is usually safe. If deinterlacing enabled (or the ``vdpaupp``
+        video filter is active in general), it forces RGB conversion. The latter
+        currently does not treat certain colorspaces like BT.2020 correctly
+        (which is mostly a mpv-specific restriction). If the ``vdpauprb``
+        retrieves image data without RGB conversion, but does not work with
+        postprocessing.
+
+        ``vaapi`` is safe if the ``vaapi-egl`` backend is indicated in the logs.
+        If ``vaapi-glx`` is indicated, and the video colorspace is either BT.601
+        or BT.709, a forced but correct RGB conversion is performed. Otherwise,
+        the result will be incorrect.
+
+        ``d3d11va`` is usually safe (if used with ANGLE builds that support
+        ``EGL_KHR_stream path`` - otherwise, it converts to RGB), except that
+        10 bit input (HEVC main 10 profiles) will be rounded down to 8 bits.
+
+        ``dxva2`` is not safe. It appears to always use BT.601 for forced RGB
+        conversion, but actual behavior depends on the GPU drivers. Some drivers
+        appear to convert to limited range RGB, which gives a faded appearance.
+        In addition to driver-specific behavior, global system settings might
+        affect this additionally. This can give incorrect results even with
+        completely ordinary video sources.
+
+        All other methods, in particular the copy-back methods (like
+        ``dxva2-copy`` etc.) are either fully safe, or not worse than software
+        decoding. In particular, ``auto-copy`` will only select safe modes
+        (although potentially slower than other methods).
 
 ``--hwdec-preload=<api>``
     This is useful for the ``opengl`` and ``opengl-cb`` VOs for creating the
@@ -1423,7 +1478,7 @@ Subtitles
 
         Using this option may lead to incorrect subtitle rendering.
 
-``--ass-style-override=<yes|no|force>``
+``--ass-style-override=<yes|no|force|signfs|strip>``
     Control whether user style overrides should be applied.
 
     :yes:   Apply all the ``--ass-*`` style override options. Changing the default
@@ -1433,6 +1488,8 @@ Subtitles
     :no:    Render subtitles as forced by subtitle scripts.
     :force: Try to force the font style as defined by the ``--sub-text-*``
             options. Can break rendering easily.
+    :strip: Radically strip all ASS tags and styles from the subtitle. This
+            is equivalent to the old ``--no-ass`` / ``--no-sub-ass`` options.
 
 ``--ass-force-margins``
     Enables placing toptitles and subtitles in black borders when they are
@@ -1529,6 +1586,13 @@ Subtitles
 ``--sub-ass``, ``--no-sub-ass``
     Render ASS subtitles natively (enabled by default).
 
+    .. note::
+
+        This has been deprecated by ``--ass-style-override=strip``. You also
+        may need ``--embeddedfonts=no`` to get the same behavior. Also,
+        using ``--ass-style-override=force`` should give better results
+        without breaking subtitles too much.
+
     If ``--no-sub-ass`` is specified, all tags and style declarations are
     stripped and ignored on display. The subtitle renderer uses the font style
     as specified by the ``--sub-text-`` options instead.
@@ -1538,10 +1602,6 @@ Subtitles
         Using ``--no-sub-ass`` may lead to incorrect or completely broken
         rendering of ASS/SSA subtitles. It can sometimes be useful to forcibly
         override the styling of ASS subtitles, but should be avoided in general.
-
-    .. note::
-
-        Try using ``--ass-style-override=force`` instead.
 
 ``--sub-auto=<no|exact|fuzzy|all>``, ``--no-sub-auto``
     Load additional subtitle files matching the video filename. The parameter
@@ -1783,6 +1843,12 @@ Window
         mode can be used to create the window always on program start, but this
         may cause other issues.
 
+``--taskbar-progress``, ``--no-taskbar-progress``
+    (Windows only)
+    Enable/disable playback progress rendering in taskbar (Windows 7 and above).
+    
+    Enabled by default.
+
 ``--ontop``
     Makes the player window stay on top of other windows.
 
@@ -1793,6 +1859,12 @@ Window
 ``--border``, ``--no-border``
     Play video with window border and decorations. Since this is on by
     default, use ``--no-border`` to disable the standard window decorations.
+
+``--fit-border``, ``--no-fit-border``
+    (Windows only) Fit the whole window with border and decorations on the
+    screen. Since this is on by default, use ``--no-fit-border`` to make mpv
+    try to only fit client area with video on the screen. This behavior only
+    applied to window/video with size exceeding size of the screen.
 
 ``--on-all-workspaces``
     (X11 only)
@@ -1885,7 +1957,7 @@ Window
             Make the window width 70% of the screen size, keeping aspect ratio.
         ``1000``
             Set the window width to 1000 pixels, keeping aspect ratio.
-        ``70%:60%``
+        ``70%x60%``
             Make the window as large as possible, without being wider than 70%
             of the screen width, or higher than 60% of the screen height.
 
@@ -1972,7 +2044,7 @@ Window
 
     .. admonition:: Example for GNOME screensaver
 
-        ``mpv --heartbeat-cmd="gnome-screensaver-command -p" file``
+        ``mpv --heartbeat-cmd="gnome-screensaver-command --deactivate" file``
 
 
 ``--heartbeat-interval=<sec>``
@@ -2068,9 +2140,17 @@ Window
 
     This option might be removed in the future.
 
-``--x11-bypass-compositor=<yes|no>``
+``--x11-bypass-compositor=<yes|no|fs-only|never>``
     If set to ``yes``, then ask the compositor to unredirect the mpv window
-    (default: no). This uses the ``_NET_WM_BYPASS_COMPOSITOR`` hint.
+    (default: ``fs-only``). This uses the ``_NET_WM_BYPASS_COMPOSITOR`` hint.
+
+    ``fs-only`` asks the window manager to disable the compositor only in
+    fullscreen mode.
+
+    ``no`` sets ``_NET_WM_BYPASS_COMPOSITOR`` to 0, which is the default value
+    as declared by the EWMH specification, i.e. no change is done.
+
+    ``never`` asks the window manager to never disable the compositor.
 
 
 Disc Devices
@@ -3524,7 +3604,7 @@ Miscellaneous
     frame dropping due to the audio "overshooting" and skipping multiple video
     frames before the sync logic can react.
 
-``--video-sync-adrop-size=<value``
+``--video-sync-adrop-size=<value>``
     For the ``--video-sync=display-adrop`` mode. This mode duplicates/drops
     audio data to keep audio in sync with video. To avoid audio artifacts on
     jitter (which would add/remove samples all the time), this is done in
@@ -3597,7 +3677,7 @@ Miscellaneous
     - A label of the form ``aidN`` selects audio track N as input (e.g.
       ``aid1``).
     - A label of the form ``vidN`` selects video track N as input.
-    - A label named ``ao`` will be connected to the audio input.
+    - A label named ``ao`` will be connected to the audio output.
     - A label named ``vo`` will be connected to the video output.
 
     Each label can be used only once. If you want to use e.g. an audio stream
@@ -3634,4 +3714,5 @@ Miscellaneous
         - ``null:// --lavfi-complex='life [vo]'``
           Conways' Life Game.
 
-    See the FFmpeg libavfilter documentation for details on the filter.
+    See the FFmpeg libavfilter documentation for details on the available
+    filters.

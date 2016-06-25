@@ -35,11 +35,6 @@
 #define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+SCALER_COUNT)
 #define TEXUNIT_DITHER   (TEXUNIT_3DLUT+1)
 
-struct lut3d {
-    uint16_t *data;
-    int size[3];
-};
-
 struct scaler_fun {
     char *name;
     float params[2];
@@ -78,6 +73,33 @@ enum scaler_unit {
     SCALER_COUNT
 };
 
+enum dither_algo {
+    DITHER_NONE = 0,
+    DITHER_FRUIT,
+    DITHER_ORDERED,
+};
+
+enum alpha_mode {
+    ALPHA_NO = 0,
+    ALPHA_YES,
+    ALPHA_BLEND,
+    ALPHA_BLEND_TILES,
+};
+
+enum blend_subs_mode {
+    BLEND_SUBS_NO = 0,
+    BLEND_SUBS_YES,
+    BLEND_SUBS_VIDEO,
+};
+
+enum tone_mapping {
+    TONE_MAPPING_CLIP,
+    TONE_MAPPING_REINHARD,
+    TONE_MAPPING_HABLE,
+    TONE_MAPPING_GAMMA,
+    TONE_MAPPING_LINEAR,
+};
+
 struct gl_video_opts {
     int dumb_mode;
     struct scaler_config scaler[4];
@@ -86,6 +108,9 @@ struct gl_video_opts {
     int gamma_auto;
     int target_prim;
     int target_trc;
+    int target_brightness;
+    int hdr_tone_mapping;
+    float tone_mapping_param;
     int linear_scaling;
     int correct_downscaling;
     int sigmoid_upscaling;
@@ -108,14 +133,11 @@ struct gl_video_opts {
     char *scale_shader;
     char **pre_shaders;
     char **post_shaders;
+    char **user_shaders;
     int deband;
     struct deband_opts *deband_opts;
     float unsharp;
-    int prescale_luma;
-    int prescale_passes;
-    float prescale_downscaling_threshold;
-    struct superxbr_opts *superxbr_opts;
-    struct nnedi3_opts *nnedi3_opts;
+    struct mp_icc_opts *icc_opts;
 };
 
 extern const struct m_sub_options gl_video_conf;
@@ -125,19 +147,18 @@ extern const struct gl_video_opts gl_video_opts_def;
 struct gl_video;
 struct vo_frame;
 
-struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g,
-                               struct gl_lcms *cms);
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g);
 void gl_video_uninit(struct gl_video *p);
 void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd);
 void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts);
 bool gl_video_check_format(struct gl_video *p, int mp_format);
 void gl_video_config(struct gl_video *p, struct mp_image_params *params);
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b);
-void gl_video_update_profile(struct gl_video *p);
 void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo);
 void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
                      struct mp_rect *src, struct mp_rect *dst,
                      struct mp_osd_res *osd);
+struct voctrl_performance_data gl_video_perfdata(struct gl_video *p);
 struct mp_csp_equalizer;
 struct mp_csp_equalizer *gl_video_eq_ptr(struct gl_video *p);
 void gl_video_eq_update(struct gl_video *p);
@@ -147,6 +168,8 @@ void gl_video_set_debug(struct gl_video *p, bool enable);
 float gl_video_scale_ambient_lux(float lmin, float lmax,
                                  float rmin, float rmax, float lux);
 void gl_video_set_ambient_lux(struct gl_video *p, int lux);
+void gl_video_set_icc_profile(struct gl_video *p, bstr icc_data);
+bool gl_video_icc_auto_enabled(struct gl_video *p);
 
 void gl_video_set_gl_state(struct gl_video *p);
 void gl_video_unset_gl_state(struct gl_video *p);

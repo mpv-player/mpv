@@ -358,8 +358,13 @@
 {
     NSPasteboard *pboard = [sender draggingPasteboard];
     if ([[pboard types] containsObject:NSURLPboardType]) {
-        NSURL *file_url = [NSURL URLFromPasteboard:pboard];
-        [self.adapter handleFilesArray:@[[file_url absoluteString]]];
+        NSArray *pbitems = [pboard readObjectsForClasses:@[[NSURL class]]
+                            options:@{}];
+        NSMutableArray* ar = [[[NSMutableArray alloc] init] autorelease];
+        for (NSURL* url in pbitems) {
+            [ar addObject:[url path]];
+        }
+        [self.adapter handleFilesArray:ar];
         return YES;
     } else if ([[pboard types] containsObject:NSFilenamesPboardType]) {
         NSArray *pbitems = [pboard propertyListForType:NSFilenamesPboardType];

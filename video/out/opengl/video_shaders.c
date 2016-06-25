@@ -45,7 +45,7 @@ static void pass_sample_separated_get_weights(struct gl_shader_cache *sc,
 
     int N = scaler->kernel->size;
     if (N == 2) {
-        GLSL(vec2 c1 = texture(lut, vec2(0.5, fcoord_lut)).RG;)
+        GLSL(vec2 c1 = texture(lut, vec2(0.5, fcoord_lut)).rg;)
         GLSL(float weights[2] = float[](c1.r, c1.g);)
     } else if (N == 6) {
         GLSL(vec4 c1 = texture(lut, vec2(0.25, fcoord_lut));)
@@ -177,7 +177,7 @@ static void bicubic_calcweights(struct gl_shader_cache *sc, const char *t, const
     GLSLF("%s = %s * %s + vec4(0, 0, -0.5, 0.5);\n", t, t, s);
     GLSLF("%s = %s * %s + vec4(-0.6666, 0, 0.8333, 0.1666);\n", t, t, s);
     GLSLF("%s.xy *= vec2(1, 1) / vec2(%s.z, %s.w);\n", t, t, t);
-    GLSLF("%s.xy += vec2(1 + %s, 1 - %s);\n", t, s, s);
+    GLSLF("%s.xy += vec2(1.0 + %s, 1.0 - %s);\n", t, s, s);
 }
 
 void pass_sample_bicubic_fast(struct gl_shader_cache *sc)
@@ -187,8 +187,8 @@ void pass_sample_bicubic_fast(struct gl_shader_cache *sc)
     bicubic_calcweights(sc, "parmx", "fcoord.x");
     bicubic_calcweights(sc, "parmy", "fcoord.y");
     GLSL(vec4 cdelta;)
-    GLSL(cdelta.xz = parmx.RG * vec2(-pt.x, pt.x);)
-    GLSL(cdelta.yw = parmy.RG * vec2(-pt.y, pt.y);)
+    GLSL(cdelta.xz = parmx.rg * vec2(-pt.x, pt.x);)
+    GLSL(cdelta.yw = parmy.rg * vec2(-pt.y, pt.y);)
     // first y-interpolation
     GLSL(vec4 ar = texture(tex, pos + cdelta.xy);)
     GLSL(vec4 ag = texture(tex, pos + cdelta.xw);)
@@ -208,33 +208,24 @@ void pass_sample_oversample(struct gl_shader_cache *sc, struct scaler *scaler,
     GLSLF("{\n");
     GLSL(vec2 pos = pos + vec2(0.5) * pt;) // round to nearest
     GLSL(vec2 fcoord = fract(pos * size - vec2(0.5));)
-    // We only need to sample from the four corner pixels since we're using
-    // nearest neighbour and can compute the exact transition point
-    GLSL(vec2 baseNW = pos - fcoord * pt;)
-    GLSL(vec2 baseNE = baseNW + vec2(pt.x, 0.0);)
-    GLSL(vec2 baseSW = baseNW + vec2(0.0, pt.y);)
-    GLSL(vec2 baseSE = baseNW + pt;)
     // Determine the mixing coefficient vector
     gl_sc_uniform_vec2(sc, "output_size", (float[2]){w, h});
-    GLSL(vec2 coeff = vec2((baseSE - pos) * output_size);)
-    GLSL(coeff = clamp(coeff, 0.0, 1.0);)
+    GLSL(vec2 coeff = fcoord * output_size/size;)
     float threshold = scaler->conf.kernel.params[0];
-    if (threshold > 0) { // also rules out NAN
-        GLSLF("coeff = mix(coeff, vec2(0.0), "
-              "lessThanEqual(coeff, vec2(%f)));\n", threshold);
-        GLSLF("coeff = mix(coeff, vec2(1.0), "
-              "greaterThanEqual(coeff, vec2(%f)));\n", 1.0 - threshold);
-    }
+    threshold = isnan(threshold) ? 0.0 : threshold;
+    GLSLF("coeff = (coeff - %f) / %f;\n", threshold, 1.0 - 2 * threshold);
+    GLSL(coeff = clamp(coeff, 0.0, 1.0);)
     // Compute the right blend of colors
-    GLSL(vec4 left = mix(texture(tex, baseSW),
-                         texture(tex, baseNW),
-                         coeff.y);)
-    GLSL(vec4 right = mix(texture(tex, baseSE),
-                          texture(tex, baseNE),
-                          coeff.y);)
-    GLSL(color = mix(right, left, coeff.x);)
+    GLSL(color = texture(tex, pos + pt * (coeff - fcoord));)
     GLSLF("}\n");
 }
+
+// Common constants for SMPTE ST.2084 (HDR)
+static const float HDR_M1 = 2610./4096 * 1./4,
+                   HDR_M2 = 2523./4096 * 128,
+                   HDR_C1 = 3424./4096,
+                   HDR_C2 = 2413./4096 * 32,
+                   HDR_C3 = 2392./4096 * 32;
 
 // Linearize (expand), given a TRC as input
 void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
@@ -267,6 +258,15 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
                              pow(color.rgb, vec3(1.8)),
                              lessThan(vec3(0.03125), color.rgb));)
         break;
+    case MP_CSP_TRC_SMPTE_ST2084:
+        GLSLF("color.rgb = pow(color.rgb, vec3(1.0/%f));\n", HDR_M2);
+        GLSLF("color.rgb = max(color.rgb - vec3(%f), vec3(0.0)) \n"
+              "             / (vec3(%f) - vec3(%f) * color.rgb);\n",
+              HDR_C1, HDR_C2, HDR_C3);
+        GLSLF("color.rgb = pow(color.rgb, vec3(1.0/%f));\n", HDR_M1);
+        break;
+    default:
+        abort();
     }
 }
 
@@ -301,12 +301,67 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
                              pow(color.rgb, vec3(1.0/1.8)),
                              lessThanEqual(vec3(0.001953), color.rgb));)
         break;
+    case MP_CSP_TRC_SMPTE_ST2084:
+        GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", HDR_M1);
+        GLSLF("color.rgb = (vec3(%f) + vec3(%f) * color.rgb) \n"
+              "             / (vec3(1.0) + vec3(%f) * color.rgb);\n",
+              HDR_C1, HDR_C2, HDR_C3);
+        GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", HDR_M2);
+        break;
+    default:
+        abort();
+    }
+}
+
+// Tone map from a known peak brightness to the range [0,1]
+void pass_tone_map(struct gl_shader_cache *sc, float peak,
+                   enum tone_mapping algo, float param)
+{
+    switch (algo) {
+    case TONE_MAPPING_CLIP:
+        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
+        break;
+
+    case TONE_MAPPING_REINHARD: {
+        float contrast = isnan(param) ? 0.5 : param,
+              offset = (1.0 - contrast) / contrast;
+        GLSLF("color.rgb = color.rgb / (color.rgb + vec3(%f));\n", offset);
+        GLSLF("color.rgb *= vec3(%f);\n", (peak + offset) / peak);
+        break;
+    }
+
+    case TONE_MAPPING_HABLE: {
+        float A = 0.15, B = 0.50, C = 0.10, D = 0.20, E = 0.02, F = 0.30;
+        GLSLHF("vec3 hable(vec3 x) {\n");
+        GLSLHF("return ((x * (%f*x + %f)+%f)/(x * (%f*x + %f) + %f)) - %f;\n",
+               A, C*B, D*E, A, B, D*F, E/F);
+        GLSLHF("}\n");
+
+        GLSLF("color.rgb = hable(color.rgb) / hable(vec3(%f));\n", peak);
+        break;
+    }
+
+    case TONE_MAPPING_GAMMA: {
+        float gamma = isnan(param) ? 1.8 : param;
+        GLSLF("color.rgb = pow(color.rgb / vec3(%f), vec3(%f));\n",
+              peak, 1.0/gamma);
+        break;
+    }
+
+    case TONE_MAPPING_LINEAR: {
+        float coeff = isnan(param) ? 1.0 : param;
+        GLSLF("color.rgb = vec3(%f) * color.rgb;\n", coeff / peak);
+        break;
+    }
+
+    default:
+        abort();
     }
 }
 
 // Wide usage friendly PRNG, shamelessly stolen from a GLSL tricks forum post.
 // Obtain random numbers by calling rand(h), followed by h = permute(h) to
-// update the state.
+// update the state. Assumes the texture was hooked.
 static void prng_init(struct gl_shader_cache *sc, AVLFG *lfg)
 {
     GLSLH(float mod289(float x)  { return x - floor(x / 289.0) * 289.0; })
@@ -314,7 +369,7 @@ static void prng_init(struct gl_shader_cache *sc, AVLFG *lfg)
     GLSLH(float rand(float x)    { return fract(x / 41.0); })
 
     // Initialize the PRNG by hashing the position + a random uniform
-    GLSL(vec3 _m = vec3(pos, random) + vec3(1.0);)
+    GLSL(vec3 _m = vec3(HOOKED_pos, random) + vec3(1.0);)
     GLSL(float h = permute(permute(permute(_m.x)+_m.y)+_m.z);)
     gl_sc_uniform_f(sc, "random", (double)av_lfg_get(lfg) / UINT32_MAX);
 }
@@ -347,44 +402,40 @@ const struct m_sub_options deband_conf = {
     .defaults = &deband_opts_def,
 };
 
-// Stochastically sample a debanded result from a given texture
+// Stochastically sample a debanded result from a hooked texture.
 void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
-                        int tex_num, float tex_mul, GLenum tex_target, AVLFG *lfg)
+                        AVLFG *lfg)
 {
-    // Set up common variables and initialize the PRNG
+    // Initialize the PRNG
     GLSLF("{\n");
-    sampler_prelude(sc, tex_num);
     prng_init(sc, lfg);
 
     // Helper: Compute a stochastic approximation of the avg color around a
     // pixel
-    GLSLHF("vec4 average(%s tex, vec2 pos, vec2 pt, float range, inout float h) {",
-           mp_sampler_type(tex_target));
+    GLSLHF("vec4 average(float range, inout float h) {\n");
         // Compute a random rangle and distance
         GLSLH(float dist = rand(h) * range;     h = permute(h);)
         GLSLH(float dir  = rand(h) * 6.2831853; h = permute(h);)
-
-        GLSLHF("pt *= dist;\n");
-        GLSLH(vec2 o = vec2(cos(dir), sin(dir));)
+        GLSLH(vec2 o = dist * vec2(cos(dir), sin(dir));)
 
         // Sample at quarter-turn intervals around the source pixel
         GLSLH(vec4 ref[4];)
-        GLSLH(ref[0] = texture(tex, pos + pt * vec2( o.x,  o.y));)
-        GLSLH(ref[1] = texture(tex, pos + pt * vec2(-o.y,  o.x));)
-        GLSLH(ref[2] = texture(tex, pos + pt * vec2(-o.x, -o.y));)
-        GLSLH(ref[3] = texture(tex, pos + pt * vec2( o.y, -o.x));)
+        GLSLH(ref[0] = HOOKED_texOff(vec2( o.x,  o.y));)
+        GLSLH(ref[1] = HOOKED_texOff(vec2(-o.y,  o.x));)
+        GLSLH(ref[2] = HOOKED_texOff(vec2(-o.x, -o.y));)
+        GLSLH(ref[3] = HOOKED_texOff(vec2( o.y, -o.x));)
 
         // Return the (normalized) average
-        GLSLHF("return %f * (ref[0] + ref[1] + ref[2] + ref[3])/4.0;\n", tex_mul);
-    GLSLH(})
+        GLSLH(return (ref[0] + ref[1] + ref[2] + ref[3])/4.0;)
+    GLSLHF("}\n");
 
     // Sample the source pixel
-    GLSLF("color = %f * texture(tex, pos);\n", tex_mul);
+    GLSL(color = HOOKED_tex(HOOKED_pos);)
     GLSLF("vec4 avg, diff;\n");
     for (int i = 1; i <= opts->iterations; i++) {
         // Sample the average pixel and use it instead of the original if
         // the difference is below the given threshold
-        GLSLF("avg = average(tex, pos, pt, %f, h);\n", i * opts->range);
+        GLSLF("avg = average(%f, h);\n", i * opts->range);
         GLSL(diff = abs(color - avg);)
         GLSLF("color = mix(avg, color, greaterThan(diff, vec4(%f)));\n",
               opts->threshold / (i * 16384.0));
@@ -399,23 +450,21 @@ void pass_sample_deband(struct gl_shader_cache *sc, struct deband_opts *opts,
     GLSLF("}\n");
 }
 
-void pass_sample_unsharp(struct gl_shader_cache *sc, int tex_num, float param)
-{
+// Assumes the texture was hooked
+void pass_sample_unsharp(struct gl_shader_cache *sc, float param) {
     GLSLF("// unsharp\n");
-    sampler_prelude(sc, tex_num);
-
     GLSLF("{\n");
-    GLSL(vec2 st1 = pt * 1.2;)
-    GLSL(vec4 p = texture(tex, pos);)
-    GLSL(vec4 sum1 = texture(tex, pos + st1 * vec2(+1, +1))
-                   + texture(tex, pos + st1 * vec2(+1, -1))
-                   + texture(tex, pos + st1 * vec2(-1, +1))
-                   + texture(tex, pos + st1 * vec2(-1, -1));)
-    GLSL(vec2 st2 = pt * 1.5;)
-    GLSL(vec4 sum2 = texture(tex, pos + st2 * vec2(+1,  0))
-                   + texture(tex, pos + st2 * vec2( 0, +1))
-                   + texture(tex, pos + st2 * vec2(-1,  0))
-                   + texture(tex, pos + st2 * vec2( 0, -1));)
+    GLSL(float st1 = 1.2;)
+    GLSL(vec4 p = HOOKED_tex(HOOKED_pos);)
+    GLSL(vec4 sum1 = HOOKED_texOff(st1 * vec2(+1, +1))
+                   + HOOKED_texOff(st1 * vec2(+1, -1))
+                   + HOOKED_texOff(st1 * vec2(-1, +1))
+                   + HOOKED_texOff(st1 * vec2(-1, -1));)
+    GLSL(float st2 = 1.5;)
+    GLSL(vec4 sum2 = HOOKED_texOff(st2 * vec2(+1,  0))
+                   + HOOKED_texOff(st2 * vec2( 0, +1))
+                   + HOOKED_texOff(st2 * vec2(-1,  0))
+                   + HOOKED_texOff(st2 * vec2( 0, -1));)
     GLSL(vec4 t = p * 0.859375 + sum2 * -0.1171875 + sum1 * -0.09765625;)
     GLSLF("color = p + t * %f;\n", param);
     GLSLF("}\n");

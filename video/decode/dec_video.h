@@ -32,7 +32,7 @@ struct dec_video {
     struct mpv_global *global;
     struct MPOpts *opts;
     const struct vd_functions *vd_driver;
-    struct mp_hwdec_info *hwdec_info; // video output hwdec handles
+    struct mp_hwdec_devices *hwdec_devs; // video output hwdec handles
     struct sh_stream *header;
     struct mp_codec_params *codec;
 

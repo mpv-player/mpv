@@ -18,15 +18,26 @@
 #include <windows.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+#include <d3d11.h>
+#include <dxgi.h>
+
+#include "angle_dynamic.h"
 
 #include "common/common.h"
 #include "video/out/w32_common.h"
 #include "context.h"
 
+#ifndef EGL_OPTIMAL_SURFACE_ORIENTATION_ANGLE
+#define EGL_OPTIMAL_SURFACE_ORIENTATION_ANGLE 0x33A7
+#define EGL_SURFACE_ORIENTATION_ANGLE 0x33A8
+#define EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE 0x0002
+#endif
+
 struct priv {
     EGLDisplay egl_display;
     EGLContext egl_context;
     EGLSurface egl_surface;
+    bool use_es2;
 };
 
 static void angle_uninit(MPGLContext *ctx)
@@ -39,6 +50,8 @@ static void angle_uninit(MPGLContext *ctx)
         eglDestroyContext(p->egl_display, p->egl_context);
     }
     p->egl_context = EGL_NO_CONTEXT;
+    if (p->egl_display)
+        eglTerminate(p->egl_display);
     vo_w32_uninit(ctx->vo);
 }
 
@@ -90,6 +103,74 @@ static bool create_context_egl(MPGLContext *ctx, EGLConfig config, int version)
     return true;
 }
 
+static void d3d_init(struct MPGLContext *ctx)
+{
+    HRESULT hr;
+    struct priv *p = ctx->priv;
+    struct vo *vo = ctx->vo;
+    IDXGIDevice *dxgi_dev = NULL;
+    IDXGIAdapter *dxgi_adapter = NULL;
+    IDXGIFactory *dxgi_factory = NULL;
+
+    PFNEGLQUERYDISPLAYATTRIBEXTPROC eglQueryDisplayAttribEXT =
+        (PFNEGLQUERYDISPLAYATTRIBEXTPROC)eglGetProcAddress("eglQueryDisplayAttribEXT");
+    PFNEGLQUERYDEVICEATTRIBEXTPROC eglQueryDeviceAttribEXT =
+        (PFNEGLQUERYDEVICEATTRIBEXTPROC)eglGetProcAddress("eglQueryDeviceAttribEXT");
+    if (!eglQueryDisplayAttribEXT || !eglQueryDeviceAttribEXT) {
+        MP_VERBOSE(vo, "Missing EGL_EXT_device_query\n");
+        goto done;
+    }
+
+    EGLAttrib dev_attr;
+    if (!eglQueryDisplayAttribEXT(p->egl_display, EGL_DEVICE_EXT, &dev_attr)) {
+        MP_VERBOSE(vo, "Missing EGL_EXT_device_query\n");
+        goto done;
+    }
+
+    // If ANGLE is in D3D11 mode, get the underlying ID3D11Device
+    EGLDeviceEXT dev = (EGLDeviceEXT)dev_attr;
+    EGLAttrib d3d11_dev_attr;
+    if (eglQueryDeviceAttribEXT(dev, EGL_D3D11_DEVICE_ANGLE, &d3d11_dev_attr)) {
+        ID3D11Device *d3d11_dev = (ID3D11Device*)d3d11_dev_attr;
+
+        hr = ID3D11Device_QueryInterface(d3d11_dev, &IID_IDXGIDevice,
+            (void**)&dxgi_dev);
+        if (FAILED(hr)) {
+            MP_ERR(vo, "Device is not a IDXGIDevice\n");
+            goto done;
+        }
+
+        hr = IDXGIDevice_GetAdapter(dxgi_dev, &dxgi_adapter);
+        if (FAILED(hr)) {
+            MP_ERR(vo, "Couldn't get IDXGIAdapter\n");
+            goto done;
+        }
+
+        hr = IDXGIAdapter_GetParent(dxgi_adapter, &IID_IDXGIFactory,
+            (void**)&dxgi_factory);
+        if (FAILED(hr)) {
+            MP_ERR(vo, "Couldn't get IDXGIFactory\n");
+            goto done;
+        }
+
+        // Prevent DXGI from making changes to the VO window, otherwise in
+        // non-DirectComposition mode it will hook the Alt+Enter keystroke and
+        // make it trigger an ugly transition to exclusive fullscreen mode
+        // instead of running the user-set command.
+        IDXGIFactory_MakeWindowAssociation(dxgi_factory, vo_w32_hwnd(vo),
+            DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER |
+            DXGI_MWA_NO_PRINT_SCREEN);
+    }
+
+done:
+    if (dxgi_dev)
+        IDXGIDevice_Release(dxgi_dev);
+    if (dxgi_adapter)
+        IDXGIAdapter_Release(dxgi_adapter);
+    if (dxgi_factory)
+        IDXGIFactory_Release(dxgi_factory);
+}
+
 static void *get_proc_address(const GLubyte *proc_name)
 {
     return eglGetProcAddress(proc_name);
@@ -99,6 +180,11 @@ static int angle_init(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
+
+    if (!angle_load()) {
+        MP_VERBOSE(vo, "Failed to load LIBEGL.DLL\n");
+        goto fail;
+    }
 
     if (!vo_w32_init(vo))
         goto fail;
@@ -142,6 +228,10 @@ static int angle_init(struct MPGLContext *ctx, int flags)
         goto fail;
     }
 
+    const char *exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
+    if (exts)
+        MP_DBG(ctx->vo, "EGL extensions: %s\n", exts);
+
     eglBindAPI(EGL_OPENGL_ES_API);
     if (eglGetError() != EGL_SUCCESS) {
         MP_FATAL(vo, "Couldn't bind GLES API\n");
@@ -152,27 +242,69 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     if (!config)
         goto fail;
 
+    int window_attribs_len = 0;
+    EGLint *window_attribs = NULL;
+
+    EGLint flip_val;
+    if (eglGetConfigAttrib(p->egl_display, config,
+                           EGL_OPTIMAL_SURFACE_ORIENTATION_ANGLE, &flip_val))
+    {
+        if (flip_val == EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE) {
+            MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len,
+                EGL_SURFACE_ORIENTATION_ANGLE);
+            MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len,
+                EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE);
+            ctx->flip_v = true;
+            MP_VERBOSE(vo, "Rendering flipped.\n");
+        }
+    }
+
+    // EGL_DIRECT_COMPOSITION_ANGLE enables the use of flip-mode present, which
+    // avoids a copy of the video image and lowers vsync jitter, though the
+    // extension is only present on Windows 8 and up.
+    if (strstr(exts, "EGL_ANGLE_direct_composition")) {
+        MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len,
+            EGL_DIRECT_COMPOSITION_ANGLE);
+        MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len, EGL_TRUE);
+        MP_VERBOSE(vo, "Using DirectComposition.\n");
+    }
+
+    MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len, EGL_NONE);
     p->egl_surface = eglCreateWindowSurface(p->egl_display, config,
-                                            vo_w32_hwnd(vo), NULL);
+                                            vo_w32_hwnd(vo), window_attribs);
+    talloc_free(window_attribs);
     if (p->egl_surface == EGL_NO_SURFACE) {
         MP_FATAL(ctx->vo, "Could not create EGL surface!\n");
         goto fail;
     }
 
-    if (!create_context_egl(ctx, config, 3) &&
+    if (!(!p->use_es2 && create_context_egl(ctx, config, 3)) &&
         !create_context_egl(ctx, config, 2))
     {
         MP_FATAL(ctx->vo, "Could not create EGL context!\n");
         goto fail;
     }
 
-    mpgl_load_functions(ctx->gl, get_proc_address, NULL, vo->log);
+    // Configure the underlying Direct3D device
+    d3d_init(ctx);
 
+    mpgl_load_functions(ctx->gl, get_proc_address, NULL, vo->log);
     return 0;
 
 fail:
     angle_uninit(ctx);
     return -1;
+}
+
+static int angle_init_es2(struct MPGLContext *ctx, int flags)
+{
+    struct priv *p = ctx->priv;
+    p->use_es2 = true;
+    if (ctx->vo->probing) {
+        MP_VERBOSE(ctx->vo, "Not using this by default.\n");
+        return -1;
+    }
+    return angle_init(ctx, flags);
 }
 
 static int angle_reconfig(struct MPGLContext *ctx)
@@ -196,6 +328,16 @@ const struct mpgl_driver mpgl_driver_angle = {
     .name           = "angle",
     .priv_size      = sizeof(struct priv),
     .init           = angle_init,
+    .reconfig       = angle_reconfig,
+    .swap_buffers   = angle_swap_buffers,
+    .control        = angle_control,
+    .uninit         = angle_uninit,
+};
+
+const struct mpgl_driver mpgl_driver_angle_es2 = {
+    .name           = "angle-es2",
+    .priv_size      = sizeof(struct priv),
+    .init           = angle_init_es2,
     .reconfig       = angle_reconfig,
     .swap_buffers   = angle_swap_buffers,
     .control        = angle_control,

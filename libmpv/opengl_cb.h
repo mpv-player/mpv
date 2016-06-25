@@ -108,6 +108,28 @@ extern "C" {
  * context must have been uninitialized. If this doesn't happen, undefined
  * behavior will result.
  *
+ * Hardware decoding
+ * -----------------
+ *
+ * Hardware decoding via opengl_cb is fully supported, but requires some
+ * additional setup. (At least if direct hardware decoding modes are wanted,
+ * instead of copying back surface data from GPU to CPU RAM.)
+ *
+ * While "normal" mpv loads the OpenGL hardware decoding interop on demand,
+ * this can't be done with opengl_cb for internal technical reasons. Instead,
+ * make it load the interop at load time by setting the "hwdec-preload"="auto"
+ * option before calling mpv_opengl_cb_init_gl().
+ *
+ * There may be certain requirements on the OpenGL implementation:
+ * - Windows: ANGLE is required (although in theory GL/DX interop could be used)
+ * - Intel/Linux: EGL is required, and also a glMPGetNativeDisplay() callback
+ *                must be provided (see sections below)
+ * - nVidia/Linux: GLX is required
+ * - OSX: CGL is required (CGLGetCurrentContext() returning non-NULL)
+ *
+ * Once these things are setup, hardware decoding can be enabled/disabled at
+ * any time by setting the "hwdec" property.
+ *
  * Special windowing system interop considerations
  * ------------------------------------------------
  *
@@ -126,18 +148,33 @@ extern "C" {
  * up until mpv_opengl_cb_uninit_gl() is called. If the name is not anything
  * you know/expected, return NULL from the function.
  *
- * Windowing system interop on Linux
- * ---------------------------------
+ * Windowing system interop on Intel/Linux with VAAPI
+ * --------------------------------------------------
  *
  * The new VAAPI OpenGL interop requires an EGL context. EGL provides no way
  * to query the X11 Display associated to a specific EGL context, so this API
  * is used to pass it through.
  *
  * glMPGetNativeDisplay("x11") should return a X11 "Display*", which then will
- * be used to create the hardware decoder state. (On GLX, this is not needed.)
+ * be used to create the hardware decoder state.
+ *
+ * glMPGetNativeDisplay("wl") should return a Wayland "struct wl_display *".
+ *
+ * glMPGetNativeDisplay("drm") should return a DRM FD casted to intptr_t (note
+ * that a 0 FD is not supported - if this can happen in your case, you must
+ * dup2() it to a non-0 FD).
+ *
+ * nVidia/Linux via VDPAU requires GLX, which does not have this problem (the
+ * GLX API can return the current X11 Display).
  *
  * Windowing system interop on MS win32
  * ------------------------------------
+ *
+ * Warning: the following is only required if native OpenGL instead of ANGLE
+ *          is used. ANGLE is recommended, because it also allows direct
+ *          hardware decoding interop without further setup by the libmpv
+ *          API user, while the same with native OpenGL is either very hard
+ *          to do (via GL/DX interop with D3D9), or not implemented.
  *
  * If OpenGL switches to fullscreen, most players give it access GPU access,
  * which means DXVA2 hardware decoding in mpv won't work. This can be worked

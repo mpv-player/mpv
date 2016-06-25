@@ -31,6 +31,8 @@
 #include "demux/stheader.h"
 #include "options/options.h"
 #include "video/mp_image.h"
+#include "video/out/bitmap_packer.h"
+#include "img_convert.h"
 #include "sd.h"
 #include "dec_sub.h"
 
@@ -39,9 +41,11 @@
 struct sub {
     bool valid;
     AVSubtitle avsub;
-    int count;
     struct sub_bitmap *inbitmaps;
-    struct osd_bmp_indexed *imgs;
+    int count;
+    struct mp_image *data;
+    int bound_w, bound_h;
+    int src_w, src_h;
     double pts;
     double endpts;
     int64_t id;
@@ -63,6 +67,7 @@ struct sd_lavc_priv {
     double current_pts;
     struct seekpoint *seekpoints;
     int num_seekpoints;
+    struct bitmap_packer *packer;
 };
 
 static void get_resolution(struct sd *sd, int wh[2])
@@ -118,6 +123,7 @@ static int init(struct sd *sd)
     if (!ctx)
         goto error;
     mp_lavc_set_extradata(ctx, sd->codec->extradata, sd->codec->extradata_size);
+#if LIBAVCODEC_VERSION_MICRO >= 100
     if (cid == AV_CODEC_ID_HDMV_PGS_SUBTITLE) {
         // We don't always want to set this, because the ridiculously shitty
         // libavcodec API will mess with certain fields (end_display_time)
@@ -129,17 +135,21 @@ static int init(struct sd *sd)
         // which coincidentally won't be overridden by the ridiculously shitty
         // pkt_timebase code. also, Libav doesn't have the pkt_timebase field,
         // because Libav tends to avoid _adding_ ridiculously shitty APIs.
-#if LIBAVCODEC_VERSION_MICRO >= 100
         priv->pkt_timebase = (AVRational){1, AV_TIME_BASE};
         ctx->pkt_timebase = priv->pkt_timebase;
-#endif
+    } else {
+        // But old ffmpeg releases have a buggy pkt_timebase check, because the
+        // shit above wasn't bad enough!
+        ctx->pkt_timebase = (AVRational){0, 0};
     }
+#endif
     if (avcodec_open2(ctx, sub_codec, NULL) < 0)
         goto error;
     priv->avctx = ctx;
     sd->priv = priv;
     priv->displayed_id = -1;
     priv->current_pts = MP_NOPTS_VALUE;
+    priv->packer = talloc_zero(priv, struct bitmap_packer);
     return 0;
 
  error:
@@ -169,7 +179,157 @@ static void alloc_sub(struct sd_lavc_priv *priv)
     // clear only some fields; the memory allocs can be reused
     priv->subs[0].valid = false;
     priv->subs[0].count = 0;
+    priv->subs[0].src_w = 0;
+    priv->subs[0].src_h = 0;
     priv->subs[0].id = priv->new_id++;
+}
+
+static void convert_pal(uint32_t *colors, size_t count, bool gray)
+{
+    for (int n = 0; n < count; n++) {
+        uint32_t c = colors[n];
+        int b = c & 0xFF;
+        int g = (c >> 8) & 0xFF;
+        int r = (c >> 16) & 0xFF;
+        int a = (c >> 24) & 0xFF;
+        if (gray)
+            r = g = b = (r + g + b) / 3;
+        // from straight to pre-multiplied alpha
+        b = b * a / 255;
+        g = g * a / 255;
+        r = r * a / 255;
+        colors[n] = b | (g << 8) | (r << 16) | (a << 24);
+    }
+}
+
+// Initialize sub from sub->avsub.
+static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
+{
+    struct MPOpts *opts = sd->opts;
+    struct sd_lavc_priv *priv = sd->priv;
+    AVSubtitle *avsub = &sub->avsub;
+
+    MP_TARRAY_GROW(priv, sub->inbitmaps, avsub->num_rects);
+
+    packer_set_size(priv->packer, avsub->num_rects);
+
+    // If we blur, we want a transparent region around the bitmap data to
+    // avoid "cut off" artifacts on the borders.
+    bool apply_blur = opts->sub_gauss != 0.0f;
+    int extend = apply_blur ? 5 : 0;
+    // Assume consumers may use bilinear scaling on it (2x2 filter)
+    int padding = 1 + extend;
+
+    priv->packer->padding = padding;
+
+    // For the sake of libswscale, which in some cases takes sub-rects as
+    // source images, and wants 16 byte start pointer and stride alignment.
+    int align = 4;
+
+    for (int i = 0; i < avsub->num_rects; i++) {
+        struct AVSubtitleRect *r = avsub->rects[i];
+        struct sub_bitmap *b = &sub->inbitmaps[sub->count];
+
+        if (r->type != SUBTITLE_BITMAP) {
+            MP_ERR(sd, "unsupported subtitle type from libavcodec\n");
+            continue;
+        }
+        if (!(r->flags & AV_SUBTITLE_FLAG_FORCED) && opts->forced_subs_only)
+            continue;
+        if (r->w <= 0 || r->h <= 0)
+            continue;
+
+        b->bitmap = r; // save for later (dumb hack to avoid more complexity)
+
+        priv->packer->in[sub->count] = (struct pos){r->w + (align - 1), r->h};
+        sub->count++;
+    }
+
+    priv->packer->count = sub->count;
+
+    if (packer_pack(priv->packer) < 0) {
+        MP_ERR(sd, "Unable to pack subtitle bitmaps.\n");
+        sub->count = 0;
+    }
+
+    if (!sub->count)
+        return;
+
+    struct pos bb[2];
+    packer_get_bb(priv->packer, bb);
+
+    sub->bound_w = bb[1].x;
+    sub->bound_h = bb[1].y;
+
+    if (!sub->data || sub->data->w < sub->bound_w || sub->data->h < sub->bound_h) {
+        talloc_free(sub->data);
+        sub->data = mp_image_alloc(IMGFMT_BGRA, priv->packer->w, priv->packer->h);
+        if (!sub->data) {
+            sub->count = 0;
+            return;
+        }
+        talloc_steal(priv, sub->data);
+    }
+
+    for (int i = 0; i < sub->count; i++) {
+        struct sub_bitmap *b = &sub->inbitmaps[i];
+        struct pos pos = priv->packer->result[i];
+        struct AVSubtitleRect *r = b->bitmap;
+#if HAVE_AV_SUBTITLE_NOPICT
+        uint8_t **data = r->data;
+        int *linesize = r->linesize;
+#else
+        uint8_t **data = r->pict.data;
+        int *linesize = r->pict.linesize;
+#endif
+        b->w = r->w;
+        b->h = r->h;
+        b->x = r->x;
+        b->y = r->y;
+
+        // Choose such that the extended start position is aligned.
+        pos.x = MP_ALIGN_UP(pos.x - extend, align) + extend;
+
+        b->src_x = pos.x;
+        b->src_y = pos.y;
+        b->stride = sub->data->stride[0];
+        b->bitmap = sub->data->planes[0] + pos.y * b->stride + pos.x * 4;
+
+        sub->src_w = FFMAX(sub->src_w, b->x + b->w);
+        sub->src_h = FFMAX(sub->src_h, b->y + b->h);
+
+        assert(r->nb_colors > 0);
+        assert(r->nb_colors <= 256);
+        uint32_t pal[256] = {0};
+        memcpy(pal, data[1], r->nb_colors * 4);
+        convert_pal(pal, 256, opts->sub_gray);
+
+        for (int y = -padding; y < b->h + padding; y++) {
+            uint32_t *out = (uint32_t*)((char*)b->bitmap + y * b->stride);
+            int start = 0;
+            for (int x = -padding; x < 0; x++)
+                out[x] = 0;
+            if (y >= 0 && y < b->h) {
+                uint8_t *in = data[0] + y * linesize[0];
+                for (int x = 0; x < b->w; x++)
+                    *out++ = pal[*in++];
+                start = b->w;
+            }
+            for (int x = start; x < b->w + padding; x++)
+                *out++ = 0;
+        }
+
+        b->bitmap = (char*)b->bitmap - extend * b->stride - extend * 4;
+        b->src_x -= extend;
+        b->src_y -= extend;
+        b->x -= extend;
+        b->y -= extend;
+        b->w += extend * 2;
+        b->h += extend * 2;
+
+        if (apply_blur)
+            mp_blur_rgba_sub_bitmap(b, opts->sub_gauss);
+    }
 }
 
 static void decode(struct sd *sd, struct demux_packet *packet)
@@ -246,40 +406,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     current->endpts = endpts;
     current->avsub = sub;
 
-    MP_TARRAY_GROW(priv, current->inbitmaps, sub.num_rects);
-    MP_TARRAY_GROW(priv, current->imgs, sub.num_rects);
-
-    for (int i = 0; i < sub.num_rects; i++) {
-        struct AVSubtitleRect *r = sub.rects[i];
-        struct sub_bitmap *b = &current->inbitmaps[current->count];
-        struct osd_bmp_indexed *img = &current->imgs[current->count];
-        if (r->type != SUBTITLE_BITMAP) {
-            MP_ERR(sd, "unsupported subtitle type from libavcodec\n");
-            continue;
-        }
-        if (!(r->flags & AV_SUBTITLE_FLAG_FORCED) && opts->forced_subs_only)
-            continue;
-        if (r->w <= 0 || r->h <= 0)
-            continue;
-#if HAVE_AV_SUBTITLE_NOPICT
-        uint8_t **data = r->data;
-        int *linesize = r->linesize;
-#else
-        uint8_t **data = r->pict.data;
-        int *linesize = r->pict.linesize;
-#endif
-        img->bitmap = data[0];
-        assert(r->nb_colors > 0);
-        assert(r->nb_colors * 4 <= sizeof(img->palette));
-        memcpy(img->palette, data[1], r->nb_colors * 4);
-        b->bitmap = img;
-        b->stride = linesize[0];
-        b->w = r->w;
-        b->h = r->h;
-        b->x = r->x;
-        b->y = r->y;
-        current->count++;
-    }
+    read_sub_bitmaps(sd, current);
 
     if (pts != MP_NOPTS_VALUE) {
         for (int n = 0; n < priv->num_seekpoints; n++) {
@@ -331,7 +458,10 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     if (priv->displayed_id != current->id)
         res->change_id++;
     priv->displayed_id = current->id;
-    res->format = SUBBITMAP_INDEXED;
+    res->packed = current->data;
+    res->packed_w = current->bound_w;
+    res->packed_h = current->bound_h;
+    res->format = SUBBITMAP_RGBA;
 
     double video_par = 0;
     if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE &&
@@ -348,14 +478,9 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
         d.ml = d.mr = d.mt = d.mb = 0;
     int insize[2];
     get_resolution(sd, insize);
-    for (int n = 0; n < res->num_parts; n++) {
-        struct sub_bitmap *p = &res->parts[n];
-        if ((p->x + p->w > insize[0] || p->y + p->h > insize[1]) &&
-            priv->video_params.w > insize[0] && priv->video_params.h > insize[1])
-        {
-            insize[0] = priv->video_params.w;
-            insize[1] = priv->video_params.h;
-        }
+    if (current->src_w > insize[0] || current->src_h > insize[1]) {
+        insize[0] = priv->video_params.w;
+        insize[1] = priv->video_params.h;
     }
     osd_rescale_bitmaps(res, insize[0], insize[1], d, video_par);
 }

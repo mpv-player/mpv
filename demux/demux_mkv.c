@@ -773,8 +773,9 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     if (cues.n_cue_point <= 3) // probably too sparse and will just break seeking
         goto done;
 
-    // Discard incremental index.
-    mkv_d->num_indexes = 0;
+    // Discard incremental index. (Keep the first entry, which must be the
+    // start of the file - helps with files that miss the first index entry.)
+    mkv_d->num_indexes = MPMIN(1, mkv_d->num_indexes);
     mkv_d->index_has_durations = false;
 
     for (int i = 0; i < cues.n_cue_point; i++) {
@@ -1719,6 +1720,7 @@ static const char *const mkv_sub_tag[][2] = {
     { "S_HDMV/PGS",         "hdmv_pgs_subtitle"},
     { "D_WEBVTT/SUBTITLES", "webvtt-webm"},
     { "D_WEBVTT/CAPTIONS",  "webvtt-webm"},
+    { "S_TEXT/WEBVTT",      "webvtt"},
     { "S_DVBSUB",           "dvb_subtitle"},
     {0}
 };
@@ -2609,6 +2611,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
     find_next_cluster:
         mkv_d->cluster_end = 0;
         for (;;) {
+            stream_peek(s, 4); // guarantee we can undo ebml_read_id() below
             mkv_d->cluster_start = stream_tell(s);
             uint32_t id = ebml_read_id(s);
             if (id == MATROSKA_ID_CLUSTER)
@@ -2627,6 +2630,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
             if ((!ebml_is_mkv_level1_id(id) && id != EBML_ID_VOID) ||
                 ebml_read_skip(demuxer->log, -1, s) != 0)
             {
+                stream_seek(s, mkv_d->cluster_start);
                 ebml_resync_cluster(demuxer->log, s);
             }
         }
@@ -2963,8 +2967,10 @@ static void probe_first_timestamp(struct demuxer *demuxer)
         return;
 
     struct block_info block;
-    if (read_next_block(demuxer, &block) > 0)
+    if (read_next_block(demuxer, &block) > 0) {
+        index_block(demuxer, &block);
         mkv_d->tmp_block = block;
+    }
 
     demuxer->start_time = mkv_d->cluster_tc / 1e9;
 

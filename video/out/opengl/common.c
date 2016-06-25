@@ -72,6 +72,8 @@ struct gl_functions {
     int provides;               // bitfield of MPGL_CAP_* constants
     int ver_core;               // introduced as required function
     int ver_es_core;            // introduced as required GL ES function
+    int ver_exclude;            // not applicable to versions >= ver_exclude
+    int ver_es_exclude;         // same for GLES
     const struct gl_function *functions;
 };
 
@@ -144,12 +146,20 @@ static const struct gl_functions gl_functions[] = {
         .ver_core = 210,
         .provides = MPGL_CAP_ROW_LENGTH | MPGL_CAP_1D_TEX,
         .functions = (const struct gl_function[]) {
-            DEF_FN(DrawBuffer),
             DEF_FN(GetTexLevelParameteriv),
-            DEF_FN(MapBuffer),
             DEF_FN(ReadBuffer),
             DEF_FN(TexImage1D),
             DEF_FN(UnmapBuffer),
+            {0}
+        },
+    },
+    // GL 2.1 has this as extension only.
+    {
+        .ver_exclude = 300,
+        .ver_es_exclude = 300,
+        .extension = "GL_ARB_map_buffer_range",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(MapBufferRange),
             {0}
         },
     },
@@ -161,6 +171,7 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(BindBufferBase),
             DEF_FN(BlitFramebuffer),
             DEF_FN(GetStringi),
+            DEF_FN(MapBufferRange),
             // for ES 3.0
             DEF_FN(ReadBuffer),
             DEF_FN(UnmapBuffer),
@@ -203,6 +214,7 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(DeleteFramebuffers),
             DEF_FN(CheckFramebufferStatus),
             DEF_FN(FramebufferTexture2D),
+            DEF_FN(GetFramebufferAttachmentParameteriv),
             {0}
         },
     },
@@ -227,12 +239,79 @@ static const struct gl_functions gl_functions[] = {
         .provides = MPGL_CAP_TEX_RG,
     },
     {
+        .ver_core = 300,
+        .ver_es_core = 300,
+        .extension = "GL_EXT_texture_rg",
+        .provides = MPGL_CAP_TEX_RG,
+    },
+    // GL_R16 etc.
+    {
+        .extension = "GL_EXT_texture_norm16",
+        .provides = MPGL_CAP_EXT16,
+        .ver_exclude = 1, // never in desktop GL
+    },
+    // Float texture support for GL 2.x
+    {
+        .extension = "GL_ARB_texture_float",
+        .provides = MPGL_CAP_ARB_FLOAT,
+        .ver_exclude = 300,
+        .ver_es_exclude = 1,
+    },
+    // 16 bit float textures that can be rendered to in GLES
+    {
+        .extension = "GL_EXT_color_buffer_half_float",
+        .provides = MPGL_CAP_EXT_CR_HFLOAT,
+        .ver_exclude = 1,
+        .ver_es_exclude = 320,
+    },
+    {
         .ver_core = 320,
         .extension = "GL_ARB_sync",
         .functions = (const struct gl_function[]) {
             DEF_FN(FenceSync),
             DEF_FN(ClientWaitSync),
             DEF_FN(DeleteSync),
+            {0}
+        },
+    },
+    {
+        .ver_core = 330,
+        .extension = "GL_ARB_timer_query",
+        .functions = (const struct gl_function[]) {
+            DEF_FN(GenQueries),
+            DEF_FN(DeleteQueries),
+            DEF_FN(BeginQuery),
+            DEF_FN(EndQuery),
+            DEF_FN(QueryCounter),
+            DEF_FN(IsQuery),
+            DEF_FN(GetQueryObjectiv),
+            DEF_FN(GetQueryObjecti64v),
+            DEF_FN(GetQueryObjectuiv),
+            DEF_FN(GetQueryObjectui64v),
+            {0}
+        },
+    },
+    {
+        .extension = "GL_EXT_disjoint_timer_query",
+        .functions = (const struct gl_function[]) {
+            DEF_FN_NAME(GenQueries, "glGenQueriesEXT"),
+            DEF_FN_NAME(DeleteQueries, "glDeleteQueriesEXT"),
+            DEF_FN_NAME(BeginQuery, "glBeginQueryEXT"),
+            DEF_FN_NAME(EndQuery, "glEndQueryEXT"),
+            DEF_FN_NAME(QueryCounter, "glQueryCounterEXT"),
+            DEF_FN_NAME(IsQuery, "glIsQueryEXT"),
+            DEF_FN_NAME(GetQueryObjectiv, "glGetQueryObjectivEXT"),
+            DEF_FN_NAME(GetQueryObjecti64v, "glGetQueryObjecti64vEXT"),
+            DEF_FN_NAME(GetQueryObjectuiv, "glGetQueryObjectuivEXT"),
+            DEF_FN_NAME(GetQueryObjectui64v, "glGetQueryObjectui64vEXT"),
+            {0}
+        },
+    },
+    {
+        .ver_core = 430,
+        .ver_es_core = 300,
+        .functions = (const struct gl_function[]) {
+            DEF_FN(InvalidateFramebuffer),
             {0}
         },
     },
@@ -270,6 +349,7 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(VDPAUInitNV),
             DEF_FN(VDPAUFiniNV),
             DEF_FN(VDPAURegisterOutputSurfaceNV),
+            DEF_FN(VDPAURegisterVideoSurfaceNV),
             DEF_FN(VDPAUUnregisterSurfaceNV),
             DEF_FN(VDPAUSurfaceAccessNV),
             DEF_FN(VDPAUMapSurfacesNV),
@@ -327,14 +407,10 @@ static const struct gl_functions gl_functions[] = {
             {0}
         },
     },
-    // uniform buffer object extensions, requires OpenGL 3.1.
     {
-        .ver_core = 310,
-        .ver_es_core = 300,
-        .extension = "GL_ARB_uniform_buffer_object",
+        .extension = "GL_ANGLE_translated_shader_source",
         .functions = (const struct gl_function[]) {
-            DEF_FN(GetUniformBlockIndex),
-            DEF_FN(UniformBlockBinding),
+            DEF_FN(GetTranslatedShaderSourceANGLE),
             {0}
         },
     },
@@ -348,11 +424,9 @@ static const struct gl_functions gl_functions[] = {
 
 // Fill the GL struct with function pointers and extensions from the current
 // GL context. Called by the backend.
-// getProcAddress: function to resolve function names, may be NULL
+// get_fn: function to resolve function names
 // ext2: an extra extension string
 // log: used to output messages
-// Note: if you create a CONTEXT_FORWARD_COMPATIBLE_BIT_ARB with OpenGL 3.0,
-//       you must append "GL_ARB_compatibility" to ext2.
 void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
                           void *fn_ctx, const char *ext2, struct mp_log *log)
 {
@@ -428,6 +502,13 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
         // NOTE: Function entrypoints can exist, even if they do not work.
         //       We must always check extension strings and versions.
 
+        if (gl->version && section->ver_exclude &&
+            gl->version >= section->ver_exclude)
+            continue;
+        if (gl->es && section->ver_es_exclude &&
+            gl->es >= section->ver_es_exclude)
+            continue;
+
         bool exists = false, must_exist = false;
         if (ver_core)
             must_exist = version >= ver_core;
@@ -448,13 +529,15 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
             void *ptr = get_fn(fn_ctx, fn->name);
             if (!ptr) {
                 all_loaded = false;
-                mp_warn(log, "Required function '%s' not "
-                        "found for %s OpenGL %d.%d.\n", fn->name,
-                        section->extension ? section->extension : "builtin",
-                        MPGL_VER_GET_MAJOR(ver_core),
-                        MPGL_VER_GET_MINOR(ver_core));
-                if (must_exist)
+                if (must_exist) {
+                    mp_err(log, "GL %d.%d function %s not found.\n",
+                           MPGL_VER_GET_MAJOR(ver_core),
+                           MPGL_VER_GET_MINOR(ver_core), fn->name);
                     goto error;
+                } else {
+                    mp_warn(log, "Function %s from extension %s not found.\n",
+                            fn->name, section->extension);
+                }
                 break;
             }
             assert(i < MAX_FN_COUNT);
@@ -469,8 +552,8 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
                 if (loaded[i])
                     *funcptr = loaded[i];
             }
-            mp_verbose(log, "Loaded functions for %d/%s.\n", ver_core,
-                       section->extension ? section->extension : "builtin");
+            if (!must_exist && section->extension)
+                mp_verbose(log, "Loaded extension %s.\n", section->extension);
         }
     }
 
@@ -492,14 +575,6 @@ void mpgl_load_functions2(GL *gl, void *(*get_fn)(void *ctx, const char *n),
     if (is_software_gl(gl)) {
         gl->mpgl_caps |= MPGL_CAP_SW;
         mp_verbose(log, "Detected suspected software renderer.\n");
-    }
-
-    // Detect 16F textures that work with GL_LINEAR filtering.
-    if ((!gl->es && (gl->version >= 300 || check_ext(gl, "GL_ARB_texture_float"))) ||
-        (gl->es && (gl->version >= 310 || check_ext(gl, "GL_OES_texture_half_float_linear"))))
-    {
-        mp_verbose(log, "Filterable half-float textures supported.\n");
-        gl->mpgl_caps |= MPGL_CAP_FLOAT_TEX;
     }
 
     // Provided for simpler handling if no framebuffer support is available.

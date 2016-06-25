@@ -157,6 +157,9 @@ enum mp_imgfmt {
     IMGFMT_NV12,
     IMGFMT_NV21,
 
+    // Like IMGFMT_NV12, but with 16 bits per component
+    IMGFMT_P010,
+
     // RGB/BGR Formats
 
     // Byte accessed (low address to high address)
@@ -195,7 +198,17 @@ enum mp_imgfmt {
     IMGFMT_VDPAU,           // VdpVideoSurface
     IMGFMT_VDPAU_OUTPUT,    // VdpOutputSurface
     IMGFMT_VAAPI,
-    IMGFMT_D3D11VA,         // ID3D11VideoDecoderOutputView (NV12/P010/P016)
+    // NV12/P010/P016
+    // plane 1: ID3D11Texture2D
+    // plane 2: slice index casted to pointer
+    // plane 3: ID3D11VideoDecoderOutputView (can be absent in filters/VO)
+    IMGFMT_D3D11VA,
+    // Like IMGFMT_D3D11VA, but format is restricted to NV12.
+    IMGFMT_D3D11NV12,
+    // Like IMGFMT_D3D11VA, but format is restricted to a certain RGB format.
+    // Also, it must have a share handle, have been flushed, and not be a
+    // texture array slice.
+    IMGFMT_D3D11RGB,
     IMGFMT_DXVA2,           // IDirect3DSurface9 (NV12/P010/P016)
     IMGFMT_MMAL,            // MMAL_BUFFER_HEADER_T
     IMGFMT_VIDEOTOOLBOX,    // CVPixelBufferRef

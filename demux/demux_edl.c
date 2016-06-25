@@ -213,25 +213,25 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
 
         resolve_timestamps(part, source);
 
-        double len = source_get_length(source);
-        if (len > 0) {
-            len += source->start_time;
-        } else {
-            MP_WARN(tl, "EDL: source file '%s' has unknown duration.\n",
-                    part->filename);
-        }
+        double end_time = source_get_length(source);
+        if (end_time >= 0)
+            end_time += source->start_time;
 
         // Unknown length => use rest of the file. If duration is unknown, make
         // something up.
-        if (part->length < 0)
-            part->length = (len < 0 ? 1 : len) - part->offset;
-
-        if (len > 0) {
-            double partlen = part->offset + part->length;
-            if (partlen > len) {
+        if (part->length < 0) {
+            if (end_time < 0) {
+                MP_WARN(tl, "EDL: source file '%s' has unknown duration.\n",
+                        part->filename);
+                end_time = 1;
+            }
+            part->length = end_time - part->offset;
+        } else if (end_time >= 0) {
+            double end_part = part->offset + part->length;
+            if (end_part > end_time) {
                 MP_WARN(tl, "EDL: entry %d uses %f "
                         "seconds, but file has only %f seconds.\n",
-                        n, partlen, len);
+                        n, end_part, end_time);
             }
         }
 

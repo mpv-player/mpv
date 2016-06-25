@@ -81,12 +81,13 @@ static bool mp_image_alloc_planes(struct mp_image *mpi)
 
 void mp_image_setfmt(struct mp_image *mpi, int out_fmt)
 {
+    struct mp_image_params params = mpi->params;
     struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(out_fmt);
-    mpi->params.imgfmt = fmt.id;
+    params.imgfmt = fmt.id;
     mpi->fmt = fmt;
     mpi->imgfmt = fmt.id;
     mpi->num_planes = fmt.num_planes;
-    mp_image_set_size(mpi, mpi->w, mpi->h);
+    mpi->params = params;
 }
 
 static void mp_image_destructor(void *ptr)
@@ -94,6 +95,7 @@ static void mp_image_destructor(void *ptr)
     mp_image_t *mpi = ptr;
     for (int p = 0; p < MP_MAX_PLANES; p++)
         av_buffer_unref(&mpi->bufs[p]);
+    av_buffer_unref(&mpi->hwctx);
 }
 
 int mp_chroma_div_up(int size, int shift)
@@ -119,7 +121,6 @@ void mp_image_set_size(struct mp_image *mpi, int w, int h)
     assert(w >= 0 && h >= 0);
     mpi->w = mpi->params.w = w;
     mpi->h = mpi->params.h = h;
-    mpi->params.p_w = mpi->params.p_h = 1;
 }
 
 void mp_image_set_params(struct mp_image *image,
@@ -163,17 +164,12 @@ void mp_image_steal_data(struct mp_image *dst, struct mp_image *src)
     assert(dst->imgfmt == src->imgfmt && dst->w == src->w && dst->h == src->h);
     assert(dst->bufs[0] && src->bufs[0]);
 
-    for (int p = 0; p < MP_MAX_PLANES; p++) {
-        dst->planes[p] = src->planes[p];
-        dst->stride[p] = src->stride[p];
-    }
-    mp_image_copy_attributes(dst, src);
+    mp_image_destructor(dst); // unref old
+    talloc_free_children(dst);
 
-    for (int p = 0; p < MP_MAX_PLANES; p++) {
-        av_buffer_unref(&dst->bufs[p]);
-        dst->bufs[p] = src->bufs[p];
-        src->bufs[p] = NULL;
-    }
+    *dst = *src;
+
+    *src = (struct mp_image){0};
     talloc_free(src);
 }
 
@@ -198,6 +194,11 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
             if (!new->bufs[p])
                 fail = true;
         }
+    }
+    if (new->hwctx) {
+        new->hwctx = av_buffer_ref(new->hwctx);
+        if (!new->hwctx)
+            fail = true;
     }
 
     if (!fail)
@@ -229,9 +230,10 @@ struct mp_image *mp_image_new_dummy_ref(struct mp_image *img)
 {
     struct mp_image *new = talloc_ptrtype(NULL, new);
     talloc_set_destructor(new, mp_image_destructor);
-    *new = *img;
+    *new = img ? *img : (struct mp_image){0};
     for (int p = 0; p < MP_MAX_PLANES; p++)
         new->bufs[p] = NULL;
+    new->hwctx = NULL;
     return new;
 }
 
@@ -539,7 +541,7 @@ bool mp_image_params_valid(const struct mp_image_params *p)
     if (p->w <= 0 || p->h <= 0 || (p->w + 128LL) * (p->h + 128LL) >= INT_MAX / 8)
         return false;
 
-    if (p->p_w <= 0 || p->p_h <= 0)
+    if (p->p_w < 0 || p->p_h < 0)
         return false;
 
     if (p->rotate < 0 || p->rotate >= 360)
@@ -566,6 +568,7 @@ bool mp_image_params_equal(const struct mp_image_params *p1,
            p1->colorlevels == p2->colorlevels &&
            p1->primaries == p2->primaries &&
            p1->gamma == p2->gamma &&
+           p1->peak == p2->peak &&
            p1->chroma_location == p2->chroma_location &&
            p1->rotate == p2->rotate &&
            p1->stereo_in == p2->stereo_in &&
@@ -660,15 +663,24 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         params->primaries = MP_CSP_PRIM_AUTO;
         params->gamma = MP_CSP_TRC_AUTO;
     }
+
+    // Guess the reference peak (independent of the colorspace)
+    if (params->gamma == MP_CSP_TRC_SMPTE_ST2084) {
+        if (!params->peak)
+            params->peak = 10000; // As per the spec
+    }
 }
 
 // Copy properties and data of the AVFrame into the mp_image, without taking
 // care of memory management issues.
-void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
-                                        struct AVFrame *src)
+static void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
+                                               struct AVFrame *src)
 {
     mp_image_setfmt(dst, pixfmt2imgfmt(src->format));
     mp_image_set_size(dst, src->width, src->height);
+
+    dst->params.p_w = src->sample_aspect_ratio.num;
+    dst->params.p_h = src->sample_aspect_ratio.den;
 
     for (int i = 0; i < 4; i++) {
         dst->planes[i] = src->data[i];
@@ -688,12 +700,15 @@ void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
 
 // Copy properties and data of the mp_image into the AVFrame, without taking
 // care of memory management issues.
-void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
-                                      struct mp_image *src)
+static void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
+                                             struct mp_image *src)
 {
     dst->format = imgfmt2pixfmt(src->imgfmt);
     dst->width = src->w;
     dst->height = src->h;
+
+    dst->sample_aspect_ratio.num = src->params.p_w;
+    dst->sample_aspect_ratio.den = src->params.p_h;
 
     for (int i = 0; i < 4; i++) {
         dst->data[i] = src->planes[i];
@@ -720,31 +735,38 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame)
     mp_image_copy_fields_from_av_frame(&t, av_frame);
     for (int p = 0; p < MP_MAX_PLANES; p++)
         t.bufs[p] = av_frame->buf[p];
+#if HAVE_AVUTIL_HAS_HWCONTEXT
+    t.hwctx = av_frame->hw_frames_ctx;
+#endif
     return mp_image_new_ref(&t);
 }
 
 // Convert the mp_image reference to a AVFrame reference.
-// Warning: img is unreferenced (i.e. free'd). This is asymmetric to
-//          mp_image_from_av_frame(). It was done as some sort of optimization,
-//          but now these semantics are pointless.
-// On failure, img is only unreffed.
-struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
+struct AVFrame *mp_image_to_av_frame(struct mp_image *img)
 {
-    struct mp_image *new_ref = mp_image_new_ref(img); // ensure it's refcounted
-    talloc_free(img);
-    if (!new_ref)
-        return NULL;
+    struct mp_image *new_ref = mp_image_new_ref(img);
     AVFrame *frame = av_frame_alloc();
-    if (!frame) {
+    if (!frame || !new_ref) {
         talloc_free(new_ref);
+        av_frame_free(&frame);
         return NULL;
     }
     mp_image_copy_fields_to_av_frame(frame, new_ref);
-    for (int p = 0; p < MP_MAX_PLANES; p++) {
+    for (int p = 0; p < MP_MAX_PLANES; p++)
         frame->buf[p] = new_ref->bufs[p];
-        new_ref->bufs[p] = NULL;
-    }
+#if HAVE_AVUTIL_HAS_HWCONTEXT
+    frame->hw_frames_ctx = new_ref->hwctx;
+#endif
+    *new_ref = (struct mp_image){0};
     talloc_free(new_ref);
+    return frame;
+}
+
+// Same as mp_image_to_av_frame(), but unref img. (It does so even on failure.)
+struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
+{
+    AVFrame *frame = mp_image_to_av_frame(img);
+    talloc_free(img);
     return frame;
 }
 

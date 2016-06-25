@@ -62,6 +62,10 @@
 #define GL_DEBUG_SEVERITY_NOTIFICATION    0x826B
 #endif
 
+#ifndef GL_BACK_LEFT
+#define GL_BACK_LEFT                      0x0402
+#endif
+
 #if HAVE_ANDROID_GL
 #define GL_UNSIGNED_BYTE_3_3_2            0x8032
 #define GL_UNSIGNED_BYTE_2_3_3_REV        0x8362
@@ -80,10 +84,32 @@
 #define GL_TEXTURE_LUMINANCE_SIZE 0x8060
 #define GL_R16 0x822A
 #define GL_RG16 0x822C
+#define GL_LUMINANCE8 0x8040
+#define GL_LUMINANCE8_ALPHA8 0x8045
 #define GL_LUMINANCE16 0x8042
 #define GL_LUMINANCE16_ALPHA16 0x8048
 #define GL_UNSIGNED_SHORT_8_8_APPLE 0x85BA
 #define GL_UNSIGNED_SHORT_8_8_REV_APPLE 0x85BB
+#endif
+
+// GL_ARB_timer_query and EXT_disjoint_timer_query
+#ifndef GL_TIME_ELAPSED
+// Same as GL_TIME_ELAPSED_EXT
+#define GL_TIME_ELAPSED 0x88BF
+#endif
+
+// GL_OES_EGL_image_external, GL_NV_EGL_stream_consumer_external
+#ifndef GL_TEXTURE_EXTERNAL_OES
+#define GL_TEXTURE_EXTERNAL_OES 0x8D65
+#endif
+
+// GL_ANGLE_translated_shader_source
+#ifndef GL_TRANSLATED_SHADER_SOURCE_LENGTH_ANGLE
+#define GL_TRANSLATED_SHADER_SOURCE_LENGTH_ANGLE 0x93A0
+#endif
+
+#ifndef GL_RGB_RAW_422_APPLE
+#define GL_RGB_RAW_422_APPLE 0x8A51
 #endif
 
 #undef MP_GET_GL_WORKAROUNDS

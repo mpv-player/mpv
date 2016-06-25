@@ -30,11 +30,10 @@
 
 #include <libavutil/rational.h>
 
-#include "osdep/atomics.h"
-
 #include "common/common.h"
 #include "common/msg.h"
 #include "options/m_config.h"
+#include "osdep/timer.h"
 #include "vo.h"
 #include "win_state.h"
 #include "video/mp_image.h"
@@ -69,11 +68,10 @@ struct priv {
     // for RAM input
     MMAL_POOL_T *swpool;
 
-    atomic_bool update_display;
-
-    pthread_mutex_t vsync_mutex;
-    pthread_cond_t vsync_cond;
+    pthread_mutex_t display_mutex;
+    pthread_cond_t display_cond;
     int64_t vsync_counter;
+    bool reload_display;
 
     int background_layer;
     int video_layer;
@@ -88,6 +86,8 @@ struct priv {
 // Magic alignments (in pixels) expected by the MMAL internals.
 #define ALIGN_W 32
 #define ALIGN_H 16
+
+static void recreate_renderer(struct vo *vo);
 
 // Make mpi point to buffer, assuming MMAL_ENCODING_I420.
 // buffer can be NULL.
@@ -255,16 +255,18 @@ static int create_overlays(struct vo *vo)
     struct priv *p = vo->priv;
     destroy_overlays(vo);
 
-    if (vo->opts->fullscreen) {
-    // Use the whole screen.
-    VC_RECT_T dst = {.width = p->w, .height = p->h};
-    VC_RECT_T src = {.width = 1 << 16, .height = 1 << 16};
-    VC_DISPMANX_ALPHA_T alpha = {
-        .flags = DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS,
-        .opacity = 0xFF,
-    };
+    if (!p->display)
+        return -1;
 
-    if (p->background) {
+    if (vo->opts->fullscreen && p->background) {
+        // Use the whole screen.
+        VC_RECT_T dst = {.width = p->w, .height = p->h};
+        VC_RECT_T src = {.width = 1 << 16, .height = 1 << 16};
+        VC_DISPMANX_ALPHA_T alpha = {
+            .flags = DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS,
+            .opacity = 0xFF,
+        };
+
         p->window = vc_dispmanx_element_add(p->update, p->display,
                                             p->background_layer,
                                             &dst, 0, &src,
@@ -274,7 +276,6 @@ static int create_overlays(struct vo *vo)
             MP_FATAL(vo, "Could not add DISPMANX element.\n");
             return -1;
         }
-    }
     }
 
     if (p->enable_osd) {
@@ -362,16 +363,23 @@ static int set_geometry(struct vo *vo)
 static void wait_next_vsync(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    pthread_mutex_lock(&p->vsync_mutex);
+    pthread_mutex_lock(&p->display_mutex);
+    struct timespec end = mp_rel_time_to_timespec(0.050);
     int64_t old = p->vsync_counter;
-    while (old == p->vsync_counter)
-        pthread_cond_wait(&p->vsync_cond, &p->vsync_mutex);
-    pthread_mutex_unlock(&p->vsync_mutex);
+    while (old == p->vsync_counter && !p->reload_display) {
+        if (pthread_cond_timedwait(&p->display_cond, &p->display_mutex, &end))
+            break;
+    }
+    pthread_mutex_unlock(&p->display_mutex);
 }
 
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
+
+    if (!p->renderer_enabled)
+        return;
+
     struct mp_image *mpi = p->next_image;
     p->next_image = NULL;
 
@@ -407,6 +415,9 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 {
     struct priv *p = vo->priv;
 
+    if (!p->renderer_enabled)
+        return;
+
     mp_image_t *mpi = NULL;
     if (!frame->redraw && !frame->repeat)
         mpi = mp_image_new_ref(frame->current);
@@ -435,8 +446,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
         }
         mmal_buffer_header_reset(buffer);
 
-        struct mp_image *new_ref = mp_image_new_custom_ref(&(struct mp_image){0},
-                                                           buffer,
+        struct mp_image *new_ref = mp_image_new_custom_ref(NULL, buffer,
                                                            free_mmal_buffer);
         if (!new_ref) {
             mmal_buffer_header_release(buffer);
@@ -509,6 +519,9 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     MMAL_PORT_T *input = p->renderer->input[0];
     bool opaque = params->imgfmt == IMGFMT_MMAL;
 
+    if (!p->display)
+        return -1;
+
     disable_renderer(vo);
 
     input->format->encoding = opaque ? MMAL_ENCODING_OPAQUE : MMAL_ENCODING_I420;
@@ -563,6 +576,9 @@ static struct mp_image *take_screenshot(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
+    if (!p->display)
+        return NULL;
+
     struct mp_image *img = mp_image_alloc(IMGFMT_BGR0, p->w, p->h);
     if (!img)
         return NULL;
@@ -615,14 +631,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SCREENSHOT_WIN:
         *(struct mp_image **)data = take_screenshot(vo);
         return VO_TRUE;
-    case VOCTRL_CHECK_EVENTS:
-        if (atomic_load(&p->update_display)) {
-            atomic_store(&p->update_display, false);
-            update_display_size(vo);
-            if (p->renderer_enabled)
-                set_geometry(vo);
-        }
+    case VOCTRL_CHECK_EVENTS: {
+        pthread_mutex_lock(&p->display_mutex);
+        bool reload_required = p->reload_display;
+        p->reload_display = false;
+        pthread_mutex_unlock(&p->display_mutex);
+        if (reload_required)
+            recreate_renderer(vo);
         return VO_TRUE;
+    }
     case VOCTRL_GET_DISPLAY_FPS:
         *(double *)data = p->display_fps;
         return VO_TRUE;
@@ -636,7 +653,10 @@ static void tv_callback(void *callback_data, uint32_t reason, uint32_t param1,
 {
     struct vo *vo = callback_data;
     struct priv *p = vo->priv;
-    atomic_store(&p->update_display, true);
+    pthread_mutex_lock(&p->display_mutex);
+    p->reload_display = true;
+    pthread_cond_signal(&p->display_cond);
+    pthread_mutex_unlock(&p->display_mutex);
     vo_wakeup(vo);
 }
 
@@ -644,10 +664,59 @@ static void vsync_callback(DISPMANX_UPDATE_HANDLE_T u, void *arg)
 {
     struct vo *vo = arg;
     struct priv *p = vo->priv;
-    pthread_mutex_lock(&p->vsync_mutex);
+    pthread_mutex_lock(&p->display_mutex);
     p->vsync_counter += 1;
-    pthread_cond_signal(&p->vsync_cond);
-    pthread_mutex_unlock(&p->vsync_mutex);
+    pthread_cond_signal(&p->display_cond);
+    pthread_mutex_unlock(&p->display_mutex);
+}
+
+static void destroy_dispmanx(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+
+    disable_renderer(vo);
+    destroy_overlays(vo);
+
+    if (p->display) {
+        vc_dispmanx_vsync_callback(p->display, NULL, NULL);
+        vc_dispmanx_display_close(p->display);
+    }
+    p->display = 0;
+}
+
+static int recreate_dispmanx(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+
+    p->display = vc_dispmanx_display_open(p->display_nr);
+    p->update = vc_dispmanx_update_start(0);
+    if (!p->display || !p->update) {
+        MP_FATAL(vo, "Could not get DISPMANX objects.\n");
+        if (p->display)
+            vc_dispmanx_display_close(p->display);
+        p->display = 0;
+        p->update = 0;
+        return -1;
+    }
+
+    update_display_size(vo);
+
+    vc_dispmanx_vsync_callback(p->display, vsync_callback, vo);
+
+    return 0;
+}
+
+static void recreate_renderer(struct vo *vo)
+{
+    MP_WARN(vo, "Recreating renderer after display change.\n");
+
+    destroy_dispmanx(vo);
+    recreate_dispmanx(vo);
+
+    if (vo->params) {
+        if (reconfig(vo, vo->params) < 0)
+            MP_FATAL(vo, "Recreation failed.\n");
+    }
 }
 
 static void uninit(struct vo *vo)
@@ -658,25 +727,18 @@ static void uninit(struct vo *vo)
 
     talloc_free(p->next_image);
 
-    destroy_overlays(vo);
+    destroy_dispmanx(vo);
 
     if (p->update)
         vc_dispmanx_update_submit_sync(p->update);
 
-    if (p->renderer) {
-        disable_renderer(vo);
+    if (p->renderer)
         mmal_component_release(p->renderer);
-    }
-
-    if (p->display) {
-        vc_dispmanx_vsync_callback(p->display, NULL, NULL);
-        vc_dispmanx_display_close(p->display);
-    }
 
     mmal_vc_deinit();
 
-    pthread_cond_destroy(&p->vsync_cond);
-    pthread_mutex_destroy(&p->vsync_mutex);
+    pthread_cond_destroy(&p->display_cond);
+    pthread_mutex_destroy(&p->display_mutex);
 }
 
 static int preinit(struct vo *vo)
@@ -696,12 +758,14 @@ static int preinit(struct vo *vo)
         return -1;
     }
 
-    p->display = vc_dispmanx_display_open(p->display_nr);
-    p->update = vc_dispmanx_update_start(0);
-    if (!p->display || !p->update) {
-        MP_FATAL(vo, "Could not get DISPMANX objects.\n");
+    pthread_mutex_init(&p->display_mutex, NULL);
+    pthread_cond_init(&p->display_cond, NULL);
+
+    if (recreate_dispmanx(vo) < 0)
         goto fail;
-    }
+
+    if (update_display_size(vo) < 0)
+        goto fail;
 
     if (mmal_component_create(MMAL_COMPONENT_DEFAULT_VIDEO_RENDERER, &p->renderer))
     {
@@ -709,15 +773,7 @@ static int preinit(struct vo *vo)
         goto fail;
     }
 
-    if (update_display_size(vo) < 0)
-        goto fail;
-
     vc_tv_register_callback(tv_callback, vo);
-
-    pthread_mutex_init(&p->vsync_mutex, NULL);
-    pthread_cond_init(&p->vsync_cond, NULL);
-
-    vc_dispmanx_vsync_callback(p->display, vsync_callback, vo);
 
     return 0;
 

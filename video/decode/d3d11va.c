@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <initguid.h>
 #include <libavcodec/d3d11va.h>
 
 #include "lavc.h"
@@ -25,7 +26,6 @@
 #include "video/mp_image_pool.h"
 #include "video/hwdec.h"
 
-#include "video/d3d11va.h"
 #include "d3d.h"
 
 #define ADDITIONAL_SURFACES (4 + HWDEC_DELAY_QUEUE_COUNT)
@@ -40,7 +40,6 @@ struct d3d11va_decoder {
 struct priv {
     struct mp_log *log;
 
-    HMODULE                 d3d11_dll;
     ID3D11Device           *device;
     ID3D11DeviceContext    *device_ctx;
     ID3D11VideoDevice      *video_dev;
@@ -49,6 +48,53 @@ struct priv {
     struct d3d11va_decoder *decoder;
     struct mp_image_pool   *sw_pool;
 };
+
+struct d3d11va_surface {
+    ID3D11Texture2D              *texture;
+    ID3D11VideoDecoderOutputView *surface;
+};
+
+static void d3d11va_release_img(void *arg)
+{
+    struct d3d11va_surface *surface = arg;
+    if (surface->surface)
+        ID3D11VideoDecoderOutputView_Release(surface->surface);
+
+    if (surface->texture)
+        ID3D11Texture2D_Release(surface->texture);
+
+    talloc_free(surface);
+}
+
+static struct mp_image *d3d11va_new_ref(ID3D11VideoDecoderOutputView *view,
+                                        int w, int h)
+{
+    if (!view)
+        return NULL;
+    struct d3d11va_surface *surface = talloc_zero(NULL, struct d3d11va_surface);
+
+    surface->surface = view;
+    ID3D11VideoDecoderOutputView_AddRef(surface->surface);
+    ID3D11VideoDecoderOutputView_GetResource(
+        surface->surface, (ID3D11Resource **)&surface->texture);
+
+    D3D11_VIDEO_DECODER_OUTPUT_VIEW_DESC surface_desc;
+    ID3D11VideoDecoderOutputView_GetDesc(surface->surface, &surface_desc);
+
+    struct mp_image *mpi =
+        mp_image_new_custom_ref(NULL, surface, d3d11va_release_img);
+    if (!mpi)
+        abort();
+
+    mp_image_setfmt(mpi, IMGFMT_D3D11VA);
+    mp_image_set_size(mpi, w, h);
+    mpi->planes[0] = NULL;
+    mpi->planes[1] = (void *)surface->texture;
+    mpi->planes[2] = (void *)(intptr_t)surface_desc.Texture2D.ArraySlice;
+    mpi->planes[3] = (void *)surface->surface;
+
+    return mpi;
+}
 
 static struct mp_image *d3d11va_allocate_image(struct lavc_ctx *s, int w, int h)
 {
@@ -66,10 +112,14 @@ static struct mp_image *d3d11va_retrieve_image(struct lavc_ctx *s,
     HRESULT hr;
     struct priv *p = s->hwdec_priv;
     ID3D11Texture2D              *staging = p->decoder->staging;
-    ID3D11Texture2D              *texture = d3d11_texture_in_mp_image(img);
-    ID3D11VideoDecoderOutputView *surface = d3d11_surface_in_mp_image(img);
 
-    if (!texture || !surface) {
+    if (img->imgfmt != IMGFMT_D3D11VA)
+        return img;
+
+    ID3D11Texture2D *texture = (void *)img->planes[1];
+    int subindex = (intptr_t)img->planes[2];
+
+    if (!texture) {
         MP_ERR(p, "Failed to get Direct3D texture and surface from mp_image\n");
         return img;
     }
@@ -82,12 +132,10 @@ static struct mp_image *d3d11va_retrieve_image(struct lavc_ctx *s,
     }
 
     // copy to the staging texture
-    D3D11_VIDEO_DECODER_OUTPUT_VIEW_DESC surface_desc;
-    ID3D11VideoDecoderOutputView_GetDesc(surface, &surface_desc);
     ID3D11DeviceContext_CopySubresourceRegion(
         p->device_ctx,
         (ID3D11Resource *)staging, 0, 0, 0, 0,
-        (ID3D11Resource *)texture, surface_desc.Texture2D.ArraySlice, NULL);
+        (ID3D11Resource *)texture, subindex, NULL);
 
     struct mp_image *sw_img = mp_image_pool_get(p->sw_pool,
                                                 p->decoder->mpfmt_decoded,
@@ -117,27 +165,47 @@ static struct mp_image *d3d11va_retrieve_image(struct lavc_ctx *s,
     return sw_img;
 }
 
-struct d3d11_format {
-    DXGI_FORMAT format;
-    const char *name;
-    int         depth;
-};
-
 #define DFMT(name) MP_CONCAT(DXGI_FORMAT_, name), # name
-static const struct d3d11_format d3d11_formats[] = {
-    {DFMT(NV12),  8},
-    {DFMT(P010), 10},
-    {DFMT(P016), 16},
+static const struct d3d_decoded_format d3d11_formats[] = {
+    {DFMT(NV12),  8, IMGFMT_NV12},
+    {DFMT(P010), 10, IMGFMT_P010},
+    {DFMT(P016), 16, IMGFMT_P010},
 };
 #undef DFMT
 
-static BOOL d3d11_format_supported(struct lavc_ctx *s, const GUID *guid,
-                                   const struct d3d11_format *format)
+// Update hw_subfmt to the underlying format. Needed because AVFrame does not
+// have such an attribute, so it can't be passed through, and is updated here
+// instead. (But in the future, AVHWFramesContext could be used.)
+static struct mp_image *d3d11va_update_image_attribs(struct lavc_ctx *s,
+                                                     struct mp_image *img)
+{
+    ID3D11Texture2D *texture = (void *)img->planes[1];
+
+    if (!texture)
+        return img;
+
+    D3D11_TEXTURE2D_DESC texture_desc;
+    ID3D11Texture2D_GetDesc(texture, &texture_desc);
+    for (int n = 0; n < MP_ARRAY_SIZE(d3d11_formats); n++) {
+        if (d3d11_formats[n].dxfmt == texture_desc.Format) {
+            img->params.hw_subfmt = d3d11_formats[n].mpfmt;
+            break;
+        }
+    }
+
+    if (img->params.hw_subfmt == IMGFMT_NV12)
+        mp_image_setfmt(img, IMGFMT_D3D11NV12);
+
+    return img;
+}
+
+static bool d3d11_format_supported(struct lavc_ctx *s, const GUID *guid,
+                                   const struct d3d_decoded_format *format)
 {
     struct priv *p = s->hwdec_priv;
     BOOL is_supported = FALSE;
     HRESULT hr = ID3D11VideoDevice_CheckVideoDecoderFormat(
-        p->video_dev, guid, format->format, &is_supported);
+        p->video_dev, guid, format->dxfmt, &is_supported);
     if (FAILED(hr)) {
         MP_ERR(p, "Check decoder output format %s for decoder %s: %s\n",
                format->name, d3d_decoder_guid_to_desc(guid),
@@ -151,23 +219,11 @@ static void dump_decoder_info(struct lavc_ctx *s, const GUID *guid)
     struct priv *p = s->hwdec_priv;
     char fmts[256] = {0};
     for (int i = 0; i < MP_ARRAY_SIZE(d3d11_formats); i++) {
-        const struct d3d11_format *format = &d3d11_formats[i];
+        const struct d3d_decoded_format *format = &d3d11_formats[i];
         if (d3d11_format_supported(s, guid, format))
             mp_snprintf_cat(fmts, sizeof(fmts), " %s", format->name);
     }
     MP_VERBOSE(p, "%s %s\n", d3d_decoder_guid_to_desc(guid), fmts);
-}
-
-static DWORD get_dxfmt_cb(struct lavc_ctx *s, const GUID *guid, int depth)
-{
-    for (int i = 0; i < MP_ARRAY_SIZE(d3d11_formats); i++) {
-        const struct d3d11_format *format = &d3d11_formats[i];
-        if (depth <= format->depth &&
-            d3d11_format_supported(s, guid, format)) {
-            return format->format;
-        }
-    }
-    return 0;
 }
 
 static void d3d11va_destroy_decoder(void *arg)
@@ -188,6 +244,7 @@ static int d3d11va_init_decoder(struct lavc_ctx *s, int w, int h)
     struct priv *p = s->hwdec_priv;
     TA_FREEP(&p->decoder);
 
+    ID3D11Texture2D *texture = NULL;
     void *tmp = talloc_new(NULL);
 
     UINT n_guids = ID3D11VideoDevice_GetVideoDecoderProfileCount(p->video_dev);
@@ -204,31 +261,32 @@ static int d3d11va_init_decoder(struct lavc_ctx *s, int w, int h)
     }
 
     struct d3d_decoder_fmt fmt =
-        d3d_select_decoder_mode(s, device_guids, n_guids, get_dxfmt_cb);
-    if (fmt.mpfmt_decoded == IMGFMT_NONE) {
+        d3d_select_decoder_mode(s, device_guids, n_guids,
+                                d3d11_formats, MP_ARRAY_SIZE(d3d11_formats),
+                                d3d11_format_supported);
+    if (!fmt.format) {
         MP_ERR(p, "Failed to find a suitable decoder\n");
         goto done;
     }
 
     struct d3d11va_decoder *decoder = talloc_zero(tmp, struct d3d11va_decoder);
     talloc_set_destructor(decoder, d3d11va_destroy_decoder);
-    decoder->mpfmt_decoded = fmt.mpfmt_decoded;
+    decoder->mpfmt_decoded = fmt.format->mpfmt;
 
     int n_surfaces = hwdec_get_max_refs(s) + ADDITIONAL_SURFACES;
     int w_align = w, h_align = h;
     d3d_surface_align(s, &w_align, &h_align);
 
-    ID3D11Texture2D *texture = NULL;
     D3D11_TEXTURE2D_DESC tex_desc = {
         .Width            = w_align,
         .Height           = h_align,
         .MipLevels        = 1,
-        .Format           = fmt.dxfmt_decoded,
+        .Format           = fmt.format->dxfmt,
         .SampleDesc.Count = 1,
         .MiscFlags        = 0,
         .ArraySize        = n_surfaces,
         .Usage            = D3D11_USAGE_DEFAULT,
-        .BindFlags        = D3D11_BIND_DECODER,
+        .BindFlags        = D3D11_BIND_DECODER | D3D11_BIND_SHADER_RESOURCE,
         .CPUAccessFlags   = 0,
     };
     hr = ID3D11Device_CreateTexture2D(p->device, &tex_desc, NULL, &texture);
@@ -290,7 +348,7 @@ static int d3d11va_init_decoder(struct lavc_ctx *s, int w, int h)
         .Guid         = *fmt.guid,
         .SampleWidth  = w,
         .SampleHeight = h,
-        .OutputFormat = fmt.dxfmt_decoded,
+        .OutputFormat = fmt.format->dxfmt,
     };
     UINT n_cfg;
     hr = ID3D11VideoDevice_GetVideoDecoderConfigCount(p->video_dev,
@@ -365,9 +423,6 @@ static void destroy_device(struct lavc_ctx *s)
 
     if (p->device_ctx)
         ID3D11DeviceContext_Release(p->device_ctx);
-
-    if (p->d3d11_dll)
-        FreeLibrary(p->d3d11_dll);
 }
 
 static bool create_device(struct lavc_ctx *s, BOOL thread_safe)
@@ -375,14 +430,14 @@ static bool create_device(struct lavc_ctx *s, BOOL thread_safe)
     HRESULT hr;
     struct priv *p = s->hwdec_priv;
 
-    p->d3d11_dll = LoadLibrary(L"d3d11.dll");
-    if (!p->d3d11_dll) {
+    d3d_load_dlls();
+    if (!d3d11_dll) {
         MP_ERR(p, "Failed to load D3D11 library\n");
         return false;
     }
 
     PFN_D3D11_CREATE_DEVICE CreateDevice =
-        (void *)GetProcAddress(p->d3d11_dll, "D3D11CreateDevice");
+        (void *)GetProcAddress(d3d11_dll, "D3D11CreateDevice");
     if (!CreateDevice) {
         MP_ERR(p, "Failed to get D3D11CreateDevice symbol from DLL: %s\n",
                mp_LastError_to_str());
@@ -445,8 +500,20 @@ static int d3d11va_init(struct lavc_ctx *s)
         p->sw_pool = talloc_steal(p, mp_image_pool_new(17));
     }
 
-    if (!create_device(s, FALSE))
+    p->device = hwdec_devices_load(s->hwdec_devs, s->hwdec->type);
+    if (p->device) {
+        ID3D11Device_AddRef(p->device);
+        ID3D11Device_GetImmediateContext(p->device, &p->device_ctx);
+        if (!p->device_ctx)
+            goto fail;
+        MP_VERBOSE(p, "Using VO-supplied device %p.\n", p->device);
+    } else if (s->hwdec->type == HWDEC_D3D11VA) {
+        MP_ERR(p, "No Direct3D device provided for native d3d11 decoding\n");
         goto fail;
+    } else {
+        if (!create_device(s, FALSE))
+            goto fail;
+    }
 
     hr = ID3D11DeviceContext_QueryInterface(p->device_ctx,
                                             &IID_ID3D11VideoContext,
@@ -478,16 +545,31 @@ fail:
     return -1;
 }
 
-static int d3d11va_probe(struct vd_lavc_hwdec *hwdec,
-                         struct mp_hwdec_info *info,
+static int d3d11va_probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                          const char *codec)
 {
-    hwdec_request_api(info, "d3d11va");
+    // d3d11va-copy can do without external context; dxva2 requires it.
+    if (hwdec->type != HWDEC_D3D11VA_COPY) {
+        if (!hwdec_devices_load(ctx->hwdec_devs, HWDEC_D3D11VA))
+            return HWDEC_ERR_NO_CTX;
+    }
     return d3d_probe_codec(codec);
 }
 
+const struct vd_lavc_hwdec mp_vd_lavc_d3d11va = {
+    .type           = HWDEC_D3D11VA,
+    .image_format   = IMGFMT_D3D11VA,
+    .probe          = d3d11va_probe,
+    .init           = d3d11va_init,
+    .uninit         = d3d11va_uninit,
+    .init_decoder   = d3d11va_init_decoder,
+    .allocate_image = d3d11va_allocate_image,
+    .process_image  = d3d11va_update_image_attribs,
+};
+
 const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy = {
     .type           = HWDEC_D3D11VA_COPY,
+    .copying        = true,
     .image_format   = IMGFMT_D3D11VA,
     .probe          = d3d11va_probe,
     .init           = d3d11va_init,

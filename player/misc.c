@@ -116,16 +116,24 @@ void update_vo_playback_state(struct MPContext *mpctx)
     if (mpctx->video_out) {
         struct voctrl_playback_state oldstate = mpctx->vo_playback_state;
         struct voctrl_playback_state newstate = {
+            .taskbar_progress = mpctx->opts->vo.taskbar_progress,
             .playing = mpctx->playing,
             .paused = mpctx->paused,
             .percent_pos = get_percent_pos(mpctx),
         };
 
-        if (oldstate.playing != newstate.playing ||
+        if (oldstate.taskbar_progress != newstate.taskbar_progress ||
+            oldstate.playing != newstate.playing ||
             oldstate.paused != newstate.paused ||
-            oldstate.percent_pos != newstate.percent_pos) {
-            vo_control(mpctx->video_out,
-                       VOCTRL_UPDATE_PLAYBACK_STATE, &newstate);
+            oldstate.percent_pos != newstate.percent_pos)
+        {
+            // Don't update progress bar if it was and still is hidden
+            if ((oldstate.playing && oldstate.taskbar_progress) ||
+                (newstate.playing && newstate.taskbar_progress))
+            {
+                vo_control(mpctx->video_out,
+                           VOCTRL_UPDATE_PLAYBACK_STATE, &newstate);
+            }
             mpctx->vo_playback_state = newstate;
         }
     } else {

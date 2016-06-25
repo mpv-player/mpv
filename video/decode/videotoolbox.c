@@ -27,11 +27,10 @@
 #include "config.h"
 
 
-static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                  const char *codec)
 {
-    hwdec_request_api(info, "videotoolbox");
-    if (!info || !info->hwctx || !info->hwctx->get_vt_fmt)
+    if (!hwdec_devices_load(ctx->hwdec_devs, HWDEC_VIDEOTOOLBOX))
         return HWDEC_ERR_NO_CTX;
     switch (mp_codec_to_av_codec_id(codec)) {
     case AV_CODEC_ID_H264:
@@ -89,8 +88,8 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 
     AVVideotoolboxContext *vtctx = av_videotoolbox_alloc_context();
 
-    struct mp_hwdec_ctx *hwctx = ctx->hwdec_info->hwctx;
-    vtctx->cv_pix_fmt_type = hwctx->get_vt_fmt(hwctx);
+    struct mp_vt_ctx *vt = hwdec_devices_load(ctx->hwdec_devs, HWDEC_VIDEOTOOLBOX);
+    vtctx->cv_pix_fmt_type = vt->get_vt_fmt(vt);
 
     int err = av_videotoolbox_default_init2(ctx->avctx, vtctx);
     if (err < 0) {

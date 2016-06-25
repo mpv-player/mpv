@@ -266,6 +266,6 @@ Example
 You could put this into ``input.conf`` to hide the OSC with the ``a`` key and
 to set auto mode (the default) with ``b``::
 
-    a script_message osc-visibility never
-    b script_message osc-visibility auto
+    a script-message osc-visibility never
+    b script-message osc-visibility auto
 

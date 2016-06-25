@@ -28,17 +28,71 @@
 #include "mp_image_pool.h"
 #include "vdpau_mixer.h"
 
+static struct mp_image *download_image_yuv(struct mp_hwdec_ctx *hwctx,
+                                           struct mp_image *mpi,
+                                           struct mp_image_pool *swpool)
+{
+    struct mp_vdpau_ctx *ctx = hwctx->ctx;
+    struct vdp_functions *vdp = &ctx->vdp;
+    VdpStatus vdp_st;
+
+    if (mpi->imgfmt != IMGFMT_VDPAU || mp_vdpau_mixed_frame_get(mpi))
+        return NULL;
+
+    VdpVideoSurface surface = (uintptr_t)mpi->planes[3];
+
+    VdpChromaType s_chroma_type;
+    uint32_t s_w, s_h;
+    vdp_st = vdp->video_surface_get_parameters(surface, &s_chroma_type, &s_w, &s_h);
+    CHECK_VDP_ERROR_NORETURN(ctx,
+                    "Error when calling vdp_video_surface_get_parameters");
+    if (vdp_st != VDP_STATUS_OK)
+        return NULL;
+
+    // Don't bother supporting other types for now.
+    if (s_chroma_type != VDP_CHROMA_TYPE_420)
+        return NULL;
+
+    // The allocation needs to be uncropped, because get_bits writes to it.
+    struct mp_image *out = mp_image_pool_get(swpool, IMGFMT_NV12, s_w, s_h);
+    if (!out)
+        return NULL;
+
+    mp_image_set_size(out, mpi->w, mpi->h);
+    mp_image_copy_attributes(out, mpi);
+
+    vdp_st = vdp->video_surface_get_bits_y_cb_cr(surface,
+                                                 VDP_YCBCR_FORMAT_NV12,
+                                                 (void * const *)out->planes,
+                                                 out->stride);
+    CHECK_VDP_ERROR_NORETURN(ctx,
+                "Error when calling vdp_output_surface_get_bits_y_cb_cr");
+    if (vdp_st != VDP_STATUS_OK) {
+        talloc_free(out);
+        return NULL;
+    }
+
+    return out;
+}
+
 static struct mp_image *download_image(struct mp_hwdec_ctx *hwctx,
                                        struct mp_image *mpi,
                                        struct mp_image_pool *swpool)
 {
-    struct mp_vdpau_ctx *ctx = hwctx->vdpau_ctx;
+    if (mpi->imgfmt != IMGFMT_VDPAU && mpi->imgfmt != IMGFMT_VDPAU_OUTPUT)
+        return NULL;
+
+    struct mp_vdpau_ctx *ctx = hwctx->ctx;
     struct vdp_functions *vdp = &ctx->vdp;
     VdpStatus vdp_st;
 
     struct mp_image *res = NULL;
     int w, h;
     mp_image_params_get_dsize(&mpi->params, &w, &h);
+
+    res = download_image_yuv(hwctx, mpi, swpool);
+    if (res)
+        return res;
 
     // Abuse this lock for our own purposes. It could use its own lock instead.
     pthread_mutex_lock(&ctx->pool_lock);
@@ -268,8 +322,7 @@ static struct mp_image *create_ref(struct mp_vdpau_ctx *ctx, int index)
     struct surface_ref *ref = talloc_ptrtype(NULL, ref);
     *ref = (struct surface_ref){ctx, index};
     struct mp_image *res =
-        mp_image_new_custom_ref(&(struct mp_image){0}, ref,
-                                release_decoder_surface);
+        mp_image_new_custom_ref(NULL, ref, release_decoder_surface);
     if (res) {
         mp_image_setfmt(res, e->rgb ? IMGFMT_VDPAU_OUTPUT : IMGFMT_VDPAU);
         mp_image_set_size(res, e->w, e->h);
@@ -396,8 +449,7 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
         .preemption_counter = 1,
         .hwctx = {
             .type = HWDEC_VDPAU,
-            .priv = ctx,
-            .vdpau_ctx = ctx,
+            .ctx = ctx,
             .download_image = download_image,
         },
         .getimg_surface = VDP_INVALID_HANDLE,

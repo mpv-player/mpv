@@ -37,6 +37,7 @@ typedef struct vf_info {
     const void *priv_defaults;
     const struct m_option *options;
     void (*print_help)(struct mp_log *log);
+    bool (*test_conversion)(int in, int out);
 } vf_info_t;
 
 typedef struct vf_instance {
@@ -92,7 +93,7 @@ typedef struct vf_instance {
     struct mp_image_pool *out_pool;
     struct vf_priv_s *priv;
     struct mp_log *log;
-    struct mp_hwdec_info *hwdec;
+    struct mp_hwdec_devices *hwdec_devs;
 
     struct mp_image **out_queued;
     int num_out_queued;
@@ -120,7 +121,7 @@ struct vf_chain {
     struct mp_log *log;
     struct MPOpts *opts;
     struct mpv_global *global;
-    struct mp_hwdec_info *hwdec;
+    struct mp_hwdec_devices *hwdec_devs;
 
     // Call when the filter chain wants new processing (for filters with
     // asynchronous behavior) - must be immutable once filters are created,

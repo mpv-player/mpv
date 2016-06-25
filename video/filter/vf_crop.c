@@ -51,10 +51,23 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     if(vf->priv->crop_y<0) vf->priv->crop_y=(height-vf->priv->crop_h)/2;
     // rounding:
 
+    int orig_x = vf->priv->crop_x;
+    int orig_y = vf->priv->crop_y;
+
     struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(in->imgfmt);
 
-    vf->priv->crop_x = MP_ALIGN_DOWN(vf->priv->crop_x, fmt.align_x);
-    vf->priv->crop_y = MP_ALIGN_DOWN(vf->priv->crop_y, fmt.align_y);
+    if (fmt.flags & MP_IMGFLAG_HWACCEL) {
+        vf->priv->crop_x = 0;
+        vf->priv->crop_y = 0;
+    } else {
+        vf->priv->crop_x = MP_ALIGN_DOWN(vf->priv->crop_x, fmt.align_x);
+        vf->priv->crop_y = MP_ALIGN_DOWN(vf->priv->crop_y, fmt.align_y);
+    }
+
+    if (vf->priv->crop_x != orig_x || vf->priv->crop_y != orig_y) {
+        MP_WARN(vf, "Adjusting crop origin to %d/%d for pixel format alignment.\n",
+                vf->priv->crop_x, vf->priv->crop_y);
+    }
 
     // check:
     if(vf->priv->crop_w+vf->priv->crop_x>width ||
@@ -71,17 +84,19 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-    mp_image_crop(mpi, vf->priv->crop_x, vf->priv->crop_y,
-                  vf->priv->crop_x + vf->priv->crop_w,
-                  vf->priv->crop_y + vf->priv->crop_h);
+    if (mpi->fmt.flags & MP_IMGFLAG_HWACCEL) {
+        mp_image_set_size(mpi, vf->fmt_out.w, vf->fmt_out.h);
+    } else {
+        mp_image_crop(mpi, vf->priv->crop_x, vf->priv->crop_y,
+                      vf->priv->crop_x + vf->priv->crop_w,
+                      vf->priv->crop_y + vf->priv->crop_h);
+    }
     return mpi;
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    if (!IMGFMT_IS_HWACCEL(fmt))
-        return vf_next_query_format(vf, fmt);
-    return 0;
+    return vf_next_query_format(vf, fmt);
 }
 
 static int vf_open(vf_instance_t *vf){

@@ -159,11 +159,11 @@ static void cache_drop_contents(struct priv *s)
 static void update_speed(struct priv *s)
 {
     int64_t now = mp_time_us();
-    s->speed = 0;
-    if (s->speed_start && s->speed_start < now)
+    if (s->speed_start + 1000000 <= now) {
         s->speed = s->speed_amount * 1e6 / (now - s->speed_start);
-    s->speed_amount = 0;
-    s->speed_start = now;
+        s->speed_amount = 0;
+        s->speed_start = now;
+    }
 }
 
 // Copy at most dst_size from the cache at the given absolute file position pos.
@@ -232,11 +232,6 @@ static void cache_fill(struct priv *s)
     if (mp_cancel_test(s->cache->cancel))
         goto done;
 
-    if (!s->speed_start) {
-        s->speed_start = mp_time_us();
-        s->speed_amount = 0;
-    }
-
     // number of buffer bytes which should be preserved in backwards direction
     int64_t back = MPCLAMP(read - s->min_filepos, 0, s->back_size);
 
@@ -300,20 +295,12 @@ done: ;
         s->eof = len <= 0;
     if (!prev_eof && s->eof) {
         s->eof_pos = stream_tell(s->stream);
-        s->speed_start = 0;
         MP_VERBOSE(s, "EOF reached.\n");
     }
     s->idle = s->eof || !read_attempted;
     s->reads++;
 
-    if (s->idle) {
-        update_speed(s);
-        s->speed_start = 0;
-    }
-
-    int64_t now = mp_time_us();
-    if (s->speed_start && s->speed_start + 1000000 <= now)
-        update_speed(s);
+    update_speed(s);
 
     pthread_cond_signal(&s->wakeup);
 }
@@ -366,7 +353,6 @@ static int resize_cache(struct priv *s, int64_t size)
     s->buffer_size = buffer_size;
     s->buffer = buffer;
     s->idle = false;
-    s->speed_start = 0;
     s->eof = false;
 
     //make sure that we won't wait from cache_fill
@@ -660,6 +646,8 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
     s->enable_readahead = true;
 
     cache_drop_contents(s);
+
+    s->speed_start = mp_time_us();
 
     s->seek_limit = opts->seek_min * 1024ULL;
     s->back_size = opts->back_buffer * 1024ULL;

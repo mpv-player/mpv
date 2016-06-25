@@ -222,7 +222,7 @@ void kms_destroy(struct kms *kms)
 static void vt_switcher_sighandler(int sig)
 {
     unsigned char event = sig == RELEASE_SIGNAL ? EVT_RELEASE : EVT_ACQUIRE;
-    write(vt_switcher_pipe[1], &event, sizeof(event));
+    (void)write(vt_switcher_pipe[1], &event, sizeof(event));
 }
 
 static bool has_signal_installed(int signo)
@@ -312,7 +312,7 @@ void vt_switcher_release(struct vt_switcher *s,
 void vt_switcher_interrupt_poll(struct vt_switcher *s)
 {
     unsigned char event = EVT_INTERRUPT;
-    write(vt_switcher_pipe[1], &event, sizeof(event));
+    (void)write(vt_switcher_pipe[1], &event, sizeof(event));
 }
 
 void vt_switcher_destroy(struct vt_switcher *s)

@@ -4,7 +4,7 @@ from waflib.ConfigSet import ConfigSet
 from waflib import Utils
 
 __all__ = [
-    "check_pkg_config", "check_cc", "check_statement", "check_libs",
+    "check_pkg_config", "check_pkg_config_cflags", "check_cc", "check_statement", "check_libs",
     "check_headers", "compose_checks", "check_true", "any_version",
     "load_fragment", "check_stub", "check_ctx_vars", "check_program"]
 
@@ -69,17 +69,23 @@ def check_cc(**kw_ext):
     return fn
 
 def check_pkg_config(*args, **kw_ext):
+    return _check_pkg_config(["--libs", "--cflags"], *args, **kw_ext)
+
+def check_pkg_config_cflags(*args, **kw_ext):
+    return _check_pkg_config(["--cflags"], *args, **kw_ext)
+
+def _check_pkg_config(_pkgc_args, *args, **kw_ext):
     def fn(ctx, dependency_identifier, **kw):
         argsl     = list(args)
         packages  = args[::2]
         verchecks = args[1::2]
         sargs     = []
+        pkgc_args = _pkgc_args
         for i in range(0, len(packages)):
             if i < len(verchecks):
                 sargs.append(packages[i] + ' ' + verchecks[i])
             else:
                 sargs.append(packages[i])
-        pkgc_args = ["--libs", "--cflags"]
         if ctx.dependency_satisfied('static-build'):
             pkgc_args += ["--static"]
 

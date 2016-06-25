@@ -61,6 +61,17 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int w, int h)
     return mp_vdpau_get_video_surface(p->mpvdp, chroma, s_w, s_h);
 }
 
+static struct mp_image *update_format(struct lavc_ctx *ctx, struct mp_image *img)
+{
+    VdpChromaType chroma = 0;
+    uint32_t s_w, s_h;
+    if (av_vdpau_get_surface_parameters(ctx->avctx, &chroma, &s_w, &s_h) >= 0) {
+        if (chroma == VDP_CHROMA_TYPE_420)
+            img->params.hw_subfmt = IMGFMT_NV12;
+    }
+    return img;
+}
+
 static void uninit(struct lavc_ctx *ctx)
 {
     struct priv *p = ctx->hwdec_priv;
@@ -75,7 +86,7 @@ static int init(struct lavc_ctx *ctx)
     struct priv *p = talloc_ptrtype(NULL, p);
     *p = (struct priv) {
         .log = mp_log_new(p, ctx->log, "vdpau"),
-        .mpvdp = ctx->hwdec_info->hwctx->vdpau_ctx,
+        .mpvdp = hwdec_devices_get(ctx->hwdec_devs, HWDEC_VDPAU)->ctx,
     };
     ctx->hwdec_priv = p;
 
@@ -83,14 +94,11 @@ static int init(struct lavc_ctx *ctx)
     return 0;
 }
 
-static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                  const char *codec)
 {
-    hwdec_request_api(info, "vdpau");
-    if (!info || !info->hwctx || !info->hwctx->vdpau_ctx)
+    if (!hwdec_devices_load(ctx->hwdec_devs, HWDEC_VDPAU))
         return HWDEC_ERR_NO_CTX;
-    if (mp_vdpau_guess_if_emulated(info->hwctx->vdpau_ctx))
-        return HWDEC_ERR_EMULATED;
     return 0;
 }
 
@@ -102,4 +110,5 @@ const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
     .uninit = uninit,
     .init_decoder = init_decoder,
     .allocate_image = allocate_image,
+    .process_image = update_format,
 };

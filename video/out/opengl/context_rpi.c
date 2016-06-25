@@ -19,7 +19,6 @@
 #include <assert.h>
 
 #include "common/common.h"
-#include "video/out/x11_common.h"
 #include "context.h"
 
 #include "context_rpi.h"

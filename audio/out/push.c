@@ -142,6 +142,7 @@ static void resume(struct ao *ao)
 static void drain(struct ao *ao)
 {
     struct ao_push_state *p = ao->api_priv;
+    double maxbuffer = ao->buffer / (double)ao->samplerate + 1;
 
     MP_VERBOSE(ao, "draining...\n");
 
@@ -151,14 +152,23 @@ static void drain(struct ao *ao)
 
     p->final_chunk = true;
     wakeup_playthread(ao);
-    while (p->still_playing && mp_audio_buffer_samples(p->buffer) > 0)
-        pthread_cond_wait(&p->wakeup, &p->lock);
+
+    // Wait until everything is done. Since the audio API (especially ALSA)
+    // can't be trusted to do this right, and we're hard-blocking here, apply
+    // an upper bound timeout.
+    struct timespec until = mp_rel_time_to_timespec(maxbuffer);
+    while (p->still_playing && mp_audio_buffer_samples(p->buffer) > 0) {
+        if (pthread_cond_timedwait(&p->wakeup, &p->lock, &until)) {
+            MP_WARN(ao, "Draining is taking too long, aborting.\n");
+            goto done;
+        }
+    }
 
     if (ao->driver->drain) {
         ao->driver->drain(ao);
     } else {
         double time = unlocked_get_delay(ao);
-        mp_sleep_us(MPMIN(time, ao->buffer / (double)ao->samplerate + 1) * 1e6);
+        mp_sleep_us(MPMIN(time, maxbuffer) * 1e6);
     }
 
 done:
@@ -292,11 +302,12 @@ static void ao_play_data(struct ao *ao)
     // If we just filled the AO completely (r == space), don't refill for a
     // while. Prevents wakeup feedback with byte-granular AOs.
     int needed = unlocked_get_space(ao);
-    bool more = needed >= (r == space ? ao->device_buffer / 4 : 1) && !stuck;
+    bool more = needed >= (r == space ? ao->device_buffer / 4 : 1) && !stuck &&
+                !(flags & AOPLAY_FINAL_CHUNK);
     if (more)
         mp_input_wakeup(ao->input_ctx); // request more data
-    MP_TRACE(ao, "in=%d flags=%d space=%d r=%d wa=%d needed=%d more=%d\n",
-             max, flags, space, r, p->wait_on_ao, needed, more);
+    MP_TRACE(ao, "in=%d flags=%d space=%d r=%d wa/pl=%d/%d needed=%d more=%d\n",
+             max, flags, space, r, p->wait_on_ao, p->still_playing, needed, more);
 }
 
 static void *playthread(void *arg)
@@ -489,7 +500,7 @@ int ao_wait_poll(struct ao *ao, struct pollfd *fds, int num_fds,
         // flush the wakeup pipe contents - might "drown" some wakeups, but
         // that's ok for our use-case
         char buf[100];
-        read(p->wakeup_pipe[0], buf, sizeof(buf));
+        (void)read(p->wakeup_pipe[0], buf, sizeof(buf));
     }
     return (r >= 0 || r == -EINTR) ? wakeup : -1;
 }
@@ -499,7 +510,7 @@ void ao_wakeup_poll(struct ao *ao)
     assert(ao->api == &ao_api_push);
     struct ao_push_state *p = ao->api_priv;
 
-    write(p->wakeup_pipe[1], &(char){0}, 1);
+    (void)write(p->wakeup_pipe[1], &(char){0}, 1);
 }
 
 #endif

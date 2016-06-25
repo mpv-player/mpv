@@ -43,6 +43,7 @@
 #include "options/m_config.h"
 #include "common/msg.h"
 #include "common/global.h"
+#include "video/hwdec.h"
 #include "video/mp_image.h"
 #include "sub/osd.h"
 #include "osdep/io.h"
@@ -258,12 +259,12 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     mp_input_set_mouse_transform(vo->input_ctx, NULL, NULL);
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
         goto error;
-    struct m_config *config = m_config_from_obj_desc(vo, vo->log, &desc);
-    if (m_config_apply_defaults(config, name, vo->opts->vo_defs) < 0)
+    vo->config = m_config_from_obj_desc(vo, vo->log, &desc);
+    if (m_config_apply_defaults(vo->config, name, vo->opts->vo_defs) < 0)
         goto error;
-    if (m_config_set_obj_params(config, args) < 0)
+    if (m_config_set_obj_params(vo->config, args) < 0)
         goto error;
-    vo->priv = config->optstruct;
+    vo->priv = vo->config->optstruct;
 
     if (pthread_create(&vo->in->thread, NULL, vo_thread, vo))
         goto error;
@@ -595,14 +596,14 @@ static void wait_event_fd(struct vo *vo, int64_t until_time)
 
     if (fds[1].revents & POLLIN) {
         char buf[100];
-        read(in->wakeup_pipe[0], buf, sizeof(buf)); // flush
+        (void)read(in->wakeup_pipe[0], buf, sizeof(buf)); // flush
     }
 }
 static void wakeup_event_fd(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
 
-    write(in->wakeup_pipe[1], &(char){0}, 1);
+    (void)write(in->wakeup_pipe[1], &(char){0}, 1);
 }
 #else
 static void wait_event_fd(struct vo *vo, int64_t until_time){}

@@ -67,10 +67,6 @@ def build(ctx):
         source = "sub/osd_font.otf",
         target = "sub/osd_font.h")
 
-    ctx.file2string(
-        source = "video/out/opengl/nnedi3_weights.bin",
-        target = "video/out/opengl/nnedi3_weights.inc")
-
     lua_files = ["defaults.lua", "assdraw.lua", "options.lua", "osc.lua",
                  "ytdl_hook.lua"]
     for fn in lua_files:
@@ -282,27 +278,26 @@ def build(ctx):
         ( "video/gpu_memcpy.c",                  "sse4-intrinsics" ),
         ( "video/image_writer.c" ),
         ( "video/img_format.c" ),
+        ( "video/hwdec.c" ),
         ( "video/mp_image.c" ),
         ( "video/mp_image_pool.c" ),
         ( "video/sws_utils.c" ),
-        ( "video/dxva2.c",                       "dxva2-hwaccel" ),
-        ( "video/d3d11va.c",                     "d3d11va-hwaccel" ),
         ( "video/vaapi.c",                       "vaapi" ),
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),
         ( "video/decode/dec_video.c"),
-        ( "video/decode/dxva2.c",                "dxva2-hwaccel" ),
-        ( "video/decode/d3d11va.c",              "d3d11va-hwaccel" ),
+        ( "video/decode/dxva2.c",                "d3d-hwaccel" ),
+        ( "video/decode/d3d11va.c",              "d3d-hwaccel" ),
         ( "video/decode/d3d.c",                  "d3d-hwaccel" ),
-        ( "video/decode/rpi.c",                  "rpi" ),
         ( "video/decode/vaapi.c",                "vaapi-hwaccel" ),
         ( "video/decode/vd_lavc.c" ),
         ( "video/decode/videotoolbox.c",         "videotoolbox-hwaccel" ),
         ( "video/decode/vdpau.c",                "vdpau-hwaccel" ),
-        ( "video/decode/mediacodec.c",           "android" ),
+        ( "video/filter/refqueue.c" ),
         ( "video/filter/vf.c" ),
         ( "video/filter/vf_buffer.c" ),
         ( "video/filter/vf_crop.c" ),
+        ( "video/filter/vf_d3d11vpp.c",          "d3d-hwaccel" ),
         ( "video/filter/vf_dlopen.c",            "dlopen" ),
         ( "video/filter/vf_dsize.c" ),
         ( "video/filter/vf_eq.c" ),
@@ -331,6 +326,8 @@ def build(ctx):
         ( "video/out/cocoa_common.m",            "cocoa" ),
         ( "video/out/dither.c" ),
         ( "video/out/filter_kernels.c" ),
+        ( "video/out/opengl/angle_dynamic.c",    "egl-angle" ),
+        ( "video/out/opengl/angle_common.c",     "egl-angle" ),
         ( "video/out/opengl/common.c",           "gl" ),
         ( "video/out/opengl/context.c",          "gl" ),
         ( "video/out/opengl/context_angle.c",    "egl-angle" ),
@@ -343,7 +340,10 @@ def build(ctx):
         ( "video/out/opengl/context_x11.c",      "gl-x11" ),
         ( "video/out/opengl/context_x11egl.c",   "egl-x11" ),
         ( "video/out/opengl/egl_helpers.c",      "egl-helpers" ),
+        ( "video/out/opengl/formats.c",          "gl" ),
         ( "video/out/opengl/hwdec.c",            "gl" ),
+        ( "video/out/opengl/hwdec_d3d11egl.c",   "egl-angle" ),
+        ( "video/out/opengl/hwdec_d3d11eglrgb.c","egl-angle" ),
         ( "video/out/opengl/hwdec_dxva2.c",      "gl-win32" ),
         ( "video/out/opengl/hwdec_dxva2gldx.c",  "gl-dxinterop" ),
         ( "video/out/opengl/hwdec_dxva2egl.c",   "egl-angle" ),
@@ -352,9 +352,8 @@ def build(ctx):
         ( "video/out/opengl/hwdec_osx.c",        "videotoolbox-gl" ),
         ( "video/out/opengl/hwdec_vdpau.c",      "vdpau-gl-x11" ),
         ( "video/out/opengl/lcms.c",             "gl" ),
-        ( "video/out/opengl/nnedi3.c",           "gl" ),
         ( "video/out/opengl/osd.c",              "gl" ),
-        ( "video/out/opengl/superxbr.c",         "gl" ),
+        ( "video/out/opengl/user_shaders.c",     "gl" ),
         ( "video/out/opengl/utils.c",            "gl" ),
         ( "video/out/opengl/video.c",            "gl" ),
         ( "video/out/opengl/video_shaders.c",    "gl" ),
@@ -479,11 +478,12 @@ def build(ctx):
     if ctx.dependency_satisfied('test'):
         for test in ctx.path.ant_glob("test/*.c"):
             ctx(
-                target   = os.path.splitext(test.srcpath())[0],
-                source   = test.srcpath(),
-                use      = ctx.dependencies_use() + ['objects'],
-                includes = _all_includes(ctx),
-                features = "c cprogram",
+                target       = os.path.splitext(test.srcpath())[0],
+                source       = test.srcpath(),
+                use          = ctx.dependencies_use() + ['objects'],
+                includes     = _all_includes(ctx),
+                features     = "c cprogram",
+                install_path = None,
             )
 
     build_shared = ctx.dependency_satisfied('libmpv-shared')

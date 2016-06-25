@@ -36,6 +36,8 @@ struct mp_imgfmt_entry {
 static const struct mp_imgfmt_entry mp_imgfmt_list[] = {
     // not in ffmpeg
     {"vdpau_output",    IMGFMT_VDPAU_OUTPUT},
+    {"d3d11_nv12",      IMGFMT_D3D11NV12},
+    {"d3d11_rgb",       IMGFMT_D3D11RGB},
     // FFmpeg names have an annoying "_vld" suffix
     {"videotoolbox",    IMGFMT_VIDEOTOOLBOX},
     {"vaapi",           IMGFMT_VAAPI},
@@ -120,10 +122,18 @@ static struct mp_imgfmt_desc mp_only_imgfmt_desc(int mpfmt)
 {
     switch (mpfmt) {
     case IMGFMT_VDPAU_OUTPUT:
+    case IMGFMT_D3D11RGB:
         return (struct mp_imgfmt_desc) {
             .id = mpfmt,
             .avformat = AV_PIX_FMT_NONE,
             .flags = MP_IMGFLAG_BE | MP_IMGFLAG_LE | MP_IMGFLAG_RGB |
+                     MP_IMGFLAG_HWACCEL,
+        };
+    case IMGFMT_D3D11NV12:
+        return (struct mp_imgfmt_desc) {
+            .id = mpfmt,
+            .avformat = AV_PIX_FMT_NONE,
+            .flags = MP_IMGFLAG_BE | MP_IMGFLAG_LE | MP_IMGFLAG_YUV |
                      MP_IMGFLAG_HWACCEL,
         };
     }

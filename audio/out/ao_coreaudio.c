@@ -133,11 +133,6 @@ static bool reinit_device(struct ao *ao) {
     OSStatus err = ca_select_device(ao, ao->device, &p->device);
     CHECK_CA_ERROR("failed to select device");
 
-    char *uid;
-    err = CA_GET_STR(p->device, kAudioDevicePropertyDeviceUID, &uid);
-    CHECK_CA_ERROR("failed to get device UID");
-    ao->detected_device = talloc_steal(ao, uid);
-
     return true;
 
 coreaudio_error:

@@ -23,7 +23,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "config.h"
+#include <ass/ass.h>
+#include <ass/ass_types.h>
 
 // This is probably arbitrary.
 // sd_lavc_conv might indirectly still assume this PlayResY, though.
@@ -34,10 +35,6 @@
 
 // m_color argument
 #define MP_ASS_COLOR(c) MP_ASS_RGBA((c).r, (c).g, (c).b, (c).a)
-
-#if HAVE_LIBASS
-#include <ass/ass.h>
-#include <ass/ass_types.h>
 
 struct MPOpts;
 struct mpv_global;
@@ -57,5 +54,4 @@ struct sub_bitmaps;
 void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
                          struct sub_bitmaps *res);
 
-#endif                          /* HAVE_LIBASS */
 #endif                          /* MPLAYER_ASS_MP_H */

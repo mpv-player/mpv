@@ -71,6 +71,7 @@ struct mp_vdpau_mixer *mp_vdpau_mixer_create(struct mp_vdpau_ctx *vdp_ctx,
             .capabilities = MP_CSP_EQ_CAPS_COLORMATRIX,
         },
     };
+    mp_vdpau_handle_preemption(mixer->ctx, &mixer->preemption_counter);
     return mixer;
 }
 
@@ -227,6 +228,13 @@ int mp_vdpau_mixer_render(struct mp_vdpau_mixer *mixer,
 
     if (!video_rect)
         video_rect = &fallback_rect;
+
+    int pe = mp_vdpau_handle_preemption(mixer->ctx, &mixer->preemption_counter);
+    if (pe < 1) {
+        mixer->video_mixer = VDP_INVALID_HANDLE;
+        if (pe < 0)
+            return -1;
+    }
 
     if (video->imgfmt == IMGFMT_VDPAU_OUTPUT) {
         VdpOutputSurface surface = (uintptr_t)video->planes[3];

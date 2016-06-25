@@ -92,8 +92,6 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
             MP_RESIZE_ARRAY(ctx, p, ta_calc_prealloc_elems(nextidx_)); \
     } while (0)
 
-#define MP_GROW_ARRAY(p, nextidx) MP_TARRAY_GROW(NULL, p, nextidx)
-
 #define MP_TARRAY_APPEND(ctx, p, idxvar, ...)       \
     do {                                            \
         MP_TARRAY_GROW(ctx, p, idxvar);             \

@@ -104,16 +104,8 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
         return str != NULL;
     }
     case M_PROPERTY_SET_STRING: {
-        if (!log)
-            return M_PROPERTY_ERROR;
-        bstr optname = bstr0(name), a, b;
-        if (bstr_split_tok(optname, "/", &a, &b))
-            optname = b;
-        if (m_option_parse(log, &opt, optname, bstr0(arg), &val) < 0)
-            return M_PROPERTY_ERROR;
-        r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
-        m_option_free(&opt, &val);
-        return r;
+        struct mpv_node node = { .format = MPV_FORMAT_STRING, .u.string = arg };
+        return m_property_do(log, prop_list, name, M_PROPERTY_SET_NODE, &node, ctx);
     }
     case M_PROPERTY_SWITCH: {
         if (!log)
@@ -163,11 +155,12 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
         return r;
     }
     case M_PROPERTY_SET_NODE: {
+        if (!log)
+            return M_PROPERTY_ERROR;
         if ((r = do_action(prop_list, name, M_PROPERTY_SET_NODE, arg, ctx)) !=
             M_PROPERTY_NOT_IMPLEMENTED)
             return r;
-        struct mpv_node *node = arg;
-        int err = m_option_set_node(&opt, &val, node);
+        int err = m_option_set_node_or_string(log, &opt, name, &val, arg);
         if (err == M_OPT_UNKNOWN) {
             r = M_PROPERTY_NOT_IMPLEMENTED;
         } else if (err < 0) {

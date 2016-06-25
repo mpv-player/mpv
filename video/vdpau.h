@@ -23,6 +23,9 @@
 #define CHECK_VDP_ERROR(ctx, message) \
     CHECK_VDP_ERROR_ST(ctx, message, return -1;)
 
+#define CHECK_VDP_ERROR_NORETURN(ctx, message) \
+    CHECK_VDP_ERROR_ST(ctx, message, ;)
+
 #define CHECK_VDP_WARNING(ctx, message) \
     do { \
         if (vdp_st != VDP_STATUS_OK) \

@@ -795,6 +795,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         avfc->pb = priv->pb;
         if (stream_control(priv->stream, STREAM_CTRL_HAS_AVSEEK, NULL) > 0)
             demuxer->seekable = true;
+        demuxer->seekable |= priv->format_hack.fully_read;
     }
 
     if (matches_avinputformat_name(priv, "rtsp")) {
@@ -1101,8 +1102,12 @@ static void demux_close_lavf(demuxer_t *demuxer)
             av_freep(&priv->pb->buffer);
         av_freep(&priv->pb);
         for (int n = 0; n < priv->num_streams; n++) {
-            if (priv->streams[n])
+            if (priv->streams[n]) {
                 avcodec_free_context(&priv->streams[n]->codec->lav_headers);
+#if HAVE_AVCODEC_HAS_CODECPAR
+                avcodec_parameters_free(&priv->streams[n]->codec->lav_codecpar);
+#endif
+            }
         }
         if (priv->stream != demuxer->stream)
             free_stream(priv->stream);

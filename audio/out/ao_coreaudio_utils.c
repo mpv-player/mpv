@@ -323,6 +323,9 @@ bool ca_stream_supports_compressed(struct ao *ao, AudioStreamID stream)
 
     for (int i = 0; i < n_formats; i++) {
         AudioStreamBasicDescription asbd = formats[i].mFormat;
+
+        ca_print_asbd(ao, "- ", &asbd);
+
         if (ca_formatid_is_compressed(asbd.mFormatID)) {
             talloc_free(formats);
             return true;
@@ -330,30 +333,6 @@ bool ca_stream_supports_compressed(struct ao *ao, AudioStreamID stream)
     }
 
     talloc_free(formats);
-coreaudio_error:
-    return false;
-}
-
-bool ca_device_supports_compressed(struct ao *ao, AudioDeviceID device)
-{
-    AudioStreamID *streams = NULL;
-    size_t n_streams;
-
-    /* Retrieve all the output streams. */
-    OSStatus err =
-        CA_GET_ARY_O(device, kAudioDevicePropertyStreams, &streams, &n_streams);
-
-    CHECK_CA_ERROR("could not get number of streams.");
-
-    for (int i = 0; i < n_streams; i++) {
-        if (ca_stream_supports_compressed(ao, streams[i])) {
-            talloc_free(streams);
-            return true;
-        }
-    }
-
-    talloc_free(streams);
-
 coreaudio_error:
     return false;
 }

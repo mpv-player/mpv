@@ -45,7 +45,6 @@
 #include "filter_kernels.h"
 #include "video/hwdec.h"
 #include "opengl/video.h"
-#include "opengl/lcms.h"
 
 #define NUM_VSYNC_FENCES 10
 
@@ -56,14 +55,15 @@ struct gl_priv {
     GL *gl;
 
     struct gl_video *renderer;
-    struct gl_lcms *cms;
 
     struct gl_hwdec *hwdec;
-    struct mp_hwdec_info hwdec_info;
+
+    int events;
+
+    void *original_opts;
 
     // Options
     struct gl_video_opts *renderer_opts;
-    struct mp_icc_opts *icc_opts;
     int use_glFinish;
     int waitvsync;
     int use_gl_debug;
@@ -130,7 +130,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
             p->vsync_fences[p->num_vsync_fences++] = fence;
     }
 
-    gl_video_render_frame(p->renderer, frame, 0);
+    gl_video_render_frame(p->renderer, frame, gl->main_fb);
 
     if (p->use_glFinish)
         gl->Finish();
@@ -196,34 +196,31 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
-static void request_hwdec_api(struct gl_priv *p, const char *api_name)
+static void request_hwdec_api(struct vo *vo, void *api)
 {
+    struct gl_priv *p = vo->priv;
+
     if (p->hwdec)
         return;
 
-    p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, p->vo->global, api_name);
+    p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, p->vo->global,
+                                 vo->hwdec_devs, (intptr_t)api);
     gl_video_set_hwdec(p->renderer, p->hwdec);
-    if (p->hwdec)
-        p->hwdec_info.hwctx = p->hwdec->hwctx;
 }
 
-static void call_request_hwdec_api(struct mp_hwdec_info *info,
-                                   const char *api_name)
+static void call_request_hwdec_api(void *ctx, enum hwdec_type type)
 {
-    struct vo *vo = info->load_api_ctx;
-    assert(&((struct gl_priv *)vo->priv)->hwdec_info == info);
     // Roundabout way to run hwdec loading on the VO thread.
     // Redirects to request_hwdec_api().
-    vo_control(vo, VOCTRL_LOAD_HWDEC_API, (void *)api_name);
+    vo_control(ctx, VOCTRL_LOAD_HWDEC_API, (void *)(intptr_t)type);
 }
 
-static void get_and_update_icc_profile(struct gl_priv *p, int *events)
+static void get_and_update_icc_profile(struct gl_priv *p)
 {
-    bool has_profile = p->icc_opts->profile && p->icc_opts->profile[0];
-    if (p->icc_opts->profile_auto && !has_profile) {
+    if (gl_video_icc_auto_enabled(p->renderer)) {
         MP_VERBOSE(p, "Querying ICC profile...\n");
         bstr icc = bstr0(NULL);
-        int r = mpgl_control(p->glctx, events, VOCTRL_GET_ICC_PROFILE, &icc);
+        int r = mpgl_control(p->glctx, &p->events, VOCTRL_GET_ICC_PROFILE, &icc);
 
         if (r != VO_NOTAVAIL) {
             if (r == VO_FALSE) {
@@ -232,19 +229,15 @@ static void get_and_update_icc_profile(struct gl_priv *p, int *events)
                 MP_ERR(p, "icc-profile-auto not implemented on this platform.\n");
             }
 
-            gl_lcms_set_memory_profile(p->cms, &icc);
-            has_profile = true;
+            gl_video_set_icc_profile(p->renderer, icc);
         }
     }
-
-    if (has_profile)
-        gl_video_update_profile(p->renderer);
 }
 
-static void get_and_update_ambient_lighting(struct gl_priv *p, int *events)
+static void get_and_update_ambient_lighting(struct gl_priv *p)
 {
     int lux;
-    int r = mpgl_control(p->glctx, events, VOCTRL_GET_AMBIENT_LUX, &lux);
+    int r = mpgl_control(p->glctx, &p->events, VOCTRL_GET_AMBIENT_LUX, &lux);
     if (r == VO_TRUE) {
         gl_video_set_ambient_lux(p->renderer, lux);
     }
@@ -254,36 +247,31 @@ static void get_and_update_ambient_lighting(struct gl_priv *p, int *events)
     }
 }
 
-static bool reparse_cmdline(struct gl_priv *p, char *args)
+static const struct m_option options[];
+
+static const struct m_sub_options opengl_conf = {
+    .opts = options,
+    .size = sizeof(struct gl_priv),
+};
+
+static bool reparse_cmdline(struct vo *vo, char *args)
 {
-    struct m_config *cfg = NULL;
-    struct gl_priv *opts = NULL;
+    struct gl_priv *p = vo->priv;
     int r = 0;
 
-    // list of options which can be changed at runtime
-#define OPT_BASE_STRUCT struct gl_priv
-    static const struct m_option change_otps[] = {
-        OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
-        {0}
-    };
-#undef OPT_BASE_STRUCT
+    struct gl_priv *opts = p;
 
     if (strcmp(args, "-") == 0) {
-        opts = p;
+        opts = p->original_opts;
     } else {
-        const struct gl_priv *vodef = p->vo->driver->priv_defaults;
-        cfg = m_config_new(NULL, p->vo->log, sizeof(*opts), vodef, change_otps);
-        opts = cfg->optstruct;
-        r = m_config_parse_suboptions(cfg, "opengl", args);
+        r = m_config_parse_suboptions(vo->config, "opengl", args);
     }
 
-    if (r >= 0) {
-        gl_video_set_options(p->renderer, opts->renderer_opts);
-        gl_video_configure_queue(p->renderer, p->vo);
-        p->vo->want_redraw = true;
-    }
+    gl_video_set_options(p->renderer, opts->renderer_opts);
+    get_and_update_icc_profile(p);
+    gl_video_configure_queue(p->renderer, p->vo);
+    p->vo->want_redraw = true;
 
-    talloc_free(cfg);
     return r >= 0;
 }
 
@@ -314,7 +302,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_NOTIMPL;
     }
     case VOCTRL_SCREENSHOT_WIN: {
-        struct mp_image *screen = glGetWindowScreenshot(p->gl);
+        struct mp_image *screen = gl_read_window_contents(p->gl);
         // set image parameters according to the display, if possible
         if (screen) {
             screen->params.primaries = p->renderer_opts->target_prim;
@@ -325,17 +313,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         *(struct mp_image **)data = screen;
         return true;
     }
-    case VOCTRL_GET_HWDEC_INFO: {
-        struct mp_hwdec_info **arg = data;
-        *arg = &p->hwdec_info;
-        return true;
-    }
     case VOCTRL_LOAD_HWDEC_API:
-        request_hwdec_api(p, data);
+        request_hwdec_api(vo, data);
         return true;
     case VOCTRL_SET_COMMAND_LINE: {
         char *arg = data;
-        return reparse_cmdline(p, arg);
+        return reparse_cmdline(vo, arg);
     }
     case VOCTRL_RESET:
         gl_video_reset(p->renderer);
@@ -346,18 +329,23 @@ static int control(struct vo *vo, uint32_t request, void *data)
             vo_wakeup(vo);
         }
         return true;
+    case VOCTRL_PERFORMANCE_DATA:
+        *(struct voctrl_performance_data *)data = gl_video_perfdata(p->renderer);
+        return true;
     }
 
     int events = 0;
     int r = mpgl_control(p->glctx, &events, request, data);
     if (events & VO_EVENT_ICC_PROFILE_CHANGED) {
-        get_and_update_icc_profile(p, &events);
+        get_and_update_icc_profile(p);
         vo->want_redraw = true;
     }
     if (events & VO_EVENT_AMBIENT_LIGHTING_CHANGED) {
-        get_and_update_ambient_lighting(p, &events);
+        get_and_update_ambient_lighting(p);
         vo->want_redraw = true;
     }
+    events |= p->events;
+    p->events = 0;
     if (events & VO_EVENT_RESIZE)
         resize(p);
     if (events & VO_EVENT_EXPOSE)
@@ -373,6 +361,10 @@ static void uninit(struct vo *vo)
 
     gl_video_uninit(p->renderer);
     gl_hwdec_uninit(p->hwdec);
+    if (vo->hwdec_devs) {
+        hwdec_devices_set_loader(vo->hwdec_devs, NULL, NULL);
+        hwdec_devices_destroy(vo->hwdec_devs);
+    }
     mpgl_uninit(p->glctx);
 }
 
@@ -411,31 +403,29 @@ static int preinit(struct vo *vo)
         MP_VERBOSE(vo, "swap_control extension missing.\n");
     }
 
-    p->cms = gl_lcms_init(p, vo->log, vo->global);
-    if (!p->cms)
-        goto err_out;
-    p->renderer = gl_video_init(p->gl, vo->log, vo->global, p->cms);
+    p->renderer = gl_video_init(p->gl, vo->log, vo->global);
     if (!p->renderer)
         goto err_out;
     gl_video_set_osd_source(p->renderer, vo->osd);
     gl_video_set_options(p->renderer, p->renderer_opts);
     gl_video_configure_queue(p->renderer, vo);
 
-    gl_lcms_set_options(p->cms, p->icc_opts);
-    get_and_update_icc_profile(p, &(int){0});
+    get_and_update_icc_profile(p);
 
-    p->hwdec_info.load_api = call_request_hwdec_api;
-    p->hwdec_info.load_api_ctx = vo;
+    vo->hwdec_devs = hwdec_devices_create();
+
+    hwdec_devices_set_loader(vo->hwdec_devs, call_request_hwdec_api, vo);
 
     int hwdec = vo->opts->hwdec_preload_api;
     if (hwdec == HWDEC_NONE)
         hwdec = vo->global->opts->hwdec_api;
     if (hwdec != HWDEC_NONE) {
-        p->hwdec = gl_hwdec_load_api_id(p->vo->log, p->gl, vo->global, hwdec);
+        p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, vo->global,
+                                     vo->hwdec_devs, hwdec);
         gl_video_set_hwdec(p->renderer, p->hwdec);
-        if (p->hwdec)
-            p->hwdec_info.hwctx = p->hwdec->hwctx;
     }
+
+    p->original_opts = m_sub_options_copy(p, &opengl_conf, p);
 
     return 0;
 
@@ -459,7 +449,6 @@ static const struct m_option options[] = {
     OPT_INTRANGE("vsync-fences", opt_vsync_fences, 0, 0, NUM_VSYNC_FENCES),
 
     OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
-    OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
     {0},
 };
 
@@ -494,7 +483,6 @@ const struct vo_driver video_out_opengl_hq = {
     .priv_size = sizeof(struct gl_priv),
     .priv_defaults = &(const struct gl_priv){
         .renderer_opts = (struct gl_video_opts *)&gl_video_opts_hq_def,
-        .es = -1,
     },
     .options = options,
 };

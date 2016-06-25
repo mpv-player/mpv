@@ -17,19 +17,21 @@
 
 #include <assert.h>
 #include <windows.h>
+#include <d3d9.h>
+
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
+
+#include "angle_dynamic.h"
 
 #include "common/common.h"
 #include "osdep/timer.h"
 #include "osdep/windows_utils.h"
 #include "hwdec.h"
-#include "video/dxva2.h"
-#include "video/d3d.h"
 #include "video/hwdec.h"
 
 struct priv {
-    struct mp_d3d_ctx ctx;
+    struct mp_hwdec_ctx hwctx;
 
     HMODULE             d3d9_dll;
     IDirect3D9Ex       *d3d9ex;
@@ -77,6 +79,8 @@ static void destroy(struct gl_hwdec *hw)
 
     destroy_textures(hw);
 
+    hwdec_devices_remove(hw->devs, &p->hwctx);
+
     if (p->query9)
         IDirect3DQuery9_Release(p->query9);
 
@@ -92,11 +96,14 @@ static void destroy(struct gl_hwdec *hw)
 
 static int create(struct gl_hwdec *hw)
 {
-    if (hw->hwctx)
+    if (!angle_load())
         return -1;
 
     EGLDisplay egl_display = eglGetCurrentDisplay();
     if (!egl_display)
+        return -1;
+
+    if (!eglGetCurrentContext())
         return -1;
 
     const char *exts = eglQueryString(egl_display, EGL_EXTENSIONS);
@@ -202,13 +209,13 @@ static int create(struct gl_hwdec *hw)
         goto fail;
     }
 
-    hw->converted_imgfmt = IMGFMT_RGB0;
+    p->hwctx = (struct mp_hwdec_ctx){
+        .type = HWDEC_DXVA2,
+        .driver_name = hw->driver->name,
+        .ctx = (IDirect3DDevice9 *)p->device9ex,
+    };
+    hwdec_devices_add(hw->devs, &p->hwctx);
 
-    p->ctx.d3d9_device = (IDirect3DDevice9 *)p->device9ex;
-    p->ctx.hwctx.type = HWDEC_DXVA2;
-    p->ctx.hwctx.d3d_ctx = &p->ctx;
-
-    hw->hwctx = &p->ctx.hwctx;
     return 0;
 fail:
     destroy(hw);
@@ -222,8 +229,6 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     HRESULT hr;
 
     destroy_textures(hw);
-
-    assert(params->imgfmt == hw->driver->imgfmt);
 
     HANDLE share_handle = NULL;
     hr = IDirect3DDevice9Ex_CreateTexture(p->device9ex,
@@ -269,14 +274,15 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
+    params->imgfmt = IMGFMT_RGB0;
     return 0;
 fail:
     destroy_textures(hw);
     return -1;
 }
 
-static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     GLuint *out_textures)
+static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
+                     struct gl_hwdec_frame *out_frame)
 {
     struct priv *p = hw->priv;
     GL *gl = hw->gl;
@@ -285,7 +291,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
 
     HRESULT hr;
     RECT rc = {0, 0, hw_image->w, hw_image->h};
-    IDirect3DSurface9* hw_surface = d3d9_surface_in_mp_image(hw_image);
+    IDirect3DSurface9* hw_surface = (IDirect3DSurface9 *)hw_image->planes[3];
     hr = IDirect3DDevice9Ex_StretchRect(p->device9ex,
                                         hw_surface, &rc,
                                         p->surface9, &rc,
@@ -329,7 +335,16 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     eglBindTexImage(p->egl_display, p->egl_surface, EGL_BACK_BUFFER);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    out_textures[0] = p->gl_texture;
+    *out_frame = (struct gl_hwdec_frame){
+        .planes = {
+            {
+                .gl_texture = p->gl_texture,
+                .gl_target = GL_TEXTURE_2D,
+                .tex_w = hw_image->w,
+                .tex_h = hw_image->h,
+            },
+        },
+    };
     return 0;
 }
 
@@ -339,6 +354,6 @@ const struct gl_hwdec_driver gl_hwdec_dxva2egl = {
     .imgfmt = IMGFMT_DXVA2,
     .create = create,
     .reinit = reinit,
-    .map_image = map_image,
+    .map_frame = map_frame,
     .destroy = destroy,
 };

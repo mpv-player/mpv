@@ -9,9 +9,11 @@
 typedef struct mp_vo_opts {
     struct m_obj_settings *video_driver_list, *vo_defs;
 
+    int taskbar_progress;
     int ontop;
     int fullscreen;
     int border;
+    int fit_border;
     int all_workspaces;
 
     int screen_id;

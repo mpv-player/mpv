@@ -19,6 +19,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <initguid.h>
+
 #define DXVA2API_USE_BITFIELDS
 #include <libavcodec/dxva2.h>
 
@@ -30,8 +32,6 @@
 #include "video/mp_image_pool.h"
 #include "video/hwdec.h"
 
-#include "video/d3d.h"
-#include "video/dxva2.h"
 #include "d3d.h"
 
 #define ADDITIONAL_SURFACES (4 + HWDEC_DELAY_QUEUE_COUNT)
@@ -39,8 +39,6 @@
 struct priv {
     struct mp_log *log;
 
-    HMODULE                      d3d9_dll;
-    HMODULE                      dxva2_dll;
     IDirect3D9                  *d3d9;
     IDirect3DDevice9            *device;
     HANDLE                       device_handle;
@@ -51,6 +49,47 @@ struct priv {
     struct mp_image_pool        *sw_pool;
     int                          mpfmt_decoded;
 };
+
+struct dxva2_surface {
+    IDirectXVideoDecoder *decoder;
+    IDirect3DSurface9    *surface;
+};
+
+static void dxva2_release_img(void *arg)
+{
+    struct dxva2_surface *surface = arg;
+    if (surface->surface)
+        IDirect3DSurface9_Release(surface->surface);
+
+    if (surface->decoder)
+        IDirectXVideoDecoder_Release(surface->decoder);
+
+    talloc_free(surface);
+}
+
+static struct mp_image *dxva2_new_ref(IDirectXVideoDecoder *decoder,
+                                      IDirect3DSurface9 *d3d9_surface,
+                                      int w, int h)
+{
+    if (!decoder || !d3d9_surface)
+        return NULL;
+    struct dxva2_surface *surface = talloc_zero(NULL, struct dxva2_surface);
+
+    surface->surface = d3d9_surface;
+    IDirect3DSurface9_AddRef(surface->surface);
+    surface->decoder = decoder;
+    IDirectXVideoDecoder_AddRef(surface->decoder);
+
+    struct mp_image *mpi =
+        mp_image_new_custom_ref(NULL, surface, dxva2_release_img);
+    if (!mpi)
+        abort();
+
+    mp_image_setfmt(mpi, IMGFMT_DXVA2);
+    mp_image_set_size(mpi, w, h);
+    mpi->planes[3] = (void *)surface->surface;
+    return mpi;
+}
 
 static struct mp_image *dxva2_allocate_image(struct lavc_ctx *s, int w, int h)
 {
@@ -67,7 +106,8 @@ static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
 {
     HRESULT hr;
     struct priv *p = s->hwdec_priv;
-    IDirect3DSurface9 *surface = d3d9_surface_in_mp_image(img);
+    IDirect3DSurface9 *surface = img->imgfmt == IMGFMT_DXVA2 ?
+        (IDirect3DSurface9 *)img->planes[3] : NULL;
 
     if (!surface) {
         MP_ERR(p, "Failed to get Direct3D surface from mp_image\n");
@@ -108,15 +148,10 @@ static struct mp_image *dxva2_retrieve_image(struct lavc_ctx *s,
     return sw_img;
 }
 
-struct d3d9_format {
-    D3DFORMAT format;
-    int       depth;
-};
-
-static const struct d3d9_format d3d9_formats[] = {
-    {MKTAG('N','V','1','2'),  8},
-    {MKTAG('P','0','1','0'), 10},
-    {MKTAG('P','0','1','6'), 16},
+static const struct d3d_decoded_format d3d9_formats[] = {
+    {MKTAG('N','V','1','2'), "NV12", 8,  IMGFMT_NV12},
+    {MKTAG('P','0','1','0'), "P010", 10, IMGFMT_P010},
+    {MKTAG('P','0','1','6'), "P016", 16, IMGFMT_P010},
 };
 
 static void dump_decoder_info(struct lavc_ctx *s,
@@ -133,7 +168,7 @@ static void dump_decoder_info(struct lavc_ctx *s,
         HRESULT hr = IDirectXVideoDecoderService_GetDecoderRenderTargets(
             p->decoder_service, guid, &n_formats, &formats);
         if (FAILED(hr)) {
-            MP_ERR(p, "Failed to get render targets for decoder %s:%s",
+            MP_ERR(p, "Failed to get render targets for decoder %s:%s\n",
                    description, mp_HRESULT_to_str(hr));
         }
 
@@ -148,9 +183,10 @@ static void dump_decoder_info(struct lavc_ctx *s,
     }
 }
 
-static DWORD get_dxfmt_cb(struct lavc_ctx *s, const GUID *guid, int depth)
+static bool dxva2_format_supported(struct lavc_ctx *s, const GUID *guid,
+                                   const struct d3d_decoded_format *format)
 {
-    DWORD ret = 0;
+    bool ret = false;
     struct priv *p = s->hwdec_priv;
     D3DFORMAT *formats = NULL;
     UINT     n_formats = 0;
@@ -162,19 +198,12 @@ static DWORD get_dxfmt_cb(struct lavc_ctx *s, const GUID *guid, int depth)
         return 0;
     }
 
-    for (int i = 0; i < MP_ARRAY_SIZE(d3d9_formats); i++) {
-        const struct d3d9_format *d3d9_fmt = &d3d9_formats[i];
-        if (d3d9_fmt->depth < depth)
-            continue;
-
-        for (UINT j = 0; j < n_formats; j++) {
-            if (formats[i] == d3d9_fmt->format) {
-                ret = formats[i];
-                goto done;
-            }
-        }
+    for (int i = 0; i < n_formats; i++) {
+        ret = formats[i] == format->dxfmt;
+        if (ret)
+            break;
     }
-done:
+
     CoTaskMemFree(formats);
     return ret;
 }
@@ -204,14 +233,16 @@ static int dxva2_init_decoder(struct lavc_ctx *s, int w, int h)
     dump_decoder_info(s, device_guids, n_guids);
 
     struct d3d_decoder_fmt fmt =
-        d3d_select_decoder_mode(s, device_guids, n_guids, get_dxfmt_cb);
+        d3d_select_decoder_mode(s, device_guids, n_guids,
+                                d3d9_formats, MP_ARRAY_SIZE(d3d9_formats),
+                                dxva2_format_supported);
     CoTaskMemFree(device_guids);
-    if (fmt.mpfmt_decoded == IMGFMT_NONE) {
+    if (!fmt.format) {
         MP_ERR(p, "Failed to find a suitable decoder\n");
         goto done;
     }
 
-    p->mpfmt_decoded = fmt.mpfmt_decoded;
+    p->mpfmt_decoded = fmt.format->mpfmt;
     struct mp_image_pool *decoder_pool =
         talloc_steal(tmp, mp_image_pool_new(n_surfaces));
     DXVA2_ConfigPictureDecode *decoder_config =
@@ -222,7 +253,7 @@ static int dxva2_init_decoder(struct lavc_ctx *s, int w, int h)
     DXVA2_VideoDesc video_desc ={
         .SampleWidth  = w,
         .SampleHeight = h,
-        .Format       = fmt.dxfmt_decoded,
+        .Format       = fmt.format->dxfmt,
     };
     UINT                     n_configs  = 0;
     DXVA2_ConfigPictureDecode *configs = NULL;
@@ -255,7 +286,7 @@ static int dxva2_init_decoder(struct lavc_ctx *s, int w, int h)
     hr = IDirectXVideoDecoderService_CreateSurface(
         p->decoder_service,
         w_align, h_align,
-        n_surfaces - 1, fmt.dxfmt_decoded, D3DPOOL_DEFAULT, 0,
+        n_surfaces - 1, fmt.format->dxfmt, D3DPOOL_DEFAULT, 0,
         DXVA2_VideoDecoderRenderTarget, surfaces, NULL);
     if (FAILED(hr)) {
         MP_ERR(p, "Failed to create %d video surfaces: %s\n",
@@ -316,25 +347,20 @@ static void destroy_device(struct lavc_ctx *s)
 
     if (p->d3d9)
         IDirect3D9_Release(p->d3d9);
-
-    if (p->d3d9_dll)
-        FreeLibrary(p->d3d9_dll);
-
-    if (p->dxva2_dll)
-        FreeLibrary(p->dxva2_dll);
 }
 
 static bool create_device(struct lavc_ctx *s)
 {
     struct priv *p = s->hwdec_priv;
-    p->d3d9_dll = LoadLibrary(L"d3d9.dll");
-    if (!p->d3d9_dll) {
+
+    d3d_load_dlls();
+    if (!d3d9_dll) {
         MP_ERR(p, "Failed to load D3D9 library\n");
         return false;
     }
 
     IDirect3D9* (WINAPI *Direct3DCreate9)(UINT) =
-        (void *)GetProcAddress(p->d3d9_dll, "Direct3DCreate9");
+        (void *)GetProcAddress(d3d9_dll, "Direct3DCreate9");
     if (!Direct3DCreate9) {
         MP_ERR(p, "Failed to locate Direct3DCreate9\n");
         return false;
@@ -413,9 +439,7 @@ static int dxva2_init(struct lavc_ctx *s)
         p->sw_pool = talloc_steal(p, mp_image_pool_new(17));
     }
 
-    if (s->hwdec_info && s->hwdec_info->hwctx && s->hwdec_info->hwctx->d3d_ctx)
-        p->device = s->hwdec_info->hwctx->d3d_ctx->d3d9_device;
-
+    p->device = hwdec_devices_load(s->hwdec_devs, s->hwdec->type);
     if (p->device) {
         IDirect3D9_AddRef(p->device);
         MP_VERBOSE(p, "Using VO-supplied device %p.\n", p->device);
@@ -427,15 +451,14 @@ static int dxva2_init(struct lavc_ctx *s)
             goto fail;
     }
 
-    p->dxva2_dll = LoadLibrary(L"dxva2.dll");
-    if (!p->dxva2_dll) {
+    d3d_load_dlls();
+    if (!dxva2_dll) {
         MP_ERR(p, "Failed to load DXVA2 library\n");
         goto fail;
     }
 
     HRESULT (WINAPI *CreateDeviceManager9)(UINT *, IDirect3DDeviceManager9 **) =
-        (void *)GetProcAddress(p->dxva2_dll,
-                               "DXVA2CreateDirect3DDeviceManager9");
+        (void *)GetProcAddress(dxva2_dll, "DXVA2CreateDirect3DDeviceManager9");
     if (!CreateDeviceManager9) {
         MP_ERR(p, "Failed to locate DXVA2CreateDirect3DDeviceManager9\n");
         goto fail;
@@ -484,15 +507,15 @@ fail:
     return -1;
 }
 
-static int dxva2_probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+static int dxva2_probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                        const char *codec)
 {
-    hwdec_request_api(info, "dxva2");
     // dxva2-copy can do without external context; dxva2 requires it.
-    if (hwdec->type != HWDEC_DXVA2_COPY) {
-        if (!info || !info->hwctx || !info->hwctx->d3d_ctx ||
-            info->hwctx->type == HWDEC_DXVA2_COPY)
+    if (hwdec->type == HWDEC_DXVA2) {
+        if (!hwdec_devices_load(ctx->hwdec_devs, HWDEC_DXVA2))
             return HWDEC_ERR_NO_CTX;
+    } else {
+        hwdec_devices_load(ctx->hwdec_devs, HWDEC_DXVA2_COPY);
     }
     return d3d_probe_codec(codec);
 }
@@ -509,6 +532,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_dxva2 = {
 
 const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy = {
     .type           = HWDEC_DXVA2_COPY,
+    .copying        = true,
     .image_format   = IMGFMT_DXVA2,
     .probe          = dxva2_probe,
     .init           = dxva2_init,

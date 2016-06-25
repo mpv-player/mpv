@@ -1,0 +1,7 @@
+Ideally, you shouldn't need enter any text here, and your commit messages should
+explain your changes sufficiently (especially why they are needed). Read
+https://github.com/mpv-player/mpv/blob/master/DOCS/contribute.md for coding
+style and development conventions. Remove this text block, but if you haven't
+agreed to it before, leave the following sentence in place:
+
+I agree that my changes can be relicensed to LGPL 2.1 or later.

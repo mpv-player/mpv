@@ -452,7 +452,7 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
         if (type == STREAM_VIDEO) {
             uninit_video_chain(mpctx);
             if (!track)
-                handle_force_window(mpctx, false);
+                handle_force_window(mpctx, true);
         } else if (type == STREAM_AUDIO) {
             clear_audio_output_buffers(mpctx);
             uninit_audio_chain(mpctx);
@@ -973,6 +973,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->last_chapter = -2;
     mpctx->paused = false;
     mpctx->paused_for_cache = false;
+    mpctx->cache_buffer = -1;
     mpctx->playing_msg_shown = false;
     mpctx->max_frames = -1;
     mpctx->video_speed = mpctx->audio_speed = opts->playback_speed;

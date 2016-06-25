@@ -179,12 +179,9 @@ static void clear_ass(struct ass_state *ass)
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function)
 {
     // 0xFF is never valid UTF-8, so we can use it to escape OSD symbols.
+    // (Same trick as OSD_ASS_0/OSD_ASS_1.)
     snprintf(buffer, buffer_size, "\xFF%c", osd_function);
 }
-
-// Same trick as above: never valid UTF-8, so we expect it's free for use.
-const char *const osd_ass_0 = "\xFD";
-const char *const osd_ass_1 = "\xFE";
 
 static void mangle_ass(bstr *dst, const char *in)
 {
@@ -198,8 +195,8 @@ static void mangle_ass(bstr *dst, const char *in)
             in += 2;
             continue;
         }
-        if (*in == '\xFD' || *in == '\xFE') {
-            escape_ass = *in == '\xFE';
+        if (*in == OSD_ASS_0[0] || *in == OSD_ASS_1[0]) {
+            escape_ass = *in == OSD_ASS_1[0];
             in += 1;
             continue;
         }

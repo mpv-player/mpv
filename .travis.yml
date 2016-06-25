@@ -37,7 +37,7 @@ matrix:
     - os: linux
       compiler: clang
 
-before_install: ./travis-deps libass-stable $LIBAV
+before_install: TOOLS/travis-deps libass-stable $LIBAV
 script:
   - ./bootstrap.py
   - ./waf configure

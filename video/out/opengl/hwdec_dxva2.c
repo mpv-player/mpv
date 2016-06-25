@@ -1,8 +1,9 @@
+#include <d3d9.h>
+
 #include "common/common.h"
 
 #include "hwdec.h"
 #include "utils.h"
-#include "video/d3d.h"
 #include "video/hwdec.h"
 
 // This does not provide real (zero-copy) interop - it merely exists for
@@ -10,36 +11,38 @@
 // may help with OpenGL fullscreen mode.
 
 struct priv {
-    struct mp_d3d_ctx ctx;
+    struct mp_hwdec_ctx hwctx;
 };
 
 static void destroy(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
-    if (p->ctx.d3d9_device)
-        IDirect3DDevice9_Release(p->ctx.d3d9_device);
+    hwdec_devices_remove(hw->devs, &p->hwctx);
+    if (p->hwctx.ctx)
+        IDirect3DDevice9_Release((IDirect3DDevice9 *)p->hwctx.ctx);
 }
 
 static int create(struct gl_hwdec *hw)
 {
     GL *gl = hw->gl;
-    if (hw->hwctx || !gl->MPGetNativeDisplay)
+    if (!gl->MPGetNativeDisplay)
         return -1;
 
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
 
-    p->ctx.d3d9_device = gl->MPGetNativeDisplay("IDirect3DDevice9");
-    if (!p->ctx.d3d9_device)
+    IDirect3DDevice9 *d3d = gl->MPGetNativeDisplay("IDirect3DDevice9");
+    if (!d3d)
         return -1;
 
-    p->ctx.hwctx.type = HWDEC_DXVA2_COPY;
-    p->ctx.hwctx.d3d_ctx = &p->ctx;
+    MP_VERBOSE(hw, "Using libmpv supplied device %p.\n", d3d);
 
-    MP_VERBOSE(hw, "Using libmpv supplied device %p.\n", p->ctx.d3d9_device);
-
-    hw->hwctx = &p->ctx.hwctx;
-    hw->converted_imgfmt = 0;
+    p->hwctx = (struct mp_hwdec_ctx){
+        .type = HWDEC_DXVA2_COPY,
+        .driver_name = hw->driver->name,
+        .ctx = d3d,
+    };
+    hwdec_devices_add(hw->devs, &p->hwctx);
     return 0;
 }
 
@@ -48,8 +51,8 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     return -1;
 }
 
-static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     GLuint *out_textures)
+static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
+                     struct gl_hwdec_frame *out_frame)
 {
     return -1;
 }
@@ -60,6 +63,6 @@ const struct gl_hwdec_driver gl_hwdec_dxva2 = {
     .imgfmt = -1,
     .create = create,
     .reinit = reinit,
-    .map_image = map_image,
+    .map_frame = map_frame,
     .destroy = destroy,
 };

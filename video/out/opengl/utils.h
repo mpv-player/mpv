@@ -20,19 +20,17 @@
 #define MP_GL_UTILS_
 
 #include "common.h"
+#include "math.h"
 
 struct mp_log;
 
-void glCheckError(GL *gl, struct mp_log *log, const char *info);
+void gl_check_error(GL *gl, struct mp_log *log, const char *info);
 
-int glFmt2bpp(GLenum format, GLenum type);
-void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
-                 const void *dataptr, int stride,
-                 int x, int y, int w, int h, int slice);
-void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
-                int x, int y, int w, int h, uint8_t val, void **scratch);
+void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
+                   const void *dataptr, int stride,
+                   int x, int y, int w, int h);
 
-mp_image_t *glGetWindowScreenshot(GL *gl);
+mp_image_t *gl_read_window_contents(GL *gl);
 
 const char* mp_sampler_type(GLenum texture_target);
 
@@ -84,6 +82,7 @@ bool fbotex_change(struct fbotex *fbo, GL *gl, struct mp_log *log, int w, int h,
 #define FBOTEX_FUZZY_H 2
 #define FBOTEX_FUZZY (FBOTEX_FUZZY_W | FBOTEX_FUZZY_H)
 void fbotex_set_filter(struct fbotex *fbo, GLenum gl_filter);
+void fbotex_invalidate(struct fbotex *fbo);
 
 // A 3x2 matrix, with the translation part separate.
 struct gl_transform {
@@ -115,6 +114,13 @@ struct mp_rect_f {
     float x0, y0, x1, y1;
 };
 
+// Semantic equality (fuzzy comparison)
+static inline bool mp_rect_f_seq(struct mp_rect_f a, struct mp_rect_f b)
+{
+    return fabs(a.x0 - b.x0) < 1e-6 && fabs(a.x1 - b.x1) < 1e-6 &&
+           fabs(a.y0 - b.y0) < 1e-6 && fabs(a.y1 - b.y1) < 1e-6;
+}
+
 static inline void gl_transform_rect(struct gl_transform t, struct mp_rect_f *r)
 {
     gl_transform_vec(t, &r->x0, &r->y0);
@@ -141,10 +147,13 @@ struct gl_shader_cache;
 
 struct gl_shader_cache *gl_sc_create(GL *gl, struct mp_log *log);
 void gl_sc_destroy(struct gl_shader_cache *sc);
+bool gl_sc_error_state(struct gl_shader_cache *sc);
+void gl_sc_reset_error(struct gl_shader_cache *sc);
 void gl_sc_add(struct gl_shader_cache *sc, const char *text);
 void gl_sc_addf(struct gl_shader_cache *sc, const char *textf, ...);
 void gl_sc_hadd(struct gl_shader_cache *sc, const char *text);
 void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...);
+void gl_sc_hadd_bstr(struct gl_shader_cache *sc, struct bstr text);
 void gl_sc_uniform_sampler(struct gl_shader_cache *sc, char *name, GLenum target,
                            int unit);
 void gl_sc_uniform_sampler_ui(struct gl_shader_cache *sc, char *name, int unit);
@@ -156,11 +165,21 @@ void gl_sc_uniform_mat2(struct gl_shader_cache *sc, char *name,
                         bool transpose, GLfloat *v);
 void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
                         bool transpose, GLfloat *v);
-void gl_sc_uniform_buffer(struct gl_shader_cache *sc, char *name,
-                          const char *text, int binding);
 void gl_sc_set_vao(struct gl_shader_cache *sc, struct gl_vao *vao);
 void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name);
 void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc);
 void gl_sc_reset(struct gl_shader_cache *sc);
+
+struct gl_timer;
+
+struct gl_timer *gl_timer_create(GL *gl);
+void gl_timer_free(struct gl_timer *timer);
+void gl_timer_start(struct gl_timer *timer);
+void gl_timer_stop(struct gl_timer *timer);
+
+int gl_timer_sample_count(struct gl_timer *timer);
+uint64_t gl_timer_last_us(struct gl_timer *timer);
+uint64_t gl_timer_avg_us(struct gl_timer *timer);
+uint64_t gl_timer_peak_us(struct gl_timer *timer);
 
 #endif

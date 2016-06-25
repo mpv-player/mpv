@@ -204,7 +204,7 @@ static void recreate_video_filters(struct MPContext *mpctx)
 
     vf_destroy(vo_c->vf);
     vo_c->vf = vf_new(mpctx->global);
-    vo_c->vf->hwdec = vo_c->hwdec_info;
+    vo_c->vf->hwdec_devs = vo_c->hwdec_devs;
     vo_c->vf->wakeup_callback = wakeup_playloop;
     vo_c->vf->wakeup_callback_ctx = mpctx;
     vo_c->vf->container_fps = vo_c->container_fps;
@@ -334,7 +334,7 @@ int init_video_decoder(struct MPContext *mpctx, struct track *track)
     d_video->codec = track->stream->codec;
     d_video->fps = d_video->header->codec->fps;
     if (mpctx->vo_chain)
-        d_video->hwdec_info = mpctx->vo_chain->hwdec_info;
+        d_video->hwdec_devs = mpctx->vo_chain->hwdec_devs;
 
     MP_VERBOSE(d_video, "Container reported FPS: %f\n", d_video->fps);
 
@@ -404,7 +404,7 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
     vo_c->vo = mpctx->video_out;
     vo_c->vf = vf_new(mpctx->global);
 
-    vo_control(vo_c->vo, VOCTRL_GET_HWDEC_INFO, &vo_c->hwdec_info);
+    vo_c->hwdec_devs = vo_c->vo->hwdec_devs;
 
     vo_c->filter_src = src;
     if (!vo_c->filter_src) {
@@ -685,7 +685,7 @@ static void handle_new_frame(struct MPContext *mpctx)
     double pts = mpctx->next_frames[0]->pts;
     if (mpctx->video_pts != MP_NOPTS_VALUE) {
         frame_time = pts - mpctx->video_pts;
-        double tolerance = 15;
+        double tolerance = mpctx->demuxer->ts_resets_possible ? 5 : 1e4;
         if (frame_time <= 0 || frame_time >= tolerance) {
             // Assume a discontinuity.
             MP_WARN(mpctx, "Invalid video timestamp: %f -> %f\n",
@@ -1130,6 +1130,10 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     drop_repeat = MPCLAMP(drop_repeat, -num_vsyncs, num_vsyncs * 10);
     num_vsyncs += drop_repeat;
 
+    // Always show the first frame.
+    if (mpctx->num_past_frames <= 1 && num_vsyncs < 1)
+        num_vsyncs = 1;
+
     // Estimate the video position, so we can calculate a good A/V difference
     // value below. This is used to estimate A/V drift.
     double time_left = vo_get_delay(vo);
@@ -1380,7 +1384,6 @@ void write_video(struct MPContext *mpctx)
 
     mpctx->video_pts = mpctx->next_frames[0]->pts;
     mpctx->last_vo_pts = mpctx->video_pts;
-    mpctx->playback_pts = mpctx->video_pts;
 
     shift_frames(mpctx);
 

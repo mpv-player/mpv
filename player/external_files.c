@@ -176,7 +176,7 @@ static void append_dir_subtitles(struct mpv_global *global,
             prio += prio;
             char *subpath = mp_path_join_bstr(*slist, path, dename);
             if (mp_path_exists(subpath)) {
-                MP_GROW_ARRAY(*slist, *nsub);
+                MP_TARRAY_GROW(NULL, *slist, *nsub);
                 struct subfn *sub = *slist + (*nsub)++;
 
                 // annoying and redundant

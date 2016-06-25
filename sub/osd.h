@@ -29,17 +29,8 @@ enum sub_bitmap_format {
     SUBBITMAP_EMPTY = 0,// no bitmaps; always has num_parts==0
     SUBBITMAP_LIBASS,   // A8, with a per-surface blend color (libass.color)
     SUBBITMAP_RGBA,     // B8G8R8A8 (MSB=A, LSB=B), scaled, premultiplied alpha
-    SUBBITMAP_INDEXED,  // scaled, bitmap points to osd_bmp_indexed
 
     SUBBITMAP_COUNT
-};
-
-// For SUBBITMAP_INDEXED
-struct osd_bmp_indexed {
-    uint8_t *bitmap;
-    // Each entry is like a pixel in SUBBITMAP_RGBA format, but using straight
-    // alpha.
-    uint32_t palette[256];
 };
 
 struct sub_bitmap {
@@ -50,6 +41,11 @@ struct sub_bitmap {
     int w, h;
     int x, y;
     int dw, dh;
+
+    // If the containing struct sub_bitmaps has the packed field set, then this
+    // is the position within the source. (Strictly speaking this is redundant
+    // with the bitmap pointer.)
+    int src_x, src_y;
 
     struct {
         uint32_t color;
@@ -68,6 +64,17 @@ struct sub_bitmaps {
 
     struct sub_bitmap *parts;
     int num_parts;
+
+    // Packed representation of the bitmap data. If non-NULL, then the
+    // parts[].bitmap pointer points into the image data here (and stride will
+    // correspond to packed->stride[0]).
+    //  SUBBITMAP_RGBA: IMGFMT_BGRA (exact match)
+    // Other formats have this set to NULL.
+    struct mp_image *packed;
+
+    // Bounding box for the packed image. All parts will be within the bounding
+    // box. (The origin of the box is at (0,0).)
+    int packed_w, packed_h;
 
     int change_id;  // Incremented on each change
 };
@@ -106,6 +113,12 @@ enum mp_osd_font_codepoints {
     OSD_PB_END = 0x12,
     OSD_PB_1 = 0x13,
 };
+
+
+// Never valid UTF-8, so we expect it's free for use.
+// Specially interpreted by osd_libass.c, in order to allow/escape ASS tags.
+#define OSD_ASS_0 "\xFD"
+#define OSD_ASS_1 "\xFE"
 
 struct osd_style_opts {
     char *font;
@@ -200,7 +213,5 @@ void osd_set_external(struct osd_state *osd, void *id, int res_x, int res_y,
 
 // doesn't need locking
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function);
-extern const char *const osd_ass_0;
-extern const char *const osd_ass_1;
 
 #endif /* MPLAYER_SUB_H */

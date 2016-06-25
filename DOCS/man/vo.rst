@@ -582,68 +582,6 @@ Available video output drivers are:
         better than without it) since it will extend the size to match only the
         milder of the scale factors between the axes.
 
-    ``prescale-luma=<filter>``
-        Apply additional pre-scaling (image doubling) on the luma plane
-        (if present). As the name implies, these will run before the main
-        upscaling pass.
-
-        ``none``
-            Disable all prescalers. This is the default.
-
-        ``superxbr``
-            A relatively fast prescaler originally developed for pixel art.
-
-            Some parameters can be tuned with ``superxbr-sharpness`` and
-            ``superxbr-edge-strength`` options.
-
-        ``nnedi3``
-            An artificial neural network based deinterlacer, which can be used
-            to upscale images.
-
-            Extremely slow and requires a recent mid or high end graphics card
-            to work smoothly (as of 2015).
-
-    ``prescale-passes=<1..5>``
-        The number of passes to apply the prescaler (defaults to be 1). Setting
-        it to 2 will perform a 4x upscaling.
-
-    ``prescale-downscaling-threshold=<0..32>``
-        This option prevents "overkill" use of prescalers, which can be caused
-        by misconfiguration, or user trying to play a video with much larger
-        size. With this option, user can specify the maximal allowed downscaling
-        ratio in both dimension. To satisfy it, the number of passes for
-        prescaler will be reduced, and if necessary prescaler could also be
-        disabled.
-
-        The default value is 2.0, and should be able to prevent most seemingly
-        unreasonable use of prescalers. Most user would probably want to set it
-        to a smaller value between 1.0 and 1.5 for better performance.
-
-        A value less than 1.0 will disable the check.
-
-    ``nnedi3-neurons=<16|32|64|128>``
-        Specify the neurons for nnedi3 prescaling (defaults to be 32). The
-        rendering time is expected to be linear to the number of neurons.
-
-    ``nnedi3-window=<8x4|8x6>``
-        Specify the size of local window for sampling in nnedi3 prescaling
-        (defaults to be ``8x4``). The ``8x6`` window produces sharper images,
-        but is also slower.
-
-    ``nnedi3-upload=<ubo|shader>``
-        Specify how to upload the NN weights to GPU. Depending on the graphics
-        card, driver, shader compiler and nnedi3 settings, both method can be
-        faster or slower.
-
-        ``ubo``
-            Upload these weights via uniform buffer objects. This is the
-            default. (requires OpenGL 3.1 / GLES 3.0)
-
-        ``shader``
-            Hard code all the weights into the shader source code. (requires
-            OpenGL 3.3 / GLES 3.0)
-
-
     ``pre-shaders=<files>``, ``post-shaders=<files>``, ``scale-shader=<file>``
         Custom GLSL fragment shaders.
 
@@ -699,6 +637,152 @@ Available video output drivers are:
                 vec4 color = texture(tex, pos);
                 return vec4(1.0 - color.rgb, color.a);
             }
+
+    ``user-shaders=<files>``
+        Custom GLSL hooks. These are similar to ``post-shaders`` etc., but more
+        flexible: They can be injected at almost arbitrary points in the
+        rendering pipeline, and access all previous intermediate textures.
+
+        .. admonition:: Warning
+
+            The syntax is not stable yet and may change any time.
+
+        The general syntax of a user shader looks like this::
+
+            //!METADATA ARGS...
+            //!METADATA ARGS...
+
+            vec4 hook() {
+               ...
+               return something;
+            }
+
+            //!METADATA ARGS...
+            //!METADATA ARGS...
+
+            ...
+
+        Each block of metadata, along with the non-metadata lines after it,
+        defines a single pass. Each pass can set the following metadata:
+
+        HOOK <name> (required)
+            The texture which to hook into. May occur multiple times within a
+            metadata block, up to a predetermined limit. See below for a list
+            of hookable textures.
+
+        BIND <name>
+            Loads a texture and makes it available to the pass, and sets up
+            macros to enable accessing it. See below for a list of set macros.
+            By default, no textures are bound. The special name HOOKED can be
+            used to refer to the texture that triggered this pass.
+
+        SAVE <name>
+            Gives the name of the texture to save the result of this pass
+            into. By default, this is set to the special name HOOKED which has
+            the effect of overwriting the hooked texture.
+
+        WIDTH <szexpr>, HEIGHT <szexpr>
+            Specifies the size of the resulting texture for this pass.
+            ``szexpr`` refers to an expression in RPN (reverse polish
+            notation), using the operators + - * / > < !, floating point
+            literals, and references to sizes of existing texture and OUTPUT
+            (such as MAIN.width or CHROMA.height). By default, these are set to
+            HOOKED.w and HOOKED.h, respectively.
+
+        WHEN <szexpr>
+            Specifies a condition that needs to be true (non-zero) for the
+            shader stage to be evaluated. If it fails, it will silently be
+            omitted. (Note that a shader stage like this which has a dependency
+            on an optional hook point can still cause that hook point to be
+            saved, which has some minor overhead)
+
+        OFFSET ox oy
+            Indicates a pixel shift (offset) introduced by this pass. These
+            pixel offsets will be accumulated and corrected during the
+            next scaling pass (``cscale`` or ``scale``). The default values
+            are 0 0 which correspond to no shift. Note that offsets are ignored
+            when not overwriting the hooked texture.
+
+        COMPONENTS n
+            Specifies how many components of this pass's output are relevant
+            and should be stored in the texture, up to 4 (rgba). By default,
+            this value is equal to the number of components in HOOKED.
+
+        Each bound texture (via ``BIND``) will make available the following
+        definitions to that shader pass, where NAME is the name of the bound
+        texture:
+
+        vec4 NAME_tex(vec2 pos)
+            The sampling function to use to access the texture at a certain
+            spot (in texture coordinate space, range [0,1]). This takes care
+            of any necessary normalization conversions.
+        vec4 NAME_texOff(vec2 offset)
+            Sample the texture at a certain offset in pixels. This works like
+            NAME_tex but additionally takes care of necessary rotations, so
+            that sampling at e.g. vec2(-1,0) is always one pixel to the left.
+        vec2 NAME_pos
+            The local texture coordinate of that texture, range [0,1].
+        vec2 NAME_size
+            The (rotated) size in pixels of the texture.
+        mat2 NAME_rot
+            The rotation matrix associated with this texture. (Rotates
+            pixel space to texture coordinates)
+        vec2 NAME_pt
+            The (unrotated) size of a single pixel, range [0,1].
+        sampler NAME_raw
+            The raw bound texture itself. The use of this should be
+            avoided unless absolutely necessary.
+
+        In addition, the global uniforms described in ``post-shaders`` are
+        also available.
+
+        Internally, vo_opengl may generate any number of the following
+        textures. Whenever a texture is rendered and saved by vo_opengl, all of
+        the passes that have hooked into it will run, in the order they were
+        added by the user. This is a list of the legal hook points:
+
+        RGB, LUMA, CHROMA, ALPHA, XYZ (resizable)
+            Source planes (raw). Which of these fire depends on the image
+            format of the source.
+
+        CHROMA_SCALED, ALPHA_SCALED (fixed)
+            Source planes (upscaled). These only fire on subsampled content.
+
+        NATIVE (resizable)
+            The combined image, in the source colorspace, before conversion
+            to RGB.
+
+        MAINPRESUB (resizable)
+            The image, after conversion to RGB, but before
+            ``blend-subtitles=video`` is applied.
+
+        MAIN (resizable)
+            The main image, after conversion to RGB but before upscaling.
+
+        LINEAR (fixed)
+            Linear light image, before scaling. This only fires when
+            ``linear-scaling`` is in effect.
+
+        SIGMOID (fixed)
+            Sigmoidized light, before scaling. This only fires when
+            ``sigmoid-upscaling`` is in effect.
+
+        PREKERNEL (fixed)
+            The image immediately before the scaler kernel runs.
+
+        POSTKERNEL (fixed)
+            The image immediately after the scaler kernel runs.
+
+        SCALED (fixed)
+            The final upscaled image, before color management.
+
+        OUTPUT (fixed)
+            The final output image, after color management but before
+            dithering and drawing to screen.
+
+        Only the textures labelled with ``resizable`` may be transformed by the
+        pass. When overwriting a texture marked ``fixed``, the WIDTH, HEIGHT
+        and OFFSET must be left at their default values.
 
     ``deband``
         Enable the debanding algorithm. This greatly reduces the amount of
@@ -807,8 +891,8 @@ Available video output drivers are:
             Win32/WGL
         angle
             Direct3D11 through the OpenGL ES translation layer ANGLE. This
-            supports almost everything the ``win`` backend does, except ICC
-            profiles, and the ``nnedi3`` prescaler.
+            supports almost everything the ``win`` backend does (if the ANGLE
+            build is new enough).
         dxinterop (experimental)
             Win32, using WGL for rendering and Direct3D 9Ex for presentation.
             Works on Nvidia and AMD. Newer Intel chips with the latest drivers
@@ -835,10 +919,11 @@ Available video output drivers are:
     ``fbo-format=<fmt>``
         Selects the internal format of textures used for FBOs. The format can
         influence performance and quality of the video output.
-        ``fmt`` can be one of: rgb, rgba, rgb8, rgb10, rgb10_a2, rgb16, rgb16f,
+        ``fmt`` can be one of: rgb8, rgb10, rgb10_a2, rgb16, rgb16f,
         rgb32f, rgba12, rgba16, rgba16f, rgba32f.
         Default: ``auto``, which maps to rgba16 on desktop GL, and rgba16f or
-        rgb10_a2 on GLES (e.g. ANGLE).
+        rgb10_a2 on GLES (e.g. ANGLE), unless GL_EXT_texture_norm16 is
+        available.
 
     ``gamma=<0.1..2.0>``
         Set a gamma value (default: 1.0). If gamma is adjusted in other ways
@@ -854,6 +939,10 @@ Available video output drivers are:
         0.8
             Pitch black room
 
+        NOTE: Typical movie content (Blu-ray etc.) already contains a gamma
+        drop of about 0.8, so specifying it here as well will result in even
+        even darker image than intended!
+
     ``gamma-auto``
         Automatically corrects the gamma value depending on ambient lighting
         conditions (adding a gamma boost for dark rooms).
@@ -864,8 +953,9 @@ Available video output drivers are:
         NOTE: Only implemented on OS X.
 
     ``target-prim=<value>``
-        Specifies the primaries of the display. Video colors will be adapted
-        to this colorspace if necessary. Valid values are:
+        Specifies the primaries of the display. Video colors will be adapted to
+        this colorspace when ICC color management is not being used. Valid
+        values are:
 
         auto
             Disable any adaptation (default)
@@ -892,12 +982,13 @@ Available video output drivers are:
 
     ``target-trc=<value>``
         Specifies the transfer characteristics (gamma) of the display. Video
-        colors will be adjusted to this curve. Valid values are:
+        colors will be adjusted to this curve when ICC color management is
+        not being used. Valid values are:
 
         auto
             Disable any adaptation (default)
         bt.1886
-            ITU-R BT.1886 curve, without the brightness drop (approx. 1.961)
+            ITU-R BT.1886 curve (assuming infinite contrast)
         srgb
             IEC 61966-2-4 (sRGB)
         linear
@@ -910,9 +1001,51 @@ Available video output drivers are:
             Pure power curve (gamma 2.8), also used for BT.470-BG
         prophoto
             ProPhoto RGB (ROMM)
+        st2084
+            SMPTE ST2084 (HDR) curve, PQ OETF
+
+    ``target-brightness=<1..100000>``
+        Specifies the display's approximate brightness in cd/m^2. When playing
+        HDR content on a SDR display (or SDR content on an HDR display), video
+        colors will be tone mapped to this target brightness using the
+        algorithm specified by ``hdr-tone-mapping``. The default of 250 cd/m^2
+        corresponds to a typical consumer display.
+
+    ``hdr-tone-mapping=<value>``
+        Specifies the algorithm used for tone-mapping HDR images onto the
+        target display. Valid values are:
+
+        clip
+            Hard-clip any out-of-range values.
+        reinhard
+            Reinhard tone mapping algorithm. Very simple continuous curve.
+            Preserves dynamic range and peak but uses nonlinear contrast.
+        hable
+            Similar to ``reinhard`` but preserves dark contrast better
+            (slightly sigmoidal). Developed by John Hable for use in video
+            games. (default)
+        gamma
+            Fits a logarithmic transfer between the tone curves.
+        linear
+            Linearly stretches the entire reference gamut to (a linear multiple
+            of) the display.
+
+    ``tone-mapping-param=<value>``
+        Set tone mapping parameters. Ignored if the tone mapping algorithm is
+        not tunable. This affects the following tone mapping algorithms:
+
+        reinhard
+            Specifies the local contrast coefficient at the display peak.
+            Defaults to 0.5, which means that in-gamut values will be about
+            half as bright as when clipping.
+        gamma
+            Specifies the exponent of the function. Defaults to 1.8.
+        linear
+            Specifies the scale factor to use while stretching. Defaults to
+            1.0.
 
     ``icc-profile=<file>``
-        Load an ICC profile and use it to transform linear RGB to screen output.
+        Load an ICC profile and use it to transform video RGB to screen output.
         Needs LittleCMS 2 support compiled in. This option overrides the
         ``target-prim``, ``target-trc`` and ``icc-profile-auto`` options.
 
@@ -949,6 +1082,13 @@ Available video output drivers are:
         Size of the 3D LUT generated from the ICC profile in each dimension.
         Default is 128x256x64.
         Sizes must be a power of two, and 512 at most.
+
+    ``icc-contrast=<0-100000>``
+        Specifies an upper limit on the target device's contrast ratio.
+        This is detected automatically from the profile if possible, but for
+        some profiles it might be missing, causing the contrast to be assumed
+        as infinite. As a result, video may appear darker than intended. This
+        only affects BT.1886 content. The default of 0 means no limit.
 
     ``blend-subtitles=<yes|video|no>``
         Blend subtitles directly onto upscaled video frames, before

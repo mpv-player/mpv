@@ -32,35 +32,40 @@ int pthread_once(pthread_once_t *once_control, void (*init_routine)(void))
 
 int pthread_mutex_destroy(pthread_mutex_t *mutex)
 {
-    DeleteCriticalSection(&mutex->cs);
+    if (mutex->use_cs)
+        DeleteCriticalSection(&mutex->lock.cs);
     return 0;
 }
 
 int pthread_mutex_init(pthread_mutex_t *restrict mutex,
                        const pthread_mutexattr_t *restrict attr)
 {
-    InitializeCriticalSection(&mutex->cs);
+    mutex->use_cs = attr && (*attr & PTHREAD_MUTEX_RECURSIVE);
+    if (mutex->use_cs) {
+        InitializeCriticalSection(&mutex->lock.cs);
+    } else {
+        InitializeSRWLock(&mutex->lock.srw);
+    }
     return 0;
 }
 
 int pthread_mutex_lock(pthread_mutex_t *mutex)
 {
-    if (mutex->static_mutex) {
-        BOOL pending;
-        if (!InitOnceBeginInitialize(&mutex->static_init, 0, &pending, NULL))
-            abort();
-        if (pending) {
-            InitializeCriticalSection(&mutex->cs);
-            InitOnceComplete(&mutex->static_init, 0, NULL);
-        }
+    if (mutex->use_cs) {
+        EnterCriticalSection(&mutex->lock.cs);
+    } else {
+        AcquireSRWLockExclusive(&mutex->lock.srw);
     }
-    EnterCriticalSection(&mutex->cs);
     return 0;
 }
 
 int pthread_mutex_unlock(pthread_mutex_t *mutex)
 {
-    LeaveCriticalSection(&mutex->cs);
+    if (mutex->use_cs) {
+        LeaveCriticalSection(&mutex->lock.cs);
+    } else {
+        ReleaseSRWLockExclusive(&mutex->lock.srw);
+    }
     return 0;
 }
 
@@ -68,7 +73,13 @@ static int cond_wait(pthread_cond_t *restrict cond,
                      pthread_mutex_t *restrict mutex,
                      DWORD ms)
 {
-    return SleepConditionVariableCS(cond, &mutex->cs, ms) ? 0 : ETIMEDOUT;
+    BOOL res;
+    if (mutex->use_cs) {
+        res = SleepConditionVariableCS(cond, &mutex->lock.cs, ms);
+    } else {
+        res = SleepConditionVariableSRW(cond, &mutex->lock.srw, ms, 0);
+    }
+    return res ? 0 : ETIMEDOUT;
 }
 
 int pthread_cond_timedwait(pthread_cond_t *restrict cond,

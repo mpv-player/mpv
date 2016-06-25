@@ -215,7 +215,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 20)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 21)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
@@ -780,6 +780,10 @@ void mpv_free_node_contents(mpv_node *node);
  * mpv_set_property() to change settings during playback, because the property
  * mechanism guarantees that changes take effect immediately.
  *
+ * Using a format other than MPV_FORMAT_NODE is equivalent to constructing a
+ * mpv_node with the given format and data, and passing the mpv_node to this
+ * function.
+ *
  * @param name Option name. This is the same as on the mpv command line, but
  *             without the leading "--".
  * @param format see enum mpv_format.
@@ -877,7 +881,13 @@ int mpv_command_node_async(mpv_handle *ctx, uint64_t reply_userdata,
  * usually will fail with MPV_ERROR_PROPERTY_FORMAT. In some cases, the data
  * is automatically converted and access succeeds. For example, MPV_FORMAT_INT64
  * is always converted to MPV_FORMAT_DOUBLE, and access using MPV_FORMAT_STRING
- * usually invokes a string parser.
+ * usually invokes a string parser. The same happens when calling this function
+ * with MPV_FORMAT_NODE: the underlying format may be converted to another
+ * type if possible.
+ *
+ * Using a format other than MPV_FORMAT_NODE is equivalent to constructing a
+ * mpv_node with the given format and data, and passing the mpv_node to this
+ * function. (Before API version 1.21, this was different.)
  *
  * @param name The property name. See input.rst for a list of properties.
  * @param format see enum mpv_format.

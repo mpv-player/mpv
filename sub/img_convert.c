@@ -41,106 +41,21 @@ struct osd_conv_cache *osd_conv_cache_new(void)
     return talloc_zero(NULL, struct osd_conv_cache);
 }
 
-static void rgba_to_premultiplied_rgba(uint32_t *colors, size_t count)
+void mp_blur_rgba_sub_bitmap(struct sub_bitmap *d, double gblur)
 {
-    for (int n = 0; n < count; n++) {
-        uint32_t c = colors[n];
-        unsigned b = c & 0xFF;
-        unsigned g = (c >> 8) & 0xFF;
-        unsigned r = (c >> 16) & 0xFF;
-        unsigned a = (c >> 24) & 0xFF;
-        b = b * a / 255;
-        g = g * a / 255;
-        r = r * a / 255;
-        colors[n] = b | (g << 8) | (r << 16) | (a << 24);
+    struct mp_image *tmp1 = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
+    if (tmp1) { // on OOM, skip region
+        struct mp_image s = {0};
+        mp_image_setfmt(&s, IMGFMT_BGRA);
+        mp_image_set_size(&s, d->w, d->h);
+        s.stride[0] = d->stride;
+        s.planes[0] = d->bitmap;
+
+        mp_image_copy(tmp1, &s);
+
+        mp_image_sw_blur_scale(&s, tmp1, gblur);
     }
-}
-
-bool osd_conv_idx_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
-{
-    struct sub_bitmaps src = *imgs;
-    if (src.format != SUBBITMAP_INDEXED)
-        return false;
-
-    imgs->format = SUBBITMAP_RGBA;
-    talloc_free(c->parts);
-    imgs->parts = c->parts = talloc_array(c, struct sub_bitmap, src.num_parts);
-
-    for (int n = 0; n < src.num_parts; n++) {
-        struct sub_bitmap *d = &imgs->parts[n];
-        struct sub_bitmap *s = &src.parts[n];
-        struct osd_bmp_indexed sb = *(struct osd_bmp_indexed *)s->bitmap;
-
-        rgba_to_premultiplied_rgba(sb.palette, 256);
-
-        *d = *s;
-        struct mp_image *image = mp_image_alloc(IMGFMT_BGRA, s->w, s->h);
-        talloc_steal(c->parts, image);
-        if (!image) {
-            // on OOM, skip the region by making it 0 sized
-            d->w = d->h = d->dw = d->dh = 0;
-            continue;
-        }
-
-        d->stride = image->stride[0];
-        d->bitmap = image->planes[0];
-
-        for (int y = 0; y < s->h; y++) {
-            uint8_t *inbmp = sb.bitmap + y * s->stride;
-            uint32_t *outbmp = (uint32_t*)((uint8_t*)d->bitmap + y * d->stride);
-            for (int x = 0; x < s->w; x++)
-                *outbmp++ = sb.palette[*inbmp++];
-        }
-    }
-    return true;
-}
-
-bool osd_conv_blur_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
-                        double gblur)
-{
-    struct sub_bitmaps src = *imgs;
-    if (src.format != SUBBITMAP_RGBA)
-        return false;
-
-    talloc_free(c->parts);
-    imgs->parts = c->parts = talloc_array(c, struct sub_bitmap, src.num_parts);
-
-    for (int n = 0; n < src.num_parts; n++) {
-        struct sub_bitmap *d = &imgs->parts[n];
-        struct sub_bitmap *s = &src.parts[n];
-
-        // add a transparent padding border to reduce artifacts
-        int pad = 5;
-        struct mp_image *temp = mp_image_alloc(IMGFMT_BGRA, s->w + pad * 2,
-                                                            s->h + pad * 2);
-        if (!temp)
-            continue; // on OOM, skip region
-        memset_pic(temp->planes[0], 0, temp->w * 4, temp->h, temp->stride[0]);
-        uint8_t *p0 = temp->planes[0] + pad * 4 + pad * temp->stride[0];
-        memcpy_pic(p0, s->bitmap, s->w * 4, s->h, temp->stride[0], s->stride);
-
-        double sx = (double)s->dw / s->w;
-        double sy = (double)s->dh / s->h;
-
-        d->x = s->x - pad * sx;
-        d->y = s->y - pad * sy;
-        d->w = d->dw = s->dw + pad * 2 * sx;
-        d->h = d->dh = s->dh + pad * 2 * sy;
-        struct mp_image *image = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
-        talloc_steal(c->parts, image);
-        if (image) {
-            d->stride = image->stride[0];
-            d->bitmap = image->planes[0];
-
-            mp_image_sw_blur_scale(image, temp, gblur);
-        } else {
-            // on OOM, skip region
-            *d = *s;
-        }
-
-        talloc_free(temp);
-    }
-    return true;
+    talloc_free(tmp1);
 }
 
 // If RGBA parts need scaling, scale them.
@@ -161,6 +76,7 @@ bool osd_scale_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
 
     talloc_free(c->parts);
     imgs->parts = c->parts = talloc_array(c, struct sub_bitmap, src.num_parts);
+    imgs->packed = NULL;
 
     // Note: we scale all parts, since most likely all need scaling anyway, and
     //       to get a proper copy of all data in the imgs list.
@@ -189,41 +105,6 @@ bool osd_scale_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
             // on OOM, skip the region; just don't scale it
             *d = *s;
         }
-    }
-    return true;
-}
-
-static void rgba_to_gray(uint32_t *colors, size_t count)
-{
-    for (int n = 0; n < count; n++) {
-        uint32_t c = colors[n];
-        int b = c & 0xFF;
-        int g = (c >> 8) & 0xFF;
-        int r = (c >> 16) & 0xFF;
-        int a = (c >> 24) & 0xFF;
-        r = g = b = (r + g + b) / 3;
-        colors[n] = b | (g << 8) | (r << 16) | (a << 24);
-    }
-}
-
-bool osd_conv_idx_to_gray(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
-{
-    struct sub_bitmaps src = *imgs;
-    if (src.format != SUBBITMAP_INDEXED)
-        return false;
-
-    talloc_free(c->parts);
-    imgs->parts = c->parts = talloc_array(c, struct sub_bitmap, src.num_parts);
-
-    for (int n = 0; n < src.num_parts; n++) {
-        struct sub_bitmap *d = &imgs->parts[n];
-        struct sub_bitmap *s = &src.parts[n];
-        struct osd_bmp_indexed sb = *(struct osd_bmp_indexed *)s->bitmap;
-
-        rgba_to_gray(sb.palette, 256);
-
-        *d = *s;
-        d->bitmap = talloc_memdup(c->parts, &sb, sizeof(sb));
     }
     return true;
 }
@@ -274,6 +155,7 @@ bool osd_conv_ass_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
     imgs->format = SUBBITMAP_RGBA;
     imgs->parts = c->part;
     imgs->num_parts = num_bb;
+    imgs->packed = NULL;
 
     size_t newsize = 0;
     for (int n = 0; n < num_bb; n++) {

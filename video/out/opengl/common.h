@@ -53,7 +53,6 @@ enum {
     MPGL_CAP_ROW_LENGTH         = (1 << 4),     // GL_[UN]PACK_ROW_LENGTH
     MPGL_CAP_FB                 = (1 << 5),
     MPGL_CAP_VAO                = (1 << 6),
-    MPGL_CAP_FLOAT_TEX          = (1 << 9),
     MPGL_CAP_TEX_RG             = (1 << 10),    // GL_ARB_texture_rg / GL 3.x
     MPGL_CAP_VDPAU              = (1 << 11),    // GL_NV_vdpau_interop
     MPGL_CAP_APPLE_RGB_422      = (1 << 12),    // GL_APPLE_rgb_422
@@ -61,6 +60,10 @@ enum {
     MPGL_CAP_3D_TEX             = (1 << 15),
     MPGL_CAP_DEBUG              = (1 << 16),
     MPGL_CAP_DXINTEROP          = (1 << 17),    // WGL_NV_DX_interop
+    MPGL_CAP_EXT16              = (1 << 18),    // GL_EXT_texture_norm16
+    MPGL_CAP_ARB_FLOAT          = (1 << 19),    // GL_ARB_texture_float
+    MPGL_CAP_EXT_CR_HFLOAT      = (1 << 20),    // GL_EXT_color_buffer_half_float
+
     MPGL_CAP_SW                 = (1 << 30),    // indirect or sw renderer
 };
 
@@ -88,7 +91,7 @@ struct GL {
     char *extensions;           // Equivalent to GL_EXTENSIONS
     int mpgl_caps;              // Bitfield of MPGL_CAP_* constants
     bool debug_context;         // use of e.g. GLX_CONTEXT_DEBUG_BIT_ARB
-    int fb_r, fb_g, fb_b;       // frame buffer bit depth (0 if unknown)
+    GLuint main_fb;             // framebuffer to render to (normally 0)
 
     void (GLAPIENTRY *Viewport)(GLint, GLint, GLsizei, GLsizei);
     void (GLAPIENTRY *Clear)(GLbitfield);
@@ -98,7 +101,6 @@ struct GL {
     void (GLAPIENTRY *Enable)(GLenum);
     void (GLAPIENTRY *Disable)(GLenum);
     const GLubyte *(GLAPIENTRY * GetString)(GLenum);
-    void (GLAPIENTRY *DrawBuffer)(GLenum);
     void (GLAPIENTRY *BlendFuncSeparate)(GLenum, GLenum, GLenum, GLenum);
     void (GLAPIENTRY *Flush)(void);
     void (GLAPIENTRY *Finish)(void);
@@ -123,7 +125,8 @@ struct GL {
     void (GLAPIENTRY *DeleteBuffers)(GLsizei, const GLuint *);
     void (GLAPIENTRY *BindBuffer)(GLenum, GLuint);
     void (GLAPIENTRY *BindBufferBase)(GLenum, GLuint, GLuint);
-    GLvoid * (GLAPIENTRY * MapBuffer)(GLenum, GLenum);
+    GLvoid * (GLAPIENTRY *MapBufferRange)(GLenum, GLintptr, GLsizeiptr,
+                                          GLbitfield);
     GLboolean (GLAPIENTRY *UnmapBuffer)(GLenum);
     void (GLAPIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
     void (GLAPIENTRY *ActiveTexture)(GLenum);
@@ -166,6 +169,8 @@ struct GL {
                                             GLint);
     void (GLAPIENTRY *BlitFramebuffer)(GLint, GLint, GLint, GLint, GLint, GLint,
                                        GLint, GLint, GLbitfield, GLenum);
+    void (GLAPIENTRY *GetFramebufferAttachmentParameteriv)(GLenum, GLenum,
+                                                           GLenum, GLint *);
 
     void (GLAPIENTRY *Uniform1f)(GLint, GLfloat);
     void (GLAPIENTRY *Uniform2f)(GLint, GLfloat, GLfloat);
@@ -177,13 +182,28 @@ struct GL {
     void (GLAPIENTRY *UniformMatrix3fv)(GLint, GLsizei, GLboolean,
                                         const GLfloat *);
 
+    void (GLAPIENTRY *InvalidateFramebuffer)(GLenum, GLsizei, const GLenum *);
+
     GLsync (GLAPIENTRY *FenceSync)(GLenum, GLbitfield);
     GLenum (GLAPIENTRY *ClientWaitSync)(GLsync, GLbitfield, GLuint64);
     void (GLAPIENTRY *DeleteSync)(GLsync sync);
 
+    void (GLAPIENTRY *GenQueries)(GLsizei, GLuint *);
+    void (GLAPIENTRY *DeleteQueries)(GLsizei, const GLuint *);
+    void (GLAPIENTRY *BeginQuery)(GLenum,  GLuint);
+    void (GLAPIENTRY *EndQuery)(GLenum);
+    void (GLAPIENTRY *QueryCounter)(GLuint, GLenum);
+    GLboolean (GLAPIENTRY *IsQuery)(GLuint);
+    void (GLAPIENTRY *GetQueryObjectiv)(GLuint, GLenum, GLint *);
+    void (GLAPIENTRY *GetQueryObjecti64v)(GLuint, GLenum, GLint64 *);
+    void (GLAPIENTRY *GetQueryObjectuiv)(GLuint, GLenum, GLuint *);
+    void (GLAPIENTRY *GetQueryObjectui64v)(GLuint, GLenum, GLuint64 *);
+
     void (GLAPIENTRY *VDPAUInitNV)(const GLvoid *, const GLvoid *);
     void (GLAPIENTRY *VDPAUFiniNV)(void);
     GLvdpauSurfaceNV (GLAPIENTRY *VDPAURegisterOutputSurfaceNV)
+        (GLvoid *, GLenum, GLsizei, const GLuint *);
+    GLvdpauSurfaceNV (GLAPIENTRY *VDPAURegisterVideoSurfaceNV)
         (GLvoid *, GLenum, GLsizei, const GLuint *);
     void (GLAPIENTRY *VDPAUUnregisterSurfaceNV)(GLvdpauSurfaceNV);
     void (GLAPIENTRY *VDPAUSurfaceAccessNV)(GLvdpauSurfaceNV, GLenum);
@@ -208,8 +228,8 @@ struct GL {
     GLint (GLAPIENTRY *GetVideoSync)(GLuint *);
     GLint (GLAPIENTRY *WaitVideoSync)(GLint, GLint, unsigned int *);
 
-    GLuint (GLAPIENTRY *GetUniformBlockIndex)(GLuint, const GLchar *);
-    void (GLAPIENTRY *UniformBlockBinding)(GLuint, GLuint, GLuint);
+    void (GLAPIENTRY *GetTranslatedShaderSourceANGLE)(GLuint, GLsizei,
+                                                      GLsizei*, GLchar* source);
 
     void (GLAPIENTRY *DebugMessageCallback)(MP_GLDEBUGPROC callback,
                                             const void *userParam);

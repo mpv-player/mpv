@@ -33,6 +33,7 @@ struct vt_gl_plane_format {
     GLenum gl_format;
     GLenum gl_type;
     GLenum gl_internal_format;
+    char swizzle[5];
 };
 
 struct vt_format {
@@ -43,9 +44,11 @@ struct vt_format {
 };
 
 struct priv {
+    struct mp_hwdec_ctx hwctx;
+    struct mp_vt_ctx vtctx;
+
     CVPixelBufferRef pbuf;
     GLuint gl_planes[MP_MAX_PLANES];
-    struct mp_hwdec_ctx hwctx;
 };
 
 static struct vt_format vt_formats[] = {
@@ -63,7 +66,7 @@ static struct vt_format vt_formats[] = {
         .imgfmt = IMGFMT_UYVY,
         .planes = 1,
         .gl = {
-            { GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, GL_RGB }
+            { GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, GL_RGB, "gbra" }
         }
     },
     {
@@ -147,9 +150,9 @@ static bool check_hwdec(struct gl_hwdec *hw)
     return true;
 }
 
-static uint32_t get_vt_fmt(struct mp_hwdec_ctx *ctx)
+static uint32_t get_vt_fmt(struct mp_vt_ctx *vtctx)
 {
-    struct gl_hwdec *hw = ctx->priv;
+    struct gl_hwdec *hw = vtctx->priv;
     struct vt_format *f =
         vt_get_gl_format_from_imgfmt(hw->global->opts->videotoolbox_format);
     return f ? f->cvpixfmt : (uint32_t)-1;
@@ -161,21 +164,21 @@ static int create(struct gl_hwdec *hw)
         return -1;
 
     struct priv *p = talloc_zero(hw, struct priv);
-    struct vt_format *f = vt_get_gl_format_from_imgfmt(IMGFMT_NV12);
-    if (!f)
-        return -1;
-
     hw->priv = p;
-    hw->converted_imgfmt = f->imgfmt;
-    hw->hwctx = &p->hwctx;
-    hw->hwctx->download_image = download_image;
-    hw->hwctx->type = HWDEC_VIDEOTOOLBOX;
-    hw->hwctx->get_vt_fmt = get_vt_fmt;
 
-    hw->gl_texture_target = GL_TEXTURE_RECTANGLE;
     hw->gl->GenTextures(MP_MAX_PLANES, p->gl_planes);
 
-    hw->hwctx->priv = hw;
+    p->vtctx = (struct mp_vt_ctx){
+        .priv = hw,
+        .get_vt_fmt = get_vt_fmt,
+    };
+    p->hwctx = (struct mp_hwdec_ctx){
+        .type = HWDEC_VIDEOTOOLBOX,
+        .download_image = download_image,
+        .ctx = &p->vtctx,
+    };
+    hwdec_devices_add(hw->devs, &p->hwctx);
+
     return 0;
 }
 
@@ -189,16 +192,13 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
         return -1;
     }
 
-    hw->converted_imgfmt = f->imgfmt;
+    params->imgfmt = f->imgfmt;
     return 0;
 }
 
-static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
-                     GLuint *out_textures)
+static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
+                     struct gl_hwdec_frame *out_frame)
 {
-    if (!check_hwdec(hw))
-        return -1;
-
     struct priv *p = hw->priv;
     GL *gl = hw->gl;
 
@@ -222,11 +222,13 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     const int planes  = CVPixelBufferGetPlaneCount(p->pbuf);
     assert(planar && planes == f->planes || f->planes == 1);
 
+    GLenum gl_target = GL_TEXTURE_RECTANGLE;
+
     for (int i = 0; i < f->planes; i++) {
-        gl->BindTexture(hw->gl_texture_target, p->gl_planes[i]);
+        gl->BindTexture(gl_target, p->gl_planes[i]);
 
         CGLError err = CGLTexImageIOSurface2D(
-            CGLGetCurrentContext(), hw->gl_texture_target,
+            CGLGetCurrentContext(), gl_target,
             f->gl[i].gl_internal_format,
             IOSurfaceGetWidthOfPlane(surface, i),
             IOSurfaceGetHeightOfPlane(surface, i),
@@ -236,9 +238,16 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
             MP_ERR(hw, "error creating IOSurface texture for plane %d: %s (%x)\n",
                    i, CGLErrorString(err), gl->GetError());
 
-        gl->BindTexture(hw->gl_texture_target, 0);
+        gl->BindTexture(gl_target, 0);
 
-        out_textures[i] = p->gl_planes[i];
+        out_frame->planes[i] = (struct gl_hwdec_plane){
+            .gl_texture = p->gl_planes[i],
+            .gl_target = gl_target,
+            .tex_w = IOSurfaceGetWidthOfPlane(surface, i),
+            .tex_h = IOSurfaceGetHeightOfPlane(surface, i),
+        };
+        snprintf(out_frame->planes[i].swizzle, sizeof(out_frame->planes[i].swizzle),
+                 "%s", f->gl[i].swizzle);
     }
 
     return 0;
@@ -251,6 +260,8 @@ static void destroy(struct gl_hwdec *hw)
 
     CVPixelBufferRelease(p->pbuf);
     gl->DeleteTextures(MP_MAX_PLANES, p->gl_planes);
+
+    hwdec_devices_remove(hw->devs, &p->hwctx);
 }
 
 const struct gl_hwdec_driver gl_hwdec_videotoolbox = {
@@ -259,6 +270,6 @@ const struct gl_hwdec_driver gl_hwdec_videotoolbox = {
     .imgfmt = IMGFMT_VIDEOTOOLBOX,
     .create = create,
     .reinit = reinit,
-    .map_image = map_image,
+    .map_frame = map_frame,
     .destroy = destroy,
 };

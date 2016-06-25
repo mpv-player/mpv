@@ -42,11 +42,12 @@ struct mp_image_params {
     uint64_t hw_subfmt;         // underlying format for some hwaccel pixfmts
                                 // (will use the HW API's format identifiers)
     int w, h;                   // image dimensions
-    int p_w, p_h;               // define pixel aspect ratio (never 0/0)
+    int p_w, p_h;               // define pixel aspect ratio (undefined: 0/0)
     enum mp_csp colorspace;
     enum mp_csp_levels colorlevels;
     enum mp_csp_prim primaries;
     enum mp_csp_trc gamma;
+    float peak; // 0 = auto/unknown
     enum mp_chroma_location chroma_location;
     // The image should be rotated clockwise (0-359 degrees).
     int rotate;
@@ -100,6 +101,8 @@ typedef struct mp_image {
     // All mp_* functions manage this automatically; do not mess with it.
     // (See also AVFrame.buf.)
     struct AVBufferRef *bufs[MP_MAX_PLANES];
+    // Points to AVHWFramesContext* (same as AVFrame.hw_frames_ctx)
+    struct AVBufferRef *hwctx;
 } mp_image_t;
 
 int mp_chroma_div_up(int size, int shift);
@@ -152,11 +155,8 @@ void mp_image_set_attributes(struct mp_image *image,
                              const struct mp_image_params *params);
 
 struct AVFrame;
-void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
-                                        struct AVFrame *src);
-void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
-                                      struct mp_image *src);
 struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame);
+struct AVFrame *mp_image_to_av_frame(struct mp_image *img);
 struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img);
 
 void memcpy_pic(void *dst, const void *src, int bytesPerLine, int height,

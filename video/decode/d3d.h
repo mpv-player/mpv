@@ -24,16 +24,31 @@
 struct mp_image;
 struct lavc_ctx;
 
-struct d3d_decoder_fmt {
-    const GUID *guid;
-    int   mpfmt_decoded;
-    DWORD dxfmt_decoded; // D3DFORMAT or DXGI_FORMAT
+struct d3d_decoded_format {
+    DWORD       dxfmt;  // D3DFORMAT or DXGI_FORMAT
+    const char *name;   // informational string repr. of dxfmt_decoded
+    int         depth;  // significant bits (not full size)
+    int         mpfmt;  // IMGFMT_ with compatible memory layout and semantics
 };
 
+struct d3d_decoder_fmt {
+    const GUID *guid;
+    const struct d3d_decoded_format *format;
+};
+
+// Must call d3d_load_dlls() before accessing. Once this is done, the DLLs
+// remain loaded forever.
+extern HMODULE d3d11_dll, d3d9_dll, dxva2_dll;
+
+void d3d_load_dlls(void);
+
 int d3d_probe_codec(const char *codec);
+
 struct d3d_decoder_fmt d3d_select_decoder_mode(
     struct lavc_ctx *s, const GUID *device_guids, UINT n_guids,
-    DWORD (*get_dxfmt_cb)(struct lavc_ctx *s, const GUID *guid, int depth));
+    const struct d3d_decoded_format *formats, int n_formats,
+    bool (*test_fmt_cb)(struct lavc_ctx *s, const GUID *guid,
+                        const struct d3d_decoded_format *fmt));
 
 char *d3d_decoder_guid_to_desc_buf(char *buf, size_t buf_size,
                                    const GUID *mode_guid);

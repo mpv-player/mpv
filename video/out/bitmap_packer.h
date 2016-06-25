@@ -23,7 +23,6 @@ struct bitmap_packer {
     int asize;
 };
 
-struct ass_image;
 struct sub_bitmaps;
 
 // Clear all internal state. Leave the following fields: w_max, h_max

@@ -134,7 +134,7 @@ static void *client_thread(void *p)
 
         if (fds[0].revents & POLLIN) {
             char discard[100];
-            read(pipe_fd, discard, sizeof(discard));
+            (void)read(pipe_fd, discard, sizeof(discard));
 
             while (1) {
                 mpv_event *event = mpv_wait_event(arg->client, 0);
@@ -413,7 +413,7 @@ void mp_uninit_ipc(struct mp_ipc_ctx *arg)
     if (!arg)
         return;
 
-    write(arg->death_pipe[1], &(char){0}, 1);
+    (void)write(arg->death_pipe[1], &(char){0}, 1);
     pthread_join(arg->thread, NULL);
 
     close(arg->death_pipe[0]);

@@ -33,14 +33,6 @@ static int set_swap_interval(int enabled)
     return (err == kCGLNoError) ? 0 : -1;
 }
 
-static int cgl_color_size(struct MPGLContext *ctx)
-{
-    struct cgl_context *p = ctx->priv;
-    GLint value;
-    CGLDescribePixelFormat(p->pix, 0, kCGLPFAColorSize, &value);
-    return value > 16 ? 8 : 5;
-}
-
 static void *cocoa_glgetaddr(const char *s)
 {
     void *ret = NULL;
@@ -123,7 +115,6 @@ static bool create_gl_context(struct MPGLContext *ctx, int vo_flags)
         CGLSetParameter(p->ctx, kCGLCPSurfaceOpacity, &(GLint){0});
 
     mpgl_load_functions(ctx->gl, (void *)cocoa_glgetaddr, NULL, ctx->vo->log);
-    ctx->gl->fb_r = ctx->gl->fb_g = ctx->gl->fb_b = cgl_color_size(ctx);
 
     CGLReleasePixelFormat(p->pix);
 
