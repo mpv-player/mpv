@@ -1,3 +1,159 @@
+Release 0.18.0
+==============
+
+
+Build System Changes
+--------------------
+
+- build: Do not link to libGL for egl-drm
+- build: also use the iconv check on FreeBSD
+- build: don't install tests, only build them
+- build: re-enable encoding mode by default
+- vo_opengl: hwdec: remove build-dependency on dxva2 (#3150)
+- wscript: make at least 1 OpenGL output mandatory
+
+
+Features
+--------
+
+New
+~~~
+
+- csputils: add SMPTE ST2084 support
+- demux_mkv: support Matroska webvtt (#3247)
+- demux_playlist: read directories recursively
+- stream_memory: add hex:// protocol
+- vf_crop: support opaque hardware decoding formats
+- vf_d3d11vpp: add a D3D11 video processor filter
+- vo_opengl: D3D11VA + ANGLE interop
+- vo_opengl: add an angle-es2 backend
+- vo_opengl: angle: dynamically load ANGLE
+- vo_opengl: d3d11egl: native NV12 sampling support
+- vo_opengl: enable color management on GLES
+- vo_opengl: implement HDR (SMPTE ST2084)
+- vo_opengl: implement tone mapping algorithms
+- vo_opengl: make PBOs work on GLES 3.x
+- vo_opengl: support external user hooks, enhancing the flexibility of user shaders
+- vo_opengl: vdpau interop without RGB conversion
+- wayland: implement HIDPI support
+
+
+Removed
+-------
+
+- vo_opengl: remove nnedi3 prescaler (replaced by user shaders)
+- vo_opengl: remove prescaling framework with superxbr prescaler (replaced by user shaders)
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- Windows: make taskbar progress indication optional (#2535)
+- af_lavcac3enc: make encoder configurable
+- command: add playlist-pos-1 property (#2828)
+- command: introduce hwdec-current and hwdec-interop properties.
+- options: add --fit-border video option (currently Windows only)
+- video: add --hwdec=auto-copy mode
+- vo_opengl: always autoselect ANGLE as backend if available
+- vo_opengl: expose performance timers as properties
+- x11: add --x11-bypass-compositor=never
+- x11: extend --x11-bypass-compositor with fs-only option (#2582)
+
+
+Changed
+~~~~~~~
+
+- command: allow setting panscan etc. properties if no video is active
+- command: don't seek immediately when setting a-b loop while paused
+- command: if only ab-loop-b is set, loop from start of file
+- options: --geometry: center window position after applying size (#2397)
+- player: loop on end of file if ab-loop-b is unset
+- sd_add: replace --sub-ass=no with --ass-style-override=strip
+
+
+Removed
+~~~~~~~
+
+- vo_opengl: remove non-working rgb/rgba FBO formats
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- TOOLS/zsh.pl: add .f4v extension in zsh completions
+- TOOLS/zsh.pl: complete --audio-device
+- Windows: center window on original window center on resize to fit screen
+- Windows: fix size calculations for window resize (#2935)
+- Windows: fix wrong behavior with window-scale when window size exceeds screen size
+- Windows: make VOCTRL_SET_UNFS_WINDOW_SIZE resize the window around its center (#3164)
+- af_lavcac3enc: fix custom bitrates
+- ao_alsa: add more workarounds for hardware with broken drivers (e.g. ODROID-C2)
+- ao_opensles: remove 32-bit audio formats (not supported by Android)
+- cocoa: fix actual display refresh rate retrieval
+- cocoa: use displaylink without manually tracking the display id (#2392)
+- command: improve playlist* properties change notifications (#3267)
+- command: slightly nicer OSD list formatting
+- compatibility with recent FFmpeg APIs
+- d3d: fix hardware decoding of most MPEG2 things
+- d3dva: move Intel_H264_NoFGT_ClearVideo to lower priority (#3059)
+- demux_mkv: better resync behavior for broken google-created webms
+- demux_mkv: fix seeking with files that miss the first index entry
+- demux_playlist: recognize m3u8 as playlist extension (#3154)
+- input: fix parsing multiple input command prefixes
+- lcms: don't warn/error on 3dlut cache misses
+- lcms: improve black point handling (especially BT.1886)
+- macOS: handle multiple dropped files on the window (#3076)
+- player: always show the first frame in DS mode
+- player: assume video forwards timestamps jumps only with some formats (#3027)
+- player: do not update OSD all the time when paused
+- player: eagerly redraw OSD when seeking with coverart
+- player: fix use-after-free with --screenshot-directory (#3049)
+- player: force VO reconfig when unselecting video track
+- player: really start audio only once video is ready
+- sd_lavc: work around bug in older FFmpeg releases (#3109)
+- stream_cdda: enable cache by default
+- sub: fix --sub-gauss
+- vd_lavc: better hwdec wrapper decoder selection
+- vo_opengl: EGL: fix hwdec probing
+- vo_opengl: angle: avoid fullscreen FBO copy for flipping
+- vo_opengl: angle: enable DirectComposition (lowers vsync jitter)
+- vo_opengl: angle: prevent DXGI hooking Alt+Enter
+- vo_opengl: avoid outputting ultra-wide-gamut by default
+- vo_opengl: correctly disable interpolation if tscale can't be used
+- vo_opengl: fix bicubic_fast in ES mode
+- vo_opengl: fix d3d11 hardware decoding probing on Windows 7
+- vo_opengl: improve scale=oversample performance
+- vo_opengl: make the screen blue on shader errors
+- vo_opengl: partially fix 0bgr format support
+- vo_opengl: possibly update icc profile after changing options
+- vo_opengl: request core profile on X11/EGL too
+- vo_opengl: require at least ES 3.0 for float textures
+- vo_opengl: vdpau: fix certain cases of preemption recovery failures
+- vo_rpi: attempt to survive display mode changes
+- vo_rpi: fix destroying overlays (#3100)
+- vo_rpi: wait for vsync with a timeout
+- vo_sdl: fix pixel formats.
+- vo_xv: Handle incorrect size returned by Xv(Shm)CreateImage (#320)
+- wayland: correctly report display refresh rate
+- wayland: use the advertised size in fullscreen (#3021, #2657)
+- x11: tell GNOME to use dark window decorations
+- ytdl_hook: fix brightcove urls
+- ytdl_hook: just check if protocol is rtmp (#3090)
+- ytdl_hook: support multi-arc subtitles
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API, and DOCS/interface-changes.rst for a history
+of changes to other user-visible interfaces.
+
+A complete changelog can be seen by running `git log v0.17.0..v0.18.0`
+in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.17.0...v0.18.0 or
+http://git.srsfckn.biz/mpv/log/?qt=range&q=v0.17.0..v0.18.0
+
+
 Release 0.17.0
 ==============
 
