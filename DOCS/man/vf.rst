@@ -288,6 +288,7 @@ Available filters are:
         :adobe:        Adobe RGB (1998)
         :prophoto:     ProPhoto RGB (ROMM)
         :cie1931:      CIE 1931 RGB
+        :dci-p3:       DCI-P3 (Digital Cinema)
         :v-gamut:      Panasonic V-Gamut primaries
 
     ``<gamma>``
