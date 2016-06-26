@@ -79,6 +79,7 @@ enum mp_csp_trc {
     MP_CSP_TRC_GAMMA28,
     MP_CSP_TRC_PRO_PHOTO,
     MP_CSP_TRC_SMPTE_ST2084,
+    MP_CSP_TRC_ARIB_STD_B67,
     MP_CSP_TRC_COUNT
 };
 

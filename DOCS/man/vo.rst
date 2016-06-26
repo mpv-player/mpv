@@ -1003,6 +1003,8 @@ Available video output drivers are:
             ProPhoto RGB (ROMM)
         st2084
             SMPTE ST2084 (HDR) curve, PQ OETF
+        std-b67
+            ARIB STD-B67 (Hybrid Log-gamma) curve, also known as BBC/NHK HDR
 
     ``target-brightness=<1..100000>``
         Specifies the display's approximate brightness in cd/m^2. When playing
