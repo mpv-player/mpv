@@ -611,8 +611,13 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
         }
         if (params->colorspace == MP_CSP_AUTO)
             params->colorspace = mp_csp_guess_colorspace(params->w, params->h);
-        if (params->colorlevels == MP_CSP_LEVELS_AUTO)
-            params->colorlevels = MP_CSP_LEVELS_TV;
+        if (params->colorlevels == MP_CSP_LEVELS_AUTO) {
+            if (params->gamma == MP_CSP_TRC_V_LOG) {
+                params->colorlevels = MP_CSP_LEVELS_PC;
+            } else {
+                params->colorlevels = MP_CSP_LEVELS_TV;
+            }
+        }
         if (params->primaries == MP_CSP_PRIM_AUTO) {
             // Guess based on the colormatrix as a first priority
             if (params->colorspace == MP_CSP_BT_2020_NC ||
