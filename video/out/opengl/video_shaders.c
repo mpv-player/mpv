@@ -227,6 +227,11 @@ static const float HDR_M1 = 2610./4096 * 1./4,
                    HDR_C2 = 2413./4096 * 32,
                    HDR_C3 = 2392./4096 * 32;
 
+// Common constants for ARIB STD-B67 (Hybrid Log-gamma)
+static const float B67_A = 0.17883277,
+                   B67_B = 0.28466892,
+                   B67_C = 0.55991073;
+
 // Linearize (expand), given a TRC as input
 void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 {
@@ -264,6 +269,17 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               "             / (vec3(%f) - vec3(%f) * color.rgb);\n",
               HDR_C1, HDR_C2, HDR_C3);
         GLSLF("color.rgb = pow(color.rgb, vec3(1.0/%f));\n", HDR_M1);
+        break;
+    case MP_CSP_TRC_ARIB_STD_B67:
+        GLSLF("color.rgb = mix(vec3(4.0) * color.rgb * color.rgb,\n"
+              "                exp((color.rgb - vec3(%f)) / vec3(%f)) + vec3(%f),\n"
+              "                lessThan(vec3(0.5), color.rgb));\n",
+              B67_C, B67_A, B67_B);
+        // Since the ARIB function's signal value of 1.0 corresponds to
+        // a peak of 12.0, we need to renormalize to prevent GL textures
+        // from clipping. (In general, mpv's internal conversions always
+        // assume 1.0 is the maximum brightness, not the reference peak)
+        GLSL(color.rgb /= vec3(12.0);)
         break;
     default:
         abort();
@@ -307,6 +323,13 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               "             / (vec3(1.0) + vec3(%f) * color.rgb);\n",
               HDR_C1, HDR_C2, HDR_C3);
         GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", HDR_M2);
+        break;
+    case MP_CSP_TRC_ARIB_STD_B67:
+        GLSL(color.rgb *= vec3(12.0);)
+        GLSLF("color.rgb = mix(vec3(0.5) * sqrt(color.rgb),\n"
+              "                vec3(%f) * log(color.rgb - vec3(%f)) + vec3(%f),\n"
+              "                lessThan(vec3(1.0), color.rgb));\n",
+              B67_A, B67_B, B67_C);
         break;
     default:
         abort();
