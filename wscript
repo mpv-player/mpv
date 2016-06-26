@@ -498,10 +498,11 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
                                 '(void)offsetof(AVFrame, hw_frames_ctx)',
                                 use='libav'),
     }, {
-        'name': 'avutil-st2084',
-        'desc': 'libavutil AVCOL_TRC_SMPTEST2084',
+        'name': 'avutil-hdr',
+        'desc': 'libavutil HDR TRCs',
         'func': check_statement('libavutil/pixfmt.h',
-                                'AVCOL_TRC_SMPTEST2084',
+                                'AVCOL_TRC_SMPTEST2084,'
+                                'AVCOL_TRC_ARIB_STD_B67',
                                 use='libav'),
     }
 ]

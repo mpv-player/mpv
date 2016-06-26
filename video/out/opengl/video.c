@@ -2172,12 +2172,15 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
         enum mp_csp_prim prim_orig = p->image_params.primaries;
         enum mp_csp_trc trc_orig = p->image_params.gamma;
 
-        // One exception: SMPTE ST.2084 is not implemented by LittleCMS
-        // for technical limitation reasons, so we use a gamma 2.2 input curve
-        // here instead. We could pick any value we want here, the difference
-        // is just coding efficiency.
-        if (trc_orig == MP_CSP_TRC_SMPTE_ST2084)
+        // One exception: HDR is not implemented by LittleCMS for technical
+        // limitation reasons, so we use a gamma 2.2 input curve here instead.
+        // We could pick any value we want here, the difference is just coding
+        // efficiency.
+        if (trc_orig == MP_CSP_TRC_SMPTE_ST2084 ||
+            trc_orig == MP_CSP_TRC_ARIB_STD_B67)
+        {
             trc_orig = MP_CSP_TRC_GAMMA22;
+        }
 
         if (gl_video_get_lut3d(p, prim_orig, trc_orig)) {
             prim_dst = prim_orig;
@@ -2216,6 +2219,11 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
         // If the source has no information known, it's display-referred
         // (and should be treated relative to the specified desired peak_dst)
         peak_src = peak_dst;
+
+        // Exception: ARIB STD-B67's nominal peak is exactly 12 times the
+        // target's reference peak
+        if (trc_src == MP_CSP_TRC_ARIB_STD_B67)
+            peak_src = 12 * peak_dst;
     }
 
     // All operations from here on require linear light as a starting point,
