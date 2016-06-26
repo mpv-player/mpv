@@ -2177,7 +2177,8 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
         // We could pick any value we want here, the difference is just coding
         // efficiency.
         if (trc_orig == MP_CSP_TRC_SMPTE_ST2084 ||
-            trc_orig == MP_CSP_TRC_ARIB_STD_B67)
+            trc_orig == MP_CSP_TRC_ARIB_STD_B67 ||
+            trc_orig == MP_CSP_TRC_V_LOG)
         {
             trc_orig = MP_CSP_TRC_GAMMA22;
         }
@@ -2224,6 +2225,10 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
         // target's reference peak
         if (trc_src == MP_CSP_TRC_ARIB_STD_B67)
             peak_src = 12 * peak_dst;
+
+        // Similar deal for V-Log
+        if (trc_src == MP_CSP_TRC_V_LOG)
+            peak_src = 46.0855 * peak_dst;
     }
 
     // All operations from here on require linear light as a starting point,

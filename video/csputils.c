@@ -80,6 +80,7 @@ const struct m_opt_choice_alternatives mp_csp_trc_names[] = {
     {"prophoto",    MP_CSP_TRC_PRO_PHOTO},
     {"st2084",      MP_CSP_TRC_SMPTE_ST2084},
     {"std-b67",     MP_CSP_TRC_ARIB_STD_B67},
+    {"v-log",       MP_CSP_TRC_V_LOG},
     {0}
 };
 

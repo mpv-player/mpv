@@ -232,6 +232,12 @@ static const float B67_A = 0.17883277,
                    B67_B = 0.28466892,
                    B67_C = 0.55991073;
 
+// Common constants for Panasonic V-Log
+static const float VLOG_B = 0.00873,
+                   VLOG_C = 0.241514,
+                   VLOG_D = 0.598206,
+                   VLOG_R = 46.085527; // nominal peak
+
 // Linearize (expand), given a TRC as input
 void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 {
@@ -280,6 +286,16 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
         // from clipping. (In general, mpv's internal conversions always
         // assume 1.0 is the maximum brightness, not the reference peak)
         GLSL(color.rgb /= vec3(12.0);)
+        break;
+    case MP_CSP_TRC_V_LOG:
+        GLSLF("color.rgb = mix((color.rgb - vec3(0.125)) / vec3(5.6), \n"
+              "    pow(vec3(10.0), (color.rgb - vec3(%f)) / vec3(%f)) \n"
+              "              - vec3(%f),                              \n"
+              "    lessThanEqual(vec3(0.181), color.rgb));            \n",
+              VLOG_D, VLOG_C, VLOG_B);
+        // Same deal as with the B67 function, renormalize to texture range
+        GLSLF("color.rgb /= vec3(%f);\n", VLOG_R);
+        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
         break;
     default:
         abort();
@@ -330,6 +346,14 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               "                vec3(%f) * log(color.rgb - vec3(%f)) + vec3(%f),\n"
               "                lessThan(vec3(1.0), color.rgb));\n",
               B67_A, B67_B, B67_C);
+        break;
+    case MP_CSP_TRC_V_LOG:
+        GLSLF("color.rgb *= vec3(%f);\n", VLOG_R);
+        GLSLF("color.rgb = mix(vec3(5.6) * color.rgb + vec3(0.125),   \n"
+              "                vec3(%f) * log(color.rgb + vec3(%f))   \n"
+              "                    + vec3(%f),                        \n"
+              "                lessThanEqual(vec3(0.01), color.rgb)); \n",
+              VLOG_C / M_LN10, VLOG_B, VLOG_D);
         break;
     default:
         abort();

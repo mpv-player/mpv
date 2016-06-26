@@ -314,6 +314,7 @@ Available filters are:
        :prophoto:     ProPhoto RGB (ROMM) curve
        :st2084:       SMPTE ST2084 (HDR) curve
        :std-b67:      ARIB STD-B67 (Hybrid Log-gamma) curve
+       :v-log:        Panasonic V-Log transfer curve
 
     ``<peak>``
         Reference peak illumination for the video file. This is mostly

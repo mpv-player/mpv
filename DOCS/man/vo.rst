@@ -1007,6 +1007,8 @@ Available video output drivers are:
             SMPTE ST2084 (HDR) curve, PQ OETF
         std-b67
             ARIB STD-B67 (Hybrid Log-gamma) curve, also known as BBC/NHK HDR
+        v-log
+            Panasonic V-Log (VARICAM) curve
 
         NOTE: When using HDR output formats, mpv will encode to the specified
               curve but it will not set any HDMI flags or other signalling that
