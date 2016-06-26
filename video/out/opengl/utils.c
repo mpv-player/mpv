@@ -109,8 +109,10 @@ mp_image_t *gl_read_window_contents(GL *gl)
     mp_image_t *image = mp_image_alloc(IMGFMT_RGB24, vp[2], vp[3]);
     if (!image)
         return NULL;
+    gl->BindFramebuffer(GL_FRAMEBUFFER, gl->main_fb);
+    GLenum obj = gl->main_fb ? GL_COLOR_ATTACHMENT0 : GL_FRONT;
     gl->PixelStorei(GL_PACK_ALIGNMENT, 1);
-    gl->ReadBuffer(GL_FRONT);
+    gl->ReadBuffer(obj);
     //flip image while reading (and also avoid stride-related trouble)
     for (int y = 0; y < vp[3]; y++) {
         gl->ReadPixels(vp[0], vp[1] + vp[3] - y - 1, vp[2], 1,
@@ -118,6 +120,7 @@ mp_image_t *gl_read_window_contents(GL *gl)
                        image->planes[0] + y * image->stride[0]);
     }
     gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
+    gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
     return image;
 }
 
