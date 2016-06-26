@@ -1006,6 +1006,12 @@ Available video output drivers are:
         std-b67
             ARIB STD-B67 (Hybrid Log-gamma) curve, also known as BBC/NHK HDR
 
+        NOTE: When using HDR output formats, mpv will encode to the specified
+              curve but it will not set any HDMI flags or other signalling that
+              might be required for the target device to correctly display the
+              HDR signal. The user should independently guarantee this before
+              using these signal formats for display.
+
     ``target-brightness=<1..100000>``
         Specifies the display's approximate brightness in cd/m^2. When playing
         HDR content on a SDR display (or SDR content on an HDR display), video
