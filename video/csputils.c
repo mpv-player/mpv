@@ -65,6 +65,7 @@ const struct m_opt_choice_alternatives mp_csp_prim_names[] = {
     {"prophoto",    MP_CSP_PRIM_PRO_PHOTO},
     {"cie1931",     MP_CSP_PRIM_CIE_1931},
     {"dci-p3",      MP_CSP_PRIM_DCI_P3},
+    {"v-gamut",     MP_CSP_PRIM_V_GAMUT},
     {0}
 };
 
@@ -420,6 +421,14 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
             .red   = {0.680, 0.320},
             .green = {0.265, 0.690},
             .blue  = {0.150, 0.060},
+            .white = d65
+        };
+    // From Panasonic VARICAM reference manual
+    case MP_CSP_PRIM_V_GAMUT:
+        return (struct mp_csp_primaries) {
+            .red   = {0.730, 0.280},
+            .green = {0.165, 0.840},
+            .blue  = {0.100, -0.03},
             .white = d65
         };
     default:

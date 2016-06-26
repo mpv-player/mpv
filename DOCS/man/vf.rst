@@ -288,6 +288,7 @@ Available filters are:
         :adobe:        Adobe RGB (1998)
         :prophoto:     ProPhoto RGB (ROMM)
         :cie1931:      CIE 1931 RGB
+        :v-gamut:      Panasonic V-Gamut primaries
 
     ``<gamma>``
        Gamma function the source file was encoded with. Normally this should be set
