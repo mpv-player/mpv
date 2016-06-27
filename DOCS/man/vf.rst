@@ -311,6 +311,7 @@ Available filters are:
        :gamma2.8:     Pure power curve (gamma 2.8)
        :prophoto:     ProPhoto RGB (ROMM) curve
        :st2084:       SMPTE ST2084 (HDR) curve
+       :std-b67:      ARIB STD-B67 (Hybrid Log-gamma) curve
 
     ``<peak>``
         Reference peak illumination for the video file. This is mostly
