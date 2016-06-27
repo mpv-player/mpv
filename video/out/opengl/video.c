@@ -2194,26 +2194,29 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
     // Some exceptions apply to source spaces that even hardcore technoluddites
     // would probably not enjoy viewing unaltered
     if (prim_dst == MP_CSP_PRIM_AUTO) {
-        prim_dst = prim_src;
+        prim_dst = p->image_params.primaries;
 
         // Avoid outputting very wide gamut content automatically, since the
         // majority target audience has standard gamut displays
-        if (prim_dst == MP_CSP_PRIM_BT_2020 || prim_dst == MP_CSP_PRIM_PRO_PHOTO)
+        if (prim_dst == MP_CSP_PRIM_BT_2020 ||
+            prim_dst == MP_CSP_PRIM_PRO_PHOTO ||
+            prim_dst == MP_CSP_PRIM_V_GAMUT)
+        {
             prim_dst = MP_CSP_PRIM_BT_709;
+        }
     }
 
     if (trc_dst == MP_CSP_TRC_AUTO) {
-        trc_dst = trc_src;
-        // Avoid outputting linear light at all costs. First try
-        // falling back to the image gamma (e.g. in the case that the input
-        // was linear light due to linear-scaling)
-        if (trc_dst == MP_CSP_TRC_LINEAR)
-            trc_dst = p->image_params.gamma;
+        trc_dst = p->image_params.gamma;
 
-        // Failing that, pick gamma 2.2 as a reasonable default. This is also
-        // picked as a default for outputting HDR content
-        if (trc_dst == MP_CSP_TRC_LINEAR || trc_dst == MP_CSP_TRC_SMPTE_ST2084)
+        // Avoid outputting linear light or HDR content "by default"
+        if (trc_dst == MP_CSP_TRC_LINEAR ||
+            trc_dst == MP_CSP_TRC_SMPTE_ST2084 ||
+            trc_dst == MP_CSP_TRC_ARIB_STD_B67 ||
+            trc_dst == MP_CSP_TRC_V_LOG)
+        {
             trc_dst = MP_CSP_TRC_GAMMA22;
+        }
     }
 
     if (!peak_src) {
@@ -2223,11 +2226,11 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
 
         // Exception: ARIB STD-B67's nominal peak is exactly 12 times the
         // target's reference peak
-        if (trc_src == MP_CSP_TRC_ARIB_STD_B67)
+        if (p->image_params.gamma == MP_CSP_TRC_ARIB_STD_B67)
             peak_src = 12 * peak_dst;
 
         // Similar deal for V-Log
-        if (trc_src == MP_CSP_TRC_V_LOG)
+        if (p->image_params.gamma == MP_CSP_TRC_V_LOG)
             peak_src = 46.0855 * peak_dst;
     }
 
