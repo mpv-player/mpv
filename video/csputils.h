@@ -219,6 +219,8 @@ int mp_chroma_location_to_av(enum mp_chroma_location mploc);
 void mp_get_chroma_location(enum mp_chroma_location loc, int *x, int *y);
 
 struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim csp);
+float mp_csp_trc_rel_peak(enum mp_csp_trc trc);
+bool mp_trc_is_hdr(enum mp_csp_trc trc);
 
 /* Color conversion matrix: RGB = m * YUV + c
  * m is in row-major matrix, with m[row][col], e.g.:

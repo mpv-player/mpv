@@ -2206,31 +2206,24 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
     }
 
     if (trc_dst == MP_CSP_TRC_AUTO) {
+        // Most people seem to complain when the image is darker or brighter
+        // than what they're "used to", so just avoid changing the gamma
+        // altogether by default. The only exceptions to this rule apply to
+        // very unusual TRCs, which even hardcode technoluddites would probably
+        // not enjoy viewing unaltered.
         trc_dst = p->image_params.gamma;
 
-        // Avoid outputting linear light or HDR content "by default"
-        if (trc_dst == MP_CSP_TRC_LINEAR ||
-            trc_dst == MP_CSP_TRC_SMPTE_ST2084 ||
-            trc_dst == MP_CSP_TRC_ARIB_STD_B67 ||
-            trc_dst == MP_CSP_TRC_V_LOG)
-        {
+        // Avoid outputting linear light or HDR content "by default". For these
+        // just pick gamma 2.2 as a default, since it's a good estimate for
+        // the response of typical displays
+        if (trc_dst == MP_CSP_TRC_LINEAR || mp_trc_is_hdr(trc_dst))
             trc_dst = MP_CSP_TRC_GAMMA22;
-        }
     }
 
     if (!peak_src) {
         // If the source has no information known, it's display-referred
         // (and should be treated relative to the specified desired peak_dst)
-        peak_src = peak_dst;
-
-        // Exception: ARIB STD-B67's nominal peak is exactly 12 times the
-        // target's reference peak
-        if (p->image_params.gamma == MP_CSP_TRC_ARIB_STD_B67)
-            peak_src = 12 * peak_dst;
-
-        // Similar deal for V-Log
-        if (p->image_params.gamma == MP_CSP_TRC_V_LOG)
-            peak_src = 46.0855 * peak_dst;
+        peak_src = peak_dst * mp_csp_trc_rel_peak(p->image_params.gamma);
     }
 
     // All operations from here on require linear light as a starting point,
