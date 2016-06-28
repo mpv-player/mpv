@@ -196,27 +196,19 @@ struct mp_csp_primaries {
 
 void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
                                   const struct mp_csp_equalizer *eq);
-
 int mp_csp_equalizer_set(struct mp_csp_equalizer *eq, const char *property,
                          int value);
-
 int mp_csp_equalizer_get(struct mp_csp_equalizer *eq, const char *property,
                          int *out_value);
 
 enum mp_csp avcol_spc_to_mp_csp(int avcolorspace);
-
 enum mp_csp_levels avcol_range_to_mp_csp_levels(int avrange);
-
 enum mp_csp_prim avcol_pri_to_mp_csp_prim(int avpri);
-
 enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc);
 
 int mp_csp_to_avcol_spc(enum mp_csp colorspace);
-
 int mp_csp_levels_to_avcol_range(enum mp_csp_levels range);
-
 int mp_csp_prim_to_avcol_pri(enum mp_csp_prim prim);
-
 int mp_csp_trc_to_avcol_trc(enum mp_csp_trc trc);
 
 enum mp_csp mp_csp_guess_colorspace(int width, int height);
@@ -224,7 +216,6 @@ enum mp_csp_prim mp_csp_guess_primaries(int width, int height);
 
 enum mp_chroma_location avchroma_location_to_mp(int avloc);
 int mp_chroma_location_to_av(enum mp_chroma_location mploc);
-
 void mp_get_chroma_location(enum mp_chroma_location loc, int *x, int *y);
 
 struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim csp);
