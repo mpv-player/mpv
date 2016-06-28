@@ -629,6 +629,8 @@ Available video output drivers are:
             never resets (regardless of seeks).
         vec2 image_size
             The size in pixels of the input image.
+        vec2 output_size
+            The size in pixels of the output screen.
 
         For example, a shader that inverts the colors could look like this::
 
