@@ -2585,7 +2585,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     }
 
     // Find the right frame for this instant
-    if (t->current&& t->current->pts != MP_NOPTS_VALUE) {
+    if (t->current && t->current->pts != MP_NOPTS_VALUE) {
         int next = fbosurface_wrap(p->surface_now + 1);
         while (p->surfaces[next].pts != MP_NOPTS_VALUE &&
                p->surfaces[next].pts > p->surfaces[p->surface_now].pts &&
@@ -2623,7 +2623,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     // this should be done before the step where we find the right frame, but
     // it only barely matters at the very beginning of playback, and this way
     // makes the code much more linear.
-    int surface_dst = fbosurface_wrap(p->surface_idx+1);
+    int surface_dst = fbosurface_wrap(p->surface_idx + 1);
     for (int i = 0; i < t->num_frames; i++) {
         // Avoid overwriting data we might still need
         if (surface_dst == surface_bse - 1)
@@ -2642,7 +2642,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
                             vp_w, vp_h, FBOTEX_FUZZY);
             p->surfaces[surface_dst].pts = f->pts;
             p->surface_idx = surface_dst;
-            surface_dst = fbosurface_wrap(surface_dst+1);
+            surface_dst = fbosurface_wrap(surface_dst + 1);
         }
     }
 
@@ -2653,7 +2653,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     // end of playback or start of playback.
     bool valid = true;
     for (int i = surface_bse, ii; valid && i != surface_end; i = ii) {
-        ii = fbosurface_wrap(i+1);
+        ii = fbosurface_wrap(i + 1);
         if (p->surfaces[i].pts == MP_NOPTS_VALUE ||
             p->surfaces[ii].pts == MP_NOPTS_VALUE)
         {
@@ -2781,7 +2781,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
                     goto done;
                 pass_render_frame(p);
 
-                // For the non-interplation case, we draw to a single "cache"
+                // For the non-interpolation case, we draw to a single "cache"
                 // FBO to speed up subsequent re-draws (if any exist)
                 int dest_fbo = fbo;
                 if (frame->num_vsyncs > 1 && frame->display_synced &&
