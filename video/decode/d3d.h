@@ -19,6 +19,9 @@
 #define MPV_DECODE_D3D_H
 
 #include <windows.h>
+#include <d3d11.h>
+
+#include <stdbool.h>
 #include <inttypes.h>
 
 struct mp_image;
@@ -61,5 +64,7 @@ unsigned d3d_decoder_config_score(struct lavc_ctx *s,
 BOOL is_clearvideo(const GUID *mode_guid);
 void copy_nv12(struct mp_image *dest, uint8_t *src_bits,
                unsigned src_pitch, unsigned surf_height);
+
+bool d3d11_check_decoding(ID3D11Device *dev);
 
 #endif
