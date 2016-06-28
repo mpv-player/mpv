@@ -67,4 +67,8 @@ void copy_nv12(struct mp_image *dest, uint8_t *src_bits,
 
 bool d3d11_check_decoding(ID3D11Device *dev);
 
+struct mp_image *d3d11_download_image(struct mp_hwdec_ctx *ctx,
+                                      struct mp_image *mpi,
+                                      struct mp_image_pool *swpool);
+
 #endif

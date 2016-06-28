@@ -195,6 +195,7 @@ static int create(struct gl_hwdec *hw)
         .type = HWDEC_D3D11VA,
         .driver_name = hw->driver->name,
         .ctx = p->d3d11_device,
+        .download_image = d3d11_download_image,
     };
     hwdec_devices_add(hw->devs, &p->hwctx);
 
