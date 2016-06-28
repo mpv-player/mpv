@@ -2189,20 +2189,19 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
         }
     }
 
-    // When auto-guessing the output color params, just pick the source color
-    // params to preserve the authentic "look and feel" of wrong/naive players.
-    // Some exceptions apply to source spaces that even hardcore technoluddites
-    // would probably not enjoy viewing unaltered
     if (prim_dst == MP_CSP_PRIM_AUTO) {
-        prim_dst = p->image_params.primaries;
+        // The vast majority of people are on sRGB or BT.709 displays, so pick
+        // this as the default output color space.
+        prim_dst = MP_CSP_PRIM_BT_709;
 
-        // Avoid outputting very wide gamut content automatically, since the
-        // majority target audience has standard gamut displays
-        if (prim_dst == MP_CSP_PRIM_BT_2020 ||
-            prim_dst == MP_CSP_PRIM_PRO_PHOTO ||
-            prim_dst == MP_CSP_PRIM_V_GAMUT)
+        if (p->image_params.primaries == MP_CSP_PRIM_BT_601_525 ||
+            p->image_params.primaries == MP_CSP_PRIM_BT_601_625)
         {
-            prim_dst = MP_CSP_PRIM_BT_709;
+            // Since we auto-pick BT.601 and BT.709 based on the dimensions,
+            // combined with the fact that they're very similar to begin with,
+            // and to avoid confusing the average user, just don't adapt BT.601
+            // content automatically at all.
+            prim_dst = p->image_params.primaries;
         }
     }
 
