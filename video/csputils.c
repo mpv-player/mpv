@@ -437,6 +437,31 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
     }
 }
 
+// Get the relative peak of a transfer curve, that is: (source reference /
+// display reference), or 0 if there is none (i.e. source has an absolute peak)
+float mp_csp_trc_rel_peak(enum mp_csp_trc trc)
+{
+    switch (trc) {
+    case MP_CSP_TRC_SMPTE_ST2084: return 0.0; // This has a fixed peak
+    case MP_CSP_TRC_ARIB_STD_B67: return 12.0;
+    case MP_CSP_TRC_V_LOG:        return 46.0855;
+    }
+
+    return 1.0;
+}
+
+bool mp_trc_is_hdr(enum mp_csp_trc trc)
+{
+    switch (trc) {
+    case MP_CSP_TRC_SMPTE_ST2084:
+    case MP_CSP_TRC_ARIB_STD_B67:
+    case MP_CSP_TRC_V_LOG:
+        return true;
+    }
+
+    return false;
+}
+
 // Compute the RGB/XYZ matrix as described here:
 // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
 static void mp_get_rgb2xyz_matrix(struct mp_csp_primaries space, float m[3][3])
