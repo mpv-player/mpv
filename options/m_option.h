@@ -333,6 +333,10 @@ struct m_option {
 
     // Initialize variable to given default before parsing options
     const void *defval;
+
+    // Print a warning when this option is used (for options with no direct
+    // replacement.)
+    const char *deprecation_message;
 };
 
 
