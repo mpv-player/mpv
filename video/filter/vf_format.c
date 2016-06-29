@@ -96,7 +96,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     if (p->gamma)
         out->color.gamma = p->gamma;
     if (p->peak)
-        out->color.peak = p->peak;
+        out->color.sig_peak = p->peak;
     if (p->chroma_location)
         out->chroma_location = p->chroma_location;
     if (p->stereo_in)

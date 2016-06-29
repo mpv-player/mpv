@@ -437,17 +437,18 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
     }
 }
 
-// Get the relative peak of a transfer curve, that is: (source reference /
-// display reference), or 0 if there is none (i.e. source has an absolute peak)
-float mp_csp_trc_rel_peak(enum mp_csp_trc trc)
+// Get the nominal peak for a given colorspace, based on a known reference peak
+// (i.e. the display of a reference white illuminant. This may or may not
+// be the actual signal peak)
+float mp_csp_trc_nom_peak(enum mp_csp_trc trc, float ref_peak)
 {
     switch (trc) {
-    case MP_CSP_TRC_SMPTE_ST2084: return 0.0; // This has a fixed peak
-    case MP_CSP_TRC_ARIB_STD_B67: return 12.0;
-    case MP_CSP_TRC_V_LOG:        return 46.0855;
+    case MP_CSP_TRC_SMPTE_ST2084: return 10000; // fixed peak
+    case MP_CSP_TRC_ARIB_STD_B67: return 12.0 * ref_peak;
+    case MP_CSP_TRC_V_LOG:        return 46.0855 * ref_peak;
     }
 
-    return 1.0;
+    return ref_peak;
 }
 
 bool mp_trc_is_hdr(enum mp_csp_trc trc)
@@ -781,7 +782,8 @@ bool mp_colorspace_equal(struct mp_colorspace c1, struct mp_colorspace c2)
            c1.levels == c2.levels &&
            c1.primaries == c2.primaries &&
            c1.gamma == c2.gamma &&
-           c1.peak == c2.peak;
+           c1.sig_peak == c2.sig_peak &&
+           c1.nom_peak == c2.nom_peak;
 }
 
 // Copy settings from eq into params.

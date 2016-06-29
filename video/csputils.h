@@ -121,7 +121,8 @@ struct mp_colorspace {
     enum mp_csp_levels levels;
     enum mp_csp_prim primaries;
     enum mp_csp_trc gamma;
-    float peak; // 0 = auto/unknown
+    float nom_peak; // nominal (absolute) peak. 0 = auto/unknown
+    float sig_peak; // signal peak, highest value that occurs in the source
 };
 
 struct mp_csp_params {
@@ -226,7 +227,7 @@ int mp_chroma_location_to_av(enum mp_chroma_location mploc);
 void mp_get_chroma_location(enum mp_chroma_location loc, int *x, int *y);
 
 struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim csp);
-float mp_csp_trc_rel_peak(enum mp_csp_trc trc);
+float mp_csp_trc_nom_peak(enum mp_csp_trc trc, float ref_peak);
 bool mp_trc_is_hdr(enum mp_csp_trc trc);
 
 /* Color conversion matrix: RGB = m * YUV + c
