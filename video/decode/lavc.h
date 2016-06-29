@@ -26,7 +26,7 @@ typedef struct lavc_ctx {
     bool hwdec_notified;
 
     // For HDR side-data caching
-    int cached_hdr_peak;
+    double cached_hdr_peak;
 
     struct mp_image **delay_queue;
     int num_delay_queue;

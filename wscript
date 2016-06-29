@@ -504,6 +504,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
                                 'AVCOL_TRC_SMPTEST2084,'
                                 'AVCOL_TRC_ARIB_STD_B67',
                                 use='libav'),
+    }, {
+        'name': 'avutil-mastering-metadata',
+        'desc': 'libavutil mastering display metadata struct',
+        'func': check_statement('libavutil/mastering_display_metadata.h',
+                                'AV_FRAME_DATA_MASTERING_DISPLAY_METADATA',
+                                use='libav'),
     }
 ]
 
