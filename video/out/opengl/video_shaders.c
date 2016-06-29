@@ -361,9 +361,11 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 }
 
 // Tone map from a known peak brightness to the range [0,1]
-void pass_tone_map(struct gl_shader_cache *sc, float peak,
-                   enum tone_mapping algo, float param)
+static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
+                          enum tone_mapping algo, float param)
 {
+    GLSLF("// HDR tone mapping\n");
+
     switch (algo) {
     case TONE_MAPPING_CLIP:
         GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
@@ -373,7 +375,7 @@ void pass_tone_map(struct gl_shader_cache *sc, float peak,
         float contrast = isnan(param) ? 0.5 : param,
               offset = (1.0 - contrast) / contrast;
         GLSLF("color.rgb = color.rgb / (color.rgb + vec3(%f));\n", offset);
-        GLSLF("color.rgb *= vec3(%f);\n", (peak + offset) / peak);
+        GLSLF("color.rgb *= vec3(%f);\n", (ref_peak + offset) / ref_peak);
         break;
     }
 
@@ -384,26 +386,69 @@ void pass_tone_map(struct gl_shader_cache *sc, float peak,
                A, C*B, D*E, A, B, D*F, E/F);
         GLSLHF("}\n");
 
-        GLSLF("color.rgb = hable(color.rgb) / hable(vec3(%f));\n", peak);
+        GLSLF("color.rgb = hable(color.rgb) / hable(vec3(%f));\n", ref_peak);
         break;
     }
 
     case TONE_MAPPING_GAMMA: {
         float gamma = isnan(param) ? 1.8 : param;
         GLSLF("color.rgb = pow(color.rgb / vec3(%f), vec3(%f));\n",
-              peak, 1.0/gamma);
+              ref_peak, 1.0/gamma);
         break;
     }
 
     case TONE_MAPPING_LINEAR: {
         float coeff = isnan(param) ? 1.0 : param;
-        GLSLF("color.rgb = vec3(%f) * color.rgb;\n", coeff / peak);
+        GLSLF("color.rgb = vec3(%f) * color.rgb;\n", coeff / ref_peak);
         break;
     }
 
     default:
         abort();
     }
+}
+
+// Map colors from one source space to another. These source spaces
+// must be known (i.e. not MP_CSP_*_AUTO), as this function won't perform
+// any auto-guessing.
+void pass_color_map(struct gl_shader_cache *sc,
+                    struct mp_colorspace src, struct mp_colorspace dst,
+                    enum tone_mapping algo, float tone_mapping_param)
+{
+    GLSLF("// color mapping\n");
+
+    // All operations from here on require linear light as a starting point,
+    // so we linearize even if src.gamma == dst.gamma when one of the other
+    // operations needs it
+    bool need_gamma = src.gamma != dst.gamma ||
+                      src.primaries != dst.primaries ||
+                      src.nom_peak != dst.nom_peak ||
+                      src.sig_peak > dst.nom_peak;
+
+    if (need_gamma)
+        pass_linearize(sc, src.gamma);
+
+    // Stretch the signal value to renormalize to the dst nominal peak
+    if (src.nom_peak != dst.nom_peak)
+        GLSLF("color.rgb *= vec3(%f);\n", src.nom_peak / dst.nom_peak);
+
+    // Tone map to prevent clipping when the source signal peak exceeds the
+    // encodable range.
+    if (src.sig_peak > dst.nom_peak)
+        pass_tone_map(sc, src.sig_peak / dst.nom_peak, algo, tone_mapping_param);
+
+    // Adapt to the right colorspace if necessary
+    if (src.primaries != dst.primaries) {
+        struct mp_csp_primaries csp_src = mp_get_csp_primaries(src.primaries),
+                                csp_dst = mp_get_csp_primaries(dst.primaries);
+        float m[3][3] = {{0}};
+        mp_get_cms_matrix(csp_src, csp_dst, MP_INTENT_RELATIVE_COLORIMETRIC, m);
+        gl_sc_uniform_mat3(sc, "cms_matrix", true, &m[0][0]);
+        GLSL(color.rgb = cms_matrix * color.rgb;)
+    }
+
+    if (need_gamma)
+        pass_delinearize(sc, dst.gamma);
 }
 
 // Wide usage friendly PRNG, shamelessly stolen from a GLSL tricks forum post.

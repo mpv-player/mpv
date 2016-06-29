@@ -395,7 +395,8 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     }
     dst->params.color.primaries = src->params.color.primaries;
     dst->params.color.gamma = src->params.color.gamma;
-    dst->params.color.peak = src->params.color.peak;
+    dst->params.color.nom_peak = src->params.color.nom_peak;
+    dst->params.color.sig_peak = src->params.color.sig_peak;
     if ((dst->fmt.flags & MP_IMGFLAG_YUV) == (src->fmt.flags & MP_IMGFLAG_YUV)) {
         dst->params.color.space = src->params.color.space;
         dst->params.color.levels = src->params.color.levels;
@@ -668,8 +669,8 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
 
     // Guess the nominal peak (independent of the colorspace)
     if (params->color.gamma == MP_CSP_TRC_SMPTE_ST2084) {
-        if (!params->color.peak)
-            params->color.peak = 10000; // As per the spec
+        if (!params->color.nom_peak)
+            params->color.nom_peak = 10000; // As per the spec
     }
 }
 

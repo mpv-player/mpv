@@ -2158,19 +2158,29 @@ static void pass_scale_main(struct gl_video *p)
     }
 }
 
-// Adapts the colors from the given color space to the display device's native
-// gamut.
-static void pass_colormanage(struct gl_video *p, float peak_src,
-                             enum mp_csp_prim prim_src,
-                             enum mp_csp_trc trc_src)
+// Adapts the colors to the right output color space. (Final pass during
+// rendering)
+// If OSD is true, ignore any changes that may have been made to the video
+// by previous passes (i.e. linear scaling)
+static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool osd)
 {
-    GLSLF("// color management\n");
-    enum mp_csp_trc trc_dst = p->opts.target_trc;
-    enum mp_csp_prim prim_dst = p->opts.target_prim;
-    float peak_dst = p->opts.target_brightness;
+    struct mp_colorspace ref = src;
+
+    if (p->use_linear && !osd)
+        src.gamma = MP_CSP_TRC_LINEAR;
+
+    // Figure out the target color space from the options, or auto-guess if
+    // none were set
+    struct mp_colorspace dst = {
+        .gamma = p->opts.target_trc,
+        .primaries = p->opts.target_prim,
+        .nom_peak = mp_csp_trc_nom_peak(p->opts.target_trc, p->opts.target_brightness),
+    };
 
     if (p->use_lut_3d) {
-        // The 3DLUT is always generated against the original source space
+        // The 3DLUT is always generated against the video's original source
+        // space, *not* the reference space. (To avoid having to regenerate
+        // the 3DLUT for the OSD on every frame)
         enum mp_csp_prim prim_orig = p->image_params.color.primaries;
         enum mp_csp_trc trc_orig = p->image_params.color.gamma;
 
@@ -2186,87 +2196,66 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
         }
 
         if (gl_video_get_lut3d(p, prim_orig, trc_orig)) {
-            prim_dst = prim_orig;
-            trc_dst = trc_orig;
+            dst.primaries = prim_orig;
+            dst.gamma = trc_orig;
         }
     }
 
-    if (prim_dst == MP_CSP_PRIM_AUTO) {
+    if (dst.primaries == MP_CSP_PRIM_AUTO) {
         // The vast majority of people are on sRGB or BT.709 displays, so pick
         // this as the default output color space.
-        prim_dst = MP_CSP_PRIM_BT_709;
+        dst.primaries = MP_CSP_PRIM_BT_709;
 
-        if (p->image_params.color.primaries == MP_CSP_PRIM_BT_601_525 ||
-            p->image_params.color.primaries == MP_CSP_PRIM_BT_601_625)
+        if (ref.primaries == MP_CSP_PRIM_BT_601_525 ||
+            ref.primaries == MP_CSP_PRIM_BT_601_625)
         {
             // Since we auto-pick BT.601 and BT.709 based on the dimensions,
             // combined with the fact that they're very similar to begin with,
             // and to avoid confusing the average user, just don't adapt BT.601
             // content automatically at all.
-            prim_dst = p->image_params.color.primaries;
+            dst.primaries = ref.gamma;
         }
     }
 
-    if (trc_dst == MP_CSP_TRC_AUTO) {
+    if (dst.gamma == MP_CSP_TRC_AUTO) {
         // Most people seem to complain when the image is darker or brighter
         // than what they're "used to", so just avoid changing the gamma
         // altogether by default. The only exceptions to this rule apply to
         // very unusual TRCs, which even hardcode technoluddites would probably
         // not enjoy viewing unaltered.
-        trc_dst = p->image_params.color.gamma;
+        dst.gamma = ref.gamma;
 
         // Avoid outputting linear light or HDR content "by default". For these
         // just pick gamma 2.2 as a default, since it's a good estimate for
         // the response of typical displays
-        if (trc_dst == MP_CSP_TRC_LINEAR || mp_trc_is_hdr(trc_dst))
-            trc_dst = MP_CSP_TRC_GAMMA22;
+        if (dst.gamma == MP_CSP_TRC_LINEAR || mp_trc_is_hdr(dst.gamma))
+            dst.gamma = MP_CSP_TRC_GAMMA22;
     }
 
-    if (!peak_src) {
-        // If the source has no information known, it's display-referred
-        // (and should be treated relative to the specified desired peak_dst)
-        peak_src = peak_dst * mp_csp_trc_rel_peak(p->image_params.color.gamma);
+    // For the src peaks, the correct brightness metadata may be present for
+    // sig_peak, nom_peak, both, or neither. To handle everything in a generic
+    // way, it's important to never automatically infer a sig_peak that is
+    // below the nom_peak (since we don't know what bits the image contains,
+    // doing so would potentially badly clip). The only time in which this
+    // may be the case is when the mastering metadata explicitly says so, i.e.
+    // the sig_peak was already set. So to simplify the logic as much as
+    // possible, make sure the nom_peak is present and correct first, and just
+    // set sig_peak = nom_peak if missing.
+    if (!src.nom_peak) {
+        // For display-referred colorspaces, we treat it as relative to
+        // target_brightness
+        src.nom_peak = mp_csp_trc_nom_peak(src.gamma, p->opts.target_brightness);
     }
 
-    // All operations from here on require linear light as a starting point,
-    // so we linearize even if trc_src == trc_dst when one of the other
-    // operations needs it
-    bool need_gamma = trc_src != trc_dst || prim_src != prim_dst ||
-                      peak_src != peak_dst;
-    if (need_gamma)
-        pass_linearize(p->sc, trc_src);
+    if (!src.sig_peak)
+        src.sig_peak = src.nom_peak;
 
-    // Adapt and tone map for a different reference peak brightness
-    if (peak_src != peak_dst)
-    {
-        GLSLF("// HDR tone mapping\n");
-        float rel_peak = peak_src / peak_dst;
-        // Normalize such that 1 is the target brightness (and values above
-        // 1 are out of range)
-        GLSLF("color.rgb *= vec3(%f);\n", rel_peak);
-        // Tone map back down to the range [0,1]
-        pass_tone_map(p->sc, rel_peak, p->opts.hdr_tone_mapping,
-                      p->opts.tone_mapping_param);
-    }
+    MP_DBG(p, "HDR src nom: %f sig: %f, dst: %f\n",
+           src.nom_peak, src.sig_peak, dst.nom_peak);
 
-    // Adapt to the right colorspace if necessary
-    if (prim_src != prim_dst) {
-        struct mp_csp_primaries csp_src = mp_get_csp_primaries(prim_src),
-                                csp_dst = mp_get_csp_primaries(prim_dst);
-        float m[3][3] = {{0}};
-        mp_get_cms_matrix(csp_src, csp_dst, MP_INTENT_RELATIVE_COLORIMETRIC, m);
-        gl_sc_uniform_mat3(p->sc, "cms_matrix", true, &m[0][0]);
-        GLSL(color.rgb = cms_matrix * color.rgb;)
-    }
-
-    if (need_gamma) {
-        // If the target encoding function has a fixed peak, we need to
-        // un-normalize back to the encoding signal range
-        if (trc_dst == MP_CSP_TRC_SMPTE_ST2084)
-            GLSLF("color.rgb *= vec3(%f);\n", peak_dst / 10000);
-
-        pass_delinearize(p->sc, trc_dst);
-    }
+    // Adapt from src to dst as necessary
+    pass_color_map(p->sc, src, dst, p->opts.hdr_tone_mapping,
+                   p->opts.tone_mapping_param);
 
     if (p->use_lut_3d) {
         gl_sc_uniform_sampler(p->sc, "lut_3d", GL_TEXTURE_3D, TEXUNIT_3DLUT);
@@ -2407,11 +2396,15 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
         default:
             abort();
         }
-        // Subtitle color management, they're assumed to be display-referred
-        // sRGB by default
+        // When subtitles need to be color managed, assume they're in sRGB
+        // (for lack of anything saner to do)
         if (cms) {
-            pass_colormanage(p, p->opts.target_brightness,
-                             MP_CSP_PRIM_BT_709, MP_CSP_TRC_SRGB);
+            static const struct mp_colorspace csp_srgb = {
+                .primaries = MP_CSP_PRIM_BT_709,
+                .gamma = MP_CSP_TRC_SRGB,
+            };
+
+            pass_colormanage(p, csp_srgb, true);
         }
         gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
         gl_sc_gen_shader_and_reset(p->sc);
@@ -2542,8 +2535,7 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
         GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
 
-    pass_colormanage(p, p->image_params.color.peak, p->image_params.color.primaries,
-                     p->use_linear ? MP_CSP_TRC_LINEAR : p->image_params.color.gamma);
+    pass_colormanage(p, p->image_params.color, false);
 
     // Draw checkerboard pattern to indicate transparency
     if (p->has_alpha && p->opts.alpha_mode == ALPHA_BLEND_TILES) {
