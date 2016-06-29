@@ -47,6 +47,10 @@
 #include "video/csputils.h"
 #include "video/sws_utils.h"
 
+#if HAVE_AVUTIL_MASTERING_METADATA
+#include <libavutil/mastering_display_metadata.h>
+#endif
+
 #include "lavc.h"
 
 #if AVPALETTE_SIZE != MP_PALETTE_SIZE
@@ -572,6 +576,26 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
     vd_ffmpeg_ctx *ctx = vd->priv;
     struct MPOpts *opts = ctx->opts;
 
+#if HAVE_AVUTIL_MASTERING_METADATA
+    // Get the reference peak (for HDR) if available. This is cached into ctx
+    // when it's found, since it's not available on every frame (and seems to
+    // be only available for keyframes)
+    AVFrameSideData *sd = av_frame_get_side_data(frame,
+                          AV_FRAME_DATA_MASTERING_DISPLAY_METADATA);
+    if (sd) {
+        AVMasteringDisplayMetadata *mdm = (AVMasteringDisplayMetadata *)sd->data;
+        if (mdm->has_luminance) {
+            double peak = av_q2d(mdm->max_luminance);
+            if (!isnormal(peak) || peak < 10 || peak > 100000) {
+                // Invalid data, ignore it. Sadly necessary
+                MP_WARN(vd, "Invalid HDR reference peak in stream: %f\n", peak);
+            } else {
+                ctx->cached_hdr_peak = peak;
+            }
+        }
+    }
+#endif
+
     *out_params = (struct mp_image_params) {
         .imgfmt = pixfmt2imgfmt(frame->format),
         .w = frame->width,
@@ -583,6 +607,7 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
             .levels = avcol_range_to_mp_csp_levels(ctx->avctx->color_range),
             .primaries = avcol_pri_to_mp_csp_prim(ctx->avctx->color_primaries),
             .gamma = avcol_trc_to_mp_csp_trc(ctx->avctx->color_trc),
+            .sig_peak = ctx->cached_hdr_peak,
         },
         .chroma_location =
             avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
