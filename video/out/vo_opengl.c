@@ -305,8 +305,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
         struct mp_image *screen = gl_read_window_contents(p->gl);
         // set image parameters according to the display, if possible
         if (screen) {
-            screen->params.primaries = p->renderer_opts->target_prim;
-            screen->params.gamma = p->renderer_opts->target_trc;
+            screen->params.color = (struct mp_colorspace) {
+                .primaries = p->renderer_opts->target_prim,
+                .gamma = p->renderer_opts->target_trc,
+            };
             if (p->glctx->flip_v)
                 mp_image_vflip(screen);
         }

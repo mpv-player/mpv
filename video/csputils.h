@@ -116,11 +116,17 @@ extern const struct m_opt_choice_alternatives mp_stereo3d_names[];
 #define MP_STEREO3D_NAME_DEF(x, def) \
     (MP_STEREO3D_NAME(x) ? MP_STEREO3D_NAME(x) : (def))
 
-struct mp_csp_params {
-    enum mp_csp colorspace;
-    enum mp_csp_levels levels_in;      // encoded video
-    enum mp_csp_levels levels_out;     // output device
+struct mp_colorspace {
+    enum mp_csp space;
+    enum mp_csp_levels levels;
     enum mp_csp_prim primaries;
+    enum mp_csp_trc gamma;
+    float peak; // 0 = auto/unknown
+};
+
+struct mp_csp_params {
+    struct mp_colorspace color; // input colorspace
+    enum mp_csp_levels levels_out; // output device
     float brightness;
     float contrast;
     float hue;
@@ -134,9 +140,8 @@ struct mp_csp_params {
 };
 
 #define MP_CSP_PARAMS_DEFAULTS {                                \
-    .colorspace = MP_CSP_BT_601,                                \
-    .levels_in = MP_CSP_LEVELS_TV,                              \
-    .primaries = MP_CSP_PRIM_AUTO,                              \
+    .color = { .space = MP_CSP_BT_601,                          \
+               .levels = MP_CSP_LEVELS_TV },                    \
     .levels_out = MP_CSP_LEVELS_PC,                             \
     .brightness = 0, .contrast = 1, .hue = 0, .saturation = 1,  \
     .gamma = 1, .texture_bits = 8, .input_bits = 8}
@@ -144,6 +149,8 @@ struct mp_csp_params {
 struct mp_image_params;
 void mp_csp_set_image_params(struct mp_csp_params *params,
                              const struct mp_image_params *imgparams);
+
+bool mp_colorspace_equal(struct mp_colorspace c1, struct mp_colorspace c2);
 
 enum mp_chroma_location {
     MP_CHROMA_AUTO,
