@@ -2019,6 +2019,14 @@ Window
     be the default behavior. Currently only affects X11 VOs.
 
 ``--heartbeat-cmd=<command>``
+
+    .. warning::
+
+        This option is redundant with Lua scripting. Further, it shouldn't be
+        needed for disabling screensaver anyway, since mpv will call
+        ``xdg-screensaver`` when using X11 backend. As a consequence this
+        option has been deprecated with no direct replacement.
+
     Command that is executed every 30 seconds during playback via *system()* -
     i.e. using the shell. The time between the commands can be customized with
     the ``--heartbeat-interval`` option. The command is not run while playback

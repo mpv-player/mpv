@@ -19,6 +19,8 @@ Interface changes
 
 ::
 
+ --- mpv 0.18.1 ---
+    - deprecate --heartbeat-cmd
  --- mpv 0.18.0 ---
     - now ab-loops are active even if one of the "ab-loop-a"/"-b" properties is
       unset ("no"), in which case the start of the file is used if the A loop
