@@ -490,10 +490,9 @@ struct ao_hotplug *ao_hotplug_create(struct mpv_global *global,
 static void get_devices(struct ao *ao, struct ao_device_list *list)
 {
     int num = list->num_devices;
-    if (ao->driver->list_devs)
+    if (ao->driver->list_devs) {
         ao->driver->list_devs(ao, list);
-    // Add at least a default entry
-    if (list->num_devices == num) {
+    } else {
         char name[80] = "Default";
         if (num > 1)
             mp_snprintf_cat(name, sizeof(name), " (%s)", ao->driver->name);
