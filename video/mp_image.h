@@ -43,11 +43,7 @@ struct mp_image_params {
                                 // (will use the HW API's format identifiers)
     int w, h;                   // image dimensions
     int p_w, p_h;               // define pixel aspect ratio (undefined: 0/0)
-    enum mp_csp colorspace;
-    enum mp_csp_levels colorlevels;
-    enum mp_csp_prim primaries;
-    enum mp_csp_trc gamma;
-    float peak; // 0 = auto/unknown
+    struct mp_colorspace color;
     enum mp_chroma_location chroma_location;
     // The image should be rotated clockwise (0-359 degrees).
     int rotate;

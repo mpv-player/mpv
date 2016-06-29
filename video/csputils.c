@@ -581,7 +581,7 @@ void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest
 static void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params,
                                   enum mp_render_intent intent, struct mp_cmat *m)
 {
-    struct mp_csp_primaries prim = mp_get_csp_primaries(params->primaries);
+    struct mp_csp_primaries prim = mp_get_csp_primaries(params->color.primaries);
     float brightness = params->brightness;
     mp_get_rgb2xyz_matrix(prim, m->m);
     mp_invert_matrix3x3(m->m);
@@ -658,10 +658,10 @@ static void luma_coeffs(struct mp_cmat *mat, float lr, float lg, float lb)
 // get the coefficients of the yuv -> rgb conversion matrix
 void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
 {
-    int colorspace = params->colorspace;
+    enum mp_csp colorspace = params->color.space;
     if (colorspace <= MP_CSP_AUTO || colorspace >= MP_CSP_COUNT)
         colorspace = MP_CSP_BT_601;
-    int levels_in = params->levels_in;
+    enum mp_csp_levels levels_in = params->color.levels;
     if (levels_in <= MP_CSP_LEVELS_AUTO || levels_in >= MP_CSP_LEVELS_COUNT)
         levels_in = MP_CSP_LEVELS_TV;
 
@@ -772,9 +772,16 @@ void mp_csp_set_image_params(struct mp_csp_params *params,
 {
     struct mp_image_params p = *imgparams;
     mp_image_params_guess_csp(&p); // ensure consistency
-    params->colorspace = p.colorspace;
-    params->levels_in = p.colorlevels;
-    params->primaries = p.primaries;
+    params->color = p.color;
+}
+
+bool mp_colorspace_equal(struct mp_colorspace c1, struct mp_colorspace c2)
+{
+    return c1.space == c2.space &&
+           c1.levels == c2.levels &&
+           c1.primaries == c2.primaries &&
+           c1.gamma == c2.gamma &&
+           c1.peak == c2.peak;
 }
 
 // Copy settings from eq into params.

@@ -193,8 +193,7 @@ static void scale_sb_rgba(struct sub_bitmap *sb, struct mp_image *dst_format,
     mp_image_swscale(sbisrc2, &sbisrc, SWS_BILINEAR);
     unpremultiply_and_split_BGR32(sbisrc2, sba);
 
-    sbi->params.colorspace = dst_format->params.colorspace;
-    sbi->params.colorlevels = dst_format->params.colorlevels;
+    sbi->params.color = dst_format->params.color;
     mp_image_swscale(sbi, sbisrc2, SWS_BILINEAR);
 
     talloc_free(sbisrc2);
@@ -367,8 +366,8 @@ static struct part *get_cache(struct mp_draw_sub_cache *cache,
         if (part) {
             if (part->change_id != sbs->change_id
                 || part->imgfmt != format->imgfmt
-                || part->colorspace != format->params.colorspace
-                || part->levels != format->params.colorlevels)
+                || part->colorspace != format->params.color.space
+                || part->levels != format->params.color.levels)
             {
                 talloc_free(part);
                 part = NULL;
@@ -380,8 +379,8 @@ static struct part *get_cache(struct mp_draw_sub_cache *cache,
                 .change_id = sbs->change_id,
                 .num_imgs = sbs->num_parts,
                 .imgfmt = format->imgfmt,
-                .levels = format->params.colorlevels,
-                .colorspace = format->params.colorspace,
+                .levels = format->params.color.levels,
+                .colorspace = format->params.color.space,
             };
             part->imgs = talloc_zero_array(part, struct sub_cache,
                                            part->num_imgs);
@@ -436,10 +435,8 @@ static struct mp_image *chroma_up(struct mp_draw_sub_cache *cache, int imgfmt,
 
     // The temp image is always YUV, but src not necessarily.
     // Reduce amount of conversions in YUV case (upsampling/shifting only)
-    if (src->fmt.flags & MP_IMGFLAG_YUV) {
-        temp->params.colorspace = src->params.colorspace;
-        temp->params.colorlevels = src->params.colorlevels;
-    }
+    if (src->fmt.flags & MP_IMGFLAG_YUV)
+        temp->params.color = src->params.color;
 
     if (src->imgfmt == IMGFMT_420P) {
         assert(imgfmt == IMGFMT_444P);

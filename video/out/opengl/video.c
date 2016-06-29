@@ -729,7 +729,7 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
 
     // The existing code assumes we just have a single tex multiplier for
     // all of the planes. This may change in the future
-    float tex_mul = 1.0 / mp_get_csp_mul(p->image_params.colorspace,
+    float tex_mul = 1.0 / mp_get_csp_mul(p->image_params.color.space,
                                          p->image_desc.component_bits,
                                          p->image_desc.component_full_bits);
 
@@ -793,7 +793,7 @@ static void init_video(struct gl_video *p)
     mp_image_params_guess_csp(&p->image_params);
 
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
-    if (p->image_params.colorspace != MP_CSP_BT_2020_C)
+    if (p->image_params.color.space != MP_CSP_BT_2020_C)
         eq_caps |= MP_CSP_EQ_CAPS_COLORMATRIX;
     if (p->image_desc.flags & MP_IMGFLAG_XYZ)
         eq_caps |= MP_CSP_EQ_CAPS_BRIGHTNESS;
@@ -1985,7 +1985,7 @@ static void pass_convert_yuv(struct gl_video *p)
         GLSLF("color = color.%s;\n", p->color_swizzle);
 
     // Pre-colormatrix input gamma correction
-    if (cparams.colorspace == MP_CSP_XYZ)
+    if (cparams.color.space == MP_CSP_XYZ)
         GLSL(color.rgb = pow(color.rgb, vec3(2.6));) // linear light
 
     // We always explicitly normalize the range in pass_read_video
@@ -2000,7 +2000,7 @@ static void pass_convert_yuv(struct gl_video *p)
 
     GLSL(color.rgb = mat3(colormatrix) * color.rgb + colormatrix_c;)
 
-    if (p->image_params.colorspace == MP_CSP_BT_2020_C) {
+    if (p->image_params.color.space == MP_CSP_BT_2020_C) {
         // Conversion for C'rcY'cC'bc via the BT.2020 CL system:
         // C'bc = (B'-Y'c) / 1.9404  | C'bc <= 0
         //      = (B'-Y'c) / 1.5816  | C'bc >  0
@@ -2111,7 +2111,7 @@ static void pass_scale_main(struct gl_video *p)
     // Pre-conversion, like linear light/sigmoidization
     GLSLF("// scaler pre-conversion\n");
     if (p->use_linear) {
-        pass_linearize(p->sc, p->image_params.gamma);
+        pass_linearize(p->sc, p->image_params.color.gamma);
         pass_opt_hook_point(p, "LINEAR", NULL);
     }
 
@@ -2171,8 +2171,8 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
 
     if (p->use_lut_3d) {
         // The 3DLUT is always generated against the original source space
-        enum mp_csp_prim prim_orig = p->image_params.primaries;
-        enum mp_csp_trc trc_orig = p->image_params.gamma;
+        enum mp_csp_prim prim_orig = p->image_params.color.primaries;
+        enum mp_csp_trc trc_orig = p->image_params.color.gamma;
 
         // One exception: HDR is not implemented by LittleCMS for technical
         // limitation reasons, so we use a gamma 2.2 input curve here instead.
@@ -2196,14 +2196,14 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
         // this as the default output color space.
         prim_dst = MP_CSP_PRIM_BT_709;
 
-        if (p->image_params.primaries == MP_CSP_PRIM_BT_601_525 ||
-            p->image_params.primaries == MP_CSP_PRIM_BT_601_625)
+        if (p->image_params.color.primaries == MP_CSP_PRIM_BT_601_525 ||
+            p->image_params.color.primaries == MP_CSP_PRIM_BT_601_625)
         {
             // Since we auto-pick BT.601 and BT.709 based on the dimensions,
             // combined with the fact that they're very similar to begin with,
             // and to avoid confusing the average user, just don't adapt BT.601
             // content automatically at all.
-            prim_dst = p->image_params.primaries;
+            prim_dst = p->image_params.color.primaries;
         }
     }
 
@@ -2213,7 +2213,7 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
         // altogether by default. The only exceptions to this rule apply to
         // very unusual TRCs, which even hardcode technoluddites would probably
         // not enjoy viewing unaltered.
-        trc_dst = p->image_params.gamma;
+        trc_dst = p->image_params.color.gamma;
 
         // Avoid outputting linear light or HDR content "by default". For these
         // just pick gamma 2.2 as a default, since it's a good estimate for
@@ -2225,7 +2225,7 @@ static void pass_colormanage(struct gl_video *p, float peak_src,
     if (!peak_src) {
         // If the source has no information known, it's display-referred
         // (and should be treated relative to the specified desired peak_dst)
-        peak_src = peak_dst * mp_csp_trc_rel_peak(p->image_params.gamma);
+        peak_src = peak_dst * mp_csp_trc_rel_peak(p->image_params.color.gamma);
     }
 
     // All operations from here on require linear light as a starting point,
@@ -2513,7 +2513,7 @@ static void pass_render_frame(struct gl_video *p)
         rect.mt *= scale[1]; rect.mb *= scale[1];
         // We should always blend subtitles in non-linear light
         if (p->use_linear) {
-            pass_delinearize(p->sc, p->image_params.gamma);
+            pass_delinearize(p->sc, p->image_params.color.gamma);
             p->use_linear = false;
         }
         finish_pass_fbo(p, &p->blend_subs_fbo, p->texture_w, p->texture_h,
@@ -2542,8 +2542,8 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
         GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
 
-    pass_colormanage(p, p->image_params.peak, p->image_params.primaries,
-                     p->use_linear ? MP_CSP_TRC_LINEAR : p->image_params.gamma);
+    pass_colormanage(p, p->image_params.color.peak, p->image_params.color.primaries,
+                     p->use_linear ? MP_CSP_TRC_LINEAR : p->image_params.color.gamma);
 
     // Draw checkerboard pattern to indicate transparency
     if (p->has_alpha && p->opts.alpha_mode == ALPHA_BLEND_TILES) {

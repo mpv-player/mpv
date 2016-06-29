@@ -518,7 +518,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     ctx->current_buf = 0;
     ctx->current_ip_buf = 0;
 
-    int is_709 = params->colorspace == MP_CSP_BT_709;
+    int is_709 = params->color.space == MP_CSP_BT_709;
     xv_set_eq(vo, ctx->xv_port, "bt_709", is_709 * 200 - 100);
     read_xv_csp(vo);
 
@@ -661,7 +661,7 @@ static struct mp_image get_xv_buffer(struct vo *vo, int buf_index)
     if (vo->params) {
         struct mp_image_params params = *vo->params;
         if (ctx->cached_csp)
-            params.colorspace = ctx->cached_csp;
+            params.color.space = ctx->cached_csp;
         mp_image_set_attributes(&img, &params);
     }
 
