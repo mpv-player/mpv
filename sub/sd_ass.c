@@ -44,7 +44,8 @@ struct sd_ass_priv {
     bool is_converted;
     struct lavc_conv *converter;
     bool on_top;
-    struct sub_bitmaps part_cache;
+    struct mp_ass_packer *packer;
+    struct sub_bitmap *bs;
     char last_text[500];
     struct mp_image_params video_params;
     struct mp_image_params last_params;
@@ -211,6 +212,8 @@ static int init(struct sd *sd)
     update_subtitle_speed(sd);
 
     enable_output(sd, true);
+
+    ctx->packer = mp_ass_packer_alloc(ctx);
 
     return 0;
 }
@@ -459,15 +462,18 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     if (no_ass)
         fill_plaintext(sd, pts);
 
-    ctx->part_cache.change_id = 0;
-    ctx->part_cache.num_parts = 0;
-    mp_ass_render_frame(renderer, track, ts, &ctx->part_cache);
-    talloc_steal(ctx, ctx->part_cache.parts);
+    int changed;
+    ASS_Image *imgs = ass_render_frame(renderer, track, ts, &changed);
+    mp_ass_packer_pack(ctx->packer, &imgs, 1, changed, SUBBITMAP_LIBASS, res);
 
-    if (!converted)
-        mangle_colors(sd, &ctx->part_cache);
+    if (!converted && res->num_parts > 0) {
+        // mangle_colors() modifies the color field, so copy the thing.
+        MP_TARRAY_GROW(ctx, ctx->bs, res->num_parts);
+        memcpy(ctx->bs, res->parts, sizeof(ctx->bs[0]) * res->num_parts);
+        res->parts = ctx->bs;
 
-    *res = ctx->part_cache;
+        mangle_colors(sd, res);
+    }
 }
 
 struct buf {

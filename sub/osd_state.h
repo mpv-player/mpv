@@ -57,8 +57,10 @@ struct osd_object {
     struct mp_osd_res vo_res;
 
     // Internally used by osd_libass.c
-    struct sub_bitmaps parts_cache;
+    bool changed;
     struct ass_state ass;
+    struct mp_ass_packer *ass_packer;
+    struct ass_image **ass_imgs;
 };
 
 struct osd_external {

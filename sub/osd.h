@@ -69,6 +69,7 @@ struct sub_bitmaps {
     // parts[].bitmap pointer points into the image data here (and stride will
     // correspond to packed->stride[0]).
     //  SUBBITMAP_RGBA: IMGFMT_BGRA (exact match)
+    //  SUBBITMAP_LIBASS: IMGFMT_Y8 (not the same, but compatible layout)
     // Other formats have this set to NULL.
     struct mp_image *packed;
 

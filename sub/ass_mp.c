@@ -35,6 +35,8 @@
 #include "osd.h"
 #include "stream/stream.h"
 #include "options/options.h"
+#include "video/out/bitmap_packer.h"
+#include "video/mp_image.h"
 
 // res_y should be track->PlayResY
 // It determines scaling of font sizes and more.
@@ -97,37 +99,6 @@ void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,
     talloc_free(tmp);
 }
 
-void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
-                         struct sub_bitmaps *res)
-{
-    int changed;
-    ASS_Image *imgs = ass_render_frame(renderer, track, time, &changed);
-    if (changed)
-        res->change_id++;
-    assert(res->format == 0 || res->format == SUBBITMAP_LIBASS);
-    res->format = SUBBITMAP_LIBASS;
-
-    int num_parts_alloc = MP_TALLOC_AVAIL(res->parts);
-    for (struct ass_image *img = imgs; img; img = img->next) {
-        if (img->w == 0 || img->h == 0)
-            continue;
-        if (res->num_parts >= num_parts_alloc) {
-            num_parts_alloc = MPMAX(num_parts_alloc * 2, 32);
-            res->parts = talloc_realloc(NULL, res->parts, struct sub_bitmap,
-                                        num_parts_alloc);
-        }
-        struct sub_bitmap *p = &res->parts[res->num_parts];
-        p->bitmap = img->bitmap;
-        p->stride = img->stride;
-        p->libass.color = img->color;
-        p->dw = p->w = img->w;
-        p->dh = p->h = img->h;
-        p->x = img->dst_x;
-        p->y = img->dst_y;
-        res->num_parts++;
-    }
-}
-
 static const int map_ass_level[] = {
     MSGL_ERR,           // 0 "FATAL errors"
     MSGL_WARN,
@@ -176,4 +147,105 @@ void mp_ass_flush_old_events(ASS_Track *track, long long ts)
     for (int i = 0; n > 0 && i < track->n_events; i++) {
         track->events[i] = track->events[i+n];
     }
+}
+
+struct mp_ass_packer {
+    struct sub_bitmap *cached_parts; // only for the array memory
+    struct mp_image *cached_img;
+    struct sub_bitmaps cached_subs;
+    bool cached_subs_valid;
+    struct bitmap_packer *packer;
+};
+
+// Free with talloc_free().
+struct mp_ass_packer *mp_ass_packer_alloc(void *ta_parent)
+{
+    struct mp_ass_packer *p = talloc_zero(ta_parent, struct mp_ass_packer);
+    p->packer = talloc_zero(p, struct bitmap_packer);
+    return p;
+}
+
+// Pack the contents of image_lists[0] to image_lists[num_image_lists-1] into
+// a single image, and make *out point to it. *out is completely overwritten.
+// If libass reported any change, image_lists_changed must be set (it then
+// repacks all images). preferred_osd_format can be set to a desired
+// sub_bitmap_format. Currently, only SUBBITMAP_LIBASS is supported.
+void mp_ass_packer_pack(struct mp_ass_packer *p, ASS_Image **image_lists,
+                        int num_image_lists, bool image_lists_changed,
+                        int preferred_osd_format, struct sub_bitmaps *out)
+{
+    if (p->cached_subs_valid && !image_lists_changed) {
+        *out = p->cached_subs;
+        return;
+    }
+
+    *out = (struct sub_bitmaps){.change_id = 1};
+    p->cached_subs_valid = false;
+
+    struct sub_bitmaps res = {
+        .change_id = image_lists_changed,
+        .format = SUBBITMAP_LIBASS,
+        .parts = p->cached_parts,
+    };
+
+    for (int n = 0; n < num_image_lists; n++) {
+        for (struct ass_image *img = image_lists[n]; img; img = img->next) {
+            if (img->w == 0 || img->h == 0)
+                continue;
+            MP_TARRAY_GROW(p, p->cached_parts, res.num_parts);
+            res.parts = p->cached_parts;
+            struct sub_bitmap *b = &res.parts[res.num_parts];
+            b->bitmap = img->bitmap;
+            b->stride = img->stride;
+            b->libass.color = img->color;
+            b->dw = b->w = img->w;
+            b->dh = b->h = img->h;
+            b->x = img->dst_x;
+            b->y = img->dst_y;
+            res.num_parts++;
+        }
+    }
+
+    packer_set_size(p->packer, res.num_parts);
+
+    for (int n = 0; n < res.num_parts; n++)
+        p->packer->in[n] = (struct pos){res.parts[n].w, res.parts[n].h};
+
+    if (p->packer->count == 0 || packer_pack(p->packer) < 0)
+        return;
+
+    struct pos bb[2];
+    packer_get_bb(p->packer, bb);
+
+    res.packed_w = bb[1].x;
+    res.packed_h = bb[1].y;
+
+    if (!p->cached_img || p->cached_img->w < res.packed_w ||
+                          p->cached_img->h < res.packed_h)
+    {
+        talloc_free(p->cached_img);
+        p->cached_img = mp_image_alloc(IMGFMT_Y8, p->packer->w, p->packer->h);
+        if (!p->cached_img)
+            return;
+        talloc_steal(p, p->cached_img);
+    }
+
+    res.packed = p->cached_img;
+
+    for (int n = 0; n < res.num_parts; n++) {
+        struct sub_bitmap *b = &res.parts[n];
+        struct pos pos = p->packer->result[n];
+
+        int stride = res.packed->stride[0];
+        void *pdata = (uint8_t *)res.packed->planes[0] + pos.y * stride + pos.x;
+        memcpy_pic(pdata, b->bitmap, b->w, b->h, stride, b->stride);
+
+        b->src_x = pos.x;
+        b->src_y = pos.y;
+    }
+
+    *out = res;
+    p->cached_subs = res;
+    p->cached_subs.change_id = 0;
+    p->cached_subs_valid = true;
 }
