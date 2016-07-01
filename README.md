@@ -148,7 +148,7 @@ The reason for not supporting this is because it creates far too much complexity
 with little to no benefit, coupled with absurd and unusable FFmpeg API
 artifacts.
 
-Newer mpv versiosn will refuse to start if runtime and compile time FFmpeg
+Newer mpv versions will refuse to start if runtime and compile time FFmpeg
 library versions mismatch.
 
 ## Release cycle
