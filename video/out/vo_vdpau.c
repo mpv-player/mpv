@@ -47,7 +47,6 @@
 #include "options/m_option.h"
 #include "video/mp_image.h"
 #include "osdep/timer.h"
-#include "bitmap_packer.h"
 
 // Returns x + a, but wrapped around to the range [0, m)
 // a must be within [-m, m], x within [0, m)
@@ -125,9 +124,7 @@ struct vdpctx {
     struct osd_bitmap_surface {
         VdpRGBAFormat format;
         VdpBitmapSurface surface;
-        uint32_t max_width;
-        uint32_t max_height;
-        struct bitmap_packer *packer;
+        uint32_t surface_w, surface_h;
         // List of surfaces to be rendered
         struct osd_target {
             VdpRect source;
@@ -455,7 +452,6 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
     vc->vdp_device = VDP_INVALID_HANDLE;
     for (int i = 0; i < MAX_OSD_PARTS; i++) {
         struct osd_bitmap_surface *sfc = &vc->osd_surfaces[i];
-        talloc_free(sfc->packer);
         sfc->change_id = 0;
         *sfc = (struct osd_bitmap_surface){
             .surface = VDP_INVALID_HANDLE,
@@ -531,22 +527,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
-static struct bitmap_packer *make_packer(struct vo *vo, VdpRGBAFormat format)
-{
-    struct vdpctx *vc = vo->priv;
-    struct vdp_functions *vdp = vc->vdp;
-
-    struct bitmap_packer *packer = talloc_zero(vo, struct bitmap_packer);
-    uint32_t w_max = 0, h_max = 0;
-    VdpStatus vdp_st = vdp->
-        bitmap_surface_query_capabilities(vc->vdp_device, format,
-                                          &(VdpBool){0}, &w_max, &h_max);
-    CHECK_VDP_WARNING(vo, "Query to get max OSD surface size failed");
-    packer->w_max = w_max;
-    packer->h_max = h_max;
-    return packer;
-}
-
 static void draw_osd_part(struct vo *vo, int index)
 {
     struct vdpctx *vc = vo->priv;
@@ -590,91 +570,99 @@ static void draw_osd_part(struct vo *vo, int index)
     }
 }
 
+static int next_pow2(int v)
+{
+    for (int x = 0; x < 30; x++) {
+        if ((1 << x) >= v)
+            return 1 << x;
+    }
+    return INT_MAX;
+}
+
 static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
     struct osd_bitmap_surface *sfc = &vc->osd_surfaces[imgs->render_index];
-    bool need_upload = false;
 
     if (imgs->change_id == sfc->change_id)
         return; // Nothing changed and we still have the old data
 
+    sfc->change_id = imgs->change_id;
     sfc->render_count = 0;
 
     if (imgs->format == SUBBITMAP_EMPTY || imgs->num_parts == 0)
         return;
 
-    need_upload = true;
     VdpRGBAFormat format;
-    int format_size;
     switch (imgs->format) {
     case SUBBITMAP_LIBASS:
         format = VDP_RGBA_FORMAT_A8;
-        format_size = 1;
         break;
     case SUBBITMAP_RGBA:
         format = VDP_RGBA_FORMAT_B8G8R8A8;
-        format_size = 4;
         break;
     default:
         abort();
     };
-    if (sfc->format != format) {
-        talloc_free(sfc->packer);
-        sfc->packer = NULL;
-    };
-    sfc->format = format;
-    if (!sfc->packer)
-        sfc->packer = make_packer(vo, format);
-    sfc->packer->padding = imgs->scaled; // assume 2x2 filter on scaling
-    int r = packer_pack_from_subbitmaps(sfc->packer, imgs);
-    if (r < 0) {
-        MP_ERR(vo, "OSD bitmaps do not fit on a surface with the maximum "
-               "supported size\n");
-        return;
-    } else if (r == 1) {
+
+    assert(imgs->packed);
+
+    int r_w = next_pow2(imgs->packed_w);
+    int r_h = next_pow2(imgs->packed_h);
+
+    if (sfc->format != format || sfc->surface == VDP_INVALID_HANDLE ||
+        sfc->surface_w < r_w || sfc->surface_h < r_h)
+    {
+        MP_VERBOSE(vo, "Allocating a %dx%d surface for OSD bitmaps.\n", r_w, r_h);
+
+        uint32_t m_w = 0, m_h = 0;
+        vdp_st = vdp->bitmap_surface_query_capabilities(vc->vdp_device, format,
+                                                        &(VdpBool){0}, &m_w, &m_h);
+        CHECK_VDP_WARNING(vo, "Query to get max OSD surface size failed");
+
+        if (r_w > m_w || r_h > m_h) {
+            MP_ERR(vo, "OSD bitmaps do not fit on a surface with the maximum "
+                   "supported size\n");
+            return;
+        }
+
         if (sfc->surface != VDP_INVALID_HANDLE) {
             vdp_st = vdp->bitmap_surface_destroy(sfc->surface);
             CHECK_VDP_WARNING(vo, "Error when calling vdp_bitmap_surface_destroy");
         }
-        MP_VERBOSE(vo, "Allocating a %dx%d surface for OSD bitmaps.\n",
-                   sfc->packer->w, sfc->packer->h);
+
+        VdpBitmapSurface surface;
         vdp_st = vdp->bitmap_surface_create(vc->vdp_device, format,
-                                            sfc->packer->w, sfc->packer->h,
-                                            true, &sfc->surface);
-        if (vdp_st != VDP_STATUS_OK)
-            sfc->surface = VDP_INVALID_HANDLE;
+                                            r_w, r_h, true, &surface);
         CHECK_VDP_WARNING(vo, "OSD: error when creating surface");
-    }
-    if (imgs->scaled) {
-        char *zeros = calloc(sfc->packer->used_width, format_size);
-        if (!zeros)
+        if (vdp_st != VDP_STATUS_OK)
             return;
-        vdp_st = vdp->bitmap_surface_put_bits_native(sfc->surface,
-                &(const void *){zeros}, &(uint32_t){0},
-                &(VdpRect){0, 0, sfc->packer->used_width,
-                                 sfc->packer->used_height});
-        CHECK_VDP_WARNING(vo, "OSD: error uploading OSD bitmap");
-        free(zeros);
+
+        sfc->surface = surface;
+        sfc->surface_w = r_w;
+        sfc->surface_h = r_h;
+        sfc->format = format;
     }
 
-    if (sfc->surface == VDP_INVALID_HANDLE)
-        return;
-    if (sfc->packer->count > sfc->targets_size) {
-        talloc_free(sfc->targets);
-        sfc->targets_size = sfc->packer->count;
-        sfc->targets = talloc_size(vc, sfc->targets_size
-                                       * sizeof(*sfc->targets));
-    }
+    void *data = imgs->packed->planes[0];
+    int stride = imgs->packed->stride[0];
+    VdpRect rc = {0, 0, imgs->packed_w, imgs->packed_h};
+    vdp_st = vdp->bitmap_surface_put_bits_native(sfc->surface,
+                                                 &(const void *){data},
+                                                 &(uint32_t){stride},
+                                                 &rc);
+    CHECK_VDP_WARNING(vo, "OSD: putbits failed");
 
-    for (int i = 0 ;i < sfc->packer->count; i++) {
+    MP_TARRAY_GROW(vc, sfc->targets, imgs->num_parts);
+    sfc->render_count = imgs->num_parts;
+
+    for (int i = 0; i < imgs->num_parts; i++) {
         struct sub_bitmap *b = &imgs->parts[i];
-        struct osd_target *target = sfc->targets + sfc->render_count;
-        int x = sfc->packer->result[i].x;
-        int y = sfc->packer->result[i].y;
-        target->source = (VdpRect){x, y, x + b->w, y + b->h};
+        struct osd_target *target = &sfc->targets[i];
+        target->source = (VdpRect){b->src_x, b->src_y,
+                                   b->src_x + b->w, b->src_y + b->h};
         target->dest = (VdpRect){b->x, b->y, b->x + b->dw, b->y + b->dh};
         target->color = (VdpColor){1, 1, 1, 1};
         if (imgs->format == SUBBITMAP_LIBASS) {
@@ -684,18 +672,7 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
             target->color.green = ((color >> 16) & 0xff) / 255.0;
             target->color.red   = ((color >> 24) & 0xff) / 255.0;
         }
-        if (need_upload) {
-            vdp_st = vdp->
-                bitmap_surface_put_bits_native(sfc->surface,
-                                               &(const void *){b->bitmap},
-                                               &(uint32_t){b->stride},
-                                               &target->source);
-                CHECK_VDP_WARNING(vo, "OSD: putbits failed");
-        }
-        sfc->render_count++;
     }
-
-    sfc->change_id = imgs->change_id;
 }
 
 static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
