@@ -189,7 +189,7 @@ struct lib {
     unsigned runv;
 };
 
-void print_libav_versions(struct mp_log *log, int v)
+bool print_libav_versions(struct mp_log *log, int v)
 {
     const struct lib libs[] = {
         {"libavutil",     LIBAVUTIL_VERSION_INT,     avutil_version()},
@@ -222,14 +222,7 @@ void print_libav_versions(struct mp_log *log, int v)
     mp_msg(log, v, "%s version: %s\n", LIB_PREFIX, av_version_info());
 #endif
 
-    if (mismatch) {
-        // Using mismatched libraries can be legitimate, but even then it's
-        // a bad idea. We don't acknowledge its usefulness and stability.
-        mp_warn(log, "Warning: mpv was compiled against a different version of "
-                "%s than the shared\nlibrary it is linked against. This is "
-                "most likely a broken build\nand misbehavior and crashes are "
-                "to be expected.\n", LIB_PREFIX);
-    }
+    return !mismatch;
 }
 
 #undef V
