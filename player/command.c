@@ -60,6 +60,7 @@
 #include "audio/filter/af.h"
 #include "video/decode/dec_video.h"
 #include "audio/decode/dec_audio.h"
+#include "video/out/bitmap_packer.h"
 #include "options/path.h"
 #include "screenshot.h"
 
@@ -88,7 +89,8 @@ struct command_ctx {
     // One of these is in use by the OSD; the other one exists so that the
     // bitmap list can be manipulated without additional synchronization.
     struct sub_bitmaps overlay_osd[2];
-    struct sub_bitmaps *overlay_osd_current;
+    int overlay_osd_current;
+    struct bitmap_packer *overlay_packer;
 
     struct hook_handler **hooks;
     int num_hooks;
@@ -98,9 +100,8 @@ struct command_ctx {
 };
 
 struct overlay {
-    void *map_start;
-    size_t map_size;
-    struct sub_bitmap osd;
+    struct mp_image *source;
+    int x, y;
 };
 
 struct hook_handler {
@@ -4314,20 +4315,85 @@ static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
 static void recreate_overlays(struct MPContext *mpctx)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
-    struct sub_bitmaps *new = &cmd->overlay_osd[0];
-    if (new == cmd->overlay_osd_current)
-        new += 1; // pick the unused one
+    int overlay_next = !cmd->overlay_osd_current;
+    struct sub_bitmaps *new = &cmd->overlay_osd[overlay_next];
     new->format = SUBBITMAP_RGBA;
     new->change_id = 1;
-    // overlay array can have unused entries, but parts list must be "packed"
+
+    bool valid = false;
+
     new->num_parts = 0;
     for (int n = 0; n < cmd->num_overlays; n++) {
         struct overlay *o = &cmd->overlays[n];
-        if (o->osd.bitmap)
-            MP_TARRAY_APPEND(cmd, new->parts, new->num_parts, o->osd);
+        if (o->source) {
+            struct mp_image *s = o->source;
+            struct sub_bitmap b = {
+                .bitmap = s->planes[0],
+                .stride = s->stride[0],
+                .w = s->w, .dw = s->w,
+                .h = s->h, .dh = s->h,
+                .x = o->x,
+                .y = o->y,
+            };
+            MP_TARRAY_APPEND(cmd, new->parts, new->num_parts, b);
+        }
     }
-    cmd->overlay_osd_current = new;
-    osd_set_external2(mpctx->osd, cmd->overlay_osd_current);
+
+    if (!cmd->overlay_packer)
+        cmd->overlay_packer = talloc_zero(cmd, struct bitmap_packer);
+
+    cmd->overlay_packer->padding = 1; // assume bilinear scaling
+    packer_set_size(cmd->overlay_packer, new->num_parts);
+
+    for (int n = 0; n < new->num_parts; n++)
+        cmd->overlay_packer->in[n] = (struct pos){new->parts[n].w, new->parts[n].h};
+
+    if (packer_pack(cmd->overlay_packer) < 0 || new->num_parts == 0)
+        goto done;
+
+    struct pos bb[2];
+    packer_get_bb(cmd->overlay_packer, bb);
+
+    new->packed_w = bb[1].x;
+    new->packed_h = bb[1].y;
+
+    if (!new->packed || new->packed->w < new->packed_w ||
+                        new->packed->h < new->packed_h)
+    {
+        talloc_free(new->packed);
+        new->packed = mp_image_alloc(IMGFMT_BGRA, cmd->overlay_packer->w,
+                                                  cmd->overlay_packer->h);
+        if (!new->packed)
+            goto done;
+    }
+
+    // clear padding
+    mp_image_clear(new->packed, 0, 0, new->packed->w, new->packed->h);
+
+    for (int n = 0; n < new->num_parts; n++) {
+        struct sub_bitmap *b = &new->parts[n];
+        struct pos pos = cmd->overlay_packer->result[n];
+
+        int stride = new->packed->stride[0];
+        void *pdata = (uint8_t *)new->packed->planes[0] + pos.y * stride + pos.x * 4;
+        memcpy_pic(pdata, b->bitmap, b->w * 4, b->h, stride, b->stride);
+
+        b->bitmap = pdata;
+        b->stride = stride;
+
+        b->src_x = pos.x;
+        b->src_y = pos.y;
+    }
+
+    valid = true;
+done:
+    if (!valid) {
+        new->format = SUBBITMAP_EMPTY;
+        new->num_parts = 0;
+    }
+
+    osd_set_external2(mpctx->osd, new);
+    cmd->overlay_osd_current = overlay_next;
 }
 
 // Set overlay with the given ID to the contents as described by "new".
@@ -4342,17 +4408,11 @@ static void replace_overlay(struct MPContext *mpctx, int id, struct overlay *new
     }
 
     struct overlay *ptr = &cmd->overlays[id];
-    struct overlay old = *ptr;
 
-    if (!ptr->osd.bitmap && !new->osd.bitmap)
-        return; // don't need to recreate or unmap
-
+    talloc_free(ptr->source);
     *ptr = *new;
-    recreate_overlays(mpctx);
 
-    // Do this afterwards, so we never unmap while the OSD is using it.
-    if (old.map_start && old.map_size)
-        munmap(old.map_start, old.map_size);
+    recreate_overlays(mpctx);
 }
 
 static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
@@ -4368,18 +4428,17 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
         MP_ERR(mpctx, "overlay_add: invalid id %d\n", id);
         goto error;
     }
-    if (w < 0 || h < 0 || stride < w * 4 || (stride % 4)) {
+    if (w <= 0 || h <= 0 || stride < w * 4 || (stride % 4)) {
         MP_ERR(mpctx, "overlay_add: inconsistent parameters\n");
         goto error;
     }
     struct overlay overlay = {
-        .osd = {
-            .stride = stride,
-            .x = x, .y = y,
-            .w = w, .h = h,
-            .dw = w, .dh = h,
-        },
+        .source = mp_image_alloc(IMGFMT_BGRA, w, h),
+        .x = x,
+        .y = y,
     };
+    if (!overlay.source)
+        goto error;
     int fd = -1;
     bool close_fd = true;
     void *p = NULL;
@@ -4398,21 +4457,25 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
     } else {
         fd = open(file, O_RDONLY | O_BINARY | O_CLOEXEC);
     }
+    int map_size = 0;
     if (fd >= 0) {
-        overlay.map_size = offset + h * stride;
-        void *m = mmap(NULL, overlay.map_size, PROT_READ, MAP_SHARED, fd, 0);
+        map_size = offset + h * stride;
+        void *m = mmap(NULL, map_size, PROT_READ, MAP_SHARED, fd, 0);
         if (close_fd)
             close(fd);
-        if (m && m != MAP_FAILED) {
-            overlay.map_start = m;
+        if (m && m != MAP_FAILED)
             p = m;
-        }
     }
     if (!p) {
         MP_ERR(mpctx, "overlay_add: could not open or map '%s'\n", file);
+        talloc_free(overlay.source);
         goto error;
     }
-    overlay.osd.bitmap = (char *)p + offset;
+    memcpy_pic(overlay.source->planes[0], (char *)p + offset, w * 4, h,
+               overlay.source->stride[0], stride);
+    if (map_size)
+        munmap(p, map_size);
+
     replace_overlay(mpctx, id, &overlay);
     r = 0;
 error:
@@ -4434,6 +4497,8 @@ static void overlay_uninit(struct MPContext *mpctx)
     for (int id = 0; id < cmd->num_overlays; id++)
         overlay_remove(mpctx, id);
     osd_set_external2(mpctx->osd, NULL);
+    for (int n = 0; n < 2; n++)
+        mp_image_unrefp(&cmd->overlay_osd[n].packed);
 }
 
 struct cycle_counter {

@@ -561,29 +561,20 @@ Input Commands that are Possibly Subject to Change
     the resolution is reduced to that of the video's. You can read the
     ``osd-width`` and ``osd-height`` properties. At least with ``--vo-xv`` and
     anamorphic video (such as DVD), ``osd-par`` should be read as well, and the
-    overlay should be aspect-compensated. (Future directions: maybe mpv should
-    take care of some of these things automatically, but it's hard to tell
-    where to draw the line.)
+    overlay should be aspect-compensated.
 
     ``id`` is an integer between 0 and 63 identifying the overlay element. The
     ID can be used to add multiple overlay parts, update a part by using this
     command with an already existing ID, or to remove a part with
     ``overlay-remove``. Using a previously unused ID will add a new overlay,
-    while reusing an ID will update it. (Future directions: there should be
-    something to ensure different programs wanting to create overlays don't
-    conflict with each others, should that ever be needed.)
+    while reusing an ID will update it.
 
     ``x`` and ``y`` specify the position where the OSD should be displayed.
 
     ``file`` specifies the file the raw image data is read from. It can be
     either a numeric UNIX file descriptor prefixed with ``@`` (e.g. ``@4``),
-    or a filename. The file will be mapped into memory with ``mmap()``. Some VOs
-    will pass the mapped pointer directly to display APIs (e.g. opengl or
-    vdpau), so no actual copying is involved. Truncating the source file while
-    the overlay is active will crash the player. You shouldn't change the data
-    while the overlay is active, because the data is essentially accessed at
-    random points. Instead, call ``overlay-add`` again (preferably with a
-    different memory region to prevent tearing).
+    or a filename. The file will be mapped into memory with ``mmap()``,
+    copied, and unmapped before the command returns (changed in mpv 0.18.1).
 
     It is also possible to pass a raw memory address for use as bitmap memory
     by passing a memory address as integer prefixed with an ``&`` character.
@@ -616,15 +607,14 @@ Input Commands that are Possibly Subject to Change
     (Technically, the minimum size would be ``stride * (h - 1) + w * 4``, but
     for simplicity, the player will access all ``stride * h`` bytes.)
 
-    .. admonition:: Warning
+    .. note::
 
-        When updating the overlay, you should prepare a second shared memory
-        region (e.g. make use of the offset parameter) and add this as overlay,
-        instead of reusing the same memory every time. Otherwise, you might
-        get the equivalent of tearing, when your application and mpv write/read
-        the buffer at the same time. Also, keep in mind that mpv might access
-        an overlay's memory at random times whenever it feels the need to do
-        so, for example when redrawing the screen.
+        Before mpv 0.18.1, you had to do manual "double buffering" when updating
+        an overlay by replacing it with a different memory buffer. Since mpv
+        0.18.1, the memory is simply copied and doesn't reference any of the
+        memory indicated by the command's arguments after the commend returns.
+        If you want to use this command before mpv 0.18.1, reads the old docs
+        to see how to handle this correctly.
 
 ``overlay-remove <id>``
     Remove an overlay added with ``overlay-add`` and the same ID. Does nothing
