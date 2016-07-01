@@ -21,8 +21,6 @@
 
 #include <libavutil/common.h>
 
-#include "video/out/bitmap_packer.h"
-
 #include "formats.h"
 #include "utils.h"
 #include "osd.h"
@@ -58,8 +56,6 @@ struct mpgl_osd_part {
     int prev_num_subparts;
     struct sub_bitmap *subparts;
     struct vertex *vertices;
-    struct bitmap_packer *packer;
-    void *upload;
 };
 
 struct mpgl_osd {
@@ -94,16 +90,8 @@ struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, struct osd_state *osd
     ctx->fmt_table[SUBBITMAP_LIBASS] = gl_find_unorm_format(gl, 1, 1);
     ctx->fmt_table[SUBBITMAP_RGBA]   = gl_find_unorm_format(gl, 1, 4);
 
-    for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        struct mpgl_osd_part *p = talloc_ptrtype(ctx, p);
-        *p = (struct mpgl_osd_part) {
-            .packer = talloc_struct(p, struct bitmap_packer, {
-                .w_max = ctx->max_tex_wh,
-                .h_max = ctx->max_tex_wh,
-            }),
-        };
-        ctx->parts[n] = p;
-    }
+    for (int n = 0; n < MAX_OSD_PARTS; n++)
+        ctx->parts[n] = talloc_zero(ctx, struct mpgl_osd_part);
 
     for (int n = 0; n < SUBBITMAP_COUNT; n++)
         ctx->formats[n] = !!ctx->fmt_table[n];
@@ -127,7 +115,6 @@ void mpgl_osd_destroy(struct mpgl_osd *ctx)
         gl->DeleteTextures(1, &p->texture);
         if (gl->DeleteBuffers)
             gl->DeleteBuffers(1, &p->buffer);
-        talloc_free(p->upload);
     }
     talloc_free(ctx);
 }
@@ -147,7 +134,10 @@ static bool upload(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
     size_t buffer_size = pix_stride * osd->h * osd->w;
 
     char *data = NULL;
-    void *texdata = NULL;
+    int copy_w = imgs->packed_w;
+    int copy_h = imgs->packed_h;
+    size_t stride = imgs->packed->stride[0];
+    void *texdata = imgs->packed->planes[0];
 
     if (pbo) {
         if (!osd->buffer) {
@@ -164,39 +154,12 @@ static bool upload(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
             success = false;
             goto done;
         }
-    } else {
-        if (!imgs->packed) {
-            if (!osd->upload)
-                osd->upload = talloc_size(NULL, buffer_size);
-            data = osd->upload;
-            texdata = data;
-        }
-    }
 
-    int copy_w = 0;
-    int copy_h = 0;
-    size_t stride = 0;
-    if (imgs->packed) {
-        copy_w = imgs->packed_w;
-        copy_h = imgs->packed_h;
-        stride = imgs->packed->stride[0];
-        texdata = imgs->packed->planes[0];
-        if (pbo) {
-            memcpy_pic(data, texdata, pix_stride * copy_w,  copy_h,
-                       osd->w * pix_stride, stride);
-            stride = osd->w * pix_stride;
-            texdata = NULL;
-        }
-    } else {
-        struct pos bb[2];
-        packer_get_bb(osd->packer, bb);
-        copy_w = bb[1].x;
-        copy_h = bb[1].y;
+        memcpy_pic(data, texdata, pix_stride * copy_w,  copy_h,
+                   osd->w * pix_stride, stride);
         stride = osd->w * pix_stride;
-        packer_copy_subbitmaps(osd->packer, imgs, data, pix_stride, stride);
-    }
+        texdata = NULL;
 
-    if (pbo) {
         if (!gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER)) {
             success = false;
             goto done;
@@ -232,24 +195,10 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
 {
     GL *gl = ctx->gl;
 
-    int req_w = 0;
-    int req_h = 0;
+    assert(imgs->packed);
 
-    if (imgs->packed) {
-        req_w = next_pow2(imgs->packed_w);
-        req_h = next_pow2(imgs->packed_h);
-    } else {
-        // assume 2x2 filter on scaling
-        osd->packer->padding = imgs->scaled;
-        int r = packer_pack_from_subbitmaps(osd->packer, imgs);
-        if (r < 0) {
-            MP_ERR(ctx, "OSD bitmaps do not fit on a surface with the maximum "
-                "supported size %dx%d.\n", osd->packer->w_max, osd->packer->h_max);
-            return false;
-        }
-        req_w = osd->packer->w;
-        req_h = osd->packer->h;
-    }
+    int req_w = next_pow2(imgs->packed_w);
+    int req_h = next_pow2(imgs->packed_h);
 
     if (req_w > ctx->max_tex_wh || req_h > ctx->max_tex_wh) {
         MP_ERR(ctx, "OSD bitmaps do not fit on a surface with the maximum "
@@ -281,9 +230,6 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
         if (gl->DeleteBuffers)
             gl->DeleteBuffers(1, &osd->buffer);
         osd->buffer = 0;
-
-        talloc_free(osd->upload);
-        osd->upload = NULL;
     }
 
     bool uploaded = false;
@@ -319,13 +265,6 @@ static void gen_osd_cb(void *pctx, struct sub_bitmaps *imgs)
     MP_TARRAY_GROW(osd, osd->subparts, osd->num_subparts);
     memcpy(osd->subparts, imgs->parts,
            osd->num_subparts * sizeof(osd->subparts[0]));
-
-    if (!imgs->packed) {
-        for (int n = 0; n < osd->num_subparts; n++) {
-            osd->subparts[n].src_x = osd->packer->result[n].x;
-            osd->subparts[n].src_y = osd->packer->result[n].y;
-        }
-    }
 }
 
 static void write_quad(struct vertex *va, struct gl_transform t,

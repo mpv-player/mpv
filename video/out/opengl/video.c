@@ -41,7 +41,6 @@
 #include "user_shaders.h"
 #include "video/out/filter_kernels.h"
 #include "video/out/aspect.h"
-#include "video/out/bitmap_packer.h"
 #include "video/out/dither.h"
 #include "video/out/vo.h"
 
