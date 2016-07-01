@@ -129,17 +129,21 @@ extern const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy;
 extern const struct vd_lavc_hwdec mp_vd_lavc_d3d11va;
 extern const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy;
 
+#if HAVE_RPI
 static const struct vd_lavc_hwdec mp_vd_lavc_rpi = {
     .type = HWDEC_RPI,
     .lavc_suffix = "_mmal",
     .image_format = IMGFMT_MMAL,
 };
+#endif
 
+#if HAVE_ANDROID
 static const struct vd_lavc_hwdec mp_vd_lavc_mediacodec = {
     .type = HWDEC_MEDIACODEC,
     .lavc_suffix = "_mediacodec",
     .copying = true,
 };
+#endif
 
 static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #if HAVE_RPI
