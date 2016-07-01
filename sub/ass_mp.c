@@ -240,6 +240,9 @@ void mp_ass_packer_pack(struct mp_ass_packer *p, ASS_Image **image_lists,
         void *pdata = (uint8_t *)res.packed->planes[0] + pos.y * stride + pos.x;
         memcpy_pic(pdata, b->bitmap, b->w, b->h, stride, b->stride);
 
+        b->bitmap = pdata;
+        b->stride = stride;
+
         b->src_x = pos.x;
         b->src_y = pos.y;
     }
