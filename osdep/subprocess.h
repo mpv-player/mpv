@@ -24,6 +24,8 @@ struct mp_cancel;
 
 typedef void (*subprocess_read_cb)(void *ctx, char *data, size_t size);
 
+void mp_devnull(void *ctx, char *data, size_t size);
+
 // Start a subprocess. Uses callbacks to read from stdout and stderr.
 int mp_subprocess(char **args, struct mp_cancel *cancel, void *ctx,
                   subprocess_read_cb on_stdout, subprocess_read_cb on_stderr,
