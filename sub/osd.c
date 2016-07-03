@@ -436,5 +436,4 @@ void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
         bi->dw = (int)(bi->w * xscale + 0.5);
         bi->dh = (int)(bi->h * yscale + 0.5);
     }
-    imgs->scaled = xscale != 1 || yscale != 1;
 }

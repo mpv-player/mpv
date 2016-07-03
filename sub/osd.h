@@ -58,10 +58,6 @@ struct sub_bitmaps {
 
     enum sub_bitmap_format format;
 
-    // If false, dw==w && dh==h.
-    // SUBBITMAP_LIBASS is never scaled.
-    bool scaled;
-
     struct sub_bitmap *parts;
     int num_parts;
 
