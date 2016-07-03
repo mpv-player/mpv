@@ -32,8 +32,9 @@
 #include "common/msg.h"
 #include "video/out/vo.h"
 #include "video/mp_image_pool.h"
-#include "sub/osd.h"
+#include "video/sws_utils.h"
 #include "sub/img_convert.h"
+#include "sub/osd.h"
 #include "x11_common.h"
 
 #include "video/mp_image.h"
@@ -58,7 +59,6 @@ struct vaapi_osd_part {
     int change_id;
     struct vaapi_osd_image image;
     struct vaapi_subpic subpic;
-    struct osd_conv_cache *conv_cache;
 };
 
 #define MAX_OUTPUT_SURFACES 2
@@ -336,8 +336,6 @@ static void draw_osd_cb(void *pctx, struct sub_bitmaps *imgs)
     if (imgs->change_id != part->change_id) {
         part->change_id = imgs->change_id;
 
-        osd_scale_rgba(part->conv_cache, imgs);
-
         struct mp_rect bb;
         if (!mp_sub_bitmaps_bb(imgs, &bb))
             goto error;
@@ -365,6 +363,25 @@ static void draw_osd_cb(void *pctx, struct sub_bitmaps *imgs)
         for (int n = 0; n < imgs->num_parts; n++) {
             struct sub_bitmap *sub = &imgs->parts[n];
 
+            struct mp_image src = {0};
+            mp_image_setfmt(&src, IMGFMT_BGRA);
+            mp_image_set_size(&src, sub->w, sub->h);
+            src.planes[0] = sub->bitmap;
+            src.stride[0] = sub->stride;
+
+            struct mp_image *bmp = &src;
+
+            struct mp_image *tmp = NULL;
+            if (sub->dw != sub->w || sub->dh != sub->h) {
+                tmp = mp_image_alloc(IMGFMT_BGRA, sub->dw, sub->dh);
+                if (!tmp)
+                    goto error;
+
+                mp_image_swscale(tmp, &src, mp_sws_fast_flags);
+
+                bmp = tmp;
+            }
+
             // Note: nothing guarantees that the sub-bitmaps don't overlap.
             //       But in all currently existing cases, they don't.
             //       We simply hope that this won't change, and nobody will
@@ -373,8 +390,10 @@ static void draw_osd_cb(void *pctx, struct sub_bitmaps *imgs)
             size_t dst = (sub->y - bb.y0) * vaimg.stride[0] +
                          (sub->x - bb.x0) * 4;
 
-            memcpy_pic(vaimg.planes[0] + dst, sub->bitmap, sub->w * 4, sub->h,
-                       vaimg.stride[0], sub->stride);
+            memcpy_pic(vaimg.planes[0] + dst, bmp->planes[0], sub->dw * 4,
+                       sub->dh, vaimg.stride[0], bmp->stride[0]);
+
+            talloc_free(tmp);
         }
 
         if (!va_image_unmap(p->mpvaapi, &img->image))
@@ -630,7 +649,6 @@ static int preinit(struct vo *vo)
         struct vaapi_osd_part *part = &p->osd_parts[n];
         part->image.image.image_id = VA_INVALID_ID;
         part->image.subpic_id = VA_INVALID_ID;
-        part->conv_cache = talloc_steal(vo, osd_conv_cache_new());
     }
 
     int max_display_attrs = vaMaxNumDisplayAttributes(p->display);

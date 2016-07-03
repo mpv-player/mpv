@@ -30,17 +30,6 @@
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
 
-struct osd_conv_cache {
-    struct sub_bitmap part[MP_SUB_BB_LIST_MAX];
-    struct sub_bitmap *parts;
-    void *scratch;
-};
-
-struct osd_conv_cache *osd_conv_cache_new(void)
-{
-    return talloc_zero(NULL, struct osd_conv_cache);
-}
-
 void mp_blur_rgba_sub_bitmap(struct sub_bitmap *d, double gblur)
 {
     struct mp_image *tmp1 = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
@@ -56,57 +45,6 @@ void mp_blur_rgba_sub_bitmap(struct sub_bitmap *d, double gblur)
         mp_image_sw_blur_scale(&s, tmp1, gblur);
     }
     talloc_free(tmp1);
-}
-
-// If RGBA parts need scaling, scale them.
-bool osd_scale_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
-{
-    struct sub_bitmaps src = *imgs;
-    if (src.format != SUBBITMAP_RGBA)
-        return false;
-
-    bool need_scale = false;
-    for (int n = 0; n < src.num_parts; n++) {
-        struct sub_bitmap *sb = &src.parts[n];
-        if (sb->w != sb->dw || sb->h != sb->dh)
-            need_scale = true;
-    }
-    if (!need_scale)
-        return false;
-
-    talloc_free(c->parts);
-    imgs->parts = c->parts = talloc_array(c, struct sub_bitmap, src.num_parts);
-    imgs->packed = NULL;
-
-    // Note: we scale all parts, since most likely all need scaling anyway, and
-    //       to get a proper copy of all data in the imgs list.
-    for (int n = 0; n < src.num_parts; n++) {
-        struct sub_bitmap *d = &imgs->parts[n];
-        struct sub_bitmap *s = &src.parts[n];
-
-        struct mp_image src_image = {0};
-        mp_image_setfmt(&src_image, IMGFMT_BGRA);
-        mp_image_set_size(&src_image, s->w, s->h);
-        src_image.planes[0] = s->bitmap;
-        src_image.stride[0] = s->stride;
-
-        d->x = s->x;
-        d->y = s->y;
-        d->w = d->dw = s->dw;
-        d->h = d->dh = s->dh;
-        struct mp_image *image = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
-        talloc_steal(c->parts, image);
-        if (image) {
-            d->stride = image->stride[0];
-            d->bitmap = image->planes[0];
-
-            mp_image_swscale(image, &src_image, mp_sws_fast_flags);
-        } else {
-            // on OOM, skip the region; just don't scale it
-            *d = *s;
-        }
-    }
-    return true;
 }
 
 bool mp_sub_bitmaps_bb(struct sub_bitmaps *imgs, struct mp_rect *out_bb)

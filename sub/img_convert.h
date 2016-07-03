@@ -3,16 +3,12 @@
 
 #include <stdbool.h>
 
-struct osd_conv_cache;
 struct sub_bitmaps;
 struct sub_bitmap;
 struct mp_rect;
 
-struct osd_conv_cache *osd_conv_cache_new(void);
-
 // Sub postprocessing
 void mp_blur_rgba_sub_bitmap(struct sub_bitmap *d, double gblur);
-bool osd_scale_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs);
 
 bool mp_sub_bitmaps_bb(struct sub_bitmaps *imgs, struct mp_rect *out_bb);
 
