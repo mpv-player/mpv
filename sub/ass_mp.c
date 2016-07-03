@@ -165,6 +165,65 @@ struct mp_ass_packer *mp_ass_packer_alloc(void *ta_parent)
     return p;
 }
 
+static bool pack(struct mp_ass_packer *p, struct sub_bitmaps *res, int imgfmt)
+{
+    packer_set_size(p->packer, res->num_parts);
+
+    for (int n = 0; n < res->num_parts; n++)
+        p->packer->in[n] = (struct pos){res->parts[n].w, res->parts[n].h};
+
+    if (p->packer->count == 0 || packer_pack(p->packer) < 0)
+        return false;
+
+    struct pos bb[2];
+    packer_get_bb(p->packer, bb);
+
+    res->packed_w = bb[1].x;
+    res->packed_h = bb[1].y;
+
+    if (!p->cached_img || p->cached_img->w < res->packed_w ||
+                          p->cached_img->h < res->packed_h)
+    {
+        talloc_free(p->cached_img);
+        p->cached_img = mp_image_alloc(imgfmt, p->packer->w, p->packer->h);
+        if (!p->cached_img)
+            return false;
+        talloc_steal(p, p->cached_img);
+    }
+
+    res->packed = p->cached_img;
+
+    for (int n = 0; n < res->num_parts; n++) {
+        struct sub_bitmap *b = &res->parts[n];
+        struct pos pos = p->packer->result[n];
+
+        b->src_x = pos.x;
+        b->src_y = pos.y;
+    }
+
+    return true;
+}
+
+static bool pack_libass(struct mp_ass_packer *p, struct sub_bitmaps *res)
+{
+    if (!pack(p, res, IMGFMT_Y8))
+        return false;
+
+    for (int n = 0; n < res->num_parts; n++) {
+        struct sub_bitmap *b = &res->parts[n];
+
+        int stride = res->packed->stride[0];
+        void *pdata =
+            (uint8_t *)res->packed->planes[0] + b->src_y * stride + b->src_x;
+        memcpy_pic(pdata, b->bitmap, b->w, b->h, stride, b->stride);
+
+        b->bitmap = pdata;
+        b->stride = stride;
+    }
+
+    return true;
+}
+
 // Pack the contents of image_lists[0] to image_lists[num_image_lists-1] into
 // a single image, and make *out point to it. *out is completely overwritten.
 // If libass reported any change, image_lists_changed must be set (it then
@@ -206,46 +265,8 @@ void mp_ass_packer_pack(struct mp_ass_packer *p, ASS_Image **image_lists,
         }
     }
 
-    packer_set_size(p->packer, res.num_parts);
-
-    for (int n = 0; n < res.num_parts; n++)
-        p->packer->in[n] = (struct pos){res.parts[n].w, res.parts[n].h};
-
-    if (p->packer->count == 0 || packer_pack(p->packer) < 0)
+    if (!pack_libass(p, &res))
         return;
-
-    struct pos bb[2];
-    packer_get_bb(p->packer, bb);
-
-    res.packed_w = bb[1].x;
-    res.packed_h = bb[1].y;
-
-    if (!p->cached_img || p->cached_img->w < res.packed_w ||
-                          p->cached_img->h < res.packed_h)
-    {
-        talloc_free(p->cached_img);
-        p->cached_img = mp_image_alloc(IMGFMT_Y8, p->packer->w, p->packer->h);
-        if (!p->cached_img)
-            return;
-        talloc_steal(p, p->cached_img);
-    }
-
-    res.packed = p->cached_img;
-
-    for (int n = 0; n < res.num_parts; n++) {
-        struct sub_bitmap *b = &res.parts[n];
-        struct pos pos = p->packer->result[n];
-
-        int stride = res.packed->stride[0];
-        void *pdata = (uint8_t *)res.packed->planes[0] + pos.y * stride + pos.x;
-        memcpy_pic(pdata, b->bitmap, b->w, b->h, stride, b->stride);
-
-        b->bitmap = pdata;
-        b->stride = stride;
-
-        b->src_x = pos.x;
-        b->src_y = pos.y;
-    }
 
     *out = res;
     p->cached_subs = res;
