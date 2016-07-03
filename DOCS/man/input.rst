@@ -459,6 +459,8 @@ Input Commands that are Possibly Subject to Change
         Remove all filters. Note that like the other sub-commands, this does
         not control automatically inserted filters.
 
+    The argument is always needed. E.g. in case of ``clr`` use ``vf clr ""``.
+
     You can assign labels to filter by prefixing them with ``@name:`` (where
     ``name`` is a user-chosen arbitrary identifier). Labels can be used to
     refer to filters by name in all of the filter chain modification commands.
