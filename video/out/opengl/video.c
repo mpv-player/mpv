@@ -1509,6 +1509,12 @@ static bool szexp_lookup(void *priv, struct bstr var, float size[2])
     struct szexp_ctx *ctx = priv;
     struct gl_video *p = ctx->p;
 
+    if (bstr_equals0(var, "NATIVE_CROPPED")) {
+        size[0] = (p->src_rect.x1 - p->src_rect.x0) * p->texture_offset.m[0][0];
+        size[1] = (p->src_rect.y1 - p->src_rect.y0) * p->texture_offset.m[1][1];
+        return true;
+    }
+
     // The size of OUTPUT is determined. It could be useful for certain
     // user shaders to skip passes.
     if (bstr_equals0(var, "OUTPUT")) {
