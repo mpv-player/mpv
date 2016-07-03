@@ -184,7 +184,8 @@ uint64_t gl_timer_peak_us(struct gl_timer *timer);
 
 struct gl_pbo_upload {
     GL *gl;
-    GLuint buffer;
+    int index;
+    GLuint buffers[2];
     size_t buffer_size;
 };
 

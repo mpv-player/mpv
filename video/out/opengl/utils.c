@@ -1152,15 +1152,20 @@ void gl_pbo_upload_tex(struct gl_pbo_upload *pbo, GL *gl, bool use_pbo,
     if (buffer_size != pbo->buffer_size)
         gl_pbo_upload_uninit(pbo);
 
-    if (!pbo->buffer) {
+    if (!pbo->buffers[0]) {
         pbo->gl = gl;
         pbo->buffer_size = buffer_size;
-        gl->GenBuffers(1, &pbo->buffer);
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo->buffer);
-        gl->BufferData(GL_PIXEL_UNPACK_BUFFER, buffer_size, NULL, GL_DYNAMIC_COPY);
+        gl->GenBuffers(2, &pbo->buffers[0]);
+        for (int n = 0; n < 2; n++) {
+            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo->buffers[n]);
+            gl->BufferData(GL_PIXEL_UNPACK_BUFFER, buffer_size, NULL,
+                           GL_DYNAMIC_COPY);
+        }
     }
 
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo->buffer);
+    pbo->index = (pbo->index + 1) % 2;
+
+    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo->buffers[pbo->index]);
     void *data = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, needed_size,
                                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
     if (!data)
@@ -1186,6 +1191,6 @@ no_pbo:
 void gl_pbo_upload_uninit(struct gl_pbo_upload *pbo)
 {
     if (pbo->gl)
-        pbo->gl->DeleteBuffers(1, &pbo->buffer);
+        pbo->gl->DeleteBuffers(2, &pbo->buffers[0]);
     *pbo = (struct gl_pbo_upload){0};
 }
