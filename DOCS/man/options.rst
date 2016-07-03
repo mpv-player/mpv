@@ -4141,9 +4141,11 @@ The following video options are currently all specific to ``--vo=opengl`` and
         Specifies the size of the resulting texture for this pass. ``szexpr``
         refers to an expression in RPN (reverse polish notation), using the
         operators + - * / > < !, floating point literals, and references to
-        sizes of existing texture and OUTPUT (such as MAIN.width or
-        CHROMA.height). By default, these are set to HOOKED.w and HOOKED.h,
-        respectively.
+        sizes of existing texture (such as MAIN.width or CHROMA.height),
+        OUTPUT, or NATIVE_CROPPED (size of an input texture cropped after
+        pan-and-scan, video-align-x/y, video-pan-x/y, etc. and possibly
+        prescaled). By default, these are set to HOOKED.w and HOOKED.h,
+        espectively.
 
     WHEN <szexpr>
         Specifies a condition that needs to be true (non-zero) for the shader
