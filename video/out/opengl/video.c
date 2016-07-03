@@ -97,12 +97,12 @@ struct texplane {
     GLenum gl_type;
     GLuint gl_texture;
     char swizzle[5];
+    bool flipped;
     struct gl_pbo_upload pbo;
 };
 
 struct video_image {
     struct texplane planes[4];
-    bool image_flipped;
     struct mp_image *mpi;       // original input image
     bool hwdec_mapped;
 };
@@ -675,7 +675,7 @@ static int pass_bind(struct gl_video *p, struct img_tex tex)
 }
 
 // Rotation by 90° and flipping.
-static void get_plane_source_transform(struct gl_video *p, int w, int h,
+static void get_plane_source_transform(struct gl_video *p, struct texplane *t,
                                        struct gl_transform *out_tr)
 {
     struct gl_transform tr = identity_trans;
@@ -688,11 +688,11 @@ static void get_plane_source_transform(struct gl_video *p, int w, int h,
     // basically, recenter to keep the whole image in view
     float b[2] = {1, 1};
     gl_transform_vec(rot, &b[0], &b[1]);
-    tr.t[0] += b[0] < 0 ? w : 0;
-    tr.t[1] += b[1] < 0 ? h : 0;
+    tr.t[0] += b[0] < 0 ? t->w : 0;
+    tr.t[1] += b[1] < 0 ? t->h : 0;
 
-    if (p->image.image_flipped) {
-        struct gl_transform flip = {{{1, 0}, {0, -1}}, {0, h}};
+    if (t->flipped) {
+        struct gl_transform flip = {{{1, 0}, {0, -1}}, {0, t->h}};
         gl_transform_trans(flip, &tr);
     }
 
@@ -763,7 +763,7 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
             .components = p->image_desc.components[n],
         };
         snprintf(tex[n].swizzle, sizeof(tex[n].swizzle), "%s", t->swizzle);
-        get_plane_source_transform(p, t->w, t->h, &tex[n].transform);
+        get_plane_source_transform(p, t, &tex[n].transform);
         if (p->image_params.rotate % 180 == 90)
             MPSWAP(int, tex[n].w, tex[n].h);
 
@@ -2986,9 +2986,11 @@ static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
 
     gl_timer_start(p->upload_timer);
 
-    vimg->image_flipped = mpi->stride[0] < 0;
+
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
+
+        plane->flipped = mpi->stride[0] < 0;
 
         gl->BindTexture(plane->gl_target, plane->gl_texture);
         gl_pbo_upload_tex(&plane->pbo, gl, p->opts.pbo, plane->gl_target,
