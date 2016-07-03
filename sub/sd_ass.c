@@ -420,8 +420,8 @@ static long long find_timestamp(struct sd *sd, double pts)
 
 #undef END
 
-static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
-                        struct sub_bitmaps *res)
+static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, int format,
+                        double pts, struct sub_bitmaps *res)
 {
     struct sd_ass_priv *ctx = sd->priv;
     struct MPOpts *opts = sd->opts;
@@ -464,7 +464,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
 
     int changed;
     ASS_Image *imgs = ass_render_frame(renderer, track, ts, &changed);
-    mp_ass_packer_pack(ctx->packer, &imgs, 1, changed, SUBBITMAP_LIBASS, res);
+    mp_ass_packer_pack(ctx->packer, &imgs, 1, changed, format, res);
 
     if (!converted && res->num_parts > 0) {
         // mangle_colors() modifies the color field, so copy the thing.

@@ -19,7 +19,7 @@ void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function)
 }
 
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
-                            struct sub_bitmaps *out_imgs)
+                            int format, struct sub_bitmaps *out_imgs)
 {
     *out_imgs = (struct sub_bitmaps) {0};
 }

@@ -205,7 +205,7 @@ void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
 
 // internal use only
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
-                            struct sub_bitmaps *out_imgs);
+                            int format, struct sub_bitmaps *out_imgs);
 void osd_init_backend(struct osd_state *osd);
 void osd_destroy_backend(struct osd_state *osd);
 

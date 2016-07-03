@@ -525,7 +525,7 @@ static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
 }
 
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
-                            struct sub_bitmaps *out_imgs)
+                            int format, struct sub_bitmaps *out_imgs)
 {
     if (obj->force_redraw && obj->type == OSDTYPE_OSD)
         update_osd(osd, obj);
@@ -542,7 +542,7 @@ void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
     }
 
     mp_ass_packer_pack(obj->ass_packer, obj->ass_imgs, obj->num_externals + 1,
-                       obj->changed, SUBBITMAP_LIBASS, out_imgs);
+                       obj->changed, format, out_imgs);
 
     obj->changed = false;
 }

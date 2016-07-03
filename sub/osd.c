@@ -247,6 +247,10 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
 {
     struct MPOpts *opts = osd->opts;
 
+    int format = SUBBITMAP_LIBASS;
+    if (!sub_formats[format] || opts->force_rgba_osd)
+        format = SUBBITMAP_RGBA;
+
     bool formats[SUBBITMAP_COUNT];
     memcpy(formats, sub_formats, sizeof(formats));
     if (opts->force_rgba_osd)
@@ -261,7 +265,7 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
             double sub_pts = video_pts;
             if (sub_pts != MP_NOPTS_VALUE)
                 sub_pts -= opts->sub_delay;
-            sub_get_bitmaps(obj->sub, obj->vo_res, sub_pts, out_imgs);
+            sub_get_bitmaps(obj->sub, obj->vo_res, format, sub_pts, out_imgs);
         }
     } else if (obj->type == OSDTYPE_EXTERNAL2) {
         if (obj->external2 && obj->external2->format) {
@@ -269,7 +273,7 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
             obj->external2->change_id = 0;
         }
     } else {
-        osd_object_get_bitmaps(osd, obj, out_imgs);
+        osd_object_get_bitmaps(osd, obj, format, out_imgs);
     }
 
     if (obj->force_redraw)
