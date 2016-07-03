@@ -1124,3 +1124,68 @@ void gl_timer_stop(struct gl_timer *timer)
     if (gl->EndQuery)
         gl->EndQuery(GL_TIME_ELAPSED);
 }
+
+// Upload a texture, going through a PBO. PBO supposedly can facilitate
+// asynchronous copy from CPU to GPU, so this is an optimization. Note that
+// changing format/type/tex_w/tex_h or reusing the PBO in the same frame can
+// ruin performance.
+// This call is like gl_upload_tex(), plus PBO management/use.
+// target, format, type, dataptr, stride, x, y, w, h: texture upload params
+//                                                    (see gl_upload_tex())
+// tex_w, tex_h: maximum size of the used texture
+// use_pbo: for convenience, if false redirects the call to gl_upload_tex
+void gl_pbo_upload_tex(struct gl_pbo_upload *pbo, GL *gl, bool use_pbo,
+                       GLenum target, GLenum format, GLenum type,
+                       int tex_w, int tex_h, const void *dataptr, int stride,
+                       int x, int y, int w, int h)
+{
+    assert(x >= 0 && y >= 0 && w >= 0 && h >= 0);
+    assert(x + w <= tex_w && y + h <= tex_h);
+
+    if (!use_pbo || !gl->MapBufferRange)
+        goto no_pbo;
+
+    size_t pix_stride = gl_bytes_per_pixel(format, type);
+    size_t buffer_size = pix_stride * tex_w * tex_h;
+    size_t needed_size = pix_stride * w * h;
+
+    if (buffer_size != pbo->buffer_size)
+        gl_pbo_upload_uninit(pbo);
+
+    if (!pbo->buffer) {
+        pbo->gl = gl;
+        pbo->buffer_size = buffer_size;
+        gl->GenBuffers(1, &pbo->buffer);
+        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo->buffer);
+        gl->BufferData(GL_PIXEL_UNPACK_BUFFER, buffer_size, NULL, GL_DYNAMIC_COPY);
+    }
+
+    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo->buffer);
+    void *data = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, needed_size,
+                                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+    if (!data)
+        goto no_pbo;
+
+    memcpy_pic(data, dataptr, pix_stride * w,  h, pix_stride * w, stride);
+
+    if (!gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER)) {
+        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        goto no_pbo;
+    }
+
+    gl_upload_tex(gl, target, format, type, NULL, pix_stride * w, x, y, w, h);
+
+    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+    return;
+
+no_pbo:
+    gl_upload_tex(gl, target, format, type, dataptr, stride, x, y, w, h);
+}
+
+void gl_pbo_upload_uninit(struct gl_pbo_upload *pbo)
+{
+    if (pbo->gl)
+        pbo->gl->DeleteBuffers(1, &pbo->buffer);
+    *pbo = (struct gl_pbo_upload){0};
+}

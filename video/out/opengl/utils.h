@@ -182,4 +182,16 @@ uint64_t gl_timer_last_us(struct gl_timer *timer);
 uint64_t gl_timer_avg_us(struct gl_timer *timer);
 uint64_t gl_timer_peak_us(struct gl_timer *timer);
 
+struct gl_pbo_upload {
+    GL *gl;
+    GLuint buffer;
+    size_t buffer_size;
+};
+
+void gl_pbo_upload_tex(struct gl_pbo_upload *pbo, GL *gl, bool use_pbo,
+                       GLenum target, GLenum format,  GLenum type,
+                       int tex_w, int tex_h, const void *dataptr, int stride,
+                       int x, int y, int w, int h);
+void gl_pbo_upload_uninit(struct gl_pbo_upload *pbo);
+
 #endif

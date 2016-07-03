@@ -96,8 +96,8 @@ struct texplane {
     GLenum gl_format;
     GLenum gl_type;
     GLuint gl_texture;
-    int gl_buffer;
     char swizzle[5];
+    struct gl_pbo_upload pbo;
 };
 
 struct video_image {
@@ -878,7 +878,7 @@ static void uninit_video(struct gl_video *p)
         struct texplane *plane = &vimg->planes[n];
 
         gl->DeleteTextures(1, &plane->gl_texture);
-        gl->DeleteBuffers(1, &plane->gl_buffer);
+        gl_pbo_upload_uninit(&plane->pbo);
     }
     *vimg = (struct video_image){0};
 
@@ -2890,54 +2890,6 @@ struct voctrl_performance_data gl_video_perfdata(struct gl_video *p)
     };
 }
 
-static bool unmap_image(struct gl_video *p, struct mp_image *mpi)
-{
-    GL *gl = p->gl;
-    bool ok = true;
-    struct video_image *vimg = &p->image;
-    for (int n = 0; n < p->plane_count; n++) {
-        struct texplane *plane = &vimg->planes[n];
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
-        ok = gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER) && ok;
-        mpi->planes[n] = NULL; // PBO offset 0
-    }
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    return ok;
-}
-
-static bool map_image(struct gl_video *p, struct mp_image *mpi)
-{
-    GL *gl = p->gl;
-
-    if (!p->opts.pbo)
-        return false;
-
-    struct video_image *vimg = &p->image;
-
-    for (int n = 0; n < p->plane_count; n++) {
-        struct texplane *plane = &vimg->planes[n];
-        mpi->stride[n] = mp_image_plane_w(mpi, n) * p->image_desc.bytes[n];
-        size_t buffer_size = mp_image_plane_h(mpi, n) * mpi->stride[n];
-        if (!plane->gl_buffer) {
-            gl->GenBuffers(1, &plane->gl_buffer);
-            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
-            gl->BufferData(GL_PIXEL_UNPACK_BUFFER, buffer_size,
-                           NULL, GL_DYNAMIC_DRAW);
-        }
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
-        mpi->planes[n] = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0,
-                                            buffer_size, GL_MAP_WRITE_BIT |
-                                                GL_MAP_INVALIDATE_BUFFER_BIT);
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        if (!mpi->planes[n]) {
-            unmap_image(p, mpi);
-            return false;
-        }
-    }
-    memset(mpi->bufs, 0, sizeof(mpi->bufs));
-    return true;
-}
-
 // This assumes nv12, with textures set to GL_NEAREST filtering.
 static void reinterleave_vdpau(struct gl_video *p, struct gl_hwdec_frame *frame)
 {
@@ -3034,32 +2986,17 @@ static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
 
     gl_timer_start(p->upload_timer);
 
-    mp_image_t pbo_mpi = *mpi;
-    bool pbo = map_image(p, &pbo_mpi);
-    if (pbo) {
-        mp_image_copy(&pbo_mpi, mpi);
-        if (unmap_image(p, &pbo_mpi)) {
-            mpi = &pbo_mpi;
-        } else {
-            MP_FATAL(p, "Video PBO upload failed. Disabling PBOs.\n");
-            pbo = false;
-            p->opts.pbo = 0;
-        }
-    }
-
     vimg->image_flipped = mpi->stride[0] < 0;
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
-        if (pbo)
-            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
-        gl->ActiveTexture(GL_TEXTURE0 + n);
+
         gl->BindTexture(plane->gl_target, plane->gl_texture);
-        gl_upload_tex(gl, plane->gl_target, plane->gl_format, plane->gl_type,
-                      mpi->planes[n], mpi->stride[n], 0, 0, plane->w, plane->h);
+        gl_pbo_upload_tex(&plane->pbo, gl, p->opts.pbo, plane->gl_target,
+                          plane->gl_format, plane->gl_type, plane->w, plane->h,
+                          mpi->planes[n], mpi->stride[n],
+                          0, 0, plane->w, plane->h);
+        gl->BindTexture(plane->gl_target, 0);
     }
-    gl->ActiveTexture(GL_TEXTURE0);
-    if (pbo)
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     gl_timer_stop(p->upload_timer);
 
