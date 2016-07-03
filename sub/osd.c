@@ -127,8 +127,6 @@ struct osd_state *osd_create(struct mpv_global *global)
             .text = talloc_strdup(obj, ""),
             .progbar_state = {.type = -1},
         };
-        for (int i = 0; i < OSD_CONV_CACHE_MAX; i++)
-            obj->cache[i] = talloc_steal(obj, osd_conv_cache_new());
         osd->objs[n] = obj;
     }
 
@@ -251,11 +249,6 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
     if (!sub_formats[format] || opts->force_rgba_osd)
         format = SUBBITMAP_RGBA;
 
-    bool formats[SUBBITMAP_COUNT];
-    memcpy(formats, sub_formats, sizeof(formats));
-    if (opts->force_rgba_osd)
-        formats[SUBBITMAP_LIBASS] = false;
-
     *out_imgs = (struct sub_bitmaps) {0};
 
     check_obj_resize(osd, res, obj);
@@ -285,25 +278,8 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
     if (out_imgs->num_parts == 0)
         return;
 
-    if (obj->cached.change_id == obj->vo_change_id && formats[obj->cached.format])
-    {
-        *out_imgs = obj->cached;
-        return;
-    }
-
     out_imgs->render_index = obj->type;
     out_imgs->change_id = obj->vo_change_id;
-
-    if (formats[out_imgs->format])
-        return;
-
-    bool cached = false; // do we have a copy of all the image data?
-
-    if (formats[SUBBITMAP_RGBA] && out_imgs->format == SUBBITMAP_LIBASS)
-        cached |= osd_conv_ass_to_rgba(obj->cache[3], out_imgs);
-
-    if (cached)
-        obj->cached = *out_imgs;
 }
 
 // draw_flags is a bit field of OSD_DRAW_* constants

@@ -32,6 +32,7 @@
 #include "common/msg.h"
 #include "options/path.h"
 #include "ass_mp.h"
+#include "img_convert.h"
 #include "osd.h"
 #include "stream/stream.h"
 #include "options/options.h"
@@ -149,11 +150,45 @@ void mp_ass_flush_old_events(ASS_Track *track, long long ts)
     }
 }
 
+static void draw_ass_rgba(unsigned char *src, int src_w, int src_h,
+                          int src_stride, unsigned char *dst, size_t dst_stride,
+                          int dst_x, int dst_y, uint32_t color)
+{
+    const unsigned int r = (color >> 24) & 0xff;
+    const unsigned int g = (color >> 16) & 0xff;
+    const unsigned int b = (color >>  8) & 0xff;
+    const unsigned int a = 0xff - (color & 0xff);
+
+    dst += dst_y * dst_stride + dst_x * 4;
+
+    for (int y = 0; y < src_h; y++, dst += dst_stride, src += src_stride) {
+        uint32_t *dstrow = (uint32_t *) dst;
+        for (int x = 0; x < src_w; x++) {
+            const unsigned int v = src[x];
+            int rr = (r * a * v);
+            int gg = (g * a * v);
+            int bb = (b * a * v);
+            int aa =      a * v;
+            uint32_t dstpix = dstrow[x];
+            unsigned int dstb =  dstpix        & 0xFF;
+            unsigned int dstg = (dstpix >>  8) & 0xFF;
+            unsigned int dstr = (dstpix >> 16) & 0xFF;
+            unsigned int dsta = (dstpix >> 24) & 0xFF;
+            dstb = (bb       + dstb * (255 * 255 - aa)) / (255 * 255);
+            dstg = (gg       + dstg * (255 * 255 - aa)) / (255 * 255);
+            dstr = (rr       + dstr * (255 * 255 - aa)) / (255 * 255);
+            dsta = (aa * 255 + dsta * (255 * 255 - aa)) / (255 * 255);
+            dstrow[x] = dstb | (dstg << 8) | (dstr << 16) | (dsta << 24);
+        }
+    }
+}
+
 struct mp_ass_packer {
     struct sub_bitmap *cached_parts; // only for the array memory
     struct mp_image *cached_img;
     struct sub_bitmaps cached_subs;
     bool cached_subs_valid;
+    struct sub_bitmap rgba_imgs[MP_SUB_BB_LIST_MAX];
     struct bitmap_packer *packer;
 };
 
@@ -224,6 +259,60 @@ static bool pack_libass(struct mp_ass_packer *p, struct sub_bitmaps *res)
     return true;
 }
 
+static bool pack_rgba(struct mp_ass_packer *p, struct sub_bitmaps *res)
+{
+    struct mp_rect bb_list[MP_SUB_BB_LIST_MAX];
+    int num_bb = mp_get_sub_bb_list(res, bb_list, MP_SUB_BB_LIST_MAX);
+
+    struct sub_bitmaps imgs = {
+        .change_id = res->change_id,
+        .format = SUBBITMAP_RGBA,
+        .parts = p->rgba_imgs,
+        .num_parts = num_bb,
+    };
+
+    for (int n = 0; n < imgs.num_parts; n++) {
+        imgs.parts[n].w = bb_list[n].x1 - bb_list[n].x0;
+        imgs.parts[n].h = bb_list[n].y1 - bb_list[n].y0;
+    }
+
+    if (!pack(p, &imgs, IMGFMT_BGRA))
+        return false;
+
+    for (int n = 0; n < num_bb; n++) {
+        struct mp_rect bb = bb_list[n];
+        struct sub_bitmap *b = &imgs.parts[n];
+
+        b->x = bb.x0;
+        b->y = bb.y0;
+        b->w = b->dw = bb.x1 - bb.x0;
+        b->h = b->dh = bb.y1 - bb.y0;
+        b->stride = imgs.packed->stride[0];
+        b->bitmap = (uint8_t *)imgs.packed->planes[0] +
+                    b->stride * b->src_y + b->src_x * 4;
+
+        memset_pic(b->bitmap, 0, b->w * 4, b->h, b->stride);
+
+        for (int i = 0; i < res->num_parts; i++) {
+            struct sub_bitmap *s = &res->parts[i];
+
+            // Assume mp_get_sub_bb_list() never splits sub bitmaps
+            // So we don't clip/adjust the size of the sub bitmap
+            if (s->x > bb.x1 || s->x + s->w < bb.x0 ||
+                s->y > bb.y1 || s->y + s->h < bb.y0)
+                continue;
+
+            draw_ass_rgba(s->bitmap, s->w, s->h, s->stride,
+                          b->bitmap, b->stride,
+                          s->x - bb.x0, s->y - bb.y0,
+                          s->libass.color);
+        }
+    }
+
+    *res = imgs;
+    return true;
+}
+
 // Pack the contents of image_lists[0] to image_lists[num_image_lists-1] into
 // a single image, and make *out point to it. *out is completely overwritten.
 // If libass reported any change, image_lists_changed must be set (it then
@@ -233,7 +322,12 @@ void mp_ass_packer_pack(struct mp_ass_packer *p, ASS_Image **image_lists,
                         int num_image_lists, bool image_lists_changed,
                         int preferred_osd_format, struct sub_bitmaps *out)
 {
-    if (p->cached_subs_valid && !image_lists_changed) {
+    int format = preferred_osd_format == SUBBITMAP_RGBA ? SUBBITMAP_RGBA
+                                                        : SUBBITMAP_LIBASS;
+
+    if (p->cached_subs_valid && !image_lists_changed &&
+        p->cached_subs.format == format)
+    {
         *out = p->cached_subs;
         return;
     }
@@ -265,7 +359,14 @@ void mp_ass_packer_pack(struct mp_ass_packer *p, ASS_Image **image_lists,
         }
     }
 
-    if (!pack_libass(p, &res))
+    bool r = false;
+    if (format == SUBBITMAP_RGBA) {
+        r = pack_rgba(p, &res);
+    } else {
+        r = pack_libass(p, &res);
+    }
+
+    if (!r)
         return;
 
     *out = res;
