@@ -1544,112 +1544,40 @@ static void user_hook_old(struct gl_video *p, struct img_tex tex,
     GLSLF("color = %s(HOOKED_raw, HOOKED_pos, HOOKED_size);\n", fn_name);
 }
 
-// Returns whether successful. 'result' is left untouched on failure
-static bool eval_szexpr(struct gl_video *p, struct img_tex tex,
-                        struct szexp expr[MAX_SZEXP_SIZE],
-                        float *result)
+struct szexp_ctx {
+    struct gl_video *p;
+    struct img_tex tex;
+};
+
+static bool szexp_lookup(void *priv, struct bstr var, float size[2])
 {
-    float stack[MAX_SZEXP_SIZE] = {0};
-    int idx = 0; // points to next element to push
+    struct szexp_ctx *ctx = priv;
+    struct gl_video *p = ctx->p;
 
-    for (int i = 0; i < MAX_SZEXP_SIZE; i++) {
-        switch (expr[i].tag) {
-        case SZEXP_END:
-            goto done;
+    // The size of OUTPUT is determined. It could be useful for certain
+    // user shaders to skip passes.
+    if (bstr_equals0(var, "OUTPUT")) {
+        size[0] = p->dst_rect.x1 - p->dst_rect.x0;
+        size[1] = p->dst_rect.y1 - p->dst_rect.y0;
+        return true;
+    }
 
-        case SZEXP_CONST:
-            // Since our SZEXPs are bound by MAX_SZEXP_SIZE, it should be
-            // impossible to overflow the stack
-            assert(idx < MAX_SZEXP_SIZE);
-            stack[idx++] = expr[i].val.cval;
-            continue;
+    // HOOKED is a special case
+    if (bstr_equals0(var, "HOOKED")) {
+        size[0] = ctx->tex.w;
+        size[1] = ctx->tex.h;
+        return true;
+    }
 
-        case SZEXP_OP1:
-            if (idx < 1) {
-                MP_WARN(p, "Stack underflow in RPN expression!\n");
-                return false;
-            }
-
-            switch (expr[i].val.op) {
-            case SZEXP_OP_NOT: stack[idx-1] = !stack[idx-1]; break;
-            default: abort();
-            }
-            continue;
-
-        case SZEXP_OP2:
-            if (idx < 2) {
-                MP_WARN(p, "Stack underflow in RPN expression!\n");
-                return false;
-            }
-
-            // Pop the operands in reverse order
-            float op2 = stack[--idx];
-            float op1 = stack[--idx];
-            float res = 0.0;
-            switch (expr[i].val.op) {
-            case SZEXP_OP_ADD: res = op1 + op2; break;
-            case SZEXP_OP_SUB: res = op1 - op2; break;
-            case SZEXP_OP_MUL: res = op1 * op2; break;
-            case SZEXP_OP_DIV: res = op1 / op2; break;
-            case SZEXP_OP_GT:  res = op1 > op2; break;
-            case SZEXP_OP_LT:  res = op1 < op2; break;
-            default: abort();
-            }
-
-            if (!isfinite(res)) {
-                MP_WARN(p, "Illegal operation in RPN expression!\n");
-                return false;
-            }
-
-            stack[idx++] = res;
-            continue;
-
-        case SZEXP_VAR_W:
-        case SZEXP_VAR_H: {
-            struct bstr name = expr[i].val.varname;
-            struct img_tex var_tex;
-
-            // The size of OUTPUT is determined. It could be useful for certain
-            // user shaders to skip passes.
-            if (bstr_equals0(name, "OUTPUT")) {
-                int vp_w = p->dst_rect.x1 - p->dst_rect.x0;
-                int vp_h = p->dst_rect.y1 - p->dst_rect.y0;
-                stack[idx++] = (expr[i].tag == SZEXP_VAR_W) ? vp_w : vp_h;
-                continue;
-            }
-
-            // HOOKED is a special case
-            if (bstr_equals0(name, "HOOKED")) {
-                var_tex = tex;
-                goto found_tex;
-            }
-
-            for (int o = 0; o < p->saved_tex_num; o++) {
-                if (bstr_equals0(name, p->saved_tex[o].name)) {
-                    var_tex = p->saved_tex[o].tex;
-                    goto found_tex;
-                }
-            }
-
-            MP_WARN(p, "Texture %.*s not found in RPN expression!\n", BSTR_P(name));
-            return false;
-
-found_tex:
-            stack[idx++] = (expr[i].tag == SZEXP_VAR_W) ? var_tex.w : var_tex.h;
-            continue;
-            }
+    for (int o = 0; o < p->saved_tex_num; o++) {
+        if (bstr_equals0(var, p->saved_tex[o].name)) {
+            size[0] = p->saved_tex[o].tex.w;
+            size[1] = p->saved_tex[o].tex.h;
+            return true;
         }
     }
 
-done:
-    // Return the single stack element
-    if (idx != 1) {
-        MP_WARN(p, "Malformed stack after RPN expression!\n");
-        return false;
-    }
-
-    *result = stack[0];
-    return true;
+    return false;
 }
 
 static bool user_hook_cond(struct gl_video *p, struct img_tex tex, void *priv)
@@ -1658,7 +1586,7 @@ static bool user_hook_cond(struct gl_video *p, struct img_tex tex, void *priv)
     assert(shader);
 
     float res = false;
-    eval_szexpr(p, tex, shader->cond, &res);
+    eval_szexpr(p->log, &(struct szexp_ctx){p, tex}, szexp_lookup, shader->cond, &res);
     return res;
 }
 
@@ -1676,8 +1604,8 @@ static void user_hook(struct gl_video *p, struct img_tex tex,
     // to do this and display an error message than just crash OpenGL
     float w = 1.0, h = 1.0;
 
-    eval_szexpr(p, tex, shader->width, &w);
-    eval_szexpr(p, tex, shader->height, &h);
+    eval_szexpr(p->log, &(struct szexp_ctx){p, tex}, szexp_lookup, shader->width, &w);
+    eval_szexpr(p->log, &(struct szexp_ctx){p, tex}, szexp_lookup, shader->height, &h);
 
     *trans = (struct gl_transform){{{w / tex.w, 0}, {0, h / tex.h}}};
     gl_transform_trans(shader->offset, trans);
