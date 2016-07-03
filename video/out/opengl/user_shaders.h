@@ -71,4 +71,9 @@ struct gl_user_shader {
 bool parse_user_shader_pass(struct mp_log *log, struct bstr *body,
                             struct gl_user_shader *out);
 
+// Evaluate a szexp, given a lookup function for named textures
+bool eval_szexpr(struct mp_log *log, void *priv,
+                 bool (*lookup)(void *priv, struct bstr var, float size[2]),
+                 struct szexp expr[MAX_SZEXP_SIZE], float *result);
+
 #endif
