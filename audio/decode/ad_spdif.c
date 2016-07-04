@@ -71,6 +71,7 @@ static void uninit(struct dec_audio *da)
             av_freep(&lavf_ctx->pb->buffer);
         av_freep(&lavf_ctx->pb);
         avformat_free_context(lavf_ctx);
+        spdif_ctx->lavf_ctx = NULL;
     }
 }
 
