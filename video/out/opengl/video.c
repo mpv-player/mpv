@@ -2667,6 +2667,11 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
 
+    if (fbo && !(gl->mpgl_caps & MPGL_CAP_FB)) {
+        MP_FATAL(p, "Rendering to FBO requested, but no FBO extension found!\n");
+        return;
+    }
+
     p->broken_frame = false;
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
