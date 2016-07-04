@@ -360,8 +360,11 @@ static int filter_out(struct vf_instance *vf)
 
     // no filtering
     if (!mp_refqueue_should_deint(p->queue) && !p->require_filtering) {
-        struct mp_image *in = mp_refqueue_get(p->queue, 0);
-        vf_add_output_frame(vf, mp_image_new_ref(in));
+        struct mp_image *in = mp_image_new_ref(mp_refqueue_get(p->queue, 0));
+        if (!in)
+            return -1;
+        mp_image_set_params(in, &p->out_params);
+        vf_add_output_frame(vf, in);
         mp_refqueue_next(p->queue);
         return 0;
     }
