@@ -545,7 +545,7 @@ static void mp_apply_chromatic_adaptation(struct mp_csp_col_xy src,
     mp_mul_matrix3x3(m, tmp);
 }
 
-// get the coefficients of the source -> bt2020 cms matrix
+// get the coefficients of the source -> dest cms matrix
 void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest,
                        enum mp_render_intent intent, float m[3][3])
 {
@@ -721,6 +721,10 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
     // The values below are written in 0-255 scale - thus bring s into range.
     double s =
         mp_get_csp_mul(colorspace, params->input_bits, params->texture_bits) / 255;
+    // NOTE: The yuvfull ranges as presented here are arguably ambiguous,
+    // and conflict with at least the full-range YCbCr/ICtCp values as defined
+    // by ITU-R BT.2100. If somebody ever complains about full-range YUV looking
+    // different from their reference display, this comment is probably why.
     struct yuvlevels { double ymin, ymax, cmin, cmid; }
         yuvlim =  { 16*s, 235*s, 16*s, 128*s },
         yuvfull = {  0*s, 255*s,  1*s, 128*s },  // '1' for symmetry around 128

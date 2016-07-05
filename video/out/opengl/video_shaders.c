@@ -238,13 +238,20 @@ static const float VLOG_B = 0.00873,
                    VLOG_D = 0.598206,
                    VLOG_R = 46.085527; // nominal peak
 
-// Linearize (expand), given a TRC as input
+// Linearize (expand), given a TRC as input. This corresponds to the EOTF
+// in ITU-R terminology.
 void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 {
     if (trc == MP_CSP_TRC_LINEAR)
         return;
 
+    // Note that this clamp may technically violate the definition of
+    // ITU-R BT.2100, which allows for sub-blacks and super-whites to be
+    // displayed on the display where such would be possible. That said, the
+    // problem is that not all gamma curves are well-defined on the values
+    // outside this range, so we ignore it and just clip anyway for sanity.
     GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
+
     switch (trc) {
     case MP_CSP_TRC_SRGB:
         GLSL(color.rgb = mix(color.rgb / vec3(12.92),
@@ -302,7 +309,8 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
     }
 }
 
-// Delinearize (compress), given a TRC as output
+// Delinearize (compress), given a TRC as output. This corresponds to the
+// inverse EOTF (not the OETF) in ITU-R terminology.
 void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 {
     if (trc == MP_CSP_TRC_LINEAR)
@@ -427,6 +435,18 @@ void pass_color_map(struct gl_shader_cache *sc,
 
     if (need_gamma)
         pass_linearize(sc, src.gamma);
+
+    // NOTE: When src.gamma = MP_CSP_TRC_ARIB_STD_B67, we would technically
+    // need to apply the reference OOTF as part of the EOTF (which is what we
+    // implement with pass_linearize), since HLG considers OOTF to be part of
+    // the display's EOTF (as opposed to the camera's OETF). But since this is
+    // stupid, complicated, arbitrary, and more importantly depends on the
+    // target display's signal peak (which is != the nom_peak in the case of
+    // HDR displays, and mpv already has enough target-specific display
+    // options), we just ignore its implementation entirely. (Plus, it doesn't
+    // even really make sense with tone mapping to begin with.) But just in
+    // case somebody ends up complaining about HLG looking different from a
+    // reference HLG display, this comment might be why.
 
     // Stretch the signal value to renormalize to the dst nominal peak
     if (src.nom_peak != dst.nom_peak)
