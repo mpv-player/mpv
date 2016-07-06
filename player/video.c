@@ -162,6 +162,14 @@ static bool check_output_format(struct vo_chain *vo_c, int imgfmt)
 
 static int probe_deint_filters(struct vo_chain *vo_c)
 {
+    // Usually, we prefer inserting/removing deint filters. But If there's VO
+    // support, or the user inserted a filter that supports swichting deint and
+    // that has no VF_DEINTERLACE_LABEL, or if the filter was auto-inserted
+    // for other reasons and supports switching deint (like vf_d3d11vpp), then
+    // use the runtime switching method.
+    if (video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &(int){1}) == CONTROL_OK)
+        return 0;
+
     if (check_output_format(vo_c, IMGFMT_VDPAU)) {
         char *args[5] = {"deint", "yes"};
         int pref = 0;
@@ -200,8 +208,13 @@ static void filter_reconfig(struct MPContext *mpctx, struct vo_chain *vo_c)
             vf_remove_filter(vo_c->vf, vf);
     }
 
-    if (vf_reconfig(vo_c->vf, &params) < 0)
-        return;
+    if (vo_c->vf->initialized < 1) {
+        if (vf_reconfig(vo_c->vf, &params) < 0)
+            return;
+    }
+
+    // Make sure to reset this even if runtime deint switching is used.
+    video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &(int){0});
 
     if (params.rotate && (params.rotate % 90 == 0)) {
         if (!(vo_c->vo->driver->caps & VO_CAP_ROTATE90)) {
@@ -252,22 +265,11 @@ int get_deinterlacing(struct MPContext *mpctx)
 
 void set_deinterlacing(struct MPContext *mpctx, bool enable)
 {
-    struct vo_chain *vo_c = mpctx->vo_chain;
-    if (vf_find_by_label(vo_c->vf, VF_DEINTERLACE_LABEL)) {
-        if (!enable) {
-            mpctx->opts->deinterlace = 0;
-            recreate_auto_filters(mpctx);
-        }
-    } else {
-        if ((get_deinterlacing(mpctx) > 0) != enable) {
-            int arg = enable;
-            if (video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &arg) != CONTROL_OK)
-            {
-                mpctx->opts->deinterlace = 1;
-                recreate_auto_filters(mpctx);
-            }
-        }
-    }
+    if (enable == (get_deinterlacing(mpctx) > 0))
+        return;
+
+    mpctx->opts->deinterlace = enable;
+    recreate_auto_filters(mpctx);
     mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
 }
 
