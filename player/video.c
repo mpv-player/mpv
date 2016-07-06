@@ -193,18 +193,15 @@ static void filter_reconfig(struct MPContext *mpctx, struct vo_chain *vo_c)
 
     set_allowed_vo_formats(vo_c);
 
-    if (vf_reconfig(vo_c->vf, &params) < 0)
-        return;
-
     char *filters[] = {"autorotate", "autostereo3d", "deinterlace", NULL};
     for (int n = 0; filters[n]; n++) {
         struct vf_instance *vf = vf_find_by_label(vo_c->vf, filters[n]);
-        if (vf) {
+        if (vf)
             vf_remove_filter(vo_c->vf, vf);
-            if (vf_reconfig(vo_c->vf, &params) < 0)
-                return;
-        }
     }
+
+    if (vf_reconfig(vo_c->vf, &params) < 0)
+        return;
 
     if (params.rotate && (params.rotate % 90 == 0)) {
         if (!(vo_c->vo->driver->caps & VO_CAP_ROTATE90)) {
