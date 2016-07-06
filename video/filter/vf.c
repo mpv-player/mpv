@@ -652,7 +652,7 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
     mp_msg(c->log, loglevel, "Video filter chain:\n");
     vf_print_filter_chain(c, loglevel, failing);
     if (r < 0)
-        c->input_params = c->output_params = (struct mp_image_params){0};
+        c->output_params = (struct mp_image_params){0};
     return r;
 }
 
