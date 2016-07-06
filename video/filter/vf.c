@@ -298,6 +298,7 @@ void vf_remove_filter(struct vf_chain *c, struct vf_instance *vf)
     assert(prev); // not inserted
     prev->next = vf->next;
     vf_uninit_filter(vf);
+    c->initialized = 0;
 }
 
 struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
@@ -312,6 +313,7 @@ struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
             pprev = &(*pprev)->next;
         vf->next = *pprev ? *pprev : NULL;
         *pprev = vf;
+        c->initialized = 0;
     }
     return vf;
 }
