@@ -469,7 +469,8 @@ const m_option_t mp_opts[] = {
     OPT_STRING("vo-mmcss-profile", vo.mmcss_profile, M_OPT_FIXED),
 #endif
 
-    OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0),
+    OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0,
+               .deprecation_message = "use Lua scripting instead"),
     OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
 
     OPT_CHOICE_OR_INT("screen", vo.screen_id, 0, 0, 32,

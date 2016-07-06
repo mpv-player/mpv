@@ -200,7 +200,9 @@ void audio_work(struct dec_audio *da)
     if (da->current_frame)
         return;
 
-    if (!da->packet && demux_read_packet_async(da->header, &da->packet) == 0) {
+    if (!da->packet && !da->new_segment &&
+        demux_read_packet_async(da->header, &da->packet) == 0)
+    {
         da->current_state = DATA_WAIT;
         return;
     }
@@ -211,6 +213,7 @@ void audio_work(struct dec_audio *da)
         da->packet = NULL;
     }
 
+    bool had_input_packet = !!da->packet;
     bool had_packet = da->packet || da->new_segment;
 
     int ret = da->ad_driver->decode_packet(da, da->packet, &da->current_frame);
@@ -233,12 +236,12 @@ void audio_work(struct dec_audio *da)
 
     fix_audio_pts(da);
 
-    bool segment_end = true;
+    bool segment_end = !da->current_frame && !had_input_packet;
 
     if (da->current_frame) {
         mp_audio_clip_timestamps(da->current_frame, da->start, da->end);
         if (da->current_frame->pts != MP_NOPTS_VALUE && da->start != MP_NOPTS_VALUE)
-            segment_end = da->current_frame->pts >= da->start;
+            segment_end = da->current_frame->pts >= da->end;
         if (da->current_frame->samples == 0) {
             talloc_free(da->current_frame);
             da->current_frame = NULL;

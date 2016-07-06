@@ -555,5 +555,7 @@ void uninit_video_out(struct MPContext *mpctx);
 void uninit_video_chain(struct MPContext *mpctx);
 double calc_average_frame_duration(struct MPContext *mpctx);
 int init_video_decoder(struct MPContext *mpctx, struct track *track);
+int get_deinterlacing(struct MPContext *mpctx);
+void set_deinterlacing(struct MPContext *mpctx, bool enable);
 
 #endif /* MPLAYER_MP_CORE_H */

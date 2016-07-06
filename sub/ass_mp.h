@@ -49,9 +49,11 @@ void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts,
                             struct mpv_global *global, struct mp_log *log);
 ASS_Library *mp_ass_init(struct mpv_global *global, struct mp_log *log);
 
-struct sub_bitmap;
 struct sub_bitmaps;
-void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
-                         struct sub_bitmaps *res);
+struct mp_ass_packer;
+struct mp_ass_packer *mp_ass_packer_alloc(void *ta_parent);
+void mp_ass_packer_pack(struct mp_ass_packer *p, ASS_Image **image_lists,
+                        int num_image_lists, bool changed,
+                        int preferred_osd_format, struct sub_bitmaps *out);
 
 #endif                          /* MPLAYER_ASS_MP_H */

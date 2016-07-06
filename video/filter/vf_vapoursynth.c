@@ -143,13 +143,13 @@ static void copy_mp_to_vs_frame_props_map(struct vf_priv_s *p, VSMap *map,
     struct mp_image_params *params = &img->params;
     p->vsapi->propSetInt(map, "_SARNum", params->p_w, 0);
     p->vsapi->propSetInt(map, "_SARDen", params->p_h, 0);
-    if (params->colorlevels) {
+    if (params->color.levels) {
         p->vsapi->propSetInt(map, "_ColorRange",
-                params->colorlevels == MP_CSP_LEVELS_TV, 0);
+                params->color.levels == MP_CSP_LEVELS_TV, 0);
     }
     // The docs explicitly say it uses libavcodec values.
     p->vsapi->propSetInt(map, "_ColorSpace",
-            mp_csp_to_avcol_spc(params->colorspace), 0);
+            mp_csp_to_avcol_spc(params->color.space), 0);
     if (params->chroma_location) {
         p->vsapi->propSetInt(map, "_ChromaLocation",
                 params->chroma_location == MP_CHROMA_CENTER, 0);

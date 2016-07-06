@@ -59,7 +59,4 @@ void mp_hook_run(struct MPContext *mpctx, char *client, char *type);
 
 void handle_ab_loop(struct MPContext *mpctx);
 
-void remove_deint_filter(struct MPContext *mpctx);
-void set_deinterlacing(struct MPContext *mpctx, bool enable);
-
 #endif /* MPLAYER_COMMAND_H */

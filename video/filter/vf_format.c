@@ -88,15 +88,15 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     if (p->outfmt)
         out->imgfmt = p->outfmt;
     if (p->colormatrix)
-        out->colorspace = p->colormatrix;
+        out->color.space = p->colormatrix;
     if (p->colorlevels)
-        out->colorlevels = p->colorlevels;
+        out->color.levels = p->colorlevels;
     if (p->primaries)
-        out->primaries = p->primaries;
+        out->color.primaries = p->primaries;
     if (p->gamma)
-        out->gamma = p->gamma;
+        out->color.gamma = p->gamma;
     if (p->peak)
-        out->peak = p->peak;
+        out->color.sig_peak = p->peak;
     if (p->chroma_location)
         out->chroma_location = p->chroma_location;
     if (p->stereo_in)

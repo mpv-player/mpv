@@ -38,6 +38,7 @@ struct priv {
     EGLContext egl_context;
     EGLSurface egl_surface;
     bool use_es2;
+    PFNEGLPOSTSUBBUFFERNVPROC eglPostSubBufferNV;
 };
 
 static void angle_uninit(MPGLContext *ctx)
@@ -288,6 +289,11 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     // Configure the underlying Direct3D device
     d3d_init(ctx);
 
+    if (strstr(exts, "EGL_NV_post_sub_buffer")) {
+        p->eglPostSubBufferNV =
+            (PFNEGLPOSTSUBBUFFERNVPROC)eglGetProcAddress("eglPostSubBufferNV");
+    }
+
     mpgl_load_functions(ctx->gl, get_proc_address, NULL, vo->log);
     return 0;
 
@@ -315,7 +321,16 @@ static int angle_reconfig(struct MPGLContext *ctx)
 
 static int angle_control(MPGLContext *ctx, int *events, int request, void *arg)
 {
-    return vo_w32_control(ctx->vo, events, request, arg);
+    struct priv *p = ctx->priv;
+    int r = vo_w32_control(ctx->vo, events, request, arg);
+
+    // Calling eglPostSubBufferNV with a 0-sized region doesn't present a frame
+    // or block, but it does update the swapchain to match the window size
+    // See: https://groups.google.com/d/msg/angleproject/RvyVkjRCQGU/gfKfT64IAgAJ
+    if ((*events & VO_EVENT_RESIZE) && p->eglPostSubBufferNV)
+        p->eglPostSubBufferNV(p->egl_display, p->egl_surface, 0, 0, 0, 0);
+
+    return r;
 }
 
 static void angle_swap_buffers(MPGLContext *ctx)

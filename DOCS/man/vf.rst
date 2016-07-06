@@ -288,6 +288,8 @@ Available filters are:
         :adobe:        Adobe RGB (1998)
         :prophoto:     ProPhoto RGB (ROMM)
         :cie1931:      CIE 1931 RGB
+        :dci-p3:       DCI-P3 (Digital Cinema)
+        :v-gamut:      Panasonic V-Gamut primaries
 
     ``<gamma>``
        Gamma function the source file was encoded with. Normally this should be set
@@ -311,6 +313,8 @@ Available filters are:
        :gamma2.8:     Pure power curve (gamma 2.8)
        :prophoto:     ProPhoto RGB (ROMM) curve
        :st2084:       SMPTE ST2084 (HDR) curve
+       :std-b67:      ARIB STD-B67 (Hybrid Log-gamma) curve
+       :v-log:        Panasonic V-Log transfer curve
 
     ``<peak>``
         Reference peak illumination for the video file. This is mostly

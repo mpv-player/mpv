@@ -83,7 +83,7 @@ void *gpu_memcpy(void *restrict d, const void *restrict s, size_t size)
         xmm15 = _mm_stream_load_si128(pSrc + 15);
 #endif
         pSrc += regsInLoop;
-        // _mm_store_si128 emit the SSE2 intruction MOVDQA (aligned store)
+        // _mm_store_si128 emit the SSE2 instruction MOVDQA (aligned store)
         _mm_store_si128(pTrg     , xmm0);
         _mm_store_si128(pTrg +  1, xmm1);
         _mm_store_si128(pTrg +  2, xmm2);

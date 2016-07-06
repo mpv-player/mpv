@@ -116,7 +116,7 @@ int bstr_validate_utf8(struct bstr s);
 // talloc, with talloc_ctx as parent.
 struct bstr bstr_sanitize_utf8_latin1(void *talloc_ctx, struct bstr s);
 
-// Return the text before the occurance of a character, and return it. Change
+// Return the text before the occurrence of a character, and return it. Change
 // *rest to point to the text following this character. (rest can be NULL.)
 struct bstr bstr_splitchar(struct bstr str, struct bstr *rest, const char c);
 

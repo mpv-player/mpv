@@ -557,7 +557,7 @@ void af_destroy(struct af_stream *s)
    format of the preferred output respectively. The function is
    reentrant i.e. if called with an already initialized stream the
    stream will be reinitialized.
-   If one of the prefered output parameters is 0 the one that needs
+   If one of the preferred output parameters is 0 the one that needs
    no conversion is used (i.e. the output format in the last filter).
    The return value is 0 if success and -1 if failure */
 int af_init(struct af_stream *s)

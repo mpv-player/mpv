@@ -612,6 +612,12 @@ static int audio_wait(struct ao *ao, pthread_mutex_t *lock)
     return r;
 }
 
+static void list_devs(struct ao *ao, struct ao_device_list *list)
+{
+    if (stat(PATH_DEV_DSP, &(struct stat){0}) == 0)
+        ao_device_list_add(list, ao, &(struct ao_device_desc){"", "Default"});
+}
+
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_oss = {
@@ -629,6 +635,7 @@ const struct ao_driver audio_out_oss = {
     .drain     = drain,
     .wait      = audio_wait,
     .wakeup    = ao_wakeup_poll,
+    .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .audio_fd = -1,

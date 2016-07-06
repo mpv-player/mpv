@@ -499,6 +499,13 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
                     co->warning_was_printed = true;
                 }
                 return NULL;
+            } else if (co->opt->deprecation_message) {
+                if (!co->warning_was_printed) {
+                    MP_WARN(config, "Warning: option %s%s is deprecated "
+                            "and might be removed in the future (%s).\n",
+                            prefix, co->name, co->opt->deprecation_message);
+                    co->warning_was_printed = true;
+                }
             }
             return co;
         }

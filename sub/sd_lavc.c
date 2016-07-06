@@ -422,8 +422,8 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     }
 }
 
-static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
-                        struct sub_bitmaps *res)
+static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
+                        double pts, struct sub_bitmaps *res)
 {
     struct sd_lavc_priv *priv = sd->priv;
     struct MPOpts *opts = sd->opts;

@@ -49,6 +49,8 @@
 #include "command.h"
 #include "screenshot.h"
 
+#define VF_DEINTERLACE_LABEL "deinterlace"
+
 enum {
     // update_video() - code also uses: <0 error, 0 eof, >0 progress
     VD_ERROR = -1,
@@ -153,8 +155,37 @@ static int try_filter(struct vo_chain *vo_c, char *name, char *label, char **arg
     return 0;
 }
 
+static bool check_output_format(struct vo_chain *vo_c, int imgfmt)
+{
+    return vo_c->vf->output_params.imgfmt == imgfmt;
+}
+
+static int probe_deint_filters(struct vo_chain *vo_c)
+{
+    if (check_output_format(vo_c, IMGFMT_VDPAU)) {
+        char *args[5] = {"deint", "yes"};
+        int pref = 0;
+        vo_control(vo_c->vo, VOCTRL_GET_PREF_DEINT, &pref);
+        pref = pref < 0 ? -pref : pref;
+        if (pref > 0 && pref <= 4) {
+            const char *types[] =
+                {"", "first-field", "bob", "temporal", "temporal-spatial"};
+            args[2] = "deint-mode";
+            args[3] = (char *)types[pref];
+        }
+
+        return try_filter(vo_c, "vdpaupp", VF_DEINTERLACE_LABEL, args);
+    }
+    if (check_output_format(vo_c, IMGFMT_VAAPI))
+        return try_filter(vo_c, "vavpp", VF_DEINTERLACE_LABEL, NULL);
+    if (check_output_format(vo_c, IMGFMT_D3D11VA) ||
+        check_output_format(vo_c, IMGFMT_D3D11NV12))
+        return try_filter(vo_c, "d3d11vpp", VF_DEINTERLACE_LABEL, NULL);
+    return try_filter(vo_c, "yadif", VF_DEINTERLACE_LABEL, NULL);
+}
+
 // Reconfigure the filter chain according to the new input format.
-static void filter_reconfig(struct vo_chain *vo_c)
+static void filter_reconfig(struct MPContext *mpctx, struct vo_chain *vo_c)
 {
     struct mp_image_params params = vo_c->input_format;
     if (!params.imgfmt)
@@ -165,7 +196,7 @@ static void filter_reconfig(struct vo_chain *vo_c)
     if (vf_reconfig(vo_c->vf, &params) < 0)
         return;
 
-    char *filters[] = {"autorotate", "autostereo3d", NULL};
+    char *filters[] = {"autorotate", "autostereo3d", "deinterlace", NULL};
     for (int n = 0; filters[n]; n++) {
         struct vf_instance *vf = vf_find_by_label(vo_c->vf, filters[n]);
         if (vf) {
@@ -194,6 +225,53 @@ static void filter_reconfig(struct vo_chain *vo_c)
                 MP_ERR(vo_c, "Can't insert 3D conversion filter.\n");
         }
     }
+
+    if (mpctx->opts->deinterlace == 1)
+        probe_deint_filters(vo_c);
+}
+
+static void recreate_auto_filters(struct MPContext *mpctx)
+{
+    filter_reconfig(mpctx, mpctx->vo_chain);
+
+    mp_force_video_refresh(mpctx);
+
+    mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
+}
+
+int get_deinterlacing(struct MPContext *mpctx)
+{
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    int enabled = 0;
+    if (video_vf_vo_control(vo_c, VFCTRL_GET_DEINTERLACE, &enabled) != CONTROL_OK)
+        enabled = -1;
+    if (enabled < 0) {
+        // vf_lavfi doesn't support VFCTRL_GET_DEINTERLACE
+        if (vf_find_by_label(vo_c->vf, VF_DEINTERLACE_LABEL))
+            enabled = 1;
+    }
+    return enabled;
+}
+
+void set_deinterlacing(struct MPContext *mpctx, bool enable)
+{
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    if (vf_find_by_label(vo_c->vf, VF_DEINTERLACE_LABEL)) {
+        if (!enable) {
+            mpctx->opts->deinterlace = 0;
+            recreate_auto_filters(mpctx);
+        }
+    } else {
+        if ((get_deinterlacing(mpctx) > 0) != enable) {
+            int arg = enable;
+            if (video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &arg) != CONTROL_OK)
+            {
+                mpctx->opts->deinterlace = 1;
+                recreate_auto_filters(mpctx);
+            }
+        }
+    }
+    mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
 }
 
 static void recreate_video_filters(struct MPContext *mpctx)
@@ -230,7 +308,7 @@ int reinit_video_filters(struct MPContext *mpctx)
     recreate_video_filters(mpctx);
 
     if (need_reconfig)
-        filter_reconfig(vo_c);
+        filter_reconfig(mpctx, vo_c);
 
     mp_force_video_refresh(mpctx);
 
@@ -314,7 +392,6 @@ void uninit_video_chain(struct MPContext *mpctx)
 
         mpctx->video_status = STATUS_EOF;
 
-        remove_deint_filter(mpctx);
         mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
     }
 }
@@ -522,22 +599,6 @@ static int decode_image(struct MPContext *mpctx)
     }
 }
 
-// Called after video reinit. This can be generally used to try to insert more
-// filters using the filter chain edit functionality in command.c.
-static void init_filter_params(struct MPContext *mpctx)
-{
-    struct MPOpts *opts = mpctx->opts;
-
-    // Note that the filter chain is already initialized. This code might
-    // recreate the chain a second time, which is not very elegant, but allows
-    // us to test whether enabling deinterlacing works with the current video
-    // format and other filters.
-    if (opts->deinterlace >= 0) {
-        remove_deint_filter(mpctx);
-        set_deinterlacing(mpctx, opts->deinterlace != 0);
-    }
-}
-
 // Feed newly decoded frames to the filter, take care of format changes.
 // If eof=true, drain the filter chain, and return VD_EOF if empty.
 static int video_filter(struct MPContext *mpctx, bool eof)
@@ -564,7 +625,7 @@ static int video_filter(struct MPContext *mpctx, bool eof)
             return VD_PROGRESS;
 
         // The filter chain is drained; execute the filter format change.
-        filter_reconfig(mpctx->vo_chain);
+        filter_reconfig(mpctx, mpctx->vo_chain);
 
         mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
 
@@ -586,7 +647,6 @@ static int video_filter(struct MPContext *mpctx, bool eof)
             MP_FATAL(mpctx, "Cannot initialize video filters.\n");
             return VD_ERROR;
         }
-        init_filter_params(mpctx);
         return VD_RECONFIG;
     }
 

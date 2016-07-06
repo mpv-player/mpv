@@ -48,20 +48,4 @@ void packer_set_size(struct bitmap_packer *packer, int size);
  */
 int packer_pack(struct bitmap_packer *packer);
 
-/* Like above, but packer->count will be automatically set and
- * packer->in will be reallocated if needed and filled from the
- * given image list.
- */
-int packer_pack_from_subbitmaps(struct bitmap_packer *packer,
-                                struct sub_bitmaps *b);
-
-// Copy the (already packed) sub-bitmaps from b to the image in data.
-// data must point to an image that is at least (packer->w, packer->h) big.
-// The image has the given stride (bytes between (x, y) to (x, y + 1)), and the
-// pixel format used by both the sub-bitmaps and the image uses pixel_stride
-// bytes per pixel (bytes between (x, y) to (x + 1, y)).
-// If packer->padding is set, the padding borders are cleared with 0.
-void packer_copy_subbitmaps(struct bitmap_packer *packer, struct sub_bitmaps *b,
-                            void *data, int pixel_stride, int stride);
-
 #endif

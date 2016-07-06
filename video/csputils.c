@@ -65,6 +65,7 @@ const struct m_opt_choice_alternatives mp_csp_prim_names[] = {
     {"prophoto",    MP_CSP_PRIM_PRO_PHOTO},
     {"cie1931",     MP_CSP_PRIM_CIE_1931},
     {"dci-p3",      MP_CSP_PRIM_DCI_P3},
+    {"v-gamut",     MP_CSP_PRIM_V_GAMUT},
     {0}
 };
 
@@ -78,6 +79,8 @@ const struct m_opt_choice_alternatives mp_csp_trc_names[] = {
     {"gamma2.8",    MP_CSP_TRC_GAMMA28},
     {"prophoto",    MP_CSP_TRC_PRO_PHOTO},
     {"st2084",      MP_CSP_TRC_SMPTE_ST2084},
+    {"std-b67",     MP_CSP_TRC_ARIB_STD_B67},
+    {"v-log",       MP_CSP_TRC_V_LOG},
     {0}
 };
 
@@ -171,8 +174,9 @@ enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc)
     case AVCOL_TRC_LINEAR:       return MP_CSP_TRC_LINEAR;
     case AVCOL_TRC_GAMMA22:      return MP_CSP_TRC_GAMMA22;
     case AVCOL_TRC_GAMMA28:      return MP_CSP_TRC_GAMMA28;
-#if HAVE_AVUTIL_ST2084
+#if HAVE_AVUTIL_HDR
     case AVCOL_TRC_SMPTEST2084:  return MP_CSP_TRC_SMPTE_ST2084;
+    case AVCOL_TRC_ARIB_STD_B67: return MP_CSP_TRC_ARIB_STD_B67;
 #endif
     default:                     return MP_CSP_TRC_AUTO;
     }
@@ -222,8 +226,9 @@ int mp_csp_trc_to_avcol_trc(enum mp_csp_trc trc)
     case MP_CSP_TRC_LINEAR:       return AVCOL_TRC_LINEAR;
     case MP_CSP_TRC_GAMMA22:      return AVCOL_TRC_GAMMA22;
     case MP_CSP_TRC_GAMMA28:      return AVCOL_TRC_GAMMA28;
-#if HAVE_AVUTIL_ST2084
+#if HAVE_AVUTIL_HDR
     case MP_CSP_TRC_SMPTE_ST2084: return AVCOL_TRC_SMPTEST2084;
+    case MP_CSP_TRC_ARIB_STD_B67: return AVCOL_TRC_ARIB_STD_B67;
 #endif
     default:                      return AVCOL_TRC_UNSPECIFIED;
     }
@@ -419,9 +424,43 @@ struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim spc)
             .blue  = {0.150, 0.060},
             .white = d65
         };
+    // From Panasonic VARICAM reference manual
+    case MP_CSP_PRIM_V_GAMUT:
+        return (struct mp_csp_primaries) {
+            .red   = {0.730, 0.280},
+            .green = {0.165, 0.840},
+            .blue  = {0.100, -0.03},
+            .white = d65
+        };
     default:
         return (struct mp_csp_primaries) {{0}};
     }
+}
+
+// Get the nominal peak for a given colorspace, based on a known reference peak
+// (i.e. the display of a reference white illuminant. This may or may not
+// be the actual signal peak)
+float mp_csp_trc_nom_peak(enum mp_csp_trc trc, float ref_peak)
+{
+    switch (trc) {
+    case MP_CSP_TRC_SMPTE_ST2084: return 10000; // fixed peak
+    case MP_CSP_TRC_ARIB_STD_B67: return 12.0 * ref_peak;
+    case MP_CSP_TRC_V_LOG:        return 46.0855 * ref_peak;
+    }
+
+    return ref_peak;
+}
+
+bool mp_trc_is_hdr(enum mp_csp_trc trc)
+{
+    switch (trc) {
+    case MP_CSP_TRC_SMPTE_ST2084:
+    case MP_CSP_TRC_ARIB_STD_B67:
+    case MP_CSP_TRC_V_LOG:
+        return true;
+    }
+
+    return false;
 }
 
 // Compute the RGB/XYZ matrix as described here:
@@ -506,7 +545,7 @@ static void mp_apply_chromatic_adaptation(struct mp_csp_col_xy src,
     mp_mul_matrix3x3(m, tmp);
 }
 
-// get the coefficients of the source -> bt2020 cms matrix
+// get the coefficients of the source -> dest cms matrix
 void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest,
                        enum mp_render_intent intent, float m[3][3])
 {
@@ -543,7 +582,7 @@ void mp_get_cms_matrix(struct mp_csp_primaries src, struct mp_csp_primaries dest
 static void mp_get_xyz2rgb_coeffs(struct mp_csp_params *params,
                                   enum mp_render_intent intent, struct mp_cmat *m)
 {
-    struct mp_csp_primaries prim = mp_get_csp_primaries(params->primaries);
+    struct mp_csp_primaries prim = mp_get_csp_primaries(params->color.primaries);
     float brightness = params->brightness;
     mp_get_rgb2xyz_matrix(prim, m->m);
     mp_invert_matrix3x3(m->m);
@@ -620,10 +659,10 @@ static void luma_coeffs(struct mp_cmat *mat, float lr, float lg, float lb)
 // get the coefficients of the yuv -> rgb conversion matrix
 void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
 {
-    int colorspace = params->colorspace;
+    enum mp_csp colorspace = params->color.space;
     if (colorspace <= MP_CSP_AUTO || colorspace >= MP_CSP_COUNT)
         colorspace = MP_CSP_BT_601;
-    int levels_in = params->levels_in;
+    enum mp_csp_levels levels_in = params->color.levels;
     if (levels_in <= MP_CSP_LEVELS_AUTO || levels_in >= MP_CSP_LEVELS_COUNT)
         levels_in = MP_CSP_LEVELS_TV;
 
@@ -682,6 +721,10 @@ void mp_get_csp_matrix(struct mp_csp_params *params, struct mp_cmat *m)
     // The values below are written in 0-255 scale - thus bring s into range.
     double s =
         mp_get_csp_mul(colorspace, params->input_bits, params->texture_bits) / 255;
+    // NOTE: The yuvfull ranges as presented here are arguably ambiguous,
+    // and conflict with at least the full-range YCbCr/ICtCp values as defined
+    // by ITU-R BT.2100. If somebody ever complains about full-range YUV looking
+    // different from their reference display, this comment is probably why.
     struct yuvlevels { double ymin, ymax, cmin, cmid; }
         yuvlim =  { 16*s, 235*s, 16*s, 128*s },
         yuvfull = {  0*s, 255*s,  1*s, 128*s },  // '1' for symmetry around 128
@@ -734,9 +777,17 @@ void mp_csp_set_image_params(struct mp_csp_params *params,
 {
     struct mp_image_params p = *imgparams;
     mp_image_params_guess_csp(&p); // ensure consistency
-    params->colorspace = p.colorspace;
-    params->levels_in = p.colorlevels;
-    params->primaries = p.primaries;
+    params->color = p.color;
+}
+
+bool mp_colorspace_equal(struct mp_colorspace c1, struct mp_colorspace c2)
+{
+    return c1.space == c2.space &&
+           c1.levels == c2.levels &&
+           c1.primaries == c2.primaries &&
+           c1.gamma == c2.gamma &&
+           c1.sig_peak == c2.sig_peak &&
+           c1.nom_peak == c2.nom_peak;
 }
 
 // Copy settings from eq into params.

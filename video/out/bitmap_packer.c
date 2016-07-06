@@ -29,8 +29,6 @@
 #include "mpv_talloc.h"
 #include "bitmap_packer.h"
 #include "common/common.h"
-#include "sub/dec_sub.h"
-#include "video/mp_image.h"
 
 #define IS_POWER_OF_2(x) (((x) > 0) && !(((x) - 1) & (x)))
 
@@ -198,35 +196,4 @@ void packer_set_size(struct bitmap_packer *packer, int size)
                                           packer->asize);
     packer->scratch = talloc_array_ptrtype(packer, packer->scratch,
                                            packer->asize + 16);
-}
-
-int packer_pack_from_subbitmaps(struct bitmap_packer *packer,
-                                struct sub_bitmaps *b)
-{
-    packer->count = 0;
-    if (b->format == SUBBITMAP_EMPTY)
-        return 0;
-    packer_set_size(packer, b->num_parts);
-    for (int i = 0; i < b->num_parts; i++)
-        packer->in[i] = (struct pos){b->parts[i].w, b->parts[i].h};
-    return packer_pack(packer);
-}
-
-void packer_copy_subbitmaps(struct bitmap_packer *packer, struct sub_bitmaps *b,
-                            void *data, int pixel_stride, int stride)
-{
-    assert(packer->count == b->num_parts);
-    if (packer->padding) {
-        struct pos bb[2];
-        packer_get_bb(packer, bb);
-        memset_pic(data, 0, bb[1].x * pixel_stride, bb[1].y, stride);
-    }
-    for (int n = 0; n < packer->count; n++) {
-        struct sub_bitmap *s = &b->parts[n];
-        struct pos p = packer->result[n];
-
-        void *pdata = (uint8_t *)data + p.y * stride + p.x * pixel_stride;
-        memcpy_pic(pdata, s->bitmap, s->w * pixel_stride, s->h,
-                   stride, s->stride);
-    }
 }
