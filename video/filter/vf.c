@@ -227,6 +227,8 @@ void vf_print_filter_chain(struct vf_chain *c, int msglevel,
     for (vf_instance_t *f = c->first; f; f = f->next) {
         char b[128] = {0};
         mp_snprintf_cat(b, sizeof(b), "  [%s] ", f->info->name);
+        if (f->label)
+            mp_snprintf_cat(b, sizeof(b), "\"%s\" ", f->label);
         mp_snprintf_cat(b, sizeof(b), "%s", mp_image_params_to_str(&f->fmt_out));
         if (f->autoinserted)
             mp_snprintf_cat(b, sizeof(b), " [a]");
