@@ -141,18 +141,17 @@ struct vdpctx {
 };
 
 static bool status_ok(struct vo *vo);
-static void draw_osd(struct vo *vo);
 
-static int render_video_to_output_surface(struct vo *vo,
-                                          VdpOutputSurface output_surface,
-                                          VdpRect *output_rect,
-                                          VdpRect *video_rect)
+static int video_to_output_surface(struct vo *vo, struct mp_image *mpi)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpTime dummy;
     VdpStatus vdp_st;
-    struct mp_image *mpi = vc->current_image;
+
+    VdpOutputSurface output_surface = vc->output_surfaces[vc->surface_num];
+    VdpRect *output_rect = &vc->out_rect_vid;
+    VdpRect *video_rect = &vc->src_rect_vid;
 
     vdp_st = vdp->presentation_queue_block_until_surface_idle(vc->flip_queue,
                                                               output_surface,
@@ -233,17 +232,6 @@ static int render_video_to_output_surface(struct vo *vo,
                               output_rect, mpi, video_rect);
     }
     return 0;
-}
-
-static int video_to_output_surface(struct vo *vo)
-{
-    struct vdpctx *vc = vo->priv;
-
-    int r = render_video_to_output_surface(vo,
-                                           vc->output_surfaces[vc->surface_num],
-                                           &vc->out_rect_vid, &vc->src_rect_vid);
-    draw_osd(vo);
-    return r;
 }
 
 static void forget_frames(struct vo *vo, bool seek_reset)
@@ -899,8 +887,10 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     vc->current_pts = frame->pts;
     vc->current_duration = frame->duration;
 
-    if (status_ok(vo))
-        video_to_output_surface(vo);
+    if (status_ok(vo)) {
+        video_to_output_surface(vo, vc->current_image);
+        draw_osd(vo);
+    }
 }
 
 // warning: the size and pixel format of surface must match that of the
