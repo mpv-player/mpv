@@ -1419,11 +1419,13 @@ void write_video(struct MPContext *mpctx)
     };
     calculate_frame_duration(mpctx);
 
+    int req = vo_get_num_req_frames(mpctx->video_out);
+    assert(req >= 1 && req <= VO_MAX_REQ_FRAMES);
     struct vo_frame dummy = {
         .pts = pts,
         .duration = -1,
         .still = mpctx->step_frames > 0,
-        .num_frames = MPMIN(mpctx->num_next_frames, VO_MAX_REQ_FRAMES),
+        .num_frames = MPMIN(mpctx->num_next_frames, req),
         .num_vsyncs = 1,
     };
     for (int n = 0; n < dummy.num_frames; n++)
