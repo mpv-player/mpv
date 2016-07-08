@@ -331,11 +331,6 @@ static int render(struct vf_instance *vf)
         goto cleanup;
     }
 
-    // Make sure the texture is updated correctly on the shared context.
-    // (I'm not sure if this is correct, though it won't harm.)
-    if (p->out_shared)
-        ID3D11DeviceContext_Flush(p->device_ctx);
-
     res = 0;
 cleanup:
     if (in_view)
