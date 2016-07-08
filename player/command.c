@@ -4941,6 +4941,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         mpctx->add_osd_seek_info |=
                 (msg_osd ? OSD_SEEK_INFO_TEXT : 0) |
                 (bar_osd ? OSD_SEEK_INFO_BAR : 0);
+        mpctx->osd_force_update = true;
         break;
 
     case MP_CMD_TV_LAST_CHANNEL: {
