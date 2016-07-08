@@ -624,6 +624,7 @@ static int video_filter(struct MPContext *mpctx, bool eof)
             return VD_PROGRESS;
 
         // The filter chain is drained; execute the filter format change.
+        vf->initialized = 0;
         filter_reconfig(mpctx, mpctx->vo_chain);
 
         mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
