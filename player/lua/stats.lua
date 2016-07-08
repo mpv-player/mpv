@@ -69,12 +69,11 @@ timer:kill()
 
 
 function print_stats(duration)
-    --local start = mp.get_time()
     local stats = {
-        header = "",
-        file = "",
-        video = "",
-        audio = ""
+        header = {},
+        file = {},
+        video = {},
+        audio = {},
     }
 
     o.ass_formatting = o.ass_formatting and has_vo_window()
@@ -91,30 +90,28 @@ function print_stats(duration)
         end
     end
 
-    add_header(stats)
-    add_file(stats)
-    add_video(stats)
-    add_audio(stats)
+    add_header(stats.header)
+    add_file(stats.file)
+    add_video(stats.video)
+    add_audio(stats.audio)
 
-    mp.osd_message(join_stats(stats), duration or o.duration)
-    --print("main: " .. mp.get_time() - start)
+    mp.osd_message(table.concat(stats.header) .. table.concat(stats.file) ..
+                   table.concat(stats.video) .. table.concat(stats.audio),
+                   duration or o.duration)
 end
 
 
 function add_file(s)
-    local sec = "file"
-    s[sec] = ""
-
-    append_property(s, sec, "filename", {prefix="File:", nl="", indent=""})
+    append_property(s, "filename", {prefix="File:", nl="", indent=""})
     if not (mp.get_property_osd("filename") == mp.get_property_osd("media-title")) then
-        append_property(s, sec, "media-title", {prefix="Title:"})
+        append_property(s, "media-title", {prefix="Title:"})
     end
-    append_property(s, sec, "chapter", {prefix="Chapter:"})
-    if append_property(s, sec, "cache-used", {prefix="Cache:"}) then
-        append_property(s, sec, "demuxer-cache-duration",
+    append_property(s, "chapter", {prefix="Chapter:"})
+    if append_property(s, "cache-used", {prefix="Cache:"}) then
+        append_property(s, "demuxer-cache-duration",
                         {prefix="+", suffix=" sec", nl="", indent=o.prefix_sep,
                          prefix_sep="", no_prefix_markup=true})
-        append_property(s, sec, "cache-speed",
+        append_property(s, "cache-speed",
                         {prefix="", suffix="", nl="", indent=o.prefix_sep,
                          prefix_sep="", no_prefix_markup=true})
     end
@@ -122,81 +119,77 @@ end
 
 
 function add_video(s)
-    local sec = "video"
-    s[sec] = ""
     if not has_video() then
         return
     end
 
-    if append_property(s, sec, "video-codec", {prefix="Video:", nl="", indent=""}) then
-        if not append_property(s, sec, "hwdec-current",
+    if append_property(s, "video-codec", {prefix=o.nl .. o.nl .. "Video:", nl="", indent=""}) then
+        if not append_property(s, "hwdec-current",
                         {prefix="(hwdec:", nl="", indent=" ",
                          no_prefix_markup=true, suffix=")"},
                         {no=true, [""]=true}) then
-            append_property(s, sec, "hwdec-active",
+            append_property(s, "hwdec-active",
                         {prefix="(hwdec)", nl="", indent=" ",
                          no_prefix_markup=true, no_value=true},
                         {no=true})
         end
     end
-    append_property(s, sec, "avsync", {prefix="A-V:"})
-    if append_property(s, sec, "drop-frame-count", {prefix="Dropped:"}) then
-        append_property(s, sec, "vo-drop-frame-count", {prefix="VO:", nl=""})
-        append_property(s, sec, "mistimed-frame-count", {prefix="Mistimed:", nl=""})
-        append_property(s, sec, "vo-delayed-frame-count", {prefix="Delayed:", nl=""})
+    append_property(s, "avsync", {prefix="A-V:"})
+    if append_property(s, "drop-frame-count", {prefix="Dropped:"}) then
+        append_property(s, "vo-drop-frame-count", {prefix="VO:", nl=""})
+        append_property(s, "mistimed-frame-count", {prefix="Mistimed:", nl=""})
+        append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl=""})
     end
-    if append_property(s, sec, "display-fps", {prefix="Display FPS:", suffix=" (specified)"}) then
-        append_property(s, sec, "estimated-display-fps",
+    if append_property(s, "display-fps", {prefix="Display FPS:", suffix=" (specified)"}) then
+        append_property(s, "estimated-display-fps",
                         {suffix=" (estimated)", nl="", indent=""})
     else
-        append_property(s, sec, "estimated-display-fps",
+        append_property(s, "estimated-display-fps",
                         {prefix="Display FPS:", suffix=" (estimated)"})
     end
-    if append_property(s, sec, "fps", {prefix="FPS:", suffix=" (specified)"}) then
-        append_property(s, sec, "estimated-vf-fps",
+    if append_property(s, "fps", {prefix="FPS:", suffix=" (specified)"}) then
+        append_property(s, "estimated-vf-fps",
                         {suffix=" (estimated)", nl="", indent=""})
     else
-        append_property(s, sec, "estimated-vf-fps",
+        append_property(s, "estimated-vf-fps",
                         {prefix="FPS:", suffix=" (estimated)"})
     end
-    if append_property(s, sec, "video-speed-correction", {prefix="DS:"}) then
-        append_property(s, sec, "audio-speed-correction",
+    if append_property(s, "video-speed-correction", {prefix="DS:"}) then
+        append_property(s, "audio-speed-correction",
                         {prefix="/", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
 
-    append_perfdata(s, sec)
+    append_perfdata(s)
 
-    if append_property(s, sec, "video-params/w", {prefix="Native Resolution:"}) then
-        append_property(s, sec, "video-params/h",
+    if append_property(s, "video-params/w", {prefix="Native Resolution:"}) then
+        append_property(s, "video-params/h",
                         {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
-    append_property(s, sec, "window-scale", {prefix="Window Scale:"})
-    append_property(s, sec, "video-params/aspect", {prefix="Aspect Ratio:"})
-    append_property(s, sec, "video-params/pixelformat", {prefix="Pixel Format:"})
-    append_property(s, sec, "video-params/colormatrix", {prefix="Colormatrix:"})
-    append_property(s, sec, "video-params/primaries", {prefix="Primaries:"})
-    append_property(s, sec, "video-params/gamma", {prefix="Gamma:"})
-    append_property(s, sec, "video-params/colorlevels", {prefix="Levels:"})
-    append_property(s, sec, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
+    append_property(s, "window-scale", {prefix="Window Scale:"})
+    append_property(s, "video-params/aspect", {prefix="Aspect Ratio:"})
+    append_property(s, "video-params/pixelformat", {prefix="Pixel Format:"})
+    append_property(s, "video-params/colormatrix", {prefix="Colormatrix:"})
+    append_property(s, "video-params/primaries", {prefix="Primaries:"})
+    append_property(s, "video-params/gamma", {prefix="Gamma:"})
+    append_property(s, "video-params/colorlevels", {prefix="Levels:"})
+    append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
 end
 
 
 function add_audio(s)
-    local sec = "audio"
-    s[sec] = ""
     if not has_audio() then
         return
     end
 
-    append_property(s, sec, "audio-codec", {prefix="Audio:", nl="", indent=""})
-    append_property(s, sec, "audio-params/samplerate", {prefix="Sample Rate:", suffix=" Hz"})
-    append_property(s, sec, "audio-params/channel-count", {prefix="Channels:"})
-    append_property(s, sec, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
+    append_property(s, "audio-codec", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
+    append_property(s, "audio-params/samplerate", {prefix="Sample Rate:", suffix=" Hz"})
+    append_property(s, "audio-params/channel-count", {prefix="Channels:"})
+    append_property(s, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
 end
 
 
 function add_header(s)
-    s.header = text_style()
+    s[1] = text_style()
 end
 
 
@@ -220,15 +213,14 @@ end
 -- is skipped and not appended.
 -- Returns `false` in case nothing was appended, otherwise `true`.
 --
--- s       : Table containing key `sec`.
--- sec     : Existing key in table `s`, value treated as a string.
+-- s       : Table containing strings.
 -- property: The property to query and format (based on its OSD representation).
 -- attr    : Optional table to overwrite certain (formatting) attributes for
 --           this property.
 -- exclude : Optional table containing keys which are considered invalid values
 --           for this property. Specifying this will replace empty string as
 --           default invalid value (nil is always invalid).
-function append_property(s, sec, prop, attr, excluded)
+function append_property(s, prop, attr, excluded)
     excluded = excluded or {[""] = true}
     local ret = mp.get_property_osd(prop)
     if not ret or excluded[ret] then
@@ -247,8 +239,8 @@ function append_property(s, sec, prop, attr, excluded)
     attr.prefix = attr.no_prefix_markup and attr.prefix or b(attr.prefix)
     ret = attr.no_value and "" or ret
 
-    s[sec] = format("%s%s%s%s%s%s%s", s[sec], attr.nl, attr.indent,
-                    attr.prefix, attr.prefix_sep, no_ASS(ret), attr.suffix)
+    s[#s+1] = format("%s%s%s%s%s%s", attr.nl, attr.indent,
+                     attr.prefix, attr.prefix_sep, no_ASS(ret), attr.suffix)
     return true
 end
 
@@ -317,7 +309,7 @@ function record_perfdata(skip)
 end
 
 
-function append_perfdata(s, sec)
+function append_perfdata(s)
     local vo_p = mp.get_property_native("vo-performance")
     if not vo_p then
         return
@@ -349,15 +341,15 @@ function append_perfdata(s, sec)
         return i
     end
 
-    s[sec] = format("%s%s%s%s%s%s / %s / %s μs %s", s[sec], o.nl, o.indent, b("Render Time:"),
-                    o.prefix_sep, hl(vo_p["render-last"], last_s), hl(vo_p["render-avg"], avg_s),
-                    hl(vo_p["render-peak"], peak_s), graph_render)
-    s[sec] = format("%s%s%s%s%s%s / %s / %s μs %s", s[sec], o.nl, o.indent, b("Present Time:"),
-                    o.prefix_sep, hl(vo_p["present-last"], last_s), hl(vo_p["present-avg"], avg_s),
-                    hl(vo_p["present-peak"], peak_s), graph_present)
-    s[sec] = format("%s%s%s%s%s%s / %s / %s μs %s", s[sec], o.nl, o.indent, b("Upload Time:"),
-                    o.prefix_sep, hl(vo_p["upload-last"], last_s), hl(vo_p["upload-avg"], avg_s),
-                    hl(vo_p["upload-peak"], peak_s), graph_upload)
+    s[#s+1] = format("%s%s%s%s%s / %s / %s μs %s", o.nl, o.indent, b("Render Time:"),
+                     o.prefix_sep, hl(vo_p["render-last"], last_s), hl(vo_p["render-avg"], avg_s),
+                     hl(vo_p["render-peak"], peak_s), graph_render)
+    s[#s+1] = format("%s%s%s%s%s / %s / %s μs %s", o.nl, o.indent, b("Present Time:"),
+                     o.prefix_sep, hl(vo_p["present-last"], last_s), hl(vo_p["present-avg"], avg_s),
+                     hl(vo_p["present-peak"], peak_s), graph_present)
+    s[#s+1] = format("%s%s%s%s%s / %s / %s μs %s", o.nl, o.indent, b("Upload Time:"),
+                     o.prefix_sep, hl(vo_p["upload-last"], last_s), hl(vo_p["upload-avg"], avg_s),
+                     hl(vo_p["upload-peak"], peak_s), graph_upload)
 end
 
 
@@ -371,20 +363,6 @@ function set_ASS(b)
         return ""
     end
     return mp.get_property_osd("osd-ass-cc/" .. (b and "0" or "1"))
-end
-
-
-function join_stats(s)
-    r = s.header .. s.file
-
-    if s.video and s.video ~= "" then
-        r = r .. o.nl .. o.nl .. s.video
-    end
-    if s.audio and s.audio ~= "" then
-        r = r .. o.nl .. o.nl .. s.audio
-    end
-
-    return r
 end
 
 
@@ -456,3 +434,5 @@ mp.register_event("video-reconfig",
                 print_stats(o.redraw_delay + 1)
             end
         end)
+
+print("test")
