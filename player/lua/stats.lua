@@ -1,10 +1,7 @@
 -- Display some stats.
 --
--- You can invoke the script with "i" by default or create a different key
--- binding in input.conf using "<yourkey> script_binding stats".
---
--- The style is configurable through a config file named "lua-settings/stats.conf"
--- located in your mpv directory.
+-- Please consult the readme for information about usage and configuration:
+-- https://github.com/Argon-/mpv-stats
 --
 -- Please note: not every property is always available and therefore not always
 -- visible.
@@ -22,9 +19,9 @@ local o = {
     ass_formatting = true,
     debug = false,
 
-    plot_render = true,
-    plot_present = true,
-    plot_upload = true,
+    -- Graph options and style
+    skip_frames = 5,
+    plot_graphs = true,
     plot_bg_border_color = "0000FF",
     plot_bg_color = "262626",
     plot_color = "FFFFFF",
@@ -61,9 +58,14 @@ local o = {
 }
 options.read_options(o)
 
-
+local format = string.format
+local plast = {{}, {}, {}}
+local ppos = 0
+local plen = 50
+local recorder = nil
 local timer = mp.add_periodic_timer(o.redraw_delay, function() print_stats(o.redraw_delay + 1) end)
 timer:kill()
+
 
 
 function print_stats(duration)
@@ -205,8 +207,7 @@ function text_style()
     if o.custom_header and o.custom_header ~= "" then
         return set_ASS(true) .. o.custom_header
     else
-        return string.format("%s{\\fs%d}{\\fn%s}{\\bord%f}{\\3c&H%s&}{\\1c&H%s&}" ..
-                                 "{\\alpha&H%s&}{\\xshad%f}{\\yshad%f}{\\4c&H%s&}",
+        return format("%s{\\fs%d}{\\fn%s}{\\bord%f}{\\3c&H%s&}{\\1c&H%s&}{\\alpha&H%s&}{\\xshad%f}{\\yshad%f}{\\4c&H%s&}",
                         set_ASS(true), o.font_size, o.font, o.border_size,
                         o.border_color, o.font_color, o.alpha, o.shadow_x_offset,
                         o.shadow_y_offset, o.shadow_color)
@@ -246,35 +247,18 @@ function append_property(s, sec, prop, attr, excluded)
     attr.prefix = attr.no_prefix_markup and attr.prefix or b(attr.prefix)
     ret = attr.no_value and "" or ret
 
-    s[sec] = string.format("%s%s%s%s%s%s%s", s[sec], attr.nl, attr.indent,
-                           attr.prefix, attr.prefix_sep, no_ASS(ret), attr.suffix)
+    s[sec] = format("%s%s%s%s%s%s%s", s[sec], attr.nl, attr.indent,
+                    attr.prefix, attr.prefix_sep, no_ASS(ret), attr.suffix)
     return true
 end
 
 
-
---local pmax = {1, 1, 1}
-local plast = {{}, {}, {}}
-local ppos = 0
-local plen = 60
-
-function record_perfdata()
-    --local start = mp.get_time()
-    local vo_p = mp.get_property_native("vo-performance")
-    ppos = (ppos % plen) + 1
-    plast[1][ppos] = vo_p["render-last"]
-    plast[2][ppos] = vo_p["present-last"]
-    plast[3][ppos] = vo_p["upload-last"]
-    --pmax[1] = math.max(pmax[1], plast[1][ppos])
-    --pmax[2] = math.max(pmax[2], plast[2][ppos])
-    --pmax[3] = math.max(pmax[3], plast[3][ppos])
-    --print("rec: " .. mp.get_time() - start)
-    return vo_p
-end
-
-
 function generate_graph(values)
-    local format = string.format
+    -- check if at least one value was recorded yet
+    if ppos < 1 then
+        return ""
+    end
+
     local pmax = 1
     for e = 1, plen do
         if values[e] and values[e] > pmax then
@@ -288,37 +272,92 @@ function generate_graph(values)
     local y_max = o.font_size / 1.5
     local x = 0
 
-    function scale(n)
-        return y_max * n / pmax * 0.8
-    end
 
     local i = ppos
-    local s = {string.format("m 0 0 n %f %f l ", x, y_max - scale(values[i]))}
+    local s = {format("m 0 0 n %f %f l ", x, y_max - (y_max * values[i] / pmax * 0.8))}
     i = ((i - 2) % plen) + 1
 
     while i ~= ppos do
         if values[i] then
             x = x - x_tics
-            s[#s+1] = format("%f %f ", x, y_max - scale(values[i]))
+            s[#s+1] = format("%f %f ", x, y_max - (y_max * values[i] / pmax * 0.8))
         end
         i = ((i - 2) % plen) + 1
     end
 
     s[#s+1] = format("%f %f %f %f", x, y_max, 0, y_max)
 
-    local bg_box = format("{\\bord0.5}{\\3c&H%s}{\\1c&H%s}m 0 %f l %f %f %f 0 0 0", o.plot_bg_border_color, o.plot_bg_color, y_max, x_max, y_max, x_max)
-    return format("\\h\\h\\h{\\r}{\\pbo%f}{\\shad0}{\\alpha&H00}{\\p1}%s{\\p0}{\\bord0}{\\1c&H%s}{\\p1}%s{\\p0}{\\r}%s", y_offset, bg_box, o.plot_color, table.concat(s), text_style())
+    local bg_box = format("{\\bord0.5}{\\3c&H%s&}{\\1c&H%s&}m 0 %f l %f %f %f 0 0 0",
+                          o.plot_bg_border_color, o.plot_bg_color, y_max, x_max, y_max, x_max)
+    return format("\\h\\h\\h{\\r}{\\pbo%f}{\\shad0}{\\alpha&H00}{\\p1}%s{\\p0}{\\bord0}{\\1c&H%s}{\\p1}%s{\\p0}{\\r}%s",
+                  y_offset, bg_box, o.plot_color, table.concat(s), text_style())
+end
+
+
+function record_perfdata(skip)
+    skip = math.max(skip, 0)
+    local i = skip
+    return function()
+        if i < skip then
+            i = i + 1
+            return
+        else
+            i = 0
+        end
+
+        local vo_p = mp.get_property_native("vo-performance")
+        if not vo_p then
+            return
+        end
+        ppos = (ppos % plen) + 1
+        plast[1][ppos] = vo_p["render-last"]
+        plast[2][ppos] = vo_p["present-last"]
+        plast[3][ppos] = vo_p["upload-last"]
+    end
 end
 
 
 function append_perfdata(s, sec)
-    local vo_p = timer:is_enabled() and mp.get_property_native("vo-performance") or record_perfdata()
+    local vo_p = mp.get_property_native("vo-performance")
+    if not vo_p then
+        return
+    end
 
-    s[sec] = string.format("%s%s%s%s%s%s / %s / %s %s", s[sec], o.nl, o.indent, b("Render Time:"), o.prefix_sep, no_ASS(vo_p["render-last"]), no_ASS(vo_p["render-avg"]), no_ASS(vo_p["render-peak"]), (o.plot_render and generate_graph(plast[1]) or ""))
+    local graph_render = ""
+    local graph_present = ""
+    local graph_upload = ""
 
-    s[sec] = string.format("%s%s%s%s%s%s / %s / %s %s", s[sec], o.nl, o.indent, b("Present Time:"), o.prefix_sep, no_ASS(vo_p["present-last"]), no_ASS(vo_p["present-avg"]), no_ASS(vo_p["present-peak"]), (o.plot_present and generate_graph(plast[2]) or ""))
+    if o.plot_graphs and timer:is_enabled() then
+        graph_render = generate_graph(plast[1])
+        graph_present = generate_graph(plast[2])
+        graph_upload = generate_graph(plast[3])
+    end
 
-    s[sec] = string.format("%s%s%s%s%s%s / %s / %s %s", s[sec], o.nl, o.indent, b("Upload Time:"), o.prefix_sep, no_ASS(vo_p["upload-last"]), no_ASS(vo_p["upload-avg"]), no_ASS(vo_p["upload-peak"]), (o.plot_upload and generate_graph(plast[3]) or ""))
+    local dfps = mp.get_property_number("display-fps", 0)
+    dfps = dfps > 0 and (1 / dfps * 1e6)
+
+    local last_s = vo_p["render-last"] + vo_p["present-last"] + vo_p["upload-last"]
+    local avg_s = vo_p["render-avg"] + vo_p["present-avg"] + vo_p["upload-avg"]
+    local peak_s = vo_p["render-peak"] + vo_p["present-peak"] + vo_p["upload-peak"]
+
+    -- highlight i with a red border when t exceeds the time for one frame
+    function hl(i, t)
+        if t > dfps and dfps > 0 then
+            return format("{\\bord0.5}{\\3c&H0000FF&}%s{\\bord%s}{\\3c&H%s&}",
+                            i, o.border_size, o.border_color)
+        end
+        return i
+    end
+
+    s[sec] = format("%s%s%s%s%s%s / %s / %s μs %s", s[sec], o.nl, o.indent, b("Render Time:"),
+                    o.prefix_sep, hl(vo_p["render-last"], last_s), hl(vo_p["render-avg"], avg_s),
+                    hl(vo_p["render-peak"], peak_s), graph_render)
+    s[sec] = format("%s%s%s%s%s%s / %s / %s μs %s", s[sec], o.nl, o.indent, b("Present Time:"),
+                    o.prefix_sep, hl(vo_p["present-last"], last_s), hl(vo_p["present-avg"], avg_s),
+                    hl(vo_p["present-peak"], peak_s), graph_present)
+    s[sec] = format("%s%s%s%s%s%s / %s / %s μs %s", s[sec], o.nl, o.indent, b("Upload Time:"),
+                    o.prefix_sep, hl(vo_p["upload-last"], last_s), hl(vo_p["upload-avg"], avg_s),
+                    hl(vo_p["upload-peak"], peak_s), graph_upload)
 end
 
 
@@ -365,6 +404,7 @@ function has_audio()
     return r and r ~= "no" and r ~= ""
 end
 
+
 function has_ansi()
     local is_windows = type(package) == 'table' and type(package.config) == 'string' and package.config:sub(1,1) == '\\'
     if is_windows then
@@ -373,6 +413,7 @@ function has_ansi()
     return true
 end
 
+
 function b(t)
     return o.b1 .. t .. o.b0
 end
@@ -380,15 +421,15 @@ end
 
 function toggle_stats()
     if timer:is_enabled() then
-        if o.plot_render or o.plot_present or o.plot_upload then
-            mp.unregister_event(record_perfdata)
+        if o.plot_graphs then
+            mp.unregister_event(recorder)
         end
         timer:kill()
         mp.osd_message("", 0)
     else
-        if o.plot_render or o.plot_present or o.plot_upload then
-            record_perfdata()
-            mp.register_event("tick", record_perfdata)
+        if o.plot_graphs then
+            recorder = record_perfdata(o.skip_frames)
+            mp.register_event("tick", recorder)
         end
         timer:resume()
         print_stats(o.redraw_delay + 1)
@@ -396,17 +437,22 @@ function toggle_stats()
 end
 
 
-mp.add_key_binding(o.key_oneshot, "display_stats", print_stats, {repeatable=true})
-if pcall(function() timer:is_enabled() end) then
-    mp.add_key_binding(o.key_toggle, "display_stats_toggle", toggle_stats, {repeatable=false})
-    mp.register_event("video-reconfig",
-                    function()
-                        if timer:is_enabled() then
-                            print_stats(o.redraw_delay + 1)
-                        end
-                    end)
-else
-    local txt = "Please upgrade mpv to toggle stats"
-    mp.add_key_binding(o.key_toggle, "display_stats_toggle",
-                    function() print(txt) ; mp.osd_message(txt) end, {repeatable=false})
+if not pcall(function() timer:is_enabled() end) then
+    local txt = "Stats.lua: your version of mpv does not possess required functionality. \nPlease upgrade mpv."
+    print(txt)
+    mp.osd_message(txt, 12)
+    return
 end
+
+
+-- Single invocation key binding
+mp.add_key_binding(o.key_oneshot, "display_stats", print_stats, {repeatable=true})
+
+-- Toggling key binding
+mp.add_key_binding(o.key_toggle, "display_stats_toggle", toggle_stats, {repeatable=false})
+mp.register_event("video-reconfig",
+        function()
+            if timer:is_enabled() then
+                print_stats(o.redraw_delay + 1)
+            end
+        end)
