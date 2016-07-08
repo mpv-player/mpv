@@ -644,9 +644,9 @@ Video
         ``vdpau`` is usually safe. If deinterlacing enabled (or the ``vdpaupp``
         video filter is active in general), it forces RGB conversion. The latter
         currently does not treat certain colorspaces like BT.2020 correctly
-        (which is mostly a mpv-specific restriction). If the ``vdpauprb``
-        retrieves image data without RGB conversion, but does not work with
-        postprocessing.
+        (which is mostly a mpv-specific restriction). The ``vdpauprb`` video
+        filter retrieves image data without RGB conversion and is safe (but
+        precludes use of vdpau postprocessing).
 
         ``vaapi`` is safe if the ``vaapi-egl`` backend is indicated in the logs.
         If ``vaapi-glx`` is indicated, and the video colorspace is either BT.601
