@@ -1244,7 +1244,7 @@ Property list
 
 ``volume-max`` (RW)
     Current maximum value the volume property can be set to. (Equivalent to the
-    ``--volume-max`` property.)
+    ``--volume-max`` option.)
 
 ``mute`` (RW)
     Current mute status (``yes``/``no``).
