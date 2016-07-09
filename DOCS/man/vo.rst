@@ -465,7 +465,7 @@ Available video output drivers are:
         8
             Dither to 8 bit output.
 
-        Note that the depth of the connected video display device can not be
+        Note that the depth of the connected video display device cannot be
         detected. Often, LCD panels will do dithering on their own, which
         conflicts with ``opengl``'s dithering and leads to ugly output.
 

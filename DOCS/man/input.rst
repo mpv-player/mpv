@@ -2126,7 +2126,7 @@ Property list
 
     (Note that if an option is marked as file-local, even ``options/`` will
     access the local value, and the ``old`` value, which will be restored on
-    end of playback, can not be read or written until end of playback.)
+    end of playback, cannot be read or written until end of playback.)
 
 ``option-info/<name>``
     Additional per-option information.
