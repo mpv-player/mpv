@@ -1479,6 +1479,12 @@ Property list
     ``video-params/gamma``
         The gamma function in use as string. (Exact values subject to change.)
 
+    ``video-params/nom-peak``
+        The video encoding's nominal peak brightness as float.
+
+    ``video-params/sig-peak``
+        The video file's tagged signal peak as float.
+
     ``video-params/chroma-location``
         Chroma location as string. (Exact values subject to change.)
 
