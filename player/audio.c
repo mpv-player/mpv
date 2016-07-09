@@ -132,7 +132,7 @@ static int recreate_audio_filters(struct MPContext *mpctx)
     if (afs->initialized < 1 && af_init(afs) < 0)
         goto fail;
 
-    mixer_reinit_audio(mpctx->mixer, mpctx->ao, afs);
+    mixer_reinit_audio(mpctx->mixer, afs);
 
     mp_notify(mpctx, MPV_EVENT_AUDIO_RECONFIG, NULL);
 

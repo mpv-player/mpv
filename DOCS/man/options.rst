@@ -1072,14 +1072,10 @@ Audio
 
 ``--volume=<value>``
     Set the startup volume. 0 means silence, 100 means no volume reduction or
-    amplification. A value of -1 (the default) will not change the volume. See
-    also ``--softvol``.
+    amplification. Negative values can be passed for compatibility, but are
+    treated as 0.
 
-    .. note::
-
-        This was changed after the mpv 0.9 release. Before that, 100 actually
-        meant maximum volume. At the same time, the volume scale was made cubic,
-        so the old values won't match up with the new ones anyway.
+    Since mpv 0.18.1, this always controls the internal mixer (aka "softvol").
 
 ``--audio-delay=<sec>``
     Audio delay in seconds (positive or negative float value). Positive values
@@ -1094,20 +1090,17 @@ Audio
 
     See also: ``--volume``.
 
-``--softvol=<mode>``
-    Control whether to use the volume controls of the audio output driver or
-    the internal mpv volume filter.
+``--softvol=<no|yes|auto>``
+    Deprecated/unfunctional. Before mpv 0.18.1, this used to control whether
+    to use the volume controls of the audio output driver or the internal mpv
+    volume filter.
 
-    :no:    prefer audio driver controls, use the volume filter only if
-            absolutely needed
-    :yes:   always use the volume filter
-    :auto:  prefer the volume filter if the audio driver uses the system mixer
-            (default)
+    The current behavior is as if this option was set to ``yes``. The other
+    behaviors are not available anymore, although ``auto`` almost matches
+    current behavior in most cases.
 
-    The intention of ``auto`` is to avoid changing system mixer settings from
-    within mpv with default settings. mpv is a video player, not a mixer panel.
-    On the other hand, mixer controls are enabled for sound servers like
-    PulseAudio, which provide per-application volume.
+    The ``no`` behavior is still partially available through the ``ao-volume``
+    and ``ao-mute`` properties. But there are no options to reset these.
 
 ``--audio-demuxer=<[+]name>``
     Use this audio demuxer type when using ``--audio-file``. Use a '+' before
@@ -1264,9 +1257,11 @@ Audio
     their start timestamps differ, and then video timing is gradually adjusted
     if necessary to reach correct synchronization later.
 
-``--softvol-max=<100.0-1000.0>``
+``--volume-max=<100.0-1000.0>``, ``--softvol-max=<...>``
     Set the maximum amplification level in percent (default: 130). A value of
     130 will allow you to adjust the volume up to about double the normal level.
+
+    ``--softvol-max`` is a deprecated alias and should not be used.
 
 ``--audio-file-auto=<no|exact|fuzzy|all>``, ``--no-audio-file-auto``
     Load additional audio files matching the video filename. The parameter

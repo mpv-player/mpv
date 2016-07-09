@@ -21,6 +21,23 @@ Interface changes
 
  --- mpv 0.18.1 ---
     - deprecate --heartbeat-cmd
+    - remove --softvol=no capability:
+        - deprecate --softvol, it now does nothing
+        - --volume, --mute, and the corrsponding properties now always control
+          softvol, and behave as expected without surprises (e.g. you can set
+          them normally while no audio is initialized)
+        - rename --softvol-max to --volume-max (deprecated alias is added)
+        - the --volume-restore-data option and property are removed without
+          replacement. They were _always_ internal, and used for watch-later
+          resume/restore. Now --volume/--mute are saved directly instead.
+        - the previous point means resuming files with older watch-later configs
+          will print an error about missing --volume-restore-data (which you can
+          ignore), and will not restore the previous value
+        - as a consequence, volume controls will no longer control PulseAudio
+          per-application value, or use the system mixer's per-application
+          volume processing
+        - system or per-application volume can still be controlled with the
+          ao-volume and ao-mute properties (there are no command line options)
  --- mpv 0.18.0 ---
     - now ab-loops are active even if one of the "ab-loop-a"/"-b" properties is
       unset ("no"), in which case the start of the file is used if the A loop

@@ -410,13 +410,13 @@ const m_option_t mp_opts[] = {
                ({"no", SOFTVOL_NO},
                 {"yes", SOFTVOL_YES},
                 {"auto", SOFTVOL_AUTO})),
-    OPT_FLOATRANGE("softvol-max", softvol_max, 0, 100, 1000),
-    OPT_FLOATRANGE("volume", mixer_init_volume, 0, -1, 1000),
-    OPT_CHOICE("mute", mixer_init_mute, 0,
+    OPT_FLOATRANGE("volume-max", softvol_max, 0, 100, 1000),
+    // values <0 for volume and mute are legacy and ignored
+    OPT_FLOATRANGE("volume", softvol_volume, 0, -1, 1000),
+    OPT_CHOICE("mute", softvol_mute, 0,
                ({"auto", -1},
                 {"no", 0},
                 {"yes", 1})),
-    OPT_STRING("volume-restore-data", mixer_restore_volume_data, 0),
     OPT_CHOICE("gapless-audio", gapless_audio, 0,
                ({"no", 0},
                 {"yes", 1},
@@ -685,6 +685,7 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("ass-use-margins", "sub-use-margins"),
     OPT_REPLACED("media-title", "force-media-title"),
     OPT_REPLACED("input-unix-socket", "input-ipc-server"),
+    OPT_REPLACED("softvol-max", "volume-max"),
 
     {0}
 };
@@ -698,8 +699,8 @@ const struct MPOpts mp_default_opts = {
     .deinterlace = -1,
     .softvol = SOFTVOL_AUTO,
     .softvol_max = 130,
-    .mixer_init_volume = -1,
-    .mixer_init_mute = -1,
+    .softvol_volume = 100,
+    .softvol_mute = 0,
     .gapless_audio = -1,
     .audio_buffer = 0.2,
     .audio_device = "auto",

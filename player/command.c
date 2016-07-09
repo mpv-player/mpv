@@ -1569,44 +1569,29 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
+    struct MPOpts *opts = mpctx->opts;
+
     switch (action) {
-    case M_PROPERTY_GET:
-        mixer_getbothvolume(mpctx->mixer, arg);
-        return M_PROPERTY_OK;
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){
             .type = CONF_TYPE_FLOAT,
             .flags = M_OPT_RANGE,
             .min = 0,
-            .max = mixer_getmaxvolume(mpctx->mixer),
+            .max = opts->softvol_max,
         };
         return M_PROPERTY_OK;
     case M_PROPERTY_GET_NEUTRAL:
         *(float *)arg = 100;
         return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT: {
-        float val;
-        mixer_getbothvolume(mpctx->mixer, &val);
-        *(char **)arg = talloc_asprintf(NULL, "%i", (int)val);
+    case M_PROPERTY_PRINT:
+        *(char **)arg = talloc_asprintf(NULL, "%i", (int)opts->softvol_volume);
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_SET:
-        mixer_setvolume(mpctx->mixer, *(float *) arg, *(float *) arg);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_SWITCH: {
-        struct m_property_switch_arg *sarg = arg;
-        mixer_addvolume(mpctx->mixer, sarg->inc);
-        return M_PROPERTY_OK;
-    }
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
 
-static int mp_property_volume_max(void *ctx, struct m_property *prop,
-                                  int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    return m_property_float_ro(action, arg, mixer_getmaxvolume(mpctx->mixer));
+    int r = mp_property_generic_option(mpctx, prop, action, arg);
+    if (action == M_PROPERTY_SET)
+        mixer_update_volume(mpctx->mixer);
+    return r;
 }
 
 /// Mute (RW)
@@ -1614,34 +1599,76 @@ static int mp_property_mute(void *ctx, struct m_property *prop,
                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    switch (action) {
-    case M_PROPERTY_SET:
-        mixer_setmute(mpctx->mixer, *(int *) arg);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-        *(int *)arg =  mixer_getmute(mpctx->mixer);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET_TYPE:
+
+    if (action == M_PROPERTY_GET_TYPE) {
         *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLAG};
+        return M_PROPERTY_OK;
+    }
+
+    int r = mp_property_generic_option(mpctx, prop, action, arg);
+    if (action == M_PROPERTY_SET)
+        mixer_update_volume(mpctx->mixer);
+    return r;
+}
+
+static int mp_property_ao_volume(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct ao *ao = mpctx->ao;
+    if (!ao)
+        return M_PROPERTY_NOT_IMPLEMENTED;
+
+    switch (action) {
+    case M_PROPERTY_SET: {
+        float value = *(float *)arg;
+        ao_control_vol_t vol = {value, value};
+        if (ao_control(ao, AOCONTROL_SET_VOLUME, &vol) != CONTROL_OK)
+            return M_PROPERTY_UNAVAILABLE;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET: {
+        ao_control_vol_t vol = {0};
+        if (ao_control(ao, AOCONTROL_GET_VOLUME, &vol) != CONTROL_OK)
+            return M_PROPERTY_UNAVAILABLE;
+        *(float *)arg = (vol.left + vol.right) / 2.0f;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLOAT};
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_volrestore(void *ctx, struct m_property *prop,
-                                  int action, void *arg)
+
+static int mp_property_ao_mute(void *ctx, struct m_property *prop,
+                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    switch (action) {
-    case M_PROPERTY_GET: {
-        char *s = mixer_get_volume_restore_data(mpctx->mixer);
-        *(char **)arg = s;
-        return s ? M_PROPERTY_OK : M_PROPERTY_UNAVAILABLE;
-    }
-    case M_PROPERTY_SET:
+    struct ao *ao = mpctx->ao;
+    if (!ao)
         return M_PROPERTY_NOT_IMPLEMENTED;
+
+    switch (action) {
+    case M_PROPERTY_SET: {
+        bool value = *(int *)arg;
+        if (ao_control(ao, AOCONTROL_SET_MUTE, &value) != CONTROL_OK)
+            return M_PROPERTY_UNAVAILABLE;
+        return M_PROPERTY_OK;
     }
-    return mp_property_generic_option(mpctx, prop, action, arg);
+    case M_PROPERTY_GET: {
+        bool value = false;
+        if (ao_control(ao, AOCONTROL_GET_MUTE, &value) != CONTROL_OK)
+            return M_PROPERTY_UNAVAILABLE;
+        *(int *)arg = value;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLAG};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 static int get_device_entry(int item, int action, void *arg, void *ctx)
@@ -3670,8 +3697,10 @@ static const struct m_property mp_properties[] = {
     // Audio
     {"mixer-active", mp_property_mixer_active},
     {"volume", mp_property_volume},
-    {"volume-max", mp_property_volume_max},
+    {"volume-max", mp_property_generic_option},
     {"mute", mp_property_mute},
+    {"ao-volume", mp_property_ao_volume},
+    {"ao-mute", mp_property_ao_mute},
     {"audio-delay", mp_property_audio_delay},
     {"audio-codec-name", mp_property_audio_codec_name},
     {"audio-codec", mp_property_audio_codec},
@@ -3681,7 +3710,6 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_DEPRECATED_ALIAS("audio-channels", "audio-params/channel-count"),
     {"aid", mp_property_audio},
     {"balance", mp_property_balance},
-    {"volume-restore-data", mp_property_volrestore},
     {"audio-device", mp_property_audio_device},
     {"audio-device-list", mp_property_audio_devices},
     {"current-ao", mp_property_ao},
@@ -3859,7 +3887,7 @@ static const char *const *const mp_event_property_change[] = {
       "colormatrix-output-range", "colormatrix-primaries", "video-aspect"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute", "balance",
-      "volume-restore-data", "current-ao", "audio-codec-name", "audio-params",
+      "current-ao", "audio-codec-name", "audio-params",
       "audio-out-params", "volume-max", "mixer-active"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle", "eof-reached"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking", "core-idle", "eof-reached"),

@@ -1234,29 +1234,31 @@ Property list
     See ``--hr-seek``.
 
 ``mixer-active``
-    Return ``yes`` if the audio mixer is active, ``no`` otherwise. This has
-    implications for ``--softvol=no`` mode: if the mixer is inactive, changing
-    ``volume`` doesn't actually change anything on the system mixer. If the
-    ``--volume`` or ``--mute`` option are used, these might not be applied
-    properly until the mixer becomes active either. (The options, if set, will
-    just overwrite the mixer state at audio initialization.)
+    Return ``yes`` if the audio mixer is active, ``no`` otherwise.
 
-    While the behavior with ``mixer-active==yes`` is relatively well-defined,
-    the ``no`` case will provide possibly wrong or insignificant values.
-
-    Note that an active mixer does not necessarily imply active audio output,
-    although this is implied in the current implementation.
+    This option is relatively useless. Before mpv 0.18.1, it could be used to
+    infer behavior of the ``volume`` property.
 
 ``volume`` (RW)
-    Current volume (see ``--volume`` for details). Also see ``mixer-active``
-    property.
+    Current volume (see ``--volume`` for details).
 
-``volume-max``
-    Current maximum value the volume property can be set to. (This may depend
-    on the ``--softvol-max`` option.)
+``volume-max`` (RW)
+    Current maximum value the volume property can be set to. (Equivalent to the
+    ``--volume-max`` property.)
 
 ``mute`` (RW)
-    Current mute status (``yes``/``no``). Also see ``mixer-active`` property.
+    Current mute status (``yes``/``no``).
+
+``ao-volume`` (RW)
+    System volume. This property is available only if mpv audio output is
+    currently active, and only if the underlying implementation supports volume
+    control. What this option does depends on the API. For example, on ALSA
+    this usually changes system-wide audio, while with PulseAudio this controls
+    per-application volume.
+
+``ao-mute`` (RW)
+    Similar to ``ao-volume``, but controls the mute state. May be unimplemented
+    even if ``ao-volume`` works.
 
 ``audio-delay`` (RW)
     See ``--audio-delay``.
