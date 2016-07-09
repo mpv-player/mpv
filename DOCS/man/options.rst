@@ -639,7 +639,7 @@ Video
         is performed by the hardware decoding API, instead of the OpenGL code
         used by ``--vo=opengl``. This means certain obscure colorspaces may
         not display correctly, not certain filtering (such as debanding)
-        can not be applied in an ideal way.
+        cannot be applied in an ideal way.
 
         ``vdpau`` is usually safe. If deinterlacing enabled (or the ``vdpaupp``
         video filter is active in general), it forces RGB conversion. The latter
@@ -1276,7 +1276,7 @@ Audio
     :no:    Don't automatically load external audio files.
     :exact: Load the media filename with audio file extension (default).
     :fuzzy: Load all audio files containing media filename.
-    :all:   Load all aufio files in the current and ``--audio-file-paths``
+    :all:   Load all audio files in the current and ``--audio-file-paths``
             directories.
 
 ``--audio-file-paths=<path1:path2:...>``
@@ -1320,7 +1320,7 @@ Subtitles
 .. note::
 
     Changing styling and position does not work with all subtitles. Image-based
-    subtitles (DVD, Bluray/PGS, DVB) can not changed for fundamental reasons.
+    subtitles (DVD, Bluray/PGS, DVB) cannot changed for fundamental reasons.
     Subtitles in ASS format are normally not changed intentionally, but
     overriding them can be controlled with ``--ass-style-override``.
 
@@ -2446,7 +2446,7 @@ Demuxer
     stop reading additional packets as soon as one of the limits is reached.
     (The limits still can be slightly overstepped due to technical reasons.)
 
-    Set these limits highher if you get a packet queue overflow warning, and
+    Set these limits higher if you get a packet queue overflow warning, and
     you think normal playback would be possible with a larger packet queue.
 
     See ``--list-options`` for defaults and value range.
@@ -2471,7 +2471,7 @@ Demuxer
 
 ``--force-seekable=<yes|no>``
     If the player thinks that the media is not seekable (e.g. playing from a
-    pipe, or it's a http stream with a server that doesn't support range
+    pipe, or it's an http stream with a server that doesn't support range
     requests), seeking will be disabled. This option can forcibly enable it.
     For seeks within the cache, there's a good chance of success.
 
@@ -3298,7 +3298,7 @@ Cache
     With ``auto``, the cache will usually be enabled for network streams,
     using the size set by ``--cache-default``. With ``yes``, the cache will
     always be enabled with the size set by ``--cache-default`` (unless the
-    stream can not be cached, or ``--cache-default`` disables caching).
+    stream cannot be cached, or ``--cache-default`` disables caching).
 
     May be useful when playing files from slow media, but can also have
     negative effects, especially with file formats that require a lot of
@@ -3693,7 +3693,7 @@ Miscellaneous
     video or audio outputs are not possible, but you can use filters to merge
     them into one.
 
-    The complex filter can not be changed yet during playback. It's also not
+    The complex filter cannot be changed yet during playback. It's also not
     possible to change the tracks connected to the filter at runtime. Other
     tracks, as long as they're not connected to the filter, and the
     corresponding output is not connected to the filter, can still be freely
