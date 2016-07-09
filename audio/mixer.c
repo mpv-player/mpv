@@ -57,6 +57,9 @@ bool mixer_audio_initialized(struct mixer *mixer)
 // Called when opts->softvol_volume or opts->softvol_mute were changed.
 void mixer_update_volume(struct mixer *mixer)
 {
+    if (!mixer->af)
+        return;
+
     float gain = MPMAX(mixer->opts->softvol_volume / 100.0, 0);
     if (mixer->opts->softvol_mute == 1)
         gain = 0.0;
