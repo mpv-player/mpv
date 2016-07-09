@@ -45,6 +45,10 @@ static void *run_subprocess(void *ptr)
     return NULL;
 }
 
+void mp_devnull(void *ctx, char *data, size_t size)
+{
+}
+
 void mp_subprocess_detached(struct mp_log *log, char **args)
 {
     struct subprocess_args *p = talloc_zero(NULL, struct subprocess_args);

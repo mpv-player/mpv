@@ -64,6 +64,7 @@ enum mp_csp_prim {
     MP_CSP_PRIM_PRO_PHOTO,
     MP_CSP_PRIM_CIE_1931,
     MP_CSP_PRIM_DCI_P3,
+    MP_CSP_PRIM_V_GAMUT,
     MP_CSP_PRIM_COUNT
 };
 
@@ -79,6 +80,8 @@ enum mp_csp_trc {
     MP_CSP_TRC_GAMMA28,
     MP_CSP_TRC_PRO_PHOTO,
     MP_CSP_TRC_SMPTE_ST2084,
+    MP_CSP_TRC_ARIB_STD_B67,
+    MP_CSP_TRC_V_LOG,
     MP_CSP_TRC_COUNT
 };
 
@@ -113,11 +116,18 @@ extern const struct m_opt_choice_alternatives mp_stereo3d_names[];
 #define MP_STEREO3D_NAME_DEF(x, def) \
     (MP_STEREO3D_NAME(x) ? MP_STEREO3D_NAME(x) : (def))
 
-struct mp_csp_params {
-    enum mp_csp colorspace;
-    enum mp_csp_levels levels_in;      // encoded video
-    enum mp_csp_levels levels_out;     // output device
+struct mp_colorspace {
+    enum mp_csp space;
+    enum mp_csp_levels levels;
     enum mp_csp_prim primaries;
+    enum mp_csp_trc gamma;
+    float nom_peak; // nominal (absolute) peak. 0 = auto/unknown
+    float sig_peak; // signal peak, highest value that occurs in the source
+};
+
+struct mp_csp_params {
+    struct mp_colorspace color; // input colorspace
+    enum mp_csp_levels levels_out; // output device
     float brightness;
     float contrast;
     float hue;
@@ -131,9 +141,8 @@ struct mp_csp_params {
 };
 
 #define MP_CSP_PARAMS_DEFAULTS {                                \
-    .colorspace = MP_CSP_BT_601,                                \
-    .levels_in = MP_CSP_LEVELS_TV,                              \
-    .primaries = MP_CSP_PRIM_AUTO,                              \
+    .color = { .space = MP_CSP_BT_601,                          \
+               .levels = MP_CSP_LEVELS_TV },                    \
     .levels_out = MP_CSP_LEVELS_PC,                             \
     .brightness = 0, .contrast = 1, .hue = 0, .saturation = 1,  \
     .gamma = 1, .texture_bits = 8, .input_bits = 8}
@@ -141,6 +150,8 @@ struct mp_csp_params {
 struct mp_image_params;
 void mp_csp_set_image_params(struct mp_csp_params *params,
                              const struct mp_image_params *imgparams);
+
+bool mp_colorspace_equal(struct mp_colorspace c1, struct mp_colorspace c2);
 
 enum mp_chroma_location {
     MP_CHROMA_AUTO,
@@ -193,27 +204,19 @@ struct mp_csp_primaries {
 
 void mp_csp_copy_equalizer_values(struct mp_csp_params *params,
                                   const struct mp_csp_equalizer *eq);
-
 int mp_csp_equalizer_set(struct mp_csp_equalizer *eq, const char *property,
                          int value);
-
 int mp_csp_equalizer_get(struct mp_csp_equalizer *eq, const char *property,
                          int *out_value);
 
 enum mp_csp avcol_spc_to_mp_csp(int avcolorspace);
-
 enum mp_csp_levels avcol_range_to_mp_csp_levels(int avrange);
-
 enum mp_csp_prim avcol_pri_to_mp_csp_prim(int avpri);
-
 enum mp_csp_trc avcol_trc_to_mp_csp_trc(int avtrc);
 
 int mp_csp_to_avcol_spc(enum mp_csp colorspace);
-
 int mp_csp_levels_to_avcol_range(enum mp_csp_levels range);
-
 int mp_csp_prim_to_avcol_pri(enum mp_csp_prim prim);
-
 int mp_csp_trc_to_avcol_trc(enum mp_csp_trc trc);
 
 enum mp_csp mp_csp_guess_colorspace(int width, int height);
@@ -221,10 +224,11 @@ enum mp_csp_prim mp_csp_guess_primaries(int width, int height);
 
 enum mp_chroma_location avchroma_location_to_mp(int avloc);
 int mp_chroma_location_to_av(enum mp_chroma_location mploc);
-
 void mp_get_chroma_location(enum mp_chroma_location loc, int *x, int *y);
 
 struct mp_csp_primaries mp_get_csp_primaries(enum mp_csp_prim csp);
+float mp_csp_trc_nom_peak(enum mp_csp_trc trc, float ref_peak);
+bool mp_trc_is_hdr(enum mp_csp_trc trc);
 
 /* Color conversion matrix: RGB = m * YUV + c
  * m is in row-major matrix, with m[row][col], e.g.:

@@ -24,6 +24,7 @@
 #include "common/av_common.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
+#include "video/mp_image_pool.h"
 #include "osdep/windows_utils.h"
 
 #include "d3d.h"
@@ -68,7 +69,7 @@ struct d3dva_mode {
 
 #define MODE2(id) &MP_CONCAT(DXVA2_Mode, id), # id
 #define  MODE(id) &MP_CONCAT(DXVA_,      id), # id
-// Prefered modes must come first
+// Preferred modes must come first
 static const struct d3dva_mode d3dva_modes[] = {
     // MPEG-1/2
     {MODE2(MPEG2_VLD),        AV_CODEC_ID_MPEG2VIDEO, PROF_MPEG2_MAIN},
@@ -265,4 +266,96 @@ void copy_nv12(struct mp_image *dest, uint8_t *src_bits,
     buf.planes[1] = src_bits + src_pitch * surf_height;
     buf.stride[1] = src_pitch;
     mp_image_copy_gpu(dest, &buf);
+}
+
+// Test if Direct3D11 can be used by us. Basically, this prevents trying to use
+// D3D11 on Win7, and then failing somewhere in the process.
+bool d3d11_check_decoding(ID3D11Device *dev)
+{
+    HRESULT hr;
+    // We assume that NV12 is always supported, if hw decoding is supported at
+    // all.
+    UINT supported = 0;
+    hr = ID3D11Device_CheckFormatSupport(dev, DXGI_FORMAT_NV12, &supported);
+    return !FAILED(hr) && (supported & D3D11_BIND_DECODER);
+}
+
+static int get_dxgi_mpfmt(DWORD dxgi_fmt)
+{
+    switch (dxgi_fmt) {
+    case DXGI_FORMAT_NV12: return IMGFMT_NV12;
+    case DXGI_FORMAT_P010: return IMGFMT_P010;
+    case DXGI_FORMAT_P016: return IMGFMT_P010;
+    }
+    return 0;
+}
+
+struct mp_image *d3d11_download_image(struct mp_hwdec_ctx *ctx,
+                                      struct mp_image *mpi,
+                                      struct mp_image_pool *swpool)
+{
+    HRESULT hr;
+    ID3D11Device *device = ctx->ctx;
+
+    if (mpi->imgfmt != IMGFMT_D3D11VA && mpi->imgfmt != IMGFMT_D3D11NV12)
+        return NULL;
+
+    ID3D11Texture2D *texture = (void *)mpi->planes[1];
+    int subindex = (intptr_t)mpi->planes[2];
+    if (!texture)
+        return NULL;
+
+    D3D11_TEXTURE2D_DESC tex_desc;
+    ID3D11Texture2D_GetDesc(texture, &tex_desc);
+    int mpfmt = get_dxgi_mpfmt(tex_desc.Format);
+    if (!mpfmt)
+        return NULL;
+
+    // create staging texture shared with the CPU with mostly the same
+    // parameters as the source texture
+    tex_desc.MipLevels      = 1;
+    tex_desc.MiscFlags      = 0;
+    tex_desc.ArraySize      = 1;
+    tex_desc.Usage          = D3D11_USAGE_STAGING;
+    tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    tex_desc.BindFlags      = 0;
+    ID3D11Texture2D *staging = NULL;
+    hr = ID3D11Device_CreateTexture2D(device, &tex_desc, NULL, &staging);
+    if (FAILED(hr))
+        return NULL;
+
+    bool ok = false;
+    struct mp_image *sw_img = NULL;
+    ID3D11DeviceContext *device_ctx = NULL;
+    ID3D11Device_GetImmediateContext(device, &device_ctx);
+
+    // copy to the staging texture
+    ID3D11DeviceContext_CopySubresourceRegion(
+        device_ctx,
+        (ID3D11Resource *)staging, 0, 0, 0, 0,
+        (ID3D11Resource *)texture, subindex, NULL);
+
+    sw_img = mp_image_pool_get(swpool, mpfmt, tex_desc.Width, tex_desc.Height);
+    if (!sw_img)
+        goto done;
+
+    // copy staging texture to the cpu mp_image
+    D3D11_MAPPED_SUBRESOURCE lock;
+    hr = ID3D11DeviceContext_Map(device_ctx, (ID3D11Resource *)staging,
+                                 0, D3D11_MAP_READ, 0, &lock);
+    if (FAILED(hr))
+        goto done;
+    copy_nv12(sw_img, lock.pData, lock.RowPitch, tex_desc.Height);
+    ID3D11DeviceContext_Unmap(device_ctx, (ID3D11Resource *)staging, 0);
+
+    mp_image_set_size(sw_img, mpi->w, mpi->h);
+    mp_image_copy_attributes(sw_img, mpi);
+    ok = true;
+
+done:
+    ID3D11Texture2D_Release(staging);
+    ID3D11DeviceContext_Release(device_ctx);
+    if (!ok)
+        mp_image_unrefp(&sw_img);
+    return sw_img;
 }

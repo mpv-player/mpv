@@ -32,7 +32,11 @@ API changes
 
 ::
 
- --- mpv 0.17.1 ---
+ --- mpv 0.18.1 ---
+ ----   - remove "status" log level from mpv_request_log_messages() docs. This
+          is 100% equivalent to "v". The behavior is still the same, thus no
+          actual API change.
+ --- mpv 0.18.0 ---
  1.21   - mpv_set_property() changes behavior with MPV_FORMAT_NODE. Before this
           change it rejected mpv_nodes with format==MPV_FORMAT_STRING if the
           property was not a string or did not have special mechanisms in place

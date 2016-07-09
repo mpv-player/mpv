@@ -465,7 +465,7 @@ Available video output drivers are:
         8
             Dither to 8 bit output.
 
-        Note that the depth of the connected video display device can not be
+        Note that the depth of the connected video display device cannot be
         detected. Often, LCD panels will do dithering on their own, which
         conflicts with ``opengl``'s dithering and leads to ugly output.
 
@@ -629,6 +629,9 @@ Available video output drivers are:
             never resets (regardless of seeks).
         vec2 image_size
             The size in pixels of the input image.
+        vec2 target_size
+            The size in pixels of the visible part of the scaled (and possibly
+            cropped) image.
 
         For example, a shader that inverts the colors could look like this::
 
@@ -979,6 +982,8 @@ Available video output drivers are:
             CIE 1931 RGB (not to be confused with CIE XYZ)
         dci-p3
             DCI-P3 (Digital Cinema Colorspace), SMPTE RP431-2
+        v-gamut
+            Panasonic V-Gamut (VARICAM) primaries
 
     ``target-trc=<value>``
         Specifies the transfer characteristics (gamma) of the display. Video
@@ -1003,6 +1008,16 @@ Available video output drivers are:
             ProPhoto RGB (ROMM)
         st2084
             SMPTE ST2084 (HDR) curve, PQ OETF
+        std-b67
+            ARIB STD-B67 (Hybrid Log-gamma) curve, also known as BBC/NHK HDR
+        v-log
+            Panasonic V-Log (VARICAM) curve
+
+        NOTE: When using HDR output formats, mpv will encode to the specified
+              curve but it will not set any HDMI flags or other signalling that
+              might be required for the target device to correctly display the
+              HDR signal. The user should independently guarantee this before
+              using these signal formats for display.
 
     ``target-brightness=<1..100000>``
         Specifies the display's approximate brightness in cd/m^2. When playing

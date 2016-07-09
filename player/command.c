@@ -60,6 +60,7 @@
 #include "audio/filter/af.h"
 #include "video/decode/dec_video.h"
 #include "audio/decode/dec_audio.h"
+#include "video/out/bitmap_packer.h"
 #include "options/path.h"
 #include "screenshot.h"
 
@@ -88,7 +89,8 @@ struct command_ctx {
     // One of these is in use by the OSD; the other one exists so that the
     // bitmap list can be manipulated without additional synchronization.
     struct sub_bitmaps overlay_osd[2];
-    struct sub_bitmaps *overlay_osd_current;
+    int overlay_osd_current;
+    struct bitmap_packer *overlay_packer;
 
     struct hook_handler **hooks;
     int num_hooks;
@@ -98,9 +100,8 @@ struct command_ctx {
 };
 
 struct overlay {
-    void *map_start;
-    size_t map_size;
-    struct sub_bitmap osd;
+    struct mp_image *source;
+    int x, y;
 };
 
 struct hook_handler {
@@ -1568,44 +1569,29 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
+    struct MPOpts *opts = mpctx->opts;
+
     switch (action) {
-    case M_PROPERTY_GET:
-        mixer_getbothvolume(mpctx->mixer, arg);
-        return M_PROPERTY_OK;
     case M_PROPERTY_GET_TYPE:
         *(struct m_option *)arg = (struct m_option){
             .type = CONF_TYPE_FLOAT,
             .flags = M_OPT_RANGE,
             .min = 0,
-            .max = mixer_getmaxvolume(mpctx->mixer),
+            .max = opts->softvol_max,
         };
         return M_PROPERTY_OK;
     case M_PROPERTY_GET_NEUTRAL:
         *(float *)arg = 100;
         return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT: {
-        float val;
-        mixer_getbothvolume(mpctx->mixer, &val);
-        *(char **)arg = talloc_asprintf(NULL, "%i", (int)val);
+    case M_PROPERTY_PRINT:
+        *(char **)arg = talloc_asprintf(NULL, "%i", (int)opts->softvol_volume);
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_SET:
-        mixer_setvolume(mpctx->mixer, *(float *) arg, *(float *) arg);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_SWITCH: {
-        struct m_property_switch_arg *sarg = arg;
-        mixer_addvolume(mpctx->mixer, sarg->inc);
-        return M_PROPERTY_OK;
-    }
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
 
-static int mp_property_volume_max(void *ctx, struct m_property *prop,
-                                  int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    return m_property_float_ro(action, arg, mixer_getmaxvolume(mpctx->mixer));
+    int r = mp_property_generic_option(mpctx, prop, action, arg);
+    if (action == M_PROPERTY_SET)
+        mixer_update_volume(mpctx->mixer);
+    return r;
 }
 
 /// Mute (RW)
@@ -1613,34 +1599,76 @@ static int mp_property_mute(void *ctx, struct m_property *prop,
                             int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    switch (action) {
-    case M_PROPERTY_SET:
-        mixer_setmute(mpctx->mixer, *(int *) arg);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-        *(int *)arg =  mixer_getmute(mpctx->mixer);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET_TYPE:
+
+    if (action == M_PROPERTY_GET_TYPE) {
         *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLAG};
+        return M_PROPERTY_OK;
+    }
+
+    int r = mp_property_generic_option(mpctx, prop, action, arg);
+    if (action == M_PROPERTY_SET)
+        mixer_update_volume(mpctx->mixer);
+    return r;
+}
+
+static int mp_property_ao_volume(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct ao *ao = mpctx->ao;
+    if (!ao)
+        return M_PROPERTY_NOT_IMPLEMENTED;
+
+    switch (action) {
+    case M_PROPERTY_SET: {
+        float value = *(float *)arg;
+        ao_control_vol_t vol = {value, value};
+        if (ao_control(ao, AOCONTROL_SET_VOLUME, &vol) != CONTROL_OK)
+            return M_PROPERTY_UNAVAILABLE;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET: {
+        ao_control_vol_t vol = {0};
+        if (ao_control(ao, AOCONTROL_GET_VOLUME, &vol) != CONTROL_OK)
+            return M_PROPERTY_UNAVAILABLE;
+        *(float *)arg = (vol.left + vol.right) / 2.0f;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLOAT};
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_volrestore(void *ctx, struct m_property *prop,
-                                  int action, void *arg)
+
+static int mp_property_ao_mute(void *ctx, struct m_property *prop,
+                               int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    switch (action) {
-    case M_PROPERTY_GET: {
-        char *s = mixer_get_volume_restore_data(mpctx->mixer);
-        *(char **)arg = s;
-        return s ? M_PROPERTY_OK : M_PROPERTY_UNAVAILABLE;
-    }
-    case M_PROPERTY_SET:
+    struct ao *ao = mpctx->ao;
+    if (!ao)
         return M_PROPERTY_NOT_IMPLEMENTED;
+
+    switch (action) {
+    case M_PROPERTY_SET: {
+        bool value = *(int *)arg;
+        if (ao_control(ao, AOCONTROL_SET_MUTE, &value) != CONTROL_OK)
+            return M_PROPERTY_UNAVAILABLE;
+        return M_PROPERTY_OK;
     }
-    return mp_property_generic_option(mpctx, prop, action, arg);
+    case M_PROPERTY_GET: {
+        bool value = false;
+        if (ao_control(ao, AOCONTROL_GET_MUTE, &value) != CONTROL_OK)
+            return M_PROPERTY_UNAVAILABLE;
+        *(int *)arg = value;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLAG};
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 static int get_device_entry(int item, int action, void *arg, void *ctx)
@@ -2257,88 +2285,6 @@ static int mp_property_detected_hwdec(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-#define VF_DEINTERLACE_LABEL "deinterlace"
-
-static bool probe_deint_filter(struct MPContext *mpctx, const char *filt)
-{
-    char filter[80];
-    // add a label so that removing the filter is easier
-    snprintf(filter, sizeof(filter), "@%s:%s", VF_DEINTERLACE_LABEL, filt);
-    return edit_filters(mpctx, mp_null_log, STREAM_VIDEO, "pre", filter) >= 0;
-}
-
-static bool check_output_format(struct MPContext *mpctx, int imgfmt)
-{
-    struct vo_chain *vo_c = mpctx->vo_chain;
-    if (!vo_c)
-        return false;
-    return vo_c->vf->allowed_output_formats[imgfmt - IMGFMT_START];
-}
-
-static int probe_deint_filters(struct MPContext *mpctx)
-{
-    if (check_output_format(mpctx, IMGFMT_VDPAU)) {
-        char filter[80] = "vdpaupp:deint=yes";
-        int pref = 0;
-        vo_control(mpctx->video_out, VOCTRL_GET_PREF_DEINT, &pref);
-        pref = pref < 0 ? -pref : pref;
-        if (pref > 0 && pref <= 4) {
-            const char *types[] =
-                {"", "first-field", "bob", "temporal", "temporal-spatial"};
-            mp_snprintf_cat(filter, sizeof(filter), ":deint-mode=%s",
-                            types[pref]);
-        }
-
-        probe_deint_filter(mpctx, filter);
-        return 0;
-    }
-    if (check_output_format(mpctx, IMGFMT_VAAPI) &&
-        probe_deint_filter(mpctx, "vavpp"))
-        return 0;
-    if ((check_output_format(mpctx, IMGFMT_D3D11VA) ||
-         check_output_format(mpctx, IMGFMT_D3D11NV12)) &&
-        probe_deint_filter(mpctx, "d3d11vpp"))
-        return 0;
-    if (probe_deint_filter(mpctx, "yadif"))
-        return 0;
-    return -1;
-}
-
-static int get_deinterlacing(struct MPContext *mpctx)
-{
-    struct vo_chain *vo_c = mpctx->vo_chain;
-    int enabled = 0;
-    if (video_vf_vo_control(vo_c, VFCTRL_GET_DEINTERLACE, &enabled) != CONTROL_OK)
-        enabled = -1;
-    if (enabled < 0) {
-        // vf_lavfi doesn't support VFCTRL_GET_DEINTERLACE
-        if (vf_find_by_label(vo_c->vf, VF_DEINTERLACE_LABEL))
-            enabled = 1;
-    }
-    return enabled;
-}
-
-void remove_deint_filter(struct MPContext *mpctx)
-{
-    edit_filters(mpctx, mp_null_log, STREAM_VIDEO, "del", "@" VF_DEINTERLACE_LABEL);
-}
-
-void set_deinterlacing(struct MPContext *mpctx, bool enable)
-{
-    struct vo_chain *vo_c = mpctx->vo_chain;
-    if (vf_find_by_label(vo_c->vf, VF_DEINTERLACE_LABEL)) {
-        if (!enable)
-            remove_deint_filter(mpctx);
-    } else {
-        if ((get_deinterlacing(mpctx) > 0) != enable) {
-            int arg = enable;
-            if (video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &arg) != CONTROL_OK)
-                probe_deint_filters(mpctx);
-        }
-    }
-    mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
-}
-
 static int mp_property_deinterlace(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
@@ -2568,13 +2514,13 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
         {"aspect",          SUB_PROP_FLOAT(d_w / (double)d_h)},
         {"par",             SUB_PROP_FLOAT(p.p_w / (double)p.p_h)},
         {"colormatrix",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_names, p.colorspace))},
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_names, p.color.space))},
         {"colorlevels",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_levels_names, p.colorlevels))},
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_levels_names, p.color.levels))},
         {"primaries",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_prim_names, p.primaries))},
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_prim_names, p.color.primaries))},
         {"gamma",
-            SUB_PROP_STR(m_opt_choice_str(mp_csp_trc_names, p.gamma))},
+            SUB_PROP_STR(m_opt_choice_str(mp_csp_trc_names, p.color.gamma))},
         {"chroma-location",
             SUB_PROP_STR(m_opt_choice_str(mp_chroma_names, p.chroma_location))},
         {"stereo-in",
@@ -3751,8 +3697,10 @@ static const struct m_property mp_properties[] = {
     // Audio
     {"mixer-active", mp_property_mixer_active},
     {"volume", mp_property_volume},
-    {"volume-max", mp_property_volume_max},
+    {"volume-max", mp_property_generic_option},
     {"mute", mp_property_mute},
+    {"ao-volume", mp_property_ao_volume},
+    {"ao-mute", mp_property_ao_mute},
     {"audio-delay", mp_property_audio_delay},
     {"audio-codec-name", mp_property_audio_codec_name},
     {"audio-codec", mp_property_audio_codec},
@@ -3762,7 +3710,6 @@ static const struct m_property mp_properties[] = {
     M_PROPERTY_DEPRECATED_ALIAS("audio-channels", "audio-params/channel-count"),
     {"aid", mp_property_audio},
     {"balance", mp_property_balance},
-    {"volume-restore-data", mp_property_volrestore},
     {"audio-device", mp_property_audio_device},
     {"audio-device-list", mp_property_audio_devices},
     {"current-ao", mp_property_ao},
@@ -3940,7 +3887,7 @@ static const char *const *const mp_event_property_change[] = {
       "colormatrix-output-range", "colormatrix-primaries", "video-aspect"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute", "balance",
-      "volume-restore-data", "current-ao", "audio-codec-name", "audio-params",
+      "current-ao", "audio-codec-name", "audio-params",
       "audio-out-params", "volume-max", "mixer-active"),
     E(MPV_EVENT_SEEK, "seeking", "core-idle", "eof-reached"),
     E(MPV_EVENT_PLAYBACK_RESTART, "seeking", "core-idle", "eof-reached"),
@@ -4314,20 +4261,85 @@ static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
 static void recreate_overlays(struct MPContext *mpctx)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
-    struct sub_bitmaps *new = &cmd->overlay_osd[0];
-    if (new == cmd->overlay_osd_current)
-        new += 1; // pick the unused one
+    int overlay_next = !cmd->overlay_osd_current;
+    struct sub_bitmaps *new = &cmd->overlay_osd[overlay_next];
     new->format = SUBBITMAP_RGBA;
     new->change_id = 1;
-    // overlay array can have unused entries, but parts list must be "packed"
+
+    bool valid = false;
+
     new->num_parts = 0;
     for (int n = 0; n < cmd->num_overlays; n++) {
         struct overlay *o = &cmd->overlays[n];
-        if (o->osd.bitmap)
-            MP_TARRAY_APPEND(cmd, new->parts, new->num_parts, o->osd);
+        if (o->source) {
+            struct mp_image *s = o->source;
+            struct sub_bitmap b = {
+                .bitmap = s->planes[0],
+                .stride = s->stride[0],
+                .w = s->w, .dw = s->w,
+                .h = s->h, .dh = s->h,
+                .x = o->x,
+                .y = o->y,
+            };
+            MP_TARRAY_APPEND(cmd, new->parts, new->num_parts, b);
+        }
     }
-    cmd->overlay_osd_current = new;
-    osd_set_external2(mpctx->osd, cmd->overlay_osd_current);
+
+    if (!cmd->overlay_packer)
+        cmd->overlay_packer = talloc_zero(cmd, struct bitmap_packer);
+
+    cmd->overlay_packer->padding = 1; // assume bilinear scaling
+    packer_set_size(cmd->overlay_packer, new->num_parts);
+
+    for (int n = 0; n < new->num_parts; n++)
+        cmd->overlay_packer->in[n] = (struct pos){new->parts[n].w, new->parts[n].h};
+
+    if (packer_pack(cmd->overlay_packer) < 0 || new->num_parts == 0)
+        goto done;
+
+    struct pos bb[2];
+    packer_get_bb(cmd->overlay_packer, bb);
+
+    new->packed_w = bb[1].x;
+    new->packed_h = bb[1].y;
+
+    if (!new->packed || new->packed->w < new->packed_w ||
+                        new->packed->h < new->packed_h)
+    {
+        talloc_free(new->packed);
+        new->packed = mp_image_alloc(IMGFMT_BGRA, cmd->overlay_packer->w,
+                                                  cmd->overlay_packer->h);
+        if (!new->packed)
+            goto done;
+    }
+
+    // clear padding
+    mp_image_clear(new->packed, 0, 0, new->packed->w, new->packed->h);
+
+    for (int n = 0; n < new->num_parts; n++) {
+        struct sub_bitmap *b = &new->parts[n];
+        struct pos pos = cmd->overlay_packer->result[n];
+
+        int stride = new->packed->stride[0];
+        void *pdata = (uint8_t *)new->packed->planes[0] + pos.y * stride + pos.x * 4;
+        memcpy_pic(pdata, b->bitmap, b->w * 4, b->h, stride, b->stride);
+
+        b->bitmap = pdata;
+        b->stride = stride;
+
+        b->src_x = pos.x;
+        b->src_y = pos.y;
+    }
+
+    valid = true;
+done:
+    if (!valid) {
+        new->format = SUBBITMAP_EMPTY;
+        new->num_parts = 0;
+    }
+
+    osd_set_external2(mpctx->osd, new);
+    cmd->overlay_osd_current = overlay_next;
 }
 
 // Set overlay with the given ID to the contents as described by "new".
@@ -4342,17 +4354,11 @@ static void replace_overlay(struct MPContext *mpctx, int id, struct overlay *new
     }
 
     struct overlay *ptr = &cmd->overlays[id];
-    struct overlay old = *ptr;
 
-    if (!ptr->osd.bitmap && !new->osd.bitmap)
-        return; // don't need to recreate or unmap
-
+    talloc_free(ptr->source);
     *ptr = *new;
-    recreate_overlays(mpctx);
 
-    // Do this afterwards, so we never unmap while the OSD is using it.
-    if (old.map_start && old.map_size)
-        munmap(old.map_start, old.map_size);
+    recreate_overlays(mpctx);
 }
 
 static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
@@ -4368,18 +4374,17 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
         MP_ERR(mpctx, "overlay_add: invalid id %d\n", id);
         goto error;
     }
-    if (w < 0 || h < 0 || stride < w * 4 || (stride % 4)) {
+    if (w <= 0 || h <= 0 || stride < w * 4 || (stride % 4)) {
         MP_ERR(mpctx, "overlay_add: inconsistent parameters\n");
         goto error;
     }
     struct overlay overlay = {
-        .osd = {
-            .stride = stride,
-            .x = x, .y = y,
-            .w = w, .h = h,
-            .dw = w, .dh = h,
-        },
+        .source = mp_image_alloc(IMGFMT_BGRA, w, h),
+        .x = x,
+        .y = y,
     };
+    if (!overlay.source)
+        goto error;
     int fd = -1;
     bool close_fd = true;
     void *p = NULL;
@@ -4398,21 +4403,25 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
     } else {
         fd = open(file, O_RDONLY | O_BINARY | O_CLOEXEC);
     }
+    int map_size = 0;
     if (fd >= 0) {
-        overlay.map_size = offset + h * stride;
-        void *m = mmap(NULL, overlay.map_size, PROT_READ, MAP_SHARED, fd, 0);
+        map_size = offset + h * stride;
+        void *m = mmap(NULL, map_size, PROT_READ, MAP_SHARED, fd, 0);
         if (close_fd)
             close(fd);
-        if (m && m != MAP_FAILED) {
-            overlay.map_start = m;
+        if (m && m != MAP_FAILED)
             p = m;
-        }
     }
     if (!p) {
         MP_ERR(mpctx, "overlay_add: could not open or map '%s'\n", file);
+        talloc_free(overlay.source);
         goto error;
     }
-    overlay.osd.bitmap = (char *)p + offset;
+    memcpy_pic(overlay.source->planes[0], (char *)p + offset, w * 4, h,
+               overlay.source->stride[0], stride);
+    if (map_size)
+        munmap(p, map_size);
+
     replace_overlay(mpctx, id, &overlay);
     r = 0;
 error:
@@ -4434,6 +4443,8 @@ static void overlay_uninit(struct MPContext *mpctx)
     for (int id = 0; id < cmd->num_overlays; id++)
         overlay_remove(mpctx, id);
     osd_set_external2(mpctx->osd, NULL);
+    for (int n = 0; n < 2; n++)
+        mp_image_unrefp(&cmd->overlay_osd[n].packed);
 }
 
 struct cycle_counter {
@@ -4958,6 +4969,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         mpctx->add_osd_seek_info |=
                 (msg_osd ? OSD_SEEK_INFO_TEXT : 0) |
                 (bar_osd ? OSD_SEEK_INFO_BAR : 0);
+        mpctx->osd_force_update = true;
         break;
 
     case MP_CMD_TV_LAST_CHANNEL: {

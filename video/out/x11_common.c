@@ -514,7 +514,7 @@ static void *screensaver_thread(void *arg)
             break;
 
         char *args[] = {"xdg-screensaver", "reset", NULL};
-        int status = mp_subprocess(args, NULL, NULL, NULL, NULL, &(char*){0});
+        int status = mp_subprocess(args, NULL, NULL, mp_devnull, mp_devnull, &(char*){0});
         if (status) {
             MP_VERBOSE(x11, "Disabling screensaver failed (%d). Make sure the "
                             "xdg-screensaver script is installed.\n", status);
@@ -1506,7 +1506,7 @@ static void vo_x11_map_window(struct vo *vo, struct mp_rect rc)
 
     // map window
     int events = StructureNotifyMask | ExposureMask | PropertyChangeMask |
-                 LeaveWindowMask | EnterWindowMask;
+                 LeaveWindowMask | EnterWindowMask | FocusChangeMask;
     if (mp_input_mouse_enabled(x11->input_ctx))
         events |= PointerMotionMask | ButtonPressMask | ButtonReleaseMask;
     if (mp_input_vo_keyboard_enabled(x11->input_ctx))

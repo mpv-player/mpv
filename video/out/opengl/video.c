@@ -41,7 +41,6 @@
 #include "user_shaders.h"
 #include "video/out/filter_kernels.h"
 #include "video/out/aspect.h"
-#include "video/out/bitmap_packer.h"
 #include "video/out/dither.h"
 #include "video/out/vo.h"
 
@@ -97,13 +96,13 @@ struct texplane {
     GLenum gl_format;
     GLenum gl_type;
     GLuint gl_texture;
-    int gl_buffer;
     char swizzle[5];
+    bool flipped;
+    struct gl_pbo_upload pbo;
 };
 
 struct video_image {
     struct texplane planes[4];
-    bool image_flipped;
     struct mp_image *mpi;       // original input image
     bool hwdec_mapped;
 };
@@ -676,7 +675,7 @@ static int pass_bind(struct gl_video *p, struct img_tex tex)
 }
 
 // Rotation by 90° and flipping.
-static void get_plane_source_transform(struct gl_video *p, int w, int h,
+static void get_plane_source_transform(struct gl_video *p, struct texplane *t,
                                        struct gl_transform *out_tr)
 {
     struct gl_transform tr = identity_trans;
@@ -689,11 +688,11 @@ static void get_plane_source_transform(struct gl_video *p, int w, int h,
     // basically, recenter to keep the whole image in view
     float b[2] = {1, 1};
     gl_transform_vec(rot, &b[0], &b[1]);
-    tr.t[0] += b[0] < 0 ? w : 0;
-    tr.t[1] += b[1] < 0 ? h : 0;
+    tr.t[0] += b[0] < 0 ? t->w : 0;
+    tr.t[1] += b[1] < 0 ? t->h : 0;
 
-    if (p->image.image_flipped) {
-        struct gl_transform flip = {{{1, 0}, {0, -1}}, {0, h}};
+    if (t->flipped) {
+        struct gl_transform flip = {{{1, 0}, {0, -1}}, {0, t->h}};
         gl_transform_trans(flip, &tr);
     }
 
@@ -730,7 +729,7 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
 
     // The existing code assumes we just have a single tex multiplier for
     // all of the planes. This may change in the future
-    float tex_mul = 1.0 / mp_get_csp_mul(p->image_params.colorspace,
+    float tex_mul = 1.0 / mp_get_csp_mul(p->image_params.color.space,
                                          p->image_desc.component_bits,
                                          p->image_desc.component_full_bits);
 
@@ -764,7 +763,7 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
             .components = p->image_desc.components[n],
         };
         snprintf(tex[n].swizzle, sizeof(tex[n].swizzle), "%s", t->swizzle);
-        get_plane_source_transform(p, t->w, t->h, &tex[n].transform);
+        get_plane_source_transform(p, t, &tex[n].transform);
         if (p->image_params.rotate % 180 == 90)
             MPSWAP(int, tex[n].w, tex[n].h);
 
@@ -794,7 +793,7 @@ static void init_video(struct gl_video *p)
     mp_image_params_guess_csp(&p->image_params);
 
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
-    if (p->image_params.colorspace != MP_CSP_BT_2020_C)
+    if (p->image_params.color.space != MP_CSP_BT_2020_C)
         eq_caps |= MP_CSP_EQ_CAPS_COLORMATRIX;
     if (p->image_desc.flags & MP_IMGFLAG_XYZ)
         eq_caps |= MP_CSP_EQ_CAPS_BRIGHTNESS;
@@ -879,7 +878,7 @@ static void uninit_video(struct gl_video *p)
         struct texplane *plane = &vimg->planes[n];
 
         gl->DeleteTextures(1, &plane->gl_texture);
-        gl->DeleteBuffers(1, &plane->gl_buffer);
+        gl_pbo_upload_uninit(&plane->pbo);
     }
     *vimg = (struct video_image){0};
 
@@ -1239,6 +1238,9 @@ static void load_shader(struct gl_video *p, struct bstr body)
     gl_sc_uniform_f(p->sc, "frame", p->frames_uploaded);
     gl_sc_uniform_vec2(p->sc, "image_size", (GLfloat[]){p->image_params.w,
                                                         p->image_params.h});
+    gl_sc_uniform_vec2(p->sc, "target_size",
+                       (GLfloat[]){p->dst_rect.x1 - p->dst_rect.x0,
+                                   p->dst_rect.y1 - p->dst_rect.y0});
 }
 
 static const char *get_custom_shader_fn(struct gl_video *p, const char *body)
@@ -1542,112 +1544,40 @@ static void user_hook_old(struct gl_video *p, struct img_tex tex,
     GLSLF("color = %s(HOOKED_raw, HOOKED_pos, HOOKED_size);\n", fn_name);
 }
 
-// Returns whether successful. 'result' is left untouched on failure
-static bool eval_szexpr(struct gl_video *p, struct img_tex tex,
-                        struct szexp expr[MAX_SZEXP_SIZE],
-                        float *result)
+struct szexp_ctx {
+    struct gl_video *p;
+    struct img_tex tex;
+};
+
+static bool szexp_lookup(void *priv, struct bstr var, float size[2])
 {
-    float stack[MAX_SZEXP_SIZE] = {0};
-    int idx = 0; // points to next element to push
+    struct szexp_ctx *ctx = priv;
+    struct gl_video *p = ctx->p;
 
-    for (int i = 0; i < MAX_SZEXP_SIZE; i++) {
-        switch (expr[i].tag) {
-        case SZEXP_END:
-            goto done;
+    // The size of OUTPUT is determined. It could be useful for certain
+    // user shaders to skip passes.
+    if (bstr_equals0(var, "OUTPUT")) {
+        size[0] = p->dst_rect.x1 - p->dst_rect.x0;
+        size[1] = p->dst_rect.y1 - p->dst_rect.y0;
+        return true;
+    }
 
-        case SZEXP_CONST:
-            // Since our SZEXPs are bound by MAX_SZEXP_SIZE, it should be
-            // impossible to overflow the stack
-            assert(idx < MAX_SZEXP_SIZE);
-            stack[idx++] = expr[i].val.cval;
-            continue;
+    // HOOKED is a special case
+    if (bstr_equals0(var, "HOOKED")) {
+        size[0] = ctx->tex.w;
+        size[1] = ctx->tex.h;
+        return true;
+    }
 
-        case SZEXP_OP1:
-            if (idx < 1) {
-                MP_WARN(p, "Stack underflow in RPN expression!\n");
-                return false;
-            }
-
-            switch (expr[i].val.op) {
-            case SZEXP_OP_NOT: stack[idx-1] = !stack[idx-1]; break;
-            default: abort();
-            }
-            continue;
-
-        case SZEXP_OP2:
-            if (idx < 2) {
-                MP_WARN(p, "Stack underflow in RPN expression!\n");
-                return false;
-            }
-
-            // Pop the operands in reverse order
-            float op2 = stack[--idx];
-            float op1 = stack[--idx];
-            float res = 0.0;
-            switch (expr[i].val.op) {
-            case SZEXP_OP_ADD: res = op1 + op2; break;
-            case SZEXP_OP_SUB: res = op1 - op2; break;
-            case SZEXP_OP_MUL: res = op1 * op2; break;
-            case SZEXP_OP_DIV: res = op1 / op2; break;
-            case SZEXP_OP_GT:  res = op1 > op2; break;
-            case SZEXP_OP_LT:  res = op1 < op2; break;
-            default: abort();
-            }
-
-            if (!isfinite(res)) {
-                MP_WARN(p, "Illegal operation in RPN expression!\n");
-                return false;
-            }
-
-            stack[idx++] = res;
-            continue;
-
-        case SZEXP_VAR_W:
-        case SZEXP_VAR_H: {
-            struct bstr name = expr[i].val.varname;
-            struct img_tex var_tex;
-
-            // The size of OUTPUT is determined. It could be useful for certain
-            // user shaders to skip passes.
-            if (bstr_equals0(name, "OUTPUT")) {
-                int vp_w = p->dst_rect.x1 - p->dst_rect.x0;
-                int vp_h = p->dst_rect.y1 - p->dst_rect.y0;
-                stack[idx++] = (expr[i].tag == SZEXP_VAR_W) ? vp_w : vp_h;
-                continue;
-            }
-
-            // HOOKED is a special case
-            if (bstr_equals0(name, "HOOKED")) {
-                var_tex = tex;
-                goto found_tex;
-            }
-
-            for (int o = 0; o < p->saved_tex_num; o++) {
-                if (bstr_equals0(name, p->saved_tex[o].name)) {
-                    var_tex = p->saved_tex[o].tex;
-                    goto found_tex;
-                }
-            }
-
-            MP_WARN(p, "Texture %.*s not found in RPN expression!\n", BSTR_P(name));
-            return false;
-
-found_tex:
-            stack[idx++] = (expr[i].tag == SZEXP_VAR_W) ? var_tex.w : var_tex.h;
-            continue;
-            }
+    for (int o = 0; o < p->saved_tex_num; o++) {
+        if (bstr_equals0(var, p->saved_tex[o].name)) {
+            size[0] = p->saved_tex[o].tex.w;
+            size[1] = p->saved_tex[o].tex.h;
+            return true;
         }
     }
 
-done:
-    // Return the single stack element
-    if (idx != 1) {
-        MP_WARN(p, "Malformed stack after RPN expression!\n");
-        return false;
-    }
-
-    *result = stack[0];
-    return true;
+    return false;
 }
 
 static bool user_hook_cond(struct gl_video *p, struct img_tex tex, void *priv)
@@ -1656,7 +1586,7 @@ static bool user_hook_cond(struct gl_video *p, struct img_tex tex, void *priv)
     assert(shader);
 
     float res = false;
-    eval_szexpr(p, tex, shader->cond, &res);
+    eval_szexpr(p->log, &(struct szexp_ctx){p, tex}, szexp_lookup, shader->cond, &res);
     return res;
 }
 
@@ -1674,8 +1604,8 @@ static void user_hook(struct gl_video *p, struct img_tex tex,
     // to do this and display an error message than just crash OpenGL
     float w = 1.0, h = 1.0;
 
-    eval_szexpr(p, tex, shader->width, &w);
-    eval_szexpr(p, tex, shader->height, &h);
+    eval_szexpr(p->log, &(struct szexp_ctx){p, tex}, szexp_lookup, shader->width, &w);
+    eval_szexpr(p->log, &(struct szexp_ctx){p, tex}, szexp_lookup, shader->height, &h);
 
     *trans = (struct gl_transform){{{w / tex.w, 0}, {0, h / tex.h}}};
     gl_transform_trans(shader->offset, trans);
@@ -1983,7 +1913,7 @@ static void pass_convert_yuv(struct gl_video *p)
         GLSLF("color = color.%s;\n", p->color_swizzle);
 
     // Pre-colormatrix input gamma correction
-    if (cparams.colorspace == MP_CSP_XYZ)
+    if (cparams.color.space == MP_CSP_XYZ)
         GLSL(color.rgb = pow(color.rgb, vec3(2.6));) // linear light
 
     // We always explicitly normalize the range in pass_read_video
@@ -1998,7 +1928,7 @@ static void pass_convert_yuv(struct gl_video *p)
 
     GLSL(color.rgb = mat3(colormatrix) * color.rgb + colormatrix_c;)
 
-    if (p->image_params.colorspace == MP_CSP_BT_2020_C) {
+    if (p->image_params.color.space == MP_CSP_BT_2020_C) {
         // Conversion for C'rcY'cC'bc via the BT.2020 CL system:
         // C'bc = (B'-Y'c) / 1.9404  | C'bc <= 0
         //      = (B'-Y'c) / 1.5816  | C'bc >  0
@@ -2109,7 +2039,7 @@ static void pass_scale_main(struct gl_video *p)
     // Pre-conversion, like linear light/sigmoidization
     GLSLF("// scaler pre-conversion\n");
     if (p->use_linear) {
-        pass_linearize(p->sc, p->image_params.gamma);
+        pass_linearize(p->sc, p->image_params.color.gamma);
         pass_opt_hook_point(p, "LINEAR", NULL);
     }
 
@@ -2156,107 +2086,104 @@ static void pass_scale_main(struct gl_video *p)
     }
 }
 
-// Adapts the colors from the given color space to the display device's native
-// gamut.
-static void pass_colormanage(struct gl_video *p, float peak_src,
-                             enum mp_csp_prim prim_src,
-                             enum mp_csp_trc trc_src)
+// Adapts the colors to the right output color space. (Final pass during
+// rendering)
+// If OSD is true, ignore any changes that may have been made to the video
+// by previous passes (i.e. linear scaling)
+static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool osd)
 {
-    GLSLF("// color management\n");
-    enum mp_csp_trc trc_dst = p->opts.target_trc;
-    enum mp_csp_prim prim_dst = p->opts.target_prim;
-    float peak_dst = p->opts.target_brightness;
+    struct mp_colorspace ref = src;
+
+    if (p->use_linear && !osd)
+        src.gamma = MP_CSP_TRC_LINEAR;
+
+    // Figure out the target color space from the options, or auto-guess if
+    // none were set
+    struct mp_colorspace dst = {
+        .gamma = p->opts.target_trc,
+        .primaries = p->opts.target_prim,
+        .nom_peak = mp_csp_trc_nom_peak(p->opts.target_trc, p->opts.target_brightness),
+    };
 
     if (p->use_lut_3d) {
-        // The 3DLUT is always generated against the original source space
-        enum mp_csp_prim prim_orig = p->image_params.primaries;
-        enum mp_csp_trc trc_orig = p->image_params.gamma;
+        // The 3DLUT is always generated against the video's original source
+        // space, *not* the reference space. (To avoid having to regenerate
+        // the 3DLUT for the OSD on every frame)
+        enum mp_csp_prim prim_orig = p->image_params.color.primaries;
+        enum mp_csp_trc trc_orig = p->image_params.color.gamma;
 
-        // One exception: SMPTE ST.2084 is not implemented by LittleCMS
-        // for technical limitation reasons, so we use a gamma 2.2 input curve
-        // here instead. We could pick any value we want here, the difference
-        // is just coding efficiency.
-        if (trc_orig == MP_CSP_TRC_SMPTE_ST2084)
+        // One exception: HDR is not implemented by LittleCMS for technical
+        // limitation reasons, so we use a gamma 2.2 input curve here instead.
+        // We could pick any value we want here, the difference is just coding
+        // efficiency.
+        if (trc_orig == MP_CSP_TRC_SMPTE_ST2084 ||
+            trc_orig == MP_CSP_TRC_ARIB_STD_B67 ||
+            trc_orig == MP_CSP_TRC_V_LOG)
+        {
             trc_orig = MP_CSP_TRC_GAMMA22;
+        }
 
         if (gl_video_get_lut3d(p, prim_orig, trc_orig)) {
-            prim_dst = prim_orig;
-            trc_dst = trc_orig;
+            dst.primaries = prim_orig;
+            dst.gamma = trc_orig;
         }
     }
 
-    // When auto-guessing the output color params, just pick the source color
-    // params to preserve the authentic "look and feel" of wrong/naive players.
-    // Some exceptions apply to source spaces that even hardcore technoluddites
-    // would probably not enjoy viewing unaltered
-    if (prim_dst == MP_CSP_PRIM_AUTO) {
-        prim_dst = prim_src;
+    if (dst.primaries == MP_CSP_PRIM_AUTO) {
+        // The vast majority of people are on sRGB or BT.709 displays, so pick
+        // this as the default output color space.
+        dst.primaries = MP_CSP_PRIM_BT_709;
 
-        // Avoid outputting very wide gamut content automatically, since the
-        // majority target audience has standard gamut displays
-        if (prim_dst == MP_CSP_PRIM_BT_2020 || prim_dst == MP_CSP_PRIM_PRO_PHOTO)
-            prim_dst = MP_CSP_PRIM_BT_709;
+        if (ref.primaries == MP_CSP_PRIM_BT_601_525 ||
+            ref.primaries == MP_CSP_PRIM_BT_601_625)
+        {
+            // Since we auto-pick BT.601 and BT.709 based on the dimensions,
+            // combined with the fact that they're very similar to begin with,
+            // and to avoid confusing the average user, just don't adapt BT.601
+            // content automatically at all.
+            dst.primaries = ref.gamma;
+        }
     }
 
-    if (trc_dst == MP_CSP_TRC_AUTO) {
-        trc_dst = trc_src;
-        // Avoid outputting linear light at all costs. First try
-        // falling back to the image gamma (e.g. in the case that the input
-        // was linear light due to linear-scaling)
-        if (trc_dst == MP_CSP_TRC_LINEAR)
-            trc_dst = p->image_params.gamma;
+    if (dst.gamma == MP_CSP_TRC_AUTO) {
+        // Most people seem to complain when the image is darker or brighter
+        // than what they're "used to", so just avoid changing the gamma
+        // altogether by default. The only exceptions to this rule apply to
+        // very unusual TRCs, which even hardcode technoluddites would probably
+        // not enjoy viewing unaltered.
+        dst.gamma = ref.gamma;
 
-        // Failing that, pick gamma 2.2 as a reasonable default. This is also
-        // picked as a default for outputting HDR content
-        if (trc_dst == MP_CSP_TRC_LINEAR || trc_dst == MP_CSP_TRC_SMPTE_ST2084)
-            trc_dst = MP_CSP_TRC_GAMMA22;
+        // Avoid outputting linear light or HDR content "by default". For these
+        // just pick gamma 2.2 as a default, since it's a good estimate for
+        // the response of typical displays
+        if (dst.gamma == MP_CSP_TRC_LINEAR || mp_trc_is_hdr(dst.gamma))
+            dst.gamma = MP_CSP_TRC_GAMMA22;
     }
 
-    if (!peak_src) {
-        // If the source has no information known, it's display-referred
-        // (and should be treated relative to the specified desired peak_dst)
-        peak_src = peak_dst;
+    // For the src peaks, the correct brightness metadata may be present for
+    // sig_peak, nom_peak, both, or neither. To handle everything in a generic
+    // way, it's important to never automatically infer a sig_peak that is
+    // below the nom_peak (since we don't know what bits the image contains,
+    // doing so would potentially badly clip). The only time in which this
+    // may be the case is when the mastering metadata explicitly says so, i.e.
+    // the sig_peak was already set. So to simplify the logic as much as
+    // possible, make sure the nom_peak is present and correct first, and just
+    // set sig_peak = nom_peak if missing.
+    if (!src.nom_peak) {
+        // For display-referred colorspaces, we treat it as relative to
+        // target_brightness
+        src.nom_peak = mp_csp_trc_nom_peak(src.gamma, p->opts.target_brightness);
     }
 
-    // All operations from here on require linear light as a starting point,
-    // so we linearize even if trc_src == trc_dst when one of the other
-    // operations needs it
-    bool need_gamma = trc_src != trc_dst || prim_src != prim_dst ||
-                      peak_src != peak_dst;
-    if (need_gamma)
-        pass_linearize(p->sc, trc_src);
+    if (!src.sig_peak)
+        src.sig_peak = src.nom_peak;
 
-    // Adapt and tone map for a different reference peak brightness
-    if (peak_src != peak_dst)
-    {
-        GLSLF("// HDR tone mapping\n");
-        float rel_peak = peak_src / peak_dst;
-        // Normalize such that 1 is the target brightness (and values above
-        // 1 are out of range)
-        GLSLF("color.rgb *= vec3(%f);\n", rel_peak);
-        // Tone map back down to the range [0,1]
-        pass_tone_map(p->sc, rel_peak, p->opts.hdr_tone_mapping,
-                      p->opts.tone_mapping_param);
-    }
+    MP_DBG(p, "HDR src nom: %f sig: %f, dst: %f\n",
+           src.nom_peak, src.sig_peak, dst.nom_peak);
 
-    // Adapt to the right colorspace if necessary
-    if (prim_src != prim_dst) {
-        struct mp_csp_primaries csp_src = mp_get_csp_primaries(prim_src),
-                                csp_dst = mp_get_csp_primaries(prim_dst);
-        float m[3][3] = {{0}};
-        mp_get_cms_matrix(csp_src, csp_dst, MP_INTENT_RELATIVE_COLORIMETRIC, m);
-        gl_sc_uniform_mat3(p->sc, "cms_matrix", true, &m[0][0]);
-        GLSL(color.rgb = cms_matrix * color.rgb;)
-    }
-
-    if (need_gamma) {
-        // If the target encoding function has a fixed peak, we need to
-        // un-normalize back to the encoding signal range
-        if (trc_dst == MP_CSP_TRC_SMPTE_ST2084)
-            GLSLF("color.rgb *= vec3(%f);\n", peak_dst / 10000);
-
-        pass_delinearize(p->sc, trc_dst);
-    }
+    // Adapt from src to dst as necessary
+    pass_color_map(p->sc, src, dst, p->opts.hdr_tone_mapping,
+                   p->opts.tone_mapping_param);
 
     if (p->use_lut_3d) {
         gl_sc_uniform_sampler(p->sc, "lut_3d", GL_TEXTURE_3D, TEXUNIT_3DLUT);
@@ -2397,11 +2324,15 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
         default:
             abort();
         }
-        // Subtitle color management, they're assumed to be display-referred
-        // sRGB by default
+        // When subtitles need to be color managed, assume they're in sRGB
+        // (for lack of anything saner to do)
         if (cms) {
-            pass_colormanage(p, p->opts.target_brightness,
-                             MP_CSP_PRIM_BT_709, MP_CSP_TRC_SRGB);
+            static const struct mp_colorspace csp_srgb = {
+                .primaries = MP_CSP_PRIM_BT_709,
+                .gamma = MP_CSP_TRC_SRGB,
+            };
+
+            pass_colormanage(p, csp_srgb, true);
         }
         gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
         gl_sc_gen_shader_and_reset(p->sc);
@@ -2503,7 +2434,7 @@ static void pass_render_frame(struct gl_video *p)
         rect.mt *= scale[1]; rect.mb *= scale[1];
         // We should always blend subtitles in non-linear light
         if (p->use_linear) {
-            pass_delinearize(p->sc, p->image_params.gamma);
+            pass_delinearize(p->sc, p->image_params.color.gamma);
             p->use_linear = false;
         }
         finish_pass_fbo(p, &p->blend_subs_fbo, p->texture_w, p->texture_h,
@@ -2532,8 +2463,7 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
         GLSL(color.rgb = pow(color.rgb, vec3(user_gamma));)
     }
 
-    pass_colormanage(p, p->image_params.peak, p->image_params.primaries,
-                     p->use_linear ? MP_CSP_TRC_LINEAR : p->image_params.gamma);
+    pass_colormanage(p, p->image_params.color, false);
 
     // Draw checkerboard pattern to indicate transparency
     if (p->has_alpha && p->opts.alpha_mode == ALPHA_BLEND_TILES) {
@@ -2564,7 +2494,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     if (t->still)
         gl_video_reset_surfaces(p);
 
-    // First of all, figure out if we have a frame availble at all, and draw
+    // First of all, figure out if we have a frame available at all, and draw
     // it manually + reset the queue if not
     if (p->surfaces[p->surface_now].pts == MP_NOPTS_VALUE) {
         if (!gl_video_upload_image(p, t->current))
@@ -2577,7 +2507,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     }
 
     // Find the right frame for this instant
-    if (t->current&& t->current->pts != MP_NOPTS_VALUE) {
+    if (t->current && t->current->pts != MP_NOPTS_VALUE) {
         int next = fbosurface_wrap(p->surface_now + 1);
         while (p->surfaces[next].pts != MP_NOPTS_VALUE &&
                p->surfaces[next].pts > p->surfaces[p->surface_now].pts &&
@@ -2615,7 +2545,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     // this should be done before the step where we find the right frame, but
     // it only barely matters at the very beginning of playback, and this way
     // makes the code much more linear.
-    int surface_dst = fbosurface_wrap(p->surface_idx+1);
+    int surface_dst = fbosurface_wrap(p->surface_idx + 1);
     for (int i = 0; i < t->num_frames; i++) {
         // Avoid overwriting data we might still need
         if (surface_dst == surface_bse - 1)
@@ -2634,7 +2564,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
                             vp_w, vp_h, FBOTEX_FUZZY);
             p->surfaces[surface_dst].pts = f->pts;
             p->surface_idx = surface_dst;
-            surface_dst = fbosurface_wrap(surface_dst+1);
+            surface_dst = fbosurface_wrap(surface_dst + 1);
         }
     }
 
@@ -2645,7 +2575,7 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     // end of playback or start of playback.
     bool valid = true;
     for (int i = surface_bse, ii; valid && i != surface_end; i = ii) {
-        ii = fbosurface_wrap(i+1);
+        ii = fbosurface_wrap(i + 1);
         if (p->surfaces[i].pts == MP_NOPTS_VALUE ||
             p->surfaces[ii].pts == MP_NOPTS_VALUE)
         {
@@ -2737,6 +2667,11 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
 
+    if (fbo && !(gl->mpgl_caps & MPGL_CAP_FB)) {
+        MP_FATAL(p, "Rendering to FBO requested, but no FBO extension found!\n");
+        return;
+    }
+
     p->broken_frame = false;
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -2773,7 +2708,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
                     goto done;
                 pass_render_frame(p);
 
-                // For the non-interplation case, we draw to a single "cache"
+                // For the non-interpolation case, we draw to a single "cache"
                 // FBO to speed up subsequent re-draws (if any exist)
                 int dest_fbo = fbo;
                 if (frame->num_vsyncs > 1 && frame->display_synced &&
@@ -2781,7 +2716,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
                 {
                     fbotex_change(&p->output_fbo, p->gl, p->log,
                                   p->vp_w, abs(p->vp_h),
-                                  p->opts.fbo_format, 0);
+                                  p->opts.fbo_format, FBOTEX_FUZZY);
                     dest_fbo = p->output_fbo.fbo;
                     p->output_fbo_valid = true;
                 }
@@ -2880,54 +2815,6 @@ struct voctrl_performance_data gl_video_perfdata(struct gl_video *p)
     };
 }
 
-static bool unmap_image(struct gl_video *p, struct mp_image *mpi)
-{
-    GL *gl = p->gl;
-    bool ok = true;
-    struct video_image *vimg = &p->image;
-    for (int n = 0; n < p->plane_count; n++) {
-        struct texplane *plane = &vimg->planes[n];
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
-        ok = gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER) && ok;
-        mpi->planes[n] = NULL; // PBO offset 0
-    }
-    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    return ok;
-}
-
-static bool map_image(struct gl_video *p, struct mp_image *mpi)
-{
-    GL *gl = p->gl;
-
-    if (!p->opts.pbo)
-        return false;
-
-    struct video_image *vimg = &p->image;
-
-    for (int n = 0; n < p->plane_count; n++) {
-        struct texplane *plane = &vimg->planes[n];
-        mpi->stride[n] = mp_image_plane_w(mpi, n) * p->image_desc.bytes[n];
-        size_t buffer_size = mp_image_plane_h(mpi, n) * mpi->stride[n];
-        if (!plane->gl_buffer) {
-            gl->GenBuffers(1, &plane->gl_buffer);
-            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
-            gl->BufferData(GL_PIXEL_UNPACK_BUFFER, buffer_size,
-                           NULL, GL_DYNAMIC_DRAW);
-        }
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
-        mpi->planes[n] = gl->MapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0,
-                                            buffer_size, GL_MAP_WRITE_BIT |
-                                                GL_MAP_INVALIDATE_BUFFER_BIT);
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        if (!mpi->planes[n]) {
-            unmap_image(p, mpi);
-            return false;
-        }
-    }
-    memset(mpi->bufs, 0, sizeof(mpi->bufs));
-    return true;
-}
-
 // This assumes nv12, with textures set to GL_NEAREST filtering.
 static void reinterleave_vdpau(struct gl_video *p, struct gl_hwdec_frame *frame)
 {
@@ -3024,32 +2911,19 @@ static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
 
     gl_timer_start(p->upload_timer);
 
-    mp_image_t pbo_mpi = *mpi;
-    bool pbo = map_image(p, &pbo_mpi);
-    if (pbo) {
-        mp_image_copy(&pbo_mpi, mpi);
-        if (unmap_image(p, &pbo_mpi)) {
-            mpi = &pbo_mpi;
-        } else {
-            MP_FATAL(p, "Video PBO upload failed. Disabling PBOs.\n");
-            pbo = false;
-            p->opts.pbo = 0;
-        }
-    }
 
-    vimg->image_flipped = mpi->stride[0] < 0;
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
-        if (pbo)
-            gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
-        gl->ActiveTexture(GL_TEXTURE0 + n);
+
+        plane->flipped = mpi->stride[0] < 0;
+
         gl->BindTexture(plane->gl_target, plane->gl_texture);
-        gl_upload_tex(gl, plane->gl_target, plane->gl_format, plane->gl_type,
-                      mpi->planes[n], mpi->stride[n], 0, 0, plane->w, plane->h);
+        gl_pbo_upload_tex(&plane->pbo, gl, p->opts.pbo, plane->gl_target,
+                          plane->gl_format, plane->gl_type, plane->w, plane->h,
+                          mpi->planes[n], mpi->stride[n],
+                          0, 0, plane->w, plane->h);
+        gl->BindTexture(plane->gl_target, 0);
     }
-    gl->ActiveTexture(GL_TEXTURE0);
-    if (pbo)
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     gl_timer_stop(p->upload_timer);
 

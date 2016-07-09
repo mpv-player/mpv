@@ -518,7 +518,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     ctx->current_buf = 0;
     ctx->current_ip_buf = 0;
 
-    int is_709 = params->colorspace == MP_CSP_BT_709;
+    int is_709 = params->color.space == MP_CSP_BT_709;
     xv_set_eq(vo, ctx->xv_port, "bt_709", is_709 * 200 - 100);
     read_xv_csp(vo);
 
@@ -533,6 +533,8 @@ static bool allocate_xvimage(struct vo *vo, int foo)
     struct vo_x11_state *x11 = vo->x11;
     // align it for faster OSD rendering (draw_bmp.c swscale usage)
     int aligned_w = FFALIGN(ctx->image_width, 32);
+    // round up the height to next chroma boundary too
+    int aligned_h = FFALIGN(ctx->image_height, 2);
 #if HAVE_SHM && HAVE_XEXT
     if (x11->display_is_local && XShmQueryExtension(x11->display)) {
         ctx->Shmem_Flag = 1;
@@ -546,7 +548,7 @@ static bool allocate_xvimage(struct vo *vo, int foo)
         ctx->xvimage[foo] =
             (XvImage *) XvShmCreateImage(x11->display, ctx->xv_port,
                                          ctx->xv_format, NULL,
-                                         aligned_w, ctx->image_height,
+                                         aligned_w, aligned_h,
                                          &ctx->Shminfo[foo]);
         if (!ctx->xvimage[foo])
             return false;
@@ -569,7 +571,7 @@ static bool allocate_xvimage(struct vo *vo, int foo)
         ctx->xvimage[foo] =
             (XvImage *) XvCreateImage(x11->display, ctx->xv_port,
                                       ctx->xv_format, NULL, aligned_w,
-                                      ctx->image_height);
+                                      aligned_h);
         if (!ctx->xvimage[foo])
             return false;
         ctx->xvimage[foo]->data = av_malloc(ctx->xvimage[foo]->data_size);
@@ -578,16 +580,16 @@ static bool allocate_xvimage(struct vo *vo, int foo)
         XSync(x11->display, False);
     }
 
-    if ((ctx->xvimage[foo]->width != aligned_w) ||
-        (ctx->xvimage[foo]->height != ctx->image_height)) {
-        MP_ERR(vo, "Got XvImage with incorrect size: %ux%u (expected %ux%u)\n",
+    if ((ctx->xvimage[foo]->width < aligned_w) ||
+        (ctx->xvimage[foo]->height < aligned_h)) {
+        MP_ERR(vo, "Got XvImage with too small size: %ux%u (expected %ux%u)\n",
                ctx->xvimage[foo]->width, ctx->xvimage[foo]->height,
                aligned_w, ctx->image_height);
         return false;
     }
 
     struct mp_image img = get_xv_buffer(vo, foo);
-    img.w = aligned_w;
+    mp_image_set_size(&img, aligned_w, aligned_h);
     mp_image_clear(&img, 0, 0, img.w, img.h);
     return true;
 }
@@ -659,7 +661,7 @@ static struct mp_image get_xv_buffer(struct vo *vo, int buf_index)
     if (vo->params) {
         struct mp_image_params params = *vo->params;
         if (ctx->cached_csp)
-            params.colorspace = ctx->cached_csp;
+            params.color.space = ctx->cached_csp;
         mp_image_set_attributes(&img, &params);
     }
 
@@ -854,7 +856,7 @@ static int preinit(struct vo *vo)
 
     MP_WARN(vo, "Warning: this legacy VO has bad quality and performance, "
                 "and will in particular result in blurry OSD and subtitles. "
-                "You should fix your graphic drivers, or not force the xv VO.\n");
+                "You should fix your graphics drivers, or not force the xv VO.\n");
     return 0;
 
   error:

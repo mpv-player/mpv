@@ -175,7 +175,7 @@ The ``mp`` module is preloaded, although it can be loaded manually with
     Similar to ``mp.set_property``, but set the given property using its native
     type.
 
-    Since there are several data types which can not represented natively in
+    Since there are several data types which cannot represented natively in
     Lua, this might not always work as expected. For example, while the Lua
     wrapper can do some guesswork to decide whether a Lua table is an array
     or a map, this would fail with empty tables. Also, there are not many

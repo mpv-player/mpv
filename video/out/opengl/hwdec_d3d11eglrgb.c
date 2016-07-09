@@ -23,7 +23,6 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 
-#include "angle_common.h"
 #include "angle_dynamic.h"
 
 #include "common/common.h"
@@ -31,6 +30,7 @@
 #include "osdep/windows_utils.h"
 #include "hwdec.h"
 #include "video/hwdec.h"
+#include "video/decode/d3d.h"
 
 #ifndef EGL_D3D_TEXTURE_SUBRESOURCE_ID_ANGLE
 #define EGL_D3D_TEXTURE_SUBRESOURCE_ID_ANGLE 0x3AAB
@@ -87,6 +87,8 @@ static int create(struct gl_hwdec *hw)
     if (!angle_load())
         return -1;
 
+    d3d_load_dlls();
+
     EGLDisplay egl_display = eglGetCurrentDisplay();
     if (!egl_display)
         return -1;
@@ -104,7 +106,6 @@ static int create(struct gl_hwdec *hw)
 
     p->egl_display = egl_display;
 
-    HANDLE d3d11_dll = GetModuleHandleW(L"d3d11.dll");
     if (!d3d11_dll) {
         if (!hw->probing)
             MP_ERR(hw, "Failed to load D3D11 library\n");

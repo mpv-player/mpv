@@ -73,6 +73,7 @@ void mp_audio_copy(struct mp_audio *dst, int dst_offset,
 void mp_audio_copy_attributes(struct mp_audio *dst, struct mp_audio *src);
 void mp_audio_skip_samples(struct mp_audio *data, int samples);
 void mp_audio_clip_timestamps(struct mp_audio *f, double start, double end);
+double mp_audio_end_pts(struct mp_audio *data);
 
 bool mp_audio_is_writeable(struct mp_audio *data);
 int mp_audio_make_writeable(struct mp_audio *data);

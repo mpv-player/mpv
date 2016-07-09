@@ -293,7 +293,7 @@ static HIDRemote *sHIDRemote = nil;
 
                 }while(0);
 
-                // An error occured. Do necessary clean up.
+                // An error occurred. Do necessary clean up.
                 if (matchDict!=NULL)
                 {
                         CFRelease(matchDict);
@@ -1422,7 +1422,7 @@ static HIDRemote *sHIDRemote = nil;
                 [((NSObject <HIDRemoteDelegate> *)[self delegate]) hidRemote:self failedNewHardwareWithError:error];
         }
 
-        // An error occured or this device is not of interest .. cleanup ..
+        // An error occurred or this device is not of interest .. cleanup ..
         if (serviceNotification!=0)
         {
                 IOObjectRelease(serviceNotification);
@@ -1615,7 +1615,7 @@ static HIDRemote *sHIDRemote = nil;
         switch (buttonCode)
         {
                 case kHIDRemoteButtonCodeIDChanged:
-                        // Do nothing, this is handled seperately
+                        // Do nothing, this is handled separately
                 break;
 
                 case kHIDRemoteButtonCodeUp:

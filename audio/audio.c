@@ -257,13 +257,21 @@ void mp_audio_skip_samples(struct mp_audio *data, int samples)
         data->pts += samples / (double)data->rate;
 }
 
+// Return the timestamp of the sample just after the end of this frame.
+double mp_audio_end_pts(struct mp_audio *f)
+{
+    if (f->pts == MP_NOPTS_VALUE || f->rate < 1)
+        return MP_NOPTS_VALUE;
+    return f->pts + f->samples / (double)f->rate;
+}
+
 // Clip the given frame to the given timestamp range. Adjusts the frame size
 // and timestamp.
 void mp_audio_clip_timestamps(struct mp_audio *f, double start, double end)
 {
-    if (f->pts == MP_NOPTS_VALUE || f->rate < 1)
+    double f_end = mp_audio_end_pts(f);
+    if (f_end == MP_NOPTS_VALUE)
         return;
-    double f_end = f->pts + f->samples / (double)f->rate;
     if (end != MP_NOPTS_VALUE) {
         if (f_end >= end) {
             if (f->pts >= end) {

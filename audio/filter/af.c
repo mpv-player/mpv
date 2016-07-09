@@ -210,29 +210,6 @@ static struct af_instance *af_prepend(struct af_stream *s,
     return new;
 }
 
-/* Create and insert a new filter of type name after the filter in the
-   argument. This function can be called during runtime, the return
-   value is the new filter */
-static struct af_instance *af_append(struct af_stream *s,
-                                     struct af_instance *af,
-                                     char *name, char **args)
-{
-    if (!af)
-        af = s->first;
-    if (af == s->last)
-        af = s->last->prev;
-    // Create the new filter and make sure it is OK
-    struct af_instance *new = af_create(s, name, args);
-    if (!new)
-        return NULL;
-    // Update pointers
-    new->prev = af;
-    new->next = af->next;
-    af->next = new;
-    new->next->prev = new;
-    return new;
-}
-
 // Uninit and remove the filter "af"
 static void af_remove(struct af_stream *s, struct af_instance *af)
 {
@@ -275,6 +252,8 @@ static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
     while (af) {
         char b[128] = {0};
         mp_snprintf_cat(b, sizeof(b), "  [%s] ", af->info->name);
+        if (af->label)
+            mp_snprintf_cat(b, sizeof(b), "\"%s\" ", af->label);
         if (af->data)
             mp_snprintf_cat(b, sizeof(b), "%s", mp_audio_config_to_str(af->data));
         if (af == at)
@@ -285,11 +264,6 @@ static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
     }
 
     MP_MSG(s, msg_level, "  [ao] %s\n", mp_audio_config_to_str(&s->output));
-}
-
-static bool af_is_conversion_filter(struct af_instance *af)
-{
-    return af && strcmp(af->info->name, "lavrresample") == 0;
 }
 
 // in is what af can take as input - insert a conversion filter if the actual
@@ -557,7 +531,7 @@ void af_destroy(struct af_stream *s)
    format of the preferred output respectively. The function is
    reentrant i.e. if called with an already initialized stream the
    stream will be reinitialized.
-   If one of the prefered output parameters is 0 the one that needs
+   If one of the preferred output parameters is 0 the one that needs
    no conversion is used (i.e. the output format in the last filter).
    The return value is 0 if success and -1 if failure */
 int af_init(struct af_stream *s)
@@ -602,12 +576,7 @@ struct af_instance *af_add(struct af_stream *s, char *name, char *label,
     if (af_find_by_label(s, label))
         return NULL;
 
-    struct af_instance *new;
-    // Insert the filter somewhere nice
-    if (af_is_conversion_filter(s->first->next))
-        new = af_append(s, s->first->next, name, args);
-    else
-        new = af_prepend(s, s->first->next, name, args);
+    struct af_instance *new = af_prepend(s, s->last, name, args);
     if (!new)
         return NULL;
     new->label = talloc_strdup(new, label);

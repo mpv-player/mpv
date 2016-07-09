@@ -211,21 +211,21 @@ static int recreate_video_proc(struct vf_instance *vf)
                                                          FALSE, 0);
 
     D3D11_VIDEO_PROCESSOR_COLOR_SPACE csp = {
-        .YCbCr_Matrix = p->params.colorspace != MP_CSP_BT_601,
-        .Nominal_Range = p->params.colorlevels == MP_CSP_LEVELS_TV ? 1 : 2,
+        .YCbCr_Matrix = p->params.color.space != MP_CSP_BT_601,
+        .Nominal_Range = p->params.color.levels == MP_CSP_LEVELS_TV ? 1 : 2,
     };
     ID3D11VideoContext_VideoProcessorSetStreamColorSpace(p->video_ctx,
                                                          p->video_proc,
                                                          0, &csp);
     if (p->out_rgb) {
-        if (p->params.colorspace != MP_CSP_BT_601 &&
-            p->params.colorspace != MP_CSP_BT_709)
+        if (p->params.color.space != MP_CSP_BT_601 &&
+            p->params.color.space != MP_CSP_BT_709)
         {
             MP_WARN(vf, "Unsupported video colorspace (%s/%s). Consider "
                     "disabling hardware decoding, or using "
                     "--hwdec=d3d11va-copy to get correct output.\n",
-                    m_opt_choice_str(mp_csp_names, p->params.colorspace),
-                    m_opt_choice_str(mp_csp_levels_names, p->params.colorlevels));
+                    m_opt_choice_str(mp_csp_names, p->params.color.space),
+                    m_opt_choice_str(mp_csp_levels_names, p->params.color.levels));
         }
     } else {
         ID3D11VideoContext_VideoProcessorSetOutputColorSpace(p->video_ctx,
@@ -331,11 +331,6 @@ static int render(struct vf_instance *vf)
         goto cleanup;
     }
 
-    // Make sure the texture is updated correctly on the shared context.
-    // (I'm not sure if this is correct, though it won't harm.)
-    if (p->out_shared)
-        ID3D11DeviceContext_Flush(p->device_ctx);
-
     res = 0;
 cleanup:
     if (in_view)
@@ -360,8 +355,11 @@ static int filter_out(struct vf_instance *vf)
 
     // no filtering
     if (!mp_refqueue_should_deint(p->queue) && !p->require_filtering) {
-        struct mp_image *in = mp_refqueue_get(p->queue, 0);
-        vf_add_output_frame(vf, mp_image_new_ref(in));
+        struct mp_image *in = mp_image_new_ref(mp_refqueue_get(p->queue, 0));
+        if (!in)
+            return -1;
+        mp_image_set_params(in, &p->out_params);
+        vf_add_output_frame(vf, in);
         mp_refqueue_next(p->queue);
         return 0;
     }

@@ -1247,11 +1247,8 @@ void mp_input_load(struct input_ctx *ictx)
         void *tmp = talloc_new(NULL);
         char **files = mp_find_all_config_files(tmp, ictx->global, "input.conf");
         for (int n = 0; files && files[n]; n++)
-            config_ok = config_ok | parse_config_file(ictx, files[n], false);
+            parse_config_file(ictx, files[n], false);
         talloc_free(tmp);
-    }
-    if (!config_ok) {
-        MP_VERBOSE(ictx, "Falling back on default (hardcoded) input config\n");
     }
 
     if (input_conf->use_alt_gr) {

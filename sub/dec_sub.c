@@ -255,8 +255,8 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
 // You must call sub_lock/sub_unlock if more than 1 thread access sub.
 // The issue is that *res will contain decoder allocated data, which might
 // be deallocated on the next decoder access.
-void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
-                     struct sub_bitmaps *res)
+void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, int format,
+                     double pts, struct sub_bitmaps *res)
 {
     struct MPOpts *opts = sub->opts;
 
@@ -267,7 +267,7 @@ void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
         return;
 
     if (opts->sub_visibility && sub->sd->driver->get_bitmaps)
-        sub->sd->driver->get_bitmaps(sub->sd, dim, pts, res);
+        sub->sd->driver->get_bitmaps(sub->sd, dim, format, pts, res);
 }
 
 // See sub_get_bitmaps() for locking requirements.

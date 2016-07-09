@@ -186,6 +186,12 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     struct priv *priv = da->priv;
     AVCodecContext *avctx = priv->avctx;
 
+    // If the decoder discards the timestamp for some reason, we use the
+    // interpolated PTS. Initialize it so that it works for the initial
+    // packet as well.
+    if (mpkt && priv->next_pts == MP_NOPTS_VALUE)
+        priv->next_pts = mpkt->pts;
+
     int in_len = mpkt ? mpkt->len : 0;
 
     AVPacket pkt;

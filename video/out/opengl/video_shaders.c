@@ -227,13 +227,31 @@ static const float HDR_M1 = 2610./4096 * 1./4,
                    HDR_C2 = 2413./4096 * 32,
                    HDR_C3 = 2392./4096 * 32;
 
-// Linearize (expand), given a TRC as input
+// Common constants for ARIB STD-B67 (Hybrid Log-gamma)
+static const float B67_A = 0.17883277,
+                   B67_B = 0.28466892,
+                   B67_C = 0.55991073;
+
+// Common constants for Panasonic V-Log
+static const float VLOG_B = 0.00873,
+                   VLOG_C = 0.241514,
+                   VLOG_D = 0.598206,
+                   VLOG_R = 46.085527; // nominal peak
+
+// Linearize (expand), given a TRC as input. This corresponds to the EOTF
+// in ITU-R terminology.
 void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 {
     if (trc == MP_CSP_TRC_LINEAR)
         return;
 
+    // Note that this clamp may technically violate the definition of
+    // ITU-R BT.2100, which allows for sub-blacks and super-whites to be
+    // displayed on the display where such would be possible. That said, the
+    // problem is that not all gamma curves are well-defined on the values
+    // outside this range, so we ignore it and just clip anyway for sanity.
     GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
+
     switch (trc) {
     case MP_CSP_TRC_SRGB:
         GLSL(color.rgb = mix(color.rgb / vec3(12.92),
@@ -265,12 +283,34 @@ void pass_linearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               HDR_C1, HDR_C2, HDR_C3);
         GLSLF("color.rgb = pow(color.rgb, vec3(1.0/%f));\n", HDR_M1);
         break;
+    case MP_CSP_TRC_ARIB_STD_B67:
+        GLSLF("color.rgb = mix(vec3(4.0) * color.rgb * color.rgb,\n"
+              "                exp((color.rgb - vec3(%f)) / vec3(%f)) + vec3(%f),\n"
+              "                lessThan(vec3(0.5), color.rgb));\n",
+              B67_C, B67_A, B67_B);
+        // Since the ARIB function's signal value of 1.0 corresponds to
+        // a peak of 12.0, we need to renormalize to prevent GL textures
+        // from clipping. (In general, mpv's internal conversions always
+        // assume 1.0 is the maximum brightness, not the reference peak)
+        GLSL(color.rgb /= vec3(12.0);)
+        break;
+    case MP_CSP_TRC_V_LOG:
+        GLSLF("color.rgb = mix((color.rgb - vec3(0.125)) / vec3(5.6), \n"
+              "    pow(vec3(10.0), (color.rgb - vec3(%f)) / vec3(%f)) \n"
+              "              - vec3(%f),                              \n"
+              "    lessThanEqual(vec3(0.181), color.rgb));            \n",
+              VLOG_D, VLOG_C, VLOG_B);
+        // Same deal as with the B67 function, renormalize to texture range
+        GLSLF("color.rgb /= vec3(%f);\n", VLOG_R);
+        GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
+        break;
     default:
         abort();
     }
 }
 
-// Delinearize (compress), given a TRC as output
+// Delinearize (compress), given a TRC as output. This corresponds to the
+// inverse EOTF (not the OETF) in ITU-R terminology.
 void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
 {
     if (trc == MP_CSP_TRC_LINEAR)
@@ -308,15 +348,32 @@ void pass_delinearize(struct gl_shader_cache *sc, enum mp_csp_trc trc)
               HDR_C1, HDR_C2, HDR_C3);
         GLSLF("color.rgb = pow(color.rgb, vec3(%f));\n", HDR_M2);
         break;
+    case MP_CSP_TRC_ARIB_STD_B67:
+        GLSL(color.rgb *= vec3(12.0);)
+        GLSLF("color.rgb = mix(vec3(0.5) * sqrt(color.rgb),\n"
+              "                vec3(%f) * log(color.rgb - vec3(%f)) + vec3(%f),\n"
+              "                lessThan(vec3(1.0), color.rgb));\n",
+              B67_A, B67_B, B67_C);
+        break;
+    case MP_CSP_TRC_V_LOG:
+        GLSLF("color.rgb *= vec3(%f);\n", VLOG_R);
+        GLSLF("color.rgb = mix(vec3(5.6) * color.rgb + vec3(0.125),   \n"
+              "                vec3(%f) * log(color.rgb + vec3(%f))   \n"
+              "                    + vec3(%f),                        \n"
+              "                lessThanEqual(vec3(0.01), color.rgb)); \n",
+              VLOG_C / M_LN10, VLOG_B, VLOG_D);
+        break;
     default:
         abort();
     }
 }
 
 // Tone map from a known peak brightness to the range [0,1]
-void pass_tone_map(struct gl_shader_cache *sc, float peak,
-                   enum tone_mapping algo, float param)
+static void pass_tone_map(struct gl_shader_cache *sc, float ref_peak,
+                          enum tone_mapping algo, float param)
 {
+    GLSLF("// HDR tone mapping\n");
+
     switch (algo) {
     case TONE_MAPPING_CLIP:
         GLSL(color.rgb = clamp(color.rgb, 0.0, 1.0);)
@@ -326,7 +383,7 @@ void pass_tone_map(struct gl_shader_cache *sc, float peak,
         float contrast = isnan(param) ? 0.5 : param,
               offset = (1.0 - contrast) / contrast;
         GLSLF("color.rgb = color.rgb / (color.rgb + vec3(%f));\n", offset);
-        GLSLF("color.rgb *= vec3(%f);\n", (peak + offset) / peak);
+        GLSLF("color.rgb *= vec3(%f);\n", (ref_peak + offset) / ref_peak);
         break;
     }
 
@@ -337,26 +394,81 @@ void pass_tone_map(struct gl_shader_cache *sc, float peak,
                A, C*B, D*E, A, B, D*F, E/F);
         GLSLHF("}\n");
 
-        GLSLF("color.rgb = hable(color.rgb) / hable(vec3(%f));\n", peak);
+        GLSLF("color.rgb = hable(color.rgb) / hable(vec3(%f));\n", ref_peak);
         break;
     }
 
     case TONE_MAPPING_GAMMA: {
         float gamma = isnan(param) ? 1.8 : param;
         GLSLF("color.rgb = pow(color.rgb / vec3(%f), vec3(%f));\n",
-              peak, 1.0/gamma);
+              ref_peak, 1.0/gamma);
         break;
     }
 
     case TONE_MAPPING_LINEAR: {
         float coeff = isnan(param) ? 1.0 : param;
-        GLSLF("color.rgb = vec3(%f) * color.rgb;\n", coeff / peak);
+        GLSLF("color.rgb = vec3(%f) * color.rgb;\n", coeff / ref_peak);
         break;
     }
 
     default:
         abort();
     }
+}
+
+// Map colors from one source space to another. These source spaces
+// must be known (i.e. not MP_CSP_*_AUTO), as this function won't perform
+// any auto-guessing.
+void pass_color_map(struct gl_shader_cache *sc,
+                    struct mp_colorspace src, struct mp_colorspace dst,
+                    enum tone_mapping algo, float tone_mapping_param)
+{
+    GLSLF("// color mapping\n");
+
+    // All operations from here on require linear light as a starting point,
+    // so we linearize even if src.gamma == dst.gamma when one of the other
+    // operations needs it
+    bool need_gamma = src.gamma != dst.gamma ||
+                      src.primaries != dst.primaries ||
+                      src.nom_peak != dst.nom_peak ||
+                      src.sig_peak > dst.nom_peak;
+
+    if (need_gamma)
+        pass_linearize(sc, src.gamma);
+
+    // NOTE: When src.gamma = MP_CSP_TRC_ARIB_STD_B67, we would technically
+    // need to apply the reference OOTF as part of the EOTF (which is what we
+    // implement with pass_linearize), since HLG considers OOTF to be part of
+    // the display's EOTF (as opposed to the camera's OETF). But since this is
+    // stupid, complicated, arbitrary, and more importantly depends on the
+    // target display's signal peak (which is != the nom_peak in the case of
+    // HDR displays, and mpv already has enough target-specific display
+    // options), we just ignore its implementation entirely. (Plus, it doesn't
+    // even really make sense with tone mapping to begin with.) But just in
+    // case somebody ends up complaining about HLG looking different from a
+    // reference HLG display, this comment might be why.
+
+    // Stretch the signal value to renormalize to the dst nominal peak
+    if (src.nom_peak != dst.nom_peak)
+        GLSLF("color.rgb *= vec3(%f);\n", src.nom_peak / dst.nom_peak);
+
+    // Tone map to prevent clipping when the source signal peak exceeds the
+    // encodable range.
+    if (src.sig_peak > dst.nom_peak)
+        pass_tone_map(sc, src.sig_peak / dst.nom_peak, algo, tone_mapping_param);
+
+    // Adapt to the right colorspace if necessary
+    if (src.primaries != dst.primaries) {
+        struct mp_csp_primaries csp_src = mp_get_csp_primaries(src.primaries),
+                                csp_dst = mp_get_csp_primaries(dst.primaries);
+        float m[3][3] = {{0}};
+        mp_get_cms_matrix(csp_src, csp_dst, MP_INTENT_RELATIVE_COLORIMETRIC, m);
+        gl_sc_uniform_mat3(sc, "cms_matrix", true, &m[0][0]);
+        GLSL(color.rgb = cms_matrix * color.rgb;)
+    }
+
+    if (need_gamma)
+        pass_delinearize(sc, dst.gamma);
 }
 
 // Wide usage friendly PRNG, shamelessly stolen from a GLSL tricks forum post.

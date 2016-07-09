@@ -22,6 +22,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "config.h"
 #include "common/common.h"
 #include "options/options.h"
 #include "video/fmt-conversion.h"
@@ -34,8 +36,6 @@
 #include "sub/osd.h"
 
 struct priv {
-    uint8_t *buffer;
-    size_t buffer_size;
     AVStream *stream;
     AVCodecContext *codec;
     int have_first_packet;
@@ -155,19 +155,11 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     vc->codec->height = height;
     vc->codec->pix_fmt = pix_fmt;
 
-    encode_lavc_set_csp(vo->encode_lavc_ctx, vc->codec, params->colorspace);
-    encode_lavc_set_csp_levels(vo->encode_lavc_ctx, vc->codec, params->colorlevels);
+    encode_lavc_set_csp(vo->encode_lavc_ctx, vc->codec, params->color.space);
+    encode_lavc_set_csp_levels(vo->encode_lavc_ctx, vc->codec, params->color.levels);
 
     if (encode_lavc_open_codec(vo->encode_lavc_ctx, vc->codec) < 0)
         goto error;
-
-    vc->buffer_size = 6 * width * height + 200;
-    if (vc->buffer_size < FF_MIN_BUFFER_SIZE)
-        vc->buffer_size = FF_MIN_BUFFER_SIZE;
-    if (vc->buffer_size < sizeof(AVPicture))
-        vc->buffer_size = sizeof(AVPicture);
-
-    vc->buffer = talloc_size(vc, vc->buffer_size);
 
 done:
     pthread_mutex_unlock(&vo->encode_lavc_ctx->lock);
@@ -194,82 +186,120 @@ static int query_format(struct vo *vo, int format)
     return flags;
 }
 
-static void write_packet(struct vo *vo, int size, AVPacket *packet)
+static void write_packet(struct vo *vo, AVPacket *packet)
 {
     struct priv *vc = vo->priv;
 
-    if (size < 0) {
-        MP_ERR(vo, "error encoding\n");
+    packet->stream_index = vc->stream->index;
+    if (packet->pts != AV_NOPTS_VALUE) {
+        packet->pts = av_rescale_q(packet->pts,
+                                   vc->codec->time_base,
+                                   vc->stream->time_base);
+    } else {
+        MP_VERBOSE(vo, "codec did not provide pts\n");
+        packet->pts = av_rescale_q(vc->lastipts,
+                                   vc->worst_time_base,
+                                   vc->stream->time_base);
+    }
+    if (packet->dts != AV_NOPTS_VALUE) {
+        packet->dts = av_rescale_q(packet->dts,
+                                   vc->codec->time_base,
+                                   vc->stream->time_base);
+    }
+    if (packet->duration > 0) {
+        packet->duration = av_rescale_q(packet->duration,
+                                        vc->codec->time_base,
+                                        vc->stream->time_base);
+    } else {
+        // HACK: libavformat calculates dts wrong if the initial packet
+        // duration is not set, but ONLY if the time base is "high" and if we
+        // have b-frames!
+        if (!packet->duration)
+            if (!vc->have_first_packet)
+                if (vc->codec->has_b_frames
+                        || vc->codec->max_b_frames)
+                    if (vc->stream->time_base.num * 1000LL <=
+                            vc->stream->time_base.den)
+                        packet->duration = FFMAX(1, av_rescale_q(1,
+                             vc->codec->time_base, vc->stream->time_base));
+    }
+
+    if (encode_lavc_write_frame(vo->encode_lavc_ctx,
+                                vc->stream, packet) < 0) {
+        MP_ERR(vo, "error writing at %d %d/%d\n",
+               (int) packet->pts,
+               vc->stream->time_base.num,
+               vc->stream->time_base.den);
         return;
     }
 
-    if (size > 0) {
-        packet->stream_index = vc->stream->index;
-        if (packet->pts != AV_NOPTS_VALUE) {
-            packet->pts = av_rescale_q(packet->pts,
-                                       vc->codec->time_base,
-                                       vc->stream->time_base);
-        } else {
-            MP_VERBOSE(vo, "codec did not provide pts\n");
-            packet->pts = av_rescale_q(vc->lastipts, vc->worst_time_base,
-                                       vc->stream->time_base);
-        }
-        if (packet->dts != AV_NOPTS_VALUE) {
-            packet->dts = av_rescale_q(packet->dts,
-                                       vc->codec->time_base,
-                                       vc->stream->time_base);
-        }
-        if (packet->duration > 0) {
-            packet->duration = av_rescale_q(packet->duration,
-                                       vc->codec->time_base,
-                                       vc->stream->time_base);
-        } else {
-            // HACK: libavformat calculates dts wrong if the initial packet
-            // duration is not set, but ONLY if the time base is "high" and if we
-            // have b-frames!
-            if (!packet->duration)
-                if (!vc->have_first_packet)
-                    if (vc->codec->has_b_frames
-                            || vc->codec->max_b_frames)
-                        if (vc->stream->time_base.num * 1000LL <=
-                                vc->stream->time_base.den)
-                            packet->duration = FFMAX(1, av_rescale_q(1,
-                                 vc->codec->time_base, vc->stream->time_base));
-        }
-
-        if (encode_lavc_write_frame(vo->encode_lavc_ctx,
-                                    vc->stream, packet) < 0) {
-            MP_ERR(vo, "error writing\n");
-            return;
-        }
-
-        vc->have_first_packet = 1;
-    }
+    vc->have_first_packet = 1;
 }
 
-static int encode_video(struct vo *vo, AVFrame *frame, AVPacket *packet)
+static void encode_video_and_write(struct vo *vo, AVFrame *frame)
 {
     struct priv *vc = vo->priv;
-    int got_packet = 0;
-    int status = avcodec_encode_video2(vc->codec, packet,
-                                        frame, &got_packet);
-    int size = (status < 0) ? status : got_packet ? packet->size : 0;
+    AVPacket packet = {0};
 
-    if (frame)
-        MP_DBG(vo, "got pts %f; out size: %d\n",
-               frame->pts * (double) vc->codec->time_base.num /
-               (double) vc->codec->time_base.den, size);
-
-    if (got_packet)
+#if HAVE_AVCODEC_NEW_CODEC_API
+    int status = avcodec_send_frame(vc->codec, frame);
+    if (status < 0) {
+        MP_ERR(vo, "error encoding at %d %d/%d\n",
+               frame ? (int) frame->pts : -1,
+               vc->codec->time_base.num,
+               vc->codec->time_base.den);
+        return;
+    }
+    for (;;) {
+        av_init_packet(&packet);
+        status = avcodec_receive_packet(vc->codec, &packet);
+        if (status == AVERROR(EAGAIN)) { // No more packets for now.
+            if (frame == NULL) {
+                MP_ERR(vo, "sent flush frame, got EAGAIN");
+            }
+            break;
+        }
+        if (status == AVERROR_EOF) { // No more packets, ever.
+            if (frame != NULL) {
+                MP_ERR(vo, "sent image frame, got EOF");
+            }
+            break;
+        }
+        if (status < 0) {
+            MP_ERR(vo, "error encoding at %d %d/%d\n",
+                   frame ? (int) frame->pts : -1,
+                   vc->codec->time_base.num,
+                   vc->codec->time_base.den);
+            break;
+        }
         encode_lavc_write_stats(vo->encode_lavc_ctx, vc->codec);
-    return size;
+        write_packet(vo, &packet);
+        av_packet_unref(&packet);
+    }
+#else
+    av_init_packet(&packet);
+    int got_packet = 0;
+    int status = avcodec_encode_video2(vc->codec, &packet, frame, &got_packet);
+    if (status < 0) {
+        MP_ERR(vo, "error encoding at %d %d/%d\n",
+               frame ? (int) frame->pts : -1,
+               vc->codec->time_base.num,
+               vc->codec->time_base.den);
+        return;
+    }
+    if (!got_packet) {
+        return;
+    }
+    encode_lavc_write_stats(vo->encode_lavc_ctx, vc->codec);
+    write_packet(vo, &packet);
+    av_packet_unref(&packet);
+#endif
 }
 
 static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *vc = vo->priv;
     struct encode_lavc_context *ectx = vo->encode_lavc_ctx;
-    int size;
     AVCodecContext *avc;
     int64_t frameipts;
     double nextpts;
@@ -398,7 +428,6 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
         // we have a valid image in lastimg
         while (vc->lastimg && vc->lastipts < frameipts) {
             int64_t thisduration = vc->harddup ? 1 : (frameipts - vc->lastipts);
-            AVPacket packet;
 
             // we will ONLY encode this frame if it can be encoded at at least
             // vc->mindeltapts after the last encoded frame!
@@ -417,20 +446,13 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
                 // this is a nop, unless the worst time base is the STREAM time base
                 frame->pts = av_rescale_q(vc->lastipts + skipframes,
                                           vc->worst_time_base, avc->time_base);
-
                 frame->pict_type = 0; // keep this at unknown/undefined
-
                 frame->quality = avc->global_quality;
+                encode_video_and_write(vo, frame);
+                av_frame_free(&frame);
 
-                av_init_packet(&packet);
-                packet.data = vc->buffer;
-                packet.size = vc->buffer_size;
-                size = encode_video(vo, frame, &packet);
-                write_packet(vo, size, &packet);
                 ++vc->lastdisplaycount;
                 vc->lastencodedipts = vc->lastipts + skipframes;
-
-                av_frame_free(&frame);
             }
 
             vc->lastipts += thisduration;
@@ -439,14 +461,7 @@ static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)
 
     if (!mpi) {
         // finish encoding
-        do {
-            AVPacket packet;
-            av_init_packet(&packet);
-            packet.data = vc->buffer;
-            packet.size = vc->buffer_size;
-            size = encode_video(vo, NULL, &packet);
-            write_packet(vo, size, &packet);
-        } while (size > 0);
+        encode_video_and_write(vo, NULL);
     } else {
         if (frameipts >= vc->lastframeipts) {
             if (vc->lastframeipts != AV_NOPTS_VALUE && vc->lastdisplaycount != 1)

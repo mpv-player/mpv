@@ -33,18 +33,11 @@ struct af_stream;
 struct mixer;
 
 struct mixer *mixer_init(void *talloc_ctx, struct mpv_global *global);
-void mixer_reinit_audio(struct mixer *mixer, struct ao *ao, struct af_stream *af);
+void mixer_reinit_audio(struct mixer *mixer, struct af_stream *af);
 void mixer_uninit_audio(struct mixer *mixer);
 bool mixer_audio_initialized(struct mixer *mixer);
-void mixer_getvolume(struct mixer *mixer, float *l, float *r);
-void mixer_setvolume(struct mixer *mixer, float l, float r);
-void mixer_addvolume(struct mixer *mixer, float step);
-void mixer_getbothvolume(struct mixer *mixer, float *b);
-void mixer_setmute(struct mixer *mixer, bool mute);
-bool mixer_getmute(struct mixer *mixer);
+void mixer_update_volume(struct mixer *mixer);
 void mixer_getbalance(struct mixer *mixer, float *bal);
 void mixer_setbalance(struct mixer *mixer, float bal);
-float mixer_getmaxvolume(struct mixer *mixer);
-char *mixer_get_volume_restore_data(struct mixer *mixer);
 
 #endif /* MPLAYER_MIXER_H */

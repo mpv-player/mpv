@@ -29,11 +29,11 @@
 #include "osdep/windows_utils.h"
 #include "hwdec.h"
 #include "video/hwdec.h"
+#include "video/decode/d3d.h"
 
 struct priv {
     struct mp_hwdec_ctx hwctx;
 
-    HMODULE             d3d9_dll;
     IDirect3D9Ex       *d3d9ex;
     IDirect3DDevice9Ex *device9ex;
     IDirect3DQuery9    *query9;
@@ -89,15 +89,14 @@ static void destroy(struct gl_hwdec *hw)
 
     if (p->d3d9ex)
         IDirect3D9Ex_Release(p->d3d9ex);
-
-    if (p->d3d9_dll)
-        FreeLibrary(p->d3d9_dll);
 }
 
 static int create(struct gl_hwdec *hw)
 {
     if (!angle_load())
         return -1;
+
+    d3d_load_dlls();
 
     EGLDisplay egl_display = eglGetCurrentDisplay();
     if (!egl_display)
@@ -118,15 +117,14 @@ static int create(struct gl_hwdec *hw)
 
     p->egl_display = egl_display;
 
-    p->d3d9_dll = LoadLibraryW(L"d3d9.dll");
-    if (!p->d3d9_dll) {
+    if (!d3d9_dll) {
         MP_FATAL(hw, "Failed to load \"d3d9.dll\": %s\n",
                  mp_LastError_to_str());
         goto fail;
     }
 
     HRESULT (WINAPI *Direct3DCreate9Ex)(UINT SDKVersion, IDirect3D9Ex **ppD3D);
-    Direct3DCreate9Ex = (void *)GetProcAddress(p->d3d9_dll, "Direct3DCreate9Ex");
+    Direct3DCreate9Ex = (void *)GetProcAddress(d3d9_dll, "Direct3DCreate9Ex");
     if (!Direct3DCreate9Ex) {
         MP_FATAL(hw, "Direct3D 9Ex not supported\n");
         goto fail;

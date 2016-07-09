@@ -129,6 +129,12 @@ static void term_osd_set_status(struct MPContext *mpctx, const char *text)
 {
     talloc_free(mpctx->term_osd_status);
     mpctx->term_osd_status = talloc_strdup(mpctx, text);
+
+    int w = 80, h = 24;
+    terminal_get_size(&w, &h);
+    if (strlen(mpctx->term_osd_status) > w)
+        mpctx->term_osd_status[w] = '\0';
+
     term_osd_update(mpctx);
 }
 

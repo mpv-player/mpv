@@ -227,6 +227,8 @@ void vf_print_filter_chain(struct vf_chain *c, int msglevel,
     for (vf_instance_t *f = c->first; f; f = f->next) {
         char b[128] = {0};
         mp_snprintf_cat(b, sizeof(b), "  [%s] ", f->info->name);
+        if (f->label)
+            mp_snprintf_cat(b, sizeof(b), "\"%s\" ", f->label);
         mp_snprintf_cat(b, sizeof(b), "%s", mp_image_params_to_str(&f->fmt_out));
         if (f->autoinserted)
             mp_snprintf_cat(b, sizeof(b), " [a]");
@@ -298,6 +300,7 @@ void vf_remove_filter(struct vf_chain *c, struct vf_instance *vf)
     assert(prev); // not inserted
     prev->next = vf->next;
     vf_uninit_filter(vf);
+    c->initialized = 0;
 }
 
 struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
@@ -312,6 +315,7 @@ struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
             pprev = &(*pprev)->next;
         vf->next = *pprev ? *pprev : NULL;
         *pprev = vf;
+        c->initialized = 0;
     }
     return vf;
 }
@@ -652,7 +656,7 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
     mp_msg(c->log, loglevel, "Video filter chain:\n");
     vf_print_filter_chain(c, loglevel, failing);
     if (r < 0)
-        c->input_params = c->output_params = (struct mp_image_params){0};
+        c->output_params = (struct mp_image_params){0};
     return r;
 }
 

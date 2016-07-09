@@ -58,10 +58,6 @@ struct sub_bitmaps {
 
     enum sub_bitmap_format format;
 
-    // If false, dw==w && dh==h.
-    // SUBBITMAP_LIBASS is never scaled.
-    bool scaled;
-
     struct sub_bitmap *parts;
     int num_parts;
 
@@ -69,6 +65,7 @@ struct sub_bitmaps {
     // parts[].bitmap pointer points into the image data here (and stride will
     // correspond to packed->stride[0]).
     //  SUBBITMAP_RGBA: IMGFMT_BGRA (exact match)
+    //  SUBBITMAP_LIBASS: IMGFMT_Y8 (not the same, but compatible layout)
     // Other formats have this set to NULL.
     struct mp_image *packed;
 
@@ -204,7 +201,7 @@ void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
 
 // internal use only
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
-                            struct sub_bitmaps *out_imgs);
+                            int format, struct sub_bitmaps *out_imgs);
 void osd_init_backend(struct osd_state *osd);
 void osd_destroy_backend(struct osd_state *osd);
 

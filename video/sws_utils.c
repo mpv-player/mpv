@@ -192,11 +192,11 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
         return -1;
     }
 
-    int s_csp = mp_csp_to_sws_colorspace(src->colorspace);
-    int s_range = src->colorlevels == MP_CSP_LEVELS_PC;
+    int s_csp = mp_csp_to_sws_colorspace(src->color.space);
+    int s_range = src->color.levels == MP_CSP_LEVELS_PC;
 
-    int d_csp = mp_csp_to_sws_colorspace(dst->colorspace);
-    int d_range = dst->colorlevels == MP_CSP_LEVELS_PC;
+    int d_csp = mp_csp_to_sws_colorspace(dst->color.space);
+    int d_range = dst->color.levels == MP_CSP_LEVELS_PC;
 
     // Work around libswscale bug #1852 (fixed in ffmpeg commit 8edf9b1fa):
     // setting range flags for RGB gives random bogus results.

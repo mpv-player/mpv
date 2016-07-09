@@ -1446,7 +1446,7 @@ int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable);
  * required log level for a message to be received with MPV_EVENT_LOG_MESSAGE.
  *
  * @param min_level Minimal log level as string. Valid log levels:
- *                      no fatal error warn info status v debug trace
+ *                      no fatal error warn info v debug trace
  *                  The value "no" disables all messages. This is the default.
  *                  An exception is the value "terminal-default", which uses the
  *                  log level as set by the "--msg-level" option. This works

@@ -341,38 +341,36 @@ static LRESULT borderless_nchittest(struct vo_w32_state *w32, int x, int y)
     POINT mouse = { x, y };
     ScreenToClient(w32->window, &mouse);
 
+    // The horizontal frame should be the same size as the vertical frame,
+    // since the NONCLIENTMETRICS structure does not distinguish between them
+    int frame_size = GetSystemMetrics(SM_CXFRAME) +
+                     GetSystemMetrics(SM_CXPADDEDBORDER);
     // The diagonal size handles are slightly wider than the side borders
-    int handle_width = GetSystemMetrics(SM_CXSMSIZE) +
-                       GetSystemMetrics(SM_CXBORDER);
+    int diagonal_width = frame_size * 2 + GetSystemMetrics(SM_CXBORDER);
 
     // Hit-test top border
-    int frame_height = GetSystemMetrics(SM_CYFRAME) +
-                       GetSystemMetrics(SM_CXPADDEDBORDER);
-    if (mouse.y < frame_height) {
-        if (mouse.x < handle_width)
+    if (mouse.y < frame_size) {
+        if (mouse.x < diagonal_width)
             return HTTOPLEFT;
-        if (mouse.x > w32->dw - handle_width)
+        if (mouse.x >= w32->dw - diagonal_width)
             return HTTOPRIGHT;
         return HTTOP;
     }
 
     // Hit-test bottom border
-    if (mouse.y > w32->dh - frame_height) {
-        if (mouse.x < handle_width)
+    if (mouse.y >= w32->dh - frame_size) {
+        if (mouse.x < diagonal_width)
             return HTBOTTOMLEFT;
-        if (mouse.x > w32->dw - handle_width)
+        if (mouse.x >= w32->dw - diagonal_width)
             return HTBOTTOMRIGHT;
         return HTBOTTOM;
     }
 
     // Hit-test side borders
-    int frame_width = GetSystemMetrics(SM_CXFRAME) +
-                      GetSystemMetrics(SM_CXPADDEDBORDER);
-    if (mouse.x < frame_width)
+    if (mouse.x < frame_size)
         return HTLEFT;
-    if (mouse.x > w32->dw - frame_width)
+    if (mouse.x >= w32->dw - frame_size)
         return HTRIGHT;
-
     return HTCLIENT;
 }
 
@@ -1182,7 +1180,7 @@ static void gui_thread_reconfig(void *ptr)
     }
 
     // Recenter window around old position on new video size
-    // excluding the case when initial positon handled by win_state.
+    // excluding the case when initial position handled by win_state.
     if (!pos_init) {
         w32->window_x += w32->dw / 2 - vo->dwidth / 2;
         w32->window_y += w32->dh / 2 - vo->dheight / 2;

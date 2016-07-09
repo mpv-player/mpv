@@ -214,7 +214,7 @@ Available filters are:
         Format name, e.g. rgb15, bgr24, 420p, etc. (default: don't change).
     ``<outfmt>``
         Format name that should be substituted for the output. If they do not
-        have the same bytes per pixel and chroma subsamplimg, it will fail.
+        have the same bytes per pixel and chroma subsampling, it will fail.
     ``<colormatrix>``
         Controls the YUV to RGB color space conversion when playing video. There
         are various standards. Normally, BT.601 should be used for SD video, and
@@ -288,6 +288,8 @@ Available filters are:
         :adobe:        Adobe RGB (1998)
         :prophoto:     ProPhoto RGB (ROMM)
         :cie1931:      CIE 1931 RGB
+        :dci-p3:       DCI-P3 (Digital Cinema)
+        :v-gamut:      Panasonic V-Gamut primaries
 
     ``<gamma>``
        Gamma function the source file was encoded with. Normally this should be set
@@ -311,6 +313,8 @@ Available filters are:
        :gamma2.8:     Pure power curve (gamma 2.8)
        :prophoto:     ProPhoto RGB (ROMM) curve
        :st2084:       SMPTE ST2084 (HDR) curve
+       :std-b67:      ARIB STD-B67 (Hybrid Log-gamma) curve
+       :v-log:        Panasonic V-Log transfer curve
 
     ``<peak>``
         Reference peak illumination for the video file. This is mostly

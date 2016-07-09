@@ -5,8 +5,6 @@
 
 #include "osd.h"
 
-#define OSD_CONV_CACHE_MAX 4
-
 enum mp_osdtype {
     OSDTYPE_SUB,
     OSDTYPE_SUB2, // IDs must be numerically successive
@@ -48,17 +46,15 @@ struct osd_object {
     // OSDTYPE_EXTERNAL2
     struct sub_bitmaps *external2;
 
-    // caches for OSD conversion (internal to render_object())
-    struct osd_conv_cache *cache[OSD_CONV_CACHE_MAX];
-    struct sub_bitmaps cached;
-
     // VO cache state
     int vo_change_id;
     struct mp_osd_res vo_res;
 
     // Internally used by osd_libass.c
-    struct sub_bitmaps parts_cache;
+    bool changed;
     struct ass_state ass;
+    struct mp_ass_packer *ass_packer;
+    struct ass_image **ass_imgs;
 };
 
 struct osd_external {

@@ -137,6 +137,20 @@ most likely the best maintenance out of all stable releases. Older releases
 are for distros, and at best receive basic changes like fixing critical security
 issues or build fixes, and at worst are completely abandoned.
 
+## FFmpeg ABI compatibility
+
+mpv does not support linking against FFmpeg versions it was not built with, even
+if the linked version is supposedly ABI-compatible with the version it was
+compiled against. Expect malfunctions, crashes, and security issues if you
+do it anyway.
+
+The reason for not supporting this is because it creates far too much complexity
+with little to no benefit, coupled with absurd and unusable FFmpeg API
+artifacts.
+
+Newer mpv versions will refuse to start if runtime and compile time FFmpeg
+library versions mismatch.
+
 ## Release cycle
 
 Every other month, an arbitrary git snapshot is made, and is assigned

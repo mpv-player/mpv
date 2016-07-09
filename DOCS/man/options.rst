@@ -638,15 +638,15 @@ Video
         In some cases, RGB conversion is forced, which means the RGB conversion
         is performed by the hardware decoding API, instead of the OpenGL code
         used by ``--vo=opengl``. This means certain obscure colorspaces may
-        not display correctly, and not certain filtering (such as debanding)
-        can not be applied in an ideal way.
+        not display correctly, not certain filtering (such as debanding)
+        cannot be applied in an ideal way.
 
         ``vdpau`` is usually safe. If deinterlacing enabled (or the ``vdpaupp``
         video filter is active in general), it forces RGB conversion. The latter
         currently does not treat certain colorspaces like BT.2020 correctly
-        (which is mostly a mpv-specific restriction). If the ``vdpauprb``
-        retrieves image data without RGB conversion, but does not work with
-        postprocessing.
+        (which is mostly a mpv-specific restriction). The ``vdpauprb`` video
+        filter retrieves image data without RGB conversion and is safe (but
+        precludes use of vdpau postprocessing).
 
         ``vaapi`` is safe if the ``vaapi-egl`` backend is indicated in the logs.
         If ``vaapi-glx`` is indicated, and the video colorspace is either BT.601
@@ -1072,14 +1072,10 @@ Audio
 
 ``--volume=<value>``
     Set the startup volume. 0 means silence, 100 means no volume reduction or
-    amplification. A value of -1 (the default) will not change the volume. See
-    also ``--softvol``.
+    amplification. Negative values can be passed for compatibility, but are
+    treated as 0.
 
-    .. note::
-
-        This was changed after the mpv 0.9 release. Before that, 100 actually
-        meant maximum volume. At the same time, the volume scale was made cubic,
-        so the old values won't match up with the new ones anyway.
+    Since mpv 0.18.1, this always controls the internal mixer (aka "softvol").
 
 ``--audio-delay=<sec>``
     Audio delay in seconds (positive or negative float value). Positive values
@@ -1094,20 +1090,17 @@ Audio
 
     See also: ``--volume``.
 
-``--softvol=<mode>``
-    Control whether to use the volume controls of the audio output driver or
-    the internal mpv volume filter.
+``--softvol=<no|yes|auto>``
+    Deprecated/unfunctional. Before mpv 0.18.1, this used to control whether
+    to use the volume controls of the audio output driver or the internal mpv
+    volume filter.
 
-    :no:    prefer audio driver controls, use the volume filter only if
-            absolutely needed
-    :yes:   always use the volume filter
-    :auto:  prefer the volume filter if the audio driver uses the system mixer
-            (default)
+    The current behavior is as if this option was set to ``yes``. The other
+    behaviors are not available anymore, although ``auto`` almost matches
+    current behavior in most cases.
 
-    The intention of ``auto`` is to avoid changing system mixer settings from
-    within mpv with default settings. mpv is a video player, not a mixer panel.
-    On the other hand, mixer controls are enabled for sound servers like
-    PulseAudio, which provide per-application volume.
+    The ``no`` behavior is still partially available through the ``ao-volume``
+    and ``ao-mute`` properties. But there are no options to reset these.
 
 ``--audio-demuxer=<[+]name>``
     Use this audio demuxer type when using ``--audio-file``. Use a '+' before
@@ -1264,9 +1257,11 @@ Audio
     their start timestamps differ, and then video timing is gradually adjusted
     if necessary to reach correct synchronization later.
 
-``--softvol-max=<100.0-1000.0>``
+``--volume-max=<100.0-1000.0>``, ``--softvol-max=<...>``
     Set the maximum amplification level in percent (default: 130). A value of
     130 will allow you to adjust the volume up to about double the normal level.
+
+    ``--softvol-max`` is a deprecated alias and should not be used.
 
 ``--audio-file-auto=<no|exact|fuzzy|all>``, ``--no-audio-file-auto``
     Load additional audio files matching the video filename. The parameter
@@ -1276,7 +1271,7 @@ Audio
     :no:    Don't automatically load external audio files.
     :exact: Load the media filename with audio file extension (default).
     :fuzzy: Load all audio files containing media filename.
-    :all:   Load all aufio files in the current and ``--audio-file-paths``
+    :all:   Load all audio files in the current and ``--audio-file-paths``
             directories.
 
 ``--audio-file-paths=<path1:path2:...>``
@@ -1320,7 +1315,7 @@ Subtitles
 .. note::
 
     Changing styling and position does not work with all subtitles. Image-based
-    subtitles (DVD, Bluray/PGS, DVB) can not changed for fundamental reasons.
+    subtitles (DVD, Bluray/PGS, DVB) cannot changed for fundamental reasons.
     Subtitles in ASS format are normally not changed intentionally, but
     overriding them can be controlled with ``--ass-style-override``.
 
@@ -2019,6 +2014,14 @@ Window
     be the default behavior. Currently only affects X11 VOs.
 
 ``--heartbeat-cmd=<command>``
+
+    .. warning::
+
+        This option is redundant with Lua scripting. Further, it shouldn't be
+        needed for disabling screensaver anyway, since mpv will call
+        ``xdg-screensaver`` when using X11 backend. As a consequence this
+        option has been deprecated with no direct replacement.
+
     Command that is executed every 30 seconds during playback via *system()* -
     i.e. using the shell. The time between the commands can be customized with
     the ``--heartbeat-interval`` option. The command is not run while playback
@@ -2438,7 +2441,7 @@ Demuxer
     stop reading additional packets as soon as one of the limits is reached.
     (The limits still can be slightly overstepped due to technical reasons.)
 
-    Set these limits highher if you get a packet queue overflow warning, and
+    Set these limits higher if you get a packet queue overflow warning, and
     you think normal playback would be possible with a larger packet queue.
 
     See ``--list-options`` for defaults and value range.
@@ -2463,7 +2466,7 @@ Demuxer
 
 ``--force-seekable=<yes|no>``
     If the player thinks that the media is not seekable (e.g. playing from a
-    pipe, or it's a http stream with a server that doesn't support range
+    pipe, or it's an http stream with a server that doesn't support range
     requests), seeking will be disabled. This option can forcibly enable it.
     For seeks within the cache, there's a good chance of success.
 
@@ -3290,7 +3293,7 @@ Cache
     With ``auto``, the cache will usually be enabled for network streams,
     using the size set by ``--cache-default``. With ``yes``, the cache will
     always be enabled with the size set by ``--cache-default`` (unless the
-    stream can not be cached, or ``--cache-default`` disables caching).
+    stream cannot be cached, or ``--cache-default`` disables caching).
 
     May be useful when playing files from slow media, but can also have
     negative effects, especially with file formats that require a lot of
@@ -3685,7 +3688,7 @@ Miscellaneous
     video or audio outputs are not possible, but you can use filters to merge
     them into one.
 
-    The complex filter can not be changed yet during playback. It's also not
+    The complex filter cannot be changed yet during playback. It's also not
     possible to change the tracks connected to the filter at runtime. Other
     tracks, as long as they're not connected to the filter, and the
     corresponding output is not connected to the filter, can still be freely
