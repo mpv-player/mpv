@@ -341,18 +341,64 @@ static int filter_reinit_with_conversion(struct af_stream *s, struct af_instance
     return rv;
 }
 
-// Return AF_OK on success or AF_ERROR on failure.
-// Warning:
-// A failed af_reinit() leaves the audio chain behind in a useless, broken
-// state (for example, format filters that were tentatively inserted stay
-// inserted).
-// In that case, you should always rebuild the filter chain, or abort.
-static int af_reinit(struct af_stream *s)
+static int af_find_output_conversion(struct af_stream *s, struct mp_audio *cfg)
 {
+    assert(mp_audio_config_valid(&s->output));
+    assert(s->initialized > 0);
+
+    if (mp_chmap_equals_reordered(&s->input.channels, &s->output.channels))
+        return AF_ERROR;
+
+    // Heuristic to detect point of conversion. If it looks like something
+    // more complicated is going on, better bail out.
+    // We expect that the last filter converts channels.
+    struct af_instance *conv = s->last->prev;
+    if (!conv->auto_inserted)
+        return AF_ERROR;
+    if (!(mp_chmap_equals_reordered(&conv->fmt_in.channels, &s->input.channels) &&
+          mp_chmap_equals_reordered(&conv->fmt_out.channels, &s->output.channels)))
+        return AF_ERROR;
+    // Also, should be the only one which does auto conversion.
+    for (struct af_instance *af = s->first->next; af != s->last; af = af->next)
+    {
+        if (af != conv && af->auto_inserted &&
+            !mp_chmap_equals_reordered(&af->fmt_in.channels, &af->fmt_out.channels))
+            return AF_ERROR;
+    }
+
+    *cfg = s->output;
+    return AF_OK;
+}
+
+// Return AF_OK on success or AF_ERROR on failure.
+static int af_do_reinit(struct af_stream *s, bool second_pass)
+{
+    struct mp_audio convert_early = {0};
+    if (second_pass) {
+        // If a channel conversion happens, and it is done by an auto-inserted
+        // filter, then insert a filter to convert it early. Otherwise, do
+        // nothing and return immediately.
+        if (af_find_output_conversion(s, &convert_early) != AF_OK)
+            return AF_OK;
+    }
+
     remove_auto_inserted_filters(s);
     af_chain_forget_frames(s);
     reset_formats(s);
     s->first->fmt_in = s->first->fmt_out = s->input;
+
+    if (mp_audio_config_valid(&convert_early)) {
+        struct af_instance *new = af_prepend(s, s->first, "lavrresample", NULL);
+        if (!new)
+            return AF_ERROR;
+        new->auto_inserted = true;
+        mp_audio_copy_config(new->data, &convert_early);
+        int rv = filter_reinit(new);
+        if (rv != AF_DETACH && rv != AF_OK)
+            return AF_ERROR;
+        MP_VERBOSE(s, "Moving up output conversion.\n");
+    }
+
     // Start with the second filter, as the first filter is the special input
     // filter which needs no initialization.
     struct af_instance *af = s->first->next;
@@ -416,6 +462,19 @@ error:
     s->initialized = -1;
     af_print_filter_chain(s, af, MSGL_ERR);
     return AF_ERROR;
+}
+
+static int af_reinit(struct af_stream *s)
+{
+    int r = af_do_reinit(s, false);
+    if (r == AF_OK && mp_audio_config_valid(&s->output)) {
+        r = af_do_reinit(s, true);
+        if (r != AF_OK) {
+            MP_ERR(s, "Failed second pass filter negotiation.\n");
+            r = af_do_reinit(s, false);
+        }
+    }
+    return r;
 }
 
 // Uninit and remove all filters
