@@ -256,6 +256,8 @@ static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
             mp_snprintf_cat(b, sizeof(b), "\"%s\" ", af->label);
         if (af->data)
             mp_snprintf_cat(b, sizeof(b), "%s", mp_audio_config_to_str(af->data));
+        if (af->auto_inserted)
+            mp_snprintf_cat(b, sizeof(b), " [a]");
         if (af == at)
             mp_snprintf_cat(b, sizeof(b), " <-");
         MP_MSG(s, msg_level, "%s\n", b);
