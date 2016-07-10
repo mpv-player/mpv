@@ -1635,8 +1635,20 @@ static int mp_property_ao_volume(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLOAT};
+        *(struct m_option *)arg = (struct m_option){
+            .type = CONF_TYPE_FLOAT,
+            .flags = M_OPT_RANGE,
+            .min = 0,
+            .max = 100,
+        };
         return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT: {
+        ao_control_vol_t vol = {0};
+        if (ao_control(ao, AOCONTROL_GET_VOLUME, &vol) != CONTROL_OK)
+            return M_PROPERTY_UNAVAILABLE;
+        *(char **)arg = talloc_asprintf(NULL, "%.f", (vol.left + vol.right) / 2.0f);
+        return M_PROPERTY_OK;
+    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -4051,7 +4063,11 @@ static const struct property_osd_display {
     { "volume", "Volume",
       .msg = "Volume: ${?volume:${volume}% ${?mute==yes:(Muted)}}${!volume:${volume}}",
       .osd_progbar = OSD_VOLUME },
+    { "ao-volume", "AO Volume",
+      .msg = "AO Volume: ${?ao-volume:${ao-volume}% ${?ao-mute==yes:(Muted)}}${!ao-volume:${ao-volume}}",
+      .osd_progbar = OSD_VOLUME },
     { "mute", "Mute" },
+    { "ao-mute", "AO Mute" },
     { "audio-delay", "A-V delay" },
     { "audio", "Audio" },
     { "balance", "Balance", .osd_progbar = OSD_BALANCE },
