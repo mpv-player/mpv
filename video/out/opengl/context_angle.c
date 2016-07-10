@@ -216,16 +216,17 @@ static int angle_init(struct MPGLContext *ctx, int flags)
 
         p->egl_display = eglGetPlatformDisplayEXT(EGL_PLATFORM_ANGLE_ANGLE, dc,
             display_attributes);
-        if (p->egl_display != EGL_NO_DISPLAY)
-            break;
+        if (p->egl_display == EGL_NO_DISPLAY)
+            continue;
+
+        if (!eglInitialize(p->egl_display, NULL, NULL)) {
+            p->egl_display = EGL_NO_DISPLAY;
+            continue;
+        }
+        break;
     }
     if (p->egl_display == EGL_NO_DISPLAY) {
         MP_FATAL(vo, "Couldn't get display\n");
-        goto fail;
-    }
-
-    if (!eglInitialize(p->egl_display, NULL, NULL)) {
-        MP_FATAL(vo, "Couldn't initialize EGL\n");
         goto fail;
     }
 
