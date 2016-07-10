@@ -1,3 +1,83 @@
+Release 0.18.1
+==============
+
+Note: Running mpv with different versions of the FFmpeg/Libav libraries than
+it was compiled with is no longer supported. Even supposedly ABI-compatible
+versions have been a source of trouble, and it creates far too much
+complexity with little to no benefit, coupled with absurd and unusable FFmpeg
+API artifacts.
+
+Instead, mpv will exit with an error when such a situation is detected.
+This simply means that mpv needs to be rebuilt whenever FFmpeg libraries change.
+
+
+Features
+--------
+
+New
+~~~
+
+- d3d: implement screenshots for --hwdec=d3d11va
+- vo_opengl: add output_size uniform to custom shader
+- vo_opengl: implement the Panasonic V-Log function (#3157)
+- vo_opengl: implement ARIB STD-B68 (HLG) HDR TRC
+
+
+Options and Commands
+--------------------
+
+Changed
+~~~~~~~
+- command: pack sub image data in overlay-add command
+
+
+Deprecated
+~~~~~~~~~~
+
+- options: deprecate --heartbeat-cmd
+- audio: deprecate --softvol
+
+
+Removed
+~~~~~~~
+
+- audio: drop --softvol=no and --softvol=auto (#3322)
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- video: fix deinterlace filter handling on pixel format changes
+- x11: silence xdg-screensaver
+- vo_opengl: angle: update the swapchain on resize (#3301)
+- vo_opengl: error out gracefully when trying to use FBOs without FBO API
+- vd_lavc: expose mastering display side data reference peak (improves results with HDR content)
+- vo_opengl: generalize HDR tone mapping mechanism (#3293)
+- vo_opengl: don't constantly resize the output FBO
+- vo_opengl: use ringbuffer of PBOs
+- Windows: make WM_NCHITTEST simpler and more accurate
+- ao_oss: do not add an entry to audio-device-list if device file missing
+- dec_audio: fix segment boudnary switching
+- ao_lavc, vo_lavc: Migrate to new FFmpeg encoding API
+- vo_opengl: explicitly use main framebuffer when reading window content (#3284)
+- vo_xv: fix behavior with odd sizes
+- audio: insert auto-inserted filters at end of chain
+- x11: add missing FocusChangeMask (disables key repeat when losing focus while a key is down)
+- ao_coreaudio: error out when selecting invalid device
+- ad_lavc: work around misbehavior of some FFmpeg decoders like wmapro (#3297)
+- player: cut off status line on terminal width
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API, and DOCS/interface-changes.rst for a history
+of changes to other user-visible interfaces.
+
+A complete changelog can be seen by running `git log v0.18.0..v0.18.1`
+in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.18.0...v0.18.1 or
+http://git.srsfckn.biz/mpv/log/?qt=range&q=v0.18.0..v0.18.1
+
+
 Release 0.18.0
 ==============
 
@@ -39,7 +119,7 @@ New
 
 
 Removed
--------
+~~~~~~~
 
 - vo_opengl: remove nnedi3 prescaler (replaced by user shaders)
 - vo_opengl: remove prescaling framework with superxbr prescaler (replaced by user shaders)
