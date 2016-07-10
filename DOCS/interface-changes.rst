@@ -23,7 +23,7 @@ Interface changes
     - deprecate --heartbeat-cmd
     - remove --softvol=no capability:
         - deprecate --softvol, it now does nothing
-        - --volume, --mute, and the corrsponding properties now always control
+        - --volume, --mute, and the corresponding properties now always control
           softvol, and behave as expected without surprises (e.g. you can set
           them normally while no audio is initialized)
         - rename --softvol-max to --volume-max (deprecated alias is added)

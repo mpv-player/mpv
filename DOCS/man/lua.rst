@@ -541,8 +541,8 @@ Example command-line::
      --script-opts=myscript-optionA=TEST,myscript-optionB=0,myscript-optionC=yes
 
 
-mp.utils options
-----------------
+mp.utils functions
+------------------
 
 This built-in module provides generic helper functions for Lua, and have
 strictly speaking nothing to do with mpv or video/audio playback. They are
