@@ -200,12 +200,9 @@ static size_t read_buffer(struct priv *s, unsigned char *dst,
     return read;
 }
 
-// Runs in the cache thread.
-static void cache_fill(struct priv *s)
+static bool cache_update_stream_position(struct priv *s)
 {
     int64_t read = s->read_filepos;
-    bool read_attempted = false;
-    int len = 0;
 
     // drop cache contents only if seeking backward or too much fwd.
     // This is also done for on-disk files, since it loses the backseek cache.
@@ -221,10 +218,22 @@ static void cache_fill(struct priv *s)
     if (stream_tell(s->stream) != s->max_filepos && s->seekable) {
         MP_VERBOSE(s, "Seeking underlying stream: %"PRId64" -> %"PRId64"\n",
                    stream_tell(s->stream), s->max_filepos);
-        stream_seek(s->stream, s->max_filepos);
-        if (stream_tell(s->stream) != s->max_filepos)
-            goto done;
+        if (!stream_seek(s->stream, s->max_filepos))
+            return false;
     }
+
+    return stream_tell(s->stream) == s->max_filepos;
+}
+
+// Runs in the cache thread.
+static void cache_fill(struct priv *s)
+{
+    int64_t read = s->read_filepos;
+    bool read_attempted = false;
+    int len = 0;
+
+    if (!cache_update_stream_position(s))
+        goto done;
 
     if (!s->enable_readahead && s->read_min <= s->max_filepos)
         goto done;
@@ -570,6 +579,7 @@ static int cache_seek(stream_t *cache, int64_t pos)
     } else {
         cache->pos = s->read_filepos = s->read_min = pos;
         s->eof = false; // so that cache_read() will actually wait for new data
+        r = cache_update_stream_position(s);
         pthread_cond_signal(&s->wakeup);
     }
 
