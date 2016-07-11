@@ -115,7 +115,7 @@ static void filter_plane(struct af_instance *af, struct mp_audio *data, int p)
 {
     struct priv *s = af->priv;
 
-    float level = s->level * s->rgain;
+    float level = s->level * s->rgain * from_dB(s->cfg_volume, 20.0, -200.0, 60.0);
     int num_samples = data->samples * data->spf;
 
     if (af_fmt_from_planar(af->data->format) == AF_FORMAT_S16) {
@@ -158,7 +158,7 @@ static int af_open(struct af_instance *af)
     struct priv *s = af->priv;
     af->control = control;
     af->filter_frame = filter;
-    s->level = from_dB(s->cfg_volume, 20.0, -200.0, 60.0);
+    s->level = 1.0;
     return AF_OK;
 }
 
