@@ -15,6 +15,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <initguid.h>
 #include <windows.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
@@ -33,11 +34,15 @@
 #define EGL_SURFACE_ORIENTATION_INVERT_Y_ANGLE 0x0002
 #endif
 
+// Windows 8 enum value, not present in mingw-w64 headers
+#define DXGI_ADAPTER_FLAG_SOFTWARE (2)
+
 struct priv {
     EGLDisplay egl_display;
     EGLContext egl_context;
     EGLSurface egl_surface;
     bool use_es2;
+    bool sw_adapter_msg_shown;
     PFNEGLPOSTSUBBUFFERNVPROC eglPostSubBufferNV;
 };
 
@@ -104,6 +109,15 @@ static bool create_context_egl(MPGLContext *ctx, EGLConfig config, int version)
     return true;
 }
 
+static void show_sw_adapter_msg(struct MPGLContext *ctx)
+{
+    struct priv *p = ctx->priv;
+    if (p->sw_adapter_msg_shown)
+        return;
+    MP_WARN(ctx->vo, "Using a software adapter\n");
+    p->sw_adapter_msg_shown = true;
+}
+
 static void d3d_init(struct MPGLContext *ctx)
 {
     HRESULT hr;
@@ -111,6 +125,7 @@ static void d3d_init(struct MPGLContext *ctx)
     struct vo *vo = ctx->vo;
     IDXGIDevice *dxgi_dev = NULL;
     IDXGIAdapter *dxgi_adapter = NULL;
+    IDXGIAdapter1 *dxgi_adapter1 = NULL;
     IDXGIFactory *dxgi_factory = NULL;
 
     PFNEGLQUERYDISPLAYATTRIBEXTPROC eglQueryDisplayAttribEXT =
@@ -147,6 +162,25 @@ static void d3d_init(struct MPGLContext *ctx)
             goto done;
         }
 
+        // Windows 8 can choose a software adapter even if mpv didn't ask for
+        // one. If this is the case, show a warning message.
+        hr = IDXGIAdapter_QueryInterface(dxgi_adapter, &IID_IDXGIAdapter1,
+            (void**)&dxgi_adapter1);
+        if (SUCCEEDED(hr)) {
+            DXGI_ADAPTER_DESC1 desc;
+            hr = IDXGIAdapter1_GetDesc1(dxgi_adapter1, &desc);
+            if (SUCCEEDED(hr)) {
+                if (desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE)
+                    show_sw_adapter_msg(ctx);
+
+                // If the primary display adapter is a software adapter, the
+                // DXGI_ADAPTER_FLAG_SOFTWARE won't be set, but the device IDs
+                // should still match the Microsoft Basic Render Driver
+                if (desc.VendorId == 0x1414 && desc.DeviceId == 0x8c)
+                    show_sw_adapter_msg(ctx);
+            }
+        }
+
         hr = IDXGIAdapter_GetParent(dxgi_adapter, &IID_IDXGIFactory,
             (void**)&dxgi_factory);
         if (FAILED(hr)) {
@@ -168,6 +202,8 @@ done:
         IDXGIDevice_Release(dxgi_dev);
     if (dxgi_adapter)
         IDXGIAdapter_Release(dxgi_adapter);
+    if (dxgi_adapter1)
+        IDXGIAdapter1_Release(dxgi_adapter1);
     if (dxgi_factory)
         IDXGIFactory_Release(dxgi_factory);
 }
@@ -204,13 +240,17 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     }
 
     EGLint d3d_types[] = {EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE,
-                          EGL_PLATFORM_ANGLE_TYPE_D3D9_ANGLE};
+                          EGL_PLATFORM_ANGLE_TYPE_D3D9_ANGLE,
+                          EGL_PLATFORM_ANGLE_TYPE_D3D11_ANGLE};
+    EGLint d3d_dev_types[] = {EGL_PLATFORM_ANGLE_DEVICE_TYPE_HARDWARE_ANGLE,
+                              EGL_PLATFORM_ANGLE_DEVICE_TYPE_HARDWARE_ANGLE,
+                              EGL_PLATFORM_ANGLE_DEVICE_TYPE_WARP_ANGLE};
     for (int i = 0; i < MP_ARRAY_SIZE(d3d_types); i++) {
         EGLint display_attributes[] = {
             EGL_PLATFORM_ANGLE_TYPE_ANGLE,
                 d3d_types[i],
             EGL_PLATFORM_ANGLE_DEVICE_TYPE_ANGLE,
-                EGL_PLATFORM_ANGLE_DEVICE_TYPE_HARDWARE_ANGLE,
+                d3d_dev_types[i],
             EGL_NONE,
         };
 
@@ -223,6 +263,9 @@ static int angle_init(struct MPGLContext *ctx, int flags)
             p->egl_display = EGL_NO_DISPLAY;
             continue;
         }
+
+        if (d3d_dev_types[i] == EGL_PLATFORM_ANGLE_DEVICE_TYPE_WARP_ANGLE)
+            show_sw_adapter_msg(ctx);
         break;
     }
     if (p->egl_display == EGL_NO_DISPLAY) {
