@@ -315,12 +315,13 @@ static int filter_reinit_with_conversion(struct af_stream *s, struct af_instance
         // First try if we can change the output format of the previous
         // filter to the input format the current filter is expecting.
         struct mp_audio in = af->fmt_in;
-        if (af->prev != s->first && !mp_audio_config_equals(af->data, &in)) {
+        if (af->prev != s->first && !mp_audio_config_equals(af->prev->data, &in)) {
             // This should have been successful (because it succeeded
             // before), even if just reverting to the old output format.
-            mp_audio_copy_config(af->data, &in);
-            if (filter_reinit(af->prev) != AF_OK)
-                return AF_ERROR;
+            mp_audio_copy_config(af->prev->data, &in);
+            rv = filter_reinit(af->prev);
+            if (rv != AF_OK)
+                return rv;
         }
         if (!mp_audio_config_equals(af->prev->data, &in)) {
             // Retry with conversion filter added.
