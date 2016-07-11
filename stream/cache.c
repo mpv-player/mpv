@@ -124,6 +124,7 @@ enum {
     CACHE_CTRL_NONE = 0,
     CACHE_CTRL_QUIT = -1,
     CACHE_CTRL_PING = -2,
+    CACHE_CTRL_SEEK = -3,
 
     // we should fill buffer only if space>=FILL_LIMIT
     FILL_LIMIT = 16 * 1024,
@@ -505,6 +506,10 @@ static void *cache_thread(void *arg)
         }
         if (s->control > 0) {
             cache_execute_control(s);
+        } else if (s->control == CACHE_CTRL_SEEK) {
+            s->control_res = cache_update_stream_position(s);
+            s->control = CACHE_CTRL_NONE;
+            pthread_cond_signal(&s->wakeup);
         } else {
             cache_fill(s);
         }
@@ -579,7 +584,12 @@ static int cache_seek(stream_t *cache, int64_t pos)
     } else {
         cache->pos = s->read_filepos = s->read_min = pos;
         s->eof = false; // so that cache_read() will actually wait for new data
-        r = cache_update_stream_position(s);
+        s->control = CACHE_CTRL_SEEK;
+        s->control_res = 0;
+        double retry = 0;
+        while (s->control != CACHE_CTRL_NONE && !mp_cancel_test(s->cache->cancel))
+            cache_wakeup_and_wait(s, &retry);
+        r = s->control_res;
         pthread_cond_signal(&s->wakeup);
     }
 
