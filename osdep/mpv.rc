@@ -19,13 +19,31 @@
 
 #include <winver.h>
 
-1 VERSIONINFO
-FILEVERSION 2,0,0,0
-PRODUCTVERSION 2,0,0,0
-FILEOS VOS__WINDOWS32
-FILETYPE VFT_APP
-{
-}
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION 2, 0, 0, 0
+    PRODUCTVERSION 2, 0, 0, 0
+    FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+    FILEFLAGS 0
+    FILEOS VOS__WINDOWS32
+    FILETYPE VFT_APP
+    FILESUBTYPE 0
+    {
+        BLOCK "StringFileInfo" {
+            BLOCK "000004b0" {
+                VALUE "Comments", "mpv is distributed under the terms of the GNU General Public License Version 2 or later."
+                VALUE "CompanyName", "mpv"
+                VALUE "FileDescription", "mpv"
+                VALUE "FileVersion", "2.0.0.0"
+                VALUE "LegalCopyright", "(C) 2000-2016 mpv/mplayer2/MPlayer"
+                VALUE "OriginalFilename", "mpv.exe"
+                VALUE "ProductName", "mpv"
+                VALUE "ProductVersion", "2.0.0.0"
+            }
+        }
+        BLOCK "VarFileInfo" {
+            VALUE "Translation", 0, 1200
+        }
+    }
 
 IDI_ICON1 ICON DISCARDABLE  "etc/mpv-icon.ico"
 
