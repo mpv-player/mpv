@@ -6,6 +6,7 @@
 -- Please note: not every property is always available and therefore not always
 -- visible.
 
+local mp = require 'mp'
 local options = require 'mp.options'
 
 -- Options
@@ -15,22 +16,25 @@ local o = {
     key_toggle = "I",
 
     duration = 3,
-    redraw_delay = 1,           -- acts as duration in the toggling case
+    redraw_delay = 1,                -- acts as duration in the toggling case
+    timing_warning = true,
     ass_formatting = true,
     debug = false,
 
     -- Graph options and style
-    skip_frames = 5,
     plot_graphs = true,
+    skip_frames = 5,
+    global_max = true,
     plot_bg_border_color = "0000FF",
     plot_bg_color = "262626",
     plot_color = "FFFFFF",
 
     -- Text style
     font = "Source Sans Pro",
+    font_mono = "Source Sans Pro",   -- monospaced digits are sufficient
     font_size = 9,
     font_color = "FFFFFF",
-    border_size = 1.0,
+    border_size = 0.8,
     border_color = "262626",
     shadow_x_offset = 0.0,
     shadow_y_offset = 0.0,
@@ -59,8 +63,8 @@ local o = {
 options.read_options(o)
 
 local format = string.format
-local plast = {{}, {}, {}}
-local ppos = 0
+local plast = {{0}, {0}, {0}}
+local ppos = 1
 local plen = 50
 local recorder = nil
 local timer = mp.add_periodic_timer(o.redraw_delay, function() print_stats(o.redraw_delay + 1) end)
@@ -245,34 +249,27 @@ function append_property(s, prop, attr, excluded)
 end
 
 
-function generate_graph(values)
+function generate_graph(values, v_max, scale)
     -- check if at least one value was recorded yet
     if ppos < 1 then
         return ""
     end
 
-    local pmax = 1
-    for e = 1, plen do
-        if values[e] and values[e] > pmax then
-            pmax = values[e]
-        end
-    end
-
     local x_tics = 1
     local x_max = (plen - 1) * x_tics
     local y_offset = o.border_size
-    local y_max = o.font_size / 1.5
+    local y_max = o.font_size * 0.66
     local x = 0
 
 
     local i = ppos
-    local s = {format("m 0 0 n %f %f l ", x, y_max - (y_max * values[i] / pmax * 0.8))}
+    local s = {format("m 0 0 n %f %f l ", x, y_max - (y_max * values[i] / v_max * scale))}
     i = ((i - 2) % plen) + 1
 
-    while i ~= ppos do
+    for p = 1, plen - 1 do
         if values[i] then
             x = x - x_tics
-            s[#s+1] = format("%f %f ", x, y_max - (y_max * values[i] / pmax * 0.8))
+            s[#s+1] = format("%f %f ", x, y_max - (y_max * values[i] / v_max * scale))
         end
         i = ((i - 2) % plen) + 1
     end
@@ -315,16 +312,6 @@ function append_perfdata(s)
         return
     end
 
-    local graph_render = ""
-    local graph_present = ""
-    local graph_upload = ""
-
-    if o.plot_graphs and timer:is_enabled() then
-        graph_render = generate_graph(plast[1])
-        graph_present = generate_graph(plast[2])
-        graph_upload = generate_graph(plast[3])
-    end
-
     local dfps = mp.get_property_number("display-fps", 0)
     dfps = dfps > 0 and (1 / dfps * 1e6)
 
@@ -333,23 +320,57 @@ function append_perfdata(s)
     local peak_s = vo_p["render-peak"] + vo_p["present-peak"] + vo_p["upload-peak"]
 
     -- highlight i with a red border when t exceeds the time for one frame
-    function hl(i, t)
-        if t > dfps and dfps > 0 then
-            return format("{\\bord0.5}{\\3c&H0000FF&}%s{\\bord%s}{\\3c&H%s&}",
+    local function hl(i, t)
+        if o.timing_warning and t > dfps and dfps > 0 then
+            return format("{\\bord0.5}{\\3c&H0000FF&}%05d{\\bord%s}{\\3c&H%s&}",
                             i, o.border_size, o.border_color)
         end
-        return i
+        return format("%05d", i)
     end
 
-    s[#s+1] = format("%s%s%s%s%s / %s / %s μs %s", o.nl, o.indent, b("Render Time:"),
-                     o.prefix_sep, hl(vo_p["render-last"], last_s), hl(vo_p["render-avg"], avg_s),
-                     hl(vo_p["render-peak"], peak_s), graph_render)
-    s[#s+1] = format("%s%s%s%s%s / %s / %s μs %s", o.nl, o.indent, b("Present Time:"),
-                     o.prefix_sep, hl(vo_p["present-last"], last_s), hl(vo_p["present-avg"], avg_s),
-                     hl(vo_p["present-peak"], peak_s), graph_present)
-    s[#s+1] = format("%s%s%s%s%s / %s / %s μs %s", o.nl, o.indent, b("Upload Time:"),
-                     o.prefix_sep, hl(vo_p["upload-last"], last_s), hl(vo_p["upload-avg"], avg_s),
-                     hl(vo_p["upload-peak"], peak_s), graph_upload)
+
+    local rsuffix, psuffix, usuffix
+
+    if o.plot_graphs and timer:is_enabled() then
+        local max = {1, 1, 1}
+        for e = 1, plen do
+            if plast[1][e] and plast[1][e] > max[1] then max[1] = plast[1][e] end
+            if plast[2][e] and plast[2][e] > max[2] then max[2] = plast[2][e] end
+            if plast[3][e] and plast[3][e] > max[3] then max[3] = plast[3][e] end
+        end
+        if o.global_max then
+            max[1] = math.max(max[1], max[2], max[3])
+            max[2], max[3] = max[1], max[1]
+        end
+
+        rsuffix = generate_graph(plast[1], max[1], 0.8)
+        psuffix = generate_graph(plast[2], max[2], 0.8)
+        usuffix = generate_graph(plast[3], max[3], 0.8)
+
+        s[#s+1] = format("%s%s%s%s{\\fs%s}%s%s%s{\\fs%s}", o.nl, o.indent,
+                         b("Timings:"), o.prefix_sep, o.font_size * 0.66,
+                         "Render  ⏎  Present  ⏎  Upload", o.prefix_sep,
+                         "(last/average/peak  μs)", o.font_size)
+    else
+        rsuffix = "Render"
+        psuffix = "Present"
+        usuffix = "Upload"
+
+        s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}", o.nl, o.indent,
+                         b("Timings:"), o.prefix_sep, o.font_size * 0.66,
+                         "(last/average/peak  μs)", o.font_size)
+    end
+
+    local f = "%s%s%s{\\fn%s}%s / %s / %s{\\fn%s}%s%s"
+    s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
+                    hl(vo_p["render-last"], last_s), hl(vo_p["render-avg"], avg_s),
+                    hl(vo_p["render-peak"], peak_s), o.font, o.prefix_sep, rsuffix)
+    s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
+                    hl(vo_p["present-last"], last_s), hl(vo_p["present-avg"], avg_s),
+                    hl(vo_p["present-peak"], peak_s), o.font, o.prefix_sep, psuffix)
+    s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
+                    hl(vo_p["upload-last"], last_s), hl(vo_p["upload-avg"], avg_s),
+                    hl(vo_p["upload-peak"], peak_s), o.font, o.prefix_sep, usuffix)
 end
 
 
@@ -416,9 +437,9 @@ end
 
 
 if not pcall(function() timer:is_enabled() end) then
-    local txt = "Stats.lua: your version of mpv does not possess required functionality. \nPlease upgrade mpv."
+    local txt = "Stats.lua: your version of mpv does not possess required functionality. \nPlease upgrade mpv or use an older version of this script."
     print(txt)
-    mp.osd_message(txt, 12)
+    mp.osd_message(txt, 15)
     return
 end
 
@@ -434,5 +455,3 @@ mp.register_event("video-reconfig",
                 print_stats(o.redraw_delay + 1)
             end
         end)
-
-print("test")
