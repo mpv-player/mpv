@@ -214,7 +214,8 @@ static void filter_reconfig(struct MPContext *mpctx, struct vo_chain *vo_c)
     }
 
     // Make sure to reset this even if runtime deint switching is used.
-    video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &(int){0});
+    if (mpctx->opts->deinterlace >= 0)
+        video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &(int){0});
 
     if (params.rotate && (params.rotate % 90 == 0)) {
         if (!(vo_c->vo->driver->caps & VO_CAP_ROTATE90)) {
