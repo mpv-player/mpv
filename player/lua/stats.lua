@@ -67,137 +67,29 @@ local plast = {{0}, {0}, {0}}
 local ppos = 1
 local plen = 50
 local recorder = nil
-local timer = mp.add_periodic_timer(o.redraw_delay, function() print_stats(o.redraw_delay + 1) end)
-timer:kill()
+local timer
 
 
 
-function print_stats(duration)
-    local stats = {
-        header = {},
-        file = {},
-        video = {},
-        audio = {},
-    }
-
-    o.ass_formatting = o.ass_formatting and has_vo_window()
+local function set_ASS(b)
     if not o.ass_formatting then
-        o.nl = o.no_ass_nl
-        o.indent = o.no_ass_indent
-        o.prefix_sep = o.no_ass_prefix_sep
-        if not has_ansi() then
-            o.b1 = ""
-            o.b0 = ""
-        else
-            o.b1 = o.no_ass_b1
-            o.b0 = o.no_ass_b0
-        end
+        return ""
     end
-
-    add_header(stats.header)
-    add_file(stats.file)
-    add_video(stats.video)
-    add_audio(stats.audio)
-
-    mp.osd_message(table.concat(stats.header) .. table.concat(stats.file) ..
-                   table.concat(stats.video) .. table.concat(stats.audio),
-                   duration or o.duration)
+    return mp.get_property_osd("osd-ass-cc/" .. (b and "0" or "1"))
 end
 
 
-function add_file(s)
-    append_property(s, "filename", {prefix="File:", nl="", indent=""})
-    if not (mp.get_property_osd("filename") == mp.get_property_osd("media-title")) then
-        append_property(s, "media-title", {prefix="Title:"})
-    end
-    append_property(s, "chapter", {prefix="Chapter:"})
-    if append_property(s, "cache-used", {prefix="Cache:"}) then
-        append_property(s, "demuxer-cache-duration",
-                        {prefix="+", suffix=" sec", nl="", indent=o.prefix_sep,
-                         prefix_sep="", no_prefix_markup=true})
-        append_property(s, "cache-speed",
-                        {prefix="", suffix="", nl="", indent=o.prefix_sep,
-                         prefix_sep="", no_prefix_markup=true})
-    end
+local function no_ASS(t)
+    return set_ASS(false) .. t .. set_ASS(true)
 end
 
 
-function add_video(s)
-    if not has_video() then
-        return
-    end
-
-    if append_property(s, "video-codec", {prefix=o.nl .. o.nl .. "Video:", nl="", indent=""}) then
-        if not append_property(s, "hwdec-current",
-                        {prefix="(hwdec:", nl="", indent=" ",
-                         no_prefix_markup=true, suffix=")"},
-                        {no=true, [""]=true}) then
-            append_property(s, "hwdec-active",
-                        {prefix="(hwdec)", nl="", indent=" ",
-                         no_prefix_markup=true, no_value=true},
-                        {no=true})
-        end
-    end
-    append_property(s, "avsync", {prefix="A-V:"})
-    if append_property(s, "drop-frame-count", {prefix="Dropped:"}) then
-        append_property(s, "vo-drop-frame-count", {prefix="VO:", nl=""})
-        append_property(s, "mistimed-frame-count", {prefix="Mistimed:", nl=""})
-        append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl=""})
-    end
-    if append_property(s, "display-fps", {prefix="Display FPS:", suffix=" (specified)"}) then
-        append_property(s, "estimated-display-fps",
-                        {suffix=" (estimated)", nl="", indent=""})
-    else
-        append_property(s, "estimated-display-fps",
-                        {prefix="Display FPS:", suffix=" (estimated)"})
-    end
-    if append_property(s, "fps", {prefix="FPS:", suffix=" (specified)"}) then
-        append_property(s, "estimated-vf-fps",
-                        {suffix=" (estimated)", nl="", indent=""})
-    else
-        append_property(s, "estimated-vf-fps",
-                        {prefix="FPS:", suffix=" (estimated)"})
-    end
-    if append_property(s, "video-speed-correction", {prefix="DS:"}) then
-        append_property(s, "audio-speed-correction",
-                        {prefix="/", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
-    end
-
-    append_perfdata(s)
-
-    if append_property(s, "video-params/w", {prefix="Native Resolution:"}) then
-        append_property(s, "video-params/h",
-                        {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
-    end
-    append_property(s, "window-scale", {prefix="Window Scale:"})
-    append_property(s, "video-params/aspect", {prefix="Aspect Ratio:"})
-    append_property(s, "video-params/pixelformat", {prefix="Pixel Format:"})
-    append_property(s, "video-params/colormatrix", {prefix="Colormatrix:"})
-    append_property(s, "video-params/primaries", {prefix="Primaries:"})
-    append_property(s, "video-params/gamma", {prefix="Gamma:"})
-    append_property(s, "video-params/colorlevels", {prefix="Levels:"})
-    append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
+local function b(t)
+    return o.b1 .. t .. o.b0
 end
 
 
-function add_audio(s)
-    if not has_audio() then
-        return
-    end
-
-    append_property(s, "audio-codec", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
-    append_property(s, "audio-params/samplerate", {prefix="Sample Rate:", suffix=" Hz"})
-    append_property(s, "audio-params/channel-count", {prefix="Channels:"})
-    append_property(s, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
-end
-
-
-function add_header(s)
-    s[1] = text_style()
-end
-
-
-function text_style()
+local function text_style()
     if not o.ass_formatting then
         return ""
     end
@@ -212,44 +104,33 @@ function text_style()
 end
 
 
--- Format and append a property.
--- A property whose value is either `nil` or empty (hereafter called "invalid")
--- is skipped and not appended.
--- Returns `false` in case nothing was appended, otherwise `true`.
---
--- s       : Table containing strings.
--- property: The property to query and format (based on its OSD representation).
--- attr    : Optional table to overwrite certain (formatting) attributes for
---           this property.
--- exclude : Optional table containing keys which are considered invalid values
---           for this property. Specifying this will replace empty string as
---           default invalid value (nil is always invalid).
-function append_property(s, prop, attr, excluded)
-    excluded = excluded or {[""] = true}
-    local ret = mp.get_property_osd(prop)
-    if not ret or excluded[ret] then
-        if o.debug then
-            print("No value for property: " .. prop)
-        end
-        return false
+local function has_vo_window()
+    return mp.get_property("vo-configured") == "yes"
+end
+
+
+local function has_video()
+    local r = mp.get_property("video")
+    return r and r ~= "no" and r ~= ""
+end
+
+
+local function has_audio()
+    local r = mp.get_property("audio")
+    return r and r ~= "no" and r ~= ""
+end
+
+
+local function has_ansi()
+    local is_windows = type(package) == 'table' and type(package.config) == 'string' and package.config:sub(1,1) == '\\'
+    if is_windows then
+        return os.getenv("ANSICON")
     end
-
-    attr.prefix_sep = attr.prefix_sep or o.prefix_sep
-    attr.indent = attr.indent or o.indent
-    attr.nl = attr.nl or o.nl
-    attr.suffix = attr.suffix or ""
-    attr.prefix = attr.prefix or ""
-    attr.no_prefix_markup = attr.no_prefix_markup or false
-    attr.prefix = attr.no_prefix_markup and attr.prefix or b(attr.prefix)
-    ret = attr.no_value and "" or ret
-
-    s[#s+1] = format("%s%s%s%s%s%s", attr.nl, attr.indent,
-                     attr.prefix, attr.prefix_sep, no_ASS(ret), attr.suffix)
     return true
 end
 
 
-function generate_graph(values, v_max, scale)
+local function generate_graph(values, v_max, scale)
     -- check if at least one value was recorded yet
     if ppos < 1 then
         return ""
@@ -283,30 +164,7 @@ function generate_graph(values, v_max, scale)
 end
 
 
-function record_perfdata(skip)
-    skip = math.max(skip, 0)
-    local i = skip
-    return function()
-        if i < skip then
-            i = i + 1
-            return
-        else
-            i = 0
-        end
-
-        local vo_p = mp.get_property_native("vo-performance")
-        if not vo_p then
-            return
-        end
-        ppos = (ppos % plen) + 1
-        plast[1][ppos] = vo_p["render-last"]
-        plast[2][ppos] = vo_p["present-last"]
-        plast[3][ppos] = vo_p["upload-last"]
-    end
-end
-
-
-function append_perfdata(s)
+local function append_perfdata(s)
     local vo_p = mp.get_property_native("vo-performance")
     if not vo_p then
         return
@@ -374,51 +232,192 @@ function append_perfdata(s)
 end
 
 
-function no_ASS(t)
-    return set_ASS(false) .. t .. set_ASS(true)
-end
-
-
-function set_ASS(b)
-    if not o.ass_formatting then
-        return ""
+-- Format and append a property.
+-- A property whose value is either `nil` or empty (hereafter called "invalid")
+-- is skipped and not appended.
+-- Returns `false` in case nothing was appended, otherwise `true`.
+--
+-- s       : Table containing strings.
+-- property: The property to query and format (based on its OSD representation).
+-- attr    : Optional table to overwrite certain (formatting) attributes for
+--           this property.
+-- exclude : Optional table containing keys which are considered invalid values
+--           for this property. Specifying this will replace empty string as
+--           default invalid value (nil is always invalid).
+local function append_property(s, prop, attr, excluded)
+    excluded = excluded or {[""] = true}
+    local ret = mp.get_property_osd(prop)
+    if not ret or excluded[ret] then
+        if o.debug then
+            print("No value for property: " .. prop)
+        end
+        return false
     end
-    return mp.get_property_osd("osd-ass-cc/" .. (b and "0" or "1"))
-end
 
+    attr.prefix_sep = attr.prefix_sep or o.prefix_sep
+    attr.indent = attr.indent or o.indent
+    attr.nl = attr.nl or o.nl
+    attr.suffix = attr.suffix or ""
+    attr.prefix = attr.prefix or ""
+    attr.no_prefix_markup = attr.no_prefix_markup or false
+    attr.prefix = attr.no_prefix_markup and attr.prefix or b(attr.prefix)
+    ret = attr.no_value and "" or ret
 
-function has_vo_window()
-    return mp.get_property("vo-configured") == "yes"
-end
-
-
-function has_video()
-    local r = mp.get_property("video")
-    return r and r ~= "no" and r ~= ""
-end
-
-
-function has_audio()
-    local r = mp.get_property("audio")
-    return r and r ~= "no" and r ~= ""
-end
-
-
-function has_ansi()
-    local is_windows = type(package) == 'table' and type(package.config) == 'string' and package.config:sub(1,1) == '\\'
-    if is_windows then
-        return os.getenv("ANSICON")
-    end
+    s[#s+1] = format("%s%s%s%s%s%s", attr.nl, attr.indent,
+                     attr.prefix, attr.prefix_sep, no_ASS(ret), attr.suffix)
     return true
 end
 
 
-function b(t)
-    return o.b1 .. t .. o.b0
+local function add_header(s)
+    s[1] = text_style()
 end
 
 
-function toggle_stats()
+local function add_file(s)
+    append_property(s, "filename", {prefix="File:", nl="", indent=""})
+    if not (mp.get_property_osd("filename") == mp.get_property_osd("media-title")) then
+        append_property(s, "media-title", {prefix="Title:"})
+    end
+    append_property(s, "chapter", {prefix="Chapter:"})
+    if append_property(s, "cache-used", {prefix="Cache:"}) then
+        append_property(s, "demuxer-cache-duration",
+                        {prefix="+", suffix=" sec", nl="", indent=o.prefix_sep,
+                         prefix_sep="", no_prefix_markup=true})
+        append_property(s, "cache-speed",
+                        {prefix="", suffix="", nl="", indent=o.prefix_sep,
+                         prefix_sep="", no_prefix_markup=true})
+    end
+end
+
+
+local function add_video(s)
+    if not has_video() then
+        return
+    end
+
+    if append_property(s, "video-codec", {prefix=o.nl .. o.nl .. "Video:", nl="", indent=""}) then
+        if not append_property(s, "hwdec-current",
+                        {prefix="(hwdec:", nl="", indent=" ",
+                         no_prefix_markup=true, suffix=")"},
+                        {no=true, [""]=true}) then
+            append_property(s, "hwdec-active",
+                        {prefix="(hwdec)", nl="", indent=" ",
+                         no_prefix_markup=true, no_value=true},
+                        {no=true})
+        end
+    end
+    append_property(s, "avsync", {prefix="A-V:"})
+    if append_property(s, "drop-frame-count", {prefix="Dropped:"}) then
+        append_property(s, "vo-drop-frame-count", {prefix="VO:", nl=""})
+        append_property(s, "mistimed-frame-count", {prefix="Mistimed:", nl=""})
+        append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl=""})
+    end
+    if append_property(s, "display-fps", {prefix="Display FPS:", suffix=" (specified)"}) then
+        append_property(s, "estimated-display-fps",
+                        {suffix=" (estimated)", nl="", indent=""})
+    else
+        append_property(s, "estimated-display-fps",
+                        {prefix="Display FPS:", suffix=" (estimated)"})
+    end
+    if append_property(s, "fps", {prefix="FPS:", suffix=" (specified)"}) then
+        append_property(s, "estimated-vf-fps",
+                        {suffix=" (estimated)", nl="", indent=""})
+    else
+        append_property(s, "estimated-vf-fps",
+                        {prefix="FPS:", suffix=" (estimated)"})
+    end
+    if append_property(s, "video-speed-correction", {prefix="DS:"}) then
+        append_property(s, "audio-speed-correction",
+                        {prefix="/", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
+    end
+
+    append_perfdata(s)
+
+    if append_property(s, "video-params/w", {prefix="Native Resolution:"}) then
+        append_property(s, "video-params/h",
+                        {prefix="x", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
+    end
+    append_property(s, "window-scale", {prefix="Window Scale:"})
+    append_property(s, "video-params/aspect", {prefix="Aspect Ratio:"})
+    append_property(s, "video-params/pixelformat", {prefix="Pixel Format:"})
+    append_property(s, "video-params/colormatrix", {prefix="Colormatrix:"})
+    append_property(s, "video-params/primaries", {prefix="Primaries:"})
+    append_property(s, "video-params/gamma", {prefix="Gamma:"})
+    append_property(s, "video-params/colorlevels", {prefix="Levels:"})
+    append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
+end
+
+
+local function add_audio(s)
+    if not has_audio() then
+        return
+    end
+
+    append_property(s, "audio-codec", {prefix=o.nl .. o.nl .. "Audio:", nl="", indent=""})
+    append_property(s, "audio-params/samplerate", {prefix="Sample Rate:", suffix=" Hz"})
+    append_property(s, "audio-params/channel-count", {prefix="Channels:"})
+    append_property(s, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
+end
+
+
+local function print_stats(duration)
+    local stats = {
+        header = {},
+        file = {},
+        video = {},
+        audio = {},
+    }
+
+    o.ass_formatting = o.ass_formatting and has_vo_window()
+    if not o.ass_formatting then
+        o.nl = o.no_ass_nl
+        o.indent = o.no_ass_indent
+        o.prefix_sep = o.no_ass_prefix_sep
+        if not has_ansi() then
+            o.b1 = ""
+            o.b0 = ""
+        else
+            o.b1 = o.no_ass_b1
+            o.b0 = o.no_ass_b0
+        end
+    end
+
+    add_header(stats.header)
+    add_file(stats.file)
+    add_video(stats.video)
+    add_audio(stats.audio)
+
+    mp.osd_message(table.concat(stats.header) .. table.concat(stats.file) ..
+                   table.concat(stats.video) .. table.concat(stats.audio),
+                   duration or o.duration)
+end
+
+
+local function record_perfdata(skip)
+    skip = math.max(skip, 0)
+    local i = skip
+    return function()
+        if i < skip then
+            i = i + 1
+            return
+        else
+            i = 0
+        end
+
+        local vo_p = mp.get_property_native("vo-performance")
+        if not vo_p then
+            return
+        end
+        ppos = (ppos % plen) + 1
+        plast[1][ppos] = vo_p["render-last"]
+        plast[2][ppos] = vo_p["present-last"]
+        plast[3][ppos] = vo_p["upload-last"]
+    end
+end
+
+
+local function toggle_stats()
     if timer:is_enabled() then
         if o.plot_graphs then
             mp.unregister_event(recorder)
@@ -436,13 +435,17 @@ function toggle_stats()
 end
 
 
+-- Create timer used for toggling, pause it immediately
+timer = mp.add_periodic_timer(o.redraw_delay, function() print_stats(o.redraw_delay + 1) end)
+timer:kill()
+
+-- Check if timer has required method
 if not pcall(function() timer:is_enabled() end) then
     local txt = "Stats.lua: your version of mpv does not possess required functionality. \nPlease upgrade mpv or use an older version of this script."
     print(txt)
     mp.osd_message(txt, 15)
     return
 end
-
 
 -- Single invocation key binding
 mp.add_key_binding(o.key_oneshot, "display_stats", print_stats, {repeatable=true})
