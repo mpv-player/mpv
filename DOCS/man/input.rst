@@ -1511,6 +1511,9 @@ Property list
             "colormatrix"       MPV_FORMAT_STRING
             "colorlevels"       MPV_FORMAT_STRING
             "primaries"         MPV_FORMAT_STRING
+            "gamma"             MPV_FORMAT_STRING
+            "nom-peak"          MPV_FORMAT_DOUBLE
+            "sig-peak"          MPV_FORMAT_DOUBLE
             "chroma-location"   MPV_FORMAT_STRING
             "rotate"            MPV_FORMAT_INT64
             "stereo-in"         MPV_FORMAT_STRING
