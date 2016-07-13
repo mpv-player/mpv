@@ -70,7 +70,7 @@ OSStatus ca_get_ary(AudioObjectID id, ca_scope scope, ca_sel selector,
 
     return err;
 coreaudio_error_free:
-    free(*data);
+    talloc_free(*data);
 coreaudio_error:
     return err;
 }
