@@ -17,7 +17,6 @@ local o = {
 
     duration = 3,
     redraw_delay = 1,                -- acts as duration in the toggling case
-    timing_warning = true,
     ass_formatting = true,
     debug = false,
 
@@ -25,6 +24,8 @@ local o = {
     plot_graphs = true,
     skip_frames = 5,
     global_max = true,
+    timing_warning = true,
+    timing_warning_th = 0.85,         -- *no* warning threshold (warning when > dfps * timing_warning_th)
     plot_bg_border_color = "0000FF",
     plot_bg_color = "262626",
     plot_color = "FFFFFF",
@@ -178,10 +179,16 @@ local function append_perfdata(s)
     local peak_s = vo_p["render-peak"] + vo_p["present-peak"] + vo_p["upload-peak"]
 
     -- highlight i with a red border when t exceeds the time for one frame
+    -- or yellow when it exceeds a given threshold
     local function hl(i, t)
-        if o.timing_warning and t > dfps and dfps > 0 then
-            return format("{\\bord0.5}{\\3c&H0000FF&}%05d{\\bord%s}{\\3c&H%s&}",
-                            i, o.border_size, o.border_color)
+        if o.timing_warning and dfps > 0 then
+            if t > dfps then
+                return format("{\\bord0.5}{\\3c&H0000FF&}%05d{\\bord%s}{\\3c&H%s&}",
+                                i, o.border_size, o.border_color)
+            elseif t > (dfps * o.timing_warning_th) then
+                return format("{\\bord0.5}{\\1c&H00DDDD&}%05d{\\bord%s}{\\1c&H%s&}",
+                                i, o.border_size, o.font_color)
+            end
         end
         return format("%05d", i)
     end
