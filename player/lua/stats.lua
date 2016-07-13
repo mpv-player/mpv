@@ -354,11 +354,21 @@ local function add_video(s)
     append_property(s, "window-scale", {prefix="Window Scale:"})
     append_property(s, "video-params/aspect", {prefix="Aspect Ratio:"})
     append_property(s, "video-params/pixelformat", {prefix="Pixel Format:"})
-    local cmat = append_property(s, "video-params/colormatrix", {prefix="Colormatrix:"})
-    local prims = append_property(s, "video-params/primaries", 
-                                  {prefix="Primaries:", nl=cmat and "" or o.nl})
-    append_property(s, "video-params/gamma", {prefix="Gamma:", nl=prims and "" or o.nl})
-    append_property(s, "video-params/colorlevels", {prefix="Levels:"})
+
+    -- Group these together to save vertical space
+    local prim = append_property(s, "video-params/primaries", {prefix="Primaries:"})
+    local cmat = append_property(s, "video-params/colormatrix",
+                                 {prefix="Colormatrix:", nl=prim and "" or o.nl})
+    append_property(s, "video-params/colorlevels", {prefix="Levels:", nl=cmat and "" or o.nl})
+
+    -- Append HDR metadata conditionally (only when present and interesting)
+    local hdrpeak = mp.get_property_number("video-params/sig-peak", 0)
+    local hdrinfo = ""
+    if hdrpeak > 0 then
+        hdrinfo = " (HDR peak: " .. hdrpeak .. " cd/m²)"
+    end
+
+    append_property(s, "video-params/gamma", {prefix="Gamma:", suffix=hdrinfo})
     append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
 end
 
