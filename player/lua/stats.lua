@@ -348,9 +348,10 @@ local function add_video(s)
     append_property(s, "window-scale", {prefix="Window Scale:"})
     append_property(s, "video-params/aspect", {prefix="Aspect Ratio:"})
     append_property(s, "video-params/pixelformat", {prefix="Pixel Format:"})
-    append_property(s, "video-params/colormatrix", {prefix="Colormatrix:"})
-    append_property(s, "video-params/primaries", {prefix="Primaries:"})
-    append_property(s, "video-params/gamma", {prefix="Gamma:"})
+    local cmat = append_property(s, "video-params/colormatrix", {prefix="Colormatrix:"})
+    local prims = append_property(s, "video-params/primaries", 
+                                  {prefix="Primaries:", nl=cmat and "" or o.nl})
+    append_property(s, "video-params/gamma", {prefix="Gamma:", nl=prims and "" or o.nl})
     append_property(s, "video-params/colorlevels", {prefix="Levels:"})
     append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
 end
