@@ -18,14 +18,15 @@ local o = {
     duration = 3,
     redraw_delay = 1,                -- acts as duration in the toggling case
     ass_formatting = true,
+    timing_warning = true,
+    timing_warning_th = 0.85,         -- *no* warning threshold (warning when > dfps * timing_warning_th)
+    timing_total = false,
     debug = false,
 
     -- Graph options and style
     plot_graphs = true,
     skip_frames = 5,
     global_max = true,
-    timing_warning = true,
-    timing_warning_th = 0.85,         -- *no* warning threshold (warning when > dfps * timing_warning_th)
     plot_bg_border_color = "0000FF",
     plot_bg_color = "262626",
     plot_color = "FFFFFF",
@@ -160,8 +161,8 @@ local function generate_graph(values, v_max, scale)
 
     local bg_box = format("{\\bord0.5}{\\3c&H%s&}{\\1c&H%s&}m 0 %f l %f %f %f 0 0 0",
                           o.plot_bg_border_color, o.plot_bg_color, y_max, x_max, y_max, x_max)
-    return format("\\h\\h\\h{\\r}{\\pbo%f}{\\shad0}{\\alpha&H00}{\\p1}%s{\\p0}{\\bord0}{\\1c&H%s}{\\p1}%s{\\p0}{\\r}%s",
-                  y_offset, bg_box, o.plot_color, table.concat(s), text_style())
+    return format("%s{\\r}{\\pbo%f}{\\shad0}{\\alpha&H00}{\\p1}%s{\\p0}{\\bord0}{\\1c&H%s}{\\p1}%s{\\p0}{\\r}%s",
+                  o.prefix_sep, y_offset, bg_box, o.plot_color, table.concat(s), text_style())
 end
 
 
@@ -217,9 +218,9 @@ local function append_perfdata(s)
                          "Render  ⏎  Present  ⏎  Upload", o.prefix_sep,
                          "(last/average/peak  μs)", o.font_size)
     else
-        rsuffix = "Render"
-        psuffix = "Present"
-        usuffix = "Upload"
+        rsuffix = o.prefix_sep .. "Render"
+        psuffix = o.prefix_sep .. "Present"
+        usuffix = o.prefix_sep .. "Upload"
 
         s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}", o.nl, o.indent,
                          b("Timings:"), o.prefix_sep, o.font_size * 0.66,
@@ -236,6 +237,11 @@ local function append_perfdata(s)
     s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
                     hl(vo_p["upload-last"], last_s), hl(vo_p["upload-avg"], avg_s),
                     hl(vo_p["upload-peak"], peak_s), o.font, o.prefix_sep, usuffix)
+    if o.timing_total then
+        s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
+                        hl(last_s, last_s), hl(avg_s, avg_s),
+                        hl(peak_s, peak_s), o.font, o.prefix_sep, o.prefix_sep .. "Total")
+    end
 end
 
 
