@@ -404,7 +404,7 @@ Program Behavior
 ``--no-resume-playback``
     Do not restore playback position from the ``watch_later`` configuration
     subdirectory (usually ``~/.config/mpv/watch_later/``).
-    See ``quit_watch_later`` input command.
+    See ``quit-watch-later`` input command.
 
 ``--profile=<profile1,profile2,...>``
     Use the given profile(s), ``--profile=help`` displays a list of the
@@ -1283,7 +1283,7 @@ Audio
     or to set your own application name when using libmpv.
 
 ``--volume-restore-data=<string>``
-    Used internally for use by playback resume (e.g. with ``quit_watch_later``).
+    Used internally for use by playback resume (e.g. with ``quit-watch-later``).
     Restoring value has to be done carefully, because different AOs as well as
     softvol can have different value ranges, and we don't want to restore
     volume if setting the volume changes it system wide. The normal options
@@ -2658,7 +2658,7 @@ OSD
     (default), then the playback time, duration, and some more information is
     shown.
 
-    This is also used for the ``show_progress`` command (by default mapped to
+    This is also used for the ``show-progress`` command (by default mapped to
     ``P``), or in some non-default cases when seeking.
 
     ``--osd-status-msg`` is a legacy equivalent (but with a minor difference).
@@ -2666,7 +2666,7 @@ OSD
 ``--osd-status-msg=<string>``
     Show a custom string during playback instead of the standard status text.
     This overrides the status text used for ``--osd-level=3``, when using the
-    ``show_progress`` command (by default mapped to ``P``), or in some
+    ``show-progress`` command (by default mapped to ``P``), or in some
     non-default cases when seeking. Expands properties. See
     `Property Expansion`_.
 

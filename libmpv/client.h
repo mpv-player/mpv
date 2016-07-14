@@ -660,7 +660,7 @@ typedef enum mpv_format {
     MPV_FORMAT_NODE_MAP         = 8,
     /**
      * A raw, untyped byte array. Only used only with mpv_node, and only in
-     * some very special situations. (Currently, only for the screenshot_raw
+     * some very special situations. (Currently, only for the screenshot-raw
      * command.)
      */
     MPV_FORMAT_BYTE_ARRAY       = 9
@@ -1148,13 +1148,13 @@ typedef enum mpv_event_id {
      * @deprecated This was used internally with the internal "script_dispatch"
      *             command to dispatch keyboard and mouse input for the OSC.
      *             It was never useful in general and has been completely
-     *             replaced with "script_binding".
+     *             replaced with "script-binding".
      *             This event never happens anymore, and is included in this
      *             header only for compatibility.
      */
     MPV_EVENT_SCRIPT_INPUT_DISPATCH = 15,
     /**
-     * Triggered by the script_message input command. The command uses the
+     * Triggered by the script-message input command. The command uses the
      * first argument of the command as client name (see mpv_client_name()) to
      * dispatch the message, and passes along all arguments starting from the
      * second argument as strings.

@@ -31,7 +31,7 @@ void mp_event_drop_files(struct input_ctx *ictx, int num_files, char **files,
         for (int i = 0; i < num_files; i++) {
             const char *cmd[] = {
                 "osd-auto",
-                "sub_add",
+                "sub-add",
                 files[i],
                 NULL
             };

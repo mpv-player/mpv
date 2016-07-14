@@ -220,7 +220,7 @@ static void mp_hook_add(struct MPContext *mpctx, char *client, char *name,
     qsort(cmd->hooks, cmd->num_hooks, sizeof(cmd->hooks[0]), compare_hook);
 }
 
-// Call before a seek, in order to allow revert_seek to undo the seek.
+// Call before a seek, in order to allow revert-seek to undo the seek.
 static void mark_seek(struct MPContext *mpctx)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
@@ -4385,15 +4385,15 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
 {
     int r = -1;
     if (strcmp(fmt, "bgra") != 0) {
-        MP_ERR(mpctx, "overlay_add: unsupported OSD format '%s'\n", fmt);
+        MP_ERR(mpctx, "overlay-add: unsupported OSD format '%s'\n", fmt);
         goto error;
     }
     if (id < 0 || id >= 64) { // arbitrary upper limit
-        MP_ERR(mpctx, "overlay_add: invalid id %d\n", id);
+        MP_ERR(mpctx, "overlay-add: invalid id %d\n", id);
         goto error;
     }
     if (w <= 0 || h <= 0 || stride < w * 4 || (stride % 4)) {
-        MP_ERR(mpctx, "overlay_add: inconsistent parameters\n");
+        MP_ERR(mpctx, "overlay-add: inconsistent parameters\n");
         goto error;
     }
     struct overlay overlay = {
@@ -4431,7 +4431,7 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
             p = m;
     }
     if (!p) {
-        MP_ERR(mpctx, "overlay_add: could not open or map '%s'\n", file);
+        MP_ERR(mpctx, "overlay-add: could not open or map '%s'\n", file);
         talloc_free(overlay.source);
         goto error;
     }

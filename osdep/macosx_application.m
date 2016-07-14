@@ -161,7 +161,7 @@ static void terminate_cocoa_application(void)
 
 - (void)stopPlaybackAndRememberPosition
 {
-    [self stopMPV:"quit_watch_later"];
+    [self stopMPV:"quit-watch-later"];
 }
 
 - (void)stopMPV:(char *)cmd
