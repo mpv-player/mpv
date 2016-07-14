@@ -586,6 +586,7 @@ Video
     :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
     :videotoolbox: requires ``--vo=opengl`` (OS X 10.8 and up only)
+    :videotoolbox-copy: copies video back into system RAM (OS X 10.8 and up only)
     :dxva2: requires ``--vo=opengl:backend=angle`` or
         ``--vo=opengl:backend=dxinterop`` (Windows only)
     :dxva2-copy: copies video back to system RAM (Windows only)

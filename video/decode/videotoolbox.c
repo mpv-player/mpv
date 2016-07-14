@@ -24,14 +24,16 @@
 #include "common/msg.h"
 #include "video/mp_image.h"
 #include "video/decode/lavc.h"
+#include "video/mp_image_pool.h"
 #include "config.h"
 
+struct priv {
+    struct mp_image_pool *sw_pool;
+};
 
-static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
+static int probe_copy(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                  const char *codec)
 {
-    if (!hwdec_devices_load(ctx->hwdec_devs, HWDEC_VIDEOTOOLBOX))
-        return HWDEC_ERR_NO_CTX;
     switch (mp_codec_to_av_codec_id(codec)) {
     case AV_CODEC_ID_H264:
     case AV_CODEC_ID_H263:
@@ -45,8 +47,19 @@ static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
     return 0;
 }
 
+static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
+                 const char *codec)
+{
+    if (!hwdec_devices_load(ctx->hwdec_devs, HWDEC_VIDEOTOOLBOX))
+        return HWDEC_ERR_NO_CTX;
+    return probe_copy(ctx, hwdec, codec);
+}
+
 static int init(struct lavc_ctx *ctx)
 {
+    struct priv *p = talloc_ptrtype(NULL, p);
+    p->sw_pool = talloc_steal(p, mp_image_pool_new(17));
+    ctx->hwdec_priv = p;
     return 0;
 }
 
@@ -82,14 +95,9 @@ static void print_videotoolbox_error(struct mp_log *log, int lev, char *message,
     mp_msg(log, lev, "%s: %d\n", message, error_code);
 }
 
-static int init_decoder(struct lavc_ctx *ctx, int w, int h)
+static int init_decoder_common(struct lavc_ctx *ctx, int w, int h, AVVideotoolboxContext *vtctx)
 {
     av_videotoolbox_default_free(ctx->avctx);
-
-    AVVideotoolboxContext *vtctx = av_videotoolbox_alloc_context();
-
-    struct mp_vt_ctx *vt = hwdec_devices_load(ctx->hwdec_devs, HWDEC_VIDEOTOOLBOX);
-    vtctx->cv_pix_fmt_type = vt->get_vt_fmt(vt);
 
     int err = av_videotoolbox_default_init2(ctx->avctx, vtctx);
     if (err < 0) {
@@ -100,10 +108,94 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
     return 0;
 }
 
+static int init_decoder(struct lavc_ctx *ctx, int w, int h)
+{
+    AVVideotoolboxContext *vtctx = av_videotoolbox_alloc_context();
+    struct mp_vt_ctx *vt = hwdec_devices_load(ctx->hwdec_devs, HWDEC_VIDEOTOOLBOX);
+    vtctx->cv_pix_fmt_type = vt->get_vt_fmt(vt);
+
+    return init_decoder_common(ctx, w, h, vtctx);
+}
+
+static int init_decoder_copy(struct lavc_ctx *ctx, int w, int h)
+{
+    return init_decoder_common(ctx, w, h, NULL);
+}
+
 static void uninit(struct lavc_ctx *ctx)
 {
     if (ctx->avctx)
         av_videotoolbox_default_free(ctx->avctx);
+
+    struct priv *p = ctx->hwdec_priv;
+    if (!p)
+        return;
+
+    talloc_free(p->sw_pool);
+    p->sw_pool = NULL;
+
+    talloc_free(p);
+    ctx->hwdec_priv = NULL;
+}
+
+static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *hw_image)
+{
+    if (hw_image->imgfmt != IMGFMT_VIDEOTOOLBOX)
+        return hw_image;
+
+    struct priv *p = ctx->hwdec_priv;
+    struct mp_image *image = NULL;
+    CVPixelBufferRef pbuf = (CVPixelBufferRef)hw_image->planes[3];
+    CVPixelBufferLockBaseAddress(pbuf, kCVPixelBufferLock_ReadOnly);
+    size_t width  = CVPixelBufferGetWidth(pbuf);
+    size_t height = CVPixelBufferGetHeight(pbuf);
+    uint32_t cvpixfmt = CVPixelBufferGetPixelFormatType(pbuf);
+    int pixfmt = 0;
+    switch (cvpixfmt) {
+    case kCVPixelFormatType_420YpCbCr8Planar:
+        pixfmt = IMGFMT_420P;
+        break;
+    case kCVPixelFormatType_422YpCbCr8:
+        pixfmt = IMGFMT_UYVY;
+        break;
+    case kCVPixelFormatType_32BGRA:
+        pixfmt = IMGFMT_RGB0;
+        break;
+    case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
+        pixfmt = IMGFMT_NV12;
+        break;
+    default:
+        goto unlock;
+    }
+
+    struct mp_image img = {0};
+    mp_image_setfmt(&img, pixfmt);
+    mp_image_set_size(&img, width, height);
+
+    if (CVPixelBufferIsPlanar(pbuf)) {
+        int planes = CVPixelBufferGetPlaneCount(pbuf);
+        for (int i = 0; i < planes; i++) {
+            img.planes[i] = CVPixelBufferGetBaseAddressOfPlane(pbuf, i);
+            img.stride[i] = CVPixelBufferGetBytesPerRowOfPlane(pbuf, i);
+        }
+    } else {
+        img.planes[0] = CVPixelBufferGetBaseAddress(pbuf);
+        img.stride[0] = CVPixelBufferGetBytesPerRow(pbuf);
+    }
+
+    mp_image_copy_attributes(&img, hw_image);
+
+    image = mp_image_pool_new_copy(p->sw_pool, &img);
+
+unlock:
+    CVPixelBufferUnlockBaseAddress(pbuf, kCVPixelBufferLock_ReadOnly);
+
+    if (image) {
+        talloc_free(hw_image);
+        return image;
+    } else {
+        return hw_image;
+    }
 }
 
 static struct mp_image *process_image(struct lavc_ctx *ctx, struct mp_image *img)
@@ -123,4 +215,16 @@ const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox = {
     .uninit = uninit,
     .init_decoder = init_decoder,
     .process_image = process_image,
+};
+
+const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox_copy = {
+    .type = HWDEC_VIDEOTOOLBOX_COPY,
+    .copying = true,
+    .image_format = IMGFMT_VIDEOTOOLBOX,
+    .probe = probe_copy,
+    .init = init,
+    .uninit = uninit,
+    .init_decoder = init_decoder_copy,
+    .process_image = copy_image,
+    .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
 };
