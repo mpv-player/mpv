@@ -42,8 +42,8 @@ function mp.input_disable_section(section)
     mp.commandv("disable-section", section)
 end
 
--- For dispatching script_binding. This is sent as:
---      script_message_to $script_name $binding_name $keystate
+-- For dispatching script-binding. This is sent as:
+--      script-message-to $script_name $binding_name $keystate
 -- The array is indexed by $binding_name, and has functions like this as value:
 --      fn($binding_name, $keystate)
 local dispatch_key_bindings = {}
@@ -412,7 +412,7 @@ mp.register_event("shutdown", function() mp.keep_running = false end)
 mp.register_event("client-message", message_dispatch)
 mp.register_event("property-change", property_change)
 
--- sent by "script_binding"
+-- sent by "script-binding"
 mp.register_script_message("key-binding", dispatch_key_binding)
 
 mp.msg = {

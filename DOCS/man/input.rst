@@ -640,7 +640,7 @@ Input Commands that are Possibly Subject to Change
     The argument is the name of the binding.
 
     It can optionally be prefixed with the name of the script, using ``/`` as
-    separator, e.g. ``script_binding scriptname/bindingname``.
+    separator, e.g. ``script-binding scriptname/bindingname``.
 
     For completeness, here is how this command works internally. The details
     could change any time. On any matching key event, ``script-message-to``
@@ -809,7 +809,7 @@ Input sections group a set of bindings, and enable or disable them at once.
 In ``input.conf``, each key binding is assigned to an input section, rather
 than actually having explicit text sections.
 
-See also: ``enable_section`` and ``disable_section`` commands.
+See also: ``enable-section`` and ``disable-section`` commands.
 
 Predefined bindings:
 
@@ -1594,7 +1594,7 @@ Property list
 
 ``osd-width``, ``osd-height``
     Last known OSD width (can be 0). This is needed if you want to use the
-    ``overlay_add`` command. It gives you the actual OSD size, which can be
+    ``overlay-add`` command. It gives you the actual OSD size, which can be
     different from the window size in some cases.
 
 ``osd-par``

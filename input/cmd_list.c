@@ -257,7 +257,7 @@ static const struct legacy_cmd legacy_cmds[] = {
     {"saturation",              "add saturation"},
     {"hue",                     "add hue"},
     {"switch_vsync",            "cycle vsync"},
-    {"sub_load",                "sub_add"},
+    {"sub_load",                "sub-add"},
     {"sub_select",              "cycle sub"},
     {"sub_pos",                 "add sub-pos"},
     {"sub_delay",               "add sub-delay"},
