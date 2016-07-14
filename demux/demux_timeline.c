@@ -301,6 +301,9 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     demuxer->metadata = meta->metadata;
     demuxer->attachments = meta->attachments;
     demuxer->num_attachments = meta->num_attachments;
+    demuxer->editions = meta->editions;
+    demuxer->num_editions = meta->num_editions;
+    demuxer->edition = meta->edition;
 
     int num_streams = demux_get_num_stream(meta);
     for (int n = 0; n < num_streams; n++) {
