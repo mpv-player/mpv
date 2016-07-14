@@ -340,7 +340,7 @@ local function add_video(s)
         append_property(s, "estimated-vf-fps",
                         {prefix="FPS:", suffix=" (estimated)"})
     end
-    if append_property(s, "video-speed-correction", {prefix="DS:"}) then
+    if append_property(s, "video-speed-correction", {prefix="DS:"}, {["+0.00000%"]=true}) then
         append_property(s, "audio-speed-correction",
                         {prefix="/", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
