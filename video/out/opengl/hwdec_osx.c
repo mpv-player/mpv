@@ -193,6 +193,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     }
 
     params->imgfmt = f->imgfmt;
+    params->hw_subfmt = 0;
     return 0;
 }
 

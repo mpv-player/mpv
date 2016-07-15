@@ -255,6 +255,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
         goto fail;
 
     params->imgfmt = params->hw_subfmt;
+    params->hw_subfmt = 0;
 
     for (int n = 0; n < num_planes; n++) {
         gl->ActiveTexture(GL_TEXTURE0 + texunits + n);

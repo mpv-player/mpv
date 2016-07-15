@@ -173,6 +173,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 
     if (p->direct_mode) {
         params->imgfmt = IMGFMT_NV12;
+        params->hw_subfmt = 0;
     } else {
         vdp_st = vdp->output_surface_create(p->ctx->vdp_device,
                                             VDP_RGBA_FORMAT_B8G8R8A8,
@@ -188,6 +189,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
         gl->VDPAUSurfaceAccessNV(p->vdpgl_surface, GL_READ_ONLY);
 
         params->imgfmt = IMGFMT_RGB0;
+        params->hw_subfmt = 0;
     }
 
     gl_check_error(gl, hw->log, "After initializing vdpau OpenGL interop");

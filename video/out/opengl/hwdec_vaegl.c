@@ -262,6 +262,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     MP_VERBOSE(p, "hw format: %s\n", mp_imgfmt_to_name(p->current_mpfmt));
 
     params->imgfmt = p->current_mpfmt;
+    params->hw_subfmt = 0;
 
     return 0;
 }

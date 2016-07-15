@@ -190,6 +190,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
     params->imgfmt = IMGFMT_RGB0;
+    params->hw_subfmt = 0;
     return 0;
 }
 
