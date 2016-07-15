@@ -23,7 +23,6 @@
 #include <libavutil/common.h>
 
 #include "config.h"
-#include "audio/out/ao.h"
 #include "audio/filter/af.h"
 #include "common/global.h"
 #include "common/msg.h"
@@ -33,7 +32,6 @@
 struct mixer {
     struct mp_log *log;
     struct MPOpts *opts;
-    struct ao *ao;
     struct af_stream *af;
     // Other stuff
     float balance;
@@ -145,8 +143,5 @@ void mixer_reinit_audio(struct mixer *mixer, struct af_stream *af)
  */
 void mixer_uninit_audio(struct mixer *mixer)
 {
-    if (!mixer->ao)
-        return;
-
     mixer->af = NULL;
 }
