@@ -269,7 +269,7 @@ static int render(struct vf_instance *vf)
     mp_image_copy_attributes(out, in);
 
     D3D11_VIDEO_FRAME_FORMAT d3d_frame_format;
-    if (!mp_refqueue_is_interlaced(p->queue)) {
+    if (!mp_refqueue_should_deint(p->queue)) {
         d3d_frame_format = D3D11_VIDEO_FRAME_FORMAT_PROGRESSIVE;
     } else if (mp_refqueue_top_field_first(p->queue)) {
         d3d_frame_format = D3D11_VIDEO_FRAME_FORMAT_INTERLACED_TOP_FIELD_FIRST;
@@ -289,7 +289,7 @@ static int render(struct vf_instance *vf)
             goto cleanup;
     }
 
-    if (!mp_refqueue_is_interlaced(p->queue)) {
+    if (!mp_refqueue_should_deint(p->queue)) {
         d3d_frame_format = D3D11_VIDEO_FRAME_FORMAT_PROGRESSIVE;
     } else if (mp_refqueue_is_top_field(p->queue)) {
         d3d_frame_format = D3D11_VIDEO_FRAME_FORMAT_INTERLACED_TOP_FIELD_FIRST;
