@@ -29,7 +29,12 @@
 #include "video/mp_image_pool.h"
 
 // missing in MinGW
+#define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND 0x1
 #define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB 0x2
+#define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_ADAPTIVE 0x4
+#define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_MOTION_COMPENSATION 0x8
+#define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_INVERSE_TELECINE 0x10
+#define D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_FRAME_RATE_CONVERSION 0x20
 
 struct vf_priv_s {
     ID3D11Device *vo_dev;
@@ -57,6 +62,7 @@ struct vf_priv_s {
 
     int deint_enabled;
     int interlaced_only;
+    int mode;
 };
 
 static void release_tex(void *arg)
@@ -159,8 +165,8 @@ static int recreate_video_proc(struct vf_instance *vf)
     if (FAILED(hr))
         goto fail;
 
-    MP_VERBOSE(vf, "Found %d rate conversion caps.\n",
-               (int)caps.RateConversionCapsCount);
+    MP_VERBOSE(vf, "Found %d rate conversion caps. Looking for caps=0x%x.\n",
+               (int)caps.RateConversionCapsCount, p->mode);
 
     int rindex = -1;
     for (int n = 0; n < caps.RateConversionCapsCount; n++) {
@@ -170,8 +176,7 @@ static int recreate_video_proc(struct vf_instance *vf)
         if (FAILED(hr))
             goto fail;
         MP_VERBOSE(vf, "  - %d: 0x%08x\n", n, (unsigned)rcaps.ProcessorCaps);
-        if (rcaps.ProcessorCaps & D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB)
-        {
+        if (rcaps.ProcessorCaps & p->mode) {
             MP_VERBOSE(vf, "       (matching)\n");
             if (rindex < 0)
                 rindex = n;
@@ -179,9 +184,11 @@ static int recreate_video_proc(struct vf_instance *vf)
     }
 
     if (rindex < 0) {
-        MP_WARN(vf, "No video deinterlacing processor found.\n");
+        MP_WARN(vf, "No fitting video processor found, picking #0.\n");
         rindex = 0;
     }
+
+    // TOOD: so, how do we select which rate conversion mode the processor uses?
 
     hr = ID3D11VideoDevice_CreateVideoProcessor(p->video_dev, p->vp_enum, rindex,
                                                 &p->video_proc);
@@ -518,6 +525,13 @@ fail:
 static const m_option_t vf_opts_fields[] = {
     OPT_FLAG("deint", deint_enabled, 0),
     OPT_FLAG("interlaced-only", interlaced_only, 0),
+    OPT_CHOICE("mode", mode, 0,
+        ({"blend", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BLEND},
+         {"bob", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB},
+         {"adaptive", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_ADAPTIVE},
+         {"mocomp", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_MOTION_COMPENSATION},
+         {"ivctc", D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_INVERSE_TELECINE},
+         {"none", 0})),
     {0}
 };
 
@@ -530,6 +544,7 @@ const vf_info_t vf_info_d3d11vpp = {
     .priv_defaults = &(const struct vf_priv_s) {
         .deint_enabled = 1,
         .interlaced_only = 1,
+        .mode = D3D11_VIDEO_PROCESSOR_PROCESSOR_CAPS_DEINTERLACE_BOB,
     },
     .options = vf_opts_fields,
 };
