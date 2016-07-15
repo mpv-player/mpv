@@ -169,7 +169,7 @@ static struct mp_image *render(struct vf_instance *vf)
     mp_image_copy_attributes(img, in);
 
     unsigned int flags = va_get_colorspace_flag(p->params.color.space);
-    if (!mp_refqueue_is_interlaced(p->queue)) {
+    if (!mp_refqueue_should_deint(p->queue)) {
         flags |= VA_FRAME_PICTURE;
     } else if (mp_refqueue_is_top_field(p->queue)) {
         flags |= VA_TOP_FIELD;

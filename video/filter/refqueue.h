@@ -27,7 +27,6 @@ enum {
 
 void mp_refqueue_set_mode(struct mp_refqueue *q, int flags);
 bool mp_refqueue_should_deint(struct mp_refqueue *q);
-bool mp_refqueue_is_interlaced(struct mp_refqueue *q);
 bool mp_refqueue_is_top_field(struct mp_refqueue *q);
 bool mp_refqueue_top_field_first(struct mp_refqueue *q);
 bool mp_refqueue_is_second_field(struct mp_refqueue *q);
