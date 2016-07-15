@@ -366,6 +366,9 @@ static int af_find_output_conversion(struct af_stream *s, struct mp_audio *cfg)
             !mp_chmap_equals_reordered(&af->fmt_in.channels, &af->fmt_out.channels))
             return AF_ERROR;
     }
+    // And not if it's the only filter.
+    if (conv->prev == s->first && conv->next == s->last)
+        return AF_ERROR;
 
     *cfg = s->output;
     return AF_OK;
