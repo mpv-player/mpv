@@ -19,7 +19,7 @@ local o = {
     redraw_delay = 1,                -- acts as duration in the toggling case
     ass_formatting = true,
     timing_warning = true,
-    timing_warning_th = 0.85,         -- *no* warning threshold (warning when > dfps * timing_warning_th)
+    timing_warning_th = 0.85,        -- *no* warning threshold (warning when > dfps * timing_warning_th)
     timing_total = false,
     debug = false,
 
@@ -214,7 +214,7 @@ local function append_perfdata(s)
         usuffix = generate_graph(plast[3], max[3], 0.8)
 
         s[#s+1] = format("%s%s%s%s{\\fs%s}%s%s%s{\\fs%s}", o.nl, o.indent,
-                         b("Timings:"), o.prefix_sep, o.font_size * 0.66,
+                         b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
                          "Render  ⏎  Present  ⏎  Upload", o.prefix_sep,
                          "(last/average/peak  μs)", o.font_size)
     else
@@ -223,7 +223,7 @@ local function append_perfdata(s)
         usuffix = o.prefix_sep .. "Upload"
 
         s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}", o.nl, o.indent,
-                         b("Timings:"), o.prefix_sep, o.font_size * 0.66,
+                         b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
                          "(last/average/peak  μs)", o.font_size)
     end
 
