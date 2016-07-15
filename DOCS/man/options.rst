@@ -4204,6 +4204,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
     vec2 target_size
         The size in pixels of the visible part of the scaled (and possibly
         cropped) image.
+    vec2 tex_offset
+        Texture offset introduced by user shaders or options like panscan, video-align-x/y, video-pan-x/y.
 
     Internally, vo_opengl may generate any number of the following textures.
     Whenever a texture is rendered and saved by vo_opengl, all of the passes
