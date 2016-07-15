@@ -70,6 +70,16 @@ static struct vt_format vt_formats[] = {
         }
     },
     {
+        .cvpixfmt = kCVPixelFormatType_420YpCbCr8Planar,
+        .imgfmt = IMGFMT_420P,
+        .planes = 3,
+        .gl = {
+            { GL_RED, GL_UNSIGNED_BYTE, GL_RED },
+            { GL_RED, GL_UNSIGNED_BYTE, GL_RED },
+            { GL_RED, GL_UNSIGNED_BYTE, GL_RED },
+        }
+    },
+    {
         .cvpixfmt = kCVPixelFormatType_32BGRA,
         .imgfmt = IMGFMT_RGB0,
         .planes = 1,

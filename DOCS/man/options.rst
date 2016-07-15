@@ -692,8 +692,8 @@ Video
     choice of the format can influence performance considerably. On the other
     hand, there doesn't appear to be a good way to detect the best format for
     the given hardware. ``nv12``, the default, works better on modern hardware,
-    while ``uyvy422`` appears to be better for old hardware. ``rgb0`` also
-    works.
+    while ``uyvy422`` appears to be better for old hardware. ``rgb0`` and
+    ``yuv420p`` also work.
 
 ``--panscan=<0.0-1.0>``
     Enables pan-and-scan functionality (cropping the sides of e.g. a 16:9
