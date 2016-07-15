@@ -186,7 +186,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 {
     assert(params->imgfmt == hw->driver->imgfmt);
 
-    struct vt_format *f = vt_get_gl_format(params->hw_subfmt);
+    struct vt_format *f = vt_get_gl_format_from_imgfmt(params->hw_subfmt);
     if (!f) {
         MP_ERR(hw, "Unsupported CVPixelBuffer format.\n");
         return -1;

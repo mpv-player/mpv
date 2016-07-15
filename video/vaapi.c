@@ -509,7 +509,7 @@ void va_surface_init_subformat(struct mp_image *mpi)
     if (status != VA_STATUS_SUCCESS)
         goto err;
 
-    mpi->params.hw_subfmt = va_image.format.fourcc;
+    mpi->params.hw_subfmt = va_fourcc_to_imgfmt(va_image.format.fourcc);
 
     status = vaDestroyImage(p->display, va_image.image_id);
     CHECK_VA_STATUS(p->ctx, "vaDestroyImage()");

@@ -250,17 +250,16 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     }
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    p->current_mpfmt = va_fourcc_to_imgfmt(params->hw_subfmt);
+    p->current_mpfmt = params->hw_subfmt;
     if (p->current_mpfmt != IMGFMT_NV12 &&
         p->current_mpfmt != IMGFMT_420P)
     {
         MP_FATAL(p, "unsupported VA image format %s\n",
-                 mp_tag_str(params->hw_subfmt));
+                 mp_imgfmt_to_name(p->current_mpfmt));
         return -1;
     }
 
-    MP_VERBOSE(p, "format: %s %s\n", mp_tag_str(params->hw_subfmt),
-               mp_imgfmt_to_name(p->current_mpfmt));
+    MP_VERBOSE(p, "hw format: %s\n", mp_imgfmt_to_name(p->current_mpfmt));
 
     params->imgfmt = p->current_mpfmt;
 
