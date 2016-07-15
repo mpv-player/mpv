@@ -588,6 +588,7 @@ Video
     :videotoolbox: requires ``--vo=opengl`` (OS X 10.8 and up only)
     :videotoolbox-copy: copies video back into system RAM (OS X 10.8 and up only)
     :dxva2: requires ``--vo=opengl:backend=angle`` or
+
         ``--vo=opengl:backend=dxinterop`` (Windows only)
     :dxva2-copy: copies video back to system RAM (Windows only)
     :d3d11va: requires ``--vo=opengl:backend=angle`` (Windows only)
