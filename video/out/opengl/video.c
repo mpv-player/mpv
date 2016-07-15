@@ -1229,6 +1229,11 @@ static void load_shader(struct gl_video *p, struct bstr body)
     gl_sc_uniform_vec2(p->sc, "target_size",
                        (GLfloat[]){p->dst_rect.x1 - p->dst_rect.x0,
                                    p->dst_rect.y1 - p->dst_rect.y0});
+    gl_sc_uniform_vec2(p->sc, "tex_offset",
+                       (GLfloat[]){p->src_rect.x0 * p->texture_offset.m[0][0] +
+                                   p->texture_offset.t[0],
+                                   p->src_rect.y0 * p->texture_offset.m[1][1] +
+                                   p->texture_offset.t[1]});
 }
 
 // Semantic equality
