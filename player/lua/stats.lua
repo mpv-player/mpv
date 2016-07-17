@@ -197,7 +197,7 @@ local function append_perfdata(s)
 
     local rsuffix, psuffix, usuffix
 
-    if o.plot_graphs and timer:is_enabled() then
+    if o.plot_graphs and o.ass_formatting and timer:is_enabled() then
         local max = {1, 1, 1}
         for e = 1, plen do
             if plast[1][e] and plast[1][e] > max[1] then max[1] = plast[1][e] end
