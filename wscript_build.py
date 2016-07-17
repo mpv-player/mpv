@@ -105,7 +105,6 @@ def build(ctx):
         ( "audio/chmap_sel.c" ),
         ( "audio/fmt-conversion.c" ),
         ( "audio/format.c" ),
-        ( "audio/mixer.c" ),
         ( "audio/decode/ad_lavc.c" ),
         ( "audio/decode/ad_spdif.c" ),
         ( "audio/decode/dec_audio.c" ),

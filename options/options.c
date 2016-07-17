@@ -40,7 +40,6 @@
 #include "video/csputils.h"
 #include "video/hwdec.h"
 #include "sub/osd.h"
-#include "audio/mixer.h"
 #include "audio/filter/af.h"
 #include "audio/decode/dec_audio.h"
 #include "player/core.h"
@@ -424,6 +423,7 @@ const m_option_t mp_opts[] = {
                 {"weak", -1})),
     OPT_DOUBLE("audio-buffer", audio_buffer, M_OPT_MIN | M_OPT_MAX,
                .min = 0, .max = 10),
+    OPT_FLOATRANGE("balance", balance, 0, -1, 1),
 
     OPT_GEOMETRY("geometry", vo.geometry, 0),
     OPT_SIZE_BOX("autofit", vo.autofit, 0),

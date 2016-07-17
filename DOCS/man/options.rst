@@ -1079,6 +1079,11 @@ Audio
 
     Since mpv 0.18.1, this always controls the internal mixer (aka "softvol").
 
+``--balance=<value>``
+    How much left/right channels contribute to the audio.
+
+    Deprecated.
+
 ``--audio-delay=<sec>``
     Audio delay in seconds (positive or negative float value). Positive values
     delay the audio, and negative values delay the video.

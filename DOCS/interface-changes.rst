@@ -19,6 +19,8 @@ Interface changes
 
 ::
 
+ --- mpv 0.18.2 ---
+    - deprecate "balance" option/property (no replacement)
  --- mpv 0.18.1 ---
     - deprecate --heartbeat-cmd
     - remove --softvol=no capability:

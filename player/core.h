@@ -287,7 +287,6 @@ typedef struct MPContext {
 
     struct lavfi *lavfi;
 
-    struct mixer *mixer;
     struct ao *ao;
     struct mp_audio *ao_decoder_fmt; // for weak gapless audio check
     struct ao_chain *ao_chain;
@@ -429,6 +428,8 @@ void uninit_audio_out(struct MPContext *mpctx);
 void uninit_audio_chain(struct MPContext *mpctx);
 int init_audio_decoder(struct MPContext *mpctx, struct track *track);
 void reinit_audio_chain_src(struct MPContext *mpctx, struct lavfi_pad *src);
+void audio_update_volume(struct MPContext *mpctx);
+void audio_update_balance(struct MPContext *mpctx);
 
 // configfiles.c
 void mp_parse_cfgfiles(struct MPContext *mpctx);
@@ -557,5 +558,12 @@ double calc_average_frame_duration(struct MPContext *mpctx);
 int init_video_decoder(struct MPContext *mpctx, struct track *track);
 int get_deinterlacing(struct MPContext *mpctx);
 void set_deinterlacing(struct MPContext *mpctx, bool enable);
+
+// Values of MPOpts.softvol
+enum {
+    SOFTVOL_NO = 0,
+    SOFTVOL_YES = 1,
+    SOFTVOL_AUTO = 2,
+};
 
 #endif /* MPLAYER_MP_CORE_H */

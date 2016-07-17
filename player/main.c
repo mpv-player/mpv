@@ -52,7 +52,6 @@
 
 #include "audio/decode/dec_audio.h"
 #include "audio/out/ao.h"
-#include "audio/mixer.h"
 #include "demux/demux.h"
 #include "stream/stream.h"
 #include "sub/osd.h"
@@ -360,7 +359,6 @@ struct MPContext *mp_create(void)
 
     mpctx->input = mp_input_init(mpctx->global);
     screenshot_init(mpctx);
-    mpctx->mixer = mixer_init(mpctx, mpctx->global);
     command_init(mpctx);
     init_libav(mpctx->global);
     mp_clients_init(mpctx);

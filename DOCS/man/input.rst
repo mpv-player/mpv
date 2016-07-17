@@ -1321,6 +1321,8 @@ Property list
     It doesn't change the volumes of each channel, but instead sets up a pan
     matrix to mix the left and right channels.)
 
+    Deprecated.
+
 ``fullscreen`` (RW)
     See ``--fullscreen``.
 

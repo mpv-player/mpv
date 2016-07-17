@@ -90,6 +90,7 @@ typedef struct MPOpts {
     int force_vo;
     int softvol;
     float softvol_volume;
+    float balance;
     int softvol_mute;
     float softvol_max;
     int gapless_audio;

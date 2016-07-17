@@ -54,7 +54,6 @@
 #include "video/decode/vd.h"
 #include "video/out/vo.h"
 #include "video/csputils.h"
-#include "audio/mixer.h"
 #include "audio/audio_buffer.h"
 #include "audio/out/ao.h"
 #include "audio/filter/af.h"
@@ -1561,7 +1560,8 @@ static int mp_property_mixer_active(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_flag_ro(action, arg, mixer_audio_initialized(mpctx->mixer));
+    struct ao_chain *ao_c = mpctx->ao_chain;
+    return m_property_flag_ro(action, arg, ao_c && ao_c->af->initialized > 0);
 }
 
 /// Volume (RW)
@@ -1590,7 +1590,7 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
 
     int r = mp_property_generic_option(mpctx, prop, action, arg);
     if (action == M_PROPERTY_SET)
-        mixer_update_volume(mpctx->mixer);
+        audio_update_volume(mpctx);
     return r;
 }
 
@@ -1607,7 +1607,7 @@ static int mp_property_mute(void *ctx, struct m_property *prop,
 
     int r = mp_property_generic_option(mpctx, prop, action, arg);
     if (action == M_PROPERTY_SET)
-        mixer_update_volume(mpctx->mixer);
+        audio_update_volume(mpctx);
     return r;
 }
 
@@ -1841,23 +1841,10 @@ static int mp_property_balance(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    float bal;
 
-    switch (action) {
-    case M_PROPERTY_GET:
-        mixer_getbalance(mpctx->mixer, arg);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){
-            .type = CONF_TYPE_FLOAT,
-            .flags = M_OPT_RANGE,
-            .min = -1,
-            .max = 1,
-        };
-        return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT: {
+    if (action == M_PROPERTY_PRINT) {
         char **str = arg;
-        mixer_getbalance(mpctx->mixer, &bal);
+        float bal = mpctx->opts->balance;
         if (bal == 0.f)
             *str = talloc_strdup(NULL, "center");
         else if (bal == -1.f)
@@ -1871,11 +1858,11 @@ static int mp_property_balance(void *ctx, struct m_property *prop,
         }
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_SET:
-        mixer_setbalance(mpctx->mixer, *(float *)arg);
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+
+    int r = mp_property_generic_option(mpctx, prop, action, arg);
+    if (action == M_PROPERTY_SET)
+        audio_update_balance(mpctx);
+    return r;
 }
 
 static struct track* track_next(struct MPContext *mpctx, enum stream_type type,

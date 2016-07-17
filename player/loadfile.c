@@ -42,7 +42,6 @@
 #include "common/encode.h"
 #include "input/input.h"
 
-#include "audio/mixer.h"
 #include "audio/audio.h"
 #include "audio/audio_buffer.h"
 #include "audio/decode/dec_audio.h"
