@@ -1123,6 +1123,7 @@ int vo_x11_check_events(struct vo *vo)
         case MapNotify:
             x11->window_hidden = false;
             x11->pseudo_mapped = true;
+            x11->current_icc_screen = -1;
             vo_x11_update_geometry(vo);
             break;
         case DestroyNotify:
@@ -1668,6 +1669,23 @@ static bool rc_overlaps(struct mp_rect rc1, struct mp_rect rc2)
     return mp_rect_intersection(&rc1, &rc2); // changes the first argument
 }
 
+// which screen's ICC profile we're going to use
+static int get_icc_screen(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    int cx = x11->winrc.x0 + (x11->winrc.x1 - x11->winrc.x0)/2,
+    cy = x11->winrc.y0 + (x11->winrc.y1 - x11->winrc.y0)/2;
+    int screen = 0; // xinerama screen number
+    for (int n = 0; n < x11->num_displays; n++) {
+        struct xrandr_display *disp = &x11->displays[n];
+        if (mp_rect_contains(&disp->rc, cx, cy)) {
+            screen = n;
+            break;
+        }
+    }
+    return screen;
+}
+
 // update x11->winrc with current boundaries of vo->x11->window
 static void vo_x11_update_geometry(struct vo *vo)
 {
@@ -1700,7 +1718,12 @@ static void vo_x11_update_geometry(struct vo *vo)
         MP_VERBOSE(x11, "Current display FPS: %f\n", fps);
     x11->current_display_fps = fps;
     // might have changed displays
-    x11->pending_vo_events |= VO_EVENT_WIN_STATE | VO_EVENT_ICC_PROFILE_CHANGED;
+    x11->pending_vo_events |= VO_EVENT_WIN_STATE;
+    int icc_screen = get_icc_screen(vo);
+    if (x11->current_icc_screen != icc_screen) {
+        x11->current_icc_screen = icc_screen;
+        x11->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
+    }
 }
 
 static void vo_x11_fullscreen(struct vo *vo)
@@ -1840,16 +1863,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_GET_ICC_PROFILE: {
         if (!x11->pseudo_mapped)
             return VO_NOTAVAIL;
-        int cx = x11->winrc.x0 + (x11->winrc.x1 - x11->winrc.x0)/2,
-            cy = x11->winrc.y0 + (x11->winrc.y1 - x11->winrc.y0)/2;
-        int screen = 0; // xinerama screen number
-        for (int n = 0; n < x11->num_displays; n++) {
-            struct xrandr_display *disp = &x11->displays[n];
-            if (mp_rect_contains(&disp->rc, cx, cy)) {
-                screen = n;
-                break;
-            }
-        }
+        int screen = get_icc_screen(vo);
         char prop[80];
         snprintf(prop, sizeof(prop), "_ICC_PROFILE");
         if (screen > 0)

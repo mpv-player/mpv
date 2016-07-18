@@ -57,6 +57,7 @@ struct vo_x11_state {
 
     struct xrandr_display displays[MAX_DISPLAYS];
     int num_displays;
+    int current_icc_screen;
 
     int xrandr_event;
 
