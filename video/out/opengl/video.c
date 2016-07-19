@@ -59,6 +59,7 @@ static const char *const fixed_scale_filters[] = {
 };
 static const char *const fixed_tscale_filters[] = {
     "oversample",
+    "linear",
     NULL
 };
 
@@ -2525,9 +2526,10 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     struct scaler *tscale = &p->scaler[SCALER_TSCALE];
     reinit_scaler(p, tscale, &p->opts.scaler[SCALER_TSCALE], 1, tscale_sizes);
     bool oversample = strcmp(tscale->conf.kernel.name, "oversample") == 0;
+    bool linear = strcmp(tscale->conf.kernel.name, "linear") == 0;
     int size;
 
-    if (oversample) {
+    if (oversample || linear) {
         size = 2;
     } else {
         assert(tscale->kernel && !tscale->kernel->polar);
@@ -2612,8 +2614,9 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             }
         }
 
-        // Blend the frames together
         if (oversample) {
+            // Oversample uses the frame area as mix ratio, not the the vsync
+            // position itself
             double vsync_dist = t->vsync_interval / t->ideal_frame_duration,
                    threshold = tscale->conf.kernel.params[0];
             threshold = isnan(threshold) ? 0.0 : threshold;
@@ -2621,6 +2624,10 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             mix = mix <= 0 + threshold ? 0 : mix;
             mix = mix >= 1 - threshold ? 1 : mix;
             mix = 1 - mix;
+        }
+
+        // Blend the frames together
+        if (oversample || linear) {
             gl_sc_uniform_f(p->sc, "inter_coeff", mix);
             GLSL(color = mix(texture(texture0, texcoord0),
                              texture(texture1, texcoord1),
@@ -3489,7 +3496,7 @@ void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
             radius = radius > 0 ? radius : p->opts.scaler[SCALER_TSCALE].radius;
             queue_size += 1 + ceil(radius);
         } else {
-            // Oversample case
+            // Oversample/linear case
             queue_size += 2;
         }
     }
