@@ -65,19 +65,26 @@ local o = {
 options.read_options(o)
 
 local format = string.format
+-- Buffer for the "last" value of performance data for render/present/upload 
 local plast = {{0}, {0}, {0}}
+-- Position in buffer
 local ppos = 1
+-- Length of buffer
 local plen = 50
+-- Function used to record performance data
 local recorder = nil
-local timer
-
+-- Timer used for toggling
+local timer = nil
+-- Save these sequences locally as we'll need them a lot
+local ass_start = mp.get_property_osd("osd-ass-cc/0")
+local ass_stop = mp.get_property_osd("osd-ass-cc/1")
 
 
 local function set_ASS(b)
     if not o.ass_formatting then
         return ""
     end
-    return mp.get_property_osd("osd-ass-cc/" .. (b and "0" or "1"))
+    return b and ass_start or ass_stop
 end
 
 
