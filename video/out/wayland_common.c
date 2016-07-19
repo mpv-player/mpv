@@ -1106,7 +1106,7 @@ static int vo_wayland_poll (struct vo *vo, int timeout_msecs)
 
     struct pollfd fd = {
         wl->display.display_fd,
-        POLLIN | POLLOUT | POLLERR | POLLHUP,
+        POLLIN | POLLERR | POLLHUP,
         0
     };
 
@@ -1125,8 +1125,8 @@ static int vo_wayland_poll (struct vo *vo, int timeout_msecs)
         }
         if (fd.revents & POLLIN)
             wl_display_dispatch(dp);
-        if (fd.revents & POLLOUT)
-            wl_display_flush(dp);
+        else
+            wl_display_dispatch_pending(dp);
     }
 
     return polled;
