@@ -610,27 +610,39 @@ static void wait_event_fd(struct vo *vo, int64_t until_time){}
 static void wakeup_event_fd(struct vo *vo){}
 #endif
 
+// VOs which have no special requirements on UI event loops etc. can set the
+// vo_driver.wait_events callback to this (and leave vo_driver.wakeup unset).
+// This function must not be used or called for other purposes.
+void vo_wait_default(struct vo *vo, int64_t until_time)
+{
+    struct vo_internal *in = vo->in;
+
+    pthread_mutex_lock(&in->lock);
+    if (!in->need_wakeup) {
+        struct timespec ts = mp_time_us_to_timespec(until_time);
+        pthread_cond_timedwait(&in->wakeup, &in->lock, &ts);
+    }
+    pthread_mutex_unlock(&in->lock);
+}
+
 // Called unlocked.
 static void wait_vo(struct vo *vo, int64_t until_time)
 {
     struct vo_internal *in = vo->in;
 
     if (vo->event_fd >= 0) {
+        // old/deprecated code path
         wait_event_fd(vo, until_time);
         pthread_mutex_lock(&in->lock);
         in->need_wakeup = false;
         pthread_mutex_unlock(&in->lock);
-    } else if (vo->driver->wait_events) {
-        vo->driver->wait_events(vo, until_time);
-        pthread_mutex_lock(&in->lock);
-        in->need_wakeup = false;
-        pthread_mutex_unlock(&in->lock);
     } else {
-        pthread_mutex_lock(&in->lock);
-        if (!in->need_wakeup) {
-            struct timespec ts = mp_time_us_to_timespec(until_time);
-            pthread_cond_timedwait(&in->wakeup, &in->lock, &ts);
+        if (vo->driver->wait_events) {
+            vo->driver->wait_events(vo, until_time);
+        } else {
+            vo_wait_default(vo, until_time);
         }
+        pthread_mutex_lock(&in->lock);
         in->need_wakeup = false;
         pthread_mutex_unlock(&in->lock);
     }

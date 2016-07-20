@@ -357,6 +357,23 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return r;
 }
 
+static void wakeup(struct vo *vo)
+{
+    struct gl_priv *p = vo->priv;
+    if (p->glctx->driver->wakeup)
+        p->glctx->driver->wakeup(p->glctx);
+}
+
+static void wait_events(struct vo *vo, int64_t until_time_us)
+{
+    struct gl_priv *p = vo->priv;
+    if (p->glctx->driver->wait_events) {
+        p->glctx->driver->wait_events(p->glctx, until_time_us);
+    } else {
+        vo_wait_default(vo, until_time_us);
+    }
+}
+
 static void uninit(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
@@ -466,6 +483,8 @@ const struct vo_driver video_out_opengl = {
     .control = control,
     .draw_frame = draw_frame,
     .flip_page = flip_page,
+    .wait_events = wait_events,
+    .wakeup = wakeup,
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),
     .options = options,
@@ -481,6 +500,8 @@ const struct vo_driver video_out_opengl_hq = {
     .control = control,
     .draw_frame = draw_frame,
     .flip_page = flip_page,
+    .wait_events = wait_events,
+    .wakeup = wakeup,
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),
     .priv_defaults = &(const struct gl_priv){

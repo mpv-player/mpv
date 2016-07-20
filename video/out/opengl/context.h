@@ -63,6 +63,11 @@ struct mpgl_driver {
     // This behaves exactly like vo_driver.control().
     int (*control)(struct MPGLContext *ctx, int *events, int request, void *arg);
 
+    // These behave exactly like vo_driver.wakeup/wait_events. They are
+    // optional.
+    void (*wakeup)(struct MPGLContext *ctx);
+    void (*wait_events)(struct MPGLContext *ctx, int64_t until_time_us);
+
     // Destroy the GL context and possibly the underlying VO backend.
     void (*uninit)(struct MPGLContext *ctx);
 };

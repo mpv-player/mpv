@@ -282,7 +282,7 @@ struct vo_driver {
      * immediately.
      */
     void (*wakeup)(struct vo *vo);
-    int (*wait_events)(struct vo *vo, int64_t until_time_us);
+    void (*wait_events)(struct vo *vo, int64_t until_time_us);
 
     /*
      * Closes driver. Should restore the original state of the system.
@@ -370,6 +370,7 @@ double vo_get_display_fps(struct vo *vo);
 double vo_get_delay(struct vo *vo);
 
 void vo_wakeup(struct vo *vo);
+void vo_wait_default(struct vo *vo, int64_t until_time);
 
 struct mp_keymap {
   int from;

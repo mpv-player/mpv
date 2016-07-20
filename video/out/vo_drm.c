@@ -253,9 +253,7 @@ static void acquire_vt(void *data)
     crtc_setup(vo);
 }
 
-
-
-static int wait_events(struct vo *vo, int64_t until_time_us)
+static void wait_events(struct vo *vo, int64_t until_time_us)
 {
     struct priv *p = vo->priv;
     if (p->vt_switcher_active) {
@@ -263,7 +261,6 @@ static int wait_events(struct vo *vo, int64_t until_time_us)
         int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
         vt_switcher_poll(&p->vt_switcher, timeout_ms);
     }
-    return 0;
 }
 
 static void wakeup(struct vo *vo)

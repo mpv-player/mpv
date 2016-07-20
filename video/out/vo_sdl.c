@@ -533,7 +533,7 @@ static void wakeup(struct vo *vo)
     SDL_PushEvent(&event);
 }
 
-static int wait_events(struct vo *vo, int64_t until_time_us)
+static void wait_events(struct vo *vo, int64_t until_time_us)
 {
     int64_t wait_us = until_time_us - mp_time_us();
     int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
@@ -619,8 +619,6 @@ static int wait_events(struct vo *vo, int64_t until_time_us)
             break;
         }
     }
-
-    return 0;
 }
 
 static void uninit(struct vo *vo)
