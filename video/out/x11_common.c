@@ -20,6 +20,8 @@
 #include <math.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <unistd.h>
+#include <poll.h>
 
 #include "config.h"
 #include "misc/bstr.h"
@@ -38,6 +40,7 @@
 #include "vo.h"
 #include "win_state.h"
 #include "osdep/atomics.h"
+#include "osdep/io.h"
 #include "osdep/timer.h"
 #include "osdep/subprocess.h"
 
@@ -593,7 +596,8 @@ int vo_x11_init(struct vo *vo)
 
     x11->wm_type = vo_wm_detect(vo);
 
-    vo->event_fd = ConnectionNumber(x11->display);
+    x11->event_fd = ConnectionNumber(x11->display);
+    mp_make_wakeup_pipe(x11->wakeup_pipe);
 
     xrandr_read(x11);
 
@@ -760,6 +764,9 @@ void vo_x11_uninit(struct vo *vo)
         pthread_join(x11->screensaver_thread, NULL);
         sem_destroy(&x11->screensaver_sem);
     }
+
+    for (int n = 0; n < 2; n++)
+        close(x11->wakeup_pipe[n]);
 
     talloc_free(x11);
     vo->x11 = NULL;
@@ -1905,6 +1912,32 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     }
     }
     return VO_NOTIMPL;
+}
+
+void vo_x11_wakeup(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    (void)write(x11->wakeup_pipe[1], &(char){0}, 1);
+}
+
+void vo_x11_wait_events(struct vo *vo, int64_t until_time_us)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    struct pollfd fds[2] = {
+        { .fd = x11->event_fd, .events = POLLIN },
+        { .fd = x11->wakeup_pipe[0], .events = POLLIN },
+    };
+    int64_t wait_us = until_time_us - mp_time_us();
+    int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
+
+    poll(fds, 2, timeout_ms);
+
+    if (fds[1].revents & POLLIN) {
+        char buf[100];
+        (void)read(x11->wakeup_pipe[0], buf, sizeof(buf)); // flush
+    }
 }
 
 static void xscreensaver_heartbeat(struct vo_x11_state *x11)

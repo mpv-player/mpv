@@ -45,6 +45,8 @@ struct vo_x11_state {
     struct mp_log *log;
     struct input_ctx *input_ctx;
     Display *display;
+    int event_fd;
+    int wakeup_pipe[2];
     Window window;
     Window rootwin;
     Window parent;  // embedded in this foreign window
@@ -132,6 +134,8 @@ bool vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
                              const char *classname);
 void vo_x11_config_vo_window(struct vo *vo);
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg);
+void vo_x11_wakeup(struct vo *vo);
+void vo_x11_wait_events(struct vo *vo, int64_t until_time_us);
 
 void vo_x11_silence_xlib(int dir);
 
