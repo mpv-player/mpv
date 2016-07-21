@@ -360,7 +360,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 static void wakeup(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
-    if (p->glctx->driver->wakeup)
+    if (p->glctx && p->glctx->driver->wakeup)
         p->glctx->driver->wakeup(p->glctx);
 }
 
