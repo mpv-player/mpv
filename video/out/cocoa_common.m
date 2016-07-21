@@ -53,7 +53,6 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
                                     const CVTimeStamp* outputTime, CVOptionFlags flagsIn, 
                                     CVOptionFlags* flagsOut, void* displayLinkContext);
 static int vo_cocoa_fullscreen(struct vo *vo);
-static void cocoa_rm_fs_screen_profile_observer(struct vo_cocoa_state *s);
 
 struct vo_cocoa_state {
     // --- The following members can be accessed only by the main thread (i.e.
@@ -87,8 +86,6 @@ struct vo_cocoa_state {
 
     uint32_t old_dwidth;
     uint32_t old_dheight;
-
-    id   fs_icc_changed_ns_observer;
 
     pthread_mutex_t lock;
     pthread_cond_t wakeup;
@@ -306,7 +303,6 @@ void vo_cocoa_uninit(struct vo *vo)
     run_on_main_thread(vo, ^{
         enable_power_management(s);
         cocoa_uninit_light_sensor(s);
-        cocoa_rm_fs_screen_profile_observer(s);
 
         [s->nsgl_ctx release];
         CGLReleaseContext(s->cgl_ctx);
@@ -543,33 +539,6 @@ static int cocoa_set_window_title(struct vo *vo)
     return VO_TRUE;
 }
 
-static void cocoa_rm_fs_screen_profile_observer(struct vo_cocoa_state *s)
-{
-    [[NSNotificationCenter defaultCenter]
-        removeObserver:s->fs_icc_changed_ns_observer];
-}
-
-static void cocoa_add_fs_screen_profile_observer(struct vo *vo)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-
-    if (s->fs_icc_changed_ns_observer)
-        cocoa_rm_fs_screen_profile_observer(s);
-
-    if (vo->opts->fsscreen_id < 0)
-        return;
-
-    void (^nblock)(NSNotification *n) = ^(NSNotification *n) {
-        flag_events(vo, VO_EVENT_ICC_PROFILE_CHANGED);
-    };
-
-    s->fs_icc_changed_ns_observer = [[NSNotificationCenter defaultCenter]
-        addObserverForName:NSScreenColorSpaceDidChangeNotification
-                    object:s->fs_screen
-                     queue:nil
-                usingBlock:nblock];
-}
-
 void vo_cocoa_set_opengl_ctx(struct vo *vo, CGLContextObj ctx)
 {
     struct vo_cocoa_state *s = vo->cocoa;
@@ -606,7 +575,6 @@ int vo_cocoa_config_window(struct vo *vo)
             if (reset_size)
                 queue_new_video_size(vo, width, height);
             vo_cocoa_fullscreen(vo);
-            cocoa_add_fs_screen_profile_observer(vo);
             cocoa_set_window_title(vo);
             vo_set_level(vo, vo->opts->ontop);
 
@@ -740,7 +708,6 @@ static int vo_cocoa_fullscreen(struct vo *vo)
         [[s->view window] setDelegate:s->adapter];
     }
 
-    flag_events(vo, VO_EVENT_ICC_PROFILE_CHANGED);
     resize_event(vo);
 
     return VO_TRUE;
@@ -926,6 +893,15 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 {
     vo_cocoa_update_screen_info(self.vout, NULL);
     vo_cocoa_update_screen_fps(self.vout);
+
+    struct vo_cocoa_state *s = self.vout->cocoa;
+    NSDictionary* fsinfo = [s->fs_screen deviceDescription];
+    NSDictionary* sinfo = [s->current_screen deviceDescription];
+    NSNumber* fsid = [fsinfo objectForKey:@"NSScreenNumber"];
+    NSNumber* sid = [sinfo objectForKey:@"NSScreenNumber"];
+    
+    if(![fsid isEqualToNumber:sid])
+        flag_events(self.vout, VO_EVENT_ICC_PROFILE_CHANGED);
 }
 
 - (void)didChangeWindowedScreenProfile:(NSScreen *)screen
