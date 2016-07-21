@@ -1009,8 +1009,11 @@ int vo_wayland_init(struct vo *vo)
 {
     vo->wayland = talloc_zero(NULL, struct vo_wayland_state);
     struct vo_wayland_state *wl = vo->wayland;
-    wl->vo = vo;
-    wl->log = mp_log_new(wl, vo->log, "wayland");
+    *wl = (struct vo_wayland_state){
+        .vo = vo,
+        .log = mp_log_new(wl, vo->log, "wayland"),
+        .wakeup_pipe = {-1, -1},
+    };
 
     wl_list_init(&wl->display.output_list);
 

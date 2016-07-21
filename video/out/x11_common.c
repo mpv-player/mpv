@@ -543,6 +543,7 @@ int vo_x11_init(struct vo *vo)
         .input_ctx = vo->input_ctx,
         .screensaver_enabled = true,
         .xrandr_event = -1,
+        .wakeup_pipe = {-1, -1},
     };
     vo->x11 = x11;
 
