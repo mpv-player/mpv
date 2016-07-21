@@ -362,6 +362,9 @@ Available video output drivers are:
             exchange for adding some blur. This filter is good at temporal
             interpolation, and also known as "smoothmotion" (see ``tscale``).
 
+        ``linear``
+            A ``tscale`` filter.
+
         ``custom``
             A user-defined custom shader (see ``scale-shader``).
 
