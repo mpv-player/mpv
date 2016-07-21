@@ -40,6 +40,7 @@
 
 #include "vo.h"
 #include "win_state.h"
+#include "osdep/io.h"
 #include "osdep/timer.h"
 
 #include "input/input.h"
@@ -225,7 +226,7 @@ static void surface_handle_enter(void *data,
         }
     }
 
-    wl->window.events |= VO_EVENT_WIN_STATE;
+    wl->window.events |= VO_EVENT_WIN_STATE | VO_EVENT_RESIZE;
 }
 
 static void surface_handle_leave(void *data,
@@ -833,10 +834,6 @@ static void frame_callback(void *data,
 
     wl_callback_add_listener(wl->frame.callback, &frame_listener, wl);
     wl_surface_commit(wl->window.video_surface);
-
-    wl->frame.last_us = mp_time_us();
-    wl->frame.pending = true;
-    wl->frame.dropping = false;
 }
 
 static const struct wl_callback_listener frame_listener = {
@@ -1045,7 +1042,7 @@ int vo_wayland_init (struct vo *vo)
                        o->refresh_rate / 1000.0f);
     }
 
-    vo->event_fd = wl->display.display_fd;
+    mp_make_wakeup_pipe(wl->wakeup_pipe);
 
     return true;
 }
@@ -1057,6 +1054,8 @@ void vo_wayland_uninit (struct vo *vo)
     destroy_window(wl);
     destroy_display(wl);
     destroy_input(wl);
+    for (int n = 0; n < 2; n++)
+        close(wl->wakeup_pipe[n]);
     talloc_free(wl);
     vo->wayland = NULL;
 }
@@ -1096,47 +1095,11 @@ static void vo_wayland_fullscreen (struct vo *vo)
     }
 }
 
-static int vo_wayland_poll (struct vo *vo, int timeout_msecs)
-{
-    struct vo_wayland_state *wl = vo->wayland;
-    struct wl_display *dp = wl->display.display;
-
-    wl_display_dispatch_pending(dp);
-    wl_display_flush(dp);
-
-    struct pollfd fd = {
-        wl->display.display_fd,
-        POLLIN | POLLERR | POLLHUP,
-        0
-    };
-
-    /* wl_display_dispatch is blocking
-     * wl_dipslay_dispatch_pending is non-blocking but does not read from the fd
-     *
-     * when pausing no input events get queued so we have to check if there
-     * are events to read from the file descriptor through poll */
-    int polled;
-    if ((polled = poll(&fd, 1, timeout_msecs)) > 0) {
-        if (fd.revents & POLLERR || fd.revents & POLLHUP) {
-            MP_FATAL(wl, "error occurred on the display fd: "
-                         "closing file descriptor\n");
-            close(wl->display.display_fd);
-            mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
-        }
-        if (fd.revents & POLLIN)
-            wl_display_dispatch(dp);
-        else
-            wl_display_dispatch_pending(dp);
-    }
-
-    return polled;
-}
-
-static int vo_wayland_check_events (struct vo *vo)
+static int vo_wayland_check_events(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
 
-    vo_wayland_poll(vo, 0);
+    vo_wayland_wait_events(vo, 0);
 
     /* If drag & drop was ended poll the file descriptor from the offer if
      * there is data to read.
@@ -1331,29 +1294,38 @@ void vo_wayland_request_frame(struct vo *vo, void *data, vo_wayland_frame_cb cb)
     frame_callback(wl, NULL, 0);
 }
 
-bool vo_wayland_wait_frame(struct vo *vo)
+void vo_wayland_wakeup(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
+    (void)write(wl->wakeup_pipe[1], &(char){0}, 1);
+}
 
-    if (!wl->frame.callback || wl->frame.dropping)
-        return false;
+void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
+{
+    struct vo_wayland_state *wl = vo->wayland;
+    struct wl_display *dp = wl->display.display;
 
-    // If mpv isn't receiving frame callbacks (for 100ms), this usually means that
-    // mpv window is not visible and compositor tells kindly to not draw anything.
-    while (!wl->frame.pending) {
-        int64_t timeout = wl->frame.last_us + (100 * 1000) - mp_time_us();
+    wl_display_dispatch_pending(dp);
+    wl_display_flush(dp);
 
-        if (timeout <= 0)
-            break;
+    struct pollfd fds[2] = {
+        {.fd = wl->display.display_fd, .events = POLLIN },
+        {.fd = wl->wakeup_pipe[0],     .events = POLLIN },
+    };
 
-        if (vo_wayland_poll(vo, timeout) <= 0)
-            break;
+    int64_t wait_us = until_time_us - mp_time_us();
+    int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
+
+    poll(fds, 2, timeout_ms);
+
+    if (fds[0].revents & POLLERR || fds[0].revents & POLLHUP) {
+        MP_FATAL(wl, "error occurred on the display fd: "
+                     "closing file descriptor\n");
+        close(wl->display.display_fd);
+        mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
+    } else if (fds[0].revents & POLLIN) {
+        wl_display_dispatch(dp);
+    } else if (fds[1].revents & POLLIN) {
+        wl_display_dispatch_pending(dp);
     }
-
-    wl->frame.dropping = !wl->frame.pending;
-    wl->frame.pending = false;
-
-    // Return false if the frame callback was not received
-    // Handler should act accordingly.
-    return !wl->frame.dropping;
 }

@@ -373,8 +373,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         p->original_image = mpi;
     }
 
-    if (!vo_wayland_wait_frame(vo))
-        MP_DBG(p->wl, "discarding frame callback\n");
+    vo_wayland_wait_events(vo, 0);
 
     shm_buffer_t *buf = buffer_pool_get_back(&p->video_bufpool);
 
@@ -513,8 +512,7 @@ static void flip_page(struct vo *vo)
     if (!p->wl->frame.callback)
         vo_wayland_request_frame(vo, p, redraw);
 
-    if (!vo_wayland_wait_frame(vo))
-        MP_DBG(p->wl, "discarding frame callback\n");
+    vo_wayland_wait_events(vo, 0);
 }
 
 static int query_format(struct vo *vo, int format)
@@ -675,6 +673,8 @@ const struct vo_driver video_out_wayland = {
     .control = control,
     .draw_image = draw_image,
     .flip_page = flip_page,
+    .wakeup = vo_wayland_wakeup,
+    .wait_events = vo_wayland_wait_events,
     .uninit = uninit,
     .options = (const struct m_option[]) {
         OPT_FLAG("alpha", enable_alpha, 0),
