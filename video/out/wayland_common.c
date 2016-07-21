@@ -58,7 +58,7 @@ static void schedule_resize(struct vo_wayland_state *wl,
                             int32_t width,
                             int32_t height);
 
-static void vo_wayland_fullscreen (struct vo *vo);
+static void vo_wayland_fullscreen(struct vo *vo);
 
 static const struct wl_callback_listener frame_listener;
 
@@ -615,11 +615,9 @@ static const struct wl_data_device_listener data_device_listener = {
     data_device_handle_selection
 };
 
-static void registry_handle_global (void *data,
-                                    struct wl_registry *reg,
-                                    uint32_t id,
-                                    const char *interface,
-                                    uint32_t version)
+static void registry_handle_global(void *data, struct wl_registry *reg,
+                                   uint32_t id, const char *interface,
+                                   uint32_t version)
 {
     struct vo_wayland_state *wl = data;
 
@@ -679,9 +677,9 @@ static void registry_handle_global (void *data,
     }
 }
 
-static void registry_handle_global_remove (void *data,
-                                           struct wl_registry *registry,
-                                           uint32_t id)
+static void registry_handle_global_remove(void *data,
+                                          struct wl_registry *registry,
+                                          uint32_t id)
 {
 }
 
@@ -840,7 +838,7 @@ static const struct wl_callback_listener frame_listener = {
     frame_callback
 };
 
-static bool create_display (struct vo_wayland_state *wl)
+static bool create_display(struct vo_wayland_state *wl)
 {
     if (wl->vo->probing && !getenv("XDG_RUNTIME_DIR"))
         return false;
@@ -865,7 +863,7 @@ static bool create_display (struct vo_wayland_state *wl)
     return true;
 }
 
-static void destroy_display (struct vo_wayland_state *wl)
+static void destroy_display(struct vo_wayland_state *wl)
 {
     struct vo_wayland_output *output = NULL;
     struct vo_wayland_output *tmp = NULL;
@@ -899,7 +897,7 @@ static void destroy_display (struct vo_wayland_state *wl)
     }
 }
 
-static bool create_window (struct vo_wayland_state *wl)
+static bool create_window(struct vo_wayland_state *wl)
 {
     wl->window.video_surface =
         wl_compositor_create_surface(wl->display.compositor);
@@ -926,7 +924,7 @@ static bool create_window (struct vo_wayland_state *wl)
     return true;
 }
 
-static void destroy_window (struct vo_wayland_state *wl)
+static void destroy_window(struct vo_wayland_state *wl)
 {
     if (wl->window.shell_surface)
         wl_shell_surface_destroy(wl->window.shell_surface);
@@ -938,7 +936,7 @@ static void destroy_window (struct vo_wayland_state *wl)
         wl_callback_destroy(wl->frame.callback);
 }
 
-static bool create_cursor (struct vo_wayland_state *wl)
+static bool create_cursor(struct vo_wayland_state *wl)
 {
     if (!wl->display.shm) {
         MP_ERR(wl->vo, "no shm interface available\n");
@@ -958,7 +956,7 @@ static bool create_cursor (struct vo_wayland_state *wl)
     return true;
 }
 
-static void destroy_cursor (struct vo_wayland_state *wl)
+static void destroy_cursor(struct vo_wayland_state *wl)
 {
     if (wl->cursor.theme)
         wl_cursor_theme_destroy(wl->cursor.theme);
@@ -967,7 +965,7 @@ static void destroy_cursor (struct vo_wayland_state *wl)
         wl_surface_destroy(wl->cursor.surface);
 }
 
-static bool create_input (struct vo_wayland_state *wl)
+static bool create_input(struct vo_wayland_state *wl)
 {
     wl->input.xkb.context = xkb_context_new(0);
 
@@ -981,7 +979,7 @@ static bool create_input (struct vo_wayland_state *wl)
     return true;
 }
 
-static void destroy_input (struct vo_wayland_state *wl)
+static void destroy_input(struct vo_wayland_state *wl)
 {
     if (wl->input.keyboard) {
         wl_keyboard_destroy(wl->input.keyboard);
@@ -1007,7 +1005,7 @@ static void destroy_input (struct vo_wayland_state *wl)
 
 /*** mplayer2 interface ***/
 
-int vo_wayland_init (struct vo *vo)
+int vo_wayland_init(struct vo *vo)
 {
     vo->wayland = talloc_zero(NULL, struct vo_wayland_state);
     struct vo_wayland_state *wl = vo->wayland;
@@ -1047,7 +1045,7 @@ int vo_wayland_init (struct vo *vo)
     return true;
 }
 
-void vo_wayland_uninit (struct vo *vo)
+void vo_wayland_uninit(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
     destroy_cursor(wl);
@@ -1060,7 +1058,7 @@ void vo_wayland_uninit (struct vo *vo)
     vo->wayland = NULL;
 }
 
-static void vo_wayland_ontop (struct vo *vo)
+static void vo_wayland_ontop(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
     MP_DBG(wl, "going ontop\n");
@@ -1069,7 +1067,7 @@ static void vo_wayland_ontop (struct vo *vo)
     schedule_resize(wl, 0, wl->window.width, wl->window.height);
 }
 
-static void vo_wayland_fullscreen (struct vo *vo)
+static void vo_wayland_fullscreen(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
     if (!wl->display.shell)
@@ -1208,7 +1206,7 @@ static void vo_wayland_update_screeninfo(struct vo *vo, struct mp_rect *screenrc
     wl->window.fs_height = screenrc->y1;
 }
 
-int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
+int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_wayland_state *wl = vo->wayland;
     wl_display_dispatch_pending(wl->display.display);
@@ -1263,7 +1261,7 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
     return VO_NOTIMPL;
 }
 
-bool vo_wayland_config (struct vo *vo)
+bool vo_wayland_config(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
 
