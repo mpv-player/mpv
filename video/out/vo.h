@@ -269,9 +269,8 @@ struct vo_driver {
     void (*flip_page)(struct vo *vo);
 
     /* These optional callbacks can be provided if the GUI framework used by
-     * the VO requires entering a message loop for receiving events, does not
-     * provide event_fd, and does not call vo_wakeup() from a separate thread
-     * when there are new events.
+     * the VO requires entering a message loop for receiving events and does
+     * not call vo_wakeup() from a separate thread when there are new events.
      *
      * wait_events() will wait for new events, until the timeout expires, or the
      * function is interrupted. wakeup() is used to possibly interrupt the
@@ -319,7 +318,6 @@ struct vo {
 
     // --- The following fields are generally only changed during initialization.
 
-    int event_fd;  // check_events() should be called when this has input
     bool probing;
 
     // --- The following fields are only changed with vo_reconfig(), and can

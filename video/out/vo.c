@@ -23,11 +23,6 @@
 #include <pthread.h>
 #include <math.h>
 
-#ifndef __MINGW32__
-#include <unistd.h>
-#include <poll.h>
-#endif
-
 #include "mpv_talloc.h"
 
 #include "config.h"
@@ -127,9 +122,6 @@ struct vo_internal {
     bool need_wakeup;
     bool terminate;
 
-    int wakeup_pipe[2]; // used for VOs that use a unix FD for waiting
-
-
     bool hasframe;
     bool hasframe_rendered;
     bool request_redraw;            // redraw request from player to VO
@@ -215,8 +207,6 @@ static void dealloc_vo(struct vo *vo)
     forget_frames(vo); // implicitly synchronized
     pthread_mutex_destroy(&vo->in->lock);
     pthread_cond_destroy(&vo->in->wakeup);
-    for (int n = 0; n < 2; n++)
-        close(vo->in->wakeup_pipe[n]);
     talloc_free(vo);
 }
 
@@ -239,7 +229,6 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
         .encode_lavc_ctx = ex->encode_lavc_ctx,
         .input_ctx = ex->input_ctx,
         .osd = ex->osd,
-        .event_fd = -1,
         .monitor_par = 1,
         .extra = *ex,
         .probing = probing,
@@ -251,7 +240,6 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
         .req_frames = 1,
         .estimated_vsync_jitter = -1,
     };
-    mp_make_wakeup_pipe(vo->in->wakeup_pipe);
     mp_dispatch_set_wakeup_fn(vo->in->dispatch, dispatch_wakeup_cb, vo);
     pthread_mutex_init(&vo->in->lock, NULL);
     pthread_cond_init(&vo->in->wakeup, NULL);
@@ -580,36 +568,6 @@ static void forget_frames(struct vo *vo)
     }
 }
 
-#ifndef __MINGW32__
-static void wait_event_fd(struct vo *vo, int64_t until_time)
-{
-    struct vo_internal *in = vo->in;
-
-    struct pollfd fds[2] = {
-        { .fd = vo->event_fd, .events = POLLIN },
-        { .fd = in->wakeup_pipe[0], .events = POLLIN },
-    };
-    int64_t wait_us = until_time - mp_time_us();
-    int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
-
-    poll(fds, 2, timeout_ms);
-
-    if (fds[1].revents & POLLIN) {
-        char buf[100];
-        (void)read(in->wakeup_pipe[0], buf, sizeof(buf)); // flush
-    }
-}
-static void wakeup_event_fd(struct vo *vo)
-{
-    struct vo_internal *in = vo->in;
-
-    (void)write(in->wakeup_pipe[1], &(char){0}, 1);
-}
-#else
-static void wait_event_fd(struct vo *vo, int64_t until_time){}
-static void wakeup_event_fd(struct vo *vo){}
-#endif
-
 // VOs which have no special requirements on UI event loops etc. can set the
 // vo_driver.wait_events callback to this (and leave vo_driver.wakeup unset).
 // This function must not be used or called for other purposes.
@@ -630,22 +588,14 @@ static void wait_vo(struct vo *vo, int64_t until_time)
 {
     struct vo_internal *in = vo->in;
 
-    if (vo->event_fd >= 0) {
-        // old/deprecated code path
-        wait_event_fd(vo, until_time);
-        pthread_mutex_lock(&in->lock);
-        in->need_wakeup = false;
-        pthread_mutex_unlock(&in->lock);
+    if (vo->driver->wait_events) {
+        vo->driver->wait_events(vo, until_time);
     } else {
-        if (vo->driver->wait_events) {
-            vo->driver->wait_events(vo, until_time);
-        } else {
-            vo_wait_default(vo, until_time);
-        }
-        pthread_mutex_lock(&in->lock);
-        in->need_wakeup = false;
-        pthread_mutex_unlock(&in->lock);
+        vo_wait_default(vo, until_time);
     }
+    pthread_mutex_lock(&in->lock);
+    in->need_wakeup = false;
+    pthread_mutex_unlock(&in->lock);
 }
 
 static void wakeup_locked(struct vo *vo)
@@ -653,8 +603,6 @@ static void wakeup_locked(struct vo *vo)
     struct vo_internal *in = vo->in;
 
     pthread_cond_broadcast(&in->wakeup);
-    if (vo->event_fd >= 0)
-        wakeup_event_fd(vo);
     if (vo->driver->wakeup)
         vo->driver->wakeup(vo);
     in->need_wakeup = true;
