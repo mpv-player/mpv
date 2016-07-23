@@ -136,11 +136,6 @@ struct vo_wayland_state {
             struct xkb_keymap *keymap;
             struct xkb_state *state;
         } xkb;
-
-        struct wl_data_device_manager *devman;
-        struct wl_data_device *datadev;
-        struct wl_data_offer *offer;
-        int dnd_fd;
     } input;
 };
 
