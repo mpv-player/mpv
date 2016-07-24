@@ -347,9 +347,9 @@ struct mp_audio *mp_audio_from_avframe(struct AVFrame *avframe)
     mp_chmap_from_lavc(&lavc_chmap, avframe->channel_layout);
 
 #if LIBAVUTIL_VERSION_MICRO >= 100
-    // FFmpeg being special again
-    if (lavc_chmap.num != avframe->channels)
-        mp_chmap_from_channels(&lavc_chmap, avframe->channels);
+    // FFmpeg being stupid POS again
+    if (lavc_chmap.num != av_frame_get_channels(avframe))
+        mp_chmap_from_channels(&lavc_chmap, av_frame_get_channels(avframe));
 #endif
 
     new->rate = avframe->sample_rate;
@@ -407,8 +407,8 @@ int mp_audio_to_avframe(struct mp_audio *frame, struct AVFrame *avframe)
     if (!avframe->channel_layout)
         goto fail;
 #if LIBAVUTIL_VERSION_MICRO >= 100
-    // FFmpeg being a stupid POS (but I respect it)
-    avframe->channels = frame->channels.num;
+    // FFmpeg being a stupid POS again
+    av_frame_set_channels(avframe, frame->channels.num);
 #endif
     avframe->sample_rate = frame->rate;
 
