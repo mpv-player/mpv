@@ -249,17 +249,8 @@ static int read_input_frame(struct af_instance *af, AVFrame *frame)
     if (!fill_buffer(af))
         return 0; // need more input
 
-    frame->nb_samples = s->in_samples;
-    frame->format = s->lavc_actx->sample_fmt;
-    frame->channel_layout = s->lavc_actx->channel_layout;
-#if LIBAVUTIL_VERSION_MICRO >= 100
-    frame->channels = s->lavc_actx->channels;
-#endif
-    assert(s->input->num_planes <= AV_NUM_DATA_POINTERS);
-    frame->extended_data = frame->data;
-    for (int n = 0; n < s->input->num_planes; n++)
-        frame->data[n] = s->input->planes[n];
-    frame->linesize[0] = s->input->samples * s->input->sstride;
+    if (mp_audio_to_avframe(s->input, frame) < 0)
+        return -1;
 
     return 1;
 }

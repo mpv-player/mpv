@@ -394,12 +394,9 @@ fail:
     return NULL;
 }
 
-// Returns NULL on failure. The input is always unreffed.
-struct AVFrame *mp_audio_to_avframe_and_unref(struct mp_audio *frame)
+int mp_audio_to_avframe(struct mp_audio *frame, struct AVFrame *avframe)
 {
-    struct AVFrame *avframe = av_frame_alloc();
-    if (!avframe)
-        goto fail;
+    av_frame_unref(avframe);
 
     avframe->nb_samples = frame->samples;
     avframe->format = af_to_avformat(frame->format);
@@ -456,6 +453,23 @@ struct AVFrame *mp_audio_to_avframe_and_unref(struct mp_audio *frame)
         av_frame_free(&avframe);
         avframe = tmp;
     }
+
+    return 0;
+
+fail:
+    av_frame_unref(avframe);
+    return -1;
+}
+
+// Returns NULL on failure. The input is always unreffed.
+struct AVFrame *mp_audio_to_avframe_and_unref(struct mp_audio *frame)
+{
+    struct AVFrame *avframe = av_frame_alloc();
+    if (!avframe)
+        goto fail;
+
+    if (mp_audio_to_avframe(frame, avframe) < 0)
+        goto fail;
 
     talloc_free(frame);
     return avframe;
