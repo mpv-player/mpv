@@ -1019,7 +1019,7 @@ static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
     }
 }
 
-int vo_x11_check_events(struct vo *vo)
+void vo_x11_check_events(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
     Display *display = vo->x11->display;
@@ -1178,9 +1178,6 @@ int vo_x11_check_events(struct vo *vo)
     }
 
     update_vo_size(vo);
-    int ret = x11->pending_vo_events;
-    x11->pending_vo_events = 0;
-    return ret;
 }
 
 static void vo_x11_sizehint(struct vo *vo, struct mp_rect rc, bool override_pos)
@@ -1791,7 +1788,9 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     struct vo_x11_state *x11 = vo->x11;
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
-        *events |= vo_x11_check_events(vo);
+        vo_x11_check_events(vo);
+        *events |= x11->pending_vo_events;
+        x11->pending_vo_events = 0;
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
         opts->fullscreen = !opts->fullscreen;

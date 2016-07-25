@@ -128,7 +128,7 @@ struct vo_x11_state {
 
 int vo_x11_init(struct vo *vo);
 void vo_x11_uninit(struct vo *vo);
-int vo_x11_check_events(struct vo *vo);
+void vo_x11_check_events(struct vo *vo);
 bool vo_x11_screen_is_composited(struct vo *vo);
 bool vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
                              const char *classname);
