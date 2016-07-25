@@ -631,8 +631,10 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
 
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_3DLUT);
     gl->BindTexture(GL_TEXTURE_3D, p->lut_3d_texture);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
     gl->TexImage3D(GL_TEXTURE_3D, 0, GL_RGB16, lut3d->size[0], lut3d->size[1],
                    lut3d->size[2], 0, GL_RGB, GL_UNSIGNED_SHORT, lut3d->data);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
     gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
