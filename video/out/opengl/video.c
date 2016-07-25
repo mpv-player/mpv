@@ -187,6 +187,7 @@ struct gl_video {
 
     GLuint lut_3d_texture;
     bool use_lut_3d;
+    int lut_3d_size[3];
 
     GLuint dither_texture;
     int dither_size;
@@ -640,6 +641,9 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
     gl->ActiveTexture(GL_TEXTURE0);
 
     debug_check_gl(p, "after 3d lut creation");
+
+    for (int i = 0; i < 3; i++)
+        p->lut_3d_size[i] = lut3d->size[i];
 
     talloc_free(lut3d);
 
@@ -2188,7 +2192,10 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
 
     if (p->use_lut_3d) {
         gl_sc_uniform_sampler(p->sc, "lut_3d", GL_TEXTURE_3D, TEXUNIT_3DLUT);
-        GLSL(color.rgb = texture3D(lut_3d, color.rgb).rgb;)
+        GLSL(vec3 cpos;)
+        for (int i = 0; i < 3; i++)
+            GLSLF("cpos[%d] = LUT_POS(color[%d], %d.0);\n", i, i, p->lut_3d_size[i]);
+        GLSL(color.rgb = texture3D(lut_3d, cpos).rgb;)
     }
 }
 
