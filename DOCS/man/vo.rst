@@ -1098,7 +1098,7 @@ Available video output drivers are:
 
     ``3dlut-size=<r>x<g>x<b>``
         Size of the 3D LUT generated from the ICC profile in each dimension.
-        Default is 128x256x64.
+        Default is 64x64x64.
         Sizes must be a power of two, and 512 at most.
 
     ``icc-contrast=<0-100000>``
