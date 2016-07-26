@@ -942,6 +942,7 @@ _INSTALL_DIRS_LIST = [
     ('datadir', '${PREFIX}/share',    'data files'),
     ('mandir',  '${DATADIR}/man',     'man pages '),
     ('docdir',  '${DATADIR}/doc/mpv', 'documentation files'),
+    ('htmldir', '${DOCDIR}',          'html documentation files'),
     ('zshdir',  '${DATADIR}/zsh/site-functions', 'zsh completion functions'),
 
     ('confloaddir', '${CONFDIR}', 'configuration files load directory'),

@@ -19,7 +19,7 @@ def _build_html(ctx):
         target       = 'DOCS/man/mpv.html',
         source       = 'DOCS/man/mpv.rst',
         rule         = '${RST2HTML} ${SRC} ${TGT}',
-        install_path = ctx.env.DOCDIR)
+        install_path = ctx.env.HTMLDIR)
 
     _add_rst_manual_dependencies(ctx)
 
