@@ -19,7 +19,7 @@ local o = {
     redraw_delay = 1,                -- acts as duration in the toggling case
     ass_formatting = true,
     timing_warning = true,
-    timing_warning_th = 0.85,        -- *no* warning threshold (warning when > dfps * timing_warning_th)
+    timing_warning_th = 0.85,        -- *no* warning threshold (warning when > target_fps * timing_warning_th)
     timing_total = false,
     debug = false,
 
@@ -65,7 +65,7 @@ local o = {
 options.read_options(o)
 
 local format = string.format
--- Buffer for the "last" value of performance data for render/present/upload 
+-- Buffer for the "last" value of performance data for render/present/upload
 local plast = {{0}, {0}, {0}}
 -- Position in buffer
 local ppos = 1
@@ -179,8 +179,9 @@ local function append_perfdata(s)
         return
     end
 
-    local dfps = mp.get_property_number("display-fps", 0)
-    dfps = dfps > 0 and (1 / dfps * 1e6)
+    local ds = mp.get_property_bool("display-sync-active", false)
+    local target_fps = ds and mp.get_property_number("display-fps", 0) or mp.get_property_number("fps", 0)
+    if target_fps > 0 then target_fps = 1 / target_fps * 1e6 end
 
     local last_s = vo_p["render-last"] + vo_p["present-last"] + vo_p["upload-last"]
     local avg_s = vo_p["render-avg"] + vo_p["present-avg"] + vo_p["upload-avg"]
@@ -189,11 +190,11 @@ local function append_perfdata(s)
     -- highlight i with a red border when t exceeds the time for one frame
     -- or yellow when it exceeds a given threshold
     local function hl(i, t)
-        if o.timing_warning and dfps > 0 then
-            if t > dfps then
+        if o.timing_warning and target_fps > 0 then
+            if t > target_fps then
                 return format("{\\bord0.5}{\\3c&H0000FF&}%05d{\\bord%s}{\\3c&H%s&}",
                                 i, o.border_size, o.border_color)
-            elseif t > (dfps * o.timing_warning_th) then
+            elseif t > (target_fps * o.timing_warning_th) then
                 return format("{\\bord0.5}{\\1c&H00DDDD&}%05d{\\bord%s}{\\1c&H%s&}",
                                 i, o.border_size, o.font_color)
             end
