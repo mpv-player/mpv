@@ -513,7 +513,13 @@ def build(ctx):
                 "install_path": ctx.env.LIBDIR,
             }
 
-            if not ctx.dependency_satisfied('android'):
+            if shared and ctx.dependency_satisfied('android'):
+                # for Android we just add the linker flag without version
+                # as we still need the SONAME for proper linkage.
+                # (LINKFLAGS logic taken from waf's apply_vnum in ccroot.py)
+                v=ctx.env.SONAME_ST%'libmpv.so'
+                ctx.env.append_value('LINKFLAGS',v.split())
+            else:
                 # for all other configurations we want SONAME to be used
                 libmpv_kwargs["vnum"] = libversion
 
