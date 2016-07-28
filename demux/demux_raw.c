@@ -55,7 +55,7 @@ const struct m_sub_options demux_rawaudio_conf = {
                    ({"u8",      PCM(0, 0,  8, 0)},
                     {"s8",      PCM(1, 0,  8, 0)},
                     {"u16le",   PCM(0, 0, 16, 0)}, {"u16be",    PCM(0, 0, 16, 1)},
-                    {"s16le",   PCM(1, 0, 16, 0)}, {"u16be",    PCM(1, 0, 16, 1)},
+                    {"s16le",   PCM(1, 0, 16, 0)}, {"s16be",    PCM(1, 0, 16, 1)},
                     {"u24le",   PCM(0, 0, 24, 0)}, {"u24be",    PCM(0, 0, 24, 1)},
                     {"s24le",   PCM(1, 0, 24, 0)}, {"s24be",    PCM(1, 0, 24, 1)},
                     {"u32le",   PCM(0, 0, 32, 0)}, {"u32be",    PCM(0, 0, 32, 1)},
