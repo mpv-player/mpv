@@ -185,7 +185,8 @@ local function append_perfdata(s)
 
     local last_s = vo_p["render-last"] + vo_p["present-last"] + vo_p["upload-last"]
     local avg_s = vo_p["render-avg"] + vo_p["present-avg"] + vo_p["upload-avg"]
-    local peak_s = vo_p["render-peak"] + vo_p["present-peak"] + vo_p["upload-peak"]
+    --local peak_s = vo_p["render-peak"] + vo_p["present-peak"] + vo_p["upload-peak"]
+    local peak_s = -math.huge
 
     -- highlight i with a red border when t exceeds the time for one frame
     -- or yellow when it exceeds a given threshold
