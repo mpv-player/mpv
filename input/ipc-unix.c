@@ -133,8 +133,7 @@ static void *client_thread(void *p)
         }
 
         if (fds[0].revents & POLLIN) {
-            char discard[100];
-            (void)read(pipe_fd, discard, sizeof(discard));
+            mp_flush_wakeup_pipe(pipe_fd);
 
             while (1) {
                 mpv_event *event = mpv_wait_event(arg->client, 0);

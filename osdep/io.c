@@ -85,6 +85,14 @@ int mp_make_wakeup_pipe(int pipes[2])
 }
 #endif
 
+void mp_flush_wakeup_pipe(int pipe_end)
+{
+#ifndef __MINGW32__
+    char buf[100];
+    (void)read(pipe_end, buf, sizeof(buf));
+#endif
+}
+
 #ifdef _WIN32
 
 #include <windows.h>

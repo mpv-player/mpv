@@ -1934,10 +1934,8 @@ void vo_x11_wait_events(struct vo *vo, int64_t until_time_us)
 
     poll(fds, 2, timeout_ms);
 
-    if (fds[1].revents & POLLIN) {
-        char buf[100];
-        (void)read(x11->wakeup_pipe[0], buf, sizeof(buf)); // flush
-    }
+    if (fds[1].revents & POLLIN)
+        mp_flush_wakeup_pipe(x11->wakeup_pipe[0]);
 }
 
 static void xscreensaver_heartbeat(struct vo_x11_state *x11)
