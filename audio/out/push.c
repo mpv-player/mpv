@@ -497,10 +497,8 @@ int ao_wait_poll(struct ao *ao, struct pollfd *fds, int num_fds,
     bool wakeup = false;
     if (p_fds[num_fds].revents & POLLIN) {
         wakeup = true;
-        // flush the wakeup pipe contents - might "drown" some wakeups, but
-        // that's ok for our use-case
-        char buf[100];
-        (void)read(p->wakeup_pipe[0], buf, sizeof(buf));
+        // might "drown" some wakeups, but that's ok for our use-case
+        mp_flush_wakeup_pipe(p->wakeup_pipe[0]);
     }
     return (r >= 0 || r == -EINTR) ? wakeup : -1;
 }
