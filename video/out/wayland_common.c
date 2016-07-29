@@ -662,11 +662,13 @@ static void schedule_resize(struct vo_wayland_state *wl,
 
     MP_DBG(wl, "schedule resize: %dx%d\n", width, height);
 
-    if (width < minimum_size)
-        width = minimum_size;
-
-    if (height < minimum_size)
-        height = minimum_size;
+    width  = MPMAX(minimum_size,  width);
+    height = MPMAX(minimum_size, height);
+    if (wl->display.current_output) {
+        int scale = wl->display.current_output->scale;
+        width  = MPMIN(width,  wl->display.current_output->width /scale);
+        height = MPMIN(height, wl->display.current_output->height/scale);
+    }
 
     // don't keep the aspect ration in fullscreen mode, because the compositor
     // shows the desktop in the border regions if the video has not the same
