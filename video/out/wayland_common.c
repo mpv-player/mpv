@@ -1124,9 +1124,6 @@ void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
     struct vo_wayland_state *wl = vo->wayland;
     struct wl_display *dp = wl->display.display;
 
-    wl_display_dispatch_pending(dp);
-    wl_display_flush(dp);
-
     struct pollfd fds[2] = {
         {.fd = wl->display.display_fd, .events = POLLIN },
         {.fd = wl->wakeup_pipe[0],     .events = POLLIN },
@@ -1135,16 +1132,21 @@ void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
     int64_t wait_us = until_time_us - mp_time_us();
     int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
 
+    wl_display_dispatch_pending(dp);
+    wl_display_flush(dp);
+
     poll(fds, 2, timeout_ms);
 
-    if (fds[0].revents & POLLERR || fds[0].revents & POLLHUP) {
+    if (fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
         MP_FATAL(wl, "error occurred on the display fd: "
                      "closing file descriptor\n");
         close(wl->display.display_fd);
         mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
-    } else if (fds[0].revents & POLLIN) {
-        wl_display_dispatch(dp);
-    } else if (fds[1].revents & POLLIN) {
-        wl_display_dispatch_pending(dp);
     }
+
+    if (fds[0].revents & POLLIN)
+        wl_display_dispatch(dp);
+
+    if (fds[1].revents & POLLIN)
+        mp_flush_wakeup_pipe(wl->wakeup_pipe[0]);
 }
