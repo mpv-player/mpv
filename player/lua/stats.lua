@@ -185,8 +185,7 @@ local function append_perfdata(s)
 
     local last_s = vo_p["render-last"] + vo_p["present-last"] + vo_p["upload-last"]
     local avg_s = vo_p["render-avg"] + vo_p["present-avg"] + vo_p["upload-avg"]
-    --local peak_s = vo_p["render-peak"] + vo_p["present-peak"] + vo_p["upload-peak"]
-    local peak_s = -math.huge
+    local peak_s = vo_p["render-peak"] + vo_p["present-peak"] + vo_p["upload-peak"]
 
     -- highlight i with a red border when t exceeds the time for one frame
     -- or yellow when it exceeds a given threshold
@@ -239,13 +238,13 @@ local function append_perfdata(s)
     local f = "%s%s%s{\\fn%s}%s / %s / %s{\\fn%s}%s%s"
     s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
                     hl(vo_p["render-last"], last_s), hl(vo_p["render-avg"], avg_s),
-                    hl(vo_p["render-peak"], peak_s), o.font, o.prefix_sep, rsuffix)
+                    hl(vo_p["render-peak"], -math.huge), o.font, o.prefix_sep, rsuffix)
     s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
                     hl(vo_p["present-last"], last_s), hl(vo_p["present-avg"], avg_s),
-                    hl(vo_p["present-peak"], peak_s), o.font, o.prefix_sep, psuffix)
+                    hl(vo_p["present-peak"], -math.huge), o.font, o.prefix_sep, psuffix)
     s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
                     hl(vo_p["upload-last"], last_s), hl(vo_p["upload-avg"], avg_s),
-                    hl(vo_p["upload-peak"], peak_s), o.font, o.prefix_sep, usuffix)
+                    hl(vo_p["upload-peak"], -math.huge), o.font, o.prefix_sep, usuffix)
     if o.timing_total then
         s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
                         hl(last_s, last_s), hl(avg_s, avg_s),
