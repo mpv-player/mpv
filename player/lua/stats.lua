@@ -259,13 +259,13 @@ end
 -- is skipped and not appended.
 -- Returns `false` in case nothing was appended, otherwise `true`.
 --
--- s       : Table containing strings.
--- property: The property to query and format (based on its OSD representation).
--- attr    : Optional table to overwrite certain (formatting) attributes for
---           this property.
--- exclude : Optional table containing keys which are considered invalid values
---           for this property. Specifying this will replace empty string as
---           default invalid value (nil is always invalid).
+-- s      : Table containing strings.
+-- prop   : The property to query and format (based on its OSD representation).
+-- attr   : Optional table to overwrite certain (formatting) attributes for
+--          this property.
+-- exclude: Optional table containing keys which are considered invalid values
+--          for this property. Specifying this will replace empty string as
+--          default invalid value (nil is always invalid).
 local function append_property(s, prop, attr, excluded)
     excluded = excluded or {[""] = true}
     local ret = mp.get_property_osd(prop)
