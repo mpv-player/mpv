@@ -59,9 +59,7 @@ static void egl_resize(struct vo_wayland_state *wl)
     /* set size for mplayer */
     wl->vo->dwidth  = scale*wl->window.width;
     wl->vo->dheight = scale*wl->window.height;
-
     wl->vo->want_redraw = true;
-    wl->window.events = 0;
 }
 
 static int egl_create_context(struct vo_wayland_state *wl,
