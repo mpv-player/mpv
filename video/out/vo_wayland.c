@@ -314,7 +314,6 @@ static bool resize(struct priv *p)
 
     p->x = x;
     p->y = y;
-    p->wl->window.events = 0;
     p->vo->want_redraw = true;
     return true;
 }

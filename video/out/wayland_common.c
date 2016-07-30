@@ -707,9 +707,7 @@ static void schedule_resize(struct vo_wayland_state *wl,
     wl->window.sh_height = height;
     wl->window.sh_x = x;
     wl->window.sh_y = y;
-    wl->window.events |= VO_EVENT_WIN_STATE | VO_EVENT_RESIZE;
-    wl->vo->dwidth = width;
-    wl->vo->dheight = height;
+    wl->window.events |= VO_EVENT_RESIZE;
 }
 
 static void frame_callback(void *data,
@@ -976,6 +974,8 @@ static void vo_wayland_fullscreen(struct vo *vo)
         wl->window.is_fullscreen = true;
         wl->window.p_width = wl->window.width;
         wl->window.p_height = wl->window.height;
+        schedule_resize(wl, 0, wl->display.current_output->width,
+                        wl->display.current_output->height);
         wl_shell_surface_set_fullscreen(wl->window.shell_surface,
                 WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT,
                 0, fs_output);
@@ -1040,6 +1040,7 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
         *events |= wl->window.events;
+        wl->window.events = 0;
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
         vo->opts->fullscreen = !vo->opts->fullscreen;
