@@ -222,6 +222,10 @@ mp.add_hook("on_load", 10, function ()
 
             -- DASH?
             if not (json["requested_formats"] == nil) then
+                if (json["requested_formats"][1].protocol == "http_dash_segments") then
+                    msg.error("MPEG-Dash Segments unsupported, add [protocol!=http_dash_segments] to your ytdl-format.")
+                    return
+                end
 
                 -- video url
                 streamurl = json["requested_formats"][1].url
