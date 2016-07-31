@@ -232,6 +232,9 @@ static bool fill_buffer(struct af_instance *af)
     af->delay = 0;
 
     if (s->pending) {
+        if (!mp_audio_is_writeable(s->input))
+            assert(s->input->samples == 0); // we can't have sent a partial frame
+        mp_audio_realloc_min(s->input, s->in_samples);
         int copy = MPMIN(s->in_samples - s->input->samples, s->pending->samples);
         s->input->samples += copy;
         mp_audio_copy(s->input, s->input->samples - copy, s->pending, 0, copy);
