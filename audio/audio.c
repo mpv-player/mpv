@@ -138,6 +138,9 @@ static void mp_audio_destructor(void *ptr)
  * available on every plane. The previous data is kept (for the smallest
  * common number of samples before/after resize).
  *
+ * This also makes sure the resulting buffer is writable (even in the case
+ * the buffer has the correct size).
+ *
  * mpa->samples is not set or used.
  *
  * This function is flexible enough to handle format and channel layout
@@ -153,6 +156,12 @@ void mp_audio_realloc(struct mp_audio *mpa, int samples)
     int size = get_plane_size(mpa, samples);
     if (size < 0)
         abort(); // oom or invalid parameters
+    if (!mp_audio_is_writeable(mpa)) {
+        for (int n = 0; n < MP_NUM_CHANNELS; n++) {
+            av_buffer_unref(&mpa->allocated[n]);
+            mpa->planes[n] = NULL;
+        }
+    }
     for (int n = 0; n < mpa->num_planes; n++) {
         if (!mpa->allocated[n] || size != mpa->allocated[n]->size) {
             if (av_buffer_realloc(&mpa->allocated[n], size) < 0)
@@ -171,7 +180,7 @@ void mp_audio_realloc(struct mp_audio *mpa, int samples)
 // If the buffer is reallocated, also preallocate.
 void mp_audio_realloc_min(struct mp_audio *mpa, int samples)
 {
-    if (samples > mp_audio_get_allocated_size(mpa)) {
+    if (samples > mp_audio_get_allocated_size(mpa) || !mp_audio_is_writeable(mpa)) {
         size_t alloc = ta_calc_prealloc_elems(samples);
         if (alloc > INT_MAX)
             abort(); // oom
