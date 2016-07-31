@@ -1050,9 +1050,11 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         vo_wayland_ontop(vo);
         return VO_TRUE;
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
-        int *s = arg;
-        s[0] = wl->window.width;
-        s[1] = wl->window.height;
+        int *s = arg, scale = 1;
+        if (wl->display.current_output)
+            scale = wl->display.current_output->scale;
+        s[0] = scale*wl->window.width;
+        s[1] = scale*wl->window.height;
         return VO_TRUE;
     }
     case VOCTRL_SET_UNFS_WINDOW_SIZE: {
