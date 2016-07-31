@@ -297,6 +297,10 @@ static int filter_out(struct af_instance *af)
         err = 0;
         goto done;
     }
+    if (lavc_ret < 0) {
+        MP_FATAL(af, "Encode failed.\n");
+        goto done;
+    }
 #else
     err = read_input_frame(af, frame);
     if (err < 0)
