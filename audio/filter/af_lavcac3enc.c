@@ -319,7 +319,7 @@ static int filter_out(struct af_instance *af)
 #endif
 
     MP_DBG(af, "avcodec_encode_audio got %d, pending %d.\n",
-           pkt.size, s->pending->samples);
+           pkt.size, s->pending->samples + s->input->samples);
 
     struct mp_audio *out =
         mp_audio_pool_get(af->out_pool, af->data, s->out_samples);
