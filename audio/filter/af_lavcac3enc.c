@@ -310,7 +310,6 @@ static int filter_out(struct af_instance *af)
     err = -1;
     int ok;
     int lavc_ret = avcodec_encode_audio2(s->lavc_actx, &pkt, frame, &ok);
-    av_frame_free(&frame);
     s->input->samples = 0;
     if (lavc_ret < 0 || !ok) {
         MP_FATAL(af, "Encode failed.\n");
@@ -361,6 +360,7 @@ static int filter_out(struct af_instance *af)
     err = 0;
 done:
     av_packet_unref(&pkt);
+    av_frame_free(&frame);
     return err;
 }
 
