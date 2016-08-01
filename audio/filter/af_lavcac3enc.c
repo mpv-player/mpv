@@ -57,6 +57,7 @@ typedef struct af_ac3enc_s {
     struct mp_audio *pending;   // unconsumed input data
     int in_samples;     // samples of input per AC3 frame
     int out_samples;    // upper bound on encoded output per AC3 frame
+    int64_t encoder_buffered;
 
     int cfg_add_iec61937_header;
     int cfg_bit_rate;
@@ -168,6 +169,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         s->in_samples = s->lavc_actx->frame_size;
         mp_audio_realloc(s->input, s->in_samples);
         s->input->samples = 0;
+        s->encoder_buffered = 0;
         return AF_OK;
     }
     case AF_CONTROL_RESET:
@@ -176,6 +178,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         talloc_free(s->pending);
         s->pending = NULL;
         s->input->samples = 0;
+        s->encoder_buffered = 0;
         return AF_OK;
     }
     return AF_UNKNOWN;
@@ -198,8 +201,8 @@ static void uninit(struct af_instance* af)
 static void update_delay(struct af_instance *af)
 {
     af_ac3enc_t *s = af->priv;
-    af->delay = ((s->pending ? s->pending->samples : 0) + s->input->samples) /
-                (double)s->input->rate;
+    af->delay = ((s->pending ? s->pending->samples : 0) + s->input->samples +
+                  s->encoder_buffered) / (double)s->input->rate;
 }
 
 static int filter_frame(struct af_instance *af, struct mp_audio *audio)
@@ -289,6 +292,7 @@ static int filter_out(struct af_instance *af)
             MP_FATAL(af, "Encode failed.\n");
             goto done;
         }
+        s->encoder_buffered += s->input->samples;
         s->input->samples = 0;
     }
     int lavc_ret = avcodec_receive_packet(s->lavc_actx, &pkt);
@@ -319,6 +323,8 @@ static int filter_out(struct af_instance *af)
 
     MP_DBG(af, "avcodec_encode_audio got %d, pending %d.\n",
            pkt.size, s->pending->samples + s->input->samples);
+
+    s->encoder_buffered -= AC3_FRAME_SIZE;
 
     struct mp_audio *out =
         mp_audio_pool_get(af->out_pool, af->data, s->out_samples);
@@ -355,12 +361,12 @@ static int filter_out(struct af_instance *af)
     swap_16((uint16_t *)(buf + header_len), pkt.size / 2);
     out->samples = frame_size / out->sstride;
     af_add_output_frame(af, out);
-    update_delay(af);
 
     err = 0;
 done:
     av_packet_unref(&pkt);
     av_frame_free(&frame);
+    update_delay(af);
     return err;
 }
 
