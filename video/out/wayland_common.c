@@ -974,8 +974,9 @@ static void vo_wayland_fullscreen(struct vo *vo)
         wl->window.is_fullscreen = true;
         wl->window.p_width = wl->window.width;
         wl->window.p_height = wl->window.height;
-        schedule_resize(wl, 0, wl->display.current_output->width,
-                        wl->display.current_output->height);
+        if (wl->display.current_output)
+            schedule_resize(wl, 0, wl->display.current_output->width,
+                            wl->display.current_output->height);
         wl_shell_surface_set_fullscreen(wl->window.shell_surface,
                 WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT,
                 0, fs_output);
