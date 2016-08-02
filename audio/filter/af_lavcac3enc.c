@@ -265,6 +265,9 @@ static int filter_out(struct af_instance *af)
 {
     af_ac3enc_t *s = af->priv;
 
+    if (!s->pending)
+        return 0;
+
     AVFrame *frame = av_frame_alloc();
     if (!frame) {
         MP_FATAL(af, "Could not allocate memory \n");
