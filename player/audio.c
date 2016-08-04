@@ -372,8 +372,6 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
                               ao_c->spdif_passthrough;
         bool ao_null_fallback = opts->ao_null_fallback && !spdif_fallback;
 
-        mp_chmap_remove_useless_channels(&afs->output.channels,
-                                         &opts->audio_output_channels);
         mp_audio_set_channels(&afs->output, &afs->output.channels);
 
         mpctx->ao = ao_init_best(mpctx->global, ao_null_fallback, mpctx->input,

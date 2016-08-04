@@ -230,44 +230,6 @@ void mp_chmap_set_unknown(struct mp_chmap *dst, int num_channels)
     }
 }
 
-// Return channel index of the given speaker, or -1.
-static int mp_chmap_find_speaker(const struct mp_chmap *map, int speaker)
-{
-    for (int n = 0; n < map->num; n++) {
-        if (map->speaker[n] == speaker)
-            return n;
-    }
-    return -1;
-}
-
-static void mp_chmap_remove_speaker(struct mp_chmap *map, int speaker)
-{
-    int index = mp_chmap_find_speaker(map, speaker);
-    if (index >= 0) {
-        for (int n = index; n < map->num - 1; n++)
-            map->speaker[n] = map->speaker[n + 1];
-        map->num--;
-    }
-}
-
-// Some decoders output additional, redundant channels, which are usually
-// useless and will mess up proper audio output channel handling.
-// map: channel map from which the channels should be removed
-// requested: if not NULL, and if it contains any of the "useless" channels,
-//            don't remove them (this is for convenience)
-void mp_chmap_remove_useless_channels(struct mp_chmap *map,
-                                      const struct mp_chmap *requested)
-{
-    if (requested &&
-        mp_chmap_find_speaker(requested, MP_SPEAKER_ID_DL) >= 0)
-        return;
-
-    if (map->num > 2) {
-        mp_chmap_remove_speaker(map, MP_SPEAKER_ID_DL);
-        mp_chmap_remove_speaker(map, MP_SPEAKER_ID_DR);
-    }
-}
-
 // Return the ffmpeg/libav channel layout as in <libavutil/channel_layout.h>.
 // Speakers not representable by ffmpeg/libav are dropped.
 // Warning: this ignores the order of the channels, and will return a channel
