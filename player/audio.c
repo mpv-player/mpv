@@ -353,7 +353,10 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     } else if (af_fmt_is_pcm(in_format.format)) {
         afs->output.rate = opts->force_srate;
         mp_audio_set_format(&afs->output, opts->audio_output_format);
-        mp_audio_set_channels(&afs->output, &opts->audio_output_channels);
+        if (opts->audio_output_channels.num_chmaps == 1) {
+            mp_audio_set_channels(&afs->output,
+                                  &opts->audio_output_channels.chmaps[0]);
+        }
     }
 
     // filter input format: same as codec's output format:
@@ -368,13 +371,22 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     }
 
     if (!mpctx->ao) {
+        int ao_flags = 0;
         bool spdif_fallback = af_fmt_is_spdif(afs->output.format) &&
                               ao_c->spdif_passthrough;
-        bool ao_null_fallback = opts->ao_null_fallback && !spdif_fallback;
+
+        if (opts->ao_null_fallback && !spdif_fallback)
+            ao_flags |= AO_INIT_NULL_FALLBACK;
+
+        if (!opts->audio_output_channels.set || opts->audio_output_channels.auto_safe)
+            ao_flags |= AO_INIT_SAFE_MULTICHANNEL_ONLY;
+
+        mp_chmap_sel_list(&afs->output.channels, opts->audio_output_channels.chmaps,
+                          opts->audio_output_channels.num_chmaps);
 
         mp_audio_set_channels(&afs->output, &afs->output.channels);
 
-        mpctx->ao = ao_init_best(mpctx->global, ao_null_fallback, mpctx->input,
+        mpctx->ao = ao_init_best(mpctx->global, ao_flags, mpctx->input,
                                  mpctx->encode_lavc_ctx, afs->output.rate,
                                  afs->output.format, afs->output.channels);
         ao_c->ao = mpctx->ao;

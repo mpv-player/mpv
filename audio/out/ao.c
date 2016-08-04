@@ -158,7 +158,7 @@ error:
 
 static struct ao *ao_init(bool probing, struct mpv_global *global,
                           struct input_ctx *input_ctx,
-                          struct encode_lavc_context *encode_lavc_ctx,
+                          struct encode_lavc_context *encode_lavc_ctx, int flags,
                           int samplerate, int format, struct mp_chmap channels,
                           char *dev, char *name, char **args)
 {
@@ -169,6 +169,7 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
     ao->channels = channels;
     ao->format = format;
     ao->encode_lavc_ctx = encode_lavc_ctx;
+    ao->init_flags = flags;
     if (ao->driver->encode != !!ao->encode_lavc_ctx)
         goto fail;
 
@@ -190,7 +191,7 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
             snprintf(redirect, sizeof(redirect), "%s", ao->redirect);
             snprintf(rdevice, sizeof(rdevice), "%s", ao->device ? ao->device : "");
             talloc_free(ao);
-            return ao_init(probing, global, input_ctx, encode_lavc_ctx,
+            return ao_init(probing, global, input_ctx, encode_lavc_ctx, flags,
                            samplerate, format, channels, rdevice, redirect, NULL);
         }
         goto fail;
@@ -240,7 +241,7 @@ static void split_ao_device(void *tmp, char *opt, char **out_ao, char **out_dev)
 }
 
 struct ao *ao_init_best(struct mpv_global *global,
-                        bool ao_null_fallback,
+                        int init_flags,
                         struct input_ctx *input_ctx,
                         struct encode_lavc_context *encode_lavc_ctx,
                         int samplerate, int format, struct mp_chmap channels)
@@ -283,7 +284,7 @@ struct ao *ao_init_best(struct mpv_global *global,
         }
     }
 
-    if (ao_null_fallback) {
+    if (init_flags & AO_INIT_NULL_FALLBACK) {
         MP_TARRAY_APPEND(tmp, ao_list, ao_num,
             (struct m_obj_settings){.name = "null"});
     }
@@ -297,7 +298,7 @@ struct ao *ao_init_best(struct mpv_global *global,
             dev = pref_dev;
             mp_verbose(log, "Using preferred device '%s'\n", dev);
         }
-        ao = ao_init(probing, global, input_ctx, encode_lavc_ctx,
+        ao = ao_init(probing, global, input_ctx, encode_lavc_ctx, init_flags,
                      samplerate, format, channels, dev,
                      entry->name, entry->attribs);
         if (ao)
@@ -427,6 +428,29 @@ bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
     if (r)
         MP_VERBOSE(ao, "result: %s\n", mp_chmap_to_str(map));
     return r;
+}
+
+// safe_multichannel=true behaves like ao_chmap_sel_adjust.
+// safe_multichannel=false is a helper for callers which do not support safe
+// handling of arbitrary channel layouts. If the multichannel layouts are not
+// considered "always safe" (e.g. HDMI), then allow only stereo or mono, if
+// they are part of the list in *s.
+bool ao_chmap_sel_adjust2(struct ao *ao, const struct mp_chmap_sel *s,
+                          struct mp_chmap *map, bool safe_multichannel)
+{
+    if (!safe_multichannel && (ao->init_flags & AO_INIT_SAFE_MULTICHANNEL_ONLY)) {
+        struct mp_chmap res = *map;
+        if (mp_chmap_sel_adjust(s, &res)) {
+            if (!mp_chmap_equals(&res, &(struct mp_chmap)MP_CHMAP_INIT_MONO) &&
+                !mp_chmap_equals(&res, &(struct mp_chmap)MP_CHMAP_INIT_STEREO))
+            {
+                MP_WARN(ao, "Disabling multichannel output.\n");
+                *map = (struct mp_chmap)MP_CHMAP_INIT_STEREO;
+            }
+        }
+    }
+
+    return ao_chmap_sel_adjust(ao, s, map);
 }
 
 bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,

@@ -1150,30 +1150,51 @@ Audio
         This and enabling passthrough via ``--ad`` are deprecated in favor of
         using ``--audio-spdif=dts-hd``.
 
-``--audio-channels=<auto|number|layout>``
-    Request a channel layout for audio output (default: stereo). This  will ask
-    the AO to open a device with the given channel layout. It's up to the AO
-    to accept this layout, or to pick a fallback or to error out if the
-    requested layout is not supported.
+``--audio-channels=<auto-safe|auto|layouts>``
+    Control which audio channels are output (e.g. surround vs. stereo). There
+    are the following possibilities:
 
-    The ``--audio-channels`` option either takes a channel number or an explicit
-    channel layout. Channel numbers refer to default layouts, e.g. 2 channels
-    refer to stereo, 6 refers to 5.1.
+    - ``--audio-channels=auto-safe``
+        Use the system's preferred channel layout. If there is none (such
+        as when accessing a hardware device instead of the system mixer),
+        force stereo. Some audio outputs might simply accept any layout and
+        do downmixing on their own.
+
+        This is the default.
+    - ``--audio-channels=auto``
+        Send the audio device whatever it accepts, preferring the audio's
+        original channel layout. Can cause issues with HDMI (see the warning
+        below).
+    - ``--audio-channels=layout1,layout2,...``
+        List of ``,``-separated channel layouts which should be allowed.
+        Technically, this only adjusts the filter chain output to the best
+        matching layout in the list, and passes the result to the audio API.
+        It's possible that the audio API will select a different channel
+        layout.
+
+        Using this mode is recommended for direct hardware output, especially
+        over HDMI (see HDMI warning below).
+    - ``--audio-channels=stereo``
+        Force  a plain stereo downmix. This is a special-case of the previous
+        item. (See paragraphs below for implications.)
+
+    If a list of layouts is given, each item can be either an explicit channel
+    layout name (like ``5.1``), or a channel number. Channel numbers refer to
+    default layouts, e.g. 2 channels refer to stereo, 6 refers to 5.1.
 
     See ``--audio-channels=help`` output for defined default layouts. This also
     lists speaker names, which can be used to express arbitrary channel
     layouts (e.g. ``fl-fr-lfe`` is 2.1).
 
-    ``--audio-channels=auto`` tries to play audio using the input file's
-    channel layout. There is no guarantee that the audio API handles this
-    correctly. See the HDMI warning below.
-    (``empty`` is an accepted obsolete alias for ``auto``.)
-
-    This will also request the channel layout from the decoder. If the decoder
-    does not support the layout, it will fall back to its native channel layout.
-    (You can use ``--ad-lavc-downmix=no`` to make the decoder always output
-    its native layout.) Note that only some decoders support remixing audio.
-    Some that do include AC-3, AAC or DTS audio.
+    If the list of channel layouts has only 1 item, the decoder is asked to
+    produce according output. This sometimes triggers decoder-downmix, which
+    might be different from the normal mpv downmix. (Only some decoders support
+    remixing audio, like AC-3, AAC or DTS. You can use ``--ad-lavc-downmix=no``
+    to make the decoder always output its native layout.) One consequence is
+    that ``--audio-channels=stereo`` triggers decoder downmix, while ``auto``
+    or ``auto-safe`` never will, even if they end up selecting stereo. This
+    happens because the decision whether to use decoder downmix happens long
+    before the audio device is opened.
 
     If the channel layout of the media file (i.e. the decoder) and the AO's
     channel layout don't match, mpv will attempt to insert a conversion filter.
@@ -1185,6 +1206,10 @@ Audio
         the receiver does not support them. If a receiver gets an unsupported
         channel layout, random things can happen, such as dropping the
         additional channels, or adding noise.
+
+        You are recommended to set an explicit whitelist of the layouts you
+        want. For example, most A/V receivers connected via HDMI and that can
+        do 7.1 would  be served by: ``--audio-channels=7.1,5.1,stereo``
 
 ``--audio-normalize-downmix=<yes|no>``
     Enable/disable normalization if surround audio is downmixed to stereo

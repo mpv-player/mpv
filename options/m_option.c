@@ -2287,51 +2287,105 @@ const m_option_type_t m_option_type_afmt = {
 
 #include "audio/chmap.h"
 
-static int parse_chmap(struct mp_log *log, const m_option_t *opt,
-                       struct bstr name, struct bstr param, void *dst)
+static int parse_channels(struct mp_log *log, const m_option_t *opt,
+                          struct bstr name, struct bstr param, void *dst)
 {
-    // min>0: at least min channels, min=0: empty ok
-    int min_ch = (opt->flags & M_OPT_MIN) ? opt->min : 1;
-    assert(min_ch >= 0);
+    // see OPT_CHANNELS for semantics.
+    bool limited = opt->min;
+
+    struct m_channels res = {0};
 
     if (bstr_equals0(param, "help")) {
         mp_chmap_print_help(log);
+        if (!limited) {
+            mp_info(log, "\nOther values:\n"
+                         "    auto-safe\n");
+        }
         return M_OPT_EXIT - 1;
     }
 
-    if (param.len == 0 && min_ch >= 1)
-        return M_OPT_MISSING_PARAM;
-
-    struct mp_chmap res = {0};
-    if (!mp_chmap_from_str(&res, param)) {
-        mp_err(log, "Error parsing channel layout: %.*s\n", BSTR_P(param));
-        return M_OPT_INVALID;
+    bool auto_safe = bstr_equals0(param, "auto-safe");
+    if (bstr_equals0(param, "auto") || bstr_equals0(param, "empty") || auto_safe) {
+        if (limited) {
+            mp_err(log, "Disallowed parameter.\n");
+            return M_OPT_INVALID;
+        }
+        param.len = 0;
+        res.set = true;
+        res.auto_safe = auto_safe;
     }
 
-    if (!mp_chmap_is_valid(&res) && !(min_ch == 0 && mp_chmap_is_empty(&res))) {
-        mp_err(log, "Invalid channel layout: %.*s\n", BSTR_P(param));
-        return M_OPT_INVALID;
+    while (param.len) {
+        bstr item;
+        if (limited) {
+            item = param;
+            param.len = 0;
+        } else {
+            bstr_split_tok(param, ",", &item, &param);
+        }
+
+        struct mp_chmap map = {0};
+        if (!mp_chmap_from_str(&map, item) || !mp_chmap_is_valid(&map)) {
+            mp_err(log, "Invalid channel layout: %.*s\n", BSTR_P(item));
+            talloc_free(res.chmaps);
+            return M_OPT_INVALID;
+        }
+
+        MP_TARRAY_APPEND(NULL, res.chmaps, res.num_chmaps, map);
+        res.set = true;
     }
 
-    if (dst)
-        *(struct mp_chmap *)dst = res;
+    if (dst) {
+        *(struct m_channels *)dst = res;
+    } else {
+        talloc_free(res.chmaps);
+    }
 
     return 1;
 }
 
-static char *print_chmap(const m_option_t *opt, const void *val)
+static char *print_channels(const m_option_t *opt, const void *val)
 {
-    const struct mp_chmap *chmap = val;
-    return talloc_strdup(NULL, mp_chmap_to_str(chmap));
+    const struct m_channels *ch = val;
+    if (!ch->set)
+        return talloc_strdup(NULL, "");
+    if (ch->auto_safe)
+        return talloc_strdup(NULL, "auto-safe");
+    if (ch->num_chmaps > 0) {
+        char *res = talloc_strdup(NULL, "");
+        for (int n = 0; n < ch->num_chmaps; n++) {
+            if (n > 0)
+                res = talloc_strdup_append(res, ",");
+            res = talloc_strdup_append(res, mp_chmap_to_str(&ch->chmaps[n]));
+        }
+        return res;
+    }
+    return talloc_strdup(NULL, "auto");
 }
 
+static void free_channels(void *src)
+{
+    struct m_channels *ch = src;
+    talloc_free(ch->chmaps);
+    *ch = (struct m_channels){0};
+}
 
-const m_option_type_t m_option_type_chmap = {
+static void copy_channels(const m_option_t *opt, void *dst, const void *src)
+{
+    struct m_channels *ch = dst;
+    free_channels(dst);
+    *ch = *(struct m_channels *)src;
+    ch->chmaps =
+        talloc_memdup(NULL, ch->chmaps, sizeof(ch->chmaps[0]) * ch->num_chmaps);
+}
+
+const m_option_type_t m_option_type_channels = {
     .name  = "Audio channels or channel map",
-    .size  = sizeof(struct mp_chmap),
-    .parse = parse_chmap,
-    .print = print_chmap,
-    .copy  = copy_opt,
+    .size  = sizeof(struct m_channels),
+    .parse = parse_channels,
+    .print = print_channels,
+    .copy  = copy_channels,
+    .free = free_channels,
 };
 
 static int parse_timestring(struct bstr str, double *time, char endchar)

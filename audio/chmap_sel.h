@@ -47,4 +47,6 @@ bool mp_chmap_sel_get_def(const struct mp_chmap_sel *s, struct mp_chmap *map,
 struct mp_log;
 void mp_chmal_sel_log(const struct mp_chmap_sel *s, struct mp_log *log, int lev);
 
+void mp_chmap_sel_list(struct mp_chmap *c, struct mp_chmap *maps, int num_maps);
+
 #endif

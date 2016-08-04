@@ -279,7 +279,7 @@ const m_option_t mp_opts[] = {
     // force video/audio rate:
     OPT_DOUBLE("fps", force_fps, CONF_MIN, .min = 0),
     OPT_INTRANGE("audio-samplerate", force_srate, 0, 1000, 16*48000),
-    OPT_CHMAP("audio-channels", audio_output_channels, CONF_MIN, .min = 0),
+    OPT_CHANNELS("audio-channels", audio_output_channels, 0),
     OPT_AUDIOFORMAT("audio-format", audio_output_format, 0),
     OPT_FLAG("audio-normalize-downmix", audio_normalize, 0),
     OPT_DOUBLE("speed", playback_speed, M_OPT_RANGE | M_OPT_FIXED,
@@ -805,7 +805,6 @@ const struct MPOpts mp_default_opts = {
     .sub_visibility = 1,
     .sub_pos = 100,
     .sub_speed = 1.0,
-    .audio_output_channels = MP_CHMAP_INIT_STEREO,
     .audio_output_format = 0,  // AF_FORMAT_UNKNOWN
     .playback_speed = 1.,
     .pitch_correction = 1,

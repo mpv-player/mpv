@@ -43,6 +43,7 @@ struct ao {
     struct encode_lavc_context *encode_lavc_ctx;
     struct input_ctx *input_ctx;
     struct mp_log *log; // Using e.g. "[ao/coreaudio]" as prefix
+    int init_flags; // AO_INIT_* flags
 
     // The device as selected by the user, usually using ao_device_desc.name
     // from an entry from the list returned by driver->list_devices. If the
@@ -191,6 +192,8 @@ void ao_wakeup_poll(struct ao *ao);
 
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map);
+bool ao_chmap_sel_adjust2(struct ao *ao, const struct mp_chmap_sel *s,
+                          struct mp_chmap *map, bool safe_multichannel);
 bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
                           struct mp_chmap *map, int num);
 

@@ -360,7 +360,7 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
 
     snd_pcm_free_chmaps(maps);
 
-    return ao_chmap_sel_adjust(ao, &chmap_sel, chmap);
+    return ao_chmap_sel_adjust2(ao, &chmap_sel, chmap, false);
 }
 
 // Map back our selected channel layout to an ALSA one. This is done this way so

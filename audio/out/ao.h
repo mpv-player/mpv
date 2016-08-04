@@ -50,6 +50,14 @@ enum {
     AO_EVENT_HOTPLUG = 2,
 };
 
+enum {
+    // Allow falling back to ao_null if nothing else works.
+    AO_INIT_NULL_FALLBACK = 1 << 0,
+    // Only accept multichannel configurations that are guaranteed to work
+    // (i.e. not sending arbitrary layouts over HDMI).
+    AO_INIT_SAFE_MULTICHANNEL_ONLY = 1 << 1,
+};
+
 typedef struct ao_control_vol {
     float left;
     float right;
@@ -72,7 +80,7 @@ struct encode_lavc_context;
 struct mp_audio;
 
 struct ao *ao_init_best(struct mpv_global *global,
-                        bool ao_null_fallback,
+                        int init_flags,
                         struct input_ctx *input_ctx,
                         struct encode_lavc_context *encode_lavc_ctx,
                         int samplerate, int format, struct mp_chmap channels);

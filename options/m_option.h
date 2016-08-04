@@ -61,7 +61,7 @@ extern const m_option_type_t m_option_type_afmt;
 extern const m_option_type_t m_option_type_color;
 extern const m_option_type_t m_option_type_geometry;
 extern const m_option_type_t m_option_type_size_box;
-extern const m_option_type_t m_option_type_chmap;
+extern const m_option_type_t m_option_type_channels;
 extern const m_option_type_t m_option_type_node;
 
 // Used internally by m_config.c
@@ -97,6 +97,13 @@ struct m_geometry {
 
 void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
                       int scrw, int scrh, struct m_geometry *gm);
+
+struct m_channels {
+    bool set : 1;
+    bool auto_safe : 1;
+    struct mp_chmap *chmaps;
+    int num_chmaps;
+};
 
 struct m_obj_desc {
     // Name which will be used in the option string
@@ -218,7 +225,7 @@ union m_option_value {
     struct m_color color;
     struct m_geometry geometry;
     struct m_geometry size_box;
-    struct mp_chmap chmap;
+    struct m_channels channels;
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -626,9 +633,10 @@ extern const char m_option_path_separator;
 #define OPT_AUDIOFORMAT(...) \
     OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_afmt)
 
-#define OPT_CHMAP(...) \
-    OPT_GENERAL(struct mp_chmap, __VA_ARGS__, .type = &m_option_type_chmap)
-
+// If .min==1, then passing auto is disallowed, but "" is still accepted, and
+// limit channel list to 1 item.
+#define OPT_CHANNELS(...) \
+    OPT_GENERAL(struct m_channels, __VA_ARGS__, .type = &m_option_type_channels)
 
 #define M_CHOICES(choices)                                              \
     .priv = (void *)&(const struct m_opt_choice_alternatives[]){        \

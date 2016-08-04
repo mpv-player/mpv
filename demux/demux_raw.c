@@ -36,7 +36,7 @@
 #include "osdep/endian.h"
 
 struct demux_rawaudio_opts {
-    struct mp_chmap channels;
+    struct m_channels channels;
     int samplerate;
     int aformat;
 };
@@ -49,7 +49,7 @@ struct demux_rawaudio_opts {
 #define OPT_BASE_STRUCT struct demux_rawaudio_opts
 const struct m_sub_options demux_rawaudio_conf = {
     .opts = (const m_option_t[]) {
-        OPT_CHMAP("channels", channels, CONF_MIN, .min = 1),
+        OPT_CHANNELS("channels", channels, 0, .min = 1),
         OPT_INTRANGE("rate", samplerate, 0, 1000, 8 * 48000),
         OPT_CHOICE("format", aformat, 0,
                    ({"u8",      PCM(0, 0,  8, 0)},
@@ -75,7 +75,11 @@ const struct m_sub_options demux_rawaudio_conf = {
     .size = sizeof(struct demux_rawaudio_opts),
     .defaults = &(const struct demux_rawaudio_opts){
         // Note that currently, stream_cdda expects exactly these parameters!
-        .channels = MP_CHMAP_INIT_STEREO,
+        .channels = {
+            .set = 1,
+            .chmaps = (struct mp_chmap[]){ MP_CHMAP_INIT_STEREO, },
+            .num_chmaps = 1,
+        },
         .samplerate = 44100,
         .aformat = PCM(1, 0, 16, 0), // s16le
     },
@@ -130,9 +134,14 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
     if (check != DEMUX_CHECK_REQUEST && check != DEMUX_CHECK_FORCE)
         return -1;
 
+    if (opts->channels.num_chmaps != 1) {
+        MP_ERR(demuxer, "Invalid channels option given.\n");
+        return -1;
+    }
+
     struct sh_stream *sh = demux_alloc_sh_stream(STREAM_AUDIO);
     struct mp_codec_params *c = sh->codec;
-    c->channels = opts->channels;
+    c->channels = opts->channels.chmaps[0];
     c->force_channels = true;
     c->samplerate = opts->samplerate;
 
