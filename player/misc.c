@@ -93,6 +93,18 @@ double get_play_end_pts(struct MPContext *mpctx)
     return end;
 }
 
+double get_track_seek_offset(struct MPContext *mpctx, struct track *track)
+{
+    struct MPOpts *opts = mpctx->opts;
+    if (track->selected) {
+        if (track->type == STREAM_AUDIO)
+            return -opts->audio_delay;
+        if (track->type == STREAM_SUB)
+            return -opts->sub_delay;
+    }
+    return 0;
+}
+
 float mp_get_cache_percent(struct MPContext *mpctx)
 {
     struct stream_cache_info info = {0};

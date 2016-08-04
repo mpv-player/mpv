@@ -247,6 +247,12 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         // The value is arbitrary, but should be "good enough" in most situations.
         if (hr_seek_very_exact)
             hr_seek_offset = MPMAX(hr_seek_offset, 0.5); // arbitrary
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            double offset = 0;
+            if (!mpctx->tracks[n]->is_external)
+                offset += get_track_seek_offset(mpctx, mpctx->tracks[n]);
+            hr_seek_offset = MPMAX(hr_seek_offset, -offset);
+        }
         demux_pts -= hr_seek_offset;
         demux_flags = (demux_flags | SEEK_HR | SEEK_BACKWARD) & ~SEEK_FORWARD;
     }
@@ -258,6 +264,8 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         struct track *track = mpctx->tracks[t];
         if (track->selected && track->is_external && track->demuxer) {
             double main_new_pos = demux_pts;
+            if (!hr_seek || track->is_external)
+                main_new_pos += get_track_seek_offset(mpctx, track);
             if (demux_flags & SEEK_FACTOR)
                 main_new_pos = seek_pts;
             demux_seek(track->demuxer, main_new_pos, 0);
