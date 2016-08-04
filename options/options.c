@@ -288,7 +288,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("audio-pitch-correction", pitch_correction, 0),
 
     // set a-v distance
-    OPT_FLOATRANGE("audio-delay", audio_delay, 0, -100.0, 100.0),
+    OPT_FLOAT("audio-delay", audio_delay, 0),
 
 // ------------------------- codec/vfilter options --------------------
 
