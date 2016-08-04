@@ -12,3 +12,6 @@ If you're not using git master or the latest release, update.
 
 Make a log file made with -v or --log-file=output.txt, paste it to sprunge.us,
 and replace this text with a link to it.
+
+Do not bother reporting a bug if you do not provide the required information.
+
