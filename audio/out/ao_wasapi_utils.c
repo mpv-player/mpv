@@ -407,7 +407,7 @@ static bool search_channels(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
     }
 
     entry = ao->channels;
-    if (ao_chmap_sel_adjust(ao, &chmap_sel, &entry)){
+    if (ao_chmap_sel_adjust2(ao, &chmap_sel, &entry, !state->opt_exclusive)){
         change_waveformat_channels(wformat, &entry);
         return true;
     }
