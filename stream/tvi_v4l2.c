@@ -1005,7 +1005,10 @@ static int uninit(priv_t *priv)
     /* free memory and close device */
     free(priv->map);                priv->map = NULL;
     priv->mapcount = 0;
-    if(priv->video_fd!=-1)v4l2_close(priv->video_fd);        priv->video_fd  = -1;
+    if(priv->video_fd!=-1) {
+        v4l2_close(priv->video_fd);
+        priv->video_fd  = -1;
+    }
     free(priv->video_dev);        priv->video_dev = NULL;
 
     if (priv->video_ringbuffer) {
