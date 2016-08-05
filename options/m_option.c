@@ -2365,6 +2365,9 @@ static char *print_channels(const m_option_t *opt, const void *val)
 
 static void free_channels(void *src)
 {
+    if (!src)
+        return;
+
     struct m_channels *ch = src;
     talloc_free(ch->chmaps);
     *ch = (struct m_channels){0};
@@ -2372,6 +2375,9 @@ static void free_channels(void *src)
 
 static void copy_channels(const m_option_t *opt, void *dst, const void *src)
 {
+    if (!(dst && src))
+        return;
+
     struct m_channels *ch = dst;
     free_channels(dst);
     *ch = *(struct m_channels *)src;
