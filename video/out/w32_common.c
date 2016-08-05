@@ -95,7 +95,7 @@ struct vo_w32_state {
 
     bool disable_screensaver;
     bool cursor_visible;
-    int event_flags;
+    atomic_uint event_flags;
 
     BOOL tracking;
     TRACKMOUSEEVENT trackEvent;
@@ -569,7 +569,7 @@ static bool handle_char(struct vo_w32_state *w32, wchar_t wc)
 
 static void signal_events(struct vo_w32_state *w32, int events)
 {
-    w32->event_flags |= events;
+    atomic_fetch_or(&w32->event_flags, events);
     vo_wakeup(w32->vo);
 }
 
@@ -1498,8 +1498,7 @@ static void do_control(void *ptr)
     void *arg = p[3];
     int *ret = p[4];
     *ret = gui_thread_control(w32, request, arg);
-    *events |= w32->event_flags;
-    w32->event_flags = 0;
+    *events |= atomic_fetch_and(&w32->event_flags, 0);
     // Safe access, since caller (owner of vo) is blocked.
     if (*events & VO_EVENT_RESIZE) {
         w32->vo->dwidth = w32->dw;
@@ -1510,10 +1509,15 @@ static void do_control(void *ptr)
 int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_w32_state *w32 = vo->w32;
-    int r;
-    void *p[] = {w32, events, &request, arg, &r};
-    mp_dispatch_run(w32->dispatch, do_control, p);
-    return r;
+    if (request == VOCTRL_CHECK_EVENTS) {
+        *events |= atomic_fetch_and(&w32->event_flags, 0);
+        return VO_TRUE;
+    } else {
+        int r;
+        void *p[] = {w32, events, &request, arg, &r};
+        mp_dispatch_run(w32->dispatch, do_control, p);
+        return r;
+    }
 }
 
 static void do_terminate(void *ptr)
