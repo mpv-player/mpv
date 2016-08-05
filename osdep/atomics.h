@@ -28,15 +28,14 @@
 
 // Emulate the parts of C11 stdatomic.h needed by mpv.
 // Still relies on gcc/clang atomic builtins.
-// The t field is a hack to make the non-atomic fallback macro mess work.
 
-typedef struct { volatile unsigned long v, t;       } atomic_ulong;
-typedef struct { volatile int v, t;                 } atomic_int;
-typedef struct { volatile unsigned int v, t;        } atomic_uint;
-typedef struct { volatile _Bool v, t;               } atomic_bool;
-typedef struct { volatile long long v, t;           } atomic_llong;
-typedef struct { volatile uint_least32_t v, t;      } atomic_uint_least32_t;
-typedef struct { volatile unsigned long long v, t;  } atomic_ullong;
+typedef struct { volatile unsigned long v;      } atomic_ulong;
+typedef struct { volatile int v;                } atomic_int;
+typedef struct { volatile unsigned int v;       } atomic_uint;
+typedef struct { volatile _Bool v;              } atomic_bool;
+typedef struct { volatile long long v;          } atomic_llong;
+typedef struct { volatile uint_least32_t v;     } atomic_uint_least32_t;
+typedef struct { volatile unsigned long long v; } atomic_ullong;
 
 #define ATOMIC_VAR_INIT(x) \
     {.v = (x)}
@@ -82,19 +81,7 @@ typedef struct { volatile unsigned long long v, t;  } atomic_ullong;
        ok_; })
 
 #else
-
-// This is extremely wrong. The build system actually disables code that has
-// a serious dependency on working atomics, so this is barely ok.
-#define atomic_load(p) ((p)->v)
-#define atomic_store(p, val) ((p)->v = (val))
-#define atomic_fetch_op_(a, b, op) \
-    ((a)->t = (a)->v, (a)->v = (a)->v op (b), (a)->t)
-#define atomic_fetch_add(a, b) atomic_fetch_op_(a, b, +)
-#define atomic_fetch_and(a, b) atomic_fetch_op_(a, b, &)
-#define atomic_fetch_or(a, b) atomic_fetch_op_(a, b, |)
-#define atomic_compare_exchange_strong(p, old, new) \
-    ((p)->v == *(old) ? ((p)->v = (new), 1) : (*(old) = (p)->v, 0))
-
+# error "this should have been a configuration error, report a bug please"
 #endif /* no atomics */
 
 #endif /* else HAVE_STDATOMIC */
