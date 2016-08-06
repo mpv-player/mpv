@@ -194,24 +194,10 @@ void reselect_demux_stream(struct MPContext *mpctx, struct track *track)
 {
     if (!track->stream)
         return;
-    demuxer_select_track(track->demuxer, track->stream, track->selected);
-    // External files may need an explicit seek to the correct position, if
-    // they were not implicitly advanced during playback.
-    if (track->selected && track->demuxer != mpctx->demuxer) {
-        bool position_ok = false;
-        for (int n = 0; n < demux_get_num_stream(track->demuxer); n++) {
-            struct sh_stream *stream = demux_get_stream(track->demuxer, n);
-            if (stream != track->stream && stream->type != STREAM_SUB)
-                position_ok |= demux_stream_is_selected(stream);
-        }
-        if (!position_ok) {
-            double pts = get_current_time(mpctx);
-            if (pts == MP_NOPTS_VALUE)
-                pts = 0;
-            pts += get_track_seek_offset(mpctx, track);
-            demux_seek(track->demuxer, pts, 0);
-        }
-    }
+    double pts = get_current_time(mpctx);
+    if (pts != MP_NOPTS_VALUE)
+        pts += get_track_seek_offset(mpctx, track);
+    demuxer_select_track(track->demuxer, track->stream, pts, track->selected);
 }
 
 // Called from the demuxer thread if a new packet is available.
@@ -266,7 +252,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
 
-    demuxer_select_track(track->demuxer, stream, false);
+    demuxer_select_track(track->demuxer, stream, MP_NOPTS_VALUE, false);
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 
@@ -467,17 +453,12 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
         reselect_demux_stream(mpctx, current);
     }
 
-    if (track && track->demuxer == mpctx->demuxer)
-        demux_set_enable_refresh_seeks(mpctx->demuxer, true);
-
     mpctx->current_track[order][type] = track;
 
     if (track) {
         track->selected = true;
         reselect_demux_stream(mpctx, track);
     }
-
-    demux_set_enable_refresh_seeks(mpctx->demuxer, false);
 
     if (type == STREAM_VIDEO && order == 0) {
         reinit_video_chain(mpctx);

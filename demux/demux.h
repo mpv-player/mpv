@@ -265,13 +265,12 @@ bool demux_cancel_test(struct demuxer *demuxer);
 
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, double rel_seek_secs, int flags);
-void demux_set_enable_refresh_seeks(struct demuxer *demuxer, bool enabled);
 void demux_set_ts_offset(struct demuxer *demuxer, double offset);
 
 int demux_control(struct demuxer *demuxer, int cmd, void *arg);
 
 void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
-                          bool selected);
+                          double ref_pts, bool selected);
 void demux_set_stream_autoselect(struct demuxer *demuxer, bool autoselect);
 
 void demuxer_help(struct mp_log *log);

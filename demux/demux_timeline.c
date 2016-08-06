@@ -84,7 +84,7 @@ static void reselect_streams(struct demuxer *demuxer)
             // This stops demuxer readahead for inactive segments.
             if (!p->current || seg->d != p->current->d)
                 selected = false;
-            demuxer_select_track(seg->d, sh, selected);
+            demuxer_select_track(seg->d, sh, MP_NOPTS_VALUE, selected);
         }
     }
 }
