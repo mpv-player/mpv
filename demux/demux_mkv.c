@@ -1927,7 +1927,6 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     process_tags(demuxer);
     display_create_tracks(demuxer);
     add_coverart(demuxer);
-    demuxer->allow_refresh_seeks = true;
 
     probe_first_timestamp(demuxer);
     if (opts->demux_mkv->probe_duration)

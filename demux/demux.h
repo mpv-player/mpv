@@ -178,12 +178,6 @@ typedef struct demuxer {
     double start_time;
     // File format allows PTS resets (even if the current file is without)
     bool ts_resets_possible;
-    // Enable fast track switching hacks. This requires from the demuxer:
-    // - seeking is somewhat reliable; packet contents must not change
-    // - packet position (demux_packet.pos) is set, not negative, unique, and
-    //   monotonically increasing
-    // - seeking leaves packet positions invariant
-    bool allow_refresh_seeks;
     // The file data was fully read, and there is no need to keep the stream
     // open, keep the cache active, or to run the demuxer thread. Generating
     // packets is not slow either (unlike e.g. libavdevice pseudo-demuxers).

@@ -158,6 +158,8 @@ struct demux_stream {
     bool eof;               // end of demuxed stream? (true if all buffer empty)
     bool need_refresh;      // enabled mid-stream
     bool refreshing;
+    bool correct_dts;       // packet DTS is strictly monotonically increasing
+    bool correct_pos;       // packet pos is strictly monotonically increasing
     size_t packs;           // number of packets in buffer
     size_t bytes;           // total bytes of packets in buffer
     double base_ts;         // timestamp of the last packet returned to decoder
@@ -166,6 +168,7 @@ struct demux_stream {
     size_t last_br_bytes;   // summed packet sizes since last bitrate calculation
     double bitrate;
     int64_t last_pos;
+    double last_dts;
     struct demux_packet *head;
     struct demux_packet *tail;
 
@@ -205,6 +208,8 @@ static void ds_flush(struct demux_stream *ds)
     ds->refreshing = false;
     ds->need_refresh = false;
     ds->last_pos = -1;
+    ds->last_dts = MP_NOPTS_VALUE;
+    ds->correct_dts = ds->correct_pos = true;
 }
 
 void demux_set_ts_offset(struct demuxer *demuxer, double offset)
@@ -405,14 +410,22 @@ static double get_refresh_seek_pts(struct demux_internal *in)
     double start_ts = in->ref_pts;
     bool needed = false;
     bool normal_seek = true;
+    bool refresh_possible = true;
     for (int n = 0; n < in->num_streams; n++) {
         struct demux_stream *ds = in->streams[n]->ds;
+
+        if (!ds->selected)
+            continue;
+
         if (ds->type == STREAM_VIDEO || ds->type == STREAM_AUDIO)
             start_ts = MP_PTS_MIN(start_ts, ds->base_ts);
+
         needed |= ds->need_refresh;
         // If there were no other streams selected, we can use a normal seek.
-        normal_seek &= ds->need_refresh || !ds->selected;
+        normal_seek &= ds->need_refresh;
         ds->need_refresh = false;
+
+        refresh_possible &= ds->correct_dts || ds->correct_pos;
     }
 
     if (!needed || start_ts == MP_NOPTS_VALUE || !demux->desc->seek ||
@@ -422,14 +435,16 @@ static double get_refresh_seek_pts(struct demux_internal *in)
     if (normal_seek)
         return start_ts;
 
-     if (!demux->allow_refresh_seeks)
+    if (!refresh_possible) {
+        MP_VERBOSE(in, "can't issue refresh seek\n");
         return MP_NOPTS_VALUE;
+    }
 
     for (int n = 0; n < in->num_streams; n++) {
         struct demux_stream *ds = in->streams[n]->ds;
-        // Streams which didn't read any packets yet can return all packets,
-        // or they'd be stuck forever; affects newly selected streams too.
-        if (ds->last_pos != -1)
+        // Streams which didn't have any packets yet will return all packets,
+        // other streams return packets only starting from the last position.
+        if (ds->last_pos != -1 || ds->last_dts != MP_NOPTS_VALUE)
             ds->refreshing = true;
     }
 
@@ -447,13 +462,18 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
     struct demux_internal *in = ds->in;
     pthread_mutex_lock(&in->lock);
 
-    bool drop = false;
+    bool drop = ds->refreshing;
     if (ds->refreshing) {
         // Resume reading once the old position was reached (i.e. we start
         // returning packets where we left off before the refresh).
-        drop = dp->pos <= ds->last_pos;
-        if (dp->pos >= ds->last_pos)
-            ds->refreshing = false;
+        // If it's the same position, drop, but continue normally next time.
+        if (ds->correct_dts) {
+            ds->refreshing = dp->dts < ds->last_dts;
+        } else if (ds->correct_pos) {
+            ds->refreshing = dp->pos < ds->last_pos;
+        } else {
+            ds->refreshing = false; // should not happen
+        }
     }
 
     if (!ds->selected || in->seeking || drop) {
@@ -462,10 +482,14 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
         return;
     }
 
+    ds->correct_pos &= dp->pos >= 0 && dp->pos > ds->last_pos;
+    ds->correct_dts &= dp->dts != MP_NOPTS_VALUE && dp->dts > ds->last_dts;
+    ds->last_pos = dp->pos;
+    ds->last_dts = dp->dts;
+
     dp->stream = stream->index;
     dp->next = NULL;
 
-    ds->last_pos = dp->pos;
     ds->packs++;
     ds->bytes += dp->len;
     if (ds->tail) {
@@ -970,7 +994,6 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         dst->partially_seekable = src->partially_seekable;
         dst->filetype = src->filetype;
         dst->ts_resets_possible = src->ts_resets_possible;
-        dst->allow_refresh_seeks = src->allow_refresh_seeks;
         dst->fully_read = src->fully_read;
         dst->start_time = src->start_time;
         dst->priv = src->priv;
