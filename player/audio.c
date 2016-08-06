@@ -671,6 +671,9 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
     } else if (mpctx->hrseek_active) {
         sync_pts = mpctx->hrseek_pts;
     }
+    // If the audio is enabled mid-stream during playback, sync accordingly.
+    if (sync_pts == MP_NOPTS_VALUE)
+        sync_pts = mpctx->playback_pts;
     if (sync_pts == MP_NOPTS_VALUE) {
         mpctx->audio_status = STATUS_FILLING;
         return true; // syncing disabled
