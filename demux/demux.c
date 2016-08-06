@@ -573,18 +573,20 @@ static bool read_packet(struct demux_internal *in)
 
     pthread_mutex_lock(&in->lock);
 
-    if (eof) {
-        for (int n = 0; n < in->num_streams; n++)
-            in->streams[n]->ds->eof = true;
-        // If we had EOF previously, then don't wakeup (avoids wakeup loop)
-        if (!in->last_eof) {
-            if (in->wakeup_cb)
-                in->wakeup_cb(in->wakeup_cb_ctx);
-            pthread_cond_signal(&in->wakeup);
-            MP_VERBOSE(in, "EOF reached.\n");
+    if (!in->seeking) {
+        if (eof) {
+            for (int n = 0; n < in->num_streams; n++)
+                in->streams[n]->ds->eof = true;
+            // If we had EOF previously, then don't wakeup (avoids wakeup loop)
+            if (!in->last_eof) {
+                if (in->wakeup_cb)
+                    in->wakeup_cb(in->wakeup_cb_ctx);
+                pthread_cond_signal(&in->wakeup);
+                MP_VERBOSE(in, "EOF reached.\n");
+            }
         }
+        in->eof = in->last_eof = eof;
     }
-    in->eof = in->last_eof = eof;
     return true;
 }
 
