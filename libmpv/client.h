@@ -248,7 +248,7 @@ typedef enum mpv_error {
      * making asynchronous requests. (Bugs in the client API implementation
      * could also trigger this, e.g. if events become "lost".)
      */
-    MPV_ERROR_EVENT_QUEUE_FULL = -1,
+    MPV_ERROR_EVENT_QUEUE_FULL  = -1,
     /**
      * Memory allocation failed.
      */
