@@ -215,7 +215,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 21)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 22)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
@@ -1610,7 +1610,7 @@ typedef enum mpv_sub_api {
      * Will return NULL if unavailable (if OpenGL support was not compiled in).
      * See opengl_cb.h for details.
      */
-    MPV_SUB_API_OPENGL_CB = 1,
+    MPV_SUB_API_OPENGL_CB = 1
 } mpv_sub_api;
 
 /**
