@@ -298,6 +298,9 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 
     mp_notify(mpctx, MPV_EVENT_SEEK, NULL);
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
+
+    mpctx->audio_allow_second_chance_seek =
+        !hr_seek && !(demux_flags & SEEK_FORWARD);
 }
 
 // This combines consecutive seek requests.
@@ -889,6 +892,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
     if (!mpctx->restart_complete) {
         mpctx->hrseek_active = false;
         mpctx->restart_complete = true;
+        mpctx->audio_allow_second_chance_seek = false;
         mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
         if (!mpctx->playing_msg_shown) {
             if (opts->playing_msg && opts->playing_msg[0]) {

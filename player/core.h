@@ -382,6 +382,10 @@ typedef struct MPContext {
         bool immediate; // disable seek delay logic
     } seek;
 
+    // Allow audio to issue a second seek if audio is too far ahead (for non-hr
+    // seeks with external audio tracks).
+    bool audio_allow_second_chance_seek;
+
     /* Heuristic for relative chapter seeks: keep track which chapter
      * the user wanted to go to, even if we aren't exactly within the
      * boundaries of that chapter due to an inaccurate seek. */
