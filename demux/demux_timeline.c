@@ -197,6 +197,11 @@ static int d_fill_buffer(struct demuxer *demuxer)
     if (pkt->stream < 0)
         goto drop;
 
+    // for refresh seeks, demux.c prefers monotonically increasing packet pos
+    // since the packet pos is meaningless anyway for timeline, use it
+    if (pkt->pos >= 0)
+        pkt->pos |= (seg->index & 0x7FFFULL) << 48;
+
     struct virtual_stream *vs = &p->streams[pkt->stream];
 
     if (pkt->pts != MP_NOPTS_VALUE && pkt->pts >= seg->end) {
