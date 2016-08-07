@@ -247,6 +247,7 @@ def build(ctx):
         ( "stream/stream_dvdnav.c",              "dvdnav" ),
         ( "stream/stream_edl.c" ),
         ( "stream/stream_file.c" ),
+        ( "stream/stream_cb.c" ),
         ( "stream/stream_lavf.c" ),
         ( "stream/stream_libarchive.c",          "libarchive" ),
         ( "stream/stream_memory.c" ),
@@ -548,7 +549,7 @@ def build(ctx):
             PRIV_LIBS    = get_deps(),
         )
 
-        headers = ["client.h", "qthelper.hpp", "opengl_cb.h"]
+        headers = ["client.h", "qthelper.hpp", "opengl_cb.h", "stream_cb.h"]
         for f in headers:
             ctx.install_as(ctx.env.INCDIR + '/mpv/' + f, 'libmpv/' + f)
 

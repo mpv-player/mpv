@@ -24,6 +24,7 @@
 #include "common/global.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
+#include "common/global.h"
 #include "input/input.h"
 #include "input/cmd_list.h"
 #include "misc/ctype.h"
@@ -62,9 +63,13 @@ struct mp_client_api {
     pthread_mutex_t lock;
 
     // -- protected by lock
+
     struct mpv_handle **clients;
     int num_clients;
     uint64_t event_masks;   // combined events of all clients, or 0 if unknown
+
+    struct mp_custom_protocol *custom_protocols;
+    int num_custom_protocols;
 };
 
 struct observe_property {
@@ -1722,4 +1727,60 @@ void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api)
     }
     unlock_core(ctx);
     return res;
+}
+
+struct mp_custom_protocol {
+    char *protocol;
+    void *user_data;
+    mpv_stream_cb_open_ro_fn open_fn;
+};
+
+int mpv_stream_cb_add_ro(mpv_handle *ctx, const char *protocol, void *user_data,
+                         mpv_stream_cb_open_ro_fn open_fn)
+{
+    if (!open_fn)
+        return MPV_ERROR_INVALID_PARAMETER;
+
+    struct mp_client_api *clients = ctx->clients;
+    int r = 0;
+    pthread_mutex_lock(&clients->lock);
+    for (int n = 0; n < clients->num_custom_protocols; n++) {
+        struct mp_custom_protocol *proto = &clients->custom_protocols[n];
+        if (strcmp(proto->protocol, protocol) == 0) {
+            r = MPV_ERROR_INVALID_PARAMETER;
+            break;
+        }
+    }
+    if (stream_has_proto(protocol))
+        r = MPV_ERROR_INVALID_PARAMETER;
+    if (r >= 0) {
+        struct mp_custom_protocol proto = {
+            .protocol = talloc_strdup(clients, protocol),
+            .user_data = user_data,
+            .open_fn = open_fn,
+        };
+        MP_TARRAY_APPEND(clients, clients->custom_protocols,
+                         clients->num_custom_protocols, proto);
+    }
+    pthread_mutex_unlock(&clients->lock);
+    return r;
+}
+
+bool mp_streamcb_lookup(struct mpv_global *g, const char *protocol,
+                        void **out_user_data, mpv_stream_cb_open_ro_fn *out_fn)
+{
+    struct mp_client_api *clients = g->client_api;
+    bool found = false;
+    pthread_mutex_lock(&clients->lock);
+    for (int n = 0; n < clients->num_custom_protocols; n++) {
+        struct mp_custom_protocol *proto = &clients->custom_protocols[n];
+        if (strcmp(proto->protocol, protocol) == 0) {
+            *out_user_data = proto->user_data;
+            *out_fn = proto->open_fn;
+            found = true;
+            break;
+        }
+    }
+    pthread_mutex_unlock(&clients->lock);
+    return found;
 }

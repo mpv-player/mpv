@@ -299,7 +299,7 @@ typedef enum mpv_error {
      */
     MPV_ERROR_COMMAND           = -12,
     /**
-     * Generic error on loading (used with mpv_event_end_file.error).
+     * Generic error on loading (usually used with mpv_event_end_file.error).
      */
     MPV_ERROR_LOADING_FAILED    = -13,
     /**
@@ -1610,7 +1610,7 @@ typedef enum mpv_sub_api {
      * Will return NULL if unavailable (if OpenGL support was not compiled in).
      * See opengl_cb.h for details.
      */
-    MPV_SUB_API_OPENGL_CB = 1
+    MPV_SUB_API_OPENGL_CB = 1,
 } mpv_sub_api;
 
 /**

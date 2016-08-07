@@ -37,6 +37,7 @@ mpv_set_property
 mpv_set_property_async
 mpv_set_property_string
 mpv_set_wakeup_callback
+mpv_stream_cb_add_ro
 mpv_suspend
 mpv_terminate_destroy
 mpv_unobserve_property

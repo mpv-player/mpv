@@ -5,6 +5,7 @@
 #include <stdbool.h>
 
 #include "libmpv/client.h"
+#include "libmpv/stream_cb.h"
 
 struct MPContext;
 struct mpv_handle;
@@ -45,5 +46,8 @@ struct osd_state;
 struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
                                                struct mp_client_api *client_api);
 void kill_video(struct mp_client_api *client_api);
+
+bool mp_streamcb_lookup(struct mpv_global *g, const char *protocol,
+                        void **out_user_data, mpv_stream_cb_open_ro_fn *out_fn);
 
 #endif
