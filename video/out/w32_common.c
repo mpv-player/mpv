@@ -1511,6 +1511,12 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
     struct vo_w32_state *w32 = vo->w32;
     if (request == VOCTRL_CHECK_EVENTS) {
         *events |= atomic_fetch_and(&w32->event_flags, 0);
+        if (*events & VO_EVENT_RESIZE) {
+            mp_dispatch_lock(w32->dispatch);
+            vo->dwidth = w32->dw;
+            vo->dheight = w32->dh;
+            mp_dispatch_unlock(w32->dispatch);
+        }
         return VO_TRUE;
     } else {
         int r;
