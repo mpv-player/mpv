@@ -1209,6 +1209,12 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     // Likewise, we know sync is off, but is going to be compensated.
     time_left += drop_repeat * vsync;
 
+    // If syncing took too long, disregard timing of the first frame.
+    if (mpctx->num_past_frames == 2 && time_left < 0) {
+        vo_discard_timing_info(vo);
+        time_left = 0;
+    }
+
     if (drop_repeat) {
         mpctx->mistimed_frames_total += 1;
         MP_STATS(mpctx, "mistimed");

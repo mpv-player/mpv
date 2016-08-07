@@ -366,6 +366,7 @@ double vo_get_estimated_vsync_interval(struct vo *vo);
 double vo_get_estimated_vsync_jitter(struct vo *vo);
 double vo_get_display_fps(struct vo *vo);
 double vo_get_delay(struct vo *vo);
+void vo_discard_timing_info(struct vo *vo);
 
 void vo_wakeup(struct vo *vo);
 void vo_wait_default(struct vo *vo, int64_t until_time);

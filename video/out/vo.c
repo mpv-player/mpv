@@ -1096,6 +1096,14 @@ double vo_get_delay(struct vo *vo)
     return res ? (res - mp_time_us()) / 1e6 : 0;
 }
 
+void vo_discard_timing_info(struct vo *vo)
+{
+    struct vo_internal *in = vo->in;
+    pthread_mutex_lock(&in->lock);
+    reset_vsync_timings(vo);
+    pthread_mutex_unlock(&in->lock);
+}
+
 int64_t vo_get_delayed_count(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
