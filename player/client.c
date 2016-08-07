@@ -1592,6 +1592,7 @@ static const char *const err_table[] = {
     [-MPV_ERROR_UNKNOWN_FORMAT] = "unrecognized file format",
     [-MPV_ERROR_UNSUPPORTED] = "not supported",
     [-MPV_ERROR_NOT_IMPLEMENTED] = "operation not implemented",
+    [-MPV_ERROR_GENERIC] = "something happened",
 };
 
 const char *mpv_error_string(int error)

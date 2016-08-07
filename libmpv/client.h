@@ -329,7 +329,11 @@ typedef enum mpv_error {
     /**
      * The API function which was called is a stub only.
      */
-    MPV_ERROR_NOT_IMPLEMENTED   = -19
+    MPV_ERROR_NOT_IMPLEMENTED   = -19,
+    /**
+     * Unspecified error.
+     */
+    MPV_ERROR_GENERIC           = -20
 } mpv_error;
 
 /**
