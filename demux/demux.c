@@ -476,7 +476,7 @@ void demux_add_packet(struct sh_stream *stream, demux_packet_t *dp)
         }
     }
 
-    if (!ds->selected || in->seeking || drop) {
+    if (!ds->selected || ds->need_refresh || in->seeking || drop) {
         pthread_mutex_unlock(&in->lock);
         talloc_free(dp);
         return;
