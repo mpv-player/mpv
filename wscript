@@ -154,7 +154,7 @@ main_dependencies = [
         'func': check_libs(['atomic'],
             check_statement('stdatomic.h',
                 'atomic_int_least64_t test = ATOMIC_VAR_INIT(123);'
-                'int test2 = atomic_load(&test)'))
+                'atomic_fetch_add(&test, 1)'))
     }, {
         'name': 'atomic-builtins',
         'desc': 'compiler support for __atomic built-ins',
