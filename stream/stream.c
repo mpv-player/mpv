@@ -805,8 +805,10 @@ int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
     if (res <= 0) {
         cache->uncached_stream = NULL; // don't free original stream
         free_stream(cache);
-        if (fcache != orig)
+        if (fcache != orig) {
+            fcache->uncached_stream = NULL;
             free_stream(fcache);
+        }
     } else {
         *stream = cache;
     }
