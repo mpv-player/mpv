@@ -154,7 +154,7 @@ typedef int64_t (*mpv_stream_cb_size_fn)(void *cookie);
 typedef void (*mpv_stream_cb_close_fn)(void *cookie);
 
 /**
- * Values for the mpv_stream_cb_control_fn cmd argument.
+ * See mpv_stream_cb_open_ro_fn callback.
  */
 typedef struct mpv_stream_cb_info {
     /**
