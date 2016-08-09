@@ -33,6 +33,7 @@
 
 #include "config.h"
 
+#include "common/av_common.h"
 #include "common/common.h"
 #include "af.h"
 #include "audio/audio_buffer.h"
@@ -63,6 +64,7 @@ typedef struct af_ac3enc_s {
     int cfg_bit_rate;
     int cfg_min_channel_num;
     char *cfg_encoder;
+    char **cfg_avopts;
 } af_ac3enc_t;
 
 // fmt carries the input format. Change it to the best next-possible format
@@ -392,6 +394,10 @@ static int af_open(struct af_instance* af){
         MP_ERR(af, "Audio LAVC, couldn't allocate context!\n");
         return AF_ERROR;
     }
+
+    if (mp_set_avopts(af->log, s->lavc_actx, s->cfg_avopts) < 0)
+        return AF_ERROR;
+
     // For this one, we require the decoder to expert lists of all supported
     // parameters. (Not all decoders do that, but the ones we're interested
     // in do.)
@@ -441,6 +447,7 @@ const struct af_info af_info_lavcac3enc = {
                           ({"auto", 0}, {"default", 0})),
         OPT_INTRANGE("minch", cfg_min_channel_num, 0, 2, 6),
         OPT_STRING("encoder", cfg_encoder, 0),
+        OPT_KEYVALUELIST("o", cfg_avopts, 0),
         {0}
     },
 };
