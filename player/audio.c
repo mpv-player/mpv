@@ -441,6 +441,9 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
                 mp_audio_config_to_str(&fmt));
         MP_VERBOSE(mpctx, "AO: Description: %s\n", ao_get_description(mpctx->ao));
         update_window_title(mpctx, true);
+
+        ao_c->ao_resume_time =
+            opts->audio_wait_open > 0 ? mp_time_sec() + opts->audio_wait_open : 0;
     }
 
     if (recreate_audio_filters(mpctx) < 0)
@@ -860,6 +863,12 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         reinit_audio_filters_and_output(mpctx);
         mpctx->sleeptime = 0;
         return; // try again next iteration
+    }
+
+    if (ao_c->ao_resume_time > mp_time_sec()) {
+        double remaining = ao_c->ao_resume_time - mp_time_sec();
+        mpctx->sleeptime = MPMIN(mpctx->sleeptime, remaining);
+        return;
     }
 
     if (mpctx->vo_chain && ao_c->pts_reset) {

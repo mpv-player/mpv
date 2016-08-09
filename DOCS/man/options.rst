@@ -1352,6 +1352,14 @@ Audio
 
     Not all AOs support this.
 
+``--audio-wait-open=<secs>``
+    This makes sense for use with ``--audio-stream-silence=yes``. If this option
+    is given, the player will wait for the given amount of seconds after opening
+    the audio device before sending actual audio data to it. Useful if your
+    expensive hardware discards the first 1 or 2 seconds of audio data sent to
+    it. If ``--audio-stream-silence=yes`` is not set, this option will likely
+    just waste time.
+
 Subtitles
 ---------
 

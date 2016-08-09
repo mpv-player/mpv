@@ -88,6 +88,7 @@ typedef struct MPOpts {
     char *audio_client_name;
     int ao_null_fallback;
     int audio_stream_silence;
+    float audio_wait_open;
     int force_vo;
     int softvol;
     float softvol_volume;

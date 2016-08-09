@@ -185,6 +185,7 @@ struct ao_chain {
     struct af_stream *af;
     struct ao *ao;
     struct mp_audio_buffer *ao_buffer;
+    double ao_resume_time;
 
     // 1-element input frame queue.
     struct mp_audio *input_frame;
