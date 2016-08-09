@@ -185,7 +185,7 @@ static double get_delay(struct ao *ao)
 static void reset(struct ao *ao)
 {
     struct ao_pull_state *p = ao->api_priv;
-    if (ao->driver->reset)
+    if (!ao->stream_silence && ao->driver->reset)
         ao->driver->reset(ao); // assumes the audio callback thread is stopped
     set_state(ao, AO_STATE_NONE);
     for (int n = 0; n < ao->num_planes; n++)
@@ -195,7 +195,7 @@ static void reset(struct ao *ao)
 
 static void pause(struct ao *ao)
 {
-    if (ao->driver->reset)
+    if (!ao->stream_silence && ao->driver->reset)
         ao->driver->reset(ao);
     set_state(ao, AO_STATE_NONE);
 }
@@ -244,6 +244,10 @@ static int init(struct ao *ao)
         p->buffers[n] = mp_ring_new(ao, ao->buffer * ao->sstride);
     atomic_store(&p->state, AO_STATE_NONE);
     assert(ao->driver->resume);
+
+    if (ao->stream_silence)
+        ao->driver->resume(ao);
+
     return 0;
 }
 

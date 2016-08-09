@@ -56,6 +56,8 @@ enum {
     // Only accept multichannel configurations that are guaranteed to work
     // (i.e. not sending arbitrary layouts over HDMI).
     AO_INIT_SAFE_MULTICHANNEL_ONLY = 1 << 1,
+    // Stream silence as long as no audio is playing.
+    AO_INIT_STREAM_SILENCE = 1 << 2,
 };
 
 typedef struct ao_control_vol {

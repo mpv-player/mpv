@@ -44,6 +44,7 @@ struct ao {
     struct input_ctx *input_ctx;
     struct mp_log *log; // Using e.g. "[ao/coreaudio]" as prefix
     int init_flags; // AO_INIT_* flags
+    bool stream_silence;        // if audio inactive, just play silence
 
     // The device as selected by the user, usually using ao_device_desc.name
     // from an entry from the list returned by driver->list_devices. If the

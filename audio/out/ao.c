@@ -183,6 +183,8 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
     ao->api_priv = talloc_zero_size(ao, ao->api->priv_size);
     assert(!ao->api->priv_defaults && !ao->api->options);
 
+    ao->stream_silence = flags & AO_INIT_STREAM_SILENCE;
+
     int r = ao->driver->init(ao);
     if (r < 0) {
         // Silly exception for coreaudio spdif redirection

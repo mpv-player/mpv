@@ -1341,6 +1341,17 @@ Audio
 
     Default: 0.2 (200 ms).
 
+``--audio-stream-silence=<yes|no>``
+    Cash-grab consumer audio hardware (such as A/V receivers) often ignore
+    initial audio sent over HDMI. This can happen every time audio over HDMI
+    is stopped and resumed. In order to compensate for this, you can enable
+    this option to not to stop and restart audio on seeks, and fill the gaps
+    with silence. Likewise, when pausing playback, audio is not stopped, and
+    silence is played while paused. Note that if no audio track is selected,
+    the audio device will still be closed immediately.
+
+    Not all AOs support this.
+
 Subtitles
 ---------
 
