@@ -296,6 +296,8 @@ static int match_lang(char **langs, char *lang)
 static bool compare_track(struct track *t1, struct track *t2, char **langs,
                           struct MPOpts *opts)
 {
+    if (!opts->autoload_files && t1->is_external != t2->is_external)
+        return !t1->is_external;
     bool ext1 = t1->is_external && !t1->no_default;
     bool ext2 = t2->is_external && !t2->no_default;
     if (ext1 != ext2)
@@ -353,6 +355,8 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         && !pick->forced_track)
         pick = NULL;
     if (pick && pick->attached_picture && !mpctx->opts->audio_display)
+        pick = NULL;
+    if (pick && !opts->autoload_files && pick->is_external)
         pick = NULL;
     return pick;
 }
@@ -604,6 +608,8 @@ static void open_external_files(struct MPContext *mpctx, char **files,
 void autoload_external_files(struct MPContext *mpctx)
 {
     if (mpctx->opts->sub_auto < 0 && mpctx->opts->audiofile_auto < 0)
+        return;
+    if (!mpctx->opts->autoload_files)
         return;
 
     void *tmp = talloc_new(NULL);

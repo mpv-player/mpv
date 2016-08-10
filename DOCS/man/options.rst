@@ -3720,6 +3720,16 @@ Miscellaneous
     ``--audio-file``, this includes all tracks, and does not cause default
     stream selection over the "proper" file.
 
+``--autoload-files=<yes|no>``
+    Automatically load/select external files (default: yes).
+
+    If set to ``no``, then do not automatically load external files as specified
+    by ``--sub-auto`` and ``--audio-file-auto``. If external files are forcibly
+    added (like with ``--sub-file``), they will not be auto-selected.
+
+    This does not affect playlist expansion, redirection, or other loading of
+    referenced files like with ordered chapters.
+
 ``--lavfi-complex=<string>``
     Set a "complex" libavfilter filter, which means a single filter graph can
     take input from multiple source audio and video tracks. The graph can result

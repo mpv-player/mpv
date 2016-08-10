@@ -342,6 +342,7 @@ const m_option_t mp_opts[] = {
     OPT_PATHLIST("sub-paths", sub_paths, 0),
     OPT_PATHLIST("audio-file-paths", audiofile_paths, 0),
     OPT_STRING_APPEND_LIST("external-file", external_files, M_OPT_FILE),
+    OPT_FLAG("autoload-files", autoload_files, 0),
     OPT_STRING("sub-codepage", sub_cp, 0),
     OPT_FLOAT("sub-delay", sub_delay, 0),
     OPT_FLOAT("sub-fps", sub_fps, 0),
@@ -763,6 +764,7 @@ const struct MPOpts mp_default_opts = {
     .sync_audio_drop_size = 0.020,
     .load_config = 1,
     .position_resume = 1,
+    .autoload_files = 1,
     .stream_cache = {
         .size = -1,
         .def_size = 75000,
