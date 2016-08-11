@@ -196,7 +196,7 @@ Playback Control
     position and so can take some time depending on decoding performance. For
     some video formats, precise seeks are disabled. This option selects the
     default choice to use for seeks; it is possible to explicitly override that
-    default in the definition of key bindings and in slave mode commands.
+    default in the definition of key bindings and in input commands.
 
     :no:       Never use precise seeks.
     :absolute: Use precise seeks if the seek is to an absolute position in the
@@ -374,7 +374,7 @@ Program Behavior
 
 ``--idle=<no|yes|once>``
     Makes mpv wait idly instead of quitting when there is no file to play.
-    Mostly useful in slave mode, where mpv can be controlled through input
+    Mostly useful in input mode, where mpv can be controlled through input
     commands.
 
     ``once`` will only idle at start and let the player close once the
@@ -2587,7 +2587,7 @@ Input
     automatically enabled when ``-`` is found on the command line. There are
     situations where you have to set it manually, e.g. if you open
     ``/dev/stdin`` (or the equivalent on your system), use stdin in a playlist
-    or intend to read from stdin later on via the loadfile or loadlist slave
+    or intend to read from stdin later on via the loadfile or loadlist input
     commands.
 
 ``--input-ipc-server=<filename>``
@@ -2978,7 +2978,7 @@ Screenshot
         insert the number of the current month as number. You have to use
         multiple ``%tX`` specifiers to build a full date/time string.
     ``%{prop[:fallback text]}``
-        Insert the value of the slave property 'prop'. E.g. ``%{filename}`` is
+        Insert the value of the input property 'prop'. E.g. ``%{filename}`` is
         the same as ``%f``. If the property does not exist or is not available,
         an error text is inserted, unless a fallback is specified.
     ``%%``
@@ -3227,7 +3227,7 @@ TV
         If <chan> is an integer greater than 1000, it will be treated as
         frequency (in kHz) rather than channel name from frequency table.
         Use _ for spaces in names (or play with quoting ;-) ). The channel
-        names will then be written using OSD, and the slave commands
+        names will then be written using OSD, and the input commands
         ``tv_step_channel``, ``tv_set_channel`` and ``tv_last_channel``
         will be usable for a remote control. Not compatible with
         the ``frequency`` parameter.
@@ -3676,7 +3676,7 @@ Miscellaneous
 ``--stream-capture=<filename>``
     Allows capturing the primary stream (not additional audio tracks or other
     kind of streams) into the given file. Capturing can also be started and
-    stopped by changing the filename with the ``stream-capture`` slave property.
+    stopped by changing the filename with the ``stream-capture`` property.
     Generally this will not produce usable results for anything else than MPEG
     or raw streams, unless capturing includes the file headers and is not
     interrupted. Note that, due to cache latencies, captured data may begin and
