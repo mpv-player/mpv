@@ -10,8 +10,12 @@ If you're not using git master or the latest release, update.
 
 ### Log files
 
-Make a log file made with -v or --log-file=output.txt, paste it to sprunge.us,
-and replace this text with a link to it.
+Make a log file made with -v or --log-file=output.txt, paste it to
+http://sprunge.us or a similar site, and replace this text with a link to it.
 
 Do not bother reporting a bug if you do not provide the required information.
 
+### Sample files
+
+Sample files needed to reproduce this issue can be uploaded to https://0x0.st/
+or similar sites. (Only needed if the issue cannot be reproduced without it.)
