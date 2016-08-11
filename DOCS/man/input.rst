@@ -869,6 +869,12 @@ Property list
     looks better for display purposes. Use the ``path`` property to get an
     unmodified filename.)
 
+    This has a sub-property:
+
+    ``filename/no-ext``
+        Like the ``filename`` property, but if the text contains a ``.``, strip
+        all text after the last ``.``. Usually this removes the file extension.
+
 ``file-size``
     Length in bytes of the source file/stream. (This is the same as
     ``${stream-end}``. For ordered chapters and such, the

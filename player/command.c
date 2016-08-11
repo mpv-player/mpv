@@ -346,7 +346,19 @@ static int mp_property_filename(void *ctx, struct m_property *prop,
     if (mp_is_url(bstr0(filename)))
         mp_url_unescape_inplace(filename);
     char *f = (char *)mp_basename(filename);
-    int r = m_property_strdup_ro(action, arg, f[0] ? f : filename);
+    if (!f[0])
+        f = filename;
+    if (action == M_PROPERTY_KEY_ACTION) {
+        struct m_property_action_arg *ka = arg;
+        if (strcmp(ka->key, "no-ext") == 0) {
+            action = ka->action;
+            arg = ka->arg;
+            bstr root;
+            if (mp_splitext(f, &root))
+                f = bstrto0(filename, root);
+        }
+    }
+    int r = m_property_strdup_ro(action, arg, f);
     talloc_free(filename);
     return r;
 }
