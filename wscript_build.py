@@ -110,7 +110,6 @@ def build(ctx):
         ( "audio/decode/dec_audio.c" ),
         ( "audio/filter/af.c" ),
         ( "audio/filter/af_channels.c" ),
-        ( "audio/filter/af_delay.c" ),
         ( "audio/filter/af_drc.c" ),
         ( "audio/filter/af_equalizer.c" ),
         ( "audio/filter/af_format.c" ),
