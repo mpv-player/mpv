@@ -210,7 +210,10 @@ typedef struct demuxer {
     struct mp_log *log, *glog;
     struct demuxer_params *params;
 
-    struct demux_internal *in; // internal to demux.c
+    // internal to demux.c
+    struct demux_internal *in;
+    struct mp_tags **update_stream_tags;
+    int num_update_stream_tags;
 
     // Since the demuxer can run in its own thread, and the stream is not
     // thread-safe, only the demuxer is allowed to access the stream directly.
@@ -273,6 +276,8 @@ int demuxer_add_attachment(struct demuxer *demuxer, char *name,
                            char *type, void *data, size_t data_size);
 int demuxer_add_chapter(demuxer_t *demuxer, char *name,
                         double pts, uint64_t demuxer_id);
+void demux_set_stream_tags(struct demuxer *demuxer, struct sh_stream *sh,
+                           struct mp_tags *tags);
 
 double demuxer_get_time_length(struct demuxer *demuxer);
 

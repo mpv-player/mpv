@@ -232,6 +232,7 @@ struct sh_stream *demux_alloc_sh_stream(enum stream_type type)
         .ff_index = -1,     // may be overwritten by demuxer
         .demuxer_id = -1,   // ... same
         .codec = talloc_zero(sh, struct mp_codec_params),
+        .tags = talloc_zero(sh, struct mp_tags),
     };
     sh->codec->type = type;
     return sh;
@@ -274,6 +275,33 @@ void demux_add_sh_stream(struct demuxer *demuxer, struct sh_stream *sh)
     if (in->wakeup_cb)
         in->wakeup_cb(in->wakeup_cb_ctx);
     pthread_mutex_unlock(&in->lock);
+}
+
+// Update sh->tags (lazily). This must be called by demuxers which update
+// stream tags after init. (sh->tags can be accessed by the playback thread,
+// which means the demuxer thread cannot write or read it directly.)
+// Before init is finished, sh->tags can still be accessed freely.
+// Ownership of tags goes to the function.
+void demux_set_stream_tags(struct demuxer *demuxer, struct sh_stream *sh,
+                           struct mp_tags *tags)
+{
+    struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_thread);
+
+    if (sh->ds) {
+        while (demuxer->num_update_stream_tags <= sh->index) {
+            MP_TARRAY_APPEND(demuxer, demuxer->update_stream_tags,
+                             demuxer->num_update_stream_tags, NULL);
+        }
+        talloc_free(demuxer->update_stream_tags[sh->index]);
+        demuxer->update_stream_tags[sh->index] = talloc_steal(demuxer, tags);
+
+        demux_changed(demuxer, DEMUX_EVENT_METADATA);
+    } else {
+        // not added yet
+        talloc_free(sh->tags);
+        sh->tags = talloc_steal(sh, tags);
+    }
 }
 
 // Return a stream with the given index. Since streams can only be added during
@@ -900,17 +928,18 @@ static int decode_float(char *str, float *out)
     return 0;
 }
 
-static int decode_gain(demuxer_t *demuxer, const char *tag, float *out)
+static int decode_gain(struct mp_log *log, struct mp_tags *tags,
+                       const char *tag, float *out)
 {
     char *tag_val = NULL;
     float dec_val;
 
-    tag_val = mp_tags_get_str(demuxer->metadata, tag);
+    tag_val = mp_tags_get_str(tags, tag);
     if (!tag_val)
         return -1;
 
     if (decode_float(tag_val, &dec_val)) {
-        mp_msg(demuxer->log, MSGL_ERR, "Invalid replaygain value\n");
+        mp_msg(log, MSGL_ERR, "Invalid replaygain value\n");
         return -1;
     }
 
@@ -918,14 +947,15 @@ static int decode_gain(demuxer_t *demuxer, const char *tag, float *out)
     return 0;
 }
 
-static int decode_peak(demuxer_t *demuxer, const char *tag, float *out)
+static int decode_peak(struct mp_log *log, struct mp_tags *tags,
+                       const char *tag, float *out)
 {
     char *tag_val = NULL;
     float dec_val;
 
     *out = 1.0;
 
-    tag_val = mp_tags_get_str(demuxer->metadata, tag);
+    tag_val = mp_tags_get_str(tags, tag);
     if (!tag_val)
         return 0;
 
@@ -939,38 +969,47 @@ static int decode_peak(demuxer_t *demuxer, const char *tag, float *out)
     return 0;
 }
 
-static void apply_replaygain(demuxer_t *demuxer, struct replaygain_data *rg)
+static struct replaygain_data *decode_rgain(struct mp_log *log,
+                                            struct mp_tags *tags)
+{
+    struct replaygain_data rg = {0};
+
+    if (!decode_gain(log, tags, "REPLAYGAIN_TRACK_GAIN", &rg.track_gain) &&
+        !decode_peak(log, tags, "REPLAYGAIN_TRACK_PEAK", &rg.track_peak) &&
+        !decode_gain(log, tags, "REPLAYGAIN_ALBUM_GAIN", &rg.album_gain) &&
+        !decode_peak(log, tags, "REPLAYGAIN_ALBUM_PEAK", &rg.album_peak))
+    {
+        return talloc_memdup(NULL, &rg, sizeof(rg));
+    }
+
+    if (!decode_gain(log, tags, "REPLAYGAIN_GAIN", &rg.track_gain) &&
+        !decode_peak(log, tags, "REPLAYGAIN_PEAK", &rg.track_peak))
+    {
+        rg.album_gain = rg.track_gain;
+        rg.album_peak = rg.track_peak;
+        return talloc_memdup(NULL, &rg, sizeof(rg));
+    }
+
+    return NULL;
+}
+
+static void demux_update_replaygain(demuxer_t *demuxer)
 {
     struct demux_internal *in = demuxer->in;
     for (int n = 0; n < in->num_streams; n++) {
         struct sh_stream *sh = in->streams[n];
         if (sh->type == STREAM_AUDIO && !sh->codec->replaygain_data) {
-            MP_VERBOSE(demuxer, "Replaygain: Track=%f/%f Album=%f/%f\n",
-                       rg->track_gain, rg->track_peak,
-                       rg->album_gain, rg->album_peak);
-            sh->codec->replaygain_data = talloc_memdup(in, rg, sizeof(*rg));
+            struct replaygain_data *rg = decode_rgain(demuxer->log, sh->tags);
+            if (!rg)
+                rg = decode_rgain(demuxer->log, demuxer->metadata);
+            if (rg) {
+                MP_VERBOSE(demuxer, "Replaygain/%d: Track=%f/%f Album=%f/%f\n",
+                           sh->index,
+                           rg->track_gain, rg->track_peak,
+                           rg->album_gain, rg->album_peak);
+                sh->codec->replaygain_data = talloc_steal(in, rg);
+            }
         }
-    }
-}
-
-static void demux_export_replaygain(demuxer_t *demuxer)
-{
-    struct replaygain_data rg = {0};
-
-    if (!decode_gain(demuxer, "REPLAYGAIN_TRACK_GAIN", &rg.track_gain) &&
-        !decode_peak(demuxer, "REPLAYGAIN_TRACK_PEAK", &rg.track_peak) &&
-        !decode_gain(demuxer, "REPLAYGAIN_ALBUM_GAIN", &rg.album_gain) &&
-        !decode_peak(demuxer, "REPLAYGAIN_ALBUM_PEAK", &rg.album_peak))
-    {
-        apply_replaygain(demuxer, &rg);
-    }
-
-    if (!decode_gain(demuxer, "REPLAYGAIN_GAIN", &rg.track_gain) &&
-        !decode_peak(demuxer, "REPLAYGAIN_PEAK", &rg.track_peak))
-    {
-        rg.album_gain = rg.track_gain;
-        rg.album_peak = rg.track_peak;
-        apply_replaygain(demuxer, &rg);
     }
 }
 
@@ -998,10 +1037,25 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         dst->start_time = src->start_time;
         dst->priv = src->priv;
     }
+
     if (src->events & DEMUX_EVENT_METADATA) {
         talloc_free(dst->metadata);
         dst->metadata = mp_tags_dup(dst, src->metadata);
+
+        if (dst->num_update_stream_tags != src->num_update_stream_tags) {
+            talloc_free(dst->update_stream_tags);
+            dst->update_stream_tags =
+                talloc_zero_array(dst, struct mp_tags *, dst->num_update_stream_tags);
+            dst->num_update_stream_tags = src->num_update_stream_tags;
+        }
+        for (int n = 0; n < dst->num_update_stream_tags; n++) {
+            talloc_free(dst->update_stream_tags[n]);
+            dst->update_stream_tags[n] =
+                talloc_steal(dst->update_stream_tags, src->update_stream_tags[n]);
+            src->update_stream_tags[n] = NULL;
+        }
     }
+
     dst->events |= src->events;
     src->events = 0;
 }
@@ -1023,8 +1077,6 @@ void demux_changed(demuxer_t *demuxer, int events)
 
     if (demuxer->events & DEMUX_EVENT_INIT)
         demuxer_sort_chapters(demuxer);
-    if (demuxer->events & (DEMUX_EVENT_METADATA | DEMUX_EVENT_STREAMS))
-        demux_export_replaygain(demuxer);
 
     demux_copy(in->d_buffer, demuxer);
 
@@ -1047,8 +1099,28 @@ void demux_update(demuxer_t *demuxer)
     demux_copy(demuxer, in->d_buffer);
     demuxer->events |= in->events;
     in->events = 0;
-    if (in->stream_metadata && (demuxer->events & DEMUX_EVENT_METADATA))
-        mp_tags_merge(demuxer->metadata, in->stream_metadata);
+    if (demuxer->events & DEMUX_EVENT_METADATA) {
+        int num_streams = MPMIN(in->num_streams, demuxer->num_update_stream_tags);
+        for (int n = 0; n < num_streams; n++) {
+            struct mp_tags *tags = demuxer->update_stream_tags[n];
+            demuxer->update_stream_tags[n] = NULL;
+            if (tags) {
+                struct sh_stream *sh = in->streams[n];
+                talloc_free(sh->tags);
+                sh->tags = talloc_steal(sh, tags);
+            }
+        }
+
+        // Often useful audio-only files, which have metadata in the audio track
+        // metadata instead of the main metadata (especially OGG).
+        if (in->num_streams == 1)
+            mp_tags_merge(demuxer->metadata, in->streams[0]->tags);
+
+        if (in->stream_metadata)
+            mp_tags_merge(demuxer->metadata, in->stream_metadata);
+    }
+    if (demuxer->events & (DEMUX_EVENT_METADATA | DEMUX_EVENT_STREAMS))
+        demux_update_replaygain(demuxer);
     pthread_mutex_unlock(&in->lock);
 }
 
