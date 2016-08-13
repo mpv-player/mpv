@@ -1813,6 +1813,16 @@ Property list
     ``track-list/N/audio-channels`` (deprecated)
         Deprecated alias for ``track-list/N/demux-channel-count``.
 
+    ``track-list/N/replaygain-track-peak``, ``track-list/N/replaygain-track-gain``
+        Per-track replaygain values. Only available for audio tracks with
+        corresponding information stored in the source file.
+
+    ``track-list/N/replaygain-album-peak``, ``track-list/N/replaygain-album-gain``
+        Per-album replaygain values. If the file has per-track but no per-album
+        information, the per-album values will be copied from the per-track
+        values currently. It's possible that future mpv versions will make
+        these properties unavailable instead in this case.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -1842,6 +1852,10 @@ Property list
                 "demux-samplerate"  MPV_FORMAT_INT64
                 "demux-fps"         MPV_FORMAT_DOUBLE
                 "audio-channels"    MPV_FORMAT_INT64
+                "replaygain-track-peak" MPV_FORMAT_DOUBLE
+                "replaygain-track-gain" MPV_FORMAT_DOUBLE
+                "replaygain-album-peak" MPV_FORMAT_DOUBLE
+                "replaygain-album-gain" MPV_FORMAT_DOUBLE
 
 ``chapter-list``
     List of chapters, current entry marked. Currently, the raw property value
