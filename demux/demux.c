@@ -938,7 +938,7 @@ static int decode_gain(struct mp_log *log, struct mp_tags *tags,
     if (!tag_val)
         return -1;
 
-    if (decode_float(tag_val, &dec_val)) {
+    if (decode_float(tag_val, &dec_val) < 0) {
         mp_msg(log, MSGL_ERR, "Invalid replaygain value\n");
         return -1;
     }
@@ -959,11 +959,8 @@ static int decode_peak(struct mp_log *log, struct mp_tags *tags,
     if (!tag_val)
         return 0;
 
-    if (decode_float(tag_val, &dec_val))
-        return 0;
-
-    if (dec_val == 0.0)
-        return 0;
+    if (decode_float(tag_val, &dec_val) < 0 || dec_val <= 0.0)
+        return -1;
 
     *out = dec_val;
     return 0;
@@ -974,11 +971,11 @@ static struct replaygain_data *decode_rgain(struct mp_log *log,
 {
     struct replaygain_data rg = {0};
 
-    if (!decode_gain(log, tags, "REPLAYGAIN_TRACK_GAIN", &rg.track_gain) &&
-        !decode_peak(log, tags, "REPLAYGAIN_TRACK_PEAK", &rg.track_peak))
+    if (decode_gain(log, tags, "REPLAYGAIN_TRACK_GAIN", &rg.track_gain) >= 0 &&
+        decode_peak(log, tags, "REPLAYGAIN_TRACK_PEAK", &rg.track_peak) >= 0)
     {
-        if (!(!decode_gain(log, tags, "REPLAYGAIN_ALBUM_GAIN", &rg.album_gain) &&
-              !decode_peak(log, tags, "REPLAYGAIN_ALBUM_PEAK", &rg.album_peak)))
+        if (decode_gain(log, tags, "REPLAYGAIN_ALBUM_GAIN", &rg.album_gain) < 0 ||
+            decode_peak(log, tags, "REPLAYGAIN_ALBUM_PEAK", &rg.album_peak) < 0)
         {
             rg.album_gain = rg.track_gain;
             rg.album_peak = rg.track_peak;
@@ -986,8 +983,8 @@ static struct replaygain_data *decode_rgain(struct mp_log *log,
         return talloc_memdup(NULL, &rg, sizeof(rg));
     }
 
-    if (!decode_gain(log, tags, "REPLAYGAIN_GAIN", &rg.track_gain) &&
-        !decode_peak(log, tags, "REPLAYGAIN_PEAK", &rg.track_peak))
+    if (decode_gain(log, tags, "REPLAYGAIN_GAIN", &rg.track_gain) >= 0 &&
+        decode_peak(log, tags, "REPLAYGAIN_PEAK", &rg.track_peak) >= 0)
     {
         rg.album_gain = rg.track_gain;
         rg.album_peak = rg.track_peak;
