@@ -975,10 +975,14 @@ static struct replaygain_data *decode_rgain(struct mp_log *log,
     struct replaygain_data rg = {0};
 
     if (!decode_gain(log, tags, "REPLAYGAIN_TRACK_GAIN", &rg.track_gain) &&
-        !decode_peak(log, tags, "REPLAYGAIN_TRACK_PEAK", &rg.track_peak) &&
-        !decode_gain(log, tags, "REPLAYGAIN_ALBUM_GAIN", &rg.album_gain) &&
-        !decode_peak(log, tags, "REPLAYGAIN_ALBUM_PEAK", &rg.album_peak))
+        !decode_peak(log, tags, "REPLAYGAIN_TRACK_PEAK", &rg.track_peak))
     {
+        if (!(!decode_gain(log, tags, "REPLAYGAIN_ALBUM_GAIN", &rg.album_gain) &&
+              !decode_peak(log, tags, "REPLAYGAIN_ALBUM_PEAK", &rg.album_peak)))
+        {
+            rg.album_gain = rg.track_gain;
+            rg.album_peak = rg.track_peak;
+        }
         return talloc_memdup(NULL, &rg, sizeof(rg));
     }
 
