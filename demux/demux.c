@@ -1002,13 +1002,8 @@ static void demux_update_replaygain(demuxer_t *demuxer)
             struct replaygain_data *rg = decode_rgain(demuxer->log, sh->tags);
             if (!rg)
                 rg = decode_rgain(demuxer->log, demuxer->metadata);
-            if (rg) {
-                MP_VERBOSE(demuxer, "Replaygain/%d: Track=%f/%f Album=%f/%f\n",
-                           sh->index,
-                           rg->track_gain, rg->track_peak,
-                           rg->album_gain, rg->album_peak);
+            if (rg)
                 sh->codec->replaygain_data = talloc_steal(in, rg);
-            }
         }
     }
 }
