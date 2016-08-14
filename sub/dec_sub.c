@@ -208,7 +208,7 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
     while (1) {
         bool read_more = true;
         if (sub->sd->driver->accepts_packet)
-            read_more = sub->sd->driver->accepts_packet(sub->sd);
+            read_more = sub->sd->driver->accepts_packet(sub->sd, video_pts);
 
         if (!read_more)
             break;
