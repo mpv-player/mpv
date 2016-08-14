@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <d3d9.h>
 #include <inttypes.h>
+#include <limits.h>
 #include "config.h"
 #include "options/options.h"
 #include "options/m_option.h"
