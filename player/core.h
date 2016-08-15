@@ -80,6 +80,10 @@ enum seek_precision {
     MPSEEK_VERY_EXACT,
 };
 
+enum seek_flags {
+    MPSEEK_FLAG_DELAY = 1 << 0, // give player chance to coalesce multiple seeks
+};
+
 enum video_sync {
     VS_DEFAULT = 0,
     VS_DISP_RESAMPLE,
@@ -380,7 +384,7 @@ typedef struct MPContext {
         enum seek_type type;
         enum seek_precision exact;
         double amount;
-        bool immediate; // disable seek delay logic
+        unsigned flags; // MPSEEK_FLAG_*
     } seek;
 
     // Allow audio to issue a second seek if audio is too far ahead (for non-hr
@@ -512,7 +516,7 @@ void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx, int dir);
 void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
-                enum seek_precision exact, bool immediate);
+                enum seek_precision exact, int flags);
 double get_time_length(struct MPContext *mpctx);
 double get_current_time(struct MPContext *mpctx);
 double get_playback_time(struct MPContext *mpctx);

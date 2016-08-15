@@ -141,7 +141,7 @@ void add_step_frame(struct MPContext *mpctx, int dir)
         unpause_player(mpctx);
     } else if (dir < 0) {
         if (!mpctx->hrseek_active) {
-            queue_seek(mpctx, MPSEEK_BACKSTEP, 0, MPSEEK_VERY_EXACT, true);
+            queue_seek(mpctx, MPSEEK_BACKSTEP, 0, MPSEEK_VERY_EXACT, 0);
             pause_player(mpctx);
         }
     }
@@ -305,7 +305,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 
 // This combines consecutive seek requests.
 void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
-                enum seek_precision exact, bool immediate)
+                enum seek_precision exact, int flags)
 {
     struct seek_params *seek = &mpctx->seek;
 
@@ -314,7 +314,7 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
 
     switch (type) {
     case MPSEEK_RELATIVE:
-        seek->immediate |= immediate;
+        seek->flags |= flags;
         if (seek->type == MPSEEK_FACTOR)
             return;  // Well... not common enough to bother doing better
         seek->amount += amount;
@@ -332,7 +332,7 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
             .type = type,
             .amount = amount,
             .exact = exact,
-            .immediate = immediate,
+            .flags = flags,
         };
         return;
     case MPSEEK_NONE:
@@ -351,7 +351,8 @@ void execute_queued_seek(struct MPContext *mpctx)
         /* If the user seeks continuously (keeps arrow key down)
          * try to finish showing a frame from one location before doing
          * another seek (which could lead to unchanging display). */
-        if (!mpctx->seek.immediate && mpctx->video_status < STATUS_PLAYING &&
+        bool delay = mpctx->seek.flags & MPSEEK_FLAG_DELAY;
+        if (delay && mpctx->video_status < STATUS_PLAYING &&
             mp_time_sec() - mpctx->start_timestamp < 0.3)
             return;
         mp_seek(mpctx, mpctx->seek);
@@ -682,7 +683,7 @@ static void handle_sstep(struct MPContext *mpctx)
 
     if (opts->step_sec > 0 && !mpctx->paused) {
         set_osd_function(mpctx, OSD_FFW);
-        queue_seek(mpctx, MPSEEK_RELATIVE, opts->step_sec, MPSEEK_DEFAULT, true);
+        queue_seek(mpctx, MPSEEK_RELATIVE, opts->step_sec, MPSEEK_DEFAULT, 0);
     }
 
     if (mpctx->video_status >= STATUS_EOF) {
@@ -699,7 +700,7 @@ static void handle_loop_file(struct MPContext *mpctx)
     if (opts->loop_file && mpctx->stop_play == AT_END_OF_FILE) {
         mpctx->stop_play = KEEP_PLAYING;
         set_osd_function(mpctx, OSD_FFW);
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, 0, MPSEEK_DEFAULT, true);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, 0, MPSEEK_DEFAULT, 0);
         if (opts->loop_file > 0)
             opts->loop_file--;
     }

@@ -229,7 +229,7 @@ int reinit_audio_filters(struct MPContext *mpctx)
         mpctx->playback_pts != MP_NOPTS_VALUE && delay > 0.2)
     {
         queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->playback_pts,
-                   MPSEEK_EXACT, true);
+                   MPSEEK_EXACT, 0);
     }
     return 1;
 }

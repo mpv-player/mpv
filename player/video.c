@@ -543,7 +543,7 @@ void mp_force_video_refresh(struct MPContext *mpctx)
         mpctx->last_vo_pts != MP_NOPTS_VALUE)
     {
         queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->last_vo_pts,
-                   MPSEEK_VERY_EXACT, true);
+                   MPSEEK_VERY_EXACT, 0);
     }
 }
 

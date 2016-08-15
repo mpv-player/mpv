@@ -1140,7 +1140,7 @@ reopen_file:
             startpos = start;
     }
     if (startpos != MP_NOPTS_VALUE) {
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, startpos, 0, true);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, startpos, MPSEEK_DEFAULT, 0);
         execute_queued_seek(mpctx);
     }
 
