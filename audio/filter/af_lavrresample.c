@@ -99,10 +99,6 @@ static double get_delay(struct af_resample *s)
     return avresample_get_delay(s->avrctx) / (double)s->in_rate +
            avresample_available(s->avrctx) / (double)s->out_rate;
 }
-static void drop_all_output(struct af_resample *s)
-{
-    while (avresample_read(s->avrctx, NULL, 1000) > 0) {}
-}
 static int get_out_samples(struct af_resample *s, int in_samples)
 {
     return avresample_get_out_samples(s->avrctx, in_samples);
@@ -112,10 +108,6 @@ static double get_delay(struct af_resample *s)
 {
     int64_t base = s->in_rate * (int64_t)s->out_rate;
     return swr_get_delay(s->avrctx, base) / (double)base;
-}
-static void drop_all_output(struct af_resample *s)
-{
-    while (swr_drop_output(s->avrctx, 1000) > 0) {}
 }
 static int get_out_samples(struct af_resample *s, int in_samples)
 {
@@ -406,8 +398,16 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return AF_OK;
     }
     case AF_CONTROL_RESET:
-        if (s->avrctx)
-            drop_all_output(s);
+        if (s->avrctx) {
+#if HAVE_LIBSWRESAMPLE
+            // This POS either can't drop state correctly, or doesn't want to.
+            // It will swallow some minor audio e.g. after a seek.
+            // Deallocate and recreate the resample state for a full reset.
+            configure_lavrr(af, &af->fmt_in, &af->fmt_out, false);
+#else
+            while (avresample_read(s->avrctx, NULL, 1000) > 0) {}
+#endif
+        }
         return AF_OK;
     }
     return AF_UNKNOWN;
