@@ -52,7 +52,6 @@
 
 #include "audio/decode/dec_audio.h"
 #include "audio/out/ao.h"
-#include "audio/mixer.h"
 #include "demux/demux.h"
 #include "stream/stream.h"
 #include "sub/osd.h"
@@ -360,7 +359,6 @@ struct MPContext *mp_create(void)
 
     mpctx->input = mp_input_init(mpctx->global);
     screenshot_init(mpctx);
-    mpctx->mixer = mixer_init(mpctx, mpctx->global);
     command_init(mpctx);
     init_libav(mpctx->global);
     mp_clients_init(mpctx);
@@ -453,11 +451,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
             return -1;
         }
         m_config_set_profile(mpctx->mconfig, "encoding", 0);
-        // never use auto
-        if (!opts->audio_output_channels.num) {
-            m_config_set_option_ext(mpctx->mconfig, bstr0("audio-channels"),
-                                    bstr0("stereo"), M_SETOPT_PRESERVE_CMDLINE);
-        }
         mp_input_enable_section(mpctx->input, "encode", MP_INPUT_EXCLUSIVE);
     }
 #endif

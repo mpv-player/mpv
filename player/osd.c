@@ -132,7 +132,7 @@ static void term_osd_set_status(struct MPContext *mpctx, const char *text)
 
     int w = 80, h = 24;
     terminal_get_size(&w, &h);
-    if (strlen(mpctx->term_osd_status) > w)
+    if (strlen(mpctx->term_osd_status) > w && !strchr(mpctx->term_osd_status, '\n'))
         mpctx->term_osd_status[w] = '\0';
 
     term_osd_update(mpctx);

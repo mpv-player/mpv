@@ -36,7 +36,6 @@
 #include "osdep/terminal.h"
 #include "osdep/timer.h"
 
-#include "audio/mixer.h"
 #include "audio/decode/dec_audio.h"
 #include "audio/filter/af.h"
 #include "audio/out/ao.h"
@@ -248,6 +247,12 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         // The value is arbitrary, but should be "good enough" in most situations.
         if (hr_seek_very_exact)
             hr_seek_offset = MPMAX(hr_seek_offset, 0.5); // arbitrary
+        for (int n = 0; n < mpctx->num_tracks; n++) {
+            double offset = 0;
+            if (!mpctx->tracks[n]->is_external)
+                offset += get_track_seek_offset(mpctx, mpctx->tracks[n]);
+            hr_seek_offset = MPMAX(hr_seek_offset, -offset);
+        }
         demux_pts -= hr_seek_offset;
         demux_flags = (demux_flags | SEEK_HR | SEEK_BACKWARD) & ~SEEK_FORWARD;
     }
@@ -259,6 +264,8 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         struct track *track = mpctx->tracks[t];
         if (track->selected && track->is_external && track->demuxer) {
             double main_new_pos = demux_pts;
+            if (!hr_seek || track->is_external)
+                main_new_pos += get_track_seek_offset(mpctx, track);
             if (demux_flags & SEEK_FACTOR)
                 main_new_pos = seek_pts;
             demux_seek(track->demuxer, main_new_pos, 0);
@@ -291,6 +298,9 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 
     mp_notify(mpctx, MPV_EVENT_SEEK, NULL);
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
+
+    mpctx->audio_allow_second_chance_seek =
+        !hr_seek && !(demux_flags & SEEK_FORWARD);
 }
 
 // This combines consecutive seek requests.
@@ -882,6 +892,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
     if (!mpctx->restart_complete) {
         mpctx->hrseek_active = false;
         mpctx->restart_complete = true;
+        mpctx->audio_allow_second_chance_seek = false;
         mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
         if (!mpctx->playing_msg_shown) {
             if (opts->playing_msg && opts->playing_msg[0]) {

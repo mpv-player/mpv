@@ -104,9 +104,9 @@ static int init(struct dec_audio *da, const char *decoder)
     lavc_context->codec_type = AVMEDIA_TYPE_AUDIO;
     lavc_context->codec_id = lavc_codec->id;
 
-    if (opts->downmix) {
+    if (opts->downmix && mpopts->audio_output_channels.num_chmaps == 1) {
         lavc_context->request_channel_layout =
-            mp_chmap_to_lavc(&mpopts->audio_output_channels);
+            mp_chmap_to_lavc(&mpopts->audio_output_channels.chmaps[0]);
     }
 
     // Always try to set - option only exists for AC3 at the moment

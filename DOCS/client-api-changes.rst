@@ -32,6 +32,8 @@ API changes
 
 ::
 
+ --- mpv 0.18.2
+ 1.22   - add stream_cb API for custom protocols
  --- mpv 0.18.1 ---
  ----   - remove "status" log level from mpv_request_log_messages() docs. This
           is 100% equivalent to "v". The behavior is still the same, thus no

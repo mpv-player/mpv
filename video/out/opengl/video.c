@@ -59,6 +59,7 @@ static const char *const fixed_scale_filters[] = {
 };
 static const char *const fixed_tscale_filters[] = {
     "oversample",
+    "linear",
     NULL
 };
 
@@ -186,6 +187,7 @@ struct gl_video {
 
     GLuint lut_3d_texture;
     bool use_lut_3d;
+    int lut_3d_size[3];
 
     GLuint dither_texture;
     int dither_size;
@@ -629,8 +631,10 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
 
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_3DLUT);
     gl->BindTexture(GL_TEXTURE_3D, p->lut_3d_texture);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
     gl->TexImage3D(GL_TEXTURE_3D, 0, GL_RGB16, lut3d->size[0], lut3d->size[1],
                    lut3d->size[2], 0, GL_RGB, GL_UNSIGNED_SHORT, lut3d->data);
+    gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
     gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -639,6 +643,9 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
     gl->ActiveTexture(GL_TEXTURE0);
 
     debug_check_gl(p, "after 3d lut creation");
+
+    for (int i = 0; i < 3; i++)
+        p->lut_3d_size[i] = lut3d->size[i];
 
     talloc_free(lut3d);
 
@@ -2187,7 +2194,10 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
 
     if (p->use_lut_3d) {
         gl_sc_uniform_sampler(p->sc, "lut_3d", GL_TEXTURE_3D, TEXUNIT_3DLUT);
-        GLSL(color.rgb = texture3D(lut_3d, color.rgb).rgb;)
+        GLSL(vec3 cpos;)
+        for (int i = 0; i < 3; i++)
+            GLSLF("cpos[%d] = LUT_POS(color[%d], %d.0);\n", i, i, p->lut_3d_size[i]);
+        GLSL(color.rgb = texture3D(lut_3d, cpos).rgb;)
     }
 }
 
@@ -2525,9 +2535,10 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     struct scaler *tscale = &p->scaler[SCALER_TSCALE];
     reinit_scaler(p, tscale, &p->opts.scaler[SCALER_TSCALE], 1, tscale_sizes);
     bool oversample = strcmp(tscale->conf.kernel.name, "oversample") == 0;
+    bool linear = strcmp(tscale->conf.kernel.name, "linear") == 0;
     int size;
 
-    if (oversample) {
+    if (oversample || linear) {
         size = 2;
     } else {
         assert(tscale->kernel && !tscale->kernel->polar);
@@ -2612,8 +2623,9 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             }
         }
 
-        // Blend the frames together
         if (oversample) {
+            // Oversample uses the frame area as mix ratio, not the the vsync
+            // position itself
             double vsync_dist = t->vsync_interval / t->ideal_frame_duration,
                    threshold = tscale->conf.kernel.params[0];
             threshold = isnan(threshold) ? 0.0 : threshold;
@@ -2621,6 +2633,10 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             mix = mix <= 0 + threshold ? 0 : mix;
             mix = mix >= 1 - threshold ? 1 : mix;
             mix = 1 - mix;
+        }
+
+        // Blend the frames together
+        if (oversample || linear) {
             gl_sc_uniform_f(p->sc, "inter_coeff", mix);
             GLSL(color = mix(texture(texture0, texcoord0),
                              texture(texture1, texcoord1),
@@ -3489,7 +3505,7 @@ void gl_video_configure_queue(struct gl_video *p, struct vo *vo)
             radius = radius > 0 ? radius : p->opts.scaler[SCALER_TSCALE].radius;
             queue_size += 1 + ceil(radius);
         } else {
-            // Oversample case
+            // Oversample/linear case
             queue_size += 2;
         }
     }

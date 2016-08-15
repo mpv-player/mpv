@@ -53,6 +53,7 @@ struct priv {
     bool device_lost;
     snd_pcm_format_t alsa_fmt;
     bool can_pause;
+    bool paused;
     snd_pcm_sframes_t prepause_frames;
     double delay_before_pause;
     snd_pcm_uframes_t buffersize;
@@ -360,7 +361,7 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
 
     snd_pcm_free_chmaps(maps);
 
-    return ao_chmap_sel_adjust(ao, &chmap_sel, chmap);
+    return ao_chmap_sel_adjust2(ao, &chmap_sel, chmap, false);
 }
 
 // Map back our selected channel layout to an ALSA one. This is done this way so
@@ -785,6 +786,14 @@ static int init_device(struct ao *ao, int mode)
     MP_VERBOSE(ao, "buffersize: %d samples\n", (int)p->buffersize);
     MP_VERBOSE(ao, "period size: %d samples\n", (int)p->outburst);
 
+    ao->device_buffer = p->buffersize;
+
+    // ao_alsa implements this by relying on underrun behavior (no data means
+    // underrun, during which silence is played). Trigger by playing some
+    // initial silence.
+    if (ao->stream_silence)
+        ao_play_silence(ao, p->outburst);
+
     return 0;
 
 alsa_error:
@@ -874,7 +883,7 @@ static double get_delay(struct ao *ao)
     struct priv *p = ao->priv;
     snd_pcm_sframes_t delay;
 
-    if (snd_pcm_state(p->alsa) == SND_PCM_STATE_PAUSED)
+    if (p->paused)
         return p->delay_before_pause;
 
     if (snd_pcm_delay(p->alsa, &delay) < 0)
@@ -888,26 +897,46 @@ static double get_delay(struct ao *ao)
     return delay / (double)ao->samplerate;
 }
 
+// For stream-silence mode: replace remaining buffer with silence.
+// Tries to cause an instant buffer underrun.
+static void soft_reset(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    snd_pcm_sframes_t frames = snd_pcm_rewindable(p->alsa);
+    if (frames > 0 && snd_pcm_state(p->alsa) == SND_PCM_STATE_RUNNING) {
+        frames = snd_pcm_rewind(p->alsa, frames);
+        if (frames < 0) {
+            int err = frames;
+            CHECK_ALSA_WARN("pcm rewind error");
+        }
+    }
+}
+
 static void audio_pause(struct ao *ao)
 {
     struct priv *p = ao->priv;
     int err;
 
-    if (p->can_pause) {
+    if (p->paused)
+        return;
+
+    p->delay_before_pause = get_delay(ao);
+    p->prepause_frames = p->delay_before_pause * ao->samplerate;
+
+    if (ao->stream_silence) {
+        soft_reset(ao);
+    } else if (p->can_pause) {
         if (snd_pcm_state(p->alsa) == SND_PCM_STATE_RUNNING) {
-            p->delay_before_pause = get_delay(ao);
             err = snd_pcm_pause(p->alsa, 1);
             CHECK_ALSA_ERROR("pcm pause error");
+            p->prepause_frames = 0;
         }
     } else {
-        if (snd_pcm_delay(p->alsa, &p->prepause_frames) < 0
-            || p->prepause_frames < 0)
-            p->prepause_frames = 0;
-        p->delay_before_pause = p->prepause_frames / (double)ao->samplerate;
-
         err = snd_pcm_drop(p->alsa);
         CHECK_ALSA_ERROR("pcm drop error");
     }
+
+    p->paused = true;
 
 alsa_error: ;
 }
@@ -930,9 +959,15 @@ static void audio_resume(struct ao *ao)
     struct priv *p = ao->priv;
     int err;
 
+    if (!p->paused)
+        return;
+
     resume_device(ao);
 
-    if (p->can_pause) {
+    if (ao->stream_silence) {
+        p->paused = false;
+        get_delay(ao); // recovers from underrun (as a side-effect)
+    } else if (p->can_pause) {
         if (snd_pcm_state(p->alsa) == SND_PCM_STATE_PAUSED) {
             err = snd_pcm_pause(p->alsa, 0);
             CHECK_ALSA_ERROR("pcm resume error");
@@ -941,11 +976,13 @@ static void audio_resume(struct ao *ao)
         MP_VERBOSE(ao, "resume not supported by hardware\n");
         err = snd_pcm_prepare(p->alsa);
         CHECK_ALSA_ERROR("pcm prepare error");
-        if (p->prepause_frames)
-            ao_play_silence(ao, p->prepause_frames);
     }
 
+    if (p->prepause_frames)
+        ao_play_silence(ao, p->prepause_frames);
+
 alsa_error: ;
+    p->paused = false;
 }
 
 static void reset(struct ao *ao)
@@ -953,12 +990,18 @@ static void reset(struct ao *ao)
     struct priv *p = ao->priv;
     int err;
 
+    p->paused = false;
     p->prepause_frames = 0;
     p->delay_before_pause = 0;
-    err = snd_pcm_drop(p->alsa);
-    CHECK_ALSA_ERROR("pcm prepare error");
-    err = snd_pcm_prepare(p->alsa);
-    CHECK_ALSA_ERROR("pcm prepare error");
+
+    if (ao->stream_silence) {
+        soft_reset(ao);
+    } else {
+        err = snd_pcm_drop(p->alsa);
+        CHECK_ALSA_ERROR("pcm prepare error");
+        err = snd_pcm_prepare(p->alsa);
+        CHECK_ALSA_ERROR("pcm prepare error");
+    }
 
 alsa_error: ;
 }
@@ -996,6 +1039,8 @@ static int play(struct ao *ao, void **data, int samples, int flags)
             res = 0;
         }
     } while (res == 0);
+
+    p->paused = false;
 
     return res < 0 ? -1 : res;
 

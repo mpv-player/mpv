@@ -93,6 +93,7 @@ typedef struct mkv_content_encoding {
 
 typedef struct mkv_track {
     int tnum;
+    uint64_t uid;
     char *name;
     struct sh_stream *stream;
 
@@ -595,6 +596,7 @@ static void parse_trackentry(struct demuxer *demuxer,
     } else {
         MP_ERR(demuxer, "Missing track number!\n");
     }
+    track->uid = entry->track_uid;
 
     if (entry->name) {
         track->name = talloc_strdup(track, entry->name);
@@ -986,9 +988,6 @@ static void process_tags(demuxer_t *demuxer)
 
     for (int i = 0; i < tags->n_tag; i++) {
         struct ebml_tag tag = tags->tag[i];
-        if (tag.targets.target_track_uid  || tag.targets.target_attachment_uid)
-            continue;
-
         struct mp_tags *dst = NULL;
 
         if (tag.targets.target_chapter_uid) {
@@ -1009,6 +1008,19 @@ static void process_tags(demuxer_t *demuxer)
                     break;
                 }
             }
+        } else if (tag.targets.target_track_uid) {
+            for (int n = 0; n < mkv_d->num_tracks; n++) {
+                if (mkv_d->tracks[n]->uid ==
+                    tag.targets.target_track_uid)
+                {
+                    struct sh_stream *sh = mkv_d->tracks[n]->stream;
+                    if (sh)
+                        dst = sh->tags;
+                    break;
+                }
+            }
+        } else if (tag.targets.target_attachment_uid) {
+            /* ignore */
         } else {
             dst = demuxer->metadata;
         }
@@ -1924,10 +1936,9 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
 
     MP_VERBOSE(demuxer, "All headers are parsed!\n");
 
-    process_tags(demuxer);
     display_create_tracks(demuxer);
     add_coverart(demuxer);
-    demuxer->allow_refresh_seeks = true;
+    process_tags(demuxer);
 
     probe_first_timestamp(demuxer);
     if (opts->demux_mkv->probe_duration)

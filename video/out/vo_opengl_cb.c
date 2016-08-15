@@ -175,10 +175,16 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
     if (ctx->renderer)
         return MPV_ERROR_INVALID_PARAMETER;
 
+    talloc_free(ctx->gl);
     ctx->gl = talloc_zero(ctx, GL);
 
     mpgl_load_functions2(ctx->gl, get_proc_address, get_proc_address_ctx,
                          exts, ctx->log);
+    if (!ctx->gl->version && !ctx->gl->es) {
+        MP_FATAL(ctx, "OpenGL not initialized.\n");
+        return MPV_ERROR_UNSUPPORTED;
+    }
+
     ctx->renderer = gl_video_init(ctx->gl, ctx->log, ctx->global);
     if (!ctx->renderer)
         return MPV_ERROR_UNSUPPORTED;

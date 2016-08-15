@@ -33,6 +33,7 @@
 
 #include "config.h"
 
+#include "common/av_common.h"
 #include "common/common.h"
 #include "af.h"
 #include "audio/audio_buffer.h"
@@ -57,11 +58,13 @@ typedef struct af_ac3enc_s {
     struct mp_audio *pending;   // unconsumed input data
     int in_samples;     // samples of input per AC3 frame
     int out_samples;    // upper bound on encoded output per AC3 frame
+    int64_t encoder_buffered;
 
     int cfg_add_iec61937_header;
     int cfg_bit_rate;
     int cfg_min_channel_num;
     char *cfg_encoder;
+    char **cfg_avopts;
 } af_ac3enc_t;
 
 // fmt carries the input format. Change it to the best next-possible format
@@ -168,6 +171,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         s->in_samples = s->lavc_actx->frame_size;
         mp_audio_realloc(s->input, s->in_samples);
         s->input->samples = 0;
+        s->encoder_buffered = 0;
         return AF_OK;
     }
     case AF_CONTROL_RESET:
@@ -176,6 +180,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         talloc_free(s->pending);
         s->pending = NULL;
         s->input->samples = 0;
+        s->encoder_buffered = 0;
         return AF_OK;
     }
     return AF_UNKNOWN;
@@ -198,8 +203,8 @@ static void uninit(struct af_instance* af)
 static void update_delay(struct af_instance *af)
 {
     af_ac3enc_t *s = af->priv;
-    af->delay = ((s->pending ? s->pending->samples : 0) + s->input->samples) /
-                (double)s->input->rate;
+    af->delay = ((s->pending ? s->pending->samples : 0) + s->input->samples +
+                  s->encoder_buffered) / (double)s->input->rate;
 }
 
 static int filter_frame(struct af_instance *af, struct mp_audio *audio)
@@ -232,6 +237,9 @@ static bool fill_buffer(struct af_instance *af)
     af->delay = 0;
 
     if (s->pending) {
+        if (!mp_audio_is_writeable(s->input))
+            assert(s->input->samples == 0); // we can't have sent a partial frame
+        mp_audio_realloc_min(s->input, s->in_samples);
         int copy = MPMIN(s->in_samples - s->input->samples, s->pending->samples);
         s->input->samples += copy;
         mp_audio_copy(s->input, s->input->samples - copy, s->pending, 0, copy);
@@ -249,17 +257,8 @@ static int read_input_frame(struct af_instance *af, AVFrame *frame)
     if (!fill_buffer(af))
         return 0; // need more input
 
-    frame->nb_samples = s->in_samples;
-    frame->format = s->lavc_actx->sample_fmt;
-    frame->channel_layout = s->lavc_actx->channel_layout;
-#if LIBAVUTIL_VERSION_MICRO >= 100
-    frame->channels = s->lavc_actx->channels;
-#endif
-    assert(s->input->num_planes <= AV_NUM_DATA_POINTERS);
-    frame->extended_data = frame->data;
-    for (int n = 0; n < s->input->num_planes; n++)
-        frame->data[n] = s->input->planes[n];
-    frame->linesize[0] = s->input->samples * s->input->sstride;
+    if (mp_audio_to_avframe(s->input, frame) < 0)
+        return -1;
 
     return 1;
 }
@@ -267,6 +266,9 @@ static int read_input_frame(struct af_instance *af, AVFrame *frame)
 static int filter_out(struct af_instance *af)
 {
     af_ac3enc_t *s = af->priv;
+
+    if (!s->pending)
+        return 0;
 
     AVFrame *frame = av_frame_alloc();
     if (!frame) {
@@ -295,12 +297,17 @@ static int filter_out(struct af_instance *af)
             MP_FATAL(af, "Encode failed.\n");
             goto done;
         }
+        s->encoder_buffered += s->input->samples;
         s->input->samples = 0;
     }
     int lavc_ret = avcodec_receive_packet(s->lavc_actx, &pkt);
     if (lavc_ret == AVERROR(EAGAIN)) {
         // Need to buffer more input.
         err = 0;
+        goto done;
+    }
+    if (lavc_ret < 0) {
+        MP_FATAL(af, "Encode failed.\n");
         goto done;
     }
 #else
@@ -312,7 +319,6 @@ static int filter_out(struct af_instance *af)
     err = -1;
     int ok;
     int lavc_ret = avcodec_encode_audio2(s->lavc_actx, &pkt, frame, &ok);
-    av_frame_free(&frame);
     s->input->samples = 0;
     if (lavc_ret < 0 || !ok) {
         MP_FATAL(af, "Encode failed.\n");
@@ -321,7 +327,9 @@ static int filter_out(struct af_instance *af)
 #endif
 
     MP_DBG(af, "avcodec_encode_audio got %d, pending %d.\n",
-           pkt.size, s->pending->samples);
+           pkt.size, s->pending->samples + s->input->samples);
+
+    s->encoder_buffered -= AC3_FRAME_SIZE;
 
     struct mp_audio *out =
         mp_audio_pool_get(af->out_pool, af->data, s->out_samples);
@@ -358,11 +366,12 @@ static int filter_out(struct af_instance *af)
     swap_16((uint16_t *)(buf + header_len), pkt.size / 2);
     out->samples = frame_size / out->sstride;
     af_add_output_frame(af, out);
-    update_delay(af);
 
     err = 0;
 done:
     av_packet_unref(&pkt);
+    av_frame_free(&frame);
+    update_delay(af);
     return err;
 }
 
@@ -385,6 +394,10 @@ static int af_open(struct af_instance* af){
         MP_ERR(af, "Audio LAVC, couldn't allocate context!\n");
         return AF_ERROR;
     }
+
+    if (mp_set_avopts(af->log, s->lavc_actx, s->cfg_avopts) < 0)
+        return AF_ERROR;
+
     // For this one, we require the decoder to expert lists of all supported
     // parameters. (Not all decoders do that, but the ones we're interested
     // in do.)
@@ -434,6 +447,7 @@ const struct af_info af_info_lavcac3enc = {
                           ({"auto", 0}, {"default", 0})),
         OPT_INTRANGE("minch", cfg_min_channel_num, 0, 2, 6),
         OPT_STRING("encoder", cfg_encoder, 0),
+        OPT_KEYVALUELIST("o", cfg_avopts, 0),
         {0}
     },
 };

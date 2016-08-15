@@ -123,7 +123,7 @@ static int init(struct ao *ao)
 
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_any(&sel);
-    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+    if (!ao_chmap_sel_adjust2(ao, &sel, &ao->channels, false))
         goto fail;
     mp_chmap_reorder_to_lavc(&ao->channels);
     ac->codec->channels = ao->channels.num;

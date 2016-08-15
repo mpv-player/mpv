@@ -218,6 +218,7 @@ struct mp_archive *mp_archive_new(struct mp_log *log, struct stream *src,
                                   int flags)
 {
     struct mp_archive *mpa = talloc_zero(NULL, struct mp_archive);
+    mpa->log = log;
     mpa->arch = archive_read_new();
     mpa->primary_src = src;
     if (!mpa->arch)
@@ -265,6 +266,43 @@ err:
     return NULL;
 }
 
+// Iterate entries. The first call establishes the first entry. Returns false
+// if no entry found, otherwise returns true and sets mpa->entry/entry_filename.
+bool mp_archive_next_entry(struct mp_archive *mpa)
+{
+    mpa->entry = NULL;
+    talloc_free(mpa->entry_filename);
+    mpa->entry_filename = NULL;
+
+    for (;;) {
+        struct archive_entry *entry;
+        int r = archive_read_next_header(mpa->arch, &entry);
+        if (r == ARCHIVE_EOF)
+            break;
+        if (r < ARCHIVE_OK)
+            MP_ERR(mpa, "%s\n", archive_error_string(mpa->arch));
+        if (r < ARCHIVE_WARN) {
+            MP_FATAL(mpa, "could not read archive entry\n");
+            break;
+        }
+        if (archive_entry_filetype(entry) != AE_IFREG)
+            continue;
+        // Some archives may have no filenames, or libarchive won't return some.
+        const char *fn = archive_entry_pathname(entry);
+        char buf[64];
+        if (!fn || bstr_validate_utf8(bstr0(fn)) < 0) {
+            snprintf(buf, sizeof(buf), "mpv_unknown#%d", mpa->entry_num);
+            fn = buf;
+        }
+        mpa->entry = entry;
+        mpa->entry_filename = talloc_strdup(mpa, fn);
+        mpa->entry_num += 1;
+        return true;
+    }
+
+    return false;
+}
+
 struct priv {
     struct mp_archive *mpa;
     struct stream *src;
@@ -282,39 +320,18 @@ static int reopen_archive(stream_t *s)
 
     // Follows the same logic as demux_libarchive.c.
     struct mp_archive *mpa = p->mpa;
-    int num_files = 0;
-    for (;;) {
-        struct archive_entry *entry;
-        int r = archive_read_next_header(mpa->arch, &entry);
-        if (r == ARCHIVE_EOF) {
-            MP_ERR(s, "archive entry not found. '%s'\n", p->entry_name);
-            goto error;
-        }
-        if (r < ARCHIVE_OK)
-            MP_ERR(s, "%s\n", archive_error_string(mpa->arch));
-        if (r < ARCHIVE_WARN)
-            goto error;
-        if (archive_entry_filetype(entry) != AE_IFREG)
-            continue;
-        const char *fn = archive_entry_pathname(entry);
-        char buf[64];
-        if (!fn) {
-            snprintf(buf, sizeof(buf), "mpv_unknown#%d\n", num_files);
-            fn = buf;
-        }
-        if (strcmp(p->entry_name, fn) == 0) {
+    while (mp_archive_next_entry(mpa)) {
+        if (strcmp(p->entry_name, mpa->entry_filename) == 0) {
             p->entry_size = -1;
-            if (archive_entry_size_is_set(entry))
-                p->entry_size = archive_entry_size(entry);
+            if (archive_entry_size_is_set(mpa->entry))
+                p->entry_size = archive_entry_size(mpa->entry);
             return STREAM_OK;
         }
-        num_files++;
     }
 
-error:
     mp_archive_free(p->mpa);
     p->mpa = NULL;
-    MP_ERR(s, "could not open archive\n");
+    MP_ERR(s, "archive entry not found. '%s'\n", p->entry_name);
     return STREAM_ERROR;
 }
 

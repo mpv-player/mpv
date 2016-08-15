@@ -312,34 +312,6 @@ Available filters are:
         ``mpv '--af=format=channels=5.1' '--audio-channels=5.1'`` would always force
         remixing audio to 5.1 and output it like this.
 
-``delay[=[ch1,ch2,...]]``
-    Delays the sound to the loudspeakers such that the sound from the
-    different channels arrives at the listening position simultaneously. It is
-    only useful if you have more than 2 loudspeakers.
-
-    ``[ch1,ch2,...]``
-        The delay in ms that should be imposed on each channel (floating point
-        number between 0 and 1000).
-
-    To calculate the required delay for the different channels, do as follows:
-
-    1. Measure the distance to the loudspeakers in meters in relation to your
-       listening position, giving you the distances s1 to s5 (for a 5.1
-       system). There is no point in compensating for the subwoofer (you will
-       not hear the difference anyway).
-
-    2. Subtract the distances s1 to s5 from the maximum distance, i.e.
-       ``s[i] = max(s) - s[i]; i = 1...5``.
-
-    3. Calculate the required delays in ms as ``d[i] = 1000*s[i]/342; i =
-       1...5``.
-
-    .. admonition:: Example
-
-        ``mpv --af=delay=[10.5,10.5,0,0,7,0] media.avi``
-            Would delay front left and right by 10.5 ms, the two rear channels
-            and the subwoofer by 0 ms and the center channel by 7 ms.
-
 ``drc[=method:target]``
     Applies dynamic range compression. This maximizes the volume by compressing
     the audio signal's dynamic range. (Formerly called ``volnorm``.)

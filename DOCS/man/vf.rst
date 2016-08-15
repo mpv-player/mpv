@@ -821,6 +821,12 @@ Available filters are:
         Whether deinterlacing is enabled (default: no).
     ``interlaced-only=<yes|no>``
         If ``yes`` (default), only deinterlace frames marked as interlaced.
+    ``mode=<blend|bob|adaptive|mocomp|ivctc|none>``
+        Tries to select a video processor with the given processing capability.
+        If a video processor supports multiple capabilities, it is not clear
+        which algorithm is actually selected. ``none`` always falls back. On
+        most if not all hardware, this option will probably do nothing, because
+        a video processor usually supports all modes or none.
 
 ``buffer=<num>``
     Buffer ``<num>`` frames in the filter chain. This filter is probably pretty

@@ -214,7 +214,8 @@ static void filter_reconfig(struct MPContext *mpctx, struct vo_chain *vo_c)
     }
 
     // Make sure to reset this even if runtime deint switching is used.
-    video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &(int){0});
+    if (mpctx->opts->deinterlace >= 0)
+        video_vf_vo_control(vo_c, VFCTRL_SET_DEINTERLACE, &(int){0});
 
     if (params.rotate && (params.rotate % 90 == 0)) {
         if (!(vo_c->vo->driver->caps & VO_CAP_ROTATE90)) {
@@ -1022,8 +1023,11 @@ static double find_best_speed(struct MPContext *mpctx, double vsync)
 
 static bool using_spdif_passthrough(struct MPContext *mpctx)
 {
-    if (mpctx->ao_chain)
-        return !af_fmt_is_pcm(mpctx->ao_chain->input_format.format);
+    if (mpctx->ao_chain && mpctx->ao_chain->ao) {
+        struct mp_audio out_format = {0};
+        ao_get_format(mpctx->ao_chain->ao, &out_format);
+        return !af_fmt_is_pcm(out_format.format);
+    }
     return false;
 }
 
@@ -1204,6 +1208,12 @@ static void handle_display_sync_frame(struct MPContext *mpctx,
     time_left += prev_error;
     // Likewise, we know sync is off, but is going to be compensated.
     time_left += drop_repeat * vsync;
+
+    // If syncing took too long, disregard timing of the first frame.
+    if (mpctx->num_past_frames == 2 && time_left < 0) {
+        vo_discard_timing_info(vo);
+        time_left = 0;
+    }
 
     if (drop_repeat) {
         mpctx->mistimed_frames_total += 1;

@@ -75,6 +75,7 @@ extern const stream_info_t stream_info_bdnav;
 extern const stream_info_t stream_info_rar;
 extern const stream_info_t stream_info_edl;
 extern const stream_info_t stream_info_libarchive;
+extern const stream_info_t stream_info_cb;
 
 static const stream_info_t *const stream_list[] = {
 #if HAVE_CDDA
@@ -115,6 +116,7 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_edl,
     &stream_info_rar,
     &stream_info_file,
+    &stream_info_cb,
     NULL
 };
 
@@ -243,6 +245,9 @@ static stream_t *new_stream(void)
 
 static const char *match_proto(const char *url, const char *proto)
 {
+    if (strcmp(proto, "*") == 0)
+        return url;
+
     int l = strlen(proto);
     if (l > 0) {
         if (strncasecmp(url, proto, l) == 0 && strncmp("://", url + l, 3) == 0)
@@ -800,8 +805,10 @@ int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
     if (res <= 0) {
         cache->uncached_stream = NULL; // don't free original stream
         free_stream(cache);
-        if (fcache != orig)
+        if (fcache != orig) {
+            fcache->uncached_stream = NULL;
             free_stream(fcache);
+        }
     } else {
         *stream = cache;
     }
@@ -1110,4 +1117,18 @@ void stream_print_proto_list(struct mp_log *log)
     }
     talloc_free(list);
     mp_info(log, "\nTotal: %d protocols\n", count);
+}
+
+bool stream_has_proto(const char *proto)
+{
+    for (int i = 0; stream_list[i]; i++) {
+        const stream_info_t *stream_info = stream_list[i];
+
+        for (int j = 0; stream_info->protocols && stream_info->protocols[j]; j++) {
+            if (strcmp(stream_info->protocols[j], proto) == 0)
+                return true;
+        }
+    }
+
+    return false;
 }

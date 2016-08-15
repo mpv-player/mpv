@@ -178,12 +178,6 @@ typedef struct demuxer {
     double start_time;
     // File format allows PTS resets (even if the current file is without)
     bool ts_resets_possible;
-    // Enable fast track switching hacks. This requires from the demuxer:
-    // - seeking is somewhat reliable; packet contents must not change
-    // - packet position (demux_packet.pos) is set, not negative, unique, and
-    //   monotonically increasing
-    // - seeking leaves packet positions invariant
-    bool allow_refresh_seeks;
     // The file data was fully read, and there is no need to keep the stream
     // open, keep the cache active, or to run the demuxer thread. Generating
     // packets is not slow either (unlike e.g. libavdevice pseudo-demuxers).
@@ -216,7 +210,10 @@ typedef struct demuxer {
     struct mp_log *log, *glog;
     struct demuxer_params *params;
 
-    struct demux_internal *in; // internal to demux.c
+    // internal to demux.c
+    struct demux_internal *in;
+    struct mp_tags **update_stream_tags;
+    int num_update_stream_tags;
 
     // Since the demuxer can run in its own thread, and the stream is not
     // thread-safe, only the demuxer is allowed to access the stream directly.
@@ -265,13 +262,12 @@ bool demux_cancel_test(struct demuxer *demuxer);
 
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, double rel_seek_secs, int flags);
-void demux_set_enable_refresh_seeks(struct demuxer *demuxer, bool enabled);
 void demux_set_ts_offset(struct demuxer *demuxer, double offset);
 
 int demux_control(struct demuxer *demuxer, int cmd, void *arg);
 
 void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
-                          bool selected);
+                          double ref_pts, bool selected);
 void demux_set_stream_autoselect(struct demuxer *demuxer, bool autoselect);
 
 void demuxer_help(struct mp_log *log);
@@ -280,6 +276,8 @@ int demuxer_add_attachment(struct demuxer *demuxer, char *name,
                            char *type, void *data, size_t data_size);
 int demuxer_add_chapter(demuxer_t *demuxer, char *name,
                         double pts, uint64_t demuxer_id);
+void demux_set_stream_tags(struct demuxer *demuxer, struct sh_stream *sh,
+                           struct mp_tags *tags);
 
 double demuxer_get_time_length(struct demuxer *demuxer);
 

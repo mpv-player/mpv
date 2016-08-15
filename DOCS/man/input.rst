@@ -640,7 +640,7 @@ Input Commands that are Possibly Subject to Change
     The argument is the name of the binding.
 
     It can optionally be prefixed with the name of the script, using ``/`` as
-    separator, e.g. ``script_binding scriptname/bindingname``.
+    separator, e.g. ``script-binding scriptname/bindingname``.
 
     For completeness, here is how this command works internally. The details
     could change any time. On any matching key event, ``script-message-to``
@@ -809,7 +809,7 @@ Input sections group a set of bindings, and enable or disable them at once.
 In ``input.conf``, each key binding is assigned to an input section, rather
 than actually having explicit text sections.
 
-See also: ``enable_section`` and ``disable_section`` commands.
+See also: ``enable-section`` and ``disable-section`` commands.
 
 Predefined bindings:
 
@@ -868,6 +868,12 @@ Property list
     percent encoding as well. (The result is not necessarily correct, but
     looks better for display purposes. Use the ``path`` property to get an
     unmodified filename.)
+
+    This has a sub-property:
+
+    ``filename/no-ext``
+        Like the ``filename`` property, but if the text contains a ``.``, strip
+        all text after the last ``.``. Usually this removes the file extension.
 
 ``file-size``
     Length in bytes of the source file/stream. (This is the same as
@@ -1321,6 +1327,8 @@ Property list
     It doesn't change the volumes of each channel, but instead sets up a pan
     matrix to mix the left and right channels.)
 
+    Deprecated.
+
 ``fullscreen`` (RW)
     See ``--fullscreen``.
 
@@ -1479,6 +1487,12 @@ Property list
     ``video-params/gamma``
         The gamma function in use as string. (Exact values subject to change.)
 
+    ``video-params/nom-peak``
+        The video encoding's nominal peak brightness as float.
+
+    ``video-params/sig-peak``
+        The video file's tagged signal peak as float.
+
     ``video-params/chroma-location``
         Chroma location as string. (Exact values subject to change.)
 
@@ -1505,6 +1519,9 @@ Property list
             "colormatrix"       MPV_FORMAT_STRING
             "colorlevels"       MPV_FORMAT_STRING
             "primaries"         MPV_FORMAT_STRING
+            "gamma"             MPV_FORMAT_STRING
+            "nom-peak"          MPV_FORMAT_DOUBLE
+            "sig-peak"          MPV_FORMAT_DOUBLE
             "chroma-location"   MPV_FORMAT_STRING
             "rotate"            MPV_FORMAT_INT64
             "stereo-in"         MPV_FORMAT_STRING
@@ -1585,7 +1602,7 @@ Property list
 
 ``osd-width``, ``osd-height``
     Last known OSD width (can be 0). This is needed if you want to use the
-    ``overlay_add`` command. It gives you the actual OSD size, which can be
+    ``overlay-add`` command. It gives you the actual OSD size, which can be
     different from the window size in some cases.
 
 ``osd-par``
@@ -1796,6 +1813,16 @@ Property list
     ``track-list/N/audio-channels`` (deprecated)
         Deprecated alias for ``track-list/N/demux-channel-count``.
 
+    ``track-list/N/replaygain-track-peak``, ``track-list/N/replaygain-track-gain``
+        Per-track replaygain values. Only available for audio tracks with
+        corresponding information stored in the source file.
+
+    ``track-list/N/replaygain-album-peak``, ``track-list/N/replaygain-album-gain``
+        Per-album replaygain values. If the file has per-track but no per-album
+        information, the per-album values will be copied from the per-track
+        values currently. It's possible that future mpv versions will make
+        these properties unavailable instead in this case.
+
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
     the following contents:
@@ -1825,6 +1852,10 @@ Property list
                 "demux-samplerate"  MPV_FORMAT_INT64
                 "demux-fps"         MPV_FORMAT_DOUBLE
                 "audio-channels"    MPV_FORMAT_INT64
+                "replaygain-track-peak" MPV_FORMAT_DOUBLE
+                "replaygain-track-gain" MPV_FORMAT_DOUBLE
+                "replaygain-album-peak" MPV_FORMAT_DOUBLE
+                "replaygain-album-gain" MPV_FORMAT_DOUBLE
 
 ``chapter-list``
     List of chapters, current entry marked. Currently, the raw property value

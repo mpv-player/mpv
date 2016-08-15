@@ -138,6 +138,9 @@ static void mp_audio_destructor(void *ptr)
  * available on every plane. The previous data is kept (for the smallest
  * common number of samples before/after resize).
  *
+ * This also makes sure the resulting buffer is writable (even in the case
+ * the buffer has the correct size).
+ *
  * mpa->samples is not set or used.
  *
  * This function is flexible enough to handle format and channel layout
@@ -153,6 +156,12 @@ void mp_audio_realloc(struct mp_audio *mpa, int samples)
     int size = get_plane_size(mpa, samples);
     if (size < 0)
         abort(); // oom or invalid parameters
+    if (!mp_audio_is_writeable(mpa)) {
+        for (int n = 0; n < MP_NUM_CHANNELS; n++) {
+            av_buffer_unref(&mpa->allocated[n]);
+            mpa->planes[n] = NULL;
+        }
+    }
     for (int n = 0; n < mpa->num_planes; n++) {
         if (!mpa->allocated[n] || size != mpa->allocated[n]->size) {
             if (av_buffer_realloc(&mpa->allocated[n], size) < 0)
@@ -171,7 +180,7 @@ void mp_audio_realloc(struct mp_audio *mpa, int samples)
 // If the buffer is reallocated, also preallocate.
 void mp_audio_realloc_min(struct mp_audio *mpa, int samples)
 {
-    if (samples > mp_audio_get_allocated_size(mpa)) {
+    if (samples > mp_audio_get_allocated_size(mpa) || !mp_audio_is_writeable(mpa)) {
         size_t alloc = ta_calc_prealloc_elems(samples);
         if (alloc > INT_MAX)
             abort(); // oom
@@ -347,9 +356,9 @@ struct mp_audio *mp_audio_from_avframe(struct AVFrame *avframe)
     mp_chmap_from_lavc(&lavc_chmap, avframe->channel_layout);
 
 #if LIBAVUTIL_VERSION_MICRO >= 100
-    // FFmpeg being special again
-    if (lavc_chmap.num != avframe->channels)
-        mp_chmap_from_channels(&lavc_chmap, avframe->channels);
+    // FFmpeg being stupid POS again
+    if (lavc_chmap.num != av_frame_get_channels(avframe))
+        mp_chmap_from_channels(&lavc_chmap, av_frame_get_channels(avframe));
 #endif
 
     new->rate = avframe->sample_rate;
@@ -394,12 +403,9 @@ fail:
     return NULL;
 }
 
-// Returns NULL on failure. The input is always unreffed.
-struct AVFrame *mp_audio_to_avframe_and_unref(struct mp_audio *frame)
+int mp_audio_to_avframe(struct mp_audio *frame, struct AVFrame *avframe)
 {
-    struct AVFrame *avframe = av_frame_alloc();
-    if (!avframe)
-        goto fail;
+    av_frame_unref(avframe);
 
     avframe->nb_samples = frame->samples;
     avframe->format = af_to_avformat(frame->format);
@@ -410,8 +416,8 @@ struct AVFrame *mp_audio_to_avframe_and_unref(struct mp_audio *frame)
     if (!avframe->channel_layout)
         goto fail;
 #if LIBAVUTIL_VERSION_MICRO >= 100
-    // FFmpeg being a stupid POS (but I respect it)
-    avframe->channels = frame->channels.num;
+    // FFmpeg being a stupid POS again
+    av_frame_set_channels(avframe, frame->channels.num);
 #endif
     avframe->sample_rate = frame->rate;
 
@@ -456,6 +462,23 @@ struct AVFrame *mp_audio_to_avframe_and_unref(struct mp_audio *frame)
         av_frame_free(&avframe);
         avframe = tmp;
     }
+
+    return 0;
+
+fail:
+    av_frame_unref(avframe);
+    return -1;
+}
+
+// Returns NULL on failure. The input is always unreffed.
+struct AVFrame *mp_audio_to_avframe_and_unref(struct mp_audio *frame)
+{
+    struct AVFrame *avframe = av_frame_alloc();
+    if (!avframe)
+        goto fail;
+
+    if (mp_audio_to_avframe(frame, avframe) < 0)
+        goto fail;
 
     talloc_free(frame);
     return avframe;

@@ -20,6 +20,8 @@
 #include <math.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <unistd.h>
+#include <poll.h>
 
 #include "config.h"
 #include "misc/bstr.h"
@@ -38,6 +40,7 @@
 #include "vo.h"
 #include "win_state.h"
 #include "osdep/atomics.h"
+#include "osdep/io.h"
 #include "osdep/timer.h"
 #include "osdep/subprocess.h"
 
@@ -540,6 +543,7 @@ int vo_x11_init(struct vo *vo)
         .input_ctx = vo->input_ctx,
         .screensaver_enabled = true,
         .xrandr_event = -1,
+        .wakeup_pipe = {-1, -1},
     };
     vo->x11 = x11;
 
@@ -593,7 +597,8 @@ int vo_x11_init(struct vo *vo)
 
     x11->wm_type = vo_wm_detect(vo);
 
-    vo->event_fd = ConnectionNumber(x11->display);
+    x11->event_fd = ConnectionNumber(x11->display);
+    mp_make_wakeup_pipe(x11->wakeup_pipe);
 
     xrandr_read(x11);
 
@@ -760,6 +765,9 @@ void vo_x11_uninit(struct vo *vo)
         pthread_join(x11->screensaver_thread, NULL);
         sem_destroy(&x11->screensaver_sem);
     }
+
+    for (int n = 0; n < 2; n++)
+        close(x11->wakeup_pipe[n]);
 
     talloc_free(x11);
     vo->x11 = NULL;
@@ -1011,7 +1019,7 @@ static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
     }
 }
 
-int vo_x11_check_events(struct vo *vo)
+void vo_x11_check_events(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
     Display *display = vo->x11->display;
@@ -1123,6 +1131,7 @@ int vo_x11_check_events(struct vo *vo)
         case MapNotify:
             x11->window_hidden = false;
             x11->pseudo_mapped = true;
+            x11->current_icc_screen = -1;
             vo_x11_update_geometry(vo);
             break;
         case DestroyNotify:
@@ -1169,9 +1178,6 @@ int vo_x11_check_events(struct vo *vo)
     }
 
     update_vo_size(vo);
-    int ret = x11->pending_vo_events;
-    x11->pending_vo_events = 0;
-    return ret;
 }
 
 static void vo_x11_sizehint(struct vo *vo, struct mp_rect rc, bool override_pos)
@@ -1668,6 +1674,23 @@ static bool rc_overlaps(struct mp_rect rc1, struct mp_rect rc2)
     return mp_rect_intersection(&rc1, &rc2); // changes the first argument
 }
 
+// which screen's ICC profile we're going to use
+static int get_icc_screen(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    int cx = x11->winrc.x0 + (x11->winrc.x1 - x11->winrc.x0)/2,
+    cy = x11->winrc.y0 + (x11->winrc.y1 - x11->winrc.y0)/2;
+    int screen = 0; // xinerama screen number
+    for (int n = 0; n < x11->num_displays; n++) {
+        struct xrandr_display *disp = &x11->displays[n];
+        if (mp_rect_contains(&disp->rc, cx, cy)) {
+            screen = n;
+            break;
+        }
+    }
+    return screen;
+}
+
 // update x11->winrc with current boundaries of vo->x11->window
 static void vo_x11_update_geometry(struct vo *vo)
 {
@@ -1700,7 +1723,12 @@ static void vo_x11_update_geometry(struct vo *vo)
         MP_VERBOSE(x11, "Current display FPS: %f\n", fps);
     x11->current_display_fps = fps;
     // might have changed displays
-    x11->pending_vo_events |= VO_EVENT_WIN_STATE | VO_EVENT_ICC_PROFILE_CHANGED;
+    x11->pending_vo_events |= VO_EVENT_WIN_STATE;
+    int icc_screen = get_icc_screen(vo);
+    if (x11->current_icc_screen != icc_screen) {
+        x11->current_icc_screen = icc_screen;
+        x11->pending_vo_events |= VO_EVENT_ICC_PROFILE_CHANGED;
+    }
 }
 
 static void vo_x11_fullscreen(struct vo *vo)
@@ -1760,7 +1788,9 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     struct vo_x11_state *x11 = vo->x11;
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
-        *events |= vo_x11_check_events(vo);
+        vo_x11_check_events(vo);
+        *events |= x11->pending_vo_events;
+        x11->pending_vo_events = 0;
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
         opts->fullscreen = !opts->fullscreen;
@@ -1840,16 +1870,7 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_GET_ICC_PROFILE: {
         if (!x11->pseudo_mapped)
             return VO_NOTAVAIL;
-        int cx = x11->winrc.x0 + (x11->winrc.x1 - x11->winrc.x0)/2,
-            cy = x11->winrc.y0 + (x11->winrc.y1 - x11->winrc.y0)/2;
-        int screen = 0; // xinerama screen number
-        for (int n = 0; n < x11->num_displays; n++) {
-            struct xrandr_display *disp = &x11->displays[n];
-            if (mp_rect_contains(&disp->rc, cx, cy)) {
-                screen = n;
-                break;
-            }
-        }
+        int screen = get_icc_screen(vo);
         char prop[80];
         snprintf(prop, sizeof(prop), "_ICC_PROFILE");
         if (screen > 0)
@@ -1891,6 +1912,30 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     }
     }
     return VO_NOTIMPL;
+}
+
+void vo_x11_wakeup(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    (void)write(x11->wakeup_pipe[1], &(char){0}, 1);
+}
+
+void vo_x11_wait_events(struct vo *vo, int64_t until_time_us)
+{
+    struct vo_x11_state *x11 = vo->x11;
+
+    struct pollfd fds[2] = {
+        { .fd = x11->event_fd, .events = POLLIN },
+        { .fd = x11->wakeup_pipe[0], .events = POLLIN },
+    };
+    int64_t wait_us = until_time_us - mp_time_us();
+    int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
+
+    poll(fds, 2, timeout_ms);
+
+    if (fds[1].revents & POLLIN)
+        mp_flush_wakeup_pipe(x11->wakeup_pipe[0]);
 }
 
 static void xscreensaver_heartbeat(struct vo_x11_state *x11)

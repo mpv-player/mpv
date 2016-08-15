@@ -54,7 +54,6 @@
 #include "video/decode/vd.h"
 #include "video/out/vo.h"
 #include "video/csputils.h"
-#include "audio/mixer.h"
 #include "audio/audio_buffer.h"
 #include "audio/out/ao.h"
 #include "audio/filter/af.h"
@@ -220,7 +219,7 @@ static void mp_hook_add(struct MPContext *mpctx, char *client, char *name,
     qsort(cmd->hooks, cmd->num_hooks, sizeof(cmd->hooks[0]), compare_hook);
 }
 
-// Call before a seek, in order to allow revert_seek to undo the seek.
+// Call before a seek, in order to allow revert-seek to undo the seek.
 static void mark_seek(struct MPContext *mpctx)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
@@ -347,7 +346,19 @@ static int mp_property_filename(void *ctx, struct m_property *prop,
     if (mp_is_url(bstr0(filename)))
         mp_url_unescape_inplace(filename);
     char *f = (char *)mp_basename(filename);
-    int r = m_property_strdup_ro(action, arg, f[0] ? f : filename);
+    if (!f[0])
+        f = filename;
+    if (action == M_PROPERTY_KEY_ACTION) {
+        struct m_property_action_arg *ka = arg;
+        if (strcmp(ka->key, "no-ext") == 0) {
+            action = ka->action;
+            arg = ka->arg;
+            bstr root;
+            if (mp_splitext(f, &root))
+                f = bstrto0(filename, root);
+        }
+    }
+    int r = m_property_strdup_ro(action, arg, f);
     talloc_free(filename);
     return r;
 }
@@ -1561,7 +1572,8 @@ static int mp_property_mixer_active(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    return m_property_flag_ro(action, arg, mixer_audio_initialized(mpctx->mixer));
+    struct ao_chain *ao_c = mpctx->ao_chain;
+    return m_property_flag_ro(action, arg, ao_c && ao_c->af->initialized > 0);
 }
 
 /// Volume (RW)
@@ -1590,7 +1602,7 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
 
     int r = mp_property_generic_option(mpctx, prop, action, arg);
     if (action == M_PROPERTY_SET)
-        mixer_update_volume(mpctx->mixer);
+        audio_update_volume(mpctx);
     return r;
 }
 
@@ -1607,7 +1619,7 @@ static int mp_property_mute(void *ctx, struct m_property *prop,
 
     int r = mp_property_generic_option(mpctx, prop, action, arg);
     if (action == M_PROPERTY_SET)
-        mixer_update_volume(mpctx->mixer);
+        audio_update_volume(mpctx);
     return r;
 }
 
@@ -1635,8 +1647,20 @@ static int mp_property_ao_volume(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLOAT};
+        *(struct m_option *)arg = (struct m_option){
+            .type = CONF_TYPE_FLOAT,
+            .flags = M_OPT_RANGE,
+            .min = 0,
+            .max = 100,
+        };
         return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT: {
+        ao_control_vol_t vol = {0};
+        if (ao_control(ao, AOCONTROL_GET_VOLUME, &vol) != CONTROL_OK)
+            return M_PROPERTY_UNAVAILABLE;
+        *(char **)arg = talloc_asprintf(NULL, "%.f", (vol.left + vol.right) / 2.0f);
+        return M_PROPERTY_OK;
+    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -1829,23 +1853,10 @@ static int mp_property_balance(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    float bal;
 
-    switch (action) {
-    case M_PROPERTY_GET:
-        mixer_getbalance(mpctx->mixer, arg);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){
-            .type = CONF_TYPE_FLOAT,
-            .flags = M_OPT_RANGE,
-            .min = -1,
-            .max = 1,
-        };
-        return M_PROPERTY_OK;
-    case M_PROPERTY_PRINT: {
+    if (action == M_PROPERTY_PRINT) {
         char **str = arg;
-        mixer_getbalance(mpctx->mixer, &bal);
+        float bal = mpctx->opts->balance;
         if (bal == 0.f)
             *str = talloc_strdup(NULL, "center");
         else if (bal == -1.f)
@@ -1859,11 +1870,11 @@ static int mp_property_balance(void *ctx, struct m_property *prop,
         }
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_SET:
-        mixer_setbalance(mpctx->mixer, *(float *)arg);
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+
+    int r = mp_property_generic_option(mpctx, prop, action, arg);
+    if (action == M_PROPERTY_SET)
+        audio_update_balance(mpctx);
+    return r;
 }
 
 static struct track* track_next(struct MPContext *mpctx, enum stream_type type,
@@ -1999,6 +2010,10 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
     if (track->d_audio)
         decoder_desc = track->d_audio->decoder_desc;
 
+    bool has_rg = track->stream->codec->replaygain_data;
+    struct replaygain_data rg = has_rg ? *track->stream->codec->replaygain_data
+                                       : (struct replaygain_data){0};
+
     struct m_sub_property props[] = {
         {"id",          SUB_PROP_INT(track->user_tid)},
         {"type",        SUB_PROP_STR(stream_type_name(track->type)),
@@ -2032,6 +2047,14 @@ static int get_track_entry(int item, int action, void *arg, void *ctx)
         {"demux-samplerate", SUB_PROP_INT(p.samplerate),
                         .unavailable = !p.samplerate},
         {"demux-fps",   SUB_PROP_DOUBLE(p.fps), .unavailable = p.fps <= 0},
+        {"replaygain-track-peak", SUB_PROP_FLOAT(rg.track_peak),
+                        .unavailable = !has_rg},
+        {"replaygain-track-gain", SUB_PROP_FLOAT(rg.track_gain),
+                        .unavailable = !has_rg},
+        {"replaygain-album-peak", SUB_PROP_FLOAT(rg.album_peak),
+                        .unavailable = !has_rg},
+        {"replaygain-album-gain", SUB_PROP_FLOAT(rg.album_gain),
+                        .unavailable = !has_rg},
         {0}
     };
 
@@ -2521,6 +2544,8 @@ static int property_imgparams(struct mp_image_params p, int action, void *arg)
             SUB_PROP_STR(m_opt_choice_str(mp_csp_prim_names, p.color.primaries))},
         {"gamma",
             SUB_PROP_STR(m_opt_choice_str(mp_csp_trc_names, p.color.gamma))},
+        {"nom-peak", SUB_PROP_FLOAT(p.color.nom_peak)},
+        {"sig-peak", SUB_PROP_FLOAT(p.color.sig_peak)},
         {"chroma-location",
             SUB_PROP_STR(m_opt_choice_str(mp_chroma_names, p.chroma_location))},
         {"stereo-in",
@@ -4051,7 +4076,11 @@ static const struct property_osd_display {
     { "volume", "Volume",
       .msg = "Volume: ${?volume:${volume}% ${?mute==yes:(Muted)}}${!volume:${volume}}",
       .osd_progbar = OSD_VOLUME },
+    { "ao-volume", "AO Volume",
+      .msg = "AO Volume: ${?ao-volume:${ao-volume}% ${?ao-mute==yes:(Muted)}}${!ao-volume:${ao-volume}}",
+      .osd_progbar = OSD_VOLUME },
     { "mute", "Mute" },
+    { "ao-mute", "AO Mute" },
     { "audio-delay", "A-V delay" },
     { "audio", "Audio" },
     { "balance", "Balance", .osd_progbar = OSD_BALANCE },
@@ -4367,15 +4396,15 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
 {
     int r = -1;
     if (strcmp(fmt, "bgra") != 0) {
-        MP_ERR(mpctx, "overlay_add: unsupported OSD format '%s'\n", fmt);
+        MP_ERR(mpctx, "overlay-add: unsupported OSD format '%s'\n", fmt);
         goto error;
     }
     if (id < 0 || id >= 64) { // arbitrary upper limit
-        MP_ERR(mpctx, "overlay_add: invalid id %d\n", id);
+        MP_ERR(mpctx, "overlay-add: invalid id %d\n", id);
         goto error;
     }
     if (w <= 0 || h <= 0 || stride < w * 4 || (stride % 4)) {
-        MP_ERR(mpctx, "overlay_add: inconsistent parameters\n");
+        MP_ERR(mpctx, "overlay-add: inconsistent parameters\n");
         goto error;
     }
     struct overlay overlay = {
@@ -4413,7 +4442,7 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
             p = m;
     }
     if (!p) {
-        MP_ERR(mpctx, "overlay_add: could not open or map '%s'\n", file);
+        MP_ERR(mpctx, "overlay-add: could not open or map '%s'\n", file);
         talloc_free(overlay.source);
         goto error;
     }

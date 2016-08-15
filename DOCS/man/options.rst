@@ -196,7 +196,7 @@ Playback Control
     position and so can take some time depending on decoding performance. For
     some video formats, precise seeks are disabled. This option selects the
     default choice to use for seeks; it is possible to explicitly override that
-    default in the definition of key bindings and in slave mode commands.
+    default in the definition of key bindings and in input commands.
 
     :no:       Never use precise seeks.
     :absolute: Use precise seeks if the seek is to an absolute position in the
@@ -374,7 +374,7 @@ Program Behavior
 
 ``--idle=<no|yes|once>``
     Makes mpv wait idly instead of quitting when there is no file to play.
-    Mostly useful in slave mode, where mpv can be controlled through input
+    Mostly useful in input mode, where mpv can be controlled through input
     commands.
 
     ``once`` will only idle at start and let the player close once the
@@ -404,7 +404,7 @@ Program Behavior
 ``--no-resume-playback``
     Do not restore playback position from the ``watch_later`` configuration
     subdirectory (usually ``~/.config/mpv/watch_later/``).
-    See ``quit_watch_later`` input command.
+    See ``quit-watch-later`` input command.
 
 ``--profile=<profile1,profile2,...>``
     Use the given profile(s), ``--profile=help`` displays a list of the
@@ -586,7 +586,9 @@ Video
     :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
     :videotoolbox: requires ``--vo=opengl`` (OS X 10.8 and up only)
+    :videotoolbox-copy: copies video back into system RAM (OS X 10.8 and up only)
     :dxva2: requires ``--vo=opengl:backend=angle`` or
+
         ``--vo=opengl:backend=dxinterop`` (Windows only)
     :dxva2-copy: copies video back to system RAM (Windows only)
     :d3d11va: requires ``--vo=opengl:backend=angle`` (Windows only)
@@ -690,8 +692,8 @@ Video
     choice of the format can influence performance considerably. On the other
     hand, there doesn't appear to be a good way to detect the best format for
     the given hardware. ``nv12``, the default, works better on modern hardware,
-    while ``uyvy422`` appears to be better for old hardware. ``rgb0`` also
-    works.
+    while ``uyvy422`` appears to be better for old hardware. ``rgb0`` and
+    ``yuv420p`` also work.
 
 ``--panscan=<0.0-1.0>``
     Enables pan-and-scan functionality (cropping the sides of e.g. a 16:9
@@ -883,9 +885,9 @@ Video
     You can get the list of allowed codecs with ``mpv --vd=help``. Remove the
     prefix, e.g. instead of ``lavc:h264`` use ``h264``.
 
-    By default, this is set to ``h264,vc1,wmv3,hevc,mpeg2video``. Note that the
-    hardware acceleration special codecs like ``h264_vdpau`` are not relevant
-    anymore, and in fact have been removed from Libav in this form.
+    By default, this is set to ``h264,vc1,wmv3,hevc,mpeg2video,vp9``. Note that
+    the hardware acceleration special codecs like ``h264_vdpau`` are not
+    relevant anymore, and in fact have been removed from Libav in this form.
 
     This is usually only needed with broken GPUs, where a codec is reported
     as supported, but decoding causes more problems than it solves.
@@ -1077,6 +1079,11 @@ Audio
 
     Since mpv 0.18.1, this always controls the internal mixer (aka "softvol").
 
+``--balance=<value>``
+    How much left/right channels contribute to the audio.
+
+    Deprecated.
+
 ``--audio-delay=<sec>``
     Audio delay in seconds (positive or negative float value). Positive values
     delay the audio, and negative values delay the video.
@@ -1143,30 +1150,51 @@ Audio
         This and enabling passthrough via ``--ad`` are deprecated in favor of
         using ``--audio-spdif=dts-hd``.
 
-``--audio-channels=<auto|number|layout>``
-    Request a channel layout for audio output (default: stereo). This  will ask
-    the AO to open a device with the given channel layout. It's up to the AO
-    to accept this layout, or to pick a fallback or to error out if the
-    requested layout is not supported.
+``--audio-channels=<auto-safe|auto|layouts>``
+    Control which audio channels are output (e.g. surround vs. stereo). There
+    are the following possibilities:
 
-    The ``--audio-channels`` option either takes a channel number or an explicit
-    channel layout. Channel numbers refer to default layouts, e.g. 2 channels
-    refer to stereo, 6 refers to 5.1.
+    - ``--audio-channels=auto-safe``
+        Use the system's preferred channel layout. If there is none (such
+        as when accessing a hardware device instead of the system mixer),
+        force stereo. Some audio outputs might simply accept any layout and
+        do downmixing on their own.
+
+        This is the default.
+    - ``--audio-channels=auto``
+        Send the audio device whatever it accepts, preferring the audio's
+        original channel layout. Can cause issues with HDMI (see the warning
+        below).
+    - ``--audio-channels=layout1,layout2,...``
+        List of ``,``-separated channel layouts which should be allowed.
+        Technically, this only adjusts the filter chain output to the best
+        matching layout in the list, and passes the result to the audio API.
+        It's possible that the audio API will select a different channel
+        layout.
+
+        Using this mode is recommended for direct hardware output, especially
+        over HDMI (see HDMI warning below).
+    - ``--audio-channels=stereo``
+        Force  a plain stereo downmix. This is a special-case of the previous
+        item. (See paragraphs below for implications.)
+
+    If a list of layouts is given, each item can be either an explicit channel
+    layout name (like ``5.1``), or a channel number. Channel numbers refer to
+    default layouts, e.g. 2 channels refer to stereo, 6 refers to 5.1.
 
     See ``--audio-channels=help`` output for defined default layouts. This also
     lists speaker names, which can be used to express arbitrary channel
     layouts (e.g. ``fl-fr-lfe`` is 2.1).
 
-    ``--audio-channels=auto`` tries to play audio using the input file's
-    channel layout. There is no guarantee that the audio API handles this
-    correctly. See the HDMI warning below.
-    (``empty`` is an accepted obsolete alias for ``auto``.)
-
-    This will also request the channel layout from the decoder. If the decoder
-    does not support the layout, it will fall back to its native channel layout.
-    (You can use ``--ad-lavc-downmix=no`` to make the decoder always output
-    its native layout.) Note that only some decoders support remixing audio.
-    Some that do include AC-3, AAC or DTS audio.
+    If the list of channel layouts has only 1 item, the decoder is asked to
+    produce according output. This sometimes triggers decoder-downmix, which
+    might be different from the normal mpv downmix. (Only some decoders support
+    remixing audio, like AC-3, AAC or DTS. You can use ``--ad-lavc-downmix=no``
+    to make the decoder always output its native layout.) One consequence is
+    that ``--audio-channels=stereo`` triggers decoder downmix, while ``auto``
+    or ``auto-safe`` never will, even if they end up selecting stereo. This
+    happens because the decision whether to use decoder downmix happens long
+    before the audio device is opened.
 
     If the channel layout of the media file (i.e. the decoder) and the AO's
     channel layout don't match, mpv will attempt to insert a conversion filter.
@@ -1178,6 +1206,10 @@ Audio
         the receiver does not support them. If a receiver gets an unsupported
         channel layout, random things can happen, such as dropping the
         additional channels, or adding noise.
+
+        You are recommended to set an explicit whitelist of the layouts you
+        want. For example, most A/V receivers connected via HDMI and that can
+        do 7.1 would  be served by: ``--audio-channels=7.1,5.1,stereo``
 
 ``--audio-normalize-downmix=<yes|no>``
     Enable/disable normalization if surround audio is downmixed to stereo
@@ -1283,7 +1315,7 @@ Audio
     or to set your own application name when using libmpv.
 
 ``--volume-restore-data=<string>``
-    Used internally for use by playback resume (e.g. with ``quit_watch_later``).
+    Used internally for use by playback resume (e.g. with ``quit-watch-later``).
     Restoring value has to be done carefully, because different AOs as well as
     softvol can have different value ranges, and we don't want to restore
     volume if setting the volume changes it system wide. The normal options
@@ -1308,6 +1340,25 @@ Audio
     significantly, the mpv developers should be contacted.
 
     Default: 0.2 (200 ms).
+
+``--audio-stream-silence=<yes|no>``
+    Cash-grab consumer audio hardware (such as A/V receivers) often ignore
+    initial audio sent over HDMI. This can happen every time audio over HDMI
+    is stopped and resumed. In order to compensate for this, you can enable
+    this option to not to stop and restart audio on seeks, and fill the gaps
+    with silence. Likewise, when pausing playback, audio is not stopped, and
+    silence is played while paused. Note that if no audio track is selected,
+    the audio device will still be closed immediately.
+
+    Not all AOs support this.
+
+``--audio-wait-open=<secs>``
+    This makes sense for use with ``--audio-stream-silence=yes``. If this option
+    is given, the player will wait for the given amount of seconds after opening
+    the audio device before sending actual audio data to it. Useful if your
+    expensive hardware discards the first 1 or 2 seconds of audio data sent to
+    it. If ``--audio-stream-silence=yes`` is not set, this option will likely
+    just waste time.
 
 Subtitles
 ---------
@@ -2536,7 +2587,7 @@ Input
     automatically enabled when ``-`` is found on the command line. There are
     situations where you have to set it manually, e.g. if you open
     ``/dev/stdin`` (or the equivalent on your system), use stdin in a playlist
-    or intend to read from stdin later on via the loadfile or loadlist slave
+    or intend to read from stdin later on via the loadfile or loadlist input
     commands.
 
 ``--input-ipc-server=<filename>``
@@ -2658,7 +2709,7 @@ OSD
     (default), then the playback time, duration, and some more information is
     shown.
 
-    This is also used for the ``show_progress`` command (by default mapped to
+    This is also used for the ``show-progress`` command (by default mapped to
     ``P``), or in some non-default cases when seeking.
 
     ``--osd-status-msg`` is a legacy equivalent (but with a minor difference).
@@ -2666,7 +2717,7 @@ OSD
 ``--osd-status-msg=<string>``
     Show a custom string during playback instead of the standard status text.
     This overrides the status text used for ``--osd-level=3``, when using the
-    ``show_progress`` command (by default mapped to ``P``), or in some
+    ``show-progress`` command (by default mapped to ``P``), or in some
     non-default cases when seeking. Expands properties. See
     `Property Expansion`_.
 
@@ -2927,7 +2978,7 @@ Screenshot
         insert the number of the current month as number. You have to use
         multiple ``%tX`` specifiers to build a full date/time string.
     ``%{prop[:fallback text]}``
-        Insert the value of the slave property 'prop'. E.g. ``%{filename}`` is
+        Insert the value of the input property 'prop'. E.g. ``%{filename}`` is
         the same as ``%f``. If the property does not exist or is not available,
         an error text is inserted, unless a fallback is specified.
     ``%%``
@@ -3176,7 +3227,7 @@ TV
         If <chan> is an integer greater than 1000, it will be treated as
         frequency (in kHz) rather than channel name from frequency table.
         Use _ for spaces in names (or play with quoting ;-) ). The channel
-        names will then be written using OSD, and the slave commands
+        names will then be written using OSD, and the input commands
         ``tv_step_channel``, ``tv_set_channel`` and ``tv_last_channel``
         will be usable for a remote control. Not compatible with
         the ``frequency`` parameter.
@@ -3625,7 +3676,7 @@ Miscellaneous
 ``--stream-capture=<filename>``
     Allows capturing the primary stream (not additional audio tracks or other
     kind of streams) into the given file. Capturing can also be started and
-    stopped by changing the filename with the ``stream-capture`` slave property.
+    stopped by changing the filename with the ``stream-capture`` property.
     Generally this will not produce usable results for anything else than MPEG
     or raw streams, unless capturing includes the file headers and is not
     interrupted. Note that, due to cache latencies, captured data may begin and
@@ -3668,6 +3719,16 @@ Miscellaneous
     Add all tracks from the given file. Unlike ``--sub-file`` and
     ``--audio-file``, this includes all tracks, and does not cause default
     stream selection over the "proper" file.
+
+``--autoload-files=<yes|no>``
+    Automatically load/select external files (default: yes).
+
+    If set to ``no``, then do not automatically load external files as specified
+    by ``--sub-auto`` and ``--audio-file-auto``. If external files are forcibly
+    added (like with ``--sub-file``), they will not be auto-selected.
+
+    This does not affect playlist expansion, redirection, or other loading of
+    referenced files like with ordered chapters.
 
 ``--lavfi-complex=<string>``
     Set a "complex" libavfilter filter, which means a single filter graph can

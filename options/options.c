@@ -40,7 +40,6 @@
 #include "video/csputils.h"
 #include "video/hwdec.h"
 #include "sub/osd.h"
-#include "audio/mixer.h"
 #include "audio/filter/af.h"
 #include "audio/decode/dec_audio.h"
 #include "player/core.h"
@@ -85,6 +84,7 @@ const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"auto-copy",   HWDEC_AUTO_COPY},
     {"vdpau",       HWDEC_VDPAU},
     {"videotoolbox",HWDEC_VIDEOTOOLBOX},
+    {"videotoolbox-copy",HWDEC_VIDEOTOOLBOX_COPY},
     {"vaapi",       HWDEC_VAAPI},
     {"vaapi-copy",  HWDEC_VAAPI_COPY},
     {"dxva2",       HWDEC_DXVA2},
@@ -279,7 +279,7 @@ const m_option_t mp_opts[] = {
     // force video/audio rate:
     OPT_DOUBLE("fps", force_fps, CONF_MIN, .min = 0),
     OPT_INTRANGE("audio-samplerate", force_srate, 0, 1000, 16*48000),
-    OPT_CHMAP("audio-channels", audio_output_channels, CONF_MIN, .min = 0),
+    OPT_CHANNELS("audio-channels", audio_output_channels, 0),
     OPT_AUDIOFORMAT("audio-format", audio_output_format, 0),
     OPT_FLAG("audio-normalize-downmix", audio_normalize, 0),
     OPT_DOUBLE("speed", playback_speed, M_OPT_RANGE | M_OPT_FIXED,
@@ -288,7 +288,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("audio-pitch-correction", pitch_correction, 0),
 
     // set a-v distance
-    OPT_FLOATRANGE("audio-delay", audio_delay, 0, -100.0, 100.0),
+    OPT_FLOAT("audio-delay", audio_delay, 0),
 
 // ------------------------- codec/vfilter options --------------------
 
@@ -342,6 +342,7 @@ const m_option_t mp_opts[] = {
     OPT_PATHLIST("sub-paths", sub_paths, 0),
     OPT_PATHLIST("audio-file-paths", audiofile_paths, 0),
     OPT_STRING_APPEND_LIST("external-file", external_files, M_OPT_FILE),
+    OPT_FLAG("autoload-files", autoload_files, 0),
     OPT_STRING("sub-codepage", sub_cp, 0),
     OPT_FLOAT("sub-delay", sub_delay, 0),
     OPT_FLOAT("sub-fps", sub_fps, 0),
@@ -396,6 +397,8 @@ const m_option_t mp_opts[] = {
     OPT_STRING("audio-device", audio_device, 0),
     OPT_STRING("audio-client-name", audio_client_name, 0),
     OPT_FLAG("audio-fallback-to-null", ao_null_fallback, 0),
+    OPT_FLAG("audio-stream-silence", audio_stream_silence, 0),
+    OPT_FLOATRANGE("audio-wait-open", audio_wait_open, 0, 0, 60),
     OPT_CHOICE("force-window", force_vo, 0,
                ({"no", 0}, {"yes", 1}, {"immediate", 2})),
     OPT_FLAG("taskbar-progress", vo.taskbar_progress, 0),
@@ -423,6 +426,7 @@ const m_option_t mp_opts[] = {
                 {"weak", -1})),
     OPT_DOUBLE("audio-buffer", audio_buffer, M_OPT_MIN | M_OPT_MAX,
                .min = 0, .max = 10),
+    OPT_FLOATRANGE("balance", balance, 0, -1, 1),
 
     OPT_GEOMETRY("geometry", vo.geometry, 0),
     OPT_SIZE_BOX("autofit", vo.autofit, 0),
@@ -760,6 +764,7 @@ const struct MPOpts mp_default_opts = {
     .sync_audio_drop_size = 0.020,
     .load_config = 1,
     .position_resume = 1,
+    .autoload_files = 1,
     .stream_cache = {
         .size = -1,
         .def_size = 75000,
@@ -804,7 +809,6 @@ const struct MPOpts mp_default_opts = {
     .sub_visibility = 1,
     .sub_pos = 100,
     .sub_speed = 1.0,
-    .audio_output_channels = MP_CHMAP_INIT_STEREO,
     .audio_output_format = 0,  // AF_FORMAT_UNKNOWN
     .playback_speed = 1.,
     .pitch_correction = 1,
@@ -827,7 +831,7 @@ const struct MPOpts mp_default_opts = {
     .sub_cp = "auto",
     .screenshot_template = "mpv-shot%n",
 
-    .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video",
+    .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video,vp9",
     .videotoolbox_format = IMGFMT_NV12,
 
     .index_mode = 1,

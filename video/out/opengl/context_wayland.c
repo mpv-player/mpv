@@ -59,9 +59,7 @@ static void egl_resize(struct vo_wayland_state *wl)
     /* set size for mplayer */
     wl->vo->dwidth  = scale*wl->window.width;
     wl->vo->dheight = scale*wl->window.height;
-
     wl->vo->want_redraw = true;
-    wl->window.events = 0;
 }
 
 static int egl_create_context(struct vo_wayland_state *wl,
@@ -207,8 +205,7 @@ static void waylandgl_swap_buffers(MPGLContext *ctx)
     if (!wl->frame.callback)
         vo_wayland_request_frame(ctx->vo, NULL, NULL);
 
-    if (!vo_wayland_wait_frame(ctx->vo))
-        MP_DBG(wl, "discarding frame callback\n");
+    vo_wayland_wait_events(ctx->vo, 0);
 
     eglSwapBuffers(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);
 }
@@ -225,6 +222,16 @@ static int waylandgl_control(MPGLContext *ctx, int *events, int request,
     return r;
 }
 
+static void wayland_wakeup(struct MPGLContext *ctx)
+{
+    vo_wayland_wakeup(ctx->vo);
+}
+
+static void wayland_wait_events(struct MPGLContext *ctx, int64_t until_time_us)
+{
+    vo_wayland_wait_events(ctx->vo, until_time_us);
+}
+
 static int waylandgl_init(struct MPGLContext *ctx, int flags)
 {
     if (!vo_wayland_init(ctx->vo))
@@ -239,5 +246,7 @@ const struct mpgl_driver mpgl_driver_wayland = {
     .reconfig       = waylandgl_reconfig,
     .swap_buffers   = waylandgl_swap_buffers,
     .control        = waylandgl_control,
+    .wakeup         = wayland_wakeup,
+    .wait_events    = wayland_wait_events,
     .uninit         = waylandgl_uninit,
 };

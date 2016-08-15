@@ -299,5 +299,6 @@ void mp_setup_av_network_options(struct AVDictionary **dict,
 
 void stream_print_proto_list(struct mp_log *log);
 char **stream_get_proto_list(void);
+bool stream_has_proto(const char *proto);
 
 #endif /* MPLAYER_STREAM_H */

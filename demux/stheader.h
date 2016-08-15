@@ -46,6 +46,8 @@ struct sh_stream {
     bool forced_track;          // container forced track flag
     int hls_bitrate;
 
+    struct mp_tags *tags;
+
     bool missing_timestamps;
 
     // stream is a picture (such as album art)

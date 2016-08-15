@@ -425,12 +425,18 @@ static int bluray_stream_open(stream_t *s)
             return STREAM_UNSUPPORTED;
         }
 
+        MP_VERBOSE(s, "List of available titles:\n");
+
         /* parse titles information */
         uint64_t max_duration = 0;
         for (int i = 0; i < b->num_titles; i++) {
             BLURAY_TITLE_INFO *ti = bd_get_title_info(bd, i, 0);
             if (!ti)
                 continue;
+
+            MP_VERBOSE(s, "idx: %3d duration: %s (playlist: %05d.mpls)\n",
+                       i + 1, mp_format_time(ti->duration / 90000, false),
+                       ti->playlist);
 
             /* try to guess which title may contain the main movie */
             if (ti->duration > max_duration) {

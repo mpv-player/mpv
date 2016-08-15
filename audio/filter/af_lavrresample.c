@@ -173,12 +173,6 @@ static int check_output_conversion(int mp_format)
     return af_to_avformat(mp_format);
 }
 
-bool af_lavrresample_test_conversion(int src_format, int dst_format)
-{
-    return af_to_avformat(src_format) != AV_SAMPLE_FMT_NONE &&
-           check_output_conversion(dst_format) != AV_SAMPLE_FMT_NONE;
-}
-
 static struct mp_chmap fudge_pairs[][2] = {
     {MP_CHMAP2(BL,  BR),  MP_CHMAP2(SL,  SR)},
     {MP_CHMAP2(SL,  SR),  MP_CHMAP2(BL,  BR)},
@@ -407,21 +401,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
             r = configure_lavrr(af, in, out, true);
         return r;
     }
-    case AF_CONTROL_SET_FORMAT: {
-        int format = *(int *)arg;
-        if (format && check_output_conversion(format) == AV_SAMPLE_FMT_NONE)
-            return AF_FALSE;
-
-        mp_audio_set_format(af->data, format);
-        return AF_OK;
-    }
-    case AF_CONTROL_SET_CHANNELS: {
-        mp_audio_set_channels(af->data, (struct mp_chmap *)arg);
-        return AF_OK;
-    }
-    case AF_CONTROL_SET_RESAMPLE_RATE:
-        af->data->rate = *(int *)arg;
-        return AF_OK;
     case AF_CONTROL_SET_PLAYBACK_SPEED_RESAMPLE: {
         s->playback_speed = *(double *)arg;
         return AF_OK;

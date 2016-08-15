@@ -449,5 +449,7 @@ const struct vo_driver video_out_x11 = {
     .control = control,
     .draw_image = draw_image,
     .flip_page = flip_page,
+    .wakeup = vo_x11_wakeup,
+    .wait_events = vo_x11_wait_events,
     .uninit = uninit,
 };

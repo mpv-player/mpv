@@ -154,7 +154,7 @@ main_dependencies = [
         'func': check_libs(['atomic'],
             check_statement('stdatomic.h',
                 'atomic_int_least64_t test = ATOMIC_VAR_INIT(123);'
-                'int test2 = atomic_load(&test)'))
+                'atomic_fetch_add(&test, 1)'))
     }, {
         'name': 'atomic-builtins',
         'desc': 'compiler support for __atomic built-ins',
@@ -175,6 +175,7 @@ main_dependencies = [
         'name': 'atomics',
         'desc': 'compiler support for usable thread synchronization built-ins',
         'func': check_true,
+        'req': True,
         'deps_any': ['stdatomic', 'atomic-builtins', 'sync-builtins'],
     }, {
         'name': 'c11-tls',
@@ -517,13 +518,11 @@ audio_output_features = [
     {
         'name': '--sdl2',
         'desc': 'SDL2',
-        'deps': ['atomics'],
         'func': check_pkg_config('sdl2'),
         'default': 'disable'
     }, {
         'name': '--sdl1',
         'desc': 'SDL (1.x)',
-        'deps': ['atomics'],
         'deps_neg': [ 'sdl2' ],
         'func': check_pkg_config('sdl'),
         'default': 'disable'
@@ -574,7 +573,6 @@ audio_output_features = [
     }, {
         'name': '--jack',
         'desc': 'JACK audio output',
-        'deps': ['atomics'],
         'func': check_pkg_config('jack'),
     }, {
         'name': '--openal',
@@ -592,14 +590,13 @@ audio_output_features = [
     }, {
         'name': '--coreaudio',
         'desc': 'CoreAudio audio output',
-        'deps': ['atomics'],
         'func': check_cc(
             fragment=load_fragment('coreaudio.c'),
             framework_name=['CoreFoundation', 'CoreAudio', 'AudioUnit', 'AudioToolbox'])
     }, {
         'name': '--wasapi',
         'desc': 'WASAPI audio output',
-        'deps': ['win32', 'atomics'],
+        'deps': ['win32'],
         'func': check_cc(fragment=load_fragment('wasapi.c')),
     }
 ]
@@ -942,6 +939,7 @@ _INSTALL_DIRS_LIST = [
     ('datadir', '${PREFIX}/share',    'data files'),
     ('mandir',  '${DATADIR}/man',     'man pages '),
     ('docdir',  '${DATADIR}/doc/mpv', 'documentation files'),
+    ('htmldir', '${DOCDIR}',          'html documentation files'),
     ('zshdir',  '${DATADIR}/zsh/site-functions', 'zsh completion functions'),
 
     ('confloaddir', '${CONFDIR}', 'configuration files load directory'),

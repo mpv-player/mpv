@@ -362,6 +362,9 @@ Available video output drivers are:
             exchange for adding some blur. This filter is good at temporal
             interpolation, and also known as "smoothmotion" (see ``tscale``).
 
+        ``linear``
+            A ``tscale`` filter.
+
         ``custom``
             A user-defined custom shader (see ``scale-shader``).
 
@@ -1095,8 +1098,7 @@ Available video output drivers are:
 
     ``3dlut-size=<r>x<g>x<b>``
         Size of the 3D LUT generated from the ICC profile in each dimension.
-        Default is 128x256x64.
-        Sizes must be a power of two, and 512 at most.
+        Default is 64x64x64. Sizes may range from 2 to 512.
 
     ``icc-contrast=<0-100000>``
         Specifies an upper limit on the target device's contrast ratio.
@@ -1300,7 +1302,7 @@ Available video output drivers are:
     This also supports many of the suboptions the ``opengl`` VO has. Run
     ``mpv --vo=opengl-cb:help`` for a list.
 
-    This also supports the ``vo_cmdline`` command.
+    This also supports the ``vo-cmdline`` command.
 
 ``rpi`` (Raspberry Pi)
     Native video output on the Raspberry Pi using the MMAL API.

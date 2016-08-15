@@ -41,7 +41,7 @@ It's also possible to send input.conf style text-only commands:
 
 ::
 
-    > echo 'show_text ${playback-time}' | socat - /tmp/mpvsocket
+    > echo 'show-text ${playback-time}' | socat - /tmp/mpvsocket
 
 But you won't get a reply over the socket. (This particular command shows the
 playback time on the player's OSD.)
@@ -65,7 +65,7 @@ You can send commands from a command prompt:
 
 ::
 
-    echo show_text ${playback-time} >\\.\pipe\mpvsocket
+    echo show-text ${playback-time} >\\.\pipe\mpvsocket
 
 To be able to simultaneously read and write from the IPC pipe, like on Linux,
 it's necessary to write an external program that uses overlapped file I/O (or

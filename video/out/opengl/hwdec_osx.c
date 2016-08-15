@@ -70,6 +70,16 @@ static struct vt_format vt_formats[] = {
         }
     },
     {
+        .cvpixfmt = kCVPixelFormatType_420YpCbCr8Planar,
+        .imgfmt = IMGFMT_420P,
+        .planes = 3,
+        .gl = {
+            { GL_RED, GL_UNSIGNED_BYTE, GL_RED },
+            { GL_RED, GL_UNSIGNED_BYTE, GL_RED },
+            { GL_RED, GL_UNSIGNED_BYTE, GL_RED },
+        }
+    },
+    {
         .cvpixfmt = kCVPixelFormatType_32BGRA,
         .imgfmt = IMGFMT_RGB0,
         .planes = 1,
@@ -186,13 +196,14 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 {
     assert(params->imgfmt == hw->driver->imgfmt);
 
-    struct vt_format *f = vt_get_gl_format(params->hw_subfmt);
+    struct vt_format *f = vt_get_gl_format_from_imgfmt(params->hw_subfmt);
     if (!f) {
         MP_ERR(hw, "Unsupported CVPixelBuffer format.\n");
         return -1;
     }
 
     params->imgfmt = f->imgfmt;
+    params->hw_subfmt = 0;
     return 0;
 }
 

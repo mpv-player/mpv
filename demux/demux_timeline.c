@@ -84,7 +84,7 @@ static void reselect_streams(struct demuxer *demuxer)
             // This stops demuxer readahead for inactive segments.
             if (!p->current || seg->d != p->current->d)
                 selected = false;
-            demuxer_select_track(seg->d, sh, selected);
+            demuxer_select_track(seg->d, sh, MP_NOPTS_VALUE, selected);
         }
     }
 }
@@ -197,6 +197,11 @@ static int d_fill_buffer(struct demuxer *demuxer)
     if (pkt->stream < 0)
         goto drop;
 
+    // for refresh seeks, demux.c prefers monotonically increasing packet pos
+    // since the packet pos is meaningless anyway for timeline, use it
+    if (pkt->pos >= 0)
+        pkt->pos |= (seg->index & 0x7FFFULL) << 48;
+
     struct virtual_stream *vs = &p->streams[pkt->stream];
 
     if (pkt->pts != MP_NOPTS_VALUE && pkt->pts >= seg->end) {
@@ -301,6 +306,9 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
     demuxer->metadata = meta->metadata;
     demuxer->attachments = meta->attachments;
     demuxer->num_attachments = meta->num_attachments;
+    demuxer->editions = meta->editions;
+    demuxer->num_editions = meta->num_editions;
+    demuxer->edition = meta->edition;
 
     int num_streams = demux_get_num_stream(meta);
     for (int n = 0; n < num_streams; n++) {

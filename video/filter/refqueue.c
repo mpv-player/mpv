@@ -75,15 +75,6 @@ bool mp_refqueue_should_deint(struct mp_refqueue *q)
            !(q->flags & MP_MODE_INTERLACED_ONLY);
 }
 
-// Whether the current output frame is marked as interlaced.
-bool mp_refqueue_is_interlaced(struct mp_refqueue *q)
-{
-    if (!mp_refqueue_has_output(q))
-        return false;
-
-    return q->queue[q->pos]->fields & MP_IMGFIELD_INTERLACED;
-}
-
 // Whether the current output frame (field) is the top field, bottom field
 // otherwise. (Assumes the caller forces deinterlacing.)
 bool mp_refqueue_is_top_field(struct mp_refqueue *q)

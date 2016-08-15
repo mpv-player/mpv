@@ -173,6 +173,24 @@ sed -i 's_/mingw64/bin_/mingw64/lib_' /mingw64/lib/pkgconfig/mpv.pc
 rmdir /mingw64/bin/pkgconfig
 ```
 
+Linking libmpv with MSVC programs
+---------------------------------
+
+You can build C++ programs in Visual Studio and link them with libmpv. To do
+this, you need a Visual Studio which supports ``stdint.h`` (recent ones do),
+and you need to create a import library for the mpv DLL:
+
+```bash
+lib /def:mpv.def /name:mpv-1.dll /out:mpv.lib /MACHINE:X64
+```
+
+The string in the ``/name:`` parameter must match the filename of the DLL (this
+is simply the filename the MSVC linker will use). The ``mpv.def`` can be
+retrieved from the mpv build directory, or can be produced by MingGW's
+gendef.exe helper from the mpv DLL.
+
+Static linking is not possible.
+
 Running mpv
 -----------
 

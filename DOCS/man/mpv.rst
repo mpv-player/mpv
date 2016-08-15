@@ -946,7 +946,7 @@ For Windows-specifics, see `FILES ON WINDOWS`_ section.
 ``~/.config/mpv/watch_later/``
     Contains temporary config files needed for resuming playback of files with
     the watch later feature. See for example the ``Q`` key binding, or the
-    ``quit_watch_later`` input command.
+    ``quit-watch-later`` input command.
 
     Each file is a small config file which is loaded if the corresponding media
     file is loaded. It contains the playback position and some (not necessarily

@@ -25,7 +25,7 @@ function add_files_at(index, files)
     local oldcount = mp.get_property_number("playlist-count", 1)
     for i = 1, #files do
         mp.commandv("loadfile", files[i], "append")
-        mp.commandv("playlist_move", oldcount + i - 1, index + i - 1)
+        mp.commandv("playlist-move", oldcount + i - 1, index + i - 1)
     end
 end
 

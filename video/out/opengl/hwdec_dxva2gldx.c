@@ -160,6 +160,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     }
 
     params->imgfmt = SHARED_SURFACE_MPFMT;
+    params->hw_subfmt = 0;
 
     return 0;
 fail:

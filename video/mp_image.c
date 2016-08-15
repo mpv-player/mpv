@@ -512,7 +512,7 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
             mp_snprintf_cat(b, bs, " [%d:%d]", p->p_w, p->p_h);
         mp_snprintf_cat(b, bs, " %s", mp_imgfmt_to_name(p->imgfmt));
         if (p->hw_subfmt)
-            mp_snprintf_cat(b, bs, "[%llu]", (unsigned long long)(p->hw_subfmt));
+            mp_snprintf_cat(b, bs, "[%s]", mp_imgfmt_to_name(p->hw_subfmt));
         mp_snprintf_cat(b, bs, " %s/%s",
                         m_opt_choice_str(mp_csp_names, p->color.space),
                         m_opt_choice_str(mp_csp_levels_names, p->color.levels));

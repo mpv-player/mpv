@@ -485,11 +485,21 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
     osd_rescale_bitmaps(res, insize[0], insize[1], d, video_par);
 }
 
-static bool accepts_packet(struct sd *sd)
+static bool accepts_packet(struct sd *sd, double min_pts)
 {
     struct sd_lavc_priv *priv = sd->priv;
 
     double pts = priv->current_pts;
+    if (min_pts != MP_NOPTS_VALUE) {
+        // guard against bogus rendering PTS in the future.
+        if (pts == MP_NOPTS_VALUE || min_pts < pts)
+            pts = min_pts;
+        // Heuristic: we assume rendering cannot lag behind more than 1 second
+        // behind decoding.
+        if (pts + 1 < min_pts)
+            pts = min_pts;
+    }
+
     int last_needed = -1;
     for (int n = 0; n < MAX_QUEUE; n++) {
         struct sub *sub = &priv->subs[n];

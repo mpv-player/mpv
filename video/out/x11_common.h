@@ -45,6 +45,8 @@ struct vo_x11_state {
     struct mp_log *log;
     struct input_ctx *input_ctx;
     Display *display;
+    int event_fd;
+    int wakeup_pipe[2];
     Window window;
     Window rootwin;
     Window parent;  // embedded in this foreign window
@@ -57,6 +59,7 @@ struct vo_x11_state {
 
     struct xrandr_display displays[MAX_DISPLAYS];
     int num_displays;
+    int current_icc_screen;
 
     int xrandr_event;
 
@@ -125,12 +128,14 @@ struct vo_x11_state {
 
 int vo_x11_init(struct vo *vo);
 void vo_x11_uninit(struct vo *vo);
-int vo_x11_check_events(struct vo *vo);
+void vo_x11_check_events(struct vo *vo);
 bool vo_x11_screen_is_composited(struct vo *vo);
 bool vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
                              const char *classname);
 void vo_x11_config_vo_window(struct vo *vo);
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg);
+void vo_x11_wakeup(struct vo *vo);
+void vo_x11_wait_events(struct vo *vo, int64_t until_time_us);
 
 void vo_x11_silence_xlib(int dir);
 

@@ -42,7 +42,6 @@
 #include "common/encode.h"
 #include "input/input.h"
 
-#include "audio/mixer.h"
 #include "audio/audio.h"
 #include "audio/audio_buffer.h"
 #include "audio/decode/dec_audio.h"
@@ -195,23 +194,10 @@ void reselect_demux_stream(struct MPContext *mpctx, struct track *track)
 {
     if (!track->stream)
         return;
-    demuxer_select_track(track->demuxer, track->stream, track->selected);
-    // External files may need an explicit seek to the correct position, if
-    // they were not implicitly advanced during playback.
-    if (track->selected && track->demuxer != mpctx->demuxer) {
-        bool position_ok = false;
-        for (int n = 0; n < demux_get_num_stream(track->demuxer); n++) {
-            struct sh_stream *stream = demux_get_stream(track->demuxer, n);
-            if (stream != track->stream && stream->type != STREAM_SUB)
-                position_ok |= demux_stream_is_selected(stream);
-        }
-        if (!position_ok) {
-            double pts = get_current_time(mpctx);
-            if (pts == MP_NOPTS_VALUE)
-                pts = 0;
-            demux_seek(track->demuxer, pts, 0);
-        }
-    }
+    double pts = get_current_time(mpctx);
+    if (pts != MP_NOPTS_VALUE)
+        pts += get_track_seek_offset(mpctx, track);
+    demuxer_select_track(track->demuxer, track->stream, pts, track->selected);
 }
 
 // Called from the demuxer thread if a new packet is available.
@@ -266,7 +252,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
 
-    demuxer_select_track(track->demuxer, stream, false);
+    demuxer_select_track(track->demuxer, stream, MP_NOPTS_VALUE, false);
 
     mp_notify(mpctx, MPV_EVENT_TRACKS_CHANGED, NULL);
 
@@ -310,6 +296,8 @@ static int match_lang(char **langs, char *lang)
 static bool compare_track(struct track *t1, struct track *t2, char **langs,
                           struct MPOpts *opts)
 {
+    if (!opts->autoload_files && t1->is_external != t2->is_external)
+        return !t1->is_external;
     bool ext1 = t1->is_external && !t1->no_default;
     bool ext2 = t2->is_external && !t2->no_default;
     if (ext1 != ext2)
@@ -367,6 +355,8 @@ struct track *select_default_track(struct MPContext *mpctx, int order,
         && !pick->forced_track)
         pick = NULL;
     if (pick && pick->attached_picture && !mpctx->opts->audio_display)
+        pick = NULL;
+    if (pick && !opts->autoload_files && pick->is_external)
         pick = NULL;
     return pick;
 }
@@ -467,17 +457,12 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
         reselect_demux_stream(mpctx, current);
     }
 
-    if (track && track->demuxer == mpctx->demuxer)
-        demux_set_enable_refresh_seeks(mpctx->demuxer, true);
-
     mpctx->current_track[order][type] = track;
 
     if (track) {
         track->selected = true;
         reselect_demux_stream(mpctx, track);
     }
-
-    demux_set_enable_refresh_seeks(mpctx->demuxer, false);
 
     if (type == STREAM_VIDEO && order == 0) {
         reinit_video_chain(mpctx);
@@ -623,6 +608,8 @@ static void open_external_files(struct MPContext *mpctx, char **files,
 void autoload_external_files(struct MPContext *mpctx)
 {
     if (mpctx->opts->sub_auto < 0 && mpctx->opts->audiofile_auto < 0)
+        return;
+    if (!mpctx->opts->autoload_files)
         return;
 
     void *tmp = talloc_new(NULL);

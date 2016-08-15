@@ -374,3 +374,16 @@ void mp_chmal_sel_log(const struct mp_chmap_sel *s, struct mp_log *log, int lev)
     if (s->allow_any)
         mp_msg(log, lev, " - anything\n");
 }
+
+// Select a channel map from the given list that fits best to c. Don't change
+// *c if there's no match, or the list is empty.
+void mp_chmap_sel_list(struct mp_chmap *c, struct mp_chmap *maps, int num_maps)
+{
+    // This is a separate function to keep messing with mp_chmap_sel internals
+    // within this source file.
+    struct mp_chmap_sel sel = {
+        .chmaps = maps,
+        .num_chmaps = num_maps,
+    };
+    mp_chmap_sel_fallback(&sel, c);
+}

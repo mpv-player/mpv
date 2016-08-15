@@ -168,7 +168,6 @@ typedef struct lavf_priv {
     int num_streams;
     int cur_program;
     char *mime_type;
-    bool merge_track_metadata;
     double seek_delay;
 } lavf_priv_t;
 
@@ -502,7 +501,7 @@ static void select_tracks(struct demuxer *demuxer, int start)
     }
 }
 
-static void export_replaygain(demuxer_t *demuxer, struct mp_codec_params *c,
+static void export_replaygain(demuxer_t *demuxer, struct sh_stream *sh,
                               AVStream *st)
 {
     for (int i = 0; i < st->nb_side_data; i++) {
@@ -528,7 +527,10 @@ static void export_replaygain(demuxer_t *demuxer, struct mp_codec_params *c,
         rgain->album_peak = (av_rgain->album_peak != 0.0) ?
             av_rgain->album_peak / 100000.0f : 1.0;
 
-        c->replaygain_data = rgain;
+        // This must be run only before the stream was added, otherwise there
+        // will be race conditions with accesses from the user thread.
+        assert(!sh->ds);
+        sh->codec->replaygain_data = rgain;
     }
 }
 
@@ -575,7 +577,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
             delay = lavc_delay / (double)codec->sample_rate;
         priv->seek_delay = MPMAX(priv->seek_delay, delay);
 
-        export_replaygain(demuxer, sh->codec, st);
+        export_replaygain(demuxer, sh, st);
 
         break;
     }
@@ -681,6 +683,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         if (!sh->title && sh->hls_bitrate > 0)
             sh->title = talloc_asprintf(sh, "bitrate %d", sh->hls_bitrate);
         sh->missing_timestamps = !!(priv->avif_flags & AVFMT_NOTIMESTAMPS);
+        mp_tags_copy_from_av_dictionary(sh->tags, st->metadata);
         demux_add_sh_stream(demuxer, sh);
     }
 
@@ -703,14 +706,14 @@ static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
         priv->avfc->event_flags = 0;
         demux_changed(demuxer, DEMUX_EVENT_METADATA);
     }
-    if (priv->merge_track_metadata) {
-        for (int n = 0; n < priv->num_streams; n++) {
-            AVStream *st = priv->streams[n] ? priv->avfc->streams[n] : NULL;
-            if (st && st->event_flags & AVSTREAM_EVENT_FLAG_METADATA_UPDATED) {
-                mp_tags_copy_from_av_dictionary(demuxer->metadata, st->metadata);
-                st->event_flags = 0;
-                demux_changed(demuxer, DEMUX_EVENT_METADATA);
-            }
+
+    for (int n = 0; n < priv->num_streams; n++) {
+        AVStream *st = priv->streams[n] ? priv->avfc->streams[n] : NULL;
+        if (st && st->event_flags & AVSTREAM_EVENT_FLAG_METADATA_UPDATED) {
+            st->event_flags = 0;
+            struct mp_tags *tags = talloc_zero(NULL, struct mp_tags);
+            mp_tags_copy_from_av_dictionary(tags, st->metadata);
+            demux_set_stream_tags(demuxer, priv->streams[n], tags);
         }
     }
 }
@@ -846,16 +849,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     add_new_streams(demuxer);
 
-    // Often useful with OGG audio-only files, which have metadata in the audio
-    // track metadata instead of the main metadata.
-    if (demux_get_num_stream(demuxer) == 1) {
-        priv->merge_track_metadata = true;
-        for (int n = 0; n < priv->num_streams; n++) {
-            if (priv->streams[n])
-                mp_tags_copy_from_av_dictionary(demuxer->metadata, avfc->streams[n]->metadata);
-        }
-    }
-
     mp_tags_copy_from_av_dictionary(demuxer->metadata, avfc->metadata);
     update_metadata(demuxer, NULL);
 
@@ -865,7 +858,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     demuxer->start_time = priv->avfc->start_time == AV_NOPTS_VALUE ?
                           0 : (double)priv->avfc->start_time / AV_TIME_BASE;
 
-    demuxer->allow_refresh_seeks = matches_avinputformat_name(priv, "mp4");
     demuxer->fully_read = priv->format_hack.fully_read;
 
     return 0;
@@ -953,30 +945,15 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
         seek_pts_av = seek_pts * AV_TIME_BASE;
     }
 
-    int r;
-    if (!priv->avfc->iformat->read_seek2) {
-        // Normal seeking.
+    int r = av_seek_frame(priv->avfc, -1, seek_pts_av, avsflags);
+    if (r < 0 && (avsflags & AVSEEK_FLAG_BACKWARD)) {
+        // When seeking before the beginning of the file, and seeking fails,
+        // try again without the backwards flag to make it seek to the
+        // beginning.
+        avsflags &= ~AVSEEK_FLAG_BACKWARD;
         r = av_seek_frame(priv->avfc, -1, seek_pts_av, avsflags);
-        if (r < 0 && (avsflags & AVSEEK_FLAG_BACKWARD)) {
-            // When seeking before the beginning of the file, and seeking fails,
-            // try again without the backwards flag to make it seek to the
-            // beginning.
-            avsflags &= ~AVSEEK_FLAG_BACKWARD;
-            r = av_seek_frame(priv->avfc, -1, seek_pts_av, avsflags);
-        }
-    } else {
-        // av_seek_frame() won't work. Use "new" seeking API. We don't use this
-        // API by default, because there are some major issues.
-        // Set max_ts==ts, so that demuxing starts from an earlier position in
-        // the worst case.
-        r = avformat_seek_file(priv->avfc, -1, INT64_MIN,
-                               seek_pts_av, seek_pts_av, avsflags);
-        // Similar issue as in the normal seeking codepath.
-        if (r < 0) {
-            r = avformat_seek_file(priv->avfc, -1, INT64_MIN,
-                                   seek_pts_av, INT64_MAX, avsflags);
-        }
     }
+
     if (r < 0) {
         char buf[180];
         av_strerror(r, buf, sizeof(buf));

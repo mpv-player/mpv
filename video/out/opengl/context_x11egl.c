@@ -191,6 +191,16 @@ static void mpegl_swap_buffers(MPGLContext *ctx)
     eglSwapBuffers(p->egl_display, p->egl_surface);
 }
 
+static void mpegl_wakeup(struct MPGLContext *ctx)
+{
+    vo_x11_wakeup(ctx->vo);
+}
+
+static void mpegl_wait_events(struct MPGLContext *ctx, int64_t until_time_us)
+{
+    vo_x11_wait_events(ctx->vo, until_time_us);
+}
+
 const struct mpgl_driver mpgl_driver_x11egl = {
     .name           = "x11egl",
     .priv_size      = sizeof(struct priv),
@@ -198,5 +208,7 @@ const struct mpgl_driver mpgl_driver_x11egl = {
     .reconfig       = mpegl_reconfig,
     .swap_buffers   = mpegl_swap_buffers,
     .control        = mpegl_control,
+    .wakeup         = mpegl_wakeup,
+    .wait_events    = mpegl_wait_events,
     .uninit         = mpegl_uninit,
 };

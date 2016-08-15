@@ -29,10 +29,10 @@ struct priv {
 
     int in_format;
     int in_srate;
-    struct mp_chmap in_channels;
+    struct m_channels in_channels;
     int out_format;
     int out_srate;
-    struct mp_chmap out_channels;
+    struct m_channels out_channels;
 
     int fail;
 };
@@ -44,8 +44,8 @@ static void force_in_params(struct af_instance *af, struct mp_audio *in)
     if (priv->in_format != AF_FORMAT_UNKNOWN)
         mp_audio_set_format(in, priv->in_format);
 
-    if (priv->in_channels.num)
-        mp_audio_set_channels(in, &priv->in_channels);
+    if (priv->in_channels.num_chmaps > 0)
+        mp_audio_set_channels(in, &priv->in_channels.chmaps[0]);
 
     if (priv->in_srate)
         in->rate = priv->in_srate;
@@ -58,8 +58,8 @@ static void force_out_params(struct af_instance *af, struct mp_audio *out)
     if (priv->out_format != AF_FORMAT_UNKNOWN)
         mp_audio_set_format(out, priv->out_format);
 
-    if (priv->out_channels.num)
-        mp_audio_set_channels(out, &priv->out_channels);
+    if (priv->out_channels.num_chmaps > 0)
+        mp_audio_set_channels(out, &priv->out_channels.chmaps[0]);
 
     if (priv->out_srate)
         out->rate = priv->out_srate;
@@ -124,10 +124,10 @@ const struct af_info af_info_format = {
     .options = (const struct m_option[]) {
         OPT_AUDIOFORMAT("format", in_format, 0),
         OPT_INTRANGE("srate", in_srate, 0, 1000, 8*48000),
-        OPT_CHMAP("channels", in_channels, CONF_MIN, .min = 0),
+        OPT_CHANNELS("channels", in_channels, 0, .min = 1),
         OPT_AUDIOFORMAT("out-format", out_format, 0),
         OPT_INTRANGE("out-srate", out_srate, 0, 1000, 8*48000),
-        OPT_CHMAP("out-channels", out_channels, CONF_MIN, .min = 0),
+        OPT_CHANNELS("out-channels", out_channels, 0, .min = 1),
         OPT_FLAG("fail", fail, 0),
         {0}
     },

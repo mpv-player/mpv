@@ -87,9 +87,12 @@ typedef struct MPOpts {
     char *audio_device;
     char *audio_client_name;
     int ao_null_fallback;
+    int audio_stream_silence;
+    float audio_wait_open;
     int force_vo;
     int softvol;
     float softvol_volume;
+    float balance;
     int softvol_mute;
     float softvol_max;
     int gapless_audio;
@@ -225,7 +228,7 @@ typedef struct MPOpts {
     double force_fps;
     int index_mode;
 
-    struct mp_chmap audio_output_channels;
+    struct m_channels audio_output_channels;
     int audio_output_format;
     int audio_normalize;
     int force_srate;
@@ -242,6 +245,7 @@ typedef struct MPOpts {
     char **sub_paths;
     char **audiofile_paths;
     char **external_files;
+    int autoload_files;
     int sub_auto;
     int audiofile_auto;
     int osd_bar_visible;
