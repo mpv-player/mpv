@@ -19,7 +19,7 @@ Interface changes
 
 ::
 
- --- mpv 0.18.2 ---
+ --- mpv 0.19.0 ---
     - deprecate "balance" option/property (no replacement)
  --- mpv 0.18.1 ---
     - deprecate --heartbeat-cmd
