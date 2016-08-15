@@ -1,3 +1,112 @@
+Release 0.19.0
+==============
+
+Build System Changes
+--------------------
+
+- build: add --htmldir option
+- build: always require atomics
+- wscript: add proper unversioned SONAME for Android
+
+
+Features
+--------
+
+New
+~~~
+
+- client API: add stream_cb API for user-defined stream implementations (bumps client API version to 1.22)
+- vf_d3d11vpp: add video processor selection
+- videotoolbox: add --hwdec=videotoolbox-copy for h/w accelerated decoding with video filters
+- vo_opengl: add a tscale=linear direct implementation
+
+Removed
+~~~~~~~
+
+- audio/filter: remove delay audio filter
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- command: add filename/no-ext sub-property that returns filename without extension (#3404)
+- command: add properties for HDR metadata
+- command: add replaygain information properties to track-list
+- options: add vp9 to --hwdec-codecs
+- player: add --audio-stream-silence
+- player: add --audio-wait-open
+- player: add --no-autoload-files
+- videotoolbox: add yuv420p to --videotoolbox-format
+
+Changed
+~~~~~~~
+
+- options: un-restrict --audio-delay
+- use - as command-name separator everywhere
+- vo_opengl: reduce default 3dlut-size to 64x64x64 (since accuracy is improved)
+
+
+Deprecated
+~~~~~~~~~~
+
+- deprecate "balance" option/property (no replacement)
+
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- Windows: don't wait for GUI thread when polling for events (#3393)
+- af_lavcac3enc: error out properly if encoding fails
+- af_volume: don't let softvol overwrite af_volume volumedb sub-option
+- ao_pulse: fix some volume control rounding issues
+- ao_wasapi: in exclusive mode, do not output multichannel by default
+- audio: add heuristic to move auto-downmixing before other filters
+- audio: show an osd bar when changing ao-volume
+- demux: make ALBUM replaygain tags optional (#3405)
+- demux_raw: fix small typo to add s16be support
+- demux_timeline: restore mkv edition switching
+- libarchive: sanitize non-UTF8 archive entries
+- macOS/vo_opengl: fix crash when glctx is NULL during init (#3360)
+- player: disable display-sync with spdif transcoding
+- player: do not cut off terminal status line if it contains newlines (#3340)
+- player: fix display-sync timing if audio resumes slowly
+- player: improve instant track switching (#3392)
+- player: improve non-hr seeking with external audio tracks
+- player: offset demuxer on start/seek properly with audio/sub delay
+- player: sync audio as well when enabling it mid-stream
+- stream/stream_bluray: display list of available titles in verbose mode
+- sub: don't potentially discard too many subtitles on seek
+- video: respect --deinterlace=auto
+- vo_direct3d: add missing header (fixes Cygwin build)
+- vo_opengl: angle: try D3D9 when D3D11 fails eglInitialize
+- vo_opengl: angle: use WARP if there are no hw adapters (makes it work on Windows 7 without hardware-accelerated graphics)
+- vo_opengl: increase 3DLUT accuracy at smaller LUT sizes
+- vo_opengl: remove the 3dlut-size npot2 restriction
+- vo_wayland: fix high CPU usage due to busy polling
+- wayland_common: clip window size to the display output size
+- wayland_common: fix crashes when switching to fullscreen before the video output is fully initialized
+- wayland_common: fix fullscreen image switching bug
+- wayland_common: prevent black bars on most non-native aspect ratios
+- wayland_common: remove untested/unusable wayland dnd code
+- win32: mpv.rc: re-add version info
+- x11: skip ICC update on every window move
+- ytdl: Error out with http_dash_segments (unsupported for now)
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API, and DOCS/interface-changes.rst for a history
+of changes to other user-visible interfaces.
+
+A complete changelog can be seen by running `git log v0.18.1..v0.19.0`
+in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.18.1...v0.19.0 or
+http://git.srsfckn.biz/mpv/log/?qt=range&q=v0.18.1..v0.19.0
+
+
 Release 0.18.1
 ==============
 

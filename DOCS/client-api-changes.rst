@@ -32,7 +32,7 @@ API changes
 
 ::
 
- --- mpv 0.18.2
+ --- mpv 0.19.0
  1.22   - add stream_cb API for custom protocols
  --- mpv 0.18.1 ---
  ----   - remove "status" log level from mpv_request_log_messages() docs. This
