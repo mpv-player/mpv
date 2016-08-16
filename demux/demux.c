@@ -1039,10 +1039,10 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         dst->metadata = mp_tags_dup(dst, src->metadata);
 
         if (dst->num_update_stream_tags != src->num_update_stream_tags) {
+            dst->num_update_stream_tags = src->num_update_stream_tags;
             talloc_free(dst->update_stream_tags);
             dst->update_stream_tags =
                 talloc_zero_array(dst, struct mp_tags *, dst->num_update_stream_tags);
-            dst->num_update_stream_tags = src->num_update_stream_tags;
         }
         for (int n = 0; n < dst->num_update_stream_tags; n++) {
             talloc_free(dst->update_stream_tags[n]);
