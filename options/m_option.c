@@ -921,22 +921,8 @@ static int parse_double(struct mp_log *log, const m_option_t *opt,
         return M_OPT_INVALID;
     }
 
-    if (opt->flags & M_OPT_MIN)
-        if (tmp_float < opt->min) {
-            mp_err(log, "The %.*s option must be >= %f: %.*s\n",
-                   BSTR_P(name), opt->min, BSTR_P(param));
-            return M_OPT_OUT_OF_RANGE;
-        }
-
-    if (opt->flags & M_OPT_MAX)
-        if (tmp_float > opt->max) {
-            mp_err(log, "The %.*s option must be <= %f: %.*s\n",
-                   BSTR_P(name), opt->max, BSTR_P(param));
-            return M_OPT_OUT_OF_RANGE;
-        }
-
-    if (!isfinite(tmp_float)) {
-        mp_err(log, "The %.*s option must be a finite number: %.*s\n",
+    if (clamp_double(opt, &tmp_float) < 0) {
+        mp_err(log, "The %.*s option is out of range: %.*s\n",
                BSTR_P(name), BSTR_P(param));
         return M_OPT_OUT_OF_RANGE;
     }
@@ -990,11 +976,7 @@ static int double_set(const m_option_t *opt, void *dst, struct mpv_node *src)
     } else {
         return M_OPT_UNKNOWN;
     }
-    if ((opt->flags & M_OPT_MIN) && val < opt->min)
-        return M_OPT_OUT_OF_RANGE;
-    if ((opt->flags & M_OPT_MAX) && val > opt->max)
-        return M_OPT_OUT_OF_RANGE;
-    if (!isfinite(val))
+    if (clamp_double(opt, &val) < 0)
         return M_OPT_OUT_OF_RANGE;
     *(double *)dst = val;
     return 1;
