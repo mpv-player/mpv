@@ -526,7 +526,7 @@ Input Commands that are Possibly Subject to Change
 ``disable-section "<section>"``
     Disable the named input section. Undoes ``enable-section``.
 
-``define-section "<section>" "<contents>" [default|forced]``
+``define-section "<section>" "<contents>" [default|force]``
     Create a named input section, or replace the contents of an already existing
     input section. The ``contents`` parameter uses the same syntax as the
     ``input.conf`` file (except that using the section syntax in it is not
@@ -544,7 +544,7 @@ Input Commands that are Possibly Subject to Change
     <default> (also used if parameter omitted)
         Use a key binding defined by this section only if the user hasn't
         already bound this key to a command.
-    <forced>
+    <force>
         Always bind a key. (The input section that was made active most recently
         wins if there are ambiguities.)
 
