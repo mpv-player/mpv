@@ -894,7 +894,8 @@ static int clamp_double(const m_option_t *opt, void *val)
         v = opt->min;
         r = M_OPT_OUT_OF_RANGE;
     }
-    if (!isfinite(v)) {
+    // (setting max/min to INFINITY/-INFINITY is allowed)
+    if (!isfinite(v) && v != opt->max && v != opt->min) {
         v = opt->min;
         r = M_OPT_OUT_OF_RANGE;
     }
