@@ -19,6 +19,10 @@ Interface changes
 
 ::
 
+ --- mpv 0.20.0 ---
+    - add --image-display-duration option - this also means that image duration
+      is not influenced by --mf-fps anymore in the general case (this is an
+      incompatible change)
  --- mpv 0.19.0 ---
     - deprecate "balance" option/property (no replacement)
  --- mpv 0.18.1 ---

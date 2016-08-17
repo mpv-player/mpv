@@ -25,6 +25,7 @@
 #include <stddef.h>
 #include <sys/types.h>
 #include <limits.h>
+#include <math.h>
 
 #include "config.h"
 
@@ -214,6 +215,8 @@ const m_option_t mp_opts[] = {
                ({"no", 0},
                 {"yes", 1},
                 {"always", 2})),
+    OPT_DOUBLE("image-display-duration", image_display_duration,
+               M_OPT_RANGE, 0, INFINITY),
 
     OPT_CHOICE("index", index_mode, 0, ({"default", 1}, {"recreate", 0})),
 
@@ -796,6 +799,7 @@ const struct MPOpts mp_default_opts = {
     .play_frames = -1,
     .rebase_start_time = 1,
     .keep_open = 0,
+    .image_display_duration = 1.0,
     .stream_id = { { [STREAM_AUDIO] = -1,
                      [STREAM_VIDEO] = -1,
                      [STREAM_SUB] = -1, },

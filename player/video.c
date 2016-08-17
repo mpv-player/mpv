@@ -1283,10 +1283,6 @@ static void calculate_frame_duration(struct MPContext *mpctx)
         double pts1 = mpctx->next_frames[1]->pts;
         if (pts0 != MP_NOPTS_VALUE && pts1 != MP_NOPTS_VALUE && pts1 >= pts0)
             duration = pts1 - pts0;
-    } else {
-        // E.g. last frame on EOF. Only use it if it's significant.
-        if (demux_duration >= 0.1)
-            duration = demux_duration;
     }
 
     // The following code tries to compensate for rounded Matroska timestamps
@@ -1350,17 +1346,31 @@ void write_video(struct MPContext *mpctx)
         return;
 
     if (r == VD_EOF) {
-        int prev_state = mpctx->video_status;
-        mpctx->video_status = STATUS_EOF;
-        if (mpctx->num_past_frames > 0 && mpctx->past_frames[0].duration > 0) {
-            if (vo_still_displaying(vo))
-                mpctx->video_status = STATUS_DRAINING;
-        }
         mpctx->delay = 0;
         mpctx->last_av_difference = 0;
+
+        if (mpctx->video_status <= STATUS_PLAYING) {
+            mpctx->video_status = STATUS_DRAINING;
+            get_relative_time(mpctx);
+            if (mpctx->num_past_frames == 1 && mpctx->past_frames[0].pts == 0 &&
+                !mpctx->ao_chain)
+            {
+                mpctx->time_frame += opts->image_display_duration;
+            } else {
+                mpctx->time_frame = 0;
+            }
+        }
+
+        if (mpctx->video_status == STATUS_DRAINING) {
+            mpctx->time_frame -= get_relative_time(mpctx);
+            mpctx->sleeptime = MPMIN(mpctx->sleeptime, mpctx->time_frame);
+            if (mpctx->time_frame <= 0) {
+                MP_VERBOSE(mpctx, "video EOF reached\n");
+                mpctx->video_status = STATUS_EOF;
+            }
+        }
+
         MP_DBG(mpctx, "video EOF (status=%d)\n", mpctx->video_status);
-        if (prev_state != mpctx->video_status)
-            mpctx->sleeptime = 0;
         return;
     }
 

@@ -1873,6 +1873,23 @@ Window
     file.mkv normally, then fail to open ``/dev/null``, then exit). (In
     mpv 0.8.0, ``always`` was introduced, which restores the old behavior.)
 
+``--image-display-duration=<seconds|inf>``
+    If the current file is an image, play the image for the given amount of
+    seconds (default: 1). ``inf`` means the file is kept open forever (until
+    the user stops playback manually).
+
+    Unlike ``--keep-open``, the player is not paused, but simply continues
+    playback until the time has elapsed. (It should not use any resources
+    during "playback".)
+
+    This affects image files, which are defined as having only 1 video frame
+    and no audio. The player may recognize certain non-images as images, for
+    example if ``--length`` is used to reduce the length to 1 frame, or if
+    you seek to the last frame.
+
+    This option does not affect the framerate used for ``mf://`` or
+    ``--merge-files``. For that, use ``--mf-fps`` instead.
+
 ``--force-window=<yes|no|immediate>``
     Create a video output window even if there is no video. This can be useful
     when pretending that mpv is a GUI application. Currently, the window
