@@ -840,9 +840,11 @@ static int video_output_image(struct MPContext *mpctx)
         struct mp_image *img = vf_read_output_frame(vo_c->vf);
         if (img) {
             double endpts = get_play_end_pts(mpctx);
-            if (endpts != MP_NOPTS_VALUE && img->pts >= endpts) {
-                r = VD_EOF;
-            } else if (mpctx->max_frames == 0) {
+            if ((endpts != MP_NOPTS_VALUE && img->pts >= endpts) ||
+                mpctx->max_frames == 0)
+            {
+                vf_unread_output_frame(vo_c->vf, img);
+                img = NULL;
                 r = VD_EOF;
             } else if (hrseek && mpctx->hrseek_lastframe) {
                 mp_image_setrefp(&mpctx->saved_frame, img);

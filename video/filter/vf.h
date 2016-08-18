@@ -157,6 +157,7 @@ int vf_filter_frame(struct vf_chain *c, struct mp_image *img);
 int vf_output_frame(struct vf_chain *c, bool eof);
 int vf_needs_input(struct vf_chain *c);
 struct mp_image *vf_read_output_frame(struct vf_chain *c);
+void vf_unread_output_frame(struct vf_chain *c, struct mp_image *img);
 void vf_seek_reset(struct vf_chain *c);
 struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
                                      char **args);
