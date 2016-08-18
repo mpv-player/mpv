@@ -881,6 +881,16 @@ Available video output drivers are:
 
         Windows only.
 
+    ``dcomposition=<yes|no>``
+        Allows DirectComposition when using the ANGLE backend (default: yes).
+        DirectComposition implies flip-model presentation, which can improve
+        rendering efficiency on Windows 8+ by avoiding a copy of the video frame.
+        mpv uses it by default where possible, but it can cause poor behaviour
+        with some drivers, such as a black screen or graphical corruption when
+        leaving full-screen mode. Use "no" to disable it.
+
+        Windows with ANGLE only.
+
     ``sw``
         Continue even if a software renderer is detected.
 

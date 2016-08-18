@@ -32,6 +32,7 @@ enum {
     VOFLAG_GL_DEBUG     = 1 << 2,       // Hint to request debug OpenGL context
     VOFLAG_ALPHA        = 1 << 3,       // Hint to request alpha framebuffer
     VOFLAG_SW           = 1 << 4,       // Hint to accept a software GL renderer
+    VOFLAG_ANGLE_DCOMP  = 1 << 5,       // Whether DirectComposition is allowed
 };
 
 extern const int mpgl_preferred_gl_versions[];

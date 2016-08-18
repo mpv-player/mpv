@@ -70,6 +70,7 @@ struct gl_priv {
     int allow_sw;
     int swap_interval;
     int dwm_flush;
+    int allow_direct_composition;
     int opt_vsync_fences;
 
     char *backend;
@@ -409,6 +410,9 @@ static int preinit(struct vo *vo)
     if (p->allow_sw)
         vo_flags |= VOFLAG_SW;
 
+    if (p->allow_direct_composition)
+        vo_flags |= VOFLAG_ANGLE_DCOMP;
+
     p->glctx = mpgl_init(vo, p->backend, vo_flags);
     if (!p->glctx)
         goto err_out;
@@ -460,6 +464,7 @@ static const struct m_option options[] = {
     OPT_INT("swapinterval", swap_interval, 0, OPTDEF_INT(1)),
     OPT_CHOICE("dwmflush", dwm_flush, 0,
                ({"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})),
+    OPT_FLAG("dcomposition", allow_direct_composition, 0, OPTDEF_INT(1)),
     OPT_FLAG("debug", use_gl_debug, 0),
     OPT_STRING_VALIDATE("backend", backend, 0, mpgl_validate_backend_opt),
     OPT_FLAG("sw", allow_sw, 0),
