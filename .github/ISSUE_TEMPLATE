@@ -13,7 +13,9 @@ If you're not using git master or the latest release, update.
 Make a log file made with -v or --log-file=output.txt, paste it to
 http://sprunge.us or a similar site, and replace this text with a link to it.
 
-Do not bother reporting a bug if you do not provide the required information.
+Providing a log file is strongly encouraged. It is very helpful for reproducing
+bugs or getting important technical context. Without log it might not be
+possibly to analyze and fix certain bugs.
 
 ### Sample files
 
