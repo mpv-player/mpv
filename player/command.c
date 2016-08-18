@@ -75,8 +75,6 @@ struct command_ctx {
     double last_seek_pts;
     double marked_pts;
 
-    double prev_pts;
-
     char **warned_deprecated;
     int num_warned_deprecated;
 
@@ -220,7 +218,7 @@ static void mp_hook_add(struct MPContext *mpctx, char *client, char *name,
 }
 
 // Call before a seek, in order to allow revert-seek to undo the seek.
-static void mark_seek(struct MPContext *mpctx)
+void mark_seek(struct MPContext *mpctx)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
     double now = mp_time_sec();
@@ -3301,9 +3299,11 @@ static int mp_property_ab_loop(void *ctx, struct m_property *prop,
     }
     int r = mp_property_generic_option(mpctx, prop, action, arg);
     if (r > 0 && action == M_PROPERTY_SET) {
+        mpctx->ab_loop_clip = mpctx->playback_pts < opts->ab_loop[1];
         if (strcmp(prop->name, "ab-loop-b") == 0) {
-            struct command_ctx *cctx = mpctx->command_ctx;
-            cctx->prev_pts = opts->ab_loop[0];
+            if (opts->ab_loop[1] != MP_NOPTS_VALUE &&
+                mpctx->playback_pts <= opts->ab_loop[1])
+                mpctx->ab_loop_clip = true;
         }
         // Update if visible
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
@@ -5375,7 +5375,6 @@ void command_init(struct MPContext *mpctx)
     mpctx->command_ctx = talloc(NULL, struct command_ctx);
     *mpctx->command_ctx = (struct command_ctx){
         .last_seek_pts = MP_NOPTS_VALUE,
-        .prev_pts = MP_NOPTS_VALUE,
     };
 }
 
@@ -5388,8 +5387,6 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         ctx->marked_pts = MP_NOPTS_VALUE;
     }
 
-    if (event == MPV_EVENT_SEEK)
-        ctx->prev_pts = MP_NOPTS_VALUE;
     if (event == MPV_EVENT_IDLE)
         ctx->is_idle = true;
     if (event == MPV_EVENT_START_FILE)
@@ -5398,35 +5395,6 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         // Update chapters - does nothing if something else is visible.
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
     }
-}
-
-void handle_ab_loop(struct MPContext *mpctx)
-{
-    struct command_ctx *ctx = mpctx->command_ctx;
-    struct MPOpts *opts = mpctx->opts;
-
-    if (opts->pause)
-        return;
-
-    double now = mpctx->restart_complete ? mpctx->playback_pts : MP_NOPTS_VALUE;
-    if (now != MP_NOPTS_VALUE && (opts->ab_loop[0] != MP_NOPTS_VALUE ||
-                                  opts->ab_loop[1] != MP_NOPTS_VALUE))
-    {
-        double start = opts->ab_loop[0];
-        if (start == MP_NOPTS_VALUE)
-            start = 0;
-        double end = opts->ab_loop[1];
-        if (end == MP_NOPTS_VALUE)
-            end = INFINITY;
-        if (ctx->prev_pts >= start && ctx->prev_pts < end &&
-            (now >= end || mpctx->stop_play == AT_END_OF_FILE))
-        {
-            mark_seek(mpctx);
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, start,
-                       MPSEEK_EXACT, MPSEEK_FLAG_DELAY);
-        }
-    }
-    ctx->prev_pts = now;
 }
 
 void handle_command_updates(struct MPContext *mpctx)

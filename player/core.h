@@ -82,6 +82,7 @@ enum seek_precision {
 
 enum seek_flags {
     MPSEEK_FLAG_DELAY = 1 << 0, // give player chance to coalesce multiple seeks
+    MPSEEK_FLAG_NOFLUSH = 1 << 1, // keeping remaining data for seamless loops
 };
 
 enum video_sync {
@@ -326,6 +327,7 @@ typedef struct MPContext {
     bool hrseek_lastframe;  // drop everything until last frame reached
     bool hrseek_backstep;   // go to frame before seek target
     double hrseek_pts;
+    bool ab_loop_clip;      // clip to the "b" part of an A-B loop if available
     // AV sync: the next frame should be shown when the audio out has this
     // much (in seconds) buffered data left. Increased when more data is
     // written to the ao, decreased when moving to the next video frame.
