@@ -722,15 +722,40 @@ static bool get_sync_samples(struct MPContext *mpctx, int *skip)
 }
 
 
-static bool copy_output(struct af_stream *afs, struct mp_audio_buffer *outbuf,
-                        int minsamples, bool eof)
+static bool copy_output(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
+                        int minsamples, double endpts, bool eof, bool *seteof)
 {
+    struct af_stream *afs = mpctx->ao_chain->af;
+
     while (mp_audio_buffer_samples(outbuf) < minsamples) {
         if (af_output_frame(afs, eof) < 0)
             return true; // error, stop doing stuff
+
+        int cursamples = mp_audio_buffer_samples(outbuf);
+        int maxsamples = INT_MAX;
+        if (endpts != MP_NOPTS_VALUE) {
+            double rate = afs->output.rate / mpctx->audio_speed;
+            double curpts = written_audio_pts(mpctx);
+            if (curpts != MP_NOPTS_VALUE)
+                maxsamples = (endpts - curpts - mpctx->opts->audio_delay) * rate;
+        }
+
         struct mp_audio *mpa = af_read_output_frame(afs);
         if (!mpa)
             return false; // out of data
+
+        if (cursamples + mpa->samples > maxsamples) {
+            if (cursamples < maxsamples) {
+                struct mp_audio pre = *mpa;
+                pre.samples = maxsamples - cursamples;
+                mp_audio_buffer_append(outbuf, &pre);
+                mp_audio_skip_samples(mpa, pre.samples);
+            }
+            af_unread_output_frame(afs, mpa);
+            *seteof = true;
+            return true;
+        }
+
         mp_audio_buffer_append(outbuf, mpa);
         talloc_free(mpa);
     }
@@ -764,20 +789,24 @@ static int decode_new_frame(struct ao_chain *ao_c)
  * Return 0 on success, or negative AD_* error code.
  * In the former case outbuf has at least minsamples buffered on return.
  * In case of EOF/error it might or might not be. */
-static int filter_audio(struct ao_chain *ao_c, struct mp_audio_buffer *outbuf,
+static int filter_audio(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
                         int minsamples)
 {
+    struct ao_chain *ao_c = mpctx->ao_chain;
     struct af_stream *afs = ao_c->af;
     if (afs->initialized < 1)
         return AD_ERR;
 
     MP_STATS(ao_c, "start audio");
 
+    double endpts = get_play_end_pts(mpctx);
+
+    bool eof = false;
     int res;
     while (1) {
         res = 0;
 
-        if (copy_output(afs, outbuf, minsamples, false))
+        if (copy_output(mpctx, outbuf, minsamples, endpts, false, &eof))
             break;
 
         res = decode_new_frame(ao_c);
@@ -785,13 +814,13 @@ static int filter_audio(struct ao_chain *ao_c, struct mp_audio_buffer *outbuf,
             break;
         if (res < 0) {
             // drain filters first (especially for true EOF case)
-            copy_output(afs, outbuf, minsamples, true);
+            copy_output(mpctx, outbuf, minsamples, endpts, true, &eof);
             break;
         }
 
         // On format change, make sure to drain the filter chain.
         if (!mp_audio_config_equals(&afs->input, ao_c->input_frame)) {
-            copy_output(afs, outbuf, minsamples, true);
+            copy_output(mpctx, outbuf, minsamples, endpts, true, &eof);
             res = AD_NEW_FMT;
             break;
         }
@@ -816,6 +845,9 @@ static int filter_audio(struct ao_chain *ao_c, struct mp_audio_buffer *outbuf,
         if (af_filter_frame(afs, mpa) < 0)
             return AD_ERR;
     }
+
+    if (res == 0 && mp_audio_buffer_samples(outbuf) < minsamples && eof)
+        res = AD_EOF;
 
     MP_STATS(ao_c, "end audio");
 
@@ -918,10 +950,10 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
 
     playsize = playsize / align * align;
 
-    int status = AD_OK;
+    int status = mpctx->audio_status >= STATUS_DRAINING ? AD_EOF : AD_OK;
     bool working = false;
     if (playsize > mp_audio_buffer_samples(ao_c->ao_buffer)) {
-        status = filter_audio(mpctx->ao_chain, ao_c->ao_buffer, playsize);
+        status = filter_audio(mpctx, ao_c->ao_buffer, playsize);
         if (status == AD_WAIT)
             return;
         if (status == AD_NO_PROGRESS) {
@@ -1014,17 +1046,6 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
     bool audio_eof = status == AD_EOF;
     bool partial_fill = false;
     int playflags = 0;
-
-    double endpts = get_play_end_pts(mpctx);
-    if (endpts != MP_NOPTS_VALUE) {
-        double samples = (endpts - written_audio_pts(mpctx) - opts->audio_delay)
-                         * play_samplerate;
-        if (playsize > samples) {
-            playsize = MPMAX((int)samples / align * align, 0);
-            audio_eof = true;
-            partial_fill = true;
-        }
-    }
 
     if (playsize > mp_audio_buffer_samples(ao_c->ao_buffer)) {
         playsize = mp_audio_buffer_samples(ao_c->ao_buffer);

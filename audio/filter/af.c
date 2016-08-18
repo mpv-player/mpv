@@ -779,6 +779,12 @@ struct mp_audio *af_read_output_frame(struct af_stream *s)
     return af_dequeue_output_frame(s->last);
 }
 
+void af_unread_output_frame(struct af_stream *s, struct mp_audio *frame)
+{
+    struct af_instance *af = s->last;
+    MP_TARRAY_INSERT_AT(af, af->out_queued, af->num_out_queued, 0, frame);
+}
+
 // Make sure the caller can change data referenced by the frame.
 // Return negative error code on failure (i.e. you can't write).
 int af_make_writeable(struct af_instance *af, struct mp_audio *frame)
