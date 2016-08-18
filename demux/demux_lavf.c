@@ -114,6 +114,7 @@ struct format_hack {
     // Do not confuse player's position estimation (position is into external
     // segment, with e.g. HLS, player knows about the playlist main file only).
     bool clear_filepos : 1;
+    bool ignore_start : 1;
 };
 
 #define BLACKLIST(fmt) {fmt, .ignore = true}
@@ -136,6 +137,9 @@ static const struct format_hack format_hacks[] = {
     // In theory, such streams might contain timestamps, but virtually none do.
     {"h264", .if_flags = AVFMT_NOTIMESTAMPS },
     {"hevc", .if_flags = AVFMT_NOTIMESTAMPS },
+
+    // Rebasing start time to 0 is very weird with ogg shoutcast streams.
+    {"ogg", .ignore_start = true},
 
     TEXTSUB("aqtitle"), TEXTSUB("jacosub"), TEXTSUB("microdvd"),
     TEXTSUB("mpl2"), TEXTSUB("mpsub"), TEXTSUB("pjs"), TEXTSUB("realtext"),
@@ -855,8 +859,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     demuxer->ts_resets_possible =
         priv->avif_flags & (AVFMT_TS_DISCONT | AVFMT_NOTIMESTAMPS);
 
-    demuxer->start_time = priv->avfc->start_time == AV_NOPTS_VALUE ?
-                          0 : (double)priv->avfc->start_time / AV_TIME_BASE;
+    if (avfc->start_time != AV_NOPTS_VALUE && !priv->format_hack.ignore_start)
+        demuxer->start_time = avfc->start_time / (double)AV_TIME_BASE;
 
     demuxer->fully_read = priv->format_hack.fully_read;
 
