@@ -306,8 +306,13 @@ static int angle_init(struct MPGLContext *ctx, int flags)
 
     // EGL_DIRECT_COMPOSITION_ANGLE enables the use of flip-mode present, which
     // avoids a copy of the video image and lowers vsync jitter, though the
-    // extension is only present on Windows 8 and up.
-    if (strstr(exts, "EGL_ANGLE_direct_composition")) {
+    // extension is only present on Windows 8 and up, and might have subpar
+    // behavior with some drivers (Intel? symptom - whole desktop is black for
+    // some seconds after spending some minutes in fullscreen and then leaving
+    // fullscreen).
+    if ((flags & VOFLAG_ANGLE_DCOMP) &&
+        strstr(exts, "EGL_ANGLE_direct_composition"))
+    {
         MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len,
             EGL_DIRECT_COMPOSITION_ANGLE);
         MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len, EGL_TRUE);
