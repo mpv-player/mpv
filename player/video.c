@@ -539,7 +539,9 @@ void mp_force_video_refresh(struct MPContext *mpctx)
         return;
 
     // If not paused, the next frame should come soon enough.
-    if (opts->pause && mpctx->video_status == STATUS_PLAYING &&
+    if ((opts->pause || mpctx->time_frame >= 0.5) &&
+        (mpctx->video_status >= STATUS_PLAYING ||
+         mpctx->video_status <= STATUS_DRAINING) &&
         mpctx->last_vo_pts != MP_NOPTS_VALUE)
     {
         queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->last_vo_pts,
