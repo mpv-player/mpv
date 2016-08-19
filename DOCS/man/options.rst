@@ -701,6 +701,8 @@ Video
     controls how much of the image is cropped. May not work with all video
     output drivers.
 
+    This option has no effect if ``--video-unscaled`` option is used.
+
 ``--video-aspect=<ratio>``
     Override video aspect ratio, in case aspect information is incorrect or
     missing in the file being played. See also ``--no-video-aspect``.
@@ -742,7 +744,8 @@ Video
     Disable scaling of the video. If the window is larger than the video,
     black bars are added. Otherwise, the video is cropped, unless the option
     is set to ``downscale-big``, in which case the video is fit to window. The
-    video still can be influenced by the other ``--video-...`` options.
+    video still can be influenced by the other ``--video-...`` options. This
+    option disables the effect of ``--panscan``.
 
     Note that the scaler algorithm may still be used, even if the video isn't
     scaled. For example, this can influence chroma conversion. The video will
