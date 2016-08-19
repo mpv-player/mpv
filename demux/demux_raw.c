@@ -145,6 +145,9 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
     c->force_channels = true;
     c->samplerate = opts->samplerate;
 
+    c->native_tb_num = 1;
+    c->native_tb_den = c->samplerate;
+
     int f = opts->aformat;
     // See PCM():               sign   float  bits    endian
     mp_set_pcm_codec(sh->codec, f & 1, f & 2, f >> 3, f & 4);
@@ -233,6 +236,7 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
     c->codec = decoder;
     c->codec_tag = imgfmt;
     c->fps = opts->fps;
+    c->reliable_fps = true;
     c->disp_w = width;
     c->disp_h = height;
     demux_add_sh_stream(demuxer, sh);

@@ -670,6 +670,8 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         if (sh->codec->lav_headers)
             mp_copy_lav_codec_headers(sh->codec->lav_headers, codec);
 #endif
+        sh->codec->native_tb_num = st->time_base.num;
+        sh->codec->native_tb_den = st->time_base.den;
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = true;

@@ -74,6 +74,9 @@ struct mp_codec_params {
     struct AVCodecContext *lav_headers;
     struct AVCodecParameters *lav_codecpar;
 
+    // Timestamp granularity for converting double<->rational timestamps.
+    int native_tb_num, native_tb_den;
+
     // STREAM_AUDIO
     int samplerate;
     struct mp_chmap channels;
@@ -85,6 +88,7 @@ struct mp_codec_params {
     // STREAM_VIDEO
     bool avi_dts;         // use DTS timing; first frame and DTS is 0
     float fps;            // frames per second (set only if constant fps)
+    bool reliable_fps;    // the fps field is definitely not broken
     int par_w, par_h;     // pixel aspect ratio (0 if unknown/square)
     int disp_w, disp_h;   // display size
     int rotate;           // intended display rotation, in degrees, [0, 359]

@@ -449,10 +449,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     if (!lavc_codec)
         return;
 
-    ctx->codec_timebase = (AVRational){0};
-    if (strstr(decoder, "_mmal") || strstr(decoder, "_mediacodec"))
-        ctx->codec_timebase = (AVRational){1, 1000000};
-
+    ctx->codec_timebase = mp_get_codec_timebase(vd->codec);
     ctx->pix_fmt = AV_PIX_FMT_NONE;
     ctx->hwdec = hwdec;
     ctx->hwdec_fmt = 0;

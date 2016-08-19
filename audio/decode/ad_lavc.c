@@ -86,7 +86,7 @@ static int init(struct dec_audio *da, const char *decoder)
     struct priv *ctx = talloc_zero(NULL, struct priv);
     da->priv = ctx;
 
-    ctx->codec_timebase = (AVRational){0};
+    ctx->codec_timebase = mp_get_codec_timebase(da->codec);
 
     ctx->force_channel_map = c->force_channels;
 
