@@ -97,8 +97,10 @@ union pts { int64_t i; double d; };
 int64_t mp_pts_to_av(double mp_pts, AVRational *tb)
 {
     assert(sizeof(int64_t) >= sizeof(double));
-    if (tb && tb->num > 0 && tb->den > 0)
-        return mp_pts == MP_NOPTS_VALUE ? AV_NOPTS_VALUE : mp_pts / av_q2d(*tb);
+    if (tb && tb->num > 0 && tb->den > 0) {
+        return mp_pts == MP_NOPTS_VALUE ?
+            AV_NOPTS_VALUE : llrint(mp_pts / av_q2d(*tb));
+    }
     // The + 0.0 is to squash possible negative zero mp_pts, which would
     // happen to end up as AV_NOPTS_VALUE.
     return (union pts){.d = mp_pts + 0.0}.i;
