@@ -479,18 +479,19 @@ static void reorder_planes(struct mp_audio *mpa, int *reorder,
 static int filter_resample(struct af_instance *af, struct mp_audio *in)
 {
     struct af_resample *s = af->priv;
+    struct mp_audio *out = NULL;
+
+    if (!s->avrctx)
+        goto error;
 
     int samples = get_out_samples(s, in ? in->samples : 0);
 
     struct mp_audio out_format = s->pool_fmt;
-    struct mp_audio *out = mp_audio_pool_get(af->out_pool, &out_format, samples);
+    out = mp_audio_pool_get(af->out_pool, &out_format, samples);
     if (!out)
         goto error;
     if (in)
         mp_audio_copy_attributes(out, in);
-
-    if (!s->avrctx)
-        goto error;
 
     if (out->samples) {
         out->samples = resample_frame(s->avrctx, out, in);
