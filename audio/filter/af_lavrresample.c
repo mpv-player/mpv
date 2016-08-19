@@ -400,10 +400,11 @@ static int control(struct af_instance *af, int cmd, void *arg)
     case AF_CONTROL_RESET:
         if (s->avrctx) {
 #if HAVE_LIBSWRESAMPLE
-            // This POS either can't drop state correctly, or doesn't want to.
-            // It will swallow some minor audio e.g. after a seek.
-            // Deallocate and recreate the resample state for a full reset.
-            configure_lavrr(af, &af->fmt_in, &af->fmt_out, false);
+            swr_close(s->avrctx);
+            if (swr_init(s->avrctx) < 0) {
+                close_lavrr(af);
+                return AF_ERROR;
+            }
 #else
             while (avresample_read(s->avrctx, NULL, 1000) > 0) {}
 #endif
