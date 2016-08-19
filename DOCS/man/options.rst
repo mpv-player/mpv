@@ -738,10 +738,11 @@ Video
     choices if you encounter video that has the wrong aspect ratio in mpv,
     but seems to be correct in other players.
 
-``--video-unscaled``
+``--video-unscaled=<no|yes|downscale-big>``
     Disable scaling of the video. If the window is larger than the video,
-    black bars are added. Otherwise, the video is cropped. The video still
-    can be influenced by the other ``--video-...`` options.
+    black bars are added. Otherwise, the video is cropped, unless the option
+    is set to ``downscale-big``, in which case the video is fit to window. The
+    video still can be influenced by the other ``--video-...`` options.
 
     Note that the scaler algorithm may still be used, even if the video isn't
     scaled. For example, this can influence chroma conversion. The video will
