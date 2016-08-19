@@ -825,7 +825,6 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         struct demux_packet *cc = new_demux_packet_from(sd->data, sd->size);
         cc->pts = vd->codec_pts;
         cc->dts = vd->codec_dts;
-        cc->pos = -1;
         demuxer_feed_caption(vd->header, cc);
     }
 
