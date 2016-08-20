@@ -3671,7 +3671,7 @@ Miscellaneous
 ``--video-sync-max-audio-change=<value>``
     Maximum *additional* speed difference in percent that is applied to audio
     with ``--video-sync=display-...`` (default: 0.125). Normally, the player
-    play the audio at the speed of the video. But if the difference between
+    plays the audio at the speed of the video. But if the difference between
     audio and video position is too high, e.g. due to drift or other timing
     errors, it will attempt to speed up or slow down audio by this additional
     factor. Too low values could lead to video frame dropping or repeating if
