@@ -297,12 +297,17 @@ autoprobe:
     return NULL;
 }
 
+static void terminate_vo(void *p)
+{
+    struct vo *vo = p;
+    struct vo_internal *in = vo->in;
+    in->terminate = true;
+}
+
 void vo_destroy(struct vo *vo)
 {
     struct vo_internal *in = vo->in;
-    mp_dispatch_lock(in->dispatch);
-    vo->in->terminate = true;
-    mp_dispatch_unlock(in->dispatch);
+    mp_dispatch_run(in->dispatch, terminate_vo, vo);
     pthread_join(vo->in->thread, NULL);
     dealloc_vo(vo);
 }
@@ -537,18 +542,37 @@ static void run_control(void *p)
 {
     void **pp = p;
     struct vo *vo = pp[0];
-    int request = *(int *)pp[1];
+    int request = (intptr_t)pp[1];
     void *data = pp[2];
     int ret = vo->driver->control(vo, request, data);
-    *(int *)pp[3] = ret;
+    if (pp[3])
+        *(int *)pp[3] = ret;
 }
 
 int vo_control(struct vo *vo, int request, void *data)
 {
     int ret;
-    void *p[] = {vo, &request, data, &ret};
+    void *p[] = {vo, (void *)(intptr_t)request, data, &ret};
     mp_dispatch_run(vo->in->dispatch, run_control, p);
     return ret;
+}
+
+// Run vo_control() without waiting for a reply.
+// (Only works for some VOCTRLs.)
+void vo_control_async(struct vo *vo, int request, void *data)
+{
+    void *p[4] = {vo, (void *)(intptr_t)request, NULL, NULL};
+    void **d = talloc_memdup(NULL, p, sizeof(p));
+
+    switch (request) {
+    case VOCTRL_UPDATE_PLAYBACK_STATE:
+        d[2] = ta_xdup_ptrtype(d, (struct voctrl_playback_state *)data);
+        break;
+    default:
+        abort(); // requires explicit support
+    }
+
+    mp_dispatch_enqueue_autofree(vo->in->dispatch, run_control, d);
 }
 
 // must be called locked

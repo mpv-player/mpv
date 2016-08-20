@@ -149,8 +149,8 @@ void update_vo_playback_state(struct MPContext *mpctx)
             if ((oldstate.playing && oldstate.taskbar_progress) ||
                 (newstate.playing && newstate.taskbar_progress))
             {
-                vo_control(mpctx->video_out,
-                           VOCTRL_UPDATE_PLAYBACK_STATE, &newstate);
+                vo_control_async(mpctx->video_out,
+                                 VOCTRL_UPDATE_PLAYBACK_STATE, &newstate);
             }
             mpctx->vo_playback_state = newstate;
         }
