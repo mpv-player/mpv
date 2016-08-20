@@ -537,13 +537,13 @@ static void run_control(void *p)
 {
     void **pp = p;
     struct vo *vo = pp[0];
-    uint32_t request = *(int *)pp[1];
+    int request = *(int *)pp[1];
     void *data = pp[2];
     int ret = vo->driver->control(vo, request, data);
     *(int *)pp[3] = ret;
 }
 
-int vo_control(struct vo *vo, uint32_t request, void *data)
+int vo_control(struct vo *vo, int request, void *data)
 {
     int ret;
     void *p[] = {vo, &request, data, &ret};

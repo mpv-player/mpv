@@ -341,7 +341,7 @@ struct mpv_global;
 struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex);
 int vo_reconfig(struct vo *vo, struct mp_image_params *p);
 
-int vo_control(struct vo *vo, uint32_t request, void *data);
+int vo_control(struct vo *vo, int request, void *data);
 bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts);
 void vo_queue_frame(struct vo *vo, struct vo_frame *frame);
 void vo_wait_frame(struct vo *vo);
