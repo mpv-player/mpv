@@ -1359,6 +1359,7 @@ void write_video(struct MPContext *mpctx)
             if (mpctx->num_past_frames == 1 && mpctx->past_frames[0].pts == 0 &&
                 !mpctx->ao_chain)
             {
+                MP_VERBOSE(mpctx, "assuming this is an image\n");
                 mpctx->time_frame += opts->image_display_duration;
             } else {
                 mpctx->time_frame = 0;
