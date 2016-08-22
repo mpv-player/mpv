@@ -580,12 +580,12 @@ static bool read_packet(struct demux_internal *in)
     if (packs >= in->max_packs || bytes >= in->max_bytes) {
         if (!in->warned_queue_overflow) {
             in->warned_queue_overflow = true;
-            MP_ERR(in, "Too many packets in the demuxer packet queues:\n");
+            MP_WARN(in, "Too many packets in the demuxer packet queues:\n");
             for (int n = 0; n < in->num_streams; n++) {
                 struct demux_stream *ds = in->streams[n]->ds;
                 if (ds->selected) {
-                    MP_ERR(in, "  %s/%d: %zd packets, %zd bytes\n",
-                           stream_type_name(ds->type), n, ds->packs, ds->bytes);
+                    MP_WARN(in, "  %s/%d: %zd packets, %zd bytes\n",
+                            stream_type_name(ds->type), n, ds->packs, ds->bytes);
                 }
             }
         }
