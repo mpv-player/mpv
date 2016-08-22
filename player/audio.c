@@ -379,14 +379,18 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
         if (opts->ao_null_fallback && !spdif_fallback)
             ao_flags |= AO_INIT_NULL_FALLBACK;
 
-        if (!opts->audio_output_channels.set || opts->audio_output_channels.auto_safe)
-            ao_flags |= AO_INIT_SAFE_MULTICHANNEL_ONLY;
-
         if (opts->audio_stream_silence)
             ao_flags |= AO_INIT_STREAM_SILENCE;
 
-        mp_chmap_sel_list(&afs->output.channels, opts->audio_output_channels.chmaps,
-                          opts->audio_output_channels.num_chmaps);
+        if (af_fmt_is_pcm(afs->output.format)) {
+            if (!opts->audio_output_channels.set ||
+                opts->audio_output_channels.auto_safe)
+                ao_flags |= AO_INIT_SAFE_MULTICHANNEL_ONLY;
+
+            mp_chmap_sel_list(&afs->output.channels,
+                              opts->audio_output_channels.chmaps,
+                              opts->audio_output_channels.num_chmaps);
+        }
 
         mp_audio_set_channels(&afs->output, &afs->output.channels);
 
