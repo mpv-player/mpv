@@ -103,6 +103,7 @@ static int init(struct dec_audio *da, const char *decoder)
     lavc_context->refcounted_frames = 1;
     lavc_context->codec_type = AVMEDIA_TYPE_AUDIO;
     lavc_context->codec_id = lavc_codec->id;
+    lavc_context->time_base = ctx->codec_timebase;
 
     if (opts->downmix && mpopts->audio_output_channels.num_chmaps == 1) {
         lavc_context->request_channel_layout =
