@@ -460,9 +460,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     avctx->opaque = vd;
     avctx->codec_type = AVMEDIA_TYPE_VIDEO;
     avctx->codec_id = lavc_codec->id;
-
-    if (ctx->codec_timebase.num)
-        avctx->time_base = ctx->codec_timebase;
+    avctx->time_base = ctx->codec_timebase;
 
     avctx->refcounted_frames = 1;
     ctx->pic = av_frame_alloc();
