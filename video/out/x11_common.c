@@ -1748,17 +1748,25 @@ static void vo_x11_fullscreen(struct vo *vo)
         x11->nofsrc = x11->winrc;
     }
 
+    struct mp_rect rc = x11->nofsrc;
+
     if (x11->wm_type & vo_wm_FULLSCREEN) {
         x11_set_ewmh_state(x11, "_NET_WM_STATE_FULLSCREEN", x11->fs);
         if (!x11->fs && (x11->pos_changed_during_fs ||
                          x11->size_changed_during_fs))
         {
+            if (x11->screenrc.x0 == rc.x0 && x11->screenrc.x1 == rc.x1 &&
+                x11->screenrc.y0 == rc.y0 && x11->screenrc.y1 == rc.y1)
+            {
+                // Workaround for some WMs switching back to FS in this case.
+                MP_VERBOSE(x11, "avoiding triggering old-style fullscreen\n");
+                rc.x1 -= 1;
+                rc.y1 -= 1;
+            }
             vo_x11_move_resize(vo, x11->pos_changed_during_fs,
-                                   x11->size_changed_during_fs,
-                                   x11->nofsrc);
+                                   x11->size_changed_during_fs, rc);
         }
     } else {
-        struct mp_rect rc = x11->nofsrc;
         if (x11->fs) {
             vo_x11_update_screeninfo(vo);
             rc = x11->screenrc;
