@@ -48,8 +48,6 @@
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
 
-static const wchar_t classname[] = L"mpv";
-
 static __thread struct vo_w32_state *w32_thread_context;
 
 struct vo_w32_state {
@@ -64,6 +62,8 @@ struct vo_w32_state {
 
     HWND window;
     HWND parent; // 0 normally, set in embedding mode
+    HHOOK parent_win_hook;
+    HWINEVENTHOOK parent_evt_hook;
 
     HMONITOR monitor; // Handle of the current screen
     struct mp_rect screenrc; // Size and virtual position of the current screen
@@ -747,11 +747,19 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         // is that will make us lose WM_USER wakeups.
         mp_input_put_key(w32->input_ctx, MP_KEY_CLOSE_WIN);
         return 0;
+    case WM_NCDESTROY: // Sometimes only WM_NCDESTROY is received in --wid mode
     case WM_DESTROY:
+        if (w32->destroyed)
+            break;
+        // If terminate is not set, something else destroyed the window. This
+        // can also happen in --wid mode when the parent window is destroyed.
+        if (!w32->terminate)
+            mp_input_put_key(w32->input_ctx, MP_KEY_CLOSE_WIN);
+        RevokeDragDrop(w32->window);
         w32->destroyed = true;
         w32->window = NULL;
         PostQuitMessage(0);
-        return 0;
+        break;
     case WM_SYSCOMMAND:
         switch (wParam) {
         case SC_SCREENSAVE:
@@ -901,26 +909,108 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     return DefWindowProcW(hWnd, message, wParam, lParam);
 }
 
+static pthread_once_t window_class_init_once = PTHREAD_ONCE_INIT;
+static ATOM window_class;
+static void register_window_class(void)
+{
+    window_class = RegisterClassExW(&(WNDCLASSEXW) {
+        .cbSize = sizeof(WNDCLASSEXW),
+        .style = CS_HREDRAW | CS_VREDRAW,
+        .lpfnWndProc = WndProc,
+        .hInstance = HINST_THISCOMPONENT,
+        .hIcon = LoadIconW(HINST_THISCOMPONENT, L"IDI_ICON1"),
+        .hCursor = LoadCursor(NULL, IDC_ARROW),
+        .lpszClassName = L"mpv",
+    });
+}
+
+static ATOM get_window_class(void)
+{
+    pthread_once(&window_class_init_once, register_window_class);
+    return window_class;
+}
+
+static void resize_child_win(HWND parent)
+{
+    // Check if an mpv window is a child of this window. This will not
+    // necessarily be the case because the hook functions will run for all
+    // windows on the parent window's thread.
+    ATOM cls = get_window_class();
+    HWND child = FindWindowExW(parent, NULL, (LPWSTR)MAKEINTATOM(cls), NULL);
+    if (!child)
+        return;
+    // Make sure the window was created by this instance
+    if (GetWindowLongPtrW(child, GWLP_HINSTANCE) != (LONG_PTR)HINST_THISCOMPONENT)
+        return;
+
+    // Resize the mpv window to match its parent window's size
+    RECT rm, rp;
+    if (!GetClientRect(child, &rm))
+        return;
+    if (!GetClientRect(parent, &rp))
+        return;
+    if (EqualRect(&rm, &rp))
+        return;
+    SetWindowPos(child, NULL, 0, 0, rp.right, rp.bottom, SWP_ASYNCWINDOWPOS |
+        SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+}
+
+static LRESULT CALLBACK parent_win_hook(int nCode, WPARAM wParam, LPARAM lParam)
+{
+    if (nCode != HC_ACTION)
+        goto done;
+    CWPSTRUCT *cwp = (CWPSTRUCT*)lParam;
+    if (cwp->message != WM_WINDOWPOSCHANGED)
+        goto done;
+    resize_child_win(cwp->hwnd);
+done:
+    return CallNextHookEx(NULL, nCode, wParam, lParam);
+}
+
+static void CALLBACK parent_evt_hook(HWINEVENTHOOK hWinEventHook, DWORD event,
+    HWND hwnd, LONG idObject, LONG idChild, DWORD dwEventThread,
+    DWORD dwmsEventTime)
+{
+    if (event != EVENT_OBJECT_LOCATIONCHANGE)
+        return;
+    if (!hwnd || idObject != OBJID_WINDOW || idChild != CHILDID_SELF)
+        return;
+    resize_child_win(hwnd);
+}
+
+static void install_parent_hook(struct vo_w32_state *w32)
+{
+    DWORD pid;
+    DWORD tid = GetWindowThreadProcessId(w32->parent, &pid);
+
+    // If the parent lives inside the current process, install a Windows hook
+    if (pid == GetCurrentProcessId()) {
+        w32->parent_win_hook = SetWindowsHookExW(WH_CALLWNDPROC,
+            parent_win_hook, NULL, tid);
+    } else {
+        // Otherwise, use a WinEvent hook. These don't seem to be as smooth as
+        // Windows hooks, but they can be delivered across process boundaries.
+        w32->parent_evt_hook = SetWinEventHook(
+            EVENT_OBJECT_LOCATIONCHANGE, EVENT_OBJECT_LOCATIONCHANGE,
+            NULL, parent_evt_hook, pid, tid, WINEVENT_OUTOFCONTEXT);
+    }
+}
+
+static void remove_parent_hook(struct vo_w32_state *w32)
+{
+    if (w32->parent_win_hook)
+        UnhookWindowsHookEx(w32->parent_win_hook);
+    if (w32->parent_evt_hook)
+        UnhookWinEvent(w32->parent_evt_hook);
+}
+
 // Dispatch incoming window events and handle them.
 // This returns only when the thread is asked to terminate.
 static void run_message_loop(struct vo_w32_state *w32)
 {
     MSG msg;
-    while (GetMessageW(&msg, 0, 0, 0) > 0) {
+    while (GetMessageW(&msg, 0, 0, 0) > 0)
         DispatchMessageW(&msg);
-
-        if (w32->parent) {
-            RECT r, rp;
-            BOOL res = GetClientRect(w32->window, &r);
-            res = res && GetClientRect(w32->parent, &rp);
-            if (res && (r.right != rp.right || r.bottom != rp.bottom))
-                MoveWindow(w32->window, 0, 0, rp.right, rp.bottom, FALSE);
-
-            // Window has probably been closed, e.g. due to parent program crash
-            if (!IsWindow(w32->parent))
-                mp_input_put_key(w32->input_ctx, MP_KEY_CLOSE_WIN);
-        }
-    }
 
     // Even if the message loop somehow exits, we still have to respond to
     // external requests until termination is requested.
@@ -1222,33 +1312,26 @@ static void *gui_thread(void *ptr)
 
     thread_disable_ime();
 
-    WNDCLASSEXW wcex = {
-        .cbSize = sizeof wcex,
-        .style = CS_HREDRAW | CS_VREDRAW,
-        .lpfnWndProc = WndProc,
-        .hInstance = HINST_THISCOMPONENT,
-        .hIcon = LoadIconW(HINST_THISCOMPONENT, L"IDI_ICON1"),
-        .hCursor = LoadCursor(NULL, IDC_ARROW),
-        .lpszClassName = classname,
-    };
-    RegisterClassExW(&wcex);
-
     w32_thread_context = w32;
 
     if (w32->opts->WinID >= 0)
         w32->parent = (HWND)(intptr_t)(w32->opts->WinID);
 
+    ATOM cls = get_window_class();
     if (w32->parent) {
         RECT r;
         GetClientRect(w32->parent, &r);
-        w32->window = CreateWindowExW(WS_EX_NOPARENTNOTIFY, classname,
-                                      classname,
+        w32->window = CreateWindowExW(WS_EX_NOPARENTNOTIFY,
+                                      (LPWSTR)MAKEINTATOM(cls), L"mpv",
                                       WS_CHILD | WS_VISIBLE,
                                       0, 0, r.right, r.bottom,
                                       w32->parent, 0, HINST_THISCOMPONENT, NULL);
+
+        // Install a hook to get notifications when the parent changes size
+        if (w32->window)
+            install_parent_hook(w32);
     } else {
-        w32->window = CreateWindowExW(0, classname,
-                                      classname,
+        w32->window = CreateWindowExW(0, (LPWSTR)MAKEINTATOM(cls), L"mpv",
                                       update_style(w32, 0),
                                       CW_USEDEFAULT, SW_HIDE, 100, 100,
                                       0, 0, HINST_THISCOMPONENT, NULL);
@@ -1323,10 +1406,9 @@ done:
 
     MP_VERBOSE(w32, "uninit\n");
 
-    if (w32->window) {
-        RevokeDragDrop(w32->window);
+    remove_parent_hook(w32);
+    if (w32->window && !w32->destroyed)
         DestroyWindow(w32->window);
-    }
     if (w32->taskbar_list)
         ITaskbarList2_Release(w32->taskbar_list);
     if (w32->taskbar_list3)
