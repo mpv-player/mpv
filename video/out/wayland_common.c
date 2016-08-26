@@ -1139,7 +1139,7 @@ void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
     };
 
     int64_t wait_us = until_time_us - mp_time_us();
-    int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
+    int timeout_ms = MPCLAMP((wait_us + 999) / 1000, 0, 10000);
 
     wl_display_dispatch_pending(dp);
     wl_display_flush(dp);
