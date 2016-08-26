@@ -80,7 +80,7 @@ local state = {
     tc_ms = user_opts.timems,               -- Should the timecodes display their time with milliseconds
     mp_screen_sizeX, mp_screen_sizeY,       -- last screen-resolution, to detect resolution changes to issue reINITs
     initREQ = false,                        -- is a re-init request pending?
-    last_mouseX, last_mouseY,               -- last mouse position, to detect siginificant mouse movement
+    last_mouseX, last_mouseY,               -- last mouse position, to detect significant mouse movement
     message_text,
     message_timeout,
     fullscreen = false,
