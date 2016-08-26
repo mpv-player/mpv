@@ -1031,6 +1031,7 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         dst->ts_resets_possible = src->ts_resets_possible;
         dst->fully_read = src->fully_read;
         dst->start_time = src->start_time;
+        dst->is_network = src->is_network;
         dst->priv = src->priv;
     }
 
@@ -1172,6 +1173,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .log = mp_log_new(demuxer, log, desc->name),
         .glog = log,
         .filename = talloc_strdup(demuxer, stream->url),
+        .is_network = stream->is_network,
         .events = DEMUX_EVENT_ALL,
     };
     demuxer->seekable = stream->seekable;

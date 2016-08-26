@@ -429,11 +429,9 @@ static int mp_property_stream_path(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    // demuxer->stream as well as stream->url are immutable -> ok to access
-    struct stream *stream = mpctx->demuxer ? mpctx->demuxer->stream : NULL;
-    if (!stream || !stream->url)
+    if (!mpctx->demuxer || !mpctx->demuxer->filename)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_strdup_ro(action, arg, stream->url);
+    return m_property_strdup_ro(action, arg, mpctx->demuxer->filename);
 }
 
 struct change_stream_capture_args {

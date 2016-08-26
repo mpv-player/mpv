@@ -634,7 +634,7 @@ void autoload_external_files(struct MPContext *mpctx)
         char *lang = list[i].lang;
         for (int n = 0; n < mpctx->num_tracks; n++) {
             struct track *t = mpctx->tracks[n];
-            if (t->demuxer && strcmp(t->demuxer->stream->url, filename) == 0)
+            if (t->demuxer && strcmp(t->demuxer->filename, filename) == 0)
                 goto skip;
         }
         if (list[i].type == STREAM_SUB && !sc[STREAM_VIDEO] && !sc[STREAM_AUDIO])
@@ -1029,7 +1029,7 @@ reopen_file:
         int entry_stream_flags = 0;
         if (!pl->disable_safety) {
             entry_stream_flags = STREAM_SAFE_ONLY;
-            if (mpctx->demuxer->stream->is_network)
+            if (mpctx->demuxer->is_network)
                 entry_stream_flags |= STREAM_NETWORK_ONLY;
         }
         for (struct playlist_entry *e = pl->first; e; e = e->next)

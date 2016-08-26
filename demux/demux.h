@@ -183,6 +183,7 @@ typedef struct demuxer {
     // packets is not slow either (unlike e.g. libavdevice pseudo-demuxers).
     // Typical examples: text subtitles, playlists
     bool fully_read;
+    bool is_network; // opened directly from a network stream
 
     // Bitmask of DEMUX_EVENT_*
     int events;
