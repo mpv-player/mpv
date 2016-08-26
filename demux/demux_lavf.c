@@ -162,6 +162,7 @@ static const struct format_hack format_hacks[] = {
 
 typedef struct lavf_priv {
     struct stream *stream;
+    bool own_stream;
     char *filename;
     struct format_hack format_hack;
     AVInputFormat *avif;
@@ -290,8 +291,10 @@ static void convert_charset(struct demuxer *demuxer)
         if (conv.start)
             data = conv;
     }
-    if (data.start)
+    if (data.start) {
         priv->stream = open_memory_stream(data.start, data.len);
+        priv->own_stream = true;
+    }
     talloc_free(alloc);
 }
 
@@ -1068,6 +1071,12 @@ redo:
         av_seek_frame(priv->avfc, 0, stream_tell(priv->stream),
                       AVSEEK_FLAG_BYTE);
         return DEMUXER_CTRL_OK;
+    case DEMUXER_CTRL_REPLACE_STREAM:
+        if (priv->own_stream)
+            free_stream(priv->stream);
+        priv->own_stream = false;
+        priv->stream = demuxer->stream;
+        return DEMUXER_CTRL_OK;
     default:
         return DEMUXER_CTRL_NOTIMPL;
     }
@@ -1092,7 +1101,7 @@ static void demux_close_lavf(demuxer_t *demuxer)
 #endif
             }
         }
-        if (priv->stream != demuxer->stream)
+        if (priv->own_stream)
             free_stream(priv->stream);
         talloc_free(priv);
         demuxer->priv = NULL;

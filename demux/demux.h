@@ -43,6 +43,7 @@ enum demux_ctrl {
     DEMUXER_CTRL_STREAM_CTRL,
     DEMUXER_CTRL_GET_READER_STATE,
     DEMUXER_CTRL_GET_BITRATE_STATS, // double[STREAM_TYPE_COUNT]
+    DEMUXER_CTRL_REPLACE_STREAM,
 };
 
 struct demux_ctrl_reader_state {
@@ -220,6 +221,7 @@ typedef struct demuxer {
     // thread-safe, only the demuxer is allowed to access the stream directly.
     // You can freely use demux_stream_control() to send STREAM_CTRLs, or use
     // demux_pause() to get exclusive access to the stream.
+    // Also note that the stream can get replaced if fully_read is set.
     struct stream *stream;
 } demuxer_t;
 

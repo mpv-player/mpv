@@ -1152,6 +1152,23 @@ static void demux_init_cuesheet(struct demuxer *demuxer)
     }
 }
 
+static void demux_maybe_replace_stream(struct demuxer *demuxer)
+{
+    struct demux_internal *in = demuxer->in;
+    assert(!in->threading && demuxer == in->d_user);
+
+    if (demuxer->fully_read) {
+        MP_VERBOSE(demuxer, "assuming demuxer read all data; closing stream\n");
+        free_stream(demuxer->stream);
+        demuxer->stream = open_memory_stream(NULL, 0); // dummy
+        in->d_thread->stream = demuxer->stream;
+        in->d_buffer->stream = demuxer->stream;
+
+        if (demuxer->desc->control)
+            demuxer->desc->control(in->d_thread, DEMUXER_CTRL_REPLACE_STREAM, NULL);
+    }
+}
+
 static struct demuxer *open_given_type(struct mpv_global *global,
                                        struct mp_log *log,
                                        const struct demuxer_desc *desc,
@@ -1313,6 +1330,7 @@ done:
 // Convenience function: open the stream, enable the cache (according to params
 // and global opts.), open the demuxer.
 // (use free_demuxer_and_stream() to free the underlying stream too)
+// Also for some reason may close the opened stream if it's not needed.
 struct demuxer *demux_open_url(const char *url,
                                 struct demuxer_params *params,
                                 struct mp_cancel *cancel,
@@ -1331,7 +1349,9 @@ struct demuxer *demux_open_url(const char *url,
     if (!params->disable_cache)
         stream_enable_cache(&s, &opts->stream_cache);
     struct demuxer *d = demux_open(s, params, global);
-    if (!d) {
+    if (d) {
+        demux_maybe_replace_stream(d);
+    } else {
         params->demuxer_failed = true;
         free_stream(s);
     }
