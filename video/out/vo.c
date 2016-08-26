@@ -665,7 +665,9 @@ bool vo_is_ready_for_frame(struct vo *vo, int64_t next_pts)
             r = false;
         if (!in->wakeup_pts || next_pts < in->wakeup_pts) {
             in->wakeup_pts = next_pts;
-            wakeup_locked(vo);
+            // If we have to wait, update the vo thread's timer.
+            if (!r)
+                wakeup_locked(vo);
         }
     }
     pthread_mutex_unlock(&in->lock);
