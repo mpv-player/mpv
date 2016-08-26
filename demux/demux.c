@@ -580,12 +580,12 @@ static bool read_packet(struct demux_internal *in)
     if (packs >= in->max_packs || bytes >= in->max_bytes) {
         if (!in->warned_queue_overflow) {
             in->warned_queue_overflow = true;
-            MP_ERR(in, "Too many packets in the demuxer packet queues:\n");
+            MP_WARN(in, "Too many packets in the demuxer packet queues:\n");
             for (int n = 0; n < in->num_streams; n++) {
                 struct demux_stream *ds = in->streams[n]->ds;
                 if (ds->selected) {
-                    MP_ERR(in, "  %s/%d: %zd packets, %zd bytes\n",
-                           stream_type_name(ds->type), n, ds->packs, ds->bytes);
+                    MP_WARN(in, "  %s/%d: %zd packets, %zd bytes\n",
+                            stream_type_name(ds->type), n, ds->packs, ds->bytes);
                 }
             }
         }
@@ -1031,6 +1031,7 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         dst->ts_resets_possible = src->ts_resets_possible;
         dst->fully_read = src->fully_read;
         dst->start_time = src->start_time;
+        dst->is_network = src->is_network;
         dst->priv = src->priv;
     }
 
@@ -1039,10 +1040,10 @@ static void demux_copy(struct demuxer *dst, struct demuxer *src)
         dst->metadata = mp_tags_dup(dst, src->metadata);
 
         if (dst->num_update_stream_tags != src->num_update_stream_tags) {
+            dst->num_update_stream_tags = src->num_update_stream_tags;
             talloc_free(dst->update_stream_tags);
             dst->update_stream_tags =
                 talloc_zero_array(dst, struct mp_tags *, dst->num_update_stream_tags);
-            dst->num_update_stream_tags = src->num_update_stream_tags;
         }
         for (int n = 0; n < dst->num_update_stream_tags; n++) {
             talloc_free(dst->update_stream_tags[n]);
@@ -1151,6 +1152,23 @@ static void demux_init_cuesheet(struct demuxer *demuxer)
     }
 }
 
+static void demux_maybe_replace_stream(struct demuxer *demuxer)
+{
+    struct demux_internal *in = demuxer->in;
+    assert(!in->threading && demuxer == in->d_user);
+
+    if (demuxer->fully_read) {
+        MP_VERBOSE(demuxer, "assuming demuxer read all data; closing stream\n");
+        free_stream(demuxer->stream);
+        demuxer->stream = open_memory_stream(NULL, 0); // dummy
+        in->d_thread->stream = demuxer->stream;
+        in->d_buffer->stream = demuxer->stream;
+
+        if (demuxer->desc->control)
+            demuxer->desc->control(in->d_thread, DEMUXER_CTRL_REPLACE_STREAM, NULL);
+    }
+}
+
 static struct demuxer *open_given_type(struct mpv_global *global,
                                        struct mp_log *log,
                                        const struct demuxer_desc *desc,
@@ -1172,6 +1190,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .log = mp_log_new(demuxer, log, desc->name),
         .glog = log,
         .filename = talloc_strdup(demuxer, stream->url),
+        .is_network = stream->is_network,
         .events = DEMUX_EVENT_ALL,
     };
     demuxer->seekable = stream->seekable;
@@ -1311,6 +1330,7 @@ done:
 // Convenience function: open the stream, enable the cache (according to params
 // and global opts.), open the demuxer.
 // (use free_demuxer_and_stream() to free the underlying stream too)
+// Also for some reason may close the opened stream if it's not needed.
 struct demuxer *demux_open_url(const char *url,
                                 struct demuxer_params *params,
                                 struct mp_cancel *cancel,
@@ -1329,7 +1349,9 @@ struct demuxer *demux_open_url(const char *url,
     if (!params->disable_cache)
         stream_enable_cache(&s, &opts->stream_cache);
     struct demuxer *d = demux_open(s, params, global);
-    if (!d) {
+    if (d) {
+        demux_maybe_replace_stream(d);
+    } else {
         params->demuxer_failed = true;
         free_stream(s);
     }

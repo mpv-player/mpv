@@ -114,6 +114,7 @@ struct format_hack {
     // Do not confuse player's position estimation (position is into external
     // segment, with e.g. HLS, player knows about the playlist main file only).
     bool clear_filepos : 1;
+    bool ignore_start : 1;
 };
 
 #define BLACKLIST(fmt) {fmt, .ignore = true}
@@ -137,6 +138,9 @@ static const struct format_hack format_hacks[] = {
     {"h264", .if_flags = AVFMT_NOTIMESTAMPS },
     {"hevc", .if_flags = AVFMT_NOTIMESTAMPS },
 
+    // Rebasing start time to 0 is very weird with ogg shoutcast streams.
+    {"ogg", .ignore_start = true},
+
     TEXTSUB("aqtitle"), TEXTSUB("jacosub"), TEXTSUB("microdvd"),
     TEXTSUB("mpl2"), TEXTSUB("mpsub"), TEXTSUB("pjs"), TEXTSUB("realtext"),
     TEXTSUB("sami"), TEXTSUB("srt"), TEXTSUB("stl"), TEXTSUB("subviewer"),
@@ -158,6 +162,7 @@ static const struct format_hack format_hacks[] = {
 
 typedef struct lavf_priv {
     struct stream *stream;
+    bool own_stream;
     char *filename;
     struct format_hack format_hack;
     AVInputFormat *avif;
@@ -286,8 +291,10 @@ static void convert_charset(struct demuxer *demuxer)
         if (conv.start)
             data = conv;
     }
-    if (data.start)
+    if (data.start) {
         priv->stream = open_memory_stream(data.start, data.len);
+        priv->own_stream = true;
+    }
     talloc_free(alloc);
 }
 
@@ -666,6 +673,8 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         if (sh->codec->lav_headers)
             mp_copy_lav_codec_headers(sh->codec->lav_headers, codec);
 #endif
+        sh->codec->native_tb_num = st->time_base.num;
+        sh->codec->native_tb_den = st->time_base.den;
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = true;
@@ -855,8 +864,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     demuxer->ts_resets_possible =
         priv->avif_flags & (AVFMT_TS_DISCONT | AVFMT_NOTIMESTAMPS);
 
-    demuxer->start_time = priv->avfc->start_time == AV_NOPTS_VALUE ?
-                          0 : (double)priv->avfc->start_time / AV_TIME_BASE;
+    if (avfc->start_time != AV_NOPTS_VALUE && !priv->format_hack.ignore_start)
+        demuxer->start_time = avfc->start_time / (double)AV_TIME_BASE;
 
     demuxer->fully_read = priv->format_hack.fully_read;
 
@@ -1062,6 +1071,12 @@ redo:
         av_seek_frame(priv->avfc, 0, stream_tell(priv->stream),
                       AVSEEK_FLAG_BYTE);
         return DEMUXER_CTRL_OK;
+    case DEMUXER_CTRL_REPLACE_STREAM:
+        if (priv->own_stream)
+            free_stream(priv->stream);
+        priv->own_stream = false;
+        priv->stream = demuxer->stream;
+        return DEMUXER_CTRL_OK;
     default:
         return DEMUXER_CTRL_NOTIMPL;
     }
@@ -1086,7 +1101,7 @@ static void demux_close_lavf(demuxer_t *demuxer)
 #endif
             }
         }
-        if (priv->stream != demuxer->stream)
+        if (priv->own_stream)
             free_stream(priv->stream);
         talloc_free(priv);
         demuxer->priv = NULL;

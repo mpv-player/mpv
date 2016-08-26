@@ -25,6 +25,7 @@
 #include <stddef.h>
 #include <sys/types.h>
 #include <limits.h>
+#include <math.h>
 
 #include "config.h"
 
@@ -214,6 +215,8 @@ const m_option_t mp_opts[] = {
                ({"no", 0},
                 {"yes", 1},
                 {"always", 2})),
+    OPT_DOUBLE("image-display-duration", image_display_duration,
+               M_OPT_RANGE, 0, INFINITY),
 
     OPT_CHOICE("index", index_mode, 0, ({"default", 1}, {"recreate", 0})),
 
@@ -451,7 +454,8 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("video-pan-y", vo.pan_y, 0, -3.0, 3.0),
     OPT_FLOATRANGE("video-align-x", vo.align_x, 0, -1.0, 1.0),
     OPT_FLOATRANGE("video-align-y", vo.align_y, 0, -1.0, 1.0),
-    OPT_FLAG("video-unscaled", vo.unscaled, 0),
+    OPT_CHOICE("video-unscaled", vo.unscaled, 0,
+               ({"no", 0}, {"yes", 1}, {"downscale-big", 2})),
     OPT_FLAG("force-rgba-osd-rendering", force_rgba_osd, 0),
     OPT_CHOICE_OR_INT("video-rotate", video_rotate, 0, 0, 359,
                       ({"no", -1})),
@@ -796,6 +800,7 @@ const struct MPOpts mp_default_opts = {
     .play_frames = -1,
     .rebase_start_time = 1,
     .keep_open = 0,
+    .image_display_duration = 1.0,
     .stream_id = { { [STREAM_AUDIO] = -1,
                      [STREAM_VIDEO] = -1,
                      [STREAM_SUB] = -1, },

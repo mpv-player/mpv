@@ -337,8 +337,10 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
     struct mp_chmap_sel chmap_sel = {.tmp = p};
 
     snd_pcm_chmap_query_t **maps = snd_pcm_query_chmaps(p->alsa);
-    if (!maps)
+    if (!maps) {
+        MP_VERBOSE(ao, "snd_pcm_query_chmaps() returned NULL\n");
         return false;
+    }
 
     for (int i = 0; maps[i] != NULL; i++) {
         char aname[128];

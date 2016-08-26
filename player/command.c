@@ -75,8 +75,6 @@ struct command_ctx {
     double last_seek_pts;
     double marked_pts;
 
-    double prev_pts;
-
     char **warned_deprecated;
     int num_warned_deprecated;
 
@@ -220,7 +218,7 @@ static void mp_hook_add(struct MPContext *mpctx, char *client, char *name,
 }
 
 // Call before a seek, in order to allow revert-seek to undo the seek.
-static void mark_seek(struct MPContext *mpctx)
+void mark_seek(struct MPContext *mpctx)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
     double now = mp_time_sec();
@@ -431,11 +429,9 @@ static int mp_property_stream_path(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    // demuxer->stream as well as stream->url are immutable -> ok to access
-    struct stream *stream = mpctx->demuxer ? mpctx->demuxer->stream : NULL;
-    if (!stream || !stream->url)
+    if (!mpctx->demuxer || !mpctx->demuxer->filename)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_strdup_ro(action, arg, stream->url);
+    return m_property_strdup_ro(action, arg, mpctx->demuxer->filename);
 }
 
 struct change_stream_capture_args {
@@ -649,7 +645,7 @@ static int mp_property_percent_pos(void *ctx, struct m_property *prop,
     switch (action) {
     case M_PROPERTY_SET: {
         double pos = *(double *)arg;
-        queue_seek(mpctx, MPSEEK_FACTOR, pos / 100.0, MPSEEK_DEFAULT, true);
+        queue_seek(mpctx, MPSEEK_FACTOR, pos / 100.0, MPSEEK_DEFAULT, 0);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET: {
@@ -694,7 +690,7 @@ static int mp_property_time_pos(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_SET) {
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, MPSEEK_DEFAULT, true);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, MPSEEK_DEFAULT, 0);
         return M_PROPERTY_OK;
     }
     return property_time(action, arg, get_current_time(mpctx));
@@ -743,7 +739,7 @@ static int mp_property_playback_time(void *ctx, struct m_property *prop,
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_SET) {
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, MPSEEK_DEFAULT, true);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, MPSEEK_DEFAULT, 0);
         return M_PROPERTY_OK;
     }
     return property_time(action, arg, get_playback_time(mpctx));
@@ -844,7 +840,7 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
         } else {
             double pts = chapter_start_time(mpctx, chapter);
             if (pts != MP_NOPTS_VALUE) {
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, MPSEEK_DEFAULT, true);
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, MPSEEK_DEFAULT, 0);
                 mpctx->last_chapter_seek = chapter;
                 mpctx->last_chapter_pts = pts;
             }
@@ -2210,7 +2206,7 @@ static int mp_property_hwdec(void *ctx, struct m_property *prop,
             video_vd_control(vd, VDCTRL_REINIT, NULL);
             double last_pts = mpctx->last_vo_pts;
             if (last_pts != MP_NOPTS_VALUE)
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, MPSEEK_EXACT, true);
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, last_pts, MPSEEK_EXACT, 0);
         }
         return M_PROPERTY_OK;
     }
@@ -3194,10 +3190,30 @@ static int mp_property_playlist_pos_1(void *ctx, struct m_property *prop,
     return mp_property_playlist_pos_x(ctx, prop, action, arg, 1);
 }
 
+struct get_playlist_ctx {
+    struct MPContext *mpctx;
+    int last_index;
+    struct playlist_entry *last_entry;
+};
+
 static int get_playlist_entry(int item, int action, void *arg, void *ctx)
 {
-    struct MPContext *mpctx = ctx;
-    struct playlist_entry *e = playlist_entry_from_index(mpctx->playlist, item);
+    struct get_playlist_ctx *p = ctx;
+    struct MPContext *mpctx = p->mpctx;
+
+    struct playlist_entry *e;
+    // This is an optimization that prevents O(n^2) behaviour when the entire
+    // playlist is requested. If a request is made for the last requested entry
+    // or the entry immediately following it, it can be found without a full
+    // traversal of the linked list.
+    if (p->last_entry && item == p->last_index)
+        e = p->last_entry;
+    else if (p->last_entry && item == p->last_index + 1)
+        e = p->last_entry->next;
+    else
+        e = playlist_entry_from_index(mpctx->playlist, item);
+    p->last_index = item;
+    p->last_entry = e;
     if (!e)
         return M_PROPERTY_ERROR;
 
@@ -3237,8 +3253,10 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
         *(char **)arg = res;
         return M_PROPERTY_OK;
     }
+
+    struct get_playlist_ctx p = { .mpctx = mpctx };
     return m_property_read_list(action, arg, playlist_entry_count(mpctx->playlist),
-                                get_playlist_entry, mpctx);
+                                get_playlist_entry, &p);
 }
 
 static char *print_obj_osd_list(struct m_obj_settings *list)
@@ -3301,9 +3319,11 @@ static int mp_property_ab_loop(void *ctx, struct m_property *prop,
     }
     int r = mp_property_generic_option(mpctx, prop, action, arg);
     if (r > 0 && action == M_PROPERTY_SET) {
+        mpctx->ab_loop_clip = mpctx->playback_pts < opts->ab_loop[1];
         if (strcmp(prop->name, "ab-loop-b") == 0) {
-            struct command_ctx *cctx = mpctx->command_ctx;
-            cctx->prev_pts = opts->ab_loop[0];
+            if (opts->ab_loop[1] != MP_NOPTS_VALUE &&
+                mpctx->playback_pts <= opts->ab_loop[1])
+                mpctx->ab_loop_clip = true;
         }
         // Update if visible
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
@@ -4622,19 +4642,19 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         mark_seek(mpctx);
         switch (abs) {
         case 0: { // Relative seek
-            queue_seek(mpctx, MPSEEK_RELATIVE, v, precision, false);
+            queue_seek(mpctx, MPSEEK_RELATIVE, v, precision, MPSEEK_FLAG_DELAY);
             set_osd_function(mpctx, (v > 0) ? OSD_FFW : OSD_REW);
             break;
         }
         case 1: { // Absolute seek by percentage
             double ratio = v / 100.0;
             double cur_pos = get_current_pos_ratio(mpctx, false);
-            queue_seek(mpctx, MPSEEK_FACTOR, ratio, precision, false);
+            queue_seek(mpctx, MPSEEK_FACTOR, ratio, precision, MPSEEK_FLAG_DELAY);
             set_osd_function(mpctx, cur_pos < ratio ? OSD_FFW : OSD_REW);
             break;
         }
         case 2: { // Absolute seek to a timestamp in seconds
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, v, precision, false);
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, v, precision, MPSEEK_FLAG_DELAY);
             set_osd_function(mpctx,
                              v > get_current_time(mpctx) ? OSD_FFW : OSD_REW);
             break;
@@ -4642,7 +4662,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         case 3: { // Relative seek by percentage
             queue_seek(mpctx, MPSEEK_FACTOR,
                               get_current_pos_ratio(mpctx, false) + v / 100.0,
-                              precision, false);
+                              precision, MPSEEK_FLAG_DELAY);
             set_osd_function(mpctx, v > 0 ? OSD_FFW : OSD_REW);
             break;
         }}
@@ -4664,7 +4684,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         } else if (oldpts != MP_NOPTS_VALUE) {
             cmdctx->last_seek_pts = get_current_time(mpctx);
             cmdctx->marked_pts = MP_NOPTS_VALUE;
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, oldpts, MPSEEK_EXACT, false);
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, oldpts, MPSEEK_EXACT,
+                       MPSEEK_FLAG_DELAY);
             set_osd_function(mpctx, OSD_REW);
             if (bar_osd)
                 mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
@@ -4850,7 +4871,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                     // rounding for the mess of it.
                     a[0] += 0.01 * (a[1] >= 0 ? 1 : -1);
                     mark_seek(mpctx);
-                    queue_seek(mpctx, MPSEEK_RELATIVE, a[0], MPSEEK_EXACT, false);
+                    queue_seek(mpctx, MPSEEK_RELATIVE, a[0], MPSEEK_EXACT,
+                               MPSEEK_FLAG_DELAY);
                     set_osd_function(mpctx, (a[0] > 0) ? OSD_FFW : OSD_REW);
                     if (bar_osd)
                         mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
@@ -5373,7 +5395,6 @@ void command_init(struct MPContext *mpctx)
     mpctx->command_ctx = talloc(NULL, struct command_ctx);
     *mpctx->command_ctx = (struct command_ctx){
         .last_seek_pts = MP_NOPTS_VALUE,
-        .prev_pts = MP_NOPTS_VALUE,
     };
 }
 
@@ -5386,8 +5407,6 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         ctx->marked_pts = MP_NOPTS_VALUE;
     }
 
-    if (event == MPV_EVENT_SEEK)
-        ctx->prev_pts = MP_NOPTS_VALUE;
     if (event == MPV_EVENT_IDLE)
         ctx->is_idle = true;
     if (event == MPV_EVENT_START_FILE)
@@ -5396,35 +5415,6 @@ static void command_event(struct MPContext *mpctx, int event, void *arg)
         // Update chapters - does nothing if something else is visible.
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
     }
-}
-
-void handle_ab_loop(struct MPContext *mpctx)
-{
-    struct command_ctx *ctx = mpctx->command_ctx;
-    struct MPOpts *opts = mpctx->opts;
-
-    if (opts->pause)
-        return;
-
-    double now = mpctx->restart_complete ? mpctx->playback_pts : MP_NOPTS_VALUE;
-    if (now != MP_NOPTS_VALUE && (opts->ab_loop[0] != MP_NOPTS_VALUE ||
-                                  opts->ab_loop[1] != MP_NOPTS_VALUE))
-    {
-        double start = opts->ab_loop[0];
-        if (start == MP_NOPTS_VALUE)
-            start = 0;
-        double end = opts->ab_loop[1];
-        if (end == MP_NOPTS_VALUE)
-            end = INFINITY;
-        if (ctx->prev_pts >= start && ctx->prev_pts < end &&
-            (now >= end || mpctx->stop_play == AT_END_OF_FILE))
-        {
-            mark_seek(mpctx);
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, start,
-                       MPSEEK_EXACT, false);
-        }
-    }
-    ctx->prev_pts = now;
 }
 
 void handle_command_updates(struct MPContext *mpctx)

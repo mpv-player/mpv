@@ -321,6 +321,7 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
     c->disp_w = 0;
     c->disp_h = 0;
     c->fps = demuxer->opts->mf_fps;
+    c->reliable_fps = true;
 
     demux_add_sh_stream(demuxer, sh);
 

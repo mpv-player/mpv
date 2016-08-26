@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <inttypes.h>
 
 #include "common/msg.h"
@@ -46,11 +47,17 @@ static int lavfi_reconfig(struct vf_instance *vf,
     struct vf_priv_s *p = vf_lw_old_priv(vf);
     if (p->angle == 4) { // "auto"
         int r = in->rotate;
-        if (r < 0 || r >= 360 || (r % 90) != 0) {
+        if (r < 0 || r >= 360) {
             MP_ERR(vf, "Can't apply rotation of %d degrees.\n", r);
             return -1;
         }
-        vf_lw_update_graph(vf, NULL, "%s", rot[(r / 90) % 360]);
+        if (r % 90) {
+            double a = r / 180.0 * M_PI;
+            vf_lw_update_graph(vf, NULL, "rotate=%f:ow=rotw(%f):oh=roth(%f)",
+                               a, a, a);
+        } else {
+            vf_lw_update_graph(vf, NULL, "%s", rot[(r / 90) % 360]);
+        }
         out->rotate = 0;
     }
     return 0;

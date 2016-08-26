@@ -458,6 +458,13 @@ struct mp_image *vf_read_output_frame(struct vf_chain *c)
     return vf_dequeue_output_frame(c->last);
 }
 
+// Undo the previous vf_read_output_frame().
+void vf_unread_output_frame(struct vf_chain *c, struct mp_image *img)
+{
+    struct vf_instance *vf = c->last;
+    MP_TARRAY_INSERT_AT(vf, vf->out_queued, vf->num_out_queued, 0, img);
+}
+
 // Some filters (vf_vapoursynth) filter on separate threads, and may need new
 // input from the decoder, even though the core does not need a new output image
 // yet (this is required to get proper pipelining in the filter). If the filter

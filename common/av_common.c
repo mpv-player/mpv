@@ -16,6 +16,7 @@
  */
 
 #include <assert.h>
+#include <math.h>
 
 #include <libavutil/common.h>
 #include <libavutil/log.h>
@@ -84,6 +85,30 @@ void mp_set_lav_codec_headers(AVCodecContext *avctx, struct mp_codec_params *c)
 #endif
 }
 
+// Pick a "good" timebase, which will be used to convert double timestamps
+// back to fractions for passing them through libavcodec.
+AVRational mp_get_codec_timebase(struct mp_codec_params *c)
+{
+    AVRational tb = {c->native_tb_num, c->native_tb_den};
+    if (tb.num < 1 || tb.den < 1) {
+        if (c->reliable_fps)
+            tb = av_inv_q(av_d2q(c->fps, 1000000));
+        if (tb.num < 1 || tb.den < 1)
+            tb = AV_TIME_BASE_Q;
+    }
+
+    // If the timebase is too coarse, raise its precision, or small adjustments
+    // to timestamps done between decoder and demuxer could be lost.
+    if (av_q2d(tb) > 0.001) {
+        AVRational r = av_div_q(tb, (AVRational){1, 1000});
+        tb.den *= (r.num + r.den - 1) / r.den;
+    }
+
+    av_reduce(&tb.num, &tb.den, tb.num, tb.den, 1000000);
+
+    return tb;
+}
+
 // We merely pass-through our PTS/DTS as an int64_t; libavcodec won't use it.
 union pts { int64_t i; double d; };
 
@@ -97,8 +122,10 @@ union pts { int64_t i; double d; };
 int64_t mp_pts_to_av(double mp_pts, AVRational *tb)
 {
     assert(sizeof(int64_t) >= sizeof(double));
-    if (tb && tb->num > 0 && tb->den > 0)
-        return mp_pts == MP_NOPTS_VALUE ? AV_NOPTS_VALUE : mp_pts / av_q2d(*tb);
+    if (tb && tb->num > 0 && tb->den > 0) {
+        return mp_pts == MP_NOPTS_VALUE ?
+            AV_NOPTS_VALUE : llrint(mp_pts / av_q2d(*tb));
+    }
     // The + 0.0 is to squash possible negative zero mp_pts, which would
     // happen to end up as AV_NOPTS_VALUE.
     return (union pts){.d = mp_pts + 0.0}.i;

@@ -99,10 +99,6 @@ static double get_delay(struct af_resample *s)
     return avresample_get_delay(s->avrctx) / (double)s->in_rate +
            avresample_available(s->avrctx) / (double)s->out_rate;
 }
-static void drop_all_output(struct af_resample *s)
-{
-    while (avresample_read(s->avrctx, NULL, 1000) > 0) {}
-}
 static int get_out_samples(struct af_resample *s, int in_samples)
 {
     return avresample_get_out_samples(s->avrctx, in_samples);
@@ -112,10 +108,6 @@ static double get_delay(struct af_resample *s)
 {
     int64_t base = s->in_rate * (int64_t)s->out_rate;
     return swr_get_delay(s->avrctx, base) / (double)base;
-}
-static void drop_all_output(struct af_resample *s)
-{
-    while (swr_drop_output(s->avrctx, 1000) > 0) {}
 }
 static int get_out_samples(struct af_resample *s, int in_samples)
 {
@@ -406,8 +398,17 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return AF_OK;
     }
     case AF_CONTROL_RESET:
-        if (s->avrctx)
-            drop_all_output(s);
+        if (s->avrctx) {
+#if HAVE_LIBSWRESAMPLE
+            swr_close(s->avrctx);
+            if (swr_init(s->avrctx) < 0) {
+                close_lavrr(af);
+                return AF_ERROR;
+            }
+#else
+            while (avresample_read(s->avrctx, NULL, 1000) > 0) {}
+#endif
+        }
         return AF_OK;
     }
     return AF_UNKNOWN;
@@ -479,18 +480,19 @@ static void reorder_planes(struct mp_audio *mpa, int *reorder,
 static int filter_resample(struct af_instance *af, struct mp_audio *in)
 {
     struct af_resample *s = af->priv;
+    struct mp_audio *out = NULL;
+
+    if (!s->avrctx)
+        goto error;
 
     int samples = get_out_samples(s, in ? in->samples : 0);
 
     struct mp_audio out_format = s->pool_fmt;
-    struct mp_audio *out = mp_audio_pool_get(af->out_pool, &out_format, samples);
+    out = mp_audio_pool_get(af->out_pool, &out_format, samples);
     if (!out)
         goto error;
     if (in)
         mp_audio_copy_attributes(out, in);
-
-    if (!s->avrctx)
-        goto error;
 
     if (out->samples) {
         out->samples = resample_frame(s->avrctx, out, in);

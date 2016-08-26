@@ -27,10 +27,12 @@
 #include "sub/osd.h"
 
 static void aspect_calc_panscan(struct mp_vo_opts *opts,
-                                int w, int h, int d_w, int d_h, bool unscaled,
+                                int w, int h, int d_w, int d_h, int unscaled,
                                 int window_w, int window_h, double monitor_par,
                                 int *out_w, int *out_h)
 {
+    w *= monitor_par;
+
     int fwidth = window_w;
     int fheight = (float)window_w / d_w * d_h / monitor_par;
     if (fheight > window_h || fheight < h) {
@@ -51,9 +53,11 @@ static void aspect_calc_panscan(struct mp_vo_opts *opts,
     }
 
     if (unscaled) {
-        fwidth = w * monitor_par;
-        fheight = h;
         vo_panscan_area = 0;
+        if (unscaled != 2 || (w <= window_w && h <= window_h)) {
+            fwidth = w;
+            fheight = h;
+        }
     }
 
     *out_w = fwidth + vo_panscan_area * opts->panscan * f_w;

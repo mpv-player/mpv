@@ -701,6 +701,8 @@ Video
     controls how much of the image is cropped. May not work with all video
     output drivers.
 
+    This option has no effect if ``--video-unscaled`` option is used.
+
 ``--video-aspect=<ratio>``
     Override video aspect ratio, in case aspect information is incorrect or
     missing in the file being played. See also ``--no-video-aspect``.
@@ -738,10 +740,12 @@ Video
     choices if you encounter video that has the wrong aspect ratio in mpv,
     but seems to be correct in other players.
 
-``--video-unscaled``
+``--video-unscaled=<no|yes|downscale-big>``
     Disable scaling of the video. If the window is larger than the video,
-    black bars are added. Otherwise, the video is cropped. The video still
-    can be influenced by the other ``--video-...`` options.
+    black bars are added. Otherwise, the video is cropped, unless the option
+    is set to ``downscale-big``, in which case the video is fit to window. The
+    video still can be influenced by the other ``--video-...`` options. This
+    option disables the effect of ``--panscan``.
 
     Note that the scaler algorithm may still be used, even if the video isn't
     scaled. For example, this can influence chroma conversion. The video will
@@ -1872,6 +1876,23 @@ Window
     is not the case (e.g. ``mpv --keep-open file.mkv /dev/null`` will play
     file.mkv normally, then fail to open ``/dev/null``, then exit). (In
     mpv 0.8.0, ``always`` was introduced, which restores the old behavior.)
+
+``--image-display-duration=<seconds|inf>``
+    If the current file is an image, play the image for the given amount of
+    seconds (default: 1). ``inf`` means the file is kept open forever (until
+    the user stops playback manually).
+
+    Unlike ``--keep-open``, the player is not paused, but simply continues
+    playback until the time has elapsed. (It should not use any resources
+    during "playback".)
+
+    This affects image files, which are defined as having only 1 video frame
+    and no audio. The player may recognize certain non-images as images, for
+    example if ``--length`` is used to reduce the length to 1 frame, or if
+    you seek to the last frame.
+
+    This option does not affect the framerate used for ``mf://`` or
+    ``--merge-files``. For that, use ``--mf-fps`` instead.
 
 ``--force-window=<yes|no|immediate>``
     Create a video output window even if there is no video. This can be useful
@@ -3650,7 +3671,7 @@ Miscellaneous
 ``--video-sync-max-audio-change=<value>``
     Maximum *additional* speed difference in percent that is applied to audio
     with ``--video-sync=display-...`` (default: 0.125). Normally, the player
-    play the audio at the speed of the video. But if the difference between
+    plays the audio at the speed of the video. But if the difference between
     audio and video position is too high, e.g. due to drift or other timing
     errors, it will attempt to speed up or slow down audio by this additional
     factor. Too low values could lead to video frame dropping or repeating if

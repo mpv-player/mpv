@@ -449,10 +449,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     if (!lavc_codec)
         return;
 
-    ctx->codec_timebase = (AVRational){0};
-    if (strstr(decoder, "_mmal") || strstr(decoder, "_mediacodec"))
-        ctx->codec_timebase = (AVRational){1, 1000000};
-
+    ctx->codec_timebase = mp_get_codec_timebase(vd->codec);
     ctx->pix_fmt = AV_PIX_FMT_NONE;
     ctx->hwdec = hwdec;
     ctx->hwdec_fmt = 0;
@@ -463,9 +460,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     avctx->opaque = vd;
     avctx->codec_type = AVMEDIA_TYPE_VIDEO;
     avctx->codec_id = lavc_codec->id;
-
-    if (ctx->codec_timebase.num)
-        avctx->time_base = ctx->codec_timebase;
+    avctx->time_base = ctx->codec_timebase;
 
     avctx->refcounted_frames = 1;
     ctx->pic = av_frame_alloc();
@@ -828,7 +823,6 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         struct demux_packet *cc = new_demux_packet_from(sd->data, sd->size);
         cc->pts = vd->codec_pts;
         cc->dts = vd->codec_dts;
-        cc->pos = -1;
         demuxer_feed_caption(vd->header, cc);
     }
 

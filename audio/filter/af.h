@@ -148,6 +148,7 @@ void af_add_output_frame(struct af_instance *af, struct mp_audio *frame);
 int af_filter_frame(struct af_stream *s, struct mp_audio *frame);
 int af_output_frame(struct af_stream *s, bool eof);
 struct mp_audio *af_read_output_frame(struct af_stream *s);
+void af_unread_output_frame(struct af_stream *s, struct mp_audio *frame);
 int af_make_writeable(struct af_instance *af, struct mp_audio *frame);
 
 double af_calc_delay(struct af_stream *s);

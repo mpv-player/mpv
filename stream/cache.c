@@ -325,6 +325,14 @@ static int resize_cache(struct priv *s, int64_t size)
     int64_t min_size = FILL_LIMIT * 2;
     int64_t max_size = ((size_t)-1) / 8;
 
+    if (s->stream_size > 0) {
+        size = MPMIN(size, s->stream_size);
+        if (size >= s->stream_size) {
+            MP_VERBOSE(s, "no backbuffer needed\n");
+            s->back_size = 0;
+        }
+    }
+
     int64_t buffer_size = MPCLAMP(size, min_size, max_size);
     s->back_size = MPCLAMP(s->back_size, min_size, max_size);
     buffer_size += s->back_size;
@@ -372,6 +380,10 @@ static int resize_cache(struct priv *s, int64_t size)
     //more data than it is allowed to fill
     if (s->seek_limit > s->buffer_size - FILL_LIMIT)
         s->seek_limit = s->buffer_size - FILL_LIMIT;
+
+    MP_VERBOSE(s, "Cache size set to %lld KiB (%lld KiB backbuffer)\n",
+               (long long)(s->buffer_size / 1024),
+               (long long)(s->back_size / 1024));
 
     assert(s->back_size < s->buffer_size);
 
@@ -675,21 +687,13 @@ int stream_cache_init(stream_t *cache, stream_t *stream,
     s->seek_limit = opts->seek_min * 1024ULL;
     s->back_size = opts->back_buffer * 1024ULL;
 
-    int64_t cache_size = opts->size * 1024ULL;
+    s->stream_size = stream_get_size(stream);
 
-    int64_t file_size = stream_get_size(stream);
-    if (file_size >= 0)
-        cache_size = MPMIN(cache_size, file_size);
-
-    if (resize_cache(s, cache_size) != STREAM_OK) {
+    if (resize_cache(s, opts->size * 1024ULL) != STREAM_OK) {
         MP_ERR(s, "Failed to allocate cache buffer.\n");
         talloc_free(s);
         return -1;
     }
-
-    MP_VERBOSE(cache, "Cache size set to %lld KiB (%lld KiB backbuffer)\n",
-               (long long)(s->buffer_size / 1024),
-               (long long)(s->back_size / 1024));
 
     pthread_mutex_init(&s->mutex, NULL);
     pthread_cond_init(&s->wakeup, NULL);

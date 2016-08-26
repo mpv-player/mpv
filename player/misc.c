@@ -90,6 +90,12 @@ double get_play_end_pts(struct MPContext *mpctx)
         if (cend != MP_NOPTS_VALUE && (end == MP_NOPTS_VALUE || cend < end))
             end = cend;
     }
+    if (mpctx->ab_loop_clip && opts->ab_loop[1] != MP_NOPTS_VALUE &&
+        opts->ab_loop[1] > opts->ab_loop[0])
+    {
+        if (end == MP_NOPTS_VALUE || end > opts->ab_loop[1])
+            end = opts->ab_loop[1];
+    }
     return end;
 }
 
@@ -143,8 +149,8 @@ void update_vo_playback_state(struct MPContext *mpctx)
             if ((oldstate.playing && oldstate.taskbar_progress) ||
                 (newstate.playing && newstate.taskbar_progress))
             {
-                vo_control(mpctx->video_out,
-                           VOCTRL_UPDATE_PLAYBACK_STATE, &newstate);
+                vo_control_async(mpctx->video_out,
+                                 VOCTRL_UPDATE_PLAYBACK_STATE, &newstate);
             }
             mpctx->vo_playback_state = newstate;
         }

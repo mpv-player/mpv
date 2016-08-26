@@ -141,7 +141,7 @@ void add_step_frame(struct MPContext *mpctx, int dir)
         unpause_player(mpctx);
     } else if (dir < 0) {
         if (!mpctx->hrseek_active) {
-            queue_seek(mpctx, MPSEEK_BACKSTEP, 0, MPSEEK_VERY_EXACT, true);
+            queue_seek(mpctx, MPSEEK_BACKSTEP, 0, MPSEEK_VERY_EXACT, 0);
             pause_player(mpctx);
         }
     }
@@ -172,6 +172,7 @@ void reset_playback_state(struct MPContext *mpctx)
     mpctx->last_seek_pts = MP_NOPTS_VALUE;
     mpctx->cache_wait_time = 0;
     mpctx->step_frames = 0;
+    mpctx->ab_loop_clip = true;
     mpctx->restart_complete = false;
 
 #if HAVE_ENCODING
@@ -272,7 +273,9 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         }
     }
 
-    clear_audio_output_buffers(mpctx);
+    if (!(seek.flags & MPSEEK_FLAG_NOFLUSH))
+        clear_audio_output_buffers(mpctx);
+
     reset_playback_state(mpctx);
 
     /* Use the target time as "current position" for further relative
@@ -301,11 +304,13 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 
     mpctx->audio_allow_second_chance_seek =
         !hr_seek && !(demux_flags & SEEK_FORWARD);
+
+    mpctx->ab_loop_clip = mpctx->last_seek_pts < opts->ab_loop[1];
 }
 
 // This combines consecutive seek requests.
 void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
-                enum seek_precision exact, bool immediate)
+                enum seek_precision exact, int flags)
 {
     struct seek_params *seek = &mpctx->seek;
 
@@ -314,7 +319,7 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
 
     switch (type) {
     case MPSEEK_RELATIVE:
-        seek->immediate |= immediate;
+        seek->flags |= flags;
         if (seek->type == MPSEEK_FACTOR)
             return;  // Well... not common enough to bother doing better
         seek->amount += amount;
@@ -332,7 +337,7 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
             .type = type,
             .amount = amount,
             .exact = exact,
-            .immediate = immediate,
+            .flags = flags,
         };
         return;
     case MPSEEK_NONE:
@@ -351,7 +356,8 @@ void execute_queued_seek(struct MPContext *mpctx)
         /* If the user seeks continuously (keeps arrow key down)
          * try to finish showing a frame from one location before doing
          * another seek (which could lead to unchanging display). */
-        if (!mpctx->seek.immediate && mpctx->video_status < STATUS_PLAYING &&
+        bool delay = mpctx->seek.flags & MPSEEK_FLAG_DELAY;
+        if (delay && mpctx->video_status < STATUS_PLAYING &&
             mp_time_sec() - mpctx->start_timestamp < 0.3)
             return;
         mp_seek(mpctx, mpctx->seek);
@@ -682,7 +688,7 @@ static void handle_sstep(struct MPContext *mpctx)
 
     if (opts->step_sec > 0 && !mpctx->paused) {
         set_osd_function(mpctx, OSD_FFW);
-        queue_seek(mpctx, MPSEEK_RELATIVE, opts->step_sec, MPSEEK_DEFAULT, true);
+        queue_seek(mpctx, MPSEEK_RELATIVE, opts->step_sec, MPSEEK_DEFAULT, 0);
     }
 
     if (mpctx->video_status >= STATUS_EOF) {
@@ -696,10 +702,25 @@ static void handle_sstep(struct MPContext *mpctx)
 static void handle_loop_file(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
+
+    if (mpctx->stop_play == AT_END_OF_FILE &&
+        (opts->ab_loop[0] != MP_NOPTS_VALUE || opts->ab_loop[1] != MP_NOPTS_VALUE))
+    {
+        // Assumes execute_queued_seek() happens before next audio/video is
+        // attempted to be decoded or filtered.
+        mpctx->stop_play = KEEP_PLAYING;
+        double start = 0;
+        if (opts->ab_loop[0] != MP_NOPTS_VALUE)
+            start = opts->ab_loop[0];
+        mark_seek(mpctx);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, start, MPSEEK_EXACT,
+                   MPSEEK_FLAG_NOFLUSH);
+    }
+
     if (opts->loop_file && mpctx->stop_play == AT_END_OF_FILE) {
         mpctx->stop_play = KEEP_PLAYING;
         set_osd_function(mpctx, OSD_FFW);
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, 0, MPSEEK_DEFAULT, true);
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, 0, MPSEEK_DEFAULT, MPSEEK_FLAG_NOFLUSH);
         if (opts->loop_file > 0)
             opts->loop_file--;
     }
@@ -893,6 +914,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
         mpctx->hrseek_active = false;
         mpctx->restart_complete = true;
         mpctx->audio_allow_second_chance_seek = false;
+        handle_playback_time(mpctx);
         mp_notify(mpctx, MPV_EVENT_PLAYBACK_RESTART, NULL);
         if (!mpctx->playing_msg_shown) {
             if (opts->playing_msg && opts->playing_msg[0]) {
@@ -912,6 +934,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
         }
         mpctx->playing_msg_shown = true;
         mpctx->sleeptime = 0;
+        mpctx->ab_loop_clip = mpctx->playback_pts < opts->ab_loop[1];
         MP_VERBOSE(mpctx, "playback restart complete\n");
     }
 }
@@ -1011,8 +1034,6 @@ void run_playloop(struct MPContext *mpctx)
     handle_eof(mpctx);
 
     handle_loop_file(mpctx);
-
-    handle_ab_loop(mpctx);
 
     handle_keep_open(mpctx);
 
