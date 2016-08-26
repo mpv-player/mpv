@@ -1,3 +1,46 @@
+Release 0.20.0
+==============
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- aspect: add --video-unscaled=downscale-big
+- player: add --image-display-duration option to control duration of image display (#3425)
+- vo_opengl: angle: new flag (dcomposition) to control DirectComposition
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- af_lavrresample: fix error if resampler could not be recreated
+- audio: avoid missed wakeups with ab-loops
+- audio: do not apply --audio-channels if spdif passthrough is in use (#3445)
+- cache: don't use a backbuffer if the cache is as large as the file
+- command: prevent O(n^2) behaviour for playlist property
+- demux: close underlying stream if it's fully read anyway (#3456)
+- demux: fix undefined behavior with ogg metadata update (#3451)
+- player: make looping slightly more seamless
+- player: refresh very low framerate video on filter changes (#3435)
+- stream_memory: disable stream cache
+- vf_rotate: allow arbitrary rotation (#3434)
+- vo: be more trusting to estimated display FPS (#3433)
+- w32_common: use hooks to detect parent window resize
+- x11: work around mutter fullscreen issue (#2072)
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API, and DOCS/interface-changes.rst for a history
+of changes to other user-visible interfaces.
+
+A complete changelog can be seen by running `git log v0.19.0..v0.20.0`
+in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.19.0...v0.20.0 or
+http://git.srsfckn.biz/mpv/log/?qt=range&q=v0.20.0..v0.20.0
+
+
 Release 0.19.0
 ==============
 
