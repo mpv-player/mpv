@@ -2971,6 +2971,25 @@ static int mp_property_sub_pos(void *ctx, struct m_property *prop,
     return property_osd_helper(mpctx, prop, action, arg);
 }
 
+static int mp_property_sub_text(void *ctx, struct m_property *prop,
+                                int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct track *track = mpctx->current_track[0][STREAM_SUB];
+    struct dec_sub *sub = track ? track->d_sub : NULL;
+    double pts = mpctx->playback_pts;
+    if (!sub || pts == MP_NOPTS_VALUE)
+        return M_PROPERTY_UNAVAILABLE;
+
+    pts -= mpctx->opts->sub_delay;
+
+    char *text = sub_get_text(sub, pts);
+    if (!text)
+        text = "";
+
+    return m_property_strdup_ro(action, arg, text);
+}
+
 static int mp_property_cursor_autohide(void *ctx, struct m_property *prop,
                                        int action, void *arg)
 {
@@ -3823,6 +3842,7 @@ static const struct m_property mp_properties[] = {
     {"secondary-sid", mp_property_sub2},
     {"sub-delay", mp_property_sub_delay},
     {"sub-pos", mp_property_sub_pos},
+    {"sub-text", mp_property_sub_text},
     {"sub-visibility", property_osd_helper},
     {"sub-forced-only", property_osd_helper},
     {"sub-scale", property_osd_helper},
@@ -3924,7 +3944,7 @@ static const char *const *const mp_event_property_change[] = {
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
       "total-avsync-change", "audio-speed-correction", "video-speed-correction",
       "vo-delayed-frame-count", "mistimed-frame-count", "vsync-ratio",
-      "estimated-display-fps", "vsync-jitter"),
+      "estimated-display-fps", "vsync-jitter", "sub-text"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",

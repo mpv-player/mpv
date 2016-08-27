@@ -1668,6 +1668,13 @@ Property list
 ``sub-use-margins`` (RW)
     See ``--sub-use-margins``.
 
+``sub-text``
+    Return the current subtitle text. Formatting is stripped. If a subtitle
+    is selected, but no text is currently visible, or the subtitle is not
+    text-based (i.e. DVD/BD subtitles), an empty string is returned.
+
+    This property is experimental and might be removed in the future.
+
 ``ass-vsfilter-aspect-compat`` (RW)
     See ``--ass-vsfilter-aspect-compat``.
 
