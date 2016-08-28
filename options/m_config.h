@@ -247,6 +247,8 @@ int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
  */
 int m_config_set_profile(struct m_config *config, char *name, int flags);
 
+struct mpv_node m_config_get_profiles(struct m_config *config);
+
 void *m_config_alloc_struct(void *talloc_ctx,
                             const struct m_sub_options *subopts);
 

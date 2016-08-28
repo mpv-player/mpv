@@ -36,6 +36,7 @@
 #include "options/m_option.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
+#include "misc/node.h"
 
 static const union m_option_value default_value;
 
@@ -931,6 +932,32 @@ int m_config_set_profile(struct m_config *config, char *name, int flags)
     config->profile_depth--;
 
     return 0;
+}
+
+struct mpv_node m_config_get_profiles(struct m_config *config)
+{
+    struct mpv_node root;
+    node_init(&root, MPV_FORMAT_NODE_ARRAY, NULL);
+
+    for (m_profile_t *profile = config->profiles; profile; profile = profile->next)
+    {
+        struct mpv_node *entry = node_array_add(&root, MPV_FORMAT_NODE_MAP);
+
+        node_map_add_string(entry, "name", profile->name);
+        if (profile->desc)
+            node_map_add_string(entry, "profile-desc", profile->desc);
+
+        struct mpv_node *opts =
+            node_map_add(entry, "options", MPV_FORMAT_NODE_ARRAY);
+
+        for (int n = 0; n < profile->num_opts; n++) {
+            struct mpv_node *opt_entry = node_array_add(opts, MPV_FORMAT_NODE_MAP);
+            node_map_add_string(opt_entry, "key", profile->opts[n * 2 + 0]);
+            node_map_add_string(opt_entry, "value", profile->opts[n * 2 + 1]);
+        }
+    }
+
+    return root;
 }
 
 void *m_config_alloc_struct(void *talloc_ctx,

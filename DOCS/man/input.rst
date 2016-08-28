@@ -2211,6 +2211,14 @@ Property list
 ``property-list``
     Return the list of top-level properties.
 
+``profile-list``
+    Return the list of profiles and their contents. This is highly
+    implementation-specific, and may change any time. Currently, it returns
+    an array of options for each profile. Each option has a name and a value,
+    with the value currently always being a string. Note that the options array
+    is not a map, as order matters and duplicate entries are possible. Recursive
+    profiles are not expanded, and show up as special ``profile`` options.
+
 Property Expansion
 ------------------
 

@@ -3668,6 +3668,22 @@ static int mp_property_list(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_profile_list(void *ctx, struct m_property *prop,
+                           int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    switch (action) {
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_NODE};
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET: {
+        *(struct mpv_node *)arg = m_config_get_profiles(mpctx->mconfig);
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 // Redirect a property name to another
 #define M_PROPERTY_ALIAS(name, real_property) \
     {(name), mp_property_alias, .priv = (real_property)}
@@ -3911,6 +3927,7 @@ static const struct m_property mp_properties[] = {
     {"file-local-options", mp_property_local_options},
     {"option-info", mp_property_option_info},
     {"property-list", mp_property_list},
+    {"profile-list", mp_profile_list},
 
     // compatibility
     M_PROPERTY_ALIAS("video", "vid"),
