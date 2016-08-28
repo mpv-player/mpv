@@ -2890,6 +2890,17 @@ OSD
 
     Default: 0.
 
+``--video-osd=<yes|no>``
+    Enabled OSD rendering on the video window (default: yes). This can be used
+    in situations where terminal OSD is preferred. If you just want to disable
+    all OSD rendering, use ``--osd-level=0``.
+
+    It does not affect subtitles or overlays created by scripts (in particular,
+    the OSC needs to be disabled with ``--no-osc``).
+
+    This option is somewhat experimental and could be replaced by another
+    mechanism in the future.
+
 Screenshot
 ----------
 
@@ -3136,11 +3147,15 @@ Terminal
         Only show warnings or worse, and let the ao_alsa output show errors
         only.
 
-``--term-osd, --no-term-osd``, ``--term-osd=force``
-    Display OSD messages on the console when no video output is available.
-    Enabled by default.
+``--term-osd=<auto|no|force>``
+    Control whether OSD messages are shown on the console when no video output
+    is available (default: auto).
 
-    ``force`` enables terminal OSD even if a video window is created.
+    :auto:      use terminal OSD if no video output active
+    :no:        disable terminal OSD
+    :force:     use terminal OSD even if video output active
+
+    The ``auto`` mode also enables terminal OSD if ``--video-osd=no`` was set.
 
 ``--term-osd-bar``, ``--no-term-osd-bar``
     Enable printing a progress bar under the status line on the terminal.

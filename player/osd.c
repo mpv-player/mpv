@@ -117,8 +117,8 @@ void term_osd_set_subs(struct MPContext *mpctx, const char *text)
 
 static void term_osd_set_text_lazy(struct MPContext *mpctx, const char *text)
 {
-    if ((mpctx->video_out && mpctx->opts->term_osd != 1) ||
-        !mpctx->opts->term_osd || !text)
+    bool video_osd = mpctx->video_out && mpctx->opts->video_osd;
+    if ((video_osd && mpctx->opts->term_osd != 1) || !text)
         text = ""; // disable
     talloc_free(mpctx->term_osd_text);
     mpctx->term_osd_text = talloc_strdup(mpctx, text);
@@ -325,7 +325,8 @@ void set_osd_bar(struct MPContext *mpctx, int type,
                  double min, double max, double neutral, double val)
 {
     struct MPOpts *opts = mpctx->opts;
-    if (opts->osd_level < 1 || !opts->osd_bar_visible || !mpctx->video_out)
+    bool video_osd = mpctx->video_out && mpctx->opts->video_osd;
+    if (opts->osd_level < 1 || !opts->osd_bar_visible || !video_osd)
         return;
 
     mpctx->osd_visible = mp_time_sec() + opts->osd_duration / 1000.0;
@@ -460,7 +461,8 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
     }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_TEXT) {
         // Never in term-osd mode
-        if (mpctx->video_out && mpctx->opts->term_osd != 1) {
+        bool video_osd = mpctx->video_out && mpctx->opts->video_osd;
+        if (video_osd && mpctx->opts->term_osd != 1) {
             if (set_osd_msg(mpctx, 1, mpctx->opts->osd_duration, ""))
                 mpctx->osd_show_pos = true;
         }
@@ -563,6 +565,9 @@ void update_osd_msg(struct MPContext *mpctx)
     term_osd_set_text_lazy(mpctx, mpctx->osd_msg_text);
     term_osd_print_status_lazy(mpctx);
     term_osd_update(mpctx);
+
+    if (!opts->video_osd)
+        return;
 
     int osd_level = opts->osd_level;
     if (mpctx->osd_show_pos)

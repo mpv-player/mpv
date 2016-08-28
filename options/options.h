@@ -127,6 +127,8 @@ typedef struct MPOpts {
     int osd_level;
     int osd_duration;
     int osd_fractions;
+    int video_osd;
+
     int untimed;
     char *stream_capture;
     char *stream_dump;

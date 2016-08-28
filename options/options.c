@@ -589,6 +589,8 @@ const m_option_t mp_opts[] = {
     OPT_STRING("osd-msg2", osd_msg[1], 0),
     OPT_STRING("osd-msg3", osd_msg[2], 0),
 
+    OPT_FLAG("video-osd", video_osd, 0),
+
     OPT_CHOICE("idle", player_idle_mode, 0,
                ({"no",   0},
                 {"once", 1},
@@ -739,6 +741,7 @@ const struct MPOpts mp_default_opts = {
     .gamma_contrast = 1000,
     .gamma_saturation = 1000,
     .gamma_hue = 1000,
+    .video_osd = 1,
     .osd_level = 1,
     .osd_duration = 1000,
     .osd_bar_align_y = 0.5,
