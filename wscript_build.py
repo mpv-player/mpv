@@ -195,6 +195,7 @@ def build(ctx):
         ( "misc/charset_conv.c" ),
         ( "misc/dispatch.c" ),
         ( "misc/json.c" ),
+        ( "misc/node.c" ),
         ( "misc/ring.c" ),
         ( "misc/rendezvous.c" ),
 
