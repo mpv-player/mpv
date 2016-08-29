@@ -3153,6 +3153,8 @@ static void init_gl(struct gl_video *p)
     if ((gl->es >= 300 || gl->version) && (gl->mpgl_caps & MPGL_CAP_FB)) {
         gl->BindFramebuffer(GL_FRAMEBUFFER, gl->main_fb);
 
+        debug_check_gl(p, "before retrieving framebuffer depth");
+
         GLenum obj = gl->version ? GL_BACK_LEFT : GL_BACK;
         if (gl->main_fb)
             obj = GL_COLOR_ATTACHMENT0;
@@ -3165,6 +3167,8 @@ static void init_gl(struct gl_video *p)
                             GL_FRAMEBUFFER_ATTACHMENT_GREEN_SIZE, &depth_g);
         gl->GetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, obj,
                             GL_FRAMEBUFFER_ATTACHMENT_BLUE_SIZE, &depth_b);
+
+        debug_check_gl(p, "retrieving framebuffer depth");
 
         MP_VERBOSE(p, "Reported display depth: R=%d, G=%d, B=%d\n",
                    depth_r, depth_g, depth_b);
