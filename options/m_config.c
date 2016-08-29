@@ -953,7 +953,8 @@ struct mpv_node m_config_get_profiles(struct m_config *config)
         for (int n = 0; n < profile->num_opts; n++) {
             struct mpv_node *opt_entry = node_array_add(opts, MPV_FORMAT_NODE_MAP);
             node_map_add_string(opt_entry, "key", profile->opts[n * 2 + 0]);
-            node_map_add_string(opt_entry, "value", profile->opts[n * 2 + 1]);
+            if (profile->opts[n * 2 + 1])
+                node_map_add_string(opt_entry, "value", profile->opts[n * 2 + 1]);
         }
     }
 
