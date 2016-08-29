@@ -142,6 +142,8 @@ static void ssurface_handle_configure(void *data,
 {
     struct vo_wayland_state *wl = data;
     float win_aspect = wl->window.aspect;
+    if (!width || !height)
+        return;
     if (!wl->window.is_fullscreen)
         width = win_aspect * height;
     schedule_resize(wl, edges, width, height);
