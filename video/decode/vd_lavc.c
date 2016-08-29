@@ -460,7 +460,10 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     avctx->opaque = vd;
     avctx->codec_type = AVMEDIA_TYPE_VIDEO;
     avctx->codec_id = lavc_codec->id;
-    avctx->time_base = ctx->codec_timebase;
+
+#if LIBAVCODEC_VERSION_MICRO >= 100
+    avctx->pkt_timebase = ctx->codec_timebase;
+#endif
 
     avctx->refcounted_frames = 1;
     ctx->pic = av_frame_alloc();
