@@ -450,6 +450,11 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
         return;
 
     ctx->codec_timebase = mp_get_codec_timebase(vd->codec);
+
+    // This decoder does not read pkt_timebase correctly yet.
+    if (strstr(decoder, "_mmal"))
+        ctx->codec_timebase = (AVRational){1, 1000000};
+
     ctx->pix_fmt = AV_PIX_FMT_NONE;
     ctx->hwdec = hwdec;
     ctx->hwdec_fmt = 0;
