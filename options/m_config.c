@@ -424,7 +424,7 @@ static void m_config_add_option(struct m_config *config,
     } else {
         // Initialize options
         if (co.data && co.default_data) {
-            if (arg->type->flags & M_OPT_TYPE_DYNAMIC) {
+            if (arg->type->free) {
                 // Would leak memory by overwriting *co.data repeatedly.
                 for (int i = 0; i < config->num_opts; i++) {
                     if (co.data == config->opts[i].data)

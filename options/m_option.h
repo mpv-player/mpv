@@ -403,19 +403,11 @@ struct m_option {
  */
 #define M_OPT_TYPE_ALLOW_WILDCARD       (1 << 1)
 
-// Dynamic data type.
-/** This flag indicates that the data is dynamically allocated (m_option::p
- *  points to a pointer). It enables a little hack in the \ref Config which
- *  replaces the initial value of such variables with a dynamic copy in case
- *  the initial value is statically allocated (pretty common with strings).
- */
-#define M_OPT_TYPE_DYNAMIC              (1 << 2)
-
 // The parameter is optional and by default no parameter is preferred. If
 // ambiguous syntax is used ("--opt value"), the command line parser will
 // assume that the argument takes no parameter. In config files, these
 // options can be used without "=" and value.
-#define M_OPT_TYPE_OPTIONAL_PARAM       (1 << 3)
+#define M_OPT_TYPE_OPTIONAL_PARAM       (1 << 2)
 
 ///////////////////////////// Parser flags /////////////////////////////////
 
