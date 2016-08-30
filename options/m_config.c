@@ -334,7 +334,7 @@ static void add_negation_option(struct m_config *config,
     struct m_config_option co = *orig;
     co.name = talloc_asprintf(config, "no-%s", orig->name);
     co.opt = no_opt;
-    co.is_generated = true;
+    co.is_hidden = true;
     MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
     // Add --sub-no-opt (unfortunately needed for: "--sub=...:no-opt")
     if (parent_name[0]) {
@@ -441,7 +441,7 @@ static void m_config_add_option(struct m_config *config,
     add_negation_option(config, &co, parent_name);
 
     if (co.opt->type == &m_option_type_alias) {
-        co.is_generated = true; // hide it
+        co.is_hidden = true;
         const char *alias = (const char *)co.opt->priv;
         char no_alias[40];
         snprintf(no_alias, sizeof(no_alias), "no-%s", alias);
@@ -456,7 +456,7 @@ static void m_config_add_option(struct m_config *config,
     }
 
     if (co.opt->type == &m_option_type_removed)
-        co.is_generated = true; // hide it
+        co.is_hidden = true;
 }
 
 struct m_config_option *m_config_get_co(const struct m_config *config,
@@ -519,7 +519,7 @@ const char *m_config_get_positional_option(const struct m_config *config, int p)
     int pos = 0;
     for (int n = 0; n < config->num_opts; n++) {
         struct m_config_option *co = &config->opts[n];
-        if (!co->is_generated) {
+        if (!co->is_hidden) {
             if (pos == p)
                 return co->name;
             pos++;
@@ -794,7 +794,7 @@ void m_config_print_option_list(const struct m_config *config)
         const struct m_option *opt = co->opt;
         if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
             continue;
-        if (co->is_generated)
+        if (co->is_hidden)
             continue;
         if (opt->type == &m_option_type_alias ||
             opt->type == &m_option_type_removed)
@@ -848,7 +848,7 @@ char **m_config_list_options(void *ta_parent, const struct m_config *config)
         const struct m_option *opt = co->opt;
         if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
             continue;
-        if (co->is_generated)
+        if (co->is_hidden)
             continue;
         // For use with CONF_TYPE_STRING_LIST, it's important not to set list
         // as allocation parent.

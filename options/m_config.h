@@ -37,7 +37,7 @@ struct mp_log;
 
 // Config option
 struct m_config_option {
-    bool is_generated : 1;          // Automatically added ("no-" options)
+    bool is_hidden : 1;             // Does not show up in help
     bool is_set_from_cmdline : 1;   // Set by user from command line
     bool is_set_locally : 1;        // Has a backup entry
     bool warning_was_printed : 1;
