@@ -576,7 +576,7 @@ static int mp_property_drop_frame_cnt(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
-     if (!mpctx->vo_chain)
+    if (!mpctx->vo_chain)
         return M_PROPERTY_UNAVAILABLE;
 
     return m_property_int_ro(action, arg, mpctx->vo_chain->video_src->dropped_frames);
@@ -2390,7 +2390,7 @@ static int mp_property_taskbar_progress(void *ctx, struct m_property *prop,
             return M_PROPERTY_OK;
         mpctx->opts->vo.taskbar_progress = desired;
         if (mpctx->video_out)
-            update_vo_playback_state( mpctx );
+            update_vo_playback_state(mpctx);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
