@@ -813,6 +813,7 @@ int handle_force_window(struct MPContext *mpctx, bool force)
             .input_ctx = mpctx->input,
             .osd = mpctx->osd,
             .encode_lavc_ctx = mpctx->encode_lavc_ctx,
+            .opengl_cb_context = mpctx->gl_cb_ctx,
         };
         mpctx->video_out = init_best_video_out(mpctx->global, &ex);
         if (!mpctx->video_out)
