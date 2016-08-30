@@ -975,7 +975,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     switch (request) {
     case VOCTRL_FULLSCREEN:
-        vo->opts->fullscreen = !vo->opts->fullscreen;
         set_fullscreen(vo);
         return 1;
     case VOCTRL_REDRAW_FRAME:

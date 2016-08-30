@@ -449,7 +449,6 @@ static int vo_cocoa_ontop(struct vo *vo)
         return VO_NOTIMPL;
 
     struct mp_vo_opts *opts = vo->opts;
-    opts->ontop = !opts->ontop;
     vo_set_level(vo, opts->ontop);
     return VO_TRUE;
 }
@@ -793,7 +792,6 @@ static int vo_cocoa_control_on_main_thread(struct vo *vo, int request, void *arg
 
     switch (request) {
     case VOCTRL_FULLSCREEN:
-        opts->fullscreen = !opts->fullscreen;
         return vo_cocoa_fullscreen(vo);
     case VOCTRL_ONTOP:
         return vo_cocoa_ontop(vo);

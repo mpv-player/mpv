@@ -612,7 +612,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     switch (request) {
     case VOCTRL_FULLSCREEN:
-        vo->opts->fullscreen = !vo->opts->fullscreen;
         if (p->renderer_enabled)
             set_geometry(vo);
         vo->want_redraw = true;

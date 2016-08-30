@@ -957,8 +957,9 @@ void vo_wayland_uninit(struct vo *vo)
 static void vo_wayland_ontop(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
+    if (!vo->opts->ontop)
+        return;
     MP_DBG(wl, "going ontop\n");
-    vo->opts->ontop = 1;
     window_set_toplevel(wl);
     schedule_resize(wl, 0, wl->window.width, wl->window.height);
 }
@@ -1046,7 +1047,6 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         wl->window.events = 0;
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
-        vo->opts->fullscreen = !vo->opts->fullscreen;
         vo_wayland_fullscreen(vo);
         return VO_TRUE;
     case VOCTRL_ONTOP:

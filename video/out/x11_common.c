@@ -1801,19 +1801,15 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         x11->pending_vo_events = 0;
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
-        opts->fullscreen = !opts->fullscreen;
         vo_x11_fullscreen(vo);
         return VO_TRUE;
     case VOCTRL_ONTOP:
-        opts->ontop = !opts->ontop;
         vo_x11_setlayer(vo, opts->ontop);
         return VO_TRUE;
     case VOCTRL_BORDER:
-        opts->border = !opts->border;
         vo_x11_decoration(vo, vo->opts->border);
         return VO_TRUE;
     case VOCTRL_ALL_WORKSPACES: {
-        opts->all_workspaces = !opts->all_workspaces;
         long params[5] = {0xFFFFFFFF, 1};
         if (!opts->all_workspaces) {
             x11_get_property_copy(x11, x11->rootwin, XA(x11, _NET_CURRENT_DESKTOP),
