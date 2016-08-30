@@ -662,7 +662,7 @@ static void handle_cursor_autohide(struct MPContext *mpctx)
     if (opts->cursor_autohide_delay == -2)
         mouse_cursor_visible = false;
 
-    if (opts->cursor_autohide_fs && !opts->vo.fullscreen)
+    if (opts->cursor_autohide_fs && !opts->vo->fullscreen)
         mouse_cursor_visible = true;
 
     if (mouse_cursor_visible != mpctx->mouse_cursor_visible)

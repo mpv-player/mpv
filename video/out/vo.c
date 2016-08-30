@@ -224,7 +224,7 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     *vo = (struct vo) {
         .log = mp_log_new(vo, log, name),
         .driver = desc.p,
-        .opts = &global->opts->vo,
+        .opts = global->opts->vo,
         .global = global,
         .encode_lavc_ctx = ex->encode_lavc_ctx,
         .input_ctx = ex->input_ctx,
@@ -269,7 +269,7 @@ error:
 
 struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex)
 {
-    struct m_obj_settings *vo_list = global->opts->vo.video_driver_list;
+    struct m_obj_settings *vo_list = global->opts->vo->video_driver_list;
     // first try the preferred drivers, with their optional subdevice param:
     if (vo_list && vo_list[0].name) {
         for (int n = 0; vo_list[n].name; n++) {

@@ -98,7 +98,7 @@ typedef struct MPOpts {
     int gapless_audio;
     double audio_buffer;
 
-    mp_vo_opts vo;
+    mp_vo_opts *vo;
     int allow_win_drag;
 
     char *wintitle;

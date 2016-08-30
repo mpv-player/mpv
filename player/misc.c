@@ -134,7 +134,7 @@ void update_vo_playback_state(struct MPContext *mpctx)
     if (mpctx->video_out) {
         struct voctrl_playback_state oldstate = mpctx->vo_playback_state;
         struct voctrl_playback_state newstate = {
-            .taskbar_progress = mpctx->opts->vo.taskbar_progress,
+            .taskbar_progress = mpctx->opts->vo->taskbar_progress,
             .playing = mpctx->playing,
             .paused = mpctx->paused,
             .percent_pos = get_percent_pos(mpctx),

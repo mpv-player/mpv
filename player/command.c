@@ -2371,10 +2371,10 @@ static int mp_property_fullscreen(void *ctx, struct m_property *prop,
                                   int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    int oldval = mpctx->opts->vo.fullscreen;
+    int oldval = mpctx->opts->vo->fullscreen;
     int r = mp_property_vo_flag(prop, action, arg, VOCTRL_FULLSCREEN,
-                                &mpctx->opts->vo.fullscreen, mpctx);
-    if (oldval && oldval != mpctx->opts->vo.fullscreen)
+                                &mpctx->opts->vo->fullscreen, mpctx);
+    if (oldval && oldval != mpctx->opts->vo->fullscreen)
         mpctx->mouse_event_ts--; // Show mouse cursor
     return r;
 }
@@ -2386,9 +2386,9 @@ static int mp_property_taskbar_progress(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     if (action == M_PROPERTY_SET) {
         int desired = !!*(int *) arg;
-        if (mpctx->opts->vo.taskbar_progress == desired)
+        if (mpctx->opts->vo->taskbar_progress == desired)
             return M_PROPERTY_OK;
-        mpctx->opts->vo.taskbar_progress = desired;
+        mpctx->opts->vo->taskbar_progress = desired;
         if (mpctx->video_out)
             update_vo_playback_state(mpctx);
         return M_PROPERTY_OK;
@@ -2402,7 +2402,7 @@ static int mp_property_ontop(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     return mp_property_vo_flag(prop, action, arg, VOCTRL_ONTOP,
-                               &mpctx->opts->vo.ontop, mpctx);
+                               &mpctx->opts->vo->ontop, mpctx);
 }
 
 /// Show window borders (RW)
@@ -2411,7 +2411,7 @@ static int mp_property_border(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     return mp_property_vo_flag(prop, action, arg, VOCTRL_BORDER,
-                               &mpctx->opts->vo.border, mpctx);
+                               &mpctx->opts->vo->border, mpctx);
 }
 
 static int mp_property_all_workspaces(void *ctx, struct m_property *prop,
@@ -2419,7 +2419,7 @@ static int mp_property_all_workspaces(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     return mp_property_vo_flag(prop, action, arg, VOCTRL_ALL_WORKSPACES,
-                               &mpctx->opts->vo.all_workspaces, mpctx);
+                               &mpctx->opts->vo->all_workspaces, mpctx);
 }
 
 static int get_frame_count(struct MPContext *mpctx)

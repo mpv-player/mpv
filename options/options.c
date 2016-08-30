@@ -97,6 +97,81 @@ const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {0}
 };
 
+#define OPT_BASE_STRUCT struct mp_vo_opts
+
+static const m_option_t mp_vo_opt_list[] = {
+    OPT_SETTINGSLIST("vo", video_driver_list, 0, &vo_obj_list),
+    OPT_SETTINGSLIST("vo-defaults", vo_defs, 0, &vo_obj_list),
+    OPT_CHOICE_C("hwdec-preload", hwdec_preload_api, 0, mp_hwdec_names),
+    OPT_SUBSTRUCT("sws", sws_opts, sws_conf, 0),
+    OPT_FLAG("taskbar-progress", taskbar_progress, 0),
+    OPT_FLAG("ontop", ontop, M_OPT_FIXED),
+    OPT_FLAG("border", border, M_OPT_FIXED),
+    OPT_FLAG("fit-border", fit_border, M_OPT_FIXED),
+    OPT_FLAG("on-all-workspaces", all_workspaces, M_OPT_FIXED),
+    OPT_GEOMETRY("geometry", geometry, 0),
+    OPT_SIZE_BOX("autofit", autofit, 0),
+    OPT_SIZE_BOX("autofit-larger", autofit_larger, 0),
+    OPT_SIZE_BOX("autofit-smaller", autofit_smaller, 0),
+    OPT_FLOATRANGE("window-scale", window_scale, 0, 0.001, 100),
+    OPT_FLAG("force-window-position", force_window_position, 0),
+    OPT_STRING("x11-name", winname, 0),
+    OPT_FLOATRANGE("monitoraspect", force_monitor_aspect, 0, 0.0, 9.0),
+    OPT_FLOATRANGE("monitorpixelaspect", monitor_pixel_aspect, 0, 0.2, 9.0),
+    OPT_FLAG("fullscreen", fullscreen, M_OPT_FIXED),
+    OPT_FLAG("fs", fullscreen, M_OPT_FIXED),
+    OPT_FLAG("native-keyrepeat", native_keyrepeat, M_OPT_FIXED),
+    OPT_FLOATRANGE("panscan", panscan, 0, 0.0, 1.0),
+    OPT_FLOATRANGE("video-zoom", zoom, 0, -20.0, 20.0),
+    OPT_FLOATRANGE("video-pan-x", pan_x, 0, -3.0, 3.0),
+    OPT_FLOATRANGE("video-pan-y", pan_y, 0, -3.0, 3.0),
+    OPT_FLOATRANGE("video-align-x", align_x, 0, -1.0, 1.0),
+    OPT_FLOATRANGE("video-align-y", align_y, 0, -1.0, 1.0),
+    OPT_CHOICE("video-unscaled", unscaled, 0,
+               ({"no", 0}, {"yes", 1}, {"downscale-big", 2})),
+    OPT_INT64("wid", WinID, 0),
+    OPT_CHOICE_OR_INT("screen", screen_id, 0, 0, 32,
+                      ({"default", -1})),
+    OPT_CHOICE_OR_INT("fs-screen", fsscreen_id, 0, 0, 32,
+                      ({"all", -2}, {"current", -1})),
+    OPT_FLAG("fs-black-out-screens", fs_black_out_screens, 0),
+    OPT_FLAG("keepaspect", keepaspect, 0),
+    OPT_FLAG("keepaspect-window", keepaspect_window, 0),
+#if HAVE_X11
+    OPT_CHOICE("x11-netwm", x11_netwm, 0,
+               ({"auto", 0}, {"no", -1}, {"yes", 1})),
+    OPT_CHOICE("x11-bypass-compositor", x11_bypass_compositor, 0,
+               ({"no", 0}, {"yes", 1}, {"fs-only", 2}, {"never", 3})),
+#endif
+#if HAVE_WIN32
+    OPT_STRING("vo-mmcss-profile", mmcss_profile, M_OPT_FIXED),
+#endif
+
+    {0}
+};
+
+static const struct m_sub_options vo_sub_opts = {
+    .opts = mp_vo_opt_list,
+    .size = sizeof(struct mp_vo_opts),
+    .defaults = &(const struct mp_vo_opts){
+        .video_driver_list = NULL,
+        .monitor_pixel_aspect = 1.0,
+        .screen_id = -1,
+        .fsscreen_id = -1,
+        .panscan = 0.0f,
+        .keepaspect = 1,
+        .keepaspect_window = 1,
+        .taskbar_progress = 1,
+        .border = 1,
+        .fit_border = 1,
+        .WinID = -1,
+        .window_scale = 1.0,
+        .x11_bypass_compositor = 2,
+        .mmcss_profile = "Playback",
+    },
+};
+
+#undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct MPOpts
 
 const m_option_t mp_opts[] = {
@@ -313,13 +388,10 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("ad-spdif-dtshd", dtshd, 0),
 
     OPT_CHOICE_C("hwdec", hwdec_api, 0, mp_hwdec_names),
-    OPT_CHOICE_C("hwdec-preload", vo.hwdec_preload_api, 0, mp_hwdec_names),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
 #if HAVE_VIDEOTOOLBOX_HWACCEL
     OPT_IMAGEFORMAT("videotoolbox-format", videotoolbox_format, 0),
 #endif
-
-    OPT_SUBSTRUCT("sws", vo.sws_opts, sws_conf, 0),
 
     // -1 means auto aspect (prefer container size until aspect change)
     //  0 means square pixels
@@ -393,8 +465,6 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("sub-clear-on-seek", sub_clear_on_seek, 0),
 
 //---------------------- libao/libvo options ------------------------
-    OPT_SETTINGSLIST("vo", vo.video_driver_list, 0, &vo_obj_list),
-    OPT_SETTINGSLIST("vo-defaults", vo.vo_defs, 0, &vo_obj_list),
     OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list),
     OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list),
     OPT_STRING("audio-device", audio_device, 0),
@@ -404,11 +474,6 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("audio-wait-open", audio_wait_open, 0, 0, 60),
     OPT_CHOICE("force-window", force_vo, 0,
                ({"no", 0}, {"yes", 1}, {"immediate", 2})),
-    OPT_FLAG("taskbar-progress", vo.taskbar_progress, 0),
-    OPT_FLAG("ontop", vo.ontop, M_OPT_FIXED),
-    OPT_FLAG("border", vo.border, M_OPT_FIXED),
-    OPT_FLAG("fit-border", vo.fit_border, M_OPT_FIXED),
-    OPT_FLAG("on-all-workspaces", vo.all_workspaces, M_OPT_FIXED),
 
     OPT_FLAG("window-dragging", allow_win_drag, CONF_GLOBAL),
 
@@ -431,31 +496,9 @@ const m_option_t mp_opts[] = {
                .min = 0, .max = 10),
     OPT_FLOATRANGE("balance", balance, 0, -1, 1),
 
-    OPT_GEOMETRY("geometry", vo.geometry, 0),
-    OPT_SIZE_BOX("autofit", vo.autofit, 0),
-    OPT_SIZE_BOX("autofit-larger", vo.autofit_larger, 0),
-    OPT_SIZE_BOX("autofit-smaller", vo.autofit_smaller, 0),
-    OPT_FLOATRANGE("window-scale", vo.window_scale, 0, 0.001, 100),
-    OPT_FLAG("force-window-position", vo.force_window_position, 0),
-    // vo name (X classname) and window title strings
-    OPT_STRING("x11-name", vo.winname, 0),
     OPT_STRING("title", wintitle, 0),
     OPT_STRING("force-media-title", media_title, 0),
     // set aspect ratio of monitor - useful for 16:9 TV-out
-    OPT_FLOATRANGE("monitoraspect", vo.force_monitor_aspect, 0, 0.0, 9.0),
-    OPT_FLOATRANGE("monitorpixelaspect", vo.monitor_pixel_aspect, 0, 0.2, 9.0),
-    // start in fullscreen mode:
-    OPT_FLAG("fullscreen", vo.fullscreen, M_OPT_FIXED),
-    OPT_FLAG("fs", vo.fullscreen, M_OPT_FIXED),
-    OPT_FLAG("native-keyrepeat", vo.native_keyrepeat, M_OPT_FIXED),
-    OPT_FLOATRANGE("panscan", vo.panscan, 0, 0.0, 1.0),
-    OPT_FLOATRANGE("video-zoom", vo.zoom, 0, -20.0, 20.0),
-    OPT_FLOATRANGE("video-pan-x", vo.pan_x, 0, -3.0, 3.0),
-    OPT_FLOATRANGE("video-pan-y", vo.pan_y, 0, -3.0, 3.0),
-    OPT_FLOATRANGE("video-align-x", vo.align_x, 0, -1.0, 1.0),
-    OPT_FLOATRANGE("video-align-y", vo.align_y, 0, -1.0, 1.0),
-    OPT_CHOICE("video-unscaled", vo.unscaled, 0,
-               ({"no", 0}, {"yes", 1}, {"downscale-big", 2})),
     OPT_FLAG("force-rgba-osd-rendering", force_rgba_osd, 0),
     OPT_CHOICE_OR_INT("video-rotate", video_rotate, 0, 0, 359,
                       ({"no", -1})),
@@ -466,28 +509,10 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("cursor-autohide-fs-only", cursor_autohide_fs, 0),
     OPT_FLAG("stop-screensaver", stop_screensaver, 0),
 
-    OPT_INT64("wid", vo.WinID, 0),
-#if HAVE_X11
-    OPT_CHOICE("x11-netwm", vo.x11_netwm, 0,
-               ({"auto", 0}, {"no", -1}, {"yes", 1})),
-    OPT_CHOICE("x11-bypass-compositor", vo.x11_bypass_compositor, 0,
-               ({"no", 0}, {"yes", 1}, {"fs-only", 2}, {"never", 3})),
-#endif
-#if HAVE_WIN32
-    OPT_STRING("vo-mmcss-profile", vo.mmcss_profile, M_OPT_FIXED),
-#endif
-
     OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0,
                .deprecation_message = "use Lua scripting instead"),
     OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
 
-    OPT_CHOICE_OR_INT("screen", vo.screen_id, 0, 0, 32,
-                      ({"default", -1})),
-
-    OPT_CHOICE_OR_INT("fs-screen", vo.fsscreen_id, 0, 0, 32,
-                      ({"all", -2}, {"current", -1})),
-
-    OPT_FLAG("fs-black-out-screens", vo.fs_black_out_screens, 0),
     OPT_INTRANGE("brightness", gamma_brightness, 0, -100, 100),
     OPT_INTRANGE("saturation", gamma_saturation, 0, -100, 100),
     OPT_INTRANGE("contrast", gamma_contrast, 0, -100, 100),
@@ -495,8 +520,6 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("gamma", gamma_gamma, 0, -100, 100),
     OPT_CHOICE_C("video-output-levels", video_output_levels, 0,
                  mp_csp_levels_names),
-    OPT_FLAG("keepaspect", vo.keepaspect, 0),
-    OPT_FLAG("keepaspect-window", vo.keepaspect_window, 0),
 
     OPT_FLAG("use-filedir-conf", use_filedir_conf, 0),
     OPT_CHOICE("osd-level", osd_level, 0,
@@ -614,6 +637,8 @@ const m_option_t mp_opts[] = {
     OPT_PRINT("version", print_version),
     OPT_PRINT("V", print_version),
 
+    OPT_SUBSTRUCT("", vo, vo_sub_opts, 0),
+
 #if HAVE_ENCODING
     OPT_SUBSTRUCT("", encode_opts, encode_config, 0),
 #endif
@@ -715,22 +740,6 @@ const struct MPOpts mp_default_opts = {
     .audio_buffer = 0.2,
     .audio_device = "auto",
     .audio_client_name = "mpv",
-    .vo = {
-        .video_driver_list = NULL,
-        .monitor_pixel_aspect = 1.0,
-        .screen_id = -1,
-        .fsscreen_id = -1,
-        .panscan = 0.0f,
-        .keepaspect = 1,
-        .keepaspect_window = 1,
-        .taskbar_progress = 1,
-        .border = 1,
-        .fit_border = 1,
-        .WinID = -1,
-        .window_scale = 1.0,
-        .x11_bypass_compositor = 2,
-        .mmcss_profile = "Playback",
-    },
     .allow_win_drag = 1,
     .wintitle = "${?media-title:${media-title}}${!media-title:No file} - mpv",
     .heartbeat_interval = 30.0,

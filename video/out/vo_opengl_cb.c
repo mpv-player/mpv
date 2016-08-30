@@ -136,7 +136,7 @@ struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
     ctx->log = mp_log_new(ctx, g->log, "opengl-cb");
     ctx->client_api = client_api;
 
-    ctx->hwdec_api = g->opts->vo.hwdec_preload_api;
+    ctx->hwdec_api = g->opts->vo->hwdec_preload_api;
     if (ctx->hwdec_api == HWDEC_NONE)
         ctx->hwdec_api = g->opts->hwdec_api;
 

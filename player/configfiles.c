@@ -152,8 +152,8 @@ void mp_load_auto_profiles(struct MPContext *mpctx)
 
     mp_load_per_file_config(mpctx);
 
-    if (opts->vo.video_driver_list)
-        mp_auto_load_profile(mpctx, "vo", bstr0(opts->vo.video_driver_list[0].name));
+    if (opts->vo->video_driver_list)
+        mp_auto_load_profile(mpctx, "vo", bstr0(opts->vo->video_driver_list[0].name));
     if (opts->audio_driver_list)
         mp_auto_load_profile(mpctx, "ao", bstr0(opts->audio_driver_list[0].name));
 }
