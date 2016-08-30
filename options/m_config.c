@@ -174,7 +174,7 @@ static void substruct_write_ptr(void *ptr, void *val)
 }
 
 static void add_options(struct m_config *config,
-                        const char *parent_name,
+                        struct m_config_option *parent,
                         void *optstruct,
                         const void *optstruct_def,
                         const struct m_option *defs);
@@ -202,7 +202,7 @@ struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
             memcpy(config->optstruct, defaults, size);
     }
     if (options)
-        add_options(config, "", config->optstruct, defaults, options);
+        add_options(config, NULL, config->optstruct, defaults, options);
     return config;
 }
 
@@ -344,19 +344,19 @@ static void add_negation_option(struct m_config *config,
 }
 
 static void m_config_add_option(struct m_config *config,
-                                const char *parent_name,
+                                struct m_config_option *parent,
                                 void *optstruct,
                                 const void *optstruct_def,
                                 const struct m_option *arg);
 
 static void add_options(struct m_config *config,
-                        const char *parent_name,
+                        struct m_config_option *parent,
                         void *optstruct,
                         const void *optstruct_def,
                         const struct m_option *defs)
 {
     for (int i = 0; defs && defs[i].name; i++)
-        m_config_add_option(config, parent_name, optstruct, optstruct_def, &defs[i]);
+        m_config_add_option(config, parent, optstruct, optstruct_def, &defs[i]);
 }
 
 // Initialize a field with a given value. In case this is dynamic data, it has
@@ -372,13 +372,15 @@ static void init_opt_inplace(const struct m_option *opt, void *dst,
 }
 
 static void m_config_add_option(struct m_config *config,
-                                const char *parent_name,
+                                struct m_config_option *parent,
                                 void *optstruct,
                                 const void *optstruct_def,
                                 const struct m_option *arg)
 {
     assert(config != NULL);
     assert(arg != NULL);
+
+    const char *parent_name = parent ? parent->name : "";
 
     struct m_config_option co = {
         .opt = arg,
@@ -419,8 +421,7 @@ static void m_config_add_option(struct m_config *config,
         if (!new_optstruct_def)
             new_optstruct_def = subopts->defaults;
 
-        add_options(config, co.name, new_optstruct,
-                    new_optstruct_def, subopts->opts);
+        add_options(config, &co, new_optstruct, new_optstruct_def, subopts->opts);
     } else {
         // Initialize options
         if (co.data && co.default_data) {
@@ -451,7 +452,7 @@ static void m_config_add_option(struct m_config *config,
             new->priv = talloc_strdup(config, no_alias);
             new->type = &m_option_type_alias;
             new->offset = -1;
-            m_config_add_option(config, "", NULL, NULL, new);
+            m_config_add_option(config, NULL, NULL, NULL, new);
         }
     }
 
