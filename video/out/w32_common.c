@@ -1464,16 +1464,13 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 {
     switch (request) {
     case VOCTRL_FULLSCREEN:
-        w32->opts->fullscreen = !w32->opts->fullscreen;
         if (w32->opts->fullscreen != w32->current_fs)
             reinit_window_state(w32);
         return VO_TRUE;
     case VOCTRL_ONTOP:
-        w32->opts->ontop = !w32->opts->ontop;
         reinit_window_state(w32);
         return VO_TRUE;
     case VOCTRL_BORDER:
-        w32->opts->border = !w32->opts->border;
         reinit_window_state(w32);
         return VO_TRUE;
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
