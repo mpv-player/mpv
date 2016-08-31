@@ -712,13 +712,14 @@ Video
 
     This option has no effect if ``--video-unscaled`` option is used.
 
-``--video-aspect=<ratio>``
+``--video-aspect=<ratio|no>``
     Override video aspect ratio, in case aspect information is incorrect or
     missing in the file being played. See also ``--no-video-aspect``.
 
-    Two values have special meaning:
+    These values have special meaning:
 
     :0:  disable aspect ratio handling, pretend the video has square pixels
+    :no: same as ``0``
     :-1: use the video stream or container aspect (default)
 
     But note that handling of these special values might change in the future.
@@ -727,10 +728,7 @@ Video
 
         - ``--video-aspect=4:3``  or ``--video-aspect=1.3333``
         - ``--video-aspect=16:9`` or ``--video-aspect=1.7777``
-
-``--no-video-aspect``
-    Ignore aspect ratio information from video file and assume the video has
-    square pixels. See also ``--video-aspect``.
+        - ``--no-video-aspect`` or ``--video-aspect=no``
 
 ``--video-aspect-method=<hybrid|bitstream|container>``
     This sets the default video aspect determination method (if the aspect is

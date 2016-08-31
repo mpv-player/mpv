@@ -38,7 +38,6 @@ struct mpv_node;
 // Simple types
 extern const m_option_type_t m_option_type_flag;
 extern const m_option_type_t m_option_type_store;
-extern const m_option_type_t m_option_type_float_store;
 extern const m_option_type_t m_option_type_int;
 extern const m_option_type_t m_option_type_int64;
 extern const m_option_type_t m_option_type_intpair;
@@ -62,6 +61,7 @@ extern const m_option_type_t m_option_type_color;
 extern const m_option_type_t m_option_type_geometry;
 extern const m_option_type_t m_option_type_size_box;
 extern const m_option_type_t m_option_type_channels;
+extern const m_option_type_t m_option_type_aspect;
 extern const m_option_type_t m_option_type_node;
 
 // Used internally by m_config.c
@@ -207,7 +207,6 @@ struct m_sub_options {
 union m_option_value {
     int flag; // not the C type "bool"!
     int store;
-    float float_store;
     int int_;
     int64_t int64;
     int intpair[2];
@@ -562,10 +561,6 @@ extern const char m_option_path_separator;
     OPT_GENERAL(int, optname, varname, flags, .max = value,     \
                 .type = &m_option_type_store)
 
-#define OPT_FLOAT_STORE(optname, varname, flags, value)         \
-    OPT_GENERAL(float, optname, varname, flags, .max = value,   \
-                .type = &m_option_type_float_store)
-
 #define OPT_STRINGLIST(...) \
     OPT_GENERAL(char**, __VA_ARGS__, .type = &m_option_type_string_list)
 
@@ -666,6 +661,9 @@ extern const char m_option_path_separator;
 
 #define OPT_TRACKCHOICE(name, var) \
     OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}))
+
+#define OPT_ASPECT(...) \
+    OPT_GENERAL(float, __VA_ARGS__, .type = &m_option_type_aspect)
 
 #define OPT_STRING_VALIDATE_(optname, varname, flags, validate_fn, ...)        \
     OPT_GENERAL(char*, optname, varname, flags, __VA_ARGS__,                   \

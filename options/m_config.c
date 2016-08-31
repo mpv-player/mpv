@@ -396,20 +396,6 @@ static void m_config_add_option(struct m_config *config,
 
     if (arg->name[0]) // no own name -> hidden
         MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
-
-    if (co.opt->type == &m_option_type_alias) {
-        const char *alias = (const char *)co.opt->priv;
-        char no_alias[40];
-        snprintf(no_alias, sizeof(no_alias), "no-%s", alias);
-        if (m_config_get_co(config, bstr0(no_alias))) {
-            struct m_option *new = talloc_zero(config, struct m_option);
-            new->name = talloc_asprintf(config, "no-%s", co.name);
-            new->priv = talloc_strdup(config, no_alias);
-            new->type = &m_option_type_alias;
-            new->offset = -1;
-            m_config_add_option(config, NULL, NULL, NULL, new);
-        }
-    }
 }
 
 struct m_config_option *m_config_get_co(const struct m_config *config,
@@ -578,7 +564,8 @@ static struct m_config_option *m_config_find_negation_opt(struct m_config *confi
     // Not all choice types have this value - if they don't, then parsing them
     // will simply result in an error. Good enough.
     if (co && co->opt->type != CONF_TYPE_FLAG &&
-              co->opt->type != CONF_TYPE_CHOICE)
+              co->opt->type != CONF_TYPE_CHOICE &&
+              co->opt->type != &m_option_type_aspect)
         co = NULL;
 
     return co;

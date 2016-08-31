@@ -395,8 +395,7 @@ const m_option_t mp_opts[] = {
 
     // -1 means auto aspect (prefer container size until aspect change)
     //  0 means square pixels
-    OPT_FLOATRANGE("video-aspect", movie_aspect, 0, -1.0, 10.0),
-    OPT_FLOAT_STORE("no-video-aspect", movie_aspect, 0, 0.0),
+    OPT_ASPECT("video-aspect", movie_aspect, 0, -1.0, 10.0),
     OPT_CHOICE("video-aspect-method", aspect_method, 0,
                ({"hybrid", 0}, {"bitstream", 1}, {"container", 2})),
 

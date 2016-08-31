@@ -234,45 +234,6 @@ const m_option_type_t m_option_type_store = {
     .set   = store_set,
 };
 
-// Same for float types
-
-#undef VAL
-#define VAL(x) (*(float *)(x))
-
-static int parse_store_float(struct mp_log *log, const m_option_t *opt,
-                             struct bstr name, struct bstr param, void *dst)
-{
-    if (param.len == 0) {
-        if (dst)
-            VAL(dst) = opt->max;
-        return 0;
-    } else {
-        mp_err(log, "Invalid parameter for %.*s flag: %.*s\n",
-               BSTR_P(name), BSTR_P(param));
-        return M_OPT_DISALLOW_PARAM;
-    }
-}
-
-static int store_float_set(const m_option_t *opt, void *dst, struct mpv_node *src)
-{
-    if (src->format != MPV_FORMAT_FLAG)
-        return M_OPT_UNKNOWN;
-    if (!src->u.flag)
-        return M_OPT_INVALID;
-    VAL(dst) = opt->max;
-    return 1;
-}
-
-const m_option_type_t m_option_type_float_store = {
-    // can only be activated
-    .name  = "Flag",
-    .size  = sizeof(float),
-    .flags = M_OPT_TYPE_OPTIONAL_PARAM,
-    .parse = parse_store_float,
-    .copy  = copy_opt,
-    .set   = store_float_set,
-};
-
 // Integer
 
 #undef VAL
@@ -1029,6 +990,30 @@ const m_option_type_t m_option_type_float = {
     .name  = "Float",
     .size  = sizeof(float),
     .parse = parse_float,
+    .print = print_float,
+    .pretty_print = print_float_f3,
+    .copy  = copy_opt,
+    .add = add_float,
+    .multiply = multiply_float,
+    .set   = float_set,
+    .get   = float_get,
+};
+
+static int parse_float_aspect(struct mp_log *log, const m_option_t *opt,
+                              struct bstr name, struct bstr param, void *dst)
+{
+    if (bstr_equals0(param, "no")) {
+        if (dst)
+            VAL(dst) = 0.0f;
+        return 1;
+    }
+    return parse_float(log, opt, name, param, dst);
+}
+
+const m_option_type_t m_option_type_aspect = {
+    .name  = "Aspect",
+    .size  = sizeof(float),
+    .parse = parse_float_aspect,
     .print = print_float,
     .pretty_print = print_float_f3,
     .copy  = copy_opt,
