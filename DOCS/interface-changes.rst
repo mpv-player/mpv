@@ -19,6 +19,11 @@ Interface changes
 
 ::
 
+ --- mpv 0.21.0 ---
+    - subtle changes in how "--no-..." options are treated mean that they are
+      not accessible under "options/..." anymore (instead, these are resolved
+      at parsing time). This does not affect options which start with "--no-",
+      but do not use the mechanism for negation options.
  --- mpv 0.20.0 ---
     - add --image-display-duration option - this also means that image duration
       is not influenced by --mf-fps anymore in the general case (this is an

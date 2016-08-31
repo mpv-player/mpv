@@ -298,51 +298,6 @@ void m_config_backup_all_opts(struct m_config *config)
         ensure_backup(config, &config->opts[n]);
 }
 
-// Given an option --opt, add --no-opt (if applicable).
-static void add_negation_option(struct m_config *config,
-                                struct m_config_option *orig,
-                                const char *parent_name)
-{
-    const struct m_option *opt = orig->opt;
-    int value;
-    if (opt->type == CONF_TYPE_FLAG) {
-        value = 0;
-    } else if (opt->type == CONF_TYPE_CHOICE) {
-        // Find out whether there's a "no" choice.
-        // m_option_parse() should be used for this, but it prints
-        // unsilenceable error messages.
-        struct m_opt_choice_alternatives *alt = opt->priv;
-        for ( ; alt->name; alt++) {
-            if (strcmp(alt->name, "no") == 0)
-                break;
-        }
-        if (!alt->name)
-            return;
-        value = alt->value;
-    } else {
-        return;
-    }
-    struct m_option *no_opt = talloc_ptrtype(config, no_opt);
-    *no_opt = (struct m_option) {
-        .name = opt->name,
-        .type = CONF_TYPE_STORE,
-        .flags = opt->flags & (M_OPT_NOCFG | M_OPT_GLOBAL | M_OPT_PRE_PARSE),
-        .offset = opt->offset,
-        .max = value,
-    };
-    // Add --no-sub-opt
-    struct m_config_option co = *orig;
-    co.name = talloc_asprintf(config, "no-%s", orig->name);
-    co.opt = no_opt;
-    co.is_hidden = true;
-    MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
-    // Add --sub-no-opt (unfortunately needed for: "--sub=...:no-opt")
-    if (parent_name[0]) {
-        co.name = talloc_asprintf(config, "%s-no-%s", parent_name, opt->name);
-        MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
-    }
-}
-
 static void m_config_add_option(struct m_config *config,
                                 struct m_config_option *parent,
                                 void *optstruct,
@@ -438,8 +393,6 @@ static void m_config_add_option(struct m_config *config,
 
     if (arg->name[0]) // no own name -> hidden
         MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
-
-    add_negation_option(config, &co, parent_name);
 
     if (co.opt->type == &m_option_type_alias) {
         co.is_hidden = true;
@@ -610,14 +563,42 @@ int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
 static int parse_subopts(struct m_config *config, char *name, char *prefix,
                          struct bstr param, int flags);
 
+// Used to turn "--no-foo" into "--foo=no".
+static struct m_config_option *m_config_find_negation_opt(struct m_config *config,
+                                                          struct bstr *name)
+{
+    assert(!m_config_get_co(config, *name));
+
+    if (!bstr_eatstart0(name, "no-"))
+        return NULL;
+
+    struct m_config_option *co = m_config_get_co(config, *name);
+
+    // Not all choice types have this value - if they don't, then parsing them
+    // will simply result in an error. Good enough.
+    if (co && co->opt->type != CONF_TYPE_FLAG &&
+              co->opt->type != CONF_TYPE_CHOICE)
+        co = NULL;
+
+    return co;
+}
+
 static int m_config_parse_option(struct m_config *config, struct bstr name,
                                  struct bstr param, int flags)
 {
     assert(config != NULL);
 
     struct m_config_option *co = m_config_get_co(config, name);
-    if (!co)
-        return M_OPT_UNKNOWN;
+    if (!co) {
+        co = m_config_find_negation_opt(config, &name);
+        if (!co)
+            return M_OPT_UNKNOWN;
+
+        if (param.len)
+            return M_OPT_DISALLOW_PARAM;
+
+        param = bstr0("no");
+    }
 
     // This is the only mandatory function
     assert(co->opt->type->parse);
@@ -720,11 +701,21 @@ int m_config_set_option(struct m_config *config, struct bstr name,
 int m_config_set_option_node(struct m_config *config, bstr name,
                              struct mpv_node *data, int flags)
 {
-    struct m_config_option *co = m_config_get_co(config, name);
-    if (!co)
-        return M_OPT_UNKNOWN;
-
+    struct mpv_node tmp;
     int r;
+
+    struct m_config_option *co = m_config_get_co(config, name);
+    if (!co) {
+        co = m_config_find_negation_opt(config, &name);
+        if (!co)
+            return M_OPT_UNKNOWN;
+        if (!(data->format == MPV_FORMAT_STRING && !bstr0(data->u.string).len) &&
+            !(data->format == MPV_FORMAT_FLAG && data->u.flag == 1))
+            return M_OPT_INVALID;
+        tmp.format = MPV_FORMAT_STRING;
+        tmp.u.string = "no";
+        data = &tmp;
+    }
 
     // Do this on an "empty" type to make setting the option strictly overwrite
     // the old value, as opposed to e.g. appending to lists.
