@@ -77,6 +77,8 @@ typedef struct m_config {
     // For the command line parser
     int recursion_depth;
 
+    bool subopt_deprecation_warning;
+
     void *optstruct; // struct mpopts or other
 } m_config_t;
 

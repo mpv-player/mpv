@@ -626,6 +626,11 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
     // Option with children are a bit different to parse
     if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD) {
         char prefix[110];
+        if (!config->subopt_deprecation_warning) {
+            MP_WARN(config, "Suboptions (--%.*s=...) are deprecated. Use "
+                    "flat options instead.\n", BSTR_P(name));
+            config->subopt_deprecation_warning = true;
+        }
         assert(strlen(co->name) < 100);
         sprintf(prefix, "%s-", co->name);
         return parse_subopts(config, (char *)co->name, prefix, param, flags);
