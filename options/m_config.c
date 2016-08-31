@@ -725,24 +725,14 @@ int m_config_set_option_node(struct m_config *config, bstr name,
     return r;
 }
 
-const struct m_option *m_config_get_option(const struct m_config *config,
-                                           struct bstr name)
-{
-    assert(config != NULL);
-
-    struct m_config_option *co = m_config_get_co(config, name);
-    return co ? co->opt : NULL;
-}
-
 int m_config_option_requires_param(struct m_config *config, bstr name)
 {
-    const struct m_option *opt = m_config_get_option(config, name);
-    if (opt) {
-        if (bstr_endswith0(name, "-clr"))
-            return 0;
-        return m_option_required_params(opt);
-    }
-    return M_OPT_UNKNOWN;
+    struct m_config_option *co = m_config_get_co(config, name);
+    if (!co)
+        return M_OPT_UNKNOWN;
+    if (bstr_endswith0(name, "-clr"))
+        return 0;
+    return m_option_required_params(co->opt);
 }
 
 static int sort_opt_compare(const void *pa, const void *pb)

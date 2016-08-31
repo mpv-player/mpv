@@ -173,14 +173,6 @@ int m_config_set_option_node(struct m_config *config, bstr name,
 int m_config_parse_suboptions(struct m_config *config, char *name,
                               char *subopts);
 
-
-/*  Get the option matching the given name.
- *  \param config The config object.
- *  \param name The option's name.
- */
-const struct m_option *m_config_get_option(const struct m_config *config,
-                                           struct bstr name);
-
 struct m_config_option *m_config_get_co(const struct m_config *config,
                                         struct bstr name);
 
