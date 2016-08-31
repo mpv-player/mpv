@@ -49,9 +49,11 @@ Available video output drivers are:
         set
           Same as use but also sets the supplied color key.
 
-    ``ck-method=<man|bg|auto>``
+    ``ck-method=<none|man|bg|auto>``
         Sets the color key drawing method (default: man).
 
+        none
+          Disables color-keying.
         man
           Draw the color key manually (reduces flicker in some cases).
         bg
@@ -62,9 +64,6 @@ Available video output drivers are:
     ``colorkey=<number>``
         Changes the color key to an RGB value of your choice. ``0x000000`` is
         black and ``0xffffff`` is white.
-
-    ``no-colorkey``
-        Disables color-keying.
 
     ``buffers=<number>``
         Number of image buffers to use for the internal ringbuffer (default: 2).

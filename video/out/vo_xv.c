@@ -317,7 +317,7 @@ static int xv_init_colorkey(struct vo *vo)
 
     /* check if colorkeying is needed */
     xv_atom = xv_intern_atom_if_exists(vo, "XV_COLORKEY");
-    if (xv_atom != None && !(ctx->colorkey & 0xFF000000)) {
+    if (xv_atom != None && ctx->xv_ck_info.method != CK_METHOD_NONE) {
         if (ctx->xv_ck_info.source == CK_SRC_CUR) {
             int colorkey_ret;
 
@@ -362,8 +362,10 @@ static int xv_init_colorkey(struct vo *vo)
             if (xv_atom != None)
                 XvSetPortAttribute(display, ctx->xv_port, xv_atom, 0);
         }
-    } else // do no colorkey drawing at all
+    } else { // do no colorkey drawing at all
         ctx->xv_ck_info.method = CK_METHOD_NONE;
+        ctx->colorkey = 0xFF000000;
+    }
 
     xv_print_ck_info(vo);
 
@@ -924,12 +926,13 @@ const struct vo_driver video_out_xv = {
                     {"set", CK_SRC_SET},
                     {"cur", CK_SRC_CUR})),
         OPT_CHOICE("ck-method", xv_ck_info.method, 0,
-                   ({"bg", CK_METHOD_BACKGROUND},
+                   ({"none", CK_METHOD_NONE},
+                    {"bg", CK_METHOD_BACKGROUND},
                     {"man", CK_METHOD_MANUALFILL},
                     {"auto", CK_METHOD_AUTOPAINT})),
         OPT_INT("colorkey", colorkey, 0),
-        OPT_FLAG_STORE("no-colorkey", colorkey, 0, 0x1000000),
         OPT_INTRANGE("buffers", cfg_buffers, 0, 1, MAX_BUFFERS),
+        OPT_REMOVED("no-colorkey", "use ck-method=none instead"),
         {0}
     },
 };
