@@ -291,13 +291,6 @@ struct m_option_type {
     // to the valid value range of the option.
     void (*multiply)(const m_option_t *opt, void *val, double f);
 
-    // Clamp the value in val to the option's valid value range.
-    // Return values:
-    //  M_OPT_OUT_OF_RANGE: val was invalid, and modified (clamped) to be valid
-    //  M_OPT_INVALID:      val was invalid, and can't be made valid
-    //  0:                  val was already valid and is unchanged
-    int (*clamp)(const m_option_t *opt, void *val);
-
     // Set the option value in dst to the contents of src.
     // (If the option is dynamic, the old value in *dst has to be freed.)
     // Return values:
