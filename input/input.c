@@ -186,12 +186,12 @@ const struct m_sub_options input_config = {
         OPT_INTRANGE("key-fifo-size", key_fifo_size, CONF_GLOBAL, 2, 65000),
         OPT_FLAG("cursor", enable_mouse_movements, CONF_GLOBAL),
         OPT_FLAG("vo-keyboard", vo_key_input, CONF_GLOBAL),
-        OPT_FLAG("x11-keyboard", vo_key_input, CONF_GLOBAL), // old alias
 #if HAVE_COCOA
         OPT_FLAG("appleremote", use_appleremote, CONF_GLOBAL),
         OPT_FLAG("media-keys", use_media_keys, CONF_GLOBAL),
         OPT_FLAG("app-events", use_app_events, CONF_GLOBAL),
 #endif
+        OPT_REPLACED("x11-keyboard", "input-vo-keyboard"),
         {0}
     },
     .size = sizeof(struct input_opts),
