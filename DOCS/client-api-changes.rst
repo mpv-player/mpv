@@ -32,7 +32,10 @@ API changes
 
 ::
 
- --- mpv 0.19.0
+ --- mpv 0.21.0 ---
+ 1.23   - deprecate setting "no-" options via mpv_set_option*(). For example,
+          instead of "no-video=" you should set "video=no".
+ --- mpv 0.19.0 ---
  1.22   - add stream_cb API for custom protocols
  --- mpv 0.18.1 ---
  ----   - remove "status" log level from mpv_request_log_messages() docs. This

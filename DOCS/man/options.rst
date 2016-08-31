@@ -36,14 +36,31 @@ Track Selection
     See also ``--alang``. mpv normally prints available audio tracks on the
     terminal when starting playback of a file.
 
+    ``--audio`` is an alias for ``--aid``.
+
+    ``--aid=no`` or ``--audio=no`` or ``--no-audio`` disables audio playback.
+    (The latter variant does not work with the client API.)
+
 ``--sid=<ID|auto|no>``
     Display the subtitle stream specified by ``<ID>``. ``auto`` selects
     the default, ``no`` disables subtitles.
 
-    See also ``--slang``, ``--no-sub``.
+    ``--sub`` is an alias for ``--sid``.
+
+    ``--sid=no`` or ``--sub=no`` or ``--no-sub`` disables subtitle decoding.
+    (The latter variant does not work with the client API.)
 
 ``--vid=<ID|auto|no>``
     Select video channel. ``auto`` selects the default, ``no`` disables video.
+
+    ``--video`` is an alias for ``--vid``.
+
+    ``--vid=no`` or ``--video=no`` or ``--no-video`` disables video playback.
+    (The latter variant does not work with the client API.)
+
+    If vudeo is disabled, mpv will try to download the audio only if media is
+    streamed with youtube-dl, because it saves bandwidth. This is done by
+    setting the ytdl_format to "bestaudio/best" in the ytdl_hook.lua script.
 
 ``--ff-aid=<ID|auto|no>``, ``--ff-sid=<ID|auto|no>``, ``--ff-vid=<ID|auto|no>``
     Select audio/subtitle/video streams by the FFmpeg stream index. The FFmpeg
@@ -516,14 +533,6 @@ Video
     The option variants ``--vf-add``, ``--vf-pre``, ``--vf-del`` and
     ``--vf-clr`` exist to modify a previously specified list, but you
     should not need these for typical use.
-
-``--no-video``
-    Do not play video. With some demuxers this may not work. In those cases
-    you can try ``--vo=null`` instead.
-
-    mpv will try to download the audio only if media is streamed with
-    youtube-dl, because it saves bandwidth. This is done by setting the ytdl_format
-    to "bestaudio/best" in the ytdl_hook.lua script.
 
 ``--untimed``
     Do not sleep when outputting video frames. Useful for benchmarks when used
@@ -1092,9 +1101,6 @@ Audio
     Audio delay in seconds (positive or negative float value). Positive values
     delay the audio, and negative values delay the video.
 
-``--no-audio``
-    Do not play sound.
-
 ``--mute=<auto|yes|no>``
     Set startup audio mute status. ``auto`` (default) will not change the mute
     status.
@@ -1373,10 +1379,6 @@ Subtitles
     subtitles (DVD, Bluray/PGS, DVB) cannot changed for fundamental reasons.
     Subtitles in ASS format are normally not changed intentionally, but
     overriding them can be controlled with ``--ass-style-override``.
-
-
-``--no-sub``
-    Do not select any subtitle when the file is loaded.
 
 ``--sub-demuxer=<[+]name>``
     Force subtitle demuxer type for ``--sub-file``. Give the demuxer name as

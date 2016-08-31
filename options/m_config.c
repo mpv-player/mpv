@@ -707,6 +707,7 @@ int m_config_set_option_node(struct m_config *config, bstr name,
 
     struct m_config_option *co = m_config_get_co(config, name);
     if (!co) {
+        bstr orig_name = name;
         co = m_config_find_negation_opt(config, &name);
         if (!co)
             return M_OPT_UNKNOWN;
@@ -716,6 +717,12 @@ int m_config_set_option_node(struct m_config *config, bstr name,
         tmp.format = MPV_FORMAT_STRING;
         tmp.u.string = "no";
         data = &tmp;
+
+        if (!co->warning_was_printed) {
+            MP_WARN(config, "Option '%.*s': setting 'no-' option via API is "
+                    "deprecated and will stop working.\n", BSTR_P(orig_name));
+            co->warning_was_printed = true;
+        }
     }
 
     // Do this on an "empty" type to make setting the option strictly overwrite
