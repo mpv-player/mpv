@@ -382,16 +382,8 @@ static void m_config_add_option(struct m_config *config,
         add_options(config, &co, new_optstruct, new_optstruct_def, subopts->opts);
     } else {
         // Initialize options
-        if (co.data && co.default_data) {
-            if (arg->type->free) {
-                // Would leak memory by overwriting *co.data repeatedly.
-                for (int i = 0; i < config->num_opts; i++) {
-                    if (co.data == config->opts[i].data)
-                        assert(0);
-                }
-            }
+        if (co.data && co.default_data)
             init_opt_inplace(arg, co.data, co.default_data);
-        }
     }
 
     if (arg->name[0]) // no own name -> hidden
@@ -510,17 +502,8 @@ static int handle_set_opt_flags(struct m_config *config,
 static void handle_on_set(struct m_config *config, struct m_config_option *co,
                           int flags)
 {
-    if (flags & M_SETOPT_FROM_CMDLINE) {
+    if (flags & M_SETOPT_FROM_CMDLINE)
         co->is_set_from_cmdline = true;
-        // Mark aliases too
-        if (co->data) {
-            for (int n = 0; n < config->num_opts; n++) {
-                struct m_config_option *co2 = &config->opts[n];
-                if (co2->data == co->data)
-                    co2->is_set_from_cmdline = true;
-            }
-        }
-    }
 
     if (config->global && (co->opt->flags & M_OPT_TERM))
         mp_msg_update_msglevels(config->global);
