@@ -691,13 +691,20 @@ extern const char m_option_path_separator;
                        .type = &m_option_type_subconfig,        \
                        .priv = (void*)&subconf)
 
-// If "--name" was removed, but "--newname" has the same semantics.
+// Provide a another name for the option.
+#define OPT_ALIAS(optname, newname) \
+    {.name = optname, .type = &m_option_type_alias, .priv = newname, \
+     .offset = -1}
+
+// If "--optname" was removed, but "--newname" has the same semantics.
 // It will be redirected, and a warning will be printed on first use.
 #define OPT_REPLACED(optname, newname) \
-    {.name = optname, .type = &m_option_type_alias, .priv = newname, .offset = -1}
+    {.name = optname, .type = &m_option_type_alias, .priv = newname, \
+     .deprecation_message = "", .offset = -1}
 
-// "--name" doesn't exist, but inform the user about a replacement with msg.
+// "--optname" doesn't exist, but inform the user about a replacement with msg.
 #define OPT_REMOVED(optname, msg) \
-    {.name = optname, .type = &m_option_type_removed, .priv = msg, .offset = -1}
+    {.name = optname, .type = &m_option_type_removed, .priv = msg, \
+     .deprecation_message = "", .offset = -1}
 
 #endif /* MPLAYER_M_OPTION_H */

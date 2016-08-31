@@ -362,6 +362,9 @@ static void m_config_add_option(struct m_config *config,
         co.name = talloc_asprintf(config, "%s-%s", parent_name, co.name);
     }
 
+    if (co.opt->deprecation_message)
+        co.is_hidden = true;
+
     // Option with children -> add them
     if (arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
         const struct m_sub_options *subopts = arg->priv;
@@ -395,7 +398,6 @@ static void m_config_add_option(struct m_config *config,
         MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
 
     if (co.opt->type == &m_option_type_alias) {
-        co.is_hidden = true;
         const char *alias = (const char *)co.opt->priv;
         char no_alias[40];
         snprintf(no_alias, sizeof(no_alias), "no-%s", alias);
@@ -408,9 +410,6 @@ static void m_config_add_option(struct m_config *config,
             m_config_add_option(config, NULL, NULL, NULL, new);
         }
     }
-
-    if (co.opt->type == &m_option_type_removed)
-        co.is_hidden = true;
 }
 
 struct m_config_option *m_config_get_co(const struct m_config *config,
@@ -434,7 +433,9 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
             const char *prefix = config->is_toplevel ? "--" : "";
             if (co->opt->type == &m_option_type_alias) {
                 const char *alias = (const char *)co->opt->priv;
-                if (!co->warning_was_printed) {
+                // deprecation_message is not used, but decides whether it's a
+                // proper or deprecated alias.
+                if (co->opt->deprecation_message && !co->warning_was_printed) {
                     MP_WARN(config, "Warning: option %s%s was replaced with "
                             "%s%s and might be removed in the future.\n",
                             prefix, co->name, prefix, alias);
@@ -787,9 +788,6 @@ void m_config_print_option_list(const struct m_config *config)
         if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
             continue;
         if (co->is_hidden)
-            continue;
-        if (opt->type == &m_option_type_alias ||
-            opt->type == &m_option_type_removed)
             continue;
         MP_INFO(config, " %s%-30s", prefix, co->name);
         if (opt->type == &m_option_type_choice) {
