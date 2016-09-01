@@ -128,6 +128,9 @@ struct m_property {
     void *priv;
 };
 
+struct m_property *m_property_list_find(const struct m_property *list,
+                                        const char *name);
+
 // Access a property.
 // action: one of m_property_action
 // ctx: opaque value passed through to property implementation

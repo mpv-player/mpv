@@ -64,6 +64,7 @@ struct mp_cache_opts {
 };
 
 typedef struct MPOpts {
+    int property_print_help;
     int use_terminal;
     char *dump_stats;
     int verbose;

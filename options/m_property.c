@@ -36,8 +36,8 @@
 #include "common/msg.h"
 #include "common/common.h"
 
-static struct m_property *m_property_list_find(const struct m_property *list,
-                                                     const char *name)
+struct m_property *m_property_list_find(const struct m_property *list,
+                                        const char *name)
 {
     for (int n = 0; list && list[n].name; n++) {
         if (strcmp(list[n].name, name) == 0)

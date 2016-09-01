@@ -447,6 +447,16 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
     return NULL;
 }
 
+int m_config_get_co_count(struct m_config *config)
+{
+    return config->num_opts;
+}
+
+struct m_config_option *m_config_get_co_index(struct m_config *config, int index)
+{
+    return &config->opts[index];
+}
+
 const char *m_config_get_positional_option(const struct m_config *config, int p)
 {
     int pos = 0;
@@ -509,7 +519,7 @@ static void handle_on_set(struct m_config *config, struct m_config_option *co,
         mp_msg_update_msglevels(config->global);
 }
 
-// The type data points to is as in: m_config_get_co(config, name)->opt
+// The type data points to is as in: co->opt
 int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags)
 {

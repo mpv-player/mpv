@@ -1091,7 +1091,10 @@ Audio
     Since mpv 0.18.1, this always controls the internal mixer (aka "softvol").
 
 ``--balance=<value>``
-    How much left/right channels contribute to the audio.
+    How much left/right channels contribute to the audio. (The implementation
+    of this feature is rather odd. It doesn't change the volumes of each
+    channel, but instead sets up a pan matrix to mix the left and right
+    channels.)
 
     Deprecated.
 

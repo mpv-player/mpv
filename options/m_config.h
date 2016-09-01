@@ -136,7 +136,7 @@ enum {
 };
 
 // Flags for safe option setting during runtime.
-#define M_SETOPT_RUNTIME (M_SETOPT_NO_FIXED | M_SETOPT_NO_PRE_PARSE)
+#define M_SETOPT_RUNTIME M_SETOPT_NO_FIXED
 
 // Set the named option to the given string.
 // flags: combination of M_SETOPT_* flags (0 for normal operation)
@@ -175,6 +175,9 @@ int m_config_parse_suboptions(struct m_config *config, char *name,
 
 struct m_config_option *m_config_get_co(const struct m_config *config,
                                         struct bstr name);
+
+int m_config_get_co_count(struct m_config *config);
+struct m_config_option *m_config_get_co_index(struct m_config *config, int index);
 
 // Return the n-th option by position. n==0 is the first option. If there are
 // less than (n + 1) options, return NULL.

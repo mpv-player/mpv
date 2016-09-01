@@ -1319,7 +1319,7 @@ int mpv_observe_property(mpv_handle *ctx, uint64_t userdata,
     *prop = (struct observe_property){
         .client = ctx,
         .name = talloc_strdup(prop, name),
-        .id = mp_get_property_id(name),
+        .id = mp_get_property_id(ctx->mpctx, name),
         .event_mask = mp_get_property_event_mask(name),
         .reply_id = userdata,
         .format = format,
@@ -1377,7 +1377,7 @@ static void mark_property_changed(struct mpv_handle *client, int index)
 void mp_client_property_change(struct MPContext *mpctx, const char *name)
 {
     struct mp_client_api *clients = mpctx->clients;
-    int id = mp_get_property_id(name);
+    int id = mp_get_property_id(mpctx, name);
 
     pthread_mutex_lock(&clients->lock);
 

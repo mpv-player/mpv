@@ -303,6 +303,10 @@ static bool handle_help_options(struct MPContext *mpctx)
         ao_print_devices(mpctx->global, log);
         opt_exit = 1;
     }
+    if (opts->property_print_help) {
+        property_print_help(mpctx);
+        opt_exit = 1;
+    }
 #if HAVE_ENCODING
     if (encode_lavc_showhelp(log, opts->encode_opts))
         opt_exit = 1;

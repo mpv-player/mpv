@@ -371,6 +371,9 @@ struct m_option {
 // Logging-related option - used to update log/terminal settings eagerly
 #define M_OPT_TERM              (1 << 12)
 
+// Do not add as property.
+#define M_OPT_NOPROP            (1 << 13)
+
 // These are kept for compatibility with older code.
 #define CONF_MIN                M_OPT_MIN
 #define CONF_MAX                M_OPT_MAX

@@ -838,20 +838,12 @@ an option at runtime.
 Property list
 -------------
 
-``osd-level`` (RW)
-    See ``--osd-level``.
+.. note::
 
-``osd-scale`` (RW)
-    OSD font size multiplier, see ``--osd-scale``.
-
-``loop`` (RW)
-    See ``--loop``.
-
-``loop-file`` (RW)
-    See ``--loop-file`` (uses ``yes``/``no``).
-
-``speed`` (RW)
-    See ``--speed``.
+    Most options can be set as runtime via properties as well. Just remove the
+    leading ``--`` from the option name. These are not documented. Only
+    properties which do not exist as option with the same name, or which have
+    very different behavior from the options are documented below.
 
 ``audio-speed-correction``, ``video-speed-correction``
     Factor multiplied with ``speed`` at which the player attempts to play the
@@ -1078,10 +1070,6 @@ Property list
                 "title"             MPV_FORMAT_STRING
                 "default"           MPV_FORMAT_FLAG
 
-``ab-loop-a``, ``ab-loop-b`` (RW)
-    Set/get A-B loop points. See corresponding options and ``ab-loop`` command
-    for details.
-
 ``angle`` (RW)
     Current DVD angle.
 
@@ -1153,9 +1141,6 @@ Property list
 
 ``af-metadata/<filter-label>``
     Equivalent to ``vf-metadata/<filter-label>``, but for audio filters.
-
-``pause`` (RW)
-    Pause status. This is usually ``yes`` or ``no``. See ``--pause``.
 
 ``idle``
     Return ``yes`` if no file is loaded, but the player is staying around
@@ -1236,24 +1221,11 @@ Property list
     is loaded, or when switching ordered chapter segments. This is because
     the same underlying code is used for seeking and resyncing.)
 
-``hr-seek`` (RW)
-    See ``--hr-seek``.
-
 ``mixer-active``
     Return ``yes`` if the audio mixer is active, ``no`` otherwise.
 
     This option is relatively useless. Before mpv 0.18.1, it could be used to
     infer behavior of the ``volume`` property.
-
-``volume`` (RW)
-    Current volume (see ``--volume`` for details).
-
-``volume-max`` (RW)
-    Current maximum value the volume property can be set to. (Equivalent to the
-    ``--volume-max`` option.)
-
-``mute`` (RW)
-    Current mute status (``yes``/``no``).
 
 ``ao-volume`` (RW)
     System volume. This property is available only if mpv audio output is
@@ -1265,9 +1237,6 @@ Property list
 ``ao-mute`` (RW)
     Similar to ``ao-volume``, but controls the mute state. May be unimplemented
     even if ``ao-volume`` works.
-
-``audio-delay`` (RW)
-    See ``--audio-delay``.
 
 ``audio-codec``
     Audio codec selected for decoding.
@@ -1316,28 +1285,6 @@ Property list
     Same as ``audio-params``, but the format of the data written to the audio
     API.
 
-``aid`` (RW)
-    Current audio track (similar to ``--aid``).
-
-``audio`` (RW)
-    Alias for ``aid``.
-
-``balance`` (RW)
-    Audio channel balance. (The implementation of this feature is rather odd.
-    It doesn't change the volumes of each channel, but instead sets up a pan
-    matrix to mix the left and right channels.)
-
-    Deprecated.
-
-``fullscreen`` (RW)
-    See ``--fullscreen``.
-
-``deinterlace`` (RW)
-    See ``--deinterlace``.
-
-``field-dominance`` (RW)
-    See ``--field-dominance``
-
 ``colormatrix`` (R)
     Redirects to ``video-params/colormatrix``. This parameter (as well as
     similar ones) can be overridden with the ``format`` video filter.
@@ -1345,41 +1292,8 @@ Property list
 ``colormatrix-input-range`` (R)
     See ``colormatrix``.
 
-``video-output-levels`` (RW)
-    See ``--video-output-levels``,
-
 ``colormatrix-primaries`` (R)
     See ``colormatrix``.
-
-``taskbar-progress`` (RW)
-    See ``--taskbar-progress``.
-
-``ontop`` (RW)
-    See ``--ontop``.
-
-``border`` (RW)
-    See ``--border``.
-
-``on-all-workspaces`` (RW)
-    See ``--on-all-workspaces``. Unsetting may not work on all WMs.
-
-``framedrop`` (RW)
-    See ``--framedrop``.
-
-``gamma`` (RW)
-    See ``--gamma``.
-
-``brightness`` (RW)
-    See ``--brightness``.
-
-``contrast`` (RW)
-    See ``--contrast``.
-
-``saturation`` (RW)
-    See ``--saturation``.
-
-``hue`` (RW)
-    See ``--hue``.
 
 ``hwdec`` (RW)
     Reflects the ``--hwdec`` option.
@@ -1430,9 +1344,6 @@ Property list
     successfully. Also, hw decoders with ``-copy`` suffix will return ``no``
     while no video is being decoded. All this reflects how detecting hw decoders
     are detected and used internally in mpv.
-
-``panscan`` (RW)
-    See ``--panscan``.
 
 ``video-format``
     Video format as string.
@@ -1600,6 +1511,9 @@ Property list
 ``video-aspect`` (RW)
     Video aspect, see ``--video-aspect``.
 
+    If video is active, this reports the effective aspect value, instead of
+    the value of the ``--video-aspect`` option.
+
 ``osd-width``, ``osd-height``
     Last known OSD width (can be 0). This is needed if you want to use the
     ``overlay-add`` command. It gives you the actual OSD size, which can be
@@ -1607,24 +1521,6 @@ Property list
 
 ``osd-par``
     Last known OSD display pixel aspect (can be 0).
-
-``vid`` (RW)
-    Current video track (similar to ``--vid``).
-
-``video`` (RW)
-    Alias for ``vid``.
-
-``video-align-x``, ``video-align-y`` (RW)
-    See ``--video-align-x`` and ``--video-align-y``.
-
-``video-pan-x``, ``video-pan-y`` (RW)
-    See ``--video-pan-x`` and ``--video-pan-y``.
-
-``video-zoom`` (RW)
-    See ``--video-zoom``.
-
-``video-unscaled`` (W)
-    See ``--video-unscaled``.
 
 ``program`` (W)
     Switch TS program (write-only).
@@ -1638,48 +1534,12 @@ Property list
     On write, a channel-switch to the named channel on the same
     card is performed. Can also be used for channel switching. 
 
-``sid`` (RW)
-    Current subtitle track (similar to ``--sid``).
-
-``secondary-sid`` (RW)
-    Secondary subtitle track (see ``--secondary-sid``).
-
-``sub`` (RW)
-    Alias for ``sid``.
-
-``sub-delay`` (RW)
-    See ``--sub-delay``.
-
-``sub-pos`` (RW)
-    See ``--sub-pos``.
-
-``sub-visibility`` (RW)
-    See ``--sub-visibility``.
-
-``sub-forced-only`` (RW)
-    See ``--sub-forced-only``.
-
-``sub-scale`` (RW)
-    Subtitle font size multiplier.
-
-``ass-force-margins`` (RW)
-    See ``--ass-force-margins``.
-
-``sub-use-margins`` (RW)
-    See ``--sub-use-margins``.
-
 ``sub-text``
     Return the current subtitle text. Formatting is stripped. If a subtitle
     is selected, but no text is currently visible, or the subtitle is not
     text-based (i.e. DVD/BD subtitles), an empty string is returned.
 
     This property is experimental and might be removed in the future.
-
-``ass-vsfilter-aspect-compat`` (RW)
-    See ``--ass-vsfilter-aspect-compat``.
-
-``ass-style-override`` (RW)
-    See ``--ass-style-override``.
 
 ``stream-capture`` (RW)
     A filename, see ``--stream-capture``. Setting this will start capture using
@@ -1891,11 +1751,8 @@ Property list
                 "title" MPV_FORMAT_STRING
                 "time"  MPV_FORMAT_DOUBLE
 
-``af`` (RW)
-    See ``--af`` and the ``af`` command.
-
-``vf`` (RW)
-    See ``--vf`` and the ``vf`` command.
+``af``, ``vf`` (RW)
+    See ``--vf``/``--af`` and the ``vf``/``af`` command.
 
     When querying the property with the client API using ``MPV_FORMAT_NODE``,
     or with Lua ``mp.get_property_native``, this will return a mpv_node with
@@ -1912,12 +1769,6 @@ Property list
                     "value" MPV_FORMAT_STRING
 
     It's also possible to write the property using this format.
-
-``video-rotate`` (RW)
-    See ``--video-rotate`` option.
-
-``video-stereo-mode`` (RW)
-    See ``--video-stereo-mode`` option.
 
 ``seekable``
     Return whether it's generally possible to seek in the current file.
@@ -2157,6 +2008,10 @@ Property list
     changed at runtime by writing to this property. Note that many options
     require reloading the file for changes to take effect. If there is an
     equivalent property, prefer setting the property instead.
+
+    There shouldn't be any reason to access ``options/<name>`` instead of
+    ``<name>``, except in situations in which the properties have different
+    behavior or conflicting semantics.
 
 ``file-local-options/<name>``
     Similar to ``options/<name>``, but when setting an option through this

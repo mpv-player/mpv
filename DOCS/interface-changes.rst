@@ -25,6 +25,8 @@ Interface changes
       at parsing time). This does not affect options which start with "--no-",
       but do not use the mechanism for negation options.
       (Also see client API change for API version 1.23.)
+    - add almost all options to the property list, meaning you can change
+      options without adding "options/" to the property name
  --- mpv 0.20.0 ---
     - add --image-display-duration option - this also means that image duration
       is not influenced by --mf-fps anymore in the general case (this is an

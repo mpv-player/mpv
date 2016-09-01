@@ -187,22 +187,25 @@ const m_option_t mp_opts[] = {
     { "profile", CONF_TYPE_STRING_LIST, M_OPT_FIXED, .offset = -1},
     { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
     { "list-options", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
+    OPT_FLAG("list-properties", property_print_help,
+             CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP),
 
     OPT_FLAG("shuffle", shuffle, 0),
 
 // ------------------------- common options --------------------
-    OPT_FLAG("quiet", quiet, CONF_GLOBAL),
-    OPT_FLAG_STORE("really-quiet", verbose, CONF_GLOBAL | CONF_PRE_PARSE, -10),
+    OPT_FLAG("quiet", quiet, CONF_GLOBAL | M_OPT_NOPROP),
+    OPT_FLAG_STORE("really-quiet", verbose,
+                   CONF_GLOBAL | CONF_PRE_PARSE | M_OPT_NOPROP, -10),
     OPT_FLAG("terminal", use_terminal, CONF_GLOBAL | CONF_PRE_PARSE | M_OPT_TERM),
-    OPT_GENERAL(char**, "msg-level", msg_levels, CONF_GLOBAL|CONF_PRE_PARSE |
-                M_OPT_TERM, .type = &m_option_type_msglevels),
+    OPT_GENERAL(char**, "msg-level", msg_levels, CONF_PRE_PARSE | M_OPT_TERM,
+                .type = &m_option_type_msglevels),
     OPT_STRING("dump-stats", dump_stats, CONF_GLOBAL | CONF_PRE_PARSE),
-    OPT_FLAG("msg-color", msg_color, CONF_GLOBAL | CONF_PRE_PARSE | M_OPT_TERM),
-    OPT_STRING("log-file", log_file, CONF_GLOBAL | CONF_PRE_PARSE | M_OPT_FILE),
-    OPT_FLAG("msg-module", msg_module, CONF_GLOBAL | M_OPT_TERM),
-    OPT_FLAG("msg-time", msg_time, CONF_GLOBAL | M_OPT_TERM),
+    OPT_FLAG("msg-color", msg_color, CONF_PRE_PARSE | M_OPT_TERM),
+    OPT_STRING("log-file", log_file, CONF_PRE_PARSE | M_OPT_FILE),
+    OPT_FLAG("msg-module", msg_module, M_OPT_TERM),
+    OPT_FLAG("msg-time", msg_time, M_OPT_TERM),
 #ifdef _WIN32
-    OPT_CHOICE("priority", w32_priority, 0,
+    OPT_CHOICE("priority", w32_priority, CONF_GLOBAL,
                ({"no",          0},
                 {"realtime",    REALTIME_PRIORITY_CLASS},
                 {"high",        HIGH_PRIORITY_CLASS},
@@ -479,7 +482,8 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("softvol", softvol, 0,
                ({"no", SOFTVOL_NO},
                 {"yes", SOFTVOL_YES},
-                {"auto", SOFTVOL_AUTO})),
+                {"auto", SOFTVOL_AUTO}),
+               .deprecation_message = "no replacement"),
     OPT_FLOATRANGE("volume-max", softvol_max, 0, 100, 1000),
     // values <0 for volume and mute are legacy and ignored
     OPT_FLOATRANGE("volume", softvol_volume, 0, -1, 1000),
@@ -621,7 +625,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
 
     OPT_STRING("input-file", input_file, M_OPT_FILE | M_OPT_GLOBAL),
-    OPT_STRING("input-ipc-server", ipc_path, M_OPT_FILE),
+    OPT_STRING("input-ipc-server", ipc_path, M_OPT_FILE | M_OPT_FIXED),
 
     OPT_SUBSTRUCT("screenshot", screenshot_image_opts, image_writer_conf, 0),
     OPT_STRING("screenshot-template", screenshot_template, 0),
@@ -629,7 +633,6 @@ const m_option_t mp_opts[] = {
 
     OPT_SUBSTRUCT("input", input_opts, input_config, 0),
 
-    OPT_PRINT("list-properties", property_print_help),
     OPT_PRINT("list-protocols", stream_print_proto_list),
     OPT_PRINT("help", print_help),
     OPT_PRINT("h", print_help),

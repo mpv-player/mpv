@@ -31,7 +31,7 @@ void command_uninit(struct MPContext *mpctx);
 int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *res);
 char *mp_property_expand_string(struct MPContext *mpctx, const char *str);
 char *mp_property_expand_escaped_string(struct MPContext *mpctx, const char *str);
-void property_print_help(struct mp_log *log);
+void property_print_help(struct MPContext *mpctx);
 int mp_property_do(const char* name, int action, void* val,
                    struct MPContext *mpctx);
 
@@ -40,7 +40,7 @@ void mp_notify_property(struct MPContext *mpctx, const char *property);
 
 void handle_command_updates(struct MPContext *mpctx);
 
-int mp_get_property_id(const char *name);
+int mp_get_property_id(struct MPContext *mpctx, const char *name);
 uint64_t mp_get_property_event_mask(const char *name);
 
 enum {
