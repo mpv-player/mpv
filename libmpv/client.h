@@ -370,7 +370,7 @@ const char *mpv_client_name(mpv_handle *ctx);
  * and needs to be initialized to be actually used with most other API
  * functions.
  *
- * Most API functions will return MPV_ERROR_UNINITIALIZED in the uninitialized
+ * Some API functions will return MPV_ERROR_UNINITIALIZED in the uninitialized
  * state. You can call mpv_set_option() (or mpv_set_option_string() and other
  * variants) to set initial options. After this, call mpv_initialize() to start
  * the player, and then use e.g. mpv_command() to start playback of a file.

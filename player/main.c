@@ -323,6 +323,12 @@ static int cfg_include(void *ctx, char *filename, int flags)
     return r;
 }
 
+void wakeup_playloop(void *ctx)
+{
+    struct MPContext *mpctx = ctx;
+    mp_input_wakeup(mpctx->input);
+}
+
 struct MPContext *mp_create(void)
 {
     mp_time_init();
@@ -366,18 +372,16 @@ struct MPContext *mp_create(void)
     command_init(mpctx);
     init_libav(mpctx->global);
     mp_clients_init(mpctx);
+    mpctx->osd = osd_create(mpctx->global);
 
 #if HAVE_COCOA
     cocoa_set_input_context(mpctx->input);
 #endif
 
-    return mpctx;
-}
+    mp_input_set_cancel(mpctx->input, mpctx->playback_abort);
+    mp_dispatch_set_wakeup_fn(mpctx->dispatch, wakeup_playloop, mpctx);
 
-void wakeup_playloop(void *ctx)
-{
-    struct MPContext *mpctx = ctx;
-    mp_input_wakeup(mpctx->input);
+    return mpctx;
 }
 
 // Finish mpctx initialization. This must be done after setting up all options.
@@ -442,9 +446,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         return -3;
 
     mp_input_load(mpctx->input);
-    mp_input_set_cancel(mpctx->input, mpctx->playback_abort);
-
-    mp_dispatch_set_wakeup_fn(mpctx->dispatch, wakeup_playloop, mpctx);
 
 #if HAVE_ENCODING
     if (opts->encode_opts->file && opts->encode_opts->file[0]) {
@@ -463,8 +464,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     MP_WARN(mpctx, "Compiled without libass.\n");
     MP_WARN(mpctx, "There will be no OSD and no text subtitles.\n");
 #endif
-
-    mpctx->osd = osd_create(mpctx->global);
 
     // From this point on, all mpctx members are initialized.
     mpctx->initialized = true;
