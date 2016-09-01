@@ -729,7 +729,7 @@ int m_config_option_requires_param(struct m_config *config, bstr name)
 {
     struct m_config_option *co = m_config_get_co(config, name);
     if (!co)
-        return M_OPT_UNKNOWN;
+        return m_config_find_negation_opt(config, &name) ? 0 : M_OPT_UNKNOWN;
     if (bstr_endswith0(name, "-clr"))
         return 0;
     return m_option_required_params(co->opt);
