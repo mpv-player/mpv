@@ -2284,54 +2284,6 @@ static int mp_property_hwdec_interop(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, name);
 }
 
-static int mp_property_hwdec_active(void *ctx, struct m_property *prop,
-                                    int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    struct dec_video *vd = track ? track->d_video : NULL;
-    bool active = false;
-    if (vd) {
-        int current = 0;
-        video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
-        active = current > 0;
-    }
-    return m_property_flag_ro(action, arg, active);
-}
-
-static int mp_property_detected_hwdec(void *ctx, struct m_property *prop,
-                                      int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    struct track *track = mpctx->current_track[0][STREAM_VIDEO];
-    struct dec_video *vd = track ? track->d_video : NULL;
-
-    switch (action) {
-    case M_PROPERTY_GET_TYPE: {
-        // Abuse another hwdec option to resolve the value names
-        struct m_property dummy = {.name = "hwdec"};
-        return mp_property_generic_option(mpctx, &dummy, action, arg);
-    }
-    case M_PROPERTY_GET: {
-        int current = 0;
-        if (vd)
-            video_vd_control(vd, VDCTRL_GET_HWDEC, &current);
-
-        if (current <= 0 && vd && vd->hwdec_devs) {
-            struct mp_hwdec_ctx *hwctx = hwdec_devices_get_first(vd->hwdec_devs);
-            if (hwctx)
-                current = hwctx->type;
-        }
-
-        // In case of the "-copy" ones, which are "detected" every time the
-        // decoder is opened, return "no" if no decoding is active.
-        *(int *)arg = current > 0 ? current : 0;
-        return M_PROPERTY_OK;
-    }
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
 static int mp_property_deinterlace(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
@@ -3858,10 +3810,8 @@ static const struct m_property mp_properties_base[] = {
     {"vid", mp_property_video},
     {"program", mp_property_program},
     {"hwdec", mp_property_hwdec},
-    {"hwdec-active", mp_property_hwdec_active},
     {"hwdec-current", mp_property_hwdec_current},
     {"hwdec-interop", mp_property_hwdec_interop},
-    {"hwdec-detected", mp_property_detected_hwdec},
 
     {"estimated-frame-count", mp_property_frame_count},
     {"estimated-frame-number", mp_property_frame_number},

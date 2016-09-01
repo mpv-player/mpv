@@ -1331,24 +1331,6 @@ Property list
     multiple interop drivers for the same hardware decoder, depending on
     platform and VO.
 
-``hwdec-active``
-    Deprecated. To be removed in mpv 0.20.0. Use ``hwdec-current`` instead.
-
-    Return ``yes`` or ``no``, depending on whether any type of hardware decoding
-    is actually in use.
-
-``hwdec-detected``
-    Deprecated. To be removed in mpv 0.20.0.
-
-    If hardware decoding is active, this returns the hardware decoder in use.
-    Otherwise, it returns either ``no``, or if applicable, the currently loaded
-    hardware decoding API. This is known only once the VO has opened (and
-    possibly later). With some VOs (like ``opengl``), this is never known in
-    advance, but only when the decoder attempted to create the hw decoder
-    successfully. Also, hw decoders with ``-copy`` suffix will return ``no``
-    while no video is being decoded. All this reflects how detecting hw decoders
-    are detected and used internally in mpv.
-
 ``video-format``
     Video format as string.
 

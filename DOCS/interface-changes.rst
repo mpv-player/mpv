@@ -32,6 +32,7 @@ Interface changes
         - "fps" -> "container-fps"
         - "idle" -> "idle-active"
       the old names are deprecated
+    - remove deprecated "hwdec-active" and "hwdec-detected" properties
  --- mpv 0.20.0 ---
     - add --image-display-duration option - this also means that image duration
       is not influenced by --mf-fps anymore in the general case (this is an
