@@ -54,7 +54,6 @@ static const char *const fixed_scale_filters[] = {
     "bilinear",
     "bicubic_fast",
     "oversample",
-    "custom",
     NULL
 };
 static const char *const fixed_tscale_filters[] = {
@@ -268,7 +267,6 @@ struct gl_video {
     bool hwdec_active;
 
     bool dsi_warned;
-    bool custom_shader_fn_warned;
     bool broken_frame; // temporary error state
 };
 
@@ -436,9 +434,6 @@ const struct m_sub_options gl_video_conf = {
                    ({"no", BLEND_SUBS_NO},
                     {"yes", BLEND_SUBS_YES},
                     {"video", BLEND_SUBS_VIDEO})),
-        OPT_STRING("scale-shader", scale_shader, 0),
-        OPT_STRINGLIST("pre-shaders", pre_shaders, 0),
-        OPT_STRINGLIST("post-shaders", post_shaders, 0),
         OPT_STRINGLIST("user-shaders", user_shaders, 0),
         OPT_FLAG("deband", deband, 0),
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
@@ -452,6 +447,9 @@ const struct m_sub_options gl_video_conf = {
         OPT_REMOVED("srgb", "use target-prim=bt709:target-trc=srgb instead"),
         OPT_REMOVED("source-shader", "use :deband to enable debanding"),
         OPT_REMOVED("prescale-luma", "use user shaders for prescaling"),
+        OPT_REMOVED("scale-shader", "use user-shaders instead"),
+        OPT_REMOVED("pre-shaders", "use user-shaders instead"),
+        OPT_REMOVED("post-shaders", "use user-shaders instead"),
 
         OPT_REPLACED("lscale", "scale"),
         OPT_REPLACED("lscale-down", "scale-down"),
@@ -1250,19 +1248,6 @@ static void load_shader(struct gl_video *p, struct bstr body)
                                    p->dst_rect.y1 - p->dst_rect.y0});
 }
 
-static const char *get_custom_shader_fn(struct gl_video *p, const char *body)
-{
-    if (!p->gl->es && strstr(body, "sample") && !strstr(body, "sample_pixel")) {
-        if (!p->custom_shader_fn_warned) {
-            MP_WARN(p, "sample() is deprecated in custom shaders. "
-                       "Use sample_pixel()\n");
-            p->custom_shader_fn_warned = true;
-        }
-        return "sample";
-    }
-    return "sample_pixel";
-}
-
 // Semantic equality
 static bool double_seq(double a, double b)
 {
@@ -1455,16 +1440,6 @@ static void pass_sample(struct gl_video *p, struct img_tex tex,
         pass_sample_bicubic_fast(p->sc);
     } else if (strcmp(name, "oversample") == 0) {
         pass_sample_oversample(p->sc, scaler, w, h);
-    } else if (strcmp(name, "custom") == 0) {
-        struct bstr body = load_cached_file(p, p->opts.scale_shader);
-        if (body.start) {
-            load_shader(p, body);
-            const char *fn_name = get_custom_shader_fn(p, body.start);
-            GLSLF("// custom scale-shader\n");
-            GLSLF("color = %s(tex, pos, size);\n", fn_name);
-        } else {
-            p->opts.scale_shader = NULL;
-        }
     } else if (scaler->kernel && scaler->kernel->polar) {
         pass_sample_polar(p->sc, scaler);
     } else if (scaler->kernel) {
@@ -1536,19 +1511,6 @@ static void unsharp_hook(struct gl_video *p, struct img_tex tex,
     GLSLF("#define pos HOOKED_pos\n");
     GLSLF("#define pt HOOKED_pt\n");
     pass_sample_unsharp(p->sc, p->opts.unsharp);
-}
-
-static void user_hook_old(struct gl_video *p, struct img_tex tex,
-                          struct gl_transform *trans, void *priv)
-{
-    const char *body = priv;
-    assert(body);
-
-    GLSLHF("#define pixel_size HOOKED_pt\n");
-    load_shader(p, bstr0(body));
-    const char *fn_name = get_custom_shader_fn(p, body);
-    GLSLF("// custom shader\n");
-    GLSLF("color = %s(HOOKED_raw, HOOKED_pos, HOOKED_size);\n", fn_name);
 }
 
 struct szexp_ctx {
@@ -1627,26 +1589,6 @@ static void user_hook_free(struct tex_hook *hook)
     talloc_free(hook->priv);
 }
 
-static void pass_hook_user_shaders_old(struct gl_video *p, char *name,
-                                       char **shaders)
-{
-    assert(name);
-    if (!shaders)
-        return;
-
-    for (int n = 0; shaders[n] != NULL; n++) {
-        char *body = load_cached_file(p, shaders[n]).start;
-        if (body) {
-            pass_add_hook(p, (struct tex_hook) {
-                .hook_tex = name,
-                .bind_tex = {"HOOKED"},
-                .hook = user_hook_old,
-                .priv = body,
-            });
-        }
-    }
-}
-
 static void pass_hook_user_shaders(struct gl_video *p, char **shaders)
 {
     if (!shaders)
@@ -1698,8 +1640,6 @@ static void gl_video_setup_hooks(struct gl_video *p)
         });
     }
 
-    pass_hook_user_shaders_old(p, "MAIN", p->opts.pre_shaders);
-    pass_hook_user_shaders_old(p, "SCALED", p->opts.post_shaders);
     pass_hook_user_shaders(p, p->opts.user_shaders);
 }
 
@@ -2988,10 +2928,6 @@ static bool check_dumb_mode(struct gl_video *p)
                 return false;
         }
     }
-    if (o->pre_shaders && o->pre_shaders[0])
-        return false;
-    if (o->post_shaders && o->post_shaders[0])
-        return false;
     if (o->user_shaders && o->user_shaders[0])
         return false;
     if (p->use_lut_3d)

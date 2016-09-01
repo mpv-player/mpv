@@ -35,6 +35,8 @@ Interface changes
         - "idle" -> "idle-active"
       the old names are deprecated
     - remove deprecated "hwdec-active" and "hwdec-detected" properties
+    - remove "pre-shaders", "post-shaders" and "scale-shader": deprecated
+      in favor of "user-shaders"
  --- mpv 0.20.0 ---
     - add --image-display-duration option - this also means that image duration
       is not influenced by --mf-fps anymore in the general case (this is an

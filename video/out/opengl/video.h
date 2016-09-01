@@ -130,9 +130,6 @@ struct gl_video_opts {
     int interpolation;
     float interpolation_threshold;
     int blend_subs;
-    char *scale_shader;
-    char **pre_shaders;
-    char **post_shaders;
     char **user_shaders;
     int deband;
     struct deband_opts *deband_opts;

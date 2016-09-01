@@ -584,68 +584,9 @@ Available video output drivers are:
         better than without it) since it will extend the size to match only the
         milder of the scale factors between the axes.
 
-    ``pre-shaders=<files>``, ``post-shaders=<files>``, ``scale-shader=<file>``
-        Custom GLSL fragment shaders.
-
-        pre-shaders (list)
-            These get applied after conversion to RGB and before linearization
-            and upscaling. Operates on non-linear RGB (same as input). This is
-            the best place to put things like sharpen filters.
-        scale-shader
-            This gets used instead of scale/cscale when those options are set
-            to ``custom``. The colorspace it operates on depends on the values
-            of ``linear-scaling`` and ``sigmoid-upscaling``, so no assumptions
-            should be made here.
-        post-shaders (list)
-            These get applied after upscaling and subtitle blending (when
-            ``blend-subtitles`` is enabled), but before color management.
-            Operates on linear RGB if ``linear-scaling`` is in effect,
-            otherwise non-linear RGB. This is the best place for colorspace
-            transformations (eg. saturation mapping).
-
-        These files must define a function with the following signature::
-
-            vec4 sample_pixel(sampler2D tex, vec2 pos, vec2 tex_size)
-
-        (If there is no string ``sample_pixel`` in the shader script, it will
-        use ``sample`` instead. This is a compatibility hack for older shader
-        scripts, and is deprecated.)
-
-        The meanings of the parameters are as follows:
-
-        sampler2D tex
-            The source texture for the shader.
-        vec2 pos
-            The position to be sampled, in coordinate space [0-1].
-        vec2 tex_size
-            The size of the texture, in pixels. This may differ from image_size,
-            eg. for subsampled content or for post-shaders.
-
-        In addition to these parameters, the following uniforms are also
-        globally available:
-
-        float random
-            A random number in the range [0-1], different per frame.
-        int frame
-            A simple count of frames rendered, increases by one per frame and
-            never resets (regardless of seeks).
-        vec2 image_size
-            The size in pixels of the input image.
-        vec2 target_size
-            The size in pixels of the visible part of the scaled (and possibly
-            cropped) image.
-
-        For example, a shader that inverts the colors could look like this::
-
-            vec4 sample(sampler2D tex, vec2 pos, vec2 tex_size)
-            {
-                vec4 color = texture(tex, pos);
-                return vec4(1.0 - color.rgb, color.a);
-            }
-
     ``user-shaders=<files>``
-        Custom GLSL hooks. These are similar to ``post-shaders`` etc., but more
-        flexible: They can be injected at almost arbitrary points in the
+        Custom GLSL hooks. These are a flexible way to add custom fragment
+        shaders, which can be injected at almost arbitrary points in the
         rendering pipeline, and access all previous intermediate textures.
 
         .. admonition:: Warning
@@ -738,8 +679,19 @@ Available video output drivers are:
             The raw bound texture itself. The use of this should be
             avoided unless absolutely necessary.
 
-        In addition, the global uniforms described in ``post-shaders`` are
-        also available.
+        In addition to these parameters, the following uniforms are also
+        globally available:
+
+        float random
+            A random number in the range [0-1], different per frame.
+        int frame
+            A simple count of frames rendered, increases by one per frame and
+            never resets (regardless of seeks).
+        vec2 image_size
+            The size in pixels of the input image.
+        vec2 target_size
+            The size in pixels of the visible part of the scaled (and possibly
+            cropped) image.
 
         Internally, vo_opengl may generate any number of the following
         textures. Whenever a texture is rendered and saved by vo_opengl, all of
