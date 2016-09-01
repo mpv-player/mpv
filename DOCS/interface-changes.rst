@@ -26,7 +26,9 @@ Interface changes
       but do not use the mechanism for negation options.
       (Also see client API change for API version 1.23.)
     - add almost all options to the property list, meaning you can change
-      options without adding "options/" to the property name
+      options without adding "options/" to the property name (a new section
+      has been added to the manpage describing some conflicting behavior
+      between options and properties)
     - rename the following properties
         - "demuxer" -> "current-demuxer"
         - "fps" -> "container-fps"

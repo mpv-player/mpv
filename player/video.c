@@ -962,15 +962,15 @@ static void init_vo(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     struct vo_chain *vo_c = mpctx->vo_chain;
 
-    if (opts->gamma_gamma != 1000)
+    if (opts->gamma_gamma != 0)
         video_set_colors(vo_c, "gamma", opts->gamma_gamma);
-    if (opts->gamma_brightness != 1000)
+    if (opts->gamma_brightness != 0)
         video_set_colors(vo_c, "brightness", opts->gamma_brightness);
-    if (opts->gamma_contrast != 1000)
+    if (opts->gamma_contrast != 0)
         video_set_colors(vo_c, "contrast", opts->gamma_contrast);
-    if (opts->gamma_saturation != 1000)
+    if (opts->gamma_saturation != 0)
         video_set_colors(vo_c, "saturation", opts->gamma_saturation);
-    if (opts->gamma_hue != 1000)
+    if (opts->gamma_hue != 0)
         video_set_colors(vo_c, "hue", opts->gamma_hue);
     video_set_colors(vo_c, "output-levels", opts->video_output_levels);
 

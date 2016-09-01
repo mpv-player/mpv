@@ -2062,6 +2062,42 @@ Property list
     is not a map, as order matters and duplicate entries are possible. Recursive
     profiles are not expanded, and show up as special ``profile`` options.
 
+Inconsistencies between options and properties
+----------------------------------------------
+
+You can access (almost) all options as properties, though there are some
+caveats with some properties (due to historical reasons):
+
+``vid``, ``aid``, ``sid``
+    While playback is active, you can set existing tracks only. (The option
+    allows setting any track ID, and which tracks to enable is chosen at
+    loading time.)
+
+``deinterlace``
+    While video is active, this behaves differently from the option. It will
+    never return the ``auto`` value (but the state as observed by the video
+    chain). You cannot set ``auto`` either.
+
+``video-aspect``
+    While video is active, always returns the effective aspect ratio.
+
+``brightness`` (and other color options)
+    If ``--vo=xv`` is used, these properties may return the adapter's current
+    values instead of the option values.
+
+``display-fps``
+    If a VO is created, this will return either the actual display FPS, or
+    an invalid value, instead of the option value.
+
+``cache``
+    This behaves completely different as property: instead of configuring the
+    cache size like the option, it returns the cache state in percent.
+
+``demuxer``, ``idle``, ``length``, ``audio-samplerate``, ``audio-channels``, ``audio-format``, ``fps``
+    These behave completely different as property, but are deprecated (newer
+    aliases which don't conflict have been added). After the deprecation period
+    they will be changed to the proper option behavior.
+
 Property Expansion
 ------------------
 

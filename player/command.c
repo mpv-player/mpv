@@ -477,10 +477,7 @@ static int mp_property_stream_capture(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->demuxer)
-        return M_PROPERTY_UNAVAILABLE;
-
-    if (action == M_PROPERTY_SET) {
+    if (mpctx->demuxer && action == M_PROPERTY_SET) {
         struct change_stream_capture_args args = {*(char **)arg, mpctx->demuxer};
         demux_run_on_thread(mpctx->demuxer, do_change_stream_capture, &args);
         // fall through to mp_property_generic_option
@@ -811,6 +808,9 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
+    if (!mpctx->playback_initialized)
+        return mp_property_generic_option(mpctx, prop, action, arg);
+
     int chapter = get_current_chapter(mpctx);
     int num = get_chapter_count(mpctx);
     if (chapter < -1)
@@ -928,7 +928,9 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    struct MPOpts *opts = mpctx->opts;
+    if (!mpctx->playback_initialized)
+        return mp_property_generic_option(mpctx, prop, action, arg);
+
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return M_PROPERTY_UNAVAILABLE;
@@ -944,7 +946,7 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
     case M_PROPERTY_SET: {
         edition = *(int *)arg;
         if (edition != demuxer->edition) {
-            opts->edition_id = edition;
+            mpctx->opts->edition_id = edition;
             if (!mpctx->stop_play)
                 mpctx->stop_play = PT_RELOAD_FILE;
         }
@@ -1312,7 +1314,7 @@ static int mp_property_pause(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
 
-    if (action == M_PROPERTY_SET) {
+    if (mpctx->playback_initialized && action == M_PROPERTY_SET) {
         if (*(int *)arg) {
             pause_player(mpctx);
         } else {
@@ -1800,8 +1802,6 @@ static int mp_property_audio_delay(void *ctx, struct m_property *prop,
                                    int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!(mpctx->ao_chain && mpctx->vo_chain))
-        return M_PROPERTY_UNAVAILABLE;
     float delay = mpctx->opts->audio_delay;
     switch (action) {
     case M_PROPERTY_PRINT:
@@ -1809,7 +1809,8 @@ static int mp_property_audio_delay(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         mpctx->opts->audio_delay = *(float *)arg;
-        mpctx->delay += mpctx->opts->audio_delay - delay;
+        if (mpctx->ao_chain && mpctx->vo_chain)
+            mpctx->delay += mpctx->opts->audio_delay - delay;
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
@@ -2441,7 +2442,7 @@ static int mp_property_video_color(void *ctx, struct m_property *prop,
     const char *name = prop->priv ? prop->priv : prop->name;
     MPContext *mpctx = ctx;
     if (!mpctx->vo_chain)
-        return M_PROPERTY_UNAVAILABLE;
+        return mp_property_generic_option(mpctx, prop, action, arg);
 
     switch (action) {
     case M_PROPERTY_SET: {
@@ -2922,8 +2923,6 @@ static int mp_property_sub_delay(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct MPOpts *opts = mpctx->opts;
-    if (!mpctx->video_out)
-        return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
         *(char **)arg = format_delay(opts->sub_delay);
@@ -2937,8 +2936,6 @@ static int mp_property_sub_pos(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     struct MPOpts *opts = mpctx->opts;
-    if (!mpctx->video_out)
-        return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_PRINT) {
         *(char **)arg = talloc_asprintf(NULL, "%d/100", opts->sub_pos);
         return M_PROPERTY_OK;
