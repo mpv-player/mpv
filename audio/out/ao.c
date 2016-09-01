@@ -121,6 +121,7 @@ const struct m_obj_list ao_obj_list = {
     .description = "audio outputs",
     .allow_unknown_entries = true,
     .allow_trailer = true,
+    .disallow_positional_parameters = true,
 };
 
 static struct ao *ao_alloc(bool probing, struct mpv_global *global,

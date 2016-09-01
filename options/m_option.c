@@ -2648,7 +2648,8 @@ static void copy_obj_settings_list(const m_option_t *opt, void *dst,
 // without '=' sets a flag, or whether it's a positional argument.
 static int get_obj_param(struct mp_log *log, bstr opt_name, bstr obj_name,
                          struct m_config *config, bstr name, bstr val,
-                         int flags, int *nold, bstr *out_name, bstr *out_val)
+                         int flags, bool nopos,
+                         int *nold, bstr *out_name, bstr *out_val)
 {
     int r;
 
@@ -2658,7 +2659,7 @@ static int get_obj_param(struct mp_log *log, bstr opt_name, bstr obj_name,
     // va.start != NULL => of the form name=val (not positional)
     // If it's just "name", and the associated option exists and is a flag,
     // don't accept it as positional argument.
-    if (val.start || m_config_option_requires_param(config, name) == 0) {
+    if (val.start || m_config_option_requires_param(config, name) == 0 || nopos) {
         r = m_config_set_option_ext(config, name, val, flags);
         if (r < 0) {
             if (r == M_OPT_UNKNOWN) {
@@ -2714,7 +2715,7 @@ static int get_obj_param(struct mp_log *log, bstr opt_name, bstr obj_name,
 // desc is optional.
 static int m_obj_parse_sub_config(struct mp_log *log, struct bstr opt_name,
                                   struct bstr name, struct bstr *pstr,
-                                  struct m_config *config, int flags,
+                                  struct m_config *config, int flags, bool nopos,
                                   struct m_obj_desc *desc, char ***ret)
 {
     int nold = 0;
@@ -2735,8 +2736,8 @@ static int m_obj_parse_sub_config(struct mp_log *log, struct bstr opt_name,
             goto exit;
         if (bstr_equals0(fname, "help"))
             goto print_help;
-        r = get_obj_param(log, opt_name, name, config, fname, fval, flags, &nold,
-                          &fname, &fval);
+        r = get_obj_param(log, opt_name, name, config, fname, fval, flags,
+                          nopos, &nold, &fname, &fval);
         if (r < 0)
             goto exit;
 
@@ -2791,6 +2792,7 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt,
     char **plist = NULL;
     struct m_obj_desc desc;
     bstr label = {0};
+    bool nopos = list->disallow_positional_parameters;
 
     if (bstr_eatstart0(pstr, "@")) {
         if (!bstr_split_tok(*pstr, ":", &label, pstr)) {
@@ -2826,7 +2828,7 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt,
         struct m_config *config = m_config_from_obj_desc_noalloc(NULL, log, &desc);
         bstr s = bstr0(desc.init_options);
         m_obj_parse_sub_config(log, opt, str, &s, config,
-                               M_SETOPT_CHECK_ONLY, NULL, &plist);
+                               M_SETOPT_CHECK_ONLY, nopos, NULL, &plist);
         assert(s.len == 0);
         talloc_free(config);
     }
@@ -2836,7 +2838,7 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt,
         if (!skip)
             config = m_config_from_obj_desc_noalloc(NULL, log, &desc);
         r = m_obj_parse_sub_config(log, opt, str, pstr, config,
-                                   M_SETOPT_CHECK_ONLY, &desc,
+                                   M_SETOPT_CHECK_ONLY, nopos, &desc,
                                    _ret ? &plist : NULL);
         talloc_free(config);
         if (r < 0)

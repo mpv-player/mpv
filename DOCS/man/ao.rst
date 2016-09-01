@@ -183,7 +183,7 @@ Available audio output drivers are:
 ``pulse``
     PulseAudio audio output driver
 
-    ``[<host>][:<output sink>]``
+    ``host=<host>``, ``sink=<sink>``
         Specify the host and optionally output sink to use. An empty <host>
         string uses a local connection, "localhost" uses network transfer
         (most likely not what you want).

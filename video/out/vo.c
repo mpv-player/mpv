@@ -193,6 +193,7 @@ const struct m_obj_list vo_obj_list = {
     },
     .allow_unknown_entries = true,
     .allow_trailer = true,
+    .disallow_positional_parameters = true,
 };
 
 static void dispatch_wakeup_cb(void *ptr)

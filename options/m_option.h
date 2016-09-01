@@ -142,6 +142,8 @@ struct m_obj_list {
     // Allow unknown entries, for which a dummy entry is inserted, and whose
     // options are skipped and ignored.
     bool allow_unknown_entries;
+    // This helps with confusing error messages if unknown flag options are used.
+    bool disallow_positional_parameters;
 };
 
 // Find entry by name
