@@ -903,8 +903,10 @@ Property list
     list of format names, e.g. mp4 is ``mov,mp4,m4a,3gp,3g2,mj2`` (the list
     may grow in the future for any format).
 
-``demuxer``
+``current-demuxer``
     Name of the current demuxer. (This is useless.)
+
+    (Renamed from ``demuxer``.)
 
 ``stream-path``
     Filename (full path) of the stream layer filename. (This is probably
@@ -1142,9 +1144,11 @@ Property list
 ``af-metadata/<filter-label>``
     Equivalent to ``vf-metadata/<filter-label>``, but for audio filters.
 
-``idle``
+``idle-active``
     Return ``yes`` if no file is loaded, but the player is staying around
     because of the ``--idle`` option.
+
+    (Renamed from ``idle``.)
 
 ``core-idle``
     Return ``yes`` if the playback core is paused, otherwise ``no``. This can
@@ -1467,9 +1471,11 @@ Property list
     ``video-frame-info/tff``
     ``video-frame-info/repeat``
 
-``fps``
+``container-fps``
     Container FPS. This can easily contain bogus values. For videos that use
     modern container formats or video codecs, this will often be incorrect.
+
+    (Renamed from ``fps``.)
 
 ``estimated-vf-fps``
     Estimated/measured FPS of the video filter chain output. (If no filters

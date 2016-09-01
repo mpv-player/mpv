@@ -3730,7 +3730,9 @@ static const struct m_property mp_properties_base[] = {
     {"media-title", mp_property_media_title},
     {"stream-path", mp_property_stream_path},
     {"stream-capture", mp_property_stream_capture},
-    {"demuxer", mp_property_demuxer}, // conflicts with option
+    {"current-demuxer", mp_property_demuxer},
+    // conflicts with option
+    M_PROPERTY_DEPRECATED_ALIAS("demuxer", "current-demuxer"),
     {"file-format", mp_property_file_format},
     {"stream-pos", mp_property_stream_pos},
     {"stream-end", mp_property_stream_end},
@@ -3780,7 +3782,8 @@ static const struct m_property mp_properties_base[] = {
     {"clock", mp_property_clock},
     {"seekable", mp_property_seekable},
     {"partially-seekable", mp_property_partially_seekable},
-    {"idle", mp_property_idle}, // conflicts with option
+    {"idle-active", mp_property_idle},
+    M_PROPERTY_DEPRECATED_ALIAS("idle", "idle-active"), // conflicts with option
 
     {"chapter-list", mp_property_list_chapters},
     {"track-list", property_list_tracks},
@@ -3848,7 +3851,8 @@ static const struct m_property mp_properties_base[] = {
     {"vo-configured", mp_property_vo_configured},
     {"vo-performance", mp_property_vo_performance},
     {"current-vo", mp_property_vo},
-    {"fps", mp_property_fps}, // conflicts with option
+    {"container-fps", mp_property_fps},
+    M_PROPERTY_DEPRECATED_ALIAS("fps", "container-fps"), // conflicts with option
     {"estimated-vf-fps", mp_property_vf_fps},
     {"video-aspect", mp_property_aspect},
     {"vid", mp_property_video},
