@@ -225,7 +225,6 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     *vo = (struct vo) {
         .log = mp_log_new(vo, log, name),
         .driver = desc.p,
-        .opts = global->opts->vo,
         .global = global,
         .encode_lavc_ctx = ex->encode_lavc_ctx,
         .input_ctx = ex->input_ctx,
@@ -244,6 +243,9 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     mp_dispatch_set_wakeup_fn(vo->in->dispatch, dispatch_wakeup_cb, vo);
     pthread_mutex_init(&vo->in->lock, NULL);
     pthread_cond_init(&vo->in->wakeup, NULL);
+
+    vo->opts_cache = m_config_cache_alloc(vo, global, &vo_sub_opts);
+    vo->opts = vo->opts_cache->opts;
 
     mp_input_set_mouse_transform(vo->input_ctx, NULL, NULL);
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
@@ -503,6 +505,8 @@ static void run_reconfig(void *p)
 
     struct vo_internal *in = vo->in;
 
+    m_config_cache_update(vo->opts_cache);
+
     mp_image_params_get_dsize(params, &vo->dwidth, &vo->dheight);
 
     talloc_free(vo->params);
@@ -541,6 +545,7 @@ static void run_control(void *p)
     struct vo *vo = pp[0];
     int request = (intptr_t)pp[1];
     void *data = pp[2];
+    m_config_cache_update(vo->opts_cache);
     int ret = vo->driver->control(vo, request, data);
     if (pp[3])
         *(int *)pp[3] = ret;

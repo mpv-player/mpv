@@ -335,5 +335,6 @@ typedef struct MPOpts {
 
 extern const m_option_t mp_opts[];
 extern const struct MPOpts mp_default_opts;
+extern const struct m_sub_options vo_sub_opts;
 
 #endif

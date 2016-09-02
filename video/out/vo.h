@@ -312,9 +312,7 @@ struct vo {
     struct osd_state *osd;
     struct encode_lavc_context *encode_lavc_ctx;
     struct vo_internal *in;
-    struct mp_vo_opts *opts;
     struct vo_extra extra;
-    struct m_config *config;
 
     // --- The following fields are generally only changed during initialization.
 
@@ -328,6 +326,10 @@ struct vo {
 
     // --- The following fields can be accessed only by the VO thread, or from
     //     anywhere _if_ the VO thread is suspended (use vo->dispatch).
+
+    struct m_config_cache *opts_cache; // cache for ->opts
+    struct mp_vo_opts *opts;
+    struct m_config *config; // config for ->priv
 
     bool want_redraw;   // redraw as soon as possible
 

@@ -150,7 +150,7 @@ static const m_option_t mp_vo_opt_list[] = {
     {0}
 };
 
-static const struct m_sub_options vo_sub_opts = {
+const struct m_sub_options vo_sub_opts = {
     .opts = mp_vo_opt_list,
     .size = sizeof(struct mp_vo_opts),
     .defaults = &(const struct mp_vo_opts){
