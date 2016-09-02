@@ -140,6 +140,7 @@ static struct ao *ao_alloc(bool probing, struct mpv_global *global,
     *ao = (struct ao) {
         .driver = desc.p,
         .probing = probing,
+        .global = global,
         .input_ctx = input_ctx,
         .log = mp_log_new(ao, log, name),
         .def_buffer = opts->audio_buffer,

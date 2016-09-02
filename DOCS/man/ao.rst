@@ -34,76 +34,12 @@ Available audio output drivers are:
 ``alsa`` (Linux only)
     ALSA audio output driver
 
-    ``device=<device>``
-        Sets the device name. For ac3 output via S/PDIF, use an "iec958" or
-        "spdif" device, unless you really know how to set it correctly.
-    ``resample=yes``
-        Enable ALSA resampling plugin. (This is disabled by default, because
-        some drivers report incorrect audio delay in some cases.)
-    ``mixer-device=<device>``
-        Set the mixer device used with ``--no-softvol`` (default: ``default``).
-    ``mixer-name=<name>``
-        Set the name of the mixer element (default: ``Master``). This is for
-        example ``PCM`` or ``Master``.
-    ``mixer-index=<number>``
-        Set the index of the mixer channel (default: 0). Consider the output of
-        "``amixer scontrols``", then the index is the number that follows the
-        name of the element.
-    ``non-interleaved``
-        Allow output of non-interleaved formats (if the audio decoder uses
-        this format). Currently disabled by default, because some popular
-        ALSA plugins are utterly broken with non-interleaved formats.
-    ``ignore-chmap``
-        Don't read or set the channel map of the ALSA device - only request the
-        required number of channels, and then pass the audio as-is to it. This
-        option most likely should not be used. It can be useful for debugging,
-        or for static setups with a specially engineered ALSA configuration (in
-        this case you should always force the same layout with ``--audio-channels``,
-        or it will work only for files which use the layout implicit to your
-        ALSA device).
-
-    .. note::
-
-        MPlayer and mplayer2 required you to replace any ',' with '.' and
-        any ':' with '=' in the ALSA device name. mpv does not do this anymore.
-        Instead, quote the device name:
-
-            ``--ao=alsa:device=[plug:surround50]``
-
-        Note that the ``[`` and ``]`` simply quote the device name. With some
-        shells (like zsh), you have to quote the option string to prevent the
-        shell from interpreting the brackets instead of passing them to mpv.
-
-        Actually, you should use the ``--audio-device`` option, instead of
-        setting the device directly.
-
     .. warning::
 
-        Handling of multichannel/surround audio changed in mpv 0.8.0 from the
-        behavior in MPlayer/mplayer2 and older versions of mpv.
-
-        The old behavior is that the player always downmixed to stereo by
-        default. The ``--audio-channels`` (or ``--channels`` before that) option
-        had to be set to get multichannel audio. Then playing stereo would
-        use the ``default`` device (which typically allows multiple programs
-        to play audio at the same time via dmix), while playing anything with
-        more channels would open one of the hardware devices, e.g. via the
-        ``surround51`` alias (typically with exclusive access). Whether the
-        player would use exclusive access or not would depend on the file
-        being played.
-
-        The new behavior since mpv 0.8.0 always enables multichannel audio,
-        i.e. ``--audio-channels=auto`` is the default. However, since ALSA
-        provides no good way to play multichannel audio in a non-exclusive
-        way (without blocking other applications from using audio), the player
-        is restricted to the capabilities of the ``default`` device by default,
-        which means it supports only stereo and mono (at least with current
-        typical ALSA configurations). But if a hardware device is selected,
-        then multichannel audio will typically work.
-
-        The short story is: if you want multichannel audio with ALSA, use
-        ``--audio-device`` to select the device (use ``--audio-device=help``
-        to get a list of all devices and their mpv name).
+        To get multichannel/surround audio, use ``--audio-channels=auto``. The
+        default for this option is ``auto-safe``, which makes this audio otuput
+        explicitly reject multichannel output, as there is no way to detect
+        whether a certain channel layout is actually supported.
 
         You can also try `using the upmix plugin <http://git.io/vfuAy>`_.
         This setup enables multichannel audio on the ``default`` device

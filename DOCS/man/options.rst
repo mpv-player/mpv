@@ -3597,6 +3597,60 @@ DVB
 
     Default: ``no``
 
+ALSA audio output options
+-------------------------
+
+
+``--alsa-device=<device>``
+    Sets the device name. For ac3 output via S/PDIF, use an "iec958" or
+    "spdif" device, unless you really know how to set it correctly.
+
+    .. note::
+
+        MPlayer and mplayer2 required you to replace any ',' with '.' and
+        any ':' with '=' in the ALSA device name. mpv does not do this anymore.
+        Instead, quote the device name:
+
+            ``--ao=alsa:device=[plug:surround50]``
+
+        Note that the ``[`` and ``]`` simply quote the device name. With some
+        shells (like zsh), you have to quote the option string to prevent the
+        shell from interpreting the brackets instead of passing them to mpv.
+
+        Actually, you should use the ``--audio-device`` option, instead of
+        setting the device directly.
+
+``--alsa-resample=yes``
+    Enable ALSA resampling plugin. (This is disabled by default, because
+    some drivers report incorrect audio delay in some cases.)
+
+``--alsa-mixer-device=<device>``
+    Set the mixer device used with ``ao-volume`` (default: ``default``).
+
+``--alsa-mixer-name=<name>``
+    Set the name of the mixer element (default: ``Master``). This is for
+    example ``PCM`` or ``Master``.
+
+``--alsa-mixer-index=<number>``
+    Set the index of the mixer channel (default: 0). Consider the output of
+    "``amixer scontrols``", then the index is the number that follows the
+    name of the element.
+
+``--alsa-non-interleaved``
+    Allow output of non-interleaved formats (if the audio decoder uses
+    this format). Currently disabled by default, because some popular
+    ALSA plugins are utterly broken with non-interleaved formats.
+
+``--alsa-ignore-chmap``
+    Don't read or set the channel map of the ALSA device - only request the
+    required number of channels, and then pass the audio as-is to it. This
+    option most likely should not be used. It can be useful for debugging,
+    or for static setups with a specially engineered ALSA configuration (in
+    this case you should always force the same layout with ``--audio-channels``,
+    or it will work only for files which use the layout implicit to your
+    ALSA device).
+
+
 OpenGL renderer options
 -----------------------
 

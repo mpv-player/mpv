@@ -35,6 +35,7 @@
 
 #include "config.h"
 #include "options/options.h"
+#include "options/m_config.h"
 #include "options/m_option.h"
 #include "common/msg.h"
 #include "osdep/endian.h"
@@ -47,6 +48,37 @@
 #include "ao.h"
 #include "internal.h"
 #include "audio/format.h"
+
+struct ao_alsa_opts {
+    char *device;
+    char *mixer_device;
+    char *mixer_name;
+    int mixer_index;
+    int resample;
+    int ni;
+    int ignore_chmap;
+};
+
+#define OPT_BASE_STRUCT struct ao_alsa_opts
+const struct m_sub_options ao_alsa_conf = {
+    .opts = (const struct m_option[]) {
+        OPT_STRING("alsa-device", device, 0),
+        OPT_FLAG("alsa-resample", resample, 0),
+        OPT_STRING("alsa-mixer-device", mixer_device, 0),
+        OPT_STRING("alsa-mixer-name", mixer_name, 0),
+        OPT_INTRANGE("alsa-mixer-index", mixer_index, 0, 0, 99),
+        OPT_FLAG("alsa-non-interleaved", ni, 0),
+        OPT_FLAG("alsa-ignore-chmap", ignore_chmap, 0),
+        {0}
+    },
+    .defaults = &(const struct ao_alsa_opts) {
+        .mixer_device = "default",
+        .mixer_name = "Master",
+        .mixer_index = 0,
+        .ni = 0,
+    },
+    .size = sizeof(struct ao_alsa_opts),
+};
 
 struct priv {
     snd_pcm_t *alsa;
@@ -61,13 +93,7 @@ struct priv {
 
     snd_output_t *output;
 
-    char *cfg_device;
-    char *cfg_mixer_device;
-    char *cfg_mixer_name;
-    int cfg_mixer_index;
-    int cfg_resample;
-    int cfg_ni;
-    int cfg_ignore_chmap;
+    struct ao_alsa_opts *opts;
 };
 
 #define BUFFER_TIME 250000  // 250ms
@@ -125,13 +151,13 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
         snd_mixer_selem_id_alloca(&sid);
 
-        snd_mixer_selem_id_set_index(sid, p->cfg_mixer_index);
-        snd_mixer_selem_id_set_name(sid, p->cfg_mixer_name);
+        snd_mixer_selem_id_set_index(sid, p->opts->mixer_index);
+        snd_mixer_selem_id_set_name(sid, p->opts->mixer_name);
 
         err = snd_mixer_open(&handle, 0);
         CHECK_ALSA_ERROR("Mixer open error");
 
-        err = snd_mixer_attach(handle, p->cfg_mixer_device);
+        err = snd_mixer_attach(handle, p->opts->mixer_device);
         CHECK_ALSA_ERROR("Mixer attach error");
 
         err = snd_mixer_selem_register(handle, NULL, NULL);
@@ -447,7 +473,7 @@ static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels
 
         MP_VERBOSE(ao, "which we understand as: %s\n", mp_chmap_to_str(&chmap));
 
-        if (p->cfg_ignore_chmap) {
+        if (p->opts->ignore_chmap) {
             MP_VERBOSE(ao, "user set ignore-chmap; ignoring the channel map.\n");
         } else if (af_fmt_is_spdif(ao->format)) {
             MP_VERBOSE(ao, "using spdif passthrough; ignoring the channel map.\n");
@@ -615,8 +641,8 @@ static int init_device(struct ao *ao, int mode)
     const char *device = "default";
     if (ao->device)
         device = ao->device;
-    if (p->cfg_device && p->cfg_device[0])
-        device = p->cfg_device;
+    if (p->opts->device && p->opts->device[0])
+        device = p->opts->device;
 
     err = try_open_device(ao, device, mode);
     CHECK_ALSA_ERROR("Playback open error");
@@ -641,7 +667,7 @@ static int init_device(struct ao *ao, int mode)
 
     // Some ALSA drivers have broken delay reporting, so disable the ALSA
     // resampling plugin by default.
-    if (!p->cfg_resample) {
+    if (!p->opts->resample) {
         err = snd_pcm_hw_params_set_rate_resample(p->alsa, alsa_hwparams, 0);
         CHECK_ALSA_ERROR("Unable to disable resampling");
     }
@@ -684,7 +710,7 @@ static int init_device(struct ao *ao, int mode)
     dump_hw_params(ao, MSGL_DEBUG, "HW params after format:\n", alsa_hwparams);
 
     struct mp_chmap dev_chmap = ao->channels;
-    if (af_fmt_is_spdif(ao->format) || p->cfg_ignore_chmap) {
+    if (af_fmt_is_spdif(ao->format) || p->opts->ignore_chmap) {
         dev_chmap.num = 0; // disable chmap API
     } else if (dev_chmap.num == 1 && dev_chmap.speaker[0] == MP_SPEAKER_ID_FC) {
         // As yet another ALSA API inconsistency, mono is not reported correctly.
@@ -806,7 +832,9 @@ alsa_error:
 static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    if (!p->cfg_ni)
+    p->opts = mp_get_config_group(ao, ao->global, &ao_alsa_conf);
+
+    if (!p->opts->ni)
         ao->format = af_fmt_from_planar(ao->format);
 
     MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());
@@ -1125,8 +1153,6 @@ static void list_devs(struct ao *ao, struct ao_device_list *list)
     snd_device_name_free_hint(hints);
 }
 
-#define OPT_BASE_STRUCT struct priv
-
 const struct ao_driver audio_out_alsa = {
     .description = "ALSA audio output",
     .name      = "alsa",
@@ -1144,20 +1170,14 @@ const struct ao_driver audio_out_alsa = {
     .wakeup    = ao_wakeup_poll,
     .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
-    .priv_defaults = &(const struct priv) {
-        .cfg_mixer_device = "default",
-        .cfg_mixer_name = "Master",
-        .cfg_mixer_index = 0,
-        .cfg_ni = 0,
-    },
     .options = (const struct m_option[]) {
-        OPT_STRING("device", cfg_device, 0),
-        OPT_FLAG("resample", cfg_resample, 0),
-        OPT_STRING("mixer-device", cfg_mixer_device, 0),
-        OPT_STRING("mixer-name", cfg_mixer_name, 0),
-        OPT_INTRANGE("mixer-index", cfg_mixer_index, 0, 0, 99),
-        OPT_FLAG("non-interleaved", cfg_ni, 0),
-        OPT_FLAG("ignore-chmap", cfg_ignore_chmap, 0),
+        OPT_SUBOPT_LEGACY("device", "alsa-device"),
+        OPT_SUBOPT_LEGACY("resample", "alsa-resample"),
+        OPT_SUBOPT_LEGACY("mixer-device", "alsa-mixer-device"),
+        OPT_SUBOPT_LEGACY("mixer-name", "alsa-mixer-name"),
+        OPT_SUBOPT_LEGACY("mixer-index", "alsa-mixer-index"),
+        OPT_SUBOPT_LEGACY("non-interleaved", "alsa-non-interleaved"),
+        OPT_SUBOPT_LEGACY("ignore-chmap", "alsa-ignore-chmap"),
         {0}
     },
 };

@@ -41,6 +41,7 @@ Interface changes
     - remove all vo_opengl suboptions. Use global options with the same name
       instead, e.g.: --vo=opengl:scale=nearest => --scale=nearest
       Some options are prefixed with "opengl-", e.g. --opengl-pbo.
+      The same change is applied to ao_alsa.
     - remove --vo=opengl-hq. Set --profile=opengl-hq instead. Note that this
       profile does not force the VO. This means if you use the --vo option to
       set another VO, it won't work. But this also means it can be used with

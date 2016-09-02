@@ -334,6 +334,7 @@ typedef struct MPOpts {
 
     struct gl_video_opts *gl_video_opts;
     struct vo_opengl_opts *vo_opengl_opts;
+    struct ao_alsa_opts *ao_alsa_opts;
 } MPOpts;
 
 extern const m_option_t mp_opts[];

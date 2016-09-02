@@ -40,6 +40,7 @@ struct ao {
     const struct ao_driver *api; // entrypoints to the wrapper (push.c/pull.c)
     const struct ao_driver *driver;
     void *priv;
+    struct mpv_global *global;
     struct encode_lavc_context *encode_lavc_ctx;
     struct input_ctx *input_ctx;
     struct mp_log *log; // Using e.g. "[ao/coreaudio]" as prefix
