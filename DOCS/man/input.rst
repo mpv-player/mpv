@@ -2089,11 +2089,7 @@ caveats with some properties (due to historical reasons):
     If a VO is created, this will return either the actual display FPS, or
     an invalid value, instead of the option value.
 
-``cache``
-    This behaves completely different as property: instead of configuring the
-    cache size like the option, it returns the cache state in percent.
-
-``demuxer``, ``idle``, ``length``, ``audio-samplerate``, ``audio-channels``, ``audio-format``, ``fps``
+``demuxer``, ``idle``, ``length``, ``audio-samplerate``, ``audio-channels``, ``audio-format``, ``fps``, ``cache``
     These behave completely different as property, but are deprecated (newer
     aliases which don't conflict have been added). After the deprecation period
     they will be changed to the proper option behavior.

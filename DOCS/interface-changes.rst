@@ -33,6 +33,7 @@ Interface changes
         - "demuxer" -> "current-demuxer"
         - "fps" -> "container-fps"
         - "idle" -> "idle-active"
+        - "cache" -> "cache-percent"
       the old names are deprecated
     - remove deprecated "hwdec-active" and "hwdec-detected" properties
     - remove "pre-shaders", "post-shaders" and "scale-shader": deprecated
