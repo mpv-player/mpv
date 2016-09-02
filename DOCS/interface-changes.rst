@@ -45,6 +45,7 @@ Interface changes
       profile does not force the VO. This means if you use the --vo option to
       set another VO, it won't work. But this also means it can be used with
       opengl-cb.
+    - deprecate --vo-defaults (no replacement)
  --- mpv 0.20.0 ---
     - add --image-display-duration option - this also means that image duration
       is not influenced by --mf-fps anymore in the general case (this is an

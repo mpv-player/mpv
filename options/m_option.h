@@ -608,10 +608,11 @@ extern const char m_option_path_separator;
 #define OPT_STRING(...) \
     OPT_GENERAL(char*, __VA_ARGS__, .type = &m_option_type_string)
 
-#define OPT_SETTINGSLIST(optname, varname, flags, objlist)      \
+#define OPT_SETTINGSLIST(optname, varname, flags, objlist, ...) \
     OPT_GENERAL(m_obj_settings_t*, optname, varname, flags,     \
                 .type = &m_option_type_obj_settings_list,       \
-                .priv = (void*)MP_EXPECT_TYPE(const struct m_obj_list*, objlist))
+                .priv = (void*)MP_EXPECT_TYPE(const struct m_obj_list*, objlist), \
+                __VA_ARGS__)
 
 #define OPT_IMAGEFORMAT(...) \
     OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_imgfmt)

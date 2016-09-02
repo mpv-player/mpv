@@ -102,8 +102,9 @@ const struct m_opt_choice_alternatives mp_hwdec_names[] = {
 #define OPT_BASE_STRUCT struct mp_vo_opts
 
 static const m_option_t mp_vo_opt_list[] = {
-    OPT_SETTINGSLIST("vo", video_driver_list, 0, &vo_obj_list),
-    OPT_SETTINGSLIST("vo-defaults", vo_defs, 0, &vo_obj_list),
+    OPT_SETTINGSLIST("vo", video_driver_list, 0, &vo_obj_list, ),
+    OPT_SETTINGSLIST("vo-defaults", vo_defs, 0, &vo_obj_list,
+                     .deprecation_message = "deprecated, use global options"),
     OPT_CHOICE_C("hwdec-preload", hwdec_preload_api, 0, mp_hwdec_names),
     OPT_SUBSTRUCT("sws", sws_opts, sws_conf, 0),
     OPT_FLAG("taskbar-progress", taskbar_progress, 0),
@@ -375,10 +376,10 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- codec/vfilter options --------------------
 
-    OPT_SETTINGSLIST("af-defaults", af_defs, 0, &af_obj_list),
-    OPT_SETTINGSLIST("af*", af_settings, 0, &af_obj_list),
-    OPT_SETTINGSLIST("vf-defaults", vf_defs, 0, &vf_obj_list),
-    OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
+    OPT_SETTINGSLIST("af-defaults", af_defs, 0, &af_obj_list, ),
+    OPT_SETTINGSLIST("af*", af_settings, 0, &af_obj_list, ),
+    OPT_SETTINGSLIST("vf-defaults", vf_defs, 0, &vf_obj_list, ),
+    OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list, ),
 
     OPT_CHOICE("deinterlace", deinterlace, 0,
                ({"auto", -1},
@@ -469,8 +470,8 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("sub-clear-on-seek", sub_clear_on_seek, 0),
 
 //---------------------- libao/libvo options ------------------------
-    OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list),
-    OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list),
+    OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list, ),
+    OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list, ),
     OPT_STRING("audio-device", audio_device, 0),
     OPT_STRING("audio-client-name", audio_client_name, 0),
     OPT_FLAG("audio-fallback-to-null", ao_null_fallback, 0),

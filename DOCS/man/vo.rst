@@ -16,6 +16,8 @@ normal driver parameters.
 ``--vo-defaults=<driver1[:parameter1:parameter2:...],driver2,...>``
     Set defaults for each driver.
 
+    Deprecated. No replacement.
+
 .. note::
 
     See ``--vo=help`` for a list of compiled-in video output drivers.
