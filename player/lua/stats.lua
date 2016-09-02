@@ -336,7 +336,8 @@ local function add_video(s)
         append_property(s, "estimated-display-fps",
                         {prefix="Display FPS:", suffix=" (estimated)"})
     end
-    if append_property(s, "fps", {prefix="FPS:", suffix=" (specified)"}) then
+    if append_property(s, "container-fps", {prefix="FPS:", suffix=" (specified)"}) or
+        append_property(s, "fps", {prefix="FPS:", suffix=" (specified)"}) then
         append_property(s, "estimated-vf-fps",
                         {suffix=" (estimated)", nl="", indent=""})
     else
