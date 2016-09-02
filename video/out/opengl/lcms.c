@@ -82,8 +82,9 @@ const struct m_sub_options mp_icc_conf = {
         OPT_STRING("icc-cache-dir", cache_dir, 0),
         OPT_INT("icc-intent", intent, 0),
         OPT_INTRANGE("icc-contrast", contrast, 0, 0, 100000),
-        OPT_STRING_VALIDATE("3dlut-size", size_str, 0, validate_3dlut_size_opt),
+        OPT_STRING_VALIDATE("icc-3dlut-size", size_str, 0, validate_3dlut_size_opt),
 
+        OPT_REPLACED("3dlut-size", "icc-3dlut-size"),
         OPT_REMOVED("icc-cache", "see icc-cache-dir"),
         {0}
     },
