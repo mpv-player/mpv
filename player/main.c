@@ -364,6 +364,7 @@ struct MPContext *mp_create(void)
     mpctx->mconfig->is_toplevel = true;
     mpctx->mconfig->global = mpctx->global;
     m_config_parse(mpctx->mconfig, "", bstr0(def_config), NULL, 0);
+    m_config_create_shadow(mpctx->mconfig);
 
     mpctx->global->opts = mpctx->opts;
 

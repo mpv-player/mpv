@@ -19,6 +19,7 @@
 #define MPLAYER_M_CONFIG_H
 
 #include <stddef.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 #include "misc/bstr.h"
@@ -41,6 +42,8 @@ struct m_config_option {
     bool is_set_from_cmdline : 1;   // Set by user from command line
     bool is_set_locally : 1;        // Has a backup entry
     bool warning_was_printed : 1;
+    int16_t shadow_offset;          // Offset into m_config_shadow.data
+    int16_t group;                  // Index into m_config.groups
     const char *name;               // Full name (ie option-subopt)
     const struct m_option *opt;     // Option description
     void *data;                     // Raw value of the option
@@ -80,6 +83,16 @@ typedef struct m_config {
     bool subopt_deprecation_warning;
 
     void *optstruct; // struct mpopts or other
+
+    int shadow_size;
+
+    // List of m_sub_options instances.
+    // Index 0 is the top-level and is always present.
+    struct m_config_group *groups;
+    int num_groups;
+
+    // Thread-safe shadow memory; only set for the main m_config.
+    struct m_config_shadow *shadow;
 } m_config_t;
 
 // Create a new config object.
@@ -95,6 +108,10 @@ typedef struct m_config {
 struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
                               size_t size, const void *defaults,
                               const struct m_option *options);
+
+// Creates "backup" shadow memory for use with m_config_cache. Sets it on
+// mpv_global. Expected to be called at early init on the main m_config.
+void m_config_create_shadow(struct m_config *config);
 
 // (Warning: new object references config->log and others.)
 struct m_config *m_config_dup(void *talloc_ctx, struct m_config *config);
@@ -187,6 +204,10 @@ const char *m_config_get_positional_option(const struct m_config *config, int n)
 // Returns: error code (<0), or number of expected params (0, 1)
 int m_config_option_requires_param(struct m_config *config, bstr name);
 
+// Notify m_config_cache users that the option has (probably) changed its value.
+void m_config_notify_change_co(struct m_config *config,
+                               struct m_config_option *co);
+
 // Return all (visible) option names as NULL terminated string list.
 char **m_config_list_options(void *ta_parent, const struct m_config *config);
 
@@ -251,5 +272,38 @@ void *m_config_alloc_struct(void *talloc_ctx,
 // Freeing the struct frees all members.
 void *m_sub_options_copy(void *talloc_ctx, const struct m_sub_options *opts,
                          const void *ptr);
+
+// This can be used to create and synchronize per-thread option structs,
+// which then can be read without synchronization. No concurrent access to
+// the cache itself is allowed.
+struct m_config_cache {
+    // The struct as indicated by m_config_cache_alloc's group parameter.
+    void *opts;
+
+    // Internal.
+    struct m_config_shadow *shadow;
+    struct m_config *shadow_config;
+    long long ts;
+    int group;
+};
+
+// Create a mirror copy from the global options.
+//  ta_parent: parent for the returned allocation
+//  global: option data source
+//  group: the option group to return. This can be NULL for the global option
+//         struct (MPOpts), or m_sub_options used in a certain OPT_SUBSTRUCT()
+//         item.
+struct m_config_cache *m_config_cache_alloc(void *ta_parent,
+                                            struct mpv_global *global,
+                                            const struct m_sub_options *group);
+
+// Update the options in cache->opts to current global values. Return whether
+// there was an update notification at all (which may or may not indicate that
+// some options have changed).
+// Keep in mind that while the cache->opts pointer does not change, the option
+// data itself will (e.g. string options might be reallocated).
+bool m_config_cache_update(struct m_config_cache *cache);
+
+struct m_config *mp_get_root_config(struct mpv_global *global);
 
 #endif /* MPLAYER_M_CONFIG_H */

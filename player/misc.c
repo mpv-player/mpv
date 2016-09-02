@@ -261,6 +261,7 @@ struct mpv_global *create_sub_global(struct MPContext *mpctx)
     struct m_config *new_config = m_config_dup(new, mpctx->mconfig);
     *new = (struct mpv_global){
         .log = mpctx->global->log,
+        .config = mpctx->global->config,
         .opts = new_config->optstruct,
         .client_api = mpctx->clients,
     };
