@@ -928,8 +928,8 @@ struct m_profile *m_config_get_profile0(const struct m_config *config,
 
 struct m_profile *m_config_add_profile(struct m_config *config, char *name)
 {
-    if (!name || !name[0] || strcmp(name, "default") == 0)
-        return NULL; // never a real profile
+    if (!name || !name[0])
+        name = "default";
     struct m_profile *p = m_config_get_profile0(config, name);
     if (p)
         return p;
@@ -984,6 +984,13 @@ int m_config_set_profile(struct m_config *config, char *name, int flags)
     config->profile_depth--;
 
     return 0;
+}
+
+void m_config_finish_default_profile(struct m_config *config, int flags)
+{
+    struct m_profile *p = m_config_add_profile(config, NULL);
+    m_config_set_profile(config, p->name, flags);
+    p->num_opts = 0;
 }
 
 struct mpv_node m_config_get_profiles(struct m_config *config)

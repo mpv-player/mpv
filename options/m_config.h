@@ -230,6 +230,10 @@ struct m_profile *m_config_get_profile0(const struct m_config *config,
                                         char *name);
 struct m_profile *m_config_get_profile(const struct m_config *config, bstr name);
 
+// Apply and clear the default profile - it's the only profile that new config
+// files do not simply append to (for configfile parser).
+void m_config_finish_default_profile(struct m_config *config, int flags);
+
 /*  Get the profile with the given name, creating it if necessary.
  *  \param config The config object.
  *  \param arg The profile's name.
