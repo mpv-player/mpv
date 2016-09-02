@@ -1143,6 +1143,27 @@ void m_config_notify_change_co(struct m_config *config,
         mp_msg_update_msglevels(config->global);
 }
 
+void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
+                          const struct m_sub_options *group)
+{
+    assert(ta_parent); // without you'd necessarily leak memory
+    struct m_config_cache *cache = m_config_cache_alloc(ta_parent, global, group);
+    return cache->opts;
+}
+
+void mp_read_option_raw(struct mpv_global *global, const char *name,
+                        const struct m_option_type *type, void *dst)
+{
+    struct m_config_shadow *shadow = global->config;
+    struct m_config_option *co = m_config_get_co(shadow->root, bstr0(name));
+    assert(co);
+    assert(co->shadow_offset >= 0);
+    assert(co->opt->type == type);
+
+    memset(dst, 0, co->opt->type->size);
+    m_option_copy(co->opt, dst, shadow->data + co->shadow_offset);
+}
+
 struct m_config *mp_get_root_config(struct mpv_global *global)
 {
     return global->config->root;

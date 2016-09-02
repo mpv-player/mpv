@@ -304,6 +304,20 @@ struct m_config_cache *m_config_cache_alloc(void *ta_parent,
 // data itself will (e.g. string options might be reallocated).
 bool m_config_cache_update(struct m_config_cache *cache);
 
+// Like m_config_cache_alloc(), but return the struct (m_config_cache->opts)
+// directly, with no way to update the config.
+// Warning: does currently not set the child as its own talloc root, which
+//          means the only way to free the struct is by freeing ta_parent.
+void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
+                          const struct m_sub_options *group);
+
+
+// Read a single global option in a thread-safe way. For multiple options,
+// use m_config_cache. The option must exist and match the provided type (the
+// type is used as a sanity check only). Performs semi-expensive lookup.
+void mp_read_option_raw(struct mpv_global *global, const char *name,
+                        const struct m_option_type *type, void *dst);
+
 struct m_config *mp_get_root_config(struct mpv_global *global);
 
 #endif /* MPLAYER_M_CONFIG_H */
