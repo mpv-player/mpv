@@ -38,6 +38,13 @@ Interface changes
     - remove deprecated "hwdec-active" and "hwdec-detected" properties
     - remove "pre-shaders", "post-shaders" and "scale-shader": deprecated
       in favor of "user-shaders"
+    - remove all vo_opengl suboptions. Use global options with the same name
+      instead, e.g.: --vo=opengl:scale=nearest => --scale=nearest
+      Some options are prefixed with "opengl-", e.g. --opengl-pbo.
+    - remove --vo=opengl-hq. Set --profile=opengl-hq instead. Note that this
+      profile does not force the VO. This means if you use the --vo option to
+      set another VO, it won't work. But this also means it can be used with
+      opengl-cb.
  --- mpv 0.20.0 ---
     - add --image-display-duration option - this also means that image duration
       is not influenced by --mf-fps anymore in the general case (this is an

@@ -73,6 +73,8 @@ extern const struct m_sub_options ad_lavc_conf;
 extern const struct m_sub_options input_config;
 extern const struct m_sub_options encode_config;
 extern const struct m_sub_options image_writer_conf;
+extern const struct m_sub_options gl_video_conf;
+extern const struct m_sub_options vo_opengl_conf;
 
 extern const struct m_obj_list vf_obj_list;
 extern const struct m_obj_list af_obj_list;
@@ -640,6 +642,11 @@ const m_option_t mp_opts[] = {
     OPT_PRINT("V", print_version),
 
     OPT_SUBSTRUCT("", vo, vo_sub_opts, 0),
+
+#if HAVE_GL
+    OPT_SUBSTRUCT("", gl_video_opts, gl_video_conf, 0),
+    OPT_SUBSTRUCT("", vo_opengl_opts, vo_opengl_conf, 0),
+#endif
 
 #if HAVE_ENCODING
     OPT_SUBSTRUCT("", encode_opts, encode_config, 0),

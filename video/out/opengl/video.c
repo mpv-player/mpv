@@ -170,6 +170,7 @@ struct gl_video {
     struct mp_log *log;
     struct gl_video_opts opts;
     struct gl_video_opts *opts_alloc;
+    struct m_config_cache *opts_cache;
     struct gl_lcms *cms;
     bool gl_debug;
 
@@ -298,7 +299,7 @@ static const struct packed_fmt_entry mp_packed_formats[] = {
     {0},
 };
 
-const struct gl_video_opts gl_video_opts_def = {
+static const struct gl_video_opts gl_video_opts_def = {
     .dither_algo = DITHER_FRUIT,
     .dither_depth = -1,
     .dither_size = 6,
@@ -319,35 +320,6 @@ const struct gl_video_opts gl_video_opts_def = {
     .alpha_mode = ALPHA_BLEND_TILES,
     .background = {0, 0, 0, 255},
     .gamma = 1.0f,
-    .target_brightness = 250,
-    .hdr_tone_mapping = TONE_MAPPING_HABLE,
-    .tone_mapping_param = NAN,
-};
-
-const struct gl_video_opts gl_video_opts_hq_def = {
-    .dither_algo = DITHER_FRUIT,
-    .dither_depth = 0,
-    .dither_size = 6,
-    .temporal_dither_period = 1,
-    .fbo_format = 0,
-    .correct_downscaling = 1,
-    .sigmoid_center = 0.75,
-    .sigmoid_slope = 6.5,
-    .sigmoid_upscaling = 1,
-    .scaler = {
-        {{"spline36",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // scale
-        {{"mitchell",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // dscale
-        {{"spline36",   .params={NAN, NAN}}, {.params = {NAN, NAN}}}, // cscale
-        {{"mitchell",   .params={NAN, NAN}}, {.params = {NAN, NAN}},
-         .clamp = 1, }, // tscale
-    },
-    .scaler_resizes_only = 1,
-    .scaler_lut_size = 6,
-    .interpolation_threshold = 0.0001,
-    .alpha_mode = ALPHA_BLEND_TILES,
-    .background = {0, 0, 0, 255},
-    .gamma = 1.0f,
-    .deband = 1,
     .target_brightness = 250,
     .hdr_tone_mapping = TONE_MAPPING_HABLE,
     .tone_mapping_param = NAN,
@@ -374,8 +346,8 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
 
 const struct m_sub_options gl_video_conf = {
     .opts = (const m_option_t[]) {
-        OPT_FLAG("dumb-mode", dumb_mode, 0),
-        OPT_FLOATRANGE("gamma", gamma, 0, 0.1, 2.0),
+        OPT_FLAG("opengl-dumb-mode", dumb_mode, 0),
+        OPT_FLOATRANGE("opengl-gamma", gamma, 0, 0.1, 2.0),
         OPT_FLAG("gamma-auto", gamma_auto, 0),
         OPT_CHOICE_C("target-prim", target_prim, 0, mp_csp_prim_names),
         OPT_CHOICE_C("target-trc", target_trc, 0, mp_csp_trc_names),
@@ -387,7 +359,7 @@ const struct m_sub_options gl_video_conf = {
                     {"gamma",    TONE_MAPPING_GAMMA},
                     {"linear",   TONE_MAPPING_LINEAR})),
         OPT_FLOAT("tone-mapping-param", tone_mapping_param, 0),
-        OPT_FLAG("pbo", pbo, 0),
+        OPT_FLAG("opengl-pbo", pbo, 0),
         SCALER_OPTS("scale",  SCALER_SCALE),
         SCALER_OPTS("dscale", SCALER_DSCALE),
         SCALER_OPTS("cscale", SCALER_CSCALE),
@@ -399,7 +371,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("sigmoid-upscaling", sigmoid_upscaling, 0),
         OPT_FLOATRANGE("sigmoid-center", sigmoid_center, 0, 0.0, 1.0),
         OPT_FLOATRANGE("sigmoid-slope", sigmoid_slope, 0, 1.0, 20.0),
-        OPT_CHOICE("fbo-format", fbo_format, 0,
+        OPT_CHOICE("opengl-fbo-format", fbo_format, 0,
                    ({"rgb8",   GL_RGB8},
                     {"rgba8",  GL_RGBA8},
                     {"rgb10",  GL_RGB10},
@@ -426,7 +398,7 @@ const struct m_sub_options gl_video_conf = {
                     {"yes", ALPHA_YES},
                     {"blend", ALPHA_BLEND},
                     {"blend-tiles", ALPHA_BLEND_TILES})),
-        OPT_FLAG("rectangle-textures", use_rectangle, 0),
+        OPT_FLAG("opengl-rectangle-textures", use_rectangle, 0),
         OPT_COLOR("background", background, 0),
         OPT_FLAG("interpolation", interpolation, 0),
         OPT_FLOAT("interpolation-threshold", interpolation_threshold, 0),
@@ -434,11 +406,76 @@ const struct m_sub_options gl_video_conf = {
                    ({"no", BLEND_SUBS_NO},
                     {"yes", BLEND_SUBS_YES},
                     {"video", BLEND_SUBS_VIDEO})),
-        OPT_STRINGLIST("user-shaders", user_shaders, 0),
+        OPT_STRINGLIST("opengl-shaders", user_shaders, 0),
         OPT_FLAG("deband", deband, 0),
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
         OPT_FLOAT("sharpen", unsharp, 0),
         OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
+
+        {0}
+    },
+    .size = sizeof(struct gl_video_opts),
+    .defaults = &gl_video_opts_def,
+};
+
+#define LEGACY_SCALER_OPTS(n)                \
+    OPT_SUBOPT_LEGACY(n, n),                           \
+    OPT_SUBOPT_LEGACY(n"-param1", n"-param1"),         \
+    OPT_SUBOPT_LEGACY(n"-param2", n"-param2"),         \
+    OPT_SUBOPT_LEGACY(n"-blur",   n"-blur"),           \
+    OPT_SUBOPT_LEGACY(n"-wparam", n"-wparam"),         \
+    OPT_SUBOPT_LEGACY(n"-clamp",  n"-clamp"),          \
+    OPT_SUBOPT_LEGACY(n"-radius", n"-radius"),         \
+    OPT_SUBOPT_LEGACY(n"-antiring", n"-antiring"),     \
+    OPT_SUBOPT_LEGACY(n"-window", n"-window")
+
+const struct m_sub_options gl_video_conf_legacy = {
+    .opts = (const m_option_t[]) {
+        OPT_SUBOPT_LEGACY("dumb-mode", "opengl-dumb-mode"),
+        OPT_SUBOPT_LEGACY("gamma", "opengl-gamma"),
+        OPT_SUBOPT_LEGACY("gamma-auto", "gamma-auto"),
+        OPT_SUBOPT_LEGACY("target-prim", "target-prim"),
+        OPT_SUBOPT_LEGACY("target-trc", "target-trc"),
+        OPT_SUBOPT_LEGACY("target-brightness", "target-brightness"),
+        OPT_SUBOPT_LEGACY("hdr-tone-mapping", "hdr-tone-mapping"),
+        OPT_SUBOPT_LEGACY("tone-mapping-param", "tone-mapping-param"),
+        OPT_SUBOPT_LEGACY("pbo", "opengl-pbo"),
+        LEGACY_SCALER_OPTS("scale"),
+        LEGACY_SCALER_OPTS("dscale"),
+        LEGACY_SCALER_OPTS("cscale"),
+        LEGACY_SCALER_OPTS("tscale"),
+        OPT_SUBOPT_LEGACY("scaler-lut-size", "scaler-lut-size"),
+        OPT_SUBOPT_LEGACY("scaler-resizes-only", "scaler-resizes-only"),
+        OPT_SUBOPT_LEGACY("linear-scaling", "linear-scaling"),
+        OPT_SUBOPT_LEGACY("correct-downscaling", "correct-downscaling"),
+        OPT_SUBOPT_LEGACY("sigmoid-upscaling", "sigmoid-upscaling"),
+        OPT_SUBOPT_LEGACY("sigmoid-center", "sigmoid-center"),
+        OPT_SUBOPT_LEGACY("sigmoid-slope", "sigmoid-slope"),
+        OPT_SUBOPT_LEGACY("fbo-format", "opengl-fbo-format"),
+        OPT_SUBOPT_LEGACY("dither-depth", "dither-depth"),
+        OPT_SUBOPT_LEGACY("dither", "dither"),
+        OPT_SUBOPT_LEGACY("dither-size-fruit", "dither-size-fruit"),
+        OPT_SUBOPT_LEGACY("temporal-dither", "temporal-dither"),
+        OPT_SUBOPT_LEGACY("temporal-dither-period", "temporal-dither-period"),
+        OPT_SUBOPT_LEGACY("alpha", "alpha"),
+        OPT_SUBOPT_LEGACY("rectangle-textures", "opengl-rectangle-textures"),
+        OPT_SUBOPT_LEGACY("background", "background"),
+        OPT_SUBOPT_LEGACY("interpolation", "interpolation"),
+        OPT_SUBOPT_LEGACY("interpolation-threshold", "interpolation-threshold"),
+        OPT_SUBOPT_LEGACY("blend-subtitles", "blend-subtitles"),
+        OPT_SUBOPT_LEGACY("user-shaders", "opengl-shaders"),
+        OPT_SUBOPT_LEGACY("deband", "deband"),
+        OPT_SUBOPT_LEGACY("deband-iterations", "deband-iterations"),
+        OPT_SUBOPT_LEGACY("deband-threshold", "deband-threshold"),
+        OPT_SUBOPT_LEGACY("deband-range", "deband-range"),
+        OPT_SUBOPT_LEGACY("deband-grain", "deband-grain"),
+        OPT_SUBOPT_LEGACY("sharpen", "sharpen"),
+        OPT_SUBOPT_LEGACY("icc-profile", "icc-profile"),
+        OPT_SUBOPT_LEGACY("icc-profile-auto", "icc-profile-auto"),
+        OPT_SUBOPT_LEGACY("icc-cache-dir", "icc-cache-dir"),
+        OPT_SUBOPT_LEGACY("icc-intent", "icc-intent"),
+        OPT_SUBOPT_LEGACY("icc-contrast", "icc-contrast"),
+        OPT_SUBOPT_LEGACY("3dlut-size", "icc-3dlut-size"),
 
         OPT_REMOVED("approx-gamma", "this is always enabled now"),
         OPT_REMOVED("cscale-down", "chroma is never downscaled"),
@@ -446,30 +483,28 @@ const struct m_sub_options gl_video_conf = {
         OPT_REMOVED("indirect", "this is set automatically whenever sane"),
         OPT_REMOVED("srgb", "use target-prim=bt709:target-trc=srgb instead"),
         OPT_REMOVED("source-shader", "use :deband to enable debanding"),
-        OPT_REMOVED("prescale-luma", "use user shaders for prescaling"),
-        OPT_REMOVED("scale-shader", "use user-shaders instead"),
-        OPT_REMOVED("pre-shaders", "use user-shaders instead"),
-        OPT_REMOVED("post-shaders", "use user-shaders instead"),
+        OPT_REMOVED("prescale-luma", "use opengl-shaders for prescaling"),
+        OPT_REMOVED("scale-shader", "use opengl-shaders instead"),
+        OPT_REMOVED("pre-shaders", "use opengl-shaders instead"),
+        OPT_REMOVED("post-shaders", "use opengl-shaders instead"),
 
-        OPT_REPLACED("lscale", "scale"),
-        OPT_REPLACED("lscale-down", "scale-down"),
-        OPT_REPLACED("lparam1", "scale-param1"),
-        OPT_REPLACED("lparam2", "scale-param2"),
-        OPT_REPLACED("lradius", "scale-radius"),
-        OPT_REPLACED("lantiring", "scale-antiring"),
-        OPT_REPLACED("cparam1", "cscale-param1"),
-        OPT_REPLACED("cparam2", "cscale-param2"),
-        OPT_REPLACED("cradius", "cscale-radius"),
-        OPT_REPLACED("cantiring", "cscale-antiring"),
-        OPT_REPLACED("smoothmotion", "interpolation"),
-        OPT_REPLACED("smoothmotion-threshold", "tscale-param1"),
-        OPT_REPLACED("scale-down", "dscale"),
-        OPT_REPLACED("fancy-downscaling", "correct-downscaling"),
+        OPT_SUBOPT_LEGACY("lscale", "scale"),
+        OPT_SUBOPT_LEGACY("lscale-down", "scale-down"),
+        OPT_SUBOPT_LEGACY("lparam1", "scale-param1"),
+        OPT_SUBOPT_LEGACY("lparam2", "scale-param2"),
+        OPT_SUBOPT_LEGACY("lradius", "scale-radius"),
+        OPT_SUBOPT_LEGACY("lantiring", "scale-antiring"),
+        OPT_SUBOPT_LEGACY("cparam1", "cscale-param1"),
+        OPT_SUBOPT_LEGACY("cparam2", "cscale-param2"),
+        OPT_SUBOPT_LEGACY("cradius", "cscale-radius"),
+        OPT_SUBOPT_LEGACY("cantiring", "cscale-antiring"),
+        OPT_SUBOPT_LEGACY("smoothmotion", "interpolation"),
+        OPT_SUBOPT_LEGACY("smoothmotion-threshold", "tscale-param1"),
+        OPT_SUBOPT_LEGACY("scale-down", "dscale"),
+        OPT_SUBOPT_LEGACY("fancy-downscaling", "correct-downscaling"),
 
         {0}
     },
-    .size = sizeof(struct gl_video_opts),
-    .defaults = &gl_video_opts_def,
 };
 
 static void uninit_rendering(struct gl_video *p);
@@ -3382,8 +3417,10 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
         .cms = gl_lcms_init(p, log, g),
         .texture_16bit_depth = 16,
         .sc = gl_sc_create(gl, log),
+        .opts_cache = m_config_cache_alloc(p, g, &gl_video_conf),
     };
-    set_options(p, NULL);
+    set_options(p, p->opts_cache->opts);
+    gl_lcms_set_options(p->cms, p->opts.icc_opts);
     for (int n = 0; n < SCALER_COUNT; n++)
         p->scaler[n] = (struct scaler){.index = n};
     gl_video_set_debug(p, true);
@@ -3417,12 +3454,12 @@ static void set_options(struct gl_video *p, struct gl_video_opts *src)
     p->opts = *p->opts_alloc;
 }
 
-// Set the options, and possibly update the filter chain too.
-// Note: assumes all options are valid and verified by the option parser.
-void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts)
+void gl_video_update_options(struct gl_video *p)
 {
-    set_options(p, opts);
-    reinit_from_options(p);
+    if (m_config_cache_update(p->opts_cache)) {
+        set_options(p, p->opts_cache->opts);
+        reinit_from_options(p);
+    }
 }
 
 static void reinit_from_options(struct gl_video *p)

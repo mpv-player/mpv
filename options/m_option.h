@@ -63,6 +63,7 @@ extern const m_option_type_t m_option_type_size_box;
 extern const m_option_type_t m_option_type_channels;
 extern const m_option_type_t m_option_type_aspect;
 extern const m_option_type_t m_option_type_node;
+extern const m_option_type_t m_option_type_subopt_legacy;
 
 // Used internally by m_config.c
 extern const m_option_type_t m_option_type_alias;
@@ -694,6 +695,12 @@ extern const char m_option_path_separator;
                        .type = &m_option_type_subconfig,        \
                        .priv = (void*)&subconf)
 
+// Same as above, but for legacy suboption usage, which have no associated
+// field (no actual data anywhere).
+#define OPT_SUBSTRUCT_LEGACY(optname, subconf)                      \
+    {.name = optname, .offset = -1, .type = &m_option_type_subconfig,      \
+     .priv = (void*)&subconf}
+
 // Provide a another name for the option.
 #define OPT_ALIAS(optname, newname) \
     {.name = optname, .type = &m_option_type_alias, .priv = newname, \
@@ -709,5 +716,11 @@ extern const char m_option_path_separator;
 #define OPT_REMOVED(optname, msg) \
     {.name = optname, .type = &m_option_type_removed, .priv = msg, \
      .deprecation_message = "", .offset = -1}
+
+// Redirect a suboption (e.g. from --vo) to a global option. The redirection
+// is handled as a special case instead of being applied automatically.
+#define OPT_SUBOPT_LEGACY(optname, globalname) \
+    {.name = optname, .type = &m_option_type_subopt_legacy, .priv = globalname, \
+     .offset = -1}
 
 #endif /* MPLAYER_M_OPTION_H */

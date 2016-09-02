@@ -47,13 +47,7 @@
  */
 
 struct vo_priv {
-    struct vo *vo;
-
     struct mpv_opengl_cb_context *ctx;
-
-    // Immutable after VO init
-    int use_gl_debug;
-    struct gl_video_opts *renderer_opts;
 };
 
 struct mpv_opengl_cb_context {
@@ -82,8 +76,6 @@ struct mpv_opengl_cb_context {
     bool imgfmt_supported[IMGFMT_END - IMGFMT_START];
     struct mp_vo_opts vo_opts;
     bool update_new_opts;
-    struct vo_priv *new_opts; // use these options, instead of the VO ones
-    struct m_config *new_opts_cfg;
     bool eq_changed;
     struct mp_csp_equalizer eq;
     struct vo *active;
@@ -234,9 +226,6 @@ int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
     ctx->hwdec_devs = NULL;
     talloc_free(ctx->gl);
     ctx->gl = NULL;
-    talloc_free(ctx->new_opts_cfg);
-    ctx->new_opts = NULL;
-    ctx->new_opts_cfg = NULL;
     return 0;
 }
 
@@ -275,15 +264,14 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         ctx->eq_changed = true;
     }
     if (ctx->update_new_opts) {
-        struct vo_priv *p = vo ? vo->priv : NULL;
-        struct vo_priv *opts = ctx->new_opts ? ctx->new_opts : p;
-        if (opts) {
-            gl_video_set_options(ctx->renderer, opts->renderer_opts);
-            if (vo)
-                gl_video_configure_queue(ctx->renderer, vo);
-            ctx->gl->debug_context = opts->use_gl_debug;
-            gl_video_set_debug(ctx->renderer, opts->use_gl_debug);
-        }
+        gl_video_update_options(ctx->renderer);
+        if (vo)
+            gl_video_configure_queue(ctx->renderer, vo);
+        int debug;
+        mp_read_option_raw(ctx->global, "opengl-debug", &m_option_type_flag,
+                           &debug);
+        ctx->gl->debug_context = debug;
+        gl_video_set_debug(ctx->renderer, debug);
         if (gl_video_icc_auto_enabled(ctx->renderer))
             MP_ERR(ctx, "icc-profile-auto is not available with opengl-cb\n");
     }
@@ -445,41 +433,6 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     return 0;
 }
 
-// list of options which can be changed at runtime
-#define OPT_BASE_STRUCT struct vo_priv
-static const struct m_option change_opts[] = {
-    OPT_FLAG("debug", use_gl_debug, 0),
-    OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
-    {0}
-};
-#undef OPT_BASE_STRUCT
-
-static bool reparse_cmdline(struct vo_priv *p, char *args)
-{
-    struct m_config *cfg = NULL;
-    struct vo_priv *opts = NULL;
-    int r = 0;
-
-    pthread_mutex_lock(&p->ctx->lock);
-    const struct vo_priv *vodef = p->vo->driver->priv_defaults;
-    cfg = m_config_new(NULL, p->vo->log, sizeof(*opts), vodef, change_opts);
-    opts = cfg->optstruct;
-    r = m_config_parse_suboptions(cfg, "opengl-cb", args);
-
-    if (r >= 0) {
-        talloc_free(p->ctx->new_opts_cfg);
-        p->ctx->new_opts = opts;
-        p->ctx->new_opts_cfg = cfg;
-        p->ctx->update_new_opts = true;
-        cfg = NULL;
-        update(p);
-    }
-
-    talloc_free(cfg);
-    pthread_mutex_unlock(&p->ctx->lock);
-    return r >= 0;
-}
-
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct vo_priv *p = vo->priv;
@@ -522,10 +475,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         update(p);
         pthread_mutex_unlock(&p->ctx->lock);
         return VO_TRUE;
-    case VOCTRL_SET_COMMAND_LINE: {
-        char *arg = data;
-        return reparse_cmdline(p, arg);
-    }
+    case VOCTRL_UPDATE_RENDER_OPTS:
+        pthread_mutex_lock(&p->ctx->lock);
+        p->ctx->update_new_opts = true;
+        update(p);
+        pthread_mutex_unlock(&p->ctx->lock);
+        return VO_TRUE;
     }
 
     return VO_NOTIMPL;
@@ -547,7 +502,6 @@ static void uninit(struct vo *vo)
 static int preinit(struct vo *vo)
 {
     struct vo_priv *p = vo->priv;
-    p->vo = vo;
     p->ctx = vo->extra.opengl_cb_context;
     if (!p->ctx) {
         MP_FATAL(vo, "No context set.\n");
@@ -575,8 +529,8 @@ static int preinit(struct vo *vo)
 
 #define OPT_BASE_STRUCT struct vo_priv
 static const struct m_option options[] = {
-    OPT_FLAG("debug", use_gl_debug, 0),
-    OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
+    OPT_SUBOPT_LEGACY("debug", "opengl-debug"),
+    OPT_SUBSTRUCT_LEGACY("", gl_video_conf_legacy),
     {0},
 };
 

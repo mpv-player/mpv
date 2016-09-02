@@ -48,22 +48,7 @@
 
 #define NUM_VSYNC_FENCES 10
 
-struct gl_priv {
-    struct vo *vo;
-    struct mp_log *log;
-    MPGLContext *glctx;
-    GL *gl;
-
-    struct gl_video *renderer;
-
-    struct gl_hwdec *hwdec;
-
-    int events;
-
-    void *original_opts;
-
-    // Options
-    struct gl_video_opts *renderer_opts;
+struct vo_opengl_opts {
     int use_glFinish;
     int waitvsync;
     int use_gl_debug;
@@ -71,16 +56,57 @@ struct gl_priv {
     int swap_interval;
     int dwm_flush;
     int allow_direct_composition;
-    int opt_vsync_fences;
-
+    int vsync_fences;
     char *backend;
     int es;
+    int pattern[2];
+};
+
+#define OPT_BASE_STRUCT struct vo_opengl_opts
+const struct m_sub_options vo_opengl_conf = {
+    .opts = (const m_option_t[]) {
+        OPT_FLAG("opengl-glfinish", use_glFinish, 0),
+        OPT_FLAG("opengl-waitvsync", waitvsync, 0),
+        OPT_INT("opengl-swapinterval", swap_interval, 0),
+        OPT_CHOICE("opengl-dwmflush", dwm_flush, 0,
+                ({"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})),
+        OPT_FLAG("opengl-dcomposition", allow_direct_composition, 0),
+        OPT_FLAG("opengl-debug", use_gl_debug, 0),
+        OPT_STRING_VALIDATE("opengl-backend", backend, 0,
+                            mpgl_validate_backend_opt),
+        OPT_FLAG("opengl-sw", allow_sw, 0),
+        OPT_CHOICE("opengl-es", es, 0, ({"no", -1}, {"auto", 0}, {"yes", 1})),
+        OPT_INTPAIR("opengl-check-pattern", pattern, 0),
+        OPT_INTRANGE("opengl-vsync-fences", vsync_fences, 0,
+                     0, NUM_VSYNC_FENCES),
+
+        {0}
+    },
+    .defaults = &(const struct vo_opengl_opts){
+        .swap_interval = 1,
+        .allow_direct_composition = 1,
+    },
+    .size = sizeof(struct vo_opengl_opts),
+};
+
+struct gl_priv {
+    struct vo *vo;
+    struct mp_log *log;
+    MPGLContext *glctx;
+    GL *gl;
+
+    struct vo_opengl_opts *opts;
+
+    struct gl_video *renderer;
+
+    struct gl_hwdec *hwdec;
+
+    int events;
 
     int frames_rendered;
     unsigned int prev_sgi_sync_count;
 
     // check-pattern sub-option; for testing/debugging
-    int opt_pattern[2];
     int last_pattern;
     int matches, mismatches;
 
@@ -107,7 +133,7 @@ static void resize(struct gl_priv *p)
 static void check_pattern(struct vo *vo, int item)
 {
     struct gl_priv *p = vo->priv;
-    int expected = p->opt_pattern[p->last_pattern];
+    int expected = p->opts->pattern[p->last_pattern];
     if (item == expected) {
         p->last_pattern++;
         if (p->last_pattern >= 2)
@@ -125,7 +151,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    if (gl->FenceSync && p->num_vsync_fences < p->opt_vsync_fences) {
+    if (gl->FenceSync && p->num_vsync_fences < p->opts->vsync_fences) {
         GLsync fence = gl->FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);;
         if (fence)
             p->vsync_fences[p->num_vsync_fences++] = fence;
@@ -133,7 +159,7 @@ static void draw_frame(struct vo *vo, struct vo_frame *frame)
 
     gl_video_render_frame(p->renderer, frame, gl->main_fb);
 
-    if (p->use_glFinish)
+    if (p->opts->use_glFinish)
         gl->Finish();
 }
 
@@ -145,30 +171,30 @@ static void flip_page(struct vo *vo)
     mpgl_swap_buffers(p->glctx);
 
     p->frames_rendered++;
-    if (p->frames_rendered > 5 && !p->use_gl_debug)
+    if (p->frames_rendered > 5 && !p->opts->use_gl_debug)
         gl_video_set_debug(p->renderer, false);
 
-    if (p->use_glFinish)
+    if (p->opts->use_glFinish)
         gl->Finish();
 
-    if (p->waitvsync || p->opt_pattern[0]) {
+    if (p->opts->waitvsync || p->opts->pattern[0]) {
         if (gl->GetVideoSync) {
             unsigned int n1 = 0, n2 = 0;
             gl->GetVideoSync(&n1);
-            if (p->waitvsync)
+            if (p->opts->waitvsync)
                 gl->WaitVideoSync(2, (n1 + 1) % 2, &n2);
             int step = n1 - p->prev_sgi_sync_count;
             p->prev_sgi_sync_count = n1;
             MP_DBG(vo, "Flip counts: %u->%u, step=%d\n", n1, n2, step);
-            if (p->opt_pattern[0])
+            if (p->opts->pattern[0])
                 check_pattern(vo, step);
         } else {
             MP_WARN(vo, "GLX_SGI_video_sync not available, disabling.\n");
-            p->waitvsync = 0;
-            p->opt_pattern[0] = 0;
+            p->opts->waitvsync = 0;
+            p->opts->pattern[0] = 0;
         }
     }
-    while (p->opt_vsync_fences > 0 && p->num_vsync_fences >= p->opt_vsync_fences) {
+    while (p->opts->vsync_fences > 0 && p->num_vsync_fences >= p->opts->vsync_fences) {
         gl->ClientWaitSync(p->vsync_fences[0], GL_SYNC_FLUSH_COMMANDS_BIT, 1e9);
         gl->DeleteSync(p->vsync_fences[0]);
         MP_TARRAY_REMOVE_AT(p->vsync_fences, p->num_vsync_fences, 0);
@@ -248,34 +274,6 @@ static void get_and_update_ambient_lighting(struct gl_priv *p)
     }
 }
 
-static const struct m_option options[];
-
-static const struct m_sub_options opengl_conf = {
-    .opts = options,
-    .size = sizeof(struct gl_priv),
-};
-
-static bool reparse_cmdline(struct vo *vo, char *args)
-{
-    struct gl_priv *p = vo->priv;
-    int r = 0;
-
-    struct gl_priv *opts = p;
-
-    if (strcmp(args, "-") == 0) {
-        opts = p->original_opts;
-    } else {
-        r = m_config_parse_suboptions(vo->config, "opengl", args);
-    }
-
-    gl_video_set_options(p->renderer, opts->renderer_opts);
-    get_and_update_icc_profile(p);
-    gl_video_configure_queue(p->renderer, p->vo);
-    p->vo->want_redraw = true;
-
-    return r >= 0;
-}
-
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct gl_priv *p = vo->priv;
@@ -316,9 +314,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_LOAD_HWDEC_API:
         request_hwdec_api(vo, data);
         return true;
-    case VOCTRL_SET_COMMAND_LINE: {
-        char *arg = data;
-        return reparse_cmdline(vo, arg);
+    case VOCTRL_UPDATE_RENDER_OPTS: {
+        gl_video_update_options(p->renderer);
+        get_and_update_icc_profile(p);
+        gl_video_configure_queue(p->renderer, p->vo);
+        p->vo->want_redraw = true;
+        return true;
     }
     case VOCTRL_RESET:
         gl_video_reset(p->renderer);
@@ -390,35 +391,39 @@ static int preinit(struct vo *vo)
     struct gl_priv *p = vo->priv;
     p->vo = vo;
     p->log = vo->log;
+    p->opts = mp_get_config_group(vo, vo->global, &vo_opengl_conf);
 
     int vo_flags = 0;
 
-    if (p->renderer_opts->alpha_mode == 1)
+    int alpha_mode;
+    mp_read_option_raw(vo->global, "alpha", &m_option_type_choice, &alpha_mode);
+
+    if (alpha_mode == 1)
         vo_flags |= VOFLAG_ALPHA;
 
-    if (p->use_gl_debug)
+    if (p->opts->use_gl_debug)
         vo_flags |= VOFLAG_GL_DEBUG;
 
-    if (p->es == 1)
+    if (p->opts->es == 1)
         vo_flags |= VOFLAG_GLES;
-    if (p->es == -1)
+    if (p->opts->es == -1)
         vo_flags |= VOFLAG_NO_GLES;
 
-    if (p->allow_sw)
+    if (p->opts->allow_sw)
         vo_flags |= VOFLAG_SW;
 
-    if (p->allow_direct_composition)
+    if (p->opts->allow_direct_composition)
         vo_flags |= VOFLAG_ANGLE_DCOMP;
 
-    p->glctx = mpgl_init(vo, p->backend, vo_flags);
+    p->glctx = mpgl_init(vo, p->opts->backend, vo_flags);
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;
 
-    p->glctx->dwm_flush_opt = p->dwm_flush;
+    p->glctx->dwm_flush_opt = p->opts->dwm_flush;
 
     if (p->gl->SwapInterval) {
-        p->gl->SwapInterval(p->swap_interval);
+        p->gl->SwapInterval(p->opts->swap_interval);
     } else {
         MP_VERBOSE(vo, "swap_control extension missing.\n");
     }
@@ -427,7 +432,6 @@ static int preinit(struct vo *vo)
     if (!p->renderer)
         goto err_out;
     gl_video_set_osd_source(p->renderer, vo->osd);
-    gl_video_set_options(p->renderer, p->renderer_opts);
     gl_video_configure_queue(p->renderer, vo);
 
     get_and_update_icc_profile(p);
@@ -445,8 +449,6 @@ static int preinit(struct vo *vo)
         gl_video_set_hwdec(p->renderer, p->hwdec);
     }
 
-    p->original_opts = m_sub_options_copy(p, &opengl_conf, p);
-
     return 0;
 
 err_out:
@@ -454,31 +456,26 @@ err_out:
     return -1;
 }
 
-#define OPT_BASE_STRUCT struct gl_priv
-static const struct m_option options[] = {
-    OPT_FLAG("glfinish", use_glFinish, 0),
-    OPT_FLAG("waitvsync", waitvsync, 0),
-    OPT_INT("swapinterval", swap_interval, 0, OPTDEF_INT(1)),
-    OPT_CHOICE("dwmflush", dwm_flush, 0,
-               ({"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})),
-    OPT_FLAG("dcomposition", allow_direct_composition, 0, OPTDEF_INT(1)),
-    OPT_FLAG("debug", use_gl_debug, 0),
-    OPT_STRING_VALIDATE("backend", backend, 0, mpgl_validate_backend_opt),
-    OPT_FLAG("sw", allow_sw, 0),
-    OPT_CHOICE("es", es, 0, ({"no", -1}, {"auto", 0}, {"yes", 1})),
-    OPT_INTPAIR("check-pattern", opt_pattern, 0),
-    OPT_INTRANGE("vsync-fences", opt_vsync_fences, 0, 0, NUM_VSYNC_FENCES),
-
-    OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
+static const struct m_option legacy_options[] = {
+    OPT_SUBOPT_LEGACY("glfinish", "opengl-glfinish"),
+    OPT_SUBOPT_LEGACY("waitvsync", "opengl-waitvsync"),
+    OPT_SUBOPT_LEGACY("swapinterval", "opengl-swapinterval"),
+    OPT_SUBOPT_LEGACY("dwmflush", "opengl-dwmflush"),
+    OPT_SUBOPT_LEGACY("dcomposition", "opengl-dcomposition"),
+    OPT_SUBOPT_LEGACY("debug", "opengl-debug"),
+    OPT_SUBOPT_LEGACY("backend", "opengl-backend"),
+    OPT_SUBOPT_LEGACY("sw", "opengl-sw"),
+    OPT_SUBOPT_LEGACY("es", "opengl-es"),
+    OPT_SUBOPT_LEGACY("check-pattern", "opengl-check-pattern"),
+    OPT_SUBOPT_LEGACY("vsync-fences", "opengl-vsync-fences"),
+    OPT_SUBSTRUCT_LEGACY("", gl_video_conf_legacy),
     {0},
 };
-
-#define CAPS VO_CAP_ROTATE90
 
 const struct vo_driver video_out_opengl = {
     .description = "Extended OpenGL Renderer",
     .name = "opengl",
-    .caps = CAPS,
+    .caps = VO_CAP_ROTATE90,
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,
@@ -489,25 +486,5 @@ const struct vo_driver video_out_opengl = {
     .wakeup = wakeup,
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),
-    .options = options,
-};
-
-const struct vo_driver video_out_opengl_hq = {
-    .description = "Extended OpenGL Renderer (high quality rendering preset)",
-    .name = "opengl-hq",
-    .caps = CAPS,
-    .preinit = preinit,
-    .query_format = query_format,
-    .reconfig = reconfig,
-    .control = control,
-    .draw_frame = draw_frame,
-    .flip_page = flip_page,
-    .wait_events = wait_events,
-    .wakeup = wakeup,
-    .uninit = uninit,
-    .priv_size = sizeof(struct gl_priv),
-    .priv_defaults = &(const struct gl_priv){
-        .renderer_opts = (struct gl_video_opts *)&gl_video_opts_hq_def,
-    },
-    .options = options,
+    .options = legacy_options,
 };

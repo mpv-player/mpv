@@ -5481,7 +5481,16 @@ void mp_notify(struct MPContext *mpctx, int event, void *arg)
     mp_client_broadcast_event(mpctx, event, arg);
 }
 
+extern const struct m_sub_options gl_video_conf;
+
 void mp_notify_property(struct MPContext *mpctx, const char *property)
 {
+    struct m_config_option *co = m_config_get_co(mpctx->mconfig, bstr0(property));
+    if (co) {
+        if (m_config_is_in_group(mpctx->mconfig, &gl_video_conf, co)) {
+            if (mpctx->video_out)
+                vo_control(mpctx->video_out, VOCTRL_UPDATE_RENDER_OPTS, NULL);
+        }
+    }
     mp_client_property_change(mpctx, property);
 }

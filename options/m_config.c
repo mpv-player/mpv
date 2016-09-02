@@ -257,29 +257,27 @@ struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
     return m_config_new(talloc_ctx, log, 0, desc->priv_defaults, desc->options);
 }
 
-static int m_config_set_obj_params(struct m_config *conf, char **args)
+static int m_config_set_obj_params(struct m_config *config, struct mp_log *log,
+                                   struct mpv_global *global, char **args)
 {
     for (int n = 0; args && args[n * 2 + 0]; n++) {
-        int r = m_config_set_option(conf, bstr0(args[n * 2 + 0]),
-                                    bstr0(args[n * 2 + 1]));
-        if (r < 0)
-            return r;
-    }
-    return 0;
-}
-
-static int m_config_apply_defaults(struct m_config *config, const char *name,
-                                   struct m_obj_settings *defaults)
-{
-    int r = 0;
-    for (int n = 0; defaults && defaults[n].name; n++) {
-        struct m_obj_settings *entry = &defaults[n];
-        if (name && strcmp(entry->name, name) == 0) {
-            r = m_config_set_obj_params(config, entry->attribs);
-            break;
+        const char *opt = args[n * 2 + 0];
+        const char *val = args[n * 2 + 1];
+        struct m_config_option *co = m_config_get_co(config, bstr0(opt));
+        struct m_config *target = config;
+        if (co && co->opt->type == &m_option_type_subopt_legacy) {
+            const char *newopt = co->opt->priv;
+            assert(global);
+            target = mp_get_root_config(global);
+            mp_warn(log, "Using suboptions is deprecated. Use the global '--%s' "
+                        "option instead of '%s' suboption.\n", newopt, opt);
+            opt = newopt;
         }
+        if (m_config_set_option(target, bstr0(opt), bstr0(val)) < 0)
+            return -1;
     }
-    return r;
+
+    return 0;
 }
 
 struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
@@ -287,9 +285,16 @@ struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
     const char *name, struct m_obj_settings *defaults, char **args)
 {
     struct m_config *config = m_config_from_obj_desc(ta_parent, log, desc);
-    if (m_config_apply_defaults(config, name, defaults) < 0)
-        goto error;
-    if (m_config_set_obj_params(config, args) < 0)
+
+    for (int n = 0; defaults && defaults[n].name; n++) {
+        struct m_obj_settings *entry = &defaults[n];
+        if (name && strcmp(entry->name, name) == 0) {
+            if (m_config_set_obj_params(config, log, global, entry->attribs) < 0)
+                goto error;
+        }
+    }
+
+    if (m_config_set_obj_params(config, log, global, args) < 0)
         goto error;
 
     return config;
@@ -1141,6 +1146,17 @@ void m_config_notify_change_co(struct m_config *config,
 
     if (config->global && (co->opt->flags & M_OPT_TERM))
         mp_msg_update_msglevels(config->global);
+}
+
+bool m_config_is_in_group(struct m_config *config,
+                          const struct m_sub_options *group,
+                          struct m_config_option *co)
+{
+    for (int n = 0; n < config->num_groups; n++) {
+        if (config->groups[n].group == group)
+            return is_group_included(config, co->group, n);
+    }
+    return false;
 }
 
 void *mp_get_config_group(void *ta_parent, struct mpv_global *global,

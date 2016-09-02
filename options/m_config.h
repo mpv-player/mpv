@@ -208,6 +208,10 @@ int m_config_option_requires_param(struct m_config *config, bstr name);
 void m_config_notify_change_co(struct m_config *config,
                                struct m_config_option *co);
 
+bool m_config_is_in_group(struct m_config *config,
+                          const struct m_sub_options *group,
+                          struct m_config_option *co);
+
 // Return all (visible) option names as NULL terminated string list.
 char **m_config_list_options(void *ta_parent, const struct m_config *config);
 

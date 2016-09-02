@@ -2653,8 +2653,11 @@ static int get_obj_param(struct mp_log *log, bstr opt_name, bstr obj_name,
 {
     int r;
 
-    if (!config)
-        return 0; // skip
+    if (!config) {
+        *out_name = name; // preserve args for opengl-hq legacy handling
+        *out_val = val;
+        return 1;
+    }
 
     // va.start != NULL => of the form name=val (not positional)
     // If it's just "name", and the associated option exists and is a flag,
@@ -3355,4 +3358,14 @@ const m_option_type_t m_option_type_alias = {
 };
 const m_option_type_t m_option_type_removed = {
     .name  = "removed",
+};
+
+static int parse_dummy(struct mp_log *log, const m_option_t *opt,
+                       struct bstr name, struct bstr param, void *dst)
+{
+    return 1;
+}
+const m_option_type_t m_option_type_subopt_legacy = {
+    .name  = "legacy suboption",
+    .parse = parse_dummy,
 };
