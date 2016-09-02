@@ -943,7 +943,7 @@ struct m_profile *m_config_add_profile(struct m_config *config, char *name)
 void m_profile_set_desc(struct m_profile *p, bstr desc)
 {
     talloc_free(p->desc);
-    p->desc = bstrdup0(p, desc);
+    p->desc = bstrto0(p, desc);
 }
 
 int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
@@ -955,8 +955,8 @@ int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
     if (i < 0)
         return i;
     p->opts = talloc_realloc(p, p->opts, char *, 2 * (p->num_opts + 2));
-    p->opts[p->num_opts * 2] = bstrdup0(p, name);
-    p->opts[p->num_opts * 2 + 1] = bstrdup0(p, val);
+    p->opts[p->num_opts * 2] = bstrto0(p, name);
+    p->opts[p->num_opts * 2 + 1] = bstrto0(p, val);
     p->num_opts++;
     p->opts[p->num_opts * 2] = p->opts[p->num_opts * 2 + 1] = NULL;
     return 1;
@@ -1005,8 +1005,7 @@ struct mpv_node m_config_get_profiles(struct m_config *config)
         for (int n = 0; n < profile->num_opts; n++) {
             struct mpv_node *opt_entry = node_array_add(opts, MPV_FORMAT_NODE_MAP);
             node_map_add_string(opt_entry, "key", profile->opts[n * 2 + 0]);
-            if (profile->opts[n * 2 + 1])
-                node_map_add_string(opt_entry, "value", profile->opts[n * 2 + 1]);
+            node_map_add_string(opt_entry, "value", profile->opts[n * 2 + 1]);
         }
     }
 
