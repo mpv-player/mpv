@@ -283,7 +283,8 @@ Available video output drivers are:
     By default, it tries to use fast and fail-safe settings. Use the
     ``opengl-hq`` profile to use this driver with defaults set to high
     quality rendering. (This profile is also the replacement for
-    ``--vo=opengl-hq``.)
+    ``--vo=opengl-hq``.) The profile can be applied with ``--profile=opengl-hq``
+    and its contents can be viewed with ``--show-profile=opengl-hq``.
 
     Requires at least OpenGL 2.1.
 
