@@ -665,13 +665,6 @@ Input Commands that are Possibly Subject to Change
     (the ``ab-loop-a`` property); the second the ``B`` point, and the third
     will clear both points.
 
-``vo-cmdline "<args>"``
-    Reset the sub-option of the current VO. Currently works with ``opengl``
-    (including ``opengl-hq``). The argument is the sub-option string usually
-    passed to the VO on the command line. Not all sub-options can be set, but
-    those which can will be reset even if they don't appear in the argument.
-    This command might be changed or removed in the future.
-
 ``drop-buffers``
     Drop audio/video/demuxer buffers, and restart from fresh. Might help with
     unseekable streams that are going out of sync.

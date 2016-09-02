@@ -101,7 +101,6 @@ enum mp_voctrl {
     // Retrieve window contents. (Normal screenshots use vo_get_current_frame().)
     VOCTRL_SCREENSHOT_WIN,              // struct mp_image**
 
-    VOCTRL_SET_COMMAND_LINE,            // char**
     VOCTRL_UPDATE_RENDER_OPTS,
 
     VOCTRL_GET_ICC_PROFILE,             // bstr*

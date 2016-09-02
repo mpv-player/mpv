@@ -5205,19 +5205,6 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
     }
 
-    case MP_CMD_VO_CMDLINE:
-        if (mpctx->video_out) {
-            char *s = cmd->args[0].v.s;
-            MP_INFO(mpctx, "Setting vo cmd line to '%s'.\n", s);
-            if (vo_control(mpctx->video_out, VOCTRL_SET_COMMAND_LINE, s) > 0) {
-                set_osd_msg(mpctx, osdl, osd_duration, "vo='%s'", s);
-            } else {
-                set_osd_msg(mpctx, osdl, osd_duration, "Failed!");
-                return -1;
-            }
-        }
-        break;
-
     case MP_CMD_AO_RELOAD:
         reload_audio_output(mpctx);
         break;
