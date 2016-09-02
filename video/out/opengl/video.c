@@ -594,6 +594,19 @@ static void uninit_rendering(struct gl_video *p)
     gl_sc_reset_error(p->sc);
 }
 
+bool gl_video_gamma_auto_enabled(struct gl_video *p)
+{
+    return p->opts.gamma_auto;
+}
+
+struct mp_colorspace gl_video_get_output_colorspace(struct gl_video *p)
+{
+    return (struct mp_colorspace) {
+        .primaries = p->opts.target_prim,
+        .gamma = p->opts.target_trc,
+    };
+}
+
 // Warning: profile.start must point to a ta allocation, and the function
 //          takes over ownership.
 void gl_video_set_icc_profile(struct gl_video *p, bstr icc_data)
