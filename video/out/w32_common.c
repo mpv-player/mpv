@@ -114,6 +114,8 @@ struct vo_w32_state {
     UINT tbtnCreatedMsg;
     bool tbtnCreated;
 
+    struct voctrl_playback_state current_pstate;
+
     // updates on move/resize/displaychange
     double display_fps;
 
@@ -676,6 +678,26 @@ static void force_update_display_info(struct vo_w32_state *w32)
     update_display_info(w32);
 }
 
+static void update_playback_state(struct vo_w32_state *w32)
+{
+    struct voctrl_playback_state *pstate = &w32->current_pstate;
+
+    if (!w32->taskbar_list3 || !w32->tbtnCreated)
+        return;
+
+    if (!pstate->playing || !pstate->taskbar_progress) {
+        ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
+                                       TBPF_NOPROGRESS);
+        return;
+    }
+
+    ITaskbarList3_SetProgressValue(w32->taskbar_list3, w32->window,
+                                   pstate->percent_pos, 100);
+    ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
+                                   pstate->paused ? TBPF_PAUSED :
+                                                    TBPF_NORMAL);
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
@@ -876,6 +898,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 
     if (message == w32->tbtnCreatedMsg) {
         w32->tbtnCreated = true;
+        update_playback_state(w32);
         return 0;
     }
 
@@ -1532,23 +1555,9 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_UPDATE_PLAYBACK_STATE: {
-        struct voctrl_playback_state *pstate =
-            (struct voctrl_playback_state *)arg;
+        w32->current_pstate = *(struct voctrl_playback_state *)arg;
 
-        if (!w32->taskbar_list3 || !w32->tbtnCreated)
-            return VO_TRUE;
-
-        if (!pstate->playing || !pstate->taskbar_progress) {
-            ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
-                                           TBPF_NOPROGRESS);
-            return VO_TRUE;
-        }
-
-        ITaskbarList3_SetProgressValue(w32->taskbar_list3, w32->window,
-                                       pstate->percent_pos, 100);
-        ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
-                                       pstate->paused ? TBPF_PAUSED :
-                                                        TBPF_NORMAL);
+        update_playback_state(w32);
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_FPS:
