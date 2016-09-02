@@ -221,7 +221,7 @@ struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
     return m_config_new(talloc_ctx, log, 0, desc->priv_defaults, desc->options);
 }
 
-int m_config_set_obj_params(struct m_config *conf, char **args)
+static int m_config_set_obj_params(struct m_config *conf, char **args)
 {
     for (int n = 0; args && args[n * 2 + 0]; n++) {
         int r = m_config_set_option(conf, bstr0(args[n * 2 + 0]),
@@ -232,8 +232,8 @@ int m_config_set_obj_params(struct m_config *conf, char **args)
     return 0;
 }
 
-int m_config_apply_defaults(struct m_config *config, const char *name,
-                            struct m_obj_settings *defaults)
+static int m_config_apply_defaults(struct m_config *config, const char *name,
+                                   struct m_obj_settings *defaults)
 {
     int r = 0;
     for (int n = 0; defaults && defaults[n].name; n++) {
@@ -244,6 +244,22 @@ int m_config_apply_defaults(struct m_config *config, const char *name,
         }
     }
     return r;
+}
+
+struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
+    struct mp_log *log, struct mpv_global *global, struct m_obj_desc *desc,
+    const char *name, struct m_obj_settings *defaults, char **args)
+{
+    struct m_config *config = m_config_from_obj_desc(ta_parent, log, desc);
+    if (m_config_apply_defaults(config, name, defaults) < 0)
+        goto error;
+    if (m_config_set_obj_params(config, args) < 0)
+        goto error;
+
+    return config;
+error:
+    talloc_free(config);
+    return NULL;
 }
 
 static void ensure_backup(struct m_config *config, struct m_config_option *co)

@@ -248,10 +248,9 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     mp_input_set_mouse_transform(vo->input_ctx, NULL, NULL);
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
         goto error;
-    vo->config = m_config_from_obj_desc(vo, vo->log, &desc);
-    if (m_config_apply_defaults(vo->config, name, vo->opts->vo_defs) < 0)
-        goto error;
-    if (m_config_set_obj_params(vo->config, args) < 0)
+    vo->config = m_config_from_obj_desc_and_args(vo, vo->log, global, &desc,
+                                                 name, vo->opts->vo_defs, args);
+    if (!vo->config)
         goto error;
     vo->priv = vo->config->optstruct;
 

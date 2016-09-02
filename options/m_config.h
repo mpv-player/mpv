@@ -106,12 +106,9 @@ struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
                                                 struct mp_log *log,
                                                 struct m_obj_desc *desc);
 
-int m_config_set_obj_params(struct m_config *conf, char **args);
-
-// Search for the object with the given name in the defaults list, and apply
-// its parameters.
-int m_config_apply_defaults(struct m_config *config, const char *name,
-                            struct m_obj_settings *defaults);
+struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
+    struct mp_log *log, struct mpv_global *global, struct m_obj_desc *desc,
+    const char *name, struct m_obj_settings *defaults, char **args);
 
 // Make sure the option is backed up. If it's already backed up, do nothing.
 // All backed up options can be restored with m_config_restore_backups().

@@ -145,10 +145,10 @@ static struct ao *ao_alloc(bool probing, struct mpv_global *global,
         .def_buffer = opts->audio_buffer,
         .client_name = talloc_strdup(ao, opts->audio_client_name),
     };
-    struct m_config *config = m_config_from_obj_desc(ao, ao->log, &desc);
-    if (m_config_apply_defaults(config, name, opts->ao_defs) < 0)
-        goto error;
-    if (m_config_set_obj_params(config, args) < 0)
+    struct m_config *config =
+        m_config_from_obj_desc_and_args(ao, ao->log, global, &desc,
+                                        name, opts->ao_defs, args);
+    if (!config)
         goto error;
     ao->priv = config->optstruct;
     return ao;
