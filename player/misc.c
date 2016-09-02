@@ -131,7 +131,7 @@ bool mp_get_cache_idle(struct MPContext *mpctx)
 
 void update_vo_playback_state(struct MPContext *mpctx)
 {
-    if (mpctx->video_out) {
+    if (mpctx->video_out && mpctx->video_out->config_ok) {
         struct voctrl_playback_state oldstate = mpctx->vo_playback_state;
         struct voctrl_playback_state newstate = {
             .taskbar_progress = mpctx->opts->vo->taskbar_progress,
