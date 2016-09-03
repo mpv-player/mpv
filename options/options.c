@@ -469,6 +469,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("osd", osd_style, osd_style_conf, 0),
     OPT_SUBSTRUCT("sub-text", sub_text_style, sub_style_conf, 0),
     OPT_FLAG("sub-clear-on-seek", sub_clear_on_seek, 0),
+    OPT_INTRANGE("teletext-page", teletext_page, 0, 1, 999),
 
 //---------------------- libao/libvo options ------------------------
     OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list, ),
@@ -776,6 +777,7 @@ const struct MPOpts mp_default_opts = {
     .sub_use_margins = 1,
     .ass_scale_with_window = 0,
     .sub_scale_with_window = 1,
+    .teletext_page = 100,
 #if HAVE_LUA
     .lua_load_osc = 1,
     .lua_load_ytdl = 1,

@@ -22,6 +22,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/common.h>
 #include <libavutil/intreadwrite.h>
+#include <libavutil/opt.h>
 
 #include "config.h"
 
@@ -106,6 +107,9 @@ static int init(struct sd *sd)
     // Supported codecs must be known to decode to paletted bitmaps
     switch (cid) {
     case AV_CODEC_ID_DVB_SUBTITLE:
+#if LIBAVCODEC_VERSION_MICRO >= 100
+    case AV_CODEC_ID_DVB_TELETEXT:
+#endif
     case AV_CODEC_ID_HDMV_PGS_SUBTITLE:
     case AV_CODEC_ID_XSUB:
     case AV_CODEC_ID_DVD_SUBTITLE:
@@ -339,6 +343,13 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         MP_WARN(sd, "Subtitle with unknown start time.\n");
 
     mp_set_av_packet(&pkt, packet, &priv->pkt_timebase);
+
+    if (ctx->codec_id == AV_CODEC_ID_DVB_TELETEXT) {
+        char page[4];
+        snprintf(page, sizeof(page), "%d", opts->teletext_page);
+        av_opt_set(ctx, "txt_page", page, AV_OPT_SEARCH_CHILDREN);
+    }
+
     int got_sub;
     int res = avcodec_decode_subtitle2(ctx, &sub, &got_sub, &pkt);
     if (res < 0 || !got_sub)

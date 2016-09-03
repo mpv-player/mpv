@@ -1795,6 +1795,10 @@ Subtitles
     of subtitles across seeks, so after a seek libass can't eliminate subtitle
     packets with the same ReadOrder as earlier packets.
 
+``--teletext-page=<1-999>``
+    This works for ``dvb_teletext`` subtitle streams, and if FFmpeg has been
+    compiled with support for it.
+
 Window
 ------
 

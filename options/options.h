@@ -281,6 +281,7 @@ typedef struct MPOpts {
     int ass_hinting;
     int ass_shaper;
     int sub_clear_on_seek;
+    int teletext_page;
 
     int hwdec_api;
     char *hwdec_codecs;
