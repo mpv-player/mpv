@@ -49,6 +49,7 @@ Interface changes
     - deprecate --vo-defaults (no replacement)
     - remove the vo-cmdline command. You can set OpenGL renderer options
       directly via properties instead.
+    - deprecate the ao and vo auto-profiles (they never made any sense)
  --- mpv 0.20.0 ---
     - add --image-display-duration option - this also means that image duration
       is not influenced by --mf-fps anymore in the general case (this is an

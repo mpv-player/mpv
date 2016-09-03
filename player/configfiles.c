@@ -137,6 +137,8 @@ static void mp_auto_load_profile(struct MPContext *mpctx, char *category,
     m_profile_t *p = m_config_get_profile0(mpctx->mconfig, t);
     if (p) {
         MP_INFO(mpctx, "Auto-loading profile '%s'\n", t);
+        if (strcmp(category, "ao") == 0 || strcmp(category, "vo") == 0)
+            MP_WARN(mpctx, "'%s' auto profiles are deprecated.\n", category);
         m_config_set_profile(mpctx->mconfig, t, FILE_LOCAL_FLAGS);
     }
 }
