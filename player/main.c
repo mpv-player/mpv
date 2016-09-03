@@ -143,7 +143,6 @@ static const char def_config[] =
     "correct-downscaling=yes\n"
     "sigmoid-upscaling=yes\n"
     "deband=yes\n"
-    "opengl-es=no\n"
 ;
 
 static pthread_mutex_t terminal_owner_lock = PTHREAD_MUTEX_INITIALIZER;
