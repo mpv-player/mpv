@@ -372,8 +372,9 @@ const char *mpv_client_name(mpv_handle *ctx);
  *
  * Some API functions will return MPV_ERROR_UNINITIALIZED in the uninitialized
  * state. You can call mpv_set_option() (or mpv_set_option_string() and other
- * variants) to set initial options. After this, call mpv_initialize() to start
- * the player, and then use e.g. mpv_command() to start playback of a file.
+ * variants, and in mpv 0.21.0 or later mpv_set_property() etc.) to set initial
+ * options. After this, call mpv_initialize() to start the player, and then use
+ * e.g. mpv_command() to start playback of a file.
  *
  * The point of separating handle creation and actual initialization is that
  * you can configure things which can't be changed during runtime.
@@ -787,6 +788,14 @@ void mpv_free_node_contents(mpv_node *node);
  * Using a format other than MPV_FORMAT_NODE is equivalent to constructing a
  * mpv_node with the given format and data, and passing the mpv_node to this
  * function.
+ *
+ * Note: for most purposes, this is not needed anymore. Starting with mpv
+ *       version 0.21.0 (version 1.23) most options can be set with
+ *       mpv_set_property() (and related functions), and even before
+ *       mpv_initialize(). In some obscure corner cases, using this function
+ *       to set options might still be required (see section "Inconsistencies
+ *       between options and properties" on the manpage). Once these are
+ *       resolved, the option setting functions might be deprecated.
  *
  * @param name Option name. This is the same as on the mpv command line, but
  *             without the leading "--".
