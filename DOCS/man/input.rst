@@ -2082,6 +2082,19 @@ caveats with some properties (due to historical reasons):
     If a VO is created, this will return either the actual display FPS, or
     an invalid value, instead of the option value.
 
+``audio-file``, ``sub-file``, ``external-file``
+    These options/properties are actually lists of filenames. To make the
+    command-line interface easier, each ``--audio-file=...`` option appends
+    the full string to the internal list. However, when used as properties,
+    every time you set the property as a string the internal list will be
+    replaced with a single entry containing the string you set. ``,`` or other
+    separators are never used. You have to use ``MPV_FORMAT_NODE_ARRAY`` (or
+    corresponding API, e.g. ``mp.set_property_native()`` with a table in Lua)
+    to set multiple entries.
+
+    Strictly speaking, option access via API (e.g. ``mpv_set_option_string()``)
+    has the same problem, and it's only a difference between CLI/API.
+
 ``demuxer``, ``idle``, ``length``, ``audio-samplerate``, ``audio-channels``, ``audio-format``, ``fps``, ``cache``
     These behave completely different as property, but are deprecated (newer
     aliases which don't conflict have been added). After the deprecation period
