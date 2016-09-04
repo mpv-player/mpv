@@ -70,6 +70,8 @@ void mp_process_input(struct MPContext *mpctx)
         mp_cmd_free(cmd);
         mp_dispatch_queue_process(mpctx->dispatch, 0);
     }
+    while (mpctx->suspend_count)
+        mp_dispatch_queue_process(mpctx->dispatch, 100);
 }
 
 double get_relative_time(struct MPContext *mpctx)

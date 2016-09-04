@@ -15,8 +15,6 @@ void mp_dispatch_enqueue_autofree(struct mp_dispatch_queue *queue,
 void mp_dispatch_run(struct mp_dispatch_queue *queue,
                      mp_dispatch_fn fn, void *fn_data);
 void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout);
-void mp_dispatch_suspend(struct mp_dispatch_queue *queue);
-void mp_dispatch_resume(struct mp_dispatch_queue *queue);
 void mp_dispatch_lock(struct mp_dispatch_queue *queue);
 void mp_dispatch_unlock(struct mp_dispatch_queue *queue);
 

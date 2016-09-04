@@ -230,7 +230,7 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
 // not a synchronization mechanism; it merely makes sure the target thread does
 // not leave mp_dispatch_queue_process(), even if it's done. mp_dispatch_lock()
 // can be used for exclusive access.
-void mp_dispatch_suspend(struct mp_dispatch_queue *queue)
+static void mp_dispatch_suspend(struct mp_dispatch_queue *queue)
 {
     pthread_mutex_lock(&queue->lock);
     queue->suspend_requested++;
@@ -247,7 +247,7 @@ void mp_dispatch_suspend(struct mp_dispatch_queue *queue)
 }
 
 // Undo mp_dispatch_suspend().
-void mp_dispatch_resume(struct mp_dispatch_queue *queue)
+static void mp_dispatch_resume(struct mp_dispatch_queue *queue)
 {
     pthread_mutex_lock(&queue->lock);
     assert(queue->suspended);

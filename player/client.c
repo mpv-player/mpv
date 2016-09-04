@@ -330,8 +330,11 @@ void mpv_suspend(mpv_handle *ctx)
     }
     pthread_mutex_unlock(&ctx->lock);
 
-    if (do_suspend)
-        mp_dispatch_suspend(ctx->mpctx->dispatch);
+    if (do_suspend) {
+        mp_dispatch_lock(ctx->mpctx->dispatch);
+        ctx->mpctx->suspend_count++;
+        mp_dispatch_unlock(ctx->mpctx->dispatch);
+    }
 }
 
 void mpv_resume(mpv_handle *ctx)
@@ -347,8 +350,11 @@ void mpv_resume(mpv_handle *ctx)
     }
     pthread_mutex_unlock(&ctx->lock);
 
-    if (do_resume)
-        mp_dispatch_resume(ctx->mpctx->dispatch);
+    if (do_resume) {
+        mp_dispatch_lock(ctx->mpctx->dispatch);
+        ctx->mpctx->suspend_count--;
+        mp_dispatch_unlock(ctx->mpctx->dispatch);
+    }
 }
 
 void mp_resume_all(mpv_handle *ctx)
@@ -358,8 +364,11 @@ void mp_resume_all(mpv_handle *ctx)
     ctx->suspend_count = 0;
     pthread_mutex_unlock(&ctx->lock);
 
-    if (do_resume)
-        mp_dispatch_resume(ctx->mpctx->dispatch);
+    if (do_resume) {
+        mp_dispatch_lock(ctx->mpctx->dispatch);
+        ctx->mpctx->suspend_count--;
+        mp_dispatch_unlock(ctx->mpctx->dispatch);
+    }
 }
 
 static void lock_core(mpv_handle *ctx)
