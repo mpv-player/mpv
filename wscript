@@ -875,6 +875,12 @@ hwaccel_features = [
                     check_headers('libavcodec/dxva2.h',  use='libav'),
                     check_headers('libavcodec/d3d11va.h',  use='libav')),
     }, {
+        'name': '--cuda-gl',
+        'desc': 'CUDA with OpenGL',
+        'func': compose_checks(
+                    check_cc(lib="cuda"),
+                    check_headers('libavutil/hwcontext_cuda.h',  use='libav')),
+    }, {
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',
         'deps_any': [ 'd3d-hwaccel', 'vaapi-hwaccel' ],

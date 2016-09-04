@@ -133,6 +133,7 @@ extern const struct vd_lavc_hwdec mp_vd_lavc_dxva2;
 extern const struct vd_lavc_hwdec mp_vd_lavc_dxva2_copy;
 extern const struct vd_lavc_hwdec mp_vd_lavc_d3d11va;
 extern const struct vd_lavc_hwdec mp_vd_lavc_d3d11va_copy;
+extern const struct vd_lavc_hwdec mp_vd_lavc_cuda;
 
 #if HAVE_RPI
 static const struct vd_lavc_hwdec mp_vd_lavc_rpi = {
@@ -173,6 +174,9 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #endif
 #if HAVE_ANDROID
     &mp_vd_lavc_mediacodec,
+#endif
+#if HAVE_CUDA_GL
+    &mp_vd_lavc_cuda,
 #endif
     NULL
 };
