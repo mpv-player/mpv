@@ -33,6 +33,7 @@ extern const struct gl_hwdec_driver gl_hwdec_d3d11egl;
 extern const struct gl_hwdec_driver gl_hwdec_d3d11eglrgb;
 extern const struct gl_hwdec_driver gl_hwdec_dxva2gldx;
 extern const struct gl_hwdec_driver gl_hwdec_dxva2;
+extern const struct gl_hwdec_driver gl_hwdec_cuda;
 
 static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
 #if HAVE_VAAPI_EGL
@@ -57,6 +58,9 @@ static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
     &gl_hwdec_dxva2gldx,
 #endif
     &gl_hwdec_dxva2,
+#endif
+#if HAVE_CUDA_GL
+    &gl_hwdec_cuda,
 #endif
     NULL
 };

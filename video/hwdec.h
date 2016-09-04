@@ -21,6 +21,7 @@ enum hwdec_type {
     HWDEC_D3D11VA_COPY,
     HWDEC_RPI,
     HWDEC_MEDIACODEC,
+    HWDEC_CUDA,
 };
 
 #define HWDEC_IS_AUTO(x) ((x) == HWDEC_AUTO || (x) == HWDEC_AUTO_COPY)
