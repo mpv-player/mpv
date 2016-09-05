@@ -58,6 +58,8 @@ enum {
     AO_INIT_SAFE_MULTICHANNEL_ONLY = 1 << 1,
     // Stream silence as long as no audio is playing.
     AO_INIT_STREAM_SILENCE = 1 << 2,
+    // Force exclusive mode, i.e. lock out the system mixer.
+    AO_INIT_EXCLUSIVE = 1 << 3,
 };
 
 typedef struct ao_control_vol {

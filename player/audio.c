@@ -382,6 +382,9 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
         if (opts->audio_stream_silence)
             ao_flags |= AO_INIT_STREAM_SILENCE;
 
+        if (opts->audio_exclusive)
+            ao_flags |= AO_INIT_EXCLUSIVE;
+
         if (af_fmt_is_pcm(afs->output.format)) {
             if (!opts->audio_output_channels.set ||
                 opts->audio_output_channels.auto_safe)

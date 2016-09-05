@@ -86,6 +86,7 @@ typedef struct MPOpts {
 
     struct m_obj_settings *audio_driver_list, *ao_defs;
     char *audio_device;
+    int audio_exclusive;
     char *audio_client_name;
     int ao_null_fallback;
     int audio_stream_silence;

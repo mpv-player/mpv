@@ -481,6 +481,7 @@ const m_option_t mp_opts[] = {
     OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list,
                      .deprecation_message = "deprecated, use global options"),
     OPT_STRING("audio-device", audio_device, 0),
+    OPT_FLAG("audio-exclusive", audio_exclusive, 0),
     OPT_STRING("audio-client-name", audio_client_name, 0),
     OPT_FLAG("audio-fallback-to-null", ao_null_fallback, 0),
     OPT_FLAG("audio-stream-silence", audio_stream_silence, 0),

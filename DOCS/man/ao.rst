@@ -107,9 +107,11 @@ Available audio output drivers are:
         utility. Note that this does not affect the selected speaker setup.
 
     ``--coreaudio-exclusive``
+        Deprecated, use ``--audio-exclusive``.
         Use exclusive mode access. This merely redirects to
         ``coreaudio_exclusive``, but should be preferred over using that AO
         directly.
+
 
 ``coreaudio_exclusive`` (Mac OS X only)
     Native Mac OS X audio output driver using direct device access and
@@ -263,6 +265,7 @@ Available audio output drivers are:
     The following global options are supported by this audio output:
 
     ``--ao-wasapi-exclusive``
+        Deprecated, use ``--audio-exclusive``.
         Requests exclusive, direct hardware access. By definition prevents
         sound playback of any other program until mpv exits.
     ``--ao-wasapi-device=<id>``
