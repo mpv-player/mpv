@@ -40,6 +40,7 @@
 #include "stream/stream.h"
 #include "video/csputils.h"
 #include "video/hwdec.h"
+#include "video/image_writer.h"
 #include "sub/osd.h"
 #include "audio/filter/af.h"
 #include "audio/decode/dec_audio.h"
@@ -72,7 +73,6 @@ extern const struct m_sub_options vd_lavc_conf;
 extern const struct m_sub_options ad_lavc_conf;
 extern const struct m_sub_options input_config;
 extern const struct m_sub_options encode_config;
-extern const struct m_sub_options image_writer_conf;
 extern const struct m_sub_options gl_video_conf;
 extern const struct m_sub_options ao_alsa_conf;
 
@@ -97,6 +97,12 @@ const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"rpi",         HWDEC_RPI},
     {"mediacodec",  HWDEC_MEDIACODEC},
     {0}
+};
+
+static const struct m_sub_options screenshot_conf = {
+    .opts = image_writer_opts,
+    .size = sizeof(struct image_writer_opts),
+    .defaults = &image_writer_opts_defaults,
 };
 
 #define OPT_BASE_STRUCT struct mp_vo_opts
@@ -632,7 +638,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("input-file", input_file, M_OPT_FILE | M_OPT_GLOBAL),
     OPT_STRING("input-ipc-server", ipc_path, M_OPT_FILE | M_OPT_FIXED),
 
-    OPT_SUBSTRUCT("screenshot", screenshot_image_opts, image_writer_conf, 0),
+    OPT_SUBSTRUCT("screenshot", screenshot_image_opts, screenshot_conf, 0),
     OPT_STRING("screenshot-template", screenshot_template, 0),
     OPT_STRING("screenshot-directory", screenshot_directory, 0),
 

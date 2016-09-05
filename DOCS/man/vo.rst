@@ -381,7 +381,9 @@ Available video output drivers are:
     Output each frame into an image file in the current directory. Each file
     takes the frame number padded with leading zeros as name.
 
-    ``format=<format>``
+    The following global options are supported by this video output:
+
+    ``--vo-image-format=<format>``
         Select the image file format.
 
         jpg
@@ -399,24 +401,24 @@ Available video output drivers are:
         tga
             Truevision TGA.
 
-    ``png-compression=<0-9>``
+    ``--vo-image-png-compression=<0-9>``
         PNG compression factor (speed vs. file size tradeoff) (default: 7)
-    ``png-filter=<0-5>``
+    ``--vo-image-png-filter=<0-5>``
         Filter applied prior to PNG compression (0 = none; 1 = sub; 2 = up;
         3 = average; 4 = Paeth; 5 = mixed) (default: 5)
-    ``jpeg-quality=<0-100>``
+    ``--vo-image-jpeg-quality=<0-100>``
         JPEG quality factor (default: 90)
-    ``(no-)jpeg-progressive``
+    ``--vo-image-jpeg-progressive=<yes|no>``
         Specify standard or progressive JPEG (default: no).
-    ``(no-)jpeg-baseline``
+    ``--vo-image-jpeg-baseline=<yes|no>``
         Specify use of JPEG baseline or not (default: yes).
-    ``jpeg-optimize=<0-100>``
+    ``--vo-image-jpeg-optimize=<0-100>``
         JPEG optimization factor (default: 100)
-    ``jpeg-smooth=<0-100>``
+    ``--vo-image-jpeg-smooth=<0-100>``
         smooth factor (default: 0)
-    ``jpeg-dpi=<1->``
+    ``--vo-image-jpeg-dpi=<1->``
         JPEG DPI (default: 72)
-    ``outdir=<dirname>``
+    ``--vo-image-outdir=<dirname>``
         Specify the directory to save the image files to (default: ``./``).
 
 ``wayland`` (Wayland only)

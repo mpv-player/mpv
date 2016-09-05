@@ -54,20 +54,16 @@ const struct image_writer_opts image_writer_opts_defaults = {
 
 #define OPT_BASE_STRUCT struct image_writer_opts
 
-const struct m_sub_options image_writer_conf = {
-    .opts = (const m_option_t[]) {
-        OPT_INTRANGE("jpeg-quality", jpeg_quality, 0, 0, 100),
-        OPT_INTRANGE("jpeg-smooth", jpeg_smooth, 0, 0, 100),
-        OPT_FLAG("jpeg-source-chroma", jpeg_source_chroma, 0),
-        OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
-        OPT_INTRANGE("png-filter", png_filter, 0, 0, 5),
-        OPT_STRING("format", format, 0),
-        OPT_FLAG("high-bit-depth", high_bit_depth, 0),
-        OPT_FLAG("tag-colorspace", tag_csp, 0),
-        {0},
-    },
-    .size = sizeof(struct image_writer_opts),
-    .defaults = &image_writer_opts_defaults,
+const struct m_option image_writer_opts[] = {
+    OPT_INTRANGE("jpeg-quality", jpeg_quality, 0, 0, 100),
+    OPT_INTRANGE("jpeg-smooth", jpeg_smooth, 0, 0, 100),
+    OPT_FLAG("jpeg-source-chroma", jpeg_source_chroma, 0),
+    OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
+    OPT_INTRANGE("png-filter", png_filter, 0, 0, 5),
+    OPT_STRING("format", format, 0),
+    OPT_FLAG("high-bit-depth", high_bit_depth, 0),
+    OPT_FLAG("tag-colorspace", tag_csp, 0),
+    {0},
 };
 
 struct image_writer_ctx {
