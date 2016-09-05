@@ -80,6 +80,9 @@ struct m_opt_backup {
     void *backup;
 };
 
+static struct m_config_option *m_config_get_co_raw(const struct m_config *config,
+                                                   struct bstr name);
+
 static int parse_include(struct m_config *config, struct bstr param, bool set,
                          int flags)
 {
@@ -319,7 +322,7 @@ struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
             struct m_config_option *co = &config->opts[n];
             char opt[100];
             snprintf(opt, sizeof(opt), "%s-%s", desc->legacy_prefix, co->name);
-            struct m_config_option *g = m_config_get_co(root, bstr0(opt));
+            struct m_config_option *g = m_config_get_co_raw(root, bstr0(opt));
             assert(g);
             m_option_copy(co->opt, co->data, g->data);
         }
@@ -539,8 +542,8 @@ static void m_config_add_option(struct m_config *config,
         MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
 }
 
-struct m_config_option *m_config_get_co(const struct m_config *config,
-                                        struct bstr name)
+static struct m_config_option *m_config_get_co_raw(const struct m_config *config,
+                                                   struct bstr name)
 {
     if (!name.len)
         return NULL;
@@ -548,52 +551,60 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
     for (int n = 0; n < config->num_opts; n++) {
         struct m_config_option *co = &config->opts[n];
         struct bstr coname = bstr0(co->name);
-        bool matches = false;
         if ((co->opt->type->flags & M_OPT_TYPE_ALLOW_WILDCARD)
                 && bstr_endswith0(coname, "*")) {
             coname.len--;
             if (bstrcmp(bstr_splice(name, 0, coname.len), coname) == 0)
-                matches = true;
-        } else if (bstrcmp(coname, name) == 0)
-            matches = true;
-        if (matches) {
-            const char *prefix = config->is_toplevel ? "--" : "";
-            if (co->opt->type == &m_option_type_alias) {
-                const char *alias = (const char *)co->opt->priv;
-                // deprecation_message is not used, but decides whether it's a
-                // proper or deprecated alias.
-                if (co->opt->deprecation_message && !co->warning_was_printed) {
-                    MP_WARN(config, "Warning: option %s%s was replaced with "
-                            "%s%s and might be removed in the future.\n",
-                            prefix, co->name, prefix, alias);
-                    co->warning_was_printed = true;
-                }
-                return m_config_get_co(config, bstr0(alias));
-            } else if (co->opt->type == &m_option_type_removed) {
-                if (!co->warning_was_printed) {
-                    char *msg = co->opt->priv;
-                    if (msg) {
-                        MP_FATAL(config, "Option %s%s was removed: %s\n",
-                                 prefix, co->name, msg);
-                    } else {
-                        MP_FATAL(config, "Option %s%s was removed.\n",
-                                 prefix, co->name);
-                    }
-                    co->warning_was_printed = true;
-                }
-                return NULL;
-            } else if (co->opt->deprecation_message) {
-                if (!co->warning_was_printed) {
-                    MP_WARN(config, "Warning: option %s%s is deprecated "
-                            "and might be removed in the future (%s).\n",
-                            prefix, co->name, co->opt->deprecation_message);
-                    co->warning_was_printed = true;
-                }
-            }
+                return co;
+        } else if (bstrcmp(coname, name) == 0) {
             return co;
         }
     }
+
     return NULL;
+}
+
+struct m_config_option *m_config_get_co(const struct m_config *config,
+                                        struct bstr name)
+{
+    struct m_config_option *co = m_config_get_co_raw(config, name);
+    if (!co)
+        return NULL;
+
+    const char *prefix = config->is_toplevel ? "--" : "";
+    if (co->opt->type == &m_option_type_alias) {
+        const char *alias = (const char *)co->opt->priv;
+        // deprecation_message is not used, but decides whether it's a
+        // proper or deprecated alias.
+        if (co->opt->deprecation_message && !co->warning_was_printed) {
+            MP_WARN(config, "Warning: option %s%s was replaced with "
+                    "%s%s and might be removed in the future.\n",
+                    prefix, co->name, prefix, alias);
+            co->warning_was_printed = true;
+        }
+        return m_config_get_co(config, bstr0(alias));
+    } else if (co->opt->type == &m_option_type_removed) {
+        if (!co->warning_was_printed) {
+            char *msg = co->opt->priv;
+            if (msg) {
+                MP_FATAL(config, "Option %s%s was removed: %s\n",
+                         prefix, co->name, msg);
+            } else {
+                MP_FATAL(config, "Option %s%s was removed.\n",
+                         prefix, co->name);
+            }
+            co->warning_was_printed = true;
+        }
+        return NULL;
+    } else if (co->opt->deprecation_message) {
+        if (!co->warning_was_printed) {
+            MP_WARN(config, "Warning: option %s%s is deprecated "
+                    "and might be removed in the future (%s).\n",
+                    prefix, co->name, co->opt->deprecation_message);
+            co->warning_was_printed = true;
+        }
+    }
+    return co;
 }
 
 int m_config_get_co_count(struct m_config *config)
