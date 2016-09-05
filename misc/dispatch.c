@@ -30,13 +30,18 @@ struct mp_dispatch_queue {
     pthread_cond_t cond;
     void (*wakeup_fn)(void *wakeup_ctx);
     void *wakeup_ctx;
-    // The target thread is blocked by mp_dispatch_queue_process().
+    // The target thread is blocked by mp_dispatch_queue_process(). Note that
+    // mp_dispatch_lock() can set this from true to false to keep the thread
+    // blocked (this stops if from processing other dispatch items, and from
+    // other threads to return from mp_dispatch_lock(), making it an exclusive
+    // lock).
     bool idling;
     // A mp_dispatch_lock() call is requesting an exclusive lock.
     bool lock_request;
     // Used to block out threads calling mp_dispatch_queue_process() while
     // they're externall locked via mp_dispatch_lock().
-    // We could use a simple counter, but with this we can perform some
+    // We could use a simple counter (increment it instead of adding a frame,
+    // also increment it when locking), but with this we can perform some
     // minimal debug checks.
     struct lock_frame *frame;
 };
@@ -44,6 +49,8 @@ struct mp_dispatch_queue {
 struct lock_frame {
     struct lock_frame *prev;
     pthread_t thread;
+    pthread_t locked_thread;
+    bool locked;
 };
 
 struct mp_dispatch_item {
@@ -201,7 +208,7 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
     if (queue->lock_request)
         pthread_cond_broadcast(&queue->cond);
     while (1) {
-        if (queue->lock_request || queue->frame != &frame) {
+        if (queue->lock_request || queue->frame != &frame || frame.locked) {
             // Block due to something having called mp_dispatch_lock(). This
             // is either a lock "acquire" (lock_request=true), or a lock in
             // progress, with the possibility the thread which called
@@ -209,7 +216,7 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
             // (the latter means we must ignore any queue state changes,
             // until it has been unlocked again).
             pthread_cond_wait(&queue->cond, &queue->lock);
-            if (queue->frame == &frame)
+            if (queue->frame == &frame && !frame.locked)
                 assert(queue->idling);
         } else if (queue->head) {
             struct mp_dispatch_item *item = queue->head;
@@ -245,6 +252,7 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
         wait = 0;
     }
     queue->idling = false;
+    assert(!frame.locked);
     assert(queue->frame == &frame);
     queue->frame = frame.prev;
     pthread_mutex_unlock(&queue->lock);
@@ -257,9 +265,6 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
 // and the mutex behavior applies to this function only.
 void mp_dispatch_lock(struct mp_dispatch_queue *queue)
 {
-    struct lock_frame *frame = talloc_zero(NULL, struct lock_frame);
-    frame->thread = pthread_self();
-
     pthread_mutex_lock(&queue->lock);
     // First grab the queue lock. Something else could be holding the lock.
     while (queue->lock_request)
@@ -278,9 +283,11 @@ void mp_dispatch_lock(struct mp_dispatch_queue *queue)
         pthread_cond_wait(&queue->cond, &queue->lock);
     }
     assert(queue->lock_request);
+    assert(queue->frame); // must be set if idling
+    assert(!queue->frame->locked); // no recursive locking on the same level
     // "Lock".
-    frame->prev = queue->frame;
-    queue->frame = frame;
+    queue->frame->locked = true;
+    queue->frame->locked_thread = pthread_self();
     // Reset state for recursive mp_dispatch_queue_process() calls.
     queue->lock_request = false;
     queue->idling = false;
@@ -291,13 +298,12 @@ void mp_dispatch_lock(struct mp_dispatch_queue *queue)
 void mp_dispatch_unlock(struct mp_dispatch_queue *queue)
 {
     pthread_mutex_lock(&queue->lock);
-    struct lock_frame *frame = queue->frame;
     // Must be called atfer a mp_dispatch_lock().
-    assert(frame);
-    assert(pthread_equal(frame->thread, pthread_self()));
+    assert(queue->frame);
+    assert(queue->frame->locked);
+    assert(pthread_equal(queue->frame->locked_thread, pthread_self()));
     // "Unlock".
-    queue->frame = frame->prev;
-    talloc_free(frame);
+    queue->frame->locked = false;
     // This must have been set to false during locking (except temporarily
     // during recursive mp_dispatch_queue_process() calls).
     assert(!queue->idling);
