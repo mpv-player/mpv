@@ -680,5 +680,6 @@ const struct vo_driver video_out_wayland = {
         OPT_FLAG("rgb565", use_rgb565, 0),
         {0}
     },
+    .legacy_prefix = "vo-wayland",
 };
 

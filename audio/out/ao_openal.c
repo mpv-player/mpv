@@ -359,4 +359,5 @@ const struct ao_driver audio_out_openal = {
         OPT_STRING_VALIDATE("device", cfg_device, 0, validate_device_opt),
         {0}
     },
+    .legacy_prefix = "ao-openal",
 };

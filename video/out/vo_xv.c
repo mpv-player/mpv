@@ -935,4 +935,5 @@ const struct vo_driver video_out_xv = {
         OPT_REMOVED("no-colorkey", "use ck-method=none instead"),
         {0}
     },
+    .legacy_prefix = "xv",
 };

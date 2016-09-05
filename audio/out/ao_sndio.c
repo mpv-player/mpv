@@ -323,4 +323,5 @@ const struct ao_driver audio_out_sndio = {
         OPT_STRING("device", dev, 0, OPTDEF_STR(SIO_DEVANY)),
         {0}
     },
+    .legacy_prefix = "ao-sndio",
 };

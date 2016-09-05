@@ -430,4 +430,5 @@ const struct ao_driver audio_out_coreaudio = {
         OPT_FLAG("exclusive", exclusive, 0),
         {0}
     },
+    .legacy_prefix = "coreaudio",
 };

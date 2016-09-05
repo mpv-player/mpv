@@ -30,6 +30,8 @@ Available audio output drivers are:
 ``alsa`` (Linux only)
     ALSA audio output driver
 
+    See `ALSA audio output options`_ for options specific to this AO.
+
     .. warning::
 
         To get multichannel/surround audio, use ``--audio-channels=auto``. The
@@ -45,11 +47,13 @@ Available audio output drivers are:
 ``oss``
     OSS audio output driver
 
-    ``<dsp-device>``
+    The following global options are supported by this audio output:
+
+    ``--oss-device``
         Sets the audio output device (default: ``/dev/dsp``).
-    ``<mixer-device>``
+    ``--oss-mixer-device``
         Sets the audio mixer device (default: ``/dev/mixer``).
-    ``<mixer-channel>``
+    ``--oss-mixer-channel``
         Sets the audio mixer channel (default: ``pcm``). Other valid values
         include **vol, pcm, line**. For a complete list of options look for
         ``SOUND_DEVICE_NAMES`` in ``/usr/include/linux/soundcard.h``.
@@ -91,7 +95,9 @@ Available audio output drivers are:
     Automatically redirects to ``coreaudio_exclusive`` when playing compressed
     formats.
 
-    ``change-physical-format=<yes|no>``
+    The following global options are supported by this audio output:
+
+    ``--coreaudio-change-physical-format=<yes|no>``
         Change the physical format to one similar to the requested audio format
         (default: no). This has the advantage that multichannel audio output
         will actually work. The disadvantage is that it will change the
@@ -99,7 +105,7 @@ Available audio output drivers are:
         setting in the ``Audio Devices`` dialog in the ``Audio MIDI Setup``
         utility. Note that this does not affect the selected speaker setup.
 
-    ``exclusive``
+    ``--coreaudio-exclusive``
         Use exclusive mode access. This merely redirects to
         ``coreaudio_exclusive``, but should be preferred over using that AO
         directly.
@@ -117,18 +123,20 @@ Available audio output drivers are:
 ``pulse``
     PulseAudio audio output driver
 
-    ``host=<host>``, ``sink=<sink>``
+    The following global options are supported by this audio output:
+
+    ``--pulse-host=<host>``, ``--pulse-sink=<sink>``
         Specify the host and optionally output sink to use. An empty <host>
         string uses a local connection, "localhost" uses network transfer
         (most likely not what you want).
 
-    ``buffer=<1-2000|native>``
+    ``--pulse-buffer=<1-2000|native>``
         Set the audio buffer size in milliseconds. A higher value buffers
         more data, and has a lower probability of buffer underruns. A smaller
         value makes the audio stream react faster, e.g. to playback speed
         changes. Default: 250.
 
-    ``latency-hacks=<yes|no>``
+    ``--pulse-latency-hacks=<yes|no>``
         Enable hacks to workaround PulseAudio timing bugs (default: no). If
         enabled, mpv will do elaborate latency calculations on its own. If
         disabled, it will use PulseAudio automatically updated timing
@@ -148,13 +156,15 @@ Available audio output drivers are:
               environments, such as systems where none of the other drivers
               are available.
 
-    ``buflen=<length>``
+    The following global options are supported by this audio output:
+
+    ``--sdl-buflen=<length>``
         Sets the audio buffer length in seconds. Is used only as a hint by the
         sound system. Playing a file with ``-v`` will show the requested and
         obtained exact buffer size. A value of 0 selects the sound system
         default.
 
-    ``bufcnt=<count>``
+    ``--sdl-bufcnt=<count>``
         Sets the number of extra audio buffers in mpv. Usually needs not be
         changed.
 
@@ -162,47 +172,51 @@ Available audio output drivers are:
     Produces no audio output but maintains video playback speed. Use
     ``--ao=null:untimed`` for benchmarking.
 
-    ``untimed``
+    The following global options are supported by this audio output:
+
+    ``--ao-null-untimed``
         Do not simulate timing of a perfect audio device. This means audio
         decoding will go as fast as possible, instead of timing it to the
         system clock.
 
-    ``buffer``
+    ``--ao-null-buffer``
         Simulated buffer length in seconds.
 
-    ``outburst``
+    ``--ao-null-outburst``
         Simulated chunk size in samples.
 
-    ``speed``
+    ``--ao-null-speed``
         Simulated audio playback speed as a multiplier. Usually, a real audio
         device will not go exactly as fast as the system clock. It will deviate
         just a little, and this option helps to simulate this.
 
-    ``latency``
+    ``--ao-null-latency``
         Simulated device latency. This is additional to EOF.
 
-    ``broken-eof``
+    ``--ao-null-broken-eof``
         Simulate broken audio drivers, which always add the fixed device
         latency to the reported audio playback position.
 
-    ``broken-delay``
+    ``--ao-null-broken-delay``
         Simulate broken audio drivers, which don't report latency correctly.
 
-    ``channel-layouts``
+    ``--ao-null-channel-layouts``
         If not empty, this is a ``,`` separated list of channel layouts the
         AO allows. This can be used to test channel layout selection.
 
 ``pcm``
     Raw PCM/WAVE file writer audio output
 
-    ``(no-)waveheader``
+    The following global options are supported by this audio output:
+
+    ``--ao-pcm-waveheader=<yes|no>``
         Include or do not include the WAVE header (default: included). When
         not included, raw PCM will be generated.
-    ``file=<filename>``
+    ``--ao-pcm-file=<filename>``
         Write the sound to ``<filename>`` instead of the default
         ``audiodump.wav``. If ``no-waveheader`` is specified, the default is
         ``audiodump.pcm``.
-    ``(no-)append``
+    ``--ao-pcm-append=<yes|no>``
         Append to the file, instead of overwriting it. Always use this with the
         ``no-waveheader`` option - with ``waveheader`` it's broken, because
         it will write a WAVE header every time the file is opened.
@@ -214,11 +228,13 @@ Available audio output drivers are:
               confused with RoarAudio, which is something completely
               different.
 
-    ``host=<name/path>``
+    The following global options are supported by this audio output:
+
+    ``--rsound-host=<name/path>``
         Set the address of the server (default: localhost).  Can be either a
         network hostname for TCP connections or a Unix domain socket path
         starting with '/'.
-    ``port=<number>``
+    ``--rsound-port=<number>``
         Set the TCP port used for connecting to the server (default: 12345).
         Not used if connecting to a Unix domain socket.
 
@@ -230,16 +246,20 @@ Available audio output drivers are:
     (Note: only supports mono, stereo, 4.0, 5.1 and 7.1 channel
     layouts.)
 
-    ``device=<device>``
+    The following global options are supported by this audio output:
+
+    ``--ao-sndio-device=<device>``
         sndio device to use (default: ``$AUDIODEVICE``, resp. ``snd0``).
 
 ``wasapi``
     Audio output to the Windows Audio Session API.
 
-    ``exclusive``
+    The following global options are supported by this audio output:
+
+    ``--ao-wasapi-exclusive``
         Requests exclusive, direct hardware access. By definition prevents
         sound playback of any other program until mpv exits.
-    ``device=<id>``
+    ``--ao-wasapi-device=<id>``
         Uses the requested endpoint instead of the system's default audio
         endpoint. Both an ordinal number (0,1,2,...) and the GUID
         String are valid; the GUID string is guaranteed to not change

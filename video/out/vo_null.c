@@ -101,4 +101,5 @@ const struct vo_driver video_out_null = {
         OPT_DOUBLE("fps", cfg_fps, M_OPT_RANGE, .min = 0, .max = 10000),
         {0},
     },
+    .legacy_prefix = "vo-null",
 };

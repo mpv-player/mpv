@@ -513,4 +513,5 @@ const struct vo_driver video_out_drm = {
         .connector_id = -1,
         .mode_id = 0,
     },
+    .legacy_prefix = "drm",
 };

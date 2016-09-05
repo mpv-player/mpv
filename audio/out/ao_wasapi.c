@@ -499,4 +499,5 @@ const struct ao_driver audio_out_wasapi = {
         OPT_STRING("device", opt_device, 0),
         {NULL},
     },
+    .legacy_prefix = "ao-wasapi",
 };

@@ -803,4 +803,5 @@ const struct vo_driver video_out_rpi = {
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
     .options = options,
+    .legacy_prefix = "rpi",
 };

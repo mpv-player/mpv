@@ -226,4 +226,5 @@ const struct ao_driver audio_out_pcm = {
         OPT_FLAG("append", append, 0),
         {0}
     },
+    .legacy_prefix = "ao-pcm",
 };

@@ -20,6 +20,10 @@ Interface changes
 ::
 
  --- mpv 0.21.0 ---
+    - deprecate _all_ --vo and --ao suboptions. Generally, all suboptions are
+      replaced by global options, which do exactly the same. For example,
+      "--vo=opengl:scale=nearest" turns into "--scale=nearest". In some cases,
+      the global option is prefixed.
     - subtle changes in how "--no-..." options are treated mean that they are
       not accessible under "options/..." anymore (instead, these are resolved
       at parsing time). This does not affect options which start with "--no-",

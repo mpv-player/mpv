@@ -1034,4 +1034,5 @@ const struct vo_driver video_out_sdl = {
     .flip_page = flip_page,
     .wait_events = wait_events,
     .wakeup = wakeup,
+    .legacy_prefix = "sdl",
 };

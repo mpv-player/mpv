@@ -160,5 +160,6 @@ const struct ao_driver audio_out_rsound = {
         OPT_STRING("port", port, 0),
         {0}
     },
+    .legacy_prefix = "rsound",
 };
 

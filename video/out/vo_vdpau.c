@@ -1162,5 +1162,6 @@ const struct vo_driver video_out_vdpau = {
                   }),
         OPT_FLAG("force-yuv", force_yuv, 0),
         {NULL},
-    }
+    },
+    .legacy_prefix = "vo-vdpau",
 };

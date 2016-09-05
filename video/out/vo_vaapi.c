@@ -698,4 +698,5 @@ const struct vo_driver video_out_vaapi = {
         OPT_FLAG("scaled-osd", force_scaled_osd, 0),
         {0}
     },
+    .legacy_prefix = "vo-vaapi",
 };

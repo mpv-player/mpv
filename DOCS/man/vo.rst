@@ -36,11 +36,13 @@ Available video output drivers are:
 
     .. note:: This driver is for compatibility with old systems.
 
-    ``adaptor=<number>``
+    The following global options are supported by this video output:
+
+    ``--xv-adaptor=<number>``
         Select a specific XVideo adapter (check xvinfo results).
-    ``port=<number>``
+    ``--xv-port=<number>``
         Select a specific XVideo port.
-    ``ck=<cur|use|set>``
+    ``--xv-ck=<cur|use|set>``
         Select the source from which the color key is taken (default: cur).
 
         cur
@@ -51,7 +53,7 @@ Available video output drivers are:
         set
           Same as use but also sets the supplied color key.
 
-    ``ck-method=<none|man|bg|auto>``
+    ``--xv-ck-method=<none|man|bg|auto>``
         Sets the color key drawing method (default: man).
 
         none
@@ -63,11 +65,11 @@ Available video output drivers are:
         auto
           Let Xv draw the color key.
 
-    ``colorkey=<number>``
+    ``--xv-colorkey=<number>``
         Changes the color key to an RGB value of your choice. ``0x000000`` is
         black and ``0xffffff`` is white.
 
-    ``buffers=<number>``
+    ``--xv-buffers=<number>``
         Number of image buffers to use for the internal ringbuffer (default: 2).
         Increasing this will use more memory, but might help with the X server
         not responding quickly enough if video FPS is close to or higher than
@@ -90,17 +92,19 @@ Available video output drivers are:
         ``chroma-deint``, ``pullup``, ``hqscaling``. These sub-options are
         deprecated, and you should use the ``vdpaupp`` video filter instead.
 
-    ``sharpen=<-1-1>``
+    The following global options are supported by this video output:
+
+    ``--vo-vdpau-sharpen=<-1-1>``
         (Deprecated. See note about ``vdpaupp``.)
 
         For positive values, apply a sharpening algorithm to the video, for
         negative values a blurring algorithm (default: 0).
-    ``denoise=<0-1>``
+    ``--vo-vdpau-denoise=<0-1>``
         (Deprecated. See note about ``vdpaupp``.)
 
         Apply a noise reduction algorithm to the video (default: 0; no noise
         reduction).
-    ``deint=<-4-4>``
+    ``--vo-vdpau-deint=<-4-4>``
         (Deprecated. See note about ``vdpaupp``.)
 
         Select deinterlacing mode (default: 0). In older versions (as well as
@@ -123,32 +127,32 @@ Available video output drivers are:
         4
             Motion-adaptive temporal deinterlacing with edge-guided spatial
             interpolation. Needs fast video hardware.
-    ``chroma-deint``
+    ``--vo-vdpau-chroma-deint``
         (Deprecated. See note about ``vdpaupp``.)
 
         Makes temporal deinterlacers operate both on luma and chroma (default).
         Use no-chroma-deint to solely use luma and speed up advanced
         deinterlacing. Useful with slow video memory.
-    ``pullup``
+    ``--vo-vdpau-pullup``
         (Deprecated. See note about ``vdpaupp``.)
 
         Try to apply inverse telecine, needs motion adaptive temporal
         deinterlacing.
-    ``hqscaling=<0-9>``
+    ``--vo-vdpau-hqscaling=<0-9>``
         (Deprecated. See note about ``vdpaupp``.)
 
         0
             Use default VDPAU scaling (default).
         1-9
             Apply high quality VDPAU scaling (needs capable hardware).
-    ``fps=<number>``
+    ``--vo-vdpau-fps=<number>``
         Override autodetected display refresh rate value (the value is needed
         for framedrop to allow video playback rates higher than display
         refresh rate, and for vsync-aware frame timing adjustments). Default 0
         means use autodetected value. A positive value is interpreted as a
         refresh rate in Hz and overrides the autodetected value. A negative
         value disables all timing adjustment and framedrop logic.
-    ``composite-detect``
+    ``--vo-vdpau-composite-detect``
         NVIDIA's current VDPAU implementation behaves somewhat differently
         under a compositing window manager and does not give accurate frame
         timing information. With this option enabled, the player tries to
@@ -159,20 +163,20 @@ Available video output drivers are:
         with the composited mode behavior of the NVIDIA driver, there is no
         hard playback speed limit even without the disabled logic. Enabled by
         default, use ``no-composite-detect`` to disable.
-    ``queuetime_windowed=<number>`` and ``queuetime_fs=<number>``
+    ``--vo-vdpau-queuetime_windowed=<number>`` and ``queuetime_fs=<number>``
         Use VDPAU's presentation queue functionality to queue future video
         frame changes at most this many milliseconds in advance (default: 50).
         See below for additional information.
-    ``output_surfaces=<2-15>``
+    ``--vo-vdpau-output_surfaces=<2-15>``
         Allocate this many output surfaces to display video frames (default:
         3). See below for additional information.
-    ``colorkey=<#RRGGBB|#AARRGGBB>``
+    ``--vo-vdpau-colorkey=<#RRGGBB|#AARRGGBB>``
         Set the VDPAU presentation queue background color, which in practice
         is the colorkey used if VDPAU operates in overlay mode (default:
         ``#020507``, some shade of black). If the alpha component of this value
         is 0, the default VDPAU colorkey will be used instead (which is usually
         green).
-    ``force-yuv``
+    ``--vo-vdpau-force-yuv``
         Never accept RGBA input. This means mpv will insert a filter to convert
         to a YUV format before the VO. Sometimes useful to force availability
         of certain YUV-only features, like video equalizer or deinterlacing.
@@ -208,29 +212,31 @@ Available video output drivers are:
     .. note:: Before to 0.21.0, ``direct3d_shaders`` and ``direct3d`` were
               different, with ``direct3d`` not using shader by default. Now
               both use shaders by default, and ``direct3d_shaders`` is a
-              deprecated alias. Use the ``prefer-stretchrect`` or the
-              ``disable-shaders`` sub-options to get the old behavior of
-              ``direct3d``.
+              deprecated alias. Use the ``--vo-direct3d-prefer-stretchrect``
+              or the ``--vo-direct3d-disable-shaders`` options to get the old
+              behavior of ``direct3d``.
 
-    ``prefer-stretchrect``
+    The following global options are supported by this video output:
+
+    ``--vo-direct3d-prefer-stretchrect``
         Use ``IDirect3DDevice9::StretchRect`` over other methods if possible.
 
-    ``disable-stretchrect``
+    ``--vo-direct3d-disable-stretchrect``
         Never render the video using ``IDirect3DDevice9::StretchRect``.
 
-    ``disable-textures``
+    ``--vo-direct3d-disable-textures``
         Never render the video using D3D texture rendering. Rendering with
         textures + shader will still be allowed. Add ``disable-shaders`` to
         completely disable video rendering with textures.
 
-    ``disable-shaders``
+    ``--vo-direct3d-disable-shaders``
         Never use shaders when rendering video.
 
-    ``only-8bit``
+    ``--vo-direct3d-only-8bit``
         Never render YUV video with more than 8 bits per component.
         Using this flag will force software conversion to 8-bit.
 
-    ``disable-texture-align``
+    ``--vo-direct3d-disable-texture-align``
         Normally texture sizes are always aligned to 16. With this option
         enabled, the video texture will always have exactly the same size as
         the video itself.
@@ -240,11 +246,11 @@ Available video output drivers are:
     might crash, might cause slow downs, etc. Contact the developers if you
     actually need any of these for performance or proper operation.
 
-    ``force-power-of-2``
+    ``--vo-direct3d-force-power-of-2``
         Always force textures to power of 2, even if the device reports
         non-power-of-2 texture sizes as supported.
 
-    ``texture-memory=<mode>``
+    ``--vo-direct3d-texture-memory=<mode>``
         Only affects operation with shaders/texturing enabled, and (E)OSD.
         Possible values:
 
@@ -268,11 +274,11 @@ Available video output drivers are:
             Use ``D3DPOOL_SCRATCH``, with a ``D3DPOOL_SYSTEMMEM`` texture for
             locking.
 
-    ``swap-discard``
+    ``--vo-direct3d-swap-discard``
         Use ``D3DSWAPEFFECT_DISCARD``, which might be faster.
         Might be slower too, as it must(?) clear every frame.
 
-    ``exact-backbuffer``
+    ``--vo-direct3d-exact-backbuffer``
         Always resize the backbuffer to window size.
 
 ``opengl``
@@ -315,10 +321,12 @@ Available video output drivers are:
     .. note:: This driver is for compatibility with systems that don't provide
               proper graphics drivers, or which support GLES only.
 
-    ``sw``
+    The following global options are supported by this video output:
+
+    ``--sdl-sw``
         Continue even if a software renderer is detected.
 
-    ``switch-mode``
+    ``--sdl-switch-mode``
         Instruct SDL to switch the monitor video mode when going fullscreen.
 
 ``vaapi``
@@ -330,7 +338,9 @@ Available video output drivers are:
     .. note:: This driver is for compatibility with crappy systems. You can
               use vaapi hardware decoding with ``--vo=opengl`` too.
 
-    ``scaling=<algorithm>``
+    The following global options are supported by this video output:
+
+    ``--vo-vaapi-scaling=<algorithm>``
         default
             Driver default (mpv default as well).
         fast
@@ -340,7 +350,7 @@ Available video output drivers are:
         nla
             ``non-linear anamorphic scaling``
 
-    ``deint-mode=<mode>``
+    ``--vo-vaapi-deint-mode=<mode>``
         Select deinterlacing algorithm. Note that by default deinterlacing is
         initially always off, and needs to be enabled with the ``d`` key
         (default key binding for ``cycle deinterlace``).
@@ -359,7 +369,7 @@ Available video output drivers are:
         bob
             bob deinterlacing (default for older libva).
 
-    ``scaled-osd=<yes|no>``
+    ``--vo-vaapi-scaled-osd=<yes|no>``
         If enabled, then the OSD is rendered at video resolution and scaled to
         display resolution. By default, this is disabled, and the OSD is
         rendered at display resolution if the driver supports it.
@@ -369,7 +379,9 @@ Available video output drivers are:
 
     Usually, it's better to disable video with ``--no-video`` instead.
 
-    ``fps=<value>``
+    The following global options are supported by this video output:
+
+    ``--vo-null-fps=<value>``
         Simulate display FPS. This artificially limits how many frames the
         VO accepts per second.
 
@@ -428,14 +440,16 @@ Available video output drivers are:
     .. note:: This driver is for compatibility with systems that don't provide
               working OpenGL drivers.
 
-    ``alpha``
+    The following global options are supported by this video output:
+
+    ``--vo-wayland-alpha``
         Use a buffer format that supports videos and images with alpha
         information
-    ``rgb565``
+    ``--vo-wayland-rgb565``
         Use RGB565 as buffer format. This format is implemented on most
         platforms, especially on embedded where it is far more efficient then
         RGB8888.
-    ``triple-buffering``
+    ``--vo-wayland-triple-buffering``
         Use 3 buffers instead of 2. This can lead to more fluid playback, but
         uses more memory.
 
@@ -448,22 +462,24 @@ Available video output drivers are:
 ``rpi`` (Raspberry Pi)
     Native video output on the Raspberry Pi using the MMAL API.
 
-    ``display=<number>``
+    The following global options are supported by this video output:
+
+    ``--rpi-display=<number>``
         Select the display number on which the video overlay should be shown
         (default: 0).
 
-    ``layer=<number>``
+    ``--rpi-layer=<number>``
         Select the dispmanx layer on which the video overlay should be shown
         (default: -10). Note that mpv will also use the 2 layers above the
         selected layer, to handle the window background and OSD. Actual video
         rendering will happen on the layer above the selected layer.
 
-    ``background=<yes|no>``
+    ``--rpi-background=<yes|no>``
         Whether to render a black background behind the video (default: no).
         Normally it's better to kill the console framebuffer instead, which
         gives better performance.
 
-    ``osd=<yes|no>``
+    ``--rpi-osd=<yes|no>``
         Enabled by default. If disabled with ``no``, no OSD layer is created.
         This also means there will be no subtitles rendered.
 
@@ -473,15 +489,17 @@ Available video output drivers are:
     environment (e.g. no X). Does not support hardware acceleration (if you
     need this, check the ``drm-egl`` backend for ``opengl`` VO).
 
-    ``connector=<number>``
+    The following global options are supported by this video output:
+
+    ``--drm-connector=<number>``
         Select the connector to use (usually this is a monitor.) If set to -1,
         mpv renders the output on the first available connector. (default: -1)
 
-    ``devpath=<filename>``
+    ``--drm-devpath=<filename>``
         Path to graphic card device.
         (default: /dev/dri/card0)
 
-    ``mode=<number>``
+    ``--drm-mode=<number>``
         Mode ID to use (resolution, bit depth and frame rate).
         (default: 0)
 
