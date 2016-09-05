@@ -132,6 +132,10 @@ struct m_obj_desc {
     const char *replaced_name;
     // For convenience: these are added as global command-line options.
     const struct m_sub_options *global_opts;
+    // Evil hack to essentially force-move .options to global_opts. All options
+    // will be added as global options with the given prefix, and using
+    // sub-options will be treated as deprecated and redirected.
+    const char *legacy_prefix;
 };
 
 // Extra definition needed for \ref m_option_type_obj_settings_list options.

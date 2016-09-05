@@ -182,6 +182,7 @@ struct ao_driver {
     const void *priv_defaults;
     const struct m_option *options;
     const struct m_sub_options *global_opts;
+    const char *legacy_prefix;
 };
 
 // These functions can be called by AOs.

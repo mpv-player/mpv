@@ -258,15 +258,28 @@ struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
 }
 
 static int m_config_set_obj_params(struct m_config *config, struct mp_log *log,
-                                   struct mpv_global *global, char **args)
+                                   struct mpv_global *global,
+                                   struct m_obj_desc *desc, char **args)
 {
     for (int n = 0; args && args[n * 2 + 0]; n++) {
         const char *opt = args[n * 2 + 0];
         const char *val = args[n * 2 + 1];
         struct m_config_option *co = m_config_get_co(config, bstr0(opt));
+        if (!co)
+            continue;
         struct m_config *target = config;
-        if (co && co->opt->type == &m_option_type_subopt_legacy) {
-            const char *newopt = co->opt->priv;
+        bool is_legacy = co->opt->type == &m_option_type_subopt_legacy;
+        bool force_legacy = !!desc->legacy_prefix;
+        if (is_legacy || force_legacy) {
+            // Legacy: redirect deprecated sub-options to global ones.
+            char tmp[100];
+            const char *newopt;
+            if (is_legacy) {
+                newopt = co->opt->priv;
+            } else {
+                snprintf(tmp, sizeof(tmp), "%s-%s", desc->legacy_prefix, opt);
+                newopt = tmp;
+            }
             assert(global);
             target = mp_get_root_config(global);
             mp_warn(log, "Using suboptions is deprecated. Use the global '--%s' "
@@ -289,13 +302,28 @@ struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
     for (int n = 0; defaults && defaults[n].name; n++) {
         struct m_obj_settings *entry = &defaults[n];
         if (name && strcmp(entry->name, name) == 0) {
-            if (m_config_set_obj_params(config, log, global, entry->attribs) < 0)
+            if (m_config_set_obj_params(config, log, global, desc, entry->attribs) < 0)
                 goto error;
         }
     }
 
-    if (m_config_set_obj_params(config, log, global, args) < 0)
+    if (m_config_set_obj_params(config, log, global, desc, args) < 0)
         goto error;
+
+    if (desc->legacy_prefix) {
+        assert(global);
+        struct m_config *root = mp_get_root_config(global);
+        // In this mode, the AO/VO will still access the options via its priv
+        // struct (like with real sub-options). We have to copy them over.
+        for (int n = 0; n < config->num_opts; n++) {
+            struct m_config_option *co = &config->opts[n];
+            char opt[100];
+            snprintf(opt, sizeof(opt), "%s-%s", desc->legacy_prefix, co->name);
+            struct m_config_option *g = m_config_get_co(root, bstr0(opt));
+            assert(g);
+            m_option_copy(co->opt, co->data, g->data);
+        }
+    }
 
     return config;
 error:
@@ -415,6 +443,20 @@ static void add_global_subopts(struct m_config *config,
             break;
         if (desc.global_opts)
             add_sub_options(config, NULL, desc.global_opts);
+        if (desc.legacy_prefix && desc.options) {
+            // Legacy: auto-add sub-options as global options (using the prefix).
+            struct m_config_option parent = {
+                .name = desc.legacy_prefix,
+                .group = 0,
+            };
+            struct m_sub_options *conf = talloc(config, struct m_sub_options);
+            *conf = (struct m_sub_options){
+                .opts = desc.options,
+                .defaults = desc.priv_defaults,
+                .size = desc.priv_size,
+            };
+            add_sub_options(config, &parent, conf);
+        }
     }
 }
 

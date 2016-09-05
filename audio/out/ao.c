@@ -110,6 +110,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
         .priv_defaults = ao->priv_defaults,
         .options = ao->options,
         .global_opts = ao->global_opts,
+        .legacy_prefix = ao->legacy_prefix,
         .hidden = ao->encode,
         .p = ao,
     };
