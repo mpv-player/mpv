@@ -55,21 +55,23 @@ Available audio output drivers are:
         ``SOUND_DEVICE_NAMES`` in ``/usr/include/linux/soundcard.h``.
 
 ``jack``
-    JACK (Jack Audio Connection Kit) audio output driver
+    JACK (Jack Audio Connection Kit) audio output driver.
 
-    ``port=<name>``
+    The following global options are supported by this audio output:
+
+    ``--jack-port=<name>``
         Connects to the ports with the given name (default: physical ports).
-    ``name=<client>``
+    ``--jack-name=<client>``
         Client name that is passed to JACK (default: ``mpv``). Useful
         if you want to have certain connections established automatically.
-    ``(no-)autostart``
+    ``--jack-autostart=<yes|no>``
         Automatically start jackd if necessary (default: disabled). Note that
         this tends to be unreliable and will flood stdout with server messages.
-    ``(no-)connect``
+    ``--jack-connect=<yes|no>``
         Automatically create connections to output ports (default: enabled).
         When enabled, the maximum number of output channels will be limited to
         the number of available output ports.
-    ``std-channel-layout=waveext|any``
+    ``--jack-std-channel-layout=<waveext|any>``
         Select the standard channel layout (default: waveext). JACK itself has no
         notion of channel layouts (i.e. assigning which speaker a given
         channel is supposed to map to) - it just takes whatever the application
