@@ -797,7 +797,7 @@ video_output_features = [
         ),
     }, {
         'name': '--standard-gl',
-        'desc': 'Desktop standard OpengGL support',
+        'desc': 'Desktop standard OpenGL support',
         'func': compose_checks(
             check_statement('GL/gl.h', '(void)GL_RGB32F'),     # arbitrary OpenGL 3.0 symbol
             check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
