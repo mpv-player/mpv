@@ -16,18 +16,14 @@ normal driver parameters.
 ``--ao-defaults=<driver1[:parameter1:parameter2:...],driver2,...>``
     Set defaults for each driver.
 
+    Deprecated. No replacement.
+
 .. note::
 
     See ``--ao=help`` for a list of compiled-in audio output drivers. The
     driver ``--ao=alsa`` is preferred. ``--ao=pulse`` is preferred on systems
     where PulseAudio is used. On BSD systems, ``--ao=oss`` or ``--ao=sndio``
     may work (the latter being experimental).
-
-.. admonition:: Examples
-
-    - ``--ao=alsa,oss,`` Try the ALSA driver, then the OSS driver, then others.
-    - ``--ao=alsa:resample=yes:device=[plughw:0,3]`` Lets ALSA resample and
-      sets the device-name as first card, fourth device.
 
 Available audio output drivers are:
 

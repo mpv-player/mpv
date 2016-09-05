@@ -60,7 +60,7 @@ struct ao_alsa_opts {
 };
 
 #define OPT_BASE_STRUCT struct ao_alsa_opts
-const struct m_sub_options ao_alsa_conf = {
+static const struct m_sub_options ao_alsa_conf = {
     .opts = (const struct m_option[]) {
         OPT_STRING("alsa-device", device, 0),
         OPT_FLAG("alsa-resample", resample, 0),
@@ -1180,4 +1180,5 @@ const struct ao_driver audio_out_alsa = {
         OPT_SUBOPT_LEGACY("ignore-chmap", "alsa-ignore-chmap"),
         {0}
     },
+    .global_opts = &ao_alsa_conf,
 };

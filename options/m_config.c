@@ -406,6 +406,18 @@ static void add_sub_options(struct m_config *config,
     add_options(config, &next, new_optstruct, new_optstruct_def, subopts->opts);
 }
 
+static void add_global_subopts(struct m_config *config,
+                               const struct m_obj_list *list)
+{
+    struct m_obj_desc desc;
+    for (int n = 0; ; n++) {
+        if (!list->get_desc(&desc, n))
+            break;
+        if (desc.global_opts)
+            add_sub_options(config, NULL, desc.global_opts);
+    }
+}
+
 // Initialize a field with a given value. In case this is dynamic data, it has
 // to be allocated and copied. src can alias dst, also can be NULL.
 static void init_opt_inplace(const struct m_option *opt, void *dst,
@@ -476,6 +488,10 @@ static void m_config_add_option(struct m_config *config,
         if (co.data && co.default_data)
             init_opt_inplace(arg, co.data, co.default_data);
     }
+
+    // (The deprecation_message check is a hack to exclude --vo-defaults etc.)
+    if (arg->type == &m_option_type_obj_settings_list && !arg->deprecation_message)
+        add_global_subopts(config, (const struct m_obj_list *)arg->priv);
 
     if (arg->name[0]) // no own name -> hidden
         MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);

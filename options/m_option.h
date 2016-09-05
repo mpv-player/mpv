@@ -130,6 +130,8 @@ struct m_obj_desc {
     // Set by m_obj_list_find(). If the requested name is an old alias, this
     // is set to the old name (while the name field uses the new name).
     const char *replaced_name;
+    // For convenience: these are added as global command-line options.
+    const struct m_sub_options *global_opts;
 };
 
 // Extra definition needed for \ref m_option_type_obj_settings_list options.

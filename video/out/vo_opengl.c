@@ -63,7 +63,7 @@ struct vo_opengl_opts {
 };
 
 #define OPT_BASE_STRUCT struct vo_opengl_opts
-const struct m_sub_options vo_opengl_conf = {
+static const struct m_sub_options vo_opengl_conf = {
     .opts = (const m_option_t[]) {
         OPT_FLAG("opengl-glfinish", use_glFinish, 0),
         OPT_FLAG("opengl-waitvsync", waitvsync, 0),
@@ -487,4 +487,5 @@ const struct vo_driver video_out_opengl = {
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),
     .options = legacy_options,
+    .global_opts = &vo_opengl_conf,
 };

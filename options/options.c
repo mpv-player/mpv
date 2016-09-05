@@ -74,7 +74,6 @@ extern const struct m_sub_options input_config;
 extern const struct m_sub_options encode_config;
 extern const struct m_sub_options image_writer_conf;
 extern const struct m_sub_options gl_video_conf;
-extern const struct m_sub_options vo_opengl_conf;
 extern const struct m_sub_options ao_alsa_conf;
 
 extern const struct m_obj_list vf_obj_list;
@@ -473,7 +472,8 @@ const m_option_t mp_opts[] = {
 
 //---------------------- libao/libvo options ------------------------
     OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list, ),
-    OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list, ),
+    OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list,
+                     .deprecation_message = "deprecated, use global options"),
     OPT_STRING("audio-device", audio_device, 0),
     OPT_STRING("audio-client-name", audio_client_name, 0),
     OPT_FLAG("audio-fallback-to-null", ao_null_fallback, 0),
@@ -648,10 +648,6 @@ const m_option_t mp_opts[] = {
 
 #if HAVE_GL
     OPT_SUBSTRUCT("", gl_video_opts, gl_video_conf, 0),
-    OPT_SUBSTRUCT("", vo_opengl_opts, vo_opengl_conf, 0),
-#endif
-#if HAVE_ALSA
-    OPT_SUBSTRUCT("", ao_alsa_opts, ao_alsa_conf, 0),
 #endif
 
 #if HAVE_ENCODING

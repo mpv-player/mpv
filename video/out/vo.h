@@ -296,6 +296,10 @@ struct vo_driver {
 
     // List of options to parse into priv struct (requires priv_size to be set)
     const struct m_option *options;
+
+    // Global options to register if the VO is compiled in.
+    // mp_get_config_group() or other function can be used to access them.
+    const struct m_sub_options *global_opts;
 };
 
 struct vo {
