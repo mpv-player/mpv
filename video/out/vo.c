@@ -55,7 +55,6 @@ extern const struct vo_driver video_out_lavc;
 extern const struct vo_driver video_out_caca;
 extern const struct vo_driver video_out_drm;
 extern const struct vo_driver video_out_direct3d;
-extern const struct vo_driver video_out_direct3d_shaders;
 extern const struct vo_driver video_out_sdl;
 extern const struct vo_driver video_out_vaapi;
 extern const struct vo_driver video_out_wayland;
@@ -73,7 +72,6 @@ const struct vo_driver *const video_out_drivers[] =
     &video_out_vdpau,
 #endif
 #if HAVE_DIRECT3D
-    &video_out_direct3d_shaders,
     &video_out_direct3d,
 #endif
 #if HAVE_WAYLAND
@@ -186,7 +184,8 @@ const struct m_obj_list vo_obj_list = {
     .get_desc = get_desc,
     .description = "video outputs",
     .aliases = {
-        {"gl",        "opengl"},
+        {"gl", "opengl"},
+        {"direct3d_shaders", "direct3d"},
         {0}
     },
     .allow_unknown_entries = true,

@@ -1732,12 +1732,6 @@ static const struct m_option opts[] = {
     {0}
 };
 
-static const d3d_priv defaults_noshaders = {
-    .video_eq = { MP_CSP_EQ_CAPS_COLORMATRIX },
-    .opt_disable_shaders = 1,
-    .opt_disable_textures = 1,
-};
-
 static const d3d_priv defaults = {
     .video_eq = { MP_CSP_EQ_CAPS_COLORMATRIX },
 };
@@ -1745,21 +1739,6 @@ static const d3d_priv defaults = {
 const struct vo_driver video_out_direct3d = {
     .description = "Direct3D 9 Renderer",
     .name = "direct3d",
-    .preinit = preinit,
-    .query_format = query_format,
-    .reconfig = reconfig,
-    .control = control,
-    .draw_image = draw_image,
-    .flip_page = flip_page,
-    .uninit = uninit,
-    .priv_size = sizeof(d3d_priv),
-    .priv_defaults = &defaults_noshaders,
-    .options = opts,
-};
-
-const struct vo_driver video_out_direct3d_shaders = {
-    .description = "Direct3D 9 Renderer (using shaders for YUV conversion)",
-    .name = "direct3d_shaders",
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,

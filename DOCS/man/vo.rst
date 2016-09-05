@@ -199,11 +199,18 @@ Available video output drivers are:
     driver implementation may also have limits on the length of maximum
     queuing time or number of queued surfaces that work well or at all.
 
-``direct3d_shaders`` (Windows only)
+``direct3d`` (Windows only)
     Video output driver that uses the Direct3D interface.
 
     .. note:: This driver is for compatibility with systems that don't provide
-              proper OpenGL drivers.
+              proper OpenGL drivers, and where ANGLE does not perform well.
+
+    .. note:: Before to 0.21.0, ``direct3d_shaders`` and ``direct3d`` were
+              different, with ``direct3d`` not using shader by default. Now
+              both use shaders by default, and ``direct3d_shaders`` is a
+              deprecated alias. Use the ``prefer-stretchrect`` or the
+              ``disable-shaders`` sub-options to get the old behavior of
+              ``direct3d``.
 
     ``prefer-stretchrect``
         Use ``IDirect3DDevice9::StretchRect`` over other methods if possible.
@@ -267,12 +274,6 @@ Available video output drivers are:
 
     ``exact-backbuffer``
         Always resize the backbuffer to window size.
-
-``direct3d`` (Windows only)
-    Same as ``direct3d_shaders``, but with the options ``disable-textures``
-    and ``disable-shaders`` forced.
-
-    .. note:: This driver is for compatibility with old systems.
 
 ``opengl``
     OpenGL video output driver. It supports extended scaling methods, dithering
