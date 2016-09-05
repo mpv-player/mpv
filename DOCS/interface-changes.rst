@@ -24,6 +24,7 @@ Interface changes
       replaced by global options, which do exactly the same. For example,
       "--vo=opengl:scale=nearest" turns into "--scale=nearest". In some cases,
       the global option is prefixed.
+    - deprecate the device/sink options on all AOs. Use --audio-device instead.
     - subtle changes in how "--no-..." options are treated mean that they are
       not accessible under "options/..." anymore (instead, these are resolved
       at parsing time). This does not affect options which start with "--no-",

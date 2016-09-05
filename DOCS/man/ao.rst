@@ -51,6 +51,7 @@ Available audio output drivers are:
 
     ``--oss-device``
         Sets the audio output device (default: ``/dev/dsp``).
+        Deprecated, use ``--audio-device``.
     ``--oss-mixer-device``
         Sets the audio mixer device (default: ``/dev/mixer``).
     ``--oss-mixer-channel``
@@ -129,6 +130,7 @@ Available audio output drivers are:
         Specify the host and optionally output sink to use. An empty <host>
         string uses a local connection, "localhost" uses network transfer
         (most likely not what you want).
+        Deprecated, use ``--audio-device``.
 
     ``--pulse-buffer=<1-2000|native>``
         Set the audio buffer size in milliseconds. A higher value buffers
@@ -238,6 +240,9 @@ Available audio output drivers are:
         Set the TCP port used for connecting to the server (default: 12345).
         Not used if connecting to a Unix domain socket.
 
+    These options are deprecated. If anyone cares enough, their functionality
+    can be added back using ``--audio-device``.
+
 ``sndio``
     Audio output to the OpenBSD sndio sound system
 
@@ -250,6 +255,7 @@ Available audio output drivers are:
 
     ``--ao-sndio-device=<device>``
         sndio device to use (default: ``$AUDIODEVICE``, resp. ``snd0``).
+        Deprecated, use ``--audio-device``.
 
 ``wasapi``
     Audio output to the Windows Audio Session API.
@@ -260,6 +266,8 @@ Available audio output drivers are:
         Requests exclusive, direct hardware access. By definition prevents
         sound playback of any other program until mpv exits.
     ``--ao-wasapi-device=<id>``
+        Deprecated, use ``--audio-device``.
+
         Uses the requested endpoint instead of the system's default audio
         endpoint. Both an ordinal number (0,1,2,...) and the GUID
         String are valid; the GUID string is guaranteed to not change
@@ -267,8 +275,3 @@ Available audio output drivers are:
 
         Also supports searching active devices by human-readable name. If more
         than one device matches the name, refuses loading it.
-
-        This option is mostly deprecated in favour of the more general
-        ``--audio-device`` option. That said, ``--audio-device=help`` will give
-        a list of valid device GUIDs (prefixed with ``wasapi/``), as well as
-        their human readable names, which should work here.

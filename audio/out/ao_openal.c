@@ -356,7 +356,8 @@ const struct ao_driver audio_out_openal = {
     .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
-        OPT_STRING_VALIDATE("device", cfg_device, 0, validate_device_opt),
+        OPT_STRING_VALIDATE("device", cfg_device, 0, validate_device_opt,
+                            DEVICE_OPT_DEPRECATION),
         {0}
     },
     .legacy_prefix = "ao-openal",

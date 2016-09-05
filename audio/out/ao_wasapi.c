@@ -496,7 +496,7 @@ const struct ao_driver audio_out_wasapi = {
     .priv_size      = sizeof(wasapi_state),
     .options        = (const struct m_option[]) {
         OPT_FLAG("exclusive", opt_exclusive, 0),
-        OPT_STRING("device", opt_device, 0),
+        OPT_STRING("device", opt_device, 0, DEVICE_OPT_DEPRECATION),
         {NULL},
     },
     .legacy_prefix = "ao-wasapi",

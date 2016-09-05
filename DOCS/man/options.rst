@@ -995,21 +995,18 @@ Audio
 ``--audio-device=<name>``
     Use the given audio device. This consists of the audio output name, e.g.
     ``alsa``, followed by ``/``, followed by the audio output specific device
-    name.
+    name. The default value for this option is ``auto``, which tries every audio
+    output in preference order with the default device.
 
     You can list audio devices with ``--audio-device=help``. This outputs the
     device name in quotes, followed by a description. The device name is what
-    you have to pass to the ``--audio-device`` option.
+    you have to pass to the ``--audio-device`` option. The list of audio devices
+    can be retrieved by API by using the ``audio-device-list`` property.
 
-    The default value for this option is ``auto``, which tries every audio
-    output in preference order with the default device.
-
-    Note that many AOs have a ``device`` sub-option, which overrides the
-    device selection of this option (but not the audio output selection).
-    Likewise, forcing an AO with ``--ao`` will override the audio output
-    selection of ``--audio-device`` (but not the device selection).
-
-    Currently not implemented for most AOs.
+    While the option normally takes one of the strings as indicated by the
+    methods above, you can also force the device for most AOs by building it
+    manually. For example ``name/foobar`` forces the AO ``name`` to use the
+    device ``foobar``.
 
 ``--audio-fallback-to-null=<yes|no>``
     If no audio device can be opened, behave as if ``--ao=null`` was given. This
