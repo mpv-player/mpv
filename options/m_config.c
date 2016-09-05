@@ -371,6 +371,41 @@ static void add_options(struct m_config *config,
         m_config_add_option(config, parent, optstruct, optstruct_def, &defs[i]);
 }
 
+static void add_sub_options(struct m_config *config,
+                            struct m_config_option *parent,
+                            const struct m_sub_options *subopts)
+{
+    // Can't be used multiple times.
+    for (int n = 0; n < config->num_groups; n++)
+        assert(config->groups[n].group != subopts);
+
+    void *new_optstruct = NULL;
+    if (config->optstruct) // only if not noalloc
+        new_optstruct = m_config_alloc_struct(config, subopts);
+    if (parent && parent->data)
+        substruct_write_ptr(parent->data, new_optstruct);
+
+    const void *new_optstruct_def = NULL;
+    if (parent && parent->default_data)
+        new_optstruct_def = substruct_read_ptr(parent->default_data);
+    if (!new_optstruct_def)
+        new_optstruct_def = subopts->defaults;
+
+    int group = config->num_groups++;
+    MP_TARRAY_GROW(config, config->groups, group);
+    config->groups[group] = (struct m_config_group){
+        .group = subopts,
+        .parent_group = parent ? parent->group : 0,
+        .opts = new_optstruct,
+    };
+
+    struct m_config_option next = {
+        .name = parent ? parent->name : "",
+        .group = group,
+    };
+    add_options(config, &next, new_optstruct, new_optstruct_def, subopts->opts);
+}
+
 // Initialize a field with a given value. In case this is dynamic data, it has
 // to be allocated and copied. src can alias dst, also can be NULL.
 static void init_opt_inplace(const struct m_option *opt, void *dst,
@@ -435,32 +470,7 @@ static void m_config_add_option(struct m_config *config,
     // Option with children -> add them
     if (arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
         const struct m_sub_options *subopts = arg->priv;
-
-        // Can't be used multiple times.
-        for (int n = 0; n < config->num_groups; n++)
-            assert(config->groups[n].group != subopts);
-
-        void *new_optstruct = NULL;
-        if (co.data) {
-            new_optstruct = m_config_alloc_struct(config, subopts);
-            substruct_write_ptr(co.data, new_optstruct);
-        }
-
-        const void *new_optstruct_def = substruct_read_ptr(co.default_data);
-        if (!new_optstruct_def)
-            new_optstruct_def = subopts->defaults;
-
-        int parent_group = co.group;
-        co.group = config->num_groups++;
-        MP_TARRAY_GROW(config, config->groups, co.group);
-        struct m_config_group *group = &config->groups[co.group];
-        *group = (struct m_config_group){
-            .group = subopts,
-            .parent_group = parent_group,
-            .opts = new_optstruct,
-        };
-
-        add_options(config, &co, new_optstruct, new_optstruct_def, subopts->opts);
+        add_sub_options(config, &co, subopts);
     } else {
         // Initialize options
         if (co.data && co.default_data)
