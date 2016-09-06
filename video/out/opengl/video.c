@@ -169,7 +169,6 @@ struct gl_video {
     struct mpv_global *global;
     struct mp_log *log;
     struct gl_video_opts opts;
-    struct gl_video_opts *opts_alloc;
     struct m_config_cache *opts_cache;
     struct gl_lcms *cms;
     bool gl_debug;
@@ -513,7 +512,6 @@ static void check_gl_features(struct gl_video *p);
 static bool init_format(struct gl_video *p, int fmt, bool test_only);
 static void init_image_desc(struct gl_video *p, int fmt);
 static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
-static void set_options(struct gl_video *p, struct gl_video_opts *src);
 static const char *handle_scaler_opt(const char *name, bool tscale);
 static void reinit_from_options(struct gl_video *p);
 static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[2]);
@@ -3026,7 +3024,7 @@ static void check_gl_features(struct gl_video *p)
         p->dumb_mode = true;
         p->use_lut_3d = false;
         // Most things don't work, so whitelist all options that still work.
-        struct gl_video_opts new_opts = {
+        p->opts = (struct gl_video_opts){
             .gamma = p->opts.gamma,
             .gamma_auto = p->opts.gamma_auto,
             .pbo = p->opts.pbo,
@@ -3040,8 +3038,7 @@ static void check_gl_features(struct gl_video *p)
             .tone_mapping_param = p->opts.tone_mapping_param,
         };
         for (int n = 0; n < SCALER_COUNT; n++)
-            new_opts.scaler[n] = gl_video_opts_def.scaler[n];
-        set_options(p, &new_opts);
+            p->opts.scaler[n] = gl_video_opts_def.scaler[n];
         return;
     }
     p->dumb_mode = false;
@@ -3062,7 +3059,7 @@ static void check_gl_features(struct gl_video *p)
             if (reason) {
                 MP_WARN(p, "Disabling scaler #%d %s %s.\n", n,
                         p->opts.scaler[n].kernel.name, reason);
-                // p->opts is a copy of p->opts_alloc => we can just mess with it.
+                // p->opts is a copy => we can just mess with it.
                 p->opts.scaler[n].kernel.name = "bilinear";
                 if (n == SCALER_TSCALE)
                     p->opts.interpolation = 0;
@@ -3414,13 +3411,13 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
         .gl = gl,
         .global = g,
         .log = log,
-        .cms = gl_lcms_init(p, log, g),
         .texture_16bit_depth = 16,
         .sc = gl_sc_create(gl, log),
         .opts_cache = m_config_cache_alloc(p, g, &gl_video_conf),
     };
-    set_options(p, p->opts_cache->opts);
-    gl_lcms_set_options(p->cms, p->opts.icc_opts);
+    struct gl_video_opts *opts = p->opts_cache->opts;
+    p->cms = gl_lcms_init(p, log, g, opts->icc_opts),
+    p->opts = *opts;
     for (int n = 0; n < SCALER_COUNT; n++)
         p->scaler[n] = (struct scaler){.index = n};
     gl_video_set_debug(p, true);
@@ -3448,27 +3445,22 @@ static const char *handle_scaler_opt(const char *name, bool tscale)
     return NULL;
 }
 
-static void set_options(struct gl_video *p, struct gl_video_opts *src)
-{
-    talloc_free(p->opts_alloc);
-    p->opts_alloc = m_sub_options_copy(p, &gl_video_conf, src);
-    p->opts = *p->opts_alloc;
-}
-
 void gl_video_update_options(struct gl_video *p)
 {
     if (m_config_cache_update(p->opts_cache)) {
-        set_options(p, p->opts_cache->opts);
+        gl_lcms_update_options(p->cms);
         reinit_from_options(p);
     }
 }
 
 static void reinit_from_options(struct gl_video *p)
 {
-    p->use_lut_3d = false;
-
-    gl_lcms_set_options(p->cms, p->opts.icc_opts);
     p->use_lut_3d = gl_lcms_has_profile(p->cms);
+
+    // Copy the option fields, so that check_gl_features() can mutate them.
+    // This works only for the fields themselves of course, not for any memory
+    // referenced by them.
+    p->opts = *(struct gl_video_opts *)p->opts_cache->opts;
 
     check_gl_features(p);
     uninit_rendering(p);

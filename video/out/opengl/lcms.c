@@ -26,7 +26,6 @@
 #include "common/common.h"
 #include "misc/bstr.h"
 #include "common/msg.h"
-#include "options/m_config.h"
 #include "options/m_option.h"
 #include "options/path.h"
 #include "video/csputils.h"
@@ -43,10 +42,11 @@
 struct gl_lcms {
     void *icc_data;
     size_t icc_size;
+    char *current_profile;
     bool using_memory_profile;
     bool changed;
-    enum mp_csp_prim prev_prim;
-    enum mp_csp_trc prev_trc;
+    enum mp_csp_prim current_prim;
+    enum mp_csp_trc current_trc;
 
     struct mp_log *log;
     struct mpv_global *global;
@@ -108,6 +108,8 @@ static void load_profile(struct gl_lcms *p)
     p->icc_data = NULL;
     p->icc_size = 0;
     p->using_memory_profile = false;
+    talloc_free(p->current_profile);
+    p->current_profile = NULL;
 
     if (!p->opts->profile || !p->opts->profile[0])
         return;
@@ -124,35 +126,32 @@ static void load_profile(struct gl_lcms *p)
 
     p->icc_data = iccdata.start;
     p->icc_size = iccdata.len;
+    p->current_profile = talloc_strdup(p, p->opts->profile);
 }
 
 struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
-                             struct mpv_global *global)
+                             struct mpv_global *global,
+                             struct mp_icc_opts *opts)
 {
     struct gl_lcms *p = talloc_ptrtype(talloc_ctx, p);
     *p = (struct gl_lcms) {
         .global = global,
         .log = log,
-        .changed = true,
-        .opts = m_sub_options_copy(p, &mp_icc_conf, mp_icc_conf.defaults),
+        .opts = opts,
     };
+    gl_lcms_update_options(p);
     return p;
 }
 
-void gl_lcms_set_options(struct gl_lcms *p, struct mp_icc_opts *opts)
+void gl_lcms_update_options(struct gl_lcms *p)
 {
-    struct mp_icc_opts *old_opts = p->opts;
-    p->opts = m_sub_options_copy(p, &mp_icc_conf, opts);
-
     if ((p->using_memory_profile && !p->opts->profile_auto) ||
-        !bstr_equals(bstr0(p->opts->profile), bstr0(old_opts->profile)))
+        !bstr_equals(bstr0(p->opts->profile), bstr0(p->current_profile)))
     {
         load_profile(p);
     }
 
     p->changed = true; // probably
-
-    talloc_free(old_opts);
 }
 
 // Warning: profile.start must point to a ta allocation, and the function
@@ -185,16 +184,12 @@ bool gl_lcms_set_memory_profile(struct gl_lcms *p, bstr profile)
     return true;
 }
 
-// Return and _reset_ whether the profile or config has changed since the last
-// call. If it has changed, gl_lcms_get_lut3d() should be called.
+// Return whether the profile or config has changed since the last time it was
+// retrieved. If it has changed, gl_lcms_get_lut3d() should be called.
 bool gl_lcms_has_changed(struct gl_lcms *p, enum mp_csp_prim prim,
                          enum mp_csp_trc trc)
 {
-    bool change = p->changed || p->prev_prim != prim || p->prev_trc != trc;
-    p->changed = false;
-    p->prev_prim = prim;
-    p->prev_trc = trc;
-    return change;
+    return p->changed || p->current_prim != prim || p->current_trc != trc;
 }
 
 // Whether a profile is set. (gl_lcms_get_lut3d() is expected to return a lut,
@@ -315,6 +310,10 @@ bool gl_lcms_get_lut3d(struct gl_lcms *p, struct lut3d **result_lut3d,
 {
     int s_r, s_g, s_b;
     bool result = false;
+
+    p->changed = false;
+    p->current_prim = prim;
+    p->current_trc = trc;
 
     if (!parse_3dlut_size(p->opts->size_str, &s_r, &s_g, &s_b))
         return false;
@@ -451,14 +450,14 @@ const struct m_sub_options mp_icc_conf = {
     .defaults = &(const struct mp_icc_opts) {0},
 };
 
-
 struct gl_lcms *gl_lcms_init(void *talloc_ctx, struct mp_log *log,
-                             struct mpv_global *global)
+                             struct mpv_global *global,
+                             struct mp_icc_opts *opts)
 {
     return (struct gl_lcms *) talloc_new(talloc_ctx);
 }
 
-void gl_lcms_set_options(struct gl_lcms *p, struct mp_icc_opts *opts) { }
+void gl_lcms_update_options(struct gl_lcms *p) { }
 bool gl_lcms_set_memory_profile(struct gl_lcms *p, bstr profile) {return false;}
 
 bool gl_lcms_has_changed(struct gl_lcms *p, enum mp_csp_prim prim,
