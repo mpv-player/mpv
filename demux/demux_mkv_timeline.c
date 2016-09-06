@@ -260,7 +260,7 @@ static void find_ordered_chapter_sources(struct tl_ctx *ctx)
             struct playlist *pl =
                 playlist_parse_file(opts->ordered_chapters_files, ctx->global);
             talloc_steal(tmp, pl);
-            for (struct playlist_entry *e = pl->first; e; e = e->next)
+            for (struct playlist_entry *e = pl ? pl->first : NULL; e; e = e->next)
                 MP_TARRAY_APPEND(tmp, filenames, num_filenames, e->filename);
         } else if (ctx->demuxer->stream->uncached_type != STREAMTYPE_FILE) {
             MP_WARN(ctx, "Playback source is not a "
