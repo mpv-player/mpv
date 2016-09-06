@@ -3425,6 +3425,7 @@ struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g)
         p->scaler[n] = (struct scaler){.index = n};
     gl_video_set_debug(p, true);
     init_gl(p);
+    reinit_from_options(p);
     return p;
 }
 
