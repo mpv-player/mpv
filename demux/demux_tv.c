@@ -25,8 +25,8 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
     if (check > DEMUX_CHECK_REQUEST || demuxer->stream->type != STREAMTYPE_TV)
         return -1;
 
-    tv_param_t *params = m_sub_options_copy(demuxer, &tv_params_conf,
-                                            demuxer->opts->tv_params);
+    tv_param_t *params = mp_get_config_group(demuxer, demuxer->global,
+                                             &tv_params_conf);
     struct tv_stream_params *sparams = demuxer->stream->priv;
     if (sparams->channel && sparams->channel[0]) {
         talloc_free(params->channel);

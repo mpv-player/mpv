@@ -99,6 +99,7 @@ struct input_ctx {
     sem_t wakeup;
     struct mp_log *log;
     struct mpv_global *global;
+    struct m_config_cache *opts_cache;
     struct input_opts *opts;
 
     bool using_alt_gr;
@@ -1201,11 +1202,13 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
     struct input_ctx *ictx = talloc_ptrtype(NULL, ictx);
     *ictx = (struct input_ctx){
         .global = global,
-        .opts = talloc_zero(ictx, struct input_opts), // replaced later
         .ar_state = -1,
         .log = mp_log_new(ictx, global->log, "input"),
         .mouse_section = "default",
+        .opts_cache = m_config_cache_alloc(ictx, global, &input_config),
     };
+
+    ictx->opts = ictx->opts_cache->opts;
 
     if (sem_init(&ictx->wakeup, 0, 0)) {
         MP_FATAL(ictx, "mpv doesn't work on systems without POSIX semaphores.\n");
@@ -1223,11 +1226,9 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
 
 void mp_input_load(struct input_ctx *ictx)
 {
-    struct input_opts *input_conf =
-        m_sub_options_copy(ictx, &input_config, ictx->global->opts->input_opts);
+    struct input_opts *input_conf = ictx->opts;
 
-    talloc_free(ictx->opts);
-    ictx->opts = input_conf;
+    m_config_cache_update(ictx->opts_cache);
 
     // "Uncomment" the default key bindings in etc/input.conf and add them.
     // All lines that do not start with '# ' are parsed.
