@@ -24,6 +24,8 @@ Interface changes
       replaced by global options, which do exactly the same. For example,
       "--vo=opengl:scale=nearest" turns into "--scale=nearest". In some cases,
       the global option is prefixed.
+      Most of the exact replacements are documented here:
+        https://github.com/mpv-player/mpv/wiki/Option-replacement-list
     - deprecate the device/sink options on all AOs. Use --audio-device instead.
     - deprecate "--ao=wasapi:exclusive" and "--ao=coreaudio:exclusive",
       use --audio-exclusive instead.
