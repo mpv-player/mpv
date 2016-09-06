@@ -163,11 +163,11 @@ Available video output drivers are:
         with the composited mode behavior of the NVIDIA driver, there is no
         hard playback speed limit even without the disabled logic. Enabled by
         default, use ``no-composite-detect`` to disable.
-    ``--vo-vdpau-queuetime_windowed=<number>`` and ``queuetime_fs=<number>``
+    ``--vo-vdpau-queuetime-windowed=<number>`` and ``queuetime-fs=<number>``
         Use VDPAU's presentation queue functionality to queue future video
         frame changes at most this many milliseconds in advance (default: 50).
         See below for additional information.
-    ``--vo-vdpau-output_surfaces=<2-15>``
+    ``--vo-vdpau-output-surfaces=<2-15>``
         Allocate this many output surfaces to display video frames (default:
         3). See below for additional information.
     ``--vo-vdpau-colorkey=<#RRGGBB|#AARRGGBB>``
