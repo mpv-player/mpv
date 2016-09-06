@@ -149,6 +149,10 @@ main_dependencies = [
         'req': True,
         'fmsg': 'Unable to find pthreads support.'
     }, {
+        'name': 'gnuc',
+        'desc': 'GNU C extensions',
+        'func': check_statement([], "__GNUC__"),
+    }, {
         'name': 'stdatomic',
         'desc': 'stdatomic.h',
         'func': check_libs(['atomic'],
@@ -173,10 +177,10 @@ main_dependencies = [
         'deps_neg': [ 'stdatomic', 'atomic-builtins' ],
     }, {
         'name': 'atomics',
-        'desc': 'compiler support for usable thread synchronization built-ins',
+        'desc': 'stdatomic.h support or emulation',
         'func': check_true,
         'req': True,
-        'deps_any': ['stdatomic', 'atomic-builtins', 'sync-builtins'],
+        'deps_any': ['stdatomic', 'atomic-builtins', 'sync-builtins', 'gnuc'],
     }, {
         'name': 'c11-tls',
         'desc': 'C11 TLS support',

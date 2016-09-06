@@ -75,6 +75,10 @@
 #define FULLCONFIG "(missing)\n"
 #endif
 
+#if !(HAVE_STDATOMIC || HAVE_ATOMIC_BUILTINS || HAVE_SYNC_BUILTINS)
+pthread_mutex_t mp_atomic_mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
+
 enum exit_reason {
   EXIT_NONE,
   EXIT_NORMAL,
