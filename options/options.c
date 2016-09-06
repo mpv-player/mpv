@@ -76,6 +76,8 @@ extern const struct m_sub_options encode_config;
 extern const struct m_sub_options gl_video_conf;
 extern const struct m_sub_options ao_alsa_conf;
 
+extern const struct m_sub_options demux_conf;
+
 extern const struct m_obj_list vf_obj_list;
 extern const struct m_obj_list af_obj_list;
 extern const struct m_obj_list vo_obj_list;
@@ -105,6 +107,35 @@ static const struct m_sub_options screenshot_conf = {
     .defaults = &image_writer_opts_defaults,
 };
 
+#define OPT_BASE_STRUCT struct mp_cache_opts
+
+const struct m_sub_options stream_cache_conf = {
+    .opts = (const struct m_option[]){
+        OPT_CHOICE_OR_INT("cache", size, 0, 32, 0x7fffffff,
+                          ({"no", 0},
+                           {"auto", -1},
+                           {"yes", -2})),
+        OPT_CHOICE_OR_INT("cache-default", def_size, 0, 32, 0x7fffffff,
+                          ({"no", 0})),
+        OPT_INTRANGE("cache-initial", initial, 0, 0, 0x7fffffff),
+        OPT_INTRANGE("cache-seek-min", seek_min, 0, 0, 0x7fffffff),
+        OPT_INTRANGE("cache-backbuffer", back_buffer, 0, 0, 0x7fffffff),
+        OPT_STRING("cache-file", file, M_OPT_FILE),
+        OPT_INTRANGE("cache-file-size", file_max, 0, 0, 0x7fffffff),
+        {0}
+    },
+    .size = sizeof(struct mp_cache_opts),
+    .defaults = &(const struct mp_cache_opts){
+        .size = -1,
+        .def_size = 75000,
+        .initial = 0,
+        .seek_min = 500,
+        .back_buffer = 75000,
+        .file_max = 1024 * 1024,
+    },
+};
+
+#undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct mp_vo_opts
 
 static const m_option_t mp_vo_opt_list[] = {
@@ -240,17 +271,7 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- stream options --------------------
 
-    OPT_CHOICE_OR_INT("cache", stream_cache.size, 0, 32, 0x7fffffff,
-                      ({"no", 0},
-                       {"auto", -1},
-                       {"yes", -2})),
-    OPT_CHOICE_OR_INT("cache-default", stream_cache.def_size, 0, 32, 0x7fffffff,
-                      ({"no", 0})),
-    OPT_INTRANGE("cache-initial", stream_cache.initial, 0, 0, 0x7fffffff),
-    OPT_INTRANGE("cache-seek-min", stream_cache.seek_min, 0, 0, 0x7fffffff),
-    OPT_INTRANGE("cache-backbuffer", stream_cache.back_buffer, 0, 0, 0x7fffffff),
-    OPT_STRING("cache-file", stream_cache.file, M_OPT_FILE),
-    OPT_INTRANGE("cache-file-size", stream_cache.file_max, 0, 0, 0x7fffffff),
+    OPT_SUBSTRUCT("", stream_cache, stream_cache_conf, 0),
 
 #if HAVE_DVDREAD || HAVE_DVDNAV
     OPT_STRING("dvd-device", dvd_device, M_OPT_FILE),
@@ -264,22 +285,6 @@ const m_option_t mp_opts[] = {
     OPT_STRING("bluray-device", bluray_device, M_OPT_FILE),
     OPT_INTRANGE("bluray-angle", bluray_angle, 0, 0, 999),
 #endif /* HAVE_LIBBLURAY */
-
-    OPT_STRINGLIST("http-header-fields", network_http_header_fields, 0),
-    OPT_STRING("user-agent", network_useragent, 0),
-    OPT_STRING("referrer", network_referrer, 0),
-    OPT_FLAG("cookies", network_cookies_enabled, 0),
-    OPT_STRING("cookies-file", network_cookies_file, M_OPT_FILE),
-    OPT_CHOICE("rtsp-transport", network_rtsp_transport, 0,
-               ({"lavf", 0},
-                {"udp", 1},
-                {"tcp", 2},
-                {"http", 3})),
-    OPT_FLAG("tls-verify", network_tls_verify, 0),
-    OPT_STRING("tls-ca-file", network_tls_ca_file, M_OPT_FILE),
-    OPT_STRING("tls-cert-file", network_tls_cert_file, M_OPT_FILE),
-    OPT_STRING("tls-key-file", network_tls_key_file, M_OPT_FILE),
-    OPT_DOUBLE("network-timeout", network_timeout, M_OPT_MIN, .min = 0),
 
 // ------------------------- demuxer options --------------------
 
@@ -342,13 +347,6 @@ const m_option_t mp_opts[] = {
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
     OPT_FLAG("demuxer-thread", demuxer_thread, 0),
-    OPT_DOUBLE("demuxer-readahead-secs", demuxer_min_secs, M_OPT_MIN, .min = 0),
-    OPT_INTRANGE("demuxer-max-packets", demuxer_max_packs, 0, 0, INT_MAX),
-    OPT_INTRANGE("demuxer-max-bytes", demuxer_max_bytes, 0, 0, INT_MAX),
-
-    OPT_FLAG("force-seekable", force_seekable, 0),
-
-    OPT_DOUBLE("cache-secs", demuxer_min_secs_cache, M_OPT_MIN, .min = 0),
     OPT_FLAG("cache-pause", cache_pausing, 0),
 
     OPT_DOUBLE("mf-fps", mf_fps, 0),
@@ -417,7 +415,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("vd-lavc", vd_lavc_params, vd_lavc_conf, 0),
     OPT_SUBSTRUCT("ad-lavc", ad_lavc_params, ad_lavc_conf, 0),
 
-    OPT_SUBSTRUCT("demuxer-lavf", demux_lavf, demux_lavf_conf, 0),
+    OPT_SUBSTRUCT("", demux_lavf, demux_lavf_conf, 0),
     OPT_SUBSTRUCT("demuxer-rawaudio", demux_rawaudio, demux_rawaudio_conf, 0),
     OPT_SUBSTRUCT("demuxer-rawvideo", demux_rawvideo, demux_rawvideo_conf, 0),
     OPT_SUBSTRUCT("demuxer-mkv", demux_mkv, demux_mkv_conf, 0),
@@ -429,7 +427,6 @@ const m_option_t mp_opts[] = {
     OPT_PATHLIST("audio-file-paths", audiofile_paths, 0),
     OPT_STRING_APPEND_LIST("external-file", external_files, M_OPT_FILE),
     OPT_FLAG("autoload-files", autoload_files, 0),
-    OPT_STRING("sub-codepage", sub_cp, 0),
     OPT_FLOAT("sub-delay", sub_delay, 0),
     OPT_FLOAT("sub-fps", sub_fps, 0),
     OPT_FLOAT("sub-speed", sub_speed, 0),
@@ -652,6 +649,7 @@ const m_option_t mp_opts[] = {
     OPT_PRINT("V", print_version),
 
     OPT_SUBSTRUCT("", vo, vo_sub_opts, 0),
+    OPT_SUBSTRUCT("", demux_opts, demux_conf, 0),
 
 #if HAVE_GL
     OPT_SUBSTRUCT("", gl_video_opts, gl_video_conf, 0),
@@ -799,22 +797,8 @@ const struct MPOpts mp_default_opts = {
     .load_config = 1,
     .position_resume = 1,
     .autoload_files = 1,
-    .stream_cache = {
-        .size = -1,
-        .def_size = 75000,
-        .initial = 0,
-        .seek_min = 500,
-        .back_buffer = 75000,
-        .file_max = 1024 * 1024,
-    },
-    .demuxer_max_packs = 16000,
-    .demuxer_max_bytes = 400 * 1024 * 1024,
     .demuxer_thread = 1,
-    .demuxer_min_secs = 1.0,
-    .network_rtsp_transport = 2,
-    .network_timeout = 0.0,
     .hls_bitrate = INT_MAX,
-    .demuxer_min_secs_cache = 10.0,
     .cache_pausing = 1,
     .chapterrange = {-1, -1},
     .ab_loop = {MP_NOPTS_VALUE, MP_NOPTS_VALUE},
@@ -863,7 +847,6 @@ const struct MPOpts mp_default_opts = {
     .ass_shaper = 1,
     .use_embedded_fonts = 1,
     .sub_fix_timing = 1,
-    .sub_cp = "auto",
     .screenshot_template = "mpv-shot%n",
 
     .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video,vp9",

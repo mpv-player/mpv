@@ -223,7 +223,7 @@ void stream_set_capture_file(stream_t *s, const char *filename);
 
 struct mp_cache_opts;
 bool stream_wants_cache(stream_t *stream, struct mp_cache_opts *opts);
-int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts);
+int stream_enable_cache_defaults(stream_t **stream);
 
 // Internal
 int stream_cache_init(stream_t *cache, stream_t *stream,
@@ -294,8 +294,7 @@ char *mp_file_get_path(void *talloc_ctx, bstr url);
 struct AVDictionary;
 void mp_setup_av_network_options(struct AVDictionary **dict,
                                  struct mpv_global *global,
-                                 struct mp_log *log,
-                                 struct MPOpts *opts);
+                                 struct mp_log *log);
 
 void stream_print_proto_list(struct mp_log *log);
 char **stream_get_proto_list(void);

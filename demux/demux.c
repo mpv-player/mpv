@@ -20,6 +20,7 @@
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
+#include <limits.h>
 #include <pthread.h>
 
 #include <math.h>
@@ -28,7 +29,8 @@
 #include <sys/stat.h>
 
 #include "config.h"
-#include "options/options.h"
+#include "options/m_config.h"
+#include "options/m_option.h"
 #include "mpv_talloc.h"
 #include "common/msg.h"
 #include "common/global.h"
@@ -79,6 +81,34 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_playlist,
     &demuxer_desc_null,
     NULL
+};
+
+struct demux_opts {
+    int max_packs;
+    int max_bytes;
+    double min_secs;
+    int force_seekable;
+    double min_secs_cache;
+};
+
+#define OPT_BASE_STRUCT struct demux_opts
+
+const struct m_sub_options demux_conf = {
+    .opts = (const struct m_option[]){
+        OPT_DOUBLE("demuxer-readahead-secs", min_secs, M_OPT_MIN, .min = 0),
+        OPT_INTRANGE("demuxer-max-packets", max_packs, 0, 0, INT_MAX),
+        OPT_INTRANGE("demuxer-max-bytes", max_bytes, 0, 0, INT_MAX),
+        OPT_FLAG("force-seekable", force_seekable, 0),
+        OPT_DOUBLE("cache-secs", min_secs_cache, M_OPT_MIN, .min = 0),
+        {0}
+    },
+    .size = sizeof(struct demux_opts),
+    .defaults = &(const struct demux_opts){
+        .max_packs = 16000,
+        .max_bytes = 400 * 1024 * 1024,
+        .min_secs = 1.0,
+        .min_secs_cache = 10.0,
+    },
 };
 
 struct demux_internal {
@@ -1185,7 +1215,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .stream = stream,
         .seekable = stream->seekable,
         .filepos = -1,
-        .opts = global->opts,
         .global = global,
         .log = mp_log_new(demuxer, log, desc->name),
         .glog = log,
@@ -1198,22 +1227,24 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         !demuxer->stream->uncached_stream->seekable)
         demuxer->seekable = false;
 
+    struct demux_opts *opts = mp_get_config_group(demuxer, global, &demux_conf);
+
     struct demux_internal *in = demuxer->in = talloc_ptrtype(demuxer, in);
     *in = (struct demux_internal){
         .log = demuxer->log,
         .d_thread = talloc(demuxer, struct demuxer),
         .d_buffer = talloc(demuxer, struct demuxer),
         .d_user = demuxer,
-        .min_secs = demuxer->opts->demuxer_min_secs,
-        .max_packs = demuxer->opts->demuxer_max_packs,
-        .max_bytes = demuxer->opts->demuxer_max_bytes,
+        .min_secs = opts->min_secs,
+        .max_packs = opts->max_packs,
+        .max_bytes = opts->max_bytes,
         .initial_state = true,
     };
     pthread_mutex_init(&in->lock, NULL);
     pthread_cond_init(&in->wakeup, NULL);
 
     if (stream->uncached_stream)
-        in->min_secs = MPMAX(in->min_secs, demuxer->opts->demuxer_min_secs_cache);
+        in->min_secs = MPMAX(in->min_secs, opts->min_secs_cache);
 
     *in->d_thread = *demuxer;
     *in->d_buffer = *demuxer;
@@ -1244,7 +1275,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
             mp_verbose(log, "Detected file format: %s\n", desc->desc);
         if (!in->d_thread->seekable)
             mp_verbose(log, "Stream is not seekable.\n");
-        if (!in->d_thread->seekable && demuxer->opts->force_seekable) {
+        if (!in->d_thread->seekable && opts->force_seekable) {
             mp_warn(log, "Not seekable, but enabling seeking on user request.\n");
             in->d_thread->seekable = true;
             in->d_thread->partially_seekable = true;
@@ -1336,7 +1367,6 @@ struct demuxer *demux_open_url(const char *url,
                                 struct mp_cancel *cancel,
                                 struct mpv_global *global)
 {
-    struct MPOpts *opts = global->opts;
     struct demuxer_params dummy = {0};
     if (!params)
         params = &dummy;
@@ -1344,10 +1374,14 @@ struct demuxer *demux_open_url(const char *url,
                                      cancel, global);
     if (!s)
         return NULL;
-    if (params->allow_capture)
-        stream_set_capture_file(s, opts->stream_capture);
+    if (params->allow_capture) {
+        char *f;
+        mp_read_option_raw(global, "stream-capture", &m_option_type_string, &f);
+        stream_set_capture_file(s, f);
+        talloc_free(f);
+    }
     if (!params->disable_cache)
-        stream_enable_cache(&s, &opts->stream_cache);
+        stream_enable_cache_defaults(&s);
     struct demuxer *d = demux_open(s, params, global);
     if (d) {
         demux_maybe_replace_stream(d);

@@ -19,12 +19,13 @@
 #include <libavformat/avio.h>
 #include <libavutil/opt.h>
 
-#include "options/options.h"
 #include "options/path.h"
+#include "common/common.h"
 #include "common/msg.h"
 #include "common/tags.h"
 #include "common/av_common.h"
 #include "stream.h"
+#include "options/m_config.h"
 #include "options/m_option.h"
 
 #include "cookies.h"
@@ -35,14 +36,37 @@
 #define OPT_BASE_STRUCT struct stream_lavf_params
 struct stream_lavf_params {
     char **avopts;
+    int cookies_enabled;
+    char *cookies_file;
+    char *useragent;
+    char *referrer;
+    char **http_header_fields;
+    int tls_verify;
+    char *tls_ca_file;
+    char *tls_cert_file;
+    char *tls_key_file;
+    double timeout;
 };
 
 const struct m_sub_options stream_lavf_conf = {
     .opts = (const m_option_t[]) {
         OPT_KEYVALUELIST("stream-lavf-o", avopts, 0),
+        OPT_STRINGLIST("http-header-fields", http_header_fields, 0),
+        OPT_STRING("user-agent", useragent, 0),
+        OPT_STRING("referrer", referrer, 0),
+        OPT_FLAG("cookies", cookies_enabled, 0),
+        OPT_STRING("cookies-file", cookies_file, M_OPT_FILE),
+        OPT_FLAG("tls-verify", tls_verify, 0),
+        OPT_STRING("tls-ca-file", tls_ca_file, M_OPT_FILE),
+        OPT_STRING("tls-cert-file", tls_cert_file, M_OPT_FILE),
+        OPT_STRING("tls-key-file", tls_key_file, M_OPT_FILE),
+        OPT_DOUBLE("network-timeout", timeout, M_OPT_MIN, .min = 0),
         {0}
     },
     .size = sizeof(struct stream_lavf_params),
+    .defaults = &(const struct stream_lavf_params){
+        .useragent = (char *)mpv_version,
+    },
 };
 
 static const char *const http_like[];
@@ -150,50 +174,52 @@ static int interrupt_cb(void *ctx)
 static const char * const prefix[] = { "lavf://", "ffmpeg://" };
 
 void mp_setup_av_network_options(AVDictionary **dict, struct mpv_global *global,
-                                 struct mp_log *log, struct MPOpts *opts)
+                                 struct mp_log *log)
 {
     void *temp = talloc_new(NULL);
+    struct stream_lavf_params *opts =
+        mp_get_config_group(temp, global, &stream_lavf_conf);
 
     // HTTP specific options (other protocols ignore them)
-    if (opts->network_useragent)
-        av_dict_set(dict, "user-agent", opts->network_useragent, 0);
-    if (opts->network_cookies_enabled) {
-        char *file = opts->network_cookies_file;
+    if (opts->useragent)
+        av_dict_set(dict, "user-agent", opts->useragent, 0);
+    if (opts->cookies_enabled) {
+        char *file = opts->cookies_file;
         if (file && file[0])
             file = mp_get_user_path(temp, global, file);
         char *cookies = cookies_lavf(temp, log, file);
         if (cookies && cookies[0])
             av_dict_set(dict, "cookies", cookies, 0);
     }
-    av_dict_set(dict, "tls_verify", opts->network_tls_verify ? "1" : "0", 0);
-    if (opts->network_tls_ca_file)
-        av_dict_set(dict, "ca_file", opts->network_tls_ca_file, 0);
-    if (opts->network_tls_cert_file)
-        av_dict_set(dict, "cert_file", opts->network_tls_cert_file, 0);
-    if (opts->network_tls_key_file)
-        av_dict_set(dict, "key_file", opts->network_tls_key_file, 0);
+    av_dict_set(dict, "tls_verify", opts->tls_verify ? "1" : "0", 0);
+    if (opts->tls_ca_file)
+        av_dict_set(dict, "ca_file", opts->tls_ca_file, 0);
+    if (opts->tls_cert_file)
+        av_dict_set(dict, "cert_file", opts->tls_cert_file, 0);
+    if (opts->tls_key_file)
+        av_dict_set(dict, "key_file", opts->tls_key_file, 0);
     char *cust_headers = talloc_strdup(temp, "");
-    if (opts->network_referrer) {
+    if (opts->referrer) {
         cust_headers = talloc_asprintf_append(cust_headers, "Referer: %s\r\n",
-                                              opts->network_referrer);
+                                              opts->referrer);
     }
-    if (opts->network_http_header_fields) {
-        for (int n = 0; opts->network_http_header_fields[n]; n++) {
+    if (opts->http_header_fields) {
+        for (int n = 0; opts->http_header_fields[n]; n++) {
             cust_headers = talloc_asprintf_append(cust_headers, "%s\r\n",
-                                                  opts->network_http_header_fields[n]);
+                                                  opts->http_header_fields[n]);
         }
     }
     if (strlen(cust_headers))
         av_dict_set(dict, "headers", cust_headers, 0);
     av_dict_set(dict, "icy", "1", 0);
     // So far, every known protocol uses microseconds for this
-    if (opts->network_timeout > 0) {
+    if (opts->timeout > 0) {
         char buf[80];
-        snprintf(buf, sizeof(buf), "%lld", (long long)(opts->network_timeout * 1e6));
+        snprintf(buf, sizeof(buf), "%lld", (long long)(opts->timeout * 1e6));
         av_dict_set(dict, "timeout", buf, 0);
     }
 
-    mp_set_avdict(dict, opts->stream_lavf_opts->avopts);
+    mp_set_avdict(dict, opts->avopts);
 
     talloc_free(temp);
 }
@@ -215,7 +241,6 @@ static char *normalize_url(void *ta_parent, const char *filename)
 
 static int open_f(stream_t *stream)
 {
-    struct MPOpts *opts = stream->opts;
     AVIOContext *avio = NULL;
     int res = STREAM_ERROR;
     AVDictionary *dict = NULL;
@@ -255,7 +280,7 @@ static int open_f(stream_t *stream)
         filename = talloc_asprintf(temp, "mmsh://%.*s", BSTR_P(b_filename));
     }
 
-    mp_setup_av_network_options(&dict, stream->global, stream->log, opts);
+    mp_setup_av_network_options(&dict, stream->global, stream->log);
 
     AVIOInterruptCB cb = {
         .callback = interrupt_cb,

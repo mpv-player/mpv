@@ -35,7 +35,6 @@
 #include <libavutil/display.h>
 #include <libavutil/opt.h>
 
-#include "options/options.h"
 #include "common/msg.h"
 #include "common/tags.h"
 #include "common/av_common.h"
@@ -45,6 +44,7 @@
 #include "stream/stream.h"
 #include "demux.h"
 #include "stheader.h"
+#include "options/m_config.h"
 #include "options/m_option.h"
 #include "options/path.h"
 
@@ -69,22 +69,32 @@ struct demux_lavf_opts {
     char **avopts;
     int hacks;
     int genptsmode;
+    char *sub_cp;
+    int rtsp_transport;
 };
 
 const struct m_sub_options demux_lavf_conf = {
     .opts = (const m_option_t[]) {
-        OPT_INTRANGE("probesize", probesize, 0, 32, INT_MAX),
-        OPT_STRING("format", format, 0),
-        OPT_FLOATRANGE("analyzeduration", analyzeduration, 0, 0, 3600),
-        OPT_INTRANGE("buffersize", buffersize, 0, 1, 10 * 1024 * 1024,
-                     OPTDEF_INT(BIO_BUFFER_SIZE)),
-        OPT_FLAG("allow-mimetype", allow_mimetype, 0),
-        OPT_INTRANGE("probescore", probescore, 0, 1, AVPROBE_SCORE_MAX),
-        OPT_STRING("cryptokey", cryptokey, 0),
-        OPT_FLAG("hacks", hacks, 0),
-        OPT_CHOICE("genpts-mode", genptsmode, 0,
+        OPT_INTRANGE("demuxer-lavf-probesize", probesize, 0, 32, INT_MAX),
+        OPT_STRING("demuxer-lavf-format", format, 0),
+        OPT_FLOATRANGE("demuxer-lavf-analyzeduration", analyzeduration, 0,
+                       0, 3600),
+        OPT_INTRANGE("demuxer-lavf-buffersize", buffersize, 0, 1,
+                     10 * 1024 * 1024, OPTDEF_INT(BIO_BUFFER_SIZE)),
+        OPT_FLAG("demuxer-lavf-allow-mimetype", allow_mimetype, 0),
+        OPT_INTRANGE("demuxer-lavf-probescore", probescore, 0,
+                     1, AVPROBE_SCORE_MAX),
+        OPT_STRING("demuxer-lavf-cryptokey", cryptokey, 0),
+        OPT_FLAG("demuxer-lavf-hacks", hacks, 0),
+        OPT_CHOICE("demuxer-lavf-genpts-mode", genptsmode, 0,
                    ({"lavf", 1}, {"no", 0})),
-        OPT_KEYVALUELIST("o", avopts, 0),
+        OPT_KEYVALUELIST("demuxer-lavf-o", avopts, 0),
+        OPT_STRING("sub-codepage", sub_cp, 0),
+        OPT_CHOICE("rtsp-transport", rtsp_transport, 0,
+               ({"lavf", 0},
+                {"udp", 1},
+                {"tcp", 2},
+                {"http", 3})),
         {0}
     },
     .size = sizeof(struct demux_lavf_opts),
@@ -95,6 +105,8 @@ const struct m_sub_options demux_lavf_conf = {
         // user is supposed to retry with larger probe sizes until a higher
         // value is reached.
         .probescore = AVPROBE_SCORE_MAX/4 + 1,
+        .sub_cp = "auto",
+        .rtsp_transport = 2,
     },
 };
 
@@ -174,6 +186,9 @@ typedef struct lavf_priv {
     int cur_program;
     char *mime_type;
     double seek_delay;
+
+    struct demux_lavf_opts *opts;
+    double mf_fps;
 } lavf_priv_t;
 
 // At least mp4 has name="mov,mp4,m4a,3gp,3g2,mj2", so we split the name
@@ -271,7 +286,7 @@ static void list_formats(struct demuxer *demuxer)
 static void convert_charset(struct demuxer *demuxer)
 {
     lavf_priv_t *priv = demuxer->priv;
-    char *cp = demuxer->opts->sub_cp;
+    char *cp = priv->opts->sub_cp;
     if (!cp || mp_charset_is_utf8(cp))
         return;
     bstr data = stream_read_complete(priv->stream, NULL, 128 * 1024 * 1024);
@@ -313,9 +328,8 @@ static const char *const prefixes[] =
 
 static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 {
-    struct MPOpts *opts = demuxer->opts;
-    struct demux_lavf_opts *lavfdopts = opts->demux_lavf;
     lavf_priv_t *priv = demuxer->priv;
+    struct demux_lavf_opts *lavfdopts = priv->opts;
     struct stream *s = priv->stream;
 
     priv->filename = remove_prefix(s->url, prefixes);
@@ -606,7 +620,7 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         if (st->avg_frame_rate.num)
             sh->codec->fps = av_q2d(st->avg_frame_rate);
         if (priv->format_hack.image_format)
-            sh->codec->fps = demuxer->opts->mf_fps;
+            sh->codec->fps = priv->mf_fps;
         sh->codec->par_w = st->sample_aspect_ratio.num;
         sh->codec->par_h = st->sample_aspect_ratio.den;
 
@@ -736,14 +750,21 @@ static int interrupt_cb(void *ctx)
 
 static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 {
-    struct MPOpts *opts = demuxer->opts;
-    struct demux_lavf_opts *lavfdopts = opts->demux_lavf;
     AVFormatContext *avfc;
     AVDictionaryEntry *t = NULL;
     float analyze_duration = 0;
     lavf_priv_t *priv = talloc_zero(NULL, lavf_priv_t);
     demuxer->priv = priv;
     priv->stream = demuxer->stream;
+
+    priv->opts = mp_get_config_group(priv, demuxer->global, &demux_lavf_conf);
+    struct demux_lavf_opts *lavfdopts = priv->opts;
+
+    int index_mode;
+    mp_read_option_raw(demuxer->global, "index", &m_option_type_choice,
+                       &index_mode);
+    mp_read_option_raw(demuxer->global, "mf-fps", &m_option_type_double,
+                       &priv->mf_fps);
 
     if (lavf_check_file(demuxer, check) < 0)
         return -1;
@@ -756,7 +777,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         parse_cryptokey(avfc, lavfdopts->cryptokey);
     if (lavfdopts->genptsmode)
         avfc->flags |= AVFMT_FLAG_GENPTS;
-    if (opts->index_mode != 1)
+    if (index_mode != 1)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
 
 #if LIBAVFORMAT_VERSION_MICRO >= 100
@@ -789,7 +810,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         priv->stream->type == STREAMTYPE_AVDEVICE ||
         priv->format_hack.no_stream)
     {
-        mp_setup_av_network_options(&dopts, demuxer->global, demuxer->log, opts);
+        mp_setup_av_network_options(&dopts, demuxer->global, demuxer->log);
         // This might be incorrect.
         demuxer->seekable = true;
     } else {
@@ -812,7 +833,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     if (matches_avinputformat_name(priv, "rtsp")) {
         const char *transport = NULL;
-        switch (opts->network_rtsp_transport) {
+        switch (lavfdopts->rtsp_transport) {
         case 1: transport = "udp";  break;
         case 2: transport = "tcp";  break;
         case 3: transport = "http"; break;

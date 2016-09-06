@@ -22,8 +22,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "options/m_config.h"
 #include "options/m_option.h"
-#include "options/options.h"
 
 #include "stream/stream.h"
 #include "demux.h"
@@ -129,7 +129,8 @@ struct priv {
 
 static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
 {
-    struct demux_rawaudio_opts *opts = demuxer->opts->demux_rawaudio;
+    struct demux_rawaudio_opts *opts =
+        mp_get_config_group(demuxer, demuxer->global, &demux_rawaudio_conf);
 
     if (check != DEMUX_CHECK_REQUEST && check != DEMUX_CHECK_FORCE)
         return -1;
@@ -169,7 +170,8 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
 
 static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
 {
-    struct demux_rawvideo_opts *opts = demuxer->opts->demux_rawvideo;
+    struct demux_rawvideo_opts *opts =
+        mp_get_config_group(demuxer, demuxer->global, &demux_rawvideo_conf);
 
     if (check != DEMUX_CHECK_REQUEST && check != DEMUX_CHECK_FORCE)
         return -1;

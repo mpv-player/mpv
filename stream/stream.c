@@ -784,7 +784,7 @@ bool stream_wants_cache(stream_t *stream, struct mp_cache_opts *opts)
 
 // return 1 on success, 0 if the cache is disabled/not needed, and -1 on error
 // or if the cache is disabled
-int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
+static int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
 {
     stream_t *orig = *stream;
     struct mp_cache_opts use_opts = check_cache_opts(*stream, opts);
@@ -813,6 +813,20 @@ int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
         *stream = cache;
     }
     return res;
+}
+
+// Do some crazy stuff to call stream_enable_cache() with the global options.
+int stream_enable_cache_defaults(stream_t **stream)
+{
+    struct mpv_global *global = (*stream)->global;
+    if (!global)
+        return 0;
+    void *tmp = talloc_new(NULL);
+    struct mp_cache_opts *opts =
+        mp_get_config_group(tmp, global, &stream_cache_conf);
+    int r = stream_enable_cache(stream, opts);
+    talloc_free(tmp);
+    return r;
 }
 
 static uint16_t stream_read_word_endian(stream_t *s, bool big_endian)

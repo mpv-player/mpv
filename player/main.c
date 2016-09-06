@@ -374,13 +374,9 @@ struct MPContext *mp_create(void)
     mpctx->log = mp_log_new(mpctx, mpctx->global->log, "!cplayer");
     mpctx->statusline = mp_log_new(mpctx, mpctx->log, "!statusline");
 
-    struct MPOpts *def_opts = talloc_ptrtype(mpctx, def_opts);
-    *def_opts = mp_default_opts;
-    def_opts->network_useragent = (char *)mpv_version;
-
     // Create the config context and register the options
     mpctx->mconfig = m_config_new(mpctx, mpctx->log, sizeof(struct MPOpts),
-                                  def_opts, mp_opts);
+                                  &mp_default_opts, mp_opts);
     mpctx->opts = mpctx->mconfig->optstruct;
     mpctx->mconfig->includefunc = cfg_include;
     mpctx->mconfig->includefunc_ctx = mpctx;

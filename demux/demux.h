@@ -207,7 +207,6 @@ typedef struct demuxer {
     struct mp_tags *metadata;
 
     void *priv;   // demuxer-specific internal data
-    struct MPOpts *opts;
     struct mpv_global *global;
     struct mp_log *log, *glog;
     struct demuxer_params *params;

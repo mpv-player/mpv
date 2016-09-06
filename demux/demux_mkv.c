@@ -43,7 +43,7 @@
 
 #include "mpv_talloc.h"
 #include "common/av_common.h"
-#include "options/options.h"
+#include "options/m_config.h"
 #include "options/m_option.h"
 #include "misc/bstr.h"
 #include "stream/stream.h"
@@ -162,6 +162,8 @@ struct block_info {
 };
 
 typedef struct mkv_demuxer {
+    struct demux_mkv_opts *opts;
+
     int64_t segment_start, segment_end;
 
     double duration;
@@ -179,6 +181,9 @@ typedef struct mkv_demuxer {
     mkv_index_t *indexes;
     size_t num_indexes;
     bool index_complete;
+    int index_mode;
+
+    int edition_id;
 
     struct header_elem {
         int32_t id;
@@ -747,11 +752,10 @@ static void add_block_position(demuxer_t *demuxer, struct mkv_track *track,
 
 static int demux_mkv_read_cues(demuxer_t *demuxer)
 {
-    struct MPOpts *opts = demuxer->opts;
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     stream_t *s = demuxer->stream;
 
-    if (opts->index_mode != 1 || mkv_d->index_complete) {
+    if (mkv_d->index_mode != 1 || mkv_d->index_complete) {
         ebml_read_skip(demuxer->log, -1, s);
         return 0;
     }
@@ -810,9 +814,9 @@ done:
 
 static int demux_mkv_read_chapters(struct demuxer *demuxer)
 {
-    struct MPOpts *opts = demuxer->opts;
+    mkv_demuxer_t *mkv_d = demuxer->priv;
     stream_t *s = demuxer->stream;
-    int wanted_edition = opts->edition_id;
+    int wanted_edition = mkv_d->edition_id;
     uint64_t wanted_edition_uid = demuxer->matroska_data.uid.edition;
 
     /* A specific edition UID was requested; ignore the user option which is
@@ -1191,10 +1195,9 @@ static int read_deferred_element(struct demuxer *demuxer,
 
 static void read_deferred_cues(demuxer_t *demuxer)
 {
-    struct MPOpts *opts = demuxer->opts;
     mkv_demuxer_t *mkv_d = demuxer->priv;
 
-    if (mkv_d->index_complete || opts->index_mode != 1)
+    if (mkv_d->index_complete || mkv_d->index_mode != 1)
         return;
 
     for (int n = 0; n < mkv_d->num_headers; n++) {
@@ -1855,7 +1858,6 @@ static int read_mkv_segment_header(demuxer_t *demuxer, int64_t *segment_end)
 static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
 {
     stream_t *s = demuxer->stream;
-    struct MPOpts *opts = demuxer->opts;
     mkv_demuxer_t *mkv_d;
     int64_t start_pos;
     int64_t end_pos;
@@ -1881,6 +1883,12 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     mkv_d->segment_end = end_pos;
     mkv_d->a_skip_preroll = 1;
     mkv_d->skip_to_timecode = INT64_MIN;
+
+    mp_read_option_raw(demuxer->global, "index", &m_option_type_choice,
+                       &mkv_d->index_mode);
+    mp_read_option_raw(demuxer->global, "edition", &m_option_type_choice,
+                       &mkv_d->edition_id);
+    mkv_d->opts = mp_get_config_group(mkv_d, demuxer->global, &demux_mkv_conf);
 
     if (demuxer->params && demuxer->params->matroska_was_valid)
         *demuxer->params->matroska_was_valid = true;
@@ -1941,7 +1949,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     process_tags(demuxer);
 
     probe_first_timestamp(demuxer);
-    if (opts->demux_mkv->probe_duration)
+    if (mkv_d->opts->probe_duration)
         probe_last_timestamp(demuxer, start_pos);
 
     return 0;
@@ -2730,7 +2738,6 @@ static int create_index_until(struct demuxer *demuxer, int64_t timecode)
 static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
                                         int64_t target_timecode, int flags)
 {
-    struct MPOpts *opts = demuxer->opts;
     struct mkv_demuxer *mkv_d = demuxer->priv;
     struct mkv_index *index = NULL;
 
@@ -2758,9 +2765,9 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
         if (flags & FLAG_SUBPREROLL) {
             // Find the cluster with the highest filepos, that has a timestamp
             // still lower than min_tc.
-            double secs = opts->demux_mkv->subtitle_preroll_secs;
+            double secs = mkv_d->opts->subtitle_preroll_secs;
             if (mkv_d->index_has_durations)
-                secs = MPMAX(secs, opts->demux_mkv->subtitle_preroll_secs_index);
+                secs = MPMAX(secs, mkv_d->opts->subtitle_preroll_secs_index);
             int64_t pre = MPMIN(INT64_MAX, secs * 1e9 / mkv_d->tc_scale);
             int64_t min_tc = pre < index->timecode ? index->timecode - pre : 0;
             uint64_t prev_target = 0;
@@ -2823,7 +2830,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, double seek_pts, int flags)
     int cueflags = (flags & SEEK_BACKWARD) ? FLAG_BACKWARD : 0;
 
     mkv_d->subtitle_preroll = NUM_SUB_PREROLL_PACKETS;
-    int preroll_opt = demuxer->opts->demux_mkv->subtitle_preroll;
+    int preroll_opt = mkv_d->opts->subtitle_preroll;
     if (((flags & SEEK_HR) || preroll_opt == 1 ||
          (preroll_opt == 2 && mkv_d->index_has_durations))
         && st_active[STREAM_SUB] && st_active[STREAM_VIDEO])
@@ -2917,7 +2924,7 @@ static void probe_last_timestamp(struct demuxer *demuxer, int64_t start_pos)
 
     // In full mode, we start reading data from the current file position,
     // which works because this function is called after headers are parsed.
-    if (demuxer->opts->demux_mkv->probe_duration != 2) {
+    if (mkv_d->opts->probe_duration != 2) {
         read_deferred_cues(demuxer);
         if (mkv_d->index_complete) {
             // Find last cluster that still has video packets
@@ -2974,7 +2981,7 @@ static void probe_first_timestamp(struct demuxer *demuxer)
 {
     mkv_demuxer_t *mkv_d = demuxer->priv;
 
-    if (!demuxer->opts->demux_mkv->probe_start_time)
+    if (!mkv_d->opts->probe_start_time)
         return;
 
     struct block_info block;
