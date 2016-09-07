@@ -329,6 +329,8 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
         set_force_flags |= ASS_OVERRIDE_BIT_STYLE | ASS_OVERRIDE_BIT_FONT_SIZE;
     if (opts->ass_style_override == 4)
         set_force_flags |= ASS_OVERRIDE_BIT_FONT_SIZE;
+    if (converted)
+        set_force_flags |= ASS_OVERRIDE_BIT_ALIGNMENT;
     ass_set_selective_style_override_enabled(priv, set_force_flags);
     ASS_Style style = {0};
     mp_ass_set_style(&style, 288, opts->sub_text_style);
