@@ -2373,6 +2373,7 @@ static void pass_render_frame(struct gl_video *p)
     p->components = 0;
     p->saved_tex_num = 0;
     p->hook_fbo_num = 0;
+    p->use_linear = false;
 
     if (p->image_params.rotate % 180 == 90)
         MPSWAP(int, p->texture_w, p->texture_h);
