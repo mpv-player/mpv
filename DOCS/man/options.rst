@@ -511,11 +511,9 @@ Program Behavior
 Video
 -----
 
-``--vo=<driver1[:suboption1[=value]:...],driver2,...[,]>``
-    Specify a priority list of video output drivers to be used. For
-    interactive use, one would normally specify a single one to use, but in
-    configuration files, specifying a list of fallbacks may make sense. See
-    `VIDEO OUTPUT DRIVERS`_ for details and descriptions of available drivers.
+``--vo=<driver>``
+    Specify the video output backend to be used. See `VIDEO OUTPUT DRIVERS`_ for
+    details and descriptions of available drivers.
 
 ``--vd=<[+|-]family1:(*|decoder1),[+|-]family2:(*|decoder2),...[-]>``
     Specify a priority list of video decoders to be used, according to their
@@ -596,11 +594,11 @@ Video
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
     :videotoolbox: requires ``--vo=opengl`` (OS X 10.8 and up only)
     :videotoolbox-copy: copies video back into system RAM (OS X 10.8 and up only)
-    :dxva2: requires ``--vo=opengl:backend=angle`` or
-
-        ``--vo=opengl:backend=dxinterop`` (Windows only)
+    :dxva2:     requires ``--vo=opengl`` with ``--opengl-backend=angle`` or
+                ``--opengl-backend=dxinterop`` (Windows only)
     :dxva2-copy: copies video back to system RAM (Windows only)
-    :d3d11va: requires ``--vo=opengl:backend=angle`` (Windows only)
+    :d3d11va:   requires ``--vo=opengl`` with ``--opengl-backend=angle``
+                (Windows only)
     :d3d11va-copy: copies video back to system RAM (Windows only)
     :mediacodec: copies video back to system RAM (Android only)
     :rpi:       requires ``--vo=rpi`` (Raspberry Pi only - default if available)
@@ -622,7 +620,7 @@ Video
     The ``vaapi`` mode, if used with ``--vo=opengl``, requires Mesa 11 and most
     likely works with Intel GPUs only. It also requires the opengl EGL backend
     (automatically used if available). You can also try the old GLX backend by
-    forcing it with ``--vo=opengl:backend=x11``, but the vaapi/GLX interop is
+    forcing it with ``--opengl-backend=x11``, but the vaapi/GLX interop is
     said to be slower than ``vaapi-copy``.
 
     Most video filters will not work with hardware decoding as they are
@@ -847,8 +845,7 @@ Video
     disable deinterlacing just because the ``--deinterlace`` was not set.
 
 ``--field-dominance=<auto|top|bottom>``
-    Set first field for interlaced content. Useful for deinterlacers that
-    double the framerate: ``--vf=yadif=field`` and ``--vo=vdpau:deint``.
+    Set first field for interlaced content.
 
     :auto:    (default) If the decoder does not export the appropriate
               information, it falls back on ``top`` (top field first).
@@ -1008,6 +1005,19 @@ Audio
     manually. For example ``name/foobar`` forces the AO ``name`` to use the
     device ``foobar``.
 
+    .. admonition:: Example for ALSA
+
+        MPlayer and mplayer2 required you to replace any ',' with '.' and
+        any ':' with '=' in the ALSA device name. For example, to use the
+        device named ``dmix:default``, you had to do:
+
+            ``-ao alsa:device=dmix=default``
+
+        In mpv you could instead use:
+
+            ``--audio-device=alsa/dmix:default``
+
+
 ``--audio-exclusive=<yes|no>``
     Enable exclusive output mode. In this mode, the system is usually locked
     out, and only mpv will be able to output audio.
@@ -1025,11 +1035,9 @@ Audio
     ``current-ao`` and ``audio-device-list`` properties to make high-level
     decisions about how to continue.
 
-``--ao=<driver1[:suboption1[=value]:...],driver2,...[,]>``
-    Specify a priority list of audio output drivers to be used. For
-    interactive use one would normally specify a single one to use, but in
-    configuration files specifying a list of fallbacks may make sense. See
-    `AUDIO OUTPUT DRIVERS`_ for details and descriptions of available drivers.
+``--ao=<driver>``
+    Specify the audio output drivers to be used. See `AUDIO OUTPUT DRIVERS`_ for
+    details and descriptions of available drivers.
 
 ``--af=<filter1[=parameter1:parameter2:...],filter2,...>``
     Specify a list of audio filters to apply to the audio stream. See
@@ -3612,23 +3620,7 @@ ALSA audio output options
 
 
 ``--alsa-device=<device>``
-    Sets the device name. For ac3 output via S/PDIF, use an "iec958" or
-    "spdif" device, unless you really know how to set it correctly.
-
-    .. note::
-
-        MPlayer and mplayer2 required you to replace any ',' with '.' and
-        any ':' with '=' in the ALSA device name. mpv does not do this anymore.
-        Instead, quote the device name:
-
-            ``--ao=alsa:device=[plug:surround50]``
-
-        Note that the ``[`` and ``]`` simply quote the device name. With some
-        shells (like zsh), you have to quote the option string to prevent the
-        shell from interpreting the brackets instead of passing them to mpv.
-
-        Actually, you should use the ``--audio-device`` option, instead of
-        setting the device directly.
+    Deprecated, use ``--audio-device`` (requires ``alsa/`` prefix).
 
 ``--alsa-resample=yes``
     Enable ALSA resampling plugin. (This is disabled by default, because

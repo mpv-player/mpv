@@ -4,14 +4,11 @@ AUDIO OUTPUT DRIVERS
 Audio output drivers are interfaces to different audio output facilities. The
 syntax is:
 
-``--ao=<driver1[:suboption1[=value]:...],driver2,...[,]>``
+``--ao=<driver1,driver2,...[,]>``
     Specify a priority list of audio output drivers to be used.
 
 If the list has a trailing ',', mpv will fall back on drivers not contained
-in the list. Suboptions are optional and can mostly be omitted.
-
-You can also set defaults for each driver. The defaults are applied before the
-normal driver parameters.
+in the list.
 
 ``--ao-defaults=<driver1[:parameter1:parameter2:...],driver2,...>``
     Set defaults for each driver.
@@ -173,8 +170,8 @@ Available audio output drivers are:
         changed.
 
 ``null``
-    Produces no audio output but maintains video playback speed. Use
-    ``--ao=null:untimed`` for benchmarking.
+    Produces no audio output but maintains video playback speed. You can use
+    ``--ao=null --ao-null-untimed`` for benchmarking.
 
     The following global options are supported by this audio output:
 

@@ -268,15 +268,16 @@ command line.
 The suboption parser can quote strings with ``"`` and ``[...]``.
 Additionally, there is a special form of quoting with ``%n%`` described below.
 
-For example, the ``opengl`` VO can take multiple options:
+For example, assume the hypothetical ``foo`` filter can take multiple options:
 
-    ``mpv test.mkv --vo=opengl:scale=lanczos:icc-profile=file.icc,xv``
+    ``mpv test.mkv --vf=foo:option1=value1:option2:option3=value3,bar``
 
-This passes ``scale=lanczos`` and ``icc-profile=file.icc`` to ``opengl``,
-and also specifies ``xv`` as fallback VO. If the icc-profile path contains
-spaces or characters like ``,`` or ``:``, you need to quote them:
+This passes ``option1`` and ``option3`` to the ``foo`` filter, with ``option2``
+as flag (implicitly ``option2=yes``), and adds a ``bar`` filter after that. If
+an option contains spaces or characters like ``,`` or ``:``, you need to quote
+them:
 
-    ``mpv '--vo=opengl:icc-profile="file with spaces.icc",xv'``
+    ``mpv '--vf=foo:option1="option value with spaces",bar'``
 
 Shells may actually strip some quotes from the string passed to the commandline,
 so the example quotes the string twice, ensuring that mpv receives the ``"``
@@ -297,11 +298,11 @@ It is started with ``%`` and has the following format::
 
 .. admonition:: Examples
 
-    ``mpv --ao=pcm:file=%10%C:test.wav test.avi``
+    ``mpv '--vf=foo:option1=%11%quoted text' test.avi``
 
     Or in a script:
 
-    ``mpv --ao=pcm:file=%`expr length "$NAME"`%"$NAME" test.avi``
+    ``mpv --vf=foo:option1=%`expr length "$NAME"`%"$NAME" test.avi``
 
 Suboptions passed to the client API are also subject to escaping. Using
 ``mpv_set_option_string()`` is exactly like passing ``--name=data`` to the
@@ -309,8 +310,7 @@ command line (but without shell processing of the string). Some options
 support passing values in a more structured way instead of flat strings, and
 can avoid the suboption parsing mess. For example, ``--vf`` supports
 ``MPV_FORMAT_NODE``, which lets you pass suboptions as a nested data structure
-of maps and arrays. (``--vo`` supports this in the same way, although this
-fact is undocumented.)
+of maps and arrays.
 
 Paths
 -----
@@ -528,7 +528,8 @@ profile name ``default`` to continue with normal options.
 
         [slow]
         profile-desc="some profile name"
-        vo=opengl:scale=ewa_lanczos:scale-radius=16
+        # reference a builtin profile
+        profile=opengl-hq
 
         [fast]
         vo=vdpau
@@ -549,10 +550,6 @@ Some profiles are loaded automatically. The following example demonstrates this:
 
     ::
 
-        [vo.vdpau]
-        # Use hardware decoding
-        hwdec=vdpau
-
         [protocol.dvd]
         profile-desc="profile for dvd:// streams"
         alang=en
@@ -560,9 +557,6 @@ Some profiles are loaded automatically. The following example demonstrates this:
         [extension.flv]
         profile-desc="profile for .flv files"
         vf=flip
-
-        [ao.alsa]
-        device=spdif
 
 The profile name follows the schema ``type.name``, where type can be ``vo``
 to match the value the ``--vo`` option is set to, ``ao`` for ``--ao``,

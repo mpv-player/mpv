@@ -4,14 +4,11 @@ VIDEO OUTPUT DRIVERS
 Video output drivers are interfaces to different video output facilities. The
 syntax is:
 
-``--vo=<driver1[:suboption1[=value]:...],driver2,...[,]>``
+``--vo=<driver1,driver2,...[,]>``
     Specify a priority list of video output drivers to be used.
 
-If the list has a trailing ',', mpv will fall back on drivers not contained
-in the list. Suboptions are optional and can mostly be omitted.
-
-You can also set defaults for each driver. The defaults are applied before the
-normal driver parameters.
+If the list has a trailing ``,``, mpv will fall back on drivers not contained
+in the list.
 
 ``--vo-defaults=<driver1[:parameter1:parameter2:...],driver2,...>``
     Set defaults for each driver.
@@ -22,10 +19,10 @@ normal driver parameters.
 
     See ``--vo=help`` for a list of compiled-in video output drivers.
 
-    The recommended output driver is ``--vo=opengl``. All other drivers are
-    for compatibility or special purposes. By default, ``--vo=opengl`` is used,
-    but if that appears not to work, it fallback to other drivers (in the same
-    order as listed by ``--vo=help``).
+    The recommended output driver is ``--vo=opengl``, which is the default. All
+    other drivers are for compatibility or special purposes. If the default
+    does not work, it will fallback to other drivers (in the same order as
+    listed by ``--vo=help``).
 
 Available video output drivers are:
 
