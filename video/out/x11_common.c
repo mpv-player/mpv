@@ -40,7 +40,6 @@
 
 #include "vo.h"
 #include "win_state.h"
-#include "osdep/atomics.h"
 #include "osdep/io.h"
 #include "osdep/timer.h"
 #include "osdep/subprocess.h"

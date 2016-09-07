@@ -21,7 +21,7 @@
 #include <libavutil/common.h>
 #include <assert.h>
 #include "mpv_talloc.h"
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 #include "ring.h"
 
 struct mp_ring {

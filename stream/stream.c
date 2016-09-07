@@ -26,7 +26,7 @@
 #include <assert.h>
 
 #include <libavutil/common.h>
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 #include "osdep/io.h"
 
 #include "mpv_talloc.h"

@@ -24,7 +24,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 #include "osdep/semaphore.h"
 
 #include "common/common.h"

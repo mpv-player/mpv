@@ -21,7 +21,7 @@
 #include "osdep/subprocess.h"
 
 #include "osdep/io.h"
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 
 #include "mpv_talloc.h"
 #include "common/common.h"

@@ -16,8 +16,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MP_ATOMICS_H
-#define MP_ATOMICS_H
+#ifndef MP_ATOMIC_H
+#define MP_ATOMIC_H
 
 #include <inttypes.h>
 #include "config.h"

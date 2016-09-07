@@ -39,7 +39,7 @@
 #include "common/msg.h"
 #include "common/msg_control.h"
 #include "misc/node.h"
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 
 static const union m_option_value default_value;
 

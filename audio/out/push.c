@@ -35,7 +35,7 @@
 
 #include "osdep/threads.h"
 #include "osdep/timer.h"
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 
 #include "audio/audio.h"
 #include "audio/audio_buffer.h"

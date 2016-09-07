@@ -30,7 +30,7 @@
 
 #include "osdep/timer.h"
 #include "osdep/threads.h"
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 #include "misc/ring.h"
 
 /*

@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 #include "audio/out/ao.h"
 
 /* global data used by ao.c and ao drivers */

@@ -19,7 +19,7 @@
 #include <io.h>
 
 #include "common/msg.h"
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 #include "osdep/io.h"
 #include "input.h"
 
