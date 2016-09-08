@@ -2668,7 +2668,6 @@ static void timer_dbg(struct gl_video *p, const char *name, struct gl_timer *t)
 void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
 {
     GL *gl = p->gl;
-    struct video_image *vimg = &p->image;
 
     if (fbo && !(gl->mpgl_caps & MPGL_CAP_FB)) {
         MP_FATAL(p, "Rendering to FBO requested, but no FBO extension found!\n");
@@ -2679,7 +2678,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
 
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    bool has_frame = frame->current || vimg->mpi;
+    bool has_frame = !!frame->current;
 
     if (!has_frame || p->dst_rect.x0 > 0 || p->dst_rect.y0 > 0 ||
         p->dst_rect.x1 < p->vp_w || p->dst_rect.y1 < abs(p->vp_h))
