@@ -3378,7 +3378,7 @@ bool gl_video_check_format(struct gl_video *p, int mp_format)
 
 void gl_video_config(struct gl_video *p, struct mp_image_params *params)
 {
-    mp_image_unrefp(&p->image.mpi);
+    unref_current_image(p);
 
     if (!mp_image_params_equal(&p->real_image_params, params)) {
         uninit_video(p);
