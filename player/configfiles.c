@@ -192,6 +192,14 @@ static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
         conf = talloc_asprintf_append(conf, "%02X", md5[i]);
 
     if (!mpctx->cached_watch_later_configdir) {
+        char *wl_dir = mpctx->opts->watch_later_directory;
+        if (wl_dir && wl_dir[0]) {
+            mpctx->cached_watch_later_configdir =
+                mp_get_user_path(mpctx, mpctx->global, wl_dir);
+        }
+    }
+
+    if (!mpctx->cached_watch_later_configdir) {
         mpctx->cached_watch_later_configdir =
             mp_find_user_config_file(mpctx, mpctx->global, MP_WATCH_LATER_CONF);
     }
@@ -314,11 +322,11 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         goto exit;
     }
 
-    mp_mk_config_dir(mpctx->global, MP_WATCH_LATER_CONF);
-
     conffile = mp_get_playback_resume_config_filename(mpctx, cur->filename);
     if (!conffile)
         goto exit;
+
+    mp_mk_config_dir(mpctx->global, mpctx->cached_watch_later_configdir);
 
     MP_INFO(mpctx, "Saving state.\n");
 

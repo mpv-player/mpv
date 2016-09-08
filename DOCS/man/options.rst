@@ -387,6 +387,13 @@ Program Behavior
     This behavior is disabled by default, but is always available when quitting
     the player with Shift+Q.
 
+``--watch-later-directory=<path>``
+
+    The directory in which to store the "watch later" temporary files.
+
+    The default is a subdirectory named "watch_later" underneath the
+    config directory (usually ``~/.config/mpv/``).
+
 ``--dump-stats=<filename>``
     Write certain statistics to the given file. The file is truncated on
     opening. The file will contain raw samples, each with a timestamp. To

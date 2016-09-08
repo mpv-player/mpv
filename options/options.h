@@ -190,6 +190,7 @@ typedef struct MPOpts {
     int position_save_on_quit;
     int write_filename_in_watch_later_config;
     int ignore_path_in_watch_later_config;
+    char *watch_later_directory;
     int pause;
     int keep_open;
     double image_display_duration;
