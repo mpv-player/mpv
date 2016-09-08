@@ -284,7 +284,6 @@ const m_option_t mp_opts[] = {
                       ({"auto", -1})),
 #if HAVE_LIBBLURAY
     OPT_STRING("bluray-device", bluray_device, M_OPT_FILE),
-    OPT_INTRANGE("bluray-angle", bluray_angle, 0, 0, 999),
 #endif /* HAVE_LIBBLURAY */
 
 // ------------------------- demuxer options --------------------
@@ -737,6 +736,7 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("media-title", "force-media-title"),
     OPT_REPLACED("input-unix-socket", "input-ipc-server"),
     OPT_REPLACED("softvol-max", "volume-max"),
+    OPT_REMOVED("bluray-angle", "this didn't do anything for a few releases"),
 
     {0}
 };

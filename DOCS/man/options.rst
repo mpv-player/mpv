@@ -2273,10 +2273,6 @@ Disc Devices
 
         ``mpv bd:// --bluray-device=/path/to/bd/``
 
-``--bluray-angle=<ID>``
-    Some Blu-ray discs contain scenes that can be viewed from multiple angles.
-    This option tells mpv which angle to use (default: 1).
-
 ``--cdda-...``
     These options can be used to tune the CD Audio reading feature of mpv.
 

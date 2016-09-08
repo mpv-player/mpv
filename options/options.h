@@ -294,7 +294,6 @@ typedef struct MPOpts {
     int dvd_angle;
     int dvd_speed;
     char *dvd_device;
-    int bluray_angle;
     char *bluray_device;
 
     double mf_fps;
