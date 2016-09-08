@@ -296,6 +296,13 @@ void mp_setup_av_network_options(struct AVDictionary **dict,
                                  struct mpv_global *global,
                                  struct mp_log *log);
 
+// sort-of legacy handling of options-in-stream-URL
+#define URL_USERNAME 0
+#define URL_HOSTNAME 1
+#define URL_PORT 2
+#define URL_FILENAME 3
+void mp_parse_legacy_url(bstr url, bstr components[4]);
+
 void stream_print_proto_list(struct mp_log *log);
 char **stream_get_proto_list(void);
 bool stream_has_proto(const char *proto);

@@ -213,6 +213,22 @@ const struct m_sub_options vo_sub_opts = {
 };
 
 #undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct dvd_opts
+
+const struct m_sub_options dvd_conf = {
+    .opts = (const struct m_option[]){
+        OPT_STRING("dvd-device", device, M_OPT_FILE),
+        OPT_INT("dvd-speed", speed, 0),
+        OPT_INTRANGE("dvd-angle", angle, 0, 1, 99),
+        {0}
+    },
+    .size = sizeof(struct dvd_opts),
+    .defaults = &(const struct dvd_opts){
+        .angle = 1,
+    },
+};
+
+#undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct MPOpts
 
 const m_option_t mp_opts[] = {
@@ -275,9 +291,7 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", stream_cache, stream_cache_conf, 0),
 
 #if HAVE_DVDREAD || HAVE_DVDNAV
-    OPT_STRING("dvd-device", dvd_device, M_OPT_FILE),
-    OPT_INT("dvd-speed", dvd_speed, 0),
-    OPT_INTRANGE("dvd-angle", dvd_angle, 0, 1, 99),
+    OPT_SUBSTRUCT("", dvd_opts, dvd_conf, 0),
 #endif /* HAVE_DVDREAD */
     OPT_INTPAIR("chapter", chapterrange, 0),
     OPT_CHOICE_OR_INT("edition", edition_id, 0, 0, 8190,
@@ -854,8 +868,6 @@ const struct MPOpts mp_default_opts = {
     .videotoolbox_format = IMGFMT_NV12,
 
     .index_mode = 1,
-
-    .dvd_angle = 1,
 
     .mf_fps = 1.0,
 

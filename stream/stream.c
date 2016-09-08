@@ -207,18 +207,22 @@ static bstr split_next(bstr *s, char end, const char *delim)
 
 // Parse the stream URL, syntax:
 //  proto://  [<username>@]<hostname>[:<port>][/<filename>]
-// (the proto:// part is already removed from s->path)
+// (the proto:// part is assumed to be already removed from s)
 // This code originates from times when http code used this, but now it's
 // just relict from other stream implementations reusing this code.
+void mp_parse_legacy_url(bstr s, bstr c[4])
+{
+    c[0] = split_next(&s, '@', "@:/");
+    c[1] = split_next(&s, 0, ":/");
+    c[2] = bstr_eatstart0(&s, ":") ? split_next(&s, 0, "/") : (bstr){0};
+    c[3] = bstr_eatstart0(&s, "/") ? s : (bstr){0};
+}
+
 static bool parse_url(struct stream *st, struct m_config *config)
 {
-    bstr s = bstr0(st->path);
-    const char *f_names[4] = {"username", "hostname", "port", "filename"};
     bstr f[4];
-    f[0] = split_next(&s, '@', "@:/");
-    f[1] = split_next(&s, 0, ":/");
-    f[2] = bstr_eatstart0(&s, ":") ? split_next(&s, 0, "/") : (bstr){0};
-    f[3] = bstr_eatstart0(&s, "/") ? s : (bstr){0};
+    mp_parse_legacy_url(bstr0(st->path), f);
+    const char *f_names[4] = {"username", "hostname", "port", "filename"};
     for (int n = 0; n < 4; n++) {
         if (f[n].len) {
             const char *opt = find_url_opt(st, f_names[n]);

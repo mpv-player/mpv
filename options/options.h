@@ -290,10 +290,6 @@ typedef struct MPOpts {
     struct stream_lavf_params *stream_lavf_opts;
 
     char *cdrom_device;
-    int dvd_title;
-    int dvd_angle;
-    int dvd_speed;
-    char *dvd_device;
     char *bluray_device;
 
     double mf_fps;
@@ -318,11 +314,19 @@ typedef struct MPOpts {
     char *input_file;
 
     struct gl_video_opts *gl_video_opts;
+    struct dvd_opts *dvd_opts;
 } MPOpts;
+
+struct dvd_opts {
+    int angle;
+    int speed;
+    char *device;
+};
 
 extern const m_option_t mp_opts[];
 extern const struct MPOpts mp_default_opts;
 extern const struct m_sub_options vo_sub_opts;
 extern const struct m_sub_options stream_cache_conf;
+extern const struct m_sub_options dvd_conf;
 
 #endif

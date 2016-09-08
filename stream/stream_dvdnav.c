@@ -34,7 +34,7 @@
 #include "options/options.h"
 #include "common/msg.h"
 #include "input/input.h"
-#include "options/m_option.h"
+#include "options/m_config.h"
 #include "options/path.h"
 #include "osdep/timer.h"
 #include "stream.h"
@@ -59,19 +59,8 @@ struct priv {
 
     int track;
     char *device;
-};
 
-static const struct priv stream_priv_dflts = {
-  .track = TITLE_LONGEST,
-};
-
-#define OPT_BASE_STRUCT struct priv
-static const m_option_t stream_opts_fields[] = {
-    OPT_CHOICE_OR_INT("title", track, 0, 0, 99,
-                      ({"menu", TITLE_MENU},
-                       {"longest", TITLE_LONGEST})),
-    OPT_STRING("device", device, 0),
-    {0}
+    struct dvd_opts *opts;
 };
 
 #define DNE(e) [e] = # e
@@ -437,7 +426,7 @@ static struct priv *new_dvdnav_stream(stream_t *stream, char *filename)
     if (!(priv->filename = strdup(filename)))
         return NULL;
 
-    priv->dvd_speed = stream->opts->dvd_speed;
+    priv->dvd_speed = priv->opts->speed;
     dvd_set_speed(stream, priv->filename, priv->dvd_speed);
 
     if (dvdnav_open(&(priv->dvdnav), priv->filename) != DVDNAV_STATUS_OK) {
@@ -458,16 +447,18 @@ static struct priv *new_dvdnav_stream(stream_t *stream, char *filename)
     return priv;
 }
 
-static int open_s(stream_t *stream)
+static int open_s_internal(stream_t *stream)
 {
     struct priv *priv, *p;
     priv = p = stream->priv;
     char *filename;
 
+    p->opts = mp_get_config_group(stream, stream->global, &dvd_conf);
+
     if (p->device && p->device[0])
         filename = p->device;
-    else if (stream->opts->dvd_device && stream->opts->dvd_device[0])
-        filename = stream->opts->dvd_device;
+    else if (p->opts->device && p->opts->device[0])
+        filename = p->opts->device;
     else
         filename = DEFAULT_DVD_DEVICE;
     if (!new_dvdnav_stream(stream, filename)) {
@@ -509,8 +500,8 @@ static int open_s(stream_t *stream)
         MP_FATAL(stream, "DVD menu support has been removed.\n");
         return STREAM_ERROR;
     }
-    if (stream->opts->dvd_angle > 1)
-        dvdnav_angle_change(priv->dvdnav, stream->opts->dvd_angle);
+    if (p->opts->angle > 1)
+        dvdnav_angle_change(priv->dvdnav, p->opts->angle);
 
     stream->sector_size = 2048;
     stream->fill_buffer = fill_buffer;
@@ -524,18 +515,38 @@ static int open_s(stream_t *stream)
     return STREAM_OK;
 }
 
+static int open_s(stream_t *stream)
+{
+    struct priv *priv = talloc_zero(stream, struct priv);
+    stream->priv = priv;
+
+    bstr title, bdevice;
+    bstr_split_tok(bstr0(stream->path), "/", &title, &bdevice);
+
+    priv->track = TITLE_LONGEST;
+
+    if (bstr_equals0(title, "longest") || bstr_equals0(title, "first")) {
+        priv->track = TITLE_LONGEST;
+    } else if (bstr_equals0(title, "menu")) {
+        priv->track = TITLE_MENU;
+    } else if (title.len) {
+        bstr rest;
+        priv->title = bstrtoll(title, &rest, 10);
+        if (rest.len) {
+            MP_ERR(stream, "number expected: '%.*s'\n", BSTR_P(rest));
+            return STREAM_ERROR;
+        }
+    }
+
+    priv->device = bstrto0(priv, bdevice);
+
+    return open_s_internal(stream);
+}
+
 const stream_info_t stream_info_dvdnav = {
     .name = "dvdnav",
     .open = open_s,
     .protocols = (const char*const[]){ "dvd", "dvdnav", NULL },
-    .priv_size = sizeof(struct priv),
-    .priv_defaults = &stream_priv_dflts,
-    .options = stream_opts_fields,
-    .url_options = (const char*const[]){
-        "hostname=title",
-        "filename=device",
-        NULL
-    },
 };
 
 static bool check_ifo(const char *path)
@@ -548,9 +559,10 @@ static bool check_ifo(const char *path)
 
 static int ifo_dvdnav_stream_open(stream_t *stream)
 {
-    struct priv *priv = talloc_ptrtype(stream, priv);
+    struct priv *priv = talloc_zero(stream, struct priv);
     stream->priv = priv;
-    *priv = stream_priv_dflts;
+
+    priv->track = TITLE_LONGEST;
 
     char *path = mp_file_get_path(priv, bstr0(stream->url));
     if (!path)
@@ -572,7 +584,7 @@ static int ifo_dvdnav_stream_open(stream_t *stream)
     priv->device = bstrto0(priv, mp_dirname(path));
 
     MP_INFO(stream, ".IFO detected. Redirecting to dvd://\n");
-    return open_s(stream);
+    return open_s_internal(stream);
 
 unsupported:
     talloc_free(priv);
