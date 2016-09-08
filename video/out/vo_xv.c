@@ -870,8 +870,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct xvctx *ctx = vo->priv;
     switch (request) {
-    case VOCTRL_GET_PANSCAN:
-        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         resize(vo);
         return VO_TRUE;

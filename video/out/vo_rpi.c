@@ -616,8 +616,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
             set_geometry(vo);
         vo->want_redraw = true;
         return VO_TRUE;
-    case VOCTRL_GET_PANSCAN:
-        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         if (p->renderer_enabled)
             resize(vo);

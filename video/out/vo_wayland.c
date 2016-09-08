@@ -639,10 +639,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
     switch (request) {
-    case VOCTRL_GET_PANSCAN:
-        return VO_TRUE;
-    case VOCTRL_SET_PANSCAN:
-    {
+    case VOCTRL_SET_PANSCAN: {
         resize(p);
         return VO_TRUE;
     }

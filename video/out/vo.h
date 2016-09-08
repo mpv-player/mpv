@@ -56,7 +56,6 @@ enum mp_voctrl {
     /* start/resume playback */
     VOCTRL_RESUME,
 
-    VOCTRL_GET_PANSCAN,
     VOCTRL_SET_PANSCAN,
     VOCTRL_SET_EQUALIZER,               // struct voctrl_set_equalizer_args*
     VOCTRL_GET_EQUALIZER,               // struct voctrl_get_equalizer_args*

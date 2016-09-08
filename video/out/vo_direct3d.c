@@ -1280,8 +1280,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         calc_fs_rect(priv);
         priv->vo->want_redraw = true;
         return VO_TRUE;
-    case VOCTRL_GET_PANSCAN:
-        return VO_TRUE;
     case VOCTRL_SCREENSHOT_WIN:
         *(struct mp_image **)data = get_window_screenshot(priv);
         return VO_TRUE;

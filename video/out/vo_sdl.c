@@ -980,8 +980,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, NULL);
         return 1;
-    case VOCTRL_GET_PANSCAN:
-        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         force_resize(vo);
         return VO_TRUE;

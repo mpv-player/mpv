@@ -448,8 +448,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         vo->want_redraw = true;
         vo_wakeup(vo);
         return VO_TRUE;
-    case VOCTRL_GET_PANSCAN:
-        return VO_TRUE;
     case VOCTRL_GET_EQUALIZER: {
         struct voctrl_get_equalizer_args *args = data;
         pthread_mutex_lock(&p->ctx->lock);
