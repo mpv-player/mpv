@@ -156,6 +156,7 @@ struct vo_internal {
     int req_frames;                 // VO's requested value of num_frames
 
     double display_fps;
+    int opt_framedrop;
 };
 
 static void forget_frames(struct vo *vo);
@@ -458,12 +459,15 @@ static void update_display_fps(struct vo *vo)
 
         pthread_mutex_unlock(&in->lock);
 
-        double display_fps = 0;
-        if (vo->global->opts->frame_drop_fps > 0) {
-            display_fps = vo->global->opts->frame_drop_fps;
-        } else {
+        mp_read_option_raw(vo->global, "framedrop", &m_option_type_choice,
+                           &in->opt_framedrop);
+
+        double display_fps;
+        mp_read_option_raw(vo->global, "display-fps", &m_option_type_double,
+                           &display_fps);
+
+        if (display_fps <= 0)
             vo->driver->control(vo, VOCTRL_GET_DISPLAY_FPS, &display_fps);
-        }
 
         pthread_mutex_lock(&in->lock);
 
@@ -763,7 +767,7 @@ static bool render_frame(struct vo *vo)
 
     in->dropped_frame &= !frame->display_synced;
     in->dropped_frame &= !(vo->driver->caps & VO_CAP_FRAMEDROP);
-    in->dropped_frame &= (vo->global->opts->frame_dropping & 1);
+    in->dropped_frame &= (in->opt_framedrop & 1);
     // Even if we're hopelessly behind, rather degrade to 10 FPS playback,
     // instead of just freezing the display forever.
     in->dropped_frame &= now - in->prev_vsync < 100 * 1000;

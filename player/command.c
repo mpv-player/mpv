@@ -2673,6 +2673,16 @@ static int mp_property_display_fps(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, fps);
 }
 
+static int mp_property_framedrop(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    int ret = mp_property_generic_option(mpctx, prop, action, arg);
+    if (action == M_PROPERTY_SET && ret == M_PROPERTY_OK && mpctx->video_out)
+        vo_event(mpctx->video_out, VO_EVENT_WIN_STATE);
+    return ret;
+}
+
 static int mp_property_estimated_display_fps(void *ctx, struct m_property *prop,
                                              int action, void *arg)
 {
@@ -3881,6 +3891,7 @@ static const struct m_property mp_properties_base[] = {
     {"display-fps", mp_property_display_fps},
     {"estimated-display-fps", mp_property_estimated_display_fps},
     {"vsync-jitter", mp_property_vsync_jitter},
+    {"framedrop", mp_property_framedrop},
 
     {"working-directory", mp_property_cwd},
 
