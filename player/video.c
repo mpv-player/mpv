@@ -986,7 +986,7 @@ double calc_average_frame_duration(struct MPContext *mpctx)
     double total = 0;
     int num = 0;
     for (int n = 0; n < mpctx->num_past_frames; n++) {
-        double dur = mpctx->past_frames[0].approx_duration;
+        double dur = mpctx->past_frames[n].approx_duration;
         if (dur <= 0)
             continue;
         total += dur;
