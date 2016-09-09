@@ -602,6 +602,7 @@ Video
     :d3d11va-copy: copies video back to system RAM (Windows only)
     :mediacodec: copies video back to system RAM (Android only)
     :rpi:       requires ``--vo=rpi`` (Raspberry Pi only - default if available)
+    :cuda:      requires ``--vo=opengl`` (Any platform CUDA is available)
 
     ``auto`` tries to automatically enable hardware decoding using the first
     available method. This still depends what VO you are using. For example,
@@ -672,6 +673,11 @@ Video
         In addition to driver-specific behavior, global system settings might
         affect this additionally. This can give incorrect results even with
         completely ordinary video sources.
+
+        ``cuda`` is usually safe. However, it will usually not fallback cleanly
+        for unsupported profiles of otherwise supported codecs - most obviously,
+        this is the case for 10bit H.264 content. 10bit HEVC is currently not
+        supported but we can add support after CUDA 8 is released.
 
         All other methods, in particular the copy-back methods (like
         ``dxva2-copy`` etc.) are either fully safe, or not worse than software
