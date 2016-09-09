@@ -67,14 +67,6 @@ typedef struct cdda_params {
 } cdda_priv;
 
 #define OPT_BASE_STRUCT struct cdda_params
-
-static const m_option_t cdda_params_fields[] = {
-    OPT_INTPAIR("span", span, 0),
-    OPT_INTRANGE("speed", speed, 0, 1, 100),
-    OPT_STRING("device", device, 0),
-    {0}
-};
-
 const struct m_sub_options stream_cdda_conf = {
     .opts = (const m_option_t[]) {
         OPT_INTRANGE("speed", speed, 0, 1, 100),
@@ -84,7 +76,6 @@ const struct m_sub_options stream_cdda_conf = {
         OPT_INT("toc-bias", toc_bias, 0),
         OPT_INT("toc-offset", toc_offset, 0),
         OPT_FLAG("skip", skip, 0),
-        OPT_STRING("device", device, 0),
         OPT_INTPAIR("span", span, 0),
         OPT_FLAG("cdtext", cdtext, 0),
         {0}
@@ -276,6 +267,7 @@ static int control(stream_t *stream, int cmd, void *arg)
 
 static int open_cdda(stream_t *st)
 {
+    st->priv = mp_get_config_group(st, st->global, &stream_cdda_conf);
     cdda_priv *priv = st->priv;
     cdda_priv *p = priv;
     int mode = p->paranoia_mode;
@@ -283,12 +275,17 @@ static int open_cdda(stream_t *st)
     cdrom_drive_t *cdd = NULL;
     int last_track;
 
-    if (!p->device || !p->device[0]) {
-        talloc_free(p->device);
-        if (st->opts->cdrom_device && st->opts->cdrom_device[0])
-            p->device = talloc_strdup(NULL, st->opts->cdrom_device);
-        else
-            p->device = talloc_strdup(NULL, DEFAULT_CDROM_DEVICE);
+    char *global_device;
+    mp_read_option_raw(st->global, "cdrom-device", &m_option_type_string,
+                       &global_device);
+    talloc_steal(st, global_device);
+
+    if (st->path[0]) {
+        p->device = st->path;
+    } else if (global_device && global_device[0]) {
+        p->device = global_device;
+    } else {
+        p->device = DEFAULT_CDROM_DEVICE;
     }
 
 #if defined(__NetBSD__)
@@ -394,22 +391,8 @@ static int open_cdda(stream_t *st)
     return STREAM_OK;
 }
 
-static void *get_defaults(stream_t *st)
-{
-    return m_sub_options_copy(st, &stream_cdda_conf, st->opts->stream_cdda_opts);
-}
-
 const stream_info_t stream_info_cdda = {
     .name = "cdda",
     .open = open_cdda,
     .protocols = (const char*const[]){"cdda", NULL },
-    .priv_size = sizeof(cdda_priv),
-    .get_defaults = get_defaults,
-    .options = cdda_params_fields,
-    .url_options = (const char*const[]){
-        "hostname=span",
-        "port=speed",
-        "filename=device",
-        NULL
-    },
 };

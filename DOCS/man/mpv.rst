@@ -682,7 +682,7 @@ PROTOCOLS
 ``mf://[filemask|@listfile]`` ``--mf-...``
     Play a series of images as video.
 
-``cdda://track[-endtrack][:speed][/device]`` ``--cdrom-device=PATH`` ``--cdda-...``
+``cdda://[device]`` ``--cdrom-device=PATH`` ``--cdda-...``
     Play CD.
 
 ``lavf://...``
