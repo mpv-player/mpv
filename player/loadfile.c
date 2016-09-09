@@ -809,7 +809,7 @@ static void open_demux_thread(void *pctx)
 static void open_demux_reentrant(struct MPContext *mpctx)
 {
     struct demux_open_args args = {
-        .global = create_sub_global(mpctx),
+        .global = mpctx->global,
         .cancel = mpctx->playback_abort,
         .log = mpctx->log,
         .stream_flags = mpctx->playing->stream_flags,
@@ -819,12 +819,10 @@ static void open_demux_reentrant(struct MPContext *mpctx)
         args.stream_flags = 0;
     mpctx_run_reentrant(mpctx, open_demux_thread, &args);
     if (args.demux) {
-        talloc_steal(args.demux, args.global);
         mpctx->demuxer = args.demux;
         enable_demux_thread(mpctx, mpctx->demuxer);
     } else {
         mpctx->error_playing = args.err;
-        talloc_free(args.global);
     }
     talloc_free(args.url);
 }

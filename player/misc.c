@@ -251,23 +251,6 @@ void merge_playlist_files(struct playlist *pl)
     talloc_free(edl);
 }
 
-// Create a talloc'ed copy of mpctx->global. It contains a copy of the global
-// option struct. It still just references some things though, like mp_log.
-// The main purpose is letting threads access the option struct without the
-// need for additional synchronization.
-struct mpv_global *create_sub_global(struct MPContext *mpctx)
-{
-    struct mpv_global *new = talloc_ptrtype(NULL, new);
-    struct m_config *new_config = m_config_dup(new, mpctx->mconfig);
-    *new = (struct mpv_global){
-        .log = mpctx->global->log,
-        .config = mpctx->global->config,
-        .opts = new_config->optstruct,
-        .client_api = mpctx->clients,
-    };
-    return new;
-}
-
 struct wrapper_args {
     struct MPContext *mpctx;
     void (*thread_fn)(void *);

@@ -411,8 +411,11 @@ static void add_sub_options(struct m_config *config,
         assert(config->groups[n].group != subopts);
 
     void *new_optstruct = NULL;
-    if (config->optstruct) // only if not noalloc
-        new_optstruct = m_config_alloc_struct(config, subopts);
+    if (config->optstruct) { // only if not noalloc
+        new_optstruct = talloc_zero_size(config, subopts->size);
+        if (subopts->defaults)
+            memcpy(new_optstruct, subopts->defaults, subopts->size);
+    }
     if (parent && parent->data)
         substruct_write_ptr(parent->data, new_optstruct);
 
@@ -1268,67 +1271,6 @@ void mp_read_option_raw(struct mpv_global *global, const char *name,
 struct m_config *mp_get_root_config(struct mpv_global *global)
 {
     return global->config->root;
-}
-
-void *m_config_alloc_struct(void *talloc_ctx,
-                            const struct m_sub_options *subopts)
-{
-    void *substruct = talloc_zero_size(talloc_ctx, subopts->size);
-    if (subopts->defaults)
-        memcpy(substruct, subopts->defaults, subopts->size);
-    return substruct;
-}
-
-struct dtor_info {
-    const struct m_sub_options *opts;
-    void *ptr;
-};
-
-static void free_substruct(void *ptr)
-{
-    struct dtor_info *d = ptr;
-    for (int n = 0; d->opts->opts && d->opts->opts[n].type; n++) {
-        const struct m_option *opt = &d->opts->opts[n];
-        void *dst = (char *)d->ptr + opt->offset;
-        m_option_free(opt, dst);
-    }
-}
-
-// Passing ptr==NULL initializes it from proper defaults.
-void *m_sub_options_copy(void *talloc_ctx, const struct m_sub_options *opts,
-                         const void *ptr)
-{
-    void *new = m_config_alloc_struct(talloc_ctx, opts);
-    struct dtor_info *dtor = talloc_ptrtype(new, dtor);
-    *dtor = (struct dtor_info){opts, new};
-    talloc_set_destructor(dtor, free_substruct);
-    for (int n = 0; opts->opts && opts->opts[n].type; n++) {
-        const struct m_option *opt = &opts->opts[n];
-        if (opt->offset < 0)
-            continue;
-        void *src = ptr ? (char *)ptr + opt->offset : NULL;
-        void *dst = (char *)new + opt->offset;
-        if (opt->type->flags  & M_OPT_TYPE_HAS_CHILD) {
-            // Specifying a default struct for a sub-option field in the
-            // containing struct's default struct is not supported here.
-            // (Out of laziness. Could possibly be supported.)
-            assert(!substruct_read_ptr(dst));
-
-            const struct m_sub_options *subopts = opt->priv;
-
-            const void *sub_src = NULL;
-            if (src)
-                sub_src = substruct_read_ptr(src);
-            if (!sub_src)
-                sub_src = subopts->defaults;
-
-            void *sub_dst = m_sub_options_copy(new, subopts, sub_src);
-            substruct_write_ptr(dst, sub_dst);
-        } else {
-            init_opt_inplace(opt, dst, src);
-        }
-    }
-    return new;
 }
 
 struct m_config *m_config_dup(void *talloc_ctx, struct m_config *config)

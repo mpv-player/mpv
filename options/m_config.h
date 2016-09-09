@@ -272,15 +272,6 @@ int m_config_set_profile(struct m_config *config, char *name, int flags);
 
 struct mpv_node m_config_get_profiles(struct m_config *config);
 
-void *m_config_alloc_struct(void *talloc_ctx,
-                            const struct m_sub_options *subopts);
-
-// Create a copy of the struct ptr, described by opts.
-// "opts" must live until the struct is free'd.
-// Freeing the struct frees all members.
-void *m_sub_options_copy(void *talloc_ctx, const struct m_sub_options *opts,
-                         const void *ptr);
-
 // This can be used to create and synchronize per-thread option structs,
 // which then can be read without synchronization. No concurrent access to
 // the cache itself is allowed.

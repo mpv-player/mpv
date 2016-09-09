@@ -497,7 +497,6 @@ void error_on_track(struct MPContext *mpctx, struct track *track);
 int stream_dump(struct MPContext *mpctx, const char *source_filename);
 int mpctx_run_reentrant(struct MPContext *mpctx, void (*thread_fn)(void *arg),
                         void *thread_arg);
-struct mpv_global *create_sub_global(struct MPContext *mpctx);
 double get_track_seek_offset(struct MPContext *mpctx, struct track *track);
 
 // osd.c

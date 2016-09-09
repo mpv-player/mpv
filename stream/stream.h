@@ -157,11 +157,6 @@ typedef struct stream_info_st {
     // opts is set from ->opts
     int (*open)(struct stream *st);
     const char *const *protocols;
-    int priv_size;
-    const void *priv_defaults;
-    void *(*get_defaults)(struct stream *st);
-    const struct m_option *options;
-    const char *const *url_options;
     bool can_write;     // correctly checks for READ/WRITE modes
     bool is_safe;       // opening is no security issue, even with remote provided URLs
     bool is_network;    // used to restrict remote playlist entries to remote URLs
@@ -203,7 +198,6 @@ typedef struct stream {
     bool is_network : 1; // original stream_info_t.is_network flag
     bool allow_caching : 1; // stream cache makes sense
     struct mp_log *log;
-    struct MPOpts *opts;
     struct mpv_global *global;
 
     struct mp_cancel *cancel;   // cancellation notification
@@ -295,13 +289,6 @@ struct AVDictionary;
 void mp_setup_av_network_options(struct AVDictionary **dict,
                                  struct mpv_global *global,
                                  struct mp_log *log);
-
-// sort-of legacy handling of options-in-stream-URL
-#define URL_USERNAME 0
-#define URL_HOSTNAME 1
-#define URL_PORT 2
-#define URL_FILENAME 3
-void mp_parse_legacy_url(bstr url, bstr components[4]);
 
 void stream_print_proto_list(struct mp_log *log);
 char **stream_get_proto_list(void);
