@@ -27,13 +27,21 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
 
     tv_param_t *params = mp_get_config_group(demuxer, demuxer->global,
                                              &tv_params_conf);
-    struct tv_stream_params *sparams = demuxer->stream->priv;
-    if (sparams->channel && sparams->channel[0]) {
-        talloc_free(params->channel);
-        params->channel = talloc_strdup(NULL, sparams->channel);
+    bstr urlparams = bstr0(demuxer->stream->path);
+    bstr channel, input;
+    bstr_split_tok(urlparams, "/", &channel, &input);
+    if (channel.len) {
+        talloc_free(params->channels);
+        params->channel = bstrto0(NULL, channel);
     }
-    if (sparams->input >= 0)
-        params->input = sparams->input;
+    if (input.len) {
+        bstr r;
+        params->input = bstrtoll(input, &r, 0);
+        if (r.len) {
+            MP_ERR(demuxer->stream, "invalid input: '%.*s'\n", BSTR_P(input));
+            return -1;
+        }
+    }
 
     assert(demuxer->priv==NULL);
     if(!(tvh=tv_begin(params, demuxer->log))) return -1;
