@@ -1666,8 +1666,12 @@ void kill_video(struct mp_client_api *client_api)
 {
     struct MPContext *mpctx = client_api->mpctx;
     mp_dispatch_lock(mpctx->dispatch);
-    mp_switch_track(mpctx, STREAM_VIDEO, NULL, 0);
+    struct track *track = mpctx->vo_chain ? mpctx->vo_chain->track : NULL;
     uninit_video_out(mpctx);
+    if (track) {
+        mpctx->error_playing = MPV_ERROR_VO_INIT_FAILED;
+        error_on_track(mpctx, track);
+    }
     mp_dispatch_unlock(mpctx->dispatch);
 }
 
