@@ -774,7 +774,8 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
         return parse_profile(config, co->opt, name, param, set, flags);
     if (config->use_profiles && bstr_equals0(name, "show-profile"))
         return show_profile(config, param);
-    if (bstr_equals0(name, "h") || bstr_equals0(name, "help"))
+    if (config->is_toplevel && (bstr_equals0(name, "h") ||
+                                bstr_equals0(name, "help")))
         return list_options(config, param, true);
     if (bstr_equals0(name, "list-options"))
         return list_options(config, bstr0("*"), false);
