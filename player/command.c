@@ -2173,7 +2173,7 @@ static int mp_property_program(void *ctx, struct m_property *prop,
     demux_program_t prog;
 
     struct demuxer *demuxer = mpctx->demuxer;
-    if (!demuxer)
+    if (!demuxer || !mpctx->playback_initialized)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
@@ -5059,9 +5059,12 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (cmd->args[1].v.i == 2) {
             struct track *t = find_track_with_url(mpctx, type, cmd->args[0].v.s);
             if (t) {
-                mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
-                if (mpctx->playback_initialized)
+                if (mpctx->playback_initialized) {
+                    mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
                     print_track_list(mpctx, "Track switched:");
+                } else {
+                    opts->stream_id[0][t->type] = t->user_tid;
+                }
                 return 0;
             }
         }
@@ -5071,7 +5074,11 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (cmd->args[1].v.i == 1) {
             t->no_default = true;
         } else {
-            mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
+            if (mpctx->playback_initialized) {
+                mp_switch_track(mpctx, t->type, t, FLAG_MARK_SELECTION);
+            } else {
+                opts->stream_id[0][t->type] = t->user_tid;
+            }
         }
         char *title = cmd->args[2].v.s;
         if (title && title[0])
@@ -5098,6 +5105,10 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
     case MP_CMD_SUB_RELOAD:
     case MP_CMD_AUDIO_RELOAD: {
+        if (mpctx->playback_initialized) {
+            MP_ERR(mpctx, "Cannot reload while not initialized.\n");
+            return -1;
+        }
         int type = cmd->id == MP_CMD_SUB_RELOAD ? STREAM_SUB : STREAM_AUDIO;
         struct track *t = mp_track_by_tid(mpctx, type, cmd->args[0].v.i);
         struct track *nt = NULL;
@@ -5119,7 +5130,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (!mpctx->playing)
             return -1;
         autoload_external_files(mpctx);
-        if (cmd->args[0].v.i) {
+        if (cmd->args[0].v.i && mpctx->playback_initialized) {
             // somewhat fuzzy and not ideal
             struct track *a = select_default_track(mpctx, 0, STREAM_AUDIO);
             if (a && a->is_external)
@@ -5128,8 +5139,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             if (s && s->is_external)
                 mp_switch_track(mpctx, STREAM_SUB, s, 0);
 
-            if (mpctx->playback_initialized)
-                print_track_list(mpctx, "Track list:\n");
+            print_track_list(mpctx, "Track list:\n");
         }
         break;
     }
