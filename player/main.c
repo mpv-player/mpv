@@ -97,6 +97,7 @@ const char mp_help_text[] =
 " --playlist=<file> specify playlist file\n"
 "\n"
 " --list-options    list all mpv options\n"
+" --h=<pat>         print options which match the given shell pattern\n"
 "\n";
 
 static const char def_config[] =

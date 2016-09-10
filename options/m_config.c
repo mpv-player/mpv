@@ -29,6 +29,11 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+#define HAVE_FNMATCH HAVE_POSIX
+#if HAVE_FNMATCH
+#include <fnmatch.h>
+#endif
+
 #include "libmpv/client.h"
 
 #include "mpv_talloc.h"
@@ -40,6 +45,8 @@
 #include "common/msg_control.h"
 #include "misc/node.h"
 #include "osdep/atomic.h"
+
+extern const char mp_help_text[];
 
 static const union m_option_value default_value;
 
@@ -171,9 +178,13 @@ static int show_profile(struct m_config *config, bstr param)
     return M_OPT_EXIT - 1;
 }
 
-static int list_options(struct m_config *config)
+static int list_options(struct m_config *config, bstr val, bool show_help)
 {
-    m_config_print_option_list(config);
+    char s[100];
+    snprintf(s, sizeof(s), "%.*s", BSTR_P(val));
+    if (show_help)
+        mp_info(config->log, "%s", mp_help_text);
+    m_config_print_option_list(config, s);
     return M_OPT_EXIT;
 }
 
@@ -762,8 +773,10 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
         return parse_profile(config, co->opt, name, param, set, flags);
     if (config->use_profiles && bstr_equals0(name, "show-profile"))
         return show_profile(config, param);
+    if (bstr_equals0(name, "h") || bstr_equals0(name, "help"))
+        return list_options(config, param, true);
     if (bstr_equals0(name, "list-options"))
-        return list_options(config);
+        return list_options(config, (bstr){0}, false);
 
     // Option with children are a bit different to parse
     if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD) {
@@ -914,7 +927,7 @@ static int sort_opt_compare(const void *pa, const void *pb)
     return strcasecmp(a->name, b->name);
 }
 
-void m_config_print_option_list(const struct m_config *config)
+void m_config_print_option_list(const struct m_config *config, const char *name)
 {
     char min[50], max[50];
     int count = 0;
@@ -933,6 +946,10 @@ void m_config_print_option_list(const struct m_config *config)
             continue;
         if (co->is_hidden)
             continue;
+#if HAVE_FNMATCH
+        if (fnmatch(name, co->name, 0))
+            continue;
+#endif
         MP_INFO(config, " %s%-30s", prefix, co->name);
         if (opt->type == &m_option_type_choice) {
             MP_INFO(config, " Choices:");

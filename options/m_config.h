@@ -212,10 +212,7 @@ bool m_config_is_in_group(struct m_config *config,
 // Return all (visible) option names as NULL terminated string list.
 char **m_config_list_options(void *ta_parent, const struct m_config *config);
 
-/*  Print a list of all registered options.
- *  \param config The config object.
- */
-void m_config_print_option_list(const struct m_config *config);
+void m_config_print_option_list(const struct m_config *config, const char *name);
 
 
 /*  Find the profile with the given name.
