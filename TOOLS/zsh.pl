@@ -4,10 +4,13 @@
 
 use strict;
 use warnings;
+use warnings FATAL => 'uninitialized';
 
 my $mpv = $ARGV[0] || 'mpv';
 
 my @opts = parse_main_opts('--list-options', '^ (\-\-[^\s\*]*)\*?\s*(.*)');
+
+die "Couldn't find any options" unless (@opts);
 
 my @ao = parse_opts('--ao=help', '^  ([^\s\:]*)\s*: (.*)');
 my @vo = parse_opts('--vo=help', '^  ([^\s\:]*)\s*: (.*)');
