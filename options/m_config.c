@@ -184,7 +184,8 @@ static int list_options(struct m_config *config, bstr val, bool show_help)
     snprintf(s, sizeof(s), "%.*s", BSTR_P(val));
     if (show_help)
         mp_info(config->log, "%s", mp_help_text);
-    m_config_print_option_list(config, s);
+    if (s[0])
+        m_config_print_option_list(config, s);
     return M_OPT_EXIT;
 }
 
@@ -776,7 +777,7 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
     if (bstr_equals0(name, "h") || bstr_equals0(name, "help"))
         return list_options(config, param, true);
     if (bstr_equals0(name, "list-options"))
-        return list_options(config, (bstr){0}, false);
+        return list_options(config, bstr0("*"), false);
 
     // Option with children are a bit different to parse
     if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD) {
