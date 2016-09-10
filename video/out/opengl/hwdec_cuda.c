@@ -40,6 +40,7 @@ struct priv {
     struct mp_image layout;
     GLuint gl_textures[2];
     GLuint gl_pbos[2];
+    CUgraphicsResource cu_res[2];
     bool mapped;
 
     CUcontext cuda_ctx;
@@ -155,9 +156,12 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
                        mp_image_plane_h(&p->layout, n) * (n + 1),
                        NULL, GL_STREAM_DRAW);
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        ret = CHECK_CU(cuGLRegisterBufferObject(p->gl_pbos[n]));
+        ret = CHECK_CU(cuGraphicsGLRegisterBuffer(&p->cu_res[n],
+                                                  p->gl_pbos[n],
+                                                  CU_GRAPHICS_MAP_RESOURCE_FLAGS_WRITE_DISCARD));
         if (ret < 0)
             goto error;
+
     }
 
  error:
@@ -177,8 +181,8 @@ static void destroy(struct gl_hwdec *hw)
     // Don't bail if any CUDA calls fail. This is all best effort.
     CHECK_CU(cuCtxPushCurrent(p->cuda_ctx));
     for (int n = 0; n < 2; n++) {
-        if (p->gl_pbos[n] > 0)
-            CHECK_CU(cuGLUnregisterBufferObject(p->gl_pbos[n]));
+        if (p->cu_res[n] > 0)
+            CHECK_CU(cuGraphicsUnregisterResource(p->cu_res[n]));
     }
     CHECK_CU(cuCtxPopCurrent(&dummy));
 
@@ -205,8 +209,6 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     struct priv *p = hw->priv;
     GL *gl = hw->gl;
     CUcontext dummy;
-    CUdeviceptr cuda_data;
-    size_t cuda_size;
     int ret = 0, eret = 0;
 
     ret = CHECK_CU(cuCtxPushCurrent(p->cuda_ctx));
@@ -215,9 +217,16 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
 
     *out_frame = (struct gl_hwdec_frame) { 0, };
 
+    ret = CHECK_CU(cuGraphicsMapResources(2, p->cu_res, NULL));
+    if (ret < 0)
+        goto error;
     for (int n = 0; n < 2; n++) {
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->gl_pbos[n]);
-        ret = CHECK_CU(cuGLMapBufferObject(&cuda_data, &cuda_size, p->gl_pbos[n]));
+        CUdeviceptr cuda_data;
+        size_t cuda_size;
+
+        ret = CHECK_CU(cuGraphicsResourceGetMappedPointer(&cuda_data,
+                                                          &cuda_size,
+                                                          p->cu_res[n]));
         if (ret < 0)
             goto error;
 
@@ -238,20 +247,24 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
         if (ret < 0)
             goto error;
 
+    }
+    ret = CHECK_CU(cuGraphicsUnmapResources(2, p->cu_res, NULL));
+    if (ret < 0)
+        goto error;
+
+    for (int n = 0; n < 2; n++) {
+        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->gl_pbos[n]);
         gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
         gl->PixelStorei(GL_UNPACK_ALIGNMENT,
                         get_alignment(mp_image_plane_w(&p->layout, n)));
+
         gl->TexSubImage2D(GL_TEXTURE_2D, 0,
                           0, 0,
                           mp_image_plane_w(&p->layout, n),
                           mp_image_plane_h(&p->layout, n),
                           n == 0 ? GL_RED : GL_RG, GL_UNSIGNED_BYTE, NULL);
+
         gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
-        ret = CHECK_CU(cuGLUnmapBufferObject(p->gl_pbos[n]));
-        if (ret < 0)
-            goto error;
-
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
         gl->BindTexture(GL_TEXTURE_2D, 0);
 
@@ -262,6 +275,7 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
             .tex_h = mp_image_plane_h(&p->layout, n),
         };
     }
+
 
  error:
    eret = CHECK_CU(cuCtxPopCurrent(&dummy));
