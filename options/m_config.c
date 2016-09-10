@@ -1272,15 +1272,3 @@ struct m_config *mp_get_root_config(struct mpv_global *global)
 {
     return global->config->root;
 }
-
-struct m_config *m_config_dup(void *talloc_ctx, struct m_config *config)
-{
-    struct m_config *new = m_config_new(talloc_ctx, config->log, config->size,
-                                        config->defaults, config->options);
-    assert(new->num_opts == config->num_opts);
-    for (int n = 0; n < new->num_opts; n++) {
-        assert(new->opts[n].opt->type == config->opts[n].opt->type);
-        m_option_copy(new->opts[n].opt, new->opts[n].data, config->opts[n].data);
-    }
-    return new;
-}
