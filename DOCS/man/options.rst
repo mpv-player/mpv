@@ -58,7 +58,7 @@ Track Selection
     ``--vid=no`` or ``--video=no`` or ``--no-video`` disables video playback.
     (The latter variant does not work with the client API.)
 
-    If vudeo is disabled, mpv will try to download the audio only if media is
+    If video is disabled, mpv will try to download the audio only if media is
     streamed with youtube-dl, because it saves bandwidth. This is done by
     setting the ytdl_format to "bestaudio/best" in the ytdl_hook.lua script.
 
