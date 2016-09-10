@@ -30,6 +30,7 @@
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_cuda.h>
 
+#include "video/mp_image_pool.h"
 #include "hwdec.h"
 #include "video.h"
 
@@ -69,6 +70,57 @@ static int check_cu(struct gl_hwdec *hw, CUresult err, const char *func)
 
 #define CHECK_CU(x) check_cu(hw, (x), #x)
 
+static struct mp_image *cuda_download_image(struct mp_hwdec_ctx *ctx,
+                                            struct mp_image *hw_image,
+                                            struct mp_image_pool *swpool)
+{
+    CUcontext cuda_ctx = ctx->ctx;
+    CUcontext dummy;
+    CUresult err, eerr;
+
+    if (hw_image->imgfmt != IMGFMT_CUDA)
+        return NULL;
+
+    struct mp_image *out = mp_image_pool_get(swpool, IMGFMT_NV12,
+                                             hw_image->w, hw_image->h);
+    if (!out)
+        return NULL;
+
+    err = cuCtxPushCurrent(cuda_ctx);
+    if (err != CUDA_SUCCESS)
+        goto error;
+
+    mp_image_set_size(out, hw_image->w, hw_image->h);
+    mp_image_copy_attributes(out, hw_image);
+
+    for (int n = 0; n < 2; n++) {
+       CUDA_MEMCPY2D cpy = {
+            .srcMemoryType = CU_MEMORYTYPE_DEVICE,
+            .dstMemoryType = CU_MEMORYTYPE_HOST,
+            .srcDevice     = (CUdeviceptr)hw_image->planes[n],
+            .dstHost       = out->planes[n],
+            .srcPitch      = hw_image->stride[n],
+            .dstPitch      = out->stride[n],
+            .WidthInBytes  = mp_image_plane_w(out, n) * (n + 1),
+            .Height        = mp_image_plane_h(out, n),
+        };
+
+        err = cuMemcpy2D(&cpy);
+        if (err != CUDA_SUCCESS) {
+            goto error;
+        }
+    }
+
+ error:
+    eerr = cuCtxPopCurrent(&dummy);
+    if (eerr != CUDA_SUCCESS || err != CUDA_SUCCESS) {
+        talloc_free(out);
+        return NULL;
+    }
+
+    return out;
+}
+
 static int cuda_create(struct gl_hwdec *hw)
 {
     CUdevice device;
@@ -103,6 +155,7 @@ static int cuda_create(struct gl_hwdec *hw)
     p->hwctx = (struct mp_hwdec_ctx) {
         .type = HWDEC_CUDA,
         .ctx = cuda_ctx,
+        .download_image = cuda_download_image,
     };
     p->hwctx.driver_name = hw->driver->name;
     hwdec_devices_add(hw->devs, &p->hwctx);
