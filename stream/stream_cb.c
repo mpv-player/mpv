@@ -104,5 +104,4 @@ static int open_cb(stream_t *stream)
 const stream_info_t stream_info_cb = {
     .name = "stream_callback",
     .open = open_cb,
-    .protocols = (const char*const[]){ "*", NULL },
 };

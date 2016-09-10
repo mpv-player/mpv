@@ -190,9 +190,6 @@ static stream_t *new_stream(void)
 
 static const char *match_proto(const char *url, const char *proto)
 {
-    if (strcmp(proto, "*") == 0)
-        return url;
-
     int l = strlen(proto);
     if (l > 0) {
         if (strncasecmp(url, proto, l) == 0 && strncmp("://", url + l, 3) == 0)
@@ -212,7 +209,7 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
     if (!sinfo->is_network && (flags & STREAM_NETWORK_ONLY))
         return STREAM_UNSAFE;
 
-    const char *path = NULL;
+    const char *path = url;
     for (int n = 0; sinfo->protocols && sinfo->protocols[n]; n++) {
         path = match_proto(url, sinfo->protocols[n]);
         if (path)
