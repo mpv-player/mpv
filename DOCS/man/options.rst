@@ -607,6 +607,7 @@ Video
     :mediacodec: copies video back to system RAM (Android only)
     :rpi:       requires ``--vo=rpi`` (Raspberry Pi only - default if available)
     :cuda:      requires ``--vo=opengl`` (Any platform CUDA is available)
+    :cuda-copy: copies video back to system RAM (Any platform CUDA is available)
 
     ``auto`` tries to automatically enable hardware decoding using the first
     available method. This still depends what VO you are using. For example,
@@ -678,10 +679,14 @@ Video
         affect this additionally. This can give incorrect results even with
         completely ordinary video sources.
 
-        ``cuda`` is usually safe. However, it will usually not fallback cleanly
-        for unsupported profiles of otherwise supported codecs - most obviously,
-        this is the case for 10bit H.264 content. 10bit HEVC is currently not
-        supported but we can add support after CUDA 8 is released.
+        ``cuda`` is usually safe. Interlaced content will be weaved by the
+        decoder, and it may not be possible for a deinterlacing filter to
+        do anything useful with this. 10bit HEVC is currently not
+        supported but maybe we can add support after CUDA 8 is released (and
+        it will be rounded down to 8 bits).
+
+	``cuda-copy`` has the same limitations as ``cuda`` - particularly
+	its handling of deinterlacing.
 
         All other methods, in particular the copy-back methods (like
         ``dxva2-copy`` etc.) are either fully safe, or not worse than software

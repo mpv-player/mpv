@@ -151,6 +151,14 @@ static const struct vd_lavc_hwdec mp_vd_lavc_mediacodec = {
 };
 #endif
 
+#if HAVE_CUDA_GL
+static const struct vd_lavc_hwdec mp_vd_lavc_cuda_copy = {
+    .type = HWDEC_CUDA_COPY,
+    .lavc_suffix = "_cuvid",
+    .copying = true,
+};
+#endif
+
 static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #if HAVE_RPI
     &mp_vd_lavc_rpi,
@@ -177,6 +185,7 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #endif
 #if HAVE_CUDA_GL
     &mp_vd_lavc_cuda,
+    &mp_vd_lavc_cuda_copy,
 #endif
     NULL
 };
