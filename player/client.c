@@ -1373,11 +1373,9 @@ int mpv_unobserve_property(mpv_handle *ctx, uint64_t userdata)
 static void mark_property_changed(struct mpv_handle *client, int index)
 {
     struct observe_property *prop = client->properties[index];
-    if (!prop->changed && !prop->need_new_value) {
-        prop->changed = true;
-        prop->need_new_value = prop->format != 0;
-        client->lowest_changed = MPMIN(client->lowest_changed, index);
-    }
+    prop->changed = true;
+    prop->need_new_value = prop->format != 0;
+    client->lowest_changed = MPMIN(client->lowest_changed, index);
 }
 
 // Broadcast that a property has changed.
