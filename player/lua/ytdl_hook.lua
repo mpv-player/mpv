@@ -189,7 +189,8 @@ mp.add_hook("on_load", 10, function ()
                     end
                 end
 
-                if not (entry_wsubs == nil) then
+                if not (entry_wsubs == nil) and
+                    not (json.entries[entry_wsubs].duration == nil) then
                     for j, req in pairs(json.entries[entry_wsubs].requested_subtitles) do
                         local subfile = "edl://"
                         for i, entry in pairs(json.entries) do
@@ -199,10 +200,7 @@ mp.add_hook("on_load", 10, function ()
                             else
                                 subfile = subfile..edl_escape("memory://WEBVTT")
                             end
-                            if not (entry.duration == nil) then
-                                subfile = subfile..",start=0,length="..entry.duration
-                            end
-                            subfile = subfile .. ";"
+                            subfile = subfile..",start=0,length="..entry.duration..";"
                         end
                         msg.debug(j.." sub EDL: "..subfile)
                         mp.commandv("sub-add", subfile, "auto", req.ext, j)
