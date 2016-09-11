@@ -99,6 +99,7 @@ const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"rpi",         HWDEC_RPI},
     {"mediacodec",  HWDEC_MEDIACODEC},
     {"cuda",        HWDEC_CUDA},
+    {"cuda-copy",   HWDEC_CUDA_COPY},
     {0}
 };
 
