@@ -4635,7 +4635,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
     bool msg_or_nobar_osd = msg_osd && !(auto_osd && opts->osd_bar_visible);
     int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
 
-    mp_cmd_dump(mpctx->log, MSGL_V, "Run command:", cmd);
+    mp_cmd_dump(mpctx->log, cmd->id == MP_CMD_IGNORE ? MSGL_DEBUG : MSGL_V,
+                "Run command:", cmd);
 
     if (cmd->flags & MP_EXPAND_PROPERTIES) {
         for (int n = 0; n < cmd->nargs; n++) {
