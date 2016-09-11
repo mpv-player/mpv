@@ -180,11 +180,25 @@ mp.add_hook("on_load", 10, function ()
                         json.title)
                 end
 
-                if not (json.entries[1].requested_subtitles == nil) then
-                    for j, req in pairs(json.entries[1].requested_subtitles) do
+                -- there might not be subs for the first segment
+                local entry_wsubs = nil
+                for i, entry in pairs(json.entries) do
+                    if not (entry.requested_subtitles == nil) then
+                        entry_wsubs = i
+                        break
+                    end
+                end
+
+                if not (entry_wsubs == nil) then
+                    for j, req in pairs(json.entries[entry_wsubs].requested_subtitles) do
                         local subfile = "edl://"
                         for i, entry in pairs(json.entries) do
-                            subfile = subfile..edl_escape(entry.requested_subtitles[j].url)
+                            if not (entry.requested_subtitles == nil) and
+                                not (entry.requested_subtitles[j] == nil) then
+                                subfile = subfile..edl_escape(entry.requested_subtitles[j].url)
+                            else
+                                subfile = subfile..edl_escape("memory://WEBVTT")
+                            end
                             if not (entry.duration == nil) then
                                 subfile = subfile..",start=0,length="..entry.duration
                             end
