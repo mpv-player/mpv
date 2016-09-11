@@ -139,29 +139,27 @@ local function has_ansi()
 end
 
 
-local function generate_graph(values, v_max, scale)
-    -- check if at least one value was recorded yet
-    if ppos < 1 then
+local function generate_graph(values, i, len, v_max, scale)
+    -- check if at least one value was recorded yet (we assume lua-style 1-indexing)
+    if i < 1 then
         return ""
     end
 
     local x_tics = 1
-    local x_max = (plen - 1) * x_tics
+    local x_max = (len - 1) * x_tics
     local y_offset = o.border_size
     local y_max = o.font_size * 0.66
     local x = 0
 
-
-    local i = ppos
     local s = {format("m 0 0 n %f %f l ", x, y_max - (y_max * values[i] / v_max * scale))}
-    i = ((i - 2) % plen) + 1
+    i = ((i - 2) % len) + 1
 
-    for p = 1, plen - 1 do
+    for p = 1, len - 1 do
         if values[i] then
             x = x - x_tics
             s[#s+1] = format("%f %f ", x, y_max - (y_max * values[i] / v_max * scale))
         end
-        i = ((i - 2) % plen) + 1
+        i = ((i - 2) % len) + 1
     end
 
     s[#s+1] = format("%f %f %f %f", x, y_max, 0, y_max)
@@ -217,9 +215,9 @@ local function append_perfdata(s)
             max[2], max[3] = max[1], max[1]
         end
 
-        rsuffix = generate_graph(plast[1], max[1], 0.8)
-        psuffix = generate_graph(plast[2], max[2], 0.8)
-        usuffix = generate_graph(plast[3], max[3], 0.8)
+        rsuffix = generate_graph(plast[1], ppos, plen, max[1], 0.8)
+        psuffix = generate_graph(plast[2], ppos, plen, max[2], 0.8)
+        usuffix = generate_graph(plast[3], ppos, plen, max[3], 0.8)
 
         s[#s+1] = format("%s%s%s%s{\\fs%s}%s%s%s{\\fs%s}", o.nl, o.indent,
                          b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
