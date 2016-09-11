@@ -138,7 +138,16 @@ local function has_ansi()
     return true
 end
 
-
+-- Generate a graph from the given values.
+-- Returns an ASS formatted vector drawing as string.
+--
+-- values: Array/Table of numbers representing the data. Used like a ring buffer
+--         it will get iterated backwards `len` times starting at position `i`.
+-- i     : Index of the latest data value in `values`.
+-- len   : The length/amount of numbers in `values`.
+-- v_max : The maximum number in `values`. It is used to scale all data
+--         values to a range of 0 to `v_max`.
+-- scale : A value that will be multiplied with all data values.
 local function generate_graph(values, i, len, v_max, scale)
     -- check if at least one value was recorded yet (we assume lua-style 1-indexing)
     if i < 1 then
