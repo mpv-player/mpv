@@ -740,6 +740,9 @@ static void uninit(struct vo *vo)
 
 static int preinit(struct vo *vo)
 {
+    MP_WARN(vo, "This VO is deprecated! Use --vo=opengl instead (which has "
+                "the same features and which is the default).\n");
+
     struct priv *p = vo->priv;
 
     p->background_layer = p->layer;

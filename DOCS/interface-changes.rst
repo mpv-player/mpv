@@ -65,6 +65,11 @@ Interface changes
       now always sets the device, not the span or speed to be played. No
       separating extra "/" is needed. The hidden --cdda-device options is also
       deleted (it was redundant with the documented --cdrom-device).
+    - deprecate --vo=rpi. It will be removed in mpv 0.22.0. Its functionality
+      was folded into --vo=opengl, which now uses RPI hardware decoding by
+      treating it as a hardware overlay (without applying GL filtering). Also
+      to be changed in 0.22.0: the --fs flag will be reset to "no" by default
+      (like on the other platforms).
  --- mpv 0.20.0 ---
     - add --image-display-duration option - this also means that image duration
       is not influenced by --mf-fps anymore in the general case (this is an
