@@ -30,21 +30,23 @@
 #include "common/common.h"
 #include "options/options.h"
 
-// VO needs to redraw
-#define VO_EVENT_EXPOSE 1
-// VO needs to update state to a new window size
-#define VO_EVENT_RESIZE 2
-// The ICC profile needs to be reloaded
-#define VO_EVENT_ICC_PROFILE_CHANGED 4
-// Some other window state changed (position, window state, fps)
-#define VO_EVENT_WIN_STATE 8
-// The ambient light conditions changed and need to be reloaded
-#define VO_EVENT_AMBIENT_LIGHTING_CHANGED 16
-// Special mechanism for making resizing with Cocoa react faster
-#define VO_EVENT_LIVE_RESIZING 32
+enum {
+    // VO needs to redraw
+    VO_EVENT_EXPOSE                     = 1 << 0,
+    // VO needs to update state to a new window size
+    VO_EVENT_RESIZE                     = 1 << 1,
+    // The ICC profile needs to be reloaded
+    VO_EVENT_ICC_PROFILE_CHANGED        = 1 << 2,
+    // Some other window state changed (position, window state, fps)
+    VO_EVENT_WIN_STATE                  = 1 << 3,
+    // The ambient light conditions changed and need to be reloaded
+    VO_EVENT_AMBIENT_LIGHTING_CHANGED   = 1 << 4,
+    // Special mechanism for making resizing with Cocoa react faster
+    VO_EVENT_LIVE_RESIZING              = 1 << 5,
 
-// Set of events the player core may be interested in.
-#define VO_EVENTS_USER (VO_EVENT_RESIZE | VO_EVENT_WIN_STATE)
+    // Set of events the player core may be interested in.
+    VO_EVENTS_USER = (VO_EVENT_RESIZE | VO_EVENT_WIN_STATE),
+};
 
 enum mp_voctrl {
     /* signal a device reset seek */
