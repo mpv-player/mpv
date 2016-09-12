@@ -9,6 +9,7 @@ struct mp_egl_rpi {
     struct mp_log *log;
     struct GL *gl;
     EGLDisplay egl_display;
+    EGLConfig egl_config;
     EGLContext egl_context;
     EGLSurface egl_surface;
     // yep, the API keeps a pointer to it
