@@ -685,12 +685,14 @@ Video
         supported but maybe we can add support after CUDA 8 is released (and
         it will be rounded down to 8 bits).
 
-	``cuda-copy`` has the same limitations as ``cuda`` - particularly
-	its handling of deinterlacing.
+        ``cuda-copy`` has the same limitations as ``cuda`` - particularly
+        its handling of deinterlacing.
 
         All other methods, in particular the copy-back methods (like
         ``dxva2-copy`` etc.) are either fully safe, or not worse than software
-        decoding. In particular, ``auto-copy`` will only select safe modes
+        decoding.
+
+        In particular, ``auto-copy`` will only select safe modes
         (although potentially slower than other methods).
 
 ``--hwdec-preload=<api>``
@@ -1949,7 +1951,7 @@ Window
 ``--taskbar-progress``, ``--no-taskbar-progress``
     (Windows only)
     Enable/disable playback progress rendering in taskbar (Windows 7 and above).
-    
+
     Enabled by default.
 
 ``--ontop``
