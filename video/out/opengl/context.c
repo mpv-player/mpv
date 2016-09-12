@@ -119,7 +119,7 @@ int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
 
 #if HAVE_C11_TLS
 #define MP_TLS _Thread_local
-#elif defined(__GNU__)
+#elif defined(__GNUC__)
 #define MP_TLS __thread
 #endif
 
