@@ -181,7 +181,7 @@ static int rpi_init(struct MPGLContext *ctx, int flags)
     VC_RECT_T dst = {.width = w, .height = h};
     VC_RECT_T src = {.width = w << 16, .height = h << 16};
     VC_DISPMANX_ALPHA_T alpha = {
-        .flags = DISPMANX_FLAGS_ALPHA_FIXED_ALL_PIXELS,
+        .flags = DISPMANX_FLAGS_ALPHA_FROM_SOURCE,
         .opacity = 0xFF,
     };
     p->window = vc_dispmanx_element_add(p->update, p->display, 1, &dst, 0,

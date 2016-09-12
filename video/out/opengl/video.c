@@ -834,6 +834,10 @@ static void init_video(struct gl_video *p)
         for (int n = 0; exts && exts[n]; n++)
             gl_sc_enable_extension(p->sc, (char *)exts[n]);
         p->hwdec_active = true;
+        if (p->hwdec->driver->overlay_frame) {
+            MP_WARN(p, "Using HW-overlay mode. No GL filtering is performed "
+                       "on the video!\n");
+        }
     } else {
         init_format(p, p->image_params.imgfmt, false);
     }
@@ -2679,6 +2683,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     bool has_frame = !!frame->current;
+    bool is_new = has_frame && !frame->redraw && !frame->repeat;
 
     if (!has_frame || p->dst_rect.x0 > 0 || p->dst_rect.y0 > 0 ||
         p->dst_rect.x1 < p->vp_w || p->dst_rect.y1 < abs(p->vp_h))
@@ -2686,6 +2691,28 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
         struct m_color c = p->opts.background;
         gl->ClearColor(c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
         gl->Clear(GL_COLOR_BUFFER_BIT);
+    }
+
+    if (p->hwdec_active && p->hwdec->driver->overlay_frame) {
+        if (has_frame) {
+            float *c = p->hwdec->overlay_colorkey;
+            gl->Scissor(p->dst_rect.x0, p->dst_rect.y0,
+                        p->dst_rect.x1 - p->dst_rect.x0,
+                        p->dst_rect.y1 - p->dst_rect.y0);
+            gl->Enable(GL_SCISSOR_TEST);
+            gl->ClearColor(c[0], c[1], c[2], c[3]);
+            gl->Clear(GL_COLOR_BUFFER_BIT);
+            gl->Disable(GL_SCISSOR_TEST);
+        }
+
+        if (is_new || !frame->current)
+            p->hwdec->driver->overlay_frame(p->hwdec, frame->current);
+
+        if (frame->current)
+            p->osd_pts = frame->current->pts;
+
+        // Disable GL rendering
+        has_frame = false;
     }
 
     if (has_frame) {
@@ -2702,7 +2729,6 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
         if (interpolate) {
             gl_video_interpolate_frame(p, frame, fbo);
         } else {
-            bool is_new = !frame->redraw && !frame->repeat;
             if (is_new || !p->output_fbo_valid) {
                 p->output_fbo_valid = false;
 
@@ -2797,6 +2823,9 @@ void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
 
     if (p->osd)
         mpgl_osd_resize(p->osd, p->osd_rect, p->image_params.stereo_out);
+
+    if (p->hwdec && p->hwdec->driver->overlay_adjust)
+        p->hwdec->driver->overlay_adjust(p->hwdec, vp_w, vp_h, src, dst);
 }
 
 static struct voctrl_performance_entry gl_video_perfentry(struct gl_timer *t)
