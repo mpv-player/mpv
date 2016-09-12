@@ -20,7 +20,7 @@ local o = {
     ass_formatting = true,
     timing_warning = true,
     timing_warning_th = 0.85,        -- *no* warning threshold (warning when > target_fps * timing_warning_th)
-    timing_total = false,
+    print_perfdata_total = false,    -- prints an additional line adding up the perfdata lines
     debug = false,
 
     -- Graph options and style
@@ -296,7 +296,7 @@ local function append_perfdata(s)
     s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
                     hl(vo_p["upload-last"], last_s), hl(vo_p["upload-avg"], avg_s),
                     hl(vo_p["upload-peak"], -math.huge), o.font, o.prefix_sep, usuffix)
-    if o.timing_total then
+    if o.print_perfdata_total then
         s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
                         hl(last_s, last_s), hl(avg_s, avg_s),
                         hl(peak_s, peak_s), o.font, o.prefix_sep, o.prefix_sep .. "Total")
