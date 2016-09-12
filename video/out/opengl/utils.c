@@ -780,9 +780,9 @@ static void compile_attach_shader(struct gl_shader_cache *sc, GLuint program,
     GLuint shader = gl->CreateShader(type);
     gl->ShaderSource(shader, 1, &source, NULL);
     gl->CompileShader(shader);
-    GLint status;
+    GLint status = 0;
     gl->GetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    GLint log_length;
+    GLint log_length = 0;
     gl->GetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_length);
 
     int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DEBUG) : MSGL_ERR;
@@ -820,9 +820,9 @@ static void link_shader(struct gl_shader_cache *sc, GLuint program)
 {
     GL *gl = sc->gl;
     gl->LinkProgram(program);
-    GLint status;
+    GLint status = 0;
     gl->GetProgramiv(program, GL_LINK_STATUS, &status);
-    GLint log_length;
+    GLint log_length = 0;
     gl->GetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
 
     int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DEBUG) : MSGL_ERR;
@@ -980,6 +980,7 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     // build vertex shader from vao and cache the locations of the uniform variables
     if (!entry->gl_shader) {
         entry->gl_shader = create_program(sc, vert->start, frag->start);
+        entry->num_uniforms = 0;
         for (int n = 0; n < sc->num_uniforms; n++) {
             struct sc_cached_uniform un = {
                 .loc = gl->GetUniformLocation(entry->gl_shader,
