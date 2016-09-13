@@ -2958,6 +2958,9 @@ static int mp_property_sub_speed(void *ctx, struct m_property *prop,
         }
         return M_PROPERTY_OK;
     }
+    case M_PROPERTY_PRINT:
+        *(char **)arg = talloc_asprintf(NULL, "%4.1f%%", 100 * opts->sub_speed);
+        return M_PROPERTY_OK;
     }
     return property_osd_helper(mpctx, prop, action, arg);
 }
@@ -4174,6 +4177,7 @@ static const struct property_osd_display {
     { "secondary-sid", "Secondary subtitles" },
     { "sub-pos", "Sub position" },
     { "sub-delay", "Sub delay" },
+    { "sub-speed", "Sub speed" },
     { "sub-visibility", .msg = "Subtitles ${!sub-visibility==yes:hidden}"
         "${?sub-visibility==yes:visible${?sub==no: (but no subtitles selected)}}" },
     { "sub-forced-only", "Forced sub only" },
