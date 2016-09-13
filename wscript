@@ -822,11 +822,22 @@ video_output_features = [
         'deps': ['any-gl'],
         'deps_any': [ 'libmpv-shared', 'libmpv-static' ],
         'func': check_true,
-    } , {
+    }, {
+        'name': '--mali-fbdev',
+        'desc': 'MALI via Linux fbdev',
+        'deps': ['standard-gl', 'libdl'],
+        'func': compose_checks(
+            check_cc(lib="EGL"),
+            check_cc(lib="GLESv2"),
+            check_statement('EGL/fbdev_window.h', 'struct fbdev_window test'),
+            check_statement('linux/fb.h', 'struct fb_var_screeninfo test'),
+        ),
+    }, {
         'name': '--gl',
         'desc': 'OpenGL video outputs',
         'deps_any': [ 'gl-cocoa', 'gl-x11', 'egl-x11', 'egl-drm',
-                      'gl-win32', 'gl-wayland', 'rpi', 'plain-gl' ],
+                      'gl-win32', 'gl-wayland', 'rpi', 'mali-fbdev',
+                      'plain-gl' ],
         'func': check_true,
         'req': True,
         'fmsg': "Unable to find OpenGL header files for video output. " +
@@ -835,7 +846,7 @@ video_output_features = [
     }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
-        'deps_any': [ 'egl-x11' ],
+        'deps_any': [ 'egl-x11', 'mali-fbdev' ],
         'func': check_true
     }
 ]

@@ -4225,6 +4225,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
         DRM/EGL
     x11egl
         X11/EGL
+    mali-fbdev
+        Direct fbdev/EGL support on some ARM/MALI devices.
 
 ``--opengl-es=<mode>``
     Select whether to use GLES:

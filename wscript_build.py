@@ -334,6 +334,7 @@ def build(ctx):
         ( "video/out/opengl/context_cocoa.c",    "gl-cocoa" ),
         ( "video/out/opengl/context_drm_egl.c",  "egl-drm" ),
         ( "video/out/opengl/context_dxinterop.c","gl-dxinterop" ),
+        ( "video/out/opengl/context_mali_fbdev.c","mali-fbdev" ),
         ( "video/out/opengl/context_rpi.c",      "rpi" ),
         ( "video/out/opengl/context_wayland.c",  "gl-wayland" ),
         ( "video/out/opengl/context_w32.c",      "gl-win32" ),
