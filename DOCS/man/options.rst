@@ -605,7 +605,7 @@ Video
                 (Windows only)
     :d3d11va-copy: copies video back to system RAM (Windows only)
     :mediacodec: copies video back to system RAM (Android only)
-    :rpi:       requires ``--vo=rpi`` (Raspberry Pi only - default if available)
+    :rpi:       requires ``--vo=opengl`` (Raspberry Pi only - default if available)
     :cuda:      requires ``--vo=opengl`` (Any platform CUDA is available)
     :cuda-copy: copies video back to system RAM (Any platform CUDA is available)
 
