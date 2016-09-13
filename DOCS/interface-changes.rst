@@ -20,13 +20,22 @@ Interface changes
 ::
 
  --- mpv 0.21.0 ---
-    - implement changing sub-speed during playback
     - deprecate _all_ --vo and --ao suboptions. Generally, all suboptions are
       replaced by global options, which do exactly the same. For example,
       "--vo=opengl:scale=nearest" turns into "--scale=nearest". In some cases,
-      the global option is prefixed.
+      the global option is prefixed, e.g. "--vo=opengl:pbo" turns into
+      "--opengl-pbo".
       Most of the exact replacements are documented here:
         https://github.com/mpv-player/mpv/wiki/Option-replacement-list
+    - remove --vo=opengl-hq. Set --profile=opengl-hq instead. Note that this
+      profile does not force the VO. This means if you use the --vo option to
+      set another VO, it won't work. But this also means it can be used with
+      opengl-cb.
+    - remove the --vo=opengl "pre-shaders", "post-shaders" and "scale-shader"
+      sub-options: they were deprecated in favor of "user-shaders"
+    - deprecate --vo-defaults (no replacement)
+    - remove the vo-cmdline command. You can set OpenGL renderer options
+      directly via properties instead.
     - deprecate the device/sink options on all AOs. Use --audio-device instead.
     - deprecate "--ao=wasapi:exclusive" and "--ao=coreaudio:exclusive",
       use --audio-exclusive instead.
@@ -35,10 +44,6 @@ Interface changes
       at parsing time). This does not affect options which start with "--no-",
       but do not use the mechanism for negation options.
       (Also see client API change for API version 1.23.)
-    - add almost all options to the property list, meaning you can change
-      options without adding "options/" to the property name (a new section
-      has been added to the manpage describing some conflicting behavior
-      between options and properties)
     - rename the following properties
         - "demuxer" -> "current-demuxer"
         - "fps" -> "container-fps"
@@ -46,19 +51,6 @@ Interface changes
         - "cache" -> "cache-percent"
       the old names are deprecated
     - remove deprecated "hwdec-active" and "hwdec-detected" properties
-    - remove "pre-shaders", "post-shaders" and "scale-shader": deprecated
-      in favor of "user-shaders"
-    - remove all vo_opengl suboptions. Use global options with the same name
-      instead, e.g.: --vo=opengl:scale=nearest => --scale=nearest
-      Some options are prefixed with "opengl-", e.g. --opengl-pbo.
-      The same change is applied to ao_alsa.
-    - remove --vo=opengl-hq. Set --profile=opengl-hq instead. Note that this
-      profile does not force the VO. This means if you use the --vo option to
-      set another VO, it won't work. But this also means it can be used with
-      opengl-cb.
-    - deprecate --vo-defaults (no replacement)
-    - remove the vo-cmdline command. You can set OpenGL renderer options
-      directly via properties instead.
     - deprecate the ao and vo auto-profiles (they never made any sense)
     - deprecate "--vo=direct3d_shaders" - use "--vo=direct3d" instead.
       Change "--vo=direct3d" to always use shaders by default.
@@ -71,6 +63,11 @@ Interface changes
       treating it as a hardware overlay (without applying GL filtering). Also
       to be changed in 0.22.0: the --fs flag will be reset to "no" by default
       (like on the other platforms).
+    - add almost all options to the property list, meaning you can change
+      options without adding "options/" to the property name (a new section
+      has been added to the manpage describing some conflicting behavior
+      between options and properties)
+    - implement changing sub-speed during playback
  --- mpv 0.20.0 ---
     - add --image-display-duration option - this also means that image duration
       is not influenced by --mf-fps anymore in the general case (this is an
