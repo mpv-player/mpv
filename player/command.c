@@ -2942,6 +2942,26 @@ static int mp_property_sub_delay(void *ctx, struct m_property *prop,
     return property_osd_helper(mpctx, prop, action, arg);
 }
 
+/// Subtitle speed (RW)
+static int mp_property_sub_speed(void *ctx, struct m_property *prop,
+                                 int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct MPOpts *opts = mpctx->opts;
+    switch (action) {
+    case M_PROPERTY_SET: {
+        opts->sub_speed = *(float *)arg;
+        struct track *track = mpctx->current_track[0][STREAM_SUB];
+        struct dec_sub *sub = track ? track->d_sub : NULL;
+        if (sub) {
+            sub_control(track->d_sub, SD_CTRL_UPDATE_SPEED, NULL);
+        }
+        return M_PROPERTY_OK;
+    }
+    }
+    return property_osd_helper(mpctx, prop, action, arg);
+}
+
 static int mp_property_sub_pos(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
@@ -3836,6 +3856,7 @@ static const struct m_property mp_properties_base[] = {
     {"sid", mp_property_sub},
     {"secondary-sid", mp_property_sub2},
     {"sub-delay", mp_property_sub_delay},
+    {"sub-speed", mp_property_sub_speed},
     {"sub-pos", mp_property_sub_pos},
     {"sub-text", mp_property_sub_text},
     {"sub-visibility", property_osd_helper},

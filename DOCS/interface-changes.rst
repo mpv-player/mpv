@@ -20,6 +20,7 @@ Interface changes
 ::
 
  --- mpv 0.21.0 ---
+    - implement changing sub-speed during playback
     - deprecate _all_ --vo and --ao suboptions. Generally, all suboptions are
       replaced by global options, which do exactly the same. For example,
       "--vo=opengl:scale=nearest" turns into "--scale=nearest". In some cases,
