@@ -846,7 +846,7 @@ video_output_features = [
     }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
-        'deps_any': [ 'egl-x11', 'mali-fbdev' ],
+        'deps_any': [ 'egl-x11', 'mali-fbdev', 'rpi' ],
         'func': check_true
     }
 ]

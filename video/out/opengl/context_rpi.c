@@ -22,6 +22,7 @@
 #include "osdep/atomic.h"
 #include "video/out/win_state.h"
 #include "context.h"
+#include "egl_helpers.h"
 
 #include "context_rpi.h"
 
@@ -140,6 +141,15 @@ void mp_egl_rpi_destroy(struct mp_egl_rpi *p)
     p->gl = NULL;
 }
 
+static void mp_egl_rpi_destroy_base(struct mp_egl_rpi *p)
+{
+    if (p->egl_context)
+        eglDestroyContext(p->egl_display, p->egl_context);
+    p->egl_context = EGL_NO_CONTEXT;
+    eglReleaseThread();
+    p->egl_display = EGL_NO_DISPLAY;
+}
+
 static int mp_egl_rpi_init_base(struct mp_egl_rpi *p)
 {
     p->egl_display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
@@ -148,38 +158,15 @@ static int mp_egl_rpi_init_base(struct mp_egl_rpi *p)
         goto fail;
     }
 
-    eglBindAPI(EGL_OPENGL_ES_API);
-
-    p->egl_config = select_fb_config_egl(p);
-    if (!p->egl_config)
+    if (!mpegl_create_context(p->egl_display, p->log, 0, &p->egl_context,
+                              &p->egl_config))
         goto fail;
-
-    EGLint context_attributes[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 2,
-        EGL_NONE
-    };
-    p->egl_context = eglCreateContext(p->egl_display, p->egl_config,
-                                      EGL_NO_CONTEXT, context_attributes);
-
-    if (p->egl_context == EGL_NO_CONTEXT) {
-        MP_FATAL(p, "Could not create EGL context!\n");
-        goto fail;
-    }
 
     return 0;
 
 fail:
-    mp_egl_rpi_destroy(p);
+    mp_egl_rpi_destroy_base(p);
     return -1;
-}
-
-static void mp_egl_rpi_destroy_base(struct mp_egl_rpi *p)
-{
-    if (p->egl_context)
-        eglDestroyContext(p->egl_display, p->egl_context);
-    p->egl_context = EGL_NO_CONTEXT;
-    eglReleaseThread();
-    p->egl_display = EGL_NO_DISPLAY;
 }
 
 static int mp_egl_rpi_init_window(struct mp_egl_rpi *p,
