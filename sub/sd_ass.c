@@ -671,6 +671,9 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
         ctx->video_fps = *(double *)arg;
         update_subtitle_speed(sd);
         return CONTROL_OK;
+    case SD_CTRL_UPDATE_SPEED:
+        update_subtitle_speed(sd);
+        return CONTROL_OK;
     default:
         return CONTROL_UNKNOWN;
     }
