@@ -233,6 +233,7 @@ static const char *const backup_properties[] = {
     "options/vid",
     "options/sid",
     "options/sub-delay",
+    "options/sub-speed",
     "options/sub-pos",
     "options/sub-visibility",
     "options/sub-scale",
