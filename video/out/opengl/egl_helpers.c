@@ -36,7 +36,7 @@ static bool create_context(EGLDisplay display, struct mp_log *log, int msgl,
     mp_msg(log, MSGL_V, "Trying to create %s context.\n", es ? "GLES" : "GL");
 
     if (!eglBindAPI(es ? EGL_OPENGL_ES_API : EGL_OPENGL_API)) {
-        mp_msg(log, msgl, "Could not bind API!\n");
+        mp_msg(log, MSGL_V, "Could not bind API!\n");
         return false;
     }
 
