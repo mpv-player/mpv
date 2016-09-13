@@ -155,6 +155,8 @@ static MPGLContext *init_backend(struct vo *vo, const struct mpgl_driver *driver
         .vo = vo,
         .driver = driver,
     };
+    if (probing)
+        vo_flags |= VOFLAG_PROBING;
     bool old_probing = vo->probing;
     vo->probing = probing; // hack; kill it once backends are separate
     MP_VERBOSE(vo, "Initializing OpenGL backend '%s'\n", ctx->driver->name);

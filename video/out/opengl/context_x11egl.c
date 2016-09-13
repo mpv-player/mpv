@@ -49,85 +49,14 @@ static void mpegl_uninit(MPGLContext *ctx)
     vo_x11_uninit(ctx->vo);
 }
 
-static EGLConfig select_fb_config_egl(struct MPGLContext *ctx, bool es)
-{
-    struct priv *p = ctx->priv;
-
-    EGLint attributes[] = {
-        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-        EGL_RED_SIZE, 8,
-        EGL_GREEN_SIZE, 8,
-        EGL_BLUE_SIZE, 8,
-        EGL_DEPTH_SIZE, 0,
-        EGL_RENDERABLE_TYPE, es ? EGL_OPENGL_ES2_BIT : EGL_OPENGL_BIT,
-        EGL_NONE
-    };
-
-    EGLint config_count;
-    EGLConfig config;
-
-    eglChooseConfig(p->egl_display, attributes, &config, 1, &config_count);
-
-    if (!config_count) {
-        MP_FATAL(ctx->vo, "Could not find EGL configuration!\n");
-        return NULL;
-    }
-
-    return config;
-}
-
-static bool create_context_egl(MPGLContext *ctx, EGLConfig config,
-                               EGLNativeWindowType window, bool es)
-{
-    struct priv *p = ctx->priv;
-
-    EGLint context_attributes[] = {
-        // aka EGL_CONTEXT_MAJOR_VERSION_KHR
-        EGL_CONTEXT_CLIENT_VERSION, es ? 2 : 3,
-        EGL_NONE, EGL_NONE,
-        EGL_NONE
-    };
-
-    if (!es) {
-        context_attributes[2] = EGL_CONTEXT_OPENGL_PROFILE_MASK;
-        context_attributes[3] = EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT;
-    }
-
-    p->egl_surface = eglCreateWindowSurface(p->egl_display, config, window, NULL);
-
-    if (p->egl_surface == EGL_NO_SURFACE) {
-        MP_FATAL(ctx->vo, "Could not create EGL surface!\n");
-        return false;
-    }
-
-    p->egl_context = eglCreateContext(p->egl_display, config,
-                                      EGL_NO_CONTEXT, context_attributes);
-
-    if (p->egl_context == EGL_NO_CONTEXT) {
-        MP_FATAL(ctx->vo, "Could not create EGL context!\n");
-        return false;
-    }
-
-    eglMakeCurrent(p->egl_display, p->egl_surface, p->egl_surface,
-                   p->egl_context);
-
-    return true;
-}
-
 static int mpegl_init(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
-    bool es = flags & VOFLAG_GLES;
     int msgl = vo->probing ? MSGL_V : MSGL_FATAL;
 
     if (!vo_x11_init(vo))
         goto uninit;
-
-    if (!eglBindAPI(es ? EGL_OPENGL_ES_API : EGL_OPENGL_API)) {
-        mp_msg(vo->log, msgl, "Could not bind API (%s).\n", es ? "GLES" : "GL");
-        goto uninit;
-    }
 
     p->egl_display = eglGetDisplay(vo->x11->display);
     if (!eglInitialize(p->egl_display, NULL, NULL)) {
@@ -135,8 +64,9 @@ static int mpegl_init(struct MPGLContext *ctx, int flags)
         goto uninit;
     }
 
-    EGLConfig config = select_fb_config_egl(ctx, es);
-    if (!config)
+    EGLConfig config;
+    if (!mpegl_create_context(p->egl_display, vo->log, flags, &p->egl_context,
+                              &config))
         goto uninit;
 
     int vID, n;
@@ -156,8 +86,20 @@ static int mpegl_init(struct MPGLContext *ctx, int flags)
 
     XFree(vi);
 
-    if (!create_context_egl(ctx, config, (EGLNativeWindowType)vo->x11->window, es))
+    p->egl_surface = eglCreateWindowSurface(p->egl_display, config,
+                                    (EGLNativeWindowType)vo->x11->window, NULL);
+
+    if (p->egl_surface == EGL_NO_SURFACE) {
+        MP_FATAL(ctx->vo, "Could not create EGL surface!\n");
         goto uninit;
+    }
+
+    if (!eglMakeCurrent(p->egl_display, p->egl_surface, p->egl_surface,
+                        p->egl_context))
+    {
+        MP_FATAL(ctx->vo, "Could not make context current!\n");
+        goto uninit;
+    }
 
     const char *egl_exts = eglQueryString(p->egl_display, EGL_EXTENSIONS);
 

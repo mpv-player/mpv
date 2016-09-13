@@ -33,6 +33,7 @@ enum {
     VOFLAG_ALPHA        = 1 << 3,       // Hint to request alpha framebuffer
     VOFLAG_SW           = 1 << 4,       // Hint to accept a software GL renderer
     VOFLAG_ANGLE_DCOMP  = 1 << 5,       // Whether DirectComposition is allowed
+    VOFLAG_PROBING      = 1 << 6,       // The backend is being auto-probed.
 };
 
 extern const int mpgl_preferred_gl_versions[];
