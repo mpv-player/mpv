@@ -37,7 +37,7 @@
 
 #include "x11_common.h"
 
-#if HAVE_SHM
+#if HAVE_SHM && HAVE_XEXT
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
@@ -78,7 +78,7 @@ struct priv {
 
     int current_buf;
 
-#if HAVE_SHM
+#if HAVE_SHM && HAVE_XEXT
     int Shmem_Flag;
     XShmSegmentInfo Shminfo[2];
     int Shm_Warned_Slow;
