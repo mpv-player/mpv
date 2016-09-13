@@ -2138,7 +2138,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
             // combined with the fact that they're very similar to begin with,
             // and to avoid confusing the average user, just don't adapt BT.601
             // content automatically at all.
-            dst.primaries = ref.gamma;
+            dst.primaries = ref.primaries;
         }
     }
 
