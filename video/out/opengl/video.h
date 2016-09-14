@@ -27,13 +27,9 @@
 #include "lcms.h"
 #include "video/out/filter_kernels.h"
 
-// Texture units 0-5 are used by the video, and for free use by the passes
+// Assume we have this many texture units for sourcing additional passes.
+// The actual texture unit assignment is dynamic.
 #define TEXUNIT_VIDEO_NUM 6
-
-// Other texture units are reserved for specific purposes
-#define TEXUNIT_SCALERS  TEXUNIT_VIDEO_NUM
-#define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+SCALER_COUNT)
-#define TEXUNIT_DITHER   (TEXUNIT_3DLUT+1)
 
 struct scaler_fun {
     char *name;

@@ -673,7 +673,6 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
     if (!p->lut_3d_texture)
         gl->GenTextures(1, &p->lut_3d_texture);
 
-    gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_3DLUT);
     gl->BindTexture(GL_TEXTURE_3D, p->lut_3d_texture);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
     gl->TexImage3D(GL_TEXTURE_3D, 0, GL_RGB16, lut3d->size[0], lut3d->size[1],
@@ -684,7 +683,7 @@ static bool gl_video_get_lut3d(struct gl_video *p, enum mp_csp_prim prim,
     gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     gl->TexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    gl->ActiveTexture(GL_TEXTURE0);
+    gl->BindTexture(GL_TEXTURE_3D, 0);
 
     debug_check_gl(p, "after 3d lut creation");
 
@@ -946,7 +945,6 @@ static void uninit_video(struct gl_video *p)
 
 static void pass_prepare_src_tex(struct gl_video *p)
 {
-    GL *gl = p->gl;
     struct gl_shader_cache *sc = p->sc;
 
     for (int n = 0; n < p->pass_tex_num; n++) {
@@ -964,9 +962,9 @@ static void pass_prepare_src_tex(struct gl_video *p)
         snprintf(pixel_size, sizeof(pixel_size), "pixel_size%d", n);
 
         if (s->use_integer) {
-            gl_sc_uniform_sampler_ui(sc, texture_name, n);
+            gl_sc_uniform_tex_ui(sc, texture_name, s->gl_tex);
         } else {
-            gl_sc_uniform_sampler(sc, texture_name, s->gl_target, n);
+            gl_sc_uniform_tex(sc, texture_name, s->gl_target, s->gl_tex);
         }
         float f[2] = {1, 1};
         if (s->gl_target != GL_TEXTURE_RECTANGLE) {
@@ -977,11 +975,7 @@ static void pass_prepare_src_tex(struct gl_video *p)
         gl_sc_uniform_mat2(sc, texture_rot, true, (float *)s->transform.m);
         gl_sc_uniform_vec2(sc, pixel_size, (GLfloat[]){1.0f / f[0],
                                                        1.0f / f[1]});
-
-        gl->ActiveTexture(GL_TEXTURE0 + n);
-        gl->BindTexture(s->gl_target, s->gl_tex);
     }
-    gl->ActiveTexture(GL_TEXTURE0);
 }
 
 static void render_pass_quad(struct gl_video *p, int vp_w, int vp_h,
@@ -1401,8 +1395,6 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
     const struct gl_format *fmt = gl_find_float16_format(gl, elems_per_pixel);
     GLenum target = scaler->gl_target;
 
-    gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_SCALERS + scaler->index);
-
     if (!scaler->gl_lut)
         gl->GenTextures(1, &scaler->gl_lut);
 
@@ -1429,7 +1421,7 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
     if (target != GL_TEXTURE_1D)
         gl->TexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    gl->ActiveTexture(GL_TEXTURE0);
+    gl->BindTexture(target, 0);
 
     debug_check_gl(p, "after initializing scaler");
 }
@@ -2184,7 +2176,7 @@ static void pass_colormanage(struct gl_video *p, struct mp_colorspace src, bool 
                    p->opts.tone_mapping_param);
 
     if (p->use_lut_3d) {
-        gl_sc_uniform_sampler(p->sc, "lut_3d", GL_TEXTURE_3D, TEXUNIT_3DLUT);
+        gl_sc_uniform_tex(p->sc, "lut_3d", GL_TEXTURE_3D, p->lut_3d_texture);
         GLSL(vec3 cpos;)
         for (int i = 0; i < 3; i++)
             GLSLF("cpos[%d] = LUT_POS(color[%d], %d.0);\n", i, i, p->lut_3d_size[i]);
@@ -2250,7 +2242,6 @@ static void pass_dither(struct gl_video *p)
 
         p->dither_size = tex_size;
 
-        gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_DITHER);
         gl->GenTextures(1, &p->dither_texture);
         gl->BindTexture(GL_TEXTURE_2D, p->dither_texture);
         gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -2261,7 +2252,7 @@ static void pass_dither(struct gl_video *p)
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
-        gl->ActiveTexture(GL_TEXTURE0);
+        gl->BindTexture(GL_TEXTURE_2D, 0);
 
         debug_check_gl(p, "dither setup");
     }
@@ -2274,7 +2265,7 @@ static void pass_dither(struct gl_video *p)
     // dither patterns can be visible.
     int dither_quantization = (1 << dst_depth) - 1;
 
-    gl_sc_uniform_sampler(p->sc, "dither", GL_TEXTURE_2D, TEXUNIT_DITHER);
+    gl_sc_uniform_tex(p->sc, "dither", GL_TEXTURE_2D, p->dither_texture);
 
     GLSLF("vec2 dither_pos = gl_FragCoord.xy / %d.0;\n", p->dither_size);
 

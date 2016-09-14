@@ -445,6 +445,9 @@ struct sc_uniform {
     int size;
     GLint loc;
     union uniform_val v;
+    // Set for sampler uniforms.
+    GLenum tex_target;
+    GLuint tex_handle;
 };
 
 struct sc_cached_uniform {
@@ -473,6 +476,7 @@ struct gl_shader_cache {
     bstr prelude_text;
     bstr header_text;
     bstr text;
+    int next_texture_unit;
     struct gl_vao *vao;
 
     struct sc_entry *entries;
@@ -507,8 +511,18 @@ void gl_sc_reset(struct gl_shader_cache *sc)
 {
     GL *gl = sc->gl;
 
-    if (sc->needs_reset)
+    if (sc->needs_reset) {
         gl->UseProgram(0);
+
+        for (int n = 0; n < sc->num_uniforms; n++) {
+            struct sc_uniform *u = &sc->uniforms[n];
+            if (u->type == UT_i && u->tex_target) {
+                gl->ActiveTexture(GL_TEXTURE0 + u->v.i[0]);
+                gl->BindTexture(u->tex_target, 0);
+            }
+        }
+        gl->ActiveTexture(GL_TEXTURE0);
+    }
 
     sc->prelude_text.len = 0;
     sc->header_text.len = 0;
@@ -516,6 +530,7 @@ void gl_sc_reset(struct gl_shader_cache *sc)
     for (int n = 0; n < sc->num_uniforms; n++)
         talloc_free(sc->uniforms[n].name);
     sc->num_uniforms = 0;
+    sc->next_texture_unit = 1; // not 0, as 0 is "free for use"
     sc->needs_reset = false;
 }
 
@@ -622,6 +637,7 @@ const char* mp_sampler_type(GLenum texture_target)
     }
 }
 
+// gl_sc_uniform_tex() should be preferred.
 void gl_sc_uniform_sampler(struct gl_shader_cache *sc, char *name, GLenum target,
                            int unit)
 {
@@ -630,15 +646,31 @@ void gl_sc_uniform_sampler(struct gl_shader_cache *sc, char *name, GLenum target
     u->size = 1;
     u->glsl_type = mp_sampler_type(target);
     u->v.i[0] = unit;
+    u->tex_target = 0;
+    u->tex_handle = 0;
 }
 
-void gl_sc_uniform_sampler_ui(struct gl_shader_cache *sc, char *name, int unit)
+void gl_sc_uniform_tex(struct gl_shader_cache *sc, char *name, GLenum target,
+                       GLuint texture)
+{
+    struct sc_uniform *u = find_uniform(sc, name);
+    u->type = UT_i;
+    u->size = 1;
+    u->glsl_type = mp_sampler_type(target);
+    u->v.i[0] = sc->next_texture_unit++;
+    u->tex_target = target;
+    u->tex_handle = texture;
+}
+
+void gl_sc_uniform_tex_ui(struct gl_shader_cache *sc, char *name, GLuint texture)
 {
     struct sc_uniform *u = find_uniform(sc, name);
     u->type = UT_i;
     u->size = 1;
     u->glsl_type = sc->gl->es ? "highp usampler2D" : "usampler2D";
-    u->v.i[0] = unit;
+    u->v.i[0] = sc->next_texture_unit++;
+    u->tex_target = GL_TEXTURE_2D;
+    u->tex_handle = texture;
 }
 
 void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, GLfloat f)
@@ -754,6 +786,11 @@ static void update_uniform(GL *gl, struct sc_entry *e, struct sc_uniform *u, int
         if (memcmp(un->v.i, u->v.i, sizeof(u->v.i)) != 0) {
             memcpy(un->v.i, u->v.i, sizeof(u->v.i));
             gl->Uniform1i(loc, u->v.i[0]);
+        }
+        // For samplers: set the actual texture.
+        if (u->tex_target) {
+            gl->ActiveTexture(GL_TEXTURE0 + u->v.i[0]);
+            gl->BindTexture(u->tex_target, u->tex_handle);
         }
         break;
     case UT_f:
