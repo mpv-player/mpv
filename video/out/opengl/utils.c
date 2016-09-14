@@ -1052,6 +1052,8 @@ void gl_sc_generate(struct gl_shader_cache *sc)
     for (int n = 0; n < sc->num_uniforms; n++)
         update_uniform(gl, entry, &sc->uniforms[n], n);
 
+    gl->ActiveTexture(GL_TEXTURE0);
+
     sc->needs_reset = true;
 }
 
