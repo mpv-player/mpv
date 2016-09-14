@@ -803,6 +803,10 @@ video_output_features = [
                 "Aborting. If you really mean to compile without OpenGL " +
                 "video outputs use --disable-gl.",
     }, {
+        'name': '--vulkan',
+        'desc':  'Vulkan context support',
+        'func': check_cc(header_name='vulkan/vulkan.h', lib='vulkan'),
+    }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
         'deps': 'egl-x11 || mali-fbdev || rpi || gl-wayland || egl-drm || ' +
