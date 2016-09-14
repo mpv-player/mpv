@@ -30,6 +30,7 @@
 #include <GL/gl.h>
 
 #include "context.h"
+#include "egl_helpers.h"
 #include "common/common.h"
 #include "video/out/drm_common.h"
 
@@ -75,33 +76,7 @@ struct priv {
     struct vt_switcher vt_switcher;
 };
 
-static EGLConfig select_fb_config_egl(struct MPGLContext *ctx, bool es)
-{
-    struct priv *p = ctx->priv;
-    const EGLint attributes[] = {
-        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-        EGL_RED_SIZE, 8,
-        EGL_GREEN_SIZE, 8,
-        EGL_BLUE_SIZE, 8,
-        EGL_ALPHA_SIZE, 0,
-        EGL_DEPTH_SIZE, 1,
-        EGL_RENDERABLE_TYPE, es ? EGL_OPENGL_ES2_BIT : EGL_OPENGL_BIT,
-        EGL_NONE
-    };
-    EGLint config_count;
-    EGLConfig config;
-    if (!eglChooseConfig(p->egl.display, attributes, &config, 1, &config_count)) {
-        MP_FATAL(ctx->vo, "Failed to configure EGL.\n");
-        return NULL;
-    }
-    if (!config_count) {
-        MP_FATAL(ctx->vo, "Could not find EGL configuration!\n");
-        return NULL;
-    }
-    return config;
-}
-
-static bool init_egl(struct MPGLContext *ctx, bool es)
+static bool init_egl(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
     MP_VERBOSE(ctx->vo, "Initializing EGL\n");
@@ -114,20 +89,10 @@ static bool init_egl(struct MPGLContext *ctx, bool es)
         MP_ERR(ctx->vo, "Failed to initialize EGL.\n");
         return false;
     }
-    if (!eglBindAPI(es ? EGL_OPENGL_ES_API : EGL_OPENGL_API)) {
-        MP_ERR(ctx->vo, "Failed to set EGL API version.\n");
-        return false;
-    }
-    EGLConfig config = select_fb_config_egl(ctx, es);
-    if (!config) {
-        MP_ERR(ctx->vo, "Failed to configure EGL.\n");
-        return false;
-    }
-    p->egl.context = eglCreateContext(p->egl.display, config, EGL_NO_CONTEXT, NULL);
-    if (!p->egl.context) {
-        MP_ERR(ctx->vo, "Failed to create EGL context.\n");
-        return false;
-    }
+    EGLConfig config;
+    if (!mpegl_create_context(p->egl.display, ctx->vo->log, flags,
+                              &p->egl.context, &config))
+        return -1;
     MP_VERBOSE(ctx->vo, "Initializing EGL surface\n");
     p->egl.surface = eglCreateWindowSurface(p->egl.display, config, p->gbm.surface, NULL);
     if (p->egl.surface == EGL_NO_SURFACE) {
@@ -339,7 +304,7 @@ static int drm_egl_init(struct MPGLContext *ctx, int flags)
         return -1;
     }
 
-    if (!init_egl(ctx, flags & VOFLAG_GLES)) {
+    if (!init_egl(ctx, flags)) {
         MP_ERR(ctx->vo, "Failed to setup EGL.\n");
         return -1;
     }
