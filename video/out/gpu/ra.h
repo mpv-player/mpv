@@ -146,6 +146,7 @@ enum ra_buf_type {
     RA_BUF_TYPE_TEX_UPLOAD,     // texture upload buffer (pixel buffer object)
     RA_BUF_TYPE_SHADER_STORAGE, // shader buffer (SSBO), for RA_VARTYPE_BUF_RW
     RA_BUF_TYPE_UNIFORM,        // uniform buffer (UBO), for RA_VARTYPE_BUF_RO
+    RA_BUF_TYPE_VERTEX,         // not publicly usable (RA-internal usage)
 };
 
 struct ra_buf_params {
@@ -369,10 +370,10 @@ struct ra_fns {
 
     void (*buf_destroy)(struct ra *ra, struct ra_buf *buf);
 
-    // Update the contents of a buffer, starting at a given offset and up to a
-    // given size, with the contents of *data. This is an extremely common
-    // operation. Calling this while the buffer is considered "in use" is an
-    // error. (See: buf_poll)
+    // Update the contents of a buffer, starting at a given offset (*must* be a
+    // multiple of 4) and up to a given size, with the contents of *data. This
+    // is an extremely common operation. Calling this while the buffer is
+    // considered "in use" is an error. (See: buf_poll)
     void (*buf_update)(struct ra *ra, struct ra_buf *buf, ptrdiff_t offset,
                        const void *data, size_t size);
 

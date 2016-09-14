@@ -4590,7 +4590,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
         on Nvidia and AMD. Newer Intel chips with the latest drivers may also
         work.
     x11
-        X11/GLX
+        X11/GLX, VK_KHR_xlib_surface
     x11probe
         For internal autoprobing, equivalent to ``x11`` otherwise. Don't use
         directly, it could be removed without warning as autoprobing is changed.
