@@ -875,7 +875,6 @@ static void init_video(struct gl_video *p)
             plane->w = plane->tex_w = mp_image_plane_w(&layout, n);
             plane->h = plane->tex_h = mp_image_plane_h(&layout, n);
 
-            gl->ActiveTexture(GL_TEXTURE0 + n);
             gl->GenTextures(1, &plane->gl_texture);
             gl->BindTexture(gl_target, plane->gl_texture);
 
@@ -889,9 +888,10 @@ static void init_video(struct gl_video *p)
             gl->TexParameteri(gl_target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             gl->TexParameteri(gl_target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+            gl->BindTexture(gl_target, 0);
+
             MP_VERBOSE(p, "Texture for plane %d: %dx%d\n", n, plane->w, plane->h);
         }
-        gl->ActiveTexture(GL_TEXTURE0);
     }
 
     debug_check_gl(p, "after video texture creation");
