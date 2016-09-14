@@ -125,6 +125,8 @@ static bool create_context(EGLDisplay display, struct mp_log *log, int msgl,
     return true;
 }
 
+#define STR_OR_ERR(s) ((s) ? (s) : "(error)")
+
 // Create a context and return it and the config it was created with. If it
 // returns false, the out_* pointers are set to NULL.
 // vo_flags is a combination of VOFLAG_* values.
@@ -133,6 +135,12 @@ bool mpegl_create_context(EGLDisplay display, struct mp_log *log, int vo_flags,
 {
     *out_context = NULL;
     *out_config = NULL;
+
+    const char *version = eglQueryString(display, EGL_VERSION);
+    const char *vendor = eglQueryString(display, EGL_VENDOR);
+    const char *apis = eglQueryString(display, EGL_CLIENT_APIS);
+    mp_verbose(log, "EGL_VERSION=%s\nEGL_VENDOR=%s\nEGL_CLIENT_APIS=%s\n",
+               STR_OR_ERR(version), STR_OR_ERR(vendor), STR_OR_ERR(apis));
 
     int clean_flags = vo_flags & ~(unsigned)(VOFLAG_GLES | VOFLAG_NO_GLES);
     int msgl = vo_flags & VOFLAG_PROBING ? MSGL_V : MSGL_FATAL;
