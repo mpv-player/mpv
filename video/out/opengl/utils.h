@@ -182,10 +182,12 @@ uint64_t gl_timer_last_us(struct gl_timer *timer);
 uint64_t gl_timer_avg_us(struct gl_timer *timer);
 uint64_t gl_timer_peak_us(struct gl_timer *timer);
 
+#define NUM_PBO_BUFFERS 3
+
 struct gl_pbo_upload {
     GL *gl;
     int index;
-    GLuint buffers[2];
+    GLuint buffers[NUM_PBO_BUFFERS];
     size_t buffer_size;
 };
 
