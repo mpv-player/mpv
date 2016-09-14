@@ -285,8 +285,9 @@ static void update_osd(struct vo *vo)
             abort();
         }
         gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
-        gl_sc_gen_shader_and_reset(p->sc);
+        gl_sc_generate(p->sc);
         mpgl_osd_draw_part(p->osd, p->osd_res.w, -p->osd_res.h, n);
+        gl_sc_reset(p->sc);
     }
 
     MP_STATS(vo, "stop rpi_osd");

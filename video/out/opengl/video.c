@@ -1026,10 +1026,11 @@ static void finish_pass_direct(struct gl_video *p, GLint fbo, int vp_w, int vp_h
 {
     GL *gl = p->gl;
     pass_prepare_src_tex(p);
+    gl_sc_generate(p->sc);
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
-    gl_sc_gen_shader_and_reset(p->sc);
     render_pass_quad(p, vp_w, vp_h, dst);
     gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+    gl_sc_reset(p->sc);
     memset(&p->pass_tex, 0, sizeof(p->pass_tex));
     p->pass_tex_num = 0;
 }
@@ -2335,8 +2336,9 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
             pass_colormanage(p, csp_srgb, true);
         }
         gl_sc_set_vao(p->sc, mpgl_osd_get_vao(p->osd));
-        gl_sc_gen_shader_and_reset(p->sc);
+        gl_sc_generate(p->sc);
         mpgl_osd_draw_part(p->osd, vp_w, vp_h, n);
+        gl_sc_reset(p->sc);
     }
     gl_sc_set_vao(p->sc, &p->vao);
 }

@@ -481,6 +481,9 @@ struct gl_shader_cache {
     struct sc_uniform *uniforms;
     int num_uniforms;
 
+    // For checking that the user is calling gl_sc_reset() properly.
+    bool needs_reset;
+
     bool error_state; // true if an error occurred
 
     // temporary buffers (avoids frequent reallocations)
@@ -494,17 +497,26 @@ struct gl_shader_cache *gl_sc_create(GL *gl, struct mp_log *log)
         .gl = gl,
         .log = log,
     };
+    gl_sc_reset(sc);
     return sc;
 }
 
+// Reset the previous pass. This must be called after
+// Unbind all GL state managed by sc - the current program and texture units.
 void gl_sc_reset(struct gl_shader_cache *sc)
 {
+    GL *gl = sc->gl;
+
+    if (sc->needs_reset)
+        gl->UseProgram(0);
+
     sc->prelude_text.len = 0;
     sc->header_text.len = 0;
     sc->text.len = 0;
     for (int n = 0; n < sc->num_uniforms; n++)
         talloc_free(sc->uniforms[n].name);
     sc->num_uniforms = 0;
+    sc->needs_reset = false;
 }
 
 static void sc_flush_cache(struct gl_shader_cache *sc)
@@ -867,13 +879,19 @@ static GLuint create_program(struct gl_shader_cache *sc, const char *vertex,
 // 1. Generate vertex and fragment shaders from the fragment shader text added
 //    with gl_sc_add(). The generated shader program is cached (based on the
 //    text), so actual compilation happens only the first time.
-// 2. Update the uniforms set with gl_sc_uniform_*.
+// 2. Update the uniforms and textures set with gl_sc_uniform_*.
 // 3. Make the new shader program current (glUseProgram()).
-// 4. Reset the sc state and prepare for a new shader program. (All uniforms
+// After that, you render, and then you call gc_sc_reset(), which does:
+// 1. Unbind the program and all textures.
+// 2. Reset the sc state and prepare for a new shader program. (All uniforms
 //    and fragment operations needed for the next program have to be re-added.)
-void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
+void gl_sc_generate(struct gl_shader_cache *sc)
 {
     GL *gl = sc->gl;
+
+    // gl_sc_reset() must be called after ending the previous render process,
+    // and before starting a new one.
+    assert(!sc->needs_reset);
 
     assert(sc->vao);
 
@@ -997,7 +1015,7 @@ void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc)
     for (int n = 0; n < sc->num_uniforms; n++)
         update_uniform(gl, entry, &sc->uniforms[n], n);
 
-    gl_sc_reset(sc);
+    sc->needs_reset = true;
 }
 
 // Maximum number of simultaneous query objects to keep around. Reducing this
