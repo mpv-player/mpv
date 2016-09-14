@@ -4103,10 +4103,6 @@ The following video options are currently all specific to ``--vo=gpu`` and
     the video along the temporal axis. The filter used can be controlled using
     the ``--tscale`` setting.
 
-    Note that this relies on vsync to work, see ``--opengl-swapinterval`` for
-    more information. It should also only be used with an ``--fbo-format``
-    that has at least 16 bit precision.
-
 ``--interpolation-threshold=<0..1,-1>``
     Threshold below which frame ratio interpolation gets disabled (default:
     ``0.0001``). This is calculated as ``abs(disphz/vfps - 1) < threshold``,
@@ -4183,6 +4179,31 @@ The following video options are currently all specific to ``--vo=gpu`` and
     syncs to the right one. Compositing window managers can also lead to bad
     results, as can missing or incorrect display FPS information (see
     ``--display-fps``).
+
+``--vulkan-swap-mode=<mode>``
+    Controls the presentation mode of the vulkan swapchain. This is similar
+    to the ``--opengl-swapinterval`` option.
+
+    auto
+        Use the preferred swapchain mode for the vulkan context. (Default)
+    fifo
+        Non-tearing, vsync blocked. Similar to "VSync on".
+    fifo-relaxed
+        Tearing, vsync blocked. Late frames will tear instead of stuttering.
+    mailbox
+        Non-tearing, not vsync blocked. Similar to "triple buffering".
+    immediate
+        Tearing, not vsync blocked. Similar to "VSync off".
+
+``--vulkan-queue-count=<1..8>``
+    Controls the number of VkQueues used for rendering (limited by how many
+    your device supports). In theory, using more queues could enable some
+    parallelism between frames (when using a ``--swapchain-depth`` higher than
+    1). (Default: 1)
+
+    NOTE: Setting this to a value higher than 1 may cause graphical corruption,
+    as mpv's vulkan implementation currently does not try and protect textures
+    against concurrent access.
 
 ``--glsl-shaders=<file-list>``
     Custom GLSL hooks. These are a flexible way to add custom fragment shaders,
@@ -4590,7 +4611,7 @@ The following video options are currently all specific to ``--vo=gpu`` and
         on Nvidia and AMD. Newer Intel chips with the latest drivers may also
         work.
     x11
-        X11/GLX
+        X11/GLX, VK_KHR_xlib_surface
     x11probe
         For internal autoprobing, equivalent to ``x11`` otherwise. Don't use
         directly, it could be removed without warning as autoprobing is changed.
@@ -5020,7 +5041,10 @@ Miscellaneous
     Media files must use constant framerate. Section-wise VFR might work as well
     with some container formats (but not e.g. mkv). If the sync code detects
     severe A/V desync, or the framerate cannot be detected, the player
-    automatically reverts to ``audio`` mode for some time or permanently.
+    automatically reverts to ``audio`` mode for some time or permanently. These
+    modes also require a vsync blocked presentation mode. For OpenGL, this
+    translates to ``--opengl-swapinterval=1``. For Vulkan, it translates to
+    ``--vulkan-swap-mode=fifo`` (or ``fifo-relaxed``).
 
     The modes with ``desync`` in their names do not attempt to keep audio/video
     in sync. They will slowly (or quickly) desync, until e.g. the next seek
