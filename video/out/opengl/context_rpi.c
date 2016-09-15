@@ -139,8 +139,8 @@ static int recreate_dispmanx(struct MPGLContext *ctx)
         .flags = DISPMANX_FLAGS_ALPHA_FROM_SOURCE,
         .opacity = 0xFF,
     };
-    p->window = vc_dispmanx_element_add(p->update, p->display, 1, &dst, 0,
-                                        &src, DISPMANX_PROTECTION_NONE, &alpha, 0, 0);
+    p->window = vc_dispmanx_element_add(p->update, p->display, 1, &dst, 0, &src,
+                                        DISPMANX_PROTECTION_NONE, &alpha, 0, 0);
     if (!p->window) {
         MP_FATAL(ctx->vo, "Could not add DISPMANX element.\n");
         goto fail;
