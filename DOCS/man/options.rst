@@ -3915,8 +3915,11 @@ The following video options are currently all specific to ``--vo=opengl`` and
 ``--interpolation-threshold=<0..1,-1>``
     Threshold below which frame ratio interpolation gets disabled (default:
     ``0.0001``). This is calculated as ``abs(disphz/vfps - 1) < threshold``,
-    where ``vfps`` is the speed-adjusted display FPS, and ``disphz`` the
-    display refresh rate.
+    where ``vfps`` is the speed-adjusted video FPS, and ``disphz`` the
+    display refresh rate. (The speed-adjusted video FPS is roughly equal to
+    the normal video FPS, but with slowdown and speedup applied. This matters
+    if you use ``--video-sync=display-resample`` to make video run synchronously
+    to the display FPS, or if you change the ``speed`` property.)
 
     The default is intended to almost always enable interpolation if the
     playback rate is even slightly different from the display refresh rate. But
