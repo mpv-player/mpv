@@ -195,10 +195,8 @@ static void shutdown_clients(struct MPContext *mpctx)
 
 void mp_destroy(struct MPContext *mpctx)
 {
-#if !defined(__MINGW32__)
     mp_uninit_ipc(mpctx->ipc_ctx);
     mpctx->ipc_ctx = NULL;
-#endif
 
     shutdown_clients(mpctx);
 
