@@ -2911,7 +2911,7 @@ static int property_osd_helper(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     if (action == M_PROPERTY_SET)
-        osd_changed_all(mpctx->osd);
+        osd_changed(mpctx->osd);
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
@@ -4909,7 +4909,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             if (sub_control(sub, SD_CTRL_SUB_STEP, a) > 0) {
                 if (cmd->id == MP_CMD_SUB_STEP) {
                     opts->sub_delay -= a[0];
-                    osd_changed_all(mpctx->osd);
+                    osd_changed(mpctx->osd);
                     show_property_osd(mpctx, "sub-delay", on_osd);
                 } else {
                     // We can easily get stuck by failing to seek to the video

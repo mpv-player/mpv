@@ -473,7 +473,6 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
     }
 
     mp_notify(mpctx, MPV_EVENT_TRACK_SWITCHED, NULL);
-    osd_changed_all(mpctx->osd);
 
     talloc_free(mpctx->track_layout_hash);
     mpctx->track_layout_hash = talloc_steal(mpctx, track_layout_hash(mpctx));

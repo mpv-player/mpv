@@ -146,10 +146,10 @@ void osd_free(struct osd_state *osd)
     talloc_free(osd);
 }
 
-void osd_changed_unlocked(struct osd_state *osd, int obj)
+void osd_changed_unlocked(struct osd_state *osd)
 {
-    osd->objs[obj]->force_redraw = true;
     osd->want_redraw = true;
+    osd->want_redraw_notification = true;
 }
 
 void osd_set_text(struct osd_state *osd, const char *text)
@@ -161,7 +161,7 @@ void osd_set_text(struct osd_state *osd, const char *text)
     if (strcmp(osd_obj->text, text) != 0) {
         talloc_free(osd_obj->text);
         osd_obj->text = talloc_strdup(osd_obj, text);
-        osd_changed_unlocked(osd, osd_obj->type);
+        osd_changed_unlocked(osd);
     }
     pthread_mutex_unlock(&osd->lock);
 }
@@ -171,6 +171,7 @@ void osd_set_sub(struct osd_state *osd, int index, struct dec_sub *dec_sub)
     pthread_mutex_lock(&osd->lock);
     if (index >= 0 && index < 2)
         osd->objs[OSDTYPE_SUB + index]->sub = dec_sub;
+    osd_changed_unlocked(osd);
     pthread_mutex_unlock(&osd->lock);
 }
 
@@ -199,7 +200,7 @@ void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s)
     MP_TARRAY_GROW(osd_obj, osd_obj->progbar_state.stops, s->num_stops);
     memcpy(osd_obj->progbar_state.stops, s->stops,
            sizeof(osd_obj->progbar_state.stops[0]) * s->num_stops);
-    osd_changed_unlocked(osd, osd_obj->type);
+    osd_changed_unlocked(osd);
     pthread_mutex_unlock(&osd->lock);
 }
 
@@ -207,7 +208,7 @@ void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs)
 {
     pthread_mutex_lock(&osd->lock);
     osd->objs[OSDTYPE_EXTERNAL2]->external2 = imgs;
-    osd_changed_unlocked(osd, OSDTYPE_EXTERNAL2);
+    osd_changed_unlocked(osd);
     pthread_mutex_unlock(&osd->lock);
 }
 
@@ -216,7 +217,7 @@ static void check_obj_resize(struct osd_state *osd, struct mp_osd_res res,
 {
     if (!osd_res_equals(res, obj->vo_res)) {
         obj->vo_res = res;
-        obj->force_redraw = true;
+        osd->want_redraw = true;
         mp_client_broadcast_event(mp_client_api_get_core(osd->global->client_api),
                                   MP_EVENT_WIN_RESIZE, NULL);
     }
@@ -269,10 +270,6 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
         osd_object_get_bitmaps(osd, obj, format, out_imgs);
     }
 
-    if (obj->force_redraw)
-        out_imgs->change_id++;
-
-    obj->force_redraw = false;
     obj->vo_change_id += out_imgs->change_id;
 
     if (out_imgs->num_parts == 0)
@@ -322,6 +319,9 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
         if (obj->sub)
             sub_unlock(obj->sub);
     }
+
+    if (!(draw_flags & OSD_DRAW_SUB_FILTER))
+        osd->want_redraw = osd->want_redraw_notification = false;
 
     pthread_mutex_unlock(&osd->lock);
 }
@@ -379,24 +379,18 @@ struct mp_osd_res osd_res_from_image_params(const struct mp_image_params *p)
     };
 }
 
-void osd_changed(struct osd_state *osd, int new_value)
+void osd_changed(struct osd_state *osd)
 {
     pthread_mutex_lock(&osd->lock);
-    osd_changed_unlocked(osd, new_value);
+    osd_changed_unlocked(osd);
     pthread_mutex_unlock(&osd->lock);
-}
-
-void osd_changed_all(struct osd_state *osd)
-{
-    for (int n = 0; n < MAX_OSD_PARTS; n++)
-        osd_changed(osd, n);
 }
 
 bool osd_query_and_reset_want_redraw(struct osd_state *osd)
 {
     pthread_mutex_lock(&osd->lock);
-    bool r = osd->want_redraw;
-    osd->want_redraw = false;
+    bool r = osd->want_redraw_notification;
+    osd->want_redraw_notification = false;
     pthread_mutex_unlock(&osd->lock);
     return r;
 }

@@ -501,7 +501,7 @@ void osd_set_external(struct osd_state *osd, void *id, int res_x, int res_y,
         entry->res_y = res_y;
         update_external(osd, obj, entry);
         obj->changed = true;
-        osd_changed_unlocked(osd, obj->type);
+        osd_changed_unlocked(osd);
     }
 
 done:
@@ -527,7 +527,7 @@ static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
                             int format, struct sub_bitmaps *out_imgs)
 {
-    if (obj->force_redraw && obj->type == OSDTYPE_OSD)
+    if (osd->want_redraw && obj->type == OSDTYPE_OSD)
         update_osd(osd, obj);
 
     if (!obj->ass_packer)
