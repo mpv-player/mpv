@@ -210,6 +210,7 @@ const struct m_sub_options vo_sub_opts = {
         .window_scale = 1.0,
         .x11_bypass_compositor = 2,
         .mmcss_profile = "Playback",
+        .fullscreen = HAVE_RPI ? 1 : 0,
     },
 };
 
@@ -865,6 +866,7 @@ const struct MPOpts mp_default_opts = {
     .sub_fix_timing = 1,
     .screenshot_template = "mpv-shot%n",
 
+    .hwdec_api = HAVE_RPI ? HWDEC_RPI : 0,
     .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video,vp9",
     .videotoolbox_format = IMGFMT_NV12,
 

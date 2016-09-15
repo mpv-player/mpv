@@ -64,6 +64,10 @@ def build(ctx):
         target = "input/input_conf.h")
 
     ctx.file2string(
+        source = "etc/builtin.conf",
+        target = "player/builtin_conf.inc")
+
+    ctx.file2string(
         source = "sub/osd_font.otf",
         target = "sub/osd_font.h")
 

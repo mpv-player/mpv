@@ -62,6 +62,10 @@
 #include "command.h"
 #include "screenshot.h"
 
+static const char def_config[] =
+#include "player/builtin_conf.inc"
+;
+
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -98,56 +102,6 @@ const char mp_help_text[] =
 " --list-options    list all mpv options\n"
 " --h=<pat>         print options which match the given shell pattern\n"
 "\n";
-
-static const char def_config[] =
-#if HAVE_RPI
-    "hwdec=rpi\n"
-    "fullscreen=yes\n"
-#endif
-    "\n"
-    "[pseudo-gui]\n"
-    "terminal=no\n"
-    "force-window=yes\n"
-    "idle=once\n"
-    "screenshot-directory=~~desktop/\n"
-    "\n"
-    "[libmpv]\n"
-    "config=no\n"
-    "idle=yes\n"
-    "terminal=no\n"
-    "input-terminal=no\n"
-    "osc=no\n"
-    "ytdl=no\n"
-    "input-default-bindings=no\n"
-    "input-vo-keyboard=no\n"
-    "input-lirc=no\n"
-    "input-appleremote=no\n"
-    "input-media-keys=no\n"
-    "input-app-events=no\n"
-    "stop-playback-on-init-failure=yes\n"
-#if HAVE_ENCODING
-    "\n"
-    "[encoding]\n"
-    "vo=lavc\n"
-    "ao=lavc\n"
-    "keep-open=no\n"
-    "force-window=no\n"
-    "gapless-audio=yes\n"
-    "resume-playback=no\n"
-    "load-scripts=no\n"
-    "osc=no\n"
-    "framedrop=no\n"
-#endif
-    "\n"
-    "[opengl-hq]\n"
-    "scale=spline36\n"
-    "cscale=spline36\n"
-    "dscale=mitchell\n"
-    "dither-depth=auto\n"
-    "correct-downscaling=yes\n"
-    "sigmoid-upscaling=yes\n"
-    "deband=yes\n"
-;
 
 static pthread_mutex_t terminal_owner_lock = PTHREAD_MUTEX_INITIALIZER;
 static struct MPContext *terminal_owner;
