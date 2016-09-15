@@ -883,7 +883,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
                     return;
                 }
             }
-            mpctx->audio_status = STATUS_SYNCING;
+            reinit_audio_filters_and_output(mpctx);
         }
     }
 
