@@ -591,8 +591,9 @@ Video
     ``<api>`` can be one of the following:
 
     :no:        always use software decoding (default)
-    :auto:      see below
-    :auto-copy: see below
+    :auto:      enable best hw decoder (see below)
+    :yes:       exactly the same as ``auto``
+    :auto-copy: enable best hw decoder with copy-back (see below)
     :vdpau:     requires ``--vo=vdpau`` or ``--vo=opengl`` (Linux only)
     :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
