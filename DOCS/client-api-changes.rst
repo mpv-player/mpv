@@ -37,6 +37,8 @@ API changes
           instead of "no-video=" you should set "video=no".
         - be much more permissive what API calls are allowed before
           mpv_initialize().
+        - do not override the SIGPIPE signal handler anymore. This was done as
+          workaround for the FFmpeg TLS code, which has been fixed long ago.
  --- mpv 0.19.0 ---
  1.22   - add stream_cb API for custom protocols
  --- mpv 0.18.1 ---

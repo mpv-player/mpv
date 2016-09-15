@@ -135,10 +135,6 @@ extern "C" {
  *   (used through libass), ALSA, FFmpeg, and possibly more.
  * - The FPU precision must be set at least to double precision.
  * - On Windows, mpv will call timeBeginPeriod(1).
- * - On UNIX, every mpv_initialize() call will block SIGPIPE. This is done
- *   because FFmpeg makes unsafe use of OpenSSL and GnuTLS, which can raise
- *   this signal under certain circumstances. Once these libraries (or FFmpeg)
- *   are fixed, libmpv will not block the signal anymore.
  * - On memory exhaustion, mpv will kill the process.
  *
  * Encoding of filenames

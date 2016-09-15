@@ -20,6 +20,7 @@
 #include <unistd.h>
 
 #include <poll.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -96,6 +97,11 @@ static int ipc_write_str(struct client_arg *client, const char *buf)
 static void *client_thread(void *p)
 {
     pthread_detach(pthread_self());
+
+    // We don't use MSG_NOSIGNAL because the moldy fruit OS doesn't support it.
+    struct sigaction sa = { .sa_handler = SIG_IGN, .sa_flags = SA_RESTART };
+    sigfillset(&sa.sa_mask);
+    sigaction(SIGPIPE, &sa, NULL);
 
     int rc;
 
