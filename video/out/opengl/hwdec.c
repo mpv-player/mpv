@@ -60,7 +60,7 @@ static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
 #endif
     &gl_hwdec_dxva2,
 #endif
-#if HAVE_CUDA_GL
+#if HAVE_CUDA_HWACCEL
     &gl_hwdec_cuda,
 #endif
 #if HAVE_RPI
