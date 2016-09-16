@@ -1621,6 +1621,8 @@ static void do_terminate(void *ptr)
 
     if (!w32->destroyed)
         DestroyWindow(w32->window);
+
+    mp_dispatch_interrupt(w32->dispatch);
 }
 
 void vo_w32_uninit(struct vo *vo)

@@ -30,6 +30,8 @@ struct mp_dispatch_queue {
     pthread_cond_t cond;
     void (*wakeup_fn)(void *wakeup_ctx);
     void *wakeup_ctx;
+    // Make mp_dispatch_queue_process() exit if it's idle.
+    bool interrupted;
     // The target thread is blocked by mp_dispatch_queue_process(). Note that
     // mp_dispatch_lock() can set this from true to false to keep the thread
     // blocked (this stops if from processing other dispatch items, and from
@@ -185,10 +187,11 @@ void mp_dispatch_run(struct mp_dispatch_queue *queue,
 // function can be much higher if the suspending/locking functions are used, or
 // if executing the dispatch items takes time. On the other hand, this function
 // can return much earlier than the timeout due to sporadic wakeups.
-// It is also guaranteed that if at least one queue item was processed, the
-// function will return as soon as possible, ignoring the timeout. This
-// simplifies users, such as re-checking conditions before waiting. (It will
-// still process the remaining queue items, and wait for unsuspend.)
+// Note that this will strictly return only after:
+//      - timeout has passed,
+//      - all queue items were processed,
+//      - the possibly acquired lock has been released
+// It's possible to cancel the timeout by calling mp_dispatch_interrupt().
 void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
 {
     int64_t wait = timeout > 0 ? mp_add_timeout(mp_time_us(), timeout) : 0;
@@ -243,18 +246,33 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
             } else {
                 item->completed = true;
             }
-        } else if (wait > 0) {
+        } else if (wait > 0 && !queue->interrupted) {
             struct timespec ts = mp_time_us_to_timespec(wait);
-            pthread_cond_timedwait(&queue->cond, &queue->lock, &ts);
+            if (pthread_cond_timedwait(&queue->cond, &queue->lock, &ts))
+                break;
         } else {
             break;
         }
-        wait = 0;
     }
     queue->idling = false;
     assert(!frame.locked);
     assert(queue->frame == &frame);
     queue->frame = frame.prev;
+    queue->interrupted = false;
+    pthread_mutex_unlock(&queue->lock);
+}
+
+// If the queue is inside of mp_dispatch_queue_process(), make it return as
+// soon as all work items have been run, without waiting for the timeout. This
+// does not make it return early if it's blocked by a mp_dispatch_lock().
+// If mp_dispatch_queue_process() is called in a reentrant way (including the
+// case where another thread calls mp_dispatch_lock() and then
+// mp_dispatch_queue_process()), this affects only the "topmost" invocation.
+void mp_dispatch_interrupt(struct mp_dispatch_queue *queue)
+{
+    pthread_mutex_lock(&queue->lock);
+    queue->interrupted = true;
+    pthread_cond_broadcast(&queue->cond);
     pthread_mutex_unlock(&queue->lock);
 }
 

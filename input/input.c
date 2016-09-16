@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <math.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -34,7 +35,6 @@
 #include <libavutil/common.h>
 
 #include "osdep/io.h"
-#include "osdep/semaphore.h"
 #include "misc/rendezvous.h"
 
 #include "input.h"
@@ -96,7 +96,6 @@ struct cmd_queue {
 
 struct input_ctx {
     pthread_mutex_t mutex;
-    sem_t wakeup;
     struct mp_log *log;
     struct mpv_global *global;
     struct m_config_cache *opts_cache;
@@ -147,6 +146,9 @@ struct input_ctx {
     struct cmd_queue cmd_queue;
 
     struct mp_cancel *cancel;
+
+    void (*wakeup_cb)(void *ctx);
+    void *wakeup_ctx;
 };
 
 static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
@@ -846,33 +848,18 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
     return NULL;
 }
 
-void mp_input_wait(struct input_ctx *ictx, double seconds)
+double mp_input_get_delay(struct input_ctx *ictx)
 {
     input_lock(ictx);
+    double seconds = INFINITY;
     adjust_max_wait_time(ictx, &seconds);
     input_unlock(ictx);
-    while (sem_trywait(&ictx->wakeup) == 0)
-        seconds = -1;
-    if (seconds > 0) {
-        MP_STATS(ictx, "start sleep");
-        struct timespec ts =
-            mp_time_us_to_timespec(mp_add_timeout(mp_time_us(), seconds));
-        sem_timedwait(&ictx->wakeup, &ts);
-        MP_STATS(ictx, "end sleep");
-    }
-}
-
-void mp_input_wakeup_nolock(struct input_ctx *ictx)
-{
-    // Some audio APIs discourage use of locking in their audio callback,
-    // and these audio callbacks happen to call mp_input_wakeup_nolock()
-    // when new data is needed. This is why we use semaphores here.
-    sem_post(&ictx->wakeup);
+    return seconds;
 }
 
 void mp_input_wakeup(struct input_ctx *ictx)
 {
-    mp_input_wakeup_nolock(ictx);
+    ictx->wakeup_cb(ictx->wakeup_ctx);
 }
 
 mp_cmd_t *mp_input_read_cmd(struct input_ctx *ictx)
@@ -1196,7 +1183,9 @@ done:
     return r;
 }
 
-struct input_ctx *mp_input_init(struct mpv_global *global)
+struct input_ctx *mp_input_init(struct mpv_global *global,
+                                void (*wakeup_cb)(void *ctx),
+                                void *wakeup_ctx)
 {
 
     struct input_ctx *ictx = talloc_ptrtype(NULL, ictx);
@@ -1206,14 +1195,11 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
         .log = mp_log_new(ictx, global->log, "input"),
         .mouse_section = "default",
         .opts_cache = m_config_cache_alloc(ictx, global, &input_config),
+        .wakeup_cb = wakeup_cb,
+        .wakeup_ctx = wakeup_ctx,
     };
 
     ictx->opts = ictx->opts_cache->opts;
-
-    if (sem_init(&ictx->wakeup, 0, 0)) {
-        MP_FATAL(ictx, "mpv doesn't work on systems without POSIX semaphores.\n");
-        abort();
-    }
 
     mpthread_mutex_init_recursive(&ictx->mutex);
 
@@ -1308,7 +1294,6 @@ void mp_input_uninit(struct input_ctx *ictx)
     clear_queue(&ictx->cmd_queue);
     talloc_free(ictx->current_down_cmd);
     pthread_mutex_destroy(&ictx->mutex);
-    sem_destroy(&ictx->wakeup);
     talloc_free(ictx);
 }
 

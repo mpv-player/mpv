@@ -356,6 +356,7 @@ void mpv_resume(mpv_handle *ctx)
         mp_dispatch_lock(ctx->mpctx->dispatch);
         ctx->mpctx->suspend_count--;
         mp_dispatch_unlock(ctx->mpctx->dispatch);
+        mp_dispatch_interrupt(ctx->mpctx->dispatch);
     }
 }
 

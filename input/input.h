@@ -219,21 +219,21 @@ bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y);
 
 // Initialize the input system
 struct mpv_global;
-struct input_ctx *mp_input_init(struct mpv_global *global);
+struct input_ctx *mp_input_init(struct mpv_global *global,
+                                void (*wakeup_cb)(void *ctx),
+                                void *wakeup_ctx);
 
 // Load config, options, and devices.
 void mp_input_load(struct input_ctx *ictx);
 
 void mp_input_uninit(struct input_ctx *ictx);
 
-// Sleep for the given amount of seconds, until mp_input_wakeup() is called,
-// or new input arrives. seconds<=0 returns immediately.
-void mp_input_wait(struct input_ctx *ictx, double seconds);
+// Return number of seconds until the next autorepeat event will be generated.
+// Returns INFINITY if no autorepeated key is active.
+double mp_input_get_delay(struct input_ctx *ictx);
 
 // Wake up sleeping input loop from another thread.
 void mp_input_wakeup(struct input_ctx *ictx);
-
-void mp_input_wakeup_nolock(struct input_ctx *ictx);
 
 // Used to asynchronously abort playback. Needed because the core still can
 // block on network in some situations.

@@ -51,10 +51,24 @@
 #include "command.h"
 
 // Wait until mp_wakeup_core() is called, since the last time
-// mp_wait_events() was called. (But see mp_process_input().)
-void mp_wait_events(struct MPContext *mpctx, double sleeptime)
+// mp_wait_events() was called.
+void mp_wait_events(struct MPContext *mpctx)
 {
-    mp_input_wait(mpctx->input, sleeptime);
+    if (mpctx->sleeptime > 0)
+        MP_STATS(mpctx, "start sleep");
+
+    mpctx->in_dispatch = true;
+
+    mp_dispatch_queue_process(mpctx->dispatch, mpctx->sleeptime);
+
+    while (mpctx->suspend_count)
+        mp_dispatch_queue_process(mpctx->dispatch, 100);
+
+    mpctx->in_dispatch = false;
+    mpctx->sleeptime = INFINITY;
+
+    if (mpctx->sleeptime > 0)
+        MP_STATS(mpctx, "end sleep");
 }
 
 // Set the timeout used when the playloop goes to sleep. This means the
@@ -63,6 +77,10 @@ void mp_wait_events(struct MPContext *mpctx, double sleeptime)
 void mp_set_timeout(struct MPContext *mpctx, double sleeptime)
 {
     mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleeptime);
+
+    // Can't adjust timeout if called from mp_dispatch_queue_process().
+    if (mpctx->in_dispatch && isfinite(sleeptime))
+        mp_wakeup_core(mpctx);
 }
 
 // Cause the playloop to run. This can be called from any thread. If called
@@ -70,7 +88,7 @@ void mp_set_timeout(struct MPContext *mpctx, double sleeptime)
 // of going to sleep in the next mp_wait_events().
 void mp_wakeup_core(struct MPContext *mpctx)
 {
-    mp_input_wakeup(mpctx->input);
+    mp_dispatch_interrupt(mpctx->dispatch);
 }
 
 // Opaque callback variant of mp_wakeup_core().
@@ -84,17 +102,14 @@ void mp_wakeup_core_cb(void *ctx)
 // API threads. This also resets the "wakeup" flag used with mp_wait_events().
 void mp_process_input(struct MPContext *mpctx)
 {
-    mp_dispatch_queue_process(mpctx->dispatch, 0);
     for (;;) {
         mp_cmd_t *cmd = mp_input_read_cmd(mpctx->input);
         if (!cmd)
             break;
         run_command(mpctx, cmd, NULL);
         mp_cmd_free(cmd);
-        mp_dispatch_queue_process(mpctx->dispatch, 0);
     }
-    while (mpctx->suspend_count)
-        mp_dispatch_queue_process(mpctx->dispatch, 100);
+    mp_set_timeout(mpctx, mp_input_get_delay(mpctx->input));
 }
 
 double get_relative_time(struct MPContext *mpctx)
@@ -1045,7 +1060,7 @@ void run_playloop(struct MPContext *mpctx)
 
     if (mpctx->lavfi) {
         if (lavfi_process(mpctx->lavfi))
-            mpctx->sleeptime = 0;
+            mp_wakeup_core(mpctx);
         if (lavfi_has_failed(mpctx->lavfi))
             mpctx->stop_play = AT_END_OF_FILE;
     }
@@ -1079,8 +1094,7 @@ void run_playloop(struct MPContext *mpctx)
 
     handle_osd_redraw(mpctx);
 
-    mp_wait_events(mpctx, mpctx->sleeptime);
-    mpctx->sleeptime = 1e9; // infinite for all practical purposes
+    mp_wait_events(mpctx);
 
     handle_pause_on_low_cache(mpctx);
 
@@ -1096,8 +1110,7 @@ void run_playloop(struct MPContext *mpctx)
 void mp_idle(struct MPContext *mpctx)
 {
     handle_dummy_ticks(mpctx);
-    mp_wait_events(mpctx, mpctx->sleeptime);
-    mpctx->sleeptime = 100.0;
+    mp_wait_events(mpctx);
     mp_process_input(mpctx);
     handle_command_updates(mpctx);
     handle_cursor_autohide(mpctx);

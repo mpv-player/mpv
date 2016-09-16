@@ -143,7 +143,7 @@ static void shutdown_clients(struct MPContext *mpctx)
     while (mpctx->clients && mp_clients_num(mpctx)) {
         mp_client_broadcast_event(mpctx, MPV_EVENT_SHUTDOWN, NULL);
         mp_dispatch_queue_process(mpctx->dispatch, 0);
-        mp_wait_events(mpctx, 10000);
+        mp_wait_events(mpctx);
     }
 }
 
@@ -344,7 +344,7 @@ struct MPContext *mp_create(void)
 
     mpctx->global->opts = mpctx->opts;
 
-    mpctx->input = mp_input_init(mpctx->global);
+    mpctx->input = mp_input_init(mpctx->global, mp_wakeup_core_cb, mpctx);
     screenshot_init(mpctx);
     command_init(mpctx);
     init_libav(mpctx->global);

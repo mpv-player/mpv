@@ -21,6 +21,8 @@
 #include <stdbool.h>
 #include <pthread.h>
 
+#include "osdep/atomic.h"
+
 #include "libmpv/client.h"
 
 #include "common/common.h"
@@ -233,6 +235,7 @@ typedef struct MPContext {
     struct mp_client_api *clients;
     struct mp_dispatch_queue *dispatch;
     struct mp_cancel *playback_abort;
+    bool in_dispatch;
 
     struct mp_log *statusline;
     struct osd_state *osd;
@@ -510,7 +513,7 @@ void get_current_osd_sym(struct MPContext *mpctx, char *buf, size_t buf_size);
 void set_osd_bar_chapters(struct MPContext *mpctx, int type);
 
 // playloop.c
-void mp_wait_events(struct MPContext *mpctx, double sleeptime);
+void mp_wait_events(struct MPContext *mpctx);
 void mp_set_timeout(struct MPContext *mpctx, double sleeptime);
 void mp_wakeup_core(struct MPContext *mpctx);
 void mp_wakeup_core_cb(void *ctx);
