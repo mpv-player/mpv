@@ -57,6 +57,14 @@ void mp_wait_events(struct MPContext *mpctx, double sleeptime)
     mp_input_wait(mpctx->input, sleeptime);
 }
 
+// Set the timeout used when the playloop goes to sleep. This means the
+// playloop will re-run as soon as the timeout elapses (or earlier).
+// mp_set_timeout(c, 0) is essentially equivalent to mp_wakeup_core(c).
+void mp_set_timeout(struct MPContext *mpctx, double sleeptime)
+{
+    mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleeptime);
+}
+
 // Cause the playloop to run. This can be called from any thread. If called
 // from within the playloop itself, it will be run immediately again, instead
 // of going to sleep in the next mp_wait_events().
@@ -118,6 +126,8 @@ void pause_player(struct MPContext *mpctx)
     if (mpctx->video_out)
         vo_set_paused(mpctx->video_out, true);
 
+    mp_wakeup_core(mpctx);
+
 end:
     mp_notify(mpctx, mpctx->opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
 }
@@ -142,6 +152,8 @@ void unpause_player(struct MPContext *mpctx)
         ao_resume(mpctx->ao);
     if (mpctx->video_out)
         vo_set_paused(mpctx->video_out, false);
+
+    mp_wakeup_core(mpctx);
 
     (void)get_relative_time(mpctx);     // ignore time that passed during pause
 
@@ -314,7 +326,7 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         mpctx->stop_play = KEEP_PLAYING;
 
     mpctx->start_timestamp = mp_time_sec();
-    mpctx->sleeptime = 0;
+    mp_wakeup_core(mpctx);
 
     mp_notify(mpctx, MPV_EVENT_SEEK, NULL);
     mp_notify(mpctx, MPV_EVENT_TICK, NULL);
@@ -330,6 +342,8 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
                 enum seek_precision exact, int flags)
 {
     struct seek_params *seek = &mpctx->seek;
+
+    mp_wakeup_core(mpctx);
 
     if (mpctx->stop_play == AT_END_OF_FILE)
         mpctx->stop_play = KEEP_PLAYING;
@@ -537,7 +551,7 @@ static void handle_osd_redraw(struct MPContext *mpctx)
     // Don't redraw immediately during a seek (makes it significantly slower).
     bool use_video = mpctx->vo_chain && !mpctx->vo_chain->is_coverart;
     if (use_video && mp_time_sec() - mpctx->start_timestamp < 0.1) {
-        mpctx->sleeptime = MPMIN(mpctx->sleeptime, 0.1);
+        mp_set_timeout(mpctx, 0.1);
         return;
     }
     bool want_redraw = osd_query_and_reset_want_redraw(mpctx->osd) ||
@@ -545,7 +559,7 @@ static void handle_osd_redraw(struct MPContext *mpctx)
     if (!want_redraw)
         return;
     vo_redraw(mpctx->video_out);
-    mpctx->sleeptime = 0;
+    mp_wakeup_core(mpctx);
 }
 
 static void handle_pause_on_low_cache(struct MPContext *mpctx)
@@ -581,7 +595,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
                     unpause_player(mpctx);
                 force_update = true;
             }
-            mpctx->sleeptime = MPMIN(mpctx->sleeptime, 0.2);
+            mp_set_timeout(mpctx, 0.2);
         } else {
             if (opts->cache_pausing && s.underrun) {
                 bool prev_paused_user = opts->pause;
@@ -606,10 +620,8 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
             mpctx->next_cache_update = busy ? now + 0.25 : 0;
             force_update = true;
         }
-        if (mpctx->next_cache_update > 0) {
-            mpctx->sleeptime =
-                MPMIN(mpctx->sleeptime, mpctx->next_cache_update - now);
-        }
+        if (mpctx->next_cache_update > 0)
+            mp_set_timeout(mpctx, mpctx->next_cache_update - now);
     }
 
     if (mpctx->cache_buffer != cache_buffer) {
@@ -645,7 +657,7 @@ static void handle_heartbeat_cmd(struct MPContext *mpctx)
             mpctx->next_heartbeat = now + opts->heartbeat_interval;
             (void)system(opts->heartbeat_cmd);
         }
-        mpctx->sleeptime = MPMIN(mpctx->sleeptime, mpctx->next_heartbeat - now);
+        mp_set_timeout(mpctx, mpctx->next_heartbeat - now);
     }
 }
 
@@ -668,7 +680,7 @@ static void handle_cursor_autohide(struct MPContext *mpctx)
     }
 
     if (mpctx->mouse_timer > now) {
-        mpctx->sleeptime = MPMIN(mpctx->sleeptime, mpctx->mouse_timer - now);
+        mp_set_timeout(mpctx, mpctx->mouse_timer - now);
     } else {
         mouse_cursor_visible = false;
     }
@@ -915,7 +927,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
     if (mpctx->video_status == STATUS_READY) {
         mpctx->video_status = STATUS_PLAYING;
         get_relative_time(mpctx);
-        mpctx->sleeptime = 0;
+        mp_wakeup_core(mpctx);
     }
 
     if (mpctx->audio_status == STATUS_READY) {
@@ -953,7 +965,7 @@ static void handle_playback_restart(struct MPContext *mpctx)
             }
         }
         mpctx->playing_msg_shown = true;
-        mpctx->sleeptime = 0;
+        mp_wakeup_core(mpctx);
         mpctx->ab_loop_clip = mpctx->playback_pts < opts->ab_loop[1];
         MP_VERBOSE(mpctx, "playback restart complete\n");
     }
@@ -1105,7 +1117,7 @@ void idle_loop(struct MPContext *mpctx)
         if (need_reinit) {
             uninit_audio_out(mpctx);
             handle_force_window(mpctx, true);
-            mpctx->sleeptime = 0;
+            mp_wakeup_core(mpctx);
             mp_notify(mpctx, MPV_EVENT_IDLE, NULL);
             need_reinit = false;
         }

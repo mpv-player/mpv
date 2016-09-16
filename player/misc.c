@@ -201,7 +201,7 @@ void error_on_track(struct MPContext *mpctx, struct track *track)
         if (mpctx->error_playing >= 0)
             mpctx->error_playing = MPV_ERROR_NOTHING_TO_PLAY;
     }
-    mpctx->sleeptime = 0;
+    mp_wakeup_core(mpctx);
 }
 
 int stream_dump(struct MPContext *mpctx, const char *source_filename)
@@ -222,7 +222,8 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
                    (long long int)pos, (long long int)size);
         }
         stream_fill_buffer(stream);
-        mp_process_input(mpctx);
+        mp_wakeup_core(mpctx); // don't actually sleep
+        mp_idle(mpctx); // but process input
     }
 
     free_stream(stream);
@@ -295,5 +296,6 @@ int mpctx_run_reentrant(struct MPContext *mpctx, void (*thread_fn)(void *arg),
     pthread_join(thread, NULL);
 done:
     pthread_mutex_destroy(&args.mutex);
+    mp_wakeup_core(mpctx); // avoid lost wakeups during waiting
     return success ? 0 : -1;
 }

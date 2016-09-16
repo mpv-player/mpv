@@ -473,6 +473,7 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
     }
 
     mp_notify(mpctx, MPV_EVENT_TRACK_SWITCHED, NULL);
+    mp_wakeup_core(mpctx);
 
     talloc_free(mpctx->track_layout_hash);
     mpctx->track_layout_hash = talloc_steal(mpctx, track_layout_hash(mpctx));
@@ -1329,4 +1330,5 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
     mpctx->playlist->current_was_replaced = false;
     if (!mpctx->stop_play)
         mpctx->stop_play = PT_CURRENT_ENTRY;
+    mp_wakeup_core(mpctx);
 }

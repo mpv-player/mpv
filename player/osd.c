@@ -304,7 +304,7 @@ static bool set_osd_msg_va(struct MPContext *mpctx, int level, int time,
     mpctx->osd_show_pos = false;
     mpctx->osd_msg_next_duration = time / 1000.0;
     mpctx->osd_force_update = true;
-    mpctx->sleeptime = 0;
+    mp_wakeup_core(mpctx);
     if (mpctx->osd_msg_next_duration <= 0)
         mpctx->osd_msg_visible = mp_time_sec();
     return true;
@@ -330,7 +330,6 @@ void set_osd_bar(struct MPContext *mpctx, int type,
         return;
 
     mpctx->osd_visible = mp_time_sec() + opts->osd_duration / 1000.0;
-    mpctx->sleeptime = 0;
     mpctx->osd_progbar.type = type;
     mpctx->osd_progbar.value = (val - min) / (max - min);
     mpctx->osd_progbar.num_stops = 0;
@@ -340,6 +339,7 @@ void set_osd_bar(struct MPContext *mpctx, int type,
                          mpctx->osd_progbar.num_stops, pos);
     }
     osd_set_progbar(mpctx->osd, &mpctx->osd_progbar);
+    mp_wakeup_core(mpctx);
 }
 
 // Update a currently displayed bar of the same type, without resetting the
@@ -387,6 +387,7 @@ void set_osd_bar_chapters(struct MPContext *mpctx, int type)
         }
     }
     osd_set_progbar(mpctx->osd, &mpctx->osd_progbar);
+    mp_wakeup_core(mpctx);
 }
 
 // osd_function is the symbol appearing in the video status, such as OSD_PLAY
@@ -397,7 +398,7 @@ void set_osd_function(struct MPContext *mpctx, int osd_function)
     mpctx->osd_function = osd_function;
     mpctx->osd_function_visible = mp_time_sec() + opts->osd_duration / 1000.0;
     mpctx->osd_force_update = true;
-    mpctx->sleeptime = 0;
+    mp_wakeup_core(mpctx);
 }
 
 void get_current_osd_sym(struct MPContext *mpctx, char *buf, size_t buf_size)
@@ -504,7 +505,7 @@ void update_osd_msg(struct MPContext *mpctx)
         double delay = 0.050; // update the OSD at most this often
         double diff = now - mpctx->osd_last_update;
         if (diff < delay) {
-            mpctx->sleeptime = MPMIN(mpctx->sleeptime, delay - diff);
+            mp_set_timeout(mpctx, delay - diff);
             return;
         }
     }
@@ -515,7 +516,7 @@ void update_osd_msg(struct MPContext *mpctx)
     if (mpctx->osd_visible) {
         double sleep = mpctx->osd_visible - now;
         if (sleep > 0) {
-            mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleep);
+            mp_set_timeout(mpctx, sleep);
             mpctx->osd_idle_update = true;
         } else {
             mpctx->osd_visible = 0;
@@ -527,7 +528,7 @@ void update_osd_msg(struct MPContext *mpctx)
     if (mpctx->osd_function_visible) {
         double sleep = mpctx->osd_function_visible - now;
         if (sleep > 0) {
-            mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleep);
+            mp_set_timeout(mpctx, sleep);
             mpctx->osd_idle_update = true;
         } else {
             mpctx->osd_function_visible = 0;
@@ -545,7 +546,7 @@ void update_osd_msg(struct MPContext *mpctx)
     if (mpctx->osd_msg_visible) {
         double sleep = mpctx->osd_msg_visible - now;
         if (sleep > 0) {
-            mpctx->sleeptime = MPMIN(mpctx->sleeptime, sleep);
+            mp_set_timeout(mpctx, sleep);
             mpctx->osd_idle_update = true;
         } else {
             talloc_free(mpctx->osd_msg_text);

@@ -316,6 +316,7 @@ static int mp_property_playback_speed(void *ctx, struct m_property *prop,
     case M_PROPERTY_SET: {
         mpctx->opts->playback_speed = *(double *)arg;
         update_playback_speed(mpctx);
+        mp_wakeup_core(mpctx);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_PRINT:
@@ -864,6 +865,7 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
                     return M_PROPERTY_UNAVAILABLE;
                 if (!mpctx->stop_play)
                     mpctx->stop_play = PT_NEXT_ENTRY;
+                mp_wakeup_core(mpctx);
             }
         } else {
             double pts = chapter_start_time(mpctx, chapter);
@@ -949,6 +951,7 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
             mpctx->opts->edition_id = edition;
             if (!mpctx->stop_play)
                 mpctx->stop_play = PT_RELOAD_FILE;
+            mp_wakeup_core(mpctx);;
         }
         return M_PROPERTY_OK;
     }
@@ -1135,6 +1138,7 @@ static int mp_property_angle(void *ctx, struct m_property *prop,
 
         reset_audio_state(mpctx);
         reset_video_state(mpctx);
+        mp_wakeup_core(mpctx);
 
         return ris == STREAM_OK ? M_PROPERTY_OK : M_PROPERTY_ERROR;
     case M_PROPERTY_GET_TYPE: {
@@ -1819,6 +1823,7 @@ static int mp_property_audio_delay(void *ctx, struct m_property *prop,
         mpctx->opts->audio_delay = *(float *)arg;
         if (mpctx->ao_chain && mpctx->vo_chain)
             mpctx->delay += mpctx->opts->audio_delay - delay;
+        mp_wakeup_core(mpctx);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(mpctx, prop, action, arg);
@@ -1981,6 +1986,7 @@ static int property_switch_track(struct m_property *prop, int action, void *arg,
             track = mp_track_by_tid(mpctx, type, *(int *)arg);
             mp_switch_track_n(mpctx, order, type, track, FLAG_MARK_SELECTION);
             print_track_list(mpctx, "Track switched:");
+            mp_wakeup_core(mpctx);
         } else {
             mpctx->opts->stream_id[order][type] = *(int *)arg;
         }
@@ -2918,8 +2924,10 @@ static int property_osd_helper(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (action == M_PROPERTY_SET)
+    if (action == M_PROPERTY_SET) {
         osd_changed(mpctx->osd);
+        mp_wakeup_core(mpctx);
+    }
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
@@ -3360,6 +3368,7 @@ static int mp_property_ab_loop(void *ctx, struct m_property *prop,
         }
         // Update if visible
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
+        mp_wakeup_core(mpctx);
     }
     return r;
 }
@@ -3548,6 +3557,7 @@ static int access_options(struct m_property_action_arg *ka, bool local,
             return M_PROPERTY_ERROR;
         int flags = M_SETOPT_RUNTIME | (local ? M_SETOPT_BACKUP : 0);
         int r = m_config_set_option_raw(mpctx->mconfig, opt, ka->arg, flags);
+        mp_wakeup_core(mpctx);
         return r < 0 ? M_PROPERTY_ERROR : M_PROPERTY_OK;
     }
     case M_PROPERTY_GET_TYPE:
@@ -4886,6 +4896,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         mpctx->stop_play = PT_QUIT;
         mpctx->quit_custom_rc = cmd->args[0].v.i;
         mpctx->has_quit_custom_rc = true;
+        mp_wakeup_core(mpctx);
         break;
 
     case MP_CMD_PLAYLIST_NEXT:
@@ -4951,6 +4962,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             set_osd_msg(mpctx, osdl, osd_duration, "OSD level: %d", opts->osd_level);
         if (opts->osd_level == 0)
             set_osd_msg(mpctx, 0, 0, "");
+        mp_wakeup_core(mpctx);
         break;
     }
 
@@ -4990,6 +5002,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             mp_set_playlist_entry(mpctx, entry);
         }
         mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
+        mp_wakeup_core(mpctx);
         break;
     }
 
@@ -5009,6 +5022,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                 mp_set_playlist_entry(mpctx, new ? new : mpctx->playlist->first);
 
             mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
+            mp_wakeup_core(mpctx);
         } else {
             MP_ERR(mpctx, "Unable to load playlist %s.\n", filename);
             return -1;
@@ -5030,6 +5044,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             playlist_remove(mpctx->playlist, e);
         }
         mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
+        mp_wakeup_core(mpctx);
         break;
     }
 
@@ -5045,6 +5060,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             mpctx->stop_play = PT_CURRENT_ENTRY;
         playlist_remove(mpctx->playlist, e);
         mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
+        mp_wakeup_core(mpctx);
         break;
     }
 
@@ -5069,6 +5085,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         playlist_clear(mpctx->playlist);
         if (mpctx->stop_play != PT_QUIT)
             mpctx->stop_play = PT_STOP;
+        mp_wakeup_core(mpctx);
         break;
 
     case MP_CMD_SHOW_PROGRESS:
@@ -5076,6 +5093,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
                 (msg_osd ? OSD_SEEK_INFO_TEXT : 0) |
                 (bar_osd ? OSD_SEEK_INFO_BAR : 0);
         mpctx->osd_force_update = true;
+        mp_wakeup_core(mpctx);
         break;
 
     case MP_CMD_TV_LAST_CHANNEL: {

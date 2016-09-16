@@ -706,7 +706,7 @@ static int video_feed_async_filter(struct MPContext *mpctx)
 
     if (vf_needs_input(vf) < 1)
         return 0;
-    mpctx->sleeptime = 0; // retry until done
+    mp_wakeup_core(mpctx); // retry until done
     return video_decode_and_filter(mpctx);
 }
 
@@ -1376,7 +1376,7 @@ void write_video(struct MPContext *mpctx)
 
         if (mpctx->video_status == STATUS_DRAINING) {
             mpctx->time_frame -= get_relative_time(mpctx);
-            mpctx->sleeptime = MPMIN(mpctx->sleeptime, mpctx->time_frame);
+            mp_set_timeout(mpctx, mpctx->time_frame);
             if (mpctx->time_frame <= 0) {
                 MP_VERBOSE(mpctx, "video EOF reached\n");
                 mpctx->video_status = STATUS_EOF;
@@ -1391,7 +1391,7 @@ void write_video(struct MPContext *mpctx)
         mpctx->video_status = STATUS_PLAYING;
 
     if (r != VD_NEW_FRAME) {
-        mpctx->sleeptime = 0; // Decode more in next iteration.
+        mp_wakeup_core(mpctx); // Decode more in next iteration.
         return;
     }
 
@@ -1519,7 +1519,7 @@ void write_video(struct MPContext *mpctx)
             mpctx->max_frames--;
     }
 
-    mpctx->sleeptime = 0;
+    mp_wakeup_core(mpctx);
     return;
 
 error:
@@ -1527,5 +1527,5 @@ error:
     uninit_video_chain(mpctx);
     error_on_track(mpctx, track);
     handle_force_window(mpctx, true);
-    mpctx->sleeptime = 0;
+    mp_wakeup_core(mpctx);
 }

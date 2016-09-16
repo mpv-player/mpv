@@ -97,6 +97,7 @@ static void wait_loaded(struct MPContext *mpctx)
 {
     while (!mp_clients_all_initialized(mpctx))
         mp_idle(mpctx);
+    mp_wakeup_core(mpctx); // avoid lost wakeups during waiting
 }
 
 static void mp_load_script(struct MPContext *mpctx, const char *fname)

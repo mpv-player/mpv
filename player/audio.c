@@ -334,7 +334,7 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
     if (!mp_audio_config_valid(&in_format)) {
         // We don't know the audio format yet - so configure it later as we're
         // resyncing. fill_audio_buffers() will call this function again.
-        mpctx->sleeptime = 0;
+        mp_wakeup_core(mpctx);
         return;
     }
 
@@ -427,7 +427,7 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
                     goto init_error;
                 reset_audio_state(mpctx);
                 ao_c->input_format = (struct mp_audio){0};
-                mpctx->sleeptime = 0; // reinit with new format next time
+                mp_wakeup_core(mpctx); // reinit with new format next time
                 return;
             }
 
@@ -550,7 +550,7 @@ void reinit_audio_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
         mp_audio_buffer_reinit(ao_c->ao_buffer, &fmt);
     }
 
-    mpctx->sleeptime = 0;
+    mp_wakeup_core(mpctx);
     return;
 
 init_error:
@@ -901,20 +901,20 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
             return;
         }
         reinit_audio_filters_and_output(mpctx);
-        mpctx->sleeptime = 0;
+        mp_wakeup_core(mpctx);
         return; // try again next iteration
     }
 
     if (ao_c->ao_resume_time > mp_time_sec()) {
         double remaining = ao_c->ao_resume_time - mp_time_sec();
-        mpctx->sleeptime = MPMIN(mpctx->sleeptime, remaining);
+        mp_set_timeout(mpctx, remaining);
         return;
     }
 
     if (mpctx->vo_chain && ao_c->pts_reset) {
         MP_VERBOSE(mpctx, "Reset playback due to audio timestamp reset.\n");
         reset_playback_state(mpctx);
-        mpctx->sleeptime = 0;
+        mp_wakeup_core(mpctx);
         return;
     }
 
@@ -965,7 +965,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         if (status == AD_WAIT)
             return;
         if (status == AD_NO_PROGRESS) {
-            mpctx->sleeptime = 0;
+            mp_wakeup_core(mpctx);
             return;
         }
         if (status == AD_NEW_FMT) {
@@ -976,11 +976,11 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
             if (mpctx->opts->gapless_audio < 1)
                 uninit_audio_out(mpctx);
             reinit_audio_filters_and_output(mpctx);
-            mpctx->sleeptime = 0;
+            mp_wakeup_core(mpctx);
             return; // retry on next iteration
         }
         if (status == AD_ERR)
-            mpctx->sleeptime = 0;
+            mp_wakeup_core(mpctx);
         working = true;
     }
 
@@ -1031,7 +1031,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         if (status != AD_OK && !mp_audio_buffer_samples(ao_c->ao_buffer))
             mpctx->audio_status = STATUS_EOF;
         if (working || end_sync)
-            mpctx->sleeptime = 0;
+            mp_wakeup_core(mpctx);
         return; // continue on next iteration
     }
 
@@ -1089,7 +1089,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
         if (ao_eof_reached(mpctx->ao) || opts->gapless_audio) {
             mpctx->audio_status = STATUS_EOF;
             if (!was_eof)
-                mpctx->sleeptime = 0;
+                mp_wakeup_core(mpctx);
         }
     }
 }
