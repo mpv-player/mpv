@@ -182,7 +182,6 @@ void mp_destroy(struct MPContext *mpctx)
         cas_terminal_owner(mpctx, NULL);
     }
 
-    mp_dispatch_set_wakeup_fn(mpctx->dispatch, NULL, NULL);
     mp_input_uninit(mpctx->input);
 
     uninit_libav(mpctx->global);
@@ -356,7 +355,6 @@ struct MPContext *mp_create(void)
 #endif
 
     mp_input_set_cancel(mpctx->input, mpctx->playback_abort);
-    mp_dispatch_set_wakeup_fn(mpctx->dispatch, wakeup_playloop, mpctx);
 
     return mpctx;
 }

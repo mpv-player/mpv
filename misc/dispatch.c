@@ -122,6 +122,10 @@ static void mp_dispatch_append(struct mp_dispatch_queue *queue,
     // Wake up the main thread; note that other threads might wait on this
     // condition for reasons, so broadcast the condition.
     pthread_cond_broadcast(&queue->cond);
+    // No wakeup callback -> assume mp_dispatch_queue_process() needs to be
+    // interrupted instead.
+    if (!queue->wakeup_fn)
+        queue->interrupted = true;
     pthread_mutex_unlock(&queue->lock);
     if (queue->wakeup_fn)
         queue->wakeup_fn(queue->wakeup_ctx);
