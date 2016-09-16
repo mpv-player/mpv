@@ -146,12 +146,6 @@ void osd_free(struct osd_state *osd)
     talloc_free(osd);
 }
 
-void osd_changed_unlocked(struct osd_state *osd)
-{
-    osd->want_redraw = true;
-    osd->want_redraw_notification = true;
-}
-
 void osd_set_text(struct osd_state *osd, const char *text)
 {
     pthread_mutex_lock(&osd->lock);
@@ -161,7 +155,8 @@ void osd_set_text(struct osd_state *osd, const char *text)
     if (strcmp(osd_obj->text, text) != 0) {
         talloc_free(osd_obj->text);
         osd_obj->text = talloc_strdup(osd_obj, text);
-        osd_changed_unlocked(osd);
+        osd_obj->osd_changed = true;
+        osd->want_redraw_notification = true;
     }
     pthread_mutex_unlock(&osd->lock);
 }
@@ -174,7 +169,7 @@ void osd_set_sub(struct osd_state *osd, int index, struct dec_sub *dec_sub)
         obj->sub = dec_sub;
         obj->vo_change_id += 1;
     }
-    osd_changed_unlocked(osd);
+    osd->want_redraw_notification = true;
     pthread_mutex_unlock(&osd->lock);
 }
 
@@ -203,7 +198,8 @@ void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s)
     MP_TARRAY_GROW(osd_obj, osd_obj->progbar_state.stops, s->num_stops);
     memcpy(osd_obj->progbar_state.stops, s->stops,
            sizeof(osd_obj->progbar_state.stops[0]) * s->num_stops);
-    osd_changed_unlocked(osd);
+    osd_obj->osd_changed = true;
+    osd->want_redraw_notification = true;
     pthread_mutex_unlock(&osd->lock);
 }
 
@@ -212,7 +208,7 @@ void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs)
     pthread_mutex_lock(&osd->lock);
     osd->objs[OSDTYPE_EXTERNAL2]->external2 = imgs;
     osd->objs[OSDTYPE_EXTERNAL2]->vo_change_id += 1;
-    osd_changed_unlocked(osd);
+    osd->want_redraw_notification = true;
     pthread_mutex_unlock(&osd->lock);
 }
 
@@ -221,7 +217,6 @@ static void check_obj_resize(struct osd_state *osd, struct mp_osd_res res,
 {
     if (!osd_res_equals(res, obj->vo_res)) {
         obj->vo_res = res;
-        osd->want_redraw = true;
         mp_client_broadcast_event(mp_client_api_get_core(osd->global->client_api),
                                   MP_EVENT_WIN_RESIZE, NULL);
     }
@@ -324,8 +319,12 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
             sub_unlock(obj->sub);
     }
 
+    // If this is called with OSD_DRAW_SUB_ONLY or OSD_DRAW_OSD_ONLY set, assume
+    // it will always draw the complete OSD by doing multiple osd_draw() calls.
+    // OSD_DRAW_SUB_FILTER on the other hand is an evil special-case, and we
+    // must not reset the flag when it happens.
     if (!(draw_flags & OSD_DRAW_SUB_FILTER))
-        osd->want_redraw = osd->want_redraw_notification = false;
+        osd->want_redraw_notification = false;
 
     pthread_mutex_unlock(&osd->lock);
 }
@@ -383,10 +382,12 @@ struct mp_osd_res osd_res_from_image_params(const struct mp_image_params *p)
     };
 }
 
+// Typically called to react to OSD style changes.
 void osd_changed(struct osd_state *osd)
 {
     pthread_mutex_lock(&osd->lock);
-    osd_changed_unlocked(osd);
+    osd->objs[OSDTYPE_OSD]->osd_changed = true;
+    osd->want_redraw_notification = true;
     pthread_mutex_unlock(&osd->lock);
 }
 

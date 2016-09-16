@@ -29,9 +29,8 @@ struct osd_object {
     bool is_sub;
 
     // OSDTYPE_OSD
+    bool osd_changed;
     char *text;
-
-    // OSDTYPE_OSD
     struct osd_progbar_state progbar_state;
 
     // OSDTYPE_SUB/OSDTYPE_SUB2
@@ -78,7 +77,5 @@ struct osd_state {
 
     struct mp_draw_sub_cache *draw_cache;
 };
-
-void osd_changed_unlocked(struct osd_state *osd);
 
 #endif
