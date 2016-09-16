@@ -249,7 +249,7 @@ void mp_dispatch_queue_process(struct mp_dispatch_queue *queue, double timeout)
         } else if (wait > 0 && !queue->interrupted) {
             struct timespec ts = mp_time_us_to_timespec(wait);
             if (pthread_cond_timedwait(&queue->cond, &queue->lock, &ts))
-                break;
+                wait = 0;
         } else {
             break;
         }
