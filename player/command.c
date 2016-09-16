@@ -190,7 +190,7 @@ void mp_hook_run(struct MPContext *mpctx, char *client, char *type)
     next->active = true;
     if (!send_hook_msg(mpctx, next, "hook_run")) {
         hook_remove(mpctx, index);
-        mp_input_wakeup(mpctx->input); // repeat next iteration to finish
+        mp_wakeup_core(mpctx); // repeat next iteration to finish
     }
 }
 
@@ -1742,14 +1742,24 @@ static void reload_audio_output(struct MPContext *mpctx)
     ao_request_reload(mpctx->ao);
 }
 
+static void create_hotplug(struct MPContext *mpctx)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+
+    if (!cmd->hotplug) {
+        cmd->hotplug = ao_hotplug_create(mpctx->global, mp_wakeup_core_cb,
+                                         mpctx);
+    }
+}
+
 static int mp_property_audio_device(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     struct MPContext *mpctx = ctx;
     struct command_ctx *cmd = mpctx->command_ctx;
     if (action == M_PROPERTY_PRINT) {
-        if (!cmd->hotplug)
-            cmd->hotplug = ao_hotplug_create(mpctx->global, mpctx->input);
+        create_hotplug(mpctx);
+
         struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug);
         for (int n = 0; n < list->num_devices; n++) {
             struct ao_device_desc *dev = &list->devices[n];
@@ -1770,8 +1780,7 @@ static int mp_property_audio_devices(void *ctx, struct m_property *prop,
 {
     struct MPContext *mpctx = ctx;
     struct command_ctx *cmd = mpctx->command_ctx;
-    if (!cmd->hotplug)
-        cmd->hotplug = ao_hotplug_create(mpctx->global, mpctx->input);
+    create_hotplug(mpctx);
 
     struct ao_device_list *list = ao_hotplug_get_device_list(cmd->hotplug);
     return m_property_read_list(action, arg, list->num_devices,
@@ -1790,8 +1799,7 @@ static int mp_property_ao_detected_device(void *ctx,struct m_property *prop,
 {
     struct MPContext *mpctx = ctx;
     struct command_ctx *cmd = mpctx->command_ctx;
-    if (!cmd->hotplug)
-        cmd->hotplug = ao_hotplug_create(mpctx->global, mpctx->input);
+    create_hotplug(mpctx);
 
     const char *d = ao_hotplug_get_detected_device(cmd->hotplug);
     return m_property_strdup_ro(action, arg, d);

@@ -204,7 +204,7 @@ void reselect_demux_stream(struct MPContext *mpctx, struct track *track)
 static void wakeup_demux(void *pctx)
 {
     struct MPContext *mpctx = pctx;
-    mp_input_wakeup(mpctx->input);
+    mp_wakeup_core(mpctx);
 }
 
 static void enable_demux_thread(struct MPContext *mpctx, struct demuxer *demux)

@@ -305,7 +305,7 @@ static void ao_play_data(struct ao *ao)
     bool more = needed >= (r == space ? ao->device_buffer / 4 : 1) && !stuck &&
                 !(flags & AOPLAY_FINAL_CHUNK);
     if (more)
-        mp_input_wakeup(ao->input_ctx); // request more data
+        ao->wakeup_cb(ao->wakeup_ctx); // request more data
     MP_TRACE(ao, "in=%d flags=%d space=%d r=%d wa/pl=%d/%d needed=%d more=%d\n",
              max, flags, space, r, p->wait_on_ao, p->still_playing, needed, more);
 }
@@ -347,7 +347,7 @@ static void *playthread(void *arg)
                 }
 
                 if (was_playing && !p->still_playing)
-                    mp_input_wakeup(ao->input_ctx);
+                    ao->wakeup_cb(ao->wakeup_ctx);
                 pthread_cond_signal(&p->wakeup); // for draining
 
                 if (p->still_playing && timeout > 0) {

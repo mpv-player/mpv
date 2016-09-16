@@ -397,8 +397,8 @@ static void reinit_audio_filters_and_output(struct MPContext *mpctx)
 
         mp_audio_set_channels(&afs->output, &afs->output.channels);
 
-        mpctx->ao = ao_init_best(mpctx->global, ao_flags, mpctx->input,
-                                 mpctx->encode_lavc_ctx, afs->output.rate,
+        mpctx->ao = ao_init_best(mpctx->global, ao_flags, mp_wakeup_core_cb,
+                                 mpctx, mpctx->encode_lavc_ctx, afs->output.rate,
                                  afs->output.format, afs->output.channels);
         ao_c->ao = mpctx->ao;
 

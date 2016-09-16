@@ -971,7 +971,7 @@ static int script_set_osd_ass(lua_State *L)
     if (!text[0])
         text = " "; // force external OSD initialization
     osd_set_external(ctx->mpctx->osd, ctx->client, res_x, res_y, (char *)text);
-    mp_input_wakeup(ctx->mpctx->input);
+    mp_wakeup_core(ctx->mpctx);
     return 0;
 }
 

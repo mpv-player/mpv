@@ -267,7 +267,7 @@ static void *thread_wrapper(void *pctx)
     pthread_mutex_lock(&args->mutex);
     args->done = true;
     pthread_mutex_unlock(&args->mutex);
-    mp_input_wakeup(args->mpctx->input); // this interrupts mp_idle()
+    mp_wakeup_core(args->mpctx); // this interrupts mp_idle()
     return NULL;
 }
 

@@ -424,8 +424,7 @@ void mpv_detach_destroy(mpv_handle *ctx)
             ctx = NULL;
             // shutdown_clients() sleeps to avoid wasting CPU.
             // mp_hook_test_completion() also relies on this a bit.
-            if (clients->mpctx->input)
-                mp_input_wakeup(clients->mpctx->input);
+            mp_wakeup_core(clients->mpctx);
             break;
         }
     }
@@ -759,8 +758,8 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
 
     pthread_mutex_lock(&ctx->lock);
 
-    if (!ctx->fuzzy_initialized && ctx->clients->mpctx->input)
-        mp_input_wakeup(ctx->clients->mpctx->input);
+    if (!ctx->fuzzy_initialized)
+        mp_wakeup_core(ctx->clients->mpctx);
     ctx->fuzzy_initialized = true;
 
     if (timeout < 0)

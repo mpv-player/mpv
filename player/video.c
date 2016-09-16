@@ -466,6 +466,8 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
             .osd = mpctx->osd,
             .encode_lavc_ctx = mpctx->encode_lavc_ctx,
             .opengl_cb_context = mpctx->gl_cb_ctx,
+            .wakeup_cb = mp_wakeup_core_cb,
+            .wakeup_ctx = mpctx,
         };
         mpctx->video_out = init_best_video_out(mpctx->global, &ex);
         if (!mpctx->video_out) {

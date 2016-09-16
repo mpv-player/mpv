@@ -85,7 +85,7 @@ struct mp_audio;
 
 struct ao *ao_init_best(struct mpv_global *global,
                         int init_flags,
-                        struct input_ctx *input_ctx,
+                        void (*wakeup_cb)(void *ctx), void *wakeup_ctx,
                         struct encode_lavc_context *encode_lavc_ctx,
                         int samplerate, int format, struct mp_chmap channels);
 void ao_uninit(struct ao *ao);
@@ -108,7 +108,8 @@ void ao_hotplug_event(struct ao *ao);
 
 struct ao_hotplug;
 struct ao_hotplug *ao_hotplug_create(struct mpv_global *global,
-                                     struct input_ctx *input_ctx);
+                                     void (*wakeup_cb)(void *ctx),
+                                     void *wakeup_ctx);
 void ao_hotplug_destroy(struct ao_hotplug *hp);
 bool ao_hotplug_check_update(struct ao_hotplug *hp);
 const char *ao_hotplug_get_detected_device(struct ao_hotplug *hp);

@@ -306,7 +306,7 @@ static int cfg_include(void *ctx, char *filename, int flags)
 void wakeup_playloop(void *ctx)
 {
     struct MPContext *mpctx = ctx;
-    mp_input_wakeup(mpctx->input);
+    mp_wakeup_core(mpctx);
 }
 
 struct MPContext *mp_create(void)

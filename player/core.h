@@ -511,6 +511,8 @@ void set_osd_bar_chapters(struct MPContext *mpctx, int type);
 
 // playloop.c
 void mp_wait_events(struct MPContext *mpctx, double sleeptime);
+void mp_wakeup_core(struct MPContext *mpctx);
+void mp_wakeup_core_cb(void *ctx);
 void mp_process_input(struct MPContext *mpctx);
 double get_relative_time(struct MPContext *mpctx);
 void reset_playback_state(struct MPContext *mpctx);

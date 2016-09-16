@@ -213,6 +213,8 @@ static void dealloc_vo(struct vo *vo)
 static struct vo *vo_create(bool probing, struct mpv_global *global,
                             struct vo_extra *ex, char *name, char **args)
 {
+    assert(ex->wakeup_cb);
+
     struct mp_log *log = mp_log_new(NULL, global->log, "vo");
     struct m_obj_desc desc;
     if (!m_obj_list_find(&desc, &vo_obj_list, bstr0(name))) {
@@ -311,6 +313,12 @@ void vo_destroy(struct vo *vo)
     mp_dispatch_run(in->dispatch, terminate_vo, vo);
     pthread_join(vo->in->thread, NULL);
     dealloc_vo(vo);
+}
+
+// Wakeup the playloop to queue new video frames etc.
+static void wakeup_core(struct vo *vo)
+{
+    vo->extra.wakeup_cb(vo->extra.wakeup_ctx);
 }
 
 // Drop timing information on discontinuities like seeking.
@@ -477,7 +485,7 @@ static void update_display_fps(struct vo *vo)
 
             // make sure to update the player
             in->queued_events |= VO_EVENT_WIN_STATE;
-            mp_input_wakeup(vo->input_ctx);
+            wakeup_core(vo);
         }
 
         in->nominal_vsync_interval = in->display_fps > 0 ? 1e6 / in->display_fps : 0;
@@ -795,7 +803,7 @@ static bool render_frame(struct vo *vo)
         in->hasframe_rendered = true;
         int64_t prev_drop_count = vo->in->drop_count;
         pthread_mutex_unlock(&in->lock);
-        mp_input_wakeup(vo->input_ctx); // core can queue new video now
+        wakeup_core(vo); // core can queue new video now
 
         MP_STATS(vo, "start video");
 
@@ -826,7 +834,7 @@ static bool render_frame(struct vo *vo)
     }
 
     pthread_cond_broadcast(&in->wakeup); // for vo_wait_frame()
-    mp_input_wakeup(vo->input_ctx);
+    wakeup_core(vo);
 
     got_frame = true;
 
@@ -906,12 +914,12 @@ static void *vo_thread(void *ptr)
                 wait_until = MPMIN(wait_until, in->wakeup_pts);
             } else {
                 in->wakeup_pts = 0;
-                mp_input_wakeup(vo->input_ctx);
+                wakeup_core(vo);
             }
         }
         if (vo->want_redraw && !in->want_redraw) {
             in->want_redraw = true;
-            mp_input_wakeup(vo->input_ctx);
+            wakeup_core(vo);
         }
         bool redraw = in->request_redraw;
         bool send_reset = in->send_reset;
@@ -1159,7 +1167,7 @@ void vo_event(struct vo *vo, int event)
     struct vo_internal *in = vo->in;
     pthread_mutex_lock(&in->lock);
     if ((in->queued_events & event & VO_EVENTS_USER) != (event & VO_EVENTS_USER))
-        mp_input_wakeup(vo->input_ctx);
+        wakeup_core(vo);
     if (event)
         wakeup_locked(vo);
     in->queued_events |= event;

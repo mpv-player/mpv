@@ -50,11 +50,26 @@
 #include "client.h"
 #include "command.h"
 
-// Wait until mp_input_wakeup(mpctx->input) is called, since the last time
+// Wait until mp_wakeup_core() is called, since the last time
 // mp_wait_events() was called. (But see mp_process_input().)
 void mp_wait_events(struct MPContext *mpctx, double sleeptime)
 {
     mp_input_wait(mpctx->input, sleeptime);
+}
+
+// Cause the playloop to run. This can be called from any thread. If called
+// from within the playloop itself, it will be run immediately again, instead
+// of going to sleep in the next mp_wait_events().
+void mp_wakeup_core(struct MPContext *mpctx)
+{
+    mp_input_wakeup(mpctx->input);
+}
+
+// Opaque callback variant of mp_wakeup_core().
+void mp_wakeup_core_cb(void *ctx)
+{
+    struct MPContext *mpctx = ctx;
+    mp_wakeup_core(mpctx);
 }
 
 // Process any queued input, whether it's user input, or requests from client
@@ -816,6 +831,8 @@ int handle_force_window(struct MPContext *mpctx, bool force)
             .osd = mpctx->osd,
             .encode_lavc_ctx = mpctx->encode_lavc_ctx,
             .opengl_cb_context = mpctx->gl_cb_ctx,
+            .wakeup_cb = mp_wakeup_core_cb,
+            .wakeup_ctx = mpctx,
         };
         mpctx->video_out = init_best_video_out(mpctx->global, &ex);
         if (!mpctx->video_out)
