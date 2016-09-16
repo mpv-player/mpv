@@ -63,6 +63,11 @@ Interface changes
       treating it as a hardware overlay (without applying GL filtering). Also
       to be changed in 0.22.0: the --fs flag will be reset to "no" by default
       (like on the other platforms).
+    - deprecate "resume" and "suspend" IPC commands. They will be completely
+      removed in 0.22.0.
+    - deprecate mp.suspend(), mp.resume(), mp.resume_all() Lua scripting
+      commands, as well as setting mp.use_suspend. They will be completely
+      removed in 0.22.0.
     - add almost all options to the property list, meaning you can change
       options without adding "options/" to the property name (a new section
       has been added to the manpage describing some conflicting behavior

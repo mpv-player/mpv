@@ -321,6 +321,8 @@ void mpv_suspend(mpv_handle *ctx)
 {
     bool do_suspend = false;
 
+    MP_WARN(ctx, "warning: mpv_suspend() is deprecated.\n");
+
     pthread_mutex_lock(&ctx->lock);
     if (ctx->suspend_count == INT_MAX) {
         MP_ERR(ctx, "suspend counter overflow");

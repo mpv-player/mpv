@@ -242,12 +242,16 @@ extra commands can also be used as part of the protocol:
     command.
 
 ``suspend``
+    Deprecated, will be removed completely in 0.21.0.
+
     Suspend the mpv main loop. There is a long-winded explanation of this in
     the C API function ``mpv_suspend()``. In short, this prevents the player
     from displaying the next video frame, so that you don't get blocked when
     trying to access the player.
 
 ``resume``
+    Deprecated, will be removed completely in 0.21.0.
+
     Undo one ``suspend`` call. ``suspend`` increments an internal counter, and
     ``resume`` decrements it. When 0 is reached, the player is actually resumed.
 

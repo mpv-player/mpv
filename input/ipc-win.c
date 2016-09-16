@@ -222,7 +222,6 @@ static void *client_thread(void *p)
     MP_VERBOSE(arg, "Client connected\n");
 
     mpv_set_wakeup_callback(arg->client, wakeup_cb, wakeup_event);
-    mpv_suspend(arg->client);
 
     // Do the first read operation on the pipe
     if ((ioerr = async_read(arg->client_h, buf, 4096, &ol))) {
@@ -233,11 +232,8 @@ static void *client_thread(void *p)
     while (1) {
         HANDLE handles[] = { wakeup_event, ol.hEvent };
         int n = WaitForMultipleObjects(2, handles, FALSE, 0);
-        if (n == WAIT_TIMEOUT) {
-            mpv_resume(arg->client);
+        if (n == WAIT_TIMEOUT)
             n = WaitForMultipleObjects(2, handles, FALSE, INFINITE);
-            mpv_suspend(arg->client);
-        }
 
         switch (n) {
         case WAIT_OBJECT_0: // wakeup_event

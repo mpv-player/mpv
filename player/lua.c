@@ -450,6 +450,8 @@ static int script_find_config_file(lua_State *L)
 static int script_suspend(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
+    MP_WARN(ctx, "mp.suspend() (possibly triggered by mp.use_suspend) is "
+                 "deprecated.\n");
     mpv_suspend(ctx->client);
     return 0;
 }

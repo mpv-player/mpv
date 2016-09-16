@@ -515,6 +515,11 @@ int mpv_load_config_file(mpv_handle *ctx, const char *filename);
  * mpv_suspend() is not allowed.
  *
  * Calling this on an uninitialized player (see mpv_create()) will deadlock.
+ *
+ * @deprecated This function, as well as mpv_resume(), are deprecated, and
+ *             will stop doing anything soon. Their semantics were never
+ *             well-defined, and their usefulness is extremely limited. The
+ *             calls will remain stubs in order to keep ABI compatibility.
  */
 void mpv_suspend(mpv_handle *ctx);
 

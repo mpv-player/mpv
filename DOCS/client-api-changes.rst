@@ -39,6 +39,8 @@ API changes
           mpv_initialize().
         - do not override the SIGPIPE signal handler anymore. This was done as
           workaround for the FFmpeg TLS code, which has been fixed long ago.
+        - deprecate mpv_suspend() and mpv_resume(). They will be stubbed out
+          in mpv 0.22.0.
  --- mpv 0.19.0 ---
  1.22   - add stream_cb API for custom protocols
  --- mpv 0.18.1 ---
