@@ -169,8 +169,11 @@ void osd_set_text(struct osd_state *osd, const char *text)
 void osd_set_sub(struct osd_state *osd, int index, struct dec_sub *dec_sub)
 {
     pthread_mutex_lock(&osd->lock);
-    if (index >= 0 && index < 2)
-        osd->objs[OSDTYPE_SUB + index]->sub = dec_sub;
+    if (index >= 0 && index < 2) {
+        struct osd_object *obj = osd->objs[OSDTYPE_SUB + index];
+        obj->sub = dec_sub;
+        obj->vo_change_id += 1;
+    }
     osd_changed_unlocked(osd);
     pthread_mutex_unlock(&osd->lock);
 }
@@ -208,6 +211,7 @@ void osd_set_external2(struct osd_state *osd, struct sub_bitmaps *imgs)
 {
     pthread_mutex_lock(&osd->lock);
     osd->objs[OSDTYPE_EXTERNAL2]->external2 = imgs;
+    osd->objs[OSDTYPE_EXTERNAL2]->vo_change_id += 1;
     osd_changed_unlocked(osd);
     pthread_mutex_unlock(&osd->lock);
 }
