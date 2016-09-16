@@ -2818,7 +2818,7 @@ void gl_video_resize(struct gl_video *p, int vp_w, int vp_h,
         mpgl_osd_resize(p->osd, p->osd_rect, p->image_params.stereo_out);
 
     if (p->hwdec && p->hwdec->driver->overlay_adjust)
-        p->hwdec->driver->overlay_adjust(p->hwdec, vp_w, vp_h, src, dst);
+        p->hwdec->driver->overlay_adjust(p->hwdec, vp_w, abs(vp_h), src, dst);
 }
 
 static struct voctrl_performance_entry gl_video_perfentry(struct gl_timer *t)
