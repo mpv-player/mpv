@@ -151,7 +151,7 @@ static const struct vd_lavc_hwdec mp_vd_lavc_mediacodec = {
 };
 #endif
 
-#if HAVE_CUDA_GL
+#if HAVE_CUDA_HWACCEL
 static const struct vd_lavc_hwdec mp_vd_lavc_cuda_copy = {
     .type = HWDEC_CUDA_COPY,
     .lavc_suffix = "_cuvid",
@@ -183,7 +183,7 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #if HAVE_ANDROID
     &mp_vd_lavc_mediacodec,
 #endif
-#if HAVE_CUDA_GL
+#if HAVE_CUDA_HWACCEL
     &mp_vd_lavc_cuda,
     &mp_vd_lavc_cuda_copy,
 #endif
