@@ -177,6 +177,7 @@ void mp_hook_run(struct MPContext *mpctx, char *client, char *type)
             if (h->active && strcmp(h->type, type) == 0) {
                 h->active = false;
                 found_current = true;
+                mp_wakeup_core(mpctx);
             }
         } else if (strcmp(h->type, type) == 0) {
             index = n;
