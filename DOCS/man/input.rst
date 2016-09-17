@@ -2082,6 +2082,33 @@ caveats with some properties (due to historical reasons):
     If a VO is created, this will return either the actual display FPS, or
     an invalid value, instead of the option value.
 
+``vf``, ``af``
+    If you set the properties during playback, and the filter chain fails to
+    reinitialize, the new value will be rejected. Setting the option or
+    setting the property outside of playback will always succeed/fail in the
+    same way. Also, there are no ``vf-add`` etc. properties, but you can use
+    the ``vf``/``af`` group of commands to achieve the same.
+
+``chapter``
+    While playback is *not* active, the property behaves like the option, and
+    you can set a chapter range. While playback is active, you can set only
+    the current chapter (to which the player will seek immediately).
+
+``volume``
+    When set as option, the maximum (set by ``--volume-max``) is not checked,
+    while when set as property, the maximum is enforced.
+
+``playlist``
+    The property is read-only and returns the current internal playlist. The
+    option is for loading playlist during command line parsing. For client API
+    uses, you should use the ``loadlist`` command instead.
+
+``playlist-pos``
+    The property refuses setting out of range values, restarts playback
+    immediately when writing to it, and does not know the ``no`` value (which
+    the option uses to indicate the default state, that is resuming a file
+    on the playlist and jumping to that instead of entry 0).
+
 ``audio-file``, ``sub-file``, ``external-file``
     These options/properties are actually lists of filenames. To make the
     command-line interface easier, each ``--audio-file=...`` option appends
