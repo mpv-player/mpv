@@ -65,6 +65,8 @@ typedef struct {
     int freq, srate, diseqc, tone;
     char pol;
     int tpid, dpid1, dpid2, progid, ca, pids[DMX_FILTER_SIZE], pids_cnt;
+    bool is_dvb_x2;
+    unsigned int delsys;
     int stream_id;
     int service_id;
     fe_spectral_inversion_t inv;
@@ -83,7 +85,7 @@ typedef struct {
 } dvb_channels_list;
 
 typedef struct {
-    int type;
+    int delsys;
     dvb_channels_list *list;
     char *name;
     int devno;
@@ -99,7 +101,6 @@ typedef struct {
     int demux_fd[3], demux_fds[DMX_FILTER_SIZE], demux_fds_cnt;
 
     dvb_channels_list *list;
-    int tuner_type;
     int is_on;
     int retry;
     int timeout;
