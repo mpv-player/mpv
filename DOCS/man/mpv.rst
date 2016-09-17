@@ -558,8 +558,7 @@ Some profiles are loaded automatically. The following example demonstrates this:
         profile-desc="profile for .flv files"
         vf=flip
 
-The profile name follows the schema ``type.name``, where type can be ``vo``
-to match the value the ``--vo`` option is set to, ``ao`` for ``--ao``,
+The profile name follows the schema ``type.name``, where type can be
 ``protocol`` for the input/output protocol in use (see ``--list-protocols``),
 and ``extension`` for the extension of the path of the currently played file
 (*not* the file format).
