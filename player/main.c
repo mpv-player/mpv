@@ -356,6 +356,9 @@ struct MPContext *mp_create(void)
 
     mp_input_set_cancel(mpctx->input, mpctx->playback_abort);
 
+    mpctx->mconfig->option_set_callback = mp_on_set_option;
+    mpctx->mconfig->option_set_callback_cb = mpctx;
+
     return mpctx;
 }
 

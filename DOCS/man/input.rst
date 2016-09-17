@@ -2066,10 +2066,14 @@ caveats with some properties (due to historical reasons):
     allows setting any track ID, and which tracks to enable is chosen at
     loading time.)
 
+    Option changes at runtime are affected by this as well.
+
 ``deinterlace``
     While video is active, this behaves differently from the option. It will
     never return the ``auto`` value (but the state as observed by the video
     chain). You cannot set ``auto`` either.
+
+    Option changes at runtime are affected by this as well.
 
 ``video-aspect``
     While video is active, always returns the effective aspect ratio.
@@ -2089,10 +2093,14 @@ caveats with some properties (due to historical reasons):
     same way. Also, there are no ``vf-add`` etc. properties, but you can use
     the ``vf``/``af`` group of commands to achieve the same.
 
+    Option changes at runtime are affected by this as well.
+
 ``chapter``
     While playback is *not* active, the property behaves like the option, and
     you can set a chapter range. While playback is active, you can set only
     the current chapter (to which the player will seek immediately).
+
+    Option changes at runtime are affected by this as well.
 
 ``volume``
     When set as option, the maximum (set by ``--volume-max``) is not checked,

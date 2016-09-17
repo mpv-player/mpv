@@ -77,6 +77,10 @@ typedef struct m_config {
     int (*includefunc)(void *ctx, char *filename, int flags);
     void *includefunc_ctx;
 
+    int (*option_set_callback)(void *ctx, struct m_config_option *co,
+                               void *data, int flags);
+    void *option_set_callback_cb;
+
     // For the command line parser
     int recursion_depth;
 
@@ -170,10 +174,12 @@ static inline int m_config_set_option0(struct m_config *config,
     return m_config_set_option(config, bstr0(name), bstr0(param));
 }
 
-// Similar to m_config_set_option_ext(), but set as data in its native format.
-// The type data points to is as in co->opt
 int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags);
+
+int m_config_set_option_raw_direct(struct m_config *config,
+                                   struct m_config_option *co,
+                                   void *data, int flags);
 
 // Similar to m_config_set_option_ext(), but set as data using mpv_node.
 struct mpv_node;
