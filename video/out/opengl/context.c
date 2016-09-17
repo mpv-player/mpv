@@ -114,7 +114,7 @@ int mpgl_validate_backend_opt(struct mp_log *log, const struct m_option *opt,
         mp_info(log, "    auto (autodetect)\n");
         for (int n = 0; n < MP_ARRAY_SIZE(backends); n++)
             mp_info(log, "    %s\n", backends[n]->name);
-        return M_OPT_EXIT - 1;
+        return M_OPT_EXIT;
     }
     char s[20];
     snprintf(s, sizeof(s), "%.*s", BSTR_P(param));

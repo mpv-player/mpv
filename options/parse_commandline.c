@@ -151,11 +151,10 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             if (mode == LOCAL)
                 flags |= M_SETOPT_BACKUP | M_SETOPT_CHECK_ONLY;
             int r = m_config_set_option_ext(config, p.arg, p.param, flags);
-            if (r <= M_OPT_EXIT) {
+            if (r == M_OPT_EXIT) {
                 ret = r;
                 goto err_out;
-            }
-            if (r < 0) {
+            } else if (r < 0) {
                 MP_FATAL(config, "Setting command line option '--%.*s=%.*s' failed.\n",
                          BSTR_P(p.arg), BSTR_P(p.param));
                 goto err_out;

@@ -392,7 +392,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         int r = m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
                                                mpctx->global, options);
         if (r < 0)
-            return r <= M_OPT_EXIT ? -2 : -1;
+            return r == M_OPT_EXIT ? -2 : -1;
         update_logging(mpctx);
     }
 

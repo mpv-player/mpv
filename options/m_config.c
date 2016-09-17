@@ -116,13 +116,13 @@ static int parse_profile(struct m_config *config, const struct m_option *opt,
         struct m_profile *p;
         if (!config->profiles) {
             MP_INFO(config, "No profiles have been defined.\n");
-            return M_OPT_EXIT - 1;
+            return M_OPT_EXIT;
         }
         MP_INFO(config, "Available profiles:\n");
         for (p = config->profiles; p; p = p->next)
             MP_INFO(config, "\t%s\t%s\n", p->name, p->desc ? p->desc : "");
         MP_INFO(config, "\n");
-        return M_OPT_EXIT - 1;
+        return M_OPT_EXIT;
     }
 
     char **list = NULL;
@@ -148,7 +148,7 @@ static int show_profile(struct m_config *config, bstr param)
         return M_OPT_MISSING_PARAM;
     if (!(p = m_config_get_profile(config, param))) {
         MP_ERR(config, "Unknown profile '%.*s'.\n", BSTR_P(param));
-        return M_OPT_EXIT - 1;
+        return M_OPT_EXIT;
     }
     if (!config->profile_depth)
         MP_INFO(config, "Profile %s: %s\n", p->name,
@@ -175,7 +175,7 @@ static int show_profile(struct m_config *config, bstr param)
     config->profile_depth--;
     if (!config->profile_depth)
         MP_INFO(config, "\n");
-    return M_OPT_EXIT - 1;
+    return M_OPT_EXIT;
 }
 
 static int list_options(struct m_config *config, bstr val, bool show_help)
@@ -814,7 +814,7 @@ static int parse_subopts(struct m_config *config, char *name, char *prefix,
             abort();
         r = m_config_parse_option(config,bstr0(n), bstr0(lst[2 * i + 1]), flags);
         if (r < 0) {
-            if (r > M_OPT_EXIT) {
+            if (r != M_OPT_EXIT) {
                 MP_ERR(config, "Error parsing suboption %s/%s (%s)\n",
                        name, lst[2 * i], m_option_strerror(r));
                 r = M_OPT_INVALID;
@@ -832,7 +832,7 @@ int m_config_parse_suboptions(struct m_config *config, char *name,
     if (!subopts || !*subopts)
         return 0;
     int r = parse_subopts(config, name, "", bstr0(subopts), 0);
-    if (r < 0 && r > M_OPT_EXIT) {
+    if (r < 0 && r != M_OPT_EXIT) {
         MP_ERR(config, "Error parsing suboption %s (%s)\n",
                name, m_option_strerror(r));
         r = M_OPT_INVALID;
@@ -844,7 +844,7 @@ int m_config_set_option_ext(struct m_config *config, struct bstr name,
                             struct bstr param, int flags)
 {
     int r = m_config_parse_option(config, name, param, flags);
-    if (r < 0 && r > M_OPT_EXIT) {
+    if (r < 0 && r != M_OPT_EXIT) {
         MP_ERR(config, "Error parsing option %.*s (%s)\n",
                BSTR_P(name), m_option_strerror(r));
         r = M_OPT_INVALID;

@@ -3535,7 +3535,7 @@ static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
     int r = 1;
     bool tscale = bstr_equals0(name, "tscale");
     if (bstr_equals0(param, "help")) {
-        r = M_OPT_EXIT - 1;
+        r = M_OPT_EXIT;
     } else {
         snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
         if (!handle_scaler_opt(s, tscale))
@@ -3564,7 +3564,7 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
     char s[20] = {0};
     int r = 1;
     if (bstr_equals0(param, "help")) {
-        r = M_OPT_EXIT - 1;
+        r = M_OPT_EXIT;
     } else {
         snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
         const struct filter_window *window = mp_find_filter_window(s);

@@ -2104,7 +2104,7 @@ static int parse_imgfmt(struct mp_log *log, const m_option_t *opt,
             mp_info(log, " %s", list[i]);
         mp_info(log, "\n");
         talloc_free(list);
-        return M_OPT_EXIT - 1;
+        return M_OPT_EXIT;
     }
 
     unsigned int fmt = mp_imgfmt_from_name(param, true);
@@ -2175,7 +2175,7 @@ static int parse_afmt(struct mp_log *log, const m_option_t *opt,
         for (int i = 1; i < AF_FORMAT_COUNT; i++)
             mp_info(log, " %s", af_fmt_to_str(i));
         mp_info(log, "\n");
-        return M_OPT_EXIT - 1;
+        return M_OPT_EXIT;
     }
 
     int fmt = 0;
@@ -2219,7 +2219,7 @@ static int parse_channels(struct mp_log *log, const m_option_t *opt,
             mp_info(log, "\nOther values:\n"
                          "    auto-safe\n");
         }
-        return M_OPT_EXIT - 1;
+        return M_OPT_EXIT;
     }
 
     bool auto_safe = bstr_equals0(param, "auto-safe");
@@ -2670,7 +2670,7 @@ static int get_obj_param(struct mp_log *log, bstr opt_name, bstr obj_name,
                        BSTR_P(opt_name), BSTR_P(obj_name), BSTR_P(name));
                 return M_OPT_UNKNOWN;
             }
-            if (r > M_OPT_EXIT)
+            if (r != M_OPT_EXIT)
                 mp_err(log, "Option %.*s: "
                        "Error while parsing %.*s parameter %.*s (%.*s)\n",
                        BSTR_P(opt_name), BSTR_P(obj_name), BSTR_P(name),
@@ -2696,7 +2696,7 @@ static int get_obj_param(struct mp_log *log, bstr opt_name, bstr obj_name,
         }
         r = m_config_set_option_ext(config, bstr0(opt), val, flags);
         if (r < 0) {
-            if (r > M_OPT_EXIT)
+            if (r != M_OPT_EXIT)
                 mp_err(log, "Option %.*s: "
                        "Error while parsing %.*s parameter %s (%.*s)\n",
                        BSTR_P(opt_name), BSTR_P(obj_name), opt, BSTR_P(val));
@@ -2776,7 +2776,7 @@ print_help: ;
         mp_warn(log, "Option %.*s: item %.*s doesn't exist.\n",
                BSTR_P(opt_name), BSTR_P(name));
     }
-    r = M_OPT_EXIT - 1;
+    r = M_OPT_EXIT;
 
 exit:
     free_str_list(&args);
@@ -2973,7 +2973,7 @@ static int parse_obj_settings_list(struct mp_log *log, const m_option_t *opt,
             }
         }
         mp_info(log, "\n");
-        return M_OPT_EXIT - 1;
+        return M_OPT_EXIT;
     }
 
     if (op == OP_CLR) {

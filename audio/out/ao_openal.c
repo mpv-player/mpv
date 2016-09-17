@@ -96,7 +96,7 @@ static int validate_device_opt(struct mp_log *log, const m_option_t *opt,
             mp_info(log, "  '%s'\n", list);
             list = list + strlen(list) + 1;
         }
-        return M_OPT_EXIT - 1;
+        return M_OPT_EXIT;
     }
     return 0;
 }

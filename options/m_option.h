@@ -417,8 +417,7 @@ struct m_option {
 // On success parsers return a number >= 0.
 //
 // To indicate that MPlayer should exit without playing anything,
-// parsers return M_OPT_EXIT minus the number of parameters they
-// consumed: \ref M_OPT_EXIT or \ref M_OPT_EXIT-1.
+// parsers return M_OPT_EXIT.
 //
 // On error one of the following (negative) error codes is returned:
 
@@ -442,8 +441,6 @@ struct m_option {
 #define M_OPT_PARSER_ERR        -6
 
 // Returned when MPlayer should exit. Used by various help stuff.
-/** M_OPT_EXIT must be the lowest number on this list.
- */
 #define M_OPT_EXIT              -7
 
 char *m_option_strerror(int code);
