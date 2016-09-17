@@ -691,6 +691,14 @@ Input Commands that are Possibly Subject to Change
 ``af-command "<label>" "<cmd>" "<args>"``
     Same as ``vf-command``, but for audio filters.
 
+``apply-profile "<name>"``
+    Apply the contents of a named profile. This is like using ``profile=name``
+    in a config file, except you can map it to a key binding to change it at
+    runtime.
+
+    There is no such thing as "unapplying" a profile - applying a profile
+    merely sets all option values listed within the profile.
+
 Undocumented commands: ``tv-last-channel`` (TV/DVB only),
 ``ao-reload`` (experimental/internal).
 
