@@ -65,7 +65,6 @@ typedef struct {
     int freq, srate, diseqc, tone;
     char pol;
     int tpid, dpid1, dpid2, progid, ca, pids[DMX_FILTER_SIZE], pids_cnt;
-    bool is_dvb_s2;
     int stream_id;
     int service_id;
     fe_spectral_inversion_t inv;
@@ -109,7 +108,7 @@ typedef struct {
     bool stream_used;
 } dvb_state_t;
 
-typedef struct dvb_params {
+typedef struct {
     struct mp_log *log;
 
     dvb_state_t *state;
@@ -122,10 +121,15 @@ typedef struct dvb_params {
     int cfg_full_transponder;
 } dvb_priv_t;
 
-#define TUNER_SAT       1
-#define TUNER_TER       2
-#define TUNER_CBL       3
-#define TUNER_ATSC      4
+
+#ifndef DVB_USE_S2API
+#    define SYS_DVBT                0
+#    define SYS_DVBT2               1
+#    define SYS_DVBC_ANNEX_AC       2
+#    define SYS_DVBS                3
+#    define SYS_DVBS2               4
+#    define SYS_ATSC                5
+#endif
 
 int dvb_step_channel(stream_t *, int);
 int dvb_set_channel(stream_t *, int, int);
