@@ -20,6 +20,15 @@ Interface changes
 ::
 
  --- mpv 0.21.0 ---
+    - setting certain options at runtime will now take care of updating them
+      property (see for example issue #3281). On the other hand, it will also
+      do runtime verification and reject option changes that do not work
+      (example: setting the "vf" option to a filter during playback, which fails
+      to initialize - the option value will remain at its old value). In general,
+      "set name value" should be mostly equivalent to "set options/name value"
+      in cases where the "name" property is not deprecated and "options/name"
+      exists - deviations from this are either bugs, or documented as caveats
+      in the "Inconsistencies between options and properties" manpage section.
     - deprecate _all_ --vo and --ao suboptions. Generally, all suboptions are
       replaced by global options, which do exactly the same. For example,
       "--vo=opengl:scale=nearest" turns into "--scale=nearest". In some cases,

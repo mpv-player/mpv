@@ -676,9 +676,11 @@ static int handle_set_opt_flags(struct m_config *config,
     return set ? 2 : 1;
 }
 
-// The type data points to is as in: co->opt
-int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
-                            void *data, int flags)
+// Unlike m_config_set_option_raw() this does not go through the property layer
+// via config.option_set_callback.
+int m_config_set_option_raw_direct(struct m_config *config,
+                                   struct m_config_option *co,
+                                   void *data, int flags)
 {
     if (!co)
         return M_OPT_UNKNOWN;
@@ -700,6 +702,24 @@ int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
     m_config_notify_change_co(config, co);
 
     return 0;
+}
+
+// Similar to m_config_set_option_ext(), but set as data in its native format.
+// This takes care of some details like sending change notifications.
+// The type data points to is as in: co->opt
+int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
+                            void *data, int flags)
+{
+    if (config->option_set_callback) {
+        int r = handle_set_opt_flags(config, co, flags);
+        if (r <= 1)
+            return r;
+
+        return config->option_set_callback(config->option_set_callback_cb,
+                                           co, data, flags);
+    } else {
+        return m_config_set_option_raw_direct(config, co, data, flags);
+    }
 }
 
 static int parse_subopts(struct m_config *config, char *name, char *prefix,

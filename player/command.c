@@ -126,6 +126,9 @@ static int edit_filters(struct MPContext *mpctx, struct mp_log *log,
 static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
                        struct m_obj_settings *new_chain);
 
+static int mp_property_do_silent(const char *name, int action, void *val,
+                                 struct MPContext *ctx);
+
 static void hook_remove(struct MPContext *mpctx, int index)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
@@ -254,6 +257,64 @@ static char *format_delay(double time)
     return talloc_asprintf(NULL, "%d ms", (int)lrint(time * 1000));
 }
 
+// Option-property bridge. This is used so that setting options via various
+// mechanisms (including command line parsing, config files, per-file options)
+// updates state associated with them. For that, they have to go through the
+// property layer. (Ideally, this would be the other way around, and there
+// would be per-option change handlers instead.)
+// Note that the property-option bridge sidesteps this, as we'd get infinite
+// recursion.
+int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flags)
+{
+    struct MPContext *mpctx = ctx;
+
+    // These options are too inconsistent as they could be pulled through the
+    // property layer. Ideally we'd remove these inconsistencies in the future,
+    // though the actual problem is compatibility to user-expected behavior.
+    // What matters is whether _write_ access is different - property read
+    // access is not used here.
+    // We're also fine with cases where the property restricts the writable
+    // value range if playback is active, but not otherwise.
+    // OK, restrict during playback: vid, aid, sid, deinterlace, video-aspect,
+    //   vf*, af*, chapter
+    // OK, is handled separately: playlist
+    // OK, does not conflict on low level: audio-file, sub-file, external-file
+    static const char *const no_property[] = {
+        "playlist-pos", // checks playlist bounds, "no" choice missing
+        "volume", // restricts to --volume-max
+        "demuxer", "idle", "length", "audio-samplerate", "audio-channels",
+        "audio-format", "fps", "cache", // different semantics
+        NULL
+    };
+
+    for (int n = 0; no_property[n]; n++) {
+        if (strcmp(co->name, no_property[n]) == 0)
+            goto direct_option;
+    }
+
+    // Normalize "vf*" to "vf"
+    const char *name = co->name;
+    bstr bname = bstr0(name);
+    char tmp[50];
+    if (bstr_eatend0(&bname, "*")) {
+        snprintf(tmp, sizeof(name), "%.*s", BSTR_P(bname));
+        name = tmp;
+    }
+
+    int r = mp_property_do_silent(name, M_PROPERTY_SET, data, mpctx);
+    if (r != M_PROPERTY_OK)
+        return M_OPT_INVALID;
+
+    // The flag can't be passed through the property layer correctly.
+    if (flags & M_SETOPT_FROM_CMDLINE)
+        co->is_set_from_cmdline = true;
+
+    return 0;
+
+direct_option:
+    return m_config_set_option_raw_direct(mpctx->mconfig, co, data, flags);
+}
+
 // Property-option bridge. (Maps the property to the option with the same name.)
 static int mp_property_generic_option_do(void *ctx, struct m_property *prop,
                                          int action, void *arg, bool force)
@@ -277,7 +338,7 @@ static int mp_property_generic_option_do(void *ctx, struct m_property *prop,
         m_option_copy(opt->opt, arg, valptr);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        if (m_config_set_option_raw(mpctx->mconfig, opt, arg, flags) < 0)
+        if (m_config_set_option_raw_direct(mpctx->mconfig, opt, arg, flags) < 0)
             return M_PROPERTY_ERROR;
         return M_PROPERTY_OK;
     }
@@ -4069,13 +4130,20 @@ static bool is_property_set(int action, void *val)
     }
 }
 
-int mp_property_do(const char *name, int action, void *val,
-                   struct MPContext *ctx)
+static int mp_property_do_silent(const char *name, int action, void *val,
+                                 struct MPContext *ctx)
 {
     struct command_ctx *cmd = ctx->command_ctx;
     int r = m_property_do(ctx->log, cmd->properties, name, action, val, ctx);
     if (r == M_PROPERTY_OK && is_property_set(action, val))
         mp_notify_property(ctx, (char *)name);
+    return r;
+}
+
+int mp_property_do(const char *name, int action, void *val,
+                   struct MPContext *ctx)
+{
+    int r = mp_property_do_silent(name, action, val, ctx);
     if (mp_msg_test(ctx->log, MSGL_V) && is_property_set(action, val)) {
         struct m_option ot = {0};
         void *data = val;
