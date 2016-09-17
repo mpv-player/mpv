@@ -373,7 +373,8 @@ void m_config_restore_backups(struct m_config *config)
         struct m_opt_backup *bc = config->backup_opts;
         config->backup_opts = bc->next;
 
-        m_option_copy(bc->co->opt, bc->co->data, bc->backup);
+        m_config_set_option_raw(config, bc->co, bc->backup, 0);
+
         m_option_free(bc->co->opt, bc->backup);
         bc->co->is_set_locally = false;
         talloc_free(bc);
@@ -675,15 +676,6 @@ static int handle_set_opt_flags(struct m_config *config,
     return set ? 2 : 1;
 }
 
-static void handle_on_set(struct m_config *config, struct m_config_option *co,
-                          int flags)
-{
-    if (flags & M_SETOPT_FROM_CMDLINE)
-        co->is_set_from_cmdline = true;
-
-    m_config_notify_change_co(config, co);
-}
-
 // The type data points to is as in: co->opt
 int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags)
@@ -701,7 +693,12 @@ int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
         return r;
 
     m_option_copy(co->opt, co->data, data);
-    handle_on_set(config, co, flags);
+
+    if (flags & M_SETOPT_FROM_CMDLINE)
+        co->is_set_from_cmdline = true;
+
+    m_config_notify_change_co(config, co);
+
     return 0;
 }
 
@@ -784,10 +781,19 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
         return parse_subopts(config, (char *)co->name, prefix, param, flags);
     }
 
-    r = m_option_parse(config->log, co->opt, name, param, set ? co->data : NULL);
+    union m_option_value val = {0};
 
-    if (r >= 0 && set)
-        handle_on_set(config, co, flags);
+    // Some option tpyes are "impure" and work on the existing data.
+    // (Prime examples: --vf-add, --sub-file)
+    if (co->data)
+        m_option_copy(co->opt, &val, co->data);
+
+    r = m_option_parse(config->log, co->opt, name, param, &val);
+
+    if (r >= 0)
+        r = m_config_set_option_raw(config, co, &val, flags);
+
+    m_option_free(co->opt, &val);
 
     return r;
 }
