@@ -122,13 +122,15 @@ typedef struct {
 } dvb_priv_t;
 
 
+/* Keep in sync with enum fe_delivery_system. */
 #ifndef DVB_USE_S2API
-#    define SYS_DVBT                0
-#    define SYS_DVBT2               1
-#    define SYS_DVBC_ANNEX_AC       2
-#    define SYS_DVBS                3
-#    define SYS_DVBS2               4
-#    define SYS_ATSC                5
+#    define SYS_DVBC_ANNEX_AC       1
+#    define SYS_DVBT                3
+#    define SYS_DVBS                5
+#    define SYS_DVBS2               6
+#    define SYS_ATSC                11
+#    define SYS_DVBT2               16
+#    define SYS_DVBC_ANNEX_C        18
 #endif
 
 int dvb_step_channel(stream_t *, int);
