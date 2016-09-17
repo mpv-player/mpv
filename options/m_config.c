@@ -350,8 +350,6 @@ static void ensure_backup(struct m_config *config, struct m_config_option *co)
 {
     if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD)
         return;
-    if (co->opt->flags & M_OPT_GLOBAL)
-        return;
     if (!co->data)
         return;
     for (struct m_opt_backup *cur = config->backup_opts; cur; cur = cur->next) {
@@ -671,15 +669,8 @@ static int handle_set_opt_flags(struct m_config *config,
                co->name);
         return M_OPT_INVALID;
     }
-    if (flags & M_SETOPT_BACKUP) {
-        if (optflags & M_OPT_GLOBAL) {
-            MP_ERR(config, "The %s option is global and can't be set per-file.\n",
-                   co->name);
-            return M_OPT_INVALID;
-        }
-        if (set)
-            ensure_backup(config, co);
-    }
+    if ((flags & M_SETOPT_BACKUP) && set)
+        ensure_backup(config, co);
 
     return set ? 2 : 1;
 }
@@ -979,8 +970,6 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
             MP_INFO(config, " (default: %s)", def);
             talloc_free(def);
         }
-        if (opt->flags & M_OPT_GLOBAL)
-            MP_INFO(config, " [global]");
         if (opt->flags & M_OPT_NOCFG)
             MP_INFO(config, " [nocfg]");
         if (opt->flags & M_OPT_FILE)

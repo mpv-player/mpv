@@ -277,11 +277,11 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("config", load_config, CONF_GLOBAL | CONF_PRE_PARSE),
     OPT_STRING("config-dir", force_configdir,
                CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
-    OPT_STRINGLIST("reset-on-next-file", reset_options, M_OPT_GLOBAL),
+    OPT_STRINGLIST("reset-on-next-file", reset_options, 0),
 
 #if HAVE_LUA
     OPT_STRINGLIST("script", script_files, CONF_GLOBAL | M_OPT_FILE),
-    OPT_KEYVALUELIST("script-opts", script_opts, M_OPT_GLOBAL),
+    OPT_KEYVALUELIST("script-opts", script_opts, 0),
     OPT_FLAG("osc", lua_load_osc, CONF_GLOBAL),
     OPT_FLAG("ytdl", lua_load_ytdl, CONF_GLOBAL),
     OPT_STRING("ytdl-format", lua_ytdl_format, CONF_GLOBAL),
@@ -650,7 +650,7 @@ const m_option_t mp_opts[] = {
 
     OPT_FLAG("input-terminal", consolecontrols, CONF_GLOBAL),
 
-    OPT_STRING("input-file", input_file, M_OPT_FILE | M_OPT_GLOBAL),
+    OPT_STRING("input-file", input_file, M_OPT_FILE),
     OPT_STRING("input-ipc-server", ipc_path, M_OPT_FILE | M_OPT_FIXED),
 
     OPT_SUBSTRUCT("screenshot", screenshot_image_opts, screenshot_conf, 0),
