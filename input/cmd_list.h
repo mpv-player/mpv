@@ -114,6 +114,8 @@ enum mp_command_type {
 
     MP_CMD_RESCAN_EXTERNAL_FILES,
 
+    MP_CMD_APPLY_PROFILE,
+
     // Internal
     MP_CMD_COMMAND_LIST, // list of sub-commands in args[0].v.p
 };

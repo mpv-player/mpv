@@ -5514,6 +5514,14 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
     }
 
+    case MP_CMD_APPLY_PROFILE: {
+        char *profile = cmd->args[0].v.s;
+        int flags = mpctx->initialized ? M_SETOPT_RUNTIME : 0;
+        if (m_config_set_profile(mpctx->mconfig, profile, flags) < 0)
+            return -1;
+        break;
+    }
+
     default:
         MP_VERBOSE(mpctx, "Received unknown cmd %s\n", cmd->name);
         return -1;
