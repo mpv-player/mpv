@@ -790,7 +790,7 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
 
     r = m_option_parse(config->log, co->opt, name, param, &val);
 
-    if (r >= 0)
+    if (r >= 0 && co->data)
         r = m_config_set_option_raw(config, co, &val, flags);
 
     m_option_free(co->opt, &val);
