@@ -2617,7 +2617,7 @@ static int mp_property_window_scale(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct vo *vo = mpctx->video_out;
     if (!vo)
-        return M_PROPERTY_UNAVAILABLE;
+        return mp_property_generic_option(mpctx, prop, action, arg);
 
     struct mp_image_params params = get_video_out_params(mpctx);
     int vid_w, vid_h;
