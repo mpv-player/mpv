@@ -79,13 +79,14 @@ typedef struct {
 } dvb_channel_t;
 
 typedef struct {
-    uint16_t NUM_CHANNELS;
-    uint16_t current;
+    unsigned int NUM_CHANNELS;
+    unsigned int current;
     dvb_channel_t *channels;
 } dvb_channels_list_t;
 
 typedef struct {
     int devno;
+    unsigned int delsys_mask;
     dvb_channels_list_t *list;
 } dvb_adapter_config_t;
 
@@ -130,9 +131,11 @@ typedef struct {
 #    define SYS_DVBT2               16
 #    define SYS_DVBC_ANNEX_C        18
 #endif
+#define SYS_DVB__MAX__              SYS_DVBC_ANNEX_C
+
 
 int dvb_step_channel(stream_t *, int);
-int dvb_set_channel(stream_t *, int, int);
+int dvb_set_channel(stream_t *, unsigned int, unsigned int);
 dvb_state_t *dvb_get_state(stream_t *);
 void dvb_free_state(dvb_state_t *);
 
