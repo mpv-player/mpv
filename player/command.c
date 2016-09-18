@@ -280,10 +280,9 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
     // OK, is handled separately: playlist
     // OK, does not conflict on low level: audio-file, sub-file, external-file
     static const char *const no_property[] = {
-        "playlist-pos", // checks playlist bounds, "no" choice missing
         "volume", // restricts to --volume-max
         "demuxer", "idle", "length", "audio-samplerate", "audio-channels",
-        "audio-format", "fps", "cache", // different semantics
+        "audio-format", "fps", "cache", "playlist-pos", // different semantics
         NULL
     };
 

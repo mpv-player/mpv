@@ -317,7 +317,8 @@ const m_option_t mp_opts[] = {
     OPT_TIME("ab-loop-a", ab_loop[0], 0, .min = MP_NOPTS_VALUE),
     OPT_TIME("ab-loop-b", ab_loop[1], 0, .min = MP_NOPTS_VALUE),
 
-    OPT_CHOICE_OR_INT("playlist-pos", playlist_pos, 0, 0, INT_MAX, ({"no", -1})),
+    OPT_CHOICE_OR_INT("playlist-start", playlist_pos, 0, 0, INT_MAX,
+                      ({"auto", -1}, {"no", -1})),
 
     OPT_FLAG("pause", pause, M_OPT_FIXED),
     OPT_CHOICE("keep-open", keep_open, 0,
@@ -754,6 +755,7 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("input-unix-socket", "input-ipc-server"),
     OPT_REPLACED("softvol-max", "volume-max"),
     OPT_REMOVED("bluray-angle", "this didn't do anything for a few releases"),
+    OPT_REPLACED("playlist-pos", "playlist-start"),
 
     {0}
 };
