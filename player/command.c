@@ -2693,7 +2693,10 @@ static int mp_property_window_scale(void *ctx, struct m_property *prop,
         int s[2] = {vid_w * scale, vid_h * scale};
         if (s[0] > 0 && s[1] > 0 &&
             vo_control(vo, VOCTRL_SET_UNFS_WINDOW_SIZE, s) > 0)
+        {
+            mpctx->opts->vo->window_scale = scale;
             return M_PROPERTY_OK;
+        }
         return M_PROPERTY_UNAVAILABLE;
     }
     case M_PROPERTY_GET: {
@@ -2707,13 +2710,7 @@ static int mp_property_window_scale(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){
-            .type = CONF_TYPE_DOUBLE,
-            .flags = CONF_RANGE,
-            .min = 0.125,
-            .max = 8,
-        };
-        return M_PROPERTY_OK;
+        return mp_property_generic_option(mpctx, prop, action, arg);
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }

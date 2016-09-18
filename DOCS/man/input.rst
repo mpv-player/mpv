@@ -2122,6 +2122,9 @@ caveats with some properties (due to historical reasons):
     option is for loading playlist during command line parsing. For client API
     uses, you should use the ``loadlist`` command instead.
 
+``window-scale``
+    Might verify the set value when setting while a window is created.
+
 ``audio-file``, ``sub-file``, ``external-file``
     These options/properties are actually lists of filenames. To make the
     command-line interface easier, each ``--audio-file=...`` option appends
