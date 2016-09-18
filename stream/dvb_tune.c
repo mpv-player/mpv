@@ -114,9 +114,9 @@ unsigned int dvb_get_tuner_delsys_mask(int fe_fd, struct mp_log *log)
     }
 
     return ret_mask;
-#endif
 
 old_api:
+#endif
     mp_verbose(log, "Querying tuner type via pre-DVBv5 API for frontend FD %d\n",
                fe_fd);
 
@@ -458,6 +458,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
 {
     int hi_lo = 0, bandwidth_hz = 0;
     dvb_state_t* state = priv->state;
+    struct dvb_frontend_parameters feparams;
 
 
     MP_VERBOSE(priv, "TUNE_IT, fd_frontend %d, %s freq %lu, srate %lu, "
@@ -480,7 +481,7 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
     }
 
    /* Prepare params, be verbose. */
-   switch (delsys) {
+    switch (delsys) {
     case SYS_DVBT2:
 #ifndef DVB_USE_S2API
         MP_ERR(priv, "ERROR: Can not tune to T2 channel, S2-API not "
@@ -567,57 +568,61 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
     }
 
 #ifdef DVB_USE_S2API
-        /* S2API is the DVB API new since 2.6.28.
-         * It is needed to tune to new delivery systems, e.g. DVB-S2.
-         * It takes a struct with a list of pairs of command + parameter.
-         */
+    /* S2API is the DVB API new since 2.6.28.
+     * It is needed to tune to new delivery systems, e.g. DVB-S2.
+     * It takes a struct with a list of pairs of command + parameter.
+     */
 
-        /* Reset before tune. */
-        struct dtv_property p_clear[] = {
-            { .cmd = DTV_CLEAR },
-        };
+    /* Reset before tune. */
+    struct dtv_property p_clear[] = {
+        { .cmd = DTV_CLEAR },
+    };
+    struct dtv_properties cmdseq_clear = {
+        .num = 1,
+        .props = p_clear
+    };
+    if (ioctl(fd_frontend, FE_SET_PROPERTY, &cmdseq_clear) < 0) {
+        MP_ERR(priv, "FE_SET_PROPERTY DTV_CLEAR failed\n");
+    }
 
-        struct dtv_properties cmdseq_clear = {
-            .num = 1,
-            .props = p_clear
-        };
+    /* Tune. */
+    struct dtv_property p[] = {
+        { .cmd = DTV_DELIVERY_SYSTEM, .u.data = delsys },
+        { .cmd = DTV_FREQUENCY, .u.data = freq },
+        { .cmd = DTV_MODULATION, .u.data = modulation },
+        { .cmd = DTV_SYMBOL_RATE, .u.data = srate },
+        { .cmd = DTV_INNER_FEC, .u.data = HP_CodeRate },
+        { .cmd = DTV_INVERSION, .u.data = specInv },
+        { .cmd = DTV_ROLLOFF, .u.data = ROLLOFF_AUTO },
+        { .cmd = DTV_BANDWIDTH_HZ, .u.data = bandwidth_hz },
+        { .cmd = DTV_PILOT, .u.data = PILOT_AUTO },
+        { .cmd = DTV_STREAM_ID, .u.data = stream_id },
+        { .cmd = DTV_TUNE },
+    };
+    struct dtv_properties cmdseq = {
+        .num = sizeof(p) / sizeof(p[0]),
+        .props = p
+    };
+    MP_VERBOSE(priv, "Tuning via S2API, channel is %s.\n",
+               get_dvb_delsys(delsys));
+    if (ioctl(fd_frontend, FE_SET_PROPERTY, &cmdseq) < 0) {
+        MP_ERR(priv, "ERROR tuning channel\n");
+        goto old_api;
+    }
 
-        if (ioctl(fd_frontend, FE_SET_PROPERTY, &cmdseq_clear) < 0) {
-            MP_ERR(priv, "FE_SET_PROPERTY DTV_CLEAR failed\n");
-            return -1;
-        }
+    return check_status(priv, fd_frontend, timeout);
 
-        /* Tune. */
-        struct dtv_property p[] = {
-            { .cmd = DTV_DELIVERY_SYSTEM, .u.data = delsys },
-            { .cmd = DTV_FREQUENCY, .u.data = freq },
-            { .cmd = DTV_MODULATION, .u.data = modulation },
-            { .cmd = DTV_SYMBOL_RATE, .u.data = srate },
-            { .cmd = DTV_INNER_FEC, .u.data = HP_CodeRate },
-            { .cmd = DTV_INVERSION, .u.data = specInv },
-            { .cmd = DTV_ROLLOFF, .u.data = ROLLOFF_AUTO },
-            { .cmd = DTV_BANDWIDTH_HZ, .u.data = bandwidth_hz },
-            { .cmd = DTV_PILOT, .u.data = PILOT_AUTO },
-            { .cmd = DTV_STREAM_ID, .u.data = stream_id },
-            { .cmd = DTV_TUNE },
-        };
-        struct dtv_properties cmdseq = {
-            .num = sizeof(p) / sizeof(p[0]),
-            .props = p
-        };
-        MP_VERBOSE(priv, "Tuning via S2API, channel is %s.\n",
-                   get_dvb_delsys(delsys));
-        if (ioctl(fd_frontend, FE_SET_PROPERTY, &cmdseq) < 0) {
-            MP_ERR(priv, "ERROR tuning channel\n");
-            return -1;
-        }
-#else
-    struct dvb_frontend_parameters feparams;
-
-    memset(&feparams, 0, sizeof(feparams));
-    feparams.frequency = freq;
+old_api:
+#endif
 
     MP_VERBOSE(priv, "Tuning via DVB-API version 3.\n");
+
+    if (stream_id != NO_STREAM_ID_FILTER && stream_id != 0) {
+        MP_ERR(priv, "DVB-API version 3 does not support stream_id (PLP).\n");
+        return -1;
+    }
+    memset(&feparams, 0, sizeof(feparams));
+    feparams.frequency = freq;
 
     switch (delsys) {
     case SYS_DVBT:
@@ -654,7 +659,6 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
         MP_ERR(priv, "ERROR tuning channel\n");
         return -1;
     }
-#endif
 
     return check_status(priv, fd_frontend, timeout);
 }
