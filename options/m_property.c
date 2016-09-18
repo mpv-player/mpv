@@ -115,7 +115,8 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
             M_PROPERTY_NOT_IMPLEMENTED)
             return r;
         // Fallback to m_option
-        r = do_action(prop_list, name, M_PROPERTY_GET_CONSTRICTED_TYPE, &opt, ctx);
+        r = m_property_do(log, prop_list, name, M_PROPERTY_GET_CONSTRICTED_TYPE,
+                          &opt, ctx);
         if (r <= 0)
             return r;
         assert(opt.type);
