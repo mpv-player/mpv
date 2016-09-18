@@ -2079,12 +2079,14 @@ caveats with some properties (due to historical reasons):
 ``deinterlace``
     While video is active, this behaves differently from the option. It will
     never return the ``auto`` value (but the state as observed by the video
-    chain). You cannot set ``auto`` either.
-
-    Option changes at runtime are affected by this as well.
+    chain). If you set ``auto``, the property will set this as the option value,
+    and will return the actual video chain state as observed instead of auto.
 
 ``video-aspect``
-    While video is active, always returns the effective aspect ratio.
+    While video is active, always returns the effective aspect ratio. Setting
+    a special value (like ``no``, values ``<= 0``) will make the property
+    set this as option, and return whatever actual aspect was derived from the
+    option setting.
 
 ``brightness`` (and other color options)
     If ``--vo=xv`` is used, these properties may return the adapter's current
@@ -2103,19 +2105,10 @@ caveats with some properties (due to historical reasons):
 
     Option changes at runtime are affected by this as well.
 
-``chapter``
-    While playback is *not* active, the property behaves like the option, and
-    you can set a chapter range. While playback is active, you can set only
-    the current chapter (to which the player will seek immediately).
-
-    Option changes at runtime are affected by this as well.
-
-``volume``
-    When set as option, the maximum (set by ``--volume-max``) is not checked,
-    while when set as property, the maximum is enforced.
-
-``mute``
-    The option has a deprecated ``auto`` value, which is equal to ``no``.
+``edition``
+    While a file is loaded, the property will always return the effective
+    edition, and setting the ``auto`` value will show somewhat strange behavior
+    (the property eventually switching to whatever is the default edition).
 
 ``playlist``
     The property is read-only and returns the current internal playlist. The
@@ -2138,7 +2131,7 @@ caveats with some properties (due to historical reasons):
     Strictly speaking, option access via API (e.g. ``mpv_set_option_string()``)
     has the same problem, and it's only a difference between CLI/API.
 
-``demuxer``, ``idle``, ``length``, ``audio-samplerate``, ``audio-channels``, ``audio-format``, ``fps``, ``cache``, ``playlist-pos``
+``demuxer``, ``idle``, ``length``, ``audio-samplerate``, ``audio-channels``, ``audio-format``, ``fps``, ``cache``, ``playlist-pos``, ``chapter``
     These behave completely different as property, but are deprecated (newer
     aliases which don't conflict have been added). After the deprecation period
     they will be changed to the proper option behavior.
