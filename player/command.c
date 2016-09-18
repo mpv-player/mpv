@@ -302,6 +302,8 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
     }
 
     int r = mp_property_do_silent(name, M_PROPERTY_SET, data, mpctx);
+    if (r == M_PROPERTY_UNKNOWN)
+        goto direct_option; // not mapped as property
     if (r != M_PROPERTY_OK)
         return M_OPT_INVALID;
 
