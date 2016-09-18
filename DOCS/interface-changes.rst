@@ -72,6 +72,7 @@ Interface changes
       treating it as a hardware overlay (without applying GL filtering). Also
       to be changed in 0.22.0: the --fs flag will be reset to "no" by default
       (like on the other platforms).
+    - deprecate --mute=auto (informally has been since 0.18.1)
     - deprecate "resume" and "suspend" IPC commands. They will be completely
       removed in 0.22.0.
     - deprecate mp.suspend(), mp.resume(), mp.resume_all() Lua scripting
