@@ -264,14 +264,16 @@ int get_deinterlacing(struct MPContext *mpctx)
     return enabled;
 }
 
-void set_deinterlacing(struct MPContext *mpctx, bool enable)
+void set_deinterlacing(struct MPContext *mpctx, int opt_val)
 {
-    if (enable == (get_deinterlacing(mpctx) > 0))
+    if ((opt_val < 0 && mpctx->opts->deinterlace == opt_val) ||
+        (opt_val == (get_deinterlacing(mpctx) > 0)))
         return;
 
-    mpctx->opts->deinterlace = enable;
+    mpctx->opts->deinterlace = opt_val;
     recreate_auto_filters(mpctx);
-    mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
+    if (opt_val >= 0)
+        mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
 }
 
 static void recreate_video_filters(struct MPContext *mpctx)

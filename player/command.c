@@ -279,10 +279,11 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
     //   vf*, af*, chapter
     // OK, is handled separately: playlist
     // OK, does not conflict on low level: audio-file, sub-file, external-file
+    // OK, different value ranges, but happens to work for now: volume, edition
+    // All the other properties are deprecated in their current form.
     static const char *const no_property[] = {
-        "volume", // restricts to --volume-max
         "demuxer", "idle", "length", "audio-samplerate", "audio-channels",
-        "audio-format", "fps", "cache", "playlist-pos", // different semantics
+        "audio-format", "fps", "cache", "playlist-pos", "chapter",
         NULL
     };
 
@@ -300,9 +301,19 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
         name = tmp;
     }
 
-    int r = mp_property_do_silent(name, M_PROPERTY_SET, data, mpctx);
+    struct m_option type = {0};
+
+    int r = mp_property_do_silent(name, M_PROPERTY_GET_TYPE, &type, mpctx);
     if (r == M_PROPERTY_UNKNOWN)
         goto direct_option; // not mapped as property
+    if (r != M_PROPERTY_OK)
+        return M_OPT_INVALID; // shouldn't happen
+
+    assert(type.type == co->opt->type);
+    assert(type.max == co->opt->max);
+    assert(type.min == co->opt->min);
+
+    r = mp_property_do_silent(name, M_PROPERTY_SET, data, mpctx);
     if (r != M_PROPERTY_OK)
         return M_OPT_INVALID;
 
@@ -873,7 +884,7 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     if (!mpctx->playback_initialized)
-        return mp_property_generic_option(mpctx, prop, action, arg);
+        return M_PROPERTY_UNAVAILABLE;
 
     int chapter = get_current_chapter(mpctx);
     int num = get_chapter_count(mpctx);
@@ -993,14 +1004,9 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
     MPContext *mpctx = ctx;
-    if (!mpctx->playback_initialized)
-        return mp_property_generic_option(mpctx, prop, action, arg);
-
     struct demuxer *demuxer = mpctx->demuxer;
-    if (!demuxer)
-        return M_PROPERTY_UNAVAILABLE;
-    if (demuxer->num_editions <= 0)
-        return M_PROPERTY_UNAVAILABLE;
+    if (!mpctx->playback_initialized || !demuxer || demuxer->num_editions <= 0)
+        return mp_property_generic_option(mpctx, prop, action, arg);
 
     int edition = demuxer->edition;
 
@@ -1014,22 +1020,18 @@ static int mp_property_edition(void *ctx, struct m_property *prop,
             mpctx->opts->edition_id = edition;
             if (!mpctx->stop_play)
                 mpctx->stop_play = PT_RELOAD_FILE;
-            mp_wakeup_core(mpctx);;
+            mp_wakeup_core(mpctx);
+            break; // make it accessible to the demuxer via option change notify
         }
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_GET_TYPE: {
-        struct m_option opt = {
-            .type = CONF_TYPE_INT,
-            .flags = CONF_RANGE,
-            .min = 0,
-            .max = demuxer->num_editions - 1,
-        };
-        *(struct m_option *)arg = opt;
-        return M_PROPERTY_OK;
+    case M_PROPERTY_GET_CONSTRICTED_TYPE: {
+        int r = mp_property_generic_option(mpctx, prop, M_PROPERTY_GET_TYPE, arg);
+        ((struct m_option *)arg)->max = demuxer->num_editions - 1;
+        return r;
     }
     }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
 static int get_edition_entry(int item, int action, void *arg, void *ctx)
@@ -1677,7 +1679,7 @@ static int mp_property_volume(void *ctx, struct m_property *prop,
     struct MPOpts *opts = mpctx->opts;
 
     switch (action) {
-    case M_PROPERTY_GET_TYPE:
+    case M_PROPERTY_GET_CONSTRICTED_TYPE:
         *(struct m_option *)arg = (struct m_option){
             .type = CONF_TYPE_FLOAT,
             .flags = M_OPT_RANGE,
@@ -1705,7 +1707,7 @@ static int mp_property_mute(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
 
-    if (action == M_PROPERTY_GET_TYPE) {
+    if (action == M_PROPERTY_GET_CONSTRICTED_TYPE) {
         *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLAG};
         return M_PROPERTY_OK;
     }
@@ -2373,14 +2375,14 @@ static int mp_property_deinterlace(void *ctx, struct m_property *prop,
     case M_PROPERTY_GET:
         *(int *)arg = get_deinterlacing(mpctx) > 0;
         return M_PROPERTY_OK;
-    case M_PROPERTY_GET_TYPE:
+    case M_PROPERTY_GET_CONSTRICTED_TYPE:
         *(struct m_option *)arg = (struct m_option){.type = CONF_TYPE_FLAG};
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
         set_deinterlacing(mpctx, *(int *)arg);
         return M_PROPERTY_OK;
     }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
 static int video_simple_refresh_property(void *ctx, struct m_property *prop,
@@ -4315,7 +4317,7 @@ static void show_property_osd(MPContext *mpctx, const char *name, int osd_mode)
     }
 
     struct m_option prop = {0};
-    mp_property_do(name, M_PROPERTY_GET_TYPE, &prop, mpctx);
+    mp_property_do(name, M_PROPERTY_GET_CONSTRICTED_TYPE, &prop, mpctx);
     if ((osd_mode & MP_ON_OSD_BAR) && (prop.flags & CONF_RANGE) == CONF_RANGE) {
         if (prop.type == CONF_TYPE_INT) {
             int n = prop.min;
@@ -4668,7 +4670,7 @@ static int mp_property_multiply(char *property, double f, struct MPContext *mpct
     struct m_option opt = {0};
     int r;
 
-    r = mp_property_do(property, M_PROPERTY_GET_TYPE, &opt, mpctx);
+    r = mp_property_do(property, M_PROPERTY_GET_CONSTRICTED_TYPE, &opt, mpctx);
     if (r != M_PROPERTY_OK)
         return r;
     assert(opt.type);
@@ -5615,7 +5617,8 @@ extern const struct m_sub_options gl_video_conf;
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)
 {
-    struct m_config_option *co = m_config_get_co(mpctx->mconfig, bstr0(property));
+    struct m_config_option *co =
+        m_config_get_co_raw(mpctx->mconfig, bstr0(property));
     if (co) {
         if (m_config_is_in_group(mpctx->mconfig, &gl_video_conf, co)) {
             if (mpctx->video_out)

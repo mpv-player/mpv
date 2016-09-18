@@ -296,7 +296,8 @@ const m_option_t mp_opts[] = {
 #if HAVE_DVDREAD || HAVE_DVDNAV
     OPT_SUBSTRUCT("", dvd_opts, dvd_conf, 0),
 #endif /* HAVE_DVDREAD */
-    OPT_INTPAIR("chapter", chapterrange, 0),
+    OPT_INTPAIR("chapter", chapterrange, 0, .deprecation_message = "instead of "
+        "--chapter=A-B use --start=#A --end=#B+1"),
     OPT_CHOICE_OR_INT("edition", edition_id, 0, 0, 8190,
                       ({"auto", -1})),
 #if HAVE_LIBBLURAY

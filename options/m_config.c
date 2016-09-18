@@ -87,9 +87,6 @@ struct m_opt_backup {
     void *backup;
 };
 
-static struct m_config_option *m_config_get_co_raw(const struct m_config *config,
-                                                   struct bstr name);
-
 static int parse_include(struct m_config *config, struct bstr param, bool set,
                          int flags)
 {
@@ -556,8 +553,8 @@ static void m_config_add_option(struct m_config *config,
         MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
 }
 
-static struct m_config_option *m_config_get_co_raw(const struct m_config *config,
-                                                   struct bstr name)
+struct m_config_option *m_config_get_co_raw(const struct m_config *config,
+                                            struct bstr name)
 {
     if (!name.len)
         return NULL;
