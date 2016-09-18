@@ -514,8 +514,8 @@ const m_option_t mp_opts[] = {
     // values <0 for volume and mute are legacy and ignored
     OPT_FLOATRANGE("volume", softvol_volume, 0, -1, 1000),
     OPT_CHOICE("mute", softvol_mute, 0,
-               ({"auto", -1},
-                {"no", 0},
+               ({"no", 0},
+                {"auto", 0},
                 {"yes", 1})),
     OPT_CHOICE("gapless-audio", gapless_audio, 0,
                ({"no", 0},

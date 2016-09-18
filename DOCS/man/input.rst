@@ -2114,6 +2114,9 @@ caveats with some properties (due to historical reasons):
     When set as option, the maximum (set by ``--volume-max``) is not checked,
     while when set as property, the maximum is enforced.
 
+``mute``
+    The option has a deprecated ``auto`` value, which is equal to ``no``.
+
 ``playlist``
     The property is read-only and returns the current internal playlist. The
     option is for loading playlist during command line parsing. For client API
