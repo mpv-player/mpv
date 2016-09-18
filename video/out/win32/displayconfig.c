@@ -94,6 +94,12 @@ static LONG (WINAPI *pQueryDisplayConfig)(UINT32, UINT32*,
         DISPLAYCONFIG_PATH_INFO*, UINT32*, DISPLAYCONFIG_MODE_INFO*,
         DISPLAYCONFIG_TOPOLOGY_ID*);
 
+static bool is_valid_refresh_rate(DISPLAYCONFIG_RATIONAL rr)
+{
+    // DisplayConfig sometimes reports a rate of 1 when the rate is not known
+    return rr.Denominator != 0 && rr.Numerator / rr.Denominator > 1;
+}
+
 static void displayconfig_load(void)
 {
     HMODULE user32 = GetModuleHandleW(L"user32.dll");
@@ -189,7 +195,7 @@ static double get_refresh_rate_from_mode(DISPLAYCONFIG_MODE_INFO *mode)
 
     DISPLAYCONFIG_VIDEO_SIGNAL_INFO *info =
         &mode->targetMode.targetVideoSignalInfo;
-    if (info->vSyncFreq.Denominator == 0)
+    if (!is_valid_refresh_rate(info->vSyncFreq))
         return 0.0;
 
     return ((double)info->vSyncFreq.Numerator) /
@@ -225,7 +231,7 @@ double mp_w32_displayconfig_get_refresh_rate(const wchar_t *device)
         freq = get_refresh_rate_from_mode(&modes[path->targetInfo.modeInfoIdx]);
 
     // If the mode didn't contain a valid refresh rate, try the path
-    if (freq == 0.0 && path->targetInfo.refreshRate.Denominator != 0) {
+    if (freq == 0.0 && is_valid_refresh_rate(path->targetInfo.refreshRate)) {
         freq = ((double)path->targetInfo.refreshRate.Numerator) /
                ((double)path->targetInfo.refreshRate.Denominator);
     }
