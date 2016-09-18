@@ -67,14 +67,14 @@ static const char *dvb_delsys_str[] = {
 
 const char *get_dvb_delsys(unsigned int delsys)
 {
-    if (SYS_DVBC_ANNEX_C < delsys)
+    if (SYS_DVB__MAX__ < delsys)
         return dvb_delsys_str[0];
     return dvb_delsys_str[delsys];
 }
 
-int dvb_get_tuner_delsys(int fe_fd, struct mp_log *log, int **tuner_delsys)
+unsigned int dvb_get_tuner_delsys_mask(int fe_fd, struct mp_log *log)
 {
-    unsigned int delsys;
+    unsigned int ret_mask = 0, delsys;
 
 #ifdef DVB_USE_S2API
     /* S2API is the DVB API new since 2.6.28.
@@ -93,8 +93,6 @@ int dvb_get_tuner_delsys(int fe_fd, struct mp_log *log, int **tuner_delsys)
       mp_err(log, "DVBv5: Frontend FD %d returned no delivery systems!\n", fe_fd);
       goto old_api;
     }
-    (*tuner_delsys) = talloc_array(NULL, int, delsys_count);
-    int supported_tuners = 0;
     for(;p[0].u.buffer.len > 0; p[0].u.buffer.len--) {
       delsys = p[0].u.buffer.data[p[0].u.buffer.len - 1];
       switch (delsys) {
@@ -112,10 +110,10 @@ int dvb_get_tuner_delsys(int fe_fd, struct mp_log *log, int **tuner_delsys)
         continue;
       }
       mp_verbose(log, "Tuner type seems to be %s\n", get_dvb_delsys(delsys));
-      (*tuner_delsys)[supported_tuners++] = delsys;
+      DELSYS_SET(ret_mask, delsys);
     }
 
-    return supported_tuners;
+    return ret_mask;
 #endif
 
 old_api:
@@ -125,7 +123,7 @@ old_api:
     struct dvb_frontend_info fe_info;
     if (ioctl(fe_fd, FE_GET_INFO, &fe_info) < 0) {
         mp_err(log, "FE_GET_INFO error: %d, FD: %d\n\n", errno, fe_fd);
-        return 0;
+        return ret_mask;
     }
 
     mp_verbose(log, "Queried tuner type of device named '%s', FD: %d\n",
@@ -147,19 +145,18 @@ old_api:
 #endif
     default:
         mp_err(log, "Unknown tuner type: %d\n", fe_info.type);
-        return 0;
+        return ret_mask;
     }
 
     mp_verbose(log, "Tuner type seems to be %s\n", get_dvb_delsys(delsys));
-    *tuner_delsys = talloc_array(NULL, int, 1);
-    (*tuner_delsys)[0] = delsys;
+    DELSYS_SET(ret_mask, delsys);
 
-    return 1;
+    return ret_mask;
 }
 
-int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
+int dvb_open_devices(dvb_priv_t *priv, unsigned int n, unsigned int demux_cnt)
 {
-    int i;
+    unsigned int i;
     char frontend_dev[PATH_MAX], dvr_dev[PATH_MAX], demux_dev[PATH_MAX];
 
     dvb_state_t* state = priv->state;
@@ -197,7 +194,7 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 }
 
 
-int dvb_fix_demuxes(dvb_priv_t *priv, int cnt)
+int dvb_fix_demuxes(dvb_priv_t *priv, unsigned int cnt)
 {
     int i;
     char demux_dev[PATH_MAX];
@@ -208,7 +205,7 @@ int dvb_fix_demuxes(dvb_priv_t *priv, int cnt)
             state->adapters[state->cur_adapter].devno);
     MP_VERBOSE(priv, "FIX %d -> %d\n", state->demux_fds_cnt, cnt);
     if (state->demux_fds_cnt >= cnt) {
-        for (i = state->demux_fds_cnt - 1; i >= cnt; i--) {
+        for (i = state->demux_fds_cnt - 1; i >= (int)cnt; i--) {
             MP_VERBOSE(priv, "FIX, CLOSE fd(%d): %d\n", i, state->demux_fds[i]);
             close(state->demux_fds[i]);
         }
@@ -329,16 +326,6 @@ int dvb_get_pmt_pid(dvb_priv_t *priv, int devno, int service_id)
     close(pat_fd);
 
     return pmt_pid;
-}
-
-int dvb_demux_stop(int fd)
-{
-    return ioctl(fd, DMX_STOP) == 0;
-}
-
-int dvb_demux_start(int fd)
-{
-    return ioctl(fd, DMX_START) == 0;
 }
 
 static void print_status(dvb_priv_t *priv, fe_status_t festatus)
@@ -476,8 +463,8 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
     MP_VERBOSE(priv, "TUNE_IT, fd_frontend %d, %s freq %lu, srate %lu, "
                "pol %c, tone %i, diseqc %u\n", fd_frontend,
                get_dvb_delsys(delsys),
-               (long unsigned int)freq, (long unsigned int)srate, pol,
-               tone, diseqc);
+               (long unsigned int)freq, (long unsigned int)srate,
+               (pol > ' ' ? pol : ' '), tone, diseqc);
 
     MP_VERBOSE(priv, "Using %s adapter %d\n",
         get_dvb_delsys(delsys),
