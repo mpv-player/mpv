@@ -2122,12 +2122,6 @@ caveats with some properties (due to historical reasons):
     option is for loading playlist during command line parsing. For client API
     uses, you should use the ``loadlist`` command instead.
 
-``playlist-pos``
-    The property refuses setting out of range values, restarts playback
-    immediately when writing to it, and does not know the ``no`` value (which
-    the option uses to indicate the default state, that is resuming a file
-    on the playlist and jumping to that instead of entry 0).
-
 ``audio-file``, ``sub-file``, ``external-file``
     These options/properties are actually lists of filenames. To make the
     command-line interface easier, each ``--audio-file=...`` option appends
@@ -2141,7 +2135,7 @@ caveats with some properties (due to historical reasons):
     Strictly speaking, option access via API (e.g. ``mpv_set_option_string()``)
     has the same problem, and it's only a difference between CLI/API.
 
-``demuxer``, ``idle``, ``length``, ``audio-samplerate``, ``audio-channels``, ``audio-format``, ``fps``, ``cache``
+``demuxer``, ``idle``, ``length``, ``audio-samplerate``, ``audio-channels``, ``audio-format``, ``fps``, ``cache``, ``playlist-pos``
     These behave completely different as property, but are deprecated (newer
     aliases which don't conflict have been added). After the deprecation period
     they will be changed to the proper option behavior.

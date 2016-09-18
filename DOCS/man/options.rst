@@ -157,16 +157,18 @@ Playback Control
 
     See also: ``--start``.
 
-``--playlist-pos=<no|index>``
+``--playlist-start=<auto|index>``
     Set which file on the internal playlist to start playback with. The index
-    is an integer, with 0 meaning the first file. The value ``no`` means that
+    is an integer, with 0 meaning the first file. The value ``auto`` means that
     the selection of the entry to play is left to the playback resume mechanism
     (default). If an entry with the given index doesn't exist, the behavior is
     unspecified and might change in future mpv versions. The same applies if
     the playlist contains further playlists (don't expect any reasonable
     behavior). Passing a playlist file to mpv should work with this option,
-    though. E.g. ``mpv playlist.m3u --playlist-pos=123`` will work as expected,
+    though. E.g. ``mpv playlist.m3u --playlist-start=123`` will work as expected,
     as long as ``playlist.m3u`` does not link to further playlists.
+
+    The value ``no`` is a deprecated alias for ``auto``.
 
 ``--playlist=<filename>``
     Play files according to a playlist file (Supports some common formats. If
