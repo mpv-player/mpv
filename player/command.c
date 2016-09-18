@@ -2959,7 +2959,7 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_PRINT: {
-        if (mpctx->opts->movie_aspect <= 0) {
+        if (mpctx->opts->movie_aspect < 0) {
             *(char **)arg = talloc_asprintf(NULL, "%.3f (original)", aspect);
             return M_PROPERTY_OK;
         }
@@ -2970,13 +2970,7 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET_TYPE:
-        *(struct m_option *)arg = (struct m_option){
-            .type = CONF_TYPE_FLOAT,
-            .flags = CONF_RANGE,
-            .min = -1,
-            .max = 10,
-        };
-        return M_PROPERTY_OK;
+        return mp_property_generic_option(mpctx, prop, action, arg);
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
