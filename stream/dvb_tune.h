@@ -23,14 +23,19 @@
 
 struct mp_log;
 
+
+#define DELSYS_SET(__mask, __bit)					\
+    (__mask) |= (((unsigned int)1) << (__bit))
+
+#define DELSYS_IS_SET(__mask, __bit)					\
+    (0 != ((__mask) & (((unsigned int)1) << (__bit))))
+
 const char *get_dvb_delsys(unsigned int delsys);
-int dvb_get_tuner_delsys(int fe_fd, struct mp_log *log, int** tuner_types);
-int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt);
-int dvb_fix_demuxes(dvb_priv_t *priv, int cnt);
+unsigned int dvb_get_tuner_delsys_mask(int fe_fd, struct mp_log *log);
+int dvb_open_devices(dvb_priv_t *priv, unsigned int n, unsigned int demux_cnt);
+int dvb_fix_demuxes(dvb_priv_t *priv, unsigned int cnt);
 int dvb_set_ts_filt(dvb_priv_t *priv, int fd, uint16_t pid, dmx_pes_type_t pestype);
 int dvb_get_pmt_pid(dvb_priv_t *priv, int card, int service_id);
-int dvb_demux_stop(int fd);
-int dvb_demux_start(int fd);
 int dvb_tune(dvb_priv_t *priv, unsigned int delsys,
              int freq, char pol, int srate, int diseqc,
              int tone, int stream_id, fe_spectral_inversion_t specInv,
