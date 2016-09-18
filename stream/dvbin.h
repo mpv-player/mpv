@@ -62,13 +62,13 @@
 
 typedef struct {
     char *name;
-    int freq, srate, diseqc, tone;
+    unsigned int freq, srate, diseqc, tone;
     char pol;
-    int tpid, dpid1, dpid2, progid, ca, pids[DMX_FILTER_SIZE], pids_cnt;
+    unsigned int tpid, dpid1, dpid2, progid, ca, pids[DMX_FILTER_SIZE], pids_cnt;
     bool is_dvb_x2;
     unsigned int delsys;
-    int stream_id;
-    int service_id;
+    unsigned int stream_id;
+    unsigned int service_id;
     fe_spectral_inversion_t inv;
     fe_modulation_t mod;
     fe_transmit_mode_t trans;
@@ -82,29 +82,26 @@ typedef struct {
     uint16_t NUM_CHANNELS;
     uint16_t current;
     dvb_channel_t *channels;
-} dvb_channels_list;
+} dvb_channels_list_t;
 
 typedef struct {
-    int delsys;
-    dvb_channels_list *list;
-    char *name;
     int devno;
-} dvb_card_config_t;
+    dvb_channels_list_t *list;
+} dvb_adapter_config_t;
 
 typedef struct {
-    int count;
-    dvb_card_config_t *cards;
+    unsigned int adapters_count;
+    dvb_adapter_config_t *adapters;
+    unsigned int cur_adapter;
 
-    int card;
     int fe_fd;
     int dvr_fd;
     int demux_fd[3], demux_fds[DMX_FILTER_SIZE], demux_fds_cnt;
 
-    dvb_channels_list *list;
     int is_on;
     int retry;
     int timeout;
-    int last_freq;
+    unsigned int last_freq;
     bool switching_channel;
     bool stream_used;
 } dvb_state_t;
@@ -115,7 +112,7 @@ typedef struct {
     dvb_state_t *state;
 
     char *cfg_prog;
-    int cfg_card;
+    int cfg_devno;
     int cfg_timeout;
     char *cfg_file;
 

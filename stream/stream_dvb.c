@@ -58,7 +58,7 @@
 #include "dvbin.h"
 #include "dvb_tune.h"
 
-#define MAX_CARDS 16
+#define MAX_ADAPTERS 16
 #define CHANNEL_LINE_LEN 256
 #define min(a, b) ((a) <= (b) ? (a) : (b))
 
@@ -70,7 +70,7 @@ static pthread_mutex_t global_dvb_state_lock = PTHREAD_MUTEX_INITIALIZER;
 const struct m_sub_options stream_dvb_conf = {
     .opts = (const m_option_t[]) {
         OPT_STRING("prog", cfg_prog, 0),
-        OPT_INTRANGE("card", cfg_card, 0, 1, 4),
+        OPT_INTRANGE("card", cfg_devno, 0, 1, 4),
         OPT_INTRANGE("timeout", cfg_timeout, 0, 1, 30),
         OPT_STRING("file", cfg_file, M_OPT_FILE),
         OPT_FLAG("full-transponder", cfg_full_transponder, 0),
@@ -79,7 +79,7 @@ const struct m_sub_options stream_dvb_conf = {
     .size = sizeof(dvb_priv_t),
     .defaults = &(const dvb_priv_t){
         .cfg_prog = NULL,
-        .cfg_card = 0,
+        .cfg_devno = 0,
         .cfg_timeout = 30,
     },
 };
@@ -197,12 +197,13 @@ static bool parse_pid_string(struct mp_log *log, char *pid_string,
     return false;
 }
 
-static dvb_channels_list *dvb_get_channels(struct mp_log *log,
+static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
+                                           dvb_channels_list_t *list_add,
                                            int cfg_full_transponder,
                                            char *filename,
-                                           int type)
+                                           int delsys)
 {
-    dvb_channels_list *list;
+    dvb_channels_list_t *list = list_add;
     FILE *f;
     char line[CHANNEL_LINE_LEN], *colon;
 
@@ -225,22 +226,24 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log,
     const char *vdr_conf =
         "%d:%255[^:]:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%*255[^:]:%d:%*d:%*d:%*d\n%n";
 
-    mp_verbose(log, "CONFIG_READ FILE: %s, type: %d\n", filename, type);
+    mp_verbose(log, "CONFIG_READ FILE: %s, type: %s\n",
+               filename, get_dvb_delsys(delsys));
     if ((f = fopen(filename, "r")) == NULL) {
         mp_fatal(log, "CAN'T READ CONFIG FILE %s\n", filename);
         return NULL;
     }
 
-    list = malloc(sizeof(dvb_channels_list));
     if (list == NULL) {
-        fclose(f);
-        mp_verbose(log, "DVB_GET_CHANNELS: couldn't malloc enough memory\n");
-        return NULL;
+        list = malloc(sizeof(dvb_channels_list_t));
+        if (list == NULL) {
+            fclose(f);
+            mp_verbose(log, "DVB_GET_CHANNELS: couldn't malloc enough memory\n");
+            return NULL;
+        }
+        memset(list, 0, sizeof(dvb_channels_list_t));
     }
 
     ptr = &chn;
-    list->NUM_CHANNELS = 0;
-    list->channels = NULL;
     while (!feof(f)) {
         if (fgets(line, CHANNEL_LINE_LEN, f) == NULL)
             continue;
@@ -258,11 +261,11 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log,
             char *bouquet_sep = strchr(line, ';');
             int channel_name_length = k;
             if (bouquet_sep && bouquet_sep < colon)
-                channel_name_length = bouquet_sep - line;
-            ptr->name = malloc(channel_name_length + 1);
+                channel_name_length = (bouquet_sep - line);
+            ptr->name = malloc((channel_name_length + 1));
             if (!ptr->name)
                 continue;
-            av_strlcpy(ptr->name, line, channel_name_length + 1);
+            av_strlcpy(ptr->name, line, (channel_name_length + 1));
         } else {
             continue;
         }
@@ -273,7 +276,7 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log,
         ptr->freq = 0;
         ptr->service_id = -1;
         ptr->is_dvb_x2 = false;
-        ptr->delsys = type;
+        ptr->delsys = delsys;
         ptr->stream_id = NO_STREAM_ID_FILTER;
         ptr->inv = INVERSION_AUTO;
         ptr->bw = BANDWIDTH_AUTO;
@@ -295,26 +298,29 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log,
             // It's a VDR-style config line.
             parse_vdr_par_string(vdr_par_str, ptr);
             // We still need the special SAT-handling here.
-            switch (type) {
+            switch (delsys) {
             case SYS_DVBT:
-                if (type == SYS_DVBT && ptr->is_dvb_x2 == true)
+                if (delsys == SYS_DVBT && ptr->is_dvb_x2 == true)
                     continue; /* Skip channel. */
                 /* PASSTROUTH */
             case SYS_DVBT2:
-                 if (type == SYS_DVBT2 && ptr->is_dvb_x2 == false)
+                 if (delsys == SYS_DVBT2 && ptr->is_dvb_x2 == false)
                     continue; /* Skip channel. */
-           case SYS_DVBC_ANNEX_AC:
+                /* PASSTROUTH */
+            case SYS_DVBC_ANNEX_AC:
             case SYS_ATSC:
-                mp_verbose(log, "VDR, NUM: %d, NUM_FIELDS: %d, NAME: %s, "
-                           "FREQ: %d, SRATE: %d", list->NUM_CHANNELS, fields,
+                mp_verbose(log, "VDR, %s, NUM: %d, NUM_FIELDS: %d, NAME: %s, "
+                           "FREQ: %d, SRATE: %d",
+                           get_dvb_delsys(delsys),
+                           list->NUM_CHANNELS, fields,
                            ptr->name, ptr->freq, ptr->srate);
                 break;
             case SYS_DVBS:
-                if (type == SYS_DVBS && ptr->is_dvb_x2 == true)
+                if (delsys == SYS_DVBS && ptr->is_dvb_x2 == true)
                     continue; /* Skip channel. */
                 /* PASSTROUTH */
             case SYS_DVBS2:
-                 if (type == SYS_DVBS2 && ptr->is_dvb_x2 == false)
+                 if (delsys == SYS_DVBS2 && ptr->is_dvb_x2 == false)
                     continue; /* Skip channel. */
                 ptr->freq *=  1000UL;
                 ptr->srate *=  1000UL;
@@ -338,40 +344,46 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log,
                     }
                 }
 
-                mp_verbose(log, "SAT, NUM: %d, NUM_FIELDS: %d, NAME: %s, "
+                mp_verbose(log, "%s NUM: %d, NUM_FIELDS: %d, NAME: %s, "
                            "FREQ: %d, SRATE: %d, POL: %c, DISEQC: %d, S2: %s, "
-                           "StreamID: %d, SID: %d", list->NUM_CHANNELS,
+                           "StreamID: %d, SID: %d",
+                           get_dvb_delsys(delsys),
+                           list->NUM_CHANNELS,
                            fields, ptr->name, ptr->freq, ptr->srate, ptr->pol,
-                           ptr->diseqc, (type == SYS_DVBS2) ? "yes" : "no",
+                           ptr->diseqc, (delsys == SYS_DVBS2) ? "yes" : "no",
                            ptr->stream_id, ptr->service_id);
                 break;
             default:
                 break;
             }
         } else {
-            switch (type) {
+            switch (delsys) {
             case SYS_DVBT:
             case SYS_DVBT2:
                 fields = sscanf(&line[k], ter_conf,
                                 &ptr->freq, inv, bw, cr, tmp_lcr, mod,
                                 transm, gi, tmp_hier, vpid_str, apid_str);
-                mp_verbose(log, "TER, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d",
-                           list->NUM_CHANNELS, fields, ptr->name, ptr->freq);
+                mp_verbose(log, "%s, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d",
+                           get_dvb_delsys(delsys), list->NUM_CHANNELS,
+                           fields, ptr->name, ptr->freq);
                 break;
             case SYS_DVBC_ANNEX_AC:
                 fields = sscanf(&line[k], cbl_conf,
                                 &ptr->freq, inv, &ptr->srate,
                                 cr, mod, vpid_str, apid_str);
-                mp_verbose(log, "CBL, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, "
-                           "SRATE: %d", list->NUM_CHANNELS, fields, ptr->name,
+                mp_verbose(log, "%s, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, "
+                           "SRATE: %d",
+                           get_dvb_delsys(delsys),
+                           list->NUM_CHANNELS, fields, ptr->name,
                            ptr->freq, ptr->srate);
                 break;
 #ifdef DVB_ATSC
             case SYS_ATSC:
                 fields = sscanf(&line[k], atsc_conf,
                                 &ptr->freq, mod, vpid_str, apid_str);
-                mp_verbose(log, "ATSC, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d\n",
-                           list->NUM_CHANNELS, fields, ptr->name, ptr->freq);
+                mp_verbose(log, "%s, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d\n",
+                           get_dvb_delsys(delsys), list->NUM_CHANNELS,
+                           fields, ptr->name, ptr->freq);
                 break;
 #endif
             case SYS_DVBS:
@@ -388,8 +400,9 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log,
                     continue;
                 if (ptr->diseqc > 0)
                     ptr->diseqc--;
-                mp_verbose(log, "SAT, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, "
+                mp_verbose(log, "%s, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, "
                            "SRATE: %d, POL: %c, DISEQC: %d",
+                           get_dvb_delsys(delsys),
                            list->NUM_CHANNELS, fields, ptr->name, ptr->freq,
                            ptr->srate, ptr->pol, ptr->diseqc);
                 break;
@@ -461,7 +474,7 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log,
             mp_verbose(log, " %d ", ptr->pids[cnt]);
         mp_verbose(log, "\n");
 
-        switch (type) {
+        switch (delsys) {
         case SYS_DVBT:
         case SYS_DVBT2:
         case SYS_DVBC_ANNEX_AC:
@@ -493,7 +506,7 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log,
             }
         }
 
-        switch (type) {
+        switch (delsys) {
         case SYS_DVBT:
         case SYS_DVBT2:
         case SYS_DVBC_ANNEX_AC:
@@ -517,7 +530,7 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log,
 #endif
         }
 
-        switch (type) {
+        switch (delsys) {
         case SYS_DVBT:
         case SYS_DVBT2:
             if (!strcmp(bw, "BANDWIDTH_5_MHZ")) {
@@ -605,7 +618,6 @@ static dvb_channels_list *dvb_get_channels(struct mp_log *log,
         return NULL;
     }
 
-    list->current = 0;
     return list;
 }
 
@@ -613,16 +625,15 @@ void dvb_free_state(dvb_state_t *state)
 {
     int i, j;
 
-    for (i = 0; i < state->count; i++) {
-        free(state->cards[i].name);
-        if (!state->cards[i].list)
+    for (i = 0; i < state->adapters_count; i++) {
+        if (!state->adapters[i].list)
             continue;
-        if (state->cards[i].list->channels) {
-            for (j = 0; j < state->cards[i].list->NUM_CHANNELS; j++)
-                free(state->cards[i].list->channels[j].name);
-            free(state->cards[i].list->channels);
+        if (state->adapters[i].list->channels) {
+            for (j = 0; j < state->adapters[i].list->NUM_CHANNELS; j++)
+                free(state->adapters[i].list->channels[j].name);
+            free(state->adapters[i].list->channels);
         }
-        free(state->cards[i].list);
+        free(state->adapters[i].list);
     }
     free(state);
 }
@@ -664,9 +675,9 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
     return pos;
 }
 
-int dvb_set_channel(stream_t *stream, int card, int n)
+int dvb_set_channel(stream_t *stream, int adapter, int n)
 {
-    dvb_channels_list *new_list;
+    dvb_channels_list_t *new_list;
     dvb_channel_t *channel;
     dvb_priv_t *priv = stream->priv;
     char buf[4096];
@@ -674,17 +685,17 @@ int dvb_set_channel(stream_t *stream, int card, int n)
     int devno;
     int i;
 
-    if ((card < 0) || (card > state->count)) {
-        MP_ERR(stream, "dvb_set_channel: INVALID CARD NUMBER: %d vs %d, abort\n",
-               card, state->count);
+    if (adapter < 0 || adapter >= state->adapters_count) {
+        MP_ERR(stream, "dvb_set_channel: INVALID internal ADAPTER NUMBER: %d vs %d, abort\n",
+               adapter, state->adapters_count);
         return 0;
     }
 
-    devno = state->cards[card].devno;
-    new_list = state->cards[card].list;
-    if ((n > new_list->NUM_CHANNELS) || (n < 0)) {
+    devno = state->adapters[adapter].devno;
+    new_list = state->adapters[adapter].list;
+    if (n > new_list->NUM_CHANNELS || n < 0) {
         MP_ERR(stream, "dvb_set_channel: INVALID CHANNEL NUMBER: %d, for "
-               "card %d, abort\n", n, card);
+               "adapter %d, abort\n", n, devno);
         return 0;
     }
     channel = &(new_list->channels[n]);
@@ -696,11 +707,11 @@ int dvb_set_channel(stream_t *stream, int card, int n)
         state->retry = 0;
         //empty both the stream's and driver's buffer
         while (dvb_streaming_read(stream, buf, sizeof(buf)) > 0) {}
-        if (state->card != card) {
+        if (state->cur_adapter != adapter) {
             dvbin_close(stream);
             if (!dvb_open_devices(priv, devno, channel->pids_cnt)) {
                 MP_ERR(stream, "DVB_SET_CHANNEL, COULDN'T OPEN DEVICES OF "
-                       "CARD: %d, EXIT\n", card);
+                       "ADAPTER: %d, EXIT\n", devno);
                 return 0;
             }
         } else {
@@ -712,17 +723,16 @@ int dvb_set_channel(stream_t *stream, int card, int n)
     } else {
         if (!dvb_open_devices(priv, devno, channel->pids_cnt)) {
             MP_ERR(stream, "DVB_SET_CHANNEL2, COULDN'T OPEN DEVICES OF "
-                   "CARD: %d, EXIT\n", card);
+                   "ADAPTER: %d, EXIT\n", devno);
             return 0;
         }
     }
 
-    state->card = card;
-    state->list = new_list;
+    state->cur_adapter = adapter;
     state->retry = 5;
     new_list->current = n;
-    MP_VERBOSE(stream, "DVB_SET_CHANNEL: new channel name=%s, card: %d, "
-               "channel %d\n", channel->name, card, n);
+    MP_VERBOSE(stream, "DVB_SET_CHANNEL: new channel name=%s, adapter: %d, "
+               "channel %d\n", channel->name, devno, n);
 
     stream_drop_buffers(stream);
 
@@ -748,7 +758,7 @@ int dvb_set_channel(stream_t *stream, int card, int n)
                 MP_VERBOSE(stream, "DVB_SET_CHANNEL: PMT-PID for service %d "
                            "not resolved yet, parsing PAT...\n",
                            channel->service_id);
-                int pmt_pid = dvb_get_pmt_pid(priv, card, channel->service_id);
+                int pmt_pid = dvb_get_pmt_pid(priv, adapter, channel->service_id);
                 MP_VERBOSE(stream, "DVB_SET_CHANNEL: Found PMT-PID: %d\n",
                            pmt_pid);
                 channel->pids[i] = pmt_pid;
@@ -777,7 +787,7 @@ int dvb_step_channel(stream_t *stream, int dir)
     int new_current;
     dvb_priv_t *priv = stream->priv;
     dvb_state_t *state = priv->state;
-    dvb_channels_list *list = state->list;
+    dvb_channels_list_t *list = state->adapters[state->cur_adapter].list;
 
     MP_VERBOSE(stream, "DVB_STEP_CHANNEL dir %d\n", dir);
 
@@ -789,7 +799,7 @@ int dvb_step_channel(stream_t *stream, int dir)
     new_current = (list->NUM_CHANNELS + list->current +
                   (dir >= 0 ? 1 : -1)) % list->NUM_CHANNELS;
 
-    return dvb_set_channel(stream, state->card, new_current);
+    return dvb_set_channel(stream, state->cur_adapter, new_current);
 }
 
 static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
@@ -797,10 +807,13 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
     int r;
     dvb_priv_t *priv  = (dvb_priv_t *) s->priv;
     dvb_state_t *state = priv->state;
+    dvb_channels_list_t *list = NULL;
+
 
     switch (cmd) {
     case STREAM_CTRL_DVB_SET_CHANNEL: {
         int *iarg = arg;
+        MP_VERBOSE(s, "dvbin_stream_control: cmd STREAM_CTRL_DVB_SET_CHANNEL: %i, %i\n", iarg[1], iarg[0]);
         r = dvb_set_channel(s, iarg[1], iarg[0]);
         if (r) {
           // Stream will be pulled down after channel switch,
@@ -810,21 +823,9 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
         }
         return STREAM_ERROR;
     }
-    case STREAM_CTRL_DVB_SET_CHANNEL_NAME: {
-        char *progname = *((char**)arg);
-        int new_channel = -1;
-        for (int i=0; i < state->list->NUM_CHANNELS; ++i) {
-          if (!strcmp(state->list->channels[i].name, progname)) {
-            new_channel = i;
-            break;
-          }
-        }
-        if (new_channel == -1) {
-          MP_ERR(s, "Program '%s' not found for card %d!\n",
-                 progname, state->card);
-          return STREAM_ERROR;
-        }
-        r = dvb_set_channel(s, state->card, new_channel);
+    case STREAM_CTRL_DVB_STEP_CHANNEL: {
+        MP_VERBOSE(s, "dvbin_stream_control: cmd STREAM_CTRL_DVB_STEP_CHANNEL: %i\n", (*(int *)arg));
+        r = dvb_step_channel(s, (*(int *)arg));
         if (r) {
           // Stream will be pulled down after channel switch,
           // persist state.
@@ -833,8 +834,33 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
         }
         return STREAM_ERROR;
     }
-    case STREAM_CTRL_DVB_STEP_CHANNEL: {
-        r = dvb_step_channel(s, *(int *)arg);
+    }
+
+
+    if (state->cur_adapter >= state->adapters_count)
+        return STREAM_ERROR;
+    list = state->adapters[state->cur_adapter].list;
+
+    switch (cmd) {
+    case STREAM_CTRL_GET_TV_FREQ:
+        (*(unsigned int*)arg) = list->channels[list->current].freq;
+        return STREAM_ERROR;
+    case STREAM_CTRL_DVB_SET_CHANNEL_NAME: {
+        char *progname = *((char**)arg);
+        int new_channel = -1;
+        MP_VERBOSE(s, "dvbin_stream_control: cmd STREAM_CTRL_DVB_SET_CHANNEL_NAME: %s\n", progname);
+        for (int i=0; i < list->NUM_CHANNELS; ++i) {
+           if (!strcmp(list->channels[i].name, progname)) {
+               new_channel = i;
+               break;
+            }
+        }
+        if (new_channel == -1) {
+              MP_ERR(s, "Program '%s' not found for adapter %d!\n",
+                     progname, state->adapters[state->cur_adapter].devno);
+              return STREAM_ERROR;
+        }
+        r = dvb_set_channel(s, state->cur_adapter, new_channel);
         if (r) {
           // Stream will be pulled down after channel switch,
           // persist state.
@@ -844,18 +870,17 @@ static int dvbin_stream_control(struct stream *s, int cmd, void *arg)
         return STREAM_ERROR;
     }
     case STREAM_CTRL_DVB_GET_CHANNEL_NAME: {
-      int current_channel = state->list->current;
-      char *progname = state->list->channels[current_channel].name;
-      *(char **)arg = talloc_strdup(NULL, progname);
-      return STREAM_OK;
+        MP_VERBOSE(s, "dvbin_stream_control: cmd STREAM_CTRL_DVB_GET_CHANNEL_NAME\n");
+        char *progname = list->channels[list->current].name;
+        *(char **)arg = talloc_strdup(NULL, progname);
+        return STREAM_OK;
     }
     case STREAM_CTRL_GET_METADATA: {
-      struct mp_tags *metadata = talloc_zero(NULL, struct mp_tags);
-      int current_channel = state->list->current;
-      char *progname = state->list->channels[current_channel].name;
-      mp_tags_set_str(metadata, "title", progname);
-      *(struct mp_tags **)arg = metadata;
-      return STREAM_OK;
+        struct mp_tags *metadata = talloc_zero(NULL, struct mp_tags);
+        char *progname = list->channels[list->current].name;
+        mp_tags_set_str(metadata, "title", progname);
+        *(struct mp_tags **)arg = metadata;
+        return STREAM_OK;
     }
     }
     return STREAM_UNSUPPORTED;
@@ -899,34 +924,33 @@ static int dvb_streaming_start(stream_t *stream, char *progname)
     dvb_channel_t *channel = NULL;
     dvb_priv_t *priv = stream->priv;
     dvb_state_t *state = priv->state;
+    dvb_channels_list_t *list;
 
     if (progname == NULL)
         return 0;
-    MP_VERBOSE(stream, "\r\ndvb_streaming_start(PROG: %s, CARD: %d)\n",
-               progname, priv->cfg_card);
+    MP_VERBOSE(stream, "\r\ndvb_streaming_start(PROG: %s, ADAPTER: %d)\n",
+               progname, priv->cfg_devno);
 
     state->is_on = 0;
-
-    i = 0;
-    while ((channel == NULL) && i < state->list->NUM_CHANNELS) {
-        if (!strcmp(state->list->channels[i].name, progname))
-            channel = &(state->list->channels[i]);
-
-        i++;
+    list = state->adapters[state->cur_adapter].list;
+    for (i = 0; i < list->NUM_CHANNELS; i ++) {
+        if (!strcmp(list->channels[i].name, progname)) {
+            channel = &(list->channels[i]);
+            break;
+        }
     }
 
-    if (channel != NULL) {
-        state->list->current = i - 1;
-        MP_VERBOSE(stream, "PROGRAM NUMBER %d: name=%s, freq=%u\n", i - 1,
-                   channel->name, channel->freq);
-    } else {
+    if (channel == NULL) {
         MP_ERR(stream, "\n\nDVBIN: no such channel \"%s\"\n\n", progname);
         return 0;
     }
 
+    list->current = i;
+    MP_VERBOSE(stream, "PROGRAM NUMBER %d: name=%s, freq=%u\n", i,
+               channel->name, channel->freq);
 
-    if (!dvb_set_channel(stream, state->card, state->list->current)) {
-        MP_ERR(stream, "ERROR, COULDN'T SET CHANNEL  %i: ", state->list->current);
+    if (!dvb_set_channel(stream, state->cur_adapter, list->current)) {
+        MP_ERR(stream, "ERROR, COULDN'T SET CHANNEL  %i: \"%s\"\n", list->current, progname);
         dvbin_close(stream);
         return 0;
     }
@@ -949,7 +973,7 @@ static int dvb_open(stream_t *stream)
 
     pthread_mutex_lock(&global_dvb_state_lock);
     if (global_dvb_state && global_dvb_state->stream_used) {
-      MP_ERR(stream, "DVB stream already in use, only one DVB stream can exist at a time!");
+      MP_ERR(stream, "DVB stream already in use, only one DVB stream can exist at a time!\n");
       pthread_mutex_unlock(&global_dvb_state_lock);
       goto err_out;
     }
@@ -971,32 +995,30 @@ static int dvb_open(stream_t *stream)
       // State could be already initialized, for example, we just did a channel switch.
       // The following setup only has to be done once.
 
-      state->card = -1;
-      for (i = 0; i < state->count; i++) {
-          if (state->cards[i].devno == priv->cfg_card) {
-              state->card = i;
+      state->cur_adapter = -1;
+      for (i = 0; i < state->adapters_count; i++) {
+          if (state->adapters[i].devno == priv->cfg_devno) {
+              state->cur_adapter = i;
               break;
           }
       }
 
-      if (state->card == -1) {
-          MP_ERR(stream, "NO CONFIGURATION FOUND FOR CARD N. %d, exit\n",
-                 priv->cfg_card);
+      if (state->cur_adapter == -1) {
+          MP_ERR(stream, "NO CONFIGURATION FOUND FOR ADAPTER N. %d, exit\n",
+                 priv->cfg_devno);
           goto err_out;
       }
       state->timeout = priv->cfg_timeout;
 
-      MP_VERBOSE(stream, "OPEN_DVB: prog=%s, card=%d\n",
-                 priv->cfg_prog, state->card);
+      MP_VERBOSE(stream, "OPEN_DVB: prog=%s, devno=%d\n",
+                 priv->cfg_prog, state->adapters[state->cur_adapter].devno);
 
-      state->list = state->cards[state->card].list;
-
-      if ((priv->cfg_prog == NULL || priv->cfg_prog[0] == 0) && (state->list != NULL)) {
-          progname = state->list->channels[0].name;
+      if ((priv->cfg_prog == NULL || priv->cfg_prog[0] == 0) &&
+          state->adapters[state->cur_adapter].list != NULL) {
+          progname = state->adapters[state->cur_adapter].list->channels[0].name;
       } else {
           progname = priv->cfg_prog;
       }
-
 
       if (!dvb_streaming_start(stream, progname))
           goto err_out;
@@ -1007,7 +1029,7 @@ static int dvb_open(stream_t *stream)
     stream->close = dvbin_close;
     stream->control = dvbin_stream_control;
     stream->streaming = true;
-
+    stream->allow_caching = false;
     stream->demuxer = "lavf";
     stream->lavf_type = "mpegts";
 
@@ -1030,42 +1052,40 @@ dvb_state_t *dvb_get_state(stream_t *stream)
     struct mpv_global *global = stream->global;
     dvb_priv_t *priv = stream->priv;
     int delsys, size;
-    char filename[30], *name;
-    dvb_channels_list *list;
-    dvb_card_config_t *cards = NULL, *tmp;
+    char filename[PATH_MAX];
+    dvb_channels_list_t *list;
+    dvb_adapter_config_t *adapters = NULL, *tmp;
     dvb_state_t *state = NULL;
-    bstr prog, card;
+    bstr prog, devno;
 
-    if (!bstr_split_tok(bstr0(stream->path), "@", &card, &prog)) {
-        prog = card;
-        card.len = 0;
+    if (!bstr_split_tok(bstr0(stream->path), "@", &devno, &prog)) {
+        prog = devno;
+        devno.len = 0;
     }
     if (prog.len) {
         talloc_free(priv->cfg_prog);
         priv->cfg_prog = bstrto0(NULL, prog);
     }
-    if (card.len) {
+    if (devno.len) {
         bstr r;
-        priv->cfg_card = bstrtoll(card, &r, 0);
-        if (r.len || priv->cfg_card < 0 || priv->cfg_card > MAX_CARDS) {
-            MP_ERR(stream, "invalid card: '%.*s'\n", BSTR_P(card));
+        priv->cfg_devno = bstrtoll(devno, &r, 0);
+        if (r.len || priv->cfg_devno < 0 || priv->cfg_devno > MAX_ADAPTERS) {
+            MP_ERR(stream, "invalid devno: '%.*s'\n", BSTR_P(devno));
             return NULL;
         }
     }
 
-    MP_VERBOSE(stream, "DVB_CONFIG: prog=%s, card=%d\n",
-               priv->cfg_prog, priv->cfg_card);
+    MP_VERBOSE(stream, "DVB_CONFIG: prog=%s, devno=%d\n",
+               priv->cfg_prog, priv->cfg_devno);
 
     state = malloc(sizeof(dvb_state_t));
     if (state == NULL)
         return NULL;
-
-    state->count = 0;
+    memset(state, 0, sizeof(dvb_state_t));
     state->switching_channel = false;
     state->stream_used = true;
-    state->cards = NULL;
     state->fe_fd = state->dvr_fd = -1;
-    for (int i = 0; i < MAX_CARDS; i++) {
+    for (int i = 0; i < MAX_ADAPTERS; i++) {
         snprintf(filename, sizeof(filename), "/dev/dvb/adapter%d/frontend0", i);
         int fd = open(filename, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
         if (fd < 0) {
@@ -1075,11 +1095,13 @@ dvb_state_t *dvb_get_state(stream_t *stream)
         }
 
         mp_verbose(log, "Opened device %s, FD: %d\n", filename, fd);
-        int* tuner_delsys = NULL;
+        int *tuner_delsys = NULL;
         int delsys_count = dvb_get_tuner_delsys(fd, log, &tuner_delsys);
         close(fd);
         mp_verbose(log, "Frontend device %s offers %d supported delivery systems.\n",
                    filename, delsys_count);
+        /* Create channel list for adapter. */
+        list = NULL;
         for (int tuner_delsys_idx = 0; tuner_delsys_idx < delsys_count; tuner_delsys_idx++) {
           delsys = tuner_delsys[tuner_delsys_idx];
             switch (delsys) {
@@ -1092,7 +1114,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
               break;
             default:
               mp_verbose(log, "DVB_CONFIG, unsupported tuner type %d - %s of "
-                         "card %d, skipping\n", delsys, get_dvb_delsys(delsys), i);
+                         "adapter %d, skipping\n", delsys, get_dvb_delsys(delsys), i);
               continue;
             }
 
@@ -1129,46 +1151,33 @@ dvb_state_t *dvb_get_state(stream_t *stream)
             }
           }
 
-          list = dvb_get_channels(log, priv->cfg_full_transponder, conf_file,
+          list = dvb_get_channels(log, list, priv->cfg_full_transponder, conf_file,
                                   delsys);
           talloc_free(talloc_ctx);
-
-          if (list == NULL)
-            continue;
-
-          size = sizeof(dvb_card_config_t) * (state->count + 1);
-          tmp = realloc(state->cards, size);
-
-          if (tmp == NULL) {
-            mp_err(log, "DVB_CONFIG, can't realloc %d bytes, skipping\n",
-                   size);
-            free(list);
-            continue;
-          }
-          cards = tmp;
-
-          name = malloc(20);
-          if (name == NULL) {
-            mp_err(log, "DVB_CONFIG, can't alloc 20 bytes, skipping\n");
-            free(list);
-            free(tmp);
-            continue;
-          }
-
-          state->cards = cards;
-          state->cards[state->count].devno = i;
-          state->cards[state->count].list = list;
-          state->cards[state->count].delsys = delsys;
-          snprintf(name, 20, "%s card n. %d",
-                   get_dvb_delsys(delsys),
-                   state->count);
-          state->cards[state->count].name = name;
-          state->count++;
         }
         talloc_free(tuner_delsys);
+        /* Add adapter with non zero channel list. */
+        if (list == NULL)
+          continue;
+
+        size = sizeof(dvb_adapter_config_t) * (state->adapters_count + 1);
+        tmp = realloc(state->adapters, size);
+
+        if (tmp == NULL) {
+          mp_err(log, "DVB_CONFIG, can't realloc %d bytes, skipping\n",
+                 size);
+          free(list);
+          continue;
+        }
+        adapters = tmp;
+
+        state->adapters = adapters;
+        state->adapters[state->adapters_count].devno = i;
+        state->adapters[state->adapters_count].list = list;
+        state->adapters_count++;
     }
 
-    if (state->count == 0) {
+    if (state->adapters_count == 0) {
         free(state);
         state = NULL;
     }
