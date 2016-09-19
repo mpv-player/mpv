@@ -5631,7 +5631,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
     struct MPContext *mpctx = ctx;
 
     if (flags & UPDATE_TERM)
-        mp_msg_update_msglevels(mpctx->global);
+        mp_update_logging(mpctx);
 
     if (flags & UPDATE_RENDERER) {
         if (mpctx->video_out)

@@ -410,10 +410,8 @@ static void *terminal_thread(void *ptr)
 
 void terminal_setup_getch(struct input_ctx *ictx)
 {
-    if (!getch2_enabled)
+    if (!getch2_enabled || input_ctx)
         return;
-
-    assert(!input_ctx); // already setup
 
     if (mp_make_wakeup_pipe(death_pipe) < 0)
         return;
