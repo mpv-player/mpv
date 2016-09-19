@@ -984,6 +984,12 @@ Property list
     Remaining length of the file in seconds. Note that the file duration is not
     always exactly known, so this is an estimate.
 
+``audio-pts`` (R)
+    Current audio playback position in current file in seconds. Unlike time-pos,
+    this updates more often than once per frame. For audio-only files, it is
+    mostly equivalent to time-pos, while for video-only files this property is
+    not available.
+
 ``playtime-remaining``
     ``time-remaining`` scaled by the current ``speed``.
 

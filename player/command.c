@@ -796,6 +796,18 @@ static int mp_property_time_pos(void *ctx, struct m_property *prop,
     return property_time(action, arg, get_current_time(mpctx));
 }
 
+/// Current audio pts in seconds (R)
+static int mp_property_audio_pts(void *ctx, struct m_property *prop,
+                                int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->playback_initialized || mpctx->audio_status < STATUS_PLAYING ||
+        mpctx->audio_status >= STATUS_EOF)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return property_time(action, arg, playing_audio_pts(mpctx));
+}
+
 static bool time_remaining(MPContext *mpctx, double *remaining)
 {
     double len = get_time_length(mpctx);
@@ -3806,6 +3818,7 @@ static const struct m_property mp_properties_base[] = {
     {"time-start", mp_property_time_start},
     {"time-pos", mp_property_time_pos},
     {"time-remaining", mp_property_remaining},
+    {"audio-pts", mp_property_audio_pts},
     {"playtime-remaining", mp_property_playtime_remaining},
     {"playback-time", mp_property_playback_time},
     {"disc-title", mp_property_disc_title},
@@ -4034,7 +4047,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_IDLE, "*"),
     E(MPV_EVENT_PAUSE,   "pause", "paused-on-cache", "core-idle", "eof-reached"),
     E(MPV_EVENT_UNPAUSE, "pause", "paused-on-cache", "core-idle", "eof-reached"),
-    E(MPV_EVENT_TICK, "time-pos", "stream-pos", "stream-time-pos", "avsync",
+    E(MPV_EVENT_TICK, "time-pos", "audio-pts", "stream-pos", "avsync",
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
       "total-avsync-change", "audio-speed-correction", "video-speed-correction",
