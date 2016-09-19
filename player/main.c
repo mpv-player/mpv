@@ -314,14 +314,12 @@ static int cfg_include(void *ctx, char *filename, int flags)
     return r;
 }
 
-void wakeup_playloop(void *ctx)
-{
-    struct MPContext *mpctx = ctx;
-    mp_wakeup_core(mpctx);
-}
-
 struct MPContext *mp_create(void)
 {
+    char *enable_talloc = getenv("MPV_LEAK_REPORT");
+    if (enable_talloc && strcmp(enable_talloc, "1") == 0)
+        talloc_enable_leak_report();
+
     mp_time_init();
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
@@ -367,6 +365,10 @@ struct MPContext *mp_create(void)
 #endif
 
     mp_input_set_cancel(mpctx->input, mpctx->playback_abort);
+
+    char *verbose_env = getenv("MPV_VERBOSE");
+    if (verbose_env)
+        mpctx->opts->verbose = atoi(verbose_env);
 
     return mpctx;
 }
@@ -473,8 +475,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         SetPriorityClass(GetCurrentProcess(), opts->w32_priority);
 #endif
 
-    prepare_playlist(mpctx, mpctx->playlist);
-
     MP_STATS(mpctx, "end init");
 
     return 0;
@@ -482,16 +482,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
 int mpv_main(int argc, char *argv[])
 {
-    char *enable_talloc = getenv("MPV_LEAK_REPORT");
-    if (enable_talloc && strcmp(enable_talloc, "1") == 0)
-        talloc_enable_leak_report();
-
     struct MPContext *mpctx = mp_create();
-    struct MPOpts *opts = mpctx->opts;
-
-    char *verbose_env = getenv("MPV_VERBOSE");
-    if (verbose_env)
-        opts->verbose = atoi(verbose_env);
 
     char **options = argv && argv[0] ? argv + 1 : NULL; // skips program name
     int r = mp_initialize(mpctx, options);
