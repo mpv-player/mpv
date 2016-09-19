@@ -367,26 +367,26 @@ struct m_option {
 // even if the settings don't get effective immediately). Note that an option
 // might still change even if this is set, e.g. via properties or per-file
 // options.
-#define M_OPT_FIXED             (1 << 5)
+#define M_OPT_FIXED             (1 << 3)
 
 // The option should be set during command line pre-parsing
-#define M_OPT_PRE_PARSE         (1 << 6)
+#define M_OPT_PRE_PARSE         (1 << 4)
 
 // The option expects a file name (or a list of file names)
-#define M_OPT_FILE              (1 << 11)
+#define M_OPT_FILE              (1 << 5)
 
 // Do not add as property.
-#define M_OPT_NOPROP            (1 << 13)
+#define M_OPT_NOPROP            (1 << 6)
 
 // The following are also part of the M_OPT_* flags, and are used to update
 // certain groups of options.
-#define UPDATE_OPT_FIRST        (1 << 14)
-#define UPDATE_TERM             (1 << 14) // terminal options
-#define UPDATE_RENDERER         (1 << 15) // mainly vo_opengl options
-#define UPDATE_VIDEOPOS         (1 << 16) // video position (panscan etc.)
-#define UPDATE_OSD              (1 << 17) // related to OSD rendering
-#define UPDATE_BUILTIN_SCRIPTS  (1 << 18) // osc/ytdl
-#define UPDATE_OPT_LAST         (1 << 18)
+#define UPDATE_OPT_FIRST        (1 << 7)
+#define UPDATE_TERM             (1 << 7) // terminal options
+#define UPDATE_RENDERER         (1 << 8) // mainly vo_opengl options
+#define UPDATE_VIDEOPOS         (1 << 9) // video position (panscan etc.)
+#define UPDATE_OSD              (1 << 10) // related to OSD rendering
+#define UPDATE_BUILTIN_SCRIPTS  (1 << 11) // osc/ytdl
+#define UPDATE_OPT_LAST         (1 << 11)
 
 // All bits between _FIRST and _LAST (inclusive)
 #define UPDATE_OPTS_MASK \
