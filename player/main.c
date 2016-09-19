@@ -432,10 +432,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         return -1;
     }
 
-    if (opts->dump_stats && opts->dump_stats[0]) {
-        if (mp_msg_open_stats_file(mpctx->global, opts->dump_stats) < 0)
-            MP_ERR(mpctx, "Failed to open stats file '%s'\n", opts->dump_stats);
-    }
     MP_STATS(mpctx, "start init");
 
     if (!mpctx->playlist->first && !opts->player_idle_mode)
