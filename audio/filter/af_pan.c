@@ -47,7 +47,7 @@ static void parse_matrix(struct af_instance *af, const char *cp)
 {
     af_pan_t *s = af->priv;
     int j = 0, k = 0, n;
-    while (cp && k < AF_NCH) {
+    while (*cp && k < AF_NCH) {
         sscanf(cp, "%f%n" , &s->level[j][k], &n);
         MP_VERBOSE(af, "Pan level from channel %i to"
                    " channel %i = %f\n", k, j, s->level[j][k]);
@@ -186,7 +186,8 @@ static int af_open(struct af_instance *af)
         return AF_ERROR;
 
     // Read pan values
-    parse_matrix(af, s->matrixstr);
+    if (s->matrixstr)
+        parse_matrix(af, s->matrixstr);
     return AF_OK;
 }
 
