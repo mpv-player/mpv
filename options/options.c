@@ -156,7 +156,7 @@ static const m_option_t mp_vo_opt_list[] = {
     OPT_SIZE_BOX("autofit", autofit, 0),
     OPT_SIZE_BOX("autofit-larger", autofit_larger, 0),
     OPT_SIZE_BOX("autofit-smaller", autofit_smaller, 0),
-    OPT_FLOATRANGE("window-scale", window_scale, 0, 0.001, 100),
+    OPT_DOUBLE("window-scale", window_scale, CONF_RANGE, .min = 0.001, .max = 100),
     OPT_FLAG("force-window-position", force_window_position, 0),
     OPT_STRING("x11-name", winname, 0),
     OPT_FLOATRANGE("monitoraspect", force_monitor_aspect, 0, 0.0, 9.0),
