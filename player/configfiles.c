@@ -195,7 +195,6 @@ static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
         char *wl_dir = mpctx->opts->watch_later_directory;
         if (wl_dir && wl_dir[0]) {
             mpctx->cached_watch_later_configdir = mp_get_user_path(NULL, mpctx->global, wl_dir);
-            mp_mkdirp(mpctx->cached_watch_later_configdir);
         }
     }
 
@@ -321,7 +320,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         goto exit;
     }
 
-    mp_mk_config_dir(mpctx->global, MP_WATCH_LATER_CONF);
+    mp_mk_config_dir(mpctx->global, mpctx->cached_watch_later_configdir);
 
     conffile = mp_get_playback_resume_config_filename(mpctx, cur->filename);
     if (!conffile)
