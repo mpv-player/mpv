@@ -214,6 +214,7 @@ const struct af_info af_info_rubberband = {
         .opt_pitch = RubberBandOptionPitchHighConsistency,
         .opt_transients = RubberBandOptionTransientsMixed,
         .opt_formant = RubberBandOptionFormantPreserved,
+        .opt_channels = RubberBandOptionChannelsTogether,
     },
     .options = (const struct m_option[]) {
         OPT_CHOICE("transients", opt_transients, 0,
