@@ -43,6 +43,27 @@ static void set_channels(struct mp_audio *mpa, int num)
     mp_audio_set_channels(mpa, &map);
 }
 
+static void parse_matrix(struct af_instance *af, const char *cp)
+{
+    af_pan_t *s = af->priv;
+    int j = 0, k = 0, n;
+    while (cp && k < AF_NCH) {
+        sscanf(cp, "%f%n" , &s->level[j][k], &n);
+        MP_VERBOSE(af, "Pan level from channel %i to"
+                   " channel %i = %f\n", k, j, s->level[j][k]);
+        cp = &cp[n];
+        j++;
+        if (j >= s->nch) {
+            j = 0;
+            k++;
+        }
+        if (*cp != ',')
+            break;
+        cp++;
+    }
+
+}
+
 // Initialization and runtime control
 static int control(struct af_instance *af, int cmd, void *arg)
 {
@@ -102,6 +123,15 @@ static int control(struct af_instance *af, int cmd, void *arg)
             return AF_ERROR;
         *(float*)arg = s->level[0][1] - s->level[1][0];
         return AF_OK;
+    case AF_CONTROL_COMMAND: {
+        char **args = arg;
+        if (!strcmp(args[0], "set-matrix")) {
+            parse_matrix(af, args[1]);
+            return CONTROL_OK;
+        } else {
+            return CONTROL_ERROR;
+        }
+    }
     }
     return AF_UNKNOWN;
 }
@@ -151,30 +181,12 @@ static int af_open(struct af_instance *af)
     af->control = control;
     af->filter_frame = filter_frame;
     af_pan_t *s = af->priv;
-    int n = 0;
-    int j, k;
-
     int nch = s->nch;
     if (nch && AF_OK != control(af, AF_CONTROL_SET_PAN_NOUT, &nch))
         return AF_ERROR;
 
     // Read pan values
-    char *cp = s->matrixstr;
-    j = 0; k = 0;
-    while (cp && k < AF_NCH) {
-        sscanf(cp, "%f%n" , &s->level[j][k], &n);
-        MP_VERBOSE(af, "Pan level from channel %i to"
-                   " channel %i = %f\n", k, j, s->level[j][k]);
-        cp = &cp[n];
-        j++;
-        if (j >= nch) {
-            j = 0;
-            k++;
-        }
-        if (*cp != ',')
-            break;
-        cp++;
-    }
+    parse_matrix(af, s->matrixstr);
     return AF_OK;
 }
 

@@ -312,6 +312,13 @@ Available filters are:
         ``mpv '--af=format=channels=5.1' '--audio-channels=5.1'`` would always force
         remixing audio to 5.1 and output it like this.
 
+    This filter supports the following ``af-command`` commands:
+
+    ``set-matrix``
+        Set the ``<matrix>`` argument dynamically. This can be used to change
+        the mixing matrix at runtime, without reinitializing the entire filter
+        chain.
+
 ``drc[=method:target]``
     Applies dynamic range compression. This maximizes the volume by compressing
     the audio signal's dynamic range. (Formerly called ``volnorm``.)
