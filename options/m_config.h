@@ -77,9 +77,16 @@ typedef struct m_config {
     int (*includefunc)(void *ctx, char *filename, int flags);
     void *includefunc_ctx;
 
+    // Can intercept option write accesses.
     int (*option_set_callback)(void *ctx, struct m_config_option *co,
                                void *data, int flags);
     void *option_set_callback_cb;
+
+    // Notification after an option was successfully written to.
+    // Uses flags as set in UPDATE_OPTS_MASK.
+    void (*option_change_callback)(void *ctx, struct m_config_option *co,
+                                   int flags);
+    void *option_change_callback_ctx;
 
     // For the command line parser
     int recursion_depth;

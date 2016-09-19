@@ -359,6 +359,9 @@ struct MPContext *mp_create(void)
     mpctx->mconfig->option_set_callback = mp_on_set_option;
     mpctx->mconfig->option_set_callback_cb = mpctx;
 
+    mpctx->mconfig->option_change_callback = mp_option_change_callback;
+    mpctx->mconfig->option_change_callback_ctx = mpctx;
+
     return mpctx;
 }
 

@@ -418,6 +418,9 @@ static void add_sub_options(struct m_config *config,
     for (int n = 0; n < config->num_groups; n++)
         assert(config->groups[n].group != subopts);
 
+    // You can only use UPDATE_ flags here.
+    assert(!(subopts->change_flags & ~(unsigned)UPDATE_OPTS_MASK));
+
     void *new_optstruct = NULL;
     if (config->optstruct) { // only if not noalloc
         new_optstruct = talloc_zero_size(config, subopts->size);
@@ -1255,16 +1258,23 @@ void m_config_notify_change_co(struct m_config *config,
         if (co->shadow_offset >= 0)
             m_option_copy(co->opt, shadow->data + co->shadow_offset, co->data);
         pthread_mutex_unlock(&shadow->lock);
-
-        int group = co->group;
-        while (group >= 0) {
-            atomic_fetch_add(&config->groups[group].ts, 1);
-            group = config->groups[group].parent_group;
-        }
     }
 
-    if (config->global && (co->opt->flags & M_OPT_TERM))
-        mp_msg_update_msglevels(config->global);
+    int changed = co->opt->flags & UPDATE_OPTS_MASK;
+
+    int group = co->group;
+    while (group >= 0) {
+        struct m_config_group *g = &config->groups[group];
+        atomic_fetch_add(&g->ts, 1);
+        if (g->group)
+            changed |= g->group->change_flags;
+        group = g->parent_group;
+    }
+
+    if (config->option_change_callback) {
+        config->option_change_callback(config->option_change_callback_ctx, co,
+                                       changed);
+    }
 }
 
 bool m_config_is_in_group(struct m_config *config,

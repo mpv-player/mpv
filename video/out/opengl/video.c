@@ -415,6 +415,7 @@ const struct m_sub_options gl_video_conf = {
     },
     .size = sizeof(struct gl_video_opts),
     .defaults = &gl_video_opts_def,
+    .change_flags = UPDATE_RENDERER,
 };
 
 #define LEGACY_SCALER_OPTS(n)                \

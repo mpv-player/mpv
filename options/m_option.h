@@ -191,6 +191,9 @@ struct m_sub_options {
     const struct m_option *opts;
     size_t size;
     const void *defaults;
+    // Change flags passed to mp_option_change_callback() if any option that is
+    // directly or indirectly part of this group is changed.
+    int change_flags;
 };
 
 #define CONF_TYPE_FLAG          (&m_option_type_flag)
@@ -372,11 +375,19 @@ struct m_option {
 // The option expects a file name (or a list of file names)
 #define M_OPT_FILE              (1 << 11)
 
-// Logging-related option - used to update log/terminal settings eagerly
-#define M_OPT_TERM              (1 << 12)
-
 // Do not add as property.
 #define M_OPT_NOPROP            (1 << 13)
+
+// The following are also part of the M_OPT_* flags, and are used to update
+// certain groups of options.
+#define UPDATE_OPT_FIRST        (1 << 14)
+#define UPDATE_TERM             (1 << 14) // terminal options
+#define UPDATE_RENDERER         (1 << 15) // mainly vo_opengl options
+#define UPDATE_OPT_LAST         (1 << 15)
+
+// All bits between _FIRST and _LAST (inclusive)
+#define UPDATE_OPTS_MASK \
+    (((UPDATE_OPT_LAST << 1) - 1) & ~(unsigned)(UPDATE_OPT_FIRST - 1))
 
 // These are kept for compatibility with older code.
 #define CONF_MIN                M_OPT_MIN
