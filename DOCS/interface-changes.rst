@@ -86,6 +86,10 @@ Interface changes
       has been added to the manpage describing some conflicting behavior
       between options and properties)
     - implement changing sub-speed during playback
+    - make many previously fixed options changeable at runtime (for example
+      --terminal, --osc, --ytdl, can all be enable/disabled after
+      mpv_initialize() - this can be extended to other still fixed options
+      on user requests)
  --- mpv 0.20.0 ---
     - add --image-display-duration option - this also means that image duration
       is not influenced by --mf-fps anymore in the general case (this is an

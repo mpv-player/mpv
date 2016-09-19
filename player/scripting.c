@@ -176,13 +176,41 @@ static char **list_script_files(void *talloc_ctx, char *path)
     return files;
 }
 
+static void load_builtin_script(struct MPContext *mpctx, bool enable,
+                                const char *fname)
+{
+    void *tmp = talloc_new(NULL);
+    // (The name doesn't have to match if there were conflicts with other
+    // scripts, so this is on best-effort basis.)
+    char *name = script_name_from_filename(tmp, fname);
+    if (enable != mp_client_exists(mpctx, name)) {
+        if (enable) {
+            mp_load_script(mpctx, fname);
+        } else {
+            // Try to unload it by sending a shutdown event. Wait until it has
+            // terminated, or re-enabling the script could be racy (because it'd
+            // recognize a still-terminating script as "loaded").
+            while (mp_client_exists(mpctx, name)) {
+                if (mp_client_send_event(mpctx, name, MPV_EVENT_SHUTDOWN, NULL) < 0)
+                    break;
+                mp_idle(mpctx);
+            }
+            mp_wakeup_core(mpctx); // avoid lost wakeups during waiting
+        }
+    }
+    talloc_free(tmp);
+}
+
+void mp_load_builtin_scripts(struct MPContext *mpctx)
+{
+    load_builtin_script(mpctx, mpctx->opts->lua_load_osc, "@osc.lua");
+    load_builtin_script(mpctx, mpctx->opts->lua_load_ytdl, "@ytdl_hook.lua");
+}
+
 void mp_load_scripts(struct MPContext *mpctx)
 {
     // Load scripts from options
-    if (mpctx->opts->lua_load_osc)
-        mp_load_script(mpctx, "@osc.lua");
-    if (mpctx->opts->lua_load_ytdl)
-        mp_load_script(mpctx, "@ytdl_hook.lua");
+    mp_load_builtin_scripts(mpctx);
     char **files = mpctx->opts->script_files;
     for (int n = 0; files && files[n]; n++) {
         if (files[n][0])

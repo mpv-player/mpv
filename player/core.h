@@ -549,6 +549,7 @@ struct mp_scripting {
     int (*load)(struct mpv_handle *client, const char *filename);
 };
 void mp_load_scripts(struct MPContext *mpctx);
+void mp_load_builtin_scripts(struct MPContext *mpctx);
 
 // sub.c
 void reset_subtitle_state(struct MPContext *mpctx);

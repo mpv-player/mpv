@@ -5603,6 +5603,9 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
         osd_changed(mpctx->osd);
         mp_wakeup_core(mpctx);
     }
+
+    if (flags & UPDATE_BUILTIN_SCRIPTS)
+        mp_load_builtin_scripts(mpctx);
 }
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)

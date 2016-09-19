@@ -385,7 +385,8 @@ struct m_option {
 #define UPDATE_RENDERER         (1 << 15) // mainly vo_opengl options
 #define UPDATE_VIDEOPOS         (1 << 16) // video position (panscan etc.)
 #define UPDATE_OSD              (1 << 17) // related to OSD rendering
-#define UPDATE_OPT_LAST         (1 << 17)
+#define UPDATE_BUILTIN_SCRIPTS  (1 << 18) // osc/ytdl
+#define UPDATE_OPT_LAST         (1 << 18)
 
 // All bits between _FIRST and _LAST (inclusive)
 #define UPDATE_OPTS_MASK \
