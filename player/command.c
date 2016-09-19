@@ -2407,18 +2407,6 @@ static int video_simple_refresh_property(void *ctx, struct m_property *prop,
     return r;
 }
 
-// Update options which are managed through VOCTRL_GET/SET_PANSCAN.
-static int panscan_property_helper(void *ctx, struct m_property *prop,
-                                   int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-
-    int r = mp_property_generic_option(mpctx, prop, action, arg);
-    if (mpctx->video_out && action == M_PROPERTY_SET)
-        vo_control(mpctx->video_out, VOCTRL_SET_PANSCAN, NULL);
-    return r;
-}
-
 /// Helper to set vo flags.
 /** \ingroup PropertyImplHelper
  */
@@ -2985,20 +2973,6 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-// For OSD and subtitle related properties using the generic option bridge.
-// - Fail as unavailable if no video is active
-// - Trigger OSD state update when property is set
-static int property_osd_helper(void *ctx, struct m_property *prop,
-                               int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (action == M_PROPERTY_SET) {
-        osd_changed(mpctx->osd);
-        mp_wakeup_core(mpctx);
-    }
-    return mp_property_generic_option(mpctx, prop, action, arg);
-}
-
 /// Selected subtitles (RW)
 static int mp_property_sub(void *ctx, struct m_property *prop,
                            int action, void *arg)
@@ -3023,7 +2997,7 @@ static int mp_property_sub_delay(void *ctx, struct m_property *prop,
         *(char **)arg = format_delay(opts->sub_delay);
         return M_PROPERTY_OK;
     }
-    return property_osd_helper(mpctx, prop, action, arg);
+    return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
 /// Subtitle speed (RW)
@@ -3046,7 +3020,7 @@ static int mp_property_sub_speed(void *ctx, struct m_property *prop,
         *(char **)arg = talloc_asprintf(NULL, "%4.1f%%", 100 * opts->sub_speed);
         return M_PROPERTY_OK;
     }
-    return property_osd_helper(mpctx, prop, action, arg);
+    return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
 static int mp_property_sub_pos(void *ctx, struct m_property *prop,
@@ -3058,7 +3032,7 @@ static int mp_property_sub_pos(void *ctx, struct m_property *prop,
         *(char **)arg = talloc_asprintf(NULL, "%d/100", opts->sub_pos);
         return M_PROPERTY_OK;
     }
-    return property_osd_helper(mpctx, prop, action, arg);
+    return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
 static int mp_property_sub_text(void *ctx, struct m_property *prop,
@@ -3787,7 +3761,6 @@ static int mp_profile_list(void *ctx, struct m_property *prop,
 // Base list of properties. This does not include option-mapped properties.
 static const struct m_property mp_properties_base[] = {
     // General
-    {"osd-scale", property_osd_helper},
     {"speed", mp_property_playback_speed},
     {"audio-speed-correction", mp_property_av_speed_correction, .priv = "a"},
     {"video-speed-correction", mp_property_av_speed_correction, .priv = "v"},
@@ -3901,14 +3874,6 @@ static const struct m_property mp_properties_base[] = {
     {"hue", mp_property_video_color},
     {"video-output-levels", mp_property_video_color,
      .priv = (void *)"output-levels"},
-    {"panscan", panscan_property_helper},
-    {"keepaspect", panscan_property_helper},
-    {"video-zoom", panscan_property_helper},
-    {"video-align-x", panscan_property_helper},
-    {"video-align-y", panscan_property_helper},
-    {"video-pan-x", panscan_property_helper},
-    {"video-pan-y", panscan_property_helper},
-    {"video-unscaled", panscan_property_helper},
     {"video-out-params", mp_property_vo_imgparams},
     {"video-params", mp_property_vd_imgparams},
     {"video-format", mp_property_video_format},
@@ -3949,13 +3914,6 @@ static const struct m_property mp_properties_base[] = {
     {"sub-speed", mp_property_sub_speed},
     {"sub-pos", mp_property_sub_pos},
     {"sub-text", mp_property_sub_text},
-    {"sub-visibility", property_osd_helper},
-    {"sub-forced-only", property_osd_helper},
-    {"sub-scale", property_osd_helper},
-    {"sub-use-margins", property_osd_helper},
-    {"ass-force-margins", property_osd_helper},
-    {"ass-vsfilter-aspect-compat", property_osd_helper},
-    {"ass-style-override", property_osd_helper},
 
     {"vf", mp_property_vf},
     {"af", mp_property_af},
@@ -5633,9 +5591,17 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
     if (flags & UPDATE_TERM)
         mp_update_logging(mpctx);
 
-    if (flags & UPDATE_RENDERER) {
-        if (mpctx->video_out)
+    if (mpctx->video_out) {
+        if (flags & UPDATE_VIDEOPOS)
+            vo_control(mpctx->video_out, VOCTRL_SET_PANSCAN, NULL);
+
+        if (flags & UPDATE_RENDERER)
             vo_control(mpctx->video_out, VOCTRL_UPDATE_RENDER_OPTS, NULL);
+    }
+
+    if (flags & UPDATE_OSD) {
+        osd_changed(mpctx->osd);
+        mp_wakeup_core(mpctx);
     }
 }
 
