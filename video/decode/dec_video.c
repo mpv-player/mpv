@@ -236,6 +236,13 @@ static void fix_image_params(struct dec_video *d_video,
     if (p.p_w <= 0 || p.p_h <= 0)
         p.p_w = p.p_h = 1;
 
+    if (opts->video_rotate < 0) {
+        p.rotate = 0;
+    } else {
+        p.rotate = (p.rotate + opts->video_rotate) % 360;
+    }
+    p.stereo_out = opts->video_stereo_mode;
+
     // Detect colorspace from resolution.
     mp_image_params_guess_csp(&p);
 
