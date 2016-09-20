@@ -635,6 +635,19 @@ strictly part of the guaranteed API.
 
     In all cases, ``mp.resume_all()`` is implicitly called.
 
+``utils.subprocess_detached(t)``
+    Runs an external process and detaches it from mpv's control.
+
+    The parameter ``t`` is a table. The function reads the following entries:
+
+        ``args``
+            Array of strings of the same semantics as the ``args`` used in the
+            ``subprocess`` function.
+
+    The function returns ``nil``.
+
+    In all cases, ``mp.resume_all()`` is implicitly called.
+
 ``utils.parse_json(str [, trail])``
     Parses the given string argument as JSON, and returns it as a Lua table. On
     error, returns ``nil, error``. (Currently, ``error`` is just a string
