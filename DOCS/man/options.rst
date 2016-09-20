@@ -4268,7 +4268,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
         Pitch black room
 
     NOTE: Typical movie content (Blu-ray etc.) already contains a gamma drop of
-    about 0.8, so specifying it here as well will result in even even darker
+    about 0.8, so specifying it here as well will result in even darker
     image than intended!
 
 ``--gamma-auto``
@@ -4338,11 +4338,13 @@ The following video options are currently all specific to ``--vo=opengl`` and
     v-log
         Panasonic V-Log (VARICAM) curve
 
-    NOTE: When using HDR output formats, mpv will encode to the specified
-          curve but it will not set any HDMI flags or other signalling that
-          might be required for the target device to correctly display the
-          HDR signal. The user should independently guarantee this before
-          using these signal formats for display.
+    .. note::
+
+        When using HDR output formats, mpv will encode to the specified
+        curve but it will not set any HDMI flags or other signalling that might
+        be required for the target device to correctly display the HDR signal.
+        The user should independently guarantee this before using these signal
+        formats for display.
 
 ``--target-brightness=<1..100000>``
     Specifies the display's approximate brightness in cd/m^2. When playing HDR
