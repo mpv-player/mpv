@@ -1438,6 +1438,9 @@ Property list
     These have the same values as ``video-out-params/dw`` and
     ``video-out-params/dh``.
 
+``video-dec-params``
+    Exactly like ``video-params``, but no overrides applied.
+
 ``video-out-params``
     Same as ``video-params``, but after video filters have been applied. If
     there are no video filters in use, this will contain the same values as

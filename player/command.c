@@ -2615,6 +2615,19 @@ static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
     return property_imgparams(get_video_out_params(ctx), action, arg);
 }
 
+static int mp_property_dec_imgparams(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct mp_image_params p = {0};
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    if (vo_c && vo_c->video_src)
+        video_get_dec_params(vo_c->video_src, &p);
+    if (!p.imgfmt)
+        return M_PROPERTY_UNAVAILABLE;
+    return property_imgparams(p, action, arg);
+}
+
 static int mp_property_vd_imgparams(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
@@ -3855,6 +3868,7 @@ static const struct m_property mp_properties_base[] = {
     {"video-output-levels", mp_property_video_color,
      .priv = (void *)"output-levels"},
     {"video-out-params", mp_property_vo_imgparams},
+    {"video-dec-params", mp_property_dec_imgparams},
     {"video-params", mp_property_vd_imgparams},
     {"video-format", mp_property_video_format},
     {"video-frame-info", mp_property_video_frame_info},
@@ -3992,7 +4006,8 @@ static const char *const *const mp_event_property_change[] = {
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",
       "detected-hwdec", "colormatrix", "colormatrix-input-range",
-      "colormatrix-output-range", "colormatrix-primaries", "video-aspect"),
+      "colormatrix-output-range", "colormatrix-primaries", "video-aspect",
+      "video-dec-params"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute", "balance",
       "current-ao", "audio-codec-name", "audio-params",
