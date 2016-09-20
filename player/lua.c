@@ -391,7 +391,6 @@ static int load_lua(struct mpv_handle *client, const char *fname)
     r = 0;
 
 error_out:
-    osd_set_external(ctx->mpctx->osd, client, 0, 0, NULL); // remove overlay
     mp_resume_all(client);
     if (ctx->state)
         lua_close(ctx->state);

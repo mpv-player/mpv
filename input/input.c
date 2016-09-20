@@ -73,6 +73,7 @@ struct cmd_bind {
 };
 
 struct cmd_bind_section {
+    char *owner;
     struct cmd_bind *binds;
     int num_binds;
     char *section;
@@ -1009,13 +1010,19 @@ static void remove_binds(struct cmd_bind_section *bs, bool builtin)
 }
 
 void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
-                             char *contents, bool builtin)
+                             char *contents, bool builtin, char *owner)
 {
     if (!name || !name[0])
         return; // parse_config() changes semantics with restrict_section==empty
     input_lock(ictx);
     // Delete:
     struct cmd_bind_section *bs = get_bind_section(ictx, bstr0(name));
+    if ((!bs->owner || (owner && strcmp(bs->owner, owner) != 0)) &&
+        strcmp(bs->section, "default") != 0)
+    {
+        talloc_free(bs->owner);
+        bs->owner = talloc_strdup(bs, owner);
+    }
     remove_binds(bs, builtin);
     if (contents && contents[0]) {
         // Redefine:
@@ -1023,6 +1030,21 @@ void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
     } else {
         // Disable:
         mp_input_disable_section(ictx, name);
+    }
+    input_unlock(ictx);
+}
+
+void mp_input_remove_sections_by_owner(struct input_ctx *ictx, char *owner)
+{
+    input_lock(ictx);
+    struct cmd_bind_section *bs = ictx->cmd_bind_sections;
+    while (bs) {
+        if (bs->owner && owner && strcmp(bs->owner, owner) == 0) {
+            mp_input_disable_section(ictx, bs->section);
+            remove_binds(bs, false);
+            remove_binds(bs, true);
+        }
+        bs = bs->next;
     }
     input_unlock(ictx);
 }

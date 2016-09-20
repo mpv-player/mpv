@@ -196,9 +196,13 @@ void mp_input_disable_all_sections(struct input_ctx *ictx);
 //  builtin: create as builtin section; this means if the user defines bindings
 //           using "{name}", they won't be ignored or overwritten - instead,
 //           they are preferred to the bindings defined with this call
+//  owner: string ID of the client which defined this, or NULL
 // If the section already exists, its bindings are removed and replaced.
 void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
-                             char *contents, bool builtin);
+                             char *contents, bool builtin, char *owner);
+
+// Remove all sections that have been defined by the given owner.
+void mp_input_remove_sections_by_owner(struct input_ctx *ictx, char *owner);
 
 // Define where on the screen the named input section should receive.
 // Setting a rectangle of size 0 unsets the mouse area.

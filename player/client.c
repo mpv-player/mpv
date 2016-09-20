@@ -416,6 +416,8 @@ void mpv_detach_destroy(mpv_handle *ctx)
                 ctx->num_events--;
             }
             mp_msg_log_buffer_destroy(ctx->messages);
+            osd_set_external(ctx->mpctx->osd, ctx, 0, 0, NULL);
+            mp_input_remove_sections_by_owner(ctx->mpctx->input, ctx->name);
             pthread_cond_destroy(&ctx->wakeup);
             pthread_mutex_destroy(&ctx->wakeup_lock);
             pthread_mutex_destroy(&ctx->lock);
@@ -758,6 +760,9 @@ int mpv_request_event(mpv_handle *ctx, mpv_event_id event, int enable)
 mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
 {
     mpv_event *event = ctx->cur_event;
+
+    if (!ctx->mpctx->initialized)
+        return NULL;
 
     pthread_mutex_lock(&ctx->lock);
 
