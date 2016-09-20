@@ -24,12 +24,6 @@
 struct mp_log;
 
 
-#define DELSYS_SET(__mask, __bit)					\
-    (__mask) |= (((unsigned int)1) << (__bit))
-
-#define DELSYS_IS_SET(__mask, __bit)					\
-    (0 != ((__mask) & (((unsigned int)1) << (__bit))))
-
 const char *get_dvb_delsys(unsigned int delsys);
 unsigned int dvb_get_tuner_delsys_mask(int fe_fd, struct mp_log *log);
 int dvb_open_devices(dvb_priv_t *priv, unsigned int n, unsigned int demux_cnt);

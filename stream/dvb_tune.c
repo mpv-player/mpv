@@ -84,33 +84,19 @@ unsigned int dvb_get_tuner_delsys_mask(int fe_fd, struct mp_log *log)
     mp_verbose(log, "Querying tuner type via DVBv5 API for frontend FD %d\n",
                fe_fd);
     if (ioctl(fe_fd, FE_GET_PROPERTY, &cmdseq) < 0) {
-      mp_err(log, "DVBv5: FE_GET_PROPERTY(DTV_ENUM_DELSYS) error: %d, FD: %d\n\n", errno, fe_fd);
-      goto old_api;
+        mp_err(log, "DVBv5: FE_GET_PROPERTY(DTV_ENUM_DELSYS) error: %d, FD: %d\n\n", errno, fe_fd);
+        goto old_api;
     }
-    int delsys_count = p[0].u.buffer.len;
-    mp_verbose(log, "Number of supported delivery systems: %d\n", delsys_count);
+    unsigned int i, delsys_count = p[0].u.buffer.len;
+    mp_verbose(log, "DVBv5: Number of supported delivery systems: %d\n", delsys_count);
     if (delsys_count == 0) {
-      mp_err(log, "DVBv5: Frontend FD %d returned no delivery systems!\n", fe_fd);
-      goto old_api;
+        mp_err(log, "DVBv5: Frontend FD %d returned no delivery systems!\n", fe_fd);
+        goto old_api;
     }
-    for(;p[0].u.buffer.len > 0; p[0].u.buffer.len--) {
-      delsys = p[0].u.buffer.data[p[0].u.buffer.len - 1];
-      switch (delsys) {
-      case SYS_DVBT:
-      case SYS_DVBC_ANNEX_AC:
-      case SYS_DVBS:
-#ifdef DVB_ATSC
-      case SYS_ATSC:
-#endif
-      case SYS_DVBS2:
-      case SYS_DVBT2:
-        break;
-      default:
-        mp_err(log, "Unsupported tuner type: %s - %d\n", get_dvb_delsys(delsys), delsys);
-        continue;
-      }
-      mp_verbose(log, "Tuner type seems to be %s\n", get_dvb_delsys(delsys));
-      DELSYS_SET(ret_mask, delsys);
+    for (i = 0; i < delsys_count; i++) {
+        delsys = (unsigned int)p[0].u.buffer.data[i];
+        DELSYS_SET(ret_mask, delsys);
+        mp_verbose(log, "DVBv5: Tuner type seems to be %s\n", get_dvb_delsys(delsys));
     }
 
     return ret_mask;
@@ -122,11 +108,11 @@ old_api:
 
     struct dvb_frontend_info fe_info;
     if (ioctl(fe_fd, FE_GET_INFO, &fe_info) < 0) {
-        mp_err(log, "FE_GET_INFO error: %d, FD: %d\n\n", errno, fe_fd);
+        mp_err(log, "pre-DVBv5: FE_GET_INFO error: %d, FD: %d\n\n", errno, fe_fd);
         return ret_mask;
     }
 
-    mp_verbose(log, "Queried tuner type of device named '%s', FD: %d\n",
+    mp_verbose(log, "pre-DVBv5: Queried tuner type of device named '%s', FD: %d\n",
                fe_info.name, fe_fd);
     switch (fe_info.type) {
     case FE_OFDM:
@@ -144,12 +130,12 @@ old_api:
         break;
 #endif
     default:
-        mp_err(log, "Unknown tuner type: %d\n", fe_info.type);
+        mp_err(log, "pre-DVBv5: Unknown tuner type: %d\n", fe_info.type);
         return ret_mask;
     }
 
-    mp_verbose(log, "Tuner type seems to be %s\n", get_dvb_delsys(delsys));
     DELSYS_SET(ret_mask, delsys);
+    mp_verbose(log, "pre-DVBv5: Tuner type seems to be %s\n", get_dvb_delsys(delsys));
 
     return ret_mask;
 }

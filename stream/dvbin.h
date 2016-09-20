@@ -134,6 +134,33 @@ typedef struct {
 #define SYS_DVB__MAX__              SYS_DVBC_ANNEX_C
 
 
+#define DELSYS_BIT(__bit)        (((unsigned int)1) << (__bit))
+
+#define DELSYS_SET(__mask, __bit)					\
+    (__mask) |= DELSYS_BIT((__bit))
+
+#define DELSYS_IS_SET(__mask, __bit)					\
+    (0 != ((__mask) & DELSYS_BIT((__bit))))
+
+
+#ifdef DVB_ATSC
+#define DELSYS_SUPP_MASK						\
+    DELSYS_BIT(SYS_DVBC_ANNEX_AC) |					\
+    DELSYS_BIT(SYS_DVBT) |						\
+    DELSYS_BIT(SYS_DVBS) |						\
+    DELSYS_BIT(SYS_DVBS2) |						\
+    DELSYS_BIT(SYS_ATSC) |						\
+    DELSYS_BIT(SYS_DVBT2)
+#else
+#define DELSYS_SUPP_MASK						\
+    DELSYS_BIT(SYS_DVBC_ANNEX_AC) |					\
+    DELSYS_BIT(SYS_DVBT) |						\
+    DELSYS_BIT(SYS_DVBS) |						\
+    DELSYS_BIT(SYS_DVBS2) |						\
+    DELSYS_BIT(SYS_DVBT2)
+#endif
+
+
 int dvb_step_channel(stream_t *, int);
 int dvb_set_channel(stream_t *, unsigned int, unsigned int);
 dvb_state_t *dvb_get_state(stream_t *);
