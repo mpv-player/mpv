@@ -26,4 +26,12 @@
 #    define MAC_OS_X_VERSION_10_9 1090
 #endif
 
+#if !defined(MAC_OS_X_VERSION_10_10)
+#    define MAC_OS_X_VERSION_10_10 101000
+#endif
+
+#if !defined(MAC_OS_X_VERSION_10_12)
+#    define MAC_OS_X_VERSION_10_12 101200
+#endif
+
 #endif /* MPV_MACOSX_VERSIONS */
