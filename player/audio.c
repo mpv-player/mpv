@@ -884,6 +884,7 @@ void fill_audio_out_buffers(struct MPContext *mpctx)
                 }
             }
             reinit_audio_filters_and_output(mpctx);
+            ao_c = mpctx->ao_chain;
         }
     }
 
