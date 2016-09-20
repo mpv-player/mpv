@@ -59,6 +59,8 @@ struct mp_log_root {
     int num_buffers;
     FILE *log_file;
     FILE *stats_file;
+    char *log_path;
+    char *stats_path;
     // --- must be accessed atomically
     /* This is incremented every time the msglevels must be reloaded.
      * (This is perhaps better than maintaining a globally accessible and
@@ -457,10 +459,35 @@ void mp_msg_init(struct mpv_global *global)
     mp_msg_update_msglevels(global);
 }
 
+// If *opt is different from *current_path, reopen *file and update *current_path.
+// If there's an error, _append_ it to err_buf.
+static void reopen_file(char **opt, char **current_path, FILE **file,
+                        const char *type, char *err_buf, size_t err_buf_size)
+{
+    char *old_path = *current_path ? *current_path : "";
+    char *new_path = *opt ? *opt : "";
+    if (strcmp(old_path, new_path) != 0) {
+        if (*file)
+            fclose(*file);
+        *file = NULL;
+        talloc_free(*current_path);
+        *current_path = talloc_strdup(NULL, new_path);
+        if (new_path[0]) {
+            *file = fopen(new_path, "wb");
+            if (!*file) {
+                mp_snprintf_cat(err_buf, err_buf_size,
+                            "Failed to open %s file '%s'\n", type, new_path);
+            }
+        }
+    }
+
+}
+
 void mp_msg_update_msglevels(struct mpv_global *global)
 {
     struct mp_log_root *root = global->log->root;
     struct MPOpts *opts = global->opts;
+    char fail_msg[512] = "";
 
     if (!opts)
         return;
@@ -480,11 +507,17 @@ void mp_msg_update_msglevels(struct mpv_global *global)
     m_option_type_msglevels.copy(NULL, &root->msg_levels,
                                  &global->opts->msg_levels);
 
-    if (!root->log_file && opts->log_file && opts->log_file[0])
-        root->log_file = fopen(opts->log_file, "wb");
+    reopen_file(&opts->log_file, &root->log_path, &root->log_file, "log",
+                fail_msg, sizeof(fail_msg));
+
+    reopen_file(&opts->dump_stats, &root->stats_path, &root->stats_file, "stats",
+                fail_msg, sizeof(fail_msg));
 
     atomic_fetch_add(&root->reload_counter, 1);
     pthread_mutex_unlock(&mp_msg_lock);
+
+    if (fail_msg[0])
+        mp_err(global->log, "%s", fail_msg);
 }
 
 void mp_msg_force_stderr(struct mpv_global *global, bool force_stderr)
@@ -499,8 +532,10 @@ void mp_msg_uninit(struct mpv_global *global)
     struct mp_log_root *root = global->log->root;
     if (root->stats_file)
         fclose(root->stats_file);
+    talloc_free(root->stats_path);
     if (root->log_file)
         fclose(root->log_file);
+    talloc_free(root->log_path);
     m_option_type_msglevels.free(&root->msg_levels);
     talloc_free(root);
     global->log = NULL;
@@ -580,24 +615,6 @@ struct mp_log_buffer_entry *mp_msg_log_buffer_read(struct mp_log_buffer *buffer)
     if (read != sizeof(ptr))
         abort();
     return ptr;
-}
-
-int mp_msg_open_stats_file(struct mpv_global *global, const char *path)
-{
-    struct mp_log_root *root = global->log->root;
-    int r;
-
-    pthread_mutex_lock(&mp_msg_lock);
-
-    if (root->stats_file)
-        fclose(root->stats_file);
-    root->stats_file = fopen(path, "wb");
-    r = root->stats_file ? 0 : -1;
-
-    pthread_mutex_unlock(&mp_msg_lock);
-
-    mp_msg_update_msglevels(global);
-    return r;
 }
 
 // Thread-safety: fully thread-safe, but keep in mind that the lifetime of

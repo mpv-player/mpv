@@ -136,7 +136,8 @@ static void *input_thread_fn(void *ptr)
 
 void terminal_setup_getch(struct input_ctx *ictx)
 {
-    assert(!running);
+    if (running)
+        return;
 
     HANDLE in = GetStdHandle(STD_INPUT_HANDLE);
     if (GetNumberOfConsoleInputEvents(in, &(DWORD){0})) {

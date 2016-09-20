@@ -285,7 +285,7 @@ static void recreate_video_filters(struct MPContext *mpctx)
     vf_destroy(vo_c->vf);
     vo_c->vf = vf_new(mpctx->global);
     vo_c->vf->hwdec_devs = vo_c->hwdec_devs;
-    vo_c->vf->wakeup_callback = wakeup_playloop;
+    vo_c->vf->wakeup_callback = mp_wakeup_core_cb;
     vo_c->vf->wakeup_callback_ctx = mpctx;
     vo_c->vf->container_fps = vo_c->container_fps;
     vo_control(vo_c->vo, VOCTRL_GET_DISPLAY_FPS, &vo_c->vf->display_fps);

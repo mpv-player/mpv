@@ -312,6 +312,13 @@ Available filters are:
         ``mpv '--af=format=channels=5.1' '--audio-channels=5.1'`` would always force
         remixing audio to 5.1 and output it like this.
 
+    This filter supports the following ``af-command`` commands:
+
+    ``set-matrix``
+        Set the ``<matrix>`` argument dynamically. This can be used to change
+        the mixing matrix at runtime, without reinitializing the entire filter
+        chain.
+
 ``drc[=method:target]``
     Applies dynamic range compression. This maximizes the volume by compressing
     the audio signal's dynamic range. (Formerly called ``volnorm``.)
@@ -406,9 +413,13 @@ Available filters are:
 ``rubberband``
     High quality pitch correction with librubberband. This can be used in place
     of ``scaletempo``, and will be used to adjust audio pitch when playing
-    at speed different from normal.
+    at speed different from normal. It can also be used to adjust audio pitch
+    without changing playback speed.
 
-    This filter has a number of sub-options. You can list them with
+    ``<pitch-scale>``
+        Sets the pitch scaling factor. Frequencies are multiplied by this value.
+
+    This filter has a number of additional sub-options. You can list them with
     ``mpv --af=rubberband=help``. This will also show the default values
     for each option. The options are not documented here, because they are
     merely passed to librubberband. Look at the librubberband documentation
@@ -416,6 +427,13 @@ Available filters are:
     http://breakfastquay.com/rubberband/code-doc/classRubberBand_1_1RubberBandStretcher.html
     (The mapping of the mpv rubberband filter sub-option names and values to
     those of librubberband follows a simple pattern: ``"Option" + Name + Value``.)
+
+    This filter supports the following ``af-command`` commands:
+
+    ``set-pitch``
+        Set the ``<pitch-scale>`` argument dynamically. This can be used to
+        change the playback pitch at runtime. Note that speed is controlled
+        using the standard ``speed`` property, not ``af-command``.
 
 ``lavfi=graph``
     Filter audio using FFmpeg's libavfilter.

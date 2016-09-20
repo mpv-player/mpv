@@ -486,7 +486,7 @@ int mp_initialize(struct MPContext *mpctx, char **argv);
 struct MPContext *mp_create(void);
 void mp_destroy(struct MPContext *mpctx);
 void mp_print_version(struct mp_log *log, int always);
-void wakeup_playloop(void *ctx);
+void mp_update_logging(struct MPContext *mpctx);
 
 // misc.c
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t);
@@ -549,6 +549,7 @@ struct mp_scripting {
     int (*load)(struct mpv_handle *client, const char *filename);
 };
 void mp_load_scripts(struct MPContext *mpctx);
+void mp_load_builtin_scripts(struct MPContext *mpctx);
 
 // sub.c
 void reset_subtitle_state(struct MPContext *mpctx);

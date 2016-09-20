@@ -796,6 +796,18 @@ static int mp_property_time_pos(void *ctx, struct m_property *prop,
     return property_time(action, arg, get_current_time(mpctx));
 }
 
+/// Current audio pts in seconds (R)
+static int mp_property_audio_pts(void *ctx, struct m_property *prop,
+                                int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    if (!mpctx->playback_initialized || mpctx->audio_status < STATUS_PLAYING ||
+        mpctx->audio_status >= STATUS_EOF)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return property_time(action, arg, playing_audio_pts(mpctx));
+}
+
 static bool time_remaining(MPContext *mpctx, double *remaining)
 {
     double len = get_time_length(mpctx);
@@ -2395,18 +2407,6 @@ static int video_simple_refresh_property(void *ctx, struct m_property *prop,
     return r;
 }
 
-// Update options which are managed through VOCTRL_GET/SET_PANSCAN.
-static int panscan_property_helper(void *ctx, struct m_property *prop,
-                                   int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-
-    int r = mp_property_generic_option(mpctx, prop, action, arg);
-    if (mpctx->video_out && action == M_PROPERTY_SET)
-        vo_control(mpctx->video_out, VOCTRL_SET_PANSCAN, NULL);
-    return r;
-}
-
 /// Helper to set vo flags.
 /** \ingroup PropertyImplHelper
  */
@@ -2973,20 +2973,6 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-// For OSD and subtitle related properties using the generic option bridge.
-// - Fail as unavailable if no video is active
-// - Trigger OSD state update when property is set
-static int property_osd_helper(void *ctx, struct m_property *prop,
-                               int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (action == M_PROPERTY_SET) {
-        osd_changed(mpctx->osd);
-        mp_wakeup_core(mpctx);
-    }
-    return mp_property_generic_option(mpctx, prop, action, arg);
-}
-
 /// Selected subtitles (RW)
 static int mp_property_sub(void *ctx, struct m_property *prop,
                            int action, void *arg)
@@ -3011,7 +2997,7 @@ static int mp_property_sub_delay(void *ctx, struct m_property *prop,
         *(char **)arg = format_delay(opts->sub_delay);
         return M_PROPERTY_OK;
     }
-    return property_osd_helper(mpctx, prop, action, arg);
+    return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
 /// Subtitle speed (RW)
@@ -3034,7 +3020,7 @@ static int mp_property_sub_speed(void *ctx, struct m_property *prop,
         *(char **)arg = talloc_asprintf(NULL, "%4.1f%%", 100 * opts->sub_speed);
         return M_PROPERTY_OK;
     }
-    return property_osd_helper(mpctx, prop, action, arg);
+    return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
 static int mp_property_sub_pos(void *ctx, struct m_property *prop,
@@ -3046,7 +3032,7 @@ static int mp_property_sub_pos(void *ctx, struct m_property *prop,
         *(char **)arg = talloc_asprintf(NULL, "%d/100", opts->sub_pos);
         return M_PROPERTY_OK;
     }
-    return property_osd_helper(mpctx, prop, action, arg);
+    return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
 static int mp_property_sub_text(void *ctx, struct m_property *prop,
@@ -3775,7 +3761,6 @@ static int mp_profile_list(void *ctx, struct m_property *prop,
 // Base list of properties. This does not include option-mapped properties.
 static const struct m_property mp_properties_base[] = {
     // General
-    {"osd-scale", property_osd_helper},
     {"speed", mp_property_playback_speed},
     {"audio-speed-correction", mp_property_av_speed_correction, .priv = "a"},
     {"video-speed-correction", mp_property_av_speed_correction, .priv = "v"},
@@ -3806,6 +3791,7 @@ static const struct m_property mp_properties_base[] = {
     {"time-start", mp_property_time_start},
     {"time-pos", mp_property_time_pos},
     {"time-remaining", mp_property_remaining},
+    {"audio-pts", mp_property_audio_pts},
     {"playtime-remaining", mp_property_playtime_remaining},
     {"playback-time", mp_property_playback_time},
     {"disc-title", mp_property_disc_title},
@@ -3888,14 +3874,6 @@ static const struct m_property mp_properties_base[] = {
     {"hue", mp_property_video_color},
     {"video-output-levels", mp_property_video_color,
      .priv = (void *)"output-levels"},
-    {"panscan", panscan_property_helper},
-    {"keepaspect", panscan_property_helper},
-    {"video-zoom", panscan_property_helper},
-    {"video-align-x", panscan_property_helper},
-    {"video-align-y", panscan_property_helper},
-    {"video-pan-x", panscan_property_helper},
-    {"video-pan-y", panscan_property_helper},
-    {"video-unscaled", panscan_property_helper},
     {"video-out-params", mp_property_vo_imgparams},
     {"video-params", mp_property_vd_imgparams},
     {"video-format", mp_property_video_format},
@@ -3936,13 +3914,6 @@ static const struct m_property mp_properties_base[] = {
     {"sub-speed", mp_property_sub_speed},
     {"sub-pos", mp_property_sub_pos},
     {"sub-text", mp_property_sub_text},
-    {"sub-visibility", property_osd_helper},
-    {"sub-forced-only", property_osd_helper},
-    {"sub-scale", property_osd_helper},
-    {"sub-use-margins", property_osd_helper},
-    {"ass-force-margins", property_osd_helper},
-    {"ass-vsfilter-aspect-compat", property_osd_helper},
-    {"ass-style-override", property_osd_helper},
 
     {"vf", mp_property_vf},
     {"af", mp_property_af},
@@ -4034,7 +4005,7 @@ static const char *const *const mp_event_property_change[] = {
     E(MPV_EVENT_IDLE, "*"),
     E(MPV_EVENT_PAUSE,   "pause", "paused-on-cache", "core-idle", "eof-reached"),
     E(MPV_EVENT_UNPAUSE, "pause", "paused-on-cache", "core-idle", "eof-reached"),
-    E(MPV_EVENT_TICK, "time-pos", "stream-pos", "stream-time-pos", "avsync",
+    E(MPV_EVENT_TICK, "time-pos", "audio-pts", "stream-pos", "avsync",
       "percent-pos", "time-remaining", "playtime-remaining", "playback-time",
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
       "total-avsync-change", "audio-speed-correction", "video-speed-correction",
@@ -5613,17 +5584,31 @@ void mp_notify(struct MPContext *mpctx, int event, void *arg)
     mp_client_broadcast_event(mpctx, event, arg);
 }
 
-extern const struct m_sub_options gl_video_conf;
+void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
+{
+    struct MPContext *mpctx = ctx;
+
+    if (flags & UPDATE_TERM)
+        mp_update_logging(mpctx);
+
+    if (mpctx->video_out) {
+        if (flags & UPDATE_VIDEOPOS)
+            vo_control(mpctx->video_out, VOCTRL_SET_PANSCAN, NULL);
+
+        if (flags & UPDATE_RENDERER)
+            vo_control(mpctx->video_out, VOCTRL_UPDATE_RENDER_OPTS, NULL);
+    }
+
+    if (flags & UPDATE_OSD) {
+        osd_changed(mpctx->osd);
+        mp_wakeup_core(mpctx);
+    }
+
+    if (flags & UPDATE_BUILTIN_SCRIPTS)
+        mp_load_builtin_scripts(mpctx);
+}
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)
 {
-    struct m_config_option *co =
-        m_config_get_co_raw(mpctx->mconfig, bstr0(property));
-    if (co) {
-        if (m_config_is_in_group(mpctx->mconfig, &gl_video_conf, co)) {
-            if (mpctx->video_out)
-                vo_control(mpctx->video_out, VOCTRL_UPDATE_RENDER_OPTS, NULL);
-        }
-    }
     mp_client_property_change(mpctx, property);
 }

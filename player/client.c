@@ -1000,6 +1000,8 @@ static void cmd_fn(void *data)
 
 static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd, mpv_node *res)
 {
+    if (!ctx->mpctx->initialized)
+        return MPV_ERROR_UNINITIALIZED;
     if (!cmd)
         return MPV_ERROR_INVALID_PARAMETER;
 
@@ -1039,6 +1041,8 @@ int mpv_command_string(mpv_handle *ctx, const char *args)
 
 static int run_cmd_async(mpv_handle *ctx, uint64_t ud, struct mp_cmd *cmd)
 {
+    if (!ctx->mpctx->initialized)
+        return MPV_ERROR_UNINITIALIZED;
     if (!cmd)
         return MPV_ERROR_INVALID_PARAMETER;
 
@@ -1116,6 +1120,8 @@ static void setproperty_fn(void *arg)
 int mpv_set_property(mpv_handle *ctx, const char *name, mpv_format format,
                      void *data)
 {
+    if (!ctx->mpctx->initialized)
+        return MPV_ERROR_UNINITIALIZED;
     if (!get_mp_type(format))
         return MPV_ERROR_PROPERTY_FORMAT;
 
@@ -1145,6 +1151,8 @@ int mpv_set_property_async(mpv_handle *ctx, uint64_t ud, const char *name,
                            mpv_format format, void *data)
 {
     const struct m_option *type = get_mp_type(format);
+    if (!ctx->mpctx->initialized)
+        return MPV_ERROR_UNINITIALIZED;
     if (!type)
         return MPV_ERROR_PROPERTY_FORMAT;
 
@@ -1257,6 +1265,8 @@ static void getproperty_fn(void *arg)
 int mpv_get_property(mpv_handle *ctx, const char *name, mpv_format format,
                      void *data)
 {
+    if (!ctx->mpctx->initialized)
+        return MPV_ERROR_UNINITIALIZED;
     if (!data)
         return MPV_ERROR_INVALID_PARAMETER;
     if (!get_mp_type_get(format))
@@ -1289,6 +1299,8 @@ char *mpv_get_property_osd_string(mpv_handle *ctx, const char *name)
 int mpv_get_property_async(mpv_handle *ctx, uint64_t ud, const char *name,
                            mpv_format format)
 {
+    if (!ctx->mpctx->initialized)
+        return MPV_ERROR_UNINITIALIZED;
     if (!get_mp_type_get(format))
         return MPV_ERROR_PROPERTY_FORMAT;
 
@@ -1455,6 +1467,8 @@ static void update_prop(void *p)
 // outstanding property.
 static bool gen_property_change_event(struct mpv_handle *ctx)
 {
+    if (!ctx->mpctx->initialized)
+        return false;
     int start = ctx->lowest_changed;
     ctx->lowest_changed = ctx->num_properties;
     for (int n = start; n < ctx->num_properties; n++) {
@@ -1724,6 +1738,8 @@ int mpv_opengl_cb_render(mpv_opengl_cb_context *ctx, int fbo, int vp[4])
 
 void *mpv_get_sub_api(mpv_handle *ctx, mpv_sub_api sub_api)
 {
+    if (!ctx->mpctx->initialized)
+        return NULL;
     void *res = NULL;
     lock_core(ctx);
     switch (sub_api) {

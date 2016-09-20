@@ -35,8 +35,6 @@ API changes
  --- mpv 0.21.0 ---
  1.23   - deprecate setting "no-" options via mpv_set_option*(). For example,
           instead of "no-video=" you should set "video=no".
-        - be much more permissive what API calls are allowed before
-          mpv_initialize().
         - do not override the SIGPIPE signal handler anymore. This was done as
           workaround for the FFmpeg TLS code, which has been fixed long ago.
         - deprecate mpv_suspend() and mpv_resume(). They will be stubbed out
