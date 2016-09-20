@@ -386,7 +386,8 @@ struct m_option {
 #define UPDATE_VIDEOPOS         (1 << 9) // video position (panscan etc.)
 #define UPDATE_OSD              (1 << 10) // related to OSD rendering
 #define UPDATE_BUILTIN_SCRIPTS  (1 << 11) // osc/ytdl
-#define UPDATE_OPT_LAST         (1 << 11)
+#define UPDATE_IMGPAR           (1 << 12) // video image params overrides
+#define UPDATE_OPT_LAST         (1 << 12)
 
 // All bits between _FIRST and _LAST (inclusive)
 #define UPDATE_OPTS_MASK \

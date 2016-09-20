@@ -2397,16 +2397,6 @@ static int mp_property_deinterlace(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
-static int video_simple_refresh_property(void *ctx, struct m_property *prop,
-                                         int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    int r = mp_property_generic_option(mpctx, prop, action, arg);
-    if (action == M_PROPERTY_SET && r == M_PROPERTY_OK)
-        mp_force_video_refresh(mpctx);
-    return r;
-}
-
 /// Helper to set vo flags.
 /** \ingroup PropertyImplHelper
  */
@@ -2948,14 +2938,6 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
     }
 
     switch (action) {
-    case M_PROPERTY_SET: {
-        mpctx->opts->movie_aspect = *(float *)arg;
-        if (track && track->d_video) {
-            video_reset_aspect(track->d_video);
-            mp_force_video_refresh(mpctx);
-        }
-        return M_PROPERTY_OK;
-    }
     case M_PROPERTY_PRINT: {
         if (mpctx->opts->movie_aspect < 0) {
             *(char **)arg = talloc_asprintf(NULL, "%.3f (original)", aspect);
@@ -2967,10 +2949,8 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
         *(float *)arg = aspect;
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_GET_TYPE:
-        return mp_property_generic_option(mpctx, prop, action, arg);
     }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
 /// Selected subtitles (RW)
@@ -3917,9 +3897,6 @@ static const struct m_property mp_properties_base[] = {
 
     {"vf", mp_property_vf},
     {"af", mp_property_af},
-
-    {"video-rotate", video_simple_refresh_property},
-    {"video-stereo-mode", video_simple_refresh_property},
 
     {"ab-loop-a", mp_property_ab_loop},
     {"ab-loop-b", mp_property_ab_loop},
@@ -5607,6 +5584,14 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
 
     if (flags & UPDATE_BUILTIN_SCRIPTS)
         mp_load_builtin_scripts(mpctx);
+
+    if (flags & UPDATE_IMGPAR) {
+        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+        if (track && track->d_video) {
+            video_reset_params(track->d_video);
+            mp_force_video_refresh(mpctx);
+        }
+    }
 }
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)

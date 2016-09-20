@@ -424,11 +424,11 @@ const m_option_t mp_opts[] = {
 
     // -1 means auto aspect (prefer container size until aspect change)
     //  0 means square pixels
-    OPT_ASPECT("video-aspect", movie_aspect, 0, -1.0, 10.0),
-    OPT_CHOICE("video-aspect-method", aspect_method, 0,
+    OPT_ASPECT("video-aspect", movie_aspect, UPDATE_IMGPAR, -1.0, 10.0),
+    OPT_CHOICE("video-aspect-method", aspect_method, UPDATE_IMGPAR,
                ({"hybrid", 0}, {"bitstream", 1}, {"container", 2})),
 
-    OPT_CHOICE("field-dominance", field_dominance, 0,
+    OPT_CHOICE("field-dominance", field_dominance, UPDATE_IMGPAR,
                ({"auto", -1}, {"top", 0}, {"bottom", 1})),
 
     OPT_SUBSTRUCT("vd-lavc", vd_lavc_params, vd_lavc_conf, 0),
@@ -531,9 +531,10 @@ const m_option_t mp_opts[] = {
     OPT_STRING("force-media-title", media_title, 0),
     // set aspect ratio of monitor - useful for 16:9 TV-out
     OPT_FLAG("force-rgba-osd-rendering", force_rgba_osd, 0),
-    OPT_CHOICE_OR_INT("video-rotate", video_rotate, 0, 0, 359,
+    OPT_CHOICE_OR_INT("video-rotate", video_rotate, UPDATE_IMGPAR, 0, 359,
                       ({"no", -1})),
-    OPT_CHOICE_C("video-stereo-mode", video_stereo_mode, 0, mp_stereo3d_names),
+    OPT_CHOICE_C("video-stereo-mode", video_stereo_mode, UPDATE_IMGPAR,
+                 mp_stereo3d_names),
 
     OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),

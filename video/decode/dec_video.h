@@ -91,6 +91,6 @@ void video_set_start(struct dec_video *d_video, double start_pts);
 
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg);
 void video_reset(struct dec_video *d_video);
-void video_reset_aspect(struct dec_video *d_video);
+void video_reset_params(struct dec_video *d_video);
 
 #endif /* MPLAYER_DEC_VIDEO_H */
