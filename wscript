@@ -386,6 +386,10 @@ iconv support use --disable-iconv.",
         'desc': 'libarchive wrapper for reading zip files and more',
         'func': check_pkg_config('libarchive >= 3.0.0'),
         'default': 'disable',
+    }, {
+        'name': '--numa',
+        'desc': 'NUMA support',
+        'func': check_cc(header_name='numa.h', lib='numa'),
     }
 ]
 

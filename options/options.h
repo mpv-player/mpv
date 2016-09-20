@@ -282,6 +282,8 @@ typedef struct MPOpts {
     int videotoolbox_format;
 
     int w32_priority;
+    int numa_membind;
+    int numa_cpubind;
 
     struct tv_params *tv_params;
     struct pvr_params *stream_pvr_opts;
