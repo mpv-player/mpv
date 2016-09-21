@@ -152,19 +152,19 @@ void mp_print_version(struct mp_log *log, int always)
 
 static void shutdown_clients(struct MPContext *mpctx)
 {
-    while (mpctx->clients && mp_clients_num(mpctx)) {
+    mp_client_enter_shutdown(mpctx);
+    while (mp_clients_num(mpctx)) {
         mp_client_broadcast_event(mpctx, MPV_EVENT_SHUTDOWN, NULL);
-        mp_dispatch_queue_process(mpctx->dispatch, 0);
         mp_wait_events(mpctx);
     }
 }
 
 void mp_destroy(struct MPContext *mpctx)
 {
+    shutdown_clients(mpctx);
+
     mp_uninit_ipc(mpctx->ipc_ctx);
     mpctx->ipc_ctx = NULL;
-
-    shutdown_clients(mpctx);
 
     uninit_audio_out(mpctx);
     uninit_video_out(mpctx);

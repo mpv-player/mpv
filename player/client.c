@@ -66,7 +66,8 @@ struct mp_client_api {
 
     struct mpv_handle **clients;
     int num_clients;
-    uint64_t event_masks;   // combined events of all clients, or 0 if unknown
+    uint64_t event_masks; // combined events of all clients, or 0 if unknown
+    bool shutting_down; // do not allow new clients
 
     struct mp_custom_protocol *custom_protocols;
     int num_custom_protocols;
@@ -206,8 +207,17 @@ bool mp_client_exists(struct MPContext *mpctx, const char *client_name)
     return r;
 }
 
+void mp_client_enter_shutdown(struct MPContext *mpctx)
+{
+    pthread_mutex_lock(&mpctx->clients->lock);
+    mpctx->clients->shutting_down = true;
+    pthread_mutex_unlock(&mpctx->clients->lock);
+}
+
 struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name)
 {
+    pthread_mutex_lock(&clients->lock);
+
     char nname[MAX_CLIENT_NAME];
     for (int n = 1; n < 1000; n++) {
         if (!name)
@@ -222,10 +232,10 @@ struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name
         nname[0] = '\0';
     }
 
-    if (!nname[0])
+    if (!nname[0] || clients->shutting_down) {
+        pthread_mutex_unlock(&clients->lock);
         return NULL;
-
-    pthread_mutex_lock(&clients->lock);
+    }
 
     int num_events = 1000;
 
