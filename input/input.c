@@ -102,10 +102,8 @@ struct input_ctx {
     struct m_config_cache *opts_cache;
     struct input_opts *opts;
 
-    bool using_alt_gr;
     bool using_ar;
     bool using_cocoa_media_keys;
-    bool win_drag;
 
     // Autorepeat stuff
     short ar_state;
@@ -174,28 +172,30 @@ struct input_opts {
     int enable_mouse_movements;
     int vo_key_input;
     int test;
+    int allow_win_drag;
 };
 
 const struct m_sub_options input_config = {
     .opts = (const m_option_t[]) {
-        OPT_STRING("conf", config_file, CONF_GLOBAL | M_OPT_FILE),
-        OPT_INT("ar-delay", ar_delay, CONF_GLOBAL),
-        OPT_INT("ar-rate", ar_rate, CONF_GLOBAL),
-        OPT_PRINT("keylist", mp_print_key_list),
-        OPT_PRINT("cmdlist", mp_print_cmd_list),
-        OPT_FLAG("default-bindings", default_bindings, CONF_GLOBAL),
-        OPT_FLAG("test", test, CONF_GLOBAL),
-        OPT_INTRANGE("doubleclick-time", doubleclick_time, 0, 0, 1000),
-        OPT_FLAG("right-alt-gr", use_alt_gr, CONF_GLOBAL),
-        OPT_INTRANGE("key-fifo-size", key_fifo_size, CONF_GLOBAL, 2, 65000),
-        OPT_FLAG("cursor", enable_mouse_movements, CONF_GLOBAL),
-        OPT_FLAG("vo-keyboard", vo_key_input, CONF_GLOBAL),
+        OPT_STRING("input-conf", config_file, M_OPT_FIXED | M_OPT_FILE),
+        OPT_INT("input-ar-delay", ar_delay, 0),
+        OPT_INT("input-ar-rate", ar_rate, 0),
+        OPT_PRINT("input-keylist", mp_print_key_list),
+        OPT_PRINT("input-cmdlist", mp_print_cmd_list),
+        OPT_FLAG("input-default-bindings", default_bindings, 0),
+        OPT_FLAG("input-test", test, 0),
+        OPT_INTRANGE("input-doubleclick-time", doubleclick_time, 0, 0, 1000),
+        OPT_FLAG("input-right-alt-gr", use_alt_gr, 0),
+        OPT_INTRANGE("input-key-fifo-size", key_fifo_size, 0, 2, 65000),
+        OPT_FLAG("input-cursor", enable_mouse_movements, 0),
+        OPT_FLAG("input-vo-keyboard", vo_key_input, 0),
 #if HAVE_COCOA
-        OPT_FLAG("appleremote", use_appleremote, CONF_GLOBAL),
-        OPT_FLAG("media-keys", use_media_keys, CONF_GLOBAL),
-        OPT_FLAG("app-events", use_app_events, CONF_GLOBAL),
+        OPT_FLAG("input-appleremote", use_appleremote, 0),
+        OPT_FLAG("input-media-keys", use_media_keys, 0),
+        OPT_FLAG("input-app-events", use_app_events, M_OPT_FIXED),
 #endif
-        OPT_REPLACED("x11-keyboard", "input-vo-keyboard"),
+        OPT_FLAG("window-dragging", allow_win_drag, 0),
+        OPT_REPLACED("input-x11-keyboard", "input-vo-keyboard"),
         {0}
     },
     .size = sizeof(struct input_opts),
@@ -213,7 +213,9 @@ const struct m_sub_options input_config = {
 #endif
         .default_bindings = 1,
         .vo_key_input = 1,
+        .allow_win_drag = 1,
     },
+    .change_flags = UPDATE_INPUT,
 };
 
 static const char builtin_input_conf[] =
@@ -985,7 +987,8 @@ bool mp_input_test_mouse_active(struct input_ctx *ictx, int x, int y)
 bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y)
 {
     input_lock(ictx);
-    bool r = !ictx->win_drag || test_mouse(ictx, x, y, MP_INPUT_ALLOW_VO_DRAGGING);
+    bool r = !ictx->opts->allow_win_drag ||
+                        test_mouse(ictx, x, y, MP_INPUT_ALLOW_VO_DRAGGING);
     input_unlock(ictx);
     return r;
 }
@@ -1232,11 +1235,45 @@ struct input_ctx *mp_input_init(struct mpv_global *global,
     return ictx;
 }
 
-void mp_input_load(struct input_ctx *ictx)
+static void reload_opts(struct input_ctx *ictx, bool shutdown)
 {
-    struct input_opts *input_conf = ictx->opts;
-
     m_config_cache_update(ictx->opts_cache);
+
+#if HAVE_COCOA
+    struct input_opts *opts = ictx->opts;
+
+    if (ictx->using_ar != (opts->use_appleremote && !shutdown)) {
+        ictx->using_ar = !ictx->using_ar;
+        if (ictx->using_ar) {
+            cocoa_init_apple_remote();
+        } else {
+            cocoa_uninit_apple_remote();
+        }
+    }
+
+    if (ictx->using_cocoa_media_keys != (opts->use_media_keys && !shutdown)) {
+        ictx->using_cocoa_media_keys = !ictx->using_cocoa_media_keys;
+        if (ictx->using_cocoa_media_keys) {
+            cocoa_init_media_keys();
+        } else {
+            cocoa_uninit_media_keys();
+        }
+    }
+#endif
+}
+
+void mp_input_update_opts(struct input_ctx *ictx)
+{
+    input_lock(ictx);
+    reload_opts(ictx, false);
+    input_unlock(ictx);
+}
+
+void mp_input_load_config(struct input_ctx *ictx)
+{
+    input_lock(ictx);
+
+    reload_opts(ictx, false);
 
     // "Uncomment" the default key bindings in etc/input.conf and add them.
     // All lines that do not start with '# ' are parsed.
@@ -1249,8 +1286,8 @@ void mp_input_load(struct input_ctx *ictx)
     }
 
     bool config_ok = false;
-    if (input_conf->config_file)
-        config_ok = parse_config_file(ictx, input_conf->config_file, true);
+    if (ictx->opts->config_file && ictx->opts->config_file[0])
+        config_ok = parse_config_file(ictx, ictx->opts->config_file, true);
     if (!config_ok) {
         // Try global conf dir
         void *tmp = talloc_new(NULL);
@@ -1260,32 +1297,17 @@ void mp_input_load(struct input_ctx *ictx)
         talloc_free(tmp);
     }
 
-    if (input_conf->use_alt_gr) {
-        ictx->using_alt_gr = true;
-    }
-
 #if HAVE_COCOA
-    if (input_conf->use_app_events) {
+    if (ictx->opts->use_app_events)
         cocoa_start_event_monitor();
-    }
-
-    if (input_conf->use_appleremote) {
-        cocoa_init_apple_remote();
-        ictx->using_ar = true;
-    }
-
-    if (input_conf->use_media_keys) {
-        cocoa_init_media_keys();
-        ictx->using_cocoa_media_keys = true;
-    }
 #endif
-
-    ictx->win_drag = ictx->global->opts->allow_win_drag;
 
 #if defined(__MINGW32__)
     if (ictx->global->opts->input_file && *ictx->global->opts->input_file)
         mp_input_pipe_add(ictx, ictx->global->opts->input_file);
 #endif
+
+    input_unlock(ictx);
 }
 
 static void clear_queue(struct cmd_queue *queue)
@@ -1302,15 +1324,9 @@ void mp_input_uninit(struct input_ctx *ictx)
     if (!ictx)
         return;
 
-#if HAVE_COCOA
-    if (ictx->using_ar) {
-        cocoa_uninit_apple_remote();
-    }
-
-    if (ictx->using_cocoa_media_keys) {
-        cocoa_uninit_media_keys();
-    }
-#endif
+    input_lock(ictx);
+    reload_opts(ictx, true);
+    input_unlock(ictx);
 
     close_input_sources(ictx);
     clear_queue(&ictx->cmd_queue);
@@ -1328,7 +1344,10 @@ void mp_input_set_cancel(struct input_ctx *ictx, struct mp_cancel *cancel)
 
 bool mp_input_use_alt_gr(struct input_ctx *ictx)
 {
-    return ictx->using_alt_gr;
+    input_lock(ictx);
+    bool r = ictx->opts->use_alt_gr;
+    input_unlock(ictx);
+    return r;
 }
 
 struct mp_cmd *mp_input_parse_cmd(struct input_ctx *ictx, bstr str,

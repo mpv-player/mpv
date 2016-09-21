@@ -101,7 +101,6 @@ typedef struct MPOpts {
     double audio_buffer;
 
     mp_vo_opts *vo;
-    int allow_win_drag;
 
     char *wintitle;
     char *media_title;

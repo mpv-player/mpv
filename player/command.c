@@ -97,6 +97,9 @@ struct command_ctx {
     int64_t hook_seq; // for hook_handler.seq
 
     struct ao_hotplug *hotplug;
+
+    char *cur_ipc;
+    char *cur_ipc_input;
 };
 
 struct overlay {
@@ -5581,6 +5584,7 @@ void mp_notify(struct MPContext *mpctx, int event, void *arg)
 void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
 {
     struct MPContext *mpctx = ctx;
+    struct command_ctx *cmd = mpctx->command_ctx;
 
     if (flags & UPDATE_TERM)
         mp_update_logging(mpctx);
@@ -5606,6 +5610,23 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
         if (track && track->d_video) {
             video_reset_params(track->d_video);
             mp_force_video_refresh(mpctx);
+        }
+    }
+
+    if (flags & UPDATE_INPUT) {
+        mp_input_update_opts(mpctx->input);
+
+        // Rather coarse change-detection, but sufficient effort.
+        struct MPOpts *opts = mpctx->opts;
+        if (!bstr_equals(bstr0(cmd->cur_ipc), bstr0(opts->ipc_path)) ||
+            !bstr_equals(bstr0(cmd->cur_ipc_input), bstr0(opts->input_file)))
+        {
+            talloc_free(cmd->cur_ipc);
+            talloc_free(cmd->cur_ipc_input);
+            cmd->cur_ipc = talloc_strdup(cmd, opts->ipc_path);
+            cmd->cur_ipc_input = talloc_strdup(cmd, opts->input_file);
+            mp_uninit_ipc(mpctx->ipc_ctx);
+            mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
         }
     }
 }

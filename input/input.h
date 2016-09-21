@@ -227,8 +227,9 @@ struct input_ctx *mp_input_init(struct mpv_global *global,
                                 void (*wakeup_cb)(void *ctx),
                                 void *wakeup_ctx);
 
-// Load config, options, and devices.
-void mp_input_load(struct input_ctx *ictx);
+void mp_input_load_config(struct input_ctx *ictx);
+
+void mp_input_update_opts(struct input_ctx *ictx);
 
 void mp_input_uninit(struct input_ctx *ictx);
 

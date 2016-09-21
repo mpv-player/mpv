@@ -505,8 +505,6 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("force-window", force_vo, 0,
                ({"no", 0}, {"yes", 1}, {"immediate", 2})),
 
-    OPT_FLAG("window-dragging", allow_win_drag, CONF_GLOBAL),
-
     OPT_CHOICE("softvol", softvol, 0,
                ({"no", SOFTVOL_NO},
                 {"yes", SOFTVOL_YES},
@@ -653,14 +651,14 @@ const m_option_t mp_opts[] = {
 
     OPT_FLAG("input-terminal", consolecontrols, UPDATE_TERM),
 
-    OPT_STRING("input-file", input_file, M_OPT_FILE),
-    OPT_STRING("input-ipc-server", ipc_path, M_OPT_FILE | M_OPT_FIXED),
+    OPT_STRING("input-file", input_file, M_OPT_FILE | UPDATE_INPUT),
+    OPT_STRING("input-ipc-server", ipc_path, M_OPT_FILE | UPDATE_INPUT),
 
     OPT_SUBSTRUCT("screenshot", screenshot_image_opts, screenshot_conf, 0),
     OPT_STRING("screenshot-template", screenshot_template, 0),
     OPT_STRING("screenshot-directory", screenshot_directory, 0),
 
-    OPT_SUBSTRUCT("input", input_opts, input_config, 0),
+    OPT_SUBSTRUCT("", input_opts, input_config, 0),
 
     OPT_PRINT("list-protocols", stream_print_proto_list),
     OPT_PRINT("help", print_help),
@@ -777,7 +775,6 @@ const struct MPOpts mp_default_opts = {
     .audio_buffer = 0.2,
     .audio_device = "auto",
     .audio_client_name = "mpv",
-    .allow_win_drag = 1,
     .wintitle = "${?media-title:${media-title}}${!media-title:No file} - mpv",
     .heartbeat_interval = 30.0,
     .stop_screensaver = 1,
