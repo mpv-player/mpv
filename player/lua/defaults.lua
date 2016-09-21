@@ -412,6 +412,13 @@ mp.register_event("shutdown", function() mp.keep_running = false end)
 mp.register_event("client-message", message_dispatch)
 mp.register_event("property-change", property_change)
 
+-- called before the event loop goes back to sleep
+local idle_handlers = {}
+
+function mp.register_idle(cb)
+    idle_handlers[#idle_handlers + 1] = cb
+end
+
 -- sent by "script-binding"
 mp.register_script_message("key-binding", dispatch_key_binding)
 
@@ -455,6 +462,9 @@ function mp.dispatch_events(allow_wait)
         if not more_events then
             wait = process_timers()
             if wait == nil then
+                for _, handler in ipairs(idle_handlers) do
+                    handler()
+                end
                 wait = 1e20 -- infinity for all practical purposes
             end
             -- Resume playloop - important especially if an error happened while

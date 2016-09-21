@@ -456,6 +456,13 @@ are useful only in special situations.
     ``mp.get_wakeup_pipe()`` if you're interested in properly working
     notification of new events and working timers.
 
+``mp.register_idle(fn)``
+    Register an event loop idle handler. Idle handlers are called before the
+    script goes to sleep after handling all new events. This can be used for
+    example to delay processing of property change events: if you're observing
+    multiple properties at once, you might not want to act on each property
+    change, but only when all change notifications have been received.
+
 ``mp.enable_messages(level)``
     Set the minimum log level of which mpv message output to receive. These
     messages are normally printed to the terminal. By calling this function,
