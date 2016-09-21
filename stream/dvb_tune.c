@@ -432,7 +432,7 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
 
 static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
                    unsigned int freq, unsigned int srate, char pol,
-                   int tone, int stream_id,
+                   int stream_id,
                    fe_spectral_inversion_t specInv, unsigned int diseqc,
                    fe_modulation_t modulation,
                    fe_code_rate_t HP_CodeRate,
@@ -448,10 +448,10 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
 
 
     MP_VERBOSE(priv, "TUNE_IT, fd_frontend %d, %s freq %lu, srate %lu, "
-               "pol %c, tone %i, diseqc %u\n", fd_frontend,
+               "pol %c, diseqc %u\n", fd_frontend,
                get_dvb_delsys(delsys),
                (long unsigned int)freq, (long unsigned int)srate,
-               (pol > ' ' ? pol : ' '), tone, diseqc);
+               (pol > ' ' ? pol : '-'), diseqc);
 
     MP_VERBOSE(priv, "Using %s adapter %d\n",
         get_dvb_delsys(delsys),
@@ -651,7 +651,6 @@ old_api:
 
 int dvb_tune(dvb_priv_t *priv, unsigned int delsys,
              int freq, char pol, int srate, int diseqc,
-             int tone,
              int stream_id, fe_spectral_inversion_t specInv,
              fe_modulation_t modulation, fe_guard_interval_t guardInterval,
              fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth,
@@ -664,7 +663,7 @@ int dvb_tune(dvb_priv_t *priv, unsigned int delsys,
 
     dvb_state_t* state = priv->state;
 
-    int ris = tune_it(priv, state->fe_fd, delsys, freq, srate, pol, tone,
+    int ris = tune_it(priv, state->fe_fd, delsys, freq, srate, pol,
                       stream_id, specInv, diseqc, modulation,
                       HP_CodeRate, TransmissionMode, guardInterval,
                       bandWidth, LP_CodeRate, hier, timeout);
