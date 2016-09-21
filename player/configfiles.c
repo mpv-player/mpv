@@ -320,11 +320,11 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         goto exit;
     }
 
-    mp_mk_config_dir(mpctx->global, mpctx->cached_watch_later_configdir);
-
     conffile = mp_get_playback_resume_config_filename(mpctx, cur->filename);
     if (!conffile)
         goto exit;
+
+    mp_mk_config_dir(mpctx->global, mpctx->cached_watch_later_configdir);
 
     MP_INFO(mpctx, "Saving state.\n");
 
