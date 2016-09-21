@@ -399,7 +399,6 @@ struct m_option {
 #define CONF_MAX                M_OPT_MAX
 #define CONF_RANGE              M_OPT_RANGE
 #define CONF_NOCFG              M_OPT_NOCFG
-#define CONF_GLOBAL             M_OPT_FIXED
 #define CONF_PRE_PARSE          M_OPT_PRE_PARSE
 
 // These flags are used to describe special parser capabilities or behavior.

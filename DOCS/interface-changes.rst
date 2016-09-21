@@ -58,7 +58,7 @@ Interface changes
         - "fps" -> "container-fps"
         - "idle" -> "idle-active"
         - "cache" -> "cache-percent"
-      the old names are deprecated
+      the old names are deprecated and will change behavior in mpv 0.22.0.
     - remove deprecated "hwdec-active" and "hwdec-detected" properties
     - deprecate the ao and vo auto-profiles (they never made any sense)
     - deprecate "--vo=direct3d_shaders" - use "--vo=direct3d" instead.

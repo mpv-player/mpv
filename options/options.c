@@ -187,7 +187,7 @@ static const m_option_t mp_vo_opt_list[] = {
                ({"no", 0}, {"yes", 1}, {"fs-only", 2}, {"never", 3})),
 #endif
 #if HAVE_WIN32
-    OPT_STRING("vo-mmcss-profile", mmcss_profile, M_OPT_FIXED),
+    OPT_STRING("vo-mmcss-profile", mmcss_profile, 0),
 #endif
 
     {0}
@@ -236,7 +236,7 @@ const struct m_sub_options dvd_conf = {
 
 const m_option_t mp_opts[] = {
     // handled in command line pre-parser (parse_commandline.c)
-    {"v", CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG, .offset = -1},
+    {"v", CONF_TYPE_STORE, M_OPT_FIXED | CONF_NOCFG, .offset = -1},
     {"playlist", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN | M_OPT_FIXED | M_OPT_FILE,
      .min = 1, .offset = -1},
     {"{", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
@@ -255,7 +255,7 @@ const m_option_t mp_opts[] = {
 // ------------------------- common options --------------------
     OPT_FLAG("quiet", quiet, 0),
     OPT_FLAG_STORE("really-quiet", verbose,
-                   CONF_GLOBAL | CONF_PRE_PARSE | M_OPT_NOPROP, -10),
+                   M_OPT_FIXED | CONF_PRE_PARSE | M_OPT_NOPROP, -10),
     OPT_FLAG("terminal", use_terminal, CONF_PRE_PARSE | UPDATE_TERM),
     OPT_GENERAL(char**, "msg-level", msg_levels, CONF_PRE_PARSE | UPDATE_TERM,
                 .type = &m_option_type_msglevels),
@@ -265,7 +265,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("msg-module", msg_module, UPDATE_TERM),
     OPT_FLAG("msg-time", msg_time, UPDATE_TERM),
 #ifdef _WIN32
-    OPT_CHOICE("priority", w32_priority, CONF_GLOBAL,
+    OPT_CHOICE("priority", w32_priority, M_OPT_FIXED,
                ({"no",          0},
                 {"realtime",    REALTIME_PRIORITY_CLASS},
                 {"high",        HIGH_PRIORITY_CLASS},
@@ -274,19 +274,19 @@ const m_option_t mp_opts[] = {
                 {"belownormal", BELOW_NORMAL_PRIORITY_CLASS},
                 {"idle",        IDLE_PRIORITY_CLASS})),
 #endif
-    OPT_FLAG("config", load_config, CONF_GLOBAL | CONF_PRE_PARSE),
+    OPT_FLAG("config", load_config, M_OPT_FIXED | CONF_PRE_PARSE),
     OPT_STRING("config-dir", force_configdir,
-               CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
+               M_OPT_FIXED | CONF_NOCFG | CONF_PRE_PARSE),
     OPT_STRINGLIST("reset-on-next-file", reset_options, 0),
 
 #if HAVE_LUA
-    OPT_STRINGLIST("script", script_files, CONF_GLOBAL | M_OPT_FILE),
+    OPT_STRINGLIST("script", script_files, M_OPT_FIXED | M_OPT_FILE),
     OPT_KEYVALUELIST("script-opts", script_opts, 0),
     OPT_FLAG("osc", lua_load_osc, UPDATE_BUILTIN_SCRIPTS),
     OPT_FLAG("ytdl", lua_load_ytdl, UPDATE_BUILTIN_SCRIPTS),
     OPT_STRING("ytdl-format", lua_ytdl_format, 0),
     OPT_KEYVALUELIST("ytdl-raw-options", lua_ytdl_raw_options, 0),
-    OPT_FLAG("load-scripts", auto_load_scripts, CONF_GLOBAL),
+    OPT_FLAG("load-scripts", auto_load_scripts, M_OPT_FIXED),
 #endif
 
 // ------------------------- stream options --------------------
@@ -306,8 +306,7 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- demuxer options --------------------
 
-    OPT_CHOICE_OR_INT("frames", play_frames, M_OPT_FIXED, 0, INT_MAX,
-                      ({"all", -1})),
+    OPT_CHOICE_OR_INT("frames", play_frames, 0, 0, INT_MAX, ({"all", -1})),
 
     OPT_REL_TIME("start", play_start, 0),
     OPT_REL_TIME("end", play_end, 0),
@@ -321,7 +320,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_OR_INT("playlist-start", playlist_pos, 0, 0, INT_MAX,
                       ({"auto", -1}, {"no", -1})),
 
-    OPT_FLAG("pause", pause, M_OPT_FIXED),
+    OPT_FLAG("pause", pause, 0),
     OPT_CHOICE("keep-open", keep_open, 0,
                ({"no", 0},
                 {"yes", 1},
@@ -389,8 +388,7 @@ const m_option_t mp_opts[] = {
     OPT_CHANNELS("audio-channels", audio_output_channels, 0),
     OPT_AUDIOFORMAT("audio-format", audio_output_format, 0),
     OPT_FLAG("audio-normalize-downmix", audio_normalize, 0),
-    OPT_DOUBLE("speed", playback_speed, M_OPT_RANGE | M_OPT_FIXED,
-               .min = 0.01, .max = 100.0),
+    OPT_DOUBLE("speed", playback_speed, M_OPT_RANGE, .min = 0.01, .max = 100.0),
 
     OPT_FLAG("audio-pitch-correction", pitch_correction, 0),
 
