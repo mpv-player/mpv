@@ -4628,6 +4628,23 @@ Miscellaneous
 
     .. warning:: Using realtime priority can cause system lockup.
 
+``--numa-membind=<node>``
+    (Linux only.)
+    Bind all memory allocations to a specified NUMA node. This can significantly
+    reduce stuttering and dropped frames on NUMA systems.
+
+    Value is the ID of the NUMA node to bind to (range 0 to 4096), or -1 to
+    use the system's default NUMA policy. Default is -1.
+
+``--numa-cpubind=<node>``
+    (Linux only.)
+    Bind all CPU threads to a specified NUMA node. This can reduce stuttering
+    and dropped frames on NUMA systems, but will limit the number of useful
+    cores for decoding.
+
+    Value is the ID of the NUMA node to bind to (range 0 to 4096), or -1 to
+    use the system's default NUMA policy. Default is -1.
+
 ``--force-media-title=<string>``
     Force the contents of the ``media-title`` property to this value. Useful
     for scripts which want to set a title, without overriding the user's

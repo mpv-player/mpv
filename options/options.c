@@ -274,6 +274,10 @@ const m_option_t mp_opts[] = {
                 {"belownormal", BELOW_NORMAL_PRIORITY_CLASS},
                 {"idle",        IDLE_PRIORITY_CLASS})),
 #endif
+#ifdef HAVE_NUMA
+    OPT_INTRANGE("numa-membind", numa_membind, CONF_GLOBAL, -1, 4096),
+    OPT_INTRANGE("numa-cpubind", numa_cpubind, CONF_GLOBAL, -1, 4096),
+#endif
     OPT_FLAG("config", load_config, CONF_GLOBAL | CONF_PRE_PARSE),
     OPT_STRING("config-dir", force_configdir,
                CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
@@ -870,6 +874,9 @@ const struct MPOpts mp_default_opts = {
     .use_embedded_fonts = 1,
     .sub_fix_timing = 1,
     .screenshot_template = "mpv-shot%n",
+
+    .numa_membind = -1,
+    .numa_cpubind = -1,
 
     .hwdec_api = HAVE_RPI ? HWDEC_RPI : 0,
     .hwdec_codecs = "h264,vc1,wmv3,hevc,mpeg2video,vp9",

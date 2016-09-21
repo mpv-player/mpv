@@ -70,6 +70,10 @@ static const char def_config[] =
 #include <windows.h>
 #endif
 
+#ifdef HAVE_NUMA
+#include <numa.h>
+#endif
+
 #if HAVE_COCOA
 #include "osdep/macosx_events.h"
 #endif
@@ -473,6 +477,19 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 #ifdef _WIN32
     if (opts->w32_priority > 0)
         SetPriorityClass(GetCurrentProcess(), opts->w32_priority);
+#endif
+
+#ifdef HAVE_NUMA
+    int nodecount = numa_max_node()+1;
+    if (opts->numa_membind >= 0 && opts->numa_membind < nodecount) {
+        struct bitmask *mask = numa_bitmask_alloc(nodecount);
+        numa_bitmask_setbit(mask, opts->numa_membind);
+        numa_set_membind(mask);
+        numa_bitmask_free(mask);
+    }
+
+    if (opts->numa_cpubind >= 0 && opts->numa_cpubind < nodecount)
+        numa_run_on_node(opts->numa_cpubind);
 #endif
 
     MP_STATS(mpctx, "end init");
