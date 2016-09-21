@@ -761,9 +761,6 @@ mpv_event *mpv_wait_event(mpv_handle *ctx, double timeout)
 {
     mpv_event *event = ctx->cur_event;
 
-    if (!ctx->mpctx->initialized)
-        return NULL;
-
     pthread_mutex_lock(&ctx->lock);
 
     if (!ctx->fuzzy_initialized)
