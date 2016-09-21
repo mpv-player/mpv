@@ -62,7 +62,7 @@
 
 typedef struct {
     char *name;
-    unsigned int freq, srate, diseqc, tone;
+    unsigned int freq, srate, diseqc;
     char pol;
     unsigned int tpid, dpid1, dpid2, progid, ca, pids[DMX_FILTER_SIZE], pids_cnt;
     bool is_dvb_x2;
@@ -145,19 +145,23 @@ typedef struct {
 
 #ifdef DVB_ATSC
 #define DELSYS_SUPP_MASK						\
-    DELSYS_BIT(SYS_DVBC_ANNEX_AC) |					\
-    DELSYS_BIT(SYS_DVBT) |						\
-    DELSYS_BIT(SYS_DVBS) |						\
-    DELSYS_BIT(SYS_DVBS2) |						\
-    DELSYS_BIT(SYS_ATSC) |						\
-    DELSYS_BIT(SYS_DVBT2)
+    (									\
+        DELSYS_BIT(SYS_DVBC_ANNEX_AC) |					\
+        DELSYS_BIT(SYS_DVBT) |						\
+        DELSYS_BIT(SYS_DVBS) |						\
+        DELSYS_BIT(SYS_DVBS2) |						\
+        DELSYS_BIT(SYS_ATSC) |						\
+        DELSYS_BIT(SYS_DVBT2)						\
+    )
 #else
 #define DELSYS_SUPP_MASK						\
-    DELSYS_BIT(SYS_DVBC_ANNEX_AC) |					\
-    DELSYS_BIT(SYS_DVBT) |						\
-    DELSYS_BIT(SYS_DVBS) |						\
-    DELSYS_BIT(SYS_DVBS2) |						\
-    DELSYS_BIT(SYS_DVBT2)
+    (									\
+        DELSYS_BIT(SYS_DVBC_ANNEX_AC) |					\
+        DELSYS_BIT(SYS_DVBT) |						\
+        DELSYS_BIT(SYS_DVBS) |						\
+        DELSYS_BIT(SYS_DVBS2) |						\
+        DELSYS_BIT(SYS_DVBT2)						\
+    )
 #endif
 
 

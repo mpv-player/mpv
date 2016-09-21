@@ -251,6 +251,10 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         if ((line[0] == '#') || (strlen(line) == 0))
             continue;
 
+	memset(ptr, 0, sizeof(dvb_channel_t));
+        vpid_str[0] = apid_str[0] = tpid_str[0] = 0;
+        vdr_loc_str[0] = vdr_par_str[0] = 0;
+
         colon = strchr(line, ':');
         if (colon) {
             k = colon - line;
@@ -270,13 +274,12 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
             continue;
         }
         k++;
-        vpid_str[0] = apid_str[0] = tpid_str[0] = 0;
-        vdr_loc_str[0] = vdr_par_str[0] = 0;
         ptr->pids_cnt = 0;
         ptr->freq = 0;
         ptr->service_id = -1;
         ptr->is_dvb_x2 = false;
         ptr->delsys = delsys;
+	ptr->diseqc = 0;
         ptr->stream_id = NO_STREAM_ID_FILTER;
         ptr->inv = INVERSION_AUTO;
         ptr->bw = BANDWIDTH_AUTO;
@@ -331,7 +334,6 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
 
                 ptr->freq *=  1000UL;
                 ptr->srate *=  1000UL;
-                ptr->tone = -1;
 
                 if (vdr_loc_str[0]) {
                     // In older vdr config format, this field contained the DISEQc information.
@@ -402,7 +404,6 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 ptr->pol = mp_toupper(ptr->pol);
                 ptr->freq *=  1000UL;
                 ptr->srate *=  1000UL;
-                ptr->tone = -1;
                 if ((ptr->diseqc > 4) || (ptr->diseqc < 0))
                     continue;
                 if (ptr->diseqc > 0)
@@ -745,8 +746,7 @@ int dvb_set_channel(stream_t *stream, unsigned int adapter, unsigned int n)
 
     if (channel->freq != state->last_freq) {
         if (!dvb_tune(priv, channel->delsys, channel->freq,
-                      channel->pol, channel->srate,
-                      channel->diseqc, channel->tone,
+                      channel->pol, channel->srate, channel->diseqc,
                       channel->stream_id, channel->inv,
                       channel->mod, channel->gi,
                       channel->trans, channel->bw, channel->cr, channel->cr_lp,
@@ -1104,7 +1104,8 @@ dvb_state_t *dvb_get_state(stream_t *stream)
         }
 
         mp_verbose(log, "Opened device %s, FD: %d\n", filename, fd);
-        delsys_mask = (DELSYS_SUPP_MASK & dvb_get_tuner_delsys_mask(fd, log));
+        delsys_mask = dvb_get_tuner_delsys_mask(fd, log);
+        delsys_mask &= DELSYS_SUPP_MASK; /* Filter unsupported delivery systems. */
         close(fd);
         if (delsys_mask == 0) {
             mp_verbose(log, "Frontend device %s has no supported delivery systems.\n",
