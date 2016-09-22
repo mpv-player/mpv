@@ -54,9 +54,9 @@ static void aspect_calc_panscan(struct mp_vo_opts *opts,
 
     if (unscaled) {
         vo_panscan_area = 0;
-        if (unscaled != 2 || (w <= window_w && h <= window_h)) {
-            fwidth = w;
-            fheight = h;
+        if (unscaled != 2 || (d_w <= window_w && d_h <= window_h)) {
+            fwidth = d_w * monitor_par;
+            fheight = d_h;
         }
     }
 
