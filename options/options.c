@@ -187,7 +187,7 @@ static const m_option_t mp_vo_opt_list[] = {
                ({"no", 0}, {"yes", 1}, {"fs-only", 2}, {"never", 3})),
 #endif
 #if HAVE_WIN32
-    OPT_STRING("vo-mmcss-profile", mmcss_profile, M_OPT_FIXED),
+    OPT_STRING("vo-mmcss-profile", mmcss_profile, 0),
 #endif
 
     {0}
@@ -236,7 +236,7 @@ const struct m_sub_options dvd_conf = {
 
 const m_option_t mp_opts[] = {
     // handled in command line pre-parser (parse_commandline.c)
-    {"v", CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG, .offset = -1},
+    {"v", CONF_TYPE_STORE, M_OPT_FIXED | CONF_NOCFG, .offset = -1},
     {"playlist", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN | M_OPT_FIXED | M_OPT_FILE,
      .min = 1, .offset = -1},
     {"{", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
@@ -255,7 +255,7 @@ const m_option_t mp_opts[] = {
 // ------------------------- common options --------------------
     OPT_FLAG("quiet", quiet, 0),
     OPT_FLAG_STORE("really-quiet", verbose,
-                   CONF_GLOBAL | CONF_PRE_PARSE | M_OPT_NOPROP, -10),
+                   M_OPT_FIXED | CONF_PRE_PARSE | M_OPT_NOPROP, -10),
     OPT_FLAG("terminal", use_terminal, CONF_PRE_PARSE | UPDATE_TERM),
     OPT_GENERAL(char**, "msg-level", msg_levels, CONF_PRE_PARSE | UPDATE_TERM,
                 .type = &m_option_type_msglevels),
@@ -265,7 +265,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("msg-module", msg_module, UPDATE_TERM),
     OPT_FLAG("msg-time", msg_time, UPDATE_TERM),
 #ifdef _WIN32
-    OPT_CHOICE("priority", w32_priority, CONF_GLOBAL,
+    OPT_CHOICE("priority", w32_priority, M_OPT_FIXED,
                ({"no",          0},
                 {"realtime",    REALTIME_PRIORITY_CLASS},
                 {"high",        HIGH_PRIORITY_CLASS},
@@ -274,19 +274,19 @@ const m_option_t mp_opts[] = {
                 {"belownormal", BELOW_NORMAL_PRIORITY_CLASS},
                 {"idle",        IDLE_PRIORITY_CLASS})),
 #endif
-    OPT_FLAG("config", load_config, CONF_GLOBAL | CONF_PRE_PARSE),
+    OPT_FLAG("config", load_config, M_OPT_FIXED | CONF_PRE_PARSE),
     OPT_STRING("config-dir", force_configdir,
-               CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
+               M_OPT_FIXED | CONF_NOCFG | CONF_PRE_PARSE),
     OPT_STRINGLIST("reset-on-next-file", reset_options, 0),
 
 #if HAVE_LUA
-    OPT_STRINGLIST("script", script_files, CONF_GLOBAL | M_OPT_FILE),
+    OPT_STRINGLIST("script", script_files, M_OPT_FIXED | M_OPT_FILE),
     OPT_KEYVALUELIST("script-opts", script_opts, 0),
     OPT_FLAG("osc", lua_load_osc, UPDATE_BUILTIN_SCRIPTS),
     OPT_FLAG("ytdl", lua_load_ytdl, UPDATE_BUILTIN_SCRIPTS),
     OPT_STRING("ytdl-format", lua_ytdl_format, 0),
     OPT_KEYVALUELIST("ytdl-raw-options", lua_ytdl_raw_options, 0),
-    OPT_FLAG("load-scripts", auto_load_scripts, CONF_GLOBAL),
+    OPT_FLAG("load-scripts", auto_load_scripts, M_OPT_FIXED),
 #endif
 
 // ------------------------- stream options --------------------
@@ -306,8 +306,7 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- demuxer options --------------------
 
-    OPT_CHOICE_OR_INT("frames", play_frames, M_OPT_FIXED, 0, INT_MAX,
-                      ({"all", -1})),
+    OPT_CHOICE_OR_INT("frames", play_frames, 0, 0, INT_MAX, ({"all", -1})),
 
     OPT_REL_TIME("start", play_start, 0),
     OPT_REL_TIME("end", play_end, 0),
@@ -321,7 +320,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_OR_INT("playlist-start", playlist_pos, 0, 0, INT_MAX,
                       ({"auto", -1}, {"no", -1})),
 
-    OPT_FLAG("pause", pause, M_OPT_FIXED),
+    OPT_FLAG("pause", pause, 0),
     OPT_CHOICE("keep-open", keep_open, 0,
                ({"no", 0},
                 {"yes", 1},
@@ -385,12 +384,11 @@ const m_option_t mp_opts[] = {
 
     // force video/audio rate:
     OPT_DOUBLE("fps", force_fps, CONF_MIN, .min = 0),
-    OPT_INTRANGE("audio-samplerate", force_srate, 0, 1000, 16*48000),
-    OPT_CHANNELS("audio-channels", audio_output_channels, 0),
-    OPT_AUDIOFORMAT("audio-format", audio_output_format, 0),
-    OPT_FLAG("audio-normalize-downmix", audio_normalize, 0),
-    OPT_DOUBLE("speed", playback_speed, M_OPT_RANGE | M_OPT_FIXED,
-               .min = 0.01, .max = 100.0),
+    OPT_INTRANGE("audio-samplerate", force_srate, UPDATE_AUDIO, 1000, 16*48000),
+    OPT_CHANNELS("audio-channels", audio_output_channels, UPDATE_AUDIO),
+    OPT_AUDIOFORMAT("audio-format", audio_output_format, UPDATE_AUDIO),
+    OPT_FLAG("audio-normalize-downmix", audio_normalize, UPDATE_AUDIO),
+    OPT_DOUBLE("speed", playback_speed, M_OPT_RANGE, .min = 0.01, .max = 100.0),
 
     OPT_FLAG("audio-pitch-correction", pitch_correction, 0),
 
@@ -424,11 +422,11 @@ const m_option_t mp_opts[] = {
 
     // -1 means auto aspect (prefer container size until aspect change)
     //  0 means square pixels
-    OPT_ASPECT("video-aspect", movie_aspect, 0, -1.0, 10.0),
-    OPT_CHOICE("video-aspect-method", aspect_method, 0,
+    OPT_ASPECT("video-aspect", movie_aspect, UPDATE_IMGPAR, -1.0, 10.0),
+    OPT_CHOICE("video-aspect-method", aspect_method, UPDATE_IMGPAR,
                ({"hybrid", 0}, {"bitstream", 1}, {"container", 2})),
 
-    OPT_CHOICE("field-dominance", field_dominance, 0,
+    OPT_CHOICE("field-dominance", field_dominance, UPDATE_IMGPAR,
                ({"auto", -1}, {"top", 0}, {"bottom", 1})),
 
     OPT_SUBSTRUCT("vd-lavc", vd_lavc_params, vd_lavc_conf, 0),
@@ -505,8 +503,6 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("force-window", force_vo, 0,
                ({"no", 0}, {"yes", 1}, {"immediate", 2})),
 
-    OPT_FLAG("window-dragging", allow_win_drag, CONF_GLOBAL),
-
     OPT_CHOICE("softvol", softvol, 0,
                ({"no", SOFTVOL_NO},
                 {"yes", SOFTVOL_YES},
@@ -531,9 +527,10 @@ const m_option_t mp_opts[] = {
     OPT_STRING("force-media-title", media_title, 0),
     // set aspect ratio of monitor - useful for 16:9 TV-out
     OPT_FLAG("force-rgba-osd-rendering", force_rgba_osd, 0),
-    OPT_CHOICE_OR_INT("video-rotate", video_rotate, 0, 0, 359,
+    OPT_CHOICE_OR_INT("video-rotate", video_rotate, UPDATE_IMGPAR, 0, 359,
                       ({"no", -1})),
-    OPT_CHOICE_C("video-stereo-mode", video_stereo_mode, 0, mp_stereo3d_names),
+    OPT_CHOICE_C("video-stereo-mode", video_stereo_mode, UPDATE_IMGPAR,
+                 mp_stereo3d_names),
 
     OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),
@@ -590,6 +587,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("save-position-on-quit", position_save_on_quit, 0),
     OPT_FLAG("write-filename-in-watch-later-config", write_filename_in_watch_later_config, 0),
     OPT_FLAG("ignore-path-in-watch-later-config", ignore_path_in_watch_later_config, 0),
+    OPT_STRING("watch-later-directory", watch_later_directory, 0),
 
     OPT_FLAG("ordered-chapters", ordered_chapters, 0),
     OPT_STRING("ordered-chapters-files", ordered_chapters_files, M_OPT_FILE),
@@ -652,14 +650,14 @@ const m_option_t mp_opts[] = {
 
     OPT_FLAG("input-terminal", consolecontrols, UPDATE_TERM),
 
-    OPT_STRING("input-file", input_file, M_OPT_FILE),
-    OPT_STRING("input-ipc-server", ipc_path, M_OPT_FILE | M_OPT_FIXED),
+    OPT_STRING("input-file", input_file, M_OPT_FILE | UPDATE_INPUT),
+    OPT_STRING("input-ipc-server", ipc_path, M_OPT_FILE | UPDATE_INPUT),
 
     OPT_SUBSTRUCT("screenshot", screenshot_image_opts, screenshot_conf, 0),
     OPT_STRING("screenshot-template", screenshot_template, 0),
     OPT_STRING("screenshot-directory", screenshot_directory, 0),
 
-    OPT_SUBSTRUCT("input", input_opts, input_config, 0),
+    OPT_SUBSTRUCT("", input_opts, input_config, 0),
 
     OPT_PRINT("list-protocols", stream_print_proto_list),
     OPT_PRINT("help", print_help),
@@ -776,7 +774,6 @@ const struct MPOpts mp_default_opts = {
     .audio_buffer = 0.2,
     .audio_device = "auto",
     .audio_client_name = "mpv",
-    .allow_win_drag = 1,
     .wintitle = "${?media-title:${media-title}}${!media-title:No file} - mpv",
     .heartbeat_interval = 30.0,
     .stop_screensaver = 1,

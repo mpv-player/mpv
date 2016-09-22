@@ -581,7 +581,7 @@ audio_output_features = [
     }, {
         'name': '--openal',
         'desc': 'OpenAL audio output',
-        'func': check_pkg_config('openal', '>= 1.13'),
+        'func': check_openal,
         'default': 'disable'
     }, {
         'name': '--opensles',

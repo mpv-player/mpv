@@ -412,6 +412,8 @@ These also live in the ``mp`` module, but are documented separately as they
 are useful only in special situations.
 
 ``mp.suspend()``
+    This function has been deprecated in mpv 0.21.0 (no replacement).
+
     Suspend the mpv main loop. There is a long-winded explanation of this in
     the C API function ``mpv_suspend()``. In short, this prevents the player
     from displaying the next video frame, so that you don't get blocked when
@@ -420,11 +422,15 @@ are useful only in special situations.
     Before mpv 0.17.0, this was automatically called by the event handler.
 
 ``mp.resume()``
+    This function has been deprecated in mpv 0.21.0 (no replacement).
+
     Undo one ``mp.suspend()`` call. ``mp.suspend()`` increments an internal
     counter, and ``mp.resume()`` decrements it. When 0 is reached, the player
     is actually resumed.
 
 ``mp.resume_all()``
+    This function has been deprecated in mpv 0.21.0 (no replacement).
+
     This resets the internal suspend counter and resumes the player. (It's
     like calling ``mp.resume()`` until the player is actually resumed.)
 
@@ -449,6 +455,13 @@ are useful only in special situations.
     emptied. It's strongly recommended to use ``mp.get_next_timeout()`` and
     ``mp.get_wakeup_pipe()`` if you're interested in properly working
     notification of new events and working timers.
+
+``mp.register_idle(fn)``
+    Register an event loop idle handler. Idle handlers are called before the
+    script goes to sleep after handling all new events. This can be used for
+    example to delay processing of property change events: if you're observing
+    multiple properties at once, you might not want to act on each property
+    change, but only when all change notifications have been received.
 
 ``mp.enable_messages(level)``
     Set the minimum log level of which mpv message output to receive. These
@@ -633,7 +646,16 @@ strictly part of the guaranteed API.
             Set to ``true`` if the process has been killed by mpv as a result
             of ``cancellable`` being set to ``true``.
 
-    In all cases, ``mp.resume_all()`` is implicitly called.
+``utils.subprocess_detached(t)``
+    Runs an external process and detaches it from mpv's control.
+
+    The parameter ``t`` is a table. The function reads the following entries:
+
+        ``args``
+            Array of strings of the same semantics as the ``args`` used in the
+            ``subprocess`` function.
+
+    The function returns ``nil``.
 
 ``utils.parse_json(str [, trail])``
     Parses the given string argument as JSON, and returns it as a Lua table. On

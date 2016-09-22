@@ -66,7 +66,8 @@ struct mp_client_api {
 
     struct mpv_handle **clients;
     int num_clients;
-    uint64_t event_masks;   // combined events of all clients, or 0 if unknown
+    uint64_t event_masks; // combined events of all clients, or 0 if unknown
+    bool shutting_down; // do not allow new clients
 
     struct mp_custom_protocol *custom_protocols;
     int num_custom_protocols;
@@ -206,8 +207,17 @@ bool mp_client_exists(struct MPContext *mpctx, const char *client_name)
     return r;
 }
 
+void mp_client_enter_shutdown(struct MPContext *mpctx)
+{
+    pthread_mutex_lock(&mpctx->clients->lock);
+    mpctx->clients->shutting_down = true;
+    pthread_mutex_unlock(&mpctx->clients->lock);
+}
+
 struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name)
 {
+    pthread_mutex_lock(&clients->lock);
+
     char nname[MAX_CLIENT_NAME];
     for (int n = 1; n < 1000; n++) {
         if (!name)
@@ -222,10 +232,10 @@ struct mpv_handle *mp_new_client(struct mp_client_api *clients, const char *name
         nname[0] = '\0';
     }
 
-    if (!nname[0])
+    if (!nname[0] || clients->shutting_down) {
+        pthread_mutex_unlock(&clients->lock);
         return NULL;
-
-    pthread_mutex_lock(&clients->lock);
+    }
 
     int num_events = 1000;
 
@@ -416,6 +426,8 @@ void mpv_detach_destroy(mpv_handle *ctx)
                 ctx->num_events--;
             }
             mp_msg_log_buffer_destroy(ctx->messages);
+            osd_set_external(ctx->mpctx->osd, ctx, 0, 0, NULL);
+            mp_input_remove_sections_by_owner(ctx->mpctx->input, ctx->name);
             pthread_cond_destroy(&ctx->wakeup);
             pthread_mutex_destroy(&ctx->wakeup_lock);
             pthread_mutex_destroy(&ctx->lock);
@@ -1120,8 +1132,17 @@ static void setproperty_fn(void *arg)
 int mpv_set_property(mpv_handle *ctx, const char *name, mpv_format format,
                      void *data)
 {
-    if (!ctx->mpctx->initialized)
-        return MPV_ERROR_UNINITIALIZED;
+    if (!ctx->mpctx->initialized) {
+        int r = mpv_set_option(ctx, name, format, data);
+        if (r == MPV_ERROR_OPTION_NOT_FOUND &&
+            mp_get_property_id(ctx->mpctx, name) >= 0)
+            return MPV_ERROR_PROPERTY_UNAVAILABLE;
+        switch (r) {
+        case MPV_ERROR_OPTION_FORMAT:    return MPV_ERROR_PROPERTY_FORMAT;
+        case MPV_ERROR_OPTION_NOT_FOUND: return MPV_ERROR_PROPERTY_NOT_FOUND;
+        default:                         return MPV_ERROR_PROPERTY_ERROR;
+        }
+    }
     if (!get_mp_type(format))
         return MPV_ERROR_PROPERTY_FORMAT;
 

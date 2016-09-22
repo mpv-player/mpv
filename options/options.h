@@ -101,7 +101,6 @@ typedef struct MPOpts {
     double audio_buffer;
 
     mp_vo_opts *vo;
-    int allow_win_drag;
 
     char *wintitle;
     char *media_title;
@@ -191,6 +190,7 @@ typedef struct MPOpts {
     int position_save_on_quit;
     int write_filename_in_watch_later_config;
     int ignore_path_in_watch_later_config;
+    char *watch_later_directory;
     int pause;
     int keep_open;
     double image_display_duration;

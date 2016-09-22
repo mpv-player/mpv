@@ -93,14 +93,15 @@ mp.add_hook("on_load", 10, function ()
         if (mp.get_property("options/vid") == "no")
             and not option_was_set("ytdl-format") then
 
-            format = "bestaudio/best"
+            format = "bestaudio"
             msg.verbose("Video disabled. Only using audio")
         end
 
-        if (format ~= "") then
-            table.insert(command, "--format")
-            table.insert(command, format)
+        if (format == "") then
+            format = "bestvideo+bestaudio"
         end
+        table.insert(command, "--format")
+        table.insert(command, string.format('(%s)[protocol!=http_dash_segments]/best', format))
 
         for param, arg in pairs(raw_options) do
             table.insert(command, "--" .. param)

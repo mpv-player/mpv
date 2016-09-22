@@ -592,7 +592,6 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
                                 struct mp_image_params *out_params)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
-    struct MPOpts *opts = ctx->opts;
 
 #if HAVE_AVUTIL_MASTERING_METADATA
     // Get the reference peak (for HDR) if available. This is cached into ctx
@@ -632,13 +631,6 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
         .rotate = vd->codec->rotate,
         .stereo_in = vd->codec->stereo_mode,
     };
-
-    if (opts->video_rotate < 0) {
-        out_params->rotate = 0;
-    } else {
-        out_params->rotate = (out_params->rotate + opts->video_rotate) % 360;
-    }
-    out_params->stereo_out = opts->video_stereo_mode;
 }
 
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,

@@ -154,6 +154,7 @@ struct vo_internal {
     bool rendering;                 // true if an image is being rendered
     struct vo_frame *frame_queued;  // should be drawn next
     int req_frames;                 // VO's requested value of num_frames
+    uint64_t current_frame_id;
 
     double display_fps;
     int opt_framedrop;
@@ -597,6 +598,7 @@ static void forget_frames(struct vo *vo)
     in->delayed_count = 0;
     talloc_free(in->frame_queued);
     in->frame_queued = NULL;
+    in->current_frame_id += VO_MAX_REQ_FRAMES + 1;
     // don't unref current_frame; we always want to be able to redraw it
     if (in->current_frame) {
         in->current_frame->num_vsyncs = 0; // but reset future repeats
@@ -699,6 +701,7 @@ void vo_queue_frame(struct vo *vo, struct vo_frame *frame)
     assert(vo->config_ok && !in->frame_queued &&
            (!in->current_frame || in->current_frame->num_vsyncs < 1));
     in->hasframe = true;
+    frame->frame_id = ++(in->current_frame_id);
     in->frame_queued = frame;
     in->wakeup_pts = frame->display_synced
                    ? 0 : frame->pts + MPMAX(frame->duration, 0);

@@ -458,10 +458,10 @@ static MpvVideoWindow *create_window(NSRect rect, NSScreen *s, bool border,
 {
     int window_mask = 0;
     if (border) {
-        window_mask = NSTitledWindowMask|NSClosableWindowMask|
-                      NSMiniaturizableWindowMask|NSResizableWindowMask;
+        window_mask = NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|
+                      NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable;
     } else {
-        window_mask = NSBorderlessWindowMask|NSResizableWindowMask;
+        window_mask = NSWindowStyleMaskBorderless|NSWindowStyleMaskResizable;
     }
 
     MpvVideoWindow *w =

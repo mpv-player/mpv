@@ -39,6 +39,15 @@ API changes
           workaround for the FFmpeg TLS code, which has been fixed long ago.
         - deprecate mpv_suspend() and mpv_resume(). They will be stubbed out
           in mpv 0.22.0.
+        - make mpv_set_property() work to some degree before mpv_initialize().
+          It can now be used instead of mpv_set_option().
+        - semi-deprecate mpv_set_option()/mpv_set_option_string(). You should
+          use mpv_set_property() instead. There are some deprecated properties
+          which conflict with some options (see client.h remarks on
+          mpv_set_option()), for which mpv_set_option() might still be required.
+          In future mpv releases, the conflicting deprecated options/properties
+          will be removed, and mpv_set_option() will internally translate API
+          calls to mpv_set_property().
  --- mpv 0.19.0 ---
  1.22   - add stream_cb API for custom protocols
  --- mpv 0.18.1 ---

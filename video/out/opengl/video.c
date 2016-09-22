@@ -762,6 +762,9 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
     float ls_w = 1.0 / (1 << p->image_desc.chroma_xs);
     float ls_h = 1.0 / (1 << p->image_desc.chroma_ys);
 
+    if (p->image_params.rotate % 180 == 90)
+        MPSWAP(float, ls_w, ls_h);
+
     struct gl_transform chroma = {{{ls_w, 0.0}, {0.0, ls_h}}};
 
     if (p->image_params.chroma_location != MP_CHROMA_CENTER) {

@@ -699,6 +699,9 @@ Input Commands that are Possibly Subject to Change
     There is no such thing as "unapplying" a profile - applying a profile
     merely sets all option values listed within the profile.
 
+``load-script "<path>"``
+    Load a script, similar to the ``--script`` option.
+
 Undocumented commands: ``tv-last-channel`` (TV/DVB only),
 ``ao-reload`` (experimental/internal).
 
@@ -1437,6 +1440,9 @@ Property list
 
     These have the same values as ``video-out-params/dw`` and
     ``video-out-params/dh``.
+
+``video-dec-params``
+    Exactly like ``video-params``, but no overrides applied.
 
 ``video-out-params``
     Same as ``video-params``, but after video filters have been applied. If

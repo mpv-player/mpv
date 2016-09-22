@@ -97,6 +97,9 @@ struct command_ctx {
     int64_t hook_seq; // for hook_handler.seq
 
     struct ao_hotplug *hotplug;
+
+    char *cur_ipc;
+    char *cur_ipc_input;
 };
 
 struct overlay {
@@ -324,16 +327,17 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
     return 0;
 
 direct_option:
+    mp_notify_property(mpctx, name);
     return m_config_set_option_raw_direct(mpctx->mconfig, co, data, flags);
 }
 
 // Property-option bridge. (Maps the property to the option with the same name.)
-static int mp_property_generic_option_do(void *ctx, struct m_property *prop,
-                                         int action, void *arg, bool force)
+static int mp_property_generic_option(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
     const char *optname = prop->name;
-    int flags = mpctx->initialized && !force ? M_SETOPT_RUNTIME : 0;
+    int flags = M_SETOPT_RUNTIME;
     struct m_config_option *opt = m_config_get_co(mpctx->mconfig,
                                                   bstr0(optname));
 
@@ -357,18 +361,6 @@ static int mp_property_generic_option_do(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_generic_option(void *ctx, struct m_property *prop,
-                                      int action, void *arg)
-{
-    return mp_property_generic_option_do(ctx, prop, action, arg, true);
-}
-
-static int mp_property_generic_option_bridge(void *ctx, struct m_property *prop,
-                                             int action, void *arg)
-{
-    return mp_property_generic_option_do(ctx, prop, action, arg, false);
-}
-
 // Dumb special-case: the option name ends in a "*".
 static int mp_property_generic_option_star(void *ctx, struct m_property *prop,
                                            int action, void *arg)
@@ -377,7 +369,7 @@ static int mp_property_generic_option_star(void *ctx, struct m_property *prop,
     char name[80];
     snprintf(name, sizeof(name), "%s*", prop->name);
     prop2.name = name;
-    return mp_property_generic_option_bridge(ctx, &prop2, action, arg);
+    return mp_property_generic_option(ctx, &prop2, action, arg);
 }
 
 /// Playback speed (RW)
@@ -2397,16 +2389,6 @@ static int mp_property_deinterlace(void *ctx, struct m_property *prop,
     return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
-static int video_simple_refresh_property(void *ctx, struct m_property *prop,
-                                         int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    int r = mp_property_generic_option(mpctx, prop, action, arg);
-    if (action == M_PROPERTY_SET && r == M_PROPERTY_OK)
-        mp_force_video_refresh(mpctx);
-    return r;
-}
-
 /// Helper to set vo flags.
 /** \ingroup PropertyImplHelper
  */
@@ -2623,6 +2605,19 @@ static int mp_property_vo_imgparams(void *ctx, struct m_property *prop,
                                     int action, void *arg)
 {
     return property_imgparams(get_video_out_params(ctx), action, arg);
+}
+
+static int mp_property_dec_imgparams(void *ctx, struct m_property *prop,
+                                    int action, void *arg)
+{
+    MPContext *mpctx = ctx;
+    struct mp_image_params p = {0};
+    struct vo_chain *vo_c = mpctx->vo_chain;
+    if (vo_c && vo_c->video_src)
+        video_get_dec_params(vo_c->video_src, &p);
+    if (!p.imgfmt)
+        return M_PROPERTY_UNAVAILABLE;
+    return property_imgparams(p, action, arg);
 }
 
 static int mp_property_vd_imgparams(void *ctx, struct m_property *prop,
@@ -2948,14 +2943,6 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
     }
 
     switch (action) {
-    case M_PROPERTY_SET: {
-        mpctx->opts->movie_aspect = *(float *)arg;
-        if (track && track->d_video) {
-            video_reset_aspect(track->d_video);
-            mp_force_video_refresh(mpctx);
-        }
-        return M_PROPERTY_OK;
-    }
     case M_PROPERTY_PRINT: {
         if (mpctx->opts->movie_aspect < 0) {
             *(char **)arg = talloc_asprintf(NULL, "%.3f (original)", aspect);
@@ -2967,10 +2954,8 @@ static int mp_property_aspect(void *ctx, struct m_property *prop,
         *(float *)arg = aspect;
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_GET_TYPE:
-        return mp_property_generic_option(mpctx, prop, action, arg);
     }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
 /// Selected subtitles (RW)
@@ -3875,6 +3860,7 @@ static const struct m_property mp_properties_base[] = {
     {"video-output-levels", mp_property_video_color,
      .priv = (void *)"output-levels"},
     {"video-out-params", mp_property_vo_imgparams},
+    {"video-dec-params", mp_property_dec_imgparams},
     {"video-params", mp_property_vd_imgparams},
     {"video-format", mp_property_video_format},
     {"video-frame-info", mp_property_video_frame_info},
@@ -3917,9 +3903,6 @@ static const struct m_property mp_properties_base[] = {
 
     {"vf", mp_property_vf},
     {"af", mp_property_af},
-
-    {"video-rotate", video_simple_refresh_property},
-    {"video-stereo-mode", video_simple_refresh_property},
 
     {"ab-loop-a", mp_property_ab_loop},
     {"ab-loop-b", mp_property_ab_loop},
@@ -4010,12 +3993,14 @@ static const char *const *const mp_event_property_change[] = {
       "estimated-vf-fps", "drop-frame-count", "vo-drop-frame-count",
       "total-avsync-change", "audio-speed-correction", "video-speed-correction",
       "vo-delayed-frame-count", "mistimed-frame-count", "vsync-ratio",
-      "estimated-display-fps", "vsync-jitter", "sub-text"),
+      "estimated-display-fps", "vsync-jitter", "sub-text", "audio-bitrate",
+      "video-bitrate", "sub-bitrate"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",
       "detected-hwdec", "colormatrix", "colormatrix-input-range",
-      "colormatrix-output-range", "colormatrix-primaries", "video-aspect"),
+      "colormatrix-output-range", "colormatrix-primaries", "video-aspect",
+      "video-dec-params"),
     E(MPV_EVENT_AUDIO_RECONFIG, "audio-format", "audio-codec", "audio-bitrate",
       "samplerate", "channels", "audio", "volume", "mute", "balance",
       "current-ao", "audio-codec-name", "audio-params",
@@ -5282,7 +5267,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
     case MP_CMD_DEFINE_INPUT_SECTION:
         mp_input_define_section(mpctx->input, cmd->args[0].v.s, "<api>",
-                                cmd->args[1].v.s, !!cmd->args[2].v.i);
+                                cmd->args[1].v.s, !!cmd->args[2].v.i,
+                                cmd->sender);
         break;
 
     case MP_CMD_AB_LOOP: {
@@ -5481,8 +5467,14 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
     case MP_CMD_APPLY_PROFILE: {
         char *profile = cmd->args[0].v.s;
-        int flags = mpctx->initialized ? M_SETOPT_RUNTIME : 0;
-        if (m_config_set_profile(mpctx->mconfig, profile, flags) < 0)
+        if (m_config_set_profile(mpctx->mconfig, profile, M_SETOPT_RUNTIME) < 0)
+            return -1;
+        break;
+    }
+
+    case MP_CMD_LOAD_SCRIPT: {
+        char *script = cmd->args[0].v.s;
+        if (mp_load_script(mpctx, script) < 0)
             return -1;
         break;
     }
@@ -5526,7 +5518,7 @@ void command_init(struct MPContext *mpctx)
 
         struct m_property prop = {
             .name = co->name,
-            .call = mp_property_generic_option_bridge,
+            .call = mp_property_generic_option,
         };
 
         bstr bname = bstr0(prop.name);
@@ -5587,6 +5579,7 @@ void mp_notify(struct MPContext *mpctx, int event, void *arg)
 void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
 {
     struct MPContext *mpctx = ctx;
+    struct command_ctx *cmd = mpctx->command_ctx;
 
     if (flags & UPDATE_TERM)
         mp_update_logging(mpctx);
@@ -5606,6 +5599,38 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
 
     if (flags & UPDATE_BUILTIN_SCRIPTS)
         mp_load_builtin_scripts(mpctx);
+
+    if (flags & UPDATE_IMGPAR) {
+        struct track *track = mpctx->current_track[0][STREAM_VIDEO];
+        if (track && track->d_video) {
+            video_reset_params(track->d_video);
+            mp_force_video_refresh(mpctx);
+        }
+    }
+
+    if (flags & UPDATE_INPUT) {
+        mp_input_update_opts(mpctx->input);
+
+        // Rather coarse change-detection, but sufficient effort.
+        struct MPOpts *opts = mpctx->opts;
+        if (!bstr_equals(bstr0(cmd->cur_ipc), bstr0(opts->ipc_path)) ||
+            !bstr_equals(bstr0(cmd->cur_ipc_input), bstr0(opts->input_file)))
+        {
+            talloc_free(cmd->cur_ipc);
+            talloc_free(cmd->cur_ipc_input);
+            cmd->cur_ipc = talloc_strdup(cmd, opts->ipc_path);
+            cmd->cur_ipc_input = talloc_strdup(cmd, opts->input_file);
+            mp_uninit_ipc(mpctx->ipc_ctx);
+            mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
+        }
+    }
+
+    if ((flags & UPDATE_AUDIO) && mpctx->ao_chain) {
+        // Force full mid-stream reinit.
+        reinit_audio_filters(mpctx);
+        uninit_audio_out(mpctx);
+        mp_wakeup_core(mpctx);
+    }
 }
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)

@@ -152,19 +152,19 @@ void mp_print_version(struct mp_log *log, int always)
 
 static void shutdown_clients(struct MPContext *mpctx)
 {
-    while (mpctx->clients && mp_clients_num(mpctx)) {
+    mp_client_enter_shutdown(mpctx);
+    while (mp_clients_num(mpctx)) {
         mp_client_broadcast_event(mpctx, MPV_EVENT_SHUTDOWN, NULL);
-        mp_dispatch_queue_process(mpctx->dispatch, 0);
         mp_wait_events(mpctx);
     }
 }
 
 void mp_destroy(struct MPContext *mpctx)
 {
+    shutdown_clients(mpctx);
+
     mp_uninit_ipc(mpctx->ipc_ctx);
     mpctx->ipc_ctx = NULL;
-
-    shutdown_clients(mpctx);
 
     uninit_audio_out(mpctx);
     uninit_video_out(mpctx);
@@ -408,6 +408,8 @@ int mp_initialize(struct MPContext *mpctx, char **options)
             return r == M_OPT_EXIT ? -2 : -1;
     }
 
+    mp_get_resume_defaults(mpctx);
+
     // From this point on, all mpctx members are initialized.
     mpctx->initialized = true;
     mpctx->mconfig->option_set_callback = mp_on_set_option;
@@ -434,12 +436,12 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         return -1;
     }
 
-    MP_STATS(mpctx, "start init");
-
     if (!mpctx->playlist->first && !opts->player_idle_mode)
         return -3;
 
-    mp_input_load(mpctx->input);
+    MP_STATS(mpctx, "start init");
+
+    mp_input_load_config(mpctx->input);
 
 #if HAVE_ENCODING
     if (opts->encode_opts->file && opts->encode_opts->file[0]) {
@@ -459,16 +461,10 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     MP_WARN(mpctx, "There will be no OSD and no text subtitles.\n");
 #endif
 
-    mp_get_resume_defaults(mpctx);
-
-    // Lua user scripts (etc.) can call arbitrary functions. Load them at a point
-    // where this is safe.
     mp_load_scripts(mpctx);
 
     if (opts->force_vo == 2 && handle_force_window(mpctx, false) < 0)
         return -1;
-
-    mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
 
 #ifdef _WIN32
     if (opts->w32_priority > 0)

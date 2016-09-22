@@ -386,7 +386,10 @@ struct m_option {
 #define UPDATE_VIDEOPOS         (1 << 9) // video position (panscan etc.)
 #define UPDATE_OSD              (1 << 10) // related to OSD rendering
 #define UPDATE_BUILTIN_SCRIPTS  (1 << 11) // osc/ytdl
-#define UPDATE_OPT_LAST         (1 << 11)
+#define UPDATE_IMGPAR           (1 << 12) // video image params overrides
+#define UPDATE_INPUT            (1 << 13) // mostly --input-* options
+#define UPDATE_AUDIO            (1 << 14) // --audio-channels etc.
+#define UPDATE_OPT_LAST         (1 << 14)
 
 // All bits between _FIRST and _LAST (inclusive)
 #define UPDATE_OPTS_MASK \
@@ -397,7 +400,6 @@ struct m_option {
 #define CONF_MAX                M_OPT_MAX
 #define CONF_RANGE              M_OPT_RANGE
 #define CONF_NOCFG              M_OPT_NOCFG
-#define CONF_GLOBAL             M_OPT_FIXED
 #define CONF_PRE_PARSE          M_OPT_PRE_PARSE
 
 // These flags are used to describe special parser capabilities or behavior.

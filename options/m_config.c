@@ -997,9 +997,11 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
             talloc_free(def);
         }
         if (opt->flags & M_OPT_NOCFG)
-            MP_INFO(config, " [nocfg]");
+            MP_INFO(config, " [not in config files]");
         if (opt->flags & M_OPT_FILE)
             MP_INFO(config, " [file]");
+        if (opt->flags & M_OPT_FIXED)
+            MP_INFO(config, " [no runtime changes]");
         MP_INFO(config, "\n");
         count++;
     }

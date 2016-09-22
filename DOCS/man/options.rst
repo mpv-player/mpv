@@ -387,6 +387,13 @@ Program Behavior
     This behavior is disabled by default, but is always available when quitting
     the player with Shift+Q.
 
+``--watch-later-directory=<path>``
+
+    The directory in which to store the "watch later" temporary files.
+
+    The default is a subdirectory named "watch_later" underneath the
+    config directory (usually ``~/.config/mpv/``).
+
 ``--dump-stats=<filename>``
     Write certain statistics to the given file. The file is truncated on
     opening. The file will contain raw samples, each with a timestamp. To
@@ -682,14 +689,17 @@ Video
         affect this additionally. This can give incorrect results even with
         completely ordinary video sources.
 
-        ``cuda`` is usually safe. Interlaced content will be weaved by the
-        decoder, and it may not be possible for a deinterlacing filter to
-        do anything useful with this. 10bit HEVC is currently not
-        supported but maybe we can add support after CUDA 8 is released (and
-        it will be rounded down to 8 bits).
+        ``cuda`` is usually safe. Interlaced content can be deinterlaced by
+        the decoder, which is useful as there is no other deinterlacing
+        mechanism in the opengl output path. To use this deinterlacing you
+        must pass the option: ``vd-lavc-o=deint=[weave|bob|adaptive]``. Pass
+        ``weave`` to not attempt any deinterlacing.
+        10bit HEVC is currently not supported but maybe we can add support
+        after CUDA 8 is released (and it will be rounded down to 8 bits).
 
-        ``cuda-copy`` has the same limitations as ``cuda`` - particularly
-        its handling of deinterlacing.
+        ``cuda-copy`` has the same behaviour as ``cuda`` - including the ability
+        to deinterlace inside the decoder. However, traditional deinterlacing
+        filters can be used in this case.
 
         All other methods, in particular the copy-back methods (like
         ``dxva2-copy`` etc.) are either fully safe, or not worse than software
@@ -4268,7 +4278,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
         Pitch black room
 
     NOTE: Typical movie content (Blu-ray etc.) already contains a gamma drop of
-    about 0.8, so specifying it here as well will result in even even darker
+    about 0.8, so specifying it here as well will result in even darker
     image than intended!
 
 ``--gamma-auto``
@@ -4338,11 +4348,13 @@ The following video options are currently all specific to ``--vo=opengl`` and
     v-log
         Panasonic V-Log (VARICAM) curve
 
-    NOTE: When using HDR output formats, mpv will encode to the specified
-          curve but it will not set any HDMI flags or other signalling that
-          might be required for the target device to correctly display the
-          HDR signal. The user should independently guarantee this before
-          using these signal formats for display.
+    .. note::
+
+        When using HDR output formats, mpv will encode to the specified
+        curve but it will not set any HDMI flags or other signalling that might
+        be required for the target device to correctly display the HDR signal.
+        The user should independently guarantee this before using these signal
+        formats for display.
 
 ``--target-brightness=<1..100000>``
     Specifies the display's approximate brightness in cd/m^2. When playing HDR

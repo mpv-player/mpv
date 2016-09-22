@@ -65,7 +65,7 @@ struct dec_video {
     // Final PTS of previously decoded image
     double decoded_pts;
 
-    struct mp_image_params last_format, fixed_format;
+    struct mp_image_params dec_format, last_format, fixed_format;
     float initial_decoder_aspect;
 
     double start_pts;
@@ -91,6 +91,7 @@ void video_set_start(struct dec_video *d_video, double start_pts);
 
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg);
 void video_reset(struct dec_video *d_video);
-void video_reset_aspect(struct dec_video *d_video);
+void video_reset_params(struct dec_video *d_video);
+void video_get_dec_params(struct dec_video *d_video, struct mp_image_params *p);
 
 #endif /* MPLAYER_DEC_VIDEO_H */

@@ -92,7 +92,8 @@ static int try_load_config(struct MPContext *mpctx, const char *file, int flags)
 
 // Set options file-local, and don't set them if the user set them via the
 // command line.
-#define FILE_LOCAL_FLAGS (M_SETOPT_BACKUP | M_SETOPT_PRESERVE_CMDLINE)
+#define FILE_LOCAL_FLAGS \
+    (M_SETOPT_BACKUP | M_SETOPT_RUNTIME | M_SETOPT_PRESERVE_CMDLINE)
 
 static void mp_load_per_file_config(struct MPContext *mpctx)
 {
@@ -192,6 +193,14 @@ static char *mp_get_playback_resume_config_filename(struct MPContext *mpctx,
         conf = talloc_asprintf_append(conf, "%02X", md5[i]);
 
     if (!mpctx->cached_watch_later_configdir) {
+        char *wl_dir = mpctx->opts->watch_later_directory;
+        if (wl_dir && wl_dir[0]) {
+            mpctx->cached_watch_later_configdir =
+                mp_get_user_path(mpctx, mpctx->global, wl_dir);
+        }
+    }
+
+    if (!mpctx->cached_watch_later_configdir) {
         mpctx->cached_watch_later_configdir =
             mp_find_user_config_file(mpctx, mpctx->global, MP_WATCH_LATER_CONF);
     }
@@ -205,44 +214,41 @@ exit:
 }
 
 static const char *const backup_properties[] = {
-    "options/osd-level",
+    "osd-level",
     //"loop",
-    "options/speed",
+    "speed",
     "options/edition",
-    "options/pause",
+    "pause",
     "volume",
     "mute",
-    "options/audio-delay",
+    "audio-delay",
     //"balance",
-    "options/fullscreen",
-    "options/colormatrix",
-    "options/colormatrix-input-range",
-    "options/colormatrix-output-range",
-    "options/ontop",
-    "options/border",
-    "options/gamma",
-    "options/brightness",
-    "options/contrast",
-    "options/saturation",
-    "options/hue",
+    "fullscreen",
+    "ontop",
+    "border",
+    "gamma",
+    "brightness",
+    "contrast",
+    "saturation",
+    "hue",
     "options/deinterlace",
-    "options/vf",
-    "options/af",
-    "options/panscan",
+    "vf",
+    "af",
+    "panscan",
     "options/aid",
     "options/vid",
     "options/sid",
-    "options/sub-delay",
-    "options/sub-speed",
-    "options/sub-pos",
-    "options/sub-visibility",
-    "options/sub-scale",
-    "options/sub-use-margins",
-    "options/ass-force-margins",
-    "options/ass-vsfilter-aspect-compat",
-    "options/ass-style-override",
-    "options/ab-loop-a",
-    "options/ab-loop-b",
+    "sub-delay",
+    "sub-speed",
+    "sub-pos",
+    "sub-visibility",
+    "sub-scale",
+    "sub-use-margins",
+    "ass-force-margins",
+    "ass-vsfilter-aspect-compat",
+    "ass-style-override",
+    "ab-loop-a",
+    "ab-loop-b",
     "options/video-aspect",
     0
 };
@@ -314,11 +320,11 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         goto exit;
     }
 
-    mp_mk_config_dir(mpctx->global, MP_WATCH_LATER_CONF);
-
     conffile = mp_get_playback_resume_config_filename(mpctx, cur->filename);
     if (!conffile)
         goto exit;
+
+    mp_mk_config_dir(mpctx->global, mpctx->cached_watch_later_configdir);
 
     MP_INFO(mpctx, "Saving state.\n");
 
