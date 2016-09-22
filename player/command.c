@@ -327,6 +327,7 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
     return 0;
 
 direct_option:
+    mp_notify_property(mpctx, name);
     return m_config_set_option_raw_direct(mpctx->mconfig, co, data, flags);
 }
 
