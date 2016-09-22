@@ -388,7 +388,8 @@ struct m_option {
 #define UPDATE_BUILTIN_SCRIPTS  (1 << 11) // osc/ytdl
 #define UPDATE_IMGPAR           (1 << 12) // video image params overrides
 #define UPDATE_INPUT            (1 << 13) // mostly --input-* options
-#define UPDATE_OPT_LAST         (1 << 13)
+#define UPDATE_AUDIO            (1 << 14) // --audio-channels etc.
+#define UPDATE_OPT_LAST         (1 << 14)
 
 // All bits between _FIRST and _LAST (inclusive)
 #define UPDATE_OPTS_MASK \

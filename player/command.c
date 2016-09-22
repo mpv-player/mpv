@@ -5624,6 +5624,13 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
             mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
         }
     }
+
+    if ((flags & UPDATE_AUDIO) && mpctx->ao_chain) {
+        // Force full mid-stream reinit.
+        reinit_audio_filters(mpctx);
+        uninit_audio_out(mpctx);
+        mp_wakeup_core(mpctx);
+    }
 }
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)
