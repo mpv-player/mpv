@@ -123,7 +123,7 @@ typedef struct {
 
 /* Keep in sync with enum fe_delivery_system. */
 #ifndef DVB_USE_S2API
-#    define SYS_DVBC_ANNEX_AC       1
+#    define SYS_DVBC_ANNEX_A        1
 #    define SYS_DVBT                3
 #    define SYS_DVBS                5
 #    define SYS_DVBS2               6
@@ -131,7 +131,7 @@ typedef struct {
 #    define SYS_DVBT2               16
 #    define SYS_DVBC_ANNEX_C        18
 #endif
-#define SYS_DVB__MAX__              SYS_DVBC_ANNEX_C
+#define SYS_DVB__MAX__              (SYS_DVBC_ANNEX_C + 1)
 
 
 #define DELSYS_BIT(__bit)        (((unsigned int)1) << (__bit))
@@ -146,21 +146,23 @@ typedef struct {
 #ifdef DVB_ATSC
 #define DELSYS_SUPP_MASK						\
     (									\
-        DELSYS_BIT(SYS_DVBC_ANNEX_AC) |					\
+        DELSYS_BIT(SYS_DVBC_ANNEX_A) |					\
         DELSYS_BIT(SYS_DVBT) |						\
         DELSYS_BIT(SYS_DVBS) |						\
         DELSYS_BIT(SYS_DVBS2) |						\
         DELSYS_BIT(SYS_ATSC) |						\
-        DELSYS_BIT(SYS_DVBT2)						\
+        DELSYS_BIT(SYS_DVBT2) |						\
+        DELSYS_BIT(SYS_DVBC_ANNEX_C)					\
     )
 #else
 #define DELSYS_SUPP_MASK						\
     (									\
-        DELSYS_BIT(SYS_DVBC_ANNEX_AC) |					\
+        DELSYS_BIT(SYS_DVBC_ANNEX_A) |					\
         DELSYS_BIT(SYS_DVBT) |						\
         DELSYS_BIT(SYS_DVBS) |						\
         DELSYS_BIT(SYS_DVBS2) |						\
-        DELSYS_BIT(SYS_DVBT2)						\
+        DELSYS_BIT(SYS_DVBT2) |						\
+        DELSYS_BIT(SYS_DVBC_ANNEX_C)					\
     )
 #endif
 

@@ -75,26 +75,28 @@ const char *get_dvb_delsys(unsigned int delsys)
 unsigned int dvb_get_tuner_delsys_mask(int fe_fd, struct mp_log *log)
 {
     unsigned int ret_mask = 0, delsys;
+    struct dtv_property prop[1];
+    struct dtv_properties cmdseq = {.num = 1, .props = prop};
+    struct dvb_frontend_info fe_info;
 
 #ifdef DVB_USE_S2API
     /* S2API is the DVB API new since 2.6.28.
        It allows to query frontends with multiple delivery systems. */
-    struct dtv_property p[] = {{ .cmd = DTV_ENUM_DELSYS }};
-    struct dtv_properties cmdseq = {.num = 1, .props = p};
     mp_verbose(log, "Querying tuner type via DVBv5 API for frontend FD %d\n",
                fe_fd);
+    prop[0].cmd = DTV_ENUM_DELSYS;
     if (ioctl(fe_fd, FE_GET_PROPERTY, &cmdseq) < 0) {
         mp_err(log, "DVBv5: FE_GET_PROPERTY(DTV_ENUM_DELSYS) error: %d, FD: %d\n\n", errno, fe_fd);
         goto old_api;
     }
-    unsigned int i, delsys_count = p[0].u.buffer.len;
+    unsigned int i, delsys_count = prop[0].u.buffer.len;
     mp_verbose(log, "DVBv5: Number of supported delivery systems: %d\n", delsys_count);
     if (delsys_count == 0) {
         mp_err(log, "DVBv5: Frontend FD %d returned no delivery systems!\n", fe_fd);
         goto old_api;
     }
     for (i = 0; i < delsys_count; i++) {
-        delsys = (unsigned int)p[0].u.buffer.data[i];
+        delsys = (unsigned int)prop[0].u.buffer.data[i];
         DELSYS_SET(ret_mask, delsys);
         mp_verbose(log, "DVBv5: Tuner type seems to be %s\n", get_dvb_delsys(delsys));
     }
@@ -106,36 +108,67 @@ old_api:
     mp_verbose(log, "Querying tuner type via pre-DVBv5 API for frontend FD %d\n",
                fe_fd);
 
-    struct dvb_frontend_info fe_info;
+    memset(&fe_info, 0, sizeof(struct dvb_frontend_info));
     if (ioctl(fe_fd, FE_GET_INFO, &fe_info) < 0) {
-        mp_err(log, "pre-DVBv5: FE_GET_INFO error: %d, FD: %d\n\n", errno, fe_fd);
+        mp_err(log, "DVBv3: FE_GET_INFO error: %d, FD: %d\n\n", errno, fe_fd);
         return ret_mask;
     }
+    /* Try to get kernel DVB API version. */
+    prop[0].cmd = DTV_API_VERSION;
+    if (ioctl(fe_fd, FE_GET_PROPERTY, &cmdseq) < 0) {
+        prop[0].u.data = 0x300; /* Fail, assume 3.0 */
+    }
 
-    mp_verbose(log, "pre-DVBv5: Queried tuner type of device named '%s', FD: %d\n",
+    mp_verbose(log, "DVBv3: Queried tuner type of device named '%s', FD: %d\n",
                fe_info.name, fe_fd);
     switch (fe_info.type) {
     case FE_OFDM:
-        delsys = SYS_DVBT;
+        DELSYS_SET(ret_mask, SYS_DVBT);
+        if (prop[0].u.data < 0x0500)
+	    break;
+        if (FE_CAN_2G_MODULATION & fe_info.caps) {
+            DELSYS_SET(ret_mask, SYS_DVBT2);
+        }
         break;
     case FE_QPSK:
-        delsys = SYS_DVBS;
+        DELSYS_SET(ret_mask, SYS_DVBS);
+        if (prop[0].u.data < 0x0500)
+	    break;
+        if (FE_CAN_2G_MODULATION & fe_info.caps) {
+            DELSYS_SET(ret_mask, SYS_DVBS2);
+        }
+#ifdef __not_yet__
+        if (FE_CAN_TURBO_FEC & fe_info.caps) {
+            DELSYS_SET(ret_mask, SYS_TURBO);
+        }
+#endif
         break;
     case FE_QAM:
-        delsys = SYS_DVBC_ANNEX_AC;
+        DELSYS_SET(ret_mask, SYS_DVBC_ANNEX_A);
+        DELSYS_SET(ret_mask, SYS_DVBC_ANNEX_C);
         break;
 #ifdef DVB_ATSC
     case FE_ATSC:
-        delsys = SYS_ATSC;
+        if ((FE_CAN_8VSB | FE_CAN_16VSB) & fe_info.caps) {
+            DELSYS_SET(ret_mask, SYS_ATSC);
+        }
+#ifdef __not_yet__
+        if ((FE_CAN_QAM_64 | FE_CAN_QAM_256 | FE_CAN_QAM_AUTO) & fe_info.caps) {
+            DELSYS_SET(ret_mask, SYS_DVBC_ANNEX_B);
+        }
+#endif
         break;
 #endif
     default:
-        mp_err(log, "pre-DVBv5: Unknown tuner type: %d\n", fe_info.type);
+        mp_err(log, "DVBv3: Unknown tuner type: %d\n", fe_info.type);
         return ret_mask;
     }
 
-    DELSYS_SET(ret_mask, delsys);
-    mp_verbose(log, "pre-DVBv5: Tuner type seems to be %s\n", get_dvb_delsys(delsys));
+    for (delsys = 0; delsys < SYS_DVB__MAX__; delsys ++) {
+        if (!DELSYS_IS_SET(ret_mask, delsys))
+            continue; /* Skip unsupported. */
+        mp_verbose(log, "DVBv3: Tuner type seems to be %s\n", get_dvb_delsys(delsys));
+    }
 
     return ret_mask;
 }
@@ -538,7 +571,8 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
         usleep(100000);
 
         break;
-    case SYS_DVBC_ANNEX_AC:
+    case SYS_DVBC_ANNEX_A:
+    case SYS_DVBC_ANNEX_C:
         MP_VERBOSE(priv, "tuning %s to %d, srate=%d\n",
                    get_dvb_delsys(delsys), freq, srate);
         break;
@@ -628,7 +662,8 @@ old_api:
         feparams.u.qpsk.symbol_rate = srate;
         feparams.u.qpsk.fec_inner = HP_CodeRate;
         break;
-    case SYS_DVBC_ANNEX_AC:
+    case SYS_DVBC_ANNEX_A:
+    case SYS_DVBC_ANNEX_C:
         feparams.inversion = specInv;
         feparams.u.qam.symbol_rate = srate;
         feparams.u.qam.fec_inner = HP_CodeRate;

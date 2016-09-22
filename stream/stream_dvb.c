@@ -313,7 +313,8 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                 if (!DELSYS_IS_SET(delsys_mask, delsys))
                     continue; /* Skip channel. */
                /* PASSTROUTH */
-            case SYS_DVBC_ANNEX_AC:
+            case SYS_DVBC_ANNEX_A:
+            case SYS_DVBC_ANNEX_C:
             case SYS_ATSC:
                 mp_verbose(log, "VDR, %s, NUM: %d, NUM_FIELDS: %d, NAME: %s, "
                            "FREQ: %d, SRATE: %d",
@@ -376,7 +377,8 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
                            get_dvb_delsys(delsys), list->NUM_CHANNELS,
                            fields, ptr->name, ptr->freq);
                 break;
-            case SYS_DVBC_ANNEX_AC:
+            case SYS_DVBC_ANNEX_A:
+            case SYS_DVBC_ANNEX_C:
                 fields = sscanf(&line[k], cbl_conf,
                                 &ptr->freq, inv, &ptr->srate,
                                 cr, mod, vpid_str, apid_str);
@@ -485,7 +487,8 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         switch (delsys) {
         case SYS_DVBT:
         case SYS_DVBT2:
-        case SYS_DVBC_ANNEX_AC:
+        case SYS_DVBC_ANNEX_A:
+        case SYS_DVBC_ANNEX_C:
             if (!strcmp(inv, "INVERSION_ON")) {
                 ptr->inv = INVERSION_ON;
             } else if (!strcmp(inv, "INVERSION_OFF")) {
@@ -517,7 +520,8 @@ static dvb_channels_list_t *dvb_get_channels(struct mp_log *log,
         switch (delsys) {
         case SYS_DVBT:
         case SYS_DVBT2:
-        case SYS_DVBC_ANNEX_AC:
+        case SYS_DVBC_ANNEX_A:
+        case SYS_DVBC_ANNEX_C:
         case SYS_ATSC:
             if (!strcmp(mod, "QAM_128")) {
                 ptr->mod = QAM_128;
@@ -1121,7 +1125,8 @@ dvb_state_t *dvb_get_state(stream_t *stream)
                 continue; /* Skip unsupported. */
 
             switch (delsys) {
-            case SYS_DVBC_ANNEX_AC:
+            case SYS_DVBC_ANNEX_A:
+            case SYS_DVBC_ANNEX_C:
 	        conf_file_name = "channels.conf.cbl";
                 break;
             case SYS_ATSC:
