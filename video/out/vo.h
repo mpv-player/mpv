@@ -211,6 +211,12 @@ struct vo_frame {
     // VO if frames are dropped.
     int num_frames;
     struct mp_image *frames[VO_MAX_REQ_FRAMES];
+    // ID for frames[0] (== current). If current==NULL, the number is
+    // meaningless. Otherwise, it's an unique ID for the frame. The ID for
+    // a frame is guaranteed not to change (instant redraws will use the same
+    // ID). frames[n] has the ID frame_id+n, with the guarantee that frame
+    // drops or reconfigs will keep the guarantee.
+    uint64_t frame_id;
 };
 
 struct vo_driver {
