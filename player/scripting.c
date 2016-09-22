@@ -100,7 +100,7 @@ static void wait_loaded(struct MPContext *mpctx)
     mp_wakeup_core(mpctx); // avoid lost wakeups during waiting
 }
 
-static void mp_load_script(struct MPContext *mpctx, const char *fname)
+int mp_load_script(struct MPContext *mpctx, const char *fname)
 {
     char *ext = mp_splitext(fname, NULL);
     const struct mp_scripting *backend = NULL;
@@ -114,7 +114,7 @@ static void mp_load_script(struct MPContext *mpctx, const char *fname)
 
     if (!backend) {
         MP_VERBOSE(mpctx, "Can't load unknown script: %s\n", fname);
-        return;
+        return -1;
     }
 
     struct thread_arg *arg = talloc_ptrtype(NULL, arg);
@@ -129,7 +129,7 @@ static void mp_load_script(struct MPContext *mpctx, const char *fname)
     };
     if (!arg->client) {
         talloc_free(arg);
-        return;
+        return -1;
     }
     arg->log = mp_client_get_log(arg->client);
 
@@ -139,13 +139,13 @@ static void mp_load_script(struct MPContext *mpctx, const char *fname)
     if (pthread_create(&thread, NULL, script_thread, arg)) {
         mpv_detach_destroy(arg->client);
         talloc_free(arg);
-        return;
+        return -1;
     }
 
     wait_loaded(mpctx);
     MP_VERBOSE(mpctx, "Done loading %s.\n", fname);
 
-    return;
+    return 0;
 }
 
 static int compare_filename(const void *pa, const void *pb)

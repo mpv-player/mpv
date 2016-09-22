@@ -116,6 +116,8 @@ enum mp_command_type {
 
     MP_CMD_APPLY_PROFILE,
 
+    MP_CMD_LOAD_SCRIPT,
+
     // Internal
     MP_CMD_COMMAND_LIST, // list of sub-commands in args[0].v.p
 };

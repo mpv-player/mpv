@@ -5472,6 +5472,13 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         break;
     }
 
+    case MP_CMD_LOAD_SCRIPT: {
+        char *script = cmd->args[0].v.s;
+        if (mp_load_script(mpctx, script) < 0)
+            return -1;
+        break;
+    }
+
     default:
         MP_VERBOSE(mpctx, "Received unknown cmd %s\n", cmd->name);
         return -1;

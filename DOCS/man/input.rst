@@ -699,6 +699,9 @@ Input Commands that are Possibly Subject to Change
     There is no such thing as "unapplying" a profile - applying a profile
     merely sets all option values listed within the profile.
 
+``load-script "<path>"``
+    Load a script, similar to the ``--script`` option.
+
 Undocumented commands: ``tv-last-channel`` (TV/DVB only),
 ``ao-reload`` (experimental/internal).
 
