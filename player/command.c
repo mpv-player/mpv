@@ -331,12 +331,12 @@ direct_option:
 }
 
 // Property-option bridge. (Maps the property to the option with the same name.)
-static int mp_property_generic_option_do(void *ctx, struct m_property *prop,
-                                         int action, void *arg, bool force)
+static int mp_property_generic_option(void *ctx, struct m_property *prop,
+                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
     const char *optname = prop->name;
-    int flags = mpctx->initialized && !force ? M_SETOPT_RUNTIME : 0;
+    int flags = M_SETOPT_RUNTIME;
     struct m_config_option *opt = m_config_get_co(mpctx->mconfig,
                                                   bstr0(optname));
 
@@ -360,18 +360,6 @@ static int mp_property_generic_option_do(void *ctx, struct m_property *prop,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int mp_property_generic_option(void *ctx, struct m_property *prop,
-                                      int action, void *arg)
-{
-    return mp_property_generic_option_do(ctx, prop, action, arg, true);
-}
-
-static int mp_property_generic_option_bridge(void *ctx, struct m_property *prop,
-                                             int action, void *arg)
-{
-    return mp_property_generic_option_do(ctx, prop, action, arg, false);
-}
-
 // Dumb special-case: the option name ends in a "*".
 static int mp_property_generic_option_star(void *ctx, struct m_property *prop,
                                            int action, void *arg)
@@ -380,7 +368,7 @@ static int mp_property_generic_option_star(void *ctx, struct m_property *prop,
     char name[80];
     snprintf(name, sizeof(name), "%s*", prop->name);
     prop2.name = name;
-    return mp_property_generic_option_bridge(ctx, &prop2, action, arg);
+    return mp_property_generic_option(ctx, &prop2, action, arg);
 }
 
 /// Playback speed (RW)
@@ -5478,8 +5466,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
     case MP_CMD_APPLY_PROFILE: {
         char *profile = cmd->args[0].v.s;
-        int flags = mpctx->initialized ? M_SETOPT_RUNTIME : 0;
-        if (m_config_set_profile(mpctx->mconfig, profile, flags) < 0)
+        if (m_config_set_profile(mpctx->mconfig, profile, M_SETOPT_RUNTIME) < 0)
             return -1;
         break;
     }
@@ -5523,7 +5510,7 @@ void command_init(struct MPContext *mpctx)
 
         struct m_property prop = {
             .name = co->name,
-            .call = mp_property_generic_option_bridge,
+            .call = mp_property_generic_option,
         };
 
         bstr bname = bstr0(prop.name);
