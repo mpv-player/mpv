@@ -689,14 +689,17 @@ Video
         affect this additionally. This can give incorrect results even with
         completely ordinary video sources.
 
-        ``cuda`` is usually safe. Interlaced content will be weaved by the
-        decoder, and it may not be possible for a deinterlacing filter to
-        do anything useful with this. 10bit HEVC is currently not
-        supported but maybe we can add support after CUDA 8 is released (and
-        it will be rounded down to 8 bits).
+        ``cuda`` is usually safe. Interlaced content can be deinterlaced by
+        the decoder, which is useful as there is no other deinterlacing
+        mechanism in the opengl output path. To use this deinterlacing you
+        must pass the option: ``vd-lavc-o=deint=[weave|bob|adaptive]``. Pass
+        ``weave`` to not attempt any deinterlacing.
+        10bit HEVC is currently not supported but maybe we can add support
+        after CUDA 8 is released (and it will be rounded down to 8 bits).
 
-        ``cuda-copy`` has the same limitations as ``cuda`` - particularly
-        its handling of deinterlacing.
+        ``cuda-copy`` has the same behaviour as ``cuda`` - including the ability
+        to deinterlace inside the decoder. However, traditional deinterlacing
+        filters can be used in this case.
 
         All other methods, in particular the copy-back methods (like
         ``dxva2-copy`` etc.) are either fully safe, or not worse than software
