@@ -290,11 +290,6 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
         NULL
     };
 
-    for (int n = 0; no_property[n]; n++) {
-        if (strcmp(co->name, no_property[n]) == 0)
-            goto direct_option;
-    }
-
     // Normalize "vf*" to "vf"
     const char *name = co->name;
     bstr bname = bstr0(name);
@@ -302,6 +297,11 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
     if (bstr_eatend0(&bname, "*")) {
         snprintf(tmp, sizeof(name), "%.*s", BSTR_P(bname));
         name = tmp;
+    }
+
+    for (int n = 0; no_property[n]; n++) {
+        if (strcmp(co->name, no_property[n]) == 0)
+            goto direct_option;
     }
 
     struct m_option type = {0};
