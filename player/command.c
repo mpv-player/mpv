@@ -320,9 +320,8 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
     if (r != M_PROPERTY_OK)
         return M_OPT_INVALID;
 
-    // The flag can't be passed through the property layer correctly.
-    if (flags & M_SETOPT_FROM_CMDLINE)
-        co->is_set_from_cmdline = true;
+    // The flags can't be passed through the property layer correctly.
+    m_config_mark_co_flags(co, flags);
 
     return 0;
 

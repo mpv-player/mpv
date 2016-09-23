@@ -184,6 +184,8 @@ static inline int m_config_set_option0(struct m_config *config,
 int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags);
 
+void m_config_mark_co_flags(struct m_config_option *co, int flags);
+
 int m_config_set_option_raw_direct(struct m_config *config,
                                    struct m_config_option *co,
                                    void *data, int flags);
