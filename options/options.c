@@ -250,6 +250,10 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("list-properties", property_print_help,
              CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP),
 
+    OPT_CHOICE("player-operation-mode", operation_mode,
+               M_OPT_FIXED | M_OPT_PRE_PARSE | M_OPT_NOPROP,
+               ({"cplayer", 0}, {"pseudo-gui", 1})),
+
     OPT_FLAG("shuffle", shuffle, 0),
 
 // ------------------------- common options --------------------

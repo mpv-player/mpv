@@ -399,6 +399,9 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     mp_print_version(mpctx->log, false);
 
+    if (opts->operation_mode == 1)
+        m_config_set_profile(mpctx->mconfig, "pseudo-gui", M_SETOPT_NO_OVERWRITE);
+
     mp_parse_cfgfiles(mpctx);
 
     if (options) {

@@ -74,6 +74,8 @@ typedef struct MPOpts {
     int msg_time;
     char *log_file;
 
+    int operation_mode;
+
     char **reset_options;
     char **script_files;
     char **script_opts;

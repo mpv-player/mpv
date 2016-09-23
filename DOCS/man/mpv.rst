@@ -736,10 +736,13 @@ Currently this happens only in the following cases:
   or file associations provided by desktop environments)
 - if started from explorer.exe on Windows (technically, if it was started on
   Windows, and all of the stdout/stderr/stdin handles are unset)
-- manually adding ``--profile=pseudo-gui`` to the command line
+- started out of the bundle on OSX
+- you can add ``--profile=pseudo-gui`` to the command line, but it will behave
+  subtly differently (since mpv 0.22.0)
 
-This mode implicitly adds ``--profile=pseudo-gui`` to the command line, with
-the ``pseudo-gui`` profile being predefined with the following contents:
+This mode implicitly performs the same action as ``--profile=pseudo-gui``, but
+roughly before config files are loaded and the command line is applied. The
+``pseudo-gui`` profile is predefined with the following contents:
 
 ::
 
@@ -749,11 +752,12 @@ the ``pseudo-gui`` profile being predefined with the following contents:
     idle=once
     screenshot-directory=~~desktop/
 
-This follows the mpv config file format. To customize pseudo-GUI mode, you can
-put your own ``pseudo-gui`` profile into your ``mpv.conf``. This profile will
-enhance the default profile, rather than overwrite it.
+.. warning::
 
-The profile always overrides other settings in ``mpv.conf``.
+    Currently, you can extend the ``pseudo-gui`` profile in the config file the
+    normal way. This is deprecated. In future mpv releases, the behavior might
+    change, and not apply your additional settings, and/or use a different
+    profile name.
 
 
 .. include:: options.rst
