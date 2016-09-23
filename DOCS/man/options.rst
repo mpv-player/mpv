@@ -700,8 +700,8 @@ Video
         mechanism in the opengl output path. To use this deinterlacing you
         must pass the option: ``vd-lavc-o=deint=[weave|bob|adaptive]``. Pass
         ``weave`` to not attempt any deinterlacing.
-        10bit HEVC is currently not supported but maybe we can add support
-        after CUDA 8 is released (and it will be rounded down to 8 bits).
+        10bit HEVC is available if the hardware supports it but it will be
+        rounded down to 8 bits.
 
         ``cuda-copy`` has the same behaviour as ``cuda`` - including the ability
         to deinterlace inside the decoder. However, traditional deinterlacing
