@@ -126,9 +126,9 @@ static int cuda_create(struct gl_hwdec *hw)
     CUdevice device;
     CUcontext cuda_ctx = NULL;
     CUcontext dummy;
+    unsigned int device_count;
     int ret = 0, eret = 0;
 
-    // PBO Requirements
     if (hw->gl->version < 210 && hw->gl->es < 300) {
         MP_ERR(hw, "need OpenGL >= 2.1 or OpenGL-ES >= 3.0\n");
         return -1;
@@ -141,8 +141,8 @@ static int cuda_create(struct gl_hwdec *hw)
     if (ret < 0)
         goto error;
 
-    ///TODO: Make device index configurable
-    ret = CHECK_CU(cuDeviceGet(&device, 0));
+    ret = CHECK_CU(cuGLGetDevices(&device_count, &device, 1,
+                                  CU_GL_DEVICE_LIST_ALL));
     if (ret < 0)
         goto error;
 
