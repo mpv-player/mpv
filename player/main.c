@@ -408,8 +408,11 @@ int mp_initialize(struct MPContext *mpctx, char **options)
             return r == M_OPT_EXIT ? -2 : -1;
     }
 
-    if (opts->operation_mode == 1)
-        m_config_set_profile(mpctx->mconfig, "pseudo-gui", M_SETOPT_NO_OVERWRITE);
+    if (opts->operation_mode == 1) {
+        m_config_set_profile(mpctx->mconfig, "builtin-pseudo-gui",
+                             M_SETOPT_NO_OVERWRITE);
+        m_config_set_profile(mpctx->mconfig, "pseudo-gui", 0);
+    }
 
     mp_get_resume_defaults(mpctx);
 
