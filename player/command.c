@@ -4032,6 +4032,12 @@ static bool match_property(const char *a, const char *b)
 {
     if (strcmp(a, "*") == 0)
         return true;
+    // Give options and properties the same ID each, so change notifications
+    // work both way.
+    if (strncmp(a, "options/", 8) == 0)
+        a += 8;
+    if (strncmp(b, "options/", 8) == 0)
+        b += 8;
     int len_a = prefix_len(a);
     int len_b = prefix_len(b);
     return strncmp(a, b, MPMIN(len_a, len_b)) == 0;
