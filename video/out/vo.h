@@ -43,9 +43,12 @@ enum {
     VO_EVENT_AMBIENT_LIGHTING_CHANGED   = 1 << 4,
     // Special mechanism for making resizing with Cocoa react faster
     VO_EVENT_LIVE_RESIZING              = 1 << 5,
+    // Window fullscreen state changed via external influence.
+    VO_EVENT_FULLSCREEN_STATE           = 1 << 6,
 
     // Set of events the player core may be interested in.
-    VO_EVENTS_USER = (VO_EVENT_RESIZE | VO_EVENT_WIN_STATE),
+    VO_EVENTS_USER = VO_EVENT_RESIZE | VO_EVENT_WIN_STATE |
+                     VO_EVENT_FULLSCREEN_STATE,
 };
 
 enum mp_voctrl {
@@ -74,6 +77,8 @@ enum mp_voctrl {
     VOCTRL_ONTOP,
     VOCTRL_BORDER,
     VOCTRL_ALL_WORKSPACES,
+
+    VOCTRL_GET_FULLSCREEN,
 
     VOCTRL_UPDATE_WINDOW_TITLE,         // char*
     VOCTRL_UPDATE_PLAYBACK_STATE,       // struct voctrl_playback_state*
