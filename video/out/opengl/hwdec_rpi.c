@@ -39,7 +39,6 @@
 
 struct priv {
     struct mp_log *log;
-    struct mp_vaapi_ctx *ctx;
 
     struct mp_image_params params;
 
