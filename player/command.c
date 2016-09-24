@@ -972,39 +972,35 @@ static int get_chapter_entry(int item, int action, void *arg, void *ctx)
     return r;
 }
 
-static int parse_lua_chapters(struct MPContext *mpctx,
-                              struct mpv_node *given_chapters)
+static int parse_node_chapters(struct MPContext *mpctx,
+                               struct mpv_node *given_chapters)
 {
-    if (given_chapters->format != MPV_FORMAT_NODE_ARRAY)
-        return M_PROPERTY_OK;
-
-    int num_chapters_given = given_chapters->u.list->num;
-    double len = get_time_length(mpctx);
-
-    if (len < 0)
+    if (!mpctx->demuxer)
         return M_PROPERTY_UNAVAILABLE;
+
+    if (given_chapters->format != MPV_FORMAT_NODE_ARRAY)
+        return M_PROPERTY_ERROR;
+
+    double len = get_time_length(mpctx);
 
     talloc_free(mpctx->chapters);
     mpctx->num_chapters = 0;
-    mpctx->chapters = NULL;
+    mpctx->chapters = talloc_array(NULL, struct demux_chapter, 0);
 
-    for (int n = 0; n < num_chapters_given; n++) {
+    for (int n = 0; n < given_chapters->u.list->num; n++) {
         struct mpv_node *chapter_data = &given_chapters->u.list->values[n];
+
         if (chapter_data->format != MPV_FORMAT_NODE_MAP)
             continue;
 
         mpv_node_list *chapter_data_elements = chapter_data->u.list;
 
-        // there should be at least 2 elements: time, title
-        int elements_count = chapter_data_elements->num;
-        if (elements_count < 2)
-            continue;
-
         double time = -1;
         char *title = 0;
 
-        for (int e = 0; e < elements_count; e++) {
-            struct mpv_node *chapter_data_element = &chapter_data_elements->values[e];
+        for (int e = 0; e < chapter_data_elements->num; e++) {
+            struct mpv_node *chapter_data_element =
+                &chapter_data_elements->values[e];
             char *key = chapter_data_elements->keys[e];
             switch (chapter_data_element->format) {
             case MPV_FORMAT_INT64:
@@ -1022,15 +1018,18 @@ static int parse_lua_chapters(struct MPContext *mpctx,
             }
         }
 
-        if (0 <= time && time < len && title) {
+        if (time >= 0 && time < len) {
             struct demux_chapter new = {
                 .pts = time,
-                .metadata = talloc_zero(NULL, struct mp_tags),
+                .metadata = talloc_zero(mpctx->chapters, struct mp_tags),
             };
-            mp_tags_set_str(new.metadata, "title", title);
+            if (title)
+                mp_tags_set_str(new.metadata, "title", title);
             MP_TARRAY_APPEND(NULL, mpctx->chapters, mpctx->num_chapters, new);
         }
     }
+
+    mp_notify(mpctx, MPV_EVENT_CHAPTER_CHANGE, NULL);
 
     return M_PROPERTY_OK;
 }
@@ -1066,7 +1065,7 @@ static int mp_property_list_chapters(void *ctx, struct m_property *prop,
     }
     case M_PROPERTY_SET: {
         struct mpv_node *given_chapters = arg;
-        return parse_lua_chapters(mpctx, given_chapters);
+        return parse_node_chapters(mpctx, given_chapters);
     }
     }
     return m_property_read_list(action, arg, count, get_chapter_entry, mpctx);
