@@ -377,8 +377,10 @@ static int load_lua(struct mpv_handle *client, const char *fname)
     }
 
     lua_State *L = ctx->state = luaL_newstate();
-    if (!L)
+    if (!L) {
+        MP_FATAL(ctx, "Could not initialize Lua.\n");
         goto error_out;
+    }
 
     if (mp_cpcall(L, run_lua, ctx)) {
         const char *err = "unknown error";
