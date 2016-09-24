@@ -243,8 +243,8 @@ const m_option_t mp_opts[] = {
     {"}", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
 
     // handled in m_config.c
-    { "include", CONF_TYPE_STRING, M_OPT_FIXED | M_OPT_FILE, .offset = -1},
-    { "profile", CONF_TYPE_STRING_LIST, M_OPT_FIXED, .offset = -1},
+    { "include", CONF_TYPE_STRING, M_OPT_FILE, .offset = -1},
+    { "profile", CONF_TYPE_STRING_LIST, 0, .offset = -1},
     { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
     { "list-options", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
     OPT_FLAG("list-properties", property_print_help,
