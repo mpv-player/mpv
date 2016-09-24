@@ -972,12 +972,76 @@ static int get_chapter_entry(int item, int action, void *arg, void *ctx)
     return r;
 }
 
+static int parse_lua_chapters(struct MPContext *mpctx,
+                              struct mpv_node *given_chapters)
+{
+    if (given_chapters->format != MPV_FORMAT_NODE_ARRAY)
+        return M_PROPERTY_OK;
+
+    int num_chapters_given = given_chapters->u.list->num;
+    double len = get_time_length(mpctx);
+
+    if (len < 0)
+        return M_PROPERTY_UNAVAILABLE;
+
+    talloc_free(mpctx->chapters);
+    mpctx->num_chapters = 0;
+    mpctx->chapters = NULL;
+
+    for (int n = 0; n < num_chapters_given; n++) {
+        struct mpv_node *chapter_data = &given_chapters->u.list->values[n];
+        if (chapter_data->format != MPV_FORMAT_NODE_MAP)
+            continue;
+
+        mpv_node_list *chapter_data_elements = chapter_data->u.list;
+
+        // there should be at least 2 elements: time, title
+        int elements_count = chapter_data_elements->num;
+        if (elements_count < 2)
+            continue;
+
+        double time = -1;
+        char *title = 0;
+
+        for (int e = 0; e < elements_count; e++) {
+            struct mpv_node *chapter_data_element = &chapter_data_elements->values[e];
+            char *key = chapter_data_elements->keys[e];
+            switch (chapter_data_element->format) {
+            case MPV_FORMAT_INT64:
+                if (strcmp(key, "time") == 0)
+                    time = (double)chapter_data_element->u.int64;
+                break;
+            case MPV_FORMAT_DOUBLE:
+                if (strcmp(key, "time") == 0)
+                    time = chapter_data_element->u.double_;
+                break;
+            case MPV_FORMAT_STRING:
+                if (strcmp(key, "title") == 0)
+                    title = chapter_data_element->u.string;
+                break;
+            }
+        }
+
+        if (0 <= time && time < len && title) {
+            struct demux_chapter new = {
+                .pts = time,
+                .metadata = talloc_zero(NULL, struct mp_tags),
+            };
+            mp_tags_set_str(new.metadata, "title", title);
+            MP_TARRAY_APPEND(NULL, mpctx->chapters, mpctx->num_chapters, new);
+        }
+    }
+
+    return M_PROPERTY_OK;
+}
+
 static int mp_property_list_chapters(void *ctx, struct m_property *prop,
                                      int action, void *arg)
 {
     MPContext *mpctx = ctx;
     int count = get_chapter_count(mpctx);
-    if (action == M_PROPERTY_PRINT) {
+    switch (action) {
+    case M_PROPERTY_PRINT: {
         int cur = mpctx->playback_initialized ? get_current_chapter(mpctx) : -1;
         char *res = NULL;
         int n;
@@ -999,6 +1063,11 @@ static int mp_property_list_chapters(void *ctx, struct m_property *prop,
 
         *(char **)arg = res;
         return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_SET: {
+        struct mpv_node *given_chapters = arg;
+        return parse_lua_chapters(mpctx, given_chapters);
+    }
     }
     return m_property_read_list(action, arg, count, get_chapter_entry, mpctx);
 }
