@@ -598,7 +598,7 @@ static bool read_packet(struct demux_internal *in)
     for (int n = 0; n < in->num_streams; n++) {
         struct demux_stream *ds = in->streams[n]->ds;
         active |= ds->active;
-        read_more |= ds->active && !ds->head;
+        read_more |= (ds->active && !ds->head) || ds->refreshing;
         packs += ds->packs;
         bytes += ds->bytes;
         if (ds->active && ds->last_ts != MP_NOPTS_VALUE && in->min_secs > 0 &&
@@ -632,10 +632,12 @@ static bool read_packet(struct demux_internal *in)
         return false;
     }
 
+    double seek_pts = get_refresh_seek_pts(in);
+    bool refresh_seek = seek_pts != MP_NOPTS_VALUE;
+    read_more |= refresh_seek;
+
     if (!read_more)
         return false;
-
-    double seek_pts = get_refresh_seek_pts(in);
 
     // Actually read a packet. Drop the lock while doing so, because waiting
     // for disk or network I/O can take time.
@@ -645,7 +647,7 @@ static bool read_packet(struct demux_internal *in)
 
     struct demuxer *demux = in->d_thread;
 
-    if (seek_pts != MP_NOPTS_VALUE) {
+    if (refresh_seek) {
         MP_VERBOSE(in, "refresh seek to %f\n", seek_pts);
         demux->desc->seek(demux, seek_pts, SEEK_BACKWARD | SEEK_HR);
     }
