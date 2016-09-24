@@ -467,12 +467,12 @@ static int query_format(struct vo *vo, int format)
     return sws_isSupportedInput(imgfmt2pixfmt(format));
 }
 
-static int control(struct vo *vo, uint32_t request, void *data)
+static int control(struct vo *vo, uint32_t request, void *arg)
 {
     struct priv *p = vo->priv;
     switch (request) {
     case VOCTRL_SCREENSHOT_WIN:
-        *(struct mp_image**)data = mp_image_new_copy(p->cur_frame);
+        *(struct mp_image**)arg = mp_image_new_copy(p->cur_frame);
         return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, p->last_input);
@@ -481,6 +481,17 @@ static int control(struct vo *vo, uint32_t request, void *data)
         if (vo->config_ok)
             reconfig(vo, vo->params);
         return VO_TRUE;
+    case VOCTRL_GET_DISPLAY_FPS: {
+        double fps =
+            p->kms->mode.clock
+            * 1000.0
+            / p->kms->mode.htotal
+            / p->kms->mode.vtotal;
+        if (fps <= 0)
+            break;
+        *(double*)arg = fps;
+        return VO_TRUE;
+    }
     }
     return VO_NOTIMPL;
 }
