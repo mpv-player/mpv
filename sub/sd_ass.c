@@ -598,6 +598,10 @@ static void fill_plaintext(struct sd *sd, double pts)
         return;
 
     bstr dst = {0};
+
+    if (ctx->on_top)
+        bstr_xappend(NULL, &dst, bstr0("{\\a6}"));
+
     while (*text) {
         if (*text == '{')
             bstr_xappend(NULL, &dst, bstr0("\\"));
@@ -617,9 +621,6 @@ static void fill_plaintext(struct sd *sd, double pts)
     event->Duration = INT_MAX;
     event->Style = track->default_style;
     event->Text = strdup(dst.start);
-
-    if (track->default_style < track->n_styles)
-        track->styles[track->default_style].Alignment = ctx->on_top ? 6 : 2;
 
     talloc_free(dst.start);
 }
