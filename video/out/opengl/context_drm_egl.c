@@ -359,6 +359,20 @@ static int drm_egl_reconfig(struct MPGLContext *ctx)
 static int drm_egl_control(struct MPGLContext *ctx, int *events, int request,
                            void *arg)
 {
+    struct priv *p = ctx->priv;
+    switch (request) {
+    case VOCTRL_GET_DISPLAY_FPS: {
+        double fps =
+            p->kms->mode.clock
+            * 1000.0
+            / p->kms->mode.htotal
+            / p->kms->mode.vtotal;
+        if (fps <= 0)
+            break;
+        *(double*)arg = fps;
+        return VO_TRUE;
+    }
+    }
     return VO_NOTIMPL;
 }
 
