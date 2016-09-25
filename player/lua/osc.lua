@@ -2018,6 +2018,7 @@ mp.register_script_message("osc-message", show_message)
 mp.observe_property("fullscreen", "bool",
     function(name, val)
         state.fullscreen = val
+        request_init()
     end
 )
 mp.observe_property("idle", "bool",
