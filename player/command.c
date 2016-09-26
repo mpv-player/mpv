@@ -5249,7 +5249,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
     case MP_CMD_SUB_RELOAD:
     case MP_CMD_AUDIO_RELOAD: {
-        if (mpctx->playback_initialized) {
+        if (!mpctx->playback_initialized) {
             MP_ERR(mpctx, "Cannot reload while not initialized.\n");
             return -1;
         }
