@@ -1288,7 +1288,7 @@ static void calculate_frame_duration(struct MPContext *mpctx)
 
     double demux_duration = mpctx->vo_chain->container_fps > 0
                             ? 1.0 / mpctx->vo_chain->container_fps : -1;
-    double duration = -1;
+    double duration = demux_duration;
 
     if (mpctx->num_next_frames >= 2) {
         double pts0 = mpctx->next_frames[0]->pts;
