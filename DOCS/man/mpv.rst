@@ -737,20 +737,22 @@ Currently this happens only in the following cases:
 - if started from explorer.exe on Windows (technically, if it was started on
   Windows, and all of the stdout/stderr/stdin handles are unset)
 - started out of the bundle on OSX
-- you can add ``--profile=pseudo-gui`` to the command line, but it will behave
-  subtly differently (since mpv 0.22.0)
+- you can manually add ``--player-operation-mode=pseudo-gui` or
+  ``--profile=pseudo-gui`` to the command line
 
 This mode implicitly performs the same action as ``--profile=pseudo-gui``, but
-roughly before config files are loaded and the command line is applied. The
-``pseudo-gui`` profile is predefined with the following contents:
+predefines some options from a different profile called ``builtin-pseudo-gui``,
+which allows mpv to not overwrite any user-defined options:
 
 ::
 
-    [pseudo-gui]
+    [builtin-pseudo-gui]
     terminal=no
     force-window=yes
     idle=once
     screenshot-directory=~~desktop/
+    [pseudo-gui]
+    player-operation-mode=pseudo-gui
 
 .. warning::
 
