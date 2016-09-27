@@ -335,7 +335,7 @@ static int open_f(stream_t *stream)
     }
 
     stream->priv = avio;
-    stream->seekable = avio->seekable;
+    stream->seekable = avio->seekable & AVIO_SEEKABLE_NORMAL;
     stream->seek = stream->seekable ? seek : NULL;
     stream->fill_buffer = fill_buffer;
     stream->write_buffer = write_buffer;
