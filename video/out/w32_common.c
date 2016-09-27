@@ -15,7 +15,6 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <initguid.h>
 #include <stdio.h>
 #include <limits.h>
 #include <pthread.h>

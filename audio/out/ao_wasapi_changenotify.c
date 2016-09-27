@@ -17,7 +17,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <initguid.h>
 #include <wchar.h>
 
 #include "ao_wasapi.h"
