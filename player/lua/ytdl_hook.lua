@@ -6,7 +6,7 @@ local ytdl = {
     searched = false
 }
 
-local chapter_list = nil
+local chapter_list = {}
 
 local function exec(args)
     local ret = utils.subprocess({args = args})
