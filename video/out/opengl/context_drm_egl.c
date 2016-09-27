@@ -348,6 +348,14 @@ static int drm_egl_init(struct MPGLContext *ctx, int flags)
     return 0;
 }
 
+static int drm_egl_init_deprecated(struct MPGLContext *ctx, int flags)
+{
+    if (ctx->vo->probing)
+        return -1;
+    MP_WARN(ctx->vo, "'drm-egl' is deprecated, use 'drm' instead.\n");
+    return drm_egl_init(ctx, flags);
+}
+
 static int drm_egl_reconfig(struct MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
@@ -405,10 +413,20 @@ static void drm_egl_swap_buffers(MPGLContext *ctx)
     p->gbm.bo = p->gbm.next_bo;
 }
 
+const struct mpgl_driver mpgl_driver_drm = {
+    .name           = "drm",
+    .priv_size      = sizeof(struct priv),
+    .init           = drm_egl_init,
+    .reconfig       = drm_egl_reconfig,
+    .swap_buffers   = drm_egl_swap_buffers,
+    .control        = drm_egl_control,
+    .uninit         = drm_egl_uninit,
+};
+
 const struct mpgl_driver mpgl_driver_drm_egl = {
     .name           = "drm-egl",
     .priv_size      = sizeof(struct priv),
-    .init           = drm_egl_init,
+    .init           = drm_egl_init_deprecated,
     .reconfig       = drm_egl_reconfig,
     .swap_buffers   = drm_egl_swap_buffers,
     .control        = drm_egl_control,

@@ -4244,8 +4244,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
         X11/GLX
     wayland
         Wayland/EGL
-    drm-egl
-        DRM/EGL
+    drm
+        DRM/EGL (``drm-egl`` is a deprecated alias)
     x11egl
         X11/EGL
     mali-fbdev
