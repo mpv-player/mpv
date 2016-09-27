@@ -6,6 +6,8 @@ local ytdl = {
     searched = false
 }
 
+local chapter_list = {}
+
 local function exec(args)
     local ret = utils.subprocess({args = args})
     return ret.status, ret.stdout, ret
@@ -55,6 +57,35 @@ end
 
 local function edl_escape(url)
     return "%" .. string.len(url) .. "%" .. url
+end
+
+local function time_to_secs(time_string)
+    local ret
+
+    local a, b, c = time_string:match("(%d+):(%d%d?):(%d%d)")
+    if a ~= nil then
+        ret = (a*3600 + b*60 + c)
+    else
+        a, b = time_string:match("(%d%d?):(%d%d)")
+        if a ~= nil then
+            ret = (a*60 + b)
+        end
+    end
+
+    return ret
+end
+
+local function extract_chapters(data, video_length)
+    local ret = {}
+
+    for line in data:gmatch("[^\r\n]+") do
+        local time = time_to_secs(line)
+        if time and (time < video_length) then
+            table.insert(ret, {time = time, title = line})
+        end
+    end
+
+    return ret
 end
 
 
@@ -284,6 +315,11 @@ mp.add_hook("on_load", 10, function ()
                 end
             end
 
+            -- add chapters from description
+            if not (json.description == nil) and not (json.duration == nil) then
+                chapter_list = extract_chapters(json.description, json.duration)
+            end
+
             -- set start time
             if not (json.start_time == nil) then
                 msg.debug("Setting start to: " .. json.start_time .. " secs")
@@ -312,5 +348,15 @@ mp.add_hook("on_load", 10, function ()
                 mp.set_property("file-local-options/stream-lavf-o", rtmp_prop)
             end
         end
+    end
+end)
+
+
+mp.add_hook("on_preloaded", 10, function ()
+    if next(chapter_list) ~= nil then
+        msg.verbose("Setting chapters from video's description")
+
+        mp.set_property_native("chapter-list", chapter_list)
+        chapter_list = {}
     end
 end)
