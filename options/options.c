@@ -269,7 +269,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("msg-module", msg_module, UPDATE_TERM),
     OPT_FLAG("msg-time", msg_time, UPDATE_TERM),
 #ifdef _WIN32
-    OPT_CHOICE("priority", w32_priority, M_OPT_FIXED,
+    OPT_CHOICE("priority", w32_priority, UPDATE_PRIORITY,
                ({"no",          0},
                 {"realtime",    REALTIME_PRIORITY_CLASS},
                 {"high",        HIGH_PRIORITY_CLASS},

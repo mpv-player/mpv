@@ -66,10 +66,6 @@ static const char def_config[] =
 #include "player/builtin_conf.inc"
 ;
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 #if HAVE_COCOA
 #include "osdep/macosx_events.h"
 #endif
@@ -471,11 +467,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     if (opts->force_vo == 2 && handle_force_window(mpctx, false) < 0)
         return -1;
-
-#ifdef _WIN32
-    if (opts->w32_priority > 0)
-        SetPriorityClass(GetCurrentProcess(), opts->w32_priority);
-#endif
 
     MP_STATS(mpctx, "end init");
 

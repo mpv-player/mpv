@@ -68,6 +68,10 @@
 
 #include "core.h"
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 struct command_ctx {
     // All properties, terminated with a {0} item.
     struct m_property *properties;
@@ -5649,6 +5653,15 @@ void mp_notify(struct MPContext *mpctx, int event, void *arg)
     mp_client_broadcast_event(mpctx, event, arg);
 }
 
+static void update_priority(struct MPContext *mpctx)
+{
+#ifdef _WIN32
+    struct MPOpts *opts = mpctx->opts;
+    if (opts->w32_priority > 0)
+        SetPriorityClass(GetCurrentProcess(), opts->w32_priority);
+#endif
+}
+
 void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
 {
     struct MPContext *mpctx = ctx;
@@ -5704,6 +5717,9 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
         uninit_audio_out(mpctx);
         mp_wakeup_core(mpctx);
     }
+
+    if (flags & UPDATE_PRIORITY)
+        update_priority(mpctx);
 }
 
 void mp_notify_property(struct MPContext *mpctx, const char *property)
