@@ -290,6 +290,12 @@ mp.add_hook("on_load", 10, function ()
                 mp.set_property("file-local-options/start", json.start_time)
             end
 
+            -- set aspect ratio for anamorphic video
+            if not (json.stretched_ratio == nil) and
+                not option_was_set("video-aspect") then
+                mp.set_property('file-local-options/video-aspect', json.stretched_ratio)
+            end
+
             -- for rtmp
             if (json.protocol == "rtmp") then
                 local rtmp_prop = append_rtmp_prop(nil,
