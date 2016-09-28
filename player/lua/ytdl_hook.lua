@@ -351,6 +351,6 @@ mp.add_hook("on_preloaded", 10, function ()
         msg.verbose("Setting chapters from video's description")
 
         mp.set_property_native("chapter-list", chapter_list)
-        chapter_list = nil
+        chapter_list = {}
     end
 end)
