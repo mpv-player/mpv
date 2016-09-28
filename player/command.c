@@ -2893,7 +2893,7 @@ static int mp_property_vo_performance(void *ctx, struct m_property *prop,
         return M_PROPERTY_OK;
     }
 
-    struct voctrl_performance_data data = {0};
+    struct voctrl_performance_data data = {{0}};
     if (vo_control(mpctx->video_out, VOCTRL_PERFORMANCE_DATA, &data) <= 0)
         return M_PROPERTY_UNAVAILABLE;
 
