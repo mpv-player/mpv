@@ -339,6 +339,8 @@ static void *ipc_thread(void *p)
         goto done;
     }
 
+    MP_VERBOSE(arg, "Listening to IPC socket.\n");
+
     int client_num = 0;
 
     struct pollfd fds[2] = {
