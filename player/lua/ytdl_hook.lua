@@ -76,7 +76,7 @@ local function extract_chapters(data, video_length)
     local ret = {}
 
     for line in data:gmatch("[^\r\n]+") do
-        local time_string = string.match(line, "([%d:.]+:[%d.]+)")
+        local time_string = line:match("%d?%d:%d%d:?%d?%d?")
         if time_string then
             time = time_to_secs(time_string)
             if time < video_length then
