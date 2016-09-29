@@ -5668,7 +5668,7 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
     struct command_ctx *cmd = mpctx->command_ctx;
 
     if (flags & UPDATE_TERM)
-        mp_update_logging(mpctx);
+        mp_update_logging(mpctx, false);
 
     if (mpctx->video_out) {
         if (flags & UPDATE_VIDEOPOS)

@@ -112,7 +112,7 @@ static bool cas_terminal_owner(struct MPContext *old, struct MPContext *new)
     return r;
 }
 
-void mp_update_logging(struct MPContext *mpctx)
+void mp_update_logging(struct MPContext *mpctx, bool preinit)
 {
     mp_msg_update_msglevels(mpctx->global);
 
@@ -121,13 +121,14 @@ void mp_update_logging(struct MPContext *mpctx)
     if (enable != enabled) {
         if (enable && cas_terminal_owner(NULL, mpctx)) {
             terminal_init();
+            enabled = true;
         } else if (!enable) {
             terminal_uninit();
             cas_terminal_owner(mpctx, NULL);
         }
     }
 
-    if (cas_terminal_owner(mpctx, mpctx) && mpctx->opts->consolecontrols)
+    if (enabled && !preinit && mpctx->opts->consolecontrols)
         terminal_setup_getch(mpctx->input);
 }
 
@@ -384,7 +385,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     if (options)
         m_config_preparse_command_line(mpctx->mconfig, mpctx->global, options);
 
-    mp_update_logging(mpctx);
+    mp_update_logging(mpctx, true);
 
     if (options) {
         MP_VERBOSE(mpctx, "Command line options:");
@@ -411,6 +412,8 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     }
 
     mp_get_resume_defaults(mpctx);
+
+    mp_input_load_config(mpctx->input);
 
     // From this point on, all mpctx members are initialized.
     mpctx->initialized = true;
@@ -442,8 +445,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         return -3;
 
     MP_STATS(mpctx, "start init");
-
-    mp_input_load_config(mpctx->input);
 
 #if HAVE_ENCODING
     if (opts->encode_opts->file && opts->encode_opts->file[0]) {

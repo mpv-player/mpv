@@ -486,7 +486,7 @@ int mp_initialize(struct MPContext *mpctx, char **argv);
 struct MPContext *mp_create(void);
 void mp_destroy(struct MPContext *mpctx);
 void mp_print_version(struct mp_log *log, int always);
-void mp_update_logging(struct MPContext *mpctx);
+void mp_update_logging(struct MPContext *mpctx, bool preinit);
 
 // misc.c
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t);
