@@ -38,6 +38,7 @@ struct gl_hwdec_driver {
     // Used to explicitly request a specific API.
     enum hwdec_type api;
     // The hardware surface IMGFMT_ that must be passed to map_image later.
+    // If the test_format callback is set, this field is ignored!
     int imgfmt;
     // Create the hwdec device. It must add it to hw->devs, if applicable.
     int (*create)(struct gl_hwdec *hw);
@@ -55,6 +56,9 @@ struct gl_hwdec_driver {
     void (*unmap)(struct gl_hwdec *hw);
 
     void (*destroy)(struct gl_hwdec *hw);
+
+    // Optional callback for checking input format support.
+    bool (*test_format)(struct gl_hwdec *hw, int imgfmt);
 
     // The following functions provide an alternative API. Each gl_hwdec_driver
     // must have either map_frame or overlay_frame set (not both or none), and
@@ -78,5 +82,7 @@ struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
                                    enum hwdec_type api);
 
 void gl_hwdec_uninit(struct gl_hwdec *hwdec);
+
+bool gl_hwdec_test_format(struct gl_hwdec *hwdec, int imgfmt);
 
 #endif

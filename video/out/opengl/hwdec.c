@@ -116,3 +116,12 @@ void gl_hwdec_uninit(struct gl_hwdec *hwdec)
         hwdec->driver->destroy(hwdec);
     talloc_free(hwdec);
 }
+
+bool gl_hwdec_test_format(struct gl_hwdec *hwdec, int imgfmt)
+{
+    if (!imgfmt)
+        return false;
+    if (hwdec->driver->test_format)
+        return hwdec->driver->test_format(hwdec, imgfmt);
+    return hwdec->driver->imgfmt == imgfmt;
+}

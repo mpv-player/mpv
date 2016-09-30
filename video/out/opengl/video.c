@@ -829,7 +829,7 @@ static void init_video(struct gl_video *p)
 {
     GL *gl = p->gl;
 
-    if (p->hwdec && p->hwdec->driver->imgfmt == p->image_params.imgfmt) {
+    if (p->hwdec && gl_hwdec_test_format(p->hwdec, p->image_params.imgfmt)) {
         if (p->hwdec->driver->reinit(p->hwdec, &p->image_params) < 0)
             MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
         init_image_desc(p, p->image_params.imgfmt);
@@ -3397,7 +3397,7 @@ bool gl_video_check_format(struct gl_video *p, int mp_format)
 {
     if (init_format(p, mp_format, true))
         return true;
-    if (p->hwdec && p->hwdec->driver->imgfmt == mp_format)
+    if (p->hwdec && gl_hwdec_test_format(p->hwdec, mp_format))
         return true;
     return false;
 }
