@@ -141,6 +141,11 @@ static const struct vd_lavc_hwdec mp_vd_lavc_rpi = {
     .lavc_suffix = "_mmal",
     .image_format = IMGFMT_MMAL,
 };
+static const struct vd_lavc_hwdec mp_vd_lavc_rpi_copy = {
+    .type = HWDEC_RPI_COPY,
+    .lavc_suffix = "_mmal",
+    .copying = true,
+};
 #endif
 
 #if HAVE_ANDROID
@@ -162,6 +167,7 @@ static const struct vd_lavc_hwdec mp_vd_lavc_cuda_copy = {
 static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #if HAVE_RPI
     &mp_vd_lavc_rpi,
+    &mp_vd_lavc_rpi_copy,
 #endif
 #if HAVE_VDPAU_HWACCEL
     &mp_vd_lavc_vdpau,

@@ -622,6 +622,7 @@ Video
     :d3d11va-copy: copies video back to system RAM (Windows only)
     :mediacodec: copies video back to system RAM (Android only)
     :rpi:       requires ``--vo=opengl`` (Raspberry Pi only - default if available)
+    :rpi-copy:  copies video back to system RAM (Raspberry Pi only)
     :cuda:      requires ``--vo=opengl`` (Any platform CUDA is available)
     :cuda-copy: copies video back to system RAM (Any platform CUDA is available)
 
@@ -706,6 +707,9 @@ Video
         ``cuda-copy`` has the same behaviour as ``cuda`` - including the ability
         to deinterlace inside the decoder. However, traditional deinterlacing
         filters can be used in this case.
+
+        ``rpi`` always uses the hardware overlay renderer, even with
+        ``--vo=opengl``.
 
         All other methods, in particular the copy-back methods (like
         ``dxva2-copy`` etc.) are either fully safe, or not worse than software
