@@ -386,10 +386,15 @@ static int create(struct gl_hwdec *hw)
     return 0;
 }
 
+static bool test_format(struct gl_hwdec *hw, int imgfmt)
+{
+    return imgfmt == IMGFMT_MMAL || imgfmt == IMGFMT_420P;
+}
+
 const struct gl_hwdec_driver gl_hwdec_rpi_overlay = {
     .name = "rpi-overlay",
     .api = HWDEC_RPI,
-    .imgfmt = IMGFMT_MMAL,
+    .test_format = test_format,
     .create = create,
     .reinit = reinit,
     .overlay_frame = overlay_frame,
