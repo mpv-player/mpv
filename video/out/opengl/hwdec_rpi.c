@@ -328,9 +328,12 @@ static int overlay_frame(struct gl_hwdec *hw, struct mp_image *hw_image)
 
     update_overlay(hw, true);
 
-    struct mp_image *mpi = mp_image_new_ref(hw_image);
-    if (hw_image->imgfmt != IMGFMT_MMAL)
+    struct mp_image *mpi = NULL;
+    if (hw_image->imgfmt == IMGFMT_MMAL) {
+        mpi = mp_image_new_ref(hw_image);
+    } else {
         mpi = upload(hw, hw_image);
+    }
 
     if (!mpi) {
         disable_renderer(hw);
