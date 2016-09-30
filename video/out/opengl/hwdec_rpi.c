@@ -282,7 +282,6 @@ static void free_mmal_buffer(void *arg)
     mmal_buffer_header_release(buffer);
 }
 
-// currently dead code; for a force-overlay mode
 static struct mp_image *upload(struct gl_hwdec *hw, struct mp_image *hw_image)
 {
     struct priv *p = hw->priv;
