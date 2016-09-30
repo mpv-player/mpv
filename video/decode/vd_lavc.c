@@ -417,11 +417,14 @@ static void reinit(struct dec_video *vd)
     }
 
     if (hwdec) {
+        const char *orig_decoder = decoder;
         if (hwdec->get_codec)
             decoder = hwdec->get_codec(ctx, decoder);
         if (hwdec->lavc_suffix)
             decoder = hwdec_find_decoder(codec, hwdec->lavc_suffix);
         MP_VERBOSE(vd, "Trying hardware decoding.\n");
+        if (strcmp(orig_decoder, decoder) != 0)
+            MP_VERBOSE(vd, "Using underlying hw-decoder '%s'\n", decoder);
     } else {
         MP_VERBOSE(vd, "Using software decoding.\n");
     }
