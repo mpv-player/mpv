@@ -289,6 +289,7 @@ static void write_log_file(struct mp_log *log, int lev, char *text)
             (mp_time_us() - MP_START_TIME) / 1e6,
             mp_log_levels[lev][0],
             log->verbose_prefix, text);
+    fflush(root->log_file);
 }
 
 static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
