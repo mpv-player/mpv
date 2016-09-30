@@ -2338,6 +2338,11 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
     gl_sc_set_vao(p->sc, &p->vao);
 }
 
+static float chroma_realign(int size, int shift)
+{
+    return size / (float)(mp_chroma_div_up(size, shift) << shift);
+}
+
 // Minimal rendering code path, for GLES or OpenGL 2.1 without proper FBOs.
 static void pass_render_frame_dumb(struct gl_video *p, int fbo)
 {
@@ -2352,11 +2357,24 @@ static void pass_render_frame_dumb(struct gl_video *p, int fbo)
 
     int index = 0;
     for (int i = 0; i < p->plane_count; i++) {
-        struct gl_transform trel = {{{(float)p->texture_w / tex[i].w, 0.0},
-                                     {0.0, (float)p->texture_h / tex[i].h}}};
-        gl_transform_trans(trel, &tex[i].transform);
-        gl_transform_trans(transform, &tex[i].transform);
-        gl_transform_trans(off[i], &tex[i].transform);
+        int xs = p->image_desc.xs[i];
+        int ys = p->image_desc.ys[i];
+        if (p->image_params.rotate % 180 == 90)
+            MPSWAP(int, xs, ys);
+
+        struct gl_transform t = transform;
+        t.m[0][0] *= chroma_realign(p->texture_w, xs);
+        t.m[1][1] *= chroma_realign(p->texture_h, ys);
+
+        t.t[0] /= 1 << xs;
+        t.t[1] /= 1 << ys;
+
+        t.t[0] += off[i].t[0];
+        t.t[1] += off[i].t[1];
+
+        gl_transform_trans(tex[i].transform, &t);
+        tex[i].transform = t;
+
         copy_img_tex(p, &index, tex[i]);
     }
 
