@@ -4490,11 +4490,17 @@ The following video options are currently all specific to ``--vo=opengl`` and
 ``--opengl-rectangle-textures``
     Force use of rectangle textures (default: no). Normally this shouldn't have
     any advantages over normal textures. Note that hardware decoding overrides
-    this flag.
+    this flag. Could be removed any time.
 
 ``--background=<color>``
     Color used to draw parts of the mpv window not covered by video. See
     ``--osd-color`` option how colors are defined.
+
+``--opengl-tex-pad-x``, ``--opengl-tex-pad-y``
+    Enlarge the video source textures by this many pixels. For debugging only
+    (normally textures are sized exactly, but due to hardware decoding interop
+    we may have to deal with additional padding, which can be tested with these
+    options). Could be removed any time.
 
 Miscellaneous
 -------------

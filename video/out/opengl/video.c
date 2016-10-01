@@ -409,6 +409,8 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("deband", deband, 0),
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
         OPT_FLOAT("sharpen", unsharp, 0),
+        OPT_INTRANGE("opengl-tex-pad-x", tex_pad_x, 0, 0, 4096),
+        OPT_INTRANGE("opengl-tex-pad-y", tex_pad_y, 0, 0, 4096),
         OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
 
         {0}
@@ -875,14 +877,16 @@ static void init_video(struct gl_video *p)
 
             plane->gl_target = gl_target;
 
-            plane->w = plane->tex_w = mp_image_plane_w(&layout, n);
-            plane->h = plane->tex_h = mp_image_plane_h(&layout, n);
+            plane->w = mp_image_plane_w(&layout, n);
+            plane->h = mp_image_plane_h(&layout, n);
+            plane->tex_w = plane->w + p->opts.tex_pad_x;
+            plane->tex_h = plane->h + p->opts.tex_pad_y;
 
             gl->GenTextures(1, &plane->gl_texture);
             gl->BindTexture(gl_target, plane->gl_texture);
 
             gl->TexImage2D(gl_target, 0, plane->gl_internal_format,
-                           plane->w, plane->h, 0,
+                           plane->tex_w, plane->tex_h, 0,
                            plane->gl_format, plane->gl_type, NULL);
 
             int filter = plane->use_integer ? GL_NEAREST : GL_LINEAR;
@@ -893,7 +897,8 @@ static void init_video(struct gl_video *p)
 
             gl->BindTexture(gl_target, 0);
 
-            MP_VERBOSE(p, "Texture for plane %d: %dx%d\n", n, plane->w, plane->h);
+            MP_VERBOSE(p, "Texture for plane %d: %dx%d\n", n,
+                       plane->tex_w, plane->tex_h);
         }
     }
 
