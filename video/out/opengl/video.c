@@ -728,11 +728,12 @@ static int pass_bind(struct gl_video *p, struct img_tex tex)
 }
 
 // Rotation by 90° and flipping.
-static void get_plane_source_transform(struct gl_video *p, struct texplane *t,
-                                       struct gl_transform *out_tr)
+// w/h is used for recentering.
+static void get_transform(float w, float h, int rotate, bool flip,
+                          struct gl_transform *out_tr)
 {
     struct gl_transform tr = identity_trans;
-    int a = p->image_params.rotate % 90 ? 0 : p->image_params.rotate / 90;
+    int a = rotate % 90 ? 0 : rotate / 90;
     int sin90[4] = {0, 1, 0, -1}; // just to avoid rounding issues etc.
     int cos90[4] = {1, 0, -1, 0};
     struct gl_transform rot = {{{cos90[a], sin90[a]}, {-sin90[a], cos90[a]}}};
@@ -741,15 +742,22 @@ static void get_plane_source_transform(struct gl_video *p, struct texplane *t,
     // basically, recenter to keep the whole image in view
     float b[2] = {1, 1};
     gl_transform_vec(rot, &b[0], &b[1]);
-    tr.t[0] += b[0] < 0 ? t->w : 0;
-    tr.t[1] += b[1] < 0 ? t->h : 0;
+    tr.t[0] += b[0] < 0 ? w : 0;
+    tr.t[1] += b[1] < 0 ? h : 0;
 
-    if (t->flipped) {
-        struct gl_transform flip = {{{1, 0}, {0, -1}}, {0, t->h}};
-        gl_transform_trans(flip, &tr);
+    if (flip) {
+        struct gl_transform fliptr = {{{1, 0}, {0, -1}}, {0, h}};
+        gl_transform_trans(fliptr, &tr);
     }
 
     *out_tr = tr;
+}
+
+// Return the chroma plane upscaled to luma size, but with additional padding
+// for image sizes not aligned to subsampling.
+static int chroma_upsize(int size, int shift)
+{
+    return mp_chroma_div_up(size, shift) << shift;
 }
 
 // Places a video_image's image textures + associated metadata into tex[]. The
@@ -760,12 +768,12 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
 {
     assert(vimg->mpi);
 
+    int w = p->image_params.w;
+    int h = p->image_params.h;
+
     // Determine the chroma offset
     float ls_w = 1.0 / (1 << p->image_desc.chroma_xs);
     float ls_h = 1.0 / (1 << p->image_desc.chroma_ys);
-
-    if (p->image_params.rotate % 180 == 90)
-        MPSWAP(float, ls_w, ls_h);
 
     struct gl_transform chroma = {{{ls_w, 0.0}, {0.0, ls_h}}};
 
@@ -780,8 +788,6 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
         chroma.t[0] = ls_w < 1 ? ls_w * -cx / 2 : 0;
         chroma.t[1] = ls_h < 1 ? ls_h * -cy / 2 : 0;
     }
-
-    // FIXME: account for rotation in the chroma offset
 
     // The existing code assumes we just have a single tex multiplier for
     // all of the planes. This may change in the future
@@ -819,11 +825,38 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
             .components = p->image_desc.components[n],
         };
         snprintf(tex[n].swizzle, sizeof(tex[n].swizzle), "%s", t->swizzle);
-        get_plane_source_transform(p, t, &tex[n].transform);
+        get_transform(t->w, t->h, p->image_params.rotate, t->flipped,
+                      &tex[n].transform);
         if (p->image_params.rotate % 180 == 90)
             MPSWAP(int, tex[n].w, tex[n].h);
 
-        off[n] = type == PLANE_CHROMA ? chroma : identity_trans;
+        off[n] = identity_trans;
+
+        if (type == PLANE_CHROMA) {
+            struct gl_transform rot;
+            get_transform(0, 0, p->image_params.rotate, true, &rot);
+
+            struct gl_transform tr = chroma;
+            gl_transform_vec(rot, &tr.t[0], &tr.t[1]);
+
+            float dx = (chroma_upsize(w, p->image_desc.xs[n]) - w) * ls_w;
+            float dy = (chroma_upsize(h, p->image_desc.ys[n]) - h) * ls_h;
+
+            // Adjust the chroma offset if the real chroma size is fractional
+            // due image sizes not aligned to chroma subsampling.
+            struct gl_transform rot2;
+            get_transform(0, 0, p->image_params.rotate, t->flipped, &rot2);
+            if (rot2.m[0][0] < 0)
+                tr.t[0] += dx;
+            if (rot2.m[1][0] < 0)
+                tr.t[0] += dy;
+            if (rot2.m[0][1] < 0)
+                tr.t[1] += dx;
+            if (rot2.m[1][1] < 0)
+                tr.t[1] += dy;
+
+            off[n] = tr;
+        }
     }
 }
 
