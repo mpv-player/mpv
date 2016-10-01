@@ -95,7 +95,7 @@ List of Input Commands
     relative (default)
         Seek relative to current position (a negative value seeks backwards).
     absolute
-        Seek to a given time.
+        Seek to a given time (a negative value starts from the end of the file).
     absolute-percent
         Seek to a given percent position.
     relative-percent
