@@ -732,16 +732,15 @@ static int pass_bind(struct gl_video *p, struct img_tex tex)
 static void get_transform(float w, float h, int rotate, bool flip,
                           struct gl_transform *out_tr)
 {
-    struct gl_transform tr = identity_trans;
     int a = rotate % 90 ? 0 : rotate / 90;
     int sin90[4] = {0, 1, 0, -1}; // just to avoid rounding issues etc.
     int cos90[4] = {1, 0, -1, 0};
-    struct gl_transform rot = {{{cos90[a], sin90[a]}, {-sin90[a], cos90[a]}}};
-    gl_transform_trans(rot, &tr);
+    struct gl_transform tr = {{{ cos90[a], sin90[a]},
+                               {-sin90[a], cos90[a]}}};
 
     // basically, recenter to keep the whole image in view
     float b[2] = {1, 1};
-    gl_transform_vec(rot, &b[0], &b[1]);
+    gl_transform_vec(tr, &b[0], &b[1]);
     tr.t[0] += b[0] < 0 ? w : 0;
     tr.t[1] += b[1] < 0 ? h : 0;
 
