@@ -930,7 +930,9 @@ static int mp_property_chapter(void *ctx, struct m_property *prop,
                 if (current_chapter_start != MP_NOPTS_VALUE &&
                     get_current_time(mpctx) - current_chapter_start >
                     mpctx->opts->chapter_seek_threshold)
+                {
                     step_all++;
+                }
             }
         } else // Absolute set
             step_all = *(int *)arg - chapter;
@@ -4815,6 +4817,13 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             break;
         }
         case 2: { // Absolute seek to a timestamp in seconds
+            if (v < 0) {
+                // Seek from end
+                double len = get_time_length(mpctx);
+                if (len < 0)
+                    return -1;
+                v = MPMAX(0, len + v);
+            }
             queue_seek(mpctx, MPSEEK_ABSOLUTE, v, precision, MPSEEK_FLAG_DELAY);
             set_osd_function(mpctx,
                              v > get_current_time(mpctx) ? OSD_FFW : OSD_REW);
