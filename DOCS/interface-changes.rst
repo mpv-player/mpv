@@ -66,6 +66,8 @@ Interface changes
     - deprecate --playlist-pos option, renamed to --playlist-start
     - deprecate the --chapter option, as it is redundant with --start/--end,
       and conflicts with the semantics of the "chapter" property
+    - rename --sub-text-* to --sub-* and --ass-* to --sub-ass-* (old options
+      deprecated)
     - incompatible change to cdda:// protocol options: the part after cdda://
       now always sets the device, not the span or speed to be played. No
       separating extra "/" is needed. The hidden --cdda-device options is also

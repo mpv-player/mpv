@@ -259,7 +259,7 @@ typedef struct MPOpts {
     int sub_scale_with_window;
     int ass_scale_with_window;
     struct osd_style_opts *osd_style;
-    struct osd_style_opts *sub_text_style;
+    struct osd_style_opts *sub_style;
     float sub_scale;
     float sub_gauss;
     int sub_gray;
