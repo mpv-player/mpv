@@ -125,8 +125,7 @@ void pause_player(struct MPContext *mpctx)
 {
     mpctx->opts->pause = 1;
 
-    if (mpctx->video_out)
-        vo_control(mpctx->video_out, VOCTRL_RESTORE_SCREENSAVER, NULL);
+    update_screensaver_state(mpctx);
 
     if (mpctx->paused)
         goto end;
@@ -152,8 +151,7 @@ void unpause_player(struct MPContext *mpctx)
 {
     mpctx->opts->pause = 0;
 
-    if (mpctx->video_out && mpctx->opts->stop_screensaver)
-        vo_control(mpctx->video_out, VOCTRL_KILL_SCREENSAVER, NULL);
+    update_screensaver_state(mpctx);
 
     if (!mpctx->paused)
         goto end;
@@ -175,6 +173,17 @@ void unpause_player(struct MPContext *mpctx)
 
 end:
     mp_notify(mpctx, mpctx->opts->pause ? MPV_EVENT_PAUSE : MPV_EVENT_UNPAUSE, 0);
+}
+
+void update_screensaver_state(struct MPContext *mpctx)
+{
+    if (!mpctx->video_out)
+        return;
+
+    bool saver_state = mpctx->opts->pause || !mpctx->opts->stop_screensaver ||
+                       !mpctx->playback_initialized;
+    vo_control(mpctx->video_out, saver_state ? VOCTRL_RESTORE_SCREENSAVER
+                                             : VOCTRL_KILL_SCREENSAVER, NULL);
 }
 
 void add_step_frame(struct MPContext *mpctx, int dir)

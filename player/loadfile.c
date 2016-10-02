@@ -1123,6 +1123,7 @@ reopen_file:
 
     mpctx->playback_initialized = true;
     mp_notify(mpctx, MPV_EVENT_FILE_LOADED, NULL);
+    update_screensaver_state(mpctx);
 
     if (mpctx->max_frames == 0) {
         if (!mpctx->stop_play)
@@ -1177,6 +1178,7 @@ terminate_playback:
         uninit_audio_out(mpctx);
 
     mpctx->playback_initialized = false;
+    update_screensaver_state(mpctx);
 
     if (mpctx->stop_play == PT_RELOAD_FILE) {
         mpctx->stop_play = KEEP_PLAYING;

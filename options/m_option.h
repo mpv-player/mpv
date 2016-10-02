@@ -390,7 +390,8 @@ struct m_option {
 #define UPDATE_INPUT            (1 << 13) // mostly --input-* options
 #define UPDATE_AUDIO            (1 << 14) // --audio-channels etc.
 #define UPDATE_PRIORITY         (1 << 15) // --priority (Windows-only)
-#define UPDATE_OPT_LAST         (1 << 15)
+#define UPDATE_SCREENSAVER      (1 << 16) // --stop-screensaver
+#define UPDATE_OPT_LAST         (1 << 16)
 
 // All bits between _FIRST and _LAST (inclusive)
 #define UPDATE_OPTS_MASK \
