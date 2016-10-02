@@ -75,7 +75,7 @@ static void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts)
         track->default_style = sid;
         ASS_Style *style = track->styles + sid;
         style->Name = strdup("Default");
-        mp_ass_set_style(style, track->PlayResY, opts->sub_text_style);
+        mp_ass_set_style(style, track->PlayResY, opts->sub_style);
     }
 
     if (opts->ass_style_override)
@@ -138,7 +138,7 @@ static void enable_output(struct sd *sd, bool enable)
     } else {
         ctx->ass_renderer = ass_renderer_init(ctx->ass_library);
 
-        mp_ass_configure_fonts(ctx->ass_renderer, sd->opts->sub_text_style,
+        mp_ass_configure_fonts(ctx->ass_renderer, sd->opts->sub_style,
                                sd->global, sd->log);
     }
 }
@@ -335,12 +335,12 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
 #endif
     ass_set_selective_style_override_enabled(priv, set_force_flags);
     ASS_Style style = {0};
-    mp_ass_set_style(&style, 288, opts->sub_text_style);
+    mp_ass_set_style(&style, 288, opts->sub_style);
     ass_set_selective_style_override(priv, &style);
     free(style.FontName);
     if (converted && track->default_style < track->n_styles) {
         mp_ass_set_style(track->styles + track->default_style,
-                         track->PlayResY, opts->sub_text_style);
+                         track->PlayResY, opts->sub_style);
     }
     ass_set_font_scale(priv, set_font_scale);
     ass_set_hinting(priv, set_hinting);
