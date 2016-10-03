@@ -190,13 +190,18 @@ bool kms_setup(struct kms *kms, const char *device_path, int connector_id, int m
     }
 
     if (!setup_connector(kms, res, connector_id))
-        return false;
+        goto err;
     if (!setup_crtc(kms, res))
-        return false;
+        goto err;
     if (!setup_mode(kms, mode_id))
-        return false;
+        goto err;
 
+    drmModeFreeResources(res);
     return true;
+
+err:
+    drmModeFreeResources(res);
+    return false;
 }
 
 void kms_destroy(struct kms *kms)
