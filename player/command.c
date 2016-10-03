@@ -4046,6 +4046,11 @@ static const struct m_property mp_properties_base[] = {
 
      // conflicts with option
     M_PROPERTY_DEPRECATED_ALIAS("audio-format", "audio-codec-name"),
+
+    M_PROPERTY_DEPRECATED_ALIAS("ass-style-override", "sub-ass-style-override"),
+    M_PROPERTY_DEPRECATED_ALIAS("ass-use-margins", "sub-ass-use-margins"),
+    M_PROPERTY_DEPRECATED_ALIAS("ass-vsfilter-aspect-compat",
+                                "sub-ass-vsfilter-aspect-compat"),
 };
 
 // Each entry describes which properties an event (possibly) changes.
@@ -4298,8 +4303,8 @@ static const struct property_osd_display {
         "${?sub-visibility==yes:visible${?sub==no: (but no subtitles selected)}}" },
     { "sub-forced-only", "Forced sub only" },
     { "sub-scale", "Sub Scale"},
-    { "ass-vsfilter-aspect-compat", "Subtitle VSFilter aspect compat"},
-    { "ass-style-override", "ASS subtitle style override"},
+    { "sub-ass-vsfilter-aspect-compat", "Subtitle VSFilter aspect compat"},
+    { "sub-ass-style-override", "ASS subtitle style override"},
     { "vf", "Video filters", .msg = "Video filters:\n${vf}"},
     { "af", "Audio filters", .msg = "Audio filters:\n${af}"},
     { "tv-brightness", "Brightness", .osd_progbar = OSD_BRIGHTNESS },
