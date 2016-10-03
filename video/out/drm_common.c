@@ -215,6 +215,11 @@ void kms_destroy(struct kms *kms)
     talloc_free(kms);
 }
 
+double kms_get_display_fps(const struct kms *kms)
+{
+    return kms->mode.clock * 1000.0 / kms->mode.htotal / kms->mode.vtotal;
+}
+
 
 
 // VT switcher ----------------------------------------------------------------
