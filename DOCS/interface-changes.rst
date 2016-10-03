@@ -81,6 +81,9 @@ Interface changes
     - deprecate mp.suspend(), mp.resume(), mp.resume_all() Lua scripting
       commands, as well as setting mp.use_suspend. They will be completely
       removed in 0.22.0.
+    - the "seek" command's absolute seek mode will now interpret negative
+      seek times as relative from the end of the file (and clamps seeks that
+      still go before 0)
     - add almost all options to the property list, meaning you can change
       options without adding "options/" to the property name (a new section
       has been added to the manpage describing some conflicting behavior
