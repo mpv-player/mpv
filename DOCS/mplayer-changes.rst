@@ -262,13 +262,14 @@ Command Line Switches
     ``-ssf <sub>``              ``--sws-...``
     ``-stop-xscreensaver``      ``--stop-screensaver``
     ``-sub-fuzziness``          ``--sub-auto``
+    ``-sub-text-*``             ``--sub-*``
     ``-sub``                    ``--sub-file``
     ``-subcp``                  ``--sub-codepage``
     ``-subdelay``               ``--sub-delay``
     ``-subfile``                ``--sub-file``
-    ``-subfont-*``              ``--sub-text-*``, ``--osd-*``
+    ``-subfont-*``              ``--sub-*``, ``--osd-*``
     ``-subfont-text-scale``     ``--sub-scale``
-    ``-subfont``                ``--sub-text-font``
+    ``-subfont``                ``--sub-font``
     ``-subfps``                 ``--sub-fps``
     ``-subpos``                 ``--sub-pos``
     ``-sws``                    ``--sws-scaler``

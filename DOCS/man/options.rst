@@ -1490,7 +1490,7 @@ Subtitles
     .. note::
 
         This affects ASS subtitles as well, and may lead to incorrect subtitle
-        rendering. Use with care, or use ``--sub-text-font-size`` instead.
+        rendering. Use with care, or use ``--sub-font-size`` instead.
 
 ``--sub-scale-by-window=<yes|no>``
     Whether to scale subtitles with the window size (default: yes). If this is
@@ -1531,7 +1531,7 @@ Subtitles
     .. note::
 
         This affects ASS subtitles as well, and may lead to incorrect subtitle
-        rendering. Use with care, or use ``--sub-text-margin-y`` instead.
+        rendering. Use with care, or use ``--sub-margin-y`` instead.
 
 ``--sub-speed=<0.1-10.0>``
     Multiply the subtitle event timestamps with the given value. Can be used
@@ -1599,7 +1599,7 @@ Subtitles
             (default).
     :signfs: like ``yes``, but apply ``--sub-scale`` only to signs
     :no:    Render subtitles as forced by subtitle scripts.
-    :force: Try to force the font style as defined by the ``--sub-text-*``
+    :force: Try to force the font style as defined by the ``--sub-*``
             options. Can break rendering easily.
     :strip: Radically strip all ASS tags and styles from the subtitle. This
             is equivalent to the old ``--no-ass`` / ``--no-sub-ass`` options.
@@ -1708,7 +1708,7 @@ Subtitles
 
     If ``--no-sub-ass`` is specified, all tags and style declarations are
     stripped and ignored on display. The subtitle renderer uses the font style
-    as specified by the ``--sub-text-`` options instead.
+    as specified by the ``--sub-`` options instead.
 
     .. note::
 
