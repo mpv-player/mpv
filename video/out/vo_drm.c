@@ -482,11 +482,7 @@ static int control(struct vo *vo, uint32_t request, void *arg)
             reconfig(vo, vo->params);
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_FPS: {
-        double fps =
-            p->kms->mode.clock
-            * 1000.0
-            / p->kms->mode.htotal
-            / p->kms->mode.vtotal;
+        double fps = kms_get_display_fps(p->kms);
         if (fps <= 0)
             break;
         *(double*)arg = fps;

@@ -49,5 +49,6 @@ void vt_switcher_release(struct vt_switcher *s, void (*handler)(void*), void *us
 struct kms *kms_create(struct mp_log *log);
 bool kms_setup(struct kms *kms, const char *device_path, int conn_id, int mode_id);
 void kms_destroy(struct kms *kms);
+double kms_get_display_fps(const struct kms *kms);
 
 #endif
