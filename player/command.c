@@ -4046,11 +4046,6 @@ static const struct m_property mp_properties_base[] = {
 
      // conflicts with option
     M_PROPERTY_DEPRECATED_ALIAS("audio-format", "audio-codec-name"),
-
-    M_PROPERTY_DEPRECATED_ALIAS("ass-style-override", "sub-ass-style-override"),
-    M_PROPERTY_DEPRECATED_ALIAS("ass-use-margins", "sub-ass-use-margins"),
-    M_PROPERTY_DEPRECATED_ALIAS("ass-vsfilter-aspect-compat",
-                                "sub-ass-vsfilter-aspect-compat"),
 };
 
 // Each entry describes which properties an event (possibly) changes.
@@ -5603,26 +5598,41 @@ void command_init(struct MPContext *mpctx)
     for (int n = 0; n < num_opts; n++) {
         struct m_config_option *co = m_config_get_co_index(mpctx->mconfig, n);
         assert(co->name[0]);
-        if (!co->data || (co->opt->flags & M_OPT_NOPROP) ||
+        if ((co->opt->flags & M_OPT_NOPROP) ||
             (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD))
             continue;
 
-        struct m_property prop = {
-            .name = co->name,
-            .call = mp_property_generic_option,
-        };
+        struct m_property prop = {0};
 
-        bstr bname = bstr0(prop.name);
-        if (bstr_eatend0(&bname, "*")) {
-            prop.name = bstrto0(ctx, bname);
-            prop.call = mp_property_generic_option_star;
+        if (co->data) {
+            prop = (struct m_property){
+                .name = co->name,
+                .call = mp_property_generic_option,
+            };
+
+            bstr bname = bstr0(prop.name);
+            if (bstr_eatend0(&bname, "*")) {
+                prop.name = bstrto0(ctx, bname);
+                prop.call = mp_property_generic_option_star;
+            }
+        } else if (co->opt->type == &m_option_type_alias) {
+            const char *alias = (const char *)co->opt->priv;
+
+            prop = (struct m_property){
+                .name = co->name,
+                .call = co->opt->deprecation_message ?
+                            mp_property_deprecated_alias : mp_property_alias,
+                .priv = (void *)alias,
+            };
         }
 
-        // The option might be covered by a manual property already.
-        if (m_property_list_find(ctx->properties, prop.name))
-            continue;
+        if (prop.name) {
+            // The option might be covered by a manual property already.
+            if (m_property_list_find(ctx->properties, prop.name))
+                continue;
 
-        ctx->properties[count++] = prop;
+            ctx->properties[count++] = prop;
+        }
     }
 }
 
