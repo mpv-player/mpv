@@ -182,6 +182,7 @@ static int unlocked_get_space(struct ao *ao)
     struct ao_push_state *p = ao->api_priv;
     int space = mp_audio_buffer_get_write_available(p->buffer);
     if (ao->driver->get_space) {
+        int align = af_format_sample_alignment(ao->format);
         // The following code attempts to keep the total buffered audio to
         // ao->buffer in order to improve latency.
         int device_space = ao->driver->get_space(ao);
@@ -191,6 +192,7 @@ static int unlocked_get_space(struct ao *ao)
         // byte based and doesn't do proper chunked processing.
         int min_buffer = ao->buffer + 64;
         int missing = min_buffer - device_buffered - soft_buffered;
+        missing = (missing + align - 1) / align * align;
         // But always keep the device's buffer filled as much as we can.
         int device_missing = device_space - soft_buffered;
         missing = MPMAX(missing, device_missing);
