@@ -54,8 +54,7 @@ struct framebuffer {
 };
 
 struct priv {
-    char *device_path;
-    int connector_id;
+    char *connector_spec;
     int mode_id;
 
     struct kms *kms;
@@ -70,8 +69,8 @@ struct priv {
     bool active;
     bool pflip_happening;
 
-    int32_t device_w;
-    int32_t device_h;
+    int32_t screen_w;
+    int32_t screen_h;
     struct mp_image *last_input;
     struct mp_image *cur_frame;
     struct mp_rect src;
@@ -158,8 +157,7 @@ static bool fb_setup_double_buffering(struct vo *vo)
 
     for (unsigned int i = 0; i < BUF_COUNT; i++) {
         if (!fb_setup_single(vo, p->kms->fd, &p->bufs[i])) {
-            MP_ERR(vo, "Cannot create framebuffer for connector %d\n",
-                   p->kms->connector->connector_id);
+            MP_ERR(vo, "Cannot create framebuffer\n");
             for (unsigned int j = 0; j < i; j++) {
                 fb_destroy(p->kms->fd, &p->bufs[j]);
             }
@@ -171,7 +169,7 @@ static bool fb_setup_double_buffering(struct vo *vo)
 }
 
 static void page_flipped(int fd, unsigned int frame, unsigned int sec,
-                                 unsigned int usec, void *data)
+                         unsigned int usec, void *data)
 {
     struct priv *p = data;
     p->pflip_happening = false;
@@ -185,10 +183,7 @@ static bool crtc_setup(struct vo *vo)
     p->old_crtc = drmModeGetCrtc(p->kms->fd, p->kms->crtc_id);
     int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id,
                              p->bufs[p->front_buf + BUF_COUNT - 1].fb,
-                             0,
-                             0,
-                             &p->kms->connector->connector_id,
-                             1,
+                             0, 0, &p->kms->connector->connector_id, 1,
                              &p->kms->mode);
     p->active = true;
     return ret == 0;
@@ -212,13 +207,10 @@ static void crtc_release(struct vo *vo)
     }
 
     if (p->old_crtc) {
-        drmModeSetCrtc(p->kms->fd,
-                       p->old_crtc->crtc_id,
+        drmModeSetCrtc(p->kms->fd, p->old_crtc->crtc_id,
                        p->old_crtc->buffer_id,
-                       p->old_crtc->x,
-                       p->old_crtc->y,
-                       &p->kms->connector->connector_id,
-                       1,
+                       p->old_crtc->x, p->old_crtc->y,
+                       &p->kms->connector->connector_id, 1,
                        &p->old_crtc->mode);
         drmModeFreeCrtc(p->old_crtc);
         p->old_crtc = NULL;
@@ -274,8 +266,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *p = vo->priv;
 
-    vo->dwidth = p->device_w;
-    vo->dheight = p->device_h;
+    vo->dwidth = p->screen_w;
+    vo->dheight = p->screen_h;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
 
     int w = p->dst.x1 - p->dst.x0;
@@ -302,7 +294,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params)
     };
 
     talloc_free(p->cur_frame);
-    p->cur_frame = mp_image_alloc(IMGFMT, p->device_w, p->device_h);
+    p->cur_frame = mp_image_alloc(IMGFMT, p->screen_w, p->screen_h);
     mp_image_params_guess_csp(&p->sws->dst);
     mp_image_set_params(p->cur_frame, &p->sws->dst);
 
@@ -338,14 +330,11 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         struct framebuffer *front_buf = &p->bufs[p->front_buf];
         int w = p->dst.x1 - p->dst.x0;
         int h = p->dst.y1 - p->dst.y0;
-        int x = (p->device_w - w) >> 1;
-        int y = (p->device_h - h) >> 1;
+        int x = (p->screen_w - w) >> 1;
+        int y = (p->screen_h - h) >> 1;
         int shift = y * front_buf->stride + x * BYTES_PER_PIXEL;
-        memcpy_pic(front_buf->map + shift,
-                   p->cur_frame->planes[0],
-                   w * BYTES_PER_PIXEL,
-                   h,
-                   front_buf->stride,
+        memcpy_pic(front_buf->map + shift, p->cur_frame->planes[0],
+                   w * BYTES_PER_PIXEL, h, front_buf->stride,
                    p->cur_frame->stride[0]);
     }
 
@@ -422,14 +411,10 @@ static int preinit(struct vo *vo)
         MP_WARN(vo, "Failed to set up VT switcher. Terminal switching will be unavailable.\n");
     }
 
-    p->kms = kms_create(vo->log);
+    p->kms = kms_create(
+        vo->log, vo->opts->drm_connector_spec, vo->opts->drm_mode_id);
     if (!p->kms) {
         MP_ERR(vo, "Failed to create KMS.\n");
-        goto err;
-    }
-
-    if (!kms_setup(p->kms, p->device_path, p->connector_id, p->mode_id)) {
-        MP_ERR(vo, "Failed to configure KMS.\n");
         goto err;
     }
 
@@ -440,18 +425,16 @@ static int preinit(struct vo *vo)
 
     uint64_t has_dumb;
     if (drmGetCap(p->kms->fd, DRM_CAP_DUMB_BUFFER, &has_dumb) < 0) {
-        MP_ERR(vo, "Device \"%s\" does not support dumb buffers.\n", p->device_path);
+        MP_ERR(vo, "Card \"%d\" does not support dumb buffers.\n",
+               p->kms->card_no);
         goto err;
     }
 
-    p->device_w = p->bufs[0].width;
-    p->device_h = p->bufs[0].height;
+    p->screen_w = p->bufs[0].width;
+    p->screen_h = p->bufs[0].height;
 
     if (!crtc_setup(vo)) {
-        MP_ERR(vo,
-               "Cannot set CRTC for connector %u: %s\n",
-               p->kms->connector->connector_id,
-               mp_strerror(errno));
+        MP_ERR(vo, "Cannot set CRTC: %s\n", mp_strerror(errno));
         goto err;
     }
 
@@ -507,16 +490,5 @@ const struct vo_driver video_out_drm = {
     .wait_events = wait_events,
     .wakeup = wakeup,
     .priv_size = sizeof(struct priv),
-    .options = (const struct m_option[]) {
-        OPT_STRING("devpath", device_path, 0),
-        OPT_INT("connector", connector_id, 0),
-        OPT_INT("mode", mode_id, 0),
-        {0},
-    },
-    .priv_defaults = &(const struct priv) {
-        .device_path = "/dev/dri/card0",
-        .connector_id = -1,
-        .mode_id = 0,
-    },
     .legacy_prefix = "drm",
 };

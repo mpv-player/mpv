@@ -94,7 +94,8 @@ static bool init_egl(struct MPGLContext *ctx, int flags)
                               &p->egl.context, &config))
         return -1;
     MP_VERBOSE(ctx->vo, "Initializing EGL surface\n");
-    p->egl.surface = eglCreateWindowSurface(p->egl.display, config, p->gbm.surface, NULL);
+    p->egl.surface
+        = eglCreateWindowSurface(p->egl.display, config, p->gbm.surface, NULL);
     if (p->egl.surface == EGL_NO_SURFACE) {
         MP_ERR(ctx->vo, "Failed to create EGL surface.\n");
         return false;
@@ -147,7 +148,7 @@ static void update_framebuffer_from_bo(
     int handle = gbm_bo_get_handle(bo).u32;
 
     int ret = drmModeAddFB(p->kms->fd, p->fb.width, p->fb.height,
-                       24, 32, stride, handle, &p->fb.id);
+                           24, 32, stride, handle, &p->fb.id);
     if (ret) {
         MP_ERR(ctx->vo, "Failed to create framebuffer: %s\n", mp_strerror(errno));
     }
@@ -155,7 +156,7 @@ static void update_framebuffer_from_bo(
 }
 
 static void page_flipped(int fd, unsigned int frame, unsigned int sec,
-                                 unsigned int usec, void *data)
+                         unsigned int usec, void *data)
 {
     struct priv *p = data;
     p->waiting_for_flip = false;
@@ -167,12 +168,8 @@ static bool crtc_setup(struct MPGLContext *ctx)
     if (p->active)
         return true;
     p->old_crtc = drmModeGetCrtc(p->kms->fd, p->kms->crtc_id);
-    int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id,
-                             p->fb.id,
-                             0,
-                             0,
-                             &p->kms->connector->connector_id,
-                             1,
+    int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id, p->fb.id,
+                             0, 0, &p->kms->connector->connector_id, 1,
                              &p->kms->mode);
     p->active = true;
     return ret == 0;
@@ -197,12 +194,9 @@ static void crtc_release(struct MPGLContext *ctx)
 
     if (p->old_crtc) {
         drmModeSetCrtc(p->kms->fd,
-                       p->old_crtc->crtc_id,
-                       p->old_crtc->buffer_id,
-                       p->old_crtc->x,
-                       p->old_crtc->y,
-                       &p->kms->connector->connector_id,
-                       1,
+                       p->old_crtc->crtc_id, p->old_crtc->buffer_id,
+                       p->old_crtc->x, p->old_crtc->y,
+                       &p->kms->connector->connector_id, 1,
                        &p->old_crtc->mode);
         drmModeFreeCrtc(p->old_crtc);
         p->old_crtc = NULL;
@@ -220,7 +214,8 @@ static void release_vt(void *data)
         //until things change, this is commented.
         struct priv *p = ctx->priv;
         if (drmDropMaster(p->kms->fd)) {
-            MP_WARN(ctx->vo, "Failed to drop DRM master: %s\n", mp_strerror(errno));
+            MP_WARN(ctx->vo, "Failed to drop DRM master: %s\n",
+                    mp_strerror(errno));
         }
     }
 }
@@ -232,7 +227,8 @@ static void acquire_vt(void *data)
     if (USE_MASTER) {
         struct priv *p = ctx->priv;
         if (drmSetMaster(p->kms->fd)) {
-            MP_WARN(ctx->vo, "Failed to acquire DRM master: %s\n", mp_strerror(errno));
+            MP_WARN(ctx->vo, "Failed to acquire DRM master: %s\n",
+                    mp_strerror(errno));
         }
     }
 
@@ -247,7 +243,8 @@ static void drm_egl_uninit(MPGLContext *ctx)
     if (p->vt_switcher_active)
         vt_switcher_destroy(&p->vt_switcher);
 
-    eglMakeCurrent(p->egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    eglMakeCurrent(p->egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                   EGL_NO_CONTEXT);
     eglDestroyContext(p->egl.display, p->egl.context);
     eglDestroySurface(p->egl.display, p->egl.surface);
     gbm_surface_destroy(p->gbm.surface);
@@ -287,15 +284,10 @@ static int drm_egl_init(struct MPGLContext *ctx, int flags)
     }
 
     MP_VERBOSE(ctx->vo, "Initializing KMS\n");
-    p->kms = kms_create(ctx->vo->log);
+    p->kms = kms_create(ctx->vo->log, ctx->vo->opts->drm_connector_spec,
+                        ctx->vo->opts->drm_mode_id);
     if (!p->kms) {
         MP_ERR(ctx->vo, "Failed to create KMS.\n");
-        return -1;
-    }
-
-    // TODO: arguments should be configurable
-    if (!kms_setup(p->kms, "/dev/dri/card0", -1, 0)) {
-        MP_ERR(ctx->vo, "Failed to configure KMS.\n");
         return -1;
     }
 
@@ -309,7 +301,8 @@ static int drm_egl_init(struct MPGLContext *ctx, int flags)
         return -1;
     }
 
-    if (!eglMakeCurrent(p->egl.display, p->egl.surface, p->egl.surface, p->egl.context)) {
+    if (!eglMakeCurrent(p->egl.display, p->egl.surface, p->egl.surface,
+                        p->egl.context)) {
         MP_ERR(ctx->vo, "Failed to make context current.\n");
         return -1;
     }
@@ -337,11 +330,8 @@ static int drm_egl_init(struct MPGLContext *ctx, int flags)
     }
 
     if (!crtc_setup(ctx)) {
-        MP_ERR(
-               ctx->vo,
-               "Failed to set CRTC for connector %u: %s\n",
-               p->kms->connector->connector_id,
-               mp_strerror(errno));
+        MP_ERR(ctx->vo, "Failed to set CRTC for connector %u: %s\n",
+               p->kms->connector->connector_id, mp_strerror(errno));
         return -1;
     }
 
