@@ -1969,7 +1969,7 @@ Subtitles
     Vertical position (default: ``bottom``).
     Details see ``--sub-align-x``.
 
-``--sub-shadow-color=<color>
+``--sub-shadow-color=<color>``
     See ``--sub-color``. Color used for sub text shadow.
 
 ``--sub-shadow-offset=<size>``
