@@ -48,6 +48,10 @@
 #include "player/command.h"
 #include "stream/stream.h"
 
+#if HAVE_DRM
+#include "video/out/drm_common.h"
+#endif
+
 extern const char mp_help_text[];
 
 static void print_version(struct mp_log *log)
@@ -189,6 +193,11 @@ static const m_option_t mp_vo_opt_list[] = {
 #endif
 #if HAVE_WIN32
     OPT_STRING("vo-mmcss-profile", mmcss_profile, 0),
+#endif
+#if HAVE_DRM
+    OPT_STRING_VALIDATE("drm-connector", drm_connector_spec,
+                        0, drm_validate_connector_opt),
+    OPT_INT("drm-mode", drm_mode_id, 0),
 #endif
 
     {0}

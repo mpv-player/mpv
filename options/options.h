@@ -51,6 +51,9 @@ typedef struct mp_vo_opts {
     struct sws_opts *sws_opts;
     // vo_opengl, vo_opengl_cb
     int hwdec_preload_api;
+    // vo_drm
+    char *drm_connector_spec;
+    int drm_mode_id;
 } mp_vo_opts;
 
 struct mp_cache_opts {

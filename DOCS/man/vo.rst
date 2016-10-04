@@ -495,13 +495,13 @@ Available video output drivers are:
 
     The following global options are supported by this video output:
 
-    ``--drm-connector=<number>``
-        Select the connector to use (usually this is a monitor.) If set to -1,
-        mpv renders the output on the first available connector. (default: -1)
-
-    ``--drm-devpath=<filename>``
-        Path to graphic card device.
-        (default: /dev/dri/card0)
+    ``--drm-connector=[<gpu_number>.]<name>``
+        Select the connector to use (usually this is a monitor.) If ``<name>``
+        is empty or ``auto``, mpv renders the output on the first available
+        connector. Use ``--drm-connector=help`` to get list of available
+        connectors. When using multiple graphic cards, use the ``<gpu_number>``
+        argument to disambiguate.
+        (default: empty)
 
     ``--drm-mode=<number>``
         Mode ID to use (resolution, bit depth and frame rate).

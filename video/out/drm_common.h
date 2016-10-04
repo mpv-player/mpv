@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
+#include "options/m_option.h"
 
 struct kms {
     struct mp_log *log;
@@ -29,6 +30,7 @@ struct kms {
     drmModeEncoder *encoder;
     drmModeModeInfo mode;
     uint32_t crtc_id;
+    int card_no;
 };
 
 struct vt_switcher {
@@ -43,12 +45,22 @@ void vt_switcher_destroy(struct vt_switcher *s);
 void vt_switcher_poll(struct vt_switcher *s, int timeout_ms);
 void vt_switcher_interrupt_poll(struct vt_switcher *s);
 
-void vt_switcher_acquire(struct vt_switcher *s, void (*handler)(void*), void *user_data);
-void vt_switcher_release(struct vt_switcher *s, void (*handler)(void*), void *user_data);
+void vt_switcher_acquire(struct vt_switcher *s, void (*handler)(void*),
+                         void *user_data);
+void vt_switcher_release(struct vt_switcher *s, void (*handler)(void*),
+                         void *user_data);
 
-struct kms *kms_create(struct mp_log *log);
-bool kms_setup(struct kms *kms, const char *device_path, int conn_id, int mode_id);
+struct kms *kms_create(struct mp_log *log, const char *connector_spec,
+                       int mode_id);
 void kms_destroy(struct kms *kms);
 double kms_get_display_fps(const struct kms *kms);
+
+void kms_show_available_connectors(struct mp_log *log, int card_no);
+void kms_show_available_modes(struct mp_log *log,
+                              const drmModeConnector *connector);
+void kms_show_available_cards_and_connectors(struct mp_log *log);
+
+int drm_validate_connector_opt(struct mp_log *log, const struct m_option *opt,
+                               struct bstr name, struct bstr param);
 
 #endif

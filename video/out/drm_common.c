@@ -16,9 +16,11 @@
  */
 
 #include <errno.h>
+#include <string.h>
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/poll.h>
+#include <sys/stat.h>
 #include <sys/vt.h>
 #include <unistd.h>
 
@@ -35,71 +37,114 @@
 #define HANDLER_RELEASE 1
 #define RELEASE_SIGNAL SIGUSR1
 #define ACQUIRE_SIGNAL SIGUSR2
+#define MAX_CONNECTOR_NAME_LEN 20
 
 static int vt_switcher_pipe[2];
 
+static const char *connector_names[] = {
+    "Unknown",   // DRM_MODE_CONNECTOR_Unknown
+    "VGA",       // DRM_MODE_CONNECTOR_VGA
+    "DVI-I",     // DRM_MODE_CONNECTOR_DVII
+    "DVI-D",     // DRM_MODE_CONNECTOR_DVID
+    "DVI-A",     // DRM_MODE_CONNECTOR_DVIA
+    "Composite", // DRM_MODE_CONNECTOR_Composite
+    "SVIDEO",    // DRM_MODE_CONNECTOR_SVIDEO
+    "LVDS",      // DRM_MODE_CONNECTOR_LVDS
+    "Component", // DRM_MODE_CONNECTOR_Component
+    "DIN",       // DRM_MODE_CONNECTOR_9PinDIN
+    "DP",        // DRM_MODE_CONNECTOR_DisplayPort
+    "HDMI-A",    // DRM_MODE_CONNECTOR_HDMIA
+    "HDMI-B",    // DRM_MODE_CONNECTOR_HDMIB
+    "TV",        // DRM_MODE_CONNECTOR_TV
+    "eDP",       // DRM_MODE_CONNECTOR_eDP
+    "Virtual",   // DRM_MODE_CONNECTOR_VIRTUAL
+    "DSI",       // DRM_MODE_CONNECTOR_DSI
+    "DPI",       // DRM_MODE_CONNECTOR_DPI
+};
+
 // KMS ------------------------------------------------------------------------
 
-static bool is_connector_valid(struct kms *kms, int connector_id,
-                               drmModeConnector *connector, bool silent)
+static void get_connector_name(
+    drmModeConnector *connector, char ret[MAX_CONNECTOR_NAME_LEN])
 {
-    if (!connector) {
-        if (!silent) {
-            MP_ERR(kms, "Cannot get connector %d: %s\n", connector_id,
-                   mp_strerror(errno));
-        }
-        return false;
-    }
-
-    if (connector->connection != DRM_MODE_CONNECTED) {
-        if (!silent) {
-            MP_ERR(kms, "Connector %d is disconnected\n", connector_id);
-        }
-        return false;
-    }
-
-    if (connector->count_modes == 0) {
-        if (!silent) {
-            MP_ERR(kms, "Connector %d has no valid modes\n", connector_id);
-        }
-        return false;
-    }
-
-    return true;
+    snprintf(ret, MAX_CONNECTOR_NAME_LEN, "%s-%d",
+             connector_names[connector->connector_type],
+             connector->connector_type_id);
 }
 
-static bool setup_connector(
-    struct kms *kms, const drmModeRes *res, int connector_id)
+// Gets the first connector whose name matches the input parameter.
+// The returned connector may be disconnected.
+// Result must be freed with drmModeFreeConnector.
+static drmModeConnector *get_connector_by_name(const struct kms *kms,
+                                               const drmModeRes *res,
+                                               const char *connector_name)
 {
-    drmModeConnector *connector = NULL;
-    if (connector_id == -1) {
-        // get the first connected connector
-        for (int i = 0; i < res->count_connectors; i++) {
-            connector = drmModeGetConnector(kms->fd, res->connectors[i]);
-            if (is_connector_valid(kms, i, connector, true)) {
-                connector_id = i;
-                break;
-            }
-            if (connector) {
-                drmModeFreeConnector(connector);
-                connector = NULL;
-            }
+    for (int i = 0; i < res->count_connectors; i++) {
+        drmModeConnector *connector
+            = drmModeGetConnector(kms->fd, res->connectors[i]);
+        if (!connector)
+            continue;
+        char other_connector_name[MAX_CONNECTOR_NAME_LEN];
+        get_connector_name(connector, other_connector_name);
+        if (!strcmp(connector_name, other_connector_name))
+            return connector;
+        drmModeFreeConnector(connector);
+    }
+    return NULL;
+}
+
+// Gets the first connected connector.
+// Result must be freed with drmModeFreeConnector.
+static drmModeConnector *get_first_connected_connector(const struct kms *kms,
+                                                       const drmModeRes *res)
+{
+    for (int i = 0; i < res->count_connectors; i++) {
+        drmModeConnector *connector
+            = drmModeGetConnector(kms->fd, res->connectors[i]);
+        if (!connector)
+            continue;
+        if (connector->connection == DRM_MODE_CONNECTED
+        && connector->count_modes > 0) {
+            return connector;
         }
-        if (connector_id == -1) {
+        drmModeFreeConnector(connector);
+    }
+    return NULL;
+}
+
+static bool setup_connector(struct kms *kms, const drmModeRes *res,
+                            const char *connector_name)
+{
+    drmModeConnector *connector;
+
+    if (connector_name
+    && strcmp(connector_name, "")
+    && strcmp(connector_name, "auto")) {
+        connector = get_connector_by_name(kms, res, connector_name);
+        if (!connector) {
+            MP_ERR(kms, "No connector with name %s found\n", connector_name);
+            kms_show_available_connectors(kms->log, kms->card_no);
+            return false;
+        }
+    } else {
+        connector = get_first_connected_connector(kms, res);
+        if (!connector) {
             MP_ERR(kms, "No connected connectors found\n");
             return false;
         }
     }
 
-    if (connector_id < 0 || connector_id >= res->count_connectors) {
-        MP_ERR(kms, "Bad connector ID. Max valid connector ID = %u\n",
-               res->count_connectors);
+    if (connector->connection != DRM_MODE_CONNECTED) {
+        drmModeFreeConnector(connector);
+        MP_ERR(kms, "Chosen connector is disconnected\n");
         return false;
     }
 
-    connector = drmModeGetConnector(kms->fd, res->connectors[connector_id]);
-    if (!is_connector_valid(kms, connector_id, connector, false))
+    if (connector->count_modes == 0) {
+        drmModeFreeConnector(connector);
+        MP_ERR(kms, "Chosen connector has no valid modes\n");
         return false;
+    }
 
     kms->connector = connector;
     return true;
@@ -130,8 +175,7 @@ static bool setup_crtc(struct kms *kms, const drmModeRes *res)
         drmModeFreeEncoder(encoder);
     }
 
-    MP_ERR(kms,
-           "Connector %u has no suitable CRTC\n",
+    MP_ERR(kms, "Connector %u has no suitable CRTC\n",
            kms->connector->connector_id);
     return false;
 }
@@ -139,20 +183,10 @@ static bool setup_crtc(struct kms *kms, const drmModeRes *res)
 static bool setup_mode(struct kms *kms, int mode_id)
 {
     if (mode_id < 0 || mode_id >= kms->connector->count_modes) {
-        MP_ERR(
-            kms,
-            "Bad mode ID (max = %d).\n",
-            kms->connector->count_modes - 1);
+        MP_ERR(kms, "Bad mode ID (max = %d).\n",
+               kms->connector->count_modes - 1);
 
-        MP_INFO(kms, "Available modes:\n");
-        for (unsigned int i = 0; i < kms->connector->count_modes; i++) {
-            MP_INFO(kms,
-                    "Mode %d: %s (%dx%d)\n",
-                    i,
-                    kms->connector->modes[i].name,
-                    kms->connector->modes[i].hdisplay,
-                    kms->connector->modes[i].vdisplay);
-        }
+        kms_show_available_modes(kms->log, kms->connector);
         return false;
     }
 
@@ -160,36 +194,66 @@ static bool setup_mode(struct kms *kms, int mode_id)
     return true;
 }
 
-
-struct kms *kms_create(struct mp_log *log)
+static int open_card(int card_no)
 {
-    struct kms *ret = talloc(NULL, struct kms);
-    *ret = (struct kms) {
-        .log = mp_log_new(ret, log, "kms"),
-        .fd = -1,
+    char card_path[128];
+    snprintf(card_path, sizeof(card_path), DRM_DEV_NAME, DRM_DIR_NAME, card_no);
+    return open(card_path, O_RDWR | O_CLOEXEC);
+}
+
+static void parse_connector_spec(struct mp_log *log,
+                                 const char *connector_spec,
+                                 int *card_no, char **connector_name)
+{
+    if (!connector_spec) {
+        *card_no = 0;
+        *connector_name = NULL;
+        return;
+    }
+    char *dot_ptr = strchr(connector_spec, '.');
+    if (dot_ptr) {
+        *card_no = atoi(connector_spec);
+        *connector_name = talloc_strdup(log, dot_ptr + 1);
+    } else {
+        *card_no = 0;
+        *connector_name = talloc_strdup(log, connector_spec);
+    }
+}
+
+
+struct kms *kms_create(struct mp_log *log, const char *connector_spec,
+                       int mode_id)
+{
+    int card_no = -1;
+    char *connector_name = NULL;
+    parse_connector_spec(log, connector_spec, &card_no, &connector_name);
+
+    struct kms *kms = talloc(NULL, struct kms);
+    *kms = (struct kms) {
+        .log = mp_log_new(kms, log, "kms"),
+        .fd = open_card(card_no),
         .connector = NULL,
         .encoder = NULL,
         .mode = { 0 },
         .crtc_id = -1,
+        .card_no = card_no,
     };
-    return ret;
-}
 
-bool kms_setup(struct kms *kms, const char *device_path, int connector_id, int mode_id)
-{
-    kms->fd = open(device_path, O_RDWR | O_CLOEXEC);
+    drmModeRes *res = NULL;
+
     if (kms->fd < 0) {
-        MP_ERR(kms, "Cannot open \"%s\": %s.\n", device_path, mp_strerror(errno));
-        return false;
+        mp_err(log, "Cannot open card \"%d\": %s.\n",
+               card_no, mp_strerror(errno));
+        goto err;
     }
 
-    drmModeRes *res = drmModeGetResources(kms->fd);
+    res = drmModeGetResources(kms->fd);
     if (!res) {
-        MP_ERR(kms, "Cannot retrieve DRM resources: %s\n", mp_strerror(errno));
-        return false;
+        mp_err(log, "Cannot retrieve DRM resources: %s\n", mp_strerror(errno));
+        goto err;
     }
 
-    if (!setup_connector(kms, res, connector_id))
+    if (!setup_connector(kms, res, connector_name))
         goto err;
     if (!setup_crtc(kms, res))
         goto err;
@@ -197,11 +261,15 @@ bool kms_setup(struct kms *kms, const char *device_path, int connector_id, int m
         goto err;
 
     drmModeFreeResources(res);
-    return true;
+    return kms;
 
 err:
-    drmModeFreeResources(res);
-    return false;
+    if (res)
+        drmModeFreeResources(res);
+    if (connector_name)
+        talloc_free(connector_name);
+    kms_destroy(kms);
+    return NULL;
 }
 
 void kms_destroy(struct kms *kms)
@@ -220,9 +288,79 @@ void kms_destroy(struct kms *kms)
     talloc_free(kms);
 }
 
+void kms_show_available_modes(
+    struct mp_log *log, const drmModeConnector *connector)
+{
+    mp_info(log, "Available modes:\n");
+    for (unsigned int i = 0; i < connector->count_modes; i++) {
+        mp_info(log, "Mode %d: %s (%dx%d)\n", i,
+                connector->modes[i].name,
+                connector->modes[i].hdisplay,
+                connector->modes[i].vdisplay);
+    }
+}
+
+void kms_show_available_connectors(struct mp_log *log, int card_no)
+{
+    mp_info(log, "Available connectors for card %d:\n", card_no);
+
+    int fd = open_card(card_no);
+    if (fd < 0) {
+        mp_err(log, "Failed to open card %d\n", card_no);
+        return;
+    }
+
+    drmModeRes *res = drmModeGetResources(fd);
+    if (!res) {
+        mp_err(log, "Cannot retrieve DRM resources: %s\n", mp_strerror(errno));
+        goto err;
+    }
+
+    for (int i = 0; i < res->count_connectors; i++) {
+        drmModeConnector *connector
+            = drmModeGetConnector(fd, res->connectors[i]);
+        if (!connector)
+            continue;
+        char other_connector_name[MAX_CONNECTOR_NAME_LEN];
+        get_connector_name(connector, other_connector_name);
+        mp_info(log, "%s (%s)\n", other_connector_name,
+                connector->connection == DRM_MODE_CONNECTED
+                    ? "connected"
+                    : "disconnected");
+        drmModeFreeConnector(connector);
+    }
+
+err:
+    if (fd >= 0)
+        close(fd);
+    if (res)
+        drmModeFreeResources(res);
+}
+
+void kms_show_available_cards_and_connectors(struct mp_log *log)
+{
+    for (int card_no = 0; card_no < DRM_MAX_MINOR; card_no++) {
+        int fd = open_card(card_no);
+        if (fd < 0)
+            break;
+        close(fd);
+        kms_show_available_connectors(log, card_no);
+    }
+}
+
 double kms_get_display_fps(const struct kms *kms)
 {
     return kms->mode.clock * 1000.0 / kms->mode.htotal / kms->mode.vtotal;
+}
+
+int drm_validate_connector_opt(struct mp_log *log, const struct m_option *opt,
+                               struct bstr name, struct bstr param)
+{
+    if (bstr_equals0(param, "help")) {
+        kms_show_available_cards_and_connectors(log);
+        return M_OPT_EXIT;
+    }
+    return 1;
 }
 
 
