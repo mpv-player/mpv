@@ -136,7 +136,9 @@ static void update_overlay(struct gl_hwdec *hw, bool check_window_only)
 
     int defs[4] = {0, 0, 0, 0};
     int *z =
-        gl->MPGetNativeDisplay ? gl->MPGetNativeDisplay("MPV_RPI_WINDOW") : defs;
+        gl->MPGetNativeDisplay ? gl->MPGetNativeDisplay("MPV_RPI_WINDOW") : NULL;
+    if (!z)
+        z = defs;
 
     // As documented in the libmpv openglcb headers.
     int display = z[0];
