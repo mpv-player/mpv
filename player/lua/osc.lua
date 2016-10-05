@@ -31,6 +31,7 @@ local user_opts = {
                                 -- functions that depend on it)
     layout = "box",
     seekbarstyle = "slider",    -- slider (diamond marker) or bar (fill)
+    tooltipborder = 1,          -- border of tooltip in bottom/topbar
     timetotal = false,          -- display total time instead of remaining time?
     timems = false,             -- display timecodes with milliseconds?
     visibility = "auto",        -- only used at init to set visibility_mode(...)
@@ -63,6 +64,7 @@ local osc_styles = {
     elementDown = "{\\1c&H999999}",
     timecodes = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs20}",
     vidtitle = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs12}",
+    timePos = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&HFFFFFF\\3c&H000000\\1a&H00\\3a&H88\\fs20}",
     box = "{\\rDefault\\blur0\\bord1\\1c&H000000\\3c&HFFFFFF}",
 }
 
@@ -585,32 +587,34 @@ function render_elements(master_ass)
 
                     local an = slider_lo.tooltip_an
 
+                    local ty
+
+                    if (an == 2) then
+                        ty = element.hitbox.y1 - slider_lo.border
+                    else
+                        ty = element.hitbox.y1 + elem_geo.h/2
+                    end
+
+                    local tx = get_virt_mouse_pos()
                     if (slider_lo.adjust_tooltip) then
-                        if (sliderpos < (s_min + 5)) then
-                            if an == 2 then
-                                an = 1
-                            else
-                                an = 7
+                        if (an == 2) then
+                            if (sliderpos < (s_min + 3)) then
+                                an = an - 1
+                            elseif (sliderpos > (s_max - 3)) then
+                                an = an + 1
                             end
-                        elseif (sliderpos > (s_max - 5)) then
-                            if an == 2 then
-                                an = 3
-                            else
-                                an = 9
-                            end
+                        elseif (sliderpos > (s_max-s_min)/2) then
+                            an = an + 1
+                            tx = tx - 5
+                        else
+                            an = an - 1
+                            tx = tx + 10
                         end
                     end
 
-
-                    local ty
-                    if (slider_lo.tooltip_an == 2) then
-                        ty = element.hitbox.y1 - slider_lo.border
-                    else
-                        ty = element.hitbox.y2 + slider_lo.border
-                    end
-
+                    -- tooltip label
                     elem_ass:new_event()
-                    elem_ass:pos(get_virt_mouse_pos(), ty)
+                    elem_ass:pos(tx, ty)
                     elem_ass:an(an)
                     elem_ass:append(slider_lo.tooltip_style)
                     elem_ass:append(tooltiplabel)
@@ -1164,9 +1168,9 @@ layouts["bottombar"] = function()
     lo = add_layout("seekbar")
     lo.geometry = geo
     lo.style = osc_styles.timecodes
-    lo.layer = 16
     lo.slider.border = 0
-    lo.slider.tooltip_style = osc_styles.vidtitle
+    lo.slider.tooltip_style = osc_styles.timePos
+    lo.slider.tooltip_an = 5
     lo.slider.stype = user_opts["seekbarstyle"]
 end
 
@@ -1273,11 +1277,10 @@ layouts["topbar"] = function()
     lo = add_layout("seekbar")
     lo.geometry = geo
     lo.style = osc_styles.timecodes
-    lo.layer = 16
     lo.slider.border = 0
-    lo.slider.tooltip_style = osc_styles.vidtitle
+    lo.slider.tooltip_style = osc_styles.timePos
     lo.slider.stype = user_opts["seekbarstyle"]
-    lo.slider.tooltip_an = 8
+    lo.slider.tooltip_an = 5
 
 
     -- Playlist prev/next
