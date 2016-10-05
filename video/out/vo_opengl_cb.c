@@ -296,7 +296,8 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     int64_t wait_present_count = ctx->present_count;
     if (frame) {
         ctx->next_frame = NULL;
-        wait_present_count += 1;
+        if (frame->redraw || !frame->current)
+            wait_present_count += 1;
         pthread_cond_signal(&ctx->wakeup);
         talloc_free(ctx->cur_frame);
         ctx->cur_frame = vo_frame_ref(frame);

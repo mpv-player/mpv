@@ -196,8 +196,10 @@ struct vo_frame {
     // Set if the current frame is repeated from the previous. It's guaranteed
     // that the current is the same as the previous one, even if the image
     // pointer is different.
-    // The repeat flag is additionally set if the OSD does not need to be
-    // redrawn.
+    // The repeat flag is set if exactly the same frame should be rendered
+    // again (and the OSD does not need to be redrawn).
+    // A repeat frame can be redrawn, in which case repeat==redraw==true, and
+    // OSD should be updated.
     bool redraw, repeat;
     // The frame is not in movement - e.g. redrawing while paused.
     bool still;
