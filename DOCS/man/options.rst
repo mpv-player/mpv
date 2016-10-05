@@ -4591,6 +4591,11 @@ The following video options are currently all specific to ``--vo=opengl`` and
     we may have to deal with additional padding, which can be tested with these
     options). Could be removed any time.
 
+``--opengl-early-flush=<yes|no>``
+    Call ``glFlush()`` after rendering a frame and before attempting to display
+    it (default: no). Can fix stuttering in some causes, in other cases probably
+    causes it. For testing - could be removed any time.
+
 Miscellaneous
 -------------
 
