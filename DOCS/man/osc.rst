@@ -235,6 +235,10 @@ Configurable Options
     | Default: slider
     | Sets the style of the seekbar, slider (diamond marker) or bar (fill)
 
+``tooltipborder``
+    | Default: 1
+    | Size of the tooltip outline when using bottombar or topbar layouts
+
 ``timetotal``
     | Default: no
     | Show total time instead of time remaining
