@@ -1158,7 +1158,8 @@ layouts["bottombar"] = function()
     lo.geometry = geo
     lo.layer = 15
     lo.style = osc_styles.timecodes
-    lo.alpha[1] = math.min(255, user_opts.boxalpha + 140)
+    lo.alpha[1] =
+        math.min(255, user_opts.boxalpha + (255 - user_opts.boxalpha)*0.8)
 
     lo = add_layout("seekbar")
     lo.geometry = geo
@@ -1266,7 +1267,8 @@ layouts["topbar"] = function()
     lo.geometry = geo
     lo.layer = 15
     lo.style = osc_styles.timecodes
-    lo.alpha[1] = math.min(255, user_opts.boxalpha + 140)
+    lo.alpha[1] =
+        math.min(255, user_opts.boxalpha + (255 - user_opts.boxalpha)*0.8)
 
     lo = add_layout("seekbar")
     lo.geometry = geo
