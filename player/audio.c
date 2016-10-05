@@ -861,33 +861,47 @@ static int filter_audio(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
     return res;
 }
 
+void reload_audio_output(struct MPContext *mpctx)
+{
+    if (!mpctx->ao)
+        return;
+
+    ao_reset(mpctx->ao);
+    uninit_audio_out(mpctx);
+    reinit_audio_filters(mpctx); // mostly to issue refresh seek
+
+    // Whether we can use spdif might have changed. If we failed to use spdif
+    // in the previous initialization, try it with spdif again (we'll fallback
+    // to PCM again if necessary).
+    struct ao_chain *ao_c = mpctx->ao_chain;
+    if (ao_c) {
+        struct dec_audio *d_audio = ao_c->audio_src;
+        if (d_audio && ao_c->spdif_failed) {
+            ao_c->spdif_passthrough = true;
+            ao_c->spdif_failed = false;
+            d_audio->try_spdif = true;
+            ao_c->af->initialized = 0;
+            if (!audio_init_best_codec(d_audio)) {
+                MP_ERR(mpctx, "Error reinitializing audio.\n");
+                error_on_track(mpctx, ao_c->track);
+            }
+        }
+    }
+
+    mp_wakeup_core(mpctx);
+}
+
 void fill_audio_out_buffers(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    struct ao_chain *ao_c = mpctx->ao_chain;
     bool was_eof = mpctx->audio_status == STATUS_EOF;
 
     dump_audio_stats(mpctx);
 
-    if (mpctx->ao && ao_query_and_reset_events(mpctx->ao, AO_EVENT_RELOAD)) {
-        ao_reset(mpctx->ao);
-        uninit_audio_out(mpctx);
-        if (ao_c) {
-            struct dec_audio *d_audio = ao_c->audio_src;
-            if (d_audio && ao_c->spdif_failed) {
-                ao_c->spdif_failed = false;
-                d_audio->try_spdif = true;
-                if (!audio_init_best_codec(d_audio)) {
-                    MP_ERR(mpctx, "Error reinitializing audio.\n");
-                    error_on_track(mpctx, ao_c->track);
-                    return;
-                }
-            }
-            reinit_audio_filters_and_output(mpctx);
-            ao_c = mpctx->ao_chain;
-        }
-    }
+    if (mpctx->ao && ao_query_and_reset_events(mpctx->ao, AO_EVENT_RELOAD))
+        reload_audio_output(mpctx);
 
+    struct ao_chain *ao_c = mpctx->ao_chain;
     if (!ao_c)
         return;
 

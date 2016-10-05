@@ -1881,13 +1881,6 @@ static int get_device_entry(int item, int action, void *arg, void *ctx)
     return m_property_read_sub(props, action, arg);
 }
 
-static void reload_audio_output(struct MPContext *mpctx)
-{
-    if (!mpctx->ao)
-        return;
-    ao_request_reload(mpctx->ao);
-}
-
 static void create_hotplug(struct MPContext *mpctx)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
@@ -5735,14 +5728,8 @@ void mp_option_change_callback(void *ctx, struct m_config_option *co, int flags)
         }
     }
 
-    if ((flags & UPDATE_AUDIO) && mpctx->ao_chain) {
-        // Force full mid-stream reinit.
-        if (mpctx->ao)
-            ao_reset(mpctx->ao);
-        uninit_audio_out(mpctx);
-        reinit_audio_filters(mpctx); // mostly to issue refresh seek
-        mp_wakeup_core(mpctx);
-    }
+    if (flags & UPDATE_AUDIO)
+        reload_audio_output(mpctx);
 
     if (flags & UPDATE_PRIORITY)
         update_priority(mpctx);

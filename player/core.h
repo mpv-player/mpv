@@ -445,6 +445,7 @@ int init_audio_decoder(struct MPContext *mpctx, struct track *track);
 void reinit_audio_chain_src(struct MPContext *mpctx, struct lavfi_pad *src);
 void audio_update_volume(struct MPContext *mpctx);
 void audio_update_balance(struct MPContext *mpctx);
+void reload_audio_output(struct MPContext *mpctx);
 
 // configfiles.c
 void mp_parse_cfgfiles(struct MPContext *mpctx);
