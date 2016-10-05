@@ -60,28 +60,28 @@ local function edl_escape(url)
 end
 
 local function time_to_secs(time_string)
-    if not time_string then
-        return nil
+    local ret
+
+    local a, b, c = time_string:match("(%d+):(%d%d?):(%d%d)")
+    if a ~= nil then
+        ret = (a*3600 + b*60 + c)
+    else
+        a, b = time_string:match("(%d%d?):(%d%d)")
+        if a ~= nil then
+            ret = (a*60 + b)
+        end
     end
 
-    local secs = 0
-    string.gsub(time_string, "[%d.]+", function (number)
-        secs = secs * 60 + tonumber(number)
-    end)
-
-    return secs
+    return ret
 end
 
 local function extract_chapters(data, video_length)
     local ret = {}
 
     for line in data:gmatch("[^\r\n]+") do
-        local time_string = line:match("%d?%d:%d%d:?%d?%d?")
-        if time_string then
-            time = time_to_secs(time_string)
-            if time < video_length then
-                table.insert(ret, {time = time, title = line})
-            end
+        local time = time_to_secs(line)
+        if time and (time < video_length) then
+            table.insert(ret, {time = time, title = line})
         end
     end
 
