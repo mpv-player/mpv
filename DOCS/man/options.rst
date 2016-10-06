@@ -4593,7 +4593,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
 
 ``--opengl-early-flush=<yes|no>``
     Call ``glFlush()`` after rendering a frame and before attempting to display
-    it (default: no). Can fix stuttering in some causes, in other cases probably
+    it (default: no). Can fix stuttering in some cases, in other cases probably
     causes it. For testing - could be removed any time.
 
 Miscellaneous

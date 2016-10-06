@@ -718,8 +718,6 @@ void vo_cocoa_swap_buffers(struct vo *vo)
     if (skip)
         return;
 
-    CGLFlushDrawable(s->cgl_ctx);
-
     pthread_mutex_lock(&s->lock);
     s->frame_w = vo->dwidth;
     s->frame_h = vo->dheight;

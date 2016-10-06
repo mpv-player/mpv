@@ -153,6 +153,7 @@ static int cocoa_control(struct MPGLContext *ctx, int *events, int request,
 static void cocoa_swap_buffers(struct MPGLContext *ctx)
 {
     vo_cocoa_swap_buffers(ctx->vo);
+    ctx->gl->Flush();
 }
 
 const struct mpgl_driver mpgl_driver_cocoa = {
