@@ -20,22 +20,23 @@ The Interface
 
 ::
 
-    +------------------+-----------+--------------------+
-    | playlist prev    |   title   |      playlist next |
-    +-------+------+---+--+------+-+----+------+--------+
-    | audio | skip | seek |      | seek | skip |  full  |
-    +-------+ back | back | play | frwd | frwd | screen |
-    | sub   |      |      |      |      |      |        |
-    +-------+------+------+------+------+------+--------+
-    |                     seekbar                       |
-    +----------------+--------------+-------------------+
-    | time passed    | cache status |    time remaining |
-    +----------------+--------------+-------------------+
+    +---------+----------+----------------------------+-------------+
+    | pl prev | pl next  |  title                     |       cache |
+    +------+--+---+------+---------+-----------+------+-------+-----+
+    | play | skip | skip | time    |  seekbar  | time | audio | sub |
+    |      | back | frwd | elapsed |           | left |       |     |
+    +------+------+------+---------+-----------+------+-------+-----+
 
 
-playlist prev
+pl prev
     =============   ================================================
     left-click      play previous file in playlist
+    shift+L-click   show playlist
+    =============   ================================================
+
+pl next
+    =============   ================================================
+    left-click      play next file in playlist
     shift+L-click   show playlist
     =============   ================================================
 
@@ -47,19 +48,12 @@ title
     right-click     show filename
     =============   ================================================
 
-playlist next
-    =============   ================================================
-    left-click      play next file in playlist
-    shift+L-click   show playlist
-    =============   ================================================
+cache
+    | Shows current cache fill status
 
-audio and sub
-    | Displays selected track and amount of available tracks
-
+play
     =============   ================================================
-    left-click      cycle audio/sub tracks forward
-    right-click     cycle audio/sub tracks backwards
-    shift+L-click   show available audio/sub tracks
+    left-click      toggle play/pause
     =============   ================================================
 
 skip back
@@ -68,34 +62,17 @@ skip back
     shift+L-click   show chapters
     =============   ================================================
 
-seek back
-    =============   ================================================
-    left-click      skip back  5 seconds
-    right-click     skip back 30 seconds
-    shift-L-click   skip back  1 frame
-    =============   ================================================
-
-play
-    =============   ================================================
-    left-click      toggle play/pause
-    =============   ================================================
-
-seek frwd
-    =============   ================================================
-    left-click      skip forward 10 seconds
-    right-click     skip forward 60 seconds
-    shift-L-click   skip forward  1 frame
-    =============   ================================================
-
 skip frwd
     =============   ================================================
     left-click      go to next chapter
     shift+L-click   show chapters
     =============   ================================================
 
-fullscreen
+time elapsed
+    | Shows current playback position timestamp
+
     =============   ================================================
-    left-click      toggle fullscreen
+    left-click      toggle displaying timecodes with milliseconds
     =============   ================================================
 
 seekbar
@@ -105,21 +82,20 @@ seekbar
     left-click      seek to position
     =============   ================================================
 
-time passed
-    | Shows current playback position timestamp
-
-    =============   ================================================
-    left-click      toggle displaying timecodes with milliseconds
-    =============   ================================================
-
-cache status
-    | Shows current cache fill status (only visible when below 45%)
-
-time remaining
+time left
     | Shows remaining playback time timestamp
 
     =============   ================================================
     left-click      toggle between total and remaining time
+    =============   ================================================
+
+audio and sub
+    | Displays selected track and amount of available tracks
+
+    =============   ================================================
+    left-click      cycle audio/sub tracks forward
+    right-click     cycle audio/sub tracks backwards
+    shift+L-click   show available audio/sub tracks
     =============   ================================================
 
 Key Bindings
@@ -176,11 +152,11 @@ Configurable Options
     | Enable the OSC when fullscreen
 
 ``scalewindowed``
-    | Default: 1.0
+    | Default: 1.5
     | Scale factor of the OSC when windowed
 
 ``scalefullscreen``
-    | Default: 1.0
+    | Default: 1.5
     | Scale factor of the OSC when fullscreen
 
 ``scaleforcedwindow``
@@ -214,7 +190,7 @@ Configurable Options
     | Duration of fade out in ms, 0 = no fade
 
 ``deadzonesize``
-    | Default: 0
+    | Default: 1
     | Size of the deadzone. The deadzone is an area that makes the mouse act
       like leaving the window. Movement there won't make the OSC show up and
       it will hide immediately if the mouse enters it. The deadzone starts
@@ -222,17 +198,17 @@ Configurable Options
       of the window it will span. Values between 0 and 1.
 
 ``minmousemove``
-    | Default: 3
+    | Default: 0
     | Minimum amount of pixels the mouse has to move between ticks to make
       the OSC show up
 
 ``layout``
-    | Default: box
+    | Default: bottombar
     | The layout for the OSC. Currently available are: box, slimbox,
       bottombar and topbar.
 
 ``seekbarstyle``
-    | Default: slider
+    | Default: bar
     | Sets the style of the seekbar, slider (diamond marker) or bar (fill)
 
 ``tooltipborder``

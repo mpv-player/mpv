@@ -11,8 +11,8 @@ local opt = require 'mp.options'
 local user_opts = {
     showwindowed = true,        -- show OSC when windowed?
     showfullscreen = true,      -- show OSC when fullscreen?
-    scalewindowed = 1,          -- scaling of the controller when windowed
-    scalefullscreen = 1,        -- scaling of the controller when fullscreen
+    scalewindowed = 1.5,        -- scaling of the controller when windowed
+    scalefullscreen = 1.5,      -- scaling of the controller when fullscreen
     scaleforcedwindow = 2,      -- scaling when rendered on a forced window
     vidscale = true,            -- scale the controller with the video?
     valign = 0.8,               -- vertical alignment, -1 (top) to 1 (bottom)
@@ -23,14 +23,14 @@ local user_opts = {
                                 -- mouse movement. enforced non-negative for the
                                 -- user, but internally negative is "always-on".
     fadeduration = 200,         -- duration of fade out in ms, 0 = no fade
-    deadzonesize = 0,           -- size of deadzone
-    minmousemove = 3,           -- minimum amount of pixels the mouse has to
+    deadzonesize = 1,           -- size of deadzone
+    minmousemove = 0,           -- minimum amount of pixels the mouse has to
                                 -- move between ticks to make the OSC show up
     iamaprogrammer = false,     -- use native mpv values and disable OSC
                                 -- internal track list management (and some
                                 -- functions that depend on it)
-    layout = "box",
-    seekbarstyle = "slider",    -- slider (diamond marker) or bar (fill)
+    layout = "bottombar",
+    seekbarstyle = "bar",    -- slider (diamond marker) or bar (fill)
     tooltipborder = 1,          -- border of tooltip in bottom/topbar
     timetotal = false,          -- display total time instead of remaining time?
     timems = false,             -- display timecodes with milliseconds?
