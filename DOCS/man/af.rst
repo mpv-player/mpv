@@ -401,10 +401,6 @@ Available filters are:
         ``mpv --af=scaletempo=stride=30:overlap=.50:search=10 media.ogg``
             Would tweak the quality and performance parameters.
 
-        ``mpv --af=format=float,scaletempo media.ogg``
-            Would make scaletempo use float code. Maybe faster on some
-            platforms.
-
         ``mpv --af=scaletempo=scale=1.2:speed=pitch audio.ogg``
             Would play media at 1.2x normal speed, with audio at normal pitch.
             Changing playback speed would change pitch, leaving audio tempo at
