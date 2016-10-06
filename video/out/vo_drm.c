@@ -392,10 +392,10 @@ static void uninit(struct vo *vo)
     struct priv *p = vo->priv;
 
     crtc_release(vo);
-    for (unsigned int i = 0; i < BUF_COUNT; i++)
-        fb_destroy(p->kms->fd, &p->bufs[i]);
 
     if (p->kms) {
+        for (unsigned int i = 0; i < BUF_COUNT; i++)
+            fb_destroy(p->kms->fd, &p->bufs[i]);
         kms_destroy(p->kms);
         p->kms = NULL;
     }
