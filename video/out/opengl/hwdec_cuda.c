@@ -28,13 +28,13 @@
  */
 
 #include <libavutil/hwcontext.h>
-#include <libavutil/hwcontext_cuda.h>
 
+#include "cuda_dynamic.h"
 #include "video/mp_image_pool.h"
 #include "hwdec.h"
 #include "video.h"
 
-#include <cudaGL.h>
+#include <libavutil/hwcontext_cuda.h>
 
 struct priv {
     struct mp_hwdec_ctx hwctx;
@@ -151,6 +151,11 @@ static int cuda_create(struct gl_hwdec *hw)
 
     struct priv *p = talloc_zero(hw, struct priv);
     hw->priv = p;
+
+    bool loaded = cuda_load();
+    if (!loaded) {
+        MP_ERR(hw, "Failed to load CUDA symbols\n");
+    }
 
     ret = CHECK_CU(cuInit(0));
     if (ret < 0)
@@ -276,6 +281,8 @@ static void destroy(struct gl_hwdec *hw)
             CHECK_CU(cuGraphicsUnregisterResource(p->cu_res[n]));
     }
     CHECK_CU(cuCtxPopCurrent(&dummy));
+
+    CHECK_CU(cuCtxDestroy(p->cuda_ctx));
 
     gl->DeleteTextures(2, p->gl_textures);
 
