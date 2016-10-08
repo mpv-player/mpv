@@ -31,12 +31,14 @@ The Interface
 pl prev
     =============   ================================================
     left-click      play previous file in playlist
+    right-click     show playlist
     shift+L-click   show playlist
     =============   ================================================
 
 pl next
     =============   ================================================
     left-click      play next file in playlist
+    right-click     show playlist
     shift+L-click   show playlist
     =============   ================================================
 
@@ -59,12 +61,14 @@ play
 skip back
     =============   ================================================
     left-click      go to beginning of chapter / previous chapter
+    right-click     show chapters
     shift+L-click   show chapters
     =============   ================================================
 
 skip frwd
     =============   ================================================
     left-click      go to next chapter
+    right-click     show chapters
     shift+L-click   show chapters
     =============   ================================================
 
