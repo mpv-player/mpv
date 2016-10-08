@@ -1398,6 +1398,8 @@ function osc_init()
         function () mp.commandv("playlist-prev", "weak") end
     ne.eventresponder["shift+mouse_btn0_up"] =
         function () show_message(mp.get_property_osd("playlist"), 3) end
+    ne.eventresponder["mouse_btn2_up"] =
+        function () show_message(mp.get_property_osd("playlist"), 3) end
 
     --next
     ne = new_element("pl_next", "button")
@@ -1407,6 +1409,8 @@ function osc_init()
     ne.eventresponder["mouse_btn0_up"] =
         function () mp.commandv("playlist-next", "weak") end
     ne.eventresponder["shift+mouse_btn0_up"] =
+        function () show_message(mp.get_property_osd("playlist"), 3) end
+    ne.eventresponder["mouse_btn2_up"] =
         function () show_message(mp.get_property_osd("playlist"), 3) end
 
 
@@ -1458,6 +1462,8 @@ function osc_init()
         function () mp.commandv("osd-msg", "add", "chapter", -1) end
     ne.eventresponder["shift+mouse_btn0_up"] =
         function () show_message(mp.get_property_osd("chapter-list"), 3) end
+    ne.eventresponder["mouse_btn2_up"] =
+        function () show_message(mp.get_property_osd("chapter-list"), 3) end
 
     --ch_next
     ne = new_element("ch_next", "button")
@@ -1467,6 +1473,8 @@ function osc_init()
     ne.eventresponder["mouse_btn0_up"] =
         function () mp.commandv("osd-msg", "add", "chapter", 1) end
     ne.eventresponder["shift+mouse_btn0_up"] =
+        function () show_message(mp.get_property_osd("chapter-list"), 3) end
+    ne.eventresponder["mouse_btn2_up"] =
         function () show_message(mp.get_property_osd("chapter-list"), 3) end
 
     --
