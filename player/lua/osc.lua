@@ -1,6 +1,7 @@
 local assdraw = require 'mp.assdraw'
 local msg = require 'mp.msg'
 local opt = require 'mp.options'
+local utils = require 'mp.utils'
 
 --
 -- Parameters
@@ -650,6 +651,81 @@ end
 -- Message display
 --
 
+function limited_list(prop, pos)
+    local fs = tonumber(mp.get_property('options/osd-font-size'))
+    local max_items = math.ceil(720 / fs)
+
+    local proplist = mp.get_property_native(prop, {})
+    local count = #proplist
+    if (count == 0) then
+        return proplist
+    end
+    local min, max = 0, count
+    local temp = {}
+    if (count > max_items - 1) then
+        local extra = math.ceil(max_items / 2) - 1
+        min = pos - extra
+        max = pos + extra
+        if (pos < extra) then
+            max = max + math.abs(min)
+            min = 0
+        end
+    end
+
+    for i=min+1, max do
+        local item = proplist[i]
+        item.current = (i-1 == pos) and true or nil
+        table.insert(temp, item)
+    end
+    return count, temp
+end
+
+function get_playlist()
+    local pos = mp.get_property_number('playlist-pos')
+    local count, limlist = limited_list('playlist', pos)
+    if (count == 0) then
+        return "Empty playlist."
+    end
+
+    local list_current = "➜\xC2\xA0"
+    local list_normal  = "\xE2\x80\x83\xC2\xA0"
+
+    local message = string.format('Playlist: (%d/%d):\n', pos + 1, count)
+    for i, v in ipairs(limlist) do
+        local title = v.title
+        local _, filename = utils.split_path(v.filename)
+        if (title == nil) then
+            title = filename
+        end
+        message = string.format('%s %s%s\n', message,
+            (v.current and list_current or list_normal), title)
+    end
+    return message
+end
+
+function get_chapterlist()
+    local pos = mp.get_property_number('chapter')
+    local count, limlist = limited_list('chapter-list', pos)
+    if (count == 0) then
+        return "No chapters."
+    end
+
+    local list_current = "➜\xC2\xA0"
+    local list_normal  = "\xE2\x80\x83\xC2\xA0"
+
+    local message = string.format('Chapters: (%d/%d):\n', pos + 1, count)
+    for i, v in ipairs(limlist) do
+        local time = mp.format_time(v.time)
+        local title = v.title
+        if (title == nil) then
+            title = string.format('Chapter %02d', i + 1)
+        end
+        message = string.format('%s[%s]   %s%s\n', message, time,
+            (v.current and list_current or list_normal), title)
+    end
+    return message
+end
+
 function show_message(text, duration)
 
     --print("text: "..text.."   duration: " .. duration)
@@ -686,10 +762,11 @@ function show_message(text, duration)
     local fontsize = tonumber(mp.get_property("options/osd-font-size")) / scale
     local outline = tonumber(mp.get_property("options/osd-border-size")) / scale
 
+
     if lines > 12 then
-        fontsize, outline = fontsize / 2, outline / 1.5
-    elseif lines > 8 then
         fontsize, outline = fontsize / 1.5, outline / 1.25
+    elseif lines > 8 then
+        fontsize, outline = fontsize / 1.25, outline / 1.125
     end
 
     local style = "{\\bord" .. outline .. "\\fs" .. fontsize .. "}"
@@ -1407,9 +1484,9 @@ function osc_init()
     ne.eventresponder["mouse_btn0_up"] =
         function () mp.commandv("playlist-prev", "weak") end
     ne.eventresponder["shift+mouse_btn0_up"] =
-        function () show_message(mp.get_property_osd("playlist"), 3) end
+        function () show_message(get_playlist(), 3) end
     ne.eventresponder["mouse_btn2_up"] =
-        function () show_message(mp.get_property_osd("playlist"), 3) end
+        function () show_message(get_playlist(), 3) end
 
     --next
     ne = new_element("pl_next", "button")
@@ -1419,9 +1496,9 @@ function osc_init()
     ne.eventresponder["mouse_btn0_up"] =
         function () mp.commandv("playlist-next", "weak") end
     ne.eventresponder["shift+mouse_btn0_up"] =
-        function () show_message(mp.get_property_osd("playlist"), 3) end
+        function () show_message(get_playlist(), 3) end
     ne.eventresponder["mouse_btn2_up"] =
-        function () show_message(mp.get_property_osd("playlist"), 3) end
+        function () show_message(get_playlist(), 3) end
 
 
     -- big buttons
@@ -1471,9 +1548,9 @@ function osc_init()
     ne.eventresponder["mouse_btn0_up"] =
         function () mp.commandv("osd-msg", "add", "chapter", -1) end
     ne.eventresponder["shift+mouse_btn0_up"] =
-        function () show_message(mp.get_property_osd("chapter-list"), 3) end
+        function () show_message(get_chapterlist(), 3) end
     ne.eventresponder["mouse_btn2_up"] =
-        function () show_message(mp.get_property_osd("chapter-list"), 3) end
+        function () show_message(get_chapterlist(), 3) end
 
     --ch_next
     ne = new_element("ch_next", "button")
@@ -1483,9 +1560,9 @@ function osc_init()
     ne.eventresponder["mouse_btn0_up"] =
         function () mp.commandv("osd-msg", "add", "chapter", 1) end
     ne.eventresponder["shift+mouse_btn0_up"] =
-        function () show_message(mp.get_property_osd("chapter-list"), 3) end
+        function () show_message(get_chapterlist(), 3) end
     ne.eventresponder["mouse_btn2_up"] =
-        function () show_message(mp.get_property_osd("chapter-list"), 3) end
+        function () show_message(get_chapterlist(), 3) end
 
     --
     update_tracklist()
