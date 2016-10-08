@@ -346,6 +346,7 @@ def build(ctx):
         ( "video/out/opengl/context_w32.c",      "gl-win32" ),
         ( "video/out/opengl/context_x11.c",      "gl-x11" ),
         ( "video/out/opengl/context_x11egl.c",   "egl-x11" ),
+        ( "video/out/opengl/cuda_dynamic.c",     "cuda-hwaccel" ),
         ( "video/out/opengl/egl_helpers.c",      "egl-helpers" ),
         ( "video/out/opengl/formats.c",          "gl" ),
         ( "video/out/opengl/hwdec.c",            "gl" ),

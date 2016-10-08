@@ -17,22 +17,16 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// This define and typedef prevent hwcontext_cuda.h trying to include cuda.h
+#define CUDA_VERSION 7050
+typedef void * CUcontext;
+
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_cuda.h>
 
 #include "common/av_common.h"
 #include "video/fmt-conversion.h"
 #include "video/decode/lavc.h"
-
-typedef struct CUVIDContext {
-    CUcontext cuda_ctx;
-} CUVIDContext;
-
-static void cuvid_ctx_free(AVHWDeviceContext *ctx)
-{
-    AVCUDADeviceContext *hwctx = ctx->hwctx;
-    cuCtxDestroy(hwctx->cuda_ctx);
-}
 
 static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                  const char *codec)
@@ -44,12 +38,7 @@ static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
 
 static int init(struct lavc_ctx *ctx)
 {
-    struct CUVIDContext *p = talloc_ptrtype(NULL, p);
-
-    *p = (struct CUVIDContext) {
-        .cuda_ctx = hwdec_devices_get(ctx->hwdec_devs, HWDEC_CUDA)->ctx,
-    };
-    ctx->hwdec_priv = p;
+    ctx->hwdec_priv = hwdec_devices_get(ctx->hwdec_devs, HWDEC_CUDA)->ctx;
     return 0;
 }
 
@@ -59,7 +48,6 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
     AVCUDADeviceContext *device_hwctx;
     AVHWDeviceContext *device_ctx;
     AVHWFramesContext *hwframe_ctx;
-    CUVIDContext *priv = ctx->hwdec_priv;
     int ret = 0;
 
     if (avctx->hw_frames_ctx) {
@@ -74,10 +62,9 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
     }
 
     device_ctx = (AVHWDeviceContext*)hw_device_ctx->data;
-    device_ctx->free = cuvid_ctx_free;
 
     device_hwctx = device_ctx->hwctx;
-    device_hwctx->cuda_ctx = priv->cuda_ctx;
+    device_hwctx->cuda_ctx = ctx->hwdec_priv;
 
     ret = av_hwdevice_ctx_init(hw_device_ctx);
     if (ret < 0) {
@@ -104,11 +91,6 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 
 static void uninit(struct lavc_ctx *ctx)
 {
-    struct CUVIDContext *p = ctx->hwdec_priv;
-    if (!p)
-        return;
-
-    talloc_free(p);
     ctx->hwdec_priv = NULL;
 }
 

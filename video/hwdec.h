@@ -44,6 +44,7 @@ struct mp_hwdec_ctx {
     //  HWDEC_D3D11VA:          ID3D11Device*
     //  HWDEC_DXVA2:            IDirect3DDevice9*
     //  HWDEC_DXVA2_COPY:       IDirect3DDevice9*
+    //  HWDEC_CUDA:             CUcontext*
     void *ctx;
 
     // Optional.
