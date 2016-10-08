@@ -673,9 +673,18 @@ function show_message(text, duration)
     text = string.gsub(text, "%.", ".\226\128\139")
     text = string.gsub(text, "_", "_\226\128\139")
 
+    local scale = 1
+    if (mp.get_property("video") == "no") then
+        scale = user_opts.scaleforcedwindow
+    elseif state.fullscreen then
+        scale = user_opts.scalefullscreen
+    else
+        scale = user_opts.scalewindowed
+    end
+
     -- scale the fontsize for longer multi-line output
-    local fontsize = tonumber(mp.get_property("options/osd-font-size"))
-    local outline = tonumber(mp.get_property("options/osd-border-size"))
+    local fontsize = tonumber(mp.get_property("options/osd-font-size")) / scale
+    local outline = tonumber(mp.get_property("options/osd-border-size")) / scale
 
     if lines > 12 then
         fontsize, outline = fontsize / 2, outline / 1.5
