@@ -164,6 +164,12 @@ static const struct vd_lavc_hwdec mp_vd_lavc_cuda_copy = {
 };
 #endif
 
+static const struct vd_lavc_hwdec mp_vd_lavc_crystalhd = {
+    .type = HWDEC_CRYSTALHD,
+    .lavc_suffix = "_crystalhd",
+    .copying = true,
+};
+
 static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #if HAVE_RPI
     &mp_vd_lavc_rpi,
@@ -193,6 +199,7 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
     &mp_vd_lavc_cuda,
     &mp_vd_lavc_cuda_copy,
 #endif
+    &mp_vd_lavc_crystalhd,
     NULL
 };
 
