@@ -180,6 +180,10 @@ Configurable Options
     | Default: 0.0
     | Horizontal alignment, -1 (left) to 1 (right)
 
+``barmargin``
+    | Default: 0
+    | Margin from bottom (bottombar) or top (topbar), in pixels
+
 ``boxalpha``
     | Default: 80
     | Alpha of the background box, 0 (opaque) to 255 (fully transparent)
