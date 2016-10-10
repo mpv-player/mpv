@@ -17,6 +17,7 @@ local user_opts = {
     vidscale = true,            -- scale the controller with the video?
     valign = 0.8,               -- vertical alignment, -1 (top) to 1 (bottom)
     halign = 0,                 -- horizontal alignment, -1 (left) to 1 (right)
+    barmargin = 0,              -- vertical margin of top/bottombar
     boxalpha = 80,              -- alpha of the background box,
                                 -- 0 (opaque) to 255 (fully transparent)
     hidetimeout = 500,          -- duration in ms until the OSC hides if no
@@ -1042,7 +1043,7 @@ end
 layouts["bottombar"] = function()
     local osc_geo = {
         x = -2,
-        y = osc_param.playresy - 36,
+        y = osc_param.playresy - 36 - user_opts.barmargin,
         an = 7,
         w = osc_param.playresx + 4,
         h = 38,
@@ -1061,7 +1062,7 @@ layouts["bottombar"] = function()
     local sh_area_y0, sh_area_y1
     sh_area_y0 = get_align(-1 + (2*user_opts.deadzonesize),
                            osc_geo.y - (osc_geo.h / 2), 0, 0)
-    sh_area_y1 = osc_param.playresy
+    sh_area_y1 = osc_param.playresy - user_opts.barmargin
     add_area("showhide", 0, sh_area_y0, osc_param.playresx, sh_area_y1)
 
     local lo, geo
@@ -1177,7 +1178,7 @@ end
 layouts["topbar"] = function()
     local osc_geo = {
         x = -2,
-        y = 36,
+        y = 36 + user_opts.barmargin,
         an = 1,
         w = osc_param.playresx + 4,
         h = 38,
@@ -1194,7 +1195,7 @@ layouts["topbar"] = function()
                                         osc_geo.w, osc_geo.h))
 
     local sh_area_y0, sh_area_y1
-    sh_area_y0 = 0
+    sh_area_y0 = user_opts.barmargin
     sh_area_y1 = (osc_geo.y + (osc_geo.h / 2)) +
                  get_align(1 - (2*user_opts.deadzonesize),
                  osc_param.playresy - (osc_geo.y + (osc_geo.h / 2)), 0, 0)
@@ -1264,7 +1265,7 @@ layouts["topbar"] = function()
 
 
     -- Seekbar
-    geo = { x = sb_l, y = 0, an = 7, w = math.max(0, sb_r - sb_l), h = geo.h }
+    geo = { x = sb_l, y = user_opts.barmargin, an = 7, w = math.max(0, sb_r - sb_l), h = geo.h }
     new_element("bgbar1", "box")
     lo = add_layout("bgbar1")
 
