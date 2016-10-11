@@ -244,6 +244,12 @@ mp.add_hook("on_load", 10, function ()
                 local playlist = "#EXTM3U\n"
                 for i, entry in pairs(json.entries) do
                     local site = entry.url
+                    local title = entry.title
+
+                    if not (title == nil) then
+                        title = string.gsub(title, '%s+', ' ')
+                        playlist = playlist .. "#EXTINF:0," .. title .. "\n"
+                    end
 
                     -- some extractors will still return the full info for
                     -- all clips in the playlist and the URL will point
