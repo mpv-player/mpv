@@ -387,6 +387,21 @@ Available video output drivers are:
 
     .. note:: This driver is a joke.
 
+``tct``
+    Color Unicode art video output driver that works on a text console.
+    Depends on support of true color by modern terminals to display the images
+    at full color range.
+
+    ``--vo-tct-algo=<algo>``
+        Select how to write the pixels to the terminal.
+
+        half-blocks
+            Uses unicode LOWER HALF BLOCK character to achieve higher vertical
+            resolution. (Default.)
+        plain
+            Uses spaces. Causes vertical resolution to drop twofolds, but in
+            theory works in more places.
+
 ``image``
     Output each frame into an image file in the current directory. Each file
     takes the frame number padded with leading zeros as name.
