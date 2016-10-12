@@ -59,6 +59,7 @@ extern const struct vo_driver video_out_sdl;
 extern const struct vo_driver video_out_vaapi;
 extern const struct vo_driver video_out_wayland;
 extern const struct vo_driver video_out_rpi;
+extern const struct vo_driver video_out_tct;
 
 const struct vo_driver *const video_out_drivers[] =
 {
@@ -89,6 +90,7 @@ const struct vo_driver *const video_out_drivers[] =
     &video_out_null,
     // should not be auto-selected
     &video_out_image,
+    &video_out_tct,
 #if HAVE_CACA
     &video_out_caca,
 #endif
