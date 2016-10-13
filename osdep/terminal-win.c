@@ -92,14 +92,26 @@ static void read_input(HANDLE in)
         UINT vkey = record->wVirtualKeyCode;
         bool ext = record->dwControlKeyState & ENHANCED_KEY;
 
+        int mods = 0;
+        if (record->dwControlKeyState & (LEFT_ALT_PRESSED | RIGHT_ALT_PRESSED))
+            mods |= MP_KEY_MODIFIER_ALT;
+        if (record->dwControlKeyState & (LEFT_CTRL_PRESSED | RIGHT_CTRL_PRESSED))
+            mods |= MP_KEY_MODIFIER_CTRL;
+        if (record->dwControlKeyState & SHIFT_PRESSED)
+            mods |= MP_KEY_MODIFIER_SHIFT;
+
         int mpkey = mp_w32_vkey_to_mpkey(vkey, ext);
         if (mpkey) {
-            mp_input_put_key(input_ctx, mpkey);
+            mp_input_put_key(input_ctx, mpkey | mods);
         } else {
             // Only characters should be remaining
             int c = record->uChar.UnicodeChar;
+            // The ctrl key always produces control characters in the console.
+            // Shift them back up to regular characters.
+            if (c > 0 && c < 0x20 && (mods & MP_KEY_MODIFIER_CTRL))
+                c += (mods & MP_KEY_MODIFIER_SHIFT) ? 0x40 : 0x60;
             if (c >= 0x20)
-                mp_input_put_key(input_ctx, c);
+                mp_input_put_key(input_ctx, c | mods);
         }
     }
 }
