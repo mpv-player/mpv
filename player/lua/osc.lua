@@ -658,7 +658,7 @@ function limited_list(prop, pos)
     local proplist = mp.get_property_native(prop, {})
     local count = #proplist
     if (count == 0) then
-        return proplist
+        return count, proplist
     end
     local min, max = 0, count
     local temp = {}
