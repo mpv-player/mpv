@@ -480,14 +480,28 @@ static int bluray_stream_open(stream_t *s)
         b->cfg_title = BLURAY_MENU_TITLE;
     } else if (bstr_equals0(title, "mpls")) {
         bstr_split_tok(bdevice, "/", &title, &bdevice);
-        b->cfg_playlist = bstrtoll(title, &rest, 10);
+        long long pl = bstrtoll(title, &rest, 10);
+        if (rest.len) {
+            MP_ERR(s, "number expected: '%.*s'\n", BSTR_P(rest));
+            return STREAM_ERROR;
+        } else if (pl < 0 || 99999 < pl) {
+            MP_ERR(s, "invalid playlist: '%.*s', must be in the range 0-99999\n",
+                            BSTR_P(title));
+            return STREAM_ERROR;
+        }
+        b->cfg_playlist = pl;
         b->cfg_title    = BLURAY_PLAYLIST_TITLE;
     } else if (title.len) {
-        b->cfg_title = bstrtoll(title, &rest, 10);
-    }
-    if (rest.len) {
-        MP_ERR(s, "number expected: '%.*s'\n", BSTR_P(rest));
-        return STREAM_ERROR;
+        long long t = bstrtoll(title, &rest, 10);
+        if (rest.len) {
+            MP_ERR(s, "number expected: '%.*s'\n", BSTR_P(rest));
+            return STREAM_ERROR;
+        } else if (t < 0 || 99999 < t) {
+            MP_ERR(s, "invalid title: '%.*s', must be in the range 0-99999\n",
+                            BSTR_P(title));
+            return STREAM_ERROR;
+        }
+        b->cfg_title = t;
     }
 
     b->cfg_device = bstrto0(b, bdevice);
