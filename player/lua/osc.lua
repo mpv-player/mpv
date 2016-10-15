@@ -1481,7 +1481,10 @@ function osc_init()
     ne.content = "\238\132\144"
     ne.visible = have_pl
     ne.eventresponder["mouse_btn0_up"] =
-        function () mp.commandv("playlist-prev", "weak") end
+        function ()
+            mp.commandv("playlist-prev", "weak")
+            show_message(get_playlist(), 3)
+        end
     ne.eventresponder["shift+mouse_btn0_up"] =
         function () show_message(get_playlist(), 3) end
     ne.eventresponder["mouse_btn2_up"] =
@@ -1493,7 +1496,10 @@ function osc_init()
     ne.content = "\238\132\129"
     ne.visible = have_pl
     ne.eventresponder["mouse_btn0_up"] =
-        function () mp.commandv("playlist-next", "weak") end
+        function ()
+            mp.commandv("playlist-next", "weak")
+            show_message(get_playlist(), 3)
+        end
     ne.eventresponder["shift+mouse_btn0_up"] =
         function () show_message(get_playlist(), 3) end
     ne.eventresponder["mouse_btn2_up"] =
@@ -1545,7 +1551,10 @@ function osc_init()
     ne.enabled = have_ch
     ne.content = "\238\132\132"
     ne.eventresponder["mouse_btn0_up"] =
-        function () mp.commandv("osd-msg", "add", "chapter", -1) end
+        function ()
+            mp.commandv("add", "chapter", -1)
+            show_message(get_chapterlist(), 3)
+        end
     ne.eventresponder["shift+mouse_btn0_up"] =
         function () show_message(get_chapterlist(), 3) end
     ne.eventresponder["mouse_btn2_up"] =
@@ -1557,7 +1566,10 @@ function osc_init()
     ne.enabled = have_ch
     ne.content = "\238\132\133"
     ne.eventresponder["mouse_btn0_up"] =
-        function () mp.commandv("osd-msg", "add", "chapter", 1) end
+        function ()
+            mp.commandv("add", "chapter", 1)
+            show_message(get_chapterlist(), 3)
+        end
     ne.eventresponder["shift+mouse_btn0_up"] =
         function () show_message(get_chapterlist(), 3) end
     ne.eventresponder["mouse_btn2_up"] =
