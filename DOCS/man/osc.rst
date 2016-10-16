@@ -156,11 +156,11 @@ Configurable Options
     | Enable the OSC when fullscreen
 
 ``scalewindowed``
-    | Default: 1.5
+    | Default: 1.2
     | Scale factor of the OSC when windowed
 
 ``scalefullscreen``
-    | Default: 1.5
+    | Default: 1.2
     | Scale factor of the OSC when fullscreen
 
 ``scaleforcedwindow``
