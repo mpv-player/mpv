@@ -8,13 +8,13 @@ If you're not using git master or the latest release, update.
 
 ### Actual behavior
 
-### Log files
+### Log file
 
 Make a log file made with -v or --log-file=output.txt, paste it to
 http://sprunge.us or a similar site, and replace this text with a link to it.
 
 Providing a log file is strongly encouraged. It is very helpful for reproducing
-bugs or getting important technical context. Without log it might not be
+bugs or getting important technical context. Without a log it might not be
 possible to analyze and fix certain bugs.
 
 ### Sample files
