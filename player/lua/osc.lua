@@ -1129,14 +1129,14 @@ end
 layouts["bottombar"] = function()
     local osc_geo = {
         x = -2,
-        y = osc_param.playresy - 36 - user_opts.barmargin,
+        y = osc_param.playresy - 60 - user_opts.barmargin,
         an = 7,
         w = osc_param.playresx + 4,
-        h = 38,
+        h = 62,
     }
 
     local padX = 6
-    local padY = 2
+    local padY = 6
     local line1 = osc_geo.y + 6 + padY
     local line2 = osc_geo.y + 24 + padY
 
@@ -1242,7 +1242,7 @@ layouts["bottombar"] = function()
 
     -- Seekbar
     geo = { x = sb_l, y = geo.y, an = geo.an,
-            w = math.max(0, sb_r - sb_l), h = geo.h }
+            w = math.max(0, sb_r - sb_l), h = 6 + geo.h }
     new_element("bgbar1", "box")
     lo = add_layout("bgbar1")
 
@@ -1264,14 +1264,14 @@ end
 layouts["topbar"] = function()
     local osc_geo = {
         x = -2,
-        y = 36 + user_opts.barmargin,
+        y = 60 + user_opts.barmargin,
         an = 1,
         w = osc_param.playresx + 4,
-        h = 38,
+        h = 62,
     }
 
     local padX = 6
-    local padY = 2
+    local padY = 6
     local line1 = osc_geo.y - 24 - padY
     local line2 = osc_geo.y - 6 - padY
 
@@ -1351,7 +1351,7 @@ layouts["topbar"] = function()
 
 
     -- Seekbar
-    geo = { x = sb_l, y = user_opts.barmargin, an = 7, w = math.max(0, sb_r - sb_l), h = geo.h }
+    geo = { x = sb_l, y = line1, an = geo.an, w = math.max(0, sb_r - sb_l), h = 6 + geo.h }
     new_element("bgbar1", "box")
     lo = add_layout("bgbar1")
 
