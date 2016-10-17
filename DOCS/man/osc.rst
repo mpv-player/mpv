@@ -203,7 +203,9 @@ Configurable Options
       like leaving the window. Movement there won't make the OSC show up and
       it will hide immediately if the mouse enters it. The deadzone starts
       at the window border opposite to the OSC and the size controls how much
-      of the window it will span. Values between 0 and 1.
+      of the window it will span. Values between 0 and 1, where 0 means the
+      OSC will always popup with mouse movement in the window, and 1 means the
+      OSC will only show up when the mouse hovers it.
 
 ``minmousemove``
     | Default: 0
