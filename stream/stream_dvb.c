@@ -1120,7 +1120,7 @@ dvb_state_t *dvb_get_state(stream_t *stream)
                    filename);
         /* Create channel list for adapter. */
         list = NULL;
-        for (delsys = 0; delsys < SYS_DVB__MAX__; delsys++) {
+        for (delsys = 0; delsys < SYS_DVB__COUNT__; delsys++) {
             if (!DELSYS_IS_SET(delsys_mask, delsys))
                 continue; /* Skip unsupported. */
 

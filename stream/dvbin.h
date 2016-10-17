@@ -131,7 +131,7 @@ typedef struct {
 #    define SYS_DVBT2               16
 #    define SYS_DVBC_ANNEX_C        18
 #endif
-#define SYS_DVB__MAX__              (SYS_DVBC_ANNEX_C + 1)
+#define SYS_DVB__COUNT__            (SYS_DVBC_ANNEX_C + 1)
 
 
 #define DELSYS_BIT(__bit)        (((unsigned int)1) << (__bit))
