@@ -44,8 +44,8 @@
 /* Keep in sync with enum fe_delivery_system. */
 static const char *dvb_delsys_str[] = {
     "UNDEFINED",
-    "DVB-C ANNEX_A",
-    "DVB-C ANNEX_B",
+    "DVB-C ANNEX A",
+    "DVB-C ANNEX B",
     "DVB-T",
     "DSS",
     "DVB-S",
@@ -61,13 +61,13 @@ static const char *dvb_delsys_str[] = {
     "DAB",
     "DVB-T2",
     "TURBO",
-    "DVB-C ANNEX_C",
+    "DVB-C ANNEX C",
     NULL
 };
 
 const char *get_dvb_delsys(unsigned int delsys)
 {
-    if (SYS_DVB__MAX__ < delsys)
+    if (SYS_DVB__COUNT__ <= delsys)
         return dvb_delsys_str[0];
     return dvb_delsys_str[delsys];
 }
@@ -116,7 +116,7 @@ old_api:
     /* Try to get kernel DVB API version. */
     prop[0].cmd = DTV_API_VERSION;
     if (ioctl(fe_fd, FE_GET_PROPERTY, &cmdseq) < 0) {
-        prop[0].u.data = 0x300; /* Fail, assume 3.0 */
+        prop[0].u.data = 0x0300; /* Fail, assume 3.0 */
     }
 
     mp_verbose(log, "DVBv3: Queried tuner type of device named '%s', FD: %d\n",
@@ -164,7 +164,7 @@ old_api:
         return ret_mask;
     }
 
-    for (delsys = 0; delsys < SYS_DVB__MAX__; delsys ++) {
+    for (delsys = 0; delsys < SYS_DVB__COUNT__; delsys ++) {
         if (!DELSYS_IS_SET(ret_mask, delsys))
             continue; /* Skip unsupported. */
         mp_verbose(log, "DVBv3: Tuner type seems to be %s\n", get_dvb_delsys(delsys));
@@ -442,6 +442,7 @@ static int diseqc_send_msg(int fd, fe_sec_voltage_t v, struct diseqc_cmd *cmd,
     usleep(15 * 1000);
     if (ioctl(fd, FE_SET_TONE, t) < 0)
         return -1;
+    usleep(100000);
 
     return 0;
 }
@@ -568,7 +569,6 @@ static int tune_it(dvb_priv_t *priv, int fd_frontend, unsigned int delsys,
             MP_ERR(priv, "DISEQC setting failed\n");
             return -1;
         }
-        usleep(100000);
 
         break;
     case SYS_DVBC_ANNEX_A:
@@ -643,11 +643,11 @@ old_api:
     }
     memset(&feparams, 0, sizeof(feparams));
     feparams.frequency = freq;
+    feparams.inversion = specInv;
 
     switch (delsys) {
     case SYS_DVBT:
     case SYS_DVBT2:
-        feparams.inversion = specInv;
         feparams.u.ofdm.bandwidth = bandwidth;
         feparams.u.ofdm.code_rate_HP = HP_CodeRate;
         feparams.u.ofdm.code_rate_LP = LP_CodeRate;
@@ -658,13 +658,11 @@ old_api:
         break;
     case SYS_DVBS:
     case SYS_DVBS2:
-        feparams.inversion = specInv;
         feparams.u.qpsk.symbol_rate = srate;
         feparams.u.qpsk.fec_inner = HP_CodeRate;
         break;
     case SYS_DVBC_ANNEX_A:
     case SYS_DVBC_ANNEX_C:
-        feparams.inversion = specInv;
         feparams.u.qam.symbol_rate = srate;
         feparams.u.qam.fec_inner = HP_CodeRate;
         feparams.u.qam.modulation = modulation;
