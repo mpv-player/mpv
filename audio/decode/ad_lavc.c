@@ -245,7 +245,8 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     if (!got_frame)
         return 0;
 
-    double out_pts = mp_pts_from_av(priv->avframe->pkt_pts, &priv->codec_timebase);
+    double out_pts = mp_pts_from_av(MP_AVFRAME_DEC_PTS(priv->avframe),
+                                    &priv->codec_timebase);
 
     struct mp_audio *mpframe = mp_audio_from_avframe(priv->avframe);
     if (!mpframe)

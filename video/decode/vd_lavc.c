@@ -861,7 +861,7 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         return;
     }
     assert(mpi->planes[0] || mpi->planes[3]);
-    mpi->pts = mp_pts_from_av(ctx->pic->pkt_pts, &ctx->codec_timebase);
+    mpi->pts = mp_pts_from_av(MP_AVFRAME_DEC_PTS(ctx->pic), &ctx->codec_timebase);
     mpi->dts = mp_pts_from_av(ctx->pic->pkt_dts, &ctx->codec_timebase);
 
     struct mp_image_params params;
