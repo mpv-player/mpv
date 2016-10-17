@@ -57,6 +57,7 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
     AVCodecContext *avctx = ctx->avctx;
     AVCUDADeviceContext *device_hwctx;
     AVHWDeviceContext *device_ctx;
+    AVHWFramesContext *hwframe_ctx;
     CUVIDContext *priv = ctx->hwdec_priv;
     int ret = 0;
 
@@ -88,6 +89,9 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
         MP_ERR(ctx, "av_hwframe_ctx_alloc failed\n");
         goto error;
     }
+
+    hwframe_ctx = (AVHWFramesContext*)avctx->hw_frames_ctx->data;
+    hwframe_ctx->format = AV_PIX_FMT_CUDA;
 
     return 0;
 

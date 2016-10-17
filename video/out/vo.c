@@ -830,7 +830,9 @@ static bool render_frame(struct vo *vo)
         update_vsync_timing_after_swap(vo);
     }
 
-    if (!in->dropped_frame) {
+    if (in->dropped_frame) {
+        MP_STATS(vo, "drop-vo");
+    } else {
         vo->want_redraw = false;
         in->want_redraw = false;
         in->request_redraw = false;

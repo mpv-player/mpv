@@ -977,17 +977,6 @@ static void vo_x11_update_composition_hint(struct vo *vo)
                     XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&hint, 1);
 }
 
-// Maximally awful hack to get MPOpts.vo.fullscreen set. The awful part is that
-// this sets a variable which is accessed by command.c without synchronization
-// (and which isn't supposed to need any). The need for this is that there's no
-// way to update this flag in any other way at all.
-static void set_global_fs_flag(struct vo *vo, int fs)
-{
-    struct m_config *rootconfig = mp_get_root_config(vo->global);
-    struct MPOpts *opts = rootconfig->optstruct;
-    opts->vo->fullscreen = fs;
-}
-
 static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -1013,7 +1002,7 @@ static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
         {
             vo->opts->fullscreen = is_fullscreen;
             x11->fs = is_fullscreen;
-            set_global_fs_flag(vo, is_fullscreen);
+            x11->pending_vo_events |= VO_EVENT_FULLSCREEN_STATE;
 
             if (!is_fullscreen && (x11->pos_changed_during_fs ||
                                    x11->size_changed_during_fs))
@@ -1814,6 +1803,9 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
         vo_x11_fullscreen(vo);
+        return VO_TRUE;
+    case VOCTRL_GET_FULLSCREEN:
+        *(int *)arg = x11->fs;
         return VO_TRUE;
     case VOCTRL_ONTOP:
         vo_x11_setlayer(vo, opts->ontop);

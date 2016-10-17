@@ -46,4 +46,13 @@ void mp_set_avdict(struct AVDictionary **dict, char **kv);
 void mp_avdict_print_unset(struct mp_log *log, int msgl, struct AVDictionary *d);
 int mp_set_avopts(struct mp_log *log, void *avobj, char **kv);
 
+#if (LIBAVCODEC_VERSION_MICRO >= 100 &&                         \
+     LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 61, 100)) ||  \
+    (LIBAVCODEC_VERSION_MICRO < 100 &&                          \
+     LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 24, 0))
+#define MP_AVFRAME_DEC_PTS(frame) ((frame)->pts)
+#else
+#define MP_AVFRAME_DEC_PTS(frame) ((frame)->pkt_pts)
+#endif
+
 #endif

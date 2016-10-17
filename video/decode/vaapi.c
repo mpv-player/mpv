@@ -99,7 +99,60 @@ static const struct va_native_display disp_x11 = {
 };
 #endif
 
+#if HAVE_VAAPI_DRM
+#include <unistd.h>
+#include <fcntl.h>
+#include <va/va_drm.h>
+
+struct va_native_display_drm {
+    int drm_fd;
+};
+
+static void drm_destroy(struct priv *p)
+{
+    struct va_native_display_drm *native_display = p->native_display;
+    if (native_display) {
+        if (native_display->drm_fd >= 0)
+            close(native_display->drm_fd);
+        talloc_free(native_display);
+        p->native_display = NULL;
+    }
+}
+
+static void drm_create(struct priv *p)
+{
+    static const char *drm_device_paths[] = {
+        "/dev/dri/renderD128",
+        "/dev/dri/card0",
+        NULL
+    };
+
+    for (int i = 0; drm_device_paths[i]; i++) {
+        int drm_fd = open(drm_device_paths[i], O_RDWR);
+        if (drm_fd < 0)
+            continue;
+
+        struct va_native_display_drm *native_display = talloc_ptrtype(NULL, native_display);
+        native_display->drm_fd = drm_fd;
+        p->native_display = native_display;
+        p->display = vaGetDisplayDRM(drm_fd);
+        if (p->display)
+            return;
+
+        drm_destroy(p);
+    }
+}
+
+static const struct va_native_display disp_drm = {
+    .create = drm_create,
+    .destroy = drm_destroy,
+};
+#endif
+
 static const struct va_native_display *const native_displays[] = {
+#if HAVE_VAAPI_DRM
+    &disp_drm,
+#endif
 #if HAVE_VAAPI_X11
     &disp_x11,
 #endif

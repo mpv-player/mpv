@@ -377,8 +377,10 @@ static int load_lua(struct mpv_handle *client, const char *fname)
     }
 
     lua_State *L = ctx->state = luaL_newstate();
-    if (!L)
+    if (!L) {
+        MP_FATAL(ctx, "Could not initialize Lua.\n");
         goto error_out;
+    }
 
     if (mp_cpcall(L, run_lua, ctx)) {
         const char *err = "unknown error";
@@ -709,7 +711,7 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
                 bool empty = lua_isnil(L, -1); // t[n]
                 lua_pop(L, 1); // -
                 if (empty) {
-                    count = n;
+                    count = n - 1;
                     break;
                 }
             }
@@ -751,7 +753,7 @@ static void makenode(void *tmp, mpv_node *dst, lua_State *L, int t)
                 makenode(tmp, &list->values[list->num], L, -1);
                 if (lua_type(L, -2) != LUA_TSTRING) {
                     luaL_error(L, "key must be a string, but got %s",
-                               lua_typename(L, -2));
+                               lua_typename(L, lua_type(L, -2)));
                 }
                 list->keys[list->num] = talloc_strdup(tmp, lua_tostring(L, -2));
                 list->num++;

@@ -48,6 +48,10 @@
 #include "player/command.h"
 #include "stream/stream.h"
 
+#if HAVE_DRM
+#include "video/out/drm_common.h"
+#endif
+
 extern const char mp_help_text[];
 
 static void print_version(struct mp_log *log)
@@ -98,9 +102,11 @@ const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"d3d11va",     HWDEC_D3D11VA},
     {"d3d11va-copy",HWDEC_D3D11VA_COPY},
     {"rpi",         HWDEC_RPI},
+    {"rpi-copy",    HWDEC_RPI_COPY},
     {"mediacodec",  HWDEC_MEDIACODEC},
     {"cuda",        HWDEC_CUDA},
     {"cuda-copy",   HWDEC_CUDA_COPY},
+    {"crystalhd",   HWDEC_CRYSTALHD},
     {0}
 };
 
@@ -189,6 +195,11 @@ static const m_option_t mp_vo_opt_list[] = {
 #if HAVE_WIN32
     OPT_STRING("vo-mmcss-profile", mmcss_profile, 0),
 #endif
+#if HAVE_DRM
+    OPT_STRING_VALIDATE("drm-connector", drm_connector_spec,
+                        0, drm_validate_connector_opt),
+    OPT_INT("drm-mode", drm_mode_id, 0),
+#endif
 
     {0}
 };
@@ -243,12 +254,16 @@ const m_option_t mp_opts[] = {
     {"}", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
 
     // handled in m_config.c
-    { "include", CONF_TYPE_STRING, M_OPT_FIXED | M_OPT_FILE, .offset = -1},
-    { "profile", CONF_TYPE_STRING_LIST, M_OPT_FIXED, .offset = -1},
+    { "include", CONF_TYPE_STRING, M_OPT_FILE, .offset = -1},
+    { "profile", CONF_TYPE_STRING_LIST, 0, .offset = -1},
     { "show-profile", CONF_TYPE_STRING, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
     { "list-options", CONF_TYPE_STORE, CONF_NOCFG | M_OPT_FIXED, .offset = -1},
     OPT_FLAG("list-properties", property_print_help,
              CONF_NOCFG | M_OPT_FIXED | M_OPT_NOPROP),
+
+    OPT_CHOICE("player-operation-mode", operation_mode,
+               M_OPT_FIXED | M_OPT_PRE_PARSE | M_OPT_NOPROP,
+               ({"cplayer", 0}, {"pseudo-gui", 1})),
 
     OPT_FLAG("shuffle", shuffle, 0),
 
@@ -265,7 +280,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("msg-module", msg_module, UPDATE_TERM),
     OPT_FLAG("msg-time", msg_time, UPDATE_TERM),
 #ifdef _WIN32
-    OPT_CHOICE("priority", w32_priority, M_OPT_FIXED,
+    OPT_CHOICE("priority", w32_priority, UPDATE_PRIORITY,
                ({"no",          0},
                 {"realtime",    REALTIME_PRIORITY_CLASS},
                 {"high",        HIGH_PRIORITY_CLASS},
@@ -461,32 +476,32 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("sub-gray", sub_gray, UPDATE_OSD),
     OPT_FLAG("sub-ass", ass_enabled, 0),
     OPT_FLOATRANGE("sub-scale", sub_scale, UPDATE_OSD, 0, 100),
-    OPT_FLOATRANGE("ass-line-spacing", ass_line_spacing, UPDATE_OSD, -1000, 1000),
+    OPT_FLOATRANGE("sub-ass-line-spacing", ass_line_spacing, UPDATE_OSD, -1000, 1000),
     OPT_FLAG("sub-use-margins", sub_use_margins, UPDATE_OSD),
-    OPT_FLAG("ass-force-margins", ass_use_margins, UPDATE_OSD),
-    OPT_FLAG("ass-vsfilter-aspect-compat", ass_vsfilter_aspect_compat, UPDATE_OSD),
-    OPT_CHOICE("ass-vsfilter-color-compat", ass_vsfilter_color_compat, UPDATE_OSD,
+    OPT_FLAG("sub-ass-force-margins", ass_use_margins, UPDATE_OSD),
+    OPT_FLAG("sub-ass-vsfilter-aspect-compat", ass_vsfilter_aspect_compat, UPDATE_OSD),
+    OPT_CHOICE("sub-ass-vsfilter-color-compat", ass_vsfilter_color_compat, UPDATE_OSD,
                ({"no", 0}, {"basic", 1}, {"full", 2}, {"force-601", 3})),
-    OPT_FLAG("ass-vsfilter-blur-compat", ass_vsfilter_blur_compat, UPDATE_OSD),
+    OPT_FLAG("sub-ass-vsfilter-blur-compat", ass_vsfilter_blur_compat, UPDATE_OSD),
     OPT_FLAG("embeddedfonts", use_embedded_fonts, 0),
-    OPT_STRINGLIST("ass-force-style", ass_force_style_list, UPDATE_OSD),
-    OPT_STRING("ass-styles", ass_styles_file, M_OPT_FILE),
-    OPT_CHOICE("ass-hinting", ass_hinting, UPDATE_OSD,
+    OPT_STRINGLIST("sub-ass-force-style", ass_force_style_list, UPDATE_OSD),
+    OPT_STRING("sub-ass-styles", ass_styles_file, M_OPT_FILE),
+    OPT_CHOICE("sub-ass-hinting", ass_hinting, UPDATE_OSD,
                ({"none", 0}, {"light", 1}, {"normal", 2}, {"native", 3})),
-    OPT_CHOICE("ass-shaper", ass_shaper, UPDATE_OSD,
+    OPT_CHOICE("sub-ass-shaper", ass_shaper, UPDATE_OSD,
                ({"simple", 0}, {"complex", 1})),
-    OPT_CHOICE("ass-style-override", ass_style_override, UPDATE_OSD,
+    OPT_CHOICE("sub-ass-style-override", ass_style_override, UPDATE_OSD,
                ({"no", 0}, {"yes", 1}, {"force", 3}, {"signfs", 4}, {"strip", 5})),
     OPT_FLAG("sub-scale-by-window", sub_scale_by_window, UPDATE_OSD),
     OPT_FLAG("sub-scale-with-window", sub_scale_with_window, UPDATE_OSD),
-    OPT_FLAG("ass-scale-with-window", ass_scale_with_window, UPDATE_OSD),
+    OPT_FLAG("sub-ass-scale-with-window", ass_scale_with_window, UPDATE_OSD),
     OPT_FLAG("osd-bar", osd_bar_visible, UPDATE_OSD),
     OPT_FLOATRANGE("osd-bar-align-x", osd_bar_align_x, UPDATE_OSD, -1.0, +1.0),
     OPT_FLOATRANGE("osd-bar-align-y", osd_bar_align_y, UPDATE_OSD, -1.0, +1.0),
     OPT_FLOATRANGE("osd-bar-w", osd_bar_w, UPDATE_OSD, 1, 100),
     OPT_FLOATRANGE("osd-bar-h", osd_bar_h, UPDATE_OSD, 0.1, 50),
     OPT_SUBSTRUCT("osd", osd_style, osd_style_conf, 0),
-    OPT_SUBSTRUCT("sub-text", sub_text_style, sub_style_conf, 0),
+    OPT_SUBSTRUCT("sub", sub_style, sub_style_conf, 0),
     OPT_FLAG("sub-clear-on-seek", sub_clear_on_seek, 0),
     OPT_INTRANGE("teletext-page", teletext_page, 0, 1, 999),
 
@@ -494,9 +509,9 @@ const m_option_t mp_opts[] = {
     OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list, ),
     OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list,
                      .deprecation_message = "deprecated, use global options"),
-    OPT_STRING("audio-device", audio_device, 0),
-    OPT_FLAG("audio-exclusive", audio_exclusive, 0),
-    OPT_STRING("audio-client-name", audio_client_name, 0),
+    OPT_STRING("audio-device", audio_device, UPDATE_AUDIO),
+    OPT_FLAG("audio-exclusive", audio_exclusive, UPDATE_AUDIO),
+    OPT_STRING("audio-client-name", audio_client_name, UPDATE_AUDIO),
     OPT_FLAG("audio-fallback-to-null", ao_null_fallback, 0),
     OPT_FLAG("audio-stream-silence", audio_stream_silence, 0),
     OPT_FLOATRANGE("audio-wait-open", audio_wait_open, 0, 0, 60),
@@ -535,7 +550,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),
     OPT_FLAG("cursor-autohide-fs-only", cursor_autohide_fs, 0),
-    OPT_FLAG("stop-screensaver", stop_screensaver, 0),
+    OPT_FLAG("stop-screensaver", stop_screensaver, UPDATE_SCREENSAVER),
 
     OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0,
                .deprecation_message = "use Lua scripting instead"),
@@ -755,6 +770,33 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("softvol-max", "volume-max"),
     OPT_REMOVED("bluray-angle", "this didn't do anything for a few releases"),
     OPT_REPLACED("playlist-pos", "playlist-start"),
+    OPT_REPLACED("sub-text-font", "sub-font"),
+    OPT_REPLACED("sub-text-font-size", "sub-font-size"),
+    OPT_REPLACED("sub-text-color", "sub-color"),
+    OPT_REPLACED("sub-text-border-color", "sub-border-color"),
+    OPT_REPLACED("sub-text-shadow-color", "sub-shadow-color"),
+    OPT_REPLACED("sub-text-back-color", "sub-back-color"),
+    OPT_REPLACED("sub-text-border-size", "sub-border-size"),
+    OPT_REPLACED("sub-text-shadow-offset", "sub-shadow-offset"),
+    OPT_REPLACED("sub-text-spacing", "sub-spacing"),
+    OPT_REPLACED("sub-text-margin-x", "sub-margin-x"),
+    OPT_REPLACED("sub-text-margin-y", "sub-margin-y"),
+    OPT_REPLACED("sub-text-align-x", "sub-align-x"),
+    OPT_REPLACED("sub-text-align-y", "sub-align-y"),
+    OPT_REPLACED("sub-text-blur", "sub-blur"),
+    OPT_REPLACED("sub-text-bold", "sub-bold"),
+    OPT_REPLACED("sub-text-italic", "sub-italic"),
+    OPT_REPLACED("ass-line-spacing", "sub-ass-line-spacing"),
+    OPT_REPLACED("ass-force-margins", "sub-ass-force-margins"),
+    OPT_REPLACED("ass-vsfilter-aspect-compat", "sub-ass-vsfilter-aspect-compat"),
+    OPT_REPLACED("ass-vsfilter-color-compat", "sub-ass-vsfilter-color-compat"),
+    OPT_REPLACED("ass-vsfilter-blur-compat", "sub-ass-vsfilter-blur-compat"),
+    OPT_REPLACED("ass-force-style", "sub-ass-force-style"),
+    OPT_REPLACED("ass-styles", "sub-ass-styles"),
+    OPT_REPLACED("ass-hinting", "sub-ass-hinting"),
+    OPT_REPLACED("ass-shaper", "sub-ass-shaper"),
+    OPT_REPLACED("ass-style-override", "sub-ass-style-override"),
+    OPT_REPLACED("ass-scale-with-window", "sub-ass-scale-with-window"),
 
     {0}
 };

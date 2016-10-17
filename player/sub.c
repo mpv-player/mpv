@@ -183,6 +183,9 @@ void reinit_sub(struct MPContext *mpctx, struct track *track)
     int order = get_order(mpctx, track);
     osd_set_sub(mpctx->osd, order, track->d_sub);
     sub_control(track->d_sub, SD_CTRL_SET_TOP, &(bool){!!order});
+
+    if (mpctx->playback_initialized)
+        update_subtitles(mpctx, mpctx->playback_pts);
 }
 
 void reinit_sub_all(struct MPContext *mpctx)

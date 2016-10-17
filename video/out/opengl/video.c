@@ -409,7 +409,10 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("deband", deband, 0),
         OPT_SUBSTRUCT("deband", deband_opts, deband_conf, 0),
         OPT_FLOAT("sharpen", unsharp, 0),
+        OPT_INTRANGE("opengl-tex-pad-x", tex_pad_x, 0, 0, 4096),
+        OPT_INTRANGE("opengl-tex-pad-y", tex_pad_y, 0, 0, 4096),
         OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
+        OPT_FLAG("opengl-early-flush", early_flush, 0),
 
         {0}
     },
@@ -726,28 +729,35 @@ static int pass_bind(struct gl_video *p, struct img_tex tex)
 }
 
 // Rotation by 90° and flipping.
-static void get_plane_source_transform(struct gl_video *p, struct texplane *t,
-                                       struct gl_transform *out_tr)
+// w/h is used for recentering.
+static void get_transform(float w, float h, int rotate, bool flip,
+                          struct gl_transform *out_tr)
 {
-    struct gl_transform tr = identity_trans;
-    int a = p->image_params.rotate % 90 ? 0 : p->image_params.rotate / 90;
+    int a = rotate % 90 ? 0 : rotate / 90;
     int sin90[4] = {0, 1, 0, -1}; // just to avoid rounding issues etc.
     int cos90[4] = {1, 0, -1, 0};
-    struct gl_transform rot = {{{cos90[a], sin90[a]}, {-sin90[a], cos90[a]}}};
-    gl_transform_trans(rot, &tr);
+    struct gl_transform tr = {{{ cos90[a], sin90[a]},
+                               {-sin90[a], cos90[a]}}};
 
     // basically, recenter to keep the whole image in view
     float b[2] = {1, 1};
-    gl_transform_vec(rot, &b[0], &b[1]);
-    tr.t[0] += b[0] < 0 ? t->w : 0;
-    tr.t[1] += b[1] < 0 ? t->h : 0;
+    gl_transform_vec(tr, &b[0], &b[1]);
+    tr.t[0] += b[0] < 0 ? w : 0;
+    tr.t[1] += b[1] < 0 ? h : 0;
 
-    if (t->flipped) {
-        struct gl_transform flip = {{{1, 0}, {0, -1}}, {0, t->h}};
-        gl_transform_trans(flip, &tr);
+    if (flip) {
+        struct gl_transform fliptr = {{{1, 0}, {0, -1}}, {0, h}};
+        gl_transform_trans(fliptr, &tr);
     }
 
     *out_tr = tr;
+}
+
+// Return the chroma plane upscaled to luma size, but with additional padding
+// for image sizes not aligned to subsampling.
+static int chroma_upsize(int size, int shift)
+{
+    return mp_chroma_div_up(size, shift) << shift;
 }
 
 // Places a video_image's image textures + associated metadata into tex[]. The
@@ -758,12 +768,12 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
 {
     assert(vimg->mpi);
 
+    int w = p->image_params.w;
+    int h = p->image_params.h;
+
     // Determine the chroma offset
     float ls_w = 1.0 / (1 << p->image_desc.chroma_xs);
     float ls_h = 1.0 / (1 << p->image_desc.chroma_ys);
-
-    if (p->image_params.rotate % 180 == 90)
-        MPSWAP(float, ls_w, ls_h);
 
     struct gl_transform chroma = {{{ls_w, 0.0}, {0.0, ls_h}}};
 
@@ -778,8 +788,6 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
         chroma.t[0] = ls_w < 1 ? ls_w * -cx / 2 : 0;
         chroma.t[1] = ls_h < 1 ? ls_h * -cy / 2 : 0;
     }
-
-    // FIXME: account for rotation in the chroma offset
 
     // The existing code assumes we just have a single tex multiplier for
     // all of the planes. This may change in the future
@@ -817,11 +825,38 @@ static void pass_get_img_tex(struct gl_video *p, struct video_image *vimg,
             .components = p->image_desc.components[n],
         };
         snprintf(tex[n].swizzle, sizeof(tex[n].swizzle), "%s", t->swizzle);
-        get_plane_source_transform(p, t, &tex[n].transform);
+        get_transform(t->w, t->h, p->image_params.rotate, t->flipped,
+                      &tex[n].transform);
         if (p->image_params.rotate % 180 == 90)
             MPSWAP(int, tex[n].w, tex[n].h);
 
-        off[n] = type == PLANE_CHROMA ? chroma : identity_trans;
+        off[n] = identity_trans;
+
+        if (type == PLANE_CHROMA) {
+            struct gl_transform rot;
+            get_transform(0, 0, p->image_params.rotate, true, &rot);
+
+            struct gl_transform tr = chroma;
+            gl_transform_vec(rot, &tr.t[0], &tr.t[1]);
+
+            float dx = (chroma_upsize(w, p->image_desc.xs[n]) - w) * ls_w;
+            float dy = (chroma_upsize(h, p->image_desc.ys[n]) - h) * ls_h;
+
+            // Adjust the chroma offset if the real chroma size is fractional
+            // due image sizes not aligned to chroma subsampling.
+            struct gl_transform rot2;
+            get_transform(0, 0, p->image_params.rotate, t->flipped, &rot2);
+            if (rot2.m[0][0] < 0)
+                tr.t[0] += dx;
+            if (rot2.m[1][0] < 0)
+                tr.t[0] += dy;
+            if (rot2.m[0][1] < 0)
+                tr.t[1] += dx;
+            if (rot2.m[1][1] < 0)
+                tr.t[1] += dy;
+
+            off[n] = tr;
+        }
     }
 }
 
@@ -829,7 +864,7 @@ static void init_video(struct gl_video *p)
 {
     GL *gl = p->gl;
 
-    if (p->hwdec && p->hwdec->driver->imgfmt == p->image_params.imgfmt) {
+    if (p->hwdec && gl_hwdec_test_format(p->hwdec, p->image_params.imgfmt)) {
         if (p->hwdec->driver->reinit(p->hwdec, &p->image_params) < 0)
             MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
         init_image_desc(p, p->image_params.imgfmt);
@@ -875,14 +910,16 @@ static void init_video(struct gl_video *p)
 
             plane->gl_target = gl_target;
 
-            plane->w = plane->tex_w = mp_image_plane_w(&layout, n);
-            plane->h = plane->tex_h = mp_image_plane_h(&layout, n);
+            plane->w = mp_image_plane_w(&layout, n);
+            plane->h = mp_image_plane_h(&layout, n);
+            plane->tex_w = plane->w + p->opts.tex_pad_x;
+            plane->tex_h = plane->h + p->opts.tex_pad_y;
 
             gl->GenTextures(1, &plane->gl_texture);
             gl->BindTexture(gl_target, plane->gl_texture);
 
             gl->TexImage2D(gl_target, 0, plane->gl_internal_format,
-                           plane->w, plane->h, 0,
+                           plane->tex_w, plane->tex_h, 0,
                            plane->gl_format, plane->gl_type, NULL);
 
             int filter = plane->use_integer ? GL_NEAREST : GL_LINEAR;
@@ -893,7 +930,8 @@ static void init_video(struct gl_video *p)
 
             gl->BindTexture(gl_target, 0);
 
-            MP_VERBOSE(p, "Texture for plane %d: %dx%d\n", n, plane->w, plane->h);
+            MP_VERBOSE(p, "Texture for plane %d: %dx%d\n", n,
+                       plane->tex_w, plane->tex_h);
         }
     }
 
@@ -2338,6 +2376,11 @@ static void pass_draw_osd(struct gl_video *p, int draw_flags, double pts,
     gl_sc_set_vao(p->sc, &p->vao);
 }
 
+static float chroma_realign(int size, int shift)
+{
+    return size / (float)(mp_chroma_div_up(size, shift) << shift);
+}
+
 // Minimal rendering code path, for GLES or OpenGL 2.1 without proper FBOs.
 static void pass_render_frame_dumb(struct gl_video *p, int fbo)
 {
@@ -2352,11 +2395,24 @@ static void pass_render_frame_dumb(struct gl_video *p, int fbo)
 
     int index = 0;
     for (int i = 0; i < p->plane_count; i++) {
-        struct gl_transform trel = {{{(float)p->texture_w / tex[i].w, 0.0},
-                                     {0.0, (float)p->texture_h / tex[i].h}}};
-        gl_transform_trans(trel, &tex[i].transform);
-        gl_transform_trans(transform, &tex[i].transform);
-        gl_transform_trans(off[i], &tex[i].transform);
+        int xs = p->image_desc.xs[i];
+        int ys = p->image_desc.ys[i];
+        if (p->image_params.rotate % 180 == 90)
+            MPSWAP(int, xs, ys);
+
+        struct gl_transform t = transform;
+        t.m[0][0] *= chroma_realign(p->texture_w, xs);
+        t.m[1][1] *= chroma_realign(p->texture_h, ys);
+
+        t.t[0] /= 1 << xs;
+        t.t[1] /= 1 << ys;
+
+        t.t[0] += off[i].t[0];
+        t.t[1] += off[i].t[1];
+
+        gl_transform_trans(tex[i].transform, &t);
+        tex[i].transform = t;
+
         copy_img_tex(p, &index, tex[i]);
     }
 
@@ -2793,7 +2849,8 @@ done:
     // The playloop calls this last before waiting some time until it decides
     // to call flip_page(). Tell OpenGL to start execution of the GPU commands
     // while we sleep (this happens asynchronously).
-    gl->Flush();
+    if (p->opts.early_flush)
+        gl->Flush();
 
     p->frames_rendered++;
 
@@ -3062,6 +3119,7 @@ static void check_gl_features(struct gl_video *p)
             .target_brightness = p->opts.target_brightness,
             .hdr_tone_mapping = p->opts.hdr_tone_mapping,
             .tone_mapping_param = p->opts.tone_mapping_param,
+            .early_flush = p->opts.early_flush,
         };
         for (int n = 0; n < SCALER_COUNT; n++)
             p->opts.scaler[n] = gl_video_opts_def.scaler[n];
@@ -3397,7 +3455,7 @@ bool gl_video_check_format(struct gl_video *p, int mp_format)
 {
     if (init_format(p, mp_format, true))
         return true;
-    if (p->hwdec && p->hwdec->driver->imgfmt == mp_format)
+    if (p->hwdec && gl_hwdec_test_format(p->hwdec, mp_format))
         return true;
     return false;
 }

@@ -426,7 +426,7 @@ mpv_handle *mpv_create(void);
  *        - input-conf
  *        - load-scripts
  *        - script
- *        - priority (win32)
+ *        - player-operation-mode
  *        - input-app-events (OSX)
  *      - all encoding mode options
  *

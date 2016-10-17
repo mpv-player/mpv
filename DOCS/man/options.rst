@@ -521,6 +521,12 @@ Program Behavior
         ``--ytdl-raw-options=username=user,password=pass``
         ``--ytdl-raw-options=force-ipv6=``
 
+``--player-operation-mode=<cplayer|pseudo-gui>``
+    For enabling "pseudo GUI mode", which means that the defaults for some
+    options are changed. This option should not normally be used directly, but
+    only by mpv internally, or mpv-provided scripts, config files, or .desktop
+    files.
+
 Video
 -----
 
@@ -616,8 +622,10 @@ Video
     :d3d11va-copy: copies video back to system RAM (Windows only)
     :mediacodec: copies video back to system RAM (Android only)
     :rpi:       requires ``--vo=opengl`` (Raspberry Pi only - default if available)
+    :rpi-copy:  copies video back to system RAM (Raspberry Pi only)
     :cuda:      requires ``--vo=opengl`` (Any platform CUDA is available)
     :cuda-copy: copies video back to system RAM (Any platform CUDA is available)
+    :crystalhd: copies video back to system RAM (Any platform supported by hardware)
 
     ``auto`` tries to automatically enable hardware decoding using the first
     available method. This still depends what VO you are using. For example,
@@ -694,12 +702,20 @@ Video
         mechanism in the opengl output path. To use this deinterlacing you
         must pass the option: ``vd-lavc-o=deint=[weave|bob|adaptive]``. Pass
         ``weave`` to not attempt any deinterlacing.
-        10bit HEVC is currently not supported but maybe we can add support
-        after CUDA 8 is released (and it will be rounded down to 8 bits).
+        10bit HEVC is available if the hardware supports it but it will be
+        rounded down to 8 bits.
 
         ``cuda-copy`` has the same behaviour as ``cuda`` - including the ability
         to deinterlace inside the decoder. However, traditional deinterlacing
         filters can be used in this case.
+
+        ``rpi`` always uses the hardware overlay renderer, even with
+        ``--vo=opengl``.
+
+        ``crystalhd`` is not safe. It always converts to 4:2:2 YUV, which
+        may be lossy, depending on how chroma sub-sampling is done during
+        conversion. It also discards the top left pixel of each frame for
+        some reason.
 
         All other methods, in particular the copy-back methods (like
         ``dxva2-copy`` etc.) are either fully safe, or not worse than software
@@ -1424,7 +1440,12 @@ Subtitles
     Changing styling and position does not work with all subtitles. Image-based
     subtitles (DVD, Bluray/PGS, DVB) cannot changed for fundamental reasons.
     Subtitles in ASS format are normally not changed intentionally, but
-    overriding them can be controlled with ``--ass-style-override``.
+    overriding them can be controlled with ``--sub-ass-style-override``.
+
+    Previously some options working on text subtitles were called
+    ``--sub-text-*``, they are now named ``--sub-*``, and those specifically
+    for ASS have been renamed from ``--ass-*`` to ``--sub-ass-*``.
+    They are now all in this section.
 
 ``--sub-demuxer=<[+]name>``
     Force subtitle demuxer type for ``--sub-file``. Give the demuxer name as
@@ -1475,7 +1496,7 @@ Subtitles
     .. note::
 
         This affects ASS subtitles as well, and may lead to incorrect subtitle
-        rendering. Use with care, or use ``--sub-text-font-size`` instead.
+        rendering. Use with care, or use ``--sub-font-size`` instead.
 
 ``--sub-scale-by-window=<yes|no>``
     Whether to scale subtitles with the window size (default: yes). If this is
@@ -1496,10 +1517,10 @@ Subtitles
     scales with the approximate window size, while the other option disables
     this scaling.
 
-    Affects plain text subtitles only (or ASS if ``--ass-style-override`` is
+    Affects plain text subtitles only (or ASS if ``--sub-ass-style-override`` is
     set high enough).
 
-``--ass-scale-with-window=<yes|no>``
+``--sub-ass-scale-with-window=<yes|no>``
     Like ``--sub-scale-with-window``, but affects subtitles in ASS format only.
     Like ``--sub-scale``, this can break ASS subtitles.
 
@@ -1516,7 +1537,7 @@ Subtitles
     .. note::
 
         This affects ASS subtitles as well, and may lead to incorrect subtitle
-        rendering. Use with care, or use ``--sub-text-margin-y`` instead.
+        rendering. Use with care, or use ``--sub-margin-y`` instead.
 
 ``--sub-speed=<0.1-10.0>``
     Multiply the subtitle event timestamps with the given value. Can be used
@@ -1528,19 +1549,19 @@ Subtitles
         `--sub-speed=25/23.976`` plays frame based subtitles which have been
         loaded assuming a framerate of 23.976 at 25 FPS.
 
-``--ass-force-style=<[Style.]Param=Value[,...]>``
+``--sub-ass-force-style=<[Style.]Param=Value[,...]>``
     Override some style or script info parameters.
 
     .. admonition:: Examples
 
-        - ``--ass-force-style=FontName=Arial,Default.Bold=1``
-        - ``--ass-force-style=PlayResY=768``
+        - ``--sub-ass-force-style=FontName=Arial,Default.Bold=1``
+        - ``--sub-ass-force-style=PlayResY=768``
 
     .. note::
 
         Using this option may lead to incorrect subtitle rendering.
 
-``--ass-hinting=<none|light|normal|native>``
+``--sub-ass-hinting=<none|light|normal|native>``
     Set font hinting type. <type> can be:
 
     :none:       no hinting (default)
@@ -1555,10 +1576,10 @@ Subtitles
         of animations with some badly authored ASS scripts. It is recommended
         to not use this option, unless really needed.
 
-``--ass-line-spacing=<value>``
+``--sub-ass-line-spacing=<value>``
     Set line spacing value for SSA/ASS renderer.
 
-``--ass-shaper=<simple|complex>``
+``--sub-ass-shaper=<simple|complex>``
     Set the text layout engine used by libass.
 
     :simple:   uses Fribidi only, fast, doesn't render some languages correctly
@@ -1567,7 +1588,7 @@ Subtitles
     ``complex`` is the default. If libass hasn't been compiled against HarfBuzz,
     libass silently reverts to ``simple``.
 
-``--ass-styles=<filename>``
+``--sub-ass-styles=<filename>``
     Load all SSA/ASS styles found in the specified file and use them for
     rendering text subtitles. The syntax of the file is exactly like the ``[V4
     Styles]`` / ``[V4+ Styles]`` section of SSA/ASS.
@@ -1576,20 +1597,20 @@ Subtitles
 
         Using this option may lead to incorrect subtitle rendering.
 
-``--ass-style-override=<yes|no|force|signfs|strip>``
+``--sub-ass-style-override=<yes|no|force|signfs|strip>``
     Control whether user style overrides should be applied.
 
-    :yes:   Apply all the ``--ass-*`` style override options. Changing the default
+    :yes:   Apply all the ``--sub-ass-*`` style override options. Changing the default
             for any of these options can lead to incorrect subtitle rendering
             (default).
     :signfs: like ``yes``, but apply ``--sub-scale`` only to signs
     :no:    Render subtitles as forced by subtitle scripts.
-    :force: Try to force the font style as defined by the ``--sub-text-*``
+    :force: Try to force the font style as defined by the ``--sub-*``
             options. Can break rendering easily.
     :strip: Radically strip all ASS tags and styles from the subtitle. This
             is equivalent to the old ``--no-ass`` / ``--no-sub-ass`` options.
 
-``--ass-force-margins``
+``--sub-ass-force-margins``
     Enables placing toptitles and subtitles in black borders when they are
     available, if the subtitles are in the ASS format.
 
@@ -1598,14 +1619,14 @@ Subtitles
 ``--sub-use-margins``
     Enables placing toptitles and subtitles in black borders when they are
     available, if the subtitles are in a plain text format  (or ASS if
-    ``--ass-style-override`` is set high enough).
+    ``--sub-ass-style-override`` is set high enough).
 
     Default: yes.
 
-    Renamed from ``--ass-use-margins``. To place ASS subtitles in the borders
-    too (like the old option did), also add ``--ass-force-margins``.
+    Renamed from ``--sub-ass-use-margins``. To place ASS subtitles in the borders
+    too (like the old option did), also add ``--sub-ass-force-margins``.
 
-``--ass-vsfilter-aspect-compat=<yes|no>``
+``--sub-ass-vsfilter-aspect-compat=<yes|no>``
     Stretch SSA/ASS subtitles when playing anamorphic videos for compatibility
     with traditional VSFilter behavior. This switch has no effect when the
     video is stored with square pixels.
@@ -1622,7 +1643,7 @@ Subtitles
 
     Enabled by default.
 
-``--ass-vsfilter-blur-compat=<yes|no>``
+``--sub-ass-vsfilter-blur-compat=<yes|no>``
     Scale ``\blur`` tags by video resolution instead of script resolution
     (enabled by default). This is bug in VSFilter, which according to some,
     can't be fixed anymore in the name of compatibility.
@@ -1631,7 +1652,7 @@ Subtitles
     offset scale factor, not what the video filter chain or the video output
     use.
 
-``--ass-vsfilter-color-compat=<basic|full|force-601|no>``
+``--sub-ass-vsfilter-color-compat=<basic|full|force-601|no>``
     Mangle colors like (xy-)vsfilter do (default: basic). Historically, VSFilter
     was not color space aware. This was no problem as long as the color space
     used for SD video (BT.601) was used. But when everything switched to HD
@@ -1653,7 +1674,7 @@ Subtitles
 
     Choosing anything other than ``no`` will make the subtitle color depend on
     the video color space, and it's for example in theory not possible to reuse
-    a subtitle script with another video file. The ``--ass-style-override``
+    a subtitle script with another video file. The ``--sub-ass-style-override``
     option doesn't affect how this option is interpreted.
 
 ``--stretch-dvd-subs=<yes|no>``
@@ -1686,14 +1707,14 @@ Subtitles
 
     .. note::
 
-        This has been deprecated by ``--ass-style-override=strip``. You also
+        This has been deprecated by ``--sub-ass-style-override=strip``. You also
         may need ``--embeddedfonts=no`` to get the same behavior. Also,
-        using ``--ass-style-override=force`` should give better results
+        using ``--sub-ass-style-override=force`` should give better results
         without breaking subtitles too much.
 
     If ``--no-sub-ass`` is specified, all tags and style declarations are
     stripped and ignored on display. The subtitle renderer uses the font style
-    as specified by the ``--sub-text-`` options instead.
+    as specified by the ``--sub-`` options instead.
 
     .. note::
 
@@ -1843,6 +1864,132 @@ Subtitles
 ``--teletext-page=<1-999>``
     This works for ``dvb_teletext`` subtitle streams, and if FFmpeg has been
     compiled with support for it.
+
+``--sub-font=<name>``
+    Specify font to use for subtitles that do not themselves
+    specify a particular font. The default is ``sans-serif``.
+
+    .. admonition:: Examples
+
+        - ``--sub-font='Bitstream Vera Sans'``
+        - ``--sub-font='MS Comic Sans'``
+
+    .. note::
+
+        The ``--sub-font`` option (and many other style related ``--sub-``
+        options) are ignored when ASS-subtitles are rendered, unless the
+        ``--no-sub-ass`` option is specified.
+
+        This used to support fontconfig patterns. Starting with libass 0.13.0,
+        this stopped working.
+
+``--sub-font-size=<size>``
+    Specify the sub font size. The unit is the size in scaled pixels at a
+    window height of 720. The actual pixel size is scaled with the window
+    height: if the window height is larger or smaller than 720, the actual size
+    of the text increases or decreases as well.
+
+    Default: 55.
+
+``--sub-back-color=<color>``
+    See ``--sub-color``. Color used for sub text background.
+
+``--sub-blur=<0..20.0>``
+    Gaussian blur factor. 0 means no blur applied (default).
+
+``--sub-bold=<yes|no>``
+    Format text on bold.
+
+``--sub-italic=<yes|no>``
+    Format text on italic.
+
+``--sub-border-color=<color>``
+    See ``--sub-color``. Color used for the sub font border.
+
+    .. note::
+
+        ignored when ``--sub-back-color`` is
+        specified (or more exactly: when that option is not set to completely
+        transparent).
+
+``--sub-border-size=<size>``
+    Size of the sub font border in scaled pixels (see ``--sub-font-size``
+    for details). A value of 0 disables borders.
+
+    Default: 3.
+
+``--sub-color=<color>``
+    Specify the color used for unstyled text subtitles.
+
+    The color is specified in the form ``r/g/b``, where each color component
+    is specified as number in the range 0.0 to 1.0. It's also possible to
+    specify the transparency by using ``r/g/b/a``, where the alpha value 0
+    means fully transparent, and 1.0 means opaque. If the alpha component is
+    not given, the color is 100% opaque.
+
+    Passing a single number to the option sets the sub to gray, and the form
+    ``gray/a`` lets you specify alpha additionally.
+
+    .. admonition:: Examples
+
+        - ``--sub-color=1.0/0.0/0.0`` set sub to opaque red
+        - ``--sub-color=1.0/0.0/0.0/0.75`` set sub to opaque red with 75% alpha
+        - ``--sub-color=0.5/0.75`` set sub to 50% gray with 75% alpha
+
+    Alternatively, the color can be specified as a RGB hex triplet in the form
+    ``#RRGGBB``, where each 2-digit group expresses a color value in the
+    range 0 (``00``) to 255 (``FF``). For example, ``#FF0000`` is red.
+    This is similar to web colors. Alpha is given with ``#AARRGGBB``.
+
+    .. admonition:: Examples
+
+        - ``--sub-color='#FF0000'`` set sub to opaque red
+        - ``--sub-color='#C0808080'`` set sub to 50% gray with 75% alpha
+
+``--sub-margin-x=<size>``
+    Left and right screen margin for the subs in scaled pixels (see
+    ``--sub-font-size`` for details).
+
+    This option specifies the distance of the sub to the left, as well as at
+    which distance from the right border long sub text will be broken.
+
+    Default: 25.
+
+``--sub-margin-y=<size>``
+    Top and bottom screen margin for the subs in scaled pixels (see
+    ``--sub-font-size`` for details).
+
+    This option specifies the vertical margins of unstyled text subtitles.
+    If you just want to raise the vertical subtitle position, use ``--sub-pos``.
+
+    Default: 22.
+
+``--sub-align-x=<left|center|right>``
+    Control to which corner of the screen text subtitles should be
+    aligned to (default: ``center``).
+
+    Never applied to ASS subtitles, except in ``--no-sub-ass`` mode. Likewise,
+    this does not apply to image subtitles.
+
+``--sub-align-y=<top|center|bottom>``
+    Vertical position (default: ``bottom``).
+    Details see ``--sub-align-x``.
+
+``--sub-shadow-color=<color>``
+    See ``--sub-color``. Color used for sub text shadow.
+
+``--sub-shadow-offset=<size>``
+    Displacement of the sub text shadow in scaled pixels (see
+    ``--sub-font-size`` for details). A value of 0 disables shadows.
+
+    Default: 0.
+
+``--sub-spacing=<size>``
+    Horizontal sub font spacing in scaled pixels (see ``--sub-font-size``
+    for details). This value is added to the normal letter spacing. Negative
+    values are allowed.
+
+    Default: 0.
 
 Window
 ------
@@ -2737,29 +2884,16 @@ OSD
 ``--osd-duration=<time>``
     Set the duration of the OSD messages in ms (default: 1000).
 
-``--osd-font=<name>``, ``--sub-text-font=<name>``
-    Specify font to use for OSD and for subtitles that do not themselves
-    specify a particular font. The default is ``sans-serif``.
+``--osd-font=<name>``
+    Specify font to use for OSD. The default is ``sans-serif``.
 
     .. admonition:: Examples
 
         - ``--osd-font='Bitstream Vera Sans'``
         - ``--osd-font='MS Comic Sans'``
 
-    .. note::
-
-        The ``--sub-text-font`` option (and most other ``--sub-text-``
-        options) are ignored when ASS-subtitles are rendered, unless the
-        ``--no-sub-ass`` option is specified.
-
-        This used to support fontconfig patterns. Starting with libass 0.13.0,
-        this stopped working.
-
-``--osd-font-size=<size>``, ``--sub-text-font-size=<size>``
-    Specify the OSD/sub font size. The unit is the size in scaled pixels at a
-    window height of 720. The actual pixel size is scaled with the window
-    height: if the window height is larger or smaller than 720, the actual size
-    of the text increases or decreases as well.
+``--osd-font-size=<size>``
+    Specify the OSD font size. See ``--sub-font-size`` for details.
 
     Default: 55.
 
@@ -2816,60 +2950,36 @@ OSD
 ``--osd-bar-h=<0.1-50>``
     Height of the OSD bar, in percentage of the screen height (default: 3.125).
 
-``--osd-back-color=<color>``, ``--sub-text-back-color=<color>``
-    See ``--osd-color``. Color used for OSD/sub text background.
+``--osd-back-color=<color>``
+    See ``--osd-color``. Color used for OSD text background.
 
-``--osd-blur=<0..20.0>``, ``--sub-text-blur=<0..20.0>``
+``--osd-blur=<0..20.0>``
     Gaussian blur factor. 0 means no blur applied (default).
 
-``--osd-bold=<yes|no>``, ``--sub-text-bold=<yes|no>``
+``--osd-bold=<yes|no>``
     Format text on bold.
 
-``--osd-italic=<yes|no>``, ``--sub-text-italic=<yes|no>``
+``--osd-italic=<yes|no>``
     Format text on italic.
 
-``--osd-border-color=<color>``, ``--sub-text-border-color=<color>``
-    See ``--osd-color``. Color used for the OSD/sub font border.
+``--osd-border-color=<color>``
+    See ``--osd-color``. Color used for the OSD font border.
 
     .. note::
 
-        ignored when ``--osd-back-color``/``--sub-text-back-color`` is
+        ignored when ``--osd-back-color`` is
         specified (or more exactly: when that option is not set to completely
         transparent).
 
-``--osd-border-size=<size>``, ``--sub-text-border-size=<size>``
-    Size of the OSD/sub font border in scaled pixels (see ``--osd-font-size``
+``--osd-border-size=<size>``
+    Size of the OSD font border in scaled pixels (see ``--sub-font-size``
     for details). A value of 0 disables borders.
 
     Default: 3.
 
-``--osd-color=<color>``, ``--sub-text-color=<color>``
-    Specify the color used for OSD/unstyled text subtitles.
-
-    The color is specified in the form ``r/g/b``, where each color component
-    is specified as number in the range 0.0 to 1.0. It's also possible to
-    specify the transparency by using ``r/g/b/a``, where the alpha value 0
-    means fully transparent, and 1.0 means opaque. If the alpha component is
-    not given, the color is 100% opaque.
-
-    Passing a single number to the option sets the OSD to gray, and the form
-    ``gray/a`` lets you specify alpha additionally.
-
-    .. admonition:: Examples
-
-        - ``--osd-color=1.0/0.0/0.0`` set OSD to opaque red
-        - ``--osd-color=1.0/0.0/0.0/0.75`` set OSD to opaque red with 75% alpha
-        - ``--osd-color=0.5/0.75`` set OSD to 50% gray with 75% alpha
-
-    Alternatively, the color can be specified as a RGB hex triplet in the form
-    ``#RRGGBB``, where each 2-digit group expresses a color value in the
-    range 0 (``00``) to 255 (``FF``). For example, ``#FF0000`` is red.
-    This is similar to web colors. Alpha is given with ``#AARRGGBB``.
-
-    .. admonition:: Examples
-
-        - ``--osd-color='#FF0000'`` set OSD to opaque red
-        - ``--osd-color='#C0808080'`` set OSD to 50% gray with 75% alpha
+``--osd-color=<color>``
+    Specify the color used for OSD.
+    See ``--sub-color`` for details.
 
 ``--osd-fractions``
     Show OSD times with fractions of seconds (in millisecond precision). Useful
@@ -2883,34 +2993,29 @@ OSD
     :2: enabled + current time visible by default
     :3: enabled + ``--osd-status-msg`` (current time and status by default)
 
-``--osd-margin-x=<size>, --sub-text-margin-x=<size>``
-    Left and right screen margin for the OSD/subs in scaled pixels (see
-    ``--osd-font-size`` for details).
+``--osd-margin-x=<size>``
+    Left and right screen margin for the OSD in scaled pixels (see
+    ``--sub-font-size`` for details).
 
     This option specifies the distance of the OSD to the left, as well as at
     which distance from the right border long OSD text will be broken.
 
     Default: 25.
 
-``--osd-margin-y=<size>, --sub-text-margin-y=<size>``
-    Top and bottom screen margin for the OSD/subs in scaled pixels (see
-    ``--osd-font-size`` for details).
+``--osd-margin-y=<size>``
+    Top and bottom screen margin for the OSD in scaled pixels (see
+    ``--sub-font-size`` for details).
 
-    This option specifies the vertical margins of the OSD. This is also used
-    for unstyled text subtitles. If you just want to raise the vertical
-    subtitle position, use ``--sub-pos``.
+    This option specifies the vertical margins of the OSD.
 
     Default: 22.
 
-``--osd-align-x=<left|center|right>``,  ``--sub-text-align-x=...``
-    Control to which corner of the screen OSD or text subtitles should be
-    aligned to (default: ``center`` for subs, ``left`` for OSD).
+``--osd-align-x=<left|center|right>``
+    Control to which corner of the screen OSD should be
+    aligned to (default: ``left``).
 
-    Never applied to ASS subtitles, except in ``--no-sub-ass`` mode. Likewise,
-    this does not apply to image subtitles.
-
-``--osd-align-y=<top|center|bottom>`` ``--sub-text-align-y=...``
-    Vertical position (default: ``bottom`` for subs, ``top`` for OSD).
+``--osd-align-y=<top|center|bottom>``
+    Vertical position (default: ``top``).
     Details see ``--osd-align-x``.
 
 ``--osd-scale=<factor>``
@@ -2922,17 +3027,17 @@ OSD
     are always in actual pixels. The effect is that changing the window size
     won't change the OSD font size.
 
-``--osd-shadow-color=<color>, --sub-text-shadow-color=<color>``
-    See ``--osd-color``. Color used for OSD/sub text shadow.
+``--osd-shadow-color=<color>``
+    See ``--sub-color``. Color used for OSD shadow.
 
-``--osd-shadow-offset=<size>, --sub-text-shadow-offset=<size>``
-    Displacement of the OSD/sub text shadow in scaled pixels (see
-    ``--osd-font-size`` for details). A value of 0 disables shadows.
+``--osd-shadow-offset=<size>``
+    Displacement of the OSD shadow in scaled pixels (see
+    ``--sub-font-size`` for details). A value of 0 disables shadows.
 
     Default: 0.
 
-``--osd-spacing=<size>, --sub-text-spacing=<size>``
-    Horizontal OSD/sub font spacing in scaled pixels (see ``--osd-font-size``
+``--osd-spacing=<size>``
+    Horizontal OSD/sub font spacing in scaled pixels (see ``--sub-font-size``
     for details). This value is added to the normal letter spacing. Negative
     values are allowed.
 
@@ -4238,8 +4343,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
         X11/GLX
     wayland
         Wayland/EGL
-    drm-egl
-        DRM/EGL
+    drm
+        DRM/EGL (``drm-egl`` is a deprecated alias)
     x11egl
         X11/EGL
     mali-fbdev
@@ -4480,11 +4585,22 @@ The following video options are currently all specific to ``--vo=opengl`` and
 ``--opengl-rectangle-textures``
     Force use of rectangle textures (default: no). Normally this shouldn't have
     any advantages over normal textures. Note that hardware decoding overrides
-    this flag.
+    this flag. Could be removed any time.
 
 ``--background=<color>``
     Color used to draw parts of the mpv window not covered by video. See
     ``--osd-color`` option how colors are defined.
+
+``--opengl-tex-pad-x``, ``--opengl-tex-pad-y``
+    Enlarge the video source textures by this many pixels. For debugging only
+    (normally textures are sized exactly, but due to hardware decoding interop
+    we may have to deal with additional padding, which can be tested with these
+    options). Could be removed any time.
+
+``--opengl-early-flush=<yes|no>``
+    Call ``glFlush()`` after rendering a frame and before attempting to display
+    it (default: no). Can fix stuttering in some cases, in other cases probably
+    causes it. For testing - could be removed any time.
 
 Miscellaneous
 -------------

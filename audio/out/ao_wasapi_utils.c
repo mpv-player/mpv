@@ -20,7 +20,6 @@
 #include <math.h>
 #include <wchar.h>
 #include <windows.h>
-#include <initguid.h>
 #include <errors.h>
 #include <ksguid.h>
 #include <ksmedia.h>

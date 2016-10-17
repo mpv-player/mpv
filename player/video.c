@@ -449,7 +449,6 @@ int reinit_video_chain(struct MPContext *mpctx)
 
 int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
 {
-    struct MPOpts *opts = mpctx->opts;
     struct track *track = NULL;
     struct sh_stream *sh = NULL;
     if (!src) {
@@ -513,9 +512,7 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
 
     recreate_video_filters(mpctx);
 
-    bool saver_state = opts->pause || !opts->stop_screensaver;
-    vo_control(vo_c->vo, saver_state ? VOCTRL_RESTORE_SCREENSAVER
-                                     : VOCTRL_KILL_SCREENSAVER, NULL);
+    update_screensaver_state(mpctx);
 
     vo_set_paused(vo_c->vo, mpctx->paused);
 
@@ -1288,7 +1285,7 @@ static void calculate_frame_duration(struct MPContext *mpctx)
 
     double demux_duration = mpctx->vo_chain->container_fps > 0
                             ? 1.0 / mpctx->vo_chain->container_fps : -1;
-    double duration = -1;
+    double duration = demux_duration;
 
     if (mpctx->num_next_frames >= 2) {
         double pts0 = mpctx->next_frames[0]->pts;

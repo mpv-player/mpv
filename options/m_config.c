@@ -658,6 +658,10 @@ static int handle_set_opt_flags(struct m_config *config,
     if ((flags & M_SETOPT_PRESERVE_CMDLINE) && co->is_set_from_cmdline)
         set = false;
 
+    if ((flags & M_SETOPT_NO_OVERWRITE) &&
+        (co->is_set_from_cmdline || co->is_set_from_config))
+        set = false;
+
     if ((flags & M_SETOPT_NO_FIXED) && (optflags & M_OPT_FIXED))
         return M_OPT_INVALID;
 
@@ -674,6 +678,15 @@ static int handle_set_opt_flags(struct m_config *config,
         ensure_backup(config, co);
 
     return set ? 2 : 1;
+}
+
+void m_config_mark_co_flags(struct m_config_option *co, int flags)
+{
+    if (flags & M_SETOPT_FROM_CMDLINE)
+        co->is_set_from_cmdline = true;
+
+    if (flags & M_SETOPT_FROM_CONFIG_FILE)
+        co->is_set_from_config = true;
 }
 
 // Unlike m_config_set_option_raw() this does not go through the property layer
@@ -696,9 +709,7 @@ int m_config_set_option_raw_direct(struct m_config *config,
 
     m_option_copy(co->opt, co->data, data);
 
-    if (flags & M_SETOPT_FROM_CMDLINE)
-        co->is_set_from_cmdline = true;
-
+    m_config_mark_co_flags(co, flags);
     m_config_notify_change_co(config, co);
 
     return 0;

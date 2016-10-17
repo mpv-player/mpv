@@ -40,6 +40,7 @@ struct mp_log;
 struct m_config_option {
     bool is_hidden : 1;             // Does not show up in help
     bool is_set_from_cmdline : 1;   // Set by user from command line
+    bool is_set_from_config : 1;    // Set by a config file
     bool is_set_locally : 1;        // Has a backup entry
     bool warning_was_printed : 1;
     int16_t shadow_offset;          // Offset into m_config_shadow.data
@@ -155,6 +156,7 @@ enum {
     M_SETOPT_PRESERVE_CMDLINE = 32, // Don't set if already marked as FROM_CMDLINE
     M_SETOPT_NO_FIXED = 64,         // Reject M_OPT_FIXED options
     M_SETOPT_NO_PRE_PARSE = 128,    // Reject M_OPT_PREPARSE options
+    M_SETOPT_NO_OVERWRITE = 256,    // Skip options marked with FROM_*
 };
 
 // Flags for safe option setting during runtime.
@@ -183,6 +185,8 @@ static inline int m_config_set_option0(struct m_config *config,
 
 int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags);
+
+void m_config_mark_co_flags(struct m_config_option *co, int flags);
 
 int m_config_set_option_raw_direct(struct m_config *config,
                                    struct m_config_option *co,

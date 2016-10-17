@@ -141,10 +141,30 @@ static int control(stream_t *s, int cmd, void *arg)
         }
         break;
     }
-    case STREAM_CTRL_HAS_AVSEEK:
-        if (avio->read_seek)
-            return 1;
+    case STREAM_CTRL_HAS_AVSEEK: {
+        // Starting at some point, read_seek is always available, and runtime
+        // behavior decides whether it exists or not. FFmpeg's API doesn't
+        // return anything helpful to determine seekability upfront, so here's
+        // a hardcoded whitelist. Not our fault.
+        // In addition we also have to jump through ridiculous hoops just to
+        // get the fucking protocol name.
+        const char *proto = NULL;
+        if (avio->av_class && avio->av_class->child_next) {
+            // This usually yields the URLContext (why does it even exist?),
+            // which holds the name of the actual protocol implementation.
+            void *child = avio->av_class->child_next(avio, NULL);
+            AVClass *cl = *(AVClass **)child;
+            if (cl && cl->item_name)
+                proto = cl->item_name(child);
+        }
+        static const char *const has_read_seek[] = {
+            "rtmp", "rtmpt", "rtmpe", "rtmpte", "rtmps", "rtmpts", "mmsh", 0};
+        for (int n = 0; has_read_seek[n]; n++) {
+            if (avio->read_seek && proto && strcmp(proto, has_read_seek[n]) == 0)
+                return 1;
+        }
         break;
+    }
     case STREAM_CTRL_GET_METADATA: {
         *(struct mp_tags **)arg = read_icy(s);
         if (!*(struct mp_tags **)arg)
@@ -315,7 +335,7 @@ static int open_f(stream_t *stream)
     }
 
     stream->priv = avio;
-    stream->seekable = avio->seekable;
+    stream->seekable = avio->seekable & AVIO_SEEKABLE_NORMAL;
     stream->seek = stream->seekable ? seek : NULL;
     stream->fill_buffer = fill_buffer;
     stream->write_buffer = write_buffer;

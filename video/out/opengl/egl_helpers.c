@@ -31,10 +31,11 @@
 #define EGL_OPENGL_ES3_BIT                      0x00000040
 #endif
 
-static bool create_context(EGLDisplay display, struct mp_log *log, int msgl,
+static bool create_context(EGLDisplay display, struct mp_log *log, bool probing,
                            int vo_flags, bool es3,
                            EGLContext *out_context, EGLConfig *out_config)
 {
+    int msgl = probing ? MSGL_V : MSGL_FATAL;
     bool es = vo_flags & VOFLAG_GLES;
 
 
@@ -143,23 +144,25 @@ bool mpegl_create_context(EGLDisplay display, struct mp_log *log, int vo_flags,
                STR_OR_ERR(version), STR_OR_ERR(vendor), STR_OR_ERR(apis));
 
     int clean_flags = vo_flags & ~(unsigned)(VOFLAG_GLES | VOFLAG_NO_GLES);
-    int msgl = vo_flags & VOFLAG_PROBING ? MSGL_V : MSGL_FATAL;
+    bool probing = vo_flags & VOFLAG_PROBING;
+    int msgl = probing ? MSGL_V : MSGL_FATAL;
+    bool try_desktop = !(vo_flags & VOFLAG_NO_GLES);
 
     if (!(vo_flags & VOFLAG_GLES)) {
         // Desktop OpenGL
-        if (create_context(display, log, msgl, clean_flags, false,
+        if (create_context(display, log, try_desktop | probing, clean_flags, false,
                            out_context, out_config))
             return true;
     }
 
-    if (!(vo_flags & VOFLAG_NO_GLES)) {
+    if (try_desktop) {
         // ES 3.x
-        if (create_context(display, log, msgl, clean_flags | VOFLAG_GLES, true,
+        if (create_context(display, log, true, clean_flags | VOFLAG_GLES, true,
                            out_context, out_config))
             return true;
 
         // ES 2.0
-        if (create_context(display, log, msgl, clean_flags | VOFLAG_GLES, false,
+        if (create_context(display, log, probing, clean_flags | VOFLAG_GLES, false,
                            out_context, out_config))
             return true;
     }

@@ -33,6 +33,7 @@
 #include "misc/ring.h"
 #include "misc/bstr.h"
 #include "options/options.h"
+#include "options/path.h"
 #include "osdep/terminal.h"
 #include "osdep/io.h"
 #include "osdep/timer.h"
@@ -288,6 +289,7 @@ static void write_log_file(struct mp_log *log, int lev, char *text)
             (mp_time_us() - MP_START_TIME) / 1e6,
             mp_log_levels[lev][0],
             log->verbose_prefix, text);
+    fflush(root->log_file);
 }
 
 static void write_msg_to_buffers(struct mp_log *log, int lev, char *text)
@@ -459,13 +461,23 @@ void mp_msg_init(struct mpv_global *global)
     mp_msg_update_msglevels(global);
 }
 
-// If *opt is different from *current_path, reopen *file and update *current_path.
+// If opt is different from *current_path, reopen *file and update *current_path.
 // If there's an error, _append_ it to err_buf.
-static void reopen_file(char **opt, char **current_path, FILE **file,
-                        const char *type, char *err_buf, size_t err_buf_size)
+// *current_path and *file are, rather trickily, only accessible under the
+// mp_msg_lock.
+static void reopen_file(char *opt, char **current_path, FILE **file,
+                        const char *type, struct mpv_global *global)
 {
+    void *tmp = talloc_new(NULL);
+    bool fail = false;
+
+    char *new_path = mp_get_user_path(tmp, global, opt);
+    if (!new_path)
+        new_path = "";
+
+    pthread_mutex_lock(&mp_msg_lock); // for *current_path/*file
+
     char *old_path = *current_path ? *current_path : "";
-    char *new_path = *opt ? *opt : "";
     if (strcmp(old_path, new_path) != 0) {
         if (*file)
             fclose(*file);
@@ -474,20 +486,22 @@ static void reopen_file(char **opt, char **current_path, FILE **file,
         *current_path = talloc_strdup(NULL, new_path);
         if (new_path[0]) {
             *file = fopen(new_path, "wb");
-            if (!*file) {
-                mp_snprintf_cat(err_buf, err_buf_size,
-                            "Failed to open %s file '%s'\n", type, new_path);
-            }
+            fail = !*file;
         }
     }
 
+    pthread_mutex_unlock(&mp_msg_lock);
+
+    if (fail)
+        mp_err(global->log, "Failed to open %s file '%s'\n", type, new_path);
+
+    talloc_free(tmp);
 }
 
 void mp_msg_update_msglevels(struct mpv_global *global)
 {
     struct mp_log_root *root = global->log->root;
     struct MPOpts *opts = global->opts;
-    char fail_msg[512] = "";
 
     if (!opts)
         return;
@@ -507,17 +521,14 @@ void mp_msg_update_msglevels(struct mpv_global *global)
     m_option_type_msglevels.copy(NULL, &root->msg_levels,
                                  &global->opts->msg_levels);
 
-    reopen_file(&opts->log_file, &root->log_path, &root->log_file, "log",
-                fail_msg, sizeof(fail_msg));
-
-    reopen_file(&opts->dump_stats, &root->stats_path, &root->stats_file, "stats",
-                fail_msg, sizeof(fail_msg));
-
     atomic_fetch_add(&root->reload_counter, 1);
     pthread_mutex_unlock(&mp_msg_lock);
 
-    if (fail_msg[0])
-        mp_err(global->log, "%s", fail_msg);
+    reopen_file(opts->log_file, &root->log_path, &root->log_file,
+                "log", global);
+
+    reopen_file(opts->dump_stats, &root->stats_path, &root->stats_file,
+                "stats", global);
 }
 
 void mp_msg_force_stderr(struct mpv_global *global, bool force_stderr)

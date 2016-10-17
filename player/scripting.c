@@ -210,7 +210,6 @@ void mp_load_builtin_scripts(struct MPContext *mpctx)
 void mp_load_scripts(struct MPContext *mpctx)
 {
     // Load scripts from options
-    mp_load_builtin_scripts(mpctx);
     char **files = mpctx->opts->script_files;
     for (int n = 0; files && files[n]; n++) {
         if (files[n][0])

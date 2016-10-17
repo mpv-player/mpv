@@ -66,10 +66,6 @@ static const char def_config[] =
 #include "player/builtin_conf.inc"
 ;
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 #if HAVE_COCOA
 #include "osdep/macosx_events.h"
 #endif
@@ -116,7 +112,7 @@ static bool cas_terminal_owner(struct MPContext *old, struct MPContext *new)
     return r;
 }
 
-void mp_update_logging(struct MPContext *mpctx)
+void mp_update_logging(struct MPContext *mpctx, bool preinit)
 {
     mp_msg_update_msglevels(mpctx->global);
 
@@ -125,13 +121,14 @@ void mp_update_logging(struct MPContext *mpctx)
     if (enable != enabled) {
         if (enable && cas_terminal_owner(NULL, mpctx)) {
             terminal_init();
+            enabled = true;
         } else if (!enable) {
             terminal_uninit();
             cas_terminal_owner(mpctx, NULL);
         }
     }
 
-    if (cas_terminal_owner(mpctx, mpctx) && mpctx->opts->consolecontrols)
+    if (enabled && !preinit && mpctx->opts->consolecontrols)
         terminal_setup_getch(mpctx->input);
 }
 
@@ -388,7 +385,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     if (options)
         m_config_preparse_command_line(mpctx->mconfig, mpctx->global, options);
 
-    mp_update_logging(mpctx);
+    mp_update_logging(mpctx, true);
 
     if (options) {
         MP_VERBOSE(mpctx, "Command line options:");
@@ -408,7 +405,15 @@ int mp_initialize(struct MPContext *mpctx, char **options)
             return r == M_OPT_EXIT ? -2 : -1;
     }
 
+    if (opts->operation_mode == 1) {
+        m_config_set_profile(mpctx->mconfig, "builtin-pseudo-gui",
+                             M_SETOPT_NO_OVERWRITE);
+        m_config_set_profile(mpctx->mconfig, "pseudo-gui", 0);
+    }
+
     mp_get_resume_defaults(mpctx);
+
+    mp_input_load_config(mpctx->input);
 
     // From this point on, all mpctx members are initialized.
     mpctx->initialized = true;
@@ -441,8 +446,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     MP_STATS(mpctx, "start init");
 
-    mp_input_load_config(mpctx->input);
-
 #if HAVE_ENCODING
     if (opts->encode_opts->file && opts->encode_opts->file[0]) {
         mpctx->encode_lavc_ctx = encode_lavc_init(opts->encode_opts,
@@ -465,11 +468,6 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     if (opts->force_vo == 2 && handle_force_window(mpctx, false) < 0)
         return -1;
-
-#ifdef _WIN32
-    if (opts->w32_priority > 0)
-        SetPriorityClass(GetCurrentProcess(), opts->w32_priority);
-#endif
 
     MP_STATS(mpctx, "end init");
 

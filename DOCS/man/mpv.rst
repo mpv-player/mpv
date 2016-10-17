@@ -143,11 +143,11 @@ Ctrl + and Ctrl -
 u
     Switch between applying no style overrides to SSA/ASS subtitles, and
     overriding them almost completely with the normal subtitle style. See
-    ``--ass-style-override`` for more info.
+    ``--sub-ass-style-override`` for more info.
 
 V
     Toggle subtitle VSFilter aspect compatibility mode. See
-    ``--ass-vsfilter-aspect-compat`` for more info.
+    ``--sub-ass-vsfilter-aspect-compat`` for more info.
 
 r and t
     Move subtitles up/down.
@@ -736,24 +736,32 @@ Currently this happens only in the following cases:
   or file associations provided by desktop environments)
 - if started from explorer.exe on Windows (technically, if it was started on
   Windows, and all of the stdout/stderr/stdin handles are unset)
-- manually adding ``--profile=pseudo-gui`` to the command line
+- started out of the bundle on OSX
+- if you manually use ``--player-operation-mode=pseudo-gui`` on the command line
 
-This mode implicitly adds ``--profile=pseudo-gui`` to the command line, with
-the ``pseudo-gui`` profile being predefined with the following contents:
+This mode applies options from the builtin profile ``builtin-pseudo-gui``, but
+only if these haven't been set in the user's config file or on the command line.
+Also, for compatibility with the old pseudo-gui behavior, the options in the
+``pseudo-gui`` profile are applied unconditionally. In addition, the profile
+makes sure to enable the pseudo-GUI mode, so that ``--profile=pseudo-gui``
+works like in older mpv releases. The profiles are currently defined as follows:
 
 ::
 
-    [pseudo-gui]
+    [builtin-pseudo-gui]
     terminal=no
     force-window=yes
     idle=once
     screenshot-directory=~~desktop/
+    [pseudo-gui]
+    player-operation-mode=pseudo-gui
 
-This follows the mpv config file format. To customize pseudo-GUI mode, you can
-put your own ``pseudo-gui`` profile into your ``mpv.conf``. This profile will
-enhance the default profile, rather than overwrite it.
+.. warning::
 
-The profile always overrides other settings in ``mpv.conf``.
+    Currently, you can extend the ``pseudo-gui`` profile in the config file the
+    normal way. This is deprecated. In future mpv releases, the behavior might
+    change, and not apply your additional settings, and/or use a different
+    profile name.
 
 
 .. include:: options.rst

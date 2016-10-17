@@ -95,7 +95,7 @@ List of Input Commands
     relative (default)
         Seek relative to current position (a negative value seeks backwards).
     absolute
-        Seek to a given time.
+        Seek to a given time (a negative value starts from the end of the file).
     absolute-percent
         Seek to a given percent position.
     relative-percent
@@ -1492,7 +1492,10 @@ Property list
 
 ``display-names``
     Names of the displays that the mpv window covers. On X11, these
-    are the xrandr names (LVDS1, HDMI1, DP1, VGA1, etc.).
+    are the xrandr names (LVDS1, HDMI1, DP1, VGA1, etc.). On Windows, these
+    are the GDI names (\\.\DISPLAY1, \\.\DISPLAY2, etc.) and the first display
+    in the list will be the one that Windows considers associated with the
+    window (as determined by the MonitorFromWindow API.)
 
 ``display-fps`` (RW)
     The refresh rate of the current display. Currently, this is the lowest FPS
@@ -1528,12 +1531,12 @@ Property list
 
 ``dvb-channel`` (W)
     Pair of integers: card,channel of current DVB stream.
-    Can be switched to switch to another channel on the same card. 
+    Can be switched to switch to another channel on the same card.
 
 ``dvb-channel-name`` (RW)
     Name of current DVB program.
     On write, a channel-switch to the named channel on the same
-    card is performed. Can also be used for channel switching. 
+    card is performed. Can also be used for channel switching.
 
 ``sub-text``
     Return the current subtitle text. Formatting is stripped. If a subtitle

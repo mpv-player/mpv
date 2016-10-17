@@ -54,7 +54,6 @@ static CGLError test_gl_version(struct vo *vo,
     CGLPixelFormatAttribute attrs[] = {
         kCGLPFAOpenGLProfile,
         (CGLPixelFormatAttribute) version,
-        kCGLPFADoubleBuffer,
         kCGLPFAAccelerated,
         #if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
         // leave this as the last entry of the array to not break the fallback
@@ -154,6 +153,7 @@ static int cocoa_control(struct MPGLContext *ctx, int *events, int request,
 static void cocoa_swap_buffers(struct MPGLContext *ctx)
 {
     vo_cocoa_swap_buffers(ctx->vo);
+    ctx->gl->Flush();
 }
 
 const struct mpgl_driver mpgl_driver_cocoa = {
