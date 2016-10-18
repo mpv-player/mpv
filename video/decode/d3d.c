@@ -31,7 +31,8 @@
 
 // define all the GUIDs used directly here, to avoid problems with inconsistent
 // dxva2api.h versions in mingw-w64 and different MSVC version
-#include <initguid.h>
+#include <guiddef.h>
+#include <cguid.h>
 DEFINE_GUID(DXVA2_ModeMPEG2_VLD,                0xee27417f, 0x5e28, 0x4e65, 0xbe, 0xea, 0x1d, 0x26, 0xb5, 0x08, 0xad, 0xc9);
 DEFINE_GUID(DXVA2_ModeMPEG2and1_VLD,            0x86695f12, 0x340e, 0x4f04, 0x9f, 0xd3, 0x92, 0x53, 0xdd, 0x32, 0x74, 0x60);
 

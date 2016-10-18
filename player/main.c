@@ -66,10 +66,6 @@ static const char def_config[] =
 #include "player/builtin_conf.inc"
 ;
 
-#ifdef _WIN32
-#include <windows.h>
-#endif
-
 #if HAVE_COCOA
 #include "osdep/macosx_events.h"
 #endif
@@ -116,11 +112,24 @@ static bool cas_terminal_owner(struct MPContext *old, struct MPContext *new)
     return r;
 }
 
-static void update_logging(struct MPContext *mpctx)
+void mp_update_logging(struct MPContext *mpctx, bool preinit)
 {
     mp_msg_update_msglevels(mpctx->global);
-    if (mpctx->opts->use_terminal && cas_terminal_owner(NULL, mpctx))
-        terminal_init();
+
+    bool enable = mpctx->opts->use_terminal;
+    bool enabled = cas_terminal_owner(mpctx, mpctx);
+    if (enable != enabled) {
+        if (enable && cas_terminal_owner(NULL, mpctx)) {
+            terminal_init();
+            enabled = true;
+        } else if (!enable) {
+            terminal_uninit();
+            cas_terminal_owner(mpctx, NULL);
+        }
+    }
+
+    if (enabled && !preinit && mpctx->opts->consolecontrols)
+        terminal_setup_getch(mpctx->input);
 }
 
 void mp_print_version(struct mp_log *log, int always)
@@ -140,19 +149,19 @@ void mp_print_version(struct mp_log *log, int always)
 
 static void shutdown_clients(struct MPContext *mpctx)
 {
-    while (mpctx->clients && mp_clients_num(mpctx)) {
+    mp_client_enter_shutdown(mpctx);
+    while (mp_clients_num(mpctx)) {
         mp_client_broadcast_event(mpctx, MPV_EVENT_SHUTDOWN, NULL);
-        mp_dispatch_queue_process(mpctx->dispatch, 0);
         mp_wait_events(mpctx);
     }
 }
 
 void mp_destroy(struct MPContext *mpctx)
 {
+    shutdown_clients(mpctx);
+
     mp_uninit_ipc(mpctx->ipc_ctx);
     mpctx->ipc_ctx = NULL;
-
-    shutdown_clients(mpctx);
 
     uninit_audio_out(mpctx);
     uninit_video_out(mpctx);
@@ -302,14 +311,12 @@ static int cfg_include(void *ctx, char *filename, int flags)
     return r;
 }
 
-void wakeup_playloop(void *ctx)
-{
-    struct MPContext *mpctx = ctx;
-    mp_wakeup_core(mpctx);
-}
-
 struct MPContext *mp_create(void)
 {
+    char *enable_talloc = getenv("MPV_LEAK_REPORT");
+    if (enable_talloc && strcmp(enable_talloc, "1") == 0)
+        talloc_enable_leak_report();
+
     mp_time_init();
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
@@ -356,6 +363,10 @@ struct MPContext *mp_create(void)
 
     mp_input_set_cancel(mpctx->input, mpctx->playback_abort);
 
+    char *verbose_env = getenv("MPV_VERBOSE");
+    if (verbose_env)
+        mpctx->opts->verbose = atoi(verbose_env);
+
     return mpctx;
 }
 
@@ -370,31 +381,48 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
     assert(!mpctx->initialized);
 
-    if (options) {
-        // Preparse the command line, so we can init the terminal early.
+    // Preparse the command line, so we can init the terminal early.
+    if (options)
         m_config_preparse_command_line(mpctx->mconfig, mpctx->global, options);
 
-        update_logging(mpctx);
+    mp_update_logging(mpctx, true);
 
+    if (options) {
         MP_VERBOSE(mpctx, "Command line options:");
         for (int i = 0; options[i]; i++)
             MP_VERBOSE(mpctx, " '%s'", options[i]);
         MP_VERBOSE(mpctx, "\n");
     }
 
-    update_logging(mpctx);
     mp_print_version(mpctx->log, false);
 
     mp_parse_cfgfiles(mpctx);
-    update_logging(mpctx);
 
     if (options) {
         int r = m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
                                                mpctx->global, options);
         if (r < 0)
             return r == M_OPT_EXIT ? -2 : -1;
-        update_logging(mpctx);
     }
+
+    if (opts->operation_mode == 1) {
+        m_config_set_profile(mpctx->mconfig, "builtin-pseudo-gui",
+                             M_SETOPT_NO_OVERWRITE);
+        m_config_set_profile(mpctx->mconfig, "pseudo-gui", 0);
+    }
+
+    mp_get_resume_defaults(mpctx);
+
+    mp_input_load_config(mpctx->input);
+
+    // From this point on, all mpctx members are initialized.
+    mpctx->initialized = true;
+    mpctx->mconfig->option_set_callback = mp_on_set_option;
+    mpctx->mconfig->option_set_callback_cb = mpctx;
+    mpctx->mconfig->option_change_callback = mp_option_change_callback;
+    mpctx->mconfig->option_change_callback_ctx = mpctx;
+    // Run all update handlers.
+    mp_option_change_callback(mpctx, NULL, UPDATE_OPTS_MASK);
 
     if (handle_help_options(mpctx))
         return -2;
@@ -413,16 +441,10 @@ int mp_initialize(struct MPContext *mpctx, char **options)
         return -1;
     }
 
-    if (opts->dump_stats && opts->dump_stats[0]) {
-        if (mp_msg_open_stats_file(mpctx->global, opts->dump_stats) < 0)
-            MP_ERR(mpctx, "Failed to open stats file '%s'\n", opts->dump_stats);
-    }
-    MP_STATS(mpctx, "start init");
-
     if (!mpctx->playlist->first && !opts->player_idle_mode)
         return -3;
 
-    mp_input_load(mpctx->input);
+    MP_STATS(mpctx, "start init");
 
 #if HAVE_ENCODING
     if (opts->encode_opts->file && opts->encode_opts->file[0]) {
@@ -442,29 +464,10 @@ int mp_initialize(struct MPContext *mpctx, char **options)
     MP_WARN(mpctx, "There will be no OSD and no text subtitles.\n");
 #endif
 
-    // From this point on, all mpctx members are initialized.
-    mpctx->initialized = true;
-
-    mp_get_resume_defaults(mpctx);
-
-    // Lua user scripts (etc.) can call arbitrary functions. Load them at a point
-    // where this is safe.
     mp_load_scripts(mpctx);
-
-    if (opts->consolecontrols && cas_terminal_owner(mpctx, mpctx))
-        terminal_setup_getch(mpctx->input);
 
     if (opts->force_vo == 2 && handle_force_window(mpctx, false) < 0)
         return -1;
-
-    mpctx->ipc_ctx = mp_init_ipc(mpctx->clients, mpctx->global);
-
-#ifdef _WIN32
-    if (opts->w32_priority > 0)
-        SetPriorityClass(GetCurrentProcess(), opts->w32_priority);
-#endif
-
-    prepare_playlist(mpctx, mpctx->playlist);
 
     MP_STATS(mpctx, "end init");
 
@@ -473,16 +476,7 @@ int mp_initialize(struct MPContext *mpctx, char **options)
 
 int mpv_main(int argc, char *argv[])
 {
-    char *enable_talloc = getenv("MPV_LEAK_REPORT");
-    if (enable_talloc && strcmp(enable_talloc, "1") == 0)
-        talloc_enable_leak_report();
-
     struct MPContext *mpctx = mp_create();
-    struct MPOpts *opts = mpctx->opts;
-
-    char *verbose_env = getenv("MPV_VERBOSE");
-    if (verbose_env)
-        opts->verbose = atoi(verbose_env);
 
     char **options = argv && argv[0] ? argv + 1 : NULL; // skips program name
     int r = mp_initialize(mpctx, options);

@@ -34,7 +34,7 @@ typedef struct mp_vo_opts {
     struct m_geometry autofit;
     struct m_geometry autofit_larger;
     struct m_geometry autofit_smaller;
-    float window_scale;
+    double window_scale;
 
     int keepaspect;
     int keepaspect_window;
@@ -51,6 +51,9 @@ typedef struct mp_vo_opts {
     struct sws_opts *sws_opts;
     // vo_opengl, vo_opengl_cb
     int hwdec_preload_api;
+    // vo_drm
+    char *drm_connector_spec;
+    int drm_mode_id;
 } mp_vo_opts;
 
 struct mp_cache_opts {
@@ -73,6 +76,8 @@ typedef struct MPOpts {
     int msg_module;
     int msg_time;
     char *log_file;
+
+    int operation_mode;
 
     char **reset_options;
     char **script_files;
@@ -101,7 +106,6 @@ typedef struct MPOpts {
     double audio_buffer;
 
     mp_vo_opts *vo;
-    int allow_win_drag;
 
     char *wintitle;
     char *media_title;
@@ -191,6 +195,7 @@ typedef struct MPOpts {
     int position_save_on_quit;
     int write_filename_in_watch_later_config;
     int ignore_path_in_watch_later_config;
+    char *watch_later_directory;
     int pause;
     int keep_open;
     double image_display_duration;
@@ -257,7 +262,7 @@ typedef struct MPOpts {
     int sub_scale_with_window;
     int ass_scale_with_window;
     struct osd_style_opts *osd_style;
-    struct osd_style_opts *sub_text_style;
+    struct osd_style_opts *sub_style;
     float sub_scale;
     float sub_gauss;
     int sub_gray;

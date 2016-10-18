@@ -141,6 +141,11 @@ static const struct vd_lavc_hwdec mp_vd_lavc_rpi = {
     .lavc_suffix = "_mmal",
     .image_format = IMGFMT_MMAL,
 };
+static const struct vd_lavc_hwdec mp_vd_lavc_rpi_copy = {
+    .type = HWDEC_RPI_COPY,
+    .lavc_suffix = "_mmal",
+    .copying = true,
+};
 #endif
 
 #if HAVE_ANDROID
@@ -159,9 +164,16 @@ static const struct vd_lavc_hwdec mp_vd_lavc_cuda_copy = {
 };
 #endif
 
+static const struct vd_lavc_hwdec mp_vd_lavc_crystalhd = {
+    .type = HWDEC_CRYSTALHD,
+    .lavc_suffix = "_crystalhd",
+    .copying = true,
+};
+
 static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #if HAVE_RPI
     &mp_vd_lavc_rpi,
+    &mp_vd_lavc_rpi_copy,
 #endif
 #if HAVE_VDPAU_HWACCEL
     &mp_vd_lavc_vdpau,
@@ -187,6 +199,7 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
     &mp_vd_lavc_cuda,
     &mp_vd_lavc_cuda_copy,
 #endif
+    &mp_vd_lavc_crystalhd,
     NULL
 };
 
@@ -411,11 +424,14 @@ static void reinit(struct dec_video *vd)
     }
 
     if (hwdec) {
+        const char *orig_decoder = decoder;
         if (hwdec->get_codec)
             decoder = hwdec->get_codec(ctx, decoder);
         if (hwdec->lavc_suffix)
             decoder = hwdec_find_decoder(codec, hwdec->lavc_suffix);
         MP_VERBOSE(vd, "Trying hardware decoding.\n");
+        if (strcmp(orig_decoder, decoder) != 0)
+            MP_VERBOSE(vd, "Using underlying hw-decoder '%s'\n", decoder);
     } else {
         MP_VERBOSE(vd, "Using software decoding.\n");
     }
@@ -592,7 +608,6 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
                                 struct mp_image_params *out_params)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
-    struct MPOpts *opts = ctx->opts;
 
 #if HAVE_AVUTIL_MASTERING_METADATA
     // Get the reference peak (for HDR) if available. This is cached into ctx
@@ -632,13 +647,6 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
         .rotate = vd->codec->rotate,
         .stereo_in = vd->codec->stereo_mode,
     };
-
-    if (opts->video_rotate < 0) {
-        out_params->rotate = 0;
-    } else {
-        out_params->rotate = (out_params->rotate + opts->video_rotate) % 360;
-    }
-    out_params->stereo_out = opts->video_stereo_mode;
 }
 
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
@@ -853,7 +861,7 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         return;
     }
     assert(mpi->planes[0] || mpi->planes[3]);
-    mpi->pts = mp_pts_from_av(ctx->pic->pkt_pts, &ctx->codec_timebase);
+    mpi->pts = mp_pts_from_av(MP_AVFRAME_DEC_PTS(ctx->pic), &ctx->codec_timebase);
     mpi->dts = mp_pts_from_av(ctx->pic->pkt_dts, &ctx->codec_timebase);
 
     struct mp_image_params params;

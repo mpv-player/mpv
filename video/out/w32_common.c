@@ -15,7 +15,6 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <initguid.h>
 #include <stdio.h>
 #include <limits.h>
 #include <pthread.h>
@@ -723,6 +722,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         ClientToScreen(w32->window, &p);
         w32->window_x = p.x;
         w32->window_y = p.y;
+
+        // Window may intersect with new monitors (see VOCTRL_GET_DISPLAY_NAMES)
+        signal_events(w32, VO_EVENT_WIN_STATE);
+
         update_display_info(w32);  // if we moved between monitors
         MP_VERBOSE(w32, "move window: %d:%d\n", w32->window_x, w32->window_y);
         break;
@@ -1483,6 +1486,51 @@ fail:
     return 0;
 }
 
+struct disp_names_data {
+    HMONITOR assoc;
+    int count;
+    char **names;
+};
+
+static BOOL CALLBACK disp_names_proc(HMONITOR mon, HDC dc, LPRECT r, LPARAM p)
+{
+    struct disp_names_data *data = (struct disp_names_data*)p;
+
+    // get_disp_names() adds data->assoc to the list, so skip it here
+    if (mon == data->assoc)
+        return TRUE;
+
+    MONITORINFOEXW mi = { .cbSize = sizeof mi };
+    if (GetMonitorInfoW(mon, (MONITORINFO*)&mi)) {
+        MP_TARRAY_APPEND(NULL, data->names, data->count,
+                         mp_to_utf8(NULL, mi.szDevice));
+    }
+    return TRUE;
+}
+
+static char **get_disp_names(struct vo_w32_state *w32)
+{
+    // Get the client area of the window in screen space
+    RECT rect = { 0 };
+    GetClientRect(w32->window, &rect);
+    MapWindowPoints(w32->window, NULL, (POINT*)&rect, 2);
+
+    struct disp_names_data data = { .assoc = w32->monitor };
+
+    // Make sure the monitor that Windows considers to be associated with the
+    // window is first in the list
+    MONITORINFOEXW mi = { .cbSize = sizeof mi };
+    if (GetMonitorInfoW(data.assoc, (MONITORINFO*)&mi)) {
+        MP_TARRAY_APPEND(NULL, data.names, data.count,
+                         mp_to_utf8(NULL, mi.szDevice));
+    }
+
+    // Get the names of the other monitors that intersect the client rect
+    EnumDisplayMonitors(NULL, &rect, disp_names_proc, (LPARAM)&data);
+    MP_TARRAY_APPEND(NULL, data.names, data.count, NULL);
+    return data.names;
+}
+
 static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 {
     switch (request) {
@@ -1563,6 +1611,9 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
     case VOCTRL_GET_DISPLAY_FPS:
         update_display_info(w32);
         *(double*) arg = w32->display_fps;
+        return VO_TRUE;
+    case VOCTRL_GET_DISPLAY_NAMES:
+        *(char ***)arg = get_disp_names(w32);
         return VO_TRUE;
     case VOCTRL_GET_ICC_PROFILE:
         update_display_info(w32);

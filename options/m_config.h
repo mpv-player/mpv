@@ -40,6 +40,7 @@ struct mp_log;
 struct m_config_option {
     bool is_hidden : 1;             // Does not show up in help
     bool is_set_from_cmdline : 1;   // Set by user from command line
+    bool is_set_from_config : 1;    // Set by a config file
     bool is_set_locally : 1;        // Has a backup entry
     bool warning_was_printed : 1;
     int16_t shadow_offset;          // Offset into m_config_shadow.data
@@ -76,6 +77,17 @@ typedef struct m_config {
     bool is_toplevel;
     int (*includefunc)(void *ctx, char *filename, int flags);
     void *includefunc_ctx;
+
+    // Can intercept option write accesses.
+    int (*option_set_callback)(void *ctx, struct m_config_option *co,
+                               void *data, int flags);
+    void *option_set_callback_cb;
+
+    // Notification after an option was successfully written to.
+    // Uses flags as set in UPDATE_OPTS_MASK.
+    void (*option_change_callback)(void *ctx, struct m_config_option *co,
+                                   int flags);
+    void *option_change_callback_ctx;
 
     // For the command line parser
     int recursion_depth;
@@ -144,6 +156,7 @@ enum {
     M_SETOPT_PRESERVE_CMDLINE = 32, // Don't set if already marked as FROM_CMDLINE
     M_SETOPT_NO_FIXED = 64,         // Reject M_OPT_FIXED options
     M_SETOPT_NO_PRE_PARSE = 128,    // Reject M_OPT_PREPARSE options
+    M_SETOPT_NO_OVERWRITE = 256,    // Skip options marked with FROM_*
 };
 
 // Flags for safe option setting during runtime.
@@ -170,10 +183,14 @@ static inline int m_config_set_option0(struct m_config *config,
     return m_config_set_option(config, bstr0(name), bstr0(param));
 }
 
-// Similar to m_config_set_option_ext(), but set as data in its native format.
-// The type data points to is as in co->opt
 int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags);
+
+void m_config_mark_co_flags(struct m_config_option *co, int flags);
+
+int m_config_set_option_raw_direct(struct m_config *config,
+                                   struct m_config_option *co,
+                                   void *data, int flags);
 
 // Similar to m_config_set_option_ext(), but set as data using mpv_node.
 struct mpv_node;
@@ -184,6 +201,8 @@ int m_config_set_option_node(struct m_config *config, bstr name,
 int m_config_parse_suboptions(struct m_config *config, char *name,
                               char *subopts);
 
+struct m_config_option *m_config_get_co_raw(const struct m_config *config,
+                                            struct bstr name);
 struct m_config_option *m_config_get_co(const struct m_config *config,
                                         struct bstr name);
 

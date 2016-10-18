@@ -377,6 +377,8 @@ static void *ipc_thread(void *p)
         goto done;
     }
 
+    MP_VERBOSE(arg, "Listening to IPC pipe.\n");
+
     while (1) {
         DWORD err = ConnectNamedPipe(server, &ol) ? 0 : GetLastError();
 

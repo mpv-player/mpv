@@ -445,6 +445,7 @@ int init_audio_decoder(struct MPContext *mpctx, struct track *track);
 void reinit_audio_chain_src(struct MPContext *mpctx, struct lavfi_pad *src);
 void audio_update_volume(struct MPContext *mpctx);
 void audio_update_balance(struct MPContext *mpctx);
+void reload_audio_output(struct MPContext *mpctx);
 
 // configfiles.c
 void mp_parse_cfgfiles(struct MPContext *mpctx);
@@ -486,7 +487,7 @@ int mp_initialize(struct MPContext *mpctx, char **argv);
 struct MPContext *mp_create(void);
 void mp_destroy(struct MPContext *mpctx);
 void mp_print_version(struct mp_log *log, int always);
-void wakeup_playloop(void *ctx);
+void mp_update_logging(struct MPContext *mpctx, bool preinit);
 
 // misc.c
 double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t);
@@ -542,6 +543,7 @@ void mp_idle(struct MPContext *mpctx);
 void idle_loop(struct MPContext *mpctx);
 int handle_force_window(struct MPContext *mpctx, bool force);
 void seek_to_last_frame(struct MPContext *mpctx);
+void update_screensaver_state(struct MPContext *mpctx);
 
 // scripting.c
 struct mp_scripting {
@@ -549,6 +551,8 @@ struct mp_scripting {
     int (*load)(struct mpv_handle *client, const char *filename);
 };
 void mp_load_scripts(struct MPContext *mpctx);
+void mp_load_builtin_scripts(struct MPContext *mpctx);
+int mp_load_script(struct MPContext *mpctx, const char *fname);
 
 // sub.c
 void reset_subtitle_state(struct MPContext *mpctx);
@@ -575,7 +579,7 @@ void uninit_video_chain(struct MPContext *mpctx);
 double calc_average_frame_duration(struct MPContext *mpctx);
 int init_video_decoder(struct MPContext *mpctx, struct track *track);
 int get_deinterlacing(struct MPContext *mpctx);
-void set_deinterlacing(struct MPContext *mpctx, bool enable);
+void set_deinterlacing(struct MPContext *mpctx, int opt_val);
 
 // Values of MPOpts.softvol
 enum {

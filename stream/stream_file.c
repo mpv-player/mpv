@@ -60,14 +60,14 @@
 struct priv {
     int fd;
     bool close;
-    bool regular;
+    bool use_poll;
 };
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
     struct priv *p = s->priv;
 #ifndef __MINGW32__
-    if (!p->regular) {
+    if (p->use_poll) {
         int c = s->cancel ? mp_cancel_get_fd(s->cancel) : -1;
         struct pollfd fds[2] = {
             {.fd = p->fd, .events = POLLIN},
@@ -269,6 +269,7 @@ static int open_f(stream_t *stream)
         openmode |= S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
         if (!write)
             m |= O_NONBLOCK;
+        p->use_poll = true;
 #endif
         p->fd = open(filename, m | O_BINARY, openmode);
         if (p->fd < 0) {
@@ -279,13 +280,14 @@ static int open_f(stream_t *stream)
         struct stat st;
         if (fstat(p->fd, &st) == 0) {
             if (S_ISDIR(st.st_mode)) {
+                p->use_poll = false;
                 stream->type = STREAMTYPE_DIR;
                 stream->allow_caching = false;
                 MP_INFO(stream, "This is a directory - adding to playlist.\n");
             }
 #ifndef __MINGW32__
             if (S_ISREG(st.st_mode)) {
-                p->regular = true;
+                p->use_poll = false;
                 // O_NONBLOCK has weird semantics on file locks; remove it.
                 int val = fcntl(p->fd, F_GETFL) & ~(unsigned)O_NONBLOCK;
                 fcntl(p->fd, F_SETFL, val);

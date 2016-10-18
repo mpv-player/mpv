@@ -95,7 +95,7 @@ List of Input Commands
     relative (default)
         Seek relative to current position (a negative value seeks backwards).
     absolute
-        Seek to a given time.
+        Seek to a given time (a negative value starts from the end of the file).
     absolute-percent
         Seek to a given percent position.
     relative-percent
@@ -691,6 +691,17 @@ Input Commands that are Possibly Subject to Change
 ``af-command "<label>" "<cmd>" "<args>"``
     Same as ``vf-command``, but for audio filters.
 
+``apply-profile "<name>"``
+    Apply the contents of a named profile. This is like using ``profile=name``
+    in a config file, except you can map it to a key binding to change it at
+    runtime.
+
+    There is no such thing as "unapplying" a profile - applying a profile
+    merely sets all option values listed within the profile.
+
+``load-script "<path>"``
+    Load a script, similar to the ``--script`` option.
+
 Undocumented commands: ``tv-last-channel`` (TV/DVB only),
 ``ao-reload`` (experimental/internal).
 
@@ -975,6 +986,12 @@ Property list
 ``time-remaining``
     Remaining length of the file in seconds. Note that the file duration is not
     always exactly known, so this is an estimate.
+
+``audio-pts`` (R)
+    Current audio playback position in current file in seconds. Unlike time-pos,
+    this updates more often than once per frame. For audio-only files, it is
+    mostly equivalent to time-pos, while for video-only files this property is
+    not available.
 
 ``playtime-remaining``
     ``time-remaining`` scaled by the current ``speed``.
@@ -1424,6 +1441,9 @@ Property list
     These have the same values as ``video-out-params/dw`` and
     ``video-out-params/dh``.
 
+``video-dec-params``
+    Exactly like ``video-params``, but no overrides applied.
+
 ``video-out-params``
     Same as ``video-params``, but after video filters have been applied. If
     there are no video filters in use, this will contain the same values as
@@ -1472,7 +1492,10 @@ Property list
 
 ``display-names``
     Names of the displays that the mpv window covers. On X11, these
-    are the xrandr names (LVDS1, HDMI1, DP1, VGA1, etc.).
+    are the xrandr names (LVDS1, HDMI1, DP1, VGA1, etc.). On Windows, these
+    are the GDI names (\\.\DISPLAY1, \\.\DISPLAY2, etc.) and the first display
+    in the list will be the one that Windows considers associated with the
+    window (as determined by the MonitorFromWindow API.)
 
 ``display-fps`` (RW)
     The refresh rate of the current display. Currently, this is the lowest FPS
@@ -1508,12 +1531,12 @@ Property list
 
 ``dvb-channel`` (W)
     Pair of integers: card,channel of current DVB stream.
-    Can be switched to switch to another channel on the same card. 
+    Can be switched to switch to another channel on the same card.
 
 ``dvb-channel-name`` (RW)
     Name of current DVB program.
     On write, a channel-switch to the named channel on the same
-    card is performed. Can also be used for channel switching. 
+    card is performed. Can also be used for channel switching.
 
 ``sub-text``
     Return the current subtitle text. Formatting is stripped. If a subtitle
@@ -2066,13 +2089,19 @@ caveats with some properties (due to historical reasons):
     allows setting any track ID, and which tracks to enable is chosen at
     loading time.)
 
+    Option changes at runtime are affected by this as well.
+
 ``deinterlace``
     While video is active, this behaves differently from the option. It will
     never return the ``auto`` value (but the state as observed by the video
-    chain). You cannot set ``auto`` either.
+    chain). If you set ``auto``, the property will set this as the option value,
+    and will return the actual video chain state as observed instead of auto.
 
 ``video-aspect``
-    While video is active, always returns the effective aspect ratio.
+    While video is active, always returns the effective aspect ratio. Setting
+    a special value (like ``no``, values ``<= 0``) will make the property
+    set this as option, and return whatever actual aspect was derived from the
+    option setting.
 
 ``brightness`` (and other color options)
     If ``--vo=xv`` is used, these properties may return the adapter's current
@@ -2081,6 +2110,28 @@ caveats with some properties (due to historical reasons):
 ``display-fps``
     If a VO is created, this will return either the actual display FPS, or
     an invalid value, instead of the option value.
+
+``vf``, ``af``
+    If you set the properties during playback, and the filter chain fails to
+    reinitialize, the new value will be rejected. Setting the option or
+    setting the property outside of playback will always succeed/fail in the
+    same way. Also, there are no ``vf-add`` etc. properties, but you can use
+    the ``vf``/``af`` group of commands to achieve the same.
+
+    Option changes at runtime are affected by this as well.
+
+``edition``
+    While a file is loaded, the property will always return the effective
+    edition, and setting the ``auto`` value will show somewhat strange behavior
+    (the property eventually switching to whatever is the default edition).
+
+``playlist``
+    The property is read-only and returns the current internal playlist. The
+    option is for loading playlist during command line parsing. For client API
+    uses, you should use the ``loadlist`` command instead.
+
+``window-scale``
+    Might verify the set value when setting while a window is created.
 
 ``audio-file``, ``sub-file``, ``external-file``
     These options/properties are actually lists of filenames. To make the
@@ -2095,7 +2146,7 @@ caveats with some properties (due to historical reasons):
     Strictly speaking, option access via API (e.g. ``mpv_set_option_string()``)
     has the same problem, and it's only a difference between CLI/API.
 
-``demuxer``, ``idle``, ``length``, ``audio-samplerate``, ``audio-channels``, ``audio-format``, ``fps``, ``cache``
+``demuxer``, ``idle``, ``length``, ``audio-samplerate``, ``audio-channels``, ``audio-format``, ``fps``, ``cache``, ``playlist-pos``, ``chapter``
     These behave completely different as property, but are deprecated (newer
     aliases which don't conflict have been added). After the deprecation period
     they will be changed to the proper option behavior.

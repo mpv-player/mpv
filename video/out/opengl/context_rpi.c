@@ -95,12 +95,14 @@ static void rpi_uninit(MPGLContext *ctx)
 static int recreate_dispmanx(struct MPGLContext *ctx)
 {
     struct priv *p = ctx->priv;
+    int display_nr = 0;
+    int layer = 0;
 
     MP_VERBOSE(ctx->vo, "Recreating DISPMANX state...\n");
 
     destroy_dispmanx(ctx);
 
-    p->display = vc_dispmanx_display_open(0);
+    p->display = vc_dispmanx_display_open(display_nr);
     p->update = vc_dispmanx_update_start(0);
     if (!p->display || !p->update) {
         MP_FATAL(ctx->vo, "Could not get DISPMANX objects.\n");
@@ -139,8 +141,9 @@ static int recreate_dispmanx(struct MPGLContext *ctx)
         .flags = DISPMANX_FLAGS_ALPHA_FROM_SOURCE,
         .opacity = 0xFF,
     };
-    p->window = vc_dispmanx_element_add(p->update, p->display, 1, &dst, 0, &src,
-                                        DISPMANX_PROTECTION_NONE, &alpha, 0, 0);
+    p->window = vc_dispmanx_element_add(p->update, p->display, layer, &dst, 0,
+                                        &src, DISPMANX_PROTECTION_NONE, &alpha,
+                                        0, 0);
     if (!p->window) {
         MP_FATAL(ctx->vo, "Could not add DISPMANX element.\n");
         goto fail;
@@ -187,6 +190,8 @@ static int recreate_dispmanx(struct MPGLContext *ctx)
         }
     }
 
+    p->win_params[0] = display_nr;
+    p->win_params[1] = layer;
     p->win_params[2] = p->x;
     p->win_params[3] = p->y;
 

@@ -135,7 +135,7 @@ main_dependencies = [
         'name': 'win32',
         'desc': 'win32',
         'deps_any': [ 'os-win32', 'os-cygwin' ],
-        'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'avrt', 'dwmapi']),
+        'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'uuid', 'avrt', 'dwmapi']),
     }, {
         'name': '--win32-internal-pthreads',
         'desc': 'internal pthread wrapper for win32 (Vista+)',
@@ -581,7 +581,7 @@ audio_output_features = [
     }, {
         'name': '--openal',
         'desc': 'OpenAL audio output',
-        'func': check_pkg_config('openal', '>= 1.13'),
+        'func': check_openal,
         'default': 'disable'
     }, {
         'name': '--opensles',

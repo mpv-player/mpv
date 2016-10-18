@@ -79,27 +79,30 @@ static VADisplay *create_drm_va_display(GL *gl)
 #endif
 
 struct va_create_native {
+    const char *name;
     VADisplay *(*create)(GL *gl);
 };
 
 static const struct va_create_native create_native_cbs[] = {
 #if HAVE_VAAPI_X11
-    {create_x11_va_display},
+    {"x11",     create_x11_va_display},
 #endif
 #if HAVE_VAAPI_WAYLAND
-    {create_wayland_va_display},
+    {"wayland", create_wayland_va_display},
 #endif
 #if HAVE_VAAPI_DRM
-    {create_drm_va_display},
+    {"drm",     create_drm_va_display},
 #endif
 };
 
-static VADisplay *create_native_va_display(GL *gl)
+static VADisplay *create_native_va_display(GL *gl, struct mp_log *log)
 {
     if (!gl->MPGetNativeDisplay)
         return NULL;
     for (int n = 0; n < MP_ARRAY_SIZE(create_native_cbs); n++) {
-        VADisplay *display = create_native_cbs[n].create(gl);
+        const struct va_create_native *disp = &create_native_cbs[n];
+        mp_verbose(log, "Trying to open a %s VA display...\n", disp->name);
+        VADisplay *display = disp->create(gl);
         if (display)
             return display;
     }
@@ -205,9 +208,11 @@ static int create(struct gl_hwdec *hw)
         !p->EGLImageTargetTexture2DOES)
         return -1;
 
-    p->display = create_native_va_display(gl);
-    if (!p->display)
+    p->display = create_native_va_display(gl, hw->log);
+    if (!p->display) {
+        MP_VERBOSE(hw, "Could not create a VA display.\n");
         return -1;
+    }
 
     p->ctx = va_initialize(p->display, p->log, true);
     if (!p->ctx) {

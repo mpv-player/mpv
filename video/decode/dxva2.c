@@ -19,8 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <initguid.h>
-
 #define DXVA2API_USE_BITFIELDS
 #include <libavcodec/dxva2.h>
 

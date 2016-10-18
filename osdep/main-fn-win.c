@@ -67,8 +67,10 @@ int wmain(int argc, wchar_t *argv[])
     // Build mpv's UTF-8 argv, and add the pseudo-GUI profile if necessary
     if (argv[0])
         MP_TARRAY_APPEND(NULL, argv_u8, argv_len, mp_to_utf8(argv_u8, argv[0]));
-    if (gui)
-        MP_TARRAY_APPEND(NULL, argv_u8, argv_len, "--profile=pseudo-gui");
+    if (gui) {
+        MP_TARRAY_APPEND(NULL, argv_u8, argv_len,
+                         "--player-operation-mode=pseudo-gui");
+    }
     for (int i = 1; i < argc; i++)
         MP_TARRAY_APPEND(NULL, argv_u8, argv_len, mp_to_utf8(argv_u8, argv[i]));
     MP_TARRAY_APPEND(NULL, argv_u8, argv_len, NULL);

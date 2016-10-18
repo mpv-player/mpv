@@ -770,7 +770,7 @@ static void load_per_file_options(m_config_t *conf,
 {
     for (int n = 0; n < params_count; n++) {
         m_config_set_option_ext(conf, params[n].name, params[n].value,
-                                M_SETOPT_BACKUP);
+                                M_SETOPT_RUNTIME | M_SETOPT_BACKUP);
     }
 }
 
@@ -1123,6 +1123,7 @@ reopen_file:
 
     mpctx->playback_initialized = true;
     mp_notify(mpctx, MPV_EVENT_FILE_LOADED, NULL);
+    update_screensaver_state(mpctx);
 
     if (mpctx->max_frames == 0) {
         if (!mpctx->stop_play)
@@ -1177,6 +1178,7 @@ terminate_playback:
         uninit_audio_out(mpctx);
 
     mpctx->playback_initialized = false;
+    update_screensaver_state(mpctx);
 
     if (mpctx->stop_play == PT_RELOAD_FILE) {
         mpctx->stop_play = KEEP_PLAYING;
@@ -1296,6 +1298,8 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
 // Return if all done.
 void mp_play_files(struct MPContext *mpctx)
 {
+    prepare_playlist(mpctx, mpctx->playlist);
+
     for (;;) {
         idle_loop(mpctx);
         if (mpctx->stop_play == PT_QUIT)

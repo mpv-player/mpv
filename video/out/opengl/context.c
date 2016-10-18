@@ -38,6 +38,7 @@ extern const struct mpgl_driver mpgl_driver_x11;
 extern const struct mpgl_driver mpgl_driver_x11egl;
 extern const struct mpgl_driver mpgl_driver_x11_probe;
 extern const struct mpgl_driver mpgl_driver_drm_egl;
+extern const struct mpgl_driver mpgl_driver_drm;
 extern const struct mpgl_driver mpgl_driver_cocoa;
 extern const struct mpgl_driver mpgl_driver_wayland;
 extern const struct mpgl_driver mpgl_driver_w32;
@@ -77,6 +78,7 @@ static const struct mpgl_driver *const backends[] = {
     &mpgl_driver_x11,
 #endif
 #if HAVE_EGL_DRM
+    &mpgl_driver_drm,
     &mpgl_driver_drm_egl,
 #endif
 #if HAVE_MALI_FBDEV
