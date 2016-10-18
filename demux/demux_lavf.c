@@ -938,7 +938,8 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
 #endif
     dp->pos = pkt->pos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
-#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 50, 100)
+#if LIBAVFORMAT_VERSION_MICRO >= 100 && \
+    LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 50, 100)
     if (pkt->flags & AV_PKT_FLAG_DISCARD)
         MP_ERR(demux, "Edit lists are not correctly supported (FFmpeg issue).\n");
 #endif
