@@ -3810,38 +3810,28 @@ The following video options are currently all specific to ``--vo=opengl`` and
 
     :bilinear: Bilinear hardware texture filtering (fastest, very low quality).
         This is the default for compatibility reasons.
-
     :spline36: Mid quality and speed. This is the default when using ``opengl-hq``.
-
     :lanczos: Lanczos scaling. Provides mid quality and speed. Generally worse
         than ``spline36``, but it results in a slightly sharper image which is
         good for some content types. The number of taps can be controlled with
-        ``scale-radius``, but is best left unchanged.
-
-        (This filter is an alias for ``sinc``-windowed ``sinc``)
-
+        ``scale-radius``, but is best left unchanged. This filter is an alias for
+        ``sinc``-windowed ``sinc``.
     :ewa_lanczos: Elliptic weighted average Lanczos scaling. Also known as Jinc.
         Relatively slow, but very good quality. The radius can be controlled
         with ``scale-radius``. Increasing the radius makes the filter sharper
-        but adds more ringing.
-
-        (This filter is an alias for ``jinc``-windowed ``jinc``)
-
+        but adds more ringing. This filter is an alias for ``jinc``-windowed ``jinc``.
     :ewa_lanczossharp: A slightly sharpened version of ewa_lanczos, preconfigured
         to use an ideal radius and parameter. If your hardware can run it, this is
         probably what you should use by default.
-
     :mitchell: Mitchell-Netravali. The ``B`` and ``C`` parameters can be set with
         ``--scale-param1`` and ``--scale-param2``. This filter is very good at
         downscaling (see ``--dscale``).
-
     :oversample: A version of nearest neighbour that (naively) oversamples pixels,
         so that pixels overlapping edges get linearly interpolated instead of
         rounded. This essentially removes the small imperfections and judder
         artifacts caused by nearest-neighbour interpolation, in exchange for
         adding some blur. This filter is good at temporal interpolation, and
         also known as "smoothmotion" (see ``--tscale``).
-
     :linear: A ``--tscale`` filter.
 
     There are some more filters, but most are not as useful. For a complete
