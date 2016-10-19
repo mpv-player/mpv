@@ -22,8 +22,12 @@
 
 struct mp_chmap;
 
+int ca_label_to_mp_speaker_id(AudioChannelLabel label);
+
+#if HAVE_COREAUDIO
 bool ca_init_chmap(struct ao *ao, AudioDeviceID device);
 void ca_get_active_chmap(struct ao *ao, AudioDeviceID device, int channel_count,
                          struct mp_chmap *out_map);
+#endif
 
 #endif
