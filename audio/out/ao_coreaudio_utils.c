@@ -22,14 +22,16 @@
  * on CoreAudio but not the AUHAL (such as using AudioQueue services).
  */
 
-#include <CoreAudio/HostTime.h>
-
 #include "audio/out/ao_coreaudio_utils.h"
-#include "audio/out/ao_coreaudio_properties.h"
 #include "osdep/timer.h"
 #include "osdep/endian.h"
 #include "osdep/semaphore.h"
 #include "audio/format.h"
+
+#if HAVE_COREAUDIO
+#include "audio/out/ao_coreaudio_properties.h"
+#include <CoreAudio/HostTime.h>
+#endif
 
 CFStringRef cfstr_from_cstr(char *str)
 {
@@ -46,6 +48,7 @@ char *cfstr_get_cstr(CFStringRef cfstr)
     return buffer;
 }
 
+#if HAVE_COREAUDIO
 static bool ca_is_output_device(struct ao *ao, AudioDeviceID dev)
 {
     size_t n_buffers;
@@ -142,6 +145,7 @@ OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device)
 coreaudio_error:
     return err;
 }
+#endif
 
 bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message)
 {
@@ -306,6 +310,7 @@ int64_t ca_frames_to_us(struct ao *ao, uint32_t frames)
     return frames / (float) ao->samplerate * 1e6;
 }
 
+#if HAVE_COREAUDIO
 int64_t ca_get_latency(const AudioTimeStamp *ts)
 {
     uint64_t out = AudioConvertHostTimeToNanos(ts->mHostTime);
@@ -522,4 +527,4 @@ coreaudio_error:
     sem_destroy(&wakeup);
     return format_set;
 }
-
+#endif

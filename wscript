@@ -607,6 +607,13 @@ audio_output_features = [
             fragment=load_fragment('coreaudio.c'),
             framework_name=['CoreFoundation', 'CoreAudio', 'AudioUnit', 'AudioToolbox'])
     }, {
+        'name': '--audiounit',
+        'desc': 'AudioUnit output for iOS',
+        'deps': ['atomics'],
+        'func': check_cc(
+            fragment=load_fragment('audiounit.c'),
+            framework_name=['Foundation', 'AudioToolbox'])
+    }, {
         'name': '--wasapi',
         'desc': 'WASAPI audio output',
         'deps': ['win32'],

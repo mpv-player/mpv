@@ -49,7 +49,9 @@ bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message);
     } while (0)
 
 void ca_get_device_list(struct ao *ao, struct ao_device_list *list);
+#if HAVE_COREAUDIO
 OSStatus ca_select_device(struct ao *ao, char* name, AudioDeviceID *device);
+#endif
 
 bool ca_formatid_is_compressed(uint32_t formatid);
 void ca_fill_asbd(struct ao *ao, AudioStreamBasicDescription *asbd);
@@ -63,8 +65,11 @@ bool ca_asbd_is_better(AudioStreamBasicDescription *req,
                        AudioStreamBasicDescription *new);
 
 int64_t ca_frames_to_us(struct ao *ao, uint32_t frames);
+#if HAVE_COREAUDIO
 int64_t ca_get_latency(const AudioTimeStamp *ts);
+#endif
 
+#if HAVE_COREAUDIO
 bool ca_stream_supports_compressed(struct ao *ao, AudioStreamID stream);
 OSStatus ca_lock_device(AudioDeviceID device, pid_t *pid);
 OSStatus ca_unlock_device(AudioDeviceID device, pid_t *pid);
@@ -73,5 +78,6 @@ OSStatus ca_enable_mixing(struct ao *ao, AudioDeviceID device, bool changed);
 int64_t ca_get_device_latency_us(struct ao *ao, AudioDeviceID device);
 bool ca_change_physical_format_sync(struct ao *ao, AudioStreamID stream,
                                     AudioStreamBasicDescription change_format);
+#endif
 
 #endif /* MPV_COREAUDIO_UTILS_H */

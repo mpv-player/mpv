@@ -56,7 +56,7 @@ static const int speaker_map[][2] = {
     { 0,                                       -1                 },
 };
 
-static int ca_label_to_mp_speaker_id(AudioChannelLabel label)
+int ca_label_to_mp_speaker_id(AudioChannelLabel label)
 {
     for (int i = 0; speaker_map[i][1] >= 0; i++)
         if (speaker_map[i][0] == label)
@@ -64,6 +64,7 @@ static int ca_label_to_mp_speaker_id(AudioChannelLabel label)
     return -1;
 }
 
+#if HAVE_COREAUDIO
 static void ca_log_layout(struct ao *ao, int l, AudioChannelLayout *layout)
 {
     if (!mp_msg_test(ao->log, l))
@@ -327,3 +328,4 @@ void ca_get_active_chmap(struct ao *ao, AudioDeviceID device, int channel_count,
     MP_WARN(ao, "mismatching channels - falling back to %s\n",
             mp_chmap_to_str(out_map));
 }
+#endif
