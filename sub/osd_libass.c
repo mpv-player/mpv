@@ -490,6 +490,8 @@ void osd_set_external(struct osd_state *osd, void *id, int res_x, int res_y,
         int index = entry - &obj->externals[0];
         destroy_external(entry);
         MP_TARRAY_REMOVE_AT(obj->externals, obj->num_externals, index);
+        obj->changed = true;
+        osd->want_redraw_notification = true;
         goto done;
     }
 

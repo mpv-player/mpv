@@ -60,8 +60,8 @@
 @end
 
 
-#define NSLeftAlternateKeyMask  (0x000020 | NSAlternateKeyMask)
-#define NSRightAlternateKeyMask (0x000040 | NSAlternateKeyMask)
+#define NSLeftAlternateKeyMask  (0x000020 | NSEventModifierFlagOption)
+#define NSRightAlternateKeyMask (0x000040 | NSEventModifierFlagOption)
 
 static bool LeftAltPressed(int mask)
 {
@@ -163,7 +163,7 @@ static CGEventRef tap_event_callback(CGEventTapProxy proxy, CGEventType type,
 
     NSEvent *nse = [NSEvent eventWithCGEvent:event];
 
-    if ([nse type] != NSSystemDefined || [nse subtype] != 8)
+    if ([nse type] != NSEventTypeSystemDefined || [nse subtype] != 8)
         // This is not a media key
         return event;
 
@@ -285,7 +285,7 @@ void cocoa_set_input_context(struct input_ctx *input_context)
 
 - (void)startEventMonitor
 {
-    [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask|NSKeyUpMask
+    [NSEvent addLocalMonitorForEventsMatchingMask:NSEventMaskKeyDown|NSEventMaskKeyUp
                                           handler:^(NSEvent *event) {
         BOOL equivalent = [[NSApp mainMenu] performKeyEquivalent:event];
         if (equivalent) {
@@ -395,14 +395,14 @@ void cocoa_set_input_context(struct input_ctx *input_context)
 - (int)mapKeyModifiers:(int)cocoaModifiers
 {
     int mask = 0;
-    if (cocoaModifiers & NSShiftKeyMask)
+    if (cocoaModifiers & NSEventModifierFlagShift)
         mask |= MP_KEY_MODIFIER_SHIFT;
-    if (cocoaModifiers & NSControlKeyMask)
+    if (cocoaModifiers & NSEventModifierFlagControl)
         mask |= MP_KEY_MODIFIER_CTRL;
     if (LeftAltPressed(cocoaModifiers) ||
         (RightAltPressed(cocoaModifiers) && ![self useAltGr]))
         mask |= MP_KEY_MODIFIER_ALT;
-    if (cocoaModifiers & NSCommandKeyMask)
+    if (cocoaModifiers & NSEventModifierFlagCommand)
         mask |= MP_KEY_MODIFIER_META;
     return mask;
 }
@@ -410,8 +410,8 @@ void cocoa_set_input_context(struct input_ctx *input_context)
 - (int)mapTypeModifiers:(NSEventType)type
 {
     NSDictionary *map = @{
-        @(NSKeyDown) : @(MP_KEY_STATE_DOWN),
-        @(NSKeyUp)   : @(MP_KEY_STATE_UP),
+        @(NSEventTypeKeyDown) : @(MP_KEY_STATE_DOWN),
+        @(NSEventTypeKeyUp)   : @(MP_KEY_STATE_UP),
     };
     return [map[@(type)] intValue];
 }

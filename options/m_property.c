@@ -115,6 +115,11 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
             M_PROPERTY_NOT_IMPLEMENTED)
             return r;
         // Fallback to m_option
+        r = m_property_do(log, prop_list, name, M_PROPERTY_GET_CONSTRICTED_TYPE,
+                          &opt, ctx);
+        if (r <= 0)
+            return r;
+        assert(opt.type);
         if (!opt.type->add)
             return M_PROPERTY_NOT_IMPLEMENTED;
         if ((r = do_action(prop_list, name, M_PROPERTY_GET, &val, ctx)) <= 0)
@@ -123,6 +128,13 @@ int m_property_do(struct mp_log *log, const struct m_property *prop_list,
         r = do_action(prop_list, name, M_PROPERTY_SET, &val, ctx);
         m_option_free(&opt, &val);
         return r;
+    }
+    case M_PROPERTY_GET_CONSTRICTED_TYPE: {
+        if ((r = do_action(prop_list, name, action, arg, ctx)) >= 0)
+            return r;
+        if ((r = do_action(prop_list, name, M_PROPERTY_GET_TYPE, arg, ctx)) >= 0)
+            return r;
+        return M_PROPERTY_NOT_IMPLEMENTED;
     }
     case M_PROPERTY_SET: {
         return do_action(prop_list, name, M_PROPERTY_SET, arg, ctx);

@@ -53,6 +53,7 @@
 
 #define BLURAY_DEFAULT_ANGLE      0
 #define BLURAY_DEFAULT_CHAPTER    0
+#define BLURAY_PLAYLIST_TITLE    -3
 #define BLURAY_DEFAULT_TITLE     -2
 #define BLURAY_MENU_TITLE        -1
 
@@ -80,6 +81,7 @@ struct bluray_priv_s {
     int current_playlist;
 
     int cfg_title;
+    int cfg_playlist;
     char *cfg_device;
 
     bool use_nav;
@@ -90,6 +92,11 @@ static void destruct(struct bluray_priv_s *priv)
     if (priv->title_info)
         bd_free_title_info(priv->title_info);
     bd_close(priv->bd);
+}
+
+inline static int play_playlist(struct bluray_priv_s *priv, int playlist)
+{
+    return bd_select_playlist(priv->bd, playlist);
 }
 
 inline static int play_title(struct bluray_priv_s *priv, int title)
@@ -341,19 +348,25 @@ static bool check_disc_info(stream_t *s)
 static void select_initial_title(stream_t *s, int title_guess) {
     struct bluray_priv_s *b = s->priv;
 
-    int title = -1;
-    if (b->cfg_title != BLURAY_DEFAULT_TITLE )
-        title = b->cfg_title;
-    else
-        title = title_guess;
-    if (title < 0)
-        return;
-
-    if (play_title(b, title))
-        b->current_title = title;
-    else {
-        MP_WARN(s, "Couldn't start title '%d'.\n", title);
+    if (b->cfg_title == BLURAY_PLAYLIST_TITLE) {
+        if (!play_playlist(b, b->cfg_playlist))
+            MP_WARN(s, "Couldn't start playlist '%05d'.\n", b->cfg_playlist);
         b->current_title = bd_get_current_title(b->bd);
+    } else {
+        int title = -1;
+        if (b->cfg_title != BLURAY_DEFAULT_TITLE )
+            title = b->cfg_title;
+        else
+            title = title_guess;
+        if (title < 0)
+            return;
+
+        if (play_title(b, title))
+            b->current_title = title;
+        else {
+            MP_WARN(s, "Couldn't start title '%d'.\n", title);
+            b->current_title = bd_get_current_title(b->bd);
+        }
     }
 }
 
@@ -456,7 +469,7 @@ static int bluray_stream_open(stream_t *s)
 
     b->use_nav = s->info == &stream_info_bdnav;
 
-    bstr title, bdevice;
+    bstr title, bdevice, rest = { .len = 0 };
     bstr_split_tok(bstr0(s->path), "/", &title, &bdevice);
 
     b->cfg_title = BLURAY_DEFAULT_TITLE;
@@ -465,13 +478,30 @@ static int bluray_stream_open(stream_t *s)
         b->cfg_title = BLURAY_DEFAULT_TITLE;
     } else if (bstr_equals0(title, "menu")) {
         b->cfg_title = BLURAY_MENU_TITLE;
-    } else if (title.len) {
-        bstr rest;
-        b->cfg_title = bstrtoll(title, &rest, 10);
+    } else if (bstr_equals0(title, "mpls")) {
+        bstr_split_tok(bdevice, "/", &title, &bdevice);
+        long long pl = bstrtoll(title, &rest, 10);
         if (rest.len) {
             MP_ERR(s, "number expected: '%.*s'\n", BSTR_P(rest));
             return STREAM_ERROR;
+        } else if (pl < 0 || 99999 < pl) {
+            MP_ERR(s, "invalid playlist: '%.*s', must be in the range 0-99999\n",
+                            BSTR_P(title));
+            return STREAM_ERROR;
         }
+        b->cfg_playlist = pl;
+        b->cfg_title    = BLURAY_PLAYLIST_TITLE;
+    } else if (title.len) {
+        long long t = bstrtoll(title, &rest, 10);
+        if (rest.len) {
+            MP_ERR(s, "number expected: '%.*s'\n", BSTR_P(rest));
+            return STREAM_ERROR;
+        } else if (t < 0 || 99999 < t) {
+            MP_ERR(s, "invalid title: '%.*s', must be in the range 0-99999\n",
+                            BSTR_P(title));
+            return STREAM_ERROR;
+        }
+        b->cfg_title = t;
     }
 
     b->cfg_device = bstrto0(b, bdevice);

@@ -264,14 +264,16 @@ int get_deinterlacing(struct MPContext *mpctx)
     return enabled;
 }
 
-void set_deinterlacing(struct MPContext *mpctx, bool enable)
+void set_deinterlacing(struct MPContext *mpctx, int opt_val)
 {
-    if (enable == (get_deinterlacing(mpctx) > 0))
+    if ((opt_val < 0 && mpctx->opts->deinterlace == opt_val) ||
+        (opt_val == (get_deinterlacing(mpctx) > 0)))
         return;
 
-    mpctx->opts->deinterlace = enable;
+    mpctx->opts->deinterlace = opt_val;
     recreate_auto_filters(mpctx);
-    mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
+    if (opt_val >= 0)
+        mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
 }
 
 static void recreate_video_filters(struct MPContext *mpctx)
@@ -283,7 +285,7 @@ static void recreate_video_filters(struct MPContext *mpctx)
     vf_destroy(vo_c->vf);
     vo_c->vf = vf_new(mpctx->global);
     vo_c->vf->hwdec_devs = vo_c->hwdec_devs;
-    vo_c->vf->wakeup_callback = wakeup_playloop;
+    vo_c->vf->wakeup_callback = mp_wakeup_core_cb;
     vo_c->vf->wakeup_callback_ctx = mpctx;
     vo_c->vf->container_fps = vo_c->container_fps;
     vo_control(vo_c->vo, VOCTRL_GET_DISPLAY_FPS, &vo_c->vf->display_fps);
@@ -447,7 +449,6 @@ int reinit_video_chain(struct MPContext *mpctx)
 
 int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
 {
-    struct MPOpts *opts = mpctx->opts;
     struct track *track = NULL;
     struct sh_stream *sh = NULL;
     if (!src) {
@@ -511,9 +512,7 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
 
     recreate_video_filters(mpctx);
 
-    bool saver_state = opts->pause || !opts->stop_screensaver;
-    vo_control(vo_c->vo, saver_state ? VOCTRL_RESTORE_SCREENSAVER
-                                     : VOCTRL_KILL_SCREENSAVER, NULL);
+    update_screensaver_state(mpctx);
 
     vo_set_paused(vo_c->vo, mpctx->paused);
 
@@ -1286,7 +1285,7 @@ static void calculate_frame_duration(struct MPContext *mpctx)
 
     double demux_duration = mpctx->vo_chain->container_fps > 0
                             ? 1.0 / mpctx->vo_chain->container_fps : -1;
-    double duration = -1;
+    double duration = demux_duration;
 
     if (mpctx->num_next_frames >= 2) {
         double pts0 = mpctx->next_frames[0]->pts;

@@ -3,7 +3,7 @@
  *
  * Copyleft (C) 2009 Reimar Döffinger <Reimar.Doeffinger@gmx.de>
  *
- * mp_invert_cmat based on DarkPlaces engine, original code (GPL2 or later)
+ * mp_invert_cmat based on DarkPlaces engine (relicensed from GPL to LGPL)
  *
  * This file is part of mpv.
  *

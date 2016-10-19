@@ -452,7 +452,7 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
         plane_clear[0] = av_le2ne16(0x8000);
     } else if (area.imgfmt == IMGFMT_UYVY) {
         plane_clear[0] = av_le2ne16(0x0080);
-    } else if (area.imgfmt == IMGFMT_NV12 || area.imgfmt == IMGFMT_NV21) {
+    } else if (area.fmt.flags & MP_IMGFLAG_YUV_NV) {
         plane_clear[1] = 0x8080;
     } else if (area.fmt.flags & MP_IMGFLAG_YUV_P) {
         uint16_t chroma_clear = (1 << area.fmt.plane_bits) / 2;

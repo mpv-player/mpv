@@ -81,6 +81,7 @@ const struct m_sub_options osd_style_conf = {
         .align_x = -1,
         .align_y = -1,
     },
+    .change_flags = UPDATE_OSD,
 };
 
 const struct m_sub_options sub_style_conf = {
@@ -99,6 +100,7 @@ const struct m_sub_options sub_style_conf = {
         .align_x = 0,
         .align_y = 1,
     },
+    .change_flags = UPDATE_OSD,
 };
 
 static bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b)

@@ -590,11 +590,16 @@ static int try_open_device(struct ao *ao, const char *device, int mode)
             bstr dev;
             bstr_split_tok(bstr0(device), ":", &dev, &(bstr){0});
             if (bstr_equals0(dev, "default")) {
-                ac3_device = append_params(tmp, "iec958", params);
-                MP_VERBOSE(ao, "got error %d; opening iec fallback device '%s'\n",
-                           err, ac3_device);
-                err = snd_pcm_open
-                          (&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, mode);
+                const char *const fallbacks[] = {"hdmi", "iec958", NULL};
+                for (int n = 0; fallbacks[n]; n++) {
+                    char *ndev = append_params(tmp, fallbacks[n], params);
+                    MP_VERBOSE(ao, "got error %d; opening iec fallback "
+                               "device '%s'\n", err, ndev);
+                    err = snd_pcm_open
+                                (&p->alsa, ndev, SND_PCM_STREAM_PLAYBACK, mode);
+                    if (err >= 0)
+                        break;
+                }
             }
         }
         talloc_free(tmp);

@@ -39,7 +39,6 @@
 
 struct priv {
     struct mp_log *log;
-    struct mp_vaapi_ctx *ctx;
 
     struct mp_image_params params;
 
@@ -137,7 +136,9 @@ static void update_overlay(struct gl_hwdec *hw, bool check_window_only)
 
     int defs[4] = {0, 0, 0, 0};
     int *z =
-        gl->MPGetNativeDisplay ? gl->MPGetNativeDisplay("MPV_RPI_WINDOW") : defs;
+        gl->MPGetNativeDisplay ? gl->MPGetNativeDisplay("MPV_RPI_WINDOW") : NULL;
+    if (!z)
+        z = defs;
 
     // As documented in the libmpv openglcb headers.
     int display = z[0];
@@ -283,7 +284,6 @@ static void free_mmal_buffer(void *arg)
     mmal_buffer_header_release(buffer);
 }
 
-// currently dead code; for a force-overlay mode
 static struct mp_image *upload(struct gl_hwdec *hw, struct mp_image *hw_image)
 {
     struct priv *p = hw->priv;
@@ -329,9 +329,12 @@ static int overlay_frame(struct gl_hwdec *hw, struct mp_image *hw_image)
 
     update_overlay(hw, true);
 
-    struct mp_image *mpi = mp_image_new_ref(hw_image);
-    if (hw_image->imgfmt != IMGFMT_MMAL)
+    struct mp_image *mpi = NULL;
+    if (hw_image->imgfmt == IMGFMT_MMAL) {
+        mpi = mp_image_new_ref(hw_image);
+    } else {
         mpi = upload(hw, hw_image);
+    }
 
     if (!mpi) {
         disable_renderer(hw);
@@ -387,10 +390,15 @@ static int create(struct gl_hwdec *hw)
     return 0;
 }
 
+static bool test_format(struct gl_hwdec *hw, int imgfmt)
+{
+    return imgfmt == IMGFMT_MMAL || imgfmt == IMGFMT_420P;
+}
+
 const struct gl_hwdec_driver gl_hwdec_rpi_overlay = {
     .name = "rpi-overlay",
     .api = HWDEC_RPI,
-    .imgfmt = IMGFMT_MMAL,
+    .test_format = test_format,
     .create = create,
     .reinit = reinit,
     .overlay_frame = overlay_frame,

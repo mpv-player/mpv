@@ -151,15 +151,16 @@ for cur in ax:
        cur.addLegend(offset = (-1, 1))
 for e in G.sevents:
     cur = ax[1 if e.type == "value" else 0]
+    if not cur in G.curveno:
+        G.curveno[cur] = 0
     args = {'name': e.name,'antialias':True}
+    color = mkColor(colors[G.curveno[cur] % len(colors)])
     if e.type == "event-signal":
         args['symbol'] = e.marker
-        args['pen'] = None
+        args['symbolBrush'] = pg.mkBrush(color, width=0)
     else:
-        if not cur in G.curveno:
-            G.curveno[cur] = 0
-        args['pen'] = pg.mkPen(mkColor(colors[G.curveno[cur] % len(colors)]), width=0)
-        G.curveno[cur] += 1
+        args['pen'] = pg.mkPen(color, width=0)
+    G.curveno[cur] += 1
     n = cur.plot([x for x,y in e.vals], [y for x,y in e.vals], **args)
 
 QtGui.QApplication.instance().exec_()

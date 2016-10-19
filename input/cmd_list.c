@@ -224,6 +224,10 @@ const struct mp_cmd_def mp_cmds[] = {
                       {"reselect", 1})),
   }},
 
+  { MP_CMD_APPLY_PROFILE, "apply-profile", {ARG_STRING } },
+
+  { MP_CMD_LOAD_SCRIPT, "load-script", {ARG_STRING} },
+
   {0}
 };
 

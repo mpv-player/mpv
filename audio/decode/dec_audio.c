@@ -180,10 +180,14 @@ static void fix_audio_pts(struct dec_audio *da)
 
     if (da->current_frame->pts != MP_NOPTS_VALUE) {
         double newpts = da->current_frame->pts;
+
+        if (da->pts != MP_NOPTS_VALUE)
+            MP_STATS(da, "value %f audio-pts-err", da->pts - newpts);
+
         // Keep the interpolated timestamp if it doesn't deviate more
         // than 1 ms from the real one. (MKV rounded timestamps.)
         if (da->pts == MP_NOPTS_VALUE || fabs(da->pts - newpts) > 0.001)
-            da->pts = da->current_frame->pts;
+            da->pts = newpts;
     }
 
     if (da->pts == MP_NOPTS_VALUE && da->header->missing_timestamps)

@@ -16,6 +16,7 @@ struct mp_log;
 #define MAX_CLIENT_NAME 64
 
 void mp_clients_init(struct MPContext *mpctx);
+void mp_client_enter_shutdown(struct MPContext *mpctx);
 void mp_clients_destroy(struct MPContext *mpctx);
 int mp_clients_num(struct MPContext *mpctx);
 bool mp_clients_all_initialized(struct MPContext *mpctx);

@@ -15,7 +15,6 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <initguid.h>
 #include <assert.h>
 #include <windows.h>
 #include <d3d11.h>

@@ -4,7 +4,7 @@ from waflib import Utils
 import os
 
 __all__ = ["check_pthreads", "check_iconv", "check_lua", "check_oss_4front",
-           "check_cocoa"]
+           "check_cocoa", "check_openal"]
 
 pthreads_program = load_fragment('pthreads.c')
 
@@ -116,3 +116,14 @@ def check_cocoa(ctx, dependency_identifier):
         linkflags        = '-fobjc-arc')
 
     return fn(ctx, dependency_identifier)
+
+def check_openal(ctx, dependency_identifier):
+    checks = [
+        check_pkg_config('openal', '>= 1.13'),
+        check_statement(['OpenAL/AL.h'], 'int i = AL_VERSION', framework='OpenAL')
+        ]
+
+    for fn in checks:
+        if fn(ctx, dependency_identifier):
+            return True
+    return False

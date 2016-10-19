@@ -1,7 +1,6 @@
 #include <malloc.h>
 #include <stdlib.h>
 #include <process.h>
-#include <initguid.h>
 #include <audioclient.h>
 #include <endpointvolume.h>
 #include <mmdeviceapi.h>

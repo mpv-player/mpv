@@ -43,9 +43,12 @@ enum {
     VO_EVENT_AMBIENT_LIGHTING_CHANGED   = 1 << 4,
     // Special mechanism for making resizing with Cocoa react faster
     VO_EVENT_LIVE_RESIZING              = 1 << 5,
+    // Window fullscreen state changed via external influence.
+    VO_EVENT_FULLSCREEN_STATE           = 1 << 6,
 
     // Set of events the player core may be interested in.
-    VO_EVENTS_USER = (VO_EVENT_RESIZE | VO_EVENT_WIN_STATE),
+    VO_EVENTS_USER = VO_EVENT_RESIZE | VO_EVENT_WIN_STATE |
+                     VO_EVENT_FULLSCREEN_STATE,
 };
 
 enum mp_voctrl {
@@ -74,6 +77,8 @@ enum mp_voctrl {
     VOCTRL_ONTOP,
     VOCTRL_BORDER,
     VOCTRL_ALL_WORKSPACES,
+
+    VOCTRL_GET_FULLSCREEN,
 
     VOCTRL_UPDATE_WINDOW_TITLE,         // char*
     VOCTRL_UPDATE_PLAYBACK_STATE,       // struct voctrl_playback_state*
@@ -191,8 +196,10 @@ struct vo_frame {
     // Set if the current frame is repeated from the previous. It's guaranteed
     // that the current is the same as the previous one, even if the image
     // pointer is different.
-    // The repeat flag is additionally set if the OSD does not need to be
-    // redrawn.
+    // The repeat flag is set if exactly the same frame should be rendered
+    // again (and the OSD does not need to be redrawn).
+    // A repeat frame can be redrawn, in which case repeat==redraw==true, and
+    // OSD should be updated.
     bool redraw, repeat;
     // The frame is not in movement - e.g. redrawing while paused.
     bool still;
@@ -211,6 +218,12 @@ struct vo_frame {
     // VO if frames are dropped.
     int num_frames;
     struct mp_image *frames[VO_MAX_REQ_FRAMES];
+    // ID for frames[0] (== current). If current==NULL, the number is
+    // meaningless. Otherwise, it's an unique ID for the frame. The ID for
+    // a frame is guaranteed not to change (instant redraws will use the same
+    // ID). frames[n] has the ID frame_id+n, with the guarantee that frame
+    // drops or reconfigs will keep the guarantee.
+    uint64_t frame_id;
 };
 
 struct vo_driver {

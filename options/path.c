@@ -169,6 +169,12 @@ char *mp_get_user_path(void *talloc_ctx, struct mpv_global *global,
             const char *rest0 = rest.start; // ok in this case
             if (bstr_equals0(prefix, "~")) {
                 res = mp_find_config_file(talloc_ctx, global, rest0);
+                if (!res) {
+                    void *tmp = talloc_new(NULL);
+                    const char *p = mp_get_platform_path(tmp, global, "home");
+                    res = mp_path_join_bstr(talloc_ctx, bstr0(p), rest);
+                    talloc_free(tmp);
+                }
             } else if (bstr_equals0(prefix, "")) {
                 res = mp_path_join_bstr(talloc_ctx, bstr0(getenv("HOME")), rest);
             } else if (bstr_eatstart0(&prefix, "~")) {

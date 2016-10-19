@@ -130,7 +130,9 @@ struct gl_video_opts {
     int deband;
     struct deband_opts *deband_opts;
     float unsharp;
+    int tex_pad_x, tex_pad_y;
     struct mp_icc_opts *icc_opts;
+    int early_flush;
 };
 
 extern const struct m_sub_options gl_video_conf;

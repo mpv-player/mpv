@@ -87,9 +87,6 @@ struct m_opt_backup {
     void *backup;
 };
 
-static struct m_config_option *m_config_get_co_raw(const struct m_config *config,
-                                                   struct bstr name);
-
 static int parse_include(struct m_config *config, struct bstr param, bool set,
                          int flags)
 {
@@ -421,6 +418,9 @@ static void add_sub_options(struct m_config *config,
     for (int n = 0; n < config->num_groups; n++)
         assert(config->groups[n].group != subopts);
 
+    // You can only use UPDATE_ flags here.
+    assert(!(subopts->change_flags & ~(unsigned)UPDATE_OPTS_MASK));
+
     void *new_optstruct = NULL;
     if (config->optstruct) { // only if not noalloc
         new_optstruct = talloc_zero_size(config, subopts->size);
@@ -556,8 +556,8 @@ static void m_config_add_option(struct m_config *config,
         MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
 }
 
-static struct m_config_option *m_config_get_co_raw(const struct m_config *config,
-                                                   struct bstr name)
+struct m_config_option *m_config_get_co_raw(const struct m_config *config,
+                                            struct bstr name)
 {
     if (!name.len)
         return NULL;
@@ -658,6 +658,10 @@ static int handle_set_opt_flags(struct m_config *config,
     if ((flags & M_SETOPT_PRESERVE_CMDLINE) && co->is_set_from_cmdline)
         set = false;
 
+    if ((flags & M_SETOPT_NO_OVERWRITE) &&
+        (co->is_set_from_cmdline || co->is_set_from_config))
+        set = false;
+
     if ((flags & M_SETOPT_NO_FIXED) && (optflags & M_OPT_FIXED))
         return M_OPT_INVALID;
 
@@ -676,9 +680,20 @@ static int handle_set_opt_flags(struct m_config *config,
     return set ? 2 : 1;
 }
 
-// The type data points to is as in: co->opt
-int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
-                            void *data, int flags)
+void m_config_mark_co_flags(struct m_config_option *co, int flags)
+{
+    if (flags & M_SETOPT_FROM_CMDLINE)
+        co->is_set_from_cmdline = true;
+
+    if (flags & M_SETOPT_FROM_CONFIG_FILE)
+        co->is_set_from_config = true;
+}
+
+// Unlike m_config_set_option_raw() this does not go through the property layer
+// via config.option_set_callback.
+int m_config_set_option_raw_direct(struct m_config *config,
+                                   struct m_config_option *co,
+                                   void *data, int flags)
 {
     if (!co)
         return M_OPT_UNKNOWN;
@@ -694,12 +709,28 @@ int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
 
     m_option_copy(co->opt, co->data, data);
 
-    if (flags & M_SETOPT_FROM_CMDLINE)
-        co->is_set_from_cmdline = true;
-
+    m_config_mark_co_flags(co, flags);
     m_config_notify_change_co(config, co);
 
     return 0;
+}
+
+// Similar to m_config_set_option_ext(), but set as data in its native format.
+// This takes care of some details like sending change notifications.
+// The type data points to is as in: co->opt
+int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
+                            void *data, int flags)
+{
+    if (config->option_set_callback) {
+        int r = handle_set_opt_flags(config, co, flags);
+        if (r <= 1)
+            return r;
+
+        return config->option_set_callback(config->option_set_callback_cb,
+                                           co, data, flags);
+    } else {
+        return m_config_set_option_raw_direct(config, co, data, flags);
+    }
 }
 
 static int parse_subopts(struct m_config *config, char *name, char *prefix,
@@ -790,7 +821,7 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
 
     r = m_option_parse(config->log, co->opt, name, param, &val);
 
-    if (r >= 0)
+    if (r >= 0 && co->data)
         r = m_config_set_option_raw(config, co, &val, flags);
 
     m_option_free(co->opt, &val);
@@ -977,9 +1008,11 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
             talloc_free(def);
         }
         if (opt->flags & M_OPT_NOCFG)
-            MP_INFO(config, " [nocfg]");
+            MP_INFO(config, " [not in config files]");
         if (opt->flags & M_OPT_FILE)
             MP_INFO(config, " [file]");
+        if (opt->flags & M_OPT_FIXED)
+            MP_INFO(config, " [no runtime changes]");
         MP_INFO(config, "\n");
         count++;
     }
@@ -1238,16 +1271,23 @@ void m_config_notify_change_co(struct m_config *config,
         if (co->shadow_offset >= 0)
             m_option_copy(co->opt, shadow->data + co->shadow_offset, co->data);
         pthread_mutex_unlock(&shadow->lock);
-
-        int group = co->group;
-        while (group >= 0) {
-            atomic_fetch_add(&config->groups[group].ts, 1);
-            group = config->groups[group].parent_group;
-        }
     }
 
-    if (config->global && (co->opt->flags & M_OPT_TERM))
-        mp_msg_update_msglevels(config->global);
+    int changed = co->opt->flags & UPDATE_OPTS_MASK;
+
+    int group = co->group;
+    while (group >= 0) {
+        struct m_config_group *g = &config->groups[group];
+        atomic_fetch_add(&g->ts, 1);
+        if (g->group)
+            changed |= g->group->change_flags;
+        group = g->parent_group;
+    }
+
+    if (config->option_change_callback) {
+        config->option_change_callback(config->option_change_callback_ctx, co,
+                                       changed);
+    }
 }
 
 bool m_config_is_in_group(struct m_config *config,

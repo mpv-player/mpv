@@ -458,10 +458,10 @@ static MpvVideoWindow *create_window(NSRect rect, NSScreen *s, bool border,
 {
     int window_mask = 0;
     if (border) {
-        window_mask = NSTitledWindowMask|NSClosableWindowMask|
-                      NSMiniaturizableWindowMask|NSResizableWindowMask;
+        window_mask = NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|
+                      NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable;
     } else {
-        window_mask = NSBorderlessWindowMask|NSResizableWindowMask;
+        window_mask = NSWindowStyleMaskBorderless|NSWindowStyleMaskResizable;
     }
 
     MpvVideoWindow *w =
@@ -717,8 +717,6 @@ void vo_cocoa_swap_buffers(struct vo *vo)
     pthread_mutex_unlock(&s->lock);
     if (skip)
         return;
-
-    CGLFlushDrawable(s->cgl_ctx);
 
     pthread_mutex_lock(&s->lock);
     s->frame_w = vo->dwidth;

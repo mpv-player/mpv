@@ -119,20 +119,14 @@ enum mp_imgfmt {
     // most significant bits with 0 (use shifts to expand them to 16 bits).
 
     IMGFMT_444P16,
-    IMGFMT_444P14,
-    IMGFMT_444P12,
     IMGFMT_444P10,
     IMGFMT_444P9,
 
     IMGFMT_422P16,
-    IMGFMT_422P14,
-    IMGFMT_422P12,
     IMGFMT_422P10,
     IMGFMT_422P9,
 
     IMGFMT_420P16,
-    IMGFMT_420P14,
-    IMGFMT_420P12,
     IMGFMT_420P10,
     IMGFMT_420P9,
 

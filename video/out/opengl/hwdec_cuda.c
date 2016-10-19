@@ -40,8 +40,8 @@ struct priv {
     struct mp_hwdec_ctx hwctx;
     struct mp_image layout;
     GLuint gl_textures[2];
-    GLuint gl_pbos[2];
     CUgraphicsResource cu_res[2];
+    CUarray cu_array[2];
     bool mapped;
 
     CUcontext cuda_ctx;
@@ -126,9 +126,9 @@ static int cuda_create(struct gl_hwdec *hw)
     CUdevice device;
     CUcontext cuda_ctx = NULL;
     CUcontext dummy;
+    unsigned int device_count;
     int ret = 0, eret = 0;
 
-    // PBO Requirements
     if (hw->gl->version < 210 && hw->gl->es < 300) {
         MP_ERR(hw, "need OpenGL >= 2.1 or OpenGL-ES >= 3.0\n");
         return -1;
@@ -141,8 +141,8 @@ static int cuda_create(struct gl_hwdec *hw)
     if (ret < 0)
         goto error;
 
-    ///TODO: Make device index configurable
-    ret = CHECK_CU(cuDeviceGet(&device, 0));
+    ret = CHECK_CU(cuGLGetDevices(&device_count, &device, 1,
+                                  CU_GL_DEVICE_LIST_ALL));
     if (ret < 0)
         goto error;
 
@@ -197,24 +197,26 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
                        mp_image_plane_w(&p->layout, n),
                        mp_image_plane_h(&p->layout, n),
                        0, n == 0 ? GL_RED : GL_RG, GL_UNSIGNED_BYTE, NULL);
-    }
-    gl->BindTexture(GL_TEXTURE_2D, 0);
+        gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    gl->GenBuffers(2, p->gl_pbos);
-    for (int n = 0; n < 2; n++) {
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->gl_pbos[n]);
-        // Chroma plane is two bytes per pixel
-        gl->BufferData(GL_PIXEL_UNPACK_BUFFER,
-                       mp_image_plane_w(&p->layout, n) *
-                       mp_image_plane_h(&p->layout, n) * (n + 1),
-                       NULL, GL_STREAM_DRAW);
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        ret = CHECK_CU(cuGraphicsGLRegisterBuffer(&p->cu_res[n],
-                                                  p->gl_pbos[n],
-                                                  CU_GRAPHICS_MAP_RESOURCE_FLAGS_WRITE_DISCARD));
+        ret = CHECK_CU(cuGraphicsGLRegisterImage(&p->cu_res[n], p->gl_textures[n],
+                                                 GL_TEXTURE_2D,
+                                                 CU_GRAPHICS_REGISTER_FLAGS_WRITE_DISCARD));
         if (ret < 0)
             goto error;
 
+        ret = CHECK_CU(cuGraphicsMapResources(1, &p->cu_res[n], 0));
+        if (ret < 0)
+            goto error;
+
+        ret = CHECK_CU(cuGraphicsSubResourceGetMappedArray(&p->cu_array[n], p->cu_res[n],
+                                                           0, 0));
+        if (ret < 0)
+            goto error;
+
+        ret = CHECK_CU(cuGraphicsUnmapResources(1, &p->cu_res[n], 0));
+        if (ret < 0)
+            goto error;
     }
 
  error:
@@ -239,28 +241,15 @@ static void destroy(struct gl_hwdec *hw)
     }
     CHECK_CU(cuCtxPopCurrent(&dummy));
 
-    gl->DeleteBuffers(2, p->gl_pbos);
     gl->DeleteTextures(2, p->gl_textures);
 
     hwdec_devices_remove(hw->devs, &p->hwctx);
-}
-
-static int get_alignment(int stride)
-{
-    if (stride % 8 == 0)
-        return 8;
-    if (stride % 4 == 0)
-        return 4;
-    if (stride % 2 == 0)
-        return 2;
-    return 1;
 }
 
 static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
                      struct gl_hwdec_frame *out_frame)
 {
     struct priv *p = hw->priv;
-    GL *gl = hw->gl;
     CUcontext dummy;
     int ret = 0, eret = 0;
 
@@ -270,56 +259,22 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
 
     *out_frame = (struct gl_hwdec_frame) { 0, };
 
-    ret = CHECK_CU(cuGraphicsMapResources(2, p->cu_res, NULL));
-    if (ret < 0)
-        goto error;
     for (int n = 0; n < 2; n++) {
-        CUdeviceptr cuda_data;
-        size_t cuda_size;
-
-        ret = CHECK_CU(cuGraphicsResourceGetMappedPointer(&cuda_data,
-                                                          &cuda_size,
-                                                          p->cu_res[n]));
-        if (ret < 0)
-            goto error;
-
-        // dstPitch and widthInBytes must account for the chroma plane
+        // widthInBytes must account for the chroma plane
         // elements being two bytes wide.
         CUDA_MEMCPY2D cpy = {
             .srcMemoryType = CU_MEMORYTYPE_DEVICE,
-            .dstMemoryType = CU_MEMORYTYPE_DEVICE,
+            .dstMemoryType = CU_MEMORYTYPE_ARRAY,
             .srcDevice     = (CUdeviceptr)hw_image->planes[n],
-            .dstDevice     = cuda_data,
             .srcPitch      = hw_image->stride[n],
-            .dstPitch      = mp_image_plane_w(&p->layout, n) * (n + 1),
             .srcY          = 0,
+            .dstArray      = p->cu_array[n],
             .WidthInBytes  = mp_image_plane_w(&p->layout, n) * (n + 1),
             .Height        = mp_image_plane_h(&p->layout, n),
         };
         ret = CHECK_CU(cuMemcpy2D(&cpy));
         if (ret < 0)
             goto error;
-
-    }
-    ret = CHECK_CU(cuGraphicsUnmapResources(2, p->cu_res, NULL));
-    if (ret < 0)
-        goto error;
-
-    for (int n = 0; n < 2; n++) {
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->gl_pbos[n]);
-        gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
-        gl->PixelStorei(GL_UNPACK_ALIGNMENT,
-                        get_alignment(mp_image_plane_w(&p->layout, n)));
-
-        gl->TexSubImage2D(GL_TEXTURE_2D, 0,
-                          0, 0,
-                          mp_image_plane_w(&p->layout, n),
-                          mp_image_plane_h(&p->layout, n),
-                          n == 0 ? GL_RED : GL_RG, GL_UNSIGNED_BYTE, NULL);
-
-        gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-        gl->BindTexture(GL_TEXTURE_2D, 0);
 
         out_frame->planes[n] = (struct gl_hwdec_plane){
             .gl_texture = p->gl_textures[n],
