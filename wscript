@@ -660,7 +660,9 @@ video_output_features = [
         'desc': 'OpenGL Cocoa Backend',
         'deps': [ 'cocoa' ],
         'groups': [ 'gl' ],
-        'func': check_true
+        'func': check_statement('IOSurface/IOSurface.h',
+                                'IOSurfaceRef surface;',
+                                framework='IOSurface')
     } , {
         'name': '--gl-x11',
         'desc': 'OpenGL X11 Backend',
@@ -868,7 +870,6 @@ hwaccel_features = [
             check_headers('VideoToolbox/VideoToolbox.h'),
             check_statement('libavcodec/videotoolbox.h',
                             'av_videotoolbox_alloc_context()',
-                            framework='IOSurface',
                             use='libav')),
     } , {
         'name': '--videotoolbox-gl',
