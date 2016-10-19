@@ -1,3 +1,168 @@
+Release 0.21.0
+==============
+
+Features
+--------
+
+Added
+~~~~~
+
+- config: allow profile forward-references in default profile
+- demux_lavf: "support" mov edit lists and log errors if used (FFmpeg only)
+- hwdec: Add support for CUDA and cuvid/NvDecode (mostly useful on Linux where VDPAU still lacks HEVC Main 10 support; keep using DXVA2 on Windows)
+- osc: add right-click behavior to playlist and chapter buttons
+- osc: add user-alterable margin for top/bottombar
+- rpi: add --hwdec=rpi-copy (#3604)
+- sd_lavc: enable teletext
+- vaapi: support drm devices when running in vaapi-copy mode
+- vd_lavc: Add hwdec wrapper for crystalhd
+- vo_opengl: add hw overlay support and use it for RPI
+- vo_opengl: basic mali fbdev support
+- vo_opengl: rpi: merge vo_rpi features
+
+
+Removed
+~~~~~~~
+
+- vo_opengl: remove pre/post/scale-shaders in favor of user-shaders
+
+
+Deprecated
+~~~~~~~~~~
+
+- config: deprecate ao and vo auto-profiles
+- vo_rpi: deprecate this VO
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- add --teletext-page option
+- af_pan: add af-command support to change the matrix
+- af_rubberband: add af-command and option to change the pitch
+- command: add a load-script command
+- command: add a video-dec-params property
+- command: add an apply-profile command
+- command: add audio-pts property to get the audio pts
+- command: add options to property list
+- command: add sub-text property for current subtitle text
+- command: export profile list as a property (#977)
+- options: add --hwdec=yes as alias for --hwdec=auto
+- player: add --player-operation-mode=pseudo-gui
+- player: add --video-osd=no option to disable video OSD (#3387)
+- player: add --watch-later-directory option
+- stream_bluray: select title by playlist (bd://mpls/[playlist])
+- vo_opengl: disable glFlush() by default, and add an option to enable it for testing
+
+
+Changed
+~~~~~~~
+
+- af_rubberband: default to channels=together
+- command: allow absolute seeks relative to end of stream
+- command: make bitrate properties observable
+- command: make most options observable
+- msg: make --log-file and --dump-stats accept config path expansion (#3591)
+- options: deprecate --playlist-pos to --playlist-start
+- options: make input options generally runtime-settable
+- options: rename subtitle options (--sub-text- → --sub; --ass- → --sub-ass-)
+- osc: change default layout to bottombar, seekbarstyle to bar, use larger scalewindowed and scalefullscreen
+- player: make --terminal, --log-file, --dump-stats, --osc, --ytdl, --audio-*, --priority, --stop-screensaver (#3615) settable at runtime
+- vo_drm: change CLI options
+    - Change connector selection to accept human readable names (such as eDP-1, HDMI-A-2) rather than arbitrary numbers.
+    - Change GPU selection to accept GPU number rather than device paths.
+    - Merge connector and GPU selection into one --drm-connector.
+    - Add support for --drm-connector=help.
+    - Add support for --drm-* in EGL backend.
+- vo_opengl: rename 3dlut-size to icc-3dlut-size
+
+
+Removed
+~~~~~~~
+
+- command: remove hwdec-active and hwdec-detected properties
+- command: remove vo-cmdline
+- options: drop unreferenced --bluray-angle option
+- vo, ao: disable positional parameter suboptions
+- vo_xv: replace no-colorkey with ck-method=none
+
+
+Deprecated
+~~~~~~~~~~
+
+- all VOs and AOs: deprecate sub-options, add them as global options
+- command: deprecate "cache" property, replace with "cache-percent"
+- deprecate --vo-defaults
+- deprecate --vo=opengl-hq alias in favor of opengl-hq profile
+- options: deprecate --mute=auto
+- vo_direct3d: deprecate direct3d_shaders alias, use shaders by default
+- vo_opengl: deprecate 'drm-egl' backend and introduce 'drm' instead
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- TOOLS/zsh.pl: die if we can't parse main options
+- TOOLS/zsh.pl: don't filter files by extension (#2273)
+- ao_alsa: try to fallback to "hdmi" before "iec958" for spdif
+- ao_rsound: fix compilation (#3501)
+- aspect: use nominal width instead of actual width for video-unscaled
+- audio/out: prevent underruns with spdif under certain conditions
+- audio: fix late audio start (#3610)
+- audio: fix missed wakeup when changing audio output device
+- audio: fix segfault when yanking USB DAC
+- charset_conv: Use CP949 instead of EUC-KR
+- command: don't log "ignore" command with -v verbosity
+- command: try selecting the next track if track switching fails (#3446)
+- demux_mkv: don't crash if --ordered-chapters-files fails
+- displayconfig: treat a refresh rate of 1 as invalid
+- ipc: log when listening to IPC socket (#3598)
+- macOS: fix fullscreen regression on 10.11 and newer (#3364)
+- mp_image: fix clearing to black with p010 format
+- osc: Fix scaling issues when toggling fullscreen (#3429)
+- osc: align text vertically in top/bottombar (#2093)
+- osc: change seekbar background's alpha scaling
+- osc: fix display of chapters and playlist scaling
+- osc: move tooltip to inside seekbar for top/bottombar
+- osc: show playlist/chapter list on prev/next instead of osd
+- path: default ~~ paths to home directory (#3591)
+- player: do not let pseudo-gui override user config settings
+- player: enable reading from stdin after loading input.conf
+- player: fix instant subtitle refresh on track switches
+- player: make --force-window work with opengl-cb
+- stream_file: don't use poll() on directories (would hang on macOS; #3530, #3649)
+- stream_lavf: fix determining seekability (#1701)
+- sub: actually apply text alignment options to non-ASS subtitles
+- terminal-win: support modifier keys in console input (#3625)
+- vo_drm: fix segfault when using invalid card
+- vo_opengl: apply 90° rotation to chroma texture size (#3568)
+- vo_opengl: fix incorrect video rendering after vdpau preemption recovery
+- vo_opengl: partially fix dumb-mode cropping with rotation
+- vo_opengl: rpi: use overlay for yuv420p too
+- w32_common: initialize playback status as soon as possible (#3482)
+- wayland: reject resize events with either dimension being 0 (#3679)
+- x11: fix external fullscreen update (#3570)
+- ytdl_hook: Add title to playlist items if available
+- ytdl_hook: Set aspect ratio for anamorphic video
+- ytdl_hook: Support playlist entries without subtitles
+- ytdl_hook: add chapters by parsing video's description
+- ytdl_hook: don't add subtitles with unknown duration
+- ytdl_hook: temporarily force disable dash segments formats
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API, and DOCS/interface-changes.rst for a history
+of changes to other user-visible interfaces.
+
+A complete changelog can be seen by running `git log v0.20.0..v0.21.0`
+in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.20.0...v0.21.0 or
+https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.20.0..v0.21.0
+
+
 Release 0.20.0
 ==============
 
@@ -10,6 +175,7 @@ Added
 - aspect: add --video-unscaled=downscale-big
 - player: add --image-display-duration option to control duration of image display (#3425)
 - vo_opengl: angle: new flag (dcomposition) to control DirectComposition
+- command: add sub-speed property
 
 
 Fixes and Minor Enhancements
@@ -38,7 +204,7 @@ of changes to other user-visible interfaces.
 A complete changelog can be seen by running `git log v0.19.0..v0.20.0`
 in the git repository or by visiting either
 https://github.com/mpv-player/mpv/compare/v0.19.0...v0.20.0 or
-http://git.srsfckn.biz/mpv/log/?qt=range&q=v0.20.0..v0.20.0
+http://git.srsfckn.biz/mpv/log/?qt=range&q=v0.19.0..v0.20.0
 
 
 Release 0.19.0
