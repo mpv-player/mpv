@@ -687,9 +687,6 @@ function get_playlist()
         return "Empty playlist."
     end
 
-    local list_current = "➜\xC2\xA0"
-    local list_normal  = "\xE2\x80\x83\xC2\xA0"
-
     local message = string.format('Playlist: (%d/%d):\n', pos + 1, count)
     for i, v in ipairs(limlist) do
         local title = v.title
@@ -697,8 +694,8 @@ function get_playlist()
         if (title == nil) then
             title = filename
         end
-        message = string.format('%s %s%s\n', message,
-            (v.current and list_current or list_normal), title)
+        message = string.format('%s %s %s\n', message,
+            (v.current and '●' or '○'), title)
     end
     return message
 end
@@ -710,9 +707,6 @@ function get_chapterlist()
         return "No chapters."
     end
 
-    local list_current = "➜\xC2\xA0"
-    local list_normal  = "\xE2\x80\x83\xC2\xA0"
-
     local message = string.format('Chapters: (%d/%d):\n', pos + 1, count)
     for i, v in ipairs(limlist) do
         local time = mp.format_time(v.time)
@@ -720,8 +714,8 @@ function get_chapterlist()
         if (title == nil) then
             title = string.format('Chapter %02d', i + 1)
         end
-        message = string.format('%s[%s]   %s%s\n', message, time,
-            (v.current and list_current or list_normal), title)
+        message = string.format('%s[%s] %s %s\n', message, time,
+            (v.current and '●' or '○'), title)
     end
     return message
 end
