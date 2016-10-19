@@ -812,9 +812,13 @@ video_output_features = [
         'deps': ['android'],
         'func': check_statement('GLES3/gl3.h', '(void)GL_RGB32F'),  # arbitrary OpenGL ES 3.0 symbol
     } , {
+        'name': '--ios-gl',
+        'desc': 'iOS OpenGL ES support',
+        'func': check_statement('OpenGLES/ES3/glext.h', '(void)GL_RGB32F'),  # arbitrary OpenGL ES 3.0 symbol
+    } , {
         'name': '--any-gl',
         'desc': 'Any OpenGL (ES) support',
-        'deps_any': ['standard-gl', 'android-gl', 'cocoa'],
+        'deps_any': ['standard-gl', 'android-gl', 'ios-gl', 'cocoa'],
         'func': check_true
     } , {
         'name': '--plain-gl',
