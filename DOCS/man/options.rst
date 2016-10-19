@@ -3806,7 +3806,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
     This option might be silently removed in the future.
 
 ``--scale=<filter>``
-
+    Set scaling filter:
     ``bilinear``
         Bilinear hardware texture filtering (fastest, very low quality). This
         is the default for compatibility reasons.
