@@ -15,7 +15,6 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <initguid.h>
 #include <stdio.h>
 #include <limits.h>
 #include <pthread.h>
@@ -40,7 +39,7 @@
 #include "osdep/io.h"
 #include "osdep/threads.h"
 #include "osdep/w32_keyboard.h"
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 #include "misc/dispatch.h"
 #include "misc/rendezvous.h"
 #include "mpv_talloc.h"
@@ -113,6 +112,8 @@ struct vo_w32_state {
     ITaskbarList3 *taskbar_list3;
     UINT tbtnCreatedMsg;
     bool tbtnCreated;
+
+    struct voctrl_playback_state current_pstate;
 
     // updates on move/resize/displaychange
     double display_fps;
@@ -676,6 +677,26 @@ static void force_update_display_info(struct vo_w32_state *w32)
     update_display_info(w32);
 }
 
+static void update_playback_state(struct vo_w32_state *w32)
+{
+    struct voctrl_playback_state *pstate = &w32->current_pstate;
+
+    if (!w32->taskbar_list3 || !w32->tbtnCreated)
+        return;
+
+    if (!pstate->playing || !pstate->taskbar_progress) {
+        ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
+                                       TBPF_NOPROGRESS);
+        return;
+    }
+
+    ITaskbarList3_SetProgressValue(w32->taskbar_list3, w32->window,
+                                   pstate->percent_pos, 100);
+    ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
+                                   pstate->paused ? TBPF_PAUSED :
+                                                    TBPF_NORMAL);
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
@@ -701,6 +722,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         ClientToScreen(w32->window, &p);
         w32->window_x = p.x;
         w32->window_y = p.y;
+
+        // Window may intersect with new monitors (see VOCTRL_GET_DISPLAY_NAMES)
+        signal_events(w32, VO_EVENT_WIN_STATE);
+
         update_display_info(w32);  // if we moved between monitors
         MP_VERBOSE(w32, "move window: %d:%d\n", w32->window_x, w32->window_y);
         break;
@@ -876,6 +901,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 
     if (message == w32->tbtnCreatedMsg) {
         w32->tbtnCreated = true;
+        update_playback_state(w32);
         return 0;
     }
 
@@ -1460,20 +1486,62 @@ fail:
     return 0;
 }
 
+struct disp_names_data {
+    HMONITOR assoc;
+    int count;
+    char **names;
+};
+
+static BOOL CALLBACK disp_names_proc(HMONITOR mon, HDC dc, LPRECT r, LPARAM p)
+{
+    struct disp_names_data *data = (struct disp_names_data*)p;
+
+    // get_disp_names() adds data->assoc to the list, so skip it here
+    if (mon == data->assoc)
+        return TRUE;
+
+    MONITORINFOEXW mi = { .cbSize = sizeof mi };
+    if (GetMonitorInfoW(mon, (MONITORINFO*)&mi)) {
+        MP_TARRAY_APPEND(NULL, data->names, data->count,
+                         mp_to_utf8(NULL, mi.szDevice));
+    }
+    return TRUE;
+}
+
+static char **get_disp_names(struct vo_w32_state *w32)
+{
+    // Get the client area of the window in screen space
+    RECT rect = { 0 };
+    GetClientRect(w32->window, &rect);
+    MapWindowPoints(w32->window, NULL, (POINT*)&rect, 2);
+
+    struct disp_names_data data = { .assoc = w32->monitor };
+
+    // Make sure the monitor that Windows considers to be associated with the
+    // window is first in the list
+    MONITORINFOEXW mi = { .cbSize = sizeof mi };
+    if (GetMonitorInfoW(data.assoc, (MONITORINFO*)&mi)) {
+        MP_TARRAY_APPEND(NULL, data.names, data.count,
+                         mp_to_utf8(NULL, mi.szDevice));
+    }
+
+    // Get the names of the other monitors that intersect the client rect
+    EnumDisplayMonitors(NULL, &rect, disp_names_proc, (LPARAM)&data);
+    MP_TARRAY_APPEND(NULL, data.names, data.count, NULL);
+    return data.names;
+}
+
 static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
 {
     switch (request) {
     case VOCTRL_FULLSCREEN:
-        w32->opts->fullscreen = !w32->opts->fullscreen;
         if (w32->opts->fullscreen != w32->current_fs)
             reinit_window_state(w32);
         return VO_TRUE;
     case VOCTRL_ONTOP:
-        w32->opts->ontop = !w32->opts->ontop;
         reinit_window_state(w32);
         return VO_TRUE;
     case VOCTRL_BORDER:
-        w32->opts->border = !w32->opts->border;
         reinit_window_state(w32);
         return VO_TRUE;
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
@@ -1535,28 +1603,17 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_UPDATE_PLAYBACK_STATE: {
-        struct voctrl_playback_state *pstate =
-            (struct voctrl_playback_state *)arg;
+        w32->current_pstate = *(struct voctrl_playback_state *)arg;
 
-        if (!w32->taskbar_list3 || !w32->tbtnCreated)
-            return VO_TRUE;
-
-        if (!pstate->playing || !pstate->taskbar_progress) {
-            ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
-                                           TBPF_NOPROGRESS);
-            return VO_TRUE;
-        }
-
-        ITaskbarList3_SetProgressValue(w32->taskbar_list3, w32->window,
-                                       pstate->percent_pos, 100);
-        ITaskbarList3_SetProgressState(w32->taskbar_list3, w32->window,
-                                       pstate->paused ? TBPF_PAUSED :
-                                                        TBPF_NORMAL);
+        update_playback_state(w32);
         return VO_TRUE;
     }
     case VOCTRL_GET_DISPLAY_FPS:
         update_display_info(w32);
         *(double*) arg = w32->display_fps;
+        return VO_TRUE;
+    case VOCTRL_GET_DISPLAY_NAMES:
+        *(char ***)arg = get_disp_names(w32);
         return VO_TRUE;
     case VOCTRL_GET_ICC_PROFILE:
         update_display_info(w32);
@@ -1615,6 +1672,8 @@ static void do_terminate(void *ptr)
 
     if (!w32->destroyed)
         DestroyWindow(w32->window);
+
+    mp_dispatch_interrupt(w32->dispatch);
 }
 
 void vo_w32_uninit(struct vo *vo)

@@ -27,13 +27,9 @@
 #include "lcms.h"
 #include "video/out/filter_kernels.h"
 
-// Texture units 0-5 are used by the video, and for free use by the passes
+// Assume we have this many texture units for sourcing additional passes.
+// The actual texture unit assignment is dynamic.
 #define TEXUNIT_VIDEO_NUM 6
-
-// Other texture units are reserved for specific purposes
-#define TEXUNIT_SCALERS  TEXUNIT_VIDEO_NUM
-#define TEXUNIT_3DLUT    (TEXUNIT_SCALERS+SCALER_COUNT)
-#define TEXUNIT_DITHER   (TEXUNIT_3DLUT+1)
 
 struct scaler_fun {
     char *name;
@@ -130,19 +126,17 @@ struct gl_video_opts {
     int interpolation;
     float interpolation_threshold;
     int blend_subs;
-    char *scale_shader;
-    char **pre_shaders;
-    char **post_shaders;
     char **user_shaders;
     int deband;
     struct deband_opts *deband_opts;
     float unsharp;
+    int tex_pad_x, tex_pad_y;
     struct mp_icc_opts *icc_opts;
+    int early_flush;
 };
 
 extern const struct m_sub_options gl_video_conf;
-extern const struct gl_video_opts gl_video_opts_hq_def;
-extern const struct gl_video_opts gl_video_opts_def;
+extern const struct m_sub_options gl_video_conf_legacy;
 
 struct gl_video;
 struct vo_frame;
@@ -150,7 +144,7 @@ struct vo_frame;
 struct gl_video *gl_video_init(GL *gl, struct mp_log *log, struct mpv_global *g);
 void gl_video_uninit(struct gl_video *p);
 void gl_video_set_osd_source(struct gl_video *p, struct osd_state *osd);
-void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts);
+void gl_video_update_options(struct gl_video *p);
 bool gl_video_check_format(struct gl_video *p, int mp_format);
 void gl_video_config(struct gl_video *p, struct mp_image_params *params);
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b);
@@ -170,6 +164,8 @@ float gl_video_scale_ambient_lux(float lmin, float lmax,
 void gl_video_set_ambient_lux(struct gl_video *p, int lux);
 void gl_video_set_icc_profile(struct gl_video *p, bstr icc_data);
 bool gl_video_icc_auto_enabled(struct gl_video *p);
+bool gl_video_gamma_auto_enabled(struct gl_video *p);
+struct mp_colorspace gl_video_get_output_colorspace(struct gl_video *p);
 
 void gl_video_set_gl_state(struct gl_video *p);
 void gl_video_unset_gl_state(struct gl_video *p);

@@ -19,6 +19,82 @@ Interface changes
 
 ::
 
+ --- mpv 0.21.0 ---
+    - setting certain options at runtime will now take care of updating them
+      property (see for example issue #3281). On the other hand, it will also
+      do runtime verification and reject option changes that do not work
+      (example: setting the "vf" option to a filter during playback, which fails
+      to initialize - the option value will remain at its old value). In general,
+      "set name value" should be mostly equivalent to "set options/name value"
+      in cases where the "name" property is not deprecated and "options/name"
+      exists - deviations from this are either bugs, or documented as caveats
+      in the "Inconsistencies between options and properties" manpage section.
+    - deprecate _all_ --vo and --ao suboptions. Generally, all suboptions are
+      replaced by global options, which do exactly the same. For example,
+      "--vo=opengl:scale=nearest" turns into "--scale=nearest". In some cases,
+      the global option is prefixed, e.g. "--vo=opengl:pbo" turns into
+      "--opengl-pbo".
+      Most of the exact replacements are documented here:
+        https://github.com/mpv-player/mpv/wiki/Option-replacement-list
+    - remove --vo=opengl-hq. Set --profile=opengl-hq instead. Note that this
+      profile does not force the VO. This means if you use the --vo option to
+      set another VO, it won't work. But this also means it can be used with
+      opengl-cb.
+    - remove the --vo=opengl "pre-shaders", "post-shaders" and "scale-shader"
+      sub-options: they were deprecated in favor of "user-shaders"
+    - deprecate --vo-defaults (no replacement)
+    - remove the vo-cmdline command. You can set OpenGL renderer options
+      directly via properties instead.
+    - deprecate the device/sink options on all AOs. Use --audio-device instead.
+    - deprecate "--ao=wasapi:exclusive" and "--ao=coreaudio:exclusive",
+      use --audio-exclusive instead.
+    - subtle changes in how "--no-..." options are treated mean that they are
+      not accessible under "options/..." anymore (instead, these are resolved
+      at parsing time). This does not affect options which start with "--no-",
+      but do not use the mechanism for negation options.
+      (Also see client API change for API version 1.23.)
+    - rename the following properties
+        - "demuxer" -> "current-demuxer"
+        - "fps" -> "container-fps"
+        - "idle" -> "idle-active"
+        - "cache" -> "cache-percent"
+      the old names are deprecated and will change behavior in mpv 0.22.0.
+    - remove deprecated "hwdec-active" and "hwdec-detected" properties
+    - deprecate the ao and vo auto-profiles (they never made any sense)
+    - deprecate "--vo=direct3d_shaders" - use "--vo=direct3d" instead.
+      Change "--vo=direct3d" to always use shaders by default.
+    - deprecate --playlist-pos option, renamed to --playlist-start
+    - deprecate the --chapter option, as it is redundant with --start/--end,
+      and conflicts with the semantics of the "chapter" property
+    - rename --sub-text-* to --sub-* and --ass-* to --sub-ass-* (old options
+      deprecated)
+    - incompatible change to cdda:// protocol options: the part after cdda://
+      now always sets the device, not the span or speed to be played. No
+      separating extra "/" is needed. The hidden --cdda-device options is also
+      deleted (it was redundant with the documented --cdrom-device).
+    - deprecate --vo=rpi. It will be removed in mpv 0.22.0. Its functionality
+      was folded into --vo=opengl, which now uses RPI hardware decoding by
+      treating it as a hardware overlay (without applying GL filtering). Also
+      to be changed in 0.22.0: the --fs flag will be reset to "no" by default
+      (like on the other platforms).
+    - deprecate --mute=auto (informally has been since 0.18.1)
+    - deprecate "resume" and "suspend" IPC commands. They will be completely
+      removed in 0.22.0.
+    - deprecate mp.suspend(), mp.resume(), mp.resume_all() Lua scripting
+      commands, as well as setting mp.use_suspend. They will be completely
+      removed in 0.22.0.
+    - the "seek" command's absolute seek mode will now interpret negative
+      seek times as relative from the end of the file (and clamps seeks that
+      still go before 0)
+    - add almost all options to the property list, meaning you can change
+      options without adding "options/" to the property name (a new section
+      has been added to the manpage describing some conflicting behavior
+      between options and properties)
+    - implement changing sub-speed during playback
+    - make many previously fixed options changeable at runtime (for example
+      --terminal, --osc, --ytdl, can all be enable/disabled after
+      mpv_initialize() - this can be extended to other still fixed options
+      on user requests)
  --- mpv 0.20.0 ---
     - add --image-display-duration option - this also means that image duration
       is not influenced by --mf-fps anymore in the general case (this is an

@@ -26,7 +26,7 @@
 #include <assert.h>
 
 #include <libavutil/common.h>
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 #include "osdep/io.h"
 
 #include "mpv_talloc.h"
@@ -183,61 +183,6 @@ char *mp_url_escape(void *talloc_ctx, const char *s, const char *ok)
     return buf;
 }
 
-static const char *find_url_opt(struct stream *s, const char *opt)
-{
-    for (int n = 0; s->info->url_options && s->info->url_options[n]; n++) {
-        const char *entry = s->info->url_options[n];
-        const char *t = strchr(entry, '=');
-        assert(t);
-        if (strncmp(opt, entry, t - entry) == 0)
-            return t + 1;
-    }
-    return NULL;
-}
-
-static bstr split_next(bstr *s, char end, const char *delim)
-{
-    int idx = bstrcspn(*s, delim);
-    if (end && (idx >= s->len || s->start[idx] != end))
-        return (bstr){0};
-    bstr r = bstr_splice(*s, 0, idx);
-    *s = bstr_cut(*s, idx + (end ? 1 : 0));
-    return r;
-}
-
-// Parse the stream URL, syntax:
-//  proto://  [<username>@]<hostname>[:<port>][/<filename>]
-// (the proto:// part is already removed from s->path)
-// This code originates from times when http code used this, but now it's
-// just relict from other stream implementations reusing this code.
-static bool parse_url(struct stream *st, struct m_config *config)
-{
-    bstr s = bstr0(st->path);
-    const char *f_names[4] = {"username", "hostname", "port", "filename"};
-    bstr f[4];
-    f[0] = split_next(&s, '@', "@:/");
-    f[1] = split_next(&s, 0, ":/");
-    f[2] = bstr_eatstart0(&s, ":") ? split_next(&s, 0, "/") : (bstr){0};
-    f[3] = bstr_eatstart0(&s, "/") ? s : (bstr){0};
-    for (int n = 0; n < 4; n++) {
-        if (f[n].len) {
-            const char *opt = find_url_opt(st, f_names[n]);
-            if (!opt) {
-                MP_ERR(st, "Stream type '%s' accepts no '%s' field in URLs.\n",
-                       st->info->name, f_names[n]);
-                return false;
-            }
-            int r = m_config_set_option(config, bstr0(opt), f[n]);
-            if (r < 0) {
-                MP_ERR(st, "Error setting stream option: %s\n",
-                       m_option_strerror(r));
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
 static stream_t *new_stream(void)
 {
     return talloc_zero_size(NULL, sizeof(stream_t) + TOTAL_BUFFER_SIZE);
@@ -245,9 +190,6 @@ static stream_t *new_stream(void)
 
 static const char *match_proto(const char *url, const char *proto)
 {
-    if (strcmp(proto, "*") == 0)
-        return url;
-
     int l = strlen(proto);
     if (l > 0) {
         if (strncasecmp(url, proto, l) == 0 && strncmp("://", url + l, 3) == 0)
@@ -267,7 +209,7 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
     if (!sinfo->is_network && (flags & STREAM_NETWORK_ONLY))
         return STREAM_UNSAFE;
 
-    const char *path = NULL;
+    const char *path = url;
     for (int n = 0; sinfo->protocols && sinfo->protocols[n]; n++) {
         path = match_proto(url, sinfo->protocols[n]);
         if (path)
@@ -280,7 +222,6 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
     stream_t *s = new_stream();
     s->log = mp_log_new(s, global->log, sinfo->name);
     s->info = sinfo;
-    s->opts = global->opts;
     s->cancel = c;
     s->global = global;
     s->url = talloc_strdup(s, url);
@@ -295,24 +236,6 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
         MP_VERBOSE(s, "No write access implemented.\n");
         talloc_free(s);
         return STREAM_NO_MATCH;
-    }
-
-    // Parse options
-    if (sinfo->priv_size) {
-        struct m_obj_desc desc = {
-            .priv_size = sinfo->priv_size,
-            .priv_defaults = sinfo->priv_defaults,
-            .options = sinfo->options,
-        };
-        if (sinfo->get_defaults)
-            desc.priv_defaults = sinfo->get_defaults(s);
-        struct m_config *config = m_config_from_obj_desc(s, s->log, &desc);
-        s->priv = config->optstruct;
-        if (s->info->url_options && !parse_url(s, config)) {
-            MP_ERR(s, "URL parsing failed on url %s\n", url);
-            talloc_free(s);
-            return STREAM_ERROR;
-        }
     }
 
     int r = (sinfo->open)(s);
@@ -753,7 +676,6 @@ static stream_t *open_cache(stream_t *orig, const char *name)
     cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
     cache->streaming = orig->streaming,
     cache->is_network = orig->is_network;
-    cache->opts = orig->opts;
     cache->cancel = orig->cancel;
     cache->global = orig->global;
 
@@ -784,7 +706,7 @@ bool stream_wants_cache(stream_t *stream, struct mp_cache_opts *opts)
 
 // return 1 on success, 0 if the cache is disabled/not needed, and -1 on error
 // or if the cache is disabled
-int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
+static int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
 {
     stream_t *orig = *stream;
     struct mp_cache_opts use_opts = check_cache_opts(*stream, opts);
@@ -813,6 +735,20 @@ int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
         *stream = cache;
     }
     return res;
+}
+
+// Do some crazy stuff to call stream_enable_cache() with the global options.
+int stream_enable_cache_defaults(stream_t **stream)
+{
+    struct mpv_global *global = (*stream)->global;
+    if (!global)
+        return 0;
+    void *tmp = talloc_new(NULL);
+    struct mp_cache_opts *opts =
+        mp_get_config_group(tmp, global, &stream_cache_conf);
+    int r = stream_enable_cache(stream, opts);
+    talloc_free(tmp);
+    return r;
 }
 
 static uint16_t stream_read_word_endian(stream_t *s, bool big_endian)

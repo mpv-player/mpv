@@ -20,6 +20,7 @@
 #include <unistd.h>
 
 #include <poll.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
@@ -97,6 +98,11 @@ static void *client_thread(void *p)
 {
     pthread_detach(pthread_self());
 
+    // We don't use MSG_NOSIGNAL because the moldy fruit OS doesn't support it.
+    struct sigaction sa = { .sa_handler = SIG_IGN, .sa_flags = SA_RESTART };
+    sigfillset(&sa.sa_mask);
+    sigaction(SIGPIPE, &sa, NULL);
+
     int rc;
 
     struct client_arg *arg = p;
@@ -118,15 +124,11 @@ static void *client_thread(void *p)
     };
 
     fcntl(arg->client_fd, F_SETFL, fcntl(arg->client_fd, F_GETFL, 0) | O_NONBLOCK);
-    mpv_suspend(arg->client);
 
     while (1) {
         rc = poll(fds, 2, 0);
-        if (rc == 0) {
-            mpv_resume(arg->client);
+        if (rc == 0)
             rc = poll(fds, 2, -1);
-            mpv_suspend(arg->client);
-        }
         if (rc < 0) {
             MP_ERR(arg, "Poll error\n");
             continue;
@@ -336,6 +338,8 @@ static void *ipc_thread(void *p)
         MP_ERR(arg, "Could not listen on IPC socket\n");
         goto done;
     }
+
+    MP_VERBOSE(arg, "Listening to IPC socket.\n");
 
     int client_num = 0;
 

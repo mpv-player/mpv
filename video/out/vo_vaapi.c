@@ -545,8 +545,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         p->output_surface = p->visible_surface;
         draw_osd(vo);
         return true;
-    case VOCTRL_GET_PANSCAN:
-        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         resize(p);
         return VO_TRUE;
@@ -698,4 +696,5 @@ const struct vo_driver video_out_vaapi = {
         OPT_FLAG("scaled-osd", force_scaled_osd, 0),
         {0}
     },
+    .legacy_prefix = "vo-vaapi",
 };

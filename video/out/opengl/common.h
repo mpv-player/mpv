@@ -120,6 +120,7 @@ struct GL {
     void (GLAPIENTRY *DrawArrays)(GLenum, GLint, GLsizei);
     GLenum (GLAPIENTRY *GetError)(void);
     void (GLAPIENTRY *GetTexLevelParameteriv)(GLenum, GLint, GLenum, GLint *);
+    void (GLAPIENTRY *Scissor)(GLint, GLint, GLsizei, GLsizei);
 
     void (GLAPIENTRY *GenBuffers)(GLsizei, GLuint *);
     void (GLAPIENTRY *DeleteBuffers)(GLsizei, const GLuint *);

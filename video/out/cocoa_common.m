@@ -30,7 +30,7 @@
 #import "video/out/cocoa/mpvadapter.h"
 
 #include "osdep/threads.h"
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 #include "osdep/macosx_compat.h"
 #include "osdep/macosx_events_objc.h"
 
@@ -449,7 +449,6 @@ static int vo_cocoa_ontop(struct vo *vo)
         return VO_NOTIMPL;
 
     struct mp_vo_opts *opts = vo->opts;
-    opts->ontop = !opts->ontop;
     vo_set_level(vo, opts->ontop);
     return VO_TRUE;
 }
@@ -459,10 +458,10 @@ static MpvVideoWindow *create_window(NSRect rect, NSScreen *s, bool border,
 {
     int window_mask = 0;
     if (border) {
-        window_mask = NSTitledWindowMask|NSClosableWindowMask|
-                      NSMiniaturizableWindowMask|NSResizableWindowMask;
+        window_mask = NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|
+                      NSWindowStyleMaskMiniaturizable|NSWindowStyleMaskResizable;
     } else {
-        window_mask = NSBorderlessWindowMask|NSResizableWindowMask;
+        window_mask = NSWindowStyleMaskBorderless|NSWindowStyleMaskResizable;
     }
 
     MpvVideoWindow *w =
@@ -719,8 +718,6 @@ void vo_cocoa_swap_buffers(struct vo *vo)
     if (skip)
         return;
 
-    CGLFlushDrawable(s->cgl_ctx);
-
     pthread_mutex_lock(&s->lock);
     s->frame_w = vo->dwidth;
     s->frame_h = vo->dheight;
@@ -793,7 +790,6 @@ static int vo_cocoa_control_on_main_thread(struct vo *vo, int request, void *arg
 
     switch (request) {
     case VOCTRL_FULLSCREEN:
-        opts->fullscreen = !opts->fullscreen;
         return vo_cocoa_fullscreen(vo);
     case VOCTRL_ONTOP:
         return vo_cocoa_ontop(vo);

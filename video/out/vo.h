@@ -30,21 +30,26 @@
 #include "common/common.h"
 #include "options/options.h"
 
-// VO needs to redraw
-#define VO_EVENT_EXPOSE 1
-// VO needs to update state to a new window size
-#define VO_EVENT_RESIZE 2
-// The ICC profile needs to be reloaded
-#define VO_EVENT_ICC_PROFILE_CHANGED 4
-// Some other window state changed (position, window state, fps)
-#define VO_EVENT_WIN_STATE 8
-// The ambient light conditions changed and need to be reloaded
-#define VO_EVENT_AMBIENT_LIGHTING_CHANGED 16
-// Special mechanism for making resizing with Cocoa react faster
-#define VO_EVENT_LIVE_RESIZING 32
+enum {
+    // VO needs to redraw
+    VO_EVENT_EXPOSE                     = 1 << 0,
+    // VO needs to update state to a new window size
+    VO_EVENT_RESIZE                     = 1 << 1,
+    // The ICC profile needs to be reloaded
+    VO_EVENT_ICC_PROFILE_CHANGED        = 1 << 2,
+    // Some other window state changed (position, window state, fps)
+    VO_EVENT_WIN_STATE                  = 1 << 3,
+    // The ambient light conditions changed and need to be reloaded
+    VO_EVENT_AMBIENT_LIGHTING_CHANGED   = 1 << 4,
+    // Special mechanism for making resizing with Cocoa react faster
+    VO_EVENT_LIVE_RESIZING              = 1 << 5,
+    // Window fullscreen state changed via external influence.
+    VO_EVENT_FULLSCREEN_STATE           = 1 << 6,
 
-// Set of events the player core may be interested in.
-#define VO_EVENTS_USER (VO_EVENT_RESIZE | VO_EVENT_WIN_STATE)
+    // Set of events the player core may be interested in.
+    VO_EVENTS_USER = VO_EVENT_RESIZE | VO_EVENT_WIN_STATE |
+                     VO_EVENT_FULLSCREEN_STATE,
+};
 
 enum mp_voctrl {
     /* signal a device reset seek */
@@ -56,7 +61,6 @@ enum mp_voctrl {
     /* start/resume playback */
     VOCTRL_RESUME,
 
-    VOCTRL_GET_PANSCAN,
     VOCTRL_SET_PANSCAN,
     VOCTRL_SET_EQUALIZER,               // struct voctrl_set_equalizer_args*
     VOCTRL_GET_EQUALIZER,               // struct voctrl_get_equalizer_args*
@@ -73,6 +77,8 @@ enum mp_voctrl {
     VOCTRL_ONTOP,
     VOCTRL_BORDER,
     VOCTRL_ALL_WORKSPACES,
+
+    VOCTRL_GET_FULLSCREEN,
 
     VOCTRL_UPDATE_WINDOW_TITLE,         // char*
     VOCTRL_UPDATE_PLAYBACK_STATE,       // struct voctrl_playback_state*
@@ -101,7 +107,7 @@ enum mp_voctrl {
     // Retrieve window contents. (Normal screenshots use vo_get_current_frame().)
     VOCTRL_SCREENSHOT_WIN,              // struct mp_image**
 
-    VOCTRL_SET_COMMAND_LINE,            // char**
+    VOCTRL_UPDATE_RENDER_OPTS,
 
     VOCTRL_GET_ICC_PROFILE,             // bstr*
     VOCTRL_GET_AMBIENT_LUX,             // int*
@@ -168,6 +174,8 @@ struct vo_extra {
     struct osd_state *osd;
     struct encode_lavc_context *encode_lavc_ctx;
     struct mpv_opengl_cb_context *opengl_cb_context;
+    void (*wakeup_cb)(void *ctx);
+    void *wakeup_ctx;
 };
 
 struct vo_frame {
@@ -188,8 +196,10 @@ struct vo_frame {
     // Set if the current frame is repeated from the previous. It's guaranteed
     // that the current is the same as the previous one, even if the image
     // pointer is different.
-    // The repeat flag is additionally set if the OSD does not need to be
-    // redrawn.
+    // The repeat flag is set if exactly the same frame should be rendered
+    // again (and the OSD does not need to be redrawn).
+    // A repeat frame can be redrawn, in which case repeat==redraw==true, and
+    // OSD should be updated.
     bool redraw, repeat;
     // The frame is not in movement - e.g. redrawing while paused.
     bool still;
@@ -208,6 +218,12 @@ struct vo_frame {
     // VO if frames are dropped.
     int num_frames;
     struct mp_image *frames[VO_MAX_REQ_FRAMES];
+    // ID for frames[0] (== current). If current==NULL, the number is
+    // meaningless. Otherwise, it's an unique ID for the frame. The ID for
+    // a frame is guaranteed not to change (instant redraws will use the same
+    // ID). frames[n] has the ID frame_id+n, with the guarantee that frame
+    // drops or reconfigs will keep the guarantee.
+    uint64_t frame_id;
 };
 
 struct vo_driver {
@@ -295,7 +311,17 @@ struct vo_driver {
     const void *priv_defaults;
 
     // List of options to parse into priv struct (requires priv_size to be set)
+    // Deprecated. Use global options or global_opts instead.
     const struct m_option *options;
+
+    // Global options to register if the VO is compiled in.
+    // mp_get_config_group() or other function can be used to access them.
+    const struct m_sub_options *global_opts;
+
+    // Evil hack: add .options as global options, using the provided prefix.
+    // For further evilness, the options will be copied to the priv struct
+    // like with normal .options behavior.
+    const char *legacy_prefix;
 };
 
 struct vo {
@@ -312,9 +338,7 @@ struct vo {
     struct osd_state *osd;
     struct encode_lavc_context *encode_lavc_ctx;
     struct vo_internal *in;
-    struct mp_vo_opts *opts;
     struct vo_extra extra;
-    struct m_config *config;
 
     // --- The following fields are generally only changed during initialization.
 
@@ -328,6 +352,10 @@ struct vo {
 
     // --- The following fields can be accessed only by the VO thread, or from
     //     anywhere _if_ the VO thread is suspended (use vo->dispatch).
+
+    struct m_config_cache *opts_cache; // cache for ->opts
+    struct mp_vo_opts *opts;
+    struct m_config *config; // config for ->priv
 
     bool want_redraw;   // redraw as soon as possible
 

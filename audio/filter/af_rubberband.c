@@ -26,6 +26,7 @@
 struct priv {
     RubberBandState rubber;
     double speed;
+    double pitch;
     struct mp_audio *pending;
     bool needs_reset;
     // Estimate how much librubberband has buffered internally.
@@ -42,6 +43,14 @@ static void update_speed(struct af_instance *af, double new_speed)
 
     p->speed = new_speed;
     rubberband_set_time_ratio(p->rubber, 1.0 / p->speed);
+}
+
+static void update_pitch(struct af_instance *af, double new_pitch)
+{
+    struct priv *p = af->priv;
+
+    p->pitch = new_pitch;
+    rubberband_set_pitch_scale(p->rubber, p->pitch);
 }
 
 static int control(struct af_instance *af, int cmd, void *arg)
@@ -72,6 +81,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         }
 
         update_speed(af, p->speed);
+        update_pitch(af, p->pitch);
         control(af, AF_CONTROL_RESET, NULL);
 
         return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
@@ -87,6 +97,19 @@ static int control(struct af_instance *af, int cmd, void *arg)
         p->pending = NULL;
         p->rubber_delay = 0;
         return AF_OK;
+    case AF_CONTROL_COMMAND: {
+        char **args = arg;
+        if (!strcmp(args[0], "set-pitch")) {
+            char *endptr;
+            double pitch = strtod(args[1], &endptr);
+            if (*endptr || pitch < 0.01 || pitch > 100.0)
+                return CONTROL_ERROR;
+            update_pitch(af, pitch);
+            return CONTROL_OK;
+        } else {
+            return CONTROL_ERROR;
+        }
+    }
     }
     return AF_UNKNOWN;
 }
@@ -187,9 +210,11 @@ const struct af_info af_info_rubberband = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .speed = 1.0,
+        .pitch = 1.0,
         .opt_pitch = RubberBandOptionPitchHighConsistency,
         .opt_transients = RubberBandOptionTransientsMixed,
         .opt_formant = RubberBandOptionFormantPreserved,
+        .opt_channels = RubberBandOptionChannelsTogether,
     },
     .options = (const struct m_option[]) {
         OPT_CHOICE("transients", opt_transients, 0,
@@ -220,6 +245,7 @@ const struct af_info af_info_rubberband = {
         OPT_CHOICE("channels", opt_channels, 0,
                    ({"apart", RubberBandOptionChannelsApart},
                     {"together", RubberBandOptionChannelsTogether})),
+        OPT_DOUBLE("pitch-scale", pitch, M_OPT_RANGE, .min = 0.01, .max = 100),
         {0}
     },
 };

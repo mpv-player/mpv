@@ -171,7 +171,7 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     }
     mp_image_params_guess_csp(out);
 
-    mp_sws_set_from_cmdline(vf->priv->sws, vf->chain->opts->vo.sws_opts);
+    mp_sws_set_from_cmdline(vf->priv->sws, vf->chain->opts->vo->sws_opts);
     vf->priv->sws->flags |= vf->priv->v_chr_drop << SWS_SRC_V_CHR_DROP_SHIFT;
     vf->priv->sws->flags |= vf->priv->accurate_rnd * SWS_ACCURATE_RND;
     vf->priv->sws->src = *in;

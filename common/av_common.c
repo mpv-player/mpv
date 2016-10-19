@@ -160,6 +160,7 @@ void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt, AVRational *tb)
         dst->side_data_elems = mpkt->avpacket->side_data_elems;
         if (dst->data == mpkt->avpacket->data)
             dst->buf = mpkt->avpacket->buf;
+        dst->flags |= mpkt->avpacket->flags;
     }
     if (mpkt && tb && tb->num > 0 && tb->den > 0)
         dst->duration = mpkt->duration / av_q2d(*tb);

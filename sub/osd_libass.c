@@ -431,6 +431,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 
 static void update_osd(struct osd_state *osd, struct osd_object *obj)
 {
+    obj->osd_changed = false;
     clear_ass(&obj->ass);
     update_osd_text(osd, obj);
     update_progbar(osd, obj);
@@ -489,6 +490,8 @@ void osd_set_external(struct osd_state *osd, void *id, int res_x, int res_y,
         int index = entry - &obj->externals[0];
         destroy_external(entry);
         MP_TARRAY_REMOVE_AT(obj->externals, obj->num_externals, index);
+        obj->changed = true;
+        osd->want_redraw_notification = true;
         goto done;
     }
 
@@ -501,7 +504,7 @@ void osd_set_external(struct osd_state *osd, void *id, int res_x, int res_y,
         entry->res_y = res_y;
         update_external(osd, obj, entry);
         obj->changed = true;
-        osd_changed_unlocked(osd, obj->type);
+        osd->want_redraw_notification = true;
     }
 
 done:
@@ -527,7 +530,7 @@ static void append_ass(struct ass_state *ass, struct mp_osd_res *res,
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
                             int format, struct sub_bitmaps *out_imgs)
 {
-    if (obj->force_redraw && obj->type == OSDTYPE_OSD)
+    if (obj->type == OSDTYPE_OSD && obj->osd_changed)
         update_osd(osd, obj);
 
     if (!obj->ass_packer)

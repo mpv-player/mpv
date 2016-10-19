@@ -192,6 +192,7 @@ static void fix_image_params(struct dec_video *d_video,
     struct mp_codec_params *c = d_video->codec;
 
     MP_VERBOSE(d_video, "Decoder format: %s\n", mp_image_params_to_str(params));
+    d_video->dec_format = *params;
 
     // While mp_image_params normally always have to have d_w/d_h set, the
     // decoder signals unknown bitstream aspect ratio with both set to 0.
@@ -235,6 +236,13 @@ static void fix_image_params(struct dec_video *d_video,
     // Assume square pixels if no aspect ratio is set at all.
     if (p.p_w <= 0 || p.p_h <= 0)
         p.p_w = p.p_h = 1;
+
+    if (opts->video_rotate < 0) {
+        p.rotate = 0;
+    } else {
+        p.rotate = (p.rotate + opts->video_rotate) % 360;
+    }
+    p.stereo_out = opts->video_stereo_mode;
 
     // Detect colorspace from resolution.
     mp_image_params_guess_csp(&p);
@@ -341,9 +349,14 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
     return mpi;
 }
 
-void video_reset_aspect(struct dec_video *d_video)
+void video_reset_params(struct dec_video *d_video)
 {
     d_video->last_format = (struct mp_image_params){0};
+}
+
+void video_get_dec_params(struct dec_video *d_video, struct mp_image_params *p)
+{
+    *p = d_video->dec_format;
 }
 
 void video_set_framedrop(struct dec_video *d_video, bool enabled)

@@ -66,13 +66,6 @@
 static dvb_state_t* global_dvb_state = NULL;
 static pthread_mutex_t global_dvb_state_lock = PTHREAD_MUTEX_INITIALIZER;
 
-/// URL definition
-static const m_option_t stream_params[] = {
-    OPT_STRING("prog", cfg_prog, 0),
-    OPT_INTRANGE("card", cfg_card, 0, 1, 4),
-    {0}
-};
-
 const struct m_sub_options stream_dvb_conf = {
     .opts = (const m_option_t[]) {
         OPT_STRING("prog", cfg_prog, 0),
@@ -928,9 +921,6 @@ static int dvb_open(stream_t *stream)
 {
     // I don't force  the file format because, although it's almost always TS,
     // there are some providers that stream an IP multicast with M$ Mpeg4 inside
-    dvb_priv_t *priv = stream->priv;
-    priv->log = stream->log;
-    dvb_priv_t *p = priv;
     char *progname;
     int tuner_type = 0, i;
 
@@ -943,7 +933,10 @@ static int dvb_open(stream_t *stream)
 
     dvb_state_t* state = dvb_get_state(stream);
 
-    priv->state = state;
+    dvb_priv_t *p = stream->priv;
+    p->log = stream->log;
+
+    p->state = state;
     if (state == NULL) {
         MP_ERR(stream, "DVB CONFIGURATION IS EMPTY, exit\n");
         pthread_mutex_unlock(&global_dvb_state_lock);
@@ -1017,12 +1010,31 @@ dvb_state_t *dvb_get_state(stream_t *stream)
     }
     struct mp_log *log = stream->log;
     struct mpv_global *global = stream->global;
+    stream->priv = mp_get_config_group(stream, stream->global, &stream_dvb_conf);
     dvb_priv_t *priv = stream->priv;
     int type, size;
     char filename[30], *name;
     dvb_channels_list *list;
     dvb_card_config_t *cards = NULL, *tmp;
     dvb_state_t *state = NULL;
+
+    bstr prog, card;
+    if (!bstr_split_tok(bstr0(stream->path), "@", &card, &prog)) {
+        prog = card;
+        card.len = 0;
+    }
+    if (prog.len) {
+        talloc_free(priv->cfg_prog);
+        priv->cfg_prog = bstrto0(NULL, prog);
+    }
+    if (card.len) {
+        bstr r;
+        priv->cfg_card = bstrtoll(card, &r, 0);
+        if (r.len || priv->cfg_card < 1 || priv->cfg_card > 4) {
+            MP_ERR(stream, "invalid card: '%.*s'\n", BSTR_P(card));
+            return NULL;
+        }
+    }
 
     state = malloc(sizeof(dvb_state_t));
     if (state == NULL)
@@ -1136,21 +1148,9 @@ dvb_state_t *dvb_get_state(stream_t *stream)
     return state;
 }
 
-static void *get_defaults(stream_t *st)
-{
-    return m_sub_options_copy(st, &stream_dvb_conf, st->opts->stream_dvb_opts);
-}
-
 const stream_info_t stream_info_dvb = {
     .name = "dvbin",
     .open = dvb_open,
     .protocols = (const char *const[]){ "dvb", NULL },
-    .priv_size = sizeof(dvb_priv_t),
-    .get_defaults = get_defaults,
-    .options = stream_params,
-    .url_options = (const char *const[]){
-        "hostname=prog",
-        "username=card",
-        NULL
-    },
+
 };

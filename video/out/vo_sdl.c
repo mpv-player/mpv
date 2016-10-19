@@ -975,14 +975,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
     switch (request) {
     case VOCTRL_FULLSCREEN:
-        vo->opts->fullscreen = !vo->opts->fullscreen;
         set_fullscreen(vo);
         return 1;
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, NULL);
         return 1;
-    case VOCTRL_GET_PANSCAN:
-        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         force_resize(vo);
         return VO_TRUE;
@@ -1035,4 +1032,5 @@ const struct vo_driver video_out_sdl = {
     .flip_page = flip_page,
     .wait_events = wait_events,
     .wakeup = wakeup,
+    .legacy_prefix = "sdl",
 };

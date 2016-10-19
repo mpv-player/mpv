@@ -125,6 +125,7 @@ static const struct gl_functions gl_functions[] = {
             DEF_FN(LinkProgram),
             DEF_FN(PixelStorei),
             DEF_FN(ReadPixels),
+            DEF_FN(Scissor),
             DEF_FN(ShaderSource),
             DEF_FN(TexImage2D),
             DEF_FN(TexParameteri),

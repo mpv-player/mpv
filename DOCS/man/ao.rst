@@ -4,17 +4,16 @@ AUDIO OUTPUT DRIVERS
 Audio output drivers are interfaces to different audio output facilities. The
 syntax is:
 
-``--ao=<driver1[:suboption1[=value]:...],driver2,...[,]>``
+``--ao=<driver1,driver2,...[,]>``
     Specify a priority list of audio output drivers to be used.
 
 If the list has a trailing ',', mpv will fall back on drivers not contained
-in the list. Suboptions are optional and can mostly be omitted.
-
-You can also set defaults for each driver. The defaults are applied before the
-normal driver parameters.
+in the list.
 
 ``--ao-defaults=<driver1[:parameter1:parameter2:...],driver2,...>``
     Set defaults for each driver.
+
+    Deprecated. No replacement.
 
 .. note::
 
@@ -23,87 +22,19 @@ normal driver parameters.
     where PulseAudio is used. On BSD systems, ``--ao=oss`` or ``--ao=sndio``
     may work (the latter being experimental).
 
-.. admonition:: Examples
-
-    - ``--ao=alsa,oss,`` Try the ALSA driver, then the OSS driver, then others.
-    - ``--ao=alsa:resample=yes:device=[plughw:0,3]`` Lets ALSA resample and
-      sets the device-name as first card, fourth device.
-
 Available audio output drivers are:
 
 ``alsa`` (Linux only)
     ALSA audio output driver
 
-    ``device=<device>``
-        Sets the device name. For ac3 output via S/PDIF, use an "iec958" or
-        "spdif" device, unless you really know how to set it correctly.
-    ``resample=yes``
-        Enable ALSA resampling plugin. (This is disabled by default, because
-        some drivers report incorrect audio delay in some cases.)
-    ``mixer-device=<device>``
-        Set the mixer device used with ``--no-softvol`` (default: ``default``).
-    ``mixer-name=<name>``
-        Set the name of the mixer element (default: ``Master``). This is for
-        example ``PCM`` or ``Master``.
-    ``mixer-index=<number>``
-        Set the index of the mixer channel (default: 0). Consider the output of
-        "``amixer scontrols``", then the index is the number that follows the
-        name of the element.
-    ``non-interleaved``
-        Allow output of non-interleaved formats (if the audio decoder uses
-        this format). Currently disabled by default, because some popular
-        ALSA plugins are utterly broken with non-interleaved formats.
-    ``ignore-chmap``
-        Don't read or set the channel map of the ALSA device - only request the
-        required number of channels, and then pass the audio as-is to it. This
-        option most likely should not be used. It can be useful for debugging,
-        or for static setups with a specially engineered ALSA configuration (in
-        this case you should always force the same layout with ``--audio-channels``,
-        or it will work only for files which use the layout implicit to your
-        ALSA device).
-
-    .. note::
-
-        MPlayer and mplayer2 required you to replace any ',' with '.' and
-        any ':' with '=' in the ALSA device name. mpv does not do this anymore.
-        Instead, quote the device name:
-
-            ``--ao=alsa:device=[plug:surround50]``
-
-        Note that the ``[`` and ``]`` simply quote the device name. With some
-        shells (like zsh), you have to quote the option string to prevent the
-        shell from interpreting the brackets instead of passing them to mpv.
-
-        Actually, you should use the ``--audio-device`` option, instead of
-        setting the device directly.
+    See `ALSA audio output options`_ for options specific to this AO.
 
     .. warning::
 
-        Handling of multichannel/surround audio changed in mpv 0.8.0 from the
-        behavior in MPlayer/mplayer2 and older versions of mpv.
-
-        The old behavior is that the player always downmixed to stereo by
-        default. The ``--audio-channels`` (or ``--channels`` before that) option
-        had to be set to get multichannel audio. Then playing stereo would
-        use the ``default`` device (which typically allows multiple programs
-        to play audio at the same time via dmix), while playing anything with
-        more channels would open one of the hardware devices, e.g. via the
-        ``surround51`` alias (typically with exclusive access). Whether the
-        player would use exclusive access or not would depend on the file
-        being played.
-
-        The new behavior since mpv 0.8.0 always enables multichannel audio,
-        i.e. ``--audio-channels=auto`` is the default. However, since ALSA
-        provides no good way to play multichannel audio in a non-exclusive
-        way (without blocking other applications from using audio), the player
-        is restricted to the capabilities of the ``default`` device by default,
-        which means it supports only stereo and mono (at least with current
-        typical ALSA configurations). But if a hardware device is selected,
-        then multichannel audio will typically work.
-
-        The short story is: if you want multichannel audio with ALSA, use
-        ``--audio-device`` to select the device (use ``--audio-device=help``
-        to get a list of all devices and their mpv name).
+        To get multichannel/surround audio, use ``--audio-channels=auto``. The
+        default for this option is ``auto-safe``, which makes this audio otuput
+        explicitly reject multichannel output, as there is no way to detect
+        whether a certain channel layout is actually supported.
 
         You can also try `using the upmix plugin <http://git.io/vfuAy>`_.
         This setup enables multichannel audio on the ``default`` device
@@ -113,31 +44,36 @@ Available audio output drivers are:
 ``oss``
     OSS audio output driver
 
-    ``<dsp-device>``
+    The following global options are supported by this audio output:
+
+    ``--oss-device``
         Sets the audio output device (default: ``/dev/dsp``).
-    ``<mixer-device>``
+        Deprecated, use ``--audio-device``.
+    ``--oss-mixer-device``
         Sets the audio mixer device (default: ``/dev/mixer``).
-    ``<mixer-channel>``
+    ``--oss-mixer-channel``
         Sets the audio mixer channel (default: ``pcm``). Other valid values
         include **vol, pcm, line**. For a complete list of options look for
         ``SOUND_DEVICE_NAMES`` in ``/usr/include/linux/soundcard.h``.
 
 ``jack``
-    JACK (Jack Audio Connection Kit) audio output driver
+    JACK (Jack Audio Connection Kit) audio output driver.
 
-    ``port=<name>``
+    The following global options are supported by this audio output:
+
+    ``--jack-port=<name>``
         Connects to the ports with the given name (default: physical ports).
-    ``name=<client>``
+    ``--jack-name=<client>``
         Client name that is passed to JACK (default: ``mpv``). Useful
         if you want to have certain connections established automatically.
-    ``(no-)autostart``
+    ``--jack-autostart=<yes|no>``
         Automatically start jackd if necessary (default: disabled). Note that
         this tends to be unreliable and will flood stdout with server messages.
-    ``(no-)connect``
+    ``--jack-connect=<yes|no>``
         Automatically create connections to output ports (default: enabled).
         When enabled, the maximum number of output channels will be limited to
         the number of available output ports.
-    ``std-channel-layout=waveext|any``
+    ``--jack-std-channel-layout=<waveext|any>``
         Select the standard channel layout (default: waveext). JACK itself has no
         notion of channel layouts (i.e. assigning which speaker a given
         channel is supposed to map to) - it just takes whatever the application
@@ -157,7 +93,9 @@ Available audio output drivers are:
     Automatically redirects to ``coreaudio_exclusive`` when playing compressed
     formats.
 
-    ``change-physical-format=<yes|no>``
+    The following global options are supported by this audio output:
+
+    ``--coreaudio-change-physical-format=<yes|no>``
         Change the physical format to one similar to the requested audio format
         (default: no). This has the advantage that multichannel audio output
         will actually work. The disadvantage is that it will change the
@@ -165,10 +103,12 @@ Available audio output drivers are:
         setting in the ``Audio Devices`` dialog in the ``Audio MIDI Setup``
         utility. Note that this does not affect the selected speaker setup.
 
-    ``exclusive``
+    ``--coreaudio-exclusive``
+        Deprecated, use ``--audio-exclusive``.
         Use exclusive mode access. This merely redirects to
         ``coreaudio_exclusive``, but should be preferred over using that AO
         directly.
+
 
 ``coreaudio_exclusive`` (Mac OS X only)
     Native Mac OS X audio output driver using direct device access and
@@ -183,18 +123,21 @@ Available audio output drivers are:
 ``pulse``
     PulseAudio audio output driver
 
-    ``[<host>][:<output sink>]``
+    The following global options are supported by this audio output:
+
+    ``--pulse-host=<host>``, ``--pulse-sink=<sink>``
         Specify the host and optionally output sink to use. An empty <host>
         string uses a local connection, "localhost" uses network transfer
         (most likely not what you want).
+        Deprecated, use ``--audio-device``.
 
-    ``buffer=<1-2000|native>``
+    ``--pulse-buffer=<1-2000|native>``
         Set the audio buffer size in milliseconds. A higher value buffers
         more data, and has a lower probability of buffer underruns. A smaller
         value makes the audio stream react faster, e.g. to playback speed
         changes. Default: 250.
 
-    ``latency-hacks=<yes|no>``
+    ``--pulse-latency-hacks=<yes|no>``
         Enable hacks to workaround PulseAudio timing bugs (default: no). If
         enabled, mpv will do elaborate latency calculations on its own. If
         disabled, it will use PulseAudio automatically updated timing
@@ -214,61 +157,67 @@ Available audio output drivers are:
               environments, such as systems where none of the other drivers
               are available.
 
-    ``buflen=<length>``
+    The following global options are supported by this audio output:
+
+    ``--sdl-buflen=<length>``
         Sets the audio buffer length in seconds. Is used only as a hint by the
         sound system. Playing a file with ``-v`` will show the requested and
         obtained exact buffer size. A value of 0 selects the sound system
         default.
 
-    ``bufcnt=<count>``
+    ``--sdl-bufcnt=<count>``
         Sets the number of extra audio buffers in mpv. Usually needs not be
         changed.
 
 ``null``
-    Produces no audio output but maintains video playback speed. Use
-    ``--ao=null:untimed`` for benchmarking.
+    Produces no audio output but maintains video playback speed. You can use
+    ``--ao=null --ao-null-untimed`` for benchmarking.
 
-    ``untimed``
+    The following global options are supported by this audio output:
+
+    ``--ao-null-untimed``
         Do not simulate timing of a perfect audio device. This means audio
         decoding will go as fast as possible, instead of timing it to the
         system clock.
 
-    ``buffer``
+    ``--ao-null-buffer``
         Simulated buffer length in seconds.
 
-    ``outburst``
+    ``--ao-null-outburst``
         Simulated chunk size in samples.
 
-    ``speed``
+    ``--ao-null-speed``
         Simulated audio playback speed as a multiplier. Usually, a real audio
         device will not go exactly as fast as the system clock. It will deviate
         just a little, and this option helps to simulate this.
 
-    ``latency``
+    ``--ao-null-latency``
         Simulated device latency. This is additional to EOF.
 
-    ``broken-eof``
+    ``--ao-null-broken-eof``
         Simulate broken audio drivers, which always add the fixed device
         latency to the reported audio playback position.
 
-    ``broken-delay``
+    ``--ao-null-broken-delay``
         Simulate broken audio drivers, which don't report latency correctly.
 
-    ``channel-layouts``
+    ``--ao-null-channel-layouts``
         If not empty, this is a ``,`` separated list of channel layouts the
         AO allows. This can be used to test channel layout selection.
 
 ``pcm``
     Raw PCM/WAVE file writer audio output
 
-    ``(no-)waveheader``
+    The following global options are supported by this audio output:
+
+    ``--ao-pcm-waveheader=<yes|no>``
         Include or do not include the WAVE header (default: included). When
         not included, raw PCM will be generated.
-    ``file=<filename>``
+    ``--ao-pcm-file=<filename>``
         Write the sound to ``<filename>`` instead of the default
         ``audiodump.wav``. If ``no-waveheader`` is specified, the default is
         ``audiodump.pcm``.
-    ``(no-)append``
+    ``--ao-pcm-append=<yes|no>``
         Append to the file, instead of overwriting it. Always use this with the
         ``no-waveheader`` option - with ``waveheader`` it's broken, because
         it will write a WAVE header every time the file is opened.
@@ -280,13 +229,18 @@ Available audio output drivers are:
               confused with RoarAudio, which is something completely
               different.
 
-    ``host=<name/path>``
+    The following global options are supported by this audio output:
+
+    ``--rsound-host=<name/path>``
         Set the address of the server (default: localhost).  Can be either a
         network hostname for TCP connections or a Unix domain socket path
         starting with '/'.
-    ``port=<number>``
+    ``--rsound-port=<number>``
         Set the TCP port used for connecting to the server (default: 12345).
         Not used if connecting to a Unix domain socket.
+
+    These options are deprecated. If anyone cares enough, their functionality
+    can be added back using ``--audio-device``.
 
 ``sndio``
     Audio output to the OpenBSD sndio sound system
@@ -296,16 +250,24 @@ Available audio output drivers are:
     (Note: only supports mono, stereo, 4.0, 5.1 and 7.1 channel
     layouts.)
 
-    ``device=<device>``
+    The following global options are supported by this audio output:
+
+    ``--ao-sndio-device=<device>``
         sndio device to use (default: ``$AUDIODEVICE``, resp. ``snd0``).
+        Deprecated, use ``--audio-device``.
 
 ``wasapi``
     Audio output to the Windows Audio Session API.
 
-    ``exclusive``
+    The following global options are supported by this audio output:
+
+    ``--ao-wasapi-exclusive``
+        Deprecated, use ``--audio-exclusive``.
         Requests exclusive, direct hardware access. By definition prevents
         sound playback of any other program until mpv exits.
-    ``device=<id>``
+    ``--ao-wasapi-device=<id>``
+        Deprecated, use ``--audio-device``.
+
         Uses the requested endpoint instead of the system's default audio
         endpoint. Both an ordinal number (0,1,2,...) and the GUID
         String are valid; the GUID string is guaranteed to not change
@@ -313,8 +275,3 @@ Available audio output drivers are:
 
         Also supports searching active devices by human-readable name. If more
         than one device matches the name, refuses loading it.
-
-        This option is mostly deprecated in favour of the more general
-        ``--audio-device`` option. That said, ``--audio-device=help`` will give
-        a list of valid device GUIDs (prefixed with ``wasapi/``), as well as
-        their human readable names, which should work here.

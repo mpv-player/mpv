@@ -17,7 +17,6 @@
 
 #include <windows.h>
 #include <versionhelpers.h>
-#include <initguid.h>
 #include <d3d9.h>
 #include <dwmapi.h>
 #include "osdep/windows_utils.h"

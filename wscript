@@ -135,7 +135,7 @@ main_dependencies = [
         'name': 'win32',
         'desc': 'win32',
         'deps_any': [ 'os-win32', 'os-cygwin' ],
-        'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'avrt', 'dwmapi']),
+        'func': check_cc(lib=['winmm', 'gdi32', 'ole32', 'uuid', 'avrt', 'dwmapi']),
     }, {
         'name': '--win32-internal-pthreads',
         'desc': 'internal pthread wrapper for win32 (Vista+)',
@@ -148,6 +148,10 @@ main_dependencies = [
         'func': check_pthreads,
         'req': True,
         'fmsg': 'Unable to find pthreads support.'
+    }, {
+        'name': 'gnuc',
+        'desc': 'GNU C extensions',
+        'func': check_statement([], "__GNUC__"),
     }, {
         'name': 'stdatomic',
         'desc': 'stdatomic.h',
@@ -173,10 +177,10 @@ main_dependencies = [
         'deps_neg': [ 'stdatomic', 'atomic-builtins' ],
     }, {
         'name': 'atomics',
-        'desc': 'compiler support for usable thread synchronization built-ins',
+        'desc': 'stdatomic.h support or emulation',
         'func': check_true,
         'req': True,
-        'deps_any': ['stdatomic', 'atomic-builtins', 'sync-builtins'],
+        'deps_any': ['stdatomic', 'atomic-builtins', 'sync-builtins', 'gnuc'],
     }, {
         'name': 'c11-tls',
         'desc': 'C11 TLS support',
@@ -577,7 +581,7 @@ audio_output_features = [
     }, {
         'name': '--openal',
         'desc': 'OpenAL audio output',
-        'func': check_pkg_config('openal', '>= 1.13'),
+        'func': check_openal,
         'default': 'disable'
     }, {
         'name': '--opensles',
@@ -797,7 +801,7 @@ video_output_features = [
         ),
     }, {
         'name': '--standard-gl',
-        'desc': 'Desktop standard OpengGL support',
+        'desc': 'Desktop standard OpenGL support',
         'func': compose_checks(
             check_statement('GL/gl.h', '(void)GL_RGB32F'),     # arbitrary OpenGL 3.0 symbol
             check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
@@ -818,11 +822,22 @@ video_output_features = [
         'deps': ['any-gl'],
         'deps_any': [ 'libmpv-shared', 'libmpv-static' ],
         'func': check_true,
-    } , {
+    }, {
+        'name': '--mali-fbdev',
+        'desc': 'MALI via Linux fbdev',
+        'deps': ['standard-gl', 'libdl'],
+        'func': compose_checks(
+            check_cc(lib="EGL"),
+            check_cc(lib="GLESv2"),
+            check_statement('EGL/fbdev_window.h', 'struct fbdev_window test'),
+            check_statement('linux/fb.h', 'struct fb_var_screeninfo test'),
+        ),
+    }, {
         'name': '--gl',
         'desc': 'OpenGL video outputs',
         'deps_any': [ 'gl-cocoa', 'gl-x11', 'egl-x11', 'egl-drm',
-                      'gl-win32', 'gl-wayland', 'rpi', 'plain-gl' ],
+                      'gl-win32', 'gl-wayland', 'rpi', 'mali-fbdev',
+                      'plain-gl' ],
         'func': check_true,
         'req': True,
         'fmsg': "Unable to find OpenGL header files for video output. " +
@@ -831,7 +846,7 @@ video_output_features = [
     }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
-        'deps_any': [ 'egl-x11' ],
+        'deps_any': [ 'egl-x11', 'mali-fbdev', 'rpi', 'gl-wayland', 'egl-drm' ],
         'func': check_true
     }
 ]
@@ -870,6 +885,12 @@ hwaccel_features = [
         'func': compose_checks(
                     check_headers('libavcodec/dxva2.h',  use='libav'),
                     check_headers('libavcodec/d3d11va.h',  use='libav')),
+    }, {
+        'name': '--cuda-hwaccel',
+        'desc': 'CUDA hwaccel',
+        'func': compose_checks(
+                    check_cc(lib="cuda"),
+                    check_headers('libavutil/hwcontext_cuda.h',  use='libav')),
     }, {
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',

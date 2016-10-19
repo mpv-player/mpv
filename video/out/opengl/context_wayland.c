@@ -18,6 +18,7 @@
 
 #include "video/out/wayland_common.h"
 #include "context.h"
+#include "egl_helpers.h"
 
 static void egl_resize(struct vo_wayland_state *wl)
 {
@@ -62,64 +63,22 @@ static void egl_resize(struct vo_wayland_state *wl)
     wl->vo->want_redraw = true;
 }
 
-static int egl_create_context(struct vo_wayland_state *wl,
-                              MPGLContext *ctx,
-                              bool enable_alpha)
+static int egl_create_context(struct vo_wayland_state *wl, MPGLContext *ctx,
+                              int flags)
 {
-    EGLint major, minor, n;
-
     GL *gl = ctx->gl;
     const char *eglstr = "";
 
     if (!(wl->egl_context.egl.dpy = eglGetDisplay(wl->display.display)))
         return -1;
 
-    EGLint config_attribs[] = {
-        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-        EGL_RED_SIZE, 1,
-        EGL_GREEN_SIZE, 1,
-        EGL_BLUE_SIZE, 1,
-        EGL_ALPHA_SIZE, enable_alpha,
-        EGL_DEPTH_SIZE, 1,
-        EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
-        EGL_NONE
-    };
-
-    /* major and minor here returns the supported EGL version (e.g.: 1.4) */
-    if (eglInitialize(wl->egl_context.egl.dpy, &major, &minor) != EGL_TRUE)
+    if (eglInitialize(wl->egl_context.egl.dpy, NULL, NULL) != EGL_TRUE)
         return -1;
 
-    MP_VERBOSE(wl, "EGL version %d.%d\n", major, minor);
-
-    EGLint context_attribs[] = {
-        // aka EGL_CONTEXT_MAJOR_VERSION_KHR
-        EGL_CONTEXT_CLIENT_VERSION, 3,
-        EGL_NONE
-    };
-
-    if (eglBindAPI(EGL_OPENGL_API) != EGL_TRUE)
+    if (!mpegl_create_context(wl->egl_context.egl.dpy, wl->log, flags,
+                              &wl->egl_context.egl.ctx,
+                              &wl->egl_context.egl.conf))
         return -1;
-
-    eglChooseConfig(wl->egl_context.egl.dpy, config_attribs,
-                    &wl->egl_context.egl.conf, 1, &n);
-
-    wl->egl_context.egl.ctx = eglCreateContext(wl->egl_context.egl.dpy,
-                                               wl->egl_context.egl.conf,
-                                               EGL_NO_CONTEXT,
-                                               context_attribs);
-    if (!wl->egl_context.egl.ctx) {
-        /* fallback to any GL version */
-        MP_WARN(wl, "can't create context for requested OpenGL version: "
-                    "fall back to any version available\n");
-        context_attribs[0] = EGL_NONE;
-        wl->egl_context.egl.ctx = eglCreateContext(wl->egl_context.egl.dpy,
-                                                   wl->egl_context.egl.conf,
-                                                   EGL_NO_CONTEXT,
-                                                   context_attribs);
-
-        if (!wl->egl_context.egl.ctx)
-            return -1;
-    }
 
     eglMakeCurrent(wl->egl_context.egl.dpy, NULL, NULL, wl->egl_context.egl.ctx);
 
@@ -237,7 +196,7 @@ static int waylandgl_init(struct MPGLContext *ctx, int flags)
     if (!vo_wayland_init(ctx->vo))
         return -1;
 
-    return egl_create_context(ctx->vo->wayland, ctx, !!(flags & VOFLAG_ALPHA));
+    return egl_create_context(ctx->vo->wayland, ctx, flags);
 }
 
 const struct mpgl_driver mpgl_driver_wayland = {

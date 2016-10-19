@@ -16,8 +16,8 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MP_ATOMICS_H
-#define MP_ATOMICS_H
+#ifndef MP_ATOMIC_H
+#define MP_ATOMIC_H
 
 #include <inttypes.h>
 #include "config.h"
@@ -79,6 +79,49 @@ typedef struct { volatile unsigned long long v; } atomic_ullong;
        bool ok_ = val_ == *(old);       \
        if (!ok_) *(old) = val_;         \
        ok_; })
+
+#elif defined(__GNUC__)
+
+#include <pthread.h>
+
+extern pthread_mutex_t mp_atomic_mutex;
+
+#define atomic_load(p)                                  \
+    ({ __typeof__(p) p_ = (p);                          \
+       pthread_mutex_lock(&mp_atomic_mutex);            \
+       __typeof__(p_->v) v = p_->v;                     \
+       pthread_mutex_unlock(&mp_atomic_mutex);          \
+       v; })
+#define atomic_store(p, val)                            \
+    ({ __typeof__(val) val_ = (val);                    \
+       __typeof__(p) p_ = (p);                          \
+       pthread_mutex_lock(&mp_atomic_mutex);            \
+       p_->v = val_;                                    \
+       pthread_mutex_unlock(&mp_atomic_mutex); })
+#define atomic_fetch_op(a, b, op)                       \
+    ({ __typeof__(a) a_ = (a);                          \
+       __typeof__(b) b_ = (b);                          \
+       pthread_mutex_lock(&mp_atomic_mutex);            \
+       __typeof__(a_->v) v = a_->v;                     \
+       a_->v = v op b_;                                 \
+       pthread_mutex_unlock(&mp_atomic_mutex);          \
+       v; })
+#define atomic_fetch_add(a, b) atomic_fetch_op(a, b, +)
+#define atomic_fetch_and(a, b) atomic_fetch_op(a, b, &)
+#define atomic_fetch_or(a, b)  atomic_fetch_op(a, b, |)
+#define atomic_compare_exchange_strong(p, old, new)     \
+    ({ __typeof__(p) p_ = (p);                          \
+       __typeof__(old) old_ = (old);                    \
+       __typeof__(new) new_ = (new);                    \
+       pthread_mutex_lock(&mp_atomic_mutex);            \
+       int res = p_->v == *old_;                        \
+       if (res) {                                       \
+           p_->v = new_;                                \
+       } else {                                         \
+           *old_ = p_->v;                               \
+       }                                                \
+       pthread_mutex_unlock(&mp_atomic_mutex);          \
+       res; })
 
 #else
 # error "this should have been a configuration error, report a bug please"

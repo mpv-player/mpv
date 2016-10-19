@@ -19,6 +19,7 @@ enum sd_ctrl {
     SD_CTRL_GET_RESOLUTION,
     SD_CTRL_SET_TOP,
     SD_CTRL_SET_VIDEO_DEF_FPS,
+    SD_CTRL_UPDATE_SPEED,
 };
 
 struct attachment_list {

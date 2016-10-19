@@ -30,7 +30,7 @@
 
 #include "osdep/timer.h"
 #include "osdep/threads.h"
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 #include "misc/ring.h"
 
 /*
@@ -151,7 +151,7 @@ int ao_read_data(struct ao *ao, void **data, int samples, int64_t out_time_us)
 end:
 
     if (need_wakeup)
-        mp_input_wakeup_nolock(ao->input_ctx);
+        ao->wakeup_cb(ao->wakeup_ctx);
 
     // pad with silence (underflow/paused/eof)
     for (int n = 0; n < ao->num_planes; n++)

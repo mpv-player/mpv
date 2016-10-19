@@ -145,8 +145,7 @@ struct mpv_global;
 struct dec_sub;
 
 struct osd_state *osd_create(struct mpv_global *global);
-void osd_changed(struct osd_state *osd, int new_value);
-void osd_changed_all(struct osd_state *osd);
+void osd_changed(struct osd_state *osd);
 void osd_free(struct osd_state *osd);
 
 bool osd_query_and_reset_want_redraw(struct osd_state *osd);

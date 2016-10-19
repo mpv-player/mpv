@@ -7,8 +7,8 @@ large part of which is incompatible or completely changes how the player
 behaves. Although there are still many similarities to its ancestors, **mpv**
 should generally be treated as a completely different program.
 
-.. note::
-    These lists are incomplete.
+.. admonition:: Warning
+    This document is not updated anymore, and is incomplete and outdated.
 
 General Changes from MPlayer to mpv
 -----------------------------------
@@ -262,13 +262,14 @@ Command Line Switches
     ``-ssf <sub>``              ``--sws-...``
     ``-stop-xscreensaver``      ``--stop-screensaver``
     ``-sub-fuzziness``          ``--sub-auto``
+    ``-sub-text-*``             ``--sub-*``
     ``-sub``                    ``--sub-file``
     ``-subcp``                  ``--sub-codepage``
     ``-subdelay``               ``--sub-delay``
     ``-subfile``                ``--sub-file``
-    ``-subfont-*``              ``--sub-text-*``, ``--osd-*``
+    ``-subfont-*``              ``--sub-*``, ``--osd-*``
     ``-subfont-text-scale``     ``--sub-scale``
-    ``-subfont``                ``--sub-text-font``
+    ``-subfont``                ``--sub-font``
     ``-subfps``                 ``--sub-fps``
     ``-subpos``                 ``--sub-pos``
     ``-sws``                    ``--sws-scaler``

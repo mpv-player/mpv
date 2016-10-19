@@ -241,4 +241,5 @@ const struct ao_driver audio_out_null = {
         OPT_CHANNELS("channel-layouts", channel_layouts, 0),
         {0}
     },
+    .legacy_prefix = "ao-null",
 };

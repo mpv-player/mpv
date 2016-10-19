@@ -19,6 +19,7 @@
 #define MPLAYER_M_CONFIG_H
 
 #include <stddef.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 #include "misc/bstr.h"
@@ -37,10 +38,13 @@ struct mp_log;
 
 // Config option
 struct m_config_option {
-    bool is_generated : 1;          // Automatically added ("no-" options)
+    bool is_hidden : 1;             // Does not show up in help
     bool is_set_from_cmdline : 1;   // Set by user from command line
+    bool is_set_from_config : 1;    // Set by a config file
     bool is_set_locally : 1;        // Has a backup entry
     bool warning_was_printed : 1;
+    int16_t shadow_offset;          // Offset into m_config_shadow.data
+    int16_t group;                  // Index into m_config.groups
     const char *name;               // Full name (ie option-subopt)
     const struct m_option *opt;     // Option description
     void *data;                     // Raw value of the option
@@ -74,10 +78,33 @@ typedef struct m_config {
     int (*includefunc)(void *ctx, char *filename, int flags);
     void *includefunc_ctx;
 
+    // Can intercept option write accesses.
+    int (*option_set_callback)(void *ctx, struct m_config_option *co,
+                               void *data, int flags);
+    void *option_set_callback_cb;
+
+    // Notification after an option was successfully written to.
+    // Uses flags as set in UPDATE_OPTS_MASK.
+    void (*option_change_callback)(void *ctx, struct m_config_option *co,
+                                   int flags);
+    void *option_change_callback_ctx;
+
     // For the command line parser
     int recursion_depth;
 
+    bool subopt_deprecation_warning;
+
     void *optstruct; // struct mpopts or other
+
+    int shadow_size;
+
+    // List of m_sub_options instances.
+    // Index 0 is the top-level and is always present.
+    struct m_config_group *groups;
+    int num_groups;
+
+    // Thread-safe shadow memory; only set for the main m_config.
+    struct m_config_shadow *shadow;
 } m_config_t;
 
 // Create a new config object.
@@ -94,8 +121,9 @@ struct m_config *m_config_new(void *talloc_ctx, struct mp_log *log,
                               size_t size, const void *defaults,
                               const struct m_option *options);
 
-// (Warning: new object references config->log and others.)
-struct m_config *m_config_dup(void *talloc_ctx, struct m_config *config);
+// Creates "backup" shadow memory for use with m_config_cache. Sets it on
+// mpv_global. Expected to be called at early init on the main m_config.
+void m_config_create_shadow(struct m_config *config);
 
 struct m_config *m_config_from_obj_desc(void *talloc_ctx, struct mp_log *log,
                                         struct m_obj_desc *desc);
@@ -104,12 +132,9 @@ struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
                                                 struct mp_log *log,
                                                 struct m_obj_desc *desc);
 
-int m_config_set_obj_params(struct m_config *conf, char **args);
-
-// Search for the object with the given name in the defaults list, and apply
-// its parameters.
-int m_config_apply_defaults(struct m_config *config, const char *name,
-                            struct m_obj_settings *defaults);
+struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
+    struct mp_log *log, struct mpv_global *global, struct m_obj_desc *desc,
+    const char *name, struct m_obj_settings *defaults, char **args);
 
 // Make sure the option is backed up. If it's already backed up, do nothing.
 // All backed up options can be restored with m_config_restore_backups().
@@ -131,10 +156,11 @@ enum {
     M_SETOPT_PRESERVE_CMDLINE = 32, // Don't set if already marked as FROM_CMDLINE
     M_SETOPT_NO_FIXED = 64,         // Reject M_OPT_FIXED options
     M_SETOPT_NO_PRE_PARSE = 128,    // Reject M_OPT_PREPARSE options
+    M_SETOPT_NO_OVERWRITE = 256,    // Skip options marked with FROM_*
 };
 
 // Flags for safe option setting during runtime.
-#define M_SETOPT_RUNTIME (M_SETOPT_NO_FIXED | M_SETOPT_NO_PRE_PARSE)
+#define M_SETOPT_RUNTIME M_SETOPT_NO_FIXED
 
 // Set the named option to the given string.
 // flags: combination of M_SETOPT_* flags (0 for normal operation)
@@ -157,10 +183,14 @@ static inline int m_config_set_option0(struct m_config *config,
     return m_config_set_option(config, bstr0(name), bstr0(param));
 }
 
-// Similar to m_config_set_option_ext(), but set as data in its native format.
-// The type data points to is as in co->opt
 int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
                             void *data, int flags);
+
+void m_config_mark_co_flags(struct m_config_option *co, int flags);
+
+int m_config_set_option_raw_direct(struct m_config *config,
+                                   struct m_config_option *co,
+                                   void *data, int flags);
 
 // Similar to m_config_set_option_ext(), but set as data using mpv_node.
 struct mpv_node;
@@ -171,16 +201,13 @@ int m_config_set_option_node(struct m_config *config, bstr name,
 int m_config_parse_suboptions(struct m_config *config, char *name,
                               char *subopts);
 
-
-/*  Get the option matching the given name.
- *  \param config The config object.
- *  \param name The option's name.
- */
-const struct m_option *m_config_get_option(const struct m_config *config,
-                                           struct bstr name);
-
+struct m_config_option *m_config_get_co_raw(const struct m_config *config,
+                                            struct bstr name);
 struct m_config_option *m_config_get_co(const struct m_config *config,
                                         struct bstr name);
+
+int m_config_get_co_count(struct m_config *config);
+struct m_config_option *m_config_get_co_index(struct m_config *config, int index);
 
 // Return the n-th option by position. n==0 is the first option. If there are
 // less than (n + 1) options, return NULL.
@@ -193,13 +220,18 @@ const char *m_config_get_positional_option(const struct m_config *config, int n)
 // Returns: error code (<0), or number of expected params (0, 1)
 int m_config_option_requires_param(struct m_config *config, bstr name);
 
+// Notify m_config_cache users that the option has (probably) changed its value.
+void m_config_notify_change_co(struct m_config *config,
+                               struct m_config_option *co);
+
+bool m_config_is_in_group(struct m_config *config,
+                          const struct m_sub_options *group,
+                          struct m_config_option *co);
+
 // Return all (visible) option names as NULL terminated string list.
 char **m_config_list_options(void *ta_parent, const struct m_config *config);
 
-/*  Print a list of all registered options.
- *  \param config The config object.
- */
-void m_config_print_option_list(const struct m_config *config);
+void m_config_print_option_list(const struct m_config *config, const char *name);
 
 
 /*  Find the profile with the given name.
@@ -210,6 +242,10 @@ void m_config_print_option_list(const struct m_config *config);
 struct m_profile *m_config_get_profile0(const struct m_config *config,
                                         char *name);
 struct m_profile *m_config_get_profile(const struct m_config *config, bstr name);
+
+// Apply and clear the default profile - it's the only profile that new config
+// files do not simply append to (for configfile parser).
+void m_config_finish_default_profile(struct m_config *config, int flags);
 
 /*  Get the profile with the given name, creating it if necessary.
  *  \param config The config object.
@@ -247,13 +283,53 @@ int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
  */
 int m_config_set_profile(struct m_config *config, char *name, int flags);
 
-void *m_config_alloc_struct(void *talloc_ctx,
-                            const struct m_sub_options *subopts);
+struct mpv_node m_config_get_profiles(struct m_config *config);
 
-// Create a copy of the struct ptr, described by opts.
-// "opts" must live until the struct is free'd.
-// Freeing the struct frees all members.
-void *m_sub_options_copy(void *talloc_ctx, const struct m_sub_options *opts,
-                         const void *ptr);
+// This can be used to create and synchronize per-thread option structs,
+// which then can be read without synchronization. No concurrent access to
+// the cache itself is allowed.
+struct m_config_cache {
+    // The struct as indicated by m_config_cache_alloc's group parameter.
+    void *opts;
+
+    // Internal.
+    struct m_config_shadow *shadow;
+    struct m_config *shadow_config;
+    long long ts;
+    int group;
+};
+
+// Create a mirror copy from the global options.
+//  ta_parent: parent for the returned allocation
+//  global: option data source
+//  group: the option group to return. This can be NULL for the global option
+//         struct (MPOpts), or m_sub_options used in a certain OPT_SUBSTRUCT()
+//         item.
+struct m_config_cache *m_config_cache_alloc(void *ta_parent,
+                                            struct mpv_global *global,
+                                            const struct m_sub_options *group);
+
+// Update the options in cache->opts to current global values. Return whether
+// there was an update notification at all (which may or may not indicate that
+// some options have changed).
+// Keep in mind that while the cache->opts pointer does not change, the option
+// data itself will (e.g. string options might be reallocated).
+bool m_config_cache_update(struct m_config_cache *cache);
+
+// Like m_config_cache_alloc(), but return the struct (m_config_cache->opts)
+// directly, with no way to update the config.
+// Warning: does currently not set the child as its own talloc root, which
+//          means the only way to free the struct is by freeing ta_parent.
+void *mp_get_config_group(void *ta_parent, struct mpv_global *global,
+                          const struct m_sub_options *group);
+
+
+// Read a single global option in a thread-safe way. For multiple options,
+// use m_config_cache. The option must exist and match the provided type (the
+// type is used as a sanity check only). Performs semi-expensive lookup.
+void mp_read_option_raw(struct mpv_global *global, const char *name,
+                        const struct m_option_type *type, void *dst);
+
+struct m_config *mp_get_root_config(struct mpv_global *global);
 
 #endif /* MPLAYER_M_CONFIG_H */

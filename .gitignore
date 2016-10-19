@@ -19,6 +19,7 @@
 /demux/ebml_types.h
 /sub/osd_font.h
 /player/lua/*.inc
+/player/builtin_conf.inc
 /DOCS/man/mpv.1
 /DOCS/man/mpv.aux
 /DOCS/man/mpv.log

@@ -31,7 +31,7 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
 static int seek(stream_t *s, int64_t newpos)
 {
     struct priv *p = s->priv;
-    return (int)p->info.seek_fn(p->info.cookie, newpos) >= 0;
+    return p->info.seek_fn(p->info.cookie, newpos) >= 0;
 }
 
 static int control(stream_t *s, int cmd, void *arg)
@@ -104,5 +104,4 @@ static int open_cb(stream_t *stream)
 const stream_info_t stream_info_cb = {
     .name = "stream_callback",
     .open = open_cb,
-    .protocols = (const char*const[]){ "*", NULL },
 };

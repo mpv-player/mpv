@@ -246,4 +246,5 @@ const struct ao_driver audio_out_opensles = {
         OPT_INTRANGE("sample-rate", cfg_sample_rate, 0, 1000, 100000),
         {0}
     },
+    .legacy_prefix = "opensles",
 };

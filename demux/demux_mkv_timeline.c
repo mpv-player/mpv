@@ -32,10 +32,10 @@
 #include "mpv_talloc.h"
 
 #include "common/msg.h"
-#include "common/global.h"
 #include "demux/demux.h"
 #include "demux/timeline.h"
 #include "demux/matroska.h"
+#include "options/m_config.h"
 #include "options/options.h"
 #include "options/path.h"
 #include "misc/bstr.h"
@@ -46,6 +46,7 @@
 struct tl_ctx {
     struct mp_log *log;
     struct mpv_global *global;
+    struct MPOpts *opts;
     struct timeline *tl;
 
     struct demuxer *demuxer;
@@ -209,8 +210,7 @@ static bool check_file_seg(struct tl_ctx *ctx, char *filename, int segment)
                 MP_TARRAY_APPEND(NULL, ctx->sources, ctx->num_sources, NULL);
             }
 
-            if (stream_wants_cache(d->stream, &ctx->global->opts->stream_cache))
-            {
+            if (stream_wants_cache(d->stream, ctx->opts->stream_cache)) {
                 free_demuxer_and_stream(d);
                 params.disable_cache = false;
                 params.matroska_wanted_uids = ctx->uids; // potentially reallocated, same data
@@ -247,7 +247,7 @@ static bool missing(struct tl_ctx *ctx)
 
 static void find_ordered_chapter_sources(struct tl_ctx *ctx)
 {
-    struct MPOpts *opts = ctx->global->opts;
+    struct MPOpts *opts = ctx->opts;
     void *tmp = talloc_new(NULL);
     int num_filenames = 0;
     char **filenames = NULL;
@@ -260,7 +260,7 @@ static void find_ordered_chapter_sources(struct tl_ctx *ctx)
             struct playlist *pl =
                 playlist_parse_file(opts->ordered_chapters_files, ctx->global);
             talloc_steal(tmp, pl);
-            for (struct playlist_entry *e = pl->first; e; e = e->next)
+            for (struct playlist_entry *e = pl ? pl->first : NULL; e; e = e->next)
                 MP_TARRAY_APPEND(tmp, filenames, num_filenames, e->filename);
         } else if (ctx->demuxer->stream->uncached_type != STREAMTYPE_FILE) {
             MP_WARN(ctx, "Playback source is not a "
@@ -317,7 +317,7 @@ static int64_t add_timeline_part(struct tl_ctx *ctx,
      * early; we don't want to try seeking over a one frame gap. */
     int64_t join_diff = start - ctx->last_end_time;
     if (ctx->num_parts == 0
-        || FFABS(join_diff) > ctx->global->opts->chapter_merge_threshold * 1e6
+        || FFABS(join_diff) > ctx->opts->chapter_merge_threshold * 1e6
         || source != ctx->timeline[ctx->num_parts - 1].source)
     {
         struct timeline_part new = {
@@ -505,19 +505,21 @@ void build_ordered_chapter_timeline(struct timeline *tl)
     if (!demuxer->matroska_data.ordered_chapters)
         return;
 
-    if (!demuxer->global->opts->ordered_chapters) {
-        MP_INFO(demuxer, "File uses ordered chapters, but "
-                "you have disabled support for them. Ignoring.\n");
-        return;
-    }
-
     struct tl_ctx *ctx = talloc_ptrtype(tl, ctx);
     *ctx = (struct tl_ctx){
         .log = tl->log,
         .global = tl->global,
         .tl = tl,
         .demuxer = demuxer,
+        .opts = mp_get_config_group(ctx, tl->global, NULL),
     };
+
+    if (!ctx->opts->ordered_chapters) {
+        MP_INFO(demuxer, "File uses ordered chapters, but "
+                "you have disabled support for them. Ignoring.\n");
+        talloc_free(ctx);
+        return;
+    }
 
     MP_INFO(ctx, "File uses ordered chapters, will build edit timeline.\n");
 

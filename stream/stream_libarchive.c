@@ -274,7 +274,7 @@ bool mp_archive_next_entry(struct mp_archive *mpa)
     talloc_free(mpa->entry_filename);
     mpa->entry_filename = NULL;
 
-    for (;;) {
+    while (!mp_cancel_test(mpa->primary_src->cancel)) {
         struct archive_entry *entry;
         int r = archive_read_next_header(mpa->arch, &entry);
         if (r == ARCHIVE_EOF)
@@ -367,6 +367,9 @@ static int archive_entry_seek(stream_t *s, int64_t newpos)
         // skip function either).
         char buffer[4096];
         while (newpos > s->pos) {
+            if (mp_cancel_test(s->cancel))
+                return -1;
+
             int size = MPMIN(newpos - s->pos, sizeof(buffer));
             int r = archive_read_data(p->mpa->arch, buffer, size);
             if (r < 0) {

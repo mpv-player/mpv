@@ -103,7 +103,10 @@ static int init(struct dec_audio *da, const char *decoder)
     lavc_context->refcounted_frames = 1;
     lavc_context->codec_type = AVMEDIA_TYPE_AUDIO;
     lavc_context->codec_id = lavc_codec->id;
-    lavc_context->time_base = ctx->codec_timebase;
+
+#if LIBAVCODEC_VERSION_MICRO >= 100
+    lavc_context->pkt_timebase = ctx->codec_timebase;
+#endif
 
     if (opts->downmix && mpopts->audio_output_channels.num_chmaps == 1) {
         lavc_context->request_channel_layout =
@@ -242,7 +245,8 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     if (!got_frame)
         return 0;
 
-    double out_pts = mp_pts_from_av(priv->avframe->pkt_pts, &priv->codec_timebase);
+    double out_pts = mp_pts_from_av(MP_AVFRAME_DEC_PTS(priv->avframe),
+                                    &priv->codec_timebase);
 
     struct mp_audio *mpframe = mp_audio_from_avframe(priv->avframe);
     if (!mpframe)

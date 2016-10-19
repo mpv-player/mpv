@@ -34,24 +34,48 @@
 #include "internal.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
+#include "options/m_config.h"
 #include "options/m_option.h"
 
 #include <jack/jack.h>
 
-struct priv {
-    jack_client_t *client;
-    float jack_latency;
-    char *cfg_port;
-    char *cfg_client_name;
+struct jack_opts {
+    char *port;
+    char *client_name;
     int connect;
     int autostart;
     int stdlayout;
+};
+
+#define OPT_BASE_STRUCT struct jack_opts
+static const struct m_sub_options ao_jack_conf = {
+    .opts = (const struct m_option[]){
+        OPT_STRING("jack-port", port, 0),
+        OPT_STRING("jack-name", client_name, 0),
+        OPT_FLAG("jack-autostart", autostart, 0),
+        OPT_FLAG("jack-connect", connect, 0),
+        OPT_CHOICE("jack-std-channel-layout", stdlayout, 0,
+                   ({"waveext", 0}, {"any", 1})),
+        {0}
+    },
+    .defaults = &(const struct jack_opts) {
+        .client_name = "mpv",
+        .connect = 1,
+    },
+    .size = sizeof(struct jack_opts),
+};
+
+struct priv {
+    jack_client_t *client;
+    float jack_latency;
     int last_chunk;
 
     int num_ports;
     jack_port_t *ports[MP_NUM_CHANNELS];
 
     int activated;
+
+    struct jack_opts *opts;
 };
 
 static int process(jack_nframes_t nframes, void *arg)
@@ -77,7 +101,7 @@ connect_to_outports(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
-    char *port_name = (p->cfg_port && p->cfg_port[0]) ? p->cfg_port : NULL;
+    char *port_name = (p->opts->port && p->opts->port[0]) ? p->opts->port : NULL;
     const char **matching_ports = NULL;
     int port_flags = JackPortIsInput;
     int i;
@@ -144,7 +168,7 @@ static void resume(struct ao *ao)
         if (jack_activate(p->client))
             MP_FATAL(ao, "activate failed\n");
 
-        if (p->connect)
+        if (p->opts->connect)
             connect_to_outports(ao);
     }
 }
@@ -155,9 +179,11 @@ static int init(struct ao *ao)
     struct mp_chmap_sel sel = {0};
     jack_options_t open_options;
 
+    p->opts = mp_get_config_group(ao, ao->global, &ao_jack_conf);
+
     ao->format = AF_FORMAT_FLOATP;
 
-    switch (p->stdlayout) {
+    switch (p->opts->stdlayout) {
     case 0:
         mp_chmap_sel_add_waveext(&sel);
         break;
@@ -170,10 +196,10 @@ static int init(struct ao *ao)
         goto err_chmap;
 
     open_options = JackNullOption;
-    if (!p->autostart)
+    if (!p->opts->autostart)
         open_options |= JackNoStartServer;
 
-    p->client = jack_client_open(p->cfg_client_name, open_options, NULL);
+    p->client = jack_client_open(p->opts->client_name, open_options, NULL);
     if (!p->client) {
         MP_FATAL(ao, "cannot open server\n");
         goto err_client_open;
@@ -213,8 +239,6 @@ static void uninit(struct ao *ao)
     jack_client_close(p->client);
 }
 
-#define OPT_BASE_STRUCT struct priv
-
 const struct ao_driver audio_out_jack = {
     .description = "JACK audio output",
     .name        = "jack",
@@ -222,17 +246,13 @@ const struct ao_driver audio_out_jack = {
     .uninit    = uninit,
     .resume    = resume,
     .priv_size = sizeof(struct priv),
-    .priv_defaults = &(const struct priv) {
-        .cfg_client_name = "mpv",
-        .connect = 1,
-    },
     .options = (const struct m_option[]) {
-        OPT_STRING("port", cfg_port, 0),
-        OPT_STRING("name", cfg_client_name, 0),
-        OPT_FLAG("autostart", autostart, 0),
-        OPT_FLAG("connect", connect, 0),
-        OPT_CHOICE("std-channel-layout", stdlayout, 0,
-                ({"waveext", 0}, {"any", 1})),
+        OPT_SUBOPT_LEGACY("port", "jack-port"),
+        OPT_SUBOPT_LEGACY("name", "jack-name"),
+        OPT_SUBOPT_LEGACY("autostart", "jack-autostart"),
+        OPT_SUBOPT_LEGACY("connect", "jack-connect"),
+        OPT_SUBOPT_LEGACY("std-channel-layout", "jack-std-channel-layout"),
         {0}
     },
+    .global_opts = &ao_jack_conf,
 };

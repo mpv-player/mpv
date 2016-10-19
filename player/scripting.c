@@ -97,9 +97,10 @@ static void wait_loaded(struct MPContext *mpctx)
 {
     while (!mp_clients_all_initialized(mpctx))
         mp_idle(mpctx);
+    mp_wakeup_core(mpctx); // avoid lost wakeups during waiting
 }
 
-static void mp_load_script(struct MPContext *mpctx, const char *fname)
+int mp_load_script(struct MPContext *mpctx, const char *fname)
 {
     char *ext = mp_splitext(fname, NULL);
     const struct mp_scripting *backend = NULL;
@@ -113,7 +114,7 @@ static void mp_load_script(struct MPContext *mpctx, const char *fname)
 
     if (!backend) {
         MP_VERBOSE(mpctx, "Can't load unknown script: %s\n", fname);
-        return;
+        return -1;
     }
 
     struct thread_arg *arg = talloc_ptrtype(NULL, arg);
@@ -128,7 +129,7 @@ static void mp_load_script(struct MPContext *mpctx, const char *fname)
     };
     if (!arg->client) {
         talloc_free(arg);
-        return;
+        return -1;
     }
     arg->log = mp_client_get_log(arg->client);
 
@@ -138,13 +139,13 @@ static void mp_load_script(struct MPContext *mpctx, const char *fname)
     if (pthread_create(&thread, NULL, script_thread, arg)) {
         mpv_detach_destroy(arg->client);
         talloc_free(arg);
-        return;
+        return -1;
     }
 
     wait_loaded(mpctx);
     MP_VERBOSE(mpctx, "Done loading %s.\n", fname);
 
-    return;
+    return 0;
 }
 
 static int compare_filename(const void *pa, const void *pb)
@@ -175,13 +176,40 @@ static char **list_script_files(void *talloc_ctx, char *path)
     return files;
 }
 
+static void load_builtin_script(struct MPContext *mpctx, bool enable,
+                                const char *fname)
+{
+    void *tmp = talloc_new(NULL);
+    // (The name doesn't have to match if there were conflicts with other
+    // scripts, so this is on best-effort basis.)
+    char *name = script_name_from_filename(tmp, fname);
+    if (enable != mp_client_exists(mpctx, name)) {
+        if (enable) {
+            mp_load_script(mpctx, fname);
+        } else {
+            // Try to unload it by sending a shutdown event. Wait until it has
+            // terminated, or re-enabling the script could be racy (because it'd
+            // recognize a still-terminating script as "loaded").
+            while (mp_client_exists(mpctx, name)) {
+                if (mp_client_send_event(mpctx, name, MPV_EVENT_SHUTDOWN, NULL) < 0)
+                    break;
+                mp_idle(mpctx);
+            }
+            mp_wakeup_core(mpctx); // avoid lost wakeups during waiting
+        }
+    }
+    talloc_free(tmp);
+}
+
+void mp_load_builtin_scripts(struct MPContext *mpctx)
+{
+    load_builtin_script(mpctx, mpctx->opts->lua_load_osc, "@osc.lua");
+    load_builtin_script(mpctx, mpctx->opts->lua_load_ytdl, "@ytdl_hook.lua");
+}
+
 void mp_load_scripts(struct MPContext *mpctx)
 {
     // Load scripts from options
-    if (mpctx->opts->lua_load_osc)
-        mp_load_script(mpctx, "@osc.lua");
-    if (mpctx->opts->lua_load_ytdl)
-        mp_load_script(mpctx, "@ytdl_hook.lua");
     char **files = mpctx->opts->script_files;
     for (int n = 0; files && files[n]; n++) {
         if (files[n][0])

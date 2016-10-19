@@ -33,6 +33,8 @@ extern const struct gl_hwdec_driver gl_hwdec_d3d11egl;
 extern const struct gl_hwdec_driver gl_hwdec_d3d11eglrgb;
 extern const struct gl_hwdec_driver gl_hwdec_dxva2gldx;
 extern const struct gl_hwdec_driver gl_hwdec_dxva2;
+extern const struct gl_hwdec_driver gl_hwdec_cuda;
+extern const struct gl_hwdec_driver gl_hwdec_rpi_overlay;
 
 static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
 #if HAVE_VAAPI_EGL
@@ -57,6 +59,12 @@ static const struct gl_hwdec_driver *const mpgl_hwdec_drivers[] = {
     &gl_hwdec_dxva2gldx,
 #endif
     &gl_hwdec_dxva2,
+#endif
+#if HAVE_CUDA_HWACCEL
+    &gl_hwdec_cuda,
+#endif
+#if HAVE_RPI
+    &gl_hwdec_rpi_overlay,
 #endif
     NULL
 };
@@ -107,4 +115,13 @@ void gl_hwdec_uninit(struct gl_hwdec *hwdec)
     if (hwdec)
         hwdec->driver->destroy(hwdec);
     talloc_free(hwdec);
+}
+
+bool gl_hwdec_test_format(struct gl_hwdec *hwdec, int imgfmt)
+{
+    if (!imgfmt)
+        return false;
+    if (hwdec->driver->test_format)
+        return hwdec->driver->test_format(hwdec, imgfmt);
+    return hwdec->driver->imgfmt == imgfmt;
 }

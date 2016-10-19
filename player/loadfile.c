@@ -204,7 +204,7 @@ void reselect_demux_stream(struct MPContext *mpctx, struct track *track)
 static void wakeup_demux(void *pctx)
 {
     struct MPContext *mpctx = pctx;
-    mp_input_wakeup(mpctx->input);
+    mp_wakeup_core(mpctx);
 }
 
 static void enable_demux_thread(struct MPContext *mpctx, struct demuxer *demux)
@@ -473,7 +473,7 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
     }
 
     mp_notify(mpctx, MPV_EVENT_TRACK_SWITCHED, NULL);
-    osd_changed_all(mpctx->osd);
+    mp_wakeup_core(mpctx);
 
     talloc_free(mpctx->track_layout_hash);
     mpctx->track_layout_hash = talloc_steal(mpctx, track_layout_hash(mpctx));
@@ -770,7 +770,7 @@ static void load_per_file_options(m_config_t *conf,
 {
     for (int n = 0; n < params_count; n++) {
         m_config_set_option_ext(conf, params[n].name, params[n].value,
-                                M_SETOPT_BACKUP);
+                                M_SETOPT_RUNTIME | M_SETOPT_BACKUP);
     }
 }
 
@@ -809,7 +809,7 @@ static void open_demux_thread(void *pctx)
 static void open_demux_reentrant(struct MPContext *mpctx)
 {
     struct demux_open_args args = {
-        .global = create_sub_global(mpctx),
+        .global = mpctx->global,
         .cancel = mpctx->playback_abort,
         .log = mpctx->log,
         .stream_flags = mpctx->playing->stream_flags,
@@ -819,12 +819,10 @@ static void open_demux_reentrant(struct MPContext *mpctx)
         args.stream_flags = 0;
     mpctx_run_reentrant(mpctx, open_demux_thread, &args);
     if (args.demux) {
-        talloc_steal(args.demux, args.global);
         mpctx->demuxer = args.demux;
         enable_demux_thread(mpctx, mpctx->demuxer);
     } else {
         mpctx->error_playing = args.err;
-        talloc_free(args.global);
     }
     talloc_free(args.url);
 }
@@ -1125,6 +1123,7 @@ reopen_file:
 
     mpctx->playback_initialized = true;
     mp_notify(mpctx, MPV_EVENT_FILE_LOADED, NULL);
+    update_screensaver_state(mpctx);
 
     if (mpctx->max_frames == 0) {
         if (!mpctx->stop_play)
@@ -1179,6 +1178,7 @@ terminate_playback:
         uninit_audio_out(mpctx);
 
     mpctx->playback_initialized = false;
+    update_screensaver_state(mpctx);
 
     if (mpctx->stop_play == PT_RELOAD_FILE) {
         mpctx->stop_play = KEEP_PLAYING;
@@ -1298,6 +1298,8 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
 // Return if all done.
 void mp_play_files(struct MPContext *mpctx)
 {
+    prepare_playlist(mpctx, mpctx->playlist);
+
     for (;;) {
         idle_loop(mpctx);
         if (mpctx->stop_play == PT_QUIT)
@@ -1332,4 +1334,5 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
     mpctx->playlist->current_was_replaced = false;
     if (!mpctx->stop_play)
         mpctx->stop_play = PT_CURRENT_ENTRY;
+    mp_wakeup_core(mpctx);
 }

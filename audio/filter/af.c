@@ -166,10 +166,10 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
         .replaygain_data = s->replaygain_data,
         .out_pool = mp_audio_pool_create(af),
     };
-    struct m_config *config = m_config_from_obj_desc(af, s->log, &desc);
-    if (m_config_apply_defaults(config, name, s->opts->af_defs) < 0)
-        goto error;
-    if (m_config_set_obj_params(config, args) < 0)
+    struct m_config *config =
+        m_config_from_obj_desc_and_args(af, s->log, NULL, &desc,
+                                        name, s->opts->af_defs, args);
+    if (!config)
         goto error;
     af->priv = config->optstruct;
 

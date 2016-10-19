@@ -264,14 +264,16 @@ int get_deinterlacing(struct MPContext *mpctx)
     return enabled;
 }
 
-void set_deinterlacing(struct MPContext *mpctx, bool enable)
+void set_deinterlacing(struct MPContext *mpctx, int opt_val)
 {
-    if (enable == (get_deinterlacing(mpctx) > 0))
+    if ((opt_val < 0 && mpctx->opts->deinterlace == opt_val) ||
+        (opt_val == (get_deinterlacing(mpctx) > 0)))
         return;
 
-    mpctx->opts->deinterlace = enable;
+    mpctx->opts->deinterlace = opt_val;
     recreate_auto_filters(mpctx);
-    mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
+    if (opt_val >= 0)
+        mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
 }
 
 static void recreate_video_filters(struct MPContext *mpctx)
@@ -283,7 +285,7 @@ static void recreate_video_filters(struct MPContext *mpctx)
     vf_destroy(vo_c->vf);
     vo_c->vf = vf_new(mpctx->global);
     vo_c->vf->hwdec_devs = vo_c->hwdec_devs;
-    vo_c->vf->wakeup_callback = wakeup_playloop;
+    vo_c->vf->wakeup_callback = mp_wakeup_core_cb;
     vo_c->vf->wakeup_callback_ctx = mpctx;
     vo_c->vf->container_fps = vo_c->container_fps;
     vo_control(vo_c->vo, VOCTRL_GET_DISPLAY_FPS, &vo_c->vf->display_fps);
@@ -410,6 +412,10 @@ int init_video_decoder(struct MPContext *mpctx, struct track *track)
     d_video->header = track->stream;
     d_video->codec = track->stream->codec;
     d_video->fps = d_video->header->codec->fps;
+
+    // Note: at least mpv_opengl_cb_uninit_gl() relies on being able to get
+    //       rid of all references to the VO by destroying the VO chain. Thus,
+    //       decoders not linked to vo_chain must not use the hwdec context.
     if (mpctx->vo_chain)
         d_video->hwdec_devs = mpctx->vo_chain->hwdec_devs;
 
@@ -443,7 +449,6 @@ int reinit_video_chain(struct MPContext *mpctx)
 
 int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
 {
-    struct MPOpts *opts = mpctx->opts;
     struct track *track = NULL;
     struct sh_stream *sh = NULL;
     if (!src) {
@@ -462,6 +467,8 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
             .osd = mpctx->osd,
             .encode_lavc_ctx = mpctx->encode_lavc_ctx,
             .opengl_cb_context = mpctx->gl_cb_ctx,
+            .wakeup_cb = mp_wakeup_core_cb,
+            .wakeup_ctx = mpctx,
         };
         mpctx->video_out = init_best_video_out(mpctx->global, &ex);
         if (!mpctx->video_out) {
@@ -505,9 +512,7 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
 
     recreate_video_filters(mpctx);
 
-    bool saver_state = opts->pause || !opts->stop_screensaver;
-    vo_control(vo_c->vo, saver_state ? VOCTRL_RESTORE_SCREENSAVER
-                                     : VOCTRL_KILL_SCREENSAVER, NULL);
+    update_screensaver_state(mpctx);
 
     vo_set_paused(vo_c->vo, mpctx->paused);
 
@@ -700,7 +705,7 @@ static int video_feed_async_filter(struct MPContext *mpctx)
 
     if (vf_needs_input(vf) < 1)
         return 0;
-    mpctx->sleeptime = 0; // retry until done
+    mp_wakeup_core(mpctx); // retry until done
     return video_decode_and_filter(mpctx);
 }
 
@@ -962,15 +967,15 @@ static void init_vo(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     struct vo_chain *vo_c = mpctx->vo_chain;
 
-    if (opts->gamma_gamma != 1000)
+    if (opts->gamma_gamma != 0)
         video_set_colors(vo_c, "gamma", opts->gamma_gamma);
-    if (opts->gamma_brightness != 1000)
+    if (opts->gamma_brightness != 0)
         video_set_colors(vo_c, "brightness", opts->gamma_brightness);
-    if (opts->gamma_contrast != 1000)
+    if (opts->gamma_contrast != 0)
         video_set_colors(vo_c, "contrast", opts->gamma_contrast);
-    if (opts->gamma_saturation != 1000)
+    if (opts->gamma_saturation != 0)
         video_set_colors(vo_c, "saturation", opts->gamma_saturation);
-    if (opts->gamma_hue != 1000)
+    if (opts->gamma_hue != 0)
         video_set_colors(vo_c, "hue", opts->gamma_hue);
     video_set_colors(vo_c, "output-levels", opts->video_output_levels);
 
@@ -982,7 +987,7 @@ double calc_average_frame_duration(struct MPContext *mpctx)
     double total = 0;
     int num = 0;
     for (int n = 0; n < mpctx->num_past_frames; n++) {
-        double dur = mpctx->past_frames[0].approx_duration;
+        double dur = mpctx->past_frames[n].approx_duration;
         if (dur <= 0)
             continue;
         total += dur;
@@ -1280,7 +1285,7 @@ static void calculate_frame_duration(struct MPContext *mpctx)
 
     double demux_duration = mpctx->vo_chain->container_fps > 0
                             ? 1.0 / mpctx->vo_chain->container_fps : -1;
-    double duration = -1;
+    double duration = demux_duration;
 
     if (mpctx->num_next_frames >= 2) {
         double pts0 = mpctx->next_frames[0]->pts;
@@ -1291,11 +1296,10 @@ static void calculate_frame_duration(struct MPContext *mpctx)
 
     // The following code tries to compensate for rounded Matroska timestamps
     // by "unrounding" frame durations, or if not possible, approximating them.
-    // These formats usually round on 1ms. (Some muxers do this incorrectly,
-    // and might be off by 2ms or more, and compensate for it later by an
-    // equal rounding error into the opposite direction. Don't try to deal
-    // with them; too much potential damage to timing.)
-    double tolerance = 0.0011;
+    // These formats usually round on 1ms. Some muxers do this incorrectly,
+    // and might go off by 1ms more, and compensate for it later by an equal
+    // rounding error into the opposite direction.
+    double tolerance = 0.001 * 3 + 0.0001;
 
     double total = 0;
     int num_dur = 0;
@@ -1314,7 +1318,7 @@ static void calculate_frame_duration(struct MPContext *mpctx)
         // Note that even if each timestamp is within rounding tolerance, it
         // could literally not add up (e.g. if demuxer FPS is rounded itself).
         if (fabs(duration - demux_duration) < tolerance &&
-            fabs(total - demux_duration * num_dur) < tolerance)
+            fabs(total - demux_duration * num_dur) < tolerance && num_dur >= 16)
         {
             approx_duration = demux_duration;
         }
@@ -1322,6 +1326,9 @@ static void calculate_frame_duration(struct MPContext *mpctx)
 
     mpctx->past_frames[0].duration = duration;
     mpctx->past_frames[0].approx_duration = approx_duration;
+
+    MP_STATS(mpctx, "value %f frame-duration", MPMAX(0, duration));
+    MP_STATS(mpctx, "value %f frame-duration-approx", MPMAX(0, approx_duration));
 }
 
 void write_video(struct MPContext *mpctx)
@@ -1368,7 +1375,7 @@ void write_video(struct MPContext *mpctx)
 
         if (mpctx->video_status == STATUS_DRAINING) {
             mpctx->time_frame -= get_relative_time(mpctx);
-            mpctx->sleeptime = MPMIN(mpctx->sleeptime, mpctx->time_frame);
+            mp_set_timeout(mpctx, mpctx->time_frame);
             if (mpctx->time_frame <= 0) {
                 MP_VERBOSE(mpctx, "video EOF reached\n");
                 mpctx->video_status = STATUS_EOF;
@@ -1383,7 +1390,7 @@ void write_video(struct MPContext *mpctx)
         mpctx->video_status = STATUS_PLAYING;
 
     if (r != VD_NEW_FRAME) {
-        mpctx->sleeptime = 0; // Decode more in next iteration.
+        mp_wakeup_core(mpctx); // Decode more in next iteration.
         return;
     }
 
@@ -1511,7 +1518,7 @@ void write_video(struct MPContext *mpctx)
             mpctx->max_frames--;
     }
 
-    mpctx->sleeptime = 0;
+    mp_wakeup_core(mpctx);
     return;
 
 error:
@@ -1519,5 +1526,5 @@ error:
     uninit_video_chain(mpctx);
     error_on_track(mpctx, track);
     handle_force_window(mpctx, true);
-    mpctx->sleeptime = 0;
+    mp_wakeup_core(mpctx);
 }

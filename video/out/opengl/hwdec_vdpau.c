@@ -210,7 +210,8 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
         mark_vdpau_objects_uninitialized(hw);
         if (pe < 0)
             return -1;
-        if (reinit(hw, &p->image_params) < 0)
+        struct mp_image_params params = p->image_params;
+        if (reinit(hw, &params) < 0)
             return -1;
     }
 

@@ -156,9 +156,12 @@ const struct ao_driver audio_out_rsound = {
     .resume    = audio_resume,
     .priv_size = sizeof(struct priv),
     .options   = (const struct m_option[]) {
-        OPT_STRING("host", host, 0),
-        OPT_STRING("port", port, 0),
+        OPT_STRING("host", host, 0,
+            .deprecation_message = "request --audio-device support on issue tracker"),
+        OPT_STRING("port", port, 0,
+            .deprecation_message = "request --audio-device support on issue tracker"),
         {0}
     },
+    .legacy_prefix = "rsound",
 };
 

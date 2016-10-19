@@ -64,6 +64,10 @@ def build(ctx):
         target = "input/input_conf.h")
 
     ctx.file2string(
+        source = "etc/builtin.conf",
+        target = "player/builtin_conf.inc")
+
+    ctx.file2string(
         source = "sub/osd_font.otf",
         target = "sub/osd_font.h")
 
@@ -195,6 +199,7 @@ def build(ctx):
         ( "misc/charset_conv.c" ),
         ( "misc/dispatch.c" ),
         ( "misc/json.c" ),
+        ( "misc/node.c" ),
         ( "misc/ring.c" ),
         ( "misc/rendezvous.c" ),
 
@@ -285,6 +290,7 @@ def build(ctx):
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),
         ( "video/decode/dec_video.c"),
+        ( "video/decode/cuda.c",                 "cuda-hwaccel" ),
         ( "video/decode/dxva2.c",                "d3d-hwaccel" ),
         ( "video/decode/d3d11va.c",              "d3d-hwaccel" ),
         ( "video/decode/d3d.c",                  "win32" ),
@@ -332,6 +338,7 @@ def build(ctx):
         ( "video/out/opengl/context_cocoa.c",    "gl-cocoa" ),
         ( "video/out/opengl/context_drm_egl.c",  "egl-drm" ),
         ( "video/out/opengl/context_dxinterop.c","gl-dxinterop" ),
+        ( "video/out/opengl/context_mali_fbdev.c","mali-fbdev" ),
         ( "video/out/opengl/context_rpi.c",      "rpi" ),
         ( "video/out/opengl/context_wayland.c",  "gl-wayland" ),
         ( "video/out/opengl/context_w32.c",      "gl-win32" ),
@@ -340,14 +347,16 @@ def build(ctx):
         ( "video/out/opengl/egl_helpers.c",      "egl-helpers" ),
         ( "video/out/opengl/formats.c",          "gl" ),
         ( "video/out/opengl/hwdec.c",            "gl" ),
+        ( "video/out/opengl/hwdec_cuda.c",       "cuda-hwaccel" ),
         ( "video/out/opengl/hwdec_d3d11egl.c",   "egl-angle" ),
         ( "video/out/opengl/hwdec_d3d11eglrgb.c","egl-angle" ),
         ( "video/out/opengl/hwdec_dxva2.c",      "gl-win32" ),
         ( "video/out/opengl/hwdec_dxva2gldx.c",  "gl-dxinterop" ),
         ( "video/out/opengl/hwdec_dxva2egl.c",   "egl-angle" ),
+        ( "video/out/opengl/hwdec_osx.c",        "videotoolbox-gl" ),
+        ( "video/out/opengl/hwdec_rpi.c",        "rpi" ),
         ( "video/out/opengl/hwdec_vaegl.c",      "vaapi-egl" ),
         ( "video/out/opengl/hwdec_vaglx.c",      "vaapi-glx" ),
-        ( "video/out/opengl/hwdec_osx.c",        "videotoolbox-gl" ),
         ( "video/out/opengl/hwdec_vdpau.c",      "vdpau-gl-x11" ),
         ( "video/out/opengl/lcms.c",             "gl" ),
         ( "video/out/opengl/osd.c",              "gl" ),
@@ -577,7 +586,7 @@ def build(ctx):
     if ctx.dependency_satisfied('cplayer'):
 
         if ctx.dependency_satisfied('zsh-comp'):
-            ctx.zshcomp(target = "etc/_mpv")
+            ctx.zshcomp(target = "etc/_mpv", source = "TOOLS/zsh.pl")
             ctx.install_files(
                 ctx.env.ZSHDIR,
                 ['etc/_mpv'])

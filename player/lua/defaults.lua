@@ -412,6 +412,13 @@ mp.register_event("shutdown", function() mp.keep_running = false end)
 mp.register_event("client-message", message_dispatch)
 mp.register_event("property-change", property_change)
 
+-- called before the event loop goes back to sleep
+local idle_handlers = {}
+
+function mp.register_idle(cb)
+    idle_handlers[#idle_handlers + 1] = cb
+end
+
 -- sent by "script-binding"
 mp.register_script_message("key-binding", dispatch_key_binding)
 
@@ -451,16 +458,17 @@ function mp.dispatch_events(allow_wait)
         mp.suspend()
     end
     while mp.keep_running do
-        local wait = process_timers()
-        if wait == nil then
-            wait = 1e20 -- infinity for all practical purposes
-        end
-        if more_events or wait < 0 then
-            wait = 0
-        end
-        -- Resume playloop - important especially if an error happened while
-        -- suspended, and the error was handled, but no resume was done.
-        if wait > 0 then
+        local wait = 0
+        if not more_events then
+            wait = process_timers()
+            if wait == nil then
+                for _, handler in ipairs(idle_handlers) do
+                    handler()
+                end
+                wait = 1e20 -- infinity for all practical purposes
+            end
+            -- Resume playloop - important especially if an error happened while
+            -- suspended, and the error was handled, but no resume was done.
             mp.resume_all()
             if allow_wait ~= true then
                 return
@@ -472,9 +480,10 @@ function mp.dispatch_events(allow_wait)
         if mp.use_suspend then
             mp.suspend()
         end
-        more_events = (e.event ~= "none")
-        if more_events then
+        more_events = false
+        if e.event ~= "none" then
             call_event_handlers(e)
+            more_events = true
         end
     end
 end

@@ -26,6 +26,7 @@
 #include "config.h"
 #include "misc/bstr.h"
 #include "options/options.h"
+#include "options/m_config.h"
 #include "common/common.h"
 #include "common/msg.h"
 #include "input/input.h"
@@ -39,7 +40,6 @@
 
 #include "vo.h"
 #include "win_state.h"
-#include "osdep/atomics.h"
 #include "osdep/io.h"
 #include "osdep/timer.h"
 #include "osdep/subprocess.h"
@@ -1002,6 +1002,7 @@ static void vo_x11_check_net_wm_state_fullscreen_change(struct vo *vo)
         {
             vo->opts->fullscreen = is_fullscreen;
             x11->fs = is_fullscreen;
+            x11->pending_vo_events |= VO_EVENT_FULLSCREEN_STATE;
 
             if (!is_fullscreen && (x11->pos_changed_during_fs ||
                                    x11->size_changed_during_fs))
@@ -1801,19 +1802,18 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         x11->pending_vo_events = 0;
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
-        opts->fullscreen = !opts->fullscreen;
         vo_x11_fullscreen(vo);
         return VO_TRUE;
+    case VOCTRL_GET_FULLSCREEN:
+        *(int *)arg = x11->fs;
+        return VO_TRUE;
     case VOCTRL_ONTOP:
-        opts->ontop = !opts->ontop;
         vo_x11_setlayer(vo, opts->ontop);
         return VO_TRUE;
     case VOCTRL_BORDER:
-        opts->border = !opts->border;
         vo_x11_decoration(vo, vo->opts->border);
         return VO_TRUE;
     case VOCTRL_ALL_WORKSPACES: {
-        opts->all_workspaces = !opts->all_workspaces;
         long params[5] = {0xFFFFFFFF, 1};
         if (!opts->all_workspaces) {
             x11_get_property_copy(x11, x11->rootwin, XA(x11, _NET_CURRENT_DESKTOP),
@@ -1938,7 +1938,7 @@ void vo_x11_wait_events(struct vo *vo, int64_t until_time_us)
         { .fd = x11->wakeup_pipe[0], .events = POLLIN },
     };
     int64_t wait_us = until_time_us - mp_time_us();
-    int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
+    int timeout_ms = MPCLAMP((wait_us + 999) / 1000, 0, 10000);
 
     poll(fds, 2, timeout_ms);
 

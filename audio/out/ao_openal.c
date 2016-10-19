@@ -24,6 +24,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>
+
+#ifdef __APPLE__
+#ifndef AL_FORMAT_MONO_FLOAT32
+#define AL_FORMAT_MONO_FLOAT32 0x10010
+#endif
+#ifndef AL_FORMAT_STEREO_FLOAT32
+#define AL_FORMAT_STEREO_FLOAT32 0x10011
+#endif
+#ifndef AL_FORMAT_MONO_DOUBLE_EXT
+#define AL_FORMAT_MONO_DOUBLE_EXT 0x10012
+#endif
+#include <OpenAL/MacOSX_OALExtensions.h>
+#else
 #ifdef OPENAL_AL_H
 #include <OpenAL/alc.h>
 #include <OpenAL/al.h>
@@ -33,6 +46,7 @@
 #include <AL/al.h>
 #include <AL/alext.h>
 #endif
+#endif // __APPLE__
 
 #include "common/msg.h"
 
@@ -96,7 +110,7 @@ static int validate_device_opt(struct mp_log *log, const m_option_t *opt,
             mp_info(log, "  '%s'\n", list);
             list = list + strlen(list) + 1;
         }
-        return M_OPT_EXIT - 1;
+        return M_OPT_EXIT;
     }
     return 0;
 }
@@ -356,7 +370,9 @@ const struct ao_driver audio_out_openal = {
     .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
-        OPT_STRING_VALIDATE("device", cfg_device, 0, validate_device_opt),
+        OPT_STRING_VALIDATE("device", cfg_device, 0, validate_device_opt,
+                            DEVICE_OPT_DEPRECATION),
         {0}
     },
+    .legacy_prefix = "ao-openal",
 };

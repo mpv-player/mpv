@@ -12,6 +12,8 @@ env:
   global:
     # Coverity token
     - secure: "H21mSRlMhk4BKS0xHZvCFGJxteCP0hRVUxTuNfM2Z9HBsyutuLEYMtViLO86VtM+Tqla3xXPzUdS4ozLwI72Ax/5ZUDXACROj73yW6QhFB5D6rLut12+FjqC7M33Qv2hl0xwgNBmR5dsm1ToP37+Wn+ecJQNvN8fkTXF+HVzOEw="
+    # Travis token for mpv.io
+    - secure: "nlTVLJK6kRhtXvhKCoJ3YdFGHuKaq/eHowfPw25hqRWuBOZd+HjHY5KIYjV7SxuKFDpJE4GpNcvA3Q31nsqomxpkLYgrwjg6TSazN7ZP+x85ZgV1QGFebrPfGm2n5UR5CAPAwFoeF3pZheLi4bajVzwq1fWW+x3grS188P9OZso="
 compiler:
   - clang
   - gcc
@@ -42,6 +44,7 @@ script:
   - ./bootstrap.py
   - ./waf configure
   - ./waf build
+after_script: TOOLS/travis-rebuild-website
 
 notifications:
   email: false

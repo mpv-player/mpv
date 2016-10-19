@@ -18,6 +18,7 @@
 #ifndef MPLAYER_MPCOMMON_H
 #define MPLAYER_MPCOMMON_H
 
+#include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -64,8 +65,8 @@ enum {
     DATA_EOF    = -2,
 };
 
-extern const char *const mpv_version;
-extern const char *const mpv_builddate;
+extern const char mpv_version[];
+extern const char mpv_builddate[];
 
 char *mp_format_time(double time, bool fractions);
 char *mp_format_time_fmt(const char *fmt, double time);

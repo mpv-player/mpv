@@ -22,6 +22,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/common.h>
 #include <libavutil/intreadwrite.h>
+#include <libavutil/opt.h>
 
 #include "config.h"
 
@@ -106,6 +107,9 @@ static int init(struct sd *sd)
     // Supported codecs must be known to decode to paletted bitmaps
     switch (cid) {
     case AV_CODEC_ID_DVB_SUBTITLE:
+#if LIBAVCODEC_VERSION_MICRO >= 100
+    case AV_CODEC_ID_DVB_TELETEXT:
+#endif
     case AV_CODEC_ID_HDMV_PGS_SUBTITLE:
     case AV_CODEC_ID_XSUB:
     case AV_CODEC_ID_DVD_SUBTITLE:
@@ -123,25 +127,9 @@ static int init(struct sd *sd)
     if (!ctx)
         goto error;
     mp_lavc_set_extradata(ctx, sd->codec->extradata, sd->codec->extradata_size);
+    priv->pkt_timebase = mp_get_codec_timebase(sd->codec);
 #if LIBAVCODEC_VERSION_MICRO >= 100
-    if (cid == AV_CODEC_ID_HDMV_PGS_SUBTITLE) {
-        // We don't always want to set this, because the ridiculously shitty
-        // libavcodec API will mess with certain fields (end_display_time)
-        // when setting it. On the other hand, PGS in particular needs PTS
-        // mangling. While the PGS decoder doesn't modify the timestamps (just
-        // reorder it), the ridiculously shitty libavcodec wants a timebase
-        // anyway and for no good reason. It always sets end_display_time to
-        // UINT32_MAX (which is a broken and undocumented way to say "unknown"),
-        // which coincidentally won't be overridden by the ridiculously shitty
-        // pkt_timebase code. also, Libav doesn't have the pkt_timebase field,
-        // because Libav tends to avoid _adding_ ridiculously shitty APIs.
-        priv->pkt_timebase = (AVRational){1, AV_TIME_BASE};
-        ctx->pkt_timebase = priv->pkt_timebase;
-    } else {
-        // But old ffmpeg releases have a buggy pkt_timebase check, because the
-        // shit above wasn't bad enough!
-        ctx->pkt_timebase = (AVRational){0, 0};
-    }
+    ctx->pkt_timebase = priv->pkt_timebase;
 #endif
     if (avcodec_open2(ctx, sub_codec, NULL) < 0)
         goto error;
@@ -355,6 +343,13 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         MP_WARN(sd, "Subtitle with unknown start time.\n");
 
     mp_set_av_packet(&pkt, packet, &priv->pkt_timebase);
+
+    if (ctx->codec_id == AV_CODEC_ID_DVB_TELETEXT) {
+        char page[4];
+        snprintf(page, sizeof(page), "%d", opts->teletext_page);
+        av_opt_set(ctx, "txt_page", page, AV_OPT_SEARCH_CHILDREN);
+    }
+
     int got_sub;
     int res = avcodec_decode_subtitle2(ctx, &sub, &got_sub, &pkt);
     if (res < 0 || !got_sub)

@@ -156,7 +156,9 @@ void gl_sc_haddf(struct gl_shader_cache *sc, const char *textf, ...);
 void gl_sc_hadd_bstr(struct gl_shader_cache *sc, struct bstr text);
 void gl_sc_uniform_sampler(struct gl_shader_cache *sc, char *name, GLenum target,
                            int unit);
-void gl_sc_uniform_sampler_ui(struct gl_shader_cache *sc, char *name, int unit);
+void gl_sc_uniform_tex(struct gl_shader_cache *sc, char *name, GLenum target,
+                       GLuint texture);
+void gl_sc_uniform_tex_ui(struct gl_shader_cache *sc, char *name, GLuint texture);
 void gl_sc_uniform_f(struct gl_shader_cache *sc, char *name, GLfloat f);
 void gl_sc_uniform_i(struct gl_shader_cache *sc, char *name, GLint f);
 void gl_sc_uniform_vec2(struct gl_shader_cache *sc, char *name, GLfloat f[2]);
@@ -167,8 +169,9 @@ void gl_sc_uniform_mat3(struct gl_shader_cache *sc, char *name,
                         bool transpose, GLfloat *v);
 void gl_sc_set_vao(struct gl_shader_cache *sc, struct gl_vao *vao);
 void gl_sc_enable_extension(struct gl_shader_cache *sc, char *name);
-void gl_sc_gen_shader_and_reset(struct gl_shader_cache *sc);
+void gl_sc_generate(struct gl_shader_cache *sc);
 void gl_sc_reset(struct gl_shader_cache *sc);
+void gl_sc_unbind(struct gl_shader_cache *sc);
 
 struct gl_timer;
 
@@ -182,10 +185,12 @@ uint64_t gl_timer_last_us(struct gl_timer *timer);
 uint64_t gl_timer_avg_us(struct gl_timer *timer);
 uint64_t gl_timer_peak_us(struct gl_timer *timer);
 
+#define NUM_PBO_BUFFERS 3
+
 struct gl_pbo_upload {
     GL *gl;
     int index;
-    GLuint buffers[2];
+    GLuint buffers[NUM_PBO_BUFFERS];
     size_t buffer_size;
 };
 

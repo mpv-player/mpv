@@ -38,8 +38,7 @@ void sampler_prelude(struct gl_shader_cache *sc, int tex_num)
 static void pass_sample_separated_get_weights(struct gl_shader_cache *sc,
                                               struct scaler *scaler)
 {
-    gl_sc_uniform_sampler(sc, "lut", scaler->gl_target,
-                          TEXUNIT_SCALERS + scaler->index);
+    gl_sc_uniform_tex(sc, "lut", scaler->gl_target, scaler->gl_lut);
     // Define a new variable to cache the corrected fcoord.
     GLSLF("float fcoord_lut = LUT_POS(fcoord, %d.0);\n", scaler->lut_size);
 
@@ -121,8 +120,7 @@ void pass_sample_polar(struct gl_shader_cache *sc, struct scaler *scaler)
         GLSL(vec4 lo = vec4(1.0);)
         GLSL(vec4 hi = vec4(0.0);)
     }
-    gl_sc_uniform_sampler(sc, "lut", scaler->gl_target,
-                          TEXUNIT_SCALERS + scaler->index);
+    gl_sc_uniform_tex(sc, "lut", scaler->gl_target, scaler->gl_lut);
     GLSLF("// scaler samples\n");
     for (int y = 1-bound; y <= bound; y++) {
         for (int x = 1-bound; x <= bound; x++) {

@@ -212,4 +212,5 @@ const struct ao_driver audio_out_sdl = {
         OPT_FLOAT("buflen", buflen, 0),
         {0}
     },
+    .legacy_prefix = "sdl",
 };

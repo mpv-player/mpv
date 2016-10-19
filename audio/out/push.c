@@ -35,7 +35,7 @@
 
 #include "osdep/threads.h"
 #include "osdep/timer.h"
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 
 #include "audio/audio.h"
 #include "audio/audio_buffer.h"
@@ -182,6 +182,7 @@ static int unlocked_get_space(struct ao *ao)
     struct ao_push_state *p = ao->api_priv;
     int space = mp_audio_buffer_get_write_available(p->buffer);
     if (ao->driver->get_space) {
+        int align = af_format_sample_alignment(ao->format);
         // The following code attempts to keep the total buffered audio to
         // ao->buffer in order to improve latency.
         int device_space = ao->driver->get_space(ao);
@@ -191,6 +192,7 @@ static int unlocked_get_space(struct ao *ao)
         // byte based and doesn't do proper chunked processing.
         int min_buffer = ao->buffer + 64;
         int missing = min_buffer - device_buffered - soft_buffered;
+        missing = (missing + align - 1) / align * align;
         // But always keep the device's buffer filled as much as we can.
         int device_missing = device_space - soft_buffered;
         missing = MPMAX(missing, device_missing);
@@ -305,7 +307,7 @@ static void ao_play_data(struct ao *ao)
     bool more = needed >= (r == space ? ao->device_buffer / 4 : 1) && !stuck &&
                 !(flags & AOPLAY_FINAL_CHUNK);
     if (more)
-        mp_input_wakeup(ao->input_ctx); // request more data
+        ao->wakeup_cb(ao->wakeup_ctx); // request more data
     MP_TRACE(ao, "in=%d flags=%d space=%d r=%d wa/pl=%d/%d needed=%d more=%d\n",
              max, flags, space, r, p->wait_on_ao, p->still_playing, needed, more);
 }
@@ -347,7 +349,7 @@ static void *playthread(void *arg)
                 }
 
                 if (was_playing && !p->still_playing)
-                    mp_input_wakeup(ao->input_ctx);
+                    ao->wakeup_cb(ao->wakeup_ctx);
                 pthread_cond_signal(&p->wakeup); // for draining
 
                 if (p->still_playing && timeout > 0) {

@@ -31,13 +31,6 @@
 
 #include <stdio.h>
 
-#define OPT_BASE_STRUCT struct tv_stream_params
-static const m_option_t stream_opts_fields[] = {
-    OPT_STRING("channel", channel, 0),
-    OPT_INT("input", input, 0),
-    {0}
-};
-
 static void
 tv_stream_close (stream_t *stream)
 {
@@ -58,14 +51,4 @@ const stream_info_t stream_info_tv = {
   .name = "tv",
   .open = tv_stream_open,
   .protocols = (const char*const[]){ "tv", NULL },
-  .priv_size = sizeof(tv_param_t),
-  .priv_defaults = &(const struct tv_stream_params){
-      .input = -1,
-  },
-  .options = stream_opts_fields,
-  .url_options = (const char*const[]){
-        "hostname=channel",
-        "filename=input",
-        NULL
-    },
 };

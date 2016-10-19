@@ -28,12 +28,9 @@ struct osd_object {
     int type; // OSDTYPE_*
     bool is_sub;
 
-    bool force_redraw;
-
     // OSDTYPE_OSD
+    bool osd_changed;
     char *text;
-
-    // OSDTYPE_OSD
     struct osd_progbar_state progbar_state;
 
     // OSDTYPE_SUB/OSDTYPE_SUB2
@@ -72,6 +69,7 @@ struct osd_state {
     bool render_subs_in_filter;
 
     bool want_redraw;
+    bool want_redraw_notification;
 
     struct MPOpts *opts;
     struct mpv_global *global;
@@ -79,7 +77,5 @@ struct osd_state {
 
     struct mp_draw_sub_cache *draw_cache;
 };
-
-void osd_changed_unlocked(struct osd_state *osd, int obj);
 
 #endif

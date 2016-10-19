@@ -131,10 +131,10 @@ bool mp_get_cache_idle(struct MPContext *mpctx)
 
 void update_vo_playback_state(struct MPContext *mpctx)
 {
-    if (mpctx->video_out) {
+    if (mpctx->video_out && mpctx->video_out->config_ok) {
         struct voctrl_playback_state oldstate = mpctx->vo_playback_state;
         struct voctrl_playback_state newstate = {
-            .taskbar_progress = mpctx->opts->vo.taskbar_progress,
+            .taskbar_progress = mpctx->opts->vo->taskbar_progress,
             .playing = mpctx->playing,
             .paused = mpctx->paused,
             .percent_pos = get_percent_pos(mpctx),
@@ -201,7 +201,7 @@ void error_on_track(struct MPContext *mpctx, struct track *track)
         if (mpctx->error_playing >= 0)
             mpctx->error_playing = MPV_ERROR_NOTHING_TO_PLAY;
     }
-    mpctx->sleeptime = 0;
+    mp_wakeup_core(mpctx);
 }
 
 int stream_dump(struct MPContext *mpctx, const char *source_filename)
@@ -222,7 +222,8 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
                    (long long int)pos, (long long int)size);
         }
         stream_fill_buffer(stream);
-        mp_process_input(mpctx);
+        mp_wakeup_core(mpctx); // don't actually sleep
+        mp_idle(mpctx); // but process input
     }
 
     free_stream(stream);
@@ -251,22 +252,6 @@ void merge_playlist_files(struct playlist *pl)
     talloc_free(edl);
 }
 
-// Create a talloc'ed copy of mpctx->global. It contains a copy of the global
-// option struct. It still just references some things though, like mp_log.
-// The main purpose is letting threads access the option struct without the
-// need for additional synchronization.
-struct mpv_global *create_sub_global(struct MPContext *mpctx)
-{
-    struct mpv_global *new = talloc_ptrtype(NULL, new);
-    struct m_config *new_config = m_config_dup(new, mpctx->mconfig);
-    *new = (struct mpv_global){
-        .log = mpctx->global->log,
-        .opts = new_config->optstruct,
-        .client_api = mpctx->clients,
-    };
-    return new;
-}
-
 struct wrapper_args {
     struct MPContext *mpctx;
     void (*thread_fn)(void *);
@@ -283,7 +268,7 @@ static void *thread_wrapper(void *pctx)
     pthread_mutex_lock(&args->mutex);
     args->done = true;
     pthread_mutex_unlock(&args->mutex);
-    mp_input_wakeup(args->mpctx->input); // this interrupts mp_idle()
+    mp_wakeup_core(args->mpctx); // this interrupts mp_idle()
     return NULL;
 }
 
@@ -311,5 +296,6 @@ int mpctx_run_reentrant(struct MPContext *mpctx, void (*thread_fn)(void *arg),
     pthread_join(thread, NULL);
 done:
     pthread_mutex_destroy(&args.mutex);
+    mp_wakeup_core(mpctx); // avoid lost wakeups during waiting
     return success ? 0 : -1;
 }

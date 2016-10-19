@@ -48,6 +48,12 @@ enum mp_property_action {
     //  arg: char**
     M_PROPERTY_PRINT,
 
+    // Like M_PROPERTY_GET_TYPE, but get a type that is compatible to the real
+    // type, but reflect practical limits, such as runtime-available values.
+    // This is mostly used for "UI" related things.
+    // (Example: volume property.)
+    M_PROPERTY_GET_CONSTRICTED_TYPE,
+
     // Switch the property up/down by a given value.
     // If unimplemented, the property wrapper uses the property type as
     // fallback.
@@ -127,6 +133,9 @@ struct m_property {
     int (*call)(void *ctx, struct m_property *prop, int action, void *arg);
     void *priv;
 };
+
+struct m_property *m_property_list_find(const struct m_property *list,
+                                        const char *name);
 
 // Access a property.
 // action: one of m_property_action

@@ -836,9 +836,10 @@ const struct ao_driver audio_out_pulse = {
     },
     .options = (const struct m_option[]) {
         OPT_STRING("host", cfg_host, 0),
-        OPT_STRING("sink", cfg_sink, 0),
+        OPT_STRING("sink", cfg_sink, 0, DEVICE_OPT_DEPRECATION),
         OPT_CHOICE_OR_INT("buffer", cfg_buffer, 0, 1, 2000, ({"native", 0})),
         OPT_FLAG("latency-hacks", cfg_latency_hacks, 0),
         {0}
     },
+    .legacy_prefix = "pulse",
 };

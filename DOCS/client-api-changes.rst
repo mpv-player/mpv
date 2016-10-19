@@ -32,8 +32,26 @@ API changes
 
 ::
 
- --- mpv 0.20.0
- --- mpv 0.19.0
+ --- mpv 0.21.0 ---
+ 1.23   - deprecate setting "no-" options via mpv_set_option*(). For example,
+          instead of "no-video=" you should set "video=no".
+        - do not override the SIGPIPE signal handler anymore. This was done as
+          workaround for the FFmpeg TLS code, which has been fixed long ago.
+        - deprecate mpv_suspend() and mpv_resume(). They will be stubbed out
+          in mpv 0.22.0.
+        - make mpv_set_property() work to some degree before mpv_initialize().
+          It can now be used instead of mpv_set_option().
+        - semi-deprecate mpv_set_option()/mpv_set_option_string(). You should
+          use mpv_set_property() instead. There are some deprecated properties
+          which conflict with some options (see client.h remarks on
+          mpv_set_option()), for which mpv_set_option() might still be required.
+          In future mpv releases, the conflicting deprecated options/properties
+          will be removed, and mpv_set_option() will internally translate API
+          calls to mpv_set_property().
+        - qthelper.hpp: deprecate get_property_variant, set_property_variant,
+          mpv_set_option, command_variant, and replace them with get_property,
+          set_property, command.
+ --- mpv 0.19.0 ---
  1.22   - add stream_cb API for custom protocols
  --- mpv 0.18.1 ---
  ----   - remove "status" log level from mpv_request_log_messages() docs. This

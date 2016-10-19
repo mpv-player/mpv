@@ -30,6 +30,7 @@
 #include <GL/gl.h>
 
 #include "context.h"
+#include "egl_helpers.h"
 #include "common/common.h"
 #include "video/out/drm_common.h"
 
@@ -75,33 +76,7 @@ struct priv {
     struct vt_switcher vt_switcher;
 };
 
-static EGLConfig select_fb_config_egl(struct MPGLContext *ctx, bool es)
-{
-    struct priv *p = ctx->priv;
-    const EGLint attributes[] = {
-        EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-        EGL_RED_SIZE, 8,
-        EGL_GREEN_SIZE, 8,
-        EGL_BLUE_SIZE, 8,
-        EGL_ALPHA_SIZE, 0,
-        EGL_DEPTH_SIZE, 1,
-        EGL_RENDERABLE_TYPE, es ? EGL_OPENGL_ES2_BIT : EGL_OPENGL_BIT,
-        EGL_NONE
-    };
-    EGLint config_count;
-    EGLConfig config;
-    if (!eglChooseConfig(p->egl.display, attributes, &config, 1, &config_count)) {
-        MP_FATAL(ctx->vo, "Failed to configure EGL.\n");
-        return NULL;
-    }
-    if (!config_count) {
-        MP_FATAL(ctx->vo, "Could not find EGL configuration!\n");
-        return NULL;
-    }
-    return config;
-}
-
-static bool init_egl(struct MPGLContext *ctx, bool es)
+static bool init_egl(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
     MP_VERBOSE(ctx->vo, "Initializing EGL\n");
@@ -114,22 +89,13 @@ static bool init_egl(struct MPGLContext *ctx, bool es)
         MP_ERR(ctx->vo, "Failed to initialize EGL.\n");
         return false;
     }
-    if (!eglBindAPI(es ? EGL_OPENGL_ES_API : EGL_OPENGL_API)) {
-        MP_ERR(ctx->vo, "Failed to set EGL API version.\n");
-        return false;
-    }
-    EGLConfig config = select_fb_config_egl(ctx, es);
-    if (!config) {
-        MP_ERR(ctx->vo, "Failed to configure EGL.\n");
-        return false;
-    }
-    p->egl.context = eglCreateContext(p->egl.display, config, EGL_NO_CONTEXT, NULL);
-    if (!p->egl.context) {
-        MP_ERR(ctx->vo, "Failed to create EGL context.\n");
-        return false;
-    }
+    EGLConfig config;
+    if (!mpegl_create_context(p->egl.display, ctx->vo->log, flags,
+                              &p->egl.context, &config))
+        return -1;
     MP_VERBOSE(ctx->vo, "Initializing EGL surface\n");
-    p->egl.surface = eglCreateWindowSurface(p->egl.display, config, p->gbm.surface, NULL);
+    p->egl.surface
+        = eglCreateWindowSurface(p->egl.display, config, p->gbm.surface, NULL);
     if (p->egl.surface == EGL_NO_SURFACE) {
         MP_ERR(ctx->vo, "Failed to create EGL surface.\n");
         return false;
@@ -182,7 +148,7 @@ static void update_framebuffer_from_bo(
     int handle = gbm_bo_get_handle(bo).u32;
 
     int ret = drmModeAddFB(p->kms->fd, p->fb.width, p->fb.height,
-                       24, 32, stride, handle, &p->fb.id);
+                           24, 32, stride, handle, &p->fb.id);
     if (ret) {
         MP_ERR(ctx->vo, "Failed to create framebuffer: %s\n", mp_strerror(errno));
     }
@@ -190,7 +156,7 @@ static void update_framebuffer_from_bo(
 }
 
 static void page_flipped(int fd, unsigned int frame, unsigned int sec,
-                                 unsigned int usec, void *data)
+                         unsigned int usec, void *data)
 {
     struct priv *p = data;
     p->waiting_for_flip = false;
@@ -202,12 +168,8 @@ static bool crtc_setup(struct MPGLContext *ctx)
     if (p->active)
         return true;
     p->old_crtc = drmModeGetCrtc(p->kms->fd, p->kms->crtc_id);
-    int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id,
-                             p->fb.id,
-                             0,
-                             0,
-                             &p->kms->connector->connector_id,
-                             1,
+    int ret = drmModeSetCrtc(p->kms->fd, p->kms->crtc_id, p->fb.id,
+                             0, 0, &p->kms->connector->connector_id, 1,
                              &p->kms->mode);
     p->active = true;
     return ret == 0;
@@ -232,12 +194,9 @@ static void crtc_release(struct MPGLContext *ctx)
 
     if (p->old_crtc) {
         drmModeSetCrtc(p->kms->fd,
-                       p->old_crtc->crtc_id,
-                       p->old_crtc->buffer_id,
-                       p->old_crtc->x,
-                       p->old_crtc->y,
-                       &p->kms->connector->connector_id,
-                       1,
+                       p->old_crtc->crtc_id, p->old_crtc->buffer_id,
+                       p->old_crtc->x, p->old_crtc->y,
+                       &p->kms->connector->connector_id, 1,
                        &p->old_crtc->mode);
         drmModeFreeCrtc(p->old_crtc);
         p->old_crtc = NULL;
@@ -255,7 +214,8 @@ static void release_vt(void *data)
         //until things change, this is commented.
         struct priv *p = ctx->priv;
         if (drmDropMaster(p->kms->fd)) {
-            MP_WARN(ctx->vo, "Failed to drop DRM master: %s\n", mp_strerror(errno));
+            MP_WARN(ctx->vo, "Failed to drop DRM master: %s\n",
+                    mp_strerror(errno));
         }
     }
 }
@@ -267,7 +227,8 @@ static void acquire_vt(void *data)
     if (USE_MASTER) {
         struct priv *p = ctx->priv;
         if (drmSetMaster(p->kms->fd)) {
-            MP_WARN(ctx->vo, "Failed to acquire DRM master: %s\n", mp_strerror(errno));
+            MP_WARN(ctx->vo, "Failed to acquire DRM master: %s\n",
+                    mp_strerror(errno));
         }
     }
 
@@ -282,7 +243,8 @@ static void drm_egl_uninit(MPGLContext *ctx)
     if (p->vt_switcher_active)
         vt_switcher_destroy(&p->vt_switcher);
 
-    eglMakeCurrent(p->egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+    eglMakeCurrent(p->egl.display, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                   EGL_NO_CONTEXT);
     eglDestroyContext(p->egl.display, p->egl.context);
     eglDestroySurface(p->egl.display, p->egl.surface);
     gbm_surface_destroy(p->gbm.surface);
@@ -322,15 +284,10 @@ static int drm_egl_init(struct MPGLContext *ctx, int flags)
     }
 
     MP_VERBOSE(ctx->vo, "Initializing KMS\n");
-    p->kms = kms_create(ctx->vo->log);
+    p->kms = kms_create(ctx->vo->log, ctx->vo->opts->drm_connector_spec,
+                        ctx->vo->opts->drm_mode_id);
     if (!p->kms) {
         MP_ERR(ctx->vo, "Failed to create KMS.\n");
-        return -1;
-    }
-
-    // TODO: arguments should be configurable
-    if (!kms_setup(p->kms, "/dev/dri/card0", -1, 0)) {
-        MP_ERR(ctx->vo, "Failed to configure KMS.\n");
         return -1;
     }
 
@@ -339,12 +296,13 @@ static int drm_egl_init(struct MPGLContext *ctx, int flags)
         return -1;
     }
 
-    if (!init_egl(ctx, flags & VOFLAG_GLES)) {
+    if (!init_egl(ctx, flags)) {
         MP_ERR(ctx->vo, "Failed to setup EGL.\n");
         return -1;
     }
 
-    if (!eglMakeCurrent(p->egl.display, p->egl.surface, p->egl.surface, p->egl.context)) {
+    if (!eglMakeCurrent(p->egl.display, p->egl.surface, p->egl.surface,
+                        p->egl.context)) {
         MP_ERR(ctx->vo, "Failed to make context current.\n");
         return -1;
     }
@@ -372,15 +330,20 @@ static int drm_egl_init(struct MPGLContext *ctx, int flags)
     }
 
     if (!crtc_setup(ctx)) {
-        MP_ERR(
-               ctx->vo,
-               "Failed to set CRTC for connector %u: %s\n",
-               p->kms->connector->connector_id,
-               mp_strerror(errno));
+        MP_ERR(ctx->vo, "Failed to set CRTC for connector %u: %s\n",
+               p->kms->connector->connector_id, mp_strerror(errno));
         return -1;
     }
 
     return 0;
+}
+
+static int drm_egl_init_deprecated(struct MPGLContext *ctx, int flags)
+{
+    if (ctx->vo->probing)
+        return -1;
+    MP_WARN(ctx->vo, "'drm-egl' is deprecated, use 'drm' instead.\n");
+    return drm_egl_init(ctx, flags);
 }
 
 static int drm_egl_reconfig(struct MPGLContext *ctx)
@@ -394,6 +357,16 @@ static int drm_egl_reconfig(struct MPGLContext *ctx)
 static int drm_egl_control(struct MPGLContext *ctx, int *events, int request,
                            void *arg)
 {
+    struct priv *p = ctx->priv;
+    switch (request) {
+    case VOCTRL_GET_DISPLAY_FPS: {
+        double fps = kms_get_display_fps(p->kms);
+        if (fps <= 0)
+            break;
+        *(double*)arg = fps;
+        return VO_TRUE;
+    }
+    }
     return VO_NOTIMPL;
 }
 
@@ -426,10 +399,20 @@ static void drm_egl_swap_buffers(MPGLContext *ctx)
     p->gbm.bo = p->gbm.next_bo;
 }
 
+const struct mpgl_driver mpgl_driver_drm = {
+    .name           = "drm",
+    .priv_size      = sizeof(struct priv),
+    .init           = drm_egl_init,
+    .reconfig       = drm_egl_reconfig,
+    .swap_buffers   = drm_egl_swap_buffers,
+    .control        = drm_egl_control,
+    .uninit         = drm_egl_uninit,
+};
+
 const struct mpgl_driver mpgl_driver_drm_egl = {
     .name           = "drm-egl",
     .priv_size      = sizeof(struct priv),
-    .init           = drm_egl_init,
+    .init           = drm_egl_init_deprecated,
     .reconfig       = drm_egl_reconfig,
     .swap_buffers   = drm_egl_swap_buffers,
     .control        = drm_egl_control,

@@ -28,7 +28,6 @@
 #include "audio/format.h"
 #include "audio/audio.h"
 
-#include "input/input.h"
 #include "options/options.h"
 #include "options/m_config.h"
 #include "common/msg.h"
@@ -109,6 +108,8 @@ static bool get_desc(struct m_obj_desc *dst, int index)
         .priv_size = ao->priv_size,
         .priv_defaults = ao->priv_defaults,
         .options = ao->options,
+        .global_opts = ao->global_opts,
+        .legacy_prefix = ao->legacy_prefix,
         .hidden = ao->encode,
         .p = ao,
     };
@@ -121,11 +122,15 @@ const struct m_obj_list ao_obj_list = {
     .description = "audio outputs",
     .allow_unknown_entries = true,
     .allow_trailer = true,
+    .disallow_positional_parameters = true,
 };
 
 static struct ao *ao_alloc(bool probing, struct mpv_global *global,
-                           struct input_ctx *input_ctx, char *name, char **args)
+                           void (*wakeup_cb)(void *ctx), void *wakeup_ctx,
+                           char *name, char **args)
 {
+    assert(wakeup_cb);
+
     struct MPOpts *opts = global->opts;
     struct mp_log *log = mp_log_new(NULL, global->log, "ao");
     struct m_obj_desc desc;
@@ -139,15 +144,17 @@ static struct ao *ao_alloc(bool probing, struct mpv_global *global,
     *ao = (struct ao) {
         .driver = desc.p,
         .probing = probing,
-        .input_ctx = input_ctx,
+        .global = global,
+        .wakeup_cb = wakeup_cb,
+        .wakeup_ctx = wakeup_ctx,
         .log = mp_log_new(ao, log, name),
         .def_buffer = opts->audio_buffer,
         .client_name = talloc_strdup(ao, opts->audio_client_name),
     };
-    struct m_config *config = m_config_from_obj_desc(ao, ao->log, &desc);
-    if (m_config_apply_defaults(config, name, opts->ao_defs) < 0)
-        goto error;
-    if (m_config_set_obj_params(config, args) < 0)
+    struct m_config *config =
+        m_config_from_obj_desc_and_args(ao, ao->log, global, &desc,
+                                        name, opts->ao_defs, args);
+    if (!config)
         goto error;
     ao->priv = config->optstruct;
     return ao;
@@ -157,12 +164,12 @@ error:
 }
 
 static struct ao *ao_init(bool probing, struct mpv_global *global,
-                          struct input_ctx *input_ctx,
+                          void (*wakeup_cb)(void *ctx), void *wakeup_ctx,
                           struct encode_lavc_context *encode_lavc_ctx, int flags,
                           int samplerate, int format, struct mp_chmap channels,
                           char *dev, char *name, char **args)
 {
-    struct ao *ao = ao_alloc(probing, global, input_ctx, name, args);
+    struct ao *ao = ao_alloc(probing, global, wakeup_cb, wakeup_ctx, name, args);
     if (!ao)
         return NULL;
     ao->samplerate = samplerate;
@@ -193,8 +200,9 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
             snprintf(redirect, sizeof(redirect), "%s", ao->redirect);
             snprintf(rdevice, sizeof(rdevice), "%s", ao->device ? ao->device : "");
             talloc_free(ao);
-            return ao_init(probing, global, input_ctx, encode_lavc_ctx, flags,
-                           samplerate, format, channels, rdevice, redirect, NULL);
+            return ao_init(probing, global, wakeup_cb, wakeup_ctx,
+                           encode_lavc_ctx, flags, samplerate, format, channels,
+                           rdevice, redirect, NULL);
         }
         goto fail;
     }
@@ -244,7 +252,7 @@ static void split_ao_device(void *tmp, char *opt, char **out_ao, char **out_dev)
 
 struct ao *ao_init_best(struct mpv_global *global,
                         int init_flags,
-                        struct input_ctx *input_ctx,
+                        void (*wakeup_cb)(void *ctx), void *wakeup_ctx,
                         struct encode_lavc_context *encode_lavc_ctx,
                         int samplerate, int format, struct mp_chmap channels)
 {
@@ -300,8 +308,8 @@ struct ao *ao_init_best(struct mpv_global *global,
             dev = pref_dev;
             mp_verbose(log, "Using preferred device '%s'\n", dev);
         }
-        ao = ao_init(probing, global, input_ctx, encode_lavc_ctx, init_flags,
-                     samplerate, format, channels, dev,
+        ao = ao_init(probing, global, wakeup_cb, wakeup_ctx, encode_lavc_ctx,
+                     init_flags, samplerate, format, channels, dev,
                      entry->name, entry->attribs);
         if (ao)
             break;
@@ -405,8 +413,7 @@ int ao_query_and_reset_events(struct ao *ao, int events)
 static void ao_add_events(struct ao *ao, int events)
 {
     atomic_fetch_or(&ao->events_, events);
-    if (ao->input_ctx)
-        mp_input_wakeup(ao->input_ctx);
+    ao->wakeup_cb(ao->wakeup_ctx);
 }
 
 // Request that the player core destroys and recreates the AO. Fully thread-safe.
@@ -490,7 +497,8 @@ bool ao_untimed(struct ao *ao)
 
 struct ao_hotplug {
     struct mpv_global *global;
-    struct input_ctx *input_ctx;
+    void (*wakeup_cb)(void *ctx);
+    void *wakeup_ctx;
     // A single AO instance is used to listen to hotplug events. It wouldn't
     // make much sense to allow multiple AO drivers; all sane platforms have
     // a single such audio API.
@@ -502,12 +510,14 @@ struct ao_hotplug {
 };
 
 struct ao_hotplug *ao_hotplug_create(struct mpv_global *global,
-                                     struct input_ctx *input_ctx)
+                                     void (*wakeup_cb)(void *ctx),
+                                     void *wakeup_ctx)
 {
     struct ao_hotplug *hp = talloc_ptrtype(NULL, hp);
     *hp = (struct ao_hotplug){
         .global = global,
-        .input_ctx = input_ctx,
+        .wakeup_cb = wakeup_cb,
+        .wakeup_ctx = wakeup_ctx,
         .needs_update = true,
     };
     return hp;
@@ -560,7 +570,7 @@ struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp)
         if (d == &audio_out_null)
             break; // don't add unsafe/special entries
 
-        struct ao *ao = ao_alloc(true, hp->global, hp->input_ctx,
+        struct ao *ao = ao_alloc(true, hp->global, hp->wakeup_cb, hp->wakeup_ctx,
                                  (char *)d->name, NULL);
         if (!ao)
             continue;
@@ -601,9 +611,13 @@ void ao_hotplug_destroy(struct ao_hotplug *hp)
     talloc_free(hp);
 }
 
+static void dummy_wakeup(void *ctx)
+{
+}
+
 void ao_print_devices(struct mpv_global *global, struct mp_log *log)
 {
-    struct ao_hotplug *hp = ao_hotplug_create(global, NULL);
+    struct ao_hotplug *hp = ao_hotplug_create(global, dummy_wakeup, NULL);
     struct ao_device_list *list = ao_hotplug_get_device_list(hp);
     mp_info(log, "List of detected audio devices:\n");
     for (int n = 0; n < list->num_devices; n++) {

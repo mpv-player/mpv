@@ -142,6 +142,8 @@ static void ssurface_handle_configure(void *data,
 {
     struct vo_wayland_state *wl = data;
     float win_aspect = wl->window.aspect;
+    if (!width || !height)
+        return;
     if (!wl->window.is_fullscreen)
         width = win_aspect * height;
     schedule_resize(wl, edges, width, height);
@@ -955,8 +957,9 @@ void vo_wayland_uninit(struct vo *vo)
 static void vo_wayland_ontop(struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
+    if (!vo->opts->ontop)
+        return;
     MP_DBG(wl, "going ontop\n");
-    vo->opts->ontop = 1;
     window_set_toplevel(wl);
     schedule_resize(wl, 0, wl->window.width, wl->window.height);
 }
@@ -1044,7 +1047,6 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         wl->window.events = 0;
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
-        vo->opts->fullscreen = !vo->opts->fullscreen;
         vo_wayland_fullscreen(vo);
         return VO_TRUE;
     case VOCTRL_ONTOP:
@@ -1139,7 +1141,7 @@ void vo_wayland_wait_events(struct vo *vo, int64_t until_time_us)
     };
 
     int64_t wait_us = until_time_us - mp_time_us();
-    int timeout_ms = MPCLAMP((wait_us + 500) / 1000, 0, 10000);
+    int timeout_ms = MPCLAMP((wait_us + 999) / 1000, 0, 10000);
 
     wl_display_dispatch_pending(dp);
     wl_display_flush(dp);

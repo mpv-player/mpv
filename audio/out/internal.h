@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#include "osdep/atomics.h"
+#include "osdep/atomic.h"
 #include "audio/out/ao.h"
 
 /* global data used by ao.c and ao drivers */
@@ -40,8 +40,10 @@ struct ao {
     const struct ao_driver *api; // entrypoints to the wrapper (push.c/pull.c)
     const struct ao_driver *driver;
     void *priv;
+    struct mpv_global *global;
     struct encode_lavc_context *encode_lavc_ctx;
-    struct input_ctx *input_ctx;
+    void (*wakeup_cb)(void *ctx);
+    void *wakeup_ctx;
     struct mp_log *log; // Using e.g. "[ao/coreaudio]" as prefix
     int init_flags; // AO_INIT_* flags
     bool stream_silence;        // if audio inactive, just play silence
@@ -180,6 +182,8 @@ struct ao_driver {
     int priv_size;
     const void *priv_defaults;
     const struct m_option *options;
+    const struct m_sub_options *global_opts;
+    const char *legacy_prefix;
 };
 
 // These functions can be called by AOs.
@@ -202,5 +206,8 @@ bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
 // Call from ao_driver->list_devs callback only.
 void ao_device_list_add(struct ao_device_list *list, struct ao *ao,
                         struct ao_device_desc *e);
+
+#define DEVICE_OPT_DEPRECATION \
+    .deprecation_message = "use --audio-device instead"
 
 #endif
