@@ -610,6 +610,7 @@ Video
     :yes:       exactly the same as ``auto``
     :auto-copy: enable best hw decoder with copy-back (see below)
     :vdpau:     requires ``--vo=vdpau`` or ``--vo=opengl`` (Linux only)
+    :vdpau-copy: copies video back into system RAM (Linux with some GPUs only)
     :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
     :videotoolbox: requires ``--vo=opengl`` (OS X 10.8 and up only)
@@ -651,10 +652,10 @@ Video
     primarily implemented on the CPU. Some exceptions are ``vdpaupp``,
     ``vdpaurb`` and ``vavpp``. See `VIDEO FILTERS`_ for more details.
 
-    The ``vaapi-copy`` and ``dxva2-copy`` modes allow you to use hardware
+    The ``...-copy`` modes (e.g. ``dxva2-copy``) allow you to use hardware
     decoding with any VO, backend or filter. Because these copy the decoded
-    video back to system RAM, they're likely less efficient than the ``vaapi``
-    or ``dxva2`` modes respectively.
+    video back to system RAM, they're likely less efficient than the direct
+    modes (like e.g. ``dxva2``).
 
     .. note::
 

@@ -21,6 +21,7 @@
 
 #include "lavc.h"
 #include "common/common.h"
+#include "video/mp_image_pool.h"
 #include "video/vdpau.h"
 #include "video/hwdec.h"
 
@@ -28,6 +29,9 @@ struct priv {
     struct mp_log              *log;
     struct mp_vdpau_ctx        *mpvdp;
     uint64_t                    preemption_counter;
+    // vdpau-copy
+    Display                    *display;
+    struct mp_image_pool       *sw_pool;
 };
 
 static int init_decoder(struct lavc_ctx *ctx, int w, int h)
@@ -76,9 +80,16 @@ static void uninit(struct lavc_ctx *ctx)
 {
     struct priv *p = ctx->hwdec_priv;
 
+    if (p->display) {
+        // for copy path: we own this stuff
+        mp_vdpau_destroy(p->mpvdp);
+        XCloseDisplay(p->display);
+    }
+
     talloc_free(p);
 
-    av_freep(&ctx->avctx->hwaccel_context);
+    if (ctx->avctx)
+        av_freep(&ctx->avctx->hwaccel_context);
 }
 
 static int init(struct lavc_ctx *ctx)
@@ -102,6 +113,56 @@ static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
     return 0;
 }
 
+static int init_copy(struct lavc_ctx *ctx)
+{
+    struct priv *p = talloc_ptrtype(NULL, p);
+    *p = (struct priv) {
+        .log = mp_log_new(p, ctx->log, "vdpau"),
+    };
+
+    p->display = XOpenDisplay(NULL);
+    if (!p->display)
+        goto error;
+
+    p->mpvdp = mp_vdpau_create_device_x11(p->log, p->display, true);
+    if (!p->mpvdp)
+        goto error;
+
+    p->sw_pool = talloc_steal(p, mp_image_pool_new(17));
+
+    ctx->hwdec_priv = p;
+
+    mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter);
+    return 0;
+
+error:
+    if (p->display)
+        XCloseDisplay(p->display);
+    talloc_free(p);
+    return -1;
+}
+
+static int probe_copy(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
+                      const char *codec)
+{
+    assert(!ctx->hwdec_priv);
+    int r = init_copy(ctx);
+    if (ctx->hwdec_priv)
+        uninit(ctx);
+    ctx->hwdec_priv = NULL;
+
+    return r < 0 ? HWDEC_ERR_NO_CTX : 0;
+}
+
+static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *img)
+{
+    struct priv *p = ctx->hwdec_priv;
+    struct mp_hwdec_ctx *hwctx = &p->mpvdp->hwctx;
+    struct mp_image *out = hwctx->download_image(hwctx, img, p->sw_pool);
+    talloc_free(img);
+    return out;
+}
+
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
     .type = HWDEC_VDPAU,
     .image_format = IMGFMT_VDPAU,
@@ -111,4 +172,16 @@ const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
     .init_decoder = init_decoder,
     .allocate_image = allocate_image,
     .process_image = update_format,
+};
+
+const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy = {
+    .type = HWDEC_VDPAU_COPY,
+    .copying = true,
+    .image_format = IMGFMT_VDPAU,
+    .probe = probe_copy,
+    .init = init_copy,
+    .uninit = uninit,
+    .init_decoder = init_decoder,
+    .allocate_image = allocate_image,
+    .process_image = copy_image,
 };
