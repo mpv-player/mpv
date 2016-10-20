@@ -249,6 +249,8 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 
     bool hr_seek_very_exact = seek.exact == MPSEEK_VERY_EXACT;
     double current_time = get_current_time(mpctx);
+    if (current_time == MP_NOPTS_VALUE && seek.type == MPSEEK_RELATIVE)
+        return;
     if (current_time == MP_NOPTS_VALUE)
         current_time = 0;
     double seek_pts = MP_NOPTS_VALUE;
