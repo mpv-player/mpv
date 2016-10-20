@@ -430,6 +430,7 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'desc': 'libavfilter',
         'func': check_pkg_config('libavfilter', '>= 5.0.0'),
         'req':  True,
+        'fmsg': 'libavfilter is a required dependency.',
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
