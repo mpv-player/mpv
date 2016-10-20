@@ -730,7 +730,7 @@ static void adjust_sync(struct MPContext *mpctx, double v_pts, double frame_time
 
     double change = av_delay * 0.1;
     double max_change = opts->default_max_pts_correction >= 0 ?
-                        opts->default_max_pts_correction : frame_time * 0.1;
+                        opts->default_max_pts_correction : frame_time * (fabs(av_delay) < 0.3 ? 0.1 : 0.4);
     if (change < -max_change)
         change = -max_change;
     else if (change > max_change)
