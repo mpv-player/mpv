@@ -186,6 +186,10 @@ main_dependencies = [
         'desc': 'C11 TLS support',
         'func': check_statement('stddef.h', 'static _Thread_local int x = 0'),
     }, {
+        'name': 'gcc-tls',
+        'desc': 'GCC TLS support',
+        'func': check_statement('stddef.h', 'static __thread int x = 0'),
+    }, {
         'name': 'librt',
         'desc': 'linking with -lrt',
         'deps': [ 'pthreads' ],
