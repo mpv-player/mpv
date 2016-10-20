@@ -672,7 +672,7 @@ function limited_list(prop, pos)
         end
     end
 
-    for i=min+1, max do
+    for i=min+1, math.min(max, count) do
         local item = proplist[i]
         item.current = (i-1 == pos) and true or nil
         table.insert(temp, item)
