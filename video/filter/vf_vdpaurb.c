@@ -87,6 +87,9 @@ static int vf_open(vf_instance_t *vf)
 {
     struct vf_priv_s *p = vf->priv;
 
+    MP_WARN(vf, "This filter is deprecated and will be removed.\n");
+    MP_WARN(vf, "Use --hwdec=vdpau-copy instead.\n");
+
     vf->filter_ext = filter_ext;
     vf->filter = NULL;
     vf->reconfig = reconfig;
