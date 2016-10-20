@@ -1139,6 +1139,9 @@ reopen_file:
             startpos = start;
     }
     if (startpos != MP_NOPTS_VALUE) {
+        if (!opts->rebase_start_time) {
+            startpos += mpctx->demuxer->start_time;
+        }
         queue_seek(mpctx, MPSEEK_ABSOLUTE, startpos, MPSEEK_DEFAULT, 0);
         execute_queued_seek(mpctx);
     }
