@@ -322,6 +322,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .target_brightness = 250,
     .hdr_tone_mapping = TONE_MAPPING_HABLE,
     .tone_mapping_param = NAN,
+    .early_flush = -1,
 };
 
 static int validate_scaler_opt(struct mp_log *log, const m_option_t *opt,
@@ -412,7 +413,8 @@ const struct m_sub_options gl_video_conf = {
         OPT_INTRANGE("opengl-tex-pad-x", tex_pad_x, 0, 0, 4096),
         OPT_INTRANGE("opengl-tex-pad-y", tex_pad_y, 0, 0, 4096),
         OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
-        OPT_FLAG("opengl-early-flush", early_flush, 0),
+        OPT_CHOICE("opengl-early-flush", early_flush, 0,
+                   ({"no", 0}, {"yes", 1}, {"auto", -1})),
 
         {0}
     },
@@ -2849,8 +2851,11 @@ done:
     // The playloop calls this last before waiting some time until it decides
     // to call flip_page(). Tell OpenGL to start execution of the GPU commands
     // while we sleep (this happens asynchronously).
-    if (p->opts.early_flush)
+    if ((p->opts.early_flush == -1 && !frame->display_synced) ||
+        p->opts.early_flush == 1)
+    {
         gl->Flush();
+    }
 
     p->frames_rendered++;
 

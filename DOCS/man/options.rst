@@ -4598,10 +4598,13 @@ The following video options are currently all specific to ``--vo=opengl`` and
     we may have to deal with additional padding, which can be tested with these
     options). Could be removed any time.
 
-``--opengl-early-flush=<yes|no>``
+``--opengl-early-flush=<yes|no|auto>``
     Call ``glFlush()`` after rendering a frame and before attempting to display
-    it (default: no). Can fix stuttering in some cases, in other cases probably
-    causes it. For testing - could be removed any time.
+    it (default: auto). Can fix stuttering in some cases, in other cases
+    probably causes it. The ``auto`` mode will call ``glFlush()`` only if
+    the renderer is going to wait for a while after rendering, instead of
+    flipping GL front and backbuffers immediately (i.e. it doesn't call it
+    in display-sync mode).
 
 Miscellaneous
 -------------
