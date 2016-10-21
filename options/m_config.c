@@ -269,16 +269,27 @@ struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
     return m_config_new(talloc_ctx, log, 0, desc->priv_defaults, desc->options);
 }
 
+static struct m_config_option *m_config_find_negation_opt(struct m_config *config,
+                                                          struct bstr *name);
+
 static int m_config_set_obj_params(struct m_config *config, struct mp_log *log,
                                    struct mpv_global *global,
                                    struct m_obj_desc *desc, char **args)
 {
     for (int n = 0; args && args[n * 2 + 0]; n++) {
-        const char *opt = args[n * 2 + 0];
+        bstr opt = bstr0(args[n * 2 + 0]);
         const char *val = args[n * 2 + 1];
-        struct m_config_option *co = m_config_get_co(config, bstr0(opt));
-        if (!co)
-            continue;
+        struct m_config_option *co = m_config_get_co(config, opt);
+        if (!co) {
+            co = m_config_find_negation_opt(config, &opt);
+            if (!co)
+                continue;
+
+            if (val && val[0])
+                return -1; // no parameter allowed
+
+            val = "no";
+        }
         struct m_config *target = config;
         bool is_legacy = co->opt->type == &m_option_type_subopt_legacy;
         bool force_legacy = !!desc->legacy_prefix;
@@ -289,16 +300,18 @@ static int m_config_set_obj_params(struct m_config *config, struct mp_log *log,
             if (is_legacy) {
                 newopt = co->opt->priv;
             } else {
-                snprintf(tmp, sizeof(tmp), "%s-%s", desc->legacy_prefix, opt);
+                snprintf(tmp, sizeof(tmp), "%s-%.*s", desc->legacy_prefix,
+                         BSTR_P(opt));
                 newopt = tmp;
             }
             assert(global);
             target = mp_get_root_config(global);
             mp_warn(log, "Using suboptions is deprecated. Use the global '--%s' "
-                        "option instead of '%s' suboption.\n", newopt, opt);
-            opt = newopt;
+                         "option instead of '%.*s' suboption.\n", newopt,
+                         BSTR_P(opt));
+            opt = bstr0(newopt);
         }
-        if (m_config_set_option(target, bstr0(opt), bstr0(val)) < 0)
+        if (m_config_set_option(target, opt, bstr0(val)) < 0)
             return -1;
     }
 
