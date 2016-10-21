@@ -608,8 +608,8 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
 
     if (mpctx->restart_complete && c.size > 0) {
         if (mpctx->paused && mpctx->paused_for_cache) {
-            if (!opts->cache_pausing || s.ts_duration >= mpctx->cache_wait_time
-                || s.idle)
+            if (!s.underrun && (!opts->cache_pausing || s.idle ||
+                                s.ts_duration >= mpctx->cache_wait_time))
             {
                 double elapsed_time = now - mpctx->cache_stop_time;
                 if (elapsed_time > mpctx->cache_wait_time) {
