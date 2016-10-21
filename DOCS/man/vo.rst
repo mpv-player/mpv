@@ -159,7 +159,7 @@ Available video output drivers are:
         means timing is somewhat less accurate than without compositing, but
         with the composited mode behavior of the NVIDIA driver, there is no
         hard playback speed limit even without the disabled logic. Enabled by
-        default, use ``no-composite-detect`` to disable.
+        default, use ``--vo-vdpau-composite-detect=no`` to disable.
     ``--vo-vdpau-queuetime-windowed=<number>`` and ``queuetime-fs=<number>``
         Use VDPAU's presentation queue functionality to queue future video
         frame changes at most this many milliseconds in advance (default: 50).
