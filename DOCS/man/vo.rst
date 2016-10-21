@@ -390,7 +390,7 @@ Available video output drivers are:
 ``tct``
     Color Unicode art video output driver that works on a text console.
     Depends on support of true color by modern terminals to display the images
-    at full color range.
+    at full color range. On Windows it requires an ansi terminal such as mintty.
 
     ``--vo-tct-algo=<algo>``
         Select how to write the pixels to the terminal.
@@ -401,6 +401,10 @@ Available video output drivers are:
         plain
             Uses spaces. Causes vertical resolution to drop twofolds, but in
             theory works in more places.
+
+    ``--vo-tct-width=<width>``  ``--vo-tct-height=<height>``
+        Assume the terminal has the specified character width and/or height.
+        These default to 80x25 if the terminal size cannot be determined.
 
 ``image``
     Output each frame into an image file in the current directory. Each file
