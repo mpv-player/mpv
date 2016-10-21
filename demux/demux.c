@@ -503,7 +503,7 @@ static double get_refresh_seek_pts(struct demux_internal *in)
         // Streams which didn't have any packets yet will return all packets,
         // other streams return packets only starting from the last position.
         if (ds->last_pos != -1 || ds->last_dts != MP_NOPTS_VALUE)
-            ds->refreshing = true;
+            ds->refreshing |= ds->selected;
     }
 
     // Seek back to player's current position, with a small offset added.
