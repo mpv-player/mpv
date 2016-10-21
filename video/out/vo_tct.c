@@ -17,7 +17,12 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <config.h>
+
+#if HAVE_POSIX
 #include <sys/ioctl.h>
+#endif
+
 #include <libswscale/swscale.h>
 
 #include "options/m_config.h"
@@ -38,9 +43,13 @@
 #define ESC_GOTOXY "\e[%d;%df"
 #define ESC_COLOR_BACKGROUND "\e[48;2;%d;%d;%dm"
 #define ESC_COLOR_FOREGROUND "\e[38;2;%d;%d;%dm"
+#define DEFAULT_WIDTH 80
+#define DEFAULT_HEIGHT 25
 
 struct vo_tct_opts {
     int algo;
+    int width;   // 0 -> default
+    int height;  // 0 -> default
 };
 
 #define OPT_BASE_STRUCT struct vo_tct_opts
@@ -49,6 +58,8 @@ static const struct m_sub_options vo_tct_conf = {
         OPT_CHOICE("vo-tct-algo", algo, 0,
                    ({"plain", ALGO_PLAIN},
                     {"half-blocks", ALGO_HALF_BLOCKS})),
+        OPT_INT("vo-tct-width", width, 0),
+        OPT_INT("vo-tct-height", height, 0),
         {0}
     },
     .defaults = &(const struct vo_tct_opts) {
@@ -113,21 +124,36 @@ static void write_half_blocks(
             unsigned char r_down = *row_down++;
             printf(ESC_COLOR_BACKGROUND, r_up, g_up, b_up);
             printf(ESC_COLOR_FOREGROUND, r_down, g_down, b_down);
-            printf("▄");
+            printf("\xe2\x96\x84");  // UTF8 bytes of U+2584 (lower half block)
         }
         printf(ESC_CLEAR_COLORS);
     }
     printf("\n");
 }
 
+static void get_win_size(struct vo *vo, int *out_width, int *out_height) {
+    struct priv *p = vo->priv;
+#if HAVE_POSIX
+    struct winsize winsize;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &winsize);
+    *out_width = winsize.ws_col;
+    *out_height = winsize.ws_row;
+#else
+    *out_width = DEFAULT_WIDTH;
+    *out_height = DEFAULT_HEIGHT;
+#endif
+
+    if (p->opts->width > 0)
+        *out_width = p->opts->width;
+    if (p->opts->height > 0)
+        *out_height = p->opts->height;
+}
+
 static int reconfig(struct vo *vo, struct mp_image_params *params)
 {
     struct priv *p = vo->priv;
 
-    struct winsize winsize;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &winsize);
-    vo->dwidth = winsize.ws_col;
-    vo->dheight = winsize.ws_row;
+    get_win_size(vo, &vo->dwidth, &vo->dheight);
 
     struct mp_osd_res osd;
     vo_get_src_dst_rects(vo, &p->src, &p->dst, &osd);
