@@ -862,6 +862,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
         if (wanted_edition_uid) {
             MP_ERR(demuxer, "Unable to find expected edition uid: %"PRIu64"\n",
                    wanted_edition_uid);
+            talloc_free(parse_ctx.talloc_ctx);
             return -1;
         } else {
             selected_edition = 0;

@@ -188,27 +188,31 @@ static bool check_file_seg(struct tl_ctx *ctx, char *filename, int segment)
         if (ctx->sources[i])
             continue;
         /* Accept the source if the segment uid matches and the edition
-            * either matches or isn't specified. */
+         * either matches or isn't specified. */
         if (!memcmp(uid->segment, m->uid.segment, 16) &&
             (!uid->edition || uid->edition == m->uid.edition))
         {
             MP_INFO(ctx, "Match for source %d: %s\n", i, d->filename);
 
-            for (int j = 0; j < m->num_ordered_chapters; j++) {
-                struct matroska_chapter *c = m->ordered_chapters + j;
+            if (!uid->edition) {
+                m->uid.edition = 0;
+            } else {
+                for (int j = 0; j < m->num_ordered_chapters; j++) {
+                    struct matroska_chapter *c = m->ordered_chapters + j;
 
-                if (!c->has_segment_uid)
-                    continue;
+                    if (!c->has_segment_uid)
+                        continue;
 
-                if (has_source_request(ctx, &c->uid))
-                    continue;
+                    if (has_source_request(ctx, &c->uid))
+                        continue;
 
-                /* Set the requested segment. */
-                MP_TARRAY_GROW(NULL, ctx->uids, ctx->num_sources);
-                ctx->uids[ctx->num_sources] = c->uid;
+                    /* Set the requested segment. */
+                    MP_TARRAY_GROW(NULL, ctx->uids, ctx->num_sources);
+                    ctx->uids[ctx->num_sources] = c->uid;
 
-                /* Add a new source slot. */
-                MP_TARRAY_APPEND(NULL, ctx->sources, ctx->num_sources, NULL);
+                    /* Add a new source slot. */
+                    MP_TARRAY_APPEND(NULL, ctx->sources, ctx->num_sources, NULL);
+                }
             }
 
             if (stream_wants_cache(d->stream, ctx->opts->stream_cache)) {
@@ -379,7 +383,7 @@ static void build_timeline_loop(struct tl_ctx *ctx,
 
             /* If we're the source or it's a non-ordered edition reference,
              * just add a timeline part from the source. */
-            if (current_source == j || !linked_m->num_ordered_chapters) {
+            if (current_source == j || !linked_m->uid.edition) {
                 uint64_t source_full_length =
                     demuxer_get_time_length(linked_source) * 1e9;
                 uint64_t source_length = source_full_length - c->start;
