@@ -287,10 +287,11 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
     // OK, is handled separately: playlist
     // OK, does not conflict on low level: audio-file, sub-file, external-file
     // OK, different value ranges, but happens to work for now: volume, edition
+    // Incompatible: tv-freq
     // All the other properties are deprecated in their current form.
     static const char *const no_property[] = {
         "demuxer", "idle", "length", "audio-samplerate", "audio-channels",
-        "audio-format", "fps", "cache", "playlist-pos", "chapter",
+        "audio-format", "fps", "cache", "playlist-pos", "chapter", "tv-freq",
         NULL
     };
 
