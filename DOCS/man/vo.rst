@@ -406,6 +406,9 @@ Available video output drivers are:
         Assume the terminal has the specified character width and/or height.
         These default to 80x25 if the terminal size cannot be determined.
 
+    ``--vo-tct-256=<yes|no>`` (default: no)
+        Use 256 colors - for terminals which don't support true color.
+
 ``image``
     Output each frame into an image file in the current directory. Each file
     takes the frame number padded with leading zeros as name.

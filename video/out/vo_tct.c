@@ -41,8 +41,10 @@
 #define ESC_CLEAR_SCREEN "\e[2J"
 #define ESC_CLEAR_COLORS "\e[0m"
 #define ESC_GOTOXY "\e[%d;%df"
-#define ESC_COLOR_BACKGROUND "\e[48;2;%d;%d;%dm"
-#define ESC_COLOR_FOREGROUND "\e[38;2;%d;%d;%dm"
+#define ESC_COLOR_BG "\e[48;2;%d;%d;%dm"
+#define ESC_COLOR_FG "\e[38;2;%d;%d;%dm"
+#define ESC_COLOR256_BG "\e[48;5;%dm"
+#define ESC_COLOR256_FG "\e[38;5;%dm"
 #define DEFAULT_WIDTH 80
 #define DEFAULT_HEIGHT 25
 
@@ -50,6 +52,7 @@ struct vo_tct_opts {
     int algo;
     int width;   // 0 -> default
     int height;  // 0 -> default
+    int term256;  // 0 -> true color
 };
 
 #define OPT_BASE_STRUCT struct vo_tct_opts
@@ -60,6 +63,7 @@ static const struct m_sub_options vo_tct_conf = {
                     {"half-blocks", ALGO_HALF_BLOCKS})),
         OPT_INT("vo-tct-width", width, 0),
         OPT_INT("vo-tct-height", height, 0),
+        OPT_FLAG("vo-tct-256", term256, 0),
         {0}
     },
     .defaults = &(const struct vo_tct_opts) {
@@ -80,10 +84,40 @@ struct priv {
     struct mp_sws_context *sws;
 };
 
+// Convert RGB24 to xterm-256 8-bit value
+// For simplicity, assume RGB space is perceptually uniform.
+// There are 5 places where one of two outputs needs to be chosen when the
+// input is the exact middle:
+// - The r/g/b channels and the gray value: the higher value output is chosen.
+// - If the gray and color have same distance from the input - color is chosen.
+static int rgb_to_x256(uint8_t r, uint8_t g, uint8_t b)
+{
+    // Calculate the nearest 0-based color index at 16 .. 231
+#   define v2ci(v) (v < 48 ? 0 : v < 115 ? 1 : (v - 35) / 40)
+    int ir = v2ci(r), ig = v2ci(g), ib = v2ci(b);   // 0..5 each
+#   define color_index() (36 * ir + 6 * ig + ib)  /* 0..215, lazy evaluation */
+
+    // Calculate the nearest 0-based gray index at 232 .. 255
+    int average = (r + g + b) / 3;
+    int gray_index = average > 238 ? 23 : (average - 3) / 10;  // 0..23
+
+    // Calculate the represented colors back from the index
+    static const int i2cv[6] = {0, 0x5f, 0x87, 0xaf, 0xd7, 0xff};
+    int cr = i2cv[ir], cg = i2cv[ig], cb = i2cv[ib];  // r/g/b, 0..255 each
+    int gv = 8 + 10 * gray_index;  // same value for r/g/b, 0..255
+
+    // Return the one which is nearer to the original input rgb value
+#   define dist_square(A,B,C, a,b,c) ((A-a)*(A-a) + (B-b)*(B-b) + (C-c)*(C-c))
+    int color_err = dist_square(cr, cg, cb, r, g, b);
+    int gray_err  = dist_square(gv, gv, gv, r, g, b);
+    return color_err <= gray_err ? 16 + color_index() : 232 + gray_index;
+}
+
 static void write_plain(
     const int dwidth, const int dheight,
     const int swidth, const int sheight,
-    const unsigned char *source, const int source_stride)
+    const unsigned char *source, const int source_stride,
+    bool term256)
 {
     assert(source);
     const int tx = (dwidth - swidth) / 2;
@@ -95,7 +129,11 @@ static void write_plain(
             unsigned char b = *row++;
             unsigned char g = *row++;
             unsigned char r = *row++;
-            printf(ESC_COLOR_BACKGROUND, r, g, b);
+            if (term256) {
+                printf(ESC_COLOR256_BG, rgb_to_x256(r, g, b));
+            } else {
+                printf(ESC_COLOR_BG, r, g, b);
+            }
             printf(" ");
         }
         printf(ESC_CLEAR_COLORS);
@@ -106,7 +144,8 @@ static void write_plain(
 static void write_half_blocks(
     const int dwidth, const int dheight,
     const int swidth, const int sheight,
-    unsigned char *source, int source_stride)
+    unsigned char *source, int source_stride,
+    bool term256)
 {
     assert(source);
     const int tx = (dwidth - swidth) / 2;
@@ -122,8 +161,13 @@ static void write_half_blocks(
             unsigned char b_down = *row_down++;
             unsigned char g_down = *row_down++;
             unsigned char r_down = *row_down++;
-            printf(ESC_COLOR_BACKGROUND, r_up, g_up, b_up);
-            printf(ESC_COLOR_FOREGROUND, r_down, g_down, b_down);
+            if (term256) {
+                printf(ESC_COLOR256_BG, rgb_to_x256(r_up, g_up, b_up));
+                printf(ESC_COLOR256_FG, rgb_to_x256(r_down, g_down, b_down));
+            } else {
+                printf(ESC_COLOR_BG, r_up, g_up, b_up);
+                printf(ESC_COLOR_FG, r_down, g_down, b_down);
+            }
             printf("\xe2\x96\x84");  // UTF8 bytes of U+2584 (lower half block)
         }
         printf(ESC_CLEAR_COLORS);
@@ -202,11 +246,13 @@ static void flip_page(struct vo *vo)
     if (p->opts->algo == ALGO_PLAIN) {
         write_plain(
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
-            p->frame->planes[0], p->frame->stride[0]);
+            p->frame->planes[0], p->frame->stride[0],
+            p->opts->term256);
     } else {
         write_half_blocks(
             vo->dwidth, vo->dheight, p->swidth, p->sheight,
-            p->frame->planes[0], p->frame->stride[0]);
+            p->frame->planes[0], p->frame->stride[0],
+            p->opts->term256);
     }
     fflush(stdout);
 }
