@@ -1287,16 +1287,18 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         demux_changed(in->d_thread, DEMUX_EVENT_ALL);
         demux_update(demuxer);
         stream_control(demuxer->stream, STREAM_CTRL_SET_READAHEAD, &(int){false});
-        struct timeline *tl = timeline_load(global, log, demuxer);
-        if (tl) {
-            struct demuxer_params params2 = {0};
-            params2.timeline = tl;
-            struct demuxer *sub = open_given_type(global, log,
-                                                  &demuxer_desc_timeline, stream,
-                                                  &params2, DEMUX_CHECK_FORCE);
-            if (sub)
-                return sub;
-            timeline_destroy(tl);
+        if (!(params && params->disable_timeline)) {
+            struct timeline *tl = timeline_load(global, log, demuxer);
+            if (tl) {
+                struct demuxer_params params2 = {0};
+                params2.timeline = tl;
+                struct demuxer *sub =
+                    open_given_type(global, log, &demuxer_desc_timeline, stream,
+                                    &params2, DEMUX_CHECK_FORCE);
+                if (sub)
+                    return sub;
+                timeline_destroy(tl);
+            }
         }
         return demuxer;
     }
