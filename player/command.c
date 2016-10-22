@@ -104,6 +104,8 @@ struct command_ctx {
 
     char *cur_ipc;
     char *cur_ipc_input;
+
+    int silence_option_deprecations;
 };
 
 struct overlay {
@@ -342,8 +344,13 @@ static int mp_property_generic_option(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     const char *optname = prop->name;
     int flags = M_SETOPT_RUNTIME;
-    struct m_config_option *opt = m_config_get_co(mpctx->mconfig,
-                                                  bstr0(optname));
+    struct m_config_option *opt;
+    if (mpctx->command_ctx->silence_option_deprecations) {
+        // This case is specifically for making --reset-on-next-file=all silent.
+        opt = m_config_get_co_raw(mpctx->mconfig, bstr0(optname));
+    } else {
+        opt = m_config_get_co(mpctx->mconfig, bstr0(optname));
+    }
 
     if (!opt)
         return M_PROPERTY_UNKNOWN;
@@ -4154,7 +4161,9 @@ static int mp_property_do_silent(const char *name, int action, void *val,
                                  struct MPContext *ctx)
 {
     struct command_ctx *cmd = ctx->command_ctx;
+    cmd->silence_option_deprecations += 1;
     int r = m_property_do(ctx->log, cmd->properties, name, action, val, ctx);
+    cmd->silence_option_deprecations -= 1;
     if (r == M_PROPERTY_OK && is_property_set(action, val))
         mp_notify_property(ctx, (char *)name);
     return r;
