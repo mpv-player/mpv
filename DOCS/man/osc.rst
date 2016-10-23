@@ -260,3 +260,7 @@ to set auto mode (the default) with ``b``::
     a script-message osc-visibility never
     b script-message osc-visibility auto
 
+``osc-playlist``, ``osc-chapterlist``, ``osc-tracklist``
+    Shows a limited view of the respective type of list using the OSC. First
+    argument is duration in seconds.
+

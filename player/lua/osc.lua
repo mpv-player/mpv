@@ -2127,6 +2127,19 @@ mp.register_event("tracks-changed", request_init)
 mp.observe_property("playlist", nil, request_init)
 
 mp.register_script_message("osc-message", show_message)
+mp.register_script_message("osc-chapterlist", function(dur)
+    show_message(get_chapterlist(), dur)
+end)
+mp.register_script_message("osc-playlist", function(dur)
+    show_message(get_playlist(), dur)
+end)
+mp.register_script_message("osc-tracklist", function(dur)
+    local msg = {}
+    for k,v in pairs(nicetypes) do
+        table.insert(msg, get_tracklist(k))
+    end
+    show_message(table.concat(msg, '\n\n'), dur)
+end)
 
 mp.observe_property("fullscreen", "bool",
     function(name, val)
