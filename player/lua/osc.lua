@@ -651,47 +651,44 @@ end
 -- Message display
 --
 
+-- pos is 1 based
 function limited_list(prop, pos)
-    local fs = tonumber(mp.get_property('options/osd-font-size'))
-    local max_items = math.ceil(720 / fs)
-
     local proplist = mp.get_property_native(prop, {})
     local count = #proplist
-    if (count == 0) then
+    if count == 0 then
         return count, proplist
     end
-    local min, max = 0, count
-    local temp = {}
-    if (count > max_items - 1) then
-        local extra = math.ceil(max_items / 2) - 1
-        min = pos - extra
-        max = pos + extra
-        if (pos < extra) then
-            max = max + math.abs(min)
-            min = 0
-        end
-    end
 
-    for i=min+1, math.min(max, count) do
-        local item = proplist[i]
-        item.current = (i-1 == pos) and true or nil
-        table.insert(temp, item)
+    local fs = tonumber(mp.get_property('options/osd-font-size'))
+    local max = math.ceil(720 / fs)
+    if max % 2 == 0 then
+        max = max - 1
     end
-    return count, temp
+    local delta = math.ceil(max / 2) - 1
+    local begi = math.max(math.min(pos - delta, count - max + 1), 1)
+    local endi = math.min(begi + max - 1, count)
+
+    local reslist = {}
+    for i=begi, endi do
+        local item = proplist[i]
+        item.current = (i == pos) and true or nil
+        table.insert(reslist, item)
+    end
+    return count, reslist
 end
 
 function get_playlist()
-    local pos = mp.get_property_number('playlist-pos')
+    local pos = mp.get_property_number('playlist-pos') + 1
     local count, limlist = limited_list('playlist', pos)
-    if (count == 0) then
-        return "Empty playlist."
+    if count == 0 then
+        return 'Empty playlist.'
     end
 
-    local message = string.format('Playlist: (%d/%d):\n', pos + 1, count)
+    local message = string.format('Playlist [%d/%d]:\n', pos, count)
     for i, v in ipairs(limlist) do
         local title = v.title
         local _, filename = utils.split_path(v.filename)
-        if (title == nil) then
+        if title == nil then
             title = filename
         end
         message = string.format('%s %s %s\n', message,
@@ -701,17 +698,17 @@ function get_playlist()
 end
 
 function get_chapterlist()
-    local pos = mp.get_property_number('chapter')
+    local pos = mp.get_property_number('chapter') + 1
     local count, limlist = limited_list('chapter-list', pos)
-    if (count == 0) then
-        return "No chapters."
+    if count == 0 then
+        return 'No chapters.'
     end
 
-    local message = string.format('Chapters: (%d/%d):\n', pos + 1, count)
+    local message = string.format('Chapters [%d/%d]:\n', pos + 1, count)
     for i, v in ipairs(limlist) do
         local time = mp.format_time(v.time)
         local title = v.title
-        if (title == nil) then
+        if title == nil then
             title = string.format('Chapter %02d', i + 1)
         end
         message = string.format('%s[%s] %s %s\n', message, time,
