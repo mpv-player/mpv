@@ -121,9 +121,14 @@ static void run_on_main_thread(struct vo *vo, void(^block)(void))
 static void queue_new_video_size(struct vo *vo, int w, int h)
 {
     struct vo_cocoa_state *s = vo->cocoa;
+    struct mp_vo_opts *opts  = vo->opts;
     if ([s->window conformsToProtocol: @protocol(MpvSizing)]) {
         id<MpvSizing> win = (id<MpvSizing>) s->window;
-        [win queueNewVideoSize:NSMakeSize(w, h)];
+        NSRect r = NSMakeRect(0, 0, w, h);
+        if(!opts->hidpi_window_scale) {
+            r = [s->current_screen convertRectFromBacking:r];
+        }
+        [win queueNewVideoSize:NSMakeSize(r.size.width, r.size.height)];
     }
 }
 
@@ -488,8 +493,10 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     if (s->embedded) {
         parent = (NSView *) (intptr_t) opts->WinID;
     } else {
-        const NSRect wr =
+        NSRect wr =
             NSMakeRect(win->x0, win->y0, win->x1 - win->x0, win->y1 - win->y0);
+        if(!opts->hidpi_window_scale)
+            wr = [s->current_screen convertRectFromBacking:wr];
         s->window = create_window(wr, s->current_screen, opts->border, adapter);
         parent = [s->window contentView];
     }
