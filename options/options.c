@@ -187,6 +187,7 @@ static const m_option_t mp_vo_opt_list[] = {
     OPT_FLAG("fs-black-out-screens", fs_black_out_screens, 0),
     OPT_FLAG("keepaspect", keepaspect, UPDATE_VIDEOPOS),
     OPT_FLAG("keepaspect-window", keepaspect_window, 0),
+    OPT_FLAG("hidpi-window-scale", hidpi_window_scale, 0),
 #if HAVE_X11
     OPT_CHOICE("x11-netwm", x11_netwm, 0,
                ({"auto", 0}, {"no", -1}, {"yes", 1})),
@@ -216,6 +217,7 @@ const struct m_sub_options vo_sub_opts = {
         .panscan = 0.0f,
         .keepaspect = 1,
         .keepaspect_window = 1,
+        .hidpi_window_scale = 1,
         .taskbar_progress = 1,
         .border = 1,
         .fit_border = 1,
