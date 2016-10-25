@@ -678,7 +678,7 @@ function limited_list(prop, pos)
 end
 
 function get_playlist()
-    local pos = mp.get_property_number('playlist-pos') + 1
+    local pos = mp.get_property_number('playlist-pos', 0) + 1
     local count, limlist = limited_list('playlist', pos)
     if count == 0 then
         return 'Empty playlist.'
@@ -698,18 +698,18 @@ function get_playlist()
 end
 
 function get_chapterlist()
-    local pos = mp.get_property_number('chapter') + 1
+    local pos = mp.get_property_number('chapter', 0) + 1
     local count, limlist = limited_list('chapter-list', pos)
     if count == 0 then
         return 'No chapters.'
     end
 
-    local message = string.format('Chapters [%d/%d]:\n', pos + 1, count)
+    local message = string.format('Chapters [%d/%d]:\n', pos, count)
     for i, v in ipairs(limlist) do
         local time = mp.format_time(v.time)
         local title = v.title
         if title == nil then
-            title = string.format('Chapter %02d', i + 1)
+            title = string.format('Chapter %02d', i)
         end
         message = string.format('%s[%s] %s %s\n', message, time,
             (v.current and '●' or '○'), title)
