@@ -560,6 +560,7 @@ function render_elements(master_ass)
                 if (slider_lo.stype == "slider") then
                     foH = elem_geo.h / 2
                 elseif (slider_lo.stype == "bar") then
+                    foV = foV + 1
                     foH = slider_lo.border + slider_lo.gap
                 end
 
