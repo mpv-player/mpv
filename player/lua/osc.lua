@@ -1131,6 +1131,7 @@ layouts["bottombar"] = function()
     local padY = 2
     local line1 = osc_geo.y + 6 + padY
     local line2 = osc_geo.y + 24 + padY
+    local tc_width = (state.tc_ms) and 100 or 70
 
     osc_param.areas = {}
 
@@ -1201,7 +1202,8 @@ layouts["bottombar"] = function()
 
 
     -- Left timecode
-    geo = { x = geo.x + geo.w + padX + 100, y = geo.y, an = 6, w = 100, h = geo.h }
+    geo = { x = geo.x + geo.w + padX + tc_width, y = geo.y, an = 6,
+            w = tc_width, h = geo.h }
     lo = add_layout("tc_left")
     lo.geometry = geo
     lo.style = osc_styles.timecodes
@@ -1223,8 +1225,8 @@ layouts["bottombar"] = function()
 
 
     -- Right timecode
-    geo = { x = geo.x - geo.w - padX - 100, y = geo.y, an = 4,
-            w = 100, h = geo.h }
+    geo = { x = geo.x - geo.w - padX - tc_width, y = geo.y, an = 4,
+            w = tc_width, h = geo.h }
     lo = add_layout("tc_right")
     lo.geometry = geo
     lo.style = osc_styles.timecodes
@@ -1266,6 +1268,7 @@ layouts["topbar"] = function()
     local padY = 2
     local line1 = osc_geo.y - 24 - padY
     local line2 = osc_geo.y - 6 - padY
+    local tc_width = (state.tc_ms) and 100 or 70
 
     osc_param.areas = {}
 
@@ -1310,8 +1313,8 @@ layouts["topbar"] = function()
 
 
     -- Left timecode
-    geo = { x = geo.x + geo.w + padX + 100, y = geo.y, an = 6,
-            w = 100, h = geo.h }
+    geo = { x = geo.x + geo.w + padX + tc_width, y = geo.y, an = 6,
+            w = tc_width, h = geo.h }
     lo = add_layout("tc_left")
     lo.geometry = geo
     lo.style = osc_styles.timecodes
@@ -1333,8 +1336,8 @@ layouts["topbar"] = function()
 
 
     -- Right timecode
-    geo = { x = geo.x - geo.w - padX - 100, y = geo.y, an = 4,
-            w = 100, h = geo.h }
+    geo = { x = geo.x - geo.w - padX - tc_width, y = geo.y, an = 4,
+            w = tc_width, h = geo.h }
     lo = add_layout("tc_right")
     lo.geometry = geo
     lo.style = osc_styles.timecodes
@@ -1681,8 +1684,10 @@ function osc_init()
             return (mp.get_property_osd("playback-time"))
         end
     end
-    ne.eventresponder["mouse_btn0_up"] =
-        function () state.tc_ms = not state.tc_ms end
+    ne.eventresponder["mouse_btn0_up"] = function ()
+        state.tc_ms = not state.tc_ms
+        request_init()
+    end
 
     -- tc_right (total/remaining time)
     ne = new_element("tc_right", "button")
