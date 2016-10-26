@@ -22,6 +22,7 @@ struct filter_window {
     double params[2]; // User-defined custom filter parameters. Not used by
                       // all filters
     double blur; // Blur coefficient (sharpens or widens the filter)
+    double taper; // Taper coefficient (flattens the filter's center)
 };
 
 struct filter_kernel {
