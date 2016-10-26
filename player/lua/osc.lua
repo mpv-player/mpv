@@ -1129,9 +1129,20 @@ layouts["bottombar"] = function()
 
     local padX = 6
     local padY = 2
+    local buttonW = 18
+    local tcW = (state.tc_ms) and 100 or 70
+    local tsW = 60
+    local minW = (buttonW + padX)*3 + (tcW + padX)*4 + (tsW + padX)*2
+
+    if ((osc_param.display_aspect > 0) and (osc_param.playresx < minW)) then
+        osc_param.playresy = minW / osc_param.display_aspect
+        osc_param.playresx = osc_param.playresy * osc_param.display_aspect
+        osc_geo.y = osc_param.playresy - 36 - user_opts.barmargin
+        osc_geo.w = osc_param.playresx + 4
+    end
+
     local line1 = osc_geo.y + 6 + padY
     local line2 = osc_geo.y + 24 + padY
-    local tc_width = (state.tc_ms) and 100 or 70
 
     osc_param.areas = {}
 
@@ -1185,7 +1196,7 @@ layouts["bottombar"] = function()
 
     -- Playback control buttons
     geo = { x = osc_geo.x + padX, y = line2, an = 4,
-            w = 18, h = 24 - padY*2}
+            w = buttonW, h = 24 - padY*2}
     lo = add_layout("playpause")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsL
@@ -1200,10 +1211,9 @@ layouts["bottombar"] = function()
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsL
 
-
     -- Left timecode
-    geo = { x = geo.x + geo.w + padX + tc_width, y = geo.y, an = 6,
-            w = tc_width, h = geo.h }
+    geo = { x = geo.x + geo.w + padX + tcW, y = geo.y, an = 6,
+            w = tcW, h = geo.h }
     lo = add_layout("tc_left")
     lo.geometry = geo
     lo.style = osc_styles.timecodes
@@ -1213,7 +1223,7 @@ layouts["bottombar"] = function()
 
     -- Track selection buttons
     geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y, an = geo.an,
-            w = 60, h = geo.h }
+            w = tsW, h = geo.h }
     lo = add_layout("cy_sub")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsL
@@ -1225,8 +1235,8 @@ layouts["bottombar"] = function()
 
 
     -- Right timecode
-    geo = { x = geo.x - geo.w - padX - tc_width, y = geo.y, an = 4,
-            w = tc_width, h = geo.h }
+    geo = { x = geo.x - geo.w - padX - tcW, y = geo.y, an = 4,
+            w = tcW, h = geo.h }
     lo = add_layout("tc_right")
     lo.geometry = geo
     lo.style = osc_styles.timecodes
@@ -1266,6 +1276,18 @@ layouts["topbar"] = function()
 
     local padX = 6
     local padY = 2
+    local buttonW = 18
+    local tcW = (state.tc_ms) and 100 or 70
+    local tsW = 60
+    local minW = (buttonW + padX)*3 + (tcW + padX)*4 + (tsW + padX)*2
+
+    if ((osc_param.display_aspect > 0) and (osc_param.playresx < minW)) then
+        osc_param.playresy = minW / osc_param.display_aspect
+        osc_param.playresx = osc_param.playresy * osc_param.display_aspect
+        osc_geo.y = 36 + user_opts.barmargin
+        osc_geo.w = osc_param.playresx + 4
+    end
+
     local line1 = osc_geo.y - 24 - padY
     local line2 = osc_geo.y - 6 - padY
     local tc_width = (state.tc_ms) and 100 or 70
@@ -1296,7 +1318,7 @@ layouts["topbar"] = function()
 
     -- Playback control buttons
     geo = { x = osc_geo.x + padX, y = line1, an = 4,
-            w = 18, h = 24 - padY*2 }
+            w = buttonW, h = 24 - padY*2 }
     lo = add_layout("playpause")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsL
@@ -1314,7 +1336,7 @@ layouts["topbar"] = function()
 
     -- Left timecode
     geo = { x = geo.x + geo.w + padX + tc_width, y = geo.y, an = 6,
-            w = tc_width, h = geo.h }
+            w = tcW, h = geo.h }
     lo = add_layout("tc_left")
     lo.geometry = geo
     lo.style = osc_styles.timecodes
@@ -1324,7 +1346,7 @@ layouts["topbar"] = function()
 
     -- Track selection buttons
     geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y, an = geo.an,
-            w = 60, h = geo.h }
+            w = tsW, h = geo.h }
     lo = add_layout("cy_sub")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsL
@@ -1337,7 +1359,7 @@ layouts["topbar"] = function()
 
     -- Right timecode
     geo = { x = geo.x - geo.w - padX - tc_width, y = geo.y, an = 4,
-            w = tc_width, h = geo.h }
+            w = tcW, h = geo.h }
     lo = add_layout("tc_right")
     lo.geometry = geo
     lo.style = osc_styles.timecodes
