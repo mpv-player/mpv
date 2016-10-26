@@ -158,7 +158,7 @@ Configurable Options
       Default pre-0.21.0 was 'slider'.
 
 ``deadzonesize``
-    | Default: 1.0
+    | Default: 0.5
     | Size of the deadzone. The deadzone is an area that makes the mouse act
       like leaving the window. Movement there won't make the OSC show up and
       it will hide immediately if the mouse enters it. The deadzone starts
