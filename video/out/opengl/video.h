@@ -35,6 +35,7 @@ struct scaler_fun {
     char *name;
     float params[2];
     float blur;
+    float taper;
 };
 
 struct scaler_config {

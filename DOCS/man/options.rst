@@ -3874,12 +3874,19 @@ The following video options are currently all specific to ``--vo=opengl`` and
         never interpolate, thus behaving as if the regular nearest neighbour
         algorithm was used. Defaults to 0.0.
 
-``--scale-blur=<value>``
-    Kernel scaling factor (also known as a blur factor). Decreasing this makes
-    the result sharper, increasing it makes it blurrier (default 0). If set to
-    0, the kernel's preferred blur factor is used. Note that setting this too
-    low (eg. 0.5) leads to bad results. It's generally recommended to stick to
-    values between 0.8 and 1.2.
+``--scale-blur=<value>``, ``--scale-wblur=<value>``
+    Kernel/window scaling factor (also known as a blur factor). Decreasing this
+    makes the result sharper, increasing it makes it blurrier (default 0). If
+    set to 0, the kernel's preferred blur factor is used. Note that setting
+    this too low (eg. 0.5) leads to bad results. It's generally recommended to
+    stick to values between 0.8 and 1.2.
+
+``--scale-taper=<value>``, ``--scale-wtaper=<value>``
+    Kernel/window taper factor. Increasing this flattens the filter function.
+    Value range is 0 to 1. A value of 0 (the default) means no flattening, a
+    value of 1 makes the filter completely flat (equivalent to a box function).
+    Values in between mean that some portion will be flat and the actual filter
+    function will be squeezed into the space in between.
 
 ``--scale-radius=<value>``
     Set radius for tunable filters, must be a float number between 0.5 and

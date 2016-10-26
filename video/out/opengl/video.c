@@ -340,7 +340,10 @@ static int validate_window_opt(struct mp_log *log, const m_option_t *opt,
     OPT_FLOAT(n"-param1", scaler[i].kernel.params[0], 0),                  \
     OPT_FLOAT(n"-param2", scaler[i].kernel.params[1], 0),                  \
     OPT_FLOAT(n"-blur",   scaler[i].kernel.blur, 0),                       \
+    OPT_FLOATRANGE(n"-taper", scaler[i].kernel.taper, 0, 0.0, 1.0),        \
     OPT_FLOAT(n"-wparam", scaler[i].window.params[0], 0),                  \
+    OPT_FLOAT(n"-wblur",  scaler[i].window.blur, 0),                       \
+    OPT_FLOATRANGE(n"-wtaper", scaler[i].window.taper, 0, 0.0, 1.0),       \
     OPT_FLAG(n"-clamp",   scaler[i].clamp, 0),                             \
     OPT_FLOATRANGE(n"-radius",    scaler[i].radius, 0, 0.5, 16.0),         \
     OPT_FLOATRANGE(n"-antiring",  scaler[i].antiring, 0, 0.0, 1.0),        \
@@ -1357,7 +1360,8 @@ static bool scaler_fun_eq(struct scaler_fun a, struct scaler_fun b)
     return ((!a.name && !b.name) || strcmp(a.name, b.name) == 0) &&
            double_seq(a.params[0], b.params[0]) &&
            double_seq(a.params[1], b.params[1]) &&
-           a.blur == b.blur;
+           a.blur == b.blur &&
+           a.taper == b.taper;
 }
 
 static bool scaler_conf_eq(struct scaler_config a, struct scaler_config b)
@@ -1417,6 +1421,11 @@ static void reinit_scaler(struct gl_video *p, struct scaler *scaler,
         scaler->kernel->f.blur = conf->kernel.blur;
     if (conf->window.blur > 0.0)
         scaler->kernel->w.blur = conf->window.blur;
+
+    if (conf->kernel.taper > 0.0)
+        scaler->kernel->f.taper = conf->kernel.taper;
+    if (conf->window.taper > 0.0)
+        scaler->kernel->w.taper = conf->window.taper;
 
     if (scaler->kernel->f.resizable && conf->radius > 0.0)
         scaler->kernel->f.radius = conf->radius;
