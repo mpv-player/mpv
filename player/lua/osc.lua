@@ -1179,12 +1179,7 @@ layouts["bottombar"] = function()
     lo.geometry = geo
     lo.style = osc_styles.topButtons
 
-    -- Title
-    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an,
-            w = 1000, h = geo.h }
-    lo = add_layout("title")
-    lo.geometry = geo
-    lo.style = osc_styles.vidtitle
+    local t_l = geo.x + geo.w + padX
 
     -- Cache
     geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y,
@@ -1192,6 +1187,16 @@ layouts["bottombar"] = function()
     lo = add_layout("cache")
     lo.geometry = geo
     lo.style = osc_styles.vidtitle
+
+    local t_r = geo.x - geo.w - padX*2
+
+    -- Title
+    geo = { x = t_l, y = geo.y, an = 4,
+            w = t_r - t_l, h = geo.h }
+    lo = add_layout("title")
+    lo.geometry = geo
+    lo.style = osc_styles.vidtitle
+    lo.button.maxchars = math.floor(geo.w/4)
 
 
     -- Playback control buttons
@@ -1398,19 +1403,24 @@ layouts["topbar"] = function()
     lo.geometry = geo
     lo.style = osc_styles.topButtons
 
-    -- Title
-    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an,
-            w = 1000, h = geo.h }
-    lo = add_layout("title")
-    lo.geometry = geo
-    lo.style = osc_styles.vidtitle
+    local t_l = geo.x + geo.w + padX
 
     -- Cache
-    geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y, an = 6,
-            w = 100, h = geo.h }
+    geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y,
+            an = 6, w = 100, h = geo.h }
     lo = add_layout("cache")
     lo.geometry = geo
     lo.style = osc_styles.vidtitle
+
+    local t_r = geo.x - geo.w - padX*2
+
+    -- Title
+    geo = { x = t_l, y = geo.y, an = 4,
+            w = t_r - t_l, h = geo.h }
+    lo = add_layout("title")
+    lo.geometry = geo
+    lo.style = osc_styles.vidtitle
+    lo.button.maxchars = math.floor(geo.w/4)
 end
 
 -- Validate string type user options
