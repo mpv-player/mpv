@@ -1000,6 +1000,31 @@ static void demux_seek_lavf(demuxer_t *demuxer, double seek_pts, int flags)
     }
 }
 
+static double estimate_timings(AVFormatContext *ic)
+{
+    int i;
+    int64_t filesize, duration, duration1, max_duration;
+    AVStream *st;
+
+    max_duration = ic->duration;
+    filesize = ic->pb ? avio_size(ic->pb) : 0;
+    if (filesize && ic->bit_rate)
+    {
+        for (i = 0; i < ic->nb_streams; i++) {
+            st = ic->streams[i];
+            if (st->time_base.num <= INT64_MAX / ic->bit_rate) {
+                duration = av_rescale(8 * filesize, st->time_base.den,
+                                      ic->bit_rate *
+                                      (int64_t) st->time_base.num);
+                duration1 = av_rescale_q(duration, st->time_base,
+                                         AV_TIME_BASE_Q);
+                max_duration = FFMAX(max_duration, duration1);
+            }
+        }
+    }
+    return max_duration / AV_TIME_BASE;
+}
+
 static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 {
     lavf_priv_t *priv = demuxer->priv;
@@ -1009,7 +1034,7 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
         if (priv->avfc->duration == 0 || priv->avfc->duration == AV_NOPTS_VALUE)
             return DEMUXER_CTRL_DONTKNOW;
 
-        *((double *)arg) = (double)priv->avfc->duration / AV_TIME_BASE;
+        *((double *)arg) = estimate_timings(priv->avfc);
         return DEMUXER_CTRL_OK;
 
     case DEMUXER_CTRL_SWITCHED_TRACKS:
