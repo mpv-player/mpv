@@ -908,7 +908,7 @@ int handle_force_window(struct MPContext *mpctx, bool force)
         };
         if (vo_reconfig(vo, &p) < 0)
             goto err;
-        vo_control(vo, VOCTRL_RESTORE_SCREENSAVER, NULL);
+        update_screensaver_state(mpctx);
         vo_set_paused(vo, true);
         vo_redraw(vo);
         mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
