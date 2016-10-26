@@ -3857,7 +3857,25 @@ The following video options are currently all specific to ``--vo=opengl`` and
 
         mpv --scale=help
 
-``--scale-param1=<value>``, ``--scale-param2=<value>``
+``--cscale=<filter>``
+    As ``--scale``, but for interpolating chroma information. If the image is
+    not subsampled, this option is ignored entirely.
+
+``--dscale=<filter>``
+    Like ``--scale``, but apply these filters on downscaling instead. If this
+    option is unset, the filter implied by ``--scale`` will be applied.
+
+``--tscale=<filter>``
+    The filter used for interpolating the temporal axis (frames). This is only
+    used if ``--interpolation`` is enabled. The only valid choices for
+    ``--tscale`` are separable convolution filters (use ``--tscale=help`` to
+    get a list). The default is ``mitchell``.
+
+    Note that the maximum supported filter radius is currently 3, due to
+    limitations in the number of video textures that can be loaded
+    simultaneously.
+
+``--scale-param1=<value>``, ``--scale-param2=<value>``, ``--cscale-param1=<value>``, ``--cscale-param2=<value>``, ``--dscale-param1=<value>``, ``--dscale-param2=<value>``, ``--tscale-param1=<value>``, ``--tscale-param2=<value>``
     Set filter parameters. Ignored if the filter is not tunable. Currently,
     this affects the following filter parameters:
 
@@ -3874,21 +3892,28 @@ The following video options are currently all specific to ``--vo=opengl`` and
         never interpolate, thus behaving as if the regular nearest neighbour
         algorithm was used. Defaults to 0.0.
 
-``--scale-blur=<value>``, ``--scale-wblur=<value>``
+``--scale-blur=<value>``, ``--scale-wblur=<value>``, ``--cscale-blur=<value>``, ``--cscale-wblur=<value>``, ``--dscale-blur=<value>``, ``--dscale-wblur=<value>``, ``--tscale-blur=<value>``, ``--tscale-wblur=<value>``
     Kernel/window scaling factor (also known as a blur factor). Decreasing this
     makes the result sharper, increasing it makes it blurrier (default 0). If
     set to 0, the kernel's preferred blur factor is used. Note that setting
     this too low (eg. 0.5) leads to bad results. It's generally recommended to
     stick to values between 0.8 and 1.2.
 
-``--scale-taper=<value>``, ``--scale-wtaper=<value>``
+``--scale-clamp``, ``--cscale-clamp``, ``--dscale-clamp``, ``--tscale-clamp``
+    Clamp the filter kernel's value range to [0-1]. This is especially useful
+    for ``--tscale``, where it reduces excessive ringing artifacts in the
+    temporal domain (which typically manifest themselves as short flashes or
+    fringes of black, mostly around moving edges) in exchange for potentially
+    adding more blur.
+
+``--scale-taper=<value>``, ``--scale-wtaper=<value>``, ``--dscale-taper=<value>``, ``--dscale-wtaper=<value>``, ``--cscale-taper=<value>``, ``--cscale-wtaper=<value>``, ``--tscale-taper=<value>``, ``--tscale-wtaper=<value>``
     Kernel/window taper factor. Increasing this flattens the filter function.
     Value range is 0 to 1. A value of 0 (the default) means no flattening, a
     value of 1 makes the filter completely flat (equivalent to a box function).
     Values in between mean that some portion will be flat and the actual filter
     function will be squeezed into the space in between.
 
-``--scale-radius=<value>``
+``--scale-radius=<value>``, ``--cscale-radius=<value>``, ``--dscale-radius=<value>``, ``--tscale-radius=<value>``
     Set radius for tunable filters, must be a float number between 0.5 and
     16.0. Defaults to the filter's preferred radius if not specified. Doesn't
     work for every scaler and VO combination.
@@ -3897,7 +3922,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
     ratio, the radius that actually being used might be different (most likely
     being increased a bit).
 
-``--scale-antiring=<value>``
+``--scale-antiring=<value>``, ``--cscale-antiring=<value>``, ``--dscale-antiring=<value>``, ``--tscale-antiring=<value>``
     Set the antiringing strength. This tries to eliminate ringing, but can
     introduce other artifacts in the process. Must be a float number between
     0.0 and 1.0. The default value of 0.0 disables antiringing entirely.
@@ -3905,14 +3930,14 @@ The following video options are currently all specific to ``--vo=opengl`` and
     Note that this doesn't affect the special filters ``bilinear`` and
     ``bicubic_fast``.
 
-``--scale-window=<window>``
+``--scale-window=<window>``, ``--cscale-window=<window>``, ``--dscale-window=<window>``, ``--tscale-window=<window>``
     (Advanced users only) Choose a custom windowing function for the kernel.
     Defaults to the filter's preferred window if unset. Use
     ``--scale-window=help`` to get a list of supported windowing functions.
 
-``--scale-wparam=<window>``
+``--scale-wparam=<window>``, ``--cscale-wparam=<window>``, ``--cscale-wparam=<window>``, ``--tscale-wparam=<window>``
     (Advanced users only) Configure the parameter for the window function given
-    by ``--scale-window``. Ignored if the window is not tunable. Currently,
+    by ``--scale-window`` etc. Ignored if the window is not tunable. Currently,
     this affects the following window parameters:
 
     kaiser
@@ -3936,6 +3961,50 @@ The following video options are currently all specific to ``--vo=opengl`` and
     ``bilinear`` is used instead of whatever is set with ``--scale``. Bilinear
     will reproduce the source image perfectly if no scaling is performed.
     Enabled by default. Note that this option never affects ``--cscale``.
+
+``--linear-scaling``
+    Scale in linear light. It should only be used with a
+    ``--opengl-fbo-format`` that has at least 16 bit precision.
+
+``--correct-downscaling``
+    When using convolution based filters, extend the filter size when
+    downscaling. Increases quality, but reduces performance while downscaling.
+
+    This will perform slightly sub-optimally for anamorphic video (but still
+    better than without it) since it will extend the size to match only the
+    milder of the scale factors between the axes.
+
+``--interpolation``
+    Reduce stuttering caused by mismatches in the video fps and display refresh
+    rate (also known as judder).
+
+    .. warning:: This requires setting the ``--video-sync`` option to one
+                 of the ``display-`` modes, or it will be silently disabled.
+                 This was not required before mpv 0.14.0.
+
+    This essentially attempts to interpolate the missing frames by convoluting
+    the video along the temporal axis. The filter used can be controlled using
+    the ``--tscale`` setting.
+
+    Note that this relies on vsync to work, see ``--opengl-swapinterval`` for
+    more information.
+
+``--interpolation-threshold=<0..1,-1>``
+    Threshold below which frame ratio interpolation gets disabled (default:
+    ``0.0001``). This is calculated as ``abs(disphz/vfps - 1) < threshold``,
+    where ``vfps`` is the speed-adjusted video FPS, and ``disphz`` the
+    display refresh rate. (The speed-adjusted video FPS is roughly equal to
+    the normal video FPS, but with slowdown and speedup applied. This matters
+    if you use ``--video-sync=display-resample`` to make video run synchronously
+    to the display FPS, or if you change the ``speed`` property.)
+
+    The default is intended to almost always enable interpolation if the
+    playback rate is even slightly different from the display refresh rate. But
+    note that if you use e.g. ``--video-sync=display-vdrop``, small deviations
+    in the rate can disable interpolation and introduce a discontinuity every
+    other minute.
+
+    Set this to ``-1`` to disable this logic.
 
 ``--opengl-pbo``
     Enable use of PBOs. On some drivers this can be faster, especially if the
@@ -3989,21 +4058,6 @@ The following video options are currently all specific to ``--vo=opengl`` and
     debug OpenGL context (which does nothing with current graphics drivers
     as of this writing).
 
-``--interpolation``
-    Reduce stuttering caused by mismatches in the video fps and display refresh
-    rate (also known as judder).
-
-    .. warning:: This requires setting the ``--video-sync`` option to one
-                 of the ``display-`` modes, or it will be silently disabled.
-                 This was not required before mpv 0.14.0.
-
-    This essentially attempts to interpolate the missing frames by convoluting
-    the video along the temporal axis. The filter used can be controlled using
-    the ``--tscale`` setting.
-
-    Note that this relies on vsync to work, see ``--opengl-swapinterval`` for
-    more information.
-
 ``--opengl-swapinterval=<n>``
     Interval in displayed frames between two buffer swaps. 1 is equivalent to
     enable VSYNC, 0 to disable VSYNC. Defaults to 1 if not specified.
@@ -4014,65 +4068,6 @@ The following video options are currently all specific to ``--vo=opengl`` and
     syncs to the right one. Compositing window managers can also lead to bad
     results, as can missing or incorrect display FPS information (see
     ``--display-fps``).
-
-``--dscale=<filter>``
-    Like ``--scale``, but apply these filters on downscaling instead. If this
-    option is unset, the filter implied by ``--scale`` will be applied.
-
-``--cscale=<filter>``
-    As ``--scale``, but for interpolating chroma information. If the image is
-    not subsampled, this option is ignored entirely.
-
-``--tscale=<filter>``
-    The filter used for interpolating the temporal axis (frames). This is only
-    used if ``--interpolation`` is enabled. The only valid choices for
-    ``--tscale`` are separable convolution filters (use ``--tscale=help`` to
-    get a list). The default is ``mitchell``.
-
-    Note that the maximum supported filter radius is currently 3, due to
-    limitations in the number of video textures that can be loaded
-    simultaneously.
-
-``--tscale-clamp``
-    Clamp the ``--tscale`` filter kernel's value range to [0-1]. This reduces
-    excessive ringing artifacts in the temporal domain (which typically
-    manifest themselves as short flashes or fringes of black, mostly around
-    moving edges) in exchange for potentially adding more blur.
-
-``--interpolation-threshold=<0..1,-1>``
-    Threshold below which frame ratio interpolation gets disabled (default:
-    ``0.0001``). This is calculated as ``abs(disphz/vfps - 1) < threshold``,
-    where ``vfps`` is the speed-adjusted video FPS, and ``disphz`` the
-    display refresh rate. (The speed-adjusted video FPS is roughly equal to
-    the normal video FPS, but with slowdown and speedup applied. This matters
-    if you use ``--video-sync=display-resample`` to make video run synchronously
-    to the display FPS, or if you change the ``speed`` property.)
-
-    The default is intended to almost always enable interpolation if the
-    playback rate is even slightly different from the display refresh rate. But
-    note that if you use e.g. ``--video-sync=display-vdrop``, small deviations
-    in the rate can disable interpolation and introduce a discontinuity every
-    other minute.
-
-    Set this to ``-1`` to disable this logic.
-
-``--dscale-radius``, ``--cscale-radius``, ``--tscale-radius``, etc.
-    Set filter parameters for ``--dscale``, ``--cscale`` and ``--tscale``,
-    respectively.
-
-    See the corresponding options for ``--scale``.
-
-``--linear-scaling``
-    Scale in linear light. It should only be used with a
-    ``--opengl-fbo-format`` that has at least 16 bit precision.
-
-``--correct-downscaling``
-    When using convolution based filters, extend the filter size when
-    downscaling. Increases quality, but reduces performance while downscaling.
-
-    This will perform slightly sub-optimally for anamorphic video (but still
-    better than without it) since it will extend the size to match only the
-    milder of the scale factors between the axes.
 
 ``--opengl-shaders=<files>``
     Custom GLSL hooks. These are a flexible way to add custom fragment shaders,
