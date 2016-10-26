@@ -482,6 +482,9 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
 
     update_window_title(mpctx, true);
 
+    // Undo what the subtitle path does if mpctx->vo_chain is unset.
+    osd_set_force_video_pts(mpctx->osd, MP_NOPTS_VALUE);
+
     struct vo_chain *vo_c = talloc_zero(NULL, struct vo_chain);
     mpctx->vo_chain = vo_c;
     vo_c->log = mpctx->log;

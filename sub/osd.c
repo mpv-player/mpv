@@ -119,6 +119,7 @@ struct osd_state *osd_create(struct mpv_global *global)
         .opts = global->opts,
         .global = global,
         .log = mp_log_new(osd, global->log, "osd"),
+        .force_video_pts = MP_NOPTS_VALUE,
     };
     pthread_mutex_init(&osd->lock, NULL);
 
@@ -188,6 +189,21 @@ void osd_set_render_subs_in_filter(struct osd_state *osd, bool s)
     pthread_mutex_lock(&osd->lock);
     osd->render_subs_in_filter = s;
     pthread_mutex_unlock(&osd->lock);
+}
+
+void osd_set_force_video_pts(struct osd_state *osd, double video_pts)
+{
+    pthread_mutex_lock(&osd->lock);
+    osd->force_video_pts = video_pts;
+    pthread_mutex_unlock(&osd->lock);
+}
+
+double osd_get_force_video_pts(struct osd_state *osd)
+{
+    pthread_mutex_lock(&osd->lock);
+    double pts = osd->force_video_pts;
+    pthread_mutex_unlock(&osd->lock);
+    return pts;
 }
 
 void osd_set_progbar(struct osd_state *osd, struct osd_progbar_state *s)
@@ -287,6 +303,9 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
               void (*cb)(void *ctx, struct sub_bitmaps *imgs), void *cb_ctx)
 {
     pthread_mutex_lock(&osd->lock);
+
+    if (osd->force_video_pts != MP_NOPTS_VALUE)
+        video_pts = osd->force_video_pts;
 
     if (draw_flags & OSD_DRAW_SUB_FILTER)
         draw_flags |= OSD_DRAW_SUB_ONLY;
