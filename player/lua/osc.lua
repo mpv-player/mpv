@@ -12,8 +12,8 @@ local utils = require 'mp.utils'
 local user_opts = {
     showwindowed = true,        -- show OSC when windowed?
     showfullscreen = true,      -- show OSC when fullscreen?
-    scalewindowed = 1.5,        -- scaling of the controller when windowed
-    scalefullscreen = 1.5,      -- scaling of the controller when fullscreen
+    scalewindowed = 1,          -- scaling of the controller when windowed
+    scalefullscreen = 1,        -- scaling of the controller when fullscreen
     scaleforcedwindow = 2,      -- scaling when rendered on a forced window
     vidscale = true,            -- scale the controller with the video?
     valign = 0.8,               -- vertical alignment, -1 (top) to 1 (bottom)
@@ -59,15 +59,20 @@ local osc_param = { -- calculated by osc_init()
 local osc_styles = {
     bigButtons = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs50\\fnmpv-osd-symbols}",
     smallButtonsL = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs19\\fnmpv-osd-symbols}",
-    smallButtonsLlabel = "{\\fs20\\fn" .. mp.get_property("options/osd-font") .. "}",
+    smallButtonsLlabel = "{\\fscx105\\fscy105\\fn" .. mp.get_property("options/osd-font") .. "}",
     smallButtonsR = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs30\\fnmpv-osd-symbols}",
     topButtons = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs12\\fnmpv-osd-symbols}",
 
     elementDown = "{\\1c&H999999}",
     timecodes = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs20}",
     vidtitle = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs12\\q2}",
-    timePos = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&HFFFFFF\\3c&H000000\\1a&H00\\3a&H88\\fs20}",
     box = "{\\rDefault\\blur0\\bord1\\1c&H000000\\3c&HFFFFFF}",
+
+    topButtonsBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs18\\fnmpv-osd-symbols}",
+    smallButtonsBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs28\\fnmpv-osd-symbols}",
+    timecodesBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs27}",
+    timePosBar = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&HFFFFFF\\3c&H000000\\1a&H00\\3a&H88\\fs30}",
+    vidtitleBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs18\\q2}",
 }
 
 -- internal states, do not touch
@@ -1121,28 +1126,28 @@ end
 layouts["bottombar"] = function()
     local osc_geo = {
         x = -2,
-        y = osc_param.playresy - 36 - user_opts.barmargin,
+        y = osc_param.playresy - 54 - user_opts.barmargin,
         an = 7,
         w = osc_param.playresx + 4,
-        h = 38,
+        h = 56,
     }
 
-    local padX = 6
-    local padY = 2
-    local buttonW = 18
-    local tcW = (state.tc_ms) and 100 or 70
-    local tsW = 60
+    local padX = 9
+    local padY = 3
+    local buttonW = 27
+    local tcW = (state.tc_ms) and 150 or 105
+    local tsW = 90
     local minW = (buttonW + padX)*3 + (tcW + padX)*4 + (tsW + padX)*2
 
     if ((osc_param.display_aspect > 0) and (osc_param.playresx < minW)) then
         osc_param.playresy = minW / osc_param.display_aspect
         osc_param.playresx = osc_param.playresy * osc_param.display_aspect
-        osc_geo.y = osc_param.playresy - 36 - user_opts.barmargin
+        osc_geo.y = osc_param.playresy - 54 - user_opts.barmargin
         osc_geo.w = osc_param.playresx + 4
     end
 
-    local line1 = osc_geo.y + 6 + padY
-    local line2 = osc_geo.y + 24 + padY
+    local line1 = osc_geo.y + 9 + padY
+    local line2 = osc_geo.y + 36 + padY
 
     osc_param.areas = {}
 
@@ -1169,24 +1174,24 @@ layouts["bottombar"] = function()
 
     -- Playlist prev/next
     geo = { x = osc_geo.x + padX, y = line1,
-            an = 4, w = 12, h = 12 - padY }
+            an = 4, w = 18, h = 18 - padY }
     lo = add_layout("pl_prev")
     lo.geometry = geo
-    lo.style = osc_styles.topButtons
+    lo.style = osc_styles.topButtonsBar
 
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
     lo = add_layout("pl_next")
     lo.geometry = geo
-    lo.style = osc_styles.topButtons
+    lo.style = osc_styles.topButtonsBar
 
     local t_l = geo.x + geo.w + padX
 
     -- Cache
     geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y,
-            an = 6, w = 100, h = geo.h }
+            an = 6, w = 150, h = geo.h }
     lo = add_layout("cache")
     lo.geometry = geo
-    lo.style = osc_styles.vidtitle
+    lo.style = osc_styles.vidtitleBar
 
     local t_r = geo.x - geo.w - padX*2
 
@@ -1195,13 +1200,134 @@ layouts["bottombar"] = function()
             w = t_r - t_l, h = geo.h }
     lo = add_layout("title")
     lo.geometry = geo
-    lo.style = osc_styles.vidtitle
-    lo.button.maxchars = math.floor(geo.w/4)
+    lo.style = osc_styles.vidtitleBar
+    lo.button.maxchars = math.floor(geo.w/7)
 
 
     -- Playback control buttons
     geo = { x = osc_geo.x + padX, y = line2, an = 4,
-            w = buttonW, h = 24 - padY*2}
+            w = buttonW, h = 36 - padY*2}
+    lo = add_layout("playpause")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("ch_prev")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("ch_next")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    -- Left timecode
+    geo = { x = geo.x + geo.w + padX + tcW, y = geo.y, an = 6,
+            w = tcW, h = geo.h }
+    lo = add_layout("tc_left")
+    lo.geometry = geo
+    lo.style = osc_styles.timecodesBar
+
+    local sb_l = geo.x + padX
+
+
+    -- Track selection buttons
+    geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y, an = geo.an,
+            w = tsW, h = geo.h }
+    lo = add_layout("cy_sub")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+    geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
+    lo = add_layout("cy_audio")
+    lo.geometry = geo
+    lo.style = osc_styles.smallButtonsBar
+
+
+    -- Right timecode
+    geo = { x = geo.x - geo.w - padX - tcW, y = geo.y, an = 4,
+            w = tcW, h = geo.h }
+    lo = add_layout("tc_right")
+    lo.geometry = geo
+    lo.style = osc_styles.timecodesBar
+
+    local sb_r = geo.x - padX
+
+
+    -- Seekbar
+    geo = { x = sb_l, y = geo.y, an = geo.an,
+            w = math.max(0, sb_r - sb_l), h = geo.h }
+    new_element("bgbar1", "box")
+    lo = add_layout("bgbar1")
+
+    lo.geometry = geo
+    lo.layer = 15
+    lo.style = osc_styles.timecodesBar
+    lo.alpha[1] =
+        math.min(255, user_opts.boxalpha + (255 - user_opts.boxalpha)*0.8)
+
+    lo = add_layout("seekbar")
+    lo.geometry = geo
+    lo.style = osc_styles.timecodes
+    lo.slider.border = 0
+    lo.slider.tooltip_style = osc_styles.timePosBar
+    lo.slider.tooltip_an = 5
+    lo.slider.stype = user_opts["seekbarstyle"]
+end
+
+layouts["topbar"] = function()
+    local osc_geo = {
+        x = -2,
+        y = 54 + user_opts.barmargin,
+        an = 1,
+        w = osc_param.playresx + 4,
+        h = 56,
+    }
+
+    local padX = 9
+    local padY = 3
+    local buttonW = 27
+    local tcW = (state.tc_ms) and 150 or 105
+    local tsW = 90
+    local minW = (buttonW + padX)*3 + (tcW + padX)*4 + (tsW + padX)*2
+
+    if ((osc_param.display_aspect > 0) and (osc_param.playresx < minW)) then
+        osc_param.playresy = minW / osc_param.display_aspect
+        osc_param.playresx = osc_param.playresy * osc_param.display_aspect
+        osc_geo.y = 54 + user_opts.barmargin
+        osc_geo.w = osc_param.playresx + 4
+    end
+
+    local line1 = osc_geo.y - 36 - padY
+    local line2 = osc_geo.y - 9 - padY
+
+    osc_param.areas = {}
+
+    add_area("input", get_hitbox_coords(osc_geo.x, osc_geo.y, osc_geo.an,
+                                        osc_geo.w, osc_geo.h))
+
+    local sh_area_y0, sh_area_y1
+    sh_area_y0 = user_opts.barmargin
+    sh_area_y1 = (osc_geo.y + (osc_geo.h / 2)) +
+                 get_align(1 - (2*user_opts.deadzonesize),
+                 osc_param.playresy - (osc_geo.y + (osc_geo.h / 2)), 0, 0)
+    add_area("showhide", 0, sh_area_y0, osc_param.playresx, sh_area_y1)
+
+    local lo, geo
+
+    -- Background bar
+    new_element("bgbox", "box")
+    lo = add_layout("bgbox")
+
+    lo.geometry = osc_geo
+    lo.layer = 10
+    lo.style = osc_styles.box
+    lo.alpha[1] = user_opts.boxalpha
+
+
+    -- Playback control buttons
+    geo = { x = osc_geo.x + padX, y = line1, an = 4,
+            w = buttonW, h = 36 - padY*2 }
     lo = add_layout("playpause")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsL
@@ -1215,6 +1341,7 @@ layouts["bottombar"] = function()
     lo = add_layout("ch_next")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsL
+
 
     -- Left timecode
     geo = { x = geo.x + geo.w + padX + tcW, y = geo.y, an = 6,
@@ -1250,129 +1377,6 @@ layouts["bottombar"] = function()
 
 
     -- Seekbar
-    geo = { x = sb_l, y = geo.y, an = geo.an,
-            w = math.max(0, sb_r - sb_l), h = geo.h }
-    new_element("bgbar1", "box")
-    lo = add_layout("bgbar1")
-
-    lo.geometry = geo
-    lo.layer = 15
-    lo.style = osc_styles.timecodes
-    lo.alpha[1] =
-        math.min(255, user_opts.boxalpha + (255 - user_opts.boxalpha)*0.8)
-
-    lo = add_layout("seekbar")
-    lo.geometry = geo
-    lo.style = osc_styles.timecodes
-    lo.slider.border = 0
-    lo.slider.tooltip_style = osc_styles.timePos
-    lo.slider.tooltip_an = 5
-    lo.slider.stype = user_opts["seekbarstyle"]
-end
-
-layouts["topbar"] = function()
-    local osc_geo = {
-        x = -2,
-        y = 36 + user_opts.barmargin,
-        an = 1,
-        w = osc_param.playresx + 4,
-        h = 38,
-    }
-
-    local padX = 6
-    local padY = 2
-    local buttonW = 18
-    local tcW = (state.tc_ms) and 100 or 70
-    local tsW = 60
-    local minW = (buttonW + padX)*3 + (tcW + padX)*4 + (tsW + padX)*2
-
-    if ((osc_param.display_aspect > 0) and (osc_param.playresx < minW)) then
-        osc_param.playresy = minW / osc_param.display_aspect
-        osc_param.playresx = osc_param.playresy * osc_param.display_aspect
-        osc_geo.y = 36 + user_opts.barmargin
-        osc_geo.w = osc_param.playresx + 4
-    end
-
-    local line1 = osc_geo.y - 24 - padY
-    local line2 = osc_geo.y - 6 - padY
-    local tc_width = (state.tc_ms) and 100 or 70
-
-    osc_param.areas = {}
-
-    add_area("input", get_hitbox_coords(osc_geo.x, osc_geo.y, osc_geo.an,
-                                        osc_geo.w, osc_geo.h))
-
-    local sh_area_y0, sh_area_y1
-    sh_area_y0 = user_opts.barmargin
-    sh_area_y1 = (osc_geo.y + (osc_geo.h / 2)) +
-                 get_align(1 - (2*user_opts.deadzonesize),
-                 osc_param.playresy - (osc_geo.y + (osc_geo.h / 2)), 0, 0)
-    add_area("showhide", 0, sh_area_y0, osc_param.playresx, sh_area_y1)
-
-    local lo, geo
-
-    -- Background bar
-    new_element("bgbox", "box")
-    lo = add_layout("bgbox")
-
-    lo.geometry = osc_geo
-    lo.layer = 10
-    lo.style = osc_styles.box
-    lo.alpha[1] = user_opts.boxalpha
-
-
-    -- Playback control buttons
-    geo = { x = osc_geo.x + padX, y = line1, an = 4,
-            w = buttonW, h = 24 - padY*2 }
-    lo = add_layout("playpause")
-    lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
-
-    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
-    lo = add_layout("ch_prev")
-    lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
-
-    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
-    lo = add_layout("ch_next")
-    lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
-
-
-    -- Left timecode
-    geo = { x = geo.x + geo.w + padX + tc_width, y = geo.y, an = 6,
-            w = tcW, h = geo.h }
-    lo = add_layout("tc_left")
-    lo.geometry = geo
-    lo.style = osc_styles.timecodes
-
-    local sb_l = geo.x + padX
-
-
-    -- Track selection buttons
-    geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y, an = geo.an,
-            w = tsW, h = geo.h }
-    lo = add_layout("cy_sub")
-    lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
-
-    geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
-    lo = add_layout("cy_audio")
-    lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
-
-
-    -- Right timecode
-    geo = { x = geo.x - geo.w - padX - tc_width, y = geo.y, an = 4,
-            w = tcW, h = geo.h }
-    lo = add_layout("tc_right")
-    lo.geometry = geo
-    lo.style = osc_styles.timecodes
-
-    local sb_r = geo.x - padX
-
-
-    -- Seekbar
     geo = { x = sb_l, y = user_opts.barmargin, an = 7, w = math.max(0, sb_r - sb_l), h = geo.h }
     new_element("bgbar1", "box")
     lo = add_layout("bgbar1")
@@ -1387,13 +1391,13 @@ layouts["topbar"] = function()
     lo.geometry = geo
     lo.style = osc_styles.timecodes
     lo.slider.border = 0
-    lo.slider.tooltip_style = osc_styles.timePos
+    lo.slider.tooltip_style = osc_styles.timePosBar
     lo.slider.stype = user_opts["seekbarstyle"]
     lo.slider.tooltip_an = 5
 
 
     -- Playlist prev/next
-    geo = { x = osc_geo.x + padX, y = line2, an = 4, w = 12, h = 12 - padY }
+    geo = { x = osc_geo.x + padX, y = line2, an = 4, w = 18, h = 18 - padY }
     lo = add_layout("pl_prev")
     lo.geometry = geo
     lo.style = osc_styles.topButtons
@@ -1407,7 +1411,7 @@ layouts["topbar"] = function()
 
     -- Cache
     geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y,
-            an = 6, w = 100, h = geo.h }
+            an = 6, w = 150, h = geo.h }
     lo = add_layout("cache")
     lo.geometry = geo
     lo.style = osc_styles.vidtitle
@@ -1420,7 +1424,7 @@ layouts["topbar"] = function()
     lo = add_layout("title")
     lo.geometry = geo
     lo.style = osc_styles.vidtitle
-    lo.button.maxchars = math.floor(geo.w/4)
+    lo.button.maxchars = math.floor(geo.w/7)
 end
 
 -- Validate string type user options
