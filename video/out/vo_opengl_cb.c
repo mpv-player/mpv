@@ -371,8 +371,10 @@ static void flip_page(struct vo *vo)
     // Wait until frame was rendered
     while (p->ctx->next_frame) {
         if (pthread_cond_timedwait(&p->ctx->wakeup, &p->ctx->lock, &ts)) {
-            MP_VERBOSE(vo, "mpv_opengl_cb_draw() not being called or stuck.\n");
-            goto done;
+            if (p->ctx->next_frame) {
+                MP_VERBOSE(vo, "mpv_opengl_cb_draw() not being called or stuck.\n");
+                goto done;
+            }
         }
     }
 
