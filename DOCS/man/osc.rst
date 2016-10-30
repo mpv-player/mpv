@@ -151,30 +151,30 @@ Configurable Options
     Default: bottombar
 
     The layout for the OSC. Currently available are: box, slimbox,
-      bottombar and topbar. Default pre-0.21.0 was 'box'.
+    bottombar and topbar. Default pre-0.21.0 was 'box'.
 
 ``seekbarstyle``
     Default: bar
 
     Sets the style of the seekbar, slider (diamond marker) or bar (fill).
-      Default pre-0.21.0 was 'slider'.
+    Default pre-0.21.0 was 'slider'.
 
 ``deadzonesize``
     Default: 0.5
 
     Size of the deadzone. The deadzone is an area that makes the mouse act
-      like leaving the window. Movement there won't make the OSC show up and
-      it will hide immediately if the mouse enters it. The deadzone starts
-      at the window border opposite to the OSC and the size controls how much
-      of the window it will span. Values between 0.0 and 1.0, where 0 means the
-      OSC will always popup with mouse movement in the window, and 1 means the
-      OSC will only show up when the mouse hovers it. Default pre-0.21.0 was 0.
+    like leaving the window. Movement there won't make the OSC show up and
+    it will hide immediately if the mouse enters it. The deadzone starts
+    at the window border opposite to the OSC and the size controls how much
+    of the window it will span. Values between 0.0 and 1.0, where 0 means the
+    OSC will always popup with mouse movement in the window, and 1 means the
+    OSC will only show up when the mouse hovers it. Default pre-0.21.0 was 0.
 
 ``minmousemove``
     Default: 0
 
     Minimum amount of pixels the mouse has to move between ticks to make
-      the OSC show up. Default pre-0.21.0 was 3.
+    the OSC show up. Default pre-0.21.0 was 3.
 
 ``showwindowed``
     Default: yes
@@ -231,7 +231,7 @@ Configurable Options
     Default: 500
 
     Duration in ms until the OSC hides if no mouse movement, must not be
-      negative
+    negative
 
 ``fadeduration``
     Default: 200
