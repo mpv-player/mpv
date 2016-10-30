@@ -399,7 +399,8 @@ done:
 
     // Cleanup after the API user is not reacting, or is being unusually slow.
     if (p->ctx->next_frame) {
-        talloc_free(p->ctx->next_frame);
+        talloc_free(p->ctx->cur_frame);
+        p->ctx->cur_frame = p->ctx->next_frame;
         p->ctx->next_frame = NULL;
         p->ctx->present_count += 2;
         pthread_cond_signal(&p->ctx->wakeup);
