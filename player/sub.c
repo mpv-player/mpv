@@ -120,9 +120,9 @@ static bool update_subtitle(struct MPContext *mpctx, double video_pts,
             osd_set_force_video_pts(mpctx->osd, video_pts);
             osd_query_and_reset_want_redraw(mpctx->osd);
             vo_redraw(mpctx->video_out);
+            // Force an arbitrary minimum FPS
+            mp_set_timeout(mpctx, 0.1);
         }
-        // Force an arbitrary minimum FPS
-        mp_set_timeout(mpctx, 0.1);
     }
 
     return true;
