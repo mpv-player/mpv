@@ -101,8 +101,8 @@ void vo_calc_window_geometry(struct vo *vo, const struct mp_rect *screen,
     calc_monitor_aspect(opts, scr_w, scr_h, &out_geo->monitor_par, &d_w, &d_h);
 
     apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit, true, true);
-    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit_larger, false, true);
     apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit_smaller, true, false);
+    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit_larger, false, true);
 
     out_geo->win.x0 = (int)(scr_w - d_w) / 2;
     out_geo->win.y0 = (int)(scr_h - d_h) / 2;
