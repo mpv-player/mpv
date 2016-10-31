@@ -1095,7 +1095,7 @@ void run_playloop(struct MPContext *mpctx)
     handle_dummy_ticks(mpctx);
 
     update_osd_msg(mpctx);
-    if (!mpctx->vo_chain)
+    if (mpctx->video_status == STATUS_EOF)
         update_subtitles(mpctx, mpctx->playback_pts);
 
     handle_eof(mpctx);
