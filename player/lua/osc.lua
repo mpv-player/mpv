@@ -71,7 +71,7 @@ local osc_styles = {
     topButtonsBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs18\\fnmpv-osd-symbols}",
     smallButtonsBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs28\\fnmpv-osd-symbols}",
     timecodesBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs27}",
-    timePosBar = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&HFFFFFF\\3c&H000000\\1a&H00\\3a&H88\\fs30}",
+    timePosBar = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&HFFFFFF\\3c&H000000\\fs30}",
     vidtitleBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs18\\q2}",
 }
 
@@ -625,6 +625,18 @@ function render_elements(master_ass)
                     elem_ass:pos(tx, ty)
                     elem_ass:an(an)
                     elem_ass:append(slider_lo.tooltip_style)
+
+                    --alpha
+                    local ar = slider_lo.alpha
+                    if not (state.animation == nil) then
+                        ar = {}
+                        for ai, av in pairs(slider_lo.alpha) do
+                            ar[ai] = mult_alpha(av, state.animation)
+                        end
+                    end
+                    elem_ass:append(string.format("{\\1a&H%X&\\2a&H%X&\\3a&H%X&\\4a&H%X&}",
+                        ar[1], ar[2], ar[3], ar[4]))
+
                     elem_ass:append(tooltiplabel)
 
                 end
@@ -832,6 +844,7 @@ function add_layout(name)
                 adjust_tooltip = true,
                 tooltip_style = "",
                 tooltip_an = 2,
+                alpha = {[1] = 0, [2] = 255, [3] = 88, [4] = 255},
             }
         elseif (elements[name].type == "box") then
             elements[name].layout.box = {radius = 0}
