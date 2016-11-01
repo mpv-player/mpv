@@ -873,6 +873,7 @@ static void do_redraw(struct vo *vo)
     if (!frame)
         frame = &dummy;
     frame->redraw = !full_redraw; // unconditionally redraw if it was dropped
+    frame->repeat = false;
     frame->still = true;
     frame->pts = 0;
     frame->duration = -1;
