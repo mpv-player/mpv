@@ -104,6 +104,7 @@ struct texplane {
 struct video_image {
     struct texplane planes[4];
     struct mp_image *mpi;       // original input image
+    uint64_t id;                // unique ID identifying mpi contents
     bool hwdec_mapped;
 };
 
@@ -153,6 +154,7 @@ struct tex_hook {
 
 struct fbosurface {
     struct fbotex fbotex;
+    uint64_t id;
     double pts;
 };
 
@@ -517,7 +519,8 @@ static void uninit_scaler(struct gl_video *p, struct scaler *scaler);
 static void check_gl_features(struct gl_video *p);
 static bool init_format(struct gl_video *p, int fmt, bool test_only);
 static void init_image_desc(struct gl_video *p, int fmt);
-static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi);
+static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi,
+                                  uint64_t id);
 static const char *handle_scaler_opt(const char *name, bool tscale);
 static void reinit_from_options(struct gl_video *p);
 static void get_scale_factors(struct gl_video *p, bool transpose_rot, double xy[2]);
@@ -565,8 +568,10 @@ void gl_video_set_debug(struct gl_video *p, bool enable)
 
 static void gl_video_reset_surfaces(struct gl_video *p)
 {
-    for (int i = 0; i < FBOSURFACES_MAX; i++)
+    for (int i = 0; i < FBOSURFACES_MAX; i++) {
+        p->surfaces[i].id = 0;
         p->surfaces[i].pts = MP_NOPTS_VALUE;
+    }
     p->surface_idx = 0;
     p->surface_now = 0;
     p->frames_drawn = 0;
@@ -960,6 +965,7 @@ static void unref_current_image(struct gl_video *p)
 {
     unmap_current_image(p);
     mp_image_unrefp(&p->image.mpi);
+    p->image.id = 0;
 }
 
 static void uninit_video(struct gl_video *p)
@@ -2552,22 +2558,23 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
 
     // First of all, figure out if we have a frame available at all, and draw
     // it manually + reset the queue if not
-    if (p->surfaces[p->surface_now].pts == MP_NOPTS_VALUE) {
-        if (!gl_video_upload_image(p, t->current))
+    if (p->surfaces[p->surface_now].id == 0) {
+        if (!gl_video_upload_image(p, t->current, t->frame_id))
             return;
         pass_render_frame(p);
         finish_pass_fbo(p, &p->surfaces[p->surface_now].fbotex,
                         vp_w, vp_h, FBOTEX_FUZZY);
+        p->surfaces[p->surface_now].id = p->image.id;
         p->surfaces[p->surface_now].pts = p->image.mpi->pts;
         p->surface_idx = p->surface_now;
     }
 
     // Find the right frame for this instant
-    if (t->current && t->current->pts != MP_NOPTS_VALUE) {
+    if (t->current) {
         int next = fbosurface_wrap(p->surface_now + 1);
-        while (p->surfaces[next].pts != MP_NOPTS_VALUE &&
-               p->surfaces[next].pts > p->surfaces[p->surface_now].pts &&
-               p->surfaces[p->surface_now].pts < t->current->pts)
+        while (p->surfaces[next].id &&
+               p->surfaces[next].id > p->surfaces[p->surface_now].id &&
+               p->surfaces[p->surface_now].id < t->frame_id)
         {
             p->surface_now = next;
             next = fbosurface_wrap(next + 1);
@@ -2609,16 +2616,17 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
             break;
 
         struct mp_image *f = t->frames[i];
-        if (!mp_image_params_equal(&f->params, &p->real_image_params) ||
-            f->pts == MP_NOPTS_VALUE)
+        uint64_t f_id = t->frame_id + i;
+        if (!mp_image_params_equal(&f->params, &p->real_image_params))
             continue;
 
-        if (f->pts > p->surfaces[p->surface_idx].pts) {
-            if (!gl_video_upload_image(p, f))
+        if (f_id > p->surfaces[p->surface_idx].id) {
+            if (!gl_video_upload_image(p, f, f_id))
                 return;
             pass_render_frame(p);
             finish_pass_fbo(p, &p->surfaces[surface_dst].fbotex,
                             vp_w, vp_h, FBOTEX_FUZZY);
+            p->surfaces[surface_dst].id = f_id;
             p->surfaces[surface_dst].pts = f->pts;
             p->surface_idx = surface_dst;
             surface_dst = fbosurface_wrap(surface_dst + 1);
@@ -2633,11 +2641,9 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
     bool valid = true;
     for (int i = surface_bse, ii; valid && i != surface_end; i = ii) {
         ii = fbosurface_wrap(i + 1);
-        if (p->surfaces[i].pts == MP_NOPTS_VALUE ||
-            p->surfaces[ii].pts == MP_NOPTS_VALUE)
-        {
+        if (p->surfaces[i].id == 0 || p->surfaces[ii].id == 0) {
             valid = false;
-        } else if (p->surfaces[ii].pts < p->surfaces[i].pts) {
+        } else if (p->surfaces[ii].id < p->surfaces[i].id) {
             valid = false;
             MP_DBG(p, "interpolation queue underrun\n");
         }
@@ -2658,8 +2664,8 @@ static void gl_video_interpolate_frame(struct gl_video *p, struct vo_frame *t,
         // (which requires some extra checking to make sure it's valid)
         if (mix < 0.0) {
             int prev = fbosurface_wrap(surface_bse - 1);
-            if (p->surfaces[prev].pts != MP_NOPTS_VALUE &&
-                p->surfaces[prev].pts < p->surfaces[surface_bse].pts)
+            if (p->surfaces[prev].id != 0 &&
+                p->surfaces[prev].id < p->surfaces[surface_bse].id)
             {
                 mix += 1.0;
                 surface_bse = prev;
@@ -2738,7 +2744,6 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
     gl->BindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     bool has_frame = !!frame->current;
-    bool is_new = has_frame && !frame->redraw && !frame->repeat;
 
     if (!has_frame || p->dst_rect.x0 > 0 || p->dst_rect.y0 > 0 ||
         p->dst_rect.x1 < p->vp_w || p->dst_rect.y1 < abs(p->vp_h))
@@ -2760,7 +2765,7 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
             gl->Disable(GL_SCISSOR_TEST);
         }
 
-        if (is_new || !frame->current)
+        if (frame->frame_id != p->image.id || !frame->current)
             p->hwdec->driver->overlay_frame(p->hwdec, frame->current);
 
         if (frame->current)
@@ -2784,10 +2789,16 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
         if (interpolate) {
             gl_video_interpolate_frame(p, frame, fbo);
         } else {
+            bool is_new = frame->frame_id != p->image.id;
+
+            // Redrawing a frame might update subtitles.
+            if (!frame->repeat && p->opts.blend_subs)
+                is_new = false;
+
             if (is_new || !p->output_fbo_valid) {
                 p->output_fbo_valid = false;
 
-                if (!gl_video_upload_image(p, frame->current))
+                if (!gl_video_upload_image(p, frame->current, frame->frame_id))
                     goto done;
                 pass_render_frame(p);
 
@@ -2949,10 +2960,14 @@ static void reinterleave_vdpau(struct gl_video *p, struct gl_hwdec_frame *frame)
 }
 
 // Returns false on failure.
-static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
+static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi,
+                                  uint64_t id)
 {
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
+
+    if (vimg->id == id)
+        return true;
 
     unref_current_image(p);
 
@@ -2961,6 +2976,7 @@ static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         goto error;
 
     vimg->mpi = mpi;
+    vimg->id = id;
     p->osd_pts = mpi->pts;
     p->frames_uploaded++;
 
