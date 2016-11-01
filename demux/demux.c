@@ -681,8 +681,7 @@ static void ds_get_packets(struct demux_stream *ds)
     struct demux_internal *in = ds->in;
     MP_DBG(in, "reading packet for %s\n", t);
     in->eof = false; // force retry
-    ds->eof = false;
-    while (ds->selected && !ds->head && !ds->eof) {
+    while (ds->selected && !ds->head) {
         ds->active = true;
         // Note: the following code marks EOF if it can't continue
         if (in->threading) {
@@ -692,6 +691,8 @@ static void ds_get_packets(struct demux_stream *ds)
         } else {
             read_packet(in);
         }
+        if (ds->eof)
+            break;
     }
 }
 
@@ -1662,7 +1663,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         int num_packets = 0;
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
-            if (ds->active) {
+            if (ds->active && !(!ds->head && ds->eof)) {
                 r->underrun |= !ds->head && !ds->eof;
                 r->ts_range[0] = MP_PTS_MAX(r->ts_range[0], ds->base_ts);
                 r->ts_range[1] = MP_PTS_MIN(r->ts_range[1], ds->last_ts);
