@@ -2801,8 +2801,8 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
             bool is_new = frame->frame_id != p->image.id;
 
             // Redrawing a frame might update subtitles.
-            if (!frame->repeat && p->opts.blend_subs)
-                is_new = false;
+            if (frame->repeat && p->opts.blend_subs)
+                is_new = true;
 
             if (is_new || !p->output_fbo_valid) {
                 p->output_fbo_valid = false;
@@ -2974,9 +2974,6 @@ static bool gl_video_upload_image(struct gl_video *p, struct mp_image *mpi,
 {
     GL *gl = p->gl;
     struct video_image *vimg = &p->image;
-
-    if (vimg->id == id)
-        return true;
 
     unref_current_image(p);
 
