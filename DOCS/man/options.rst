@@ -1508,7 +1508,7 @@ Subtitles
 ``--sub-scale-with-window=<yes|no>``
     Make the subtitle font size relative to the window, instead of the video.
     This is useful if you always want the same font size, even if the video
-    doesn't covert the window fully, e.g. because screen aspect and window
+    doesn't cover the window fully, e.g. because screen aspect and window
     aspect mismatch (and the player adds black bars).
 
     Default: yes.
