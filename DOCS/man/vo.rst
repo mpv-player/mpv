@@ -513,7 +513,7 @@ Available video output drivers are:
     Video output driver using Kernel Mode Setting / Direct Rendering Manager.
     Should be used when one doesn't want to install full-blown graphical
     environment (e.g. no X). Does not support hardware acceleration (if you
-    need this, check the ``drm-egl`` backend for ``opengl`` VO).
+    need this, check the ``drm`` backend for ``opengl`` VO).
 
     The following global options are supported by this video output:
 
