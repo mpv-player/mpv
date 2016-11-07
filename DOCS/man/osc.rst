@@ -156,7 +156,8 @@ Configurable Options
 ``seekbarstyle``
     Default: bar
 
-    Sets the style of the seekbar, slider (diamond marker) or bar (fill).
+    Sets the style of the seekbar, slider (diamond marker), knob (circle
+    marker with guide), or bar (fill).
     Default pre-0.21.0 was 'slider'.
 
 ``deadzonesize``
