@@ -1093,7 +1093,9 @@ layouts["slimbox"] = function ()
     lo.style = osc_styles.box
     lo.alpha[1] = user_opts.boxalpha
     lo.alpha[3] = 0
-    lo.box.radius = osc_geo.r
+    if not (user_opts["seekbarstyle"] == "bar") then
+        lo.box.radius = osc_geo.r
+    end
 
 
     lo = add_layout("seekbar")
