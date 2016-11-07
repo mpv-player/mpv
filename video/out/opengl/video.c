@@ -2802,8 +2802,8 @@ void gl_video_render_frame(struct gl_video *p, struct vo_frame *frame, int fbo)
             bool is_new = frame->frame_id != p->image.id;
 
             // Redrawing a frame might update subtitles.
-            if (!frame->repeat && p->opts.blend_subs)
-                is_new = false;
+            if (frame->still && p->opts.blend_subs)
+                is_new = true;
 
             if (is_new || !p->output_fbo_valid) {
                 p->output_fbo_valid = false;
