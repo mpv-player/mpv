@@ -794,8 +794,13 @@ static int init_device(struct ao *ao, int mode)
     if (num_channels != ao->channels.num) {
         int req = ao->channels.num;
         mp_chmap_from_channels(&ao->channels, MPMIN(2, num_channels));
+        mp_chmap_fill_na(&ao->channels, num_channels);
         MP_ERR(ao, "Asked for %d channels, got %d - fallback to %s.\n", req,
                num_channels, mp_chmap_to_str(&ao->channels));
+        if (num_channels != ao->channels.num) {
+            MP_FATAL(ao, "mismatching channel counts.\n");
+            goto alsa_error;
+        }
     }
 
     err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &p->buffersize);
