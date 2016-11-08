@@ -513,9 +513,15 @@ char *mp_image_params_to_str_buf(char *b, size_t bs,
         mp_snprintf_cat(b, bs, " %s", mp_imgfmt_to_name(p->imgfmt));
         if (p->hw_subfmt)
             mp_snprintf_cat(b, bs, "[%s]", mp_imgfmt_to_name(p->hw_subfmt));
-        mp_snprintf_cat(b, bs, " %s/%s",
+        mp_snprintf_cat(b, bs, " %s/%s/%s/%s",
                         m_opt_choice_str(mp_csp_names, p->color.space),
+                        m_opt_choice_str(mp_csp_prim_names, p->color.primaries),
+                        m_opt_choice_str(mp_csp_trc_names, p->color.gamma),
                         m_opt_choice_str(mp_csp_levels_names, p->color.levels));
+        if (p->color.nom_peak)
+            mp_snprintf_cat(b, bs, " NP=%f", p->color.nom_peak);
+        if (p->color.sig_peak)
+            mp_snprintf_cat(b, bs, " SP=%f", p->color.sig_peak);
         mp_snprintf_cat(b, bs, " CL=%s",
                         m_opt_choice_str(mp_chroma_names, p->chroma_location));
         if (p->rotate)
