@@ -376,12 +376,18 @@ static bool query_chmaps(struct ao *ao, struct mp_chmap *chmap)
         struct mp_chmap entry;
         if (mp_chmap_from_alsa(&entry, &maps[i]->map)) {
             struct mp_chmap reorder = entry;
-            if (maps[i]->type == SND_CHMAP_TYPE_VAR)
-                mp_chmap_reorder_norm(&reorder);
-            MP_DBG(ao, "Got supported channel map: %s (type %s) -> %s -> %s\n",
-                   aname, snd_pcm_chmap_type_name(maps[i]->type),
-                   mp_chmap_to_str(&entry), mp_chmap_to_str(&reorder));
-            mp_chmap_sel_add_map(&chmap_sel, &reorder);
+            mp_chmap_reorder_norm(&reorder);
+
+            MP_DBG(ao, "got ALSA chmap: %s (%s) -> %s", aname,
+                   snd_pcm_chmap_type_name(maps[i]->type),
+                   mp_chmap_to_str(&entry));
+            if (!mp_chmap_equals(&entry, &reorder))
+                MP_DBG(ao, " -> %s", mp_chmap_to_str(&reorder));
+            MP_DBG(ao, "\n");
+
+            struct mp_chmap final =
+                maps[i]->type == SND_CHMAP_TYPE_VAR ? reorder : entry;
+            mp_chmap_sel_add_map(&chmap_sel, &final);
         } else {
             MP_VERBOSE(ao, "skipping unknown ALSA channel map: %s\n", aname);
         }
