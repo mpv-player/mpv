@@ -29,7 +29,6 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#define HAVE_FNMATCH HAVE_POSIX
 #if HAVE_FNMATCH
 #include <fnmatch.h>
 #endif
