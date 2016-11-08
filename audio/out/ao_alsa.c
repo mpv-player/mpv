@@ -488,10 +488,14 @@ static int set_chmap(struct ao *ao, struct mp_chmap *dev_chmap, int num_channels
         } else if (chmap.num != num_channels) {
             MP_WARN(ao, "ALSA channel map conflicts with channel count!\n");
         } else {
-            MP_VERBOSE(ao, "using the ALSA channel map.\n");
-            if (mp_chmap_equals(&chmap, &ao->channels))
+            if (mp_chmap_equals(&chmap, &ao->channels)) {
                 MP_VERBOSE(ao, "which is what we requested.\n");
-            ao->channels = chmap;
+            } else if (!mp_chmap_is_valid(dev_chmap)) {
+                MP_VERBOSE(ao, "ignoring the ALSA channel map.\n");
+            } else {
+                MP_VERBOSE(ao, "using the ALSA channel map.\n");
+                ao->channels = chmap;
+            }
         }
 
         free(alsa_chmap);
