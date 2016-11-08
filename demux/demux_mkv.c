@@ -1436,6 +1436,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v->par_h = p.p_h;
 
     sh_v->stereo_mode = track->stereo_mode;
+    sh_v->color = track->color;
 
 done:
     demux_add_sh_stream(demuxer, sh);

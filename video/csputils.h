@@ -125,6 +125,9 @@ struct mp_colorspace {
     float sig_peak; // signal peak, highest value that occurs in the source
 };
 
+// Replaces unknown values in the first struct by those of the second struct
+void mp_colorspace_merge(struct mp_colorspace *orig, struct mp_colorspace *new);
+
 struct mp_csp_params {
     struct mp_colorspace color; // input colorspace
     enum mp_csp_levels levels_out; // output device
