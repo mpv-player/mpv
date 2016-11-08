@@ -724,18 +724,27 @@ static int init_device(struct ao *ao, int mode)
     CHECK_ALSA_ERROR("Unable to set format");
     dump_hw_params(ao, MSGL_DEBUG, "HW params after format:\n", alsa_hwparams);
 
-    struct mp_chmap dev_chmap = ao->channels;
-    if (af_fmt_is_spdif(ao->format) || p->opts->ignore_chmap) {
-        dev_chmap.num = 0; // disable chmap API
-    } else if (dev_chmap.num == 1 && dev_chmap.speaker[0] == MP_SPEAKER_ID_FC) {
-        // As yet another ALSA API inconsistency, mono is not reported correctly.
-        dev_chmap.num = 0;
-    } else if (query_chmaps(ao, &dev_chmap)) {
-        ao->channels = dev_chmap;
-    } else {
-        // Assume only stereo and mono are supported.
-        mp_chmap_from_channels(&ao->channels, MPMIN(2, dev_chmap.num));
-        dev_chmap.num = 0;
+    // Stereo, or mono if input is 1 channel.
+    struct mp_chmap reduced;
+    mp_chmap_from_channels(&reduced, MPMIN(2, ao->channels.num));
+
+    struct mp_chmap dev_chmap = {0};
+    if (!af_fmt_is_spdif(ao->format) && !p->opts->ignore_chmap &&
+        !mp_chmap_equals(&ao->channels, &reduced))
+    {
+        struct mp_chmap res = ao->channels;
+        if (query_chmaps(ao, &res))
+            dev_chmap = res;
+
+        // Whatever it is, we dumb it down to mono or stereo. Some drivers may
+        // return things like bl-br, but the user (probably) still wants stereo.
+        // This also handles the failure case (dev_chmap.num==0).
+        if (dev_chmap.num <= 2) {
+            dev_chmap.num = 0;
+            ao->channels = reduced;
+        } else if (dev_chmap.num) {
+            ao->channels = dev_chmap;
+        }
     }
 
     int num_channels = ao->channels.num;
