@@ -245,6 +245,7 @@ static void fix_image_params(struct dec_video *d_video,
     p.stereo_out = opts->video_stereo_mode;
 
     // Detect colorspace from resolution.
+    mp_colorspace_merge(&p.color, &c->color);
     mp_image_params_guess_csp(&p);
 
     d_video->last_format = *params;
