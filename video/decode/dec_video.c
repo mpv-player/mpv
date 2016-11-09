@@ -64,6 +64,7 @@ void video_reset(struct dec_video *d_video)
     d_video->decoded_pts = MP_NOPTS_VALUE;
     d_video->codec_pts = MP_NOPTS_VALUE;
     d_video->codec_dts = MP_NOPTS_VALUE;
+    d_video->has_broken_decoded_pts = 0;
     d_video->last_format = d_video->fixed_format = (struct mp_image_params){0};
     d_video->dropped_frames = 0;
     d_video->current_state = DATA_AGAIN;
@@ -317,8 +318,14 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
         pts = dts;
 
     if (!opts->correct_pts || pts == MP_NOPTS_VALUE) {
-        if (opts->correct_pts && !d_video->header->missing_timestamps)
-            MP_WARN(d_video, "No video PTS! Making something up.\n");
+        if (opts->correct_pts && !d_video->header->missing_timestamps) {
+            if (d_video->has_broken_decoded_pts <= 1) {
+                MP_WARN(d_video, "No video PTS! Making something up.\n");
+                if (d_video->has_broken_decoded_pts == 1)
+                    MP_WARN(d_video, "Ignoring further missing PTS warnings.\n");
+                d_video->has_broken_decoded_pts++;
+            }
+        }
 
         double frame_time = 1.0f / (d_video->fps > 0 ? d_video->fps : 25);
         double base = d_video->first_packet_pdts;

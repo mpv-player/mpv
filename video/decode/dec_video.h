@@ -62,6 +62,8 @@ struct dec_video {
     // There was at least one packet with non-sense timestamps.
     int has_broken_packet_pts; // <0: uninitialized, 0: no problems, 1: broken
 
+    int has_broken_decoded_pts;
+
     // Final PTS of previously decoded image
     double decoded_pts;
 
