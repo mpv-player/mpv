@@ -198,6 +198,12 @@ void sub_preload(struct dec_sub *sub)
     pthread_mutex_unlock(&sub->lock);
 }
 
+static bool is_new_segment(struct dec_sub *sub, struct demux_packet *p)
+{
+    return p->new_segment &&
+        (p->start != sub->start || p->end != sub->end || p->codec != sub->codec);
+}
+
 // Read packets from the demuxer stream passed to sub_create(). Return true if
 // enough packets were read, false if the player should wait until the demuxer
 // signals new packets available (and then should retry).
@@ -236,7 +242,7 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
 
         sub->last_pkt_pts = pkt->pts;
 
-        if (pkt->new_segment) {
+        if (is_new_segment(sub, pkt)) {
             sub->new_segment = pkt;
             // Note that this can be delayed to a much later point in time.
             update_segment(sub);
@@ -294,7 +300,6 @@ void sub_reset(struct dec_sub *sub)
     if (sub->sd->driver->reset)
         sub->sd->driver->reset(sub->sd);
     sub->last_pkt_pts = MP_NOPTS_VALUE;
-    sub->start = sub->end = MP_NOPTS_VALUE;
     sub->last_vo_pts = MP_NOPTS_VALUE;
     talloc_free(sub->new_segment);
     sub->new_segment = NULL;
