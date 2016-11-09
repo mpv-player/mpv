@@ -459,12 +459,15 @@ void video_work(struct dec_video *d_video)
         struct demux_packet *new_segment = d_video->new_segment;
         d_video->new_segment = NULL;
 
-        // Could avoid decoder reinit; would still need flush.
-        d_video->codec = new_segment->codec;
-        if (d_video->vd_driver)
-            d_video->vd_driver->uninit(d_video);
-        d_video->vd_driver = NULL;
-        video_init_best_codec(d_video);
+        if (d_video->codec == new_segment->codec) {
+            video_reset(d_video);
+        } else {
+            d_video->codec = new_segment->codec;
+            if (d_video->vd_driver)
+                d_video->vd_driver->uninit(d_video);
+            d_video->vd_driver = NULL;
+            video_init_best_codec(d_video);
+        }
 
         d_video->start = new_segment->start;
         d_video->end = new_segment->end;
