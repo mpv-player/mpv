@@ -86,7 +86,7 @@ static void uninit(struct lavc_ctx *ctx)
         XCloseDisplay(p->display);
     }
 
-    talloc_free(p);
+    TA_FREEP(&ctx->hwdec_priv);
 
     if (ctx->avctx)
         av_freep(&ctx->avctx->hwaccel_context);
