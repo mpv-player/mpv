@@ -2013,8 +2013,6 @@ static void pass_convert_yuv(struct gl_video *p)
     p->components = 3;
     if (!p->has_alpha || p->opts.alpha_mode == ALPHA_NO) {
         GLSL(color.a = 1.0;)
-    } else if (p->opts.alpha_mode == ALPHA_BLEND) {
-        GLSL(color = vec4(color.rgb * color.a, 1.0);)
     } else { // alpha present in image
         p->components = 4;
         GLSL(color = vec4(color.rgb * color.a, color.a);)
@@ -2537,12 +2535,20 @@ static void pass_draw_to_screen(struct gl_video *p, int fbo)
 
     pass_colormanage(p, p->image_params.color, false);
 
-    // Draw checkerboard pattern to indicate transparency
-    if (p->has_alpha && p->opts.alpha_mode == ALPHA_BLEND_TILES) {
-        GLSLF("// transparency checkerboard\n");
-        GLSL(bvec2 tile = lessThan(fract(gl_FragCoord.xy / 32.0), vec2(0.5));)
-        GLSL(vec3 background = vec3(tile.x == tile.y ? 1.0 : 0.75);)
-        GLSL(color.rgb = mix(background, color.rgb, color.a);)
+    if (p->has_alpha){
+        if (p->opts.alpha_mode == ALPHA_BLEND_TILES) {
+            // Draw checkerboard pattern to indicate transparency
+            GLSLF("// transparency checkerboard\n");
+            GLSL(bvec2 tile = lessThan(fract(gl_FragCoord.xy / 32.0), vec2(0.5));)
+            GLSL(vec3 background = vec3(tile.x == tile.y ? 1.0 : 0.75);)
+            GLSL(color.rgb = mix(background, color.rgb, color.a);)
+        } else if (p->opts.alpha_mode == ALPHA_BLEND) {
+            // Blend into background color (usually black)
+            struct m_color c = p->opts.background;
+            GLSLF("vec4 background = vec4(%f, %f, %f, %f);\n",
+                  c.r / 255.0, c.g / 255.0, c.b / 255.0, c.a / 255.0);
+            GLSL(color = mix(background, vec4(color.rgb, 1.0), color.a);)
+        }
     }
 
     pass_opt_hook_point(p, "OUTPUT", NULL);

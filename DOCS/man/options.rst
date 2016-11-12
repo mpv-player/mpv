@@ -4581,7 +4581,8 @@ The following video options are currently all specific to ``--vo=opengl`` and
     blend-tiles
         Blend the frame against a 16x16 gray/white tiles background (default).
     blend
-        Blend the frame against a black background.
+        Blend the frame against the background color (``--background``, normally
+        black).
     yes
         Try to create a framebuffer with alpha component. This only makes sense
         if the video contains alpha information (which is extremely rare). May
