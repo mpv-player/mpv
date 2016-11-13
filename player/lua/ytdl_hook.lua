@@ -84,7 +84,7 @@ local function extract_chapters(data, video_length)
             table.insert(ret, {time = time, title = line})
         end
     end
-
+    table.sort(ret, function(a, b) return a.time < b.time end)
     return ret
 end
 
