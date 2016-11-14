@@ -599,6 +599,8 @@ void ao_device_list_add(struct ao_device_list *list, struct ao *ao,
 {
     struct ao_device_desc c = *e;
     const char *dname = ao->driver->name;
+    if ((!c.desc || !c.desc[0]) && c.name)
+        c.desc = c.name;
     c.name = c.name[0] ? talloc_asprintf(list, "%s/%s", dname, c.name)
                        : talloc_strdup(list, dname);
     c.desc = talloc_strdup(list, c.desc);

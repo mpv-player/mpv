@@ -1912,8 +1912,9 @@ Property list
 
     The ``name`` is what is to be passed to the ``--audio-device`` option (and
     often a rather cryptic audio API-specific ID), while ``description`` is
-    human readable free form text. The description is an empty string if none
-    was received.
+    human readable free form text. The description is set to the device name
+    (minus mpv-specific ``<driver>/`` prefix) if no description is available
+    or the description would have been an empty string.
 
     The special entry with the name set to ``auto`` selects the default audio
     output driver and the default device.

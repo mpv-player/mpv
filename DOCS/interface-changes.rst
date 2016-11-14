@@ -95,6 +95,8 @@ Interface changes
       --terminal, --osc, --ytdl, can all be enable/disabled after
       mpv_initialize() - this can be extended to other still fixed options
       on user requests)
+    - the "audio-device-list" property now sets empty device description to the
+      device name as a fallback
  --- mpv 0.20.0 ---
     - add --image-display-duration option - this also means that image duration
       is not influenced by --mf-fps anymore in the general case (this is an
