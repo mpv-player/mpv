@@ -1145,7 +1145,8 @@ static bool is_useless_device(char *name)
 {
     char *crap[] = {"front", "rear", "center_lfe", "side", "surround21",
         "surround40", "surround41", "surround50", "surround51", "surround71",
-        "sysdefault", "pulse", "null", "dsnoop", "dmix", "hw", "iec958"};
+        "sysdefault", "pulse", "null", "dsnoop", "dmix", "hw", "iec958",
+        "default"};
     for (int i = 0; i < MP_ARRAY_SIZE(crap); i++) {
         int l = strlen(crap[i]);
         if (name && strncmp(name, crap[i], l) == 0 &&
@@ -1160,6 +1161,8 @@ static void list_devs(struct ao *ao, struct ao_device_list *list)
     void **hints;
     if (snd_device_name_hint(-1, "pcm", &hints) < 0)
         return;
+
+    ao_device_list_add(list, ao, &(struct ao_device_desc){"", ""});
 
     for (int n = 0; hints[n]; n++) {
         char *name = snd_device_name_get_hint(hints[n], "NAME");
