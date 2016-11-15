@@ -49,8 +49,8 @@ API changes
           will be removed, and mpv_set_option() will internally translate API
           calls to mpv_set_property().
         - qthelper.hpp: deprecate get_property_variant, set_property_variant,
-          mpv_set_option, command_variant, and replace them with get_property,
-          set_property, command.
+          set_option_variant, command_variant, and replace them with
+          get_property, set_property, command.
  --- mpv 0.19.0 ---
  1.22   - add stream_cb API for custom protocols
  --- mpv 0.18.1 ---
