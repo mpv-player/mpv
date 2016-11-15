@@ -20,8 +20,8 @@ Interface changes
 ::
 
  --- mpv 0.21.0 ---
-    - setting certain options at runtime will now take care of updating them
-      property (see for example issue #3281). On the other hand, it will also
+    - unlike in older versions, setting options at runtime will now take effect
+      immediately (see for example issue #3281). On the other hand, it will also
       do runtime verification and reject option changes that do not work
       (example: setting the "vf" option to a filter during playback, which fails
       to initialize - the option value will remain at its old value). In general,
