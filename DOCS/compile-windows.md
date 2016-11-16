@@ -166,11 +166,8 @@ Or, compile and install both libmpv and mpv:
 ./waf configure CC=gcc.exe --check-c-compiler=gcc --enable-libmpv-shared --prefix=/mingw64
 ./waf install
 
-# waf installs libmpv to the wrong directory, so fix it up
-mv -f /mingw64/bin/pkgconfig/mpv.pc /mingw64/lib/pkgconfig/
-mv -f /mingw64/bin/libmpv.dll.a /mingw64/lib/
-sed -i 's_/mingw64/bin_/mingw64/lib_' /mingw64/lib/pkgconfig/mpv.pc
-rmdir /mingw64/bin/pkgconfig
+# waf installs libmpv dll to the wrong directory, so fix it up
+mv -f /mingw64/lib/mpv-1.dll /mingw64/bin/
 ```
 
 Linking libmpv with MSVC programs
