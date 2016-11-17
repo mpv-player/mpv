@@ -27,7 +27,7 @@
 #endif
 
 // Broken crap with __USE_MINGW_ANSI_STDIO
-#ifdef __MINGW32__
+#if defined(__MINGW32__) && defined(__GNUC__) && !defined(__clang__)
 #undef TA_PRF
 #define TA_PRF(a1, a2) __attribute__ ((format (gnu_printf, a1, a2)))
 #endif
