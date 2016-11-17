@@ -119,7 +119,7 @@ main_dependencies = [
         'name': 'mingw',
         'desc': 'MinGW',
         'deps': [ 'os-win32' ],
-        'func': check_statement('stddef.h', 'int x = __MINGW32__;'
+        'func': check_statement('stdlib.h', 'int x = __MINGW32__;'
                                             'int y = __MINGW64_VERSION_MAJOR'),
     }, {
         'name': 'posix',
