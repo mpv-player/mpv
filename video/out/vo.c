@@ -401,7 +401,7 @@ static void vsync_skip_detection(struct vo *vo)
     }
     int64_t desync = diff / in->num_vsync_samples;
     if (in->drop_point > window * 2 &&
-        labs(desync - desync_early) >= in->vsync_interval * 3 / 4)
+        llabs(desync - desync_early) >= in->vsync_interval * 3 / 4)
     {
         // Assume a drop. An underflow can technically speaking not be a drop
         // (it's up to the driver what this is supposed to mean), but no reason
