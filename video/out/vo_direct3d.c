@@ -1466,13 +1466,13 @@ static mp_image_t *get_window_screenshot(d3d_priv *priv)
     POINT pt;
     D3DLOCKED_RECT locked_rect;
     int width, height;
+    IDirect3DSurface9 *surface = NULL;
 
     if (FAILED(IDirect3DDevice9_GetDisplayMode(priv->d3d_device, 0, &mode))) {
         MP_ERR(priv, "GetDisplayMode failed.\n");
         goto error_exit;
     }
 
-    IDirect3DSurface9 *surface = NULL;
     if (FAILED(IDirect3DDevice9_CreateOffscreenPlainSurface(priv->d3d_device,
         mode.Width, mode.Height, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &surface,
         NULL)))

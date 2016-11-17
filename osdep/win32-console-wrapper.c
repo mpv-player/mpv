@@ -36,8 +36,8 @@ void cr_perror(const wchar_t *prefix)
 
 int cr_runproc(wchar_t *name, wchar_t *cmdline)
 {
-    STARTUPINFO si;
-    STARTUPINFO our_si;
+    STARTUPINFOW si;
+    STARTUPINFOW our_si;
     PROCESS_INFORMATION pi;
     DWORD retval = 1;
 
@@ -50,7 +50,7 @@ int cr_runproc(wchar_t *name, wchar_t *cmdline)
 
     // Copy the list of inherited CRT file descriptors to the new process
     our_si.cb = sizeof(our_si);
-    GetStartupInfo(&our_si);
+    GetStartupInfoW(&our_si);
     si.lpReserved2 = our_si.lpReserved2;
     si.cbReserved2 = our_si.cbReserved2;
 
