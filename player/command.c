@@ -138,6 +138,9 @@ static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
 static int mp_property_do_silent(const char *name, int action, void *val,
                                  struct MPContext *ctx);
 
+extern const struct m_obj_list vo_obj_list;
+extern const struct m_obj_list ao_obj_list;
+
 static void hook_remove(struct MPContext *mpctx, int index)
 {
     struct command_ctx *cmd = mpctx->command_ctx;
@@ -3579,6 +3582,55 @@ static int mp_property_encoders(void *ctx, struct m_property *prop,
     return r;
 }
 
+static int get_obj_list_entry(int item, int action, void *arg, void *ctx)
+{
+    const struct m_obj_list *obj_list = ctx;
+    struct m_obj_desc dst;
+
+    if (!obj_list->get_desc(&dst, item))
+        return M_PROPERTY_ERROR;
+
+    struct m_sub_property props[] = {
+        {"name",              SUB_PROP_STR(dst.name)},
+        {"description",       SUB_PROP_STR(dst.description)},
+        {0}
+    };
+
+    return m_property_read_sub(props, action, arg);
+}
+
+static int get_obj_list_count(const struct m_obj_list *obj_list) {
+    int count = 0;
+    struct m_obj_desc dst;
+
+    while (obj_list->get_desc(&dst, count))
+        ++count;
+
+    return count;
+}
+
+static m_property_read_obj_list(int action, void *arg,
+                                const struct m_obj_list *obj_list) {
+    int count = get_obj_list_count(obj_list);
+
+    //cast away const qualifier here to avoid compiler warnings
+    return m_property_read_list(action, arg, count,
+                                 get_obj_list_entry, obj_list);
+}
+
+static int mp_property_vo_list(void *ctx, struct m_property *prop,
+                               int action, void *arg)
+{
+
+    return m_property_read_obj_list(action, arg, &vo_obj_list);
+}
+
+static int mp_property_ao_list(void *ctx, struct m_property *prop,
+                               int action, void *arg)
+{
+    return m_property_read_obj_list(action, arg, &ao_obj_list);
+}
+
 static int mp_property_version(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
@@ -4016,6 +4068,8 @@ static const struct m_property mp_properties_base[] = {
     {"protocol-list", mp_property_protocols},
     {"decoder-list", mp_property_decoders},
     {"encoder-list", mp_property_encoders},
+    {"vo-list", mp_property_vo_list},
+    {"ao-list", mp_property_ao_list},
 
     {"mpv-version", mp_property_version},
     {"mpv-configuration", mp_property_configuration},

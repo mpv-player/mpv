@@ -1939,8 +1939,26 @@ Property list
 ``current-vo``
     Current video output driver (name as used with ``--vo``).
 
+``vo-list``
+    List of available decoders to be used with ``--vo``.
+
+    ``name``
+        Name of output driver that can be passed to ``--vo``.
+
+    ``description``
+        Description of output driver.
+
 ``current-ao``
     Current audio output driver (name as used with ``--ao``).
+
+``ao-list``
+    List of available decoders to be used with ``--ao``.
+
+    ``name``
+        Name of output driver that can be passed to ``--ao``.
+
+    ``description``
+        Description of output driver.
 
 ``audio-out-detected-device``
     Return the audio device selected by the AO driver (only implemented for
