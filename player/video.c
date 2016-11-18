@@ -482,9 +482,6 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
 
     update_window_title(mpctx, true);
 
-    // Undo what the subtitle path does if mpctx->vo_chain is unset.
-    osd_set_force_video_pts(mpctx->osd, MP_NOPTS_VALUE);
-
     struct vo_chain *vo_c = talloc_zero(NULL, struct vo_chain);
     mpctx->vo_chain = vo_c;
     vo_c->log = mpctx->log;
@@ -1426,6 +1423,9 @@ void write_video(struct MPContext *mpctx)
 
     mpctx->time_frame -= get_relative_time(mpctx);
     update_avsync_before_frame(mpctx);
+
+    // Enforce timing subtitles to video frames.
+    osd_set_force_video_pts(mpctx->osd, MP_NOPTS_VALUE);
 
     if (!update_subtitles(mpctx, mpctx->next_frames[0]->pts)) {
         MP_VERBOSE(mpctx, "Video frame delayed due waiting on subtitles.\n");
