@@ -5157,7 +5157,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             return -1;
         // Can't play a removed entry
         if (mpctx->playlist->current == e && !mpctx->stop_play)
-            mpctx->stop_play = PT_CURRENT_ENTRY;
+            mpctx->stop_play = PT_NEXT_ENTRY;
         playlist_remove(mpctx->playlist, e);
         mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
         mp_wakeup_core(mpctx);
