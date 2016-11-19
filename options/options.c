@@ -525,7 +525,8 @@ const m_option_t mp_opts[] = {
                ({"no", SOFTVOL_NO},
                 {"yes", SOFTVOL_YES},
                 {"auto", SOFTVOL_AUTO}),
-               .deprecation_message = "no replacement"),
+               .deprecation_message = "softvol is always active, and behaves "
+                                      "as if --softvol=yes is always set"),
     OPT_FLOATRANGE("volume-max", softvol_max, 0, 100, 1000),
     // values <0 for volume and mute are legacy and ignored
     OPT_FLOATRANGE("volume", softvol_volume, 0, -1, 1000),

@@ -1175,9 +1175,9 @@ Audio
     to use the volume controls of the audio output driver or the internal mpv
     volume filter.
 
-    The current behavior is as if this option was set to ``yes``. The other
-    behaviors are not available anymore, although ``auto`` almost matches
-    current behavior in most cases.
+    The current behavior is that softvol is always enabled, i.e. as if this
+    option is set to ``yes``. The other behaviors are not available anymore,
+    although ``auto`` almost matches current behavior in most cases.
 
     The ``no`` behavior is still partially available through the ``ao-volume``
     and ``ao-mute`` properties. But there are no options to reset these.
