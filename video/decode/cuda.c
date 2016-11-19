@@ -21,6 +21,7 @@
 #include <libavutil/hwcontext_cuda.h>
 
 #include "common/av_common.h"
+#include "video/fmt-conversion.h"
 #include "video/decode/lavc.h"
 
 typedef struct CUVIDContext {
@@ -114,7 +115,7 @@ static void uninit(struct lavc_ctx *ctx)
 static struct mp_image *process_image(struct lavc_ctx *ctx, struct mp_image *img)
 {
     if (img->imgfmt == IMGFMT_CUDA)
-        img->params.hw_subfmt = IMGFMT_NV12;
+        img->params.hw_subfmt = pixfmt2imgfmt(ctx->avctx->sw_pix_fmt);
     return img;
 }
 

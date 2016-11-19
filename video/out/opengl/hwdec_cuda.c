@@ -42,7 +42,7 @@ struct priv {
     GLuint gl_textures[2];
     CUgraphicsResource cu_res[2];
     CUarray cu_array[2];
-    bool mapped;
+    int sample_width;
 
     CUcontext cuda_ctx;
 };
@@ -81,7 +81,21 @@ static struct mp_image *cuda_download_image(struct mp_hwdec_ctx *ctx,
     if (hw_image->imgfmt != IMGFMT_CUDA)
         return NULL;
 
-    struct mp_image *out = mp_image_pool_get(swpool, IMGFMT_NV12,
+    int sample_width;
+    switch (hw_image->params.hw_subfmt) {
+    case IMGFMT_NV12:
+        sample_width = 1;
+        break;
+    case IMGFMT_P010:
+    case IMGFMT_P016:
+        sample_width = 2;
+        break;
+    default:
+        return NULL;
+    }
+
+    struct mp_image *out = mp_image_pool_get(swpool,
+                                             hw_image->params.hw_subfmt,
                                              hw_image->w, hw_image->h);
     if (!out)
         return NULL;
@@ -101,7 +115,8 @@ static struct mp_image *cuda_download_image(struct mp_hwdec_ctx *ctx,
             .dstHost       = out->planes[n],
             .srcPitch      = hw_image->stride[n],
             .dstPitch      = out->stride[n],
-            .WidthInBytes  = mp_image_plane_w(out, n) * (n + 1),
+            .WidthInBytes  = mp_image_plane_w(out, n) *
+                             (n + 1) * sample_width,
             .Height        = mp_image_plane_h(out, n),
         };
 
@@ -176,10 +191,31 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     int ret = 0, eret = 0;
 
     assert(params->imgfmt == hw->driver->imgfmt);
-    params->imgfmt = IMGFMT_NV12;
+    params->imgfmt = params->hw_subfmt;
     params->hw_subfmt = 0;
 
     mp_image_set_params(&p->layout, params);
+
+    GLint luma_format, chroma_format;
+    GLenum type;
+    switch (params->imgfmt) {
+    case IMGFMT_NV12:
+        luma_format = GL_R8;
+        chroma_format = GL_RG8;
+        type = GL_UNSIGNED_BYTE;
+        p->sample_width = 1;
+        break;
+    case IMGFMT_P010:
+    case IMGFMT_P016:
+        luma_format = GL_R16;
+        chroma_format = GL_RG16;
+        type = GL_UNSIGNED_SHORT;
+        p->sample_width = 2;
+        break;
+    default:
+        MP_ERR(hw, "Unsupported format: %s\n", mp_imgfmt_to_name(params->imgfmt));
+        return -1;
+    }
 
     ret = CHECK_CU(cuCtxPushCurrent(p->cuda_ctx));
     if (ret < 0)
@@ -193,10 +229,10 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        gl->TexImage2D(GL_TEXTURE_2D, 0, n == 0 ? GL_R8 : GL_RG8,
+        gl->TexImage2D(GL_TEXTURE_2D, 0, n == 0 ? luma_format : chroma_format,
                        mp_image_plane_w(&p->layout, n),
                        mp_image_plane_h(&p->layout, n),
-                       0, n == 0 ? GL_RED : GL_RG, GL_UNSIGNED_BYTE, NULL);
+                       0, n == 0 ? GL_RED : GL_RG, type, NULL);
         gl->BindTexture(GL_TEXTURE_2D, 0);
 
         ret = CHECK_CU(cuGraphicsGLRegisterImage(&p->cu_res[n], p->gl_textures[n],
@@ -261,7 +297,7 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
 
     for (int n = 0; n < 2; n++) {
         // widthInBytes must account for the chroma plane
-        // elements being two bytes wide.
+        // elements being two samples wide.
         CUDA_MEMCPY2D cpy = {
             .srcMemoryType = CU_MEMORYTYPE_DEVICE,
             .dstMemoryType = CU_MEMORYTYPE_ARRAY,
@@ -269,7 +305,8 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
             .srcPitch      = hw_image->stride[n],
             .srcY          = 0,
             .dstArray      = p->cu_array[n],
-            .WidthInBytes  = mp_image_plane_w(&p->layout, n) * (n + 1),
+            .WidthInBytes  = mp_image_plane_w(&p->layout, n) *
+                             (n + 1) * p->sample_width,
             .Height        = mp_image_plane_h(&p->layout, n),
         };
         ret = CHECK_CU(cuMemcpy2D(&cpy));
