@@ -7,6 +7,7 @@
 
 * [Overview](#overview)
 * [Downloads](#downloads)
+* [Changelog](#changelog)
 * [Compilation](#compilation)
 * [FFmpeg vs. Libav](#ffmpeg-vs-libav)
 * [Release cycle](#release-cycle)
@@ -14,6 +15,7 @@
 * [Contributing](#contributing)
 * [Relation to MPlayer and mplayer2](#relation-to-mplayer-and-mplayer2)
 * [Wiki](https://github.com/mpv-player/mpv/wiki)
+* [FAQ](https://github.com/mpv-player/mpv/wiki/FAQ)
 * [Man pages](http://mpv.io/manual/master/)
 * [Contact](#contact)
 * [License](#license)
@@ -46,6 +48,20 @@ Releases can be found on the [release list][releases].
 
 For semi-official builds and third-party packages please see
 [mpv.io](http://mpv.io/installation/).
+
+## Changelog
+
+
+There is no completely changelog, however changes to the player core interface
+are listed in the [interface changelog][interface-changes].
+
+Changes to the C API are documented in the [client API changelog][api-changes].
+
+The [release list][releases] has a summary of most of the important changes
+on every release.
+
+Changes to the default key bindings are inidcated in
+[restore-old-bindings.conf][restore-old-bindings].
 
 ## Compilation
 
@@ -197,7 +213,7 @@ In general, mpv should be considered a completely new program, rather than a
 MPlayer drop-in replacement.
 
 If you are wondering what's different from mplayer2 and MPlayer, an incomplete
-list of changes is located [here][mplayer-changes].
+and now unmaintained list of changes is located [here][mplayer-changes].
 
 ## Contact
 
@@ -220,6 +236,9 @@ only if discretion is required.
 [release-policy]: https://github.com/mpv-player/mpv/blob/master/DOCS/release-policy.md
 [windows_compilation]: https://github.com/mpv-player/mpv/blob/master/DOCS/compile-windows.md
 [mplayer-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/mplayer-changes.rst
+[interface-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/interface-changes.rst
+[api-changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/client-api-changes.rst
+[restore-old-bindings]: https://github.com/mpv-player/mpv/blob/master/etc/restore-old-bindings.conf
 
 ## License
 

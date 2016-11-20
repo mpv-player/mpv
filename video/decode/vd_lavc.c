@@ -125,6 +125,7 @@ const struct m_sub_options vd_lavc_conf = {
 };
 
 extern const struct vd_lavc_hwdec mp_vd_lavc_vdpau;
+extern const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy;
 extern const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox;
 extern const struct vd_lavc_hwdec mp_vd_lavc_videotoolbox_copy;
 extern const struct vd_lavc_hwdec mp_vd_lavc_vaapi;
@@ -177,6 +178,7 @@ static const struct vd_lavc_hwdec *const hwdec_list[] = {
 #endif
 #if HAVE_VDPAU_HWACCEL
     &mp_vd_lavc_vdpau,
+    &mp_vd_lavc_vdpau_copy,
 #endif
 #if HAVE_VIDEOTOOLBOX_HWACCEL
     &mp_vd_lavc_videotoolbox,
@@ -596,6 +598,7 @@ static void uninit_avctx(struct dec_video *vd)
     if (ctx->hwdec && ctx->hwdec->uninit)
         ctx->hwdec->uninit(ctx);
     ctx->hwdec = NULL;
+    assert(ctx->hwdec_priv == NULL);
 
     av_freep(&ctx->avctx);
 

@@ -257,12 +257,15 @@ void audio_work(struct dec_audio *da)
         struct demux_packet *new_segment = da->new_segment;
         da->new_segment = NULL;
 
-        // Could avoid decoder reinit; would still need flush.
-        da->codec = new_segment->codec;
-        if (da->ad_driver)
-            da->ad_driver->uninit(da);
-        da->ad_driver = NULL;
-        audio_init_best_codec(da);
+        if (da->codec == new_segment->codec) {
+            audio_reset_decoding(da);
+        } else {
+            da->codec = new_segment->codec;
+            if (da->ad_driver)
+                da->ad_driver->uninit(da);
+            da->ad_driver = NULL;
+            audio_init_best_codec(da);
+        }
 
         da->start = new_segment->start;
         da->end = new_segment->end;

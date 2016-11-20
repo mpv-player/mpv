@@ -840,8 +840,8 @@ static int filter_audio(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
             // Attempt to detect jumps in PTS. Even for the lowest sample rates
             // and with worst container rounded timestamp, this should be a
             // margin more than enough.
-            double desync = fabs(mpa->pts - ao_c->pts);
-            if (ao_c->pts != MP_NOPTS_VALUE && desync > 0.1) {
+            double desync = mpa->pts - ao_c->pts;
+            if (ao_c->pts != MP_NOPTS_VALUE && fabs(desync) > 0.1) {
                 MP_WARN(ao_c, "Invalid audio PTS: %f -> %f\n",
                         ao_c->pts, mpa->pts);
                 if (desync >= 5)

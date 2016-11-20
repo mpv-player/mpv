@@ -4,9 +4,13 @@ import sys, os, re
 sys.path.insert(0, os.path.join(os.getcwd(), 'waftools'))
 sys.path.insert(0, os.getcwd())
 from waflib.Configure import conf
+from waflib.Tools import c_preproc
 from waflib import Utils
 from waftools.checks.generic import *
 from waftools.checks.custom import *
+
+c_preproc.go_absolute=True # enable system folders
+c_preproc.standard_includes.append('/usr/local/include')
 
 build_options = [
     {
@@ -115,7 +119,7 @@ main_dependencies = [
         'name': 'mingw',
         'desc': 'MinGW',
         'deps': [ 'os-win32' ],
-        'func': check_statement('stddef.h', 'int x = __MINGW32__;'
+        'func': check_statement('stdlib.h', 'int x = __MINGW32__;'
                                             'int y = __MINGW64_VERSION_MAJOR'),
     }, {
         'name': 'posix',
@@ -123,6 +127,10 @@ main_dependencies = [
         # This should be good enough.
         'func': check_statement(['poll.h', 'unistd.h', 'sys/mman.h'],
             'struct pollfd pfd; poll(&pfd, 1, 0); fork(); int f[2]; pipe(f); munmap(f,0)'),
+    }, {
+        'name': 'fnmatch',
+        'desc': 'fnmatch()',
+        'func': check_statement('fnmatch.h', 'fnmatch("", "", 0)')
     }, {
         'name': 'posix-or-mingw',
         'desc': 'development environment',
@@ -185,6 +193,10 @@ main_dependencies = [
         'name': 'c11-tls',
         'desc': 'C11 TLS support',
         'func': check_statement('stddef.h', 'static _Thread_local int x = 0'),
+    }, {
+        'name': 'gcc-tls',
+        'desc': 'GCC TLS support',
+        'func': check_statement('stddef.h', 'static __thread int x = 0'),
     }, {
         'name': 'librt',
         'desc': 'linking with -lrt',
@@ -426,6 +438,7 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'desc': 'libavfilter',
         'func': check_pkg_config('libavfilter', '>= 5.0.0'),
         'req':  True,
+        'fmsg': 'libavfilter is a required dependency.',
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
@@ -598,6 +611,13 @@ audio_output_features = [
             fragment=load_fragment('coreaudio.c'),
             framework_name=['CoreFoundation', 'CoreAudio', 'AudioUnit', 'AudioToolbox'])
     }, {
+        'name': '--audiounit',
+        'desc': 'AudioUnit output for iOS',
+        'deps': ['atomics'],
+        'func': check_cc(
+            fragment=load_fragment('audiounit.c'),
+            framework_name=['Foundation', 'AudioToolbox'])
+    }, {
         'name': '--wasapi',
         'desc': 'WASAPI audio output',
         'deps': ['win32'],
@@ -660,7 +680,9 @@ video_output_features = [
         'desc': 'OpenGL Cocoa Backend',
         'deps': [ 'cocoa' ],
         'groups': [ 'gl' ],
-        'func': check_true
+        'func': check_statement('IOSurface/IOSurface.h',
+                                'IOSurfaceRef surface;',
+                                framework='IOSurface')
     } , {
         'name': '--gl-x11',
         'desc': 'OpenGL X11 Backend',
@@ -812,9 +834,13 @@ video_output_features = [
         'deps': ['android'],
         'func': check_statement('GLES3/gl3.h', '(void)GL_RGB32F'),  # arbitrary OpenGL ES 3.0 symbol
     } , {
+        'name': '--ios-gl',
+        'desc': 'iOS OpenGL ES support',
+        'func': check_statement('OpenGLES/ES3/glext.h', '(void)GL_RGB32F'),  # arbitrary OpenGL ES 3.0 symbol
+    } , {
         'name': '--any-gl',
         'desc': 'Any OpenGL (ES) support',
-        'deps_any': ['standard-gl', 'android-gl', 'cocoa'],
+        'deps_any': ['standard-gl', 'android-gl', 'ios-gl', 'cocoa'],
         'func': check_true
     } , {
         'name': '--plain-gl',
@@ -864,7 +890,6 @@ hwaccel_features = [
             check_headers('VideoToolbox/VideoToolbox.h'),
             check_statement('libavcodec/videotoolbox.h',
                             'av_videotoolbox_alloc_context()',
-                            framework='IOSurface',
                             use='libav')),
     } , {
         'name': '--videotoolbox-gl',
@@ -1028,6 +1053,12 @@ def configure(ctx):
     ctx.find_program('rst2pdf',   var='RST2PDF',   mandatory=False)
     ctx.find_program(windres,     var='WINDRES',   mandatory=False)
 
+    ctx.load('compiler_c')
+    ctx.load('waf_customizations')
+    ctx.load('dependencies')
+    ctx.load('detections.compiler')
+    ctx.load('detections.devices')
+
     for ident, _, _ in _INSTALL_DIRS_LIST:
         varname = ident.upper()
         ctx.env[varname] = getattr(ctx.options, ident)
@@ -1035,12 +1066,6 @@ def configure(ctx):
         # keep substituting vars, until the paths are fully expanded
         while re.match('\$\{([^}]+)\}', ctx.env[varname]):
             ctx.env[varname] = Utils.subst_vars(ctx.env[varname], ctx.env)
-
-    ctx.load('compiler_c')
-    ctx.load('waf_customizations')
-    ctx.load('dependencies')
-    ctx.load('detections.compiler')
-    ctx.load('detections.devices')
 
     ctx.parse_dependencies(build_options)
     ctx.parse_dependencies(main_dependencies)

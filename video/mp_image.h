@@ -133,7 +133,7 @@ void mp_image_params_guess_csp(struct mp_image_params *params);
 
 char *mp_image_params_to_str_buf(char *b, size_t bs,
                                  const struct mp_image_params *p);
-#define mp_image_params_to_str(p) mp_image_params_to_str_buf((char[80]){0}, 80, p)
+#define mp_image_params_to_str(p) mp_image_params_to_str_buf((char[99]){0}, 99, p)
 
 bool mp_image_params_valid(const struct mp_image_params *p);
 bool mp_image_params_equal(const struct mp_image_params *p1,

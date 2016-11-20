@@ -92,34 +92,45 @@ bool mp_init_filter(struct filter_kernel *filter, const int *sizes,
     }
 }
 
-// Sample from the blurred, windowed kernel. Note: The window is always
-// stretched to the true radius, regardless of the filter blur/scale.
-static double sample_filter(struct filter_kernel *filter,
-                            struct filter_window *window, double x)
+// Sample from a blurred and tapered window
+static double sample_window(struct filter_window *kernel, double x)
 {
-    double bk = filter->f.blur > 0.0 ? filter->f.blur : 1.0;
-    double bw = window->blur > 0.0 ? window->blur : 1.0;
-    double c = fabs(x) / (filter->inv_scale * bk);
-    double w = window->weight ? window->weight(window, x/bw * window->radius
-                                                            / filter->f.radius)
-                              : 1.0;
-    double v = c < filter->f.radius ? w * filter->f.weight(&filter->f, c) : 0.0;
-    return filter->clamp ? fmax(0.0, fmin(1.0, v)) : v;
+    if (!kernel->weight)
+        return 1.0;
+
+    // All windows are symmetric, this makes life easier
+    x = fabs(x);
+    if (x >= kernel->radius)
+        return 0.0;
+
+    // Stretch and taper the window size as needed
+    x = kernel->blur > 0.0 ? x / kernel->blur : x;
+    x = x <= kernel->taper ? 0.0 : (x - kernel->taper) / (1 - kernel->taper);
+
+    return kernel->weight(kernel, x);
+}
+
+// Evaluate a filter's kernel and window at a given absolute position
+static double sample_filter(struct filter_kernel *filter, double x)
+{
+    // The window is always stretched to the entire kernel
+    double w = sample_window(&filter->w, x / filter->f.radius * filter->w.radius);
+    double k = sample_window(&filter->f, x / filter->inv_scale);
+    return filter->clamp ? fmax(0.0, fmin(1.0, w * k)) : w * k;
 }
 
 // Calculate the 1D filtering kernel for N sample points.
 // N = number of samples, which is filter->size
 // The weights will be stored in out_w[0] to out_w[N - 1]
 // f = x0 - abs(x0), subpixel position in the range [0,1) or [0,1].
-static void mp_compute_weights(struct filter_kernel *filter,
-                               struct filter_window *window,
-                               double f, float *out_w)
+static void mp_compute_weights(struct filter_kernel *filter, double f,
+                               float *out_w)
 {
     assert(filter->size > 0);
     double sum = 0;
     for (int n = 0; n < filter->size; n++) {
         double x = f - (n - filter->size / 2 + 1);
-        double w = sample_filter(filter, window, x);
+        double w = sample_filter(filter, x);
         out_w[n] = w;
         sum += w;
     }
@@ -138,17 +149,16 @@ static void mp_compute_weights(struct filter_kernel *filter,
 // [0.5 / count, 1.0 - 0.5 / count].
 void mp_compute_lut(struct filter_kernel *filter, int count, float *out_array)
 {
-    struct filter_window *window = &filter->w;
     if (filter->polar) {
         // Compute a 1D array indexed by radius
         for (int x = 0; x < count; x++) {
             double r = x * filter->f.radius / (count - 1);
-            out_array[x] = sample_filter(filter, window, r);
+            out_array[x] = sample_filter(filter, r);
         }
     } else {
         // Compute a 2D array indexed by subpixel position
         for (int n = 0; n < count; n++) {
-            mp_compute_weights(filter, window,  n / (double)(count - 1),
+            mp_compute_weights(filter, n / (double)(count - 1),
                                out_array + filter->size * n);
         }
     }
@@ -321,6 +331,7 @@ const struct filter_window mp_filter_windows[] = {
     {"triangle",       1,   triangle},
     {"bartlett",       1,   triangle},
     {"hanning",        1,   hanning},
+    {"tukey",          1,   hanning, .taper = 0.5},
     {"hamming",        1,   hamming},
     {"quadric",        1.5, quadric},
     {"welch",          1,   welch},

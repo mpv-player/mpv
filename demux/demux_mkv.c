@@ -107,6 +107,7 @@ typedef struct mkv_track {
     double v_frate;
     uint32_t colorspace;
     int stereo_mode;
+    struct mp_colorspace color;
 
     uint32_t a_channels, a_bps;
     float a_sfreq;
@@ -536,6 +537,42 @@ static void parse_trackaudio(struct demuxer *demuxer, struct mkv_track *track,
     }
 }
 
+static void parse_trackcolour(struct demuxer *demuxer, struct mkv_track *track,
+                              struct ebml_colour *colour)
+{
+    // Note: As per matroska spec, the order is consistent with ISO/IEC
+    // 23001-8:2013/DCOR1, which is the same order used by libavutil/pixfmt.h,
+    // so we can just re-use our avcol_ conversion functions.
+    if (colour->n_matrix_coefficients) {
+        track->color.space = avcol_spc_to_mp_csp(colour->matrix_coefficients);
+        MP_VERBOSE(demuxer, "|    + Matrix: %s\n",
+                   m_opt_choice_str(mp_csp_names, track->color.space));
+    }
+    if (colour->n_primaries) {
+        track->color.primaries = avcol_pri_to_mp_csp_prim(colour->primaries);
+        MP_VERBOSE(demuxer, "|    + Primaries: %s\n",
+                   m_opt_choice_str(mp_csp_prim_names, track->color.primaries));
+    }
+    if (colour->n_transfer_characteristics) {
+        track->color.gamma = avcol_trc_to_mp_csp_trc(colour->transfer_characteristics);
+        MP_VERBOSE(demuxer, "|    + Gamma: %s\n",
+                   m_opt_choice_str(mp_csp_trc_names, track->color.gamma));
+    }
+    if (colour->n_range) {
+        track->color.levels = avcol_range_to_mp_csp_levels(colour->range);
+        MP_VERBOSE(demuxer, "|    + Levels: %s\n",
+                   m_opt_choice_str(mp_csp_levels_names, track->color.levels));
+    }
+    if (colour->n_mastering_metadata) {
+        struct ebml_mastering_metadata *mastering = &colour->mastering_metadata;
+
+        if (mastering->n_luminance_max) {
+            track->color.sig_peak = mastering->luminance_max;
+            MP_VERBOSE(demuxer, "|    + HDR peak: %f\n", track->color.sig_peak);
+        }
+    }
+}
+
 static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
                              struct ebml_video *video)
 {
@@ -575,6 +612,8 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
             MP_WARN(demuxer, "Unknown StereoMode: %d\n", (int)video->stereo_mode);
         }
     }
+    if (video->n_colour)
+        parse_trackcolour(demuxer, track, &video->colour);
 }
 
 /**
@@ -862,6 +901,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
         if (wanted_edition_uid) {
             MP_ERR(demuxer, "Unable to find expected edition uid: %"PRIu64"\n",
                    wanted_edition_uid);
+            talloc_free(parse_ctx.talloc_ctx);
             return -1;
         } else {
             selected_edition = 0;
@@ -1396,6 +1436,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v->par_h = p.p_h;
 
     sh_v->stereo_mode = track->stereo_mode;
+    sh_v->color = track->color;
 
 done:
     demux_add_sh_stream(demuxer, sh);

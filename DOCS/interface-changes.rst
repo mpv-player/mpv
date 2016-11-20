@@ -19,9 +19,18 @@ Interface changes
 
 ::
 
+ --- mpv 0.22.0 ---
+    - the "audio-device-list" property now sets empty device description to the
+      device name as a fallback
+    - add --hidpi-window-scale option for macOS
+    - add audiounit audio output for iOS
+    - make --start-time work with --rebase-start-time=no
+    - add --opengl-early-flush=auto mode
+    - add --hwdec=vdpau-copy, deprecate vf_vdpaurb
+    - add tct video output for true-color and 256-color terminals
  --- mpv 0.21.0 ---
-    - setting certain options at runtime will now take care of updating them
-      property (see for example issue #3281). On the other hand, it will also
+    - unlike in older versions, setting options at runtime will now take effect
+      immediately (see for example issue #3281). On the other hand, it will also
       do runtime verification and reject option changes that do not work
       (example: setting the "vf" option to a filter during playback, which fails
       to initialize - the option value will remain at its old value). In general,

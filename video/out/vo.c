@@ -59,6 +59,7 @@ extern const struct vo_driver video_out_sdl;
 extern const struct vo_driver video_out_vaapi;
 extern const struct vo_driver video_out_wayland;
 extern const struct vo_driver video_out_rpi;
+extern const struct vo_driver video_out_tct;
 
 const struct vo_driver *const video_out_drivers[] =
 {
@@ -89,6 +90,7 @@ const struct vo_driver *const video_out_drivers[] =
     &video_out_null,
     // should not be auto-selected
     &video_out_image,
+    &video_out_tct,
 #if HAVE_CACA
     &video_out_caca,
 #endif
@@ -399,7 +401,7 @@ static void vsync_skip_detection(struct vo *vo)
     }
     int64_t desync = diff / in->num_vsync_samples;
     if (in->drop_point > window * 2 &&
-        labs(desync - desync_early) >= in->vsync_interval * 3 / 4)
+        llabs(desync - desync_early) >= in->vsync_interval * 3 / 4)
     {
         // Assume a drop. An underflow can technically speaking not be a drop
         // (it's up to the driver what this is supposed to mean), but no reason
@@ -871,6 +873,7 @@ static void do_redraw(struct vo *vo)
     if (!frame)
         frame = &dummy;
     frame->redraw = !full_redraw; // unconditionally redraw if it was dropped
+    frame->repeat = false;
     frame->still = true;
     frame->pts = 0;
     frame->duration = -1;

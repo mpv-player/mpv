@@ -807,6 +807,8 @@ Available filters are:
             Apply high quality VDPAU scaling (needs capable hardware).
 
 ``vdpaurb``
+    This filter is deprecated. Use ``--hwdec=vdpau-copy`` instead.
+
     VDPAU video read back. Works with ``--vo=vdpau`` and ``--vo=opengl`` only.
     This filter will read back frames decoded by VDPAU so that other filters,
     which are not normally compatible with VDPAU, can be used like normal.

@@ -42,7 +42,7 @@ struct priv {
     EGL_DISPMANX_WINDOW_T egl_window;
     int x, y, w, h;
     double display_fps;
-    atomic_bool reload_display;
+    atomic_int reload_display;
     int win_params[4];
 };
 

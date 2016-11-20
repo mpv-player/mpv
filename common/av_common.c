@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <limits.h>
 
 #include <libavutil/common.h>
 #include <libavutil/log.h>
@@ -104,7 +105,10 @@ AVRational mp_get_codec_timebase(struct mp_codec_params *c)
         tb.den *= (r.num + r.den - 1) / r.den;
     }
 
-    av_reduce(&tb.num, &tb.den, tb.num, tb.den, 1000000);
+    av_reduce(&tb.num, &tb.den, tb.num, tb.den, INT_MAX);
+
+    if (tb.num < 1 || tb.den < 1)
+        tb = AV_TIME_BASE_Q;
 
     return tb;
 }

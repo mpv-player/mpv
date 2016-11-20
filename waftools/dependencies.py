@@ -119,7 +119,7 @@ the autodetection check failed.".format(self.identifier)
         if self.enabled_option() == False:
             return
         if self.attributes.get('req', False):
-            raise ConfigurationError(self.attributes['fmsg'])
+            raise ConfigurationError(self.attributes.get('fmsg', 'Unsatisfied requirement'))
 
     def skip(self, reason='disabled', color='YELLOW'):
         self.ctx.end_msg(self.__message__(reason), color)

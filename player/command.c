@@ -104,6 +104,8 @@ struct command_ctx {
 
     char *cur_ipc;
     char *cur_ipc_input;
+
+    int silence_option_deprecations;
 };
 
 struct overlay {
@@ -287,10 +289,11 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
     // OK, is handled separately: playlist
     // OK, does not conflict on low level: audio-file, sub-file, external-file
     // OK, different value ranges, but happens to work for now: volume, edition
+    // Incompatible: tv-freq
     // All the other properties are deprecated in their current form.
     static const char *const no_property[] = {
         "demuxer", "idle", "length", "audio-samplerate", "audio-channels",
-        "audio-format", "fps", "cache", "playlist-pos", "chapter",
+        "audio-format", "fps", "cache", "playlist-pos", "chapter", "tv-freq",
         NULL
     };
 
@@ -341,8 +344,13 @@ static int mp_property_generic_option(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     const char *optname = prop->name;
     int flags = M_SETOPT_RUNTIME;
-    struct m_config_option *opt = m_config_get_co(mpctx->mconfig,
-                                                  bstr0(optname));
+    struct m_config_option *opt;
+    if (mpctx->command_ctx->silence_option_deprecations) {
+        // This case is specifically for making --reset-on-next-file=all silent.
+        opt = m_config_get_co_raw(mpctx->mconfig, bstr0(optname));
+    } else {
+        opt = m_config_get_co(mpctx->mconfig, bstr0(optname));
+    }
 
     if (!opt)
         return M_PROPERTY_UNKNOWN;
@@ -2739,40 +2747,35 @@ static int mp_property_window_scale(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct vo *vo = mpctx->video_out;
     if (!vo)
-        return mp_property_generic_option(mpctx, prop, action, arg);
+        goto generic;
 
     struct mp_image_params params = get_video_out_params(mpctx);
     int vid_w, vid_h;
     mp_image_params_get_dsize(&params, &vid_w, &vid_h);
     if (vid_w < 1 || vid_h < 1)
-        return M_PROPERTY_UNAVAILABLE;
+        goto generic;
 
     switch (action) {
     case M_PROPERTY_SET: {
         double scale = *(double *)arg;
         int s[2] = {vid_w * scale, vid_h * scale};
-        if (s[0] > 0 && s[1] > 0 &&
-            vo_control(vo, VOCTRL_SET_UNFS_WINDOW_SIZE, s) > 0)
-        {
-            mpctx->opts->vo->window_scale = scale;
-            return M_PROPERTY_OK;
-        }
-        return M_PROPERTY_UNAVAILABLE;
+        if (s[0] > 0 && s[1] > 0)
+            vo_control(vo, VOCTRL_SET_UNFS_WINDOW_SIZE, s);
+        goto generic;
     }
     case M_PROPERTY_GET: {
         int s[2];
         if (vo_control(vo, VOCTRL_GET_UNFS_WINDOW_SIZE, s) <= 0 ||
             s[0] < 1 || s[1] < 1)
-            return M_PROPERTY_UNAVAILABLE;
+            goto generic;
         double xs = (double)s[0] / vid_w;
         double ys = (double)s[1] / vid_h;
         *(double *)arg = (xs + ys) / 2;
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_GET_TYPE:
-        return mp_property_generic_option(mpctx, prop, action, arg);
     }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+generic:
+    return mp_property_generic_option(mpctx, prop, action, arg);
 }
 
 static int mp_property_win_minimized(void *ctx, struct m_property *prop,
@@ -4153,7 +4156,9 @@ static int mp_property_do_silent(const char *name, int action, void *val,
                                  struct MPContext *ctx)
 {
     struct command_ctx *cmd = ctx->command_ctx;
+    cmd->silence_option_deprecations += 1;
     int r = m_property_do(ctx->log, cmd->properties, name, action, val, ctx);
+    cmd->silence_option_deprecations -= 1;
     if (r == M_PROPERTY_OK && is_property_set(action, val))
         mp_notify_property(ctx, (char *)name);
     return r;
@@ -5152,7 +5157,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
             return -1;
         // Can't play a removed entry
         if (mpctx->playlist->current == e && !mpctx->stop_play)
-            mpctx->stop_play = PT_CURRENT_ENTRY;
+            mpctx->stop_play = PT_NEXT_ENTRY;
         playlist_remove(mpctx->playlist, e);
         mp_notify(mpctx, MP_EVENT_CHANGE_PLAYLIST, NULL);
         mp_wakeup_core(mpctx);

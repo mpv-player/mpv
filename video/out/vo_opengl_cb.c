@@ -296,7 +296,7 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
     int64_t wait_present_count = ctx->present_count;
     if (frame) {
         ctx->next_frame = NULL;
-        if (frame->redraw || !frame->current)
+        if (!(frame->redraw || !frame->current))
             wait_present_count += 1;
         pthread_cond_signal(&ctx->wakeup);
         talloc_free(ctx->cur_frame);
@@ -371,8 +371,10 @@ static void flip_page(struct vo *vo)
     // Wait until frame was rendered
     while (p->ctx->next_frame) {
         if (pthread_cond_timedwait(&p->ctx->wakeup, &p->ctx->lock, &ts)) {
-            MP_VERBOSE(vo, "mpv_opengl_cb_draw() not being called or stuck.\n");
-            goto done;
+            if (p->ctx->next_frame) {
+                MP_VERBOSE(vo, "mpv_opengl_cb_draw() not being called or stuck.\n");
+                goto done;
+            }
         }
     }
 
@@ -399,7 +401,8 @@ done:
 
     // Cleanup after the API user is not reacting, or is being unusually slow.
     if (p->ctx->next_frame) {
-        talloc_free(p->ctx->next_frame);
+        talloc_free(p->ctx->cur_frame);
+        p->ctx->cur_frame = p->ctx->next_frame;
         p->ctx->next_frame = NULL;
         p->ctx->present_count += 2;
         pthread_cond_signal(&p->ctx->wakeup);

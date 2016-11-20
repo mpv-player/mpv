@@ -12,8 +12,8 @@ local utils = require 'mp.utils'
 local user_opts = {
     showwindowed = true,        -- show OSC when windowed?
     showfullscreen = true,      -- show OSC when fullscreen?
-    scalewindowed = 1.5,        -- scaling of the controller when windowed
-    scalefullscreen = 1.5,      -- scaling of the controller when fullscreen
+    scalewindowed = 1,          -- scaling of the controller when windowed
+    scalefullscreen = 1,        -- scaling of the controller when fullscreen
     scaleforcedwindow = 2,      -- scaling when rendered on a forced window
     vidscale = true,            -- scale the controller with the video?
     valign = 0.8,               -- vertical alignment, -1 (top) to 1 (bottom)
@@ -25,14 +25,15 @@ local user_opts = {
                                 -- mouse movement. enforced non-negative for the
                                 -- user, but internally negative is "always-on".
     fadeduration = 200,         -- duration of fade out in ms, 0 = no fade
-    deadzonesize = 1,           -- size of deadzone
+    deadzonesize = 0.5,         -- size of deadzone
     minmousemove = 0,           -- minimum amount of pixels the mouse has to
                                 -- move between ticks to make the OSC show up
     iamaprogrammer = false,     -- use native mpv values and disable OSC
                                 -- internal track list management (and some
                                 -- functions that depend on it)
     layout = "bottombar",
-    seekbarstyle = "bar",    -- slider (diamond marker) or bar (fill)
+    seekbarstyle = "bar",       -- slider (diamond marker), knob (circle
+                                -- marker with guide), or bar (fill)
     tooltipborder = 1,          -- border of tooltip in bottom/topbar
     timetotal = false,          -- display total time instead of remaining time?
     timems = false,             -- display timecodes with milliseconds?
@@ -59,15 +60,20 @@ local osc_param = { -- calculated by osc_init()
 local osc_styles = {
     bigButtons = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs50\\fnmpv-osd-symbols}",
     smallButtonsL = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs19\\fnmpv-osd-symbols}",
-    smallButtonsLlabel = "{\\fs20\\fn" .. mp.get_property("options/osd-font") .. "}",
+    smallButtonsLlabel = "{\\fscx105\\fscy105\\fn" .. mp.get_property("options/osd-font") .. "}",
     smallButtonsR = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs30\\fnmpv-osd-symbols}",
     topButtons = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs12\\fnmpv-osd-symbols}",
 
     elementDown = "{\\1c&H999999}",
     timecodes = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs20}",
-    vidtitle = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs12}",
-    timePos = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&HFFFFFF\\3c&H000000\\1a&H00\\3a&H88\\fs20}",
+    vidtitle = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs12\\q2}",
     box = "{\\rDefault\\blur0\\bord1\\1c&H000000\\3c&HFFFFFF}",
+
+    topButtonsBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs18\\fnmpv-osd-symbols}",
+    smallButtonsBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs28\\fnmpv-osd-symbols}",
+    timecodesBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs27}",
+    timePosBar = "{\\blur0\\bord".. user_opts.tooltipborder .."\\1c&HFFFFFF\\3c&H000000\\fs30}",
+    vidtitleBar = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs18\\q2}",
 }
 
 -- internal states, do not touch
@@ -395,7 +401,8 @@ function prepare_elements()
             local foV = slider_lo.border + slider_lo.gap
 
             -- calculate positions of min and max points
-            if (slider_lo.stype == "slider") then
+            if (slider_lo.stype == "slider") or
+                (slider_lo.stype == "knob") then
                 element.slider.min.ele_pos = elem_geo.h / 2
                 element.slider.max.ele_pos = elem_geo.w - (elem_geo.h / 2)
 
@@ -557,9 +564,11 @@ function render_elements(master_ass)
 
                 local foV = slider_lo.border + slider_lo.gap
                 local foH = 0
-                if (slider_lo.stype == "slider") then
+                if (slider_lo.stype == "slider") or
+                    (slider_lo.stype == "knob") then
                     foH = elem_geo.h / 2
                 elseif (slider_lo.stype == "bar") then
+                    foV = foV + 1
                     foH = slider_lo.border + slider_lo.gap
                 end
 
@@ -575,6 +584,11 @@ function render_elements(master_ass)
                     elem_ass:line_to(xp+(innerH/2), (innerH/2)+foV)
                     elem_ass:line_to(xp, (innerH)+foV)
                     elem_ass:line_to(xp-(innerH/2), (innerH/2)+foV)
+                elseif (slider_lo.stype == "knob") then
+                    elem_ass:rect_cw(xp, (9*innerH/20)+foV, elem_geo.w - foH, (11*innerH/20)+foV)
+                    elem_ass:rect_cw(foH, (3*innerH/8)+foV, xp, (5*innerH/8)+foV)
+                    elem_ass:round_rect_cw(xp - innerH/2, foV, xp + innerH/2,
+                                           foV + innerH, innerH/2.0)
                 end
             end
 
@@ -619,6 +633,18 @@ function render_elements(master_ass)
                     elem_ass:pos(tx, ty)
                     elem_ass:an(an)
                     elem_ass:append(slider_lo.tooltip_style)
+
+                    --alpha
+                    local ar = slider_lo.alpha
+                    if not (state.animation == nil) then
+                        ar = {}
+                        for ai, av in pairs(slider_lo.alpha) do
+                            ar[ai] = mult_alpha(av, state.animation)
+                        end
+                    end
+                    elem_ass:append(string.format("{\\1a&H%X&\\2a&H%X&\\3a&H%X&\\4a&H%X&}",
+                        ar[1], ar[2], ar[3], ar[4]))
+
                     elem_ass:append(tooltiplabel)
 
                 end
@@ -651,47 +677,44 @@ end
 -- Message display
 --
 
+-- pos is 1 based
 function limited_list(prop, pos)
-    local fs = tonumber(mp.get_property('options/osd-font-size'))
-    local max_items = math.ceil(720 / fs)
-
     local proplist = mp.get_property_native(prop, {})
     local count = #proplist
-    if (count == 0) then
+    if count == 0 then
         return count, proplist
     end
-    local min, max = 0, count
-    local temp = {}
-    if (count > max_items - 1) then
-        local extra = math.ceil(max_items / 2) - 1
-        min = pos - extra
-        max = pos + extra
-        if (pos < extra) then
-            max = max + math.abs(min)
-            min = 0
-        end
-    end
 
-    for i=min+1, max do
-        local item = proplist[i]
-        item.current = (i-1 == pos) and true or nil
-        table.insert(temp, item)
+    local fs = tonumber(mp.get_property('options/osd-font-size'))
+    local max = math.ceil(720 / fs)
+    if max % 2 == 0 then
+        max = max - 1
     end
-    return count, temp
+    local delta = math.ceil(max / 2) - 1
+    local begi = math.max(math.min(pos - delta, count - max + 1), 1)
+    local endi = math.min(begi + max - 1, count)
+
+    local reslist = {}
+    for i=begi, endi do
+        local item = proplist[i]
+        item.current = (i == pos) and true or nil
+        table.insert(reslist, item)
+    end
+    return count, reslist
 end
 
 function get_playlist()
-    local pos = mp.get_property_number('playlist-pos')
+    local pos = mp.get_property_number('playlist-pos', 0) + 1
     local count, limlist = limited_list('playlist', pos)
-    if (count == 0) then
-        return "Empty playlist."
+    if count == 0 then
+        return 'Empty playlist.'
     end
 
-    local message = string.format('Playlist: (%d/%d):\n', pos + 1, count)
+    local message = string.format('Playlist [%d/%d]:\n', pos, count)
     for i, v in ipairs(limlist) do
         local title = v.title
         local _, filename = utils.split_path(v.filename)
-        if (title == nil) then
+        if title == nil then
             title = filename
         end
         message = string.format('%s %s %s\n', message,
@@ -701,18 +724,18 @@ function get_playlist()
 end
 
 function get_chapterlist()
-    local pos = mp.get_property_number('chapter')
+    local pos = mp.get_property_number('chapter', 0) + 1
     local count, limlist = limited_list('chapter-list', pos)
-    if (count == 0) then
-        return "No chapters."
+    if count == 0 then
+        return 'No chapters.'
     end
 
-    local message = string.format('Chapters: (%d/%d):\n', pos + 1, count)
+    local message = string.format('Chapters [%d/%d]:\n', pos, count)
     for i, v in ipairs(limlist) do
         local time = mp.format_time(v.time)
         local title = v.title
-        if (title == nil) then
-            title = string.format('Chapter %02d', i + 1)
+        if title == nil then
+            title = string.format('Chapter %02d', i)
         end
         message = string.format('%s[%s] %s %s\n', message, time,
             (v.current and '●' or '○'), title)
@@ -829,6 +852,7 @@ function add_layout(name)
                 adjust_tooltip = true,
                 tooltip_style = "",
                 tooltip_an = 2,
+                alpha = {[1] = 0, [2] = 255, [3] = 88, [4] = 255},
             }
         elseif (elements[name].type == "box") then
             elements[name].layout.box = {radius = 0}
@@ -991,6 +1015,9 @@ layouts["box"] = function ()
     lo.style = osc_styles.timecodes
     lo.slider.tooltip_style = osc_styles.vidtitle
     lo.slider.stype = user_opts["seekbarstyle"]
+    if lo.slider.stype == "knob" then
+        lo.slider.border = 0
+    end
 
     --
     -- Timecodes + Cache
@@ -1077,7 +1104,9 @@ layouts["slimbox"] = function ()
     lo.style = osc_styles.box
     lo.alpha[1] = user_opts.boxalpha
     lo.alpha[3] = 0
-    lo.box.radius = osc_geo.r
+    if not (user_opts["seekbarstyle"] == "bar") then
+        lo.box.radius = osc_geo.r
+    end
 
 
     lo = add_layout("seekbar")
@@ -1123,16 +1152,28 @@ end
 layouts["bottombar"] = function()
     local osc_geo = {
         x = -2,
-        y = osc_param.playresy - 36 - user_opts.barmargin,
+        y = osc_param.playresy - 54 - user_opts.barmargin,
         an = 7,
         w = osc_param.playresx + 4,
-        h = 38,
+        h = 56,
     }
 
-    local padX = 6
-    local padY = 2
-    local line1 = osc_geo.y + 6 + padY
-    local line2 = osc_geo.y + 24 + padY
+    local padX = 9
+    local padY = 3
+    local buttonW = 27
+    local tcW = (state.tc_ms) and 150 or 105
+    local tsW = 90
+    local minW = (buttonW + padX)*3 + (tcW + padX)*4 + (tsW + padX)*2
+
+    if ((osc_param.display_aspect > 0) and (osc_param.playresx < minW)) then
+        osc_param.playresy = minW / osc_param.display_aspect
+        osc_param.playresx = osc_param.playresy * osc_param.display_aspect
+        osc_geo.y = osc_param.playresy - 54 - user_opts.barmargin
+        osc_geo.w = osc_param.playresx + 4
+    end
+
+    local line1 = osc_geo.y + 9 + padY
+    local line2 = osc_geo.y + 36 + padY
 
     osc_param.areas = {}
 
@@ -1159,77 +1200,82 @@ layouts["bottombar"] = function()
 
     -- Playlist prev/next
     geo = { x = osc_geo.x + padX, y = line1,
-            an = 4, w = 12, h = 12 - padY }
+            an = 4, w = 18, h = 18 - padY }
     lo = add_layout("pl_prev")
     lo.geometry = geo
-    lo.style = osc_styles.topButtons
+    lo.style = osc_styles.topButtonsBar
 
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
     lo = add_layout("pl_next")
     lo.geometry = geo
-    lo.style = osc_styles.topButtons
+    lo.style = osc_styles.topButtonsBar
 
-    -- Title
-    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an,
-            w = 1000, h = geo.h }
-    lo = add_layout("title")
-    lo.geometry = geo
-    lo.style = osc_styles.vidtitle
+    local t_l = geo.x + geo.w + padX
 
     -- Cache
     geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y,
-            an = 6, w = 100, h = geo.h }
+            an = 6, w = 150, h = geo.h }
     lo = add_layout("cache")
     lo.geometry = geo
-    lo.style = osc_styles.vidtitle
+    lo.style = osc_styles.vidtitleBar
+
+    local t_r = geo.x - geo.w - padX*2
+
+    -- Title
+    geo = { x = t_l, y = geo.y, an = 4,
+            w = t_r - t_l, h = geo.h }
+    lo = add_layout("title")
+    lo.geometry = geo
+    lo.style = osc_styles.vidtitleBar
+    lo.button.maxchars = math.floor(geo.w/7)
 
 
     -- Playback control buttons
     geo = { x = osc_geo.x + padX, y = line2, an = 4,
-            w = 18, h = 24 - padY*2}
+            w = buttonW, h = 36 - padY*2}
     lo = add_layout("playpause")
     lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
+    lo.style = osc_styles.smallButtonsBar
 
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
     lo = add_layout("ch_prev")
     lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
+    lo.style = osc_styles.smallButtonsBar
 
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
     lo = add_layout("ch_next")
     lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
-
+    lo.style = osc_styles.smallButtonsBar
 
     -- Left timecode
-    geo = { x = geo.x + geo.w + padX + 100, y = geo.y, an = 6, w = 100, h = geo.h }
+    geo = { x = geo.x + geo.w + padX + tcW, y = geo.y, an = 6,
+            w = tcW, h = geo.h }
     lo = add_layout("tc_left")
     lo.geometry = geo
-    lo.style = osc_styles.timecodes
+    lo.style = osc_styles.timecodesBar
 
     local sb_l = geo.x + padX
 
 
     -- Track selection buttons
     geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y, an = geo.an,
-            w = 60, h = geo.h }
+            w = tsW, h = geo.h }
     lo = add_layout("cy_sub")
     lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
+    lo.style = osc_styles.smallButtonsBar
 
     geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
     lo = add_layout("cy_audio")
     lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
+    lo.style = osc_styles.smallButtonsBar
 
 
     -- Right timecode
-    geo = { x = geo.x - geo.w - padX - 100, y = geo.y, an = 4,
-            w = 100, h = geo.h }
+    geo = { x = geo.x - geo.w - padX - tcW, y = geo.y, an = 4,
+            w = tcW, h = geo.h }
     lo = add_layout("tc_right")
     lo.geometry = geo
-    lo.style = osc_styles.timecodes
+    lo.style = osc_styles.timecodesBar
 
     local sb_r = geo.x - padX
 
@@ -1242,7 +1288,7 @@ layouts["bottombar"] = function()
 
     lo.geometry = geo
     lo.layer = 15
-    lo.style = osc_styles.timecodes
+    lo.style = osc_styles.timecodesBar
     lo.alpha[1] =
         math.min(255, user_opts.boxalpha + (255 - user_opts.boxalpha)*0.8)
 
@@ -1250,7 +1296,7 @@ layouts["bottombar"] = function()
     lo.geometry = geo
     lo.style = osc_styles.timecodes
     lo.slider.border = 0
-    lo.slider.tooltip_style = osc_styles.timePos
+    lo.slider.tooltip_style = osc_styles.timePosBar
     lo.slider.tooltip_an = 5
     lo.slider.stype = user_opts["seekbarstyle"]
 end
@@ -1258,16 +1304,28 @@ end
 layouts["topbar"] = function()
     local osc_geo = {
         x = -2,
-        y = 36 + user_opts.barmargin,
+        y = 54 + user_opts.barmargin,
         an = 1,
         w = osc_param.playresx + 4,
-        h = 38,
+        h = 56,
     }
 
-    local padX = 6
-    local padY = 2
-    local line1 = osc_geo.y - 24 - padY
-    local line2 = osc_geo.y - 6 - padY
+    local padX = 9
+    local padY = 3
+    local buttonW = 27
+    local tcW = (state.tc_ms) and 150 or 105
+    local tsW = 90
+    local minW = (buttonW + padX)*3 + (tcW + padX)*4 + (tsW + padX)*2
+
+    if ((osc_param.display_aspect > 0) and (osc_param.playresx < minW)) then
+        osc_param.playresy = minW / osc_param.display_aspect
+        osc_param.playresx = osc_param.playresy * osc_param.display_aspect
+        osc_geo.y = 54 + user_opts.barmargin
+        osc_geo.w = osc_param.playresx + 4
+    end
+
+    local line1 = osc_geo.y - 36 - padY
+    local line2 = osc_geo.y - 9 - padY
 
     osc_param.areas = {}
 
@@ -1295,7 +1353,7 @@ layouts["topbar"] = function()
 
     -- Playback control buttons
     geo = { x = osc_geo.x + padX, y = line1, an = 4,
-            w = 18, h = 24 - padY*2 }
+            w = buttonW, h = 36 - padY*2 }
     lo = add_layout("playpause")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsL
@@ -1312,8 +1370,8 @@ layouts["topbar"] = function()
 
 
     -- Left timecode
-    geo = { x = geo.x + geo.w + padX + 100, y = geo.y, an = 6,
-            w = 100, h = geo.h }
+    geo = { x = geo.x + geo.w + padX + tcW, y = geo.y, an = 6,
+            w = tcW, h = geo.h }
     lo = add_layout("tc_left")
     lo.geometry = geo
     lo.style = osc_styles.timecodes
@@ -1323,7 +1381,7 @@ layouts["topbar"] = function()
 
     -- Track selection buttons
     geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y, an = geo.an,
-            w = 60, h = geo.h }
+            w = tsW, h = geo.h }
     lo = add_layout("cy_sub")
     lo.geometry = geo
     lo.style = osc_styles.smallButtonsL
@@ -1335,8 +1393,8 @@ layouts["topbar"] = function()
 
 
     -- Right timecode
-    geo = { x = geo.x - geo.w - padX - 100, y = geo.y, an = 4,
-            w = 100, h = geo.h }
+    geo = { x = geo.x - geo.w - padX - tcW, y = geo.y, an = 4,
+            w = tcW, h = geo.h }
     lo = add_layout("tc_right")
     lo.geometry = geo
     lo.style = osc_styles.timecodes
@@ -1359,13 +1417,13 @@ layouts["topbar"] = function()
     lo.geometry = geo
     lo.style = osc_styles.timecodes
     lo.slider.border = 0
-    lo.slider.tooltip_style = osc_styles.timePos
+    lo.slider.tooltip_style = osc_styles.timePosBar
     lo.slider.stype = user_opts["seekbarstyle"]
     lo.slider.tooltip_an = 5
 
 
     -- Playlist prev/next
-    geo = { x = osc_geo.x + padX, y = line2, an = 4, w = 12, h = 12 - padY }
+    geo = { x = osc_geo.x + padX, y = line2, an = 4, w = 18, h = 18 - padY }
     lo = add_layout("pl_prev")
     lo.geometry = geo
     lo.style = osc_styles.topButtons
@@ -1375,19 +1433,24 @@ layouts["topbar"] = function()
     lo.geometry = geo
     lo.style = osc_styles.topButtons
 
-    -- Title
-    geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an,
-            w = 1000, h = geo.h }
-    lo = add_layout("title")
-    lo.geometry = geo
-    lo.style = osc_styles.vidtitle
+    local t_l = geo.x + geo.w + padX
 
     -- Cache
-    geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y, an = 6,
-            w = 100, h = geo.h }
+    geo = { x = osc_geo.x + osc_geo.w - padX, y = geo.y,
+            an = 6, w = 150, h = geo.h }
     lo = add_layout("cache")
     lo.geometry = geo
     lo.style = osc_styles.vidtitle
+
+    local t_r = geo.x - geo.w - padX*2
+
+    -- Title
+    geo = { x = t_l, y = geo.y, an = 4,
+            w = t_r - t_l, h = geo.h }
+    lo = add_layout("title")
+    lo.geometry = geo
+    lo.style = osc_styles.vidtitle
+    lo.button.maxchars = math.floor(geo.w/7)
 end
 
 -- Validate string type user options
@@ -1398,7 +1461,8 @@ function validate_user_opts()
     end
 
     if user_opts.seekbarstyle ~= "slider" and
-       user_opts.seekbarstyle ~= "bar" then
+       user_opts.seekbarstyle ~= "bar" and
+       user_opts.seekbarstyle ~= "knob" then
         msg.warn("Invalid setting \"" .. user_opts.seekbarstyle
             .. "\" for seekbarstyle")
         user_opts.seekbarstyle = "slider"
@@ -1683,8 +1747,10 @@ function osc_init()
             return (mp.get_property_osd("playback-time"))
         end
     end
-    ne.eventresponder["mouse_btn0_up"] =
-        function () state.tc_ms = not state.tc_ms end
+    ne.eventresponder["mouse_btn0_up"] = function ()
+        state.tc_ms = not state.tc_ms
+        request_init()
+    end
 
     -- tc_right (total/remaining time)
     ne = new_element("tc_right", "button")
@@ -2004,7 +2070,8 @@ function process_event(source, what)
 
             if n == 0 then
                 --click on background (does not work)
-            elseif n > 0 and not (elements[n].eventresponder[source .. "_" .. what] == nil) then
+            elseif n > 0 and not (n > #elements) and
+                not (elements[n].eventresponder[source .. "_" .. what] == nil) then
 
                 if mouse_hit(elements[n]) then
                     elements[n].eventresponder[source .. "_" .. what](elements[n])
@@ -2036,7 +2103,7 @@ function process_event(source, what)
 
             local n = state.active_element
 
-            if not (elements[n].eventresponder == nil) then
+            if not (n > #elements) and not (elements[n].eventresponder == nil) then
                 if not (elements[n].eventresponder[source] == nil) then
                     elements[n].eventresponder[source](elements[n])
                 end
@@ -2127,6 +2194,19 @@ mp.register_event("tracks-changed", request_init)
 mp.observe_property("playlist", nil, request_init)
 
 mp.register_script_message("osc-message", show_message)
+mp.register_script_message("osc-chapterlist", function(dur)
+    show_message(get_chapterlist(), dur)
+end)
+mp.register_script_message("osc-playlist", function(dur)
+    show_message(get_playlist(), dur)
+end)
+mp.register_script_message("osc-tracklist", function(dur)
+    local msg = {}
+    for k,v in pairs(nicetypes) do
+        table.insert(msg, get_tracklist(k))
+    end
+    show_message(table.concat(msg, '\n\n'), dur)
+end)
 
 mp.observe_property("fullscreen", "bool",
     function(name, val)

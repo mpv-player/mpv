@@ -249,6 +249,8 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
 
     bool hr_seek_very_exact = seek.exact == MPSEEK_VERY_EXACT;
     double current_time = get_current_time(mpctx);
+    if (current_time == MP_NOPTS_VALUE && seek.type == MPSEEK_RELATIVE)
+        return;
     if (current_time == MP_NOPTS_VALUE)
         current_time = 0;
     double seek_pts = MP_NOPTS_VALUE;
@@ -606,8 +608,8 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
 
     if (mpctx->restart_complete && c.size > 0) {
         if (mpctx->paused && mpctx->paused_for_cache) {
-            if (!opts->cache_pausing || s.ts_duration >= mpctx->cache_wait_time
-                || s.idle)
+            if (!s.underrun && (!opts->cache_pausing || s.idle ||
+                                s.ts_duration >= mpctx->cache_wait_time))
             {
                 double elapsed_time = now - mpctx->cache_stop_time;
                 if (elapsed_time > mpctx->cache_wait_time) {
@@ -906,7 +908,7 @@ int handle_force_window(struct MPContext *mpctx, bool force)
         };
         if (vo_reconfig(vo, &p) < 0)
             goto err;
-        vo_control(vo, VOCTRL_RESTORE_SCREENSAVER, NULL);
+        update_screensaver_state(mpctx);
         vo_set_paused(vo, true);
         vo_redraw(vo);
         mp_notify(mpctx, MPV_EVENT_VIDEO_RECONFIG, NULL);
@@ -1093,7 +1095,7 @@ void run_playloop(struct MPContext *mpctx)
     handle_dummy_ticks(mpctx);
 
     update_osd_msg(mpctx);
-    if (!mpctx->video_out)
+    if (mpctx->video_status == STATUS_EOF)
         update_subtitles(mpctx, mpctx->playback_pts);
 
     handle_eof(mpctx);

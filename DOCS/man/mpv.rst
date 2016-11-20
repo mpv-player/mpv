@@ -646,6 +646,15 @@ PROTOCOLS
     either aliases to documented protocols, or are just redirections to
     protocols implemented and documented in FFmpeg.
 
+``ytdl://...``
+    By default, the youtube-dl hook script (enabled by default for mpv CLI)
+    only looks at http URLs. Prefixing an URL with ``ytdl://`` forces it to
+    be always processed by the script. This can also be used to invoke special
+    youtube-dl functionality like playing a video by ID or invoking search.
+
+    Keep in mind that you can't pass youtube-dl command line options by this,
+    and you have to use ``--ytdl-raw-options`` instead.
+
 ``-``
     Play data from stdin.
 

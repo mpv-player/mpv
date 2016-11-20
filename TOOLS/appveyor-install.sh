@@ -29,7 +29,7 @@ pacman -S --noconfirm --needed \
     $MINGW_PACKAGE_PREFIX-libjpeg-turbo \
     $MINGW_PACKAGE_PREFIX-lua51 \
     $MINGW_PACKAGE_PREFIX-rubberband \
-    $MINGW_PACKAGE_PREFIX-uchardet-git
+    $MINGW_PACKAGE_PREFIX-uchardet
 
 # Delete unused packages to reduce space used in the Appveyor cache
 pacman -Sc --noconfirm

@@ -93,6 +93,7 @@ const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"yes" ,        HWDEC_AUTO},
     {"auto-copy",   HWDEC_AUTO_COPY},
     {"vdpau",       HWDEC_VDPAU},
+    {"vdpau-copy",  HWDEC_VDPAU_COPY},
     {"videotoolbox",HWDEC_VIDEOTOOLBOX},
     {"videotoolbox-copy",HWDEC_VIDEOTOOLBOX_COPY},
     {"vaapi",       HWDEC_VAAPI},
@@ -186,6 +187,7 @@ static const m_option_t mp_vo_opt_list[] = {
     OPT_FLAG("fs-black-out-screens", fs_black_out_screens, 0),
     OPT_FLAG("keepaspect", keepaspect, UPDATE_VIDEOPOS),
     OPT_FLAG("keepaspect-window", keepaspect_window, 0),
+    OPT_FLAG("hidpi-window-scale", hidpi_window_scale, 0),
 #if HAVE_X11
     OPT_CHOICE("x11-netwm", x11_netwm, 0,
                ({"auto", 0}, {"no", -1}, {"yes", 1})),
@@ -215,6 +217,7 @@ const struct m_sub_options vo_sub_opts = {
         .panscan = 0.0f,
         .keepaspect = 1,
         .keepaspect_window = 1,
+        .hidpi_window_scale = 1,
         .taskbar_progress = 1,
         .border = 1,
         .fit_border = 1,
@@ -301,7 +304,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("ytdl", lua_load_ytdl, UPDATE_BUILTIN_SCRIPTS),
     OPT_STRING("ytdl-format", lua_ytdl_format, 0),
     OPT_KEYVALUELIST("ytdl-raw-options", lua_ytdl_raw_options, 0),
-    OPT_FLAG("load-scripts", auto_load_scripts, M_OPT_FIXED),
+    OPT_FLAG("load-scripts", auto_load_scripts, 0),
 #endif
 
 // ------------------------- stream options --------------------
@@ -522,7 +525,8 @@ const m_option_t mp_opts[] = {
                ({"no", SOFTVOL_NO},
                 {"yes", SOFTVOL_YES},
                 {"auto", SOFTVOL_AUTO}),
-               .deprecation_message = "no replacement"),
+               .deprecation_message = "softvol is always active, and behaves "
+                                      "as if --softvol=yes is always set"),
     OPT_FLOATRANGE("volume-max", softvol_max, 0, 100, 1000),
     // values <0 for volume and mute are legacy and ignored
     OPT_FLOATRANGE("volume", softvol_volume, 0, -1, 1000),

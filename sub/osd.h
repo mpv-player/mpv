@@ -155,6 +155,8 @@ void osd_set_sub(struct osd_state *osd, int index, struct dec_sub *dec_sub);
 
 bool osd_get_render_subs_in_filter(struct osd_state *osd);
 void osd_set_render_subs_in_filter(struct osd_state *osd, bool s);
+void osd_set_force_video_pts(struct osd_state *osd, double video_pts);
+double osd_get_force_video_pts(struct osd_state *osd);
 
 struct osd_progbar_state {
     int type;           // <0: disabled, 1-255: symbol, else: no symbol

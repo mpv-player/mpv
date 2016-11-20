@@ -100,6 +100,22 @@ const struct m_opt_choice_alternatives mp_chroma_names[] = {
     {0}
 };
 
+void mp_colorspace_merge(struct mp_colorspace *orig, struct mp_colorspace *new)
+{
+    if (!orig->space)
+        orig->space = new->space;
+    if (!orig->levels)
+        orig->levels = new->levels;
+    if (!orig->primaries)
+        orig->primaries = new->primaries;
+    if (!orig->gamma)
+        orig->gamma = new->gamma;
+    if (!orig->nom_peak)
+        orig->nom_peak = new->nom_peak;
+    if (!orig->sig_peak)
+        orig->sig_peak = new->sig_peak;
+}
+
 // The short name _must_ match with what vf_stereo3d accepts (if supported).
 // The long name in comments is closer to the Matroska spec (StereoMode element).
 // The numeric index matches the Matroska StereoMode value. If you add entries

@@ -503,7 +503,7 @@ static double get_refresh_seek_pts(struct demux_internal *in)
         // Streams which didn't have any packets yet will return all packets,
         // other streams return packets only starting from the last position.
         if (ds->last_pos != -1 || ds->last_dts != MP_NOPTS_VALUE)
-            ds->refreshing = true;
+            ds->refreshing |= ds->selected;
     }
 
     // Seek back to player's current position, with a small offset added.
@@ -681,8 +681,7 @@ static void ds_get_packets(struct demux_stream *ds)
     struct demux_internal *in = ds->in;
     MP_DBG(in, "reading packet for %s\n", t);
     in->eof = false; // force retry
-    ds->eof = false;
-    while (ds->selected && !ds->head && !ds->eof) {
+    while (ds->selected && !ds->head) {
         ds->active = true;
         // Note: the following code marks EOF if it can't continue
         if (in->threading) {
@@ -692,6 +691,8 @@ static void ds_get_packets(struct demux_stream *ds)
         } else {
             read_packet(in);
         }
+        if (ds->eof)
+            break;
     }
 }
 
@@ -1287,16 +1288,18 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         demux_changed(in->d_thread, DEMUX_EVENT_ALL);
         demux_update(demuxer);
         stream_control(demuxer->stream, STREAM_CTRL_SET_READAHEAD, &(int){false});
-        struct timeline *tl = timeline_load(global, log, demuxer);
-        if (tl) {
-            struct demuxer_params params2 = {0};
-            params2.timeline = tl;
-            struct demuxer *sub = open_given_type(global, log,
-                                                  &demuxer_desc_timeline, stream,
-                                                  &params2, DEMUX_CHECK_FORCE);
-            if (sub)
-                return sub;
-            timeline_destroy(tl);
+        if (!(params && params->disable_timeline)) {
+            struct timeline *tl = timeline_load(global, log, demuxer);
+            if (tl) {
+                struct demuxer_params params2 = {0};
+                params2.timeline = tl;
+                struct demuxer *sub =
+                    open_given_type(global, log, &demuxer_desc_timeline, stream,
+                                    &params2, DEMUX_CHECK_FORCE);
+                if (sub)
+                    return sub;
+                timeline_destroy(tl);
+            }
         }
         return demuxer;
     }
@@ -1660,7 +1663,7 @@ static int cached_demux_control(struct demux_internal *in, int cmd, void *arg)
         int num_packets = 0;
         for (int n = 0; n < in->num_streams; n++) {
             struct demux_stream *ds = in->streams[n]->ds;
-            if (ds->active) {
+            if (ds->active && !(!ds->head && ds->eof)) {
                 r->underrun |= !ds->head && !ds->eof;
                 r->ts_range[0] = MP_PTS_MAX(r->ts_range[0], ds->base_ts);
                 r->ts_range[1] = MP_PTS_MIN(r->ts_range[1], ds->last_ts);

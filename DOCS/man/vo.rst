@@ -159,7 +159,7 @@ Available video output drivers are:
         means timing is somewhat less accurate than without compositing, but
         with the composited mode behavior of the NVIDIA driver, there is no
         hard playback speed limit even without the disabled logic. Enabled by
-        default, use ``no-composite-detect`` to disable.
+        default, use ``--vo-vdpau-composite-detect=no`` to disable.
     ``--vo-vdpau-queuetime-windowed=<number>`` and ``queuetime-fs=<number>``
         Use VDPAU's presentation queue functionality to queue future video
         frame changes at most this many milliseconds in advance (default: 50).
@@ -387,6 +387,28 @@ Available video output drivers are:
 
     .. note:: This driver is a joke.
 
+``tct``
+    Color Unicode art video output driver that works on a text console.
+    Depends on support of true color by modern terminals to display the images
+    at full color range. On Windows it requires an ansi terminal such as mintty.
+
+    ``--vo-tct-algo=<algo>``
+        Select how to write the pixels to the terminal.
+
+        half-blocks
+            Uses unicode LOWER HALF BLOCK character to achieve higher vertical
+            resolution. (Default.)
+        plain
+            Uses spaces. Causes vertical resolution to drop twofolds, but in
+            theory works in more places.
+
+    ``--vo-tct-width=<width>``  ``--vo-tct-height=<height>``
+        Assume the terminal has the specified character width and/or height.
+        These default to 80x25 if the terminal size cannot be determined.
+
+    ``--vo-tct-256=<yes|no>`` (default: no)
+        Use 256 colors - for terminals which don't support true color.
+
 ``image``
     Output each frame into an image file in the current directory. Each file
     takes the frame number padded with leading zeros as name.
@@ -491,7 +513,7 @@ Available video output drivers are:
     Video output driver using Kernel Mode Setting / Direct Rendering Manager.
     Should be used when one doesn't want to install full-blown graphical
     environment (e.g. no X). Does not support hardware acceleration (if you
-    need this, check the ``drm-egl`` backend for ``opengl`` VO).
+    need this, check the ``drm`` backend for ``opengl`` VO).
 
     The following global options are supported by this video output:
 

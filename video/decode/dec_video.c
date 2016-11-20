@@ -64,6 +64,7 @@ void video_reset(struct dec_video *d_video)
     d_video->decoded_pts = MP_NOPTS_VALUE;
     d_video->codec_pts = MP_NOPTS_VALUE;
     d_video->codec_dts = MP_NOPTS_VALUE;
+    d_video->has_broken_decoded_pts = 0;
     d_video->last_format = d_video->fixed_format = (struct mp_image_params){0};
     d_video->dropped_frames = 0;
     d_video->current_state = DATA_AGAIN;
@@ -245,6 +246,7 @@ static void fix_image_params(struct dec_video *d_video,
     p.stereo_out = opts->video_stereo_mode;
 
     // Detect colorspace from resolution.
+    mp_colorspace_merge(&p.color, &c->color);
     mp_image_params_guess_csp(&p);
 
     d_video->last_format = *params;
@@ -316,8 +318,14 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
         pts = dts;
 
     if (!opts->correct_pts || pts == MP_NOPTS_VALUE) {
-        if (opts->correct_pts && !d_video->header->missing_timestamps)
-            MP_WARN(d_video, "No video PTS! Making something up.\n");
+        if (opts->correct_pts && !d_video->header->missing_timestamps) {
+            if (d_video->has_broken_decoded_pts <= 1) {
+                MP_WARN(d_video, "No video PTS! Making something up.\n");
+                if (d_video->has_broken_decoded_pts == 1)
+                    MP_WARN(d_video, "Ignoring further missing PTS warnings.\n");
+                d_video->has_broken_decoded_pts++;
+            }
+        }
 
         double frame_time = 1.0f / (d_video->fps > 0 ? d_video->fps : 25);
         double base = d_video->first_packet_pdts;
@@ -458,12 +466,15 @@ void video_work(struct dec_video *d_video)
         struct demux_packet *new_segment = d_video->new_segment;
         d_video->new_segment = NULL;
 
-        // Could avoid decoder reinit; would still need flush.
-        d_video->codec = new_segment->codec;
-        if (d_video->vd_driver)
-            d_video->vd_driver->uninit(d_video);
-        d_video->vd_driver = NULL;
-        video_init_best_codec(d_video);
+        if (d_video->codec == new_segment->codec) {
+            video_reset(d_video);
+        } else {
+            d_video->codec = new_segment->codec;
+            if (d_video->vd_driver)
+                d_video->vd_driver->uninit(d_video);
+            d_video->vd_driver = NULL;
+            video_init_best_codec(d_video);
+        }
 
         d_video->start = new_segment->start;
         d_video->end = new_segment->end;

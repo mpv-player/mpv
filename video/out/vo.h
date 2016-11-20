@@ -223,6 +223,7 @@ struct vo_frame {
     // a frame is guaranteed not to change (instant redraws will use the same
     // ID). frames[n] has the ID frame_id+n, with the guarantee that frame
     // drops or reconfigs will keep the guarantee.
+    // The ID is never 0 (unless num_frames==0). IDs are strictly monotonous.
     uint64_t frame_id;
 };
 

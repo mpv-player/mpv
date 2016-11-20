@@ -10,7 +10,7 @@
 /** Use gcc attribute to check printf fns.  a1 is the 1-based index of
  * the parameter containing the format, and a2 the index of the first
  * argument. **/
-#ifdef __MINGW32__
+#if defined(__MINGW32__) && !defined(__clang__)
 // MinGW maps "printf" to the non-standard MSVCRT functions, even if
 // __USE_MINGW_ANSI_STDIO is defined and set to 1. We need to use "gnu_printf",
 // which isn't necessarily available on other GCC compatible compilers.

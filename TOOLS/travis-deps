@@ -107,7 +107,7 @@ class Libav < TravisDepsBuilder
   end
 
   def configure
-    [super, "--cc=#{ENV['CC']}"].join(" ")
+    [super, "--cc=#{ENV['CC']} --disable-asm"].join(" ")
   end
 end
 

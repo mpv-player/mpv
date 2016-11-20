@@ -35,6 +35,7 @@
 #include "common/global.h"
 
 extern const struct ao_driver audio_out_oss;
+extern const struct ao_driver audio_out_audiounit;
 extern const struct ao_driver audio_out_coreaudio;
 extern const struct ao_driver audio_out_coreaudio_exclusive;
 extern const struct ao_driver audio_out_rsound;
@@ -52,6 +53,9 @@ extern const struct ao_driver audio_out_sdl;
 
 static const struct ao_driver * const audio_out_drivers[] = {
 // native:
+#if HAVE_AUDIOUNIT
+    &audio_out_audiounit,
+#endif
 #if HAVE_COREAUDIO
     &audio_out_coreaudio,
 #endif
@@ -525,14 +529,10 @@ struct ao_hotplug *ao_hotplug_create(struct mpv_global *global,
 
 static void get_devices(struct ao *ao, struct ao_device_list *list)
 {
-    int num = list->num_devices;
     if (ao->driver->list_devs) {
         ao->driver->list_devs(ao, list);
     } else {
-        char name[80] = "Default";
-        if (num > 1)
-            mp_snprintf_cat(name, sizeof(name), " (%s)", ao->driver->name);
-        ao_device_list_add(list, ao, &(struct ao_device_desc){"", name});
+        ao_device_list_add(list, ao, &(struct ao_device_desc){"", ""});
     }
 }
 
@@ -595,6 +595,19 @@ void ao_device_list_add(struct ao_device_list *list, struct ao *ao,
 {
     struct ao_device_desc c = *e;
     const char *dname = ao->driver->name;
+    char buf[80];
+    if (!c.desc || !c.desc[0]) {
+        if (c.name && c.name[0]) {
+            c.desc = c.name;
+        } else if (list->num_devices) {
+            // Assume this is the default device.
+            snprintf(buf, sizeof(buf), "Default (%s)", dname);
+            c.desc = buf;
+        } else {
+            // First default device (and maybe the only one).
+            c.desc = "Default";
+        }
+    }
     c.name = c.name[0] ? talloc_asprintf(list, "%s/%s", dname, c.name)
                        : talloc_strdup(list, dname);
     c.desc = talloc_strdup(list, c.desc);
