@@ -19,6 +19,15 @@ Interface changes
 
 ::
 
+ --- mpv 0.22.0 ---
+    - the "audio-device-list" property now sets empty device description to the
+      device name as a fallback
+    - add --hidpi-window-scale option for macOS
+    - add audiounit audio output for iOS
+    - make --start-time work with --rebase-start-time=no
+    - add --opengl-early-flush=auto mode
+    - add --hwdec=vdpau-copy, deprecate vf_vdpaurb
+    - add tct video output for true-color and 256-color terminals
  --- mpv 0.21.0 ---
     - unlike in older versions, setting options at runtime will now take effect
       immediately (see for example issue #3281). On the other hand, it will also
@@ -95,8 +104,6 @@ Interface changes
       --terminal, --osc, --ytdl, can all be enable/disabled after
       mpv_initialize() - this can be extended to other still fixed options
       on user requests)
-    - the "audio-device-list" property now sets empty device description to the
-      device name as a fallback
  --- mpv 0.20.0 ---
     - add --image-display-duration option - this also means that image duration
       is not influenced by --mf-fps anymore in the general case (this is an

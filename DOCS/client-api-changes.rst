@@ -32,7 +32,7 @@ API changes
 
 ::
 
- --- mpv 0.21.0 ---
+ --- mpv 0.22.0 ---
  1.23   - deprecate setting "no-" options via mpv_set_option*(). For example,
           instead of "no-video=" you should set "video=no".
         - do not override the SIGPIPE signal handler anymore. This was done as
