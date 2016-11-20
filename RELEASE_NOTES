@@ -1,3 +1,93 @@
+Release 0.22.0
+==============
+
+Features
+--------
+
+Added
+~~~~~
+
+- audio/out: add AudioUnit output driver for iOS
+- demux_mkv: parse Matroska colorimetry metadata
+- filter_kernels: add ability to taper kernels/windows, add tukey window
+- osc: add seekbarstyle=knob (#2365)
+- video/out: add tct as modern caca alternative for true-color and 256-color terminals
+- video: add --hwdec=vdpau-copy mode
+
+
+Deprecated
+~~~~~~~~~~
+
+- vf_vdpaurb: deprecated in favor of --hwdec=vdpau-copy
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- --opengl-early-flush=auto
+- --scale-taper, --scale-wtaper
+- --scale-wblur
+- macOS: --hidpi-window-scale (#3716)
+- osc: add script message handlers for chapter/track/playlists
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- Apply --autofit-larger after --autofit-smaller (#3753)
+- Set subtitle track title to indicate hearing/visual impaired tracks
+- ao_alsa: disable chmap API use for mono/stereo (#2905, #3045)
+- build: add required failure message for libavfilter check (#3692)
+- build: fix compilation with mingw-w64/Clang (#3800)
+- build: make VideoToolbox available on iOS
+- command: fix reset-on-next-file=all and tv-freq option (#3708)
+- command: if window-scale can't be set properly, set it as option (#3724)
+- demux_mkv: don't recursively resolve timeline for opened reference files
+- demux_mkv: fix ordered chapter sources with ordered editions
+- opengl: compile against iOS OpenGLES implementation
+- options: handle legacy no-* sub-options
+- osc: add alpha animation to tooltip (fix lingering tooltip)
+- osc: change default deadzonesize to 0.5
+- osc: don't wrap the title
+- osc: fix crash after reaching a certain position in limited lists (#3691)
+- osc: fix crash with no chapters
+- osc: fix crashes when dragging seekbar across file changes (#3210)
+- osc: fix displaying only half of the entries when at the end of a list
+- osc: fix missing chapter ticks with seekbarstyle=bar
+- osc: slimbox: fix clipping with seekbarstyle=bar (#3737)
+- osc: top/bottombar: also scale when min-width is reached to match box/slimbox behavior
+- osc: top/bottombar: dynamically size timecodes according to timems
+- osc: top/bottombar: rescale layout to same size with scale=1
+- osc: top/bottombar: scale title if too large like box
+- player: consistently initialize screensaver state with --force-window
+- player: enable no-video subtitle display on coverart too
+- player: make --start-time work with --rebase-start-time=no
+- player: make sure non-video subtitle rendering is reset if video resumes (#3770)
+- player: removing last playlist entry while looping should not stop (#3808)
+- player: show subtitles on VO if --force-window is used (#3684)
+- player: speed up audio/video re-sync when there is a huge delay
+- vdpau: fix hwdec uninit (#3788)
+- vo_opengl: blend against background color for --alpha=blend
+- vo_opengl: context_rpi: fix stdatomic usage (#3699)
+- vo_opengl: fix --blend-subtitles handling (#3773)
+- vo_opengl: fix redrawing with hardware decoding (#3773)
+- vo_opengl: partially re-enable glFlush() calls (#3670)
+- ytdl_hook: sort chapters by time
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API, and DOCS/interface-changes.rst for a history
+of changes to other user-visible interfaces.
+
+A complete changelog can be seen by running `git log v0.21.0..v0.22.0`
+in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.21.0...v0.22.0 or
+https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.21.0..v0.22.0
+
+
 Release 0.21.0
 ==============
 
