@@ -67,7 +67,7 @@ Interface changes
         - "fps" -> "container-fps"
         - "idle" -> "idle-active"
         - "cache" -> "cache-percent"
-      the old names are deprecated and will change behavior in mpv 0.22.0.
+      the old names are deprecated and will change behavior in mpv 0.23.0.
     - remove deprecated "hwdec-active" and "hwdec-detected" properties
     - deprecate the ao and vo auto-profiles (they never made any sense)
     - deprecate "--vo=direct3d_shaders" - use "--vo=direct3d" instead.
@@ -81,17 +81,17 @@ Interface changes
       now always sets the device, not the span or speed to be played. No
       separating extra "/" is needed. The hidden --cdda-device options is also
       deleted (it was redundant with the documented --cdrom-device).
-    - deprecate --vo=rpi. It will be removed in mpv 0.22.0. Its functionality
+    - deprecate --vo=rpi. It will be removed in mpv 0.23.0. Its functionality
       was folded into --vo=opengl, which now uses RPI hardware decoding by
       treating it as a hardware overlay (without applying GL filtering). Also
-      to be changed in 0.22.0: the --fs flag will be reset to "no" by default
+      to be changed in 0.23.0: the --fs flag will be reset to "no" by default
       (like on the other platforms).
     - deprecate --mute=auto (informally has been since 0.18.1)
     - deprecate "resume" and "suspend" IPC commands. They will be completely
-      removed in 0.22.0.
+      removed in 0.23.0.
     - deprecate mp.suspend(), mp.resume(), mp.resume_all() Lua scripting
       commands, as well as setting mp.use_suspend. They will be completely
-      removed in 0.22.0.
+      removed in 0.23.0.
     - the "seek" command's absolute seek mode will now interpret negative
       seek times as relative from the end of the file (and clamps seeks that
       still go before 0)

@@ -38,7 +38,7 @@ API changes
         - do not override the SIGPIPE signal handler anymore. This was done as
           workaround for the FFmpeg TLS code, which has been fixed long ago.
         - deprecate mpv_suspend() and mpv_resume(). They will be stubbed out
-          in mpv 0.22.0.
+          in mpv 0.23.0.
         - make mpv_set_property() work to some degree before mpv_initialize().
           It can now be used instead of mpv_set_option().
         - semi-deprecate mpv_set_option()/mpv_set_option_string(). You should

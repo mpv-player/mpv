@@ -815,7 +815,7 @@ void mpv_free_node_contents(mpv_node *node);
  *              - deprecated options shadowed by properties:
  *                - chapter (option deprecated in 0.21.0)
  *                - playlist-pos (option deprecated in 0.21.0)
- *       The deprecated properties will be removed in mpv 0.22.0.
+ *       The deprecated properties will be removed in mpv 0.23.0.
  *
  * @param name Option name. This is the same as on the mpv command line, but
  *             without the leading "--".
@@ -929,7 +929,7 @@ int mpv_command_node_async(mpv_handle *ctx, uint64_t reply_userdata,
  *       In some cases, properties and options still conflict. In these cases,
  *       mpv_set_property() accesses the options before mpv_initialize(), and
  *       the properties after mpv_initialize(). These conflicts will be removed
- *       in mpv 0.22.0. See mpv_set_option() for further remarks.
+ *       in mpv 0.23.0. See mpv_set_option() for further remarks.
  *
  * @param name The property name. See input.rst for a list of properties.
  * @param format see enum mpv_format.
