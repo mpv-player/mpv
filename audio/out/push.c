@@ -453,8 +453,9 @@ int ao_play_silence(struct ao *ao, int samples)
     assert(ao->api == &ao_api_push);
     if (samples <= 0 || !af_fmt_is_pcm(ao->format) || !ao->driver->play)
         return 0;
-    char *p = talloc_size(NULL, samples * ao->sstride);
-    af_fill_silence(p, samples * ao->sstride, ao->format);
+    int bytes = af_fmt_to_bytes(ao->format) * samples * ao->channels.num;
+    char *p = talloc_size(NULL, bytes);
+    af_fill_silence(p, bytes, ao->format);
     void *tmp[MP_NUM_CHANNELS];
     for (int n = 0; n < MP_NUM_CHANNELS; n++)
         tmp[n] = p;
