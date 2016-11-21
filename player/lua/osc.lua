@@ -1755,8 +1755,7 @@ function osc_init()
     -- tc_right (total/remaining time)
     ne = new_element("tc_right", "button")
 
-    ne.visible = (not (mp.get_property("duration") == nil))
-        and (mp.get_property_number("duration") > 0)
+    ne.visible = (mp.get_property_number("duration", 0) > 0)
     ne.content = function ()
         if (state.rightTC_trem) then
             if state.tc_ms then
