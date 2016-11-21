@@ -101,7 +101,8 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     int state = atomic_load(&p->state);
     if (!IS_PLAYING(state)) {
         set_state(ao, AO_STATE_PLAY);
-        ao->driver->resume(ao);
+        if (!ao->stream_silence)
+            ao->driver->resume(ao);
     }
 
     return write_samples;
@@ -203,7 +204,8 @@ static void pause(struct ao *ao)
 static void resume(struct ao *ao)
 {
     set_state(ao, AO_STATE_PLAY);
-    ao->driver->resume(ao);
+    if (!ao->stream_silence)
+        ao->driver->resume(ao);
 }
 
 static bool get_eof(struct ao *ao)
