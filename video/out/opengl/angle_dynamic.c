@@ -4,6 +4,7 @@
 #define ANGLE_NO_ALIASES
 #include "angle_dynamic.h"
 
+#include "config.h"
 #include "common/common.h"
 
 #define ANGLE_DECL(NAME, VAR) \
@@ -28,6 +29,10 @@ static void angle_do_load(void)
 
 bool angle_load(void)
 {
+#if !HAVE_EGL_ANGLE_LIB
     pthread_once(&angle_load_once, angle_do_load);
     return angle_loaded;
+#else
+    return true;
+#endif
 }

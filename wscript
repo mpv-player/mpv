@@ -736,6 +736,15 @@ video_output_features = [
         'func': check_statement(['EGL/egl.h', 'EGL/eglext.h'],
                                 'int x = EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE')
     } , {
+        'name': '--egl-angle-lib',
+        'desc': 'OpenGL Win32 ANGLE Library',
+        'deps': [ 'egl-angle' ],
+        'groups': [ 'gl' ],
+        'func': check_statement(['EGL/egl.h'],
+                                'eglCreateWindowSurface(0, 0, 0, 0)',
+                                cflags="-DGL_APICALL= -DEGLAPI= -DANGLE_NO_ALIASES",
+                                lib=['EGL', 'GLESv2', 'dxguid', 'd3d9', 'gdi32', 'stdc++'])
+    } , {
         'name': '--vdpau',
         'desc': 'VDPAU acceleration',
         'deps': [ 'x11' ],
