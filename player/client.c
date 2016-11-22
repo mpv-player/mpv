@@ -329,59 +329,11 @@ void mpv_set_wakeup_callback(mpv_handle *ctx, void (*cb)(void *d), void *d)
 
 void mpv_suspend(mpv_handle *ctx)
 {
-    bool do_suspend = false;
-
-    MP_WARN(ctx, "warning: mpv_suspend() is deprecated.\n");
-
-    pthread_mutex_lock(&ctx->lock);
-    if (ctx->suspend_count == INT_MAX) {
-        MP_ERR(ctx, "suspend counter overflow");
-    } else {
-        do_suspend = ctx->suspend_count == 0;
-        ctx->suspend_count++;
-    }
-    pthread_mutex_unlock(&ctx->lock);
-
-    if (do_suspend) {
-        mp_dispatch_lock(ctx->mpctx->dispatch);
-        ctx->mpctx->suspend_count++;
-        mp_dispatch_unlock(ctx->mpctx->dispatch);
-    }
+    MP_ERR(ctx, "mpv_suspend() is deprecated and does nothing.\n");
 }
 
 void mpv_resume(mpv_handle *ctx)
 {
-    bool do_resume = false;
-
-    pthread_mutex_lock(&ctx->lock);
-    if (ctx->suspend_count == 0) {
-        MP_ERR(ctx, "suspend counter underflow");
-    } else {
-        do_resume = ctx->suspend_count == 1;
-        ctx->suspend_count--;
-    }
-    pthread_mutex_unlock(&ctx->lock);
-
-    if (do_resume) {
-        mp_dispatch_lock(ctx->mpctx->dispatch);
-        ctx->mpctx->suspend_count--;
-        mp_dispatch_unlock(ctx->mpctx->dispatch);
-        mp_dispatch_interrupt(ctx->mpctx->dispatch);
-    }
-}
-
-void mp_resume_all(mpv_handle *ctx)
-{
-    pthread_mutex_lock(&ctx->lock);
-    bool do_resume = ctx->suspend_count > 0;
-    ctx->suspend_count = 0;
-    pthread_mutex_unlock(&ctx->lock);
-
-    if (do_resume) {
-        mp_dispatch_lock(ctx->mpctx->dispatch);
-        ctx->mpctx->suspend_count--;
-        mp_dispatch_unlock(ctx->mpctx->dispatch);
-    }
 }
 
 static void lock_core(mpv_handle *ctx)
@@ -396,8 +348,6 @@ static void unlock_core(mpv_handle *ctx)
 
 void mpv_wait_async_requests(mpv_handle *ctx)
 {
-    mp_resume_all(ctx);
-
     pthread_mutex_lock(&ctx->lock);
     while (ctx->reserved_events || ctx->properties_updating)
         wait_wakeup(ctx, INT64_MAX);

@@ -211,7 +211,7 @@ extern "C" {
  * relational operators (<, >, <=, >=).
  */
 #define MPV_MAKE_VERSION(major, minor) (((major) << 16) | (minor) | 0UL)
-#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 23)
+#define MPV_CLIENT_API_VERSION MPV_MAKE_VERSION(1, 24)
 
 /**
  * Return the MPV_CLIENT_API_VERSION the mpv source has been compiled with.
@@ -506,6 +506,9 @@ mpv_handle *mpv_create_client(mpv_handle *ctx, const char *name);
 int mpv_load_config_file(mpv_handle *ctx, const char *filename);
 
 /**
+ * This does nothing since mpv 0.23.0 (API version 1.24). Below is the
+ * description of the old behavior.
+ *
  * Stop the playback thread. This means the core will stop doing anything, and
  * only run and answer to client API requests. This is sometimes useful; for
  * example, no new frame will be queued to the video output, so doing requests

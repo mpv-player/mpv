@@ -452,10 +452,15 @@ end
 
 mp.use_suspend = false
 
+local suspend_warned = false
+
 function mp.dispatch_events(allow_wait)
     local more_events = true
     if mp.use_suspend then
-        mp.suspend()
+        if not suspend_warned then
+            mp.msg.error("mp.use_suspend is now ignored.")
+            suspend_warned = true
+        end
     end
     while mp.keep_running do
         local wait = 0
@@ -475,11 +480,6 @@ function mp.dispatch_events(allow_wait)
             end
         end
         local e = mp.wait_event(wait)
-        -- Empty the event queue while suspended; otherwise, each
-        -- event will keep us waiting until the core suspends again.
-        if mp.use_suspend then
-            mp.suspend()
-        end
         more_events = false
         if e.event ~= "none" then
             call_event_handlers(e)

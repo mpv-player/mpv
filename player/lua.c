@@ -393,7 +393,6 @@ static int load_lua(struct mpv_handle *client, const char *fname)
     r = 0;
 
 error_out:
-    mp_resume_all(client);
     if (ctx->state)
         lua_close(ctx->state);
     talloc_free(ctx);
@@ -451,22 +450,17 @@ static int script_find_config_file(lua_State *L)
 static int script_suspend(lua_State *L)
 {
     struct script_ctx *ctx = get_ctx(L);
-    MP_WARN(ctx, "mp.suspend() (possibly triggered by mp.use_suspend) is "
-                 "deprecated.\n");
-    mpv_suspend(ctx->client);
+    MP_ERR(ctx, "mp.suspend() is deprecated and does nothing.\n");
     return 0;
 }
 
 static int script_resume(lua_State *L)
 {
-    struct script_ctx *ctx = get_ctx(L);
-    mpv_resume(ctx->client);
     return 0;
 }
 
 static int script_resume_all(lua_State *L)
 {
-    mp_resume_all(get_ctx(L)->client);
     return 0;
 }
 
@@ -1134,8 +1128,6 @@ static int script_subprocess(lua_State *L)
     luaL_checktype(L, 1, LUA_TTABLE);
     void *tmp = mp_lua_PITA(L);
 
-    mp_resume_all(ctx->client);
-
     lua_getfield(L, 1, "args"); // args
     int num_args = mp_lua_len(L, -1);
     char *args[256];
@@ -1192,8 +1184,6 @@ static int script_subprocess_detached(lua_State *L)
     struct script_ctx *ctx = get_ctx(L);
     luaL_checktype(L, 1, LUA_TTABLE);
     void *tmp = mp_lua_PITA(L);
-
-    mp_resume_all(ctx->client);
 
     lua_getfield(L, 1, "args"); // args
     int num_args = mp_lua_len(L, -1);

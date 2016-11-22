@@ -62,9 +62,6 @@ void mp_wait_events(struct MPContext *mpctx)
 
     mp_dispatch_queue_process(mpctx->dispatch, mpctx->sleeptime);
 
-    while (mpctx->suspend_count)
-        mp_dispatch_queue_process(mpctx->dispatch, 100);
-
     mpctx->in_dispatch = false;
     mpctx->sleeptime = INFINITY;
 

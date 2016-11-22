@@ -32,6 +32,8 @@ API changes
 
 ::
 
+ --- mpv 0.23.0 ---
+ 1.24   - the deprecated mpv_suspend() and mpv_resume() APIs now do nothing.
  --- mpv 0.22.0 ---
  1.23   - deprecate setting "no-" options via mpv_set_option*(). For example,
           instead of "no-video=" you should set "video=no".

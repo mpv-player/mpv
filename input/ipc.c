@@ -384,12 +384,6 @@ static char *json_execute_command(struct mpv_handle *client, void *ta_parent,
 
         rc = mpv_request_log_messages(client,
                                       cmd_node->u.list->values[1].u.string);
-    } else if (!strcmp("suspend", cmd)) {
-        mpv_suspend(client);
-        rc = MPV_ERROR_SUCCESS;
-    } else if (!strcmp("resume", cmd)) {
-        mpv_resume(client);
-        rc = MPV_ERROR_SUCCESS;
     } else if (!strcmp("enable_event", cmd) ||
                !strcmp("disable_event", cmd))
     {
