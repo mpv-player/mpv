@@ -74,7 +74,7 @@ const struct m_sub_options tv_params_conf = {
         OPT_INT("audiorate", audiorate, 0),
         OPT_STRING("driver", driver, 0),
         OPT_STRING("device", device, 0),
-        OPT_STRING("freq", freq, 0),
+        OPT_FLOAT("freq", freq, 0),
         OPT_STRING("channel", channel, 0),
         OPT_STRING("chanlist", chanlist, 0),
         OPT_STRING("norm", norm, 0),
@@ -602,7 +602,7 @@ int open_tv(tvi_handle_t *tvh)
     /* we need to set frequency */
     if (tvh->tv_param->freq)
     {
-        unsigned long freq = atof(tvh->tv_param->freq)*16;
+        unsigned long freq = tvh->tv_param->freq * 16;
 
         /* set freq in MHz */
         funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &freq);

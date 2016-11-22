@@ -27,7 +27,7 @@
 struct mp_log;
 
 typedef struct tv_params {
-    char *freq;
+    float freq;
     char *channel;
     char *chanlist;
     char *norm;
