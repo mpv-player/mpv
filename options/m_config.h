@@ -92,8 +92,6 @@ typedef struct m_config {
     // For the command line parser
     int recursion_depth;
 
-    bool subopt_deprecation_warning;
-
     void *optstruct; // struct mpopts or other
 
     int shadow_size;
@@ -196,10 +194,6 @@ int m_config_set_option_raw_direct(struct m_config *config,
 struct mpv_node;
 int m_config_set_option_node(struct m_config *config, bstr name,
                              struct mpv_node *data, int flags);
-
-
-int m_config_parse_suboptions(struct m_config *config, char *name,
-                              char *subopts);
 
 struct m_config_option *m_config_get_co_raw(const struct m_config *config,
                                             struct bstr name);

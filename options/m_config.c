@@ -745,9 +745,6 @@ int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
     }
 }
 
-static int parse_subopts(struct m_config *config, char *name, char *prefix,
-                         struct bstr param, int flags);
-
 // Used to turn "--no-foo" into "--foo=no".
 static struct m_config_option *m_config_find_negation_opt(struct m_config *config,
                                                           struct bstr *name)
@@ -813,15 +810,9 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
 
     // Option with children are a bit different to parse
     if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD) {
-        char prefix[110];
-        if (!config->subopt_deprecation_warning) {
-            MP_WARN(config, "Suboptions (--%.*s=...) are deprecated. Use "
-                    "flat options instead.\n", BSTR_P(name));
-            config->subopt_deprecation_warning = true;
-        }
-        assert(strlen(co->name) < 100);
-        sprintf(prefix, "%s-", co->name);
-        return parse_subopts(config, (char *)co->name, prefix, param, flags);
+        MP_FATAL(config, "Suboptions (--%.*s=...) have been removed. Use "
+                 "flat options instead.\n", BSTR_P(name));
+        return M_OPT_INVALID;
     }
 
     union m_option_value val = {0};
@@ -838,48 +829,6 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
 
     m_option_free(co->opt, &val);
 
-    return r;
-}
-
-static int parse_subopts(struct m_config *config, char *name, char *prefix,
-                         struct bstr param, int flags)
-{
-    char **lst = NULL;
-    // Split the argument into child options
-    int r = m_option_type_subconfig.parse(config->log, NULL, bstr0(""), param, &lst);
-    if (r < 0)
-        return r;
-    // Parse the child options
-    for (int i = 0; lst && lst[2 * i]; i++) {
-        // Build the full name
-        char n[110];
-        if (snprintf(n, 110, "%s%s", prefix, lst[2 * i]) > 100)
-            abort();
-        r = m_config_parse_option(config,bstr0(n), bstr0(lst[2 * i + 1]), flags);
-        if (r < 0) {
-            if (r != M_OPT_EXIT) {
-                MP_ERR(config, "Error parsing suboption %s/%s (%s)\n",
-                       name, lst[2 * i], m_option_strerror(r));
-                r = M_OPT_INVALID;
-            }
-            break;
-        }
-    }
-    talloc_free(lst);
-    return r;
-}
-
-int m_config_parse_suboptions(struct m_config *config, char *name,
-                              char *subopts)
-{
-    if (!subopts || !*subopts)
-        return 0;
-    int r = parse_subopts(config, name, "", bstr0(subopts), 0);
-    if (r < 0 && r != M_OPT_EXIT) {
-        MP_ERR(config, "Error parsing suboption %s (%s)\n",
-               name, m_option_strerror(r));
-        r = M_OPT_INVALID;
-    }
     return r;
 }
 

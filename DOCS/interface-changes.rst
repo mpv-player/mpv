@@ -30,6 +30,8 @@ Interface changes
         - "audio-channels" (use "audio-params/channel-count")
         - "audio-format" (use "audio-codec-name")
       (the properties equivalent to the old semantics are in parentheses)
+    - remove deprecated global sub-options (like -demuxer-rawaudio format=...),
+      use flat options (like --demuxer-rawaudio-format=...)
  --- mpv 0.22.0 ---
     - the "audio-device-list" property now sets empty device description to the
       device name as a fallback
