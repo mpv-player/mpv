@@ -429,7 +429,6 @@ static bool create_device(struct lavc_ctx *s, BOOL thread_safe)
     HRESULT hr;
     struct priv *p = s->hwdec_priv;
 
-    d3d_load_dlls();
     if (!d3d11_dll) {
         MP_ERR(p, "Failed to load D3D11 library\n");
         return false;
@@ -491,6 +490,11 @@ static int d3d11va_init(struct lavc_ctx *s)
     struct priv *p = talloc_zero(NULL, struct priv);
     if (!p)
         return -1;
+
+    // Unconditionally load Direct3D DLLs, even when using a VO-supplied D3D11
+    // device. This prevents a crash that occurs at least with NVIDIA drivers,
+    // where D3D objects are accessed after ANGLE unloads d3d11.dll.
+    d3d_load_dlls();
 
     s->hwdec_priv = p;
     p->log = mp_log_new(s, s->log, "d3d11va");
