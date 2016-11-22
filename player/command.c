@@ -277,26 +277,6 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
 {
     struct MPContext *mpctx = ctx;
 
-    // These options are too inconsistent as they could be pulled through the
-    // property layer. Ideally we'd remove these inconsistencies in the future,
-    // though the actual problem is compatibility to user-expected behavior.
-    // What matters is whether _write_ access is different - property read
-    // access is not used here.
-    // We're also fine with cases where the property restricts the writable
-    // value range if playback is active, but not otherwise.
-    // OK, restrict during playback: vid, aid, sid, deinterlace, video-aspect,
-    //   vf*, af*, chapter
-    // OK, is handled separately: playlist
-    // OK, does not conflict on low level: audio-file, sub-file, external-file
-    // OK, different value ranges, but happens to work for now: volume, edition
-    // Incompatible: tv-freq
-    // All the other properties are deprecated in their current form.
-    static const char *const no_property[] = {
-        "demuxer", "idle", "length", "audio-samplerate", "audio-channels",
-        "audio-format", "fps", "cache", "playlist-pos", "chapter", "tv-freq",
-        NULL
-    };
-
     // Normalize "vf*" to "vf"
     const char *name = co->name;
     bstr bname = bstr0(name);
@@ -304,11 +284,6 @@ int mp_on_set_option(void *ctx, struct m_config_option *co, void *data, int flag
     if (bstr_eatend0(&bname, "*")) {
         snprintf(tmp, sizeof(name), "%.*s", BSTR_P(bname));
         name = tmp;
-    }
-
-    for (int n = 0; no_property[n]; n++) {
-        if (strcmp(co->name, no_property[n]) == 0)
-            goto direct_option;
     }
 
     struct m_option type = {0};
@@ -3824,13 +3799,10 @@ static const struct m_property mp_properties_base[] = {
     {"stream-path", mp_property_stream_path},
     {"stream-capture", mp_property_stream_capture},
     {"current-demuxer", mp_property_demuxer},
-    // conflicts with option
-    M_PROPERTY_DEPRECATED_ALIAS("demuxer", "current-demuxer"),
     {"file-format", mp_property_file_format},
     {"stream-pos", mp_property_stream_pos},
     {"stream-end", mp_property_stream_end},
     {"duration", mp_property_duration},
-    M_PROPERTY_DEPRECATED_ALIAS("length", "duration"), // conflicts with option
     {"avsync", mp_property_avsync},
     {"total-avsync-change", mp_property_total_avsync_change},
     {"drop-frame-count", mp_property_drop_frame_cnt},
@@ -3863,7 +3835,6 @@ static const struct m_property mp_properties_base[] = {
     {"seeking", mp_property_seeking},
     {"playback-abort", mp_property_playback_abort},
     {"cache-percent", mp_property_cache},
-    M_PROPERTY_DEPRECATED_ALIAS("cache", "cache-percent"), // conflicts with option
     {"cache-free", mp_property_cache_free},
     {"cache-used", mp_property_cache_used},
     {"cache-size", mp_property_cache_size},
@@ -3878,7 +3849,6 @@ static const struct m_property mp_properties_base[] = {
     {"seekable", mp_property_seekable},
     {"partially-seekable", mp_property_partially_seekable},
     {"idle-active", mp_property_idle},
-    M_PROPERTY_DEPRECATED_ALIAS("idle", "idle-active"), // conflicts with option
 
     {"chapter-list", mp_property_list_chapters},
     {"track-list", property_list_tracks},
@@ -3901,9 +3871,6 @@ static const struct m_property mp_properties_base[] = {
     {"audio-codec", mp_property_audio_codec},
     {"audio-params", mp_property_audio_params},
     {"audio-out-params", mp_property_audio_out_params},
-    // conflicts with option
-    M_PROPERTY_DEPRECATED_ALIAS("audio-samplerate", "audio-params/samplerate"),
-    M_PROPERTY_DEPRECATED_ALIAS("audio-channels", "audio-params/channel-count"),
     {"aid", mp_property_audio},
     {"balance", mp_property_balance},
     {"audio-device", mp_property_audio_device},
@@ -3940,7 +3907,6 @@ static const struct m_property mp_properties_base[] = {
     {"vo-performance", mp_property_vo_performance},
     {"current-vo", mp_property_vo},
     {"container-fps", mp_property_fps},
-    M_PROPERTY_DEPRECATED_ALIAS("fps", "container-fps"), // conflicts with option
     {"estimated-vf-fps", mp_property_vf_fps},
     {"video-aspect", mp_property_aspect},
     {"vid", mp_property_video},
@@ -4036,9 +4002,6 @@ static const struct m_property mp_properties_base[] = {
     M_PROPERTY_ALIAS("colormatrix-input-range", "video-params/colorlevels"),
     M_PROPERTY_ALIAS("colormatrix-primaries", "video-params/primaries"),
     M_PROPERTY_ALIAS("colormatrix-gamma", "video-params/gamma"),
-
-     // conflicts with option
-    M_PROPERTY_DEPRECATED_ALIAS("audio-format", "audio-codec-name"),
 };
 
 // Each entry describes which properties an event (possibly) changes.

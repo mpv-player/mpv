@@ -21,6 +21,15 @@ Interface changes
 
  --- mpv 0.23.0 ---
     - remove deprecated vf_vdpaurb (use "--hwdec=vdpau-copy" instead)
+    - the following properties now have new semantics:
+        - "demuxer" (use "current-demuxer")
+        - "fps" (use "container-fps")
+        - "idle" (use "idle-active")
+        - "cache" (use "cache-percent")
+        - "audio-samplerate" (use "audio-params/samplerate")
+        - "audio-channels" (use "audio-params/channel-count")
+        - "audio-format" (use "audio-codec-name")
+      (the properties equivalent to the old semantics are in parentheses)
  --- mpv 0.22.0 ---
     - the "audio-device-list" property now sets empty device description to the
       device name as a fallback

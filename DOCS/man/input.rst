@@ -2147,10 +2147,9 @@ caveats with some properties (due to historical reasons):
     Strictly speaking, option access via API (e.g. ``mpv_set_option_string()``)
     has the same problem, and it's only a difference between CLI/API.
 
-``demuxer``, ``idle``, ``length``, ``audio-samplerate``, ``audio-channels``, ``audio-format``, ``fps``, ``cache``, ``playlist-pos``, ``chapter``
-    These behave completely different as property, but are deprecated (newer
-    aliases which don't conflict have been added). After the deprecation period
-    they will be changed to the proper option behavior.
+``playlist-pos``, ``chapter``
+    These properties behave different from the deprecated options with the same
+    names.
 
 Property Expansion
 ------------------
