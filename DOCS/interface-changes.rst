@@ -19,6 +19,8 @@ Interface changes
 
 ::
 
+ --- mpv 0.23.0 ---
+    - remove deprecated vf_vdpaurb (use "--hwdec=vdpau-copy" instead)
  --- mpv 0.22.0 ---
     - the "audio-device-list" property now sets empty device description to the
       device name as a fallback
