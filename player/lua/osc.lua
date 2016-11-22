@@ -2213,7 +2213,7 @@ mp.observe_property("fullscreen", "bool",
         request_init()
     end
 )
-mp.observe_property("idle", "bool",
+mp.observe_property("idle-active", "bool",
     function(name, val)
         state.idle = val
         tick()
