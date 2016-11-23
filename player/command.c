@@ -3589,20 +3589,16 @@ static int mp_property_deprecated_alias(void *ctx, struct m_property *prop,
     MPContext *mpctx = ctx;
     struct command_ctx *cmd = mpctx->command_ctx;
     const char *real_property = prop->priv;
-    if (action == M_PROPERTY_SET || action == M_PROPERTY_GET ||
-        action == M_PROPERTY_PRINT)
-    {
-        for (int n = 0; n < cmd->num_warned_deprecated; n++) {
-            if (strcmp(cmd->warned_deprecated[n], prop->name) == 0)
-                goto done;
-        }
-        MP_WARN(mpctx, "Warning: property '%s' was replaced with '%s' and "
-                "might be removed in the future.\n", prop->name, real_property);
-        MP_TARRAY_APPEND(cmd, cmd->warned_deprecated, cmd->num_warned_deprecated,
-                         (char *)prop->name);
-
-    done:;
+    for (int n = 0; n < cmd->num_warned_deprecated; n++) {
+        if (strcmp(cmd->warned_deprecated[n], prop->name) == 0)
+            goto done;
     }
+    MP_WARN(mpctx, "Warning: property '%s' was replaced with '%s' and "
+            "might be removed in the future.\n", prop->name, real_property);
+    MP_TARRAY_APPEND(cmd, cmd->warned_deprecated, cmd->num_warned_deprecated,
+                     (char *)prop->name);
+
+done:
     return mp_property_do(real_property, action, arg, ctx);
 }
 
