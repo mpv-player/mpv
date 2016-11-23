@@ -1511,7 +1511,7 @@ static void parse_flac_chmap(struct mp_chmap *channels, unsigned char *data,
 }
 
 static const char *const mkv_audio_tags[][2] = {
-    { "A_MPEG/L2",              "mp3" },
+    { "A_MPEG/L2",              "mp2" },
     { "A_MPEG/L3",              "mp3" },
     { "A_AC3",                  "ac3" },
     { "A_EAC3",                 "eac3" },
@@ -1701,7 +1701,9 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         mp_chmap_set_unknown(&sh_a->channels, track->a_channels);
 
     const char *codec = sh_a->codec;
-    if (!strcmp(codec, "mp3") || !strcmp(codec, "truehd")) {
+    if (!strcmp(codec, "mp2") || !strcmp(codec, "mp3") ||
+        !strcmp(codec, "truehd"))
+    {
         track->parse = true;
     } else if (!strcmp(codec, "flac")) {
         unsigned char *ptr = extradata;
