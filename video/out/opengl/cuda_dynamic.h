@@ -19,7 +19,7 @@
  * License along with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined(MPV_CUDA_DYNAMIC_H) && !defined(CUDA_VERSION)
+#ifndef MPV_CUDA_DYNAMIC_H
 #define MPV_CUDA_DYNAMIC_H
 
 #include <stdbool.h>

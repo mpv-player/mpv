@@ -922,9 +922,8 @@ hwaccel_features = [
     }, {
         'name': '--cuda-hwaccel',
         'desc': 'CUDA hwaccel',
-        'func': check_statement('libavutil/hwcontext_cuda.h',
-                                'AVCUDADeviceContextInternal* foo',
-                                use='libav'),
+        'func': check_cc(fragment=load_fragment('cuda.c'),
+                         use='libav'),
     }, {
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',
