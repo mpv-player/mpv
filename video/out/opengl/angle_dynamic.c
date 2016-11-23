@@ -29,10 +29,10 @@ static void angle_do_load(void)
 
 bool angle_load(void)
 {
-#if !HAVE_EGL_ANGLE_LIB
+#if HAVE_EGL_ANGLE_LIB
+    return true;
+#else
     pthread_once(&angle_load_once, angle_do_load);
     return angle_loaded;
-#else
-    return true;
 #endif
 }
