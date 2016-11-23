@@ -49,7 +49,7 @@ static void cuda_do_load(void)
     }
 
 #define CUDA_LOAD_SYMBOL(NAME, TYPE) \
-    NAME = dlsym(lib, #NAME); if (!NAME) return;
+    NAME = (TYPE *)dlsym(lib, #NAME); if (!NAME) return;
 
     CUDA_FNS(CUDA_LOAD_SYMBOL)
 
