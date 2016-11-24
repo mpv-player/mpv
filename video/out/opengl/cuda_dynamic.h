@@ -119,20 +119,27 @@ typedef CUresult CUDAAPI tcuGraphicsSubResourceGetMappedArray(CUarray* pArray, C
     FN(cuGraphicsUnregisterResource, tcuGraphicsUnregisterResource) \
     FN(cuGraphicsMapResources, tcuGraphicsMapResources) \
     FN(cuGraphicsUnmapResources, tcuGraphicsUnmapResources) \
-    FN(cuGraphicsUnmapResources, tcuGraphicsUnmapResources) \
     FN(cuGraphicsSubResourceGetMappedArray, tcuGraphicsSubResourceGetMappedArray) \
 
 #define CUDA_EXT_DECL(NAME, TYPE) \
-    extern TYPE *NAME;
+    extern TYPE *mpv_ ## NAME;
 
 CUDA_FNS(CUDA_EXT_DECL)
 
-#define cuCtxCreate cuCtxCreate_v2
-#define cuCtxPushCurrent cuCtxPushCurrent_v2
-#define cuCtxPopCurrent cuCtxPopCurrent_v2
-#define cuCtxDestroy cuCtxDestroy_v2
-#define cuMemcpy2D cuMemcpy2D_v2
-#define cuGLGetDevices cuGLGetDevices_v2
+#define cuInit mpv_cuInit
+#define cuCtxCreate mpv_cuCtxCreate_v2
+#define cuCtxPushCurrent mpv_cuCtxPushCurrent_v2
+#define cuCtxPopCurrent mpv_cuCtxPopCurrent_v2
+#define cuCtxDestroy mpv_cuCtxDestroy_v2
+#define cuMemcpy2D mpv_cuMemcpy2D_v2
+#define cuGetErrorName mpv_cuGetErrorName
+#define cuGetErrorString mpv_cuGetErrorString
+#define cuGLGetDevices mpv_cuGLGetDevices_v2
+#define cuGraphicsGLRegisterImage mpv_cuGraphicsGLRegisterImage
+#define cuGraphicsUnregisterResource mpv_cuGraphicsUnregisterResource
+#define cuGraphicsMapResources mpv_cuGraphicsMapResources
+#define cuGraphicsUnmapResources mpv_cuGraphicsUnmapResources
+#define cuGraphicsSubResourceGetMappedArray mpv_cuGraphicsSubResourceGetMappedArray
 
 bool cuda_load(void);
 
