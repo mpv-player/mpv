@@ -49,6 +49,8 @@ struct ao_push_state {
 
     struct mp_audio_buffer *buffer;
 
+    struct mp_audio *silence;
+
     bool terminate;
     bool wait_on_ao;
     bool still_playing;
@@ -259,15 +261,38 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     return write_samples;
 }
 
+static void ao_get_silence(struct ao *ao, struct mp_audio *data, int size)
+{
+    struct ao_push_state *p = ao->api_priv;
+    if (!p->silence) {
+        p->silence = talloc_zero(p, struct mp_audio);
+        mp_audio_set_format(p->silence, ao->format);
+        mp_audio_set_channels(p->silence, &ao->channels);
+        p->silence->rate = ao->samplerate;
+    }
+    if (p->silence->samples < size) {
+        mp_audio_realloc_min(p->silence, size);
+        p->silence->samples = size;
+        mp_audio_fill_silence(p->silence, 0, size);
+    }
+    *data = *p->silence;
+    data->samples = size;
+}
+
 // called locked
 static void ao_play_data(struct ao *ao)
 {
     struct ao_push_state *p = ao->api_priv;
-    struct mp_audio data;
-    mp_audio_buffer_peek(p->buffer, &data);
-    int max = data.samples;
     int space = ao->driver->get_space(ao);
+    bool play_silence = p->paused || (ao->stream_silence && !p->still_playing);
     space = MPMAX(space, 0);
+    struct mp_audio data;
+    if (play_silence) {
+        ao_get_silence(ao, &data, space);
+    } else {
+        mp_audio_buffer_peek(p->buffer, &data);
+    }
+    int max = data.samples;
     if (data.samples > space)
         data.samples = space;
     int flags = 0;
@@ -289,7 +314,8 @@ static void ao_play_data(struct ao *ao)
         MP_ERR(ao, "Audio output driver seems to ignore AOPLAY_FINAL_CHUNK.\n");
         r = max;
     }
-    mp_audio_buffer_skip(p->buffer, r);
+    if (!play_silence)
+        mp_audio_buffer_skip(p->buffer, r);
     if (r > 0)
         p->expected_end_time = 0;
     // Nothing written, but more input data than space - this must mean the
@@ -300,7 +326,7 @@ static void ao_play_data(struct ao *ao)
     // Wait until space becomes available. Also wait if we actually wrote data,
     // so the AO wakes us up properly if it needs more data.
     p->wait_on_ao = space == 0 || r > 0 || stuck;
-    p->still_playing |= r > 0;
+    p->still_playing |= r > 0 && !play_silence;
     // If we just filled the AO completely (r == space), don't refill for a
     // while. Prevents wakeup feedback with byte-granular AOs.
     int needed = unlocked_get_space(ao);
@@ -319,12 +345,13 @@ static void *playthread(void *arg)
     mpthread_set_name("ao");
     pthread_mutex_lock(&p->lock);
     while (!p->terminate) {
-        if (!p->paused)
+        bool playing = !p->paused || ao->stream_silence;
+        if (playing)
             ao_play_data(ao);
 
         if (!p->need_wakeup) {
             MP_STATS(ao, "start audio wait");
-            if (!p->wait_on_ao || p->paused) {
+            if (!p->wait_on_ao || !playing) {
                 // Avoid busy waiting, because the audio API will still report
                 // that it needs new data, even if we're not ready yet, or if
                 // get_space() decides that the amount of audio buffered in the

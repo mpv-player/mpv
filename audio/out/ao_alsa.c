@@ -845,12 +845,6 @@ static int init_device(struct ao *ao, int mode)
 
     ao->device_buffer = p->buffersize;
 
-    // ao_alsa implements this by relying on underrun behavior (no data means
-    // underrun, during which silence is played). Trigger by playing some
-    // initial silence.
-    if (ao->stream_silence)
-        ao_play_silence(ao, p->outburst);
-
     return 0;
 
 alsa_error:
