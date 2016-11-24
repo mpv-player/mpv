@@ -145,7 +145,7 @@ static int cuda_create(struct gl_hwdec *hw)
     int ret = 0, eret = 0;
 
     if (hw->gl->version < 210 && hw->gl->es < 300) {
-        MP_ERR(hw, "need OpenGL >= 2.1 or OpenGL-ES >= 3.0\n");
+        MP_VERBOSE(hw, "need OpenGL >= 2.1 or OpenGL-ES >= 3.0\n");
         return -1;
     }
 
@@ -154,7 +154,7 @@ static int cuda_create(struct gl_hwdec *hw)
 
     bool loaded = cuda_load();
     if (!loaded) {
-        MP_ERR(hw, "Failed to load CUDA symbols\n");
+        MP_VERBOSE(hw, "Failed to load CUDA symbols\n");
         return -1;
     }
 
