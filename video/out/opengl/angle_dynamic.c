@@ -1,12 +1,21 @@
 #include <pthread.h>
 #include <windows.h>
 
+#ifndef ANGLE_NO_ALIASES
 #define ANGLE_NO_ALIASES
+#endif
+
 #include "angle_dynamic.h"
 
 #include "config.h"
 #include "common/common.h"
 
+#if HAVE_EGL_ANGLE_LIB
+bool angle_load(void)
+{
+    return true;
+}
+#else
 #define ANGLE_DECL(NAME, VAR) \
     VAR;
 ANGLE_FNS(ANGLE_DECL)
@@ -29,10 +38,7 @@ static void angle_do_load(void)
 
 bool angle_load(void)
 {
-#if HAVE_EGL_ANGLE_LIB
-    return true;
-#else
     pthread_once(&angle_load_once, angle_do_load);
     return angle_loaded;
-#endif
 }
+#endif
