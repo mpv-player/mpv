@@ -22,7 +22,7 @@
 #if defined(_WIN32)
 # include <windows.h>
 # define dlopen(filename, flags) LoadLibrary(TEXT(filename))
-# define dlsym(handle, symbol) GetProcAddress(handle, symbol)
+# define dlsym(handle, symbol) (void *)GetProcAddress(handle, symbol)
 # define dlclose(handle) FreeLibrary(handle)
 #else
 # include <dlfcn.h>
@@ -35,7 +35,7 @@
 #endif
 
 #define CUDA_DECL(NAME, TYPE) \
-    TYPE *NAME;
+    TYPE *mpv_ ## NAME;
 CUDA_FNS(CUDA_DECL)
 
 static bool cuda_loaded = false;
@@ -49,7 +49,7 @@ static void cuda_do_load(void)
     }
 
 #define CUDA_LOAD_SYMBOL(NAME, TYPE) \
-    NAME = (TYPE *)dlsym(lib, #NAME); if (!NAME) return;
+    mpv_ ## NAME = dlsym(lib, #NAME); if (!mpv_ ## NAME) return;
 
     CUDA_FNS(CUDA_LOAD_SYMBOL)
 
