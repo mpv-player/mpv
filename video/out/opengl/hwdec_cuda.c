@@ -155,6 +155,7 @@ static int cuda_create(struct gl_hwdec *hw)
     bool loaded = cuda_load();
     if (!loaded) {
         MP_ERR(hw, "Failed to load CUDA symbols\n");
+        return -1;
     }
 
     ret = CHECK_CU(cuInit(0));
