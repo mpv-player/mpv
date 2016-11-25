@@ -144,7 +144,7 @@ static void copy_vo_opts(struct vo *vo)
     // copy the struct with an assignment.
     // Just remove all the dynamic data to avoid confusion.
     struct mp_vo_opts opts = *vo->opts;
-    opts.video_driver_list = opts.vo_defs = NULL;
+    opts.video_driver_list = NULL;
     opts.winname = NULL;
     opts.sws_opts = NULL;
     p->ctx->vo_opts = opts;
@@ -529,13 +529,6 @@ static int preinit(struct vo *vo)
     return 0;
 }
 
-#define OPT_BASE_STRUCT struct vo_priv
-static const struct m_option options[] = {
-    OPT_SUBOPT_LEGACY("debug", "opengl-debug"),
-    OPT_SUBSTRUCT_LEGACY("", gl_video_conf_legacy),
-    {0},
-};
-
 const struct vo_driver video_out_opengl_cb = {
     .description = "OpenGL Callbacks for libmpv",
     .name = "opengl-cb",
@@ -548,5 +541,4 @@ const struct vo_driver video_out_opengl_cb = {
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct vo_priv),
-    .options = options,
 };

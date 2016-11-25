@@ -2719,7 +2719,8 @@ static int get_obj_param(struct mp_log *log, bstr opt_name, bstr obj_name,
 static int m_obj_parse_sub_config(struct mp_log *log, struct bstr opt_name,
                                   struct bstr name, struct bstr *pstr,
                                   struct m_config *config, int flags, bool nopos,
-                                  struct m_obj_desc *desc, char ***ret)
+                                  struct m_obj_desc *desc,
+                                  const struct m_obj_list *list, char ***ret)
 {
     int nold = 0;
     char **args = NULL;
@@ -2737,6 +2738,16 @@ static int m_obj_parse_sub_config(struct mp_log *log, struct bstr opt_name,
         r = split_subconf(log, opt_name, pstr, &fname, &fval);
         if (r < 0)
             goto exit;
+
+        if (list->use_global_options) {
+            mp_err(log, "Option %.*s: this option does not accept sub-options.\n",
+                   BSTR_P(opt_name));
+            mp_err(log, "Sub-options for --vo and --ao were removed from mpv in "
+                   "release 0.23.0.\nSee https://0x0.st/uM for details.\n");
+            r = M_OPT_INVALID;
+            goto exit;
+        }
+
         if (bstr_equals0(fname, "help"))
             goto print_help;
         r = get_obj_param(log, opt_name, name, config, fname, fval, flags,
@@ -2831,7 +2842,7 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt,
         struct m_config *config = m_config_from_obj_desc_noalloc(NULL, log, &desc);
         bstr s = bstr0(desc.init_options);
         m_obj_parse_sub_config(log, opt, str, &s, config,
-                               M_SETOPT_CHECK_ONLY, nopos, NULL, &plist);
+                               M_SETOPT_CHECK_ONLY, nopos, NULL, list, &plist);
         assert(s.len == 0);
         talloc_free(config);
     }
@@ -2841,7 +2852,7 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt,
         if (!skip)
             config = m_config_from_obj_desc_noalloc(NULL, log, &desc);
         r = m_obj_parse_sub_config(log, opt, str, pstr, config,
-                                   M_SETOPT_CHECK_ONLY, nopos, &desc,
+                                   M_SETOPT_CHECK_ONLY, nopos, &desc, list,
                                    _ret ? &plist : NULL);
         talloc_free(config);
         if (r < 0)

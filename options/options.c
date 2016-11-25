@@ -150,8 +150,6 @@ const struct m_sub_options stream_cache_conf = {
 
 static const m_option_t mp_vo_opt_list[] = {
     OPT_SETTINGSLIST("vo", video_driver_list, 0, &vo_obj_list, ),
-    OPT_SETTINGSLIST("vo-defaults", vo_defs, 0, &vo_obj_list,
-                     .deprecation_message = "deprecated, use global options"),
     OPT_CHOICE_C("hwdec-preload", hwdec_preload_api, 0, mp_hwdec_names),
     OPT_SUBSTRUCT("sws", sws_opts, sws_conf, 0),
     OPT_FLAG("taskbar-progress", taskbar_progress, 0),
@@ -510,8 +508,6 @@ const m_option_t mp_opts[] = {
 
 //---------------------- libao/libvo options ------------------------
     OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list, ),
-    OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list,
-                     .deprecation_message = "deprecated, use global options"),
     OPT_STRING("audio-device", audio_device, UPDATE_AUDIO),
     OPT_FLAG("audio-exclusive", audio_exclusive, UPDATE_AUDIO),
     OPT_STRING("audio-client-name", audio_client_name, UPDATE_AUDIO),

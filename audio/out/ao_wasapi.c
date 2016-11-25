@@ -496,11 +496,4 @@ const struct ao_driver audio_out_wasapi = {
     .hotplug_init   = hotplug_init,
     .hotplug_uninit = hotplug_uninit,
     .priv_size      = sizeof(wasapi_state),
-    .options        = (const struct m_option[]) {
-        OPT_FLAG("exclusive", opt_exclusive, 0,
-                 .deprecation_message = "use --audio-exclusive"),
-        OPT_STRING("device", opt_device, 0, DEVICE_OPT_DEPRECATION),
-        {NULL},
-    },
-    .legacy_prefix = "ao-wasapi",
 };

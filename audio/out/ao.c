@@ -112,8 +112,8 @@ static bool get_desc(struct m_obj_desc *dst, int index)
         .priv_size = ao->priv_size,
         .priv_defaults = ao->priv_defaults,
         .options = ao->options,
+        .options_prefix = ao->options_prefix,
         .global_opts = ao->global_opts,
-        .legacy_prefix = ao->legacy_prefix,
         .hidden = ao->encode,
         .p = ao,
     };
@@ -127,11 +127,12 @@ const struct m_obj_list ao_obj_list = {
     .allow_unknown_entries = true,
     .allow_trailer = true,
     .disallow_positional_parameters = true,
+    .use_global_options = true,
 };
 
 static struct ao *ao_alloc(bool probing, struct mpv_global *global,
                            void (*wakeup_cb)(void *ctx), void *wakeup_ctx,
-                           char *name, char **args)
+                           char *name)
 {
     assert(wakeup_cb);
 
@@ -155,12 +156,9 @@ static struct ao *ao_alloc(bool probing, struct mpv_global *global,
         .def_buffer = opts->audio_buffer,
         .client_name = talloc_strdup(ao, opts->audio_client_name),
     };
-    struct m_config *config =
-        m_config_from_obj_desc_and_args(ao, ao->log, global, &desc,
-                                        name, opts->ao_defs, args);
-    if (!config)
+    ao->priv = m_config_group_from_desc(ao, ao->log, global, &desc, name);
+    if (!ao->priv)
         goto error;
-    ao->priv = config->optstruct;
     return ao;
 error:
     talloc_free(ao);
@@ -171,9 +169,9 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
                           void (*wakeup_cb)(void *ctx), void *wakeup_ctx,
                           struct encode_lavc_context *encode_lavc_ctx, int flags,
                           int samplerate, int format, struct mp_chmap channels,
-                          char *dev, char *name, char **args)
+                          char *dev, char *name)
 {
-    struct ao *ao = ao_alloc(probing, global, wakeup_cb, wakeup_ctx, name, args);
+    struct ao *ao = ao_alloc(probing, global, wakeup_cb, wakeup_ctx, name);
     if (!ao)
         return NULL;
     ao->samplerate = samplerate;
@@ -206,7 +204,7 @@ static struct ao *ao_init(bool probing, struct mpv_global *global,
             talloc_free(ao);
             return ao_init(probing, global, wakeup_cb, wakeup_ctx,
                            encode_lavc_ctx, flags, samplerate, format, channels,
-                           rdevice, redirect, NULL);
+                           rdevice, redirect);
         }
         goto fail;
     }
@@ -313,8 +311,7 @@ struct ao *ao_init_best(struct mpv_global *global,
             mp_verbose(log, "Using preferred device '%s'\n", dev);
         }
         ao = ao_init(probing, global, wakeup_cb, wakeup_ctx, encode_lavc_ctx,
-                     init_flags, samplerate, format, channels, dev,
-                     entry->name, entry->attribs);
+                     init_flags, samplerate, format, channels, dev, entry->name);
         if (ao)
             break;
         if (!probing)
@@ -571,7 +568,7 @@ struct ao_device_list *ao_hotplug_get_device_list(struct ao_hotplug *hp)
             break; // don't add unsafe/special entries
 
         struct ao *ao = ao_alloc(true, hp->global, hp->wakeup_cb, hp->wakeup_ctx,
-                                 (char *)d->name, NULL);
+                                 (char *)d->name);
         if (!ao)
             continue;
 

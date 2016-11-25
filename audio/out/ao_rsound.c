@@ -162,6 +162,6 @@ const struct ao_driver audio_out_rsound = {
             .deprecation_message = "request --audio-device support on issue tracker"),
         {0}
     },
-    .legacy_prefix = "rsound",
+    .options_prefix = "rsound",
 };
 

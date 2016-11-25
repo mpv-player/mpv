@@ -1196,15 +1196,5 @@ const struct ao_driver audio_out_alsa = {
     .wakeup    = ao_wakeup_poll,
     .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
-    .options = (const struct m_option[]) {
-        OPT_SUBOPT_LEGACY("device", "alsa-device"),
-        OPT_SUBOPT_LEGACY("resample", "alsa-resample"),
-        OPT_SUBOPT_LEGACY("mixer-device", "alsa-mixer-device"),
-        OPT_SUBOPT_LEGACY("mixer-name", "alsa-mixer-name"),
-        OPT_SUBOPT_LEGACY("mixer-index", "alsa-mixer-index"),
-        OPT_SUBOPT_LEGACY("non-interleaved", "alsa-non-interleaved"),
-        OPT_SUBOPT_LEGACY("ignore-chmap", "alsa-ignore-chmap"),
-        {0}
-    },
     .global_opts = &ao_alsa_conf,
 };

@@ -653,5 +653,5 @@ const struct ao_driver audio_out_oss = {
         OPT_STRING("mixer-channel", cfg_oss_mixer_channel, 0),
         {0}
     },
-    .legacy_prefix = "oss",
+    .options_prefix = "oss",
 };

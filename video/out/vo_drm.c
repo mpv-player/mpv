@@ -490,5 +490,4 @@ const struct vo_driver video_out_drm = {
     .wait_events = wait_events,
     .wakeup = wakeup,
     .priv_size = sizeof(struct priv),
-    .legacy_prefix = "drm",
 };

@@ -137,7 +137,6 @@ struct gl_video_opts {
 };
 
 extern const struct m_sub_options gl_video_conf;
-extern const struct m_sub_options gl_video_conf_legacy;
 
 struct gl_video;
 struct vo_frame;

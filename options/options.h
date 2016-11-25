@@ -7,7 +7,7 @@
 #include "common/common.h"
 
 typedef struct mp_vo_opts {
-    struct m_obj_settings *video_driver_list, *vo_defs;
+    struct m_obj_settings *video_driver_list;
 
     int taskbar_progress;
     int ontop;
@@ -90,7 +90,7 @@ typedef struct MPOpts {
 
     int auto_load_scripts;
 
-    struct m_obj_settings *audio_driver_list, *ao_defs;
+    struct m_obj_settings *audio_driver_list;
     char *audio_device;
     int audio_exclusive;
     char *audio_client_name;

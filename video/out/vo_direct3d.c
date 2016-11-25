@@ -1747,5 +1747,5 @@ const struct vo_driver video_out_direct3d = {
     .priv_size = sizeof(d3d_priv),
     .priv_defaults = &defaults,
     .options = opts,
-    .legacy_prefix = "vo-direct3d",
+    .options_prefix = "vo-direct3d",
 };

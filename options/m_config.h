@@ -134,6 +134,9 @@ struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
     struct mp_log *log, struct mpv_global *global, struct m_obj_desc *desc,
     const char *name, struct m_obj_settings *defaults, char **args);
 
+void *m_config_group_from_desc(void *ta_parent, struct mp_log *log,
+        struct mpv_global *global, struct m_obj_desc *desc, const char *name);
+
 // Make sure the option is backed up. If it's already backed up, do nothing.
 // All backed up options can be restored with m_config_restore_backups().
 void m_config_backup_opt(struct m_config *config, const char *opt);

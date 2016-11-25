@@ -858,10 +858,7 @@ static LPWSTR select_device(struct mp_log *l, struct device_desc *d)
 bstr wasapi_get_specified_device_string(struct ao *ao)
 {
     struct wasapi_state *state = ao->priv;
-    bstr device = bstr_strip(bstr0(state->opt_device));
-    if (!device.len)
-        device = bstr_strip(bstr0(ao->device));
-    return device;
+    return bstr_strip(bstr0(ao->device));
 }
 
 LPWSTR wasapi_find_deviceID(struct ao *ao)

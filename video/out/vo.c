@@ -176,8 +176,8 @@ static bool get_desc(struct m_obj_desc *dst, int index)
         .priv_size = vo->priv_size,
         .priv_defaults = vo->priv_defaults,
         .options = vo->options,
+        .options_prefix = vo->options_prefix,
         .global_opts = vo->global_opts,
-        .legacy_prefix = vo->legacy_prefix,
         .hidden = vo->encode || !strcmp(vo->name, "opengl-cb"),
         .p = vo,
     };
@@ -196,6 +196,7 @@ const struct m_obj_list vo_obj_list = {
     .allow_unknown_entries = true,
     .allow_trailer = true,
     .disallow_positional_parameters = true,
+    .use_global_options = true,
 };
 
 static void dispatch_wakeup_cb(void *ptr)
@@ -214,7 +215,7 @@ static void dealloc_vo(struct vo *vo)
 }
 
 static struct vo *vo_create(bool probing, struct mpv_global *global,
-                            struct vo_extra *ex, char *name, char **args)
+                            struct vo_extra *ex, char *name)
 {
     assert(ex->wakeup_cb);
 
@@ -254,11 +255,9 @@ static struct vo *vo_create(bool probing, struct mpv_global *global,
     mp_input_set_mouse_transform(vo->input_ctx, NULL, NULL);
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
         goto error;
-    vo->config = m_config_from_obj_desc_and_args(vo, vo->log, global, &desc,
-                                                 name, vo->opts->vo_defs, args);
-    if (!vo->config)
+    vo->priv = m_config_group_from_desc(vo, vo->log, global, &desc, name);
+    if (!vo->priv)
         goto error;
-    vo->priv = vo->config->optstruct;
 
     if (pthread_create(&vo->in->thread, NULL, vo_thread, vo))
         goto error;
@@ -283,8 +282,7 @@ struct vo *init_best_video_out(struct mpv_global *global, struct vo_extra *ex)
             if (strlen(vo_list[n].name) == 0)
                 goto autoprobe;
             bool p = !!vo_list[n + 1].name;
-            struct vo *vo = vo_create(p, global, ex, vo_list[n].name,
-                                      vo_list[n].attribs);
+            struct vo *vo = vo_create(p, global, ex, vo_list[n].name);
             if (vo)
                 return vo;
         }
@@ -296,7 +294,7 @@ autoprobe:
         const struct vo_driver *driver = video_out_drivers[i];
         if (driver == &video_out_null)
             break;
-        struct vo *vo = vo_create(true, global, ex, (char *)driver->name, NULL);
+        struct vo *vo = vo_create(true, global, ex, (char *)driver->name);
         if (vo)
             return vo;
     }

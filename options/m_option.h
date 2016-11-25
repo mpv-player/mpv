@@ -117,6 +117,8 @@ struct m_obj_desc {
     const void *priv_defaults;
     // Options which refer to members in the private struct
     const struct m_option *options;
+    // Prefix for each of the above options (none if NULL).
+    const char *options_prefix;
     // For free use by the implementer of m_obj_list.get_desc
     const void *p;
     // If not NULL, options which should be set before applying other options.
@@ -132,10 +134,6 @@ struct m_obj_desc {
     const char *replaced_name;
     // For convenience: these are added as global command-line options.
     const struct m_sub_options *global_opts;
-    // Evil hack to essentially force-move .options to global_opts. All options
-    // will be added as global options with the given prefix, and using
-    // sub-options will be treated as deprecated and redirected.
-    const char *legacy_prefix;
 };
 
 // Extra definition needed for \ref m_option_type_obj_settings_list options.
@@ -151,6 +149,8 @@ struct m_obj_list {
     bool allow_unknown_entries;
     // This helps with confusing error messages if unknown flag options are used.
     bool disallow_positional_parameters;
+    // Each sub-item is backed by global options (for AOs and VOs).
+    bool use_global_options;
 };
 
 // Find entry by name
@@ -188,6 +188,7 @@ typedef int (*m_opt_string_validate_fn)(struct mp_log *log, const m_option_t *op
 
 // m_option.priv points to this if OPT_SUBSTRUCT is used
 struct m_sub_options {
+    const char *prefix;
     const struct m_option *opts;
     size_t size;
     const void *defaults;
@@ -713,12 +714,6 @@ extern const char m_option_path_separator;
     OPT_GENERAL_NOTYPE(name, varname, flagv,                    \
                        .type = &m_option_type_subconfig,        \
                        .priv = (void*)&subconf)
-
-// Same as above, but for legacy suboption usage, which have no associated
-// field (no actual data anywhere).
-#define OPT_SUBSTRUCT_LEGACY(optname, subconf)                      \
-    {.name = optname, .offset = -1, .type = &m_option_type_subconfig,      \
-     .priv = (void*)&subconf}
 
 // Provide a another name for the option.
 #define OPT_ALIAS(optname, newname) \

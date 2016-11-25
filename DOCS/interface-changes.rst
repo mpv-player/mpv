@@ -30,6 +30,10 @@ Interface changes
         - "audio-channels" (use "audio-params/channel-count")
         - "audio-format" (use "audio-codec-name")
       (the properties equivalent to the old semantics are in parentheses)
+    - remove deprecated --vo and --ao sub-options (like --vo=opengl:...), and
+      replace them with global options. A somewhat complete list can be found
+      here: https://github.com/mpv-player/mpv/wiki/Option-replacement-list#mpv-0210
+    - remove --vo-defaults and --ao-defaults as well
     - remove deprecated global sub-options (like -demuxer-rawaudio format=...),
       use flat options (like --demuxer-rawaudio-format=...)
  --- mpv 0.22.0 ---

@@ -1164,5 +1164,5 @@ const struct vo_driver video_out_vdpau = {
         OPT_REPLACED("output_surfaces", "output-surfaces"),
         {NULL},
     },
-    .legacy_prefix = "vo-vdpau",
+    .options_prefix = "vo-vdpau",
 };

@@ -92,8 +92,6 @@ typedef struct wasapi_state {
 
     // ao options
     int opt_exclusive;
-    int opt_list;
-    char *opt_device;
 
     // format info
     WAVEFORMATEXTENSIBLE format;
