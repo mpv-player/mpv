@@ -946,8 +946,8 @@ void vo_wayland_uninit(struct vo *vo)
     struct vo_wayland_state *wl = vo->wayland;
     destroy_cursor(wl);
     destroy_window(wl);
-    destroy_display(wl);
     destroy_input(wl);
+    destroy_display(wl);
     for (int n = 0; n < 2; n++)
         close(wl->wakeup_pipe[n]);
     talloc_free(wl);
