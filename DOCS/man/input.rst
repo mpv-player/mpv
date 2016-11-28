@@ -2007,6 +2007,24 @@ Property list
     still named the same.) This property is unavailable if mpv is linked against
     older FFmpeg and Libav versions.
 
+``library-version``
+    Return the list of the FFmpeg/Libav library versions. This has a number
+    of sub properties. Replace ``LIB`` with ``avutil``, ``avcodec``,
+    ``avformat``, ``avfilter``, ``swscale``, ``avresample``/``swresample``, or
+    ``avdevice``.
+
+    ``LIB-int``
+        Library version as integer.
+
+    ``LIB-major``
+        Library major version.
+
+    ``LIB-minor``
+        Library minor version.
+
+    ``LIB-micro``
+        Library micro version.
+
 ``options/<name>`` (RW)
     Read-only access to value of option ``--<name>``. Most options can be
     changed at runtime by writing to this property. Note that many options
