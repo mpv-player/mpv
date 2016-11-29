@@ -5552,8 +5552,7 @@ void command_init(struct MPContext *mpctx)
     for (int n = 0; n < num_opts; n++) {
         struct m_config_option *co = m_config_get_co_index(mpctx->mconfig, n);
         assert(co->name[0]);
-        if ((co->opt->flags & M_OPT_NOPROP) ||
-            (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD))
+        if (co->opt->flags & M_OPT_NOPROP)
             continue;
 
         struct m_property prop = {0};

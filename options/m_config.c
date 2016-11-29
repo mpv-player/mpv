@@ -344,8 +344,6 @@ error:
 
 static void ensure_backup(struct m_config *config, struct m_config_option *co)
 {
-    if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD)
-        return;
     if (!co->data)
         return;
     for (struct m_opt_backup *cur = config->backup_opts; cur; cur = cur->next) {
@@ -553,6 +551,8 @@ static void m_config_add_option(struct m_config *config,
         .name = arg->name,
         .shadow_offset = -1,
         .group = parent ? parent->group : 0,
+        .default_data = &default_value,
+        .is_hidden = !!arg->deprecation_message,
     };
 
     if (arg->offset >= 0) {
@@ -560,21 +560,10 @@ static void m_config_add_option(struct m_config *config,
             co.data = (char *)optstruct + arg->offset;
         if (optstruct_def)
             co.default_data = (char *)optstruct_def + arg->offset;
-        int size = arg->type->size;
-        if (optstruct && size) {
-            // The required alignment is unknown, so go with the minimum C
-            // could require. Slightly wasteful, but not that much.
-            int align = (size - config->shadow_size % size) % size;
-            co.shadow_offset = config->shadow_size + align;
-            config->shadow_size = co.shadow_offset + size;
-        }
     }
 
     if (arg->defval)
         co.default_data = arg->defval;
-
-    if (!co.default_data)
-        co.default_data = &default_value;
 
     // Fill in the full name
     if (!co.name[0]) {
@@ -583,24 +572,28 @@ static void m_config_add_option(struct m_config *config,
         co.name = talloc_asprintf(config, "%s-%s", parent_name, co.name);
     }
 
-    if (co.opt->deprecation_message)
-        co.is_hidden = true;
-
-    // Option with children -> add them
-    if (arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
+    if (arg->type == &m_option_type_subconfig) {
         const struct m_sub_options *subopts = arg->priv;
         add_sub_options(config, &co, subopts);
     } else {
+        int size = arg->type->size;
+        if (optstruct && size) {
+            // The required alignment is unknown, so go with the maximum C
+            // could require. Slightly wasteful, but not that much.
+            int align = (size - config->shadow_size % size) % size;
+            co.shadow_offset = config->shadow_size + align;
+            config->shadow_size = co.shadow_offset + size;
+        }
+
         // Initialize options
         if (co.data && co.default_data)
             init_opt_inplace(arg, co.data, co.default_data);
-    }
 
-    if (arg->type == &m_option_type_obj_settings_list)
-        init_obj_settings_list(config, (const struct m_obj_list *)arg->priv);
-
-    if (arg->name[0]) // no own name -> hidden
         MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
+
+        if (arg->type == &m_option_type_obj_settings_list)
+            init_obj_settings_list(config, (const struct m_obj_list *)arg->priv);
+    }
 }
 
 struct m_config_option *m_config_get_co_raw(const struct m_config *config,
@@ -843,16 +836,9 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
     if (bstr_equals0(name, "list-options"))
         return list_options(config, bstr0("*"), false);
 
-    // Option with children are a bit different to parse
-    if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD) {
-        MP_FATAL(config, "Suboptions (--%.*s=...) have been removed. Use "
-                 "flat options instead.\n", BSTR_P(name));
-        return M_OPT_INVALID;
-    }
-
     union m_option_value val = {0};
 
-    // Some option tpyes are "impure" and work on the existing data.
+    // Some option types are "impure" and work on the existing data.
     // (Prime examples: --vf-add, --sub-file)
     if (co->data)
         m_option_copy(co->opt, &val, co->data);
@@ -968,8 +954,6 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
     for (int i = 0; i < config->num_opts; i++) {
         struct m_config_option *co = &sorted[i];
         const struct m_option *opt = co->opt;
-        if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
-            continue;
         if (co->is_hidden)
             continue;
 #if HAVE_FNMATCH
@@ -1022,9 +1006,6 @@ char **m_config_list_options(void *ta_parent, const struct m_config *config)
     int count = 0;
     for (int i = 0; i < config->num_opts; i++) {
         struct m_config_option *co = &config->opts[i];
-        const struct m_option *opt = co->opt;
-        if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
-            continue;
         if (co->is_hidden)
             continue;
         // For use with CONF_TYPE_STRING_LIST, it's important not to set list

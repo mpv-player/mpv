@@ -1662,10 +1662,7 @@ const m_option_type_t m_option_type_print_fn = {
     .parse = parse_print,
 };
 
-
-/////////////////////// Subconfig
 #undef VAL
-#define VAL(x) (*(char ***)(x))
 
 // Read s sub-option name, or a positional sub-opt value.
 // termset is a string containing the set of chars that terminate an option.
@@ -1749,50 +1746,6 @@ static int split_subconf(struct mp_log *log, bstr optname, bstr *str,
     *out_val = subparam;
     return 0;
 }
-
-static int parse_subconf(struct mp_log *log, const m_option_t *opt,
-                         struct bstr name, struct bstr param, void *dst)
-{
-    int nr = 0;
-    char **lst = NULL;
-
-    if (param.len == 0)
-        return M_OPT_MISSING_PARAM;
-
-    struct bstr p = param;
-
-    while (p.len) {
-        bstr subopt, subparam;
-        int r = split_subconf(log, name, &p, &subopt, &subparam);
-        if (r < 0)
-            return r;
-        if (bstr_startswith0(p, ":"))
-            p = bstr_cut(p, 1);
-        else if (p.len > 0) {
-            mp_err(log, "Incorrect termination for '%.*s'\n", BSTR_P(subopt));
-            return M_OPT_INVALID;
-        }
-
-        if (dst) {
-            lst = talloc_realloc(NULL, lst, char *, 2 * (nr + 2));
-            lst[2 * nr] = bstrto0(lst, subopt);
-            lst[2 * nr + 1] = bstrto0(lst, subparam);
-            memset(&lst[2 * (nr + 1)], 0, 2 * sizeof(char *));
-            nr++;
-        }
-    }
-
-    if (dst)
-        VAL(dst) = lst;
-
-    return 1;
-}
-
-const m_option_type_t m_option_type_subconfig = {
-    .name = "Subconfig",
-    .flags = M_OPT_TYPE_HAS_CHILD,
-    .parse = parse_subconf,
-};
 
 #undef VAL
 
@@ -3370,13 +3323,6 @@ const m_option_type_t m_option_type_alias = {
 const m_option_type_t m_option_type_removed = {
     .name  = "removed",
 };
-
-static int parse_dummy(struct mp_log *log, const m_option_t *opt,
-                       struct bstr name, struct bstr param, void *dst)
-{
-    return 1;
-}
-const m_option_type_t m_option_type_subopt_legacy = {
-    .name  = "legacy suboption",
-    .parse = parse_dummy,
+const m_option_type_t m_option_type_subconfig = {
+    .name = "Subconfig",
 };

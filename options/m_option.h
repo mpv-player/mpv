@@ -53,7 +53,6 @@ extern const m_option_type_t m_option_type_choice;
 extern const m_option_type_t m_option_type_flags;
 extern const m_option_type_t m_option_type_msglevels;
 extern const m_option_type_t m_option_type_print_fn;
-extern const m_option_type_t m_option_type_subconfig;
 extern const m_option_type_t m_option_type_imgfmt;
 extern const m_option_type_t m_option_type_fourcc;
 extern const m_option_type_t m_option_type_afmt;
@@ -63,11 +62,11 @@ extern const m_option_type_t m_option_type_size_box;
 extern const m_option_type_t m_option_type_channels;
 extern const m_option_type_t m_option_type_aspect;
 extern const m_option_type_t m_option_type_node;
-extern const m_option_type_t m_option_type_subopt_legacy;
 
 // Used internally by m_config.c
 extern const m_option_type_t m_option_type_alias;
 extern const m_option_type_t m_option_type_removed;
+extern const m_option_type_t m_option_type_subconfig;
 
 // Callback used by m_option_type_print_fn options.
 typedef void (*m_opt_print_fn)(struct mp_log *log);
@@ -407,16 +406,6 @@ struct m_option {
 
 // These flags are used to describe special parser capabilities or behavior.
 
-// Suboption parser flag.
-/** When this flag is set, m_option::p should point to another m_option
- *  array. Only the parse function will be called. If dst is set, it should
- *  create/update an array of char* containg opt/val pairs. The options in
- *  the child array will then be set automatically by the \ref Config.
- *  Also note that suboptions may be directly accessed by using
- *  -option:subopt blah.
- */
-#define M_OPT_TYPE_HAS_CHILD            (1 << 0)
-
 // Wildcard matching flag.
 /** If set the option type has a use for option names ending with a *
  *  (used for -aa*), this only affects the option name matching.
@@ -730,11 +719,5 @@ extern const char m_option_path_separator;
 #define OPT_REMOVED(optname, msg) \
     {.name = optname, .type = &m_option_type_removed, .priv = msg, \
      .deprecation_message = "", .offset = -1}
-
-// Redirect a suboption (e.g. from --vo) to a global option. The redirection
-// is handled as a special case instead of being applied automatically.
-#define OPT_SUBOPT_LEGACY(optname, globalname) \
-    {.name = optname, .type = &m_option_type_subopt_legacy, .priv = globalname, \
-     .offset = -1}
 
 #endif /* MPLAYER_M_OPTION_H */
