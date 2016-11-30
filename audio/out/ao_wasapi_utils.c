@@ -289,18 +289,12 @@ static bool set_ao_format(struct ao *ao, WAVEFORMATEX *wf,
 static bool try_format_exclusive(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
 {
     struct wasapi_state *state = ao->priv;
-    MP_VERBOSE(ao, "Trying %s (exclusive)\n",
-               waveformat_to_str(&wformat->Format));
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 AUDCLNT_SHAREMODE_EXCLUSIVE,
                                                 &wformat->Format, NULL);
-    if (hr != AUDCLNT_E_UNSUPPORTED_FORMAT)
-        EXIT_ON_ERROR(hr);
-
+    MP_VERBOSE(ao, "Trying %s (exclusive) -> %s\n",
+               waveformat_to_str(&wformat->Format), mp_format_res_str(hr));
     return SUCCEEDED(hr);
-exit_label:
-    MP_ERR(state, "Error testing exclusive format: %s\n", mp_HRESULT_to_str(hr));
-    return false;
 }
 
 // This works like try_format_exclusive(), but will try to fallback to the AC3
@@ -393,11 +387,8 @@ static bool search_channels(struct ao *ao, WAVEFORMATEXTENSIBLE *wformat)
     for (int j = 0; channel_layouts[j]; j++) {
         mp_chmap_from_str(&entry, bstr0(channel_layouts[j]));
         if (!wformat->Format.nSamplesPerSec) {
-            if (search_samplerates(ao, wformat, &entry)) {
+            if (search_samplerates(ao, wformat, &entry))
                 mp_chmap_sel_add_map(&chmap_sel, &entry);
-                MP_VERBOSE(ao, "%s is supported\n",
-                           waveformat_to_str(&wformat->Format));
-            }
         } else {
             change_waveformat_channels(wformat, &entry);
             if (try_format_exclusive(ao, wformat))
@@ -442,11 +433,12 @@ static bool find_formats_shared(struct ao *ao)
     WAVEFORMATEXTENSIBLE wformat;
     set_waveformat_with_ao(&wformat, ao);
 
-    MP_VERBOSE(ao, "Trying %s (shared)\n", waveformat_to_str(&wformat.Format));
     WAVEFORMATEX *closestMatch;
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 AUDCLNT_SHAREMODE_SHARED,
                                                 &wformat.Format, &closestMatch);
+    MP_VERBOSE(ao, "Trying %s (shared) -> %s\n",
+               waveformat_to_str(&wformat.Format), mp_format_res_str(hr));
     if (hr != AUDCLNT_E_UNSUPPORTED_FORMAT)
         EXIT_ON_ERROR(hr);
 
