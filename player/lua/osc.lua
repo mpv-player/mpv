@@ -1356,17 +1356,17 @@ layouts["topbar"] = function()
             w = buttonW, h = 36 - padY*2 }
     lo = add_layout("playpause")
     lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
+    lo.style = osc_styles.smallButtonsBar
 
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
     lo = add_layout("ch_prev")
     lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
+    lo.style = osc_styles.smallButtonsBar
 
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
     lo = add_layout("ch_next")
     lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
+    lo.style = osc_styles.smallButtonsBar
 
 
     -- Left timecode
@@ -1374,7 +1374,7 @@ layouts["topbar"] = function()
             w = tcW, h = geo.h }
     lo = add_layout("tc_left")
     lo.geometry = geo
-    lo.style = osc_styles.timecodes
+    lo.style = osc_styles.timecodesBar
 
     local sb_l = geo.x + padX
 
@@ -1384,12 +1384,12 @@ layouts["topbar"] = function()
             w = tsW, h = geo.h }
     lo = add_layout("cy_sub")
     lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
+    lo.style = osc_styles.smallButtonsBar
 
     geo = { x = geo.x - geo.w - padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
     lo = add_layout("cy_audio")
     lo.geometry = geo
-    lo.style = osc_styles.smallButtonsL
+    lo.style = osc_styles.smallButtonsBar
 
 
     -- Right timecode
@@ -1397,7 +1397,7 @@ layouts["topbar"] = function()
             w = tcW, h = geo.h }
     lo = add_layout("tc_right")
     lo.geometry = geo
-    lo.style = osc_styles.timecodes
+    lo.style = osc_styles.timecodesBar
 
     local sb_r = geo.x - padX
 
@@ -1409,13 +1409,13 @@ layouts["topbar"] = function()
 
     lo.geometry = geo
     lo.layer = 15
-    lo.style = osc_styles.timecodes
+    lo.style = osc_styles.timecodesBar
     lo.alpha[1] =
         math.min(255, user_opts.boxalpha + (255 - user_opts.boxalpha)*0.8)
 
     lo = add_layout("seekbar")
     lo.geometry = geo
-    lo.style = osc_styles.timecodes
+    lo.style = osc_styles.timecodesBar
     lo.slider.border = 0
     lo.slider.tooltip_style = osc_styles.timePosBar
     lo.slider.stype = user_opts["seekbarstyle"]
@@ -1426,12 +1426,12 @@ layouts["topbar"] = function()
     geo = { x = osc_geo.x + padX, y = line2, an = 4, w = 18, h = 18 - padY }
     lo = add_layout("pl_prev")
     lo.geometry = geo
-    lo.style = osc_styles.topButtons
+    lo.style = osc_styles.topButtonsBar
 
     geo = { x = geo.x + geo.w + padX, y = geo.y, an = geo.an, w = geo.w, h = geo.h }
     lo = add_layout("pl_next")
     lo.geometry = geo
-    lo.style = osc_styles.topButtons
+    lo.style = osc_styles.topButtonsBar
 
     local t_l = geo.x + geo.w + padX
 
@@ -1440,7 +1440,7 @@ layouts["topbar"] = function()
             an = 6, w = 150, h = geo.h }
     lo = add_layout("cache")
     lo.geometry = geo
-    lo.style = osc_styles.vidtitle
+    lo.style = osc_styles.vidtitleBar
 
     local t_r = geo.x - geo.w - padX*2
 
@@ -1449,7 +1449,7 @@ layouts["topbar"] = function()
             w = t_r - t_l, h = geo.h }
     lo = add_layout("title")
     lo.geometry = geo
-    lo.style = osc_styles.vidtitle
+    lo.style = osc_styles.vidtitleBar
     lo.button.maxchars = math.floor(geo.w/7)
 end
 
