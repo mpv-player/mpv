@@ -1502,8 +1502,9 @@ function osc_init()
     elements = {}
 
     -- some often needed stuff
-    local pl_count = mp.get_property_number("playlist-count")
+    local pl_count = mp.get_property_number("playlist-count", 0)
     local have_pl = (pl_count > 1)
+    local pl_pos = mp.get_property_number("playlist-pos", 0) + 1
     local have_ch = (mp.get_property_number("chapters", 0) > 0)
 
     local ne
@@ -1523,8 +1524,8 @@ function osc_init()
     ne.eventresponder["mouse_btn0_up"] = function ()
         local title = mp.get_property_osd("media-title")
         if (have_pl) then
-            local pl_pos = countone(mp.get_property_number("playlist-pos"))
-            title = "[" .. pl_pos .. "/" .. pl_count .. "] " .. title
+            title = string.format("[%d/%d] %s", countone(pl_pos - 1),
+                                  pl_count, title)
         end
         show_message(title)
     end
@@ -1538,7 +1539,7 @@ function osc_init()
     ne = new_element("pl_prev", "button")
 
     ne.content = "\238\132\144"
-    ne.visible = have_pl
+    ne.enabled = (pl_pos > 1)
     ne.eventresponder["mouse_btn0_up"] =
         function ()
             mp.commandv("playlist-prev", "weak")
@@ -1553,7 +1554,7 @@ function osc_init()
     ne = new_element("pl_next", "button")
 
     ne.content = "\238\132\129"
-    ne.visible = have_pl
+    ne.enabled = (have_pl) and (pl_pos < pl_count)
     ne.eventresponder["mouse_btn0_up"] =
         function ()
             mp.commandv("playlist-next", "weak")
