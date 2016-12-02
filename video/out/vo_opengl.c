@@ -272,7 +272,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_NOTIMPL;
     }
     case VOCTRL_SCREENSHOT_WIN: {
-        struct mp_image *screen = gl_read_window_contents(p->gl);
+        struct mp_image *screen =
+            gl_read_window_contents(p->gl, vo->dwidth, vo->dheight);
         if (!screen)
             break; // redirect to backend
         // set image parameters according to the display, if possible
