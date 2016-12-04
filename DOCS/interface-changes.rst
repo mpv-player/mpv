@@ -42,6 +42,7 @@ Interface changes
           been compiled-in)
         - --sub-codepage=<codepage> does not force the codepage anymore
           (this requires different and new syntax)
+    - remove --fs-black-out-screens option for macOS
  --- mpv 0.22.0 ---
     - the "audio-device-list" property now sets empty device description to the
       device name as a fallback

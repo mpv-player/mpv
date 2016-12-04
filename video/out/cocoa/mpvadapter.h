@@ -26,14 +26,14 @@
 - (void)putAxis:(int)mpkey delta:(float)delta;
 - (void)putCommand:(char*)cmd;
 - (void)handleFilesArray:(NSArray *)files;
-- (void)didChangeWindowedScreenProfile:(NSScreen *)screen;
+- (void)didChangeWindowedScreenProfile:(NSNotification *)notification;
 - (void)performAsyncResize:(NSSize)size;
 - (void)didChangeMousePosition;
 
 - (BOOL)isInFullScreenMode;
 - (BOOL)keyboardEnabled;
 - (BOOL)mouseEnabled;
-- (NSScreen *)fsScreen;
-- (BOOL)fsModeAllScreens;
+
+- (NSScreen *)getTargetScreen;
 @property(nonatomic, assign) struct vo *vout;
 @end
