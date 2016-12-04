@@ -182,7 +182,6 @@ static const m_option_t mp_vo_opt_list[] = {
                       ({"default", -1})),
     OPT_CHOICE_OR_INT("fs-screen", fsscreen_id, 0, 0, 32,
                       ({"all", -2}, {"current", -1})),
-    OPT_FLAG("fs-black-out-screens", fs_black_out_screens, 0),
     OPT_FLAG("keepaspect", keepaspect, UPDATE_VIDEOPOS),
     OPT_FLAG("keepaspect-window", keepaspect_window, 0),
     OPT_FLAG("hidpi-window-scale", hidpi_window_scale, 0),
@@ -796,6 +795,7 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("ass-shaper", "sub-ass-shaper"),
     OPT_REPLACED("ass-style-override", "sub-ass-style-override"),
     OPT_REPLACED("ass-scale-with-window", "sub-ass-scale-with-window"),
+    OPT_REMOVED("fs-black-out-screens", NULL),
 
     {0}
 };

@@ -26,15 +26,25 @@
 #include "window.h"
 
 @interface MpvVideoWindow()
+@property(nonatomic, retain) NSScreen *targetScreen;
+@property(nonatomic, retain) NSScreen *previousScreen;
+@property(nonatomic, retain) NSScreen *currentScreen;
+
 - (NSRect)frameRect:(NSRect)frameRect forCenteredContentSize:(NSSize)newSize;
 - (void)setCenteredContentSize:(NSSize)newSize;
 @end
 
 @implementation MpvVideoWindow {
     NSSize _queued_video_size;
+    NSRect _unfs_content_frame;
+    NSRect _unfs_screen_frame;
+    int _is_animating;
 }
 
 @synthesize adapter = _adapter;
+@synthesize targetScreen = _target_screen;
+@synthesize previousScreen = _previous_screen;
+@synthesize currentScreen = _current_screen;
 - (id)initWithContentRect:(NSRect)content_rect
                 styleMask:(NSUInteger)style_mask
                   backing:(NSBackingStoreType)buffering_type
@@ -46,8 +56,94 @@
                                     defer:flag]) {
         [self setBackgroundColor:[NSColor blackColor]];
         [self setMinSize:NSMakeSize(50,50)];
+        [self setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
+
+        self.targetScreen = [self screen];
+        self.currentScreen = [self screen];
+        _is_animating = 0;
+        _unfs_content_frame = [self convertRectToScreen:[[self contentView] frame]];
+        _unfs_screen_frame = [[self screen] frame];
     }
     return self;
+}
+
+- (void)toggleFullScreen:(id)sender
+{
+    if (_is_animating)
+        return;
+
+    _is_animating = 1;
+
+    self.targetScreen = [self.adapter getTargetScreen];
+    if(![self targetScreen] && ![self previousScreen]) {
+        self.targetScreen = [self screen];
+    } else if (![self targetScreen]) {
+        self.targetScreen = self.previousScreen;
+        self.previousScreen = nil;
+    } else {
+        self.previousScreen = [self screen];
+    }
+
+    if (![self.adapter isInFullScreenMode]) {
+        _unfs_content_frame = [self convertRectToScreen:[[self contentView] frame]];
+        _unfs_screen_frame = [[self screen] frame];
+    }
+
+    //move window to target screen when going to fullscreen
+    if (![self.adapter isInFullScreenMode] && ![[self targetScreen] isEqual:[self screen]]) {
+        [self setFrame:[self calculateWindowPositionForScreen:[self targetScreen]] display:YES];
+    }
+
+    [super toggleFullScreen:sender];
+
+    if (![self.adapter isInFullScreenMode]) {
+        [self setStyleMask:([self styleMask] | NSWindowStyleMaskFullScreen)];
+        NSRect frame = [[self targetScreen] frame];
+        [self setFrame:frame display:YES];
+    } else {
+        [self setStyleMask:([self styleMask] & ~NSWindowStyleMaskFullScreen)];
+        NSRect frame = [self calculateWindowPositionForScreen:[self targetScreen]];
+        [self setFrame:frame display:YES];
+        [self setContentAspectRatio:_unfs_content_frame.size];
+        [self setCenteredContentSize:_unfs_content_frame.size];
+    }
+}
+
+- (NSArray *)customWindowsToEnterFullScreenForWindow:(NSWindow *)window
+{
+    return [NSArray arrayWithObject:window];
+}
+
+- (NSArray*)customWindowsToExitFullScreenForWindow:(NSWindow*)window
+{
+    return [NSArray arrayWithObject:window];
+}
+
+// we still need to keep those around or it will use the standard animation
+- (void)window:(NSWindow *)window startCustomAnimationToEnterFullScreenWithDuration:(NSTimeInterval)duration {}
+
+- (void)window:(NSWindow *)window startCustomAnimationToExitFullScreenWithDuration:(NSTimeInterval)duration {}
+
+- (void)windowDidEnterFullScreen:(NSNotification *)notification
+{
+    _is_animating = 0;
+    [self.adapter windowDidEnterFullScreen:notification];
+}
+
+- (void)windowDidExitFullScreen:(NSNotification *)notification
+{
+    _is_animating = 0;
+    [self.adapter windowDidExitFullScreen:notification];
+}
+
+- (void)windowDidFailToEnterFullScreen:(NSWindow *)window
+{
+    _is_animating = 0;
+}
+
+- (void)windowDidFailToExitFullScreen:(NSWindow *)window
+{
+    _is_animating = 0;
 }
 
 - (void)windowDidChangeBackingProperties:(NSNotification *)notification
@@ -58,12 +154,18 @@
 
 - (void)windowDidChangeScreen:(NSNotification *)notification
 {
+    //this event doesn't exclusively trigger on screen change
+    //examples: screen reconfigure, toggling fullscreen
+    if (!_is_animating && ![[self currentScreen] isEqual:[self screen]]) {
+        self.previousScreen = [self screen];
+    }
+    self.currentScreen = [self screen];
     [self.adapter windowDidChangeScreen:notification];
 }
 
 - (void)windowDidChangeScreenProfile:(NSNotification *)notification
 {
-    [self.adapter didChangeWindowedScreenProfile:[self screen]];
+    [self.adapter didChangeWindowedScreenProfile:notification];
 }
 
 - (void)windowDidResignKey:(NSNotification *)notification
@@ -125,8 +227,41 @@
            animate:NO];
 }
 
+- (NSRect)calculateWindowPositionForScreen:(NSScreen *)screen
+{
+    NSRect frame = [self frameRectForContentRect:_unfs_content_frame];
+    NSRect targetFrame = [screen frame];
+
+    CGFloat x_per = (_unfs_screen_frame.size.width - frame.size.width);
+    CGFloat y_per = (_unfs_screen_frame.size.height - frame.size.height);
+    if (x_per > 0) x_per = (frame.origin.x - _unfs_screen_frame.origin.x)/x_per;
+    if (y_per > 0) y_per = (frame.origin.y - _unfs_screen_frame.origin.y)/y_per;
+
+    frame.origin.x = targetFrame.origin.x +
+        (targetFrame.size.width - frame.size.width)*x_per;
+    frame.origin.y = targetFrame.origin.y +
+        (targetFrame.size.height - frame.size.height)*y_per;
+
+    //screen bounds right and left
+    if (frame.origin.x + frame.size.width > targetFrame.origin.x + targetFrame.size.width)
+        frame.origin.x = targetFrame.origin.x + targetFrame.size.width - frame.size.width;
+    if (frame.origin.x < targetFrame.origin.x)
+        frame.origin.x = targetFrame.origin.x;
+
+    //screen bounds top and bottom
+    if (frame.origin.y + frame.size.height > targetFrame.origin.y + targetFrame.size.height)
+        frame.origin.y = targetFrame.origin.y + targetFrame.size.height - frame.size.height;
+    if (frame.origin.y < targetFrame.origin.y)
+        frame.origin.y = targetFrame.origin.y;
+
+    return frame;
+}
+
 - (NSRect)constrainFrameRect:(NSRect)nf toScreen:(NSScreen *)screen
 {
+    if (_is_animating)
+        screen = [self targetScreen];
+
     NSRect of  = [self frame];
     NSRect vf  = [screen ?: self.screen ?: [NSScreen mainScreen] visibleFrame];
     NSRect ncf = [self contentRectForFrameRect:nf];
@@ -136,7 +271,7 @@
     if (NSMaxY(nf) > NSMaxY(vf))
         nf.origin.y = NSMaxY(vf) - NSHeight(nf);
 
-    // Prevent the window's titlebar from exiting the screen on the top edge.
+    // Prevent the window's titlebar from exiting the screen on the bottom edge.
     if (NSMaxY(ncf) < NSMinY(vf))
         nf.origin.y = NSMinY(vf) + NSMinY(ncf) - NSMaxY(ncf);
 
@@ -157,30 +292,42 @@
     return nf;
 }
 
+- (void)windowWillStartLiveResize:(NSNotification *)notification
+{
+    [self.adapter windowWillStartLiveResize:notification];
+}
+
 - (void)windowDidEndLiveResize:(NSNotification *)notification
 {
+    [self.adapter windowDidEndLiveResize:notification];
     [self setFrame:[self constrainFrameRect:self.frame toScreen:self.screen]
            display:NO];
+}
+
+- (void)updateWindowFrame:(NSSize)newSize
+{
+    _unfs_content_frame = [self frameRect:_unfs_content_frame forCenteredContentSize:newSize];
 }
 
 - (void)tryDequeueSize {
     if (_queued_video_size.width <= 0.0 || _queued_video_size.height <= 0.0)
         return;
 
-    // XXX find a way to kill this state
-    if (![self.adapter isInFullScreenMode]) {
-        [self setContentAspectRatio:_queued_video_size];
-        [self setCenteredContentSize:_queued_video_size];
-        _queued_video_size = NSZeroSize;
-    }
+    [self setContentAspectRatio:_queued_video_size];
+    [self setCenteredContentSize:_queued_video_size];
+    _queued_video_size = NSZeroSize;
 }
 
-- (void)queueNewVideoSize:(NSSize)new_size
+- (void)queueNewVideoSize:(NSSize)newSize
 {
-    if (NSEqualSizes(_queued_video_size, new_size))
-        return;
-    _queued_video_size = new_size;
-    [self tryDequeueSize];
+    if ([self.adapter isInFullScreenMode]) {
+        [self updateWindowFrame:newSize];
+    } else {
+        if (NSEqualSizes(_queued_video_size, newSize))
+            return;
+        _queued_video_size = newSize;
+        [self tryDequeueSize];
+    }
 }
 
 - (void)windowDidBecomeMain:(NSNotification *)notification {
