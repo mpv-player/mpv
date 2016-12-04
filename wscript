@@ -528,6 +528,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavutil/frame.h',
                                 'AV_FRAME_DATA_MASTERING_DISPLAY_METADATA',
                                 use='libav'),
+    }, {
+        'name': 'avformat-ioopen',
+        'desc': 'libavformat io_open callback',
+        'func': check_statement('libavformat/avformat.h',
+                                'offsetof(AVFormatContext, io_open)',
+                                use='libav'),
     }
 ]
 

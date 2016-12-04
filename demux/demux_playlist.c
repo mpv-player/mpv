@@ -283,6 +283,8 @@ static int parse_dir(struct pl_parser *p)
         return 0;
 
     char *path = mp_file_get_path(p, bstr0(p->real_stream->url));
+    if (!path)
+        return -1;
 
     char **files = NULL;
     int num_files = 0;
@@ -339,6 +341,9 @@ static const struct pl_format *probe_pl(struct pl_parser *p)
 
 static int open_file(struct demuxer *demuxer, enum demux_check check)
 {
+    if (!demuxer->access_references)
+        return -1;
+
     bool force = check < DEMUX_CHECK_UNSAFE || check == DEMUX_CHECK_REQUEST;
 
     struct pl_parser *p = talloc_zero(NULL, struct pl_parser);

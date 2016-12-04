@@ -89,6 +89,7 @@ struct demux_opts {
     double min_secs;
     int force_seekable;
     double min_secs_cache;
+    int access_references;
 };
 
 #define OPT_BASE_STRUCT struct demux_opts
@@ -100,6 +101,7 @@ const struct m_sub_options demux_conf = {
         OPT_INTRANGE("demuxer-max-bytes", max_bytes, 0, 0, INT_MAX),
         OPT_FLAG("force-seekable", force_seekable, 0),
         OPT_DOUBLE("cache-secs", min_secs_cache, M_OPT_MIN, .min = 0),
+        OPT_FLAG("access-references", access_references, 0),
         {0}
     },
     .size = sizeof(struct demux_opts),
@@ -108,6 +110,7 @@ const struct m_sub_options demux_conf = {
         .max_bytes = 400 * 1024 * 1024,
         .min_secs = 1.0,
         .min_secs_cache = 10.0,
+        .access_references = 1,
     },
 };
 
@@ -1213,6 +1216,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         return NULL;
 
     struct demuxer *demuxer = talloc_ptrtype(NULL, demuxer);
+    struct demux_opts *opts = mp_get_config_group(demuxer, global, &demux_conf);
     *demuxer = (struct demuxer) {
         .desc = desc,
         .stream = stream,
@@ -1223,14 +1227,13 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .glog = log,
         .filename = talloc_strdup(demuxer, stream->url),
         .is_network = stream->is_network,
+        .access_references = opts->access_references,
         .events = DEMUX_EVENT_ALL,
     };
     demuxer->seekable = stream->seekable;
     if (demuxer->stream->uncached_stream &&
         !demuxer->stream->uncached_stream->seekable)
         demuxer->seekable = false;
-
-    struct demux_opts *opts = mp_get_config_group(demuxer, global, &demux_conf);
 
     struct demux_internal *in = demuxer->in = talloc_ptrtype(demuxer, in);
     *in = (struct demux_internal){

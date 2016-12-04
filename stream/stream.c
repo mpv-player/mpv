@@ -230,6 +230,12 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
     s->is_network = sinfo->is_network;
     s->mode = flags & (STREAM_READ | STREAM_WRITE);
 
+    if (global->config) {
+        int opt;
+        mp_read_option_raw(global, "access-references", &m_option_type_flag, &opt);
+        s->access_references = opt;
+    }
+
     MP_VERBOSE(s, "Opening %s\n", url);
 
     if ((s->mode & STREAM_WRITE) && !sinfo->can_write) {

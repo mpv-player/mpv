@@ -186,6 +186,7 @@ typedef struct demuxer {
     // Typical examples: text subtitles, playlists
     bool fully_read;
     bool is_network; // opened directly from a network stream
+    bool access_references; // allow opening other files/URLs
 
     // Bitmask of DEMUX_EVENT_*
     int events;

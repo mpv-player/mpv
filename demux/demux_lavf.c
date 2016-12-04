@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <strings.h>
+#include <errno.h>
 #include <assert.h>
 
 #include "config.h"
@@ -754,6 +755,14 @@ static int interrupt_cb(void *ctx)
     return mp_cancel_test(priv->stream->cancel);
 }
 
+static int block_io_open(struct AVFormatContext *s, AVIOContext **pb,
+                         const char *url, int flags, AVDictionary **options)
+{
+    struct demuxer *demuxer = s->opaque;
+    MP_ERR(demuxer, "Not opening '%s' due to --access-references=no.\n", url);
+    return AVERROR(EACCES);
+}
+
 static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 {
     AVFormatContext *avfc;
@@ -854,6 +863,12 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         .callback = interrupt_cb,
         .opaque = demuxer,
     };
+
+#if HAVE_AVFORMAT_IOOPEN
+    avfc->opaque = demuxer;
+    if (!demuxer->access_references)
+        avfc->io_open = block_io_open;
+#endif
 
     mp_set_avdict(&dopts, lavfdopts->avopts);
 

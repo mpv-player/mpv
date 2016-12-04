@@ -562,6 +562,9 @@ static int ifo_dvdnav_stream_open(stream_t *stream)
     struct priv *priv = talloc_zero(stream, struct priv);
     stream->priv = priv;
 
+    if (!stream->access_references)
+        goto unsupported;
+
     priv->track = TITLE_LONGEST;
 
     char *path = mp_file_get_path(priv, bstr0(stream->url));

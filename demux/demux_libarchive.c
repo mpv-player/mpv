@@ -32,6 +32,9 @@ static int cmp_filename(const void *a, const void *b)
 
 static int open_file(struct demuxer *demuxer, enum demux_check check)
 {
+    if (!demuxer->access_references)
+        return -1;
+
     int flags = 0;
     int probe_size = STREAM_BUFFER_SIZE;
     if (check <= DEMUX_CHECK_REQUEST) {

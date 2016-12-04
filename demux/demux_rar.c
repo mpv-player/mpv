@@ -23,6 +23,9 @@
 
 static int open_file(struct demuxer *demuxer, enum demux_check check)
 {
+    if (!demuxer->access_references)
+        return -1;
+
     if (RarProbe(demuxer->stream))
         return -1;
 

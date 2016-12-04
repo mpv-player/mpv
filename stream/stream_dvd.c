@@ -951,6 +951,9 @@ static int ifo_stream_open(stream_t *stream)
     dvd_priv_t *priv = talloc_zero(stream, dvd_priv_t);
     stream->priv = priv;
 
+    if (!stream->access_references)
+        goto unsupported;
+
     char *path = mp_file_get_path(priv, bstr0(stream->url));
     if (!path)
         goto unsupported;

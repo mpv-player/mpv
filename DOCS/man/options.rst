@@ -267,6 +267,26 @@ Playback Control
     Note that ``--playlist`` always loads all entries, so you use that instead
     if you really have the need for this functionality.
 
+``--access-references=<yes|no>``
+    Follow any references in the file being opened (default: yes). Disabling
+    this is helpful if the file is automatically scanned (e.g. thumbnail
+    generation). If the thumbnail scanner for example encounters a playlist
+    file, which contains network URLs, and the scanner should not open these,
+    enabling this option will prevent it. This option also disables ordered
+    chapters, mov reference files, opening of archives, and a number of other
+    features.
+
+    On older FFmpeg versions, this will not work in some cases. Some FFmpeg
+    demuxers might not respect this option.
+
+    This option does not prevent opening of paired subtitle files and such. Use
+    ``--autoload-files=no`` to prevent this.
+
+    This option does not always work if you open non-files (for example using
+    ``dvd://directory`` would open a whole bunch of files in the given
+    directory). Prefixing the filename with ``./`` if it doesn't start with
+    a ``/`` will avoid this.
+
 ``--loop-file=<N|inf|no>``
     Loop a single file N times. ``inf`` means forever, ``no`` means normal
     playback. For compatibility, ``--loop-file`` and ``--loop-file=yes`` are
