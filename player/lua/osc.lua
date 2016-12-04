@@ -1766,7 +1766,7 @@ function osc_init()
             end
         else
             if state.tc_ms then
-                return (mp.get_property_osd("length/full"))
+                return (mp.get_property_osd("duration/full"))
             else
                 return (mp.get_property_osd("duration"))
             end
