@@ -27,14 +27,10 @@
  * when decoding 10bit streams (there is some hardware dithering going on).
  */
 
-#include <libavutil/hwcontext.h>
-
 #include "cuda_dynamic.h"
 #include "video/mp_image_pool.h"
 #include "hwdec.h"
 #include "video.h"
-
-#include <libavutil/hwcontext_cuda.h>
 
 struct priv {
     struct mp_hwdec_ctx hwctx;
