@@ -208,9 +208,6 @@ Alt+2 (and command+2 on OSX)
 command + f (OSX only)
     Toggle fullscreen (see also ``--fs``).
 
-command + [ and command + ] (OSX only)
-    Set video window alpha.
-
 (The following keys are valid if you have a keyboard with multimedia keys.)
 
 PAUSE
@@ -431,7 +428,7 @@ tree and play the longest title.
     a bitmap video stream which can be superimposed over the main
     movie. mpv's subtitle styling and positioning options and keyboard
     shortcuts generally do not work with image-based subtitles.
-    Exceptions include options like ``--stretch-dvd-subs`` and 
+    Exceptions include options like ``--stretch-dvd-subs`` and
     ``--stretch-image-subs-to-screen``.
 
 
