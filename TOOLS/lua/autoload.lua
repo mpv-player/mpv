@@ -7,6 +7,13 @@
 -- Add at most 5000 * 2 files when starting a file (before + after).
 MAXENTRIES = 5000
 
+local options = require 'mp.options'
+
+o = {
+    disabled = false
+}
+options.read_options(o)
+
 function Set (t)
     local set = {}
     for _, v in pairs(t) do set[v] = true end
@@ -49,7 +56,7 @@ end
 function find_and_add_entries()
     local path = mp.get_property("path", "")
     local dir, filename = mputils.split_path(path)
-    if #dir == 0 then
+    if o.disabled or #dir == 0 then
         return
     end
     local pl_count = mp.get_property_number("playlist-count", 1)
