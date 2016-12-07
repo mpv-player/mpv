@@ -603,8 +603,8 @@ static int try_open_device(struct ao *ao, const char *device, int mode)
                 const char *const fallbacks[] = {"hdmi", "iec958", NULL};
                 for (int n = 0; fallbacks[n]; n++) {
                     char *ndev = append_params(tmp, fallbacks[n], params);
-                    MP_VERBOSE(ao, "got error %d; opening iec fallback "
-                               "device '%s'\n", err, ndev);
+                    MP_VERBOSE(ao, "got error '%s'; opening iec fallback "
+                               "device '%s'\n", snd_strerror(err), ndev);
                     err = snd_pcm_open
                                 (&p->alsa, ndev, SND_PCM_STREAM_PLAYBACK, mode);
                     if (err >= 0)
