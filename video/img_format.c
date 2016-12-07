@@ -161,21 +161,14 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     int shift = -1; // shift for all components, or -1 if not uniform
     for (int c = 0; c < pd->nb_components; c++) {
         AVComponentDescriptor d = pd->comp[c];
-#if HAVE_AV_NEW_PIXDESC
-        int depth = d.depth;
-        int step = d.step;
-#else
-        int depth = d.depth_minus1 + 1;
-        int step = d.step_minus1 + 1;
-#endif
         // multiple components per plane -> Y is definitive, ignore chroma
         if (!desc.bpp[d.plane])
-            desc.bpp[d.plane] = step * el_size;
-        planedepth[d.plane] += depth;
-        need_endian |= (depth + d.shift) > 8;
+            desc.bpp[d.plane] = d.step * el_size;
+        planedepth[d.plane] += d.depth;
+        need_endian |= (d.depth + d.shift) > 8;
         if (c == 0)
-            desc.component_bits = depth;
-        if (depth != desc.component_bits)
+            desc.component_bits = d.depth;
+        if (d.depth != desc.component_bits)
             desc.component_bits = 0;
         if (c == 0)
             shift = d.shift;

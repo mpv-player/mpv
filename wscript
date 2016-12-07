@@ -477,79 +477,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
                                 'enum AVFrameSideDataType type = AV_FRAME_DATA_SKIP_SAMPLES',
                                 use='libav')
     }, {
-        'name': 'av-pix-fmt-mmal',
-        'desc': 'libavutil AV_PIX_FMT_MMAL',
-        'func': check_statement('libavutil/pixfmt.h',
-                                'int x = AV_PIX_FMT_MMAL',
-                                use='libav'),
-    }, {
-        'name': 'av-version-info',
-        'desc': 'libavtuil av_version_info()',
-        'func': check_statement('libavutil/avutil.h',
-                                'const char *x = av_version_info()',
-                                use='libav'),
-    }, {
-        'name': 'av-new-pixdesc',
-        'desc': 'libavutil new pixdesc fields',
-        'func': check_statement('libavutil/pixdesc.h',
-                                'AVComponentDescriptor d; int x = d.depth',
-                                use='libav'),
-    }, {
-        'name': 'av-avpacket-int64-duration',
-        'desc': 'libavcodec 64 bit AVPacket.duration',
-        'func': check_statement('libavcodec/avcodec.h',
-                                'int x[(int)sizeof(((AVPacket){0}).duration) - 7]',
-                                use='libav'),
-    }, {
-        'name': 'av-subtitle-nopict',
-        'desc': 'libavcodec AVSubtitleRect AVPicture removal',
-        'func': check_statement('libavcodec/avcodec.h',
-                                'AVSubtitleRect r = {.linesize={0}}',
-                                use='libav'),
-    }, {
-        'name': 'avcodec-profile-name',
-        'desc': 'libavcodec avcodec_profile_name()',
-        'func': check_statement('libavcodec/avcodec.h',
-                                'avcodec_profile_name(0,0)',
-                                use='libav'),
-    }, {
-        'name': 'avcodec-new-codec-api',
-        'desc': 'libavcodec decode/encode API',
-        'func': check_statement('libavcodec/avcodec.h',
-                                'avcodec_send_packet(0,0)',
-                                use='libav'),
-    }, {
-        'name': 'avcodec-has-codecpar',
-        'desc': 'libavcodec AVCodecParameters API',
-        'func': check_statement('libavformat/avformat.h',
-                                '(void)offsetof(AVStream, codecpar)',
-                                use='libav'),
-    }, {
-        'name': 'avutil-has-hwcontext',
-        'desc': 'libavutil AVHWFramesContext API',
-        'func': check_statement('libavutil/frame.h',
-                                '(void)offsetof(AVFrame, hw_frames_ctx)',
-                                use='libav'),
-    }, {
-        'name': 'avutil-hdr',
-        'desc': 'libavutil HDR TRCs',
-        'func': check_statement('libavutil/pixfmt.h',
-                                'AVCOL_TRC_SMPTEST2084,'
-                                'AVCOL_TRC_ARIB_STD_B67',
-                                use='libav'),
-    }, {
         'name': 'avutil-mastering-metadata',
         'desc': 'libavutil mastering display metadata struct',
         'func': check_statement('libavutil/frame.h',
                                 'AV_FRAME_DATA_MASTERING_DISPLAY_METADATA',
                                 use='libav'),
-    }, {
-        'name': 'avformat-ioopen',
-        'desc': 'libavformat io_open callback',
-        'func': check_statement('libavformat/avformat.h',
-                                'offsetof(AVFormatContext, io_open)',
-                                use='libav'),
-    }
+    },
 ]
 
 audio_output_features = [

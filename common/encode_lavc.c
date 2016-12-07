@@ -595,12 +595,7 @@ int encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
             }
             return -1;
         }
-#if HAVE_AVCODEC_HAS_CODECPAR
         ctx->vcc = avcodec_alloc_context3(ctx->vc);
-#else
-        avcodec_get_context_defaults3(ctx->vst->codec, ctx->vc);
-        ctx->vcc = ctx->vst->codec;
-#endif
 
         // Using codec->time_base is deprecated, but needed for older lavf.
         ctx->vst->time_base = ctx->timebase;
@@ -635,12 +630,7 @@ int encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
             }
             return -1;
         }
-#if HAVE_AVCODEC_HAS_CODECPAR
         ctx->acc = avcodec_alloc_context3(ctx->ac);
-#else
-        avcodec_get_context_defaults3(ctx->ast->codec, ctx->ac);
-        ctx->acc = ctx->ast->codec;
-#endif
 
         // Using codec->time_base is deprecated, but needed for older lavf.
         ctx->ast->time_base = ctx->timebase;
@@ -708,10 +698,8 @@ int encode_lavc_open_codec(struct encode_lavc_context *ctx,
         }
 
         ret = avcodec_open2(codec, ctx->vc, &ctx->voptions);
-#if HAVE_AVCODEC_HAS_CODECPAR
         if (ret >= 0)
             ret = avcodec_parameters_from_context(ctx->vst->codecpar, codec);
-#endif
 
         // complain about all remaining options, then free the dict
         for (de = NULL; (de = av_dict_get(ctx->voptions, "", de,
@@ -747,10 +735,8 @@ int encode_lavc_open_codec(struct encode_lavc_context *ctx,
         }
 
         ret = avcodec_open2(codec, ctx->ac, &ctx->aoptions);
-#if HAVE_AVCODEC_HAS_CODECPAR
         if (ret >= 0)
             ret = avcodec_parameters_from_context(ctx->ast->codecpar, codec);
-#endif
 
         // complain about all remaining options, then free the dict
         for (de = NULL; (de = av_dict_get(ctx->aoptions, "", de,
@@ -826,11 +812,7 @@ int encode_lavc_write_frame(struct encode_lavc_context *ctx, AVStream *stream,
         (int)packet->size);
 
 
-#if HAVE_AVCODEC_HAS_CODECPAR
     switch (stream->codecpar->codec_type) {
-#else
-    switch (stream->codec->codec_type) {
-#endif
         case AVMEDIA_TYPE_VIDEO:
             ctx->vbytes += packet->size;
             ++ctx->frames;

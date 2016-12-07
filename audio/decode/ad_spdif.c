@@ -116,16 +116,10 @@ static int determine_codec_profile(struct dec_audio *da, AVPacket *pkt)
         goto done;
     }
 
-#if HAVE_AVCODEC_NEW_CODEC_API
     if (avcodec_send_packet(ctx, pkt) < 0)
         goto done;
     if (avcodec_receive_frame(ctx, frame) < 0)
         goto done;
-#else
-    int got_frame = 0;
-    if (avcodec_decode_audio4(ctx, frame, &got_frame, pkt) < 1 || !got_frame)
-        goto done;
-#endif
 
     profile = ctx->profile;
 
@@ -178,11 +172,7 @@ static int init_filter(struct dec_audio *da, AVPacket *pkt)
     if (!stream)
         goto fail;
 
-#if HAVE_AVCODEC_HAS_CODECPAR
     stream->codecpar->codec_id = spdif_ctx->codec_id;
-#else
-    stream->codec->codec_id = spdif_ctx->codec_id;
-#endif
 
     AVDictionary *format_opts = NULL;
 

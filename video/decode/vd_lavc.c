@@ -663,11 +663,9 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
         MP_VERBOSE(vd, " %s", av_get_pix_fmt_name(fmt[i]));
     MP_VERBOSE(vd, "\n");
 
-#if HAVE_AVCODEC_PROFILE_NAME
     const char *profile = avcodec_profile_name(avctx->codec_id, avctx->profile);
     MP_VERBOSE(vd, "Codec profile: %s (0x%x)\n", profile ? profile : "unknown",
                avctx->profile);
-#endif
 
     assert(ctx->hwdec);
 
@@ -794,7 +792,6 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         reset_avctx(vd);
 
     hwdec_lock(ctx);
-#if HAVE_AVCODEC_NEW_CODEC_API
     ret = avcodec_send_packet(avctx, packet ? &pkt : NULL);
     if (ret >= 0 || ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
         if (ret >= 0)
@@ -807,10 +804,6 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     } else {
         consumed = true;
     }
-#else
-    ret = avcodec_decode_video2(avctx, ctx->pic, &got_picture, &pkt);
-    consumed = true;
-#endif
     hwdec_unlock(ctx);
 
     // Reset decoder if it was fully flushed. Caller might send more flush
@@ -864,7 +857,7 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         return;
     }
     assert(mpi->planes[0] || mpi->planes[3]);
-    mpi->pts = mp_pts_from_av(MP_AVFRAME_DEC_PTS(ctx->pic), &ctx->codec_timebase);
+    mpi->pts = mp_pts_from_av(ctx->pic->pts, &ctx->codec_timebase);
     mpi->dts = mp_pts_from_av(ctx->pic->pkt_dts, &ctx->codec_timebase);
 
     struct mp_image_params params;

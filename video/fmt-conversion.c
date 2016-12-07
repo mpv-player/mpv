@@ -73,10 +73,8 @@ static const struct {
 
     {IMGFMT_XYZ12,   AV_PIX_FMT_XYZ12},
 
-#ifdef AV_PIX_FMT_RGBA64
     {IMGFMT_RGBA64,  AV_PIX_FMT_RGBA64},
     {IMGFMT_BGRA64,  AV_PIX_FMT_BGRA64},
-#endif
 
 #if LIBAVUTIL_VERSION_MICRO >= 100
     {IMGFMT_BGR0,  AV_PIX_FMT_BGR0},
@@ -90,9 +88,7 @@ static const struct {
     {IMGFMT_0BGR,  AV_PIX_FMT_ABGR},
 #endif
 
-#ifdef AV_PIX_FMT_YA16
     {IMGFMT_YA16,  AV_PIX_FMT_YA16},
-#endif
 
     {IMGFMT_VDPAU, AV_PIX_FMT_VDPAU},
 #if HAVE_VIDEOTOOLBOX_HWACCEL
@@ -103,15 +99,11 @@ static const struct {
 #if HAVE_D3D_HWACCEL
     {IMGFMT_D3D11VA, AV_PIX_FMT_D3D11VA_VLD},
 #endif
-#if HAVE_AV_PIX_FMT_MMAL
     {IMGFMT_MMAL, AV_PIX_FMT_MMAL},
-#endif
 #if HAVE_CUDA_HWACCEL
     {IMGFMT_CUDA, AV_PIX_FMT_CUDA},
 #endif
-#ifdef AV_PIX_FMT_P010
     {IMGFMT_P010, AV_PIX_FMT_P010},
-#endif
 #ifdef AV_PIX_FMT_P016
     {IMGFMT_P016, AV_PIX_FMT_P016},
 #endif

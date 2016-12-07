@@ -3569,11 +3569,7 @@ static int mp_property_configuration(void *ctx, struct m_property *prop,
 static int mp_property_ffmpeg(void *ctx, struct m_property *prop,
                                int action, void *arg)
 {
-#if HAVE_AV_VERSION_INFO
     return m_property_strdup_ro(action, arg, av_version_info());
-#else
-    return M_PROPERTY_UNAVAILABLE;
-#endif
 }
 
 static int mp_property_alias(void *ctx, struct m_property *prop,

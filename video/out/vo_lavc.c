@@ -241,7 +241,6 @@ static void encode_video_and_write(struct vo *vo, AVFrame *frame)
     struct priv *vc = vo->priv;
     AVPacket packet = {0};
 
-#if HAVE_AVCODEC_NEW_CODEC_API
     int status = avcodec_send_frame(vc->codec, frame);
     if (status < 0) {
         MP_ERR(vo, "error encoding at %d %d/%d\n",
@@ -276,24 +275,6 @@ static void encode_video_and_write(struct vo *vo, AVFrame *frame)
         write_packet(vo, &packet);
         av_packet_unref(&packet);
     }
-#else
-    av_init_packet(&packet);
-    int got_packet = 0;
-    int status = avcodec_encode_video2(vc->codec, &packet, frame, &got_packet);
-    if (status < 0) {
-        MP_ERR(vo, "error encoding at %d %d/%d\n",
-               frame ? (int) frame->pts : -1,
-               vc->codec->time_base.num,
-               vc->codec->time_base.den);
-        return;
-    }
-    if (!got_packet) {
-        return;
-    }
-    encode_lavc_write_stats(vo->encode_lavc_ctx, vc->codec);
-    write_packet(vo, &packet);
-    av_packet_unref(&packet);
-#endif
 }
 
 static void draw_image_unlocked(struct vo *vo, mp_image_t *mpi)

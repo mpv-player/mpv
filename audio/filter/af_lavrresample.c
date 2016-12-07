@@ -111,12 +111,7 @@ static double get_delay(struct af_resample *s)
 }
 static int get_out_samples(struct af_resample *s, int in_samples)
 {
-#if LIBSWRESAMPLE_VERSION_MAJOR > 1 || LIBSWRESAMPLE_VERSION_MINOR >= 2
     return swr_get_out_samples(s->avrctx, in_samples);
-#else
-    return av_rescale_rnd(in_samples, s->out_rate, s->in_rate, AV_ROUND_UP)
-           + swr_get_delay(s->avrctx, s->out_rate);
-#endif
 }
 #endif
 

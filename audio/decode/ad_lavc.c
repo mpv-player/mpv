@@ -207,7 +207,6 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     if (priv->needs_reset)
         control(da, ADCTRL_RESET, NULL);
 
-#if HAVE_AVCODEC_NEW_CODEC_API
     int ret = avcodec_send_packet(avctx, &pkt);
     if (ret >= 0 || ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
         if (ret >= 0 && mpkt)
@@ -220,24 +219,6 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
         if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
             ret = 0;
     }
-#else
-    int ret = avcodec_decode_audio4(avctx, priv->avframe, &got_frame, &pkt);
-    if (mpkt) {
-        // At least "shorten" decodes sub-frames, instead of the whole packet.
-        // At least "mpc8" can return 0 and wants the packet again next time.
-        if (ret >= 0) {
-            ret = FFMIN(ret, mpkt->len); // sanity check against decoder overreads
-            mpkt->buffer += ret;
-            mpkt->len    -= ret;
-            mpkt->pts = MP_NOPTS_VALUE; // don't reset PTS next time
-        }
-        // LATM may need many packets to find mux info
-        if (ret == AVERROR(EAGAIN)) {
-            mpkt->len = 0;
-            return 0;
-        }
-    }
-#endif
     if (ret < 0) {
         MP_ERR(da, "Error decoding audio.\n");
         return -1;
@@ -245,8 +226,7 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     if (!got_frame)
         return 0;
 
-    double out_pts = mp_pts_from_av(MP_AVFRAME_DEC_PTS(priv->avframe),
-                                    &priv->codec_timebase);
+    double out_pts = mp_pts_from_av(priv->avframe->pts, &priv->codec_timebase);
 
     struct mp_audio *mpframe = mp_audio_from_avframe(priv->avframe);
     if (!mpframe)
