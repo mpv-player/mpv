@@ -401,13 +401,28 @@ iconv support use --disable-iconv.",
     }
 ]
 
+# Libav 12:
+#   libavutil       55.20.0
+#   libavcodec      57.25.0
+#   libavformat     57.7.2
+#   libswscale      4.0.0
+#   libavfilter     6.7.0
+#   libavresample   3.0.0
+# FFmpeg 3.2.2:
+#   libavutil       55.34.100
+#   libavcodec      57.64.101
+#   libavformat     57.56.100
+#   libswscale      4.2.100
+#   libavfilter     6.65.100
+#   libswresample   2.3.100
+
 libav_pkg_config_checks = [
-    'libavutil',   '>= 54.02.0',
-    'libavcodec',  '>= 56.1.0',
-    'libavformat', '>= 56.01.0',
-    'libswscale',  '>= 2.1.3'
+    'libavutil',   '>= 55.20.0',
+    'libavcodec',  '>= 57.25.0',
+    'libavformat', '>= 57.07.0',
+    'libswscale',  '>= 4.0.0'
 ]
-libav_versions_string = "FFmpeg 2.4 or Libav 11"
+libav_versions_string = "FFmpeg 3.2.2 or Libav 12"
 
 libav_dependencies = [
     {
@@ -420,11 +435,11 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
     }, {
         'name': '--libswresample',
         'desc': 'libswresample',
-        'func': check_pkg_config('libswresample', '>= 1.1.100'),
+        'func': check_pkg_config('libswresample', '>= 2.3.100'),
     }, {
         'name': '--libavresample',
         'desc': 'libavresample',
-        'func': check_pkg_config('libavresample',  '>= 2.1.0'),
+        'func': check_pkg_config('libavresample',  '>= 3.0.0'),
         'deps_neg': ['libswresample'],
     }, {
         'name': 'resampler',
@@ -436,13 +451,13 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
     }, {
         'name': 'libavfilter',
         'desc': 'libavfilter',
-        'func': check_pkg_config('libavfilter', '>= 5.0.0'),
+        'func': check_pkg_config('libavfilter', '>= 6.7.0'),
         'req':  True,
         'fmsg': 'libavfilter is a required dependency.',
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
-        'func': check_pkg_config('libavdevice', '>= 55.0.0'),
+        'func': check_pkg_config('libavdevice', '>= 57.0.0'),
     }, {
         'name': 'avcodec-chroma-pos-api',
         'desc': 'libavcodec avcodec_enum_to_chroma_pos API',
