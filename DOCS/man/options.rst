@@ -3819,20 +3819,6 @@ OpenGL renderer options
 The following video options are currently all specific to ``--vo=opengl`` and
 ``-vo=opengl-cb`` only, which are the only VOs that implement them.
 
-``--opengl-dumb-mode=<yes|no>``
-    This mode is extremely restricted, and will disable most extended OpenGL
-    features. This includes high quality scalers and custom shaders!
-
-    It is intended for hardware that does not support FBOs (including GLES,
-    which supports it insufficiently), or to get some more performance out of
-    bad or old hardware.
-
-    This mode is forced automatically if needed, and this option is mostly
-    useful for debugging. It's also enabled automatically if nothing uses
-    features which require FBOs.
-
-    This option might be silently removed in the future.
-
 ``--scale=<filter>``
 
     ``bilinear``
@@ -4635,6 +4621,20 @@ The following video options are currently all specific to ``--vo=opengl`` and
     the renderer is going to wait for a while after rendering, instead of
     flipping GL front and backbuffers immediately (i.e. it doesn't call it
     in display-sync mode).
+
+``--opengl-dumb-mode=<yes|no>``
+    This mode is extremely restricted, and will disable most extended OpenGL
+    features. This includes high quality scalers and custom shaders!
+
+    It is intended for hardware that does not support FBOs (including GLES,
+    which supports it insufficiently), or to get some more performance out of
+    bad or old hardware.
+
+    This mode is forced automatically if needed, and this option is mostly
+    useful for debugging. It's also enabled automatically if nothing uses
+    features which require FBOs.
+
+    This option might be silently removed in the future.
 
 Miscellaneous
 -------------
