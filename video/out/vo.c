@@ -63,6 +63,9 @@ extern const struct vo_driver video_out_tct;
 
 const struct vo_driver *const video_out_drivers[] =
 {
+#if HAVE_RPI
+    &video_out_rpi,
+#endif
 #if HAVE_GL
     &video_out_opengl,
 #endif
@@ -102,9 +105,6 @@ const struct vo_driver *const video_out_drivers[] =
 #endif
 #if HAVE_GL
     &video_out_opengl_cb,
-#endif
-#if HAVE_RPI
-    &video_out_rpi,
 #endif
     NULL
 };
