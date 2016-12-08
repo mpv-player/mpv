@@ -473,7 +473,7 @@ int reinit_video_chain_src(struct MPContext *mpctx, struct lavfi_pad *src)
         mpctx->video_out = init_best_video_out(mpctx->global, &ex);
         if (!mpctx->video_out) {
             MP_FATAL(mpctx, "Error opening/initializing "
-                    "the selected video_out (-vo) device.\n");
+                    "the selected video_out (--vo) device.\n");
             mpctx->error_playing = MPV_ERROR_VO_INIT_FAILED;
             goto err_out;
         }

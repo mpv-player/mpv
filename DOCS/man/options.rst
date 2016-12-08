@@ -2325,7 +2325,7 @@ Window
         ensure it does not cause security problems (e.g. make sure to use full
         paths if "." is in your path like on Windows). It also only works when
         playing video (i.e. not with ``--no-video`` but works with
-        ``-vo=null``).
+        ``--vo=null``).
 
     This can be "misused" to disable screensavers that do not support the
     proper X API (see also ``--stop-screensaver``). If you think this is too
@@ -3817,7 +3817,7 @@ OpenGL renderer options
 -----------------------
 
 The following video options are currently all specific to ``--vo=opengl`` and
-``-vo=opengl-cb`` only, which are the only VOs that implement them.
+``--vo=opengl-cb`` only, which are the only VOs that implement them.
 
 ``--scale=<filter>``
 
