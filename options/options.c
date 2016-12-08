@@ -223,7 +223,6 @@ const struct m_sub_options vo_sub_opts = {
         .window_scale = 1.0,
         .x11_bypass_compositor = 2,
         .mmcss_profile = "Playback",
-        .fullscreen = HAVE_RPI ? 1 : 0,
     },
 };
 
