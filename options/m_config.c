@@ -31,6 +31,8 @@
 
 #if HAVE_FNMATCH
 #include <fnmatch.h>
+#elif defined(_WIN32)
+#include <shlwapi.h>
 #endif
 
 #include "libmpv/client.h"
@@ -958,6 +960,9 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
             continue;
 #if HAVE_FNMATCH
         if (fnmatch(name, co->name, 0))
+            continue;
+#elif defined(_WIN32)
+        if (!PathMatchSpecA(co->name, name))
             continue;
 #endif
         MP_INFO(config, " %s%-30s", prefix, co->name);
