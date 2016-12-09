@@ -4270,6 +4270,7 @@ static const struct property_osd_display {
     // video
     { "panscan", "Panscan", .osd_progbar = OSD_PANSCAN },
     { "taskbar-progress", "Progress in taskbar" },
+    { "snap-window", "Snap to screen edges" },
     { "ontop", "Stay on top" },
     { "border", "Border" },
     { "framedrop", "Framedrop" },

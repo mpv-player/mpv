@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <windows.h>
 #include <windowsx.h>
+#include <dwmapi.h>
 #include <ole2.h>
 #include <shobjidl.h>
 #include <avrt.h>
@@ -47,7 +48,24 @@
 EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 #define HINST_THISCOMPONENT ((HINSTANCE)&__ImageBase)
 
+#ifndef WM_DPICHANGED
+#define WM_DPICHANGED (0x02E0)
+#endif
+
+#ifndef DPI_ENUMS_DECLARED
+typedef enum MONITOR_DPI_TYPE {
+    MDT_EFFECTIVE_DPI = 0,
+    MDT_ANGULAR_DPI = 1,
+    MDT_RAW_DPI = 2,
+    MDT_DEFAULT = MDT_EFFECTIVE_DPI
+} MONITOR_DPI_TYPE;
+#endif
+
 static __thread struct vo_w32_state *w32_thread_context;
+
+struct w32_api {
+    HRESULT (WINAPI *pGetDpiForMonitor)(HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
+};
 
 struct vo_w32_state {
     struct mp_log *log;
@@ -58,6 +76,8 @@ struct vo_w32_state {
     pthread_t thread;
     bool terminate;
     struct mp_dispatch_queue *dispatch; // used to run stuff on the GUI thread
+
+    struct w32_api api; // stores functions from dynamically loaded DLLs
 
     HWND window;
     HWND parent; // 0 normally, set in embedding mode
@@ -92,6 +112,8 @@ struct vo_w32_state {
     uint32_t o_dwidth;
     uint32_t o_dheight;
 
+    int dpi;
+
     bool disable_screensaver;
     bool cursor_visible;
     atomic_uint event_flags;
@@ -117,6 +139,10 @@ struct vo_w32_state {
 
     // updates on move/resize/displaychange
     double display_fps;
+
+    bool snapped;
+    int snap_dx;
+    int snap_dy;
 
     HANDLE avrt_handle;
 };
@@ -630,12 +656,34 @@ done:
     return name;
 }
 
+static void update_dpi(struct vo_w32_state *w32)
+{
+    UINT dpiX, dpiY;
+    if (w32->api.pGetDpiForMonitor && w32->api.pGetDpiForMonitor(w32->monitor,
+                                     MDT_EFFECTIVE_DPI, &dpiX, &dpiY) == S_OK) {
+        w32->dpi = (int)dpiX;
+        MP_VERBOSE(w32, "DPI detected from the new API: %d\n", w32->dpi);
+        return;
+    }
+    HDC hdc = GetDC(NULL);
+    if (hdc) {
+        w32->dpi = GetDeviceCaps(hdc, LOGPIXELSX);
+        ReleaseDC(NULL, hdc);
+        MP_VERBOSE(w32, "DPI detected from the old API: %d\n", w32->dpi);
+    } else {
+        w32->dpi = 96;
+        MP_VERBOSE(w32, "Couldn't determine DPI, falling back to %d\n", w32->dpi);
+    }
+}
+
 static void update_display_info(struct vo_w32_state *w32)
 {
     HMONITOR monitor = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
     if (w32->monitor == monitor)
         return;
     w32->monitor = monitor;
+
+    update_dpi(w32);
 
     MONITORINFOEXW mi = { .cbSize = sizeof mi };
     GetMonitorInfoW(monitor, (MONITORINFO*)&mi);
@@ -697,6 +745,75 @@ static void update_playback_state(struct vo_w32_state *w32)
                                                     TBPF_NORMAL);
 }
 
+static bool snap_to_screen_edges(struct vo_w32_state *w32, RECT *rc)
+{
+    if (!w32->opts->snap_window) {
+        w32->snapped = false;
+        return false;
+    }
+
+    RECT rect;
+    POINT cursor;
+    if (!GetWindowRect(w32->window, &rect) || !GetCursorPos(&cursor))
+        return false;
+    // Check for aero snapping
+    if ((rc->right - rc->left != rect.right - rect.left) ||
+        (rc->bottom - rc->top != rect.bottom - rect.top))
+        return false;
+
+    MONITORINFO mi = { .cbSize = sizeof(mi) };
+    if (!GetMonitorInfoW(w32->monitor, &mi))
+        return false;
+    // Get the work area to let the window snap to taskbar
+    RECT wr = mi.rcWork;
+
+    // Check for invisible borders and adjust the work area size
+    RECT frame = {0};
+    if (DwmGetWindowAttribute(w32->window, DWMWA_EXTENDED_FRAME_BOUNDS,
+                              &frame, sizeof(RECT)) == S_OK) {
+        wr.left -= frame.left - rect.left;
+        wr.top -= frame.top - rect.top;
+        wr.right += rect.right - frame.right;
+        wr.bottom += rect.bottom - frame.bottom;
+    }
+
+    // Let the window to unsnap by changing its position,
+    // otherwise it will stick to the screen edges forever
+    rect = *rc;
+    if (w32->snapped) {
+        OffsetRect(&rect, cursor.x - rect.left - w32->snap_dx,
+                          cursor.y - rect.top - w32->snap_dy);
+    }
+
+    int threshold = (w32->dpi * 16) / 96;
+    bool snapped = false;
+    // Adjust X position
+    if (abs(rect.left - wr.left) < threshold) {
+        snapped = true;
+        OffsetRect(&rect, wr.left - rect.left, 0);
+    } else if (abs(rect.right - wr.right) < threshold) {
+        snapped = true;
+        OffsetRect(&rect, wr.right - rect.right, 0);
+    }
+    // Adjust Y position
+    if (abs(rect.top - wr.top) < threshold) {
+        snapped = true;
+        OffsetRect(&rect, 0, wr.top - rect.top);
+    } else if (abs(rect.bottom - wr.bottom) < threshold) {
+        snapped = true;
+        OffsetRect(&rect, 0, wr.bottom - rect.bottom);
+    }
+
+    if (!w32->snapped && snapped) {
+        w32->snap_dx = cursor.x - rc->left;
+        w32->snap_dy = cursor.y - rc->top;
+    }
+
+    w32->snapped = snapped;
+    *rc = rect;
+    return true;
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
@@ -730,6 +847,24 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         MP_DBG(w32, "move window: %d:%d\n", w32->window_x, w32->window_y);
         break;
     }
+    case WM_MOVING: {
+        RECT *rc = (RECT*)lParam;
+        if (snap_to_screen_edges(w32, rc))
+            return TRUE;
+        break;
+    }
+    case WM_ENTERSIZEMOVE:
+        if (w32->snapped) {
+            // Save the cursor offset from the window borders,
+            // so the player window can be unsnapped later
+            RECT rc;
+            POINT cursor;
+            if (GetWindowRect(w32->window, &rc) && GetCursorPos(&cursor)) {
+                w32->snap_dx = cursor.x - rc.left;
+                w32->snap_dy = cursor.y - rc.top;
+            }
+        }
+        break;
     case WM_SIZE: {
         RECT r;
         if (GetClientRect(w32->window, &r) && r.right > 0 && r.bottom > 0) {
@@ -766,6 +901,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             *rc = (RECT) { corners[0], corners[1], corners[2], corners[3] };
             return TRUE;
         }
+        break;
+    case WM_DPICHANGED:
+        update_display_info(w32);
         break;
     case WM_CLOSE:
         // Don't actually allow it to destroy the window, or whatever else it
@@ -1333,6 +1471,13 @@ static void thread_disable_ime(void)
     FreeLibrary(imm32);
 }
 
+static void w32_api_load(struct vo_w32_state *w32)
+{
+    HMODULE shcore_dll = LoadLibraryW(L"shcore.dll");
+    w32->api.pGetDpiForMonitor = !shcore_dll ? NULL :
+                (void *)GetProcAddress(shcore_dll, "GetDpiForMonitor");
+}
+
 static void *gui_thread(void *ptr)
 {
     struct vo_w32_state *w32 = ptr;
@@ -1341,6 +1486,7 @@ static void *gui_thread(void *ptr)
 
     mpthread_set_name("win32 window");
 
+    w32_api_load(w32);
     thread_disable_ime();
 
     w32_thread_context = w32;
