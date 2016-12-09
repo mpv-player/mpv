@@ -1754,66 +1754,31 @@ Subtitles
     :all:   Load all subs in the current and ``--sub-paths`` directories.
 
 ``--sub-codepage=<codepage>``
-    If your system supports ``iconv(3)``, you can use this option to specify
-    the subtitle codepage. By default, uchardet will be used to guess the
-    charset. If mpv is not compiled with uchardet, enca will be used.
-    If mpv is compiled with neither uchardet nor enca, ``UTF-8:UTF-8-BROKEN``
-    is the default, which means it will try to use UTF-8, otherwise the
-    ``UTF-8-BROKEN`` pseudo codepage (see below).
+    You can use this option to specify the subtitle codepage. uchardet will be
+    used to guess the charset. (If mpv was not compiled with uchardet, then
+    ``utf-8`` is the effective default.)
 
-    The default value for this option is ``auto``, whose actual effect depends
-    on whether ENCA is compiled.
+    The default value for this option is ``auto``, which enables autodetection.
 
-    .. admonition:: Warning
+    The following steps are taken to determine the final codepage, in order:
 
-        If you force the charset, even subtitles that are known to be
-        UTF-8 will be recoded, which is perhaps not what you expect. Prefix
-        codepages with ``utf8:`` if you want the codepage to be used only if the
-        input is not valid UTF-8.
+    - if the specific codepage has a ``+``, use that codepage
+    - if the data looks like UTF-8, assume it is UTF-8
+    - if ``--sub-codepage`` is set to a specific codepage, use that
+    - run uchardet, and if successful, use that
+    - otherwise, use ``UTF-8-BROKEN``
 
     .. admonition:: Examples
 
-        - ``--sub-codepage=utf8:latin2`` Use Latin 2 if input is not UTF-8.
-        - ``--sub-codepage=cp1250`` Always force recoding to cp1250.
+        - ``--sub-codepage=latin2`` Use Latin 2 if input is not UTF-8.
+        - ``--sub-codepage=+cp1250`` Always force recoding to cp1250.
 
-    The pseudo codepage ``UTF-8-BROKEN`` is used internally. When it
-    is the codepage, subtitles are interpreted as UTF-8 with "Latin 1" as
-    fallback for bytes which are not valid UTF-8 sequences. iconv is
-    never involved in this mode.
+    The pseudo codepage ``UTF-8-BROKEN`` is used internally. If it's set,
+    subtitles are interpreted as UTF-8 with "Latin 1" as fallback for bytes
+    which are not valid UTF-8 sequences. iconv is never involved in this mode.
 
-    If the player was compiled with ENCA support, you can control it with the
-    following syntax:
-
-    ``--sub-codepage=enca:<language>:<fallback codepage>``
-
-    Language is specified using a two letter code to help ENCA detect
-    the codepage automatically. If an invalid language code is
-    entered, mpv will complain and list valid languages.  (Note
-    however that this list will only be printed when the conversion code is actually
-    called, for example when loading an external subtitle). The
-    fallback codepage is used if autodetection fails.  If no fallback
-    is specified, ``UTF-8-BROKEN`` is used.
-
-    .. admonition:: Examples
-
-        - ``--sub-codepage=enca:pl:cp1250`` guess the encoding, assuming the subtitles
-          are Polish, fall back on cp1250
-        - ``--sub-codepage=enca:pl`` guess the encoding for Polish, fall back on UTF-8.
-        - ``--sub-codepage=enca`` try universal detection, fall back on UTF-8.
-
-    If the player was compiled with libguess support, you can use it with:
-
-    ``--sub-codepage=guess:<language>:<fallback codepage>``
-
-    libguess always needs a language. There is no universal detection
-    mode. Use ``--sub-codepage=guess:help`` to get a list of
-    languages subject to the same caveat as with ENCA above.
-
-    If the player was compiled with uchardet support you can use it with:
-
-    ``--sub-codepage=uchardet``
-
-    This mode doesn't take language or fallback codepage.
+    This option changed in mpv 0.23.0. The old syntax is still emulated to some
+    degree.
 
 ``--sub-fix-timing``, ``--no-sub-fix-timing``
     By default, subtitle timing is adjusted to remove minor gaps or overlaps

@@ -36,6 +36,12 @@ Interface changes
     - remove --vo-defaults and --ao-defaults as well
     - remove deprecated global sub-options (like -demuxer-rawaudio format=...),
       use flat options (like --demuxer-rawaudio-format=...)
+    - the --sub-codepage option changes in incompatible ways:
+        - detector-selection and fallback syntax is deprecated
+        - enca/libguess are removed and deprecated (behaves as if they hadn't
+          been compiled-in)
+        - --sub-codepage=<codepage> does not force the codepage anymore
+          (this requires different and new syntax)
  --- mpv 0.22.0 ---
     - the "audio-device-list" property now sets empty device description to the
       device name as a fallback

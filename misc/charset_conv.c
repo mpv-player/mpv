@@ -73,24 +73,6 @@ static int split_colon(const char *user_cp, int max, bstr *out_arr)
     return count;
 }
 
-// Returns true if user_cp implies that calling mp_charset_guess() on the
-// input data is required to determine the real codepage. This is the case
-// if user_cp is not a real iconv codepage, but a magic value that requests
-// for example ENCA charset auto-detection.
-bool mp_charset_requires_guess(const char *user_cp)
-{
-    bstr res[2] = {{0}};
-    int r = split_colon(user_cp, 2, res);
-    // Note that "utf8" is the UTF-8 codepage, while "utf8:..." specifies UTF-8
-    // by default, plus a codepage that is used if the input is not UTF-8.
-    return bstrcasecmp0(res[0], "enca") == 0 ||
-           bstrcasecmp0(res[0], "uchardet") == 0 ||
-           bstrcasecmp0(res[0], "auto") == 0 ||
-           bstrcasecmp0(res[0], "guess") == 0 ||
-           (r > 1 && bstrcasecmp0(res[0], "utf-8") == 0) ||
-           (r > 1 && bstrcasecmp0(res[0], "utf8") == 0);
-}
-
 static const char *const utf_bom[3] = {"\xEF\xBB\xBF", "\xFF\xFE", "\xFE\xFF"};
 static const char *const utf_enc[3] = {"utf-8",        "utf-16le", "utf-16be"};
 
@@ -118,17 +100,15 @@ static const char *mp_uchardet(void *talloc_ctx, struct mp_log *log, bstr buf)
     if (res && !res[0])
         res = NULL;
     if (res) {
+        mp_verbose(log, "libuchardet detected charset as %s\n", res);
         iconv_t icdsc = iconv_open("UTF-8", res);
         if (icdsc == (iconv_t)(-1)) {
-            mp_warn(log, "Charset detected as %s, but not supported by iconv.\n",
-                    res);
+            mp_warn(log, "Charset '%s' not supported by iconv.\n", res);
             res = NULL;
         } else {
             iconv_close(icdsc);
         }
     }
-    if (!res && bstr_validate_utf8(buf) >= 0)
-        res = "utf-8";
     uchardet_delete(det);
     return res;
 }
@@ -140,22 +120,11 @@ static const char *mp_uchardet(void *talloc_ctx, struct mp_log *log, bstr buf)
 // it's a real iconv codepage), user_cp is returned without even looking at
 // the buf data.
 // The return value may (but doesn't have to) be allocated under talloc_ctx.
-const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log, bstr buf,
-                             const char *user_cp, int flags)
+static const char *mp_charset_guess_compat(void *talloc_ctx, struct mp_log *log,
+                                           bstr buf, const char *user_cp,
+                                           int flags)
 {
-    if (!mp_charset_requires_guess(user_cp))
-        return user_cp;
-
-    bool use_auto = strcasecmp(user_cp, "auto") == 0;
-    if (use_auto) {
-#if HAVE_UCHARDET
-        user_cp = "uchardet";
-#elif HAVE_ENCA
-        user_cp = "enca";
-#else
-        user_cp = "UTF-8:UTF-8-BROKEN";
-#endif
-    }
+    mp_warn(log, "This syntax for the --sub-codepage option is deprecated.\n");
 
     bstr params[3] = {{0}};
     split_colon(user_cp, 3, params);
@@ -167,15 +136,12 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log, bstr buf,
 
     const char *res = NULL;
 
-    if (use_auto) {
-        res = ms_bom_guess(buf);
-        if (res)
-            type = bstr0("auto");
-    }
-
 #if HAVE_UCHARDET
-    if (bstrcasecmp0(type, "uchardet") == 0)
+    if (bstrcasecmp0(type, "uchardet") == 0) {
         res = mp_uchardet(talloc_ctx, log, buf);
+        if (!res && bstr_validate_utf8(buf) >= 0)
+            res = "utf-8";
+    }
 #endif
 
     if (bstrcasecmp0(type, "utf8") == 0 || bstrcasecmp0(type, "utf-8") == 0) {
@@ -196,6 +162,45 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log, bstr buf,
 
     if (!res && !(flags & MP_STRICT_UTF8))
         res = "UTF-8-BROKEN";
+
+    mp_verbose(log, "Using charset '%s'.\n", res);
+    return res;
+}
+
+const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log,  bstr buf,
+                             const char *user_cp, int flags)
+{
+    if (strcasecmp(user_cp, "enca") == 0 || strcasecmp(user_cp, "guess") == 0 ||
+        strcasecmp(user_cp, "uchardet") == 0 || strchr(user_cp, ':'))
+        return mp_charset_guess_compat(talloc_ctx, log, buf, user_cp, flags);
+
+    if (user_cp[0] == '+') {
+        mp_verbose(log, "Forcing charset '%s'.\n", user_cp + 1);
+        return user_cp + 1;
+    }
+
+    const char *bom_cp = ms_bom_guess(buf);
+    if (bom_cp) {
+        mp_verbose(log, "Data has a BOM, assuming %s as charset.\n", bom_cp);
+        return bom_cp;
+    }
+
+    int r = bstr_validate_utf8(buf);
+    if (r >= 0 || (r > -8 && (flags & MP_ICONV_ALLOW_CUTOFF))) {
+        mp_verbose(log, "Data looks like UTF-8, ignoring user-provided charset.\n");
+        return "utf-8";
+    }
+
+    const char *res = user_cp;
+    if (strcasecmp(user_cp, "auto") == 0) {
+#if HAVE_UCHARDET
+        res = mp_uchardet(talloc_ctx, log, buf);
+#endif
+        if (!res) {
+            mp_verbose(log, "Charset auto-detection failed.\n");
+            res = "UTF-8-BROKEN";
+        }
+    }
 
     mp_verbose(log, "Using charset '%s'.\n", res);
     return res;
