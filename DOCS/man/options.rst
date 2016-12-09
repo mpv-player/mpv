@@ -2136,6 +2136,9 @@ Window
 
     Enabled by default.
 
+``--snap-window``
+    (Windows only) Snap the player window to screen edges.
+
 ``--ontop``
     Makes the player window stay on top of other windows.
 
