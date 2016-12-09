@@ -356,16 +356,6 @@ iconv support use --disable-iconv.",
         'desc': 'cdda support (libcdio)',
         'func': check_pkg_config('libcdio_paranoia'),
     }, {
-        'name': '--enca',
-        'desc': 'ENCA support',
-        'deps': [ 'iconv' ],
-        'func': check_statement('enca.h', 'enca_get_languages(NULL)', lib='enca'),
-    }, {
-        'name': '--libguess',
-        'desc': 'libguess support',
-        'deps': [ 'iconv' ],
-        'func': check_pkg_config('libguess', '>= 1.0'),
-    }, {
         'name': '--uchardet',
         'desc': 'uchardet support',
         'deps': [ 'iconv' ],

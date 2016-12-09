@@ -28,14 +28,6 @@
 
 #include "common/msg.h"
 
-#if HAVE_ENCA
-#include <enca.h>
-#endif
-
-#if HAVE_LIBGUESS
-#include <libguess.h>
-#endif
-
 #if HAVE_UCHARDET
 #include <uchardet.h>
 #endif
@@ -111,57 +103,6 @@ static const char *ms_bom_guess(bstr buf)
     return NULL;
 }
 
-#if HAVE_ENCA
-static const char *enca_guess(struct mp_log *log, bstr buf, const char *language)
-{
-    // Do our own UTF-8 detection, because ENCA seems to get it wrong sometimes
-    // (suggested by divVerent). Explicitly allow cut-off UTF-8.
-    if (bstr_validate_utf8(buf) > -8)
-        return "UTF-8";
-
-    if (!language || !language[0])
-        language = "__"; // neutral language
-
-    const char *detected_cp = NULL;
-
-    EncaAnalyser analyser = enca_analyser_alloc(language);
-    if (analyser) {
-        enca_set_termination_strictness(analyser, 0);
-        EncaEncoding enc = enca_analyse_const(analyser, buf.start, buf.len);
-        const char *tmp = enca_charset_name(enc.charset, ENCA_NAME_STYLE_ICONV);
-        if (tmp && enc.charset != ENCA_CS_UNKNOWN)
-            detected_cp = tmp;
-        enca_analyser_free(analyser);
-    } else {
-        mp_err(log, "ENCA doesn't know language '%s'\n", language);
-        size_t langcnt;
-        const char **languages = enca_get_languages(&langcnt);
-        mp_err(log, "ENCA supported languages:");
-        for (int i = 0; i < langcnt; i++)
-            mp_err(log, " %s", languages[i]);
-        mp_err(log, "\n");
-        free(languages);
-    }
-
-    return detected_cp;
-}
-#endif
-
-#if HAVE_LIBGUESS
-static const char *libguess_guess(struct mp_log *log, bstr buf,
-                                  const char *language)
-{
-    if (!language || !language[0] || strcmp(language, "help") == 0) {
-        mp_err(log, "libguess needs a language: "
-               "japanese taiwanese chinese korean russian arabic turkish "
-               "greek hebrew polish baltic\n");
-        return NULL;
-    }
-
-    return libguess_determine_encoding(buf.start, buf.len, language);
-}
-#endif
-
 #if HAVE_UCHARDET
 static const char *mp_uchardet(void *talloc_ctx, struct mp_log *log, bstr buf)
 {
@@ -232,14 +173,6 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log, bstr buf,
             type = bstr0("auto");
     }
 
-#if HAVE_ENCA
-    if (bstrcasecmp0(type, "enca") == 0)
-        res = enca_guess(log, buf, lang);
-#endif
-#if HAVE_LIBGUESS
-    if (bstrcasecmp0(type, "guess") == 0)
-        res = libguess_guess(log, buf, lang);
-#endif
 #if HAVE_UCHARDET
     if (bstrcasecmp0(type, "uchardet") == 0)
         res = mp_uchardet(talloc_ctx, log, buf);
