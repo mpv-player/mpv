@@ -204,6 +204,9 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
 
 int mpv_opengl_cb_uninit_gl(struct mpv_opengl_cb_context *ctx)
 {
+    if (!ctx)
+        return 0;
+
     // Bring down the decoder etc., which still might be using the hwdec
     // context. Setting initialized=false guarantees it can't come back.
 
