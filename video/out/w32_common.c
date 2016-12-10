@@ -320,7 +320,7 @@ static void DropTarget_Init(DropTarget* This, struct vo_w32_state *w32)
 
 static void add_window_borders(HWND hwnd, RECT *rc)
 {
-    AdjustWindowRect(rc, GetWindowLong(hwnd, GWL_STYLE), 0);
+    AdjustWindowRect(rc, GetWindowLongPtrW(hwnd, GWL_STYLE), 0);
 }
 
 // basically a reverse AdjustWindowRect (win32 doesn't appear to have this)
@@ -1137,7 +1137,7 @@ static void reinit_window_state(struct vo_w32_state *w32)
                                            w32->window, w32->current_fs);
     }
 
-    DWORD style = update_style(w32, GetWindowLong(w32->window, GWL_STYLE));
+    DWORD style = update_style(w32, GetWindowLongPtrW(w32->window, GWL_STYLE));
 
     if (w32->opts->ontop)
         layer = HWND_TOPMOST;
@@ -1180,7 +1180,7 @@ static void reinit_window_state(struct vo_w32_state *w32)
     r.top = w32->window_y;
     r.bottom = r.top + w32->dh;
 
-    SetWindowLong(w32->window, GWL_STYLE, style);
+    SetWindowLongPtrW(w32->window, GWL_STYLE, style);
 
     RECT cr = r;
     add_window_borders(w32->window, &r);
