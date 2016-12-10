@@ -1112,10 +1112,15 @@ static void update_screen_rect(struct vo_w32_state *w32)
 
 static DWORD update_style(struct vo_w32_state *w32, DWORD style)
 {
-    const DWORD NO_FRAME = WS_OVERLAPPED;
-    const DWORD FRAME = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
-    style &= ~(NO_FRAME | FRAME);
-    style |= (w32->opts->border && !w32->current_fs) ? FRAME : NO_FRAME;
+    const DWORD NO_FRAME = WS_OVERLAPPED | WS_MINIMIZEBOX;
+    const DWORD FRAME = WS_OVERLAPPEDWINDOW;
+    const DWORD FULLSCREEN = NO_FRAME | WS_SYSMENU;
+    style &= ~(NO_FRAME | FRAME | FULLSCREEN);
+    if (w32->current_fs) {
+        style |= FULLSCREEN;
+    } else {
+        style |= w32->opts->border ? FRAME : NO_FRAME;
+    }
     return style;
 }
 
