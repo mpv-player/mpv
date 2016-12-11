@@ -50,7 +50,7 @@ static pthread_t playback_thread_id;
                                  child:(NSMenu *)child;
 - (void)registerMenuItem:(NSMenuItem*)menuItem forKey:(MPMenuKey)key;
 - (NSMenu *)appleMenuWithMainMenu:(NSMenu *)mainMenu;
-- (NSMenu *)movieMenu;
+- (NSMenu *)videoMenu;
 - (NSMenu *)windowMenu;
 @end
 
@@ -117,17 +117,15 @@ static void terminate_cocoa_application(void)
     [self mainMenuItemWithParent:mainMenu child:menu];
     [self menuItemWithParent:menu title:@"Hide mpv"
                       action:@selector(hide:) keyEquivalent: @"h"];
+    [menu addItem:[NSMenuItem separatorItem]];
     [self menuItemWithParent:menu title:@"Quit mpv"
                       action:@selector(stopPlayback) keyEquivalent: @"q"];
-    [self menuItemWithParent:menu title:@"Quit mpv & remember position"
-                      action:@selector(stopPlaybackAndRememberPosition)
-               keyEquivalent: @"Q"];
     return [menu autorelease];
 }
 
-- (NSMenu *)movieMenu
+- (NSMenu *)videoMenu
 {
-    NSMenu *menu = [[NSMenu alloc] initWithTitle:@"Movie"];
+    NSMenu *menu = [[NSMenu alloc] initWithTitle:@"Video"];
     _R(menu, @"Half Size",   @"0", MPM_H_SIZE)
     _R(menu, @"Normal Size", @"1", MPM_N_SIZE)
     _R(menu, @"Double Size", @"2", MPM_D_SIZE)
@@ -148,7 +146,7 @@ static void terminate_cocoa_application(void)
     [NSApp setMainMenu:main_menu];
     [NSApp setAppleMenu:[self appleMenuWithMainMenu:main_menu]];
 
-    [NSApp mainMenuItemWithParent:main_menu child:[self movieMenu]];
+    [NSApp mainMenuItemWithParent:main_menu child:[self videoMenu]];
     [NSApp mainMenuItemWithParent:main_menu child:[self windowMenu]];
 }
 
