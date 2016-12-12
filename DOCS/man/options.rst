@@ -134,11 +134,11 @@ Playback Control
     speed higher than normal automatically inserts the ``scaletempo`` audio
     filter.
 
-``--loop=<N|inf|force|no>``
+``--loop=<N|inf|force|no>``, ``--loop``
     Loops playback ``N`` times. A value of ``1`` plays it one time (default),
     ``2`` two times, etc. ``inf`` means forever. ``no`` is the same as ``1`` and
     disables looping. If several files are specified on command line, the
-    entire playlist is looped.
+    entire playlist is looped. ``--loop`` is the same as ``--loop=inf``.
 
     The ``force`` mode is like ``inf``, but does not skip playlist entries
     which have been marked as failing. This means the player might waste CPU
