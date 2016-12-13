@@ -462,6 +462,9 @@ void cocoa_set_input_context(struct input_ctx *input_context)
 
 - (void)handleFilesArray:(NSArray *)files
 {
+    enum mp_dnd_action action = [NSEvent modifierFlags] &
+                                NSEventModifierFlagShift ? DND_APPEND : DND_REPLACE;
+
     size_t num_files  = [files count];
     char **files_utf8 = talloc_array(NULL, char*, num_files);
     [files enumerateObjectsUsingBlock:^(NSString *p, NSUInteger i, BOOL *_){
@@ -473,7 +476,7 @@ void cocoa_set_input_context(struct input_ctx *input_context)
     }];
     [_input_lock lock];
     if (_inputContext)
-        mp_event_drop_files(_inputContext, num_files, files_utf8, DND_REPLACE);
+        mp_event_drop_files(_inputContext, num_files, files_utf8, action);
     [_input_lock unlock];
     talloc_free(files_utf8);
 }
