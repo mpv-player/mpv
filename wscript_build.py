@@ -28,7 +28,7 @@ def _build_man(ctx):
         name         = 'rst2man',
         target       = 'DOCS/man/mpv.1',
         source       = 'DOCS/man/mpv.rst',
-        rule         = '${RST2MAN} ${SRC} ${TGT}',
+        rule         = '${RST2MAN} --strip-elements-with-class=contents ${SRC} ${TGT}',
         install_path = ctx.env.MANDIR + '/man1')
 
     _add_rst_manual_dependencies(ctx)

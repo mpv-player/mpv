@@ -9,6 +9,8 @@ a media player
 :Manual section: 1
 :Manual group: multimedia
 
+.. contents:: Table of Contents
+
 SYNOPSIS
 ========
 
