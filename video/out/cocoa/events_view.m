@@ -39,7 +39,8 @@
 @synthesize tracker = _tracker;
 @synthesize hasMouseDown = _mouse_down;
 
-- (id)initWithFrame:(NSRect)frame {
+- (id)initWithFrame:(NSRect)frame
+{
     self = [super initWithFrame:frame];
     if (self) {
         [self registerForDraggedTypes:@[NSFilenamesPboardType,
@@ -96,21 +97,25 @@
 {
     return [self.adapter mouseEnabled];
 }
-- (BOOL)acceptsFirstResponder {
+- (BOOL)acceptsFirstResponder
+{
     return [self.adapter keyboardEnabled] || [self.adapter mouseEnabled];
 }
 
-- (BOOL)becomeFirstResponder {
+- (BOOL)becomeFirstResponder
+{
     return [self.adapter keyboardEnabled] || [self.adapter mouseEnabled];
 }
 
 - (BOOL)resignFirstResponder { return YES; }
 
-- (void)keyDown:(NSEvent *)event {
+- (void)keyDown:(NSEvent *)event
+{
     [self.adapter putKeyEvent:event];
 }
 
-- (void)keyUp:(NSEvent *)event {
+- (void)keyUp:(NSEvent *)event
+{
     [self.adapter putKeyEvent:event];
 }
 
@@ -298,10 +303,11 @@
     NSPasteboard *pboard = [sender draggingPasteboard];
     NSArray *types = [pboard types];
     if ([types containsObject:NSFilenamesPboardType] ||
-        [types containsObject:NSURLPboardType])
+        [types containsObject:NSURLPboardType]) {
         return NSDragOperationCopy;
-    else
+    } else {
         return NSDragOperationNone;
+    }
 }
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
@@ -314,8 +320,7 @@
         for (NSURL* url in pbitems) {
             if (url.fileURL) {
                 [ar addObject:[url path]];
-            }
-            else {
+            } else {
                 [ar addObject:[url absoluteString]];
             }
         }

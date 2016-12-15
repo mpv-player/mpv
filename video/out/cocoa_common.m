@@ -803,20 +803,24 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 @implementation MpvCocoaAdapter
 @synthesize vout = _video_output;
 
-- (void)performAsyncResize:(NSSize)size {
+- (void)performAsyncResize:(NSSize)size
+{
     struct vo_cocoa_state *s = self.vout->cocoa;
     vo_cocoa_resize_redraw(self.vout, size.width, size.height);
 }
 
-- (BOOL)keyboardEnabled {
+- (BOOL)keyboardEnabled
+{
     return !!mp_input_vo_keyboard_enabled(self.vout->input_ctx);
 }
 
-- (BOOL)mouseEnabled {
+- (BOOL)mouseEnabled
+{
     return !!mp_input_mouse_enabled(self.vout->input_ctx);
 }
 
-- (void)setNeedsResize {
+- (void)setNeedsResize
+{
     resize_event(self.vout);
 }
 
@@ -830,7 +834,8 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     [self.vout->cocoa->window setMovableByWindowBackground:movable];
 }
 
-- (void)signalMouseMovement:(NSPoint)point {
+- (void)signalMouseMovement:(NSPoint)point
+{
     mp_input_set_mouse_pos(self.vout->input_ctx, point.x, point.y);
     [self recalcMovableByWindowBackground:point];
 }

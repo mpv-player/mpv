@@ -206,7 +206,8 @@ static void terminate_cocoa_application(void)
     return [item autorelease];
 }
 
-- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)theApp {
+- (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)theApp
+{
     return NSTerminateNow;
 }
 
