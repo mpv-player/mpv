@@ -27,4 +27,5 @@
 - (BOOL)canBecomeKeyWindow;
 - (BOOL)canBecomeMainWindow;
 - (void)mulSize:(float)multiplier;
+- (void)updateBorder:(int)border;
 @end

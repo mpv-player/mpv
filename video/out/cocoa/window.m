@@ -212,6 +212,34 @@
     [self.adapter putCommand:cmd];
 }
 
+- (void)updateBorder:(int)border
+{
+    int borderStyle = NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|
+                 NSWindowStyleMaskMiniaturizable;
+    if (border) {
+        int window_mask = [self styleMask] & ~NSWindowStyleMaskBorderless;
+        window_mask |= borderStyle;
+        [self setStyleMask:window_mask];
+    } else {
+        int window_mask = [self styleMask] & ~borderStyle;
+        window_mask |= NSWindowStyleMaskBorderless;
+        [self setStyleMask:window_mask];
+    }
+
+    if (![self.adapter isInFullScreenMode]) {
+        // XXX: workaround to force redrawing of window decoration
+        if (border) {
+            NSRect frame = [self frame];
+            frame.size.width += 1;
+            [self setFrame:frame display:YES];
+            frame.size.width -= 1;
+            [self setFrame:frame display:YES];
+        }
+
+        [self setContentAspectRatio:_unfs_content_frame.size];
+    }
+}
+
 - (NSRect)frameRect:(NSRect)f forCenteredContentSize:(NSSize)ns
 {
     NSRect cr  = [self contentRectForFrameRect:f];
