@@ -552,6 +552,20 @@ static int cocoa_set_window_title(struct vo *vo)
     return VO_TRUE;
 }
 
+static int vo_cocoa_window_border(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    if (s->embedded)
+        return VO_NOTIMPL;
+
+    struct mp_vo_opts *opts = vo->opts;
+    [s->window updateBorder:opts->border];
+    if (opts->border)
+        cocoa_set_window_title(vo);
+
+    return VO_TRUE;
+}
+
 static void cocoa_screen_reconfiguration_observer(
     CGDirectDisplayID display, CGDisplayChangeSummaryFlags flags, void *ctx)
 {
@@ -747,6 +761,8 @@ static int vo_cocoa_control_on_main_thread(struct vo *vo, int request, void *arg
         return VO_TRUE;
     case VOCTRL_ONTOP:
         return vo_cocoa_ontop(vo);
+    case VOCTRL_BORDER:
+        return vo_cocoa_window_border(vo);
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *sz = arg;
         NSSize size = [s->view frame].size;
