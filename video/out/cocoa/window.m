@@ -309,7 +309,8 @@
     _unfs_content_frame = [self frameRect:_unfs_content_frame forCenteredContentSize:newSize];
 }
 
-- (void)tryDequeueSize {
+- (void)tryDequeueSize
+{
     if (_queued_video_size.width <= 0.0 || _queued_video_size.height <= 0.0)
         return;
 
@@ -330,7 +331,8 @@
     }
 }
 
-- (void)windowDidBecomeMain:(NSNotification *)notification {
+- (void)windowDidBecomeMain:(NSNotification *)notification
+{
     [self tryDequeueSize];
 }
 @end
