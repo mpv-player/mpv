@@ -786,7 +786,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         PostQuitMessage(0);
         break;
     case WM_SYSCOMMAND:
-        switch (wParam) {
+        switch (wParam & 0xFFF0) {
         case SC_SCREENSAVE:
         case SC_MONITORPOWER:
             if (w32->disable_screensaver) {
