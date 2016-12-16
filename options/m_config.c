@@ -29,10 +29,6 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#if HAVE_FNMATCH
-#include <fnmatch.h>
-#endif
-
 #include "libmpv/client.h"
 
 #include "mpv_talloc.h"
@@ -956,10 +952,8 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
         const struct m_option *opt = co->opt;
         if (co->is_hidden)
             continue;
-#if HAVE_FNMATCH
-        if (fnmatch(name, co->name, 0))
+        if (strcmp(name, "*") != 0 && !strstr(co->name, name))
             continue;
-#endif
         MP_INFO(config, " %s%-30s", prefix, co->name);
         if (opt->type == &m_option_type_choice) {
             MP_INFO(config, " Choices:");

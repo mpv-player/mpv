@@ -350,9 +350,10 @@ Program Behavior
 ``--help``, ``--h``
     Show short summary of options.
 
-    You can also pass a shell pattern to this option, which will list all
-    matching top-level options, e.g. ``--h=*scale*`` for all options that
-    contain the word "scale".
+    You can also pass a string to this option, which will list all top-level
+    options which contain the string in the name, e.g. ``--h=scale`` for all
+    options that contain the word ``scale``. The special string ``*`` lists
+    all top-level options.
 
 ``-v``
     Increment verbosity level, one level for each ``-v`` found on the command

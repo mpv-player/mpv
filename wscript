@@ -128,10 +128,6 @@ main_dependencies = [
         'func': check_statement(['poll.h', 'unistd.h', 'sys/mman.h'],
             'struct pollfd pfd; poll(&pfd, 1, 0); fork(); int f[2]; pipe(f); munmap(f,0)'),
     }, {
-        'name': 'fnmatch',
-        'desc': 'fnmatch()',
-        'func': check_statement('fnmatch.h', 'fnmatch("", "", 0)')
-    }, {
         'name': 'posix-or-mingw',
         'desc': 'development environment',
         'deps_any': [ 'posix', 'mingw' ],
