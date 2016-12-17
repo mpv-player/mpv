@@ -51,39 +51,64 @@ def build(ctx):
     ctx.load('waf_customizations')
     ctx.load('generators.sources')
 
-    ctx.file2string(
+    ctx(
+        features = "file2string",
         source = "TOOLS/osxbundle/mpv.app/Contents/Resources/icon.icns",
-        target = "osdep/macosx_icon.inc")
+        target = "osdep/macosx_icon.inc",
+        before = ['c']
+    )
 
-    ctx.file2string(
+    ctx(
+        features = "file2string",
         source = "video/out/x11_icon.bin",
-        target = "video/out/x11_icon.inc")
+        target = "video/out/x11_icon.inc",
+        before = ['c']
+    )
 
-    ctx.file2string(
+    ctx(
+        features = "file2string",
         source = "etc/input.conf",
-        target = "input/input_conf.h")
+        target = "input/input_conf.h",
+        before = ['c']
+    )
 
-    ctx.file2string(
+    ctx(
+        features = "file2string",
         source = "etc/builtin.conf",
-        target = "player/builtin_conf.inc")
+        target = "player/builtin_conf.inc",
+        before = ['c']
+    )
 
-    ctx.file2string(
+    ctx(
+        features = "file2string",
         source = "sub/osd_font.otf",
-        target = "sub/osd_font.h")
+        target = "sub/osd_font.h",
+        before = ['c']
+    )
 
     lua_files = ["defaults.lua", "assdraw.lua", "options.lua", "osc.lua",
                  "ytdl_hook.lua"]
+
     for fn in lua_files:
         fn = "player/lua/" + fn
-        ctx.file2string(source = fn, target = os.path.splitext(fn)[0] + ".inc")
+        ctx(
+            features = "file2string",
+            source = fn,
+            target = os.path.splitext(fn)[0] + ".inc",
+            before = ['c']
+        )
 
-    ctx.matroska_header(
-        source = "demux/ebml.c demux/demux_mkv.c",
-        target = "ebml_types.h")
+    ctx(
+        features = "ebml_header",
+        target = "ebml_types.h",
+        before = ['c']
+    )
 
-    ctx.matroska_definitions(
-        source = "demux/ebml.c",
-        target = "ebml_defs.c")
+    ctx(
+        features = "ebml_definitions",
+        target = "ebml_defs.c",
+        before = ['c']
+    )
 
     if ctx.env.DEST_OS == 'win32':
         main_fn_c = 'osdep/main-fn-win.c'
