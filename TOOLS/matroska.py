@@ -408,7 +408,7 @@ def parse_one(s, depth, parent, maxlen):
     this_length = len(elid) / 2 + size + length
     if elem is not None:
         if elem.valtype != 'skip':
-            print(depth, elid, elem.name, 'size:', length, 'value:', end=' ')
+            print("    " * depth, '[' + elid + ']', elem.name, 'size:', length, 'value:', end=' ')
         if elem.valtype == 'sub':
             print('subelements:')
             while length > 0:
@@ -429,7 +429,7 @@ def parse_one(s, depth, parent, maxlen):
             if len(t) < 20:
                 t = hexlify(t).decode('ascii')
             else:
-                t = '<skipped {0} bytes>'.format(len(t))
+                t = '<{0} bytes>'.format(len(t))
             print('binary', t, dec)
         elif elem.valtype == 'uint':
             print('uint', read_uint(s, length))
