@@ -67,6 +67,7 @@ EOF
         chapters
         editions
         titles
+        duration
 
         audio
         audio-bitrate
