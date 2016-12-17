@@ -1,13 +1,9 @@
 from waflib.Build import BuildContext
+from waflib import TaskGen
+from io import StringIO
+from TOOLS.matroska import generate_C_header, generate_C_definitions
+from TOOLS.file2string import file2string
 import os
-
-def __file2string_cmd__(ctx):
-    return '"${{BIN_PYTHON}}" "{0}/TOOLS/file2string.py" "${{SRC}}" > "${{TGT}}"' \
-                .format(ctx.srcnode.abspath())
-
-def __matroska_cmd__(ctx, argument):
-    return '"${{BIN_PYTHON}}" "{0}/TOOLS/matroska.py" "{1}" "${{SRC}}" > "${{TGT}}"' \
-                .format(ctx.srcnode.abspath(), argument)
 
 def __zshcomp_cmd__(ctx, argument):
     return '"${{BIN_PERL}}" "{0}/TOOLS/zsh.pl" "{1}" > "${{TGT}}"' \
@@ -21,20 +17,30 @@ def __file2string__(ctx, **kwargs):
         **kwargs
     )
 
-def __matroska_header__(ctx, **kwargs):
-    ctx(
-        rule   = __matroska_cmd__(ctx, '--generate-header'),
-        before = ("c",),
-        name   = os.path.basename(kwargs['target']),
-        **kwargs
-    )
+def execf(self, fn):
+    setattr(self, 'rule', ' ') # waf doesn't print the task with no rule
+    target = getattr(self, 'target', None)
+    out = self.path.find_or_declare(target)
+    tmp = StringIO()
+    fn(tmp)
+    out.write(tmp.getvalue())
+    tmp.close()
 
-def __matroska_definitions__(ctx, **kwargs):
-    ctx(
-        rule   = __matroska_cmd__(ctx, '--generate-definitions'),
-        before = ("c",),
-        **kwargs
-    )
+@TaskGen.feature('file2string')
+def f2s(self):
+    def fn(out):
+        source = getattr(self, 'source', None)
+        src = self.path.find_resource(source)
+        file2string(source, iter(src.read().splitlines()), out)
+    execf(self, fn)
+
+@TaskGen.feature('ebml_header')
+def ebml_header(self):
+    execf(self, generate_C_header)
+
+@TaskGen.feature('ebml_definitions')
+def ebml_definitions(self):
+    execf(self, generate_C_definitions)
 
 def __zshcomp__(ctx, **kwargs):
     ctx(
@@ -44,7 +50,5 @@ def __zshcomp__(ctx, **kwargs):
         **kwargs
     )
 
-BuildContext.file2string          = __file2string__
-BuildContext.matroska_header      = __matroska_header__
-BuildContext.matroska_definitions = __matroska_definitions__
-BuildContext.zshcomp              = __zshcomp__
+BuildContext.file2string = __file2string__
+BuildContext.zshcomp = __zshcomp__
