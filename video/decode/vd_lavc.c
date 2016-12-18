@@ -501,7 +501,6 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     avctx->pkt_timebase = ctx->codec_timebase;
 #endif
 
-    avctx->refcounted_frames = 1;
     ctx->pic = av_frame_alloc();
     if (!ctx->pic)
         goto error;
