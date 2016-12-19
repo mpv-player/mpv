@@ -235,7 +235,9 @@ local function append_perfdata(s)
     end
 
     local ds = mp.get_property_bool("display-sync-active", false)
-    local target_fps = ds and mp.get_property_number("display-fps", 0) or mp.get_property_number("fps", 0)
+    local target_fps = ds and mp.get_property_number("display-fps", 0)
+                       or mp.get_property_number("container-fps", 0)
+                       or mp.get_property_number("fps", 0)
     if target_fps > 0 then target_fps = 1 / target_fps * 1e6 end
 
     local last_s = vo_p["render-last"] + vo_p["present-last"] + vo_p["upload-last"]
