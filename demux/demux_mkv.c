@@ -1756,7 +1756,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 
     // Deal with some FFmpeg-produced garbage, and assume all audio codecs can
     // start decoding from anywhere.
-    track->require_keyframes = true;
+    if (strcmp(codec, "truehd") != 0)
+        track->require_keyframes = true;
 
     sh_a->extradata = extradata;
     sh_a->extradata_size = extradata_len;
