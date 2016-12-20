@@ -2164,7 +2164,7 @@ Window
         ``50%x50%``
             Forces the window width and height to half the screen width and
             height. Will show black borders to compensate for the video aspect
-            ration (with most VOs and without ``--no-keepaspect``).
+            ratio (with most VOs and without ``--no-keepaspect``).
         ``50%+10+10``
             Sets the window to half the screen widths, and positions it 10
             pixels below/left of the top left corner of the screen.
