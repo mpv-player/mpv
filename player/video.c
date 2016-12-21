@@ -343,6 +343,7 @@ void reset_video_state(struct MPContext *mpctx)
     mpctx->delay = 0;
     mpctx->time_frame = 0;
     mpctx->video_pts = MP_NOPTS_VALUE;
+    mpctx->last_frame_duration = 0;
     mpctx->num_past_frames = 0;
     mpctx->total_avsync_change = 0;
     mpctx->last_av_difference = 0;
@@ -1369,6 +1370,9 @@ void write_video(struct MPContext *mpctx)
             {
                 MP_VERBOSE(mpctx, "assuming this is an image\n");
                 mpctx->time_frame += opts->image_display_duration;
+            } else if (mpctx->last_frame_duration > 0) {
+                MP_VERBOSE(mpctx, "using demuxer frame duration for last frame\n");
+                mpctx->time_frame += mpctx->last_frame_duration;
             } else {
                 mpctx->time_frame = 0;
             }
@@ -1482,6 +1486,8 @@ void write_video(struct MPContext *mpctx)
 
     mpctx->video_pts = mpctx->next_frames[0]->pts;
     mpctx->last_vo_pts = mpctx->video_pts;
+    mpctx->last_frame_duration =
+        mpctx->next_frames[0]->pkt_duration / mpctx->video_speed;
 
     shift_frames(mpctx);
 

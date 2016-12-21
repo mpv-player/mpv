@@ -85,7 +85,7 @@ typedef struct mp_image {
     /* only inside filter chain */
     double pts;
     /* only after decoder */
-    double dts;
+    double dts, pkt_duration;
     /* for private use */
     void* priv;
 

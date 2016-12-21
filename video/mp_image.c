@@ -386,6 +386,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->fields = src->fields;
     dst->pts = src->pts;
     dst->dts = src->dts;
+    dst->pkt_duration = src->pkt_duration;
     dst->params.rotate = src->params.rotate;
     dst->params.stereo_in = src->params.stereo_in;
     dst->params.stereo_out = src->params.stereo_out;

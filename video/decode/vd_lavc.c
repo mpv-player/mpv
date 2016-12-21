@@ -859,6 +859,11 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     mpi->pts = mp_pts_from_av(ctx->pic->pts, &ctx->codec_timebase);
     mpi->dts = mp_pts_from_av(ctx->pic->pkt_dts, &ctx->codec_timebase);
 
+#if LIBAVCODEC_VERSION_MICRO >= 100
+    mpi->pkt_duration =
+        mp_pts_from_av(av_frame_get_pkt_duration(ctx->pic), &ctx->codec_timebase);
+#endif
+
     struct mp_image_params params;
     update_image_params(vd, ctx->pic, &params);
     mp_image_set_params(mpi, &params);
