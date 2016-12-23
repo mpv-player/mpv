@@ -46,6 +46,8 @@ Interface changes
     - change how spdif codecs are selected. You can't enable spdif passthrough
       with --ad anymore. This was deprecated; use --audio-spdif instead.
     - deprecate the "family" selection with --ad/--vd
+    - explicitly mark --ad-spdif-dtshd as deprecated (it was done so a long time
+      ago, but it didn't complain when using the option)
  --- mpv 0.22.0 ---
     - the "audio-device-list" property now sets empty device description to the
       device name as a fallback
