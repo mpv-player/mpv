@@ -83,12 +83,10 @@ static int init(struct dec_audio *da, const char *decoder)
     spdif_ctx->use_dts_hd = da->opts->dtshd;
     spdif_ctx->pool = mp_audio_pool_create(spdif_ctx);
 
-    if (strcmp(decoder, "dts-hd") == 0) {
-        decoder = "dts";
+    if (strcmp(decoder, "spdif_dts_hd") == 0)
         spdif_ctx->use_dts_hd = true;
-    }
 
-    spdif_ctx->codec_id = mp_codec_to_av_codec_id(decoder);
+    spdif_ctx->codec_id = mp_codec_to_av_codec_id(da->codec->codec);
     return spdif_ctx->codec_id != AV_CODEC_ID_NONE;
 }
 
@@ -296,22 +294,53 @@ static const int codecs[] = {
     AV_CODEC_ID_NONE
 };
 
-static void add_decoders(struct mp_decoder_list *list)
+static bool find_codec(const char *name)
 {
     for (int n = 0; codecs[n] != AV_CODEC_ID_NONE; n++) {
         const char *format = mp_codec_from_av_codec_id(codecs[n]);
-        if (format) {
-            mp_add_decoder(list, "spdif", format, format,
-                           "libavformat/spdifenc audio pass-through decoder");
+        if (format && name && strcmp(format, name) == 0)
+            return true;
+    }
+    return false;
+}
+
+// codec is the libavcodec name of the source audio codec.
+// pref is a ","-separated list of names, some of them which do not match with
+// libavcodec names (like dts-hd).
+struct mp_decoder_list *select_spdif_codec(const char *codec, const char *pref)
+{
+    struct mp_decoder_list *list = talloc_zero(NULL, struct mp_decoder_list);
+
+    if (!find_codec(codec))
+        return list;
+
+    bool spdif_allowed = false, dts_hd_allowed = false;
+    bstr sel = bstr0(pref);
+    while (sel.len) {
+        bstr decoder;
+        bstr_split_tok(sel, ",", &decoder, &sel);
+        if (decoder.len) {
+            if (bstr_equals0(decoder, codec))
+                spdif_allowed = true;
+            if (bstr_equals0(decoder, "dts-hd") && strcmp(codec, "dts") == 0)
+                spdif_allowed = dts_hd_allowed = true;
         }
     }
-    mp_add_decoder(list, "spdif", "dts", "dts-hd",
+
+    if (!spdif_allowed)
+        return list;
+
+    const char *suffix_name = dts_hd_allowed ? "dts_hd" : codec;
+    char name[80];
+    snprintf(name, sizeof(name), "spdif_%s", suffix_name);
+    mp_add_decoder(list, "spdif", codec, name,
                    "libavformat/spdifenc audio pass-through decoder");
+    return list;
 }
 
 const struct ad_functions ad_spdif = {
     .name = "spdif",
-    .add_decoders = add_decoders,
+    .add_decoders = NULL,
     .init = init,
     .uninit = uninit,
     .control = control,

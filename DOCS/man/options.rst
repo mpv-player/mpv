@@ -1121,11 +1121,10 @@ Audio
     Possible codecs are ``ac3``, ``dts``, ``dts-hd``. Multiple codecs can be
     specified by separating them with ``,``. ``dts`` refers to low bitrate DTS
     core, while ``dts-hd`` refers to DTS MA (receiver and OS support varies).
-    You should only use either ``dts`` or ``dts-hd`` (if both are specified,
-    and ``dts`` comes first, only ``dts`` will be used).
+    If both ``dts`` and ``dts-hd`` are specified, it behaves equivalent to
+    specifying ``dts-hd`` only.
 
-    In general, all codecs in the ``spdif`` family listed with ``--ad=help``
-    are supported in theory.
+    In earlier mpv versions
 
     .. admonition:: Warning
 

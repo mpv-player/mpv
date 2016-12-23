@@ -43,11 +43,12 @@
 #include "audio/filter/af.h"
 
 extern const struct ad_functions ad_lavc;
+
+// Not a real codec - specially treated.
 extern const struct ad_functions ad_spdif;
 
 static const struct ad_functions * const ad_drivers[] = {
     &ad_lavc,
-    &ad_spdif,
     NULL
 };
 
@@ -91,9 +92,9 @@ static struct mp_decoder_list *audio_select_decoders(struct dec_audio *d_audio)
     struct mp_decoder_list *list = audio_decoder_list();
     struct mp_decoder_list *new =
         mp_select_decoders(list, codec, opts->audio_decoders);
-    if (d_audio->try_spdif) {
+    if (d_audio->try_spdif && codec) {
         struct mp_decoder_list *spdif =
-            mp_select_decoder_list(list, codec, "spdif", opts->audio_spdif);
+            select_spdif_codec(codec, opts->audio_spdif);
         mp_append_decoders(spdif, new);
         talloc_free(new);
         new = spdif;
@@ -108,6 +109,8 @@ static const struct ad_functions *find_driver(const char *name)
         if (strcmp(ad_drivers[i]->name, name) == 0)
             return ad_drivers[i];
     }
+    if (strcmp(name, "spdif") == 0)
+        return &ad_spdif;
     return NULL;
 }
 
