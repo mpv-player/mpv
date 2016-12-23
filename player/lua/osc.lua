@@ -459,20 +459,19 @@ function prepare_elements()
                                     elem_geo.h - slider_lo.border)
                             end
 
-                        else -- draw 1px nibbles
+                        else -- draw 2x1px nibbles
 
                             --top
                             if (slider_lo.nibbles_top) then
-                                static_ass:rect_cw(s - 0.5, slider_lo.gap,
-                                    s + 0.5, slider_lo.gap*2);
+                                static_ass:rect_cw(s - 1, slider_lo.border,
+                                    s + 1, slider_lo.border + slider_lo.gap);
                             end
 
                             --bottom
                             if (slider_lo.nibbles_bottom) then
-                                static_ass:rect_cw(s - 0.5,
-                                    elem_geo.h - slider_lo.gap*2,
-                                    s + 0.5,
-                                    elem_geo.h - slider_lo.gap);
+                                static_ass:rect_cw(s - 1,
+                                    elem_geo.h -slider_lo.border -slider_lo.gap,
+                                    s + 1, elem_geo.h - slider_lo.border);
                             end
                         end
                     end
@@ -548,14 +547,12 @@ function render_elements(master_ass)
             elem_ass:merge(element.static_ass)
         end
 
-
-
         if (element.type == "slider") then
 
             local slider_lo = element.layout.slider
             local elem_geo = element.layout.geometry
-            local s_min, s_max = element.slider.min.value, element.slider.max.value
-
+            local s_min = element.slider.min.value
+            local s_max = element.slider.max.value
 
             -- draw pos marker
             local pos = element.slider.posF()
@@ -568,7 +565,6 @@ function render_elements(master_ass)
                     (slider_lo.stype == "knob") then
                     foH = elem_geo.h / 2
                 elseif (slider_lo.stype == "bar") then
-                    foV = foV + 1
                     foH = slider_lo.border + slider_lo.gap
                 end
 
@@ -585,10 +581,12 @@ function render_elements(master_ass)
                     elem_ass:line_to(xp, (innerH)+foV)
                     elem_ass:line_to(xp-(innerH/2), (innerH/2)+foV)
                 elseif (slider_lo.stype == "knob") then
-                    elem_ass:rect_cw(xp, (9*innerH/20)+foV, elem_geo.w - foH, (11*innerH/20)+foV)
-                    elem_ass:rect_cw(foH, (3*innerH/8)+foV, xp, (5*innerH/8)+foV)
-                    elem_ass:round_rect_cw(xp - innerH/2, foV, xp + innerH/2,
-                                           foV + innerH, innerH/2.0)
+                    elem_ass:rect_cw(xp, (9*innerH/20) + foV,
+                        elem_geo.w - foH, (11*innerH/20) + foV)
+                    elem_ass:rect_cw(foH, (3*innerH/8) + foV,
+                        xp, (5*innerH/8) + foV)
+                    elem_ass:round_rect_cw(xp - innerH/2, foV,
+                        xp + innerH/2, foV + innerH, innerH/2.0)
                 end
             end
 
@@ -1296,6 +1294,7 @@ layouts["bottombar"] = function()
     lo.geometry = geo
     lo.style = osc_styles.timecodes
     lo.slider.border = 0
+    lo.slider.gap = 2
     lo.slider.tooltip_style = osc_styles.timePosBar
     lo.slider.tooltip_an = 5
     lo.slider.stype = user_opts["seekbarstyle"]
@@ -1403,7 +1402,8 @@ layouts["topbar"] = function()
 
 
     -- Seekbar
-    geo = { x = sb_l, y = user_opts.barmargin, an = 7, w = math.max(0, sb_r - sb_l), h = geo.h }
+    geo = { x = sb_l, y = user_opts.barmargin, an = 7,
+        w = math.max(0, sb_r - sb_l), h = geo.h }
     new_element("bgbar1", "box")
     lo = add_layout("bgbar1")
 
@@ -1417,6 +1417,7 @@ layouts["topbar"] = function()
     lo.geometry = geo
     lo.style = osc_styles.timecodesBar
     lo.slider.border = 0
+    lo.slider.gap = 2
     lo.slider.tooltip_style = osc_styles.timePosBar
     lo.slider.stype = user_opts["seekbarstyle"]
     lo.slider.tooltip_an = 5
