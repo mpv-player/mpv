@@ -116,11 +116,12 @@ struct mp_decoder_list *video_decoder_list(void)
     return list;
 }
 
-static struct mp_decoder_list *mp_select_video_decoders(const char *codec,
+static struct mp_decoder_list *mp_select_video_decoders(struct mp_log *log,
+                                                        const char *codec,
                                                         char *selection)
 {
     struct mp_decoder_list *list = video_decoder_list();
-    struct mp_decoder_list *new = mp_select_decoders(list, codec, selection);
+    struct mp_decoder_list *new = mp_select_decoders(log, list, codec, selection);
     talloc_free(list);
     return new;
 }
@@ -143,8 +144,9 @@ bool video_init_best_codec(struct dec_video *d_video)
     d_video->has_broken_packet_pts = -10; // needs 10 packets to reach decision
 
     struct mp_decoder_entry *decoder = NULL;
-    struct mp_decoder_list *list =
-        mp_select_video_decoders(d_video->codec->codec, opts->video_decoders);
+    struct mp_decoder_list *list = mp_select_video_decoders(d_video->log,
+                                                            d_video->codec->codec,
+                                                            opts->video_decoders);
 
     mp_print_decoders(d_video->log, MSGL_V, "Codec list:", list);
 
@@ -153,22 +155,19 @@ bool video_init_best_codec(struct dec_video *d_video)
         const struct vd_functions *driver = find_driver(sel->family);
         if (!driver)
             continue;
-        MP_VERBOSE(d_video, "Opening video decoder %s:%s\n",
-                   sel->family, sel->decoder);
+        MP_VERBOSE(d_video, "Opening video decoder %s\n", sel->decoder);
         d_video->vd_driver = driver;
         if (init_video_codec(d_video, sel->decoder)) {
             decoder = sel;
             break;
         }
         d_video->vd_driver = NULL;
-        MP_WARN(d_video, "Video decoder init failed for "
-                "%s:%s\n", sel->family, sel->decoder);
+        MP_WARN(d_video, "Video decoder init failed for %s\n", sel->decoder);
     }
 
     if (d_video->vd_driver) {
         d_video->decoder_desc =
-            talloc_asprintf(d_video, "%s [%s:%s]", decoder->desc, decoder->family,
-                            decoder->decoder);
+            talloc_asprintf(d_video, "%s (%s)", decoder->decoder, decoder->desc);
         MP_VERBOSE(d_video, "Selected video codec: %s\n", d_video->decoder_desc);
     } else {
         MP_ERR(d_video, "Failed to initialize a video decoder for codec '%s'.\n",

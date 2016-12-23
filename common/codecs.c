@@ -45,9 +45,10 @@ static struct mp_decoder_entry *find_decoder(struct mp_decoder_list *list,
 {
     for (int n = 0; n < list->num_entries; n++) {
         struct mp_decoder_entry *cur = &list->entries[n];
-        if (bstr_equals0(decoder, cur->decoder) &&
-            bstr_equals0(family, cur->family))
-            return cur;
+        if (bstr_equals0(decoder, cur->decoder)) {
+            if (bstr_equals0(family, "*") || bstr_equals0(family, cur->family))
+                return cur;
+        }
     }
     return NULL;
 }
@@ -70,13 +71,14 @@ static void add_new(struct mp_decoder_list *to, struct mp_decoder_entry *entry,
 // The selection string corresponds to --vd/--ad directly, and has the
 // following syntax:
 //   selection = [<entry> ("," <entry>)*]
-//       entry = <family> ":" <decoder>         // prefer decoder
+//       entry = [<family> ":"] <decoder>       // prefer decoder
 //       entry = <family> ":*"                  // prefer all decoders
-//       entry = "+" <family> ":" <decoder>     // force a decoder
-//       entry = "-" <family> ":" <decoder>     // exclude a decoder
+//       entry = "+" [<family> ":"] <decoder>   // force a decoder
+//       entry = "-" [<family> ":"] <decoder>   // exclude a decoder
 //       entry = "-"                            // don't add fallback decoders
 // Forcing a decoder means it's added even if the codec mismatches.
-struct mp_decoder_list *mp_select_decoders(struct mp_decoder_list *all,
+struct mp_decoder_list *mp_select_decoders(struct mp_log *log,
+                                           struct mp_decoder_list *all,
                                            const char *codec,
                                            const char *selection)
 {
@@ -97,9 +99,12 @@ struct mp_decoder_list *mp_select_decoders(struct mp_decoder_list *all,
         bool exclude = !force && bstr_eatstart0(&entry, "-");
         struct mp_decoder_list *dest = exclude ? remove : list;
         bstr family, decoder;
-        if (!bstr_split_tok(entry, ":", &family, &decoder)) {
-            family = entry;
-            decoder = bstr0("*");
+        if (bstr_split_tok(entry, ":", &family, &decoder)) {
+            mp_warn(log, "Codec family selection is deprecated. "
+                         "Pass the codec name directly.\n");
+        } else {
+            family = bstr0("*");
+            decoder = entry;
         }
         if (bstr_equals0(decoder, "*")) {
             for (int n = 0; n < all->num_entries; n++) {
@@ -142,7 +147,7 @@ void mp_print_decoders(struct mp_log *log, int msgl, const char *header,
     mp_msg(log, msgl, "%s\n", header);
     for (int n = 0; n < list->num_entries; n++) {
         struct mp_decoder_entry *entry = &list->entries[n];
-        mp_msg(log, msgl, "    %s:%s", entry->family, entry->decoder);
+        mp_msg(log, msgl, "    %s", entry->decoder);
         if (strcmp(entry->decoder, entry->codec) != 0)
             mp_msg(log, msgl, " (%s)", entry->codec);
         mp_msg(log, msgl, " - %s\n", entry->desc);

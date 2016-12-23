@@ -45,6 +45,7 @@ Interface changes
     - remove --fs-black-out-screens option for macOS
     - change how spdif codecs are selected. You can't enable spdif passthrough
       with --ad anymore. This was deprecated; use --audio-spdif instead.
+    - deprecate the "family" selection with --ad/--vd
  --- mpv 0.22.0 ---
     - the "audio-device-list" property now sets empty device description to the
       device name as a fallback

@@ -555,7 +555,7 @@ Video
     Specify the video output backend to be used. See `VIDEO OUTPUT DRIVERS`_ for
     details and descriptions of available drivers.
 
-``--vd=<[+|-]family1:(*|decoder1),[+|-]family2:(*|decoder2),...[-]>``
+``--vd=<...>``
     Specify a priority list of video decoders to be used, according to their
     family and name. See ``--ad`` for further details. Both of these options
     use the same syntax and semantics; the only difference is that they
@@ -1134,11 +1134,13 @@ Audio
 
 ``--ad=<[+|-]family1:(*|decoder1),[+|-]family2:(*|decoder2),...[-]>``
     Specify a priority list of audio decoders to be used, according to their
-    family and decoder name. Entries like ``family:*`` prioritize all decoders
-    of the given family. When determining which decoder to use, the first
-    decoder that matches the audio format is selected. If that is unavailable,
-    the next decoder is used. Finally, it tries all other decoders that are not
+    decoder name. When determining which decoder to use, the first decoder that
+    matches the audio format is selected. If that is unavailable, the next
+    decoder is used. Finally, it tries all other decoders that are not
     explicitly selected or rejected by the option.
+
+    Specifying family names is deprecated. Entries like ``family:*`` prioritize
+    all decoders of the given family.
 
     ``-`` at the end of the list suppresses fallback on other available
     decoders not on the ``--ad`` list. ``+`` in front of an entry forces the
@@ -1149,12 +1151,13 @@ Audio
 
     .. admonition:: Examples
 
-        ``--ad=lavc:mp3float``
+        ``--ad=mp3float``
             Prefer the FFmpeg/Libav ``mp3float`` decoder over all other MP3
             decoders.
 
-        ``--ad=spdif:ac3,lavc:*``
-            Always prefer spdif AC3 over FFmpeg/Libav over anything else.
+        ``--ad=lavc:mp3float``
+            Prefer the FFmpeg/Libav ``mp3float`` decoder over all other MP3
+            decoders. (Using deprecated family syntax.)
 
         ``--ad=help``
             List all available decoders.
