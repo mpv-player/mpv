@@ -92,11 +92,14 @@ struct mp_decoder_list *mp_select_decoders(struct mp_log *log,
         bstr entry;
         bstr_split_tok(sel, ",", &entry, &sel);
         if (bstr_equals0(entry, "-")) {
+            mp_warn(log, "Excluding codecs is deprecated.\n");
             stop = true;
             break;
         }
         bool force = bstr_eatstart0(&entry, "+");
         bool exclude = !force && bstr_eatstart0(&entry, "-");
+        if (exclude || force)
+            mp_warn(log, "Forcing or excluding codecs is deprecated.\n");
         struct mp_decoder_list *dest = exclude ? remove : list;
         bstr family, decoder;
         if (bstr_split_tok(entry, ":", &family, &decoder)) {
