@@ -374,5 +374,5 @@ const struct ao_driver audio_out_openal = {
                             DEVICE_OPT_DEPRECATION),
         {0}
     },
-    .legacy_prefix = "ao-openal",
+    .options_prefix = "ao-openal",
 };

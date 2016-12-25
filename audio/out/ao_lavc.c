@@ -258,7 +258,6 @@ static void encode_audio_and_write(struct ao *ao, AVFrame *frame)
     struct priv *ac = ao->priv;
     AVPacket packet = {0};
 
-#if HAVE_AVCODEC_NEW_CODEC_API
     int status = avcodec_send_frame(ac->codec, frame);
     if (status < 0) {
         MP_ERR(ao, "error encoding at %d %d/%d\n",
@@ -297,28 +296,6 @@ static void encode_audio_and_write(struct ao *ao, AVFrame *frame)
         write_packet(ao, &packet);
         av_packet_unref(&packet);
     }
-#else
-    av_init_packet(&packet);
-    int got_packet = 0;
-    int status = avcodec_encode_audio2(ac->codec, &packet, frame, &got_packet);
-    if (status < 0) {
-        MP_ERR(ao, "error encoding at %d %d/%d\n",
-               frame ? (int) frame->pts : -1,
-               ac->codec->time_base.num,
-               ac->codec->time_base.den);
-        return;
-    }
-    if (!got_packet) {
-        return;
-    }
-    if (frame) {
-        if (ac->savepts == AV_NOPTS_VALUE)
-            ac->savepts = frame->pts;
-    }
-    encode_lavc_write_stats(ao->encode_lavc_ctx, ac->codec);
-    write_packet(ao, &packet);
-    av_packet_unref(&packet);
-#endif
 }
 
 // must get exactly ac->aframesize amount of data

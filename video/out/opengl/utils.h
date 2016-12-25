@@ -30,7 +30,7 @@ void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
                    const void *dataptr, int stride,
                    int x, int y, int w, int h);
 
-mp_image_t *gl_read_window_contents(GL *gl);
+mp_image_t *gl_read_window_contents(GL *gl, int w, int h);
 
 const char* mp_sampler_type(GLenum texture_target);
 

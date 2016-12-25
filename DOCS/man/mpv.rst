@@ -9,6 +9,8 @@ a media player
 :Manual section: 1
 :Manual group: multimedia
 
+.. contents:: Table of Contents
+
 SYNOPSIS
 ========
 
@@ -208,9 +210,6 @@ Alt+2 (and command+2 on OSX)
 command + f (OSX only)
     Toggle fullscreen (see also ``--fs``).
 
-command + [ and command + ] (OSX only)
-    Set video window alpha.
-
 (The following keys are valid if you have a keyboard with multimedia keys.)
 
 PAUSE
@@ -244,12 +243,40 @@ button 5 and button 6
 USAGE
 =====
 
+Command line arguments starting with ``-`` are interpreted as options,
+everything else as filenames or URLs. All options except *flag* options (or
+choice options which include ``yes``) require a parameter in the form
+``--option=value``.
+
+One exception is the lone ``-`` (without anything else), which means media data
+will be read from stdin. Also, ``--`` (without anything else) will make the
+player interpret all following arguments as filenames, even if they start with
+``-``. (To play a file named ``-``, you need to use ``./-``.)
+
 Every *flag* option has a *no-flag* counterpart, e.g. the opposite of the
 ``--fs`` option is ``--no-fs``. ``--fs=yes`` is same as ``--fs``, ``--fs=no``
 is the same as ``--no-fs``.
 
 If an option is marked as *(XXX only)*, it will only work in combination with
 the *XXX* option or if *XXX* is compiled in.
+
+Legacy option syntax
+--------------------
+
+The ``--option=value`` syntax is not strictly enforced, and the alternative
+legacy syntax ``-option value`` and ``--option value`` will also work. This is
+mostly  for compatibility with MPlayer. Using these should be avoided. Their
+semantics can change any time in the future.
+
+For example, the alternative syntax will consider an argument following the
+option a filename. ``mpv -fs no`` will attempt to play a file named ``no``,
+because ``--fs`` is a flag option that requires no parameter. If an option
+changes and its parameter becomes optional, then a command line using the
+alternative syntax will break.
+
+Currently, the parser makes no difference whether an option starts with ``--``
+or a single ``-``. This might also change in the future, and ``--option value``
+might always interpret ``value`` as filename in order to reduce ambiguities.
 
 Escaping spaces and other special characters
 --------------------------------------------
@@ -431,7 +458,7 @@ tree and play the longest title.
     a bitmap video stream which can be superimposed over the main
     movie. mpv's subtitle styling and positioning options and keyboard
     shortcuts generally do not work with image-based subtitles.
-    Exceptions include options like ``--stretch-dvd-subs`` and 
+    Exceptions include options like ``--stretch-dvd-subs`` and
     ``--stretch-image-subs-to-screen``.
 
 

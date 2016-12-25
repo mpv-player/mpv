@@ -81,6 +81,7 @@ build_options = [
     }, {
         'name': '--zsh-comp',
         'desc': 'zsh completion',
+        'func': check_ctx_vars('BIN_PERL'),
         'func': check_true,
         'default': 'disable',
     }, {
@@ -127,10 +128,6 @@ main_dependencies = [
         # This should be good enough.
         'func': check_statement(['poll.h', 'unistd.h', 'sys/mman.h'],
             'struct pollfd pfd; poll(&pfd, 1, 0); fork(); int f[2]; pipe(f); munmap(f,0)'),
-    }, {
-        'name': 'fnmatch',
-        'desc': 'fnmatch()',
-        'func': check_statement('fnmatch.h', 'fnmatch("", "", 0)')
     }, {
         'name': 'posix-or-mingw',
         'desc': 'development environment',
@@ -356,16 +353,6 @@ iconv support use --disable-iconv.",
         'desc': 'cdda support (libcdio)',
         'func': check_pkg_config('libcdio_paranoia'),
     }, {
-        'name': '--enca',
-        'desc': 'ENCA support',
-        'deps': [ 'iconv' ],
-        'func': check_statement('enca.h', 'enca_get_languages(NULL)', lib='enca'),
-    }, {
-        'name': '--libguess',
-        'desc': 'libguess support',
-        'deps': [ 'iconv' ],
-        'func': check_pkg_config('libguess', '>= 1.0'),
-    }, {
         'name': '--uchardet',
         'desc': 'uchardet support',
         'deps': [ 'iconv' ],
@@ -401,13 +388,28 @@ iconv support use --disable-iconv.",
     }
 ]
 
+# Libav 12:
+#   libavutil       55.20.0
+#   libavcodec      57.25.0
+#   libavformat     57.7.2
+#   libswscale      4.0.0
+#   libavfilter     6.7.0
+#   libavresample   3.0.0
+# FFmpeg 3.2.2:
+#   libavutil       55.34.100
+#   libavcodec      57.64.101
+#   libavformat     57.56.100
+#   libswscale      4.2.100
+#   libavfilter     6.65.100
+#   libswresample   2.3.100
+
 libav_pkg_config_checks = [
-    'libavutil',   '>= 54.02.0',
-    'libavcodec',  '>= 56.1.0',
-    'libavformat', '>= 56.01.0',
-    'libswscale',  '>= 2.1.3'
+    'libavutil',   '>= 55.20.0',
+    'libavcodec',  '>= 57.25.0',
+    'libavformat', '>= 57.07.0',
+    'libswscale',  '>= 4.0.0'
 ]
-libav_versions_string = "FFmpeg 2.4 or Libav 11"
+libav_versions_string = "FFmpeg 3.2.2 or Libav 12"
 
 libav_dependencies = [
     {
@@ -420,11 +422,11 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
     }, {
         'name': '--libswresample',
         'desc': 'libswresample',
-        'func': check_pkg_config('libswresample', '>= 1.1.100'),
+        'func': check_pkg_config('libswresample', '>= 2.3.100'),
     }, {
         'name': '--libavresample',
         'desc': 'libavresample',
-        'func': check_pkg_config('libavresample',  '>= 2.1.0'),
+        'func': check_pkg_config('libavresample',  '>= 3.0.0'),
         'deps_neg': ['libswresample'],
     }, {
         'name': 'resampler',
@@ -436,13 +438,13 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
     }, {
         'name': 'libavfilter',
         'desc': 'libavfilter',
-        'func': check_pkg_config('libavfilter', '>= 5.0.0'),
+        'func': check_pkg_config('libavfilter', '>= 6.7.0'),
         'req':  True,
         'fmsg': 'libavfilter is a required dependency.',
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
-        'func': check_pkg_config('libavdevice', '>= 55.0.0'),
+        'func': check_pkg_config('libavdevice', '>= 57.0.0'),
     }, {
         'name': 'avcodec-chroma-pos-api',
         'desc': 'libavcodec avcodec_enum_to_chroma_pos API',
@@ -462,73 +464,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
                                 'enum AVFrameSideDataType type = AV_FRAME_DATA_SKIP_SAMPLES',
                                 use='libav')
     }, {
-        'name': 'av-pix-fmt-mmal',
-        'desc': 'libavutil AV_PIX_FMT_MMAL',
-        'func': check_statement('libavutil/pixfmt.h',
-                                'int x = AV_PIX_FMT_MMAL',
-                                use='libav'),
-    }, {
-        'name': 'av-version-info',
-        'desc': 'libavtuil av_version_info()',
-        'func': check_statement('libavutil/avutil.h',
-                                'const char *x = av_version_info()',
-                                use='libav'),
-    }, {
-        'name': 'av-new-pixdesc',
-        'desc': 'libavutil new pixdesc fields',
-        'func': check_statement('libavutil/pixdesc.h',
-                                'AVComponentDescriptor d; int x = d.depth',
-                                use='libav'),
-    }, {
-        'name': 'av-avpacket-int64-duration',
-        'desc': 'libavcodec 64 bit AVPacket.duration',
-        'func': check_statement('libavcodec/avcodec.h',
-                                'int x[(int)sizeof(((AVPacket){0}).duration) - 7]',
-                                use='libav'),
-    }, {
-        'name': 'av-subtitle-nopict',
-        'desc': 'libavcodec AVSubtitleRect AVPicture removal',
-        'func': check_statement('libavcodec/avcodec.h',
-                                'AVSubtitleRect r = {.linesize={0}}',
-                                use='libav'),
-    }, {
-        'name': 'avcodec-profile-name',
-        'desc': 'libavcodec avcodec_profile_name()',
-        'func': check_statement('libavcodec/avcodec.h',
-                                'avcodec_profile_name(0,0)',
-                                use='libav'),
-    }, {
-        'name': 'avcodec-new-codec-api',
-        'desc': 'libavcodec decode/encode API',
-        'func': check_statement('libavcodec/avcodec.h',
-                                'avcodec_send_packet(0,0)',
-                                use='libav'),
-    }, {
-        'name': 'avcodec-has-codecpar',
-        'desc': 'libavcodec AVCodecParameters API',
-        'func': check_statement('libavformat/avformat.h',
-                                '(void)offsetof(AVStream, codecpar)',
-                                use='libav'),
-    }, {
-        'name': 'avutil-has-hwcontext',
-        'desc': 'libavutil AVHWFramesContext API',
-        'func': check_statement('libavutil/frame.h',
-                                '(void)offsetof(AVFrame, hw_frames_ctx)',
-                                use='libav'),
-    }, {
-        'name': 'avutil-hdr',
-        'desc': 'libavutil HDR TRCs',
-        'func': check_statement('libavutil/pixfmt.h',
-                                'AVCOL_TRC_SMPTEST2084,'
-                                'AVCOL_TRC_ARIB_STD_B67',
-                                use='libav'),
-    }, {
         'name': 'avutil-mastering-metadata',
         'desc': 'libavutil mastering display metadata struct',
         'func': check_statement('libavutil/frame.h',
                                 'AV_FRAME_DATA_MASTERING_DISPLAY_METADATA',
                                 use='libav'),
-    }
+    },
 ]
 
 audio_output_features = [
@@ -736,6 +677,15 @@ video_output_features = [
         'func': check_statement(['EGL/egl.h', 'EGL/eglext.h'],
                                 'int x = EGL_D3D_TEXTURE_2D_SHARE_HANDLE_ANGLE')
     } , {
+        'name': '--egl-angle-lib',
+        'desc': 'OpenGL Win32 ANGLE Library',
+        'deps': [ 'egl-angle' ],
+        'groups': [ 'gl' ],
+        'func': check_statement(['EGL/egl.h'],
+                                'eglCreateWindowSurface(0, 0, 0, 0)',
+                                cflags="-DGL_APICALL= -DEGLAPI= -DANGLE_NO_ALIASES -DANGLE_EXPORT=",
+                                lib=['EGL', 'GLESv2', 'dxguid', 'd3d9', 'gdi32', 'stdc++'])
+    } , {
         'name': '--vdpau',
         'desc': 'VDPAU acceleration',
         'deps': [ 'x11' ],
@@ -913,9 +863,8 @@ hwaccel_features = [
     }, {
         'name': '--cuda-hwaccel',
         'desc': 'CUDA hwaccel',
-        'func': compose_checks(
-                    check_cc(lib="cuda"),
-                    check_headers('libavutil/hwcontext_cuda.h',  use='libav')),
+        'func': check_cc(fragment=load_fragment('cuda.c'),
+                         use='libav'),
     }, {
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',
@@ -1047,11 +996,12 @@ def configure(ctx):
     ctx.find_program(cc,          var='CC')
     ctx.find_program(pkg_config,  var='PKG_CONFIG')
     ctx.find_program(ar,          var='AR')
-    ctx.find_program('perl',      var='BIN_PERL')
+    ctx.find_program('python',    var='BIN_PYTHON')
     ctx.find_program('rst2html',  var='RST2HTML',  mandatory=False)
     ctx.find_program('rst2man',   var='RST2MAN',   mandatory=False)
     ctx.find_program('rst2pdf',   var='RST2PDF',   mandatory=False)
     ctx.find_program(windres,     var='WINDRES',   mandatory=False)
+    ctx.find_program('perl',      var='BIN_PERL',  mandatory=False)
 
     ctx.load('compiler_c')
     ctx.load('waf_customizations')

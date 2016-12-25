@@ -43,9 +43,8 @@ timers added with ``mp.add_timeout`` or similar.
 
 When the player quits, all scripts will be asked to terminate. This happens via
 a ``shutdown`` event, which by default will make the event loop return. If your
-script got into an endless loop, mpv will probably behave fine during playback
-(unless the player is suspended, see ``mp.suspend``), but it won't terminate
-when quitting, because it's waiting on your script.
+script got into an endless loop, mpv will probably behave fine during playback,
+but it won't terminate when quitting, because it's waiting on your script.
 
 Internally, the C code will call the Lua function ``mp_event_loop`` after
 loading a Lua script. This function is normally defined by the default prelude
@@ -412,27 +411,16 @@ These also live in the ``mp`` module, but are documented separately as they
 are useful only in special situations.
 
 ``mp.suspend()``
-    This function has been deprecated in mpv 0.21.0 (no replacement).
-
-    Suspend the mpv main loop. There is a long-winded explanation of this in
-    the C API function ``mpv_suspend()``. In short, this prevents the player
-    from displaying the next video frame, so that you don't get blocked when
-    trying to access the player.
-
-    Before mpv 0.17.0, this was automatically called by the event handler.
+    This function has been deprecated in mpv 0.21.0 and does nothing starting
+    with mpv 0.23.0 (no replacement).
 
 ``mp.resume()``
-    This function has been deprecated in mpv 0.21.0 (no replacement).
-
-    Undo one ``mp.suspend()`` call. ``mp.suspend()`` increments an internal
-    counter, and ``mp.resume()`` decrements it. When 0 is reached, the player
-    is actually resumed.
+    This function has been deprecated in mpv 0.21.0 and does nothing starting
+    with mpv 0.23.0 (no replacement).
 
 ``mp.resume_all()``
-    This function has been deprecated in mpv 0.21.0 (no replacement).
-
-    This resets the internal suspend counter and resumes the player. (It's
-    like calling ``mp.resume()`` until the player is actually resumed.)
+    This function has been deprecated in mpv 0.21.0 and does nothing starting
+    with mpv 0.23.0 (no replacement).
 
 ``mp.get_wakeup_pipe()``
     Calls ``mpv_get_wakeup_pipe()`` and returns the read end of the wakeup

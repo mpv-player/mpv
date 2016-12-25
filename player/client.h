@@ -35,8 +35,6 @@ struct mp_log *mp_client_get_log(struct mpv_handle *ctx);
 struct MPContext *mp_client_get_core(struct mpv_handle *ctx);
 struct MPContext *mp_client_api_get_core(struct mp_client_api *api);
 
-void mp_resume_all(struct mpv_handle *ctx);
-
 // m_option.c
 void *node_get_alloc(struct mpv_node *node);
 

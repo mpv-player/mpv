@@ -28,7 +28,7 @@ def _build_man(ctx):
         name         = 'rst2man',
         target       = 'DOCS/man/mpv.1',
         source       = 'DOCS/man/mpv.rst',
-        rule         = '${RST2MAN} ${SRC} ${TGT}',
+        rule         = '${RST2MAN} --strip-elements-with-class=contents ${SRC} ${TGT}',
         install_path = ctx.env.MANDIR + '/man1')
 
     _add_rst_manual_dependencies(ctx)
@@ -38,7 +38,7 @@ def _build_pdf(ctx):
         name         = 'rst2pdf',
         target       = 'DOCS/man/mpv.pdf',
         source       = 'DOCS/man/mpv.rst',
-        rule         = '${RST2PDF} -c --repeat-table-rows ${SRC} -o ${TGT}',
+        rule         = '${RST2PDF} -c -b 1 --repeat-table-rows ${SRC} -o ${TGT}',
         install_path = ctx.env.DOCDIR)
 
     _add_rst_manual_dependencies(ctx)
@@ -322,9 +322,8 @@ def build(ctx):
         ( "video/filter/vf_stereo3d.c" ),
         ( "video/filter/vf_sub.c" ),
         ( "video/filter/vf_vapoursynth.c",       "vapoursynth-core" ),
-        ( "video/filter/vf_vavpp.c",             "vaapi"),
+        ( "video/filter/vf_vavpp.c",             "vaapi" ),
         ( "video/filter/vf_vdpaupp.c",           "vdpau" ),
-        ( "video/filter/vf_vdpaurb.c",           "vdpau" ),
         ( "video/filter/vf_yadif.c" ),
         ( "video/out/aspect.c" ),
         ( "video/out/bitmap_packer.c" ),
@@ -347,6 +346,7 @@ def build(ctx):
         ( "video/out/opengl/context_w32.c",      "gl-win32" ),
         ( "video/out/opengl/context_x11.c",      "gl-x11" ),
         ( "video/out/opengl/context_x11egl.c",   "egl-x11" ),
+        ( "video/out/opengl/cuda_dynamic.c",     "cuda-hwaccel" ),
         ( "video/out/opengl/egl_helpers.c",      "egl-helpers" ),
         ( "video/out/opengl/formats.c",          "gl" ),
         ( "video/out/opengl/hwdec.c",            "gl" ),

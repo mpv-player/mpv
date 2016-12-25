@@ -100,13 +100,11 @@ void gl_upload_tex(GL *gl, GLenum target, GLenum format, GLenum type,
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 4);
 }
 
-mp_image_t *gl_read_window_contents(GL *gl)
+mp_image_t *gl_read_window_contents(GL *gl, int w, int h)
 {
     if (gl->es)
         return NULL; // ES can't read from front buffer
-    GLint vp[4]; //x, y, w, h
-    gl->GetIntegerv(GL_VIEWPORT, vp);
-    mp_image_t *image = mp_image_alloc(IMGFMT_RGB24, vp[2], vp[3]);
+    mp_image_t *image = mp_image_alloc(IMGFMT_RGB24, w, h);
     if (!image)
         return NULL;
     gl->BindFramebuffer(GL_FRAMEBUFFER, gl->main_fb);
@@ -114,9 +112,8 @@ mp_image_t *gl_read_window_contents(GL *gl)
     gl->PixelStorei(GL_PACK_ALIGNMENT, 1);
     gl->ReadBuffer(obj);
     //flip image while reading (and also avoid stride-related trouble)
-    for (int y = 0; y < vp[3]; y++) {
-        gl->ReadPixels(vp[0], vp[1] + vp[3] - y - 1, vp[2], 1,
-                       GL_RGB, GL_UNSIGNED_BYTE,
+    for (int y = 0; y < h; y++) {
+        gl->ReadPixels(0, h - y - 1, w, 1, GL_RGB, GL_UNSIGNED_BYTE,
                        image->planes[0] + y * image->stride[0]);
     }
     gl->PixelStorei(GL_PACK_ALIGNMENT, 4);

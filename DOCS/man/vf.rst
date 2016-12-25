@@ -806,15 +806,6 @@ Available filters are:
         1-9
             Apply high quality VDPAU scaling (needs capable hardware).
 
-``vdpaurb``
-    This filter is deprecated. Use ``--hwdec=vdpau-copy`` instead.
-
-    VDPAU video read back. Works with ``--vo=vdpau`` and ``--vo=opengl`` only.
-    This filter will read back frames decoded by VDPAU so that other filters,
-    which are not normally compatible with VDPAU, can be used like normal.
-    This filter must be specified before ``vdpaupp`` in the filter chain if
-    ``vdpaupp`` is used.
-
 ``d3d11vpp``
     Direct3D 11 video post processing. Currently requires D3D11 hardware
     decoding for use.

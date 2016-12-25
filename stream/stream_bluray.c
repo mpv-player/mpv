@@ -569,6 +569,9 @@ static int bdmv_dir_stream_open(stream_t *stream)
         .cfg_title = BLURAY_DEFAULT_TITLE,
     };
 
+    if (!stream->access_references)
+        goto unsupported;
+
     char *path = mp_file_get_path(priv, bstr0(stream->url));
     if (!path)
         goto unsupported;

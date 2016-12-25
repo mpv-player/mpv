@@ -146,12 +146,14 @@ static int probe_copy(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                       const char *codec)
 {
     assert(!ctx->hwdec_priv);
-    int r = init_copy(ctx);
-    if (ctx->hwdec_priv)
-        uninit(ctx);
-    ctx->hwdec_priv = NULL;
 
-    return r < 0 ? HWDEC_ERR_NO_CTX : 0;
+    int r = HWDEC_ERR_NO_CTX;
+    if (init_copy(ctx) >=0 ) {
+        struct priv *p = ctx->hwdec_priv;
+        r = mp_vdpau_guess_if_emulated(p->mpvdp) ? HWDEC_ERR_EMULATED : 0;
+        uninit(ctx);
+    }
+    return r;
 }
 
 static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *img)

@@ -312,17 +312,16 @@ struct vo_driver {
     const void *priv_defaults;
 
     // List of options to parse into priv struct (requires priv_size to be set)
-    // Deprecated. Use global options or global_opts instead.
+    // This will register them as global options (with options_prefix), and
+    // copy the current value at VO creation time to the priv struct.
     const struct m_option *options;
 
-    // Global options to register if the VO is compiled in.
-    // mp_get_config_group() or other function can be used to access them.
-    const struct m_sub_options *global_opts;
+    // All options in the above array are prefixed with this string. (It's just
+    // for convenience and makes no difference in semantics.)
+    const char *options_prefix;
 
-    // Evil hack: add .options as global options, using the provided prefix.
-    // For further evilness, the options will be copied to the priv struct
-    // like with normal .options behavior.
-    const char *legacy_prefix;
+    // Registers global options that go to a separate options struct.
+    const struct m_sub_options *global_opts;
 };
 
 struct vo {
@@ -356,7 +355,6 @@ struct vo {
 
     struct m_config_cache *opts_cache; // cache for ->opts
     struct mp_vo_opts *opts;
-    struct m_config *config; // config for ->priv
 
     bool want_redraw;   // redraw as soon as possible
 

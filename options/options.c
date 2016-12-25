@@ -150,8 +150,6 @@ const struct m_sub_options stream_cache_conf = {
 
 static const m_option_t mp_vo_opt_list[] = {
     OPT_SETTINGSLIST("vo", video_driver_list, 0, &vo_obj_list, ),
-    OPT_SETTINGSLIST("vo-defaults", vo_defs, 0, &vo_obj_list,
-                     .deprecation_message = "deprecated, use global options"),
     OPT_CHOICE_C("hwdec-preload", hwdec_preload_api, 0, mp_hwdec_names),
     OPT_SUBSTRUCT("sws", sws_opts, sws_conf, 0),
     OPT_FLAG("taskbar-progress", taskbar_progress, 0),
@@ -184,7 +182,6 @@ static const m_option_t mp_vo_opt_list[] = {
                       ({"default", -1})),
     OPT_CHOICE_OR_INT("fs-screen", fsscreen_id, 0, 0, 32,
                       ({"all", -2}, {"current", -1})),
-    OPT_FLAG("fs-black-out-screens", fs_black_out_screens, 0),
     OPT_FLAG("keepaspect", keepaspect, UPDATE_VIDEOPOS),
     OPT_FLAG("keepaspect-window", keepaspect_window, 0),
     OPT_FLAG("hidpi-window-scale", hidpi_window_scale, 0),
@@ -225,7 +222,6 @@ const struct m_sub_options vo_sub_opts = {
         .window_scale = 1.0,
         .x11_bypass_compositor = 2,
         .mmcss_profile = "Playback",
-        .fullscreen = HAVE_RPI ? 1 : 0,
     },
 };
 
@@ -430,7 +426,8 @@ const m_option_t mp_opts[] = {
 
     OPT_STRING("audio-spdif", audio_spdif, 0),
 
-    OPT_FLAG("ad-spdif-dtshd", dtshd, 0),
+    OPT_FLAG("ad-spdif-dtshd", dtshd, 0,
+             .deprecation_message = "use --audio-spdif instead"),
 
     OPT_CHOICE_C("hwdec", hwdec_api, 0, mp_hwdec_names),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
@@ -510,8 +507,6 @@ const m_option_t mp_opts[] = {
 
 //---------------------- libao/libvo options ------------------------
     OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list, ),
-    OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list,
-                     .deprecation_message = "deprecated, use global options"),
     OPT_STRING("audio-device", audio_device, UPDATE_AUDIO),
     OPT_FLAG("audio-exclusive", audio_exclusive, UPDATE_AUDIO),
     OPT_STRING("audio-client-name", audio_client_name, UPDATE_AUDIO),
@@ -801,6 +796,7 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("ass-shaper", "sub-ass-shaper"),
     OPT_REPLACED("ass-style-override", "sub-ass-style-override"),
     OPT_REPLACED("ass-scale-with-window", "sub-ass-scale-with-window"),
+    OPT_REMOVED("fs-black-out-screens", NULL),
 
     {0}
 };
@@ -809,7 +805,7 @@ const struct MPOpts mp_default_opts = {
     .use_terminal = 1,
     .msg_color = 1,
     .audio_driver_list = NULL,
-    .audio_decoders = "-spdif:*", // never select spdif by default
+    .audio_decoders = NULL,
     .video_decoders = NULL,
     .deinterlace = -1,
     .softvol = SOFTVOL_AUTO,

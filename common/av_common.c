@@ -77,13 +77,8 @@ void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st)
 // other demuxers must be handled manually.
 void mp_set_lav_codec_headers(AVCodecContext *avctx, struct mp_codec_params *c)
 {
-#if HAVE_AVCODEC_HAS_CODECPAR
     if (c->lav_codecpar)
         avcodec_parameters_to_context(avctx, c->lav_codecpar);
-#else
-    if (c->lav_headers)
-        mp_copy_lav_codec_headers(avctx, c->lav_headers);
-#endif
 }
 
 // Pick a "good" timebase, which will be used to convert double timestamps

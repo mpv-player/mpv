@@ -519,7 +519,7 @@ void build_ordered_chapter_timeline(struct timeline *tl)
         .opts = mp_get_config_group(ctx, tl->global, NULL),
     };
 
-    if (!ctx->opts->ordered_chapters) {
+    if (!ctx->opts->ordered_chapters || !demuxer->access_references) {
         MP_INFO(demuxer, "File uses ordered chapters, but "
                 "you have disabled support for them. Ignoring.\n");
         talloc_free(ctx);

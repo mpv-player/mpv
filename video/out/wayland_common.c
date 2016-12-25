@@ -675,9 +675,9 @@ static void schedule_resize(struct vo_wayland_state *wl,
         height = MPMIN(height, wl->display.current_output->height/scale);
     }
 
-    // don't keep the aspect ration in fullscreen mode, because the compositor
-    // shows the desktop in the border regions if the video has not the same
-    // aspect ration as the screen
+    // don't keep the aspect ratio in fullscreen mode because the compositor
+    // shows the desktop in the border regions if the video does not have the same
+    // aspect ratio as the screen
     /* if only the height is changed we have to calculate the width
      * in any other case we calculate the height */
     switch (edges) {
@@ -946,8 +946,8 @@ void vo_wayland_uninit(struct vo *vo)
     struct vo_wayland_state *wl = vo->wayland;
     destroy_cursor(wl);
     destroy_window(wl);
-    destroy_display(wl);
     destroy_input(wl);
+    destroy_display(wl);
     for (int n = 0; n < 2; n++)
         close(wl->wakeup_pipe[n]);
     talloc_free(wl);

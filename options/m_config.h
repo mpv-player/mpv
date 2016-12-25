@@ -92,8 +92,6 @@ typedef struct m_config {
     // For the command line parser
     int recursion_depth;
 
-    bool subopt_deprecation_warning;
-
     void *optstruct; // struct mpopts or other
 
     int shadow_size;
@@ -135,6 +133,9 @@ struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
 struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
     struct mp_log *log, struct mpv_global *global, struct m_obj_desc *desc,
     const char *name, struct m_obj_settings *defaults, char **args);
+
+void *m_config_group_from_desc(void *ta_parent, struct mp_log *log,
+        struct mpv_global *global, struct m_obj_desc *desc, const char *name);
 
 // Make sure the option is backed up. If it's already backed up, do nothing.
 // All backed up options can be restored with m_config_restore_backups().
@@ -196,10 +197,6 @@ int m_config_set_option_raw_direct(struct m_config *config,
 struct mpv_node;
 int m_config_set_option_node(struct m_config *config, bstr name,
                              struct mpv_node *data, int flags);
-
-
-int m_config_parse_suboptions(struct m_config *config, char *name,
-                              char *subopts);
 
 struct m_config_option *m_config_get_co_raw(const struct m_config *config,
                                             struct bstr name);

@@ -226,7 +226,6 @@ enum playback_status {
 typedef struct MPContext {
     bool initialized;
     bool autodetach;
-    int suspend_count;
     struct mpv_global *global;
     struct MPOpts *opts;
     struct mp_log *log;
@@ -354,6 +353,9 @@ typedef struct MPContext {
     // As video_pts, but is not reset when seeking away. (For the very short
     // period of time until a new frame is decoded and shown.)
     double last_vo_pts;
+    // Frame duration field from demuxer. Only used for duration of the last
+    // video frame.
+    double last_frame_duration;
     // Video PTS, or audio PTS if video has ended.
     double playback_pts;
     // audio stats only

@@ -603,8 +603,8 @@ static int try_open_device(struct ao *ao, const char *device, int mode)
                 const char *const fallbacks[] = {"hdmi", "iec958", NULL};
                 for (int n = 0; fallbacks[n]; n++) {
                     char *ndev = append_params(tmp, fallbacks[n], params);
-                    MP_VERBOSE(ao, "got error %d; opening iec fallback "
-                               "device '%s'\n", err, ndev);
+                    MP_VERBOSE(ao, "got error '%s'; opening iec fallback "
+                               "device '%s'\n", snd_strerror(err), ndev);
                     err = snd_pcm_open
                                 (&p->alsa, ndev, SND_PCM_STREAM_PLAYBACK, mode);
                     if (err >= 0)
@@ -844,12 +844,6 @@ static int init_device(struct ao *ao, int mode)
     MP_VERBOSE(ao, "period size: %d samples\n", (int)p->outburst);
 
     ao->device_buffer = p->buffersize;
-
-    // ao_alsa implements this by relying on underrun behavior (no data means
-    // underrun, during which silence is played). Trigger by playing some
-    // initial silence.
-    if (ao->stream_silence)
-        ao_play_silence(ao, p->outburst);
 
     return 0;
 
@@ -1202,15 +1196,5 @@ const struct ao_driver audio_out_alsa = {
     .wakeup    = ao_wakeup_poll,
     .list_devs = list_devs,
     .priv_size = sizeof(struct priv),
-    .options = (const struct m_option[]) {
-        OPT_SUBOPT_LEGACY("device", "alsa-device"),
-        OPT_SUBOPT_LEGACY("resample", "alsa-resample"),
-        OPT_SUBOPT_LEGACY("mixer-device", "alsa-mixer-device"),
-        OPT_SUBOPT_LEGACY("mixer-name", "alsa-mixer-name"),
-        OPT_SUBOPT_LEGACY("mixer-index", "alsa-mixer-index"),
-        OPT_SUBOPT_LEGACY("non-interleaved", "alsa-non-interleaved"),
-        OPT_SUBOPT_LEGACY("ignore-chmap", "alsa-ignore-chmap"),
-        {0}
-    },
     .global_opts = &ao_alsa_conf,
 };

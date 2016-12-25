@@ -43,11 +43,12 @@
 #include "audio/filter/af.h"
 
 extern const struct ad_functions ad_lavc;
+
+// Not a real codec - specially treated.
 extern const struct ad_functions ad_spdif;
 
 static const struct ad_functions * const ad_drivers[] = {
     &ad_lavc,
-    &ad_spdif,
     NULL
 };
 
@@ -90,10 +91,10 @@ static struct mp_decoder_list *audio_select_decoders(struct dec_audio *d_audio)
 
     struct mp_decoder_list *list = audio_decoder_list();
     struct mp_decoder_list *new =
-        mp_select_decoders(list, codec, opts->audio_decoders);
-    if (d_audio->try_spdif) {
+        mp_select_decoders(d_audio->log, list, codec, opts->audio_decoders);
+    if (d_audio->try_spdif && codec) {
         struct mp_decoder_list *spdif =
-            mp_select_decoder_list(list, codec, "spdif", opts->audio_spdif);
+            select_spdif_codec(codec, opts->audio_spdif);
         mp_append_decoders(spdif, new);
         talloc_free(new);
         new = spdif;
@@ -108,6 +109,8 @@ static const struct ad_functions *find_driver(const char *name)
         if (strcmp(ad_drivers[i]->name, name) == 0)
             return ad_drivers[i];
     }
+    if (strcmp(name, "spdif") == 0)
+        return &ad_spdif;
     return NULL;
 }
 
@@ -126,21 +129,18 @@ int audio_init_best_codec(struct dec_audio *d_audio)
         const struct ad_functions *driver = find_driver(sel->family);
         if (!driver)
             continue;
-        MP_VERBOSE(d_audio, "Opening audio decoder %s:%s\n",
-                   sel->family, sel->decoder);
+        MP_VERBOSE(d_audio, "Opening audio decoder %s\n", sel->decoder);
         d_audio->ad_driver = driver;
         if (init_audio_codec(d_audio, sel->decoder)) {
             decoder = sel;
             break;
         }
-        MP_WARN(d_audio, "Audio decoder init failed for "
-                "%s:%s\n", sel->family, sel->decoder);
+        MP_WARN(d_audio, "Audio decoder init failed for %s\n", sel->decoder);
     }
 
     if (d_audio->ad_driver) {
         d_audio->decoder_desc =
-            talloc_asprintf(d_audio, "%s [%s:%s]", decoder->desc, decoder->family,
-                            decoder->decoder);
+            talloc_asprintf(d_audio, "%s (%s)", decoder->decoder, decoder->desc);
         MP_VERBOSE(d_audio, "Selected audio codec: %s\n", d_audio->decoder_desc);
     } else {
         MP_ERR(d_audio, "Failed to initialize an audio decoder for codec '%s'.\n",

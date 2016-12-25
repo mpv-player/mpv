@@ -280,7 +280,6 @@ static int filter_out(struct af_instance *af)
     AVPacket pkt = {0};
     av_init_packet(&pkt);
 
-#if HAVE_AVCODEC_NEW_CODEC_API
     // Send input as long as it wants.
     while (1) {
         err = read_input_frame(af, frame);
@@ -310,21 +309,6 @@ static int filter_out(struct af_instance *af)
         MP_FATAL(af, "Encode failed.\n");
         goto done;
     }
-#else
-    err = read_input_frame(af, frame);
-    if (err < 0)
-        goto done;
-    if (err == 0)
-        goto done;
-    err = -1;
-    int ok;
-    int lavc_ret = avcodec_encode_audio2(s->lavc_actx, &pkt, frame, &ok);
-    s->input->samples = 0;
-    if (lavc_ret < 0 || !ok) {
-        MP_FATAL(af, "Encode failed.\n");
-        goto done;
-    }
-#endif
 
     MP_DBG(af, "avcodec_encode_audio got %d, pending %d.\n",
            pkt.size, s->pending->samples + s->input->samples);

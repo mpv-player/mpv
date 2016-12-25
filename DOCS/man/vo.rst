@@ -10,11 +10,6 @@ syntax is:
 If the list has a trailing ``,``, mpv will fall back on drivers not contained
 in the list.
 
-``--vo-defaults=<driver1[:parameter1:parameter2:...],driver2,...>``
-    Set defaults for each driver.
-
-    Deprecated. No replacement.
-
 .. note::
 
     See ``--vo=help`` for a list of compiled-in video output drivers.
@@ -483,9 +478,9 @@ Available video output drivers are:
 
     This is deprecated. Use ``--vo=opengl`` instead, which is the default and
     provides the same functionality. The ``rpi`` VO will be removed in
-    mpv 0.22.0. Its functionality was folded into --vo=opengl, which now uses
+    mpv 0.23.0. Its functionality was folded into --vo=opengl, which now uses
     RPI hardware decoding by treating it as a hardware overlay (without applying
-    GL filtering). Also to be changed in 0.22.0: the --fs flag will be reset to
+    GL filtering). Also to be changed in 0.23.0: the --fs flag will be reset to
     "no" by default (like on the other platforms).
 
     The following deprecated global options are supported by this video output:

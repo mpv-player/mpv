@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <strings.h>
+#include <errno.h>
 #include <assert.h>
 
 #include "config.h"
@@ -167,6 +168,8 @@ static const struct format_hack format_hacks[] = {
     BLACKLIST("bin"),
     // Useless, does not work with custom streams.
     BLACKLIST("image2"),
+    // Probably a security risk.
+    BLACKLIST("ffm"),
     // Image demuxers ("<name>_pipe" is detected explicitly)
     {"image2pipe", .image_format = true},
     {0}
@@ -574,13 +577,8 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
     AVFormatContext *avfc = priv->avfc;
     AVStream *st = avfc->streams[i];
     struct sh_stream *sh = NULL;
-#if HAVE_AVCODEC_HAS_CODECPAR
     AVCodecParameters *codec = st->codecpar;
     int lavc_delay = codec->initial_padding;
-#else
-    AVCodecContext *codec = st->codec;
-    int lavc_delay = codec->delay;
-#endif
 
     switch (codec->codec_type) {
     case AVMEDIA_TYPE_AUDIO: {
@@ -676,17 +674,9 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
         sh->ff_index = st->index;
         sh->codec->codec = mp_codec_from_av_codec_id(codec->codec_id);
         sh->codec->codec_tag = codec->codec_tag;
-#if HAVE_AVCODEC_HAS_CODECPAR
         sh->codec->lav_codecpar = avcodec_parameters_alloc();
         if (sh->codec->lav_codecpar)
             avcodec_parameters_copy(sh->codec->lav_codecpar, codec);
-#else
-        sh->codec->codec = mp_codec_from_av_codec_id(codec->codec_id);
-        sh->codec->codec_tag = codec->codec_tag;
-        sh->codec->lav_headers = avcodec_alloc_context3(NULL);
-        if (sh->codec->lav_headers)
-            mp_copy_lav_codec_headers(sh->codec->lav_headers, codec);
-#endif
         sh->codec->native_tb_num = st->time_base.num;
         sh->codec->native_tb_den = st->time_base.den;
 
@@ -750,6 +740,14 @@ static int interrupt_cb(void *ctx)
     struct demuxer *demuxer = ctx;
     lavf_priv_t *priv = demuxer->priv;
     return mp_cancel_test(priv->stream->cancel);
+}
+
+static int block_io_open(struct AVFormatContext *s, AVIOContext **pb,
+                         const char *url, int flags, AVDictionary **options)
+{
+    struct demuxer *demuxer = s->opaque;
+    MP_ERR(demuxer, "Not opening '%s' due to --access-references=no.\n", url);
+    return AVERROR(EACCES);
 }
 
 static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
@@ -853,6 +851,10 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         .opaque = demuxer,
     };
 
+    avfc->opaque = demuxer;
+    if (!demuxer->access_references)
+        avfc->io_open = block_io_open;
+
     mp_set_avdict(&dopts, lavfdopts->avopts);
 
     if (avformat_open_input(&avfc, priv->filename, priv->avif, &dopts) < 0) {
@@ -936,14 +938,9 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     if (pkt->dts != AV_NOPTS_VALUE)
         dp->dts = pkt->dts * av_q2d(st->time_base);
     dp->duration = pkt->duration * av_q2d(st->time_base);
-#if !HAVE_AV_AVPACKET_INT64_DURATION
-    if (pkt->convergence_duration > 0)
-        dp->duration = pkt->convergence_duration * av_q2d(st->time_base);
-#endif
     dp->pos = pkt->pos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
-#if LIBAVFORMAT_VERSION_MICRO >= 100 && \
-    LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(57, 50, 100)
+#if LIBAVFORMAT_VERSION_MICRO >= 100
     if (pkt->flags & AV_PKT_FLAG_DISCARD)
         MP_ERR(demux, "Edit lists are not correctly supported (FFmpeg issue).\n");
 #endif
@@ -1124,12 +1121,8 @@ static void demux_close_lavf(demuxer_t *demuxer)
             av_freep(&priv->pb->buffer);
         av_freep(&priv->pb);
         for (int n = 0; n < priv->num_streams; n++) {
-            if (priv->streams[n]) {
-                avcodec_free_context(&priv->streams[n]->codec->lav_headers);
-#if HAVE_AVCODEC_HAS_CODECPAR
+            if (priv->streams[n])
                 avcodec_parameters_free(&priv->streams[n]->codec->lav_codecpar);
-#endif
-            }
         }
         if (priv->own_stream)
             free_stream(priv->stream);

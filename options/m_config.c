@@ -29,16 +29,13 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#if HAVE_FNMATCH
-#include <fnmatch.h>
-#endif
-
 #include "libmpv/client.h"
 
 #include "mpv_talloc.h"
 
 #include "m_config.h"
 #include "options/m_option.h"
+#include "common/common.h"
 #include "common/global.h"
 #include "common/msg.h"
 #include "common/msg_control.h"
@@ -268,6 +265,39 @@ struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
     return m_config_new(talloc_ctx, log, 0, desc->priv_defaults, desc->options);
 }
 
+static struct m_config_group *find_group(struct mpv_global *global,
+                                         const struct m_option *cfg)
+{
+    struct m_config_shadow *shadow = global->config;
+    struct m_config *root = shadow->root;
+
+    for (int n = 0; n < root->num_groups; n++) {
+        if (cfg && root->groups[n].group && root->groups[n].group->opts == cfg)
+            return &root->groups[n];
+    }
+
+    return NULL;
+}
+
+// Allocate a priv struct that is backed by global options (like AOs and VOs,
+// anything that uses m_obj_list.use_global_options == true).
+// The result contains a snapshot of the current option values of desc->options.
+// For convenience, desc->options can be NULL; then priv struct is allocated
+// with just zero (or priv_defaults if set).
+void *m_config_group_from_desc(void *ta_parent, struct mp_log *log,
+        struct mpv_global *global, struct m_obj_desc *desc, const char *name)
+{
+    struct m_config_group *group = find_group(global, desc->options);
+    if (group) {
+        return mp_get_config_group(ta_parent, global, group->group);
+    } else {
+        void *d = talloc_zero_size(ta_parent, desc->priv_size);
+        if (desc->priv_defaults)
+            memcpy(d, desc->priv_defaults, desc->priv_size);
+        return d;
+    }
+}
+
 static struct m_config_option *m_config_find_negation_opt(struct m_config *config,
                                                           struct bstr *name);
 
@@ -277,40 +307,8 @@ static int m_config_set_obj_params(struct m_config *config, struct mp_log *log,
 {
     for (int n = 0; args && args[n * 2 + 0]; n++) {
         bstr opt = bstr0(args[n * 2 + 0]);
-        const char *val = args[n * 2 + 1];
-        struct m_config_option *co = m_config_get_co(config, opt);
-        if (!co) {
-            co = m_config_find_negation_opt(config, &opt);
-            if (!co)
-                continue;
-
-            if (val && val[0])
-                return -1; // no parameter allowed
-
-            val = "no";
-        }
-        struct m_config *target = config;
-        bool is_legacy = co->opt->type == &m_option_type_subopt_legacy;
-        bool force_legacy = !!desc->legacy_prefix;
-        if (is_legacy || force_legacy) {
-            // Legacy: redirect deprecated sub-options to global ones.
-            char tmp[100];
-            const char *newopt;
-            if (is_legacy) {
-                newopt = co->opt->priv;
-            } else {
-                snprintf(tmp, sizeof(tmp), "%s-%.*s", desc->legacy_prefix,
-                         BSTR_P(opt));
-                newopt = tmp;
-            }
-            assert(global);
-            target = mp_get_root_config(global);
-            mp_warn(log, "Using suboptions is deprecated. Use the global '--%s' "
-                         "option instead of '%.*s' suboption.\n", newopt,
-                         BSTR_P(opt));
-            opt = bstr0(newopt);
-        }
-        if (m_config_set_option(target, opt, bstr0(val)) < 0)
+        bstr val = bstr0(args[n * 2 + 1]);
+        if (m_config_set_option(config, opt, val) < 0)
             return -1;
     }
 
@@ -334,21 +332,6 @@ struct m_config *m_config_from_obj_desc_and_args(void *ta_parent,
     if (m_config_set_obj_params(config, log, global, desc, args) < 0)
         goto error;
 
-    if (desc->legacy_prefix) {
-        assert(global);
-        struct m_config *root = mp_get_root_config(global);
-        // In this mode, the AO/VO will still access the options via its priv
-        // struct (like with real sub-options). We have to copy them over.
-        for (int n = 0; n < config->num_opts; n++) {
-            struct m_config_option *co = &config->opts[n];
-            char opt[100];
-            snprintf(opt, sizeof(opt), "%s-%s", desc->legacy_prefix, co->name);
-            struct m_config_option *g = m_config_get_co_raw(root, bstr0(opt));
-            assert(g);
-            m_option_copy(co->opt, co->data, g->data);
-        }
-    }
-
     return config;
 error:
     talloc_free(config);
@@ -357,8 +340,6 @@ error:
 
 static void ensure_backup(struct m_config *config, struct m_config_option *co)
 {
-    if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD)
-        return;
     if (!co->data)
         return;
     for (struct m_opt_backup *cur = config->backup_opts; cur; cur = cur->next) {
@@ -457,34 +438,83 @@ static void add_sub_options(struct m_config *config,
     };
 
     struct m_config_option next = {
-        .name = parent ? parent->name : "",
+        .name = "",
         .group = group,
     };
+    if (parent && parent->name && parent->name[0])
+        next.name = parent->name;
+    if (subopts->prefix && subopts->prefix[0]) {
+        assert(next.name);
+        next.name = subopts->prefix;
+    }
     add_options(config, &next, new_optstruct, new_optstruct_def, subopts->opts);
 }
 
-static void add_global_subopts(struct m_config *config,
-                               const struct m_obj_list *list)
+#define MAX_VO_AO 16
+
+struct group_entry {
+    const struct m_obj_list *entry;
+    struct m_sub_options subs[MAX_VO_AO];
+    bool initialized;
+};
+
+static struct group_entry g_groups[2]; // limited by max. m_obj_list overall
+static int g_num_groups = 0;
+static pthread_mutex_t g_group_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static const struct m_sub_options *get_cached_group(const struct m_obj_list *list,
+                                                    int n, struct m_sub_options *v)
+{
+    pthread_mutex_lock(&g_group_mutex);
+
+    struct group_entry *group = NULL;
+    for (int i = 0; i < g_num_groups; i++) {
+        if (g_groups[i].entry == list) {
+            group = &g_groups[i];
+            break;
+        }
+    }
+    if (!group) {
+        assert(g_num_groups < MP_ARRAY_SIZE(g_groups));
+        group = &g_groups[g_num_groups++];
+        group->entry = list;
+    }
+
+    if (!group->initialized) {
+        if (!v) {
+            n = -1;
+            group->initialized = true;
+        } else {
+            assert(n < MAX_VO_AO); // simply increase this if it fails
+            group->subs[n] = *v;
+        }
+    }
+
+    pthread_mutex_unlock(&g_group_mutex);
+
+    return n >= 0 ? &group->subs[n] : NULL;
+}
+
+static void init_obj_settings_list(struct m_config *config,
+                                   const struct m_obj_list *list)
 {
     struct m_obj_desc desc;
     for (int n = 0; ; n++) {
-        if (!list->get_desc(&desc, n))
+        if (!list->get_desc(&desc, n)) {
+            if (list->use_global_options)
+                get_cached_group(list, n, NULL);
             break;
+        }
         if (desc.global_opts)
             add_sub_options(config, NULL, desc.global_opts);
-        if (desc.legacy_prefix && desc.options) {
-            // Legacy: auto-add sub-options as global options (using the prefix).
-            struct m_config_option parent = {
-                .name = desc.legacy_prefix,
-                .group = 0,
-            };
-            struct m_sub_options *conf = talloc(config, struct m_sub_options);
-            *conf = (struct m_sub_options){
+        if (list->use_global_options && desc.options) {
+            struct m_sub_options conf = {
+                .prefix = desc.options_prefix,
                 .opts = desc.options,
                 .defaults = desc.priv_defaults,
                 .size = desc.priv_size,
             };
-            add_sub_options(config, &parent, conf);
+            add_sub_options(config, NULL, get_cached_group(list, n, &conf));
         }
     }
 }
@@ -517,6 +547,8 @@ static void m_config_add_option(struct m_config *config,
         .name = arg->name,
         .shadow_offset = -1,
         .group = parent ? parent->group : 0,
+        .default_data = &default_value,
+        .is_hidden = !!arg->deprecation_message,
     };
 
     if (arg->offset >= 0) {
@@ -524,21 +556,10 @@ static void m_config_add_option(struct m_config *config,
             co.data = (char *)optstruct + arg->offset;
         if (optstruct_def)
             co.default_data = (char *)optstruct_def + arg->offset;
-        int size = arg->type->size;
-        if (optstruct && size) {
-            // The required alignment is unknown, so go with the minimum C
-            // could require. Slightly wasteful, but not that much.
-            int align = (size - config->shadow_size % size) % size;
-            co.shadow_offset = config->shadow_size + align;
-            config->shadow_size = co.shadow_offset + size;
-        }
     }
 
     if (arg->defval)
         co.default_data = arg->defval;
-
-    if (!co.default_data)
-        co.default_data = &default_value;
 
     // Fill in the full name
     if (!co.name[0]) {
@@ -547,25 +568,28 @@ static void m_config_add_option(struct m_config *config,
         co.name = talloc_asprintf(config, "%s-%s", parent_name, co.name);
     }
 
-    if (co.opt->deprecation_message)
-        co.is_hidden = true;
-
-    // Option with children -> add them
-    if (arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
+    if (arg->type == &m_option_type_subconfig) {
         const struct m_sub_options *subopts = arg->priv;
         add_sub_options(config, &co, subopts);
     } else {
+        int size = arg->type->size;
+        if (optstruct && size) {
+            // The required alignment is unknown, so go with the maximum C
+            // could require. Slightly wasteful, but not that much.
+            int align = (size - config->shadow_size % size) % size;
+            co.shadow_offset = config->shadow_size + align;
+            config->shadow_size = co.shadow_offset + size;
+        }
+
         // Initialize options
         if (co.data && co.default_data)
             init_opt_inplace(arg, co.data, co.default_data);
-    }
 
-    // (The deprecation_message check is a hack to exclude --vo-defaults etc.)
-    if (arg->type == &m_option_type_obj_settings_list && !arg->deprecation_message)
-        add_global_subopts(config, (const struct m_obj_list *)arg->priv);
-
-    if (arg->name[0]) // no own name -> hidden
         MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
+
+        if (arg->type == &m_option_type_obj_settings_list)
+            init_obj_settings_list(config, (const struct m_obj_list *)arg->priv);
+    }
 }
 
 struct m_config_option *m_config_get_co_raw(const struct m_config *config,
@@ -745,9 +769,6 @@ int m_config_set_option_raw(struct m_config *config, struct m_config_option *co,
     }
 }
 
-static int parse_subopts(struct m_config *config, char *name, char *prefix,
-                         struct bstr param, int flags);
-
 // Used to turn "--no-foo" into "--foo=no".
 static struct m_config_option *m_config_find_negation_opt(struct m_config *config,
                                                           struct bstr *name)
@@ -811,22 +832,9 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
     if (bstr_equals0(name, "list-options"))
         return list_options(config, bstr0("*"), false);
 
-    // Option with children are a bit different to parse
-    if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD) {
-        char prefix[110];
-        if (!config->subopt_deprecation_warning) {
-            MP_WARN(config, "Suboptions (--%.*s=...) are deprecated. Use "
-                    "flat options instead.\n", BSTR_P(name));
-            config->subopt_deprecation_warning = true;
-        }
-        assert(strlen(co->name) < 100);
-        sprintf(prefix, "%s-", co->name);
-        return parse_subopts(config, (char *)co->name, prefix, param, flags);
-    }
-
     union m_option_value val = {0};
 
-    // Some option tpyes are "impure" and work on the existing data.
+    // Some option types are "impure" and work on the existing data.
     // (Prime examples: --vf-add, --sub-file)
     if (co->data)
         m_option_copy(co->opt, &val, co->data);
@@ -838,48 +846,6 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
 
     m_option_free(co->opt, &val);
 
-    return r;
-}
-
-static int parse_subopts(struct m_config *config, char *name, char *prefix,
-                         struct bstr param, int flags)
-{
-    char **lst = NULL;
-    // Split the argument into child options
-    int r = m_option_type_subconfig.parse(config->log, NULL, bstr0(""), param, &lst);
-    if (r < 0)
-        return r;
-    // Parse the child options
-    for (int i = 0; lst && lst[2 * i]; i++) {
-        // Build the full name
-        char n[110];
-        if (snprintf(n, 110, "%s%s", prefix, lst[2 * i]) > 100)
-            abort();
-        r = m_config_parse_option(config,bstr0(n), bstr0(lst[2 * i + 1]), flags);
-        if (r < 0) {
-            if (r != M_OPT_EXIT) {
-                MP_ERR(config, "Error parsing suboption %s/%s (%s)\n",
-                       name, lst[2 * i], m_option_strerror(r));
-                r = M_OPT_INVALID;
-            }
-            break;
-        }
-    }
-    talloc_free(lst);
-    return r;
-}
-
-int m_config_parse_suboptions(struct m_config *config, char *name,
-                              char *subopts)
-{
-    if (!subopts || !*subopts)
-        return 0;
-    int r = parse_subopts(config, name, "", bstr0(subopts), 0);
-    if (r < 0 && r != M_OPT_EXIT) {
-        MP_ERR(config, "Error parsing suboption %s (%s)\n",
-               name, m_option_strerror(r));
-        r = M_OPT_INVALID;
-    }
     return r;
 }
 
@@ -984,14 +950,10 @@ void m_config_print_option_list(const struct m_config *config, const char *name)
     for (int i = 0; i < config->num_opts; i++) {
         struct m_config_option *co = &sorted[i];
         const struct m_option *opt = co->opt;
-        if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
-            continue;
         if (co->is_hidden)
             continue;
-#if HAVE_FNMATCH
-        if (fnmatch(name, co->name, 0))
+        if (strcmp(name, "*") != 0 && !strstr(co->name, name))
             continue;
-#endif
         MP_INFO(config, " %s%-30s", prefix, co->name);
         if (opt->type == &m_option_type_choice) {
             MP_INFO(config, " Choices:");
@@ -1038,9 +1000,6 @@ char **m_config_list_options(void *ta_parent, const struct m_config *config)
     int count = 0;
     for (int i = 0; i < config->num_opts; i++) {
         struct m_config_option *co = &config->opts[i];
-        const struct m_option *opt = co->opt;
-        if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
-            continue;
         if (co->is_hidden)
             continue;
         // For use with CONF_TYPE_STRING_LIST, it's important not to set list

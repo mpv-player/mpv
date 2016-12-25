@@ -28,8 +28,6 @@
 @property(nonatomic, assign) BOOL clearing;
 @property(nonatomic, assign) BOOL hasMouseDown;
 @property(nonatomic, retain) NSTrackingArea *tracker;
-- (BOOL)hasDock:(NSScreen*)screen;
-- (BOOL)hasMenubar:(NSScreen*)screen;
 - (int)mpvButtonNumber:(NSEvent*)event;
 - (void)mouseDownEvent:(NSEvent *)event;
 - (void)mouseUpEvent:(NSEvent *)event;
@@ -41,7 +39,8 @@
 @synthesize tracker = _tracker;
 @synthesize hasMouseDown = _mouse_down;
 
-- (id)initWithFrame:(NSRect)frame {
+- (id)initWithFrame:(NSRect)frame
+{
     self = [super initWithFrame:frame];
     if (self) {
         [self registerForDraggedTypes:@[NSFilenamesPboardType,
@@ -49,54 +48,6 @@
         [self setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
     }
     return self;
-}
-
-- (void)setFullScreen:(BOOL)willBeFullscreen
-{
-    if (willBeFullscreen && ![self isInFullScreenMode]) {
-        NSApplicationPresentationOptions popts =
-            NSApplicationPresentationDefault;
-
-        if ([self hasMenubar:[self.adapter fsScreen]])
-            // Cocoa raises an exception when autohiding the menubar but
-            // not the dock. They probably got bored while programming the
-            // multi screen support and took some shortcuts (tested on 10.8).
-            popts |= NSApplicationPresentationAutoHideMenuBar |
-                     NSApplicationPresentationAutoHideDock;
-
-        if ([self hasDock:[self.adapter fsScreen]])
-            popts |= NSApplicationPresentationAutoHideDock;
-
-        NSDictionary *fsopts = @{
-            NSFullScreenModeAllScreens : @([self.adapter fsModeAllScreens]),
-            NSFullScreenModeApplicationPresentationOptions : @(popts)
-        };
-
-        // The original "windowed" window will stay around since sending a
-        // view fullscreen wraps it in another window. This is noticeable when
-        // sending the View fullscreen to another screen. Make it go away
-        // manually.
-        [self.window orderOut:self];
-
-        [self enterFullScreenMode:[self.adapter fsScreen]
-                                  withOptions:fsopts];
-    }
-
-    if (!willBeFullscreen && [self isInFullScreenMode]) {
-        [self exitFullScreenModeWithOptions:nil];
-
-        // Show the "windowed" window again.
-        [self.window makeKeyAndOrderFront:self];
-        [self.window makeFirstResponder:self];
-    }
-}
-
-- (void)clear
-{
-    if ([self isInFullScreenMode]) {
-        self.clearing = YES;
-        [self exitFullScreenModeWithOptions:nil];
-    }
 }
 
 // mpv uses flipped coordinates, because X11 uses those. So let's just use them
@@ -146,21 +97,25 @@
 {
     return [self.adapter mouseEnabled];
 }
-- (BOOL)acceptsFirstResponder {
+- (BOOL)acceptsFirstResponder
+{
     return [self.adapter keyboardEnabled] || [self.adapter mouseEnabled];
 }
 
-- (BOOL)becomeFirstResponder {
+- (BOOL)becomeFirstResponder
+{
     return [self.adapter keyboardEnabled] || [self.adapter mouseEnabled];
 }
 
 - (BOOL)resignFirstResponder { return YES; }
 
-- (void)keyDown:(NSEvent *)event {
+- (void)keyDown:(NSEvent *)event
+{
     [self.adapter putKeyEvent:event];
 }
 
-- (void)keyUp:(NSEvent *)event {
+- (void)keyUp:(NSEvent *)event
+{
     [self.adapter putKeyEvent:event];
 }
 
@@ -348,10 +303,11 @@
     NSPasteboard *pboard = [sender draggingPasteboard];
     NSArray *types = [pboard types];
     if ([types containsObject:NSFilenamesPboardType] ||
-        [types containsObject:NSURLPboardType])
+        [types containsObject:NSURLPboardType]) {
         return NSDragOperationCopy;
-    else
+    } else {
         return NSDragOperationNone;
+    }
 }
 
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
@@ -362,7 +318,11 @@
                             options:@{}];
         NSMutableArray* ar = [[[NSMutableArray alloc] init] autorelease];
         for (NSURL* url in pbitems) {
-            [ar addObject:[url path]];
+            if (url.fileURL) {
+                [ar addObject:[url path]];
+            } else {
+                [ar addObject:[url absoluteString]];
+            }
         }
         [self.adapter handleFilesArray:ar];
         return YES;
@@ -372,27 +332,6 @@
         return YES;
     }
     return NO;
-}
-
-- (BOOL)hasDock:(NSScreen*)screen
-{
-    NSRect vF = [screen visibleFrame];
-    NSRect f  = [screen frame];
-    return
-        // The visible frame's width is smaller: dock is on left or right end
-        // of this method's receiver.
-        vF.size.width < f.size.width ||
-        // The visible frame's veritical origin is bigger: dock is
-        // on the bottom of this method's receiver.
-        vF.origin.y > f.origin.y;
-
-}
-
-- (BOOL)hasMenubar:(NSScreen*)screen
-{
-    NSRect vF = [screen visibleFrame];
-    NSRect f  = [screen frame];
-    return f.size.height + f.origin.y > vF.size.height + vF.origin.y;
 }
 
 - (int)mpvButtonNumber:(NSEvent*)event

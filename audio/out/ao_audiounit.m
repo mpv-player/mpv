@@ -195,7 +195,4 @@ const struct ao_driver audio_out_audiounit = {
     .pause          = stop,
     .resume         = start,
     .priv_size      = sizeof(struct priv),
-    .options = (const struct m_option[]){
-        {0}
-    },
 };

@@ -320,7 +320,7 @@ static void DropTarget_Init(DropTarget* This, struct vo_w32_state *w32)
 
 static void add_window_borders(HWND hwnd, RECT *rc)
 {
-    AdjustWindowRect(rc, GetWindowLong(hwnd, GWL_STYLE), 0);
+    AdjustWindowRect(rc, GetWindowLongPtrW(hwnd, GWL_STYLE), 0);
 }
 
 // basically a reverse AdjustWindowRect (win32 doesn't appear to have this)
@@ -727,7 +727,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         signal_events(w32, VO_EVENT_WIN_STATE);
 
         update_display_info(w32);  // if we moved between monitors
-        MP_VERBOSE(w32, "move window: %d:%d\n", w32->window_x, w32->window_y);
+        MP_DBG(w32, "move window: %d:%d\n", w32->window_x, w32->window_y);
         break;
     }
     case WM_SIZE: {
@@ -1112,10 +1112,15 @@ static void update_screen_rect(struct vo_w32_state *w32)
 
 static DWORD update_style(struct vo_w32_state *w32, DWORD style)
 {
-    const DWORD NO_FRAME = WS_OVERLAPPED;
-    const DWORD FRAME = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
-    style &= ~(NO_FRAME | FRAME);
-    style |= (w32->opts->border && !w32->current_fs) ? FRAME : NO_FRAME;
+    const DWORD NO_FRAME = WS_OVERLAPPED | WS_MINIMIZEBOX;
+    const DWORD FRAME = WS_OVERLAPPEDWINDOW;
+    const DWORD FULLSCREEN = NO_FRAME | WS_SYSMENU;
+    style &= ~(NO_FRAME | FRAME | FULLSCREEN);
+    if (w32->current_fs) {
+        style |= FULLSCREEN;
+    } else {
+        style |= w32->opts->border ? FRAME : NO_FRAME;
+    }
     return style;
 }
 
@@ -1137,7 +1142,7 @@ static void reinit_window_state(struct vo_w32_state *w32)
                                            w32->window, w32->current_fs);
     }
 
-    DWORD style = update_style(w32, GetWindowLong(w32->window, GWL_STYLE));
+    DWORD style = update_style(w32, GetWindowLongPtrW(w32->window, GWL_STYLE));
 
     if (w32->opts->ontop)
         layer = HWND_TOPMOST;
@@ -1180,7 +1185,7 @@ static void reinit_window_state(struct vo_w32_state *w32)
     r.top = w32->window_y;
     r.bottom = r.top + w32->dh;
 
-    SetWindowLong(w32->window, GWL_STYLE, style);
+    SetWindowLongPtrW(w32->window, GWL_STYLE, style);
 
     RECT cr = r;
     add_window_borders(w32->window, &r);

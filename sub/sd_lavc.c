@@ -263,13 +263,8 @@ static void read_sub_bitmaps(struct sd *sd, struct sub *sub)
         struct sub_bitmap *b = &sub->inbitmaps[i];
         struct pos pos = priv->packer->result[i];
         struct AVSubtitleRect *r = b->bitmap;
-#if HAVE_AV_SUBTITLE_NOPICT
         uint8_t **data = r->data;
         int *linesize = r->linesize;
-#else
-        uint8_t **data = r->pict.data;
-        int *linesize = r->pict.linesize;
-#endif
         b->w = r->w;
         b->h = r->h;
         b->x = r->x;

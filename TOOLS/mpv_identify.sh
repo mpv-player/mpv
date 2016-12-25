@@ -67,13 +67,12 @@ EOF
         chapters
         editions
         titles
+        duration
 
         audio
         audio-bitrate
         audio-codec
-        audio-format
-        channels
-        samplerate
+        audio-codec-name
 
         video
         angle

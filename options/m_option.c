@@ -1662,10 +1662,7 @@ const m_option_type_t m_option_type_print_fn = {
     .parse = parse_print,
 };
 
-
-/////////////////////// Subconfig
 #undef VAL
-#define VAL(x) (*(char ***)(x))
 
 // Read s sub-option name, or a positional sub-opt value.
 // termset is a string containing the set of chars that terminate an option.
@@ -1749,50 +1746,6 @@ static int split_subconf(struct mp_log *log, bstr optname, bstr *str,
     *out_val = subparam;
     return 0;
 }
-
-static int parse_subconf(struct mp_log *log, const m_option_t *opt,
-                         struct bstr name, struct bstr param, void *dst)
-{
-    int nr = 0;
-    char **lst = NULL;
-
-    if (param.len == 0)
-        return M_OPT_MISSING_PARAM;
-
-    struct bstr p = param;
-
-    while (p.len) {
-        bstr subopt, subparam;
-        int r = split_subconf(log, name, &p, &subopt, &subparam);
-        if (r < 0)
-            return r;
-        if (bstr_startswith0(p, ":"))
-            p = bstr_cut(p, 1);
-        else if (p.len > 0) {
-            mp_err(log, "Incorrect termination for '%.*s'\n", BSTR_P(subopt));
-            return M_OPT_INVALID;
-        }
-
-        if (dst) {
-            lst = talloc_realloc(NULL, lst, char *, 2 * (nr + 2));
-            lst[2 * nr] = bstrto0(lst, subopt);
-            lst[2 * nr + 1] = bstrto0(lst, subparam);
-            memset(&lst[2 * (nr + 1)], 0, 2 * sizeof(char *));
-            nr++;
-        }
-    }
-
-    if (dst)
-        VAL(dst) = lst;
-
-    return 1;
-}
-
-const m_option_type_t m_option_type_subconfig = {
-    .name = "Subconfig",
-    .flags = M_OPT_TYPE_HAS_CHILD,
-    .parse = parse_subconf,
-};
 
 #undef VAL
 
@@ -2719,7 +2672,8 @@ static int get_obj_param(struct mp_log *log, bstr opt_name, bstr obj_name,
 static int m_obj_parse_sub_config(struct mp_log *log, struct bstr opt_name,
                                   struct bstr name, struct bstr *pstr,
                                   struct m_config *config, int flags, bool nopos,
-                                  struct m_obj_desc *desc, char ***ret)
+                                  struct m_obj_desc *desc,
+                                  const struct m_obj_list *list, char ***ret)
 {
     int nold = 0;
     char **args = NULL;
@@ -2737,6 +2691,16 @@ static int m_obj_parse_sub_config(struct mp_log *log, struct bstr opt_name,
         r = split_subconf(log, opt_name, pstr, &fname, &fval);
         if (r < 0)
             goto exit;
+
+        if (list->use_global_options) {
+            mp_err(log, "Option %.*s: this option does not accept sub-options.\n",
+                   BSTR_P(opt_name));
+            mp_err(log, "Sub-options for --vo and --ao were removed from mpv in "
+                   "release 0.23.0.\nSee https://0x0.st/uM for details.\n");
+            r = M_OPT_INVALID;
+            goto exit;
+        }
+
         if (bstr_equals0(fname, "help"))
             goto print_help;
         r = get_obj_param(log, opt_name, name, config, fname, fval, flags,
@@ -2831,7 +2795,7 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt,
         struct m_config *config = m_config_from_obj_desc_noalloc(NULL, log, &desc);
         bstr s = bstr0(desc.init_options);
         m_obj_parse_sub_config(log, opt, str, &s, config,
-                               M_SETOPT_CHECK_ONLY, nopos, NULL, &plist);
+                               M_SETOPT_CHECK_ONLY, nopos, NULL, list, &plist);
         assert(s.len == 0);
         talloc_free(config);
     }
@@ -2841,7 +2805,7 @@ static int parse_obj_settings(struct mp_log *log, struct bstr opt,
         if (!skip)
             config = m_config_from_obj_desc_noalloc(NULL, log, &desc);
         r = m_obj_parse_sub_config(log, opt, str, pstr, config,
-                                   M_SETOPT_CHECK_ONLY, nopos, &desc,
+                                   M_SETOPT_CHECK_ONLY, nopos, &desc, list,
                                    _ret ? &plist : NULL);
         talloc_free(config);
         if (r < 0)
@@ -3359,13 +3323,6 @@ const m_option_type_t m_option_type_alias = {
 const m_option_type_t m_option_type_removed = {
     .name  = "removed",
 };
-
-static int parse_dummy(struct mp_log *log, const m_option_t *opt,
-                       struct bstr name, struct bstr param, void *dst)
-{
-    return 1;
-}
-const m_option_type_t m_option_type_subopt_legacy = {
-    .name  = "legacy suboption",
-    .parse = parse_dummy,
+const m_option_type_t m_option_type_subconfig = {
+    .name = "Subconfig",
 };

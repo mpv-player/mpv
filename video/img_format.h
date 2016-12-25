@@ -151,8 +151,10 @@ enum mp_imgfmt {
     IMGFMT_NV12,
     IMGFMT_NV21,
 
-    // Like IMGFMT_NV12, but with 16 bits per component
+    // Like IMGFMT_NV12, but with 10 bits per component (and 6 bits of padding)
     IMGFMT_P010,
+    // Like IMGFMT_NV12, but with 16 bits per component
+    IMGFMT_P016,
 
     // RGB/BGR Formats
 

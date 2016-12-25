@@ -386,6 +386,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->fields = src->fields;
     dst->pts = src->pts;
     dst->dts = src->dts;
+    dst->pkt_duration = src->pkt_duration;
     dst->params.rotate = src->params.rotate;
     dst->params.stereo_in = src->params.stereo_in;
     dst->params.stereo_out = src->params.stereo_out;
@@ -744,9 +745,7 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame)
     mp_image_copy_fields_from_av_frame(&t, av_frame);
     for (int p = 0; p < MP_MAX_PLANES; p++)
         t.bufs[p] = av_frame->buf[p];
-#if HAVE_AVUTIL_HAS_HWCONTEXT
     t.hwctx = av_frame->hw_frames_ctx;
-#endif
     return mp_image_new_ref(&t);
 }
 
@@ -763,9 +762,7 @@ struct AVFrame *mp_image_to_av_frame(struct mp_image *img)
     mp_image_copy_fields_to_av_frame(frame, new_ref);
     for (int p = 0; p < MP_MAX_PLANES; p++)
         frame->buf[p] = new_ref->bufs[p];
-#if HAVE_AVUTIL_HAS_HWCONTEXT
     frame->hw_frames_ctx = new_ref->hwctx;
-#endif
     *new_ref = (struct mp_image){0};
     talloc_free(new_ref);
     return frame;

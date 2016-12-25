@@ -128,6 +128,8 @@ typedef struct mkv_track {
     AVCodecParserContext *av_parser;
     AVCodecContext *av_parser_codec;
 
+    bool require_keyframes;
+
     /* stuff for realaudio braincancer */
     double ra_pts;              /* previous audio timestamp */
     uint32_t sub_packet_size;   ///< sub packet size, per stream
@@ -200,7 +202,7 @@ typedef struct mkv_demuxer {
 
     bool index_has_durations;
 
-    bool eof_warning;
+    bool eof_warning, keyframe_warning;
 
     struct block_info tmp_block;
 } mkv_demuxer_t;
@@ -1511,7 +1513,7 @@ static void parse_flac_chmap(struct mp_chmap *channels, unsigned char *data,
 }
 
 static const char *const mkv_audio_tags[][2] = {
-    { "A_MPEG/L2",              "mp3" },
+    { "A_MPEG/L2",              "mp2" },
     { "A_MPEG/L3",              "mp3" },
     { "A_AC3",                  "ac3" },
     { "A_EAC3",                 "eac3" },
@@ -1701,7 +1703,9 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         mp_chmap_set_unknown(&sh_a->channels, track->a_channels);
 
     const char *codec = sh_a->codec;
-    if (!strcmp(codec, "mp3") || !strcmp(codec, "truehd")) {
+    if (!strcmp(codec, "mp2") || !strcmp(codec, "mp3") ||
+        !strcmp(codec, "truehd"))
+    {
         track->parse = true;
     } else if (!strcmp(codec, "flac")) {
         unsigned char *ptr = extradata;
@@ -1749,6 +1753,11 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     // 6158a3b, sample see FFmpeg ticket 2508.
     if (sh_a->samplerate == 8000 && strcmp(codec, "ac3") == 0)
         track->default_duration = 0;
+
+    // Deal with some FFmpeg-produced garbage, and assume all audio codecs can
+    // start decoding from anywhere.
+    if (strcmp(codec, "truehd") != 0)
+        track->require_keyframes = true;
 
     sh_a->extradata = extradata;
     sh_a->extradata_size = extradata_len;
@@ -2471,6 +2480,15 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
     }
 
     current_pts = tc / 1e9 - track->codec_delay;
+
+    if (track->require_keyframes && !keyframe) {
+        keyframe = true;
+        if (!mkv_d->keyframe_warning) {
+            MP_WARN(demuxer, "This is a broken file! Packets with incorrect "
+                    "keyframe flag found. Enabling workaround.\n");
+            mkv_d->keyframe_warning = true;
+        }
+    }
 
     if (track->type == MATROSKA_TRACK_AUDIO) {
         if (mkv_d->a_skip_to_keyframe)

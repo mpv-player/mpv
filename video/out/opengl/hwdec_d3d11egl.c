@@ -32,7 +32,7 @@
 #include "video/decode/d3d.h"
 
 #ifndef EGL_D3D_TEXTURE_SUBRESOURCE_ID_ANGLE
-#define EGL_D3D_TEXTURE_SUBRESOURCE_ID_ANGLE 0x3AAB
+#define EGL_D3D_TEXTURE_SUBRESOURCE_ID_ANGLE 0x33AB
 #endif
 
 struct priv {

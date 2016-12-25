@@ -869,9 +869,6 @@ static void uninit(struct vo *vo)
 
 static int preinit(struct vo *vo)
 {
-    MP_WARN(vo, "This VO is deprecated! Use --vo=opengl instead (which has "
-                "the same features and which is the default).\n");
-
     struct priv *p = vo->priv;
 
     p->background_layer = p->layer;
@@ -933,5 +930,5 @@ const struct vo_driver video_out_rpi = {
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
     .options = options,
-    .legacy_prefix = "rpi",
+    .options_prefix = "rpi",
 };

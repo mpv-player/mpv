@@ -22,7 +22,8 @@
 @implementation MpvVideoView
 @synthesize adapter = _adapter;
 
-- (id)initWithFrame:(NSRect)frame {
+- (id)initWithFrame:(NSRect)frame
+{
     self = [super initWithFrame:frame];
     if (self) {
         [self setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];

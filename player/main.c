@@ -96,7 +96,7 @@ const char mp_help_text[] =
 " --playlist=<file> specify playlist file\n"
 "\n"
 " --list-options    list all mpv options\n"
-" --h=<pat>         print options which match the given shell pattern\n"
+" --h=<string>      print options which contain the given string in their name\n"
 "\n";
 
 static pthread_mutex_t terminal_owner_lock = PTHREAD_MUTEX_INITIALIZER;

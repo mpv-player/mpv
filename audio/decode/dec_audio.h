@@ -59,4 +59,7 @@ int audio_get_frame(struct dec_audio *d_audio, struct mp_audio **out_frame);
 
 void audio_reset_decoding(struct dec_audio *d_audio);
 
+// ad_spdif.c
+struct mp_decoder_list *select_spdif_codec(const char *codec, const char *pref);
+
 #endif /* MPLAYER_DEC_AUDIO_H */

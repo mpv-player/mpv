@@ -53,7 +53,6 @@ extern const m_option_type_t m_option_type_choice;
 extern const m_option_type_t m_option_type_flags;
 extern const m_option_type_t m_option_type_msglevels;
 extern const m_option_type_t m_option_type_print_fn;
-extern const m_option_type_t m_option_type_subconfig;
 extern const m_option_type_t m_option_type_imgfmt;
 extern const m_option_type_t m_option_type_fourcc;
 extern const m_option_type_t m_option_type_afmt;
@@ -63,11 +62,11 @@ extern const m_option_type_t m_option_type_size_box;
 extern const m_option_type_t m_option_type_channels;
 extern const m_option_type_t m_option_type_aspect;
 extern const m_option_type_t m_option_type_node;
-extern const m_option_type_t m_option_type_subopt_legacy;
 
 // Used internally by m_config.c
 extern const m_option_type_t m_option_type_alias;
 extern const m_option_type_t m_option_type_removed;
+extern const m_option_type_t m_option_type_subconfig;
 
 // Callback used by m_option_type_print_fn options.
 typedef void (*m_opt_print_fn)(struct mp_log *log);
@@ -117,6 +116,8 @@ struct m_obj_desc {
     const void *priv_defaults;
     // Options which refer to members in the private struct
     const struct m_option *options;
+    // Prefix for each of the above options (none if NULL).
+    const char *options_prefix;
     // For free use by the implementer of m_obj_list.get_desc
     const void *p;
     // If not NULL, options which should be set before applying other options.
@@ -132,10 +133,6 @@ struct m_obj_desc {
     const char *replaced_name;
     // For convenience: these are added as global command-line options.
     const struct m_sub_options *global_opts;
-    // Evil hack to essentially force-move .options to global_opts. All options
-    // will be added as global options with the given prefix, and using
-    // sub-options will be treated as deprecated and redirected.
-    const char *legacy_prefix;
 };
 
 // Extra definition needed for \ref m_option_type_obj_settings_list options.
@@ -151,6 +148,8 @@ struct m_obj_list {
     bool allow_unknown_entries;
     // This helps with confusing error messages if unknown flag options are used.
     bool disallow_positional_parameters;
+    // Each sub-item is backed by global options (for AOs and VOs).
+    bool use_global_options;
 };
 
 // Find entry by name
@@ -188,6 +187,7 @@ typedef int (*m_opt_string_validate_fn)(struct mp_log *log, const m_option_t *op
 
 // m_option.priv points to this if OPT_SUBSTRUCT is used
 struct m_sub_options {
+    const char *prefix;
     const struct m_option *opts;
     size_t size;
     const void *defaults;
@@ -405,16 +405,6 @@ struct m_option {
 #define CONF_PRE_PARSE          M_OPT_PRE_PARSE
 
 // These flags are used to describe special parser capabilities or behavior.
-
-// Suboption parser flag.
-/** When this flag is set, m_option::p should point to another m_option
- *  array. Only the parse function will be called. If dst is set, it should
- *  create/update an array of char* containg opt/val pairs. The options in
- *  the child array will then be set automatically by the \ref Config.
- *  Also note that suboptions may be directly accessed by using
- *  -option:subopt blah.
- */
-#define M_OPT_TYPE_HAS_CHILD            (1 << 0)
 
 // Wildcard matching flag.
 /** If set the option type has a use for option names ending with a *
@@ -714,12 +704,6 @@ extern const char m_option_path_separator;
                        .type = &m_option_type_subconfig,        \
                        .priv = (void*)&subconf)
 
-// Same as above, but for legacy suboption usage, which have no associated
-// field (no actual data anywhere).
-#define OPT_SUBSTRUCT_LEGACY(optname, subconf)                      \
-    {.name = optname, .offset = -1, .type = &m_option_type_subconfig,      \
-     .priv = (void*)&subconf}
-
 // Provide a another name for the option.
 #define OPT_ALIAS(optname, newname) \
     {.name = optname, .type = &m_option_type_alias, .priv = newname, \
@@ -735,11 +719,5 @@ extern const char m_option_path_separator;
 #define OPT_REMOVED(optname, msg) \
     {.name = optname, .type = &m_option_type_removed, .priv = msg, \
      .deprecation_message = "", .offset = -1}
-
-// Redirect a suboption (e.g. from --vo) to a global option. The redirection
-// is handled as a special case instead of being applied automatically.
-#define OPT_SUBOPT_LEGACY(optname, globalname) \
-    {.name = optname, .type = &m_option_type_subopt_legacy, .priv = globalname, \
-     .offset = -1}
 
 #endif /* MPLAYER_M_OPTION_H */

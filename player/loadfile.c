@@ -1231,7 +1231,7 @@ terminate_playback:
 
     MP_VERBOSE(mpctx, "finished playback, %s (reason %d)\n",
                mpv_error_string(end_event.error), end_event.reason);
-    if (mpctx->error_playing == MPV_ERROR_UNKNOWN_FORMAT)
+    if (end_event.error == MPV_ERROR_UNKNOWN_FORMAT)
         MP_ERR(mpctx, "Failed to recognize file format.\n");
     MP_INFO(mpctx, "\n");
 

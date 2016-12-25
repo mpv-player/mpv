@@ -501,7 +501,6 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     avctx->pkt_timebase = ctx->codec_timebase;
 #endif
 
-    avctx->refcounted_frames = 1;
     ctx->pic = av_frame_alloc();
     if (!ctx->pic)
         goto error;
@@ -639,10 +638,10 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
         .p_w = frame->sample_aspect_ratio.num,
         .p_h = frame->sample_aspect_ratio.den,
         .color = {
-            .space = avcol_spc_to_mp_csp(ctx->avctx->colorspace),
-            .levels = avcol_range_to_mp_csp_levels(ctx->avctx->color_range),
-            .primaries = avcol_pri_to_mp_csp_prim(ctx->avctx->color_primaries),
-            .gamma = avcol_trc_to_mp_csp_trc(ctx->avctx->color_trc),
+            .space = avcol_spc_to_mp_csp(frame->colorspace),
+            .levels = avcol_range_to_mp_csp_levels(frame->color_range),
+            .primaries = avcol_pri_to_mp_csp_prim(frame->color_primaries),
+            .gamma = avcol_trc_to_mp_csp_trc(frame->color_trc),
             .sig_peak = ctx->cached_hdr_peak,
         },
         .chroma_location =
@@ -663,11 +662,9 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
         MP_VERBOSE(vd, " %s", av_get_pix_fmt_name(fmt[i]));
     MP_VERBOSE(vd, "\n");
 
-#if HAVE_AVCODEC_PROFILE_NAME
     const char *profile = avcodec_profile_name(avctx->codec_id, avctx->profile);
     MP_VERBOSE(vd, "Codec profile: %s (0x%x)\n", profile ? profile : "unknown",
                avctx->profile);
-#endif
 
     assert(ctx->hwdec);
 
@@ -794,7 +791,6 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         reset_avctx(vd);
 
     hwdec_lock(ctx);
-#if HAVE_AVCODEC_NEW_CODEC_API
     ret = avcodec_send_packet(avctx, packet ? &pkt : NULL);
     if (ret >= 0 || ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
         if (ret >= 0)
@@ -807,10 +803,6 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
     } else {
         consumed = true;
     }
-#else
-    ret = avcodec_decode_video2(avctx, ctx->pic, &got_picture, &pkt);
-    consumed = true;
-#endif
     hwdec_unlock(ctx);
 
     // Reset decoder if it was fully flushed. Caller might send more flush
@@ -864,8 +856,13 @@ static void decode(struct dec_video *vd, struct demux_packet *packet,
         return;
     }
     assert(mpi->planes[0] || mpi->planes[3]);
-    mpi->pts = mp_pts_from_av(MP_AVFRAME_DEC_PTS(ctx->pic), &ctx->codec_timebase);
+    mpi->pts = mp_pts_from_av(ctx->pic->pts, &ctx->codec_timebase);
     mpi->dts = mp_pts_from_av(ctx->pic->pkt_dts, &ctx->codec_timebase);
+
+#if LIBAVCODEC_VERSION_MICRO >= 100
+    mpi->pkt_duration =
+        mp_pts_from_av(av_frame_get_pkt_duration(ctx->pic), &ctx->codec_timebase);
+#endif
 
     struct mp_image_params params;
     update_image_params(vd, ctx->pic, &params);

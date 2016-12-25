@@ -246,13 +246,5 @@ const struct ao_driver audio_out_jack = {
     .uninit    = uninit,
     .resume    = resume,
     .priv_size = sizeof(struct priv),
-    .options = (const struct m_option[]) {
-        OPT_SUBOPT_LEGACY("port", "jack-port"),
-        OPT_SUBOPT_LEGACY("name", "jack-name"),
-        OPT_SUBOPT_LEGACY("autostart", "jack-autostart"),
-        OPT_SUBOPT_LEGACY("connect", "jack-connect"),
-        OPT_SUBOPT_LEGACY("std-channel-layout", "jack-std-channel-layout"),
-        {0}
-    },
     .global_opts = &ao_jack_conf,
 };

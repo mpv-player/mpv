@@ -142,7 +142,8 @@ static int mk_flags(NSEvent *event)
     return ([event data1] & 0x0000FFFF);
 }
 
-static  int mk_down(NSEvent *event) {
+static  int mk_down(NSEvent *event)
+{
     return (((mk_flags(event) & 0xFF00) >> 8)) == 0xA;
 }
 
@@ -178,11 +179,13 @@ static CGEventRef tap_event_callback(CGEventTapProxy proxy, CGEventType type,
     }
 }
 
-void cocoa_init_media_keys(void) {
+void cocoa_init_media_keys(void)
+{
     [[EventsResponder sharedInstance] startMediaKeys];
 }
 
-void cocoa_uninit_media_keys(void) {
+void cocoa_uninit_media_keys(void)
+{
     [[EventsResponder sharedInstance] stopMediaKeys];
 }
 
@@ -446,10 +449,11 @@ void cocoa_set_input_context(struct input_ctx *input_context)
 
     NSString *chars;
 
-    if ([self useAltGr] && RightAltPressed([event modifierFlags]))
+    if ([self useAltGr] && RightAltPressed([event modifierFlags])) {
         chars = [event characters];
-    else
+    } else {
         chars = [event charactersIgnoringModifiers];
+    }
 
     struct bstr t = bstr0([chars UTF8String]);
     int key = convert_key([event keyCode], bstr_decode_utf8(t, &t));
@@ -462,6 +466,9 @@ void cocoa_set_input_context(struct input_ctx *input_context)
 
 - (void)handleFilesArray:(NSArray *)files
 {
+    enum mp_dnd_action action = [NSEvent modifierFlags] &
+                                NSEventModifierFlagShift ? DND_APPEND : DND_REPLACE;
+
     size_t num_files  = [files count];
     char **files_utf8 = talloc_array(NULL, char*, num_files);
     [files enumerateObjectsUsingBlock:^(NSString *p, NSUInteger i, BOOL *_){
@@ -473,7 +480,7 @@ void cocoa_set_input_context(struct input_ctx *input_context)
     }];
     [_input_lock lock];
     if (_inputContext)
-        mp_event_drop_files(_inputContext, num_files, files_utf8, DND_REPLACE);
+        mp_event_drop_files(_inputContext, num_files, files_utf8, action);
     [_input_lock unlock];
     talloc_free(files_utf8);
 }

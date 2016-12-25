@@ -841,5 +841,5 @@ const struct ao_driver audio_out_pulse = {
         OPT_FLAG("latency-hacks", cfg_latency_hacks, 0),
         {0}
     },
-    .legacy_prefix = "pulse",
+    .options_prefix = "pulse",
 };

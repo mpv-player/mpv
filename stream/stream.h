@@ -197,6 +197,7 @@ typedef struct stream {
     bool fast_skip : 1; // consider stream fast enough to fw-seek by skipping
     bool is_network : 1; // original stream_info_t.is_network flag
     bool allow_caching : 1; // stream cache makes sense
+    bool access_references : 1; // open other streams
     struct mp_log *log;
     struct mpv_global *global;
 

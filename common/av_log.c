@@ -218,9 +218,7 @@ bool print_libav_versions(struct mp_log *log, int v)
         mp_msg(log, v, "\n");
     }
 
-#if HAVE_AV_VERSION_INFO
     mp_msg(log, v, "%s version: %s\n", LIB_PREFIX, av_version_info());
-#endif
 
     return !mismatch;
 }

@@ -205,11 +205,10 @@ DLLs in that folder. The simplest solution is to add ``C:\msys64\mingw64\bin``
 to the windows system ``%PATH%``. Beware though that this can cause problems or
 confusion in Cygwin if that is also installed on the machine.
 
-Use of the ANGLE OpenGL backend requires a copy of ``d3dcompiler_43.dll`` (yes,
-exactly 43) in the path or in the same folder as mpv. It must be of the same
-architecture (x86_64 / i686) as the mpv you compiled. You can find a copy in the
-official mpv builds:
+Use of the ANGLE OpenGL backend requires a copy of the D3D compiler DLL that
+matches the version of the D3D SDK that ANGLE was built with
+(``d3dcompiler_43.dll`` in case of MinGW-built ANGLE) in the path or in the
+same folder as mpv. It must be of the same architecture (x86_64 / i686) as the
+mpv you compiled. You can find copies here:
 
-https://mpv.srsfckn.biz/mpv-x86_64-20160118.7z
-
-https://mpv.srsfckn.biz/mpv-i686-20160118.7z
+https://mpv.srsfckn.biz/d3dcompiler.7z
