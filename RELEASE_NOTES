@@ -1,3 +1,82 @@
+Release 0.23.0
+==============
+
+Now requires at least FFmpeg 3.2.2.
+
+Features
+--------
+
+- vo_rpi: partially undeprecate
+
+Added
+~~~~~
+
+- vo_opengl: hwdec_cuda: Support P016 output surfaces
+
+Removed
+~~~~~~~
+
+- charset_conv: drop enca and libguess support in favor of uchardet
+- vf_vdpaurb: remove this filter in favor of --hwdec=vdpau-copy
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- TOOLS/autoload: allow disabling through script-opts
+- demux, stream: add --access-references to prevent opening referenced files
+
+
+Deprecated
+~~~~~~~~~~
+
+- options: deprecate codec family selection in --vd/--ad
+
+
+Removed
+~~~~~~~
+
+- macOS: remove --fs-black-out-screens
+- options: remove deprecated sub-option handling for --vo and --ao
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- Windows: window styles improvements (allow minimizing borderless/fullscreen window) (#2229, #2451)
+- ad_spdif: Fix crash when spdif muxer is not available
+- audio: fix --audio-stream-silence with ao_alsa
+- audio: fix --audio-stream-silence with ao_wasapi
+- build: drop build-time dependency on Perl
+- build: support linking ANGLE (previously loaded dynamically)
+- d3d11va: unconditionally load D3D DLLs (#3348)
+- demux_mkv: fix seeking in some broken files (#3920)
+- hwdec_cuda: allow building without CUDA SDK (load CUDA dynamically)
+- macOS: fix dropping of URLs containing query strings on the window
+- macOS: fullscreen refactoring (#2857, #3272, #1352, #2062, #3864)
+- macOS: support append file to paylist on drop (#2166)
+- macOS: update the menu and remove conflicting “Quit & remember position” item (#3865)
+- osc: don't hide playlist buttons, just disable
+- osc: fix possible race condition in right timecode
+- osc: topbar: use same styles as bottombar
+- player: don't print format detection error when aborting loading
+- vdpau: fix vaapi probing if libvdpau-va-gl1 is present
+- video: use demuxer-signaled duration for last video frame (#3924)
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API, and DOCS/interface-changes.rst for a history
+of changes to other user-visible interfaces.
+
+A complete changelog can be seen by running `git log v0.22.0..v0.23.0`
+in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.22.0...v0.23.0 or
+https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.22.0..v0.23.0
+
+
 Release 0.22.0
 ==============
 
