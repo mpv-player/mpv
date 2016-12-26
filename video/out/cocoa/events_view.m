@@ -318,7 +318,7 @@
                             options:@{}];
         NSMutableArray* ar = [[[NSMutableArray alloc] init] autorelease];
         for (NSURL* url in pbitems) {
-            if (url.fileURL) {
+            if ([url isFileURL]) {
                 [ar addObject:[url path]];
             } else {
                 [ar addObject:[url absoluteString]];
