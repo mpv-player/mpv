@@ -191,7 +191,7 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log,  bstr buf,
         return "utf-8";
     }
 
-    const char *res = user_cp;
+    const char *res = NULL;
     if (strcasecmp(user_cp, "auto") == 0) {
 #if HAVE_UCHARDET
         res = mp_uchardet(talloc_ctx, log, buf);
@@ -200,6 +200,8 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log,  bstr buf,
             mp_verbose(log, "Charset auto-detection failed.\n");
             res = "UTF-8-BROKEN";
         }
+    } else {
+        res = user_cp;
     }
 
     mp_verbose(log, "Using charset '%s'.\n", res);
