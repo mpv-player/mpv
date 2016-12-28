@@ -243,6 +243,11 @@ Configurable Options
     Default: 1
 
     Size of the tooltip outline when using bottombar or topbar layouts
+    
+``fontscale``
+    Default: 1
+    
+    Scale the fontsize of timecodes and title in bar modes
 
 ``timetotal``
     Default: no
