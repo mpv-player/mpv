@@ -1775,6 +1775,8 @@ static void pass_read_video(struct gl_video *p)
                   {0.0, (ref.y1 - ref.y0) / (rect.y1 - rect.y0)}},
             .t = {ref.x0, ref.y0},
         };
+        MP_DBG(p, "-> fix[%d] = {%f %f} + off {%f %f}\n", n,
+               fix.m[0][0], fix.m[1][1], fix.t[0], fix.t[1]);
 
         // Since the scale in texture space is different from the scale in
         // absolute terms, we have to scale the coefficients down to be
@@ -1784,8 +1786,11 @@ static void pass_read_video(struct gl_video *p)
                   {0.0, (float)tex[n].h / p->texture_h}},
             .t = {-rect.x0, -rect.y0},
         };
+        if (p->image_params.rotate % 180 == 90)
+            MPSWAP(double, scale.m[0][0], scale.m[1][1]);
+
         gl_transform_trans(scale, &fix);
-        MP_DBG(p, "-> fix[%d] = {%f %f} + off {%f %f}\n", n,
+        MP_DBG(p, "-> scaled[%d] = {%f %f} + off {%f %f}\n", n,
                fix.m[0][0], fix.m[1][1], fix.t[0], fix.t[1]);
 
         // Since the texture transform is a function of the texture coordinates
