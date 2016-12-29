@@ -387,6 +387,16 @@ void vo_cocoa_uninit(struct vo *vo)
     pthread_cond_signal(&s->wakeup);
     pthread_mutex_unlock(&s->lock);
 
+    // close window beforehand to prevent undefined behavior when in fullscreen
+    // that resets the desktop to space 1
+    run_on_main_thread(vo, ^{
+        // if using --wid + libmpv there's no window to release
+        if (s->window) {
+            [s->window setDelegate:nil];
+            [s->window close];
+        }
+    });
+
     run_on_main_thread(vo, ^{
         enable_power_management(s);
         vo_cocoa_uninit_displaylink(s);
@@ -405,12 +415,6 @@ void vo_cocoa_uninit(struct vo *vo)
 
         [s->view removeFromSuperview];
         [s->view release];
-
-        // if using --wid + libmpv there's no window to release
-        if (s->window) {
-            [s->window setDelegate:nil];
-            [s->window close];
-        }
 
         if (!s->embedded)
             [s->blankCursor release];
