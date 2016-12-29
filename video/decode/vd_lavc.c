@@ -518,11 +518,11 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
         mp_set_avcodec_threads(vd->log, avctx, lavc_param->threads);
     }
 
-    avctx->flags |= lavc_param->bitexact ? CODEC_FLAG_BITEXACT : 0;
-    avctx->flags2 |= lavc_param->fast ? CODEC_FLAG2_FAST : 0;
+    avctx->flags |= lavc_param->bitexact ? AV_CODEC_FLAG_BITEXACT : 0;
+    avctx->flags2 |= lavc_param->fast ? AV_CODEC_FLAG2_FAST : 0;
 
     if (lavc_param->show_all)
-        avctx->flags |= CODEC_FLAG_OUTPUT_CORRUPT;
+        avctx->flags |= AV_CODEC_FLAG_OUTPUT_CORRUPT;
 
     avctx->skip_loop_filter = lavc_param->skip_loop_filter;
     avctx->skip_idct = lavc_param->skip_idct;
