@@ -66,7 +66,6 @@ static bool create_context(EGLDisplay display, struct mp_log *log, bool probing,
         EGL_GREEN_SIZE, 1,
         EGL_BLUE_SIZE, 1,
         EGL_ALPHA_SIZE, (opts->vo_flags & VOFLAG_ALPHA ) ? 1 : 0,
-        EGL_DEPTH_SIZE, 1,
         EGL_RENDERABLE_TYPE, rend,
         EGL_NONE
     };
