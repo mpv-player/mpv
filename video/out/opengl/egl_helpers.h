@@ -11,4 +11,13 @@ struct mp_log;
 bool mpegl_create_context(EGLDisplay display, struct mp_log *log, int vo_flags,
                           EGLContext *out_context, EGLConfig *out_config);
 
+struct mpegl_opts {
+    // combination of VOFLAG_* values.
+    int vo_flags;
+};
+
+bool mpegl_create_context_opts(EGLDisplay display, struct mp_log *log,
+                               struct mpegl_opts *opts,
+                               EGLContext *out_context, EGLConfig *out_config);
+
 #endif
