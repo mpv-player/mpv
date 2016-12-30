@@ -2044,3 +2044,15 @@ bool vo_x11_screen_is_composited(struct vo *vo)
     Atom NET_WM_CM = XInternAtom(x11->display, buf, False);
     return XGetSelectionOwner(x11->display, NET_WM_CM) != None;
 }
+
+// Return whether the given visual has alpha (when compositing is used).
+bool vo_x11_is_rgba_visual(XVisualInfo *v)
+{
+    // This is a heuristic at best. Note that normal 8 bit Visuals use
+    // a depth of 24, even if the pixels are padded to 32 bit. If the
+    // depth is higher than 24, the remaining bits must be alpha.
+    // Note: vinfo->bits_per_rgb appears to be useless (is always 8).
+    unsigned long mask = v->depth == sizeof(unsigned long) * 8 ?
+        (unsigned long)-1 : (1UL << v->depth) - 1;
+    return mask & ~(v->red_mask | v->green_mask | v->blue_mask);
+}
