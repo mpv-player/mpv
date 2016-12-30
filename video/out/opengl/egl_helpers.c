@@ -72,14 +72,26 @@ static bool create_context(EGLDisplay display, struct mp_log *log, bool probing,
     };
 
     EGLint config_count;
-    EGLConfig config;
+    EGLConfig *configs = NULL;
 
-    eglChooseConfig(display, attributes, &config, 1, &config_count);
+    eglChooseConfig(display, attributes, NULL, 0, &config_count);
+
+    if (config_count) {
+        configs = talloc_array(NULL, EGLConfig, config_count);
+        eglChooseConfig(display, attributes, configs, config_count, &config_count);
+    }
 
     if (!config_count) {
         mp_msg(log, msgl, "Could not find EGL configuration!\n");
         return false;
     }
+
+    int chosen = 0;
+    if (opts->refine_config)
+        chosen = opts->refine_config(opts->user_data, configs, config_count);
+    EGLConfig config = configs[chosen];
+
+    talloc_free(configs);
 
     EGLContext *ctx = NULL;
 
