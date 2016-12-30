@@ -113,14 +113,36 @@ static void run_on_main_thread(struct vo *vo, void(^block)(void))
     dispatch_sync(dispatch_get_main_queue(), block);
 }
 
+static NSRect calculate_window_geometry(struct vo *vo, NSRect rect)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    struct mp_vo_opts *opts  = vo->opts;
+
+    NSRect screenFrame = [s->current_screen frame];
+    rect.origin.y = screenFrame.size.height - (rect.origin.y + rect.size.height);
+
+    if(!opts->hidpi_window_scale) {
+        NSRect oldRect = rect;
+        rect = [s->current_screen convertRectFromBacking:rect];
+
+        CGFloat x_per = screenFrame.size.width - oldRect.size.width;
+        CGFloat y_per = screenFrame.size.height - oldRect.size.height;
+        if (x_per > 0) x_per = oldRect.origin.x/x_per;
+        if (y_per > 0) y_per = oldRect.origin.y/y_per;
+
+        rect.origin.x = (screenFrame.size.width - rect.size.width)*x_per;
+        rect.origin.y = (screenFrame.size.height - rect.size.height)*y_per;
+    }
+
+    return rect;
+}
+
 static void queue_new_video_size(struct vo *vo, int w, int h)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     struct mp_vo_opts *opts  = vo->opts;
     id<MpvSizing> win = (id<MpvSizing>) s->window;
-    NSRect r = NSMakeRect(0, 0, w, h);
-    if(!opts->hidpi_window_scale)
-        r = [s->current_screen convertRectFromBacking:r];
+    NSRect r = calculate_window_geometry(vo, NSMakeRect(0, 0, w, h));
     [win queueNewVideoSize:NSMakeSize(r.size.width, r.size.height)];
 }
 
@@ -472,10 +494,8 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     if (s->embedded) {
         parent = (NSView *) (intptr_t) opts->WinID;
     } else {
-        NSRect wr =
-            NSMakeRect(win->x0, win->y0, win->x1 - win->x0, win->y1 - win->y0);
-        if(!opts->hidpi_window_scale)
-            wr = [s->current_screen convertRectFromBacking:wr];
+        NSRect wr = calculate_window_geometry(vo,
+            NSMakeRect(win->x0, win->y0, win->x1 - win->x0, win->y1 - win->y0));
         s->window = create_window(wr, s->current_screen, opts->border, adapter);
         parent = [s->window contentView];
     }
