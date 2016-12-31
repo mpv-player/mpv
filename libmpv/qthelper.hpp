@@ -369,15 +369,16 @@ static inline QVariant command(mpv_handle *ctx, const QVariant &args)
 
 
 /**
- * Set the given property as mpv_node converted from the QVariant argument asynchronously.
- *
+ * Set the given property as mpv_node converted from the QVariant argument
+ *  asynchronously.
  * @return mpv error code (<0 on error, >= 0 on success)
  */
-static inline int set_property_async(mpv_handle *ctx, const QString &name,
-                                             const QVariant &v)
+static inline int set_property_async(mpv_handle *ctx, int reply_userdata,
+                                     const QString &name, const QVariant &v)
 {
     node_builder node(v);
-    return mpv_set_property_async(ctx, 0, name.toUtf8().data(), MPV_FORMAT_NODE, node.node());
+    return mpv_set_property_async(ctx, reply_userdata, name.toUtf8().data(),
+                                  MPV_FORMAT_NODE, node.node());
 }
 
 /**
@@ -388,7 +389,8 @@ static inline int set_property_async(mpv_handle *ctx, const QString &name,
  * @param args command arguments, with args[0] being the command name as string
  * @return the property value, or an ErrorReturn with the error code
  */
-static inline int command_async(mpv_handle *ctx, int reply_userdata, const QVariant &args)
+static inline int command_async(mpv_handle *ctx, int reply_userdata,
+                                const QVariant &args)
 {
     node_builder node(args, true);
     return mpv_command_node_async(ctx, reply_userdata, node.node());
@@ -401,9 +403,11 @@ static inline int command_async(mpv_handle *ctx, int reply_userdata, const QVari
  * @param name The property name.
  * @return an ErrorReturn with the error code
  */
-static inline int observe_property(mpv_handle *ctx, int reply_userdata, const QString &name)
+static inline int observe_property(mpv_handle *ctx, int reply_userdata,
+                                   const QString &name)
 {
-    return mpv_observe_property(ctx, reply_userdata, name.toUtf8().data(), MPV_FORMAT_NODE);
+    return mpv_observe_property(ctx, reply_userdata,
+                                name.toUtf8().data(), MPV_FORMAT_NODE);
 }
 
 /**
