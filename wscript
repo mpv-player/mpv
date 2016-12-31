@@ -824,8 +824,16 @@ video_output_features = [
         'desc': 'EGL helper functions',
         'deps_any': [ 'egl-x11', 'mali-fbdev', 'rpi', 'gl-wayland', 'egl-drm' ],
         'func': check_true
-    }
-]
+    }, {
+        'name': '--ncurses',
+        'desc': 'ncurses',
+        'func': check_pkg_config('ncurses'),
+    }, {
+        'name': '--tct',
+        'desc': 'True-color terminal',
+        'deps': [ 'ncurses' ],
+        'func': check_true,
+    }]
 
 hwaccel_features = [
     {

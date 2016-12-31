@@ -93,7 +93,9 @@ const struct vo_driver *const video_out_drivers[] =
     &video_out_null,
     // should not be auto-selected
     &video_out_image,
+#if HAVE_NCURSES
     &video_out_tct,
+#endif
 #if HAVE_CACA
     &video_out_caca,
 #endif
