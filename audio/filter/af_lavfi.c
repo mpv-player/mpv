@@ -266,6 +266,12 @@ static int filter_frame(struct af_instance *af, struct mp_audio *data)
     if (!p->graph)
         goto error;
 
+    if (!data) {
+        if (p->eof)
+            return 0;
+        p->eof = true;
+    }
+
     if (data) {
         frame = mp_audio_to_avframe_and_unref(data);
         data = NULL;

@@ -298,6 +298,12 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
     if (!p->graph)
         return -1;
 
+    if (!mpi) {
+        if (p->eof)
+            return 0;
+        p->eof = true;
+    }
+
     AVFrame *frame = mp_to_av(vf, mpi);
     int r = av_buffersrc_add_frame(p->in, frame) < 0 ? -1 : 0;
     av_frame_free(&frame);
