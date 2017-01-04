@@ -1088,6 +1088,7 @@ int mpv_set_property(mpv_handle *ctx, const char *name, mpv_format format,
             mp_get_property_id(ctx->mpctx, name) >= 0)
             return MPV_ERROR_PROPERTY_UNAVAILABLE;
         switch (r) {
+        case MPV_ERROR_SUCCESS:          return MPV_ERROR_SUCCESS;
         case MPV_ERROR_OPTION_FORMAT:    return MPV_ERROR_PROPERTY_FORMAT;
         case MPV_ERROR_OPTION_NOT_FOUND: return MPV_ERROR_PROPERTY_NOT_FOUND;
         default:                         return MPV_ERROR_PROPERTY_ERROR;
