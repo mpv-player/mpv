@@ -977,7 +977,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->filename = talloc_strdup(NULL, mpctx->playing->filename);
     mpctx->stream_open_filename = mpctx->filename;
 
-    mpctx->add_osd_seek_info &= OSD_SEEK_INFO_EDITION | OSD_SEEK_INFO_CURRENT_FILE;
+    mpctx->add_osd_seek_info &= OSD_SEEK_INFO_CURRENT_FILE;
 
     if (opts->reset_options) {
         for (int n = 0; opts->reset_options[n]; n++) {

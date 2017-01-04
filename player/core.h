@@ -52,8 +52,7 @@ enum mp_osd_seek_info {
     OSD_SEEK_INFO_BAR           = 1,
     OSD_SEEK_INFO_TEXT          = 2,
     OSD_SEEK_INFO_CHAPTER_TEXT  = 4,
-    OSD_SEEK_INFO_EDITION       = 8,
-    OSD_SEEK_INFO_CURRENT_FILE  = 16,
+    OSD_SEEK_INFO_CURRENT_FILE  = 8,
 };
 
 

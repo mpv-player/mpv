@@ -4199,7 +4199,6 @@ static const struct property_osd_display {
     { "loop", "Loop" },
     { "chapter", .seek_msg = OSD_SEEK_INFO_CHAPTER_TEXT,
                  .seek_bar = OSD_SEEK_INFO_BAR },
-    { "edition", .seek_msg = OSD_SEEK_INFO_EDITION },
     { "hr-seek", "hr-seek" },
     { "speed", "Speed" },
     { "clock", "Clock" },
