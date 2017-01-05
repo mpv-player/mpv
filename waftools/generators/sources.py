@@ -31,7 +31,7 @@ def f2s(self):
     def fn(out):
         source = getattr(self, 'source', None)
         src = self.path.find_resource(source)
-        file2string(source, iter(src.read().splitlines()), out)
+        file2string(source, iter(src.read().splitlines(True)), out)
     execf(self, fn)
 
 @TaskGen.feature('ebml_header')
