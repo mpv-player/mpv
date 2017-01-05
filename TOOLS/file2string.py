@@ -28,4 +28,4 @@ def file2string(infilename, infile, outfile):
 
 if __name__ == "__main__":
     with open(sys.argv[1], 'rb') as infile:
-        main(sys.argv[1], infile, sys.stdout)
+        file2string(sys.argv[1], infile, sys.stdout)
