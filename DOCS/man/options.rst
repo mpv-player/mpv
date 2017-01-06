@@ -4322,6 +4322,9 @@ The following video options are currently all specific to ``--vo=opengl`` and
         work.
     x11
         X11/GLX
+    x11probe
+        For internal autoprobing, equivalent to ``x11`` otherwise. Don't use
+        directly, it could be removed without warning as autoprobing is changed.
     wayland
         Wayland/EGL
     drm
