@@ -55,35 +55,30 @@ def build(ctx):
         features = "file2string",
         source = "TOOLS/osxbundle/mpv.app/Contents/Resources/icon.icns",
         target = "osdep/macosx_icon.inc",
-        before = ['c']
     )
 
     ctx(
         features = "file2string",
         source = "video/out/x11_icon.bin",
         target = "video/out/x11_icon.inc",
-        before = ['c']
     )
 
     ctx(
         features = "file2string",
         source = "etc/input.conf",
         target = "input/input_conf.h",
-        before = ['c']
     )
 
     ctx(
         features = "file2string",
         source = "etc/builtin.conf",
         target = "player/builtin_conf.inc",
-        before = ['c']
     )
 
     ctx(
         features = "file2string",
         source = "sub/osd_font.otf",
         target = "sub/osd_font.h",
-        before = ['c']
     )
 
     lua_files = ["defaults.lua", "assdraw.lua", "options.lua", "osc.lua",
@@ -95,20 +90,10 @@ def build(ctx):
             features = "file2string",
             source = fn,
             target = os.path.splitext(fn)[0] + ".inc",
-            before = ['c']
         )
 
-    ctx(
-        features = "ebml_header",
-        target = "ebml_types.h",
-        before = ['c']
-    )
-
-    ctx(
-        features = "ebml_definitions",
-        target = "ebml_defs.c",
-        before = ['c']
-    )
+    ctx(features = "ebml_header", target = "ebml_types.h")
+    ctx(features = "ebml_definitions", target = "ebml_defs.c")
 
     if ctx.env.DEST_OS == 'win32':
         main_fn_c = 'osdep/main-fn-win.c'

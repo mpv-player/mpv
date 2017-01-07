@@ -18,6 +18,7 @@ def __file2string__(ctx, **kwargs):
     )
 
 def execf(self, fn):
+    setattr(self, 'before', ['c'])
     setattr(self, 'rule', ' ') # waf doesn't print the task with no rule
     target = getattr(self, 'target', None)
     out = self.path.find_or_declare(target)
