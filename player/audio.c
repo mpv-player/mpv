@@ -817,7 +817,7 @@ static int filter_audio(struct MPContext *mpctx, struct mp_audio_buffer *outbuf,
             break;
 
         res = decode_new_frame(ao_c);
-        if (res == AD_NO_PROGRESS)
+        if (res == AD_NO_PROGRESS || res == AD_WAIT)
             break;
         if (res < 0) {
             // drain filters first (especially for true EOF case)
