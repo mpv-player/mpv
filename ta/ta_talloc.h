@@ -73,7 +73,7 @@ char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 
 
 // mpv specific stuff - should be made part of proper TA API
 
-#define TA_FREEP(pctx) do {if (pctx) {talloc_free(*pctx); (*pctx) = NULL;}} while(0)
+#define TA_FREEP(pctx) do {talloc_free(*(pctx)); *(pctx) = NULL;} while(0)
 
 #define TA_EXPAND_ARGS(...) __VA_ARGS__
 
