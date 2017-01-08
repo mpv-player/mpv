@@ -1685,7 +1685,7 @@ static void pass_read_video(struct gl_video *p)
                 GLSLF("// merging plane %d ...\n", i);
                 copy_img_tex(p, &num, tex[i]);
                 first = MPMIN(first, i);
-                memset(&tex[i], 0, sizeof(tex[i]));
+                tex[i] = (struct img_tex){0};
             }
         }
 
@@ -1694,7 +1694,7 @@ static void pass_read_video(struct gl_video *p)
             copy_img_tex(p, &num, tex[n]);
             finish_pass_fbo(p, &p->merge_fbo[n], tex[n].w, tex[n].h, 0);
             tex[first] = img_tex_fbo(&p->merge_fbo[n], tex[n].type, num);
-            memset(&tex[n], 0, sizeof(tex[n]));
+            tex[n] = (struct img_tex){0};
         }
     }
 
