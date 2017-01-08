@@ -108,6 +108,44 @@ static void va_get_formats(struct mp_vaapi_ctx *ctx)
     ctx->image_formats = formats;
 }
 
+// VA message callbacks are global and do not have a context parameter, so it's
+// impossible to know from which VADisplay they originate. Try to route them
+// to existing mpv/libmpv instances within this process.
+static pthread_mutex_t va_log_mutex = PTHREAD_MUTEX_INITIALIZER;
+static struct mp_vaapi_ctx **va_mpv_clients;
+static int num_va_mpv_clients;
+
+static void va_message_callback(const char *msg, int mp_level)
+{
+    pthread_mutex_lock(&va_log_mutex);
+
+    if (num_va_mpv_clients) {
+        struct mp_log *dst = va_mpv_clients[num_va_mpv_clients - 1]->log;
+        mp_msg(dst, mp_level, "libva: %s", msg);
+    } else {
+        // We can't get or call the original libva handler (vaSet... return
+        // them, but it might be from some other lib etc.). So just do what
+        // libva happened to do at the time of this writing.
+        if (mp_level <= MSGL_ERR) {
+            fprintf(stderr, "libva error: %s", msg);
+        } else {
+            fprintf(stderr, "libva info: %s", msg);
+        }
+    }
+
+    pthread_mutex_unlock(&va_log_mutex);
+}
+
+static void va_error_callback(const char *msg)
+{
+    va_message_callback(msg, MSGL_ERR);
+}
+
+static void va_info_callback(const char *msg)
+{
+    va_message_callback(msg, MSGL_V);
+}
+
 struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
                                    bool probing)
 {
@@ -122,6 +160,17 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
         },
     };
     mpthread_mutex_init_recursive(&res->lock);
+
+    pthread_mutex_lock(&va_log_mutex);
+    MP_TARRAY_APPEND(NULL, va_mpv_clients, num_va_mpv_clients, res);
+    pthread_mutex_unlock(&va_log_mutex);
+
+    // Check some random symbol added after message callbacks.
+    // VA_MICRO_VERSION wasn't bumped at the time.
+#ifdef VA_FOURCC_I010
+    vaSetErrorCallback(va_error_callback);
+    vaSetInfoCallback(va_info_callback);
+#endif
 
     int major_version, minor_version;
     int status = vaInitialize(display, &major_version, &minor_version);
@@ -149,6 +198,18 @@ void va_destroy(struct mp_vaapi_ctx *ctx)
     if (ctx) {
         if (ctx->display)
             vaTerminate(ctx->display);
+
+        pthread_mutex_lock(&va_log_mutex);
+        for (int n = 0; n < num_va_mpv_clients; n++) {
+            if (va_mpv_clients[n] == ctx) {
+                MP_TARRAY_REMOVE_AT(va_mpv_clients, num_va_mpv_clients, n);
+                break;
+            }
+        }
+        if (num_va_mpv_clients == 0)
+            TA_FREEP(&va_mpv_clients); // avoid triggering leak detectors
+        pthread_mutex_unlock(&va_log_mutex);
+
         pthread_mutex_destroy(&ctx->lock);
         talloc_free(ctx);
     }
