@@ -111,20 +111,9 @@ static void va_get_formats(struct mp_vaapi_ctx *ctx)
 struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
                                    bool probing)
 {
-    struct mp_vaapi_ctx *res = NULL;
-    struct mp_log *log = mp_log_new(NULL, plog, "/vaapi");
-    int major_version, minor_version;
-    int status = vaInitialize(display, &major_version, &minor_version);
-    if (status != VA_STATUS_SUCCESS && probing)
-        goto error;
-    if (!check_va_status(log, status, "vaInitialize()"))
-        goto error;
-
-    mp_verbose(log, "VA API version %d.%d\n", major_version, minor_version);
-
-    res = talloc_ptrtype(NULL, res);
+    struct mp_vaapi_ctx *res = talloc_ptrtype(NULL, res);
     *res = (struct mp_vaapi_ctx) {
-        .log = talloc_steal(res, log),
+        .log = mp_log_new(res, plog, "/vaapi"),
         .display = display,
         .hwctx = {
             .type = HWDEC_VAAPI,
@@ -134,16 +123,23 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
     };
     mpthread_mutex_init_recursive(&res->lock);
 
+    int major_version, minor_version;
+    int status = vaInitialize(display, &major_version, &minor_version);
+    if (status != VA_STATUS_SUCCESS && probing)
+        goto error;
+    if (!check_va_status(res->log, status, "vaInitialize()"))
+        goto error;
+
+    MP_VERBOSE(res, "VA API version %d.%d\n", major_version, minor_version);
+
     va_get_formats(res);
     if (!res->image_formats)
         goto error;
     return res;
 
 error:
-    if (res && res->display)
-        vaTerminate(res->display);
-    talloc_free(log);
-    talloc_free(res);
+    res->display = NULL; // do not vaTerminate this
+    va_destroy(res);
     return NULL;
 }
 
