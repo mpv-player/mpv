@@ -19,7 +19,7 @@
 #include <string.h>
 #include <signal.h>
 #include <sys/ioctl.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <sys/stat.h>
 #include <sys/vt.h>
 #include <unistd.h>

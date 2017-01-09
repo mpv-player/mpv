@@ -20,7 +20,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <string.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <time.h>
 #include <unistd.h>
 
