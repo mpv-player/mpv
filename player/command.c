@@ -5308,20 +5308,19 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
 
     case MP_CMD_AB_LOOP: {
         double now = get_current_time(mpctx);
-        int r = 0;
         if (opts->ab_loop[0] == MP_NOPTS_VALUE) {
-            r = mp_property_do("ab-loop-a", M_PROPERTY_SET, &now, mpctx);
+            mp_property_do("ab-loop-a", M_PROPERTY_SET, &now, mpctx);
             show_property_osd(mpctx, "ab-loop-a", on_osd);
         } else if (opts->ab_loop[1] == MP_NOPTS_VALUE) {
-            r = mp_property_do("ab-loop-b", M_PROPERTY_SET, &now, mpctx);
+            mp_property_do("ab-loop-b", M_PROPERTY_SET, &now, mpctx);
             show_property_osd(mpctx, "ab-loop-b", on_osd);
         } else {
             now = MP_NOPTS_VALUE;
-            r = mp_property_do("ab-loop-a", M_PROPERTY_SET, &now, mpctx);
-            r = mp_property_do("ab-loop-b", M_PROPERTY_SET, &now, mpctx);
+            mp_property_do("ab-loop-a", M_PROPERTY_SET, &now, mpctx);
+            mp_property_do("ab-loop-b", M_PROPERTY_SET, &now, mpctx);
             set_osd_msg(mpctx, osdl, osd_duration, "Clear A-B loop");
         }
-        return r > 0;
+        break;
     }
 
     case MP_CMD_DROP_BUFFERS: {
