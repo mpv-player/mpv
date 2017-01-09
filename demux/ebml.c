@@ -120,7 +120,7 @@ int64_t ebml_read_vlen_int(bstr *buffer)
         return EBML_INT_INVALID;
     l = len - buffer->len;
 
-    return unum - ((1 << ((7 * l) - 1)) - 1);
+    return unum - ((1LL << ((7 * l) - 1)) - 1);
 }
 
 /*
