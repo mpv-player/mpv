@@ -24,8 +24,6 @@
 #include <unistd.h>
 
 #include <libswscale/swscale.h>
-#include <xf86drm.h>
-#include <xf86drmMode.h>
 
 #include "drm_common.h"
 
