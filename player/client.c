@@ -851,6 +851,12 @@ static bool compare_value(void *a, void *b, mpv_format format)
             return false;
         return compare_value(&a_n->u, &b_n->u, a_n->format);
     }
+    case MPV_FORMAT_BYTE_ARRAY: {
+        struct mpv_byte_array *a_r = a, *b_r = b;
+        if (a_r->size != b_r->size)
+            return false;
+        return memcmp(a_r->data, b_r->data, a_r->size) == 0;
+    }
     case MPV_FORMAT_NODE_ARRAY:
     case MPV_FORMAT_NODE_MAP:
     {
