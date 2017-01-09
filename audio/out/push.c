@@ -251,12 +251,11 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     if (got_data) {
         p->still_playing = true;
         p->expected_end_time = 0;
-    }
 
-    // If we don't have new data, the decoder thread basically promises it
-    // will send new data as soon as it's available.
-    if (got_data)
+        // If we don't have new data, the decoder thread basically promises it
+        // will send new data as soon as it's available.
         wakeup_playthread(ao);
+    }
     pthread_mutex_unlock(&p->lock);
     return write_samples;
 }
