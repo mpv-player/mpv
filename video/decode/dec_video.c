@@ -251,15 +251,8 @@ static void fix_image_params(struct dec_video *d_video,
     d_video->fixed_format = p;
 }
 
-static struct mp_image *decode_packet(struct dec_video *d_video,
-                                      struct demux_packet *packet,
-                                      int drop_frame)
+static bool send_packet(struct dec_video *d_video, struct demux_packet *packet)
 {
-    struct MPOpts *opts = d_video->opts;
-
-    if (!d_video->vd_driver)
-        return NULL;
-
     double pkt_pts = packet ? packet->pts : MP_NOPTS_VALUE;
     double pkt_dts = packet ? packet->dts : MP_NOPTS_VALUE;
 
@@ -272,15 +265,26 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
 
     MP_STATS(d_video, "start decode video");
 
-    struct mp_image *mpi = d_video->vd_driver->decode(d_video, packet, drop_frame);
+    bool res = d_video->vd_driver->send_packet(d_video, packet);
+
+    MP_STATS(d_video, "end decode video");
+
+    return res;
+}
+
+static struct mp_image *receive_frame(struct dec_video *d_video)
+{
+    struct MPOpts *opts = d_video->opts;
+
+    MP_STATS(d_video, "start decode video");
+
+    struct mp_image *mpi = d_video->vd_driver->receive_frame(d_video);
 
     MP_STATS(d_video, "end decode video");
 
     // Error, discarded frame, dropped frame, or initial codec delay.
-    if (!mpi || drop_frame) {
-        talloc_free(mpi);
+    if (!mpi)
         return NULL;
-    }
 
     if (opts->field_dominance == 0) {
         mpi->fields |= MP_IMGFIELD_TOP_FIRST | MP_IMGFIELD_INTERLACED;
@@ -378,7 +382,7 @@ void video_set_start(struct dec_video *d_video, double start_pts)
 
 void video_work(struct dec_video *d_video)
 {
-    if (d_video->current_mpi)
+    if (d_video->current_mpi || !d_video->vd_driver)
         return;
 
     if (!d_video->packet && !d_video->new_segment &&
@@ -414,11 +418,15 @@ void video_work(struct dec_video *d_video)
     {
         framedrop_type = 2;
     }
-    d_video->current_mpi = decode_packet(d_video, d_video->packet, framedrop_type);
-    if (d_video->packet && d_video->packet->len == 0) {
+
+    d_video->vd_driver->control(d_video, VDCTRL_SET_FRAMEDROP, &framedrop_type);
+
+    if (send_packet(d_video, d_video->packet)) {
         talloc_free(d_video->packet);
         d_video->packet = NULL;
     }
+
+    d_video->current_mpi = receive_frame(d_video);
 
     d_video->current_state = DATA_OK;
     if (!d_video->current_mpi) {

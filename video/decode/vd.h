@@ -33,8 +33,9 @@ typedef struct vd_functions
     int (*init)(struct dec_video *vd, const char *decoder);
     void (*uninit)(struct dec_video *vd);
     int (*control)(struct dec_video *vd, int cmd, void *arg);
-    struct mp_image *(*decode)(struct dec_video *vd, struct demux_packet *pkt,
-                               int flags);
+    // Return whether or not the packet has been consumed.
+    bool (*send_packet)(struct dec_video *vd, struct demux_packet *pkt);
+    struct mp_image *(*receive_frame)(struct dec_video *vd);
 } vd_functions_t;
 
 // NULL terminated array of all drivers
@@ -46,6 +47,8 @@ enum vd_ctrl {
     VDCTRL_GET_HWDEC,
     VDCTRL_REINIT,
     VDCTRL_GET_BFRAMES,
+    // framedrop mode: 0=none, 1=standard, 2=hrseek
+    VDCTRL_SET_FRAMEDROP,
 };
 
 #endif /* MPLAYER_VD_H */

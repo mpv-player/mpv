@@ -25,8 +25,12 @@ typedef struct lavc_ctx {
     bool hwdec_failed;
     bool hwdec_notified;
 
+    int framedrop_flags;
+
     // For HDR side-data caching
     double cached_hdr_peak;
+
+    struct demux_packet *prev_packet;
 
     struct mp_image **delay_queue;
     int num_delay_queue;
