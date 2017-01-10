@@ -677,28 +677,6 @@ static bool read_packet(struct demux_internal *in)
     return true;
 }
 
-// must be called locked; may temporarily unlock
-static void ds_get_packets(struct demux_stream *ds)
-{
-    const char *t = stream_type_name(ds->type);
-    struct demux_internal *in = ds->in;
-    MP_DBG(in, "reading packet for %s\n", t);
-    in->eof = false; // force retry
-    while (ds->selected && !ds->head) {
-        ds->active = true;
-        // Note: the following code marks EOF if it can't continue
-        if (in->threading) {
-            MP_VERBOSE(in, "waiting for demux thread (%s)\n", t);
-            pthread_cond_signal(&in->wakeup);
-            pthread_cond_wait(&in->wakeup, &in->lock);
-        } else {
-            read_packet(in);
-        }
-        if (ds->eof)
-            break;
-    }
-}
-
 static void execute_trackswitch(struct demux_internal *in)
 {
     in->tracks_switched = false;
@@ -843,12 +821,29 @@ struct demux_packet *demux_read_packet(struct sh_stream *sh)
     struct demux_stream *ds = sh ? sh->ds : NULL;
     struct demux_packet *pkt = NULL;
     if (ds) {
-        pthread_mutex_lock(&ds->in->lock);
-        if (!use_lazy_subtitle_reading(ds))
-            ds_get_packets(ds);
+        struct demux_internal *in = ds->in;
+        pthread_mutex_lock(&in->lock);
+        if (!use_lazy_subtitle_reading(ds)) {
+            const char *t = stream_type_name(ds->type);
+            MP_DBG(in, "reading packet for %s\n", t);
+            in->eof = false; // force retry
+            while (ds->selected && !ds->head) {
+                ds->active = true;
+                // Note: the following code marks EOF if it can't continue
+                if (in->threading) {
+                    MP_VERBOSE(in, "waiting for demux thread (%s)\n", t);
+                    pthread_cond_signal(&in->wakeup);
+                    pthread_cond_wait(&in->wakeup, &in->lock);
+                } else {
+                    read_packet(in);
+                }
+                if (ds->eof)
+                    break;
+            }
+        }
         pkt = dequeue_packet(ds);
-        pthread_cond_signal(&ds->in->wakeup); // possibly read more
-        pthread_mutex_unlock(&ds->in->lock);
+        pthread_cond_signal(&in->wakeup); // possibly read more
+        pthread_mutex_unlock(&in->lock);
     }
     return pkt;
 }
