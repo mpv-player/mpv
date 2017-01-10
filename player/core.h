@@ -178,6 +178,8 @@ struct vo_chain {
     // - video consists of a single picture, which should be shown only once
     // - do not sync audio to video in any way
     bool is_coverart;
+    // Just to avoid decoding the coverart picture again after a seek.
+    struct mp_image *cached_coverart;
 };
 
 // Like vo_chain, for audio.

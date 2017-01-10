@@ -328,6 +328,10 @@ static void vo_chain_reset_state(struct vo_chain *vo_c)
 
     if (vo_c->video_src)
         video_reset(vo_c->video_src);
+
+    // Prepare for continued playback after a seek.
+    if (!vo_c->input_mpi && vo_c->cached_coverart)
+        vo_c->input_mpi = mp_image_new_ref(vo_c->cached_coverart);
 }
 
 void reset_video_state(struct MPContext *mpctx)
@@ -381,6 +385,7 @@ static void vo_chain_uninit(struct vo_chain *vo_c)
         lavfi_set_connected(vo_c->filter_src, false);
 
     mp_image_unrefp(&vo_c->input_mpi);
+    mp_image_unrefp(&vo_c->cached_coverart);
     vf_destroy(vo_c->vf);
     talloc_free(vo_c);
     // this does not free the VO
@@ -682,13 +687,24 @@ static int video_decode_and_filter(struct MPContext *mpctx)
         return r;
 
     if (!vo_c->input_mpi) {
-        // Decode a new image, or at least feed the decoder a packet.
-        r = decode_image(mpctx);
-        if (r == VD_WAIT)
-            return r;
+        if (vo_c->cached_coverart) {
+            // Don't ever decode it twice, not even after seek resets.
+            // (On seek resets, input_mpi is set to the cached image.)
+            r = VD_EOF;
+        } else {
+            // Decode a new image, or at least feed the decoder a packet.
+            r = decode_image(mpctx);
+            if (r == VD_WAIT)
+                return r;
+        }
     }
-    if (vo_c->input_mpi)
+
+    if (vo_c->input_mpi) {
         vo_c->input_format = vo_c->input_mpi->params;
+
+        if (vo_c->is_coverart && !vo_c->cached_coverart)
+            vo_c->cached_coverart = mp_image_new_ref(vo_c->input_mpi);
+    }
 
     bool eof = !vo_c->input_mpi && (r == VD_EOF || r < 0);
     r = video_filter(mpctx, eof);

@@ -89,7 +89,6 @@ void video_uninit(struct dec_video *d_video)
     if (!d_video)
         return;
     mp_image_unrefp(&d_video->current_mpi);
-    mp_image_unrefp(&d_video->cover_art_mpi);
     if (d_video->vd_driver) {
         MP_VERBOSE(d_video, "Uninit video.\n");
         d_video->vd_driver->uninit(d_video);
@@ -381,22 +380,6 @@ void video_work(struct dec_video *d_video)
 {
     if (d_video->current_mpi)
         return;
-
-    if (d_video->header->attached_picture) {
-        if (d_video->current_state == DATA_AGAIN && !d_video->cover_art_mpi) {
-            struct demux_packet *packet =
-                demux_copy_packet(d_video->header->attached_picture);
-            d_video->cover_art_mpi = decode_packet(d_video, packet, 0);
-            // Might need flush.
-            if (!d_video->cover_art_mpi)
-                d_video->cover_art_mpi = decode_packet(d_video, NULL, 0);
-            talloc_free(packet);
-        }
-        if (d_video->current_state != DATA_EOF)
-            d_video->current_mpi = mp_image_new_ref(d_video->cover_art_mpi);
-        d_video->current_state = DATA_EOF;
-        return;
-    }
 
     if (!d_video->packet && !d_video->new_segment &&
         demux_read_packet_async(d_video->header, &d_video->packet) == 0)

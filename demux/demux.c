@@ -205,6 +205,9 @@ struct demux_stream {
     struct demux_packet *head;
     struct demux_packet *tail;
 
+    struct demux_packet *attached_picture;
+    bool attached_picture_added;
+
     // for closed captions (demuxer_feed_caption)
     struct sh_stream *cc;
 };
@@ -243,6 +246,7 @@ static void ds_flush(struct demux_stream *ds)
     ds->last_pos = -1;
     ds->last_dts = MP_NOPTS_VALUE;
     ds->correct_dts = ds->correct_pos = true;
+    ds->attached_picture_added = false;
 }
 
 void demux_set_ts_offset(struct demuxer *demuxer, double offset)
@@ -290,6 +294,8 @@ void demux_add_sh_stream(struct demuxer *demuxer, struct sh_stream *sh)
 
     if (!sh->codec->codec)
         sh->codec->codec = "";
+
+    sh->ds->attached_picture = sh->attached_picture;
 
     sh->index = in->num_streams;
     if (sh->ff_index < 0)
@@ -755,6 +761,13 @@ static void *demux_thread(void *pctx)
 
 static struct demux_packet *dequeue_packet(struct demux_stream *ds)
 {
+    if (ds->attached_picture) {
+        ds->eof = true;
+        if (ds->attached_picture_added)
+            return NULL;
+        ds->attached_picture_added = true;
+        return demux_copy_packet(ds->attached_picture);
+    }
     if (!ds->head)
         return NULL;
     struct demux_packet *pkt = ds->head;
@@ -800,18 +813,21 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
 
 // Whether to avoid actively demuxing new packets to find a new packet on the
 // given stream.
+// Attached pictures (cover art) should never actively read.
 // Sparse packets (Subtitles) interleaved with other non-sparse packets (video,
 // audio) should never be read actively, meaning the demuxer thread does not
 // try to exceed default readahead in order to find a new packet.
 static bool use_lazy_packet_reading(struct demux_stream *ds)
 {
+    if (ds->attached_picture)
+        return true;
     if (ds->type != STREAM_SUB)
         return false;
     // Subtitles are only lazily read if there's at least 1 other actively read
     // stream.
     for (int n = 0; n < ds->in->num_streams; n++) {
         struct demux_stream *s = ds->in->streams[n]->ds;
-        if (s->type != STREAM_SUB && s->selected && !s->eof)
+        if (s->type != STREAM_SUB && s->selected && !s->eof && !s->attached_picture)
             return true;
     }
     return false;
