@@ -30,7 +30,12 @@ typedef struct lavc_ctx {
     // For HDR side-data caching
     double cached_hdr_peak;
 
-    struct demux_packet *prev_packet;
+    bool hw_probing;
+    struct demux_packet **sent_packets;
+    int num_sent_packets;
+
+    struct demux_packet **requeue_packets;
+    int num_requeue_packets;
 
     struct mp_image **delay_queue;
     int num_delay_queue;

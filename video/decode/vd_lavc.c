@@ -514,6 +514,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
         if (ctx->hwdec->init && ctx->hwdec->init(ctx) < 0)
             goto error;
         ctx->max_delay_queue = ctx->hwdec->delay_queue;
+        ctx->hw_probing = true;
     } else {
         mp_set_avcodec_threads(vd->log, avctx, lavc_param->threads);
     }
@@ -578,8 +579,13 @@ static void flush_all(struct dec_video *vd)
         talloc_free(ctx->delay_queue[n]);
     ctx->num_delay_queue = 0;
 
-    talloc_free(ctx->prev_packet);
-    ctx->prev_packet = NULL;
+    for (int n = 0; n < ctx->num_sent_packets; n++)
+        talloc_free(ctx->sent_packets[n]);
+    ctx->num_sent_packets = 0;
+
+    for (int n = 0; n < ctx->num_requeue_packets; n++)
+        talloc_free(ctx->requeue_packets[n]);
+    ctx->num_requeue_packets = 0;
 
     reset_avctx(vd);
 }
@@ -607,6 +613,7 @@ static void uninit_avctx(struct dec_video *vd)
     ctx->hwdec_failed = false;
     ctx->hwdec_fail_count = 0;
     ctx->max_delay_queue = 0;
+    ctx->hw_probing = false;
 }
 
 static void update_image_params(struct dec_video *vd, AVFrame *frame,
@@ -748,11 +755,14 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
     return 0;
 }
 
-static struct mp_image *read_output(struct dec_video *vd)
+static struct mp_image *read_output(struct dec_video *vd, bool eof)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
     if (!ctx->num_delay_queue)
+        return NULL;
+
+    if (ctx->num_delay_queue <= ctx->max_delay_queue && !eof)
         return NULL;
 
     struct mp_image *res = ctx->delay_queue[0];
@@ -773,6 +783,11 @@ static struct mp_image *read_output(struct dec_video *vd)
             MP_INFO(vd, "Using software decoding.\n");
         }
         ctx->hwdec_notified = true;
+
+        ctx->hw_probing = false;
+        for (int n = 0; n < ctx->num_sent_packets; n++)
+            talloc_free(ctx->sent_packets[n]);
+        ctx->num_sent_packets = 0;
     }
 
     return res;
@@ -818,7 +833,7 @@ static void handle_err(struct dec_video *vd)
     }
 }
 
-static bool send_packet(struct dec_video *vd, struct demux_packet *pkt)
+static bool do_send_packet(struct dec_video *vd, struct demux_packet *pkt)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
@@ -836,12 +851,27 @@ static bool send_packet(struct dec_video *vd, struct demux_packet *pkt)
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
         return false;
 
-    talloc_free(ctx->prev_packet);
-    ctx->prev_packet = pkt ? demux_copy_packet(pkt) : NULL;
+    if (ctx->hw_probing && ctx->num_sent_packets < 32) {
+        pkt = pkt ? demux_copy_packet(pkt) : NULL;
+        MP_TARRAY_APPEND(ctx, ctx->sent_packets, ctx->num_sent_packets, pkt);
+    }
 
     if (ret < 0)
         handle_err(vd);
     return true;
+}
+
+static bool send_packet(struct dec_video *vd, struct demux_packet *pkt)
+{
+    vd_ffmpeg_ctx *ctx = vd->priv;
+
+    if (ctx->num_requeue_packets) {
+        if (do_send_packet(vd, ctx->requeue_packets[0]))
+            MP_TARRAY_REMOVE_AT(ctx->requeue_packets, ctx->num_requeue_packets, 0);
+        return false;
+    }
+
+    return do_send_packet(vd, pkt);
 }
 
 // Returns EOF state.
@@ -912,20 +942,34 @@ static struct mp_image *receive_frame(struct dec_video *vd)
 
     if (ctx->hwdec_failed) {
         // Failed hardware decoding? Try again in software.
-        struct demux_packet *pkt = ctx->prev_packet;
-        ctx->prev_packet = NULL;
+        struct demux_packet **pkts = ctx->sent_packets;
+        int num_pkts = ctx->num_sent_packets;
+        ctx->sent_packets = NULL;
+        ctx->num_sent_packets = 0;
 
         force_fallback(vd);
-        if (pkt)
-            send_packet(vd, pkt);
-        talloc_free(pkt);
 
-        eof = decode_frame(vd);
+        struct mp_image *img = NULL;
+
+        while (num_pkts > 0) {
+            if (send_packet(vd, pkts[0])) {
+                talloc_free(pkts[0]);
+                MP_TARRAY_REMOVE_AT(pkts, num_pkts, 0);
+            }
+            if (decode_frame(vd)) {
+                eof = true;
+                break;
+            }
+            img = read_output(vd, eof);
+            if (img)
+                break;
+        }
+
+        ctx->requeue_packets = pkts;
+        ctx->num_requeue_packets = num_pkts;
     }
 
-    if (eof || ctx->num_delay_queue > ctx->max_delay_queue)
-        return read_output(vd);
-    return NULL;
+    return read_output(vd, eof);
 }
 
 static int control(struct dec_video *vd, int cmd, void *arg)
