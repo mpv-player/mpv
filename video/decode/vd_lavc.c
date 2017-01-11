@@ -783,11 +783,13 @@ static struct mp_image *read_output(struct dec_video *vd, bool eof)
             MP_INFO(vd, "Using software decoding.\n");
         }
         ctx->hwdec_notified = true;
+    }
 
-        ctx->hw_probing = false;
+    if (ctx->hw_probing) {
         for (int n = 0; n < ctx->num_sent_packets; n++)
             talloc_free(ctx->sent_packets[n]);
         ctx->num_sent_packets = 0;
+        ctx->hw_probing = false;
     }
 
     return res;
