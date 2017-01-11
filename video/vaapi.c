@@ -25,6 +25,9 @@
 #include "img_format.h"
 #include "mp_image_pool.h"
 
+#include <libavutil/hwcontext.h>
+#include <libavutil/hwcontext_vaapi.h>
+
 bool check_va_status(struct mp_log *log, VAStatus status, const char *msg)
 {
     if (status != VA_STATUS_SUCCESS) {
@@ -330,11 +333,8 @@ static void va_surface_image_destroy(struct va_surface *surface)
     surface->is_derived = false;
 }
 
-static int va_surface_image_alloc(struct mp_image *img, VAImageFormat *format)
+static int va_surface_image_alloc(struct va_surface *p, VAImageFormat *format)
 {
-    struct va_surface *p = va_surface_in_mp_image(img);
-    if (!format || !p)
-        return -1;
     VADisplay *display = p->display;
 
     if (p->image.image_id != VA_INVALID_ID &&
@@ -387,7 +387,7 @@ int va_surface_alloc_imgfmt(struct mp_image *img, int imgfmt)
     VAImageFormat *format = va_image_format_from_imgfmt(p->ctx, imgfmt);
     if (!format)
         return -1;
-    if (va_surface_image_alloc(img, format) < 0)
+    if (va_surface_image_alloc(p, format) < 0)
         return -1;
     return 0;
 }
@@ -464,14 +464,10 @@ int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src)
     return 0;
 }
 
-static struct mp_image *try_download(struct mp_image *src,
+static struct mp_image *try_download(struct va_surface *p, struct mp_image *src,
                                      struct mp_image_pool *pool)
 {
     VAStatus status;
-    struct va_surface *p = va_surface_in_mp_image(src);
-    if (!p)
-        return NULL;
-
     VAImage *image = &p->image;
 
     if (image->image_id == VA_INVALID_ID ||
@@ -513,19 +509,40 @@ static struct mp_image *try_download(struct mp_image *src,
 struct mp_image *va_surface_download(struct mp_image *src,
                                      struct mp_image_pool *pool)
 {
-    struct va_surface *p = va_surface_in_mp_image(src);
-    if (!p)
+    if (!src || src->imgfmt != IMGFMT_VAAPI)
         return NULL;
+    struct va_surface *p = va_surface_in_mp_image(src);
+    struct va_surface tmp_p;
+    if (!p) {
+        // We might still be able to get to the cheese if this is a surface
+        // produced by libavutil's vaapi glue code.
+        if (!src->hwctx)
+            return NULL;
+        AVHWFramesContext *fctx = (void *)src->hwctx->data;
+        AVHWDeviceContext *dctx = fctx->device_ctx;
+        AVVAAPIDeviceContext *vactx = dctx->hwctx;
+        tmp_p = (struct va_surface){
+            .ctx = dctx->user_opaque, // as set by video/decode/vaapi.c
+            .id = va_surface_id(src),
+            .rt_format = VA_RT_FORMAT_YUV420,
+            .w = fctx->width,
+            .h = fctx->height,
+            .display = vactx->display,
+            .image = { .image_id = VA_INVALID_ID, .buf = VA_INVALID_ID },
+        };
+        p = &tmp_p;
+    }
+    struct mp_image *mpi = NULL;
     struct mp_vaapi_ctx *ctx = p->ctx;
     va_lock(ctx);
     VAStatus status = vaSyncSurface(p->display, p->id);
     va_unlock(ctx);
     if (!CHECK_VA_STATUS(ctx, "vaSyncSurface()"))
-        return NULL;
+        goto done;
 
-    struct mp_image *mpi = try_download(src, pool);
+    mpi = try_download(p, src, pool);
     if (mpi)
-        return mpi;
+        goto done;
 
     // We have no clue which format will work, so try them all.
     // Make sure to start with the most preferred format (nv12), to avoid
@@ -534,16 +551,24 @@ struct mp_image *va_surface_download(struct mp_image *src,
         VAImageFormat *format =
             va_image_format_from_imgfmt(ctx, va_to_imgfmt[n].mp);
         if (format) {
-            if (va_surface_image_alloc(src, format) < 0)
+            if (va_surface_image_alloc(p, format) < 0)
                 continue;
-            mpi = try_download(src, pool);
+            mpi = try_download(p, src, pool);
             if (mpi)
-                return mpi;
+                goto done;
         }
     }
 
-    MP_ERR(ctx, "failed to get surface data.\n");
-    return NULL;
+done:
+
+    if (p == &tmp_p) {
+        if (p->image.image_id != VA_INVALID_ID)
+            vaDestroyImage(p->display, p->image.image_id);
+    }
+
+    if (!mpi)
+        MP_ERR(ctx, "failed to get surface data.\n");
+    return mpi;
 }
 
 // Set the hw_subfmt from the surface's real format. Because of this bug:
