@@ -201,7 +201,7 @@ static void fix_audio_pts(struct dec_audio *da)
 
 void audio_work(struct dec_audio *da)
 {
-    if (da->current_frame)
+    if (da->current_frame || !da->ad_driver)
         return;
 
     if (!da->packet && !da->new_segment &&
@@ -217,30 +217,25 @@ void audio_work(struct dec_audio *da)
         da->packet = NULL;
     }
 
-    bool had_input_packet = !!da->packet;
-    bool had_packet = da->packet || da->new_segment;
-
-    int ret = da->ad_driver->decode_packet(da, da->packet, &da->current_frame);
-    if (ret < 0 || (da->packet && da->packet->len == 0)) {
+    if (da->ad_driver->send_packet(da, da->packet)) {
         talloc_free(da->packet);
         da->packet = NULL;
     }
+
+    bool progress = da->ad_driver->receive_frame(da, &da->current_frame);
 
     if (da->current_frame && !mp_audio_config_valid(da->current_frame)) {
         talloc_free(da->current_frame);
         da->current_frame = NULL;
     }
 
-    da->current_state = DATA_OK;
-    if (!da->current_frame) {
+    da->current_state = da->current_frame ? DATA_OK : DATA_AGAIN;
+    if (!progress)
         da->current_state = DATA_EOF;
-        if (had_packet)
-            da->current_state = DATA_AGAIN;
-    }
 
     fix_audio_pts(da);
 
-    bool segment_end = !da->current_frame && !had_input_packet;
+    bool segment_end = da->current_state == DATA_EOF;
 
     if (da->current_frame) {
         mp_audio_clip_timestamps(da->current_frame, da->start, da->end);

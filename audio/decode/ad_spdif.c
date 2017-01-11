@@ -42,6 +42,8 @@ struct spdifContext {
     bool             use_dts_hd;
     struct mp_audio  fmt;
     struct mp_audio_pool *pool;
+    bool             got_eof;
+    struct demux_packet *queued_packet;
 };
 
 static int write_packet(void *p, uint8_t *buf, int buf_size)
@@ -71,6 +73,7 @@ static void uninit(struct dec_audio *da)
             av_freep(&lavf_ctx->pb->buffer);
         av_freep(&lavf_ctx->pb);
         avformat_free_context(lavf_ctx);
+        talloc_free(spdif_ctx->queued_packet);
         spdif_ctx->lavf_ctx = NULL;
     }
 }
@@ -243,44 +246,70 @@ fail:
     return -1;
 }
 
-static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
-                         struct mp_audio **out)
+
+static bool send_packet(struct dec_audio *da, struct demux_packet *mpkt)
 {
     struct spdifContext *spdif_ctx = da->priv;
 
-    spdif_ctx->out_buffer_len  = 0;
+    if (spdif_ctx->queued_packet || spdif_ctx->got_eof)
+        return false;
 
-    if (!mpkt)
-        return 0;
+    spdif_ctx->queued_packet = mpkt ? demux_copy_packet(mpkt) : NULL;
+    spdif_ctx->got_eof = !mpkt;
+    return true;
+}
 
-    double pts = mpkt->pts;
+static bool receive_frame(struct dec_audio *da, struct mp_audio **out)
+{
+    struct spdifContext *spdif_ctx = da->priv;
+
+    if (spdif_ctx->got_eof) {
+        spdif_ctx->got_eof = false;
+        return false;
+    }
+
+    if (!spdif_ctx->queued_packet)
+        return true;
+
+    double pts = spdif_ctx->queued_packet->pts;
 
     AVPacket pkt;
-    mp_set_av_packet(&pkt, mpkt, NULL);
-    mpkt->len = 0; // will be fully consumed
+    mp_set_av_packet(&pkt, spdif_ctx->queued_packet, NULL);
     pkt.pts = pkt.dts = 0;
     if (!spdif_ctx->lavf_ctx) {
         if (init_filter(da, &pkt) < 0)
-            return -1;
+            goto done;
     }
+    spdif_ctx->out_buffer_len  = 0;
     int ret = av_write_frame(spdif_ctx->lavf_ctx, &pkt);
     avio_flush(spdif_ctx->lavf_ctx->pb);
     if (ret < 0)
-        return -1;
+        goto done;
 
     int samples = spdif_ctx->out_buffer_len / spdif_ctx->fmt.sstride;
     *out = mp_audio_pool_get(spdif_ctx->pool, &spdif_ctx->fmt, samples);
     if (!*out)
-        return -1;
+        goto done;
 
     memcpy((*out)->planes[0], spdif_ctx->out_buffer, spdif_ctx->out_buffer_len);
     (*out)->pts = pts;
 
-    return 0;
+done:
+    talloc_free(spdif_ctx->queued_packet);
+    spdif_ctx->queued_packet = NULL;
+    return true;
 }
 
 static int control(struct dec_audio *da, int cmd, void *arg)
 {
+    struct spdifContext *spdif_ctx = da->priv;
+    switch (cmd) {
+    case ADCTRL_RESET:
+        talloc_free(spdif_ctx->queued_packet);
+        spdif_ctx->queued_packet = NULL;
+        spdif_ctx->got_eof = false;
+        return CONTROL_TRUE;
+    }
     return CONTROL_UNKNOWN;
 }
 
@@ -344,5 +373,6 @@ const struct ad_functions ad_spdif = {
     .init = init,
     .uninit = uninit,
     .control = control,
-    .decode_packet = decode_packet,
+    .send_packet = send_packet,
+    .receive_frame = receive_frame,
 };

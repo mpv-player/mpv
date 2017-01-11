@@ -45,7 +45,6 @@ struct priv {
     uint32_t skip_samples, trim_samples;
     bool preroll_done;
     double next_pts;
-    bool needs_reset;
     AVRational codec_timebase;
 };
 
@@ -177,14 +176,12 @@ static int control(struct dec_audio *da, int cmd, void *arg)
         ctx->trim_samples = 0;
         ctx->preroll_done = false;
         ctx->next_pts = MP_NOPTS_VALUE;
-        ctx->needs_reset = false;
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
 }
 
-static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
-                         struct mp_audio **out)
+static bool send_packet(struct dec_audio *da, struct demux_packet *mpkt)
 {
     struct priv *priv = da->priv;
     AVCodecContext *avctx = priv->avctx;
@@ -195,41 +192,43 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
     if (mpkt && priv->next_pts == MP_NOPTS_VALUE)
         priv->next_pts = mpkt->pts;
 
-    int in_len = mpkt ? mpkt->len : 0;
-
     AVPacket pkt;
     mp_set_av_packet(&pkt, mpkt, &priv->codec_timebase);
 
-    int got_frame = 0;
-    av_frame_unref(priv->avframe);
+    int ret = avcodec_send_packet(avctx, mpkt ? &pkt : NULL);
 
-    if (priv->needs_reset)
-        control(da, ADCTRL_RESET, NULL);
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+        return false;
 
-    int ret = avcodec_send_packet(avctx, &pkt);
-    if (ret >= 0 || ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-        if (ret >= 0 && mpkt)
-            mpkt->len = 0;
-        ret = avcodec_receive_frame(avctx, priv->avframe);
-        if (ret >= 0)
-            got_frame = 1;
-        if (ret == AVERROR_EOF)
-            priv->needs_reset = true;
-        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
-            ret = 0;
-    }
-    if (ret < 0) {
+    if (ret < 0)
         MP_ERR(da, "Error decoding audio.\n");
-        return -1;
+    return true;
+}
+
+static bool receive_frame(struct dec_audio *da, struct mp_audio **out)
+{
+    struct priv *priv = da->priv;
+    AVCodecContext *avctx = priv->avctx;
+
+    int ret = avcodec_receive_frame(avctx, priv->avframe);
+
+    if (ret == AVERROR_EOF) {
+        // If flushing was initialized earlier and has ended now, make it start
+        // over in case we get new packets at some point in the future.
+        control(da, ADCTRL_RESET, NULL);
+        return false;
+    } else if (ret < 0 && ret != AVERROR(EAGAIN)) {
+        MP_ERR(da, "Error decoding audio.\n");
     }
-    if (!got_frame)
-        return 0;
+
+    if (!priv->avframe->buf[0])
+        return true;
 
     double out_pts = mp_pts_from_av(priv->avframe->pts, &priv->codec_timebase);
 
     struct mp_audio *mpframe = mp_audio_from_avframe(priv->avframe);
     if (!mpframe)
-        return -1;
+        return true;
 
     struct mp_chmap lavc_chmap = mpframe->channels;
     if (lavc_chmap.num != avctx->channels)
@@ -279,8 +278,8 @@ static int decode_packet(struct dec_audio *da, struct demux_packet *mpkt,
 
     av_frame_unref(priv->avframe);
 
-    MP_DBG(da, "Decoded %d -> %d samples\n", in_len, mpframe->samples);
-    return 0;
+    MP_DBG(da, "Decoded %d samples\n", mpframe->samples);
+    return true;
 }
 
 static void add_decoders(struct mp_decoder_list *list)
@@ -294,5 +293,6 @@ const struct ad_functions ad_lavc = {
     .init = init,
     .uninit = uninit,
     .control = control,
-    .decode_packet = decode_packet,
+    .send_packet = send_packet,
+    .receive_frame = receive_frame,
 };
