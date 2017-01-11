@@ -307,7 +307,7 @@ def build(ctx):
         ( "video/decode/dxva2.c",                "d3d-hwaccel" ),
         ( "video/decode/d3d11va.c",              "d3d-hwaccel" ),
         ( "video/decode/d3d.c",                  "win32" ),
-        ( "video/decode/vaapi.c",                "vaapi-hwaccel" ),
+        ( "video/decode/vaapi_old.c",            "vaapi-hwaccel" ),
         ( "video/decode/vd_lavc.c" ),
         ( "video/decode/videotoolbox.c",         "videotoolbox-hwaccel" ),
         ( "video/decode/vdpau.c",                "vdpau-hwaccel" ),
