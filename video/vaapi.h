@@ -45,8 +45,8 @@ bool check_va_status(struct mp_log *log, VAStatus status, const char *msg);
 
 #define CHECK_VA_STATUS(ctx, msg) check_va_status((ctx)->log, status, msg)
 
-#define va_lock(ctx)     pthread_mutex_lock(&(ctx)->lock)
-#define va_unlock(ctx)   pthread_mutex_unlock(&(ctx)->lock)
+#define va_lock(ctx)     (void)(ctx)
+#define va_unlock(ctx)   (void)(ctx)
 
 int                      va_get_colorspace_flag(enum mp_csp csp);
 
