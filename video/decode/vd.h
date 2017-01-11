@@ -35,7 +35,9 @@ typedef struct vd_functions
     int (*control)(struct dec_video *vd, int cmd, void *arg);
     // Return whether or not the packet has been consumed.
     bool (*send_packet)(struct dec_video *vd, struct demux_packet *pkt);
-    struct mp_image *(*receive_frame)(struct dec_video *vd);
+    // Return whether decoding is still going on (false if EOF was reached).
+    // Never returns false & *out_image set, but can return true with no image.
+    bool (*receive_frame)(struct dec_video *vd, struct mp_image **out_image);
 } vd_functions_t;
 
 // NULL terminated array of all drivers

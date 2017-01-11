@@ -755,15 +755,18 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
     return 0;
 }
 
-static struct mp_image *read_output(struct dec_video *vd, bool eof)
+static bool read_output(struct dec_video *vd, bool progress,
+                        struct mp_image **out_image)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
-    if (!ctx->num_delay_queue)
-        return NULL;
+    assert(!*out_image);
 
-    if (ctx->num_delay_queue <= ctx->max_delay_queue && !eof)
-        return NULL;
+    if (!ctx->num_delay_queue)
+        return progress;
+
+    if (ctx->num_delay_queue <= ctx->max_delay_queue && progress)
+        return true;
 
     struct mp_image *res = ctx->delay_queue[0];
     MP_TARRAY_REMOVE_AT(ctx->delay_queue, ctx->num_delay_queue, 0);
@@ -773,7 +776,7 @@ static struct mp_image *read_output(struct dec_video *vd, bool eof)
 
     res = res ? mp_img_swap_to_native(res) : NULL;
     if (!res)
-        return NULL;
+        return progress;
 
     if (!ctx->hwdec_notified && vd->opts->hwdec_api != HWDEC_NONE) {
         if (ctx->hwdec) {
@@ -792,7 +795,8 @@ static struct mp_image *read_output(struct dec_video *vd, bool eof)
         ctx->hw_probing = false;
     }
 
-    return res;
+    *out_image = res;
+    return true;
 }
 
 static bool prepare_decoding(struct dec_video *vd)
@@ -878,14 +882,14 @@ static bool send_packet(struct dec_video *vd, struct demux_packet *pkt)
     return do_send_packet(vd, pkt);
 }
 
-// Returns EOF state.
+// Returns whether decoder is still active (!EOF state).
 static bool decode_frame(struct dec_video *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
 
     if (!prepare_decoding(vd))
-        return false;
+        return true;
 
     hwdec_lock(ctx);
     int ret = avcodec_receive_frame(avctx, ctx->pic);
@@ -895,13 +899,13 @@ static bool decode_frame(struct dec_video *vd)
         // If flushing was initialized earlier and has ended now, make it start
         // over in case we get new packets at some point in the future.
         reset_avctx(vd);
-        return true;
+        return false;
     } else if (ret < 0 && ret != AVERROR(EAGAIN)) {
         handle_err(vd);
     }
 
     if (!ctx->pic->buf[0])
-        return false;
+        return true;
 
     ctx->hwdec_fail_count = 0;
 
@@ -917,7 +921,7 @@ static bool decode_frame(struct dec_video *vd)
     struct mp_image *mpi = mp_image_from_av_frame(ctx->pic);
     if (!mpi) {
         av_frame_unref(ctx->pic);
-        return false;
+        return true;
     }
     assert(mpi->planes[0] || mpi->planes[3]);
     mpi->pts = mp_pts_from_av(ctx->pic->pts, &ctx->codec_timebase);
@@ -935,14 +939,14 @@ static bool decode_frame(struct dec_video *vd)
     av_frame_unref(ctx->pic);
 
     MP_TARRAY_APPEND(ctx, ctx->delay_queue, ctx->num_delay_queue, mpi);
-    return false;
+    return true;
 }
 
-static struct mp_image *receive_frame(struct dec_video *vd)
+static bool receive_frame(struct dec_video *vd, struct mp_image **out_image)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
-    bool eof = decode_frame(vd);
+    bool progress = decode_frame(vd);
 
     if (ctx->hwdec_failed) {
         // Failed hardware decoding? Try again in software.
@@ -953,30 +957,11 @@ static struct mp_image *receive_frame(struct dec_video *vd)
 
         force_fallback(vd);
 
-        struct mp_image *img = NULL;
-
-        while (num_pkts > 0) {
-            if (send_packet(vd, pkts[0])) {
-                talloc_free(pkts[0]);
-                MP_TARRAY_REMOVE_AT(pkts, num_pkts, 0);
-            }
-            if (decode_frame(vd)) {
-                eof = true;
-                break;
-            }
-            img = read_output(vd, eof);
-            if (img)
-                break;
-        }
-
         ctx->requeue_packets = pkts;
         ctx->num_requeue_packets = num_pkts;
-
-        if (img)
-            return img;
     }
 
-    return read_output(vd, eof);
+    return read_output(vd, progress, out_image);
 }
 
 static int control(struct dec_video *vd, int cmd, void *arg)

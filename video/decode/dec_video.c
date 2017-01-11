@@ -272,19 +272,22 @@ static bool send_packet(struct dec_video *d_video, struct demux_packet *packet)
     return res;
 }
 
-static struct mp_image *receive_frame(struct dec_video *d_video)
+static bool receive_frame(struct dec_video *d_video, struct mp_image **out_image)
 {
     struct MPOpts *opts = d_video->opts;
+    struct mp_image *mpi = NULL;
+
+    assert(!*out_image);
 
     MP_STATS(d_video, "start decode video");
 
-    struct mp_image *mpi = d_video->vd_driver->receive_frame(d_video);
+    bool progress = d_video->vd_driver->receive_frame(d_video, &mpi);
 
     MP_STATS(d_video, "end decode video");
 
-    // Error, discarded frame, dropped frame, or initial codec delay.
+    // Error, EOF, discarded frame, dropped frame, or initial codec delay.
     if (!mpi)
-        return NULL;
+        return progress;
 
     if (opts->field_dominance == 0) {
         mpi->fields |= MP_IMGFIELD_TOP_FIRST | MP_IMGFIELD_INTERLACED;
@@ -356,7 +359,8 @@ static struct mp_image *receive_frame(struct dec_video *d_video)
         mpi->pts -= MPMAX(delay, 0) / d_video->fps;
     }
 
-    return mpi;
+    *out_image = mpi;
+    return true;
 }
 
 void video_reset_params(struct dec_video *d_video)
@@ -403,9 +407,6 @@ void video_work(struct dec_video *d_video)
         d_video->packet = NULL;
     }
 
-    bool had_input_packet = !!d_video->packet;
-    bool had_packet = had_input_packet || d_video->new_segment;
-
     double start_pts = d_video->start_pts;
     if (d_video->start != MP_NOPTS_VALUE && (start_pts == MP_NOPTS_VALUE ||
                                              d_video->start > start_pts))
@@ -426,19 +427,18 @@ void video_work(struct dec_video *d_video)
         d_video->packet = NULL;
     }
 
-    d_video->current_mpi = receive_frame(d_video);
+    bool progress = receive_frame(d_video, &d_video->current_mpi);
 
     d_video->current_state = DATA_OK;
-    if (!d_video->current_mpi) {
+    if (!progress) {
         d_video->current_state = DATA_EOF;
-        if (had_packet) {
-            if (framedrop_type == 1)
-                d_video->dropped_frames += 1;
-            d_video->current_state = DATA_AGAIN;
-        }
+    } else if (!d_video->current_mpi) {
+        if (framedrop_type == 1)
+            d_video->dropped_frames += 1;
+        d_video->current_state = DATA_AGAIN;
     }
 
-    bool segment_ended = !d_video->current_mpi && !had_input_packet;
+    bool segment_ended = d_video->current_state == DATA_EOF;
 
     if (d_video->current_mpi && d_video->current_mpi->pts != MP_NOPTS_VALUE) {
         double vpts = d_video->current_mpi->pts;
