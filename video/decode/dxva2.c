@@ -32,7 +32,7 @@
 
 #include "d3d.h"
 
-#define ADDITIONAL_SURFACES (4 + HWDEC_DELAY_QUEUE_COUNT)
+#define ADDITIONAL_SURFACES (HWDEC_EXTRA_SURFACES + HWDEC_DELAY_QUEUE_COUNT)
 
 struct priv {
     struct mp_log *log;

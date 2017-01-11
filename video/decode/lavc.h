@@ -11,6 +11,13 @@
 
 #define HWDEC_DELAY_QUEUE_COUNT 2
 
+// Maximum number of surfaces the player wants to buffer.
+// This number might require adjustment depending on whatever the player does;
+// for example, if vo_opengl increases the number of reference surfaces for
+// interpolation, this value has to be increased too.
+// This value does not yet include HWDEC_DELAY_QUEUE_COUNT.
+#define HWDEC_EXTRA_SURFACES 4
+
 typedef struct lavc_ctx {
     struct mp_log *log;
     struct MPOpts *opts;
