@@ -75,6 +75,8 @@ struct vd_lavc_hwdec {
     // efficiency by not blocking on the hardware pipeline by reading back
     // immediately after decoding.
     int delay_queue;
+    // If true, AVCodecContext will destroy the underlying decoder.
+    bool volatile_context;
     int (*probe)(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                  const char *codec);
     int (*init)(struct lavc_ctx *ctx);

@@ -690,7 +690,8 @@ static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                 ctx->hwdec_h != avctx->coded_height ||
                 ctx->hwdec_fmt != ctx->hwdec->image_format ||
                 ctx->hwdec_profile != avctx->profile ||
-                ctx->hwdec_request_reinit;
+                ctx->hwdec_request_reinit ||
+                ctx->hwdec->volatile_context;
             ctx->hwdec_w = avctx->coded_width;
             ctx->hwdec_h = avctx->coded_height;
             ctx->hwdec_fmt = ctx->hwdec->image_format;

@@ -420,6 +420,13 @@ libav_dependencies = [
         'fmsg': "Unable to find development files for some of the required \
 FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_string)
     }, {
+        'name': 'is_ffmpeg',
+        'desc': 'libav* is FFmpeg',
+        # FFmpeg <=> LIBAVUTIL_VERSION_MICRO>=100
+        'func': check_statement('libavutil/version.h',
+                                'int x[LIBAVUTIL_VERSION_MICRO >= 100 ? 1 : -1]',
+                                use='libav')
+    }, {
         'name': '--libswresample',
         'desc': 'libswresample',
         'func': check_pkg_config('libswresample', '>= 2.3.100'),
@@ -833,6 +840,20 @@ hwaccel_features = [
         'desc': 'libavcodec VAAPI hwaccel',
         'deps': [ 'vaapi' ],
         'func': check_headers('libavcodec/vaapi.h', use='libav'),
+    }, {
+        'name': '--vaapi-hwaccel-new',
+        'desc': 'libavcodec VAAPI hwaccel (new)',
+        'deps': [ 'vaapi-hwaccel' ],
+        'deps_neg': [ 'is_ffmpeg' ],
+        'func': check_statement('libavcodec/version.h',
+                                'int x[LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 26, 0) ? 1 : -1]',
+                                use='libav'),
+    }, {
+        'name': '--vaapi-hwaccel-old',
+        'desc': 'libavcodec VAAPI hwaccel (old)',
+        'deps': [ 'vaapi-hwaccel' ],
+        'deps_neg': [ 'vaapi-hwaccel-new' ],
+        'func': check_true,
     }, {
         'name': '--videotoolbox-hwaccel',
         'desc': 'libavcodec videotoolbox hwaccel',
