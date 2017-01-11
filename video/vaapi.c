@@ -17,6 +17,8 @@
 
 #include <assert.h>
 
+#include "config.h"
+
 #include "vaapi.h"
 #include "common/common.h"
 #include "common/msg.h"
