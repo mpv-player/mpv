@@ -739,11 +739,11 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
     int h = pic->height;
 
     if (imgfmt != ctx->hwdec_fmt && w != ctx->hwdec_w && h != ctx->hwdec_h)
-        return -1;
+        return AVERROR(EINVAL);
 
     struct mp_image *mpi = ctx->hwdec->allocate_image(ctx, w, h);
     if (!mpi)
-        return -1;
+        return AVERROR(ENOMEM);
 
     for (int i = 0; i < 4; i++) {
         pic->data[i] = mpi->planes[i];
