@@ -36,6 +36,9 @@ struct mp_vaapi_ctx {
     struct va_image_formats *image_formats;
     bool gpu_memcpy_message;
     pthread_mutex_t lock;
+    // Internal, for va_create_standalone()
+    void *native_ctx;
+    void (*destroy_native_ctx)(void *native_ctx);
 };
 
 bool check_va_status(struct mp_log *log, VAStatus status, const char *msg);
@@ -72,5 +75,7 @@ int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src);
 void va_surface_init_subformat(struct mp_image *mpi);
 
 bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx);
+
+struct mp_vaapi_ctx *va_create_standalone(struct mp_log *plog, bool probing);
 
 #endif

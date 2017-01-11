@@ -199,6 +199,9 @@ void va_destroy(struct mp_vaapi_ctx *ctx)
         if (ctx->display)
             vaTerminate(ctx->display);
 
+        if (ctx->destroy_native_ctx)
+            ctx->destroy_native_ctx(ctx->native_ctx);
+
         pthread_mutex_lock(&va_log_mutex);
         for (int n = 0; n < num_va_mpv_clients; n++) {
             if (va_mpv_clients[n] == ctx) {
@@ -609,4 +612,116 @@ bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx)
     const char *s = vaQueryVendorString(ctx->display);
     va_unlock(ctx);
     return s && strstr(s, "VDPAU backend");
+}
+
+struct va_native_display {
+    void (*create)(VADisplay **out_display, void **out_native_ctx);
+    void (*destroy)(void *native_ctx);
+};
+
+#if HAVE_VAAPI_X11
+#include <X11/Xlib.h>
+#include <va/va_x11.h>
+
+static void x11_destroy(void *native_ctx)
+{
+    XCloseDisplay(native_ctx);
+}
+
+static void x11_create(VADisplay **out_display, void **out_native_ctx)
+{
+    void *native_display = XOpenDisplay(NULL);
+    if (!native_display)
+        return;
+    *out_display = vaGetDisplay(native_display);
+    if (*out_display) {
+        *out_native_ctx = native_display;
+    } else {
+        XCloseDisplay(native_display);
+    }
+}
+
+static const struct va_native_display disp_x11 = {
+    .create = x11_create,
+    .destroy = x11_destroy,
+};
+#endif
+
+#if HAVE_VAAPI_DRM
+#include <unistd.h>
+#include <fcntl.h>
+#include <va/va_drm.h>
+
+struct va_native_display_drm {
+    int drm_fd;
+};
+
+static void drm_destroy(void *native_ctx)
+{
+    struct va_native_display_drm *ctx = native_ctx;
+    close(ctx->drm_fd);
+    talloc_free(ctx);
+}
+
+static void drm_create(VADisplay **out_display, void **out_native_ctx)
+{
+    static const char *drm_device_paths[] = {
+        "/dev/dri/renderD128",
+        "/dev/dri/card0",
+        NULL
+    };
+
+    for (int i = 0; drm_device_paths[i]; i++) {
+        int drm_fd = open(drm_device_paths[i], O_RDWR);
+        if (drm_fd < 0)
+            continue;
+
+        struct va_native_display_drm *ctx = talloc_ptrtype(NULL, ctx);
+        ctx->drm_fd = drm_fd;
+        *out_display = vaGetDisplayDRM(drm_fd);
+        if (out_display) {
+            *out_native_ctx = ctx;
+            return;
+        }
+
+        close(drm_fd);
+        talloc_free(ctx);
+    }
+}
+
+static const struct va_native_display disp_drm = {
+    .create = drm_create,
+    .destroy = drm_destroy,
+};
+#endif
+
+static const struct va_native_display *const native_displays[] = {
+#if HAVE_VAAPI_DRM
+    &disp_drm,
+#endif
+#if HAVE_VAAPI_X11
+    &disp_x11,
+#endif
+    NULL
+};
+
+struct mp_vaapi_ctx *va_create_standalone(struct mp_log *plog, bool probing)
+{
+    for (int n = 0; native_displays[n]; n++) {
+        VADisplay *display = NULL;
+        void *native_ctx = NULL;
+        native_displays[n]->create(&display, &native_ctx);
+        if (display) {
+            struct mp_vaapi_ctx *ctx = va_initialize(display, plog, probing);
+            if (!ctx) {
+                vaTerminate(display);
+                native_displays[n]->destroy(native_ctx);
+                return NULL;
+            }
+            ctx->native_ctx = native_ctx;
+            ctx->destroy_native_ctx = native_displays[n]->destroy;
+            return ctx;
+        }
+    }
+    return NULL;
 }
