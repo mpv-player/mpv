@@ -755,50 +755,6 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
     return 0;
 }
 
-static bool read_output(struct dec_video *vd, bool progress,
-                        struct mp_image **out_image)
-{
-    vd_ffmpeg_ctx *ctx = vd->priv;
-
-    assert(!*out_image);
-
-    if (!ctx->num_delay_queue)
-        return progress;
-
-    if (ctx->num_delay_queue <= ctx->max_delay_queue && progress)
-        return true;
-
-    struct mp_image *res = ctx->delay_queue[0];
-    MP_TARRAY_REMOVE_AT(ctx->delay_queue, ctx->num_delay_queue, 0);
-
-    if (ctx->hwdec && ctx->hwdec->process_image)
-        res = ctx->hwdec->process_image(ctx, res);
-
-    res = res ? mp_img_swap_to_native(res) : NULL;
-    if (!res)
-        return progress;
-
-    if (!ctx->hwdec_notified && vd->opts->hwdec_api != HWDEC_NONE) {
-        if (ctx->hwdec) {
-            MP_INFO(vd, "Using hardware decoding (%s).\n",
-                    m_opt_choice_str(mp_hwdec_names, ctx->hwdec->type));
-        } else {
-            MP_INFO(vd, "Using software decoding.\n");
-        }
-        ctx->hwdec_notified = true;
-    }
-
-    if (ctx->hw_probing) {
-        for (int n = 0; n < ctx->num_sent_packets; n++)
-            talloc_free(ctx->sent_packets[n]);
-        ctx->num_sent_packets = 0;
-        ctx->hw_probing = false;
-    }
-
-    *out_image = res;
-    return true;
-}
-
 static bool prepare_decoding(struct dec_video *vd)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
@@ -946,6 +902,8 @@ static bool receive_frame(struct dec_video *vd, struct mp_image **out_image)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
+    assert(!*out_image);
+
     bool progress = decode_frame(vd);
 
     if (ctx->hwdec_failed) {
@@ -961,7 +919,41 @@ static bool receive_frame(struct dec_video *vd, struct mp_image **out_image)
         ctx->num_requeue_packets = num_pkts;
     }
 
-    return read_output(vd, progress, out_image);
+    if (!ctx->num_delay_queue)
+        return progress;
+
+    if (ctx->num_delay_queue <= ctx->max_delay_queue && progress)
+        return true;
+
+    struct mp_image *res = ctx->delay_queue[0];
+    MP_TARRAY_REMOVE_AT(ctx->delay_queue, ctx->num_delay_queue, 0);
+
+    if (ctx->hwdec && ctx->hwdec->process_image)
+        res = ctx->hwdec->process_image(ctx, res);
+
+    res = res ? mp_img_swap_to_native(res) : NULL;
+    if (!res)
+        return progress;
+
+    if (!ctx->hwdec_notified && vd->opts->hwdec_api != HWDEC_NONE) {
+        if (ctx->hwdec) {
+            MP_INFO(vd, "Using hardware decoding (%s).\n",
+                    m_opt_choice_str(mp_hwdec_names, ctx->hwdec->type));
+        } else {
+            MP_INFO(vd, "Using software decoding.\n");
+        }
+        ctx->hwdec_notified = true;
+    }
+
+    if (ctx->hw_probing) {
+        for (int n = 0; n < ctx->num_sent_packets; n++)
+            talloc_free(ctx->sent_packets[n]);
+        ctx->num_sent_packets = 0;
+        ctx->hw_probing = false;
+    }
+
+    *out_image = res;
+    return true;
 }
 
 static int control(struct dec_video *vd, int cmd, void *arg)
