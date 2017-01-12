@@ -618,7 +618,7 @@ static void uninit_avctx(struct dec_video *vd)
 }
 
 static void update_image_params(struct dec_video *vd, AVFrame *frame,
-                                struct mp_image_params *out_params)
+                                struct mp_image_params *params)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
@@ -642,29 +642,9 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
     }
 #endif
 
-    *out_params = (struct mp_image_params) {
-        .imgfmt = pixfmt2imgfmt(frame->format),
-        .w = frame->width,
-        .h = frame->height,
-        .p_w = frame->sample_aspect_ratio.num,
-        .p_h = frame->sample_aspect_ratio.den,
-        .color = {
-            .space = avcol_spc_to_mp_csp(frame->colorspace),
-            .levels = avcol_range_to_mp_csp_levels(frame->color_range),
-            .primaries = avcol_pri_to_mp_csp_prim(frame->color_primaries),
-            .gamma = avcol_trc_to_mp_csp_trc(frame->color_trc),
-            .sig_peak = ctx->cached_hdr_peak,
-        },
-        .chroma_location =
-            avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
-        .rotate = vd->codec->rotate,
-        .stereo_in = vd->codec->stereo_mode,
-    };
-
-    if (frame->hw_frames_ctx) {
-        AVHWFramesContext *fctx = (void *)frame->hw_frames_ctx->data;
-        out_params->hw_subfmt = pixfmt2imgfmt(fctx->sw_format);
-    }
+    params->color.sig_peak = ctx->cached_hdr_peak;
+    params->rotate = vd->codec->rotate;
+    params->stereo_in = vd->codec->stereo_mode;
 }
 
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
@@ -895,9 +875,7 @@ static bool decode_frame(struct dec_video *vd)
         mp_pts_from_av(av_frame_get_pkt_duration(ctx->pic), &ctx->codec_timebase);
 #endif
 
-    struct mp_image_params params;
-    update_image_params(vd, ctx->pic, &params);
-    mp_image_set_params(mpi, &params);
+    update_image_params(vd, ctx->pic, &mpi->params);
 
     av_frame_unref(ctx->pic);
 
