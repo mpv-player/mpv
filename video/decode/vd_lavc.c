@@ -24,6 +24,7 @@
 
 #include <libavutil/common.h>
 #include <libavutil/opt.h>
+#include <libavutil/hwcontext.h>
 #include <libavutil/intreadwrite.h>
 #include <libavutil/pixdesc.h>
 
@@ -659,6 +660,11 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
         .rotate = vd->codec->rotate,
         .stereo_in = vd->codec->stereo_mode,
     };
+
+    if (frame->hw_frames_ctx) {
+        AVHWFramesContext *fctx = (void *)frame->hw_frames_ctx->data;
+        out_params->hw_subfmt = pixfmt2imgfmt(fctx->sw_format);
+    }
 }
 
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,

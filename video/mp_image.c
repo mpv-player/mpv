@@ -27,6 +27,7 @@
 #include <libavutil/mem.h>
 #include <libavutil/common.h>
 #include <libavutil/bswap.h>
+#include <libavutil/hwcontext.h>
 #include <libavutil/rational.h>
 #include <libavcodec/avcodec.h>
 
@@ -706,6 +707,11 @@ static void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
         dst->fields |= MP_IMGFIELD_TOP_FIRST;
     if (src->repeat_pict == 1)
         dst->fields |= MP_IMGFIELD_REPEAT_FIRST;
+
+    if (src->hw_frames_ctx) {
+        AVHWFramesContext *fctx = (void *)src->hw_frames_ctx->data;
+        dst->params.hw_subfmt = pixfmt2imgfmt(fctx->sw_format);
+    }
 }
 
 // Copy properties and data of the mp_image into the AVFrame, without taking

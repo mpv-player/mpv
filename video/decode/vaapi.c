@@ -101,12 +101,6 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
     return 0;
 }
 
-static struct mp_image *update_format(struct lavc_ctx *ctx, struct mp_image *img)
-{
-    va_surface_init_subformat(img);
-    return img;
-}
-
 static void uninit(struct lavc_ctx *ctx)
 {
     struct priv *p = ctx->hwdec_priv;
@@ -222,7 +216,6 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .init_decoder = init_decoder,
     .lock = intel_shit_lock,
     .unlock = intel_crap_unlock,
-    .process_image = update_format,
 };
 
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
