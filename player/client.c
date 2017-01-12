@@ -407,7 +407,13 @@ void mpv_terminate_destroy(mpv_handle *ctx)
     if (!ctx)
         return;
 
-    mpv_command(ctx, (const char*[]){"quit", NULL});
+    if (ctx->mpctx->initialized) {
+        mpv_command(ctx, (const char*[]){"quit", NULL});
+    } else {
+        mp_dispatch_lock(ctx->mpctx->dispatch);
+        ctx->mpctx->stop_play = PT_QUIT;
+        mp_dispatch_unlock(ctx->mpctx->dispatch);
+    }
 
     if (!ctx->owner) {
         mpv_detach_destroy(ctx);
