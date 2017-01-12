@@ -24,6 +24,7 @@
 
 #include <libavutil/buffer.h>
 #include <libavutil/hwcontext.h>
+#include <libavutil/mem.h>
 
 #include "mpv_talloc.h"
 
