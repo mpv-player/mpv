@@ -23,12 +23,14 @@
 #include <assert.h>
 
 #include <libavutil/buffer.h>
+#include <libavutil/hwcontext.h>
 
 #include "mpv_talloc.h"
 
 #include "common/common.h"
-#include "video/mp_image.h"
 
+#include "fmt-conversion.h"
+#include "mp_image.h"
 #include "mp_image_pool.h"
 
 static pthread_mutex_t pool_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -246,4 +248,63 @@ void mp_image_pool_set_allocator(struct mp_image_pool *pool,
 void mp_image_pool_set_lru(struct mp_image_pool *pool)
 {
     pool->use_lru = true;
+}
+
+
+// Copies the contents of the HW surface img to system memory and retuns it.
+// If swpool is not NULL, it's used to allocate the target image.
+// img must be a hw surface with a AVHWFramesContext attached. If not, you
+// must use the legacy mp_hwdec_ctx.download_image.
+// The returned image is cropped as needed.
+// Returns NULL on failure.
+struct mp_image *mp_image_hw_download(struct mp_image *src,
+                                      struct mp_image_pool *swpool)
+{
+    if (!src->hwctx)
+        return NULL;
+    AVHWFramesContext *fctx = (void *)src->hwctx->data;
+
+    // Try to find the first format which we can apparently use.
+    int imgfmt = 0;
+    enum AVPixelFormat *fmts;
+    if (av_hwframe_transfer_get_formats(src->hwctx,
+            AV_HWFRAME_TRANSFER_DIRECTION_FROM, &fmts, 0) < 0)
+        return NULL;
+    for (int n = 0; fmts[n] != AV_PIX_FMT_NONE; n++) {
+        imgfmt = pixfmt2imgfmt(fmts[n]);
+        if (imgfmt)
+            break;
+    }
+    av_free(fmts);
+
+    if (!imgfmt)
+        return NULL;
+
+    struct mp_image *dst =
+        mp_image_pool_get(swpool, imgfmt, fctx->width, fctx->height);
+    if (!dst)
+        return NULL;
+
+    // Target image must be writable, so unref it.
+    AVFrame *dstav = mp_image_to_av_frame_and_unref(dst);
+    if (!dstav)
+        return NULL;
+
+    AVFrame *srcav = mp_image_to_av_frame(src);
+    if (!srcav) {
+        av_frame_unref(dstav);
+        return NULL;
+    }
+
+    int res = av_hwframe_transfer_data(dstav, srcav, 0);
+    av_frame_unref(srcav);
+    dst = mp_image_from_av_frame(dstav);
+    av_frame_unref(dstav);
+    if (res >= 0) {
+        mp_image_set_size(dst, src->w, src->h);
+        mp_image_copy_attributes(dst, src);
+    } else {
+        mp_image_unrefp(&dst);
+    }
+    return dst;
 }

@@ -514,25 +514,10 @@ struct mp_image *va_surface_download(struct mp_image *src,
     if (!src || src->imgfmt != IMGFMT_VAAPI)
         return NULL;
     struct va_surface *p = va_surface_in_mp_image(src);
-    struct va_surface tmp_p;
     if (!p) {
         // We might still be able to get to the cheese if this is a surface
         // produced by libavutil's vaapi glue code.
-        if (!src->hwctx)
-            return NULL;
-        AVHWFramesContext *fctx = (void *)src->hwctx->data;
-        // as set by video/decode/vaapi.c
-        struct mp_vaapi_ctx *ctx = fctx->user_opaque;
-        tmp_p = (struct va_surface){
-            .ctx = ctx,
-            .id = va_surface_id(src),
-            .rt_format = VA_RT_FORMAT_YUV420,
-            .w = fctx->width,
-            .h = fctx->height,
-            .display = ctx->display,
-            .image = { .image_id = VA_INVALID_ID, .buf = VA_INVALID_ID },
-        };
-        p = &tmp_p;
+        return mp_image_hw_download(src, pool);
     }
     struct mp_image *mpi = NULL;
     struct mp_vaapi_ctx *ctx = p->ctx;
@@ -562,11 +547,6 @@ struct mp_image *va_surface_download(struct mp_image *src,
     }
 
 done:
-
-    if (p == &tmp_p) {
-        if (p->image.image_id != VA_INVALID_ID)
-            vaDestroyImage(p->display, p->image.image_id);
-    }
 
     if (!mpi)
         MP_ERR(ctx, "failed to get surface data.\n");
