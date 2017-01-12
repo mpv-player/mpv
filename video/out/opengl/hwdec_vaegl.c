@@ -322,7 +322,7 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
         MP_FOURCC('R', 'A', '2', '4'),   // DRM_FORMAT_RGBA8888
         // 2 bytes per pixel, 1-4 components
         MP_FOURCC('R', '1', '6', ' '),   // proposed DRM_FORMAT_R16
-        MP_FOURCC('G', 'R', '1', '6'),   // proposed DRM_FORMAT_GR16
+        MP_FOURCC('G', 'R', '3', '2'),   // proposed DRM_FORMAT_GR32
         0,                               // N/A
         0,                               // N/A
     };
