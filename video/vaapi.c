@@ -521,15 +521,15 @@ struct mp_image *va_surface_download(struct mp_image *src,
         if (!src->hwctx)
             return NULL;
         AVHWFramesContext *fctx = (void *)src->hwctx->data;
-        AVHWDeviceContext *dctx = fctx->device_ctx;
-        AVVAAPIDeviceContext *vactx = dctx->hwctx;
+        // as set by video/decode/vaapi.c
+        struct mp_vaapi_ctx *ctx = fctx->user_opaque;
         tmp_p = (struct va_surface){
-            .ctx = dctx->user_opaque, // as set by video/decode/vaapi.c
+            .ctx = ctx,
             .id = va_surface_id(src),
             .rt_format = VA_RT_FORMAT_YUV420,
             .w = fctx->width,
             .h = fctx->height,
-            .display = vactx->display,
+            .display = ctx->display,
             .image = { .image_id = VA_INVALID_ID, .buf = VA_INVALID_ID },
         };
         p = &tmp_p;

@@ -80,6 +80,9 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 
         fctx->initial_pool_size = hwdec_get_max_refs(ctx) + ADDITIONAL_SURFACES;
 
+        // Some mpv downstream code uses this.
+        fctx->user_opaque = p->ctx;
+
         va_lock(p->ctx);
         int res = av_hwframe_ctx_init(p->frames_ref);
         va_unlock(p->ctx);
@@ -150,9 +153,6 @@ static int init(struct lavc_ctx *ctx, bool direct)
     AVVAAPIDeviceContext *vactx = hwctx->hwctx;
 
     vactx->display = p->ctx->display;
-
-    // Some mpv downstream code uses this.
-    hwctx->user_opaque = p->ctx;
 
     if (av_hwdevice_ctx_init(p->device_ref) < 0)
         return -1;
