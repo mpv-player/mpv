@@ -452,6 +452,7 @@ static int init(struct dec_video *vd, const char *decoder)
     ctx->opts = vd->opts;
     ctx->decoder = talloc_strdup(ctx, decoder);
     ctx->hwdec_devs = vd->hwdec_devs;
+    ctx->hwdec_swpool = talloc_steal(ctx, mp_image_pool_new(17));
 
     reinit(vd);
 
@@ -919,6 +920,18 @@ static bool receive_frame(struct dec_video *vd, struct mp_image **out_image)
     res = res ? mp_img_swap_to_native(res) : NULL;
     if (!res)
         return progress;
+
+    if (ctx->hwdec && ctx->hwdec->copying && (res->fmt.flags & MP_IMGFLAG_HWACCEL))
+    {
+        struct mp_image *sw = mp_image_hw_download(res, ctx->hwdec_swpool);
+        mp_image_unrefp(&res);
+        res = sw;
+        if (!res) {
+            MP_ERR(vd, "Could not copy back hardware decoded frame.\n");
+            handle_err(vd);
+            return NULL;
+        }
+    }
 
     if (!ctx->hwdec_notified && vd->opts->hwdec_api != HWDEC_NONE) {
         if (ctx->hwdec) {

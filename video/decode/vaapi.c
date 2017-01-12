@@ -43,8 +43,6 @@ struct priv {
 
     AVBufferRef *device_ref;
     AVBufferRef *frames_ref;
-
-    struct mp_image_pool *sw_pool;
 };
 
 
@@ -123,7 +121,6 @@ static int init(struct lavc_ctx *ctx, bool direct)
     struct priv *p = talloc_ptrtype(NULL, p);
     *p = (struct priv) {
         .log = mp_log_new(p, ctx->log, "vaapi"),
-        .sw_pool = talloc_steal(p, mp_image_pool_new(17)),
     };
 
     if (direct) {
@@ -185,15 +182,6 @@ static int init_copy(struct lavc_ctx *ctx)
     return init(ctx, false);
 }
 
-static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *img)
-{
-    struct priv *p = ctx->hwdec_priv;
-
-    struct mp_image *simg = va_surface_download(img, p->sw_pool);
-    talloc_free(img);
-    return simg;
-}
-
 static void intel_shit_lock(struct lavc_ctx *ctx)
 {
     struct priv *p = ctx->hwdec_priv;
@@ -227,6 +215,5 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
     .init = init_copy,
     .uninit = uninit,
     .init_decoder = init_decoder,
-    .process_image = copy_image,
     .delay_queue = HWDEC_DELAY_QUEUE_COUNT,
 };

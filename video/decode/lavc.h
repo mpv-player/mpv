@@ -7,6 +7,7 @@
 
 #include "demux/stheader.h"
 #include "video/mp_image.h"
+#include "video/mp_image_pool.h"
 #include "video/hwdec.h"
 
 #define HWDEC_DELAY_QUEUE_COUNT 2
@@ -61,6 +62,8 @@ typedef struct lavc_ctx {
 
     bool hwdec_request_reinit;
     int hwdec_fail_count;
+
+    struct mp_image_pool *hwdec_swpool;
 } vd_ffmpeg_ctx;
 
 struct vd_lavc_hwdec {
