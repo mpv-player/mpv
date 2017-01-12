@@ -68,6 +68,12 @@ build_options = [
         'desc': 'dynamic loader',
         'func': check_libs(['dl'], check_statement('dlfcn.h', 'dlopen("", 0)'))
     }, {
+        'name': '--cplugins',
+        'desc': 'C plugins',
+        'deps': [ 'libdl' ],
+        'default': 'disable',
+        'func': check_cc(linkflags=['-Wl,-export-dynamic']),
+    }, {
         'name': 'dlopen',
         'desc': 'dlopen',
         'deps_any': [ 'libdl', 'os-win32', 'os-cygwin' ],
@@ -1058,6 +1064,13 @@ def configure(ctx):
 
     if ctx.dependency_satisfied('clang-database'):
         ctx.load('clang_compilation_database')
+
+    if ctx.dependency_satisfied('cplugins'):
+        # We need to export the libmpv symbols, since the mpv binary itself is
+        # not linked against libmpv. The C plugin needs to be able to pick
+        # up the libmpv symbols from the binary. We still restrict the set
+        # of exported symbols via mpv.def.
+        ctx.env.LINKFLAGS += ['-Wl,-export-dynamic']
 
     ctx.store_dependencies_lists()
 

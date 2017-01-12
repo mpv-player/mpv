@@ -470,13 +470,19 @@ def build(ctx):
             features     = "c",
         )
 
+    syms = False
+    if ctx.dependency_satisfied('cplugins'):
+        syms = True
+        ctx.load("syms")
+
     if ctx.dependency_satisfied('cplayer'):
         ctx(
             target       = "mpv",
             source       = main_fn_c,
             use          = ctx.dependencies_use() + ['objects'],
             includes     = _all_includes(ctx),
-            features     = "c cprogram",
+            features     = "c cprogram" + (" syms" if syms else ""),
+            export_symbols_def = "libmpv/mpv.def", # for syms=True
             install_path = ctx.env.BINDIR
         )
         for f in ['mpv.conf', 'input.conf', 'mplayer-input.conf', \
