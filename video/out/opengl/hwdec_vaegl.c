@@ -257,6 +257,7 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 
     p->current_mpfmt = params->hw_subfmt;
     if (p->current_mpfmt != IMGFMT_NV12 &&
+        p->current_mpfmt != IMGFMT_P010 &&
         p->current_mpfmt != IMGFMT_420P)
     {
         MP_FATAL(p, "unsupported VA image format %s\n",
@@ -313,17 +314,27 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     mp_image_set_params(&layout, &hw_image->params);
     mp_image_setfmt(&layout, mpfmt);
 
-    // (it would be nice if we could use EGL_IMAGE_INTERNAL_FORMAT_EXT)
-    int drm_fmts[4] = {MP_FOURCC('R', '8', ' ', ' '),   // DRM_FORMAT_R8
-                       MP_FOURCC('G', 'R', '8', '8'),   // DRM_FORMAT_GR88
-                       MP_FOURCC('R', 'G', '2', '4'),   // DRM_FORMAT_RGB888
-                       MP_FOURCC('R', 'A', '2', '4')};  // DRM_FORMAT_RGBA8888
+    int drm_fmts[8] = {
+        // 1 bytes per pixel, 1-4 components
+        MP_FOURCC('R', '8', ' ', ' '),   // DRM_FORMAT_R8
+        MP_FOURCC('G', 'R', '8', '8'),   // DRM_FORMAT_GR88
+        MP_FOURCC('R', 'G', '2', '4'),   // DRM_FORMAT_RGB888
+        MP_FOURCC('R', 'A', '2', '4'),   // DRM_FORMAT_RGBA8888
+        // 2 bytes per pixel, 1-4 components
+        MP_FOURCC('R', '1', '6', ' '),   // proposed DRM_FORMAT_R16
+        MP_FOURCC('G', 'R', '1', '6'),   // proposed DRM_FORMAT_GR16
+        0,                               // N/A
+        0,                               // N/A
+    };
 
     for (int n = 0; n < layout.num_planes; n++) {
         int attribs[20] = {EGL_NONE};
         int num_attribs = 0;
 
-        ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, drm_fmts[layout.fmt.bytes[n] - 1]);
+        int fmt_index = layout.fmt.components[n] - 1 +
+                        4 * (layout.fmt.component_full_bits / 8 - 1);
+
+        ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, drm_fmts[fmt_index]);
         ADD_ATTRIB(EGL_WIDTH, mp_image_plane_w(&layout, n));
         ADD_ATTRIB(EGL_HEIGHT, mp_image_plane_h(&layout, n));
         ADD_ATTRIB(EGL_DMA_BUF_PLANE0_FD_EXT, buffer_info.handle);
