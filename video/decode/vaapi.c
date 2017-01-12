@@ -55,6 +55,13 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 
     assert(!ctx->avctx->hw_frames_ctx);
 
+    // If we use direct rendering, disallow 10 bit - it's probably not
+    // implemented yet, and our downstream components can't deal with it.
+    if (!p->own_ctx && required_sw_format != AV_PIX_FMT_NV12) {
+        MP_WARN(ctx, "10 bit surfaces are currently supported.\n");
+        return -1;
+    }
+
     if (p->frames_ref) {
         AVHWFramesContext *fctx = (void *)p->frames_ref->data;
         if (fctx->width != w || fctx->height != h ||
