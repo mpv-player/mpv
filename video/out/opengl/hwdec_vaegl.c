@@ -423,7 +423,7 @@ static void determine_working_formats(struct gl_hwdec *hw)
         if (s) {
             va_surface_init_subformat(s);
             if (try_format(hw, s))
-                MP_TARRAY_APPEND(p, formats, num_formats, s->params.hw_subfmt);
+                MP_TARRAY_APPEND(p, formats, num_formats, IMGFMT_NV12);
         }
         talloc_free(s);
         talloc_free(alloc);
