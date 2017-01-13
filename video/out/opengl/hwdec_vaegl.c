@@ -315,12 +315,12 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     mp_image_setfmt(&layout, mpfmt);
 
     int drm_fmts[8] = {
-        // 1 bytes per pixel, 1-4 components
+        // 1 bytes per component, 1-4 components
         MP_FOURCC('R', '8', ' ', ' '),   // DRM_FORMAT_R8
         MP_FOURCC('G', 'R', '8', '8'),   // DRM_FORMAT_GR88
         MP_FOURCC('R', 'G', '2', '4'),   // DRM_FORMAT_RGB888
         MP_FOURCC('R', 'A', '2', '4'),   // DRM_FORMAT_RGBA8888
-        // 2 bytes per pixel, 1-4 components
+        // 2 bytes per component, 1-4 components
         MP_FOURCC('R', '1', '6', ' '),   // proposed DRM_FORMAT_R16
         MP_FOURCC('G', 'R', '3', '2'),   // proposed DRM_FORMAT_GR32
         0,                               // N/A
