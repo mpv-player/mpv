@@ -362,6 +362,16 @@ int cocoa_main(int argc, char *argv[])
         ctx.argc     = &argc;
         ctx.argv     = &argv;
 
+        // convert all filenames and URLs to decomposed unicode (NFC->NFD).
+        // command line input can either be NFC or NFD whereas anything else
+        // on macOS uses NFD.
+        char *arg_decomposed;
+        for (int i = 1; i < argc; i++) {
+            NSString *arg = [NSString stringWithUTF8String:argv[i]];
+            arg_decomposed = [[arg decomposedStringWithCanonicalMapping] UTF8String];
+            argv[i] = arg_decomposed;
+        }
+
         if (bundle_started_from_finder(argc, argv)) {
             if (argc > 1) {
                 argc = 1; // clears out -psn argument if present
