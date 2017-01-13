@@ -297,13 +297,6 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     if (!CHECK_VA_STATUS(p, "vaDeriveImage()"))
         goto err;
 
-    int mpfmt = va_fourcc_to_imgfmt(va_image->format.fourcc);
-    if (p->current_mpfmt != mpfmt) {
-        MP_FATAL(p, "mid-stream hwdec format change (%s -> %s) not supported\n",
-                 mp_imgfmt_to_name(p->current_mpfmt), mp_imgfmt_to_name(mpfmt));
-        goto err;
-    }
-
     VABufferInfo buffer_info = {.mem_type = VA_SURFACE_ATTRIB_MEM_TYPE_DRM_PRIME};
     status = vaAcquireBufferHandle(p->display, va_image->buf, &buffer_info);
     if (!CHECK_VA_STATUS(p, "vaAcquireBufferHandle()"))
@@ -312,7 +305,7 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
 
     struct mp_image layout = {0};
     mp_image_set_params(&layout, &hw_image->params);
-    mp_image_setfmt(&layout, mpfmt);
+    mp_image_setfmt(&layout, p->current_mpfmt);
 
     int drm_fmts[8] = {
         // 1 bytes per component, 1-4 components
