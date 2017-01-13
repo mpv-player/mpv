@@ -33,6 +33,7 @@ struct mp_vaapi_ctx {
     struct mp_hwdec_ctx hwctx;
     struct mp_log *log;
     VADisplay display;
+    struct AVBufferRef *av_device_ref; // AVVAAPIDeviceContext*
     struct va_image_formats *image_formats;
     bool gpu_memcpy_message;
     pthread_mutex_t lock;

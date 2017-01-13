@@ -41,7 +41,6 @@ struct priv {
     struct mp_vaapi_ctx *ctx;
     bool own_ctx;
 
-    AVBufferRef *device_ref;
     AVBufferRef *frames_ref;
 };
 
@@ -72,7 +71,7 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
     }
 
     if (!p->frames_ref) {
-        p->frames_ref = av_hwframe_ctx_alloc(p->device_ref);
+        p->frames_ref = av_hwframe_ctx_alloc(p->ctx->av_device_ref);
         if (!p->frames_ref)
             return -1;
 
@@ -114,7 +113,6 @@ static void uninit(struct lavc_ctx *ctx)
         return;
 
     av_buffer_unref(&p->frames_ref);
-    av_buffer_unref(&p->device_ref);
 
     if (p->own_ctx)
         va_destroy(p->ctx);
@@ -143,16 +141,7 @@ static int init(struct lavc_ctx *ctx, bool direct)
 
     ctx->hwdec_priv = p;
 
-    p->device_ref = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VAAPI);
-    if (!p->device_ref)
-        return -1;
-
-    AVHWDeviceContext *hwctx = (void *)p->device_ref->data;
-    AVVAAPIDeviceContext *vactx = hwctx->hwctx;
-
-    vactx->display = p->ctx->display;
-
-    if (av_hwdevice_ctx_init(p->device_ref) < 0)
+    if (!p->ctx->av_device_ref)
         return -1;
 
     return 0;

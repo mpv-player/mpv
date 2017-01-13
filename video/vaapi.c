@@ -151,6 +151,21 @@ static void va_info_callback(const char *msg)
     va_message_callback(msg, MSGL_V);
 }
 
+static void open_lavu_vaapi_device(struct mp_vaapi_ctx *ctx)
+{
+    ctx->av_device_ref = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VAAPI);
+    if (!ctx->av_device_ref)
+        return;
+
+    AVHWDeviceContext *hwctx = (void *)ctx->av_device_ref->data;
+    AVVAAPIDeviceContext *vactx = hwctx->hwctx;
+
+    vactx->display = ctx->display;
+
+    if (av_hwdevice_ctx_init(ctx->av_device_ref) < 0)
+        av_buffer_unref(&ctx->av_device_ref);
+}
+
 struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
                                    bool probing)
 {
@@ -189,6 +204,11 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
     va_get_formats(res);
     if (!res->image_formats)
         goto error;
+
+    // For now, some code will still work even if libavutil fails on old crap
+    // libva drivers (such as the vdpau wraper). So don't error out on failure.
+    open_lavu_vaapi_device(res);
+
     return res;
 
 error:
