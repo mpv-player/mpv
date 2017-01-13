@@ -150,7 +150,8 @@ int m_config_parse(m_config_t *config, const char *location, bstr data,
         }
     }
 
-    m_config_finish_default_profile(config, flags);
+    if (config->recursion_depth == 0)
+        m_config_finish_default_profile(config, flags);
 
     talloc_free(tmp);
     return 1;
