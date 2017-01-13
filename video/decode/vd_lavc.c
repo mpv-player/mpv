@@ -938,7 +938,7 @@ static bool receive_frame(struct dec_video *vd, struct mp_image **out_image)
             MP_INFO(vd, "Using hardware decoding (%s).\n",
                     m_opt_choice_str(mp_hwdec_names, ctx->hwdec->type));
         } else {
-            MP_INFO(vd, "Using software decoding.\n");
+            MP_VERBOSE(vd, "Using software decoding.\n");
         }
         ctx->hwdec_notified = true;
     }
