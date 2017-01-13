@@ -47,7 +47,11 @@ struct mp_hwdec_ctx {
     //  HWDEC_CUDA:             CUcontext*
     void *ctx;
 
-    // Optional.
+    // List of IMGFMT_s, terminated with 0. NULL if N/A.
+    int *supported_formats;
+
+    // Optional. Legacy. (New code should use AVHWFramesContext and
+    // mp_image_hw_download().)
     // Allocates a software image from the pool, downloads the hw image from
     // mpi, and returns it.
     // pool can be NULL (then just use straight allocation).

@@ -39,7 +39,7 @@
 struct priv {
     struct mp_log *log;
     struct mp_vaapi_ctx *ctx;
-    bool own_ctx;
+    struct mp_hwdec_ctx *hwdev;
 
     AVBufferRef *frames_ref;
 };
@@ -54,11 +54,22 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 
     assert(!ctx->avctx->hw_frames_ctx);
 
-    // If we use direct rendering, disallow 10 bit - it's probably not
-    // implemented yet, and our downstream components can't deal with it.
-    if (!p->own_ctx && required_sw_format != AV_PIX_FMT_NV12) {
-        MP_WARN(ctx, "10 bit surfaces are currently unsupported.\n");
-        return -1;
+    // The video output might not support all formats.
+    // Note that supported_formats==NULL means any are accepted.
+    if (p->hwdev && p->hwdev->supported_formats) {
+        int mp_format = pixfmt2imgfmt(required_sw_format);
+        bool found = false;
+        for (int n = 0; p->hwdev->supported_formats[n]; n++) {
+            if (p->hwdev->supported_formats[n] == mp_format) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            MP_WARN(ctx, "Surface format %s not supported for direct rendering.\n",
+                    mp_imgfmt_to_name(mp_format));
+            return -1;
+        }
     }
 
     if (p->frames_ref) {
@@ -114,7 +125,7 @@ static void uninit(struct lavc_ctx *ctx)
 
     av_buffer_unref(&p->frames_ref);
 
-    if (p->own_ctx)
+    if (!p->hwdev)
         va_destroy(p->ctx);
 
     talloc_free(p);
@@ -129,14 +140,14 @@ static int init(struct lavc_ctx *ctx, bool direct)
     };
 
     if (direct) {
-        p->ctx = hwdec_devices_get(ctx->hwdec_devs, HWDEC_VAAPI)->ctx;
+        p->hwdev = hwdec_devices_get(ctx->hwdec_devs, HWDEC_VAAPI);
+        p->ctx = p->hwdev->ctx;
     } else {
         p->ctx = va_create_standalone(ctx->log, false);
         if (!p->ctx) {
             talloc_free(p);
             return -1;
         }
-        p->own_ctx = true;
     }
 
     ctx->hwdec_priv = p;

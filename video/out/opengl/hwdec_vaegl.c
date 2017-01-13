@@ -24,6 +24,11 @@
 
 #include <va/va_drmcommon.h>
 
+#include <libavutil/hwcontext.h>
+#include <libavutil/hwcontext_vaapi.h>
+
+#include "config.h"
+
 #include "hwdec.h"
 #include "video/vaapi.h"
 #include "video/img_fourcc.h"
@@ -118,6 +123,8 @@ struct priv {
     VAImage current_image;
     bool buffer_acquired;
     int current_mpfmt;
+    int *formats;
+    bool probing_formats; // temporary during init
 
     EGLImageKHR (EGLAPIENTRY *CreateImageKHR)(EGLDisplay, EGLContext,
                                               EGLenum, EGLClientBuffer,
@@ -126,7 +133,7 @@ struct priv {
     void (EGLAPIENTRY *EGLImageTargetTexture2DOES)(GLenum, GLeglImageOES);
 };
 
-static bool test_format(struct gl_hwdec *hw);
+static void determine_working_formats(struct gl_hwdec *hw);
 
 static void unmap_frame(struct gl_hwdec *hw)
 {
@@ -219,6 +226,11 @@ static int create(struct gl_hwdec *hw)
         vaTerminate(p->display);
         return -1;
     }
+    if (!p->ctx->av_device_ref) {
+        MP_VERBOSE(hw, "libavutil vaapi code rejected the driver?\n");
+        destroy(hw);
+        return -1;
+    }
 
     if (hw->probing && va_guess_if_emulated(p->ctx)) {
         destroy(hw);
@@ -227,14 +239,25 @@ static int create(struct gl_hwdec *hw)
 
     MP_VERBOSE(p, "using VAAPI EGL interop\n");
 
-    if (!test_format(hw)) {
+    determine_working_formats(hw);
+    if (!p->formats || !p->formats[0]) {
         destroy(hw);
         return -1;
     }
 
+    p->ctx->hwctx.supported_formats = p->formats;
     p->ctx->hwctx.driver_name = hw->driver->name;
     hwdec_devices_add(hw->devs, &p->ctx->hwctx);
     return 0;
+}
+
+static bool check_fmt(struct priv *p, int fmt)
+{
+    for (int n = 0; p->formats[n]; n++) {
+        if (p->formats[n] == fmt)
+            return true;
+    }
+    return false;
 }
 
 static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
@@ -256,16 +279,12 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
     p->current_mpfmt = params->hw_subfmt;
-    if (p->current_mpfmt != IMGFMT_NV12 &&
-        p->current_mpfmt != IMGFMT_P010 &&
-        p->current_mpfmt != IMGFMT_420P)
-    {
+
+    if (!p->probing_formats && !check_fmt(p, p->current_mpfmt)) {
         MP_FATAL(p, "unsupported VA image format %s\n",
                  mp_imgfmt_to_name(p->current_mpfmt));
         return -1;
     }
-
-    MP_VERBOSE(p, "hw format: %s\n", mp_imgfmt_to_name(p->current_mpfmt));
 
     params->imgfmt = p->current_mpfmt;
     params->hw_subfmt = 0;
@@ -306,13 +325,14 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     struct mp_image layout = {0};
     mp_image_set_params(&layout, &hw_image->params);
     mp_image_setfmt(&layout, p->current_mpfmt);
+    struct mp_imgfmt_desc fmt = layout.fmt;
 
     int drm_fmts[8] = {
         // 1 bytes per component, 1-4 components
         MP_FOURCC('R', '8', ' ', ' '),   // DRM_FORMAT_R8
         MP_FOURCC('G', 'R', '8', '8'),   // DRM_FORMAT_GR88
-        MP_FOURCC('R', 'G', '2', '4'),   // DRM_FORMAT_RGB888
-        MP_FOURCC('R', 'A', '2', '4'),   // DRM_FORMAT_RGBA8888
+        0,                               // untested (DRM_FORMAT_RGB888?)
+        0,                               // untested (DRM_FORMAT_RGBA8888?)
         // 2 bytes per component, 1-4 components
         MP_FOURCC('R', '1', '6', ' '),   // proposed DRM_FORMAT_R16
         MP_FOURCC('G', 'R', '3', '2'),   // proposed DRM_FORMAT_GR32
@@ -324,8 +344,19 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
         int attribs[20] = {EGL_NONE};
         int num_attribs = 0;
 
-        int fmt_index = layout.fmt.components[n] - 1 +
-                        4 * (layout.fmt.component_full_bits / 8 - 1);
+        int fmt_index = -1;
+        int cbits = fmt.component_bits;
+        if ((fmt.flags & (MP_IMGFLAG_YUV_P | MP_IMGFLAG_YUV_NV)) &&
+            (fmt.flags & MP_IMGFLAG_NE) && cbits >= 8 && cbits <= 16)
+        {
+            // Regular planar and semi-planar formats.
+            fmt_index = fmt.components[n] - 1 + 4 * ((cbits + 7) / 8 - 1);
+        } else if (fmt.id == IMGFMT_RGB0 || fmt.id == IMGFMT_BGR0) {
+            fmt_index = 3 + 4 * ((cbits + 7) / 8 - 1);
+        }
+
+        if (fmt_index < 0 || fmt_index >= 8 || !drm_fmts[fmt_index])
+            goto err;
 
         ADD_ATTRIB(EGL_LINUX_DRM_FOURCC_EXT, drm_fmts[fmt_index]);
         ADD_ATTRIB(EGL_WIDTH, mp_image_plane_w(&layout, n));
@@ -359,32 +390,90 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
 
 err:
     va_unlock(p->ctx);
-    MP_FATAL(p, "mapping VAAPI EGL image failed\n");
+    if (!p->probing_formats)
+        MP_FATAL(p, "mapping VAAPI EGL image failed\n");
     unmap_frame(hw);
     return -1;
 }
 
-static bool test_format(struct gl_hwdec *hw)
+static bool try_format(struct gl_hwdec *hw, struct mp_image *surface)
+{
+    bool ok = false;
+    struct mp_image_params params = surface->params;
+    if (reinit(hw, &params) >= 0) {
+        struct gl_hwdec_frame frame = {0};
+        ok = map_frame(hw, surface, &frame) >= 0;
+    }
+    unmap_frame(hw);
+    return ok;
+}
+
+static void determine_working_formats(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
-    bool ok = false;
+    int num_formats = 0;
+    int *formats = NULL;
 
-    struct mp_image_pool *alloc = mp_image_pool_new(1);
-    va_pool_set_allocator(alloc, p->ctx, VA_RT_FORMAT_YUV420);
-    struct mp_image *surface = mp_image_pool_get(alloc, IMGFMT_VAAPI, 64, 64);
-    if (surface) {
-        va_surface_init_subformat(surface);
-        struct mp_image_params params = surface->params;
-        if (reinit(hw, &params) >= 0) {
-            struct gl_hwdec_frame frame = {0};
-            ok = map_frame(hw, surface, &frame) >= 0;
+    p->probing_formats = true;
+
+    if (HAVE_VAAPI_HWACCEL_OLD) {
+        struct mp_image_pool *alloc = mp_image_pool_new(1);
+        va_pool_set_allocator(alloc, p->ctx, VA_RT_FORMAT_YUV420);
+        struct mp_image *s = mp_image_pool_get(alloc, IMGFMT_VAAPI, 64, 64);
+        if (s) {
+            va_surface_init_subformat(s);
+            if (try_format(hw, s))
+                MP_TARRAY_APPEND(p, formats, num_formats, s->params.hw_subfmt);
         }
-        unmap_frame(hw);
+        talloc_free(s);
+        talloc_free(alloc);
+    } else {
+        AVHWFramesConstraints *fc =
+            av_hwdevice_get_hwframe_constraints(p->ctx->av_device_ref, NULL);
+        if (!fc) {
+            MP_WARN(hw, "failed to retrieve libavutil frame constaints\n");
+            goto done;
+        }
+        for (int n = 0; fc->valid_sw_formats[n] != AV_PIX_FMT_NONE; n++) {
+            AVBufferRef *fref = NULL;
+            fref = av_hwframe_ctx_alloc(p->ctx->av_device_ref);
+            if (!fref)
+                goto err;
+            AVHWFramesContext *fctx = (void *)fref->data;
+            struct mp_image *s = NULL;
+            AVFrame *frame = NULL;
+            fctx->format = AV_PIX_FMT_VAAPI;
+            fctx->sw_format = fc->valid_sw_formats[n];
+            fctx->width = 128;
+            fctx->height = 128;
+            if (av_hwframe_ctx_init(fref) < 0)
+                goto err;
+            frame = av_frame_alloc();
+            if (!frame)
+                goto err;
+            if (av_hwframe_get_buffer(fref, frame, 0) < 0)
+                goto err;
+            s = mp_image_from_av_frame(frame);
+            if (!s || !mp_image_params_valid(&s->params))
+                goto err;
+            if (try_format(hw, s))
+                MP_TARRAY_APPEND(p, formats, num_formats, s->params.hw_subfmt);
+        err:
+            talloc_free(s);
+            av_frame_free(&frame);
+            av_buffer_unref(&fref);
+        }
+        av_hwframe_constraints_free(&fc);
     }
-    talloc_free(surface);
-    talloc_free(alloc);
 
-    return ok;
+done:
+    MP_TARRAY_APPEND(p, formats, num_formats, 0); // terminate it
+    p->formats = formats;
+    p->probing_formats = false;
+
+    MP_VERBOSE(hw, "Supported formats:\n");
+    for (int n = 0; formats[n]; n++)
+        MP_VERBOSE(hw, " %s\n", mp_imgfmt_to_name(formats[n]));
 }
 
 const struct gl_hwdec_driver gl_hwdec_vaegl = {
