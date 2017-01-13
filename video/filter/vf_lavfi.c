@@ -108,7 +108,7 @@ static bool recreate_graph(struct vf_instance *vf, struct mp_image_params *fmt)
 {
     void *tmp = talloc_new(NULL);
     struct vf_priv_s *p = vf->priv;
-    AVFilterContext *in = NULL, *out = NULL, *f_format = NULL;
+    AVFilterContext *in = NULL, *out = NULL;
 
     if (bstr0(p->cfg_graph).len == 0) {
         MP_FATAL(vf, "lavfi: no filter graph set\n");
@@ -130,19 +130,6 @@ static bool recreate_graph(struct vf_instance *vf, struct mp_image_params *fmt)
     if (!outputs || !inputs)
         goto error;
 
-    // Build list of acceptable output pixel formats. libavfilter will insert
-    // conversion filters if needed.
-    char *fmtstr = talloc_strdup(tmp, "");
-    for (int n = IMGFMT_START; n < IMGFMT_END; n++) {
-        if (vf_next_query_format(vf, n)) {
-            const char *name = av_get_pix_fmt_name(imgfmt2pixfmt(n));
-            if (name) {
-                const char *s = fmtstr[0] ? "|" : "";
-                fmtstr = talloc_asprintf_append_buffer(fmtstr, "%s%s", s, name);
-            }
-        }
-    }
-
     char *sws_flags = talloc_asprintf(tmp, "flags=%"PRId64, p->cfg_sws_flags);
     graph->scale_sws_opts = av_strdup(sws_flags);
 
@@ -161,18 +148,11 @@ static bool recreate_graph(struct vf_instance *vf, struct mp_image_params *fmt)
                                      "out", NULL, NULL, graph) < 0)
         goto error;
 
-    if (avfilter_graph_create_filter(&f_format, avfilter_get_by_name("format"),
-                                     "format", fmtstr, NULL, graph) < 0)
-        goto error;
-
-    if (avfilter_link(f_format, 0, out, 0) < 0)
-        goto error;
-
     outputs->name    = av_strdup("in");
     outputs->filter_ctx = in;
 
     inputs->name    = av_strdup("out");
-    inputs->filter_ctx = f_format;
+    inputs->filter_ctx = out;
 
     if (graph_parse(graph, p->cfg_graph, inputs, outputs, NULL) < 0)
         goto error;
