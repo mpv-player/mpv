@@ -84,13 +84,12 @@ static void *script_thread(void *p)
     struct thread_arg *arg = p;
 
     char name[90];
-    snprintf(name, sizeof(name), "lua (%s)", mpv_client_name(arg->client));
+    snprintf(name, sizeof(name), "%s (%s)", arg->backend->name,
+             mpv_client_name(arg->client));
     mpthread_set_name(name);
 
     if (arg->backend->load(arg->client, arg->fname) < 0)
-        MP_ERR(arg, "Could not load script %s\n", arg->fname);
-
-    MP_VERBOSE(arg, "Exiting...\n");
+        MP_ERR(arg, "Could not load %s %s\n", arg->backend->name, arg->fname);
 
     mpv_detach_destroy(arg->client);
     talloc_free(arg);
@@ -137,7 +136,7 @@ int mp_load_script(struct MPContext *mpctx, const char *fname)
     }
     arg->log = mp_client_get_log(arg->client);
 
-    MP_VERBOSE(arg, "Loading script %s...\n", fname);
+    MP_VERBOSE(arg, "Loading %s %s...\n", backend->name, fname);
 
     pthread_t thread;
     if (pthread_create(&thread, NULL, script_thread, arg)) {
@@ -257,6 +256,7 @@ error:
 }
 
 const struct mp_scripting mp_scripting_cplugin = {
+    .name = "SO plugin",
     .file_ext = "so",
     .load = load_cplugin,
 };

@@ -550,6 +550,7 @@ void update_screensaver_state(struct MPContext *mpctx);
 
 // scripting.c
 struct mp_scripting {
+    const char *name;       // e.g. "lua script"
     const char *file_ext;   // e.g. "lua"
     int (*load)(struct mpv_handle *client, const char *filename);
 };

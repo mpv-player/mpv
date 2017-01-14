@@ -359,6 +359,8 @@ void mpv_detach_destroy(mpv_handle *ctx)
     if (!ctx)
         return;
 
+    MP_VERBOSE(ctx, "Exiting...\n");
+
     // reserved_events equals the number of asynchronous requests that weren't
     // yet replied. In order to avoid that trying to reply to a removed client
     // causes a crash, block until all asynchronous requests were served.
