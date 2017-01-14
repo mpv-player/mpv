@@ -43,8 +43,11 @@ return as long as your plugin is loaded (it runs in its own thread). The
 ``handle`` will be deallocated as soon as the plugin function returns.
 
 The return value is interpreted as error status. A value of ``0`` is
-interpreted as success, while any other value signals an error. In the latter
-case, the player prints an uninformative error message that loading failed.
+interpreted as success, while ``-1`` signals an error. In the latter case,
+the player prints an uninformative error message that loading failed.
+
+Return values other than ``0`` and ``-1`` are reserved, and trigger undefined
+behavior.
 
 Within the plugin function, you can call libmpv API functions. The ``handle``
 is created by ``mpv_create_client()`` (or actually an internal equivalent),
