@@ -332,11 +332,6 @@
            display:NO];
 }
 
-- (void)updateWindowFrame:(NSSize)newSize
-{
-    _unfs_content_frame = [self frameRect:_unfs_content_frame forCenteredContentSize:newSize];
-}
-
 - (void)tryDequeueSize
 {
     if (_queued_video_size.width <= 0.0 || _queued_video_size.height <= 0.0)
@@ -349,9 +344,8 @@
 
 - (void)queueNewVideoSize:(NSSize)newSize
 {
-    if ([self.adapter isInFullScreenMode]) {
-        [self updateWindowFrame:newSize];
-    } else {
+    _unfs_content_frame = [self frameRect:_unfs_content_frame forCenteredContentSize:newSize];
+    if (![self.adapter isInFullScreenMode]) {
         if (NSEqualSizes(_queued_video_size, newSize))
             return;
         _queued_video_size = newSize;
