@@ -146,7 +146,7 @@ static void queue_new_video_size(struct vo *vo, int w, int h)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     struct mp_vo_opts *opts  = vo->opts;
-    id<MpvSizing> win = (id<MpvSizing>) s->window;
+    id<MpvWindowUpdate> win = (id<MpvWindowUpdate>) s->window;
     NSRect r = calculate_window_geometry(vo, NSMakeRect(0, 0, w, h));
     [win queueNewVideoSize:NSMakeSize(r.size.width, r.size.height)];
 }
@@ -592,7 +592,8 @@ static int vo_cocoa_window_border(struct vo *vo)
         return VO_NOTIMPL;
 
     struct mp_vo_opts *opts = vo->opts;
-    [s->window updateBorder:opts->border];
+    id<MpvWindowUpdate> win = (id<MpvWindowUpdate>) s->window;
+    [win updateBorder:opts->border];
     if (opts->border)
         cocoa_set_window_title(vo);
 
