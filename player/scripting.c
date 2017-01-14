@@ -245,13 +245,13 @@ static int load_cplugin(struct mpv_handle *client, const char *fname)
     void *lib = dlopen(fname, RTLD_NOW | RTLD_LOCAL);
     if (!lib)
         goto error;
+    // Note: once loaded, we never unload, as unloading the libraries linked to
+    //       the plugin can cause random serious problems.
     mpv_open_cplugin sym = (mpv_open_cplugin)dlsym(lib, MPV_DLOPEN_FN);
     if (!sym)
         goto error;
     r = sym(client) ? -1 : 0;
 error:
-    if (lib)
-        dlclose(lib);
     return r;
 }
 
