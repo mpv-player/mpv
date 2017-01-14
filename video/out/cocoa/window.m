@@ -97,16 +97,26 @@
     [super toggleFullScreen:sender];
 
     if (![self.adapter isInFullScreenMode]) {
-        [self setStyleMask:([self styleMask] | NSWindowStyleMaskFullScreen)];
-        NSRect frame = [[self targetScreen] frame];
-        [self setFrame:frame display:YES];
+        [self setToFullScreen];
     } else {
-        [self setStyleMask:([self styleMask] & ~NSWindowStyleMaskFullScreen)];
-        NSRect frame = [self calculateWindowPositionForScreen:[self targetScreen]];
-        [self setFrame:frame display:YES];
-        [self setContentAspectRatio:_unfs_content_frame.size];
-        [self setCenteredContentSize:_unfs_content_frame.size];
+        [self setToWindow];
     }
+}
+
+- (void)setToFullScreen
+{
+    [self setStyleMask:([self styleMask] | NSWindowStyleMaskFullScreen)];
+    NSRect frame = [[self targetScreen] frame];
+    [self setFrame:frame display:YES];
+}
+
+- (void)setToWindow
+{
+    [self setStyleMask:([self styleMask] & ~NSWindowStyleMaskFullScreen)];
+    NSRect frame = [self calculateWindowPositionForScreen:[self targetScreen]];
+    [self setFrame:frame display:YES];
+    [self setContentAspectRatio:_unfs_content_frame.size];
+    [self setCenteredContentSize:_unfs_content_frame.size];
 }
 
 - (NSArray *)customWindowsToEnterFullScreenForWindow:(NSWindow *)window
@@ -139,11 +149,13 @@
 - (void)windowDidFailToEnterFullScreen:(NSWindow *)window
 {
     _is_animating = 0;
+    [self setToWindow];
 }
 
 - (void)windowDidFailToExitFullScreen:(NSWindow *)window
 {
     _is_animating = 0;
+    [self setToFullScreen];
 }
 
 - (void)windowDidChangeBackingProperties:(NSNotification *)notification
