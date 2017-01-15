@@ -365,8 +365,8 @@ int cocoa_main(int argc, char *argv[])
         // convert all filenames and URLs to decomposed unicode (NFC->NFD).
         // command line input can either be NFC or NFD whereas anything else
         // on macOS uses NFD.
-        char *arg_decomposed;
         for (int i = 1; i < argc; i++) {
+            char *arg_decomposed;
             NSString *arg = [NSString stringWithUTF8String:argv[i]];
             arg_decomposed = [[arg decomposedStringWithCanonicalMapping] UTF8String];
             argv[i] = arg_decomposed;
