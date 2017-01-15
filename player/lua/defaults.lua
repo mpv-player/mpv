@@ -419,6 +419,16 @@ function mp.register_idle(cb)
     idle_handlers[#idle_handlers + 1] = cb
 end
 
+function mp.unregister_idle(cb)
+    local new = {}
+    for _, handler in ipairs(idle_handlers) do
+        if handler ~= cb then
+            new[#new + 1] = handler
+        end
+    end
+    idle_handlers = new
+end
+
 -- sent by "script-binding"
 mp.register_script_message("key-binding", dispatch_key_binding)
 
