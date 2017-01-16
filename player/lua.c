@@ -1079,6 +1079,7 @@ static int script_readdir(lua_State *L)
         lua_pushstring(L, name); // list index name
         lua_settable(L, -3); // list
     }
+    closedir(dir);
     talloc_free(fullpath);
     return 1;
 }
