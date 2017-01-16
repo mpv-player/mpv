@@ -425,7 +425,7 @@ static int bluray_stream_open_internal(stream_t *s)
 
             char *time = mp_format_time(ti->duration / 90000, false);
             MP_VERBOSE(s, "idx: %3d duration: %s (playlist: %05d.mpls)\n",
-                       i + 1, time, ti->playlist);
+                       i, time, ti->playlist);
             talloc_free(time);
 
             /* try to guess which title may contain the main movie */
