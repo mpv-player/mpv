@@ -28,7 +28,10 @@
  */
 
 #include "cuda_dynamic.h"
-#include "video/mp_image_pool.h"
+
+#include <libavutil/hwcontext.h>
+#include <libavutil/hwcontext_cuda.h>
+
 #include "hwdec.h"
 #include "video.h"
 
@@ -70,9 +73,10 @@ static int cuda_create(struct gl_hwdec *hw)
 {
     CUdevice device;
     CUcontext cuda_ctx = NULL;
+    AVBufferRef *hw_device_ctx = NULL;
     CUcontext dummy;
     unsigned int device_count;
-    int ret = 0, eret = 0;
+    int ret = 0;
 
     if (hw->gl->version < 210 && hw->gl->es < 300) {
         MP_VERBOSE(hw, "need OpenGL >= 2.1 or OpenGL-ES >= 3.0\n");
@@ -103,19 +107,39 @@ static int cuda_create(struct gl_hwdec *hw)
 
     p->cuda_ctx = cuda_ctx;
 
+    hw_device_ctx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_CUDA);
+    if (!hw_device_ctx)
+        goto error;
+
+    AVHWDeviceContext *device_ctx = (void *)hw_device_ctx->data;
+
+    AVCUDADeviceContext *device_hwctx = device_ctx->hwctx;
+    device_hwctx->cuda_ctx = cuda_ctx;
+
+    ret = av_hwdevice_ctx_init(hw_device_ctx);
+    if (ret < 0) {
+        MP_ERR(hw, "av_hwdevice_ctx_init failed\n");
+        goto error;
+    }
+
+    ret = CHECK_CU(cuCtxPopCurrent(&dummy));
+    if (ret < 0)
+        goto error;
+
     p->hwctx = (struct mp_hwdec_ctx) {
         .type = HWDEC_CUDA,
         .ctx = cuda_ctx,
+        .av_device_ref = hw_device_ctx,
     };
     p->hwctx.driver_name = hw->driver->name;
     hwdec_devices_add(hw->devs, &p->hwctx);
+    return 0;
 
  error:
-   eret = CHECK_CU(cuCtxPopCurrent(&dummy));
-   if (eret < 0)
-       return eret;
+    av_buffer_unref(&hw_device_ctx);
+    CHECK_CU(cuCtxPopCurrent(&dummy));
 
-   return ret;
+    return -1;
 }
 
 static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
@@ -217,6 +241,7 @@ static void destroy(struct gl_hwdec *hw)
     gl->DeleteTextures(2, p->gl_textures);
 
     hwdec_devices_remove(hw->devs, &p->hwctx);
+    av_buffer_unref(&p->hwctx.av_device_ref);
 }
 
 static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,

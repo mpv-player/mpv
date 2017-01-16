@@ -38,54 +38,33 @@ static int probe(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
 
 static int init(struct lavc_ctx *ctx)
 {
-    ctx->hwdec_priv = hwdec_devices_get(ctx->hwdec_devs, HWDEC_CUDA)->ctx;
+    ctx->hwdec_priv = hwdec_devices_get(ctx->hwdec_devs, HWDEC_CUDA);
     return 0;
 }
 
 static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 {
     AVCodecContext *avctx = ctx->avctx;
-    AVCUDADeviceContext *device_hwctx;
-    AVHWDeviceContext *device_ctx;
-    AVHWFramesContext *hwframe_ctx;
-    int ret = 0;
+    struct mp_hwdec_ctx *hwctx = ctx->hwdec_priv;
 
     if (avctx->hw_frames_ctx) {
         MP_ERR(ctx, "hw_frames_ctx already initialised!\n");
         return -1;
     }
 
-    AVBufferRef *hw_device_ctx = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_CUDA);
-    if (!hw_device_ctx) {
-        MP_WARN(ctx, "av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_CUDA) failed\n");
-        goto error;
-    }
-
-    device_ctx = (AVHWDeviceContext*)hw_device_ctx->data;
-
-    device_hwctx = device_ctx->hwctx;
-    device_hwctx->cuda_ctx = ctx->hwdec_priv;
-
-    ret = av_hwdevice_ctx_init(hw_device_ctx);
-    if (ret < 0) {
-        MP_ERR(ctx, "av_hwdevice_ctx_init failed\n");
-        goto error;
-    }
-
-    avctx->hw_frames_ctx = av_hwframe_ctx_alloc(hw_device_ctx);
+    avctx->hw_frames_ctx = av_hwframe_ctx_alloc(hwctx->av_device_ref);
     if (!avctx->hw_frames_ctx) {
         MP_ERR(ctx, "av_hwframe_ctx_alloc failed\n");
         goto error;
     }
 
-    hwframe_ctx = (AVHWFramesContext*)avctx->hw_frames_ctx->data;
+    AVHWFramesContext *hwframe_ctx = (void* )avctx->hw_frames_ctx->data;
     hwframe_ctx->format = AV_PIX_FMT_CUDA;
 
     return 0;
 
  error:
     av_buffer_unref(&avctx->hw_frames_ctx);
-    av_buffer_unref(&hw_device_ctx);
     return -1;
 }
 
