@@ -60,6 +60,12 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 
     AVHWFramesContext *hwframe_ctx = (void* )avctx->hw_frames_ctx->data;
     hwframe_ctx->format = AV_PIX_FMT_CUDA;
+    hwframe_ctx->width = w;
+    hwframe_ctx->height = h;
+    hwframe_ctx->sw_format = avctx->sw_pix_fmt;
+
+    if (av_hwframe_ctx_init(avctx->hw_frames_ctx) < 0)
+        goto error;
 
     return 0;
 
