@@ -164,6 +164,8 @@ static void open_lavu_vaapi_device(struct mp_vaapi_ctx *ctx)
 
     if (av_hwdevice_ctx_init(ctx->av_device_ref) < 0)
         av_buffer_unref(&ctx->av_device_ref);
+
+    ctx->hwctx.av_device_ref = ctx->av_device_ref;
 }
 
 struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,

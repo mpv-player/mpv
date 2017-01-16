@@ -47,6 +47,9 @@ struct mp_hwdec_ctx {
     //  HWDEC_CUDA:             CUcontext*
     void *ctx;
 
+    // libavutil-wrapped context, if available.
+    struct AVBufferRef *av_device_ref; // AVVAAPIDeviceContext*
+
     // List of IMGFMT_s, terminated with 0. NULL if N/A.
     int *supported_formats;
 
