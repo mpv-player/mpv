@@ -299,11 +299,12 @@
 
 - (NSRect)constrainFrameRect:(NSRect)nf toScreen:(NSScreen *)screen
 {
-    if (_is_animating)
-        screen = [self targetScreen];
+    if (_is_animating && ![self.adapter isInFullScreenMode])
+        return nf;
 
+    screen = screen ?: self.screen ?: [NSScreen mainScreen];
     NSRect of  = [self frame];
-    NSRect vf  = [screen ?: self.screen ?: [NSScreen mainScreen] visibleFrame];
+    NSRect vf  = [_is_animating ? [self targetScreen] : screen visibleFrame];
     NSRect ncf = [self contentRectForFrameRect:nf];
 
     // Prevent the window's titlebar from exiting the screen on the top edge.
