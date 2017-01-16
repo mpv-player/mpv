@@ -701,6 +701,7 @@ static int video_decode_and_filter(struct MPContext *mpctx)
 
     if (vo_c->input_mpi) {
         vo_c->input_format = vo_c->input_mpi->params;
+        vf_set_proto_frame(vo_c->vf, vo_c->input_mpi);
 
         if (vo_c->is_coverart && !vo_c->cached_coverart)
             vo_c->cached_coverart = mp_image_new_ref(vo_c->input_mpi);

@@ -26,6 +26,7 @@
 #include <assert.h>
 
 #include <libavutil/avstring.h>
+#include <libavutil/hwcontext.h>
 #include <libavutil/mem.h>
 #include <libavutil/mathematics.h>
 #include <libavutil/rational.h>
@@ -44,6 +45,7 @@
 #include "options/m_option.h"
 #include "common/tags.h"
 
+#include "video/hwdec.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
@@ -148,6 +150,8 @@ static bool recreate_graph(struct vf_instance *vf, struct mp_image_params *fmt)
     in_params->height = fmt->h;
     in_params->sample_aspect_ratio.num = fmt->p_w;
     in_params->sample_aspect_ratio.den = fmt->p_h;
+    // Assume it's ignored for non-hwaccel formats.
+    in_params->hw_frames_ctx = vf->in_hwframes_ref;
 
     ret = av_buffersrc_parameters_set(in, in_params);
     av_free(in_params);
@@ -169,6 +173,13 @@ static bool recreate_graph(struct vf_instance *vf, struct mp_image_params *fmt)
 
     if (graph_parse(graph, p->cfg_graph, inputs, outputs, NULL) < 0)
         goto error;
+
+    struct mp_hwdec_ctx *hwdec = hwdec_devices_get_first(vf->hwdec_devs);
+    for (int n = 0; n < graph->nb_filters; n++) {
+        AVFilterContext *filter = graph->filters[n];
+        if (hwdec && hwdec->av_device_ref)
+            filter->hw_device_ctx = av_buffer_ref(hwdec->av_device_ref);
+    }
 
     if (avfilter_graph_config(graph, NULL) < 0)
         goto error;
@@ -226,17 +237,25 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
     out->p_w = l_out->sample_aspect_ratio.num;
     out->p_h = l_out->sample_aspect_ratio.den;
     out->imgfmt = pixfmt2imgfmt(l_out->format);
+    av_buffer_unref(&vf->out_hwframes_ref);
+#if LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(6, 69, 100) && \
+    LIBAVFILTER_VERSION_MICRO >= 100
+    AVBufferRef *hw_frames_ctx = av_buffersink_get_hw_frames_ctx(p->out);
+#else
+    AVBufferRef *hw_frames_ctx = l_out->hw_frames_ctx;
+#endif
+    if (hw_frames_ctx) {
+        AVHWFramesContext *fctx = (void *)hw_frames_ctx->data;
+        out->hw_subfmt = pixfmt2imgfmt(fctx->sw_format);
+        vf->out_hwframes_ref = av_buffer_ref(hw_frames_ctx);
+    }
     return 0;
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    // We accept all sws-convertable formats as inputs. Output formats are
-    // handled in config(). The current public libavfilter API doesn't really
-    // allow us to do anything more sophisticated.
-    // This breaks with filters which accept input pixel formats not
-    // supported by libswscale.
-    return !!mp_sws_supported_format(fmt);
+    // Format negotiation is not possible with libavfilter.
+    return 1;
 }
 
 static AVFrame *mp_to_av(struct vf_instance *vf, struct mp_image *img)

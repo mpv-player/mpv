@@ -90,6 +90,9 @@ typedef struct vf_instance {
 
     struct mp_image_params fmt_in, fmt_out;
 
+    // This is a dirty hack.
+    struct AVBufferRef *in_hwframes_ref, *out_hwframes_ref;
+
     struct mp_image_pool *out_pool;
     struct vf_priv_s *priv;
     struct mp_log *log;
@@ -123,6 +126,9 @@ struct vf_chain {
     struct mpv_global *global;
     struct mp_hwdec_devices *hwdec_devs;
 
+    // This is a dirty hack.
+    struct AVBufferRef *in_hwframes_ref;
+
     // Call when the filter chain wants new processing (for filters with
     // asynchronous behavior) - must be immutable once filters are created,
     // since they are supposed to call it from foreign threads.
@@ -150,6 +156,7 @@ enum vf_ctrl {
 
 struct vf_chain *vf_new(struct mpv_global *global);
 void vf_destroy(struct vf_chain *c);
+void vf_set_proto_frame(struct vf_chain *c, struct mp_image *img);
 int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params);
 int vf_control_any(struct vf_chain *c, int cmd, void *arg);
 int vf_control_by_label(struct vf_chain *c, int cmd, void *arg, bstr label);
