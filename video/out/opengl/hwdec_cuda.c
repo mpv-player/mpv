@@ -32,15 +32,17 @@
 #include <libavutil/hwcontext.h>
 #include <libavutil/hwcontext_cuda.h>
 
+#include "formats.h"
 #include "hwdec.h"
 #include "video.h"
 
 struct priv {
     struct mp_hwdec_ctx hwctx;
     struct mp_image layout;
-    GLuint gl_textures[2];
-    CUgraphicsResource cu_res[2];
-    CUarray cu_array[2];
+    GLuint gl_textures[4];
+    CUgraphicsResource cu_res[4];
+    CUarray cu_array[4];
+    int sample_count[4];
     int sample_width;
 
     CUcontext cuda_ctx;
@@ -155,21 +157,25 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 
     mp_image_set_params(&p->layout, params);
 
-    GLint luma_format, chroma_format;
-    GLenum type;
+    for (int n = 0; n < 4; n++)
+        p->sample_count[n] = 0;
+
     switch (params->imgfmt) {
     case IMGFMT_NV12:
-        luma_format = GL_R8;
-        chroma_format = GL_RG8;
-        type = GL_UNSIGNED_BYTE;
         p->sample_width = 1;
+        p->sample_count[0] = 1;
+        p->sample_count[1] = 2;
         break;
     case IMGFMT_P010:
     case IMGFMT_P016:
-        luma_format = GL_R16;
-        chroma_format = GL_RG16;
-        type = GL_UNSIGNED_SHORT;
         p->sample_width = 2;
+        p->sample_count[0] = 1;
+        p->sample_count[1] = 2;
+        break;
+    case IMGFMT_420P:
+        p->sample_width = 1;
+        for (int n = 0; n < 3; n++)
+            p->sample_count[n] = 1;
         break;
     default:
         MP_ERR(hw, "Unsupported format: %s\n", mp_imgfmt_to_name(params->imgfmt));
@@ -180,18 +186,24 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
     if (ret < 0)
         return ret;
 
-    gl->GenTextures(2, p->gl_textures);
-    for (int n = 0; n < 2; n++) {
+    gl->GenTextures(4, p->gl_textures);
+    for (int n = 0; n < 4; n++) {
+        if (!p->sample_count[n])
+            break;
+
+        const struct gl_format *fmt =
+            gl_find_unorm_format(gl, p->sample_width, p->sample_count[n]);
+
         gl->BindTexture(GL_TEXTURE_2D, p->gl_textures[n]);
         GLenum filter = GL_NEAREST;
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        gl->TexImage2D(GL_TEXTURE_2D, 0, n == 0 ? luma_format : chroma_format,
+        gl->TexImage2D(GL_TEXTURE_2D, 0, fmt->internal_format,
                        mp_image_plane_w(&p->layout, n),
                        mp_image_plane_h(&p->layout, n),
-                       0, n == 0 ? GL_RED : GL_RG, type, NULL);
+                       0, fmt->format, fmt->type, NULL);
         gl->BindTexture(GL_TEXTURE_2D, 0);
 
         ret = CHECK_CU(cuGraphicsGLRegisterImage(&p->cu_res[n], p->gl_textures[n],
@@ -230,15 +242,16 @@ static void destroy(struct gl_hwdec *hw)
 
     // Don't bail if any CUDA calls fail. This is all best effort.
     CHECK_CU(cuCtxPushCurrent(p->cuda_ctx));
-    for (int n = 0; n < 2; n++) {
+    for (int n = 0; n < 4; n++) {
         if (p->cu_res[n] > 0)
             CHECK_CU(cuGraphicsUnregisterResource(p->cu_res[n]));
+        p->cu_res[n] = 0;
     }
     CHECK_CU(cuCtxPopCurrent(&dummy));
 
     CHECK_CU(cuCtxDestroy(p->cuda_ctx));
 
-    gl->DeleteTextures(2, p->gl_textures);
+    gl->DeleteTextures(4, p->gl_textures);
 
     hwdec_devices_remove(hw->devs, &p->hwctx);
     av_buffer_unref(&p->hwctx.av_device_ref);
@@ -257,7 +270,10 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
 
     *out_frame = (struct gl_hwdec_frame) { 0, };
 
-    for (int n = 0; n < 2; n++) {
+    for (int n = 0; n < 4; n++) {
+        if (!p->sample_count[n])
+            break;
+
         // widthInBytes must account for the chroma plane
         // elements being two samples wide.
         CUDA_MEMCPY2D cpy = {
@@ -268,7 +284,7 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
             .srcY          = 0,
             .dstArray      = p->cu_array[n],
             .WidthInBytes  = mp_image_plane_w(&p->layout, n) *
-                             (n + 1) * p->sample_width,
+                             p->sample_count[n] * p->sample_width,
             .Height        = mp_image_plane_h(&p->layout, n),
         };
         ret = CHECK_CU(cuMemcpy2D(&cpy));
