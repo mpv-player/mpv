@@ -60,12 +60,18 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 
     AVHWFramesContext *hwframe_ctx = (void* )avctx->hw_frames_ctx->data;
     hwframe_ctx->format = AV_PIX_FMT_CUDA;
+
+    // This is proper use of the hw_frames_ctx API, but it does not work
+    // (appaears to work but fails e.g. with 10 bit). The cuvid wrapper
+    // does non-standard things, and it's a meesy situation.
+    /*
     hwframe_ctx->width = w;
     hwframe_ctx->height = h;
     hwframe_ctx->sw_format = avctx->sw_pix_fmt;
 
     if (av_hwframe_ctx_init(avctx->hw_frames_ctx) < 0)
         goto error;
+    */
 
     return 0;
 
