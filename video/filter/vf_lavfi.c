@@ -109,6 +109,7 @@ static bool recreate_graph(struct vf_instance *vf, struct mp_image_params *fmt)
     void *tmp = talloc_new(NULL);
     struct vf_priv_s *p = vf->priv;
     AVFilterContext *in = NULL, *out = NULL;
+    int ret;
 
     if (bstr0(p->cfg_graph).len == 0) {
         MP_FATAL(vf, "lavfi: no filter graph set\n");
@@ -133,15 +134,27 @@ static bool recreate_graph(struct vf_instance *vf, struct mp_image_params *fmt)
     char *sws_flags = talloc_asprintf(tmp, "flags=%"PRId64, p->cfg_sws_flags);
     graph->scale_sws_opts = av_strdup(sws_flags);
 
-    AVRational timebase = AV_TIME_BASE_Q;
+    in = avfilter_graph_alloc_filter(graph, avfilter_get_by_name("buffer"), "src");
+    if (!in)
+        goto error;
 
-    char *src_args = talloc_asprintf(tmp, "%d:%d:%d:%d:%d:%d:%d",
-                                     fmt->w, fmt->h, imgfmt2pixfmt(fmt->imgfmt),
-                                     timebase.num, timebase.den,
-                                     fmt->p_w, fmt->p_h);
+    AVBufferSrcParameters *in_params = av_buffersrc_parameters_alloc();
+    if (!in_params)
+        goto error;
 
-    if (avfilter_graph_create_filter(&in, avfilter_get_by_name("buffer"),
-                                     "src", src_args, NULL, graph) < 0)
+    in_params->format = imgfmt2pixfmt(fmt->imgfmt);
+    in_params->time_base = AV_TIME_BASE_Q;
+    in_params->width = fmt->w;
+    in_params->height = fmt->h;
+    in_params->sample_aspect_ratio.num = fmt->p_w;
+    in_params->sample_aspect_ratio.den = fmt->p_h;
+
+    ret = av_buffersrc_parameters_set(in, in_params);
+    av_free(in_params);
+    if (ret < 0)
+        goto error;
+
+    if (avfilter_init_str(in, NULL) < 0)
         goto error;
 
     if (avfilter_graph_create_filter(&out, avfilter_get_by_name("buffersink"),
