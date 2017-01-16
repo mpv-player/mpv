@@ -4564,6 +4564,7 @@ The following video options are currently all specific to ``--vo=opengl`` and
         unavailable, it silently falls back on a normal framebuffer. Note that
         if you set the ``--opengl-fbo-format`` option to a non-default value, a
         format with alpha must be specified, or this won't work.
+        This does not work on X11 with EGL and Mesa (freedesktop bug 67676).
     no
         Ignore alpha component.
 
