@@ -74,12 +74,10 @@ struct mpv_opengl_cb_context {
     bool flip;
     bool force_update;
     bool imgfmt_supported[IMGFMT_END - IMGFMT_START];
-    struct mp_vo_opts vo_opts;
     bool update_new_opts;
     bool eq_changed;
     struct mp_csp_equalizer eq;
     struct vo *active;
-    int hwdec_api;
 
     // --- This is only mutable while initialized=false, during which nothing
     //     except the OpenGL context manager is allowed to access it.
@@ -91,6 +89,8 @@ struct mpv_opengl_cb_context {
     GL *gl;
     struct gl_video *renderer;
     struct gl_hwdec *hwdec;
+    struct m_config_cache *vo_opts_cache;
+    struct mp_vo_opts *vo_opts;
 };
 
 static void update(struct vo_priv *p);
@@ -128,26 +128,10 @@ struct mpv_opengl_cb_context *mp_opengl_create(struct mpv_global *g,
     ctx->log = mp_log_new(ctx, g->log, "opengl-cb");
     ctx->client_api = client_api;
 
-    ctx->hwdec_api = g->opts->vo->hwdec_preload_api;
-    if (ctx->hwdec_api == HWDEC_NONE)
-        ctx->hwdec_api = g->opts->hwdec_api;
+    ctx->vo_opts_cache = m_config_cache_alloc(ctx, ctx->global, &vo_sub_opts);
+    ctx->vo_opts = ctx->vo_opts_cache->opts;
 
     return ctx;
-}
-
-// To be called from VO thread, with p->ctx->lock held.
-static void copy_vo_opts(struct vo *vo)
-{
-    struct vo_priv *p = vo->priv;
-
-    // We're being lazy: none of the options we need use dynamic data, so
-    // copy the struct with an assignment.
-    // Just remove all the dynamic data to avoid confusion.
-    struct mp_vo_opts opts = *vo->opts;
-    opts.video_driver_list = NULL;
-    opts.winname = NULL;
-    opts.sws_opts = NULL;
-    p->ctx->vo_opts = opts;
 }
 
 void mpv_opengl_cb_set_update_callback(struct mpv_opengl_cb_context *ctx,
@@ -181,9 +165,17 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
     if (!ctx->renderer)
         return MPV_ERROR_UNSUPPORTED;
 
+    m_config_cache_update(ctx->vo_opts_cache);
+
+    int g_hwdec_api;
+    mp_read_option_raw(ctx->global, "hwdec", &m_option_type_choice, &g_hwdec_api);
+
     ctx->hwdec_devs = hwdec_devices_create();
+    int hwdec_api = ctx->vo_opts->hwdec_preload_api;
+    if (hwdec_api == HWDEC_NONE)
+        hwdec_api = g_hwdec_api;
     ctx->hwdec = gl_hwdec_load_api(ctx->log, ctx->gl, ctx->global,
-                                   ctx->hwdec_devs, ctx->hwdec_api);
+                                   ctx->hwdec_devs, hwdec_api);
     gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
 
     pthread_mutex_lock(&ctx->lock);
@@ -252,9 +244,11 @@ int mpv_opengl_cb_draw(mpv_opengl_cb_context *ctx, int fbo, int vp_w, int vp_h)
         ctx->vp_w = vp_w;
         ctx->vp_h = vp_h;
 
+        m_config_cache_update(ctx->vo_opts_cache);
+
         struct mp_rect src, dst;
         struct mp_osd_res osd;
-        mp_get_src_dst_rects(ctx->log, &ctx->vo_opts, vo->driver->caps,
+        mp_get_src_dst_rects(ctx->log, ctx->vo_opts, vo->driver->caps,
                              &ctx->img_params, vp_w, abs(vp_h),
                              1.0, &src, &dst, &osd);
 
@@ -475,7 +469,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
     case VOCTRL_SET_PANSCAN:
         pthread_mutex_lock(&p->ctx->lock);
-        copy_vo_opts(vo);
         p->ctx->force_update = true;
         update(p);
         pthread_mutex_unlock(&p->ctx->lock);
@@ -522,7 +515,6 @@ static int preinit(struct vo *vo)
     p->ctx->active = vo;
     p->ctx->reconfigured = true;
     p->ctx->update_new_opts = true;
-    copy_vo_opts(vo);
     memset(p->ctx->eq.values, 0, sizeof(p->ctx->eq.values));
     p->ctx->eq_changed = true;
     pthread_mutex_unlock(&p->ctx->lock);
