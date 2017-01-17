@@ -64,6 +64,8 @@ typedef struct lavc_ctx {
     int hwdec_fail_count;
 
     struct mp_image_pool *hwdec_swpool;
+
+    AVBufferRef *cached_hw_frames_ctx;
 } vd_ffmpeg_ctx;
 
 struct vd_lavc_hwdec {
@@ -118,6 +120,8 @@ const struct hwdec_profile_entry *hwdec_find_profile(
 bool hwdec_check_codec_support(const char *codec,
                                const struct hwdec_profile_entry *table);
 int hwdec_get_max_refs(struct lavc_ctx *ctx);
+int hwdec_setup_hw_frames_ctx(struct lavc_ctx *ctx, AVBufferRef *device_ctx,
+                              int av_sw_format, int initial_pool_size);
 
 const char *hwdec_find_decoder(const char *codec, const char *suffix);
 

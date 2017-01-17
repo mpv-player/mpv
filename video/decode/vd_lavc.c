@@ -598,6 +598,7 @@ static void uninit_avctx(struct dec_video *vd)
 
     flush_all(vd);
     av_frame_free(&ctx->pic);
+    av_buffer_unref(&ctx->cached_hw_frames_ctx);
 
     if (ctx->avctx) {
         if (avcodec_close(ctx->avctx) < 0)
@@ -646,6 +647,59 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
     params->color.sig_peak = ctx->cached_hdr_peak;
     params->rotate = vd->codec->rotate;
     params->stereo_in = vd->codec->stereo_mode;
+}
+
+// Allocate and set AVCodecContext.hw_frames_ctx. Also caches them on redundant
+// calls (useful because seeks issue get_format, which clears hw_frames_ctx).
+//  device_ctx: reference to an AVHWDeviceContext
+//  av_sw_format: AV_PIX_FMT_ for the underlying hardware frame format
+//  initial_pool_size: number of frames in the memory pool on creation
+// Return >=0 on success, <0 on error.
+int hwdec_setup_hw_frames_ctx(struct lavc_ctx *ctx, AVBufferRef *device_ctx,
+                              int av_sw_format, int initial_pool_size)
+{
+    int w = ctx->avctx->coded_width;
+    int h = ctx->avctx->coded_height;
+    int av_hw_format = imgfmt2pixfmt(ctx->hwdec_fmt);
+
+    if (ctx->cached_hw_frames_ctx) {
+        AVHWFramesContext *fctx = (void *)ctx->cached_hw_frames_ctx->data;
+        if (fctx->width != w || fctx->height != h ||
+            fctx->sw_format != av_sw_format ||
+            fctx->format != av_hw_format)
+        {
+            av_buffer_unref(&ctx->cached_hw_frames_ctx);
+        }
+    }
+
+    if (!ctx->cached_hw_frames_ctx) {
+        ctx->cached_hw_frames_ctx = av_hwframe_ctx_alloc(device_ctx);
+        if (!ctx->cached_hw_frames_ctx)
+            return -1;
+
+        AVHWFramesContext *fctx = (void *)ctx->cached_hw_frames_ctx->data;
+
+        fctx->format = av_hw_format;
+        fctx->sw_format = av_sw_format;
+        fctx->width = w;
+        fctx->height = h;
+
+        fctx->initial_pool_size = initial_pool_size;
+
+        hwdec_lock(ctx);
+        int res = av_hwframe_ctx_init(ctx->cached_hw_frames_ctx);
+        hwdec_unlock(ctx);
+
+        if (res > 0) {
+            MP_ERR(ctx, "Failed to allocate hw frames.\n");
+            av_buffer_unref(&ctx->cached_hw_frames_ctx);
+            return -1;
+        }
+    }
+
+    assert(!ctx->avctx->hw_frames_ctx);
+    ctx->avctx->hw_frames_ctx = av_buffer_ref(ctx->cached_hw_frames_ctx);
+    return ctx->avctx->hw_frames_ctx ? 0 : -1;
 }
 
 static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,

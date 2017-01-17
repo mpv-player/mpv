@@ -40,24 +40,19 @@ struct priv {
     struct mp_log *log;
     struct mp_vaapi_ctx *ctx;
     struct mp_hwdec_ctx *hwdev;
-
-    AVBufferRef *frames_ref;
 };
-
 
 static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 {
     struct priv *p = ctx->hwdec_priv;
     // From avconv_vaapi.c. Disgusting, but apparently this is the best we get.
-    int required_sw_format = ctx->avctx->sw_pix_fmt == AV_PIX_FMT_YUV420P10 ?
-                             AV_PIX_FMT_P010 : AV_PIX_FMT_NV12;
-
-    assert(!ctx->avctx->hw_frames_ctx);
+    int sw_format = ctx->avctx->sw_pix_fmt == AV_PIX_FMT_YUV420P10 ?
+                    AV_PIX_FMT_P010 : AV_PIX_FMT_NV12;
 
     // The video output might not support all formats.
     // Note that supported_formats==NULL means any are accepted.
     if (p->hwdev && p->hwdev->supported_formats) {
-        int mp_format = pixfmt2imgfmt(required_sw_format);
+        int mp_format = pixfmt2imgfmt(sw_format);
         bool found = false;
         for (int n = 0; p->hwdev->supported_formats[n]; n++) {
             if (p->hwdev->supported_formats[n] == mp_format) {
@@ -72,48 +67,8 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
         }
     }
 
-    if (p->frames_ref) {
-        AVHWFramesContext *fctx = (void *)p->frames_ref->data;
-        if (fctx->width != w || fctx->height != h ||
-            fctx->sw_format != required_sw_format)
-        {
-            av_buffer_unref(&p->frames_ref);
-        }
-    }
-
-    if (!p->frames_ref) {
-        p->frames_ref = av_hwframe_ctx_alloc(p->ctx->av_device_ref);
-        if (!p->frames_ref)
-            return -1;
-
-        AVHWFramesContext *fctx = (void *)p->frames_ref->data;
-
-        fctx->format = AV_PIX_FMT_VAAPI;
-        fctx->sw_format = required_sw_format;
-        fctx->width = w;
-        fctx->height = h;
-
-        fctx->initial_pool_size = hwdec_get_max_refs(ctx) + ADDITIONAL_SURFACES;
-
-        // Some mpv downstream code uses this.
-        fctx->user_opaque = p->ctx;
-
-        va_lock(p->ctx);
-        int res = av_hwframe_ctx_init(p->frames_ref);
-        va_unlock(p->ctx);
-
-        if (res > 0) {
-            MP_ERR(ctx, "Failed to allocate hw frames.\n");
-            av_buffer_unref(&p->frames_ref);
-            return -1;
-        }
-    }
-
-    ctx->avctx->hw_frames_ctx = av_buffer_ref(p->frames_ref);
-    if (!ctx->avctx->hw_frames_ctx)
-        return -1;
-
-    return 0;
+    return hwdec_setup_hw_frames_ctx(ctx, p->ctx->av_device_ref, sw_format,
+                                hwdec_get_max_refs(ctx) + ADDITIONAL_SURFACES);
 }
 
 static void uninit(struct lavc_ctx *ctx)
@@ -122,8 +77,6 @@ static void uninit(struct lavc_ctx *ctx)
 
     if (!p)
         return;
-
-    av_buffer_unref(&p->frames_ref);
 
     if (!p->hwdev)
         va_destroy(p->ctx);
