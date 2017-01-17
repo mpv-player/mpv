@@ -982,6 +982,7 @@ static bool receive_frame(struct dec_video *vd, struct mp_image **out_image)
         res = sw;
         if (!res) {
             MP_ERR(vd, "Could not copy back hardware decoded frame.\n");
+            ctx->hwdec_fail_count = INT_MAX - 1; // force fallback
             handle_err(vd);
             return NULL;
         }
