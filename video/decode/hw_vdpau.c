@@ -39,6 +39,11 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
     struct priv *p = ctx->hwdec_priv;
     int sw_format = ctx->avctx->sw_pix_fmt;
 
+    if (sw_format != AV_PIX_FMT_YUV420P && sw_format != AV_PIX_FMT_NV12) {
+        MP_VERBOSE(ctx, "Rejecting non 4:2:0 8 bit decoding.\n");
+        return -1;
+    }
+
     if (hwdec_setup_hw_frames_ctx(ctx, p->mpvdp->av_device_ref, sw_format, 0) < 0)
         return -1;
 
