@@ -18,6 +18,7 @@
 #include <libavcodec/avcodec.h>
 #include <libavcodec/vdpau.h>
 #include <libavutil/common.h>
+#include <libavutil/hwcontext.h>
 
 #include "lavc.h"
 #include "common/common.h"
@@ -31,12 +32,15 @@ struct priv {
     uint64_t                    preemption_counter;
     // vdpau-copy
     Display                    *display;
-    struct mp_image_pool       *sw_pool;
 };
 
 static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 {
     struct priv *p = ctx->hwdec_priv;
+    int sw_format = ctx->avctx->sw_pix_fmt;
+
+    if (hwdec_setup_hw_frames_ctx(ctx, p->mpvdp->av_device_ref, sw_format, 0) < 0)
+        return -1;
 
     // During preemption, pretend everything is ok.
     if (mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter) < 0)
@@ -46,34 +50,6 @@ static int init_decoder(struct lavc_ctx *ctx, int w, int h)
                                  p->mpvdp->get_proc_address,
                                  AV_HWACCEL_FLAG_IGNORE_LEVEL |
                                  AV_HWACCEL_FLAG_ALLOW_HIGH_DEPTH);
-}
-
-static struct mp_image *allocate_image(struct lavc_ctx *ctx, int w, int h)
-{
-    struct priv *p = ctx->hwdec_priv;
-
-    // In case of preemption, reinit the decoder. Setting hwdec_request_reinit
-    // will cause init_decoder() to be called again.
-    if (mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter) == 0)
-        ctx->hwdec_request_reinit = true;
-
-    VdpChromaType chroma = 0;
-    uint32_t s_w = w, s_h = h;
-    if (av_vdpau_get_surface_parameters(ctx->avctx, &chroma, &s_w, &s_h) < 0)
-        return NULL;
-
-    return mp_vdpau_get_video_surface(p->mpvdp, chroma, s_w, s_h);
-}
-
-static struct mp_image *update_format(struct lavc_ctx *ctx, struct mp_image *img)
-{
-    VdpChromaType chroma = 0;
-    uint32_t s_w, s_h;
-    if (av_vdpau_get_surface_parameters(ctx->avctx, &chroma, &s_w, &s_h) >= 0) {
-        if (chroma == VDP_CHROMA_TYPE_420)
-            img->params.hw_subfmt = IMGFMT_NV12;
-    }
-    return img;
 }
 
 static void uninit(struct lavc_ctx *ctx)
@@ -128,8 +104,6 @@ static int init_copy(struct lavc_ctx *ctx)
     if (!p->mpvdp)
         goto error;
 
-    p->sw_pool = talloc_steal(p, mp_image_pool_new(17));
-
     ctx->hwdec_priv = p;
 
     mp_vdpau_handle_preemption(p->mpvdp, &p->preemption_counter);
@@ -156,15 +130,6 @@ static int probe_copy(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
     return r;
 }
 
-static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *img)
-{
-    struct priv *p = ctx->hwdec_priv;
-    struct mp_hwdec_ctx *hwctx = &p->mpvdp->hwctx;
-    struct mp_image *out = hwctx->download_image(hwctx, img, p->sw_pool);
-    talloc_free(img);
-    return out;
-}
-
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
     .type = HWDEC_VDPAU,
     .image_format = IMGFMT_VDPAU,
@@ -172,8 +137,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
     .init = init,
     .uninit = uninit,
     .init_decoder = init_decoder,
-    .allocate_image = allocate_image,
-    .process_image = update_format,
+    .volatile_context = true,
 };
 
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy = {
@@ -184,6 +148,5 @@ const struct vd_lavc_hwdec mp_vd_lavc_vdpau_copy = {
     .init = init_copy,
     .uninit = uninit,
     .init_decoder = init_decoder,
-    .allocate_image = allocate_image,
-    .process_image = copy_image,
+    .volatile_context = true,
 };

@@ -48,6 +48,7 @@ struct mp_vdpau_ctx {
     Display *x11;
 
     struct mp_hwdec_ctx hwctx;
+    struct AVBufferRef *av_device_ref;
 
     // These are mostly immutable, except on preemption. We don't really care
     // to synchronize the preemption case fully correctly, because it's an

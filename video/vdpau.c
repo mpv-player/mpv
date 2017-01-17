@@ -17,6 +17,9 @@
 
 #include <assert.h>
 
+#include <libavutil/hwcontext.h>
+#include <libavutil/hwcontext_vdpau.h>
+
 #include "vdpau.h"
 
 #include "osdep/threads.h"
@@ -32,47 +35,10 @@ static struct mp_image *download_image_yuv(struct mp_hwdec_ctx *hwctx,
                                            struct mp_image *mpi,
                                            struct mp_image_pool *swpool)
 {
-    struct mp_vdpau_ctx *ctx = hwctx->ctx;
-    struct vdp_functions *vdp = &ctx->vdp;
-    VdpStatus vdp_st;
-
     if (mpi->imgfmt != IMGFMT_VDPAU || mp_vdpau_mixed_frame_get(mpi))
         return NULL;
 
-    VdpVideoSurface surface = (uintptr_t)mpi->planes[3];
-
-    VdpChromaType s_chroma_type;
-    uint32_t s_w, s_h;
-    vdp_st = vdp->video_surface_get_parameters(surface, &s_chroma_type, &s_w, &s_h);
-    CHECK_VDP_ERROR_NORETURN(ctx,
-                    "Error when calling vdp_video_surface_get_parameters");
-    if (vdp_st != VDP_STATUS_OK)
-        return NULL;
-
-    // Don't bother supporting other types for now.
-    if (s_chroma_type != VDP_CHROMA_TYPE_420)
-        return NULL;
-
-    // The allocation needs to be uncropped, because get_bits writes to it.
-    struct mp_image *out = mp_image_pool_get(swpool, IMGFMT_NV12, s_w, s_h);
-    if (!out)
-        return NULL;
-
-    mp_image_set_size(out, mpi->w, mpi->h);
-    mp_image_copy_attributes(out, mpi);
-
-    vdp_st = vdp->video_surface_get_bits_y_cb_cr(surface,
-                                                 VDP_YCBCR_FORMAT_NV12,
-                                                 (void * const *)out->planes,
-                                                 out->stride);
-    CHECK_VDP_ERROR_NORETURN(ctx,
-                "Error when calling vdp_output_surface_get_bits_y_cb_cr");
-    if (vdp_st != VDP_STATUS_OK) {
-        talloc_free(out);
-        return NULL;
-    }
-
-    return out;
+    return mp_image_hw_download(mpi, swpool);
 }
 
 static struct mp_image *download_image(struct mp_hwdec_ctx *hwctx,
@@ -439,6 +405,26 @@ struct mp_image *mp_vdpau_get_video_surface(struct mp_vdpau_ctx *ctx,
     return mp_vdpau_get_surface(ctx, chroma, 0, false, w, h);
 }
 
+static bool open_lavu_vdpau_device(struct mp_vdpau_ctx *ctx)
+{
+    ctx->av_device_ref = av_hwdevice_ctx_alloc(AV_HWDEVICE_TYPE_VDPAU);
+    if (!ctx->av_device_ref)
+        return false;
+
+    AVHWDeviceContext *hwctx = (void *)ctx->av_device_ref->data;
+    AVVDPAUDeviceContext *vdctx = hwctx->hwctx;
+
+    vdctx->device = ctx->vdp_device;
+    vdctx->get_proc_address = ctx->get_proc_address;
+
+    if (av_hwdevice_ctx_init(ctx->av_device_ref) < 0)
+        av_buffer_unref(&ctx->av_device_ref);
+
+    ctx->hwctx.av_device_ref = ctx->av_device_ref;
+
+    return !!ctx->av_device_ref;
+}
+
 struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11,
                                                 bool probing)
 {
@@ -460,6 +446,10 @@ struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log, Display *x11
     mark_vdpau_objects_uninitialized(ctx);
 
     if (win_x11_init_vdpau_procs(ctx, probing) < 0) {
+        mp_vdpau_destroy(ctx);
+        return NULL;
+    }
+    if (!open_lavu_vdpau_device(ctx)) {
         mp_vdpau_destroy(ctx);
         return NULL;
     }
