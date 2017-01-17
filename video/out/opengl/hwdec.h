@@ -81,6 +81,14 @@ struct gl_hwdec *gl_hwdec_load_api(struct mp_log *log, GL *gl,
                                    struct mp_hwdec_devices *devs,
                                    enum hwdec_type api);
 
+struct gl_hwdec *gl_hwdec_load(struct mp_log *log, GL *gl,
+                               struct mpv_global *g,
+                               struct mp_hwdec_devices *devs,
+                               const char *name);
+
+int gl_hwdec_validate_opt(struct mp_log *log, const m_option_t *opt,
+                          struct bstr name, struct bstr param);
+
 void gl_hwdec_uninit(struct gl_hwdec *hwdec);
 
 bool gl_hwdec_test_format(struct gl_hwdec *hwdec, int imgfmt);

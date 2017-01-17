@@ -50,7 +50,7 @@ typedef struct mp_vo_opts {
     // vo_wayland, vo_drm
     struct sws_opts *sws_opts;
     // vo_opengl, vo_opengl_cb
-    int hwdec_preload_api;
+    char *gl_hwdec_interop;
     // vo_drm
     char *drm_connector_spec;
     int drm_mode_id;

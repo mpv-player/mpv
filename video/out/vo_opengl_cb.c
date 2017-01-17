@@ -167,15 +167,9 @@ int mpv_opengl_cb_init_gl(struct mpv_opengl_cb_context *ctx, const char *exts,
 
     m_config_cache_update(ctx->vo_opts_cache);
 
-    int g_hwdec_api;
-    mp_read_option_raw(ctx->global, "hwdec", &m_option_type_choice, &g_hwdec_api);
-
     ctx->hwdec_devs = hwdec_devices_create();
-    int hwdec_api = ctx->vo_opts->hwdec_preload_api;
-    if (hwdec_api == HWDEC_NONE)
-        hwdec_api = g_hwdec_api;
-    ctx->hwdec = gl_hwdec_load_api(ctx->log, ctx->gl, ctx->global,
-                                   ctx->hwdec_devs, hwdec_api);
+    ctx->hwdec = gl_hwdec_load(ctx->log, ctx->gl, ctx->global,
+                               ctx->hwdec_devs, ctx->vo_opts->gl_hwdec_interop);
     gl_video_set_hwdec(ctx->renderer, ctx->hwdec);
 
     pthread_mutex_lock(&ctx->lock);

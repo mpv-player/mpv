@@ -40,6 +40,7 @@
 #include "stream/stream.h"
 #include "video/csputils.h"
 #include "video/hwdec.h"
+#include "video/out/opengl/hwdec.h"
 #include "video/image_writer.h"
 #include "sub/osd.h"
 #include "audio/filter/af.h"
@@ -150,7 +151,6 @@ const struct m_sub_options stream_cache_conf = {
 
 static const m_option_t mp_vo_opt_list[] = {
     OPT_SETTINGSLIST("vo", video_driver_list, 0, &vo_obj_list, ),
-    OPT_CHOICE_C("hwdec-preload", hwdec_preload_api, 0, mp_hwdec_names),
     OPT_SUBSTRUCT("sws", sws_opts, sws_conf, 0),
     OPT_FLAG("taskbar-progress", taskbar_progress, 0),
     OPT_FLAG("ontop", ontop, 0),
@@ -199,7 +199,11 @@ static const m_option_t mp_vo_opt_list[] = {
                         0, drm_validate_connector_opt),
     OPT_INT("drm-mode", drm_mode_id, 0),
 #endif
-
+#if HAVE_GL
+    OPT_STRING_VALIDATE("opengl-hwdec-interop", gl_hwdec_interop, 0,
+                        gl_hwdec_validate_opt),
+    OPT_REPLACED("hwdec-preload", "opengl-hwdec-interop"),
+#endif
     {0}
 };
 

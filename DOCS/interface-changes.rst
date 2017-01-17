@@ -19,6 +19,12 @@ Interface changes
 
 ::
 
+ --- mpv 0.24.0 ---
+    - deprecate --hwdec-api and replace it with --opengl-hwdec-interop.
+      The new option accepts both --hwdec values, as well as named backends.
+      A minor difference is that --hwdec-api=no (which used to be the default)
+      now actually does not preload any interop layer, while the new default
+      ("") uses the value of --hwdec.
  --- mpv 0.23.0 ---
     - remove deprecated vf_vdpaurb (use "--hwdec=vdpau-copy" instead)
     - the following properties now have new semantics:

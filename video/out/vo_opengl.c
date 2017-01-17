@@ -411,14 +411,9 @@ static int preinit(struct vo *vo)
 
     hwdec_devices_set_loader(vo->hwdec_devs, call_request_hwdec_api, vo);
 
-    int hwdec = vo->opts->hwdec_preload_api;
-    if (hwdec == HWDEC_NONE)
-        hwdec = vo->global->opts->hwdec_api;
-    if (hwdec != HWDEC_NONE) {
-        p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, vo->global,
-                                     vo->hwdec_devs, hwdec);
-        gl_video_set_hwdec(p->renderer, p->hwdec);
-    }
+    p->hwdec = gl_hwdec_load(p->vo->log, p->gl, vo->global,
+                             vo->hwdec_devs, vo->opts->gl_hwdec_interop);
+    gl_video_set_hwdec(p->renderer, p->hwdec);
 
     return 0;
 

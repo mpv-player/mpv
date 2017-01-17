@@ -746,12 +746,12 @@ Video
         In particular, ``auto-copy`` will only select safe modes
         (although potentially slower than other methods).
 
-``--hwdec-preload=<api>``
+``--opengl-hwdec-interop=<name>``
     This is useful for the ``opengl`` and ``opengl-cb`` VOs for creating the
     hardware decoding OpenGL interop context, but without actually enabling
     hardware decoding itself (like ``--hwdec`` does).
 
-    If set to ``no`` (default), the ``--hwdec`` option is used.
+    If set to an empty string (default), the ``--hwdec`` option is used.
 
     For ``opengl``, if set, do not create the interop context on demand, but
     when the VO is created.
@@ -761,6 +761,19 @@ Video
     allows enabling hardware decoding at runtime at all, without having
     to temporarily set the ``hwdec`` option just during OpenGL context
     initialization with ``mpv_opengl_cb_init_gl()``.
+
+    See ``--opengl-hwdec-interop=help`` for accepted values. This lists the
+    interop backend, with the ``--hwdec`` alias after it in ``[...]``. Consider
+    all values except the proper interop backend name, ``auto``, and ``no`` as
+    silently deprecated and subject to change. Also, if you use this in
+    application code (e.g. via libmpv), any value other than ``auto`` and ``no``
+    should be avoided, as backends can change.
+
+    Currently the option sets a single value. It is possible that the option
+    type changes to a list in the future.
+
+    The old alias ``--hwdec-preload`` has different behavior if the option value
+    is ``no``.
 
 ``--videotoolbox-format=<name>``
     Set the internal pixel format used by ``--hwdec=videotoolbox`` on OSX. The
