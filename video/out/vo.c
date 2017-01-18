@@ -808,7 +808,7 @@ static bool render_frame(struct vo *vo)
         pthread_mutex_unlock(&in->lock);
         wakeup_core(vo); // core can queue new video now
 
-        MP_STATS(vo, "start video");
+        MP_STATS(vo, "start video-draw");
 
         if (vo->driver->draw_frame) {
             vo->driver->draw_frame(vo, frame);
@@ -816,12 +816,15 @@ static bool render_frame(struct vo *vo)
             vo->driver->draw_image(vo, mp_image_new_ref(frame->current));
         }
 
+        MP_STATS(vo, "end video-draw");
+
         wait_until(vo, target);
+
+        MP_STATS(vo, "start video-flip");
 
         vo->driver->flip_page(vo);
 
-        MP_STATS(vo, "end video");
-        MP_STATS(vo, "video_end");
+        MP_STATS(vo, "end video-flip");
 
         pthread_mutex_lock(&in->lock);
         in->dropped_frame = prev_drop_count < vo->in->drop_count;
