@@ -306,7 +306,7 @@ local function append_perfdata(s)
 end
 
 
-function append_display_sync(s)
+local function append_display_sync(s)
     if not mp.get_property_bool("display-sync-active", false) then
         return
     end
