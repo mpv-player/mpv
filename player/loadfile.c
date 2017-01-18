@@ -57,6 +57,17 @@
 #include "command.h"
 #include "libmpv/client.h"
 
+// Called by foreign threads when playback should be stopped and such.
+void mp_abort_playback_async(struct MPContext *mpctx)
+{
+    mp_cancel_trigger(mpctx->playback_abort);
+
+    pthread_mutex_lock(&mpctx->lock);
+    if (mpctx->demuxer_cancel)
+        mp_cancel_trigger(mpctx->demuxer_cancel);
+    pthread_mutex_unlock(&mpctx->lock);
+}
+
 static void uninit_demuxer(struct MPContext *mpctx)
 {
     for (int r = 0; r < NUM_PTRACKS; r++) {
@@ -80,6 +91,11 @@ static void uninit_demuxer(struct MPContext *mpctx)
 
     free_demuxer_and_stream(mpctx->demuxer);
     mpctx->demuxer = NULL;
+
+    pthread_mutex_lock(&mpctx->lock);
+    talloc_free(mpctx->demuxer_cancel);
+    mpctx->demuxer_cancel = NULL;
+    pthread_mutex_unlock(&mpctx->lock);
 }
 
 #define APPEND(s, ...) mp_snprintf_cat(s, sizeof(s), __VA_ARGS__)
@@ -808,11 +824,14 @@ static void open_demux_reentrant(struct MPContext *mpctx)
 {
     struct demux_open_args args = {
         .global = mpctx->global,
-        .cancel = mpctx->playback_abort,
+        .cancel = mp_cancel_new(NULL),
         .log = mpctx->log,
         .stream_flags = mpctx->playing->stream_flags,
         .url = talloc_strdup(NULL, mpctx->stream_open_filename),
     };
+    pthread_mutex_lock(&mpctx->lock);
+    mpctx->demuxer_cancel = args.cancel;
+    pthread_mutex_unlock(&mpctx->lock);
     if (mpctx->opts->load_unsafe_playlists)
         args.stream_flags = 0;
     mpctx_run_reentrant(mpctx, open_demux_thread, &args);
@@ -820,6 +839,10 @@ static void open_demux_reentrant(struct MPContext *mpctx)
         mpctx->demuxer = args.demux;
     } else {
         mpctx->error_playing = args.err;
+        pthread_mutex_lock(&mpctx->lock);
+        talloc_free(mpctx->demuxer_cancel);
+        mpctx->demuxer_cancel = NULL;
+        pthread_mutex_unlock(&mpctx->lock);
     }
     talloc_free(args.url);
 }
@@ -1170,7 +1193,7 @@ terminate_playback:
     if (mpctx->step_frames)
         opts->pause = 1;
 
-    mp_cancel_trigger(mpctx->playback_abort);
+    mp_abort_playback_async(mpctx);
 
     // time to uninit all, except global stuff:
     uninit_complex_filters(mpctx);

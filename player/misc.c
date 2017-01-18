@@ -287,7 +287,7 @@ int mpctx_run_reentrant(struct MPContext *mpctx, void (*thread_fn)(void *arg),
         mp_idle(mpctx);
 
         if (mpctx->stop_play)
-            mp_cancel_trigger(mpctx->playback_abort);
+            mp_abort_playback_async(mpctx);
 
         pthread_mutex_lock(&args.mutex);
         success |= args.done;

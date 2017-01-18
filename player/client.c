@@ -982,7 +982,7 @@ static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd, mpv_node *res
         return MPV_ERROR_INVALID_PARAMETER;
 
     if (mp_input_is_abort_cmd(cmd))
-        mp_cancel_trigger(ctx->mpctx->playback_abort);
+        mp_abort_playback_async(ctx->mpctx);
 
     cmd->sender = ctx->name;
 

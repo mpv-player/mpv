@@ -430,6 +430,11 @@ typedef struct MPContext {
     struct mp_ipc_ctx *ipc_ctx;
 
     struct mpv_opengl_cb_context *gl_cb_ctx;
+
+    pthread_mutex_t lock;
+
+    // --- The following fields are protected by lock
+    struct mp_cancel *demuxer_cancel; // cancel handle for MPContext.demuxer
 } MPContext;
 
 // audio.c
@@ -460,6 +465,7 @@ struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
                                                 struct playlist *playlist);
 
 // loadfile.c
+void mp_abort_playback_async(struct MPContext *mpctx);
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
 struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
                                    enum stream_type filter);

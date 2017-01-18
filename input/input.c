@@ -144,7 +144,8 @@ struct input_ctx {
 
     struct cmd_queue cmd_queue;
 
-    struct mp_cancel *cancel;
+    void (*cancel)(void *cancel_ctx);
+    void *cancel_ctx;
 
     void (*wakeup_cb)(void *ctx);
     void *wakeup_ctx;
@@ -809,7 +810,7 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
     input_lock(ictx);
     if (cmd) {
         if (ictx->cancel && test_abort_cmd(ictx, cmd))
-            mp_cancel_trigger(ictx->cancel);
+            ictx->cancel(ictx->cancel_ctx);
         queue_add_tail(&ictx->cmd_queue, cmd);
         mp_input_wakeup(ictx);
     }
@@ -1335,10 +1336,11 @@ void mp_input_uninit(struct input_ctx *ictx)
     talloc_free(ictx);
 }
 
-void mp_input_set_cancel(struct input_ctx *ictx, struct mp_cancel *cancel)
+void mp_input_set_cancel(struct input_ctx *ictx, void (*cb)(void *c), void *c)
 {
     input_lock(ictx);
-    ictx->cancel = cancel;
+    ictx->cancel = cb;
+    ictx->cancel_ctx = c;
     input_unlock(ictx);
 }
 

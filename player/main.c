@@ -311,6 +311,12 @@ static int cfg_include(void *ctx, char *filename, int flags)
     return r;
 }
 
+static void abort_playback_cb(void *ctx)
+{
+    struct MPContext *mpctx = ctx;
+    mp_abort_playback_async(mpctx);
+}
+
 struct MPContext *mp_create(void)
 {
     char *enable_talloc = getenv("MPV_LEAK_REPORT");
@@ -361,7 +367,7 @@ struct MPContext *mp_create(void)
     cocoa_set_input_context(mpctx->input);
 #endif
 
-    mp_input_set_cancel(mpctx->input, mpctx->playback_abort);
+    mp_input_set_cancel(mpctx->input, abort_playback_cb, mpctx);
 
     char *verbose_env = getenv("MPV_VERBOSE");
     if (verbose_env)
