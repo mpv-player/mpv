@@ -802,8 +802,6 @@ static void open_demux_thread(void *pctx)
             args->err = MPV_ERROR_LOADING_FAILED;
         }
     }
-    if (args->demux && global->opts->rebase_start_time)
-        demux_set_ts_offset(args->demux, -args->demux->start_time);
 }
 
 static void open_demux_reentrant(struct MPContext *mpctx)
@@ -820,7 +818,6 @@ static void open_demux_reentrant(struct MPContext *mpctx)
     mpctx_run_reentrant(mpctx, open_demux_thread, &args);
     if (args.demux) {
         mpctx->demuxer = args.demux;
-        enable_demux_thread(mpctx, mpctx->demuxer);
     } else {
         mpctx->error_playing = args.err;
     }
@@ -1037,6 +1034,10 @@ reopen_file:
         mpctx->error_playing = 2;
         goto terminate_playback;
     }
+
+    if (mpctx->opts->rebase_start_time)
+        demux_set_ts_offset(mpctx->demuxer, -mpctx->demuxer->start_time);
+    enable_demux_thread(mpctx, mpctx->demuxer);
 
     load_chapters(mpctx);
     add_demuxer_tracks(mpctx, mpctx->demuxer);
