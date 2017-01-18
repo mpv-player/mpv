@@ -475,6 +475,12 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_statement('libavutil/frame.h',
                                 'AV_FRAME_DATA_MASTERING_DISPLAY_METADATA',
                                 use='libav'),
+    }, {
+        'name': 'avutil-imgcpy-uc',
+        'desc': 'libavutil GPU memcpy for hardware decoding',
+        'func': check_statement('libavutil/imgutils.h',
+                                'av_image_copy_uc_from(0,0,0,0,0,0,0)',
+                                use='libav'),
     },
 ]
 
@@ -842,10 +848,13 @@ hwaccel_features = [
     }, {
         'name': '--vaapi-hwaccel-new',
         'desc': 'libavcodec VAAPI hwaccel (new)',
-        'deps': [ 'vaapi-hwaccel' ],
+        'deps': [ 'vaapi-hwaccel', 'avutil-imgcpy-uc' ],
         'func': check_statement('libavcodec/version.h',
             'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 26, 0) && '
-            '       LIBAVCODEC_VERSION_MICRO < 100) ? 1 : -1]',
+            '       LIBAVCODEC_VERSION_MICRO < 100) ||'
+            '      (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 74, 100) && '
+            '       LIBAVCODEC_VERSION_MICRO >= 100)'
+            '      ? 1 : -1]',
             use='libav'),
     }, {
         'name': '--vaapi-hwaccel-old',
