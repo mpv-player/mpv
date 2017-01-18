@@ -350,6 +350,7 @@ void vo_cocoa_init(struct vo *vo)
     pthread_cond_init(&s->sync_wakeup, NULL);
     vo->cocoa = s;
     vo_cocoa_update_screen_info(vo);
+    vo_cocoa_init_displaylink(vo);
     cocoa_init_light_sensor(vo);
     cocoa_add_screen_reconfiguration_observer(vo);
     if (!s->embedded) {
@@ -637,7 +638,6 @@ int vo_cocoa_config_window(struct vo *vo)
     struct mp_vo_opts *opts  = vo->opts;
 
     run_on_main_thread(vo, ^{
-        vo_cocoa_init_displaylink(vo);
         vo_cocoa_update_screen_fps(vo);
 
         NSRect r = [s->current_screen frame];
