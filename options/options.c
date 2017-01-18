@@ -383,6 +383,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
     OPT_FLAG("demuxer-thread", demuxer_thread, 0),
+    OPT_FLAG("prefetch-playlist", prefetch_open, 0),
     OPT_FLAG("cache-pause", cache_pausing, 0),
 
     OPT_DOUBLE("mf-fps", mf_fps, 0),

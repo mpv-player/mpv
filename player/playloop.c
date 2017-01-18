@@ -663,6 +663,9 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
         force_update = true;
     }
 
+    if (s.eof && !busy)
+        prefetch_next(mpctx);
+
     if (force_update)
         mp_notify(mpctx, MP_EVENT_CACHE_UPDATE, NULL);
 }

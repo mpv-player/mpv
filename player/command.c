@@ -4959,7 +4959,7 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         int dir = cmd->id == MP_CMD_PLAYLIST_PREV ? -1 : +1;
         int force = cmd->args[0].v.i;
 
-        struct playlist_entry *e = mp_next_file(mpctx, dir, force);
+        struct playlist_entry *e = mp_next_file(mpctx, dir, force, true);
         if (!e && !force)
             return -1;
         mp_set_playlist_entry(mpctx, e);

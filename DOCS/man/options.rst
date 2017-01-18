@@ -2737,6 +2737,27 @@ Demuxer
     (This value tends to be fuzzy, because many file formats don't store linear
     timestamps.)
 
+``--prefetch-playlist=<yes|no>``
+    Prefetch next playlist entry while playback of the current entry is ending
+    (default: no). This merely opens the URL of the next playlist entry as soon
+    as the current URL is fully read.
+
+    This does **not** work with URLs resolved by the ``youtube-dl`` wrapper,
+    and it won't.
+
+    This does not affect HLS (``.m3u8`` URLs) - HLS prefetching depends on the
+    demuxer cache settings and is on by default.
+
+    This can give subtly wrong results if per-file options are used, or if
+    options are changed in the time window between prefetching start and next
+    file played.
+
+    This can occasionally make wrong prefetching decisions. For example, it
+    can't predict whether you go backwards in the playlist, and assumes you
+    won't edit the playlist.
+
+    Highly experimental.
+
 ``--force-seekable=<yes|no>``
     If the player thinks that the media is not seekable (e.g. playing from a
     pipe, or it's an http stream with a server that doesn't support range
