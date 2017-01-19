@@ -2343,7 +2343,7 @@ Window
         - ``--monitoraspect=16:9`` or ``--monitoraspect=1.7777``
 
 ``--hidpi-window-scale``, ``--no-hidpi-window-scale``
-    (OS X only)
+    (OS X and X11 only)
     Scale the window size according to the backing scale factor (default: yes).
     On regular HiDPI resolutions the window opens with double the size but appears
     as having the same size as on none-HiDPI resolutions. This is the default OS X

@@ -67,13 +67,17 @@ static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
 // Compute the "suggested" window size and position and return it in *out_geo.
 // screen is the bounding box of the current screen within the virtual desktop.
 // Does not change *vo.
+//  screen: position of the screen on virtual desktop on which the window
+//          should be placed
+//  dpi_scale: the DPI multiplier to get from virtual to real coordinates
+//             (>1 for "hidpi")
 // Use vo_apply_window_geometry() to copy the result into the vo.
 // NOTE: currently, all windowing backends do their own handling of window
 //       geometry additional to this code. This is to deal with initial window
 //       placement, fullscreen handling, avoiding resize on reconfig() with no
 //       size change, multi-monitor stuff, and possibly more.
-void vo_calc_window_geometry(struct vo *vo, const struct mp_rect *screen,
-                             struct vo_win_geometry *out_geo)
+void vo_calc_window_geometry2(struct vo *vo, const struct mp_rect *screen,
+                              double dpi_scale, struct vo_win_geometry *out_geo)
 {
     struct mp_vo_opts *opts = vo->opts;
 
@@ -86,12 +90,15 @@ void vo_calc_window_geometry(struct vo *vo, const struct mp_rect *screen,
     if (vo->params)
         params = *vo->params;
 
+    if (!opts->hidpi_window_scale)
+        dpi_scale = 1;
+
     int d_w, d_h;
     mp_image_params_get_dsize(&params, &d_w, &d_h);
     if ((vo->driver->caps & VO_CAP_ROTATE90) && params.rotate % 180 == 90)
         MPSWAP(int, d_w, d_h);
-    d_w = MPCLAMP(d_w * opts->window_scale, 1, 16000);
-    d_h = MPCLAMP(d_h * opts->window_scale, 1, 16000);
+    d_w = MPCLAMP(d_w * opts->window_scale * dpi_scale, 1, 16000);
+    d_h = MPCLAMP(d_h * opts->window_scale * dpi_scale, 1, 16000);
 
     int scr_w = screen->x1 - screen->x0;
     int scr_h = screen->y1 - screen->y0;
@@ -116,6 +123,12 @@ void vo_calc_window_geometry(struct vo *vo, const struct mp_rect *screen,
 
     if (opts->geometry.xy_valid || opts->force_window_position)
         out_geo->flags |= VO_WIN_FORCE_POS;
+}
+
+void vo_calc_window_geometry(struct vo *vo, const struct mp_rect *screen,
+                             struct vo_win_geometry *out_geo)
+{
+    vo_calc_window_geometry2(vo, screen, 1.0, out_geo);
 }
 
 // Copy the parameters in *geo to the vo fields.

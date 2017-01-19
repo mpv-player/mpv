@@ -544,6 +544,7 @@ int vo_x11_init(struct vo *vo)
         .screensaver_enabled = true,
         .xrandr_event = -1,
         .wakeup_pipe = {-1, -1},
+        .dpi_scale = 1,
     };
     vo->x11 = x11;
 
@@ -594,6 +595,22 @@ int vo_x11_init(struct vo *vo)
     MP_VERBOSE(x11, "X11 running at %dx%d (\"%s\" => %s display)\n",
                x11->ws_width, x11->ws_height, dispName,
                x11->display_is_local ? "local" : "remote");
+
+    int w_mm = DisplayWidthMM(x11->display, x11->screen);
+    int h_mm = DisplayHeightMM(x11->display, x11->screen);
+    double dpi_x = x11->ws_width * 25.4 / w_mm;
+    double dpi_y = x11->ws_height * 25.4 / h_mm;
+    double base_dpi = 96;
+    if (isfinite(dpi_x) && isfinite(dpi_y)) {
+        int s_x = lrint(MPCLAMP(dpi_x / base_dpi, 0, 10));
+        int s_y = lrint(MPCLAMP(dpi_y / base_dpi, 0, 10));
+        if (s_x == s_y && s_x > 1 && s_x < 10) {
+            x11->dpi_scale = s_x;
+            MP_VERBOSE(x11, "Assuming DPI scale %d for prescaling. This can "
+                       "be disabled with --hidpi-window-scale=no.\n",
+                       x11->dpi_scale);
+        }
+    }
 
     x11->wm_type = vo_wm_detect(vo);
 
@@ -1604,7 +1621,7 @@ void vo_x11_config_vo_window(struct vo *vo)
     vo_x11_update_screeninfo(vo);
 
     struct vo_win_geometry geo;
-    vo_calc_window_geometry(vo, &x11->screenrc, &geo);
+    vo_calc_window_geometry2(vo, &x11->screenrc, x11->dpi_scale, &geo);
     vo_apply_window_geometry(vo, &geo);
 
     struct mp_rect rc = geo.win;

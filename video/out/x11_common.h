@@ -54,6 +54,7 @@ struct vo_x11_state {
     int display_is_local;
     int ws_width;
     int ws_height;
+    int dpi_scale;
     struct mp_rect screenrc;
     char *window_title;
 
