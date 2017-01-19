@@ -879,8 +879,11 @@ static void open_demux_reentrant(struct MPContext *mpctx)
             MP_VERBOSE(mpctx, "Prefetched URL failed, retrying.\n");
             cancel_open(mpctx);
         } else {
-            if (!done)
+            if (done) {
+                MP_VERBOSE(mpctx, "Dropping finished prefetch of wrong URL.\n");
+            } else {
                 MP_VERBOSE(mpctx, "Aborting onging prefetch of wrong URL.\n");
+            }
             cancel_open(mpctx);
         }
     }
