@@ -798,6 +798,7 @@ static void *open_demux_thread(void *ctx)
         .force_format = mpctx->open_format,
         .allow_capture = true,
         .stream_flags = mpctx->open_url_flags,
+        .initial_readahead = true,
     };
     mpctx->open_res_demuxer =
         demux_open_url(mpctx->open_url, &p, mpctx->open_cancel, mpctx->global);

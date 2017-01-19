@@ -1305,7 +1305,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         demux_init_cache(demuxer);
         demux_changed(in->d_thread, DEMUX_EVENT_ALL);
         demux_update(demuxer);
-        stream_control(demuxer->stream, STREAM_CTRL_SET_READAHEAD, &(int){false});
+        stream_control(demuxer->stream, STREAM_CTRL_SET_READAHEAD,
+                       &(int){params ? params->initial_readahead : false});
         if (!(params && params->disable_timeline)) {
             struct timeline *tl = timeline_load(global, log, demuxer);
             if (tl) {

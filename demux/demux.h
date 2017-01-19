@@ -162,6 +162,7 @@ struct demuxer_params {
     bool *matroska_was_valid;
     struct timeline *timeline;
     bool disable_timeline;
+    bool initial_readahead;
     // -- demux_open_url() only
     int stream_flags;
     bool allow_capture;
