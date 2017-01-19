@@ -478,8 +478,10 @@ static void vo_set_level(struct vo *vo, int ontop)
         s->window_level = NSNormalWindowLevel;
     }
 
-    [[s->view window] setLevel:s->window_level];
-    [s->window        setLevel:s->window_level];
+    [s->window setLevel:s->window_level];
+    NSWindowCollectionBehavior behavior = [s->window collectionBehavior] &
+                                          ~NSWindowCollectionBehaviorTransient;
+    [s->window setCollectionBehavior:behavior|NSWindowCollectionBehaviorManaged];
 }
 
 static int vo_cocoa_ontop(struct vo *vo)
