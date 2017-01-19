@@ -25,6 +25,7 @@ Interface changes
       A minor difference is that --hwdec-api=no (which used to be the default)
       now actually does not preload any interop layer, while the new default
       ("") uses the value of --hwdec.
+    - drop deprecated --ad/--vd features
  --- mpv 0.23.0 ---
     - remove deprecated vf_vdpaurb (use "--hwdec=vdpau-copy" instead)
     - the following properties now have new semantics:

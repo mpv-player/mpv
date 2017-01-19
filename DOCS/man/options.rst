@@ -1145,23 +1145,17 @@ Audio
         multichannel PCM, and mpv supports lossless DTS-HD decoding via
         FFmpeg's new DCA decoder (based on libdcadec).
 
-``--ad=<[+|-]family1:(*|decoder1),[+|-]family2:(*|decoder2),...[-]>``
+``--ad=<decoder1,decoder2,...[-]>``
     Specify a priority list of audio decoders to be used, according to their
     decoder name. When determining which decoder to use, the first decoder that
     matches the audio format is selected. If that is unavailable, the next
     decoder is used. Finally, it tries all other decoders that are not
     explicitly selected or rejected by the option.
 
-    Specifying family names is deprecated. Entries like ``family:*`` prioritize
-    all decoders of the given family.
-
     ``-`` at the end of the list suppresses fallback on other available
     decoders not on the ``--ad`` list. ``+`` in front of an entry forces the
     decoder. Both of these should not normally be used, because they break
     normal decoder auto-selection! Both of these methods are deprecated.
-
-    ``-`` in front of an entry disables selection of the decoder. This is
-    deprecated.
 
     .. admonition:: Examples
 
@@ -1169,17 +1163,13 @@ Audio
             Prefer the FFmpeg/Libav ``mp3float`` decoder over all other MP3
             decoders.
 
-        ``--ad=lavc:mp3float``
-            Prefer the FFmpeg/Libav ``mp3float`` decoder over all other MP3
-            decoders. (Using deprecated family syntax.)
-
         ``--ad=help``
             List all available decoders.
 
     .. admonition:: Warning
 
         Enabling compressed audio passthrough (AC3 and DTS via SPDIF/HDMI) with
-        this option is deprecated. Use ``--audio-spdif`` instead.
+        this option is not possible. Use ``--audio-spdif`` instead.
 
 ``--volume=<value>``
     Set the startup volume. 0 means silence, 100 means no volume reduction or
