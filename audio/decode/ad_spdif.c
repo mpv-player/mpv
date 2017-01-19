@@ -304,8 +304,10 @@ static bool receive_frame(struct dec_audio *da, struct mp_audio **out)
     spdif_ctx->out_buffer_len  = 0;
     int ret = av_write_frame(spdif_ctx->lavf_ctx, &pkt);
     avio_flush(spdif_ctx->lavf_ctx->pb);
-    if (ret < 0)
+    if (ret < 0) {
+        MP_ERR(da, "spdif mux error: '%s'\n", mp_strerror(AVUNERROR(ret)));
         goto done;
+    }
 
     int samples = spdif_ctx->out_buffer_len / spdif_ctx->fmt.sstride;
     *out = mp_audio_pool_get(spdif_ctx->pool, &spdif_ctx->fmt, samples);
