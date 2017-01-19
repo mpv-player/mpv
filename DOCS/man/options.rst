@@ -1784,8 +1784,9 @@ Subtitles
     subtitles are interpreted as UTF-8 with "Latin 1" as fallback for bytes
     which are not valid UTF-8 sequences. iconv is never involved in this mode.
 
-    This option changed in mpv 0.23.0. The old syntax is still emulated to some
-    degree.
+    This option changed in mpv 0.23.0. Support for the old syntax was fully
+    removed in mpv 0.24.0.
+
 
 ``--sub-fix-timing``, ``--no-sub-fix-timing``
     By default, subtitle timing is adjusted to remove minor gaps or overlaps

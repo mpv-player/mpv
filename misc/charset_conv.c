@@ -51,28 +51,6 @@ bool mp_charset_is_utf16(const char *user_cp)
            bstr_case_startswith(s, bstr0("utf-16"));
 }
 
-// Split the string on ':' into components.
-// out_arr is at least max entries long.
-// Return number of out_arr entries filled.
-static int split_colon(const char *user_cp, int max, bstr *out_arr)
-{
-    if (!user_cp || max < 1)
-        return 0;
-
-    int count = 0;
-    while (1) {
-        const char *next = strchr(user_cp, ':');
-        if (next && max - count > 1) {
-            out_arr[count++] = (bstr){(char *)user_cp, next - user_cp};
-            user_cp = next + 1;
-        } else {
-            out_arr[count++] = (bstr){(char *)user_cp, strlen(user_cp)};
-            break;
-        }
-    }
-    return count;
-}
-
 static const char *const utf_bom[3] = {"\xEF\xBB\xBF", "\xFF\xFE", "\xFE\xFF"};
 static const char *const utf_enc[3] = {"utf-8",        "utf-16le", "utf-16be"};
 
@@ -120,59 +98,16 @@ static const char *mp_uchardet(void *talloc_ctx, struct mp_log *log, bstr buf)
 // it's a real iconv codepage), user_cp is returned without even looking at
 // the buf data.
 // The return value may (but doesn't have to) be allocated under talloc_ctx.
-static const char *mp_charset_guess_compat(void *talloc_ctx, struct mp_log *log,
-                                           bstr buf, const char *user_cp,
-                                           int flags)
-{
-    mp_warn(log, "This syntax for the --sub-codepage option is deprecated.\n");
-
-    bstr params[3] = {{0}};
-    split_colon(user_cp, 3, params);
-
-    bstr type = params[0];
-    char lang[100];
-    snprintf(lang, sizeof(lang), "%.*s", BSTR_P(params[1]));
-    const char *fallback = params[2].start; // last item, already 0-terminated
-
-    const char *res = NULL;
-
-#if HAVE_UCHARDET
-    if (bstrcasecmp0(type, "uchardet") == 0) {
-        res = mp_uchardet(talloc_ctx, log, buf);
-        if (!res && bstr_validate_utf8(buf) >= 0)
-            res = "utf-8";
-    }
-#endif
-
-    if (bstrcasecmp0(type, "utf8") == 0 || bstrcasecmp0(type, "utf-8") == 0) {
-        if (!fallback)
-            fallback = params[1].start; // must be already 0-terminated
-        int r = bstr_validate_utf8(buf);
-        if (r >= 0 || (r > -8 && (flags & MP_ICONV_ALLOW_CUTOFF)))
-            res = "utf-8";
-    }
-
-    if (res) {
-        mp_dbg(log, "%.*s detected charset: '%s'\n", BSTR_P(type), res);
-    } else {
-        res = fallback;
-        mp_dbg(log, "Detection with %.*s failed: fallback to %s\n",
-               BSTR_P(type), res && res[0] ? res : "broken UTF-8/Latin1");
-    }
-
-    if (!res && !(flags & MP_STRICT_UTF8))
-        res = "UTF-8-BROKEN";
-
-    mp_verbose(log, "Using charset '%s'.\n", res);
-    return res;
-}
-
 const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log,  bstr buf,
                              const char *user_cp, int flags)
 {
     if (strcasecmp(user_cp, "enca") == 0 || strcasecmp(user_cp, "guess") == 0 ||
         strcasecmp(user_cp, "uchardet") == 0 || strchr(user_cp, ':'))
-        return mp_charset_guess_compat(talloc_ctx, log, buf, user_cp, flags);
+    {
+        mp_err(log, "This syntax for the --sub-codepage option was deprecated "
+                    "and has been removed.\n");
+        user_cp = "";
+    }
 
     if (user_cp[0] == '+') {
         mp_verbose(log, "Forcing charset '%s'.\n", user_cp + 1);
