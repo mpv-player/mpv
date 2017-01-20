@@ -88,6 +88,8 @@ extern const struct m_obj_list af_obj_list;
 extern const struct m_obj_list vo_obj_list;
 extern const struct m_obj_list ao_obj_list;
 
+extern const struct m_sub_options angle_conf;
+
 const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"no",          HWDEC_NONE},
     {"auto",        HWDEC_AUTO},
@@ -689,6 +691,10 @@ const m_option_t mp_opts[] = {
 
 #if HAVE_GL
     OPT_SUBSTRUCT("", gl_video_opts, gl_video_conf, 0),
+#endif
+
+#if HAVE_EGL_ANGLE
+    OPT_SUBSTRUCT("", angle_opts, angle_conf, 0),
 #endif
 
 #if HAVE_ENCODING

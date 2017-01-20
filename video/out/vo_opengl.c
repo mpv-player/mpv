@@ -55,7 +55,6 @@ struct vo_opengl_opts {
     int allow_sw;
     int swap_interval;
     int dwm_flush;
-    int allow_direct_composition;
     int vsync_fences;
     char *backend;
     int es;
@@ -383,9 +382,6 @@ static int preinit(struct vo *vo)
     if (p->opts.allow_sw)
         vo_flags |= VOFLAG_SW;
 
-    if (p->opts.allow_direct_composition)
-        vo_flags |= VOFLAG_ANGLE_DCOMP;
-
     p->glctx = mpgl_init(vo, p->opts.backend, vo_flags);
     if (!p->glctx)
         goto err_out;
@@ -444,7 +440,6 @@ const struct vo_driver video_out_opengl = {
         OPT_INT("opengl-swapinterval", opts.swap_interval, 0),
         OPT_CHOICE("opengl-dwmflush", opts.dwm_flush, 0,
                 ({"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})),
-        OPT_FLAG("opengl-dcomposition", opts.allow_direct_composition, 0),
         OPT_FLAG("opengl-debug", opts.use_gl_debug, 0),
         OPT_STRING_VALIDATE("opengl-backend", opts.backend, 0,
                             mpgl_validate_backend_opt),
@@ -459,7 +454,6 @@ const struct vo_driver video_out_opengl = {
     .priv_defaults = &(const struct gl_priv){
         .opts = {
             .swap_interval = 1,
-            .allow_direct_composition = 1,
         },
     },
 };

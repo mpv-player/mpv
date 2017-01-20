@@ -320,6 +320,7 @@ typedef struct MPOpts {
     char *input_file;
 
     struct gl_video_opts *gl_video_opts;
+    struct angle_opts *angle_opts;
     struct dvd_opts *dvd_opts;
 } MPOpts;
 

@@ -159,6 +159,7 @@ static MPGLContext *init_backend(struct vo *vo, const struct mpgl_driver *driver
     *ctx = (MPGLContext) {
         .gl = talloc_zero(ctx, GL),
         .vo = vo,
+        .global = vo->global,
         .driver = driver,
     };
     if (probing)

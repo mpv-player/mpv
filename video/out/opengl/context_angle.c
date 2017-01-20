@@ -24,6 +24,7 @@
 #include "angle_dynamic.h"
 
 #include "common/common.h"
+#include "options/m_config.h"
 #include "video/out/w32_common.h"
 #include "context.h"
 
@@ -36,6 +37,22 @@
 // Windows 8 enum value, not present in mingw-w64 headers
 #define DXGI_ADAPTER_FLAG_SOFTWARE (2)
 
+struct angle_opts {
+    int allow_direct_composition;
+};
+
+#define OPT_BASE_STRUCT struct angle_opts
+const struct m_sub_options angle_conf = {
+    .opts = (const struct m_option[]) {
+        OPT_FLAG("opengl-dcomposition", allow_direct_composition, 0),
+        {0}
+    },
+    .defaults = &(const struct angle_opts) {
+        .allow_direct_composition = 1,
+    },
+    .size = sizeof(struct angle_opts),
+};
+
 struct priv {
     EGLDisplay egl_display;
     EGLContext egl_context;
@@ -43,6 +60,7 @@ struct priv {
     bool use_es2;
     bool sw_adapter_msg_shown;
     PFNEGLPOSTSUBBUFFERNVPROC eglPostSubBufferNV;
+    struct angle_opts *opts;
 };
 
 static void angle_uninit(MPGLContext *ctx)
@@ -217,6 +235,8 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
 
+    p->opts = mp_get_config_group(ctx, ctx->global, &angle_conf);
+
     if (!angle_load()) {
         MP_VERBOSE(vo, "Failed to load LIBEGL.DLL\n");
         goto fail;
@@ -309,7 +329,7 @@ static int angle_init(struct MPGLContext *ctx, int flags)
     // behavior with some drivers (Intel? symptom - whole desktop is black for
     // some seconds after spending some minutes in fullscreen and then leaving
     // fullscreen).
-    if ((flags & VOFLAG_ANGLE_DCOMP) &&
+    if (p->opts->allow_direct_composition &&
         strstr(exts, "EGL_ANGLE_direct_composition"))
     {
         MP_TARRAY_APPEND(NULL, window_attribs, window_attribs_len,

@@ -32,7 +32,6 @@ enum {
     VOFLAG_GL_DEBUG     = 1 << 2,       // Hint to request debug OpenGL context
     VOFLAG_ALPHA        = 1 << 3,       // Hint to request alpha framebuffer
     VOFLAG_SW           = 1 << 4,       // Hint to accept a software GL renderer
-    VOFLAG_ANGLE_DCOMP  = 1 << 5,       // Whether DirectComposition is allowed
     VOFLAG_PROBING      = 1 << 6,       // The backend is being auto-probed.
 };
 
@@ -78,6 +77,7 @@ typedef struct MPGLContext {
     GL *gl;
     struct vo *vo;
     const struct mpgl_driver *driver;
+    struct mpv_global *global;
 
     // For hwdec_vaegl.c.
     const char *native_display_type;
