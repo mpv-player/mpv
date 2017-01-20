@@ -940,14 +940,18 @@ Property list
     Total A-V sync correction done. Unavailable if audio or video is
     disabled.
 
-``drop-frame-count``
+``decoder-frame-drop-count``
     Video frames dropped by decoder, because video is too far behind audio (when
     using ``--framedrop=decoder``). Sometimes, this may be incremented in other
     situations, e.g. when video packets are damaged, or the decoder doesn't
     follow the usual rules. Unavailable if video is disabled.
 
-``vo-drop-frame-count``
+    ``drop-frame-count`` is a deprecated alias.
+
+``frame-drop-count``
     Frames dropped by VO (when using ``--framedrop=vo``).
+
+    ``vo-drop-frame-count`` is a deprecated alias.
 
 ``mistimed-frame-count``
     Number of video frames that were not timed correctly in display-sync mode

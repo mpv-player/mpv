@@ -650,7 +650,7 @@ static int mp_property_total_avsync_change(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, mpctx->total_avsync_change);
 }
 
-static int mp_property_drop_frame_cnt(void *ctx, struct m_property *prop,
+static int mp_property_frame_drop_dec(void *ctx, struct m_property *prop,
                                       int action, void *arg)
 {
     MPContext *mpctx = ctx;
@@ -692,8 +692,8 @@ static int mp_property_vsync_ratio(void *ctx, struct m_property *prop,
     return m_property_double_ro(action, arg, vsyncs / (double)frames);
 }
 
-static int mp_property_vo_drop_frame_count(void *ctx, struct m_property *prop,
-                                           int action, void *arg)
+static int mp_property_frame_drop_vo(void *ctx, struct m_property *prop,
+                                     int action, void *arg)
 {
     MPContext *mpctx = ctx;
     if (!mpctx->vo_chain)
@@ -3797,10 +3797,10 @@ static const struct m_property mp_properties_base[] = {
     {"duration", mp_property_duration},
     {"avsync", mp_property_avsync},
     {"total-avsync-change", mp_property_total_avsync_change},
-    {"drop-frame-count", mp_property_drop_frame_cnt},
     {"mistimed-frame-count", mp_property_mistimed_frame_count},
     {"vsync-ratio", mp_property_vsync_ratio},
-    {"vo-drop-frame-count", mp_property_vo_drop_frame_count},
+    {"decoder-frame-drop-count", mp_property_frame_drop_dec},
+    {"frame-drop-count", mp_property_frame_drop_vo},
     {"vo-delayed-frame-count", mp_property_vo_delayed_frame_count},
     {"percent-pos", mp_property_percent_pos},
     {"time-start", mp_property_time_start},
@@ -3994,6 +3994,9 @@ static const struct m_property mp_properties_base[] = {
     M_PROPERTY_ALIAS("colormatrix-input-range", "video-params/colorlevels"),
     M_PROPERTY_ALIAS("colormatrix-primaries", "video-params/primaries"),
     M_PROPERTY_ALIAS("colormatrix-gamma", "video-params/gamma"),
+
+    M_PROPERTY_DEPRECATED_ALIAS("drop-frame-count", "decoder-frame-drop-count"),
+    M_PROPERTY_DEPRECATED_ALIAS("vo-drop-frame-count", "frame-drop-count"),
 };
 
 // Each entry describes which properties an event (possibly) changes.
@@ -4015,7 +4018,8 @@ static const char *const *const mp_event_property_change[] = {
       "total-avsync-change", "audio-speed-correction", "video-speed-correction",
       "vo-delayed-frame-count", "mistimed-frame-count", "vsync-ratio",
       "estimated-display-fps", "vsync-jitter", "sub-text", "audio-bitrate",
-      "video-bitrate", "sub-bitrate"),
+      "video-bitrate", "sub-bitrate", "decoder-frame-drop-count",
+      "frame-drop-count"),
     E(MPV_EVENT_VIDEO_RECONFIG, "video-out-params", "video-params",
       "video-format", "video-codec", "video-bitrate", "dwidth", "dheight",
       "width", "height", "fps", "aspect", "vo-configured", "current-vo",

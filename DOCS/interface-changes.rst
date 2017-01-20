@@ -27,6 +27,10 @@ Interface changes
       ("") uses the value of --hwdec.
     - drop deprecated --ad/--vd features
     - drop deprecated --sub-codepage syntax
+    - rename properties:
+        - "drop-frame-count" to "decoder-frame-drop-count"
+        - "vo-drop-frame-count" to "frame-drop-count"
+      The old names still work, but are deprecated.
  --- mpv 0.23.0 ---
     - remove deprecated vf_vdpaurb (use "--hwdec=vdpau-copy" instead)
     - the following properties now have new semantics:
