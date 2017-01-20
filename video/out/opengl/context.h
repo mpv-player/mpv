@@ -83,9 +83,6 @@ typedef struct MPGLContext {
     const char *native_display_type;
     void *native_display;
 
-    // Windows-specific hack. See vo_opengl dwmflush suboption.
-    int dwm_flush_opt;
-
     // Flip the rendered image vertically. This is useful for dxinterop.
     bool flip_v;
 

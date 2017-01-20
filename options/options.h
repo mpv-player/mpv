@@ -319,6 +319,8 @@ typedef struct MPOpts {
     char *ipc_path;
     char *input_file;
 
+    int wingl_dwm_flush;
+
     struct gl_video_opts *gl_video_opts;
     struct angle_opts *angle_opts;
     struct dvd_opts *dvd_opts;

@@ -54,7 +54,6 @@ struct vo_opengl_opts {
     int use_gl_debug;
     int allow_sw;
     int swap_interval;
-    int dwm_flush;
     int vsync_fences;
     char *backend;
     int es;
@@ -387,8 +386,6 @@ static int preinit(struct vo *vo)
         goto err_out;
     p->gl = p->glctx->gl;
 
-    p->glctx->dwm_flush_opt = p->opts.dwm_flush;
-
     if (p->gl->SwapInterval) {
         p->gl->SwapInterval(p->opts.swap_interval);
     } else {
@@ -438,8 +435,6 @@ const struct vo_driver video_out_opengl = {
         OPT_FLAG("opengl-glfinish", opts.use_glFinish, 0),
         OPT_FLAG("opengl-waitvsync", opts.waitvsync, 0),
         OPT_INT("opengl-swapinterval", opts.swap_interval, 0),
-        OPT_CHOICE("opengl-dwmflush", opts.dwm_flush, 0,
-                ({"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})),
         OPT_FLAG("opengl-debug", opts.use_gl_debug, 0),
         OPT_STRING_VALIDATE("opengl-backend", opts.backend, 0,
                             mpgl_validate_backend_opt),

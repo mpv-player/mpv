@@ -697,6 +697,11 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", angle_opts, angle_conf, 0),
 #endif
 
+#if HAVE_GL_WIN32
+    OPT_CHOICE("opengl-dwmflush", wingl_dwm_flush, 0,
+               ({"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})),
+#endif
+
 #if HAVE_ENCODING
     OPT_SUBSTRUCT("", encode_opts, encode_config, 0),
 #endif
