@@ -17,6 +17,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <errno.h>
 #include <assert.h>
 
 #include "config.h"
@@ -212,21 +213,34 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
 
     int64_t size = stream_get_size(stream);
 
-    stream_set_capture_file(stream, opts->stream_dump);
+    FILE *dest = fopen(opts->stream_dump, "wb");
+    if (!dest) {
+        MP_ERR(mpctx, "Error opening dump file: %s\n", mp_strerror(errno));
+        return -1;
+    }
 
-    while (mpctx->stop_play == KEEP_PLAYING && !stream->eof) {
+    bool ok = true;
+
+    while (mpctx->stop_play == KEEP_PLAYING && ok) {
         if (!opts->quiet && ((stream->pos / (1024 * 1024)) % 2) == 1) {
             uint64_t pos = stream->pos;
             MP_MSG(mpctx, MSGL_STATUS, "Dumping %lld/%lld...",
                    (long long int)pos, (long long int)size);
         }
-        stream_fill_buffer(stream);
+        bstr data = stream_peek(stream, STREAM_MAX_BUFFER_SIZE);
+        if (data.len == 0) {
+            ok &= stream->eof;
+            break;
+        }
+        ok &= fwrite(data.start, data.len, 1, dest) == 1;
+        stream_skip(stream, data.len);
         mp_wakeup_core(mpctx); // don't actually sleep
         mp_idle(mpctx); // but process input
     }
 
+    ok &= fclose(dest) == 0;
     free_stream(stream);
-    return 0;
+    return ok ? 0 : -1;
 }
 
 void merge_playlist_files(struct playlist *pl)

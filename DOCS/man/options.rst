@@ -4745,21 +4745,10 @@ Miscellaneous
     Input file type for ``mf://`` (available: jpeg, png, tga, sgi). By default,
     this is guessed from the file extension.
 
-``--stream-capture=<filename>``
-    Allows capturing the primary stream (not additional audio tracks or other
-    kind of streams) into the given file. Capturing can also be started and
-    stopped by changing the filename with the ``stream-capture`` property.
-    Generally this will not produce usable results for anything else than MPEG
-    or raw streams, unless capturing includes the file headers and is not
-    interrupted. Note that, due to cache latencies, captured data may begin and
-    end somewhat delayed compared to what you see displayed.
-
-    The destination file is always appended. (Before mpv 0.8.0, the file was
-    overwritten.)
-
-``--stream-dump=<filename>``
-    Same as ``--stream-capture``, but do not start playback. Instead, the entire
-    file is dumped.
+``--stream-dump=<destination-filename>``
+    Instead of playing a file, read its byte stream and write it to the given
+    destination file. The destination is overwritten. Can be useful to test
+    network-related behavior.
 
 ``--stream-lavf-o=opt1=value1,opt2=value2,...``
     Set AVOptions on streams opened with libavformat. Unknown or misspelled

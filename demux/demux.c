@@ -1398,12 +1398,6 @@ struct demuxer *demux_open_url(const char *url,
                                      cancel, global);
     if (!s)
         return NULL;
-    if (params->allow_capture) {
-        char *f;
-        mp_read_option_raw(global, "stream-capture", &m_option_type_string, &f);
-        stream_set_capture_file(s, f);
-        talloc_free(f);
-    }
     if (!params->disable_cache)
         stream_enable_cache_defaults(&s);
     struct demuxer *d = demux_open(s, params, global);
@@ -1740,6 +1734,7 @@ static void thread_demux_control(void *p)
 int demux_control(demuxer_t *demuxer, int cmd, void *arg)
 {
     struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_user);
 
     if (in->threading) {
         pthread_mutex_lock(&in->lock);
@@ -1751,7 +1746,20 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
 
     int r = 0;
     struct demux_control_args args = {demuxer, cmd, arg, &r};
-    demux_run_on_thread(demuxer, thread_demux_control, &args);
+    if (in->threading) {
+        MP_VERBOSE(in, "blocking on demuxer thread\n");
+        pthread_mutex_lock(&in->lock);
+        while (in->run_fn)
+            pthread_cond_wait(&in->wakeup, &in->lock);
+        in->run_fn = thread_demux_control;
+        in->run_fn_arg = &args;
+        pthread_cond_signal(&in->wakeup);
+        while (in->run_fn)
+            pthread_cond_wait(&in->wakeup, &in->lock);
+        pthread_mutex_unlock(&in->lock);
+    } else {
+        thread_demux_control(&args);
+    }
 
     return r;
 }
@@ -1761,27 +1769,6 @@ int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg)
     struct demux_ctrl_stream_ctrl c = {ctrl, arg, STREAM_UNSUPPORTED};
     demux_control(demuxer, DEMUXER_CTRL_STREAM_CTRL, &c);
     return c.res;
-}
-
-void demux_run_on_thread(struct demuxer *demuxer, void (*fn)(void *), void *ctx)
-{
-    struct demux_internal *in = demuxer->in;
-    assert(demuxer == in->d_user);
-
-    if (in->threading) {
-        MP_VERBOSE(in, "blocking on demuxer thread\n");
-        pthread_mutex_lock(&in->lock);
-        while (in->run_fn)
-            pthread_cond_wait(&in->wakeup, &in->lock);
-        in->run_fn = fn;
-        in->run_fn_arg = ctx;
-        pthread_cond_signal(&in->wakeup);
-        while (in->run_fn)
-            pthread_cond_wait(&in->wakeup, &in->lock);
-        pthread_mutex_unlock(&in->lock);
-    } else {
-        fn(ctx);
-    }
 }
 
 bool demux_cancel_test(struct demuxer *demuxer)

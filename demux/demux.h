@@ -165,7 +165,6 @@ struct demuxer_params {
     bool initial_readahead;
     // -- demux_open_url() only
     int stream_flags;
-    bool allow_capture;
     bool disable_cache;
     // result
     bool demuxer_failed;
@@ -287,8 +286,6 @@ void demux_set_stream_tags(struct demuxer *demuxer, struct sh_stream *sh,
 double demuxer_get_time_length(struct demuxer *demuxer);
 
 int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg);
-
-void demux_run_on_thread(struct demuxer *demuxer, void (*fn)(void *), void *ctx);
 
 void demux_changed(demuxer_t *demuxer, int events);
 void demux_update(demuxer_t *demuxer);

@@ -1552,10 +1552,6 @@ Property list
 
     This property is experimental and might be removed in the future.
 
-``stream-capture`` (RW)
-    A filename, see ``--stream-capture``. Setting this will start capture using
-    the given filename. Setting it to an empty string will stop it.
-
 ``tv-brightness``, ``tv-contrast``, ``tv-saturation``, ``tv-hue`` (RW)
     TV stuff.
 

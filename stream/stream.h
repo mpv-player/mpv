@@ -203,9 +203,6 @@ typedef struct stream {
 
     struct mp_cancel *cancel;   // cancellation notification
 
-    FILE *capture_file;
-    char *capture_filename;
-
     struct stream *uncached_stream; // underlying stream for cache wrapper
 
     // Includes additional padding in case sizes get rounded up by sector size.
@@ -213,8 +210,6 @@ typedef struct stream {
 } stream_t;
 
 int stream_fill_buffer(stream_t *s);
-
-void stream_set_capture_file(stream_t *s, const char *filename);
 
 struct mp_cache_opts;
 bool stream_wants_cache(stream_t *stream, struct mp_cache_opts *opts);

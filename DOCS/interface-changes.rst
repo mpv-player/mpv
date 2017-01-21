@@ -31,6 +31,7 @@ Interface changes
         - "drop-frame-count" to "decoder-frame-drop-count"
         - "vo-drop-frame-count" to "frame-drop-count"
       The old names still work, but are deprecated.
+    - remove the --stream-capture option and property. No replacement.
  --- mpv 0.23.0 ---
     - remove deprecated vf_vdpaurb (use "--hwdec=vdpau-copy" instead)
     - the following properties now have new semantics:

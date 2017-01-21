@@ -353,37 +353,6 @@ static bool stream_reconnect(stream_t *s)
     return false;
 }
 
-static void stream_capture_write(stream_t *s, void *buf, size_t len)
-{
-    if (s->capture_file && len > 0) {
-        if (fwrite(buf, len, 1, s->capture_file) < 1) {
-            MP_ERR(s, "Error writing capture file: %s\n", mp_strerror(errno));
-            stream_set_capture_file(s, NULL);
-        }
-    }
-}
-
-void stream_set_capture_file(stream_t *s, const char *filename)
-{
-    if (!bstr_equals(bstr0(s->capture_filename), bstr0(filename))) {
-        if (s->capture_file)
-            fclose(s->capture_file);
-        talloc_free(s->capture_filename);
-        s->capture_file = NULL;
-        s->capture_filename = NULL;
-        if (filename) {
-            s->capture_file = fopen(filename, "ab");
-            if (s->capture_file) {
-                s->capture_filename = talloc_strdup(NULL, filename);
-                if (s->buf_pos < s->buf_len)
-                    stream_capture_write(s, s->buffer, s->buf_len);
-            } else {
-                MP_ERR(s, "Error opening capture file: %s\n", mp_strerror(errno));
-            }
-        }
-    }
-}
-
 // Read function bypassing the local stream buffer. This will not write into
 // s->buffer, but into buf[0..len] instead.
 // Returns 0 on error or EOF, and length of bytes read on success.
@@ -412,7 +381,6 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
     // When reading succeeded we are obviously not at eof.
     s->eof = 0;
     s->pos += len;
-    stream_capture_write(s, buf, len);
     return len;
 }
 
@@ -646,8 +614,6 @@ void free_stream(stream_t *s)
 {
     if (!s)
         return;
-
-    stream_set_capture_file(s, NULL);
 
     if (s->close)
         s->close(s);

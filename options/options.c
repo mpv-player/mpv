@@ -590,7 +590,6 @@ const m_option_t mp_opts[] = {
 
     OPT_FLAG("untimed", untimed, 0),
 
-    OPT_STRING("stream-capture", stream_capture, M_OPT_FILE),
     OPT_STRING("stream-dump", stream_dump, M_OPT_FILE),
 
     OPT_FLAG("stop-playback-on-init-failure", stop_playback_on_init_failure, 0),
@@ -713,7 +712,8 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("ass", "sub-ass"),
     OPT_REPLACED("audiofile", "audio-file"),
     OPT_REMOVED("benchmark", "use --untimed (no stats)"),
-    OPT_REMOVED("capture", "use --stream-capture=<filename>"),
+    OPT_REMOVED("capture", NULL),
+    OPT_REMOVED("stream-capture", NULL),
     OPT_REMOVED("channels", "use --audio-channels (changed semantics)"),
     OPT_REPLACED("cursor-autohide-delay", "cursor-autohide"),
     OPT_REPLACED("delay", "audio-delay"),

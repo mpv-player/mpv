@@ -515,29 +515,6 @@ static int mp_property_stream_path(void *ctx, struct m_property *prop,
     return m_property_strdup_ro(action, arg, mpctx->demuxer->filename);
 }
 
-struct change_stream_capture_args {
-    char *filename;
-    struct demuxer *demux;
-};
-
-static void do_change_stream_capture(void *p)
-{
-    struct change_stream_capture_args *args = p;
-    stream_set_capture_file(args->demux->stream, args->filename);
-}
-
-static int mp_property_stream_capture(void *ctx, struct m_property *prop,
-                                      int action, void *arg)
-{
-    MPContext *mpctx = ctx;
-    if (mpctx->demuxer && action == M_PROPERTY_SET) {
-        struct change_stream_capture_args args = {*(char **)arg, mpctx->demuxer};
-        demux_run_on_thread(mpctx->demuxer, do_change_stream_capture, &args);
-        // fall through to mp_property_generic_option
-    }
-    return mp_property_generic_option(mpctx, prop, action, arg);
-}
-
 /// Demuxer name (RO)
 static int mp_property_demuxer(void *ctx, struct m_property *prop,
                                int action, void *arg)
@@ -3789,7 +3766,6 @@ static const struct m_property mp_properties_base[] = {
     {"path", mp_property_path},
     {"media-title", mp_property_media_title},
     {"stream-path", mp_property_stream_path},
-    {"stream-capture", mp_property_stream_capture},
     {"current-demuxer", mp_property_demuxer},
     {"file-format", mp_property_file_format},
     {"stream-pos", mp_property_stream_pos},

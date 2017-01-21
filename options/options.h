@@ -136,7 +136,6 @@ typedef struct MPOpts {
     int video_osd;
 
     int untimed;
-    char *stream_capture;
     char *stream_dump;
     int stop_playback_on_init_failure;
     int loop_times;
