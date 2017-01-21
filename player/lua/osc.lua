@@ -2072,6 +2072,7 @@ function process_event(source, what)
             if n == 0 then
                 --click on background (does not work)
             elseif n > 0 and not (n > #elements) and
+                not (elements[n].eventresponder == nil) and
                 not (elements[n].eventresponder[source .. "_" .. what] == nil) then
 
                 if mouse_hit(elements[n]) then
