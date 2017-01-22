@@ -234,5 +234,5 @@ bstr mp_iconv_to_utf8(struct mp_log *log, bstr buf, const char *cp, int flags)
 #endif
 
 failure:
-    return (bstr){0};
+    return bstr_sanitize_utf8_latin1(NULL, buf);
 }
