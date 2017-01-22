@@ -106,7 +106,11 @@ const char *mp_charset_guess(void *talloc_ctx, struct mp_log *log,  bstr buf,
     {
         mp_err(log, "This syntax for the --sub-codepage option was deprecated "
                     "and has been removed.\n");
-        user_cp = "";
+        if (strncasecmp(user_cp, "utf8:", 5) == 0) {
+            user_cp = user_cp + 5;
+        } else {
+            user_cp = "";
+        }
     }
 
     if (user_cp[0] == '+') {
