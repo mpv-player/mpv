@@ -212,6 +212,7 @@ typedef struct MPOpts {
     int forced_subs_only;
     int stretch_dvd_subs;
     int stretch_image_subs;
+    int image_subs_video_res;
 
     int sub_fix_timing;
 

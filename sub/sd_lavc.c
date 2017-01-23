@@ -439,7 +439,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
         d.ml = d.mr = d.mt = d.mb = 0;
     int w = priv->avctx->width;
     int h = priv->avctx->height;
-    if (w <= 0 || h <= 0) {
+    if (w <= 0 || h <= 0 || opts->image_subs_video_res) {
         w = priv->video_params.w;
         h = priv->video_params.h;
     }

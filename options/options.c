@@ -473,6 +473,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("sub-forced-only", forced_subs_only, UPDATE_OSD),
     OPT_FLAG("stretch-dvd-subs", stretch_dvd_subs, UPDATE_OSD),
     OPT_FLAG("stretch-image-subs-to-screen", stretch_image_subs, UPDATE_OSD),
+    OPT_FLAG("image-subs-video-resolution", image_subs_video_res, UPDATE_OSD),
     OPT_FLAG("sub-fix-timing", sub_fix_timing, 0),
     OPT_CHOICE("sub-auto", sub_auto, 0,
                ({"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})),

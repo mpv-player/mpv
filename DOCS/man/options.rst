@@ -1730,6 +1730,13 @@ Subtitles
 
     Disabled by default.
 
+``--image-subs-video-resolution=<yes|no>``
+    Override the image subtitle resolution with the video resolution
+    (default: no). Normally, the subtitle canvas is fit into the video canvas
+    (e.g. letterboxed). Setting this option uses the video size as subtitle
+    canvas size. Can be useful to test broken subtitles, which often happen
+    when the video was trancoded, while attempting to keep the old subtitles.
+
 ``--sub-ass``, ``--no-sub-ass``
     Render ASS subtitles natively (enabled by default).
 
