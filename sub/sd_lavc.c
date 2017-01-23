@@ -71,35 +71,6 @@ struct sd_lavc_priv {
     struct bitmap_packer *packer;
 };
 
-static void get_resolution(struct sd *sd, int wh[2])
-{
-    struct sd_lavc_priv *priv = sd->priv;
-    enum AVCodecID codec = priv->avctx->codec_id;
-    int *w = &wh[0], *h = &wh[1];
-    *w = priv->avctx->width;
-    *h = priv->avctx->height;
-    if (codec == AV_CODEC_ID_DVD_SUBTITLE) {
-        if (*w <= 0 || *h <= 0) {
-            *w = priv->video_params.w;
-            *h = priv->video_params.h;
-        }
-        /* XXX Although the video frame is some size, the SPU frame is
-           always maximum size i.e. 720 wide and 576 or 480 high */
-        // For HD files in MKV the VobSub resolution can be higher though,
-        // see largeres_vobsub.mkv
-        if (*w <= 720 && *h <= 576) {
-            *w = 720;
-            *h = (*h == 480 || *h == 240) ? 480 : 576;
-        }
-    } else {
-        // Hope that PGS subs set these and 720/576 works for dvb subs
-        if (!*w)
-            *w = 720;
-        if (!*h)
-            *h = 576;
-    }
-}
-
 static int init(struct sd *sd)
 {
     enum AVCodecID cid = mp_codec_to_av_codec_id(sd->codec->codec);
@@ -466,13 +437,17 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, int format,
         video_par = -1;
     if (opts->stretch_image_subs)
         d.ml = d.mr = d.mt = d.mb = 0;
-    int insize[2];
-    get_resolution(sd, insize);
-    if (current->src_w > insize[0] || current->src_h > insize[1]) {
-        insize[0] = priv->video_params.w;
-        insize[1] = priv->video_params.h;
+    int w = priv->avctx->width;
+    int h = priv->avctx->height;
+    if (w <= 0 || h <= 0) {
+        w = priv->video_params.w;
+        h = priv->video_params.h;
     }
-    osd_rescale_bitmaps(res, insize[0], insize[1], d, video_par);
+    if (current->src_w > w || current->src_h > h) {
+        w = priv->video_params.w;
+        h = priv->video_params.h;
+    }
+    osd_rescale_bitmaps(res, w, h, d, video_par);
 }
 
 static bool accepts_packet(struct sd *sd, double min_pts)
@@ -605,9 +580,6 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     }
     case SD_CTRL_SET_VIDEO_PARAMS:
         priv->video_params = *(struct mp_image_params *)arg;
-        return CONTROL_OK;
-    case SD_CTRL_GET_RESOLUTION:
-        get_resolution(sd, arg);
         return CONTROL_OK;
     default:
         return CONTROL_UNKNOWN;
