@@ -378,6 +378,7 @@ local function add_video(s)
         append_property(s, "frame-drop-count", {prefix="VO:", nl=""})
         append_property(s, "mistimed-frame-count", {prefix="Mistimed:", nl=""})
         append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl=""})
+    -- Deprecated FPS properties for backwards compatibility
     elseif append_property(s, "drop-frame-count", {prefix="Dropped:"}) then
         append_property(s, "vo-drop-frame-count", {prefix="VO:", nl=""})
         append_property(s, "mistimed-frame-count", {prefix="Mistimed:", nl=""})
