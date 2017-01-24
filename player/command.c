@@ -5354,7 +5354,8 @@ int run_command(struct MPContext *mpctx, struct mp_cmd *cmd, struct mpv_node *re
         if (cmd->is_up_down)
             state[0] = cmd->repeated ? 'r' : (cmd->is_up ? 'u' : 'd');
         event.num_args = 4;
-        event.args = (const char*[4]){"key-binding", name, state, cmd->key_name};
+        event.args = (const char*[4]){"key-binding", name, state,
+                                      cmd->key_name ? cmd->key_name : ""};
         if (mp_client_send_event_dup(mpctx, target,
                                      MPV_EVENT_CLIENT_MESSAGE, &event) < 0)
         {
