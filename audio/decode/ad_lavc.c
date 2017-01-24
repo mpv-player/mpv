@@ -221,6 +221,11 @@ static bool receive_frame(struct dec_audio *da, struct mp_audio **out)
         MP_ERR(da, "Error decoding audio.\n");
     }
 
+#if LIBAVCODEC_VERSION_MICRO >= 100
+    if (priv->avframe->flags & AV_FRAME_FLAG_DISCARD)
+        av_frame_unref(priv->avframe);
+#endif
+
     if (!priv->avframe->buf[0])
         return true;
 
