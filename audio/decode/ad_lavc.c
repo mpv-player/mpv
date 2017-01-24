@@ -115,7 +115,7 @@ static int init(struct dec_audio *da, const char *decoder)
     av_opt_set_double(lavc_context, "drc_scale", opts->ac3drc,
                       AV_OPT_SEARCH_CHILDREN);
 
-#if HAVE_AVFRAME_SKIP_SAMPLES
+#if LIBAVCODEC_VERSION_MICRO >= 100
     // Let decoder add AV_FRAME_DATA_SKIP_SAMPLES.
     av_opt_set(lavc_context, "flags2", "+skip_manual", AV_OPT_SEARCH_CHILDREN);
 #endif
@@ -251,7 +251,7 @@ static bool receive_frame(struct dec_audio *da, struct mp_audio **out)
     if (mpframe->pts != MP_NOPTS_VALUE)
         priv->next_pts = mpframe->pts + mpframe->samples / (double)mpframe->rate;
 
-#if HAVE_AVFRAME_SKIP_SAMPLES
+#if LIBAVCODEC_VERSION_MICRO >= 100
     AVFrameSideData *sd =
         av_frame_get_side_data(priv->avframe, AV_FRAME_DATA_SKIP_SAMPLES);
     if (sd && sd->size >= 10) {

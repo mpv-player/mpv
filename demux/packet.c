@@ -132,7 +132,7 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
 
 int demux_packet_set_padding(struct demux_packet *dp, int start, int end)
 {
-#if HAVE_AVFRAME_SKIP_SAMPLES
+#if LIBAVCODEC_VERSION_MICRO >= 100
     if (!start  && !end)
         return 0;
     if (!dp->avpacket)

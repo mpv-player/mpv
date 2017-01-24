@@ -48,7 +48,7 @@
 #include "video/csputils.h"
 #include "video/sws_utils.h"
 
-#if HAVE_AVUTIL_MASTERING_METADATA
+#if LIBAVCODEC_VERSION_MICRO >= 100
 #include <libavutil/mastering_display_metadata.h>
 #endif
 
@@ -624,7 +624,7 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame,
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
 
-#if HAVE_AVUTIL_MASTERING_METADATA
+#if LIBAVCODEC_VERSION_MICRO >= 100
     // Get the reference peak (for HDR) if available. This is cached into ctx
     // when it's found, since it's not available on every frame (and seems to
     // be only available for keyframes)

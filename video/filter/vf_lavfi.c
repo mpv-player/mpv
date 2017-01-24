@@ -287,7 +287,7 @@ static struct mp_image *av_to_mp(struct vf_instance *vf, AVFrame *av_frame)
 
 static void get_metadata_from_av_frame(struct vf_instance *vf, AVFrame *frame)
 {
-#if HAVE_AVFRAME_METADATA
+#if LIBAVUTIL_VERSION_MICRO >= 100
     struct vf_priv_s *p = vf->priv;
     if (!p->metadata)
         p->metadata = talloc_zero(p, struct mp_tags);

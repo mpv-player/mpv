@@ -452,30 +452,6 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'desc': 'libavdevice',
         'func': check_pkg_config('libavdevice', '>= 57.0.0'),
     }, {
-        'name': 'avcodec-chroma-pos-api',
-        'desc': 'libavcodec avcodec_enum_to_chroma_pos API',
-        'func': check_statement('libavcodec/avcodec.h', """int x, y;
-            avcodec_enum_to_chroma_pos(&x, &y, AVCHROMA_LOC_UNSPECIFIED)""",
-            use='libav')
-    }, {
-        'name': 'avframe-metadata',
-        'desc': 'libavutil AVFrame metadata',
-        'func': check_statement('libavutil/frame.h',
-                                'av_frame_get_metadata(NULL)',
-                                use='libav')
-    }, {
-        'name': 'avframe-skip-samples',
-        'desc': 'libavutil AVFrame skip samples metadata',
-        'func': check_statement('libavutil/frame.h',
-                                'enum AVFrameSideDataType type = AV_FRAME_DATA_SKIP_SAMPLES',
-                                use='libav')
-    }, {
-        'name': 'avutil-mastering-metadata',
-        'desc': 'libavutil mastering display metadata struct',
-        'func': check_statement('libavutil/frame.h',
-                                'AV_FRAME_DATA_MASTERING_DISPLAY_METADATA',
-                                use='libav'),
-    }, {
         'name': 'avutil-imgcpy-uc',
         'desc': 'libavutil GPU memcpy for hardware decoding',
         'func': check_statement('libavutil/imgutils.h',
