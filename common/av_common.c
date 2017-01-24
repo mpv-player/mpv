@@ -85,37 +85,24 @@ AVRational mp_get_codec_timebase(struct mp_codec_params *c)
     return tb;
 }
 
-// We merely pass-through our PTS/DTS as an int64_t; libavcodec won't use it.
-union pts { int64_t i; double d; };
+static AVRational get_def_tb(AVRational *tb)
+{
+    return tb && tb->num > 0 && tb->den > 0 ? *tb : AV_TIME_BASE_Q;
+}
 
 // Convert the mpv style timestamp (seconds as double) to a libavcodec style
 // timestamp (integer units in a given timebase).
-//
-// If the given timebase is NULL or invalid, pass through the mpv timestamp by
-// reinterpret casting them to int64_t. In this case, the timestamps will be
-// non-sense for libavcodec, but we expect that it doesn't interpret them,
-// and treats them as opaque.
 int64_t mp_pts_to_av(double mp_pts, AVRational *tb)
 {
-    assert(sizeof(int64_t) >= sizeof(double));
-    if (tb && tb->num > 0 && tb->den > 0) {
-        return mp_pts == MP_NOPTS_VALUE ?
-            AV_NOPTS_VALUE : llrint(mp_pts / av_q2d(*tb));
-    }
-    // The + 0.0 is to squash possible negative zero mp_pts, which would
-    // happen to end up as AV_NOPTS_VALUE.
-    return (union pts){.d = mp_pts + 0.0}.i;
+    AVRational b = get_def_tb(tb);
+    return mp_pts == MP_NOPTS_VALUE ? AV_NOPTS_VALUE : llrint(mp_pts / av_q2d(b));
 }
 
 // Inverse of mp_pts_to_av(). (The timebases must be exactly the same.)
 double mp_pts_from_av(int64_t av_pts, AVRational *tb)
 {
-    assert(sizeof(int64_t) >= sizeof(double));
-    if (tb && tb->num > 0 && tb->den > 0)
-        return av_pts == AV_NOPTS_VALUE ? MP_NOPTS_VALUE : av_pts * av_q2d(*tb);
-    // Should libavcodec set the PTS to AV_NOPTS_VALUE, it would end up as
-    // non-sense (usually negative zero) when unwrapped to double.
-    return av_pts == AV_NOPTS_VALUE ? MP_NOPTS_VALUE : (union pts){.i = av_pts}.d;
+    AVRational b = get_def_tb(tb);
+    return av_pts == AV_NOPTS_VALUE ? MP_NOPTS_VALUE : av_pts * av_q2d(b);
 }
 
 // Set dst from mpkt. Note that dst is not refcountable.
