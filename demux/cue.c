@@ -70,7 +70,7 @@ static enum cue_command read_cmd(struct bstr *data, struct bstr *out_params)
         return CUE_EMPTY;
     for (int n = 0; cue_command_strings[n].command != -1; n++) {
         struct bstr name = bstr0(cue_command_strings[n].text);
-        if (bstr_startswith(line, name)) {
+        if (bstr_case_startswith(line, name)) {
             struct bstr rest = bstr_cut(line, name.len);
             if (rest.len && !strchr(WHITESPACE, rest.start[0]))
                 continue;
