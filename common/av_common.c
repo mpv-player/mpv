@@ -50,29 +50,6 @@ int mp_lavc_set_extradata(AVCodecContext *avctx, void *ptr, int size)
     return 0;
 }
 
-// Copy the codec-related fields from st into avctx. This does not set the
-// codec itself, only codec related header data provided by libavformat.
-// The goal is to initialize a new decoder with the header data provided by
-// libavformat, and unlike avcodec_copy_context(), allow the user to create
-// a clean AVCodecContext for a manually selected AVCodec.
-// This is strictly for decoding only.
-void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st)
-{
-    mp_lavc_set_extradata(avctx, st->extradata, st->extradata_size);
-    avctx->codec_tag                = st->codec_tag;
-    avctx->bit_rate                 = st->bit_rate;
-    avctx->width                    = st->width;
-    avctx->height                   = st->height;
-    avctx->pix_fmt                  = st->pix_fmt;
-    avctx->chroma_sample_location   = st->chroma_sample_location;
-    avctx->sample_rate              = st->sample_rate;
-    avctx->channels                 = st->channels;
-    avctx->block_align              = st->block_align;
-    avctx->channel_layout           = st->channel_layout;
-    avctx->bits_per_coded_sample    = st->bits_per_coded_sample;
-    avctx->has_b_frames             = st->has_b_frames;
-}
-
 // This only copies ffmpeg-native codec parameters. Parameters produced by
 // other demuxers must be handled manually.
 void mp_set_lav_codec_headers(AVCodecContext *avctx, struct mp_codec_params *c)
