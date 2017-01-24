@@ -824,7 +824,7 @@ hwaccel_features = [
     }, {
         'name': '--vaapi-hwaccel-new',
         'desc': 'libavcodec VAAPI hwaccel (new)',
-        'deps': [ 'vaapi-hwaccel', 'avutil-imgcpy-uc' ],
+        'deps': [ 'vaapi-hwaccel' ],
         'func': check_statement('libavcodec/version.h',
             'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 26, 0) && '
             '       LIBAVCODEC_VERSION_MICRO < 100) ||'
