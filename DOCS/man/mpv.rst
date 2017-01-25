@@ -673,6 +673,10 @@ PROTOCOLS
     either aliases to documented protocols, or are just redirections to
     protocols implemented and documented in FFmpeg.
 
+    ``data:`` is supported in FFmpeg (not in Libav), but needs to be in the
+    format ``data://``. This is done to avoid ambiguity with filenames. You
+    can also prefix it with ``lavf://`` or ``ffmpeg://``.
+
 ``ytdl://...``
     By default, the youtube-dl hook script (enabled by default for mpv CLI)
     only looks at http URLs. Prefixing an URL with ``ytdl://`` forces it to

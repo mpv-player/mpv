@@ -295,7 +295,7 @@ mp.add_hook("on_load", 10, function ()
 
             msg.debug("streamurl: " .. streamurl)
 
-            mp.set_property("stream-open-filename", streamurl)
+            mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
 
             mp.set_property("file-local-options/force-media-title", json.title)
 
