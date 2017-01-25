@@ -33,6 +33,7 @@
 #include "common/msg.h"
 #include "demux/packet.h"
 #include "demux/stheader.h"
+#include "video/fmt-conversion.h"
 #include "av_common.h"
 #include "codecs.h"
 
@@ -50,12 +51,73 @@ int mp_lavc_set_extradata(AVCodecContext *avctx, void *ptr, int size)
     return 0;
 }
 
-// This only copies ffmpeg-native codec parameters. Parameters produced by
-// other demuxers must be handled manually.
-void mp_set_lav_codec_headers(AVCodecContext *avctx, struct mp_codec_params *c)
+enum AVMediaType mp_to_av_stream_type(int type)
 {
-    if (c->lav_codecpar)
-        avcodec_parameters_to_context(avctx, c->lav_codecpar);
+    switch (type) {
+    case STREAM_VIDEO: return AVMEDIA_TYPE_VIDEO;
+    case STREAM_AUDIO: return AVMEDIA_TYPE_AUDIO;
+    case STREAM_SUB:   return AVMEDIA_TYPE_SUBTITLE;
+    default:           return AVMEDIA_TYPE_UNKNOWN;
+    }
+}
+
+AVCodecParameters *mp_codec_params_to_av(struct mp_codec_params *c)
+{
+    AVCodecParameters *avp = avcodec_parameters_alloc();
+    if (!avp)
+        return NULL;
+
+    // If we have lavf demuxer params, they overwrite by definition any others.
+    if (c->lav_codecpar) {
+        if (avcodec_parameters_copy(avp, c->lav_codecpar) < 0)
+            goto error;
+        return avp;
+    }
+
+    avp->codec_type = mp_to_av_stream_type(c->type);
+    avp->codec_id = mp_codec_to_av_codec_id(c->codec);
+    avp->codec_tag = c->codec_tag;
+    if (c->extradata_size) {
+        avp->extradata =
+            av_mallocz(c->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
+        if (!avp->extradata)
+            goto error;
+        avp->extradata_size = c->extradata_size;
+        memcpy(avp->extradata, c->extradata, avp->extradata_size);
+    }
+    avp->bits_per_coded_sample = c->bits_per_coded_sample;
+
+    // Video only
+    avp->width = c->disp_w;
+    avp->height = c->disp_h;
+    if (c->codec && strcmp(c->codec, "mp-rawvideo") == 0) {
+        avp->format = imgfmt2pixfmt(c->codec_tag);
+        avp->codec_tag = 0;
+    }
+
+    // Audio only
+    avp->sample_rate = c->samplerate;
+    avp->bit_rate = c->bitrate;
+    avp->block_align = c->block_align;
+    avp->channels = c->channels.num;
+    if (!mp_chmap_is_unknown(&c->channels))
+        avp->channel_layout = mp_chmap_to_lavc(&c->channels);
+
+    return avp;
+error:
+    avcodec_parameters_free(&avp);
+    return NULL;
+}
+
+// Set avctx codec headers for decoding. Returns <0 on failure.
+int mp_set_avctx_codec_headers(AVCodecContext *avctx, struct mp_codec_params *c)
+{
+    AVCodecParameters *avp = mp_codec_params_to_av(c);
+    if (!avp)
+        return -1;
+    int r = avcodec_parameters_to_context(avctx, avp) < 0 ? -1 : 0;
+    avcodec_parameters_free(&avp);
+    return r;
 }
 
 // Pick a "good" timebase, which will be used to convert double timestamps

@@ -468,15 +468,12 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
     struct vd_lavc_params *lavc_param = vd->opts->vd_lavc_params;
-    bool mp_rawvideo = false;
     struct mp_codec_params *c = vd->codec;
 
     assert(!ctx->avctx);
 
-    if (strcmp(decoder, "mp-rawvideo") == 0) {
-        mp_rawvideo = true;
+    if (strcmp(decoder, "mp-rawvideo") == 0)
         decoder = "rawvideo";
-    }
 
     AVCodec *lavc_codec = avcodec_find_decoder_by_name(decoder);
     if (!lavc_codec)
@@ -536,22 +533,10 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     // Do this after the above avopt handling in case it changes values
     ctx->skip_frame = avctx->skip_frame;
 
-    avctx->codec_tag = c->codec_tag;
-    avctx->coded_width  = c->disp_w;
-    avctx->coded_height = c->disp_h;
-    avctx->bits_per_coded_sample = c->bits_per_coded_sample;
-
-    mp_lavc_set_extradata(avctx, c->extradata, c->extradata_size);
-
-    if (mp_rawvideo) {
-        avctx->pix_fmt = imgfmt2pixfmt(c->codec_tag);
-        avctx->codec_tag = 0;
-        if (avctx->pix_fmt == AV_PIX_FMT_NONE && c->codec_tag)
-            MP_ERR(vd, "Image format %s not supported by lavc.\n",
-                   mp_imgfmt_to_name(c->codec_tag));
+    if (mp_set_avctx_codec_headers(avctx, c) < 0) {
+        MP_ERR(vd, "Could not set codec parameters.\n");
+        goto error;
     }
-
-    mp_set_lav_codec_headers(avctx, c);
 
     /* open it */
     if (avcodec_open2(avctx, lavc_codec, NULL) < 0)

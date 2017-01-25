@@ -122,19 +122,11 @@ static int init(struct dec_audio *da, const char *decoder)
 
     mp_set_avopts(da->log, lavc_context, opts->avopts);
 
-    lavc_context->codec_tag = c->codec_tag;
-    lavc_context->sample_rate = c->samplerate;
-    lavc_context->bit_rate = c->bitrate;
-    lavc_context->block_align = c->block_align;
-    lavc_context->bits_per_coded_sample = c->bits_per_coded_sample;
-    lavc_context->channels = c->channels.num;
-    if (!mp_chmap_is_unknown(&c->channels))
-        lavc_context->channel_layout = mp_chmap_to_lavc(&c->channels);
-
-    // demux_mkv
-    mp_lavc_set_extradata(lavc_context, c->extradata, c->extradata_size);
-
-    mp_set_lav_codec_headers(lavc_context, c);
+    if (mp_set_avctx_codec_headers(lavc_context, c) < 0) {
+        MP_ERR(da, "Could not set decoder parameters.\n");
+        uninit(da);
+        return 0;
+    }
 
     mp_set_avcodec_threads(da->log, lavc_context, opts->threads);
 
