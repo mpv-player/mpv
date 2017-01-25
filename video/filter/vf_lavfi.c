@@ -174,11 +174,13 @@ static bool recreate_graph(struct vf_instance *vf, struct mp_image_params *fmt)
     if (graph_parse(graph, p->cfg_graph, inputs, outputs, NULL) < 0)
         goto error;
 
-    struct mp_hwdec_ctx *hwdec = hwdec_devices_get_first(vf->hwdec_devs);
-    for (int n = 0; n < graph->nb_filters; n++) {
-        AVFilterContext *filter = graph->filters[n];
-        if (hwdec && hwdec->av_device_ref)
-            filter->hw_device_ctx = av_buffer_ref(hwdec->av_device_ref);
+    if (vf->hwdec_devs) {
+        struct mp_hwdec_ctx *hwdec = hwdec_devices_get_first(vf->hwdec_devs);
+        for (int n = 0; n < graph->nb_filters; n++) {
+            AVFilterContext *filter = graph->filters[n];
+            if (hwdec && hwdec->av_device_ref)
+                filter->hw_device_ctx = av_buffer_ref(hwdec->av_device_ref);
+        }
     }
 
     if (avfilter_graph_config(graph, NULL) < 0)
