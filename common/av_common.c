@@ -112,11 +112,19 @@ error:
 // Set avctx codec headers for decoding. Returns <0 on failure.
 int mp_set_avctx_codec_headers(AVCodecContext *avctx, struct mp_codec_params *c)
 {
+    enum AVMediaType codec_type = avctx->codec_type;
+    enum AVCodecID codec_id = avctx->codec_id;
     AVCodecParameters *avp = mp_codec_params_to_av(c);
     if (!avp)
         return -1;
+
     int r = avcodec_parameters_to_context(avctx, avp) < 0 ? -1 : 0;
     avcodec_parameters_free(&avp);
+
+    if (avctx->codec_type != AVMEDIA_TYPE_UNKNOWN)
+        avctx->codec_type = codec_type;
+    if (avctx->codec_id != AV_CODEC_ID_NONE)
+        avctx->codec_id = codec_id;
     return r;
 }
 
