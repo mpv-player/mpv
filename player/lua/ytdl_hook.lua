@@ -6,6 +6,53 @@ local ytdl = {
     searched = false
 }
 
+-- base64 decoding
+local function base64_dec(data)
+    -- character table string
+    local b='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+
+    data = string.gsub(data, '[^'..b..'=]', '')
+    return (data:gsub('.', function(x)
+        if (x == '=') then return '' end
+        local r,f='',(b:find(x)-1)
+        for i=6,1,-1 do r=r..(f%2^i-f%2^(i-1)>0 and '1' or '0') end
+        return r;
+    end):gsub('%d%d%d?%d?%d?%d?%d?%d?', function(x)
+        if (#x ~= 8) then return '' end
+        local c=0
+        for i=1,8 do c=c+(x:sub(i,i)=='1' and 2^(8-i) or 0) end
+        return string.char(c)
+    end))
+end
+
+-- url-encoded string decoding %XX%XX
+local function url_decode(str)
+  str = string.gsub (str, "+", " ")
+  str = string.gsub (str, "%%(%x%x)",
+      function(h) return string.char(tonumber(h,16)) end)
+  str = string.gsub (str, "\r\n", "\n")
+  return str
+end
+
+-- Decode data URI scheme:
+--   data:text/html;charset=utf-8;base64,KDSOFJ
+local function decode_data_uri(str)
+    local _, _, mediatype, data = str:find("^data:([^,]*),(.*)")
+    if not mediatype then return str end
+    local base64 = false
+    if mediatype:find(";base64$") then
+        base64 = true
+    end
+    local _, _, charset = mediatype:find(";charset%s*=%s*([^;]+)")
+    if base64 then
+        data = base64_dec(data)
+    else
+        data = url_decode(data)
+    end
+    -- FIXME: convert data to UTF-8 when given charset?
+    return charset, data
+end
+
 local chapter_list = {}
 
 local function exec(args)
@@ -87,7 +134,6 @@ local function extract_chapters(data, video_length)
     table.sort(ret, function(a, b) return a.time < b.time end)
     return ret
 end
-
 
 mp.add_hook("on_load", 10, function ()
     local url = mp.get_property("stream-open-filename")
@@ -295,7 +341,13 @@ mp.add_hook("on_load", 10, function ()
 
             msg.debug("streamurl: " .. streamurl)
 
-            mp.set_property("stream-open-filename", streamurl)
+            if streamurl:find("^data:") then
+                local _, url_data = decode_data_uri(streamurl)
+                mp.set_property("stream-open-filename", "memory://" .. url_data)
+                return
+            else
+                mp.set_property("stream-open-filename", streamurl)
+            end
 
             mp.set_property("file-local-options/force-media-title", json.title)
 
