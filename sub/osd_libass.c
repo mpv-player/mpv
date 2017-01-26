@@ -219,12 +219,9 @@ static ASS_Event *add_osd_ass_event_escaped(ASS_Track *track, const char *style,
     return e;
 }
 
-static void update_osd_text(struct osd_state *osd, struct osd_object *obj)
+static ASS_Style *prepare_osd_ass(struct osd_state *osd, struct osd_object *obj)
 {
     struct MPOpts *opts = osd->opts;
-
-    if (!obj->text[0])
-        return;
 
     create_ass_track(osd, obj, &obj->ass, 0, 0);
 
@@ -236,8 +233,29 @@ static void update_osd_text(struct osd_state *osd, struct osd_object *obj)
     if (!opts->osd_scale_by_window)
         playresy *= 720.0 / obj->vo_res.h;
 
-    mp_ass_set_style(get_style(&obj->ass, "OSD"), playresy, &font);
+    ASS_Style *style = get_style(&obj->ass, "OSD");
+    mp_ass_set_style(style, playresy, &font);
+    return style;
+}
+
+static void update_osd_text(struct osd_state *osd, struct osd_object *obj)
+{
+
+    if (!obj->text[0])
+        return;
+
+    prepare_osd_ass(osd, obj);
     add_osd_ass_event_escaped(obj->ass.track, "OSD", obj->text);
+}
+
+void osd_get_text_size(struct osd_state *osd, int *out_screen_h, int *out_font_h)
+{
+    pthread_mutex_lock(&osd->lock);
+    struct osd_object *obj = osd->objs[OSDTYPE_OSD];
+    ASS_Style *style = prepare_osd_ass(osd, obj);
+    *out_screen_h = obj->ass.track->PlayResY - style->MarginV;
+    *out_font_h = style->FontSize;
+    pthread_mutex_unlock(&osd->lock);
 }
 
 // align: -1 .. +1

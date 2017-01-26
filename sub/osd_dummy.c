@@ -28,3 +28,9 @@ void osd_set_external(struct osd_state *osd, void *id, int res_x, int res_y,
                       char *text)
 {
 }
+
+void osd_get_text_size(struct osd_state *osd, int *out_screen_h, int *out_font_h)
+{
+    *out_screen_h = 0;
+    *out_font_h = 0;
+}

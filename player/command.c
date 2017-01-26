@@ -243,6 +243,78 @@ void mark_seek(struct MPContext *mpctx)
     cmd->last_seek_time = now;
 }
 
+static char *skip_n_lines(char *text, int lines)
+{
+    while (text && lines > 0) {
+        char *next = strchr(text, '\n');
+        text = next ? next + 1 : NULL;
+        lines--;
+    }
+    return text;
+}
+
+static int count_lines(char *text)
+{
+    int count = 0;
+    while (text) {
+        char *next = strchr(text, '\n');
+        if (!next || (next[0] == '\n' && !next[1]))
+            break;
+        text = next + 1;
+        count++;
+    }
+    return count;
+}
+
+// Given a huge string separated by new lines, attempts to cut off text above
+// the current line to keep the line visible, and below to keep rendering
+// performance up. pos gives the current line (0 for the first line).
+// "text" might be returned as is, or it can be freed and a new allocation is
+// returned.
+// This is only a heuristic - we can't deal with line breaking.
+static char *cut_osd_list(struct MPContext *mpctx, char *text, int pos)
+{
+    int screen_h, font_h;
+    osd_get_text_size(mpctx->osd, &screen_h, &font_h);
+    int max_lines = screen_h / MPMAX(font_h, 1) - 1;
+
+    if (!text || max_lines < 5)
+        return text;
+
+    int count = count_lines(text);
+    if (count <= max_lines)
+        return text;
+
+    char *new = talloc_strdup(NULL, "");
+
+    int start = pos - max_lines / 2;
+    if (start == 1)
+        start = 0; // avoid weird transition when pad_h becomes visible
+    int pad_h = start > 0;
+    if (pad_h)
+        new = talloc_strdup_append_buffer(new, "\342\206\221 (hidden items)\n");
+
+    int space = max_lines - pad_h - 1;
+    int pad_t = count - start > space;
+    if (!pad_t)
+        start = count - space;
+
+    char *head = skip_n_lines(text, start);
+    if (!head) {
+        talloc_free(new);
+        return text;
+    }
+
+    char *tail = skip_n_lines(head, max_lines - pad_h - pad_t);
+    new = talloc_asprintf_append_buffer(new, "%.*s",
+                            (int)(tail ? tail - head : strlen(head)), head);
+    if (pad_t)
+        new = talloc_strdup_append_buffer(new, "\342\206\223 (hidden items)\n");
+
+    talloc_free(text);
+    return new;
+}
+
 static char *format_file_size(int64_t size)
 {
     double s = size;
@@ -3321,9 +3393,10 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
 {
     MPContext *mpctx = ctx;
     if (action == M_PROPERTY_PRINT) {
+        struct playlist *pl = mpctx->playlist;
         char *res = talloc_strdup(NULL, "");
 
-        for (struct playlist_entry *e = mpctx->playlist->first; e; e = e->next)
+        for (struct playlist_entry *e = pl->first; e; e = e->next)
         {
             char *p = e->filename;
             if (!mp_is_url(bstr0(p))) {
@@ -3331,12 +3404,12 @@ static int mp_property_playlist(void *ctx, struct m_property *prop,
                 if (s[0])
                     p = s;
             }
-            const char *m = mpctx->playlist->current == e ?
-                            list_current : list_normal;
+            const char *m = pl->current == e ? list_current : list_normal;
             res = talloc_asprintf_append(res, "%s%s\n", m, p);
         }
 
-        *(char **)arg = res;
+        *(char **)arg =
+            cut_osd_list(mpctx, res, playlist_entry_to_index(pl, pl->current));
         return M_PROPERTY_OK;
     }
 

@@ -201,6 +201,7 @@ void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
 // defined in osd_libass.c and osd_dummy.c
 void osd_set_external(struct osd_state *osd, void *id, int res_x, int res_y,
                       char *text);
+void osd_get_text_size(struct osd_state *osd, int *out_screen_h, int *out_font_h);
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function);
 
 #endif /* MPLAYER_SUB_H */
