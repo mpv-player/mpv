@@ -658,8 +658,15 @@ function render_elements(master_ass)
             end
 
             local maxchars = element.layout.button.maxchars
-
             if not (maxchars == nil) and (#buttontext > maxchars) then
+                if (#buttontext > maxchars+20) then
+                    while (#buttontext > maxchars+20) do
+                        buttontext = buttontext:gsub(".[\128-\191]*$", "")
+                    end
+                    buttontext = buttontext .. "..."
+                end
+                local _, nchars2 = buttontext:gsub(".[\128-\191]*", "")
+                local stretch = (maxchars/#buttontext)*100
                 buttontext = string.format("{\\fscx%f}",
                     (maxchars/#buttontext)*100) .. buttontext
             end
@@ -944,7 +951,7 @@ layouts["box"] = function ()
     lo = add_layout("title")
     lo.geometry = {x = posX, y = titlerowY, an = 8, w = 496, h = 12}
     lo.style = osc_styles.vidtitle
-    lo.button.maxchars = 90
+    lo.button.maxchars = 80
 
     lo = add_layout("pl_prev")
     lo.geometry =
