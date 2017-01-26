@@ -1224,8 +1224,9 @@ layouts["bottombar"] = function()
             w = t_r - t_l, h = geo.h }
     lo = add_layout("title")
     lo.geometry = geo
-    lo.style = osc_styles.vidtitleBar
-    lo.button.maxchars = math.floor(geo.w/7)
+    lo.style = string.format("%s{\\clip(%f,%f,%f,%f)}",
+        osc_styles.vidtitleBar,
+        geo.x, geo.y-geo.h/2, geo.w, geo.y+geo.h/2)
 
 
     -- Playback control buttons
@@ -1450,8 +1451,9 @@ layouts["topbar"] = function()
             w = t_r - t_l, h = geo.h }
     lo = add_layout("title")
     lo.geometry = geo
-    lo.style = osc_styles.vidtitleBar
-    lo.button.maxchars = math.floor(geo.w/7)
+    lo.style = string.format("%s{\\clip(%f,%f,%f,%f)}",
+        osc_styles.vidtitleBar,
+        geo.x, geo.y-geo.h/2, geo.w, geo.y+geo.h/2)
 end
 
 -- Validate string type user options
