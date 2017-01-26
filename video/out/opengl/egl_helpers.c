@@ -166,16 +166,16 @@ bool mpegl_create_context_opts(EGLDisplay display, struct mp_log *log,
 
     bool probing = opts->vo_flags & VOFLAG_PROBING;
     int msgl = probing ? MSGL_V : MSGL_FATAL;
-    bool try_desktop = !(opts->vo_flags & VOFLAG_NO_GLES);
+    bool try_gles = !(opts->vo_flags & VOFLAG_NO_GLES);
 
     if (!(opts->vo_flags & VOFLAG_GLES)) {
         // Desktop OpenGL
-        if (create_context(display, log, try_desktop | probing, 0, opts,
+        if (create_context(display, log, try_gles | probing, 0, opts,
                            out_context, out_config))
             return true;
     }
 
-    if (try_desktop) {
+    if (try_gles) {
         // ES 3.x
         if (create_context(display, log, true, 3, opts,
                            out_context, out_config))
