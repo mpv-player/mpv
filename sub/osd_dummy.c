@@ -4,7 +4,7 @@
 
 #include "config.h"
 #include "mpv_talloc.h"
-#include "osd.h"
+#include "osd_state.h"
 
 void osd_init_backend(struct osd_state *osd)
 {
