@@ -772,7 +772,7 @@ video_output_features = [
                      lib=['mmal_core', 'mmal_util', 'mmal_vc_client', 'bcm_host']),
             # We still need all OpenGL symbols, because the vo_opengl code is
             # generic and supports anything from GLES2/OpenGL 2.1 to OpenGL 4 core.
-            check_cc(lib="EGL"),
+            check_cc(lib="EGL", linkflags="-lGLESv2"),
             check_cc(lib="GLESv2"),
         ),
     } , {
