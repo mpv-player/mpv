@@ -179,19 +179,11 @@ main_dependencies = [
                 'test = __atomic_add_fetch(&test, 1, __ATOMIC_SEQ_CST)')),
         'deps_neg': [ 'stdatomic' ],
     }, {
-        'name': 'sync-builtins',
-        'desc': 'compiler support for __sync built-ins',
-        'func': check_statement('stdint.h',
-                    'int64_t test = 0;'
-                    '__typeof__(test) x = ({int a = 1; a;});'
-                    'test = __sync_add_and_fetch(&test, 1)'),
-        'deps_neg': [ 'stdatomic', 'atomic-builtins' ],
-    }, {
         'name': 'atomics',
         'desc': 'stdatomic.h support or emulation',
         'func': check_true,
         'req': True,
-        'deps_any': ['stdatomic', 'atomic-builtins', 'sync-builtins', 'gnuc'],
+        'deps_any': ['stdatomic', 'atomic-builtins', 'gnuc'],
     }, {
         'name': 'c11-tls',
         'desc': 'C11 TLS support',
