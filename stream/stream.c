@@ -359,24 +359,19 @@ static bool stream_reconnect(stream_t *s)
 // Partial reads are possible, even if EOF is not reached.
 static int stream_read_unbuffered(stream_t *s, void *buf, int len)
 {
-    int orig_len = len;
+    int res = 0;
     s->buf_pos = s->buf_len = 0;
-    if (mp_cancel_test(s->cancel)) {
-        s->eof = 1;
-        return 0;
-    }
     // we will retry even if we already reached EOF previously.
-    len = s->fill_buffer ? s->fill_buffer(s, buf, len) : -1;
-    if (len < 0)
-        len = 0;
-    if (len == 0) {
+    if (s->fill_buffer && !mp_cancel_test(s->cancel))
+        res = s->fill_buffer(s, buf, len);
+    if (res <= 0) {
         // just in case this is an error e.g. due to network
         // timeout reset and retry
         // do not retry if this looks like proper eof
         int64_t size = stream_get_size(s);
         if (!s->eof && s->pos != size && stream_reconnect(s)) {
             s->eof = 1; // make sure EOF is set to ensure no endless recursion
-            return stream_read_unbuffered(s, buf, orig_len);
+            return stream_read_unbuffered(s, buf, len);
         }
 
         s->eof = 1;
@@ -384,8 +379,8 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
     }
     // When reading succeeded we are obviously not at eof.
     s->eof = 0;
-    s->pos += len;
-    return len;
+    s->pos += res;
+    return res;
 }
 
 static int stream_fill_buffer_by(stream_t *s, int64_t len)
