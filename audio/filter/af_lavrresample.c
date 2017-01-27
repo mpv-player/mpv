@@ -36,6 +36,9 @@
 #include "common/common.h"
 #include "config.h"
 
+#define HAVE_LIBSWRESAMPLE HAVE_IS_FFMPEG
+#define HAVE_LIBAVRESAMPLE HAVE_IS_LIBAV
+
 #if HAVE_LIBAVRESAMPLE
 #include <libavresample/avresample.h>
 #elif HAVE_LIBSWRESAMPLE
