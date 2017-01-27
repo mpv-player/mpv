@@ -81,6 +81,7 @@ struct vo_w32_state {
     bool window_bounds_initialized;
 
     bool current_fs;
+    bool toggle_fs; // whether the current fullscreen state needs to be switched
 
     // currently known window state
     int window_x;
@@ -697,6 +698,12 @@ static void update_playback_state(struct vo_w32_state *w32)
                                                     TBPF_NORMAL);
 }
 
+static void toggle_fullscreen(struct vo_w32_state *w32)
+{
+    w32->toggle_fs = true;
+    signal_events(w32, VO_EVENT_FULLSCREEN_STATE);
+}
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
@@ -791,6 +798,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         case SC_MONITORPOWER:
             if (w32->disable_screensaver) {
                 MP_VERBOSE(w32, "killing screensaver\n");
+                return 0;
+            }
+            break;
+        case SC_RESTORE:
+            if (IsMaximized(w32->window) && w32->current_fs) {
+                toggle_fullscreen(w32);
                 return 0;
             }
             break;
@@ -1133,9 +1146,10 @@ static void reinit_window_state(struct vo_w32_state *w32)
     if (w32->parent)
         return;
 
-    bool new_fs = w32->opts->fullscreen;
+    bool new_fs = w32->toggle_fs ? !w32->current_fs : w32->opts->fullscreen;
     bool toggle_fs = w32->current_fs != new_fs;
     w32->current_fs = new_fs;
+    w32->toggle_fs = false;
 
     if (w32->taskbar_list) {
         ITaskbarList2_MarkFullscreenWindow(w32->taskbar_list,
@@ -1549,6 +1563,9 @@ static int gui_thread_control(struct vo_w32_state *w32, int request, void *arg)
     case VOCTRL_BORDER:
         reinit_window_state(w32);
         return VO_TRUE;
+    case VOCTRL_GET_FULLSCREEN:
+        *(bool *)arg = w32->toggle_fs != w32->current_fs;
+        return VO_TRUE;
     case VOCTRL_GET_UNFS_WINDOW_SIZE: {
         int *s = arg;
 
@@ -1648,6 +1665,8 @@ static void do_control(void *ptr)
         w32->vo->dwidth = w32->dw;
         w32->vo->dheight = w32->dh;
     }
+    if (*events & VO_EVENT_FULLSCREEN_STATE)
+        reinit_window_state(w32);
 }
 
 int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
@@ -1661,6 +1680,8 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
             vo->dheight = w32->dh;
             mp_dispatch_unlock(w32->dispatch);
         }
+        if (*events & VO_EVENT_FULLSCREEN_STATE)
+            reinit_window_state(w32);
         return VO_TRUE;
     } else {
         int r;
