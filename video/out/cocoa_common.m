@@ -69,7 +69,6 @@ struct vo_cocoa_state {
     NSOpenGLContext *nsgl_ctx;
 
     NSScreen *current_screen;
-    double screen_fps;
 
     NSInteger window_level;
     int fullscreen;
@@ -428,28 +427,39 @@ void vo_cocoa_uninit(struct vo *vo)
     });
 }
 
-static void vo_cocoa_update_screen_fps(struct vo *vo)
+static void vo_cocoa_update_displaylink(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
-    NSDictionary* sinfo = [s->current_screen deviceDescription];
-    NSNumber* sid = [sinfo objectForKey:@"NSScreenNumber"];
-    CGDirectDisplayID did = [sid longValue];
+    vo_cocoa_uninit_displaylink(s);
+    vo_cocoa_init_displaylink(vo);
 
-    CVDisplayLinkSetCurrentCGDisplay(s->link, did);
-    double display_period = CVDisplayLinkGetActualOutputVideoRefreshPeriod(s->link);
+    flag_events(vo, VO_EVENT_WIN_STATE);
+}
 
-    if (display_period > 0) {
-        s->screen_fps = 1/display_period;
-    } else {
-        const CVTime t = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(s->link);
-        if (!(t.flags & kCVTimeIsIndefinite)) {
-            s->screen_fps = (t.timeScale / (double) t.timeValue);
-            MP_VERBOSE(vo, "Falling back to %f for display sync.\n", s->screen_fps);
+static double vo_cocoa_update_screen_fps(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    double actual_fps = CVDisplayLinkGetActualOutputVideoRefreshPeriod(s->link);
+    const CVTime t = CVDisplayLinkGetNominalOutputVideoRefreshPeriod(s->link);
+
+    if (!(t.flags & kCVTimeIsIndefinite)) {
+        double nominal_fps = (t.timeScale / (double) t.timeValue);
+
+        if (actual_fps > 0)
+            actual_fps = 1/actual_fps;
+
+        if (fabs(actual_fps - nominal_fps) > 0.1) {
+            MP_VERBOSE(vo, "Falling back to nominal display "
+                           "refresh rate: %fHz\n", nominal_fps);
+            return nominal_fps;
+        } else {
+            return actual_fps;
         }
     }
 
-    flag_events(vo, VO_EVENT_WIN_STATE);
+    MP_WARN(vo, "Falling back to standard display refresh rate: 60Hz\n");
+    return 60.0;
 }
 
 static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeStamp* now,
@@ -609,7 +619,7 @@ static void cocoa_screen_reconfiguration_observer(
     if (flags & kCGDisplaySetModeFlag) {
         struct vo *vo = ctx;
         MP_WARN(vo, "detected display mode change, updating screen info\n");
-        vo_cocoa_update_screen_fps(vo);
+        vo_cocoa_update_displaylink(vo);
     }
 }
 
@@ -640,8 +650,6 @@ int vo_cocoa_config_window(struct vo *vo)
     struct mp_vo_opts *opts  = vo->opts;
 
     run_on_main_thread(vo, ^{
-        vo_cocoa_update_screen_fps(vo);
-
         NSRect r = [s->current_screen frame];
         struct mp_rect screenrc = {0, 0, r.size.width, r.size.height};
         struct vo_win_geometry geo;
@@ -844,10 +852,8 @@ static int vo_cocoa_control_on_main_thread(struct vo *vo, int request, void *arg
         vo_cocoa_control_get_icc_profile(vo, arg);
         return VO_TRUE;
     case VOCTRL_GET_DISPLAY_FPS:
-        if (s->screen_fps > 0.0) {
-            *(double *)arg = s->screen_fps;
-            return VO_TRUE;
-        }
+        *(double *)arg = vo_cocoa_update_screen_fps(vo);
+        return VO_TRUE;
         break;
     case VOCTRL_GET_AMBIENT_LUX:
         if (s->light_sensor != IO_OBJECT_NULL) {
@@ -965,7 +971,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 - (void)windowDidChangeScreen:(NSNotification *)notification
 {
     vo_cocoa_update_screen_info(self.vout);
-    vo_cocoa_update_screen_fps(self.vout);
+    vo_cocoa_update_displaylink(self.vout);
 }
 
 - (void)windowDidEnterFullScreen:(NSNotification *)notification
