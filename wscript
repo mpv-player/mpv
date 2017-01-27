@@ -405,7 +405,8 @@ libav_pkg_config_checks = [
     'libavutil',   '>= 55.20.0',
     'libavcodec',  '>= 57.25.0',
     'libavformat', '>= 57.07.0',
-    'libswscale',  '>= 4.0.0'
+    'libswscale',  '>= 4.0.0',
+    'libavfilter', '>= 6.7.0',
 ]
 libav_versions_string = "FFmpeg 3.2.2 or Libav 12"
 
@@ -433,12 +434,6 @@ FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_
         'func': check_true,
         'req':  True,
         'fmsg': 'No resampler found. Install libavresample or libswresample (FFmpeg).'
-    }, {
-        'name': 'libavfilter',
-        'desc': 'libavfilter',
-        'func': check_pkg_config('libavfilter', '>= 6.7.0'),
-        'req':  True,
-        'fmsg': 'libavfilter is a required dependency.',
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
