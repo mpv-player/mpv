@@ -433,8 +433,6 @@ static void vo_cocoa_update_displaylink(struct vo *vo)
 
     vo_cocoa_uninit_displaylink(s);
     vo_cocoa_init_displaylink(vo);
-
-    flag_events(vo, VO_EVENT_WIN_STATE);
 }
 
 static double vo_cocoa_update_screen_fps(struct vo *vo)
@@ -618,8 +616,16 @@ static void cocoa_screen_reconfiguration_observer(
 {
     if (flags & kCGDisplaySetModeFlag) {
         struct vo *vo = ctx;
-        MP_WARN(vo, "detected display mode change, updating screen info\n");
-        vo_cocoa_update_displaylink(vo);
+        struct vo_cocoa_state *s = vo->cocoa;
+
+        NSDictionary* sinfo = [s->current_screen deviceDescription];
+        NSNumber* sid = [sinfo objectForKey:@"NSScreenNumber"];
+        CGDirectDisplayID did = [sid longValue];
+
+        if (did == display) {
+            MP_VERBOSE(vo, "detected display mode change, updating screen refresh rate\n");
+            flag_events(vo, VO_EVENT_WIN_STATE);
+        }
     }
 }
 
@@ -972,6 +978,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 {
     vo_cocoa_update_screen_info(self.vout);
     vo_cocoa_update_displaylink(self.vout);
+    flag_events(self.vout, VO_EVENT_WIN_STATE);
 }
 
 - (void)windowDidEnterFullScreen:(NSNotification *)notification
