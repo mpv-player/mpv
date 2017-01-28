@@ -36,7 +36,6 @@ struct mp_vaapi_ctx {
     struct AVBufferRef *av_device_ref; // AVVAAPIDeviceContext*
     struct va_image_formats *image_formats;
     bool gpu_memcpy_message;
-    pthread_mutex_t lock;
     // Internal, for va_create_standalone()
     void *native_ctx;
     void (*destroy_native_ctx)(void *native_ctx);
@@ -45,9 +44,6 @@ struct mp_vaapi_ctx {
 bool check_va_status(struct mp_log *log, VAStatus status, const char *msg);
 
 #define CHECK_VA_STATUS(ctx, msg) check_va_status((ctx)->log, status, msg)
-
-#define va_lock(ctx)     (void)(ctx)
-#define va_unlock(ctx)   (void)(ctx)
 
 int                      va_get_colorspace_flag(enum mp_csp csp);
 

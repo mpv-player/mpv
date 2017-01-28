@@ -142,18 +142,6 @@ static int init_copy(struct lavc_ctx *ctx)
     return init(ctx, false);
 }
 
-static void intel_shit_lock(struct lavc_ctx *ctx)
-{
-    struct priv *p = ctx->hwdec_priv;
-    va_lock(p->ctx);
-}
-
-static void intel_crap_unlock(struct lavc_ctx *ctx)
-{
-    struct priv *p = ctx->hwdec_priv;
-    va_unlock(p->ctx);
-}
-
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .type = HWDEC_VAAPI,
     .image_format = IMGFMT_VAAPI,
@@ -162,8 +150,6 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .init = init_direct,
     .uninit = uninit,
     .init_decoder = init_decoder,
-    .lock = intel_shit_lock,
-    .unlock = intel_crap_unlock,
 };
 
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {

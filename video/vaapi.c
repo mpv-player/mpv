@@ -181,7 +181,6 @@ struct mp_vaapi_ctx *va_initialize(VADisplay *display, struct mp_log *plog,
             .download_image = ctx_download_image,
         },
     };
-    mpthread_mutex_init_recursive(&res->lock);
 
     pthread_mutex_lock(&va_log_mutex);
     MP_TARRAY_APPEND(NULL, va_mpv_clients, num_va_mpv_clients, res);
@@ -240,7 +239,6 @@ void va_destroy(struct mp_vaapi_ctx *ctx)
             TA_FREEP(&va_mpv_clients); // avoid triggering leak detectors
         pthread_mutex_unlock(&va_log_mutex);
 
-        pthread_mutex_destroy(&ctx->lock);
         talloc_free(ctx);
     }
 }
@@ -311,13 +309,12 @@ static void release_va_surface(void *arg)
 {
     struct va_surface *surface = arg;
 
-    va_lock(surface->ctx);
     if (surface->id != VA_INVALID_ID) {
         if (surface->image.image_id != VA_INVALID_ID)
             vaDestroyImage(surface->display, surface->image.image_id);
         vaDestroySurfaces(surface->display, &surface->id, 1);
     }
-    va_unlock(surface->ctx);
+
     talloc_free(surface);
 }
 
@@ -326,9 +323,7 @@ static struct mp_image *alloc_surface(struct mp_vaapi_ctx *ctx, int rt_format,
 {
     VASurfaceID id = VA_INVALID_ID;
     VAStatus status;
-    va_lock(ctx);
     status = vaCreateSurfaces(ctx->display, rt_format, w, h, &id, 1, NULL, 0);
-    va_unlock(ctx);
     if (!CHECK_VA_STATUS(ctx, "vaCreateSurfaces()"))
         return NULL;
 
@@ -372,7 +367,6 @@ static int va_surface_image_alloc(struct va_surface *p, VAImageFormat *format)
         return 0;
 
     int r = 0;
-    va_lock(p->ctx);
 
     va_surface_image_destroy(p);
 
@@ -398,7 +392,6 @@ static int va_surface_image_alloc(struct va_surface *p, VAImageFormat *format)
         }
     }
 
-    va_unlock(p->ctx);
     return r;
 }
 
@@ -428,9 +421,7 @@ bool va_image_map(struct mp_vaapi_ctx *ctx, VAImage *image, struct mp_image *mpi
     if (imgfmt == IMGFMT_NONE)
         return false;
     void *data = NULL;
-    va_lock(ctx);
     const VAStatus status = vaMapBuffer(ctx->display, image->buf, &data);
-    va_unlock(ctx);
     if (!CHECK_VA_STATUS(ctx, "vaMapBuffer()"))
         return false;
 
@@ -453,9 +444,7 @@ bool va_image_map(struct mp_vaapi_ctx *ctx, VAImage *image, struct mp_image *mpi
 
 bool va_image_unmap(struct mp_vaapi_ctx *ctx, VAImage *image)
 {
-    va_lock(ctx);
     const VAStatus status = vaUnmapBuffer(ctx->display, image->buf);
-    va_unlock(ctx);
     return CHECK_VA_STATUS(ctx, "vaUnmapBuffer()");
 }
 
@@ -479,12 +468,10 @@ int va_surface_upload(struct mp_image *va_dst, struct mp_image *sw_src)
     va_image_unmap(p->ctx, &p->image);
 
     if (!p->is_derived) {
-        va_lock(p->ctx);
         VAStatus status = vaPutImage(p->display, p->id,
                                      p->image.image_id,
                                      0, 0, sw_src->w, sw_src->h,
                                      0, 0, sw_src->w, sw_src->h);
-        va_unlock(p->ctx);
         if (!CHECK_VA_STATUS(p->ctx, "vaPutImage()"))
             return -1;
     }
@@ -505,10 +492,8 @@ static struct mp_image *try_download(struct va_surface *p, struct mp_image *src,
         return NULL;
 
     if (!p->is_derived) {
-        va_lock(p->ctx);
         status = vaGetImage(p->display, p->id, 0, 0,
                             p->w, p->h, image->image_id);
-        va_unlock(p->ctx);
         if (status != VA_STATUS_SUCCESS)
             return NULL;
     }
@@ -520,9 +505,7 @@ static struct mp_image *try_download(struct va_surface *p, struct mp_image *src,
         mp_image_set_size(&tmp, src->w, src->h); // copy only visible part
         dst = mp_image_pool_get(pool, tmp.imgfmt, tmp.w, tmp.h);
         if (dst) {
-            va_lock(p->ctx);
             mp_check_gpu_memcpy(p->ctx->log, &p->ctx->gpu_memcpy_message);
-            va_unlock(p->ctx);
 
             mp_image_copy_gpu(dst, &tmp);
             mp_image_copy_attributes(dst, src);
@@ -549,9 +532,7 @@ struct mp_image *va_surface_download(struct mp_image *src,
     }
     struct mp_image *mpi = NULL;
     struct mp_vaapi_ctx *ctx = p->ctx;
-    va_lock(ctx);
     VAStatus status = vaSyncSurface(p->display, p->id);
-    va_unlock(ctx);
     if (!CHECK_VA_STATUS(ctx, "vaSyncSurface()"))
         goto done;
 
@@ -598,8 +579,6 @@ void va_surface_init_subformat(struct mp_image *mpi)
 
     VAImage va_image = { .image_id = VA_INVALID_ID };
 
-    va_lock(p->ctx);
-
     status = vaDeriveImage(p->display, va_surface_id(mpi), &va_image);
     if (status != VA_STATUS_SUCCESS)
         goto err;
@@ -609,8 +588,7 @@ void va_surface_init_subformat(struct mp_image *mpi)
     status = vaDestroyImage(p->display, va_image.image_id);
     CHECK_VA_STATUS(p->ctx, "vaDestroyImage()");
 
-err:
-    va_unlock(p->ctx);
+err: ;
 }
 
 struct pool_alloc_ctx {
@@ -643,9 +621,7 @@ void va_pool_set_allocator(struct mp_image_pool *pool, struct mp_vaapi_ctx *ctx,
 
 bool va_guess_if_emulated(struct mp_vaapi_ctx *ctx)
 {
-    va_lock(ctx);
     const char *s = vaQueryVendorString(ctx->display);
-    va_unlock(ctx);
     return s && strstr(s, "VDPAU backend");
 }
 

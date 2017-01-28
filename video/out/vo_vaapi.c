@@ -205,8 +205,6 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
     if (surface == VA_INVALID_ID)
         return false;
 
-    va_lock(p->mpvaapi);
-
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct vaapi_osd_part *part = &p->osd_parts[n];
         if (part->active) {
@@ -251,8 +249,6 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
             CHECK_VA_STATUS(p, "vaDeassociateSubpicture()");
         }
     }
-
-    va_unlock(p->mpvaapi);
 
     return true;
 }
@@ -424,8 +420,6 @@ static void draw_osd(struct vo *vo)
     if (!p->osd_format.fourcc)
         return;
 
-    va_lock(p->mpvaapi);
-
     struct mp_osd_res vid_res = osd_res_from_image_params(vo->params);
 
     struct mp_osd_res *res;
@@ -438,8 +432,6 @@ static void draw_osd(struct vo *vo)
     for (int n = 0; n < MAX_OSD_PARTS; n++)
         p->osd_parts[n].active = false;
     osd_draw(vo->osd, *res, pts, 0, osd_formats, draw_osd_cb, p);
-
-    va_unlock(p->mpvaapi);
 }
 
 static int get_displayattribtype(const char *name)
@@ -520,9 +512,7 @@ static int set_equalizer(struct priv *p, const char *name, int value)
     MP_VERBOSE(p, "Changing '%s' (range [%d, %d]) to %d\n", name,
                attr->max_value, attr->min_value, attr->value);
 
-    va_lock(p->mpvaapi);
     status = vaSetDisplayAttributes(p->display, attr, 1);
-    va_unlock(p->mpvaapi);
     if (!CHECK_VA_STATUS(p, "vaSetDisplayAttributes()"))
         return VO_FALSE;
     return VO_TRUE;

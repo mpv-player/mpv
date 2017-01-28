@@ -146,8 +146,6 @@ static void unmap_frame(struct gl_hwdec *hw)
         p->images[n] = 0;
     }
 
-    va_lock(p->ctx);
-
     if (p->buffer_acquired) {
         status = vaReleaseBufferHandle(p->display, p->current_image.buf);
         CHECK_VA_STATUS(p, "vaReleaseBufferHandle()");
@@ -158,8 +156,6 @@ static void unmap_frame(struct gl_hwdec *hw)
         CHECK_VA_STATUS(p, "vaDestroyImage()");
         p->current_image.image_id = VA_INVALID_ID;
     }
-
-    va_unlock(p->ctx);
 }
 
 static void destroy_textures(struct gl_hwdec *hw)
@@ -310,8 +306,6 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
 
     unmap_frame(hw);
 
-    va_lock(p->ctx);
-
     status = vaDeriveImage(p->display, va_surface_id(hw_image), va_image);
     if (!CHECK_VA_STATUS(p, "vaDeriveImage()"))
         goto err;
@@ -385,11 +379,9 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     if (va_image->format.fourcc == VA_FOURCC_YV12)
         MPSWAP(struct gl_hwdec_plane, out_frame->planes[1], out_frame->planes[2]);
 
-    va_unlock(p->ctx);
     return 0;
 
 err:
-    va_unlock(p->ctx);
     if (!p->probing_formats)
         MP_FATAL(p, "mapping VAAPI EGL image failed\n");
     unmap_frame(hw);
