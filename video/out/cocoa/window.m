@@ -49,20 +49,22 @@
                 styleMask:(NSUInteger)style_mask
                   backing:(NSBackingStoreType)buffering_type
                     defer:(BOOL)flag
+                   screen:(NSScreen *)screen
 {
     if (self = [super initWithContentRect:content_rect
                                 styleMask:style_mask
                                   backing:buffering_type
-                                    defer:flag]) {
+                                    defer:flag
+                                   screen:screen]) {
         [self setBackgroundColor:[NSColor blackColor]];
         [self setMinSize:NSMakeSize(50,50)];
         [self setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
 
-        self.targetScreen = [self screen];
-        self.currentScreen = [self screen];
+        self.targetScreen = screen;
+        self.currentScreen = screen;
         _is_animating = 0;
         _unfs_content_frame = [self convertRectToScreen:[[self contentView] frame]];
-        _unfs_screen_frame = [[self screen] frame];
+        _unfs_screen_frame = [screen frame];
     }
     return self;
 }
@@ -171,8 +173,10 @@
     if (!_is_animating && ![[self currentScreen] isEqual:[self screen]]) {
         self.previousScreen = [self screen];
     }
+    if (![[self currentScreen] isEqual:[self screen]]) {
+        [self.adapter windowDidChangeScreen:notification];
+    }
     self.currentScreen = [self screen];
-    [self.adapter windowDidChangeScreen:notification];
 }
 
 - (void)windowDidChangeScreenProfile:(NSNotification *)notification
