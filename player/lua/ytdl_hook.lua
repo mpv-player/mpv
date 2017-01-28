@@ -144,7 +144,7 @@ mp.add_hook("on_load", 10, function ()
             format = "bestvideo+bestaudio"
         end
         table.insert(command, "--format")
-        table.insert(command, string.format('(%s)[protocol!=http_dash_segments]/best', format))
+        table.insert(command, string.format('%s', format))
 
         for param, arg in pairs(raw_options) do
             table.insert(command, "--" .. param)
@@ -275,26 +275,30 @@ mp.add_hook("on_load", 10, function ()
         else -- probably a video
             local streamurl = ""
 
-            -- DASH/split tracks (ex: bestvideo+bestaudio)
-            if (json["requested_formats"] ~= nil) then
-
-                for i = 1, #json["requested_formats"] do
-                    local track = json["requested_formats"][i]
-
+            -- DASH/split tracks
+            if not (json["requested_formats"] == nil) then
+                for _, track in pairs(json.requested_formats) do
+                    local edl_track = nil
+                    if (track.protocol == "http_dash_segments") and
+                        (track.fragments ~= nil) then
+                        edl_track = edl_track_joined(track.fragments)
+                    end
                     if track.acodec and track.acodec ~= "none" then
-                        -- audio url
                         mp.commandv("audio-add",
-                            track.url, "auto",
+                            edl_track or track.url, "auto",
                             track.format_note or "")
                     elseif track.vcodec and track.vcodec ~= "none" then
-                        -- video url
-                        streamurl = track.url
+                        streamurl = edl_track or track.url
                     end
                 end
 
             elseif not (json.url == nil) then
+                local edl_track = nil
+                if json.protocol == "http_dash_segments" then
+                    edl_track = edl_track_joined(json.fragments)
+                end
                 -- normal video
-                streamurl = json.url
+                streamurl = edl_track or json.url
                 set_http_headers(json.http_headers)
             else
                 msg.error("No URL found in JSON data.")
