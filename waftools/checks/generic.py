@@ -4,7 +4,8 @@ from waflib.ConfigSet import ConfigSet
 from waflib import Utils
 
 __all__ = [
-    "check_pkg_config", "check_pkg_config_cflags", "check_cc", "check_statement", "check_libs",
+    "check_pkg_config", "check_pkg_config_mixed", "check_pkg_config_mixed_all",
+    "check_pkg_config_cflags", "check_cc", "check_statement", "check_libs",
     "check_headers", "compose_checks", "check_true", "any_version",
     "load_fragment", "check_stub", "check_ctx_vars", "check_program"]
 
@@ -69,24 +70,34 @@ def check_cc(**kw_ext):
     return fn
 
 def check_pkg_config(*args, **kw_ext):
-    return _check_pkg_config(["--libs", "--cflags"], *args, **kw_ext)
+    return _check_pkg_config([], ["--libs", "--cflags"], *args, **kw_ext)
+
+def check_pkg_config_mixed(_dyn_libs, *args, **kw_ext):
+    return _check_pkg_config([_dyn_libs], ["--libs", "--cflags"], *args, **kw_ext)
+
+def check_pkg_config_mixed_all(*all_args, **kw_ext):
+    args = [all_args[i] for i in [n for n in range(0, len(all_args)) if n % 3]]
+    return _check_pkg_config(all_args[::3], ["--libs", "--cflags"], *args, **kw_ext)
 
 def check_pkg_config_cflags(*args, **kw_ext):
-    return _check_pkg_config(["--cflags"], *args, **kw_ext)
+    return _check_pkg_config([], ["--cflags"], *args, **kw_ext)
 
-def _check_pkg_config(_pkgc_args, *args, **kw_ext):
+def _check_pkg_config(_dyn_libs, _pkgc_args, *args, **kw_ext):
     def fn(ctx, dependency_identifier, **kw):
         argsl     = list(args)
         packages  = args[::2]
         verchecks = args[1::2]
         sargs     = []
         pkgc_args = _pkgc_args
+        dyn_libs  = {}
         for i in range(0, len(packages)):
             if i < len(verchecks):
                 sargs.append(packages[i] + ' ' + verchecks[i])
             else:
                 sargs.append(packages[i])
-        if ctx.dependency_satisfied('static-build'):
+            if _dyn_libs and _dyn_libs[i]:
+                dyn_libs[packages[i]] = _dyn_libs[i]
+        if ctx.dependency_satisfied('static-build') and not dyn_libs:
             pkgc_args += ["--static"]
 
         defaults = {
@@ -108,6 +119,8 @@ def _check_pkg_config(_pkgc_args, *args, **kw_ext):
         defkey = inflector.define_key(dependency_identifier)
         if result:
             ctx.define(defkey, 1)
+            for x in dyn_libs.keys():
+                ctx.env['LIB_'+x] += dyn_libs[x]
         else:
             ctx.add_optional_message(dependency_identifier,
                                      "'{0}' not found".format(" ".join(sargs)))
