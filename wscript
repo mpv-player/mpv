@@ -989,6 +989,8 @@ def configure(ctx):
     ctx.find_program(windres,     var='WINDRES',   mandatory=False)
     ctx.find_program('perl',      var='BIN_PERL',  mandatory=False)
 
+    ctx.add_os_flags('LIBRARY_PATH')
+
     ctx.load('compiler_c')
     ctx.load('waf_customizations')
     ctx.load('dependencies')

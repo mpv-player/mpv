@@ -50,6 +50,8 @@ def check_iconv(ctx, dependency_identifier):
     if ctx.env.DEST_OS == 'openbsd' or ctx.env.DEST_OS == 'freebsd':
         args['cflags'] = '-I/usr/local/include'
         args['linkflags'] = '-L/usr/local/lib'
+    elif ctx.env.DEST_OS == 'win32':
+        args['linkflags'] = " ".join(['-L' + x for x in ctx.env.LIBRARY_PATH])
     checkfn = check_cc(**args)
     return check_libs(libs, checkfn)(ctx, dependency_identifier)
 
