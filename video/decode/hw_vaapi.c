@@ -45,7 +45,13 @@ struct priv {
 static int init_decoder(struct lavc_ctx *ctx, int w, int h)
 {
     struct priv *p = ctx->hwdec_priv;
-    // From avconv_vaapi.c. Disgusting, but apparently this is the best we get.
+    // libavcodec has no way yet to communicate the exact surface format needed
+    // for the frame pool, or the required minimum size of the frame pool.
+    // Hopefully, this weakness in the libavcodec API will be fixed in the
+    // future.
+    // For the pixel format, we try to second-guess from what the libavcodec
+    // software decoder would require (sw_pix_fmt). It could break and require
+    // adjustment if new VAAPI surface formats are added.
     int sw_format = ctx->avctx->sw_pix_fmt == AV_PIX_FMT_YUV420P10 ?
                     AV_PIX_FMT_P010 : AV_PIX_FMT_NV12;
 
