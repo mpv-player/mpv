@@ -1430,8 +1430,11 @@ void write_video(struct MPContext *mpctx)
             mp_image_params_get_dsize(&p, &d_w, &d_h);
             snprintf(extra, sizeof(extra), " => %dx%d", d_w, d_h);
         }
-        MP_INFO(mpctx, "VO: [%s] %dx%d%s %s\n",
-                info->name, p.w, p.h, extra, vo_format_name(p.imgfmt));
+        char sfmt[20] = {0};
+        if (p.hw_subfmt)
+            snprintf(sfmt, sizeof(sfmt), "[%s]", mp_imgfmt_to_name(p.hw_subfmt));
+        MP_INFO(mpctx, "VO: [%s] %dx%d%s %s%s\n",
+                info->name, p.w, p.h, extra, mp_imgfmt_to_name(p.imgfmt), sfmt);
         MP_VERBOSE(mpctx, "VO: Description: %s\n", info->description);
 
         int vo_r = vo_reconfig(vo, &p);
