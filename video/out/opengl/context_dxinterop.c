@@ -235,12 +235,12 @@ static int d3d_size_dependent_create(MPGLContext *ctx)
     hr = IDirect3DSwapChain9_QueryInterface(sw9, &IID_IDirect3DSwapChain9Ex,
         (void**)&p->swapchain);
     if (FAILED(hr)) {
-        IDirect3DSwapChain9_Release(sw9);
+        SAFE_RELEASE(sw9);
         MP_ERR(ctx->vo, "Obtained swap chain is not IDirect3DSwapChain9Ex: %s\n",
                mp_HRESULT_to_str(hr));
         return -1;
     }
-    IDirect3DSwapChain9_Release(sw9);
+    SAFE_RELEASE(sw9);
 
     hr = IDirect3DSwapChain9Ex_GetBackBuffer(p->swapchain, 0,
         D3DBACKBUFFER_TYPE_MONO, &p->backbuffer);
@@ -315,15 +315,10 @@ static void d3d_size_dependent_destroy(MPGLContext *ctx)
     if (p->texture)
         gl->DeleteTextures(1, &p->texture);
     p->texture = 0;
-    if (p->rtarget)
-        IDirect3DSurface9_Release(p->rtarget);
-    p->rtarget = NULL;
-    if (p->backbuffer)
-        IDirect3DSurface9_Release(p->backbuffer);
-    p->backbuffer = NULL;
-    if (p->swapchain)
-        IDirect3DSwapChain9Ex_Release(p->swapchain);
-    p->swapchain = NULL;
+
+    SAFE_RELEASE(p->rtarget);
+    SAFE_RELEASE(p->backbuffer);
+    SAFE_RELEASE(p->swapchain);
 }
 
 static void fill_presentparams(MPGLContext *ctx, D3DPRESENT_PARAMETERS *pparams)
@@ -422,10 +417,8 @@ static void d3d_destroy(MPGLContext *ctx)
 
     if (p->device_h)
         gl->DXCloseDeviceNV(p->device_h);
-    if (p->device)
-        IDirect3DDevice9Ex_Release(p->device);
-    if (p->d3d9ex)
-        IDirect3D9Ex_Release(p->d3d9ex);
+    SAFE_RELEASE(p->device);
+    SAFE_RELEASE(p->d3d9ex);
     if (p->d3d9_dll)
         FreeLibrary(p->d3d9_dll);
 }
