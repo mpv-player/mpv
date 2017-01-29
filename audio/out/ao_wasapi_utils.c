@@ -539,8 +539,7 @@ static void init_session_display(struct wasapi_state *state) {
     return;
 exit_label:
     // if we got here then the session control is useless - release it
-    SAFE_RELEASE(state->pSessionControl,
-                 IAudioSessionControl_Release(state->pSessionControl));
+    SAFE_RELEASE(state->pSessionControl);
     MP_WARN(state, "Error setting audio session display name: %s\n",
             mp_HRESULT_to_str(hr));
     return;
@@ -571,10 +570,8 @@ static void init_volume_control(struct wasapi_state *state)
     return;
 exit_label:
     state->vol_hw_support = 0;
-    SAFE_RELEASE(state->pEndpointVolume,
-                 IAudioEndpointVolume_Release(state->pEndpointVolume));
-    SAFE_RELEASE(state->pAudioVolume,
-                 ISimpleAudioVolume_Release(state->pAudioVolume));
+    SAFE_RELEASE(state->pEndpointVolume);
+    SAFE_RELEASE(state->pAudioVolume);
     MP_WARN(state, "Error setting up volume control: %s\n",
             mp_HRESULT_to_str(hr));
 }
@@ -707,7 +704,7 @@ exit_label:
     if (FAILED(hr))
         mp_warn(l, "Failed getting device name: %s\n", mp_HRESULT_to_str(hr));
     PropVariantClear(&devname);
-    SAFE_RELEASE(pProps, IPropertyStore_Release(pProps));
+    SAFE_RELEASE(pProps);
     return namestr ? namestr : talloc_strdup(talloc_ctx, "");
 }
 
@@ -722,7 +719,7 @@ static struct device_desc *get_device_desc(struct mp_log *l, IMMDevice *pDevice)
     struct device_desc *d = talloc_zero(NULL, struct device_desc);
     d->deviceID = talloc_memdup(d, deviceID,
                                 (wcslen(deviceID) + 1) * sizeof(wchar_t));
-    SAFE_RELEASE(deviceID, CoTaskMemFree(deviceID));
+    SAFE_DESTROY(deviceID, CoTaskMemFree(deviceID));
 
     char *full_id = mp_to_utf8(NULL, d->deviceID);
     bstr id = bstr0(full_id);
@@ -745,8 +742,8 @@ static void destroy_enumerator(struct enumerator *e)
 {
     if (!e)
         return;
-    SAFE_RELEASE(e->pDevices, IMMDeviceCollection_Release(e->pDevices));
-    SAFE_RELEASE(e->pEnumerator, IMMDeviceEnumerator_Release(e->pEnumerator));
+    SAFE_RELEASE(e->pDevices);
+    SAFE_RELEASE(e->pEnumerator);
     talloc_free(e);
 }
 
@@ -782,7 +779,7 @@ static struct device_desc *device_desc_for_num(struct enumerator *e, UINT i)
         return NULL;
     }
     struct device_desc *d = get_device_desc(e->log, pDevice);
-    SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
+    SAFE_RELEASE(pDevice);
     return d;
 }
 
@@ -797,7 +794,7 @@ static struct device_desc *default_device_desc(struct enumerator *e)
         return NULL;
     }
     struct device_desc *d = get_device_desc(e->log, pDevice);
-    SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
+    SAFE_RELEASE(pDevice);
     return d;
 }
 
@@ -834,7 +831,7 @@ static HRESULT load_device(struct mp_log *l,
 exit_label:
     if (FAILED(hr))
         mp_err(l, "Error loading selected device: %s\n", mp_HRESULT_to_str(hr));
-    SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
+    SAFE_RELEASE(pEnumerator);
     return hr;
 }
 
@@ -908,7 +905,7 @@ LPWSTR wasapi_find_deviceID(struct ao *ao)
                         BSTR_P(device), d->id, d->name);
             }
         }
-        SAFE_RELEASE(d, talloc_free(d));
+        SAFE_DESTROY(d, talloc_free(d));
     }
 
     if (!deviceID)
@@ -969,13 +966,13 @@ void wasapi_thread_uninit(struct ao *ao)
     if (state->pAudioClient)
         IAudioClient_Stop(state->pAudioClient);
 
-    SAFE_RELEASE(state->pRenderClient,   IAudioRenderClient_Release(state->pRenderClient));
-    SAFE_RELEASE(state->pAudioClock,     IAudioClock_Release(state->pAudioClock));
-    SAFE_RELEASE(state->pAudioVolume,    ISimpleAudioVolume_Release(state->pAudioVolume));
-    SAFE_RELEASE(state->pEndpointVolume, IAudioEndpointVolume_Release(state->pEndpointVolume));
-    SAFE_RELEASE(state->pSessionControl, IAudioSessionControl_Release(state->pSessionControl));
-    SAFE_RELEASE(state->pAudioClient,    IAudioClient_Release(state->pAudioClient));
-    SAFE_RELEASE(state->pDevice,         IMMDevice_Release(state->pDevice));
-    SAFE_RELEASE(state->hTask,           AvRevertMmThreadCharacteristics(state->hTask));
+    SAFE_RELEASE(state->pRenderClient);
+    SAFE_RELEASE(state->pAudioClock);
+    SAFE_RELEASE(state->pAudioVolume);
+    SAFE_RELEASE(state->pEndpointVolume);
+    SAFE_RELEASE(state->pSessionControl);
+    SAFE_RELEASE(state->pAudioClient);
+    SAFE_RELEASE(state->pDevice);
+    SAFE_DESTROY(state->hTask, AvRevertMmThreadCharacteristics(state->hTask));
     MP_DBG(ao, "Thread uninit done\n");
 }

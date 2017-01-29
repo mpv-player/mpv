@@ -255,9 +255,9 @@ static void uninit(struct ao *ao)
                "while waiting for audio thread to terminate\n");
     }
 
-    SAFE_RELEASE(state->hInitDone,   CloseHandle(state->hInitDone));
-    SAFE_RELEASE(state->hWake,       CloseHandle(state->hWake));
-    SAFE_RELEASE(state->hAudioThread,CloseHandle(state->hAudioThread));
+    SAFE_DESTROY(state->hInitDone,   CloseHandle(state->hInitDone));
+    SAFE_DESTROY(state->hWake,       CloseHandle(state->hWake));
+    SAFE_DESTROY(state->hAudioThread,CloseHandle(state->hAudioThread));
 
     wasapi_change_uninit(ao);
 
@@ -305,7 +305,7 @@ static int init(struct ao *ao)
     }
 
     WaitForSingleObject(state->hInitDone, INFINITE); // wait on init complete
-    SAFE_RELEASE(state->hInitDone,CloseHandle(state->hInitDone));
+    SAFE_DESTROY(state->hInitDone,CloseHandle(state->hInitDone));
     if (FAILED(state->init_ret)) {
         if (!ao->probing)
             MP_FATAL(ao, "Received failure from audio thread\n");
@@ -418,10 +418,10 @@ static int thread_control(struct ao *ao, enum aocontrol cmd, void *arg)
         do {
             IAudioSessionControl_SetDisplayName(state->pSessionControl, title, NULL);
 
-            SAFE_RELEASE(tmp, CoTaskMemFree(tmp));
+            SAFE_DESTROY(tmp, CoTaskMemFree(tmp));
             IAudioSessionControl_GetDisplayName(state->pSessionControl, &tmp);
         } while (lstrcmpW(title, tmp));
-        SAFE_RELEASE(tmp, CoTaskMemFree(tmp));
+        SAFE_DESTROY(tmp, CoTaskMemFree(tmp));
         talloc_free(title);
         return CONTROL_OK;
     }
