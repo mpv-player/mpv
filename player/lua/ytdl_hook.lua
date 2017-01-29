@@ -349,6 +349,8 @@ mp.add_hook("on_load", 10, function ()
                 rtmp_prop = append_rtmp_prop(rtmp_prop,
                     "rtmp_swfverify", json.player_url)
                 rtmp_prop = append_rtmp_prop(rtmp_prop,
+                    "rtmp_swfurl", json.player_url)
+                rtmp_prop = append_rtmp_prop(rtmp_prop,
                     "rtmp_app", json.app)
 
                 mp.set_property("file-local-options/stream-lavf-o", rtmp_prop)
