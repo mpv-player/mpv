@@ -242,5 +242,5 @@ void wasapi_change_uninit(struct ao *ao)
             change->pEnumerator, (IMMNotificationClient *)change);
     }
 
-    SAFE_RELEASE(change->pEnumerator, IMMDeviceEnumerator_Release(change->pEnumerator));
+    SAFE_RELEASE(change->pEnumerator);
 }
