@@ -313,22 +313,13 @@
 - (BOOL)performDragOperation:(id <NSDraggingInfo>)sender
 {
     NSPasteboard *pboard = [sender draggingPasteboard];
-    if ([[pboard types] containsObject:NSURLPboardType]) {
-        NSArray *pbitems = [pboard readObjectsForClasses:@[[NSURL class]]
-                            options:@{}];
-        NSMutableArray* ar = [[[NSMutableArray alloc] init] autorelease];
-        for (NSURL* url in pbitems) {
-            if ([url isFileURL]) {
-                [ar addObject:[url path]];
-            } else {
-                [ar addObject:[url absoluteString]];
-            }
-        }
-        [self.adapter handleFilesArray:ar];
-        return YES;
-    } else if ([[pboard types] containsObject:NSFilenamesPboardType]) {
+    if ([[pboard types] containsObject:NSFilenamesPboardType]) {
         NSArray *pbitems = [pboard propertyListForType:NSFilenamesPboardType];
         [self.adapter handleFilesArray:pbitems];
+        return YES;
+    } else if ([[pboard types] containsObject:NSURLPboardType]) {
+        NSURL *url = [NSURL URLFromPasteboard:pboard];
+        [self.adapter handleFilesArray:@[[url absoluteString]]];
         return YES;
     }
     return NO;
