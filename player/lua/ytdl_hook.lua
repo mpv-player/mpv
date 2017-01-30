@@ -88,6 +88,18 @@ local function extract_chapters(data, video_length)
     return ret
 end
 
+local function edl_track_joined(fragments)
+    local edl = "edl://"
+    for i = 1, #fragments do
+        local fragment = fragments[i]
+        edl = edl .. edl_escape(fragment.url)
+        if fragment.duration then
+            edl = edl .. ",length=" .. fragment.duration
+        end
+        edl = edl .. ";"
+    end
+    return edl
+end
 
 mp.add_hook("on_load", 10, function ()
     local url = mp.get_property("stream-open-filename")
@@ -190,14 +202,7 @@ mp.add_hook("on_load", 10, function ()
                 and (json.entries[1]["webpage_url"] == json["webpage_url"])) then
                 msg.verbose("multi-arc video detected, building EDL")
 
-                local playlist = "edl://"
-                for i, entry in pairs(json.entries) do
-                    playlist = playlist .. edl_escape(entry.url)
-                    if not (entry.duration == nil) then
-                        playlist = playlist..",start=0,length="..entry.duration
-                    end
-                    playlist = playlist .. ";"
-                end
+                local playlist = edl_track_joined(json.entries)
 
                 msg.debug("EDL: " .. playlist)
 
@@ -232,7 +237,7 @@ mp.add_hook("on_load", 10, function ()
                             else
                                 subfile = subfile..edl_escape("memory://WEBVTT")
                             end
-                            subfile = subfile..",start=0,length="..entry.duration..";"
+                            subfile = subfile..",length="..entry.duration..";"
                         end
                         msg.debug(j.." sub EDL: "..subfile)
                         mp.commandv("sub-add", subfile, "auto", req.ext, j)
@@ -270,19 +275,22 @@ mp.add_hook("on_load", 10, function ()
         else -- probably a video
             local streamurl = ""
 
-            -- DASH?
-            if not (json["requested_formats"] == nil) then
-                if (json["requested_formats"][1].protocol == "http_dash_segments") then
-                    msg.error("MPEG-Dash Segments unsupported, add [protocol!=http_dash_segments] to your ytdl-format.")
-                    return
+            -- DASH/split tracks (ex: bestvideo+bestaudio)
+            if (json["requested_formats"] ~= nil) then
+
+                for i = 1, #json["requested_formats"] do
+                    local track = json["requested_formats"][i]
+
+                    if track.acodec and track.acodec ~= "none" then
+                        -- audio url
+                        mp.commandv("audio-add",
+                            track.url, "auto",
+                            track.format_note or "")
+                    elseif track.vcodec and track.vcodec ~= "none" then
+                        -- video url
+                        streamurl = track.url
+                    end
                 end
-
-                -- video url
-                streamurl = json["requested_formats"][1].url
-
-                -- audio url
-                mp.commandv("audio-add", json["requested_formats"][2].url,
-                    "auto", json["requested_formats"][2]["format_note"] or "")
 
             elseif not (json.url == nil) then
                 -- normal video
