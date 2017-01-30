@@ -65,6 +65,47 @@ struct priv {
     int eos_packets;
 };
 
+static bool target_stream_used(struct segment *seg, int target_index)
+{
+    for (int n = 0; n < seg->num_stream_map; n++) {
+        if (seg->stream_map[n] == target_index)
+            return true;
+    }
+    return false;
+}
+
+// Create mapping from segment streams to virtual timeline streams.
+static void associate_streams(struct demuxer *demuxer, struct segment *seg)
+{
+    struct priv *p = demuxer->priv;
+
+    int counts[STREAM_TYPE_COUNT] = {0};
+
+    int num_streams = demux_get_num_stream(seg->d);
+    for (int n = 0; n < num_streams; n++) {
+        struct sh_stream *sh = demux_get_stream(seg->d, n);
+        // Try associating by demuxer ID (supposedly useful for ordered chapters).
+        struct sh_stream *other =
+            demuxer_stream_by_demuxer_id(demuxer, sh->type, sh->demuxer_id);
+        if (!other || !target_stream_used(seg, other->index)) {
+            // Try to associate the first unused stream with matching media type.
+            for (int i = 0; i < p->num_streams; i++) {
+                struct sh_stream *cur = p->streams[i].sh;
+                if (cur->type == sh->type && !target_stream_used(seg, cur->index))
+                {
+                    other = cur;
+                    break;
+                }
+            }
+        }
+
+        MP_TARRAY_APPEND(seg, seg->stream_map, seg->num_stream_map,
+                         other ? other->index : -1);
+
+        counts[sh->type] += 1;
+    }
+}
+
 static void reselect_streams(struct demuxer *demuxer)
 {
     struct priv *p = demuxer->priv;
@@ -245,47 +286,6 @@ static void print_timeline(struct demuxer *demuxer)
         MP_VERBOSE(demuxer, ") %d:'%s'\n", src_num, seg->d->filename);
     }
     MP_VERBOSE(demuxer, "Total duration: %f\n", p->duration);
-}
-
-static bool target_stream_used(struct segment *seg, int target_index)
-{
-    for (int n = 0; n < seg->num_stream_map; n++) {
-        if (seg->stream_map[n] == target_index)
-            return true;
-    }
-    return false;
-}
-
-// Create mapping from segment streams to virtual timeline streams.
-static void associate_streams(struct demuxer *demuxer, struct segment *seg)
-{
-    struct priv *p = demuxer->priv;
-
-    int counts[STREAM_TYPE_COUNT] = {0};
-
-    int num_streams = demux_get_num_stream(seg->d);
-    for (int n = 0; n < num_streams; n++) {
-        struct sh_stream *sh = demux_get_stream(seg->d, n);
-        // Try associating by demuxer ID (supposedly useful for ordered chapters).
-        struct sh_stream *other =
-            demuxer_stream_by_demuxer_id(demuxer, sh->type, sh->demuxer_id);
-        if (!other || !target_stream_used(seg, other->index)) {
-            // Try to associate the first unused stream with matching media type.
-            for (int i = 0; i < p->num_streams; i++) {
-                struct sh_stream *cur = p->streams[i].sh;
-                if (cur->type == sh->type && !target_stream_used(seg, cur->index))
-                {
-                    other = cur;
-                    break;
-                }
-            }
-        }
-
-        MP_TARRAY_APPEND(seg, seg->stream_map, seg->num_stream_map,
-                         other ? other->index : -1);
-
-        counts[sh->type] += 1;
-    }
 }
 
 static int d_open(struct demuxer *demuxer, enum demux_check check)
