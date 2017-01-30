@@ -51,7 +51,8 @@ The rest of the lines belong to one of these classes:
 1) An empty or commented line. A comment starts with ``#``, which must be the
    first character in the line. The rest of the line (up until the next line
    break) is ignored. An empty line has 0 bytes between two line feed bytes.
-2) A segment entry in all other cases.
+2) A header entry if the line starts with ``!``.
+3) A segment entry in all other cases.
 
 Each segment entry consists of a list of named or unnamed parameters.
 Parameters are separated with ``,``. Named parameters consist of a name,
@@ -63,8 +64,8 @@ Syntax::
     segment_entry ::= <param> ( <param> ',' )*
     param         ::= [ <name> '=' ] ( <value> | '%' <number> '%' <valuebytes> )
 
-The ``name`` string can consist of any characters, except ``=%,;\n``. The
-``value`` string can consist of any characters except of ``,;\n``.
+The ``name`` string can consist of any characters, except ``=%,;\n!``. The
+``value`` string can consist of any characters except of ``,;\n!``.
 
 The construct starting with ``%`` allows defining any value with arbitrary
 contents inline, where ``number`` is an integer giving the number of bytes in
@@ -93,6 +94,42 @@ to ``20``, ``param3`` to ``value,escaped``, ``param4`` to ``value2``.
 
 Instead of line breaks, the character ``;`` can be used. Line feed bytes and
 ``;`` are treated equally.
+
+Header entries start with ``!`` as first character after a line break. Header
+entries affect all other file entries in the EDL file. Their format is highly
+implementation specific. They should generally follow the file header, and come
+before any file entries.
+
+MP4 DASH
+========
+
+This is a header that helps implementing DASH, although it only provides a low
+level mechanism.
+
+If this header is set, the given url designates an mp4 init fragment. It's
+downloaded, and every URL in the EDL is prefixed with the init fragment on the
+byte stream level. This is mostly for use by mpv's internal ytdl support. The
+ytdl script will call youtube-dl, which in turn actually processes DASH
+manifests. It may work only for this very specific purpose and fail to be
+useful in other scenarios. It can be removed ot changed in incompatible ways
+at any times.
+
+Example::
+
+    !mp4_dash,init=url
+
+The ``url`` is encoded as parameter value as defined in the general EDL syntax.
+It's expected to point to an "initialization fragment", which will be prefixed
+to every entry in the EDL on the byte stream level.
+
+The current implementation will
+
+- ignore stream start times
+- use durations as hint for seeking only
+- not adjust source timestamps
+- open and close segments (i.e. fragments) as needed
+- not add segment boundaries as chapter points
+- require full compatibility between all segments (same codec etc.)
 
 Timestamp format
 ================

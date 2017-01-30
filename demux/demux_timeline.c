@@ -24,11 +24,14 @@
 #include "demux.h"
 #include "timeline.h"
 #include "stheader.h"
+#include "stream/stream.h"
 
 struct segment {
     int index;
     double start, end;
     double d_start;
+    char *url;
+    bool lazy;
     struct demuxer *d;
     // stream_map[sh_stream.index] = index into priv.streams, where sh_stream
     // is a stream from the source d. It's used to map the streams of the
@@ -51,6 +54,7 @@ struct priv {
     struct timeline *tl;
 
     double duration;
+    bool dash;
 
     struct segment **segments;
     int num_segments;
@@ -78,6 +82,9 @@ static bool target_stream_used(struct segment *seg, int target_index)
 static void associate_streams(struct demuxer *demuxer, struct segment *seg)
 {
     struct priv *p = demuxer->priv;
+
+    if (!seg->d || seg->stream_map)
+        return;
 
     int counts[STREAM_TYPE_COUNT] = {0};
 
@@ -118,6 +125,9 @@ static void reselect_streams(struct demuxer *demuxer)
     for (int n = 0; n < p->num_segments; n++) {
         struct segment *seg = p->segments[n];
         for (int i = 0; i < seg->num_stream_map; i++) {
+            if (!seg->d)
+                continue;
+
             struct sh_stream *sh = demux_get_stream(seg->d, i);
             bool selected = false;
             if (seg->stream_map[i] >= 0)
@@ -130,8 +140,42 @@ static void reselect_streams(struct demuxer *demuxer)
     }
 }
 
+static void close_lazy_segments(struct demuxer *demuxer)
+{
+    struct priv *p = demuxer->priv;
+
+    // unload previous segment
+    for (int n = 0; n < p->num_segments; n++) {
+        struct segment *seg = p->segments[n];
+        if (seg != p->current && seg->d && seg->lazy) {
+            free_demuxer_and_stream(seg->d);
+            seg->d = NULL;
+        }
+    }
+}
+
+static void reopen_lazy_segments(struct demuxer *demuxer)
+{
+    struct priv *p = demuxer->priv;
+
+    if (p->current->d)
+        return;
+
+    close_lazy_segments(demuxer);
+
+    struct demuxer_params params = {
+        .init_fragment = p->tl->init_fragment,
+        .skip_lavf_probing = true,
+    };
+    p->current->d = demux_open_url(p->current->url, &params,
+                                   demuxer->stream->cancel, demuxer->global);
+    if (!p->current->d)
+        MP_ERR(demuxer, "failed to load segment\n");
+    associate_streams(demuxer, p->current);
+}
+
 static void switch_segment(struct demuxer *demuxer, struct segment *new,
-                           double start_pts, int flags)
+                           double start_pts, int flags, bool init)
 {
     struct priv *p = demuxer->priv;
 
@@ -141,9 +185,14 @@ static void switch_segment(struct demuxer *demuxer, struct segment *new,
     MP_VERBOSE(demuxer, "switch to segment %d\n", new->index);
 
     p->current = new;
+    reopen_lazy_segments(demuxer);
+    if (!new->d)
+        return;
     reselect_streams(demuxer);
-    demux_set_ts_offset(new->d, new->start - new->d_start);
-    demux_seek(new->d, start_pts, flags);
+    if (!p->dash)
+        demux_set_ts_offset(new->d, new->start - new->d_start);
+    if (!p->dash || !init)
+        demux_seek(new->d, start_pts, flags);
 
     for (int n = 0; n < p->num_streams; n++) {
         struct virtual_stream *vs = &p->streams[n];
@@ -170,7 +219,7 @@ static void d_seek(struct demuxer *demuxer, double seek_pts, int flags)
         }
     }
 
-    switch_segment(demuxer, new, pts, flags);
+    switch_segment(demuxer, new, pts, flags, false);
 }
 
 static int d_fill_buffer(struct demuxer *demuxer)
@@ -178,9 +227,11 @@ static int d_fill_buffer(struct demuxer *demuxer)
     struct priv *p = demuxer->priv;
 
     if (!p->current)
-        switch_segment(demuxer, p->segments[0], 0, 0);
+        switch_segment(demuxer, p->segments[0], 0, 0, true);
 
     struct segment *seg = p->current;
+    if (!seg || !seg->d)
+        return 0;
 
     struct demux_packet *pkt = demux_read_any_packet(seg->d);
     if (!pkt || pkt->pts >= seg->end)
@@ -217,20 +268,21 @@ static int d_fill_buffer(struct demuxer *demuxer)
         }
         if (!next)
             return 0;
-        switch_segment(demuxer, next, next->start, 0);
+        switch_segment(demuxer, next, next->start, 0, true);
         return 1; // reader will retry
     }
 
     if (pkt->stream < 0 || pkt->stream > seg->num_stream_map)
         goto drop;
 
-    if (!pkt->codec)
-        pkt->codec = demux_get_stream(seg->d, pkt->stream)->codec;
-
-    if (pkt->start == MP_NOPTS_VALUE || pkt->start < seg->start)
-        pkt->start = seg->start;
-    if (pkt->end == MP_NOPTS_VALUE || pkt->end > seg->end)
-        pkt->end = seg->end;
+    if (!p->dash) {
+        if (!pkt->codec)
+            pkt->codec = demux_get_stream(seg->d, pkt->stream)->codec;
+        if (pkt->start == MP_NOPTS_VALUE || pkt->start < seg->start)
+            pkt->start = seg->start;
+        if (pkt->end == MP_NOPTS_VALUE || pkt->end > seg->end)
+            pkt->end = seg->end;
+    }
 
     pkt->stream = seg->stream_map[pkt->stream];
     if (pkt->stream < 0)
@@ -255,7 +307,8 @@ static int d_fill_buffer(struct demuxer *demuxer)
         }
     }
 
-    pkt->new_segment |= vs->new_segment;
+    if (!p->dash)
+        pkt->new_segment |= vs->new_segment;
     vs->new_segment = false;
 
     demux_add_packet(vs->sh, pkt);
@@ -273,9 +326,9 @@ static void print_timeline(struct demuxer *demuxer)
     MP_VERBOSE(demuxer, "Timeline segments:\n");
     for (int n = 0; n < p->num_segments; n++) {
         struct segment *seg = p->segments[n];
-        int src_num = -1;
-        for (int i = 0; i < p->tl->num_sources; i++) {
-            if (p->tl->sources[i] == seg->d) {
+        int src_num = n;
+        for (int i = 0; i < n - 1; i++) {
+            if (seg->d && p->segments[i]->d == seg->d) {
                 src_num = i;
                 break;
             }
@@ -283,9 +336,12 @@ static void print_timeline(struct demuxer *demuxer)
         MP_VERBOSE(demuxer, " %2d: %12f [%12f] (", n, seg->start, seg->d_start);
         for (int i = 0; i < seg->num_stream_map; i++)
             MP_VERBOSE(demuxer, "%s%d", i ? " " : "", seg->stream_map[i]);
-        MP_VERBOSE(demuxer, ") %d:'%s'\n", src_num, seg->d->filename);
+        MP_VERBOSE(demuxer, ") %d:'%s'\n", src_num, seg->url);
     }
     MP_VERBOSE(demuxer, "Total duration: %f\n", p->duration);
+
+    if (p->dash)
+        MP_VERBOSE(demuxer, "Durations and offsets are non-authoritative.\n");
 }
 
 static int d_open(struct demuxer *demuxer, enum demux_check check)
@@ -334,6 +390,8 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
         struct segment *seg = talloc_ptrtype(p, seg);
         *seg = (struct segment){
             .d = part->source,
+            .url = part->source ? part->source->filename : part->url,
+            .lazy = !part->source,
             .d_start = part->source_start,
             .start = part->start,
             .end = next->start,
@@ -344,6 +402,8 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
         seg->index = n;
         MP_TARRAY_APPEND(p, p->segments, p->num_segments, seg);
     }
+
+    p->dash = p->tl->dash;
 
     print_timeline(demuxer);
 
@@ -363,6 +423,8 @@ static void d_close(struct demuxer *demuxer)
 {
     struct priv *p = demuxer->priv;
     struct demuxer *master = p->tl->demuxer;
+    p->current = NULL;
+    close_lazy_segments(demuxer);
     timeline_destroy(p->tl);
     free_demuxer(master);
 }

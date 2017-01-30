@@ -163,6 +163,8 @@ struct demuxer_params {
     struct timeline *timeline;
     bool disable_timeline;
     bool initial_readahead;
+    bstr init_fragment;
+    bool skip_lavf_probing;
     // -- demux_open_url() only
     int stream_flags;
     bool disable_cache;

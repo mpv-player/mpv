@@ -183,6 +183,8 @@ typedef struct lavf_priv {
     AVInputFormat *avif;
     int avif_flags;
     AVFormatContext *avfc;
+    bstr init_fragment;
+    int64_t stream_pos;
     AVIOContext *pb;
     struct sh_stream **streams; // NULL for unknown streams
     int num_streams;
@@ -218,7 +220,14 @@ static int mp_read(void *opaque, uint8_t *buf, int size)
     struct stream *stream = priv->stream;
     int ret;
 
-    ret = stream_read(stream, buf, size);
+    if (priv->stream_pos < priv->init_fragment.len) {
+        ret = MPMIN(size, priv->init_fragment.len - priv->stream_pos);
+        memcpy(buf, priv->init_fragment.start + priv->stream_pos, ret);
+        priv->stream_pos += ret;
+    } else {
+        ret = stream_read(stream, buf, size);
+        priv->stream_pos = priv->init_fragment.len + stream_tell(stream);
+    }
 
     MP_TRACE(demuxer, "%d=mp_read(%p, %p, %d), pos: %"PRId64", eof:%d\n",
              ret, stream, buf, size, stream_tell(stream), stream->eof);
@@ -230,30 +239,42 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
     struct demuxer *demuxer = opaque;
     lavf_priv_t *priv = demuxer->priv;
     struct stream *stream = priv->stream;
-    int64_t current_pos;
+
     MP_TRACE(demuxer, "mp_seek(%p, %"PRId64", %s)\n", stream, pos,
              whence == SEEK_END ? "end" :
              whence == SEEK_CUR ? "cur" :
              whence == SEEK_SET ? "set" : "size");
     if (whence == SEEK_END || whence == AVSEEK_SIZE) {
-        int64_t end = stream_get_size(stream);
+        int64_t end = stream_get_size(stream) + priv->init_fragment.len;
         if (end < 0)
             return -1;
         if (whence == AVSEEK_SIZE)
             return end;
         pos += end;
     } else if (whence == SEEK_CUR) {
-        pos += stream_tell(stream);
+        pos += priv->stream_pos;
     } else if (whence != SEEK_SET) {
         return -1;
     }
 
     if (pos < 0)
         return -1;
-    current_pos = stream_tell(stream);
-    if (stream_seek(stream, pos) == 0) {
+
+    int64_t stream_target = pos - priv->init_fragment.len;
+    bool seek_before = stream_target < 0;
+    if (seek_before)
+        stream_target = 0; // within init segment - seek real stream to 0
+
+    int64_t current_pos = stream_tell(stream);
+    if (stream_seek(stream, stream_target) == 0) {
         stream_seek(stream, current_pos);
         return -1;
+    }
+
+    if (seek_before) {
+        priv->stream_pos = pos;
+    } else {
+        priv->stream_pos = priv->init_fragment.len + stream_tell(stream);
     }
 
     return pos;
@@ -771,6 +792,9 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (lavf_check_file(demuxer, check) < 0)
         return -1;
 
+    if (demuxer->params)
+        priv->init_fragment = bstrdup(priv, demuxer->params->init_fragment);
+
     avfc = avformat_alloc_context();
     if (!avfc)
         return -1;
@@ -864,9 +888,12 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     av_dict_free(&dopts);
 
     priv->avfc = avfc;
-    if (avformat_find_stream_info(avfc, NULL) < 0) {
-        MP_ERR(demuxer, "av_find_stream_info() failed\n");
-        return -1;
+
+    if (!demuxer->params || !demuxer->params->skip_lavf_probing) {
+        if (avformat_find_stream_info(avfc, NULL) < 0) {
+            MP_ERR(demuxer, "av_find_stream_info() failed\n");
+            return -1;
+        }
     }
 
     MP_VERBOSE(demuxer, "avformat_find_stream_info() finished after %"PRId64
