@@ -850,6 +850,7 @@ hwaccel_features = [
     }, {
         'name': '--cuda-hwaccel',
         'desc': 'CUDA hwaccel',
+        'deps': [ 'gl' ],
         'func': check_cc(fragment=load_fragment('cuda.c'),
                          use='libav'),
     }, {
