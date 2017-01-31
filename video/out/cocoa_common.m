@@ -1008,6 +1008,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 
 - (void)didChangeWindowedScreenProfile:(NSNotification *)notification
 {
+    vo_cocoa_update_screen_info(self.vout);
     flag_events(self.vout, VO_EVENT_ICC_PROFILE_CHANGED);
 }
 
