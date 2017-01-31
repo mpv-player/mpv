@@ -2604,8 +2604,7 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
             int64_t num = ebml_read_int(s);
             if (num == EBML_INT_INVALID)
                 goto error;
-            if (num)
-                block->keyframe = false;
+            block->keyframe = false;
             break;
 
         case MATROSKA_ID_CLUSTER:
