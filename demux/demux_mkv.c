@@ -162,6 +162,7 @@ struct block_info {
     bstr data;
     void *alloc;
     int64_t filepos;
+    struct ebml_block_additions *additions;
 };
 
 typedef struct mkv_demuxer {
@@ -2392,6 +2393,8 @@ static void free_block(struct block_info *block)
     free(block->alloc);
     block->alloc = NULL;
     block->data = (bstr){0};
+    talloc_free(block->additions);
+    block->additions = NULL;
 }
 
 static void index_block(demuxer_t *demuxer, struct block_info *block)
@@ -2552,6 +2555,15 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                     block_info->discardpadding / 1e9 * srate);
                 mkv_d->a_skip_preroll = 0;
             }
+            if (block_info->additions) {
+                for (int n = 0; n < block_info->additions->n_block_more; n++) {
+                    struct ebml_block_more *add =
+                        &block_info->additions->block_more[n];
+                    int64_t id = add->n_block_add_id ? add->block_add_id : 1;
+                    demux_packet_add_blockadditional(dp, id,
+                        add->block_additional.start, add->block_additional.len);
+                }
+            }
 
             mkv_parse_and_add_packet(demuxer, track, dp);
             talloc_free_children(track->parser_tmp);
@@ -2605,6 +2617,21 @@ static int read_block_group(demuxer_t *demuxer, int64_t end,
             if (num == EBML_INT_INVALID)
                 goto error;
             block->keyframe = false;
+            break;
+
+        case MATROSKA_ID_BLOCKADDITIONS:;
+            struct ebml_block_additions additions = {0};
+            struct ebml_parse_ctx parse_ctx = {demuxer->log};
+            if (ebml_read_element(s, &parse_ctx, &additions,
+                                  &ebml_block_additions_desc) < 0)
+                return -1;
+            if (additions.n_block_more > 0) {
+                block->additions =
+                    talloc_memdup(NULL, &additions, sizeof(additions));
+                talloc_steal(block->additions, parse_ctx.talloc_ctx);
+                parse_ctx.talloc_ctx = NULL;
+            }
+            talloc_free(parse_ctx.talloc_ctx);
             break;
 
         case MATROSKA_ID_CLUSTER:

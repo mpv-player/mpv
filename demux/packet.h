@@ -55,5 +55,7 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp);
 void demux_packet_copy_attribs(struct demux_packet *dst, struct demux_packet *src);
 
 int demux_packet_set_padding(struct demux_packet *dp, int start, int end);
+int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
+                                     void *data, size_t size);
 
 #endif /* MPLAYER_DEMUX_PACKET_H */

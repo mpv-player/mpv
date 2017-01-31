@@ -69,6 +69,12 @@ elements_matroska = (
                 'BlockDuration, 9b, uint',
                 'ReferenceBlock*, fb, sint',
                 'DiscardPadding,  75A2, sint',
+                'BlockAdditions, 75A1, sub', (
+                    'BlockMore*, A6, sub', (
+                        'BlockAddID, EE, uint',
+                        'BlockAdditional, A5, binary',
+                    ),
+                ),
             ),
             'SimpleBlock*, a3, binary',
         ),
