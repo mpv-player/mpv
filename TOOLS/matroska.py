@@ -271,6 +271,7 @@ def parse_elems(l, namespace):
     for el in l:
         if isinstance(el, str):
             name, hexid, eltype = [x.strip() for x in el.split(',')]
+            hexid = hexid.lower()
             multiple = name.endswith('*')
             name = name.strip('*')
             new = MatroskaElement(name, hexid, eltype, namespace)
@@ -400,10 +401,6 @@ def read_float(s, length):
 def parse_one(s, depth, parent, maxlen):
     elid = hexlify(read_id(s)).decode('ascii')
     elem = elementd.get(elid)
-    if parent is not None and elid not in parent.subids and elid not in ('ec', 'bf'):
-        print('Unexpected:', elid)
-        if 1:
-            raise NotImplementedError
     size, length = read_vint(s)
     this_length = len(elid) / 2 + size + length
     if elem is not None:
@@ -442,7 +439,7 @@ def parse_one(s, depth, parent, maxlen):
         else:
             raise NotImplementedError
     else:
-        print(depth, 'Unknown element:', elid, 'size:', length)
+        print("    " * depth, '[' + elid + '] Unknown element! size:', length)
         read(s, length)
     return this_length
 
@@ -455,6 +452,8 @@ if __name__ == "__main__":
     elif sys.argv[1] == '--generate-definitions':
         generate_C_definitions(sys.stdout)
     else:
+        if sys.version_info.major < 3:
+            raise Exception("Dumping requires Python 3.")
         s = open(sys.argv[1], "rb")
         while 1:
             start = s.tell()
