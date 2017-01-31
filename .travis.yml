@@ -41,7 +41,6 @@ matrix:
 
 before_install: TOOLS/travis-deps libass-stable $LIBAV
 script:
-  - ./bootstrap.py
   - ./waf configure
   - ./waf build
 after_script: TOOLS/travis-rebuild-website
@@ -60,6 +59,6 @@ addons:
       name: "mpv-player/mpv"
       description: "Build submitted via Travis CI"
     notification_email: mpv-team@googlegroups.com
-    build_command_prepend: "./bootstrap.py && ./waf configure"
+    build_command_prepend: "./waf configure"
     build_command:   "./waf build"
     branch_pattern: coverity_scan
