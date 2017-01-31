@@ -4250,6 +4250,7 @@ static const struct property_osd_display {
 } property_osd_display[] = {
     // general
     { "loop", "Loop" },
+    { "loop-file", "Loop current file" },
     { "chapter", .seek_msg = OSD_SEEK_INFO_CHAPTER_TEXT,
                  .seek_bar = OSD_SEEK_INFO_BAR },
     { "hr-seek", "hr-seek" },
