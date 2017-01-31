@@ -1,0 +1,166 @@
+#!/usr/bin/env python
+# encoding: ISO8859-1
+# Thomas Nagy, 2005-2016
+
+"""
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+
+3. The name of the author may not be used to endorse or promote products
+   derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+"""
+
+import os, sys, inspect
+
+VERSION="1.8.19"
+REVISION="b1fc8f7baef51bd2db4c2971909a568d"
+GIT="22213cd8abbd141bda40667f7ca2a48f2d6ad785"
+INSTALL=''
+C1='#5'
+C2='#/'
+C3='#,'
+cwd = os.getcwd()
+join = os.path.join
+
+
+WAF='waf'
+def b(x):
+	return x
+if sys.hexversion>0x300000f:
+	WAF='waf3'
+	def b(x):
+		return x.encode()
+
+def err(m):
+	print(('\033[91mError: %s\033[0m' % m))
+	sys.exit(1)
+
+def unpack_wafdir(dir, src):
+	f = open(src,'rb')
+	c = 'corrupt archive (%d)'
+	while 1:
+		line = f.readline()
+		if not line: err('run waf-light from a folder containing waflib')
+		if line == b('#==>\n'):
+			txt = f.readline()
+			if not txt: err(c % 1)
+			if f.readline() != b('#<==\n'): err(c % 2)
+			break
+	if not txt: err(c % 3)
+	txt = txt[1:-1].replace(b(C1), b('\n')).replace(b(C2), b('\r')).replace(b(C3), b('\x00'))
+
+	import shutil, tarfile
+	try: shutil.rmtree(dir)
+	except OSError: pass
+	try:
+		for x in ('Tools', 'extras'):
+			os.makedirs(join(dir, 'waflib', x))
+	except OSError:
+		err("Cannot unpack waf lib into %s\nMove waf in a writable directory" % dir)
+
+	os.chdir(dir)
+	tmp = 't.bz2'
+	t = open(tmp,'wb')
+	try: t.write(txt)
+	finally: t.close()
+
+	try:
+		t = tarfile.open(tmp)
+	except:
+		try:
+			os.system('bunzip2 t.bz2')
+			t = tarfile.open('t')
+			tmp = 't'
+		except:
+			os.chdir(cwd)
+			try: shutil.rmtree(dir)
+			except OSError: pass
+			err("Waf cannot be unpacked, check that bzip2 support is present")
+
+	try:
+		for x in t: t.extract(x)
+	finally:
+		t.close()
+
+	for x in ('Tools', 'extras'):
+		os.chmod(join('waflib',x), 493)
+
+	if sys.hexversion<0x300000f:
+		sys.path = [join(dir, 'waflib')] + sys.path
+		import fixpy2
+		fixpy2.fixdir(dir)
+
+	os.remove(tmp)
+	os.chdir(cwd)
+
+	try: dir = unicode(dir, 'mbcs')
+	except: pass
+	try:
+		from ctypes import windll
+		windll.kernel32.SetFileAttributesW(dir, 2)
+	except:
+		pass
+
+def test(dir):
+	try:
+		os.stat(join(dir, 'waflib'))
+		return os.path.abspath(dir)
+	except OSError:
+		pass
+
+def find_lib():
+	src = os.path.abspath(inspect.getfile(inspect.getmodule(err)))
+	base, name = os.path.split(src)
+
+	#devs use $WAFDIR
+	w=test(os.environ.get('WAFDIR', ''))
+	if w: return w
+
+	#waf-light
+	if name.endswith('waf-light'):
+		w = test(base)
+		if w: return w
+		err('waf-light requires waflib -> export WAFDIR=/folder')
+
+	dirname = '%s-%s-%s' % (WAF, VERSION, REVISION)
+	for i in (INSTALL,'/usr','/usr/local','/opt'):
+		w = test(i + '/lib/' + dirname)
+		if w: return w
+
+	#waf-local
+	dir = join(base, (sys.platform != 'win32' and '.' or '') + dirname)
+	w = test(dir)
+	if w: return w
+
+	#unpack
+	unpack_wafdir(dir, src)
+	return dir
+
+wafdir = find_lib()
+sys.path.insert(0, wafdir)
+
+if __name__ == '__main__':
+
+	from waflib import Scripting
+	Scripting.waf_entry_point(cwd, VERSION, wafdir)
+
