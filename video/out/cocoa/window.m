@@ -54,7 +54,7 @@
                                 styleMask:style_mask
                                   backing:buffering_type
                                     defer:flag]) {
-        [self setBackgroundColor:[NSColor blackColor]];
+        [self setBackgroundColor:[NSColor whiteColor]];
         [self setMinSize:NSMakeSize(50,50)];
         [self setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
 
