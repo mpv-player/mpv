@@ -1976,6 +1976,18 @@ Subtitles
     Vertical position (default: ``bottom``).
     Details see ``--sub-align-x``.
 
+``--sub-justify=<auto|left|center|right>``
+    Control how multi line subs are justified irrespective of where they
+    are aligned (default: ``auto`` which justifies as defined by
+    ``--sub-align-y``).
+    Left justification is recommended to make the subs easier to read
+    as it is easier for the eyes.
+
+``--sub-ass-justify=<yes|no>``
+    Applies justification as defined by ``--sub-justify`` on ASS subtitles
+    if ``--sub-ass-style-override`` is not set to ``no``.
+    Default: ``no``.
+
 ``--sub-shadow-color=<color>``
     See ``--sub-color``. Color used for sub text shadow.
 

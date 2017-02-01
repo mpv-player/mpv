@@ -500,6 +500,7 @@ const m_option_t mp_opts[] = {
                ({"none", 0}, {"light", 1}, {"normal", 2}, {"native", 3})),
     OPT_CHOICE("sub-ass-shaper", ass_shaper, UPDATE_OSD,
                ({"simple", 0}, {"complex", 1})),
+    OPT_FLAG("sub-ass-justify", ass_justify, 0),
     OPT_CHOICE("sub-ass-style-override", ass_style_override, UPDATE_OSD,
                ({"no", 0}, {"yes", 1}, {"force", 3}, {"signfs", 4}, {"strip", 5})),
     OPT_FLAG("sub-scale-by-window", sub_scale_by_window, UPDATE_OSD),

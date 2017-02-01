@@ -134,6 +134,7 @@ struct osd_style_opts {
     float blur;
     int bold;
     int italic;
+    int justify;
 };
 
 extern const struct m_sub_options osd_style_conf;
