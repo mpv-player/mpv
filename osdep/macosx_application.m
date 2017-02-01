@@ -310,53 +310,12 @@ static void macosx_redirect_output_to_logfile(const char *filename)
     [pool release];
 }
 
-static void get_system_version(int* major, int* minor, int* bugfix)
+static bool bundle_started_from_finder()
 {
-    static dispatch_once_t once_token;
-    static int s_major  = 0;
-    static int s_minor  = 0;
-    static int s_bugfix = 0;
-    dispatch_once(&once_token, ^{
-        NSString *version_plist =
-            @"/System/Library/CoreServices/SystemVersion.plist";
-        NSString *version_string =
-            [NSDictionary dictionaryWithContentsOfFile:version_plist]
-                [@"ProductVersion"];
-        NSArray* versions = [version_string componentsSeparatedByString:@"."];
-        int count = [versions count];
-        if (count >= 1)
-            s_major = [versions[0] intValue];
-        if (count >= 2)
-            s_minor = [versions[1] intValue];
-        if (count >= 3)
-            s_bugfix = [versions[2] intValue];
-    });
-    *major  = s_major;
-    *minor  = s_minor;
-    *bugfix = s_bugfix;
-}
+    NSDictionary *env = [[NSProcessInfo processInfo] environment];
+    NSString *is_bundle = [env objectForKey:@"MPVBUNDLE"];
 
-static bool is_psn_argument(char *psn_arg_to_check)
-{
-    NSString *psn_arg = [NSString stringWithUTF8String:psn_arg_to_check];
-    return [psn_arg hasPrefix:@"-psn_"];
-}
-
-static bool bundle_started_from_finder(int argc, char **argv)
-{
-    bool bundle_detected = [[NSBundle mainBundle] bundleIdentifier];
-    int major, minor, bugfix;
-    get_system_version(&major, &minor, &bugfix);
-    bool without_psn = bundle_detected && argc==1;
-    bool with_psn    = bundle_detected && argc==2 && is_psn_argument(argv[1]);
-
-    if ((major == 10) && (minor >= 9)) {
-        // Looks like opening quarantined files from the finder inserts the
-        // -psn argument while normal files do not. Hurr.
-        return with_psn || without_psn;
-    } else {
-        return with_psn;
-    }
+    return is_bundle ? [is_bundle boolValue] : false;
 }
 
 int cocoa_main(int argc, char *argv[])
@@ -368,11 +327,7 @@ int cocoa_main(int argc, char *argv[])
         ctx.argc     = &argc;
         ctx.argv     = &argv;
 
-        if (bundle_started_from_finder(argc, argv)) {
-            if (argc > 1) {
-                argc = 1; // clears out -psn argument if present
-                argv[1] = NULL;
-            }
+        if (bundle_started_from_finder()) {
             macosx_redirect_output_to_logfile("mpv");
             init_cocoa_application(true);
         } else {
