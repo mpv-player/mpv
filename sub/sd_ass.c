@@ -23,7 +23,6 @@
 
 #include <libavutil/common.h>
 #include <ass/ass.h>
-#include <ass/ass_types.h>
 
 #include "mpv_talloc.h"
 
