@@ -1516,6 +1516,7 @@ function osc_init()
     local have_pl = (pl_count > 1)
     local pl_pos = mp.get_property_number("playlist-pos", 0) + 1
     local have_ch = (mp.get_property_number("chapters", 0) > 0)
+    local loop = mp.get_property("loop", "no")
 
     local ne
 
@@ -1549,7 +1550,7 @@ function osc_init()
     ne = new_element("pl_prev", "button")
 
     ne.content = "\238\132\144"
-    ne.enabled = (pl_pos > 1)
+    ne.enabled = (pl_pos > 1) or (loop ~= "no")
     ne.eventresponder["mouse_btn0_up"] =
         function ()
             mp.commandv("playlist-prev", "weak")
@@ -1564,7 +1565,7 @@ function osc_init()
     ne = new_element("pl_next", "button")
 
     ne.content = "\238\132\129"
-    ne.enabled = (have_pl) and (pl_pos < pl_count)
+    ne.enabled = (have_pl and (pl_pos < pl_count)) or (loop ~= "no")
     ne.eventresponder["mouse_btn0_up"] =
         function ()
             mp.commandv("playlist-next", "weak")
