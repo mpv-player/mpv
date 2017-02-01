@@ -78,6 +78,9 @@ void mp_ass_set_style(ASS_Style *style, double res_y,
     style->ScaleX = 1.;
     style->ScaleY = 1.;
     style->Alignment = 1 + (opts->align_x + 1) + (opts->align_y + 2) % 3 * 4;
+#ifdef ASS_JUSTIFY_LEFT
+    style->Justify = opts->justify;
+#endif
     style->Blur = opts->blur;
     style->Bold = opts->bold;
     style->Italic = opts->italic;

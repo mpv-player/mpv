@@ -23,6 +23,7 @@
 
 #include <libavutil/common.h>
 #include <ass/ass.h>
+#include <ass/ass_types.h>
 
 #include "mpv_talloc.h"
 
@@ -332,6 +333,10 @@ static void configure_ass(struct sd *sd, struct mp_osd_res *dim,
 #if LIBASS_VERSION >= 0x01201001
     if (converted)
         set_force_flags |= ASS_OVERRIDE_BIT_ALIGNMENT;
+#endif
+#ifdef ASS_JUSTIFY_AUTO
+    if ((converted || opts->ass_style_override) && opts->ass_justify)
+        set_force_flags |= ASS_OVERRIDE_BIT_JUSTIFY;
 #endif
     ass_set_selective_style_override_enabled(priv, set_force_flags);
     ASS_Style style = {0};

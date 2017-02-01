@@ -62,6 +62,8 @@ static const m_option_t style_opts[] = {
     OPT_FLOATRANGE("blur", blur, 0, 0, 20),
     OPT_FLAG("bold", bold, 0),
     OPT_FLAG("italic", italic, 0),
+    OPT_CHOICE("justify", justify, 0,
+               ({"auto", 0}, {"left", 1}, {"center", 2}, {"right", 3})),
     {0}
 };
 
