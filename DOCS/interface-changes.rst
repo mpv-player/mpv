@@ -28,6 +28,8 @@ Interface changes
     - --af=drc is gone (you can use e.g. lavfi/acompressor instead)
     - remove image_size predefined uniform from OpenGL user shaders. Use
       input_size instead
+    - add --sub-filter-sdh
+    - add --sub-filter-sdh-harder
  --- mpv 0.24.0 ---
     - deprecate --hwdec-api and replace it with --opengl-hwdec-interop.
       The new option accepts both --hwdec values, as well as named backends.

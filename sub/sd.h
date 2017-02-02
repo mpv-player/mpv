@@ -45,6 +45,7 @@ struct sd_functions {
 struct lavc_conv;
 struct lavc_conv *lavc_conv_create(struct mp_log *log, const char *codec_name,
                                    char *extradata, int extradata_len);
+char *filter_SDH(struct sd *sd, char *format, int n_ignored, char *data, int length);
 char *lavc_conv_get_extradata(struct lavc_conv *priv);
 char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet);
 void lavc_conv_reset(struct lavc_conv *priv);

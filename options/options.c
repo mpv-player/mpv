@@ -492,6 +492,8 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("sub-gauss", sub_gauss, UPDATE_OSD, 0.0, 3.0),
     OPT_FLAG("sub-gray", sub_gray, UPDATE_OSD),
     OPT_FLAG("sub-ass", ass_enabled, 0),
+    OPT_FLAG("sub-filter-sdh", sub_filter_SDH, 0),
+    OPT_FLAG("sub-filter-sdh-harder", sub_filter_SDH_harder, 0),
     OPT_FLOATRANGE("sub-scale", sub_scale, UPDATE_OSD, 0, 100),
     OPT_FLOATRANGE("sub-ass-line-spacing", ass_line_spacing, UPDATE_OSD, -1000, 1000),
     OPT_FLAG("sub-use-margins", sub_use_margins, UPDATE_OSD),
