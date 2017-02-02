@@ -328,7 +328,7 @@ stream_t *open_output_stream(const char *filename, struct mpv_global *global)
 
 static bool stream_reconnect(stream_t *s)
 {
-    if (!s->streaming || s->uncached_stream || !s->seekable || !s->cancel)
+    if (!s->streaming || s->caching || !s->seekable || !s->cancel)
         return false;
 
     int64_t pos = s->pos;
@@ -616,7 +616,7 @@ void free_stream(stream_t *s)
 
     if (s->close)
         s->close(s);
-    free_stream(s->uncached_stream);
+    free_stream(s->underlying);
     talloc_free(s);
 }
 
@@ -636,7 +636,8 @@ static stream_t *open_cache(stream_t *orig, const char *name)
 {
     stream_t *cache = new_stream();
     cache->uncached_type = orig->uncached_type;
-    cache->uncached_stream = orig;
+    cache->underlying = orig;
+    cache->caching = true;
     cache->seekable = true;
     cache->mode = STREAM_READ;
     cache->read_chunk = 4 * STREAM_BUFFER_SIZE;
@@ -687,7 +688,7 @@ static int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
 
     stream_t *fcache = open_cache(orig, "file-cache");
     if (stream_file_cache_init(fcache, orig, &use_opts) <= 0) {
-        fcache->uncached_stream = NULL; // don't free original stream
+        fcache->underlying = NULL; // don't free original stream
         free_stream(fcache);
         fcache = orig;
     }
@@ -696,10 +697,10 @@ static int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
 
     int res = stream_cache_init(cache, fcache, &use_opts);
     if (res <= 0) {
-        cache->uncached_stream = NULL; // don't free original stream
+        cache->underlying = NULL; // don't free original stream
         free_stream(cache);
         if (fcache != orig) {
-            fcache->uncached_stream = NULL;
+            fcache->underlying = NULL;
             free_stream(fcache);
         }
     } else {

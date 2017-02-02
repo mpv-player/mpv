@@ -197,13 +197,14 @@ typedef struct stream {
     bool fast_skip : 1; // consider stream fast enough to fw-seek by skipping
     bool is_network : 1; // original stream_info_t.is_network flag
     bool allow_caching : 1; // stream cache makes sense
+    bool caching : 1; // is a cache, or accesses a cache
     bool access_references : 1; // open other streams
     struct mp_log *log;
     struct mpv_global *global;
 
     struct mp_cancel *cancel;   // cancellation notification
 
-    struct stream *uncached_stream; // underlying stream for cache wrapper
+    struct stream *underlying;  // e.g. cache wrapper
 
     // Includes additional padding in case sizes get rounded up by sector size.
     unsigned char buffer[];

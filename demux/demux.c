@@ -1246,8 +1246,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .events = DEMUX_EVENT_ALL,
     };
     demuxer->seekable = stream->seekable;
-    if (demuxer->stream->uncached_stream &&
-        !demuxer->stream->uncached_stream->seekable)
+    if (demuxer->stream->underlying && !demuxer->stream->underlying->seekable)
         demuxer->seekable = false;
 
     struct demux_internal *in = demuxer->in = talloc_ptrtype(demuxer, in);
@@ -1264,7 +1263,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     pthread_mutex_init(&in->lock, NULL);
     pthread_cond_init(&in->wakeup, NULL);
 
-    if (stream->uncached_stream)
+    if (stream->caching)
         in->min_secs = MPMAX(in->min_secs, opts->min_secs_cache);
 
     *in->d_thread = *demuxer;
