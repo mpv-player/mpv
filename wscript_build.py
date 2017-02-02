@@ -288,6 +288,7 @@ def build(ctx):
         ( "sub/osd_libass.c",                    "libass-osd" ),
         ( "sub/sd_ass.c",                        "libass" ),
         ( "sub/sd_lavc.c" ),
+        ( "sub/filter_sdh.c" ),
 
         ## Video
         ( "video/csputils.c" ),

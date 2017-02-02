@@ -50,4 +50,6 @@ char **lavc_conv_decode(struct lavc_conv *priv, struct demux_packet *packet);
 void lavc_conv_reset(struct lavc_conv *priv);
 void lavc_conv_uninit(struct lavc_conv *priv);
 
+char *filter_SDH(struct sd *sd, char *format, int n_ignored, char *data, int length);
+
 #endif
