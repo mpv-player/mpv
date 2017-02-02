@@ -20,6 +20,7 @@
 #include "config.h"
 
 #include <stdio.h>
+#include "common/common.h"
 #include "video/img_fourcc.h"
 #include "tv.h"
 
@@ -105,7 +106,7 @@ static int do_control(priv_t *priv, int cmd, void *arg)
 static double grab_video_frame(priv_t *priv, char *buffer, int len)
 {
     memset(buffer, 0x42, len);
-    return 1;
+    return MP_NOPTS_VALUE;
 }
 
 static int get_video_framesize(priv_t *priv)
@@ -117,7 +118,7 @@ static int get_video_framesize(priv_t *priv)
 static double grab_audio_frame(priv_t *priv, char *buffer, int len)
 {
     memset(buffer, 0x42, len);
-    return 1;
+    return MP_NOPTS_VALUE;
 }
 
 static int get_audio_framesize(priv_t *priv)
