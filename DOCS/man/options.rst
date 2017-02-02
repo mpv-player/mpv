@@ -640,8 +640,8 @@ Video
                 ``--opengl-backend=dxinterop`` (Windows only)
     :dxva2-copy: copies video back to system RAM (Windows only)
     :d3d11va:   requires ``--vo=opengl`` with ``--opengl-backend=angle``
-                (Windows only)
-    :d3d11va-copy: copies video back to system RAM (Windows only)
+                (Windows 8+ only)
+    :d3d11va-copy: copies video back to system RAM (Windows 8+ only)
     :mediacodec: copies video back to system RAM (Android only)
     :rpi:       requires ``--vo=opengl`` (Raspberry Pi only - default if available)
     :rpi-copy:  copies video back to system RAM (Raspberry Pi only)
