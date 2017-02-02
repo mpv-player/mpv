@@ -39,7 +39,6 @@ static int
 tv_stream_open (stream_t *stream)
 {
 
-  stream->type = STREAMTYPE_TV;
   stream->close=tv_stream_close;
   stream->demuxer = "tv";
   stream->allow_caching = false;

@@ -277,7 +277,7 @@ static int cmp_filename(const void *a, const void *b)
 
 static int parse_dir(struct pl_parser *p)
 {
-    if (p->real_stream->type != STREAMTYPE_DIR)
+    if (!p->real_stream->is_directory)
         return -1;
     if (p->probing)
         return 0;

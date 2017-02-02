@@ -43,6 +43,8 @@ struct priv {
     double base_dts;    // packet DTS that maps to base_time
     double last_dts;    // DTS of previously demuxed packet
     bool seek_reinit;   // needs reinit after seek
+
+    bool is_dvd, is_cdda;
 };
 
 // If the timestamp difference between subsequent packets is this big, assume
@@ -65,7 +67,7 @@ static void reselect_streams(demuxer_t *demuxer)
 static void get_disc_lang(struct stream *stream, struct sh_stream *sh)
 {
     struct stream_lang_req req = {.type = sh->type, .id = sh->demuxer_id};
-    if (stream->uncached_type == STREAMTYPE_DVD && sh->type == STREAM_SUB)
+    if (sh->type == STREAM_SUB)
         req.id = req.id & 0x1F; // mpeg ID to index
     stream_control(stream, STREAM_CTRL_GET_LANG, &req);
     if (req.name[0])
@@ -76,7 +78,7 @@ static void add_dvd_streams(demuxer_t *demuxer)
 {
     struct priv *p = demuxer->priv;
     struct stream *stream = demuxer->stream;
-    if (stream->uncached_type != STREAMTYPE_DVD)
+    if (!p->is_dvd)
         return;
     struct stream_dvd_info_req info;
     if (stream_control(stream, STREAM_CTRL_GET_DVD_INFO, &info) > 0) {
@@ -162,7 +164,7 @@ static void d_seek(demuxer_t *demuxer, double seek_pts, int flags)
 {
     struct priv *p = demuxer->priv;
 
-    if (demuxer->stream->uncached_type == STREAMTYPE_CDDA) {
+    if (p->is_cdda) {
         demux_seek(p->slave, seek_pts, flags);
         return;
     }
@@ -222,7 +224,7 @@ static int d_fill_buffer(demuxer_t *demuxer)
         return 1;
     }
 
-    if (demuxer->stream->uncached_type == STREAMTYPE_CDDA) {
+    if (p->is_cdda) {
         demux_add_packet(sh, pkt);
         return 1;
     }
@@ -285,7 +287,21 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
 
     struct demuxer_params params = {.force_format = "+lavf"};
 
-    if (demuxer->stream->uncached_type == STREAMTYPE_CDDA)
+    struct stream *cur = demuxer->stream;
+    const char *sname = "";
+    while (cur) {
+        if (cur->info)
+            sname = cur->info->name;
+        cur = cur->underlying; // down the caching chain
+    }
+
+    p->is_cdda = strcmp(sname, "cdda") == 0;
+    p->is_dvd = strcmp(sname, "dvd") == 0 ||
+                strcmp(sname, "ifo") == 0 ||
+                strcmp(sname, "dvdnav") == 0 ||
+                strcmp(sname, "ifo_dvdnav") == 0;
+
+    if (p->is_cdda)
         params.force_format = "+rawaudio";
 
     char *t = NULL;
@@ -311,7 +327,7 @@ static int d_open(demuxer_t *demuxer, enum demux_check check)
     // (actually libavformat/mpegts.c) to seek sometimes when reading a packet.
     // It does this to seek back a bit in case the current file position points
     // into the middle of a packet.
-    if (demuxer->stream->uncached_type != STREAMTYPE_CDDA) {
+    if (!p->is_cdda) {
         demuxer->stream->seekable = false;
 
         // Can be seekable even if the stream isn't.

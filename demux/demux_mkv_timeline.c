@@ -267,7 +267,7 @@ static void find_ordered_chapter_sources(struct tl_ctx *ctx)
             talloc_steal(tmp, pl);
             for (struct playlist_entry *e = pl ? pl->first : NULL; e; e = e->next)
                 MP_TARRAY_APPEND(tmp, filenames, num_filenames, e->filename);
-        } else if (ctx->demuxer->stream->uncached_type != STREAMTYPE_FILE) {
+        } else if (!ctx->demuxer->stream->is_local_file) {
             MP_WARN(ctx, "Playback source is not a "
                     "normal disk file. Will not search for related files.\n");
         } else {

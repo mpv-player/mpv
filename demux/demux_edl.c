@@ -50,6 +50,7 @@ struct tl_parts {
 
 struct priv {
     bstr data;
+    bool allow_any;
 };
 
 // Parse a time (absolute file time or duration). Currently equivalent to a
@@ -286,8 +287,7 @@ static void build_mpv_edl_timeline(struct timeline *tl)
         return;
     }
     MP_TARRAY_APPEND(tl, tl->sources, tl->num_sources, tl->demuxer);
-    // Source is .edl and not edl:// => don't allow arbitrary paths
-    if (tl->demuxer->stream->uncached_type != STREAMTYPE_EDL)
+    if (!p->allow_any)
         fix_filenames(parts, tl->demuxer->filename);
     build_timeline(tl, parts);
     talloc_free(parts);
@@ -303,8 +303,10 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
     demuxer->fully_read = true;
 
     struct stream *s = demuxer->stream;
-    if (s->uncached_type == STREAMTYPE_EDL) {
+    if (s->info && strcmp(s->info->name, "edl") == 0) {
         p->data = bstr0(s->path);
+        // Source is edl:// and not .edl => allow arbitrary paths
+        p->allow_any = true;
         return 0;
     }
     if (check >= DEMUX_CHECK_UNSAFE) {

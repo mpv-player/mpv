@@ -338,7 +338,7 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
     priv->filename = remove_prefix(s->url, prefixes);
 
     char *avdevice_format = NULL;
-    if (s->uncached_type == STREAMTYPE_AVDEVICE) {
+    if (s->info && strcmp(s->info->name, "avdevice") == 0) {
         // always require filename in the form "format:filename"
         char *sep = strchr(priv->filename, ':');
         if (!sep) {
@@ -808,10 +808,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     AVDictionary *dopts = NULL;
 
-    if ((priv->avif_flags & AVFMT_NOFILE) ||
-        priv->stream->type == STREAMTYPE_AVDEVICE ||
-        priv->format_hack.no_stream)
-    {
+    if ((priv->avif_flags & AVFMT_NOFILE) || priv->format_hack.no_stream) {
         mp_setup_av_network_options(&dopts, demuxer->global, demuxer->log);
         // This might be incorrect.
         demuxer->seekable = true;

@@ -990,7 +990,6 @@ static int dvb_open(stream_t *stream)
           return STREAM_ERROR;
     }
 
-    stream->type = STREAMTYPE_DVB;
     stream->fill_buffer = dvb_streaming_read;
     stream->close = dvbin_close;
     stream->control = dvbin_stream_control;

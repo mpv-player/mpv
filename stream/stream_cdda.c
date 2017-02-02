@@ -383,7 +383,6 @@ static int open_cdda(stream_t *st)
 
     st->streaming = true;
 
-    st->type = STREAMTYPE_CDDA;
     st->demuxer = "+disc";
 
     print_cdtext(st, 0);

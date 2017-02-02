@@ -904,7 +904,6 @@ static int open_s_internal(stream_t *stream)
 
     // ... (unimplemented)
     //    return NULL;
-    stream->type = STREAMTYPE_DVD;
     stream->demuxer = "+disc";
     stream->lavf_type = "mpeg";
     stream->sector_size = 2048;

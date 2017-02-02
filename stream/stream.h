@@ -28,20 +28,6 @@
 
 #include "misc/bstr.h"
 
-enum streamtype {
-    STREAMTYPE_GENERIC = 0,
-    STREAMTYPE_FILE,
-    STREAMTYPE_DIR,
-    STREAMTYPE_DVB,
-    STREAMTYPE_DVD,
-    STREAMTYPE_BLURAY,
-    STREAMTYPE_TV,
-    STREAMTYPE_MF,
-    STREAMTYPE_EDL,
-    STREAMTYPE_AVDEVICE,
-    STREAMTYPE_CDDA,
-};
-
 #define STREAM_BUFFER_SIZE 2048
 #define STREAM_MAX_SECTOR_SIZE (8 * 1024)
 
@@ -178,8 +164,6 @@ typedef struct stream {
     // Close
     void (*close)(struct stream *s);
 
-    enum streamtype type; // see STREAMTYPE_*
-    enum streamtype uncached_type; // if stream is cache, type of wrapped str.
     int sector_size; // sector size (seek will be aligned on this size if non 0)
     int read_chunk; // maximum amount of data to read at once to limit latency
     unsigned int buf_pos, buf_len;
@@ -198,6 +182,8 @@ typedef struct stream {
     bool is_network : 1; // original stream_info_t.is_network flag
     bool allow_caching : 1; // stream cache makes sense
     bool caching : 1; // is a cache, or accesses a cache
+    bool is_local_file : 1; // from the filesystem
+    bool is_directory : 1; // directory on the filesystem
     bool access_references : 1; // open other streams
     struct mp_log *log;
     struct mpv_global *global;

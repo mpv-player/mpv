@@ -258,8 +258,6 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
 
     assert(s->seekable == !!s->seek);
 
-    s->uncached_type = s->type;
-
     if (s->mime_type)
         MP_VERBOSE(s, "Mime-type: '%s'\n", s->mime_type);
 
@@ -635,7 +633,6 @@ stream_t *open_memory_stream(void *data, int len)
 static stream_t *open_cache(stream_t *orig, const char *name)
 {
     stream_t *cache = new_stream();
-    cache->uncached_type = orig->uncached_type;
     cache->underlying = orig;
     cache->caching = true;
     cache->seekable = true;
@@ -648,6 +645,8 @@ static stream_t *open_cache(stream_t *orig, const char *name)
     cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
     cache->streaming = orig->streaming,
     cache->is_network = orig->is_network;
+    cache->is_local_file = orig->is_local_file;
+    cache->is_directory = orig->is_directory;
     cache->cancel = orig->cancel;
     cache->global = orig->global;
 
