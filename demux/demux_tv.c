@@ -31,7 +31,7 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
     bstr channel, input;
     bstr_split_tok(urlparams, "/", &channel, &input);
     if (channel.len) {
-        talloc_free(params->channels);
+        talloc_free(params->channel);
         params->channel = bstrto0(NULL, channel);
     }
     if (input.len) {
