@@ -352,6 +352,8 @@ static int d_open(struct demuxer *demuxer, enum demux_check check)
 
     demuxer->filetype = meta->filetype ? meta->filetype : meta->desc->name;
 
+    demuxer->is_network = p->tl->demuxer->is_network;
+
     reselect_streams(demuxer);
 
     return 0;

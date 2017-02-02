@@ -254,6 +254,8 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
         };
 
         starttime += part->length;
+
+        tl->demuxer->is_network |= source->is_network;
     }
     tl->parts[parts->num_parts] = (struct timeline_part) {.start = starttime};
     tl->num_parts = parts->num_parts;

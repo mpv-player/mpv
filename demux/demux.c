@@ -1263,9 +1263,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     pthread_mutex_init(&in->lock, NULL);
     pthread_cond_init(&in->wakeup, NULL);
 
-    if (stream->caching)
-        in->min_secs = MPMAX(in->min_secs, opts->min_secs_cache);
-
     *in->d_thread = *demuxer;
     *in->d_buffer = *demuxer;
 
@@ -1314,11 +1311,15 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                 struct demuxer *sub =
                     open_given_type(global, log, &demuxer_desc_timeline, stream,
                                     &params2, DEMUX_CHECK_FORCE);
-                if (sub)
-                    return sub;
-                timeline_destroy(tl);
+                if (sub) {
+                    demuxer = sub;
+                } else {
+                    timeline_destroy(tl);
+                }
             }
         }
+        if (demuxer->is_network || stream->caching)
+            in->min_secs = MPMAX(in->min_secs, opts->min_secs_cache);
         return demuxer;
     }
 

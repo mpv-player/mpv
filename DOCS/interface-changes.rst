@@ -34,6 +34,8 @@ Interface changes
     - remove the --stream-capture option and property. No replacement.
     - add --sub-justify
     - add --sub-ass-justify
+    - internally there's a different way to enable the demuxer cache now
+      it can be auto-enabled even if the stream cache remains disabled
  --- mpv 0.23.0 ---
     - remove deprecated vf_vdpaurb (use "--hwdec=vdpau-copy" instead)
     - the following properties now have new semantics:
