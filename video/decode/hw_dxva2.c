@@ -357,44 +357,53 @@ static bool create_device(struct lavc_ctx *s)
         return false;
     }
 
-    IDirect3D9* (WINAPI *Direct3DCreate9)(UINT) =
-        (void *)GetProcAddress(d3d9_dll, "Direct3DCreate9");
-    if (!Direct3DCreate9) {
-        MP_ERR(p, "Failed to locate Direct3DCreate9\n");
+    HRESULT (WINAPI *Direct3DCreate9Ex)(UINT, IDirect3D9Ex **) =
+        (void *)GetProcAddress(d3d9_dll, "Direct3DCreate9Ex");
+    if (!Direct3DCreate9Ex) {
+        MP_ERR(p, "Failed to locate Direct3DCreate9Ex\n");
         return false;
     }
 
-    p->d3d9 = Direct3DCreate9(D3D_SDK_VERSION);
-    if (!p->d3d9) {
-        MP_ERR(p, "Failed to create IDirect3D object\n");
+    IDirect3D9Ex *d3d9ex = NULL;
+    HRESULT hr = Direct3DCreate9Ex(D3D_SDK_VERSION, &d3d9ex);
+    if (FAILED(hr)) {
+        MP_ERR(p, "Failed to create IDirect3D9Ex object\n");
         return false;
     }
 
     UINT adapter = D3DADAPTER_DEFAULT;
-    D3DDISPLAYMODE display_mode;
-    IDirect3D9_GetAdapterDisplayMode(p->d3d9, adapter, &display_mode);
+    D3DDISPLAYMODEEX modeex = {0};
+    IDirect3D9Ex_GetAdapterDisplayModeEx(d3d9ex, adapter, &modeex, NULL);
+
     D3DPRESENT_PARAMETERS present_params = {
         .Windowed         = TRUE,
         .BackBufferWidth  = 640,
         .BackBufferHeight = 480,
         .BackBufferCount  = 0,
-        .BackBufferFormat = display_mode.Format,
+        .BackBufferFormat = modeex.Format,
         .SwapEffect       = D3DSWAPEFFECT_DISCARD,
         .Flags            = D3DPRESENTFLAG_VIDEO,
     };
-    HRESULT hr = IDirect3D9_CreateDevice(p->d3d9, adapter,
-                                         D3DDEVTYPE_HAL,
-                                         GetShellWindow(),
-                                         D3DCREATE_SOFTWARE_VERTEXPROCESSING |
-                                         D3DCREATE_MULTITHREADED |
-                                         D3DCREATE_FPU_PRESERVE,
-                                         &present_params,
-                                         &p->device);
+
+    IDirect3DDevice9Ex *exdev = NULL;
+    hr = IDirect3D9Ex_CreateDeviceEx(d3d9ex, adapter,
+                                     D3DDEVTYPE_HAL,
+                                     GetShellWindow(),
+                                     D3DCREATE_SOFTWARE_VERTEXPROCESSING |
+                                     D3DCREATE_MULTITHREADED |
+                                     D3DCREATE_FPU_PRESERVE,
+                                     &present_params,
+                                     NULL,
+                                     &exdev);
     if (FAILED(hr)) {
         MP_ERR(p, "Failed to create Direct3D device: %s\n",
                mp_HRESULT_to_str(hr));
+        IDirect3D9_Release(d3d9ex);
         return false;
     }
+
+    p->d3d9 = (IDirect3D9 *)d3d9ex;
+    p->device = (IDirect3DDevice9 *)exdev;
     return true;
 }
 
