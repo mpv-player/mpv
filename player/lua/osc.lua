@@ -54,6 +54,7 @@ local osc_param = { -- calculated by osc_init()
     playresy = 0,                           -- canvas size Y
     playresx = 0,                           -- canvas size X
     display_aspect = 1,
+    unscaled_y = 0,
     areas = {},
 }
 
@@ -691,7 +692,7 @@ function limited_list(prop, pos)
     end
 
     local fs = tonumber(mp.get_property('options/osd-font-size'))
-    local max = math.ceil(720 / fs)
+    local max = math.ceil(osc_param.unscaled_y*0.75 / fs)
     if max % 2 == 0 then
         max = max - 1
     end
@@ -762,47 +763,30 @@ function show_message(text, duration)
     text = string.sub(text, 0, 4000)
 
     -- replace actual linebreaks with ASS linebreaks
-    -- and get the amount of lines along the way
-    local lines
-    text, lines = string.gsub(text, "\n", "\\N")
+    text = string.gsub(text, "\n", "\\N")
 
-    -- append a Zero-Width-Space to . and _ to enable
-    -- linebreaking of long filenames
-    text = string.gsub(text, "%.", ".\226\128\139")
-    text = string.gsub(text, "_", "_\226\128\139")
-
-    local scale = 1
-    if (mp.get_property("video") == "no") then
-        scale = user_opts.scaleforcedwindow
-    elseif state.fullscreen then
-        scale = user_opts.scalefullscreen
-    else
-        scale = user_opts.scalewindowed
-    end
-
-    -- scale the fontsize for longer multi-line output
-    local fontsize = tonumber(mp.get_property("options/osd-font-size")) / scale
-    local outline = tonumber(mp.get_property("options/osd-border-size")) / scale
-
-
-    if lines > 12 then
-        fontsize, outline = fontsize / 1.5, outline / 1.25
-    elseif lines > 8 then
-        fontsize, outline = fontsize / 1.25, outline / 1.125
-    end
-
-    local style = "{\\bord" .. outline .. "\\fs" .. fontsize .. "}"
-
-    state.message_text = style .. text
+    state.message_text = text
     state.message_timeout = mp.get_time() + duration
 end
 
 function render_message(ass)
     if not(state.message_timeout == nil) and not(state.message_text == nil)
         and state.message_timeout > mp.get_time() then
+        local _, lines = string.gsub(state.message_text, "\\N", "")
+
+        local fontsize = tonumber(mp.get_property("options/osd-font-size"))
+        local outline = tonumber(mp.get_property("options/osd-border-size"))
+        local maxlines = math.ceil(osc_param.unscaled_y*0.75 / fontsize)
+        local counterscale = osc_param.playresy / osc_param.unscaled_y
+
+        fontsize = fontsize * counterscale / math.max(0.65 + math.min(lines/maxlines, 1), 1)
+        outline = outline * counterscale / math.max(0.75 + math.min(lines/maxlines, 1)/2, 1)
+
+        local style = "{\\bord" .. outline .. "\\fs" .. fontsize .. "}"
+
 
         ass:new_event()
-        ass:append(state.message_text)
+        ass:append(style .. state.message_text)
     else
         state.message_text = nil
         state.message_timeout = nil
@@ -1498,10 +1482,11 @@ function osc_init()
     end
 
     if user_opts.vidscale then
-        osc_param.playresy = baseResY / scale
+        osc_param.unscaled_y = baseResY
     else
-        osc_param.playresy = display_h / scale
+        osc_param.unscaled_y = display_h
     end
+    osc_param.playresy = osc_param.unscaled_y / scale
     osc_param.playresx = osc_param.playresy * display_aspect
     osc_param.display_aspect = display_aspect
 
