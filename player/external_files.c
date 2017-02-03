@@ -16,7 +16,7 @@
 #include "external_files.h"
 
 static const char *const sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt",
-                                       "smi", "rt", "txt", "ssa", "aqt", "jss",
+                                       "smi", "rt", "ssa", "aqt", "jss",
                                        "js", "ass", "mks", "vtt", "sup", "scc",
                                        NULL};
 
