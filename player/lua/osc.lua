@@ -1776,19 +1776,26 @@ function osc_init()
 
     ne.content = function ()
         local dmx_cache = mp.get_property_number("demuxer-cache-duration")
-        if not (dmx_cache == nil) then
-            dmx_cache = math.floor(dmx_cache + 0.5) .. "s + "
-        else
-            dmx_cache = ""
-        end
         local cache_used = mp.get_property_number("cache-used")
-        if not (cache_used == nil) then
-            if (cache_used < 1024) then
-                cache_used = cache_used .. " KB"
-            else
-                cache_used = math.floor((cache_used/102.4)+0.5)/10 .. " MB"
+        local is_network = mp.get_property_native("demuxer-via-network")
+        if dmx_cache then
+            dmx_cache = string.format("%3.0fs", dmx_cache)
+        end
+        if cache_used then
+            local suffix = " KiB"
+            if (cache_used >= 1024) then
+                cache_used = cache_used/1024
+                suffix = " MiB"
             end
-            return ("Cache: " .. dmx_cache .. cache_used)
+            cache_used = string.format("%5.1f%s", cache_used, suffix)
+        end
+        if (is_network and dmx_cache) or cache_used then
+            -- Only show dmx-cache-duration by itself if it's a network file.
+            -- Cache can be forced even for local files, so always show that.
+            return string.format("Cache: %s%s%s",
+                (dmx_cache and dmx_cache or ""),
+                ((dmx_cache and cache_used) and " + " or ""),
+                (cache_used or ""))
         else
             return ""
         end
