@@ -669,6 +669,14 @@ Video
     forcing it with ``--opengl-backend=x11``, but the vaapi/GLX interop is
     said to be slower than ``vaapi-copy``.
 
+    The ``cuda`` and ``cuda-copy`` modes provides deinterlacing in the decoder
+    which is useful as there is no other deinterlacing mechanism in the opengl
+    output path. To use this deinterlacing you must pass the option:
+    ``vd-lavc-o=deint=[weave|bob|adaptive]``.
+    Pass ``weave`` (or leave the option unset) to not attempt any
+    deinterlacing. ``cuda`` should always be preferred unless the ``opengl``
+    vo is not being used or filters are required.
+
     Most video filters will not work with hardware decoding as they are
     primarily implemented on the CPU. Some exceptions are ``vdpaupp``,
     ``vdpaurb`` and ``vavpp``. See `VIDEO FILTERS`_ for more details.
@@ -718,18 +726,6 @@ Video
         In addition to driver-specific behavior, global system settings might
         affect this additionally. This can give incorrect results even with
         completely ordinary video sources.
-
-        ``cuda`` is usually safe. Interlaced content can be deinterlaced by
-        the decoder, which is useful as there is no other deinterlacing
-        mechanism in the opengl output path. To use this deinterlacing you
-        must pass the option: ``vd-lavc-o=deint=[weave|bob|adaptive]``. Pass
-        ``weave`` to not attempt any deinterlacing.
-        10 and 12bit HEVC is available if the hardware supports it and a
-        sufficiently new driver (> 375.xx) is used.
-
-        ``cuda-copy`` has the same behaviour as ``cuda`` - including the ability
-        to deinterlace inside the decoder. However, traditional deinterlacing
-        filters can be used in this case.
 
         ``rpi`` always uses the hardware overlay renderer, even with
         ``--vo=opengl``.
