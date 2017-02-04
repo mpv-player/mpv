@@ -22,6 +22,7 @@
 #include <errors.h>
 #include <audioclient.h>
 #include <d3d9.h>
+#include <dxgi1_2.h>
 
 #include "windows_utils.h"
 
@@ -118,6 +119,13 @@ static char *hresult_to_str(const HRESULT hr)
     E(D3DERR_CANNOTPROTECTCONTENT)
     E(D3DERR_UNSUPPORTEDCRYPTO)
     E(D3DERR_PRESENT_STATISTICS_DISJOINT)
+    E(DXGI_ERROR_DEVICE_HUNG)
+    E(DXGI_ERROR_DEVICE_REMOVED)
+    E(DXGI_ERROR_DEVICE_RESET)
+    E(DXGI_ERROR_DRIVER_INTERNAL_ERROR)
+    E(DXGI_ERROR_INVALID_CALL)
+    E(DXGI_ERROR_WAS_STILL_DRAWING)
+    E(DXGI_STATUS_OCCLUDED)
     default:
         return "<Unknown>";
     }
