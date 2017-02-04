@@ -169,7 +169,7 @@ static void reopen_lazy_segments(struct demuxer *demuxer)
     };
     p->current->d = demux_open_url(p->current->url, &params,
                                    demuxer->stream->cancel, demuxer->global);
-    if (!p->current->d)
+    if (!p->current->d && !demux_cancel_test(demuxer))
         MP_ERR(demuxer, "failed to load segment\n");
     associate_streams(demuxer, p->current);
 }
