@@ -1150,7 +1150,7 @@ layouts["bottombar"] = function()
     local padX = 9
     local padY = 3
     local buttonW = 27
-    local tcW = (state.tc_ms) and 150 or 105
+    local tcW = (state.tc_ms) and 170 or 110
     local tsW = 90
     local minW = (buttonW + padX)*3 + (tcW + padX)*4 + (tsW + padX)*2
 
@@ -1261,7 +1261,7 @@ layouts["bottombar"] = function()
 
 
     -- Right timecode
-    geo = { x = geo.x - geo.w - padX - tcW, y = geo.y, an = 4,
+    geo = { x = geo.x - geo.w - padX - tcW - 10, y = geo.y, an = 4,
             w = tcW, h = geo.h }
     lo = add_layout("tc_right")
     lo.geometry = geo
@@ -1304,7 +1304,7 @@ layouts["topbar"] = function()
     local padX = 9
     local padY = 3
     local buttonW = 27
-    local tcW = (state.tc_ms) and 150 or 105
+    local tcW = (state.tc_ms) and 170 or 110
     local tsW = 90
     local minW = (buttonW + padX)*3 + (tcW + padX)*4 + (tsW + padX)*2
 
@@ -1384,7 +1384,7 @@ layouts["topbar"] = function()
 
 
     -- Right timecode
-    geo = { x = geo.x - geo.w - padX - tcW, y = geo.y, an = 4,
+    geo = { x = geo.x - geo.w - padX - tcW - 10, y = geo.y, an = 4,
             w = tcW, h = geo.h }
     lo = add_layout("tc_right")
     lo.geometry = geo
