@@ -661,7 +661,9 @@ static bool read_packet(struct demux_internal *in)
         demux->desc->seek(demux, seek_pts, SEEK_BACKWARD | SEEK_HR);
     }
 
-    bool eof = !demux->desc->fill_buffer || demux->desc->fill_buffer(demux) <= 0;
+    bool eof = true;
+    if (demux->desc->fill_buffer && !demux_cancel_test(demux))
+        eof = demux->desc->fill_buffer(demux) <= 0;
     update_cache(in);
 
     pthread_mutex_lock(&in->lock);
