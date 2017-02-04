@@ -19,6 +19,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <d3d11.h>
+#include <d3d9.h>
 #include <dxgi.h>
 
 #include "angle_dynamic.h"
@@ -141,9 +142,11 @@ static void d3d_init(struct MPGLContext *ctx)
     struct priv *p = ctx->priv;
     struct vo *vo = ctx->vo;
     IDXGIDevice *dxgi_dev = NULL;
+    IDXGIDevice1 *dxgi_dev1 = NULL;
     IDXGIAdapter *dxgi_adapter = NULL;
     IDXGIAdapter1 *dxgi_adapter1 = NULL;
     IDXGIFactory *dxgi_factory = NULL;
+    IDirect3DDevice9Ex *d3d9ex_dev = NULL;
 
     PFNEGLQUERYDISPLAYATTRIBEXTPROC eglQueryDisplayAttribEXT =
         (PFNEGLQUERYDISPLAYATTRIBEXTPROC)eglGetProcAddress("eglQueryDisplayAttribEXT");
@@ -212,17 +215,49 @@ static void d3d_init(struct MPGLContext *ctx)
         IDXGIFactory_MakeWindowAssociation(dxgi_factory, vo_w32_hwnd(vo),
             DXGI_MWA_NO_WINDOW_CHANGES | DXGI_MWA_NO_ALT_ENTER |
             DXGI_MWA_NO_PRINT_SCREEN);
+
+        // Get a reference to a IDXGIDevice1 for DXGI 1.1 and up
+        hr = IDXGIDevice_QueryInterface(dxgi_dev, &IID_IDXGIDevice1,
+            (void**)&dxgi_dev1);
+        if (SUCCEEDED(hr)) {
+            // mpv expects frames to be presented right after
+            // angle_swap_buffers() returns
+            hr = IDXGIDevice1_SetMaximumFrameLatency(dxgi_dev1, 1);
+            if (SUCCEEDED(hr))
+                MP_VERBOSE(vo, "Using low-latency rendering.\n");
+        }
+    }
+
+    // If ANGLE is in D3D9 mode, get the underlying IDirect3DDevice9
+    EGLAttrib d3d9_dev_attr;
+    if (eglQueryDeviceAttribEXT(dev, EGL_D3D9_DEVICE_ANGLE, &d3d9_dev_attr)) {
+        IDirect3DDevice9 *d3d9_dev = (IDirect3DDevice9*)d3d9_dev_attr;
+
+        // Get the D3D9Ex device if D3D9Ex is being used
+        hr = IDirect3DDevice9_QueryInterface(d3d9_dev, &IID_IDirect3DDevice9Ex,
+            (void**)&d3d9ex_dev);
+        if (SUCCEEDED(hr)) {
+            // mpv expects frames to be presented right after
+            // angle_swap_buffers() returns
+            hr = IDirect3DDevice9Ex_SetMaximumFrameLatency(d3d9ex_dev, 1);
+            if (SUCCEEDED(hr))
+                MP_VERBOSE(vo, "Using low-latency rendering (D3D9Ex).\n");
+        }
     }
 
 done:
     if (dxgi_dev)
         IDXGIDevice_Release(dxgi_dev);
+    if (dxgi_dev1)
+        IDXGIDevice1_Release(dxgi_dev1);
     if (dxgi_adapter)
         IDXGIAdapter_Release(dxgi_adapter);
     if (dxgi_adapter1)
         IDXGIAdapter1_Release(dxgi_adapter1);
     if (dxgi_factory)
         IDXGIFactory_Release(dxgi_factory);
+    if (d3d9ex_dev)
+        IDirect3DDevice9Ex_Release(d3d9ex_dev);
 }
 
 static void *get_proc_address(const GLubyte *proc_name)
