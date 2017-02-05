@@ -93,7 +93,7 @@ local function edl_track_joined(fragments)
     local offset = 1
     if fragments[1] and not fragments[1].duration then
         -- if no duration, probably initialization segment
-        edl = edl .. "!mp4_dash,init=" .. edl_escape(fragments[1].url)
+        edl = edl .. "!mp4_dash,init=" .. edl_escape(fragments[1].url) .. ";"
         offset = 2
     end
     for i = offset, #fragments do
