@@ -264,6 +264,12 @@ static void build_timeline(struct timeline *tl, struct tl_parts *parts)
             if (part->offset_set)
                 MP_WARN(tl, "Offsets are ignored.\n");
             tl->demuxer->is_network = true;
+
+            if (!tl->track_layout) {
+                source = open_source(tl, part->filename);
+                if (!source)
+                    goto error;
+            }
         } else {
             MP_VERBOSE(tl, "Opening segment %d...\n", n);
 
