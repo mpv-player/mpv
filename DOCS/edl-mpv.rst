@@ -111,7 +111,7 @@ downloaded, and every URL in the EDL is prefixed with the init fragment on the
 byte stream level. This is mostly for use by mpv's internal ytdl support. The
 ytdl script will call youtube-dl, which in turn actually processes DASH
 manifests. It may work only for this very specific purpose and fail to be
-useful in other scenarios. It can be removed ot changed in incompatible ways
+useful in other scenarios. It can be removed or changed in incompatible ways
 at any times.
 
 Example::
