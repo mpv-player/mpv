@@ -681,6 +681,8 @@ const m_option_t mp_opts[] = {
     OPT_STRING("screenshot-template", screenshot_template, 0),
     OPT_STRING("screenshot-directory", screenshot_directory, 0),
 
+    OPT_STRING("record-file", record_file, M_OPT_FILE),
+
     OPT_SUBSTRUCT("", input_opts, input_config, 0),
 
     OPT_PRINT("list-protocols", stream_print_proto_list),

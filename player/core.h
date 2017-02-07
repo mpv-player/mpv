@@ -153,6 +153,9 @@ struct track {
     struct vo_chain *vo_c;
     struct ao_chain *ao_c;
     struct lavfi_pad *sink;
+
+    // For stream recording (remuxing mode).
+    struct mp_recorder_sink *remux_sink;
 };
 
 // Summarizes video filtering and output.
@@ -421,6 +424,8 @@ typedef struct MPContext {
     // playback rate. Used to avoid showing it multiple times.
     bool drop_message_shown;
 
+    struct mp_recorder *recorder;
+
     char *cached_watch_later_configdir;
 
     struct screenshot_ctx *screenshot_ctx;
@@ -506,6 +511,9 @@ void autoload_external_files(struct MPContext *mpctx);
 struct track *select_default_track(struct MPContext *mpctx, int order,
                                    enum stream_type type);
 void prefetch_next(struct MPContext *mpctx);
+void close_recorder(struct MPContext *mpctx);
+void close_recorder_and_error(struct MPContext *mpctx);
+void open_recorder(struct MPContext *mpctx, bool on_init);
 
 // main.c
 int mp_initialize(struct MPContext *mpctx, char **argv);

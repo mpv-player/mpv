@@ -28,6 +28,7 @@
 #include "options/options.h"
 #include "common/common.h"
 #include "common/encode.h"
+#include "common/recorder.h"
 #include "options/m_config.h"
 #include "options/m_property.h"
 #include "common/playlist.h"
@@ -330,6 +331,8 @@ static void mp_seek(MPContext *mpctx, struct seek_params seek)
         clear_audio_output_buffers(mpctx);
 
     reset_playback_state(mpctx);
+    if (mpctx->recorder)
+        mp_recorder_mark_discontinuity(mpctx->recorder);
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */

@@ -4863,6 +4863,29 @@ Miscellaneous
     This does not affect playlist expansion, redirection, or other loading of
     referenced files like with ordered chapters.
 
+``--record-stream=<file>``
+    Record the current stream to the given target file. The target file will
+    always be overwritten without asking.
+
+    This remuxes the source stream without reencoding, which makes this a
+    highly fragile and experimental feature. It's entirely possible that this
+    writes files which are broken, not standards compliant, not playable with
+    all players (including mpv), or incomplete.
+
+    The target file format is determined by the file extension of the target
+    filename. It is recommended to use the same target container as the source
+    container if possible, and preferring Matroska as fallback.
+
+    Seeking during stream recording, or enabling/disabling stream recording
+    during playback, can cut off data, or produce "holes" in the output file.
+    These are technical restrictions. In particular, video data or subtitles
+    which were read ahead can produce such holes, which might cause playback
+    problems with various players (including mpv).
+
+    The behavior of this option might changed in the future, such as changing
+    it to a template (similar to ``--screenshot-template``), being renamed,
+    removed, or anything else, until it is declared semi-stable.
+
 ``--lavfi-complex=<string>``
     Set a "complex" libavfilter filter, which means a single filter graph can
     take input from multiple source audio and video tracks. The graph can result

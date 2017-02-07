@@ -37,6 +37,8 @@ struct dec_audio {
 
     bool try_spdif;
 
+    struct mp_recorder_sink *recorder_sink;
+
     // For free use by the ad_driver
     void *priv;
 

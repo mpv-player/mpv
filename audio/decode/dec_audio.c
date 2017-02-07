@@ -27,6 +27,7 @@
 
 #include "common/codecs.h"
 #include "common/msg.h"
+#include "common/recorder.h"
 #include "misc/bstr.h"
 
 #include "stream/stream.h"
@@ -218,6 +219,9 @@ void audio_work(struct dec_audio *da)
     }
 
     if (da->ad_driver->send_packet(da, da->packet)) {
+        if (da->recorder_sink)
+            mp_recorder_feed_packet(da->recorder_sink, da->packet);
+
         talloc_free(da->packet);
         da->packet = NULL;
     }

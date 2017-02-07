@@ -172,6 +172,7 @@ def build(ctx):
         ( "common/tags.c" ),
         ( "common/msg.c" ),
         ( "common/playlist.c" ),
+        ( "common/recorder.c" ),
         ( "common/version.c" ),
 
         ## Demuxers

@@ -42,6 +42,8 @@ struct dec_video {
 
     int dropped_frames;
 
+    struct mp_recorder_sink *recorder_sink;
+
     // Internal (shared with vd_lavc.c).
 
     void *priv; // for free use by vd_driver

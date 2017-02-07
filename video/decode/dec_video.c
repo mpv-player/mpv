@@ -33,6 +33,7 @@
 #include "demux/packet.h"
 
 #include "common/codecs.h"
+#include "common/recorder.h"
 
 #include "video/out/vo.h"
 #include "video/csputils.h"
@@ -259,6 +260,12 @@ static bool send_packet(struct dec_video *d_video, struct demux_packet *packet)
     if (pkt_pts == MP_NOPTS_VALUE)
         d_video->has_broken_packet_pts = 1;
 
+    bool dts_replaced = false;
+    if (packet && packet->dts == MP_NOPTS_VALUE && !d_video->codec->avi_dts) {
+        packet->dts = packet->pts;
+        dts_replaced = true;
+    }
+
     double pkt_pdts = pkt_pts == MP_NOPTS_VALUE ? pkt_dts : pkt_pts;
     if (pkt_pdts != MP_NOPTS_VALUE && d_video->first_packet_pdts == MP_NOPTS_VALUE)
         d_video->first_packet_pdts = pkt_pdts;
@@ -268,6 +275,10 @@ static bool send_packet(struct dec_video *d_video, struct demux_packet *packet)
     bool res = d_video->vd_driver->send_packet(d_video, packet);
 
     MP_STATS(d_video, "end decode video");
+
+    // Stream recording can't deal with almost surely wrong fake DTS.
+    if (dts_replaced)
+        packet->dts = MP_NOPTS_VALUE;
 
     return res;
 }
@@ -396,11 +407,6 @@ void video_work(struct dec_video *d_video)
         return;
     }
 
-    if (d_video->packet) {
-        if (d_video->packet->dts == MP_NOPTS_VALUE && !d_video->codec->avi_dts)
-            d_video->packet->dts = d_video->packet->pts;
-    }
-
     if (d_video->packet && d_video->packet->new_segment) {
         assert(!d_video->new_segment);
         d_video->new_segment = d_video->packet;
@@ -423,6 +429,9 @@ void video_work(struct dec_video *d_video)
     d_video->vd_driver->control(d_video, VDCTRL_SET_FRAMEDROP, &framedrop_type);
 
     if (send_packet(d_video, d_video->packet)) {
+        if (d_video->recorder_sink)
+            mp_recorder_feed_packet(d_video->recorder_sink, d_video->packet);
+
         talloc_free(d_video->packet);
         d_video->packet = NULL;
     }
