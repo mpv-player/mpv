@@ -21,7 +21,7 @@
 #include "common.h"
 #include "context.h"
 
-#ifdef HAVE_EGL_ANGLE
+#if HAVE_EGL_ANGLE
 // On Windows, egl_helpers.c is only used by ANGLE, where the EGL functions may
 // be loaded dynamically from ANGLE DLLs
 #include "angle_dynamic.h"
