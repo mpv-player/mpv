@@ -24,6 +24,9 @@
 #include <libavutil/rational.h>
 #include <libavcodec/avcodec.h>
 
+#ifndef AV_INPUT_BUFFER_PADDING_SIZE
+#define AV_INPUT_BUFFER_PADDING_SIZE FF_INPUT_BUFFER_PADDING_SIZE
+#endif
 struct mp_decoder_list;
 struct demux_packet;
 struct mp_codec_params;
