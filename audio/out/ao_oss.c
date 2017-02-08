@@ -451,7 +451,7 @@ static int init(struct ao *ao)
     }
 
     MP_VERBOSE(ao, "using '%s' mixer device\n", p->oss_mixer_device);
-    MP_VERBOSE(ao, "using '%s' mixer device\n", mixer_channels[p->oss_mixer_channel]);
+    MP_VERBOSE(ao, "using '%s' mixer channel\n", mixer_channels[p->oss_mixer_channel]);
 
     ao->format = af_fmt_from_planar(ao->format);
 
