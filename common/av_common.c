@@ -42,7 +42,7 @@ int mp_lavc_set_extradata(AVCodecContext *avctx, void *ptr, int size)
     if (size) {
         av_free(avctx->extradata);
         avctx->extradata_size = 0;
-        avctx->extradata = av_mallocz(size + FF_INPUT_BUFFER_PADDING_SIZE);
+        avctx->extradata = av_mallocz(size + AV_INPUT_BUFFER_PADDING_SIZE);
         if (!avctx->extradata)
             return -1;
         avctx->extradata_size = size;
@@ -79,7 +79,7 @@ AVCodecParameters *mp_codec_params_to_av(struct mp_codec_params *c)
     avp->codec_tag = c->codec_tag;
     if (c->extradata_size) {
         avp->extradata =
-            av_mallocz(c->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
+            av_mallocz(c->extradata_size + AV_INPUT_BUFFER_PADDING_SIZE);
         if (!avp->extradata)
             goto error;
         avp->extradata_size = c->extradata_size;
