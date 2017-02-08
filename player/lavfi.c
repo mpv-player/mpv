@@ -43,6 +43,11 @@
 
 #include "lavfi.h"
 
+#if LIBAVFILTER_VERSION_MICRO < 100
+#define av_buffersink_get_frame_flags(a, b, c) av_buffersink_get_frame(a, b)
+#define AV_BUFFERSINK_FLAG_NO_REQUEST 0
+#endif
+
 struct lavfi {
     struct mp_log *log;
     char *graph_string;
@@ -266,6 +271,10 @@ enum stream_type lavfi_pad_type(struct lavfi_pad *pad)
 void lavfi_set_connected(struct lavfi_pad *pad, bool connected)
 {
     pad->connected = connected;
+    if (!pad->connected) {
+        pad->output_needed = false;
+        drop_pad_data(pad);
+    }
 }
 
 bool lavfi_get_connected(struct lavfi_pad *pad)
@@ -545,19 +554,17 @@ static void read_output_pads(struct lavfi *c)
         if (pad->dir != LAVFI_OUT)
             continue;
 
-        // If disconnected, read and discard everything.
-        if (!pad->pending_v && !pad->pending_a && !pad->connected)
-            pad->output_needed = true;
-
-        if (!pad->output_needed)
+        // If disconnected, read and discard everything (passively).
+        if (pad->connected && !pad->output_needed)
             continue;
 
         assert(pad->buffer);
         assert(!pad->pending_v && !pad->pending_a);
 
+        int flags = pad->output_needed ? 0 : AV_BUFFERSINK_FLAG_NO_REQUEST;
         int r = AVERROR_EOF;
         if (!pad->buffer_is_eof)
-            r = av_buffersink_get_frame(pad->buffer, pad->tmp_frame);
+            r = av_buffersink_get_frame_flags(pad->buffer, pad->tmp_frame, flags);
         if (r >= 0) {
             pad->output_needed = false;
             double pts = mp_pts_from_av(pad->tmp_frame->pts, &pad->timebase);
@@ -583,6 +590,7 @@ static void read_output_pads(struct lavfi *c)
             // input pads (via av_buffersrc_get_nb_failed_requests()).
             pad->output_eof = false;
         } else if (r == AVERROR_EOF) {
+            pad->output_needed = false;
             pad->buffer_is_eof = true;
             if (!c->draining_recover_eof && !c->draining_new_format)
                 pad->output_eof = true;
