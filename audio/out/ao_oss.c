@@ -279,14 +279,21 @@ static int reopen_device(struct ao *ao, bool allow_format_changes)
     int format = ao->format;
     struct mp_chmap channels = ao->channels;
 
+    const char *device = PATH_DEV_DSP;
+    if (ao->device)
+        device = ao->device;
+    if (p->dsp && p->dsp[0])
+        device = p->dsp;
+
+    MP_VERBOSE(ao, "using '%s' dsp device\n", device);
 #ifdef __linux__
-    p->audio_fd = open(p->dsp, O_WRONLY | O_NONBLOCK);
+    p->audio_fd = open(device, O_WRONLY | O_NONBLOCK);
 #else
-    p->audio_fd = open(p->dsp, O_WRONLY);
+    p->audio_fd = open(device, O_WRONLY);
 #endif
     if (p->audio_fd < 0) {
         MP_ERR(ao, "Can't open audio device %s: %s\n",
-               p->dsp, mp_strerror(errno));
+               device, mp_strerror(errno));
         goto fail;
     }
 
@@ -443,7 +450,6 @@ static int init(struct ao *ao)
         p->oss_mixer_channel = SOUND_MIXER_PCM;
     }
 
-    MP_VERBOSE(ao, "using '%s' dsp device\n", p->dsp);
     MP_VERBOSE(ao, "using '%s' mixer device\n", p->oss_mixer_device);
     MP_VERBOSE(ao, "using '%s' mixer device\n", mixer_channels[p->oss_mixer_channel]);
 
@@ -643,8 +649,6 @@ const struct ao_driver audio_out_oss = {
         .buffersize = -1,
         .outburst = 512,
         .oss_mixer_channel = SOUND_MIXER_PCM,
-
-        .dsp = PATH_DEV_DSP,
         .oss_mixer_device = PATH_DEV_MIXER,
     },
     .options = (const struct m_option[]) {
