@@ -32,7 +32,7 @@ Interface changes
         - "vo-drop-frame-count" to "frame-drop-count"
       The old names still work, but are deprecated.
     - remove the --stream-capture option and property. No replacement.
-      (--stream-record might serve as alternative)
+      (--record-file might serve as alternative)
     - add --sub-justify
     - add --sub-ass-justify
     - internally there's a different way to enable the demuxer cache now

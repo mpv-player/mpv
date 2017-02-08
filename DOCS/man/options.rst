@@ -4863,7 +4863,7 @@ Miscellaneous
     This does not affect playlist expansion, redirection, or other loading of
     referenced files like with ordered chapters.
 
-``--record-stream=<file>``
+``--record-file=<file>``
     Record the current stream to the given target file. The target file will
     always be overwritten without asking.
 
