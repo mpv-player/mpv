@@ -619,7 +619,7 @@ bool lavfi_process(struct lavfi *c)
     bool all_waiting = true;
     bool any_needs_input = false;
     bool any_needs_output = false;
-    bool all_lavfi_eof = true;
+    bool all_output_eof = true;
     bool all_input_eof = true;
 
     // Determine the graph state
@@ -631,12 +631,12 @@ bool lavfi_process(struct lavfi *c)
             any_needs_input |= pad->input_needed;
             all_input_eof &= pad->input_eof;
         } else if (pad->dir == LAVFI_OUT) {
-            all_lavfi_eof &= pad->buffer_is_eof;
+            all_output_eof &= pad->buffer_is_eof;
             any_needs_output |= pad->output_needed;
         }
     }
 
-    if (all_lavfi_eof && !all_input_eof) {
+    if (all_output_eof && !all_input_eof) {
         free_graph(c);
         precreate_graph(c);
         all_waiting = false;
