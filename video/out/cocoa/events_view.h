@@ -21,5 +21,4 @@
 @interface MpvEventsView : NSView <NSDraggingDestination>
 @property(nonatomic, retain) MpvCocoaAdapter *adapter;
 - (BOOL)canHideCursor;
-- (void)signalMousePosition;
 @end

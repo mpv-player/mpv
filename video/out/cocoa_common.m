@@ -73,6 +73,10 @@ struct vo_cocoa_state {
     NSInteger window_level;
     int fullscreen;
 
+    bool cursor_visibility;
+    bool cursor_visibility_wanted;
+    bool cursor_needs_set;
+
     bool embedded; // wether we are embedding in another GUI
 
     IOPMAssertionID power_mgmt_assertion;
@@ -106,8 +110,6 @@ struct vo_cocoa_state {
     bool vo_ready;                      // the VO is in a state in which it can
                                         // render frames
     int frame_w, frame_h;               // dimensions of the frame rendered
-
-    NSCursor *blankCursor;
 
     char *window_title;
 };
@@ -336,13 +338,10 @@ void vo_cocoa_init(struct vo *vo)
         .power_mgmt_assertion = kIOPMNullAssertionID,
         .log = mp_log_new(s, vo->log, "cocoa"),
         .embedded = vo->opts->WinID >= 0,
+        .cursor_visibility = true,
+        .cursor_visibility_wanted = true,
         .fullscreen = 0,
     };
-    if (!s->embedded) {
-        NSImage* blankImage = [[NSImage alloc] initWithSize:NSMakeSize(1, 1)];
-        s->blankCursor = [[NSCursor alloc] initWithImage:blankImage hotSpot:NSZeroPoint];
-        [blankImage release];
-    }
     pthread_mutex_init(&s->lock, NULL);
     pthread_cond_init(&s->wakeup, NULL);
     pthread_mutex_init(&s->sync_lock, NULL);
@@ -358,6 +357,22 @@ void vo_cocoa_init(struct vo *vo)
     }
 }
 
+static void vo_cocoa_update_cursor(struct vo *vo, bool forceVisible)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+
+    if (s->embedded)
+        return;
+
+    if ((forceVisible || s->cursor_visibility_wanted) && !s->cursor_visibility) {
+        [NSCursor unhide];
+        s->cursor_visibility = YES;
+    } else if (!s->cursor_visibility_wanted && s->cursor_visibility) {
+        [NSCursor hide];
+        s->cursor_visibility = NO;
+    }
+}
+
 static int vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
 {
     struct vo_cocoa_state *s = vo->cocoa;
@@ -365,15 +380,15 @@ static int vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
     if (s->embedded)
         return VO_NOTIMPL;
 
-    MpvEventsView *v = (MpvEventsView *) s->view;
-
-    if (*visible) {
-        [[NSCursor arrowCursor] set];
-    } else if ([v canHideCursor] && s->blankCursor) {
-        [s->blankCursor set];
+    if (s->view) {
+        MpvEventsView *v = (MpvEventsView *) s->view;
+        s->cursor_visibility_wanted = !(!*visible && [v canHideCursor]);
+        vo_cocoa_update_cursor(vo, false);
     } else {
-        *visible = true;
+        s->cursor_visibility_wanted = *visible;
+        s->cursor_needs_set = true;
     }
+    *visible = s->cursor_visibility;
 
     return VO_TRUE;
 }
@@ -392,6 +407,7 @@ void vo_cocoa_uninit(struct vo *vo)
     run_on_main_thread(vo, ^{
         // if using --wid + libmpv there's no window to release
         if (s->window) {
+            vo_cocoa_update_cursor(vo, true);
             [s->window setDelegate:nil];
             [s->window close];
         }
@@ -415,9 +431,6 @@ void vo_cocoa_uninit(struct vo *vo)
 
         [s->view removeFromSuperview];
         [s->view release];
-
-        if (!s->embedded)
-            [s->blankCursor release];
 
         pthread_cond_destroy(&s->sync_wakeup);
         pthread_mutex_destroy(&s->sync_lock);
@@ -548,8 +561,6 @@ static void create_ui(struct vo *vo, struct mp_rect *win, int geo_flags)
     view.adapter = adapter;
     s->view = view;
     [parent addSubview:s->view];
-    // update the cursor position now that the view has been added.
-    [view signalMousePosition];
     s->adapter = adapter;
 
     cocoa_register_menu_item_action(MPM_H_SIZE,   @selector(halfSize));
@@ -1012,20 +1023,20 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     flag_events(self.vout, VO_EVENT_ICC_PROFILE_CHANGED);
 }
 
-- (void)didChangeMousePosition
-{
-    struct vo_cocoa_state *s = self.vout->cocoa;
-    [(MpvEventsView *)s->view signalMousePosition];
-}
-
 - (void)windowDidResignKey:(NSNotification *)notification
 {
-    [self didChangeMousePosition];
+    vo_cocoa_update_cursor(self.vout, true);
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)notification
 {
-    [self didChangeMousePosition];
+    struct vo_cocoa_state *s = self.vout->cocoa;
+    if (s->cursor_needs_set) {
+        vo_cocoa_set_cursor_visibility(self.vout, &s->cursor_visibility_wanted);
+        s->cursor_needs_set = false;
+    } else {
+        vo_cocoa_update_cursor(self.vout, false);
+    }
 }
 
 - (void)windowDidMiniaturize:(NSNotification *)notification
