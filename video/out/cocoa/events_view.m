@@ -74,6 +74,9 @@
                                      userInfo:nil] autorelease];
 
     [self addTrackingArea:self.tracker];
+
+    if (![self containsMouseLocation])
+        [self.adapter putKey:MP_KEY_MOUSE_LEAVE withModifiers:0];
 }
 
 - (NSPoint)mouseLocation
@@ -148,8 +151,6 @@
 
     if (self.clearing)
         return;
-
-    [self signalMousePosition];
 }
 
 - (NSPoint)convertPointToPixels:(NSPoint)point
@@ -160,14 +161,6 @@
     // coordinate system
     point.y = -point.y;
     return point;
-}
-
-- (void)signalMousePosition
-{
-    NSPoint p = [self convertPointToPixels:[self mouseLocation]];
-    p.x = MIN(MAX(p.x, 0), self.bounds.size.width-1);
-    p.y = MIN(MAX(p.y, 0), self.bounds.size.height-1);
-    [self.adapter signalMouseMovement:p];
 }
 
 - (void)signalMouseMovement:(NSEvent *)event
