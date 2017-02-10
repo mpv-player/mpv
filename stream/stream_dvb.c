@@ -931,6 +931,7 @@ static int dvb_open(stream_t *stream)
       return STREAM_ERROR;
     }
 
+    stream->priv = mp_get_config_group(stream, stream->global, &stream_dvb_conf);
     dvb_state_t* state = dvb_get_state(stream);
 
     dvb_priv_t *p = stream->priv;
@@ -1009,7 +1010,6 @@ dvb_state_t *dvb_get_state(stream_t *stream)
     }
     struct mp_log *log = stream->log;
     struct mpv_global *global = stream->global;
-    stream->priv = mp_get_config_group(stream, stream->global, &stream_dvb_conf);
     dvb_priv_t *priv = stream->priv;
     int type, size;
     char filename[30], *name;
