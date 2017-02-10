@@ -88,7 +88,7 @@ local function extract_chapters(data, video_length)
     return ret
 end
 
-local function edl_track_joined(fragments, protocol)
+local function edl_track_joined(fragments, protocol, is_live)
     if not (type(fragments) == "table") or not fragments[1] then
         msg.debug("No fragments to join into EDL")
         return nil
@@ -98,7 +98,7 @@ local function edl_track_joined(fragments, protocol)
     local offset = 1
 
     if (protocol == "http_dash_segments") and
-        not fragments[1].duration then
+        not fragments[1].duration and not is_live then
         -- assume MP4 DASH initialization segment
         edl = edl .. "!mp4_dash,init=" .. edl_escape(fragments[1].url) .. ";"
         offset = 2
@@ -303,7 +303,8 @@ mp.add_hook("on_load", 10, function ()
             if not (json["requested_formats"] == nil) then
                 for _, track in pairs(json.requested_formats) do
                     local edl_track = nil
-                    edl_track = edl_track_joined(track.fragments,track.protocol)
+                    edl_track = edl_track_joined(track.fragments,
+                        track.protocol, json.is_live)
                     if track.acodec and track.acodec ~= "none" then
                         -- audio track
                         mp.commandv("audio-add",
@@ -317,7 +318,8 @@ mp.add_hook("on_load", 10, function ()
 
             elseif not (json.url == nil) then
                 local edl_track = nil
-                edl_track = edl_track_joined(json.fragments, json.protocol)
+                edl_track = edl_track_joined(json.fragments, json.protocol,
+                    json.is_live)
 
                 -- normal video or single track
                 streamurl = edl_track or json.url
