@@ -104,6 +104,7 @@ struct priv {
     ID3D11Device *d3d11_device;
     ID3D11DeviceContext *d3d11_context;
     ID3D11Texture2D *d3d11_backbuffer;
+    D3D_FEATURE_LEVEL d3d11_level;
 
     EGLConfig egl_config;
     EGLDisplay egl_display;
@@ -260,7 +261,6 @@ static bool d3d11_device_create(MPGLContext *ctx, int flags)
         D3D_FEATURE_LEVEL_10_0,
         D3D_FEATURE_LEVEL_9_3,
     };
-    D3D_FEATURE_LEVEL selected_level;
     int level_count = 4;
 
     // Only try feature levels less than or equal to the user specified level
@@ -273,13 +273,13 @@ static bool d3d11_device_create(MPGLContext *ctx, int flags)
     hr = E_FAIL;
     if ((FAILED(hr) && o->d3d11_warp == -1) || o->d3d11_warp == 0) {
         hr = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, levels,
-            level_count, D3D11_SDK_VERSION, &p->d3d11_device, &selected_level,
+            level_count, D3D11_SDK_VERSION, &p->d3d11_device, &p->d3d11_level,
             &p->d3d11_context);
     }
     // Try WARP if it is forced or if the HW adapter failed
     if ((FAILED(hr) && o->d3d11_warp == -1) || o->d3d11_warp == 1) {
         hr = D3D11CreateDevice(NULL, D3D_DRIVER_TYPE_WARP, NULL, 0, levels,
-            level_count, D3D11_SDK_VERSION, &p->d3d11_device, &selected_level,
+            level_count, D3D11_SDK_VERSION, &p->d3d11_device, &p->d3d11_level,
             &p->d3d11_context);
         if (SUCCEEDED(hr))
             show_sw_adapter_msg(ctx);
@@ -289,10 +289,6 @@ static bool d3d11_device_create(MPGLContext *ctx, int flags)
                  mp_HRESULT_to_str(hr));
         return false;
     }
-
-    MP_VERBOSE(vo, "Using Direct3D 11 feature level %u_%u\n",
-        ((unsigned)selected_level) >> 12,
-        (((unsigned)selected_level) >> 8) & 0xf);
 
     hr = ID3D11Device_QueryInterface(p->d3d11_device, &IID_IDXGIDevice1,
         (void**)&p->dxgi_device);
@@ -452,12 +448,10 @@ static bool d3d11_swapchain_surface_create(MPGLContext *ctx, int flags)
         // Create a DXGI 1.2+ (Windows 8+) swap chain if possible
         if (!d3d11_swapchain_create_1_2(ctx, flags))
             goto fail;
-        MP_VERBOSE(vo, "Using DXGI 1.2+\n");
     } else if (p->dxgi_factory) {
         // Fall back to DXGI 1.1 (Windows 7)
         if (!d3d11_swapchain_create_1_1(ctx, flags))
             goto fail;
-        MP_VERBOSE(vo, "Using DXGI 1.1\n");
     } else {
         goto fail;
     }
@@ -634,10 +628,19 @@ static int angle_init(struct MPGLContext *ctx, int flags)
 
     // Create the underlying EGL device implementation
     bool device_ok = false;
-    if ((!device_ok && !o->renderer) || o->renderer == RENDERER_D3D11)
+    if ((!device_ok && !o->renderer) || o->renderer == RENDERER_D3D11) {
         device_ok = d3d11_device_create(ctx, flags);
-    if ((!device_ok && !o->renderer) || o->renderer == RENDERER_D3D9)
+        if (device_ok) {
+            MP_VERBOSE(vo, "Using Direct3D 11 feature level %u_%u\n",
+                ((unsigned)p->d3d11_level) >> 12,
+                (((unsigned)p->d3d11_level) >> 8) & 0xf);
+        }
+    }
+    if ((!device_ok && !o->renderer) || o->renderer == RENDERER_D3D9) {
         device_ok = d3d9_device_create(ctx, flags);
+        if (device_ok)
+            MP_VERBOSE(vo, "Using Direct3D 9\n");
+    }
     if (!device_ok)
         goto fail;
 
@@ -662,10 +665,21 @@ static int angle_init(struct MPGLContext *ctx, int flags)
 
     // Create the underlying EGL surface implementation
     bool surface_ok = false;
-    if ((!surface_ok && o->egl_windowing == -1) || o->egl_windowing == 0)
+    if ((!surface_ok && o->egl_windowing == -1) || o->egl_windowing == 0) {
         surface_ok = d3d11_swapchain_surface_create(ctx, flags);
-    if ((!surface_ok && o->egl_windowing == -1) || o->egl_windowing == 1)
+        if (surface_ok) {
+            if (p->dxgi_swapchain1) {
+                MP_VERBOSE(vo, "Using DXGI 1.2+\n");
+            } else {
+                MP_VERBOSE(vo, "Using DXGI 1.1\n");
+            }
+        }
+    }
+    if ((!surface_ok && o->egl_windowing == -1) || o->egl_windowing == 1) {
         surface_ok = egl_window_surface_create(ctx, flags);
+        if (surface_ok)
+            MP_VERBOSE(vo, "Using EGL windowing\n");
+    }
     if (!surface_ok)
         goto fail;
 
