@@ -101,18 +101,16 @@ mpv uses C99 with K&R formatting, with some exceptions.
             do_something();
     }
     ```
-- If the body of an if statement uses braces, the else branch should also
-  use braces (and reverse).
+- If the if has an else branch, both branches should use braces, even if they're
+  technically redundant.
 
   Example:
 
     ```C
     if (a) {
-        // do something
-        something();
-        something_else();
-    } else {
         one_line();
+    } else {
+        one_other_line();
     }
     ```
 - If an if condition spans multiple physical lines, then put the opening brace
