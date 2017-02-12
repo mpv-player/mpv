@@ -145,7 +145,7 @@ const struct m_sub_options tv_params_conf = {
 
 tvi_handle_t *tv_new_handle(int size, struct mp_log *log, const tvi_functions_t *functions)
 {
-    tvi_handle_t *h = malloc(sizeof(*h));
+    tvi_handle_t *h = calloc(1, sizeof(*h));
 
     if (!h)
         return NULL;
@@ -159,12 +159,9 @@ tvi_handle_t *tv_new_handle(int size, struct mp_log *log, const tvi_functions_t 
 
     h->log        = log;
     h->functions  = functions;
-    h->seq        = 0;
     h->chanlist   = -1;
-    h->chanlist_s = NULL;
     h->norm       = -1;
     h->channel    = -1;
-    h->scan       = NULL;
 
     return h;
 }

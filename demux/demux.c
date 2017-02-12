@@ -205,6 +205,9 @@ struct demux_stream {
     struct demux_packet *head;
     struct demux_packet *tail;
 
+    struct demux_packet *attached_picture;
+    bool attached_picture_added;
+
     // for closed captions (demuxer_feed_caption)
     struct sh_stream *cc;
 };
@@ -243,6 +246,7 @@ static void ds_flush(struct demux_stream *ds)
     ds->last_pos = -1;
     ds->last_dts = MP_NOPTS_VALUE;
     ds->correct_dts = ds->correct_pos = true;
+    ds->attached_picture_added = false;
 }
 
 void demux_set_ts_offset(struct demuxer *demuxer, double offset)
@@ -290,6 +294,8 @@ void demux_add_sh_stream(struct demuxer *demuxer, struct sh_stream *sh)
 
     if (!sh->codec->codec)
         sh->codec->codec = "";
+
+    sh->ds->attached_picture = sh->attached_picture;
 
     sh->index = in->num_streams;
     if (sh->ff_index < 0)
@@ -655,7 +661,9 @@ static bool read_packet(struct demux_internal *in)
         demux->desc->seek(demux, seek_pts, SEEK_BACKWARD | SEEK_HR);
     }
 
-    bool eof = !demux->desc->fill_buffer || demux->desc->fill_buffer(demux) <= 0;
+    bool eof = true;
+    if (demux->desc->fill_buffer && !demux_cancel_test(demux))
+        eof = demux->desc->fill_buffer(demux) <= 0;
     update_cache(in);
 
     pthread_mutex_lock(&in->lock);
@@ -675,28 +683,6 @@ static bool read_packet(struct demux_internal *in)
         in->eof = in->last_eof = eof;
     }
     return true;
-}
-
-// must be called locked; may temporarily unlock
-static void ds_get_packets(struct demux_stream *ds)
-{
-    const char *t = stream_type_name(ds->type);
-    struct demux_internal *in = ds->in;
-    MP_DBG(in, "reading packet for %s\n", t);
-    in->eof = false; // force retry
-    while (ds->selected && !ds->head) {
-        ds->active = true;
-        // Note: the following code marks EOF if it can't continue
-        if (in->threading) {
-            MP_VERBOSE(in, "waiting for demux thread (%s)\n", t);
-            pthread_cond_signal(&in->wakeup);
-            pthread_cond_wait(&in->wakeup, &in->lock);
-        } else {
-            read_packet(in);
-        }
-        if (ds->eof)
-            break;
-    }
 }
 
 static void execute_trackswitch(struct demux_internal *in)
@@ -777,6 +763,13 @@ static void *demux_thread(void *pctx)
 
 static struct demux_packet *dequeue_packet(struct demux_stream *ds)
 {
+    if (ds->attached_picture) {
+        ds->eof = true;
+        if (ds->attached_picture_added)
+            return NULL;
+        ds->attached_picture_added = true;
+        return demux_copy_packet(ds->attached_picture);
+    }
     if (!ds->head)
         return NULL;
     struct demux_packet *pkt = ds->head;
@@ -820,16 +813,23 @@ static struct demux_packet *dequeue_packet(struct demux_stream *ds)
     return pkt;
 }
 
+// Whether to avoid actively demuxing new packets to find a new packet on the
+// given stream.
+// Attached pictures (cover art) should never actively read.
 // Sparse packets (Subtitles) interleaved with other non-sparse packets (video,
 // audio) should never be read actively, meaning the demuxer thread does not
 // try to exceed default readahead in order to find a new packet.
-static bool use_lazy_subtitle_reading(struct demux_stream *ds)
+static bool use_lazy_packet_reading(struct demux_stream *ds)
 {
+    if (ds->attached_picture)
+        return true;
     if (ds->type != STREAM_SUB)
         return false;
+    // Subtitles are only lazily read if there's at least 1 other actively read
+    // stream.
     for (int n = 0; n < ds->in->num_streams; n++) {
         struct demux_stream *s = ds->in->streams[n]->ds;
-        if (s->type != STREAM_SUB && s->selected && !s->eof)
+        if (s->type != STREAM_SUB && s->selected && !s->eof && !s->attached_picture)
             return true;
     }
     return false;
@@ -843,12 +843,29 @@ struct demux_packet *demux_read_packet(struct sh_stream *sh)
     struct demux_stream *ds = sh ? sh->ds : NULL;
     struct demux_packet *pkt = NULL;
     if (ds) {
-        pthread_mutex_lock(&ds->in->lock);
-        if (!use_lazy_subtitle_reading(ds))
-            ds_get_packets(ds);
+        struct demux_internal *in = ds->in;
+        pthread_mutex_lock(&in->lock);
+        if (!use_lazy_packet_reading(ds)) {
+            const char *t = stream_type_name(ds->type);
+            MP_DBG(in, "reading packet for %s\n", t);
+            in->eof = false; // force retry
+            while (ds->selected && !ds->head) {
+                ds->active = true;
+                // Note: the following code marks EOF if it can't continue
+                if (in->threading) {
+                    MP_VERBOSE(in, "waiting for demux thread (%s)\n", t);
+                    pthread_cond_signal(&in->wakeup);
+                    pthread_cond_wait(&in->wakeup, &in->lock);
+                } else {
+                    read_packet(in);
+                }
+                if (ds->eof)
+                    break;
+            }
+        }
         pkt = dequeue_packet(ds);
-        pthread_cond_signal(&ds->in->wakeup); // possibly read more
-        pthread_mutex_unlock(&ds->in->lock);
+        pthread_cond_signal(&in->wakeup); // possibly read more
+        pthread_mutex_unlock(&in->lock);
     }
     return pkt;
 }
@@ -874,7 +891,7 @@ int demux_read_packet_async(struct sh_stream *sh, struct demux_packet **out_pkt)
         if (ds->in->threading) {
             pthread_mutex_lock(&ds->in->lock);
             *out_pkt = dequeue_packet(ds);
-            if (use_lazy_subtitle_reading(ds)) {
+            if (use_lazy_packet_reading(ds)) {
                 r = *out_pkt ? 1 : -1;
             } else {
                 r = *out_pkt ? 1 : ((ds->eof || !ds->selected) ? -1 : 0);
@@ -1231,8 +1248,7 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         .events = DEMUX_EVENT_ALL,
     };
     demuxer->seekable = stream->seekable;
-    if (demuxer->stream->uncached_stream &&
-        !demuxer->stream->uncached_stream->seekable)
+    if (demuxer->stream->underlying && !demuxer->stream->underlying->seekable)
         demuxer->seekable = false;
 
     struct demux_internal *in = demuxer->in = talloc_ptrtype(demuxer, in);
@@ -1248,9 +1264,6 @@ static struct demuxer *open_given_type(struct mpv_global *global,
     };
     pthread_mutex_init(&in->lock, NULL);
     pthread_cond_init(&in->wakeup, NULL);
-
-    if (stream->uncached_stream)
-        in->min_secs = MPMAX(in->min_secs, opts->min_secs_cache);
 
     *in->d_thread = *demuxer;
     *in->d_buffer = *demuxer;
@@ -1290,7 +1303,8 @@ static struct demuxer *open_given_type(struct mpv_global *global,
         demux_init_cache(demuxer);
         demux_changed(in->d_thread, DEMUX_EVENT_ALL);
         demux_update(demuxer);
-        stream_control(demuxer->stream, STREAM_CTRL_SET_READAHEAD, &(int){false});
+        stream_control(demuxer->stream, STREAM_CTRL_SET_READAHEAD,
+                       &(int){params ? params->initial_readahead : false});
         if (!(params && params->disable_timeline)) {
             struct timeline *tl = timeline_load(global, log, demuxer);
             if (tl) {
@@ -1299,11 +1313,15 @@ static struct demuxer *open_given_type(struct mpv_global *global,
                 struct demuxer *sub =
                     open_given_type(global, log, &demuxer_desc_timeline, stream,
                                     &params2, DEMUX_CHECK_FORCE);
-                if (sub)
-                    return sub;
-                timeline_destroy(tl);
+                if (sub) {
+                    demuxer = sub;
+                } else {
+                    timeline_destroy(tl);
+                }
             }
         }
+        if (demuxer->is_network || stream->caching)
+            in->min_secs = MPMAX(in->min_secs, opts->min_secs_cache);
         return demuxer;
     }
 
@@ -1382,12 +1400,6 @@ struct demuxer *demux_open_url(const char *url,
                                      cancel, global);
     if (!s)
         return NULL;
-    if (params->allow_capture) {
-        char *f;
-        mp_read_option_raw(global, "stream-capture", &m_option_type_string, &f);
-        stream_set_capture_file(s, f);
-        talloc_free(f);
-    }
     if (!params->disable_cache)
         stream_enable_cache_defaults(&s);
     struct demuxer *d = demux_open(s, params, global);
@@ -1724,6 +1736,7 @@ static void thread_demux_control(void *p)
 int demux_control(demuxer_t *demuxer, int cmd, void *arg)
 {
     struct demux_internal *in = demuxer->in;
+    assert(demuxer == in->d_user);
 
     if (in->threading) {
         pthread_mutex_lock(&in->lock);
@@ -1735,7 +1748,20 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg)
 
     int r = 0;
     struct demux_control_args args = {demuxer, cmd, arg, &r};
-    demux_run_on_thread(demuxer, thread_demux_control, &args);
+    if (in->threading) {
+        MP_VERBOSE(in, "blocking on demuxer thread\n");
+        pthread_mutex_lock(&in->lock);
+        while (in->run_fn)
+            pthread_cond_wait(&in->wakeup, &in->lock);
+        in->run_fn = thread_demux_control;
+        in->run_fn_arg = &args;
+        pthread_cond_signal(&in->wakeup);
+        while (in->run_fn)
+            pthread_cond_wait(&in->wakeup, &in->lock);
+        pthread_mutex_unlock(&in->lock);
+    } else {
+        thread_demux_control(&args);
+    }
 
     return r;
 }
@@ -1745,27 +1771,6 @@ int demux_stream_control(demuxer_t *demuxer, int ctrl, void *arg)
     struct demux_ctrl_stream_ctrl c = {ctrl, arg, STREAM_UNSUPPORTED};
     demux_control(demuxer, DEMUXER_CTRL_STREAM_CTRL, &c);
     return c.res;
-}
-
-void demux_run_on_thread(struct demuxer *demuxer, void (*fn)(void *), void *ctx)
-{
-    struct demux_internal *in = demuxer->in;
-    assert(demuxer == in->d_user);
-
-    if (in->threading) {
-        MP_VERBOSE(in, "blocking on demuxer thread\n");
-        pthread_mutex_lock(&in->lock);
-        while (in->run_fn)
-            pthread_cond_wait(&in->wakeup, &in->lock);
-        in->run_fn = fn;
-        in->run_fn_arg = ctx;
-        pthread_cond_signal(&in->wakeup);
-        while (in->run_fn)
-            pthread_cond_wait(&in->wakeup, &in->lock);
-        pthread_mutex_unlock(&in->lock);
-    } else {
-        fn(ctx);
-    }
 }
 
 bool demux_cancel_test(struct demuxer *demuxer)

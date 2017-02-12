@@ -40,6 +40,7 @@
 #include "stream/stream.h"
 #include "video/csputils.h"
 #include "video/hwdec.h"
+#include "video/out/opengl/hwdec.h"
 #include "video/image_writer.h"
 #include "sub/osd.h"
 #include "audio/filter/af.h"
@@ -86,6 +87,8 @@ extern const struct m_obj_list vf_obj_list;
 extern const struct m_obj_list af_obj_list;
 extern const struct m_obj_list vo_obj_list;
 extern const struct m_obj_list ao_obj_list;
+
+extern const struct m_sub_options angle_conf;
 
 const struct m_opt_choice_alternatives mp_hwdec_names[] = {
     {"no",          HWDEC_NONE},
@@ -150,9 +153,9 @@ const struct m_sub_options stream_cache_conf = {
 
 static const m_option_t mp_vo_opt_list[] = {
     OPT_SETTINGSLIST("vo", video_driver_list, 0, &vo_obj_list, ),
-    OPT_CHOICE_C("hwdec-preload", hwdec_preload_api, 0, mp_hwdec_names),
     OPT_SUBSTRUCT("sws", sws_opts, sws_conf, 0),
     OPT_FLAG("taskbar-progress", taskbar_progress, 0),
+    OPT_FLAG("snap-window", snap_window, 0),
     OPT_FLAG("ontop", ontop, 0),
     OPT_FLAG("border", border, 0),
     OPT_FLAG("fit-border", fit_border, 0),
@@ -199,7 +202,11 @@ static const m_option_t mp_vo_opt_list[] = {
                         0, drm_validate_connector_opt),
     OPT_INT("drm-mode", drm_mode_id, 0),
 #endif
-
+#if HAVE_GL
+    OPT_STRING_VALIDATE("opengl-hwdec-interop", gl_hwdec_interop, 0,
+                        gl_hwdec_validate_opt),
+    OPT_REPLACED("hwdec-preload", "opengl-hwdec-interop"),
+#endif
     {0}
 };
 
@@ -216,6 +223,7 @@ const struct m_sub_options vo_sub_opts = {
         .keepaspect_window = 1,
         .hidpi_window_scale = 1,
         .taskbar_progress = 1,
+        .snap_window = 0,
         .border = 1,
         .fit_border = 1,
         .WinID = -1,
@@ -379,6 +387,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
     OPT_FLAG("demuxer-thread", demuxer_thread, 0),
+    OPT_FLAG("prefetch-playlist", prefetch_open, 0),
     OPT_FLAG("cache-pause", cache_pausing, 0),
 
     OPT_DOUBLE("mf-fps", mf_fps, 0),
@@ -466,6 +475,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("sub-forced-only", forced_subs_only, UPDATE_OSD),
     OPT_FLAG("stretch-dvd-subs", stretch_dvd_subs, UPDATE_OSD),
     OPT_FLAG("stretch-image-subs-to-screen", stretch_image_subs, UPDATE_OSD),
+    OPT_FLAG("image-subs-video-resolution", image_subs_video_res, UPDATE_OSD),
     OPT_FLAG("sub-fix-timing", sub_fix_timing, 0),
     OPT_CHOICE("sub-auto", sub_auto, 0,
                ({"no", -1}, {"exact", 0}, {"fuzzy", 1}, {"all", 2})),
@@ -490,6 +500,7 @@ const m_option_t mp_opts[] = {
                ({"none", 0}, {"light", 1}, {"normal", 2}, {"native", 3})),
     OPT_CHOICE("sub-ass-shaper", ass_shaper, UPDATE_OSD,
                ({"simple", 0}, {"complex", 1})),
+    OPT_FLAG("sub-ass-justify", ass_justify, 0),
     OPT_CHOICE("sub-ass-style-override", ass_style_override, UPDATE_OSD,
                ({"no", 0}, {"yes", 1}, {"force", 3}, {"signfs", 4}, {"strip", 5})),
     OPT_FLAG("sub-scale-by-window", sub_scale_by_window, UPDATE_OSD),
@@ -583,7 +594,6 @@ const m_option_t mp_opts[] = {
 
     OPT_FLAG("untimed", untimed, 0),
 
-    OPT_STRING("stream-capture", stream_capture, M_OPT_FILE),
     OPT_STRING("stream-dump", stream_dump, M_OPT_FILE),
 
     OPT_FLAG("stop-playback-on-init-failure", stop_playback_on_init_failure, 0),
@@ -671,6 +681,8 @@ const m_option_t mp_opts[] = {
     OPT_STRING("screenshot-template", screenshot_template, 0),
     OPT_STRING("screenshot-directory", screenshot_directory, 0),
 
+    OPT_STRING("record-file", record_file, M_OPT_FILE),
+
     OPT_SUBSTRUCT("", input_opts, input_config, 0),
 
     OPT_PRINT("list-protocols", stream_print_proto_list),
@@ -686,6 +698,15 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("", gl_video_opts, gl_video_conf, 0),
 #endif
 
+#if HAVE_EGL_ANGLE
+    OPT_SUBSTRUCT("", angle_opts, angle_conf, 0),
+#endif
+
+#if HAVE_GL_WIN32
+    OPT_CHOICE("opengl-dwmflush", wingl_dwm_flush, 0,
+               ({"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})),
+#endif
+
 #if HAVE_ENCODING
     OPT_SUBSTRUCT("", encode_opts, encode_config, 0),
 #endif
@@ -697,7 +718,8 @@ const m_option_t mp_opts[] = {
     OPT_REPLACED("ass", "sub-ass"),
     OPT_REPLACED("audiofile", "audio-file"),
     OPT_REMOVED("benchmark", "use --untimed (no stats)"),
-    OPT_REMOVED("capture", "use --stream-capture=<filename>"),
+    OPT_REMOVED("capture", NULL),
+    OPT_REMOVED("stream-capture", NULL),
     OPT_REMOVED("channels", "use --audio-channels (changed semantics)"),
     OPT_REPLACED("cursor-autohide-delay", "cursor-autohide"),
     OPT_REPLACED("delay", "audio-delay"),

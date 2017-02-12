@@ -258,8 +258,6 @@ static int open_internal(const stream_info_t *sinfo, const char *url, int flags,
 
     assert(s->seekable == !!s->seek);
 
-    s->uncached_type = s->type;
-
     if (s->mime_type)
         MP_VERBOSE(s, "Mime-type: '%s'\n", s->mime_type);
 
@@ -328,7 +326,7 @@ stream_t *open_output_stream(const char *filename, struct mpv_global *global)
 
 static bool stream_reconnect(stream_t *s)
 {
-    if (!s->streaming || s->uncached_stream || !s->seekable || !s->cancel)
+    if (!s->streaming || s->caching || !s->seekable || !s->cancel)
         return false;
 
     int64_t pos = s->pos;
@@ -353,57 +351,25 @@ static bool stream_reconnect(stream_t *s)
     return false;
 }
 
-static void stream_capture_write(stream_t *s, void *buf, size_t len)
-{
-    if (s->capture_file && len > 0) {
-        if (fwrite(buf, len, 1, s->capture_file) < 1) {
-            MP_ERR(s, "Error writing capture file: %s\n", mp_strerror(errno));
-            stream_set_capture_file(s, NULL);
-        }
-    }
-}
-
-void stream_set_capture_file(stream_t *s, const char *filename)
-{
-    if (!bstr_equals(bstr0(s->capture_filename), bstr0(filename))) {
-        if (s->capture_file)
-            fclose(s->capture_file);
-        talloc_free(s->capture_filename);
-        s->capture_file = NULL;
-        s->capture_filename = NULL;
-        if (filename) {
-            s->capture_file = fopen(filename, "ab");
-            if (s->capture_file) {
-                s->capture_filename = talloc_strdup(NULL, filename);
-                if (s->buf_pos < s->buf_len)
-                    stream_capture_write(s, s->buffer, s->buf_len);
-            } else {
-                MP_ERR(s, "Error opening capture file: %s\n", mp_strerror(errno));
-            }
-        }
-    }
-}
-
 // Read function bypassing the local stream buffer. This will not write into
 // s->buffer, but into buf[0..len] instead.
 // Returns 0 on error or EOF, and length of bytes read on success.
 // Partial reads are possible, even if EOF is not reached.
 static int stream_read_unbuffered(stream_t *s, void *buf, int len)
 {
-    int orig_len = len;
+    int res = 0;
     s->buf_pos = s->buf_len = 0;
     // we will retry even if we already reached EOF previously.
-    len = s->fill_buffer ? s->fill_buffer(s, buf, len) : -1;
-    if (len < 0)
-        len = 0;
-    if (len == 0) {
+    if (s->fill_buffer && !mp_cancel_test(s->cancel))
+        res = s->fill_buffer(s, buf, len);
+    if (res <= 0) {
         // just in case this is an error e.g. due to network
         // timeout reset and retry
         // do not retry if this looks like proper eof
         int64_t size = stream_get_size(s);
         if (!s->eof && s->pos != size && stream_reconnect(s)) {
             s->eof = 1; // make sure EOF is set to ensure no endless recursion
-            return stream_read_unbuffered(s, buf, orig_len);
+            return stream_read_unbuffered(s, buf, len);
         }
 
         s->eof = 1;
@@ -411,9 +377,8 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
     }
     // When reading succeeded we are obviously not at eof.
     s->eof = 0;
-    s->pos += len;
-    stream_capture_write(s, buf, len);
-    return len;
+    s->pos += res;
+    return res;
 }
 
 static int stream_fill_buffer_by(stream_t *s, int64_t len)
@@ -647,11 +612,9 @@ void free_stream(stream_t *s)
     if (!s)
         return;
 
-    stream_set_capture_file(s, NULL);
-
     if (s->close)
         s->close(s);
-    free_stream(s->uncached_stream);
+    free_stream(s->underlying);
     talloc_free(s);
 }
 
@@ -670,8 +633,8 @@ stream_t *open_memory_stream(void *data, int len)
 static stream_t *open_cache(stream_t *orig, const char *name)
 {
     stream_t *cache = new_stream();
-    cache->uncached_type = orig->uncached_type;
-    cache->uncached_stream = orig;
+    cache->underlying = orig;
+    cache->caching = true;
     cache->seekable = true;
     cache->mode = STREAM_READ;
     cache->read_chunk = 4 * STREAM_BUFFER_SIZE;
@@ -682,6 +645,8 @@ static stream_t *open_cache(stream_t *orig, const char *name)
     cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
     cache->streaming = orig->streaming,
     cache->is_network = orig->is_network;
+    cache->is_local_file = orig->is_local_file;
+    cache->is_directory = orig->is_directory;
     cache->cancel = orig->cancel;
     cache->global = orig->global;
 
@@ -722,7 +687,7 @@ static int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
 
     stream_t *fcache = open_cache(orig, "file-cache");
     if (stream_file_cache_init(fcache, orig, &use_opts) <= 0) {
-        fcache->uncached_stream = NULL; // don't free original stream
+        fcache->underlying = NULL; // don't free original stream
         free_stream(fcache);
         fcache = orig;
     }
@@ -731,10 +696,10 @@ static int stream_enable_cache(stream_t **stream, struct mp_cache_opts *opts)
 
     int res = stream_cache_init(cache, fcache, &use_opts);
     if (res <= 0) {
-        cache->uncached_stream = NULL; // don't free original stream
+        cache->underlying = NULL; // don't free original stream
         free_stream(cache);
         if (fcache != orig) {
-            fcache->uncached_stream = NULL;
+            fcache->underlying = NULL;
             free_stream(fcache);
         }
     } else {

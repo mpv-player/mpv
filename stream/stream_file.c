@@ -234,7 +234,7 @@ static int open_f(stream_t *stream)
         .fd = -1
     };
     stream->priv = p;
-    stream->type = STREAMTYPE_FILE;
+    stream->is_local_file = true;
 
     bool write = stream->mode == STREAM_WRITE;
     int m = O_CLOEXEC | (write ? O_RDWR | O_CREAT | O_TRUNC : O_RDONLY);
@@ -281,7 +281,7 @@ static int open_f(stream_t *stream)
         if (fstat(p->fd, &st) == 0) {
             if (S_ISDIR(st.st_mode)) {
                 p->use_poll = false;
-                stream->type = STREAMTYPE_DIR;
+                stream->is_directory = true;
                 stream->allow_caching = false;
                 MP_INFO(stream, "This is a directory - adding to playlist.\n");
             }

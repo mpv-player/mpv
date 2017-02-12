@@ -294,9 +294,10 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
     mf_t *mf;
 
     if (strncmp(demuxer->stream->url, "mf://", 5) == 0 &&
-        demuxer->stream->type == STREAMTYPE_MF)
+        demuxer->stream->info && strcmp(demuxer->stream->info->name, "mf") == 0)
+    {
         mf = open_mf_pattern(demuxer, demuxer->log, demuxer->stream->url + 5);
-    else {
+    } else {
         mf = open_mf_single(demuxer, demuxer->log, demuxer->stream->url);
         int bog = 0;
         MP_TARRAY_APPEND(mf, mf->streams, bog, demuxer->stream);

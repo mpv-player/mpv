@@ -21,6 +21,12 @@
 #include "common.h"
 #include "context.h"
 
+#if HAVE_EGL_ANGLE
+// On Windows, egl_helpers.c is only used by ANGLE, where the EGL functions may
+// be loaded dynamically from ANGLE DLLs
+#include "angle_dynamic.h"
+#endif
+
 // EGL 1.5
 #ifndef EGL_CONTEXT_OPENGL_PROFILE_MASK
 #define EGL_CONTEXT_MAJOR_VERSION               0x3098
@@ -31,23 +37,22 @@
 #define EGL_OPENGL_ES3_BIT                      0x00000040
 #endif
 
+// es_version = 0 (desktop), 2/3 (ES major version)
 static bool create_context(EGLDisplay display, struct mp_log *log, bool probing,
-                           int vo_flags, bool es3,
+                           int es_version, struct mpegl_opts *opts,
                            EGLContext *out_context, EGLConfig *out_config)
 {
     int msgl = probing ? MSGL_V : MSGL_FATAL;
-    bool es = vo_flags & VOFLAG_GLES;
-
 
     EGLenum api = EGL_OPENGL_API;
     EGLint rend = EGL_OPENGL_BIT;
     const char *name = "Desktop OpenGL";
-    if (es) {
+    if (es_version == 2) {
         api = EGL_OPENGL_ES_API;
         rend = EGL_OPENGL_ES2_BIT;
         name = "GLES 2.0";
     }
-    if (es3) {
+    if (es_version == 3) {
         api = EGL_OPENGL_ES_API;
         rend = EGL_OPENGL_ES3_BIT;
         name = "GLES 3.x";
@@ -66,27 +71,37 @@ static bool create_context(EGLDisplay display, struct mp_log *log, bool probing,
         EGL_RED_SIZE, 1,
         EGL_GREEN_SIZE, 1,
         EGL_BLUE_SIZE, 1,
-        EGL_ALPHA_SIZE, (vo_flags & VOFLAG_ALPHA ) ? 1 : 0,
-        EGL_DEPTH_SIZE, 0,
+        EGL_ALPHA_SIZE, (opts->vo_flags & VOFLAG_ALPHA ) ? 1 : 0,
         EGL_RENDERABLE_TYPE, rend,
         EGL_NONE
     };
 
-    EGLint config_count;
-    EGLConfig config;
+    EGLint num_configs;
+    if (!eglChooseConfig(display, attributes, NULL, 0, &num_configs))
+        num_configs = 0;
 
-    eglChooseConfig(display, attributes, &config, 1, &config_count);
+    EGLConfig *configs = talloc_array(NULL, EGLConfig, num_configs);
+    if (!eglChooseConfig(display, attributes, configs, num_configs, &num_configs))
+        num_configs = 0;
 
-    if (!config_count) {
-        mp_msg(log, msgl, "Could not find EGL configuration!\n");
+    if (!num_configs) {
+        talloc_free(configs);
+        mp_msg(log, msgl, "Could not choose EGLConfig!\n");
         return false;
     }
 
+    int chosen = 0;
+    if (opts->refine_config)
+        chosen = opts->refine_config(opts->user_data, configs, num_configs);
+    EGLConfig config = configs[chosen];
+
+    talloc_free(configs);
+
     EGLContext *ctx = NULL;
 
-    if (es) {
+    if (es_version) {
         EGLint attrs[] = {
-            EGL_CONTEXT_CLIENT_VERSION, es3 ? 3 : 2,
+            EGL_CONTEXT_CLIENT_VERSION, es_version,
             EGL_NONE
         };
 
@@ -134,6 +149,18 @@ static bool create_context(EGLDisplay display, struct mp_log *log, bool probing,
 bool mpegl_create_context(EGLDisplay display, struct mp_log *log, int vo_flags,
                           EGLContext *out_context, EGLConfig *out_config)
 {
+    return mpegl_create_context_opts(display, log,
+        &(struct mpegl_opts){.vo_flags = vo_flags}, out_context, out_config);
+}
+
+// Create a context and return it and the config it was created with. If it
+// returns false, the out_* pointers are set to NULL.
+bool mpegl_create_context_opts(EGLDisplay display, struct mp_log *log,
+                               struct mpegl_opts *opts,
+                               EGLContext *out_context, EGLConfig *out_config)
+{
+    assert(opts);
+
     *out_context = NULL;
     *out_config = NULL;
 
@@ -143,26 +170,25 @@ bool mpegl_create_context(EGLDisplay display, struct mp_log *log, int vo_flags,
     mp_verbose(log, "EGL_VERSION=%s\nEGL_VENDOR=%s\nEGL_CLIENT_APIS=%s\n",
                STR_OR_ERR(version), STR_OR_ERR(vendor), STR_OR_ERR(apis));
 
-    int clean_flags = vo_flags & ~(unsigned)(VOFLAG_GLES | VOFLAG_NO_GLES);
-    bool probing = vo_flags & VOFLAG_PROBING;
+    bool probing = opts->vo_flags & VOFLAG_PROBING;
     int msgl = probing ? MSGL_V : MSGL_FATAL;
-    bool try_desktop = !(vo_flags & VOFLAG_NO_GLES);
+    bool try_gles = !(opts->vo_flags & VOFLAG_NO_GLES);
 
-    if (!(vo_flags & VOFLAG_GLES)) {
+    if (!(opts->vo_flags & VOFLAG_GLES)) {
         // Desktop OpenGL
-        if (create_context(display, log, try_desktop | probing, clean_flags, false,
+        if (create_context(display, log, try_gles | probing, 0, opts,
                            out_context, out_config))
             return true;
     }
 
-    if (try_desktop) {
+    if (try_gles) {
         // ES 3.x
-        if (create_context(display, log, true, clean_flags | VOFLAG_GLES, true,
+        if (create_context(display, log, true, 3, opts,
                            out_context, out_config))
             return true;
 
         // ES 2.0
-        if (create_context(display, log, probing, clean_flags | VOFLAG_GLES, false,
+        if (create_context(display, log, probing, 2, opts,
                            out_context, out_config))
             return true;
     }

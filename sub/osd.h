@@ -134,6 +134,7 @@ struct osd_style_opts {
     float blur;
     int bold;
     int italic;
+    int justify;
 };
 
 extern const struct m_sub_options osd_style_conf;
@@ -199,17 +200,9 @@ void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
                          struct mp_osd_res res, double compensate_par);
 
 // defined in osd_libass.c and osd_dummy.c
-
-// internal use only
-void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
-                            int format, struct sub_bitmaps *out_imgs);
-void osd_init_backend(struct osd_state *osd);
-void osd_destroy_backend(struct osd_state *osd);
-
 void osd_set_external(struct osd_state *osd, void *id, int res_x, int res_y,
                       char *text);
-
-// doesn't need locking
+void osd_get_text_size(struct osd_state *osd, int *out_screen_h, int *out_font_h);
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function);
 
 #endif /* MPLAYER_SUB_H */

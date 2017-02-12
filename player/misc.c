@@ -17,7 +17,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
-#include <pthread.h>
+#include <errno.h>
 #include <assert.h>
 
 #include "config.h"
@@ -213,21 +213,34 @@ int stream_dump(struct MPContext *mpctx, const char *source_filename)
 
     int64_t size = stream_get_size(stream);
 
-    stream_set_capture_file(stream, opts->stream_dump);
+    FILE *dest = fopen(opts->stream_dump, "wb");
+    if (!dest) {
+        MP_ERR(mpctx, "Error opening dump file: %s\n", mp_strerror(errno));
+        return -1;
+    }
 
-    while (mpctx->stop_play == KEEP_PLAYING && !stream->eof) {
+    bool ok = true;
+
+    while (mpctx->stop_play == KEEP_PLAYING && ok) {
         if (!opts->quiet && ((stream->pos / (1024 * 1024)) % 2) == 1) {
             uint64_t pos = stream->pos;
             MP_MSG(mpctx, MSGL_STATUS, "Dumping %lld/%lld...",
                    (long long int)pos, (long long int)size);
         }
-        stream_fill_buffer(stream);
+        bstr data = stream_peek(stream, STREAM_MAX_BUFFER_SIZE);
+        if (data.len == 0) {
+            ok &= stream->eof;
+            break;
+        }
+        ok &= fwrite(data.start, data.len, 1, dest) == 1;
+        stream_skip(stream, data.len);
         mp_wakeup_core(mpctx); // don't actually sleep
         mp_idle(mpctx); // but process input
     }
 
+    ok &= fclose(dest) == 0;
     free_stream(stream);
-    return 0;
+    return ok ? 0 : -1;
 }
 
 void merge_playlist_files(struct playlist *pl)
@@ -250,52 +263,4 @@ void merge_playlist_files(struct playlist *pl)
     playlist_clear(pl);
     playlist_add_file(pl, edl);
     talloc_free(edl);
-}
-
-struct wrapper_args {
-    struct MPContext *mpctx;
-    void (*thread_fn)(void *);
-    void *thread_arg;
-    pthread_mutex_t mutex;
-    bool done;
-};
-
-static void *thread_wrapper(void *pctx)
-{
-    struct wrapper_args *args = pctx;
-    mpthread_set_name("opener");
-    args->thread_fn(args->thread_arg);
-    pthread_mutex_lock(&args->mutex);
-    args->done = true;
-    pthread_mutex_unlock(&args->mutex);
-    mp_wakeup_core(args->mpctx); // this interrupts mp_idle()
-    return NULL;
-}
-
-// Run the thread_fn in a new thread. Wait until the thread returns, but while
-// waiting, process input and input commands.
-int mpctx_run_reentrant(struct MPContext *mpctx, void (*thread_fn)(void *arg),
-                        void *thread_arg)
-{
-    struct wrapper_args args = {mpctx, thread_fn, thread_arg};
-    pthread_mutex_init(&args.mutex, NULL);
-    bool success = false;
-    pthread_t thread;
-    if (pthread_create(&thread, NULL, thread_wrapper, &args))
-        goto done;
-    while (!success) {
-        mp_idle(mpctx);
-
-        if (mpctx->stop_play)
-            mp_cancel_trigger(mpctx->playback_abort);
-
-        pthread_mutex_lock(&args.mutex);
-        success |= args.done;
-        pthread_mutex_unlock(&args.mutex);
-    }
-    pthread_join(thread, NULL);
-done:
-    pthread_mutex_destroy(&args.mutex);
-    mp_wakeup_core(mpctx); // avoid lost wakeups during waiting
-    return success ? 0 : -1;
 }

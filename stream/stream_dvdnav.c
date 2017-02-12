@@ -507,7 +507,6 @@ static int open_s_internal(stream_t *stream)
     stream->fill_buffer = fill_buffer;
     stream->control = control;
     stream->close = stream_dvdnav_close;
-    stream->type = STREAMTYPE_DVD;
     stream->demuxer = "+disc";
     stream->lavf_type = "mpeg";
     stream->allow_caching = false;
@@ -596,7 +595,7 @@ unsupported:
 }
 
 const stream_info_t stream_info_ifo_dvdnav = {
-    .name = "ifo/dvdnav",
+    .name = "ifo_dvdnav",
     .open = ifo_dvdnav_stream_open,
     .protocols = (const char*const[]){ "file", "", NULL },
 };

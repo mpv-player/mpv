@@ -140,7 +140,7 @@ L
     Toggle infinite looping.
 
 Ctrl + and Ctrl -
-    Adjust audio delay by +/- 0.1 seconds.
+    Adjust audio delay (A/V sync) by +/- 0.1 seconds.
 
 u
     Switch between applying no style overrides to SSA/ASS subtitles, and
@@ -672,6 +672,10 @@ PROTOCOLS
     Note that not all prefixes are documented here. Undocumented prefixes are
     either aliases to documented protocols, or are just redirections to
     protocols implemented and documented in FFmpeg.
+
+    ``data:`` is supported in FFmpeg (not in Libav), but needs to be in the
+    format ``data://``. This is done to avoid ambiguity with filenames. You
+    can also prefix it with ``lavf://`` or ``ffmpeg://``.
 
 ``ytdl://...``
     By default, the youtube-dl hook script (enabled by default for mpv CLI)

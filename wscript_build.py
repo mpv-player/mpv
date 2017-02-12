@@ -51,39 +51,49 @@ def build(ctx):
     ctx.load('waf_customizations')
     ctx.load('generators.sources')
 
-    ctx.file2string(
+    ctx(
+        features = "file2string",
         source = "TOOLS/osxbundle/mpv.app/Contents/Resources/icon.icns",
-        target = "osdep/macosx_icon.inc")
+        target = "osdep/macosx_icon.inc",
+    )
 
-    ctx.file2string(
+    ctx(
+        features = "file2string",
         source = "video/out/x11_icon.bin",
-        target = "video/out/x11_icon.inc")
+        target = "video/out/x11_icon.inc",
+    )
 
-    ctx.file2string(
+    ctx(
+        features = "file2string",
         source = "etc/input.conf",
-        target = "input/input_conf.h")
+        target = "input/input_conf.h",
+    )
 
-    ctx.file2string(
+    ctx(
+        features = "file2string",
         source = "etc/builtin.conf",
-        target = "player/builtin_conf.inc")
+        target = "player/builtin_conf.inc",
+    )
 
-    ctx.file2string(
+    ctx(
+        features = "file2string",
         source = "sub/osd_font.otf",
-        target = "sub/osd_font.h")
+        target = "sub/osd_font.h",
+    )
 
     lua_files = ["defaults.lua", "assdraw.lua", "options.lua", "osc.lua",
                  "ytdl_hook.lua"]
+
     for fn in lua_files:
         fn = "player/lua/" + fn
-        ctx.file2string(source = fn, target = os.path.splitext(fn)[0] + ".inc")
+        ctx(
+            features = "file2string",
+            source = fn,
+            target = os.path.splitext(fn)[0] + ".inc",
+        )
 
-    ctx.matroska_header(
-        source = "demux/ebml.c demux/demux_mkv.c",
-        target = "ebml_types.h")
-
-    ctx.matroska_definitions(
-        source = "demux/ebml.c",
-        target = "ebml_defs.c")
+    ctx(features = "ebml_header", target = "ebml_types.h")
+    ctx(features = "ebml_definitions", target = "ebml_defs.c")
 
     if ctx.env.DEST_OS == 'win32':
         main_fn_c = 'osdep/main-fn-win.c'
@@ -162,6 +172,7 @@ def build(ctx):
         ( "common/tags.c" ),
         ( "common/msg.c" ),
         ( "common/playlist.c" ),
+        ( "common/recorder.c" ),
         ( "common/version.c" ),
 
         ## Demuxers
@@ -292,15 +303,16 @@ def build(ctx):
         ( "video/vaapi.c",                       "vaapi" ),
         ( "video/vdpau.c",                       "vdpau" ),
         ( "video/vdpau_mixer.c",                 "vdpau" ),
-        ( "video/decode/dec_video.c"),
-        ( "video/decode/cuda.c",                 "cuda-hwaccel" ),
-        ( "video/decode/dxva2.c",                "d3d-hwaccel" ),
-        ( "video/decode/d3d11va.c",              "d3d-hwaccel" ),
         ( "video/decode/d3d.c",                  "win32" ),
-        ( "video/decode/vaapi.c",                "vaapi-hwaccel" ),
+        ( "video/decode/dec_video.c"),
+        ( "video/decode/hw_cuda.c",              "cuda-hwaccel" ),
+        ( "video/decode/hw_dxva2.c",             "d3d-hwaccel" ),
+        ( "video/decode/hw_d3d11va.c",           "d3d-hwaccel" ),
+        ( "video/decode/hw_vaapi.c",             "vaapi-hwaccel-new" ),
+        ( "video/decode/hw_vaapi_old.c",         "vaapi-hwaccel-old" ),
+        ( "video/decode/hw_vdpau.c",             "vdpau-hwaccel" ),
+        ( "video/decode/hw_videotoolbox.c",      "videotoolbox-hwaccel" ),
         ( "video/decode/vd_lavc.c" ),
-        ( "video/decode/videotoolbox.c",         "videotoolbox-hwaccel" ),
-        ( "video/decode/vdpau.c",                "vdpau-hwaccel" ),
         ( "video/filter/refqueue.c" ),
         ( "video/filter/vf.c" ),
         ( "video/filter/vf_buffer.c" ),
@@ -459,13 +471,19 @@ def build(ctx):
             features     = "c",
         )
 
+    syms = False
+    if ctx.dependency_satisfied('cplugins'):
+        syms = True
+        ctx.load("syms")
+
     if ctx.dependency_satisfied('cplayer'):
         ctx(
             target       = "mpv",
             source       = main_fn_c,
             use          = ctx.dependencies_use() + ['objects'],
             includes     = _all_includes(ctx),
-            features     = "c cprogram",
+            features     = "c cprogram" + (" syms" if syms else ""),
+            export_symbols_def = "libmpv/mpv.def", # for syms=True
             install_path = ctx.env.BINDIR
         )
         for f in ['mpv.conf', 'input.conf', 'mplayer-input.conf', \

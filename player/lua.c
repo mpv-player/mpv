@@ -1079,6 +1079,7 @@ static int script_readdir(lua_State *L)
         lua_pushstring(L, name); // list index name
         lua_settable(L, -3); // list
     }
+    closedir(dir);
     talloc_free(fullpath);
     return 1;
 }
@@ -1331,6 +1332,7 @@ static void add_functions(struct script_ctx *ctx)
 }
 
 const struct mp_scripting mp_scripting_lua = {
+    .name = "lua script",
     .file_ext = "lua",
     .load = load_lua,
 };

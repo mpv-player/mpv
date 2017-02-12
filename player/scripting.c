@@ -37,10 +37,14 @@
 #include "libmpv/client.h"
 
 extern const struct mp_scripting mp_scripting_lua;
+extern const struct mp_scripting mp_scripting_cplugin;
 
 static const struct mp_scripting *const scripting_backends[] = {
 #if HAVE_LUA
     &mp_scripting_lua,
+#endif
+#if HAVE_CPLUGINS
+    &mp_scripting_cplugin,
 #endif
     NULL
 };
@@ -80,13 +84,12 @@ static void *script_thread(void *p)
     struct thread_arg *arg = p;
 
     char name[90];
-    snprintf(name, sizeof(name), "lua (%s)", mpv_client_name(arg->client));
+    snprintf(name, sizeof(name), "%s (%s)", arg->backend->name,
+             mpv_client_name(arg->client));
     mpthread_set_name(name);
 
     if (arg->backend->load(arg->client, arg->fname) < 0)
-        MP_ERR(arg, "Could not load script %s\n", arg->fname);
-
-    MP_VERBOSE(arg, "Exiting...\n");
+        MP_ERR(arg, "Could not load %s %s\n", arg->backend->name, arg->fname);
 
     mpv_detach_destroy(arg->client);
     talloc_free(arg);
@@ -133,7 +136,7 @@ int mp_load_script(struct MPContext *mpctx, const char *fname)
     }
     arg->log = mp_client_get_log(arg->client);
 
-    MP_VERBOSE(arg, "Loading script %s...\n", fname);
+    MP_VERBOSE(arg, "Loading %s %s...\n", backend->name, fname);
 
     pthread_t thread;
     if (pthread_create(&thread, NULL, script_thread, arg)) {
@@ -228,3 +231,34 @@ void mp_load_scripts(struct MPContext *mpctx)
     }
     talloc_free(tmp);
 }
+
+#if HAVE_CPLUGINS
+
+#include <dlfcn.h>
+
+#define MPV_DLOPEN_FN "mpv_open_cplugin"
+typedef int (*mpv_open_cplugin)(mpv_handle *handle);
+
+static int load_cplugin(struct mpv_handle *client, const char *fname)
+{
+    int r = -1;
+    void *lib = dlopen(fname, RTLD_NOW | RTLD_LOCAL);
+    if (!lib)
+        goto error;
+    // Note: once loaded, we never unload, as unloading the libraries linked to
+    //       the plugin can cause random serious problems.
+    mpv_open_cplugin sym = (mpv_open_cplugin)dlsym(lib, MPV_DLOPEN_FN);
+    if (!sym)
+        goto error;
+    r = sym(client) ? -1 : 0;
+error:
+    return r;
+}
+
+const struct mp_scripting mp_scripting_cplugin = {
+    .name = "SO plugin",
+    .file_ext = "so",
+    .load = load_cplugin,
+};
+
+#endif

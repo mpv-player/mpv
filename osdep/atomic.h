@@ -61,25 +61,6 @@ typedef struct { volatile unsigned long long v; } atomic_ullong;
     __atomic_compare_exchange_n(&(a)->v, b, c, 0, __ATOMIC_SEQ_CST, \
     __ATOMIC_SEQ_CST)
 
-#elif HAVE_SYNC_BUILTINS
-
-#define atomic_load(p) \
-    __sync_fetch_and_add(&(p)->v, 0)
-#define atomic_store(p, val) \
-    (__sync_synchronize(), (p)->v = (val), __sync_synchronize())
-#define atomic_fetch_add(a, b) \
-    __sync_fetch_and_add(&(a)->v, b)
-#define atomic_fetch_and(a, b) \
-    __sync_fetch_and_and(&(a)->v, b)
-#define atomic_fetch_or(a, b) \
-    __sync_fetch_and_or(&(a)->v, b)
-// Assumes __sync_val_compare_and_swap is "strong" (using the C11 meaning).
-#define atomic_compare_exchange_strong(p, old, new) \
-    ({ __typeof__((p)->v) val_ = __sync_val_compare_and_swap(&(p)->v, *(old), new); \
-       bool ok_ = val_ == *(old);       \
-       if (!ok_) *(old) = val_;         \
-       ok_; })
-
 #elif defined(__GNUC__)
 
 #include <pthread.h>

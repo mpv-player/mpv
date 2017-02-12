@@ -451,6 +451,11 @@ are useful only in special situations.
     multiple properties at once, you might not want to act on each property
     change, but only when all change notifications have been received.
 
+``mp.unregister_idle(fn)``
+    Undo ``mp.register_idle(fn)``. This removes all idle handlers that
+    are equal to the ``fn`` parameter. This uses normal Lua ``==`` comparison,
+    so be careful when dealing with closures.
+
 ``mp.enable_messages(level)``
     Set the minimum log level of which mpv message output to receive. These
     messages are normally printed to the terminal. By calling this function,

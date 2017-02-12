@@ -359,6 +359,8 @@ void mpv_detach_destroy(mpv_handle *ctx)
     if (!ctx)
         return;
 
+    MP_VERBOSE(ctx, "Exiting...\n");
+
     // reserved_events equals the number of asynchronous requests that weren't
     // yet replied. In order to avoid that trying to reply to a removed client
     // causes a crash, block until all asynchronous requests were served.
@@ -407,7 +409,13 @@ void mpv_terminate_destroy(mpv_handle *ctx)
     if (!ctx)
         return;
 
-    mpv_command(ctx, (const char*[]){"quit", NULL});
+    if (ctx->mpctx->initialized) {
+        mpv_command(ctx, (const char*[]){"quit", NULL});
+    } else {
+        mp_dispatch_lock(ctx->mpctx->dispatch);
+        ctx->mpctx->stop_play = PT_QUIT;
+        mp_dispatch_unlock(ctx->mpctx->dispatch);
+    }
 
     if (!ctx->owner) {
         mpv_detach_destroy(ctx);
@@ -851,6 +859,12 @@ static bool compare_value(void *a, void *b, mpv_format format)
             return false;
         return compare_value(&a_n->u, &b_n->u, a_n->format);
     }
+    case MPV_FORMAT_BYTE_ARRAY: {
+        struct mpv_byte_array *a_r = a, *b_r = b;
+        if (a_r->size != b_r->size)
+            return false;
+        return memcmp(a_r->data, b_r->data, a_r->size) == 0;
+    }
     case MPV_FORMAT_NODE_ARRAY:
     case MPV_FORMAT_NODE_MAP:
     {
@@ -968,7 +982,7 @@ static int run_client_command(mpv_handle *ctx, struct mp_cmd *cmd, mpv_node *res
         return MPV_ERROR_INVALID_PARAMETER;
 
     if (mp_input_is_abort_cmd(cmd))
-        mp_cancel_trigger(ctx->mpctx->playback_abort);
+        mp_abort_playback_async(ctx->mpctx);
 
     cmd->sender = ctx->name;
 
@@ -1088,6 +1102,7 @@ int mpv_set_property(mpv_handle *ctx, const char *name, mpv_format format,
             mp_get_property_id(ctx->mpctx, name) >= 0)
             return MPV_ERROR_PROPERTY_UNAVAILABLE;
         switch (r) {
+        case MPV_ERROR_SUCCESS:          return MPV_ERROR_SUCCESS;
         case MPV_ERROR_OPTION_FORMAT:    return MPV_ERROR_PROPERTY_FORMAT;
         case MPV_ERROR_OPTION_NOT_FOUND: return MPV_ERROR_PROPERTY_NOT_FOUND;
         default:                         return MPV_ERROR_PROPERTY_ERROR;

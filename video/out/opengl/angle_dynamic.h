@@ -45,9 +45,12 @@
         (EGLDisplay, EGLint)) \
     FN(eglSwapBuffers, EGLBoolean (*EGLAPIENTRY PFN_eglSwapBuffers) \
         (EGLDisplay, EGLSurface)) \
+    FN(eglSwapInterval, EGLBoolean (*EGLAPIENTRY PFN_eglSwapInterval) \
+        (EGLDisplay, EGLint)) \
     FN(eglReleaseTexImage, EGLBoolean (*EGLAPIENTRY PFN_eglReleaseTexImage) \
         (EGLDisplay, EGLSurface, EGLint)) \
-    FN(eglTerminate, EGLBoolean (*EGLAPIENTRY PFN_eglTerminate)(EGLDisplay))
+    FN(eglTerminate, EGLBoolean (*EGLAPIENTRY PFN_eglTerminate)(EGLDisplay)) \
+    FN(eglWaitClient, EGLBoolean (*EGLAPIENTRY PFN_eglWaitClient)(void))
 
 #define ANGLE_EXT_DECL(NAME, VAR) \
     extern VAR;
@@ -76,7 +79,9 @@ bool angle_load(void);
 #define eglQueryString                  PFN_eglQueryString
 #define eglReleaseTexImage              PFN_eglReleaseTexImage
 #define eglSwapBuffers                  PFN_eglSwapBuffers
+#define eglSwapInterval                 PFN_eglSwapInterval
 #define eglTerminate                    PFN_eglTerminate
+#define eglWaitClient                   PFN_eglWaitClient
 #endif
 
 #endif

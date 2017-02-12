@@ -459,20 +459,19 @@ function prepare_elements()
                                     elem_geo.h - slider_lo.border)
                             end
 
-                        else -- draw 1px nibbles
+                        else -- draw 2x1px nibbles
 
                             --top
                             if (slider_lo.nibbles_top) then
-                                static_ass:rect_cw(s - 0.5, slider_lo.gap,
-                                    s + 0.5, slider_lo.gap*2);
+                                static_ass:rect_cw(s - 1, slider_lo.border,
+                                    s + 1, slider_lo.border + slider_lo.gap);
                             end
 
                             --bottom
                             if (slider_lo.nibbles_bottom) then
-                                static_ass:rect_cw(s - 0.5,
-                                    elem_geo.h - slider_lo.gap*2,
-                                    s + 0.5,
-                                    elem_geo.h - slider_lo.gap);
+                                static_ass:rect_cw(s - 1,
+                                    elem_geo.h -slider_lo.border -slider_lo.gap,
+                                    s + 1, elem_geo.h - slider_lo.border);
                             end
                         end
                     end
@@ -548,14 +547,12 @@ function render_elements(master_ass)
             elem_ass:merge(element.static_ass)
         end
 
-
-
         if (element.type == "slider") then
 
             local slider_lo = element.layout.slider
             local elem_geo = element.layout.geometry
-            local s_min, s_max = element.slider.min.value, element.slider.max.value
-
+            local s_min = element.slider.min.value
+            local s_max = element.slider.max.value
 
             -- draw pos marker
             local pos = element.slider.posF()
@@ -568,7 +565,6 @@ function render_elements(master_ass)
                     (slider_lo.stype == "knob") then
                     foH = elem_geo.h / 2
                 elseif (slider_lo.stype == "bar") then
-                    foV = foV + 1
                     foH = slider_lo.border + slider_lo.gap
                 end
 
@@ -585,10 +581,12 @@ function render_elements(master_ass)
                     elem_ass:line_to(xp, (innerH)+foV)
                     elem_ass:line_to(xp-(innerH/2), (innerH/2)+foV)
                 elseif (slider_lo.stype == "knob") then
-                    elem_ass:rect_cw(xp, (9*innerH/20)+foV, elem_geo.w - foH, (11*innerH/20)+foV)
-                    elem_ass:rect_cw(foH, (3*innerH/8)+foV, xp, (5*innerH/8)+foV)
-                    elem_ass:round_rect_cw(xp - innerH/2, foV, xp + innerH/2,
-                                           foV + innerH, innerH/2.0)
+                    elem_ass:rect_cw(xp, (9*innerH/20) + foV,
+                        elem_geo.w - foH, (11*innerH/20) + foV)
+                    elem_ass:rect_cw(foH, (3*innerH/8) + foV,
+                        xp, (5*innerH/8) + foV)
+                    elem_ass:round_rect_cw(xp - innerH/2, foV,
+                        xp + innerH/2, foV + innerH, innerH/2.0)
                 end
             end
 
@@ -660,8 +658,15 @@ function render_elements(master_ass)
             end
 
             local maxchars = element.layout.button.maxchars
-
             if not (maxchars == nil) and (#buttontext > maxchars) then
+                if (#buttontext > maxchars+20) then
+                    while (#buttontext > maxchars+20) do
+                        buttontext = buttontext:gsub(".[\128-\191]*$", "")
+                    end
+                    buttontext = buttontext .. "..."
+                end
+                local _, nchars2 = buttontext:gsub(".[\128-\191]*", "")
+                local stretch = (maxchars/#buttontext)*100
                 buttontext = string.format("{\\fscx%f}",
                     (maxchars/#buttontext)*100) .. buttontext
             end
@@ -946,7 +951,7 @@ layouts["box"] = function ()
     lo = add_layout("title")
     lo.geometry = {x = posX, y = titlerowY, an = 8, w = 496, h = 12}
     lo.style = osc_styles.vidtitle
-    lo.button.maxchars = 90
+    lo.button.maxchars = 80
 
     lo = add_layout("pl_prev")
     lo.geometry =
@@ -1226,8 +1231,9 @@ layouts["bottombar"] = function()
             w = t_r - t_l, h = geo.h }
     lo = add_layout("title")
     lo.geometry = geo
-    lo.style = osc_styles.vidtitleBar
-    lo.button.maxchars = math.floor(geo.w/7)
+    lo.style = string.format("%s{\\clip(%f,%f,%f,%f)}",
+        osc_styles.vidtitleBar,
+        geo.x, geo.y-geo.h/2, geo.w, geo.y+geo.h/2)
 
 
     -- Playback control buttons
@@ -1296,6 +1302,7 @@ layouts["bottombar"] = function()
     lo.geometry = geo
     lo.style = osc_styles.timecodes
     lo.slider.border = 0
+    lo.slider.gap = 2
     lo.slider.tooltip_style = osc_styles.timePosBar
     lo.slider.tooltip_an = 5
     lo.slider.stype = user_opts["seekbarstyle"]
@@ -1403,7 +1410,8 @@ layouts["topbar"] = function()
 
 
     -- Seekbar
-    geo = { x = sb_l, y = user_opts.barmargin, an = 7, w = math.max(0, sb_r - sb_l), h = geo.h }
+    geo = { x = sb_l, y = user_opts.barmargin, an = 7,
+        w = math.max(0, sb_r - sb_l), h = geo.h }
     new_element("bgbar1", "box")
     lo = add_layout("bgbar1")
 
@@ -1417,6 +1425,7 @@ layouts["topbar"] = function()
     lo.geometry = geo
     lo.style = osc_styles.timecodesBar
     lo.slider.border = 0
+    lo.slider.gap = 2
     lo.slider.tooltip_style = osc_styles.timePosBar
     lo.slider.stype = user_opts["seekbarstyle"]
     lo.slider.tooltip_an = 5
@@ -1449,8 +1458,9 @@ layouts["topbar"] = function()
             w = t_r - t_l, h = geo.h }
     lo = add_layout("title")
     lo.geometry = geo
-    lo.style = osc_styles.vidtitleBar
-    lo.button.maxchars = math.floor(geo.w/7)
+    lo.style = string.format("%s{\\clip(%f,%f,%f,%f)}",
+        osc_styles.vidtitleBar,
+        geo.x, geo.y-geo.h/2, geo.w, geo.y+geo.h/2)
 end
 
 -- Validate string type user options
@@ -1506,6 +1516,7 @@ function osc_init()
     local have_pl = (pl_count > 1)
     local pl_pos = mp.get_property_number("playlist-pos", 0) + 1
     local have_ch = (mp.get_property_number("chapters", 0) > 0)
+    local loop = mp.get_property("loop", "no")
 
     local ne
 
@@ -1539,7 +1550,7 @@ function osc_init()
     ne = new_element("pl_prev", "button")
 
     ne.content = "\238\132\144"
-    ne.enabled = (pl_pos > 1)
+    ne.enabled = (pl_pos > 1) or (loop ~= "no")
     ne.eventresponder["mouse_btn0_up"] =
         function ()
             mp.commandv("playlist-prev", "weak")
@@ -1554,7 +1565,7 @@ function osc_init()
     ne = new_element("pl_next", "button")
 
     ne.content = "\238\132\129"
-    ne.enabled = (have_pl) and (pl_pos < pl_count)
+    ne.enabled = (have_pl and (pl_pos < pl_count)) or (loop ~= "no")
     ne.eventresponder["mouse_btn0_up"] =
         function ()
             mp.commandv("playlist-next", "weak")
@@ -2071,6 +2082,7 @@ function process_event(source, what)
             if n == 0 then
                 --click on background (does not work)
             elseif n > 0 and not (n > #elements) and
+                not (elements[n].eventresponder == nil) and
                 not (elements[n].eventresponder[source .. "_" .. what] == nil) then
 
                 if mouse_hit(elements[n]) then

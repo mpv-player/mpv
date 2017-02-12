@@ -136,7 +136,7 @@ void mp_print_version(struct mp_log *log, int always)
 {
     int v = always ? MSGL_INFO : MSGL_V;
     mp_msg(log, v,
-           "%s (C) 2000-2016 mpv/MPlayer/mplayer2 projects\n built on %s\n",
+           "%s (C) 2000-2017 mpv/MPlayer/mplayer2 projects\n built on %s\n",
            mpv_version, mpv_builddate);
     print_libav_versions(log, v);
     mp_msg(log, v, "\n");
@@ -199,6 +199,7 @@ void mp_destroy(struct MPContext *mpctx)
         pthread_detach(pthread_self());
 
     mp_msg_uninit(mpctx->global);
+    pthread_mutex_destroy(&mpctx->lock);
     talloc_free(mpctx);
 }
 
@@ -311,6 +312,12 @@ static int cfg_include(void *ctx, char *filename, int flags)
     return r;
 }
 
+static void abort_playback_cb(void *ctx)
+{
+    struct MPContext *mpctx = ctx;
+    mp_abort_playback_async(mpctx);
+}
+
 struct MPContext *mp_create(void)
 {
     char *enable_talloc = getenv("MPV_LEAK_REPORT");
@@ -328,6 +335,8 @@ struct MPContext *mp_create(void)
         .dispatch = mp_dispatch_create(mpctx),
         .playback_abort = mp_cancel_new(mpctx),
     };
+
+    pthread_mutex_init(&mpctx->lock, NULL);
 
     mpctx->global = talloc_zero(mpctx, struct mpv_global);
 
@@ -361,7 +370,7 @@ struct MPContext *mp_create(void)
     cocoa_set_input_context(mpctx->input);
 #endif
 
-    mp_input_set_cancel(mpctx->input, mpctx->playback_abort);
+    mp_input_set_cancel(mpctx->input, abort_playback_cb, mpctx);
 
     char *verbose_env = getenv("MPV_VERBOSE");
     if (verbose_env)

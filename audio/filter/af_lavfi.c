@@ -246,7 +246,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
 static void get_metadata_from_av_frame(struct af_instance *af, AVFrame *frame)
 {
-#if HAVE_AVFRAME_METADATA
+#if LIBAVUTIL_VERSION_MICRO >= 100
     struct priv *p = af->priv;
     if (!p->metadata)
         p->metadata = talloc_zero(p, struct mp_tags);
@@ -265,6 +265,12 @@ static int filter_frame(struct af_instance *af, struct mp_audio *data)
 
     if (!p->graph)
         goto error;
+
+    if (!data) {
+        if (p->eof)
+            return 0;
+        p->eof = true;
+    }
 
     if (data) {
         frame = mp_audio_to_avframe_and_unref(data);

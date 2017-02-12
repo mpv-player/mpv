@@ -47,7 +47,7 @@ void wasapi_change_uninit(struct ao* ao);
 
 #define EXIT_ON_ERROR(hres)  \
               do { if (FAILED(hres)) { goto exit_label; } } while(0)
-#define SAFE_RELEASE(unk, release) \
+#define SAFE_DESTROY(unk, release) \
               do { if ((unk) != NULL) { release; (unk) = NULL; } } while(0)
 
 #define mp_format_res_str(hres) \

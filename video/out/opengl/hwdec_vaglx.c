@@ -181,14 +181,12 @@ static int map_frame(struct gl_hwdec *hw, struct mp_image *hw_image,
     if (!p->pixmap)
         return -1;
 
-    va_lock(p->ctx);
     status = vaPutSurface(p->display, va_surface_id(hw_image), p->pixmap,
                           0, 0, hw_image->w, hw_image->h,
                           0, 0, hw_image->w, hw_image->h,
                           NULL, 0,
                           va_get_colorspace_flag(hw_image->params.color.space));
     CHECK_VA_STATUS(p, "vaPutSurface()");
-    va_unlock(p->ctx);
 
     *out_frame = (struct gl_hwdec_frame){
         .planes = {

@@ -20,6 +20,7 @@
 #include <string.h>
 #include <assert.h>
 #include <sys/types.h>
+#include <libavutil/buffer.h>
 #include <libavutil/common.h>
 #include <libavutil/mem.h>
 
@@ -644,14 +645,20 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
 
     uint8_t unused[IMGFMT_END - IMGFMT_START];
     update_formats(c, c->first, unused);
+    AVBufferRef *hwfctx = c->in_hwframes_ref;
     struct vf_instance *failing = NULL;
     for (struct vf_instance *vf = c->first; vf; vf = vf->next) {
+        av_buffer_unref(&vf->in_hwframes_ref);
+        av_buffer_unref(&vf->out_hwframes_ref);
+        vf->in_hwframes_ref = hwfctx ? av_buffer_ref(hwfctx) : NULL;
+        vf->out_hwframes_ref = hwfctx ? av_buffer_ref(hwfctx) : NULL;
         r = vf_reconfig_wrapper(vf, &cur);
         if (r < 0) {
             failing = vf;
             break;
         }
         cur = vf->fmt_out;
+        hwfctx = vf->out_hwframes_ref;
     }
     c->output_params = cur;
     c->initialized = r < 0 ? -1 : 1;
@@ -663,6 +670,13 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
     if (r < 0)
         c->output_params = (struct mp_image_params){0};
     return r;
+}
+
+// Hack to get mp_image.hwctx before vf_reconfig()
+void vf_set_proto_frame(struct vf_chain *c, struct mp_image *img)
+{
+    av_buffer_unref(&c->in_hwframes_ref);
+    c->in_hwframes_ref = img && img->hwctx ? av_buffer_ref(img->hwctx) : NULL;
 }
 
 struct vf_instance *vf_find_by_label(struct vf_chain *c, const char *label)
@@ -678,6 +692,8 @@ struct vf_instance *vf_find_by_label(struct vf_chain *c, const char *label)
 
 static void vf_uninit_filter(vf_instance_t *vf)
 {
+    av_buffer_unref(&vf->in_hwframes_ref);
+    av_buffer_unref(&vf->out_hwframes_ref);
     if (vf->uninit)
         vf->uninit(vf);
     vf_forget_frames(vf);
@@ -729,6 +745,7 @@ void vf_destroy(struct vf_chain *c)
 {
     if (!c)
         return;
+    av_buffer_unref(&c->in_hwframes_ref);
     while (c->first) {
         vf_instance_t *vf = c->first;
         c->first = vf->next;

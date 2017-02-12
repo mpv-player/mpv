@@ -160,17 +160,13 @@ static GLXFBConfig select_fb_config(struct vo *vo, const int *attribs, int flags
     if (flags & VOFLAG_ALPHA) {
         for (int n = 0; n < fbcount; n++) {
             XVisualInfo *v = glXGetVisualFromFBConfig(vo->x11->display, fbc[n]);
-            if (!v)
-                continue;
-            // This is a heuristic at best. Note that normal 8 bit Visuals use
-            // a depth of 24, even if the pixels are padded to 32 bit. If the
-            // depth is higher than 24, the remaining bits must be alpha.
-            // Note: vinfo->bits_per_rgb appears to be useless (is always 8).
-            unsigned long mask = v->depth == sizeof(unsigned long) * 8 ?
-                (unsigned long)-1 : (1UL << v->depth) - 1;
-            if (mask & ~(v->red_mask | v->green_mask | v->blue_mask)) {
-                fbconfig = fbc[n];
-                break;
+            if (v) {
+                bool is_rgba = vo_x11_is_rgba_visual(v);
+                XFree(v);
+                if (is_rgba) {
+                    fbconfig = fbc[n];
+                    break;
+                }
             }
         }
     }
@@ -235,7 +231,10 @@ static int glx_init(struct MPGLContext *ctx, int flags)
         MP_ERR(vo, "no GLX support present\n");
         goto uninit;
     }
-    MP_VERBOSE(vo, "GLX chose FB config with ID 0x%x\n", (int)(intptr_t)fbc);
+
+    int fbid = -1;
+    if (!glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_FBCONFIG_ID, &fbid))
+        MP_VERBOSE(vo, "GLX chose FB config with ID 0x%x\n", fbid);
 
     glx_ctx->fbc = fbc;
     glx_ctx->vinfo = glXGetVisualFromFBConfig(vo->x11->display, fbc);

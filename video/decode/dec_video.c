@@ -33,6 +33,7 @@
 #include "demux/packet.h"
 
 #include "common/codecs.h"
+#include "common/recorder.h"
 
 #include "video/out/vo.h"
 #include "video/csputils.h"
@@ -89,7 +90,6 @@ void video_uninit(struct dec_video *d_video)
     if (!d_video)
         return;
     mp_image_unrefp(&d_video->current_mpi);
-    mp_image_unrefp(&d_video->cover_art_mpi);
     if (d_video->vd_driver) {
         MP_VERBOSE(d_video, "Uninit video.\n");
         d_video->vd_driver->uninit(d_video);
@@ -252,20 +252,19 @@ static void fix_image_params(struct dec_video *d_video,
     d_video->fixed_format = p;
 }
 
-static struct mp_image *decode_packet(struct dec_video *d_video,
-                                      struct demux_packet *packet,
-                                      int drop_frame)
+static bool send_packet(struct dec_video *d_video, struct demux_packet *packet)
 {
-    struct MPOpts *opts = d_video->opts;
-
-    if (!d_video->vd_driver)
-        return NULL;
-
     double pkt_pts = packet ? packet->pts : MP_NOPTS_VALUE;
     double pkt_dts = packet ? packet->dts : MP_NOPTS_VALUE;
 
     if (pkt_pts == MP_NOPTS_VALUE)
         d_video->has_broken_packet_pts = 1;
+
+    bool dts_replaced = false;
+    if (packet && packet->dts == MP_NOPTS_VALUE && !d_video->codec->avi_dts) {
+        packet->dts = packet->pts;
+        dts_replaced = true;
+    }
 
     double pkt_pdts = pkt_pts == MP_NOPTS_VALUE ? pkt_dts : pkt_pts;
     if (pkt_pdts != MP_NOPTS_VALUE && d_video->first_packet_pdts == MP_NOPTS_VALUE)
@@ -273,15 +272,33 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
 
     MP_STATS(d_video, "start decode video");
 
-    struct mp_image *mpi = d_video->vd_driver->decode(d_video, packet, drop_frame);
+    bool res = d_video->vd_driver->send_packet(d_video, packet);
 
     MP_STATS(d_video, "end decode video");
 
-    // Error, discarded frame, dropped frame, or initial codec delay.
-    if (!mpi || drop_frame) {
-        talloc_free(mpi);
-        return NULL;
-    }
+    // Stream recording can't deal with almost surely wrong fake DTS.
+    if (dts_replaced)
+        packet->dts = MP_NOPTS_VALUE;
+
+    return res;
+}
+
+static bool receive_frame(struct dec_video *d_video, struct mp_image **out_image)
+{
+    struct MPOpts *opts = d_video->opts;
+    struct mp_image *mpi = NULL;
+
+    assert(!*out_image);
+
+    MP_STATS(d_video, "start decode video");
+
+    bool progress = d_video->vd_driver->receive_frame(d_video, &mpi);
+
+    MP_STATS(d_video, "end decode video");
+
+    // Error, EOF, discarded frame, dropped frame, or initial codec delay.
+    if (!mpi)
+        return progress;
 
     if (opts->field_dominance == 0) {
         mpi->fields |= MP_IMGFIELD_TOP_FIRST | MP_IMGFIELD_INTERLACED;
@@ -353,7 +370,8 @@ static struct mp_image *decode_packet(struct dec_video *d_video,
         mpi->pts -= MPMAX(delay, 0) / d_video->fps;
     }
 
-    return mpi;
+    *out_image = mpi;
+    return true;
 }
 
 void video_reset_params(struct dec_video *d_video)
@@ -379,24 +397,8 @@ void video_set_start(struct dec_video *d_video, double start_pts)
 
 void video_work(struct dec_video *d_video)
 {
-    if (d_video->current_mpi)
+    if (d_video->current_mpi || !d_video->vd_driver)
         return;
-
-    if (d_video->header->attached_picture) {
-        if (d_video->current_state == DATA_AGAIN && !d_video->cover_art_mpi) {
-            struct demux_packet *packet =
-                demux_copy_packet(d_video->header->attached_picture);
-            d_video->cover_art_mpi = decode_packet(d_video, packet, 0);
-            // Might need flush.
-            if (!d_video->cover_art_mpi)
-                d_video->cover_art_mpi = decode_packet(d_video, NULL, 0);
-            talloc_free(packet);
-        }
-        if (d_video->current_state != DATA_EOF)
-            d_video->current_mpi = mp_image_new_ref(d_video->cover_art_mpi);
-        d_video->current_state = DATA_EOF;
-        return;
-    }
 
     if (!d_video->packet && !d_video->new_segment &&
         demux_read_packet_async(d_video->header, &d_video->packet) == 0)
@@ -405,19 +407,11 @@ void video_work(struct dec_video *d_video)
         return;
     }
 
-    if (d_video->packet) {
-        if (d_video->packet->dts == MP_NOPTS_VALUE && !d_video->codec->avi_dts)
-            d_video->packet->dts = d_video->packet->pts;
-    }
-
     if (d_video->packet && d_video->packet->new_segment) {
         assert(!d_video->new_segment);
         d_video->new_segment = d_video->packet;
         d_video->packet = NULL;
     }
-
-    bool had_input_packet = !!d_video->packet;
-    bool had_packet = had_input_packet || d_video->new_segment;
 
     double start_pts = d_video->start_pts;
     if (d_video->start != MP_NOPTS_VALUE && (start_pts == MP_NOPTS_VALUE ||
@@ -431,23 +425,29 @@ void video_work(struct dec_video *d_video)
     {
         framedrop_type = 2;
     }
-    d_video->current_mpi = decode_packet(d_video, d_video->packet, framedrop_type);
-    if (d_video->packet && d_video->packet->len == 0) {
+
+    d_video->vd_driver->control(d_video, VDCTRL_SET_FRAMEDROP, &framedrop_type);
+
+    if (send_packet(d_video, d_video->packet)) {
+        if (d_video->recorder_sink)
+            mp_recorder_feed_packet(d_video->recorder_sink, d_video->packet);
+
         talloc_free(d_video->packet);
         d_video->packet = NULL;
     }
 
+    bool progress = receive_frame(d_video, &d_video->current_mpi);
+
     d_video->current_state = DATA_OK;
-    if (!d_video->current_mpi) {
+    if (!progress) {
         d_video->current_state = DATA_EOF;
-        if (had_packet) {
-            if (framedrop_type == 1)
-                d_video->dropped_frames += 1;
-            d_video->current_state = DATA_AGAIN;
-        }
+    } else if (!d_video->current_mpi) {
+        if (framedrop_type == 1)
+            d_video->dropped_frames += 1;
+        d_video->current_state = DATA_AGAIN;
     }
 
-    bool segment_ended = !d_video->current_mpi && !had_input_packet;
+    bool segment_ended = d_video->current_state == DATA_EOF;
 
     if (d_video->current_mpi && d_video->current_mpi->pts != MP_NOPTS_VALUE) {
         double vpts = d_video->current_mpi->pts;

@@ -7,9 +7,17 @@
 
 #include "demux/stheader.h"
 #include "video/mp_image.h"
+#include "video/mp_image_pool.h"
 #include "video/hwdec.h"
 
 #define HWDEC_DELAY_QUEUE_COUNT 2
+
+// Maximum number of surfaces the player wants to buffer.
+// This number might require adjustment depending on whatever the player does;
+// for example, if vo_opengl increases the number of reference surfaces for
+// interpolation, this value has to be increased too.
+// This value does not yet include HWDEC_DELAY_QUEUE_COUNT.
+#define HWDEC_EXTRA_SURFACES 4
 
 typedef struct lavc_ctx {
     struct mp_log *log;
@@ -25,8 +33,17 @@ typedef struct lavc_ctx {
     bool hwdec_failed;
     bool hwdec_notified;
 
+    int framedrop_flags;
+
     // For HDR side-data caching
     double cached_hdr_peak;
+
+    bool hw_probing;
+    struct demux_packet **sent_packets;
+    int num_sent_packets;
+
+    struct demux_packet **requeue_packets;
+    int num_requeue_packets;
 
     struct mp_image **delay_queue;
     int num_delay_queue;
@@ -45,6 +62,10 @@ typedef struct lavc_ctx {
 
     bool hwdec_request_reinit;
     int hwdec_fail_count;
+
+    struct mp_image_pool *hwdec_swpool;
+
+    AVBufferRef *cached_hw_frames_ctx;
 } vd_ffmpeg_ctx;
 
 struct vd_lavc_hwdec {
@@ -59,6 +80,8 @@ struct vd_lavc_hwdec {
     // efficiency by not blocking on the hardware pipeline by reading back
     // immediately after decoding.
     int delay_queue;
+    // If true, AVCodecContext will destroy the underlying decoder.
+    bool volatile_context;
     int (*probe)(struct lavc_ctx *ctx, struct vd_lavc_hwdec *hwdec,
                  const char *codec);
     int (*init)(struct lavc_ctx *ctx);
@@ -97,6 +120,8 @@ const struct hwdec_profile_entry *hwdec_find_profile(
 bool hwdec_check_codec_support(const char *codec,
                                const struct hwdec_profile_entry *table);
 int hwdec_get_max_refs(struct lavc_ctx *ctx);
+int hwdec_setup_hw_frames_ctx(struct lavc_ctx *ctx, AVBufferRef *device_ctx,
+                              int av_sw_format, int initial_pool_size);
 
 const char *hwdec_find_decoder(const char *codec, const char *suffix);
 

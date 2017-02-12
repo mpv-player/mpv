@@ -68,6 +68,12 @@ build_options = [
         'desc': 'dynamic loader',
         'func': check_libs(['dl'], check_statement('dlfcn.h', 'dlopen("", 0)'))
     }, {
+        'name': '--cplugins',
+        'desc': 'C plugins',
+        'deps': [ 'libdl' ],
+        'default': 'disable',
+        'func': check_cc(linkflags=['-Wl,-export-dynamic']),
+    }, {
         'name': 'dlopen',
         'desc': 'dlopen',
         'deps_any': [ 'libdl', 'os-win32', 'os-cygwin' ],
@@ -173,19 +179,11 @@ main_dependencies = [
                 'test = __atomic_add_fetch(&test, 1, __ATOMIC_SEQ_CST)')),
         'deps_neg': [ 'stdatomic' ],
     }, {
-        'name': 'sync-builtins',
-        'desc': 'compiler support for __sync built-ins',
-        'func': check_statement('stdint.h',
-                    'int64_t test = 0;'
-                    '__typeof__(test) x = ({int a = 1; a;});'
-                    'test = __sync_add_and_fetch(&test, 1)'),
-        'deps_neg': [ 'stdatomic', 'atomic-builtins' ],
-    }, {
         'name': 'atomics',
         'desc': 'stdatomic.h support or emulation',
         'func': check_true,
         'req': True,
-        'deps_any': ['stdatomic', 'atomic-builtins', 'sync-builtins', 'gnuc'],
+        'deps_any': ['stdatomic', 'atomic-builtins', 'gnuc'],
     }, {
         'name': 'c11-tls',
         'desc': 'C11 TLS support',
@@ -388,86 +386,76 @@ iconv support use --disable-iconv.",
     }
 ]
 
-# Libav 12:
-#   libavutil       55.20.0
-#   libavcodec      57.25.0
-#   libavformat     57.7.2
-#   libswscale      4.0.0
-#   libavfilter     6.7.0
-#   libavresample   3.0.0
-# FFmpeg 3.2.2:
-#   libavutil       55.34.100
-#   libavcodec      57.64.101
-#   libavformat     57.56.100
-#   libswscale      4.2.100
-#   libavfilter     6.65.100
-#   libswresample   2.3.100
-
-libav_pkg_config_checks = [
-    'libavutil',   '>= 55.20.0',
-    'libavcodec',  '>= 57.25.0',
-    'libavformat', '>= 57.07.0',
-    'libswscale',  '>= 4.0.0'
+ffmpeg_version = "3.2.2"
+ffmpeg_pkg_config_checks = [
+    'libavutil',     '>= 55.34.100',
+    'libavcodec',    '>= 57.64.100',
+    'libavformat',   '>= 57.56.100',
+    'libswscale',    '>= 4.2.100',
+    'libavfilter',   '>= 6.65.100',
+    'libswresample', '>= 2.3.100',
 ]
-libav_versions_string = "FFmpeg 3.2.2 or Libav 12"
+libav_version = "12"
+libav_pkg_config_checks = [
+    'libavutil',     '>= 55.20.0',
+    'libavcodec',    '>= 57.25.0',
+    'libavformat',   '>= 57.7.0',
+    'libswscale',    '>= 4.0.0',
+    'libavfilter',   '>= 6.7.0',
+    'libavresample', '>= 3.0.0',
+]
+
+libav_versions_string = "FFmpeg %s or Libav %s" % (ffmpeg_version, libav_version)
+
+def check_ffmpeg_or_libav_versions():
+    def fn(ctx, dependency_identifier, **kw):
+        versions = ffmpeg_pkg_config_checks
+        if ctx.dependency_satisfied('is_libav'):
+            versions = libav_pkg_config_checks
+        return check_pkg_config(*versions)(ctx, dependency_identifier, **kw)
+    return fn
 
 libav_dependencies = [
     {
+        'name': 'libavcodec',
+        'desc': 'FFmpeg/Libav present',
+        'func': check_pkg_config('libavcodec'),
+        'req': True,
+        'fmsg': "FFmpeg/Libav development files not found.",
+    }, {
+        'name': 'is_ffmpeg',
+        'desc': 'libav* is FFmpeg',
+        # FFmpeg <=> LIBAVUTIL_VERSION_MICRO>=100
+        'func': check_statement('libavcodec/version.h',
+                                'int x[LIBAVCODEC_VERSION_MICRO >= 100 ? 1 : -1]',
+                                use='libavcodec')
+    }, {
+        # This check should always result in the opposite of is_ffmpeg.
+        # Run it to make sure is_ffmpeg didn't fail for some other reason than
+        # the actual version check.
+        'name': 'is_libav',
+        'desc': 'libav* is Libav',
+        # FFmpeg <=> LIBAVUTIL_VERSION_MICRO>=100
+        'func': check_statement('libavcodec/version.h',
+                                'int x[LIBAVCODEC_VERSION_MICRO >= 100 ? -1 : 1]',
+                                use='libavcodec')
+    }, {
         'name': 'libav',
-        'desc': 'libav/ffmpeg',
-        'func': check_pkg_config(*libav_pkg_config_checks),
+        'desc': 'Libav/FFmpeg library versions',
+        'deps_any': [ 'is_ffmpeg', 'is_libav' ],
+        'func': check_ffmpeg_or_libav_versions(),
         'req': True,
         'fmsg': "Unable to find development files for some of the required \
 FFmpeg/Libav libraries. You need at least {0}. Aborting.".format(libav_versions_string)
-    }, {
-        'name': '--libswresample',
-        'desc': 'libswresample',
-        'func': check_pkg_config('libswresample', '>= 2.3.100'),
-    }, {
-        'name': '--libavresample',
-        'desc': 'libavresample',
-        'func': check_pkg_config('libavresample',  '>= 3.0.0'),
-        'deps_neg': ['libswresample'],
-    }, {
-        'name': 'resampler',
-        'desc': 'usable resampler found',
-        'deps_any': [ 'libavresample', 'libswresample' ],
-        'func': check_true,
-        'req':  True,
-        'fmsg': 'No resampler found. Install libavresample or libswresample (FFmpeg).'
-    }, {
-        'name': 'libavfilter',
-        'desc': 'libavfilter',
-        'func': check_pkg_config('libavfilter', '>= 6.7.0'),
-        'req':  True,
-        'fmsg': 'libavfilter is a required dependency.',
     }, {
         'name': '--libavdevice',
         'desc': 'libavdevice',
         'func': check_pkg_config('libavdevice', '>= 57.0.0'),
     }, {
-        'name': 'avcodec-chroma-pos-api',
-        'desc': 'libavcodec avcodec_enum_to_chroma_pos API',
-        'func': check_statement('libavcodec/avcodec.h', """int x, y;
-            avcodec_enum_to_chroma_pos(&x, &y, AVCHROMA_LOC_UNSPECIFIED)""",
-            use='libav')
-    }, {
-        'name': 'avframe-metadata',
-        'desc': 'libavutil AVFrame metadata',
-        'func': check_statement('libavutil/frame.h',
-                                'av_frame_get_metadata(NULL)',
-                                use='libav')
-    }, {
-        'name': 'avframe-skip-samples',
-        'desc': 'libavutil AVFrame skip samples metadata',
-        'func': check_statement('libavutil/frame.h',
-                                'enum AVFrameSideDataType type = AV_FRAME_DATA_SKIP_SAMPLES',
-                                use='libav')
-    }, {
-        'name': 'avutil-mastering-metadata',
-        'desc': 'libavutil mastering display metadata struct',
-        'func': check_statement('libavutil/frame.h',
-                                'AV_FRAME_DATA_MASTERING_DISPLAY_METADATA',
+        'name': 'avutil-imgcpy-uc',
+        'desc': 'libavutil GPU memcpy for hardware decoding',
+        'func': check_statement('libavutil/imgutils.h',
+                                'av_image_copy_uc_from(0,0,0,0,0,0,0)',
                                 use='libav'),
     },
 ]
@@ -750,27 +738,9 @@ video_output_features = [
         'desc': 'Android support',
         'func': check_statement('android/api-level.h', '(void)__ANDROID__'),  # arbitrary android-specific header
     }, {
-        # We need MMAL/bcm_host/dispmanx APIs. Also, most RPI distros require
-        # every project to hardcode the paths to the include directories. Also,
-        # these headers are so broken that they spam tons of warnings by merely
-        # including them (compensate with -isystem and -fgnu89-inline).
         'name': '--rpi',
         'desc': 'Raspberry Pi support',
-        'func': compose_checks(
-            check_cc(cflags="-isystem/opt/vc/include/ "+
-                            "-isystem/opt/vc/include/interface/vcos/pthreads " +
-                            "-isystem/opt/vc/include/interface/vmcs_host/linux " +
-                            "-fgnu89-inline",
-                     linkflags="-L/opt/vc/lib",
-                     header_name="bcm_host.h",
-                     lib=['mmal_core', 'mmal_util', 'mmal_vc_client', 'bcm_host']),
-            # We still need all OpenGL symbols, because the vo_opengl code is
-            # generic and supports anything from GLES2/OpenGL 2.1 to OpenGL 4 core.
-            check_cc(lib="EGL"),
-            check_cc(lib="GLESv2"),
-            check_statement('GL/gl.h', '(void)GL_RGB32F'),     # arbitrary OpenGL 3.0 symbol
-            check_statement('GL/gl.h', '(void)GL_LUMINANCE16') # arbitrary OpenGL legacy-only symbol
-        ),
+        'func': check_rpi,
     }, {
         'name': '--standard-gl',
         'desc': 'Desktop standard OpenGL support',
@@ -822,7 +792,8 @@ video_output_features = [
     }, {
         'name': 'egl-helpers',
         'desc': 'EGL helper functions',
-        'deps_any': [ 'egl-x11', 'mali-fbdev', 'rpi', 'gl-wayland', 'egl-drm' ],
+        'deps_any': [ 'egl-x11', 'mali-fbdev', 'rpi', 'gl-wayland', 'egl-drm',
+                      'egl-angle' ],
         'func': check_true
     }
 ]
@@ -833,6 +804,23 @@ hwaccel_features = [
         'desc': 'libavcodec VAAPI hwaccel',
         'deps': [ 'vaapi' ],
         'func': check_headers('libavcodec/vaapi.h', use='libav'),
+    }, {
+        'name': '--vaapi-hwaccel-new',
+        'desc': 'libavcodec VAAPI hwaccel (new)',
+        'deps': [ 'vaapi-hwaccel' ],
+        'func': check_statement('libavcodec/version.h',
+            'int x[(LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 26, 0) && '
+            '       LIBAVCODEC_VERSION_MICRO < 100) ||'
+            '      (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(57, 74, 100) && '
+            '       LIBAVCODEC_VERSION_MICRO >= 100)'
+            '      ? 1 : -1]',
+            use='libav'),
+    }, {
+        'name': '--vaapi-hwaccel-old',
+        'desc': 'libavcodec VAAPI hwaccel (old)',
+        'deps': [ 'vaapi-hwaccel' ],
+        'deps_neg': [ 'vaapi-hwaccel-new' ],
+        'func': check_true,
     }, {
         'name': '--videotoolbox-hwaccel',
         'desc': 'libavcodec videotoolbox hwaccel',
@@ -863,12 +851,13 @@ hwaccel_features = [
     }, {
         'name': '--cuda-hwaccel',
         'desc': 'CUDA hwaccel',
+        'deps': [ 'gl' ],
         'func': check_cc(fragment=load_fragment('cuda.c'),
                          use='libav'),
     }, {
         'name': 'sse4-intrinsics',
         'desc': 'GCC SSE4 intrinsics for GPU memcpy',
-        'deps_any': [ 'd3d-hwaccel', 'vaapi-hwaccel' ],
+        'deps_any': [ 'd3d-hwaccel', 'vaapi-hwaccel-old' ],
         'func': check_cc(fragment=load_fragment('sse.c')),
     }
 ]
@@ -996,12 +985,13 @@ def configure(ctx):
     ctx.find_program(cc,          var='CC')
     ctx.find_program(pkg_config,  var='PKG_CONFIG')
     ctx.find_program(ar,          var='AR')
-    ctx.find_program('python',    var='BIN_PYTHON')
     ctx.find_program('rst2html',  var='RST2HTML',  mandatory=False)
     ctx.find_program('rst2man',   var='RST2MAN',   mandatory=False)
     ctx.find_program('rst2pdf',   var='RST2PDF',   mandatory=False)
     ctx.find_program(windres,     var='WINDRES',   mandatory=False)
     ctx.find_program('perl',      var='BIN_PERL',  mandatory=False)
+
+    ctx.add_os_flags('LIBRARY_PATH')
 
     ctx.load('compiler_c')
     ctx.load('waf_customizations')
@@ -1045,6 +1035,13 @@ def configure(ctx):
 
     if ctx.dependency_satisfied('clang-database'):
         ctx.load('clang_compilation_database')
+
+    if ctx.dependency_satisfied('cplugins'):
+        # We need to export the libmpv symbols, since the mpv binary itself is
+        # not linked against libmpv. The C plugin needs to be able to pick
+        # up the libmpv symbols from the binary. We still restrict the set
+        # of exported symbols via mpv.def.
+        ctx.env.LINKFLAGS += ['-Wl,-export-dynamic']
 
     ctx.store_dependencies_lists()
 

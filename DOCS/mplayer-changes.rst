@@ -8,7 +8,10 @@ behaves. Although there are still many similarities to its ancestors, **mpv**
 should generally be treated as a completely different program.
 
 .. admonition:: Warning
-    This document is not updated anymore, and is incomplete and outdated.
+
+    This document is **not updated** anymore, and is **incomplete** and
+    **outdated**. If you look for old option replacements, always check with
+    the current mpv manpage, as the options could have changed meanwhile.
 
 General Changes from MPlayer to mpv
 -----------------------------------

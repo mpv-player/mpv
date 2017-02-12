@@ -328,6 +328,10 @@ static void vo_chain_reset_state(struct vo_chain *vo_c)
 
     if (vo_c->video_src)
         video_reset(vo_c->video_src);
+
+    // Prepare for continued playback after a seek.
+    if (!vo_c->input_mpi && vo_c->cached_coverart)
+        vo_c->input_mpi = mp_image_new_ref(vo_c->cached_coverart);
 }
 
 void reset_video_state(struct MPContext *mpctx)
@@ -381,6 +385,7 @@ static void vo_chain_uninit(struct vo_chain *vo_c)
         lavfi_set_connected(vo_c->filter_src, false);
 
     mp_image_unrefp(&vo_c->input_mpi);
+    mp_image_unrefp(&vo_c->cached_coverart);
     vf_destroy(vo_c->vf);
     talloc_free(vo_c);
     // this does not free the VO
@@ -682,13 +687,25 @@ static int video_decode_and_filter(struct MPContext *mpctx)
         return r;
 
     if (!vo_c->input_mpi) {
-        // Decode a new image, or at least feed the decoder a packet.
-        r = decode_image(mpctx);
-        if (r == VD_WAIT)
-            return r;
+        if (vo_c->cached_coverart) {
+            // Don't ever decode it twice, not even after seek resets.
+            // (On seek resets, input_mpi is set to the cached image.)
+            r = VD_EOF;
+        } else {
+            // Decode a new image, or at least feed the decoder a packet.
+            r = decode_image(mpctx);
+            if (r == VD_WAIT)
+                return r;
+        }
     }
-    if (vo_c->input_mpi)
+
+    if (vo_c->input_mpi) {
         vo_c->input_format = vo_c->input_mpi->params;
+        vf_set_proto_frame(vo_c->vf, vo_c->input_mpi);
+
+        if (vo_c->is_coverart && !vo_c->cached_coverart)
+            vo_c->cached_coverart = mp_image_new_ref(vo_c->input_mpi);
+    }
 
     bool eof = !vo_c->input_mpi && (r == VD_EOF || r < 0);
     r = video_filter(mpctx, eof);
@@ -1413,8 +1430,11 @@ void write_video(struct MPContext *mpctx)
             mp_image_params_get_dsize(&p, &d_w, &d_h);
             snprintf(extra, sizeof(extra), " => %dx%d", d_w, d_h);
         }
-        MP_INFO(mpctx, "VO: [%s] %dx%d%s %s\n",
-                info->name, p.w, p.h, extra, vo_format_name(p.imgfmt));
+        char sfmt[20] = {0};
+        if (p.hw_subfmt)
+            snprintf(sfmt, sizeof(sfmt), "[%s]", mp_imgfmt_to_name(p.hw_subfmt));
+        MP_INFO(mpctx, "VO: [%s] %dx%d%s %s%s\n",
+                info->name, p.w, p.h, extra, mp_imgfmt_to_name(p.imgfmt), sfmt);
         MP_VERBOSE(mpctx, "VO: Description: %s\n", info->description);
 
         int vo_r = vo_reconfig(vo, &p);

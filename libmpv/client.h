@@ -864,8 +864,7 @@ int mpv_command(mpv_handle *ctx, const char **args);
  *                    function succeeds, this is set to command-specific return
  *                    data. You must call mpv_free_node_contents() to free it
  *                    (again, only if the command actually succeeds).
- *                    Currently, no command uses this, but that can change in
- *                    the future.
+ *                    Not many commands actually use this at all.
  * @return error code (the result parameter is not set on error)
  */
 int mpv_command_node(mpv_handle *ctx, mpv_node *args, mpv_node *result);

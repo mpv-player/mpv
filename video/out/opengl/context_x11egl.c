@@ -49,6 +49,29 @@ static void mpegl_uninit(MPGLContext *ctx)
     vo_x11_uninit(ctx->vo);
 }
 
+static int pick_xrgba_config(void *user_data, EGLConfig *configs, int num_configs)
+{
+    struct MPGLContext *ctx = user_data;
+    struct priv *p = ctx->priv;
+    struct vo *vo = ctx->vo;
+
+    for (int n = 0; n < num_configs; n++) {
+        int vID = 0, num;
+        eglGetConfigAttrib(p->egl_display, configs[n], EGL_NATIVE_VISUAL_ID, &vID);
+        XVisualInfo template = {.visualid = vID};
+        XVisualInfo *vi = XGetVisualInfo(vo->x11->display, VisualIDMask,
+                                         &template, &num);
+        if (vi) {
+            bool is_rgba = vo_x11_is_rgba_visual(vi);
+            XFree(vi);
+            if (is_rgba)
+                return n;
+        }
+    }
+
+    return 0;
+}
+
 static int mpegl_init(struct MPGLContext *ctx, int flags)
 {
     struct priv *p = ctx->priv;
@@ -64,13 +87,20 @@ static int mpegl_init(struct MPGLContext *ctx, int flags)
         goto uninit;
     }
 
+    struct mpegl_opts opts = {
+        .vo_flags = flags,
+        .user_data = ctx,
+        .refine_config = (flags & VOFLAG_ALPHA) ? pick_xrgba_config : NULL,
+    };
+
     EGLConfig config;
-    if (!mpegl_create_context(p->egl_display, vo->log, flags, &p->egl_context,
-                              &config))
+    if (!mpegl_create_context_opts(p->egl_display, vo->log, &opts,
+                                   &p->egl_context, &config))
         goto uninit;
 
     int vID, n;
     eglGetConfigAttrib(p->egl_display, config, EGL_NATIVE_VISUAL_ID, &vID);
+    MP_VERBOSE(vo, "chose visual 0x%x\n", vID);
     XVisualInfo template = {.visualid = vID};
     XVisualInfo *vi = XGetVisualInfo(vo->x11->display, VisualIDMask, &template, &n);
 

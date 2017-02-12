@@ -19,6 +19,24 @@ Interface changes
 
 ::
 
+ --- mpv 0.24.0 ---
+    - deprecate --hwdec-api and replace it with --opengl-hwdec-interop.
+      The new option accepts both --hwdec values, as well as named backends.
+      A minor difference is that --hwdec-api=no (which used to be the default)
+      now actually does not preload any interop layer, while the new default
+      ("") uses the value of --hwdec.
+    - drop deprecated --ad/--vd features
+    - drop deprecated --sub-codepage syntax
+    - rename properties:
+        - "drop-frame-count" to "decoder-frame-drop-count"
+        - "vo-drop-frame-count" to "frame-drop-count"
+      The old names still work, but are deprecated.
+    - remove the --stream-capture option and property. No replacement.
+      (--record-file might serve as alternative)
+    - add --sub-justify
+    - add --sub-ass-justify
+    - internally there's a different way to enable the demuxer cache now
+      it can be auto-enabled even if the stream cache remains disabled
  --- mpv 0.23.0 ---
     - remove deprecated vf_vdpaurb (use "--hwdec=vdpau-copy" instead)
     - the following properties now have new semantics:

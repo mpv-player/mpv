@@ -54,6 +54,7 @@ struct vo_x11_state {
     int display_is_local;
     int ws_width;
     int ws_height;
+    int dpi_scale;
     struct mp_rect screenrc;
     char *window_title;
 
@@ -138,5 +139,7 @@ void vo_x11_wakeup(struct vo *vo);
 void vo_x11_wait_events(struct vo *vo, int64_t until_time_us);
 
 void vo_x11_silence_xlib(int dir);
+
+bool vo_x11_is_rgba_visual(XVisualInfo *v);
 
 #endif /* MPLAYER_X11_COMMON_H */

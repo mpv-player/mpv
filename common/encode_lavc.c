@@ -473,7 +473,7 @@ static void encode_2pass_prepare(struct encode_lavc_context *ctx,
             if (!(*bytebuf = stream_open(buf, ctx->global))) {
                 MP_WARN(ctx, "%s: could not open '%s', "
                        "disabling 2-pass encoding at pass 2\n", prefix, buf);
-                codec->flags &= ~CODEC_FLAG_PASS2;
+                codec->flags &= ~AV_CODEC_FLAG_PASS2;
                 set_to_avdictionary(ctx, dictp, "flags", "-pass2");
             } else {
                 struct bstr content = stream_read_complete(*bytebuf, NULL,

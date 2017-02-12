@@ -40,6 +40,7 @@
 #include "options/m_property.h"
 #include "common/common.h"
 #include "common/encode.h"
+#include "common/recorder.h"
 #include "input/input.h"
 
 #include "audio/audio.h"
@@ -56,6 +57,17 @@
 #include "core.h"
 #include "command.h"
 #include "libmpv/client.h"
+
+// Called by foreign threads when playback should be stopped and such.
+void mp_abort_playback_async(struct MPContext *mpctx)
+{
+    mp_cancel_trigger(mpctx->playback_abort);
+
+    pthread_mutex_lock(&mpctx->lock);
+    if (mpctx->demuxer_cancel)
+        mp_cancel_trigger(mpctx->demuxer_cancel);
+    pthread_mutex_unlock(&mpctx->lock);
+}
 
 static void uninit_demuxer(struct MPContext *mpctx)
 {
@@ -80,6 +92,11 @@ static void uninit_demuxer(struct MPContext *mpctx)
 
     free_demuxer_and_stream(mpctx->demuxer);
     mpctx->demuxer = NULL;
+
+    pthread_mutex_lock(&mpctx->lock);
+    talloc_free(mpctx->demuxer_cancel);
+    mpctx->demuxer_cancel = NULL;
+    pthread_mutex_unlock(&mpctx->lock);
 }
 
 #define APPEND(s, ...) mp_snprintf_cat(s, sizeof(s), __VA_ARGS__)
@@ -453,6 +470,8 @@ void mp_switch_track_n(struct MPContext *mpctx, int order, enum stream_type type
         uninit_sub(mpctx, current);
 
     if (current) {
+        if (current->remux_sink)
+            close_recorder_and_error(mpctx);
         current->selected = false;
         reselect_demux_stream(mpctx, current);
     }
@@ -774,57 +793,144 @@ static void load_per_file_options(m_config_t *conf,
     }
 }
 
-struct demux_open_args {
-    int stream_flags;
-    char *url;
-    struct mpv_global *global;
-    struct mp_cancel *cancel;
-    struct mp_log *log;
-    // results
-    struct demuxer *demux;
-    int err;
-};
-
-static void open_demux_thread(void *pctx)
+static void *open_demux_thread(void *ctx)
 {
-    struct demux_open_args *args = pctx;
-    struct mpv_global *global = args->global;
+    struct MPContext *mpctx = ctx;
+
     struct demuxer_params p = {
-        .force_format = global->opts->demuxer_name,
-        .allow_capture = true,
-        .stream_flags = args->stream_flags,
+        .force_format = mpctx->open_format,
+        .stream_flags = mpctx->open_url_flags,
+        .initial_readahead = true,
     };
-    args->demux = demux_open_url(args->url, &p, args->cancel, global);
-    if (!args->demux) {
+    mpctx->open_res_demuxer =
+        demux_open_url(mpctx->open_url, &p, mpctx->open_cancel, mpctx->global);
+
+    if (mpctx->open_res_demuxer) {
+        MP_VERBOSE(mpctx, "Opening done: %s\n", mpctx->open_url);
+    } else {
+        MP_VERBOSE(mpctx, "Opening failed or was aborted: %s\n", mpctx->open_url);
+
         if (p.demuxer_failed) {
-            args->err = MPV_ERROR_UNKNOWN_FORMAT;
+            mpctx->open_res_error = MPV_ERROR_UNKNOWN_FORMAT;
         } else {
-            args->err = MPV_ERROR_LOADING_FAILED;
+            mpctx->open_res_error = MPV_ERROR_LOADING_FAILED;
         }
     }
-    if (args->demux && global->opts->rebase_start_time)
-        demux_set_ts_offset(args->demux, -args->demux->start_time);
+
+    atomic_store(&mpctx->open_done, true);
+    mp_wakeup_core(mpctx);
+    return NULL;
+}
+
+static void cancel_open(struct MPContext *mpctx)
+{
+    if (mpctx->open_cancel)
+        mp_cancel_trigger(mpctx->open_cancel);
+
+    if (mpctx->open_active)
+        pthread_join(mpctx->open_thread, NULL);
+    mpctx->open_active = false;
+
+    TA_FREEP(&mpctx->open_cancel);
+    TA_FREEP(&mpctx->open_url);
+    TA_FREEP(&mpctx->open_format);
+
+    if (mpctx->open_res_demuxer)
+        free_demuxer_and_stream(mpctx->open_res_demuxer);
+    mpctx->open_res_demuxer = NULL;
+
+    atomic_store(&mpctx->open_done, false);
+}
+
+// Setup all the field to open this url, and make sure a thread is running.
+static void start_open(struct MPContext *mpctx, char *url, int url_flags)
+{
+    cancel_open(mpctx);
+
+    assert(!mpctx->open_active);
+    assert(!mpctx->open_cancel);
+    assert(!mpctx->open_res_demuxer);
+    assert(!atomic_load(&mpctx->open_done));
+
+    mpctx->open_cancel = mp_cancel_new(NULL);
+    mpctx->open_url = talloc_strdup(NULL, url);
+    mpctx->open_format = talloc_strdup(NULL, mpctx->opts->demuxer_name);
+    mpctx->open_url_flags = url_flags;
+    if (mpctx->opts->load_unsafe_playlists)
+        mpctx->open_url_flags = 0;
+
+    if (pthread_create(&mpctx->open_thread, NULL, open_demux_thread, mpctx)) {
+        cancel_open(mpctx);
+        return;
+    }
+
+    mpctx->open_active = true;
 }
 
 static void open_demux_reentrant(struct MPContext *mpctx)
 {
-    struct demux_open_args args = {
-        .global = mpctx->global,
-        .cancel = mpctx->playback_abort,
-        .log = mpctx->log,
-        .stream_flags = mpctx->playing->stream_flags,
-        .url = talloc_strdup(NULL, mpctx->stream_open_filename),
-    };
-    if (mpctx->opts->load_unsafe_playlists)
-        args.stream_flags = 0;
-    mpctx_run_reentrant(mpctx, open_demux_thread, &args);
-    if (args.demux) {
-        mpctx->demuxer = args.demux;
-        enable_demux_thread(mpctx, mpctx->demuxer);
-    } else {
-        mpctx->error_playing = args.err;
+    char *url = mpctx->stream_open_filename;
+
+    if (mpctx->open_active) {
+        bool done = atomic_load(&mpctx->open_done);
+        bool failed = done && !mpctx->open_res_demuxer;
+        bool correct_url = strcmp(mpctx->open_url, url) == 0;
+
+        if (correct_url && !failed) {
+            MP_VERBOSE(mpctx, "Using prefetched/prefetching URL.\n");
+        } else if (correct_url && failed) {
+            MP_VERBOSE(mpctx, "Prefetched URL failed, retrying.\n");
+            cancel_open(mpctx);
+        } else {
+            if (done) {
+                MP_VERBOSE(mpctx, "Dropping finished prefetch of wrong URL.\n");
+            } else {
+                MP_VERBOSE(mpctx, "Aborting onging prefetch of wrong URL.\n");
+            }
+            cancel_open(mpctx);
+        }
     }
-    talloc_free(args.url);
+
+    if (!mpctx->open_active)
+        start_open(mpctx, url, mpctx->playing->stream_flags);
+
+    // User abort should cancel the opener now.
+    pthread_mutex_lock(&mpctx->lock);
+    mpctx->demuxer_cancel = mpctx->open_cancel;
+    pthread_mutex_unlock(&mpctx->lock);
+
+    while (!atomic_load(&mpctx->open_done)) {
+        mp_idle(mpctx);
+
+        if (mpctx->stop_play)
+            mp_abort_playback_async(mpctx);
+    }
+
+    if (mpctx->open_res_demuxer) {
+        assert(mpctx->demuxer_cancel == mpctx->open_cancel);
+        mpctx->demuxer = mpctx->open_res_demuxer;
+        mpctx->open_res_demuxer = NULL;
+        mpctx->open_cancel = NULL;
+    } else {
+        mpctx->error_playing = mpctx->open_res_error;
+        pthread_mutex_lock(&mpctx->lock);
+        mpctx->demuxer_cancel = NULL;
+        pthread_mutex_unlock(&mpctx->lock);
+    }
+
+    cancel_open(mpctx); // cleanup
+}
+
+void prefetch_next(struct MPContext *mpctx)
+{
+    if (!mpctx->opts->prefetch_open)
+        return;
+
+    struct playlist_entry *new_entry = mp_next_file(mpctx, +1, false, false);
+    if (new_entry && !mpctx->open_active && new_entry->filename) {
+        MP_VERBOSE(mpctx, "Prefetching: %s\n", new_entry->filename);
+        start_open(mpctx, new_entry->filename, new_entry->stream_flags);
+    }
 }
 
 static bool init_complex_filters(struct MPContext *mpctx)
@@ -977,7 +1083,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->filename = talloc_strdup(NULL, mpctx->playing->filename);
     mpctx->stream_open_filename = mpctx->filename;
 
-    mpctx->add_osd_seek_info &= OSD_SEEK_INFO_EDITION | OSD_SEEK_INFO_CURRENT_FILE;
+    mpctx->add_osd_seek_info &= OSD_SEEK_INFO_CURRENT_FILE;
 
     if (opts->reset_options) {
         for (int n = 0; opts->reset_options[n]; n++) {
@@ -1037,6 +1143,10 @@ reopen_file:
         mpctx->error_playing = 2;
         goto terminate_playback;
     }
+
+    if (mpctx->opts->rebase_start_time)
+        demux_set_ts_offset(mpctx->demuxer, -mpctx->demuxer->start_time);
+    enable_demux_thread(mpctx, mpctx->demuxer);
 
     load_chapters(mpctx);
     add_demuxer_tracks(mpctx, mpctx->demuxer);
@@ -1149,6 +1259,8 @@ reopen_file:
     if (mpctx->opts->pause)
         pause_player(mpctx);
 
+    open_recorder(mpctx, true);
+
     playback_start = mp_time_sec();
     mpctx->error_playing = 0;
     while (!mpctx->stop_play)
@@ -1169,7 +1281,9 @@ terminate_playback:
     if (mpctx->step_frames)
         opts->pause = 1;
 
-    mp_cancel_trigger(mpctx->playback_abort);
+    mp_abort_playback_async(mpctx);
+
+    close_recorder(mpctx);
 
     // time to uninit all, except global stuff:
     uninit_complex_filters(mpctx);
@@ -1255,8 +1369,9 @@ terminate_playback:
 // it can have side-effects and mutate mpctx.
 //  direction: -1 (previous) or +1 (next)
 //  force: if true, don't skip playlist entries marked as failed
+//  mutate: if true, change loop counters
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
-                                    bool force)
+                                    bool force, bool mutate)
 {
     struct playlist_entry *next = playlist_get_next(mpctx->playlist, direction);
     if (next && direction < 0 && !force) {
@@ -1316,7 +1431,7 @@ void mp_play_files(struct MPContext *mpctx)
         if (mpctx->stop_play == PT_NEXT_ENTRY || mpctx->stop_play == PT_ERROR ||
             mpctx->stop_play == AT_END_OF_FILE || !mpctx->stop_play)
         {
-            new_entry = mp_next_file(mpctx, +1, false);
+            new_entry = mp_next_file(mpctx, +1, false, true);
         }
 
         mpctx->playlist->current = new_entry;
@@ -1326,6 +1441,8 @@ void mp_play_files(struct MPContext *mpctx)
         if (!mpctx->playlist->current && mpctx->opts->player_idle_mode < 2)
             break;
     }
+
+    cancel_open(mpctx);
 }
 
 // Abort current playback and set the given entry to play next.
@@ -1339,3 +1456,89 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
         mpctx->stop_play = PT_CURRENT_ENTRY;
     mp_wakeup_core(mpctx);
 }
+
+static void set_track_recorder_sink(struct track *track,
+                                    struct mp_recorder_sink *sink)
+{
+    if (track->d_sub)
+        sub_set_recorder_sink(track->d_sub, sink);
+    if (track->d_video)
+        track->d_video->recorder_sink = sink;
+    if (track->d_audio)
+        track->d_audio->recorder_sink = sink;
+    track->remux_sink = sink;
+}
+
+void close_recorder(struct MPContext *mpctx)
+{
+    if (!mpctx->recorder)
+        return;
+
+    for (int n = 0; n < mpctx->num_tracks; n++)
+        set_track_recorder_sink(mpctx->tracks[n], NULL);
+
+    mp_recorder_destroy(mpctx->recorder);
+    mpctx->recorder = NULL;
+}
+
+// Like close_recorder(), but also unset the option. Intended for use on errors.
+void close_recorder_and_error(struct MPContext *mpctx)
+{
+    close_recorder(mpctx);
+    talloc_free(mpctx->opts->record_file);
+    mpctx->opts->record_file = NULL;
+    mp_notify_property(mpctx, "record-file");
+    MP_ERR(mpctx, "Disabling stream recording.\n");
+}
+
+void open_recorder(struct MPContext *mpctx, bool on_init)
+{
+    if (!mpctx->playback_initialized)
+        return;
+
+    close_recorder(mpctx);
+
+    char *target = mpctx->opts->record_file;
+    if (!target || !target[0])
+        return;
+
+    struct sh_stream **streams = NULL;
+    int num_streams = 0;
+
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *track = mpctx->tracks[n];
+        if (track->stream && track->selected &&
+            (track->d_sub || track->d_video || track->d_audio))
+        {
+            MP_TARRAY_APPEND(NULL, streams, num_streams, track->stream);
+        }
+    }
+
+    mpctx->recorder = mp_recorder_create(mpctx->global, mpctx->opts->record_file,
+                                         streams, num_streams);
+
+    if (!mpctx->recorder) {
+        talloc_free(streams);
+        close_recorder_and_error(mpctx);
+        return;
+    }
+
+    if (!on_init)
+        mp_recorder_mark_discontinuity(mpctx->recorder);
+
+    int n_stream = 0;
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *track = mpctx->tracks[n];
+        if (n_stream >= num_streams)
+            break;
+        // (We expect track->stream not to be reused on other tracks.)
+        if (track->stream == streams[n_stream]) {
+            set_track_recorder_sink(track,
+                            mp_recorder_get_sink(mpctx->recorder, n_stream));
+            n_stream++;
+        }
+    }
+
+    talloc_free(streams);
+}
+

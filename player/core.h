@@ -52,8 +52,7 @@ enum mp_osd_seek_info {
     OSD_SEEK_INFO_BAR           = 1,
     OSD_SEEK_INFO_TEXT          = 2,
     OSD_SEEK_INFO_CHAPTER_TEXT  = 4,
-    OSD_SEEK_INFO_EDITION       = 8,
-    OSD_SEEK_INFO_CURRENT_FILE  = 16,
+    OSD_SEEK_INFO_CURRENT_FILE  = 8,
 };
 
 
@@ -154,6 +153,9 @@ struct track {
     struct vo_chain *vo_c;
     struct ao_chain *ao_c;
     struct lavfi_pad *sink;
+
+    // For stream recording (remuxing mode).
+    struct mp_recorder_sink *remux_sink;
 };
 
 // Summarizes video filtering and output.
@@ -179,6 +181,8 @@ struct vo_chain {
     // - video consists of a single picture, which should be shown only once
     // - do not sync audio to video in any way
     bool is_coverart;
+    // Just to avoid decoding the coverart picture again after a seek.
+    struct mp_image *cached_coverart;
 };
 
 // Like vo_chain, for audio.
@@ -420,6 +424,8 @@ typedef struct MPContext {
     // playback rate. Used to avoid showing it multiple times.
     bool drop_message_shown;
 
+    struct mp_recorder *recorder;
+
     char *cached_watch_later_configdir;
 
     struct screenshot_ctx *screenshot_ctx;
@@ -429,6 +435,26 @@ typedef struct MPContext {
     struct mp_ipc_ctx *ipc_ctx;
 
     struct mpv_opengl_cb_context *gl_cb_ctx;
+
+    pthread_mutex_t lock;
+
+    // --- The following fields are protected by lock
+    struct mp_cancel *demuxer_cancel; // cancel handle for MPContext.demuxer
+
+    // --- Owned by MPContext
+    pthread_t open_thread;
+    bool open_active; // open_thread is a valid thread handle, all setup
+    atomic_bool open_done;
+    // --- All fields below are immutable while open_active is true.
+    //     Otherwise, they're owned by MPContext.
+    struct mp_cancel *open_cancel;
+    char *open_url;
+    char *open_format;
+    int open_url_flags;
+    // --- All fields below are owned by open_thread, unless open_done was set
+    //     to true.
+    struct demuxer *open_res_demuxer;
+    int open_res_error;
 } MPContext;
 
 // audio.c
@@ -459,6 +485,7 @@ struct playlist_entry *mp_check_playlist_resume(struct MPContext *mpctx,
                                                 struct playlist *playlist);
 
 // loadfile.c
+void mp_abort_playback_async(struct MPContext *mpctx);
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
 struct track *mp_add_external_file(struct MPContext *mpctx, char *filename,
                                    enum stream_type filter);
@@ -473,7 +500,7 @@ struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
 void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer);
 bool mp_remove_track(struct MPContext *mpctx, struct track *track);
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
-                                    bool force);
+                                    bool force, bool mutate);
 void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
 void mp_play_files(struct MPContext *mpctx);
 void update_demuxer_properties(struct MPContext *mpctx);
@@ -483,6 +510,10 @@ void prepare_playlist(struct MPContext *mpctx, struct playlist *pl);
 void autoload_external_files(struct MPContext *mpctx);
 struct track *select_default_track(struct MPContext *mpctx, int order,
                                    enum stream_type type);
+void prefetch_next(struct MPContext *mpctx);
+void close_recorder(struct MPContext *mpctx);
+void close_recorder_and_error(struct MPContext *mpctx);
+void open_recorder(struct MPContext *mpctx, bool on_init);
 
 // main.c
 int mp_initialize(struct MPContext *mpctx, char **argv);
@@ -501,8 +532,6 @@ void update_vo_playback_state(struct MPContext *mpctx);
 void update_window_title(struct MPContext *mpctx, bool force);
 void error_on_track(struct MPContext *mpctx, struct track *track);
 int stream_dump(struct MPContext *mpctx, const char *source_filename);
-int mpctx_run_reentrant(struct MPContext *mpctx, void (*thread_fn)(void *arg),
-                        void *thread_arg);
 double get_track_seek_offset(struct MPContext *mpctx, struct track *track);
 
 // osd.c
@@ -549,6 +578,7 @@ void update_screensaver_state(struct MPContext *mpctx);
 
 // scripting.c
 struct mp_scripting {
+    const char *name;       // e.g. "lua script"
     const char *file_ext;   // e.g. "lua"
     int (*load)(struct mpv_handle *client, const char *filename);
 };

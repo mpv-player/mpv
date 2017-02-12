@@ -338,10 +338,8 @@ static int resize_cache(struct priv *s, int64_t size)
     buffer_size += s->back_size;
 
     unsigned char *buffer = malloc(buffer_size);
-    if (!buffer) {
-        free(buffer);
+    if (!buffer)
         return STREAM_ERROR;
-    }
 
     if (s->buffer) {
         // Copy & free the old ringbuffer data.

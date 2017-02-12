@@ -33,26 +33,6 @@ void mp_add_decoder(struct mp_decoder_list *list, const char *family,
     MP_TARRAY_APPEND(list, list->entries, list->num_entries, entry);
 }
 
-static void mp_add_decoder_entry(struct mp_decoder_list *list,
-                                 struct mp_decoder_entry *entry)
-{
-    mp_add_decoder(list, entry->family, entry->codec, entry->decoder,
-                   entry->desc);
-}
-
-static struct mp_decoder_entry *find_decoder(struct mp_decoder_list *list,
-                                             bstr family, bstr decoder)
-{
-    for (int n = 0; n < list->num_entries; n++) {
-        struct mp_decoder_entry *cur = &list->entries[n];
-        if (bstr_equals0(decoder, cur->decoder)) {
-            if (bstr_equals0(family, "*") || bstr_equals0(family, cur->family))
-                return cur;
-        }
-    }
-    return NULL;
-}
-
 // Add entry, but only if it's not yet on the list, and if the codec matches.
 // If codec == NULL, don't compare codecs.
 static void add_new(struct mp_decoder_list *to, struct mp_decoder_entry *entry,
@@ -60,8 +40,7 @@ static void add_new(struct mp_decoder_list *to, struct mp_decoder_entry *entry,
 {
     if (!entry || (codec && strcmp(entry->codec, codec) != 0))
         return;
-    if (!find_decoder(to, bstr0(entry->family), bstr0(entry->decoder)))
-        mp_add_decoder_entry(to, entry);
+    mp_add_decoder(to, entry->family, entry->codec, entry->decoder, entry->desc);
 }
 
 // Select a decoder from the given list for the given codec. The selection
@@ -71,10 +50,8 @@ static void add_new(struct mp_decoder_list *to, struct mp_decoder_entry *entry,
 // The selection string corresponds to --vd/--ad directly, and has the
 // following syntax:
 //   selection = [<entry> ("," <entry>)*]
-//       entry = [<family> ":"] <decoder>       // prefer decoder
-//       entry = <family> ":*"                  // prefer all decoders
-//       entry = "+" [<family> ":"] <decoder>   // force a decoder
-//       entry = "-" [<family> ":"] <decoder>   // exclude a decoder
+//       entry = <decoder>       // prefer decoder
+//       entry = "-" <decoder>   // exclude a decoder
 //       entry = "-"                            // don't add fallback decoders
 // Forcing a decoder means it's added even if the codec mismatches.
 struct mp_decoder_list *mp_select_decoders(struct mp_log *log,
@@ -83,7 +60,6 @@ struct mp_decoder_list *mp_select_decoders(struct mp_log *log,
                                            const char *selection)
 {
     struct mp_decoder_list *list = talloc_zero(NULL, struct mp_decoder_list);
-    struct mp_decoder_list *remove = talloc_zero(NULL, struct mp_decoder_list);
     if (!codec)
         codec = "unknown";
     bool stop = false;
@@ -96,28 +72,15 @@ struct mp_decoder_list *mp_select_decoders(struct mp_log *log,
             stop = true;
             break;
         }
-        bool force = bstr_eatstart0(&entry, "+");
-        bool exclude = !force && bstr_eatstart0(&entry, "-");
-        if (exclude || force)
-            mp_warn(log, "Forcing or excluding codecs is deprecated.\n");
-        struct mp_decoder_list *dest = exclude ? remove : list;
-        bstr family, decoder;
-        if (bstr_split_tok(entry, ":", &family, &decoder)) {
-            mp_warn(log, "Codec family selection is deprecated. "
-                         "Pass the codec name directly.\n");
-        } else {
-            family = bstr0("*");
-            decoder = entry;
+        if (bstr_find0(entry, ":") >= 0) {
+            mp_err(log, "Codec family selection was removed. "
+                        "Pass the codec name directly.\n");
+            break;
         }
-        if (bstr_equals0(decoder, "*")) {
-            for (int n = 0; n < all->num_entries; n++) {
-                struct mp_decoder_entry *cur = &all->entries[n];
-                if (bstr_equals0(family, cur->family))
-                    add_new(dest, cur, codec);
-            }
-        } else {
-            add_new(dest, find_decoder(all, family, decoder),
-                    force ? NULL : codec);
+        for (int n = 0; n < all->num_entries; n++) {
+            struct mp_decoder_entry *cur = &all->entries[n];
+            if (bstr_equals0(entry, cur->decoder))
+                add_new(list, cur, codec);
         }
     }
     if (!stop) {
@@ -125,16 +88,6 @@ struct mp_decoder_list *mp_select_decoders(struct mp_log *log,
         for (int n = 0; n < all->num_entries; n++)
             add_new(list, &all->entries[n], codec);
     }
-    for (int n = 0; n < remove->num_entries; n++) {
-        struct mp_decoder_entry *ex = &remove->entries[n];
-        struct mp_decoder_entry *del =
-            find_decoder(list, bstr0(ex->family), bstr0(ex->decoder));
-        if (del) {
-            int index = del - &list->entries[0];
-            MP_TARRAY_REMOVE_AT(list->entries, list->num_entries, index);
-        }
-    }
-    talloc_free(remove);
     return list;
 }
 

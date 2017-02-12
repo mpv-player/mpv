@@ -22,7 +22,10 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
     tvi_handle_t *tvh;
     const tvi_functions_t *funcs;
 
-    if (check > DEMUX_CHECK_REQUEST || demuxer->stream->type != STREAMTYPE_TV)
+    if (check > DEMUX_CHECK_REQUEST)
+        return -1;
+
+    if (!demuxer->stream->info || strcmp(demuxer->stream->info->name, "tv") != 0)
         return -1;
 
     tv_param_t *params = mp_get_config_group(demuxer, demuxer->global,
@@ -31,7 +34,7 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
     bstr channel, input;
     bstr_split_tok(urlparams, "/", &channel, &input);
     if (channel.len) {
-        talloc_free(params->channels);
+        talloc_free(params->channel);
         params->channel = bstrto0(NULL, channel);
     }
     if (input.len) {

@@ -158,7 +158,8 @@ static int reinit(struct gl_hwdec *hw, struct mp_image_params *params)
 
     p->vdpgl_initialized = true;
 
-    p->direct_mode = params->hw_subfmt == IMGFMT_NV12;
+    p->direct_mode = params->hw_subfmt == IMGFMT_NV12 ||
+                     params->hw_subfmt == IMGFMT_420P;
 
     gl->GenTextures(4, p->gl_textures);
     for (int n = 0; n < 4; n++) {

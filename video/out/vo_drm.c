@@ -20,12 +20,10 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <sys/mman.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <unistd.h>
 
 #include <libswscale/swscale.h>
-#include <xf86drm.h>
-#include <xf86drmMode.h>
 
 #include "drm_common.h"
 

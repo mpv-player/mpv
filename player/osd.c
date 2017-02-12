@@ -262,7 +262,7 @@ static void term_osd_print_status_lazy(struct MPContext *mpctx)
     if (mpctx->demuxer) {
         struct stream_cache_info info = {0};
         demux_stream_control(mpctx->demuxer, STREAM_CTRL_GET_CACHE_INFO, &info);
-        if (info.size > 0) {
+        if (info.size > 0 || mpctx->demuxer->is_network) {
             saddf(&line, " Cache: ");
 
             struct demux_ctrl_reader_state s = {.ts_duration = -1};
@@ -273,10 +273,12 @@ static void term_osd_print_status_lazy(struct MPContext *mpctx)
             } else {
                 saddf(&line, "%2ds", (int)s.ts_duration);
             }
-            if (info.fill >= 1024 * 1024) {
-                saddf(&line, "+%lldMB", (long long)(info.fill / 1024 / 1024));
-            } else {
-                saddf(&line, "+%lldKB", (long long)(info.fill / 1024));
+            if (info.size > 0) {
+                if (info.fill >= 1024 * 1024) {
+                    saddf(&line, "+%lldMB", (long long)(info.fill / 1024 / 1024));
+                } else {
+                    saddf(&line, "+%lldKB", (long long)(info.fill / 1024));
+                }
             }
         }
     }
@@ -473,12 +475,6 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
         set_osd_msg(mpctx, 1, mpctx->opts->osd_duration,
                      "Chapter: %s", chapter);
         talloc_free(chapter);
-    }
-    if ((mpctx->add_osd_seek_info & OSD_SEEK_INFO_EDITION) && mpctx->demuxer) {
-        set_osd_msg(mpctx, 1, mpctx->opts->osd_duration,
-                     "Playing edition %d of %d.",
-                     mpctx->demuxer->edition + 1,
-                     mpctx->demuxer->num_editions);
     }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_CURRENT_FILE) {
         if (mpctx->filename) {

@@ -42,6 +42,8 @@ struct dec_video {
 
     int dropped_frames;
 
+    struct mp_recorder_sink *recorder_sink;
+
     // Internal (shared with vd_lavc.c).
 
     void *priv; // for free use by vd_driver
@@ -75,7 +77,6 @@ struct dec_video {
     struct demux_packet *new_segment;
     struct demux_packet *packet;
     bool framedrop_enabled;
-    struct mp_image *cover_art_mpi;
     struct mp_image *current_mpi;
     int current_state;
 };

@@ -94,7 +94,7 @@ void demux_packet_shorten(struct demux_packet *dp, size_t len)
 {
     assert(len <= dp->len);
     dp->len = len;
-    memset(dp->buffer + dp->len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+    memset(dp->buffer + dp->len, 0, AV_INPUT_BUFFER_PADDING_SIZE);
 }
 
 void free_demux_packet(struct demux_packet *dp)
@@ -132,8 +132,8 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
 
 int demux_packet_set_padding(struct demux_packet *dp, int start, int end)
 {
-#if HAVE_AVFRAME_SKIP_SAMPLES
-    if (!start  && !end)
+#if LIBAVCODEC_VERSION_MICRO >= 100
+    if (!start && !end)
         return 0;
     if (!dp->avpacket)
         return -1;
@@ -143,6 +143,24 @@ int demux_packet_set_padding(struct demux_packet *dp, int start, int end)
 
     AV_WL32(p + 0, start);
     AV_WL32(p + 4, end);
+#endif
+    return 0;
+}
+
+int demux_packet_add_blockadditional(struct demux_packet *dp, uint64_t id,
+                                     void *data, size_t size)
+{
+#if LIBAVCODEC_VERSION_MICRO >= 100
+    if (!dp->avpacket)
+        return -1;
+    uint8_t *sd =  av_packet_new_side_data(dp->avpacket,
+                                           AV_PKT_DATA_MATROSKA_BLOCKADDITIONAL,
+                                           8 + size);
+    if (!sd)
+        return -1;
+    AV_WB64(sd, id);
+    if (size > 0)
+        memcpy(sd + 8, data, size);
 #endif
     return 0;
 }

@@ -20,6 +20,10 @@
 
 #include <windows.h>
 
+// Conditionally release a COM interface and set the pointer to NULL
+#define SAFE_RELEASE(u) \
+    do { if ((u) != NULL) (u)->lpVtbl->Release(u); (u) = NULL; } while(0)
+
 char *mp_GUID_to_str_buf(char *buf, size_t buf_size, const GUID *guid);
 #define mp_GUID_to_str(guid) mp_GUID_to_str_buf((char[40]){0}, 40, (guid))
 char *mp_HRESULT_to_str_buf(char *buf, size_t buf_size, HRESULT hr);

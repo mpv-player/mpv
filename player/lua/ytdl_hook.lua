@@ -88,6 +88,42 @@ local function extract_chapters(data, video_length)
     return ret
 end
 
+local function edl_track_joined(fragments, protocol, is_live)
+    if not (type(fragments) == "table") or not fragments[1] then
+        msg.debug("No fragments to join into EDL")
+        return nil
+    end
+
+    local edl = "edl://"
+    local offset = 1
+
+    if (protocol == "http_dash_segments") and
+        not fragments[1].duration and not is_live then
+        -- assume MP4 DASH initialization segment
+        edl = edl .. "!mp4_dash,init=" .. edl_escape(fragments[1].url) .. ";"
+        offset = 2
+
+        -- Check remaining fragments for duration;
+        -- if not available in all, give up.
+        for i = offset, #fragments do
+            if not fragments[i].duration then
+                msg.error("EDL doesn't support fragments" ..
+                         "without duration with MP4 DASH")
+                return nil
+            end
+        end
+    end
+
+    for i = offset, #fragments do
+        local fragment = fragments[i]
+        edl = edl .. edl_escape(fragment.url)
+        if fragment.duration then
+            edl = edl..",length="..fragment.duration
+        end
+        edl = edl .. ";"
+    end
+    return edl
+end
 
 mp.add_hook("on_load", 10, function ()
     local url = mp.get_property("stream-open-filename")
@@ -124,15 +160,15 @@ mp.add_hook("on_load", 10, function ()
         if (mp.get_property("options/vid") == "no")
             and not option_was_set("ytdl-format") then
 
-            format = "bestaudio"
+            format = "bestaudio/best"
             msg.verbose("Video disabled. Only using audio")
         end
 
         if (format == "") then
-            format = "bestvideo+bestaudio"
+            format = "bestvideo+bestaudio/best"
         end
         table.insert(command, "--format")
-        table.insert(command, string.format('(%s)[protocol!=http_dash_segments]/best', format))
+        table.insert(command, format)
 
         for param, arg in pairs(raw_options) do
             table.insert(command, "--" .. param)
@@ -190,14 +226,7 @@ mp.add_hook("on_load", 10, function ()
                 and (json.entries[1]["webpage_url"] == json["webpage_url"])) then
                 msg.verbose("multi-arc video detected, building EDL")
 
-                local playlist = "edl://"
-                for i, entry in pairs(json.entries) do
-                    playlist = playlist .. edl_escape(entry.url)
-                    if not (entry.duration == nil) then
-                        playlist = playlist..",start=0,length="..entry.duration
-                    end
-                    playlist = playlist .. ";"
-                end
+                local playlist = edl_track_joined(json.entries)
 
                 msg.debug("EDL: " .. playlist)
 
@@ -232,7 +261,7 @@ mp.add_hook("on_load", 10, function ()
                             else
                                 subfile = subfile..edl_escape("memory://WEBVTT")
                             end
-                            subfile = subfile..",start=0,length="..entry.duration..";"
+                            subfile = subfile..",length="..entry.duration..";"
                         end
                         msg.debug(j.." sub EDL: "..subfile)
                         mp.commandv("sub-add", subfile, "auto", req.ext, j)
@@ -270,23 +299,30 @@ mp.add_hook("on_load", 10, function ()
         else -- probably a video
             local streamurl = ""
 
-            -- DASH?
+            -- DASH/split tracks
             if not (json["requested_formats"] == nil) then
-                if (json["requested_formats"][1].protocol == "http_dash_segments") then
-                    msg.error("MPEG-Dash Segments unsupported, add [protocol!=http_dash_segments] to your ytdl-format.")
-                    return
+                for _, track in pairs(json.requested_formats) do
+                    local edl_track = nil
+                    edl_track = edl_track_joined(track.fragments,
+                        track.protocol, json.is_live)
+                    if track.acodec and track.acodec ~= "none" then
+                        -- audio track
+                        mp.commandv("audio-add",
+                            edl_track or track.url, "auto",
+                            track.format_note or "")
+                    elseif track.vcodec and track.vcodec ~= "none" then
+                        -- video track
+                        streamurl = edl_track or track.url
+                    end
                 end
 
-                -- video url
-                streamurl = json["requested_formats"][1].url
-
-                -- audio url
-                mp.commandv("audio-add", json["requested_formats"][2].url,
-                    "select", json["requested_formats"][2]["format_note"] or "")
-
             elseif not (json.url == nil) then
-                -- normal video
-                streamurl = json.url
+                local edl_track = nil
+                edl_track = edl_track_joined(json.fragments, json.protocol,
+                    json.is_live)
+
+                -- normal video or single track
+                streamurl = edl_track or json.url
                 set_http_headers(json.http_headers)
             else
                 msg.error("No URL found in JSON data.")
@@ -295,7 +331,7 @@ mp.add_hook("on_load", 10, function ()
 
             msg.debug("streamurl: " .. streamurl)
 
-            mp.set_property("stream-open-filename", streamurl)
+            mp.set_property("stream-open-filename", streamurl:gsub("^data:", "data://", 1))
 
             mp.set_property("file-local-options/force-media-title", json.title)
 
@@ -348,6 +384,8 @@ mp.add_hook("on_load", 10, function ()
                     "rtmp_playpath", json.play_path)
                 rtmp_prop = append_rtmp_prop(rtmp_prop,
                     "rtmp_swfverify", json.player_url)
+                rtmp_prop = append_rtmp_prop(rtmp_prop,
+                    "rtmp_swfurl", json.player_url)
                 rtmp_prop = append_rtmp_prop(rtmp_prop,
                     "rtmp_app", json.app)
 

@@ -940,14 +940,18 @@ Property list
     Total A-V sync correction done. Unavailable if audio or video is
     disabled.
 
-``drop-frame-count``
+``decoder-frame-drop-count``
     Video frames dropped by decoder, because video is too far behind audio (when
     using ``--framedrop=decoder``). Sometimes, this may be incremented in other
     situations, e.g. when video packets are damaged, or the decoder doesn't
     follow the usual rules. Unavailable if video is disabled.
 
-``vo-drop-frame-count``
+    ``drop-frame-count`` is a deprecated alias.
+
+``frame-drop-count``
     Frames dropped by VO (when using ``--framedrop=vo``).
+
+    ``vo-drop-frame-count`` is a deprecated alias.
 
 ``mistimed-frame-count``
     Number of video frames that were not timed correctly in display-sync mode
@@ -1331,8 +1335,8 @@ Property list
     This is known only once the VO has opened (and possibly later). With some
     VOs (like ``opengl``), this might be never known in advance, but only when
     the decoder attempted to create the hw decoder successfully. (Using
-    ``--hwdec-preload`` can load it eagerly.) If there are multiple drivers
-    loaded, they will be separated by ``,``.
+    ``--opengl-hwdec-interop`` can load it eagerly.) If there are multiple
+    drivers loaded, they will be separated by ``,``.
 
     If no VO is active or no interop driver is known, this property is
     unavailable.
@@ -1340,6 +1344,9 @@ Property list
     This does not necessarily use the same values as ``hwdec``. There can be
     multiple interop drivers for the same hardware decoder, depending on
     platform and VO.
+
+    This is somewhat similar to the ``--opengl-hwdec-interop`` option, but
+    it returns the actually loaded backend, not the value of this option.
 
 ``video-format``
     Video format as string.
@@ -1544,10 +1551,6 @@ Property list
     text-based (i.e. DVD/BD subtitles), an empty string is returned.
 
     This property is experimental and might be removed in the future.
-
-``stream-capture`` (RW)
-    A filename, see ``--stream-capture``. Setting this will start capture using
-    the given filename. Setting it to an empty string will stop it.
 
 ``tv-brightness``, ``tv-contrast``, ``tv-saturation``, ``tv-hue`` (RW)
     TV stuff.

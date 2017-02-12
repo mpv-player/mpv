@@ -161,9 +161,6 @@ static void waylandgl_swap_buffers(MPGLContext *ctx)
 {
     struct vo_wayland_state *wl = ctx->vo->wayland;
 
-    if (!wl->frame.callback)
-        vo_wayland_request_frame(ctx->vo, NULL, NULL);
-
     vo_wayland_wait_events(ctx->vo, 0);
 
     eglSwapBuffers(wl->egl_context.egl.dpy, wl->egl_context.egl_surface);

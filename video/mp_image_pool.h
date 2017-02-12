@@ -26,4 +26,7 @@ struct mp_image *mp_image_pool_new_copy(struct mp_image_pool *pool,
 bool mp_image_pool_make_writeable(struct mp_image_pool *pool,
                                   struct mp_image *img);
 
+struct mp_image *mp_image_hw_download(struct mp_image *img,
+                                      struct mp_image_pool *swpool);
+
 #endif

@@ -54,8 +54,6 @@ struct vo_opengl_opts {
     int use_gl_debug;
     int allow_sw;
     int swap_interval;
-    int dwm_flush;
-    int allow_direct_composition;
     int vsync_fences;
     char *backend;
     int es;
@@ -383,15 +381,10 @@ static int preinit(struct vo *vo)
     if (p->opts.allow_sw)
         vo_flags |= VOFLAG_SW;
 
-    if (p->opts.allow_direct_composition)
-        vo_flags |= VOFLAG_ANGLE_DCOMP;
-
     p->glctx = mpgl_init(vo, p->opts.backend, vo_flags);
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;
-
-    p->glctx->dwm_flush_opt = p->opts.dwm_flush;
 
     if (p->gl->SwapInterval) {
         p->gl->SwapInterval(p->opts.swap_interval);
@@ -411,14 +404,9 @@ static int preinit(struct vo *vo)
 
     hwdec_devices_set_loader(vo->hwdec_devs, call_request_hwdec_api, vo);
 
-    int hwdec = vo->opts->hwdec_preload_api;
-    if (hwdec == HWDEC_NONE)
-        hwdec = vo->global->opts->hwdec_api;
-    if (hwdec != HWDEC_NONE) {
-        p->hwdec = gl_hwdec_load_api(p->vo->log, p->gl, vo->global,
-                                     vo->hwdec_devs, hwdec);
-        gl_video_set_hwdec(p->renderer, p->hwdec);
-    }
+    p->hwdec = gl_hwdec_load(p->vo->log, p->gl, vo->global,
+                             vo->hwdec_devs, vo->opts->gl_hwdec_interop);
+    gl_video_set_hwdec(p->renderer, p->hwdec);
 
     return 0;
 
@@ -447,9 +435,6 @@ const struct vo_driver video_out_opengl = {
         OPT_FLAG("opengl-glfinish", opts.use_glFinish, 0),
         OPT_FLAG("opengl-waitvsync", opts.waitvsync, 0),
         OPT_INT("opengl-swapinterval", opts.swap_interval, 0),
-        OPT_CHOICE("opengl-dwmflush", opts.dwm_flush, 0,
-                ({"no", -1}, {"auto", 0}, {"windowed", 1}, {"yes", 2})),
-        OPT_FLAG("opengl-dcomposition", opts.allow_direct_composition, 0),
         OPT_FLAG("opengl-debug", opts.use_gl_debug, 0),
         OPT_STRING_VALIDATE("opengl-backend", opts.backend, 0,
                             mpgl_validate_backend_opt),
@@ -464,7 +449,6 @@ const struct vo_driver video_out_opengl = {
     .priv_defaults = &(const struct gl_priv){
         .opts = {
             .swap_interval = 1,
-            .allow_direct_composition = 1,
         },
     },
 };

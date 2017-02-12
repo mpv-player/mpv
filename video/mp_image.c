@@ -27,6 +27,7 @@
 #include <libavutil/mem.h>
 #include <libavutil/common.h>
 #include <libavutil/bswap.h>
+#include <libavutil/hwcontext.h>
 #include <libavutil/rational.h>
 #include <libavcodec/avcodec.h>
 
@@ -706,6 +707,20 @@ static void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
         dst->fields |= MP_IMGFIELD_TOP_FIRST;
     if (src->repeat_pict == 1)
         dst->fields |= MP_IMGFIELD_REPEAT_FIRST;
+
+    if (src->hw_frames_ctx) {
+        AVHWFramesContext *fctx = (void *)src->hw_frames_ctx->data;
+        dst->params.hw_subfmt = pixfmt2imgfmt(fctx->sw_format);
+    }
+
+    dst->params.color = (struct mp_colorspace){
+        .space = avcol_spc_to_mp_csp(src->colorspace),
+        .levels = avcol_range_to_mp_csp_levels(src->color_range),
+        .primaries = avcol_pri_to_mp_csp_prim(src->color_primaries),
+        .gamma = avcol_trc_to_mp_csp_trc(src->color_trc),
+    };
+
+    dst->params.chroma_location = avchroma_location_to_mp(src->chroma_location);
 }
 
 // Copy properties and data of the mp_image into the AVFrame, without taking
@@ -736,6 +751,11 @@ static void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
 
     dst->colorspace = mp_csp_to_avcol_spc(src->params.color.space);
     dst->color_range = mp_csp_levels_to_avcol_range(src->params.color.levels);
+    dst->color_primaries =
+        mp_csp_prim_to_avcol_pri(src->params.color.primaries);
+    dst->color_trc = mp_csp_trc_to_avcol_trc(src->params.color.gamma);
+
+    dst->chroma_location = mp_chroma_location_to_av(src->params.chroma_location);
 }
 
 // Create a new mp_image reference to av_frame.

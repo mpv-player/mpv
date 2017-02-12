@@ -21,8 +21,8 @@
 
 static int open_f(stream_t *stream)
 {
-    stream->type = STREAMTYPE_AVDEVICE;
     stream->demuxer = "lavf";
+    stream->allow_caching = false;
 
     return STREAM_OK;
 }

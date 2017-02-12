@@ -57,7 +57,6 @@ static const struct mpgl_driver *const backends[] = {
 #endif
 #if HAVE_EGL_ANGLE
     &mpgl_driver_angle,
-    &mpgl_driver_angle_es2,
 #endif
 #if HAVE_GL_WIN32
     &mpgl_driver_w32,
@@ -159,6 +158,7 @@ static MPGLContext *init_backend(struct vo *vo, const struct mpgl_driver *driver
     *ctx = (MPGLContext) {
         .gl = talloc_zero(ctx, GL),
         .vo = vo,
+        .global = vo->global,
         .driver = driver,
     };
     if (probing)

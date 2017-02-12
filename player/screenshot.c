@@ -31,6 +31,7 @@
 #include "common/msg.h"
 #include "options/path.h"
 #include "video/mp_image.h"
+#include "video/mp_image_pool.h"
 #include "video/decode/dec_video.h"
 #include "video/out/vo.h"
 #include "video/image_writer.h"
@@ -346,12 +347,15 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
         }
     }
 
-    if (image && mpctx->vo_chain && mpctx->vo_chain->hwdec_devs) {
-        struct mp_hwdec_ctx *ctx =
-            hwdec_devices_get_first(mpctx->vo_chain->hwdec_devs);
-        struct mp_image *nimage = NULL;
-        if (ctx && ctx->download_image && (image->fmt.flags & MP_IMGFLAG_HWACCEL))
-            nimage = ctx->download_image(ctx, image, NULL);
+    bool hwimage = image && (image->fmt.flags & MP_IMGFLAG_HWACCEL);
+    if (hwimage) {
+        struct mp_image *nimage = mp_image_hw_download(image, NULL);
+        if (!nimage && mpctx->vo_chain && mpctx->vo_chain->hwdec_devs) {
+            struct mp_hwdec_ctx *ctx =
+                hwdec_devices_get_first(mpctx->vo_chain->hwdec_devs);
+            if (ctx && ctx->download_image && hwimage)
+                nimage = ctx->download_image(ctx, image, NULL);
+        }
         if (nimage) {
             talloc_free(image);
             image = nimage;

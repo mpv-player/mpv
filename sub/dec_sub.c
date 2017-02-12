@@ -29,6 +29,7 @@
 #include "options/options.h"
 #include "common/global.h"
 #include "common/msg.h"
+#include "common/recorder.h"
 #include "osdep/threads.h"
 
 extern const struct sd_functions sd_ass;
@@ -48,6 +49,8 @@ struct dec_sub {
     struct mp_log *log;
     struct mpv_global *global;
     struct MPOpts *opts;
+
+    struct mp_recorder_sink *recorder_sink;
 
     struct attachment_list *attachments;
 
@@ -240,6 +243,9 @@ bool sub_read_packets(struct dec_sub *sub, double video_pts)
             break;
         }
 
+        if (sub->recorder_sink)
+            mp_recorder_feed_packet(sub->recorder_sink, pkt);
+
         sub->last_pkt_pts = pkt->pts;
 
         if (is_new_segment(sub, pkt)) {
@@ -323,3 +329,11 @@ int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
     pthread_mutex_unlock(&sub->lock);
     return r;
 }
+
+void sub_set_recorder_sink(struct dec_sub *sub, struct mp_recorder_sink *sink)
+{
+    pthread_mutex_lock(&sub->lock);
+    sub->recorder_sink = sink;
+    pthread_mutex_unlock(&sub->lock);
+}
+
