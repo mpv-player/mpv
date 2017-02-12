@@ -1,3 +1,124 @@
+Release 0.24.0
+==============
+
+Features
+--------
+
+Added
+~~~~~
+
+- Windows: allow snapping to screen edges (#2248)
+- macOS: add border cycling (#2430)
+- player: add experimental C plugin interface
+- player: add experimental stream recording feature (--record-file)
+- player: add prefetching of the next playlist entry (--prefetch-playlist; does NOT work with URLs resolved by youtube-dl)
+- stream_lavf: add support for data URIs (#4058)
+- vaapi: add support for 10-bit video formats (requires patched Mesa and capable hardware)
+- x11: pseudo HiDPI scaling
+
+
+Options and Commands
+--------------------
+
+Added
+~~~~~
+
+- sub: add --sub-justify and --sub-ass-justify options
+- sub: add option to force using video resolution for image subtitles (--image-subs-video-resolution)
+
+
+Changed
+~~~~~~~
+
+- command: rename framedrop properties
+    - drop-frame-count → decoder-frame-drop-count
+    - vo-drop-frame-count → frame-drop-count
+- input.conf: change "L" to change loop-file by default
+
+
+Deprecated
+~~~~~~~~~~
+
+- --hwdec-preload (replaced with --opengl-hwdec-interop)
+
+
+Removed
+~~~~~~~
+
+- options: drop deprecated --sub-codepage syntax
+- options: drop deprecated --vd/--ad codecs selection features
+- player: remove --stream-capture option/property
+
+
+Fixes and Minor Enhancements
+----------------------------
+
+- Windows: update the fullscreen state on restoring
+- ad_spdif: fix obscure cases of AC3 passthrough (e.g. 44100 Hz AC3)
+- ao_oss: use --audio-device if --oss-device isn't set (#4122)
+- build: fix --disable-gl if cuda is enabled
+- build: rpi: rely on pkgconfig for compiler flags to ease cross compilation
+- charset_conv: fallback to interpreting subs as latin1 if iconv fails
+- charset_conv: fix "auto" fallback with uchardet not compiled (#3954)
+- client API: fix freeze when destroying mpv_handle before mpv_initialize
+- client API: fix mpv_set_property() return value before init (#3988)
+- command: fix potential crash for script-binding with multi-commands
+- command: nicer OSD formatting for loop-file
+- command: shorten long playlists on OSD
+- config: do not resolve default profile during "include" processing (#4024)
+- cuda: fix 10 bit decoding
+- cue: accept lower-case cue commands (#4057)
+- demux_mkv: any reference makes a frame not a keyframe (fixes seeking in WebM files with alpha channel)
+- lavfi: slightly better disconnected output handling (#4118)
+- lua: close directory after reading its entries (#4045)
+- macOS: consistent normalization when searching for external files (#4016)
+- macOS: don't change Space on quit in fullscreen (#3957)
+- macOS: don't constrain window frame for fullscreen (#4044)
+- macOS: don't init displaylink on reconfig (#4031)
+- macOS: fix build on OS X 10.9 (#3946)
+- macOS: fix color profile retrieval
+- macOS: fix displaylink refresh rate retrieval
+- macOS: fix dropping of files and URLs (#4036)
+- macOS: fix handling of geometry option (#3867)
+- macOS: fix unwanted behavior with window level other than the default (#1757, #1884)
+- macOS: fix window size in certain circumstances
+- macOS: properly recover from toggleFullscreen fail (#4035)
+- osc: allow playlist buttons when looping (#4092)
+- osc: bottom/topbar: clip title instead of stretching
+- osc: bottombar/topbar: make chapter markers slightly bigger
+- osc: box: clip with ellipsis after too much stretching
+- osc: fix crashes related to field eventresponder being nil (#3210)
+- player: add .scc subtitle extension
+- stream_bluray: use proper 0-based index
+- sub: remove .txt as text subtitle extension
+- tv: fix segfaults on TV input (#4096)
+- vaapi: set libva > 0.39.4 message callbacks to prevent it from printing messages to the terminal
+- vd_lavc: improved fallback behavior for --hwdec=cuda (#3914)
+- vdpau: reject decoding of non-4:2:0 (would decode to garbage)
+- vf_lavfi: don't crash with VOs without hardware decoding support (#4064)
+- vo_opengl, vo_opengl_cb: better hwdec interop backend selection
+- vo_opengl: angle: rewrite with custom swap chain (fixes problems with e.g. 24 fps video on 24 Hz monitors, avoids problems with DirectComposition, enables "screenshot window" command on Windows 8 and newer)
+- vo_opengl: partially fix rotation for 4:2:2 content
+- vo_opengl: x11egl: fix alpha mode
+- wayland: fix high CPU usage with mpv paused and visible
+- ytdl_hook, edl: implement pseudo-DASH support
+- ytdl_hook: add non-dash fallbacks to default formats
+- ytdl_hook: fix opening hitbox.tv rtmp stream
+- ytdl_hook: respect --no-audio, don't force-select track
+- ytdl_hook: support livestream segmented DASH VODs
+- ytdl_hook: support segmented dash
+
+
+This listing is not complete. Check DOCS/client-api-changes.rst for a history
+of changes to the client API, and DOCS/interface-changes.rst for a history
+of changes to other user-visible interfaces.
+
+A complete changelog can be seen by running `git log v0.23.0..v0.24.0`
+in the git repository or by visiting either
+https://github.com/mpv-player/mpv/compare/v0.23.0...v0.24.0 or
+https://git.srsfckn.biz/mpv/log/?qt=range&q=v0.23.0..v0.24.0
+
+
 Release 0.23.0
 ==============
 
