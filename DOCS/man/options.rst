@@ -2130,6 +2130,14 @@ Window
     treated as exclusive fullscreen window that bypasses the Desktop Window
     Manager.
 
+``--ontop-level=<window|system|level>``
+    (OS X only)
+    Sets the level of an ontop window (default: window).
+
+    :window:  On top of all other windows.
+    :system:  On top of system elements like Taskbar, Menubar and Dock.
+    :level:   A level as integer.
+
 ``--border``, ``--no-border``
     Play video with window border and decorations. Since this is on by
     default, use ``--no-border`` to disable the standard window decorations.

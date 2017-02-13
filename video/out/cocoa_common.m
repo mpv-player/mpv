@@ -474,14 +474,21 @@ static CVReturn displayLinkCallback(CVDisplayLinkRef displayLink, const CVTimeSt
     return kCVReturnSuccess;
 }
 
-static void vo_set_level(struct vo *vo, int ontop)
+static void vo_set_level(struct vo *vo, int ontop, int ontop_level)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
     if (ontop) {
-        // +1 is not enough as that will show the icon layer on top of the
-        // menubar when the application is not frontmost. so use +2
-        s->window_level = NSMainMenuWindowLevel + 2;
+        switch (ontop_level) {
+        case -1:
+            s->window_level = NSFloatingWindowLevel;
+            break;
+        case -2:
+            s->window_level = NSStatusWindowLevel;
+            break;
+        default:
+            s->window_level = ontop_level;
+        }
     } else {
         s->window_level = NSNormalWindowLevel;
     }
@@ -499,7 +506,7 @@ static int vo_cocoa_ontop(struct vo *vo)
         return VO_NOTIMPL;
 
     struct mp_vo_opts *opts = vo->opts;
-    vo_set_level(vo, opts->ontop);
+    vo_set_level(vo, opts->ontop, opts->ontop_level);
     return VO_TRUE;
 }
 
@@ -679,7 +686,7 @@ int vo_cocoa_config_window(struct vo *vo)
             if (opts->fullscreen && !s->fullscreen)
                 vo_cocoa_fullscreen(vo);
             cocoa_set_window_title(vo);
-            vo_set_level(vo, opts->ontop);
+            vo_set_level(vo, opts->ontop, opts->ontop_level);
 
             GLint o;
             if (!CGLGetParameter(s->cgl_ctx, kCGLCPSurfaceOpacity, &o) && !o) {

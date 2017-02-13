@@ -160,6 +160,8 @@ static const m_option_t mp_vo_opt_list[] = {
     OPT_FLAG("taskbar-progress", taskbar_progress, 0),
     OPT_FLAG("snap-window", snap_window, 0),
     OPT_FLAG("ontop", ontop, 0),
+    OPT_CHOICE_OR_INT("ontop-level", ontop_level, 0, 0, INT_MAX,
+                      ({"window", -1}, {"system", -2})),
     OPT_FLAG("border", border, 0),
     OPT_FLAG("fit-border", fit_border, 0),
     OPT_FLAG("on-all-workspaces", all_workspaces, 0),
@@ -233,6 +235,7 @@ const struct m_sub_options vo_sub_opts = {
         .window_scale = 1.0,
         .x11_bypass_compositor = 2,
         .mmcss_profile = "Playback",
+        .ontop_level = -1,
     },
 };
 
